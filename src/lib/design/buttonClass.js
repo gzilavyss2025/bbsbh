@@ -31,3 +31,20 @@ export function buttonAria({ pressed, busy = false } = {}) {
   if (busy) aria['aria-busy'] = 'true'
   return aria
 }
+
+// THE ICON-ONLY BUTTON'S CLASS LIST (#1209). A close ✕, a clear ✕, an (i): a
+// glyph with no label, so the name is an aria-label the caller must give. It is
+// a Button — same skins, same states — with a round VISIBLE mark and a tap area
+// that is always --tap-min. `mark` is the size of what you see: 'tap' (44, the
+// default: the mark is the whole tap area), 'md' (32) or 'sm' (18). Its default
+// skin is ghost, a bare glyph, because that is what every icon button in the
+// app already was. An unknown mark throws, like an unknown size or skin.
+export const MARKS = ['tap', 'md', 'sm']
+
+export function iconButtonClassName({ mark = 'tap', skin = 'ghost', className = '' } = {}) {
+  if (!MARKS.includes(mark)) throw new Error(`IconButton: unknown mark "${mark}" (${MARKS.join(', ')})`)
+  const parts = [buttonClassName({ skin }), 'btn--icon']
+  if (mark !== 'tap') parts.push(`btn--mark-${mark}`)
+  if (className) parts.push(className)
+  return parts.join(' ')
+}

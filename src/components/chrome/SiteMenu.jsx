@@ -3,6 +3,7 @@ import { useNav, useRouteLink } from '../../lib/nav.js'
 import { MENU_GROUPS, isGuidePath } from '../../lib/reportPages.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { DirectoryHeading } from './DirectoryHeading.jsx'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // AdminMenuLink.jsx imports @clerk/clerk-react at its top, so it is only
 // dynamically imported — and only then does that SDK reach a device — when a
@@ -131,15 +132,9 @@ function SiteMenuModal({ onClose }) {
             <p className="sitemenusheet__eyebrow">Tally Baseball</p>
             <h2 className="sheet__title">Site menu</h2>
           </div>
-          <button
-            ref={closeRef}
-            type="button"
-            className="sheet__close"
-            onClick={onClose}
-            aria-label="Close"
-          >
+          <IconButton ref={closeRef} onClick={onClose} label="Close">
             ✕
-          </button>
+          </IconButton>
         </div>
 
         <div className="sitemenusheet__scroll">

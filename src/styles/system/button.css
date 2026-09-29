@@ -39,7 +39,8 @@
               minting is the one action that leaves something behind on the
               far side of a seal. Never on a control that does not mean that.
 
-   Size and skin are the only two axes. `tap` and `outline` are the defaults,
+   Size and skin are the only two axes. An icon-only button (.btn--icon, #1209,
+   components/ui/control/IconButton.jsx) is a shape on top of them, not a third. `tap` and `outline` are the defaults,
    so neither has a class: a second copy of the default is a second place for
    it to drift. .btn--control and .btn--ink/--ghost/--danger/--seal are the
    modifiers. No club colour ever reaches a control (ADR-0030), and --marker is
@@ -142,6 +143,45 @@
   min-height: var(--control-min);
   padding: var(--space-1) var(--space-3);
   font-size: var(--fs-label);
+}
+
+/* ---- the icon-only button (#1209) ----
+   A glyph with no label: a close ✕, a clear ✕, an (i). The VISIBLE mark is a
+   circle of --icon-mark (--tap-min by default, --mark-md or --mark-sm). The
+   TAP AREA is always --tap-min: an ::after that is 44x44 and centred on the
+   mark, so a small mark never makes a small target and never takes layout room
+   it does not draw. --radius-pill on a square box is a circle. It sits BEFORE
+   the skins so a skin's ink still wins; the ghost skin does not set an ink, so
+   an icon reads in caption grey, the way every one of these always did. */
+.btn--icon {
+  --icon-mark: var(--tap-min);
+  --btn-ink: var(--text-caption);
+
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: var(--icon-mark);
+  height: var(--icon-mark);
+  min-height: 0;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
+}
+.btn--icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  translate: -50% -50%;
+}
+.btn--mark-md {
+  --icon-mark: var(--mark-md);
+}
+.btn--mark-sm {
+  --icon-mark: var(--mark-sm);
 }
 
 /* ---- skins ---- */

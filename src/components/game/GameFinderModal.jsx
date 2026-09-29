@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { GameFinder } from './GameFinder.jsx'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // Bottom-sheet wrapper around GameFinder, opened from the footer's "Find a
 // past matchup" button so the two team pickers + results list don't have to
@@ -35,15 +36,9 @@ export function GameFinderModal({ onClose }) {
       >
         <div className="gamefindersheet__head">
           <h2 className="sheet__title">Find a past matchup</h2>
-          <button
-            ref={closeRef}
-            type="button"
-            className="gamefindersheet__close"
-            onClick={onClose}
-            aria-label="Close"
-          >
+          <IconButton ref={closeRef} onClick={onClose} label="Close">
             ✕
-          </button>
+          </IconButton>
         </div>
         <GameFinder />
       </div>

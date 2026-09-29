@@ -5,6 +5,7 @@ import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { PINNED_TEAM_ID, SPORT_IDS } from '../../lib/teams.js'
 import { ClubPicker } from './ClubPicker.jsx'
 import { ClubSeal } from '../profile/ClubSeal.jsx'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // Same lazy gate as GameSelect/SiteHeader: AccountPitch imports
 // @clerk/clerk-react at its top, so it's never fetched — let alone rendered —
@@ -147,15 +148,9 @@ export function FavoriteTeamModal({ favoriteTeamId, onSave, onClose }) {
               {step === 1 ? 'Make Tally yours.' : 'Take your Tally with you.'}
             </h2>
           </div>
-          <button
-            ref={closeRef}
-            type="button"
-            className="favteamsheet__close"
-            onClick={finish}
-            aria-label="Close"
-          >
+          <IconButton ref={closeRef} onClick={finish} label="Close">
             ✕
-          </button>
+          </IconButton>
         </div>
 
         {step === 1 ? (

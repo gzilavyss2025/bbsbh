@@ -17,6 +17,7 @@ import { ExtrasFacts } from './ExtrasFacts.jsx'
 import { UmpireTendenciesFold } from '../../umpire/UmpireTendenciesFold.jsx'
 import { StatBox, AbsCard } from '../../gamehud/StatBox.jsx'
 import { WinProbChart } from '../../charts/WinProbChart.jsx'
+import { IconButton } from '../../ui/control/IconButton.jsx'
 
 // Focus mode's reference shelf — lineups, the fielding diamond, the pitcher
 // tables, the benches (ADR-0043). This replaces ReferenceRail.jsx, which
@@ -562,9 +563,9 @@ function RefSheet({ onClose, children }) {
         <div className="sheet focusrail__sheet" role="dialog" aria-modal="true" aria-label="Reference">
           <div className="focusrail__sheethead">
             <h2 className="sheet__title">Reference</h2>
-            <button ref={closeRef} className="sheet__close" onClick={onClose} aria-label="Close">
+            <IconButton ref={closeRef} onClick={onClose} label="Close">
               ✕
-            </button>
+            </IconButton>
           </div>
           {children}
         </div>

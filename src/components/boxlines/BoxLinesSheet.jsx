@@ -9,6 +9,7 @@ import { BoxLineRow, BoxLineSkeleton } from './BoxLineRow.jsx'
 import { BoxLinesList } from './BoxLinesList.jsx'
 import { Stat } from '../gamehud/StatBox.jsx'
 import { humanDateWithYear } from '../../lib/dates.js'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // BOX LINES — the drilldown behind a summary stat line (ADR-0069). Tap a
 // line such as "Career vs MIL: 7 G, 34.0 IP, 3.44 ERA, 28 K, 17 BB" and this
@@ -175,9 +176,9 @@ export function BoxLinesSheet({
               <p className="boxlines__kicker">{kick}</p>
               <h2 className="sheet__title boxlines__title">{heading}</h2>
             </div>
-            <button ref={closeRef} type="button" className="sheet__close" onClick={onClose} aria-label="Close">
+            <IconButton ref={closeRef} onClick={onClose} label="Close">
               ✕
-            </button>
+            </IconButton>
           </div>
           {head && <p className="boxlines__headline">{head}</p>}
           {stats && (

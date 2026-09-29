@@ -279,20 +279,11 @@
   text-align: center;
 }
 
+/* An IconButton (#1209, mark md) pinned to the modal's corner. position here
+   also anchors the button's 44x44 tap area. */
 .logomodal__close {
   position: absolute;
   top: 8px;
   right: 8px;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: var(--fs-num-md);
-  color: var(--text-caption);
-  border-radius: var(--radius-pill);
 }
 

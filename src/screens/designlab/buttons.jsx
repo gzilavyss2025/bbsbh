@@ -3,9 +3,10 @@ import { Entry, Group } from './Entry.jsx'
 // The REAL Button and Door, rendered — never a copy of their markup.
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Door } from '../../components/ui/control/Door.jsx'
+import { IconButton } from '../../components/ui/control/IconButton.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
-import { SKINS } from '../../lib/design/buttonClass.js'
+import { MARKS, SKINS } from '../../lib/design/buttonClass.js'
 
 const PATH = 'src/components/ui/control/Button.jsx'
 const SIZES = [
@@ -130,6 +131,23 @@ export function ButtonHalf() {
             ))}
           </tbody>
         </table>
+      </Entry>
+      <Entry
+        title="IconButton"
+        path="src/components/ui/control/IconButton.jsx"
+        wide
+        note="A glyph with no label: a close, a clear, an (i). The mark you see is a circle of 44, 32 or 18px; the tap area is 44x44 for all three. Hover, press and Tab are live."
+      >
+        <div className="dlab__row">
+          {MARKS.map((mark) => (
+            <div key={mark} className="dlab__matrixcell">
+              <IconButton mark={mark} label={`Close (${mark})`}>
+                ✕
+              </IconButton>
+              <span className="dlab__path">{mark}</span>
+            </div>
+          ))}
+        </div>
       </Entry>
       <Entry
         title="Which face outline is"
