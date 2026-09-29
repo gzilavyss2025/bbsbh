@@ -75,6 +75,11 @@
   height: calc(var(--fs-body) * var(--lh-solid) + 20px);
   margin-block: -10px;
 }
+/* A control in the band (the Bullpen pill) is taller than the title line, so
+   the band grows and the mark must grow with it to keep touching both edges. */
+.sectionhead:has(.sectionhead__action) > .teamlogo-crop-bar {
+  height: calc(max(var(--fs-body) * var(--lh-solid), var(--control-min)) + 20px);
+}
 
 /* THE LABEL. A section's name on the page: graphite caps, one step down from
    a band's title, on a hairline. It carries its own space above and below
