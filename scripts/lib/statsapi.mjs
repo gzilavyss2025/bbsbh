@@ -17,8 +17,8 @@
 //
 // RETRY POLICY, decided once, here. The same for every caller:
 //   - 3 tries, with a pause of 2000 ms x attempt between them (2 s, then 4 s,
-//     none after the last). These are the numbers PR #1266 chose for
-//     gen-doubleheaders.mjs after one dropped socket killed a nightly run.
+//     none after the last). These are the numbers gen-doubleheaders.mjs got
+//     after one dropped socket killed the 2026-09-29 nightly run.
 //   - Retried: a network error (a dropped socket, a truncated body, a DNS blip),
 //     HTTP 429, and HTTP 5xx.
 //   - Never retried: any other 4xx. A 404 or a 400 will answer the same way
@@ -50,6 +50,10 @@ import { fileURLToPath } from 'node:url'
 import { withRetry } from './net/retry.mjs'
 
 export const STATSAPI_BASE = 'https://statsapi.mlb.com'
+
+// The full URL for a path, for a script that RECORDS the address it read (a
+// fixture's source note) rather than fetching it. Fetching goes through getJson.
+export const statsapiUrl = (path) => STATSAPI_BASE + path
 
 export const RETRY_TRIES = 3
 export const RETRY_DELAY_MS = 2000
@@ -141,7 +145,9 @@ export function createStatsapiClient({
 }
 
 // The shared client. No cache, ever.
-export const { getJson } = createStatsapiClient()
+const shared = createStatsapiClient()
+export const getJson = shared.getJson
 
 // The opt-in research client. See the header: .scratch only, never scripts/.
-export const { getJson: cachedGetJson } = createStatsapiClient({ cacheDir: CACHE_DIR })
+const researchClient = createStatsapiClient({ cacheDir: CACHE_DIR })
+export const cachedGetJson = researchClient.getJson

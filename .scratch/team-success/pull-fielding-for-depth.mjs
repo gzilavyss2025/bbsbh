@@ -20,6 +20,7 @@
 import { writeFileSync, existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const MLB_CACHE = join(__dirname, 'mlb-field-cache.json')
@@ -27,19 +28,6 @@ const MILB_CACHE = join(__dirname, 'milb-field-cache.json')
 
 const SEASON_MIN = 2009
 const SEASON_MAX = 2023
-
-async function get(url, tries = 3) {
-  for (let i = 0; i < tries; i += 1) {
-    try {
-      const r = await fetch(url)
-      if (!r.ok) throw new Error(`HTTP ${r.status}`)
-      return await r.json()
-    } catch (e) {
-      if (i === tries - 1) throw e
-      await new Promise((res) => setTimeout(res, 1500 * (i + 1)))
-    }
-  }
-}
 
 function rowsFrom(json) {
   const splits = json?.stats?.[0]?.splits || []
@@ -58,9 +46,9 @@ async function pull(cachePath, sportId) {
     const key = `${season}`
     if (cache[key]) continue
     const url =
-      `https://statsapi.mlb.com/api/v1/stats?stats=season&group=fielding` +
+      `/api/v1/stats?stats=season&group=fielding` +
       `&season=${season}&sportId=${sportId}&gameType=R&playerPool=All&limit=9000`
-    const json = await get(url)
+    const json = await getJson(url)
     const total = json?.stats?.[0]?.totalSplits
     const rows = rowsFrom(json)
     cache[key] = rows

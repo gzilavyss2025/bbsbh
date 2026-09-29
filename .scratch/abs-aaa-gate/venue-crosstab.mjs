@@ -13,6 +13,8 @@
 //
 //   node .scratch/abs-aaa-gate/venue-crosstab.mjs 14
 //   node .scratch/abs-aaa-gate/venue-crosstab.mjs 11 2026-08-29 2026-07-04
+import { getJson } from '../../scripts/lib/statsapi.mjs'
+
 const sportId = Number(process.argv[2] ?? 14)
 const dates = process.argv.slice(3).length
   ? process.argv.slice(3)
@@ -29,12 +31,10 @@ const countMj = (feed) => {
 
 const byVenue = new Map()
 for (const date of dates) {
-  const sched = await (
-    await fetch(`https://statsapi.mlb.com/api/v1/schedule?sportId=${sportId}&date=${date}`)
-  ).json()
+  const sched = await getJson(`/api/v1/schedule?sportId=${sportId}&date=${date}`)
   for (const g of sched.dates?.[0]?.games ?? []) {
     if (g.status?.abstractGameState !== 'Final') continue
-    const feed = await (await fetch(`https://statsapi.mlb.com/api/v1.1/game/${g.gamePk}/feed/live`)).json()
+    const feed = await getJson(`/api/v1.1/game/${g.gamePk}/feed/live`)
     const venue = feed.gameData?.venue?.name ?? '?'
     const hasKey = feed.gameData?.absChallenges != null
     const mj = countMj(feed)

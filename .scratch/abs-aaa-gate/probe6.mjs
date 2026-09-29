@@ -1,5 +1,7 @@
 // (a) any gameData-level flag naming ABS / challenge? (b) per-league split within a sportId.
-const feed = await (await fetch('https://statsapi.mlb.com/api/v1.1/game/815863/feed/live')).json()
+import { getJson } from '../../scripts/lib/statsapi.mjs'
+
+const feed = await getJson('/api/v1.1/game/815863/feed/live')
 const hits = []
 ;(function walk(o, path, depth) {
   if (depth > 5 || o == null || typeof o !== 'object') return
@@ -18,10 +20,10 @@ console.log('away league:', JSON.stringify(feed.gameData.teams.away.league))
 console.log('--- sportId 14 per-league ---')
 const byLeague = new Map()
 for (const date of ['2026-08-26', '2026-07-15', '2026-05-14']) {
-  const sched = await (await fetch(`https://statsapi.mlb.com/api/v1/schedule?sportId=14&date=${date}`)).json()
+  const sched = await getJson(`/api/v1/schedule?sportId=14&date=${date}`)
   for (const g of sched.dates?.[0]?.games ?? []) {
     if (g.status?.abstractGameState !== 'Final') continue
-    const f = await (await fetch(`https://statsapi.mlb.com/api/v1.1/game/${g.gamePk}/feed/live`)).json()
+    const f = await getJson(`/api/v1.1/game/${g.gamePk}/feed/live`)
     const lg = f.gameData.teams.away.league?.name ?? '?'
     let mj = 0
     for (const p of f.liveData?.plays?.allPlays ?? [])

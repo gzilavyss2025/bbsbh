@@ -22,7 +22,7 @@
 import { writeFile, mkdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { getJson } from '../src/api/statsapi.js'
+import { getJson as statsapiJson } from './lib/statsapi.mjs'
 import { dedupeTransactions } from '../src/api/teamTransactions.js'
 import {
   SEASONS,
@@ -38,6 +38,10 @@ import { draftInfo, pitcherRole, signedFallback } from '../src/api/person.js'
 import { sumHitting, sumPitching } from '../src/api/statsLevels.js'
 import { MILB_LEVELS } from '../src/lib/teams.js'
 import { prospectBadge } from '../src/api/prospects.js'
+
+// The browser client this file used to import capped every call at 15 s; keep
+// that cap on the shared client, whose own default is none.
+const getJson = (path) => statsapiJson(path, { timeoutMs: 15_000 })
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'trade-deadline')

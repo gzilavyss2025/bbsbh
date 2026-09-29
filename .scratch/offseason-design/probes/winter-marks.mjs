@@ -1,12 +1,13 @@
 // The app is mark-heavy: club strip, game cards, treatment tiles. If a winter
 // league's clubs have no logo on the CDN, its slate looks broken.
-const API = 'https://statsapi.mlb.com'
+import { getJson } from '../../../scripts/lib/statsapi.mjs'
+
 const LEAGUES = [
   [119, 'AFL'], [132, 'LMP'], [135, 'LVBP'], [131, 'LIDOM'],
   [133, 'PWL'], [595, 'ABL'], [162, 'CS'],
 ]
 for (const [id, label] of LEAGUES) {
-  const j = await (await fetch(`${API}/api/v1/teams?sportId=17&leagueIds=${id}&season=2025`)).json()
+  const j = await getJson(`/api/v1/teams?sportId=17&leagueIds=${id}&season=2025`)
   const teams = j.teams ?? []
   let withLogo = 0
   let noAbbr = 0

@@ -68,6 +68,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const CACHE_PATH = join(__dirname, 'roster-age-cache.json')
@@ -96,21 +97,6 @@ function loadCache() {
 }
 function saveCache(cache) {
   writeFileSync(CACHE_PATH, JSON.stringify(cache))
-}
-
-async function fetchWithRetry(url, attempts = 4) {
-  let lastErr
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`statsapi ${res.status} ${url}`)
-      return await res.json()
-    } catch (err) {
-      lastErr = err
-      await new Promise((r) => setTimeout(r, 300 * (i + 1)))
-    }
-  }
-  throw lastErr
 }
 
 // "180.1" -> 180 + 1/3, "180.2" -> 180 + 2/3 (baseball's fractional-inning
@@ -143,9 +129,9 @@ async function fetchTeamSeasonGroup(cache, teamId, season, group) {
   const key = `${group}-${teamId}-${season}`
   if (cache[key]) return cache[key]
   const url =
-    `https://statsapi.mlb.com/api/v1/stats?stats=season&group=${group}` +
+    `/api/v1/stats?stats=season&group=${group}` +
     `&season=${season}&sportId=1&teamId=${teamId}&limit=3000&playerPool=all`
-  const json = await fetchWithRetry(url)
+  const json = await getJson(url)
   const splits = (json.stats?.[0]?.splits ?? []).map((s) => slimSplit(s, group))
   cache[key] = splits
   return splits
@@ -165,8 +151,8 @@ function sumWeight(rows) {
 
 // The club's OWN season total, which the per-player stints must add up to.
 async function clubAggregateWeight(teamId, season, group) {
-  const json = await fetchWithRetry(
-    `https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=${group}&season=${season}`,
+  const json = await getJson(
+    `/api/v1/teams/${teamId}/stats?stats=season&group=${group}&season=${season}`,
   )
   return statWeight(json.stats?.[0]?.splits?.[0]?.stat, group) ?? 0
 }
@@ -178,8 +164,8 @@ async function clubAggregateWeight(teamId, season, group) {
 async function multiClubPlayers(season, group) {
   const players = []
   for (let offset = 0; ; offset += 1000) {
-    const json = await fetchWithRetry(
-      `https://statsapi.mlb.com/api/v1/stats?stats=season&group=${group}&season=${season}` +
+    const json = await getJson(
+      `/api/v1/stats?stats=season&group=${group}&season=${season}` +
         `&sportId=1&limit=1000&offset=${offset}&playerPool=all`,
     )
     const splits = json.stats?.[0]?.splits ?? []
@@ -201,8 +187,8 @@ async function playerStints(personId, season, group) {
   const memoKey = `${group}-${personId}`
   let bySeason = stintMemo.get(memoKey)
   if (!bySeason) {
-    const json = await fetchWithRetry(
-      `https://statsapi.mlb.com/api/v1/people/${personId}/stats` +
+    const json = await getJson(
+      `/api/v1/people/${personId}/stats` +
         `?stats=yearByYear&group=${group}&gameType=R`,
     )
     bySeason = {}
@@ -225,8 +211,8 @@ async function playerStints(personId, season, group) {
 // Every player who wore the uniform at any point in the season, which is the
 // backstop set for a club the multi-club pass could not close.
 async function fullSeasonRoster(teamId, season) {
-  const json = await fetchWithRetry(
-    `https://statsapi.mlb.com/api/v1/teams/${teamId}/roster?rosterType=fullSeason&season=${season}`,
+  const json = await getJson(
+    `/api/v1/teams/${teamId}/roster?rosterType=fullSeason&season=${season}`,
   )
   return (json.roster ?? [])
     .filter((entry) => entry.person?.id != null)

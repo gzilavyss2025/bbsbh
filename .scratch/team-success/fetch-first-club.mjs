@@ -28,6 +28,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO = join(__dirname, '..', '..')
@@ -45,28 +46,13 @@ function saveRawCache(cache) {
   writeFileSync(RAW_CACHE_PATH, JSON.stringify(cache))
 }
 
-async function fetchWithRetry(url, attempts = 4) {
-  let lastErr
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`statsapi ${res.status} ${url}`)
-      return await res.json()
-    } catch (err) {
-      lastErr = err
-      await new Promise((r) => setTimeout(r, 300 * (i + 1)))
-    }
-  }
-  throw lastErr
-}
-
 async function fetchGameLog(cache, mlbId, season, group) {
   const key = `${group}-${mlbId}-${season}`
   if (cache[key]) return cache[key]
   const url =
-    `https://statsapi.mlb.com/api/v1/people/${mlbId}/stats?stats=gameLog` +
+    `/api/v1/people/${mlbId}/stats?stats=gameLog` +
     `&season=${season}&sportId=1&group=${group}`
-  const json = await fetchWithRetry(url)
+  const json = await getJson(url)
   const splits = (json.stats?.[0]?.splits ?? []).map((s) => ({
     date: s.date ?? null,
     teamId: s.team?.id ?? null,

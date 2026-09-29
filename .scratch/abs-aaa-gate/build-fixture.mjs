@@ -17,9 +17,10 @@
 //
 // `venue` is kept because gameHasAbs reads venue.id for that allowlist.
 import { writeFileSync } from 'node:fs'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const PK = Number(process.argv[2]) || 815863
-const feed = await (await fetch(`https://statsapi.mlb.com/api/v1.1/game/${PK}/feed/live`)).json()
+const feed = await getJson(`/api/v1.1/game/${PK}/feed/live`)
 const team = (t) => ({ id: t.id, name: t.name, abbreviation: t.abbreviation, sport: t.sport, league: t.league })
 
 const out = {

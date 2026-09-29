@@ -1,11 +1,11 @@
 // Throwaway probe: does a Triple-A feed carry ABS challenges in the shape
 // challenges.js parses, and what are its sport ids + challenge-remaining rules?
 import { selectChallengeState } from '../../src/api/challenges.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const PKS = process.argv.slice(2).map(Number)
 for (const pk of PKS) {
-  const res = await fetch(`https://statsapi.mlb.com/api/v1.1/game/${pk}/feed/live`)
-  const feed = await res.json()
+  const feed = await getJson(`/api/v1.1/game/${pk}/feed/live`)
   const gd = feed.gameData
   console.log('='.repeat(70))
   console.log(pk, gd.game?.type, gd.datetime?.officialDate)

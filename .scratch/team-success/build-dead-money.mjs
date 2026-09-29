@@ -66,7 +66,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { getJson } from '../../src/api/statsapi.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 import { isMlbTeamId } from '../../src/lib/teams.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))

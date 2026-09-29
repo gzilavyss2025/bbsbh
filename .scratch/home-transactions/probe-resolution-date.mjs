@@ -1,6 +1,6 @@
 // What is resolutionDate for? Measured across a full season of the wire.
 // Run: node .scratch/home-transactions/probe-resolution-date.mjs
-import { getJson } from '../../src/api/statsapi.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const today = new Date()
 const season = today.getUTCFullYear()

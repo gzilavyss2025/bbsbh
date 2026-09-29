@@ -26,6 +26,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = join(__dirname, '..', '..')
@@ -38,21 +39,6 @@ function loadCache() {
 }
 function saveCache(cache) {
   writeFileSync(CACHE_PATH, JSON.stringify(cache))
-}
-
-async function fetchWithRetry(url, attempts = 4) {
-  let lastErr
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`statsapi ${res.status} ${url}`)
-      return await res.json()
-    } catch (err) {
-      lastErr = err
-      await new Promise((r) => setTimeout(r, 300 * (i + 1)))
-    }
-  }
-  throw lastErr
 }
 
 function parseInnings(ip) {
@@ -77,7 +63,7 @@ function slimSide(side) {
 async function fetchBoxscore(cache, gamePk) {
   const key = String(gamePk)
   if (cache[key]) return cache[key]
-  const json = await fetchWithRetry(`https://statsapi.mlb.com/api/v1/game/${gamePk}/boxscore`)
+  const json = await getJson(`/api/v1/game/${gamePk}/boxscore`)
   const slim = {
     home: { teamId: json.teams.home.team.id, players: slimSide(json.teams.home) },
     away: { teamId: json.teams.away.team.id, players: slimSide(json.teams.away) },

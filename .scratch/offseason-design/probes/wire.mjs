@@ -1,6 +1,8 @@
 // How much does MLB's roster wire actually carry in the offseason? The rail's
 // window is 3 days (5 fetched). If the wire is to LEAD the offseason page, a
 // quiet window is the case that decides the design.
+import { getJson } from '../../../scripts/lib/statsapi.mjs'
+
 const WINDOWS = [
   ['2025-11-03', '2025-11-07'], // week one of the winter
   ['2025-11-17', '2025-11-21'], // 40-man deadline
@@ -12,9 +14,7 @@ const WINDOWS = [
   ['2026-06-10', '2026-06-14'], // an in-season window, for scale
 ]
 for (const [a, b] of WINDOWS) {
-  const j = await (await fetch(
-    `https://statsapi.mlb.com/api/v1/transactions?startDate=${a}&endDate=${b}`,
-  )).json()
+  const j = await getJson(`/api/v1/transactions?startDate=${a}&endDate=${b}`)
   const rows = j.transactions ?? []
   const byType = {}
   for (const r of rows) byType[r.typeDesc] = (byType[r.typeDesc] || 0) + 1

@@ -1,8 +1,10 @@
 // Dump every ABS review in the two anomalous games, straight from the feed,
 // with no interpretation by our own code.
+import { getJson } from '../../scripts/lib/statsapi.mjs'
+
 const GAMES = [[815094, 102], [816599, 416]]
 for (const [pk, teamId] of GAMES) {
-  const f = await (await fetch(`https://statsapi.mlb.com/api/v1.1/game/${pk}/feed/live`)).json()
+  const f = await getJson(`/api/v1.1/game/${pk}/feed/live`)
   const away = f.gameData.teams.away
   const home = f.gameData.teams.home
   console.log(`\n===== gamePk ${pk} — ${away.name} (${away.id}) at ${home.name} (${home.id}) =====`)

@@ -3,6 +3,7 @@ import {
   bucketToOrg, dedupeTransactions, filterStoryworthy, groupIntoStories,
 } from '../../src/api/teamTransactions.js'
 import { feedWindow } from '../../src/api/transactions/leagueFeed.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const orgId = Number(process.argv[2])
 const date = process.argv[3]
@@ -13,12 +14,11 @@ const affilToOrg = new Map()
 for (const [org, clubs] of Object.entries(affil.byOrgId ?? {})) {
   for (const c of clubs ?? []) if (c?.id != null) affilToOrg.set(c.id, Number(org))
 }
-const rows = (await (await fetch(
-  `https://statsapi.mlb.com/api/v1/transactions?startDate=${w.fetchStart}&endDate=${w.endDate}`)).json()).transactions ?? []
+const rows = (await getJson(`/api/v1/transactions?startDate=${w.fetchStart}&endDate=${w.endDate}`)).transactions ?? []
 const ids = [...new Set(rows.map((t) => t.person?.id).filter((x) => x != null))]
 const positions = {}; const debutedIds = new Set()
 for (let i = 0; i < ids.length; i += 100) {
-  const d = await (await fetch(`https://statsapi.mlb.com/api/v1/people?personIds=${ids.slice(i, i + 100).join(',')}`)).json()
+  const d = await getJson(`/api/v1/people?personIds=${ids.slice(i, i + 100).join(',')}`)
   for (const p of d.people ?? []) { positions[p.id] = p.primaryPosition?.abbreviation || ''; if (p.mlbDebutDate) debutedIds.add(p.id) }
 }
 const clubRows = dedupeTransactions(bucketToOrg(rows, orgId, affilToOrg))

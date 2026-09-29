@@ -24,9 +24,10 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const API = 'https://statsapi.mlb.com/api/v1'
+const API = '/api/v1'
 
 // The debut window. 2005 is where the reusable prospect cohort starts; 2025 is
 // the last complete season. 2026 is in progress and is deliberately out.
@@ -36,20 +37,6 @@ export const LAST_SEASON = 2025
 const refetch = new Set(
   process.argv.slice(2).flatMap((a, i, all) => (a === '--refetch' ? [all[i + 1]] : [])),
 )
-
-async function get(url, tries = 2) {
-  for (let attempt = 1; attempt <= tries; attempt++) {
-    try {
-      const res = await fetch(url, { headers: { 'User-Agent': 'bbsbh-research/1.0' } })
-      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
-      return await res.json()
-    } catch (err) {
-      // The standing note: retry once on a connect timeout before giving up.
-      if (attempt === tries) throw err
-      await new Promise((r) => setTimeout(r, 2000))
-    }
-  }
-}
 
 async function cached(name, build) {
   const path = join(here, `${name}.json`)
@@ -69,7 +56,7 @@ async function cached(name, build) {
 async function pullSeasons() {
   const out = []
   for (let y = FIRST_SEASON; y <= LAST_SEASON; y++) {
-    const j = await get(`${API}/seasons?sportId=1&season=${y}`)
+    const j = await getJson(`${API}/seasons?sportId=1&season=${y}`)
     const s = j.seasons?.[0]
     if (!s) throw new Error(`no season record for ${y}`)
     out.push({
@@ -92,7 +79,7 @@ async function pullSeasons() {
 async function pullDebuts() {
   const byId = new Map()
   for (let y = FIRST_SEASON; y <= LAST_SEASON; y++) {
-    const j = await get(`${API}/sports/1/players?season=${y}`)
+    const j = await getJson(`${API}/sports/1/players?season=${y}`)
     const people = j.people ?? []
     let debuts = 0
     for (const p of people) {
@@ -132,7 +119,7 @@ async function pullTransactions() {
       const start = `${y}-${String(m).padStart(2, '0')}-01`
       const endDay = new Date(Date.UTC(y, m, 0)).getUTCDate()
       const end = `${y}-${String(m).padStart(2, '0')}-${String(endDay).padStart(2, '0')}`
-      const j = await get(`${API}/transactions?startDate=${start}&endDate=${end}&sportId=1`)
+      const j = await getJson(`${API}/transactions?startDate=${start}&endDate=${end}&sportId=1`)
       for (const t of j.transactions ?? []) {
         rows.push({
           id: t.id,

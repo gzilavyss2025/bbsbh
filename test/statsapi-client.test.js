@@ -13,6 +13,7 @@ import {
   createStatsapiClient,
   getJson,
   isRetryable,
+  statsapiUrl,
 } from '../scripts/lib/statsapi.mjs'
 
 // The Node client for scripts/ and .scratch/ (#1116). Every case runs offline:
@@ -50,6 +51,10 @@ test('a 200 returns the parsed body, fetched from the statsapi base', async () =
   const { fetch, getJson } = client([{ teams: [1, 2] }])
   assert.deepEqual(await getJson('/api/v1/teams?sportId=1'), { teams: [1, 2] })
   assert.deepEqual(fetch.calls, [`${STATSAPI_BASE}/api/v1/teams?sportId=1`])
+})
+
+test('statsapiUrl joins the base and a path, for a script that records an address', () => {
+  assert.equal(statsapiUrl('/api/v1/teams'), 'https://statsapi.mlb.com/api/v1/teams')
 })
 
 test('a 503 then a 200 retries and succeeds', async () => {
@@ -108,7 +113,7 @@ test('the pause grows after each failure, and there is none after the last', asy
   assert.deepEqual(pauses, [RETRY_DELAY_MS, RETRY_DELAY_MS * 2])
 })
 
-test('the default policy is the one #1266 chose: 3 tries, 2000 ms x attempt', () => {
+test('the default policy is the one the nightly fix chose: 3 tries, 2000 ms x attempt', () => {
   assert.equal(RETRY_TRIES, 3)
   assert.equal(RETRY_DELAY_MS, 2000)
 })
