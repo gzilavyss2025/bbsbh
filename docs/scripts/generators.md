@@ -19,6 +19,41 @@ a twenty-three-day-old postseason-odds snapshot to the Team hub the whole time,
 with nothing on screen to say so. A date-keyed file rots quietly. This catalog
 is where that becomes visible.
 
+## The statsapi client (every script's one door)
+
+A generator in `scripts/` and a research script in `.scratch/` reach
+`statsapi.mlb.com` through `getJson(path)` in `scripts/lib/statsapi.mjs`, and
+through nothing else (#1116). `npm run lint` runs `check-statsapi-client.mjs`,
+which fails a file that names the host or `STATSAPI_BASE` outside the client. A
+new generator imports the client and does not write a `fetch`, a retry loop or a
+sleep of its own.
+
+- **Path, not URL.** `getJson('/api/v1/teams?sportId=1')`. To RECORD an address
+  in an output, use `statsapiUrl(path)`.
+- **One retry policy.** 3 tries, with a pause of 2000 ms x attempt. It retries a
+  network error, HTTP 429 and HTTP 5xx, and it throws at once on any other 4xx.
+  The mechanism is `scripts/lib/net/retry.mjs`. To change a number, change it in
+  the client, with the reason in the PR.
+- **Timeout is opt-in.** `getJson(path, { timeoutMs })` aborts a try that has not
+  answered, and the abort is retried like a network error. `warm-previews.mjs`
+  and the three generators that used the browser client keep their old 8 s and
+  15 s caps this way.
+- **A DNS failure names the sandbox.** When `ENOTFOUND` or `EAI_AGAIN` outlasts
+  the retries, the error says the Claude Code Bash sandbox blocks statsapi and
+  to rerun with the sandbox off.
+- **A research cache, for `.scratch` only.** `cachedGetJson(path)` keeps each
+  answer for an hour in `node_modules/.cache/statsapi/`, which git ignores, so a
+  re-run of a spike does not pull again. `getJson` never reads it, and the guard
+  fails a file in `scripts/` that names `cachedGetJson`: the nightly data must be
+  fresh.
+- **No concurrency limit in the client.** `scripts/lib/concurrency.mjs` stays
+  beside it. Its pool turns a failed item into `null`, which a client must not
+  do for every caller, and each generator sizes its own pool.
+- **Files that keep the host** sit in the guard's `ALLOWLIST`, each with a
+  reason. `probe-diffpatch.mjs` needs the raw response bytes.
+  `check-feed-shape-drift.mjs` re-fetches each fixture from the URL recorded in
+  its manifest.
+
 ## Nightly-cron generators (`update-nightly-data.yml`)
 
 Precomputed because they're too heavy (COST) to build on a page load. Normally you

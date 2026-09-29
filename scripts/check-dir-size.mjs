@@ -781,7 +781,13 @@ const BUDGETS = {
   // cron, but a CLI with a dispatch at the bottom RUNS on import, so it cannot go
   // in scripts/lib/, and every other top-level script sits flat here. Its pure
   // half went to scripts/lib/game-notes-download.mjs (next entry).
-  scripts: 122,
+  // +1 for check-statsapi-client.mjs, the lint guard that fails a script in
+  // scripts/ or .scratch/ which builds a statsapi.mlb.com URL outside
+  // scripts/lib/statsapi.mjs (#1116). Flat beside its sibling guards, which
+  // `npm run lint` chains as top-level scripts; its pure matcher is exported from
+  // the same file for test/statsapi-client-guard.test.js, because scripts/lib/
+  // is at its own budget.
+  scripts: 123,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
