@@ -387,3 +387,129 @@
 @media (prefers-reduced-motion: reduce) {
   .prospectcard__disclose { transition: background-color 160ms ease; }
 }
+
+/* ============================================================
+   PROSPECT RANKINGS
+   components/player/ProspectRankHistoryCard.jsx -- the years a man sat on a
+   top-prospect list. It wears the dossier shell above (`.levelprog` head and
+   accent rule), so only the ledger body is its own.
+
+   The metaphor is a ledger page read down one column: the year on the left,
+   the source that ranked him in the middle, the rank on the right in one mono
+   rail. Each row is its own grid; the `1fr` middle column pushes every rank to
+   the same right edge whatever its width, which is all a reader comparing one
+   year to the next needs.
+   ============================================================ */
+
+.prankhist__list {
+  margin: 0;
+  padding: var(--space-2h) var(--space-4);
+  list-style: none;
+}
+
+.prankhist__row {
+  display: grid;
+  grid-template-columns: 3.75rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: var(--space-3);
+  padding: var(--space-1) 0;
+}
+
+.prankhist__row + .prankhist__row {
+  border-top: var(--bw-hair) dotted var(--rule-grid);
+}
+
+.prankhist__year {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-num);
+  color: var(--text-body);
+}
+
+.prankhist__src {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prankhist__rank {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* "of 50" -- how deep that year's list ran. Penciled, not inked: it qualifies
+   the rank and must not compete with it. */
+.prankhist__of {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+
+/* The debut is the turn in the story, so it takes the ink and spans the two
+   columns a rank would fill. */
+.prankhist__label {
+  grid-column: 2 / -1;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+
+.prankhist__row--today .prankhist__year {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+
+/* ---- the foot: what the lists cover, then who to credit ---- */
+.prankhist__foot {
+  padding: var(--space-2h) var(--space-4) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.prankhist__note,
+.prankhist__credit {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-text);
+  color: var(--text-caption);
+}
+
+.prankhist__credit {
+  margin-top: 2px;
+}
+
+/* THE FOOT IS PROSE, so it renders in the case it was written in. Every other
+   string on this card is a label or a figure and stays shouted by the global
+   ALL-CAPS invariant (01-base.css). The coverage sentence and the credit lines
+   are sentences, and shouting a licence name would misprint it. The `#root`
+   prefix is what lets this out-rank `#root *`; the descendant half covers any
+   inline child. Same idiom as .cthist__sub. */
+#root .prankhist__foot,
+#root .prankhist__foot * {
+  text-transform: none; /* caps-exempt: the card's prose foot, same idiom as .cthist__sub */
+}

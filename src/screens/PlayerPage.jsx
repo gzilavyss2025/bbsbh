@@ -1,5 +1,6 @@
 import { loadPlayerCore } from '../api/player/core.js'
 import { loadPlayerOverview } from '../api/player/overview.js'
+import { fetchProspectRankHistory } from '../api/player/prospectRankHistory.js'
 import { fetchPersonStats } from '../api/person-fetch.js'
 import { SPORT_LABEL, isMlbTeamId } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -9,6 +10,7 @@ import { GameLink } from '../components/player/GameLink.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { CareerTimeline } from '../components/player/CareerTimeline.jsx'
 import { LevelProgressionCard } from '../components/player/LevelProgressionCard.jsx'
+import { ProspectRankHistoryCard } from '../components/player/ProspectRankHistoryCard.jsx'
 import { GameLog } from '../components/player/GameLog.jsx'
 import { StatcastPercentiles } from '../components/charts/StatcastPercentiles.jsx'
 import { ProspectCard } from '../components/playerstats/ProspectCard.jsx'
@@ -70,6 +72,9 @@ function draftLabel(draft, signedYear) {
 export function PlayerPage({ id, asOf, sportId }) {
   const core = useAsync(() => loadPlayerCore(id, asOf), [id, asOf])
   const overview = useAsync(() => loadPlayerOverview(id, asOf), [id, asOf])
+  // Its own load, outside the gate: a frozen file the card needs only for a
+  // player who has not debuted (#1111).
+  const rankHistory = useAsync(() => fetchProspectRankHistory(), [])
   const navigate = useNav()
   const back = () => window.history.back()
 
@@ -115,6 +120,15 @@ export function PlayerPage({ id, asOf, sportId }) {
           does debut — see api/player/overview.js. */}
       {data.timeline && <CareerTimeline entries={data.timeline.entries} />}
       {data.progression && <LevelProgressionCard levels={data.progression.levels} />}
+      {/* His ranked years sit beside his path, and move to the History tab with
+          it the day he debuts. */}
+      {!bio.debut && (
+        <ProspectRankHistoryCard
+          history={rankHistory.data}
+          playerId={bio.id}
+          currentRank={core.data.prospectRank}
+        />
+      )}
 
       <FactGrid as="div">
         <Fact label="Ht / Wt" value={bio.heightWeight} />

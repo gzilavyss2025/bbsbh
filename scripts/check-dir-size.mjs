@@ -1060,7 +1060,12 @@ const BUDGETS = {
   // guard's usual remedy of a subdirectory would put ONE of this bucket's
   // player-page cards in a folder of its own and leave the other ten flat,
   // which is not a subdivision, only a scattering.
-  'src/components/player': 16,
+  // 16 -> 17 for ProspectRankHistoryCard.jsx (#1111) — the prospect-ranking
+  // card that sits beside LevelProgressionCard.jsx on the History tab and the
+  // Overview. It shares that card's shell, so moving it to a folder of its own
+  // would split one dossier in two. src/components/playerstats/ is already at
+  // the 12-file cap, so it cannot take it either.
+  'src/components/player': 17,
   // New entry: src/components/charts holds 13, one past the cap, for
   // GloveTarget.jsx — the Glove Target plot, a peer of CommandMap.jsx and
   // SprayMap.jsx beside it and built the same way (one component that only
