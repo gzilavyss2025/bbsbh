@@ -63,8 +63,16 @@ async function saveOne(row, dir, fetchFn) {
 }
 
 // Save every row whose file is missing, at most `concurrency` at a time. Returns
-// { saved, skipped, failed: [{ row, reason }] }. A failure never stops the run and
-// leaves nothing behind, so the next run simply tries that row again.
+// { saved, skipped, failed: [{ row, reason }], repeats, collided: [{ row, sameAs }] }.
+// A failure never stops the run and leaves nothing behind, so the next run simply
+// tries that row again.
+//
+// Every row lands in exactly one of those buckets, so the counts add up to
+// rows.length. `repeats` counts a row with the same URL as one already listed:
+// one PDF, listed twice. `collided` holds a row with a DIFFERENT URL whose flattened
+// file name is the same as an earlier row's (ids that differ only in punctuation).
+// That PDF is not saved, since it would overwrite the other one, and a re-run
+// cannot fix it, so the caller must print it.
 export async function downloadMissing({
   rows,
   dir,
@@ -72,15 +80,20 @@ export async function downloadMissing({
   concurrency = 4,
   onProgress = () => {},
 }) {
-  const seen = new Set()
+  const seen = new Map()
+  const out = { saved: 0, skipped: 0, failed: [], repeats: 0, collided: [] }
   const unique = rows.filter((r) => {
     const key = pdfPath(r)
-    if (seen.has(key)) return false
-    seen.add(key)
-    return true
+    const first = seen.get(key)
+    if (!first) {
+      seen.set(key, r)
+      return true
+    }
+    if (first.url === r.url) out.repeats += 1
+    else out.collided.push({ row: r, sameAs: first })
+    return false
   })
 
-  const out = { saved: 0, skipped: 0, failed: [] }
   let next = 0
   let done = 0
   async function worker() {

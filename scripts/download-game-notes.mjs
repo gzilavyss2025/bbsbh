@@ -74,7 +74,13 @@ async function main() {
     },
   })
 
-  console.log(`Saved ${result.saved}, already had ${result.skipped}, failed ${result.failed.length}.`)
+  console.log(
+    `Saved ${result.saved}, already had ${result.skipped}, failed ${result.failed.length}` +
+      `, listed twice ${result.repeats}, name clash ${result.collided.length}.`,
+  )
+  for (const { row, sameAs } of result.collided) {
+    console.error(`  NOT SAVED ${row.date} ${row.teamId} ${row.url} — same file name as ${sameAs.url}`)
+  }
   for (const { row, reason } of result.failed) console.error(`  FAILED ${row.date} ${row.teamId} ${row.url} — ${reason}`)
   if (result.failed.length > 0) process.exit(1)
 }

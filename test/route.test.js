@@ -1162,3 +1162,11 @@ test('gameNotesPath: the bare page, or one club through ?team=', () => {
   assert.equal(gameNotesPath(158), '/game-notes?team=158')
   assert.deepEqual(parseRoute(gameNotesPath(158)), { name: 'game-notes', teamId: 158 })
 })
+
+// The page writes the picked club back to the address, so 'every club' needs a
+// value too; without one, a reload would fall back to the favorite club.
+test('/game-notes?team=all is the every-club pick, and gameNotesPath writes it', () => {
+  assert.deepEqual(parseRoute('/game-notes?team=all'), { name: 'game-notes', teamId: 'all' })
+  assert.equal(gameNotesPath('all'), '/game-notes?team=all')
+  assert.deepEqual(parseRoute(gameNotesPath('all')), { name: 'game-notes', teamId: 'all' })
+})

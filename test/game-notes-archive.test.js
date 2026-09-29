@@ -1,13 +1,19 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import {
   ALL_CLUBS,
+  PAGE_SIZE,
   archiveRows,
   clubOptions,
   csvFileName,
+  csvForDownload,
   csvText,
   defaultClub,
+  pageRows,
 } from '../src/lib/gameNotes/archive.js'
+import { fetchArchiveShard, resolveGameNotes } from '../src/api/gameNotes.js'
 
 // Pure helpers behind the /game-notes archive page (#1258). Nothing here fetches:
 // the page hands in the shards it loaded and a name lookup.
@@ -153,4 +159,75 @@ test('csvText of no rows is the header alone', () => {
 
 test('csvFileName carries the day it was saved', () => {
   assert.equal(csvFileName('2026-09-29'), 'game-notes-links-2026-09-29.csv')
+})
+
+test('defaultClub: ?team=all opens on every club, even for a reader with a favorite', () => {
+  assert.equal(defaultClub({ favoriteId: 138, requestedId: ALL_CLUBS, clubIds: [158, 138] }), ALL_CLUBS)
+})
+
+test('pageRows mounts one page and says how many rows are held back', () => {
+  const rows = Array.from({ length: PAGE_SIZE * 2 + 5 }, (_, i) => i)
+  const first = pageRows(rows, PAGE_SIZE)
+  assert.equal(first.shown.length, PAGE_SIZE)
+  assert.equal(first.left, PAGE_SIZE + 5)
+  const all = pageRows(rows, PAGE_SIZE * 3)
+  assert.equal(all.shown.length, rows.length)
+  assert.equal(all.left, 0)
+  assert.deepEqual(pageRows([], PAGE_SIZE), { shown: [], left: 0 })
+})
+
+test('csvForDownload is the CSV behind a UTF-8 byte-order mark, so Excel keeps the accents', () => {
+  const rows = [{ date: '2026-09-27', teamId: 158, club: 'Milwaukee Brewers', title: 'Café', url: 'https://x/y.pdf' }]
+  const text = csvForDownload(rows)
+  assert.equal(text.charCodeAt(0), 0xfeff)
+  assert.equal(text.slice(1), csvText(rows))
+})
+
+// One download per club: the team hub's button and the archive page read the
+// same shard, and must not fetch it twice.
+test('a shard is fetched once, whether the button or the archive page asks first', async () => {
+  const realFetch = globalThis.fetch
+  const calls = []
+  globalThis.fetch = async (url) => {
+    calls.push(String(url))
+    return new Response(JSON.stringify({ notes: [note('2026-01-05', 'Opening series')] }), { status: 200 })
+  }
+  try {
+    const hit = await resolveGameNotes(9991, '2026-01-05')
+    assert.equal(hit?.title, 'Opening series')
+    const shard = await fetchArchiveShard(9991)
+    assert.equal(shard.notes.length, 1)
+    assert.equal(calls.filter((u) => u.includes('/data/game-notes/9991.json')).length, 1)
+  } finally {
+    globalThis.fetch = realFetch
+  }
+})
+
+test('the button swallows a failed shard, but the archive page still sees the error and can retry', async () => {
+  const realFetch = globalThis.fetch
+  let ok = false
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('dapi.mlbinfra.com')) return new Response('{}', { status: 500 })
+    return ok ? new Response(JSON.stringify({ notes: [] }), { status: 200 }) : new Response('', { status: 503 })
+  }
+  try {
+    assert.equal(await resolveGameNotes(9992, '2026-01-05'), null)
+    await assert.rejects(fetchArchiveShard(9992), /HTTP 503/)
+    ok = true
+    assert.deepEqual((await fetchArchiveShard(9992)).notes, [])
+  } finally {
+    globalThis.fetch = realFetch
+  }
+})
+
+// The team hub's "Notes archive" link is the archive's only door. It sits beside
+// the newest-note button but must not wait on that button's lookup.
+test('the Notes archive link renders whether or not the newest-note lookup found a PDF', () => {
+  const src = readFileSync(fileURLToPath(new URL('../src/screens/team/TeamHubShell.jsx', import.meta.url)), 'utf8')
+  const fn = src.slice(src.indexOf('function GameNotesLink'), src.indexOf('// The chrome every team-hub tab'))
+  assert.doesNotMatch(fn, /if \(!notes\?\.url\) return null/)
+  assert.match(fn, /gameNotesPath\(teamId\)/)
+  // A native title= tip never shows on a phone (house rule).
+  const archiveLink = fn.slice(fn.indexOf('gameNotesPath(teamId)'))
+  assert.doesNotMatch(archiveLink.slice(0, archiveLink.indexOf('</a>')), /title=/)
 })

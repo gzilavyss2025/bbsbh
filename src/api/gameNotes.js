@@ -34,28 +34,10 @@ const DAPI = 'https://dapi.mlbinfra.com/v2/content/en-us/documents/'
 // territory — serve them straight from the archive without a live round-trip.
 const LIVE_LOOKBACK_DAYS = 3
 
-// One club's archived notes, from his shard. Memoized per team id — a game view
-// asks for one club, the team page for one club. `[]` when the club has no
-// shard (every MiLB club, or a run before the generator wrote one).
-const archiveCache = new Map()
-function loadArchive(teamId) {
-  if (!archiveCache.has(teamId)) {
-    archiveCache.set(
-      teamId,
-      fetch(`/data/game-notes/${teamId}.json`)
-        .then((r) => (r.ok ? r.json() : { notes: [] }))
-        .then((d) => d.notes ?? [])
-        .catch(() => []),
-    )
-  }
-  return archiveCache.get(teamId)
-}
-
-// One club's whole archive shard for the /game-notes page, or a THROWN error.
-// The button's loader above swallows a failure into `[]` and caches it, which is
-// right for one button and wrong here: a shard that quietly came back empty would
-// make "All clubs" and the CSV look complete while missing a club. So this one
-// throws, and caches only a shard that arrived — a retry asks again.
+// One club's whole archive shard, or a THROWN error. This is the only place the
+// shard is fetched and its shape read, so the team hub's button and the
+// /game-notes page share one download per club. It caches only a shard that
+// arrived, so a retry asks again.
 const shardCache = new Map()
 export function fetchArchiveShard(teamId) {
   if (!shardCache.has(teamId)) {
@@ -69,6 +51,23 @@ export function fetchArchiveShard(teamId) {
     load.catch(() => shardCache.delete(teamId))
   }
   return shardCache.get(teamId)
+}
+
+// One club's archived notes for the button. Memoized per team id — a game view
+// asks for one club, the team page for one club. `[]` when the club has no
+// shard (every MiLB club, or a run before the generator wrote one) or the shard
+// would not load: one button can fail quietly, where the archive page cannot.
+const archiveCache = new Map()
+function loadArchive(teamId) {
+  if (!archiveCache.has(teamId)) {
+    archiveCache.set(
+      teamId,
+      fetchArchiveShard(teamId)
+        .then((shard) => shard.notes)
+        .catch(() => []),
+    )
+  }
+  return archiveCache.get(teamId)
 }
 
 // The note's true game date is its publish time in America/New_York — NOT the

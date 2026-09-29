@@ -56,12 +56,24 @@ export function clubOptions(clubs, favoriteId) {
   ]
 }
 
-// Where the page opens: a `?team=` from the team hub if it names an MLB club,
-// else the reader's own club, else every club.
+// Where the page opens: a `?team=` if it names an MLB club (or says `all`), else
+// the reader's own club, else every club. The address carries the pick, so a
+// reload or a copied link reopens on the club on screen.
 export function defaultClub({ favoriteId, requestedId, clubIds }) {
+  if (requestedId === ALL_CLUBS) return ALL_CLUBS
   if (clubIds.includes(requestedId)) return requestedId
   if (clubIds.includes(favoriteId)) return favoriteId
   return ALL_CLUBS
+}
+
+// How many table rows the page mounts at a time. "All clubs" holds about 5,000
+// notes and grows nightly, which is too many rows for a phone to mount at once.
+export const PAGE_SIZE = 200
+
+// The rows to mount for a `count` the reader has asked to see, and how many are
+// still held back.
+export function pageRows(rows, count) {
+  return { shown: rows.slice(0, count), left: Math.max(0, rows.length - count) }
 }
 
 // RFC 4180: quote a field holding a comma, quote or line break, and double any
@@ -75,6 +87,13 @@ export function csvText(rows) {
   const lines = [HEADER.join(',')]
   for (const r of rows) lines.push(HEADER.map((k) => cell(r[k])).join(','))
   return lines.join('\r\n') + '\r\n'
+}
+
+// The file the browser saves: the CSV behind a UTF-8 byte-order mark. Excel on
+// Windows opens a BOM-less UTF-8 file as ANSI, which garbles any accent in a
+// club name or a title.
+export function csvForDownload(rows) {
+  return '﻿' + csvText(rows)
 }
 
 export function csvFileName(isoDate) {

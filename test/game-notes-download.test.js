@@ -129,3 +129,29 @@ test('downloadMissing never runs more fetches at once than the concurrency it wa
   assert.ok(peak >= 2, `expected some overlap, peak ${peak}`)
   await rm(dir, { recursive: true })
 })
+
+// Two ids that differ only in punctuation flatten to one file name. The second PDF
+// cannot be saved without overwriting the first, and it must not vanish: it is
+// counted, so the buckets add up to the rows announced.
+test('a row whose file name clashes with another PDF is reported, not silently dropped', async () => {
+  const dir = await scratchDir()
+  const rows = [row(158, '2026-09-27', 'a.b'), row(158, '2026-09-27', 'a_b')]
+  assert.equal(pdfPath(rows[0]), pdfPath(rows[1]))
+  const out = await downloadMissing({ rows, dir, fetchFn: okFetch([]), concurrency: 1 })
+  assert.equal(out.saved, 1)
+  assert.equal(out.collided.length, 1)
+  assert.equal(out.collided[0].row.url, rows[1].url)
+  assert.equal(out.collided[0].sameAs.url, rows[0].url)
+  assert.equal(out.saved + out.skipped + out.failed.length + out.repeats + out.collided.length, rows.length)
+  await rm(dir, { recursive: true })
+})
+
+test('the same PDF listed twice is one download and one counted repeat', async () => {
+  const dir = await scratchDir()
+  const log = []
+  const r = row(158, '2026-09-27', 'a')
+  const out = await downloadMissing({ rows: [r, { ...r }], dir, fetchFn: okFetch(log), concurrency: 1 })
+  assert.deepEqual([out.saved, out.repeats, out.collided.length], [1, 1, 0])
+  assert.equal(log.length, 1)
+  await rm(dir, { recursive: true })
+})

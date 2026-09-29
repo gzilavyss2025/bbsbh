@@ -467,7 +467,7 @@ export default function App() {
   } else if (route.name === 'manager') {
     content = <ManagerPage id={route.id} />
   } else if (route.name === 'game-notes') {
-    content = <GameNotesArchivePage key={route.teamId ?? 'all'} teamId={route.teamId} />
+    content = <GameNotesArchivePage teamId={route.teamId} />
   } else if (route.name === 'game-notes-debug') {
     content = <GameNotesDebugPage />
   } else if (route.name === 'animation-lab') {

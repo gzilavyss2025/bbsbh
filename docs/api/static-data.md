@@ -230,9 +230,10 @@ for each generator; the reader modules:
   MiLB and any date with no note. Spoiler-free in-app (renders only a link), but the
   PDF recaps prior results, so it opens in a new tab as a user-initiated jump.
   Kept OUT of the PWA precache (grows each game day). `fetchArchiveShard(teamId)`
-  is the strict read of one shard for the `/game-notes` archive page (#1258): it
-  THROWS on a failed fetch and caches only a shard that arrived, unlike the
-  button's loader, which swallows a failure into `[]`. The page's pure half is
+  is the one strict read of a shard (#1258): it THROWS on a failed fetch and caches
+  only a shard that arrived. The `/game-notes` archive page calls it directly. The
+  button's loader wraps it and swallows a failure into `[]`, so the two share one
+  download per club. The page's pure half is
   `src/lib/gameNotes/archive.js`; `scripts/download-game-notes.mjs` saves the same
   archive's PDFs to a gitignored folder.
 - `whatsBrewing.js` — **QA-only since 2026-08-18.** For a CALIBRATED club (a

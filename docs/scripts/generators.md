@@ -1386,7 +1386,9 @@ Re-run only to fold in a new season.
   archive added. `--team {id}` limits a run to one club, `--dir` moves the folder.
   A first full run is about 2 GB (170 PDFs for one club measured 74 MB). A file
   appears only after the whole body arrives and starts `%PDF`, so a killed run
-  leaves nothing a re-run would trust; exit 1 lists any failures. The loop and
+  leaves nothing a re-run would trust; exit 1 lists any failures. Two ids that differ
+  only in punctuation flatten to one file name; the second PDF is not saved, and the
+  run prints it under "NOT SAVED" and counts it, so the totals add up. The loop and
   the naming are in `scripts/lib/game-notes-download.mjs`
   (`test/game-notes-download.test.js`).
 

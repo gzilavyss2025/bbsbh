@@ -7,12 +7,16 @@ import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { monthDayYear, toApiDate } from '../../lib/dates.js'
 import {
   ALL_CLUBS,
+  PAGE_SIZE,
   archiveRows,
   clubOptions,
   csvFileName,
-  csvText,
+  csvForDownload,
   defaultClub,
+  pageRows,
 } from '../../lib/gameNotes/archive.js'
+import { useNav } from '../../lib/nav.js'
+import { gameNotesPath } from '../../lib/route.js'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../../lib/teams.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
@@ -31,7 +35,10 @@ import { Button } from '../../components/ui/control/Button.jsx'
 // text.
 //
 // MLB CLUBS ONLY: MiLB clubs publish no notes, so they are not in the filter.
-// One club's shard loads at a time; "All clubs" loads all thirty.
+// One club's shard loads at a time; "All clubs" loads all thirty. The table shows
+// PAGE_SIZE rows and a button for more, since "All clubs" is about 5,000 rows.
+// The club in the filter is the club in the address (`?team=`), so a reload or a
+// copied link reopens on it.
 //
 // The CSV button is for the local copy: 5,000 PDFs is too many for a browser
 // button, so it saves the link list, and scripts/download-game-notes.mjs turns
@@ -60,20 +67,24 @@ function saveCsv(text, fileName) {
 export function GameNotesArchivePage({ teamId: requestedId = null }) {
   useDocumentTitle('Game Notes')
   const { favoriteTeamId } = useFavoriteTeam()
+  const navigate = useNav()
   const options = useMemo(() => clubOptions(CLUBS, favoriteTeamId), [favoriteTeamId])
-  const [pick, setPick] = useState(() =>
-    defaultClub({ favoriteId: favoriteTeamId, requestedId, clubIds: CLUB_IDS }),
-  )
+  const pick = defaultClub({ favoriteId: favoriteTeamId, requestedId, clubIds: CLUB_IDS })
   const [csv, setCsv] = useState({ busy: false, error: false })
+  // How many rows the reader has asked to see, for one pick. A new pick starts
+  // over at one page, with no reset to remember.
+  const [more, setMore] = useState({ pick, count: PAGE_SIZE })
+  const count = more.pick === pick ? more.count : PAGE_SIZE
 
   const shards = useAsync(() => loadShards(pick), [pick])
   const rows = useMemo(() => archiveRows(shards.data ?? [], teamFullName), [shards.data])
+  const { shown, left } = pageRows(rows, count)
 
   async function downloadList() {
     setCsv({ busy: true, error: false })
     try {
       const all = archiveRows(await loadShards(ALL_CLUBS), teamFullName)
-      saveCsv(csvText(all), csvFileName(toApiDate()))
+      saveCsv(csvForDownload(all), csvFileName(toApiDate()))
       setCsv({ busy: false, error: false })
     } catch {
       setCsv({ busy: false, error: true })
@@ -98,7 +109,7 @@ export function GameNotesArchivePage({ teamId: requestedId = null }) {
           value={pick}
           onChange={(e) => {
             const v = e.target.value
-            setPick(v === ALL_CLUBS ? ALL_CLUBS : Number(v))
+            navigate(gameNotesPath(v === ALL_CLUBS ? ALL_CLUBS : Number(v)), { replace: true })
           }}
         >
           {options.map((o) => (
@@ -141,7 +152,7 @@ export function GameNotesArchivePage({ teamId: requestedId = null }) {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {shown.map((r) => (
                   <tr key={r.url}>
                     <td className="gnotes__date">{monthDayYear(r.date)}</td>
                     <td className="gnotes__club">{r.club}</td>
@@ -160,6 +171,13 @@ export function GameNotesArchivePage({ teamId: requestedId = null }) {
                 ))}
               </tbody>
             </table>
+          )}
+          {left > 0 && (
+            <div className="gnotes__more">
+              <Button size="control" onClick={() => setMore({ pick, count: count + PAGE_SIZE })}>
+                {`Show ${Math.min(PAGE_SIZE, left)} more (${left.toLocaleString('en-US')} left)`}
+              </Button>
+            </div>
           )}
         </>
       )}

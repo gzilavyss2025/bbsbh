@@ -66,28 +66,27 @@ const TAB_TITLE = {
 // MLB only — see gameNotes.js.
 //
 // Beside it, the one door onto the Game Notes archive (#1258): every note this
-// club has posted, opened on this club. The archive has no other link in the app.
+// club has posted, opened on this club. The archive has no other link in the app,
+// and it does not wait on the newest-note lookup: the archive page loads and
+// retries its own data, so a lookup that failed must not remove the door.
 function GameNotesLink({ teamId }) {
   const { data: notes } = useAsync(() => resolveGameNotes(teamId), [teamId])
   const linkProps = useRouteLink()
-  if (!notes?.url) return null
   return (
     <>
-      <a
-        className="btn btn--control innings__notes"
-        href={notes.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        title={`${notes.title} — the club's official press notes (PDF), opens in a new tab`}
-      >
-        Game Notes
-        <span className="btn__icon" aria-hidden="true">↗</span>
-      </a>
-      <a
-        className="btn btn--control innings__notes"
-        {...linkProps(gameNotesPath(teamId))}
-        title="Every Game Notes PDF this club has posted"
-      >
+      {notes?.url && (
+        <a
+          className="btn btn--control innings__notes"
+          href={notes.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={`${notes.title} — the club's official press notes (PDF), opens in a new tab`}
+        >
+          Game Notes
+          <span className="btn__icon" aria-hidden="true">↗</span>
+        </a>
+      )}
+      <a className="btn btn--control innings__notes" {...linkProps(gameNotesPath(teamId))}>
         Notes archive
         <span className="btn__icon" aria-hidden="true">›</span>
       </a>

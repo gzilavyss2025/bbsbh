@@ -57,7 +57,7 @@
 //   '/identity-lab'                     -> { name: 'identity-lab' }  (dev-only curation lab)
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
 //   '/game-notes'                       -> { name: 'game-notes', teamId }  (every club's notes PDFs, links only;
-//                                          '?team=' opens on one MLB club, any other value degrades to the default)
+//                                          '?team=' opens on one MLB club, 'all' on every club, else the default)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
 //   '/between-innings-lab'              -> { name: 'between-innings-lab' }  (unlisted QA page)
@@ -430,9 +430,11 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'uniform-names')
     return { name: 'uniform-names' }
   // The Game Notes archive (#1258). `?team=` is the team hub's door onto one
-  // club; a value that is not a whole number degrades to the page's own default
-  // rather than erroring, and the page itself rejects an id that is not an MLB club.
+  // club and the page writes the pick back, so the address is the pick; 'all' is
+  // every club. Anything else degrades to the page's default rather than erroring,
+  // and the page rejects an id that is not an MLB club.
   if (parts.length === 1 && parts[0] === 'game-notes') {
+    if (q.get('team') === 'all') return { name: 'game-notes', teamId: 'all' }
     const team = Number(q.get('team'))
     return { name: 'game-notes', teamId: Number.isInteger(team) && team > 0 ? team : null }
   }
@@ -819,7 +821,7 @@ export function playerTabPath(id, tab, opts = {}) {
 export function teamPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}${linkQuery(opts)}`
 }
-// The Game Notes archive, bare or opened on one club (the team hub's link).
+// The Game Notes archive, bare or opened on one club (or 'all').
 export function gameNotesPath(teamId = null) {
   return teamId ? `/game-notes?team=${teamId}` : '/game-notes'
 }

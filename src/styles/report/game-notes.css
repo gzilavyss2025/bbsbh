@@ -54,3 +54,10 @@
   color: var(--accent-link);
   font-weight: var(--w-semibold);
 }
+
+/* The "Show more" button under a long table: one page of rows at a time. */
+.gnotes__more {
+  margin-top: var(--space-3);
+  display: flex;
+  justify-content: center;
+}
