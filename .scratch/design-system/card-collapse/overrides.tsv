@@ -6,6 +6,7 @@
 # A key that matches no row prints STALE.
 # LANDED in slice C0 (#1113): .thub-card is the Card component now (components/ui/frame/Card.jsx, styles/system/card.css), so its row left this file. Its sixteen modules render <Card>; the co-class .chalcard is <Card className="chal">.
 # LANDED in slice C1 (#1222): .tlead__cat, .tledg__block, .jerseydeck__card, .team-score, .txstory, .tstats-card (renamed .tstats), .roster-super, .thub-affiliate, .horizontile, .hzntile, .alum__card, .ctr__tile, .ctr__card are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. .horizontile__statbox and .hzntile__tile stay — the wells inside these tiles are unchanged (Q4, later).
+# LANDED in slice C2 (#1113): .player__statgrid, .player__splits, .factgrid, .vsteam__last, .gamelog, .milestonewatch, .cthist__seasons, .posinn__diamond, .levelprog, .prospectcard, .simlike__link, .awards, .awardblk, .hitchart, .bflight, .spray, .gamelines__rows are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. The three gap-rule grids keep their --border-rule ground on the grid inside the Card (.factgrid__grid, .player__statgrid, .player__splits). .cthist__toggle is a block Door. .prospectcard kept its name: .prospect is already the ProspectPill's namespace (.prospect__tag), so the rename is not a clean two-step.
 .wordmarklab__colorlock	lab	sheet				C8	wordmark lab (/wordmark-lab), a dev page: the colour-lock panel
 .wordmarklab__option	lab	sheet	none	padded	C8	wordmark lab option tile; an <article> with its own hover — a lab specimen
 .wordmarklab__context	lab	sheet	none	flush	C8	wordmark lab context frame on page ground; holds a live mock of the slate
@@ -32,7 +33,6 @@
 .favteamsheet	modal					the favourite-team bottom sheet (FavoriteTeamModal): a sheet with safe-area padding and an entry animation — sheets stay bespoke (ADR-0037, critique "modals are correctly bespoke")
 .dirglyph	media					the site-menu directory glyph box (a small square with a left rule), an icon frame
 .sitemenusheet__group	card	sheet	none	padded	C7	a grouped block of links inside the site menu sheet. A card inside a modal; low traffic, lands last in C7
-.factgrid	card	sheet	outside:label	flush	C2	a <dl> fact grid drawn on --border-rule (the 1px-gap rule trick) — CommandMap, SprayMap and the innings reference panel's ExtrasFacts. The grid must move to an inner element when Card owns the frame. ExtrasFacts is in the innings viewer: check seal scope in that slice
 .attendance__note	notice					a note paragraph with a pop-in animation on page ground (BoxScore + TeamInfo) — the Notice family (#1132)
 .fact__infonote	notice					an info note under a stat on the player page (AdvancedStatsCard), animated in — Notice family (#1132)
 .umps__list	card	sheet	outside:label	flush	C3	umpire crew list (UmpiresCard; ExtrasFacts in the innings reference) — a gap-rule grid (background = --border-rule); grid moves inside Card
@@ -102,17 +102,10 @@
 .bs__totalsCard	card	sheet	none	padded	C5	box score totals sheet. Inside the reveal render
 .bs__board	card	sheet	none	padded	C5	box score board sheet. Inside the reveal render
 .bs__fill	card	sheet	none	flush	C5	a gap-rule grid sheet in the box score detail — the grid moves inside Card
-.player__statgrid	card	sheet	outside:band	flush	C2	player-page stat grid on the gap-rule trick (issue #1113 comment 2 names it). The bleed band head sits above it, outside
 .player__career	delete					DEAD: no file under src/ names player__career outside styles
-.player__splits	card	sheet	outside:band	flush	C2	player-page splits grid, gap-rule trick (issue comment 2 names it)
 .vsteam__tray	well					the club tray under Splits vs Team / ClubPicker — an inset tray inside a card
 .teamfilterstrip__arrow	control					scroll arrow <button> on the team filter strip
-.vsteam__last	card	ledger	none	padded	C2	"last game vs this club" box in SplitsVsTeam: radius-sm + shadow — the radius says ledger (the shadow is invisible, critique finding 5)
-.gamelog	card	sheet	outside:band	flush	C2	player game log <ul> (issue comment 2 names it); head is the bleed band above
 .ledger, .standings	table					the boxed TABLE frame: 30 tables ride .standings by co-class (critique finding 8). This is Table frame="sheet" in #1132, not Card — moving it here would split one family across two issues
-.milestonewatch	card	sheet	label	padded	C2	Milestone Watch on the player page — the "label inside an inset box" idiom (critique finding 3). Plain radius-md → sheet; its label becomes the card's head
-.cthist__seasons	card	sheet	outside:label	flush	C2	Contract history ledger (issue comment 2): radius-md, no shadow. Head is .section__title + <em> note ABOVE it; the <ol> keeps its own inset. The toggle foot becomes a Door
-.posinn__diamond	card	sheet	none	padded	C2	position-innings diamond diagram (PositionInnings.jsx)
 .asof-banner__input	field					a date <input> in the as-of banner
 .team-hub__id	bespoke					the team hub's pinned identity header (TeamHubShell hero, ADR-0082) — a masthead, not a section card
 .last10__nav	control					Last-10 rail arrow <button>
@@ -128,8 +121,6 @@
 .horizontile__statbox	well					inset stat box inside a horizon tile
 .hzntile__tile	well					inset box inside a horizon tile
 .prospects__filterdeck	card	sheet	label	padded	C6b	/prospects filter deck: a sheet that holds the filter controls, with a border-top of its own
-.levelprog	card	ledger	label	flush	C2	Level progression card (LevelProgressionCard.jsx): radius-sm, no shadow, plus a border-top rule — the ledger frame; the top rule stays a namespace rule like .prospectcard's
-.prospectcard	card	ledger	label	flush	C2	Prospect card (inventory group B). Its 3px accent top rule stays a namespace rule on the block (critique: accent has one consumer). Rename .prospect
 .prospectboard	table					the /prospects board <table> — Table (#1132), not Card
 .milestonewatch-page__card	card	sheet	none	padded	C6b	a milestone tile on /milestones. Plain → sheet
 .seedcard	card	ledger	none	padded	C6a	postseason seed tile (inventory group B), a <button> on the race page: Card as="button". Rename .seed
@@ -188,7 +179,6 @@
 .passportbook__nav button	control					passport book page-turn <button>
 .passportpage	bespoke					the ruled 2x4 passport page (finding 9 must-survive; PassportPage.jsx is on STAMP_ALLOWLIST)
 .logbooklanding__devicenote	notice					device note on the logbook landing — Notice family (#1132)
-.simlike__link	card	sheet	none	padded	C2	a similar-player tile link (SimilarPlayerGrid.jsx): Card as="a". Plain → sheet
 .hlclip	bespoke					a highlight clip card: a video-poster <button> with its own snap and hover — a media tile (clips: see the video memory notes)
 .cliprail__nav	control					clip rail arrow <button>
 .umptend	card	sheet	band	flush	C6b	umpire tendencies card (UmpireTendencies.jsx). Its .is-themed .umptend__bar opts OUT of club theming and is seal-scope allowlisted — the band head must support "unthemed on a themed page"
@@ -216,11 +206,8 @@
 .trrank__chip	control					records chip <button>
 .trrank__tile	card	sheet	none	flush	C6b	a records tile link on /records: Card as="a"; has its own border-top
 .trrank__tilemark	media					club-mark frame on a records tile
-.awards	card	sheet	outside:band	padded	C2	the Awards ledger on the player page (AwardsLedger.jsx; the admin award-order editor previews it). Plain → sheet
-.hitchart	card	sheet	label	flush	C2	the hit chart card (HitChart.jsx) — player page AND the innings half (HalfInning). SEAL SCOPE on the half variant: move the box only
 .hitchart__chip	control					hit-chart filter chip (built by a template literal in HitChart.jsx:134, so the census found no literal consumer)
 .hitchart__readout	well					inset readout under the hit chart
-.bflight	card	sheet	none	padded	C2	the ball-flight chart card (BallFlight.jsx)
 .bflight__code	not-card					a code tag inside the ball-flight card (a small inset label)
 .pitchslab__tabs	control					the pitch-mix segmented tabs (PitchMix.jsx) — a control group
 .payboard	card	sheet	band	flush	C6b	the /salaries league board (SalaryBoard.jsx)
@@ -228,7 +215,6 @@
 .posspend__chip	not-card					a positioned label chip on the position-spend chart
 .phcard	bespoke					the player hover card: position:fixed popover (inventory bespoke #7)
 .phcard__tile	well					inset tile inside the hover card
-.spray	card	sheet	label	flush	C2	the spray map card (SprayMap.jsx)
 .spray__chip	control					spray map chip <button>
 .cwb__narrow	lab					contract workbench narrow-screen notice (admin)
 .cwb__tab	control					contract workbench tab <button> (admin)
@@ -245,7 +231,6 @@
 .note__when	control					an <a> date link inside a story — a Door or a Pill control
 .boxlines__headline	well					inset headline strip inside the Box Lines sheet
 .boxline__series	not-card					a small inset tag on a box-line row
-.gamelines__rows	card	sheet	label	flush	C2	Game lines card rows (GameLinesCard.jsx; ADR-0073). Plain → sheet
 .boxlines__stats	panel					gap-rule stats grid inside the Box Lines sheet (a modal)
 .dlab__verdictbox	lab					design lab verdict box
 .dlab__recipe	lab					design lab recipe well
@@ -266,5 +251,4 @@
 .stars3__card	card	ledger	outside:band	padded	C5	a three-stars tile in the box score, boxed only from 740px (@media). Inside the reveal render
 .abscard	card	sheet	band	flush	C4	ABS challenges card, boxed only from 740px (@media); display:none below. Renames .absframe (ledger). SEAL SCOPE
 .pbp__zonecell	panel					a zone cell in the play-by-play, boxed only from 740px
-.awardblk	card	sheet	label	padded	C2	an awards block, boxed only from 740px (@media). Plain → sheet
 .dueupconsole__col	panel					a column inside the due-up console, boxed only from 740px. SEAL SCOPE

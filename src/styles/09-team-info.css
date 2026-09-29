@@ -227,16 +227,20 @@
   color: var(--text-caption);
 }
 
+/* The fact card is a Card (sheet, flush body; #1113, slice C2), and this rule
+   keeps only its margin. The rules between the facts are the gap-rule trick:
+   the inner grid is painted --border-rule and its white cells leave 1px gaps.
+   Card paints --surface-card, so that ground lives on .factgrid__grid, inside
+   the frame. */
 .factgrid {
   margin: 0 0 18px;
+}
+.factgrid__grid {
+  margin: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1px;
   background: var(--border-rule);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
 }
 
 .fact {

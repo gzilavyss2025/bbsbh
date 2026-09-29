@@ -17,13 +17,12 @@
 
 /* One card holding every award table, hairline-divided — not one bordered
    box per award, which at three-to-six awards reads as a stack of unrelated
-   receipts rather than one page of a ledger. */
+   receipts rather than one page of a ledger. On a phone .awards is a Card
+   (sheet, flush body; #1113, slice C2) and this rule keeps its margin and its
+   inset; AwardsLedger.jsx decides which box is the card at each width. */
 .awards {
   margin: 0 2px;
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
 }
 
 /* "3 of 43 · 89 selections" — the aside on the section's own club bar. Mono,
@@ -41,8 +40,6 @@
 .awards--preview {
   margin: 10px 0 0;
   padding: 0;
-  border: none;
-  background: none;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1h);
@@ -50,11 +47,15 @@
 /* Each chip ("NL MVP ×1") is a paper pill (#1131), drawn by
    components/player/AwardsLedger.jsx with no class of its own. */
 
-/* ---- one award's block ---- */
-.awardblk + .awardblk {
-  margin-top: 15px;
-  padding-top: var(--space-3h);
-  border-top: var(--bw-hair) solid var(--border-hairline);
+/* ---- one award's block ----
+   On a phone the blocks share one card, so a hairline divides them. From
+   740px each block is its own card and needs no divider. */
+@media (max-width: 739.98px) {
+  .awardblk + .awardblk {
+    margin-top: 15px;
+    padding-top: var(--space-3h);
+    border-top: var(--bw-hair) solid var(--border-hairline);
+  }
 }
 .awardblk__head {
   display: flex;
@@ -335,7 +336,8 @@
 /* ---- wide layout ---- Past the app's one breakpoint (25-wide-layout.css)
    .screen opens from 440px to 960px, and a three-column table in a single
    928px run is mostly empty middle. The tables pair off instead, each taking
-   its own card since a grid cell has no hairline neighbour to divide from.
+   its own card since a grid cell has no hairline neighbour to divide from:
+   each .awardblk is a Card here, and .awards is only the grid.
    The index below them stays one column: its rows are already single lines. */
 @media (min-width: 740px) {
   .awards {
@@ -344,19 +346,9 @@
     gap: var(--space-5) var(--space-6);
     align-items: start;
     padding: 0;
-    border: none;
-    background: none;
   }
   .awardblk {
     padding: var(--space-3);
-    border: var(--bw-hair) solid var(--border-rule);
-    border-radius: var(--radius-md);
-    background: var(--surface-card);
-  }
-  .awardblk + .awardblk {
-    margin-top: 0;
-    padding-top: var(--space-3);
-    border-top: var(--bw-hair) solid var(--border-rule);
   }
   /* The index and both actions span the pair — they are about the whole
      section, not about the column they happen to land in. */

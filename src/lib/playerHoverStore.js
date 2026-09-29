@@ -19,6 +19,13 @@
 // two: a pointer travelling down a batting order to reach the name below
 // crosses several on the way, and at 150ms each of them opened a card. A
 // reader who WANTS one rests on the name; a reader in transit does not.
+//
+// usePlayerHoverCard at the foot is the trigger's side of this: the ref and
+// the four handlers a trigger spreads to write here. It subscribes to
+// nothing, so a trigger still never re-renders on a hover.
+
+import { useRef } from 'react'
+import { useMediaQuery, HOVER_CARD_QUERY } from '../hooks/useMediaQuery.js'
 
 const SHOW_DELAY_MS = 300
 const HIDE_DELAY_MS = 150
@@ -74,4 +81,50 @@ export function scheduleHoverHide(id) {
 export function hideHoverNow() {
   clearTimeout(timer)
   if (state.id !== null) commit({ id: null, name: null, rect: null })
+}
+
+// A trigger's own box, or — when that box has collapsed to nothing — the box
+// of what it actually renders. `.wire__cutline .plink` and
+// `.txstory__cutline .plink` both go `display: contents` so a player's name
+// wraps mid-sentence with the prose around it (04-site-bar.css,
+// 29-team-transactions.css), predating this card; a `display: contents`
+// element generates no box of its own, so its own getBoundingClientRect() is
+// always all-zero even while it's on screen and hovered. Its rendered
+// content still has a box, reached here through a Range over its children.
+function triggerRect(el) {
+  const own = el.getBoundingClientRect()
+  if (own.width || own.height) return own
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  return range.getBoundingClientRect()
+}
+
+// The hover card's trigger props — a ref to measure and the four handlers —
+// for PlayerLink's button (components/player/PlayerLink.jsx), and for a
+// trigger that is not one: a whole-tile Card link (SimilarPlayerGrid, #1113
+// slice C2) keeps the card PlayerLink gave it. Spread the result on the
+// trigger element.
+export function usePlayerHoverCard(id, displayName) {
+  const ref = useRef(null)
+  // Desktop-only (see HOVER_CARD_QUERY's own header): a real mouse, at the
+  // app's own "wide" width. Read once per render rather than gating inside
+  // the handlers below — the handlers still no-op on a stale `true` from the
+  // instant before a resize, since the global card requires an active id it
+  // never receives from a query that's already false by then.
+  const hoverCapable = useMediaQuery(HOVER_CARD_QUERY)
+  const show = (opts) => {
+    if (!hoverCapable || !ref.current) return
+    scheduleHoverShow(id, displayName, triggerRect(ref.current), opts)
+  }
+  const hide = () => {
+    if (!hoverCapable) return
+    scheduleHoverHide(id)
+  }
+  return {
+    ref,
+    onMouseEnter: () => show(),
+    onMouseLeave: hide,
+    onFocus: () => show({ immediate: true }),
+    onBlur: hide,
+  }
 }

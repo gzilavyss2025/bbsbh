@@ -1,7 +1,10 @@
 import '../../styles/51-similar-players.css'
 import { Headshot } from '../player/Headshot.jsx'
-import { PlayerLink } from '../player/PlayerLink.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { splitDisplayName } from '../../api/person.js'
+import { useLinkScope, useRouteLink } from '../../lib/nav.js'
+import { usePlayerHoverCard } from '../../lib/playerHoverStore.js'
+import { playerPath } from '../../lib/route.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 
 // The shared presentation for both neighbour cards — "Pitches like"
@@ -92,7 +95,7 @@ export function SimilarPlayerGrid({ rows, measure, excludes }) {
           const club = teamClubNameShort(p.teamId)
           return (
             <li className="simlike__item" key={p.personId}>
-              <PlayerLink id={p.personId} name={p.name} className="simlike__link">
+              <SimilarTile p={p}>
                 <Headshot
                   personId={p.personId}
                   name={p.name}
@@ -128,11 +131,27 @@ export function SimilarPlayerGrid({ rows, measure, excludes }) {
                   </span>
                   <span className="simlike__matchunit">match</span>
                 </span>
-              </PlayerLink>
+              </SimilarTile>
             </li>
           )
         })}
       </ul>
     </div>
+  )
+}
+
+// The whole tile is the link to that player's page, so it is a Card link (the
+// interactive card: its hover tint and focus ring; #1113, slice C2), and a
+// real anchor, so a middle-click or "open in new tab" works (useRouteLink). It
+// was a PlayerLink button, and it keeps the desktop hover card that gave it.
+function SimilarTile({ p, children }) {
+  const linkProps = useRouteLink()
+  const { asOf, sportId } = useLinkScope()
+  const hoverCard = usePlayerHoverCard(p.personId, p.name)
+  const path = playerPath(p.personId, { name: p.name, d: asOf, s: sportId })
+  return (
+    <Card as="a" body="flush" className="simlike__link" {...linkProps(path)} {...hoverCard}>
+      {children}
+    </Card>
   )
 }

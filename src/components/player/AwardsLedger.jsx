@@ -4,6 +4,7 @@ import { useCopy } from '../../copy/copyContext.js'
 import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
 import { teamAbbr, teamFullName, teamLogoUrl } from '../../lib/teams.js'
 import { Pill } from '../ui/control/Pill.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // Awards — the player page's career-honors section (api/person/awards.js's
@@ -85,9 +86,9 @@ export function AwardsLedger({ ledger, preview = false, limit }) {
       >
         Awards
       </SectionHead>
-      <div className="awards">
+      <LedgerBody wide={wide}>
         {tabled.map((cat) => (
-          <AwardTable key={cat.key} category={cat} />
+          <AwardTable key={cat.key} category={cat} boxed={wide} />
         ))}
 
         {rest.length > 0 && !open && (
@@ -104,17 +105,31 @@ export function AwardsLedger({ ledger, preview = false, limit }) {
             </button>
           </>
         )}
-      </div>
+      </LedgerBody>
     </>
+  )
+}
+
+// WHICH BOX IS THE CARD. On a phone ONE card holds every award table, divided
+// by hairlines. From 740px the tables pair off, and a grid cell has no
+// neighbour to divide from, so each table is its own card and the ledger is
+// only the grid. Card draws the frame either way (#1113, slice C2); the CSS
+// never has to strip one. `wide` is the same WIDE_QUERY that sets the cap.
+function LedgerBody({ wide, children }) {
+  if (wide) return <div className="awards">{children}</div>
+  return (
+    <Card as="div" body="flush" className="awards">
+      {children}
+    </Card>
   )
 }
 
 // One award, one table. The name and its occurrence count share a line, a
 // short tier-coloured rule sits under both (the same divider the retired
 // marquee used, run full width here because it heads a table), then the rows.
-function AwardTable({ category }) {
-  return (
-    <section className="awardblk">
+function AwardTable({ category, boxed }) {
+  const table = (
+    <>
       <div className="awardblk__head">
         <h4 className="awardblk__name">{category.label}</h4>
         <span className={`awardblk__count tier-${category.tier}`}>×{category.count}</span>
@@ -144,7 +159,13 @@ function AwardTable({ category }) {
           ))}
         </tbody>
       </table>
-    </section>
+    </>
+  )
+  if (!boxed) return <section className="awardblk">{table}</section>
+  return (
+    <Card body="flush" className="awardblk">
+      {table}
+    </Card>
   )
 }
 

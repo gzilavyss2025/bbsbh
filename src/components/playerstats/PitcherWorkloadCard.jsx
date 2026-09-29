@@ -14,6 +14,7 @@ import { ThresholdBullets } from '../workload/ThresholdBullets.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
 import { Pill } from '../ui/control/Pill.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // THE MOUND CARD — the pitcher's counterpart to a hitter's Recent form.
 //
@@ -103,20 +104,22 @@ export function PitcherWorkloadCard({ playerId, asOf, role = null, gameLog = nul
         ? !turn.outOfTurn && <TurnStrip turn={turn} />
         : <MoundDayStrip data={data} playerId={playerId} asOfDate={asOfDate} />}
 
-      <dl className="factgrid moundcard__foot">
-        <Fact label={`Last ${load.last10.apps}`} value={`${load.last10.pitches} pitches`} />
-        {vs?.vsOwnPct != null && <Fact label="Vs. his norm" value={signedPct(vs.vsOwnPct)} />}
-        {turn
-          ? rates?.ipPerStart && (
-              <Fact label="Avg per start" value={`${rates.ipPerStart} IP · ${rates.pitchesPerStart} P`} />
-            )
-          : rates && (
-              <Fact
-                label="Outs per outing"
-                value={`${rates.outsPerOuting}${rates.multiInning ? ' · multi-inning' : ''}`}
-              />
-            )}
-      </dl>
+      <Card as="div" body="flush" className="factgrid moundcard__foot">
+        <dl className="factgrid__grid">
+          <Fact label={`Last ${load.last10.apps}`} value={`${load.last10.pitches} pitches`} />
+          {vs?.vsOwnPct != null && <Fact label="Vs. his norm" value={signedPct(vs.vsOwnPct)} />}
+          {turn
+            ? rates?.ipPerStart && (
+                <Fact label="Avg per start" value={`${rates.ipPerStart} IP · ${rates.pitchesPerStart} P`} />
+              )
+            : rates && (
+                <Fact
+                  label="Outs per outing"
+                  value={`${rates.outsPerOuting}${rates.multiInning ? ' · multi-inning' : ''}`}
+                />
+              )}
+        </dl>
+      </Card>
     </div>
   )
 }

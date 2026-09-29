@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // The player page's "Advanced" card, either group: the rates behind the
 // headline tiles. For a pitcher that's FIP, league-adjusted ERA−, the K/BB
@@ -22,11 +23,13 @@ export function AdvancedStatsCard({ adv }) {
       <SectionHead look="rule" note="full season">
         Advanced
       </SectionHead>
-      <dl className="factgrid">
-        {adv.facts.map((f) => (
-          <AdvancedFact key={f.label} label={f.label} value={f.value} note={f.note} />
-        ))}
-      </dl>
+      <Card as="div" body="flush" className="factgrid">
+        <dl className="factgrid__grid">
+          {adv.facts.map((f) => (
+            <AdvancedFact key={f.label} label={f.label} value={f.value} note={f.note} />
+          ))}
+        </dl>
+      </Card>
     </div>
   )
 }

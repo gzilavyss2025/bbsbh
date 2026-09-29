@@ -122,6 +122,9 @@
   display: flex;
   min-width: 0;
 }
+/* The whole cell is a Card link (sheet, flush body; #1113, slice C2): Card
+   draws the frame, the hover tint and the focus ring, and takes no underline.
+   This rule keeps the cell's layout and its own inset. */
 .simlike__link {
   display: flex;
   flex-direction: column;
@@ -131,25 +134,9 @@
   min-width: 0;
   padding: var(--space-3) var(--space-1h) var(--space-2h);
   text-align: center;
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  transition: background-color var(--dur-fast) var(--ease-out);
 }
-/* The whole cell is the PlayerLink button, so `.plink:hover`'s dotted
-   underline propagates into every line inside it — club, match figure and
-   MATCH label all struck through with dashes at once. A descendant can't
-   refuse an inherited decoration, so it's declined at the button and
-   re-declared on the surname alone (same fix, same reason, as
-   .tradecard__playerlink in 47-trade-deadline.css). What signals the whole
-   cell is tappable is the card lifting to the page tint instead. */
-.simlike__link.simlike__link:hover {
-  text-decoration: none;
-}
+/* The surname alone takes the dotted underline a name link shows on hover. */
 @media (hover: hover) {
-  .simlike__link:hover {
-    background: var(--bg-page);
-  }
   .simlike__link:hover .simlike__last {
     text-decoration: underline dotted;
     text-underline-offset: 3px;

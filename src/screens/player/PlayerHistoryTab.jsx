@@ -15,6 +15,7 @@ import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './PlayerHubShell.jsx'
 import { debutLabel } from './parts.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../components/ui/frame/Card.jsx'
 
 // Reads as the story of a rookie season: the MLB debut, first taking the field,
 // then each milestone at the plate in the order it's likeliest to arrive. The
@@ -80,31 +81,33 @@ export function PlayerHistoryTab({ id, asOf, sportId }) {
       {hasFirsts && (
         <section>
           <SectionHead look="rule">Firsts</SectionHead>
-          <div className="player__splits">
-            {firstsOrder.map((key) => {
-              const f = data.firsts[key]
-              if (!f) return null
-              return (
-                <div className="split" key={key}>
-                  <div className="split__k">{f.label}</div>
-                  <div className="split__row">
-                    <GameLink path={f.path} className="split__v">
-                      {debutLabel(f.date)}
-                    </GameLink>
-                    <span className="split__sub">
-                      {f.batter ? (
-                        <PlayerLink id={f.batter.id}>{f.batter.fullName}</PlayerLink>
-                      ) : f.pitcher ? (
-                        <PlayerLink id={f.pitcher.id}>{f.pitcher.fullName}</PlayerLink>
-                      ) : (
-                        f.oppName || f.oppAbbr
-                      )}
-                    </span>
+          <Card as="div" body="flush">
+            <div className="player__splits">
+              {firstsOrder.map((key) => {
+                const f = data.firsts[key]
+                if (!f) return null
+                return (
+                  <div className="split" key={key}>
+                    <div className="split__k">{f.label}</div>
+                    <div className="split__row">
+                      <GameLink path={f.path} className="split__v">
+                        {debutLabel(f.date)}
+                      </GameLink>
+                      <span className="split__sub">
+                        {f.batter ? (
+                          <PlayerLink id={f.batter.id}>{f.batter.fullName}</PlayerLink>
+                        ) : f.pitcher ? (
+                          <PlayerLink id={f.pitcher.id}>{f.pitcher.fullName}</PlayerLink>
+                        ) : (
+                          f.oppName || f.oppAbbr
+                        )}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          </Card>
         </section>
       )}
 

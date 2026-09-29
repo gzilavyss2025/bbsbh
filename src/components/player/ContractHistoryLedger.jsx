@@ -3,7 +3,9 @@ import '../../styles/26e-contract-history.css'
 import { contractHistoryView } from '../../api/person/contract/history.js'
 import { teamFullName } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Door } from '../ui/control/Door.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // CONTRACT HISTORY — the money half of a career, season by season, newest
@@ -51,20 +53,24 @@ export function ContractHistoryLedger({ rows }) {
       <SectionHead look="rule" note={tally(view)}>
         Contract history
       </SectionHead>
-      <ol className="cthist__seasons">
-        {seasons.map((season) => (
-          <SeasonBlock key={season.season ?? 'undated'} season={season} />
-        ))}
-      </ol>
+      <Card as="div" body="flush">
+        <ol className="cthist__seasons">
+          {seasons.map((season) => (
+            <SeasonBlock key={season.season ?? 'undated'} season={season} />
+          ))}
+        </ol>
+      </Card>
+      {/* The foot is a Door (#1113): it opens the rest of the list in place,
+          so it is the block door, a <button> with no arrow. */}
       {view.dense &&
         (expanded ? (
-          <button type="button" className="cthist__toggle" onClick={() => setExpanded(false)}>
+          <Door layout="block" className="cthist__toggle" onClick={() => setExpanded(false)}>
             Show fewer
-          </button>
+          </Door>
         ) : (
-          <button type="button" className="cthist__toggle" onClick={() => setExpanded(true)}>
+          <Door layout="block" className="cthist__toggle" onClick={() => setExpanded(true)}>
             Show all {view.seasons.length} seasons
-          </button>
+          </Door>
         ))}
     </section>
   )

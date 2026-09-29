@@ -1,3 +1,6 @@
+import '../../styles/31d-prospect-card.css'
+import { Card } from '../ui/frame/Card.jsx'
+
 // A factual level-by-level dossier: reached levels retain their year and
 // workload, the live assignment is explicit, and unreached levels remain the
 // path ahead. Performance analysis belongs to ProspectCard, so this component
@@ -13,7 +16,7 @@ export function LevelProgressionCard({ levels, debutYear }) {
   const current = steps.find((level) => level.isCurrent)
 
   return (
-    <section className="levelprog">
+    <Card frame="ledger" body="flush" className="levelprog">
       <header className="levelprog__head">
         <h3 className="levelprog__title">Path to the Majors</h3>
         {current && (
@@ -57,6 +60,6 @@ export function LevelProgressionCard({ levels, debutYear }) {
           })}
         </ol>
       </div>
-    </section>
+    </Card>
   )
 }

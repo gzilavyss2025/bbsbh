@@ -10,15 +10,13 @@
 
    ONE COLOUR RULE WORTH STATING. Kraft amber (--seal-*) is the cover over a
    score you have not opened. It never appears here, on a control or anywhere
-   else, because nothing on this card is sealed — a lit chip is navy. */
+   else, because nothing on this card is sealed — a lit chip is navy.
+
+   The card is a Card (sheet, flush body; #1113, slice C2), which draws the
+   frame. This rule keeps only its margin. */
 
 .spray {
-  overflow: hidden;
   margin: 0 0 18px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 
 /* ---- Chips ---- */
@@ -336,6 +334,8 @@
 
 .spray .spray__facts {
   margin: var(--space-3) 14px 0;
+}
+.spray__facts .factgrid__grid {
   grid-template-columns: repeat(4, 1fr);
 }
 

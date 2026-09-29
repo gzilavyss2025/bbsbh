@@ -4,6 +4,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { vsTeamDoorLabel } from '../../api/vsTeamSplits.js'
 import { teamLocationName, teamClubName } from '../../lib/teams.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // SPLITS VS TEAM — a player's career line against a chosen opponent, with a
 // finger-scrollable strip of every MLB club's logo to pick a different one
@@ -121,14 +122,16 @@ export function SplitsVsTeam({ vsTeam, season, asOf, personId, playerSurname }) 
 
       {cells ? (
         <>
-          <div
-            className="player__statgrid vsteam__grid"
-            style={{ gridTemplateColumns: `repeat(${cells.length}, 1fr)` }}
-          >
-            {cells.map(([k, v]) => (
-              <Cell key={k} k={k} v={v} />
-            ))}
-          </div>
+          <Card as="div" body="flush" className="vsteam__grid">
+            <div
+              className="player__statgrid"
+              style={{ gridTemplateColumns: `repeat(${cells.length}, 1fr)` }}
+            >
+              {cells.map(([k, v]) => (
+                <Cell key={k} k={k} v={v} />
+              ))}
+            </div>
+          </Card>
 
           {/* The door to those games, worded by the same helper the lineup
               page's door uses. Keyed on the picked club, so the door and the
@@ -160,7 +163,7 @@ export function SplitsVsTeam({ vsTeam, season, asOf, personId, playerSurname }) 
       )}
 
       {last && (
-        <div className="vsteam__last">
+        <Card as="div" frame="ledger" body="flush" className="vsteam__last">
           <div className="vsteam__last-label">
             Last game against {teamLocationName(sel.id) ?? sel.name}
           </div>
@@ -171,7 +174,7 @@ export function SplitsVsTeam({ vsTeam, season, asOf, personId, playerSurname }) 
             <span className="vsteam__last-sep">|</span>
             <span className="vsteam__last-line">{last.line}</span>
           </p>
-        </div>
+        </Card>
       )}
     </section>
   )

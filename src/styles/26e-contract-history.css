@@ -24,14 +24,13 @@
 
 /* One ruled card holding every season, hairline-divided — not a bordered box
    per season, which at a dozen seasons reads as a stack of receipts rather
-   than one page of a book. Same body as the Awards ledger above it. */
+   than one page of a book. Same body as the Awards ledger above it. The Card
+   around the list draws the frame (sheet, flush body; #1113, slice C2); the
+   list keeps its own inset. */
 .cthist__seasons {
   margin: 0;
   padding: var(--space-2h) var(--space-3);
   list-style: none;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
 }
 
 .cthist__season + .cthist__season {
@@ -178,31 +177,12 @@
   border-style: dashed;
 }
 
-/* ---- the collapse control ---- */
+/* ---- the collapse control ----
+   A block Door (system/door.css, #1113): the door draws the row. This rule
+   keeps only its place under the card and the tap target it always had. */
 .cthist__toggle {
-  display: block;
-  width: 100%;
   min-height: var(--tap-min);
   margin-top: 10px;
-  padding: var(--space-2h);
-  appearance: none;
-  cursor: pointer;
-  border: var(--bw-hair) dashed var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: none;
-  color: var(--text-muted);
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-}
-.cthist__toggle:hover {
-  border-style: solid;
-  color: var(--text-heading);
-}
-.cthist__toggle:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
 }
 
 /* A wide screen has room for the year and the rows side by side, which keeps a

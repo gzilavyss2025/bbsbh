@@ -2,15 +2,14 @@
    PLAYER DEVELOPMENT DOSSIER
    Shared shell for LevelProgressionCard and current-level analysis for
    ProspectCard. Both use one paper ledger and PLAYER DEVELOPMENT kicker.
+   Both are ledger Cards (#1113, slice C2): Card draws the edge, the corners
+   and the ground. The 3px accent rule on top is each card's own, so it stays
+   here and wins on order over the Card's hairline.
    ============================================================ */
 
 .levelprog {
   margin-top: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
   border-top: 3px solid var(--accent-primary);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  overflow: hidden;
 }
 
 .levelprog__head {
@@ -62,11 +61,7 @@
 
 .prospectcard {
   margin-top: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
   border-top: 3px solid var(--accent-primary);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  overflow: hidden;
 }
 
 .prospectcard__head {

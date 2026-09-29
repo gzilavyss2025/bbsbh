@@ -9,15 +9,13 @@
    It sits after the ballpark partial on purpose: the field drawing arrives with
    the modal's own sizing (a centred 380px sketch), and this card needs it
    full-bleed so the half's HTML dot numbers can be positioned in percentages
-   against the very box the SVG occupies. */
+   against the very box the SVG occupies.
+
+   The card itself is a Card (sheet, flush body; #1113, slice C2), which draws
+   the frame and clips to it. The chart keeps only its positioning context. */
 
 .hitchart {
   position: relative;
-  overflow: hidden;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 
 /* In the innings feed this card is a SIBLING of `.half`, not a child of it
@@ -624,12 +622,13 @@
   border-radius: var(--radius-sm);
 }
 
+/* A Card (sheet, flush body; #1113, slice C2) draws the edge, the corners and
+   the ground. The shadow stays here: this card floats over the feed, as a
+   popover or a sheet, so it wears the raised shadow a floating layer does,
+   not the card shadow of paper lying on paper. */
 .bflight {
   width: 300px;
   max-width: 100%;
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-md);
   box-shadow: var(--shadow-raised);
   font-family: var(--font-body);
   padding: var(--space-3) var(--space-3) var(--space-1);
