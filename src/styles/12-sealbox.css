@@ -1607,12 +1607,12 @@
 /* Focus mode's Field tab: zeroing the OUTER .halfdefense like the box score
    does would leave this card with no frame (unlike its sibling .entering),
    so this uses .half .defdiamond's other remedy instead — drop the diamond's
-   own border/shadow/background so its edges stop double-drawing on top of
+   own border/shadow so its edges stop double-drawing on top of
    .halfdefense's own (the Card's `overflow: hidden` already joins the seam). */
 .refpanel__body .defdiamond {
   border: none;
   box-shadow: none;
-  background: none;
+  background: var(--field-ground);
 }
 
 .stat {
@@ -1651,4 +1651,3 @@
   font-style: normal;
   opacity: 0.7;
 }
-

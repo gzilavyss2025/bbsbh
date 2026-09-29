@@ -586,10 +586,8 @@ button.starter__careervs {
 
 
 /* ----------------------------------------------------------- defense diamond
-   The sheet's bottom-left graphic: infield square on its point, surnames on
-   writing lines at their positions, the position number penciled beneath,
-   HOME/VISITOR DEFENSE ringed in the middle. Label spots share the SVG's
-   0–100 coordinate space (percent of the box).
+   Grass and clay beneath the fielders' surnames. The ground also fills the
+   DH row. Label anchors use percentages of the 4:3 field.
 
    The box is a Card (DefenseDiamond.jsx, #1113 slice C3), in all five places
    it renders: the lineup page, the innings view's Field tab, the box score,
@@ -598,6 +596,7 @@ button.starter__careervs {
    classes, which beats the Card's one. Only the inset stays here. */
 .defdiamond {
   padding: var(--space-3) var(--space-2h) var(--space-2);
+  background: var(--field-ground);
 }
 
 .defdiamond__field {
@@ -620,19 +619,24 @@ button.starter__careervs {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
-  max-width: 112px;
+  width: max-content;
+  min-width: 58px;
+  max-width: 40%;
+  /* One paper label per spot: a substitution stack shares it, so a starter,
+     his reliever and a second reliever cost three lines, not three boxes. */
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  padding: 1px var(--space-1);
 }
 
-/* The surname sits on its writing line, like penciling above the rule. */
+/* Names and substitution marks stay readable over grass or clay. */
 .defdiamond__name {
   font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
   color: var(--text-body);
-  border-bottom: var(--bw-hair) solid var(--rule);
-  padding: 0 var(--space-1) 1px;
-  min-width: 58px;
-  max-width: 112px;
+  max-width: 100%;
+  min-height: 1.4em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -640,11 +644,11 @@ button.starter__careervs {
 }
 
 .defdiamond__name--tbd {
-  color: var(--graphite-soft);
+  color: var(--text-caption);
 }
 
 /* A fielder who's been replaced: struck through in pencil, the reliever penciled
-   on his own writing line above (the stack renders newest-on-top).
+   on his own line above (the stack renders newest-on-top).
 
    THE `.plink` HALF OF THIS RULE IS GONE BECAUSE THE PROBLEM IS (issue #981,
    Route A). A <button> won't take an ancestor's line-through and .plink zeroes
@@ -674,12 +678,6 @@ button.starter__careervs {
 .defdiamond__name .ilmark {
   font-size: var(--fs-caption);
   margin-left: 1px;
-}
-.defdiamond__num {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-cell);
-  color: var(--text-caption);
 }
 
 /* The DH bats but never takes the field — one line under the diamond.
@@ -714,7 +712,13 @@ button.starter__careervs {
 /* The DH's substitution stack shares the diamond's writing-line names. */
 .defdiamond__dhstack {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-1h);
 }
 
+/* An empty DH still shows the writing line the field's blank boxes imply. */
+.defdiamond__dhstack .defdiamond__name {
+  min-width: 58px;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
