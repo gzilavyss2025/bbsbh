@@ -491,13 +491,12 @@
   color: var(--text-caption);
 }
 
+/* The roster drawer (RosterPanel.jsx, and the umpire drawer in
+   UmpireTendenciesFold.jsx) is a Card (#1113 slice C4): system/card.css
+   draws its frame. The lineup page's not-posted roster list also wears
+   .roster, inside the batting-order card, which frames it already. */
 .roster {
   margin-top: 10px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 
 /* A club bar, not a plain paper row — same navy/seal/white recipe

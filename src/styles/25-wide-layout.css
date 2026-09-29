@@ -431,21 +431,17 @@
   .innings__statbox .statbox__abs {
     display: none;
   }
-  /* AbsCard's own card chrome — same recipe as .winprob/.marginnotes (border,
-     radius, background, shadow) since it sits as its own sibling card in the
-     ARMS tab rather than nested inside StatBox's card. No padding of its own —
-     SealBox's .statgrid wrapper already insets its content 14px, and the
-     title bar below bleeds past exactly that inset to cap the card flush
-     (same masthead recipe as .pitchers__title), so overflow:hidden here clips
-     it to the card's own rounded corners instead of stacking a second,
-     smaller rounded shape inside the card's padding. */
+  /* AbsCard is a flush Card, like .winprob/.marginnotes (#1113 slice C4):
+     system/card.css draws its frame, since it sits as its own sibling card in
+     the ARMS tab rather than nested inside StatBox's card. This rule only
+     shows it. No padding of its own — SealBox's .statgrid wrapper already
+     insets its content 14px, and the title bar below bleeds past exactly that
+     inset to cap the card flush (same masthead recipe as .pitchers__title), so
+     the Card's overflow: hidden clips it to the card's own rounded corners
+     instead of stacking a second, smaller rounded shape inside the card's
+     padding. */
   .absframe {
     display: block;
-    border: var(--bw-hair) solid var(--border-rule);
-    border-radius: var(--radius-md);
-    background: var(--surface-card);
-    box-shadow: var(--shadow-card);
-    overflow: hidden;
   }
   /* Same fix as .statbox .statgrid above: SealBox's own .statgrid wrapper
      paints --surface-inset once revealed, which otherwise shows through as

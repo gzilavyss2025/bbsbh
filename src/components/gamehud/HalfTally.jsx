@@ -1,6 +1,7 @@
 import { revealInning } from '../../api/linescore.js'
 import { revealDerived } from '../../api/derive.js'
 import { SealBox } from '../SealBox.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { Stat } from './StatBox.jsx'
 import { TALLY_STAGGER_MS } from '../inning/focus/beats.js'
 
@@ -68,7 +69,7 @@ export function HalfTally({
 }) {
   const closing = phase === 'running'
   return (
-    <div className={`halftally ${className}`.trim()} key={`${inning}-${half}`}>
+    <Card as="div" body="flush" className={`halftally ${className}`.trim()} key={`${inning}-${half}`}>
       <SealBox forceRevealed coverless>
         {() => {
           // R/H/LOB are the batting side's; E is a FIELDING stat and belongs to
@@ -98,6 +99,6 @@ export function HalfTally({
           )
         }}
       </SealBox>
-    </div>
+    </Card>
   )
 }

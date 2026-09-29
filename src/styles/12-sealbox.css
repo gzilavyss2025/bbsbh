@@ -766,19 +766,15 @@
 }
 
 /* The R/H/E/LOB + pitch-stat card, row 2 beside the win-probability chart —
-   rounded, bordered, and shadowed like every other card in the view. */
+   a Card (StatBox.jsx, #1113 slice C4), so system/card.css draws its frame.
+   The rule keeps only what lets it shrink in its grid column. */
 .statbox {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
   min-width: 0;
 }
 
 /* Same flush masthead recipe as .pitchers__title — no padding
-   of its own on .statbox, so this caps the card directly; overflow:hidden
-   above clips its square corners to the card's own rounded ones. */
+   of its own on .statbox, so this caps the card directly; the Card's
+   overflow: hidden clips its square corners to the card's rounded ones. */
 .statbox__title {
   margin: 0;
   padding: var(--space-2) var(--space-2h);
@@ -1235,19 +1231,15 @@
   display: none;
 }
 
-/* DueUpNextCard: the OTHER team's next half, previewed — same card recipe as
-   .statbox, stacked below it on both breakpoints (unlike .absframe, this has
-   no other-breakpoint home to hide from). */
+/* DueUpNextCard: the OTHER team's next half, previewed — a Card like
+   .statbox (#1113 slice C4), stacked below it on both breakpoints (unlike
+   .absframe, this has no other-breakpoint home to hide from). A flush Card:
+   the inset is this rule's own. */
 .dueup {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   padding: var(--space-3) var(--space-3h);
-  overflow: hidden;
 }
 /* Bleeds past the card's own padding to cap it flush (same masthead recipe
-   as .pitchers__title) — overflow:hidden on .dueup clips the
+   as .pitchers__title) — the Card's overflow: hidden clips the
    square corners here to the card's own rounded ones. */
 .dueup__title {
   display: flex;
@@ -1325,14 +1317,11 @@
    above it (see .pitchernotice--pbp), rather than a bare navy header sitting
    directly on the page with unbordered rows below (what this used to be:
    a dashed divider, no card of its own). Tapping the title (see
-   LineupSection, EnteringReference.jsx) collapses .entering__teams. */
+   LineupSection, EnteringReference.jsx) collapses .entering__teams. A Card
+   (#1113 slice C4): system/card.css draws the frame, and Card owns no
+   margin, so the inset stays here. */
 .entering {
   margin: 12px 14px 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
 }
 
 /* Names the topic ("Lineups") — same navy masthead treatment as
@@ -1538,14 +1527,10 @@
    page's defense diamond, now building up substitutions as innings are revealed
    (reveal-only, see api/defense.js). Same self-contained clickable card as
    .entering above (same 14px inset, same reasoning) — collapses the diamond
-   below via the title button (DefenseSection, EnteringReference.jsx). */
+   below via the title button (DefenseSection, EnteringReference.jsx). A Card
+   there (#1113 slice C4), so this rule keeps only the inset. */
 .halfdefense {
   margin: 12px 14px 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
 }
 
 .halfdefense__title {
@@ -1600,14 +1585,12 @@
   /* Now an independent card in its own right (BoxScoreBody's .bs__col), below
      BoxAbs but no longer its nested continuation — the column's own flex gap
      (var(--space-4)) spaces the two apart, so the base .halfdefense rule's
-     own margin/border/shadow would draw a second, redundant card around this
-     one's own title+diamond "joined ears" look (see .bs__defensecard
-     .defdiamond below) rather than sitting flush in the column. */
+     inset margin comes off. This copy is NOT a Card (#1113 slice C4): its
+     title and diamond join into one shape of their own (see
+     .bs__defensecard .defdiamond below), so it draws no frame around them,
+     and keeps the clip the shared .halfdefense rule used to give it. */
   margin: 0;
-  border: none;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
+  overflow: hidden;
 }
 .bs__defensecard .halfdefense__title {
   /* A plain <h4> here, not the innings view's collapsible <button> copy —
@@ -1625,7 +1608,7 @@
    does would leave this card with no frame (unlike its sibling .entering),
    so this uses .half .defdiamond's other remedy instead — drop the diamond's
    own border/shadow/background so its edges stop double-drawing on top of
-   .halfdefense's own (`overflow: hidden` up top already joins the seam). */
+   .halfdefense's own (the Card's `overflow: hidden` already joins the seam). */
 .refpanel__body .defdiamond {
   border: none;
   box-shadow: none;

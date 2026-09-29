@@ -10,6 +10,7 @@ import { DefenseDiamond } from '../scoring/DefenseDiamond.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { RookiePill } from '../badges/RookiePill.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../../lib/headerTheme.js'
 import { StruckLine } from '../scoring/StruckLine.jsx'
 
@@ -70,7 +71,7 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
     />
   )
   return (
-    <section className={`halfdefense ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
+    <Card body="flush" className={`halfdefense ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       {bare ? (
         <h4 className="halfdefense__title halfdefense__title--bare sectionhead--band">
           Defensive alignment
@@ -91,7 +92,7 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
         </button>
       )}
       {(bare || open) && <DefenseDiamond defense={defense} />}
-    </section>
+    </Card>
   )
 })
 
@@ -203,7 +204,7 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
   const otherSide = shown === 'away' ? 'home' : 'away'
   const canSwap = leadSide != null && teamFor(otherSide).slots.length > 0
   return (
-    <section className="entering">
+    <Card body="flush" className="entering">
       {!bare && (
         <button
           type="button"
@@ -245,7 +246,7 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
           )}
         </div>
       )}
-    </section>
+    </Card>
   )
 })
 

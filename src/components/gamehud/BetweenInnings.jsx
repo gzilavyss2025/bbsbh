@@ -6,6 +6,7 @@ import { halfIndex } from '../../api/select.js'
 import { useCalloutLedger } from '../../hooks/useCalloutLedger.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { HalfTally } from './HalfTally.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // Focus mode's post-half hold, ONE card cycling through its own states
 // (ConsoleBand.jsx). State 0 is the half's tally grid (HalfTally.jsx) — the
@@ -91,7 +92,7 @@ export function BetweenInnings({
   const teamId = card.side != null ? bundle?.[card.side]?.teamId : null
 
   return (
-    <button type="button" className="betweeninnings" onClick={advance}>
+    <Card as="button" body="flush" className="betweeninnings" onClick={advance}>
       <div className="betweeninnings__label">
         <span className="betweeninnings__eyebrow">Between Innings</span>
         <span className="betweeninnings__progress">
@@ -109,6 +110,6 @@ export function BetweenInnings({
           <span className="betweeninnings__text">{card.text}</span>
         </span>
       </div>
-    </button>
+    </Card>
   )
 }

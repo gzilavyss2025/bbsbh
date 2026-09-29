@@ -8,6 +8,7 @@ import { resolveCardPlayer } from '../../api/boxscore.js'
 import { teamLogoUrl, teamStripeGradient } from '../../lib/teams.js'
 import { ordinal } from '../../lib/format.js'
 import { SealBox } from '../SealBox.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PerformerCard } from '../player/PerformerCard.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
@@ -73,7 +74,7 @@ export function StatBox({
 }) {
   if (!revealed && placeholder) return null
   return (
-    <div className={`statbox ${className}`} key={`${inning}-${half}`}>
+    <Card as="div" body="flush" className={`statbox ${className}`} key={`${inning}-${half}`}>
       <h3 className="statbox__title sectionhead--band sectionhead--house">Insights</h3>
       <SealBox forceRevealed={revealed} coverless>
         {() => {
@@ -169,7 +170,7 @@ export function StatBox({
           )
         }}
       </SealBox>
-    </div>
+    </Card>
   )
 }
 
@@ -206,7 +207,7 @@ export function AbsCard({ feed, inning, half, revealed, awayAbbr, homeAbbr }) {
   // above the win-probability chart.
   if (!gameHasAbs(feed) || !revealed) return null
   return (
-    <div className="absframe" key={`${inning}-${half}`}>
+    <Card as="div" body="flush" className="absframe" key={`${inning}-${half}`}>
       <SealBox forceRevealed={revealed} coverless>
         {() => (
           <AbsChallengesCard
@@ -216,7 +217,7 @@ export function AbsCard({ feed, inning, half, revealed, awayAbbr, homeAbbr }) {
           />
         )}
       </SealBox>
-    </div>
+    </Card>
   )
 }
 
