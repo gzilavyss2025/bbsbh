@@ -20,6 +20,7 @@ import { TeamLink } from '../components/team/TeamLink.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 import { BaseoutDiamond } from '../components/scoring/BaseoutDiamond.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
@@ -323,17 +324,18 @@ function buildBoards(data, teamId = null) {
 
 // Every board on this page wears the same navy/gold masthead the rest of the
 // app's card sections use (Bullpen Tonight, batting order, opposing defense,
-// …) — the container owns the border/radius/shadow, the masthead caps it,
-// same convention as those. No descriptive copy under the title — the board's
-// own name plus its data carries the meaning, and every board's table/list
-// bleeds edge-to-edge under the masthead (.foulboard-block rules in
-// index.css) rather than floating inset with its own redundant border.
+// …) — the Card owns the border/radius/shadow and the clip, the masthead
+// caps it, same convention as those (#1113, slice C3). No descriptive copy
+// under the title — the board's own name plus its data carries the meaning,
+// and every board's table/list bleeds edge-to-edge under the masthead
+// (.foulboard-block rules in 43-foul-tracker.css) rather than floating inset
+// with its own redundant border.
 function BoardCard({ title, children }) {
+  const head = <SectionMasthead as="h2" title={title} />
   return (
-    <section className="metriccard foulboard-block">
-      <SectionMasthead as="h2" title={title} />
-      <div className="metriccard__body">{children}</div>
-    </section>
+    <Card className="metric foulboard-block" head={head} body="flush">
+      <div className="metric__body">{children}</div>
+    </Card>
   )
 }
 

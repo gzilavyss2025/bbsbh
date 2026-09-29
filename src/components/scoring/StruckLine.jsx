@@ -5,7 +5,7 @@ import { useBecameTrue } from '../../hooks/motion/useBecameTrue.js'
 // being there on the next render.
 //
 // ONE COMPONENT FOR FOUR SURFACES. The play-by-play card (.pbp__replaced), the
-// lineup card (.lineupcard__name--out), the defense diamond
+// lineup card (.entering__name--out), the defense diamond
 // (.defdiamond__name--out) and the scorecard sheet's own footer diamond all
 // mark a replaced player the same way and now draw it the same way. Each keeps
 // its own class — the settled appearance still belongs to that surface's

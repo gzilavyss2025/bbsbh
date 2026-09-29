@@ -5,6 +5,7 @@ import { UmpireTierGlyph } from '../badges/UmpireTierGlyph.jsx'
 import { UmpireAccuracyModal } from './UmpireAccuracyModal.jsx'
 import { UmpireLink } from './UmpireLink.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // The lineup page's Umpires section (moved out of TeamInfo.jsx when that
 // screen hit its file-size budget): the crew grid, the plate ump's accuracy
@@ -42,26 +43,30 @@ export function UmpiresCard({ officials }) {
   return (
     <section className="umps">
       <SectionHead look="label">Umpires</SectionHead>
-      <ul className={`umps__list${sixMan ? ' umps__list--six' : ''}`}>
-        {officials.map((o) => (
-          <li key={o.role}>
-            <span className="umps__role">{o.role}</span>
-            <span className="umps__namerow">
-              <UmpireLink id={o.id} className="umps__name" onOpen={() => setModalId(o.id)}>
-                {o.name}
-              </UmpireLink>
-              {o.role === 'HP' && hpAccuracy?.tier && (
-                <UmpireTierGlyph
-                  tier={hpAccuracy.tier}
-                  rank={hpAccuracy.rank}
-                  total={hpAccuracy.total}
-                  onFullBreakdown={() => setModalId(o.id)}
-                />
-              )}
-            </span>
-          </li>
-        ))}
-      </ul>
+      {/* The Card is the box (#1113, slice C3); the grid inside it keeps its
+          gap rules (.umps__list, 09-team-info.css). */}
+      <Card as="div" body="flush">
+        <ul className={`umps__list${sixMan ? ' umps__list--six' : ''}`}>
+          {officials.map((o) => (
+            <li key={o.role}>
+              <span className="umps__role">{o.role}</span>
+              <span className="umps__namerow">
+                <UmpireLink id={o.id} className="umps__name" onOpen={() => setModalId(o.id)}>
+                  {o.name}
+                </UmpireLink>
+                {o.role === 'HP' && hpAccuracy?.tier && (
+                  <UmpireTierGlyph
+                    tier={hpAccuracy.tier}
+                    rank={hpAccuracy.rank}
+                    total={hpAccuracy.total}
+                    onFullBreakdown={() => setModalId(o.id)}
+                  />
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Card>
       {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
     </section>
   )

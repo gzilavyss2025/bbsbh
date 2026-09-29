@@ -1,24 +1,19 @@
 /* ------------------------------------------------------------- foul tracker
-   FoulTrackerPage.jsx — season foul-ball boards. Every board is a .metriccard
+   FoulTrackerPage.jsx — season foul-ball boards. Every board is a .metric Card
    wearing the same navy/gold SectionMasthead the rest of the app's card
    sections use (Bullpen Health, batting order, opposing defense, …) —
    .foulboard-block only adds page-specific tweaks on top of the shared
-   .metriccard / SectionHead band rules. Reuses .standings/.ledger-wrap ledger styling
+   Card / SectionHead band rules. Reuses .standings/.ledger-wrap ledger styling
    (same right-aligned mono figures, left-aligned .team cell) for the tables;
    only the muted team abbreviation riding a player's name and the by-inning
    rate bar are specific to this page. No note/description copy under any
    board's title — deliberate, so a board reads as data first, and every
    board's table/list bleeds to the card's own edges below (rather than
    floating inset with a second, redundant border) for more width on a phone.
-   .metriccard itself is `overflow: visible` (its masthead's info-popover
-   needs to spill past the card), but no board here ever passes SectionMasthead
-   an info popover — so unlike its .metriccard siblings, this variant can
-   safely clip. It has to: a bled-flush table/list is a flat square, but the
-   card's own border curves inward at the bottom corners, so without clipping
-   the square corner pokes past the curve as a small triangular notch. */
-.foulboard-block {
-  overflow: hidden;
-}
+   The board must clip, and the Card does it (system/card.css, #1113 slice
+   C3): a bled-flush table/list is a flat square, but the card's own border
+   curves inward at the bottom corners, so without the clip the square corner
+   pokes past the curve as a small triangular notch. */
 /* Single-Game Highs + Best Souvenir Odds — both per-GAME story boards, so on
    a wide screen (same breakpoint as the rest of the app's wide layout, see
    `.screen` above) they share a row 50/50 instead of stacking full-width like
@@ -104,14 +99,14 @@
 }
 /* A ledger-wrap that opens a card (no featured hero above it, e.g. Foul Rate
    By Pitch Type, Team Fouls Per Game, Foul Rate By Inning) also cancels
-   .metriccard__body's own top padding — otherwise the table floats in a band
+   .metric__body's own top padding — otherwise the table floats in a band
    of blank paper under the masthead before its own header row starts. Scoped
    to :first-child so a table that follows a FoulFeatured hero (which owns its
    own bottom margin already) keeps its normal top breathing room. */
-.foulboard-block .metriccard__body > .ledger-wrap:first-child {
+.foulboard-block .metric__body > .ledger-wrap:first-child {
   margin-top: calc(-1 * var(--space-3));
 }
-.foulboard-block .metriccard__body > .ledger-wrap:last-child {
+.foulboard-block .metric__body > .ledger-wrap:last-child {
   margin-bottom: calc(-1 * var(--space-4));
 }
 .foulboard-block .ledger-wrap .standings.foulboard {

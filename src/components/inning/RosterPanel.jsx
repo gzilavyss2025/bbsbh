@@ -5,6 +5,7 @@ import { showRookiePill } from '../../api/rookies.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../../lib/headerTheme.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { RookiePill } from '../badges/RookiePill.jsx'
 
@@ -62,7 +63,7 @@ export const RosterPanel = memo(function RosterPanel({ title, roster, teamId = n
   const rowClass = (p) => `roster__row ${entered(p) ? 'is-entered' : ''}`
   const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
   return (
-    <section className={`roster ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
+    <Card body="flush" className={`roster ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <button
         className="roster__toggle sectionhead--band"
         onClick={() => setOpen((o) => !o)}
@@ -144,7 +145,7 @@ export const RosterPanel = memo(function RosterPanel({ title, roster, teamId = n
           )}
         </div>
       )}
-    </section>
+    </Card>
   )
 })
 

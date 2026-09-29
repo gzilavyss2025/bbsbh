@@ -102,7 +102,7 @@
 }
 
 /* Jersey number before position — EnteringReference.jsx's own lineup-row
-   convention (.lineupcard__jersey), reused here rather than reinvented. */
+   convention (.entering__jersey), reused here rather than reinvented. */
 .abhero__jersey {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

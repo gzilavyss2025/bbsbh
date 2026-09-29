@@ -14,7 +14,7 @@ function splitFirstLast(full) {
 }
 
 // One "baseball card" tile: headshot (with position floated on it as a small
-// badge, same idiom as the former-teammates cards' .teammatecard__posbadge),
+// badge, same idiom as the former-teammates cards' .teammate__posbadge),
 // name (a clickable PlayerLink), team logo + abbreviation + an optional
 // prospect pill, stat line underneath. Shared by the Statcast leaders box,
 // the box score's Insights card, and each result card's Dominant Performance

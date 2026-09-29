@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { Headshot } from '../player/Headshot.jsx'
 import { Door } from '../ui/control/Door.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { useCalloutLedger } from '../../hooks/useCalloutLedger.js'
 
 // Show only the first handful up front and let a button reveal the rest —
@@ -66,7 +67,7 @@ export const MarginNotes = memo(function MarginNotes({ notes, feed, bundle, half
   const hidden = list.length - shown.length
   const groups = groupNotesBySubject(shown)
   return (
-    <section className="marginnotes">
+    <Card body="flush" className="marginnotes">
       <h3 className="marginnotes__title sectionhead--band sectionhead--house">Margin Notes</h3>
       <div className="marginnotes__grid">
         {groups.map((g) => {
@@ -98,6 +99,6 @@ export const MarginNotes = memo(function MarginNotes({ notes, feed, bundle, half
           Show {hidden} more margin {hidden === 1 ? 'note' : 'notes'}
         </Door>
       )}
-    </section>
+    </Card>
   )
 })

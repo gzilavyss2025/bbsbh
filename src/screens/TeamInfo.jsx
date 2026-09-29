@@ -61,6 +61,7 @@ import { SPORT_LABEL, teamAbbr } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, mastheadMarkFor } from '../lib/headerTheme.js'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -551,6 +552,17 @@ function TeamSections({
   )
   const roster = useMemo(() => rosterFallbackGroups(rawRoster), [rawRoster])
 
+  const lineupHead = (
+    <ClubHead title="Batting order" teamId={meta.id} teamName={meta.teamName} masthead={ownMasthead}>
+      {/* Names the pitcher the notes below are measured against, and
+          switches them off for a clean order to copy onto paper. */}
+      <MatchupNotesToggle pitcherLast={starterLast} showNotes={showNotes} onToggle={setShowNotes} />
+    </ClubHead>
+  )
+  const oppHead = (
+    <ClubHead title="Defensive alignment" teamId={oppMeta.id} teamName={oppMeta.teamName} masthead={oppMasthead} />
+  )
+
   return (
     <>
       <OpposingStarterCard
@@ -598,30 +610,9 @@ function TeamSections({
           rather than 50/50 — the order's the meat of the page, the diamond is
           a small square (see .teaminfo__lineupdefense's 3fr/2fr split). */}
       <div className="teaminfo__lineupdefense">
-        <section className="lineup">
-          <SectionMasthead
-            as="h3"
-            title="Batting order"
-            logo={
-              <TeamLogo
-                teamId={meta.id}
-                name={meta.teamName}
-                size={22}
-                variant="mono"
-                crop="bar"
-                overrideUrl={ownMasthead.url}
-                className={`sectionhead__mark${ownMasthead.url ? ' sectionhead__mark--custom' : ''}`}
-              />
-            }
-          >
-            {/* Names the pitcher the notes below are measured against, and
-                switches them off for a clean order to copy onto paper. */}
-            <MatchupNotesToggle
-              pitcherLast={starterLast}
-              showNotes={showNotes}
-              onToggle={setShowNotes}
-            />
-          </SectionMasthead>
+        {/* A Card with the club band as its head (#1113, slice C3). The list
+            is its flush body; the Card clips the rows to its corners. */}
+        <Card className="lineup" head={lineupHead} body="flush">
           {lineup.length > 0 ? (
             <ol className="lineup__list">
               {lineup.map((p, i) => (
@@ -717,35 +708,22 @@ function TeamSections({
               Not final{info.scheduledTime ? ` — posts close to first pitch (${info.scheduledTime})` : ' yet'}
             </p>
           )}
-        </section>
+        </Card>
 
         {oppDefense.length > 0 && (
-          <section
+          <Card
             className={`opp ${headerThemeClass(oppTheme)}`.trim()}
             style={headerThemeStyle(oppTheme, oppMasthead.scale)}
+            head={oppHead}
+            body="flush"
           >
-            <SectionMasthead
-              as="h3"
-              title="Defensive alignment"
-              logo={
-                <TeamLogo
-                  teamId={oppMeta.id}
-                  name={oppMeta.teamName}
-                  size={22}
-                  variant="mono"
-                  crop="bar"
-                  overrideUrl={oppMasthead.url}
-                  className={`sectionhead__mark${oppMasthead.url ? ' sectionhead__mark--custom' : ''}`}
-                />
-              }
-            />
             {/* Drawn like the sheet's bottom-left diamond: surnames on writing
                 lines at their positions. The defense belongs to the OTHER side,
                 so — same as the Starting pitcher card above — its masthead
                 wears THAT club's jersey colors (oppTheme) rather than this
                 page's own. */}
             <DefenseDiamond defense={oppDefense} />
-          </section>
+          </Card>
         )}
       </div>
 
@@ -788,39 +766,29 @@ function OpposingStarterCard({
   arsenalSides,
   bullpenToggle,
 }) {
+  const head = (
+    <ClubHead title="Starting pitcher" teamId={teamId} teamName={teamName} masthead={masthead}>
+      {bullpenToggle}
+    </ClubHead>
+  )
   return (
-    <section
-      className={`startercard ${headerThemeClass(theme)}`.trim()}
+    <Card
+      className={`starter ${headerThemeClass(theme)}`.trim()}
       style={headerThemeStyle(theme, masthead.scale)}
+      head={head}
+      body="flush"
     >
-      <SectionMasthead
-        as="h3"
-        title="Starting pitcher"
-        logo={
-          <TeamLogo
-            teamId={teamId}
-            name={teamName}
-            size={22}
-            variant="mono"
-            crop="bar"
-            overrideUrl={masthead.url}
-            className={`sectionhead__mark${masthead.url ? ' sectionhead__mark--custom' : ''}`}
-          />
-        }
-      >
-        {bullpenToggle}
-      </SectionMasthead>
       {pitcher ? (
-        <div className="startercard__body">
+        <div className="starter__body">
           <Headshot
             personId={pitcher.id}
             name={pitcher.name}
             teamId={teamId}
-            className="startercard__shot"
+            className="starter__shot"
           />
-          <div className="startercard__info">
-            <span className="startercard__namewrap">
-              <PlayerLink id={pitcher.id} className="startercard__name">
+          <div className="starter__info">
+            <span className="starter__namewrap">
+              <PlayerLink id={pitcher.id} className="starter__name">
                 {pitcher.nameLastFirst}
               </PlayerLink>
               <ProspectPill {...prospectBadge(prospectsData, pitcher.id, orgTeamId)} />
@@ -828,14 +796,14 @@ function OpposingStarterCard({
               <RookiePill active={showRookiePill(rookiesData, pitcher.id, isMlb)} />
               <DebutPill debuted={!isMlb && hasDebuted(rookiesData, pitcher.id)} />
             </span>
-            <span className="startercard__badges">
-              {pitcher.jersey && <span className="startercard__jersey">{pitcher.jersey}</span>}
-              {pitcher.hand && <span className="startercard__hand">{pitcher.hand}HP</span>}
+            <span className="starter__badges">
+              {pitcher.jersey && <span className="starter__jersey">{pitcher.jersey}</span>}
+              {pitcher.hand && <span className="starter__hand">{pitcher.hand}HP</span>}
             </span>
             {/* Season line (aggregates only, never this game's) — the numbers
                 you pencil next to the starter while staging. */}
             {pitcherLine && (
-              <span className="startercard__stats">
+              <span className="starter__stats">
                 {[
                   pitcherLine.era && `${pitcherLine.era} ERA`,
                   pitcherLine.wins != null && `${pitcherLine.wins}-${pitcherLine.losses}`,
@@ -851,13 +819,13 @@ function OpposingStarterCard({
                 game, so it's staging-safe the same way the season line above
                 is; never this game's. */}
             {pitcherLine?.lastGame && (
-              <span className="startercard__last">{lastGameLine(pitcherLine.lastGame)}</span>
+              <span className="starter__last">{lastGameLine(pitcherLine.lastGame)}</span>
             )}
             {/* His summed line against TONIGHT'S opponent so far this season
                 (see fetchPitcherSeasonVsOpponent) — every past start against
                 this club folded into one line, staging-safe the same way. */}
             {pitcherLine?.vsOpponent && (
-              <span className="startercard__seasonvs">
+              <span className="starter__seasonvs">
                 {seasonVsOpponentLine(pitcherLine.vsOpponent, vsOpponentAbbr)}
               </span>
             )}
@@ -869,7 +837,7 @@ function OpposingStarterCard({
                 cannot word the same career differently. */}
             {careerVsOpp && (
               <BoxLinesDoor
-                className="startercard__careervs"
+                className="starter__careervs"
                 label={vsTeamDoorLabel(careerVsOpp, 'pitching', vsOpponentAbbr)}
                 sheet={{
                   personId: pitcher.id,
@@ -882,7 +850,7 @@ function OpposingStarterCard({
               />
             )}
           </div>
-          {/* Fills the wide layout's open right half (see .startercard__arsenal
+          {/* Fills the wide layout's open right half (see .starter__arsenal
               in index.css) — hidden below the wide breakpoint, where there's
               no room for it next to the headshot + info column. */}
           {arsenal && (
@@ -890,19 +858,45 @@ function OpposingStarterCard({
               arsenal={arsenal}
               tto={arsenalTto}
               sides={arsenalSides}
-              className="startercard__arsenal"
+              className="starter__arsenal"
             />
           )}
         </div>
       ) : (
         <p className="hint">Not posted yet.</p>
       )}
-    </section>
+    </Card>
+  )
+}
+
+// The band head of a pre-game club card (the batting order, the defensive
+// alignment, the starting pitcher): the title, the club's mono mark at the far
+// right (ADR-0031), and one control in the aside slot. It is the Card's `head`
+// (#1113, slice C3). The club colours come from the theme on the card root.
+function ClubHead({ title, teamId, teamName, masthead, children }) {
+  return (
+    <SectionMasthead
+      as="h3"
+      title={title}
+      logo={
+        <TeamLogo
+          teamId={teamId}
+          name={teamName}
+          size={22}
+          variant="mono"
+          crop="bar"
+          overrideUrl={masthead.url}
+          className={`sectionhead__mark${masthead.url ? ' sectionhead__mark--custom' : ''}`}
+        />
+      }
+    >
+      {children}
+    </SectionMasthead>
   )
 }
 
 // "LAST: 7/12 AT BOS (AAA) — 6.0 IP · 5 H · 2 ER · 6 K" — the compact line
-// under .startercard__last's dotted divider (see fetchPitcherLastGame).
+// under .starter__last's dotted divider (see fetchPitcherLastGame).
 function lastGameLine(g) {
   const md = monthDay(g.date)
   const where = g.opponent ? `${g.home ? 'vs' : '@'} ${g.opponent}${g.level ? ` (${g.level})` : ''}` : ''
@@ -1007,10 +1001,10 @@ function FormerTeammates({ pairs, startingIds, dayNight, awayTeamId, homeTeamId 
   const shown = showAll ? cards : cards.slice(0, TEAMMATES_SHOWN)
   const hidden = cards.length - shown.length
   const startingLabel = dayNight === 'day' ? 'Starting today' : 'Starting tonight'
+  const head = <SectionMasthead as="h3" title="Former teammates" />
   return (
-    <section className="metriccard teammates">
-      <SectionMasthead as="h3" title="Former teammates" />
-      <div className="metriccard__body">
+    <Card className="metric teammates" head={head} body="flush">
+      <div className="metric__body">
         {/* A CSS multi-column "waterfall" rather than a grid: a big reunion card
             can run much taller than a plain pair card, and a grid stretches
             every OTHER card in that row to match — the exact mess this avoids.
@@ -1042,29 +1036,29 @@ function FormerTeammates({ pairs, startingIds, dayNight, awayTeamId, homeTeamId 
           </Door>
         )}
       </div>
-    </section>
+    </Card>
   )
 }
 
-// A plain 1-vs-1 former-teammate card.
+// A plain 1-vs-1 former-teammate card: a tile on Card (#1113, slice C3).
 function PairCard({ card: c, startingLabel, sideTeamId }) {
   return (
-    <li className="teammatecard">
-      {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
+    <Card as="li" className="teammate" body="flush">
+      {c.tonight && <span className="teammate__badge">{startingLabel}</span>}
       <TeammateHalf id={c.a.id} name={c.a.name} pos={c.a.pos} teamId={sideTeamId(c.a.id)} />
-      <div className="teammatecard__mid">
-        <div className="teammatecard__logos">
+      <div className="teammate__mid">
+        <div className="teammate__logos">
           {c.clubs.slice(0, 2).map((club) => (
             <TeamLogo key={club.teamId} teamId={club.teamId} name={club.teamName} size={28} />
           ))}
         </div>
-        <span className="teammatecard__years">{clubsYears(c.clubs)}</span>
+        <span className="teammate__years">{clubsYears(c.clubs)}</span>
       </div>
       <TeammateHalf id={c.b.id} name={c.b.name} pos={c.b.pos} teamId={sideTeamId(c.b.id)} />
-      <span className="teammatecard__caption">
+      <span className="teammate__caption">
         {connectionCaption(c.clubs[0]?.level, c.clubs[0]?.teamName, c.clubs[0]?.seasons)}
       </span>
-    </li>
+    </Card>
   )
 }
 
@@ -1076,12 +1070,12 @@ function GroupCard({ card: c, startingLabel, sideTeamId }) {
   const shownMates = expanded ? c.mates : c.mates.slice(0, GROUP_MATES_SHOWN)
   const moreCount = c.mates.length - shownMates.length
   return (
-    <li className="teammatecard teammatecard--group">
-      {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
+    <Card as="li" className="teammate teammate--group" body="flush">
+      {c.tonight && <span className="teammate__badge">{startingLabel}</span>}
       {/* A reunion this size is exactly where a wall of headshots most needs
           the per-player club color (see TeammateHalf) — WHOSE roster each face
           is on tonight gets easy to lose track of past a couple of rows. */}
-      <div className="teammatecard__group">
+      <div className="teammate__group">
         <TeammateHalf
           id={c.anchor.id}
           name={c.anchor.name}
@@ -1092,23 +1086,23 @@ function GroupCard({ card: c, startingLabel, sideTeamId }) {
           <TeammateHalf key={m.id} id={m.id} name={m.name} pos={m.pos} teamId={sideTeamId(m.id)} />
         ))}
       </div>
-      <div className="teammatecard__mid">
+      <div className="teammate__mid">
         <TeamLogo teamId={c.club.teamId} name={c.club.teamName} size={32} />
-        <span className="teammatecard__years">{seasonRange(c.seasons)}</span>
+        <span className="teammate__years">{seasonRange(c.seasons)}</span>
       </div>
-      <span className="teammatecard__caption">
+      <span className="teammate__caption">
         {connectionCaption(c.club.level, c.club.teamName, c.seasons)}
       </span>
       {moreCount > 0 && (
         <button
           type="button"
-          className="teammatecard__groupmore"
+          className="teammate__groupmore"
           onClick={() => setExpanded(true)}
         >
           +{moreCount} more {moreCount === 1 ? 'teammate' : 'teammates'}
         </button>
       )}
-    </li>
+    </Card>
   )
 }
 
@@ -1124,7 +1118,7 @@ function orgTieCaption(t) {
 // (see orgTiesFor) — "this player has a history in the org tonight's opponent
 // belongs to," even without ever sharing a roster with anyone playing
 // tonight. Reuses the group card's single-column-of-headshots + shared-club
-// layout (teammatecard--group) since it's the same shape (N headshots, one
+// layout (teammate--group) since it's the same shape (N headshots, one
 // club to point at) with N pinned at 1. Hidden when there are no ties — which
 // is the common case, since the generator only falls back to this when the
 // real Former Teammates card came up empty.
@@ -1136,8 +1130,8 @@ function OrgTies({ ties }) {
       <p className="hint">No shared roster tonight — but these players have history in the other side&rsquo;s organization.</p>
       <ul className="teammates__grid">
         {ties.map((t) => (
-          <li key={`${t.player.id}-${t.orgId}`} className="teammatecard teammatecard--group">
-            <div className="teammatecard__group">
+          <Card as="li" key={`${t.player.id}-${t.orgId}`} className="teammate teammate--group" body="flush">
+            <div className="teammate__group">
               <TeammateHalf
                 id={t.player.id}
                 name={t.player.name}
@@ -1145,12 +1139,12 @@ function OrgTies({ ties }) {
                 teamId={t.rosterTeamId}
               />
             </div>
-            <div className="teammatecard__mid">
+            <div className="teammate__mid">
               <TeamLogo teamId={t.orgId} name={t.orgName} size={32} />
-              <span className="teammatecard__years">{seasonRange(t.seasons)}</span>
+              <span className="teammate__years">{seasonRange(t.seasons)}</span>
             </div>
-            <span className="teammatecard__caption">{orgTieCaption(t)}</span>
-          </li>
+            <span className="teammate__caption">{orgTieCaption(t)}</span>
+          </Card>
         ))}
       </ul>
     </section>
@@ -1169,14 +1163,14 @@ const posLabel = (pos) => (pos === 'SP' || pos === 'RP' ? 'P' : pos)
 function TeammateHalf({ id, name, pos, teamId }) {
   const { first, last } = splitDisplayName(name)
   return (
-    <PlayerLink id={id} name={name} className="teammatecard__half">
-      <span className="teammatecard__shotwrap">
-        <Headshot personId={id} name={name} teamId={teamId} className="teammatecard__shot" />
-        {pos && <span className="teammatecard__posbadge">{posLabel(pos)}</span>}
+    <PlayerLink id={id} name={name} className="teammate__half">
+      <span className="teammate__shotwrap">
+        <Headshot personId={id} name={name} teamId={teamId} className="teammate__shot" />
+        {pos && <span className="teammate__posbadge">{posLabel(pos)}</span>}
       </span>
-      <span className="teammatecard__name">
-        {first && <span className="teammatecard__name-first">{first}</span>}
-        <span className="teammatecard__name-last">{last}</span>
+      <span className="teammate__name">
+        {first && <span className="teammate__name-first">{first}</span>}
+        <span className="teammate__name-last">{last}</span>
       </span>
     </PlayerLink>
   )

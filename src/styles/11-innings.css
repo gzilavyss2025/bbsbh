@@ -308,13 +308,8 @@
   pointer-events: none;
 }
 
-.half {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-}
+/* .half is a Card (HalfInning.jsx, #1113 slice C4): system/card.css draws
+   its frame, and it has no rule of its own here. */
 
 /* SealBox's revealed wrapper (.statgrid, SealBox.jsx) defaults to
    var(--surface-inset) — right for a reveal sitting directly on the plain

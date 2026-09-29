@@ -2,6 +2,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BoxScoreSkeleton } from '../components/game/BoxScoreSkeleton.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { PostponedBanner } from '../components/game/GameCardParts.jsx'
 import { CountBlink, Stat } from '../components/gamehud/StatBox.jsx'
@@ -438,7 +439,7 @@ const TALLY_CELLS = [
 // that file uses, minus the feed read (`Stat` itself never touches one).
 function TallyCloseDemo() {
   return (
-    <div className="halftally">
+    <Card as="div" body="flush" className="halftally">
       <div
         className="statline statline--console statline--closing"
         style={{ '--tally-step': `${TALLY_STAGGER_MS}ms` }}
@@ -447,7 +448,7 @@ function TallyCloseDemo() {
           <Stat key={c.k} k={c.k} v={c.v} tone={c.tone} style={{ '--tally-i': i }} />
         ))}
       </div>
-    </div>
+    </Card>
   )
 }
 

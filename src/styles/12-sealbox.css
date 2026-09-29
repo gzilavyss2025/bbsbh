@@ -132,7 +132,7 @@
    rather than a header floating loose above a separately-bordered box (which
    this used to be inside .statbox, its inset-padded default context — see
    .abs__rows below). .bs__abscard (box score) already wants this same
-   joined look; .abscard (desktop) is the one context that still wants the
+   joined look; .absframe (desktop) is the one context that still wants the
    header floating separately, and overrides both back apart below. */
 .abs__title {
   display: block;
@@ -766,19 +766,15 @@
 }
 
 /* The R/H/E/LOB + pitch-stat card, row 2 beside the win-probability chart —
-   rounded, bordered, and shadowed like every other card in the view. */
+   a Card (StatBox.jsx, #1113 slice C4), so system/card.css draws its frame.
+   The rule keeps only what lets it shrink in its grid column. */
 .statbox {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
   min-width: 0;
 }
 
 /* Same flush masthead recipe as .pitchers__title — no padding
-   of its own on .statbox, so this caps the card directly; overflow:hidden
-   above clips its square corners to the card's own rounded ones. */
+   of its own on .statbox, so this caps the card directly; the Card's
+   overflow: hidden clips its square corners to the card's rounded ones. */
 .statbox__title {
   margin: 0;
   padding: var(--space-2) var(--space-2h);
@@ -1231,23 +1227,19 @@
    exists for the wide layout's right column (unhidden in the min-width:740px
    block below) — on a phone the ABS block stays inline inside StatBox
    (`.statbox__abs`, always visible there below this breakpoint). */
-.abscard {
+.absframe {
   display: none;
 }
 
-/* DueUpNextCard: the OTHER team's next half, previewed — same card recipe as
-   .statbox, stacked below it on both breakpoints (unlike .abscard, this has
-   no other-breakpoint home to hide from). */
+/* DueUpNextCard: the OTHER team's next half, previewed — a Card like
+   .statbox (#1113 slice C4), stacked below it on both breakpoints (unlike
+   .absframe, this has no other-breakpoint home to hide from). A flush Card:
+   the inset is this rule's own. */
 .dueup {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   padding: var(--space-3) var(--space-3h);
-  overflow: hidden;
 }
 /* Bleeds past the card's own padding to cap it flush (same masthead recipe
-   as .pitchers__title) — overflow:hidden on .dueup clips the
+   as .pitchers__title) — the Card's overflow: hidden clips the
    square corners here to the card's own rounded ones. */
 .dueup__title {
   display: flex;
@@ -1325,14 +1317,11 @@
    above it (see .pitchernotice--pbp), rather than a bare navy header sitting
    directly on the page with unbordered rows below (what this used to be:
    a dashed divider, no card of its own). Tapping the title (see
-   LineupSection, EnteringReference.jsx) collapses .lineupcard__teams. */
-.lineupcard {
+   LineupSection, EnteringReference.jsx) collapses .entering__teams. A Card
+   (#1113 slice C4): system/card.css draws the frame, and Card owns no
+   margin, so the inset stays here. */
+.entering {
   margin: 12px 14px 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
 }
 
 /* Names the topic ("Lineups") — same navy masthead treatment as
@@ -1342,9 +1331,9 @@
    EnteringReference.jsx has why they stopped and why the pair stays matched
    either way. Replaces the old .innings__reference-title, which only existed on
    the wide layout and left the phone's inline copy with no title at all.
-   A <button> (LineupSection) toggling .lineupcard__teams below — reset off
+   A <button> (LineupSection) toggling .entering__teams below — reset off
    the browser's own button chrome so it still reads as a plain masthead. */
-.lineupcard__title {
+.entering__title {
   width: 100%;
   margin: 0;
   padding: var(--space-2) var(--space-2h);
@@ -1364,7 +1353,7 @@
   cursor: pointer;
 }
 
-.lineupcard__chevron {
+.entering__chevron {
   margin-left: auto;
   color: var(--text-on-ink);
   opacity: 0.8;
@@ -1372,7 +1361,7 @@
 
 /* Away over home, each a self-contained nine-slot list. Stacked so a long name
    with its number/position never has to wrap in a cramped column on a phone. */
-.lineupcard__teams {
+.entering__teams {
   padding: var(--space-3) var(--space-2h);
   display: flex;
   flex-direction: column;
@@ -1382,7 +1371,7 @@
 /* Same navy-bar recipe as .halfdefense__title — a themed club recolors it via
    .lineupteam.is-themed (09-team-info.css); untuned falls back to the same
    navy/seal/white default every other masthead bar wears, not a one-off look.
-   EDGE TO EDGE: the margin cancels .lineupcard__teams' 10px side padding that
+   EDGE TO EDGE: the margin cancels .entering__teams' 10px side padding that
    `width: 100%` cannot reach past (the bar read as a label ON the card, not its
    masthead); padding-inline holds the text at the same x, so only the fill moves. */
 .lineupteam__name {
@@ -1410,15 +1399,15 @@
    (RosterPanel.jsx) keeps the full "ROOKIE" word (see the rookie pill's own
    header); a lineup row already carries a slot number, two names and a
    position/jersey column, and the full word was the one thing left to trim. */
-.lineupcard__names .rookie__full {
+.entering__names .rookie__full {
   display: none;
 }
 
-.lineupcard__names .rookie__short {
+.entering__names .rookie__short {
   display: inline;
 }
 
-.lineupcard__list {
+.entering__list {
   margin: 0;
   padding: 0 var(--space-2);
   list-style: none;
@@ -1427,7 +1416,7 @@
   gap: var(--space-1);
 }
 
-.lineupcard__row {
+.entering__row {
   display: flex;
   align-items: baseline;
   gap: var(--space-2);
@@ -1437,22 +1426,22 @@
    Lineups tab) — --marker, same highlighter-yellow as the at-bat card's
    decisive-pitch row (14-strike-zone.css). Not .duepill's kraft-amber: that
    pill answers a different question (the FIELDING club's next half). */
-.lineupcard__row--ondeck {
+.entering__row--ondeck {
   background: color-mix(in srgb, var(--marker) 18%, var(--paper-2));
   border-radius: var(--radius-sm);
   margin-inline: -6px;
   padding: 3px var(--space-1h);
 }
 
-/* Reuses .duepill's shape (className="duepill lineupcard__ondeck"), just
+/* Reuses .duepill's shape (className="duepill entering__ondeck"), just
    recolored — see comment above. */
-.lineupcard__ondeck {
+.entering__ondeck {
   background: var(--marker);
   color: var(--text-heading);
   border-color: transparent;
 }
 
-.lineupcard__slot {
+.entering__slot {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-cell);
@@ -1467,7 +1456,7 @@
    above its own baseline than plain text does, so baseline alignment was
    inflating the whole row's height just to fit one pill — same fix already
    used by .lineup__namewrap elsewhere. */
-.lineupcard__names {
+.entering__names {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
@@ -1476,7 +1465,7 @@
   gap: var(--space-1h);
 }
 
-.lineupcard__name {
+.entering__name {
   font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   color: var(--text-body);
@@ -1486,18 +1475,18 @@
    diamond's --out name. The strike is a drawn bar now rather than
    `text-decoration` — see styles/motion/strike.css, which took the `.plink`
    half of this rule with it by covering the wrapper instead. */
-.lineupcard__name--out {
+.entering__name--out {
   color: var(--text-caption);
 }
 
 /* The standing occupant of a slot that's seen a sub: inked seam-red, same as
    the defense diamond's --in name. */
-.lineupcard__name--in,
-.lineupcard__name--in .plink {
+.entering__name--in,
+.entering__name--in .plink {
   color: var(--accent-negative);
 }
 
-.lineupcard__enter {
+.entering__enter {
   margin-left: 5px;
   color: var(--accent-negative);
   font-weight: var(--w-bold);
@@ -1506,7 +1495,7 @@
 /* Right-aligned number + position for the slot's standing occupant: jersey in
    clay (like the roster cards), then the fielding position in field green.
    Held on one line, flush to the row's right edge. */
-.lineupcard__meta {
+.entering__meta {
   margin-left: auto;
   flex: 0 0 auto;
   display: flex;
@@ -1515,7 +1504,7 @@
   white-space: nowrap;
 }
 
-.lineupcard__jersey {
+.entering__jersey {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-cell);
@@ -1523,7 +1512,7 @@
   color: var(--clay);
 }
 
-.lineupcard__pos {
+.entering__pos {
   min-width: 20px;
   text-align: right;
   font-family: var(--font-display);
@@ -1537,15 +1526,11 @@
 /* The fielding team's live alignment for the half, below the feed — the lineup
    page's defense diamond, now building up substitutions as innings are revealed
    (reveal-only, see api/defense.js). Same self-contained clickable card as
-   .lineupcard above (same 14px inset, same reasoning) — collapses the diamond
-   below via the title button (DefenseSection, EnteringReference.jsx). */
+   .entering above (same 14px inset, same reasoning) — collapses the diamond
+   below via the title button (DefenseSection, EnteringReference.jsx). A Card
+   there (#1113 slice C4), so this rule keeps only the inset. */
 .halfdefense {
   margin: 12px 14px 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
 }
 
 .halfdefense__title {
@@ -1600,14 +1585,12 @@
   /* Now an independent card in its own right (BoxScoreBody's .bs__col), below
      BoxAbs but no longer its nested continuation — the column's own flex gap
      (var(--space-4)) spaces the two apart, so the base .halfdefense rule's
-     own margin/border/shadow would draw a second, redundant card around this
-     one's own title+diamond "joined ears" look (see .bs__defensecard
-     .defdiamond below) rather than sitting flush in the column. */
+     inset margin comes off. This copy is NOT a Card (#1113 slice C4): its
+     title and diamond join into one shape of their own (see
+     .bs__defensecard .defdiamond below), so it draws no frame around them,
+     and keeps the clip the shared .halfdefense rule used to give it. */
   margin: 0;
-  border: none;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
+  overflow: hidden;
 }
 .bs__defensecard .halfdefense__title {
   /* A plain <h4> here, not the innings view's collapsible <button> copy —
@@ -1622,10 +1605,10 @@
 }
 
 /* Focus mode's Field tab: zeroing the OUTER .halfdefense like the box score
-   does would leave this card with no frame (unlike its sibling .lineupcard),
+   does would leave this card with no frame (unlike its sibling .entering),
    so this uses .half .defdiamond's other remedy instead — drop the diamond's
    own border/shadow/background so its edges stop double-drawing on top of
-   .halfdefense's own (`overflow: hidden` up top already joins the seam). */
+   .halfdefense's own (the Card's `overflow: hidden` already joins the seam). */
 .refpanel__body .defdiamond {
   border: none;
   box-shadow: none;

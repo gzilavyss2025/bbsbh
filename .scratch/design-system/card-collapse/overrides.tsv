@@ -7,6 +7,8 @@
 # LANDED in slice C0 (#1113): .thub-card is the Card component now (components/ui/frame/Card.jsx, styles/system/card.css), so its row left this file. Its sixteen modules render <Card>; the co-class .chalcard is <Card className="chal">.
 # LANDED in slice C1 (#1222): .tlead__cat, .tledg__block, .jerseydeck__card, .team-score, .txstory, .tstats-card (renamed .tstats), .roster-super, .thub-affiliate, .horizontile, .hzntile, .alum__card, .ctr__tile, .ctr__card are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. .horizontile__statbox and .hzntile__tile stay — the wells inside these tiles are unchanged (Q4, later).
 # LANDED in slice C2 (#1113): .player__statgrid, .player__splits, .factgrid, .vsteam__last, .gamelog, .milestonewatch, .cthist__seasons, .posinn__diamond, .levelprog, .prospectcard, .simlike__link, .awards, .awardblk, .hitchart, .bflight, .spray, .gamelines__rows are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. The three gap-rule grids keep their --border-rule ground on the grid inside the Card (.factgrid__grid, .player__statgrid, .player__splits). .cthist__toggle is a block Door. .prospectcard kept its name: .prospect is already the ProspectPill's namespace (.prospect__tag), so the rename is not a clean two-step.
+# LANDED in slice C4 (#1113): .half, .statbox, .dueup, .lineupcard (renamed .entering), .halfdefense, .roster, .rolling__scroll, .winprob, .marginnotes, .pitchers, .halftally, .betweeninnings (a Card button), .abscard (renamed .absframe) are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. Every one is a sheet with a flush body, and each band head stays the first child, as H1b left it. The box score's .bs__defensecard.halfdefense is NOT a Card: it drew no frame before and draws none now. .roster also wears the umpire drawer (UmpireTendenciesFold) and the lineup page's not-posted list; the list sits inside the batting-order card and takes no Card of its own.
+# LANDED in slice C3 (#1113): .metriccard (renamed .metric), .lineup, .opp, .startercard (renamed .starter), .teammatecard (renamed .teammate), .defdiamond and .umps__list are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. .lineup__list left too: it is the lineup Card's flush body and draws no frame. The umpire grid keeps its --border-rule ground on the grid inside the Card. .teammatecard__groupmore is .teammate__groupmore. .thub-roster stays a panel row and moved to C6a.
 # REMOVED 2026-09-29: .logbook__seasons button and .bookmgmt__modes button went STALE. Their rules left the CSS (the logbook season buttons moved onto the one Button, ea7d0aed1; .bookmgmt__modes was dead code), so their rows left this file.
 .wordmarklab__colorlock	lab	sheet				C8	wordmark lab (/wordmark-lab), a dev page: the colour-lock panel
 .wordmarklab__option	lab	sheet	none	padded	C8	wordmark lab option tile; an <article> with its own hover — a lab specimen
@@ -36,25 +38,15 @@
 .sitemenusheet__group	card	sheet	none	padded	C7	a grouped block of links inside the site menu sheet. A card inside a modal; low traffic, lands last in C7
 .attendance__note	notice					a note paragraph with a pop-in animation on page ground (BoxScore + TeamInfo) — the Notice family (#1132)
 .fact__infonote	notice					an info note under a stat on the player page (AdvancedStatsCard), animated in — Notice family (#1132)
-.umps__list	card	sheet	outside:label	flush	C3	umpire crew list (UmpiresCard; ExtrasFacts in the innings reference) — a gap-rule grid (background = --border-rule); grid moves inside Card
 .umptier__note	notice					the umpire-tier explainer note (UmpireTierGlyph) — Notice family (#1132)
-.lineup__list	panel					NESTED SHEET: the batting-order <ol> sits inside the .lineup sheet, under its SectionMasthead (TeamInfo.jsx:624) — a second frame inside a frame. It becomes the flush body of the .lineup Card, not a Card of its own
-.teammatecard	card	sheet	none	padded	C3	a teammate tile in TeamInfo's lineup (inventory group A). Rename .teammate (ADR-0084 ledger). In a masonry column: break-inside stays a namespace rule
-.teammatecard__groupmore	control					"show more" inside a teammate group: a <button> on inset — a Door block (#1130)
-.defdiamond	card	sheet	none	padded	C3	the defence diamond diagram card (DefenseDiamond.jsx), used in TeamInfo AND the innings viewer. Renders OUTSIDE the SealBox by design (src/CLAUDE.md): CSS-only move, no data change
+.teammate__groupmore	control					"show more" inside a teammate group: a <button> on inset — a Door block (#1130)
 .innings__extras	notice					the extra-innings banner (ExtrasBanner): a tinted inset line — Notice family (#1132). ADR-0008 gates what it says, not its box
-.half	card	sheet	label	flush	C4	one half-inning sheet (HalfInning.jsx:347, <section className="half">). The census counts 16 files because 'half' is also a string value elsewhere; the real consumer is one. SEAL SCOPE: the half's content is reveal-gated — move the box only
 .statline	panel					a gap-rule line of stats inside StatBox / HalfTally — a panel inside a card, not a card
 .wcall	panel					the win-call block inside StatBox — a box inside the statbox card
 .favormeter	panel					the umpire-favour meter inside StatBox — a box inside the statbox card
-.statbox	card	sheet	band	flush	C4	the at-bat stat box (StatBox.jsx). Band head .statbox__title is on check-seal-scope's allowlist: the band's kraft fallback moves with the SectionHead, and the allowlist moves in the same PR. SEAL SCOPE
 .halfcast	panel					a cast-of-players block inside StatBox — a box inside the statbox card
-.dueup	card	sheet	band	padded	C4	Due-up-next card (DueUpNextCard.jsx); band head .dueup__title is seal-scope allowlisted
-.lineupcard	card	sheet	band	flush	C4	the innings view's entering-lineup card (EnteringReference.jsx); renames .entering (ledger). .lineupcard__title is seal-scope allowlisted. Its .duepill stays guarded (pill census)
-.halfdefense	card	sheet	band	flush	C4	defence card in EnteringReference + BoxScore; .halfdefense__title band is seal-scope allowlisted. BoxScore.jsx renders it inside the reveal: CSS/markup only
 .stat	panel					a single stat tile (StatBox, PitcherHandoffCard, LevelProgressionCard, PositionInnings…) — a cell inside a card. 'stat' is also a common string, so the consumer count is noisy
 .pbp__card	panel					one play-by-play event box inside the half sheet (PlayByPlay, PlacedRunnerCard) — a row inside a card. SEAL SCOPE: reveal-gated content
-.roster	card	sheet	band	flush	C4	the roster/bench drawer (RosterPanel.jsx) — band head is .roster__toggle, a <button> that is seal-scope allowlisted. The toggle is the head's action, so the head must accept a button as its whole row
 .szmodal	modal					the strike-zone modal card (StrikeZone.jsx) — a modal; its kicker .szmodal__eyebrow is a head row (retire to __note)
 .umpmodal	modal					the umpire-accuracy modal — a modal
 .logotile	bespoke					a tile on LogoSheet, the PRINTABLE grayscale logo sheet: a shadow would print as a grey smear; keep it flat and its own
@@ -82,11 +74,7 @@
 .patternlab__notefield	field					pattern lab <textarea>
 .logomodal	modal					the logo modal (LogoModal.jsx) on inset ground with an entry animation
 .logomodal__variants	panel					the variant strip inside the logo modal
-.rolling__scroll	card	sheet	none	flush	C4	the rolling-line chart scroller in the game HUD (RollingLine.jsx) — a sheet around a horizontally scrolling chart. SEAL SCOPE
-.winprob	card	sheet	band	padded	C4	win-probability chart card (WinProbChart; box score + innings). .winprob__head band is seal-scope allowlisted. SEAL SCOPE
-.marginnotes	card	sheet	band	padded	C4	margin notes card (MarginNotes.jsx); .marginnotes__title band is seal-scope allowlisted. SEAL SCOPE
 .marginnotes__card	panel					one note tile inside the margin-notes card
-.pitchers	card	sheet	band	padded	C4	the Pitchers card (PitchersSection.jsx; also UmpireTendencies' board). .pitchers__title band is seal-scope allowlisted. ADR-0009: the table is gated by revealedThrough, not a SealBox — do not touch that gate, move the box only
 .gamestory	card	sheet	label	flush	C5	the game story card (GameStoryCard.jsx, MLB.com RSS). plain radius-md → sheet
 .gamestory__link	control					the story link row: an <a> with its own type on inset — a Door (#1130)
 .bs__team	card	sheet	band	padded	C5	box score team section, themed per card (.is-themed on the section). Inside the SealBox reveal render (screens/BoxScore.jsx, also on STAMP_ALLOWLIST): CSS + className only
@@ -117,7 +105,7 @@
 .sstrip__cell	bespoke					one game cell on the season strip — same allowlisted convention
 .standings-daynav button	control					standings day-nav <button>
 .radarpill__note	notice					the explainer note the RadarPill opens — Notice family (#1132)
-.thub-roster	panel					NESTED SHEET: RosterList's <ul> renders inside .thub-card__body (CurrentRosterCard, InjuredListCard) and inside AllStar/Postseason pages — a frame inside a frame. It becomes a flush body; verify the two non-hub pages still want a box
+.thub-roster	panel					NESTED SHEET: RosterList's <ul> renders inside .thub-card__body (CurrentRosterCard, InjuredListCard) and inside AllStar/Postseason pages — a frame inside a frame. It becomes a flush body; verify the two non-hub pages still want a box. Moved to C6a: it renders in the team hub, on the All-Star rosters page and on the postseason series pages, never on TeamInfo, so it left C3
 .rehabcard	card	sheet	none	padded	C6b	rehab tile on /rehab (inventory: "flat" — critique: the missing shadow is invisible). Plain → sheet
 .horizontile__statbox	well					inset stat box inside a horizon tile
 .hzntile__tile	well					inset box inside a horizon tile
@@ -154,8 +142,6 @@
 .sgh-list	card	sheet	none	flush	C6c	/fouls souvenir list <ol>
 .gamehigh-tiles	card	ledger	none	flush	C6c	/fouls game-high tiles on the gap-rule grid; grid moves inside Card
 .souvenir-row__tiles	card	ledger	none	flush	C6c	/fouls souvenir tiles on the gap-rule grid
-.metriccard	card	sheet	band	flush	C3	pre-game metric card (5 modules) — head is SectionMasthead (.metricbar band). Inventory group A. Rename .metric
-.lineup, .opp, .startercard	card	sheet	band	flush	C3	batting order / opposing defence / starting pitcher cards in TeamInfo — one rule for three blocks; head is the metricbar band. .startercard renames .starter
 .seasonseries__nav	control					season-series strip arrow <button>
 .photostrip__nav	control					photo strip arrow <button>
 .photostrip__thumb	media					photo strip thumbnail link
@@ -235,11 +221,9 @@
 .boxlines__stats	panel					gap-rule stats grid inside the Box Lines sheet (a modal)
 .dlab__verdictbox	lab					design lab verdict box
 .dlab__recipe	lab					design lab recipe well
-.halftally	card	sheet	none	flush	C4	the half tally (HalfTally.jsx) in the game HUD console. Plain → sheet. SEAL SCOPE
-.betweeninnings	card	sheet	none	padded	C4	the between-innings card, a whole-card <button> (BetweenInnings.jsx): Card as="button". Plain → sheet. SEAL SCOPE
 .refpanel__tabs	control					the reference panel's tab row
 .refbar__chip	control					reference bar chip <button>
-.lineupcard__swap	control					swap <button> inside the entering-lineup card
+.entering__swap	control					swap <button> inside the entering-lineup card
 .chal__view	control					"view" toggle inside the challenge card
 .researchdiary__traps	lab					research diary / contender diary (/admin/contenders) — research pages
 .sc-labload__input	field					scorecard lab <input>
@@ -250,6 +234,5 @@
 .door--block	not-card					system/door.css — the Door's own block layout (#1130), written by Door.jsx as a template class. Not a card and not dead
 .searchoverlay__panel	bespoke					the site-search dialog panel from 560px (ADR-0037: site search is the one dialog that is not a sheet)
 .stars3__card	card	ledger	outside:band	padded	C5	a three-stars tile in the box score, boxed only from 740px (@media). Inside the reveal render
-.abscard	card	sheet	band	flush	C4	ABS challenges card, boxed only from 740px (@media); display:none below. Renames .absframe (ledger). SEAL SCOPE
 .pbp__zonecell	panel					a zone cell in the play-by-play, boxed only from 740px
 .dueupconsole__col	panel					a column inside the due-up console, boxed only from 740px. SEAL SCOPE

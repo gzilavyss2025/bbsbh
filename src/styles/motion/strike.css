@@ -52,7 +52,7 @@
   position: relative;
 }
 .pbp__replaced > .struckline::after,
-.lineupcard__name--out > .struckline::after,
+.entering__name--out > .struckline::after,
 .defdiamond__name--out > .struckline::after {
   content: '';
   position: absolute;
@@ -70,7 +70,7 @@
   pointer-events: none;
 }
 .pbp__replaced > .struckline.is-drawing::after,
-.lineupcard__name--out > .struckline.is-drawing::after,
+.entering__name--out > .struckline.is-drawing::after,
 .defdiamond__name--out > .struckline.is-drawing::after {
   animation: strike-draw var(--dur-med) var(--ease-out) backwards;
 }
@@ -82,7 +82,7 @@
    its baseline alignment. Restated here rather than in each surface's own
    partial because the inner span exists only for the bar above; the wrappers
    keep their own declarations untouched, and this is what makes the extra
-   element cost nothing. The other two sites need nothing: `.lineupcard__name`
+   element cost nothing. The other two sites need nothing: `.entering__name`
    is a flex item in a ROW, so it already hugs, and `.defdiamond__name` lays its
    content out as ordinary centred inline text. */
 .abhero__pr > .struckline {
@@ -107,7 +107,7 @@
    has to be there — it says who is out of the game. */
 @media (prefers-reduced-motion: reduce) {
   .pbp__replaced > .struckline.is-drawing::after,
-  .lineupcard__name--out > .struckline.is-drawing::after,
+  .entering__name--out > .struckline.is-drawing::after,
   .defdiamond__name--out > .struckline.is-drawing::after {
     animation: none;
   }
