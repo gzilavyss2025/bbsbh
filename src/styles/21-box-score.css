@@ -769,15 +769,17 @@
 /* One call-out note card: a headshot (or team logo(s), for a note about a
    club rather than a person) beside the player's name and the note itself
    (a .pbp__callout, same star-marked strip as the innings view). A ledger
-   Card (#1113, slice C5), the same tile as the .playerline tiles in the
-   Statcast card above it, but laid out as a row — there's a full sentence to
-   fit, not just a number. */
+   Card (#1113, slice C5) that keeps its own soft hairline edge and inset
+   shadow, laid out as a row — there's a full sentence to fit, not just a
+   number. */
 .bs__noteCard {
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-2);
   margin-bottom: 8px;
+  border-color: var(--border-hairline);
+  box-shadow: var(--inset-cell);
   min-width: 0;
   break-inside: avoid;
 }

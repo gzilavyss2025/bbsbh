@@ -1148,7 +1148,9 @@ const C5 = [
   { css: '21-box-score.css', sel: '.bs__potg', jsx: ['screens/BoxScore.jsx'], ns: 'bs__potg', as: 'div' },
   { css: '21-box-score.css', sel: '.bs__insights', jsx: ['screens/BoxScore.jsx'], ns: 'bs__insights' },
   { css: '21-box-score.css', sel: '.bs__statcastCard', jsx: ['screens/BoxScore.jsx'], ns: 'bs__statcastCard' },
-  { css: '21-box-score.css', sel: '.bs__noteCard', jsx: ['screens/BoxScore.jsx'], ns: 'bs__noteCard', frame: 'ledger', as: 'div' },
+  // A note tile keeps its soft edge and inset shadow over the ledger frame
+  // (Gary, 2026-09-29): that is its look, not a second frame.
+  { css: '21-box-score.css', sel: '.bs__noteCard', jsx: ['screens/BoxScore.jsx'], ns: 'bs__noteCard', frame: 'ledger', as: 'div', keep: ['box-shadow'] },
   { css: '21a-box-score-stars.css', sel: '.bs__stars', jsx: ['screens/BoxScore.jsx'], ns: 'bs__stars', as: 'div' },
   // Boxed only from 740px: its phone rules strip the frame (test below).
   { css: '21a-box-score-stars.css', sel: '.stars3__card', jsx: ['screens/BoxScore.jsx'], ns: 'stars3__card', frame: 'ledger', as: 'li', phoneOnly: true },
@@ -1271,6 +1273,17 @@ test('C5: a note tile still never breaks across the waterfall columns', () => {
   const css = read('21-box-score.css')
   assert.equal(decl(ruleBody(css, '.bs__noteCard'), 'break-inside'), 'avoid')
   assert.equal(decl(ruleBody(css, '.bs__noteGrid'), 'column-width'), '240px')
+})
+
+// Gary kept the note tile's old edge (2026-09-29): the soft hairline and the
+// inset shadow, over the ledger Card's radius and paper. 21-box-score.css
+// loads after system/card.css, so the tile's rule wins on order.
+test('C5: a note tile keeps its soft edge and inset shadow', () => {
+  const body = ruleBody(read('21-box-score.css'), '.bs__noteCard')
+  assert.equal(decl(body, 'border-color'), 'var(--border-hairline)')
+  assert.equal(decl(body, 'box-shadow'), 'var(--inset-cell)')
+  const imports = importOrder()
+  assert.ok(imports.indexOf('21-box-score.css') > imports.indexOf('system/card.css'))
 })
 
 // The scorebook's fill-in boxes are a gap-rule grid: the rules between the
