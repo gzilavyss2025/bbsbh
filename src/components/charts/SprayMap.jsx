@@ -3,6 +3,7 @@ import { HOME } from '../../lib/ballpark/ballparkGeometry.js'
 import { HARD_HIT_MPH, hitCoordToSvg } from '../../lib/ballpark/hitProjection.js'
 import { directionCaption, directionMix, hrNote, splitBalls } from '../../api/spray.js'
 import { Card } from '../ui/frame/Card.jsx'
+import { FactGrid } from '../ui/frame/FactGrid.jsx'
 
 // The season spray map: where one batter's hits land, and how that moves
 // against a right-handed or a left-handed pitcher.
@@ -315,21 +316,19 @@ export function SprayMap({ view }) {
         </div>
       )}
 
-      <Card as="div" body="flush" className="factgrid spray__facts">
-        <dl className="factgrid__grid">
-          {[
-            ['Hits', chosen.hits],
-            ['XBH', chosen.xbh],
-            ['HR', chosen.hr],
-            ['Hard-hit', pct(chosen.hard, chosen.bip)],
-          ].map(([label, value]) => (
-            <div className="fact" key={label}>
-              <dt className="fact__label">{label}</dt>
-              <dd className="fact__value">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      </Card>
+      <FactGrid className="spray__facts">
+        {[
+          ['Hits', chosen.hits],
+          ['XBH', chosen.xbh],
+          ['HR', chosen.hr],
+          ['Hard-hit', pct(chosen.hard, chosen.bip)],
+        ].map(([label, value]) => (
+          <div className="fact" key={label}>
+            <dt className="fact__label">{label}</dt>
+            <dd className="fact__value">{value}</dd>
+          </div>
+        ))}
+      </FactGrid>
 
       <p className="spray__foot">
         {levels} · {chosen.bip} balls in play. Hard-hit share is of balls in play.

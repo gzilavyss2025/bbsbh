@@ -25,7 +25,7 @@ import { gameLogDoorLabel } from './player/overviewPreview.js'
 import { DASH, Fact, StatGrid, debutLabel, isoToday, monthDay, roleWord } from './player/parts.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
-import { Card } from '../components/ui/frame/Card.jsx'
+import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
 
 // The player hub's OVERVIEW tab — the bare `/player/{id}`, and the tab the
 // other three hang off (screens/player/PlayerHubShell.jsx). Who he is now: the
@@ -116,44 +116,42 @@ export function PlayerPage({ id, asOf, sportId }) {
       {data.timeline && <CareerTimeline entries={data.timeline.entries} />}
       {data.progression && <LevelProgressionCard levels={data.progression.levels} />}
 
-      <Card as="div" body="flush" className="factgrid">
-        <div className="factgrid__grid">
-          <Fact label="Ht / Wt" value={bio.heightWeight} />
+      <FactGrid as="div">
+        <Fact label="Ht / Wt" value={bio.heightWeight} />
+        <Fact
+          label={retired ? 'Age at retirement' : 'Age'}
+          value={retired ? status.retiredAge ?? DASH : bio.age}
+          mono
+        />
+        <Fact label="Born" value={bio.born} />
+        <Fact
+          label="MLB Debut"
+          value={
+            bio.debut
+              ? data.debutBoxscorePath
+                ? <GameLink path={data.debutBoxscorePath}>{debutLabel(bio.debut)}</GameLink>
+                : debutLabel(bio.debut)
+              : DASH
+          }
+        />
+        <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} />
+        <Fact label="Draft" value={draftLabel(bio.draft, bio.signedYear)} />
+        {/* Where he last was, for the unrostered only — the fact the hero
+            stopped implying, now said outright under a label that can't be
+            misread as "his team". Spans the grid because a seventh cell
+            would otherwise leave a rule-colored hole beside it. */}
+        {status?.lastTeam && (
           <Fact
-            label={retired ? 'Age at retirement' : 'Age'}
-            value={retired ? status.retiredAge ?? DASH : bio.age}
-            mono
-          />
-          <Fact label="Born" value={bio.born} />
-          <Fact
-            label="MLB Debut"
+            label="Last Team"
+            wide
             value={
-              bio.debut
-                ? data.debutBoxscorePath
-                  ? <GameLink path={data.debutBoxscorePath}>{debutLabel(bio.debut)}</GameLink>
-                  : debutLabel(bio.debut)
-                : DASH
+              <TeamLink id={status.lastTeam.id} className="player__team">
+                {status.lastTeam.name}
+              </TeamLink>
             }
           />
-          <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} />
-          <Fact label="Draft" value={draftLabel(bio.draft, bio.signedYear)} />
-          {/* Where he last was, for the unrostered only — the fact the hero
-              stopped implying, now said outright under a label that can't be
-              misread as "his team". Spans the grid because a seventh cell
-              would otherwise leave a rule-colored hole beside it. */}
-          {status?.lastTeam && (
-            <Fact
-              label="Last Team"
-              wide
-              value={
-                <TeamLink id={status.lastTeam.id} className="player__team">
-                  {status.lastTeam.name}
-                </TeamLink>
-              }
-            />
-          )}
-        </div>
-      </Card>
+        )}
+      </FactGrid>
 
       {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
 

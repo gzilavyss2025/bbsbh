@@ -60,7 +60,7 @@ import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx
 import { SPORT_LABEL, teamAbbr } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, mastheadMarkFor } from '../lib/headerTheme.js'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
-import { Card } from '../components/ui/frame/Card.jsx'
+import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -174,26 +174,24 @@ export function TeamInfo({
           an unswept umpire. */}
       <div className="teaminfo__topzone">
         <div className="teaminfo__topmain">
-          <Card as="div" body="flush" className="factgrid">
-            <dl className="factgrid__grid">
-              <GameFacts
-                info={info}
-                scorebookWeather={scorebookWeather}
-                scorebookWeatherLoading={scorebookWeatherLoading}
-              />
-              <Fact label="Manager" value={managerFact(manager)} />
-              {/* Tonight's uniform, synthesized to a tight summary ("Away Alternate
-                  Navy Blue") — spoiler-free, but the assignment isn't posted until
-                  around first pitch, so pregame this reads "—" until a Refresh picks
-                  it up. Never posted for MiLB. */}
-              <Fact label="Uniform" value={uniform} />
-              {/* Broadcast rides on the away page only, filling the cell that
-                  otherwise sits empty next to Uniform (an odd fact count leaves it
-                  alone at the end of the grid — see the ESPN-sourced fetch in
-                  GameView). The home page's grid is already even without it. */}
-              {side === 'away' && <Fact label="Broadcast" value={broadcast} />}
-            </dl>
-          </Card>
+          <FactGrid>
+            <GameFacts
+              info={info}
+              scorebookWeather={scorebookWeather}
+              scorebookWeatherLoading={scorebookWeatherLoading}
+            />
+            <Fact label="Manager" value={managerFact(manager)} />
+            {/* Tonight's uniform, synthesized to a tight summary ("Away Alternate
+                Navy Blue") — spoiler-free, but the assignment isn't posted until
+                around first pitch, so pregame this reads "—" until a Refresh picks
+                it up. Never posted for MiLB. */}
+            <Fact label="Uniform" value={uniform} />
+            {/* Broadcast rides on the away page only, filling the cell that
+                otherwise sits empty next to Uniform (an odd fact count leaves it
+                alone at the end of the grid — see the ESPN-sourced fetch in
+                GameView). The home page's grid is already even without it. */}
+            {side === 'away' && <Fact label="Broadcast" value={broadcast} />}
+          </FactGrid>
 
           <UmpiresCard officials={officials} />
 

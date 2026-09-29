@@ -562,24 +562,22 @@ const C2 = [
   { css: '69-hit-chart.css', sel: '.hitchart', jsx: ['components/charts/HitChart.jsx'], ns: 'hitchart' },
   { css: '69-hit-chart.css', sel: '.bflight', jsx: ['components/charts/BallFlight.jsx'], ns: 'bflight', keep: ['box-shadow'] },
   { css: '73-spray-map.css', sel: '.spray', jsx: ['components/charts/SprayMap.jsx'], ns: 'spray' },
-  { css: 'boxlines/gamelines.css', sel: '.gamelines__rows', jsx: ['components/playerstats/GameLinesCard.jsx'], ns: 'gamelines__rows', mode: 'wrap' },
+  // Four of these panels stack, so they are ledgers: no shadow (gamelines.css).
+  { css: 'boxlines/gamelines.css', sel: '.gamelines__rows', jsx: ['components/playerstats/GameLinesCard.jsx'], ns: 'gamelines__rows', mode: 'wrap', frame: 'ledger' },
   // .factgrid: the Card is the block and keeps its margin; the gap-rule grid
-  // is the inner .factgrid__grid. Eight files render one.
-  {
-    css: '09-team-info.css',
-    sel: '.factgrid',
-    jsx: [
-      'components/charts/CommandMap.jsx',
-      'components/charts/SprayMap.jsx',
-      'components/inning/focus/ExtrasFacts.jsx',
-      'components/player/AdvancedStatsCard.jsx',
-      'components/playerstats/FoulCard.jsx',
-      'components/playerstats/PitcherWorkloadCard.jsx',
-      'screens/PlayerPage.jsx',
-      'screens/TeamInfo.jsx',
-    ],
-    ns: 'factgrid',
-  },
+  // is the inner .factgrid__grid. FactGrid draws both, once; eight files
+  // render a FactGrid (FACT_GRID_USERS below).
+  { css: '09-team-info.css', sel: '.factgrid', jsx: ['components/ui/frame/FactGrid.jsx'], ns: 'factgrid' },
+]
+const FACT_GRID_USERS = [
+  'components/charts/CommandMap.jsx',
+  'components/charts/SprayMap.jsx',
+  'components/inning/focus/ExtrasFacts.jsx',
+  'components/player/AdvancedStatsCard.jsx',
+  'components/playerstats/FoulCard.jsx',
+  'components/playerstats/PitcherWorkloadCard.jsx',
+  'screens/PlayerPage.jsx',
+  'screens/TeamInfo.jsx',
 ]
 
 // Every rule whose whole selector is `sel`, inside a media query too.
@@ -614,7 +612,7 @@ test('C2: every player-page block renders on Card, with its frame and a flush bo
   for (const { jsx, ns, mode = 'card', frame = 'sheet' } of C2) {
     for (const rel of jsx) {
       const code = src(rel)
-      assert.match(code, /import \{ Card \} from ["'][\w./]+\/ui\/frame\/Card\.jsx["']/, `${rel} imports Card`)
+      assert.match(code, /import \{ Card \} from ["'](?:[\w./]+\/ui\/frame|\.)\/Card\.jsx["']/, `${rel} imports Card`)
       const tags = mode === 'wrap' ? wrappingTags(code, ns) : cardTags(code).filter((attrs) => namesClass(attrs, ns))
       assert.ok(tags.length > 0, `${rel}: .${ns} renders ${mode === 'wrap' ? 'inside' : 'on'} a Card`)
       for (const attrs of tags) {
@@ -654,13 +652,18 @@ test('C2: the three gap-rule grids keep their rules inside the Card', () => {
   assert.equal(decl(outer, 'display'), undefined, '.factgrid is the card now, not the grid')
 })
 
-test('C2: every fact grid is .factgrid__grid inside a .factgrid Card', () => {
-  const rels = C2.find((r) => r.ns === 'factgrid').jsx
-  for (const rel of rels) {
+// The Card and the grid inside it are drawn in one place, so the eight fact
+// grids cannot drift apart: each file renders a FactGrid, never the pair.
+test('C2: every fact grid is a FactGrid: one .factgrid__grid inside one .factgrid Card', () => {
+  const grid = src('components/ui/frame/FactGrid.jsx')
+  assert.equal(cardTags(grid).filter((attrs) => namesClass(attrs, 'factgrid')).length, 1)
+  assert.equal((grid.match(/className="factgrid__grid"/g) ?? []).length, 1)
+  for (const rel of FACT_GRID_USERS) {
     const code = src(rel)
-    const cards = cardTags(code).filter((attrs) => namesClass(attrs, 'factgrid')).length
-    const grids = (code.match(/className="factgrid__grid"/g) ?? []).length
-    assert.equal(grids, cards, `${rel}: one .factgrid__grid per .factgrid Card`)
+    assert.match(code, /import \{ FactGrid \} from ["'][\w./]+\/ui\/frame\/FactGrid\.jsx["']/, `${rel} imports FactGrid`)
+    assert.match(code, /<FactGrid[\s>]/, `${rel} renders a FactGrid`)
+    assert.doesNotMatch(code, /factgrid__grid/, `${rel} builds no fact grid of its own`)
+    assert.equal(cardTags(code).filter((attrs) => namesClass(attrs, 'factgrid')).length, 0, `${rel}: no hand-built .factgrid Card`)
   }
   // The co-classes that sized the old grid now size its inner grid.
   assert.equal(decl(ruleBody(read('73-spray-map.css'), '.spray__facts .factgrid__grid'), 'grid-template-columns'), 'repeat(4, 1fr)')
@@ -699,17 +702,32 @@ test('C2: the two dossier cards are ledgers and keep their 3px accent rule', () 
 
 // The tile was a PlayerLink <button>; it is a Card link now (as="a"), a real
 // anchor, so a middle-click opens a tab. It keeps the desktop hover card that
-// PlayerLink gave it.
+// PlayerLink gave it, and it takes its path and that card from the same hook
+// PlayerLink uses, so a player URL is built in one place. A row with no
+// personId is a name, not a link, as it was under PlayerLink.
 test('C2: a similar-player tile is a Card link that keeps the hover card', () => {
   const code = src('components/playercard/SimilarPlayerGrid.jsx')
-  const tile = cardTags(code).find((attrs) => namesClass(attrs, 'simlike__link'))
-  assert.ok(tile, 'a Card carries .simlike__link')
-  assert.match(tile, /as="a"/)
+  const tiles = cardTags(code).filter((attrs) => namesClass(attrs, 'simlike__link'))
+  assert.ok(tiles.some((attrs) => /as="a"/.test(attrs)), 'a Card link carries .simlike__link')
+  assert.ok(tiles.some((attrs) => /as="div"/.test(attrs)), 'with no id, the tile is a plain Card, not a link')
+  assert.match(code, /if \(!path\)/, 'the tile checks for a missing path before it renders a link')
   assert.doesNotMatch(code, /<PlayerLink[^>]*simlike__link/)
-  assert.match(code, /usePlayerHoverCard\(/)
+  assert.match(code, /import \{ usePlayerLink \} from '\.\.\/player\/PlayerLink\.jsx'/)
+  assert.match(code, /usePlayerLink\(/)
+  assert.doesNotMatch(code, /playerPath\(/, 'the tile builds no player URL of its own')
   for (const body of bodiesOf(read('51-similar-players.css'), '.simlike__link:hover')) {
     assert.equal(decl(body, 'background'), undefined, 'the interactive Card owns the hover tint')
   }
+})
+
+// src/lib is pure data and pure functions, no React (src/lib/CLAUDE.md). The
+// hover store is the plain external store; the trigger's hook that writes to it
+// lives with PlayerLink, in the component layer.
+test('the player hover store imports no React and no hook', () => {
+  const code = src('lib/playerHoverStore.js')
+  assert.doesNotMatch(code, /from ['"]react['"]/)
+  assert.doesNotMatch(code, /from ['"][\w./]*\/hooks\//)
+  assert.doesNotMatch(code, /export function use[A-Z]/)
 })
 
 // The ball-flight card floats over the feed, as a popover or a sheet, so it

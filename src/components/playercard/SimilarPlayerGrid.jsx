@@ -1,10 +1,9 @@
 import '../../styles/51-similar-players.css'
 import { Headshot } from '../player/Headshot.jsx'
+import { usePlayerLink } from '../player/PlayerLink.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { splitDisplayName } from '../../api/person.js'
-import { useLinkScope, useRouteLink } from '../../lib/nav.js'
-import { usePlayerHoverCard } from '../../lib/playerHoverStore.js'
-import { playerPath } from '../../lib/route.js'
+import { useRouteLink } from '../../lib/nav.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 
 // The shared presentation for both neighbour cards — "Pitches like"
@@ -144,13 +143,21 @@ export function SimilarPlayerGrid({ rows, measure, excludes }) {
 // interactive card: its hover tint and focus ring; #1113, slice C2), and a
 // real anchor, so a middle-click or "open in new tab" works (useRouteLink). It
 // was a PlayerLink button, and it keeps the desktop hover card that gave it.
+// Its path and hover card come from PlayerLink's own hook. With no personId
+// there is no page to open, so the tile is a plain Card, as PlayerLink falls
+// back to plain text.
 function SimilarTile({ p, children }) {
   const linkProps = useRouteLink()
-  const { asOf, sportId } = useLinkScope()
-  const hoverCard = usePlayerHoverCard(p.personId, p.name)
-  const path = playerPath(p.personId, { name: p.name, d: asOf, s: sportId })
+  const { path, hoverProps } = usePlayerLink(p.personId, p.name)
+  if (!path) {
+    return (
+      <Card as="div" body="flush" className="simlike__link">
+        {children}
+      </Card>
+    )
+  }
   return (
-    <Card as="a" body="flush" className="simlike__link" {...linkProps(path)} {...hoverCard}>
+    <Card as="a" body="flush" className="simlike__link" {...linkProps(path)} {...hoverProps}>
       {children}
     </Card>
   )

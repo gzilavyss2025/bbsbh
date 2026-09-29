@@ -4,7 +4,7 @@ import { scorebookDate } from '../../../lib/dates.js'
 import { ManagerLink } from '../../team/ManagerLink.jsx'
 import { UmpireLink } from '../../umpire/UmpireLink.jsx'
 import { SectionHead } from '../../ui/frame/SectionHead.jsx'
-import { Card } from '../../ui/frame/Card.jsx'
+import { FactGrid } from '../../ui/frame/FactGrid.jsx'
 
 // The fill-in half of focus mode's EXTRAS tab (ReferencePanel.jsx): the
 // scorecard-header facts a hand-scorer writes down once and then looks up
@@ -38,19 +38,17 @@ export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }
             ABBREVIATION: this grid is two cells wide in a ~300px rail, and a
             label reading "DIAMONDBACKS MANAGER" wraps to three lines where
             "AZ MANAGER" fits on one. */}
-        <Card as="div" body="flush" className="factgrid refextras__grid">
-          <dl className="factgrid__grid">
-            {['away', 'home'].map((side) => (
-              <Fragment key={side}>
-                <Fact
-                  label={`${clubTag(meta, side)} manager`}
-                  value={managerFact(managers?.[side])}
-                />
-                <Fact label={`${clubTag(meta, side)} uniform`} value={uniforms?.[side]} />
-              </Fragment>
-            ))}
-          </dl>
-        </Card>
+        <FactGrid className="refextras__grid">
+          {['away', 'home'].map((side) => (
+            <Fragment key={side}>
+              <Fact
+                label={`${clubTag(meta, side)} manager`}
+                value={managerFact(managers?.[side])}
+              />
+              <Fact label={`${clubTag(meta, side)} uniform`} value={uniforms?.[side]} />
+            </Fragment>
+          ))}
+        </FactGrid>
       </section>
 
       {/* The crew, in the lineup page's own markup and roles order (HP first,
@@ -80,24 +78,22 @@ export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }
 
       <section className="refextras">
         <SectionHead look="label">Game</SectionHead>
-        <Card as="div" body="flush" className="factgrid refextras__grid">
-          <dl className="factgrid__grid">
-            <Fact label="Date" value={scorebookDate(info.officialDate)} />
-            {/* The feed appends a period to the venue name ("Busch Stadium.") —
-                drop it, same as the box score does. */}
-            <Fact label="Ballpark" value={info.venue.replace(/\.\s*$/, '')} />
-            {/* The scheduled start until the box score's own "First pitch" info
-                line posts once the game is under way, at which point the actual
-                time overwrites the estimate in the same cell. */}
-            <Fact label="First pitch" value={info.firstPitch || info.scheduledTime} />
-            {/* Outdoor scorebook weather from the park's lat/lon (see
-                scripts/gen-weather + weather.js) — the value worth copying onto
-                paper. Falls back to the feed's own reading, which for a closed
-                roof is the interior one, when the generator has nothing (a MiLB
-                park with no coordinates). */}
-            <Fact label="Weather" value={scorebookWeather?.text || info.weather} />
-          </dl>
-        </Card>
+        <FactGrid className="refextras__grid">
+          <Fact label="Date" value={scorebookDate(info.officialDate)} />
+          {/* The feed appends a period to the venue name ("Busch Stadium.") —
+              drop it, same as the box score does. */}
+          <Fact label="Ballpark" value={info.venue.replace(/\.\s*$/, '')} />
+          {/* The scheduled start until the box score's own "First pitch" info
+              line posts once the game is under way, at which point the actual
+              time overwrites the estimate in the same cell. */}
+          <Fact label="First pitch" value={info.firstPitch || info.scheduledTime} />
+          {/* Outdoor scorebook weather from the park's lat/lon (see
+              scripts/gen-weather + weather.js) — the value worth copying onto
+              paper. Falls back to the feed's own reading, which for a closed
+              roof is the interior one, when the generator has nothing (a MiLB
+              park with no coordinates). */}
+          <Fact label="Weather" value={scorebookWeather?.text || info.weather} />
+        </FactGrid>
       </section>
     </>
   )

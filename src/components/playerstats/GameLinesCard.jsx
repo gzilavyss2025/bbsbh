@@ -195,7 +195,7 @@ export function GameLinesCard({ personId, playerSurname, group, asOf }) {
           );
           return (
             <div className="gamelines__section" key={section.key}>
-              <Card as="div" body="flush">
+              <Card as="div" frame="ledger" body="flush">
                 <ul className="gamelines__rows">
                   <li className="gamelines__head">
                     <h4 className="gamelines__heading">{section.title}</h4>

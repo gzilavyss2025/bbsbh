@@ -7,6 +7,7 @@
 # LANDED in slice C0 (#1113): .thub-card is the Card component now (components/ui/frame/Card.jsx, styles/system/card.css), so its row left this file. Its sixteen modules render <Card>; the co-class .chalcard is <Card className="chal">.
 # LANDED in slice C1 (#1222): .tlead__cat, .tledg__block, .jerseydeck__card, .team-score, .txstory, .tstats-card (renamed .tstats), .roster-super, .thub-affiliate, .horizontile, .hzntile, .alum__card, .ctr__tile, .ctr__card are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. .horizontile__statbox and .hzntile__tile stay — the wells inside these tiles are unchanged (Q4, later).
 # LANDED in slice C2 (#1113): .player__statgrid, .player__splits, .factgrid, .vsteam__last, .gamelog, .milestonewatch, .cthist__seasons, .posinn__diamond, .levelprog, .prospectcard, .simlike__link, .awards, .awardblk, .hitchart, .bflight, .spray, .gamelines__rows are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. The three gap-rule grids keep their --border-rule ground on the grid inside the Card (.factgrid__grid, .player__statgrid, .player__splits). .cthist__toggle is a block Door. .prospectcard kept its name: .prospect is already the ProspectPill's namespace (.prospect__tag), so the rename is not a clean two-step.
+# REMOVED 2026-09-29: .logbook__seasons button and .bookmgmt__modes button went STALE. Their rules left the CSS (the logbook season buttons moved onto the one Button, ea7d0aed1; .bookmgmt__modes was dead code), so their rows left this file.
 .wordmarklab__colorlock	lab	sheet				C8	wordmark lab (/wordmark-lab), a dev page: the colour-lock panel
 .wordmarklab__option	lab	sheet	none	padded	C8	wordmark lab option tile; an <article> with its own hover — a lab specimen
 .wordmarklab__context	lab	sheet	none	flush	C8	wordmark lab context frame on page ground; holds a live mock of the slate
@@ -131,6 +132,8 @@
 .psseries__lrows	well					inset rows inside the series leaderboard
 .psseries__rostercard	card	sheet	none	padded	C6a	series roster card
 .psseries__rosterlist	well					inset list inside the series roster card
+.psseries__todaycard	card	sheet	outside:label	padded	C6a	today's game on the live series page (LiveSeriesPage.jsx, /postseason/{seriesId}?d=): a card of its own under a label head, not a panel inside a card. Named, never scored. Radius-lg; the target frame is sheet
+.psseries__upcominglist	card	sheet	outside:label	flush	C6a	the games still to play on the live series page (LiveSeriesPage.jsx): a card of its own under a label head, not a panel inside a card. The <ul> keeps its row rules. Radius-lg; the target frame is sheet
 .psleaders__teamboard	card	sheet	label	padded	C6a	postseason leaders team board
 .allstarrosters__year	card	sheet	none	padded	C6a	All-Star rosters year block (a section with controls). Plain → sheet
 .allstarrosters__rows	card	sheet	none	flush	C6a	All-Star roster rows <ul>. Plain → sheet
@@ -166,7 +169,6 @@
 .animlab__framebox	lab					animation lab frame box
 .teamtabs__btn	control					the hub tab/jump bar button — Button family (#1130 tab slice, pill map note)
 .tradecard	card	sheet	none	padded	C6b	trade card (TradeCard.jsx; trade-deadline page). Inventory group A. Rename .trade
-.logbook__seasons button	control					logbook season <button> — StampCollection.jsx is a STAMP_ALLOWLIST file: a control there moves with the Button family, not here
 .stampcard	hold					HOLD (ADR-0035): a stamp is a final score; the class sits on StampCollection.jsx (STAMP_ALLOWLIST). check-stamp-surfaces tracks JS identifiers, not this class, so a move would pass lint in silence
 .stampstrip	hold					HOLD (ADR-0035): the Game Log mint strip across the head of the revealed box score (StampGameButton.jsx, STAMP_ALLOWLIST)
 .logbookstats__splits div	card	ledger	none	padded	C7	a split tile on /logbook/stats. Stamp-ADJACENT: the page summarises the user's stamped games; it renders no stamp art and is not on STAMP_ALLOWLIST. Verify that before the slice
@@ -189,7 +191,6 @@
 .mergereceipt	notice					the merge receipt aside on inset ground (MergeReceipt.jsx) — a Notice (#1132)
 .introsheet__reaction	well					an inset reaction box inside the intro sheet (a modal)
 .bookmgmt	panel					the body box inside BookManagementSheet (a sheet) — a panel in a modal
-.bookmgmt__modes button	delete					DEAD: no file under src/ outside styles names bookmgmt__modes (git log -S: last touched in #632)
 .bookmgmt__field input	field					book-management <input>
 .bookmgmt__confirm	well					the confirm box inside BookManagementSheet
 .moredir__card	card	ledger	label	padded	C6b	a directory section card on /more (MorePage.jsx)

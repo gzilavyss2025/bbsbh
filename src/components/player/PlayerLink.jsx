@@ -1,6 +1,62 @@
+import { useRef } from 'react'
 import { useNav, useLinkScope, nameFromChildren } from '../../lib/nav.js'
 import { playerPath } from '../../lib/route.js'
-import { usePlayerHoverCard } from '../../lib/playerHoverStore.js'
+import { useMediaQuery, HOVER_CARD_QUERY } from '../../hooks/useMediaQuery.js'
+import { scheduleHoverShow, scheduleHoverHide } from '../../lib/playerHoverStore.js'
+
+// A trigger's own box, or — when that box has collapsed to nothing — the box
+// of what it actually renders. `.wire__cutline .plink` and
+// `.txstory__cutline .plink` both go `display: contents` so a player's name
+// wraps mid-sentence with the prose around it (04-site-bar.css,
+// 29-team-transactions.css), predating this card; a `display: contents`
+// element generates no box of its own, so its own getBoundingClientRect() is
+// always all-zero even while it's on screen and hovered. Its rendered
+// content still has a box, reached here through a Range over its children.
+function triggerRect(el) {
+  const own = el.getBoundingClientRect()
+  if (own.width || own.height) return own
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  return range.getBoundingClientRect()
+}
+
+// A player link's two parts, for PlayerLink's button below and for a trigger
+// that is not one: a whole-tile Card link (SimilarPlayerGrid, #1113 slice C2).
+// Both build the player's URL here, so the two never drift apart.
+//   path        the player's page in the link scope it sits in, or null when
+//               there is no id: a row without one is a name, not a link.
+//   hoverProps  a ref to measure and the four handlers that arm the desktop
+//               hover card (lib/playerHoverStore.js). Spread them on the
+//               trigger. They subscribe to nothing, so a trigger never
+//               re-renders on a hover.
+export function usePlayerLink(id, displayName) {
+  const { asOf, sportId } = useLinkScope()
+  const ref = useRef(null)
+  // Desktop-only (see HOVER_CARD_QUERY's own header): a real mouse, at the
+  // app's own "wide" width. Read once per render rather than gating inside
+  // the handlers below — the handlers still no-op on a stale `true` from the
+  // instant before a resize, since the global card requires an active id it
+  // never receives from a query that's already false by then.
+  const hoverCapable = useMediaQuery(HOVER_CARD_QUERY)
+  const show = (opts) => {
+    if (!hoverCapable || !ref.current) return
+    scheduleHoverShow(id, displayName, triggerRect(ref.current), opts)
+  }
+  const hide = () => {
+    if (!hoverCapable) return
+    scheduleHoverHide(id)
+  }
+  return {
+    path: id ? playerPath(id, { name: displayName, d: asOf, s: sportId }) : null,
+    hoverProps: {
+      ref,
+      onMouseEnter: () => show(),
+      onMouseLeave: hide,
+      onFocus: () => show({ immediate: true }),
+      onBlur: hide,
+    },
+  }
+}
 
 // Wraps a player's name (already rendered as children) in a plain, no-underline
 // button that navigates to their page. SPOILER-SAFE for the reason that
@@ -30,10 +86,9 @@ import { usePlayerHoverCard } from '../../lib/playerHoverStore.js'
 // explicitly; without it the link still works, just at the bare-id address.
 export function PlayerLink({ id, name, className = '', ariaLabel, children }) {
   const navigate = useNav()
-  const { asOf, sportId } = useLinkScope()
   const displayName = name ?? nameFromChildren(children)
-  const hoverCard = usePlayerHoverCard(id, displayName)
-  if (!id) {
+  const { path, hoverProps } = usePlayerLink(id, displayName)
+  if (!path) {
     return <span className={className}>{children}</span>
   }
   return (
@@ -41,8 +96,8 @@ export function PlayerLink({ id, name, className = '', ariaLabel, children }) {
       type="button"
       className={`plink ${className}`}
       aria-label={ariaLabel}
-      onClick={() => navigate(playerPath(id, { name: displayName, d: asOf, s: sportId }))}
-      {...hoverCard}
+      onClick={() => navigate(path)}
+      {...hoverProps}
     >
       {children}
     </button>

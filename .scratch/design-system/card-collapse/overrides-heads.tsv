@@ -80,3 +80,4 @@
 .researchdiary__eyebrow	note	kicker	H3	ledger: → .researchdiary__note (research page)
 .researchdiary__title	lab	title	-	research diary title
 .sc-footer__title	bespoke	plain	-	the #22 scorecard footer — the scorecard is bespoke (inventory #1)
+.pbkt-ticket__head	bespoke	plain	-	the series line at the top of a bracket ticket (BracketFold.jsx), part of the ticket graphic like .last10__card, not a section head

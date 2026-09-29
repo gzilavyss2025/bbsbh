@@ -94,10 +94,16 @@ step 4.
 
    - *Disposable — say so and offer to remove, he has approved this before:*
      untracked files in a **merged** worktree that are only proof shots (before
-     and after PNGs under `.scratch/**/before|after|crops/`) or working notes in
-     a `.scratch/<slug>/` folder named for that worktree's own task. The work
-     they proved is in `main`. Also PR-body drafts (`PR_BODY.md`,
-     `COMMENT_<n>.md`) once the PR is merged or closed.
+     and after PNGs under `.scratch/**/before|after|crops/`). The work they
+     proved is in `main`. Also PR-body drafts (`PR_BODY.md`, `COMMENT_<n>.md`)
+     once the PR is merged or closed.
+   - *Keep — never offer to delete:* untracked working notes, data or scripts
+     (`.md`, `.json`, `.mjs`) in a `.scratch/<slug>/` folder, merged worktree or
+     not. `.scratch` is load-bearing: code comments cite its notes and
+     `scripts/research-db.mjs` reads its JSON, and an untracked note exists
+     nowhere else. Report them by path and offer to commit them on a branch
+     (a PR, like any change to `.scratch`). The worktree stays until they are
+     committed or he says in so many words to drop them.
    - *Disposable when the whole program is closed:* scratch, PR drafts and
      captured test data in worktrees of a program he closed as not planned. The
      local-only commits go too. Check `git branch -r --contains HEAD` and say
@@ -113,9 +119,10 @@ step 4.
      committing it as-is would bake that in. Say so, and give the regenerate
      command from its header.
 
-   Always group the answer by these kinds, with counts. Removing a worktree with
-   only disposable files needs `git worktree remove --force`, and only after his
-   yes: `.scratch` files are load-bearing on other branches, so never call
+   Always group the answer by these kinds, with counts. Only a worktree whose
+   every leftover file is *disposable* can go, with `git worktree remove
+   --force`, and only after his yes. `--force` deletes untracked files for good,
+   so a worktree that still holds a *keep* file is never forced. Never call
    `.scratch` itself junk.
 5. **Dead branches.** Worktree removal only deletes the branches that still had
    a worktree. Branches outlive their worktrees, and nothing else in the normal
