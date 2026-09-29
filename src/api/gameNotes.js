@@ -51,6 +51,26 @@ function loadArchive(teamId) {
   return archiveCache.get(teamId)
 }
 
+// One club's whole archive shard for the /game-notes page, or a THROWN error.
+// The button's loader above swallows a failure into `[]` and caches it, which is
+// right for one button and wrong here: a shard that quietly came back empty would
+// make "All clubs" and the CSV look complete while missing a club. So this one
+// throws, and caches only a shard that arrived — a retry asks again.
+const shardCache = new Map()
+export function fetchArchiveShard(teamId) {
+  if (!shardCache.has(teamId)) {
+    const load = fetch(`/data/game-notes/${teamId}.json`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`Game Notes shard ${teamId}: HTTP ${r.status}`)
+        return r.json()
+      })
+      .then((d) => ({ teamId, notes: Array.isArray(d.notes) ? d.notes : [] }))
+    shardCache.set(teamId, load)
+    load.catch(() => shardCache.delete(teamId))
+  }
+  return shardCache.get(teamId)
+}
+
 // The note's true game date is its publish time in America/New_York — NOT the
 // raw UTC date. Notes post on the afternoon/evening of the game they cover, and
 // an evening-ET post is already the NEXT calendar day in UTC (a July 9 note

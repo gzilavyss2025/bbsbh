@@ -11,6 +11,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  gameNotesPath,
   parseRoute,
   slugify,
   idFromSlug,
@@ -1142,4 +1143,22 @@ test('gameSeriesHref: the live page heading into the game date, even for a decid
   assert.equal(gameSeriesHref({ id: null }, '2026-09-29'), null)
   assert.equal(gameSeriesHref(null, '2026-09-29'), null)
   assert.equal(gameSeriesHref({ id: '2026-wildcard-111-147' }, ''), null)
+})
+
+// The Game Notes archive (#1258): one page, every club's notes PDFs. `?team=` is
+// the team hub's door onto one club's list; anything else opens on the reader's
+// own default, so a bad value must degrade, never error.
+test('/game-notes parses, with the club from ?team= when it is a whole number', () => {
+  assert.deepEqual(parseRoute('/game-notes'), { name: 'game-notes', teamId: null })
+  assert.deepEqual(parseRoute('/game-notes?team=158'), { name: 'game-notes', teamId: 158 })
+  for (const bad of ['?team=', '?team=abc', '?team=1.5', '?team=-3', '?team=0']) {
+    assert.equal(parseRoute(`/game-notes${bad}`).teamId, null, bad)
+  }
+})
+
+test('gameNotesPath: the bare page, or one club through ?team=', () => {
+  assert.equal(gameNotesPath(), '/game-notes')
+  assert.equal(gameNotesPath(null), '/game-notes')
+  assert.equal(gameNotesPath(158), '/game-notes?team=158')
+  assert.deepEqual(parseRoute(gameNotesPath(158)), { name: 'game-notes', teamId: 158 })
 })

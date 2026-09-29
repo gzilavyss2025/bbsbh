@@ -776,7 +776,12 @@ const BUDGETS = {
   // the ratchet it copies, for the reason that entry gives: `npm run lint` runs
   // this directory as a flat chain of guards. Its pure half is exported from the
   // same file for test/raw-values.test.js, because scripts/lib/ is at its budget.
-  scripts: 121,
+  // +1 for download-game-notes.mjs, the hand-run CLI that saves every archived
+  // Game Notes PDF to a gitignored folder (#1258). Not a generator and on no
+  // cron, but a CLI with a dispatch at the bottom RUNS on import, so it cannot go
+  // in scripts/lib/, and every other top-level script sits flat here. Its pure
+  // half went to scripts/lib/game-notes-download.mjs (next entry).
+  scripts: 122,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -968,7 +973,11 @@ const BUDGETS = {
   // a winter stint never makes two players teammates, that org ties stay off
   // for a winter club, and the per-shard row cap that holds the 40 KB
   // hot-path ceiling. test/former-teammates.test.js pins all four.
-  'scripts/lib': 39,
+  // +1 for game-notes-download.mjs, the pure half of download-game-notes.mjs
+  // (#1258): where a PDF lands and the skip-what-you-have loop, with the fetch
+  // injected so test/game-notes-download.test.js pins "a second run downloads
+  // nothing" offline. The same testable-helper reason as its neighbours above.
+  'scripts/lib': 40,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

@@ -1,0 +1,56 @@
+/* ============================================================
+   GAME NOTES ARCHIVE — the table at /game-notes (#1258).
+
+   A thin four-column table: date, club, title, and the PDF link. The
+   shared .standings table sets every cell to nowrap and pins its first
+   column, which on a phone pushes the PDF link off the right edge — the
+   one thing a row is for. Here the club and title cells WRAP, and only
+   the date and the link hold one line, so all four columns fit a 390px
+   screen with no sideways scroll.
+   ============================================================ */
+.gnotes {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+.gnotes th,
+.gnotes td {
+  padding: var(--space-1h) var(--space-2);
+  text-align: left;
+  vertical-align: top;
+}
+.gnotes tbody td {
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.gnotes thead th {
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+/* Date and link stay on one line; club and title are free to wrap. */
+.gnotes__date,
+.gnotes__pdf {
+  white-space: nowrap;
+}
+.gnotes__date {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.gnotes__club {
+  color: var(--text-heading);
+  font-weight: var(--w-semibold);
+}
+.gnotes__pdf a {
+  color: var(--accent-link);
+  font-weight: var(--w-semibold);
+}

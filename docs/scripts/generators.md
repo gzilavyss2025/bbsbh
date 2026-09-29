@@ -1378,6 +1378,18 @@ Re-run only to fold in a new season.
   --date/--limit/--concurrency` scope the sweep. Writes `.scratch/callout-audit/`
   (gitignored), never `public/data/`. Read alongside `docs/callouts.md`.
 
+- `download-game-notes.mjs` — NOT a generator and NOT on a cron: run by hand to
+  keep a local copy of every archived Game Notes PDF (#1258). Reads
+  `public/data/game-notes/{teamId}.json` (what `gen-game-notes.mjs` appends) and
+  saves each PDF to `game-notes-archive/{teamId}/{date}_{id}.pdf` (gitignored),
+  skipping any file already there, so a second run fetches only what the nightly
+  archive added. `--team {id}` limits a run to one club, `--dir` moves the folder.
+  A first full run is about 2 GB (170 PDFs for one club measured 74 MB). A file
+  appears only after the whole body arrives and starts `%PDF`, so a killed run
+  leaves nothing a re-run would trust; exit 1 lists any failures. The loop and
+  the naming are in `scripts/lib/game-notes-download.mjs`
+  (`test/game-notes-download.test.js`).
+
 - `scan-game-notes-insights.mjs` — NOT a generator and NOT on a cron: the
   MANUALLY-TRIGGERED Game Notes curation scan (issue #774), with a reading job
   in the middle that only an agent can do. `extract <teamId|all> [--days=N]`
