@@ -1155,6 +1155,29 @@ don't run these by hand.
 
 Re-run only to fold in a new season.
 
+- `gen-prospect-rank-history.mjs` → `public/data/prospect-rank-history.json`
+  — every year a man sat on a top-prospect list, 2005–2024 (1,823 rows, 982
+  players). Input is the finished research pull in
+  `.scratch/top-prospects-history/` (`rows.json` + `seasons.json`), read in
+  place: that folder is also read by `scripts/research-db.mjs` and two docs, so
+  it does not move. Pure half: `scripts/lib/prospect-rank-history.mjs`. Reader:
+  `src/api/player/prospectRankHistory.js`. Four rules.
+  **No clock:** the file has no `generatedAt` or `fetchedAt`, so a re-run writes
+  the same bytes (`--out <path>` writes elsewhere; the test uses it to prove it).
+  **Every row keeps its source:** `[season, rank, source]`. Baseball America
+  (2005–2008, a third-party transcription with no declared licence, ids joined
+  through the Chadwick Bureau register, ODC-BY 1.0) and MLB Pipeline (2009–2024)
+  never blur into one list, and a `sources` table carries each one's label and
+  credit lines. **One switch drops 2005–2008:** delete `'baseball-america'` from
+  `INCLUDE_SOURCES` in the generator and re-run. Its rows, seasons, depths and
+  credits (Chadwick's too) leave the file, and the page needs no change because
+  it names no source. **`depths`** records how many players each season's list
+  ranked (50 for 2009–2011, 99 for 2020–2021, 100 otherwise), because a missing
+  year only means "not on that list". Not shipped: `ba-non-debuts.json`. Its
+  players never debuted, so they have no MLBAM id and cannot join a page. Not on
+  any cron: the years do not change, and `top-prospects.json` already carries
+  the current season. **Follow-up:** the pull stops at 2024; pulling 2025 means
+  running `pull.mjs` for that season, then this script.
 - `gen-level-tenure-benchmark.mjs` → `public/data/level-tenure-benchmark.json`
   — for each full-season MiLB level, how much playing time (PA for hitters,
   outs for pitchers) a typical prospect accumulates there before promotion.

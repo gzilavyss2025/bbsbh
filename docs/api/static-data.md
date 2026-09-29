@@ -889,6 +889,18 @@ for each generator; the reader modules:
   committed only when Cot's states a dollar, so an out-year written as a CODE
   (`A1`..`A4`, `OPT`, `FA`) is a status and adds nothing to a total — which is
   what makes a club's later columns fall away.
+- `player/prospectRankHistory.js` — a player's prospect ranking history, from
+  `public/data/prospect-rank-history.json` (`gen-prospect-rank-history.mjs`, hand-run,
+  #1111). The player page's Prospect rankings card reads it through
+  `staticJson`, only on the History tab (a debuted player) or the Overview (a
+  player who has not debuted), never on the slate. `prospectRankView` is the pure
+  part: one row per ranked year in season order, the debut placed where it
+  happened, today's rank last (it arrives from `top-prospects.json`, not from
+  this file), and the credit lines for the sources on screen. It names no source
+  and no year itself, so dropping Baseball America needs no code change. It
+  returns null for a player with no row, and says "no data" (not "dropped") for
+  a season the history has not reached. See the generator entry for the file
+  shape and the licence notes.
 - `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
   `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Contrast
   `feverRadar.js` above: not a third party, not attributed, and not an MLE —

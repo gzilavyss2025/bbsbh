@@ -781,7 +781,11 @@ const BUDGETS = {
   // cron, but a CLI with a dispatch at the bottom RUNS on import, so it cannot go
   // in scripts/lib/, and every other top-level script sits flat here. Its pure
   // half went to scripts/lib/game-notes-download.mjs (next entry).
-  scripts: 122,
+  // +1 for gen-prospect-rank-history.mjs, the hand-run generator behind the
+  // player page's Prospect rankings card (#1111). A generator RUNS on import, so
+  // scripts/lib/ cannot hold it, and every other gen-*.mjs sits flat here. Its
+  // pure half went to scripts/lib/prospect-rank-history.mjs (see that entry).
+  scripts: 123,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -977,7 +981,11 @@ const BUDGETS = {
   // (#1258): where a PDF lands and the skip-what-you-have loop, with the fetch
   // injected so test/game-notes-download.test.js pins "a second run downloads
   // nothing" offline. The same testable-helper reason as its neighbours above.
-  'scripts/lib': 40,
+  // +1 for prospect-rank-history.mjs, the pure half of gen-prospect-rank-history.mjs
+  // (#1111): the row shape, the per-source credit table, and the one switch that
+  // drops Baseball America's four seasons together with their credit lines. The
+  // same testable-helper reason as its neighbours above.
+  'scripts/lib': 41,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

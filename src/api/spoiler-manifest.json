@@ -749,6 +749,10 @@
       "class": "spoiler-free",
       "why": "The player hub's Overview tab loader — the fact grid, the contract card, the season tiles with their rank chips and promoted other-level rows, Milestone Watch, and four preview doors into the other tabs (a trimmed game log, a Statcast/prospect teaser, an awards-chip strip). Season aggregates and a cutoff-filtered game log, over completed games."
     },
+    "player/prospectRankHistory.js": {
+      "class": "spoiler-free",
+      "why": "The player page's Prospect rankings card: the years a man sat on a top-prospect list, from a frozen 2005-2024 file. A scout's ranking of a player, not a fact about a game, so it opens live (ADR-0034). It names no source and no year itself; labels, credits and coverage all come from the file."
+    },
     "player/stats.js": {
       "class": "spoiler-free",
       "why": "The player hub's Stats tab loader — the game log, the splits and the career register. A game-log row carries this player's own line and a link to that game's (sealed) box score, never the game's score; the register is a career aggregate. Its one score-adjacent element is SplitsVsTeam's last-meeting line, gated against the page's own asOf in the component."
