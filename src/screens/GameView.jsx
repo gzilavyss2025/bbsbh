@@ -3,7 +3,7 @@ import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
 import { useKeepAwakePreference } from '../hooks/preferences/useKeepAwakePreference.js'
-import { sectionToStep, stepToSection } from '../lib/route.js'
+import { gameSeriesHref, sectionToStep, stepToSection } from '../lib/route.js'
 import { selectGameStatus } from '../api/select.js'
 import { filmCanExist } from '../api/expresslane/eligibility.js'
 import { catchUpPlan, catchUpRevealTo } from '../hooks/useRevealProgress.js'
@@ -13,9 +13,12 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
 import { LinkScope } from '../lib/nav.jsx'
+import { useRouteLink } from '../lib/nav.js'
 import { humanDateWithYear } from '../lib/dates.js'
 import { seriesMarkForFeed } from '../lib/postseason/seriesMarks.js'
 import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
+import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
+import { seriesForGame } from '../api/postseason/bracket.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { useCopy } from '../copy/copyContext.js'
 import { formatResetTime } from '../lib/scoresUnlocked.js'
@@ -157,6 +160,15 @@ export function GameView({ game, section, onSection }) {
 
   const sketchTeam = sketching ? game[sketching] : null
   const seriesMark = seriesMarkForFeed(feed)
+  // The band taps through to its series' live page, heading into this game's
+  // own date (gameSeriesHref). The id comes from the bracket, the one place
+  // that knows Game 1's clubs, and the bracket is read only for a postseason
+  // game. It is cutoff-gated (api/spoiler-manifest.json): results strictly
+  // BEFORE this game's date, so nothing here knows how this game went. Until
+  // it loads, or if it fails, the band is a plain band.
+  const { bracket: seriesBracket } = usePostseasonBracket(seriesMark ? officialDate : null)
+  const seriesPage = gameSeriesHref(seriesForGame(seriesBracket, feed?.gamePk)?.series, officialDate)
+  const routeLink = useRouteLink()
 
   // CATCH UP TO LIVE (ADR-0055) — the extra button on the home lineup page for
   // a reader who opened a game already in progress. `catchUpPlan` decides
@@ -276,11 +288,16 @@ export function GameView({ game, section, onSection }) {
           before a name is read. Not on the innings view, where a phone's
           height belongs to the half being scored. A round name, never a
           score; null for a regular-season game or a season with no art. */}
-      {seriesMark && (step === 0 || step === 1 || step === 3) && (
-        <div className="gameseries">
-          <SeriesMark mark={seriesMark} height={40} />
-        </div>
-      )}
+      {seriesMark && (step === 0 || step === 1 || step === 3) &&
+        (seriesPage ? (
+          <a className="gameseries gameseries--link" aria-label={`${seriesMark.alt}: open the series page`} {...routeLink(seriesPage)}>
+            <SeriesMark mark={seriesMark} height={40} decorative />
+          </a>
+        ) : (
+          <div className="gameseries">
+            <SeriesMark mark={seriesMark} height={40} />
+          </div>
+        ))}
 
       {/* The spoilers-off strip, on EVERY section of the game (both lineups,
           innings, box score) — not just the innings view, so you can never be
