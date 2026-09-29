@@ -1,14 +1,15 @@
 import '../../styles/35-postseason-series.css'
 import { usePostseasonBracket } from '../../hooks/postseason/usePostseasonBracket.js'
-import { recordLine } from '../../api/postseason/text.js'
+import { bestOfLine, cardLines, recordLine } from '../../api/postseason/text.js'
 import { fetchSeriesRoster, rosterReadDate } from '../../api/postseason/roster.js'
 import { loadSeriesStats, BATTING_CATEGORIES, SERIES_PITCHING_CATEGORIES } from '../../api/postseasonSeries.js'
-import { fetchGameCardsByPk } from '../../api/schedule.js'
+import { fetchGameCardsByPk, fetchSchedule } from '../../api/schedule.js'
 import { computePlayOfTheGame } from '../../api/boxscore.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { usePastGameSignals } from '../../hooks/usePastGameSignals.js'
 import { gamePath } from '../../lib/route.js'
+import { useNav } from '../../lib/nav.js'
 import { toApiDate } from '../../lib/dates.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { TeamLink } from '../../components/team/TeamLink.jsx'
@@ -17,6 +18,7 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { GameResultFace } from '../../components/game/GameResultFace.jsx'
+import { GameCard } from '../../components/game/GameCard.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { seriesGameBuckets, upcomingGameLabel } from './selectors.js'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../../components/postseason/SeriesParts.jsx'
@@ -104,6 +106,19 @@ export function LiveSeriesPage({ seriesId, asOf }) {
     [rosterDate, rosterClubIds.join(',')],
   )
 
+  // Today's game as the home slate draws it. The slate fetch's field list has
+  // no score in it, and the card is handed no `liveLine`, so nothing here can
+  // spoil the game; a failed read only drops the card.
+  const navigate = useNav()
+  const todayPk = series?.cutoffGame?.gamePk ?? null
+  const { data: todayGame } = useAsync(
+    () =>
+      todayPk
+        ? fetchSchedule(cutoffInput).then((rows) => rows.find((g) => g.gamePk === todayPk) ?? null)
+        : Promise.resolve(null),
+    [todayPk, cutoffInput],
+  )
+
   const getSignals = usePastGameSignals()
   const games = series?.games ?? []
   const gamePks = games.map((g) => g.gamePk).join(',')
@@ -164,7 +179,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
           applies only once the series actually is decided. */}
       <section className="psseries__result">
         <div className="psseries__banner">
-          <h2 className="psseries__headline">{recordLine(series)}</h2>
+          <h2 className="psseries__headline">{results.length === 0 ? bestOfLine(series) : recordLine(series)}</h2>
           <SeriesMark
             mark={seriesMark({ season: bracket.season, round: series.round, league: series.league })}
             height={40}
@@ -203,23 +218,27 @@ export function LiveSeriesPage({ seriesId, asOf }) {
         </div>
       </section>
 
-      {/* Today's game — named, never scored. No feed or box-score fetch ever
-          runs for this gamePk on this page (root CLAUDE.md's spoiler rule). */}
-      {today && (
+      {/* Today's game — the home slate's own card, never scored. It is handed
+          no score line, and no feed or box-score fetch ever runs for this
+          gamePk on this page (root CLAUDE.md's spoiler rule). */}
+      {today && todayGame && (
         <section className="psseries__today">
           <SectionHead look="label">Today</SectionHead>
-          <div className="psseries__todaycard">
-            <span className="psseries__todaygame">Game {today.gameNumber}</span>
-            <div className="psseries__todayteams">
-              {clubs.map((club) => (
-                <span key={club.id} className="psseries__todayteam">
-                  <TeamLogo teamId={club.id} name={teamClubNameShort(club.id)} size={24} />
-                  {club.abbreviation}
-                </span>
-              ))}
-            </div>
-            <p className="hint">No score here until this game is scored on its own page.</p>
-          </div>
+          <GameCard
+            game={todayGame}
+            postseasonLine={cardLines(todayGame, bracket)}
+            onSelect={() =>
+              navigate(
+                gamePath(
+                  todayGame.officialDate,
+                  todayGame.away.abbreviation,
+                  todayGame.home.abbreviation,
+                  'lineup1',
+                  todayGame.gameNumber,
+                ),
+              )
+            }
+          />
         </section>
       )}
 

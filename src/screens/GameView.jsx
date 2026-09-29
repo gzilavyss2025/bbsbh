@@ -19,6 +19,7 @@ import { seriesMarkForFeed } from '../lib/postseason/seriesMarks.js'
 import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
 import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
 import { seriesForGame } from '../api/postseason/bracket.js'
+import { gameStatusLine } from '../api/postseason/text.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { useCopy } from '../copy/copyContext.js'
 import { formatResetTime } from '../lib/scoresUnlocked.js'
@@ -167,7 +168,10 @@ export function GameView({ game, section, onSection }) {
   // BEFORE this game's date, so nothing here knows how this game went. Until
   // it loads, or if it fails, the band is a plain band.
   const { bracket: seriesBracket } = usePostseasonBracket(seriesMark ? officialDate : null)
-  const seriesPage = gameSeriesHref(seriesForGame(seriesBracket, feed?.gamePk)?.series, officialDate)
+  const seriesHit = seriesForGame(seriesBracket, feed?.gamePk)
+  const seriesPage = gameSeriesHref(seriesHit?.series, officialDate)
+  // "Game 2 · Braves Lead 1–0", beside the mark. Empty until the bracket loads.
+  const seriesStatus = gameStatusLine(seriesHit?.series, seriesHit?.gameNumber)
   const routeLink = useRouteLink()
 
   // CATCH UP TO LIVE (ADR-0055) — the extra button on the home lineup page for
@@ -292,10 +296,12 @@ export function GameView({ game, section, onSection }) {
         (seriesPage ? (
           <a className="gameseries gameseries--link" aria-label={`${seriesMark.alt}: open the series page`} {...routeLink(seriesPage)}>
             <SeriesMark mark={seriesMark} height={40} decorative />
+            {seriesStatus && <span className="gameseries__status">{seriesStatus}</span>}
           </a>
         ) : (
           <div className="gameseries">
             <SeriesMark mark={seriesMark} height={40} />
+            {seriesStatus && <span className="gameseries__status">{seriesStatus}</span>}
           </div>
         ))}
 
