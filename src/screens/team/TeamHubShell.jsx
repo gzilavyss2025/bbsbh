@@ -5,11 +5,11 @@ import { ordinal } from '../../api/person.js'
 import { SPORT_LABEL, treatmentTile, defaultHomeTreatmentFor } from '../../lib/teams.js'
 import { milbTreatmentTile } from '../../lib/milbColors.js'
 import { readableTextColor } from '../../lib/contrast.js'
-import { teamPath } from '../../lib/route.js'
+import { gameNotesPath, teamPath } from '../../lib/route.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { LinkScope } from '../../lib/nav.jsx'
-import { useNav } from '../../lib/nav.js'
+import { useNav, useRouteLink } from '../../lib/nav.js'
 import { identityVersion } from '../../lib/identity/overlay.js'
 import { headerThemeFor, headerThemeClass, headerThemeStyle, themeKeyFor } from '../../lib/headerTheme.js'
 import { humanDate } from '../../lib/dates.js'
@@ -64,20 +64,34 @@ const TAB_TITLE = {
 // as the lineup page's Game Notes button. No gameDate, so resolveGameNotes falls
 // through to the newest note on file rather than one tied to tonight's game.
 // MLB only — see gameNotes.js.
+//
+// Beside it, the one door onto the Game Notes archive (#1258): every note this
+// club has posted, opened on this club. The archive has no other link in the app.
 function GameNotesLink({ teamId }) {
   const { data: notes } = useAsync(() => resolveGameNotes(teamId), [teamId])
+  const linkProps = useRouteLink()
   if (!notes?.url) return null
   return (
-    <a
-      className="btn btn--control innings__notes"
-      href={notes.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      title={`${notes.title} — the club's official press notes (PDF), opens in a new tab`}
-    >
-      Game Notes
-      <span className="btn__icon" aria-hidden="true">↗</span>
-    </a>
+    <>
+      <a
+        className="btn btn--control innings__notes"
+        href={notes.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={`${notes.title} — the club's official press notes (PDF), opens in a new tab`}
+      >
+        Game Notes
+        <span className="btn__icon" aria-hidden="true">↗</span>
+      </a>
+      <a
+        className="btn btn--control innings__notes"
+        {...linkProps(gameNotesPath(teamId))}
+        title="Every Game Notes PDF this club has posted"
+      >
+        Notes archive
+        <span className="btn__icon" aria-hidden="true">›</span>
+      </a>
+    </>
   )
 }
 

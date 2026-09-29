@@ -250,6 +250,11 @@ const RunValuePage = lazyNamed(
   'RunValuePage',
 )
 const ManagerPage = lazyNamed(() => import('./screens/ManagerPage.jsx'), 'ManagerPage')
+// Game Notes archive (#1258): links only, one door (the team hub), not in the menu.
+const GameNotesArchivePage = lazyNamed(
+  () => import('./screens/game-notes/GameNotesArchivePage.jsx'),
+  'GameNotesArchivePage',
+)
 const GameNotesDebugPage = lazyNamed(
   () => import('./screens/GameNotesDebugPage.jsx'),
   'GameNotesDebugPage',
@@ -461,6 +466,8 @@ export default function App() {
     content = <RunValuePage />
   } else if (route.name === 'manager') {
     content = <ManagerPage id={route.id} />
+  } else if (route.name === 'game-notes') {
+    content = <GameNotesArchivePage key={route.teamId ?? 'all'} teamId={route.teamId} />
   } else if (route.name === 'game-notes-debug') {
     content = <GameNotesDebugPage />
   } else if (route.name === 'animation-lab') {

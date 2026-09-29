@@ -56,6 +56,8 @@
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/identity-lab'                     -> { name: 'identity-lab' }  (dev-only curation lab)
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
+//   '/game-notes'                       -> { name: 'game-notes', teamId }  (every club's notes PDFs, links only;
+//                                          '?team=' opens on one MLB club, any other value degrades to the default)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
 //   '/between-innings-lab'              -> { name: 'between-innings-lab' }  (unlisted QA page)
@@ -427,6 +429,13 @@ export function parseRoute(url) {
   // still parsed: see ADR-0029's isolation layers.
   if (parts.length === 1 && parts[0] === 'uniform-names')
     return { name: 'uniform-names' }
+  // The Game Notes archive (#1258). `?team=` is the team hub's door onto one
+  // club; a value that is not a whole number degrades to the page's own default
+  // rather than erroring, and the page itself rejects an id that is not an MLB club.
+  if (parts.length === 1 && parts[0] === 'game-notes') {
+    const team = Number(q.get('team'))
+    return { name: 'game-notes', teamId: Number.isInteger(team) && team > 0 ? team : null }
+  }
   // Unlisted QA page (every club's Game Notes calibration status + a shortcut
   // to open its modal) — linked from nowhere, reachable only by direct URL.
   if (parts.length === 1 && parts[0] === 'game-notes-debug')
@@ -810,6 +819,11 @@ export function playerTabPath(id, tab, opts = {}) {
 export function teamPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}${linkQuery(opts)}`
 }
+// The Game Notes archive, bare or opened on one club (the team hub's link).
+export function gameNotesPath(teamId = null) {
+  return teamId ? `/game-notes?team=${teamId}` : '/game-notes'
+}
+
 export function postseasonSeriesPath(seriesId) {
   return `/postseason/${seriesId}`
 }
