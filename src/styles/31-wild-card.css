@@ -306,7 +306,7 @@
 /* Top 100 prospect — an outline pill carrying the MLB mark (or the org's) and
    the rank (components/badges/ProspectPill.jsx). .prospect__tag draws nothing
    itself: it is the hook two context rules and the offseason spec hold on to
-   (.tlead__row, .tradecard__playerinfo, e2e/offseason-home.spec.js). */
+   (.tlead__row, .trade__playerinfo, e2e/offseason-home.spec.js). */
 .prospect__logo {
   width: 12px;
   height: 12px;

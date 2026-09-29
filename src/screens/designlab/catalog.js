@@ -83,7 +83,7 @@ export const CARDS = [
     note: 'Was the sheet, plus a three-column grid and break-inside:avoid. It is a Card now (#1113, slice C3), and .teammate keeps the grid and the column break.',
   },
   {
-    cls: 'tradecard',
+    cls: 'trade',
     partial: '47-trade-deadline.css',
     consumers: 1,
     group: 'sheet',
