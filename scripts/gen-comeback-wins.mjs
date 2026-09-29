@@ -227,12 +227,14 @@ async function main() {
   }
 
   const total = db.prepare('SELECT COUNT(*) AS n FROM comeback_ingested_games').get().n
-  if (ingested > 0) {
-    await writeOut()
-    console.log(`wrote ${out} (${ingested} ingested this run, ${total} total games)`)
-  } else {
-    console.log(`no changes (${total} total games)`)
-  }
+  // Write even when nothing was ingested. The file carries generatedAt, and
+  // check-data-freshness.mjs reads it as proof the generator RAN. Skipping the
+  // write on a quiet night (the last days of the regular season, then every
+  // night of the offseason) let that stamp age past the 20-hour budget and
+  // failed the whole nightly run on 2026-09-29. The nightly job commits every
+  // night anyway, so the stamp costs no extra commit.
+  await writeOut()
+  console.log(`wrote ${out} (${ingested} ingested this run, ${total} total games)`)
   db.close()
 }
 
