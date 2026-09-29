@@ -136,6 +136,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | record-ranks.test.js | 10 | src/api/callout-notes/rank.js, checkpoints.js, heldNotes.js | League ranks on the W-L record families — tie/floor math, the no-"#" display rule, a legacy bundle reading byte-identical, and a folded sentence staying bare |
 | recent-decided-games.test.js | 4 | src/api/scheduleGames.js | recentDecidedGames' `won != null` cutoff invariant (Last 10 Games) |
 | recent-form.test.js | 14 | src/api/recentForm.js | Recent form roster eligibility |
+| research-db-catalog.test.js | 9 | scripts/research-db.mjs, docs/agents/research-database.md | The research database's front door (#1117): every registered path exists, the catalog names every view and every skipped file, the rule is stated where spikes start, a rebuild drops a stale view, and the contract terms view reads all 36,366 rows (a money field mixes numbers and text) |
 | reveal-only.test.js | 21 | derive.js, linescore.js, pitchers.js | ADR-0001 reveal-only contract |
 | reveal-progress-core.test.js | 15 | src/hooks/revealProgressCore.js, select.js | Reveal-progress state machine |
 | rookies.test.js | 18 | src/api/rookies.js | Rookie pill + the sharded reads (compact status map, per-id record shard) |

@@ -1359,6 +1359,14 @@ Re-run only to fold in a new season.
 
 ## Assets / off-app
 
+- `research-db.mjs` — NOT a generator and NOT on any cron: the local DuckDB query
+  layer over the research JSON under `.scratch/` and `public/data/`, and the first
+  thing a research spike opens (#1117). Before a spike pulls anything from
+  statsapi, it queries what exists. It writes only `.scratch/research.duckdb`
+  (view definitions, git-ignored). Flags: `--sql`, `--markdown`, `--uncovered`.
+  Catalog, rule and the list of skipped files: `docs/agents/research-database.md`;
+  the why: ADR-0065.
+
 - `migrate-contract-row-keys.mjs` — NOT a generator: a one-off migration of the
   ADR-0067 contract-identity overrides from the old positional `rowKey` onto
   ADR-0069's content key. Dry run unless given `--apply`; prints the old key, the

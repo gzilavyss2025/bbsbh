@@ -79,7 +79,7 @@
 // These two views share a (year, teamId) key and are the smoke-test join.
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -87,281 +87,18 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..');
 const DB_PATH = join(REPO_ROOT, '.scratch', 'research.duckdb');
 
-// Every cataloged panel: [relative path (globs allowed), notes].
-// Two entries use a glob instead of a literal filename because their
-// on-disk name carries a date stamp or lives in a sharded directory; a
-// glob keeps the view valid as those files are regenerated or added to.
-export const PANEL_PATHS = [
-  '.scratch/team-success/outcome-ladder.json',
-  '.scratch/team-success/roster-age.json',
-  '.scratch/team-success/roster-age-cache.json',
-  '.scratch/team-success/postseason-experience.json',
-  '.scratch/team-success/postseason-usage.json',
-  '.scratch/team-success/postseason-boxscore-cache.json',
-  '.scratch/team-success/prior-postseason-cache.json',
-  '.scratch/team-success/october-texture-findings.json',
-  '.scratch/team-success/roster-age-deadline.json',
-  '.scratch/team-success/roster-age-deadline-cache.json',
-  '.scratch/team-success/trade-deadline-panel.json',
-  '.scratch/team-success/tenure-lag-panel.json',
-  '.scratch/team-success/mlb-field-cache.json',
-  '.scratch/team-success/milb-field-cache.json',
-  '.scratch/team-success/exit-reason-mix.json',
-  '.scratch/team-success/exit-reason-mix-findings.json',
-  '.scratch/team-success/free-agency-market.json',
-  '.scratch/team-success/free-agency-market-findings.json',
-  '.scratch/level-benchmarks/raw.json',
-  '.scratch/level-benchmarks/dates.json',
-  '.scratch/level-benchmarks/homegrown-cohort.json',
-  '.scratch/level-benchmarks/homegrown-panel.json',
-  '.scratch/level-benchmarks/milb-cohort-cache.json',
-  '.scratch/level-benchmarks/milb-mlb-cache.json',
-  '.scratch/level-benchmarks/perf-pool.json',
-  '.scratch/level-benchmarks/draft-cache.json',
-  '.scratch/level-benchmarks/attendance-cache.json',
-  '.scratch/level-benchmarks/standings-cache.json',
-  '.scratch/level-benchmarks/teamstats-cache.json',
-  '.scratch/level-benchmarks/context-panel.json',
-  '.scratch/level-benchmarks/homegrown-outcomes.json',
-  '.scratch/level-benchmarks/homegrown-duration-model.json',
-  '.scratch/level-benchmarks/homegrown-winning.json',
-  '.scratch/level-benchmarks/homegrown-precheck.json',
-  '.scratch/level-benchmarks/team-windows.json',
-  '.scratch/level-benchmarks/orgmap-ext.json',
-  '.scratch/level-benchmarks/orgmap-wide.json',
-  '.scratch/level-benchmarks/era-hump.json',
-  '.scratch/level-benchmarks/org-regression.json',
-  '.scratch/level-benchmarks/org-timing.json',
-  '.scratch/level-benchmarks/org-variance-components.json',
-  '.scratch/level-benchmarks/findings.json',
-  '.scratch/prospect-traits/bio.json',
-  '.scratch/prospect-traits/awards.json',
-  '.scratch/prospect-traits/mlb.json',
-  '.scratch/prospect-traits/arsenal.json',
-  '.scratch/prospect-traits/league.json',
-  '.scratch/prospect-traits/award-catalog.json',
-  '.scratch/prospect-traits/q1-rookie-traits.json',
-  '.scratch/prospect-traits/q2-size.json',
-  '.scratch/prospect-traits/q3-pitchers.json',
-  '.scratch/prospect-traits/q5-final-four.json',
-  // The service-clock spike (docs/service-time-debut-clock.md). panel.json is
-  // one row per major-league debut 2005-2025 with the season's service line,
-  // the wire-resolved roster-add date and the roster-need counts beside it.
-  // The 47MB transaction wire it was built from is git-ignored and is not
-  // cataloged; rebuild it with .scratch/service-clock/pull.mjs.
-  '.scratch/service-clock/panel.json',
-  '.scratch/service-clock/controls.json',
-  '.scratch/service-clock/k0-blank-rate.json',
-  // Historical Top Prospects lists, from TWO publications
-  // (.scratch/top-prospects-history/pull.mjs for 2009-2024, pull-ba.mjs for
-  // 2005-2008, #946): rows.json is one row per (season, rank, mlbId), 2005-
-  // 2024 -- mlbId joins directly to prospect-traits/bio.json above, no
-  // crosswalk. Every row carries a `source` field, "mlb-pipeline" or
-  // "baseball-america" -- the two rankings are never pooled without checking
-  // it (.scratch/prospect-value/panel.mjs filters to "mlb-pipeline" alone).
-  // seasons.json is the per-season coverage record (2005-2024): status
-  // ("ok"/"unavailable"), list depth, row count, fetch timestamp -- depth is
-  // NOT assumed 100 (2009-2011 are top-50 lists; 2020/2021 top out at 99,
-  // confirmed not a parsing gap). Deliberately a plain top-level ARRAY for
-  // both files, not a {meta,rows} wrapper -- a sibling panel in this wave
-  // registered that shape and it threw on every row-grain query; a bare array
-  // registers as one row per element with no flattening step needed.
-  '.scratch/top-prospects-history/rows.json',
-  '.scratch/top-prospects-history/seasons.json',
-  // What a ranking is worth in dollars (docs/prospect-ranking-value.md,
-  // .scratch/prospect-value/). panel.json is one row per player in the UNION of
-  // the ranked population and the 3,061-man debut cohort, carrying the rank
-  // facts, the career earnings joined from salaries.csv, and `windowStatus` --
-  // the flag that says whether the man's ranking window sat inside a published
-  // list at all. A 2006 debut is 'censored', NOT unranked: no list exists for
-  // his ranking years. Any query that compares ranked against unranked must
-  // filter windowStatus = 'observed-deep' or it is measuring a data gap.
-  // Same plain-ARRAY shape as rows.json above, for the same reason; the
-  // metadata sits beside it in panel-meta.json rather than wrapping it.
-  '.scratch/prospect-value/panel.json',
-  '.scratch/prospect-value/panel-meta.json',
-  '.scratch/prospect-value/bios.json',
-  '.scratch/prospect-value/findings.json',
-  '.scratch/blockage/incumbent-ids.json',
-  '.scratch/blockage/incumbent-bio.json',
-  '.scratch/blockage/exits.json',
-  '.scratch/blockage/deepen.json',
-  '.scratch/blockage/confound.json',
-  '.scratch/blockage/check.json',
-  '.scratch/blockage/findings.json',
-  'public/data/postseason-history.json',
-  'public/data/rookies.json',
-  'public/data/war.json',
-  'public/data/war-history/*.json', // sharded directory, not one file
-  'public/data/all-star-rosters.json',
-  'public/data/awards-history.json',
-  '.scratch/game-notes/insights/verdicts-*.json', // filename carries a date stamp
-  // Extension-value spike (W3.3, docs/contracts-extension-value.md): a
-  // season-by-season price-of-a-win panel derived from free_agency.csv, and
-  // the extensions.csv outcomes it prices.
-  '.scratch/contracts-extensions/fa-war-price.json',
-  '.scratch/contracts-extensions/extension-outcomes.json',
-  // Historical contract identity crosswalk (scripts/gen-contracts-identity.mjs):
-  // one row per source-CSV row, keyed on real MLB id like every panel above.
-  // A row with no confident id has mlbId = null, confidence != 'exact'/'fuzzy'
-  // -- see docs/adr/0066-a-contract-row-with-no-confident-id-stays-unresolved.md.
-  'public/data/contracts-history/identity/extensions.json',
-  'public/data/contracts-history/identity/arbitration.json',
-  'public/data/contracts-history/identity/free_agency.json',
-  'public/data/contracts-history/identity/salaries.json',
-  // The season-players candidate pool itself (scripts/gen-contracts-season-players.mjs)
-  // -- sharded one file per season, same glob pattern as war-history above.
-  'public/data/contracts-history/season-players/*.json',
-  // The dollar terms behind each identity row above (scripts/gen-contracts-shards.mjs):
-  // one row per rowKey, keyed the same way -- sharded per source file, same glob
-  // pattern as war-history and season-players above.
-  'public/data/contracts-history/terms/*.json',
-  // Per-player shards of the same rows, grouped by personId instead of rowKey
-  // (scripts/gen-contracts-shards.mjs) -- sharded across 100 files, same glob
-  // pattern as war-history and season-players above.
-  // KNOWN ISSUE: all 100 shards hold a term field that mixes a number and
-  // a free-text value in the same shard (e.g. "non-tendered",
-  // "1 y/$2.325+opt") -- term: 100 shards, club_offer: 78, settled_salary:
-  // 65, player_request: 8. DuckDB's nested-struct auto-detection infers
-  // those fields as numeric, so the view registers but a full scan of its
-  // flattened companion view (*__players) throws a cast error. Deferred:
-  // this needs a hand-written schema, the same way
-  // registerOutcomeLadderByTeam/registerRosterAgeByTeam already do for
-  // their panels. Do not add one here without a decision; see
-  // docs/agents/research-database.md.
-  'public/data/contracts-history/player/*.json',
-
-  // ---- Added by #1117: the panels the first catalog missed. ----
-  // Contracts: the arbitration-warp spike (.scratch/contracts/).
-  '.scratch/contracts/arbitration-warp-panel.json',
-  '.scratch/contracts/arbitration-findings.json',
-  // Level benchmarks: the org-regression variants and rechecks.
-  '.scratch/level-benchmarks/era-hump-org-recheck.json',
-  '.scratch/level-benchmarks/org-era-granularity.json',
-  '.scratch/level-benchmarks/org-omnibus-transform-check.json',
-  '.scratch/level-benchmarks/org-regression-perf.json',
-  '.scratch/level-benchmarks/org-regression-transform-levels.json',
-  '.scratch/level-benchmarks/org-regression-transform-log.json',
-  '.scratch/level-benchmarks/org-regression-transform-sqrt.json',
-  // Prospect traits: the follow-up cuts of q1, q2 and q4.
-  '.scratch/prospect-traits/q1b-confounds.json',
-  '.scratch/prospect-traits/q2b-size-robustness.json',
-  '.scratch/prospect-traits/q4-debut-month.json',
-  '.scratch/prospect-traits/q4b-month-checks.json',
-  // Service clock: the rest of the spike (panel.json and controls.json are above).
-  '.scratch/service-clock/debuts.json',
-  '.scratch/service-clock/seasons.json',
-  '.scratch/service-clock/panel-meta.json',
-  '.scratch/service-clock/findings.json',
-  '.scratch/service-clock/decisive.json',
-  '.scratch/service-clock/mls-defect.json',
-  // Service-clock pedigree: does a top pedigree change the call-up clock?
-  '.scratch/service-clock-pedigree/panel.json',
-  '.scratch/service-clock-pedigree/panel-meta.json',
-  '.scratch/service-clock-pedigree/findings.json',
-  '.scratch/service-clock-pedigree/power.json',
-  '.scratch/service-clock-pedigree/power-exact.json',
-  // Team success: the payroll, dead-money and first-club panels.
-  '.scratch/team-success/payroll-panel.json',
-  '.scratch/team-success/payroll-by-player.json',
-  '.scratch/team-success/payroll-rules-panel.json',
-  '.scratch/team-success/payroll-rules-findings.json',
-  '.scratch/team-success/dead-money-panel.json',
-  '.scratch/team-success/paid-no-appearance.json',
-  '.scratch/team-success/first-club-cache.json',
-  // Top prospects history: the Baseball America names that never debuted.
-  '.scratch/top-prospects-history/ba-non-debuts.json',
-  // Shipped files that a research spike reads as a source of record.
-  'public/data/run-differential.json',
-  'public/data/level-tenure-benchmark.json',
-  'public/data/prospect-trend.json',
-  'public/data/top-prospects.json',
-  'public/data/trade-deadline/20*.json', // one file per season; index.json is not data
-  'public/data/manager-history/*.json', // 100 shards by person id
-  'public/data/milb-history.json',
-];
-
-// Tracked JSON that is deliberately NOT a view: [path or directory prefix, why].
-// A prefix ends in "/". `node scripts/research-db.mjs --uncovered` lists every
-// tracked JSON file under .scratch/ and public/data/ that is in neither list.
-// docs/agents/research-database.md repeats these reasons, and
-// test/research-db-catalog.test.js keeps the two in step.
-export const SKIPPED = [
-  // .scratch/: design and probe output, not research panels.
-  ['.scratch/design-system/', 'UI measurement output (sheets, boxes, census) from design work; no research question'],
-  ['.scratch/abs-reports/design/', 'design canvas file for a page mock-up'],
-  ['.scratch/homefeed/canvas/', 'design canvas file for a page mock-up'],
-  ['.scratch/offseason-design/', 'design canvas file and a one-off endpoint shape check'],
-  ['.scratch/team-one-scroll/canvas/', 'design canvas files and per-club rank probes for a page mock-up'],
-  ['.scratch/live-feed-diffpatch/', 'one-off byte-count probes of the live feed (three tiny files)'],
-  ['.scratch/level-benchmarks/org-gaps.json', 'empty array; no rows'],
-  ['.scratch/team-success/first-club-gamelog-cache.json', 'raw fetch cache of game logs (6 MB); first-club-cache.json holds the result'],
-  // public/data/contracts-history/: copies and review queues.
-  ['public/data/contracts-history/identity/pending.json', 'review queue of fuzzy matches; the same rowKeys are already in identity/*.json'],
-  ['public/data/contracts-history/search-index.json', 'shipped search index (5.8 MB); a slim copy of the identity rows'],
-  // public/data/: shipped UI data. Only the files named in PANEL_PATHS are research sources.
-  ['public/data/callouts/', 'shipped UI data for callout surfaces'],
-  ['public/data/highlights/', 'shipped UI data for the video surface'],
-  ['public/data/logos/', 'shipped logo manifests'],
-  ['public/data/umpires/', 'shipped UI data for umpire pages'],
-  ['public/data/umpire-accuracy/', 'shipped UI data for the umpire accuracy page'],
-  ['public/data/glove-target/', 'shipped UI data for the pitch-command surface'],
-  ['public/data/spray/', 'shipped UI data for the hit chart'],
-  ['public/data/fouls/', 'shipped UI data for the fouls card'],
-  ['public/data/pitch-arsenal/', 'shipped UI data for the arsenal card'],
-  ['public/data/pitch-arsenal-pool/', 'shipped UI data for the arsenal card'],
-  ['public/data/pitch-command/', 'shipped UI data for the command card'],
-  ['public/data/long-at-bats/', 'shipped UI data for a callout'],
-  ['public/data/schedule-shape/', 'shipped UI data for the schedule page'],
-  ['public/data/vs-team-splits/', 'shipped UI data for the matchup card'],
-  ['public/data/game-notes/', 'shipped UI data; the research copy is .scratch/game-notes/insights'],
-  ['public/data/team-transactions/', 'shipped UI data for the club transactions tab'],
-  ['public/data/team-records/', 'shipped UI data: current-season game lists per club, rebuilt nightly'],
-  ['public/data/team-contracts/', 'shipped money page data; contracts-history is the historical copy'],
-  ['public/data/player-contracts/', 'shipped money page data; contracts-history is the historical copy'],
-  ['public/data/milb-alumni/', 'shipped UI data for the club alumni list'],
-  ['public/data/milb-pool/', 'shipped UI data: the current MiLB game pool'],
-  ['public/data/former-teammates/', 'shipped UI data for a callout'],
-  ['public/data/youngest-regulars/', 'shipped UI data; current season only'],
-  ['public/data/rookies/', 'shipped UI data; rookies.json is the registered summary'],
-  ['public/data/abs-challenges.json', 'shipped UI data for the ABS page'],
-  ['public/data/abs-exposure.json', 'shipped UI data for the ABS page'],
-  ['public/data/abs-exposure-clubs-aaa.json', 'shipped UI data for the ABS page'],
-  ['public/data/abs-exposure-clubs-mlb.json', 'shipped UI data for the ABS page'],
-  ['public/data/affiliates.json', 'lookup table (club to affiliates); not a measurement'],
-  ['public/data/teams.json', 'lookup table (club names by level); not a measurement'],
-  ['public/data/attendance.json', 'shipped UI data; level-benchmarks/attendance-cache.json is the registered research copy'],
-  ['public/data/career-matchups.json', 'shipped UI data for a callout'],
-  ['public/data/comeback-wins.json', 'shipped score-surface data'],
-  ['public/data/season-score.json', 'shipped score-surface data'],
-  ['public/data/team-score.json', 'shipped score-surface data'],
-  ['public/data/postseason-odds.json', 'shipped score-surface data'],
-  ['public/data/command-received.json', 'shipped UI data for the pitch-command surface'],
-  ['public/data/target-command.json', 'shipped UI data for the pitch-command surface'],
-  ['public/data/doubleheaders.json', 'shipped UI data; small (22 KB)'],
-  ['public/data/farm-system.json', 'derived from top-prospects.json and standings for a page; no new measurement'],
-  ['public/data/fever-radar.json', 'shipped UI data for the home page'],
-  ['public/data/first-scorebook.json', 'shipped UI data for a callout'],
-  ['public/data/fouls.json', 'shipped UI data for the fouls card'],
-  ['public/data/game-notes-corroboration.json', 'shipped UI data for game notes'],
-  ['public/data/gate.json', 'shipped UI data; small (31 KB)'],
-  ['public/data/jerseys.json', 'shipped UI data for jersey art'],
-  ['public/data/milestones.json', 'shipped UI data for the milestone watch'],
-  ['public/data/minors-leaders.json', 'shipped UI data: current season leaders only'],
-  ['public/data/nine-keys.json', 'shipped UI data for a callout'],
-  ['public/data/postseason-leaders.json', 'shipped UI data; postseason-history.json is the registered source'],
-  ['public/data/rehab.json', 'shipped UI data for the rehab tracker'],
-  ['public/data/run-expectancy.json', 'shipped run-expectancy table (9 KB); a lookup, not a panel'],
-  ['public/data/run-value.json', 'shipped UI data: current season only'],
-  ['public/data/salaries.json', 'shipped money page data (current season); contracts-history is the historical copy'],
-  ['public/data/savant-matchup.json', 'shipped UI data for the matchup card'],
-  ['public/data/savant-percentiles.json', 'shipped UI data: current season only'],
-  ['public/data/uniform-names.json', 'shipped UI data for jersey art'],
-  ['public/data/umpire-accuracy-summary.json', 'shipped UI data for the umpire accuracy page'],
-  ['public/data/workload.json', 'shipped UI data: current season only'],
-  ['public/data/workload-summary.json', 'shipped UI data; small (1 KB)'],
-  ['public/data/trade-deadline/index.json', 'index of the season files, not data'],
-];
+// The lists live in scripts/data/research-db-panels.json, not here: this file
+// hit the 600-line size guard when the catalog grew. That file holds
+//   panels  every tracked JSON that becomes a view (a glob reads many files as
+//           one view; a sharded directory or a dated name needs one),
+//   unnest  the array columns that also get a `<view>__<column>` view,
+//   skipped tracked JSON that is deliberately NOT a view, with the reason,
+//   notes   why a panel is shaped the way it is.
+// docs/agents/research-database.md is the catalog a person reads.
+const LISTS = JSON.parse(readFileSync(join(REPO_ROOT, 'scripts', 'data', 'research-db-panels.json'), 'utf8'));
+export const PANEL_PATHS = LISTS.panels;
+export const UNNEST_COLUMNS = LISTS.unnest;
+export const SKIPPED = LISTS.skipped;
 
 // Panels whose money fields mix numbers and free text ("forfeited",
 // "non-tendered"). By default DuckDB types a field from a few rows of the first
@@ -453,6 +190,13 @@ async function registerPanel(conn, relPath) {
     const sql = flattenMapColumnSql(name, c.column_name, c.column_type);
     await conn.run(`CREATE OR REPLACE VIEW ${flatName} AS ${sql}`);
     created.push(flatName);
+  }
+  for (const col of UNNEST_COLUMNS[relPath] ?? []) {
+    const arrName = `${name}__${col.toLowerCase()}`;
+    await conn.run(
+      `CREATE OR REPLACE VIEW ${arrName} AS SELECT u.* FROM (SELECT unnest(${quoteIdent(col)}) AS u FROM ${name})`
+    );
+    created.push(arrName);
   }
   return created;
 }
