@@ -27,11 +27,13 @@
 /* The game's own band: under the masthead on the lineup pages and the box
    score, so a postseason game reads as one before a name is read. The same
    navy-with-award-seam idiom as the slate card's series line and the series
-   page's banner. */
+   page's banner. The bottom margin is the masthead's own 16px gap above it,
+   so the tab row under the band does not sit on its seam. */
 .gameseries {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 0 0 var(--space-4);
   padding: var(--space-2) var(--space-4);
   background: var(--accent-primary);
   border-bottom: var(--bw-heavy) solid var(--award-line);
