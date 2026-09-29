@@ -39,9 +39,12 @@
     .dh b { color: #34634e; }
     .spec { margin: 12px 1px 0; color: #58646c; font-size: 12px; line-height: 1.45; }
     .spec b { color: #172c40; }
-    .choice--grass .field { background: #e7eedb; }.choice--grass .spot__name,
+    .choice--grass .sheet { background: #e7eedb; }.choice--grass .spot__name,
     .choice--aerial .spot__name { padding: 2px 5px; border: 1px solid #b2a88e; border-radius: 3px; background: #fffaf0e9; box-shadow: 0 1px 2px #172b3426; }
     .choice--grass .spot__num, .choice--aerial .spot__num { margin-top: 1px; padding: 1px 3px; border-radius: 2px; background: #fffaf0d9; color: #263c43; }
+    .choice--grass .spot--lf { left: 23%; top: 20%; }.choice--grass .spot--cf { top: 8%; }.choice--grass .spot--rf { left: 77%; top: 20%; }
+    .choice--grass .spot--ss { left: 38%; top: 37%; }.choice--grass .spot--2b { left: 62%; top: 37%; }
+    .choice--grass .spot--3b { left: 25%; top: 48%; }.choice--grass .spot--1b { left: 75%; top: 48%; }.choice--grass .spot--c { top: 88%; }
     .choice--aerial .field { background: #71966c; }.choice--aerial .spot__name { color: #102b36; }
     .choice--aerial .spot__num { background: #f9f2de; }
     .note { margin-top: 25px; padding: 15px 18px; border-left: 3px solid #b45e3d; background: #fffaf0; font-size: 13px; line-height: 1.5; }
@@ -67,7 +70,7 @@
     <div class="grid" id="choices"></div>
     <aside class="note">
       <p><b>How these would ship:</b> One small inline SVG in the existing DefenseDiamond component. It adds no image request, raster asset, font, or dependency. Names stay HTML above the drawing, so links and substitution stacks keep their present behavior.</p>
-      <p>The four drawings below have no filters, masks, patterns, or animation. Their SVG geometry is reusable for either team.</p>
+      <p>Option B follows the straight grass edges, curved dirt boundary, and circular cutouts in the <a href="https://img.mlbstatic.com/mlb-images/image/upload/mlb/atcjzj9j7wrgvsm8wnjq#page=169">MLB field diagram</a> and this <a href="https://seatgeek.com/venues/chase-field/views/312-w">Chase Field photo</a>. Its outfield is shortened to fit the card. Base markers are enlarged for legibility.</p>
     </aside>
   </main>
   <script>
@@ -80,7 +83,22 @@
     const drawings = [
       { id: 'current', name: 'Current', description: 'The square and mound ring now used on both pages.', cost: '2 SVG shapes', svg: `<polygon points="170,227 259,137 170,48 81,137" fill="none" stroke="#b6aea0" stroke-width="1"/><circle cx="170" cy="137" r="10" fill="none" stroke="#b6aea0" stroke-width="1"/>` },
       { id: 'contour', name: 'A · Scorebook field', description: 'Foul lines and an outfield arc give the sketch its full field shape.', cost: '7 SVG shapes · muted ink', svg: `<path d="M170 222 10 65 M170 222 330 65" fill="none" stroke="#bdac91" stroke-width="1.5"/><path d="M10 65 Q170 -41 330 65" fill="none" stroke="#9caf94" stroke-width="1.6"/><path d="M45 97 Q170 10 295 97" fill="none" stroke="#b8c7ab" stroke-width="1" stroke-dasharray="2 5"/><path d="M170 222 252 146 170 70 88 146Z" fill="#e9e0ce" fill-opacity=".55" stroke="#aa9a7e" stroke-width="1.5"/><path d="M170 222 235 146 170 87 105 146Z" fill="none" stroke="#c9baa3" stroke-width="1"/><circle cx="170" cy="146" r="7" fill="#fcf8ee" stroke="#aa9a7e" stroke-width="1.3"/><path d="M165 218h10 M247 142h10 M165 66h10 M83 142h10" stroke="#806f56" stroke-width="2"/>` },
-      { id: 'grass', name: 'B · Grass and clay', description: 'A quiet grass tint and clay infield make the positions read as baseball.', cost: '10 SVG shapes · grass and clay', svg: `<path d="M170 222 8 67 Q170 -49 332 67Z" fill="#d8e6c9"/><path d="M170 222 8 67 M170 222 332 67" fill="none" stroke="#8eaa83" stroke-width="1.4"/><path d="M8 67 Q170 -49 332 67" fill="none" stroke="#80a376" stroke-width="2"/><path d="M170 229 263 146 170 62 77 146Z" fill="#d6aa83" stroke="#bb8965" stroke-width="1.5"/><path d="M170 215 246 146 170 77 94 146Z" fill="#a6c393" stroke="#c2936d" stroke-width="5"/><path d="M170 215 246 146 170 77 94 146Z" fill="none" stroke="#f7eee0" stroke-width="1"/><circle cx="170" cy="146" r="8" fill="#d6aa83"/><path d="M165 220h10 M244 142h10 M165 72h10 M86 142h10" stroke="#fff8e9" stroke-width="4"/><path d="M166 229h8l-4 5Z" fill="#fff8e9"/><circle cx="170" cy="146" r="2" fill="#fff8e9"/>` },
+      // Infield scale: 58 SVG units per half-diagonal of a 90-foot square.
+      // Rubber: 60.5 feet from home; dirt arc: 95 feet from the rubber.
+      // Home cutout: 26-foot diameter; mound: 18-foot diameter, centered at 59 feet.
+      { id: 'grass', name: 'B · Grass and clay', description: 'Straight grass edges, a clean dirt arc, and round cutouts. The same quiet colors.', cost: '11 SVG shapes · grass and clay', svg: `
+        <path d="M170 218 21.51 69.51 A210 210 0 0 1 318.49 69.51Z" fill="#d8e6c9"/>
+        <path d="M21.51 69.51 A210 210 0 0 1 318.49 69.51" fill="none" stroke="#80a376" stroke-width="2"/>
+        <path d="M170 224 86.2 140.2 A86.58 86.58 0 0 1 253.8 140.2Z" fill="#d6aa83"/>
+        <path d="M170 110 220 160 170 210 120 160Z" fill="#a6c393"/>
+        <circle cx="170" cy="218" r="11.85" fill="#d6aa83"/>
+        <circle cx="170" cy="164.23" r="8.2" fill="#d6aa83"/>
+        <path d="M21.51 69.51 170 218 318.49 69.51" fill="none" stroke="#fff8e9" stroke-width="1.4"/>
+        <path d="M108 156 112 152 116 156 112 160Z M166 102 170 98 174 102 170 106Z M224 156 228 152 232 156 228 160Z" fill="#fff8e9"/>
+        <path d="M167 212h6v3l-3 3-3-3Z" fill="#fff8e9"/>
+        <path d="M167 162.86h6" stroke="#fff8e9" stroke-width="1.5"/>
+        <path d="M160 210h4v7h-4Z M176 210h4v7h-4Z" fill="none" stroke="#fff8e9" stroke-width=".8"/>
+      ` },
       { id: 'aerial', name: 'C · Ballpark view', description: 'A greener field with cut grass and a fuller dirt arc.', cost: '11 SVG shapes · grass and clay', svg: `<path d="M170 231 0 64 Q170 -48 340 64Z" fill="#88aa77"/><path d="M34 93 Q170 -5 306 93 M65 122 Q170 43 275 122 M97 151 Q170 96 243 151" fill="none" stroke="#759c71" stroke-width="19" opacity=".55"/><path d="M170 231 0 64 M170 231 340 64" fill="none" stroke="#f1ead8" stroke-width="1.4"/><path d="M0 64 Q170 -48 340 64" fill="none" stroke="#365f58" stroke-width="3"/><path d="M170 226 Q87 211 82 149 Q81 126 105 111 L170 54 235 111 Q259 126 258 149 Q253 211 170 226Z" fill="#c89970"/><path d="M170 212 245 145 170 77 95 145Z" fill="#78a276" stroke="#f5ebd8" stroke-width="1.5"/><path d="M170 223 252 145 170 69 88 145Z" fill="none" stroke="#f1ead8" stroke-width="1"/><circle cx="170" cy="145" r="9" fill="#c89970"/><path d="M165 220h10 M247 141h10 M165 65h10 M83 141h10" stroke="#fff8ec" stroke-width="4"/><path d="M165 229h10l-5 5Z" fill="#fff8ec"/><circle cx="170" cy="145" r="2" fill="#fff8ec"/>` },
     ]
     const choices = document.querySelector('#choices')
@@ -90,7 +108,7 @@
         <div class="choice__head"><p class="eyebrow">${drawing.id === 'current' ? 'Reference' : 'Option'}</p><h2>${drawing.name}</h2><p>${drawing.description}</p></div>
         <div class="sheet"><div class="sheet__bar">${team.label} defense</div><div class="field">
           <svg viewBox="0 0 340 255" preserveAspectRatio="none" aria-hidden="true">${drawing.svg}</svg>
-          ${spots.map(([position, number]) => `<div class="spot spot--${position.toLowerCase()}"><span class="spot__name">${team.players[position]}</span><span class="spot__num">${number}</span></div>`).join('')}
+          ${spots.map(([position, number]) => `<div class="spot spot--${position.toLowerCase()}" role="group" aria-label="${position}"><span class="spot__name">${team.players[position]}</span>${drawing.id === 'grass' ? '' : `<span class="spot__num">${number}</span>`}</div>`).join('')}
         </div><p class="dh"><b>DH</b><strong>${team.players.DH}</strong></p></div>
         <p class="spec"><b>${drawing.cost}</b> · inline vector · no extra request</p>
       </article>`).join('')
