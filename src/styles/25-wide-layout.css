@@ -439,7 +439,7 @@
      (same masthead recipe as .pitchers__title), so overflow:hidden here clips
      it to the card's own rounded corners instead of stacking a second,
      smaller rounded shape inside the card's padding. */
-  .abscard {
+  .absframe {
     display: block;
     border: var(--bw-hair) solid var(--border-rule);
     border-radius: var(--radius-md);
@@ -450,22 +450,22 @@
   /* Same fix as .statbox .statgrid above: SealBox's own .statgrid wrapper
      paints --surface-inset once revealed, which otherwise shows through as
      a whiter patch inside this card's own background. */
-  .abscard .statgrid {
+  .absframe .statgrid {
     background: none;
   }
-  .abscard .abs__title {
+  .absframe .abs__title {
     margin: -14px -14px 8px;
     border-radius: 0;
   }
-  .abscard .abs {
+  .absframe .abs {
     margin-top: 0;
   }
   /* Unlike the base rule's joined-card look (title's bottom corners squared
-     flush against the rows), this context already gives .abscard itself the
+     flush against the rows), this context already gives .absframe itself the
      card chrome and floats the title flush off it via the negative margin
      above — restore the rows' own full rounded pill/border so they don't
      read as attached to nothing. */
-  .abscard .abs__rows {
+  .absframe .abs__rows {
     border-top: var(--bw-hair) solid var(--border-hairline);
     border-radius: var(--radius-sm);
   }

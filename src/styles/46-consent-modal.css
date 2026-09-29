@@ -239,7 +239,7 @@
 .animlab__frame .pbp__replaced > .struckline.is-drawing::after,
 .animlab__frame .defdiamond__name--out > .struckline.is-drawing::after,
 .animlab__frame .animlab-boxlines__sheet,
-.animlab__frame .lineupcard__name--out > .struckline.is-drawing::after {
+.animlab__frame .entering__name--out > .struckline.is-drawing::after {
   animation-play-state: paused;
   animation-delay: var(--animlab-delay, 0s);
 }

@@ -43,7 +43,7 @@ export const CARDS = [
     note: 'The Card component’s sheet (#1113). The team hub’s card moved onto it first: sixteen modules. Four of them pass a box-less namespace as className (chal, rvclub, depthchart, horizoncard), the variant pattern the hub already used.',
   },
   {
-    cls: 'abscard',
+    cls: 'absframe',
     partial: '12-sealbox.css + 25-wide-layout.css',
     consumers: 1,
     group: 'sheet',
@@ -51,7 +51,7 @@ export const CARDS = [
     note: 'The sheet, plus overflow:hidden. Hidden below 740px, so it draws nothing on a phone.',
   },
   {
-    cls: 'lineupcard',
+    cls: 'entering',
     partial: '12-sealbox.css',
     consumers: 1,
     group: 'sheet',

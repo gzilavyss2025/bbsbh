@@ -162,7 +162,7 @@ test('every band in the innings view and the box score wears the band paint', ()
   const heads = {
     'components/gamehud/StatBox.jsx': ['statbox__title', 'abs__title'],
     'components/playbyplay/DueUpNextCard.jsx': ['dueup__title'],
-    'components/inning/EnteringReference.jsx': ['lineupcard__title', 'lineupteam__name', 'halfdefense__title'],
+    'components/inning/EnteringReference.jsx': ['entering__title', 'lineupteam__name', 'halfdefense__title'],
     'components/inning/RosterPanel.jsx': ['roster__toggle'],
     'components/umpire/UmpireTendenciesFold.jsx': ['roster__toggle'],
     'components/charts/WinProbChart.jsx': ['winprob__head'],
