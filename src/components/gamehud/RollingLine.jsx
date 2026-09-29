@@ -1,6 +1,7 @@
 import { halfIndex, selectSkippedBottomHalf } from '../../api/select.js'
 import { revealInning } from '../../api/linescore.js'
 import { ordinal } from '../../lib/format.js'
+import { Card } from '../ui/frame/Card.jsx'
 
 // The running line at the top of the innings view. It "builds as you reveal":
 // each half you uncover drops its runs into this grid; halves you haven't
@@ -92,7 +93,7 @@ export function RollingLine({
 
   return (
     <section className="rolling" aria-label="Running line" ref={sectionRef}>
-      <div className="rolling__scroll">
+      <Card as="div" body="flush" className="rolling__scroll">
         <table className="rolling__grid">
           <thead>
             <tr>
@@ -176,7 +177,7 @@ export function RollingLine({
             })}
           </tbody>
         </table>
-      </div>
+      </Card>
     </section>
   )
 }

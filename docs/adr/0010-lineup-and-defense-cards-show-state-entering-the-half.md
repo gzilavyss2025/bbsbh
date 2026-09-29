@@ -70,4 +70,4 @@ the one place with least room for it: focus mode's reference rail is a fixed
 reader's own next half by `safeToShowEntering`. This addendum records a copy
 decision, not a semantic one — and the two titles must stay matched to each
 other, long or short, for the reason `12-sealbox.css` gives at
-`.lineupcard__title`.
+`.entering__title`.

@@ -6,13 +6,12 @@
   margin-bottom: var(--space-4);
 }
 
+/* The scroller IS the Card (RollingLine.jsx, #1113 slice C4): system/card.css
+   draws the frame, and this later rule's overflow-x wins over the Card's clip
+   on the one axis that scrolls. */
 .rolling__scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 
 .rolling__grid {
@@ -148,20 +147,17 @@
    teamChipColors) is reserved for identity chrome — the header swatches/
    splitbar, the ledger chips, the linked big-swing markers — the bands/line
    stay the neutral navy/clay pair above since their job is structural
-   ("which side of 50%"), not "which team". */
+   ("which side of 50%"), not "which team". A flush Card (WinProbChart.jsx,
+   #1113 slice C4): system/card.css draws the frame, this rule the space
+   below it and the inset. */
 .winprob {
   margin-bottom: var(--space-4);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   padding: var(--space-3) var(--space-3h) var(--space-2h);
-  overflow: hidden;
 }
 
 /* Bleeds past the card's own padding to cap it flush (same masthead recipe
    as .pitchers__title) rather than floating as a smaller rounded shape inside
-   the card's padding — overflow:hidden on .winprob clips the square corners
+   the card's padding — the Card's overflow: hidden clips the square corners
    here to the card's own rounded ones. */
 .winprob__head {
   display: flex;
@@ -440,19 +436,14 @@
    callouts.js's buildMarginNotes) — same card anatomy as .prehalf (a headshot
    beside a star-marked sentence), sat above the Pitchers stat grid it used to
    be folded into. Same flush navy/gold masthead recipe as .pitchers__title
-   (bleeds past the card's own padding to cap it flush; overflow:hidden on
-   .marginnotes clips the square corners to the card's own rounded ones), plus
-   its own margin-bottom so it doesn't sit flush against the Pitchers card
-   right below it. */
+   (bleeds past the card's own padding to cap it flush; the Card's overflow:
+   hidden clips the square corners to the card's own rounded ones), plus its
+   own margin-bottom so it doesn't sit flush against the Pitchers card right
+   below it. A flush Card (#1113 slice C4): system/card.css draws the frame. */
 .marginnotes {
   margin-top: var(--space-4);
   margin-bottom: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   padding: var(--space-3) var(--space-3h) var(--space-2);
-  overflow: hidden;
 }
 .marginnotes__title {
   margin: -12px -14px 8px;
@@ -535,19 +526,16 @@
    one block per team, each led by the team name and its own header row (gated
    in api/pitchers.js — not sealed). Sized to fit a phone with NO horizontal
    scroll: the Pitcher column absorbs the slack and wraps; the numeric columns
-   stay tight. */
+   stay tight. A flush Card (PitchersSection.jsx, #1113 slice C4):
+   system/card.css draws the frame. The reveal gate is the caller's
+   (ADR-0009), and the frame knows nothing of it. */
 .pitchers {
   margin-top: var(--space-4);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   padding: var(--space-3) var(--space-3h) var(--space-2);
-  overflow: hidden;
 }
 
-/* Bleeds past the card's own padding to cap it flush — overflow:hidden on
-   .pitchers clips the square corners here to the card's own rounded ones. */
+/* Bleeds past the card's own padding to cap it flush — the Card's overflow:
+   hidden clips the square corners here to the card's own rounded ones. */
 .pitchers__title {
   margin: -12px -14px 8px;
   padding: var(--space-2) var(--space-2h);

@@ -269,10 +269,10 @@
 /* The Lineups masthead (.lineupteam__name) sits one level deeper than the
    Field/Bench mastheads (.halfdefense__title/.roster__toggle, both direct
    children of their own bordered card) — it's nested inside
-   .lineupcard__teams, whose own 12px top padding left a stripe of bare paper
+   .entering__teams, whose own 12px top padding left a stripe of bare paper
    ABOVE the club's colored bar that those other two tabs never had. Canceled
    here rather than in the base rule (12-sealbox.css) even though
-   ReferencePanel's LINEUPS tab is `.lineupcard`'s only caller now — an
+   ReferencePanel's LINEUPS tab is `.entering`'s only caller now — an
    override kept local to where it's needed reads clearer than a base rule
    whose one remaining consumer has to be discovered by grep. */
 .refpanel__body .lineupteam__name {
@@ -288,7 +288,7 @@
    portalled phone sheet, which share this class) rather than touching the
    base rules directly: `.halfdefense__title`'s base size still serves the box
    score's own defense card (BoxScore.jsx) at its own established size, and
-   `.lineupteam__name`'s base rule — `.lineupcard`'s only other caller retired
+   `.lineupteam__name`'s base rule — `.entering`'s only other caller retired
    with the unfocused stacked page — is kept as the honest default for
    whichever future caller reaches for it next. */
 .refpanel__body .halfdefense__title,
@@ -325,7 +325,7 @@
      interchangeable with the default `0 1 auto`. The panel is a COLUMN flex
      container, and inside the sheet it has a bounded height — so every section
      is a flex ITEM free to shrink; a flex item's automatic minimum size would
-     normally stop that at its content, but `.lineupcard` (and the roster cards)
+     normally stop that at its content, but `.entering` (and the roster cards)
      carry `overflow: hidden`, which sets that minimum to zero. Both clubs'
      lineups — 523px of card — were therefore squeezed into the 302px the sheet
      had free and CLIPPED there: `scrollHeight` equalled `clientHeight`, so
@@ -527,11 +527,11 @@
 
    Sized to its own text + chevron rather than the card's full width — a
    footer action reading edge to edge looked like a third masthead bar, not a
-   small "one more tap" link. align-self pulls it out of .lineupcard__teams'
+   small "one more tap" link. align-self pulls it out of .entering__teams'
    stretched flex-column default; min-height still holds the tap floor even
    though the box itself is now content-sized (a phone's docked sheet is where
    the thumb is doing the reaching, same as before). */
-.lineupcard__swap {
+.entering__swap {
   align-self: flex-start;
   width: auto;
   min-height: var(--tap-min);
@@ -551,11 +551,11 @@
   cursor: pointer;
 }
 
-.lineupcard__swaplogo {
+.entering__swaplogo {
   flex: 0 0 auto;
 }
 
-.lineupcard__swap:focus-visible {
+.entering__swap:focus-visible {
   outline: none;
   box-shadow: var(--ring);
 }

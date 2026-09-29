@@ -230,12 +230,9 @@
    (HalfTally.jsx) and the two rules below take the padding out from under it,
    leaving the frame — hairline border, --radius-md, `overflow: hidden` — sitting
    directly against the outer cells. Eight of them, two rows of four: the half's
-   line (R/H/E/LOB) over its pitch analysis. */
+   line (R/H/E/LOB) over its pitch analysis. The frame is a flush Card now
+   (HalfTally.jsx, #1113 slice C4), drawn by system/card.css. */
 .halftally {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  overflow: hidden;
   margin: 0;
   min-width: 0;
 }
@@ -350,14 +347,17 @@
 
 /* BetweenInnings.jsx — up to 5 tap-through facts, one at a time. Tapping past
    the last one returns to HalfTally's grid (.halftally-tap above), not to
-   fact 1 — the grid is the card's resting state. */
+   fact 1 — the grid is the card's resting state. A Card button (#1113 slice
+   C4): system/card.css draws the frame, the hover tint and the focus ring.
+   The Card's button reset sets `font: inherit`; every line inside names its
+   own face and size, so only the line height would move — from the button's
+   `normal` (14px on the 12px label and the 11px count) to the page's body
+   leading (18px). --lh-compact is the nearest token to `normal` (14.4px). */
 .betweeninnings {
   display: block;
   width: 100%;
   text-align: left;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
+  line-height: var(--lh-compact);
   padding: var(--space-3);
   cursor: pointer;
 }

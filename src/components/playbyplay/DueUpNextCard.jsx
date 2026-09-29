@@ -2,6 +2,7 @@ import { selectDueUpNext } from '../../api/dueup.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // A preview of the OTHER team's next half: the first few spots due up, same
 // headshot-column presentation as UpNextBatters.jsx's own "Due up" card (no
@@ -17,7 +18,7 @@ export function DueUpNextCard({ feed, inning, half, revealedThrough, awayId, hom
   const teamName = info.battingSide === 'away' ? awayName : homeName
 
   return (
-    <div className="dueup">
+    <Card as="div" body="flush" className="dueup">
       <span className="dueup__title sectionhead--band sectionhead--house">
         <TeamLogo teamId={teamId} name={teamName} size={18} variant="mono" className="sectionhead__mark" />
         Due up next for the {teamName}
@@ -32,6 +33,6 @@ export function DueUpNextCard({ feed, inning, half, revealedThrough, awayId, hom
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   )
 }

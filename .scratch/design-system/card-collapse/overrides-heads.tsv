@@ -20,7 +20,7 @@
 .upnext__title	label	label	H2	"Up next" caps label (UpNextBatters.jsx)
 .statbox__title	band	band	H1	statbox band. Allowlisted. SEAL SCOPE
 .dueup__title	band	band	H1	due-up band. Allowlisted
-.lineupcard__title	band	band	H1	entering-lineup band. Allowlisted. Renames with .lineupcard → .entering (the allowlist names it)
+.entering__title	band	band	H1	entering-lineup band. Renamed from .lineupcard__title with its block in slice C4; check-seal-scope did not name it by then
 .halfdefense__title	band	band	H1	defence band. Allowlisted
 .szmodal__eyebrow	note	kicker	H3	ledger: → .szmodal__note ("Pitch zone")
 .umpmodal__eyebrow	note	kicker	H3	ledger: → .umpmodal__note ("Plate accuracy")

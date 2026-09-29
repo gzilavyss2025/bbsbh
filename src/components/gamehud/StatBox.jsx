@@ -8,6 +8,7 @@ import { resolveCardPlayer } from '../../api/boxscore.js'
 import { teamLogoUrl, teamStripeGradient } from '../../lib/teams.js'
 import { ordinal } from '../../lib/format.js'
 import { SealBox } from '../SealBox.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PerformerCard } from '../player/PerformerCard.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
@@ -73,7 +74,7 @@ export function StatBox({
 }) {
   if (!revealed && placeholder) return null
   return (
-    <div className={`statbox ${className}`} key={`${inning}-${half}`}>
+    <Card as="div" body="flush" className={`statbox ${className}`} key={`${inning}-${half}`}>
       <h3 className="statbox__title sectionhead--band sectionhead--house">Insights</h3>
       <SealBox forceRevealed={revealed} coverless>
         {() => {
@@ -120,7 +121,7 @@ export function StatBox({
               {/* On a phone this is the ABS card's only home. From the wide
                   breakpoint up it's hidden here and a second copy — AbsCard,
                   below — renders standalone in the win-probability column
-                  instead (see index.css's `.statbox__abs`/`.abscard` pair);
+                  instead (see index.css's `.statbox__abs`/`.absframe` pair);
                   CSS toggles which copy shows rather than this component
                   reaching outside its own card. */}
               <div className="statbox__abs">
@@ -169,7 +170,7 @@ export function StatBox({
           )
         }}
       </SealBox>
-    </div>
+    </Card>
   )
 }
 
@@ -196,7 +197,7 @@ function AbsChallengesCard({ challenges, awayAbbr, homeAbbr }) {
 // win-probability chart in the right column at the wide breakpoint instead
 // of trailing the pitch-stat grid in the left one — CSS hides this and
 // StatBox's own inline copy at whichever breakpoint doesn't want it (see
-// `.abscard`/`.statbox__abs` in index.css). Its own coverless SealBox, same
+// `.absframe`/`.statbox__abs` in index.css). Its own coverless SealBox, same
 // footing as StatBox's — this only computes challenges.js's reveal-only
 // selector once revealed, never at render top-level (ADR-0001).
 export function AbsCard({ feed, inning, half, revealed, awayAbbr, homeAbbr }) {
@@ -206,7 +207,7 @@ export function AbsCard({ feed, inning, half, revealed, awayAbbr, homeAbbr }) {
   // above the win-probability chart.
   if (!gameHasAbs(feed) || !revealed) return null
   return (
-    <div className="abscard" key={`${inning}-${half}`}>
+    <Card as="div" body="flush" className="absframe" key={`${inning}-${half}`}>
       <SealBox forceRevealed={revealed} coverless>
         {() => (
           <AbsChallengesCard
@@ -216,7 +217,7 @@ export function AbsCard({ feed, inning, half, revealed, awayAbbr, homeAbbr }) {
           />
         )}
       </SealBox>
-    </div>
+    </Card>
   )
 }
 

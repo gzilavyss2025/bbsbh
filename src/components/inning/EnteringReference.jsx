@@ -10,6 +10,7 @@ import { DefenseDiamond } from '../scoring/DefenseDiamond.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { RookiePill } from '../badges/RookiePill.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../../lib/headerTheme.js'
 import { StruckLine } from '../scoring/StruckLine.jsx'
 
@@ -70,7 +71,7 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
     />
   )
   return (
-    <section className={`halfdefense ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
+    <Card body="flush" className={`halfdefense ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       {bare ? (
         <h4 className="halfdefense__title halfdefense__title--bare sectionhead--band">
           Defensive alignment
@@ -91,7 +92,7 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
         </button>
       )}
       {(bare || open) && <DefenseDiamond defense={defense} />}
-    </section>
+    </Card>
   )
 })
 
@@ -112,7 +113,7 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
 // appear.
 //
 // Carries its own "entering the Top 7th" masthead now (same treatment as
-// DefenseSection's, .lineupcard__title mirrors .halfdefense__title) rather
+// DefenseSection's, .entering__title mirrors .halfdefense__title) rather
 // than relying on a caller-supplied title — the wide layout used to bolt on
 // its own bare "Lineups" heading (InningViewer.jsx) while the phone's inline
 // placement (HalfInning.jsx's .halfentering) had no title at all, so the two
@@ -203,22 +204,22 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
   const otherSide = shown === 'away' ? 'home' : 'away'
   const canSwap = leadSide != null && teamFor(otherSide).slots.length > 0
   return (
-    <section className="lineupcard">
+    <Card body="flush" className="entering">
       {!bare && (
         <button
           type="button"
-          className="lineupcard__title sectionhead--band sectionhead--house"
+          className="entering__title sectionhead--band sectionhead--house"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
         >
           Lineups
-          <span className="lineupcard__chevron" aria-hidden="true">
+          <span className="entering__chevron" aria-hidden="true">
             {open ? '▾' : '▸'}
           </span>
         </button>
       )}
       {(bare || open) && (
-        <div className="lineupcard__teams">
+        <div className="entering__teams">
           {leadSide != null ? (
             renderTeam(shown)
           ) : (
@@ -233,19 +234,19 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
               this sits on plain paper rather than a club-colored bar —
               nothing to knock the mark out AGAINST. */}
           {canSwap && (
-            <button type="button" className="lineupcard__swap" onClick={() => setShown(otherSide)}>
+            <button type="button" className="entering__swap" onClick={() => setShown(otherSide)}>
               <TeamLogo
                 teamId={teamFor(otherSide).teamId}
                 name={teamFor(otherSide).name}
                 size={18}
-                className="lineupcard__swaplogo"
+                className="entering__swaplogo"
               />
               {teamFor(otherSide).name} lineup ›
             </button>
           )}
         </div>
       )}
-    </section>
+    </Card>
   )
 })
 
@@ -274,24 +275,24 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
         <span className="lineupteam__namelabel">{name} Lineup</span>
         <TeamLogo teamId={teamId} name={name} size={20} variant="mono" crop="bar" className="sectionhead__mark" />
       </h5>
-      <ol className="lineupcard__list">
+      <ol className="entering__list">
         {slots.map((s) => {
           const cur = s.entries[s.entries.length - 1] // standing occupant
           const upNextLabel = upNextLabels?.get(s.slot)
           const onDeck = s.slot === onDeckSlot
           return (
             <li
-              className={`lineupcard__row ${onDeck ? 'lineupcard__row--ondeck' : ''}`}
+              className={`entering__row ${onDeck ? 'entering__row--ondeck' : ''}`}
               key={s.slot}
             >
-              <span className="lineupcard__slot">{s.slot}</span>
-              <span className="lineupcard__names">
+              <span className="entering__slot">{s.slot}</span>
+              <span className="entering__names">
                 {s.entries.map((e, i) => (
                   <LineupName key={i} entry={e} />
                 ))}
                 <ProspectPill {...prospectBadge(prospectsData, cur.id)} />
                 <RookiePill active={showRookiePill(rookiesData, cur.id, isMlb)} />
-                {onDeck && <span className="duepill lineupcard__ondeck">Up next</span>}
+                {onDeck && <span className="duepill entering__ondeck">Up next</span>}
                 {upNextLabel && (
                   <span className="duepill">
                     {upNextLabel === 'Due up' && <span aria-hidden="true">&larr; </span>}
@@ -299,12 +300,12 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
                   </span>
                 )}
               </span>
-              <span className="lineupcard__meta">
+              <span className="entering__meta">
                 {cur.jersey ? (
-                  <span className="lineupcard__jersey">{cur.jersey}</span>
+                  <span className="entering__jersey">{cur.jersey}</span>
                 ) : null}
                 {cur.position ? (
-                  <span className="lineupcard__pos">{cur.position}</span>
+                  <span className="entering__pos">{cur.position}</span>
                 ) : null}
               </span>
             </li>
@@ -324,8 +325,8 @@ function LineupName({ entry }) {
   return (
     <StruckLine
       struck={entry.replaced}
-      className={`lineupcard__name ${entry.replaced ? 'lineupcard__name--out' : ''} ${
-        entered ? 'lineupcard__name--in' : ''
+      className={`entering__name ${entry.replaced ? 'entering__name--out' : ''} ${
+        entered ? 'entering__name--in' : ''
       }`}
     >
       {/* The card PRINTS 'Last, First' — the scorebook's sorted spelling — but
@@ -336,7 +337,7 @@ function LineupName({ entry }) {
         {entry.first ? `, ${entry.first}` : ''}
       </PlayerLink>
       {entry.inning != null && (
-        <span className="lineupcard__enter">({ordinal(entry.inning)})</span>
+        <span className="entering__enter">({ordinal(entry.inning)})</span>
       )}
     </StruckLine>
   )

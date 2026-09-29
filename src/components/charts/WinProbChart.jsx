@@ -7,6 +7,7 @@ import { milbWpaLogoLayout, milbWpaBandColor, milbWpaBandPinstripeColor } from '
 import { useWpaLogo } from '../../hooks/useWpaLogo.js'
 import { useMilbWpaLogo } from '../../hooks/useMilbWpaLogo.js'
 import { ordinal } from '../../lib/format.js'
+import { Card } from '../ui/frame/Card.jsx'
 
 // The win-probability "story of the game", drawn the scorebook way: one ink line
 // tracing the home team's win % across every plotted play, the plot split into
@@ -339,7 +340,7 @@ export function WinProbChart({
     `${home} ${split.home}%, ${away} ${split.away}%.`
 
   return (
-    <section className={`winprob${hasActive ? ' is-active' : ''}`} onClick={() => setPinnedIdx(null)}>
+    <Card body="flush" className={`winprob${hasActive ? ' is-active' : ''}`} onClick={() => setPinnedIdx(null)}>
       <div className="winprob__head sectionhead--band sectionhead--house">
         <h3 className="winprob__title">Win probability</h3>
         <div className="winprob__split" aria-hidden="true">
@@ -607,6 +608,6 @@ export function WinProbChart({
           </ol>
         </div>
       )}
-    </section>
+    </Card>
   )
 }

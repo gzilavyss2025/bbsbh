@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { selectOfficials } from '../../api/select.js'
 import { loadUmpire } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
+import { Card } from '../ui/frame/Card.jsx'
 import { UmpireTendencies } from './UmpireTendencies.jsx'
 
 // The Umpire Tendencies card as a collapsed drawer, for focus mode's EXTRAS
@@ -34,7 +35,7 @@ export function UmpireTendenciesFold({ feed }) {
   if (!data?.accuracy?.season?.called) return null
 
   return (
-    <section className="roster umptendfold">
+    <Card body="flush" className="roster umptendfold">
       <button className="roster__toggle sectionhead--band sectionhead--house" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         <span className="roster__club">Umpire tendencies</span>
         <span className="roster__chevron" aria-hidden="true">
@@ -42,6 +43,6 @@ export function UmpireTendenciesFold({ feed }) {
         </span>
       </button>
       {open && <UmpireTendencies umpire={data} />}
-    </section>
+    </Card>
   )
 }
