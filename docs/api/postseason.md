@@ -29,7 +29,7 @@ The bracket shows each series **heading into the cutoff date**.
 | --- | --- |
 | `fetch.js` | The two statsapi reads, the row normalizers, and `loadPostseasonBracket(cutoff, season)`. |
 | `bracket.js` | `deriveBracket(skeletonRows, resultRows, cutoffDate)`, pure. Also `seriesForGame` and `isClub`. |
-| `text.js` | `recordLine(series)`, `seriesLine(series, gameNumber)`, `cardLines(game, bracket)`. |
+| `text.js` | `recordLine(series)`, `seriesLine(series, gameNumber)`, `gameStatusLine(series, gameNumber)` (the lineup band's "Game 2 · Braves Lead 1–0"), `bestOfLine(series)` (the live page's "Best of 3" banner before Game 1), `cardLines(game, bracket)`. |
 | `roster.js` | A club's declared postseason roster: `rosterUrl`, `seriesRosterDate`, `shapeRoster`, `fetchSeriesRoster`. Spoiler-free. |
 | `src/hooks/postseason/usePostseasonBracket.js` | The hook, and `bracketCutoff(date, today)`. |
 

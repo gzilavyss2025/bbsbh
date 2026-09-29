@@ -207,7 +207,7 @@ test('the button swallows a failed shard, but the archive page still sees the er
   const realFetch = globalThis.fetch
   let ok = false
   globalThis.fetch = async (url) => {
-    const host = new URL(String(url)).hostname
+    const host = new URL(String(url), 'https://tally.test').hostname
     if (host === 'dapi.mlbinfra.com') return new Response('{}', { status: 500 })
     return ok ? new Response(JSON.stringify({ notes: [] }), { status: 200 }) : new Response('', { status: 503 })
   }

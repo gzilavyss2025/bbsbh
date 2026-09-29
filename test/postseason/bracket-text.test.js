@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { deriveBracket } from '../../src/api/postseason/bracket.js'
-import { cardLines, recordLine, seriesLine } from '../../src/api/postseason/text.js'
+import { bestOfLine, cardLines, gameStatusLine, recordLine, seriesLine } from '../../src/api/postseason/text.js'
 import { results, seriesWith, skeleton } from './fixtures.js'
 
 const bracket2025 = (cutoff) => deriveBracket(skeleton(2025), results(2025), cutoff)
@@ -83,4 +83,27 @@ test("cardLines on the cutoff date never shows that game's own result", () => {
     recordLine: 'DET leads 1–0',
     mark: null, // 2025 has no series mark on file
   })
+})
+
+test('gameStatusLine: number plus the series heading into the game, by nickname', () => {
+  const wc = (cutoff) => seriesWith(bracket2025(cutoff), 'NL', 'wildcard', 'CHC')
+  assert.equal(gameStatusLine(wc('2025-09-30'), 1), 'Game 1 · Series Tied, 0–0')
+  assert.equal(gameStatusLine(wc('2025-10-01'), 2), 'Game 2 · Cubs Lead 1–0')
+  const ds = seriesWith(bracket2025('2025-10-09'), 'NL', 'division', 'MIL')
+  assert.equal(gameStatusLine(ds, 4), 'Game 4 · Brewers Lead 2–1')
+  assert.equal(gameStatusLine(seriesWith(bracket2025('2025-10-07'), 'AL', 'division', 'SEA'), 3), 'Game 3 · Series Tied, 1–1')
+})
+
+test('gameStatusLine: empty for a decided series, a missing series or no game number', () => {
+  const decided = seriesWith(bracket2025('2025-10-05'), 'NL', 'wildcard', 'CHC')
+  assert.equal(decided.decided, true)
+  assert.equal(gameStatusLine(decided, 3), '')
+  assert.equal(gameStatusLine(null, 1), '')
+  assert.equal(gameStatusLine(seriesWith(bracket2025('2025-10-01'), 'NL', 'wildcard', 'CHC'), 0), '')
+})
+
+test('bestOfLine: the series length, from the skeleton', () => {
+  const b = deriveBracket(skeleton(2026), [], '2026-09-29')
+  assert.equal(bestOfLine(b.leagues.NL.wildcard[0]), 'Best of 3')
+  assert.equal(bestOfLine(null), '')
 })

@@ -31,12 +31,25 @@
    so the tab row under the band does not sit on its seam. */
 .gameseries {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
+  gap: var(--space-3);
   margin: 0 0 var(--space-4);
   padding: var(--space-2) var(--space-4);
   background: var(--accent-primary);
   border-bottom: var(--bw-heavy) solid var(--award-line);
+}
+
+/* Game number and series record, left of centre beside the mark. Labels-tier
+   type on navy, like the series page's banner headline. */
+.gameseries__status {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-tight);
+  color: var(--text-on-ink);
 }
 
 /* The band as a link (GameView, once the bracket names the series): it taps
