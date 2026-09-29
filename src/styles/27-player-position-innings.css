@@ -1,6 +1,6 @@
 /* ---------------------------------------------------------------- posinn
    "Innings by position" — career/season workload by fielding spot, drawn on
-   a small diamond that echoes .defdiamond's SPOTS layout, plus a starter/
+   the shared grass-and-clay field, plus a starter/
    reliever IP pair for pitchers. Purely presentational: PositionInnings.jsx
    owns no state. */
 
@@ -645,4 +645,3 @@
   border-radius: var(--radius-sm);
   padding: 2px var(--space-1h);
 }
-

@@ -36,6 +36,8 @@
    `min-width` with centred text, because that width IS the writing line its
    `border-bottom` prints. On the wrapper the bar ran a rule out into empty
    card at one and hung off both ends of a short surname at the other.
+   (The diamond has since dropped that writing line: its names are plain
+   lines inside one paper label per spot. The inline hug still holds.)
 
    An inline `.struckline` hugs exactly the text, and still sits OUTSIDE the
    link, which is what Route A was for: it covers a `.plink` button, an
