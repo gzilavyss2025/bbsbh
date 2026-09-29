@@ -7,6 +7,7 @@
 # LANDED in slice C0 (#1113): .thub-card is the Card component now (components/ui/frame/Card.jsx, styles/system/card.css), so its row left this file. Its sixteen modules render <Card>; the co-class .chalcard is <Card className="chal">.
 # LANDED in slice C1 (#1222): .tlead__cat, .tledg__block, .jerseydeck__card, .team-score, .txstory, .tstats-card (renamed .tstats), .roster-super, .thub-affiliate, .horizontile, .hzntile, .alum__card, .ctr__tile, .ctr__card are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. .horizontile__statbox and .hzntile__tile stay — the wells inside these tiles are unchanged (Q4, later).
 # LANDED in slice C2 (#1113): .player__statgrid, .player__splits, .factgrid, .vsteam__last, .gamelog, .milestonewatch, .cthist__seasons, .posinn__diamond, .levelprog, .prospectcard, .simlike__link, .awards, .awardblk, .hitchart, .bflight, .spray, .gamelines__rows are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. The three gap-rule grids keep their --border-rule ground on the grid inside the Card (.factgrid__grid, .player__statgrid, .player__splits). .cthist__toggle is a block Door. .prospectcard kept its name: .prospect is already the ProspectPill's namespace (.prospect__tag), so the rename is not a clean two-step.
+# LANDED in slice C3 (#1113): .metriccard (renamed .metric), .lineup, .opp, .startercard (renamed .starter), .teammatecard (renamed .teammate), .defdiamond and .umps__list are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. .lineup__list left too: it is the lineup Card's flush body and draws no frame. The umpire grid keeps its --border-rule ground on the grid inside the Card. .teammatecard__groupmore is .teammate__groupmore. .thub-roster stays a panel row and moved to C6a.
 # REMOVED 2026-09-29: .logbook__seasons button and .bookmgmt__modes button went STALE. Their rules left the CSS (the logbook season buttons moved onto the one Button, ea7d0aed1; .bookmgmt__modes was dead code), so their rows left this file.
 .wordmarklab__colorlock	lab	sheet				C8	wordmark lab (/wordmark-lab), a dev page: the colour-lock panel
 .wordmarklab__option	lab	sheet	none	padded	C8	wordmark lab option tile; an <article> with its own hover — a lab specimen
@@ -36,12 +37,8 @@
 .sitemenusheet__group	card	sheet	none	padded	C7	a grouped block of links inside the site menu sheet. A card inside a modal; low traffic, lands last in C7
 .attendance__note	notice					a note paragraph with a pop-in animation on page ground (BoxScore + TeamInfo) — the Notice family (#1132)
 .fact__infonote	notice					an info note under a stat on the player page (AdvancedStatsCard), animated in — Notice family (#1132)
-.umps__list	card	sheet	outside:label	flush	C3	umpire crew list (UmpiresCard; ExtrasFacts in the innings reference) — a gap-rule grid (background = --border-rule); grid moves inside Card
 .umptier__note	notice					the umpire-tier explainer note (UmpireTierGlyph) — Notice family (#1132)
-.lineup__list	panel					NESTED SHEET: the batting-order <ol> sits inside the .lineup sheet, under its SectionMasthead (TeamInfo.jsx:624) — a second frame inside a frame. It becomes the flush body of the .lineup Card, not a Card of its own
-.teammatecard	card	sheet	none	padded	C3	a teammate tile in TeamInfo's lineup (inventory group A). Rename .teammate (ADR-0084 ledger). In a masonry column: break-inside stays a namespace rule
-.teammatecard__groupmore	control					"show more" inside a teammate group: a <button> on inset — a Door block (#1130)
-.defdiamond	card	sheet	none	padded	C3	the defence diamond diagram card (DefenseDiamond.jsx), used in TeamInfo AND the innings viewer. Renders OUTSIDE the SealBox by design (src/CLAUDE.md): CSS-only move, no data change
+.teammate__groupmore	control					"show more" inside a teammate group: a <button> on inset — a Door block (#1130)
 .innings__extras	notice					the extra-innings banner (ExtrasBanner): a tinted inset line — Notice family (#1132). ADR-0008 gates what it says, not its box
 .half	card	sheet	label	flush	C4	one half-inning sheet (HalfInning.jsx:347, <section className="half">). The census counts 16 files because 'half' is also a string value elsewhere; the real consumer is one. SEAL SCOPE: the half's content is reveal-gated — move the box only
 .statline	panel					a gap-rule line of stats inside StatBox / HalfTally — a panel inside a card, not a card
@@ -117,7 +114,7 @@
 .sstrip__cell	bespoke					one game cell on the season strip — same allowlisted convention
 .standings-daynav button	control					standings day-nav <button>
 .radarpill__note	notice					the explainer note the RadarPill opens — Notice family (#1132)
-.thub-roster	panel					NESTED SHEET: RosterList's <ul> renders inside .thub-card__body (CurrentRosterCard, InjuredListCard) and inside AllStar/Postseason pages — a frame inside a frame. It becomes a flush body; verify the two non-hub pages still want a box
+.thub-roster	panel					NESTED SHEET: RosterList's <ul> renders inside .thub-card__body (CurrentRosterCard, InjuredListCard) and inside AllStar/Postseason pages — a frame inside a frame. It becomes a flush body; verify the two non-hub pages still want a box. Moved to C6a: it renders in the team hub, on the All-Star rosters page and on the postseason series pages, never on TeamInfo, so it left C3
 .rehabcard	card	sheet	none	padded	C6b	rehab tile on /rehab (inventory: "flat" — critique: the missing shadow is invisible). Plain → sheet
 .horizontile__statbox	well					inset stat box inside a horizon tile
 .hzntile__tile	well					inset box inside a horizon tile
@@ -154,8 +151,6 @@
 .sgh-list	card	sheet	none	flush	C6c	/fouls souvenir list <ol>
 .gamehigh-tiles	card	ledger	none	flush	C6c	/fouls game-high tiles on the gap-rule grid; grid moves inside Card
 .souvenir-row__tiles	card	ledger	none	flush	C6c	/fouls souvenir tiles on the gap-rule grid
-.metriccard	card	sheet	band	flush	C3	pre-game metric card (5 modules) — head is SectionMasthead (.metricbar band). Inventory group A. Rename .metric
-.lineup, .opp, .startercard	card	sheet	band	flush	C3	batting order / opposing defence / starting pitcher cards in TeamInfo — one rule for three blocks; head is the metricbar band. .startercard renames .starter
 .seasonseries__nav	control					season-series strip arrow <button>
 .photostrip__nav	control					photo strip arrow <button>
 .photostrip__thumb	media					photo strip thumbnail link
