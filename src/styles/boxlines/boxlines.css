@@ -327,7 +327,7 @@ a.boxline__link:focus-visible {
    page) — the one thing a stat line stacked with its neighbours cannot do.
    This partial loads after the host's, so the reset wins: a host that wants
    its row's vertical dress back states it at `button.` specificity (see
-   .startercard__careervs in 10-lineup.css). */
+   .starter__careervs in 10-lineup.css). */
 .boxlines__door {
   display: flex;
   align-items: center;

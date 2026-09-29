@@ -1,6 +1,7 @@
 import { ordinal } from '../../lib/format.js'
 import { InjuredMark } from '../badges/InjuredMark.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { StruckLine } from './StruckLine.jsx'
 
 // The scorebook's defense diamond, drawn the way the #22 sheet prints it:
@@ -73,8 +74,12 @@ export function DefenseDiamond({ defense }) {
   const hasFielder = Object.keys(SPOTS).some((pos) => byPos[pos])
   if (!hasFielder) return null
 
+  // The box is a Card (#1113, slice C3): the same frame wherever the diamond
+  // renders. A host that makes it part of its own card reshapes it in CSS
+  // (.opp, .bs__defensecard, .refpanel__body). The Card computes nothing, so
+  // it is safe inside the box score's reveal render.
   return (
-    <div className="defdiamond">
+    <Card as="div" body="flush" className="defdiamond">
       <div className="defdiamond__field">
         {/* Infield square + a small mound ring, in pencil rule. The box is 4:3,
             and the SVG stretches to fill it, so viewBox y-units compress to 75%
@@ -122,7 +127,7 @@ export function DefenseDiamond({ defense }) {
           </span>
         </p>
       )}
-    </div>
+    </Card>
   )
 }
 

@@ -7,6 +7,7 @@ import { gamePath } from '../../lib/route.js'
 import { monthDayYear } from '../../lib/dates.js'
 import { teamClubName } from '../../lib/teams.js'
 import { SectionMasthead } from '../ui/SectionMasthead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 
 // "Cardinals lead series, 4-2" / "Series tied at 2-2" — the masthead's
@@ -110,12 +111,15 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
     navigate(gamePath(cell.apiDate, awayAbbr, homeAbbr, cell.final ? 'boxscore' : 'lineup1', cell.gameNumber))
   }
 
+  const head = (
+    <SectionMasthead title="Season series" as="h3">
+      {leadLabel && <span className="seasonseries__lead">{leadLabel}</span>}
+    </SectionMasthead>
+  )
+
   return (
-    <section className="metriccard seasonseries">
-      <SectionMasthead title="Season series" as="h3">
-        {leadLabel && <span className="seasonseries__lead">{leadLabel}</span>}
-      </SectionMasthead>
-      <div className="metriccard__body seasonseries__body">
+    <Card className="metric seasonseries" head={head} body="flush">
+      <div className="metric__body seasonseries__body">
         {canScroll && (
           <button
             type="button"
@@ -151,7 +155,7 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
           </button>
         )}
       </div>
-    </section>
+    </Card>
   )
 }
 
