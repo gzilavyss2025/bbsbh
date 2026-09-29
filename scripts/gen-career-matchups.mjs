@@ -46,10 +46,10 @@
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'career-matchups.json')
-const BASE = 'https://statsapi.mlb.com'
 
 // Today + tomorrow, so late-night and next-day browsing both find their game.
 // Deliberately narrower than the sibling generators' three-day window: those
@@ -95,12 +95,6 @@ const isoDay = (offset = 0) => {
   const d = new Date()
   d.setUTCDate(d.getUTCDate() + offset)
   return d.toISOString().slice(0, 10)
-}
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
 }
 
 async function mapConcurrent(items, limit, mapper) {

@@ -31,19 +31,12 @@ import { readdir, readFile } from 'node:fs/promises'
 import { writeJsonAtomic, writeShards } from '../lib/io.js'
 import { mapConcurrent } from '../lib/concurrency.mjs'
 import { resolvePosition, rollUpSalaries } from '../lib/salaries.mjs'
+import { getJson } from '../lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const contractsDir = join(here, '..', '..', 'public', 'data', 'player-contracts')
 const teamDir = join(here, '..', '..', 'public', 'data', 'team-contracts')
 const leagueOut = join(here, '..', '..', 'public', 'data', 'salaries.json')
-const STATSAPI = 'https://statsapi.mlb.com'
-
-async function getJson(path) {
-  const res = await fetch(`${STATSAPI}${path}`)
-  if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`)
-  return res.json()
-}
-
 // Every contract record the nightly shards hold, plus the meta they share.
 async function readContractShards() {
   const files = (await readdir(contractsDir)).filter((f) => f.endsWith('.json')).sort()

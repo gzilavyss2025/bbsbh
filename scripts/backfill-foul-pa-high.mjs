@@ -19,10 +19,10 @@ import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { aggregateGameFouls, exportFouls } from './gen-fouls.mjs'
+import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'fouls.json')
-const BASE = 'https://statsapi.mlb.com'
 
 function parseArgs(argv) {
   const args = {}
@@ -31,12 +31,6 @@ function parseArgs(argv) {
     if (m) args[m[1]] = m[2]
   }
   return args
-}
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
 }
 
 const upsertPaHigh = (db) =>

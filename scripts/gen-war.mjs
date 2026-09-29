@@ -57,6 +57,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
 import { teamWarSplits } from './lib/war-splits.mjs'
+import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'war.json')
@@ -69,28 +70,14 @@ const previous = await readFile(out, 'utf8')
   .then((t) => JSON.parse(t))
   .catch(() => ({}))
 
-// Retried for the same reason the per-player splits are: this is two requests
-// a night against an API that intermittently 500s, and losing either one loses
-// the whole file. Local to this script, matching the convention lib/statsapi.mjs
-// documents (gen-manager-history/gen-milb-history/gen-workload each keep their
-// own counts rather than unifying them).
-async function fetchSabermetrics(group, attempts = 3) {
-  const url =
-    `https://statsapi.mlb.com/api/v1/stats?stats=sabermetrics&group=${group}` +
-    `&season=${season}&sportId=1&limit=3000&playerPool=ALL`
-  let lastErr
-  for (let attempt = 1; attempt <= attempts; attempt++) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`statsapi sabermetrics ${group} leaderboard: HTTP ${res.status}`)
-      const json = await res.json()
-      return json.stats?.[0]?.splits ?? []
-    } catch (err) {
-      lastErr = err
-      if (attempt < attempts) await new Promise((r) => setTimeout(r, 400 * 2 ** (attempt - 1)))
-    }
-  }
-  throw lastErr
+// Two requests a night against an API that intermittently 500s, and losing
+// either one loses the whole file: the shared client's retry covers them.
+async function fetchSabermetrics(group) {
+  const json = await getJson(
+    `/api/v1/stats?stats=sabermetrics&group=${group}` +
+      `&season=${season}&sportId=1&limit=3000&playerPool=ALL`,
+  )
+  return json.stats?.[0]?.splits ?? []
 }
 
 const num = (v) => {

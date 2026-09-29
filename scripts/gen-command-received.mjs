@@ -31,7 +31,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
-import { STATSAPI_BASE } from './lib/statsapi.mjs'
+import { getJson } from './lib/statsapi.mjs'
 import { catcherChart } from '../src/api/catcherOfRecord.js'
 import {
   MIN_COMMAND_PITCHES,
@@ -125,9 +125,7 @@ const bucketFor = (map, id) => {
 await mapConcurrent(games, FETCH_CONCURRENCY, async (gamePk) => {
   let feed
   try {
-    const res = await fetch(`${STATSAPI_BASE}/api/v1.1/game/${gamePk}/feed/live?fields=${FEED_FIELDS}`)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    feed = await res.json()
+    feed = await getJson(`/api/v1.1/game/${gamePk}/feed/live?fields=${FEED_FIELDS}`)
   } catch {
     // One unreachable feed is a handful of pitches lost, not a reason to lose
     // the night — the same best-effort footing mapConcurrent itself takes.
@@ -178,13 +176,11 @@ await mapConcurrent(games, FETCH_CONCURRENCY, async (gamePk) => {
 // pitcher's name would mean holding a second map across 1,865 feeds.
 const pitcherNames = new Map()
 try {
-  const res = await fetch(
-    `${STATSAPI_BASE}/api/v1/sports/1/players?season=${season}&fields=people,id,lastName,useLastName,fullName`,
+  const json = await getJson(
+    `/api/v1/sports/1/players?season=${season}&fields=people,id,lastName,useLastName,fullName`,
   )
-  if (res.ok) {
-    for (const p of (await res.json()).people ?? []) {
-      pitcherNames.set(p.id, p.useLastName || p.lastName || p.fullName || '')
-    }
+  for (const p of json.people ?? []) {
+    pitcherNames.set(p.id, p.useLastName || p.lastName || p.fullName || '')
   }
 } catch {
   // Names are a nicety; the card can print an id-keyed row with the name it

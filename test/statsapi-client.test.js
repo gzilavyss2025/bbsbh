@@ -75,7 +75,7 @@ test('a 404 throws at once, with no second call', async () => {
   await assert.rejects(getJson('/api/v1/gone'), (err) => {
     assert.ok(err instanceof StatsapiError)
     assert.equal(err.status, 404)
-    assert.match(err.message, /statsapi 404 \/api\/v1\/gone/)
+    assert.match(err.message, /statsapi HTTP 404 \/api\/v1\/gone/)
     return true
   })
   assert.equal(fetch.calls.length, 1)
@@ -127,6 +127,37 @@ test('a path that is not a path fails at once, before any call', async () => {
   await assert.rejects(getJson('https://statsapi.mlb.com/api/v1/teams'), /start with "\/"/)
   await assert.rejects(getJson('api/v1/teams'), /start with "\/"/)
   assert.equal(fetch.calls.length, 0)
+})
+
+test('timeoutMs aborts a call that never answers, and the timeout is retried', async () => {
+  const calls = []
+  const hang = (url, init) => {
+    calls.push(url)
+    return new Promise((_resolve, reject) => {
+      init.signal.addEventListener('abort', () => reject(init.signal.reason))
+    })
+  }
+  const { getJson } = createStatsapiClient({ fetch: hang, sleep: noSleep })
+  // A real hung socket keeps the event loop alive; this stand-in does not, and
+  // AbortSignal.timeout's own timer is unref'd, so hold the loop open here.
+  const keepAlive = setInterval(() => {}, 1000)
+  try {
+    await assert.rejects(getJson('/api/v1/x', { timeoutMs: 15 }), (err) => err.name === 'TimeoutError')
+  } finally {
+    clearInterval(keepAlive)
+  }
+  assert.equal(calls.length, RETRY_TRIES)
+})
+
+test('without timeoutMs no signal is passed: a call waits as long as it takes', async () => {
+  let init = 'unset'
+  const fetch = async (_url, second) => {
+    init = second
+    return { ok: true, status: 200, json: async () => ({ ok: true }) }
+  }
+  const { getJson } = createStatsapiClient({ fetch, sleep: noSleep })
+  await getJson('/api/v1/x')
+  assert.equal(init, undefined)
 })
 
 // (c) The sandbox error.

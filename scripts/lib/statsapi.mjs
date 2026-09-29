@@ -11,6 +11,9 @@
 //
 // The argument is a PATH that starts with "/", never a full URL. GET
 // https://statsapi.mlb.com + path, throw on a non-2xx, return the parsed body.
+// An optional second argument, { timeoutMs }, aborts a try that has not answered
+// in that time (the abort is a network error, so it is retried like one). No
+// caller gets a timeout unless it asks: warm-previews.mjs asks for 8 s.
 //
 // RETRY POLICY, decided once, here. The same for every caller:
 //   - 3 tries, with a pause of 2000 ms x attempt between them (2 s, then 4 s,
@@ -58,7 +61,7 @@ const DNS_CODES = new Set(['ENOTFOUND', 'EAI_AGAIN'])
 
 export class StatsapiError extends Error {
   constructor(status, path) {
-    super(`statsapi ${status} ${path}`)
+    super(`statsapi HTTP ${status} ${path}`)
     this.name = 'StatsapiError'
     this.status = status
     this.path = path
@@ -95,15 +98,15 @@ export function createStatsapiClient({
   cacheMaxAgeMs = CACHE_MAX_AGE_MS,
   now = Date.now,
 } = {}) {
-  async function fetchOnce(path) {
-    const res = await fetchFn(STATSAPI_BASE + path)
+  async function fetchOnce(path, timeoutMs) {
+    const res = await fetchFn(STATSAPI_BASE + path, timeoutMs ? { signal: AbortSignal.timeout(timeoutMs) } : undefined)
     if (!res.ok) throw new StatsapiError(res.status, path)
     return res.json()
   }
 
-  async function pull(path) {
+  async function pull(path, timeoutMs) {
     try {
-      return await withRetry(() => fetchOnce(path), { tries, delayMs, sleep, shouldRetry: isRetryable })
+      return await withRetry(() => fetchOnce(path, timeoutMs), { tries, delayMs, sleep, shouldRetry: isRetryable })
     } catch (err) {
       throw explain(err, path)
     }
@@ -121,14 +124,14 @@ export function createStatsapiClient({
     return null
   }
 
-  async function getJson(path) {
+  async function getJson(path, { timeoutMs } = {}) {
     if (typeof path !== 'string' || !path.startsWith('/')) {
       throw new Error(`statsapi getJson: the argument is a path and must start with "/", got ${JSON.stringify(path)}`)
     }
-    if (!cacheDir) return pull(path)
+    if (!cacheDir) return pull(path, timeoutMs)
     const hit = await readCache(path)
     if (hit) return hit.body
-    const body = await pull(path)
+    const body = await pull(path, timeoutMs)
     await mkdir(cacheDir, { recursive: true })
     await writeFile(cacheFile(path), JSON.stringify({ fetchedAt: now(), path, body }))
     return body

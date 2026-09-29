@@ -39,6 +39,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeShards } from './lib/io.js'
 import { warShardKey } from '../src/api/war.js'
+import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'war-history')
@@ -49,12 +50,10 @@ const START_SEASON = 1901
 const LAST_SEASON = new Date().getFullYear() - 1
 
 async function fetchLeaderboard(group, season) {
-  const url =
-    `https://statsapi.mlb.com/api/v1/stats?stats=sabermetrics&group=${group}` +
-    `&season=${season}&sportId=1&limit=3000&playerPool=ALL`
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`statsapi sabermetrics ${group} ${season} leaderboard: HTTP ${res.status}`)
-  const json = await res.json()
+  const json = await getJson(
+    `/api/v1/stats?stats=sabermetrics&group=${group}` +
+      `&season=${season}&sportId=1&limit=3000&playerPool=ALL`,
+  )
   const map = {}
   for (const split of json.stats?.[0]?.splits ?? []) {
     const id = split.player?.id
