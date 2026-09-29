@@ -77,7 +77,7 @@
 }
 /* A control in the band (the Bullpen pill) is taller than the title line, so
    the band grows and the mark must grow with it to keep touching both edges. */
-.sectionhead:has(.sectionhead__action) > .teamlogo-crop-bar {
+.sectionhead:has(.sectionhead__action > *) > .teamlogo-crop-bar {
   height: calc(max(var(--fs-body) * var(--lh-solid), var(--control-min)) + 20px);
 }
 
