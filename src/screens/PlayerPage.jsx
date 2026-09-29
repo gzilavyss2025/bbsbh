@@ -25,6 +25,7 @@ import { gameLogDoorLabel } from './player/overviewPreview.js'
 import { DASH, Fact, StatGrid, debutLabel, isoToday, monthDay, roleWord } from './player/parts.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
+import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
 
 // The player hub's OVERVIEW tab — the bare `/player/{id}`, and the tab the
 // other three hang off (screens/player/PlayerHubShell.jsx). Who he is now: the
@@ -115,7 +116,7 @@ export function PlayerPage({ id, asOf, sportId }) {
       {data.timeline && <CareerTimeline entries={data.timeline.entries} />}
       {data.progression && <LevelProgressionCard levels={data.progression.levels} />}
 
-      <div className="factgrid">
+      <FactGrid as="div">
         <Fact label="Ht / Wt" value={bio.heightWeight} />
         <Fact
           label={retired ? 'Age at retirement' : 'Age'}
@@ -150,7 +151,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             }
           />
         )}
-      </div>
+      </FactGrid>
 
       {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
 

@@ -1,6 +1,7 @@
 import { useAsync } from '../../hooks/useAsync.js'
 import { loadMilestoneWatch, milestonesForPlayer, formatMilestoneProjection } from '../../api/milestones.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // Milestone Watch — the player page's forward-looking companion to the plain
 // "X shy of Y" progress line: a projected timeframe for each career-total
@@ -22,11 +23,16 @@ export function MilestoneWatchCard({ playerId, asOf, milestones, groupLabel }) {
   if (!milestones?.length) return null
   const projections = data ? milestonesForPlayer(data, playerId) : []
 
+  // The label is the card's head (#1113, slice C2). The body is flush and the
+  // block keeps its own inset, so the head sits inside it, where it always sat.
+  const head = (
+    <SectionHead as="span" className="milestonewatch__title">
+      Milestone Watch{groupLabel ? ` — ${groupLabel}` : ''}
+    </SectionHead>
+  )
+
   return (
-    <div className="milestonewatch">
-      <SectionHead as="span" className="milestonewatch__title">
-        Milestone Watch{groupLabel ? ` — ${groupLabel}` : ''}
-      </SectionHead>
+    <Card as="div" body="flush" className="milestonewatch" head={head}>
       {milestones.map((m) => {
         const proj = projections.find((p) => p.stat === m.stat)
         const eta = formatMilestoneProjection(proj?.projection)
@@ -39,6 +45,6 @@ export function MilestoneWatchCard({ playerId, asOf, milestones, groupLabel }) {
           </p>
         )
       })}
-    </div>
+    </Card>
   )
 }

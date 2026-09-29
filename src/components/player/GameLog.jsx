@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { GameLink } from './GameLink.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // The player page's game-by-game log. A player who split real season time
 // between two levels (buildBlock's `otherLevels` gate, api/person/activity.js —
@@ -47,22 +48,24 @@ export function GameLog({ gameLog, gameLogAlt, altLevel, note, limit }) {
       >
         Game log
       </SectionHead>
-      <ul className="gamelog">
-        {rows.map((r) => (
-          <li className="gamelog__row" key={r.gamePk ?? r.date}>
-            <div className="gamelog__meta">
-              <span className="gamelog__date">{r.date}</span>
-              <span className="gamelog__opp">
-                {r.home ? 'vs' : '@'}{' '}
-                <GameLink path={r.boxscorePath}>{r.opp}</GameLink>
-                {r.level && <span className="gamelog__level">{r.level}</span>}
-                {r.qs && <span className="gamelog__qs" title="Quality start">QS</span>}
-              </span>
-            </div>
-            <div className="gamelog__line">{r.line}</div>
-          </li>
-        ))}
-      </ul>
+      <Card as="div" body="flush" className="gamelog">
+        <ul className="gamelog__list">
+          {rows.map((r) => (
+            <li className="gamelog__row" key={r.gamePk ?? r.date}>
+              <div className="gamelog__meta">
+                <span className="gamelog__date">{r.date}</span>
+                <span className="gamelog__opp">
+                  {r.home ? 'vs' : '@'}{' '}
+                  <GameLink path={r.boxscorePath}>{r.opp}</GameLink>
+                  {r.level && <span className="gamelog__level">{r.level}</span>}
+                  {r.qs && <span className="gamelog__qs" title="Quality start">QS</span>}
+                </span>
+              </div>
+              <div className="gamelog__line">{r.line}</div>
+            </li>
+          ))}
+        </ul>
+      </Card>
     </>
   )
 }

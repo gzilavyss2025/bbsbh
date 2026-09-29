@@ -200,6 +200,14 @@ World Series band), both series pages' banners, the history bracket's round
 labels, and a band under the game masthead on both lineup pages and the box
 score (not the innings view). A mark names the round only, so no seal applies.
 
+The game masthead's band is also a link to its series' **live** page, heading
+into the game's own date (`gameSeriesHref` in `src/lib/route.js`). It is never
+the finished page, which shows how the series ended, and the game on screen can
+be the game that ended it. GameView reads the bracket for a postseason game
+only, with the game's date as the cutoff, and takes the series id from
+`seriesForGame`. Until the bracket loads, or when it has no id for the game (a
+game after today, whose date the cutoff cap cuts off), the band is not a link.
+
 ## The declared roster (`roster.js`)
 
 statsapi has **no postseason roster type** (`/api/v1/rosterTypes`, checked

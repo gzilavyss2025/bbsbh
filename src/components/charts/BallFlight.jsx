@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { BallparkDiagram } from '../ballpark/BallparkDiagram.jsx'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { ballparkFor } from '../../lib/ballpark/ballparkData.js'
 import { PLOT_VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
 import { ballFlightPath } from '../../lib/ballpark/ballFlight.js'
@@ -298,14 +299,16 @@ export function BallFlight({ ball, batter, code = '' }) {
       />
       {pos && !open && (
         <ModalPortal>
-          <div
+          <Card
+            as="div"
+            body="flush"
             className="bflight bflight--hover"
             role="dialog"
             aria-label={label}
             style={{ left: pos.left, top: pos.top }}
           >
             <FlightBody ball={ball} park={park} name={name} code={code} />
-          </div>
+          </Card>
         </ModalPortal>
       )}
       {open && (
@@ -316,7 +319,7 @@ export function BallFlight({ ball, batter, code = '' }) {
               worse of the two. The ✕ stays for the pointer that expects one and
               for a keyboard, which needs a real focus target. */}
           <div className="scrim scrim--center" onClick={() => setOpen(false)}>
-            <div className="bflight bflight--modal" role="dialog" aria-modal="true" aria-label={label}>
+            <Card as="div" body="flush" className="bflight bflight--modal" role="dialog" aria-modal="true" aria-label={label}>
               <FlightBody
                 ball={ball}
                 park={park}
@@ -325,7 +328,7 @@ export function BallFlight({ ball, batter, code = '' }) {
                 closeRef={closeRef}
                 onClose={() => setOpen(false)}
               />
-            </div>
+            </Card>
           </div>
         </ModalPortal>
       )}

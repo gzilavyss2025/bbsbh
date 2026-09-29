@@ -60,6 +60,7 @@ import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx
 import { SPORT_LABEL, teamAbbr } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, mastheadMarkFor } from '../lib/headerTheme.js'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
+import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -173,7 +174,7 @@ export function TeamInfo({
           an unswept umpire. */}
       <div className="teaminfo__topzone">
         <div className="teaminfo__topmain">
-          <dl className="factgrid">
+          <FactGrid>
             <GameFacts
               info={info}
               scorebookWeather={scorebookWeather}
@@ -190,7 +191,7 @@ export function TeamInfo({
                 alone at the end of the grid — see the ESPN-sourced fetch in
                 GameView). The home page's grid is already even without it. */}
             {side === 'away' && <Fact label="Broadcast" value={broadcast} />}
-          </dl>
+          </FactGrid>
 
           <UmpiresCard officials={officials} />
 

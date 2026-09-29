@@ -4,6 +4,8 @@
 // nothing here belongs to one tab (a piece only one tab draws stays in that
 // tab's own screen).
 
+import { Card } from '../../components/ui/frame/Card.jsx'
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 export const DASH = '—'
 
@@ -30,14 +32,16 @@ export function roleWord(role) {
 // promoted other-level tile row (see block.otherLevels).
 export function StatGrid({ tiles }) {
   return (
-    <div className="player__statgrid">
-      {tiles.map((t) => (
-        <div key={t.k} className={`stat${t.tone === 'run' ? ' stat--run' : ''}`}>
-          <div className="stat__v">{t.v}</div>
-          <div className="stat__k">{t.k}</div>
-        </div>
-      ))}
-    </div>
+    <Card as="div" body="flush">
+      <div className="player__statgrid">
+        {tiles.map((t) => (
+          <div key={t.k} className={`stat${t.tone === 'run' ? ' stat--run' : ''}`}>
+            <div className="stat__v">{t.v}</div>
+            <div className="stat__k">{t.k}</div>
+          </div>
+        ))}
+      </div>
+    </Card>
   )
 }
 

@@ -24,11 +24,9 @@
   padding: var(--space-6) 0;
 }
 
+/* A Card (sheet, flush body; #1113, slice C2) draws the frame; the diagram
+   keeps its own inset. */
 .posinn__diamond {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   padding: var(--space-3) var(--space-2h) var(--space-2);
 }
 

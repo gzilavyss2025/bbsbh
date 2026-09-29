@@ -4,6 +4,7 @@ import { GRID, commandCell, normalizePitch, viewCol } from '../../lib/zone/zoneG
 import { MIN_COMMAND_PITCHES, commandHandCounts, commandTypes, commandView } from '../../api/commandMap.js'
 import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
 import { Pill } from '../ui/control/Pill.jsx'
+import { FactGrid } from '../ui/frame/FactGrid.jsx'
 
 // THE COMMAND MAP — where a pitcher puts each pitch, over a season.
 //
@@ -156,12 +157,12 @@ export function CommandMap({ entry, level = 'mlb', throws = null }) {
         <span className="cmdmap__keyitem cmdmap__keyitem--homer">Home run allowed</span>
       </p>
 
-      <dl className="factgrid cmdmap__facts">
+      <FactGrid className="cmdmap__facts">
         <Fact label="Zone" value={view.zonePct} />
         <Fact label="Heart" value={view.heartPct} />
         <Fact label="1st pitch" value={view.firstZonePct} />
         <Fact label="Whiff" value={view.whiffPct} />
-      </dl>
+      </FactGrid>
 
       <p className="hint cmdmap__note">
         {view.pitches.toLocaleString()} tracked pitches

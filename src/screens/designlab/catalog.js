@@ -178,12 +178,12 @@ export const CARDS = [
     note: 'Was the tstats card block: the tight sheet plus overflow:hidden. It is a ledger Card now (#1113, slice C1), and .tstats is its namespace.',
   },
   {
-    cls: 'prospectcard',
-    partial: '31d-prospect-card.css',
+    cls: 'card card--ledger prospectcard',
+    partial: 'system/card.css',
     consumers: 1,
     group: 'dense',
-    verdict: 'Merge — dense + accent',
-    note: 'The tight sheet with a 3px --accent-primary rule on top. The accent is the only difference from .seedcard.',
+    verdict: 'Merged — ledger + accent',
+    note: 'Was the tight sheet with a 3px --accent-primary rule on top. It is a ledger Card now (#1113, slice C2), and .prospectcard keeps only the accent rule and its margin.',
   },
 
   {

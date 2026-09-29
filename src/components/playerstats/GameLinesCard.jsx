@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BoxLinesDoor } from "../boxlines/BoxLinesDoor.jsx";
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from "../ui/frame/Card.jsx";
 import {
   cardFacetsFor,
   FAMILIES,
@@ -194,31 +195,33 @@ export function GameLinesCard({ personId, playerSurname, group, asOf }) {
           );
           return (
             <div className="gamelines__section" key={section.key}>
-              <ul className="gamelines__rows">
-                <li className="gamelines__head">
-                  <h4 className="gamelines__heading">{section.title}</h4>
-                  {columns.map((name) => (
-                    <span className="gamelines__col" key={name}>
-                      {name}
-                    </span>
+              <Card as="div" frame="ledger" body="flush">
+                <ul className="gamelines__rows">
+                  <li className="gamelines__head">
+                    <h4 className="gamelines__heading">{section.title}</h4>
+                    {columns.map((name) => (
+                      <span className="gamelines__col" key={name}>
+                        {name}
+                      </span>
+                    ))}
+                    <span />
+                  </li>
+                  {loose.map(({ row, stat }) => door(row, stat, false))}
+                  {folded.map(({ fam, members }) => (
+                    <Family
+                      key={fam.key}
+                      family={fam}
+                      count={members.length}
+                      open={!!open[fam.key]}
+                      onToggle={() =>
+                        setOpen((was) => ({ ...was, [fam.key]: !was[fam.key] }))
+                      }
+                    >
+                      {members.map(({ row, stat }) => door(row, stat, true))}
+                    </Family>
                   ))}
-                  <span />
-                </li>
-                {loose.map(({ row, stat }) => door(row, stat, false))}
-                {folded.map(({ fam, members }) => (
-                  <Family
-                    key={fam.key}
-                    family={fam}
-                    count={members.length}
-                    open={!!open[fam.key]}
-                    onToggle={() =>
-                      setOpen((was) => ({ ...was, [fam.key]: !was[fam.key] }))
-                    }
-                  >
-                    {members.map(({ row, stat }) => door(row, stat, true))}
-                  </Family>
-                ))}
-              </ul>
+                </ul>
+              </Card>
             </div>
           );
         })}

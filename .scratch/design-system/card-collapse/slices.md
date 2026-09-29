@@ -208,14 +208,16 @@ the slice at 390px and 900px, with `?nointro` on every URL.
 - **Screenshots:** `/07072026/milstl-2/boxscore` sealed and revealed, a Box Lines
   sheet, `/awards`.
 
-### C6a — postseason and All-Star (11 rows)
+### C6a — postseason and All-Star (13 rows)
 
 - **Rows:** `.seedcard` (as="button", → `.seed`), `.psseries__result`, `__log`,
   `__lboard`, `__rostercard`, `.psleaders__teamboard`, `.allstarrosters__year`,
-  `__rows`, `.allstargame`, `.allstarlegacy__leadercard`, `__teamcard`.
-- **Screenshots:** `/postseason-history`, `/postseason-race`, one
-  `/postseason/{seriesId}`, `/postseason-leaders`, `/all-star-rosters`,
-  `/all-star-legacy`.
+  `__rows`, `.allstargame`, `.allstarlegacy__leadercard`, `__teamcard`. Added
+  2026-09-29 from the live series page: `.psseries__todaycard`,
+  `__upcominglist` (flush; the list keeps its row rules).
+- **Screenshots:** `/postseason-history`, `/postseason-race`, one finished
+  `/postseason/{seriesId}` and one live `/postseason/{seriesId}?d=`,
+  `/postseason-leaders`, `/all-star-rosters`, `/all-star-legacy`.
 
 ### C6b — people, records and reference pages (14 rows)
 

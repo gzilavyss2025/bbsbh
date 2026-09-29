@@ -3,6 +3,7 @@ import { foulsPath } from '../../lib/route.js'
 import { fetchFoulsFor, batterFoulLine, pitcherFoulLine } from '../../api/fouls.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { FactGrid } from '../ui/frame/FactGrid.jsx'
 
 // The player page's foul-ball card — his season foul line from the nightly
 // gen-fouls.mjs sweep, batter or pitcher flavored to match the stat block
@@ -42,14 +43,14 @@ export function FoulCard({ playerId, group, asOf }) {
       <SectionHead look="rule" note="this season">
         Foul balls
       </SectionHead>
-      <dl className="factgrid">
+      <FactGrid>
         {tiles.map((t) => (
           <div className="fact" key={t.k}>
             <dt className="fact__label">{t.k}</dt>
             <dd className="fact__value">{t.v}</dd>
           </div>
         ))}
-      </dl>
+      </FactGrid>
       <button type="button" className="plink foulcard__door" onClick={() => navigate(foulsPath())}>
         League foul tracker ›
       </button>

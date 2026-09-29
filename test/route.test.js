@@ -48,6 +48,7 @@ import {
   postseasonLivePath,
   seriesPageFor,
   seriesHref,
+  gameSeriesHref,
 } from '../src/lib/route.js'
 
 // --------------------------------------------------------------------------
@@ -1123,4 +1124,22 @@ test('seriesHref: the finished page only for a series decided before the cutoff 
   // A series with an empty slot has no id, so no link.
   assert.equal(seriesHref({ id: null, decided: false }, '2026-09-29', history), null)
   assert.equal(seriesHref(null, '2026-09-29', history), null)
+})
+
+// The game page's series band (GameView) links to the LIVE page heading into
+// the game's own date, never the finished page: that page shows how the series
+// ended, and the game on screen can be the one that ended it.
+test('gameSeriesHref: the live page heading into the game date, even for a decided series', () => {
+  assert.equal(
+    gameSeriesHref({ id: '2026-wildcard-111-147', decided: false }, '2026-09-29'),
+    '/postseason/2026-wildcard-111-147?d=2026-09-29',
+  )
+  assert.equal(
+    gameSeriesHref({ id: '2025-division-112-158', decided: true }, '2025-10-09'),
+    '/postseason/2025-division-112-158?d=2025-10-09',
+  )
+  // No id (an empty slot, or the bracket has not loaded) or no date: no link.
+  assert.equal(gameSeriesHref({ id: null }, '2026-09-29'), null)
+  assert.equal(gameSeriesHref(null, '2026-09-29'), null)
+  assert.equal(gameSeriesHref({ id: '2026-wildcard-111-147' }, ''), null)
 })

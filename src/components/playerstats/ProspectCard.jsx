@@ -4,6 +4,7 @@ import { dotFraction } from '../../lib/percentileStrip.js'
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { confidenceLabel, movementState } from '../../api/prospectTrend.js'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 const CHART_H = 140
 const PLOT_TOP = 26
@@ -79,18 +80,18 @@ export function ProspectCard({ view, level, badge, group, preview = false }) {
 
   if (preview) {
     return (
-      <section className="prospectcard prospectcard--preview">
+      <Card frame="ledger" body="flush" className="prospectcard prospectcard--preview">
         <header className="prospectcard__head">
           <h3 className="prospectcard__title">Prospect performance</h3>
           {hasBadge && <ProspectPill {...badge} />}
         </header>
         <p className="prospectcard__teaser">{standingLine(view, level)}</p>
-      </section>
+      </Card>
     )
   }
 
   return (
-    <section className="prospectcard">
+    <Card frame="ledger" body="flush" className="prospectcard">
       <header className="prospectcard__head">
         <h3 className="prospectcard__title">Prospect performance</h3>
         {hasBadge && <ProspectPill {...badge} />}
@@ -109,7 +110,7 @@ export function ProspectCard({ view, level, badge, group, preview = false }) {
 
         {view.ageEdge && <AgeContext view={view} level={level} group={group} />}
       </div>
-    </section>
+    </Card>
   )
 }
 

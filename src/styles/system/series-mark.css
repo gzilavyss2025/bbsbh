@@ -27,12 +27,38 @@
 /* The game's own band: under the masthead on the lineup pages and the box
    score, so a postseason game reads as one before a name is read. The same
    navy-with-award-seam idiom as the slate card's series line and the series
-   page's banner. */
+   page's banner. The bottom margin is the masthead's own 16px gap above it,
+   so the tab row under the band does not sit on its seam. */
 .gameseries {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 0 0 var(--space-4);
   padding: var(--space-2) var(--space-4);
   background: var(--accent-primary);
   border-bottom: var(--bw-heavy) solid var(--award-line);
+}
+
+/* The band as a link (GameView, once the bracket names the series): it taps
+   through to the series page. The hover lifts the navy a step toward paper,
+   and the focus ring sits outside the band, on paper, like an interactive
+   Card's (system/card.css). */
+.gameseries--link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .gameseries--link:hover {
+    background-color: color-mix(in srgb, var(--accent-primary) 88%, var(--surface-card));
+  }
+}
+.gameseries--link:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+@media (prefers-reduced-motion: reduce) {
+  .gameseries--link {
+    transition: none;
+  }
 }

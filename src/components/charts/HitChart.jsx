@@ -1,6 +1,7 @@
 import { useId, useMemo, useState } from 'react'
 import { BallparkDiagram } from '../ballpark/BallparkDiagram.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { ballparkFor } from '../../lib/ballpark/ballparkData.js'
 import { VIEWBOX, PLOT_SKY_CROP, PLOT_VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
 
@@ -134,7 +135,7 @@ export function HitChart({
     `hitchart__chip${on ? ` hitchart__chip--${tone}` : ''}`
 
   return (
-    <div className={`hitchart hitchart--${isHalf ? 'half' : 'game'}`}>
+    <Card as="div" body="flush" className={`hitchart hitchart--${isHalf ? 'half' : 'game'}`}>
       <div className="hitchart__head">
         <div>
           <p className="hitchart__eyebrow">{eyebrow ?? venue}</p>
@@ -448,6 +449,6 @@ export function HitChart({
           </ol>
         </>
       )}
-    </div>
+    </Card>
   )
 }

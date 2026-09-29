@@ -1,6 +1,7 @@
 import { Loader } from '../ui/Loader.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // Career/season workload by fielding position, drawn on a small diamond that
 // echoes DefenseDiamond's SPOTS layout (see components/DefenseDiamond.jsx) —
@@ -84,7 +85,7 @@ export function PositionInnings({ options, scope, onScope, loading, fielding, pi
       ) : (
         <>
           {fielding && (
-            <div className="posinn__diamond">
+            <Card as="div" body="flush" className="posinn__diamond">
               <div
                 className="posinn__field"
                 aria-label={`Innings by fielding position, ${activeLabel || 'selected scope'}`}
@@ -130,7 +131,7 @@ export function PositionInnings({ options, scope, onScope, loading, fielding, pi
                   <span className="posinn__dhvalue">{fielding.dh.games} G</span>
                 </p>
               )}
-            </div>
+            </Card>
           )}
 
           {pitching && (

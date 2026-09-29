@@ -4,6 +4,7 @@ import { scorebookDate } from '../../../lib/dates.js'
 import { ManagerLink } from '../../team/ManagerLink.jsx'
 import { UmpireLink } from '../../umpire/UmpireLink.jsx'
 import { SectionHead } from '../../ui/frame/SectionHead.jsx'
+import { FactGrid } from '../../ui/frame/FactGrid.jsx'
 
 // The fill-in half of focus mode's EXTRAS tab (ReferencePanel.jsx): the
 // scorecard-header facts a hand-scorer writes down once and then looks up
@@ -37,7 +38,7 @@ export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }
             ABBREVIATION: this grid is two cells wide in a ~300px rail, and a
             label reading "DIAMONDBACKS MANAGER" wraps to three lines where
             "AZ MANAGER" fits on one. */}
-        <dl className="factgrid refextras__grid">
+        <FactGrid className="refextras__grid">
           {['away', 'home'].map((side) => (
             <Fragment key={side}>
               <Fact
@@ -47,7 +48,7 @@ export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }
               <Fact label={`${clubTag(meta, side)} uniform`} value={uniforms?.[side]} />
             </Fragment>
           ))}
-        </dl>
+        </FactGrid>
       </section>
 
       {/* The crew, in the lineup page's own markup and roles order (HP first,
@@ -77,7 +78,7 @@ export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }
 
       <section className="refextras">
         <SectionHead look="label">Game</SectionHead>
-        <dl className="factgrid refextras__grid">
+        <FactGrid className="refextras__grid">
           <Fact label="Date" value={scorebookDate(info.officialDate)} />
           {/* The feed appends a period to the venue name ("Busch Stadium.") —
               drop it, same as the box score does. */}
@@ -92,7 +93,7 @@ export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }
               roof is the interior one, when the generator has nothing (a MiLB
               park with no coordinates). */}
           <Fact label="Weather" value={scorebookWeather?.text || info.weather} />
-        </dl>
+        </FactGrid>
       </section>
     </>
   )

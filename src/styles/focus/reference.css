@@ -435,10 +435,12 @@
    and a surname fit a 150px cell with room over, which is the case this rule
    exists to catch and that one isn't. */
 .refextras__grid {
-  grid-template-columns: 1fr;
   /* .factgrid's own 18px bottom margin would land on top of the panel's flex
      gap, same double-spacing as the heading above. */
   margin: 0;
+}
+.refextras__grid .factgrid__grid {
+  grid-template-columns: 1fr;
 }
 
 /* The sheet — same .scrim/.sheet chrome as HighlightSheet/StrikeZone, portalled

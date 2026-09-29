@@ -20,6 +20,44 @@ function triggerRect(el) {
   return range.getBoundingClientRect()
 }
 
+// A player link's two parts, for PlayerLink's button below and for a trigger
+// that is not one: a whole-tile Card link (SimilarPlayerGrid, #1113 slice C2).
+// Both build the player's URL here, so the two never drift apart.
+//   path        the player's page in the link scope it sits in, or null when
+//               there is no id: a row without one is a name, not a link.
+//   hoverProps  a ref to measure and the four handlers that arm the desktop
+//               hover card (lib/playerHoverStore.js). Spread them on the
+//               trigger. They subscribe to nothing, so a trigger never
+//               re-renders on a hover.
+export function usePlayerLink(id, displayName) {
+  const { asOf, sportId } = useLinkScope()
+  const ref = useRef(null)
+  // Desktop-only (see HOVER_CARD_QUERY's own header): a real mouse, at the
+  // app's own "wide" width. Read once per render rather than gating inside
+  // the handlers below — the handlers still no-op on a stale `true` from the
+  // instant before a resize, since the global card requires an active id it
+  // never receives from a query that's already false by then.
+  const hoverCapable = useMediaQuery(HOVER_CARD_QUERY)
+  const show = (opts) => {
+    if (!hoverCapable || !ref.current) return
+    scheduleHoverShow(id, displayName, triggerRect(ref.current), opts)
+  }
+  const hide = () => {
+    if (!hoverCapable) return
+    scheduleHoverHide(id)
+  }
+  return {
+    path: id ? playerPath(id, { name: displayName, d: asOf, s: sportId }) : null,
+    hoverProps: {
+      ref,
+      onMouseEnter: () => show(),
+      onMouseLeave: hide,
+      onFocus: () => show({ immediate: true }),
+      onBlur: hide,
+    },
+  }
+}
+
 // Wraps a player's name (already rendered as children) in a plain, no-underline
 // button that navigates to their page. SPOILER-SAFE for the reason that
 // matters: it injects no stat or score into the DOM at the link site — the
@@ -48,37 +86,18 @@ function triggerRect(el) {
 // explicitly; without it the link still works, just at the bare-id address.
 export function PlayerLink({ id, name, className = '', ariaLabel, children }) {
   const navigate = useNav()
-  const { asOf, sportId } = useLinkScope()
-  const btnRef = useRef(null)
-  // Desktop-only (see HOVER_CARD_QUERY's own header): a real mouse, at the
-  // app's own "wide" width. Read once per render rather than gating inside
-  // the handlers below — the handlers still no-op on a stale `true` from the
-  // instant before a resize, since the global card requires an active id it
-  // never receives from a query that's already false by then.
-  const hoverCapable = useMediaQuery(HOVER_CARD_QUERY)
-  if (!id) {
-    return <span className={className}>{children}</span>
-  }
   const displayName = name ?? nameFromChildren(children)
-  const showHoverCard = (opts) => {
-    if (!hoverCapable || !btnRef.current) return
-    scheduleHoverShow(id, displayName, triggerRect(btnRef.current), opts)
-  }
-  const hideHoverCard = () => {
-    if (!hoverCapable) return
-    scheduleHoverHide(id)
+  const { path, hoverProps } = usePlayerLink(id, displayName)
+  if (!path) {
+    return <span className={className}>{children}</span>
   }
   return (
     <button
-      ref={btnRef}
       type="button"
       className={`plink ${className}`}
       aria-label={ariaLabel}
-      onClick={() => navigate(playerPath(id, { name: displayName, d: asOf, s: sportId }))}
-      onMouseEnter={() => showHoverCard()}
-      onMouseLeave={hideHoverCard}
-      onFocus={() => showHoverCard({ immediate: true })}
-      onBlur={hideHoverCard}
+      onClick={() => navigate(path)}
+      {...hoverProps}
     >
       {children}
     </button>

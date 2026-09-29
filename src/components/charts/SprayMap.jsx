@@ -2,6 +2,8 @@ import { useId, useMemo, useState } from 'react'
 import { HOME } from '../../lib/ballpark/ballparkGeometry.js'
 import { HARD_HIT_MPH, hitCoordToSvg } from '../../lib/ballpark/hitProjection.js'
 import { directionCaption, directionMix, hrNote, splitBalls } from '../../api/spray.js'
+import { Card } from '../ui/frame/Card.jsx'
+import { FactGrid } from '../ui/frame/FactGrid.jsx'
 
 // The season spray map: where one batter's hits land, and how that moves
 // against a right-handed or a left-handed pitcher.
@@ -152,7 +154,7 @@ export function SprayMap({ view }) {
   const levels = view.levels.map((l) => LEVEL_LABEL[l]).join(' + ')
 
   return (
-    <div className="spray">
+    <Card as="div" body="flush" className="spray">
       <div className="spray__chiprow">
         {view.splits.map((s) => (
           <button
@@ -314,7 +316,7 @@ export function SprayMap({ view }) {
         </div>
       )}
 
-      <dl className="factgrid spray__facts">
+      <FactGrid className="spray__facts">
         {[
           ['Hits', chosen.hits],
           ['XBH', chosen.xbh],
@@ -326,12 +328,12 @@ export function SprayMap({ view }) {
             <dd className="fact__value">{value}</dd>
           </div>
         ))}
-      </dl>
+      </FactGrid>
 
       <p className="spray__foot">
         {levels} · {chosen.bip} balls in play. Hard-hit share is of balls in play.
         {note ? ` ${note}.` : ''}
       </p>
-    </div>
+    </Card>
   )
 }

@@ -55,18 +55,16 @@
 }
 
 /* THE PANEL. The card sits under the splits tables on a page whose vocabulary
-   for a bordered figure block is .player__statgrid (26-player-page.css) — the
-   same hairline, the same radius — so this reads as one of the page's objects
-   rather than a list bolted under a heading. No shadow: four of these stack,
-   and four raised cards is a heavier page than the one figure grid above. */
+   for a bordered figure block is .player__statgrid (26-player-page.css), so
+   this reads as one of the page's objects rather than a list bolted under a
+   heading. Each panel's list sits in a Card with a flush body (#1113, slice
+   C2); the list owns its row rules. The Card is a LEDGER, not a sheet: no
+   shadow. Four of these panels stack, and four raised cards is a heavier page
+   than the one figure grid above. */
 .gamelines__rows {
   margin: 0;
   padding: 0;
   list-style: none;
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-md);
-  overflow: hidden;
 }
 
 /* THE HEAD ROW — the section's name and its five column names, on the same

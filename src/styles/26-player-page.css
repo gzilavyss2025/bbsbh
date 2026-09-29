@@ -271,18 +271,16 @@
 
 
 /* ---- 5-tile season row (reuses .stat) ----
-   Same edge-to-edge hairline-ruled container as .factgrid/.player__splits —
-   also covers SplitsVsTeam's career line, which reuses this class
-   (.player__statgrid vsteam__grid) rather than styling its own grid. */
+   Same edge-to-edge hairline-ruled grid as .factgrid/.player__splits, inside
+   a Card (sheet, flush body; #1113, slice C2) that draws the frame. The grid
+   keeps the --border-rule ground its 1px gaps show as rules. Also covers
+   SplitsVsTeam's career line, which reuses this class inside its own
+   .vsteam__grid Card rather than styling its own grid. */
 .player__statgrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 1px;
   background: var(--border-rule);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
 }
 .player__statgrid .stat {
   background: var(--surface-card);
@@ -380,17 +378,13 @@
 
 /* ---- splits ----
    Same edge-to-edge grid treatment as .factgrid (the bio card above it):
-   a single hairline-ruled container rather than a gap of separately
-   bordered/shadowed cards. */
+   one hairline-ruled grid inside a Card (#1113, slice C2) rather than a gap
+   of separately bordered/shadowed cards. */
 .player__splits {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1px;
   background: var(--border-rule);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
 }
 .split {
   background: var(--surface-card);
@@ -621,14 +615,11 @@
 }
 /* The conditional last-meeting card — a caption naming what it is ("Last game
    vs STL"), then the date + opponent, a divider, and the broadcast-style stat
-   line, the same mono treatment as the game log. */
+   line, the same mono treatment as the game log. A ledger Card (#1113, slice
+   C2); this rule keeps its margin and its own inset. */
 .vsteam__last {
   margin: 10px 0 0;
   padding: var(--space-2) var(--space-3);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-card);
 }
 .vsteam__last-label {
   font-family: var(--font-display);
@@ -668,16 +659,15 @@
 
 /* ---- game log: one broadcast-style stat line per game ----
    The date + opponent ride a fixed left column; the stat line ("2-4, 2B, HR,
-   2 RBI, K") fills the rest in mono, reading like a TV lower-third. */
+   2 RBI, K") fills the rest in mono, reading like a TV lower-third. The log
+   is a Card (sheet, flush body; #1113, slice C2) holding the list. */
 .gamelog {
-  list-style: none;
   margin: 8px 0 0;
+}
+.gamelog__list {
+  list-style: none;
+  margin: 0;
   padding: 0;
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
 }
 .gamelog__row {
   display: grid;
@@ -1011,18 +1001,16 @@
   font-style: italic;
   color: var(--graphite);
 }
-/* MILESTONE WATCH card below the career register — a small bordered block
-   (echoes .rehabcard's card treatment) rather than a bare line, since it now
-   carries a projected timeframe alongside the progress fact. Title uppercase
-   like every other SectionTitle; each row's progress text stays neutral, the
-   projected timeframe inked in the accent color (like the milestone pill) so the
-   forward-looking half of the fact reads as distinct from the plain count. */
+/* MILESTONE WATCH card below the career register — a Card (sheet, flush body;
+   #1113, slice C2) rather than a bare line, since it now carries a projected
+   timeframe alongside the progress fact. This rule keeps its margin and its
+   own inset. Title uppercase like every other SectionTitle; each row's
+   progress text stays neutral, the projected timeframe inked in the accent
+   color (like the milestone pill) so the forward-looking half of the fact
+   reads as distinct from the plain count. */
 .milestonewatch {
   margin: 8px 2px 0;
   padding: var(--space-2) var(--space-2h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
 }
 /* A SectionHead label (#1113); only its place in the box is kept here. */
 .milestonewatch__title {

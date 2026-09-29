@@ -836,6 +836,13 @@ export function seriesHref(series, cutoffDate, historyIds) {
     ? postseasonSeriesPath(series.id)
     : postseasonLivePath(series.id, cutoffDate)
 }
+// Where a game page's series band links (GameView): the LIVE page heading into
+// the game's own date, never the finished page. The finished page shows how
+// the series ended, and the game on screen can be the game that ended it.
+// Null with no series id (an empty slot, a bracket still loading) or no date.
+export function gameSeriesHref(series, officialDate) {
+  return series?.id && officialDate ? postseasonLivePath(series.id, officialDate) : null
+}
 export function tradeDeadlinePath() {
   return '/trade-deadline'
 }
