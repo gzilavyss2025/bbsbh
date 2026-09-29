@@ -115,10 +115,13 @@ export function AwardsLedger({ ledger, preview = false, limit }) {
 // neighbour to divide from, so each table is its own card and the ledger is
 // only the grid. Card draws the frame either way (#1113, slice C2); the CSS
 // never has to strip one. `wide` is the same WIDE_QUERY that sets the cap.
+// The phone's hairline divider keys on .awards--stacked, the class this Card
+// carries, not on a second media query, so JS and CSS can never disagree at
+// a fractional width (#1257, test/awards-ledger-breakpoint.test.js).
 function LedgerBody({ wide, children }) {
   if (wide) return <div className="awards">{children}</div>
   return (
-    <Card as="div" body="flush" className="awards">
+    <Card as="div" body="flush" className="awards awards--stacked">
       {children}
     </Card>
   )

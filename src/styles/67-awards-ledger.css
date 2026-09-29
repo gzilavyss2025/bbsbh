@@ -49,13 +49,15 @@
 
 /* ---- one award's block ----
    On a phone the blocks share one card, so a hairline divides them. From
-   740px each block is its own card and needs no divider. */
-@media (max-width: 739.98px) {
-  .awardblk + .awardblk {
-    margin-top: 15px;
-    padding-top: var(--space-3h);
-    border-top: var(--bw-hair) solid var(--border-hairline);
-  }
+   740px each block is its own card and needs no divider. The rule keys on
+   .awards--stacked, the one card that AwardsLedger.jsx draws on a phone, not
+   on a second media query: a (max-width: 739.98px) query left a gap under 740px where JS drew
+   the one card and CSS drew no divider (#1257).
+   test/awards-ledger-breakpoint.test.js pins this. */
+.awards--stacked .awardblk + .awardblk {
+  margin-top: 15px;
+  padding-top: var(--space-3h);
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .awardblk__head {
   display: flex;
