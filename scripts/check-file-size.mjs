@@ -195,7 +195,7 @@ const BUDGETS = {
   // pitch-mix card's batter-side split — one more arsenalSidesView memo beside
   // the times-through one it crosses with, and the prop that carries it down.
   'src/screens/TeamInfo.jsx': 1400, // 1369
-  'src/screens/BoxScore.jsx': 1300, // 1203 — the hit chart's 3-line mount; the card itself is screens/boxscore/HitChartCard.jsx
+  'src/screens/BoxScore.jsx': 1200, // 1191 — the hit chart's 3-line mount; the card itself is screens/boxscore/HitChartCard.jsx
   'src/screens/FoulTrackerPage.jsx': 1200, // 1168
   // 1200 -> 1225 for the runtime logo-override hooks (ADR-0050's logo
   // dimension): the store/reader themselves went to their own module

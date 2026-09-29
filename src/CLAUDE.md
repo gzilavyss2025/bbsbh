@@ -263,9 +263,8 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   a thin strip across the HEAD of the revealed sheet (ADR-0035's third
   amendment), and it stays ONE row — mount, a line of copy, one action — with
   everything a minted stamp additionally offers behind its `Details` disclosure.
-  Its two positions are CSS, not two renders: first child of the Highlights
-  section, with `48-stamp-strip.css` floating that section's title and the
-  R/H/E/LOB totals above it below the wide breakpoint. That
+  It is the first child of the box score's one section on every width; the box
+  score's phone order (`48-stamp-strip.css`) is CSS `order`, not a second render. That
   host `SealBox` has an `onReveal` since ADR-0049, but only for a real TAP: it writes
   `bbsbh:boxreveal:{gamePk}`, one bit that re-opens this page and nothing else, withheld under
   the pass and under a stamp — either would record a permanent mark for a seal nobody touched,

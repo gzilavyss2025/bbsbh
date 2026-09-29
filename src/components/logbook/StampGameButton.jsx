@@ -45,8 +45,8 @@ import { GameStamp } from './GameStamp.jsx'
 // the width of the sheet, about one stamp tall — so the stamp is an offer you
 // decline by scrolling past rather than a reward you have to find. Where it
 // lands is set by BoxScore.jsx plus the ordering rules in
-// styles/48-stamp-strip.css: above the Highlights rule on a wide screen, and
-// directly under the R/H/E/LOB totals on a phone.
+// styles/48-stamp-strip.css: first on the sheet, above the Highlights rule on a
+// wide screen, and first on a phone too.
 //
 // Staying thin is the constraint, not a preference. The strip is ONE row —
 // mount, a line of copy, one action. Everything a minted stamp additionally
