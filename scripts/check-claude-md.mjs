@@ -53,7 +53,7 @@ const BUDGETS = {
   // an entry for it means the catalog started growing back into it.
   //
   // Screens, routing, the design system, and the UI half of the spoiler rule.
-  'src/CLAUDE.md': 451,
+  'src/CLAUDE.md': 450,
   // The club-identity data model and the dev-only lab that writes it.
   'src/lib/CLAUDE.md': 385,
 }
