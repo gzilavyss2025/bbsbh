@@ -20,7 +20,7 @@
 // dated section of the player page respects, so a game-scoped view of a player
 // cannot show an award he had not won yet on that date.
 
-import { MONTH_ABBR } from './shared.js'
+import { MONTH_NAMES } from '../../lib/dates.js'
 import { isMlbTeamId } from '../../lib/teams.js'
 
 // The majors, keyed by the stable award `id` (league-prefixed AL*/NL* pairs),
@@ -196,7 +196,7 @@ export function orgIdFor(teamId) {
 
 function monthYear(iso) {
   const [y, m] = (iso || '').split('-')
-  return m ? `${MONTH_ABBR[Number(m) - 1]} ${y}` : y || ''
+  return m ? `${MONTH_NAMES[Number(m) - 1]} ${y}` : y || ''
 }
 
 // Broadcast convention: "AL MVP" / "NL Cy Young" is how these are said. Folded

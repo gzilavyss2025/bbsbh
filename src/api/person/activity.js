@@ -14,7 +14,7 @@ import {
   mentionsInjuredList,
   injuredListDays,
 } from '../rehab-policy.js'
-import { MONTH_ABBR } from './shared.js'
+import { monthDayName } from '../../lib/dates.js'
 import { pitcherRole } from './identity.js'
 import { aggregateSplits, hitterTiles, pitcherTiles, splitsView } from './stats.js'
 import { gameLogView } from './gameLog.js'
@@ -260,11 +260,6 @@ export function injuredListStints(transactions) {
   return stints
 }
 
-function ilMonthDay(iso) {
-  const [, m, d] = (iso || '').split('-')
-  return m ? `${MONTH_ABBR[Number(m) - 1]} ${Number(d)}` : ''
-}
-
 // One timeline row per stint, in the feed's own voice: the placement's raw
 // description IS the opening sentence (it already names the club, position,
 // player, day count and the injury — "New York Yankees placed RHP Gerrit Cole
@@ -356,8 +351,8 @@ function ilArcClause(s, levelByTeamId) {
   if (!s.end) return rehab ? `Rehabbing with ${rehab}.` : ''
   const span = s.days != null ? ` after ${s.days} ${s.days === 1 ? 'day' : 'days'}` : ''
   return rehab
-    ? `Rehabbed with ${rehab}, then activated ${ilMonthDay(s.end)}${span}.`
-    : `Activated ${ilMonthDay(s.end)}${span}.`
+    ? `Rehabbed with ${rehab}, then activated ${monthDayName(s.end)}${span}.`
+    : `Activated ${monthDayName(s.end)}${span}.`
 }
 
 export function ilStintRow(s, levelByTeamId) {

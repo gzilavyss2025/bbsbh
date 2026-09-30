@@ -63,9 +63,6 @@ function copyRedis() {
   return getRedis({ automaticDeserialization: false })
 }
 
-// Re-exported so test/api-copy-handler.test.js keeps pinning it from here.
-export { hashFromReply }
-
 // The admin gate (Clerk token + COPY_ADMIN_USER_IDS allowlist) lives in
 // _lib/adminAuth.js now that api/ballpark-photo.js shares it. Same behaviour,
 // one implementation — see that file for why an authorization check in

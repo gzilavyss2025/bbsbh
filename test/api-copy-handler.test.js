@@ -27,7 +27,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import handler, { hashFromReply } from '../api/copy.js'
+import handler from '../api/copy.js'
+import { hashFromReply } from '../api/_lib/redis.js'
 import { nodeRes } from './helpers/node-http.js'
 
 const PHOTO_URL =

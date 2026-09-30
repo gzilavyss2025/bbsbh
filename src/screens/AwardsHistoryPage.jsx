@@ -323,7 +323,7 @@ export function AwardsHistoryPage() {
   const { favoriteTeamId } = useFavoriteTeam()
   const [view, setView] = useState('award')
   const families = useMemo(() => data?.families ?? [], [data])
-  const updated = monthDayName(data?.generatedAt?.slice(0, 10))
+  const updated = monthDayName(data?.generatedAt)
 
   const { hardware, allMlbFirst, allMlbSecond } = useMemo(() => {
     const first = families.find((f) => f.key === ALL_MLB_FIRST_KEY) ?? null

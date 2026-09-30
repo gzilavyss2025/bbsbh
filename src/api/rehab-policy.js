@@ -11,9 +11,6 @@
 import { ipToOuts } from '../lib/math/innings.js'
 import { num } from '../lib/math/number.js'
 
-// Re-exported: the tracked .scratch scripts still import it from here.
-export { ipToOuts }
-
 // A minor-league stint clears a workload threshold in whichever unit fits the
 // group and role: games played for a hitter, but EITHER innings pitched OR
 // games pitched for a pitcher. Innings alone undercounts a RELIEVER, who
