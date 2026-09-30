@@ -146,7 +146,8 @@ function statLineFrom(splits, pitching) {
   if (!splits.length) return null
   if (pitching) {
     const t = sumPitching(splits)
-    return [`${t.inningsPitched} IP`, `${num2(t.era)} ERA`, `${t.strikeOuts} SO`].join(', ')
+    // No outs means no ERA (null from sumPitching, #1276): a dash, not "0.00".
+    return [`${t.inningsPitched} IP`, `${num2(t.era) ?? '—'} ERA`, `${t.strikeOuts} SO`].join(', ')
   }
   const t = sumHitting(splits)
   return [rate3(t.avg), `${t.homeRuns} HR`, `${t.rbi} RBI`].join(', ')

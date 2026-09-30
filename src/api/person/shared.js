@@ -19,6 +19,22 @@ export function rate3(x) {
   return x.toFixed(3).replace(/^0(?=\.)/, '')
 }
 
+// MLB'S OWN OPS: round OBP and SLG to three places, THEN add. Not their sum at
+// full precision, which differs from the published string for about one hitter
+// in four (Judge 2025: 1.145 from MLB, 1.144 from the full-precision sum; 673 of
+// 673 hitters match this way, #1275). Returns a number; print it with rate3.
+const round3 = (v) => Math.round(v * 1000) / 1000
+export const mlbOps = (obp, slg) => round3(obp) + round3(slg)
+
+// ERA and WHIP from summed components. A pitcher who recorded no out has none:
+// null, never 0, which would claim he was perfect (#1276). Each surface keeps
+// its own "no value" and maps the null itself. Innings are outs / 3, so ERA is
+// earned runs * 27 / outs.
+export const eraOf = (earnedRuns, outs) => (outs > 0 ? (earnedRuns * 27) / outs : null)
+export const whipOf = (walks, hits, outs) => (outs > 0 ? ((walks + hits) * 3) / outs : null)
+// Sort key for a table of pitchers by ERA, best first: a null ERA goes last.
+export const byEra = (a, b) => (a.era ?? Infinity) - (b.era ?? Infinity) || 0
+
 // ".59" style rate: two decimals, no leading zero — BB/K reads like a
 // fractional average, not a whole-number ratio.
 export function rate2(v) {

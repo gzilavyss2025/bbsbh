@@ -2,7 +2,7 @@
 // chips. See ../person.js's header for the module's overall spoiler footing.
 
 import { ipToOuts } from '../rehab-policy.js'
-import { DASH, num, rate3, outsToIp } from './shared.js'
+import { DASH, num, rate3, outsToIp, mlbOps, eraOf, whipOf } from './shared.js'
 import { ordinal } from './teamPage.js'
 
 // ---------------------------------------------------------------------------
@@ -57,7 +57,6 @@ export function aggregateSplits(splits, group) {
   const sum = (k) => uniq.reduce((t, s) => t + num(s[k]), 0)
   if (group === 'pitching') {
     const outs = uniq.reduce((t, s) => t + ipToOuts(s.inningsPitched), 0)
-    const ip = outs / 3
     const er = sum('earnedRuns')
     const h = sum('hits')
     const bb = sum('baseOnBalls')
@@ -74,8 +73,8 @@ export function aggregateSplits(splits, group) {
       // ERA/WHIP are 2-decimal by baseball convention ("4.27", "1.30"), matching
       // the API's own single-stint values — never rate3's three, which would make
       // a mid-season-trade season read differently from every other row.
-      era: ip ? ((er * 9) / ip).toFixed(2) : DASH,
-      whip: ip ? ((bb + h) / ip).toFixed(2) : DASH,
+      era: eraOf(er, outs)?.toFixed(2) ?? DASH,
+      whip: whipOf(bb, h, outs)?.toFixed(2) ?? DASH,
     }
   }
   const ab = sum('atBats')
@@ -101,7 +100,7 @@ export function aggregateSplits(splits, group) {
     avg: ab ? rate3(h / ab) : DASH,
     obp: rate3(obp),
     slg: rate3(slg),
-    ops: rate3(obp + slg),
+    ops: rate3(mlbOps(obp, slg)),
   }
 }
 
@@ -217,13 +216,8 @@ function overallSide(stats, group) {
   const obpDen = ab + bb + hbp + sf
   const obp = obpDen ? (h + bb + hbp) / obpDen : 0
   const slg = ab ? sum('totalBases') / ab : 0
-  // OPS from the ROUNDED obp/slg, not from the full-precision pair. This row
-  // prints its own OBP and SLG one column to the left, and OPS is defined as
-  // their sum, so a reader can and will add them up: .3155 + .3694 rounds to
-  // .685 while the .315 and .369 on the page add to .684. The third decimal
-  // that buys is worth less than a table that fails its own arithmetic.
-  const obp3 = rate3(obp)
-  const slg3 = rate3(slg)
+  // OPS is the sum of the ROUNDED obp/slg (mlbOps), so this row adds up: it
+  // prints its own OBP and SLG one column to the left, and a reader can add them.
   return splitSide(
     {
       atBats: ab,
@@ -236,9 +230,9 @@ function overallSide(stats, group) {
       strikeOuts: sum('strikeOuts'),
       baseOnBalls: bb,
       avg: ab ? rate3(h / ab) : DASH,
-      obp: obp3,
-      slg: slg3,
-      ops: rate3(Number.parseFloat(obp3) + Number.parseFloat(slg3)),
+      obp: rate3(obp),
+      slg: rate3(slg),
+      ops: rate3(mlbOps(obp, slg)),
     },
     group,
   )

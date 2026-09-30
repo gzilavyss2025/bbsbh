@@ -476,6 +476,13 @@ test('formatPitchingLine includes a record for SP, drops it for RP, and shows sa
   assert.equal(formatPitchingLine('CL', base), '3.15 ERA, 2 SV, 142.0 IP, 24% SO%, 7% BB%')
 })
 
+// #1276: sumPitching gives era null when the pitcher recorded no out. The line
+// said "0.00 ERA", which claims he was perfect.
+test('formatPitchingLine prints a dash, not 0.00, for a pitcher with no ERA', () => {
+  const line = formatPitchingLine('RP', { era: null, inningsPitched: '0.0', strikeOuts: 0, baseOnBalls: 1, battersFaced: 4 })
+  assert.equal(line, '— ERA, 0.0 IP, 0% SO%, 25% BB%')
+})
+
 // --------------------------------------------------------------------------
 // bothSidesMlb — a real deadline deal always involves two DIFFERENT MLB
 // organizations, even when logged at the affiliate level. Verified live:

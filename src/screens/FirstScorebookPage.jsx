@@ -5,6 +5,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'
 import { extraInningsOf } from '../api/select.js'
+import { DASH, byEra, eraOf, whipOf } from '../api/person/shared.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
@@ -116,11 +117,12 @@ export function FirstScorebookPage() {
           teamLosses: pitcher.starts.length - teamWins,
           strikeOuts: pitcher.starts.reduce((n, s) => n + s.k, 0),
           inningsPitched: `${Math.floor(outs / 3)}.${outs % 3}`,
-          era: outs ? (earnedRuns * 9) / (outs / 3) : 0,
-          whip: outs ? (walks + hits) / (outs / 3) : 0,
+          // null at no outs (#1276): no ERA, sorted behind every pitcher who has one.
+          era: eraOf(earnedRuns, outs),
+          whip: whipOf(walks, hits, outs),
         }
       })
-      .sort((a, b) => b.gamesStarted - a.gamesStarted || a.era - b.era)
+      .sort((a, b) => b.gamesStarted - a.gamesStarted || byEra(a, b))
   }, [data])
 
   const rotationTotals = useMemo(() => {
@@ -133,7 +135,7 @@ export function FirstScorebookPage() {
       arms: rotation.length,
       starts: starts.length,
       inningsPitched: `${Math.floor(outs / 3)}.${outs % 3}`,
-      era: (earnedRuns * 9) / (outs / 3),
+      era: eraOf(earnedRuns, outs),
       strikeOuts: starts.reduce((n, s) => n + s.k, 0),
       teamWins,
       teamLosses: starts.length - teamWins,
@@ -148,7 +150,7 @@ export function FirstScorebookPage() {
     const noDecisions = starts.filter((s) => s.decision === 'ND')
     const hardLuck = noDecisions.length ? [...noDecisions].sort((a, b) => b.gameScore - a.gameScore)[0] : null
     const workhorse = [...rotation].filter((p) => p.gamesStarted >= 4).sort((a, b) => (b.gamesStarted - b.wins - b.losses) - (a.gamesStarted - a.wins - a.losses))[0]
-    const tightest = [...rotation].filter((p) => p.gamesStarted >= 2).sort((a, b) => a.whip - b.whip)[0]
+    const tightest = [...rotation].filter((p) => p.gamesStarted >= 2 && p.whip != null).sort((a, b) => a.whip - b.whip)[0]
     const bestStartLeague = leagueGameScoreContext(league?.scores, bestStart.gameScore)
     const hardLuckLeague = hardLuck ? leagueGameScoreContext(league?.scores, hardLuck.gameScore) : null
     const nuggets = [
@@ -159,14 +161,17 @@ export function FirstScorebookPage() {
         headline: 'The one for the scrapbook',
         body: `${bestStart.name}’s start against the ${bestStart.opponent} on ${dateLabel(bestStart.date, true)} is the best in the book — ${bestStart.ip} IP, ${bestStart.h} H, ${bestStart.bb} BB, ${bestStart.k} K${bestStart.shutout ? ', a shutout' : ''}${bestStart.completeGame ? ', and the only complete game a Brewers starter finished all summer.' : '.'} ${bestStartLeague ? `Leaguewide, it’s ${leagueRankPhrase(bestStartLeague, league.season)}.` : ''}`,
       },
-      {
+    ]
+    // No outs across every start means no rotation ERA (#1276): skip this nugget.
+    if (rotationTotals.era != null) {
+      nuggets.push({
         key: 'rotation',
         stat: rotationTotals.era.toFixed(2),
         label: 'Rotation ERA',
         headline: 'The full arsenal',
         body: `${rotationTotals.arms} different arms started for Milwaukee across these ${rotationTotals.starts} games and combined for a ${rotationTotals.era.toFixed(2)} ERA over ${rotationTotals.inningsPitched} innings with ${rotationTotals.strikeOuts} strikeouts. The Brewers went ${rotationTotals.teamWins}–${rotationTotals.teamLosses} in games their starter took the ball — the same record as the book itself.`,
-      },
-    ]
+      })
+    }
     if (league?.scores?.length) {
       const eliteThreshold = league.scores[Math.floor(0.9 * league.scores.length)]
       const eliteStarts = starts.filter((s) => s.gameScore >= eliteThreshold).length
@@ -359,7 +364,7 @@ export function FirstScorebookPage() {
             <div className="scorebookstory__leaderhead"><span>Pitcher</span><span>IP</span><span>K</span><span>ER</span><span>WHIP</span></div>
             {data.pitchingLeaders.slice(0, 8).map((player) => {
               const outs = player.pitching._outs
-              const whip = ((player.pitching.baseOnBalls + player.pitching.hits) / (outs / 3)).toFixed(2)
+              const whip = whipOf(player.pitching.baseOnBalls, player.pitching.hits, outs)?.toFixed(2) ?? DASH
               return (
                 <div className="scorebookstory__leaderrow" key={player.id}>
                   <span><TeamLogo teamId={player.teamId} name={player.team} size={20} /><b>{player.name}</b><small>{player.games} G</small></span>
@@ -386,7 +391,7 @@ export function FirstScorebookPage() {
               <span>{pitcher.gamesStarted}</span>
               <span>{pitcher.wins}–{pitcher.losses}</span>
               <span>{pitcher.teamWins}–{pitcher.teamLosses}</span>
-              <span>{pitcher.era.toFixed(2)}</span>
+              <span>{pitcher.era?.toFixed(2) ?? DASH}</span>
             </div>
           ))}
         </div>

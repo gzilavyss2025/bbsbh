@@ -1,4 +1,5 @@
 import { contextNeutralPoints } from './performanceScore.js'
+import { byEra, eraOf, whipOf } from './person/shared.js'
 
 // The Logbook retrospective's ported First Scorebook sections — best
 // individual performances, most memorable moments, combined leaders, and the
@@ -40,8 +41,6 @@ import { contextNeutralPoints } from './performanceScore.js'
 // degradation as a stamp missing its schedule facts in logbookStats.js.
 
 const ipString = (outs) => `${Math.floor(outs / 3)}.${outs % 3}`
-const era = (er, outs) => (outs ? (er * 9) / (outs / 3) : 0)
-const whip = (bb, h, outs) => (outs ? (bb + h) / (outs / 3) : 0)
 
 function lineForBatter(b) {
   const extras = []
@@ -167,7 +166,7 @@ function leaders(rows) {
       team: row.team,
       games: row.games,
       pitching: { ...row.s, inningsPitched: ipString(row.outs) },
-      whip: whip(row.s.baseOnBalls, row.s.hits, row.outs),
+      whip: whipOf(row.s.baseOnBalls, row.s.hits, row.outs),
     }))
     .sort(
       (a, b) =>
@@ -262,12 +261,12 @@ function pitchingRoles(rows) {
       teamWins: row.teamWins,
       teamLosses: row.teamLosses,
       inningsPitched: ipString(row.outs),
-      era: era(row.s.earnedRuns, row.outs),
-      whip: whip(row.s.baseOnBalls, row.s.hits, row.outs),
+      era: eraOf(row.s.earnedRuns, row.outs),
+      whip: whipOf(row.s.baseOnBalls, row.s.hits, row.outs),
       avgPitches: row.games ? row.pitches / row.games : 0,
       pitching: row.s,
     }))
-    .sort((a, b) => b.gamesStarted - a.gamesStarted || a.era - b.era)
+    .sort((a, b) => b.gamesStarted - a.gamesStarted || byEra(a, b))
 
   const bullpen = [...relief.values()]
     .map((row) => ({
@@ -279,11 +278,11 @@ function pitchingRoles(rows) {
       saves: row.saves,
       holds: row.holds,
       inningsPitched: ipString(row.outs),
-      era: era(row.s.earnedRuns, row.outs),
-      whip: whip(row.s.baseOnBalls, row.s.hits, row.outs),
+      era: eraOf(row.s.earnedRuns, row.outs),
+      whip: whipOf(row.s.baseOnBalls, row.s.hits, row.outs),
       pitching: row.s,
     }))
-    .sort((a, b) => b.appearances - a.appearances || a.era - b.era)
+    .sort((a, b) => b.appearances - a.appearances || byEra(a, b))
 
   return { rotation, bullpen }
 }

@@ -1,4 +1,5 @@
 import { eligibleHighlightForPlay } from '../../api/highlights.js'
+import { DASH } from '../../api/person/shared.js'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { HighlightSheet } from '../../components/playbyplay/HighlightSheet.jsx'
@@ -126,7 +127,7 @@ export function RetrospectiveSections({ retro, facts, loading, momentClips, open
                   <span>{p.pitching.inningsPitched}</span>
                   <span>{p.pitching.strikeOuts}</span>
                   <span>{p.pitching.earnedRuns}</span>
-                  <span>{p.whip.toFixed(2)}</span>
+                  <span>{p.whip?.toFixed(2) ?? DASH}</span>
                 </div>
               ))}
             </div>
@@ -155,7 +156,7 @@ export function RetrospectiveSections({ retro, facts, loading, momentClips, open
                 <span>{p.gamesStarted}</span>
                 <span>{p.wins}–{p.losses}</span>
                 <span>{p.teamWins}–{p.teamLosses}</span>
-                <span>{p.era.toFixed(2)}</span>
+                <span>{p.era?.toFixed(2) ?? DASH}</span>
                 <small className="logbookstats__leaderdetail">
                   {p.pitching.hits} H, {p.pitching.runs} R, {p.pitching.earnedRuns} ER, {p.pitching.baseOnBalls} BB,{' '}
                   {p.pitching.strikeOuts} SO · {Math.round(p.avgPitches)} pitches/start
@@ -187,7 +188,7 @@ export function RetrospectiveSections({ retro, facts, loading, momentClips, open
                 <span>{p.appearances}</span>
                 <span>{p.saves}</span>
                 <span>{p.holds}</span>
-                <span>{p.era.toFixed(2)}</span>
+                <span>{p.era?.toFixed(2) ?? DASH}</span>
                 <small className="logbookstats__leaderdetail">
                   {p.pitching.hits} H, {p.pitching.runs} R, {p.pitching.earnedRuns} ER, {p.pitching.baseOnBalls} BB,{' '}
                   {p.pitching.strikeOuts} SO
