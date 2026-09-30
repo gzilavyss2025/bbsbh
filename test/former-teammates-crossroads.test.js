@@ -226,3 +226,20 @@ test('a farm-club tie whose player who left starts lifts its former row to the t
   assert.equal(former[0].home[0].starting, true)
   assert.equal(former[1].tonight, false)
 })
+
+test('on a MiLB matchup, tonight’s own club reads as itself, never as a “system”', () => {
+  // Nashville (AAA, Brewers org) vs Iowa (AAA, Cubs org). The shared club IS
+  // tonight's club, and a MiLB club has no farm system of its own.
+  const NASHVILLE = 556
+  const IOWA = 451
+  const milbNames = { [NASHVILLE]: 'Sounds', [IOWA]: 'Cubs' }
+  const left = player(20, 'Left Nashville', IOWA)
+  const stayed = player(21, 'Still a Sound', NASHVILLE)
+  const sounds = farm(NASHVILLE, 'Nashville Sounds', [2025], 'AAA', 158)
+  const { former } = teammateCrossroads([pair(left, stayed, [sounds])], NASHVILLE, IOWA, undefined, milbNames)
+  assert.equal(former.length, 1)
+  assert.equal(former[0].club.teamId, NASHVILLE)
+  assert.equal(former[0].club.teamName, 'Sounds')
+  assert.equal(former[0].club.level, 'AAA')
+  assert.deepEqual(ids(former[0].home), [left.id])
+})

@@ -131,10 +131,11 @@ export function historicalParentOrgAt(milbHistory, teamId, season) {
 
 // The `orgId` a shard's `shared` club entry carries: the club's season-accurate
 // parent org, so the card can file a farm club of tonight's club as a former
-// club (#1319). An MLB club is its own org. A `shared` entry merges several
+// club (#1319). An MLB club writes none: it is its own org, and the reader
+// already matches a club on its `teamId`. A `shared` entry merges several
 // seasons of one club, and affiliations change, so a minor-league club takes
 // the parent of its LATEST shared season. `orgOf(teamId, season)` returns an
 // org id or undefined; undefined means no `orgId` is written (never a guess).
-export function orgIdForShared(teamId, level, seasons, orgOf) {
-  return level === 'MLB' ? teamId : orgOf(teamId, Math.max(...seasons))
+export function orgIdForShared(teamId, seasons, orgOf) {
+  return orgOf(teamId, Math.max(...seasons))
 }
