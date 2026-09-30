@@ -45,13 +45,8 @@ import {
 
 export const SCORES_UNLOCKED_KEY = 'bbsbh:scoresUnlocked'
 
-// Private mode / storage disabled degrades to in-session state for this tab
-// (and an unreadable pass reads as sealed). `notify` is the same-tab echo of the
-// `storage` event: the browser fires it only in OTHER tabs, so without it two
-// mounted instances of this hook (the slate and a game view, or the cloud-sync
-// component) would not see each other's writes until a reload. Dispatching the
-// event ourselves lets the listener below serve as the single refresh path for
-// every source — another tab, this tab, or the cloud merge.
+// Degrade to memory and the same-tab `storage` echo: see src/lib/account/localStore.js.
+// An unreadable pass reads as sealed.
 const passStore = localStore(SCORES_UNLOCKED_KEY, (raw) => raw, (value) => value)
 const daysStore = localStore(SPOILED_DAYS_KEY, parseSpoiledDays, serializeSpoiledDays)
 

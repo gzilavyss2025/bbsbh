@@ -12,6 +12,7 @@ import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../components/ui/frame/Card.jsx'
+import { ordinal } from '../../../lib/format.js'
 
 // THE TEAM HUB'S CHALLENGE CARD, on the Numbers tab — who on this club argues
 // with the plate umpire, against how much baseball they see.
@@ -75,14 +76,6 @@ function ticksTo(max, count = 3) {
 
 const num2 = (x) => (x == null ? '—' : x.toFixed(2))
 const commas = (n) => (n == null ? '—' : Math.round(n).toLocaleString('en-US'))
-
-// Local ordinal. lib/format.js exports the shared one; this body is spelled
-// differently, so it was left as it is.
-function ordinal(n) {
-  const rest = n % 100
-  if (rest >= 11 && rest <= 13) return `${n}th`
-  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`
-}
 
 export function TeamChallengeCard({ data, teamId, clubName, level = 'MLB' }) {
   const navigate = useNav()

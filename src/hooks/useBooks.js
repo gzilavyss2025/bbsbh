@@ -30,11 +30,7 @@ import { localStore, readOwner, writeOwner } from '../lib/account/localStore.js'
 // belong to which book lives on the STAMP record's own `placement.bookId`
 // (src/lib/stamps.js), not here.
 
-// Private mode / storage disabled degrades to in-session memory — the shelf
-// still works for this visit. `notify` is a same-tab echo of the `storage`
-// event (the browser fires it only in OTHER tabs), so two hook instances
-// mounted at once in this tab — a book picker and a settings screen, say —
-// see each other's writes without a reload. Same as useStamps.js.
+// Degrade to memory and the same-tab `storage` echo: see src/lib/account/localStore.js.
 const store = localStore(BOOKS_KEY, parseBooks, serializeBooks)
 
 // Unconditional migration: if the store has no LIVE `default` book, synthesize

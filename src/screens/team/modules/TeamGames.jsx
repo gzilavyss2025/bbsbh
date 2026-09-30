@@ -7,6 +7,7 @@ import { Door } from '../../../components/ui/control/Door.jsx'
 import { DOW_LABELS, MONTH_LABELS } from './TeamStatsCard.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../components/ui/frame/Card.jsx'
+import { jumpScrollLeft } from '../../../hooks/scroll/useScrollRail.js'
 
 // Two surfaces over the same ticket-stub card, both fed lists the caller has
 // already `won != null`-filtered (see loadGames.js / loadOverview.js — never
@@ -22,16 +23,6 @@ import { Card } from '../../../components/ui/frame/Card.jsx'
 // The card markup/CSS (`.last10__*`) is shared by both — the class prefix
 // predates the grid and is left as-is rather than churned through ~40 CSS
 // rules; see the block comment over `.last10` in index.css.
-
-// A setup jump, not a user-visible scroll gesture — bypasses the track's own
-// `scroll-behavior: smooth` (index.css) so the strip's opening position lands
-// instantly instead of visibly gliding across from the oldest card.
-function jumpScrollLeft(el, value) {
-  const prev = el.style.scrollBehavior
-  el.style.scrollBehavior = 'auto'
-  el.scrollLeft = value
-  el.style.scrollBehavior = prev
-}
 
 // Ticket-stub day/month/date parts for a game card. Same UTC-parse convention
 // as dayOfWeekRecord/todayDowLabel in TeamStatsCard, so the weekday can't
