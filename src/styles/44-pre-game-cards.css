@@ -146,6 +146,9 @@
 .seasonseries__cell--current {
   background: color-mix(in srgb, var(--navy) 7%, var(--surface-card));
   border-color: var(--navy);
+  /* The strip lands with this card centred (SeasonSeriesStrip.jsx); the
+     other cards snap to their start, which would pull that landing sideways. */
+  scroll-snap-align: center;
 }
 .seasonseries__cell--current:hover {
   background: color-mix(in srgb, var(--navy) 13%, var(--surface-card));
@@ -158,6 +161,35 @@
 }
 .seasonseries__cell--otherpark:hover {
   background: color-mix(in srgb, var(--accent-link) 10%, var(--surface-inset));
+}
+/* A POSTSEASON game in the strip: the same card, dressed in navy ink so the
+   games that mattered most read apart from the regular season at a glance,
+   with a round tag (WC / DS / LCS / WS · game number) on top and a thin
+   rule ahead of the first one (.seasonseries__divider). The viewed game keeps
+   its own current-game look, hence the :not(). */
+.seasonseries__cell--postseason:not(.seasonseries__cell--current) {
+  background: color-mix(in srgb, var(--navy) 10%, var(--surface-card));
+}
+.seasonseries__cell--postseason:not(.seasonseries__cell--current):hover {
+  background: color-mix(in srgb, var(--navy) 16%, var(--surface-card));
+}
+.seasonseries__round {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--navy);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-body);
+  white-space: nowrap;
+}
+.seasonseries__divider {
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: var(--bw-hair);
+  margin: var(--space-1) var(--space-1);
+  background: var(--border-rule);
 }
 .seasonseries__logo {
   flex-shrink: 0;

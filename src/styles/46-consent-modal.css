@@ -386,6 +386,10 @@
    card/table above. */
 .thub__door {
   display: flex;
+  flex-wrap: wrap;
+  /* Two doors on one line (the lineup page's preview card and blank sheet)
+     sit apart; a lone door is unaffected. */
+  gap: var(--space-1) var(--space-4);
   justify-content: flex-end;
   margin: var(--space-2) 0 var(--space-4);
 }

@@ -175,7 +175,9 @@ export function TeamInfo({
           an unswept umpire. */}
       <div className="teaminfo__topzone">
         <div className="teaminfo__topmain">
-          <FactGrid>
+          {/* The crew rides in this same grid as more cells (HP UMP, 1B UMP, …),
+              so the page's two top tables are one table. */}
+          <FactGrid className="teaminfo__facts">
             <GameFacts
               info={info}
               scorebookWeather={scorebookWeather}
@@ -192,30 +194,17 @@ export function TeamInfo({
                 alone at the end of the grid — see the ESPN-sourced fetch in
                 GameView). The home page's grid is already even without it. */}
             {side === 'away' && <Fact label="Broadcast" value={broadcast} />}
+            <UmpiresCard officials={officials} />
           </FactGrid>
 
-          <UmpiresCard officials={officials} />
-
-          {/* The preview card's door — moved here from its old "Card"
-              tab-bar stop once that tab started opening the live scorecard
-              (ADR-0047's second amendment). Full-width, not a quiet chevron:
-              a scorer on a lineup page is usually here to post the matchup.
-              Nested directly under the crew rather than trailing the whole
-              zone, so it reads as this column's next step. */}
-          {onPreview && (
-            <button
-              type="button"
-              className="btn btn--ink btn--next teaminfo__previewdoor"
-              onClick={onPreview}
-            >
-              View preview card
-            </button>
-          )}
-          {/* Renamed from "Print tonight's sheet" — the live #22 sheet covers
-              what this used to promise; the destination awaits a rebuild. */}
-          {onPrintSheet && (
+          {/* The preview card and the blank sheet: two plain doors on one line
+              (ADR-0047's second amendment moved the preview here from its old
+              "Card" tab-bar stop). Quiet links, not bars — the page opens as a
+              scorebook header and a departure must not shout over the sheet. */}
+          {(onPreview || onPrintSheet) && (
             <div className="thub__door">
-              <Door onClick={onPrintSheet}>Print blank scorecard</Door>
+              {onPreview && <Door onClick={onPreview}>View preview card</Door>}
+              {onPrintSheet && <Door onClick={onPrintSheet}>Print blank scorecard</Door>}
             </div>
           )}
 

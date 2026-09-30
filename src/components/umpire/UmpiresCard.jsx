@@ -4,15 +4,15 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { UmpireTierGlyph } from '../badges/UmpireTierGlyph.jsx'
 import { UmpireAccuracyModal } from './UmpireAccuracyModal.jsx'
 import { UmpireLink } from './UmpireLink.jsx'
-import { SectionHead } from '../ui/frame/SectionHead.jsx'
-import { Card } from '../ui/frame/Card.jsx'
 
-// The lineup page's Umpires section (moved out of TeamInfo.jsx when that
-// screen hit its file-size budget): the crew grid, the plate ump's accuracy
-// tier glyph, and the accuracy modal every name opens. The full Umpire
-// Tendencies card is NOT in here — TeamInfo renders it as the page-top
-// zone's right column (see .teaminfo__topzone), so this section stays just
-// the crew.
+// The lineup page's crew (moved out of TeamInfo.jsx when that screen hit its
+// file-size budget): one fact cell per umpire — "HP UMP", "1B UMP", … — the
+// plate ump's accuracy tier glyph, and the accuracy modal every name opens.
+// It draws CELLS, not a card and not a header: TeamInfo renders it inside the
+// same FactGrid as the date / ballpark / weather facts, so the page's two top
+// tables are one table and the crew fills the cell an odd fact count left
+// empty. The full Umpire Tendencies card is NOT in here — TeamInfo renders it
+// as the page-top zone's right column (see .teaminfo__topzone).
 //
 // Under tonight's plate ump: his season accuracy TIER (Elite/Good/Average/
 // Below Average — see api/umpires.js's tierForZ), as a tap glyph next to
@@ -34,40 +34,27 @@ export function UmpiresCard({ officials }) {
   const [modalId, setModalId] = useState(null)
 
   if (officials.length === 0) return null
-  // A six-man crew (All-Star Game / postseason, LF + RF added — see
-  // selectOfficials) needs its own desktop/ipad layout: two rows of three
-  // rather than the auto-fit grid's crowded row of four plus a stray row of
-  // two (see .umps__list--six in index.css). Four-and-under crews keep the
-  // existing auto-fit flow untouched.
-  const sixMan = officials.length === 6
   return (
-    <section className="umps">
-      <SectionHead look="label">Umpires</SectionHead>
-      {/* The Card is the box (#1113, slice C3); the grid inside it keeps its
-          gap rules (.umps__list, 09-team-info.css). */}
-      <Card as="div" body="flush">
-        <ul className={`umps__list${sixMan ? ' umps__list--six' : ''}`}>
-          {officials.map((o) => (
-            <li key={o.role}>
-              <span className="umps__role">{o.role}</span>
-              <span className="umps__namerow">
-                <UmpireLink id={o.id} className="umps__name" onOpen={() => setModalId(o.id)}>
-                  {o.name}
-                </UmpireLink>
-                {o.role === 'HP' && hpAccuracy?.tier && (
-                  <UmpireTierGlyph
-                    tier={hpAccuracy.tier}
-                    rank={hpAccuracy.rank}
-                    total={hpAccuracy.total}
-                    onFullBreakdown={() => setModalId(o.id)}
-                  />
-                )}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </Card>
+    <>
+      {officials.map((o) => (
+        <div className="fact" key={o.role}>
+          <dt className="fact__label">{o.role} ump</dt>
+          <dd className="fact__value umps__namerow">
+            <UmpireLink id={o.id} className="umps__name" onOpen={() => setModalId(o.id)}>
+              {o.name}
+            </UmpireLink>
+            {o.role === 'HP' && hpAccuracy?.tier && (
+              <UmpireTierGlyph
+                tier={hpAccuracy.tier}
+                rank={hpAccuracy.rank}
+                total={hpAccuracy.total}
+                onFullBreakdown={() => setModalId(o.id)}
+              />
+            )}
+          </dd>
+        </div>
+      ))}
       {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
-    </section>
+    </>
   )
 }

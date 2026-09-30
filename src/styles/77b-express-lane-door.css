@@ -148,14 +148,10 @@
   box-shadow: inset 0 -1px 0 rgba(251, 246, 233, 0.07);
 }
 
-.xl__go {
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-.xl__door:hover .xl__go {
-  transform: translateX(3px);
-}
-@media (prefers-reduced-motion: reduce) {
-  .xl__go {
-    transition: none;
-  }
+/* The name never wraps. The door is a flex row, and a bare text node in one
+   is a flex item that shrinks and breaks at the space ("EXPRESS" over "LANE"),
+   which is what this label replaces. */
+.xl__label {
+  white-space: nowrap;
+  text-align: center;
 }

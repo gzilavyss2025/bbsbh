@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { seasonSeriesCells } from '../src/api/seasonSeries.js'
+import { centeredScrollLeft, seasonSeriesCells, seasonSeriesRecord } from '../src/api/seasonSeries.js'
 import { extraInningsOf, regulationInnings } from '../src/api/select.js'
 
 const NYM = 121
@@ -121,4 +121,120 @@ test("regulationInnings: the game's own length, else nine", () => {
   assert.equal(regulationInnings(null), 9)
   assert.equal(regulationInnings(undefined), 9)
   assert.equal(regulationInnings(0), 9)
+})
+
+const post = (gamePk, gameType, seriesGameNumber, awayScore, homeScore, extra = {}) => ({
+  gamePk, apiDate: '2026-10-0' + seriesGameNumber, gameDate: '2026-10-0' + seriesGameNumber + 'T23:10:00Z', gameNumber: 1,
+  awayId: NYM, homeId: MIL, final: true, awayScore, homeScore, gameType, seriesGameNumber, ...extra,
+})
+
+test('seasonSeriesCells: a postseason game carries its round tag and series game number', () => {
+  const games = [post(10, 'F', 1, 2, 3), post(11, 'D', 2, 4, 1), post(12, 'L', 3, 0, 1), post(13, 'W', 4, 5, 6)]
+  const cells = seasonSeriesCells(games, MIL, 99)
+  assert.deepEqual(cells.map((c) => c.round), ['WC', 'DS', 'LCS', 'WS'])
+  assert.deepEqual(cells.map((c) => c.seriesGame), [1, 2, 3, 4])
+})
+
+test('seasonSeriesCells: a regular-season game (or a row with no game type) has no round tag', () => {
+  const games = [post(14, 'R', 1, 2, 3), { gamePk: 15, apiDate: '2026-07-01', gameNumber: 1, awayId: NYM, homeId: MIL, final: false }]
+  for (const c of seasonSeriesCells(games, MIL, 99)) {
+    assert.equal(c.round, null)
+    assert.equal(c.seriesGame, null)
+  }
+})
+
+test('seasonSeriesCells: the viewed postseason game is still sealed', () => {
+  const [cell] = seasonSeriesCells([post(16, 'D', 2, 9, 0)], MIL, 16)
+  assert.equal(cell.round, 'DS')
+  assert.equal(cell.final, false)
+  assert.equal(cell.winnerScore, null)
+})
+
+test('seasonSeriesRecord: postseason games stay out of the season record', () => {
+  const games = [post(17, 'R', 1, 2, 3), post(18, 'R', 2, 1, 4), post(19, 'D', 1, 7, 0), post(20, 'D', 2, 8, 1)]
+  const cells = seasonSeriesCells(games, MIL, 99)
+  assert.deepEqual(seasonSeriesRecord(cells, MIL, NYM), { aWins: 2, bWins: 0 })
+})
+
+// A replayed postseason page must not tell you how the series ended: every game
+// AFTER the viewed one is sealed, the way the viewed game is.
+const series = () => [
+  post(30, 'W', 1, 1, 4), post(31, 'W', 2, 3, 5), post(32, 'W', 3, 6, 2),
+  post(33, 'W', 4, 2, 7, { innings: 11 }), post(34, 'W', 5, 0, 1),
+]
+
+test('seasonSeriesCells: games after the viewed game are sealed, games before keep their score', () => {
+  const cells = seasonSeriesCells(series(), MIL, 32)
+  const [g1, g2, g3, g4, g5] = cells
+  for (const c of [g1, g2]) {
+    assert.equal(c.final, true)
+    assert.equal(c.hasScore, true)
+  }
+  assert.equal(g1.winnerId, MIL)
+  assert.equal(g1.winnerScore, 4)
+  assert.equal(g3.isCurrent, true)
+  assert.equal(g3.final, false)
+  for (const c of [g4, g5]) {
+    assert.equal(c.isCurrent, false)
+    assert.equal(c.final, false)
+    assert.equal(c.hasScore, false)
+    assert.equal(c.winnerId, null)
+    assert.equal(c.winnerAbbr, null)
+    assert.equal(c.winnerScore, null)
+    assert.equal(c.loserScore, null)
+    assert.equal(c.extraInnings, null)
+  }
+  // The schedule facts stay: the round tag and series game are not results.
+  assert.equal(g4.round, 'WS')
+  assert.equal(g4.seriesGame, 4)
+})
+
+test('seasonSeriesCells: a regular-season game after the viewed game is sealed too', () => {
+  const games = [post(40, 'R', 1, 2, 3), post(41, 'R', 2, 1, 4)]
+  const [before, after] = seasonSeriesCells(games, MIL, 40)
+  assert.equal(before.final, false)
+  assert.equal(after.final, false)
+  assert.equal(after.winnerScore, null)
+})
+
+test('seasonSeriesCells: in a doubleheader, only the later game number is sealed', () => {
+  const dh = (gamePk, gameNumber) => ({ ...post(gamePk, 'R', 1, 2, 3), apiDate: '2026-07-07', gameNumber })
+  const [g1, g2] = seasonSeriesCells([dh(50, 1), dh(51, 2)], MIL, 50)
+  assert.equal(g1.isCurrent, true)
+  assert.equal(g2.final, false)
+  assert.equal(g2.winnerScore, null)
+  const [h1, h2] = seasonSeriesCells([dh(50, 1), dh(51, 2)], MIL, 51)
+  assert.equal(h1.final, true)
+  assert.equal(h1.winnerScore, 3)
+  assert.equal(h2.isCurrent, true)
+})
+
+test('seasonSeriesCells: with no current game in the list, nothing is sealed', () => {
+  for (const pk of [undefined, null, 999]) {
+    for (const c of seasonSeriesCells(series(), MIL, pk)) assert.equal(c.final, true)
+  }
+})
+
+test('seasonSeriesRecord: counts only the regular-season games before the viewed game', () => {
+  const games = [post(60, 'R', 1, 2, 3), post(61, 'R', 2, 1, 4), post(62, 'R', 3, 5, 0), post(63, 'R', 4, 0, 6)]
+  assert.deepEqual(seasonSeriesRecord(seasonSeriesCells(games, MIL, 62), MIL, NYM), { aWins: 2, bWins: 0 })
+  assert.deepEqual(seasonSeriesRecord(seasonSeriesCells(games, MIL, 60), MIL, NYM), { aWins: 0, bWins: 0 })
+})
+
+// The strip is not its cards' offsetParent, so offsetLeft counts the page
+// distance to the strip too and the current card landed off centre. The helper
+// works from on-screen rects, which do not care who the offsetParent is.
+test('centeredScrollLeft: puts the card at the strip centre, wherever the strip sits on the page', () => {
+  // Strip 292 wide at x=69, scrolled 0. The card sits 517 px into the content,
+  // so on screen it starts at 69 + 517 = 586 and is 90 wide (centre 631).
+  // The strip centre is 69 + 146 = 215, so the strip must scroll 416 more.
+  const left = centeredScrollLeft({ scrollLeft: 0, stripLeft: 69, stripWidth: 292, cellLeft: 586, cellWidth: 90 })
+  assert.equal(left, 416)
+  // Already scrolled 100: the card is 100 px further left on screen.
+  assert.equal(
+    centeredScrollLeft({ scrollLeft: 100, stripLeft: 69, stripWidth: 292, cellLeft: 486, cellWidth: 90 }),
+    416,
+  )
+  // The same card in a strip at another page position gives the same answer.
+  assert.equal(centeredScrollLeft({ scrollLeft: 0, stripLeft: 229, stripWidth: 292, cellLeft: 746, cellWidth: 90 }), 416)
 })

@@ -79,7 +79,7 @@
 // These two views share a (year, teamId) key and are the smoke-test join.
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -134,6 +134,31 @@ function absPath(relPath) {
 // are one big top-level object past that, so raise the cap for every read —
 // harmless for the small panels, required for the large ones.
 const MAX_JSON_OBJECT_BYTES = 200 * 1024 * 1024; // 200 MB
+const MIN_JSON_OBJECT_BYTES = 1024 * 1024; // 1 MB
+
+// The object-size cap a panel's read needs. DuckDB sizes a read buffer from
+// this number for every reader thread, and on Windows that is committed memory
+// whether or not a byte of it is used. A flat 200 MB cap across seventy-five
+// four-kilobyte terms shards made a full build fail with "Out of Memory Error:
+// Allocation failure" whenever the machine was busy with anything else — and
+// buildAllViews logs a failed panel and moves on, so the view just went
+// missing. One object cannot be larger than the file that holds it, so the
+// cap is twice the LARGEST file the panel reads, never under 1 MB and never
+// over the 200 MB ceiling. A file the stat cannot read keeps the ceiling.
+function maxObjectBytesFor(relPath) {
+  try {
+    const rel = relPath.replace(/\\/g, '/');
+    const dir = dirname(rel);
+    const base = rel.slice(dir.length + 1);
+    const names = base.includes('*')
+      ? readdirSync(join(REPO_ROOT, dir)).filter((f) => globToRegExp(base).test(f))
+      : [base];
+    const largest = Math.max(0, ...names.map((f) => statSync(join(REPO_ROOT, dir, f)).size));
+    return Math.min(MAX_JSON_OBJECT_BYTES, Math.max(MIN_JSON_OBJECT_BYTES, largest * 2));
+  } catch {
+    return MAX_JSON_OBJECT_BYTES;
+  }
+}
 
 function quoteIdent(name) {
   return `"${name.replace(/"/g, '""')}"`;
@@ -161,7 +186,7 @@ function flattenMapColumnSql(fromExpr, colName, mapType) {
 async function registerPanel(conn, relPath) {
   const name = viewNameFor(relPath);
   const extra = FULL_SCAN.has(relPath) ? ', sample_size = -1, maximum_sample_files = 100000' : '';
-  const src = `read_json_auto('${absPath(relPath)}', maximum_object_size = ${MAX_JSON_OBJECT_BYTES}${extra})`;
+  const src = `read_json_auto('${absPath(relPath)}', maximum_object_size = ${maxObjectBytesFor(relPath)}${extra})`;
   const desc = await conn.runAndReadAll(`DESCRIBE SELECT * FROM ${src}`);
   const cols = desc.getRowObjectsJson();
   const mapCols = cols.filter((c) => c.column_type.startsWith('MAP('));
