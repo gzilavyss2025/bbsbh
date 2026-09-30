@@ -12,8 +12,16 @@ export function winProbReadout(point, { final = false } = {}) {
   const outs = point.outs == null ? '' : point.outs === 3 ? ' · Half over' : ` · ${point.outs} out${point.outs === 1 ? '' : 's'}`
   return { context: `${half}${point.inning}${outs}`, delta: point.delta ?? null }
 }
-// The club that gained on a play and by how much, in whole percent. A change
-// that rounds to 0 names neither club.
+// The home club's change across one play, as the two header numbers a reader
+// sees: the rounded home % after the play minus the rounded home % before it
+// (the play before, or the even 50% origin for the first play). Rounding the
+// raw step separately can disagree with the header: 49.6 to 50.4 reads 50% to
+// 50% but rounds to +1.
+export function wholeSwing(prevHome, home) {
+  return Math.round(home) - Math.round(prevHome)
+}
+// The club that gained on a play and by how much, in whole percent (pass a
+// wholeSwing). A change of 0 names neither club.
 export function winProbChangeLabel(delta, home, away) {
   const val = Math.round(Math.abs(delta))
   return val === 0 ? 'No change' : `${delta > 0 ? home : away} +${val}%`

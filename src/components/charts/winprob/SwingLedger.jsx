@@ -6,8 +6,10 @@ import { winProbKeyPill } from './keyColors.js'
 // biggest to match the plot's markers (api/winprob.js orders them). A row
 // selects its play (`onPick`); its Watch button selects it too (`onWatch`)
 // and opens the play's film (`clip`, useSwingClip.js). `keys` are the two
-// clubs' key colours (keyColors.js).
-export function SwingLedger({ bigPlays, activeIdx, home, away, keys, clip, onPick, onWatch }) {
+// clubs' key colours (keyColors.js). `stepAt(idx)` is a play's whole-percent
+// change in the header's own numbers (explore.js wholeSwing); the ranking
+// stays on the raw delta.
+export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, clip, onPick, onWatch }) {
   if (bigPlays.length === 0) return null
   return (
     <div className="winprob__ledger">
@@ -18,7 +20,7 @@ export function SwingLedger({ bigPlays, activeIdx, home, away, keys, clip, onPic
         {bigPlays.map((p, index) => {
           const toHome = p.delta > 0
           const abbr = toHome ? home : away
-          const chipText = winProbChangeLabel(p.delta, home, away)
+          const chipText = winProbChangeLabel(stepAt(p.idx), home, away)
           const tag = `${p.half === 'top' ? '▲' : '▼'}${p.inning}`
           const isActive = activeIdx === p.idx
           const watchable = clip.hasClip(p.playId)

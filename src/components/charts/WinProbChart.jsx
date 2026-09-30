@@ -1,6 +1,6 @@
 import { useId, useRef } from 'react'
 import { winProbSplit } from '../../api/winprob.js'
-import { winProbChangeLabel, winProbReadout } from './winprob/explore.js'
+import { winProbChangeLabel, winProbReadout, wholeSwing } from './winprob/explore.js'
 import { useWinProbSelection } from './winprob/useWinProbSelection.js'
 import { useSwingClip } from './winprob/useSwingClip.js'
 import { winProbKeyColor, winProbKeyPair, winProbKeyPill } from './winprob/keyColors.js'
@@ -313,8 +313,12 @@ export function WinProbChart({
     .map((p, i) => (p.isScoring ? i : -1))
     .filter((i) => i >= 0)
 
-  const change = readout.delta == null ? '' : winProbChangeLabel(readout.delta, home, away)
-  const changeKey = Math.round(readout.delta ?? 0) === 0 ? null : readout.delta > 0 ? keys.home : keys.away
+  // A play's change is the difference of the two header numbers a reader sees,
+  // not its raw step rounded again (wholeSwing). Play idx sits at pts[idx + 1].
+  const stepAt = (idx) => wholeSwing(pts[idx].home, pts[idx + 1].home)
+  const step = readout.delta == null ? null : stepAt(activeIdx)
+  const change = step == null ? '' : winProbChangeLabel(step, home, away)
+  const changeKey = !step ? null : step > 0 ? keys.home : keys.away
   const summary = `${away} ${split.away}%, ${home} ${split.home}%. ${readout.context.replace('▲', 'Top ').replace('▼', 'Bottom ')}.${change ? ` ${change}.` : ''}`
 
   // A swing marker floats above the step it marks on a short pin, or below it
@@ -520,6 +524,7 @@ export function WinProbChart({
         home={home}
         away={away}
         keys={keys}
+        stepAt={stepAt}
         clip={clip}
         onPick={pickSwing}
         onWatch={select}

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { nearestWinProbEvent, winProbReadout, winProbChangeLabel, touchIntent, followLatest, snapToMarker, focusInput, moveSnaps } from '../src/components/charts/winprob/explore.js'
+import { nearestWinProbEvent, winProbReadout, winProbChangeLabel, touchIntent, followLatest, snapToMarker, focusInput, moveSnaps, wholeSwing } from '../src/components/charts/winprob/explore.js'
 import { winProbKeyColor, winProbKeyPair } from '../src/components/charts/winprob/keyColors.js'
 
 const FALLBACK = { primary: '#6B6558', secondary: '#938C7C', text: '#FBF6E9' }
@@ -109,4 +109,16 @@ test('only a mouse hover snaps to a swing marker; a drag steps play by play', ()
   // A touch drag captures the pointer and stays unsnapped.
   assert.equal(moveSnaps('touch', true), false)
   assert.equal(moveSnaps('touch', false), false)
+})
+
+test('the change pill is the difference of the two header numbers, not a second rounding', () => {
+  // Header reads 50% before and 50% after: the pill must say no change, not +1%.
+  assert.equal(wholeSwing(49.6, 50.4), 0)
+  assert.equal(winProbChangeLabel(wholeSwing(49.6, 50.4), 'HOM', 'AWY'), 'No change')
+  // Header goes 50% to 51%: the pill must say +1%, though the raw step (0.2) rounds to 0.
+  assert.equal(wholeSwing(50.4, 50.6), 1)
+  assert.equal(winProbChangeLabel(wholeSwing(50.4, 50.6), 'HOM', 'AWY'), 'HOM +1%')
+  // A fall names the away club; the first play is measured from the even 50%.
+  assert.equal(winProbChangeLabel(wholeSwing(60.4, 47.6), 'HOM', 'AWY'), 'AWY +12%')
+  assert.equal(wholeSwing(50, 52.2), 2)
 })
