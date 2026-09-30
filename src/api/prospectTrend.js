@@ -31,6 +31,8 @@ export function packProspectTrend(snapshot) {
 }
 
 export function unpackProspectTrend(raw) {
+  // Old shape passes through (#1269): drop this line once a nightly run has
+  // written the packed shape. Until then a deploy and a nightly run work in either order.
   if (raw?.packed !== 1) return raw
   const { historyDates, players, ...rest } = raw
   delete rest.packed
@@ -56,7 +58,7 @@ let trendPromise = null
 export function fetchProspectTrend() {
   if (!trendPromise) {
     trendPromise = fetch(SNAPSHOT_URL)
-      .then((res) => (res.ok ? res.json() : EMPTY_SNAPSHOT))
+      .then((res) => (res.ok ? res.json().then(unpackProspectTrend) : EMPTY_SNAPSHOT))
       .catch(() => EMPTY_SNAPSHOT)
   }
   return trendPromise
