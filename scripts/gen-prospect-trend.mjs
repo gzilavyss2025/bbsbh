@@ -44,6 +44,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fetchLevelSeasonStats, combineToPool } from '../src/api/statsLevels.js'
+import { packProspectTrend } from '../src/api/prospectTrend.js'
 import {
   meetsPlayingTimeFloor,
   percentileRank,
@@ -175,7 +176,7 @@ async function main() {
   }
   await dumpGroup(db, 'player-snapshots')
 
-  await writeJsonAtomic(out, exportJson(db, today, levelAverageAge))
+  await writeJsonAtomic(out, packProspectTrend(exportJson(db, today, levelAverageAge)))
   db.close()
   console.log(`wrote ${out} (${pool.length} prospects with a current-level line, ${qualifiedCount} qualified)`)
 }
