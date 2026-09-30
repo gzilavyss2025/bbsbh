@@ -9,11 +9,7 @@
 // re-implemented; if a caller needs its own copy, extend this file instead.
 
 import { ipToOuts } from '../lib/math/innings.js'
-
-function num(x) {
-  const n = Number(x)
-  return Number.isFinite(n) ? n : 0
-}
+import { num } from '../lib/math/number.js'
 
 // A minor-league stint clears a workload threshold in whichever unit fits the
 // group and role: games played for a hitter, but EITHER innings pitched OR

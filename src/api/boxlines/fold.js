@@ -43,6 +43,7 @@
 // can only ever describe a set the gate allowed.
 
 import { outsToIp } from '../../lib/math/innings.js'
+import { num } from '../../lib/math/number.js'
 
 // What an entry's two figures are CALLED, in the order `foldLine` returns them
 // and the vocabulary the card's own columns already print (careerSplits.js's
@@ -50,11 +51,6 @@ import { outsToIp } from '../../lib/math/innings.js'
 export const LIST_COLUMNS = {
   hitting: ['G', 'AVG'],
   pitching: ['G', 'ERA'],
-}
-
-function num(v) {
-  const n = Number(v)
-  return Number.isFinite(n) ? n : 0
 }
 
 // Every counting stat a set of rows holds, added once. Both readers below take

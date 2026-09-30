@@ -29,13 +29,9 @@
 // null / ignored for a single-level pool.
 
 import { ipToOuts, outsToIp } from '../lib/math/innings.js'
+import { num } from '../lib/math/number.js'
 
 const DASH = '—'
-
-function num(x) {
-  const n = Number(x)
-  return Number.isFinite(n) ? n : 0
-}
 
 // ---------------------------------------------------------------------------
 // Formatters (baseball display conventions)

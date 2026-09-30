@@ -25,6 +25,7 @@ import { getJson } from './statsapi.js'
 import { firstLast } from './person.js'
 import { teamAbbr } from '../lib/teams.js'
 import { outsToIp } from '../lib/math/innings.js'
+import { num } from '../lib/math/number.js'
 import { fetchStaticTeams } from './teams-static.js'
 
 // A whole level's season lines for one group ('hitting'|'pitching'): one split
@@ -158,10 +159,6 @@ async function attachDisplayTeams(pool) {
   })
 }
 
-const num = (x) => {
-  const n = Number(x)
-  return Number.isFinite(n) ? n : 0
-}
 // Rate = numerator / denominator, guarded so an empty denominator is 0 (not
 // NaN/Infinity) — the descriptors' formatters expect a finite number.
 const rate = (n, d) => (d > 0 ? n / d : 0)

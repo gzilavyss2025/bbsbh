@@ -8,10 +8,8 @@ export const DASH = '—'
 // never splitting a single stat like "9 K" across two lines.
 export const NBSP = ' '
 
-export function num(x) {
-  const n = Number(x)
-  return Number.isFinite(n) ? n : 0
-}
+// `num` lives in lib/math; re-exported so person/* keep one import line.
+export { num } from '../../lib/math/number.js'
 
 // ".302" style rate: three decimals, no leading zero (baseball convention).
 export function rate3(x) {
