@@ -29,6 +29,7 @@ import {
 } from '../scripts/lib/schedule-shape.mjs'
 import { tagSeries as recordsTagSeries } from '../scripts/lib/team-records.mjs'
 import {
+  seriesRuns,
   ledgerOf,
   droughtFor,
   droughtsFor,
@@ -130,6 +131,22 @@ test('a neutral-site game does not split the series around it', () => {
   // The relocated game is game 3 of that series, not a game with no series.
   const relocated = rows.find((r) => r.site === 'neutral')
   assert.deepEqual([relocated.seriesGame, relocated.seriesLength], [3, 5])
+})
+
+test('a neutral-site game does not carry a series across a home/away change', () => {
+  // Neutral is transparent, not a wildcard. Compared pair by pair, away~neutral
+  // and neutral~home both held, so a road set, a neutral game and a home set
+  // against one club chained into ONE series with one opener. The side of the
+  // road still ends a series; the neutral game stays with the set before it.
+  const row = (site) => ({ opponentId: STL, site })
+  assert.deepEqual(seriesRuns([row('away'), row('neutral'), row('home')]), [[0, 1], [2]])
+  assert.deepEqual(seriesRuns([row('home'), row('neutral'), row('neutral'), row('away')]), [[0, 1, 2], [3]])
+  // A neutral game that opens a run takes the side of the game after it.
+  assert.deepEqual(seriesRuns([row('neutral'), row('home'), row('away')]), [[0, 1], [2]])
+  // The documented shapes still hold: a neutral game inside or at the end of a
+  // one-sided run joins it.
+  assert.deepEqual(seriesRuns([row('away'), row('away'), row('neutral'), row('away')]), [[0, 1, 2, 3]])
+  assert.deepEqual(seriesRuns([row('home'), row('home'), row('neutral')]), [[0, 1, 2]])
 })
 
 test('all three series callers agree on a neutral-site game inside a run (#1283)', () => {

@@ -89,6 +89,12 @@ function eachRun(rows, keyOf, onSegment) {
 // game of the Yankees' three-game set at Comerica, as MLB numbers it; it is
 // neither a one-game series nor a game with no series.
 //
+// Neutral is TRANSPARENT, not a wildcard: the side a run is on is the side of
+// its first non-neutral game, and every later game is checked against that.
+// Checked pair by pair instead, away~neutral and neutral~home both pass, and a
+// road set, a neutral game and a home set against one club chain into one
+// series. A neutral game at a home/away change stays with the set before it.
+//
 // Derived from the ledger, never from the feed's own seriesGameNumber /
 // gamesInSeries: those describe the series as SCHEDULED, and a rained-out
 // game or a makeup leaves them describing a set that never happened.
@@ -98,14 +104,17 @@ function eachRun(rows, keyOf, onSegment) {
 // of one series.
 export function seriesRuns(rows) {
   const runs = []
+  let side = null
   rows.forEach((r, i) => {
     const prev = rows[i - 1]
-    const same =
-      prev &&
-      prev.opponentId === r.opponentId &&
-      (prev.site === r.site || prev.site === 'neutral' || r.site === 'neutral')
-    if (same) runs[runs.length - 1].push(i)
-    else runs.push([i])
+    const own = r.site === 'neutral' ? null : r.site
+    if (prev && prev.opponentId === r.opponentId && (!own || !side || own === side)) {
+      runs[runs.length - 1].push(i)
+      side = side ?? own
+    } else {
+      runs.push([i])
+      side = own
+    }
   })
   return runs
 }
