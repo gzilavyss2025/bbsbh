@@ -977,8 +977,8 @@ const C3 = [
       'components/game/GamePhotosStrip.jsx',
       'components/teamstats/BullpenBoard.jsx',
       'components/teamstats/SeasonSeriesStrip.jsx',
+      'components/team/FormerTeammates.jsx',
       'screens/FoulTrackerPage.jsx',
-      'screens/TeamInfo.jsx',
     ],
     ns: 'metric',
     head: true,
@@ -986,7 +986,7 @@ const C3 = [
   { css: '44-pre-game-cards.css', sel: '.lineup', jsx: ['screens/TeamInfo.jsx'], ns: 'lineup', head: true },
   { css: '44-pre-game-cards.css', sel: '.opp', jsx: ['screens/TeamInfo.jsx'], ns: 'opp', head: true },
   { css: '44-pre-game-cards.css', sel: '.starter', jsx: ['screens/TeamInfo.jsx'], ns: 'starter', head: true },
-  { css: '10-lineup.css', sel: '.teammate', jsx: ['screens/TeamInfo.jsx'], ns: 'teammate', as: 'li' },
+  { css: '10-lineup.css', sel: '.teammate', jsx: ['components/team/FormerTeammates.jsx'], ns: 'teammate', as: 'li' },
   { css: '10-lineup.css', sel: '.defdiamond', jsx: ['components/scoring/DefenseDiamond.jsx'], ns: 'defdiamond', as: 'div' },
   {
     css: '09-team-info.css',

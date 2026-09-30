@@ -55,7 +55,10 @@ import { resolve, join } from 'node:path'
 //
 // 124 -> 123: one rule left this role. The team score modal's footnote rule
 // (.tscoremodal__foot) had no element that used it, so it was deleted.
-const BUDGET = 123
+// 123 -> 122: the Former Teammates card became crossroads rows; its side
+// names, legend and "+N" button are labels (--fs-label), and the old cards'
+// caption rules went with them.
+const BUDGET = 122
 
 const stylesDir = resolve('src/styles')
 const sheets = []

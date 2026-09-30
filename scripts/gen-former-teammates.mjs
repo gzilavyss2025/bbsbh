@@ -46,8 +46,8 @@
 // bonus for corroborating stints and a bonus for each player's own peak
 // single-season WAR (recognizability, not the shared season's WAR — the point
 // is "these two players", not "this stint was good"). See stintScore/starBonus
-// below; src/api/formerTeammates.js reads `score` to rank and to gate the
-// hub-and-spokes grouping (groupTeammateCards).
+// below; src/api/formerTeammates.js reads `score` to rank the card's rows
+// (teammateCrossroads).
 //
 // ORG TIES fallback: most matchups have zero literal shared-teammate pairs, but
 // still have a story — "Tellez came up through the Brewers, and Nashville is a

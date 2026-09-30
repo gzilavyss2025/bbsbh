@@ -71,7 +71,12 @@ export async function loadFormerTeammates(teamIdA, teamIdB) {
 //
 // Returns [] when the matchup isn't in the file (outside the build's day
 // window, or the matchup's only card is an orgTiesFor fallback). Each entry:
-//   { a: {id, name}, b: {id, name},                      // the two players
+// Each player carries the `teamId` of the club he is on NOW, read from the
+// shard's own teamA/teamB. Never infer it from tonight's away/home: the
+// generator files a shard under the ascending-id key and its 3-day window lets
+// a later game in the other park overwrite it, so `a` can be tonight's HOME
+// player (a Division Series flips parks inside that window).
+//   { a: {id, name, pos, teamId}, b: {id, name, pos, teamId}, // the two players
 //     clubs: [{teamId, teamName, level, seasons:[…]}],    // shared club(s)
 //     score: number }
 export function formerTeammatePairs(data, teamIdA, teamIdB) {
@@ -94,10 +99,100 @@ export function formerTeammatePairs(data, teamIdA, teamIdB) {
         LEVEL_RANK(y.level) - LEVEL_RANK(x.level) ||
         Math.max(...y.seasons) - Math.max(...x.seasons),
     )
-    pairs.push({ a: row.a, b: row.b, clubs, score: row.score ?? 0 })
+    pairs.push({
+      a: { ...row.a, teamId: entry.teamA ?? null },
+      b: { ...row.b, teamId: entry.teamB ?? null },
+      clubs,
+      score: row.score ?? 0,
+    })
   }
 
   return pairs.sort((x, y) => y.score - x.score)
+}
+
+// Turns formerTeammatePairs() output into the card's ROWS: one row per shared
+// club, the club in the middle and each of tonight's clubs' players on its own
+// side (away left, home right). Two kinds:
+//   - 'former': the club is one of tonight's two clubs, so the tie only says
+//     "he used to play here". The row holds the players who LEFT it, on the
+//     side of the club they are on now; the other side stays empty rather
+//     than a wall of the players he played with there.
+//   - 'elsewhere': the players met on a THIRD club. A pair that shares a
+//     third club and one of tonight's clubs files under the third club only.
+//     A pair that shares two third clubs files under its best one (clubs[0]).
+// `startingIds` (a Set, optional) marks each starting player and pins a row
+// that plays out tonight: an 'elsewhere' row with a PAIR who both start, or
+// a 'former' row whose player starts. Each list is sorted pinned-first, then
+// by the best pair score in the row.
+//
+// Returns { former: [...], elsewhere: [...] } of:
+//   { kind, club: {teamId, teamName, level}, seasons: [...],
+//     away: [player], home: [player],      // player = {id, name, pos, teamId, starting}
+//     score, tonight }
+export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds) {
+  const rows = new Map()
+  const starts = (id) => Boolean(startingIds?.has(id))
+  const sideOf = (player) =>
+    player.teamId === awayTeamId ? 'away' : player.teamId === homeTeamId ? 'home' : null
+  const rowFor = (kind, club) => {
+    const key = `${kind}|${club.teamId}`
+    if (!rows.has(key)) {
+      rows.set(key, {
+        kind,
+        club: { teamId: club.teamId, teamName: club.teamName, level: club.level },
+        seasons: new Set(),
+        away: new Map(),
+        home: new Map(),
+        score: 0,
+        tonight: false,
+      })
+    }
+    return rows.get(key)
+  }
+  const place = (row, player, score) => {
+    const side = sideOf(player)
+    if (!side) return
+    const held = row[side].get(player.id)
+    if (!held || held.score < score) row[side].set(player.id, { ...player, starting: starts(player.id), score })
+  }
+
+  for (const p of pairs ?? []) {
+    const isTonight = (c) => c.teamId === awayTeamId || c.teamId === homeTeamId
+    const third = p.clubs.find((c) => !isTonight(c))
+    if (third) {
+      const row = rowFor('elsewhere', third)
+      for (const s of third.seasons) row.seasons.add(s)
+      place(row, p.a, p.score)
+      place(row, p.b, p.score)
+      row.score = Math.max(row.score, p.score)
+      if (starts(p.a.id) && starts(p.b.id)) row.tonight = true
+      continue
+    }
+    for (const club of p.clubs) {
+      // The player NOT on that club now is the one who left it.
+      const left = p.a.teamId === club.teamId ? p.b : p.a
+      const row = rowFor('former', club)
+      for (const s of club.seasons) row.seasons.add(s)
+      place(row, left, p.score)
+      row.score = Math.max(row.score, p.score)
+      if (starts(left.id)) row.tonight = true
+    }
+  }
+
+  const bySideScore = (x, y) => Number(y.starting) - Number(x.starting) || y.score - x.score
+  const finished = [...rows.values()]
+    .map((r) => ({
+      ...r,
+      seasons: [...r.seasons].sort((x, y) => x - y),
+      away: [...r.away.values()].sort(bySideScore),
+      home: [...r.home.values()].sort(bySideScore),
+    }))
+    .filter((r) => r.away.length + r.home.length > 0)
+    .sort((x, y) => Number(y.tonight) - Number(x.tonight) || y.score - x.score)
+  return {
+    former: finished.filter((r) => r.kind === 'former'),
+    elsewhere: finished.filter((r) => r.kind === 'elsewhere'),
+  }
 }
 
 const LEVEL_ORDER = { MLB: 5, AAA: 4, AA: 3, 'A+': 2, A: 1 }
@@ -124,80 +219,4 @@ export function orgTiesFor(data, teamIdA, teamIdB) {
   const entry = data?.matchups?.[matchupKey(teamIdA, teamIdB)]
   if (entry?.kind !== 'orgties' || !Array.isArray(entry.orgTies)) return []
   return [...entry.orgTies].sort((x, y) => (y.score ?? 0) - (x.score ?? 0))
-}
-
-// A cluster of pairs is worth collapsing into one "hub and spokes" card only
-// when it's a REAL reunion, not the kind of incidental overlap that blew up
-// the first attempt at this (a single low-level stint chaining dozens of
-// unrelated players together). Three independent gates, all required:
-//   - level floor: only an AA-or-better stint can anchor a group (kills the
-//     Rookie/A-ball chains outright — that's where the explosion came from)
-//   - a real hub: one specific player ties to ≥2 others via that SAME
-//     (team, season) — hub-and-spokes only, never a many-to-many blob. Two is
-//     the floor rather than one because a lone pair is already its own card;
-//     the group form only earns its keep once a shared club actually chains
-//     multiple opposing players to the same anchor (e.g. Kenley Jansen's '24
-//     Red Sox stint tying to both Brad Keller and Chase Shugart).
-//   - a per-pair floor: every spoke must individually clear a minimum score,
-//     so a weak/incidental tie doesn't ride along just because it shares the
-//     cluster key
-const GROUP_LEVEL_FLOOR = LEVEL_RANK('AA')
-const GROUP_MIN_SPOKES = 2
-const GROUP_SCORE_FLOOR = 25
-
-// Collapses formerTeammatePairs() output into display cards: a plain 1-vs-1
-// PAIR card normally, or a GROUP card when a real hub-and-spokes reunion
-// clears all three gates above (see GROUP_* constants). Returns cards sorted
-// by score (a group's score is its best spoke's score plus a small per-extra-
-// member bump, so a big reunion can outrank a merely-good single pair without
-// letting group size alone dominate).
-//   { kind: 'pair', a, b, clubs, score }
-//   { kind: 'group', anchor, mates: [...], club, seasons: [...], score }
-export function groupTeammateCards(pairs) {
-  if (!pairs || pairs.length === 0) return []
-
-  const byKey = new Map()
-  pairs.forEach((p, idx) => {
-    const club = p.clubs[0]
-    if (!club || LEVEL_RANK(club.level) < GROUP_LEVEL_FLOOR) return
-    if (p.score < GROUP_SCORE_FLOOR) return
-    for (const [me, other] of [
-      [p.a, p.b],
-      [p.b, p.a],
-    ]) {
-      const key = `${me.id}|${club.teamId}`
-      if (!byKey.has(key)) {
-        byKey.set(key, { anchor: me, club, seasons: new Set(), members: [] })
-      }
-      const g = byKey.get(key)
-      g.members.push({ other, idx, score: p.score })
-      for (const s of club.seasons) g.seasons.add(s)
-    }
-  })
-
-  // Largest clusters claim their pairs first, so a real reunion wins over a
-  // smaller/coincidental grouping that shares one of its pairs.
-  const candidates = [...byKey.values()].sort((x, y) => y.members.length - x.members.length)
-  const consumed = new Set()
-  const groupAtIndex = new Map()
-  for (const g of candidates) {
-    const available = g.members.filter((m) => !consumed.has(m.idx))
-    if (available.length < GROUP_MIN_SPOKES) continue
-    available.forEach((m) => consumed.add(m.idx))
-    groupAtIndex.set(Math.min(...available.map((m) => m.idx)), {
-      kind: 'group',
-      anchor: g.anchor,
-      mates: available.map((m) => m.other),
-      club: g.club,
-      seasons: [...g.seasons].sort((x, y) => x - y),
-      score: Math.max(...available.map((m) => m.score)) + 5 * (available.length - 1),
-    })
-  }
-
-  const cards = []
-  pairs.forEach((p, idx) => {
-    if (groupAtIndex.has(idx)) cards.push(groupAtIndex.get(idx))
-    else if (!consumed.has(idx)) cards.push({ kind: 'pair', ...p })
-  })
-  return cards.sort((x, y) => y.score - x.score)
 }
