@@ -1,12 +1,11 @@
 // If every winter league got a tab, HOW MANY tabs would the rail carry on a
 // given day? The rail already wraps to two rows at 320px with five.
-const API = 'https://statsapi.mlb.com'
+import { getJson } from '../../../scripts/lib/statsapi.mjs'
+
 const NAMES = {
   119: 'AFL', 132: 'LMP', 135: 'LVBP', 131: 'LIDOM', 133: 'PWL', 595: 'ABL', 162: 'CS',
 }
-const j = await (await fetch(
-  `${API}/api/v1/schedule?sportId=17&startDate=2025-10-01&endDate=2026-02-28&hydrate=team`,
-)).json()
+const j = await getJson(`/api/v1/schedule?sportId=17&startDate=2025-10-01&endDate=2026-02-28&hydrate=team`)
 const seen = new Set()
 const byDate = new Map()
 for (const d of j.dates ?? []) {

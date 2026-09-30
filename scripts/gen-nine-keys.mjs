@@ -87,10 +87,11 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { shapeWildCard } from '../src/api/standings.js'
+import { getJson } from './lib/statsapi.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = join(__dirname, '..')
-const API = 'https://statsapi.mlb.com/api/v1'
+const API = '/api/v1'
 const CACHE_PATH = join(REPO_ROOT, 'scripts', 'data', 'nine-keys-seasons.json')
 
 export const FIRST_SEASON = 2000
@@ -123,20 +124,6 @@ export const KEYS = [
 ]
 
 const num = (v) => (v === undefined || v === null || v === '' ? null : Number(v))
-
-async function getJSON(url) {
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`${res.status}`)
-      return await res.json()
-    } catch (err) {
-      if (attempt === 3) throw new Error(`${url} failed: ${err.message}`)
-      await new Promise((r) => setTimeout(r, 700 * (attempt + 1)))
-    }
-  }
-  return null
-}
 
 // Talent WAR per club, from one sabermetrics response per club and group.
 //
@@ -174,11 +161,11 @@ async function mapAll(items, limit, mapper, what) {
 // standings records too: the projected field is shaped from them.
 async function seasonInputs(year) {
   const [standings, hitting, pitching, sp, rp] = await Promise.all([
-    getJSON(`${API}/standings?leagueId=103,104&season=${year}&standingsTypes=regularSeason`),
-    getJSON(`${API}/teams/stats?season=${year}&sportId=1&stats=season&group=hitting&gameType=R`),
-    getJSON(`${API}/teams/stats?season=${year}&sportId=1&stats=season&group=pitching&gameType=R`),
-    getJSON(`${API}/teams/stats?season=${year}&sportId=1&stats=statSplits&group=pitching&sitCodes=sp&gameType=R`),
-    getJSON(`${API}/teams/stats?season=${year}&sportId=1&stats=statSplits&group=pitching&sitCodes=rp&gameType=R`),
+    getJson(`${API}/standings?leagueId=103,104&season=${year}&standingsTypes=regularSeason`),
+    getJson(`${API}/teams/stats?season=${year}&sportId=1&stats=season&group=hitting&gameType=R`),
+    getJson(`${API}/teams/stats?season=${year}&sportId=1&stats=season&group=pitching&gameType=R`),
+    getJson(`${API}/teams/stats?season=${year}&sportId=1&stats=statSplits&group=pitching&sitCodes=sp&gameType=R`),
+    getJson(`${API}/teams/stats?season=${year}&sportId=1&stats=statSplits&group=pitching&sitCodes=rp&gameType=R`),
   ])
 
   const clubs = new Map()
@@ -221,7 +208,7 @@ async function seasonInputs(year) {
     queries,
     6,
     async ({ teamId, group }) => {
-      const json = await getJSON(
+      const json = await getJson(
         `${API}/stats?stats=sabermetrics&group=${group}&season=${year}&sportId=1&playerPool=ALL&limit=4000&teamId=${teamId}`,
       )
       return { teamId, splits: json?.stats?.[0]?.splits ?? [] }
@@ -534,7 +521,7 @@ async function main() {
   // drafted — a run on 2026-09-22 saw 2027, a season with no games and no
   // clubs. So this is only the upper bound to probe; the season the page
   // actually reports on is the last one that came back with real clubs.
-  const seasonMeta = await getJSON(`${API}/seasons/all?sportId=1`)
+  const seasonMeta = await getJson(`${API}/seasons/all?sportId=1`)
   const endOf = new Map((seasonMeta?.seasons ?? []).map((s) => [Number(s.seasonId), s.regularSeasonEndDate]))
   const newest = Math.max(FIRST_SEASON, ...endOf.keys())
   const today = new Date().toISOString().slice(0, 10)

@@ -39,6 +39,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const BACKFILL_CACHE = join(__dirname, 'prior-postseason-cache.json')
@@ -59,21 +60,6 @@ const RELATIVE_FIELDS = ['expShare', 'deepShare', 'wsShare', 'expYears', 'expDep
 function loadJson(p, fallback) {
   if (!existsSync(p)) return fallback
   return JSON.parse(readFileSync(p, 'utf8'))
-}
-
-async function fetchWithRetry(url, attempts = 5) {
-  let lastErr
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`statsapi ${res.status} ${url}`)
-      return await res.json()
-    } catch (err) {
-      lastErr = err
-      await new Promise((r) => setTimeout(r, 400 * (i + 1)))
-    }
-  }
-  throw lastErr
 }
 
 function parseInnings(ip) {
@@ -107,8 +93,8 @@ async function main() {
     const key = `sched-${year}`
     let sched = backfill[key]
     if (!sched) {
-      const json = await fetchWithRetry(
-        `https://statsapi.mlb.com/api/v1/schedule?sportId=1&season=${year}&gameType=F,D,L,W`,
+      const json = await getJson(
+        `/api/v1/schedule?sportId=1&season=${year}&gameType=F,D,L,W`,
       )
       const seen = new Set()
       sched = []
@@ -139,7 +125,7 @@ async function main() {
   )
   let fetched = 0
   for (const g of needed) {
-    const json = await fetchWithRetry(`https://statsapi.mlb.com/api/v1/game/${g.gamePk}/boxscore`)
+    const json = await getJson(`/api/v1/game/${g.gamePk}/boxscore`)
     backfill.games[String(g.gamePk)] = {
       home: { teamId: json.teams?.home?.team?.id ?? null, players: slimSide(json.teams?.home ?? {}) },
       away: { teamId: json.teams?.away?.team?.id ?? null, players: slimSide(json.teams?.away ?? {}) },

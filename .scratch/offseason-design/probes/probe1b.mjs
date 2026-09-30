@@ -1,20 +1,8 @@
 // Probe 1b: what fraction of a MiLB season is actually SCOREABLE in Tally's
 // GameSelect -> GameView -> TeamInfo -> InningViewer flow?
 // Not the scheduled count. A completed game with a feed complete enough to score.
-const API = 'https://statsapi.mlb.com'
 
-async function getJson(path, tries = 3) {
-  for (let i = 0; i < tries; i++) {
-    try {
-      const r = await fetch(API + path)
-      if (!r.ok) throw new Error('HTTP ' + r.status)
-      return await r.json()
-    } catch (e) {
-      if (i === tries - 1) throw e
-      await new Promise((s) => setTimeout(s, 1500 * (i + 1)))
-    }
-  }
-}
+import { getJson } from '../../../scripts/lib/statsapi.mjs'
 
 // Deterministic sample so a re-run reports the same games.
 function mulberry32(a) {

@@ -4,7 +4,8 @@
 // needs no data. Exits 1 (and lists the stragglers) while any game is still
 // Live/Preview, e.g. a suspended game resuming, so the workflow can back off
 // and retry rather than running the batch against an incomplete slate.
-const BASE = 'https://statsapi.mlb.com'
+import { getJson } from './lib/statsapi.mjs'
+
 const SETTLED_STATES = new Set(['Postponed', 'Cancelled'])
 
 function easternDateParts(date) {
@@ -26,11 +27,7 @@ function yesterdayEasternDateStr() {
 
 async function main() {
   const dateStr = yesterdayEasternDateStr()
-  const res = await fetch(
-    `${BASE}/api/v1/schedule?sportId=1&gameType=R,F,D,L,W,A&date=${dateStr}`,
-  )
-  if (!res.ok) throw new Error(`statsapi ${res.status} /api/v1/schedule`)
-  const data = await res.json()
+  const data = await getJson(`/api/v1/schedule?sportId=1&gameType=R,F,D,L,W,A&date=${dateStr}`)
   const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
 
   if (games.length === 0) {

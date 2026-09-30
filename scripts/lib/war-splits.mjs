@@ -21,7 +21,7 @@
 //
 // Two changes prevent it:
 //
-//   1. Each player is retried with exponential backoff before counting as
+//   1. Each player is retried (the shared client's policy) before counting as
 //      failed, since the observed failure is transient.
 //   2. A player who still fails CARRIES FORWARD his previous value from the
 //      committed war.json rather than vanishing from the file. Dropping him
@@ -35,15 +35,12 @@
 // rewritten, and the workflow's `steps.war.outcome == 'success'` gates hold
 // the consumers off yesterday's file deliberately rather than by accident.
 
+import { createStatsapiClient, getJson } from './statsapi.mjs'
+
 export const MAX_CARRIED_RATIO = 0.25
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
-
-export function splitsUrl(id, group, season) {
-  return (
-    `https://statsapi.mlb.com/api/v1/people/${id}/stats?stats=sabermetrics&group=${group}` +
-    `&season=${season}&sportId=1`
-  )
+export function splitsPath(id, group, season) {
+  return `/api/v1/people/${id}/stats?stats=sabermetrics&group=${group}&season=${season}&sportId=1`
 }
 
 const num = (v) => {
@@ -51,26 +48,14 @@ const num = (v) => {
   return Number.isFinite(n) ? n : null
 }
 
-// One player's team stints, retried. Throws only once every attempt is spent.
+// One player's team stints, retried by the shared client (scripts/lib/
+// statsapi.mjs). Throws only once every try is spent. `fetchImpl` and
+// `sleepImpl` are the test seams; a real run passes neither.
 export async function fetchTeamSplits(id, group, season, opts = {}) {
-  const { fetchImpl = fetch, attempts = 3, delayMs = 400, sleepImpl = sleep } = opts
-  let lastErr
-  for (let attempt = 1; attempt <= attempts; attempt++) {
-    try {
-      const res = await fetchImpl(splitsUrl(id, group, season))
-      if (!res.ok) {
-        throw new Error(
-          `statsapi sabermetrics ${group} team splits for person ${id}: HTTP ${res.status}`,
-        )
-      }
-      const json = await res.json()
-      return (json.stats?.[0]?.splits ?? []).filter((s) => s.team)
-    } catch (err) {
-      lastErr = err
-      if (attempt < attempts) await sleepImpl(delayMs * 2 ** (attempt - 1))
-    }
-  }
-  throw lastErr
+  const { fetchImpl, sleepImpl } = opts
+  const client = fetchImpl || sleepImpl ? createStatsapiClient({ fetch: fetchImpl, sleep: sleepImpl }) : { getJson }
+  const json = await client.getJson(splitsPath(id, group, season))
+  return (json.stats?.[0]?.splits ?? []).filter((s) => s.team)
 }
 
 // `previous` is the prior run's byTeam map (war.json's batByTeam/pitByTeam),

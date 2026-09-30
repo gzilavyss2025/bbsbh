@@ -1,10 +1,9 @@
 // One verified, representative gamePk per shipped winter league, for the issue.
-const API = 'https://statsapi.mlb.com'
+import { getJson } from '../../../scripts/lib/statsapi.mjs'
+
 const L = [[119, 'FALL'], [132, 'MEX'], [135, 'VEN'], [131, 'DOM'], [133, 'PR']]
 for (const [id, label] of L) {
-  const j = await (await fetch(
-    `${API}/api/v1/schedule?sportId=17&leagueId=${id}&startDate=2025-10-01&endDate=2026-02-28&hydrate=team`,
-  )).json()
+  const j = await getJson(`/api/v1/schedule?sportId=17&leagueId=${id}&startDate=2025-10-01&endDate=2026-02-28&hydrate=team`)
   const seen = new Map()
   for (const d of j.dates ?? []) for (const g of d.games ?? []) if (!seen.has(g.gamePk)) seen.set(g.gamePk, { ...g, date: d.date })
   const played = [...seen.values()].filter(
@@ -12,7 +11,7 @@ for (const [id, label] of L) {
   )
   // Pick one from the middle of the season, a regular 9-inning game.
   for (const cand of played.slice(Math.floor(played.length / 2))) {
-    const f = await (await fetch(`${API}/api/v1.1/game/${cand.gamePk}/feed/live`)).json()
+    const f = await getJson(`/api/v1.1/game/${cand.gamePk}/feed/live`)
     const plays = f?.liveData?.plays?.allPlays ?? []
     const innings = (f?.liveData?.linescore?.innings ?? []).length
     const pit = plays.reduce((n, p) => n + (p.playEvents ?? []).filter((e) => e.isPitch).length, 0)

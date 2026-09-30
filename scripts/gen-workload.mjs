@@ -30,12 +30,12 @@ import { fileURLToPath } from 'node:url'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { clubPenCounts } from '../src/api/workload.js'
+import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'workload.json')
 // The slate's sidecar — thirty rows of counts, written beside the full store.
 const summaryOut = join(here, '..', 'public', 'data', 'workload-summary.json')
-const BASE = 'https://statsapi.mlb.com'
 const SEASON = 2026
 
 // Number of most-recent appearances stored per pitcher (feeds the 1/3/10 buckets
@@ -54,19 +54,6 @@ const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
 const ipToOuts = (ip) => {
   const [whole, frac = '0'] = String(ip ?? '0').split('.')
   return num(whole) * 3 + num(frac[0])
-}
-
-async function getJson(path) {
-  // Retry once on any failure (network blip / transient statsapi 5xx).
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const res = await fetch(BASE + path)
-      if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-      return await res.json()
-    } catch (err) {
-      if (attempt === 1) throw err
-    }
-  }
 }
 
 // Run an async mapper across items with a small concurrency cap, results in

@@ -46,6 +46,7 @@ import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { writeShards } from './lib/io.js'
+import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // BUCKETED on `personId % 100` (shardKey100, imported from the app so the
@@ -67,7 +68,7 @@ const HINT =
   'an unresolved shared team-season is queued in scripts/manager-transitions-needs-research.json and ' +
   'its stints carry `sharedSeason: true` with no `record`.'
 
-const API = 'https://statsapi.mlb.com/api/v1'
+const API = '/api/v1'
 const START_YEAR = 2000
 const currentSeason = () => new Date().getUTCFullYear()
 
@@ -80,19 +81,6 @@ const currentSeason = () => new Date().getUTCFullYear()
 const MANAGER_JOB_IDS = new Set(['MNGR', 'NTRM'])
 
 const CURRENT_ONLY = process.argv.includes('--current-only')
-
-async function getJson(url, tries = 3) {
-  for (let i = 0; i < tries; i++) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      return await res.json()
-    } catch (err) {
-      if (i === tries - 1) throw new Error(`${url}: ${err.message}`)
-      await new Promise((r) => setTimeout(r, 400 * (i + 1)))
-    }
-  }
-}
 
 // Run `jobs` (thunks returning promises) with a bounded concurrency pool —
 // same idiom as gen-milb-history.mjs.

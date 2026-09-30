@@ -2,7 +2,7 @@
 // last 21 days league-wide and reports raw field shapes + volumes, so the real
 // report is built against verified structure rather than a guess.
 // Run: node .scratch/home-transactions/recon.mjs
-import { getJson } from '../../src/api/statsapi.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const DAYS = 21
 const end = new Date()

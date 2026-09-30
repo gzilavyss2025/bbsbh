@@ -1,10 +1,11 @@
 // Do our stored rows match the feed's own isOverturned flags, for BOTH clubs in
 // the two anomalous games? If yes, the inconsistency is upstream, not ours.
 import { openDb } from '../../scripts/lib/db.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 const db = await openDb()
 const H = (h) => (h === 'top' ? 0 : 1)
 for (const pk of [815094, 816599]) {
-  const f = await (await fetch(`https://statsapi.mlb.com/api/v1.1/game/${pk}/feed/live`)).json()
+  const f = await getJson(`/api/v1.1/game/${pk}/feed/live`)
   // ground truth straight from the feed, in atBat order
   const truth = []
   for (const p of f.liveData.plays.allPlays ?? []) {

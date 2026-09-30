@@ -7,7 +7,7 @@
 // classifies what sits next to it.
 //
 // Run: node .scratch/home-transactions/probe-bare-activation.mjs [days]
-import { getJson } from '../../src/api/statsapi.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 import { txnDate, mentionsInjuredList } from '../../src/api/rehab-policy.js'
 
 const DAYS = Number(process.argv[2] ?? 60)

@@ -1,11 +1,10 @@
 // If the Puerto Rican league is dropped, how many DAYS of coverage are lost?
-const API = 'https://statsapi.mlb.com'
+import { getJson } from '../../../scripts/lib/statsapi.mjs'
+
 const L = { 119: 'FALL', 132: 'MEX', 135: 'VEN', 131: 'DOM', 133: 'PR' }
 const days = new Map()
 for (const id of Object.keys(L)) {
-  const j = await (await fetch(
-    `${API}/api/v1/schedule?sportId=17&leagueId=${id}&startDate=2025-10-01&endDate=2026-02-28`,
-  )).json()
+  const j = await getJson(`/api/v1/schedule?sportId=17&leagueId=${id}&startDate=2025-10-01&endDate=2026-02-28`)
   const seen = new Set()
   for (const d of j.dates ?? []) for (const g of d.games ?? []) {
     if (seen.has(g.gamePk)) continue

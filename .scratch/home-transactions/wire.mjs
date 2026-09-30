@@ -4,7 +4,7 @@
 // Extracted so the flat feed and the joined feed cannot disagree about what a
 // line is — the same "import the shaper, don't copy it" rule the generators in
 // scripts/ follow.
-import { getJson } from '../../src/api/statsapi.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 export const iso = (d) => d.toISOString().slice(0, 10)
 

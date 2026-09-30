@@ -1,6 +1,7 @@
 // Same completeness check probe 1b used on the MiLB levels, run across the
 // winter leagues: what the scoring flow actually reads.
-const API = 'https://statsapi.mlb.com'
+import { getJson } from '../../../scripts/lib/statsapi.mjs'
+
 const LEAGUES = [[119, 'AFL'], [132, 'LMP'], [135, 'LVBP'], [131, 'LIDOM'], [133, 'PWL'], [162, 'CS']]
 function mulberry32(a) {
   return function () {
@@ -11,9 +12,7 @@ function mulberry32(a) {
   }
 }
 for (const [id, label] of LEAGUES) {
-  const j = await (await fetch(
-    `${API}/api/v1/schedule?sportId=17&leagueId=${id}&startDate=2025-10-01&endDate=2026-02-28`,
-  )).json()
+  const j = await getJson(`/api/v1/schedule?sportId=17&leagueId=${id}&startDate=2025-10-01&endDate=2026-02-28`)
   const seen = new Map()
   for (const d of j.dates ?? []) for (const g of d.games ?? []) if (!seen.has(g.gamePk)) seen.set(g.gamePk, g)
   const played = [...seen.values()].filter(
@@ -26,7 +25,7 @@ for (const [id, label] of LEAGUES) {
   const fails = []
   for (const pk of picks) {
     try {
-      const f = await (await fetch(`${API}/api/v1.1/game/${pk}/feed/live`)).json()
+      const f = await getJson(`/api/v1.1/game/${pk}/feed/live`)
       const plays = f?.liveData?.plays?.allPlays ?? []
       const box = f?.liveData?.boxscore?.teams ?? {}
       const placed = plays.filter((p) => p?.about?.inning && p?.about?.halfInning).length

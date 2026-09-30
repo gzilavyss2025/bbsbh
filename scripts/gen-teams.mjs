@@ -25,6 +25,7 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
+import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'teams.json')
@@ -55,10 +56,7 @@ const WINTER_LEAGUE_IDS = [119, 132, 135, 131]
 
 async function fetchLevel(sportId, leagueId = null) {
   const league = leagueId ? `&leagueId=${leagueId}` : ''
-  const url = `https://statsapi.mlb.com/api/v1/teams?sportId=${sportId}${league}&activeStatus=Y`
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`teams sportId=${sportId}: HTTP ${res.status}`)
-  const json = await res.json()
+  const json = await getJson(`/api/v1/teams?sportId=${sportId}${league}&activeStatus=Y`)
   return (json.teams ?? [])
     .filter((t) => t.active)
     .map((t) => ({

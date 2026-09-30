@@ -13,25 +13,13 @@
 //       e.g. "... placed RHP X on the 60-day disabled list")
 //   ASG/SFA/SGN/NUM/LON/TRN/DEC/RTN/CP - mostly winter ball/minors noise
 import { writeFileSync, existsSync, readFileSync } from 'node:fs'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const SEASONS = []
 for (let y = 2008; y <= 2024; y += 1) SEASONS.push(y)
 
 const CACHE = 'txn-season-cache.json'
 const cache = existsSync(CACHE) ? JSON.parse(readFileSync(CACHE, 'utf8')) : {}
-
-async function get(url, tries = 4) {
-  for (let i = 0; i < tries; i += 1) {
-    try {
-      const r = await fetch(url)
-      if (!r.ok) throw new Error(`HTTP ${r.status}`)
-      return await r.json()
-    } catch (e) {
-      if (i === tries - 1) throw e
-      await new Promise((res) => setTimeout(res, 1500 * (i + 1)))
-    }
-  }
-}
 
 // Keep only what the join needs. person/toTeam/fromTeam ids, the type, both
 // dates (effectiveDate is often the one that actually matches a roster
@@ -44,7 +32,7 @@ for (const season of SEASONS) {
   const key = String(season)
   if (cache[key]) continue
   console.log(`fetching ${season}...`)
-  const data = await get(`https://statsapi.mlb.com/api/v1/transactions?startDate=${season}-01-01&endDate=${season}-12-31`)
+  const data = await getJson(`/api/v1/transactions?startDate=${season}-01-01&endDate=${season}-12-31`)
   const txns = data.transactions || []
   const slim = txns
     .filter((t) => CARE_ABOUT.has(t.typeCode))

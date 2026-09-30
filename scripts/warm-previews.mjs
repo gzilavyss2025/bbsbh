@@ -33,8 +33,8 @@
 // letting image-warm coverage quietly drop to zero with no signal.
 
 import { fetchWithTimeout } from '../api/_lib/http.js'
+import { getJson } from './lib/statsapi.mjs'
 
-const STATSAPI = 'https://statsapi.mlb.com'
 const APP_ORIGIN = 'https://bbsbh.vercel.app'
 const REQUEST_TIMEOUT_MS = 8000
 const CONCURRENCY = 8
@@ -118,11 +118,6 @@ async function mapConcurrent(items, limit, mapper) {
   return results
 }
 
-async function getJson(url) {
-  const res = await fetchWithTimeout(url, undefined, REQUEST_TIMEOUT_MS)
-  if (!res.ok) throw new Error(`${res.status} for ${url}`)
-  return res.json()
-}
 
 // Fetches a pretty preview page (warming its own cache entry as a side
 // effect) and, if it carries an og:image tag not already warmed this run,
@@ -155,9 +150,9 @@ async function warmPage(url, seenImages) {
 async function main() {
   const apiDate = todayEasternDateStr()
   const urlDate = apiDateToUrl(apiDate)
-  const schedule = await getJson(
-    `${STATSAPI}/api/v1/schedule?sportId=1&date=${apiDate}&hydrate=team`,
-  )
+  const schedule = await getJson(`/api/v1/schedule?sportId=1&date=${apiDate}&hydrate=team`, {
+    timeoutMs: REQUEST_TIMEOUT_MS,
+  })
   const games = (schedule.dates ?? []).flatMap((d) => d.games ?? [])
   if (games.length === 0) {
     console.log(`${apiDate}: no MLB games scheduled — nothing to warm`)
@@ -185,7 +180,9 @@ async function main() {
   }
 
   const rosterResults = await mapConcurrent(teamIds, CONCURRENCY, async (id) => {
-    const data = await getJson(`${STATSAPI}/api/v1/teams/${id}/roster?rosterType=active`)
+    const data = await getJson(`/api/v1/teams/${id}/roster?rosterType=active`, {
+      timeoutMs: REQUEST_TIMEOUT_MS,
+    })
     return (data.roster ?? [])
       .filter((r) => r.person?.id)
       .map((r) => ({ id: r.person.id, name: r.person.fullName }))

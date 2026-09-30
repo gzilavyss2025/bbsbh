@@ -2,15 +2,16 @@
 // discriminator for the starting bank: a 2-challenge start caps regulation
 // fails at 2, a 3-challenge start at 3.
 import { selectChallengeState } from '../../src/api/challenges.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 const sportId = Number(process.argv[2])
 const dates = process.argv.slice(3)
 const hist = new Map()
 let games = 0
 for (const date of dates) {
-  const sched = await (await fetch(`https://statsapi.mlb.com/api/v1/schedule?sportId=${sportId}&date=${date}`)).json()
+  const sched = await getJson(`/api/v1/schedule?sportId=${sportId}&date=${date}`)
   const pks = (sched.dates?.[0]?.games ?? []).filter((g) => g.status?.abstractGameState === 'Final').map((g) => g.gamePk)
   for (const pk of pks) {
-    const feed = await (await fetch(`https://statsapi.mlb.com/api/v1.1/game/${pk}/feed/live`)).json()
+    const feed = await getJson(`/api/v1.1/game/${pk}/feed/live`)
     const innings = feed.liveData?.linescore?.currentInning ?? 9
     if (innings > 9) continue // skip extras: bonus challenges muddy the cap
     const st = selectChallengeState(feed, Infinity, 'bottom')

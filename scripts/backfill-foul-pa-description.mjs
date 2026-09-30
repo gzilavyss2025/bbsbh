@@ -17,16 +17,10 @@ import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { exportFouls, aggregateGameFouls } from './gen-fouls.mjs'
+import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'fouls.json')
-const BASE = 'https://statsapi.mlb.com'
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
 
 async function main() {
   const db = await openDb()

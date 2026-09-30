@@ -19,6 +19,7 @@
 // club PLUS an aggregate whose `team` is undefined, so a sweep that takes
 // `splits[0]` attributes his whole season to one club. Match on `split.team.id`.
 import { writeFileSync } from 'node:fs'
+import { getJson, statsapiUrl } from '../../scripts/lib/statsapi.mjs'
 
 const LINESCORES = [
   { pk: 824872, why: 'home club did not bat in the 9th — last inning home object has no runs key' },
@@ -27,11 +28,7 @@ const LINESCORES = [
   { pk: 815811, why: 'Suspended: Rain — abstractGameState Live, swept anyway, permanently incomplete (#1073)' },
 ]
 
-async function feed(pk) {
-  const r = await fetch(`https://statsapi.mlb.com/api/v1.1/game/${pk}/feed/live`)
-  if (!r.ok) throw new Error(`${pk}: ${r.status}`)
-  return r.json()
-}
+const feed = (pk) => getJson(`/api/v1.1/game/${pk}/feed/live`)
 
 const linescores = []
 for (const { pk, why } of LINESCORES) {
@@ -65,13 +62,13 @@ for (const { pk, why } of LINESCORES) {
 // catchers this season, one of them traded in, which is the shape that matters.
 const TEAM = 114
 const rosterUrl =
-  `https://statsapi.mlb.com/api/v1/teams/${TEAM}/roster?rosterType=fullSeason&season=2026` +
+  `/api/v1/teams/${TEAM}/roster?rosterType=fullSeason&season=2026` +
   `&hydrate=person(stats(type=season,group=[hitting,fielding],season=2026,sportId=1))`
-const rr = await (await fetch(rosterUrl)).json()
+const rr = await getJson(rosterUrl)
 
 const roster = {
   teamId: TEAM,
-  url: rosterUrl,
+  url: statsapiUrl(rosterUrl),
   why: 'fullSeason hydrate; a traded player carries one split per club plus an aggregate with no team',
   players: (rr.roster ?? [])
     .map((p) => {

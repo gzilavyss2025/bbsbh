@@ -15,6 +15,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, 'bios.json')
@@ -30,24 +31,10 @@ const rows = JSON.parse(await readFile(join(here, '..', 'top-prospects-history',
 const ids = [...new Set(rows.map((r) => r.mlbId))].sort((a, b) => a - b)
 console.log(`${ids.length} distinct ranked players to look up`)
 
-async function getJson(url) {
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      return await res.json()
-    } catch (err) {
-      if (attempt === 1) throw err
-      console.warn(`  retry after ${err.message}`)
-      await new Promise((r) => setTimeout(r, 2000))
-    }
-  }
-}
-
 const bios = {}
 for (let i = 0; i < ids.length; i += 100) {
   const chunk = ids.slice(i, i + 100)
-  const url = `https://statsapi.mlb.com/api/v1/people?personIds=${chunk.join(',')}`
+  const url = `/api/v1/people?personIds=${chunk.join(',')}`
   const data = await getJson(url)
   for (const p of data.people ?? []) {
     bios[p.id] = {

@@ -26,6 +26,8 @@
 // team) rather than an overall ranking. Both datasets are needed here: the
 // bare URL for the standalone Top 100 page + player-page badge, the
 // query-string URL for each team page's own prospect table.
+import { getJson } from './lib/statsapi.mjs'
+
 const TOP100_URL = 'https://www.mlb.com/prospects/stats/top-prospects'
 const ORG_URL = 'https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1'
 const OUT_PATH = new URL('../public/data/top-prospects.json', import.meta.url)
@@ -167,9 +169,7 @@ async function fetchList(url) {
 async function fetchJerseyNumbers(playerIds) {
   if (!playerIds.length) return new Map()
   try {
-    const res = await fetch(`https://statsapi.mlb.com/api/v1/people?personIds=${playerIds.join(',')}`)
-    if (!res.ok) return new Map()
-    const data = await res.json()
+    const data = await getJson(`/api/v1/people?personIds=${playerIds.join(',')}`)
     return new Map((data.people ?? []).map((p) => [p.id, p.primaryNumber ?? null]))
   } catch {
     return new Map()
