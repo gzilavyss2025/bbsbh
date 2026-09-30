@@ -331,7 +331,7 @@ export function SituationalRecordsPage({
       <SiteHeader />
 
       <header className="trrank__hero">
-        <span className="trrank__eyebrow">{season} {SPORT_LABEL[sportId] ?? ''} season</span>
+        <span className="trrank__note">{season} {SPORT_LABEL[sportId] ?? ''} season</span>
         <h1>Situational Records</h1>
         <p>W–L records and season totals for every club, split by game situation.</p>
       </header>

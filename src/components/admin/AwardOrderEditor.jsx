@@ -115,7 +115,7 @@ export function AwardOrderEditor({ fields, values, onChange, onReset }) {
 
       <div className="awardord__body">
         <div className="awardord__listcol">
-          <p className="awardord__hd">Weight order</p>
+          <p className="awardord__title">Weight order</p>
           <ol className="awardord__list">
             {keys.map((key, i) => {
               const hit = byRankKey.get(key)
@@ -166,7 +166,7 @@ export function AwardOrderEditor({ fields, values, onChange, onReset }) {
         </div>
 
         <div className="awardord__previewcol">
-          <p className="awardord__hd">What it does</p>
+          <p className="awardord__title">What it does</p>
           <div className="awardord__preview">
             <p className="awardord__who">{SAMPLE.name}</p>
             <p className="awardord__whoLine">

@@ -117,7 +117,7 @@ function StampInSeason({ teamId, asOf, onBack }) {
       {/* Second person, and about what you SAW — never about how much of the
           season is "done". docs/game-log.md §1: the Game Log has no completion
           state, so this page carries no count, no bar, and no total. */}
-      <p className="stampin__lede">
+      <p className="stampin__note">
         Every {club} game already played, newest first. Press a stamp on the ones you watched — it
         lands in your Game Log, waiting for a page.
       </p>

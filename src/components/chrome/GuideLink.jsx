@@ -36,7 +36,7 @@ export function GuideLink({ path, eyebrow = 'New to this?', className = '' }) {
 
   return (
     <a className={`guidelink ${className}`} href={guide.path}>
-      <span className="guidelink__eyebrow">{eyebrow}</span>
+      <span className="guidelink__note">{eyebrow}</span>
       <span className="guidelink__label">{guide.label}</span>
     </a>
   )

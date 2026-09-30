@@ -240,7 +240,7 @@ export function FirstScorebookPage() {
           <span>Numbers Game</span>
           <span>No. 01</span>
         </div>
-        <p className="scorebookstory__kicker">The 22 Scorebook</p>
+        <p className="scorebookstory__note">The 22 Scorebook</p>
         <h1>My First <br />Scorebook</h1>
         <p className="scorebookstory__prose scorebookstory__dek">
           Thirty-nine games in pencil, from the first out in Milwaukee to a one-run finish in Arlington.

@@ -66,7 +66,7 @@ export function TeamSearchBox({ label = 'Find a team', placeholder = 'Team nameâ
                     onMouseDown={() => pick(t)}
                   >
                     <span className="searchbox__name">{t.name}</span>
-                    <span className="searchbox__sub">{SPORT_LABEL[t.sportId] ?? ''}</span>
+                    <span className="searchbox__note">{SPORT_LABEL[t.sportId] ?? ''}</span>
                   </button>
                 </li>
               ))}

@@ -52,7 +52,7 @@
   padding: var(--space-4) var(--space-5) var(--space-5);
 }
 
-.bcast__eyebrow {
+.bcast__note {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -514,7 +514,7 @@
   box-shadow: inset 3px 0 0 var(--clay);
 }
 
-.rpt__sub {
+.rpt__note {
   display: block;
   font-family: var(--font-body);
   font-size: var(--fs-small);

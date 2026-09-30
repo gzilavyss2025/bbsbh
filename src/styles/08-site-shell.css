@@ -91,7 +91,7 @@
   color: var(--text-body);
 }
 
-.searchbox__sub {
+.searchbox__note {
   font-size: var(--fs-compact);
   color: var(--text-caption);
 }
@@ -562,7 +562,7 @@
   white-space: nowrap;
 }
 
-.searchoverlay__sub {
+.searchoverlay__note {
   font-size: var(--fs-compact);
   color: var(--text-caption);
   overflow: hidden;

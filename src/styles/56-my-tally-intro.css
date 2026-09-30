@@ -17,7 +17,7 @@
   text-transform: none; /* caps-exempt: welcome-modal step copy reads as natural sentences, like the rest of this dialog */
 }
 
-.introsheet__eyebrow {
+.introsheet__note {
   margin: 0 0 2px;
   font-family: var(--font-display);
   font-size: var(--fs-compact);

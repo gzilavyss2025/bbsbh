@@ -422,7 +422,7 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-num);
 }
-.split__sub {
+.split__note {
   font-size: var(--fs-caption);
   color: var(--text-caption);
   font-weight: var(--w-regular);

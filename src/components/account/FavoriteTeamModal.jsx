@@ -140,7 +140,7 @@ export function FavoriteTeamModal({ favoriteTeamId, onSave, onClose }) {
                 on an unconfigured deploy there is "no step 2, no indicator,
                 and no dead '1 of 2'". */}
             {AccountPitch && (
-              <p className="introsheet__eyebrow caps-exempt">
+              <p className="introsheet__note caps-exempt">
                 {step === 1 ? 'Step 1 · Your club' : 'Step 2 · Your scorebook'}
               </p>
             )}

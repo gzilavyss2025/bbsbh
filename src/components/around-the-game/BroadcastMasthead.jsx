@@ -58,7 +58,7 @@ export function BroadcastMasthead({
       <div className="bcast__bar" aria-hidden="true" />
       <div className="bcast__body">
         {strand === null ? null : (
-          <p className="bcast__eyebrow">
+          <p className="bcast__note">
             <span className="bcast__strand">{strand}</span>
             {eyebrow ? <span className="bcast__slash">/</span> : null}
             {eyebrow ? <span>{eyebrow}</span> : null}

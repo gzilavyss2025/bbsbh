@@ -150,7 +150,7 @@ function RecordSearchPanel() {
 
   return (
     <section className="lookupdeck__panel" aria-labelledby={`${uid}-heading`}>
-      <h3 id={`${uid}-heading`} className="lookupdeck__heading">
+      <h3 id={`${uid}-heading`} className="lookupdeck__title">
         Search contract records
       </h3>
 
@@ -304,7 +304,7 @@ function PlayerSearchPanel({ selectedRow, onUseAsMatch, disabled }) {
 
   return (
     <section className="lookupdeck__panel" aria-labelledby={`${uid}-heading`}>
-      <h3 id={`${uid}-heading`} className="lookupdeck__heading">
+      <h3 id={`${uid}-heading`} className="lookupdeck__title">
         Search MLB players
       </h3>
 

@@ -151,7 +151,7 @@
   margin: 0;
 }
 
-.clubsseen__lede {
+.clubsseen__note {
   margin: var(--space-1) 0 var(--space-4);
   font-family: var(--font-body);
   font-size: var(--fs-small);

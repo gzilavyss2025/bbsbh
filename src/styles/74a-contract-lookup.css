@@ -28,7 +28,7 @@
   background: var(--surface-card);
 }
 
-.lookupdeck__heading {
+.lookupdeck__title {
   margin: 0;
   color: var(--text-heading);
   font-family: var(--font-display);

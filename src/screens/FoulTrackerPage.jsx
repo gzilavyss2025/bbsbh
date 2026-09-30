@@ -869,7 +869,7 @@ function SeasonAverageCard({ data }) {
 
   return (
     <Card as="div" body="flush" className="foulavg">
-      <p className="foulavg__lede">
+      <p className="foulavg__note">
         There are <b>{Math.round(avgPitches)}</b> pitches thrown in an average MLB game and{' '}
         <b>{Math.round(avgFouls)}</b> are fouled off ({pct1(foulRate)}). The average plate appearance features{' '}
         <b>{avgFoulsPerPA == null ? '—' : avgFoulsPerPA.toFixed(1)}</b> foul balls, and a starting pitcher averages{' '}

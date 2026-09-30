@@ -130,7 +130,7 @@ function SiteMenuModal({ onClose }) {
       >
         <div className="sitemenusheet__head">
           <div>
-            <p className="sitemenusheet__eyebrow">Tally Baseball</p>
+            <p className="sitemenusheet__note">Tally Baseball</p>
             <h2 className="sheet__title">Site menu</h2>
           </div>
           <IconButton ref={closeRef} onClick={onClose} label="Close">
