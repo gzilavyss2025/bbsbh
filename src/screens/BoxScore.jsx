@@ -8,6 +8,7 @@ import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { selectOfficials, selectIsFinal } from '../api/select.js'
 import { stepToSection } from '../lib/route.js'
+import { ordinal } from '../lib/format.js'
 import { umpireAccuracySummary } from '../api/umpires.js'
 import { selectChallengeState, gameHasAbs } from '../api/challenges.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -1017,12 +1018,6 @@ function Decisions({ decisions }) {
       ))}
     </Card>
   )
-}
-
-function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd']
-  const v = n % 100
-  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }
 
 // The night's single most memorable moment (see computePlayOfTheGame) — the

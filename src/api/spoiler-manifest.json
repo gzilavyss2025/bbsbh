@@ -152,10 +152,6 @@
       "class": "cutoff-gated",
       "why": "The Box Lines sheet's pure half (ADR-0069): a player's game-by-game rows behind a career line, each carrying a FINAL SCORE, opened from the lineup page — a scoring surface. The gate is here and nowhere else: `boxLineRows` returns only games dated strictly before `cutoff` (a same-day game 1 shares the date and is out) and only games the schedule reports Final; `logRequestPlan` applies the same cutoff upstream so the cutoff season is requested only through the day before. `scorelessGamePks` is the same gate read the other way — the games it turned away FOR WANT OF A SCORE, which fetch.js re-scores off each game's own linescore (#1031) and hands back as `recoveredScores`. That can only ever ADD a row the gate already approved on date and status: a game with no score on either source still has none, and a schedule record that carries a score keeps it. Same footing as person/gameLog.js: the safety is the date the caller asks for, and the sheet holds no date logic of its own."
     },
-    "boxlines/vsClub.js": {
-      "class": "cutoff-gated",
-      "why": "The club facet under its original name — a one-line wrapper over boxlines/fetch.js kept so the lineup page and the Splits vs team card did not have to change when #997 generalised the fetch. It computes nothing and inherits fetch.js's footing whole."
-    },
     "boxscore.js": {
       "class": "reveal-only",
       "why": "Every number in the full box-score line is score-revealing. `selectBoxscore` must run inside the box score's SealBox reveal.",

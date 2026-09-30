@@ -188,8 +188,6 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   returning SPONSOR names unseasoned and omitting parks with `&season=`.
   `sitCodes=ven` returns nothing at all, three ways over.
   `test/boxlines-fold.test.js` pins the arithmetic.
-  `vsClub.js` is now a one-line wrapper on `fetch.js` for the club facet, kept
-  so the two shipped doors did not have to change.
   THE SCHEDULE IS ASKED BY gamePk FOR EVERY FACET, not per (club, season):
   measured 2026-09-02, 162 gamePks answer in one 177 ms call, a club-season
   carries all 164 of the club's games where a starter appeared in ~30, and a

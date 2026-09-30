@@ -10,6 +10,7 @@ import { fetchHighlights, classifyHighlight, isEligibleForPositiveFilter } from 
 import { fetchGameFeed } from '../../api/game.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 import { teamClubNameShort } from '../../lib/teams.js'
+import { ordinal } from '../../lib/format.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -17,12 +18,6 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 
 const PLAY_ID_FIELDS = 'liveData,plays,allPlays,about,atBatIndex,playEvents,isPitch,playId'
-
-function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd']
-  const v = n % 100
-  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
-}
 
 // The night's single most memorable moment, headshot-led — same idea as
 // BoxScore.jsx's own PlayOfTheGame (the full box score's "real" version this
