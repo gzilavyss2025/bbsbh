@@ -582,6 +582,8 @@ export function computePlayOfTheGame(winProb, feed) {
     // Nullable, and null on the pruned past-game path by design — the slate
     // flip-card's .flipback__potg shows the description only, no Watch button.
     playId,
+    // Lets a caller on the pruned path find the clip on its own (the series pages).
+    atBatIndex: best.about?.atBatIndex ?? null,
     batterId,
     batterName: batterGd ? firstLast(batterGd) : '',
     // Team + position, same lookup shape as starLine below — lets the card

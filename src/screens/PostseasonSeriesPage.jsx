@@ -252,6 +252,7 @@ export function PostseasonSeriesPage({ seriesId }) {
                       </div>
                       <SeriesPlayOfTheGame
                         potg={potg}
+                        gamePk={g.gamePk}
                         awayAbbr={card.away.abbreviation}
                         homeAbbr={card.home.abbreviation}
                       />

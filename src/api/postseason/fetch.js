@@ -81,10 +81,10 @@ export function skeletonUrl(season) {
   return `/api/v1/schedule?sportId=1&season=${season}&gameType=${GAME_TYPES}&hydrate=team&fields=${SKELETON_FIELDS}`
 }
 
-export function resultsUrl(season, cutoffDate) {
+export function resultsUrl(season, cutoffDate, { live = false } = {}) {
   return (
     `/api/v1/schedule?sportId=1&season=${season}&gameType=${GAME_TYPES}` +
-    `&startDate=${season}-01-01&endDate=${dayBefore(cutoffDate)}&fields=${RESULT_FIELDS}`
+    `&startDate=${season}-01-01&endDate=${live ? cutoffDate : dayBefore(cutoffDate)}&fields=${RESULT_FIELDS}`
   )
 }
 
@@ -150,16 +150,18 @@ export async function fetchPostseasonSkeleton(season, { signal } = {}) {
   return skeletonRowsFrom(await getJson(skeletonUrl(season), { signal }))
 }
 
-export async function fetchPostseasonResults(season, cutoffDate, { signal } = {}) {
-  return resultRowsFrom(await getJson(resultsUrl(season, cutoffDate), { signal }))
+export async function fetchPostseasonResults(season, cutoffDate, { signal, live = false } = {}) {
+  return resultRowsFrom(await getJson(resultsUrl(season, cutoffDate, { live }), { signal }))
 }
 
 // Both reads, then the derivation. A failed results read FAILS the whole load
 // rather than drawing every series 0-0: a wrong state is worse than none.
-export async function loadPostseasonBracket(cutoffDate, season, { signal } = {}) {
+// `live` is the reader's own unlock of the day's scores: the cutoff day's Finals
+// count too, so the bracket moves as a game ends.
+export async function loadPostseasonBracket(cutoffDate, season, { signal, live = false } = {}) {
   const [skeleton, results] = await Promise.all([
     fetchPostseasonSkeleton(season, { signal }),
-    fetchPostseasonResults(season, cutoffDate, { signal }),
+    fetchPostseasonResults(season, cutoffDate, { signal, live }),
   ])
-  return deriveBracket(skeleton, results, cutoffDate)
+  return deriveBracket(skeleton, results, cutoffDate, { live })
 }

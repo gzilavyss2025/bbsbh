@@ -101,3 +101,13 @@ season.
   `gameIndex` holds only games dated on or before its cutoff.
 - `GameSelect.jsx` no longer calls `capSlateDate`. `atForwardLimit` is gone.
   Decisions 1 to 4 do not change.
+
+## Addendum (2026-09-30): revealing the day's live scores moves the bracket
+
+Decision 4 stands for the series page and for any reader who has not revealed
+anything. One departure, Gary's call: on the home slate, when Scores Unlocked is
+on for the slate's date, the bracket and the cards' series line count that day's
+Final games too (`usePostseasonBracket(date, { live: true })`, and it refetches
+on foreground). A game still in progress counts only once it is Final. The
+switch is read in `GameSelect.jsx` and passed in; the bracket code still never
+reads it.

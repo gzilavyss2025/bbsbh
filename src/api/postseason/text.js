@@ -38,6 +38,12 @@ function roundTitle(series) {
   return `${series.league}CS`
 }
 
+// "NL Wild Card · Best of 3" — the home page's series ticket head, in place of a
+// game number (Gary, 2026-09-30).
+export function roundLine(series) {
+  return series ? `${roundTitle(series)} · ${bestOfLine(series)}` : ''
+}
+
 // "Game 2 · NL Wild Card"
 export function seriesLine(series, gameNumber) {
   if (!series || !gameNumber) return ''
