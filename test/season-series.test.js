@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { seasonSeriesCells } from '../src/api/seasonSeries.js'
+import { seasonSeriesCells, extraInningsOf } from '../src/api/seasonSeries.js'
 
 const NYM = 121
 const MIL = 158
@@ -81,4 +81,28 @@ test('seasonSeriesCells: a genuine tie (equal scores) is final with no winner, f
   assert.equal(cell.winnerId, null)
   assert.equal(cell.winnerScore, null)
   assert.equal(cell.loserAbbr, null)
+})
+
+test('seasonSeriesCells: a seven-inning game that went to eight is flagged as extras', () => {
+  const [cell] = seasonSeriesCells(
+    [{ gamePk: 7, apiDate: '2026-05-06', gameDate: '2026-05-06T23:10:00Z', gameNumber: 1, awayId: NYM, homeId: MIL, final: true, awayScore: 3, homeScore: 2, innings: 8, scheduledInnings: 7 }],
+    MIL,
+    999,
+  )
+  assert.equal(cell.extraInnings, 8)
+})
+
+test('seasonSeriesCells: a seven-inning game that ended in seven has no flag', () => {
+  const [cell] = seasonSeriesCells(
+    [{ gamePk: 8, apiDate: '2026-05-06', gameDate: '2026-05-06T23:10:00Z', gameNumber: 1, awayId: NYM, homeId: MIL, final: true, awayScore: 3, homeScore: 2, innings: 7, scheduledInnings: 7 }],
+    MIL,
+    999,
+  )
+  assert.equal(cell.extraInnings, null)
+})
+
+test('extraInningsOf: falls back to nine when scheduledInnings is missing', () => {
+  assert.equal(extraInningsOf(9, null), null)
+  assert.equal(extraInningsOf(10, undefined), 10)
+  assert.equal(extraInningsOf(8, 7), 8)
 })

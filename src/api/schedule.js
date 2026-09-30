@@ -495,7 +495,7 @@ const SCHEDULE_FIELDS = `${GAME_CARDS_FIELDS},lineups,awayPlayers,homePlayers,of
 const HEAD_TO_HEAD_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id'
 const TEAM_SCHEDULE_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,teams,away,home,team,id,name,teamName,abbreviation,status,abstractGameState,isWinner,score,linescore,currentInning'
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,teams,away,home,team,id,name,teamName,abbreviation,status,abstractGameState,isWinner,score,linescore,currentInning,scheduledInnings'
 
 // Every regular-season meeting between two clubs in one season, for the
 // footer's "find a past matchup" search. The schedule endpoint has no
@@ -535,7 +535,7 @@ export async function fetchHeadToHead(teamAId, teamBId, season, sportId = 1) {
 }
 
 const SEASON_SERIES_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id,score,isWinner,venue,name,timeZone,tz,linescore,currentInning'
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id,score,isWinner,venue,name,timeZone,tz,linescore,currentInning,scheduledInnings'
 
 // Same lookup as fetchHeadToHead, but WITH each side's score, the venue's own
 // time zone, and (for a completed game) how many innings it actually ran —
@@ -574,6 +574,7 @@ export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1) {
           awayScore: final ? (awaySide?.score ?? null) : null,
           homeScore: final ? (homeSide?.score ?? null) : null,
           innings: final ? (g.linescore?.currentInning ?? null) : null,
+          scheduledInnings: g.linescore?.scheduledInnings ?? null,
           tzId: g.venue?.timeZone?.id ?? null,
         })
       }
@@ -705,6 +706,7 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCuto
         runs: resultVisible ? (mySide?.score ?? null) : null,
         oppRuns: resultVisible ? (oppSide?.score ?? null) : null,
         innings: resultVisible ? (g.linescore?.currentInning ?? null) : null,
+        scheduledInnings: g.linescore?.scheduledInnings ?? null,
         // Status only, never gated by `resultsCutoff` — "has this game left
         // Preview" carries no score, unlike `won`/`runs`/`innings` above, so
         // it needs no cutoff to stay spoiler-free. See allStartedGames' own
