@@ -69,12 +69,6 @@ export function isElimination(series) {
   return a.wins === n || b.wins === n
 }
 
-// The brief's "one bold moment": a deciding game or an elimination game,
-// playing on the cutoff date. Everything else about the bracket stays quiet.
-export function isBoldMoment(series) {
-  return Boolean(series?.playsOnCutoff) && (isDecidingGame(series) || isElimination(series))
-}
-
 // Which round is "current" for one league, for the full bracket's Concept A
 // look: the earliest round with something still undecided. Every earlier
 // round has already been fully decided and draws compact; every later round

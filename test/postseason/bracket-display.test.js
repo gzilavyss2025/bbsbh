@@ -10,7 +10,6 @@ import {
   aliveClubs,
   bracketOpensByItself,
   byeSlotIndex,
-  isBoldMoment,
   isDecidingGame,
   isElimination,
   leaguePhase,
@@ -63,36 +62,32 @@ test('offDayAliveTeams: null/undefined playingIds never throws and keeps every a
   assert.deepEqual(off, aliveClubs(b).map((c) => c.abbreviation).sort())
 })
 
-test('isDecidingGame / isElimination / isBoldMoment: a 2-1 series is elimination for the trailing club only', () => {
+test('isDecidingGame / isElimination: a 2-1 series is elimination for the trailing club only', () => {
   const b = bracket2025('2025-10-09')
   const mil = seriesWith(b, 'NL', 'division', 'MIL') // MIL 2, CHC 1 heading into 10-09, plays today
   assert.equal(isDecidingGame(mil), false, 'both clubs are not one win from the series at 2-1')
   assert.equal(isElimination(mil), true, 'CHC is one loss from out')
-  assert.equal(isBoldMoment(mil), true, 'it also plays on the cutoff date')
 })
 
-test('isDecidingGame / isBoldMoment: a decided series is never the bold moment again', () => {
+test('isDecidingGame: a decided series is not a deciding game', () => {
   const b = bracket2025('2025-10-09')
   const tor = seriesWith(b, 'AL', 'division', 'TOR') // decided 3-1, no longer plays
   assert.equal(isDecidingGame(tor), false)
   assert.equal(isElimination(tor), false)
-  assert.equal(isBoldMoment(tor), false)
 })
 
-test('isDecidingGame: a tied series not playing today is not the bold moment (SEA-DET 2-2, next day)', () => {
+test('isDecidingGame: a tied series is a decider even when it does not play today (SEA-DET 2-2, next day)', () => {
   const b = bracket2025('2025-10-09')
   const sea = seriesWith(b, 'AL', 'division', 'SEA') // 2-2, deciding, but its Game 5 is the NEXT day
   assert.equal(isDecidingGame(sea), true, '2-2 of a best-of-5 is a symmetric decider')
   assert.equal(sea.playsOnCutoff, false)
-  assert.equal(isBoldMoment(sea), false, 'the bold moment only applies to a game playing today')
 })
 
-test('isDecidingGame/isElimination: an empty slot is never a bold moment', () => {
+test('isDecidingGame/isElimination: an empty slot is neither', () => {
   const b = bracket2025('2025-10-04')
   const alcs = b.leagues.AL.lcs
   assert.equal(isDecidingGame(alcs), false)
   assert.equal(isElimination(alcs), false)
-  assert.equal(isBoldMoment(alcs), false)
 })
 
 test('leaguePhase: the full bracket’s current round, per league (Concept A)', () => {

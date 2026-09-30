@@ -29,10 +29,6 @@ export const SURFACES = Object.freeze({
   SLATE: 'slate',
 })
 
-// The ONLY keys that can ever reach the analytics payload. Anything not in this
-// set is dropped — the guarantee that no game-identifying field escapes.
-export const ALLOWED_PROP_KEYS = Object.freeze(['toggle', 'action', 'surface'])
-
 const TOGGLE_VALUES = new Set(Object.values(TOGGLES))
 const ACTION_VALUES = new Set(Object.values(ACTIONS))
 const SURFACE_VALUES = new Set(Object.values(SURFACES))

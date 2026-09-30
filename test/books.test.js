@@ -17,7 +17,6 @@ import {
   MAX_BOOK_TITLE_LENGTH,
   applyRemoteBooks,
   bookCount,
-  bookFor,
   booksToPublish,
   createBook,
   genBookId,
@@ -39,6 +38,9 @@ import {
 // ---------------------------------------------------------------------------
 // Validation and sanitizing
 // ---------------------------------------------------------------------------
+
+// The live book with this id, or null: a tombstoned book reads as gone.
+const bookFor = (map, id) => (isBookId(id) && map?.[id]?.state === 'on' ? map[id] : null)
 
 test('isBookId takes a short slug and refuses everything else', () => {
   assert.equal(isBookId('default'), true)
