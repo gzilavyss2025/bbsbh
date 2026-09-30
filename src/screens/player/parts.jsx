@@ -9,10 +9,6 @@ import { Card } from '../../components/ui/frame/Card.jsx'
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 export const DASH = '—'
 
-export function isoToday() {
-  return new Date().toISOString().slice(0, 10)
-}
-
 // "Jul 5, 2019" — a dated career event (the debut fact, every "first").
 export function debutLabel(iso) {
   const [y, m, d] = (iso || '').split('-')

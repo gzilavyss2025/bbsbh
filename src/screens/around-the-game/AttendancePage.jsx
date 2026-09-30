@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { fetchGate, gateBoard, GATE_SORTS, latestSeason, monthsIn } from '../../api/around-the-game/gate.js'
 import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
 import { humanDate } from '../../lib/dates.js'
+import { commas } from './abs/format.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -35,7 +36,6 @@ import { BarCell, TrendStrip } from '../../components/around-the-game/BroadcastB
 //
 // SPOILER-FREE. A crowd count is not a score (api/around-the-game/gate.js).
 
-const commas = (n) => (n == null ? '—' : n.toLocaleString('en-US'))
 const pct1 = (n) => (n == null ? '—' : `${n.toFixed(1)}%`)
 
 // The board's numeric columns, in the order the table prints them. Held as

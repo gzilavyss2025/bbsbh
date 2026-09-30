@@ -8,6 +8,12 @@ export function toApiDate(date = new Date()) {
   return `${y}-${m}-${d}`
 }
 
+// Today as a UTC YYYY-MM-DD — the cutoff every open stat page compares dates
+// against. toApiDate above is the local-date one; don't swap them.
+export function isoToday() {
+  return new Date().toISOString().slice(0, 10)
+}
+
 export function addDays(date, n) {
   const copy = new Date(date)
   copy.setDate(copy.getDate() + n)

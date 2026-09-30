@@ -5,7 +5,7 @@
 // to get off-by-one on.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { isWithinDays, monthDayName, timeOfDay, isFriday, isRealDate, asOfBounds, clampAsOfDate } from '../src/lib/dates.js'
+import { isWithinDays, monthDayName, isoToday, timeOfDay, isFriday, isRealDate, asOfBounds, clampAsOfDate } from '../src/lib/dates.js'
 
 const TODAY = new Date(2026, 6, 22) // July 22, 2026
 
@@ -126,4 +126,9 @@ test('monthDayName answers an empty string for a missing or garbled date', () =>
   for (const bad of [undefined, null, '', 'soon', '2026-07']) {
     assert.equal(monthDayName(bad), '', `expected '' for ${JSON.stringify(bad)}`)
   }
+})
+
+test('isoToday is today as a UTC YYYY-MM-DD', () => {
+  assert.match(isoToday(), /^\d{4}-\d{2}-\d{2}$/)
+  assert.equal(isoToday(), new Date().toISOString().slice(0, 10))
 })

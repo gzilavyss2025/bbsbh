@@ -13,10 +13,7 @@ import { AllGames } from './modules/TeamGames.jsx'
 import { SeasonSchedule } from './modules/SeasonSchedule.jsx'
 import { TeamHighlightsRail } from './modules/media/TeamHighlightsRail.jsx'
 import { TeamPhotosRail } from './modules/media/TeamPhotosRail.jsx'
-
-function isoToday() {
-  return new Date().toISOString().slice(0, 10)
-}
+import { isoToday } from '../../lib/dates.js'
 
 // The Games tab: season schedule (the tab's headline), then every decided game
 // so far as a grid of ticket stubs — the Overview keeps the last-ten strip, the
