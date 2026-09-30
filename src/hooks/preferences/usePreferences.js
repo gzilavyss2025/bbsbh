@@ -13,6 +13,7 @@ import {
   writeOwnerTo,
   writePreferencesTo,
 } from '../../lib/account/preferencesStorage.js'
+import { notifyStorage } from '../../lib/account/localStore.js'
 
 // My Tally's preference store. Mirrors useStamps.js exactly: the rules are the
 // React-free core in src/lib/account/preferences.js (unit-tested there, and
@@ -43,18 +44,11 @@ const writePreferences = (doc) => writePreferencesTo(browserStorage(), doc)
 export const readPrefsOwner = () => readOwnerFrom(browserStorage())
 export const writePrefsOwner = (userId) => writeOwnerTo(browserStorage(), userId)
 
-// A same-tab echo of the `storage` event. The browser fires `storage` only in
-// OTHER tabs, and several instances of this hook really are mounted at once —
-// the slate's level toggle, the header avatar's club, a game view's keep-awake
-// switch, and PreferencesCloudSync. Same mechanism, and same reason, as
-// useStamps.js's notifyLocalChange.
-function notifyLocalChange() {
-  try {
-    window.dispatchEvent(new StorageEvent('storage', { key: PREFS_KEY }))
-  } catch {
-    // StorageEvent unavailable — cross-instance updates degrade to next render.
-  }
-}
+// The same-tab echo of the `storage` event (notifyStorage): several instances of
+// this hook really are mounted at once — the slate's level toggle, the header
+// avatar's club, a game view's keep-awake switch, and PreferencesCloudSync — and
+// the browser fires `storage` only in OTHER tabs.
+const notifyLocalChange = () => notifyStorage(PREFS_KEY)
 
 export function usePreferences() {
   const [prefs, setPrefs] = useState(readPreferences)
