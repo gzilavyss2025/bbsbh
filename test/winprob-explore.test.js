@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { nearestWinProbEvent, winProbReadout, winProbChangeLabel, touchIntent, followLatest, snapToMarker } from '../src/components/charts/winprob/explore.js'
+import { nearestWinProbEvent, winProbReadout, winProbChangeLabel, touchIntent, followLatest, snapToMarker, focusInput } from '../src/components/charts/winprob/explore.js'
 import { winProbKeyColor, winProbKeyPair } from '../src/components/charts/winprob/keyColors.js'
 
 const FALLBACK = { primary: '#6B6558', secondary: '#938C7C', text: '#FBF6E9' }
@@ -90,4 +90,13 @@ test('two near-identical key colours move the away key to its fallback', () => {
   assert.equal(clash.home, home)
   const apart = winProbKeyPair({ fill: '#BD3039', text: '#FFFFFF' }, home, FALLBACK)
   assert.equal(apart.away.fill, '#BD3039')
+})
+
+test('focus that did not follow a pointer down on the slider is keyboard focus', () => {
+  // Click, Tab away, Tab back: no pointer down came first, so the ring must show.
+  assert.equal(focusInput(null, 5000), 'key')
+  // A pointer down that never led to focus goes stale rather than hiding a later Tab-in's ring.
+  assert.equal(focusInput(1000, 5000), 'key')
+  // Focus that lands right after a pointer down (a click's own focus() or a tap's) draws no ring.
+  assert.equal(focusInput(4900, 5000), 'pointer')
 })

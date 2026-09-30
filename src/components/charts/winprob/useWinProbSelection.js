@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { followLatest, nearestWinProbEvent, snapToMarker, touchIntent } from './explore.js'
+import { focusInput, followLatest, nearestWinProbEvent, snapToMarker, touchIntent } from './explore.js'
 
 // Which plotted play WinProbChart shows, and the slider's pointer and key
 // handlers. `plot` is the chart's viewBox geometry: { W, H, left, width }.
@@ -8,7 +8,9 @@ import { followLatest, nearestWinProbEvent, snapToMarker, touchIntent } from './
 //
 // `used` turns true on the reader's first pick, so the chart can drop its
 // how-to hint. `input` is 'pointer' or 'key', the last way the chart was
-// used, so a tap does not draw the keyboard focus ring.
+// used, so a tap does not draw the keyboard focus ring. Focus that does not
+// follow a pointer down on the slider (Tab, Shift+Tab) is keyboard focus, and
+// sets 'key' again (focusInput).
 //
 // The latest play until the user picks one. A pick persists when the pointer
 // leaves, and drops (followLatest) when a reveal or a live poll adds plays.
@@ -29,6 +31,8 @@ export function useWinProbSelection(count, plot, markers = []) {
   // The <svg>'s box, read once per hover or touch rather than on every
   // pointermove; a scroll or resize moves it, so both drop the cached box.
   const rectRef = useRef(null)
+  // When the last pointer down on the slider happened; onFocus reads and clears it.
+  const downAtRef = useRef(null)
   // A touch that has not yet shown whether it is a tap, a drag or a scroll.
   const touchRef = useRef(null)
   useEffect(() => {
@@ -63,9 +67,14 @@ export function useWinProbSelection(count, plot, markers = []) {
       setInput('key')
       select(Math.max(0, Math.min(count - 1, next)))
     },
+    onFocus: (e) => {
+      setInput(focusInput(downAtRef.current, e.timeStamp))
+      downAtRef.current = null
+    },
     onPointerEnter: () => { rectRef.current = null },
     onPointerDown: (e) => {
       rectRef.current = null
+      downAtRef.current = e.timeStamp
       setInput('pointer')
       if (e.pointerType === 'touch') {
         touchRef.current = { id: e.pointerId, x: e.clientX, y: e.clientY, drag: false }

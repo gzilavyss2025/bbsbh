@@ -41,3 +41,11 @@ export function touchIntent(dx, dy) {
 export function followLatest(state, count) {
   return state.count === count ? state : { count, idx: null }
 }
+// Focus that lands within this many ms of a pointer down on the slider came
+// from that pointer (a click's own focus(), or the browser's focus on a tap).
+// Any other focus (Tab, Shift+Tab) is keyboard focus and keeps its ring. A
+// pointer down that never led to focus goes stale after the window.
+export const POINTER_FOCUS_MS = 500
+export function focusInput(pointerDownAt, now) {
+  return pointerDownAt != null && now - pointerDownAt <= POINTER_FOCUS_MS ? 'pointer' : 'key'
+}
