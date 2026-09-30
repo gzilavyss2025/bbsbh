@@ -20,6 +20,8 @@
 // live here rather than in the generator so test/team-records.test.js can
 // import them (the lib/roster.mjs convention).
 
+import { isPlateAppearance } from './long-at-bats.mjs'
+
 // ---------------------------------------------------------------------------
 // Which games count
 // ---------------------------------------------------------------------------
@@ -402,16 +404,26 @@ export async function refreshRoleFacts(db, season, sportIds, fetchRoles) {
 // DEFINITION: 10 plate appearances, so the leadoff hitter of the inning bats a
 // second time. "Batting around" gets used for 9 (everyone hits once) too; 10
 // is the stricter reading and the one that makes the count mean something.
-// Change the constant, re-run --export-only, and no game is refetched.
+// The row stores the finished COUNT, not the per-half PAs, so a changed
+// definition here does not reach games already on file through --export-only:
+// those games must be re-ingested (delete their team_record_ingested_games
+// marks and run a sweep over their dates).
 //
-// Filters on `result.type === 'atBat'`. allPlays interleaves top-level
-// baserunning plays (steals, pickoffs, balks, wild pitches) with real plate
-// appearances — gen-run-expectancy.mjs's header records the same trap — and
-// counting those would inflate a half-inning that never turned the lineup over.
+// Counts plays with long-at-bats.mjs's `isPlateAppearance`, the shared rule.
+// allPlays interleaves top-level baserunning plays (steals, pickoffs, balks,
+// wild pitches) with real plate appearances, and `result.type` is 'atBat' on
+// every one of them, so it cannot drop them (#1282: gamePk 823594's top 3rd
+// ends on a pickoff caught stealing, 3 PAs read as 4). Counting them would
+// make a half with 9 PAs a phantom bat-around.
+//
+// The fetch that feeds this: statsapi's `fields` filter prunes nested keys by
+// name, so `eventType` must be listed or the shared rule sees no PA at all.
+export const PBP_FIELDS = 'allPlays,about,inning,halfInning,result,type,eventType'
+
 export function battedAroundHalves(allPlays, minBatters = 10) {
   const perHalf = new Map()
   for (const p of allPlays ?? []) {
-    if (p?.result?.type !== 'atBat') continue
+    if (!isPlateAppearance(p)) continue
     const inning = p?.about?.inning
     const half = p?.about?.halfInning
     if (inning == null || !half) continue
