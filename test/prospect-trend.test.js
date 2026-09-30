@@ -374,7 +374,7 @@ test('a qualified row with no percentile survives the round trip', () => {
 test('the packed shape is marked and does not repeat a date per row', () => {
   const packed = packProspectTrend(PLAIN)
   assert.ok(packed.packed)
-  assert.equal(JSON.stringify(packed).split('2026-09-09').length - 1, 1)
+  assert.equal(JSON.stringify(packed).split('2026-09-02').length - 1, 1)
 })
 
 test('unpack returns an old-shape snapshot unchanged', () => {

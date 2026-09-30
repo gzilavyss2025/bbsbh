@@ -10,6 +10,44 @@
 const SNAPSHOT_URL = '/data/prospect-trend.json'
 const EMPTY_SNAPSHOT = { generatedAt: null, dataThrough: null, players: [] }
 
+// The file on disk is packed (#1269): the phone parses all of it before the
+// trend pill shows, and most of the old 3.2 MB was the four key names repeated
+// on 47k history rows. Packed, the week dates are stored once in `historyDates`
+// and a row is [dateIndex, sportId, percentile] — plus a fourth `qualified`
+// item only on the rare row where it is not simply "percentile is not null".
+// `packed` is the version marker. Pure both ways; callers only ever see the
+// plain shape, because fetchProspectTrend unpacks.
+export function packProspectTrend(snapshot) {
+  const historyDates = [...new Set(snapshot.players.flatMap((p) => p.history.map((h) => h.date)))].sort()
+  const index = new Map(historyDates.map((date, i) => [date, i]))
+  const players = snapshot.players.map((p) => ({
+    ...p,
+    history: p.history.map((h) => {
+      const row = [index.get(h.date), h.sportId, h.percentile]
+      return h.qualified === (h.percentile !== null) ? row : [...row, h.qualified]
+    }),
+  }))
+  return { ...snapshot, packed: 1, historyDates, players }
+}
+
+export function unpackProspectTrend(raw) {
+  if (raw?.packed !== 1) return raw
+  const { historyDates, players, ...rest } = raw
+  delete rest.packed
+  return {
+    ...rest,
+    players: players.map((p) => ({
+      ...p,
+      history: p.history.map(([i, sportId, percentile, qualified = percentile !== null]) => ({
+        date: historyDates[i],
+        sportId,
+        percentile,
+        qualified,
+      })),
+    })),
+  }
+}
+
 // Session-memoized, same pattern as fetchTopProspects (prospects.js) and
 // fetchFeverRadar (feverRadar.js). Degrades to an empty snapshot on any
 // failure (404 before the first nightly run, network, malformed JSON) — no
