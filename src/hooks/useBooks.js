@@ -13,6 +13,7 @@ import {
   serializeBooks,
   updateBookCover,
 } from '../lib/books.js'
+import { localStore, readOwner, writeOwner } from '../lib/account/localStore.js'
 
 // The multi-book shelf's React entry point. Mirrors useStamps.js exactly: the
 // rules are the React-free core in src/lib/books.js (unit-tested there); this
@@ -29,35 +30,12 @@ import {
 // belong to which book lives on the STAMP record's own `placement.bookId`
 // (src/lib/stamps.js), not here.
 
-function readBooks() {
-  try {
-    return parseBooks(window.localStorage.getItem(BOOKS_KEY))
-  } catch {
-    return {}
-  }
-}
-
-function writeBooks(map) {
-  try {
-    window.localStorage.setItem(BOOKS_KEY, serializeBooks(map))
-  } catch {
-    // Private mode / storage disabled — the shelf still works for this
-    // session, same degrade as every other preference hook.
-  }
-}
-
-// A same-tab echo of the `storage` event. The browser fires `storage` only in
-// OTHER tabs, so without this two hook instances mounted at once in this tab
-// — a book picker and a settings screen, say — would not see each other's
-// writes until a reload. Same mechanism, and same reason, as useStamps.js's
-// notifyLocalChange.
-function notifyLocalChange() {
-  try {
-    window.dispatchEvent(new StorageEvent('storage', { key: BOOKS_KEY }))
-  } catch {
-    // StorageEvent unavailable — cross-instance updates degrade to next render.
-  }
-}
+// Private mode / storage disabled degrades to in-session memory — the shelf
+// still works for this visit. `notify` is a same-tab echo of the `storage`
+// event (the browser fires it only in OTHER tabs), so two hook instances
+// mounted at once in this tab — a book picker and a settings screen, say —
+// see each other's writes without a reload. Same as useStamps.js.
+const store = localStore(BOOKS_KEY, parseBooks, serializeBooks)
 
 // Unconditional migration: if the store has no LIVE `default` book, synthesize
 // and persist one immediately. This is what guarantees `books` is NEVER empty
@@ -93,9 +71,9 @@ function ensureDefaultBook(map) {
 }
 
 function readBooksMigrated() {
-  const current = readBooks()
+  const current = store.read()
   const next = ensureDefaultBook(current)
-  if (next !== current) writeBooks(next)
+  if (next !== current) store.write(next)
   return next
 }
 
@@ -103,23 +81,8 @@ function readBooksMigrated() {
 // in src/lib/books.js for the leak it exists to close. Empty string for
 // "nobody's yet", which `mergeStrategyFor` reads as a guest's own shelf and
 // backfills rather than discards.
-export function readBooksOwner() {
-  try {
-    return window.localStorage?.getItem(BOOKS_OWNER_KEY) || ''
-  } catch {
-    return ''
-  }
-}
-
-export function writeBooksOwner(userId) {
-  try {
-    if (!userId) window.localStorage?.removeItem(BOOKS_OWNER_KEY)
-    else window.localStorage?.setItem(BOOKS_OWNER_KEY, String(userId))
-    return true
-  } catch {
-    return false
-  }
-}
+export const readBooksOwner = () => readOwner(BOOKS_OWNER_KEY)
+export const writeBooksOwner = (userId) => writeOwner(BOOKS_OWNER_KEY, userId)
 
 export function useBooks() {
   const [books, setBooks] = useState(readBooksMigrated)
@@ -160,10 +123,10 @@ export function useBooks() {
     const next = transform(latest.current)
     if (next !== latest.current) {
       latest.current = next
-      writeBooks(next)
+      store.write(next)
       setBooks(next)
     }
-    notifyLocalChange()
+    store.notify()
   }, [])
 
   // Create a new book. Generates its id here — the pure layer never invents
@@ -187,9 +150,9 @@ export function useBooks() {
     })
     if (next === latest.current) return null
     latest.current = next
-    writeBooks(next)
+    store.write(next)
     setBooks(next)
-    notifyLocalChange()
+    store.notify()
     return id
   }, [])
 
@@ -248,7 +211,7 @@ export function useBooks() {
       // `key === null` is a whole-storage clear, which is also our business.
       if (e.key !== BOOKS_KEY && e.key !== null) return
       // A plain eager read, which is only safe because `commit` above writes
-      // BEFORE it echoes. This used to have to be `setBooks(() => readBooks())`
+      // BEFORE it echoes. This used to have to be `setBooks(() => store.read())`
       // — deferring the read into the updater — precisely because the write
       // then happened inside another updater that had not run yet, so an eager
       // read here re-queued the pre-change collection behind the change. With
@@ -258,7 +221,7 @@ export function useBooks() {
       // The ref moves with the state, here and in every other setter, so the
       // next commit transforms what this device actually holds — including a
       // change that arrived from another tab.
-      const next = readBooks()
+      const next = store.read()
       latest.current = next
       setBooks(next)
     }
