@@ -94,7 +94,7 @@ async function fetchLeagueStarterGameScores() {
     .filter((g) => g.status?.abstractGameState === 'Final')
     .map((g) => g.gamePk)
   // Bounded: statsapi fails a large share of requests once a few hundred are in flight.
-  const boxscores = await mapConcurrent(gamePks, 40, (gamePk) => getJson(`/api/v1/game/${gamePk}/boxscore`).catch(() => null))
+  const boxscores = await mapConcurrent(gamePks, 40, (gamePk) => getJson(`/api/v1/game/${gamePk}/boxscore`))
   const scores = []
   for (const box of boxscores) {
     if (!box) continue
