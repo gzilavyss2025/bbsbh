@@ -178,8 +178,25 @@ export function challengeRowsForGame(feed, table) {
   const state = selectChallengeState(feed, Infinity, 'bottom')
   const all = [...state.away.outcomes, ...state.home.outcomes]
   if (all.length === 0) return []
+  // A LIST per at-bat, never one challenge: a plate appearance can carry two or
+  // more (#963, #1277) — the same club twice, or both clubs. A map that keeps
+  // one per key dropped every challenge but the last, and the ledger every
+  // figure on /abs-challenges reads came up short of the live bank.
   const byAtBat = new Map()
-  for (const c of all) byAtBat.set(c.atBatIndex, c)
+  for (const c of all) {
+    const list = byAtBat.get(c.atBatIndex)
+    if (list) list.push(c)
+    else byAtBat.set(c.atBatIndex, [c])
+  }
+  // `all` is the away club's challenges, then the home club's, which is not
+  // time order, and the bank replay reads the order rows are written in. Time
+  // order inside an at-bat is pitch order, and a play-level review (resolved to
+  // the last pitch) goes after a pitch-level one on the same pitch — the order
+  // challengesForPlay itself returns them in.
+  const inTimeOrder = (a, b) =>
+    (a.pitchNumber ?? Infinity) - (b.pitchNumber ?? Infinity) ||
+    (a.isHeuristic ? 1 : 0) - (b.isHeuristic ? 1 : 0)
+  for (const list of byAtBat.values()) list.sort(inTimeOrder)
 
   const awayId = feed?.gameData?.teams?.away?.id ?? null
   const homeId = feed?.gameData?.teams?.home?.id ?? null
@@ -199,26 +216,30 @@ export function challengeRowsForGame(feed, table) {
     const preBaseMask = (bases[0] ? 1 : 0) | (bases[1] ? 2 : 0) | (bases[2] ? 4 : 0)
     const preOuts = Math.min(outs, 2)
     const batSide = p.matchup?.batSide?.code ?? 'R'
-    const challenge = byAtBat.get(p.about?.atBatIndex)
+    const challenges = byAtBat.get(p.about?.atBatIndex)
 
-    if (challenge) {
-      let prevCount = { balls: 0, strikes: 0 }
-      let hit = null
-      for (const ev of p.playEvents ?? []) {
-        if (!ev.isPitch) continue
-        const preCount = prevCount
-        prevCount = {
-          balls: ev.count?.balls ?? preCount.balls,
-          strikes: ev.count?.strikes ?? preCount.strikes,
+    if (challenges) {
+      // Each challenge finds its own pitch. The count before it is carried
+      // pitch to pitch, so this reads the play's events once per challenge.
+      for (const challenge of challenges) {
+        let prevCount = { balls: 0, strikes: 0 }
+        let hit = null
+        for (const ev of p.playEvents ?? []) {
+          if (!ev.isPitch) continue
+          const preCount = prevCount
+          prevCount = {
+            balls: ev.count?.balls ?? preCount.balls,
+            strikes: ev.count?.strikes ?? preCount.strikes,
+          }
+          if (ev.pitchNumber === challenge.pitchNumber) {
+            hit = { ev, preCount }
+            break
+          }
         }
-        if (ev.pitchNumber === challenge.pitchNumber) {
-          hit = { ev, preCount }
-          break
-        }
+        rows.push(
+          buildRow({ feed, play: p, challenge, hit, batSide, preBaseMask, preOuts, awayId, homeId, table }),
+        )
       }
-      rows.push(
-        buildRow({ feed, play: p, challenge, hit, batSide, preBaseMask, preOuts, awayId, homeId, table }),
-      )
       byAtBat.delete(p.about?.atBatIndex)
     }
 
@@ -235,7 +256,7 @@ export function challengeRowsForGame(feed, table) {
   // A challenge whose play never came round in the walk (an atBatIndex the
   // plays array does not carry) still belongs on the board — it just has no
   // pitch, so no call type, no distance and no run value.
-  for (const c of byAtBat.values()) {
+  for (const c of [...byAtBat.values()].flat()) {
     rows.push(
       buildRow({
         feed, play: null, challenge: c, hit: null, batSide: 'R',

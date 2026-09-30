@@ -743,6 +743,81 @@ test('challengeRowsForGame: a game with no ABS review produces nothing', () => {
   assert.deepEqual(challengeRowsForGame(feed, null), [])
 })
 
+// One plate appearance, four pitches (all printed as balls, so a successful
+// challenge reads as a called strike and a failed one as a called ball), with
+// reviews hung where the caller says: `onPitch` maps a pitch number to a
+// review, `onPlay` is a play-level review.
+function multiChallengeFeed({ onPitch = {}, onPlay = null } = {}) {
+  const feed = oneChallengeFeed()
+  const play = feed.liveData.plays.allPlays[0]
+  play.playEvents = [1, 2, 3, 4].map((n) =>
+    pitch(n, 'B', Math.min(n, 3), 0, onPitch[n] ? { reviewDetails: onPitch[n] } : {}),
+  )
+  if (onPlay) play.reviewDetails = onPlay
+  return feed
+}
+
+test('challengeRowsForGame: two clubs challenging in ONE at-bat give two rows, in pitch order (#1277)', () => {
+  // gamePk 823011's shape. The away club challenges pitch 2 (upheld) and the
+  // home club pitch 1 (overturned). The old at-bat-keyed map kept only one of
+  // them, and the away-then-home order the state comes in would put the wrong
+  // one first.
+  const rows = challengeRowsForGame(
+    multiChallengeFeed({ onPitch: { 1: review(200, true, 22, 'A Pitcher'), 2: review(100, false, 11, 'A Hitter') } }),
+    null,
+  )
+  assert.deepEqual(
+    rows.map((r) => [r.seq, r.side, r.outcome, r.call_type]),
+    [
+      [0, 'home', 'success', 'strike'],
+      [1, 'away', 'fail', 'ball'],
+    ],
+  )
+})
+
+test('challengeRowsForGame: one club challenging twice in one at-bat gives two rows (#1277)', () => {
+  // gamePk 816831's shape: a failed challenge, then an overturn, same club.
+  const rows = challengeRowsForGame(
+    multiChallengeFeed({ onPitch: { 2: review(100, false, 11, 'A Hitter'), 4: review(100, true, 11, 'A Hitter') } }),
+    null,
+  )
+  assert.deepEqual(
+    rows.map((r) => [r.seq, r.team_id, r.outcome]),
+    [
+      [0, 100, 'fail'],
+      [1, 100, 'success'],
+    ],
+  )
+})
+
+test('challengeRowsForGame: a play-level review sorts after a pitch-level one on the same pitch (#1277)', () => {
+  // The away play-level review resolves to the last pitch (4), where the home
+  // club also challenged at the pitch level. Time order is pitch-level first,
+  // whichever club it was — not the away-then-home order of the state.
+  const rows = challengeRowsForGame(
+    multiChallengeFeed({
+      onPitch: { 4: review(200, true, 22, 'A Pitcher') },
+      onPlay: review(100, false, 11, 'A Hitter'),
+    }),
+    null,
+  )
+  assert.deepEqual(
+    rows.map((r) => [r.seq, r.side, r.outcome]),
+    [
+      [0, 'home', 'success'],
+      [1, 'away', 'fail'],
+    ],
+  )
+})
+
+test('challengeRowsForGame: a challenge on a null atBatIndex is not merged with another (#1277)', () => {
+  const feed = multiChallengeFeed({
+    onPitch: { 1: review(100, false, 11, 'A Hitter'), 3: review(200, true, 22, 'A Pitcher') },
+  })
+  delete feed.liveData.plays.allPlays[0].about.atBatIndex
+  assert.equal(challengeRowsForGame(feed, null).length, 2)
+})
+
 test('challengeRowsForGame: run value needs the table, and is null without it', () => {
   // A table whose every state is worth the same is enough to prove the wiring:
   // pitchFavor still returns a number rather than null.
