@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures.js'
 import { installMockApi, ANCHOR_DATE } from './fixtures/mock-api.js'
+import { stubWire } from './fixtures/wire-stub.js'
 
 // THE WIRE DOCK — the phone's presentation of the league's roster moves
 // (components/transactions/WireDock.jsx). The arithmetic behind the drag is
@@ -20,79 +21,15 @@ import { installMockApi, ANCHOR_DATE } from './fixtures/mock-api.js'
 //  4. **It stays a dock, not a modal.** The slate behind it is still there,
 //     and a link inside the ledger still navigates.
 //
-// The wire is stubbed for the same reason the rail's spec stubs it: this shows
-// today and yesterday, so a captured response is one day stale the day after it
-// was taken and empty every winter. Rows are real shapes with the ids, names
-// and dates rewritten per run.
+// The wire is stubbed by e2e/fixtures/wire-stub.js (today and yesterday here).
 
 const PHONE = { width: 390, height: 844 }
 const DESKTOP = { width: 900, height: 844 }
 
-const CLUBS = [
-  [108, 'Los Angeles Angels'], [109, 'Arizona Diamondbacks'], [110, 'Baltimore Orioles'],
-  [111, 'Boston Red Sox'], [112, 'Chicago Cubs'], [113, 'Cincinnati Reds'],
-  [114, 'Cleveland Guardians'], [115, 'Colorado Rockies'], [116, 'Detroit Tigers'],
-  [117, 'Houston Astros'], [118, 'Kansas City Royals'], [119, 'Los Angeles Dodgers'],
-]
-const POSITIONS = ['RHP', 'LHP', 'C', '1B', 'SS', 'CF']
-
-// A day back from an ISO date, by the same manual y/m/d parse the app uses —
-// a raw Date subtraction can drift across a DST edge.
-function dayBefore(iso) {
-  const [y, m, d] = iso.split('-').map(Number)
-  const date = new Date(y, m - 1, d - 1)
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
-
-function wireFor(dates) {
-  const rows = []
-  for (const [dayIndex, date] of dates.entries()) {
-    for (const [clubIndex, [id, name]] of CLUBS.entries()) {
-      const personId = 900_000 + dayIndex * 100 + clubIndex
-      const pos = POSITIONS[clubIndex % POSITIONS.length]
-      const player = `Test Player${personId}`
-      rows.push({
-        id: 900_000 + rows.length,
-        person: { id: personId, fullName: player },
-        fromTeam: { id: 8000 + clubIndex, name: `${name} Affiliate` },
-        toTeam: { id, name },
-        date,
-        effectiveDate: date,
-        typeCode: 'CU',
-        typeDesc: 'Recalled',
-        description: `${name} recalled ${pos} ${player} from ${name} Affiliate.`,
-      })
-    }
-  }
-  return rows
-}
-
-function peopleFor(ids) {
-  return ids.map((id) => ({
-    id: Number(id),
-    primaryPosition: { abbreviation: POSITIONS[Number(id) % POSITIONS.length] },
-    mlbDebutDate: '2024-04-01',
-  }))
-}
-
-// Registered AFTER installMockApi so these win — Playwright runs the most
-// recently added matching handler first.
-async function stubWire(page) {
-  await page.route('**/api/v1/transactions*', async (route) => {
-    const end = new URL(route.request().url()).searchParams.get('endDate')
-    await route.fulfill({ json: { transactions: wireFor([end, dayBefore(end)]) } })
-  })
-  await page.route('**/api/v1/people*', async (route) => {
-    const ids = (new URL(route.request().url()).searchParams.get('personIds') ?? '').split(',')
-    await route.fulfill({ json: { people: peopleFor(ids.filter(Boolean)) } })
-  })
-}
-
 async function openSlate(page, path = '/', viewport = PHONE) {
   await page.setViewportSize(viewport)
   await installMockApi(page)
-  await stubWire(page)
+  await stubWire(page, { days: 2, clubs: 12 })
   await page.goto(path)
 }
 

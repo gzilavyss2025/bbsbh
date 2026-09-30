@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures.js'
 import { installMockApi, ANCHOR_DATE } from './fixtures/mock-api.js'
+import { CLUBS, stubWire } from './fixtures/wire-stub.js'
 import { VIEWPORT_MARGIN } from '../src/lib/playerHoverPosition.js'
 
 // The home slate's league roster wire on the WIDE surface — the rail down the
@@ -70,27 +71,6 @@ const LEVEL_SLOP = 48
 // its ground rather than shrinking to a stub.
 const MIN_ROWS = 4
 
-// Real clubs, real names — the cutline is parsed out of the wire's own
-// sentence, so the names have to be the ones the wire actually writes.
-const CLUBS = [
-  [108, 'Los Angeles Angels'], [109, 'Arizona Diamondbacks'], [110, 'Baltimore Orioles'],
-  [111, 'Boston Red Sox'], [112, 'Chicago Cubs'], [113, 'Cincinnati Reds'],
-  [114, 'Cleveland Guardians'], [115, 'Colorado Rockies'], [116, 'Detroit Tigers'],
-  [117, 'Houston Astros'], [118, 'Kansas City Royals'], [119, 'Los Angeles Dodgers'],
-  [120, 'Washington Nationals'], [121, 'New York Mets'], [133, 'Athletics'],
-  [134, 'Pittsburgh Pirates'],
-]
-const POSITIONS = ['RHP', 'LHP', 'C', '1B', 'SS', 'CF']
-
-// A day back from an ISO date, by the same manual y/m/d parse the app uses —
-// a raw Date subtraction can drift across a DST edge.
-function dayBefore(iso) {
-  const [y, m, d] = iso.split('-').map(Number)
-  const date = new Date(y, m - 1, d - 1)
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
-
 // One recall per club per day: the wire's own CU shape, which owns cleanly
 // (the sending club is a farm club naming no other major-league org) and so
 // becomes one story per club rather than one grouped shuffle. THREE days,
@@ -100,53 +80,6 @@ function dayBefore(iso) {
 const WINDOW_DAYS = 3
 const STORIES_PER_DAY = CLUBS.length
 const TOTAL_STORIES = STORIES_PER_DAY * WINDOW_DAYS
-
-function wireFor(dates) {
-  const rows = []
-  for (const [dayIndex, date] of dates.entries()) {
-    for (const [clubIndex, [id, name]] of CLUBS.entries()) {
-      const personId = 900_000 + dayIndex * 100 + clubIndex
-      const pos = POSITIONS[clubIndex % POSITIONS.length]
-      const player = `Test Player${personId}`
-      rows.push({
-        id: 900_000 + rows.length,
-        person: { id: personId, fullName: player },
-        fromTeam: { id: 8000 + clubIndex, name: `${name} Affiliate` },
-        toTeam: { id, name },
-        date,
-        effectiveDate: date,
-        typeCode: 'CU',
-        typeDesc: 'Recalled',
-        description: `${name} recalled ${pos} ${player} from ${name} Affiliate.`,
-      })
-    }
-  }
-  return rows
-}
-
-function peopleFor(ids) {
-  return ids.map((id) => ({
-    id: Number(id),
-    primaryPosition: { abbreviation: POSITIONS[Number(id) % POSITIONS.length] },
-    mlbDebutDate: '2024-04-01',
-  }))
-}
-
-// Registered AFTER installMockApi so these win — Playwright runs the most
-// recently added matching handler first. `rows` lets one test hand back an
-// empty wire without a second helper.
-async function stubWire(page, rows = null) {
-  await page.route('**/api/v1/transactions*', async (route) => {
-    const end = new URL(route.request().url()).searchParams.get('endDate')
-    const days = [end]
-    while (days.length < WINDOW_DAYS) days.push(dayBefore(days[days.length - 1]))
-    await route.fulfill({ json: { transactions: rows ?? wireFor(days) } })
-  })
-  await page.route('**/api/v1/people*', async (route) => {
-    const ids = (new URL(route.request().url()).searchParams.get('personIds') ?? '').split(',')
-    await route.fulfill({ json: { people: peopleFor(ids.filter(Boolean)) } })
-  })
-}
 
 // The boxes the layout is a claim about. Read together in one pass so the
 // numbers describe the same frame.
@@ -207,7 +140,7 @@ async function readFit(page) {
 
 async function openSlate(page, path = '/', rows = null) {
   await installMockApi(page)
-  await stubWire(page, rows)
+  await stubWire(page, { rows })
   await page.goto(path)
 }
 
