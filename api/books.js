@@ -56,6 +56,7 @@ import { getRedis } from './_lib/redis.js'
 // Node runtime, not edge — same reason as reveal.js/spoiled-days.js/stamps.js:
 // @clerk/backend's verifyToken pulls in internals Vercel's edge sandbox rejects.
 export const config = { runtime: 'nodejs' }
+
 const booksKey = (userId) => `books:${userId}`
 
 // Re-validate whatever Redis hands back before it reaches a client: a

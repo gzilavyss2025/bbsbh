@@ -57,9 +57,9 @@ function copyRedis() {
   // the shared factory instead of calling it bare.
   //
   // It also costs this endpoint the hash PAIRING, which is why every read below
-  // goes through hashFromReply. Read that function before changing this line —
-  // the two are a matched pair, and removing either one alone reintroduces a
-  // bug the other exists to prevent.
+  // goes through hashFromReply (_lib/redis.js). Read that function before
+  // changing this line — the two are a matched pair, and removing either one
+  // alone reintroduces a bug the other exists to prevent.
   return getRedis({ automaticDeserialization: false })
 }
 

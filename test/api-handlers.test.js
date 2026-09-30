@@ -901,8 +901,9 @@ test('hashFromReply pairs a flat HGETALL array, passes an object through, and an
   assert.deepEqual(hashFromReply(['a', '1', 'orphan']), { a: '1' })
 })
 
-// One wrapper for the six per-user handlers (account, books, preferences,
-// reveal, spoiled-days, stamps): a shared cache must never hold their answers.
+// One wrapper for the eight per-user handlers (account, ballpark-photo, books,
+// identity-logo, preferences, reveal, spoiled-days, stamps): a shared cache must
+// never hold their answers.
 test('privateJson answers JSON with private, no-store, status 200 by default', () => {
   const res = nodeRes()
   privateJson(res, { ok: true })

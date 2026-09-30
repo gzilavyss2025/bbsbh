@@ -28,6 +28,7 @@ import { getRedis } from './_lib/redis.js'
 // The handler below still uses the Web-standard Request/Response shape, which
 // Vercel's Node.js runtime supports the same as edge — only `config.runtime` changes.
 export const config = { runtime: 'nodejs' }
+
 // A revealedThrough is a half-index; even a marathon extra-inning game stays
 // well under this. Bounds a malformed/hostile client so it can't store an
 // absurd integer that would then gate every device to a nonsense high-water.

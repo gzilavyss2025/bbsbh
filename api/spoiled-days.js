@@ -37,6 +37,7 @@ import { getRedis } from './_lib/redis.js'
 // Node runtime, not edge — same reason as reveal.js: @clerk/backend's
 // verifyToken pulls in internals Vercel's edge sandbox rejects.
 export const config = { runtime: 'nodejs' }
+
 // Re-validate whatever Redis hands back before it reaches a client: a hand-edited
 // or cross-version hash can only ever yield known-shape days and states, never a
 // surprise key the client would then have to defend against.
