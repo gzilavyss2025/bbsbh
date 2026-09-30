@@ -86,6 +86,7 @@
 @import './styles/charts/winprob.css';
 @import './styles/21-box-score.css';
 @import './styles/21a-box-score-stars.css';
+@import './styles/box-score/scoring-summary.css';
 @import './styles/21b-box-score-tally.css';
 @import './styles/22-box-score-tables.css';
 /* The DOOR — the one "there is more behind this" control the app draws

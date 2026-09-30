@@ -153,6 +153,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | scorecard-sac-double-play.test.js | 1 | src/api/scorecardGame.js | sac_fly_double_play AB-charging bug (regression) |
 | scoreless-dow-callouts.test.js | 21 | src/api/callout-notes.js | Scoreless/day-of-week/pitch-pace callouts |
 | scores-unlocked.test.js | 20 | src/lib/scoresUnlocked.js | Scores Unlocked unlock timer + the 8am-anchored game day a consent records (ADR-0026) |
+| scoring-summary.test.js | 7 | src/api/boxscore/scoringSummary.js | The box score's Scoring summary — scoring plays grouped by half-inning with the club that batted, the man a row is about (the batter, unless a run scored with no RBI and he wasn't among the scorers), the score after each play, the LAST pitch's playId as the clip key, and a thin feed degrading to [] |
 | season-score.test.js | 14 | scripts/gen-season-score.mjs, src/api/seasonScore.js, seasonScoreFormula.js | Season score / Marcel baseline / team-specific home-field factor |
 | season-series.test.js | 7 | src/api/seasonSeries.js | Season series cells |
 | skipped-bottom-half.test.js | 9 | src/api/select.js | selectSkippedBottomHalf, selectFinalHalfIndex |

@@ -5,6 +5,7 @@ import { computeDerivedByInning, computeGameSuperlatives, computeInningDigest } 
 import { computeGameCalloutNotes } from '../../api/callout-notes.js'
 import { eligibleHighlightForPlay } from '../../api/highlights.js'
 import { selectBattedBalls } from '../../api/hitchart.js'
+import { computeScoringSummary } from '../../api/boxscore/scoringSummary.js'
 
 // REVEAL-ONLY, with ONE legal call site: the render function inside
 // `BoxScore.jsx`'s SealBox. Every export of every module imported above is a
@@ -57,6 +58,14 @@ export function revealBoxScore(cacheRef, feed, winProbability, highlights, callo
   // outcome, so neither may exist in the DOM before the tap. Null is the common
   // case and renders the card exactly as it did before this button existed.
   const potgHighlight = eligibleHighlightForPlay(highlights, potg?.playId)
+  // The Scoring summary: each scoring play with MLB's edited clip attached where
+  // one is eligible (same lookup, same reason as the Play of the Game's above —
+  // a clip's title and poster narrate the play, so it is resolved in here and
+  // the row's Watch button carries nothing before the tap).
+  const scoringSummary = computeScoringSummary(feed).map((g) => ({
+    ...g,
+    plays: g.plays.map((p) => ({ ...p, highlight: eligibleHighlightForPlay(highlights, p.playId) })),
+  }))
   const winProbPoints = selectWinProbPath(winProbability)
   const winProbBigPlays = selectWinProbBigPlays(winProbability)
   // One per-inning play-by-play pass, shared by the Statcast superlatives and
@@ -86,6 +95,7 @@ export function revealBoxScore(cacheRef, feed, winProbability, highlights, callo
     stars,
     potg,
     potgHighlight,
+    scoringSummary,
     winProbPoints,
     winProbBigPlays,
     insights,

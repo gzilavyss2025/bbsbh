@@ -4,6 +4,7 @@ import { highlightPoster } from '../api/highlights.js'
 import { filmCanExist } from '../api/expresslane/eligibility.js'
 import { revealBoxScore } from './boxscore/revealBoxScore.js'
 import { InningTally } from './boxscore/InningTally.jsx'
+import { ScoringSummary } from './boxscore/ScoringSummary.jsx'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { selectOfficials, selectIsFinal } from '../api/select.js'
@@ -175,6 +176,7 @@ export function BoxScore({
               stars={r.stars}
               potg={r.potg}
               potgHighlight={r.potgHighlight}
+              scoringSummary={r.scoringSummary}
               highlights={highlights}
               winProbPoints={r.winProbPoints}
               winProbBigPlays={r.winProbBigPlays}
@@ -225,7 +227,7 @@ export function BoxScore({
 // that render out. It cannot render anything the un-memoized version would not
 // have: memo only skips a render whose props are identical, and it is still
 // mounted only from inside the SealBox reveal function (ADR-0002).
-const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars, potg, potgHighlight, highlights, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection, stampFacts }) {
+const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars, potg, potgHighlight, scoringSummary, highlights, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection, stampFacts }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -340,12 +342,12 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
             on the page. */}
         <StampGameButton game={stampFacts} />
         <h2 className="bs__sectionTitle">Highlights</h2>
-        {/* Wide: totals over Three Stars beside decisions over the win-prob
-            arc. The wrappers are transparent on a phone. */}
+        {/* Wide: totals over the scoring summary beside decisions over the
+            win-prob arc. The wrappers are transparent on a phone. */}
         <div className="bs__duo">
           <div className="bs__col">
             <LineTotals away={box.away} home={box.home} />
-            <ThreeStars stars={stars} />
+            <ScoringSummary groups={scoringSummary} box={box} filmEligible={filmCanExist(feed)} />
           </div>
           <div className="bs__col">
             <Decisions decisions={box.decisions} />
@@ -419,6 +421,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
         <GameVideoRow items={highlights} />
         <HitChartCard battedBalls={battedBalls} box={box} venue={get('Venue').replace(/\.\s*$/, '')} />
         <GameInfo rows={box.footNotes} />
+        <ThreeStars stars={stars} />
       </section>
 
       {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
