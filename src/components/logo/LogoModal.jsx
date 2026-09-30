@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { sketchMarkVariants } from '../../lib/markSources.js'
 import { TeamLogo } from './TeamLogo.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // A large grayscale team mark blown up for pencil-sketching, shown when the
 // user taps a logo on a team page. Same tonal treatment as the printable Logo
@@ -43,14 +44,9 @@ export function LogoModal({ teamId, name, onClose }) {
       onClick={(e) => e.target.classList.contains('scrim') && onClose()}
     >
       <div className="logomodal" role="dialog" aria-modal="true" aria-label={`${name} logo`}>
-        <button
-          ref={closeRef}
-          className="logomodal__close"
-          onClick={onClose}
-          aria-label="Close"
-        >
+        <IconButton ref={closeRef} mark="md" className="logomodal__close" onClick={onClose} label="Close">
           ✕
-        </button>
+        </IconButton>
         <TeamLogo
           teamId={teamId}
           name={name}

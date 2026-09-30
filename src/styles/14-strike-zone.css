@@ -555,22 +555,6 @@
   color: var(--text-muted);
 }
 
-/* The ✕ in a sheet's head row. Lived on .sitesearchsheet__close until the site
-   search stopped being a sheet (see .searchoverlay above); it was always a
-   .sheet part rather than a search part, so it moved here rather than keeping a
-   dead block's name alive. */
-.sheet__close {
-  flex: 0 0 auto;
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  border: none;
-  background: none;
-  color: var(--text-caption);
-  font-size: var(--fs-num-md);
-  cursor: pointer;
-  border-radius: var(--radius-pill);
-}
-
 .sheet__actions {
   display: flex;
   gap: var(--space-2h);

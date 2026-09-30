@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { IconButton } from './control/IconButton.jsx'
 
 // A small, self-contained "(i)" info popover for a caveat/definition — lighter
 // than UmpireAccuracyModal (a full focus-trapping dialog for rich, navigable
@@ -34,16 +35,16 @@ export function InfoPopover({ label, children, className = '' }) {
 
   return (
     <span ref={wrapRef} className={`infopop ${className}`}>
-      <button
-        type="button"
+      <IconButton
+        mark="sm"
         className="infopop__btn"
-        aria-label={label}
+        label={label}
         aria-expanded={open}
         aria-describedby={tipId}
         onClick={() => setOpen((v) => !v)}
       >
         i
-      </button>
+      </IconButton>
       <span id={tipId} role="tooltip" className="infopop__tip">
         {children}
       </span>

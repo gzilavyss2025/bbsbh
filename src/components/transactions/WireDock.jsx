@@ -14,6 +14,7 @@ import {
   velocityFrom,
 } from './dockPhysics.js'
 import { Pill } from '../ui/control/Pill.jsx'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // THE WIRE DOCK — the phone's presentation of the league's roster moves.
 //
@@ -453,16 +454,16 @@ export function WireDock({ endDate, sportId, onPresence, singleDay = false }) {
               <span className="wiredock__note">
                 {singleDay ? dateline(endDate) : `Last ${windowDaysFor(sportId)} days`} · {total}
               </span>
-              <button
-                type="button"
+              <IconButton
+                mark="md"
                 className="wiredock__close"
                 data-nodrag=""
                 onClick={() => setIndex(RAIL)}
                 tabIndex={index === RAIL ? -1 : 0}
-                aria-label="Collapse roster moves"
+                label="Collapse roster moves"
               >
-                <span aria-hidden="true">⌄</span>
-              </button>
+                ⌄
+              </IconButton>
             </div>
           </div>
         </div>

@@ -231,22 +231,19 @@
   font-weight: var(--w-semibold);
   color: var(--graphite-soft);
 }
-.wiredock__close {
+/* An IconButton (#1209, mark md). This partial loads BEFORE system/button.css,
+   so the rule is written at two-class specificity to beat .btn on order. The
+   mark keeps its canvas fill; the 44x44 tap area is the button's own. */
+.btn.wiredock__close {
+  --btn-fill: var(--bg-canvas);
+  --btn-edge: var(--bg-canvas);
+  --btn-fill-hover: var(--surface-inset);
+  --btn-edge-hover: var(--surface-inset);
   margin-left: auto;
-  min-width: var(--tap-min);
-  min-height: 30px;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-pill);
-  background: var(--bg-canvas);
-  color: var(--text-caption);
   font-size: var(--fs-body);
-  line-height: var(--lh-solid);
-  cursor: pointer;
 }
 
-.wiredock__latest:focus-visible,
-.wiredock__close:focus-visible {
+.wiredock__latest:focus-visible {
   outline: var(--bw-heavy) solid var(--focus-ring);
   outline-offset: 2px;
 }
