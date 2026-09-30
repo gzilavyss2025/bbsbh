@@ -52,7 +52,10 @@ import { resolve, join } from 'node:path'
 // is --fs-label (126 -> 125). The win probability chart then lost its axes, and
 // the rule for the half-inning arrow beside an axis label (.winprob__inningarrow)
 // went with them (125 -> 124).
-const BUDGET = 124
+//
+// 124 -> 123: one rule left this role. The team score modal's footnote rule
+// (.tscoremodal__foot) had no element that used it, so it was deleted.
+const BUDGET = 123
 
 const stylesDir = resolve('src/styles')
 const sheets = []

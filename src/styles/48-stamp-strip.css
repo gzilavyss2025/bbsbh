@@ -249,10 +249,10 @@
 /* ---- the box score's phone order ---------------------------------------
    BoxScore.jsx renders ONE section in the desktop reading order. On a phone
    the reader wants a different one (Gary's, 2026-09-29): stamp, totals,
-   decisions, line score, Insights, pitching tally, the game story, both clubs'
+   the scoring summary, decisions, line score, Insights, pitching tally, the game story, both clubs'
    cards (away's four, then home's four), and only then the win-prob arc, Play
-   of the Game, Photos, Three Stars, Statcast Leaders, the video row and the
-   hit chart. The HIGHLIGHTS rule is dropped: the blocks no longer sit under it.
+   of the Game, Photos, Statcast Leaders, the video row, the hit chart, the notes and,
+   last, Three Stars. The HIGHLIGHTS rule is dropped: the blocks no longer sit under it.
 
    One ordering context does it. .bs__duo/.bs__col are display: contents
    below the wide breakpoint (25-wide-layout.css), so every block below is
@@ -268,47 +268,38 @@
 
   .bs .stampstrip { order: 1; }
   .bs .bs__totalsCard { order: 2; }
-  .bs .bs__decisions { order: 3; }
-  .bs .bs__board { order: 4; }
-  .bs .bs__insights { order: 5; }
-  .bs .bs__tally { order: 6; }
-  .bs .gamestory { order: 7; }
-  .bs .bs__col--away > .bs__fill { order: 8; }
-  .bs .bs__col--away > .bs__team { order: 9; }
-  .bs .bs__col--away > .bs__abscard { order: 10; }
-  .bs .bs__col--away > .bs__defensecard { order: 11; }
-  .bs .bs__col--home > .bs__fill { order: 12; }
-  .bs .bs__col--home > .bs__team { order: 13; }
-  .bs .bs__col--home > .bs__abscard { order: 14; }
-  .bs .bs__col--home > .bs__defensecard { order: 15; }
-  .bs .winprob { order: 16; }
-  .bs .bs__potg { order: 17; }
-  .bs .photostrip { order: 18; }
-  .bs .bs__stars { order: 19; }
+  .bs .bs__scoring { order: 3; }
+  .bs .bs__decisions { order: 4; }
+  .bs .bs__board { order: 5; }
+  .bs .bs__insights { order: 6; }
+  .bs .bs__tally { order: 7; }
+  .bs .gamestory { order: 8; }
+  .bs .bs__col--away > .bs__fill { order: 9; }
+  .bs .bs__col--away > .bs__team { order: 10; }
+  .bs .bs__col--away > .bs__abscard { order: 11; }
+  .bs .bs__col--away > .bs__defensecard { order: 12; }
+  .bs .bs__col--home > .bs__fill { order: 13; }
+  .bs .bs__col--home > .bs__team { order: 14; }
+  .bs .bs__col--home > .bs__abscard { order: 15; }
+  .bs .bs__col--home > .bs__defensecard { order: 16; }
+  .bs .winprob { order: 17; }
+  .bs .bs__potg { order: 18; }
+  .bs .photostrip { order: 19; }
   .bs .bs__statcastCard { order: 20; }
   .bs .hlclip { order: 21; }
   .bs .cliprail { order: 22; }
   .bs .hitchart { order: 23; }
   .bs .bs__info { order: 24; }
+  .bs .bs__stars { order: 25; }
 }
 
 /* ---- what the single desktop order changed ------------------------------
-   Two blocks moved into places built for something else. Three Stars now sits
-   in the half-width left column beside the decisions and win-prob arc, where
-   the 300px horizontal cards (21a-box-score-stars.css) would spill out of the
-   column: stack them there. Play of the Game is a full-width row of its own, so
-   its 16:9 poster under the write-up filled the sheet: put the still beside the
-   text instead — only when there IS a poster; the plain Watch pill keeps
-   stacking. */
+   Play of the Game is a full-width row of its own, so its 16:9 poster under the
+   write-up filled the sheet: put the still beside the text instead — only when
+   there IS a poster; the plain Watch pill keeps stacking. (Three Stars used to
+   sit in the half-width left column and stack its cards there; it now closes
+   the sheet as a full-width row, so those cards keep their horizontal layout.) */
 @media (min-width: 740px) {
-  .bs__col .stars3__row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .bs__col .stars3__card {
-    flex: none;
-  }
-
   .bs__potg:has(.bs__potgWatch--poster) {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

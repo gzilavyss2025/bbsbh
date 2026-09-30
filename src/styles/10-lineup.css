@@ -703,11 +703,6 @@ button.starter__careervs {
   letter-spacing: var(--ls-caps);
 }
 
-.defdiamond__dhname {
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-}
-
 /* The DH's substitution stack shares the diamond's writing-line names. */
 .defdiamond__dhstack {
   display: flex;

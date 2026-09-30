@@ -233,11 +233,6 @@
   color: var(--text-heading);
 }
 
-.inningnav__of {
-  color: var(--text-caption);
-  font-weight: var(--w-semibold);
-}
-
 .inning {
   display: flex;
   flex-direction: column;

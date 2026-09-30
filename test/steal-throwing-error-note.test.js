@@ -50,6 +50,16 @@ test('a steal with no playEvent of its own still gets a leading notification car
   // playEvents-sourced baserunning note (ADR-0017's leading-card convention).
   const card = entries.findIndex((e) => e.kind === 'atbat' && e.batterId === 15)
   assert.ok(entries.indexOf(note) < card)
+  // …and it happened on that batter's own pitch, so it steps and windows WITH
+  // him rather than trailing whoever batted before.
+  assert.equal(note.midAtBat, true)
+  // It broke on the strikeout's own last pitch, so that is the pitch it was on.
+  const play = feedWithBuriedStealAndError().liveData.plays.allPlays.find(
+    (p) => p.about.inning === 2 && p.about.halfInning === 'bottom' && p.matchup.batter.id === 15,
+  )
+  const thrown = play.playEvents.filter((e) => e.isPitch).length
+  assert.ok(thrown > 0)
+  assert.equal(note.pitchLabel, `Pitch ${thrown}`)
 })
 
 test('the trailing throwing-error leg folds into the SAME card, naming the fielder', () => {

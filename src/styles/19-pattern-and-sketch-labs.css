@@ -167,22 +167,7 @@
   margin-bottom: var(--space-3);
 }
 
-/* -------------------------------------------------------------- logo sketch
-   Tap a grayscale team mark on a team page to blow it up for pencil tracing.
-   Reuses the .scrim backdrop but centers its card instead of docking a sheet. */
-.teaminfo__logobtn {
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: var(--radius-xs);
-  line-height: var(--lh-zero);
-}
-.teaminfo__logobtn:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
+/* Reuses the .scrim backdrop but centers its card instead of docking a sheet. */
 .scrim--center {
   align-items: center;
 }

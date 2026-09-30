@@ -103,7 +103,8 @@ export function stepCommitReady(entries, cap, halfInProgress) {
 // at-bats at or under the cap — which only ever grows, because an at-bat's own
 // index cannot move, no matter how much trailing content streams in around it.
 //
-// Window i covers [anchor[i], anchor[i+1]): the plate appearance PLUS the
+// Window i covers [anchor[i], anchor[i+1]) — less any `midAtBat` notes at the far
+// end, which lead at-bat i+1 instead: the plate appearance PLUS the
 // notices that trail it — a pitching change, a mound visit, an ejection —
 // same direction nextStepBoundary already bundles into the tap that reveals
 // anchor[i] in the first place. A trailing notice is therefore on screen the
@@ -148,16 +149,45 @@ export function focusWindows(entries, cap) {
   for (let i = 0; i < limit; i++) {
     if (entries[i].kind !== 'atbat') continue
     if (sawAtBat) {
-      // A later at-bat: it closes the PRECEDING one's window right here — the
-      // trailing notices between them stay with the batter who came before,
-      // never re-drawn against the one who comes after.
-      wins.push({ start, end: i })
-      start = i
+      // A later at-bat: it closes the PRECEDING one's window — at the first
+      // `midAtBat` note in the run between them, else at the at-bat itself.
+      // The announcements made once the earlier batter was retired stay with
+      // him, never re-drawn against the one who comes after. A note that
+      // happened DURING this at-bat (a steal, a mound visit between pitches)
+      // is the opposite: it is part of the page this batter owns, which is
+      // exactly how nextStepBoundary already splits the two between taps.
+      // Windowing them the other way put a steal on the page of the batter who
+      // made the out before it, while "Next at-bat" said it belonged to the
+      // next one.
+      //
+      // Safe for the stability rule above: the boundary is found only once THIS
+      // at-bat is under the cap, and the run before it is under the cap with it.
+      let boundary = i
+      for (let j = i - 1; j >= 0 && entries[j].kind === 'event'; j--) {
+        if (entries[j].midAtBat) boundary = j
+      }
+      wins.push({ start, end: boundary })
+      start = boundary
     }
     sawAtBat = true
   }
   if (start < limit) wins.push({ start, end: limit })
   return wins
+}
+
+// Who relieved, for a window that opens on the first batter he faces — or null.
+// Focus mode shows ONE at-bat at a time, and the card announcing a pitching
+// change trails the at-bat BEFORE it (above), so the page holding the new
+// pitcher's first result has no mention of him at all. The window repeats his
+// card at its head. `reliefPitcherId` is stamped by computeHalfInningFeed on
+// that first batter's card and only for a change made between plate
+// appearances — one between pitches already leads this window itself, and the
+// half's opening change is the persistent "Now pitching" card's.
+//
+// Spoiler footing: a window exists only under the cap, and the change this
+// repeats trailed the PREVIOUS at-bat's window, so it was on screen a tap ago.
+export function windowReliefPitcherId(windowEntries) {
+  return windowEntries.find((e) => e.kind === 'atbat')?.reliefPitcherId ?? null
 }
 
 // The half's runs and hits SO FAR — over the first `cap` entries only, which

@@ -93,11 +93,7 @@
   color: var(--text-heading);
   text-align: right;
 }
-.tscoremodal__foot {
-  margin: 4px 0 0 !important;
-  color: var(--graphite-soft);
-  font-size: var(--fs-caption);
-}
+
 /* Only the prose paragraphs (and inline strong/em within them) read as
    natural sentences; the figures table (.tscoremodal__figs dt/dd) stays
    shouted like every other card detail, and the section sub-kicker stays

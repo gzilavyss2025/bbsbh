@@ -745,26 +745,6 @@
   color: var(--text-body);
 }
 
-/* "Now pitching for the Giants: BIVENS, SPENCER 76 | RHP" — a scorebook
-   announcement line, condensed uppercase to match the lineup-team headers. */
-.prepitch__pitching {
-  display: block;
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-}
-
-.prepitch__now {
-  font-weight: var(--w-bold);
-  color: var(--text-caption);
-}
-
-.prepitch__pitcher {
-  font-weight: var(--w-bold);
-  color: var(--text-body);
-}
-
 /* The R/H/E/LOB + pitch-stat card, row 2 beside the win-probability chart —
    a Card (StatBox.jsx, #1113 slice C4), so system/card.css draws its frame.
    The rule keeps only what lets it shrink in its grid column. */
@@ -1017,6 +997,17 @@
 .pitchernotice__mvcount {
   flex: none;
   margin-left: 8px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+/* Which pitch a steal / caught stealing / pickoff came on ("Pitch 3"), pushed to
+   the card's right edge — the same caption recipe as the "N left" tail above. */
+.pitchernotice__pitchno {
+  flex: none;
+  margin-left: auto;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);

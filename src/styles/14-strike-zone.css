@@ -356,9 +356,7 @@
   height: auto;
   color: var(--accent-primary);
 }
-.zonemap__cell {
-  fill: currentColor;
-}
+
 .zonemap__frame {
   fill: none;
   stroke: var(--border-rule);
@@ -418,18 +416,7 @@
   text-transform: uppercase;
   color: var(--text-heading);
 }
-.umpmodal__rankrow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1h);
-}
-.umpmodal__rank {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-cell);
-  font-weight: var(--w-semibold);
-  color: var(--award-ink);
-}
+
 .umpmodal__hint {
   margin: 4px 0 0;
   font-size: var(--fs-compact);

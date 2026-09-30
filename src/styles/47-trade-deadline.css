@@ -7,47 +7,6 @@
    history" family elsewhere; a trade's own accents stay the app's plain
    graphite/caption tones, same restraint as .rehabcard. */
 
-.tradedl__seasongrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: var(--space-3);
-  margin-top: var(--space-4);
-}
-
-.tradedl__seasontile {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-3);
-  border: var(--bw-hair) solid var(--award-line);
-  border-radius: var(--radius-md);
-  background: var(--award-soft);
-  text-align: left;
-}
-.tradedl__seasontile:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-}
-.tradedl__seasonyear {
-  font-family: var(--font-display);
-  font-size: var(--fs-num-lg);
-  font-weight: var(--w-bold);
-  color: var(--award-ink);
-}
-.tradedl__seasondeadline {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-caps);
-  color: var(--text-caption);
-}
-.tradedl__seasoncount {
-  margin-top: 2px;
-  font-family: var(--font-body);
-  font-size: var(--fs-compact);
-  color: var(--text-body);
-}
-
 /* The season page's own year switcher, below the "TRADE DEADLINE" title —
    reuses the slate's .levelnav look (same idiom as LeadersPage's ScopeNav);
    wraps to a second row on a phone rather than squeezing six pills into one. */
