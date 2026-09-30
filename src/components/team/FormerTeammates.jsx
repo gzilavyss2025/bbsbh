@@ -16,16 +16,14 @@ import { SectionMasthead } from '../ui/SectionMasthead.jsx'
 // Rows shown before "Show N more clubs" — a heavy shared history (two rosters
 // that swapped a lot of players) can run to a dozen clubs.
 const ROWS_SHOWN = 6
-// Headshots on one side of one row before "+N" — a big reunion can put a
-// dozen players on one side of a single club.
-const FACES_SHOWN = 4
 
 // The card as crossroads: one row per shared club (see teammateCrossroads),
 // the club's logo and years in the middle, tonight's away players on the left
 // and home players on the right, under a head that names each side. Two
 // sections: "Facing a former club" (the club is one of tonight's own, so the
-// row holds only the player who LEFT it, with a count on the other side) and
-// "Teammates elsewhere" (they met on a third club). A green position badge
+// row holds only the player who LEFT it) and
+// "Teammates elsewhere" (they met on a third club). Every face shows: no
+// "+N" and no "with N of tonight's …" count. A green position badge
 // marks a starter; a row that plays out tonight is pinned first.
 export function FormerTeammates({ pairs, startingIds, dayNight, away, home }) {
   const [showAll, setShowAll] = useState(false)
@@ -42,7 +40,6 @@ export function FormerTeammates({ pairs, startingIds, dayNight, away, home }) {
   const anyStarting = [...former, ...elsewhere].some((r) =>
     [...r.away, ...r.home].some((p) => p.starting),
   )
-  const sides = { away, home }
   const head = <SectionMasthead as="h3" title="Former teammates" />
   return (
     <Card className="metric teammates" head={head} body="flush">
@@ -63,8 +60,8 @@ export function FormerTeammates({ pairs, startingIds, dayNight, away, home }) {
             {dayNight === 'day' ? 'Starting today' : 'Starting tonight'}
           </p>
         )}
-        <RowGroup title="Facing a former club" rows={formerShown} sides={sides} />
-        <RowGroup title="Teammates elsewhere" rows={elsewhereShown} sides={sides} />
+        <RowGroup title="Facing a former club" rows={formerShown} />
+        <RowGroup title="Teammates elsewhere" rows={elsewhereShown} />
         {hidden > 0 && (
           <Door layout="block" onClick={() => setShowAll(true)}>
             Show {hidden} more {hidden === 1 ? 'club' : 'clubs'}
@@ -75,27 +72,31 @@ export function FormerTeammates({ pairs, startingIds, dayNight, away, home }) {
   )
 }
 
-function RowGroup({ title, rows, sides }) {
+function RowGroup({ title, rows }) {
   if (rows.length === 0) return null
   return (
     <section className="xroads__group">
       <SectionHead look="label">{title}</SectionHead>
       <ul className="xroads__list">
         {rows.map((r) => (
-          <CrossroadsRow key={`${r.kind}-${r.club.teamId}`} row={r} sides={sides} />
+          <CrossroadsRow key={`${r.kind}-${r.club.teamId}`} row={r} />
         ))}
       </ul>
     </section>
   )
 }
 
-// One shared club: away side | club | home side. On a 'former' row one side
-// is empty by construction (nobody on that club LEFT it), so it carries the
-// count of its players he played with there instead.
-function CrossroadsRow({ row: r, sides }) {
+// One shared club as a tile: away side | club | home side. On a 'former' row
+// one side is empty by construction (nobody on that club LEFT it). A tile with
+// three or more faces on a side spans two tile tracks where the card is wide.
+function CrossroadsRow({ row: r }) {
+  const wide = Math.max(r.away.length, r.home.length) > 2
+  // An empty side takes no room: the tile closes up to faces | club (or
+  // club | faces), so the faces keep their side of the card.
+  const oneSide = r.away.length === 0 ? ' xroads__row--homeonly' : r.home.length === 0 ? ' xroads__row--awayonly' : ''
   return (
-    <li className="xroads__row">
-      <Side players={r.away} row={r} club={sides.away} align="end" />
+    <li className={`xroads__row${wide ? ' xroads__row--wide' : ''}${oneSide}`}>
+      {r.away.length > 0 && <Side players={r.away} align="end" />}
       <div className="xroads__club">
         <TeamLogo teamId={r.club.teamId} name={r.club.teamName} size={32} />
         <span className="xroads__clubname">
@@ -104,35 +105,17 @@ function CrossroadsRow({ row: r, sides }) {
         </span>
         <span className="xroads__years">{seasonRange(r.seasons)}</span>
       </div>
-      <Side players={r.home} row={r} club={sides.home} align="start" />
+      {r.home.length > 0 && <Side players={r.home} align="start" />}
     </li>
   )
 }
 
-function Side({ players, row, club, align }) {
-  const [expanded, setExpanded] = useState(false)
-  if (players.length === 0) {
-    if (row.kind !== 'former' || row.mates === 0) return <div className={`xroads__side xroads__side--${align}`} />
-    return (
-      <div className={`xroads__side xroads__side--${align} xroads__side--note`}>
-        <span className="xroads__mates">
-          With {row.mates} of tonight&rsquo;s {club.teamName}
-        </span>
-      </div>
-    )
-  }
-  const shown = expanded ? players : players.slice(0, FACES_SHOWN)
-  const more = players.length - shown.length
+function Side({ players, align }) {
   return (
     <div className={`xroads__side xroads__side--${align}`}>
-      {shown.map((p) => (
+      {players.map((p) => (
         <Face key={p.id} player={p} />
       ))}
-      {more > 0 && (
-        <button type="button" className="xroads__more" onClick={() => setExpanded(true)}>
-          +{more}
-        </button>
-      )}
     </div>
   )
 }

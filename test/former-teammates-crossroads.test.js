@@ -1,8 +1,8 @@
 // THE FORMER TEAMMATES CARD'S ROWS (teammateCrossroads). One row per shared
 // club: the club in the middle, each of tonight's clubs' players on its own
 // side. A tie made only on one of tonight's two clubs ("he used to play here")
-// is a 'former' row holding just the player who LEFT, with a count of the
-// players he played with there — not a wall of their faces.
+// is a 'former' row holding just the player who LEFT — not a wall of the
+// faces he played with there.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { formerTeammatePairs, teammateCrossroads } from '../src/api/formerTeammates.js'
@@ -67,11 +67,9 @@ test('a tie made only on tonight’s club is a former row for the player who lef
   assert.equal(redSox.club.teamId, AWAY)
   assert.deepEqual(ids(redSox.home), [sanchez.id], 'Sánchez left the Red Sox; he sits on the Yankees side')
   assert.deepEqual(redSox.away, [], 'no wall of the Red Sox he played with')
-  assert.equal(redSox.mates, 2)
   assert.equal(yankees.club.teamId, HOME)
   assert.deepEqual(ids(yankees.away), [ikf.id])
   assert.deepEqual(yankees.seasons, [2022, 2023], 'seasons are the union across his mates')
-  assert.equal(yankees.mates, 2)
 })
 
 test('a pair that shares a third club and tonight’s club files under the third club only', () => {

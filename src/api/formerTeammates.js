@@ -115,8 +115,8 @@ export function formerTeammatePairs(data, teamIdA, teamIdB) {
 // side (away left, home right). Two kinds:
 //   - 'former': the club is one of tonight's two clubs, so the tie only says
 //     "he used to play here". The row holds the players who LEFT it, on the
-//     side of the club they are on now; the other side is just the count of
-//     tonight's players he played with there (`mates`), not a wall of faces.
+//     side of the club they are on now; the other side stays empty rather
+//     than a wall of the players he played with there.
 //   - 'elsewhere': the players met on a THIRD club. A pair that shares a
 //     third club and one of tonight's clubs files under the third club only.
 //     A pair that shares two third clubs files under its best one (clubs[0]).
@@ -128,7 +128,7 @@ export function formerTeammatePairs(data, teamIdA, teamIdB) {
 // Returns { former: [...], elsewhere: [...] } of:
 //   { kind, club: {teamId, teamName, level}, seasons: [...],
 //     away: [player], home: [player],      // player = {id, name, pos, teamId, starting}
-//     mates, score, tonight }
+//     score, tonight }
 export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds) {
   const rows = new Map()
   const starts = (id) => Boolean(startingIds?.has(id))
@@ -143,7 +143,6 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds) {
         seasons: new Set(),
         away: new Map(),
         home: new Map(),
-        mates: new Set(),
         score: 0,
         tonight: false,
       })
@@ -171,11 +170,10 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds) {
     }
     for (const club of p.clubs) {
       // The player NOT on that club now is the one who left it.
-      const [left, stayed] = p.a.teamId === club.teamId ? [p.b, p.a] : [p.a, p.b]
+      const left = p.a.teamId === club.teamId ? p.b : p.a
       const row = rowFor('former', club)
       for (const s of club.seasons) row.seasons.add(s)
       place(row, left, p.score)
-      row.mates.add(stayed.id)
       row.score = Math.max(row.score, p.score)
       if (starts(left.id)) row.tonight = true
     }
@@ -188,7 +186,6 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds) {
       seasons: [...r.seasons].sort((x, y) => x - y),
       away: [...r.away.values()].sort(bySideScore),
       home: [...r.home.values()].sort(bySideScore),
-      mates: r.mates.size,
     }))
     .filter((r) => r.away.length + r.home.length > 0)
     .sort((x, y) => Number(y.tonight) - Number(x.tonight) || y.score - x.score)
