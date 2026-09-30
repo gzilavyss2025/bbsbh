@@ -32,39 +32,7 @@ import revealHandler, {
 import spoiledDaysHandler from '../api/spoiled-days.js'
 import stampsHandler, { mint, mintRefusal, seasonRows, stampEntry } from '../api/stamps.js'
 import { MAX_STAMPS_PER_SEASON, applyRemoteStamps, isStamped } from '../src/lib/stamps.js'
-
-// A stand-in for Node's (IncomingMessage, ServerResponse) pair.
-function nodeReq(url, { method = 'GET', headers = {}, body } = {}) {
-  return { url, method, headers, body }
-}
-function nodeRes() {
-  const headers = {}
-  return {
-    statusCode: 0,
-    payload: null,
-    headers,
-    setHeader(k, v) {
-      headers[k] = v
-    },
-    end(p) {
-      this.payload = p
-    },
-    get json() {
-      return JSON.parse(this.payload)
-    },
-  }
-}
-
-async function call(handler, req) {
-  const res = nodeRes()
-  const returned = await handler(req, res)
-  // Node path writes through `res` and returns undefined; if a handler ever
-  // returns a Response instead, surface that rather than silently passing.
-  if (returned !== undefined) {
-    return { status: returned.status, json: await returned.json(), viaResponse: true }
-  }
-  return { status: res.statusCode, json: res.json, headers: res.headers }
-}
+import { nodeReq, nodeRes, call } from './helpers/node-http.js'
 
 // --------------------------------------------------------------------------
 // The regression: a bare path must not throw
