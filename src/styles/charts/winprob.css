@@ -132,23 +132,6 @@
   stroke-width: 1.5;
 }
 
-.winprob__inninglabel {
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  fill: var(--text-caption);
-}
-
-/* Compact half-inning landmarks; the readout and ledger use the same glyphs. */
-.winprob__inningarrow {
-  font-size: var(--fs-caption);
-}
-.winprob__tick { stroke: var(--text-caption); stroke-width: 1; }
-.winprob__midlabel {
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  fill: var(--text-caption);
-}
-
 /* The selected play's readout, on the paper above the plot rather than over
    the logo tiles; a paper-backed cursor and landmarks stay readable on them. */
 /* The change leads, as a pill in the gaining club's key colour; the half,
@@ -223,7 +206,6 @@
   background: color-mix(in srgb, var(--text-body) 7%, var(--surface-inset));
 }
 
-.winprob__ledger-row.is-active .winprob__moment-number { text-decoration: underline; }
 .winprob__ledger-pick:focus-visible,
 .winprob__ledger-watch:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -235,8 +217,13 @@
   align-items: center;
   gap: var(--space-2);
 }
-/* Clear the Watch button, which sits over the meta line's right end. */
-.winprob__ledger-row:has(.winprob__ledger-watch) .winprob__ledger-meta { padding-right: calc(var(--space-16) + var(--space-5)); }
+/* Clear the Watch button, which sits over the meta line's right end. The
+   meta line is at least as tall as the button, so the description below
+   starts under it rather than running beneath it. */
+.winprob__ledger-row:has(.winprob__ledger-watch) .winprob__ledger-meta {
+  min-height: 28px;
+  padding-right: calc(var(--space-16) + var(--space-5));
+}
 
 /* The swing's club and size, a solid figure Pill tag (#1131, #1186) in the
    club's own colour. It names that club in its text, so the colour is
@@ -261,7 +248,7 @@
 /* A real control: an outlined button, drawn 28px tall with a 44px hit area. */
 .winprob__ledger-watch {
   position: absolute;
-  top: var(--space-1);
+  top: var(--space-1h);
   right: var(--space-1h);
   display: inline-flex;
   align-items: center;

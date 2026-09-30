@@ -46,7 +46,7 @@ import { resolve, join } from 'node:path'
 //
 // 127 -> 126: #1131 slice 2 moved the umpire card's two calls (.wcall__pill)
 // onto the Pill tag, which is --fs-label.
-const BUDGET = 125
+const BUDGET = 124
 
 const stylesDir = resolve('src/styles')
 const sheets = []

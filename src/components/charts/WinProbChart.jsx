@@ -29,12 +29,10 @@ import { Card } from '../ui/frame/Card.jsx'
 // are, by design, single-tone marks — will partly or wholly disappear into
 // its own band; this is a known open issue, not yet worked around.
 //
-// No horizontal or vertical grid lines, and no numeric y-axis — the two
-// solid bands' own boundary already reads as "which side of 50%," and the
-// two labeled split pills up top carry the selected recorded numbers, so the gridlines/
-// axis labels were dropped to give the plot the width back. The inning axis
-// itself is landmarks, not a full ledger — only the top of every 3rd inning
-// (3, 6, 9, and on into extras — 12, 15, …) gets a label.
+// No grid lines, axis labels or tick marks on either axis — the two solid
+// bands' own boundary already reads as "which side of 50%," and the readout
+// above the plot names the selected play's half-inning, so the axes were
+// dropped to give the plot the room back.
 //
 // SPOILER RULE: this only draws what it's handed. `points` comes from
 // selectWinProbPath (api/winprob.js), a REVEAL-ONLY selector — the box score
@@ -49,24 +47,17 @@ import { Card } from '../ui/frame/Card.jsx'
 
 const W = 328
 const H = 220
-// No y-axis labels to clear room for anymore (see the block comment above) —
-// just a small inset. The readout sits above the <svg>, not in this top pad,
+// No axis labels to clear room for (see the block comment above) — just a
+// small inset. The readout sits above the <svg>, not in this top pad,
 // and lib/wpa/wpaBandColors.js's WPA_PLOT_SIZE repeats these four numbers.
 const PAD_L = 8
-const PAD_R = 16
+const PAD_R = 8
 const PAD_T = 10
-const PAD_B = 22
+const PAD_B = 10
 const PLOT_L = PAD_L
 const PLOT_R = W - PAD_R
 const PLOT_T = PAD_T
 const PLOT_B = H - PAD_B
-const INNING_LABEL_Y = H - 7
-// Only every 3rd inning gets an axis label (top of 3, top of 6, top of 9,
-// and on into extras — 12, 15, …) — labeling every half-inning read as
-// clutter once the bands themselves carry the identity via color + logo, and
-// a coarser landmark ("about a third of the way through") is plenty to
-// orient by.
-const INNING_LABEL_STEP = 3
 const PLOT_W = PLOT_R - PLOT_L
 // A swing marker's radius, and how far above (or below) its step it floats.
 const MARK_R = 7
@@ -316,18 +307,6 @@ export function WinProbChart({
     pts.map((p, i) => `L ${x(i).toFixed(1)} ${y(p.home).toFixed(1)}`).join(' ') +
     ` L ${x(n - 1).toFixed(1)} ${PLOT_B} Z`
 
-  // Contiguous runs of the same half-inning (not just the same inning), for the
-  // dividing hairlines and the inning-number labels centered under each run —
-  // this is what lets top and bottom of an inning show as two distinct spans
-  // instead of one merged block.
-  const groups = []
-  for (let i = 0; i < pts.length; i++) {
-    const key = `${pts[i].inning}-${pts[i].half}`
-    const last = groups[groups.length - 1]
-    if (last && last.key === key) last.end = i
-    else groups.push({ inning: pts[i].inning, half: pts[i].half, key, start: i, end: i })
-  }
-
   const scoring = pts
     .map((p, i) => (p.isScoring ? i : -1))
     .filter((i) => i >= 0)
@@ -510,42 +489,15 @@ export function WinProbChart({
           r={3}
         />
 
-        {/* Inning landmarks along the foot — every half used to get its own
-            label, which packed unreadably tight past a handful of innings;
-            now only the top of every INNING_LABEL_STEP-th inning (3, 6, 9,
-            and on into extras — 12, 15, …) gets one, coarse orientation
-            ("about a third of the way through") rather than a full ledger
-            the bands' own color + logo already make redundant. Always the
-            top half specifically (the ▲ arrow, the same half glyph the
-            readout and the ledger's inning tags use) so the mark always
-            lands on a consistent, real half-inning rather than needing to
-            guess whether inning N's bottom was played. */}
-        {groups
-          .filter((g) => g.half === 'top' && g.inning % INNING_LABEL_STEP === 0)
-          .map((g) => (
-            <text
-              key={`in-${g.key}`}
-              className="winprob__inninglabel"
-              x={(x(g.start) + x(g.end)) / 2}
-              y={INNING_LABEL_Y}
-              textAnchor="middle"
-            >
-              <tspan className="winprob__inningarrow">▲</tspan>
-              {g.inning}
-            </text>
-          ))}
+        {/* The selection cursor sits under the numbered markers, so a
+            marker stays readable when the cursor passes over it. */}
+        <g className="winprob__cursor" aria-hidden="true">
+          <path className="winprob__cursor-halo" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${PLOT_B}`} />
+          <path className="winprob__cursor-line" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${PLOT_B}`} />
+          <circle cx={x(activeIdx + 1)} cy={y(selected.home)} r={4} />
+        </g>
 
-        {/* A hairline tick where each inning starts, under the landmarks. */}
-        {groups
-          .filter((g) => g.half === 'top' && g.start > 0)
-          .map((g) => (
-            <path key={`tk-${g.key}`} className="winprob__tick" d={`M ${x(g.start)} ${PLOT_B} v 4`} />
-          ))}
-        {/* The even-game level, in the right gutter. */}
-        <text className="winprob__midlabel" x={PLOT_R + 2} y={y(50)} dy=".35em">50</text>
-
-        {/* Numbered landmarks match the ledger (1 = biggest swing); selection
-            is a separate layer. */}
+        {/* Numbered landmarks match the ledger (1 = biggest swing). */}
         {bigPlays.map((p, index) => {
           const m = markerAt(p.idx)
           return (
@@ -556,11 +508,6 @@ export function WinProbChart({
             </g>
           )
         })}
-        <g className="winprob__cursor" aria-hidden="true">
-          <path className="winprob__cursor-halo" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${PLOT_B}`} />
-          <path className="winprob__cursor-line" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${PLOT_B}`} />
-          <circle cx={x(activeIdx + 1)} cy={y(selected.home)} r={4} />
-        </g>
       </svg>
 
       <p id={`winprob-help-${patternUid}`} className="sr-only">Hover, tap or drag to select a recorded play. Arrow keys move one play. Home selects the first; End selects the latest. Values are rounded to whole percentages. Probabilities are after the selected play.</p>
