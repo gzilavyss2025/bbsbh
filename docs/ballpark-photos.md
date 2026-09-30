@@ -105,10 +105,10 @@ Aspect ratio does not need to match anything. The card crops to 16:9 with
 `object-fit: cover` (`src/styles/57-ballpark-card.css`), so a 4:3 phone snap and
 a wide aerial both land in the same silhouette without re-encoding.
 
-## Ballpark logos — the empty slot, and why
+## Ballpark logos — none bundled, and why
 
-`LOGO_KEYS` in `ballparkArt.js` is empty on purpose, and the card falls back to
-the park's name typeset in the display face.
+No ballpark wordmark is bundled, on purpose, and the card falls back to the
+park's name typeset in the display face.
 
 A ballpark's own wordmark is a sponsor's registered trademark. The copies
 circulating on Wikipedia are uploaded under fair-use rationales that apply to an
@@ -117,22 +117,17 @@ site, so none are bundled here. Coverage would also be patchy — many parks hav
 no distinct mark separate from the club's — which would make the card look
 inconsistent from team to team.
 
-The slot is real and wired up, and there are now two ways into it for a park you
-have the rights to. The trademark caution above applies to both equally — the
-licence question does not care which door the image came through.
+The slot is real and wired up, for a park you have the rights to. The trademark
+caution above applies to whatever you upload: the licence question does not care
+how the image arrived.
 
-**From the card, in seconds (the usual way).** Open `/team/{id}` signed in as the
-site owner, press the gear in the Ballpark masthead, and choose a PNG under "Name
-as an image". It is resized in the browser, stored in Vercel Blob, and saved into
-the `ballpark.{venueKey}Wordmark` copy field. No deploy — see ADR-0044.
+**From the card, in seconds.** Open `/team/{id}` signed in as the site owner,
+press the gear in the Ballpark masthead, and choose a PNG under "Name as an
+image". It is resized in the browser, stored in Vercel Blob, and saved into the
+`ballpark.{venueKey}Wordmark` copy field. No deploy — see ADR-0044.
 
-**Bundled in the repo (the shipped default).** Drop the file at
-`public/ballparks/logos/{venueKey}.svg` (or `.png`) and add the key to
-`LOGO_KEYS` with its extension: `{ fenwaypark: 'svg' }`. This needs a deploy.
-
-An override beats a bundled key, the same precedence every other copy field
-follows. Either way the card swaps the typeset name for the mark, and a park with
-neither keeps its name as text. `.ballparkcard__logo` caps the height so a tall
+The card swaps the typeset name for the mark, and a park without one keeps its
+name as text. `.ballparkcard__logo` caps the height so a tall
 mark cannot out-scale the photo beside it.
 
 ## Ballpark notes
