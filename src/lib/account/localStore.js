@@ -1,3 +1,5 @@
+import { readOwnerIn, writeOwnerIn } from './deviceOwner.js'
+
 // The localStorage plumbing the local-first stores (stamps, books, the Scores
 // Unlocked pass and its consent days, preferences) each hand-wrote: a guarded
 // read, a guarded write, and the same-tab `storage` echo.
@@ -47,5 +49,24 @@ export function localStore(key, parse, serialize) {
       }
     },
     notify: () => notifyStorage(key),
+  }
+}
+
+// The per-channel owner tag (see deviceOwner.js for the leak it closes), with
+// the `window.localStorage` access itself guarded — reading that property can
+// throw where the calls on it cannot.
+export function readOwner(ownerKey) {
+  try {
+    return readOwnerIn(window.localStorage, ownerKey)
+  } catch {
+    return ''
+  }
+}
+
+export function writeOwner(ownerKey, userId) {
+  try {
+    return writeOwnerIn(window.localStorage, ownerKey, userId)
+  } catch {
+    return false
   }
 }

@@ -17,6 +17,7 @@ import {
   stampsForSeason,
   unplaceStamp,
 } from '../lib/stamps.js'
+import { localStore, readOwner, writeOwner } from '../lib/account/localStore.js'
 
 // The Logbook's React entry point (ADR-0035). Mirrors useRevealProgress.js: the
 // rules are the React-free core in src/lib/stamps.js (unit-tested there, and
@@ -38,59 +39,23 @@ import {
 // is. The Logbook resolves runs, clubs, and venue from the game facts at render
 // time (src/api/logbook.js). Do not "cache the score here to save a fetch."
 
-function readStamps() {
-  try {
-    return parseStamps(window.localStorage.getItem(STAMPS_KEY))
-  } catch {
-    return {}
-  }
-}
-
-function writeStamps(map) {
-  try {
-    window.localStorage.setItem(STAMPS_KEY, serializeStamps(map))
-  } catch {
-    // Private mode / storage disabled — the collection still works for this
-    // session, same degrade as every other preference hook.
-  }
-}
-
-// A same-tab echo of the `storage` event. The browser fires `storage` only in
-// OTHER tabs, so without this the two hook instances that are genuinely mounted
-// at once — the mint affordance inside a box score and the app-wide
-// StampsCloudSync — would not see each other's writes until a reload. Same
-// mechanism, and same reason, as useScoresUnlocked's notifyLocalChange.
-function notifyLocalChange() {
-  try {
-    window.dispatchEvent(new StorageEvent('storage', { key: STAMPS_KEY }))
-  } catch {
-    // StorageEvent unavailable — cross-instance updates degrade to next render.
-  }
-}
+// Private mode / storage disabled degrades to in-session memory — the
+// collection still works for this visit, same as every other local-first store.
+//
+// `notify` is a same-tab echo of the `storage` event: the browser fires it only
+// in OTHER tabs, so without it the two hook instances genuinely mounted at once
+// — the mint affordance inside a box score and the app-wide StampsCloudSync —
+// would not see each other's writes until a reload.
+const store = localStore(STAMPS_KEY, parseStamps, serializeStamps)
 
 // The account this device's stamps were last merged from — see
 // STAMPS_OWNER_KEY. Empty string for "nobody's yet", which `mergeStrategyFor`
 // reads as a guest's own collection and backfills rather than discards.
-export function readStampsOwner() {
-  try {
-    return window.localStorage?.getItem(STAMPS_OWNER_KEY) || ''
-  } catch {
-    return ''
-  }
-}
-
-export function writeStampsOwner(userId) {
-  try {
-    if (!userId) window.localStorage?.removeItem(STAMPS_OWNER_KEY)
-    else window.localStorage?.setItem(STAMPS_OWNER_KEY, String(userId))
-    return true
-  } catch {
-    return false
-  }
-}
+export const readStampsOwner = () => readOwner(STAMPS_OWNER_KEY)
+export const writeStampsOwner = (userId) => writeOwner(STAMPS_OWNER_KEY, userId)
 
 export function useStamps() {
-  const [stamps, setStamps] = useState(readStamps)
+  const [stamps, setStamps] = useState(store.read)
 
   // The latest collection this instance knows about, readable synchronously —
   // what `commit` transforms. Every path that changes `stamps` moves it too.
@@ -112,10 +77,10 @@ export function useStamps() {
     const next = transform(latest.current)
     if (next !== latest.current) {
       latest.current = next
-      writeStamps(next)
+      store.write(next)
       setStamps(next)
     }
-    notifyLocalChange()
+    store.notify()
   }, [])
 
   // Stamp a game. `date` is the game's officialDate — it is what decides the
@@ -164,14 +129,14 @@ export function useStamps() {
       // `key === null` is a whole-storage clear, which is also our business.
       if (e.key !== STAMPS_KEY && e.key !== null) return
       // A plain eager read, safe only because `commit` above writes BEFORE it
-      // echoes. This had to be `setStamps(() => readStamps())` while the write
+      // echoes. This had to be `setStamps(() => store.read())` while the write
       // lived inside another updater that had not run yet: an eager read then
       // queued the pre-change collection behind the change, and on /logbook
       // that looked like placing a stamp doing nothing at all until a reload.
       // With the write hoisted out, storage already holds the new value here.
       // The ref moves with the state so the next commit transforms what this
       // device actually holds — including a change from another tab.
-      const next = readStamps()
+      const next = store.read()
       latest.current = next
       setStamps(next)
     }
