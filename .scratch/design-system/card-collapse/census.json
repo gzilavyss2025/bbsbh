@@ -1,6 +1,6 @@
 {
   "generated": "2026-09-30",
-  "rev": "7dcf2283f (working tree)",
+  "rev": "45d20bb8d (working tree)",
   "definition": "see census.mjs header",
   "cards": [
     {"selector":".wordmarklab__colorlock","file":"02-wordmark-lab.css","line":59,"hook":"wordmarklab__colorlock","block":"wordmarklab","isElement":true,"element":"div","consumers":["screens/WordmarkLab.jsx"],"coClasses":[],"frame":"sheet","ground":"card","radius":"md","shadow":"card","edge":"hair","edgeColour":"border-rule","at":null,"head":"none","headParts":[],"secondLines":["wordmarklab__note"],"usesSectionTitle":false,"usesMasthead":false,"body":"padded","padding":"var(--space-3) var(--space-4)","overflow":null,"display":"flex","fontSize":null,"interactive":false,"position":null,"extra":["display","align-items","gap","min-width","padding"],"decls":{"display":"flex","align-items":"center","gap":"var(--space-3)","min-width":"max-content","padding":"var(--space-3) var(--space-4)","border":"var(--bw-hair) solid var(--border-rule)","border-radius":"var(--radius-md)","background":"var(--surface-card)","box-shadow":"var(--shadow-card)"},"sealGuarded":false,"stampSurface":[],"stampForbidden":[],"sealScope":[],"nameSaysCard":false,"verdict":"lab","reason":"C8","heuristicVerdict":"not-card","heuristicFrame":"sheet","heuristicHead":"none","heuristicBody":"padded","reviewed":true},
