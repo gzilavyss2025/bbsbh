@@ -1,5 +1,6 @@
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { BreakableLocation } from '../ui/BreakableLocation.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { useNav } from '../../lib/nav.js'
 import { teamPath } from '../../lib/route.js'
 import { splitName } from '../../lib/teamSplits.js'
@@ -89,8 +90,10 @@ function OffDayCard({ team, pinned, onOpen }) {
       : undefined
   const logoboxClass = `offday__logobox${pinstripeColor ? ' offday__logobox--pinstripe' : ''}`
   return (
-    <button
-      type="button"
+    <Card
+      as="button"
+      accent="--offday-accent"
+      body="flush"
       className={`offday__tile ${pinned ? 'offday__tile--pinned' : ''}`}
       style={cardStyle}
       onClick={onOpen}
@@ -108,6 +111,6 @@ function OffDayCard({ team, pinned, onOpen }) {
           ★
         </span>
       )}
-    </button>
+    </Card>
   )
 }

@@ -184,9 +184,6 @@
   align-self: flex-start;
   margin-top: var(--space-6);
   padding: var(--space-4);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
   text-align: center;
 }
 .springcount__label {
@@ -243,13 +240,8 @@
    labelled columns of the same three facts per row, and a screen reader that
    reads "Finished at, A to Triple-A" is reading what the page means.
 
-   THE .movedup ROWS ARE PROVISIONAL. They are drawn to the offseason study's
-   own artboard and to the .oseason__head / .oseason__door chrome beside them,
-   which is where they had to start. They are NOT meant to keep that shape:
-   when the design lab settles a canonical card and pill (issues #1112-1114),
-   these rows take that style instead. Recorded here as well as on those issues
-   because this is the file the next person will be standing in. Note the row
-   hosts a ProspectPill, so it is in the pill slice as well as the card one.
+   THE .movedup TABLE SITS ON THE CANONICAL CARD (#1113, slice C6c): a flush
+   sheet Card round the table, with the head above it.
    --------------------------------------------------------------------------- */
 .oseason--level .movedup {
   margin-top: var(--space-6);
@@ -276,19 +268,14 @@
    buttons and the one solid fill is the navy primary the app uses for a
    follow-on step everywhere else.
 
-   PROVISIONAL, in the same way the .movedup rows below are. This is drawn to
-   the offseason study's artboard and to the .oseason chrome around it; when the
-   design lab settles a canonical card (issues #1112-1114) this takes that
-   shape. It is one box with one action, which is the easy case for that move. */
+   THE BOX IS THE CANONICAL CARD (#1113, slice C6c): .pgame__card is a sheet
+   Card with a flush body, and keeps its own inset. It is one box with one
+   action, which was the easy case for that move. */
 .pgame {
   margin-top: var(--space-5);
 }
 .pgame__card {
   padding: var(--space-5) var(--space-4);
-  border: var(--bw-rule) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   text-align: center;
 }
 
@@ -416,9 +403,11 @@
   text-decoration: none;
 }
 
+.movedup__card {
+  margin-top: var(--space-2);
+}
 .movedup__table {
   width: 100%;
-  margin-top: var(--space-2);
   border-collapse: collapse;
   /* Two of the three columns are short and fixed in width; the player takes
      what is left, which is what a name needs and a level path does not. */
@@ -432,6 +421,13 @@
   /* Middle, not baseline: the player cell is as tall as a headshot and the two
      short columns beside it would otherwise sit against the top rule. */
   vertical-align: middle;
+}
+/* The Card is flush, so the table keeps its own inset at both edges. */
+.movedup__table :is(th, td):first-child {
+  padding-left: var(--space-3);
+}
+.movedup__table :is(th, td):last-child {
+  padding-right: var(--space-3);
 }
 .movedup__table thead th {
   /* The header row has no photo in it and reads better on its baseline. */
@@ -803,10 +799,6 @@
    --------------------------------------------------------------------------- */
 .srecord {
   margin-top: var(--space-6);
-  border: var(--bw-rule) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 .srecord__body {
   padding: var(--space-4);
@@ -938,16 +930,15 @@
    43-foul-tracker.css is component-imported by that page alone and pulling 877
    lines of foul-tracker chrome onto the home slate to reuse forty of them would
    be a bad trade. The shared version is the design lab's job (issues
-   #1112-1114) — the same note .movedup and .pgame above already carry.
+   #1112-1114). The box itself is the canonical Card already (#1113).
    --------------------------------------------------------------------------- */
+.note__storybox {
+  margin-top: var(--space-4);
+}
 .note__stories {
   list-style: none;
-  margin: var(--space-4) 0 0;
+  margin: 0;
   padding: 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  overflow: hidden;
 }
 /* A 3x2 grid: both faces span both rows, so they read tall while the middle
    column stacks the name line over the date. minmax(0, 1fr), not a bare 1fr —
@@ -1145,7 +1136,6 @@
 .srecord--labelled {
   display: flex;
   align-items: stretch;
-  overflow: hidden;
 }
 .srecord--labelled .srecord__body {
   flex: 1 1 auto;

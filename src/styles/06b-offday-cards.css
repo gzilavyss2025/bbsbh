@@ -43,13 +43,6 @@
   align-items: center;
   gap: var(--space-1h);
   padding: var(--space-2) var(--space-1h);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
 }
 .offday__logobox {
   position: relative;
@@ -257,12 +250,10 @@
   }
 }
 
-/* The keyboard path to the same state, on top of the shared focus ring — a
+/* The keyboard path to the same state, on top of the Card's focus ring — a
    tab through the off-day grid should show the club the same way the pointer
    does, not just a ring around a tile that otherwise sits flat. */
 .offday__tile:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
   border-color: color-mix(in srgb, var(--offday-accent, var(--field)) 55%, var(--border-rule));
 }
 .offday__tile:focus-visible::before {

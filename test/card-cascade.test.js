@@ -1781,3 +1781,209 @@ test('C6b: the ledger frames stay ledgers, and the ledger keeps the old .tradeca
   const ledger = readFileSync(join(SRC, '..', 'docs', 'design-system-naming.md'), 'utf8')
   assert.match(ledger, /\| `\.tradecard` \|/)
 })
+
+
+// ---- slice C6c: fouls, offseason and the off-day tile ----
+
+// Nine blocks that drew their own copy of the card, on the /fouls page, the
+// offseason pages and the slate's off-day row, plus the "Players who moved up"
+// table, which drew no frame at all. These pages open live (ADR-0034), and the
+// slice moves a box and nothing else. Each block keeps its own inset, which is
+// not the padded body's, so each takes body="flush" (C2 to C6b did the same).
+// Each head stays where it was: no head prop, no SectionHead edit. Modes:
+//   card  the Card IS the block and carries its class.
+//   wrap  the Card wraps the block's <ol>, which keeps its class and row rules
+//         (Card has no <ol>). The Card takes the margin the list had.
+// `ground` names the inner gap-rule grid that keeps its --border-rule ground:
+// the Card paints --surface-card, so the ground lives inside it (C2's
+// .factgrid__grid).
+const C6C = [
+  { css: '06b-offday-cards.css', sel: '.offday__tile', jsx: ['components/team/OffDaySection.jsx'], ns: 'offday__tile', as: 'button', accent: '--offday-accent' },
+  { css: '43-foul-tracker.css', sel: '.foulboard__hero', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulboard__hero', as: 'div' },
+  { css: '43-foul-tracker.css', sel: '.foulavg', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulavg', as: 'div' },
+  { css: '43-foul-tracker.css', sel: '.gamehigh-tiles', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'gamehigh-tiles', as: 'div', frame: 'ledger', ground: '.gamehigh-tiles__grid' },
+  { css: '43-foul-tracker.css', sel: '.souvenir-row__tiles', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'souvenir-row__tiles', as: 'div', frame: 'ledger', ground: '.souvenir-row__tilegrid' },
+  { css: '78-offseason.css', sel: '.springcount', jsx: ['components/offseason/WinterCalendar.jsx'], ns: 'springcount', as: 'aside', frame: 'ledger' },
+  { css: '78-offseason.css', sel: '.pgame__card', jsx: ['components/offseason/PickedGame.jsx'], ns: 'pgame__card', as: 'div' },
+  { css: '78-offseason.css', sel: '.srecord', jsx: ['components/offseason/SeasonRecord.jsx'], ns: 'srecord' },
+  { css: '78-offseason.css', sel: '.note__stories', jsx: ['components/offseason/LongAtBats.jsx'], ns: 'note__stories', mode: 'wrap', box: 'note__storybox' },
+]
+
+test('C6c: no fouls, offseason or off-day block draws a second frame over its Card', () => {
+  for (const { css, sel } of C6C) {
+    const bodies = bodiesOf(read(css), sel)
+    assert.ok(bodies.length > 0, `${css}: a ${sel} rule`)
+    for (const body of bodies) assert.deepEqual(frameDecls(body), [], `${css}: ${sel} still draws its own frame`)
+  }
+  // The clip is the Card's now, so the labelled record row no longer asks for it.
+  assert.equal(decl(ruleBody(read('78-offseason.css'), '.srecord--labelled') ?? '', 'overflow'), undefined)
+})
+
+test('C6c: every block renders on Card, with its frame and a flush body', () => {
+  for (const { jsx, ns, mode = 'card', as, frame, box } of C6C) {
+    for (const rel of jsx) {
+      const code = src(rel)
+      assert.match(code, /import \{ Card \} from ["'][\w./]+\/ui\/frame\/Card\.jsx["']/, `${rel} imports Card`)
+      const tags =
+        mode === 'wrap'
+          ? wrappingTags(code, ns)
+          : cardTags(code).filter((attrs) => namesClass(attrs, ns))
+      assert.ok(tags.length > 0, `${rel}: .${ns} renders ${mode === 'wrap' ? 'inside' : 'on'} a Card`)
+      for (const attrs of tags) {
+        assert.match(attrs, /body="flush"/, `${rel}: .${ns}'s Card keeps the block's own inset`)
+        if (frame) assert.match(attrs, new RegExp(`frame="${frame}"`), `${rel}: .${ns} is a ${frame}`)
+        else assert.doesNotMatch(attrs, /frame=/, `${rel}: .${ns} is a sheet (the default)`)
+        if (as) assert.match(attrs, new RegExp(`as="${as}"`), `${rel}: .${ns} is a Card ${as}`)
+        if (mode === 'wrap') assert.match(attrs, /as="div"/, `${rel}: the list sits in a Card div`)
+        if (box) assert.ok(namesClass(attrs, box), `${rel}: the Card carries .${box}`)
+        assert.doesNotMatch(attrs, /head=/, `${rel}: .${ns} keeps its head where it was`)
+      }
+      const bare = [...code.matchAll(/<(?:div|section|li|article|aside|ul|ol|dl|a|button)\b([^>]*)>/g)]
+        .map((m) => m[1])
+        .filter((attrs) => namesClass(attrs, ns))
+      if (mode === 'wrap') assert.ok(bare.every((a) => /^\s*className=/.test(a)), `${rel}: the list is a plain <ol>`)
+      else assert.deepEqual(bare, [], `${rel}: .${ns} is on a bare element`)
+    }
+  }
+})
+
+// Card owns no margin, and a flush body adds no inset, so each block keeps the
+// space and the inset that were its own, in its namespace rule.
+test('C6c: each block keeps its own margin and inset', () => {
+  const kept = [
+    ['06b-offday-cards.css', '.offday__tile', 'padding', 'var(--space-2) var(--space-1h)'],
+    ['06b-offday-cards.css', '.offday__tile', 'display', 'flex'],
+    ['43-foul-tracker.css', '.foulboard__hero', 'margin-bottom', '10px'],
+    ['43-foul-tracker.css', '.foulboard__hero', 'padding', 'var(--space-2h) var(--space-3)'],
+    ['43-foul-tracker.css', '.foulavg', 'margin-top', 'var(--space-3)'],
+    ['43-foul-tracker.css', '.foulavg', 'padding', 'var(--space-3) var(--space-3h)'],
+    ['43-foul-tracker.css', '.sgh-list', 'list-style', 'none'],
+    ['43-foul-tracker.css', '.sgh-list', 'margin', '0'],
+    ['43-foul-tracker.css', '.sgh-list', 'padding', '0'],
+    ['43-foul-tracker.css', '.gamehigh-tiles', 'grid-area', 'tiles'],
+    ['43-foul-tracker.css', '.souvenir-row__tiles', 'flex', 'none'],
+    ['78-offseason.css', '.springcount', 'margin-top', 'var(--space-6)'],
+    ['78-offseason.css', '.springcount', 'padding', 'var(--space-4)'],
+    ['78-offseason.css', '.pgame__card', 'padding', 'var(--space-5) var(--space-4)'],
+    ['78-offseason.css', '.srecord', 'margin-top', 'var(--space-6)'],
+    ['78-offseason.css', '.srecord__body', 'padding', 'var(--space-4)'],
+    ['78-offseason.css', '.note__stories', 'list-style', 'none'],
+    ['78-offseason.css', '.note__stories', 'margin', '0'],
+    ['78-offseason.css', '.note__stories', 'padding', '0'],
+    ['78-offseason.css', '.note__storybox', 'margin-top', 'var(--space-4)'],
+  ]
+  for (const [css, sel, prop, value] of kept) {
+    assert.equal(decl(ruleBody(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)
+  }
+})
+
+// .sgh-list is an <ol> that sits in a board's Card, under its masthead. The
+// board rule below already bled it to that Card's edge and shed its frame, so
+// the list's own frame never drew. The Card is the board's, and a second Card
+// round the list would draw a card inside a card: the list takes no Card.
+test('C6c: the souvenir lists sit in their board Card and draw no frame of their own', () => {
+  const css = read('43-foul-tracker.css')
+  for (const sel of ['.sgh-list', '.foulboard-block .sgh-list']) {
+    for (const body of bodiesOf(css, sel)) assert.deepEqual(frameDecls(body), [], `${sel} draws no frame`)
+  }
+  const board = src('screens/FoulTrackerPage.jsx')
+  assert.match(board, /<Card className="metric foulboard-block" head=\{head\} body="flush">/)
+  assert.equal((board.match(/<Card\b[^>]*>\s*<ol className="sgh-list"/g) ?? []).length, 0)
+})
+
+// The two gap-rule grids keep their --border-rule ground: the Card paints
+// --surface-card, so the 1px rules between the tiles are the grid's own ground,
+// inside the Card.
+test('C6c: the two tile grids keep their --border-rule ground inside a ledger Card', () => {
+  for (const { css, sel, ground } of C6C.filter((row) => row.ground)) {
+    const body = ruleBody(read(css), ground)
+    assert.ok(body, `${css}: a ${ground} rule`)
+    assert.equal(decl(body, 'background'), 'var(--border-rule)', `${ground} keeps the rule ground`)
+    assert.equal(decl(body, 'gap'), '1px', `${ground} keeps its 1px rules`)
+    const code = src('screens/FoulTrackerPage.jsx')
+    const ns = sel.slice(1)
+    const inner = ground.slice(1)
+    assert.match(
+      code,
+      new RegExp(`<Card\\b[^>]*className="${ns}"[^>]*>\\s*<div className="${inner}">`),
+      `${ns} holds ${inner} in a Card`,
+    )
+  }
+  const css = read('43-foul-tracker.css')
+  assert.ok(css.includes('.gamehigh-tiles__grid .stat'), 'the tile cells keep their reset')
+  assert.ok(css.includes('.souvenir-row__tilegrid .stat'), 'the tile cells keep their reset')
+})
+
+// The table had no frame. It takes the canonical sheet, which Gary approved on
+// #1113. The head stays above the Card, and the pool note and the "more" door
+// stay outside it.
+test('C6c: the moved-up table sits in a flush sheet Card and its head stays outside', () => {
+  const code = src('components/offseason/MovedUp.jsx')
+  assert.match(code, /import \{ Card \} from ["']..\/ui\/frame\/Card\.jsx["']/)
+  const m = code.match(/<\/SectionHead>\s*<Card\b([^>]*)>\s*<table className="movedup__table">[\s\S]*?<\/table>\s*<\/Card>/)
+  assert.ok(m, 'the table is the Card\'s only child, straight after the head')
+  assert.match(m[1], /as="div"/)
+  assert.match(m[1], /frame="sheet"/)
+  assert.match(m[1], /body="flush"/)
+  assert.doesNotMatch(m[1], /head=/)
+  assert.ok(namesClass(m[1], 'movedup__card'))
+  assert.match(code, /<\/Card>\s*\{\(hidden > 0 \|\| expanded\) && \(/, 'the "more" door is outside the Card')
+  const css = read('78-offseason.css')
+  assert.equal(decl(ruleBody(css, '.movedup__card') ?? '', 'margin-top'), 'var(--space-2)')
+  assert.equal(decl(ruleBody(css, '.movedup__table') ?? '', 'margin-top'), undefined, 'the gap is the Card\'s now')
+  // The Card is flush, so the first and last cell of a row keep the inset.
+  assert.ok(css.includes('.movedup__table :is(th, td):first-child'))
+  assert.ok(css.includes('.movedup__table :is(th, td):last-child'))
+  assert.doesNotMatch(css, /PROVISIONAL, in the same way the \.movedup|THE \.movedup ROWS ARE PROVISIONAL/)
+})
+
+// The two names Gary keeps until he picks a look (H2, 2026-09-29).
+test('C6c: the big card names keep their rules', () => {
+  const css = read('78-offseason.css')
+  assert.equal(decl(ruleBody(css, '.note__title') ?? '', 'font-size'), 'var(--fs-title-md)')
+  assert.equal(decl(ruleBody(css, '.srecord__title') ?? '', 'font-size'), 'var(--fs-title-sm)')
+  assert.match(src('components/offseason/SeasonRecord.jsx'), /<h3 className="srecord__title">Season record<\/h3>/)
+  assert.match(src('components/offseason/LongAtBats.jsx'), /<h4 className="note__title">/)
+})
+
+// The ADR-0084 rename. Strict, comments too. The naming ledger (docs/) keeps
+// the old name on purpose.
+const RETIRED_C6C = /(^|[^\w-])offdaycard(?![a-z0-9-])/
+test('C6c: .offdaycard is .offday__tile, gone from stylesheets, markup, comments, e2e, scripts and the lab', () => {
+  const root = join(SRC, '..')
+  const found = [
+    ...files(STYLES, ['.css']).map((rel) => join(STYLES, rel)),
+    ...files(SRC, ['.jsx', '.js', '.md']).map((rel) => join(SRC, rel)),
+    ...files(join(root, 'e2e'), ['.js', '.mjs']).map((rel) => join(root, 'e2e', rel)),
+    ...files(join(root, 'scripts'), ['.js', '.mjs', '.md']).map((rel) => join(root, 'scripts', rel)),
+  ].filter((abs) => RETIRED_C6C.test(readFileSync(abs, 'utf8')))
+  assert.deepEqual(found.map((abs) => relative(root, abs)), [])
+  assert.match(src('screens/designlab/catalog.js'), /cls: 'card card--sheet card--interactive offday__tile'/)
+  const ledger = readFileSync(join(root, 'docs', 'design-system-naming.md'), 'utf8')
+  assert.match(ledger, /\| `\.offdaycard` \|/)
+})
+
+// The parts carry the new namespace, and the tile still holds its club accent:
+// the hover tint mixes --offday-accent (ADR-0050), so the Card takes it by
+// NAME and the tile's own hover rule still reads it.
+test('C6c: the off-day tile is a Card button that keeps its club accent and its parts', () => {
+  const code = src('components/team/OffDaySection.jsx')
+  const tag = code.match(/<Card\b([^>]*)>/)?.[1] ?? ''
+  assert.match(tag, /as="button"/)
+  assert.match(tag, /accent="--offday-accent"/)
+  assert.match(tag, /onClick=\{onOpen\}/)
+  assert.match(tag, /aria-label=/)
+  assert.match(tag, /style=\{cardStyle\}/)
+  assert.match(code, /'--pin-accent'[\s\S]*'--offday-accent'/)
+  assert.match(code, /offday__tile--pinned/)
+  assert.match(code, /offday__logobox--pinstripe/)
+  for (const part of ['logobox', 'name', 'loc', 'mascot', 'pin']) assert.ok(code.includes(`offday__${part}`), `offday__${part}`)
+  const css = read('06b-offday-cards.css')
+  assert.ok(css.includes('var(--offday-accent, var(--field))'), 'the hover tint keeps its accent')
+  assert.ok(ruleBody(css, '.offday__tile--pinned'), 'the pinned state')
+  assert.ok(ruleBody(css, '.offday__logobox.offday__logobox--pinstripe'), 'the pinstripe box')
+  // The Card owns the tap target's face and its focus ring.
+  const tile = ruleBody(css, '.offday__tile') ?? ''
+  for (const prop of ['cursor', 'font', 'color']) assert.equal(decl(tile, prop), undefined, `.offday__tile leaves ${prop} to the Card`)
+  assert.equal(decl(ruleBody(css, '.offday__tile:focus-visible') ?? '', 'outline'), undefined)
+})
