@@ -21,37 +21,7 @@ import preferencesHandler, {
   handleRequest,
   sanitizeStored,
 } from '../api/preferences.js'
-
-function nodeReq(url, { method = 'GET', headers = {}, body } = {}) {
-  return { url, method, headers, body }
-}
-function nodeRes() {
-  const headers = {}
-  return {
-    statusCode: 0,
-    payload: null,
-    headers,
-    setHeader(k, v) {
-      headers[k] = v
-    },
-    end(p) {
-      this.payload = p
-    },
-    get json() {
-      return JSON.parse(this.payload)
-    },
-  }
-}
-async function call(handler, req, ...rest) {
-  const res = nodeRes()
-  const returned = await handler(req, res, ...rest)
-  // The Node path writes through `res` and returns undefined; if a handler ever
-  // returns a Response instead, surface that rather than silently passing.
-  if (returned !== undefined) {
-    return { status: returned.status, json: await returned.json(), viaResponse: true }
-  }
-  return { status: res.statusCode, json: res.json, headers: res.headers }
-}
+import { nodeReq, nodeRes, call } from './helpers/node-http.js'
 
 // `erase` takes (res, redis, userId) — it has no request to read, so it does
 // not share the (req, res, …) shape the two handlers above do.

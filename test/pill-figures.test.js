@@ -16,9 +16,9 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { pillClassName } from '../src/lib/design/pillClass.js'
+import { stripComments } from './helpers/css.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
-const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '')
 const readCss = (rel) => stripComments(readFileSync(join(SRC, 'styles', rel), 'utf8'))
 
 // Every rule body whose selector list names `selector` exactly (not as a

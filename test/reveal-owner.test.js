@@ -28,31 +28,7 @@ import {
 } from '../src/lib/account/revealOwner.js'
 import { SPOILED_DAYS_OWNER_KEY, parseSpoiledDays, serializeSpoiledDays } from '../src/lib/spoiledDays.js'
 import { mergeStrategyFor } from '../src/lib/account/preferences.js'
-
-// A localStorage stand-in with the two behaviours that matter here: `key(i)` is
-// positional over insertion order, and a removal RE-INDEXES everything after
-// it — which is the trap a sweep that removes while iterating falls into.
-function fakeStorage(initial = {}) {
-  const data = { ...initial }
-  return {
-    data,
-    get length() {
-      return Object.keys(data).length
-    },
-    key(i) {
-      return Object.keys(data)[i] ?? null
-    },
-    getItem(k) {
-      return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null
-    },
-    setItem(k, v) {
-      data[k] = String(v)
-    },
-    removeItem(k) {
-      delete data[k]
-    },
-  }
-}
+import { fakeStorage } from './helpers/fakeStorage.js'
 
 test('every reveal mark comes off, and the at-bat cursor goes with it', () => {
   const storage = fakeStorage({

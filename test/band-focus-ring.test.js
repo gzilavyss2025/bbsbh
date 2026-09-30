@@ -35,11 +35,11 @@ import {
   treatmentTile,
 } from '../src/lib/teams.js'
 import { MILB_HEADER_COLOR_OVERRIDES } from '../src/lib/milbColors.js'
+import { stripComments } from './helpers/css.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const STYLES = join(ROOT, 'src', 'styles')
 const TOKENS = join(ROOT, 'src', 'tokens')
-const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '')
 const read = (rel) => stripComments(readFileSync(join(STYLES, rel), 'utf8'))
 
 // Every `selectors { body }` in a sheet, innermost only, so a rule inside
