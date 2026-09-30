@@ -186,7 +186,7 @@
   color: var(--graphite-soft);
 }
 
-.dlab__note {
+.dlabentry__note {
   margin: 0;
   font-family: var(--font-body);
   font-size: var(--fs-small);

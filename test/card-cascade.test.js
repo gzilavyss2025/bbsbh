@@ -2207,6 +2207,8 @@ const H3_RENAMED = [
   ['note__lede', 'note__note'],
   ['stampin__lede', 'stampin__note'],
   ['xl-entry__lede', 'xl-entry__note'],
+  // batch B, step one: the entry's own note gives up the name the page-level lede takes
+  ['dlab__note', 'dlabentry__note'],
 ]
 
 // Text files of the four trees, this file excluded (it names the old classes).
@@ -2220,11 +2222,14 @@ const h3Trees = () =>
       .map((rel) => [rel, readFileSync(join(H3_ROOT, rel), 'utf8')]),
   )
 // `\b` is wrong here: `_` is a word character, so it does not exist before `__element`.
-const h3Class = (name) => new RegExp(`(?<![A-Za-z0-9_-])${name}(?![a-z0-9-])`)
+// A modifier (`name--tight`) counts as the class; a longer name (`name-x`, `name_x`) does not.
+const h3Class = (name) => new RegExp(`(?<![A-Za-z0-9_-])${name}(?![a-z0-9_]|-[a-z0-9])`)
 
 test('H3: each old second-line class is gone from src, e2e, scripts and test, comments too', () => {
   const trees = h3Trees()
-  for (const [old] of H3_RENAMED) {
+  // A two-step row frees a name that the next row takes (`dlab__note`).
+  const taken = new Set(H3_RENAMED.map(([, now]) => now))
+  for (const [old] of H3_RENAMED.filter(([o]) => !taken.has(o))) {
     const re = h3Class(old)
     assert.deepEqual(
       trees.filter(([, text]) => re.test(text)).map(([rel]) => rel),
@@ -2251,7 +2256,15 @@ test('H3: a renamed class never lands on a name another block already owns', () 
 
 test('H3: the held rows keep their names', () => {
   const trees = h3Trees()
-  for (const name of ['wire__kicker', 'bs__sub', 'ledger__sub']) {
+  const held = [
+    'wire__kicker', 'bs__sub', 'ledger__sub', // not a second line (#1113, #1132)
+    'contractcard__eyebrow', // `.contractcard__note` is the optioned caption, a different line
+    // two different second lines on one head: needs a decision on the grammar
+    'abouthero__kicker', 'abouthero__lede', 'derbycard__eyebrow', 'derbycard__sub',
+    'logbooklanding__eyebrow', 'logbooklanding__lede', 'researchdiary__eyebrow', 'researchdiary__lede',
+    'stampstrip__eyebrow', 'stampstrip__lede',
+  ]
+  for (const name of held) {
     const re = h3Class(name)
     assert.ok(
       trees.some(([rel, text]) => rel.startsWith('src/styles/') && re.test(text)),

@@ -36,7 +36,7 @@ export function Entry({ title, path, consumers, verdict, tone = '', note, wide =
           )}
         </p>
       )}
-      {note && <p className="dlab__note">{note}</p>}
+      {note && <p className="dlabentry__note">{note}</p>}
     </section>
   )
 }
