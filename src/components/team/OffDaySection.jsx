@@ -51,7 +51,7 @@ export function OffDaySection({ teams, favoriteTeamId, favoriteAffiliateIds, win
 // gets the pinned accent (border tint + star) via the --pin-accent inline var,
 // exactly like .gamecard--pinned. favoriteAccentColor is MLB-only and returns
 // null for a MiLB id — the CSS var then just falls back to the default
-// pinned tint (see .offdaycard--pinned's color-mix fallback).
+// pinned tint (see .offday__tile--pinned's color-mix fallback).
 function OffDayCard({ team, pinned, onOpen }) {
   const { id, name: full } = team
   // Same hand-maintained splits the slate cards use, so the Athletics render
@@ -87,11 +87,11 @@ function OffDayCard({ team, pinned, onOpen }) {
     tint || pinstripeColor
       ? { '--tint': tint, '--scale': 1.32 * scale, '--pinstripe-color': pinstripeColor, '--pinstripe-bg': pinstripeBg || undefined }
       : undefined
-  const logoboxClass = `offdaycard__logobox${pinstripeColor ? ' offdaycard__logobox--pinstripe' : ''}`
+  const logoboxClass = `offday__logobox${pinstripeColor ? ' offday__logobox--pinstripe' : ''}`
   return (
     <button
       type="button"
-      className={`offdaycard ${pinned ? 'offdaycard--pinned' : ''}`}
+      className={`offday__tile ${pinned ? 'offday__tile--pinned' : ''}`}
       style={cardStyle}
       onClick={onOpen}
       aria-label={`${full} — off day, open team page`}
@@ -99,12 +99,12 @@ function OffDayCard({ team, pinned, onOpen }) {
       <span className={logoboxClass} style={logoboxStyle}>
         <TeamLogo teamId={id} name={mascot || full} size={40} variant={logoVariant} />
       </span>
-      <span className="offdaycard__name">
-        {location && <BreakableLocation text={location} className="offdaycard__loc" />}
-        <span className="offdaycard__mascot">{shortMascot || full}</span>
+      <span className="offday__name">
+        {location && <BreakableLocation text={location} className="offday__loc" />}
+        <span className="offday__mascot">{shortMascot || full}</span>
       </span>
       {pinned && (
-        <span className="offdaycard__pin" aria-hidden="true">
+        <span className="offday__pin" aria-hidden="true">
           ★
         </span>
       )}
