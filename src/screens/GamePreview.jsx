@@ -9,6 +9,7 @@ import { loadPosterArt } from '../lib/preview/posterArt.js'
 import { cardsHeight, POSTER, posterLayout } from '../lib/preview/posterLayout.js'
 import { ensurePosterFonts } from '../lib/preview/posterPaper.js'
 import { SavePosterButton } from '../components/preview/SavePosterButton.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 import '../styles/62-game-preview.css'
 
 // The preview poster's studio: the sheet on the left (or on top, on a phone),
@@ -130,7 +131,7 @@ export function GamePreview({ feed, starterLines, broadcast, callouts, treatment
         {!painted && <p className="posterstudio__loading">Setting the poster…</p>}
       </div>
 
-      <div className="posterstudio__panel">
+      <Card as="div" body="flush" className="posterstudio__panel">
         <h2 className="posterstudio__title">Preview card</h2>
         <p className="posterstudio__note">
           A 1200 × 1600 image, the tallest an X timeline shows without cropping it.
@@ -174,7 +175,7 @@ export function GamePreview({ feed, starterLines, broadcast, callouts, treatment
           On a phone this opens the share sheet, where Save Image puts it in Photos. On a
           computer it downloads.
         </p>
-      </div>
+      </Card>
     </div>
   )
 }

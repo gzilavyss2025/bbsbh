@@ -262,10 +262,10 @@
 
 .sitemenusheet__group {
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
+  /* Card clips its edge, and a clipped grid item has a minimum height of 0:
+     in the wide sheet the two rows of groups would shrink to fit the sheet and
+     cut every group short. The group has no band head for a clip to serve. */
+  overflow: visible;
 }
 
 .sitemenusheet__group + .sitemenusheet__group {

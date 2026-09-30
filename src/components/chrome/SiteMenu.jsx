@@ -4,6 +4,7 @@ import { MENU_GROUPS, isGuidePath } from '../../lib/reportPages.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { DirectoryHeading } from './DirectoryHeading.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // AdminMenuLink.jsx imports @clerk/clerk-react at its top, so it is only
 // dynamically imported — and only then does that SDK reach a device — when a
@@ -139,7 +140,7 @@ function SiteMenuModal({ onClose }) {
 
         <div className="sitemenusheet__scroll">
           {MENU_GROUPS.map((group) => (
-            <section key={group.id} className="sitemenusheet__group">
+            <Card key={group.id} body="flush" className="sitemenusheet__group">
               <DirectoryHeading group={group} as="h3" />
               <ul className="navdir__list">
                 {group.pages.map((item) => {
@@ -177,7 +178,7 @@ function SiteMenuModal({ onClose }) {
                   </Suspense>
                 )}
               </ul>
-            </section>
+            </Card>
           ))}
         </div>
 
