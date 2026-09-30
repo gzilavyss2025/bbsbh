@@ -46,13 +46,23 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { stateKey, re24Key } from '../src/lib/runExpectancy.js'
 import { getJson } from './lib/statsapi.mjs'
-import { parseArgs } from './lib/args.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'run-expectancy.json')
 const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
+
+// Strict on purpose: a bare `--flag` is ignored, so a mistyped value flag falls
+// back to its default. The shared parseArgs in lib/args.mjs would make it `true`.
+function parseArgs(argv) {
+  const args = {}
+  for (const a of argv) {
+    const m = /^--([^=]+)=(.*)$/.exec(a)
+    if (m) args[m[1]] = m[2]
+  }
+  return args
+}
 
 // Every Final regular-season gamePk for one season. Same postponed-replay
 // dedup guard as gen-umpires.mjs / gen-umpire-accuracy.mjs: a replayed game

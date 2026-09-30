@@ -2,6 +2,8 @@
 // generators.
 //
 // parseArgs reads `--flag=value` as a string and a bare `--flag` as `true`.
+// gen-rookies-backfill and gen-run-expectancy keep a stricter local copy that
+// ignores a bare `--flag`, so a mistyped value flag still falls back to its default.
 
 export function parseArgs(argv) {
   const args = {}
