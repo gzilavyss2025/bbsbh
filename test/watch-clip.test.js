@@ -18,7 +18,7 @@
 // fetcher, so nothing here touches a host that blocks automated access.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { CLIP_PACKAGE, CLIP_RAW, watchClipSource, resolveRawClip } from '../src/components/highlights/watchClip.js'
+import { CLIP_PACKAGE, CLIP_RAW, watchClipSource, resolveRawClip, createClipLookup } from '../src/components/highlights/watchClip.js'
 
 // What the Savant lookup returns for a play that has a clip.
 const page = (token) =>
@@ -131,4 +131,96 @@ test('a play with no playId is never asked about', async () => {
   const view = await resolveRawClip(null, { fetchImpl: fake.impl })
   assert.equal(view.src, null)
   assert.equal(fake.calls.length, 0)
+})
+
+// --- the lookup both Watch buttons share (useWatchClip) ---------------------
+
+// A lookup wired to the real resolver and a fake host, collecting what it hands
+// back. `clipUrlCache` is module-wide, so each test uses playIds of its own.
+function lookupOver(fake) {
+  const got = []
+  const resolve = (id, opts) => resolveRawClip(id, { ...opts, fetchImpl: fake.impl })
+  return { got, lookup: createClipLookup((r) => got.push(r), resolve) }
+}
+
+test('a hit is reused: a second tap on the same play asks the host nothing', async () => {
+  const fake = fakeFetcher({ 'lk-hit': page('lk-token') })
+  const { got, lookup } = lookupOver(fake)
+  await lookup.start('lk-hit')
+  await lookup.start('lk-hit')
+  assert.equal(fake.calls.length, 1)
+  assert.deepEqual(got.map((r) => r.src), [
+    'https://sporty-clips.mlb.com/lk-token.mp4',
+    'https://sporty-clips.mlb.com/lk-token.mp4',
+  ])
+})
+
+test('a miss is never kept: the next tap asks again and gets the clip once it posts', async () => {
+  const bodies = {}
+  const fake = fakeFetcher(bodies)
+  const { got, lookup } = lookupOver(fake)
+  await lookup.start('lk-late')
+  assert.equal(got[0].src, null)
+  assert.notEqual(got[0].notice, '')
+  bodies['lk-late'] = page('lk-posted')
+  await lookup.start('lk-late')
+  assert.equal(fake.calls.length, 2)
+  assert.equal(got[1].src, 'https://sporty-clips.mlb.com/lk-posted.mp4')
+})
+
+// A resolver the test settles by hand, so an answer can arrive late.
+function deferredResolve() {
+  const waiting = []
+  const resolve = (id, opts) => new Promise((done) => waiting.push({ id, opts, done }))
+  return { waiting, resolve }
+}
+
+test('an abort drops a late answer', async () => {
+  const d = deferredResolve()
+  const got = []
+  const lookup = createClipLookup((r) => got.push(r), d.resolve)
+  const tap = lookup.start('lk-abort')
+  lookup.cancel()
+  assert.equal(d.waiting[0].opts.signal.aborted, true)
+  d.waiting[0].done({ src: 'late.mp4', notice: '' })
+  await tap
+  assert.deepEqual(got, [])
+})
+
+test('a newer tap supersedes the one still in flight', async () => {
+  const d = deferredResolve()
+  const got = []
+  const lookup = createClipLookup((r) => got.push(r), d.resolve)
+  const first = lookup.start('lk-one')
+  const second = lookup.start('lk-two')
+  d.waiting[1].done({ src: 'two.mp4', notice: '' })
+  d.waiting[0].done({ src: 'one.mp4', notice: '' })
+  await Promise.all([first, second])
+  assert.deepEqual(got.map((r) => r.src), ['two.mp4'])
+})
+
+test('a remount does not leave the sheet on Loading', async () => {
+  // StrictMode runs an effect's cleanup and then its setup again. A flag that
+  // only cleanup touched would stay false, and every answer would be dropped.
+  const d = deferredResolve()
+  const got = []
+  const lookup = createClipLookup((r) => got.push(r), d.resolve)
+  lookup.mount()
+  lookup.unmount()
+  lookup.mount()
+  const tap = lookup.start('lk-remount')
+  d.waiting[0].done({ src: 'here.mp4', notice: '' })
+  await tap
+  assert.deepEqual(got.map((r) => r.src), ['here.mp4'])
+})
+
+test('an unmounted lookup hands nothing back', async () => {
+  const d = deferredResolve()
+  const got = []
+  const lookup = createClipLookup((r) => got.push(r), d.resolve)
+  const tap = lookup.start('lk-gone')
+  lookup.unmount()
+  d.waiting[0].done({ src: 'gone.mp4', notice: '' })
+  await tap
+  assert.deepEqual(got, [])
 })
