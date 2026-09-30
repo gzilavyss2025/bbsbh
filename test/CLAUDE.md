@@ -43,6 +43,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | derive-live-state.test.js | 9 | src/api/playbyplay.js | Core spoiler-safe HUD state (cap, bases, batterDone) |
 | dev-custom-marks.test.js | 3 | scripts/lib/dev-custom-marks.mjs | Dev-only recolored-mark lab (ADR-0029) |
 | dev-data-stores.test.js | 30 | scripts/lib/dev-data-stores.mjs | Dev-lab data-store validators/allowlists |
+| dialog-focus-core.test.js | 3 | src/hooks/dialog/dialogFocusCore.js | The dialog contract behind useDialogFocus — Escape closes and stops after cleanup, focus moves in and returns to the trigger; `window` and `document` are stubs, since the suite has no DOM |
 | due-up.test.js | 8 | src/api/dueup.js | "Due up" pre-pitch preview |
 | express-lane-byte-store.test.js | 20 | src/lib/expresslane/byteStore.js | Express Lane Tier 3 — the on-device clip store over an in-memory IndexedDB stand-in: the round trip, per-game isolation, the resume read, eviction, and the refusals that must stay apart (a quota refusal is a full disk, not a bad clip); plus the object-URL release that stops 84 unrevoked 6 MB blobs |
 | express-lane-clip-index.test.js | 23 | src/api/expresslane/clipIndex.js | Express Lane Tier 2 — the Savant playId-to-mp4 resolver (parse, request memoization, a miss never cached), the derived poster, and the sequential index queue with its stop-asking breaker; all offline through an injected fetcher |
