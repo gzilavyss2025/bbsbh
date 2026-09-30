@@ -1143,7 +1143,9 @@ don't run these by hand.
   weekly-refreshed Pipeline rank, not replace it: a rank only moves when
   Pipeline re-ranks, this moves with the prospect's own current-season stat
   line. Same SQLite `player_snapshots` + self-join `movement` pattern as
-  `gen-fever-radar.mjs`, source `prospect-trend`. Depends on
+  `gen-fever-radar.mjs`, source `prospect-trend`. A row reads the prospect's
+  line at his primary level only (`snapshotRow`), because the percentile
+  population and the tenure benchmark each cover one level. Depends on
   `top-prospects.json` already existing; skips (not a failure) if that
   snapshot is missing/empty. App reads it via `src/api/prospectTrend.js`.
 

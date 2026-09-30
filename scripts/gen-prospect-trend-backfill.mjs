@@ -36,13 +36,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fetchLevelDateRangeStats, combineToPool } from '../src/api/statsLevels.js'
-import {
-  meetsPlayingTimeFloor,
-  percentileRank,
-  primaryGroupFor,
-  buildPopulations,
-  populationKey,
-} from './lib/prospectPercentile.mjs'
+import { buildPopulations, snapshotRow } from './lib/prospectPercentile.mjs'
 import { getJson } from './lib/statsapi.mjs'
 import { openDb, dumpGroup } from './lib/db.js'
 
@@ -135,16 +129,9 @@ async function runCheckpoint(db, insert, checkpointDate, openingDayBySport, pros
 
   let written = 0
   for (const p of pool) {
-    const group = primaryGroupFor(p.position, Boolean(p.hitting), Boolean(p.pitching))
-    if (!group) continue
-    const line = group === 'hitting' ? p.hitting : p.pitching
-    const qualified = meetsPlayingTimeFloor(group, line)
-    const population = populations.get(populationKey(p.sportId, group)) ?? []
-    const metric = Number(group === 'hitting' ? line.ops : line.era)
-    const percentile = qualified ? percentileRank(metric, population, group === 'hitting') : null
-    const sampleSize = group === 'hitting' ? Number(line.plateAppearances) || 0 : Number(line.outs) || 0
-    const payload = { sportId: p.sportId, percentile, qualified, sampleSize, populationSize: population.length }
-    insert.run(checkpointDate, p.id, group, SOURCE, JSON.stringify(payload))
+    const row = snapshotRow(p, populations)
+    if (!row) continue
+    insert.run(checkpointDate, p.id, row.group, SOURCE, JSON.stringify(row.payload))
     written++
   }
   return written

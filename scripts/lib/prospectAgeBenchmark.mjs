@@ -15,16 +15,10 @@
 import { getJson } from './statsapi.mjs'
 import { mapConcurrent } from './concurrency.mjs'
 import { qualifiedPlayerIds } from './prospectPercentile.mjs'
+import { decimalAge } from '../../src/api/prospectTrend.js'
 
 const CHUNK_SIZE = 100
 const CONCURRENCY = 4
-
-function ageFromBirthDate(birthDate, asOf) {
-  if (!birthDate) return null
-  const born = new Date(birthDate)
-  if (Number.isNaN(born.getTime())) return null
-  return (asOf.getTime() - born.getTime()) / (365.2425 * 24 * 60 * 60 * 1000)
-}
 
 function chunk(arr, size) {
   const out = []
@@ -76,7 +70,7 @@ export async function fetchLevelAverageAges(hitSplits, pitSplits, sportIds, asOf
   const out = {}
   for (const [sportId, ids] of idsBySport) {
     const ages = [...ids]
-      .map((id) => ageFromBirthDate(birthDateById.get(id), asOf))
+      .map((id) => decimalAge(birthDateById.get(id), asOf))
       .filter((a) => Number.isFinite(a))
     out[sportId] = ages.length ? Math.round((ages.reduce((a, b) => a + b, 0) / ages.length) * 10) / 10 : null
   }

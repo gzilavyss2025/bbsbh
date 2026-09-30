@@ -29,10 +29,12 @@ export function benchmarkFor(snapshot, sportId, group) {
   return entry ?? null
 }
 
-// The Prospect Card's tenure fact: how far a player's CURRENT sample (PA for
-// a hitter, OUTS for a pitcher — the same units prospectTrend.js's
+// The Prospect Card's tenure fact: how far a player's CURRENT sample AT THIS
+// LEVEL (PA for a hitter, OUTS for a pitcher — the same units prospectTrend.js's
 // `sampleSize` already carries, so callers pass entry.sampleSize straight
-// through with no conversion) sits relative to a typical stay at this level,
+// through with no conversion; gen-prospect-trend.mjs writes it from his line at
+// that one level, not his season summed over every level) sits relative to a
+// typical stay at this level,
 // expressed as a percent of the MEDIAN — the framing this feature exists to
 // answer ("roughly X% through a typical stay"), not a percentile of the
 // population (that's the performance card's job, not this one's).

@@ -932,7 +932,9 @@ for each generator; the reader modules:
   TYPICAL STAY at his level — `tenureFact` compares his current PA/outs
   (the same count `prospectTrend.js`'s `sampleSize` already carries, so the
   two never disagree) against the historical cohort's median, expressed as a
-  plain percent ("about 62% of a typical AA stay"). `ProspectCard` renders it
+  plain percent ("about 62% of a typical AA stay"). That count is his line at
+  his primary level alone, not his season summed over every level (#1279).
+  `ProspectCard` renders it
   as a "Time at level" fact beside the performance standing, in both the
   qualified and early-sample states — it's most useful in the early state,
   where it explains WHY the sample is still small rather than just saying so.
