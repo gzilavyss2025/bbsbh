@@ -113,7 +113,6 @@ These have one home, and every other caller imports it. I found no copy.
 - **Rehab transaction test.** `src/api/rehab-policy.js`. (A6 is about the end rule, which is not shared.)
 - **Hit coordinates.** `HIT_COORD_ORIGIN` in `src/lib/ballpark/hitProjection.js`. Savant's `hc_x`/`hc_y` projection is different, and `gen-spray.mjs` says so.
 - **Win probability.** It comes from MLB's endpoint. The repo does not compute it.
-- **Service time.** `src/lib/contracts/parseServiceTime.js` parses a salary column. `.scratch/service-clock/lib.mjs` computes a season's service line. Different quantities.
 
 ## Found on the way
 
