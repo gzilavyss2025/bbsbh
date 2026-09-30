@@ -122,3 +122,24 @@ test('the change pill is the difference of the two header numbers, not a second 
   assert.equal(winProbChangeLabel(wholeSwing(60.4, 47.6), 'HOM', 'AWY'), 'AWY +12%')
   assert.equal(wholeSwing(50, 52.2), 2)
 })
+
+test('when the secondary also clashes, the away key still clears the home fill', () => {
+  const dist = (a, b) => {
+    const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16))
+    return Math.hypot(...rgb(a).map((v, i) => v - rgb(b)[i]))
+  }
+  const CLASH = 48
+  const home = { fill: '#0C2340', text: '#FFFFFF' }
+  // Two navy clubs: the away band, its secondary and its primary all sit near the home navy.
+  const navy = { primary: '#0E2442', secondary: '#102846', text: '#FFFFFF' }
+  const both = winProbKeyPair({ fill: '#0E2442', text: '#FFFFFF' }, home, navy)
+  assert.ok(dist(both.away.fill, home.fill) >= CLASH)
+  assert.equal(both.home, home)
+  // The secondary clashes but the primary does not: the primary is next in line.
+  const primaryClears = winProbKeyPair({ fill: '#0E2442', text: '#FFFFFF' }, home, { primary: '#C8102E', secondary: '#102846', text: '#FFFFFF' })
+  assert.equal(primaryClears.away.fill, '#C8102E')
+  // Neither clears: the farther of white and the ink navy, whichever it is.
+  const onLight = winProbKeyPair({ fill: '#F0F0F0', text: '#1B2A3A' }, { fill: '#EEEEEE', text: '#1B2A3A' }, { primary: '#F1F1F1', secondary: '#F2F2F2', text: '#1B2A3A' })
+  assert.equal(onLight.away.fill, '#1B2A3A')
+  assert.equal(both.away.fill, '#FFFFFF')
+})

@@ -27,14 +27,16 @@ function distance(a, b) {
   return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2])
 }
 
-// Both keys, and when they clash, the away key moves to the club's secondary
-// chip colour, so the two pills never read as one club. The home key keeps
+// Both keys, and when they clash, the away key moves to the first of the club's
+// secondary, then primary chip colour that clears the home fill, so the two
+// pills never read as one club. If neither clears it, the away key takes white
+// or the ink navy, whichever is farther from the home fill. The home key keeps
 // the band colour.
 export function winProbKeyPair(away, home, awayChip) {
   if (!HEX.test(away.fill) || !HEX.test(home.fill) || distance(away.fill, home.fill) >= CLASH) return { away, home }
-  const fill = HEX.test(awayChip.secondary ?? '') && distance(awayChip.secondary, home.fill) >= CLASH
-    ? awayChip.secondary
-    : awayChip.primary
+  const clear = [awayChip.secondary, awayChip.primary]
+    .find((c) => HEX.test(c ?? '') && distance(c, home.fill) >= CLASH)
+  const fill = clear ?? (distance(LIGHT, home.fill) >= distance(DARK, home.fill) ? LIGHT : DARK)
   return { away: winProbKeyColor(fill, awayChip), home }
 }
 
