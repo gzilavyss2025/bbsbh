@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { nearestWinProbEvent, winProbReadout } from '../src/components/charts/winprob/explore.js'
-import { selectWinProbPath } from '../src/api/winprob.js'
+import { nearestWinProbEvent, winProbReadout, winProbChangeLabel, touchIntent, followLatest } from '../src/components/charts/winprob/explore.js'
+import { selectWinProbPath, selectWinProbBigPlays } from '../src/api/winprob.js'
 import { WIN_PROB_FIELDS } from '../src/api/game.js'
 
 test('snap selects recorded events, excludes origin, and clamps edges', () => {
@@ -20,13 +20,38 @@ test('readout identifies after-play outs and preserves the recorded delta', () =
   assert.equal(winProbReadout({ home: 100, inning: 9, half: 'bottom', outs: 3 }).context, '▼9 · Half over')
   assert.equal(winProbReadout({ home: 50, inning: 1, half: 'top' }).delta, null)
 })
-test('outs and recorded delta inherit reveal clamp and survive field pruning', () => {
+test('outs and the drawn delta inherit reveal clamp and survive field pruning', () => {
   for (const field of ['count', 'outs', 'homeTeamWinProbabilityAdded']) assert.ok(WIN_PROB_FIELDS.includes(field))
   const rows = [1, 2].map(inning => ({ homeTeamWinProbability: 52.2,
     homeTeamWinProbabilityAdded: 2.2, about: { inning, isTopInning: true }, count: { outs: 1 } }))
   const points = selectWinProbPath(rows, { throughHalf: 0 })
   assert.equal(points.length, 1)
   assert.equal(points[0].outs, 1)
-  assert.equal(points[0].delta, 2.2)
+  assert.equal(points[0].delta.toFixed(1), '2.2')
   assert.equal(selectWinProbPath([{ ...rows[0], count: null, homeTeamWinProbabilityAdded: null }])[0].outs, null)
+})
+test('each plotted delta is the step the line draws, so readout and ledger agree', () => {
+  const rows = [52.2, 40, 40.2].map((home, i) => ({ homeTeamWinProbability: home,
+    homeTeamWinProbabilityAdded: 99, about: { inning: i + 1, isTopInning: true } }))
+  const points = selectWinProbPath(rows)
+  // The first play is measured from the chart's even 50% origin, not the feed's pre-game odds.
+  assert.deepEqual(points.map(p => Number(p.delta.toFixed(1))), [2.2, -12.2, 0.2])
+  const [swing] = selectWinProbBigPlays(rows)
+  assert.equal(swing.delta, points[swing.idx].delta)
+})
+test('change label names the gaining club and says no change when it rounds to zero', () => {
+  assert.equal(winProbChangeLabel(12.4, 'HOM', 'AWY'), 'HOM +12%')
+  assert.equal(winProbChangeLabel(-12.6, 'HOM', 'AWY'), 'AWY +13%')
+  assert.equal(winProbChangeLabel(0, 'HOM', 'AWY'), 'No change')
+  assert.equal(winProbChangeLabel(-0.3, 'HOM', 'AWY'), 'No change')
+})
+test('a touch only selects once it moves sideways; a vertical move is a page scroll', () => {
+  assert.equal(touchIntent(2, 3), 'pending')
+  assert.equal(touchIntent(12, 4), 'drag')
+  assert.equal(touchIntent(-12, 4), 'drag')
+  assert.equal(touchIntent(3, 14), 'scroll')
+})
+test('a selection resets to the latest play when more plays arrive', () => {
+  assert.deepEqual(followLatest({ count: 20, idx: 12 }, 20), { count: 20, idx: 12 })
+  assert.deepEqual(followLatest({ count: 20, idx: 12 }, 30), { count: 30, idx: null })
 })

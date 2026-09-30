@@ -1,6 +1,7 @@
-import { useId, useState } from 'react'
+import { useId } from 'react'
 import { winProbSplit } from '../../api/winprob.js'
-import { nearestWinProbEvent, winProbReadout } from './winprob/explore.js'
+import { winProbChangeLabel, winProbReadout } from './winprob/explore.js'
+import { useWinProbSelection } from './winprob/useWinProbSelection.js'
 import { wpaBandColor, wpaBandPinstripeColor, wpaBandPinstripeBg, chipColorsFor } from '../../lib/wpa/wpaBandColors.js'
 import { wpaLogoLayout, wpaTilePlacements } from '../../lib/wpa/wpaLogo.js'
 import { isMlbTeamId } from '../../lib/teams.js'
@@ -46,10 +47,11 @@ import { Card } from '../ui/frame/Card.jsx'
 const W = 328
 const H = 220
 // No y-axis labels to clear room for anymore (see the block comment above) —
-// A small side inset; top space holds the stable exploration readout.
+// just a small inset. The readout sits above the <svg>, not in this top pad,
+// and lib/wpa/wpaBandColors.js's WPA_PLOT_SIZE repeats these four numbers.
 const PAD_L = 8
 const PAD_R = 16
-const PAD_T = 40
+const PAD_T = 10
 const PAD_B = 22
 const PLOT_L = PAD_L
 const PLOT_R = W - PAD_R
@@ -157,15 +159,16 @@ export function WinProbChart({
   homeMarkOverride,
   partial = false,
 }) {
-  // Latest event before interaction; the last selected event persists on leave.
   const patternUid = useId()
-  const [selectedIdx, setSelectedIdx] = useState(null)
-  const activeIdx = Math.min(selectedIdx ?? (points?.length ?? 1) - 1, (points?.length ?? 1) - 1)
+  // The latest play until the user picks one (winprob/useWinProbSelection.js).
+  const { activeIdx, select, svgHandlers } = useWinProbSelection(
+    points?.length ?? 0, { W, H, left: PLOT_L, width: PLOT_W },
+  )
   const linkedProps = (idx, label) => ({
     tabIndex: 0, role: 'button', 'aria-label': label, 'aria-pressed': activeIdx === idx,
-    onClick: () => setSelectedIdx(idx),
+    onClick: () => select(idx),
     onKeyDown: (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedIdx(idx) }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(idx) }
     },
   })
 
@@ -313,27 +316,15 @@ export function WinProbChart({
     .map((p, i) => (p.isScoring ? i : -1))
     .filter((i) => i >= 0)
 
-  const summary = `${away} ${split.away}%, ${home} ${split.home}%. ${readout.context.replace('▲', 'Top ').replace('▼', 'Bottom ')}. After play.`
-  const selectAtPointer = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    // Account for xMidYMid meet letterboxing at the SVG height cap.
-    const scale = Math.min(rect.width / W, rect.height / H)
-    const left = rect.left + (rect.width - W * scale) / 2
-    setSelectedIdx(nearestWinProbEvent(((e.clientX - left) / scale - PLOT_L) / PLOT_W, points.length))
-  }
-  const navigate = (e) => {
-    const next = { ArrowLeft: activeIdx - 1, ArrowRight: activeIdx + 1,
-      ArrowDown: activeIdx - 1, ArrowUp: activeIdx + 1, Home: 0, End: points.length - 1 }[e.key]
-    if (next == null) return
-    e.preventDefault()
-    setSelectedIdx(Math.max(0, Math.min(points.length - 1, next)))
-  }
+  const change = winProbChangeLabel(readout.delta, home, away)
+  const summary = `${away} ${split.away}%, ${home} ${split.home}%. ${readout.context.replace('▲', 'Top ').replace('▼', 'Bottom ')}. ${change}.`
 
   return (
     <Card body="flush" className="winprob">
       <div className="winprob__head sectionhead--band sectionhead--house">
         <h3 className="winprob__title">Win probability</h3>
-        <div className="winprob__split">
+        {/* The slider's aria-valuetext reads these same two numbers. */}
+        <div className="winprob__split" aria-hidden="true">
           <span className="winprob__team winprob__team--away" style={{ '--team-color': awayColors.primary }}>
             {away} <span className="winprob__pct">{split.away}%</span>
           </span>
@@ -344,10 +335,15 @@ export function WinProbChart({
       </div>
 
       <div className="winprob__explorer">
-      <div className="winprob__readout">
+      {/* The slider's aria-valuetext and the help text below carry all of this. */}
+      <div className="winprob__readout" aria-hidden="true">
         <span>{readout.context}</span>
-        <span className="winprob__change">{readout.delta == null ? 'Change unavailable' : `${readout.delta >= 0 ? home : away} +${Math.round(Math.abs(readout.delta))}%`}</span>
-        <span className="winprob__hint">After play · {activeIdx + 1}/{points.length}{partial ? ' revealed' : ''} · Drag or use ← →</span>
+        <span className="winprob__change">{change}</span>
+        <span className="winprob__hint">
+          After play · {activeIdx + 1}/{points.length}{partial ? ' revealed' : ''}
+          <span className="winprob__hint-fine"> · Hover or use ← →</span>
+          <span className="winprob__hint-touch"> · Tap or drag</span>
+        </span>
       </div>
 
       <svg
@@ -359,15 +355,7 @@ export function WinProbChart({
         aria-valuemin={1} aria-valuemax={points.length} aria-valuenow={activeIdx + 1}
         aria-valuetext={summary}
         aria-describedby={`winprob-help-${patternUid}`}
-        onKeyDown={navigate}
-        onPointerDown={(e) => {
-          e.currentTarget.focus({ preventScroll: true })
-          e.currentTarget.setPointerCapture(e.pointerId)
-          selectAtPointer(e)
-        }}
-        onPointerMove={(e) => {
-          if (e.pointerType === 'mouse' || e.currentTarget.hasPointerCapture(e.pointerId)) selectAtPointer(e)
-        }}
+        {...svgHandlers}
       >
         {/* Each band's step-and-repeat texture: a tile of a solid fill of
             that band's own color (BAND_COLOR_OVERRIDES-aware) plus one copy
@@ -493,11 +481,10 @@ export function WinProbChart({
             and on into extras — 12, 15, …) gets one, coarse orientation
             ("about a third of the way through") rather than a full ledger
             the bands' own color + logo already make redundant. Always the
-            top half specifically (the ▲ arrow — same card-wide rule as
-            before: this is the only ▲/▼ glyph on this card, the ledger below
-            carries direction as a team-colored chip instead) so the mark
-            always lands on a consistent, real half-inning rather than
-            needing to guess whether inning N's bottom was played. */}
+            top half specifically (the ▲ arrow, the same half glyph the
+            readout and the ledger's inning tags use) so the mark always
+            lands on a consistent, real half-inning rather than needing to
+            guess whether inning N's bottom was played. */}
         {groups
           .filter((g) => g.half === 'top' && g.inning % INNING_LABEL_STEP === 0)
           .map((g) => (
@@ -528,7 +515,7 @@ export function WinProbChart({
       </svg>
       </div>
 
-      <p id={`winprob-help-${patternUid}`} className="sr-only">Hover or drag to select a recorded play. Arrow keys move one play. Home selects the first; End selects the latest. Values are rounded to whole percentages. Probabilities are after the selected play.</p>
+      <p id={`winprob-help-${patternUid}`} className="sr-only">Hover, tap or drag to select a recorded play. Arrow keys move one play. Home selects the first; End selects the latest. Values are rounded to whole percentages. Probabilities are after the selected play.</p>
 
       {bigPlays.length > 0 && (
         <div className="winprob__ledger">
@@ -538,8 +525,7 @@ export function WinProbChart({
               const toHome = p.delta > 0
               const abbr = toHome ? home : away
               const colors = chipColorsFor(toHome ? homeId : awayId)
-              const val = Math.round(Math.abs(p.delta))
-              const chipText = `${abbr} +${val}%`
+              const chipText = winProbChangeLabel(p.delta, home, away)
               const tag = `${p.half === 'top' ? '▲' : '▼'}${p.inning}`
               const isActive = activeIdx === p.idx
               return (

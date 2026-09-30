@@ -145,9 +145,8 @@
    innings view feeds only the plays through the revealed half, the box score
    the whole game inside its seal. Real per-team brand color (teams.js's
    teamChipColors) is reserved for identity chrome — the header swatches/
-   splitbar, the ledger chips, the linked big-swing markers — the bands/line
-   stay the neutral navy/clay pair above since their job is structural
-   ("which side of 50%"), not "which team". A flush Card (WinProbChart.jsx,
+   splitbar and the ledger chips; the numbered big-swing markers and the
+   cursor stay neutral ink. A flush Card (WinProbChart.jsx,
    #1113 slice C4): system/card.css draws the frame, this rule the space
    below it and the inset. */
 .winprob {
@@ -208,14 +207,25 @@
   background: var(--team-color, var(--graphite-soft));
 }
 
-.winprob__pct { color: var(--text-on-ink); }
+.winprob__pct { display: inline-block; width: 4ch; text-align: right; color: var(--text-on-ink); }
 
-/* Preserve the chart's existing aspect ratio and desktop height cap. */
+/* The readout and the plot share one column, capped at the width where the
+   plot reaches 260px tall (the viewBox is 328 x 220), so the readout's right
+   edge stays on the plot's right edge on a wide box score. */
+.winprob__explorer {
+  max-width: calc(260px * 328 / 220);
+  margin-inline: auto;
+}
 .winprob__svg {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 260px;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+.winprob__svg:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /* The bands themselves are filled via inline `style={{ fill: url(#...) }}`
@@ -267,30 +277,24 @@
   font-size: var(--fs-caption);
 }
 
-/* Paper-backed landmarks and a solid cursor stay readable over the logo tiles. */
-.winprob__explorer { position: relative; }
+/* The selected play's readout, on the paper above the plot rather than over
+   the logo tiles; a paper-backed cursor and landmarks stay readable on them. */
 .winprob__readout {
-  position: absolute;
-  inset: 0 0 auto;
-  pointer-events: none;
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: var(--space-1);
+  gap: 0 var(--space-1);
+  margin-bottom: var(--space-1);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   font-variant-numeric: tabular-nums;
-  margin-bottom: var(--space-1);
   color: var(--text-body);
 }
 .winprob__hint { grid-column: 1 / -1; color: var(--text-caption); }
 .winprob__change { text-align: right; }
-.winprob__pct { display: inline-block; width: 4ch; text-align: right; }
-.winprob__svg { touch-action: pan-y; cursor: crosshair; }
-.winprob__svg:focus-visible { outline: none; }
-.winprob__explorer:has(.winprob__svg:focus-visible) .winprob__hint {
-  text-decoration: underline;
-  text-decoration-color: var(--focus-ring);
-  text-underline-offset: 3px;
+.winprob__hint-touch { display: none; }
+@media (hover: none), (pointer: coarse) {
+  .winprob__hint-fine { display: none; }
+  .winprob__hint-touch { display: inline; }
 }
 .winprob__cursor { pointer-events: none; }
 .winprob__cursor-halo { stroke: var(--surface-inset); stroke-width: 4; }
@@ -320,8 +324,6 @@
 
 .winprob__ledger-row {
   display: block;
-  align-items: flex-start;
-  gap: var(--space-2h);
   padding: var(--space-1h) var(--space-1h);
   margin: 0 -6px;
   border-top: var(--bw-hair) solid var(--border-hairline);
@@ -334,18 +336,17 @@
 }
 
 .winprob__ledger-row:hover,
-.winprob__ledger-row:focus-visible,
 .winprob__ledger-row.is-active {
   background: color-mix(in srgb, var(--team-color) 12%, var(--surface-inset));
-
 }
 
-.winprob__ledger-row.is-active .winprob__moment-number,
-.winprob__ledger-row:focus-visible .winprob__moment-number { text-decoration: underline; }
-.winprob__ledger-row:focus-visible { outline: none; }
+.winprob__ledger-row.is-active .winprob__moment-number { text-decoration: underline; }
+.winprob__ledger-row:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
 
 .winprob__ledger-meta {
-  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -372,9 +373,6 @@
 }
 
 .winprob__ledger-desc {
-  padding-top: var(--space-1);
-  flex: 1 1 auto;
-  min-width: 0;
   margin: 0;
   color: var(--text-body);
 }
