@@ -38,15 +38,6 @@
   color: var(--text-caption);
 }
 
-.sitebar__word {
-  font-family: var(--font-display);
-  font-size: var(--fs-h1);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-title);
-  text-transform: uppercase;
-  color: var(--text-heading);
-}
-
 /* Persistent site-wide search trigger (SiteSearch.jsx), the Game Log shortcut
    (LogbookButton.jsx), and the "more pages" menu trigger (SiteMenu.jsx) —
    ghost Buttons (no docked input; there's no room for one on a
@@ -337,28 +328,6 @@
   .continuebar--pitch {
     padding-left: var(--space-2);
   }
-}
-
-/* Box-score shortcut, top-right of the site bar — reachable from any in-game
-   sub-page (lineups, innings) so the sealed full box score is always one tap
-   away without walking back through the sections. */
-.sitebar__box {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-1h) var(--space-3);
-  min-height: var(--tap-min);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  color: var(--text-heading);
 }
 
 /* ----------------------------------------------------- around the league

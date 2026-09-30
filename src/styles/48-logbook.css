@@ -189,10 +189,6 @@
   opacity: 0.34;
 }
 
-.clubsseen__club.is-seen {
-  opacity: 1;
-}
-
 .clubsseen__name {
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -201,10 +197,6 @@
   line-height: var(--lh-snug);
   text-align: center;
   color: var(--text-caption);
-}
-
-.clubsseen__club.is-seen .clubsseen__name {
-  color: var(--text-body);
 }
 
 /* ---- the stamp collection card (screens/logbook/StampCollection.jsx) ----

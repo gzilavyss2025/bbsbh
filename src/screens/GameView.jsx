@@ -15,6 +15,7 @@ import { Loader } from '../components/ui/Loader.jsx'
 import { LinkScope } from '../lib/nav.jsx'
 import { useRouteLink } from '../lib/nav.js'
 import { humanDateWithYear } from '../lib/dates.js'
+import { ordinal } from '../lib/format.js'
 import { seriesMarkForFeed } from '../lib/postseason/seriesMarks.js'
 import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
 import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
@@ -635,12 +636,6 @@ function GameStatusBanner({ status }) {
       </span>
     </div>
   )
-}
-
-function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd']
-  const v = n % 100
-  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }
 
 // Spoiler-safe tab title: team abbreviations plus a structural section label

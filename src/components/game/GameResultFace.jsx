@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { selectBoxscore, computePlayOfTheGame } from '../../api/boxscore.js'
 import { useRouteLink } from '../../lib/nav.js'
+import { ordinal } from '../../lib/format.js'
 import { favoriteAccentColor } from '../../lib/teams.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -270,12 +271,6 @@ function Decisions({ decisions }) {
       ))}
     </div>
   )
-}
-
-function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd']
-  const v = n % 100
-  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }
 
 // The leading team is whoever was ahead at the moment of the play (not always

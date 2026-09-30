@@ -201,13 +201,6 @@
   flex: none;
 }
 
-.teaminfo__title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2h);
-  min-width: 0;
-}
-
 .teaminfo__name {
   font-family: var(--font-display);
   font-size: var(--fs-h1);
@@ -576,12 +569,7 @@
   border: var(--bw-hair) solid var(--border-hairline);
   animation: postponed-in var(--dur-med) var(--ease-out) both;
 }
-.umptier__note-text {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-}
+
 .umptier__note-stats {
   font-family: var(--font-mono);
   font-size: var(--fs-compact);
