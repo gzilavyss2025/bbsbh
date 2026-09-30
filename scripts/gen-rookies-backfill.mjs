@@ -28,6 +28,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
+import { parseArgs } from './lib/args.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { writeRookieShards } from './lib/rookie-shards.mjs'
@@ -35,17 +36,6 @@ import { findCrossingSeason, crossingDateFromGameLog } from './lib/rookie-crossi
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'rookies.json')
-
-// Run an async mapper across items with a small concurrency cap (be polite to
-// statsapi). Mirrors gen-milestones.mjs's helper.
-function parseArgs(argv) {
-  const args = {}
-  for (const a of argv) {
-    const m = /^--([^=]+)=(.*)$/.exec(a)
-    if (m) args[m[1]] = m[2]
-  }
-  return args
-}
 
 // A two-way player (Ohtani) is checked in both groups; everyone else in the
 // one group his primary position implies. Mirrors gen-milestones.mjs's
