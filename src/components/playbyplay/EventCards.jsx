@@ -176,7 +176,7 @@ export function EjectionBar({ text, code = 'EJ' }) {
 // instead of an emoji, plus the one clear person the event is actually about
 // when the feed names one (a runner stealing, the pitcher on a balk/wild
 // pitch, the catcher on a passed ball).
-export function EventCard({ code, runnerId, teamId, segments }) {
+export function EventCard({ code, runnerId, teamId, segments, pitchLabel = null }) {
   return (
     <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
       <span className="pitchernotice__code">{code}</span>
@@ -192,6 +192,7 @@ export function EventCard({ code, runnerId, teamId, segments }) {
           ),
         )}
       </span>
+      {pitchLabel && <span className="pitchernotice__pitchno">{pitchLabel}</span>}
     </div>
   )
 }

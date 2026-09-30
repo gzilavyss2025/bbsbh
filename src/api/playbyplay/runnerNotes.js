@@ -23,6 +23,25 @@
 import { NON_PA_EVENT_TYPES } from './eventTypes.js'
 import { runnerLastName } from './notificationCards.js'
 
+// Which pitch of the plate appearance a steal / caught stealing / pickoff
+// happened on, as the words the card prints — or null when the feed gives no
+// pitch to hang it on. The count is the pitches thrown BEFORE the event in the
+// play's own playEvents: the feed logs a steal as an action directly after the
+// pitch the runner went on (sampled across three days of MLB games,
+// 2026-09-25..27: 49 of 49 steal / caught-stealing / pickoff events sat after
+// at least one pitch, none before the first), and an event with no playEvent of
+// its own broke on the play's last pitch, so its count is the whole play's.
+// That ordering is inferred from the sample, not documented by MLB.
+//
+// A steal or caught stealing IS the pitch ("Pitch 3"). A pickoff is a throw
+// BETWEEN pitches, so it says which pitch it followed.
+export function runnerPitchLabel(eventType, pitchesBefore) {
+  const n = pitchesBefore ?? 0
+  if (/^(stolen_base|caught_stealing)/.test(eventType ?? '')) return n > 0 ? `Pitch ${n}` : null
+  if (/^pickoff/.test(eventType ?? '')) return n > 0 ? `After pitch ${n}` : 'Before pitch 1'
+  return null
+}
+
 const BASE_WORD = { '1B': 'first', '2B': 'second', '3B': 'third', '4B': 'home', score: 'home' }
 
 // The sentence fragment for a runner's own notable movement — never "to
@@ -70,6 +89,7 @@ function errorSegments(feed, r) {
 // its own note rather than being guessed into this one.
 export function uncoveredRunnerNotes(feed, play, batterId, coveredRunnerEvents, midAtBat) {
   const legs = play.runners ?? []
+  const pitchesInPlay = (play.playEvents ?? []).filter((e) => e.isPitch).length
   const notes = []
   for (let i = 0; i < legs.length; i++) {
     const r = legs[i]
@@ -90,7 +110,14 @@ export function uncoveredRunnerNotes(feed, play, batterId, coveredRunnerEvents, 
       const errSeg = errorSegments(feed, next)
       if (errSeg) segments.push(...errSeg)
     }
-    notes.push({ kind: 'event', eventType: et, midAtBat, playerId: rid, segments })
+    notes.push({
+      kind: 'event',
+      eventType: et,
+      midAtBat,
+      playerId: rid,
+      segments,
+      pitchLabel: runnerPitchLabel(et, pitchesInPlay),
+    })
   }
   return notes
 }

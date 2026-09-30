@@ -221,7 +221,7 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   lands there sealed. One step is an at-bat **plus the notes trailing it** — the feed
   nests a stoppage at the head of the PA that follows it, so they announce what followed
   the batter you just charted, not a preface to the next. The exception is a stoppage
-  between pitches (`midAtBat`), which leads its own at-bat's step. A step therefore ends
+  between pitches (`midAtBat`), or any steal/pickoff, which leads its own step and window (ADR-0016's amendment). A step therefore ends
   mid-play, which is why the pinch-runner pencil-in keys on its notice's index rather
   than the play's `visible` gate — read ADR-0016 before touching `nextStepBoundary`.
   Either choice's **tap target is the dead space around it**: `.pagenav` is click-through,

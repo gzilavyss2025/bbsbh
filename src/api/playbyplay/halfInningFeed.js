@@ -28,7 +28,7 @@ import {
   isDelayAdvisory,
 } from './eventTypes.js'
 import { sentenceCaseEventText, runnerLastName, delayNoteFields } from './notificationCards.js'
-import { uncoveredRunnerNotes } from './runnerNotes.js'
+import { uncoveredRunnerNotes, runnerPitchLabel } from './runnerNotes.js'
 import { pitchCardInfo, matchupPitcher } from './pitchInfo.js'
 import { scorebookCode } from './scorebookCode.js'
 // The play's own batted ball, projected into the ballpark drawing's space.
@@ -192,10 +192,12 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // interrupted the at-bat in progress rather than following the previous
     // one, which is what decides the step it belongs to (see nextStepBoundary).
     let pitchInPlay = false
+    let pitchesInPlay = 0 // how many, for a steal's "Pitch N" (runnerNotes.js)
     for (const [evIndex, e] of (play.playEvents ?? []).entries()) {
       if (e.isPitch) {
         anyPitchInHalf = true
         pitchInPlay = true
+        pitchesInPlay += 1
         continue
       }
       const et = e.details?.eventType
@@ -393,6 +395,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           runnerLast: runnerLastName(feed, rid),
           segments: linkifyNames(e.details.description, nameIndex),
           midAtBat: pitchInPlay,
+          pitchLabel: runnerPitchLabel(et, pitchesInPlay),
         }
         baserunningNotes.push(note)
         // For a play that WILL get an at-bat card, push this event's own
@@ -414,9 +417,16 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           entries.push({
             kind: 'event',
             eventType: et,
-            midAtBat: note.midAtBat,
+            // ALWAYS mid-at-bat here, not `note.midAtBat` (= a pitch was already
+            // thrown in this play). A steal announced ahead of the play's first
+            // pitch is still the runner going while THIS batter is at the plate;
+            // only a substitution or a visit announced ahead of it is something
+            // said about the batter before. Reading it as the latter stepped the
+            // steal with the previous at-bat — the wrong page for the scorer.
+            midAtBat: true,
             playerId: rid,
             segments: note.segments,
+            pitchLabel: note.pitchLabel,
           })
         }
       }
@@ -425,7 +435,9 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // A steal/WP/balk that broke on the play's LAST pitch carries no playEvent
     // of its own (runnerNotes.js's header, gamePk 816025) — recover it here.
     if (isRealPA) {
-      entries.push(...uncoveredRunnerNotes(feed, play, batterId, coveredRunnerEvents, pitchInPlay))
+      // Always mid-at-bat, same as the playEvents-sourced notes above: it broke on
+      // this plate appearance's own last pitch.
+      entries.push(...uncoveredRunnerNotes(feed, play, batterId, coveredRunnerEvents, true))
     }
 
     // Whose plate appearance this CARD is — normally `matchup.batter`, but a
@@ -607,6 +619,8 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           runnerId: rid,
           runnerLast: runnerLastName(feed, rid),
           segments: linkifyNames(play.result.description, nameIndex),
+          // No playEvent of its own: it came on the last pitch thrown to him.
+          pitchLabel: runnerPitchLabel(play.result.eventType, pitchesInPlay),
         })
       }
       const { pitchEvents, pitches, pitchDetails } =
@@ -679,6 +693,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
             midAtBat: false,
             playerId: n.runnerId,
             segments: n.segments,
+            pitchLabel: n.pitchLabel ?? null,
           })
         }
       }
@@ -829,6 +844,21 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
 
   // Bank every batter's final (or only) trip.
   for (const batterId of originIndex.keys()) finalizeTrip(batterId)
+
+  // Who came in since the last plate appearance, stamped on the first batter he
+  // faces so focus mode can repeat his card on that batter's page (see
+  // entriesView.js's windowReliefPitcherId). Only a change made BETWEEN plate
+  // appearances counts: a change between pitches already leads its own at-bat's
+  // window, and the half's opening change never reaches `entries` at all.
+  let relievedBy = null
+  for (const e of entries) {
+    if (e.kind === 'event' && e.eventType === 'pitching_substitution') {
+      relievedBy = e.midAtBat ? null : (e.playerId ?? null)
+    } else if (e.kind === 'atbat') {
+      if (relievedBy != null) e.reliefPitcherId = relievedBy
+      relievedBy = null
+    }
+  }
 
   return entries
 }

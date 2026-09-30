@@ -32,6 +32,8 @@ import { computeHalfInningFeed, focusWindows, nextStepBoundary, buildTrailItems 
 // small synthetic arrays exercise it more precisely than a threaded feed.
 const ab = (last, extra = {}) => ({ kind: 'atbat', batter: { last, first: '' }, code: '', ...extra })
 const note = (eventType) => ({ kind: 'event', eventType })
+// A stoppage or steal that landed DURING the at-bat it precedes (halfInningFeed's `midAtBat`).
+const mid = (eventType) => ({ kind: 'event', eventType, midAtBat: true })
 const placedAt = (last, extra = {}) => ({ kind: 'placed', runner: { last, first: '' }, code: '', ...extra })
 
 const shown = (entries, wins) => wins.map(({ start, end }) => entries.slice(start, end).map(label))
@@ -143,6 +145,56 @@ test('a cap holding only leading notices still yields the window that shows them
   // alternative is a tap that answers with a blank stage.
   const entries = [placedAt('Contreras'), note('offensive_substitution')]
   assert.deepEqual(shown(entries, focusWindows(entries, 2)), [['PLACED:Contreras', 'note:offensive_substitution']])
+})
+
+// A steal belongs to the at-bat it was stolen DURING, not to the batter who made the
+// out before it. The reveal tap already says so (nextStepBoundary stops its trailing
+// sweep at a midAtBat note); the window has to agree, or focus mode shows the steal
+// on the previous batter's page — "Next at-bat" then answers with a page that has
+// no steal on it.
+test('a steal during an at-bat leads THAT at-bat’s window, not the one before it', () => {
+  const entries = [ab('Alpha'), mid('stolen_base_2b'), ab('Bravo')]
+  const firstTap = nextStepBoundary(entries, 0)
+  assert.equal(firstTap, 1, 'Alpha alone: the steal belongs to Bravo’s tap')
+  assert.deepEqual(shown(entries, focusWindows(entries, firstTap)), [['AB:Alpha']])
+  assert.deepEqual(shown(entries, focusWindows(entries, nextStepBoundary(entries, firstTap))), [
+    ['AB:Alpha'],
+    ['note:stolen_base_2b', 'AB:Bravo'],
+  ])
+})
+
+test('a pitching change stays with the batter it followed while a steal after it leads the next', () => {
+  const entries = [ab('Alpha'), note('pitching_substitution'), mid('stolen_base_2b'), ab('Bravo')]
+  const firstTap = nextStepBoundary(entries, 0)
+  assert.equal(firstTap, 2, 'the tap reveals Alpha and the change announced after him')
+  assert.deepEqual(shown(entries, focusWindows(entries, nextStepBoundary(entries, firstTap))), [
+    ['AB:Alpha', 'note:pitching_substitution'],
+    ['note:stolen_base_2b', 'AB:Bravo'],
+  ])
+})
+
+test('a mound visit between pitches opens its own at-bat’s window', () => {
+  const entries = [ab('Alpha'), mid('mound_visit'), ab('Bravo')]
+  assert.deepEqual(shown(entries, focusWindows(entries, entries.length)), [
+    ['AB:Alpha'],
+    ['note:mound_visit', 'AB:Bravo'],
+  ])
+})
+
+test('every card is in exactly one window, whichever way its note leans', () => {
+  const entries = [
+    ab('Alpha'),
+    note('pitching_substitution'),
+    mid('stolen_base_2b'),
+    ab('Bravo'),
+    mid('mound_visit'),
+    ab('Charlie'),
+    note('ejection'),
+  ]
+  const wins = focusWindows(entries, entries.length)
+  assert.equal(wins[0].start, 0)
+  for (let i = 1; i < wins.length; i++) assert.equal(wins[i].start, wins[i - 1].end, 'no gap, no overlap')
+  assert.equal(wins.at(-1).end, entries.length)
 })
 
 const CODES = { pitching_substitution: 'P', mound_visit: 'MV', stolen_base_2b: 'SB' }

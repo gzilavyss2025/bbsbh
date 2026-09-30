@@ -84,3 +84,29 @@ every plate appearance that landed arrived already revealed. `stepCommitReady`
 now takes a third condition, "the half is not in progress"; a live half reports
 `atHalfEdge` instead, and the floating bar drops "Rest of half" for it. See
 ADR-0055, which also adds the lineup page's "Catch up to live" button.
+
+**Amended (a steal belongs to the batter at the plate; a reliever's first batter repeats his card).**
+Two corrections, both from scoring along in focus mode, where the page is one at-bat.
+
+- *A baserunning event during a plate appearance leads THAT at-bat.* A steal is not an
+  announcement made once the earlier batter was retired: the runner goes while the next batter
+  is up. The feed still nests it before that batter's first pitch, which read as "trailing the
+  previous at-bat", so "Next at-bat" put a steal on the page of a batter who had nothing to do
+  with it. Such a note is now always `midAtBat`. And `focusWindows` had never honoured that flag:
+  it closed every window at the next at-bat, so even a between-pitches note trailed the PREVIOUS
+  page. A window now closes at the first `midAtBat` note in the run before the next at-bat,
+  which is the split `nextStepBoundary` already made between taps. Counts of windows are still
+  counts of at-bats, so the stability rule above is unchanged.
+- *The change card stays where it is, and is repeated.* A pitching change made between plate
+  appearances still trails the at-bat before it — that is what tells the scorer who comes in.
+  Windowed, the page holding his first batter opens with the same card ("Pitching for…",
+  `windowReliefPitcherId`), because that page otherwise never names him. Not repeated while
+  stacked (change then batter is already adjacent), nor for a change between pitches (it leads
+  its own window), nor for the half-opening change (the persistent "Now pitching" card's).
+  Nothing new is revealed: the change was on screen a tap ago.
+
+The steal, caught-stealing and pickoff cards also say which pitch of the at-bat they came on
+("Pitch 3"; a pickoff, a throw between pitches, says "After pitch 3"). The count is the pitches
+before the event in the play's own `playEvents`, or the whole play's for an event the feed
+folded into `runners[]`. That order is inferred from a three-day MLB sample (2026-09-25..27:
+49 of 49 events after at least one pitch), not documented by MLB.
