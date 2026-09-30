@@ -472,14 +472,17 @@
 }
 
 /* …and the two exemptions that live inside it, re-stated for the same reason:
-   `20-charts.css` writes them as `#root .marginnotes__text` and
-   `#root .winprob__ledger-desc`, which cannot match out here. The ARMS tab's
-   fun-fact line and the EXTRAS tab's swing descriptions are sentences and
-   read as them. */
+   `20-charts.css` writes `#root .marginnotes__text` and `charts/winprob.css`
+   writes `#root .winprob__ledger-desc`, which cannot match out here. The ARMS
+   tab's fun-fact line and the EXTRAS tab's swing descriptions are sentences and
+   read as them. The swing description also repeats the `padding-top` its
+   `#root` rule sets, so it sits the same distance from its row in this rail as
+   in the box score. */
 .focusrail__sheet .marginnotes__text {
   text-transform: none; /* caps-exempt: margin notes' fun-fact line reads as a natural sentence, exactly as it does inside #root */
 }
 .focusrail__sheet .winprob__ledger-desc {
+  padding-top: var(--space-1);
   text-transform: none; /* caps-exempt: a swing's feed-sourced play description reads as a natural sentence, exactly as it does inside #root */
 }
 

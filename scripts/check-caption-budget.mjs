@@ -46,6 +46,12 @@ import { resolve, join } from 'node:path'
 //
 // 127 -> 126: #1131 slice 2 moved the umpire card's two calls (.wcall__pill)
 // onto the Pill tag, which is --fs-label.
+//
+// 126 -> 124: two rules left this role. SectionHead slice H2b (#1113) moved the
+// Ballpark card's rank-group title (.rankgrp__title) onto the label head, which
+// is --fs-label (126 -> 125). The win probability chart then lost its axes, and
+// the rule for the half-inning arrow beside an axis label (.winprob__inningarrow)
+// went with them (125 -> 124).
 const BUDGET = 124
 
 const stylesDir = resolve('src/styles')
