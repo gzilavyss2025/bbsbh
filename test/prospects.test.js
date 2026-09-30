@@ -356,6 +356,30 @@ test('resolveCurrentLevels prints a pitcher\'s (MLB)/(MiLB) split as IP/ERA/SO, 
   assert.deepEqual(resolved.lines, ['(MLB) 20.0 IP, 4.50 ERA, 25 SO', '(MiLB) 30.0 IP, 3.60 ERA, 40 SO'])
 })
 
+// #1276: a pitcher who got nobody out has no ERA. The line said "0.00 ERA".
+test('resolveCurrentLevels prints a dash, not 0.00, for the ERA of a pitcher with no outs', async (t) => {
+  const { restore } = stubFetch({
+    [affiliatesUrl(900009)]: {
+      json: { teams: [{ id: 900090, name: 'Org AAA', sport: { id: 11 }, locationName: 'Somewhere' }] },
+    },
+    [complexAffiliatesUrl(900009)]: { json: { teams: [] } },
+    [rosterUrl(900009, '40Man')]: { json: { roster: [] } },
+    [rosterUrl(900090, '40Man')]: { json: { roster: [rosterEntry(800009)] } },
+    [statsUrl(900009, 'hitting')]: emptyStats(),
+    [statsUrl(900009, 'pitching')]: emptyStats(),
+    [statsUrl(900090, 'hitting')]: emptyStats(),
+    [statsUrl(900090, 'pitching')]: {
+      json: { stats: [{ splits: [pitSplit(800009, 900090, 11, { outs: 0, earnedRuns: 2, strikeOuts: 0 })] }] },
+    },
+    '/data/teams.json': teamsJsonRoute,
+  })
+  t.after(restore)
+
+  const players = [{ playerId: 800009, teamId: 900009, levelRaw: 'AAA', position: 'RHP' }]
+  const [resolved] = await resolveCurrentLevels(players)
+  assert.deepEqual(resolved.lines, ['0.0 IP, — ERA, 0 SO'])
+})
+
 test('resolveCurrentLevels prints one unprefixed line for a hitter with a season only in the minors', async (t) => {
   const { restore } = stubFetch({
     [affiliatesUrl(900008)]: {

@@ -88,6 +88,16 @@ test('statLineFor builds W-L/ERA/K/WHIP for a pitcher', () => {
   ])
 })
 
+// #1276: no outs means no ERA and no WHIP (null from sumPitching). The tile
+// shows the dash, not an empty cell and not "null".
+test('statLineFor shows the dash for ERA and WHIP when the pitcher has no outs', () => {
+  const stats = statLineFor('RHP', {
+    pitching: { wins: 0, losses: 1, era: null, strikeOuts: 0, whip: null },
+  })
+  assert.equal(stats.find((s) => s.k === 'ERA').v, '—')
+  assert.equal(stats.find((s) => s.k === 'WHIP').v, '—')
+})
+
 test('statLineFor builds AVG/HR/RBI/OPS for a hitter, with no leading zero on rate stats', () => {
   const stats = statLineFor('SS', {
     hitting: { avg: 0.2724, homeRuns: 13, rbi: 80, ops: 0.9615 },

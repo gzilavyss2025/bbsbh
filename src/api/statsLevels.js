@@ -23,6 +23,7 @@
 
 import { getJson } from './statsapi.js'
 import { firstLast } from './person.js'
+import { mlbOps, eraOf, whipOf } from './person/shared.js'
 import { teamAbbr } from '../lib/teams.js'
 import { fetchStaticTeams } from './teams-static.js'
 
@@ -188,7 +189,7 @@ export function sumHitting(splits) {
   t.avg = rate(t.hits, t.atBats)
   t.slg = rate(t.totalBases, t.atBats)
   t.obp = rate(t.hits + t.baseOnBalls + t.hitByPitch, obDen)
-  t.ops = t.obp + t.slg
+  t.ops = mlbOps(t.obp, t.slg)
   t.babip = rate(t.hits - t.homeRuns, t.atBats - t.strikeOuts - t.homeRuns + t.sacFlies)
   return t
 }
@@ -210,8 +211,10 @@ export function sumPitching(splits) {
   }
   const ip = t.outs / 3
   t.inningsPitched = outsToIp(t.outs)
-  t.era = rate(t.earnedRuns * 9, ip)
-  t.whip = rate(t.baseOnBalls + t.hits, ip)
+  // null, not 0, at no outs: a pitcher with no out has no ERA, and a 0 would rank
+  // him first. Readers check for it (teamLeaders.js, prospects.js, loadMinors.js).
+  t.era = eraOf(t.earnedRuns, t.outs)
+  t.whip = whipOf(t.baseOnBalls, t.hits, t.outs)
   t.avg = rate(t.hits, t.atBats)
   t.pitchesPerInning = rate(t.numberOfPitches, ip)
   t.strikeoutsPer9Inn = rate(t.strikeOuts * 9, ip)

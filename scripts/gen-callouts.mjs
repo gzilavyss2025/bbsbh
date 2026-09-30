@@ -161,6 +161,7 @@ import {
 // so the field this ranks over is the one rankClause names (see rank.js).
 import { rankAllLevels } from '../src/api/callout-notes/rank.js'
 import { MILESTONE_DEFS, nearestMilestone } from '../src/api/person.js'
+import { mlbOps, eraOf, rate3 } from '../src/api/person/shared.js'
 import { tallyStarterRecord, starterCgShutoutCount } from './lib/pitcher-starts.mjs'
 import { corroboratedFor, loadCorroborationFile } from './lib/game-notes-corroboration.mjs'
 
@@ -1031,7 +1032,10 @@ async function pitcherEnrich(personId, sportId, teamId) {
   const isReliever = reliefRows.length >= RELIEVER_MIN_G && reliefRows.length >= RELIEVER_START_RATIO * starts
   const pitchedYesterday = rows.some((s) => s.date === asOf)
 
-  const eraOf = (er, outs) => (outs > 0 ? Math.round(((er * 27) / outs) * 100) / 100 : null)
+  const roundedEra = (er, outs) => {
+    const e = eraOf(er, outs)
+    return e == null ? null : Math.round(e * 100) / 100
+  }
   let backToBack = null
   if (isReliever) {
     const appearanceDates = new Set(rows.map((s) => s.date))
@@ -1050,7 +1054,7 @@ async function pitcherEnrich(personId, sportId, teamId) {
       }
     }
     if (bG >= B2B_MIN_G && rG >= B2B_MIN_G && bOuts > 0 && rOuts > 0) {
-      backToBack = { g: bG, era: eraOf(bEr, bOuts), restEra: eraOf(rEr, rOuts) }
+      backToBack = { g: bG, era: roundedEra(bEr, bOuts), restEra: roundedEra(rEr, rOuts) }
     }
   }
 
@@ -1158,7 +1162,7 @@ async function ttoSplits(personId, sportId) {
     const obpDen = t.ab + t.bb + t.hbp + t.sf
     const ops =
       t.ab > 0 && obpDen > 0
-        ? ((t.h + t.bb + t.hbp) / obpDen + t.tb / t.ab).toFixed(3).replace(/^0/, '')
+        ? rate3(mlbOps((t.h + t.bb + t.hbp) / obpDen, t.tb / t.ab))
         : null
     // Pitches per PA this trip, one decimal — the ttoPitches note reads it.
     const ppa = Math.round((t.pit / t.pa) * 10) / 10
