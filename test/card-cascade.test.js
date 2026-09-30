@@ -2274,3 +2274,21 @@ test('H3: the held rows keep their names', () => {
     )
   }
 })
+
+test('H3: .cover__sub is deleted, and the seal-scope allowlist no longer names it', () => {
+  const trees = h3Trees()
+  assert.deepEqual(trees.filter(([, text]) => h3Class('cover__sub').test(text)).map(([rel]) => rel), [])
+  assert.doesNotMatch(readFileSync(join(H3_ROOT, 'scripts/check-seal-scope.mjs'), 'utf8'), /cover__sub/)
+})
+
+test('H3: the between-innings eyebrow is retired, and the button is still named by its fact', () => {
+  const trees = h3Trees()
+  assert.deepEqual(trees.filter(([, text]) => h3Class('betweeninnings__eyebrow').test(text)).map(([rel]) => rel), [])
+  const jsx = readFileSync(join(SRC, 'components/gamehud/BetweenInnings.jsx'), 'utf8')
+  const button = jsx.slice(jsx.indexOf('<Card as="button"'), jsx.indexOf('</Card>'))
+  // The name comes from the content: the progress count, the player and the fact.
+  // An aria-label would replace it and hide the fact from a screen reader.
+  assert.match(button, /betweeninnings__progress/)
+  assert.match(button, /\{card\.text\}/)
+  assert.doesNotMatch(button, /aria-label/)
+})

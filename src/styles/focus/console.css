@@ -373,16 +373,8 @@
 .betweeninnings__label {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-bottom: var(--space-2);
-}
-.betweeninnings__eyebrow {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
 }
 .betweeninnings__progress {
   font-family: var(--font-mono);
