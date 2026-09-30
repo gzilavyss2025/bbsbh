@@ -74,7 +74,9 @@ import {
   MATCHUP_SPORT_IDS,
   capRows,
   careerRequests,
+  historicalParentOrgAt,
   isShippedGame,
+  orgIdForShared,
   orgTiesApply,
   reduceCareer,
 } from './lib/former-teammates.mjs'
@@ -242,12 +244,6 @@ async function loadMilbHistory() {
   }
 }
 
-function historicalParentOrgAt(milbHistory, teamId, season) {
-  const club = milbHistory.clubs?.[String(teamId)]
-  const era = (club?.parentHistory ?? []).find((e) => season >= e.years[0] && season <= e.years[1])
-  return era ? { id: era.parentOrgId, name: era.parentOrgName } : null
-}
-
 // A club's CURRENT parent org — itself for an MLB club, its affiliate parent
 // for a MiLB one — via the live team endpoint, cached per teamId since the
 // same club recurs across many matchups/stints in one run.
@@ -396,7 +392,7 @@ const REUNION_BONUS = 40
 // display, plus a `score` (see stintScore/starBonus/REUNION_BONUS above) —
 // computed per RAW (team, season) stint, not the display-collapsed club, since
 // two stints on the same club in different years shouldn't average together.
-function connectionsFor(awayIds, homeIds, careers, names, positions, peakWar, awayId, homeId) {
+function connectionsFor(awayIds, homeIds, careers, names, positions, peakWar, awayId, homeId, orgOf) {
   const currentYear = new Date().getUTCFullYear()
   const rows = []
   for (const aId of awayIds) {
@@ -440,12 +436,11 @@ function connectionsFor(awayIds, homeIds, careers, names, positions, peakWar, aw
         b: { id: hId, name: names.get(hId) ?? '', pos: positions.get(hId) ?? '' },
         score,
         shared: [...shared.entries()]
-          .map(([teamId, v]) => ({
-            teamId,
-            teamName: v.teamName,
-            level: v.level,
-            seasons: [...v.seasons].sort((x, y) => x - y),
-          }))
+          .map(([teamId, v]) => {
+            const seasons = [...v.seasons].sort((x, y) => x - y)
+            const orgId = orgIdForShared(teamId, v.level, seasons, orgOf)
+            return { teamId, teamName: v.teamName, level: v.level, seasons, ...(orgId && { orgId }) }
+          })
           // Highest level (MLB) first, then most recent.
           .sort(
             (x, y) =>
@@ -509,6 +504,20 @@ const peakWar = await loadPeakWar()
 const milbHistory = await loadMilbHistory()
 const orgCache = new Map() // teamId -> {id, name} — shared across every matchup/stint this run
 
+// "teamId|season" -> parent org id, for every minor-league stint in `careers`,
+// so the sync connectionsFor can write `orgId` (the live fallback is cached
+// per teamId). resolveCurrentOrg returns the club's OWN id when its live call
+// fails: that is "nothing found", so it stays out of the map.
+const orgByStint = new Map()
+for (const { pairs: stints, clubs } of careers.values()) {
+  for (const key of stints) {
+    const [teamId, season] = key.split('|').map(Number)
+    const { id } = await resolveStintOrg(teamId, season, clubs.get(teamId).sportId, milbHistory, orgCache)
+    if (id !== teamId) orgByStint.set(key, id)
+  }
+}
+const orgOf = (teamId, season) => orgByStint.get(`${teamId}|${season}`)
+
 const matchups = {}
 let orgTieMatchups = 0
 for (const { awayId, homeId, sportId } of pairs) {
@@ -523,6 +532,7 @@ for (const { awayId, homeId, sportId } of pairs) {
     peakWar,
     awayId,
     homeId,
+    orgOf,
   ))
   // Sorted "low-high" key so either lineup page finds the same entry; teamA/teamB
   // record which club each row's `a`/`b` player is on (or, for an org-ties

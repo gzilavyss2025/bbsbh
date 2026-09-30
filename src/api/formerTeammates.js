@@ -77,7 +77,8 @@ export async function loadFormerTeammates(teamIdA, teamIdB) {
 // a later game in the other park overwrite it, so `a` can be tonight's HOME
 // player (a Division Series flips parks inside that window).
 //   { a: {id, name, pos, teamId}, b: {id, name, pos, teamId}, // the two players
-//     clubs: [{teamId, teamName, level, seasons:[…]}],    // shared club(s)
+//     clubs: [{teamId, teamName, level, seasons:[…], orgId?}], // shared club(s); orgId =
+//       its season-accurate parent org (absent on shards written before #1319)
 //     score: number }
 export function formerTeammatePairs(data, teamIdA, teamIdB) {
   if (!teamIdA || !teamIdB) return []
@@ -113,10 +114,14 @@ export function formerTeammatePairs(data, teamIdA, teamIdB) {
 // Turns formerTeammatePairs() output into the card's ROWS: one row per shared
 // club, the club in the middle and each of tonight's clubs' players on its own
 // side (away left, home right). Two kinds:
-//   - 'former': the club is one of tonight's two clubs, so the tie only says
-//     "he used to play here". The row holds the players who LEFT it, on the
-//     side of the club they are on now; the other side stays empty rather
-//     than a wall of the players he played with there.
+//   - 'former': the club is one of tonight's two clubs, OR a farm club whose
+//     `orgId` is one (`teamId` alone when a shard has no `orgId`). The tie only
+//     says "he used to play here". The row is keyed by the parent club, so a
+//     man's MLB and farm years are one row. It holds the players who LEFT that
+//     org, on the side of the club they are on now; the other side stays empty
+//     rather than a wall of the players he played with there. When every stint
+//     in the row was in the minors it reads "<club> system" at the highest
+//     minor level shared; any MLB stint keeps the plain club name and MLB.
 //   - 'elsewhere': the players met on a THIRD club. A pair that shares a
 //     third club and one of tonight's clubs files under the third club only.
 //     A pair that shares two third clubs files under its best one (clubs[0]).
@@ -125,21 +130,29 @@ export function formerTeammatePairs(data, teamIdA, teamIdB) {
 // a 'former' row whose player starts. Each list is sorted pinned-first, then
 // by the best pair score in the row.
 //
+// `teamNames` ({ [teamId]: name }, optional) names the parent club of a
+// 'former' row; a missing name falls back to the shared club's own.
+//
 // Returns { former: [...], elsewhere: [...] } of:
 //   { kind, club: {teamId, teamName, level}, seasons: [...],
 //     away: [player], home: [player],      // player = {id, name, pos, teamId, starting}
 //     score, tonight }
-export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds) {
+export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds, teamNames) {
   const rows = new Map()
   const starts = (id) => Boolean(startingIds?.has(id))
   const sideOf = (player) =>
     player.teamId === awayTeamId ? 'away' : player.teamId === homeTeamId ? 'home' : null
-  const rowFor = (kind, club) => {
-    const key = `${kind}|${club.teamId}`
+  // Which of tonight's clubs a shared club belongs to: itself, or (a farm club)
+  // its parent org. A shard written before `orgId` falls back to `teamId` alone.
+  const tonightOrg = (c) =>
+    [c.teamId, c.orgId].find((id) => id === awayTeamId || id === homeTeamId)
+  const rowFor = (kind, teamId, stint) => {
+    const key = `${kind}|${teamId}`
     if (!rows.has(key)) {
       rows.set(key, {
         kind,
-        club: { teamId: club.teamId, teamName: club.teamName, level: club.level },
+        teamId,
+        top: stint,
         seasons: new Set(),
         away: new Map(),
         home: new Map(),
@@ -147,7 +160,10 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds) {
         tonight: false,
       })
     }
-    return rows.get(key)
+    const row = rows.get(key)
+    if (LEVEL_RANK(stint.level) > LEVEL_RANK(row.top.level)) row.top = stint
+    for (const s of stint.seasons) row.seasons.add(s)
+    return row
   }
   const place = (row, player, score) => {
     const side = sideOf(player)
@@ -157,11 +173,9 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds) {
   }
 
   for (const p of pairs ?? []) {
-    const isTonight = (c) => c.teamId === awayTeamId || c.teamId === homeTeamId
-    const third = p.clubs.find((c) => !isTonight(c))
+    const third = p.clubs.find((c) => !tonightOrg(c))
     if (third) {
-      const row = rowFor('elsewhere', third)
-      for (const s of third.seasons) row.seasons.add(s)
+      const row = rowFor('elsewhere', third.teamId, third)
       place(row, p.a, p.score)
       place(row, p.b, p.score)
       row.score = Math.max(row.score, p.score)
@@ -169,20 +183,33 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds) {
       continue
     }
     for (const club of p.clubs) {
-      // The player NOT on that club now is the one who left it.
-      const left = p.a.teamId === club.teamId ? p.b : p.a
-      const row = rowFor('former', club)
-      for (const s of club.seasons) row.seasons.add(s)
+      // A 'former' row is keyed by the parent club, so an MLB year and a farm
+      // year in one org are one row. The player NOT on that org now left it.
+      const org = tonightOrg(club)
+      const left = p.a.teamId === org ? p.b : p.a
+      const row = rowFor('former', org, club)
       place(row, left, p.score)
       row.score = Math.max(row.score, p.score)
       if (starts(left.id)) row.tonight = true
     }
   }
 
+  // The row's club: its highest-level stint, named for the parent club (from
+  // `teamNames`, which only ever holds tonight's two clubs) when every stint
+  // was in the minors ("New York Yankees system"). No name given: the shared
+  // club's own name, unsuffixed, since "<farm club> system" would be wrong.
+  const clubOf = (r) => {
+    const org = r.kind === 'former' ? teamNames?.[r.teamId] : undefined
+    const teamName = org ? (r.top.level === 'MLB' ? org : `${org} system`) : r.top.teamName
+    return { teamId: r.teamId, teamName, level: r.top.level }
+  }
   const bySideScore = (x, y) => Number(y.starting) - Number(x.starting) || y.score - x.score
   const finished = [...rows.values()]
     .map((r) => ({
-      ...r,
+      kind: r.kind,
+      club: clubOf(r),
+      score: r.score,
+      tonight: r.tonight,
       seasons: [...r.seasons].sort((x, y) => x - y),
       away: [...r.away.values()].sort(bySideScore),
       home: [...r.home.values()].sort(bySideScore),

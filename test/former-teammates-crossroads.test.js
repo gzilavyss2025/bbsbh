@@ -132,3 +132,97 @@ test('a shard stored the other way round still names the player who left', () =>
   assert.deepEqual(ids(former[0].home), [sanchez.id], 'Sánchez left the Red Sox; Whitlock is still one')
   assert.deepEqual(former[0].away, [])
 })
+
+// A FARM CLUB of tonight's club is a 'former' tie too (#1319): the shard's
+// club entry carries `orgId`, its season-accurate parent org.
+const farm = (teamId, teamName, seasons, level, orgId) => ({ ...club(teamId, teamName, seasons, level), orgId })
+const scranton = (seasons, level = 'AAA') => farm(531, 'Scranton/Wilkes-Barre RailRiders', seasons, level, HOME)
+const worcester = farm(533, 'Worcester Red Sox', [2022], 'AAA', AWAY)
+const names = { [AWAY]: 'Boston Red Sox', [HOME]: 'New York Yankees' }
+
+test('a farm-club tie is a former row under the parent, for the player who left that org', () => {
+  const { former, elsewhere } = teammateCrossroads([pair(whitlock, volpe, [scranton([2019])])], AWAY, HOME, undefined, names)
+  assert.deepEqual(elsewhere, [], 'no elsewhere row for a farm club of tonight’s club')
+  assert.equal(former.length, 1)
+  assert.equal(former[0].club.teamId, HOME, 'keyed by the parent, so the logo is the Yankees’')
+  assert.deepEqual(ids(former[0].away), [whitlock.id], 'Whitlock left the Yankees system')
+  assert.deepEqual(former[0].home, [])
+})
+
+test('the player who left is found by org, from either side', () => {
+  const { former } = teammateCrossroads([pair(story, cole, [worcester])], AWAY, HOME, undefined, names)
+  assert.equal(former[0].club.teamId, AWAY)
+  assert.deepEqual(ids(former[0].home), [cole.id], 'Cole left the Red Sox system')
+  assert.deepEqual(former[0].away, [])
+})
+
+test('an MLB year and a farm year in the same org show the player once, seasons merged', () => {
+  const both = [club(HOME, 'New York Yankees', [2021], 'MLB'), scranton([2019, 2020])]
+  const { former, elsewhere } = teammateCrossroads([pair(whitlock, volpe, both)], AWAY, HOME, undefined, names)
+  assert.deepEqual(elsewhere, [])
+  assert.equal(former.length, 1, 'one row for the parent, not one per club')
+  assert.deepEqual(ids(former[0].away), [whitlock.id])
+  assert.deepEqual(former[0].seasons, [2019, 2020, 2021])
+})
+
+test('a row of only minor-league stints reads “<club> system”, at the highest minor level shared', () => {
+  const minors = [scranton([2018], 'AA'), scranton([2019], 'AAA')]
+  const { former } = teammateCrossroads([pair(whitlock, volpe, minors)], AWAY, HOME, undefined, names)
+  assert.equal(former[0].club.teamName, 'New York Yankees system')
+  assert.equal(former[0].club.level, 'AAA')
+})
+
+test('a row with any MLB stint keeps the plain club name and MLB', () => {
+  const both = [club(HOME, 'New York Yankees', [2021], 'MLB'), scranton([2019])]
+  const { former } = teammateCrossroads([pair(whitlock, volpe, both)], AWAY, HOME, undefined, names)
+  assert.equal(former[0].club.teamName, 'New York Yankees')
+  assert.equal(former[0].club.level, 'MLB')
+})
+
+test('a row whose stints are merged across pairs still reads MLB when one pair had an MLB year', () => {
+  const ties = [
+    pair(whitlock, volpe, [scranton([2019])], 30),
+    pair(rafaela, sanchez, [club(HOME, 'New York Yankees', [2024], 'MLB')], 20),
+  ]
+  const { former } = teammateCrossroads(ties, AWAY, HOME, undefined, names)
+  assert.equal(former.length, 1)
+  assert.equal(former[0].club.level, 'MLB')
+  assert.deepEqual(ids(former[0].away), [whitlock.id, rafaela.id])
+})
+
+test('a missing team name falls back to the shared club’s own name', () => {
+  const { former } = teammateCrossroads([pair(whitlock, volpe, [scranton([2019])])], AWAY, HOME)
+  assert.equal(former[0].club.teamName, 'Scranton/Wilkes-Barre RailRiders')
+  assert.equal(former[0].club.level, 'AAA')
+})
+
+test('a shard with no orgId files a farm club under elsewhere, as before', () => {
+  const bare = { ...scranton([2019]) }
+  delete bare.orgId
+  const { former, elsewhere } = teammateCrossroads([pair(whitlock, volpe, [bare])], AWAY, HOME, undefined, names)
+  assert.deepEqual(former, [])
+  assert.equal(elsewhere.length, 1)
+  assert.equal(elsewhere[0].club.teamId, 531)
+  assert.equal(elsewhere[0].club.teamName, 'Scranton/Wilkes-Barre RailRiders')
+})
+
+test('a farm club of a THIRD org still files under elsewhere', () => {
+  const phillies = farm(1234, 'Lehigh Valley IronPigs', [2019], 'AAA', 143)
+  const { former, elsewhere } = teammateCrossroads([pair(story, mcmahon, [phillies])], AWAY, HOME, undefined, names)
+  assert.deepEqual(former, [])
+  assert.equal(elsewhere[0].club.teamId, 1234)
+  assert.deepEqual(ids(elsewhere[0].away), [story.id])
+  assert.deepEqual(ids(elsewhere[0].home), [mcmahon.id])
+})
+
+test('a farm-club tie whose player who left starts lifts its former row to the top', () => {
+  const ties = [
+    pair(ikf, sanchez, [club(HOME, 'New York Yankees', [2022])], 90),
+    pair(story, cole, [worcester], 5),
+  ]
+  const { former } = teammateCrossroads(ties, AWAY, HOME, new Set([cole.id]), names)
+  assert.equal(former[0].club.teamId, AWAY, 'Cole starts and left the Red Sox system; Kiner-Falefa does not start')
+  assert.equal(former[0].tonight, true)
+  assert.equal(former[0].home[0].starting, true)
+  assert.equal(former[1].tonight, false)
+})
