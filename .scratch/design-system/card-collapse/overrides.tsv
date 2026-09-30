@@ -12,6 +12,7 @@
 # LANDED in slice C5 (#1113): .gamestory, .bs__team, .bs__decisions, .bs__potg, .bs__insights, .bs__statcastCard, .bs__noteCard, .bs__stars, .stars3__card, .bs__tally, .playercard (renamed .playerline), .bs__info, .bs__totalsCard, .bs__board and .bs__fill are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. Every one takes a flush body; each band head stays the first child, and .gamestory keeps its large title (Gary, 2026-09-29). The six sheets on page paper take the Card's paper (Q3). .bs__fill IS its Card (not wrapped): the phone order ranks it as its column's direct child, and the grid keeps its --border-rule ground. .stars3__card strips the frame below 740px, where it is a list row. .playerline and the phone star row opt out of the Card's clip (it cut the name link's focus ring). .gamestory__link stays a control row.
 # LANDED in slice C6a (#1113): .seedcard (renamed .seed), .psseries__result, .psseries__log, .psseries__lboard, .psseries__rostercard, .psseries__upcominglist, .psleaders__teamboard, .allstarrosters__year, .allstarrosters__rows, .allstargame, .allstarlegacy__leadercard and .allstarlegacy__teamcard are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. .psseries__todaycard no longer exists: #1264 replaced that card with the slate GameCard, so its line left too. Every one is flush (each block keeps its own inset) and each head stays the first child. The two <ul>s sit in a flush Card div. .seed is a ledger; only the history page's tap tile is a Card button, and .seed sets overflow: visible so the bracket connectors show. .psseries__lrows and .psseries__rosterlist stay wells, and .allstarlegacy__rankrail stays a navigation strip.
 # LANDED in slice C6b (#1113): .rehabcard, .prospects__filterdeck, .milestonewatch-page__card, .umpage__card, .umpage__list, .mgrpage__card, .tradecard (renamed .trade), .umptend, .moredir__card, .aboutrule, .trrank__tile (a Card link), .payboard, .penpage__grid and .trrank__podiumcard are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. Every one takes body="flush" (each block has its own inset), and each head stays the first child. .umpage__list is a <ul> inside a flush Card div. .aboutrule and .penpage__grid are ledgers. .umptend keeps its house band and its four host overrides (.umpmodal, .teaminfo__topzone, .umptendfold, the umpire page).
+# LANDED in slice C6c (#1113): .offdaycard (renamed .offday__tile, a Card button with the --offday-accent accent), .foulboard__hero, .foulavg, .gamehigh-tiles, .souvenir-row__tiles, .springcount, .pgame__card, .srecord and .note__stories are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. Every one takes body="flush" (each block has its own inset), and each head stays where it was. .gamehigh-tiles and .souvenir-row__tiles are ledgers whose gap-rule grid (.gamehigh-tiles__grid, .souvenir-row__tilegrid) keeps its --border-rule ground inside the Card. .note__stories is an <ol> inside a flush Card div (.note__storybox holds its margin). .sgh-list took NO Card: it already sat in its board's Card, and a rule shed its frame, so it draws no frame now. The .movedup table, which had no frame, sits in a flush sheet Card (.movedup__card). .note__title and .srecord__title keep their rules until Gary picks a look (H2).
 # REMOVED 2026-09-29: .logbook__seasons button and .bookmgmt__modes button went STALE. Their rules left the CSS (the logbook season buttons moved onto the one Button, ea7d0aed1; .bookmgmt__modes was dead code), so their rows left this file.
 .wordmarklab__colorlock	lab	sheet				C8	wordmark lab (/wordmark-lab), a dev page: the colour-lock panel
 .wordmarklab__option	lab	sheet	none	padded	C8	wordmark lab option tile; an <article> with its own hover — a lab specimen
@@ -30,8 +31,7 @@
 .gamecardstack__sheet	bespoke					the paper sheets fanned behind a slate card — part of .gamecard's own art, absolutely positioned
 .gamecard__box	control					the slate card's "Box score" <button>, caps type; a control on .gamecard, which stays bespoke
 .gamecard__logobox	media					slate card club-mark box, with backface-visibility for the flip; part of .gamecard
-.offdaycard	card	sheet	none	padded	C6c	slate off-day tile (GameSelect + offseason WinterRail) — a whole-card <button>: Card as="button"; its --offday-accent hover tint must ride through as the accent (ADR-0050). GameSelect.jsx is a stamp FORBIDDEN_SURFACE: Card imports nothing stamp-related
-.offdaycard__logobox	media					off-day tile's club-mark box; stays a namespace rule on the tile
+.offday__logobox	media					off-day tile's club-mark box; stays a namespace rule on the tile
 .searchbox__input	field					team search <input> (TeamSearchBox + two identity-lab consumers) — a form field, not a card
 .searchbox__results	bespoke					the team-search results listbox: absolutely positioned popover under the input, z-index — a popover, not a card
 .gamefinder__season select	field					a <select> in the game finder
@@ -106,12 +106,7 @@
 .scorebookstory__leaders	card	ledger	label	flush	C7	leaders block on /first-scorebook
 .scorebookstory__nugget	card	ledger	none	padded	C7	a fact nugget on /first-scorebook
 .allstarlegacy__rankrail	not-card					a positioned rank rail with a transition — a navigation strip, not a card
-.foulboard__hero	card	sheet	none	padded	C6c	/fouls hero sheet
-.foulavg	card	sheet	band	padded	C6c	/fouls average card
 .scorebug	bespoke					a broadcast scorebug replica on /fouls — a TV graphic, drawn on inset ground on purpose
-.sgh-list	card	sheet	none	flush	C6c	/fouls souvenir list <ol>
-.gamehigh-tiles	card	ledger	none	flush	C6c	/fouls game-high tiles on the gap-rule grid; grid moves inside Card
-.souvenir-row__tiles	card	ledger	none	flush	C6c	/fouls souvenir tiles on the gap-rule grid
 .seasonseries__nav	control					season-series strip arrow <button>
 .photostrip__nav	control					photo strip arrow <button>
 .photostrip__thumb	media					photo strip thumbnail link
@@ -174,10 +169,6 @@
 .cwb__pane	lab					contract workbench decision pane (admin)
 .cwb__primary, .cwb__danger, .cwb__mini, .cwb__use	control					contract workbench buttons (admin)
 .lookupdeck__panel	lab					contract lookup panel (admin)
-.springcount	card	ledger	label	padded	C6c	offseason spring-training countdown (WinterCalendar.jsx). #1113 comment 1: the offseason page takes whatever card the lab settles on
-.pgame__card	card	sheet	none	padded	C6c	offseason picked-game card (PickedGame.jsx)
-.srecord	card	sheet	label	flush	C6c	offseason season-record card (SeasonRecord.jsx)
-.note__stories	card	sheet	outside:label	flush	C6c	offseason long-at-bats story list (LongAtBats.jsx). Plain → sheet
 .note__when	control					an <a> date link inside a story — a Door or a Pill control
 .boxlines__headline	well					inset headline strip inside the Box Lines sheet
 .boxline__series	not-card					a small inset tag on a box-line row

@@ -31,11 +31,11 @@
   display: grid;
   /* Wide enough that an ordinary 9-10 letter mascot (CARDINALS, ROCKHOUNDS)
      fits on one line — a truly long one (DIAMONDBACKS) still wraps, which
-     .offdaycard__name already handles cleanly (see overflow-wrap below). */
+     .offday__name already handles cleanly (see overflow-wrap below). */
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: var(--space-2);
 }
-.offdaycard {
+.offday__tile {
   position: relative;
   width: 100%;
   display: flex;
@@ -43,15 +43,8 @@
   align-items: center;
   gap: var(--space-1h);
   padding: var(--space-2) var(--space-1h);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
 }
-.offdaycard__logobox {
+.offday__logobox {
   position: relative;
   width: 100%;
   max-width: 64px;
@@ -71,7 +64,7 @@
 }
 /* Pinstripe background, same recipe as .gamecard__logobox's own pinstripe
    variant — --pinstripe-color picks the line color per team. */
-.offdaycard__logobox.offdaycard__logobox--pinstripe {
+.offday__logobox.offday__logobox--pinstripe {
   background: repeating-linear-gradient(
     to right,
     var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
@@ -82,7 +75,7 @@
 }
 /* Same diagonal gloss sheen as .gamecard__logobox::after, so an off-day tile
    reads as the identical glossy badge as a slate card's. */
-.offdaycard__logobox::after {
+.offday__logobox::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -95,7 +88,7 @@
   );
   pointer-events: none;
 }
-.offdaycard__logobox .teamlogo {
+.offday__logobox .teamlogo {
   width: 100% !important;
   height: 100% !important;
   object-fit: contain;
@@ -105,13 +98,13 @@
      read as "the whole tile is this color" against its own new fill. */
   transform: scale(var(--scale, 1.32));
 }
-.offdaycard__logobox .teamlogo--fallback {
+.offday__logobox .teamlogo--fallback {
   border: none;
   background: none;
   transform: none;
   font-size: var(--fs-hero-sm);
 }
-.offdaycard__name {
+.offday__name {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -123,7 +116,7 @@
   max-width: 100%;
   overflow-wrap: anywhere;
 }
-.offdaycard__loc {
+.offday__loc {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
@@ -131,7 +124,7 @@
   text-transform: uppercase;
   color: var(--text-caption);
 }
-.offdaycard__mascot {
+.offday__mascot {
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   text-transform: uppercase;
@@ -139,7 +132,7 @@
   color: var(--text-heading);
 }
 /* Favorite team's off-day card — same per-club accent tint as .gamecard--pinned. */
-.offdaycard--pinned {
+.offday__tile--pinned {
   border-color: color-mix(in srgb, var(--pin-accent, var(--field)) 45%, var(--border-rule));
   background: linear-gradient(
     180deg,
@@ -147,7 +140,7 @@
     var(--surface-card) 70%
   );
 }
-.offdaycard__pin {
+.offday__pin {
   position: absolute;
   top: 4px;
   right: 6px;
@@ -155,10 +148,11 @@
   color: var(--pin-accent, var(--field));
 }
 
-.offdaycard {
+.offday__tile {
   transition:
     transform var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out);
 }
 
@@ -172,7 +166,7 @@
    logo) instead of overwriting it. --offday-accent is set per card in
    OffDaySection.jsx (teamPrimaryColor); an unaffiliated MiLB id has no known
    pair and falls back to --field, so every tile still responds. */
-.offdaycard__logobox {
+.offday__logobox {
   transition: transform var(--dur-fast) var(--ease-out);
 }
 /* THE CLUB'S OWN BAR. A pointer over a tile used to answer with a hairline of
@@ -185,11 +179,11 @@
    that fades out before it reaches the name.
 
    ONE OVERLAY, NOT A BACKGROUND. Both layers live on a pseudo-element rather
-   than on the card's own `background`, because `.offdaycard--pinned` sets that
+   than on the card's own `background`, because `.offday__tile--pinned` sets that
    property to the favourite's gradient — a hover that wrote there would take
    the pin tint away for as long as you pointed at the tile. The overlay is
    clipped by its own border-radius, which is what rounds the band's top
-   corners, and it sits under `.offdaycard__logobox` (position: relative) and
+   corners, and it sits under `.offday__logobox` (position: relative) and
    over nothing else, since the wash is fully transparent by the time it
    reaches the two name lines. That is deliberate: the location and mascot are
    small type in caption grey, and they stay on clean manila rather than on a
@@ -199,7 +193,7 @@
    which resolves a MiLB club through its affiliate-then-parent chain); an
    unaffiliated id has no known pair and falls back to --field, so every tile
    still answers the pointer. */
-.offdaycard::before {
+.offday__tile::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -219,10 +213,10 @@
    box so it never adds height and never nudges the two-line name — a card in
    a grid row must not change size under the pointer while its neighbors hold
    still. */
-.offdaycard__mascot {
+.offday__mascot {
   position: relative;
 }
-.offdaycard__mascot::after {
+.offday__mascot::after {
   content: '';
   position: absolute;
   left: 0;
@@ -241,60 +235,58 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .offdaycard:hover {
+  .offday__tile:hover {
     transform: translateY(-2px);
     border-color: color-mix(in srgb, var(--offday-accent, var(--field)) 55%, var(--border-rule));
     box-shadow: var(--shadow-raised);
   }
-  .offdaycard:hover::before {
+  .offday__tile:hover::before {
     opacity: 1;
   }
-  .offdaycard:hover .offdaycard__logobox {
+  .offday__tile:hover .offday__logobox {
     transform: scale(1.04);
   }
-  .offdaycard:hover .offdaycard__mascot::after {
+  .offday__tile:hover .offday__mascot::after {
     transform: scaleX(1);
   }
 }
 
-/* The keyboard path to the same state, on top of the shared focus ring — a
+/* The keyboard path to the same state, on top of the Card's focus ring — a
    tab through the off-day grid should show the club the same way the pointer
    does, not just a ring around a tile that otherwise sits flat. */
-.offdaycard:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+.offday__tile:focus-visible {
   border-color: color-mix(in srgb, var(--offday-accent, var(--field)) 55%, var(--border-rule));
 }
-.offdaycard:focus-visible::before {
+.offday__tile:focus-visible::before {
   opacity: 1;
 }
-.offdaycard:focus-visible .offdaycard__mascot::after {
+.offday__tile:focus-visible .offday__mascot::after {
   transform: scaleX(1);
 }
 
 /* Press wins over the hover lift: the card goes back down onto the page. */
-.offdaycard:active {
+.offday__tile:active {
   transform: translateY(0) scale(0.985);
   box-shadow: var(--shadow-card);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .offdaycard,
-  .offdaycard::before,
-  .offdaycard__logobox,
-  .offdaycard__mascot::after {
+  .offday__tile,
+  .offday__tile::before,
+  .offday__logobox,
+  .offday__mascot::after {
     transition: none;
   }
-  .offdaycard:hover,
-  .offdaycard:active {
+  .offday__tile:hover,
+  .offday__tile:active {
     transform: none;
   }
-  .offdaycard:hover .offdaycard__logobox {
+  .offday__tile:hover .offday__logobox {
     transform: none;
   }
   /* The colour still arrives, it just does not fade itself in. */
-  .offdaycard:hover .offdaycard__mascot::after,
-  .offdaycard:focus-visible .offdaycard__mascot::after {
+  .offday__tile:hover .offday__mascot::after,
+  .offday__tile:focus-visible .offday__mascot::after {
     transform: scaleX(1);
   }
 }

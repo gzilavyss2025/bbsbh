@@ -5,6 +5,7 @@ import { useRouteLink } from '../../lib/nav.js'
 import { monthDayShort } from '../../lib/dates.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Headshot } from '../player/Headshot.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // THE NOTEBOOK, AT MLB — one note about the season that just finished (issue
@@ -102,69 +103,71 @@ export function LongAtBats({ season }) {
             one opens its game, sealed.
           </p>
 
-          <ol className="note__stories">
-            {shown.map((row) => (
-              <li className="note__story" key={`${row.pk}-${row.batter.id}-${row.pitches}`}>
-                <Headshot
-                  personId={row.batter.id}
-                  name={row.batter.name}
-                  teamId={row.batter.teamId}
-                  className="note__shot note__shot--batter"
-                />
+          <Card as="div" body="flush" className="note__storybox">
+            <ol className="note__stories">
+              {shown.map((row) => (
+                <li className="note__story" key={`${row.pk}-${row.batter.id}-${row.pitches}`}>
+                  <Headshot
+                    personId={row.batter.id}
+                    name={row.batter.name}
+                    teamId={row.batter.teamId}
+                    className="note__shot note__shot--batter"
+                  />
 
-                <div className="note__line">
-                  <div className="note__who">
-                    <div className="note__nameline">
-                      <PlayerLink id={row.batter.id} name={row.batter.name} className="note__name">
-                        {row.batter.name}
-                      </PlayerLink>
-                      <span className="note__club">{clubAbbr(row, row.batter.teamId)}</span>
+                  <div className="note__line">
+                    <div className="note__who">
+                      <div className="note__nameline">
+                        <PlayerLink id={row.batter.id} name={row.batter.name} className="note__name">
+                          {row.batter.name}
+                        </PlayerLink>
+                        <span className="note__club">{clubAbbr(row, row.batter.teamId)}</span>
+                      </div>
+                      {/* The phone's only copy of the pitcher's name — his own
+                          block on the right drops at 600px, and his face alone
+                          would not tell a reader who he is. */}
+                      <div className="note__vs">
+                        vs{' '}
+                        <PlayerLink id={row.pitcher.id} name={row.pitcher.name}>
+                          {row.pitcher.name}
+                        </PlayerLink>
+                      </div>
                     </div>
-                    {/* The phone's only copy of the pitcher's name — his own
-                        block on the right drops at 600px, and his face alone
-                        would not tell a reader who he is. */}
-                    <div className="note__vs">
-                      vs{' '}
-                      <PlayerLink id={row.pitcher.id} name={row.pitcher.name}>
-                        {row.pitcher.name}
-                      </PlayerLink>
+
+                    <span className="note__val">
+                      <span className="note__valn">{row.pitches}</span>
+                      <span className="note__vallabel">Pitches</span>
+                    </span>
+
+                    <div className="note__who note__who--pitcher">
+                      <div className="note__nameline">
+                        <PlayerLink id={row.pitcher.id} name={row.pitcher.name} className="note__name">
+                          {row.pitcher.name}
+                        </PlayerLink>
+                        <span className="note__club">{clubAbbr(row, row.pitcher.teamId)}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <span className="note__val">
-                    <span className="note__valn">{row.pitches}</span>
-                    <span className="note__vallabel">Pitches</span>
-                  </span>
+                  {/* The game, at its first lineup page — the same address the
+                      slate's own cards build, so it arrives sealed. */}
+                  {atBatGamePath(row) && (
+                    <a className="note__when" {...linkProps(atBatGamePath(row))}>
+                      {monthDayShort(row.date)}
+                      <span className="sr-only"> — open this game</span>
+                      <span aria-hidden="true">›</span>
+                    </a>
+                  )}
 
-                  <div className="note__who note__who--pitcher">
-                    <div className="note__nameline">
-                      <PlayerLink id={row.pitcher.id} name={row.pitcher.name} className="note__name">
-                        {row.pitcher.name}
-                      </PlayerLink>
-                      <span className="note__club">{clubAbbr(row, row.pitcher.teamId)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* The game, at its first lineup page — the same address the
-                    slate's own cards build, so it arrives sealed. */}
-                {atBatGamePath(row) && (
-                  <a className="note__when" {...linkProps(atBatGamePath(row))}>
-                    {monthDayShort(row.date)}
-                    <span className="sr-only"> — open this game</span>
-                    <span aria-hidden="true">›</span>
-                  </a>
-                )}
-
-                <Headshot
-                  personId={row.pitcher.id}
-                  name={row.pitcher.name}
-                  teamId={row.pitcher.teamId}
-                  className="note__shot note__shot--pitcher"
-                />
-              </li>
-            ))}
-          </ol>
+                  <Headshot
+                    personId={row.pitcher.id}
+                    name={row.pitcher.name}
+                    teamId={row.pitcher.teamId}
+                    className="note__shot note__shot--pitcher"
+                  />
+                </li>
+              ))}
+            </ol>
+          </Card>
 
           {(hidden > 0 || visible > LEAD_ROWS) && (
             <button

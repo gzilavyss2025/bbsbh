@@ -107,7 +107,7 @@ export const CARDS = [
     note: 'Geometry says merge — the sheet without a shadow. ADR-0035 says stop: stamp surfaces are safe because of WHERE stamp art may render, and check-stamp-surfaces.mjs enforces that list. Read it before touching this row.',
   },
   {
-    cls: 'offdaycard',
+    cls: 'card card--sheet card--interactive offday__tile',
     partial: '06b-offday-cards.css',
     consumers: 1,
     group: 'sheet',
