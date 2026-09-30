@@ -5,6 +5,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { teamFullName } from '../../lib/teams.js'
+import { Card } from '../ui/frame/Card.jsx'
 
 // The stats-to-date block under a traded player's name — one line for an MLB
 // player (role-gated hitting/SP/RP/CL line), or a MiLB player's three lines
@@ -17,17 +18,17 @@ function PlayerStatLines({ stats }) {
   if (!stats) return null
   if (stats.kind === 'mlb') {
     return (
-      <span className="tradecard__playerstats">
-        <span className="tradecard__statline">{stats.line}</span>
+      <span className="trade__playerstats">
+        <span className="trade__statline">{stats.line}</span>
       </span>
     )
   }
   if (!stats.entry && !stats.levelGamesLine && !stats.line) return null
   return (
-    <span className="tradecard__playerstats">
-      {stats.entry && <span className="tradecard__statline">{stats.entry}</span>}
-      {stats.levelGamesLine && <span className="tradecard__statline">{stats.levelGamesLine}</span>}
-      {stats.line && <span className="tradecard__statline">{stats.line}</span>}
+    <span className="trade__playerstats">
+      {stats.entry && <span className="trade__statline">{stats.entry}</span>}
+      {stats.levelGamesLine && <span className="trade__statline">{stats.levelGamesLine}</span>}
+      {stats.line && <span className="trade__statline">{stats.line}</span>}
     </span>
   )
 }
@@ -49,20 +50,20 @@ function PlayerStatLines({ stats }) {
 // it like the roster list's ProspectPill usage.
 function PlayerRow({ player, teamId }) {
   return (
-    <li className="tradecard__player">
-      <PlayerLink id={player.playerId} name={player.name} className="tradecard__playerlink">
+    <li className="trade__player">
+      <PlayerLink id={player.playerId} name={player.name} className="trade__playerlink">
         <Headshot
           personId={player.playerId}
           name={player.name}
           teamId={teamId}
           isMlb={player.isMlb}
-          className="tradecard__shot"
+          className="trade__shot"
         />
-        <span className="tradecard__playerinfo">
+        <span className="trade__playerinfo">
           {player.prospect && <ProspectPill {...player.prospect} />}
-          <span className="tradecard__nameline">
-            <span className="tradecard__playername">{player.name}</span>
-            {player.pos && <span className="tradecard__pos">{player.pos}</span>}
+          <span className="trade__nameline">
+            <span className="trade__playername">{player.name}</span>
+            {player.pos && <span className="trade__pos">{player.pos}</span>}
           </span>
           <PlayerStatLines stats={player.stats} />
         </span>
@@ -98,16 +99,16 @@ const CONSIDERATION_ICONS = {
 function ConsiderationRow({ consideration }) {
   const tone = consideration.type === 'cash' ? 'cash' : null
   return (
-    <li className="tradecard__player">
-      <span className="tradecard__playerlink tradecard__considerationlink">
+    <li className="trade__player">
+      <span className="trade__playerlink trade__considerationlink">
         <span
-          className={`tradecard__considerationicon${tone ? ` tradecard__considerationicon--${tone}` : ''}`}
+          className={`trade__considerationicon${tone ? ` trade__considerationicon--${tone}` : ''}`}
           aria-hidden="true"
         >
           {CONSIDERATION_ICONS[consideration.type] ?? '🤝'}
         </span>
-        <span className="tradecard__playername">{consideration.label}</span>
-        {consideration.detail && <span className="tradecard__pos">{consideration.detail}</span>}
+        <span className="trade__playername">{consideration.label}</span>
+        {consideration.detail && <span className="trade__pos">{consideration.detail}</span>}
       </span>
     </li>
   )
@@ -122,13 +123,13 @@ function TeamSide({ side }) {
   const hasGot = side.receives.length > 0 || side.considerationsIn.length > 0
 
   return (
-    <div className="tradecard__side">
-      <TeamLink id={side.teamId} className="tradecard__teamhead" ariaLabel={name}>
+    <div className="trade__side">
+      <TeamLink id={side.teamId} className="trade__teamhead" ariaLabel={name}>
         <TeamLogo teamId={side.teamId} name={name} size={30} />
-        <span className="tradecard__teamname">{name}</span>
+        <span className="trade__teamname">{name}</span>
       </TeamLink>
       {hasGot && (
-        <ul className="tradecard__players">
+        <ul className="trade__players">
           {side.receives.map((p) => (
             <PlayerRow key={p.playerId} player={p} teamId={side.teamId} />
           ))}
@@ -162,35 +163,35 @@ function badgeLabel(trade) {
 // phone the column pair holds and it's each player ROW that restacks
 // (headshot above the name instead of beside it). Collapsing to one
 // column per club, which this used to do, spends the exchange to buy
-// width the rows don't need. See the @media block by .tradecard__swap in
+// width the rows don't need. See the @media block by .trade__swap in
 // index.css.
 export function TradeCard({ trade }) {
   const badge = badgeLabel(trade)
   const isSwap = trade.teams.length === 2
 
   return (
-    <article className="tradecard">
-      {badge && <p className="tradecard__badge">{badge}</p>}
+    <Card as="article" body="flush" className="trade">
+      {badge && <p className="trade__badge">{badge}</p>}
       {isSwap ? (
-        <div className="tradecard__swap">
+        <div className="trade__swap">
           <TeamSide side={trade.teams[0]} />
-          <span className="tradecard__connector" aria-hidden="true">
+          <span className="trade__connector" aria-hidden="true">
             ⇄
           </span>
           <TeamSide side={trade.teams[1]} />
         </div>
       ) : (
-        <div className="tradecard__stack">
+        <div className="trade__stack">
           {trade.teams.map((side) => (
             <TeamSide key={side.teamId} side={side} />
           ))}
         </div>
       )}
       {trade.cutline.map((line, i) => (
-        <p className="tradecard__cutline" key={i}>
+        <p className="trade__cutline" key={i}>
           {line}
         </p>
       ))}
-    </article>
+    </Card>
   )
 }

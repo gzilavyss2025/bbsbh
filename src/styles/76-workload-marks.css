@@ -485,9 +485,6 @@
    file-size budget, and its guard asks for new code elsewhere first. */
 .penpage__grid {
   padding: var(--space-4);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
 }
 
 .penpage__gridclub {

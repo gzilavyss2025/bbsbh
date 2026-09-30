@@ -27,9 +27,6 @@
 }
 .umpage__card {
   padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 .umpage__cardtitle {
   margin: 0 0 10px;
@@ -186,10 +183,6 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
 .umpage__row {
   display: grid;

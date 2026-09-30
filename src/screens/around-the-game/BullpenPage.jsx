@@ -18,6 +18,7 @@ import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
 import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
 import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
 import { BarCell, StatusMeter } from '../../components/around-the-game/BroadcastBar.jsx'
+import { Card } from '../../components/ui/frame/Card.jsx'
 
 // THE PEN — all thirty bullpens on one board, tonight.
 //
@@ -286,11 +287,11 @@ export function BullpenPage() {
             </div>
 
             {grid && (
-              <div className="penpage__grid">
+              <Card as="div" frame="ledger" body="flush" className="penpage__grid">
                 <h3 className="penpage__gridclub">{clubName(clubs, selected.teamId)}</h3>
                 <StaffGrid rows={grid} />
                 <PenRule row={grid[0]} />
-              </div>
+              </Card>
             )}
           </BroadcastSection>
 

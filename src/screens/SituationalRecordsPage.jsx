@@ -19,6 +19,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
 import { Button } from '../components/ui/control/Button.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 
 // One situational record, every club at one level, in rank order. The bare
 // route is a browse-first index: every split stays visible inside its
@@ -90,7 +91,9 @@ function SituationTile({ result, favoriteTeamId, linkProps, path }) {
   const leaderName = leader?.team.teamName ?? leader?.team.name ?? 'No leader yet'
 
   return (
-    <a
+    <Card
+      as="a"
+      body="flush"
       className="trrank__tile"
       aria-label={`View ${result.metric.k} leaderboard`}
       {...linkProps(path)}
@@ -146,7 +149,7 @@ function SituationTile({ result, favoriteTeamId, linkProps, path }) {
         )}
         <span className="trrank__tilearrow" aria-hidden="true">›</span>
       </span>
-    </a>
+    </Card>
   )
 }
 
@@ -197,7 +200,7 @@ function LeadersSpotlight({ rows, metric }) {
   return (
     <div className="trrank__podium" aria-label="Top three clubs">
       {rows.map((row) => (
-        <div className="trrank__podiumcard" key={row.teamId}>
+        <Card as="div" body="flush" className="trrank__podiumcard" key={row.teamId}>
           <span className="trrank__podiumrank">{row.tied ? 'T' : ''}{row.rank}</span>
           <TeamLogo teamId={row.teamId} name={row.team.name} size={42} />
           <TeamLink id={row.teamId} tab="numbers" className="trrank__podiumteam">
@@ -206,7 +209,7 @@ function LeadersSpotlight({ rows, metric }) {
           <span className="trrank__podiumfigure">
             <MetricFigure row={row} metric={metric} compact />
           </span>
-        </div>
+        </Card>
       ))}
     </div>
   )

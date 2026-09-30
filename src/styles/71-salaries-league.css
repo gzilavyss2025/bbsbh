@@ -14,13 +14,6 @@
    ============================================================ */
 
 /* ------------------------------------------------ highest paid players */
-.payboard {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-}
 .payboard__context {
   margin-left: auto;
   font-family: var(--font-mono);

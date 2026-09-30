@@ -12,6 +12,7 @@ import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Button } from '../components/ui/control/Button.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const TOP_VENUES_LIMIT = 5
@@ -134,7 +135,7 @@ export function UmpirePage({ id }) {
         </div>
         <div className="umpage__sidecol">
           {teams.length > 0 && (
-            <section className="umpage__card">
+            <Card body="flush" className="umpage__card">
               <h2 className="umpage__cardtitle">Most worked teams</h2>
               <ul className="umpage__teamgrid">
                 {teams.map((t) => (
@@ -149,11 +150,11 @@ export function UmpirePage({ id }) {
                   </li>
                 ))}
               </ul>
-            </section>
+            </Card>
           )}
 
           {venues.length > 0 && (
-            <section className="umpage__card">
+            <Card body="flush" className="umpage__card">
               <h2 className="umpage__cardtitle">Most worked ballparks</h2>
               <ul className="umpage__venuelist">
                 {shownVenues.map((v, i) => (
@@ -176,11 +177,11 @@ export function UmpirePage({ id }) {
                   Show all {venues.length}
                 </button>
               )}
-            </section>
+            </Card>
           )}
 
           {hpRecords.length > 0 && (
-            <section className="umpage__card">
+            <Card body="flush" className="umpage__card">
               <h2 className="umpage__cardtitle">Team records, this ump behind the plate</h2>
               <ul className="umpage__venuelist">
                 {shownRecords.map((r, i) => (
@@ -203,7 +204,7 @@ export function UmpirePage({ id }) {
                   Show all {hpRecords.length}
                 </button>
               )}
-            </section>
+            </Card>
           )}
         </div>
       </div>
@@ -228,46 +229,48 @@ export function UmpirePage({ id }) {
           {hpOnly ? 'No games behind the plate this season.' : 'No games recorded this season.'}
         </p>
       ) : (
-        <ul className="umpage__list">
-          {shown.map((g) => {
-            const acc = g.role === 'HP' ? accByGamePk[g.gamePk] : null
-            // Zebra-stripe the plate-umpire games only in the mixed "All games"
-            // view, where they'd otherwise blend in with his base/field
-            // assignments — pointless once "Home plate only" already filters to
-            // nothing else.
-            const isHpRow = g.role === 'HP' && !hpOnly
-            return (
-              <li
-                key={`${g.gamePk}-${g.gameNumber}-${g.role}`}
-                className={`umpage__row ${isHpRow ? 'umpage__row--hp' : ''}`}
-              >
-                <span className="umpage__role">{g.role}</span>
-                <span className="umpage__date">{monthDay(g.date)}</span>
-                <button
-                  type="button"
-                  className="plink umpage__matchup"
-                  onClick={() =>
-                    navigate(gamePath(g.date, g.awayAbbr, g.homeAbbr, 'boxscore', g.gameNumber))
-                  }
+        <Card as="div" body="flush">
+          <ul className="umpage__list">
+            {shown.map((g) => {
+              const acc = g.role === 'HP' ? accByGamePk[g.gamePk] : null
+              // Zebra-stripe the plate-umpire games only in the mixed "All games"
+              // view, where they'd otherwise blend in with his base/field
+              // assignments — pointless once "Home plate only" already filters to
+              // nothing else.
+              const isHpRow = g.role === 'HP' && !hpOnly
+              return (
+                <li
+                  key={`${g.gamePk}-${g.gameNumber}-${g.role}`}
+                  className={`umpage__row ${isHpRow ? 'umpage__row--hp' : ''}`}
                 >
-                  {g.awayAbbr} @ {g.homeAbbr}
-                </button>
-                {g.level === 'AAA' && <span className="umpage__levelchip">AAA</span>}
-                {CTX_SHORT[g.gameType] && (
-                  <span className="umpage__ctxchip" title={CTX_FULL[g.gameType]}>
-                    {CTX_SHORT[g.gameType]}
-                  </span>
-                )}
-                {acc?.called ? (
-                  <span className="umpage__rowacc">
-                    {((acc.correct / acc.called) * 100).toFixed(1)}%
-                    <span className="umpage__rowacclabel"> Accurate strike zone</span>
-                  </span>
-                ) : null}
-              </li>
-            )
-          })}
-        </ul>
+                  <span className="umpage__role">{g.role}</span>
+                  <span className="umpage__date">{monthDay(g.date)}</span>
+                  <button
+                    type="button"
+                    className="plink umpage__matchup"
+                    onClick={() =>
+                      navigate(gamePath(g.date, g.awayAbbr, g.homeAbbr, 'boxscore', g.gameNumber))
+                    }
+                  >
+                    {g.awayAbbr} @ {g.homeAbbr}
+                  </button>
+                  {g.level === 'AAA' && <span className="umpage__levelchip">AAA</span>}
+                  {CTX_SHORT[g.gameType] && (
+                    <span className="umpage__ctxchip" title={CTX_FULL[g.gameType]}>
+                      {CTX_SHORT[g.gameType]}
+                    </span>
+                  )}
+                  {acc?.called ? (
+                    <span className="umpage__rowacc">
+                      {((acc.correct / acc.called) * 100).toFixed(1)}%
+                      <span className="umpage__rowacclabel"> Accurate strike zone</span>
+                    </span>
+                  ) : null}
+                </li>
+              )
+            })}
+          </ul>
+        </Card>
       )}
     </div>
   )

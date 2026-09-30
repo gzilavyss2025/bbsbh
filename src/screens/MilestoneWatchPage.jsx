@@ -13,6 +13,7 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function monthDay(iso) {
@@ -86,7 +87,7 @@ export function MilestoneWatchPage() {
             columnClassName="milestonewatch-page__col"
           >
             {(g) => (
-              <article className="milestonewatch-page__card" key={g.playerId}>
+              <Card as="article" body="flush" className="milestonewatch-page__card" key={g.playerId}>
                 <span className="milestonewatch-page__mug">
                   <Headshot personId={g.playerId} name={g.playerName} teamId={g.teamId} className="milestonewatch-page__shot" />
                   {g.position && <span className="milestonewatch-page__pos">{g.position}</span>}
@@ -110,7 +111,7 @@ export function MilestoneWatchPage() {
                     )
                   })}
                 </div>
-              </article>
+              </Card>
             )}
           </MasonryColumns>
           <p className="hint prospects__caption">
