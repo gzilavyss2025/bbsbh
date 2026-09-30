@@ -9,6 +9,8 @@ import {
   txnDate,
   isRehabTxn,
   isRehabEndingTxn,
+  REHAB_MAX_DAYS,
+  isoDaysBetween,
   mentionsInjuredList,
   injuredListDays,
 } from '../rehab-policy.js'
@@ -38,6 +40,8 @@ import { careerRegisterView, levelSeasonStat, LEVEL_ORDER_DESC } from './careerR
 // rehab-policy.js — shared with gen-rehab.mjs so the app's per-player detector
 // and the league-wide Rehab Assignments generator agree on when a rehab ends.
 //
+// An open stint also ends after REHAB_MAX_DAYS (rehab-policy.js), closing row or not.
+//
 // A rehab stint never carries ACROSS a season boundary, same reasoning as
 // detectInjuredList below: an uncaptured closing transaction from a prior
 // season must not keep painting today's (now-active) player with the amber
@@ -51,6 +55,7 @@ export function detectRehabAssignment(transactions, debutYear, asOf) {
   const latest = rehabs.reduce((a, b) => (txnDate(a) >= txnDate(b) ? a : b))
   const start = txnDate(latest)
   if (asOf && start.slice(0, 4) < asOf.slice(0, 4)) return null
+  if (asOf && isoDaysBetween(start.slice(0, 10), asOf) > REHAB_MAX_DAYS) return null
   const ends = (transactions ?? []).some((t) => txnDate(t) > start && isRehabEndingTxn(t))
   if (ends) return null
   const club = latest.toTeam
@@ -379,8 +384,8 @@ export function ilStintRow(s, levelByTeamId) {
 // no longer lives here: that list can't be built spoiler-cheaply on a page load
 // (each stint has to be verified against the player's game log to drop ones that
 // have really ended), so it's precomputed on a cron into public/data/rehab.json.
-// See scripts/gen-rehab.mjs (which keeps its own copy of the transaction-scan
-// logic above) and src/api/rehab.js.
+// See scripts/gen-rehab.mjs (which imports the transaction tests and the 30-day
+// cap from rehab-policy.js) and src/api/rehab.js.
 
 // ---------------------------------------------------------------------------
 // Promoted other-level tiles — the current season's line at each level the

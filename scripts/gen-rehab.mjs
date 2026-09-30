@@ -17,7 +17,7 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { SPORT_LABEL } from '../src/lib/teams.js'
-import { txnDate, isRehabTxn, isRehabEndingTxn } from '../src/api/rehab-policy.js'
+import { txnDate, isRehabTxn, isRehabEndingTxn, REHAB_MAX_DAYS, isoDaysBetween } from '../src/api/rehab-policy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
@@ -30,13 +30,6 @@ const REHAB_WINDOW_DAYS = 40
 // last appearance for them; at or beyond it the stint is treated as ended.
 // Counting contests (not days) clears a starter's 5–6-day turn with margin.
 const REHAB_STALE_GAMES = 7
-// MLB rule hard-caps a rehab assignment at 30 days. isStillRehabbing's
-// games-since-last-appearance check can't tell "still rehabbing" from "the
-// club's schedule lookup came back empty" (its catch returns []), which would
-// otherwise let a stint with a data gap run forever — this is the backstop:
-// any candidate whose stint started more than 30 days ago is dropped outright,
-// independent of what the game-log check finds.
-const REHAB_MAX_DAYS = 30
 
 const isoToday = () => new Date().toISOString().slice(0, 10)
 const daysAgo = (n) => {
@@ -44,7 +37,6 @@ const daysAgo = (n) => {
   d.setUTCDate(d.getUTCDate() - n)
   return d.toISOString().slice(0, 10)
 }
-const daysSince = (isoDate) => Math.round((Date.now() - new Date(`${isoDate}T00:00:00Z`)) / 86400000)
 const currentSeason = () => new Date().getUTCFullYear()
 
 // --- transaction pass: who is on a rehab assignment right now -----------------
@@ -195,7 +187,7 @@ async function keepConcurrent(items, limit, predicate) {
 const mlbIds = await fetchMlbTeamIds()
 const txns = (await getJson(`/api/v1/transactions?startDate=${daysAgo(REHAB_WINDOW_DAYS)}&endDate=${isoToday()}`)).transactions ?? []
 const candidates = selectActiveRehabAssignments(txns, mlbIds).filter(
-  (r) => daysSince(r.since) <= REHAB_MAX_DAYS,
+  (r) => isoDaysBetween(r.since, isoToday()) <= REHAB_MAX_DAYS,
 )
 const [positions, levels] = await Promise.all([
   fetchPositions(candidates.map((r) => r.playerId)),

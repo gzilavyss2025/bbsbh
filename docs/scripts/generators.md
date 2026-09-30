@@ -106,8 +106,9 @@ don't run these by hand.
   churn on a timestamp. App reads it via `fetchMilbAlumni` in `src/api/team.js`.
 - `gen-rehab.mjs` → `public/data/rehab.json` — the league-wide Rehab Assignments
   list. Starts from a transaction scan, then verifies each candidate against his
-  game log + club's schedule to drop ended stints. Keeps its own self-contained copy
-  of the transaction-scan logic (mirrors `person.js`'s `detectRehabAssignment`).
+  game log + club's schedule to drop ended stints. Imports the transaction tests and
+  the 30-day cap (`REHAB_MAX_DAYS`) from `src/api/rehab-policy.js`, shared with
+  `person.js`'s `detectRehabAssignment`. The 7-club-games stale rule stays here.
 - `gen-umpires.mjs` → `public/data/umpires/{season}/{personId}.json` + `umpires/seasons.json`
   — each MLB + AAA umpire's season game log, ONE FILE PER UMPIRE (readers want one man;
   the league-wide file hit 3.2 MB). A season store (ADR-0086): a run rebuilds only its
