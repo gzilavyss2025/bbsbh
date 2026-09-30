@@ -541,12 +541,10 @@ const SEASON_SERIES_FIELDS =
 // time zone, and (for a completed game) how many innings it actually ran —
 // feeds the lineup page's season-series strip (see SeasonSeriesStrip.jsx,
 // which shows each game at its own ballpark's local time rather than the
-// viewer's, and flags an extra-innings final). Safe to carry scores here:
-// every row this returns is either already Final (a genuinely different,
-// already-decided game) or not yet played (the feed reports no score). The
-// one exception — the game the strip is rendered ON — is the caller's job to
-// blank out via seasonSeriesCells' `currentGamePk`, since this fetcher has no
-// notion of which game is "the current page". The regular season ('R') plus,
+// viewer's, and flags an extra-innings final). The rows carry scores, so the
+// caller seals them: the game the strip is rendered ON, and every game after
+// it, are blanked via seasonSeriesCells' `currentGamePk`, since this fetcher
+// has no notion of which game is "the current page". The regular season ('R') plus,
 // at MLB, the postseason rounds (F/D/L/W) between the same two clubs, each
 // row carrying its gameType so the strip can tag it; MiLB stays 'R' because
 // its postseason codes were never checked. Same dedupe-by-gamePk handling as

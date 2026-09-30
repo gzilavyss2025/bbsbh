@@ -1,6 +1,6 @@
 import { Fragment, useLayoutEffect, useRef, useState } from 'react'
 import { fetchSeasonSeries } from '../../api/schedule.js'
-import { seasonSeriesCells, seasonSeriesRecord } from '../../api/seasonSeries.js'
+import { centeredScrollLeft, seasonSeriesCells, seasonSeriesRecord } from '../../api/seasonSeries.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useNav } from '../../lib/nav.js'
 import { gamePath } from '../../lib/route.js'
@@ -24,17 +24,39 @@ function seriesLeadLabel(record, teamAId, teamBId) {
   return `${leaderName} lead series, ${Math.max(aWins, bWins)}-${Math.min(aWins, bWins)}`
 }
 
+// Scrolls `strip` so `cell` sits at its centre. `behavior: 'instant'` — the
+// strip's CSS is scroll-behavior: smooth, which would animate the landing and
+// lose it to the next re-run.
+function centerOn(strip, cell) {
+  const s = strip.getBoundingClientRect()
+  const c = cell.getBoundingClientRect()
+  strip.scrollTo({
+    left: centeredScrollLeft({
+      scrollLeft: strip.scrollLeft,
+      stripLeft: s.left,
+      stripWidth: s.width,
+      cellLeft: c.left,
+      cellWidth: c.width,
+    }),
+    behavior: 'instant',
+  })
+}
+
 // This season's other meetings between the two clubs, as a scrollable strip
-// of cards — every OTHER game's result is fair to show up front (they already
-// happened, or haven't), the one exception being the game this page is FOR,
-// which seasonSeriesCells blanks the score of regardless of what the feed
-// says (see its own header comment / the root spoiler-rule invariant).
+// of cards — the games BEFORE this page's game show their result up front (they
+// were already decided when it started). The game this page is FOR, and every
+// game AFTER it, have their score blanked by seasonSeriesCells regardless of
+// what the feed says, so a replayed page never tells you how a series ended
+// (see its own header comment / the root spoiler-rule invariant).
 // Renders nothing for a one-off interleague game (no real "series" to show)
 // or before the schedule loads.
 export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, sportId, currentGamePk }) {
   const navigate = useNav()
   const stripRef = useRef(null)
   const currentCellRef = useRef(null)
+  // True once the reader has scrolled the strip themselves; from then on a
+  // resize no longer re-centres it.
+  const movedRef = useRef(false)
   const season = (officialDate ?? '').slice(0, 4)
 
   const { data: games } = useAsync(
@@ -70,12 +92,24 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
     if (!el) return
     const check = () => setCanScroll(el.scrollWidth > el.clientWidth + 1)
     check()
-    const ro = new ResizeObserver(check)
+    // The strip's own width can change after first paint (the wide desktop
+    // spread settles as its neighbours load), which moves the current card off
+    // centre. Re-centre on every such change until the reader scrolls it.
+    const onResize = () => {
+      check()
+      if (!movedRef.current && currentCellRef.current) centerOn(el, currentCellRef.current)
+    }
+    const markMoved = () => {
+      movedRef.current = true
+    }
+    const ro = new ResizeObserver(onResize)
     ro.observe(el)
     window.addEventListener('resize', check)
+    for (const type of ['wheel', 'touchstart', 'pointerdown']) el.addEventListener(type, markMoved, { passive: true })
     return () => {
       ro.disconnect()
       window.removeEventListener('resize', check)
+      for (const type of ['wheel', 'touchstart', 'pointerdown']) el.removeEventListener(type, markMoved)
     }
   }, [cells.length])
 
@@ -94,7 +128,7 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
     const strip = stripRef.current
     const cell = currentCellRef.current
     if (!strip || !cell) return
-    strip.scrollLeft = cell.offsetLeft - strip.clientWidth / 2 + cell.clientWidth / 2
+    centerOn(strip, cell)
   }, [cells.length, canScroll])
 
   if (cells.length < 2) return null
@@ -102,6 +136,7 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
   const scroll = (dir) => {
     const el = stripRef.current
     if (!el) return
+    movedRef.current = true
     el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
   }
 

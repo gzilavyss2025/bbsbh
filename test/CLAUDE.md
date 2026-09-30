@@ -154,7 +154,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | scoreless-dow-callouts.test.js | 21 | src/api/callout-notes.js | Scoreless/day-of-week/pitch-pace callouts |
 | scores-unlocked.test.js | 20 | src/lib/scoresUnlocked.js | Scores Unlocked unlock timer + the 8am-anchored game day a consent records (ADR-0026) |
 | season-score.test.js | 14 | scripts/gen-season-score.mjs, src/api/seasonScore.js, seasonScoreFormula.js | Season score / Marcel baseline / team-specific home-field factor |
-| season-series.test.js | 7 | src/api/seasonSeries.js | Season series cells |
+| season-series.test.js | 21 | src/api/seasonSeries.js | Season series cells and record: winner/loser and extras flags, postseason round tags, and the seal — the viewed game and every game after it (a later date, or a higher doubleheader game number) carry no score, and the record counts only earlier games |
 | skipped-bottom-half.test.js | 9 | src/api/select.js | selectSkippedBottomHalf, selectFinalHalfIndex |
 | skipped-half-cells.test.js | 3 | src/api/boxscore.js, src/api/derive.js | A never-batted half prints X on the box score's line score and gets no by-inning row at all (the `runs` KEY, never its value) |
 | slate-scores.test.js | 14 | src/api/schedule.js, src/lib/slateScoreLine.js | Slate score line normalization, and the slate model carrying no postseason `seriesStatus` or `leagueRecord` (#1227, test 7) |

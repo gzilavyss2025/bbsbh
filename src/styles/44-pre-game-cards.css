@@ -146,6 +146,9 @@
 .seasonseries__cell--current {
   background: color-mix(in srgb, var(--navy) 7%, var(--surface-card));
   border-color: var(--navy);
+  /* The strip lands with this card centred (SeasonSeriesStrip.jsx); the
+     other cards snap to their start, which would pull that landing sideways. */
+  scroll-snap-align: center;
 }
 .seasonseries__cell--current:hover {
   background: color-mix(in srgb, var(--navy) 13%, var(--surface-card));
