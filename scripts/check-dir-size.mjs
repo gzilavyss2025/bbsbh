@@ -331,7 +331,7 @@ const BUDGETS = {
   // cannot nest without breaking the ordering the exception above protects.
   //
   // 95 -> 96 for `70-postseason-race.css`: PostseasonRacePage.jsx's own
-  // layout, reusing .seedcard/.seedrow (34-postseason.css) and
+  // layout, reusing .seed/.seedrow (34-postseason.css) and
   // .standings/.lgstand (30-standings.css) rather than redeclaring them. It
   // SHARES the 70 prefix with `70-contracts-grid.css` above — the two
   // branches picked the next free integer independently off the same base

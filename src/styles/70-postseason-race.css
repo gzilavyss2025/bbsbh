@@ -37,7 +37,7 @@
 
 /* A Division Series card: a real, clickable SeedRow (the bye seed) over a
    PendingRow (the fixed-but-unplayed Wild Card matchup that feeds this
-   slot). `.psrace__ds` only overrides the pointer — `.seedcard`'s own
+   slot). `.psrace__ds` only overrides the pointer — `.seed`'s own
    column layout and border already fit this card unchanged. */
 .psrace__ds {
   cursor: default;
@@ -124,7 +124,7 @@
   align-items: center;
 }
 .psrace__round--cs .psbracket__lanes { grid-template-rows: 1fr; }
-.psrace__miniboard .seedcard { padding: 0; gap: 0; border-radius: 0; cursor: default; }
+.psrace__miniboard .seed { padding: 0; gap: 0; border-radius: 0; cursor: default; }
 .psrace__miniboard .seedrow { min-height: 44px; padding: var(--space-2); color: var(--text-body); }
 .psrace__miniboard .seedrow + .seedrow { border-top: var(--bw-hair) solid var(--border-rule); }
 .psrace__miniboard .seedrow__name { font-weight: var(--w-semibold); }
@@ -132,9 +132,9 @@
 .psrace__miniboard .seedrow:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
 .psrace__bye { font-family: var(--font-display); font-size: var(--fs-label); color: var(--text-caption); }
 /* The two Division Series paths join midway before the Championship. */
-.psrace__round--wc .seedcard::after,
-.psrace__round--ds .seedcard::after,
-.psrace__round--cs .seedcard::before {
+.psrace__round--wc .seed::after,
+.psrace__round--ds .seed::after,
+.psrace__round--cs .seed::before {
   content: '';
   position: absolute;
   top: 50%;
@@ -143,7 +143,7 @@
   border-top: var(--bw-hair) solid var(--text-caption);
   pointer-events: none;
 }
-.psrace__round--ds .seedcard::after { width: calc(var(--bracket-gap) / 2); }
+.psrace__round--ds .seed::after { width: calc(var(--bracket-gap) / 2); }
 .psrace__round--ds .psbracket__lanes::after {
   content: '';
   position: absolute;
@@ -152,8 +152,8 @@
   height: 50%;
   border-left: var(--bw-hair) solid var(--text-caption);
 }
-.psrace__round--cs .seedcard::before { left: auto; right: 100%; width: calc(var(--bracket-gap) / 2); }
-.psrace__miniboard .seedcard--tbd { opacity: 1; border-style: solid; }
+.psrace__round--cs .seed::before { left: auto; right: 100%; width: calc(var(--bracket-gap) / 2); }
+.psrace__miniboard .seed--tbd { opacity: 1; border-style: solid; }
 .psrace__miniboard .seedrow--pending,
 .psrace__miniboard .seedrow--tbd { color: var(--text-caption); background: var(--bg-canvas); font-style: normal; }
 .psrace__destination { margin: 0 0 var(--space-4); text-align: right; }

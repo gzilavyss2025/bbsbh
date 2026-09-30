@@ -4,6 +4,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { BallparkModal } from '../ballpark/BallparkModal.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { leagueLogoUrl } from '../../lib/teams.js'
 import { ballparkFor } from '../../lib/ballpark/ballparkData.js'
 
@@ -38,7 +39,7 @@ export function AllStarGameResult({ score, mvp, venue, dateLabel, onBoxScore }) 
   const hasBallpark = venue && ballparkFor(venue.name)
 
   return (
-    <div className="allstargame">
+    <Card as="div" body="flush" className="allstargame">
       <div className="allstargame__main">
         <div className="allstargame__scorecol">
           {dateLabel && <span className="allstargame__date">{dateLabel}</span>}
@@ -124,6 +125,6 @@ export function AllStarGameResult({ score, mvp, venue, dateLabel, onBoxScore }) 
       {ballparkOpen && (
         <BallparkModal venue={venue.name} onClose={() => setBallparkOpen(false)} />
       )}
-    </div>
+    </Card>
   )
 }

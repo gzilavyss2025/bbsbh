@@ -15,11 +15,6 @@
    no structure to hold the space it claimed. */
 .psseries__result {
   margin: var(--space-3) 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-lg);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
 }
 .psseries__banner {
   display: flex;
@@ -168,13 +163,6 @@
    ledger rather than a card sitting ON it. */
 .psseries__games {
   margin: 0 0 var(--space-3);
-}
-.psseries__log {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-lg);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
 }
 .psseries__logbody {
   position: relative;
@@ -458,12 +446,8 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
-/* Same elevated-card shell as .psseries__rostercard — one card family. */
+/* Same Card shell as .psseries__rostercard — one card family. */
 .psseries__lboard {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   padding: var(--space-3);
 }
 /* Board titles share the label head (SectionHead) with "Game by game" above
@@ -605,10 +589,6 @@
   }
 }
 .psseries__rostercard {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   padding: var(--space-3);
 }
 .psseries__rosterhead {
@@ -711,11 +691,6 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-lg);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
 }
 .psseries__upcomingrow {
   display: flex;

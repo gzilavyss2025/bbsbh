@@ -20,6 +20,7 @@ import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { GameResultFace } from '../../components/game/GameResultFace.jsx'
 import { GameCard } from '../../components/game/GameCard.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
+import { Card } from '../../components/ui/frame/Card.jsx'
 import { seriesGameBuckets, upcomingGameLabel } from './selectors.js'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../../components/postseason/SeriesParts.jsx'
 import { monthDay } from '../../components/postseason/monthDay.js'
@@ -177,7 +178,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
           may render before there IS one. Each club's win trace is the same
           inked-cell ledger idiom (.psseries__cell--won); winner/loser tinting
           applies only once the series actually is decided. */}
-      <section className="psseries__result">
+      <Card body="flush" className="psseries__result">
         <div className="psseries__banner">
           <h2 className="psseries__headline">{results.length === 0 ? bestOfLine(series) : recordLine(series)}</h2>
           <SeriesMark
@@ -216,7 +217,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             )
           })}
         </div>
-      </section>
+      </Card>
 
       {/* Today's game — the home slate's own card, never scored. It is handed
           no score line, and no feed or box-score fetch ever runs for this
@@ -245,7 +246,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
       {results.length > 0 && (
         <section className="psseries__games">
           <SectionHead look="label">Game by game</SectionHead>
-          <div className="psseries__log">
+          <Card as="div" body="flush" className="psseries__log">
             <div className="psseries__logbody">
               {results.map((g, i) => {
                 const card = cardsByPk?.[g.gamePk]
@@ -289,21 +290,23 @@ export function LiveSeriesPage({ seriesId, asOf }) {
                 )
               })}
             </div>
-          </div>
+          </Card>
         </section>
       )}
 
       {upcoming.length > 0 && (
         <section className="psseries__upcoming">
           <SectionHead look="label">Still to play</SectionHead>
-          <ul className="psseries__upcominglist">
-            {upcoming.map((g) => (
-              <li key={g.gameNumber} className="psseries__upcomingrow">
-                <span className="psseries__upcominggame">Game {g.gameNumber}</span>
-                <span className="psseries__upcomingdate">{upcomingGameLabel(g, monthDay)}</span>
-              </li>
-            ))}
-          </ul>
+          <Card as="div" body="flush">
+            <ul className="psseries__upcominglist">
+              {upcoming.map((g) => (
+                <li key={g.gameNumber} className="psseries__upcomingrow">
+                  <span className="psseries__upcominggame">Game {g.gameNumber}</span>
+                  <span className="psseries__upcomingdate">{upcomingGameLabel(g, monthDay)}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
         </section>
       )}
 

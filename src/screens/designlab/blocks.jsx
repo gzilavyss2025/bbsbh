@@ -17,7 +17,7 @@ import { Pill } from '../../components/ui/control/Pill.jsx'
 // does not own, for the same reason.
 //
 // THE FIRST RUN PROVED IT BY MISSING ONE. 34-postseason.css was left off this
-// list, so .seedcard and .pswscard drew nothing and two inventory verdicts were
+// list, so .seed and .pswscard drew nothing and two inventory verdicts were
 // signed off against blank boxes (#1127). When a block joins the catalog, check
 // that the partial owning its BASE rule is imported here — the count above is
 // the thing to keep true.

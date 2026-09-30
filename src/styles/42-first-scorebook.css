@@ -569,10 +569,6 @@
   align-items: flex-start;
   gap: var(--space-3);
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--inset-cell);
 }
 .allstarlegacy__leadermug {
   flex: none;
@@ -637,10 +633,6 @@
 }
 .allstarlegacy__teamcard {
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--inset-cell);
 }
 .allstarlegacy__teamhead {
   display: flex;

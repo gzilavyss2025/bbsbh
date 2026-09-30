@@ -102,11 +102,13 @@ function RecipientRow({ r, effectiveTeamId, filtering }) {
 function RosterCard({ recipients, effectiveTeamId, filtering }) {
   if (!recipients.length) return null
   return (
-    <ul className="allstarrosters__rows">
-      {recipients.map((r) => (
-        <RecipientRow key={r.playerId} r={r} effectiveTeamId={effectiveTeamId} filtering={filtering} />
-      ))}
-    </ul>
+    <Card as="div" body="flush">
+      <ul className="allstarrosters__rows">
+        {recipients.map((r) => (
+          <RecipientRow key={r.playerId} r={r} effectiveTeamId={effectiveTeamId} filtering={filtering} />
+        ))}
+      </ul>
+    </Card>
   )
 }
 
@@ -165,7 +167,7 @@ function RosterLeagues({ roster, effectiveTeamId, filtering }) {
 // card still renders even in the rare case `card` hasn't resolved yet.
 function RosterYear({ year, roster, score, mvp, venue, card, navigate, effectiveTeamId, filtering }) {
   return (
-    <section className="allstarrosters__year">
+    <Card body="flush" className="allstarrosters__year">
       <span className="allstarrosters__yearnum">{year}</span>
       <div className="allstarrosters__body">
         {score && (
@@ -194,7 +196,7 @@ function RosterYear({ year, roster, score, mvp, venue, card, navigate, effective
         )}
         <RosterLeagues roster={roster} effectiveTeamId={effectiveTeamId} filtering={filtering} />
       </div>
-    </section>
+    </Card>
   )
 }
 

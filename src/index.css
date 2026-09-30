@@ -211,7 +211,7 @@
      36-postseason-leaders    screens/PostseasonLeadersPage.jsx
      70-postseason-race       screens/PostseasonRacePage.jsx (which also
                               imports 34-postseason.css and 30-standings.css
-                              directly, reusing their seedcard/standings rules)
+                              directly, reusing their seed/standings rules)
      37-all-star-rosters      screens/AllStarRostersPage.jsx,
                               components/allstar/AllStarGameResult.jsx
      42-first-scorebook       screens/FirstScorebookPage.jsx,
