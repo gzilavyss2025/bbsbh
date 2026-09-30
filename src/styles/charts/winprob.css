@@ -137,8 +137,9 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1) var(--space-2);
-  min-height: 24px;
-  margin-bottom: var(--space-1h);
+  /* Just taller than the change pill, so the line keeps one height when
+     the pill comes and goes. */
+  min-height: 21px;
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   font-variant-numeric: tabular-nums;
@@ -168,7 +169,7 @@
 /* Biggest revealed swings, no heading: the numbered plot markers tie the rows
    to the chart. A row selects its play; its Watch button opens the play's
    film (winprob/useSwingClip.js). */
-.winprob__ledger { margin-top: var(--space-2); }
+.winprob__ledger { margin-top: 0; }
 .winprob__ledger-list {
   margin: 0;
   padding: 0;
@@ -196,6 +197,9 @@
 .winprob__ledger-row:first-child {
   border-top: 0;
 }
+/* The first row sits close under the plot. */
+.winprob__ledger-row:first-child .winprob__ledger-pick { padding-top: 0; }
+.winprob__ledger-row:first-child .winprob__ledger-watch { top: 0; }
 
 .winprob__ledger-row:hover,
 .winprob__ledger-row.is-active {

@@ -56,8 +56,8 @@ const H = 220
 // the line runs flat out to each edge.
 const PAD_L = 8
 const PAD_R = 8
-const PAD_T = 10
-const PAD_B = 10
+const PAD_T = 5
+const PAD_B = 5
 const PLOT_L = PAD_L
 const PLOT_R = W - PAD_R
 const PLOT_T = PAD_T

@@ -23,8 +23,8 @@ import { DEFAULT_PINSTRIPE_COLOR } from './wpaDefaults.js'
 // would actually look like in the app.
 const W = 328
 const H = 220
-const PAD_T = 10
-const PAD_B = 10
+const PAD_T = 5
+const PAD_B = 5
 // The bands run the full width; only the plotted plays sit inside the
 // chart's side insets (WinProbChart.jsx).
 export const WPA_PLOT_SIZE = { width: W, height: H - PAD_B - PAD_T }
