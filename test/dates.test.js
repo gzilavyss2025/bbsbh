@@ -5,7 +5,7 @@
 // to get off-by-one on.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { isWithinDays, timeOfDay, isFriday, isRealDate, asOfBounds, clampAsOfDate } from '../src/lib/dates.js'
+import { isWithinDays, monthDayName, timeOfDay, isFriday, isRealDate, asOfBounds, clampAsOfDate } from '../src/lib/dates.js'
 
 const TODAY = new Date(2026, 6, 22) // July 22, 2026
 
@@ -108,4 +108,22 @@ test('clampAsOfDate returns null for a garbled or missing value', () => {
   assert.equal(clampAsOfDate('', TODAY), null)
   assert.equal(clampAsOfDate(null, TODAY), null)
   assert.equal(clampAsOfDate('not-a-date', TODAY), null)
+})
+
+test('monthDayName spells the month and drops leading zeros', () => {
+  assert.equal(monthDayName('2026-07-05'), 'Jul 5')
+  assert.equal(monthDayName('2026-01-31'), 'Jan 31')
+  assert.equal(monthDayName('2026-12-01'), 'Dec 1')
+  assert.equal(monthDayName('2024-02-29'), 'Feb 29')
+})
+
+test('monthDayName reads a date that carries a time and zone suffix', () => {
+  assert.equal(monthDayName('2026-09-30T18:12:22Z'), 'Sep 30')
+  assert.equal(monthDayName('2026-04-09T00:00:00-05:00'), 'Apr 9')
+})
+
+test('monthDayName answers an empty string for a missing or garbled date', () => {
+  for (const bad of [undefined, null, '', 'soon', '2026-07']) {
+    assert.equal(monthDayName(bad), '', `expected '' for ${JSON.stringify(bad)}`)
+  }
 })

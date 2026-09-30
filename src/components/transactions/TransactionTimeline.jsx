@@ -2,13 +2,8 @@ import { Fragment, useState } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { monthDayName } from '../../lib/dates.js'
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-function monthDay(iso) {
-  const [, m, d] = (iso || '').split('-')
-  return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
-}
 
 // Wrap each other-player's name in a trade description with a link to his page.
 // `links` are the {id, fullName} of the OTHER players in the swap (resolved by
@@ -90,7 +85,7 @@ export function TransactionTimeline({ rows }) {
                 <li className="txntl__yr" aria-hidden="true"><span>{r.year}</span></li>
               )}
               <li className={`txntl__item txntl__item--${r.tone}`}>
-                <time className="txntl__date">{monthDay(r.date)}</time>
+                <time className="txntl__date">{monthDayName(r.date)}</time>
                 <div className="txntl__main">
                   <div className="txntl__head">
                     <span className={`txntl__chip txntl__chip--${r.tone}`}>{r.label}</span>

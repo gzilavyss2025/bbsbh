@@ -24,7 +24,7 @@ import { GameResultFace } from '../components/game/GameResultFace.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../components/postseason/SeriesParts.jsx'
-import { monthDay } from '../components/postseason/monthDay.js'
+import { monthDayName } from '../lib/dates.js'
 import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
 import { seriesMarkForHistory } from '../lib/postseason/seriesMarks.js'
 
@@ -233,7 +233,7 @@ export function PostseasonSeriesPage({ seriesId }) {
                     {g.gameNumber}
                   </span>
                   <div className="psseries__entryhead">
-                    <span className="psseries__gamedate">{monthDay(g.date)}</span>
+                    <span className="psseries__gamedate">{monthDayName(g.date)}</span>
                     <span
                       className={`psseries__gamestatus${isClincher ? ' psseries__gamestatus--final' : ''}`}
                     >

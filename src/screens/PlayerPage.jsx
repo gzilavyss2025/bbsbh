@@ -25,7 +25,8 @@ import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './player/PlayerHubShell.jsx'
 import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCard.jsx'
 import { gameLogDoorLabel } from './player/overviewPreview.js'
-import { DASH, Fact, StatGrid, debutLabel, isoToday, monthDay, roleWord } from './player/parts.jsx'
+import { DASH, Fact, StatGrid, debutLabel, isoToday, roleWord } from './player/parts.jsx'
+import { monthDayName } from '../lib/dates.js'
 import { Pill } from '../components/ui/control/Pill.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
@@ -98,10 +99,10 @@ export function PlayerPage({ id, asOf, sportId }) {
   const status = core.data.rosterStatus
   const retired = status?.state === 'retired'
   const club = status ? null : bio.team
-  const enteringLabel = asOf ? `entering ${monthDay(asOf)}` : 'season to date'
+  const enteringLabel = asOf ? `entering ${monthDayName(asOf)}` : 'season to date'
   // The game-log preview's own note — the Stats tab's own wording
   // ("entering today"/"entering Jul 5"), not the tiles' "season to date".
-  const gameLogNote = asOf ? `entering ${monthDay(asOf)}` : 'entering today'
+  const gameLogNote = asOf ? `entering ${monthDayName(asOf)}` : 'entering today'
   // Every door goes through playerTabPath -> linkQuery, so a dated link's
   // `?d=` (the spoiler cutoff) and `?s=` survive the jump — the same rule
   // the team hub's own doors follow (TeamPage.jsx).
