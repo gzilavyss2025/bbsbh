@@ -47,7 +47,7 @@ export function Band({ id, title, lede, children }) {
   return (
     <section className="dlab__band" id={id}>
       <h2 className="dlab__bandtitle">{title}</h2>
-      {lede && <p className="dlab__lede">{lede}</p>}
+      {lede && <p className="dlab__note">{lede}</p>}
       {children}
     </section>
   )
@@ -58,7 +58,7 @@ export function Group({ title, lede, children, grid = true }) {
   return (
     <section className="dlab__group">
       <h3 className="dlab__grouptitle">{title}</h3>
-      {lede && <p className="dlab__lede dlab__lede--tight">{lede}</p>}
+      {lede && <p className="dlab__note dlab__note--tight">{lede}</p>}
       <div className={grid ? 'dlab__grid' : 'dlab__rows'}>{children}</div>
     </section>
   )

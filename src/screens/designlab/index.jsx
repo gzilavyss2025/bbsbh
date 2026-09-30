@@ -69,7 +69,7 @@ export function DesignLab() {
 
       <section className="dlab__verdictbox">
         <h2 className="dlab__bandtitle">What the catalog shows</h2>
-        <p className="dlab__lede">
+        <p className="dlab__note">
           {CARDS.length} card blocks and {PILLS.length} pill blocks, against 13 shared components.
           But there are not {CARDS.length} cards: <strong>{sheets} of them draw the same box</strong>,
           token for token, and <strong>{namespaces} draw no box at all</strong>. On the pill side,{' '}
@@ -77,7 +77,7 @@ export function DesignLab() {
           already ships the pattern that fixes this — a canonical card with a box-less class beside
           it — under a name nobody generalised.
         </p>
-        <p className="dlab__lede">
+        <p className="dlab__note">
           The verdicts on each entry are proposals for issue #1113, and they are Gary&rsquo;s to sign
           off. The reasoning, the consumer counts and the four open questions are in{' '}
           <code>.scratch/design-system/inventory.md</code>. The naming grammar every rename below

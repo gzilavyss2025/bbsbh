@@ -2209,6 +2209,8 @@ const H3_RENAMED = [
   ['xl-entry__lede', 'xl-entry__note'],
   // batch B, step one: the entry's own note gives up the name the page-level lede takes
   ['dlab__note', 'dlabentry__note'],
+  // batch B, step two: the page-level lede takes the freed name
+  ['dlab__lede', 'dlab__note'],
 ]
 
 // Text files of the four trees, this file excluded (it names the old classes).

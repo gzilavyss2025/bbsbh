@@ -141,7 +141,7 @@ function Recipe({ title, lines, lede }) {
   return (
     <div className="dlab__recipe">
       <h4 className="dlab__recipetitle">{title}</h4>
-      {lede && <p className="dlab__lede dlab__lede--tight">{lede}</p>}
+      {lede && <p className="dlab__note dlab__note--tight">{lede}</p>}
       <ul className="dlab__recipelist">
         {lines.map((l) => (
           <li key={l}>{l}</li>
