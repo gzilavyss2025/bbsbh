@@ -55,6 +55,9 @@ test('WIN_PROB_FIELDS covers every field selectWinProbPath reads', () => {
     'atBatIndex', // the at-bat-stepping clamp (stepHalfIndex/throughAtBatIndex)
     'result', // e.result.description
     'description',
+    'playEvents', // e.playEvents[].{isPitch,playId} — a swing row's clip
+    'isPitch',
+    'playId',
   ]
   const present = new Set(WIN_PROB_FIELDS)
   for (const field of required) {
@@ -236,9 +239,9 @@ test('winProbSplit reads the last plotted point and inherits the gate', () => {
 // --------------------------------------------------------------------------
 // selectWinProbBigPlays — the "how we got here" ledger.
 // --------------------------------------------------------------------------
-test('selectWinProbBigPlays returns the biggest swings, newest first', () => {
-  // Per-play deltas from even: +2, +6, -12, +24. With minSwing 8 only the last
-  // two qualify; newest-first ⇒ the +24 (idx 3) then the -12 (idx 2).
+test('selectWinProbBigPlays returns only the swings past the threshold', () => {
+  // Per-play deltas from even: +2, +3, +3, -12, +24. With minSwing 8 only the
+  // last two qualify, biggest first.
   const plays = selectWinProbBigPlays(buildWinProb(), { minSwing: 8 })
   assert.deepEqual(
     plays.map((p) => [p.inning, p.half, p.delta, p.desc]),
@@ -247,6 +250,26 @@ test('selectWinProbBigPlays returns the biggest swings, newest first', () => {
       [2, 'top', -12, 'Two-run double'],
     ],
   )
+})
+
+test('selectWinProbBigPlays carries the terminal pitch playId for the clip', () => {
+  const winProb = buildWinProb()
+  winProb[4].playEvents = [
+    { isPitch: true, playId: 'first-pitch' },
+    { isPitch: true, playId: 'homer-pitch' },
+    { isPitch: false, playId: 'mound-visit' },
+  ]
+  const [homer, double] = selectWinProbBigPlays(winProb, { minSwing: 8 })
+  assert.equal(homer.playId, 'homer-pitch')
+  // A play with no pitch on record carries no clip key.
+  assert.equal(double.playId, null)
+})
+
+test('selectWinProbBigPlays ranks biggest first, not newest first', () => {
+  // Deltas +2, +3, +3, -12, +24: the -12 (idx 3) is older and smaller than the
+  // +24 (idx 4), and the +3s tie — the earlier play ranks first on a tie.
+  const plays = selectWinProbBigPlays(buildWinProb(), { minSwing: 3 })
+  assert.deepEqual(plays.map((p) => [p.idx, p.delta]), [[4, 24], [3, -12], [1, 3], [2, 3]])
 })
 
 test('selectWinProbBigPlays caps at limit and inherits the reveal gate', () => {

@@ -184,14 +184,21 @@ export function mergeFeedDiff(base, diffResponse, gamePk) {
 //
 // The unpruned response is ~186 KB gzipped — nearly a whole second feed —
 // because each play entry carries the full `playEvents` pitch-by-pitch array
-// (~85% of the payload), which this app never reads (it takes pitch data from
-// /feed/live instead). WIN_PROB_FIELDS is the COMPLETE read-set of the THREE
-// consumers — `computeThreeStars` + `computePlayOfTheGame` in boxscore.js (which
+// (~85% of the payload). This app takes its pitch data from /feed/live, so the
+// list keeps `playEvents` for ONE read only: `selectWinProbPath` (winprob.js)
+// takes each play's terminal pitch `playId` from it, the key that lets the
+// chart's big-swing rows open that pitch's clip (useSwingClip.js). That needs
+// just `playEvents`, `isPitch` and `playId`. The filter matches names at any
+// depth, so a key this list names for another read (`details`, `count`) also
+// survives inside `playEvents`; every other key is dropped. WIN_PROB_FIELDS is
+// the COMPLETE read-set of the THREE consumers — `computeThreeStars` +
+// `computePlayOfTheGame` in boxscore.js (which
 // read the per-play delta `homeTeamWinProbabilityAdded`) AND `selectWinProbPath`
 // in winprob.js → the WinProbChart line, which reads the CUMULATIVE
 // `homeTeamWinProbability` plus `about.isScoringPlay` and `about.atBatIndex`
 // (the at-bat-stepping clamp, ADR-0016 — see its `stepHalfIndex`/
-// `throughAtBatIndex` doc) — so the `fields=` allowlist prunes the payload
+// `throughAtBatIndex` doc) and the terminal-pitch `playId` above — so the
+// `fields=` allowlist prunes the payload
 // while keeping every field those three read. The
 // MLB `fields=` filter matches key names at any depth, so a nested read like
 // `about.isScoringPlay` needs BOTH `about` and `isScoringPlay` listed. `matchup`
@@ -204,6 +211,8 @@ export function mergeFeedDiff(base, diffResponse, gamePk) {
 export const WIN_PROB_FIELDS = [
   'homeTeamWinProbability',
   'homeTeamWinProbabilityAdded',
+  'count',
+  'outs',
   'atBatIndex',
   'about',
   'captivatingIndex',
@@ -222,6 +231,10 @@ export const WIN_PROB_FIELDS = [
   'details',
   'isScoringEvent',
   'runner',
+  // The chart's big-swing rows open the terminal pitch's clip (winprob.js).
+  'playEvents',
+  'isPitch',
+  'playId',
 ]
 
 export async function fetchWinProbability(gamePk) {
