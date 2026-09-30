@@ -10,13 +10,9 @@
 const SNAPSHOT_URL = '/data/prospect-trend.json'
 const EMPTY_SNAPSHOT = { generatedAt: null, dataThrough: null, players: [] }
 
-// The file on disk is packed (#1269): the phone parses all of it before the
-// trend pill shows, and most of the old 3.2 MB was the four key names repeated
-// on 47k history rows. Packed, the week dates are stored once in `historyDates`
-// and a row is [dateIndex, sportId, percentile] — plus a fourth `qualified`
-// item only on the rare row where it is not simply "percentile is not null".
-// `packed` is the version marker. Pure both ways; callers only ever see the
-// plain shape, because fetchProspectTrend unpacks.
+// The file on disk is packed (#1269) so the phone parses 0.65 MB, not 3.2: week
+// dates once in `historyDates`, a history row as [dateIndex, sportId, percentile]
+// (+ `qualified` only when it is not "percentile is not null"), `packed: 1` as version.
 export function packProspectTrend(snapshot) {
   const historyDates = [...new Set(snapshot.players.flatMap((p) => p.history.map((h) => h.date)))].sort()
   const index = new Map(historyDates.map((date, i) => [date, i]))
