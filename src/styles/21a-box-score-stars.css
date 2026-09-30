@@ -11,13 +11,11 @@
    on the Team Score card's .team-score__grade) for extra weight, not a
    different shape. Below 740px the cards stack as rows (phone width can't
    fit three side by side); from 740px up they lay out in one horizontal
-   row — see the media query at the bottom of this block. */
+   row — see the media query at the bottom of this block. The sheet and
+   each tile are Cards (#1113, slice C5): a tile is a ledger Card, and the
+   phone query strips its frame back to a list row. */
 .bs__stars {
   padding: var(--space-3) var(--space-3h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-1);
-  box-shadow: var(--shadow-card);
 }
 
 .stars3__row {
@@ -33,24 +31,13 @@
   align-items: center;
   gap: var(--space-2h);
   padding: var(--space-2) 2px;
-  border-top: var(--bw-hair) solid var(--rule-soft);
-}
-/* First card in the list — no rule above it, it isn't a continuation of a
-   row before it. */
-.stars3__card:first-child {
-  border-top: none;
 }
 /* The hero card gets its own panel treatment layered over the shared
-   .stars3__card layout: an inset gradient background instead of the bare
-   list-row rule above it, so the top mover reads as the headline entry. */
+   .stars3__card layout, so the top mover reads as the headline entry: an
+   inset shadow at every width, and on a phone an inset gradient panel
+   instead of the bare list-row rule (the phone query below). */
 .stars3__card--hero {
   padding: var(--space-2h) var(--space-3);
-  border-top: none;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--marker) 16%, transparent), transparent 58%),
-    var(--surface-inset);
   box-shadow: var(--inset-cell);
 }
 /* A hero card followed by a plain row needs its own top gap back — the
@@ -137,12 +124,31 @@
    "Row 2" comment for why a flex-wrap + flex-basis:100% attempt here would
    instead push the name/meta block below the photo rather than beside it. */
 @media (max-width: 739.98px) {
+  /* A list row, not a tile: the Card's frame gives way to a soft rule above
+     each row, and its clip too (the row's 2px side inset would cut the name
+     link's focus ring). The first row has no rule above it, it isn't a
+     continuation of a row before it. */
   .stars3__card {
     display: grid;
     grid-template-columns: auto 1fr;
     column-gap: var(--space-2h);
     row-gap: var(--space-1);
     align-items: start;
+    border: none;
+    border-top: var(--bw-hair) solid var(--rule-soft);
+    border-radius: 0;
+    background: none;
+    overflow: visible;
+  }
+  .stars3__card:first-child {
+    border-top: none;
+  }
+  .stars3__card--hero {
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-sm);
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--marker) 16%, transparent), transparent 58%),
+      var(--surface-inset);
   }
   .shot.stars3__shot {
     grid-row: 1 / 3;
@@ -188,15 +194,6 @@
     row-gap: var(--space-1);
     align-items: center;
     padding: var(--space-3);
-    border: var(--bw-hair) solid var(--border-rule);
-    border-radius: var(--radius-sm);
-    background: var(--surface-inset);
-  }
-  /* The phone list's first-card/top-rule handling doesn't apply once every
-     card carries its own full border in a row — restore the rule the
-     :first-child rule above strips for the list idiom. */
-  .stars3__card:first-child {
-    border-top: var(--bw-hair) solid var(--border-rule);
   }
   .shot.stars3__shot {
     grid-row: 1 / 3;

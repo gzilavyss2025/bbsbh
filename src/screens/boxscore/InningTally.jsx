@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { TeamLink } from '../../components/team/TeamLink.jsx'
 import { TeamTreatmentMark } from '../../components/logo/TeamTreatmentMark.jsx'
+import { Card } from '../../components/ui/frame/Card.jsx'
 
 // A per-half-inning tally the printed line score never carries: pitches thrown,
 // whiffs (swing-and-miss), fouls, and runners left on base (see
@@ -89,7 +90,7 @@ export function InningTally({ rows, away, home, treatments }) {
   const shown = shownSide === CLUB_ALL ? sides : sides.filter((s) => s.side === shownSide)
 
   return (
-    <div className="bs__tally">
+    <Card as="div" body="flush" className="bs__tally">
       <div className="bs__tallyHead">
         <span className="bs__insightsTitle">Pitching stats</span>
         {/* Which club's staff the rows belong to. A club segment is labelled
@@ -173,7 +174,7 @@ export function InningTally({ rows, away, home, treatments }) {
           ))}
         </table>
       </div>
-    </div>
+    </Card>
   )
 }
 

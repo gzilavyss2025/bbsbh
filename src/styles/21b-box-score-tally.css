@@ -11,17 +11,14 @@
    padding and border.
    ============================================================ */
 
-/* The card frame — matches .bs__insights/.bs__stars beside it. Always open:
+/* A Card, like .bs__insights/.bs__stars beside it (#1113, slice C5): the
+   frame and its clip are the Card's, and the head and the grid inside it
+   keep their own rules. Always open:
    unlike the line score's run counts this card adds nothing spoiler-shaped
    (it is already inside the box score's one seal), so there is no reason to
    default it collapsed the way its old row-per-half layout did. */
 .bs__tally {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-1);
-  box-shadow: var(--shadow-card);
   margin-top: var(--space-3);
-  overflow: hidden;
 }
 /* Wraps rather than squeezes: three club segments plus the title do not fit a
    320px card on one line, and a pill that shrinks its own hit target is worse

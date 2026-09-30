@@ -995,7 +995,7 @@
 /* ============================================================
    Minors tab — Horizon card + Depth Chart card. Both are built from the
    same "broadcast lower-third" tile (.horizontile): headshot with a floated
-   position badge (same idiom as .playercard__posbadge/.prospectshowcase__
+   position badge (same idiom as .playerline__posbadge/.prospectshowcase__
    posbadge above), name + team crest, and a boxed stat tile on the trailing
    edge — the .phcard__tile idiom (72-player-hover-card.css) reused here as
    .horizontile__statbox rather than a second stat-box pattern. One card

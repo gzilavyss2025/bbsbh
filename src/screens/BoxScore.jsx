@@ -33,6 +33,7 @@ import { UmpireTierPill } from '../components/badges/UmpireTierPill.jsx'
 import { UmpireLink } from '../components/umpire/UmpireLink.jsx'
 import { ManagerLink } from '../components/team/ManagerLink.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 import { RefreshButton, InfoIcon } from './TeamInfo.jsx'
 import { ballparkFor } from '../lib/ballpark/ballparkData.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../lib/headerTheme.js'
@@ -505,19 +506,19 @@ function StatcastLeadersCard({ feed, insights }) {
   const cards = statcastCards(feed, insights)
   if (cards.length === 0) return null
   return (
-    <section className="bs__statcastCard">
+    <Card body="flush" className="bs__statcastCard">
       <SectionMasthead as="h3" title="Statcast Leaders" />
       <div className="bs__statcastRow">
         {cards.map(({ label, entry }) => (
           <div className="bs__statcastCol" key={label}>
-            <h4 className="playercard__bucket">{label}</h4>
-            <ul className="playercard__list">
+            <h4 className="playerline__bucket">{label}</h4>
+            <ul className="playerline__list">
               <PerformerCard entry={entry} />
             </ul>
           </div>
         ))}
       </div>
-    </section>
+    </Card>
   )
 }
 
@@ -531,7 +532,7 @@ function InsightsCard({ calloutNotes }) {
   const shownGroups = showAll ? groups : groups.slice(0, INSIGHTS_SHOWN)
   const hiddenCount = groups.length - shownGroups.length
   return (
-    <section className="bs__insights">
+    <Card body="flush" className="bs__insights">
       <SectionMasthead as="h3" title="Insights" />
       {/* Every leader/streak/situational-record note that fired somewhere in
           the game (see computeGameCalloutNotes) — the same notes shown one at
@@ -553,7 +554,7 @@ function InsightsCard({ calloutNotes }) {
           Show {hiddenCount} more {hiddenCount === 1 ? 'insight' : 'insights'}
         </Door>
       )}
-    </section>
+    </Card>
   )
 }
 
@@ -563,7 +564,7 @@ function InsightsCard({ calloutNotes }) {
 // name and a bullet per note that fired for him tonight.
 function InsightNoteCard({ group }) {
   return (
-    <div className="bs__noteCard">
+    <Card as="div" frame="ledger" body="flush" className="bs__noteCard">
       <span className="bs__noteAvatar">
         {group.personId != null ? (
           <Headshot personId={group.personId} name={group.personName} teamId={group.teamId} className="bs__noteShot" />
@@ -582,7 +583,7 @@ function InsightNoteCard({ group }) {
           <CalloutNote key={i} text={note.text} />
         ))}
       </span>
-    </div>
+    </Card>
   )
 }
 
@@ -630,7 +631,7 @@ function AttendanceValue({ venue, attendance }) {
 // Anything the feed didn't post shows "—".
 function InfoCard({ fields }) {
   return (
-    <div className="bs__fill">
+    <Card as="div" body="flush" className="bs__fill">
       {fields.map((f) => (
         <div
           className={`bs__field${f.wide ? ' bs__field--wide' : ''}`}
@@ -640,13 +641,13 @@ function InfoCard({ fields }) {
           <span className="bs__fieldValue">{f.value || '—'}</span>
         </div>
       ))}
-    </div>
+    </Card>
   )
 }
 
 function TeamBlock({ side, theme }) {
   return (
-    <section className={`bs__team ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
+    <Card body="flush" className={`bs__team ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <SectionMasthead as="h3" title={<TeamLink id={side.id}>{side.teamName}</TeamLink>} />
 
       <div className="bs__scroll">
@@ -793,7 +794,7 @@ function TeamBlock({ side, theme }) {
           ))}
         </div>
       )}
-    </section>
+    </Card>
   )
 }
 
@@ -855,7 +856,7 @@ function BoxDefense({ feed, sideKey, theme }) {
 // below fills in the inning-by-inning story; this is the bottom-line summary.
 function LineTotals({ away, home }) {
   return (
-    <div className="bs__totalsCard">
+    <Card as="div" body="flush" className="bs__totalsCard">
       <table className="bs__grid bs__grid--totals">
         <thead>
           <tr>
@@ -882,7 +883,7 @@ function LineTotals({ away, home }) {
           ))}
         </tbody>
       </table>
-    </div>
+    </Card>
   )
 }
 
@@ -905,7 +906,7 @@ function Scoreboard({ away, home, innings, onSection, treatments }) {
     { side: home, gameSide: 'home', cells: innings.map((i) => i.home), half: 'bottom' },
   ]
   return (
-    <div className="bs__board">
+    <Card as="div" body="flush" className="bs__board">
       <div className="bs__scroll">
         <table className="bs__grid bs__grid--board">
           <thead>
@@ -970,7 +971,7 @@ function Scoreboard({ away, home, innings, onSection, treatments }) {
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   )
 }
 
@@ -1003,14 +1004,14 @@ function Decisions({ decisions }) {
   ].filter(Boolean)
   if (parts.length === 0) return null
   return (
-    <div className="bs__decisions">
+    <Card as="div" body="flush" className="bs__decisions">
       {parts.map((p) => (
         <span className="bs__decision" key={p.k}>
           <span className="bs__decisionK">{p.k}</span>
           <span className="bs__decisionV">{p.v}</span>
         </span>
       ))}
-    </div>
+    </Card>
   )
 }
 
@@ -1054,7 +1055,7 @@ function PlayOfTheGame({ play, highlight, awayAbbr, homeAbbr }) {
     ? `Watch highlight for ${play.batterName}`
     : 'Watch highlight for the play of the game'
   return (
-    <div className="bs__potg">
+    <Card as="div" body="flush" className="bs__potg">
       <SectionMasthead as="h3" title="Play of the game" />
       <div className="bs__potgBody">
         <Headshot
@@ -1125,7 +1126,7 @@ function PlayOfTheGame({ play, highlight, awayAbbr, homeAbbr }) {
       {watchOpen && highlight && (
         <HighlightSheet item={highlight} onClose={() => setWatchOpen(false)} />
       )}
-    </div>
+    </Card>
   )
 }
 
@@ -1143,11 +1144,11 @@ function PlayOfTheGame({ play, highlight, awayAbbr, homeAbbr }) {
 function ThreeStars({ stars }) {
   if (!stars || stars.length === 0) return null
   return (
-    <div className="bs__stars">
+    <Card as="div" body="flush" className="bs__stars">
       <SectionMasthead as="h3" title="Three stars" />
       <ol className="stars3__row">
         {stars.map((s, i) => (
-          <li className={`stars3__card${i === 0 ? ' stars3__card--hero' : ''}`} key={s.id}>
+          <Card as="li" frame="ledger" body="flush" className={`stars3__card${i === 0 ? ' stars3__card--hero' : ''}`} key={s.id}>
             <Headshot personId={s.id} name={s.name} teamId={s.teamId} className="stars3__shot" />
             <span className="stars3__copy">
               <span className="stars3__marks" aria-label={`${s.stars} star`}>
@@ -1159,10 +1160,10 @@ function ThreeStars({ stars }) {
               )}
             </span>
             <span className="stars3__stat">{s.stat}</span>
-          </li>
+          </Card>
         ))}
       </ol>
-    </div>
+    </Card>
   )
 }
 
@@ -1180,12 +1181,12 @@ function ThreeStars({ stars }) {
 function GameInfo({ rows }) {
   if (rows.length === 0) return null
   return (
-    <div className="bs__info">
+    <Card as="div" body="flush" className="bs__info">
       {rows.map((r, i) => (
         <p className="bs__infoRow" key={i}>
           <span className="bs__infoLabel">{r.label}:</span> {r.value}
         </p>
       ))}
-    </div>
+    </Card>
   )
 }

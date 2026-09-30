@@ -154,12 +154,12 @@ export const CARDS = [
   },
 
   {
-    cls: 'playercard',
-    partial: '22-box-score-tables.css',
+    cls: 'card card--ledger playerline',
+    partial: 'system/card.css',
     consumers: 5,
     group: 'dense',
-    verdict: 'Merge — dense',
-    note: '--radius-sm, no shadow, 8px padding, flex row.',
+    verdict: 'Merged — ledger',
+    note: 'Was the performer tile block: --radius-sm, no shadow, 8px padding, flex row. It is a ledger Card now (#1113, slice C5), under its ledger name .playerline, and keeps only its padding and flex row.',
   },
   {
     cls: 'seedcard',

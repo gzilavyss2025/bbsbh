@@ -158,7 +158,7 @@ export function StatBox({
                     {cards.map(({ label, entry }) => (
                       <div className="halfcast__row" key={label}>
                         <span className="halfcast__label">{label}</span>
-                        <ul className="playercard__list">
+                        <ul className="playerline__list">
                           <PerformerCard entry={entry} />
                         </ul>
                       </div>
