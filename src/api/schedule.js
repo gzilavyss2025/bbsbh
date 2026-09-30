@@ -535,7 +535,7 @@ export async function fetchHeadToHead(teamAId, teamBId, season, sportId = 1) {
 }
 
 const SEASON_SERIES_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id,score,isWinner,venue,name,timeZone,tz,linescore,currentInning,scheduledInnings'
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,gameType,seriesGameNumber,status,abstractGameState,teams,away,home,team,id,score,isWinner,venue,name,timeZone,tz,linescore,currentInning,scheduledInnings'
 
 // Same lookup as fetchHeadToHead, but WITH each side's score, the venue's own
 // time zone, and (for a completed game) how many innings it actually ran —
@@ -546,13 +546,16 @@ const SEASON_SERIES_FIELDS =
 // already-decided game) or not yet played (the feed reports no score). The
 // one exception — the game the strip is rendered ON — is the caller's job to
 // blank out via seasonSeriesCells' `currentGamePk`, since this fetcher has no
-// notion of which game is "the current page". Regular season only ('R'),
-// same dedupe-by-gamePk handling as fetchHeadToHead.
+// notion of which game is "the current page". The regular season ('R') plus,
+// at MLB, the postseason rounds (F/D/L/W) between the same two clubs, each
+// row carrying its gameType so the strip can tag it; MiLB stays 'R' because
+// its postseason codes were never checked. Same dedupe-by-gamePk handling as
+// fetchHeadToHead.
 export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1) {
   if (!teamAId || !teamBId || !season) return []
   try {
     const data = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&teamId=${teamAId}&season=${season}&gameType=R&hydrate=venue(timezone),linescore&fields=${SEASON_SERIES_FIELDS}`,
+      `/api/v1/schedule?sportId=${sportId}&teamId=${teamAId}&season=${season}&gameType=${sportId === 1 ? 'R,F,D,L,W' : 'R'}&hydrate=venue(timezone),linescore&fields=${SEASON_SERIES_FIELDS}`,
     )
     const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
     const byPk = new Map()
@@ -568,6 +571,8 @@ export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1) {
           apiDate: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
           gameDate: g.gameDate ?? null,
           gameNumber: g.gameNumber ?? 1,
+          gameType: g.gameType ?? 'R',
+          seriesGameNumber: g.seriesGameNumber ?? null,
           awayId: a,
           homeId: h,
           final,

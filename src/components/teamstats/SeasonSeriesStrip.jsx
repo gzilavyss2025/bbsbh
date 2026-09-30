@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { Fragment, useLayoutEffect, useRef, useState } from 'react'
 import { fetchSeasonSeries } from '../../api/schedule.js'
 import { seasonSeriesCells, seasonSeriesRecord } from '../../api/seasonSeries.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -134,14 +134,21 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
           className={`seasonseries__strip${canScroll ? '' : ' seasonseries__strip--fit'}`}
           ref={stripRef}
         >
-          {cells.map((cell) => (
-            <SeasonSeriesCell
-              key={cell.gamePk}
-              cell={cell}
-              onSelect={() => openGame(cell)}
-              cellRef={cell.isCurrent ? currentCellRef : null}
-              otherPark={currentHomeId != null && cell.homeId !== currentHomeId}
-            />
+          {cells.map((cell, i) => (
+            <Fragment key={cell.gamePk}>
+              {/* The rule where the regular season ends and the postseason
+                  begins — the games after it wear a round tag and a navy
+                  tint (.seasonseries__cell--postseason). */}
+              {cell.round && !cells[i - 1]?.round && (
+                <span className="seasonseries__divider" aria-hidden="true" />
+              )}
+              <SeasonSeriesCell
+                cell={cell}
+                onSelect={() => openGame(cell)}
+                cellRef={cell.isCurrent ? currentCellRef : null}
+                otherPark={currentHomeId != null && cell.homeId !== currentHomeId}
+              />
+            </Fragment>
           ))}
         </div>
         {canScroll && (
@@ -170,12 +177,19 @@ function SeasonSeriesCell({ cell, onSelect, cellRef, otherPark }) {
     'seasonseries__cell',
     cell.isCurrent && 'seasonseries__cell--current',
     otherPark && 'seasonseries__cell--otherpark',
+    cell.round && 'seasonseries__cell--postseason',
   ]
     .filter(Boolean)
     .join(' ')
 
   return (
     <button ref={cellRef} type="button" className={classNames} onClick={onSelect}>
+      {cell.round && (
+        <span className="seasonseries__round">
+          {cell.round}
+          {cell.seriesGame ? ` · G${cell.seriesGame}` : ''}
+        </span>
+      )}
       {cell.final && cell.hasScore ? (
         <>
           <TeamLogo teamId={cell.winnerId} size={30} className="seasonseries__logo" />

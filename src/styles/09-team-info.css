@@ -258,6 +258,14 @@
   grid-column: 1 / -1;
 }
 
+/* The lineup page's one top table: the game facts and the umpire crew share a
+   grid, so an odd total leaves the last cell alone on its row — stretch it
+   across. "Of .fact" counts only the cells, so the accuracy modal the crew
+   mounts in the same grid (position: fixed, out of the flow) cannot shift it. */
+.teaminfo__facts .fact:nth-child(odd of .fact):nth-last-child(1 of .fact) {
+  grid-column: 1 / -1;
+}
+
 .fact__label {
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -414,7 +422,7 @@
 }
 /* The umpire crew: a gap-rule grid. The rules between the umpires are this
    grid's own --border-rule ground, seen through its 1px gaps. The Card around
-   it (UmpiresCard.jsx and ExtrasFacts.jsx, #1113 slice C3) draws the edge,
+   it (ExtrasFacts.jsx, #1113 slice C3; the lineup page's crew is fact cells now, see UmpiresCard.jsx) draws the edge,
    the corners and the shadow, and clips the corner cells, so the grid draws
    no frame of its own. */
 .umps__list {

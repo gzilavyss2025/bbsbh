@@ -4,6 +4,11 @@
 import { teamAbbr } from '../lib/teams.js'
 import { extraInningsOf } from './select.js'
 
+// The postseason round a schedule row's gameType names — the same four short
+// tags the rest of the app prints (WC / DS / LCS / WS). Anything else, the
+// regular season included, is null.
+const ROUND_TAG = { F: 'WC', D: 'DS', L: 'LCS', W: 'WS' }
+
 // The game matching `currentGamePk` NEVER carries a score, even if the feed
 // already reports it Final — that game's own result stays sealed until the
 // user reveals it on its own page (see the root spoiler-rule invariant).
@@ -31,6 +36,10 @@ export function seasonSeriesCells(games, viewingTeamId, currentGamePk) {
       gameDate: g.gameDate,
       tzId: g.tzId,
       gameNumber: g.gameNumber,
+      // A postseason game's round tag and its place in that series ("G2"); both
+      // null for a regular-season game. A fact about the schedule, not a result.
+      round: ROUND_TAG[g.gameType] ?? null,
+      seriesGame: ROUND_TAG[g.gameType] ? (g.seriesGameNumber ?? null) : null,
       awayId: g.awayId,
       homeId: g.homeId,
       isHome,
@@ -57,8 +66,10 @@ export function seasonSeriesCells(games, viewingTeamId, currentGamePk) {
   })
 }
 
-// The two clubs' head-to-head record so far this season, tallied from the
-// same cells the strip already built — every decided leg but never the
+// The two clubs' head-to-head record so far this REGULAR season, tallied from
+// the same cells the strip already built — every decided regular-season leg
+// (a postseason game sits in the strip under its own round tag and is not
+// part of this tally) but never the
 // game `currentGamePk` masks (seasonSeriesCells already stripped its score,
 // so it never counts either way). `{ aWins: 0, bWins: 0 }` before anything's
 // been decided.
@@ -66,7 +77,7 @@ export function seasonSeriesRecord(cells, teamAId, teamBId) {
   let aWins = 0
   let bWins = 0
   for (const c of cells) {
-    if (!c.hasScore) continue
+    if (!c.hasScore || c.round) continue
     if (c.winnerId === teamAId) aWins++
     else if (c.winnerId === teamBId) bWins++
   }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { seasonSeriesCells } from '../src/api/seasonSeries.js'
+import { seasonSeriesCells, seasonSeriesRecord } from '../src/api/seasonSeries.js'
 import { extraInningsOf, regulationInnings } from '../src/api/select.js'
 
 const NYM = 121
@@ -121,4 +121,37 @@ test("regulationInnings: the game's own length, else nine", () => {
   assert.equal(regulationInnings(null), 9)
   assert.equal(regulationInnings(undefined), 9)
   assert.equal(regulationInnings(0), 9)
+})
+
+const post = (gamePk, gameType, seriesGameNumber, awayScore, homeScore, extra = {}) => ({
+  gamePk, apiDate: '2026-10-0' + seriesGameNumber, gameDate: '2026-10-0' + seriesGameNumber + 'T23:10:00Z', gameNumber: 1,
+  awayId: NYM, homeId: MIL, final: true, awayScore, homeScore, gameType, seriesGameNumber, ...extra,
+})
+
+test('seasonSeriesCells: a postseason game carries its round tag and series game number', () => {
+  const games = [post(10, 'F', 1, 2, 3), post(11, 'D', 2, 4, 1), post(12, 'L', 3, 0, 1), post(13, 'W', 4, 5, 6)]
+  const cells = seasonSeriesCells(games, MIL, 99)
+  assert.deepEqual(cells.map((c) => c.round), ['WC', 'DS', 'LCS', 'WS'])
+  assert.deepEqual(cells.map((c) => c.seriesGame), [1, 2, 3, 4])
+})
+
+test('seasonSeriesCells: a regular-season game (or a row with no game type) has no round tag', () => {
+  const games = [post(14, 'R', 1, 2, 3), { gamePk: 15, apiDate: '2026-07-01', gameNumber: 1, awayId: NYM, homeId: MIL, final: false }]
+  for (const c of seasonSeriesCells(games, MIL, 99)) {
+    assert.equal(c.round, null)
+    assert.equal(c.seriesGame, null)
+  }
+})
+
+test('seasonSeriesCells: the viewed postseason game is still sealed', () => {
+  const [cell] = seasonSeriesCells([post(16, 'D', 2, 9, 0)], MIL, 16)
+  assert.equal(cell.round, 'DS')
+  assert.equal(cell.final, false)
+  assert.equal(cell.winnerScore, null)
+})
+
+test('seasonSeriesRecord: postseason games stay out of the season record', () => {
+  const games = [post(17, 'R', 1, 2, 3), post(18, 'R', 2, 1, 4), post(19, 'D', 1, 7, 0), post(20, 'D', 2, 8, 1)]
+  const cells = seasonSeriesCells(games, MIL, 99)
+  assert.deepEqual(seasonSeriesRecord(cells, MIL, NYM), { aWins: 2, bWins: 0 })
 })

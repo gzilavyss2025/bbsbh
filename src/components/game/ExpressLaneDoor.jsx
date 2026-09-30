@@ -75,12 +75,10 @@ export function ExpressLaneDoor({ feed }) {
 
   return (
     <button type="button" className="door xl__door" onClick={() => navigate(path)}>
-      Express Lane
-      {/* Decoration, not the name — the accessible name is the two words
-          beside it, and a screen reader gains nothing from a chevron. */}
-      <span className="xl__go" aria-hidden="true">
-        ›
-      </span>
+      {/* One unbreakable label, so the two words stay on one line whatever the
+          strip's width. The strip carries no chevron: the whole thing is the
+          control, and an arrow beside the name only ever floated off it. */}
+      <span className="xl__label">Express Lane</span>
     </button>
   )
 }

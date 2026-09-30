@@ -1,4 +1,4 @@
-import test from 'node:test'
+import test, { after } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -100,27 +100,44 @@ test('the catalog states the rule where a spike reads it', () => {
   }
 })
 
-// The three tests below open a real in-memory DuckDB and read the JSON on disk.
-async function openMemory() {
-  const { DuckDBInstance } = await import('@duckdb/node-api')
-  const instance = await DuckDBInstance.create(':memory:')
-  return instance.connect()
+// The three tests below share ONE real in-memory DuckDB, built once, and read
+// the JSON on disk. A full build of every view takes over a minute and they
+// used to make three of them, with the instances left open. Run beside the rest
+// of the suite on a machine short of memory that ran DuckDB out of it
+// ("Out of Memory Error: Allocation failure"): the terms view then failed to
+// build, buildAllViews logged it and moved on, and the catalog test blamed the
+// catalog. One build, closed when the file is done, is a third of the memory.
+// The stale view is planted BEFORE that build, so the first test still proves a
+// rebuild drops what an older list left behind.
+let shared
+function sharedBuild() {
+  shared ??= (async () => {
+    const { DuckDBInstance } = await import('@duckdb/node-api')
+    const instance = await DuckDBInstance.create(':memory:')
+    const conn = await instance.connect()
+    await conn.run('CREATE VIEW stale_from_an_older_list AS SELECT 1 AS x')
+    const built = await buildAllViews(conn)
+    return { instance, conn, built }
+  })()
+  return shared
 }
+after(async () => {
+  if (!shared) return
+  const { instance, conn } = await shared
+  conn.closeSync()
+  instance.closeSync()
+})
 
 test('a rebuild drops a view that an older list left behind', async () => {
-  const conn = await openMemory()
-  await conn.run('CREATE VIEW stale_from_an_older_list AS SELECT 1 AS x')
-  await buildAllViews(conn)
+  const { conn } = await sharedBuild()
   const left = (
     await conn.runAndReadAll("SELECT view_name FROM duckdb_views() WHERE view_name = 'stale_from_an_older_list'")
   ).getRowObjectsJson()
   assert.equal(left.length, 0)
-  conn.closeSync()
 })
 
 test('the catalog rows and the built views are the same set, and each view has a row', async () => {
-  const conn = await openMemory()
-  const built = await buildAllViews(conn)
+  const { conn, built } = await sharedBuild()
   const names = built.map(([v]) => v)
   const documented = [...DOC.matchAll(/^\| `([a-z0-9_]+)` \|/gm)].map((m) => m[1])
 
@@ -136,19 +153,16 @@ test('the catalog rows and the built views are the same set, and each view has a
     if (rows.length === 0) empty.push(v)
   }
   assert.deepEqual(empty, [], 'views that return no rows')
-  conn.closeSync()
 })
 
 test('a full scan of the contract terms view reads every row', async () => {
   // Some shards hold a number in a money field and "forfeited" in another row.
   // DuckDB's default sampling threw on the first text value.
-  const conn = await openMemory()
-  await buildAllViews(conn)
+  const { conn } = await sharedBuild()
   const [{ n }] = (await conn.runAndReadAll('SELECT count(*) AS n FROM public_contracts_history_terms')).getRowObjectsJson()
   assert.ok(Number(n) > 36000, `expected the full terms table, got ${n}`)
   const [{ s }] = (
     await conn.runAndReadAll('SELECT count(terms.salary) AS s FROM public_contracts_history_terms')
   ).getRowObjectsJson()
   assert.ok(Number(s) > 0)
-  conn.closeSync()
 })

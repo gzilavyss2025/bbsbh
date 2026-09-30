@@ -991,7 +991,7 @@ const C3 = [
   {
     css: '09-team-info.css',
     sel: '.umps__list',
-    jsx: ['components/umpire/UmpiresCard.jsx', 'components/inning/focus/ExtrasFacts.jsx'],
+    jsx: ['components/inning/focus/ExtrasFacts.jsx'],
     ns: 'umps__list',
     mode: 'wrap',
     as: 'div',
