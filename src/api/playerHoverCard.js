@@ -21,16 +21,13 @@ import {
 import { detectInjuredList, detectRehabAssignment } from './person/activity.js'
 import { DASH, num } from './person/shared.js'
 import { SPORT_LABEL } from '../lib/teams.js'
+import { isoToday } from '../lib/dates.js'
 
 // A reliever leads with SV once he clears this many saves; below it (and for
 // a starter, always) the lead stat is W-L. Its own threshold, deliberately
 // NOT person/identity.js's pitcherRole 'CL' cut (8 saves) — that one tunes a
 // different surface's lead stat, and this card's cut is its own product call.
 const SAVES_THRESHOLD = 5
-
-function isoToday() {
-  return new Date().toISOString().slice(0, 10)
-}
 
 // Starter or reliever-with-fewer-than-SAVES_THRESHOLD-saves: W-L / ERA / K /
 // WHIP. A reliever at or above the threshold: SV / ERA / K / WHIP. Pure —

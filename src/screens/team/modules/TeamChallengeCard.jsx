@@ -76,9 +76,8 @@ function ticksTo(max, count = 3) {
 const num2 = (x) => (x == null ? '—' : x.toFixed(2))
 const commas = (n) => (n == null ? '—' : Math.round(n).toLocaleString('en-US'))
 
-// Same four lines TeamRunValueCard carries, for the same reason it carries
-// them: an ordinal is a formatting rule and a shared export nothing else would
-// call is a wider surface than two copies.
+// Local ordinal. lib/format.js exports the shared one; this body is spelled
+// differently, so it was left as it is.
 function ordinal(n) {
   const rest = n % 100
   if (rest >= 11 && rest <= 13) return `${n}th`

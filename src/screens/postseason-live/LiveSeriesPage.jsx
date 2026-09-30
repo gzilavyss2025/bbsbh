@@ -10,7 +10,7 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { usePastGameSignals } from '../../hooks/usePastGameSignals.js'
 import { gamePath } from '../../lib/route.js'
 import { useNav } from '../../lib/nav.js'
-import { toApiDate } from '../../lib/dates.js'
+import { monthDayName, toApiDate } from '../../lib/dates.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { TeamLink } from '../../components/team/TeamLink.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
@@ -23,7 +23,6 @@ import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { seriesGameBuckets, upcomingGameLabel } from './selectors.js'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../../components/postseason/SeriesParts.jsx'
-import { monthDay } from '../../components/postseason/monthDay.js'
 import { seriesMark } from '../../lib/postseason/seriesMarks.js'
 import { SeriesMark } from '../../components/postseason/SeriesMark.jsx'
 
@@ -262,7 +261,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
                       {g.gameNumber}
                     </span>
                     <div className="psseries__entryhead">
-                      <span className="psseries__gamedate">{monthDay(g.date)}</span>
+                      <span className="psseries__gamedate">{monthDayName(g.date)}</span>
                       <span className={`psseries__gamestatus${isClincher ? ' psseries__gamestatus--final' : ''}`}>
                         {recordAfterGame(series, i)}
                       </span>
@@ -303,7 +302,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
               {upcoming.map((g) => (
                 <li key={g.gameNumber} className="psseries__upcomingrow">
                   <span className="psseries__upcominggame">Game {g.gameNumber}</span>
-                  <span className="psseries__upcomingdate">{upcomingGameLabel(g, monthDay)}</span>
+                  <span className="psseries__upcomingdate">{upcomingGameLabel(g, monthDayName)}</span>
                 </li>
               ))}
             </ul>

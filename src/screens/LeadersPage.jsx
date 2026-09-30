@@ -18,10 +18,7 @@ import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { TeamLeaders } from '../components/teamstats/TeamLeaders.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
-
-function isoToday() {
-  return new Date().toISOString().slice(0, 10)
-}
+import { isoToday } from '../lib/dates.js'
 
 // The league / level / org leaderboards, reusing the same TeamLeaders component
 // + descriptors as the team page — only the POOL changes (see api/leaders.js).

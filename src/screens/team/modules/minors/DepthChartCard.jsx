@@ -8,10 +8,8 @@ import { Card } from '../../../../components/ui/frame/Card.jsx'
 
 const DASH = '—'
 
-// Same ordinal suffix rule as ProspectTrendPill's own local copy
-// (src/components/badges/ProspectTrendPill.jsx) — kept as its own copy here
-// rather than a shared import for one formatter, same cross-boundary
-// convention prospects.js's rate3/num2 already use.
+// Local ordinal. lib/format.js exports the shared one; this body is spelled
+// differently, so it was left as it is.
 function ordinal(value) {
   const mod100 = value % 100
   const suffix =

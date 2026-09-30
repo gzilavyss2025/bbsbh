@@ -8,6 +8,12 @@ export function toApiDate(date = new Date()) {
   return `${y}-${m}-${d}`
 }
 
+// Today as a UTC YYYY-MM-DD — the cutoff every open stat page compares dates
+// against. toApiDate above is the local-date one; don't swap them.
+export function isoToday() {
+  return new Date().toISOString().slice(0, 10)
+}
+
 export function addDays(date, n) {
   const copy = new Date(date)
   copy.setDate(copy.getDate() + n)
@@ -37,6 +43,17 @@ export function isWithinDays(apiDate, days, today = new Date()) {
 export function monthDay(apiDate) {
   const m = /^\d{4}-(\d{2})-(\d{2})/.exec(apiDate ?? '')
   return m ? `${Number(m[1])}/${Number(m[2])}` : ''
+}
+
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+// "Jul 5" — month name and day, no weekday and no year, read straight off the
+// YYYY-MM-DD (a trailing time or zone is ignored). The one spelling for a
+// caption or a row date; monthDay above is the compact "7/5" and monthDayShort
+// below is the locale-formatted one. Returns '' for a missing/garbled date.
+export function monthDayName(apiDate) {
+  const m = /^\d{4}-(\d{2})-(\d{2})/.exec(apiDate ?? '')
+  return m ? `${MONTH_NAMES[Number(m[1]) - 1]} ${Number(m[2])}` : ''
 }
 
 // "4/14/26" — compact month/day/2-digit-year, for a context where the season

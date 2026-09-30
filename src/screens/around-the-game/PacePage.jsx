@@ -11,6 +11,7 @@ import {
 } from '../../api/around-the-game/gate.js'
 import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
 import { humanDate } from '../../lib/dates.js'
+import { commas } from './abs/format.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -45,7 +46,6 @@ import { BarCell, TrendStrip } from '../../components/around-the-game/BroadcastB
 //
 // SPOILER-FREE. A clock reading carries no result (api/around-the-game/gate.js).
 
-const commas = (n) => (n == null ? '—' : n.toLocaleString('en-US'))
 
 // EVERY DURATION ON THIS PAGE CARRIES ITS UNIT. A column of "2:49" is only
 // obviously hours-and-minutes to someone who already knows what the page is

@@ -44,7 +44,7 @@ import {
 import { reclaimableBlobUrls, reclaimBlobs } from './ballpark-photo.js'
 import { authenticateAdmin } from './_lib/adminAuth.js'
 import { jsonResponse, readJsonBody } from './_lib/nodeHandler.js'
-import { getRedis } from './_lib/redis.js'
+import { getRedis, hashFromReply } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as copy.js: @clerk/backend's verifyToken
 // pulls in internals Vercel's edge sandbox rejects.
@@ -68,20 +68,6 @@ function reply(res, body, status = 200, extraHeaders = {}) {
 // removing either alone reintroduces the bug the other prevents.
 function identityRedis() {
   return getRedis({ automaticDeserialization: false })
-}
-
-// Pair Upstash's HGETALL reply into `{ field: value }`. Identical to
-// api/copy.js's, and deliberately a second copy rather than a shared import:
-// this is a workaround for a client option each endpoint sets for its own
-// reasons, and a future client version that pairs the hash up would be a WIDENING
-// for whichever endpoint upgraded first. An object is passed through unchanged
-// so that day is a no-op rather than a break.
-export function hashFromReply(reply) {
-  if (!reply || typeof reply !== 'object') return {}
-  if (!Array.isArray(reply)) return reply
-  const out = {}
-  for (let i = 0; i + 1 < reply.length; i += 2) out[String(reply[i])] = reply[i + 1]
-  return out
 }
 
 // Is this a body the write can act on at all? Only a patch: unlike /api/copy,

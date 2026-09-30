@@ -49,10 +49,8 @@ import {
   signedFallback,
 } from '../person.js'
 import { gamePath } from '../../lib/route.js'
+import { isoToday } from '../../lib/dates.js'
 
-export function isoToday() {
-  return new Date().toISOString().slice(0, 10)
-}
 export function dayBefore(iso) {
   const d = new Date(`${iso}T00:00:00Z`)
   d.setUTCDate(d.getUTCDate() - 1)

@@ -35,7 +35,7 @@ import { describeLogoRejection, LOGO_MAX_BYTES } from '../src/lib/logoArt.js'
 import { IDENTITY_DIMENSIONS, identityFieldId } from '../src/lib/identity/fields.js'
 import { isOwnBlobUrlUnder, sniffImage } from './ballpark-photo.js'
 import { authenticateAdmin } from './_lib/adminAuth.js'
-import { jsonResponse, readRawBody, requestUrl } from './_lib/nodeHandler.js'
+import { privateJson, readRawBody, requestUrl } from './_lib/nodeHandler.js'
 
 // Node runtime, not edge — @clerk/backend's verifyToken pulls in internals
 // Vercel's edge sandbox rejects. Same reason as api/copy.js.
@@ -47,22 +47,19 @@ export const config = { runtime: 'nodejs' }
 const SLOTS = new Set(IDENTITY_DIMENSIONS.logo.keys)
 
 export default async function handler(req, res) {
-  const reply = (body, status = 200) =>
-    jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
-
-  if (req.method !== 'POST') return reply({ error: 'method not allowed' }, 405)
+  if (req.method !== 'POST') return privateJson(res, { error: 'method not allowed' }, 405)
 
   const token = process.env.BLOB_READ_WRITE_TOKEN
-  if (!token) return reply({ error: 'image store not configured' }, 501)
+  if (!token) return privateJson(res, { error: 'image store not configured' }, 501)
 
   const userId = await authenticateAdmin(req)
-  if (!userId) return reply({ error: 'forbidden' }, 403)
+  if (!userId) return privateJson(res, { error: 'forbidden' }, 403)
 
   const { searchParams } = requestUrl(req)
   const teamId = searchParams.get('teamId') || ''
   const slot = searchParams.get('slot') || ''
-  if (!/^[1-9]\d*$/.test(teamId)) return reply({ error: 'unknown team' }, 400)
-  if (!SLOTS.has(slot)) return reply({ error: 'unknown slot' }, 400)
+  if (!/^[1-9]\d*$/.test(teamId)) return privateJson(res, { error: 'unknown team' }, 400)
+  if (!SLOTS.has(slot)) return privateJson(res, { error: 'unknown slot' }, 400)
 
   const bytes = await readRawBody(req, LOGO_MAX_BYTES)
   // null for BOTH "nothing arrived" and "went over the cap"; content-length is
@@ -71,18 +68,18 @@ export default async function handler(req, res) {
   if (!bytes) {
     const declared = Number(req.headers?.['content-length'] ?? 0)
     return declared > LOGO_MAX_BYTES
-      ? reply({ error: `image too large — the limit is ${LOGO_MAX_BYTES / 1024} KB` }, 413)
-      : reply({ error: 'no image received' }, 400)
+      ? privateJson(res, { error: `image too large — the limit is ${LOGO_MAX_BYTES / 1024} KB` }, 413)
+      : privateJson(res, { error: 'no image received' }, 400)
   }
 
   // The curated-art standard, judged by the same function the dev lab and its
   // endpoint already share (512x512 PNG under the cap) — so a file this refuses
   // is one /identity-lab would have refused, with the same sentence.
   const rejection = describeLogoRejection(bytes)
-  if (rejection) return reply({ error: rejection }, 415)
+  if (rejection) return privateJson(res, { error: rejection }, 415)
 
   const sig = sniffImage(bytes)
-  if (!sig || sig.ext !== 'png') return reply({ error: 'not a PNG' }, 415)
+  if (!sig || sig.ext !== 'png') return privateJson(res, { error: 'not a PNG' }, 415)
 
   // Lazy import, so the module still loads (and answers 501) where the
   // dependency exists but the store is not configured.
@@ -102,7 +99,7 @@ export default async function handler(req, res) {
       cacheControlMaxAge: 31_536_000,
     })
   } catch {
-    return reply({ error: 'upload failed' }, 502)
+    return privateJson(res, { error: 'upload failed' }, 502)
   }
 
   // Best-effort cleanup of a blob this one replaces — after a successful put,
@@ -118,5 +115,5 @@ export default async function handler(req, res) {
     }
   }
 
-  return reply({ url: uploaded.url, field: identityFieldId('logo', teamId, slot) })
+  return privateJson(res, { url: uploaded.url, field: identityFieldId('logo', teamId, slot) })
 }

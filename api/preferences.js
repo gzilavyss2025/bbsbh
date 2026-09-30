@@ -42,18 +42,12 @@ import {
   normalizeEntry,
 } from '../src/lib/account/preferences.js'
 import { authenticateUser } from './_lib/auth.js'
-import { jsonResponse, readJsonBody } from './_lib/nodeHandler.js'
+import { privateJson, readJsonBody } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js/spoiled-days.js/stamps.js:
 // @clerk/backend's verifyToken pulls in internals Vercel's edge sandbox rejects.
 export const config = { runtime: 'nodejs' }
-
-// Per-user, auth-gated data — never let a shared cache (or the browser) hold one
-// user's settings and hand them to another request.
-function reply(res, body, status = 200) {
-  return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
-}
 
 // Re-validate whatever Redis hands back before it reaches a client, exactly as
 // spoiled-days.js and stamps.js do: a hand-edited or cross-version hash can only
@@ -108,16 +102,16 @@ export async function handleRequest(req, res, redis, userId) {
   const key = `prefs:${userId}`
 
   if (req.method === 'GET') {
-    return reply(res, { prefs: await readAll(redis, key) })
+    return privateJson(res, { prefs: await readAll(redis, key) })
   }
 
   // POST — publish this device's decision about ONE preference.
   const body = await readJsonBody(req)
-  if (body == null) return reply(res, { error: 'invalid body' }, 400)
+  if (body == null) return privateJson(res, { error: 'invalid body' }, 400)
 
   const field = body?.field
-  if (!isFieldName(field)) return reply(res, { error: 'unknown field' }, 400)
-  if (!isValidValue(field, body?.value)) return reply(res, { error: 'invalid value' }, 400)
+  if (!isFieldName(field)) return privateJson(res, { error: 'unknown field' }, 400)
+  if (!isValidValue(field, body?.value)) return privateJson(res, { error: 'invalid value' }, 400)
 
   // A clock further ahead than the skew bound is a broken device, not a choice;
   // clamp rather than refuse, so a user with a wrong system clock still keeps
@@ -139,29 +133,29 @@ export async function handleRequest(req, res, redis, userId) {
     try {
       await redis.hset(key, { [field]: next })
     } catch {
-      return reply(res, { error: 'write failed' }, 503)
+      return privateJson(res, { error: 'write failed' }, 503)
     }
   }
 
   // Answer with the whole stored document, not just the written field: the
   // client uses it to refresh its baseline AND to converge immediately when
   // another device's newer value won the comparison above.
-  return reply(res, { prefs: await readAll(redis, key) })
+  return privateJson(res, { prefs: await readAll(redis, key) })
 }
 
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
-    return reply(res, { error: 'method not allowed' }, 405)
+    return privateJson(res, { error: 'method not allowed' }, 405)
   }
 
   // Store BEFORE auth, so `curl` against this endpoint distinguishes "no Redis
   // credentials reaching the function" (501) from "the store is live and the
   // problem is elsewhere" (401) — the diagnosis docs/development.md rests on.
   const redis = getRedis()
-  if (!redis) return reply(res, { error: 'sync not configured' }, 501)
+  if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
 
   const auth = await authenticateUser(req)
-  if (!auth.ok) return reply(res, { error: auth.error }, auth.status)
+  if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
 
   return handleRequest(req, res, redis, auth.userId)
 }

@@ -16,6 +16,7 @@ import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { rate3 } from '../api/person/shared.js'
 
 // One person's career coaching page: a header (photo, current role or "last
 // managed"), an awards strip, a compact per-team managerial win-loss record,
@@ -124,10 +125,6 @@ function AwardsStrip({ awards }) {
   )
 }
 
-// ".302"-style rate: three decimals, no leading zero (baseball convention).
-function rate3(x) {
-  return Number.isFinite(x) ? x.toFixed(3).replace(/^0(?=\.)/, '') : '—'
-}
 // ERA / WHIP: two decimals, keep the leading digit.
 function rate2(x) {
   return Number.isFinite(x) ? x.toFixed(2) : '—'

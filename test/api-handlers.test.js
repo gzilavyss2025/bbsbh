@@ -21,7 +21,8 @@ import {
   authenticateUser,
   bearerToken,
 } from '../api/_lib/auth.js'
-import { redisConfigFromEnv } from '../api/_lib/redis.js'
+import { privateJson } from '../api/_lib/nodeHandler.js'
+import { hashFromReply, redisConfigFromEnv } from '../api/_lib/redis.js'
 import copyHandler from '../api/copy.js'
 import revealHandler, {
   isFullyWrappedUp,
@@ -857,4 +858,32 @@ test('the season cap still refuses when the live stamps reach it', async () => {
 
   assert.equal(res.statusCode, 409)
   assert.equal(res.json.error, 'season full')
+})
+
+// hashFromReply lives in _lib/redis.js and serves copy, identity,
+// contract-identity and page — all four read with automaticDeserialization off.
+test('hashFromReply pairs a flat HGETALL array, passes an object through, and answers {} for no data', () => {
+  assert.deepEqual(hashFromReply(['a', '1', 'b', '2']), { a: '1', b: '2' })
+  assert.deepEqual(hashFromReply({ a: '1' }), { a: '1' })
+  for (const empty of [null, undefined, [], '', 0]) assert.deepEqual(hashFromReply(empty), {})
+  assert.deepEqual(hashFromReply(['a', '1', 'orphan']), { a: '1' })
+})
+
+// One wrapper for the eight per-user handlers (account, ballpark-photo, books,
+// identity-logo, preferences, reveal, spoiled-days, stamps): a shared cache must
+// never hold their answers.
+test('privateJson answers JSON with private, no-store, status 200 by default', () => {
+  const res = nodeRes()
+  privateJson(res, { ok: true })
+  assert.equal(res.statusCode, 200)
+  assert.equal(res.headers['cache-control'], 'private, no-store')
+  assert.equal(res.headers['content-type'], 'application/json')
+  assert.deepEqual(res.json, { ok: true })
+})
+
+test('privateJson keeps the status it is given', () => {
+  const res = nodeRes()
+  privateJson(res, { error: 'nope' }, 401)
+  assert.equal(res.statusCode, 401)
+  assert.equal(res.headers['cache-control'], 'private, no-store')
 })

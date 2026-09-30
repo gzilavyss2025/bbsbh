@@ -44,17 +44,13 @@
 
 import { isSeasonNumber } from '../src/lib/stamps.js'
 import { authenticateUser } from './_lib/auth.js'
-import { jsonResponse } from './_lib/nodeHandler.js'
+import { privateJson } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as every other authenticated function
 // here: @clerk/backend's verifyToken pulls in internals Vercel's edge sandbox
 // rejects.
 export const config = { runtime: 'nodejs' }
-
-function reply(res, body, status = 200) {
-  return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
-}
 
 // Every key belonging to one user, resolved from the two indexes rather than a
 // SCAN. Pure apart from the two reads, and exported so the unit suite can pin
@@ -138,7 +134,7 @@ export async function erase(res, redis, userId) {
   // find the keys — the alternative is an unrecoverable residue reported as a
   // success. The client only wipes the device on `ok`.
   if (partial) {
-    return reply(res, { error: 'erase failed' }, 503)
+    return privateJson(res, { error: 'erase failed' }, 503)
   }
 
   // Deleted in one call where the client supports it, and never partially
@@ -147,13 +143,13 @@ export async function erase(res, redis, userId) {
   try {
     await redis.del(...keys)
   } catch {
-    return reply(res, { error: 'erase failed' }, 503)
+    return privateJson(res, { error: 'erase failed' }, 503)
   }
 
   // Counts of what was addressed, so the confirmation can be specific without
   // naming a single game. Note what is absent from this response and from this
   // whole file: any game, club, date, or number that came out of a ballpark.
-  return reply(res, {
+  return privateJson(res, {
     ok: true,
     erased: { prefs: 1, spoiled: 1, scorebook: 1, stamps: seasons, reveal: reveals },
   })
@@ -161,16 +157,16 @@ export async function erase(res, redis, userId) {
 
 export default async function handler(req, res) {
   if (req.method !== 'DELETE') {
-    return reply(res, { error: 'method not allowed' }, 405)
+    return privateJson(res, { error: 'method not allowed' }, 405)
   }
 
   // Store before auth, same ordering and same diagnostic reason as every other
   // authenticated function here.
   const redis = getRedis()
-  if (!redis) return reply(res, { error: 'sync not configured' }, 501)
+  if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
 
   const auth = await authenticateUser(req)
-  if (!auth.ok) return reply(res, { error: auth.error }, auth.status)
+  if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
 
   return erase(res, redis, auth.userId)
 }

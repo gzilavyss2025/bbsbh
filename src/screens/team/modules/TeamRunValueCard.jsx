@@ -83,9 +83,8 @@ export function TeamRunValueCard({ data, clubName }) {
   )
 }
 
-// Same small helper the player card carries. Two copies of four lines rather
-// than a shared export nothing else would ever call — the convention
-// absChallenges.js's own local `ranked` sets.
+// Local ordinal. lib/format.js exports the shared one; this body is spelled
+// differently, so it was left as it is.
 function ordinal(n) {
   const rest = n % 100
   if (rest >= 11 && rest <= 13) return `${n}th`

@@ -10,7 +10,7 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { AsOfBanner } from '../../components/seal/AsOfBanner.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { PlayerTabBar } from './PlayerTabBar.jsx'
-import { monthDay } from './parts.jsx'
+import { monthDayName } from '../../lib/dates.js'
 import { Pill } from '../../components/ui/control/Pill.jsx'
 
 const TAB_TITLE = {
@@ -207,7 +207,7 @@ export function PlayerHubShell({ core, asOf = null, sportId = null, active, chil
             have the way back to live (ADR-0034's "The gap gets a way in"). */}
         {asOf && (
           <p className="hint hint--prose player__caveat">
-            Season tiles, game log and past-year rows are frozen to “entering {monthDay(asOf)}.”
+            Season tiles, game log and past-year rows are frozen to “entering {monthDayName(asOf)}.”
             The current-year row, the splits and the Advanced rates are full-season figures.
           </p>
         )}

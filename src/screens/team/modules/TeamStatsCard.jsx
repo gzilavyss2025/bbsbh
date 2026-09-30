@@ -1,11 +1,8 @@
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../components/ui/frame/Card.jsx'
+import { isoToday } from '../../../lib/dates.js'
 
 const DASH = '—'
-
-function isoToday() {
-  return new Date().toISOString().slice(0, 10)
-}
 
 // Sunday-first, matching the calendar week Date.getUTCDay() indexes (0=Sun).
 export const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
