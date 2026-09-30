@@ -77,6 +77,9 @@ export function selectWinProbPath(
       isScoring: !!e.about?.isScoringPlay,
       desc: e.result?.description ?? '',
       atBatIndex,
+      // Verified against gamePk 823738: resulting outs and recorded per-play WPA.
+      outs: Number.isInteger(e.count?.outs) ? e.count.outs : null,
+      delta: typeof e.homeTeamWinProbabilityAdded === 'number' ? e.homeTeamWinProbabilityAdded : null,
     })
   }
   return points

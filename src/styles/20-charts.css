@@ -210,13 +210,7 @@
 
 .winprob__pct { color: var(--text-on-ink); }
 
-/* Scales uniformly (default preserveAspectRatio) so the dots stay round and the
-   labels crisp. On a phone the viewBox ratio sets the height (~180px); on the
-   wide box-score layout max-height caps it and it letterboxes rather than
-   growing huge. Taller than before now that the decorative splitbar recap
-   (removed — it duplicated the split pills above and the chart's own bands
-   below) no longer claims its own slice of the card's height; the chart
-   grows into that freed space instead. */
+/* Preserve the chart's existing aspect ratio and desktop height cap. */
 .winprob__svg {
   display: block;
   width: 100%;
@@ -268,81 +262,44 @@
   fill: var(--text-caption);
 }
 
-/* Card-wide rule: these ▲/▼ are the ONLY top/bottom glyphs anywhere on this
-   card — the ledger below never reuses them (see .winprob__ledger-chip). */
+/* Compact half-inning landmarks; the readout and ledger use the same glyphs. */
 .winprob__inningarrow {
   font-size: var(--fs-caption);
 }
 
-/* ---- linked highlighting: chart markers ----
-   One hand-drawn baseball per selectWinProbBigPlays() entry — a circle plus
-   two seam arcs, all inline SVG (no fetched icon, same "nothing external"
-   rule the rest of the client's game-data rendering follows).
-   `.winprob__bigdot-hit` is an
-   invisible larger circle for a comfortable tap target around the small
-   visible glyph. `.winprob__bigdot-ball` scales as one unit via a CSS
-   transform (transform-box:fill-box pins the scale origin to the glyph's own
-   center, not the chart's corner). */
-.winprob__bigdot { cursor: pointer; }
-.winprob__bigdot-hit { fill: transparent; }
-.winprob__bigdot-ball {
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: scale(1.7);
-  transition: transform 0.15s ease;
-}
-
-.winprob__ball-body {
-  fill: var(--surface-inset);
-  stroke: var(--ink-1);
-  stroke-width: 0.9px;
-  transition: fill 0.15s ease, stroke 0.15s ease;
-}
-
-.winprob__ball-seam {
-  fill: none;
-  stroke: var(--clay);
-  stroke-width: 0.6px;
-  stroke-linecap: round;
-  opacity: 0.4;
-  transition: opacity 0.15s ease, stroke-width 0.15s ease;
-}
-
-.winprob__bigdot-ring {
-  r: 0px;
-  opacity: 0;
-  fill: var(--team-color);
-  transition: r 0.18s ease, opacity 0.18s ease;
-}
-
-.winprob__bigdot-label {
-  opacity: 0;
-  transition: opacity var(--dur-fast) ease;
+/* Paper-backed landmarks and a solid cursor stay readable over the logo tiles. */
+.winprob__explorer { position: relative; }
+.winprob__readout {
+  position: absolute;
+  inset: 0 0 auto;
   pointer-events: none;
-}
-.winprob__bigdot-label-bg { fill: var(--team-color); }
-.winprob__bigdot-label-text {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-1);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
-  font-weight: var(--w-bold);
-  fill: var(--team-text);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--space-1);
+  color: var(--text-body);
 }
-
-/* Active state: the tapped/hovered baseball grows and tints toward the
-   favored team's own color (seams stay --clay "seam red" — it never stops
-   reading as a ball), plus a soft halo and its own value label. Every OTHER
-   big-swing marker fades once something is active (.winprob.is-active) — an
-   idle chart shows every marker at equal, unhighlighted weight. */
-.winprob__bigdot.is-active .winprob__bigdot-ball { transform: scale(3.23); } /* 1.9 * the 1.7x base size */
-.winprob__bigdot.is-active .winprob__ball-body {
-  fill: color-mix(in srgb, var(--team-color) 55%, var(--surface-inset));
-  stroke: var(--team-color);
-  stroke-width: 1.1px;
+.winprob__hint { grid-column: 1 / -1; color: var(--text-caption); }
+.winprob__change { text-align: right; }
+.winprob__pct { display: inline-block; width: 4ch; text-align: right; }
+.winprob__svg { touch-action: pan-y; cursor: crosshair; }
+.winprob__svg:focus-visible { outline: none; }
+.winprob__explorer:has(.winprob__svg:focus-visible) .winprob__hint {
+  text-decoration: underline;
+  text-decoration-color: var(--focus-ring);
+  text-underline-offset: 3px;
 }
-.winprob__bigdot.is-active .winprob__ball-seam { opacity: 1; stroke-width: 0.8px; }
-.winprob__bigdot.is-active .winprob__bigdot-ring { r: 11px; opacity: 0.16; }
-.winprob__bigdot.is-active .winprob__bigdot-label { opacity: 1; }
-.winprob.is-active .winprob__bigdot:not(.is-active) .winprob__bigdot-ball { opacity: 0.32; }
+.winprob__cursor { pointer-events: none; }
+.winprob__cursor-halo { stroke: var(--surface-inset); stroke-width: 4; }
+.winprob__cursor-line { stroke: var(--text-body); stroke-width: 1.5; }
+.winprob__cursor circle { fill: var(--text-body); stroke: var(--surface-inset); stroke-width: 2.5; }
+.winprob__moment { pointer-events: none; }
+.winprob__moment circle { fill: var(--surface-inset); stroke: var(--text-body); stroke-width: 1.5; }
+.winprob__moment text { fill: var(--text-body); font-family: var(--font-mono); font-size: var(--fs-cell); font-weight: var(--w-bold); }
+.winprob__moment-number { font-family: var(--font-mono); color: var(--text-body); width: 1ch; flex-shrink: 0; }
 
 .winprob__subhead {
   margin: 10px 0 4px;
@@ -354,10 +311,7 @@
   color: var(--text-caption);
 }
 
-/* "How we got here" — a ruled ledger of the biggest revealed swings, newest
-   on top: a team-colored chip (abbreviation + signed % magnitude) with its
-   half-inning caption underneath, then the play in full (no truncation) —
-   and the ledger half of the chart↔ledger linked highlight above. */
+/* Biggest revealed swings: compact metadata above each full play description. */
 .winprob__ledger-list {
   margin: 0;
   padding: 0;
@@ -365,34 +319,36 @@
 }
 
 .winprob__ledger-row {
-  display: flex;
+  display: block;
   align-items: flex-start;
   gap: var(--space-2h);
   padding: var(--space-1h) var(--space-1h);
   margin: 0 -6px;
   border-top: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
   font-size: var(--fs-compact);
   cursor: pointer;
-  transition: background 0.15s ease, opacity 0.15s ease;
 }
 
 .winprob__ledger-row:first-child {
   border-top: 0;
 }
 
+.winprob__ledger-row:hover,
+.winprob__ledger-row:focus-visible,
 .winprob__ledger-row.is-active {
   background: color-mix(in srgb, var(--team-color) 12%, var(--surface-inset));
-  box-shadow: inset 3px 0 0 var(--team-color);
+
 }
-.winprob.is-active .winprob__ledger-row:not(.is-active) { opacity: 0.5; }
+
+.winprob__ledger-row.is-active .winprob__moment-number,
+.winprob__ledger-row:focus-visible .winprob__moment-number { text-decoration: underline; }
+.winprob__ledger-row:focus-visible { outline: none; }
 
 .winprob__ledger-meta {
   flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 /* The swing's club and size, a solid figure Pill tag (#1131, #1186) in the
@@ -416,6 +372,7 @@
 }
 
 .winprob__ledger-desc {
+  padding-top: var(--space-1);
   flex: 1 1 auto;
   min-width: 0;
   margin: 0;
@@ -428,6 +385,7 @@
    ledger-desc { text-transform: none }` rule here would lose to `#root *` on
    specificity and silently stay shouted — this is that exact trap. */
 #root .winprob__ledger-desc {
+  padding-top: var(--space-1);
   text-transform: none; /* caps-exempt: feed-sourced play description reads as a natural sentence, same idiom as .pbp__desc */
 }
 

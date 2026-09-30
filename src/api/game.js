@@ -204,6 +204,8 @@ export function mergeFeedDiff(base, diffResponse, gamePk) {
 export const WIN_PROB_FIELDS = [
   'homeTeamWinProbability',
   'homeTeamWinProbabilityAdded',
+  'count',
+  'outs',
   'atBatIndex',
   'about',
   'captivatingIndex',
