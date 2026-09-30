@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { favoriteAccentColor } from '../../lib/teams.js'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // Rounding straight to 1 decimal would show "100.0%" for anything from
 // 99.95% up to a true 2000/2000 — indistinguishable from actual certainty.
@@ -24,20 +25,8 @@ function pct(n) {
 // it, focus moves to the close button on open and back to the trigger on
 // close.
 export function PostseasonOddsModal({ divisionName, rows, onClose }) {
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   const sims = rows.find((r) => r.sims != null)?.sims ?? null
 
