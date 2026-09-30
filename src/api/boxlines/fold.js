@@ -42,7 +42,7 @@
 // looks at them. It counts rows boxlines/rows.js already approved, and a fold
 // can only ever describe a set the gate allowed.
 
-import { outsToIp } from '../person/shared.js'
+import { outsToIp } from '../../lib/math/innings.js'
 
 // What an entry's two figures are CALLED, in the order `foldLine` returns them
 // and the vocabulary the card's own columns already print (careerSplits.js's

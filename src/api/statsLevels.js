@@ -24,6 +24,7 @@
 import { getJson } from './statsapi.js'
 import { firstLast } from './person.js'
 import { teamAbbr } from '../lib/teams.js'
+import { outsToIp } from '../lib/math/innings.js'
 import { fetchStaticTeams } from './teams-static.js'
 
 // A whole level's season lines for one group ('hitting'|'pitching'): one split
@@ -164,8 +165,6 @@ const num = (x) => {
 // Rate = numerator / denominator, guarded so an empty denominator is 0 (not
 // NaN/Infinity) — the descriptors' formatters expect a finite number.
 const rate = (n, d) => (d > 0 ? n / d : 0)
-// Outs → "X.Y" innings-pitched string (the shape teamLeaders' ipToOuts parses back).
-const outsToIp = (outs) => `${Math.floor(outs / 3)}.${outs % 3}`
 
 // Sum a player's hitting splits into one stat object shaped like the API's, with
 // the rate fields the descriptors read (avg/obp/slg/ops/babip) recomputed from

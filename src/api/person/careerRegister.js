@@ -1,9 +1,9 @@
 // Career register — the unified MLB + MiLB stat table — plus level
 // progression and the chronological career timeline. See ../person.js's
 // header for the module's overall spoiler footing.
-
 import { SPORT_LABEL, MILB_LEVELS } from '../../lib/teams.js'
-import { ipToOuts, meetsWorkload, CUP_OF_COFFEE_FLOOR, REHAB_CAP, txnDate, transactionTeamRanks } from '../rehab-policy.js'
+import { meetsWorkload, CUP_OF_COFFEE_FLOOR, REHAB_CAP, txnDate, transactionTeamRanks } from '../rehab-policy.js'
+import { ipToOuts } from '../../lib/math/innings.js'
 import { DASH, num } from './shared.js'
 import { aggregateSplits, withoutMultiTeamAggregate } from './stats.js'
 import { isIlPlacementTxn } from './activity.js'

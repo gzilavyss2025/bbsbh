@@ -5,6 +5,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'
 import { extraInningsOf } from '../api/select.js'
+import { outsToIp } from '../lib/math/innings.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
@@ -115,7 +116,7 @@ export function FirstScorebookPage() {
           teamWins,
           teamLosses: pitcher.starts.length - teamWins,
           strikeOuts: pitcher.starts.reduce((n, s) => n + s.k, 0),
-          inningsPitched: `${Math.floor(outs / 3)}.${outs % 3}`,
+          inningsPitched: outsToIp(outs),
           era: outs ? (earnedRuns * 9) / (outs / 3) : 0,
           whip: outs ? (walks + hits) / (outs / 3) : 0,
         }
@@ -132,7 +133,7 @@ export function FirstScorebookPage() {
     return {
       arms: rotation.length,
       starts: starts.length,
-      inningsPitched: `${Math.floor(outs / 3)}.${outs % 3}`,
+      inningsPitched: outsToIp(outs),
       era: (earnedRuns * 9) / (outs / 3),
       strikeOuts: starts.reduce((n, s) => n + s.k, 0),
       teamWins,

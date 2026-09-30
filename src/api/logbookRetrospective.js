@@ -1,4 +1,5 @@
 import { contextNeutralPoints } from './performanceScore.js'
+import { outsToIp } from '../lib/math/innings.js'
 
 // The Logbook retrospective's ported First Scorebook sections — best
 // individual performances, most memorable moments, combined leaders, and the
@@ -39,7 +40,6 @@ import { contextNeutralPoints } from './performanceScore.js'
 // fetch failed) is simply left out of these sections — the same graceful
 // degradation as a stamp missing its schedule facts in logbookStats.js.
 
-const ipString = (outs) => `${Math.floor(outs / 3)}.${outs % 3}`
 const era = (er, outs) => (outs ? (er * 9) / (outs / 3) : 0)
 const whip = (bb, h, outs) => (outs ? (bb + h) / (outs / 3) : 0)
 
@@ -166,7 +166,7 @@ function leaders(rows) {
       teamId: row.teamId,
       team: row.team,
       games: row.games,
-      pitching: { ...row.s, inningsPitched: ipString(row.outs) },
+      pitching: { ...row.s, inningsPitched: outsToIp(row.outs) },
       whip: whip(row.s.baseOnBalls, row.s.hits, row.outs),
     }))
     .sort(
@@ -261,7 +261,7 @@ function pitchingRoles(rows) {
       losses: row.losses,
       teamWins: row.teamWins,
       teamLosses: row.teamLosses,
-      inningsPitched: ipString(row.outs),
+      inningsPitched: outsToIp(row.outs),
       era: era(row.s.earnedRuns, row.outs),
       whip: whip(row.s.baseOnBalls, row.s.hits, row.outs),
       avgPitches: row.games ? row.pitches / row.games : 0,
@@ -278,7 +278,7 @@ function pitchingRoles(rows) {
       appearances: row.games,
       saves: row.saves,
       holds: row.holds,
-      inningsPitched: ipString(row.outs),
+      inningsPitched: outsToIp(row.outs),
       era: era(row.s.earnedRuns, row.outs),
       whip: whip(row.s.baseOnBalls, row.s.hits, row.outs),
       pitching: row.s,

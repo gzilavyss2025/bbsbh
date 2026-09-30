@@ -26,10 +26,6 @@ export function rate2(v) {
   return Number.isFinite(n) ? n.toFixed(2).replace(/^0(?=\.)/, '') : null
 }
 
-export function outsToIp(outs) {
-  return `${Math.floor(outs / 3)}.${outs % 3}`
-}
-
 // A proportion field (the API sends ".406" strings) as a one-decimal percent.
 export function propPct(v) {
   const n = Number(v)

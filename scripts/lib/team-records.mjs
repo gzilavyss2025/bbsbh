@@ -21,6 +21,7 @@
 // import them (the lib/roster.mjs convention).
 
 import { isPlateAppearance } from './long-at-bats.mjs'
+import { ipToOuts } from '../../src/lib/math/innings.js'
 
 // ---------------------------------------------------------------------------
 // Which games count
@@ -211,15 +212,6 @@ export function lastAtBatOutcome(innings, homeWon) {
 // ---------------------------------------------------------------------------
 // Pitching
 // ---------------------------------------------------------------------------
-
-// Innings pitched ("5.1" = 5⅓) → outs. Same conversion as the app's own
-// ipToOuts (src/screens/team/data/shared.js, api/teamLeaders.js); duplicated
-// here rather than imported because those live under src/ and carry JSX-era
-// imports a generator has no business loading.
-export function ipToOuts(ip) {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return (Number(whole) || 0) * 3 + (Number(frac[0]) || 0)
-}
 
 // A quality start: at least 6 innings, at most 3 earned runs. The standard
 // definition, and deliberately not a house variant.

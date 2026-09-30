@@ -14,7 +14,8 @@ import { careerTimelineView } from './person.js'
 import { fetchPersonStats, fetchMilbYearByYear, fetchMilbCareer } from './person-fetch.js'
 import { fetchTeam } from './team.js'
 import { historicalParentOrg } from './milbHistory.js'
-import { ipToOuts, meetsWorkload, CUP_OF_COFFEE_FLOOR } from './rehab-policy.js'
+import { meetsWorkload, CUP_OF_COFFEE_FLOOR } from './rehab-policy.js'
+import { ipToOuts } from '../lib/math/innings.js'
 
 // A soft background wash for a team, derived from its own logo colors so the
 // full-color mark reads cleanly on it with no border or drop shadow (see

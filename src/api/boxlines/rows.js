@@ -44,7 +44,7 @@
 // games), so day/night is read off the schedule record too.
 import { gamePath } from '../../lib/route.js'
 import { hitterLine, pitcherLine } from '../person/gameLog.js'
-import { ipToOuts } from '../rehab-policy.js'
+import { ipToOuts } from '../../lib/math/innings.js'
 
 const n = (v) => Number(v) || 0
 

@@ -24,11 +24,11 @@ import {
   seasonOf,
   cutoffFor,
   injuredListFrom,
-  ipToOuts,
   preferredLineupFrom,
   rosterHittingStat,
   rosterPitchingStat,
 } from './shared.js'
+import { ipToOuts } from '../../../lib/math/innings.js'
 
 const DASH = '—'
 const ROLE_ORDER = { SP: 0, CL: 1, RP: 2 }

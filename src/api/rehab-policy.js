@@ -8,15 +8,11 @@
 // Pure — no fetching, no DOM. Every export here is meant to be imported, not
 // re-implemented; if a caller needs its own copy, extend this file instead.
 
+import { ipToOuts } from '../lib/math/innings.js'
+
 function num(x) {
   const n = Number(x)
   return Number.isFinite(n) ? n : 0
-}
-
-// Innings pitched ("104.1" = 104 ⅓) -> outs, so multi-stint lines sum right.
-export function ipToOuts(ip) {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return num(whole) * 3 + num(frac[0])
 }
 
 // A minor-league stint clears a workload threshold in whichever unit fits the

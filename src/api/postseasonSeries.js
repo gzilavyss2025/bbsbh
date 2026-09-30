@@ -18,6 +18,7 @@ import { getJson } from './statsapi.js'
 import { BATTING_CATEGORIES, int, rate3 } from './postseasonLeaders.js'
 import { startingPositionAbbr } from './select.js'
 import { rosterGroups } from './postseason/roster.js'
+import { outsToIp } from '../lib/math/innings.js'
 
 export { BATTING_CATEGORIES }
 
@@ -77,9 +78,6 @@ async function fetchGameBoxscore(gamePk) {
   }
 }
 
-// "6.2" — box score innings-pitched notation (whole innings + outs left over).
-const ipFormat = (outs) => `${Math.floor(outs / 3)}.${outs % 3}`
-
 // `uncapped: true` (HR, W, SV, ER — see SERIES_UNCAPPED_FLOOR) lifts the
 // SERIES_LIMIT cut when the whole qualifying pool is barely bigger than it.
 function topBy(rows, key, format, { uncapped = false } = {}) {
@@ -117,7 +115,7 @@ function rankPitching(map) {
     wins: topBy(rows, 'wins', int, { uncapped: true }),
     strikeouts: topBy(rows, 'strikeOuts', int),
     saves: topBy(rows, 'saves', int, { uncapped: true }),
-    inningsPitched: topBy(rows, 'outs', ipFormat),
+    inningsPitched: topBy(rows, 'outs', outsToIp),
     earnedRuns: topBy(rows, 'earnedRuns', int, { uncapped: true }),
   }
 }
