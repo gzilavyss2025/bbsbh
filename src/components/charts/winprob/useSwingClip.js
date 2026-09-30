@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { eligibleHighlightForPlay } from '../../../api/highlights.js'
+import { highlightForPlay } from '../../../api/highlights.js'
 import { CLIP_PACKAGE, CLIP_RAW, watchClipSource, resolveRawClip } from '../../highlights/watchClip.js'
 
 // The film behind one big-swing row, opened in the same HighlightSheet the
@@ -7,6 +7,11 @@ import { CLIP_PACKAGE, CLIP_RAW, watchClipSource, resolveRawClip } from '../../h
 // MLB's edited package when one exists, else the raw clip of the terminal
 // pitch, and only the TAP asks a host anything — one lookup, one playId, never
 // a prefetch. A hit is kept per playId; a miss is not (watchClip.js says why).
+//
+// The package comes from highlightForPlay, NOT eligibleHighlightForPlay. A swing
+// row exists only for a revealed play, and a swing is not a "best play" claim,
+// so the Play of the Game filter does not apply: any package MLB cut for the
+// play is offered, as on the play-by-play card.
 //
 // Spoiler-safe for the same reason the chart is: a swing row exists only for a
 // play the reader has already revealed, so the clip's burned-in scorebug shows
@@ -24,7 +29,7 @@ export function useSwingClip({ highlights = null, filmEligible = true } = {}) {
   useEffect(() => () => abortRef.current?.abort(), [])
 
   const sourceFor = (playId) => {
-    const item = eligibleHighlightForPlay(highlights, playId)
+    const item = highlightForPlay(highlights, playId)
     return { item, kind: watchClipSource(item, playId, { filmEligible }) }
   }
 

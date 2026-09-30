@@ -14,7 +14,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { computePlayOfTheGame } from '../src/api/boxscore.js'
 import { WIN_PROB_FIELDS } from '../src/api/game.js'
-import { eligibleHighlightForPlay } from '../src/api/highlights.js'
+import { eligibleHighlightForPlay, highlightForPlay } from '../src/api/highlights.js'
 
 // One /winProbability row, shaped like the real endpoint's (see winprob.test.js).
 // `homeTeamWinProbabilityAdded` is the per-play DELTA the ranking sorts on.
@@ -156,4 +156,20 @@ test('eligibleHighlightForPlay degrades quietly on every absent input', () => {
   // 54% of content items carry no guid (see classifyHighlight's header) — one
   // must never match a null playId by accident.
   assert.equal(eligibleHighlightForPlay([{ id: 'guidless', keywordsAll: [] }], null), null)
+})
+
+test('highlightForPlay returns any clip MLB cut for the play, filtered or not', () => {
+  // The swing list and the play-by-play card offer a revealed play's package
+  // whatever its sign. The positive filter is for the Play of the Game claim only.
+  const rejected = clip('aaa', ['highlight', 'abs'])
+  assert.equal(eligibleHighlightForPlay([rejected], 'aaa'), null, 'the filter still rejects it')
+  assert.equal(highlightForPlay([rejected], 'aaa'), rejected)
+})
+
+test('highlightForPlay degrades quietly on every absent input', () => {
+  const items = [clip('aaa', ['highlight', 'hitting'])]
+  assert.equal(highlightForPlay(items, null), null, 'no playId resolved')
+  assert.equal(highlightForPlay(items, 'zzz'), null, 'no clip for this play')
+  assert.equal(highlightForPlay(null, 'aaa'), null, 'highlights not fetched yet')
+  assert.equal(highlightForPlay([{ id: 'guidless' }], null), null)
 })
