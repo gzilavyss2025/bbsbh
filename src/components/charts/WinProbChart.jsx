@@ -49,7 +49,11 @@ const W = 328
 const H = 220
 // No axis labels to clear room for (see the block comment above) — just a
 // small inset. The readout sits above the <svg>, not in this top pad,
-// and lib/wpa/wpaBandColors.js's WPA_PLOT_SIZE repeats these four numbers.
+// and lib/wpa/wpaBandColors.js's WPA_PLOT_SIZE repeats these numbers. The
+// bands run the full width, edge to edge with the card (.winprob__svg bleeds
+// past the card's padding). Only the plays sit inside PAD_L/PAD_R, so a
+// numbered marker or the cursor at the first or last play is not cut off;
+// the line runs flat out to each edge.
 const PAD_L = 8
 const PAD_R = 8
 const PAD_T = 10
@@ -296,16 +300,14 @@ export function WinProbChart({
   const x = (i) => (n === 1 ? PLOT_L : PLOT_L + (i / (n - 1)) * PLOT_W)
   const y = (h) => PLOT_T + (1 - h / 100) * PLOT_H
 
-  const linePath = pts
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(p.home).toFixed(1)}`)
-    .join(' ')
+  const linePath =
+    `M 0 ${y(pts[0].home).toFixed(1)} ` +
+    pts.map((p, i) => `L ${x(i).toFixed(1)} ${y(p.home).toFixed(1)}`).join(' ') +
+    ` L ${W} ${y(pts[n - 1].home).toFixed(1)}`
 
   // Home band: the area between the line and the baseline. The away band is the
   // plot rect behind it, so the two always tile the full height.
-  const homeArea =
-    `M ${x(0).toFixed(1)} ${PLOT_B} ` +
-    pts.map((p, i) => `L ${x(i).toFixed(1)} ${y(p.home).toFixed(1)}`).join(' ') +
-    ` L ${x(n - 1).toFixed(1)} ${PLOT_B} Z`
+  const homeArea = `M 0 ${PLOT_B} L${linePath.slice(1)} L ${W} ${PLOT_B} Z`
 
   const scoring = pts
     .map((p, i) => (p.isScoring ? i : -1))
@@ -453,9 +455,9 @@ export function WinProbChart({
         {/* Away band fills the whole plot; the home band is painted over it. */}
         <rect
           className="winprob__band winprob__band--away"
-          x={PLOT_L}
+          x={0}
           y={PLOT_T}
-          width={PLOT_W}
+          width={W}
           height={PLOT_H}
           style={{ fill: `url(#${awayPatternId})` }}
         />

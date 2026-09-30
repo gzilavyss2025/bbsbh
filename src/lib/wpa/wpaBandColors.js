@@ -23,11 +23,11 @@ import { DEFAULT_PINSTRIPE_COLOR } from './wpaDefaults.js'
 // would actually look like in the app.
 const W = 328
 const H = 220
-const PAD_L = 8
-const PAD_R = 8
 const PAD_T = 10
 const PAD_B = 10
-export const WPA_PLOT_SIZE = { width: W - PAD_R - PAD_L, height: H - PAD_B - PAD_T }
+// The bands run the full width; only the plotted plays sit inside the
+// chart's side insets (WinProbChart.jsx).
+export const WPA_PLOT_SIZE = { width: W, height: H - PAD_B - PAD_T }
 
 // A handful of clubs' band background is better off as something OTHER than
 // their TEAM_COLOR_PAIRS primary (teams.js) — a lighter secondary shade that

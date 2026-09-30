@@ -69,16 +69,12 @@
 
 .winprob__pct { display: inline-block; width: 4ch; text-align: right; color: var(--text-on-ink); }
 
-/* The readout and the plot share one column, capped at the width where the
-   plot reaches 260px tall (the viewBox is 328 x 220), so the readout's right
-   edge stays on the plot's right edge on a wide box score. */
-.winprob__explorer {
-  max-width: calc(260px * 328 / 220);
-  margin-inline: auto;
-}
+/* The plot bleeds past the card's side padding, so its bands meet the
+   card's edges (the Card's overflow: hidden clips it there). */
 .winprob__svg {
   display: block;
-  width: 100%;
+  width: calc(100% + 2 * var(--space-3h));
+  margin-inline: calc(-1 * var(--space-3h));
   height: auto;
   touch-action: pan-y;
   cursor: crosshair;
