@@ -14,6 +14,13 @@
 // It (re)builds every view in .scratch/research.duckdb and prints a smoke
 // test: a real join between two Contender Diary panels on (year, teamId).
 //
+// This is the FIRST thing a research spike opens (#1117). Before a spike pulls
+// anything from statsapi, read the catalog in docs/agents/research-database.md
+// and query what exists. Flags:
+//   node scripts/research-db.mjs --sql "SELECT ... FROM <view> LIMIT 5"
+//   node scripts/research-db.mjs --markdown    # the view list, with row counts
+//   node scripts/research-db.mjs --uncovered   # tracked JSON that is not a view
+//
 // To query interactively from another script, open the same file:
 //   import { DuckDBInstance } from '@duckdb/node-api';
 //   const instance = await DuckDBInstance.create('.scratch/research.duckdb');
@@ -71,161 +78,44 @@
 // is exactly the case the DuckDB docs call out for explicit read_json().
 // These two views share a (year, teamId) key and are the smoke-test join.
 
-import { DuckDBInstance } from '@duckdb/node-api';
-import { existsSync, mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..');
 const DB_PATH = join(REPO_ROOT, '.scratch', 'research.duckdb');
 
-// Every cataloged panel: [relative path (globs allowed), notes].
-// Two entries use a glob instead of a literal filename because their
-// on-disk name carries a date stamp or lives in a sharded directory; a
-// glob keeps the view valid as those files are regenerated or added to.
-const PANEL_PATHS = [
-  '.scratch/team-success/outcome-ladder.json',
-  '.scratch/team-success/roster-age.json',
-  '.scratch/team-success/roster-age-cache.json',
-  '.scratch/team-success/postseason-experience.json',
-  '.scratch/team-success/postseason-usage.json',
-  '.scratch/team-success/postseason-boxscore-cache.json',
-  '.scratch/team-success/prior-postseason-cache.json',
-  '.scratch/team-success/october-texture-findings.json',
-  '.scratch/team-success/roster-age-deadline.json',
-  '.scratch/team-success/roster-age-deadline-cache.json',
-  '.scratch/team-success/trade-deadline-panel.json',
-  '.scratch/team-success/tenure-lag-panel.json',
-  '.scratch/team-success/mlb-field-cache.json',
-  '.scratch/team-success/milb-field-cache.json',
-  '.scratch/team-success/exit-reason-mix.json',
-  '.scratch/team-success/exit-reason-mix-findings.json',
-  '.scratch/team-success/free-agency-market.json',
-  '.scratch/team-success/free-agency-market-findings.json',
-  '.scratch/level-benchmarks/raw.json',
-  '.scratch/level-benchmarks/dates.json',
-  '.scratch/level-benchmarks/homegrown-cohort.json',
-  '.scratch/level-benchmarks/homegrown-panel.json',
-  '.scratch/level-benchmarks/milb-cohort-cache.json',
-  '.scratch/level-benchmarks/milb-mlb-cache.json',
-  '.scratch/level-benchmarks/perf-pool.json',
-  '.scratch/level-benchmarks/draft-cache.json',
-  '.scratch/level-benchmarks/attendance-cache.json',
-  '.scratch/level-benchmarks/standings-cache.json',
-  '.scratch/level-benchmarks/teamstats-cache.json',
-  '.scratch/level-benchmarks/context-panel.json',
-  '.scratch/level-benchmarks/homegrown-outcomes.json',
-  '.scratch/level-benchmarks/homegrown-duration-model.json',
-  '.scratch/level-benchmarks/homegrown-winning.json',
-  '.scratch/level-benchmarks/homegrown-precheck.json',
-  '.scratch/level-benchmarks/team-windows.json',
-  '.scratch/level-benchmarks/orgmap-ext.json',
-  '.scratch/level-benchmarks/orgmap-wide.json',
-  '.scratch/level-benchmarks/era-hump.json',
-  '.scratch/level-benchmarks/org-regression.json',
-  '.scratch/level-benchmarks/org-timing.json',
-  '.scratch/level-benchmarks/org-variance-components.json',
-  '.scratch/level-benchmarks/findings.json',
-  '.scratch/prospect-traits/bio.json',
-  '.scratch/prospect-traits/awards.json',
-  '.scratch/prospect-traits/mlb.json',
-  '.scratch/prospect-traits/arsenal.json',
-  '.scratch/prospect-traits/league.json',
-  '.scratch/prospect-traits/award-catalog.json',
-  '.scratch/prospect-traits/q1-rookie-traits.json',
-  '.scratch/prospect-traits/q2-size.json',
-  '.scratch/prospect-traits/q3-pitchers.json',
-  '.scratch/prospect-traits/q5-final-four.json',
-  // The service-clock spike (docs/service-time-debut-clock.md). panel.json is
-  // one row per major-league debut 2005-2025 with the season's service line,
-  // the wire-resolved roster-add date and the roster-need counts beside it.
-  // The 47MB transaction wire it was built from is git-ignored and is not
-  // cataloged; rebuild it with .scratch/service-clock/pull.mjs.
-  '.scratch/service-clock/panel.json',
-  '.scratch/service-clock/controls.json',
-  '.scratch/service-clock/k0-blank-rate.json',
-  // Historical Top Prospects lists, from TWO publications
-  // (.scratch/top-prospects-history/pull.mjs for 2009-2024, pull-ba.mjs for
-  // 2005-2008, #946): rows.json is one row per (season, rank, mlbId), 2005-
-  // 2024 -- mlbId joins directly to prospect-traits/bio.json above, no
-  // crosswalk. Every row carries a `source` field, "mlb-pipeline" or
-  // "baseball-america" -- the two rankings are never pooled without checking
-  // it (.scratch/prospect-value/panel.mjs filters to "mlb-pipeline" alone).
-  // seasons.json is the per-season coverage record (2005-2024): status
-  // ("ok"/"unavailable"), list depth, row count, fetch timestamp -- depth is
-  // NOT assumed 100 (2009-2011 are top-50 lists; 2020/2021 top out at 99,
-  // confirmed not a parsing gap). Deliberately a plain top-level ARRAY for
-  // both files, not a {meta,rows} wrapper -- a sibling panel in this wave
-  // registered that shape and it threw on every row-grain query; a bare array
-  // registers as one row per element with no flattening step needed.
-  '.scratch/top-prospects-history/rows.json',
-  '.scratch/top-prospects-history/seasons.json',
-  // What a ranking is worth in dollars (docs/prospect-ranking-value.md,
-  // .scratch/prospect-value/). panel.json is one row per player in the UNION of
-  // the ranked population and the 3,061-man debut cohort, carrying the rank
-  // facts, the career earnings joined from salaries.csv, and `windowStatus` --
-  // the flag that says whether the man's ranking window sat inside a published
-  // list at all. A 2006 debut is 'censored', NOT unranked: no list exists for
-  // his ranking years. Any query that compares ranked against unranked must
-  // filter windowStatus = 'observed-deep' or it is measuring a data gap.
-  // Same plain-ARRAY shape as rows.json above, for the same reason; the
-  // metadata sits beside it in panel-meta.json rather than wrapping it.
-  '.scratch/prospect-value/panel.json',
-  '.scratch/prospect-value/panel-meta.json',
-  '.scratch/prospect-value/bios.json',
-  '.scratch/prospect-value/findings.json',
-  '.scratch/blockage/incumbent-ids.json',
-  '.scratch/blockage/incumbent-bio.json',
-  '.scratch/blockage/exits.json',
-  '.scratch/blockage/deepen.json',
-  '.scratch/blockage/confound.json',
-  '.scratch/blockage/check.json',
-  '.scratch/blockage/findings.json',
-  'public/data/postseason-history.json',
-  'public/data/rookies.json',
-  'public/data/war.json',
-  'public/data/war-history/*.json', // sharded directory, not one file
-  'public/data/all-star-rosters.json',
-  'public/data/awards-history.json',
-  '.scratch/game-notes/insights/verdicts-*.json', // filename carries a date stamp
-  // Extension-value spike (W3.3, docs/contracts-extension-value.md): a
-  // season-by-season price-of-a-win panel derived from free_agency.csv, and
-  // the extensions.csv outcomes it prices.
-  '.scratch/contracts-extensions/fa-war-price.json',
-  '.scratch/contracts-extensions/extension-outcomes.json',
-  // Historical contract identity crosswalk (scripts/gen-contracts-identity.mjs):
-  // one row per source-CSV row, keyed on real MLB id like every panel above.
-  // A row with no confident id has mlbId = null, confidence != 'exact'/'fuzzy'
-  // -- see docs/adr/0066-a-contract-row-with-no-confident-id-stays-unresolved.md.
-  'public/data/contracts-history/identity/extensions.json',
-  'public/data/contracts-history/identity/arbitration.json',
-  'public/data/contracts-history/identity/free_agency.json',
-  'public/data/contracts-history/identity/salaries.json',
-  // The season-players candidate pool itself (scripts/gen-contracts-season-players.mjs)
-  // -- sharded one file per season, same glob pattern as war-history above.
-  'public/data/contracts-history/season-players/*.json',
-  // The dollar terms behind each identity row above (scripts/gen-contracts-shards.mjs):
-  // one row per rowKey, keyed the same way -- sharded per source file, same glob
-  // pattern as war-history and season-players above.
-  'public/data/contracts-history/terms/*.json',
-  // Per-player shards of the same rows, grouped by personId instead of rowKey
-  // (scripts/gen-contracts-shards.mjs) -- sharded across 100 files, same glob
-  // pattern as war-history and season-players above.
-  // KNOWN ISSUE: all 100 shards hold a term field that mixes a number and
-  // a free-text value in the same shard (e.g. "non-tendered",
-  // "1 y/$2.325+opt") -- term: 100 shards, club_offer: 78, settled_salary:
-  // 65, player_request: 8. DuckDB's nested-struct auto-detection infers
-  // those fields as numeric, so the view registers but a full scan of its
-  // flattened companion view (*__players) throws a cast error. Deferred:
-  // this needs a hand-written schema, the same way
-  // registerOutcomeLadderByTeam/registerRosterAgeByTeam already do for
-  // their panels. Do not add one here without a decision; see
-  // docs/agents/research-database.md.
-  'public/data/contracts-history/player/*.json',
-];
+// The lists live in scripts/data/research-db-panels.json, not here: this file
+// hit the 600-line size guard when the catalog grew. That file holds
+//   panels  every tracked JSON that becomes a view (a glob reads many files as
+//           one view; a sharded directory or a dated name needs one),
+//   unnest  the array columns that also get a `<view>__<column>` view,
+//   skipped tracked JSON that is deliberately NOT a view, with the reason,
+//   notes   why a panel is shaped the way it is.
+// docs/agents/research-database.md is the catalog a person reads.
+const LISTS = JSON.parse(readFileSync(join(REPO_ROOT, 'scripts', 'data', 'research-db-panels.json'), 'utf8'));
+export const PANEL_PATHS = LISTS.panels;
+export const UNNEST_COLUMNS = LISTS.unnest;
+export const SKIPPED = LISTS.skipped;
+
+// Panels whose money fields mix numbers and free text ("forfeited",
+// "non-tendered"). By default DuckDB types a field from a few rows of the first
+// 32 files, guesses a number, and the view then throws on the first text value.
+// sample_size = -1 with a high maximum_sample_files reads every row of every
+// file first, so a mixed field is typed JSON. Found by #1117: a full scan of the
+// terms view threw on salaries-54.json before this.
+const FULL_SCAN = new Set(['public/data/contracts-history/terms/*.json']);
+
+// A glob's own text would leak into the view name (`20*.json` gives
+// `public_trade_deadline_20`), so a glob that needs a clean name gets one here.
+const VIEW_NAMES = {
+  'public/data/trade-deadline/20*.json': 'public_trade_deadline',
+};
 
 function viewNameFor(relPath) {
+  if (VIEW_NAMES[relPath]) return VIEW_NAMES[relPath];
   let p = relPath.replace(/\\/g, '/');
   p = p.replace(/\.json$/, '');
   p = p.replace(/^\.scratch\//, '');
@@ -270,7 +160,8 @@ function flattenMapColumnSql(fromExpr, colName, mapType) {
 // Register one panel as one or more views. Returns the view names created.
 async function registerPanel(conn, relPath) {
   const name = viewNameFor(relPath);
-  const src = `read_json_auto('${absPath(relPath)}', maximum_object_size = ${MAX_JSON_OBJECT_BYTES})`;
+  const extra = FULL_SCAN.has(relPath) ? ', sample_size = -1, maximum_sample_files = 100000' : '';
+  const src = `read_json_auto('${absPath(relPath)}', maximum_object_size = ${MAX_JSON_OBJECT_BYTES}${extra})`;
   const desc = await conn.runAndReadAll(`DESCRIBE SELECT * FROM ${src}`);
   const cols = desc.getRowObjectsJson();
   const mapCols = cols.filter((c) => c.column_type.startsWith('MAP('));
@@ -299,6 +190,13 @@ async function registerPanel(conn, relPath) {
     const sql = flattenMapColumnSql(name, c.column_name, c.column_type);
     await conn.run(`CREATE OR REPLACE VIEW ${flatName} AS ${sql}`);
     created.push(flatName);
+  }
+  for (const col of UNNEST_COLUMNS[relPath] ?? []) {
+    const arrName = `${name}__${col.toLowerCase()}`;
+    await conn.run(
+      `CREATE OR REPLACE VIEW ${arrName} AS SELECT u.* FROM (SELECT unnest(${quoteIdent(col)}) AS u FROM ${name})`
+    );
+    created.push(arrName);
   }
   return created;
 }
@@ -372,7 +270,18 @@ async function registerRosterAgeByTeam(conn) {
   `);
 }
 
-async function buildAllViews(conn, { verbose = false } = {}) {
+// CREATE OR REPLACE never removes a view whose path left PANEL_PATHS, so a
+// database built from an older list kept dead views (#1117 saw one). Drop every
+// view first: the file holds view definitions only, so nothing is lost.
+async function dropAllViews(conn) {
+  const reader = await conn.runAndReadAll('SELECT view_name FROM duckdb_views() WHERE NOT internal');
+  for (const { view_name } of reader.getRowObjectsJson()) {
+    await conn.run(`DROP VIEW IF EXISTS ${quoteIdent(view_name)} CASCADE`);
+  }
+}
+
+export async function buildAllViews(conn, { verbose = false } = {}) {
+  await dropAllViews(conn);
   const allViews = [];
   for (const relPath of PANEL_PATHS) {
     try {
@@ -394,12 +303,99 @@ async function buildAllViews(conn, { verbose = false } = {}) {
 
 async function openResearchDb() {
   if (!existsSync(dirname(DB_PATH))) mkdirSync(dirname(DB_PATH), { recursive: true });
+  // Imported here, not at the top, so a test can import PANEL_PATHS and
+  // SKIPPED without loading the DuckDB native binding.
+  const { DuckDBInstance } = await import('@duckdb/node-api');
   const instance = await DuckDBInstance.create(DB_PATH);
   const conn = await instance.connect();
   return { instance, conn };
 }
 
+// Does a tracked path match a PANEL_PATHS entry (literal or glob)?
+export function globToRegExp(glob) {
+  return new RegExp('^' + glob.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*') + '$');
+}
+
+export function isRegistered(path, panelPaths = PANEL_PATHS) {
+  return panelPaths.some((p) => (p.includes('*') ? globToRegExp(p).test(path) : p === path));
+}
+
+export function isSkipped(path, skipped = SKIPPED) {
+  return skipped.some(([p]) => (p.endsWith('/') ? path.startsWith(p) : p === path));
+}
+
+// Tracked JSON under .scratch/ and public/data/ that is neither a view nor on
+// the skip list. New research output shows up here until someone triages it.
+function listUncovered() {
+  const out = execFileSync('git', ['ls-files', '--', '.scratch', 'public/data'], {
+    cwd: REPO_ROOT,
+    maxBuffer: 64 * 1024 * 1024,
+  }).toString();
+  return out
+    .split('\n')
+    .filter((f) => f.endsWith('.json'))
+    .filter((f) => !isRegistered(f) && !isSkipped(f));
+}
+
+// One Markdown table row per view, from a real build. Row counts are counted,
+// not guessed. Use it to check the catalog in docs/agents/research-database.md.
+async function printMarkdown(conn, views) {
+  console.log('| View | Source | Rows |');
+  console.log('| --- | --- | --- |');
+  for (const [view, src] of views) {
+    let rows = 'error';
+    try {
+      const r = await conn.runAndReadAll(`SELECT count(*) AS n FROM ${quoteIdent(view)}`);
+      rows = String(r.getRowObjectsJson()[0].n);
+    } catch (err) {
+      rows = `error: ${err.message.split('\n')[0].slice(0, 60)}`;
+    }
+    console.log(`| \`${view}\` | \`${src}\` | ${rows} |`);
+  }
+}
+
+const USAGE = `Usage: node scripts/research-db.mjs [flag]
+  (none)           rebuild every view and run the smoke join
+  --sql "<query>"  rebuild, then run one SQL query and print the rows
+  --markdown       rebuild, then print the view list as a Markdown table
+  --uncovered      list tracked JSON that is neither a view nor skipped (no build)
+Catalog and rules: docs/agents/research-database.md`;
+
 async function main() {
+  const args = process.argv.slice(2);
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(USAGE);
+    return;
+  }
+  if (args.includes('--uncovered')) {
+    const un = listUncovered();
+    console.log(un.length ? un.join('\n') : 'Nothing uncovered: every tracked JSON is a view or is skipped.');
+    console.log(`\n${un.length} uncovered file(s).`);
+    return;
+  }
+  const sqlAt = args.indexOf('--sql');
+  if (sqlAt !== -1) {
+    const query = args[sqlAt + 1];
+    if (!query) {
+      console.error('--sql needs a query string.\n\n' + USAGE);
+      process.exitCode = 2;
+      return;
+    }
+    const { conn } = await openResearchDb();
+    await buildAllViews(conn);
+    const reader = await conn.runAndReadAll(query);
+    console.table(reader.getRowObjectsJson());
+    conn.closeSync();
+    return;
+  }
+  if (args.includes('--markdown')) {
+    const { conn } = await openResearchDb();
+    const views = await buildAllViews(conn);
+    await printMarkdown(conn, views);
+    conn.closeSync();
+    return;
+  }
+
   console.log(`Building research views in ${DB_PATH} ...`);
   const { conn } = await openResearchDb();
   const views = await buildAllViews(conn, { verbose: true });
@@ -430,7 +426,10 @@ async function main() {
   console.log(`\nDone. Reopen this database any time with:\n  DuckDBInstance.create('${DB_PATH.replace(/\\/g, '/')}')`);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exitCode = 1;
-});
+// Run only when invoked as a script, so a test can import the lists above.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error(err);
+    process.exitCode = 1;
+  });
+}
