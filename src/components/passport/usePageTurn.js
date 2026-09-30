@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useMediaQuery } from '../../hooks/useMediaQuery.js'
+import { clamp } from '../../lib/math/number.js'
 
 // The turn state of the passport book (PassportBook.jsx) — which spread is
 // open, and whether a leaf is mid-flip.
@@ -54,8 +55,6 @@ import { useMediaQuery } from '../../hooks/useMediaQuery.js'
 const TURN_SAFETY_MS = 1200
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
-
-const clamp = (n, lo, hi) => (n < lo ? lo : n > hi ? hi : n)
 
 // `spreadCount` is how many openings the book has (PassportBook decides what
 // an opening is — one page on a phone, two side by side on a desktop, plus

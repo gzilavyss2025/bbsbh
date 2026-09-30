@@ -5,6 +5,7 @@
 // knowledge of games past that date.
 
 import { staticJson } from './staticJson.js'
+import { latestAtOrBefore } from '../lib/math/snapshot.js'
 
 export const fetchPostseasonOdds = staticJson('/data/postseason-odds.json', {
   fallback: { version: 1, generatedAt: null, seasons: {} },
@@ -12,7 +13,5 @@ export const fetchPostseasonOdds = staticJson('/data/postseason-odds.json', {
 
 export function postseasonOddsFor(data, teamId, season, cutoff) {
   const snapshots = data?.seasons?.[season]?.byTeamId?.[teamId]
-  if (!snapshots) return null
-  const eligible = Object.keys(snapshots).filter((date) => !cutoff || date <= cutoff).sort()
-  return eligible.length ? snapshots[eligible[eligible.length - 1]] : null
+  return snapshots ? latestAtOrBefore(snapshots, cutoff) : null
 }

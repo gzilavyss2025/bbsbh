@@ -8,10 +8,8 @@ export const DASH = '—'
 // never splitting a single stat like "9 K" across two lines.
 export const NBSP = ' '
 
-export function num(x) {
-  const n = Number(x)
-  return Number.isFinite(n) ? n : 0
-}
+// `num` lives in lib/math; re-exported so person/* keep one import line.
+export { num } from '../../lib/math/number.js'
 
 // ".302" style rate: three decimals, no leading zero (baseball convention).
 export function rate3(x) {
@@ -40,10 +38,6 @@ export const byEra = (a, b) => (a.era ?? Infinity) - (b.era ?? Infinity) || 0
 export function rate2(v) {
   const n = Number(v)
   return Number.isFinite(n) ? n.toFixed(2).replace(/^0(?=\.)/, '') : null
-}
-
-export function outsToIp(outs) {
-  return `${Math.floor(outs / 3)}.${outs % 3}`
 }
 
 // A proportion field (the API sends ".406" strings) as a one-decimal percent.

@@ -18,6 +18,7 @@
 // from .scratch/metric-engines/pitch-workload.md live here.
 
 import { staticJson } from './staticJson.js'
+import { outsToIp } from '../lib/math/innings.js'
 
 export const fetchWorkload = staticJson('/data/workload.json')
 
@@ -347,10 +348,6 @@ export function moundRateFor(data, personId) {
     ipPerStart: s.gs > 0 ? outsToIp(Math.round(s.outs / s.gs)) : null,
     pitchesPerStart: s.gs > 0 ? Math.round(s.pitches / s.gs) : null,
   }
-}
-
-function outsToIp(outs) {
-  return `${Math.floor(outs / 3)}.${outs % 3}`
 }
 
 // ---------------------------------------------------------------------------

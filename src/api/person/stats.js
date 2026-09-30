@@ -1,8 +1,8 @@
 // Stat aggregation, season tiles, vs-L/R + situational splits, and league rank
 // chips. See ../person.js's header for the module's overall spoiler footing.
 
-import { ipToOuts } from '../rehab-policy.js'
-import { DASH, num, rate3, outsToIp, mlbOps, eraOf, whipOf } from './shared.js'
+import { ipToOuts, outsToIp } from '../../lib/math/innings.js'
+import { DASH, num, rate3, mlbOps, eraOf, whipOf } from './shared.js'
 import { ordinal } from './teamPage.js'
 
 // ---------------------------------------------------------------------------

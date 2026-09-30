@@ -4,7 +4,7 @@
 
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { monthDay } from '../../lib/dates.js'
-import { ipToOuts } from '../rehab-policy.js'
+import { ipToOuts } from '../../lib/math/innings.js'
 import { DASH, NBSP, num } from './shared.js'
 
 // ---------------------------------------------------------------------------

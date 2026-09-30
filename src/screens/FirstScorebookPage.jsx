@@ -6,6 +6,7 @@ import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'
 import { extraInningsOf } from '../api/select.js'
 import { DASH, byEra, eraOf, whipOf } from '../api/person/shared.js'
+import { outsToIp } from '../lib/math/innings.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
@@ -116,7 +117,7 @@ export function FirstScorebookPage() {
           teamWins,
           teamLosses: pitcher.starts.length - teamWins,
           strikeOuts: pitcher.starts.reduce((n, s) => n + s.k, 0),
-          inningsPitched: `${Math.floor(outs / 3)}.${outs % 3}`,
+          inningsPitched: outsToIp(outs),
           // null at no outs (#1276): no ERA, sorted behind every pitcher who has one.
           era: eraOf(earnedRuns, outs),
           whip: whipOf(walks, hits, outs),
@@ -134,7 +135,7 @@ export function FirstScorebookPage() {
     return {
       arms: rotation.length,
       starts: starts.length,
-      inningsPitched: `${Math.floor(outs / 3)}.${outs % 3}`,
+      inningsPitched: outsToIp(outs),
       era: eraOf(earnedRuns, outs),
       strikeOuts: starts.reduce((n, s) => n + s.k, 0),
       teamWins,

@@ -1,4 +1,5 @@
 import { confidenceLabel, confidenceState, levelTier, movementState, tierLabel } from '../../api/prospectTrend.js'
+import { outsToIp } from '../../lib/math/innings.js'
 
 // A compact, always-visible /prospects Ledger cell for bbsbh's own
 // level-relative OPS/ERA percentile (src/api/prospectTrend.js,
@@ -52,10 +53,6 @@ function shortDate(apiDate) {
     month: 'short',
     day: 'numeric',
   })
-}
-
-function outsToIp(outs) {
-  return `${Math.floor(outs / 3)}.${outs % 3}`
 }
 
 function sampleLabel(entry) {

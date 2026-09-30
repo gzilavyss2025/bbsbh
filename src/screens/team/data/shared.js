@@ -2,6 +2,7 @@ import { lastName } from '../../../api/select.js'
 import { firstLast, isTwoWay } from '../../../api/person.js'
 import { isWinterSport } from '../../../lib/winter/leagues.js'
 import { winterSeasonFor } from '../../../lib/winter/window.js'
+import { ipToOuts } from '../../../lib/math/innings.js'
 
 // Pieces MORE THAN ONE team-hub loader genuinely needs, collapsed here once the
 // tabs had all landed (issue 07 of .scratch/team-page-ia — the tab loaders were
@@ -222,13 +223,6 @@ export function rosterHittingStat(r, teamId) {
   const stats = r.person?.stats ?? []
   const hit = stats.find((s) => s.group?.displayName === 'hitting')
   return preferTeamSplits(hit?.splits ?? [], teamId)[0]?.stat ?? null
-}
-
-// Innings pitched ("104.1" = 104⅓) → outs, so a workload tiebreak compares
-// linearly (see api/teamLeaders.js's identical ipToOuts).
-export function ipToOuts(ip) {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return (Number(whole) || 0) * 3 + (Number(frac[0]) || 0)
 }
 
 // ---------------------------------------------------------------------------

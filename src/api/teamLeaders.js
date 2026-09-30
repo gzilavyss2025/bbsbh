@@ -28,23 +28,10 @@
 // pool — an org's whole farm system — can badge each leader with his level;
 // null / ignored for a single-level pool.
 
+import { ipToOuts, outsToIp } from '../lib/math/innings.js'
+import { num } from '../lib/math/number.js'
+
 const DASH = '—'
-
-function num(x) {
-  const n = Number(x)
-  return Number.isFinite(n) ? n : 0
-}
-
-// Innings pitched ("104.1" = 104 ⅓) → outs, so playing-time comparisons and the
-// IP leaderboard sort linearly (raw "104.1" < "104.2" happens to work, but
-// "104.2" + one out is "105.0", not "104.3", so compare in outs to be safe).
-function ipToOuts(ip) {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return num(whole) * 3 + num(frac[0])
-}
-function outsToIp(outs) {
-  return `${Math.floor(outs / 3)}.${outs % 3}`
-}
 
 // ---------------------------------------------------------------------------
 // Formatters (baseball display conventions)

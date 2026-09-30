@@ -41,6 +41,8 @@
 // takes a cutoff, because a career line does not have one.
 import { getJson } from '../statsapi.js'
 import { mlbOps, eraOf } from '../person/shared.js'
+import { outsToIp } from '../../lib/math/innings.js'
+import { num } from '../../lib/math/number.js'
 
 // Every field either group's line reads, in one list — statsapi ignores the
 // names that do not apply to the group asked for.
@@ -85,10 +87,6 @@ export function careerSplitLine(stat, group) {
 // the unrounded sum is 1.1884 and would print 1.188. The suite pins this by
 // feeding one real split back through the merge and requiring MLB's own
 // published string out the other side.
-function num(v) {
-  const n = Number(v)
-  return Number.isFinite(n) ? n : 0
-}
 
 // A three-place rate the way a scorebook writes one: ".293", "1.189".
 function rate3(v) {
@@ -107,7 +105,7 @@ export function mergeCareerSplits(a, b, group) {
     const earned = sum('earnedRuns')
     return {
       gamesPlayed: sum('gamesPlayed'),
-      inningsPitched: `${Math.floor(outs / 3)}.${outs % 3}`,
+      inningsPitched: outsToIp(outs),
       era: eraOf(earned, outs)?.toFixed(2) ?? '-.--',
       strikeOuts: sum('strikeOuts'),
       baseOnBalls: sum('baseOnBalls'),

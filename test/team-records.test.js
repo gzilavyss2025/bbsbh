@@ -21,7 +21,6 @@ import {
   leadStateAfter,
   leadTrailFlags,
   lastAtBatOutcome,
-  ipToOuts,
   isQualityStart,
   starterLine,
   battedAroundHalves,
@@ -37,6 +36,7 @@ import {
   inningsScoredMask,
   scoredInExtras,
 } from '../scripts/lib/team-records.mjs'
+import { ipToOuts } from '../src/lib/math/innings.js'
 import {
   teamRecordsFor,
   longestStreaks,
