@@ -17,6 +17,7 @@ import { ExtrasFacts } from './ExtrasFacts.jsx'
 import { UmpireTendenciesFold } from '../../umpire/UmpireTendenciesFold.jsx'
 import { StatBox, AbsCard } from '../../gamehud/StatBox.jsx'
 import { WinProbChart } from '../../charts/WinProbChart.jsx'
+import { filmCanExist } from '../../../api/expresslane/eligibility.js'
 import { IconButton } from '../../ui/control/IconButton.jsx'
 
 // Focus mode's reference shelf — lineups, the fielding diamond, the pitcher
@@ -381,6 +382,7 @@ function Section({
           homeId={meta.home.id}
           awayTreatment={treatment?.away}
           homeTreatment={treatment?.home}
+          filmEligible={filmCanExist(feed)}
           partial
         />
         {/* The plate ump's Tendencies card as a drawer (open by default,

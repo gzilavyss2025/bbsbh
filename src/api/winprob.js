@@ -18,6 +18,10 @@
 
 import { halfIndex } from './select.js'
 
+// The game opens even — 0–0 at first pitch — so the first play's delta is
+// measured from a 50% home share, matching WinProbChart's synthetic origin.
+const EVEN = 50
+
 // Ordered chart points from the raw win-probability array. `throughHalf` clamps
 // to a reveal high-water mark (a half-index; see halfIndex): only plays in a
 // half at or below it are included, so the innings view can draw the line as it
@@ -54,6 +58,7 @@ export function selectWinProbPath(
   if (!Array.isArray(winProb) || winProb.length === 0) return []
   const steppingHalfIdx = stepHalfIndex === throughHalf + 1 ? stepHalfIndex : null
   const points = []
+  let prev = EVEN
   for (const e of winProb) {
     const home = e.homeTeamWinProbability
     const inning = e.about?.inning
@@ -77,7 +82,19 @@ export function selectWinProbPath(
       isScoring: !!e.about?.isScoringPlay,
       desc: e.result?.description ?? '',
       atBatIndex,
+      // The terminal pitch's playId, the key a raw clip resolves on (the same
+      // read as halfInningFeed.js). Verified against gamePk 823738; null when
+      // the play has no pitch on record.
+      playId: (e.playEvents ?? []).filter((ev) => ev?.isPitch).at(-1)?.playId ?? null,
+      // Verified against gamePk 823738: the outs after the play.
+      outs: Number.isInteger(e.count?.outs) ? e.count.outs : null,
+      // The step the chart's line draws for this play (the first from even),
+      // not the feed's recorded homeTeamWinProbabilityAdded: that one measures
+      // the first play from the pre-game odds, so the readout and the ledger
+      // would disagree with each other and with the line.
+      delta: home - prev,
     })
+    prev = home
   }
   return points
 }
@@ -91,33 +108,26 @@ export function winProbSplit(points) {
   return { home, away: 100 - home }
 }
 
-// The game opens even — 0–0 at first pitch — so the first play's delta is
-// measured from a 50% home share, matching WinProbChart's synthetic origin.
-const EVEN = 50
-
-// The biggest momentum plays so far, newest first — the "how we got here"
-// ledger. Each entry is a single play's per-play delta (home share vs. the play
-// before it, the first measured from even), kept only if it cleared a swing
-// threshold, then the top `limit` by magnitude, re-sorted newest-first for
-// display. REVEAL-ONLY (same `throughHalf` clamp); [] when there's no data.
+// The biggest momentum plays so far, biggest first — the "how we got here"
+// ledger, numbered 1 to `limit` in that order on the plot and in the list.
+// Each entry is a single play's `delta` from selectWinProbPath (home share vs.
+// the play before it, the first measured from even), kept only if it cleared
+// a swing threshold. A tie goes to the earlier play. REVEAL-ONLY (same
+// `throughHalf` clamp); [] when there's no data.
 export function selectWinProbBigPlays(
   winProb,
   { throughHalf = Infinity, stepHalfIndex = null, throughAtBatIndex = null, limit = 4, minSwing = 8 } = {},
 ) {
   const points = selectWinProbPath(winProb, { throughHalf, stepHalfIndex, throughAtBatIndex })
   if (points.length === 0) return []
-  let prev = EVEN
   const plays = []
   for (let idx = 0; idx < points.length; idx++) {
     const p = points[idx]
-    const delta = p.home - prev
-    prev = p.home
-    if (Math.abs(delta) >= minSwing) {
-      plays.push({ idx, delta, home: p.home, inning: p.inning, half: p.half, desc: p.desc })
+    if (Math.abs(p.delta) >= minSwing) {
+      plays.push({ idx, delta: p.delta, home: p.home, inning: p.inning, half: p.half, desc: p.desc, playId: p.playId })
     }
   }
   return plays
-    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta) || a.idx - b.idx)
     .slice(0, limit)
-    .sort((a, b) => b.idx - a.idx) // newest first for the ledger
 }

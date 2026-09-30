@@ -38,8 +38,7 @@
 // check below is what stops it rotting into a permanent exemption.
 const KNOWN_UNDEFINED = new Set([
   // --- set inline from JS at runtime; no fallback, but never unresolved ---
-  '--team-color', // 20-charts.css — the club's own ink, set per chart
-  '--team-text',
+  '--team-color', // charts/winprob.css — the club's own ink, set per chart
   '--chip-accent', // 22-box-score-tables.css — per-club chips and pills
   '--card-accent',
   '--pill-accent',

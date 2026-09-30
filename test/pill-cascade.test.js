@@ -212,12 +212,17 @@ test('--marker reaches a pill only as its fill, never as its ink', () => {
 })
 
 test('the win-probability chip takes its club colour through the pill, not a repaint', () => {
-  const jsx = readFileSync(join(SRC, 'components/charts/WinProbChart.jsx'), 'utf8')
+  const jsx = readFileSync(join(SRC, 'components/charts/winprob/SwingLedger.jsx'), 'utf8')
   const at = jsx.indexOf('winprob__ledger-chip')
   const chip = jsx.slice(at, jsx.indexOf('{chipText}', at))
-  assert.match(chip, /'--pill-fill': colors\.primary/)
-  assert.match(chip, /'--pill-text': colors\.text/)
-  assert.doesNotMatch(chip, /background:|color:/)
+  // The chip's colours come from winProbKeyPill, which feeds the pill's own
+  // custom properties the club's key colour (winprob/keyColors.js).
+  assert.match(chip, /style=\{winProbKeyPill\(/)
+  const colors = readFileSync(join(SRC, 'components/charts/winprob/keyColors.js'), 'utf8')
+  const keyPill = colors.slice(colors.indexOf('export function winProbKeyPill'))
+  assert.match(keyPill, /'--pill-fill': key\.fill/)
+  assert.match(keyPill, /'--pill-text': key\.text/)
+  assert.doesNotMatch(chip + keyPill, /background:|[^-]color:/)
 })
 
 test('the defaults carry no class, and a typo throws', () => {

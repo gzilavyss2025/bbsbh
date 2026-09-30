@@ -45,7 +45,8 @@ const decl = (body, property) =>
 // renders it (and so must opt in).
 const HOSTS = [
   { css: '04a-wire-dock.css', sel: '.wiredock__count', jsx: 'components/transactions/WireDock.jsx' },
-  { css: '20-charts.css', sel: '.winprob__ledger-chip', jsx: 'components/charts/WinProbChart.jsx' },
+  { css: 'charts/winprob.css', sel: '.winprob__ledger-chip', jsx: 'components/charts/winprob/SwingLedger.jsx' },
+  { css: 'charts/winprob.css', sel: '.winprob__change', jsx: 'components/charts/WinProbChart.jsx' },
   { css: '23-box-score-detail.css', sel: '.tlead__level', jsx: 'components/teamstats/TeamLeaders.jsx' },
   { css: '31-wild-card.css', sel: '.thub-affiliate__level', jsx: 'screens/team/modules/minors/AffiliatesCard.jsx' },
   { css: '31-wild-card.css', sel: '.prospecttable__top', jsx: 'screens/team/modules/minors/ProspectsCard.jsx' },

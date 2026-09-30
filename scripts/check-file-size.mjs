@@ -104,7 +104,6 @@ const BUDGETS = {
   'src/styles/14-strike-zone.css': 900, // 898 — the sheet's ✕ left for IconButton (system/button.css, #1209); both pitch-colour keys left earlier
   'src/styles/15-team-color-lab.css': 700, // 691
   'src/styles/17-identity-lab-workbench.css': 1300, // 1229 — stamp-ink rules
-  'src/styles/20-charts.css': 700, // 684
   'src/styles/21-box-score.css': 900, // 800 -> 869: the Coverage card's lead-story treatment (.gamestory__lead*) — a full-bleed photo, team badge, headline and blurb for the first enriched story, same .gamestory namespace the compact-row rules already live in here. 771 — the Three Stars card split out to 21a-box-score-stars.css,
   //                                    the by-inning tally to 21b-box-score-tally.css
   'src/styles/22-box-score-tables.css': 800, // 789
@@ -330,7 +329,6 @@ const BUDGETS = {
   // src/api/loadPlayer.js surrendered its entry the same way: it is a 20-line
   // barrel over src/api/player/ now, one loader per tab of the player hub.
   'src/api/tradeDeadline.js': 700, // 629
-  'src/components/charts/WinProbChart.jsx': 700, // 612
   'src/App.jsx': 700, // 606 — mounts the one global PlayerHoverCard, same as SyncStatusProvider beside it. 701: the postseason series route branch (#1230, slice 6). 693: one /postseason/{id} route (SeriesRoute)
 }
 

@@ -790,7 +790,7 @@ const C4 = [
   },
   // The Card IS the scroller: its own overflow-x wins over the Card's clip.
   { css: '20-charts.css', sel: '.rolling__scroll', jsx: ['components/gamehud/RollingLine.jsx'], ns: 'rolling__scroll' },
-  { css: '20-charts.css', sel: '.winprob', jsx: ['components/charts/WinProbChart.jsx'], ns: 'winprob' },
+  { css: 'charts/winprob.css', sel: '.winprob', jsx: ['components/charts/WinProbChart.jsx'], ns: 'winprob' },
   { css: '20-charts.css', sel: '.marginnotes', jsx: ['components/inning/MarginNotes.jsx'], ns: 'marginnotes' },
   // ADR-0009: the table is gated by revealedThrough in the caller, not here.
   { css: '20-charts.css', sel: '.pitchers', jsx: ['components/inning/PitchersSection.jsx'], ns: 'pitchers' },
@@ -838,8 +838,8 @@ test('C4: each block keeps its own margin and inset', () => {
     ['12-sealbox.css', '.statbox', 'min-width', '0'],
     ['12-sealbox.css', '.dueup', 'padding', 'var(--space-3) var(--space-3h)'],
     ['13-play-by-play.css', '.roster', 'margin-top', '10px'],
-    ['20-charts.css', '.winprob', 'margin-bottom', 'var(--space-4)'],
-    ['20-charts.css', '.winprob', 'padding', 'var(--space-3) var(--space-3h) var(--space-2h)'],
+    ['charts/winprob.css', '.winprob', 'margin-bottom', 'var(--space-4)'],
+    ['charts/winprob.css', '.winprob', 'padding', 'var(--space-3) var(--space-3h) var(--space-2h)'],
     ['20-charts.css', '.marginnotes', 'margin-top', 'var(--space-4)'],
     ['20-charts.css', '.marginnotes', 'margin-bottom', 'var(--space-3)'],
     ['20-charts.css', '.marginnotes', 'padding', 'var(--space-3) var(--space-3h) var(--space-2)'],
