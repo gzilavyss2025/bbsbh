@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import { devScript } from './e2e/fixtures/dev-script.js'
 
 // Verification harness for manually exercising the app (there is no CI test
 // suite — see CLAUDE.md). `npm run e2e` (or `npx playwright test <file>`)
@@ -19,8 +20,7 @@ import { defineConfig, devices } from '@playwright/test'
 // The dev script it launches follows suit, so a cold run starts a server on the
 // same port rather than colliding on 5173 (vite's strictPort would refuse).
 const PORT = Number(process.env.E2E_PORT) || 5173
-const DEV_SCRIPT =
-  { 5173: 'dev', 5172: 'dev:2', 5171: 'dev:3', 5170: 'dev:4', 5169: 'dev:5' }[PORT] ?? 'dev'
+const DEV_SCRIPT = devScript(PORT)
 
 export default defineConfig({
   testDir: './e2e',
