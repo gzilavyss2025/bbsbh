@@ -305,17 +305,9 @@
 .winprob__moment text { fill: var(--text-body); font-family: var(--font-mono); font-size: var(--fs-cell); font-weight: var(--w-bold); }
 .winprob__moment-number { font-family: var(--font-mono); color: var(--text-body); width: 1ch; flex-shrink: 0; }
 
-.winprob__subhead {
-  margin: 10px 0 4px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
-/* Biggest revealed swings: compact metadata above each full play description. */
+/* Biggest revealed swings, no heading: the numbered plot markers tie the rows
+   to the chart. A row with film opens it (winprob/useSwingClip.js). */
+.winprob__ledger { margin-top: var(--space-2); }
 .winprob__ledger-list {
   margin: 0;
   padding: 0;
@@ -370,6 +362,15 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
+}
+
+.winprob__ledger-watch {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
 }
 
 .winprob__ledger-desc {

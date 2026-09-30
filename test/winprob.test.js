@@ -55,6 +55,9 @@ test('WIN_PROB_FIELDS covers every field selectWinProbPath reads', () => {
     'atBatIndex', // the at-bat-stepping clamp (stepHalfIndex/throughAtBatIndex)
     'result', // e.result.description
     'description',
+    'playEvents', // e.playEvents[].{isPitch,playId} — a swing row's clip
+    'isPitch',
+    'playId',
   ]
   const present = new Set(WIN_PROB_FIELDS)
   for (const field of required) {
@@ -247,6 +250,19 @@ test('selectWinProbBigPlays returns the biggest swings, newest first', () => {
       [2, 'top', -12, 'Two-run double'],
     ],
   )
+})
+
+test('selectWinProbBigPlays carries the terminal pitch playId for the clip', () => {
+  const winProb = buildWinProb()
+  winProb[4].playEvents = [
+    { isPitch: true, playId: 'first-pitch' },
+    { isPitch: true, playId: 'homer-pitch' },
+    { isPitch: false, playId: 'mound-visit' },
+  ]
+  const [homer, double] = selectWinProbBigPlays(winProb, { minSwing: 8 })
+  assert.equal(homer.playId, 'homer-pitch')
+  // A play with no pitch on record carries no clip key.
+  assert.equal(double.playId, null)
 })
 
 test('selectWinProbBigPlays caps at limit and inherits the reveal gate', () => {

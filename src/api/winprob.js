@@ -82,6 +82,10 @@ export function selectWinProbPath(
       isScoring: !!e.about?.isScoringPlay,
       desc: e.result?.description ?? '',
       atBatIndex,
+      // The terminal pitch's playId, the key a raw clip resolves on (the same
+      // read as halfInningFeed.js). Verified against gamePk 823738; null when
+      // the play has no pitch on record.
+      playId: (e.playEvents ?? []).filter((ev) => ev?.isPitch).at(-1)?.playId ?? null,
       // Verified against gamePk 823738: the outs after the play.
       outs: Number.isInteger(e.count?.outs) ? e.count.outs : null,
       // The step the chart's line draws for this play (the first from even),
@@ -119,7 +123,7 @@ export function selectWinProbBigPlays(
   for (let idx = 0; idx < points.length; idx++) {
     const p = points[idx]
     if (Math.abs(p.delta) >= minSwing) {
-      plays.push({ idx, delta: p.delta, home: p.home, inning: p.inning, half: p.half, desc: p.desc })
+      plays.push({ idx, delta: p.delta, home: p.home, inning: p.inning, half: p.half, desc: p.desc, playId: p.playId })
     }
   }
   return plays

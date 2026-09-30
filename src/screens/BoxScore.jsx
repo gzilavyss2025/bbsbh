@@ -1,6 +1,7 @@
 import { memo, useMemo, useRef, useState } from 'react'
 import { resolveCardPlayer } from '../api/boxscore.js'
 import { highlightPoster } from '../api/highlights.js'
+import { filmCanExist } from '../api/expresslane/eligibility.js'
 import { revealBoxScore } from './boxscore/revealBoxScore.js'
 import { InningTally } from './boxscore/InningTally.jsx'
 import { managerLabel } from '../api/game.js'
@@ -360,6 +361,8 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
               homeId={box.home.id}
               awayTreatment={winProbTreatment?.away}
               homeTreatment={winProbTreatment?.home}
+              highlights={highlights}
+              filmEligible={filmCanExist(feed)}
             />
           </div>
         </div>

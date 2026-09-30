@@ -2,6 +2,8 @@ import { useId } from 'react'
 import { winProbSplit } from '../../api/winprob.js'
 import { winProbChangeLabel, winProbReadout } from './winprob/explore.js'
 import { useWinProbSelection } from './winprob/useWinProbSelection.js'
+import { useSwingClip } from './winprob/useSwingClip.js'
+import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 import { wpaBandColor, wpaBandPinstripeColor, wpaBandPinstripeBg, chipColorsFor } from '../../lib/wpa/wpaBandColors.js'
 import { wpaLogoLayout, wpaTilePlacements } from '../../lib/wpa/wpaLogo.js'
 import { isMlbTeamId } from '../../lib/teams.js'
@@ -158,17 +160,21 @@ export function WinProbChart({
   homeBandOverride,
   homeMarkOverride,
   partial = false,
+  highlights = null,
+  filmEligible = true,
 }) {
   const patternUid = useId()
   // The latest play until the user picks one (winprob/useWinProbSelection.js).
   const { activeIdx, select, svgHandlers } = useWinProbSelection(
     points?.length ?? 0, { W, H, left: PLOT_L, width: PLOT_W },
   )
-  const linkedProps = (idx, label) => ({
+  // A swing row also opens that play's clip (winprob/useSwingClip.js).
+  const clip = useSwingClip({ highlights, filmEligible })
+  const linkedProps = (idx, label, onPick = () => select(idx)) => ({
     tabIndex: 0, role: 'button', 'aria-label': label, 'aria-pressed': activeIdx === idx,
-    onClick: () => select(idx),
+    onClick: onPick,
     onKeyDown: (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(idx) }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick() }
     },
   })
 
@@ -519,8 +525,10 @@ export function WinProbChart({
 
       {bigPlays.length > 0 && (
         <div className="winprob__ledger">
-          <h4 className="winprob__subhead">Biggest swings</h4>
-          <ol className="winprob__ledger-list">
+          {/* No visible heading: the numbered markers on the plot already tie
+              these rows to the chart. The list keeps its name for a screen
+              reader. */}
+          <ol className="winprob__ledger-list" aria-label="Biggest swings">
             {bigPlays.map((p, index) => {
               const toHome = p.delta > 0
               const abbr = toHome ? home : away
@@ -528,6 +536,8 @@ export function WinProbChart({
               const chipText = winProbChangeLabel(p.delta, home, away)
               const tag = `${p.half === 'top' ? '▲' : '▼'}${p.inning}`
               const isActive = activeIdx === p.idx
+              const watchable = clip.hasClip(p.playId)
+              const halfWords = `${p.half === 'top' ? 'top' : 'bottom'} of the ${ordinal(p.inning)}`
               return (
                 <li
                   className={`winprob__ledger-row${isActive ? ' is-active' : ''}`}
@@ -535,7 +545,11 @@ export function WinProbChart({
                   style={{ '--team-color': colors.primary }}
                   {...linkedProps(
                     p.idx,
-                    `Biggest swing: ${chipText}, ${p.half === 'top' ? 'top' : 'bottom'} of the ${ordinal(p.inning)}`,
+                    `Biggest swing: ${chipText}, ${halfWords}${watchable ? '. Watch the play' : ''}`,
+                    () => {
+                      select(p.idx)
+                      if (watchable) clip.openClip(p.playId, `${chipText} · ${tag}`)
+                    },
                   )}
                 >
                   <span className="winprob__ledger-meta">
@@ -547,6 +561,9 @@ export function WinProbChart({
                       {chipText}
                     </span>
                     <span className="winprob__ledger-half">{tag}</span>
+                    {watchable && (
+                      <span className="winprob__ledger-watch" aria-hidden="true">▶ Watch</span>
+                    )}
                   </span>
                   <p className="winprob__ledger-desc">{p.desc || `${abbr} rally`}</p>
                 </li>
@@ -554,6 +571,16 @@ export function WinProbChart({
             })}
           </ol>
         </div>
+      )}
+      {clip.open && (
+        <HighlightSheet
+          item={clip.open.item}
+          src={clip.src}
+          loading={clip.loading}
+          notice={clip.notice}
+          title={clip.open.title}
+          onClose={clip.close}
+        />
       )}
     </Card>
   )

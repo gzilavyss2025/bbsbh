@@ -224,6 +224,10 @@ export const WIN_PROB_FIELDS = [
   'details',
   'isScoringEvent',
   'runner',
+  // The chart's big-swing rows open the terminal pitch's clip (winprob.js).
+  'playEvents',
+  'isPitch',
+  'playId',
 ]
 
 export async function fetchWinProbability(gamePk) {
