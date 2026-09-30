@@ -75,6 +75,54 @@ function eachRun(rows, keyOf, onSegment) {
   }
 }
 
+// SERIES: the one definition (#1283). The reader, scripts/lib/schedule-shape.mjs
+// and scripts/lib/team-records.mjs all cut a club's ordered ledger with this
+// function; it lives here because the browser cannot import from scripts/ and
+// scripts/ can import from src/api/.
+//
+// A series is consecutive games against the same opponent on the same side of
+// the road: a change of opponent ends it, and so does a change between home
+// and away, so a home set and a road set against one club, back to back, are
+// two series. A neutral-site game (London, Mexico City, the Field of Dreams)
+// is on neither side, so it never ends a series: it joins the run beside it
+// when the opponent is the same. The 2024 Little League Classic is the third
+// game of the Yankees' three-game set at Comerica, as MLB numbers it; it is
+// neither a one-game series nor a game with no series.
+//
+// Derived from the ledger, never from the feed's own seriesGameNumber /
+// gamesInSeries: those describe the series as SCHEDULED, and a rained-out
+// game or a makeup leaves them describing a set that never happened.
+//
+// `rows` is one club's games in play order, each with `opponentId` and `site`
+// ('home' | 'away' | 'neutral'). Returns an array of runs, each the row indexes
+// of one series.
+export function seriesRuns(rows) {
+  const runs = []
+  rows.forEach((r, i) => {
+    const prev = rows[i - 1]
+    const same =
+      prev &&
+      prev.opponentId === r.opponentId &&
+      (prev.site === r.site || prev.site === 'neutral' || r.site === 'neutral')
+    if (same) runs[runs.length - 1].push(i)
+    else runs.push([i])
+  })
+  return runs
+}
+
+// Tags each row, in place, with its place in its series.
+export function tagSeries(rows) {
+  for (const seg of seriesRuns(rows)) {
+    seg.forEach((i, n) => {
+      rows[i].seriesGame = n + 1
+      rows[i].seriesLength = seg.length
+      rows[i].seriesOpener = n === 0
+      rows[i].seriesFinale = n === seg.length - 1
+    })
+  }
+  return rows
+}
+
 // The club's whole ledger, decoded, ordered, and tagged with its place in the
 // three segments. Segments are cut PER SEASON: a road trip does not run from
 // one October into the next March, and a ledger that segmented across the
@@ -112,21 +160,12 @@ export function ledgerOf(data, { cutoff = null } = {}) {
       }
       rows.push(base)
     }
-    // Neutral-site games are transparent to BOTH segmentations — see the
+    // Neutral-site games never split a series or a stand/trip — see the
     // generator's lib for the 2020 Brewers game at Busch Stadium that proved
     // it, a designated home game inside a road series that split the series in
-    // two and invented an opener nobody played.
-    eachRun(
-      rows,
-      (r) => (r.site === 'neutral' ? null : `${r.opponentId}|${r.site}`),
-      (seg) =>
-        seg.forEach((i, n) => {
-          rows[i].seriesGame = n + 1
-          rows[i].seriesLength = seg.length
-          rows[i].seriesOpener = n === 0
-          rows[i].seriesFinale = n === seg.length - 1
-        }),
-    )
+    // two and invented an opener nobody played. A trip skips them; a series
+    // counts them as a game (seriesRuns).
+    tagSeries(rows)
     eachRun(
       rows,
       (r) => (r.site === 'neutral' ? null : r.site),

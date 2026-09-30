@@ -21,6 +21,7 @@
 // import them (the lib/roster.mjs convention).
 
 import { isPlateAppearance } from './long-at-bats.mjs'
+import { seriesRuns } from '../../src/api/scheduleShape.js'
 
 // ---------------------------------------------------------------------------
 // Which games count
@@ -462,33 +463,25 @@ export function battedAroundHalves(allPlays, minBatters = 10) {
 // `gamesInSeries`. Those two describe the series as SCHEDULED; a rained-out
 // middle game leaves them describing a series that never happened, and a
 // makeup game appended to the next trip carries the old series' numbering. A
-// series here is what actually got played: consecutive games against the same
-// opponent at the same venue, with no other opponent in between. Both halves
-// of a doubleheader belong to the series they are played inside.
+// series here is what actually got played. The cut itself is `seriesRuns`
+// (src/api/scheduleShape.js), the one definition shared with the schedule-shape
+// generator and the reader (#1283): same opponent, same side of the road, and
+// a neutral-site game joins the series beside it. Both halves of a
+// doubleheader belong to the series they are played inside.
 //
 // `rows` must be sorted by (date, gameNumber) ascending — the order
-// gen-team-records.mjs reads them out of SQLite in.
+// gen-team-records.mjs reads them out of SQLite in — and carry `opp_id` and
+// `site` ('home' | 'away' | 'neutral', from siteOf in schedule-shape.mjs).
 export function tagSeries(rows) {
-  let seriesStart = 0
-  const boundaries = []
-  for (let i = 1; i <= rows.length; i++) {
-    const prev = rows[i - 1]
-    const cur = rows[i]
-    const sameSeries =
-      cur != null && cur.opp_id === prev.opp_id && cur.venue_id === prev.venue_id
-    if (sameSeries) continue
-    boundaries.push([seriesStart, i - 1])
-    seriesStart = i
-  }
   const tagged = rows.map((r) => ({ ...r }))
-  for (const [start, end] of boundaries) {
-    const length = end - start + 1
-    for (let i = start; i <= end; i++) {
-      tagged[i].seriesGame = i - start + 1
-      tagged[i].seriesLength = length
-      tagged[i].opener = i === start
-      tagged[i].finale = i === end
-    }
+  const runs = seriesRuns(rows.map((r) => ({ opponentId: r.opp_id, site: r.site })))
+  for (const run of runs) {
+    run.forEach((i, n) => {
+      tagged[i].seriesGame = n + 1
+      tagged[i].seriesLength = run.length
+      tagged[i].opener = n === 0
+      tagged[i].finale = n === run.length - 1
+    })
   }
   return tagged
 }
