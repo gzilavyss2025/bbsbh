@@ -181,3 +181,9 @@ test('built without baseball-america, the same code reads the file with no trace
   const onlyOld = Object.entries(history.players).find(([, list]) => list.every((row) => row[0] <= 2008))[0]
   assert.equal(prospectRankView({ history: mlbOnly, playerId: onlyOld, currentSeason: 2026 }), null)
 })
+
+// Review of #1287: "and today's list" was in the note even with no current rank.
+test('the note names today\'s list only when a current rank is drawn', () => {
+  assert.doesNotMatch(view({ playerId: CAHILL }).note, /today/i)
+  assert.match(view({ playerId: WALCOTT, currentRank: 9 }).note, /today's list/)
+})
