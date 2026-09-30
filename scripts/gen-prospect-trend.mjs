@@ -47,7 +47,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fetchLevelSeasonStats, combineToPool } from '../src/api/statsLevels.js'
-import { buildPopulations, snapshotRow } from './lib/prospectPercentile.mjs'
+import { buildPopulations, snapshotRow, movementSince } from './lib/prospectPercentile.mjs'
 import { fetchLevelAverageAges } from './lib/prospectAgeBenchmark.mjs'
 import { openDb, dumpGroup } from './lib/db.js'
 import { writeJsonAtomic } from './lib/io.js'
@@ -89,7 +89,7 @@ const upsertSnapshot = (db) =>
 // over the table this generator itself has been filling in, same pattern as
 // gen-fever-radar.mjs's exportJson — plus the player's FULL recorded history
 // (today's row included), oldest first, for the trend chart.
-function exportJson(db, today, levelAverageAge) {
+function exportJson(db, today, levelAverageAge, asOf) {
   const rows = db
     .prepare(
       `SELECT player_id, board, payload_json FROM player_snapshots
@@ -103,7 +103,7 @@ function exportJson(db, today, levelAverageAge) {
      ORDER BY date ASC`,
   )
   const players = rows.map((row) => {
-    const payload = JSON.parse(row.payload_json)
+    const { atLevel, ...payload } = JSON.parse(row.payload_json)
     const prior = db
       .prepare(
         `SELECT date, payload_json FROM player_snapshots
@@ -111,20 +111,17 @@ function exportJson(db, today, levelAverageAge) {
          ORDER BY date DESC LIMIT 1`,
       )
       .get(row.player_id, row.board, SOURCE, today)
-    let movement = null
-    if (prior) {
-      const priorPayload = JSON.parse(prior.payload_json)
-      if (payload.percentile != null && priorPayload.percentile != null) {
-        movement = { delta: payload.percentile - priorPayload.percentile, sinceDate: prior.date }
-      }
-    }
+    const movement = movementSince(
+      { ...payload, atLevel },
+      prior && { date: prior.date, payload: JSON.parse(prior.payload_json) },
+    )
     const history = historyStmt.all(row.player_id, row.board, SOURCE).map((h) => {
       const p = JSON.parse(h.payload_json)
       return { date: h.date, sportId: p.sportId, percentile: p.percentile, qualified: p.qualified }
     })
     return { playerId: row.player_id, group: row.board, ...payload, movement, history }
   })
-  return { generatedAt: new Date().toISOString(), dataThrough: today, levelAverageAge, players }
+  return { generatedAt: asOf.toISOString(), dataThrough: today, levelAverageAge, players }
 }
 
 async function main() {
@@ -145,7 +142,8 @@ async function main() {
   // Every qualified player's age, averaged per level — the Prospect Card's
   // age-benchmark fact. A separate bulk call (birthDate isn't on a season
   // split), so it runs once here rather than per prospect.
-  const levelAverageAge = await fetchLevelAverageAges(hitSplits, pitSplits, LEVEL_SPORT_IDS)
+  const asOf = new Date() // also the file's generatedAt: the page ages each player to this same instant
+  const levelAverageAge = await fetchLevelAverageAges(hitSplits, pitSplits, LEVEL_SPORT_IDS, asOf)
 
   // Each prospect is filed at his PRIMARY level (highest reached) and read at
   // his line there alone — snapshotRow, because the percentile population and
@@ -165,7 +163,7 @@ async function main() {
   }
   await dumpGroup(db, 'player-snapshots')
 
-  await writeJsonAtomic(out, exportJson(db, today, levelAverageAge))
+  await writeJsonAtomic(out, exportJson(db, today, levelAverageAge, asOf))
   db.close()
   console.log(`wrote ${out} (${pool.length} prospects with a current-level line, ${qualifiedCount} qualified)`)
 }

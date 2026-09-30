@@ -14,6 +14,7 @@ import {
   buildPopulations,
   populationKey,
   snapshotRow,
+  movementSince,
 } from '../scripts/lib/prospectPercentile.mjs'
 import { combineToPool } from '../src/api/statsLevels.js'
 import { tenureFact } from '../src/api/levelTenure.js'
@@ -204,4 +205,22 @@ test('snapshotRow: a promotion 30 PA ago leaves him unqualified at the new level
 
 test('snapshotRow is null for a player with no line in either group', () => {
   assert.equal(snapshotRow({ position: 'C', hitting: null, pitching: null }, new Map()), null)
+})
+
+// A row written before #1279 summed every level. Diffing it against a level-only
+// row would print a method change as a move (Ayers: 91 then 38 = "down 53").
+test('movementSince compares two rows that both read one level', () => {
+  const prior = { date: '2026-09-16', payload: { percentile: 50, atLevel: true } }
+  assert.deepEqual(movementSince({ percentile: 62, atLevel: true }, prior), { delta: 12, sinceDate: '2026-09-16' })
+})
+
+test('movementSince is null against a row from before the one-level rule', () => {
+  const prior = { date: '2026-09-16', payload: { percentile: 91 } }
+  assert.equal(movementSince({ percentile: 38, atLevel: true }, prior), null)
+})
+
+test('movementSince is null with no prior row or an unranked side', () => {
+  assert.equal(movementSince({ percentile: 38, atLevel: true }, undefined), null)
+  assert.equal(movementSince({ percentile: null, atLevel: true }, { date: 'd', payload: { percentile: 4, atLevel: true } }), null)
+  assert.equal(movementSince({ percentile: 4, atLevel: true }, { date: 'd', payload: { percentile: null, atLevel: true } }), null)
 })
