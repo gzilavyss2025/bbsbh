@@ -68,10 +68,12 @@ test('a click near a swing marker snaps to it; one farther off does not', () => 
   assert.equal(snapToMarker(0.5, 80, [], 1 / 80), 39)
 })
 
-test('the last play of a finished game reads Final, with no change', () => {
-  const last = { home: 100, inning: 9, half: 'top', outs: 3, delta: 3 }
-  assert.deepEqual(winProbReadout(last, { final: true }), { context: 'Final', delta: null })
-  assert.equal(winProbReadout(last).context, '▲9 · Half over')
+test('the last play of a finished game reads Final and keeps its change', () => {
+  // The decisive play (often a walk-off, often swing #1) must still show its swing.
+  const last = { home: 100, inning: 9, half: 'bottom', outs: 2, delta: 31.4 }
+  assert.deepEqual(winProbReadout(last, { final: true }), { context: 'Final', delta: 31.4 })
+  assert.equal(winProbReadout(last).context, '▼9 · 2 outs')
+  assert.equal(winProbReadout({ home: 0, inning: 9, half: 'top', outs: 3 }, { final: true }).delta, null)
 })
 
 test('the key colour is the band colour, with readable text on it', () => {

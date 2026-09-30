@@ -4,9 +4,10 @@ export function nearestWinProbEvent(fraction, count) {
   return Math.max(0, Math.min(count - 1, Math.round(fraction * count) - 1))
 }
 // `final`: the point is the last play of a finished game, which reads as the
-// result rather than as one more play.
+// result rather than as one more play. It keeps its change: the decisive play
+// is often the biggest swing.
 export function winProbReadout(point, { final = false } = {}) {
-  if (final) return { context: 'Final', delta: null }
+  if (final) return { context: 'Final', delta: point.delta ?? null }
   const half = point.half === 'top' ? '▲' : '▼'
   const outs = point.outs == null ? '' : point.outs === 3 ? ' · Half over' : ` · ${point.outs} out${point.outs === 1 ? '' : 's'}`
   return { context: `${half}${point.inning}${outs}`, delta: point.delta ?? null }
