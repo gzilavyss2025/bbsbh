@@ -1,6 +1,6 @@
 import '../../styles/boxlines/boxlines.css'
 import '../../styles/boxlines/listdoor.css'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { fetchBoxLines } from '../../api/boxlines/fetch.js'
 import { foldGroups, foldStats, LIST_COLUMNS } from '../../api/boxlines/fold.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -10,6 +10,7 @@ import { BoxLinesList } from './BoxLinesList.jsx'
 import { Stat } from '../gamehud/StatBox.jsx'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { IconButton } from '../ui/control/IconButton.jsx'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // BOX LINES — the drilldown behind a summary stat line (ADR-0069). Tap a
 // line such as "Career vs MIL: 7 G, 34.0 IP, 3.44 ERA, 28 K, 17 BB" and this
@@ -108,20 +109,8 @@ export function BoxLinesSheet({
     [personId, group, cutoff, facetKey],
   )
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   const rows = query.data
   const failed = !query.loading && rows === null

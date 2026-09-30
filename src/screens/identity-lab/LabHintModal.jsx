@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // The per-dimension "what is this page" explainer, popped from an info button
 // beside the title instead of sitting in the page flow permanently — the
@@ -8,20 +9,8 @@ import { useEffect, useRef } from 'react'
 // backdrop tap, the close button, or Escape; focus moves to the close button
 // on open and back to the trigger on close.
 export function LabHintModal({ title, hint, onClose }) {
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   return (
     <div className="scrim scrim--center" onClick={(e) => e.target.classList.contains('scrim') && onClose()}>
