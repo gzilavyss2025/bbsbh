@@ -4,12 +4,19 @@
 // cutoff date, #1224). One copy, so the two pages cannot drift apart. Each
 // part draws only what its caller hands it; neither page's spoiler footing
 // changes here.
+import { useState } from 'react'
+import { useAsync } from '../../hooks/useAsync.js'
+import { fetchHighlights, classifyHighlight, isEligibleForPositiveFilter } from '../../api/highlights.js'
+import { fetchGameFeed } from '../../api/game.js'
+import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+
+const PLAY_ID_FIELDS = 'liveData,plays,allPlays,about,atBatIndex,playEvents,isPitch,playId'
 
 function ordinal(n) {
   const s = ['th', 'st', 'nd', 'rd']
@@ -24,8 +31,34 @@ function ordinal(n) {
 // version elsewhere; here it's suppressed via `hidePlayOfGame` so the two
 // don't double up). Hidden entirely when WPA isn't available (most MiLB
 // parks) or box-score resolution failed for this game.
-export function SeriesPlayOfTheGame({ potg, awayAbbr, homeAbbr }) {
+export function SeriesPlayOfTheGame({ potg, gamePk, awayAbbr, homeAbbr }) {
+  const [watchOpen, setWatchOpen] = useState(false)
+  // The clip for that one play, when MLB cut one. Both series pages show only
+  // Final games, so the play is already revealed prose beside the button.
+  // The past-game feed is pruned of playEvents, so the play's own id (the clip's
+  // join key) is read with one narrow feed call when potg came without it.
+  const { data: found } = useAsync(
+    async () => {
+      if (!gamePk || !potg?.desc) return null
+      const [clips, playId] = await Promise.all([
+        fetchHighlights(gamePk),
+        potg.playId ??
+          (potg.atBatIndex == null
+            ? null
+            : fetchGameFeed(gamePk, { fields: PLAY_ID_FIELDS }).then((feed) => {
+                const play = (feed?.liveData?.plays?.allPlays ?? []).find((p) => p?.about?.atBatIndex === potg.atBatIndex)
+                return (play?.playEvents ?? []).filter((e) => e.isPitch).at(-1)?.playId ?? null
+              })),
+      ])
+      return { clips, playId }
+    },
+    [gamePk, potg?.playId, potg?.atBatIndex],
+  )
   if (!potg?.desc) return null
+  // The join is done here rather than through the reveal-only
+  // eligibleHighlightForPlay: this page never seals a game.
+  const clip = found?.playId ? (found.clips ?? []).find((i) => i?.guid === found.playId) : null
+  const highlight = clip && isEligibleForPositiveFilter(classifyHighlight(clip)) ? clip : null
   const halfLabel = potg.half === 'top' ? 'Top' : 'Bottom'
   const hasScore = potg.awayScore != null && potg.homeScore != null
   return (
@@ -65,8 +98,25 @@ export function SeriesPlayOfTheGame({ potg, awayAbbr, homeAbbr }) {
               </span>
             )}
           </p>
+          {highlight && (
+            <button
+              type="button"
+              className="bs__potgWatch"
+              onClick={() => setWatchOpen(true)}
+              aria-label={
+                potg.batterName
+                  ? `Watch highlight for ${potg.batterName}`
+                  : 'Watch highlight for the play of the game'
+              }
+            >
+              <span className="bs__potgPlay">
+                <span className="bs__potgPlayIcon" aria-hidden="true">▶</span> Watch
+              </span>
+            </button>
+          )}
         </div>
       </div>
+      {watchOpen && highlight && <HighlightSheet item={highlight} onClose={() => setWatchOpen(false)} />}
     </div>
   )
 }

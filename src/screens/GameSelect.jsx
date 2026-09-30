@@ -148,7 +148,13 @@ export function GameSelect({
   // different shape, so its slate stays the plain one.
   const inPostseasonWindow =
     sportId === SPORT_IDS.MLB && bracketSeason >= 2022 && isPostseasonWindow(dateStr, bracketSeasonMeta.data)
-  const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null)
+  // Site-wide "Scores Unlocked" pass (see the toggle below). Read here, ahead of
+  // the bracket, because revealing the day's live scores also moves the bracket
+  // (Gary, 2026-09-30, ADR-0087 addendum).
+  const { passActive, resetAt, spoilersOffFor, enable: enableUnlock, disable: disableUnlock } =
+    useScoresUnlocked()
+  const scoresUnlocked = spoilersOffFor(dateStr)
+  const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null, { live: scoresUnlocked })
   // The bracket stands in for the off-day banner and the empty-slate line
   // only when it can draw. A failed read falls back to the plain slate, never
   // to a blank page.
@@ -204,13 +210,10 @@ export function GameSelect({
   // gates turning it on; turning it off is immediate and takes today's consent
   // back with it.
   const { t: copy } = useCopy()
-  const { passActive, resetAt, spoilersOffFor, enable: enableUnlock, disable: disableUnlock } =
-    useScoresUnlocked()
   // Spoilers are off for THIS slate's date when the pass is running (today) or
   // when this is a day already consented to and locked in (ADR-0026). A past day
   // you spoiled keeps showing plainly forever — you agreed to see it, and
   // pretending otherwise the next morning would be a fiction.
-  const scoresUnlocked = spoilersOffFor(dateStr)
   const [askUnlock, setAskUnlock] = useState(false)
   // The `scores-unlocked-local` contextual prompt (PRD-adjacent, §6.2's honest-
   // wording mandate): right after the user consents, quietly confirm the

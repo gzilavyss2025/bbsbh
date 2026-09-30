@@ -5,35 +5,27 @@
 // FullBracket.jsx underneath.
 import { useRouteLink } from '../../lib/nav.js'
 import { seriesHref } from '../../lib/route.js'
-import { recordLine, seriesLine } from '../../api/postseason/text.js'
-import { isBoldMoment, isDecidingGame, seriesPlayingToday } from '../../lib/postseason/bracketDisplay.js'
+import { recordLine, roundLine } from '../../api/postseason/text.js'
+import { seriesPlayingToday } from '../../lib/postseason/bracketDisplay.js'
 import { ClubMark, Pips, Trophy } from './bracketParts.jsx'
 import { Door } from '../ui/control/Door.jsx'
 
-function ticketLabel(series, note) {
+function ticketLabel(series) {
   const sides = series.slots
     .map((slot) => `${slot.club.abbreviation} ${slot.wins} ${slot.wins === 1 ? 'win' : 'wins'}`)
     .join(', ')
-  const line = seriesLine(series, series.cutoffGame.gameNumber)
-  return `${line}. ${sides}, best of ${series.bestOf}.${note ? ` ${note}.` : ''}`
+  return `${roundLine(series)}. ${sides}.`
 }
 
-// A series playing today: the round + game number, both clubs' pips, and —
-// the brief's one bold moment — "Winner take all" or "One loss from out".
+// A series playing today: the round and its length, and both clubs' pips.
 function SeriesTicket({ series, cutoff, historyIds }) {
   const linkProps = useRouteLink()
   const href = series.id ? seriesHref(series, cutoff, historyIds) : null
   const Wrapper = href ? 'a' : 'div'
   const wrapperProps = href ? linkProps(href) : { role: 'group' }
-  const bold = isBoldMoment(series)
-  const note = bold ? (isDecidingGame(series) ? 'Winner take all' : 'One loss from out') : null
   return (
-    <Wrapper
-      className={`pbkt-ticket${bold ? ' pbkt-ticket--bold' : ''}`}
-      aria-label={ticketLabel(series, note)}
-      {...wrapperProps}
-    >
-      <span className="pbkt-ticket__head">{seriesLine(series, series.cutoffGame.gameNumber)}</span>
+    <Wrapper className="pbkt-ticket" aria-label={ticketLabel(series)} {...wrapperProps}>
+      <span className="pbkt-ticket__head">{roundLine(series)}</span>
       {series.slots.map((slot, i) => (
         <span key={i} className="pbkt-ticket__row">
           <ClubMark club={slot.club} size={20} />
@@ -41,7 +33,6 @@ function SeriesTicket({ series, cutoff, historyIds }) {
           <Pips winsNeeded={series.winsNeeded} wins={slot.wins} />
         </span>
       ))}
-      {note && <span className="pbkt-ticket__note">{note}</span>}
     </Wrapper>
   )
 }
