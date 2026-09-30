@@ -59,8 +59,9 @@
 // (mirroring src/api/milbHistory.js's historicalParentOrg — the 2021 MiLB
 // reorg means a naive "current org" lookup misattributes older stints), falling
 // back to a live current-team lookup when that file doesn't cover the
-// (team, season). See computeOrgTies/resolveCurrentOrg/historicalParentOrgAt
-// below; the client (src/api/formerTeammates.js) just reads whichever of
+// (team, season). See computeOrgTies/resolveCurrentOrg below (and
+// historicalParentOrgAt in lib/former-teammates.mjs); the client
+// (src/api/formerTeammates.js) just reads whichever of
 // `rows`/`orgTies` the matchup's `kind` says is populated — never both, so the
 // UI never has to choose between two card types for the same matchup.
 // Run by hand: node scripts/gen-former-teammates.mjs
