@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { detectInjuredList, careerRegisterView } from '../src/api/person.js'
+import { detectInjuredList, detectRehabAssignment, careerRegisterView } from '../src/api/person.js'
 
 // ---------------------------------------------------------------------------
 // Real fixture rows — pulled live from
@@ -239,4 +239,15 @@ test('a season lost to a pre-2019 disabled-list stint reads as injured, not as a
   const gap = view.rows.find((r) => r.gap)
   assert.equal(gap.year, '2015')
   assert.equal(gap.note, 'Injured — missed season')
+})
+
+// A rehab with no closing row stops at MLB's 30-day cap (#1280): day 30 is open,
+// day 31 is closed — the same boundary gen-rehab.mjs uses for the list.
+test('detectRehabAssignment: an open rehab ends after 30 days', () => {
+  const asg = (date) => [{
+    typeCode: 'ASG', date, effectiveDate: date, toTeam: { id: 553, name: 'Durham Bulls' },
+    description: 'Tampa Bay Rays sent SS Gavin Lux on a rehab assignment to Durham Bulls.',
+  }]
+  assert.deepEqual(detectRehabAssignment(asg('2026-06-30'), 2019, '2026-07-30'), { id: 553, name: 'Durham Bulls' })
+  assert.equal(detectRehabAssignment(asg('2026-06-30'), 2019, '2026-07-31'), null)
 })

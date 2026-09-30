@@ -110,7 +110,7 @@ These have one home, and every other caller imports it. I found no copy.
 - **Bullpen thresholds.** `gen-workload.mjs` imports `clubPenCounts` from `src/api/workload.js`.
 - **Pitch codes.** `WHIFF_CODES`, `FOUL_CODES`, `BALL_CODES` in `src/api/playbyplay/pitchInfo.js`.
 - **K% and BB%.** Every home divides by PA (BF for a pitcher).
-- **Rehab transaction test.** `src/api/rehab-policy.js`. (A6 is about the end rule, which is not shared.)
+- **Rehab transaction test.** `src/api/rehab-policy.js`. (The 30-day cap is shared too, since A6. The 7-club-games stale rule is not: it needs game logs.)
 - **Hit coordinates.** `HIT_COORD_ORIGIN` in `src/lib/ballpark/hitProjection.js`. Savant's `hc_x`/`hc_y` projection is different, and `gen-spray.mjs` says so.
 - **Win probability.** It comes from MLB's endpoint. The repo does not compute it.
 - **Service time.** `src/lib/contracts/parseServiceTime.js` parses a salary column. `.scratch/service-clock/lib.mjs` computes a season's service line. Different quantities.

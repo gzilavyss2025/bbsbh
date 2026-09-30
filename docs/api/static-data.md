@@ -83,8 +83,8 @@ for each generator; the reader modules:
 - `rehab.js` — the Rehab Assignments page, from `public/data/rehab.json`.
   Cost-driven: a league-wide transaction scan then per-candidate verification
   against his game log + rehab club's schedule to drop ended stints — dozens of
-  calls. `gen-rehab.mjs` (daily cron) keeps its own copy of the transaction-scan
-  logic, which mirrors `person.js`'s `detectRehabAssignment`.
+  calls. `gen-rehab.mjs` (daily cron) imports the transaction tests and the 30-day
+  cap from `rehab-policy.js`, shared with `person.js`'s `detectRehabAssignment`.
 - `milestones.js` — the Milestone Watch page + the player page's Milestone Watch
   card, from `public/data/milestones.json`. Cost-driven: a career-total + this
   season's pace pull per debuted player on any MLB org's full roster (active,
