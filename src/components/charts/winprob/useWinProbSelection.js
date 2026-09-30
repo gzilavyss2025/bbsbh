@@ -1,17 +1,30 @@
 import { useEffect, useRef, useState } from 'react'
-import { followLatest, nearestWinProbEvent, touchIntent } from './explore.js'
+import { followLatest, nearestWinProbEvent, snapToMarker, touchIntent } from './explore.js'
 
 // Which plotted play WinProbChart shows, and the slider's pointer and key
 // handlers. `plot` is the chart's viewBox geometry: { W, H, left, width }.
+// `markers` are the big-swing plays' indices: a click (not a drag) within
+// SNAP viewBox units of one selects it.
+//
+// `used` turns true on the reader's first pick, so the chart can drop its
+// how-to hint. `input` is 'pointer' or 'key', the last way the chart was
+// used, so a tap does not draw the keyboard focus ring.
 //
 // The latest play until the user picks one. A pick persists when the pointer
 // leaves, and drops (followLatest) when a reveal or a live poll adds plays.
-export function useWinProbSelection(count, plot) {
+const SNAP = 8
+
+export function useWinProbSelection(count, plot, markers = []) {
   const [pick, setPick] = useState({ count, idx: null })
+  const [used, setUsed] = useState(false)
+  const [input, setInput] = useState('key')
   const synced = followLatest(pick, count)
   if (synced !== pick) setPick(synced)
   const activeIdx = synced.idx ?? count - 1
-  const select = (idx) => setPick((p) => (p.idx === idx && p.count === count ? p : { count, idx }))
+  const select = (idx) => {
+    setUsed(true)
+    setPick((p) => (p.idx === idx && p.count === count ? p : { count, idx }))
+  }
 
   // The <svg>'s box, read once per hover or touch rather than on every
   // pointermove; a scroll or resize moves it, so both drop the cached box.
@@ -28,13 +41,14 @@ export function useWinProbSelection(count, plot) {
     }
   }, [])
 
-  const selectAtPointer = (e) => {
+  const selectAtPointer = (e, snap = false) => {
     rectRef.current ??= e.currentTarget.getBoundingClientRect()
     const rect = rectRef.current
     // Account for xMidYMid meet letterboxing, should the box ever be off-ratio.
     const scale = Math.min(rect.width / plot.W, rect.height / plot.H)
     const left = rect.left + (rect.width - plot.W * scale) / 2
-    select(nearestWinProbEvent(((e.clientX - left) / scale - plot.left) / plot.width, count))
+    const fraction = ((e.clientX - left) / scale - plot.left) / plot.width
+    select(snap ? snapToMarker(fraction, count, markers, SNAP / plot.width) : nearestWinProbEvent(fraction, count))
   }
 
   // A mouse or pen selects at once. A touch waits: a tap or a sideways drag
@@ -46,18 +60,20 @@ export function useWinProbSelection(count, plot) {
         ArrowDown: activeIdx - 1, ArrowUp: activeIdx + 1, Home: 0, End: count - 1 }[e.key]
       if (next == null) return
       e.preventDefault()
+      setInput('key')
       select(Math.max(0, Math.min(count - 1, next)))
     },
     onPointerEnter: () => { rectRef.current = null },
     onPointerDown: (e) => {
       rectRef.current = null
+      setInput('pointer')
       if (e.pointerType === 'touch') {
         touchRef.current = { id: e.pointerId, x: e.clientX, y: e.clientY, drag: false }
         return
       }
       e.currentTarget.focus({ preventScroll: true })
       e.currentTarget.setPointerCapture(e.pointerId)
-      selectAtPointer(e)
+      selectAtPointer(e, true)
     },
     onPointerMove: (e) => {
       const t = touchRef.current
@@ -76,11 +92,11 @@ export function useWinProbSelection(count, plot) {
     },
     onPointerUp: (e) => {
       const t = touchRef.current
-      if (t && t.id === e.pointerId && !t.drag) selectAtPointer(e)
+      if (t && t.id === e.pointerId && !t.drag) selectAtPointer(e, true)
       touchRef.current = null
     },
     onPointerCancel: () => { touchRef.current = null },
   }
 
-  return { activeIdx, select, svgHandlers }
+  return { activeIdx, select, svgHandlers, used, input }
 }

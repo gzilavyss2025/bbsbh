@@ -1,6 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { nearestWinProbEvent, winProbReadout, winProbChangeLabel, touchIntent, followLatest } from '../src/components/charts/winprob/explore.js'
+import { nearestWinProbEvent, winProbReadout, winProbChangeLabel, touchIntent, followLatest, snapToMarker } from '../src/components/charts/winprob/explore.js'
+import { winProbKeyColor, winProbKeyPair } from '../src/components/charts/winprob/keyColors.js'
+
+const FALLBACK = { primary: '#6B6558', secondary: '#938C7C', text: '#FBF6E9' }
 import { selectWinProbPath, selectWinProbBigPlays } from '../src/api/winprob.js'
 import { WIN_PROB_FIELDS } from '../src/api/game.js'
 
@@ -54,4 +57,35 @@ test('a touch only selects once it moves sideways; a vertical move is a page scr
 test('a selection resets to the latest play when more plays arrive', () => {
   assert.deepEqual(followLatest({ count: 20, idx: 12 }, 20), { count: 20, idx: 12 })
   assert.deepEqual(followLatest({ count: 20, idx: 12 }, 30), { count: 30, idx: null })
+})
+
+test('a click near a swing marker snaps to it; one farther off does not', () => {
+  // 80 plays; marker on play idx 39 sits at fraction 40/80.
+  assert.equal(snapToMarker(40.4 / 80, 80, [39], 1 / 80), 39)
+  assert.equal(snapToMarker(38.2 / 80, 80, [39], 1 / 80), 37)
+  // The nearest of two markers wins.
+  assert.equal(snapToMarker(42.6 / 80, 80, [39, 42], 1 / 80), 42)
+  assert.equal(snapToMarker(0.5, 80, [], 1 / 80), 39)
+})
+
+test('the last play of a finished game reads Final, with no change', () => {
+  const last = { home: 100, inning: 9, half: 'top', outs: 3, delta: 3 }
+  assert.deepEqual(winProbReadout(last, { final: true }), { context: 'Final', delta: null })
+  assert.equal(winProbReadout(last).context, '▲9 · Half over')
+})
+
+test('the key colour is the band colour, with readable text on it', () => {
+  assert.deepEqual(winProbKeyColor('#FFFFFF', FALLBACK), { fill: '#FFFFFF', text: '#1B2A3A' })
+  assert.deepEqual(winProbKeyColor('#0C2340', FALLBACK), { fill: '#0C2340', text: '#FFFFFF' })
+  // Not a plain hex (a pattern, a named colour): the club's chip colours.
+  assert.deepEqual(winProbKeyColor('url(#x)', FALLBACK), { fill: FALLBACK.primary, text: FALLBACK.text })
+})
+
+test('two near-identical key colours move the away key to its fallback', () => {
+  const home = { fill: '#0C2340', text: '#FFFFFF' }
+  const clash = winProbKeyPair({ fill: '#0E2442', text: '#FFFFFF' }, home, { primary: '#0E2442', secondary: '#E31937', text: '#FFFFFF' })
+  assert.equal(clash.away.fill, '#E31937')
+  assert.equal(clash.home, home)
+  const apart = winProbKeyPair({ fill: '#BD3039', text: '#FFFFFF' }, home, FALLBACK)
+  assert.equal(apart.away.fill, '#BD3039')
 })

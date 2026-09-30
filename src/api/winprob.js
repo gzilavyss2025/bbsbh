@@ -108,11 +108,12 @@ export function winProbSplit(points) {
   return { home, away: 100 - home }
 }
 
-// The biggest momentum plays so far, newest first — the "how we got here"
-// ledger. Each entry is a single play's `delta` from selectWinProbPath (home
-// share vs. the play before it, the first measured from even), kept only if it
-// cleared a swing threshold, then the top `limit` by magnitude, re-sorted newest-first for
-// display. REVEAL-ONLY (same `throughHalf` clamp); [] when there's no data.
+// The biggest momentum plays so far, biggest first — the "how we got here"
+// ledger, numbered 1 to `limit` in that order on the plot and in the list.
+// Each entry is a single play's `delta` from selectWinProbPath (home share vs.
+// the play before it, the first measured from even), kept only if it cleared
+// a swing threshold. A tie goes to the earlier play. REVEAL-ONLY (same
+// `throughHalf` clamp); [] when there's no data.
 export function selectWinProbBigPlays(
   winProb,
   { throughHalf = Infinity, stepHalfIndex = null, throughAtBatIndex = null, limit = 4, minSwing = 8 } = {},
@@ -127,7 +128,6 @@ export function selectWinProbBigPlays(
     }
   }
   return plays
-    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta) || a.idx - b.idx)
     .slice(0, limit)
-    .sort((a, b) => b.idx - a.idx) // newest first for the ledger
 }

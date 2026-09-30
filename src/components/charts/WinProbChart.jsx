@@ -1,8 +1,10 @@
-import { useId } from 'react'
+import { useId, useRef } from 'react'
 import { winProbSplit } from '../../api/winprob.js'
 import { winProbChangeLabel, winProbReadout } from './winprob/explore.js'
 import { useWinProbSelection } from './winprob/useWinProbSelection.js'
 import { useSwingClip } from './winprob/useSwingClip.js'
+import { winProbKeyColor, winProbKeyPair, winProbKeyPill } from './winprob/keyColors.js'
+import { SwingLedger } from './winprob/SwingLedger.jsx'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 import { wpaBandColor, wpaBandPinstripeColor, wpaBandPinstripeBg, chipColorsFor } from '../../lib/wpa/wpaBandColors.js'
 import { wpaLogoLayout, wpaTilePlacements } from '../../lib/wpa/wpaLogo.js'
@@ -10,7 +12,6 @@ import { isMlbTeamId } from '../../lib/teams.js'
 import { milbWpaLogoLayout, milbWpaBandColor, milbWpaBandPinstripeColor } from '../../lib/milbColors.js'
 import { useWpaLogo } from '../../hooks/useWpaLogo.js'
 import { useMilbWpaLogo } from '../../hooks/useMilbWpaLogo.js'
-import { ordinal } from '../../lib/format.js'
 import { Card } from '../ui/frame/Card.jsx'
 
 // The win-probability "story of the game", drawn the scorebook way: one ink line
@@ -67,6 +68,9 @@ const INNING_LABEL_Y = H - 7
 // orient by.
 const INNING_LABEL_STEP = 3
 const PLOT_W = PLOT_R - PLOT_L
+// A swing marker's radius, and how far above (or below) its step it floats.
+const MARK_R = 7
+const MARK_LIFT = 15
 const PLOT_H = PLOT_B - PLOT_T
 
 // The step-and-repeat band texture — each tile a SOLID fill of that band's
@@ -160,23 +164,24 @@ export function WinProbChart({
   homeBandOverride,
   homeMarkOverride,
   partial = false,
+  final = false,
   highlights = null,
   filmEligible = true,
 }) {
   const patternUid = useId()
   // The latest play until the user picks one (winprob/useWinProbSelection.js).
-  const { activeIdx, select, svgHandlers } = useWinProbSelection(
-    points?.length ?? 0, { W, H, left: PLOT_L, width: PLOT_W },
+  // A click near a numbered marker snaps to it.
+  const { activeIdx, select, svgHandlers, used, input } = useWinProbSelection(
+    points?.length ?? 0, { W, H, left: PLOT_L, width: PLOT_W }, bigPlays.map((p) => p.idx),
   )
-  // A swing row also opens that play's clip (winprob/useSwingClip.js).
+  // A swing row's Watch button opens that play's clip (winprob/useSwingClip.js).
   const clip = useSwingClip({ highlights, filmEligible })
-  const linkedProps = (idx, label, onPick = () => select(idx)) => ({
-    tabIndex: 0, role: 'button', 'aria-label': label, 'aria-pressed': activeIdx === idx,
-    onClick: onPick,
-    onKeyDown: (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick() }
-    },
-  })
+  const svgRef = useRef(null)
+  // A swing row selects its play and brings the plot into view to show it.
+  const pickSwing = (idx) => {
+    select(idx)
+    svgRef.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' })
+  }
 
   // `awayTreatment`/`homeTreatment` (props) carry that GAME's real worn
   // uniform treatment — see api/jerseys.js — so the tiled mark actually
@@ -226,7 +231,8 @@ export function WinProbChart({
   const away = awayAbbr || 'AWY'
   const home = homeAbbr || 'HOM'
   const selected = points[activeIdx]
-  const readout = winProbReadout(selected)
+  // The last play of a finished game reads as the result (`final`, box score).
+  const readout = winProbReadout(selected, { final: final && activeIdx === points.length - 1 })
   const split = winProbSplit([selected])
   const awayColors = chipColorsFor(awayId)
   const homeColors = chipColorsFor(homeId)
@@ -273,18 +279,22 @@ export function WinProbChart({
       : wpaBandPinstripeBg(homeId, homeTreat)
   const awayPinstripeId = `winprob-pinstripe-away-${patternUid}`
   const homePinstripeId = `winprob-pinstripe-home-${patternUid}`
-  const awayBandFill = awayPinstripe
-    ? `url(#${awayPinstripeId})`
-    : awayMilb
-      ? milbWpaBandColor(awayId, 'away')
-      : wpaBandColor(awayId, awayTreat)
-  const homeBandFill = homePinstripe
-    ? `url(#${homePinstripeId})`
-    : homeBandOverride
-      ? homeBandOverride.color
-      : homeMilb
-        ? milbWpaBandColor(homeId, 'home')
-        : wpaBandColor(homeId, homeTreat)
+  const awaySolid = awayMilb ? milbWpaBandColor(awayId, 'away') : wpaBandColor(awayId, awayTreat)
+  const homeSolid = homeBandOverride
+    ? homeBandOverride.color
+    : homeMilb
+      ? milbWpaBandColor(homeId, 'home')
+      : wpaBandColor(homeId, homeTreat)
+  const awayBandFill = awayPinstripe ? `url(#${awayPinstripeId})` : awaySolid
+  const homeBandFill = homePinstripe ? `url(#${homePinstripeId})` : homeSolid
+  // The colour key (header swatches, change pill, swing pills) takes each
+  // band's own colour, so a pill matches the band it describes
+  // (winprob/keyColors.js). A pinstripe band keys on its line colour.
+  const keys = winProbKeyPair(
+    winProbKeyColor(awayPinstripe ?? awaySolid, awayColors),
+    winProbKeyColor(homePinstripe ?? homeSolid, homeColors),
+    awayColors,
+  )
 
   // Prepend a synthetic even-game origin so the line starts on the midfield 50%
   // (the score is 0–0 at first pitch); its inning matches the first real play so
@@ -322,8 +332,19 @@ export function WinProbChart({
     .map((p, i) => (p.isScoring ? i : -1))
     .filter((i) => i >= 0)
 
-  const change = winProbChangeLabel(readout.delta, home, away)
-  const summary = `${away} ${split.away}%, ${home} ${split.home}%. ${readout.context.replace('▲', 'Top ').replace('▼', 'Bottom ')}. ${change}.`
+  const change = readout.delta == null ? '' : winProbChangeLabel(readout.delta, home, away)
+  const changeKey = Math.round(readout.delta ?? 0) === 0 ? null : readout.delta > 0 ? keys.home : keys.away
+  const summary = `${away} ${split.away}%, ${home} ${split.home}%. ${readout.context.replace('▲', 'Top ').replace('▼', 'Bottom ')}.${change ? ` ${change}.` : ''}`
+
+  // A swing marker floats above the step it marks on a short pin, or below it
+  // when the step is too near the top, so it never covers the line.
+  const markerAt = (idx) => {
+    const cx = x(idx + 1)
+    const cy = y(points[idx].home)
+    const up = cy - MARK_LIFT - MARK_R >= PLOT_T
+    const my = up ? cy - MARK_LIFT : cy + MARK_LIFT
+    return { cx, cy, my, edge: up ? my + MARK_R : my - MARK_R }
+  }
 
   return (
     <Card body="flush" className="winprob">
@@ -331,10 +352,10 @@ export function WinProbChart({
         <h3 className="winprob__title">Win probability</h3>
         {/* The slider's aria-valuetext reads these same two numbers. */}
         <div className="winprob__split" aria-hidden="true">
-          <span className="winprob__team winprob__team--away" style={{ '--team-color': awayColors.primary }}>
+          <span className="winprob__team winprob__team--away" style={{ '--team-color': keys.away.fill }}>
             {away} <span className="winprob__pct">{split.away}%</span>
           </span>
-          <span className="winprob__team winprob__team--home" style={{ '--team-color': homeColors.primary }}>
+          <span className="winprob__team winprob__team--home" style={{ '--team-color': keys.home.fill }}>
             {home} <span className="winprob__pct">{split.home}%</span>
           </span>
         </div>
@@ -343,17 +364,23 @@ export function WinProbChart({
       <div className="winprob__explorer">
       {/* The slider's aria-valuetext and the help text below carry all of this. */}
       <div className="winprob__readout" aria-hidden="true">
-        <span>{readout.context}</span>
-        <span className="winprob__change">{change}</span>
-        <span className="winprob__hint">
-          After play · {activeIdx + 1}/{points.length}{partial ? ' revealed' : ''}
-          <span className="winprob__hint-fine"> · Hover or use ← →</span>
-          <span className="winprob__hint-touch"> · Tap or drag</span>
+        {changeKey ? (
+          <span className="pill pill--ink pill--figure winprob__change" style={winProbKeyPill(changeKey)}>{change}</span>
+        ) : (
+          change && <span className="winprob__change winprob__change--none">{change}</span>
+        )}
+        <span className="winprob__context">
+          {readout.context} · Play {activeIdx + 1}/{points.length}{partial ? ' revealed' : ''}
+          {/* The how-to drops once the reader has used the chart. */}
+          {!used && <span className="winprob__hint winprob__hint-fine"> · Hover or use ← →</span>}
+          {!used && <span className="winprob__hint winprob__hint-touch"> · Tap or drag</span>}
         </span>
       </div>
 
       <svg
+        ref={svgRef}
         className="winprob__svg"
+        data-input={input}
         viewBox={`0 0 ${W} ${H}`}
         role="slider"
         tabIndex={0}
@@ -456,6 +483,8 @@ export function WinProbChart({
         <path className="winprob__band winprob__band--home" d={homeArea} style={{ fill: `url(#${homePatternId})` }} />
 
         {/* The win-probability line itself. */}
+        {/* An ink casing under the line keeps it readable on any band. */}
+        <path className="winprob__line-casing" d={linePath} />
         <path className="winprob__line" d={linePath} />
 
         {/* Scoring plays — where the line took its steps. Flattened into the
@@ -506,72 +535,48 @@ export function WinProbChart({
             </text>
           ))}
 
-        {/* Numbered landmarks match the ledger; selection is a separate layer. */}
-        {bigPlays.map((p, index) => (
-          <g key={p.idx} className="winprob__moment">
-            <circle cx={x(p.idx + 1)} cy={y(points[p.idx].home)} r={6} />
-            <text x={x(p.idx + 1)} y={y(points[p.idx].home)} dy=".35em" textAnchor="middle">{index + 1}</text>
-          </g>
-        ))}
+        {/* A hairline tick where each inning starts, under the landmarks. */}
+        {groups
+          .filter((g) => g.half === 'top' && g.start > 0)
+          .map((g) => (
+            <path key={`tk-${g.key}`} className="winprob__tick" d={`M ${x(g.start)} ${PLOT_B} v 4`} />
+          ))}
+        {/* The even-game level, in the right gutter. */}
+        <text className="winprob__midlabel" x={PLOT_R + 2} y={y(50)} dy=".35em">50</text>
+
+        {/* Numbered landmarks match the ledger (1 = biggest swing); selection
+            is a separate layer. */}
+        {bigPlays.map((p, index) => {
+          const m = markerAt(p.idx)
+          return (
+            <g key={p.idx} className={`winprob__moment${activeIdx === p.idx ? ' is-active' : ''}`}>
+              <path className="winprob__pin" d={`M ${m.cx} ${m.cy} V ${m.edge}`} />
+              <circle cx={m.cx} cy={m.my} r={MARK_R} />
+              <text x={m.cx} y={m.my} dy=".35em" textAnchor="middle">{index + 1}</text>
+            </g>
+          )
+        })}
         <g className="winprob__cursor" aria-hidden="true">
           <path className="winprob__cursor-halo" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${PLOT_B}`} />
           <path className="winprob__cursor-line" d={`M ${x(activeIdx + 1)} ${PLOT_T} V ${PLOT_B}`} />
-          <circle cx={x(activeIdx + 1)} cy={y(selected.home)} r={5} />
+          <circle cx={x(activeIdx + 1)} cy={y(selected.home)} r={4} />
         </g>
       </svg>
-      </div>
 
       <p id={`winprob-help-${patternUid}`} className="sr-only">Hover, tap or drag to select a recorded play. Arrow keys move one play. Home selects the first; End selects the latest. Values are rounded to whole percentages. Probabilities are after the selected play.</p>
 
-      {bigPlays.length > 0 && (
-        <div className="winprob__ledger">
-          {/* No visible heading: the numbered markers on the plot already tie
-              these rows to the chart. The list keeps its name for a screen
-              reader. */}
-          <ol className="winprob__ledger-list" aria-label="Biggest swings">
-            {bigPlays.map((p, index) => {
-              const toHome = p.delta > 0
-              const abbr = toHome ? home : away
-              const colors = chipColorsFor(toHome ? homeId : awayId)
-              const chipText = winProbChangeLabel(p.delta, home, away)
-              const tag = `${p.half === 'top' ? '▲' : '▼'}${p.inning}`
-              const isActive = activeIdx === p.idx
-              const watchable = clip.hasClip(p.playId)
-              const halfWords = `${p.half === 'top' ? 'top' : 'bottom'} of the ${ordinal(p.inning)}`
-              return (
-                <li
-                  className={`winprob__ledger-row${isActive ? ' is-active' : ''}`}
-                  key={`bp-${p.idx}`}
-                  style={{ '--team-color': colors.primary }}
-                  {...linkedProps(
-                    p.idx,
-                    `Biggest swing: ${chipText}, ${halfWords}${watchable ? '. Watch the play' : ''}`,
-                    () => {
-                      select(p.idx)
-                      if (watchable) clip.openClip(p.playId, `${chipText} · ${tag}`)
-                    },
-                  )}
-                >
-                  <span className="winprob__ledger-meta">
-                    <span className="winprob__moment-number">{index + 1}</span>
-                    <span
-                      className="pill pill--ink pill--figure winprob__ledger-chip"
-                      style={{ '--pill-fill': colors.primary, '--pill-edge': colors.primary, '--pill-text': colors.text }}
-                    >
-                      {chipText}
-                    </span>
-                    <span className="winprob__ledger-half">{tag}</span>
-                    {watchable && (
-                      <span className="winprob__ledger-watch" aria-hidden="true">▶ Watch</span>
-                    )}
-                  </span>
-                  <p className="winprob__ledger-desc">{p.desc || `${abbr} rally`}</p>
-                </li>
-              )
-            })}
-          </ol>
-        </div>
-      )}
+      <SwingLedger
+        bigPlays={bigPlays}
+        activeIdx={activeIdx}
+        home={home}
+        away={away}
+        keys={keys}
+        clip={clip}
+        onPick={pickSwing}
+        onWatch={select}
+      />
+      </div>
+
       {clip.open && (
         <HighlightSheet
           item={clip.open.item}

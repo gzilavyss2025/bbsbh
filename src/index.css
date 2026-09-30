@@ -80,6 +80,10 @@
 @import './styles/18-uniforms-and-jerseys.css';
 @import './styles/19-pattern-and-sketch-labs.css';
 @import './styles/20-charts.css';
+/* The win-probability card, split out of 20-charts.css at the 600-line file
+   cap (ADR-0038). A subdirectory, not a numbered sibling, for the reason
+   motion/ and focus/ are: src/styles is a flat directory at its own ratchet. */
+@import './styles/charts/winprob.css';
 @import './styles/21-box-score.css';
 @import './styles/21a-box-score-stars.css';
 @import './styles/21b-box-score-tally.css';

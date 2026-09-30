@@ -363,6 +363,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
               homeTreatment={winProbTreatment?.home}
               highlights={highlights}
               filmEligible={filmCanExist(feed)}
+              final={selectIsFinal(feed)}
             />
           </div>
         </div>

@@ -239,9 +239,9 @@ test('winProbSplit reads the last plotted point and inherits the gate', () => {
 // --------------------------------------------------------------------------
 // selectWinProbBigPlays — the "how we got here" ledger.
 // --------------------------------------------------------------------------
-test('selectWinProbBigPlays returns the biggest swings, newest first', () => {
-  // Per-play deltas from even: +2, +6, -12, +24. With minSwing 8 only the last
-  // two qualify; newest-first ⇒ the +24 (idx 3) then the -12 (idx 2).
+test('selectWinProbBigPlays returns only the swings past the threshold', () => {
+  // Per-play deltas from even: +2, +3, +3, -12, +24. With minSwing 8 only the
+  // last two qualify, biggest first.
   const plays = selectWinProbBigPlays(buildWinProb(), { minSwing: 8 })
   assert.deepEqual(
     plays.map((p) => [p.inning, p.half, p.delta, p.desc]),
@@ -263,6 +263,13 @@ test('selectWinProbBigPlays carries the terminal pitch playId for the clip', () 
   assert.equal(homer.playId, 'homer-pitch')
   // A play with no pitch on record carries no clip key.
   assert.equal(double.playId, null)
+})
+
+test('selectWinProbBigPlays ranks biggest first, not newest first', () => {
+  // Deltas +2, +3, +3, -12, +24: the -12 (idx 3) is older and smaller than the
+  // +24 (idx 4), and the +3s tie — the earlier play ranks first on a tie.
+  const plays = selectWinProbBigPlays(buildWinProb(), { minSwing: 3 })
+  assert.deepEqual(plays.map((p) => [p.idx, p.delta]), [[4, 24], [3, -12], [1, 3], [2, 3]])
 })
 
 test('selectWinProbBigPlays caps at limit and inherits the reveal gate', () => {
