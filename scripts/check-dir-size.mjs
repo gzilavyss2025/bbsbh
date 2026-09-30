@@ -787,7 +787,11 @@ const BUDGETS = {
   // `npm run lint` chains as top-level scripts; its pure matcher is exported from
   // the same file for test/statsapi-client-guard.test.js, because scripts/lib/
   // is at its own budget.
-  scripts: 123,
+  // +1 for gen-prospect-rank-history.mjs, the hand-run generator behind the
+  // player page's Prospect rankings card (#1111). A generator RUNS on import, so
+  // scripts/lib/ cannot hold it, and every other gen-*.mjs sits flat here. Its
+  // pure half went to scripts/lib/prospect-rank-history.mjs (see that entry).
+  scripts: 124,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -983,7 +987,11 @@ const BUDGETS = {
   // (#1258): where a PDF lands and the skip-what-you-have loop, with the fetch
   // injected so test/game-notes-download.test.js pins "a second run downloads
   // nothing" offline. The same testable-helper reason as its neighbours above.
-  'scripts/lib': 40,
+  // +1 for prospect-rank-history.mjs, the pure half of gen-prospect-rank-history.mjs
+  // (#1111): the row shape, the per-source credit table, and the one switch that
+  // drops Baseball America's four seasons together with their credit lines. The
+  // same testable-helper reason as its neighbours above.
+  'scripts/lib': 41,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
@@ -1058,7 +1066,12 @@ const BUDGETS = {
   // guard's usual remedy of a subdirectory would put ONE of this bucket's
   // player-page cards in a folder of its own and leave the other ten flat,
   // which is not a subdivision, only a scattering.
-  'src/components/player': 16,
+  // 16 -> 17 for ProspectRankHistoryCard.jsx (#1111) — the prospect-ranking
+  // card that sits beside LevelProgressionCard.jsx on the History tab and the
+  // Overview. It shares that card's shell, so moving it to a folder of its own
+  // would split one dossier in two. src/components/playerstats/ is already at
+  // the 12-file cap, so it cannot take it either.
+  'src/components/player': 17,
   // New entry: src/components/charts holds 13, one past the cap, for
   // GloveTarget.jsx — the Glove Target plot, a peer of CommandMap.jsx and
   // SprayMap.jsx beside it and built the same way (one component that only

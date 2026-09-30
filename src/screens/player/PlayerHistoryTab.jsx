@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { fetchPlayerContractHistory } from '../../api/contractsHistory.js'
 import { loadPlayerCore } from '../../api/player/core.js'
 import { loadPlayerHistory, loadPositionScope } from '../../api/player/history.js'
+import { fetchProspectRankHistory } from '../../api/player/prospectRankHistory.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { AwardsLedger } from '../../components/player/AwardsLedger.jsx'
 import { CareerTimeline } from '../../components/player/CareerTimeline.jsx'
@@ -10,6 +11,7 @@ import { GameLink } from '../../components/player/GameLink.jsx'
 import { LevelProgressionCard } from '../../components/player/LevelProgressionCard.jsx'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { PositionInnings } from '../../components/player/PositionInnings.jsx'
+import { ProspectRankHistoryCard } from '../../components/player/ProspectRankHistoryCard.jsx'
 import { TransactionTimeline } from '../../components/transactions/TransactionTimeline.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './PlayerHubShell.jsx'
@@ -50,6 +52,9 @@ export function PlayerHistoryTab({ id, asOf, sportId }) {
   // Keyed on the player alone — a career's money is an open, season-long record
   // with no as-of cutoff over it (ADR-0034, ADR-0052).
   const contracts = useAsync(() => fetchPlayerContractHistory(id), [id])
+  // Also its own load, for the same reason: a frozen file that only a minority
+  // of players have a row in (#1111). The card renders nothing until it arrives.
+  const rankHistory = useAsync(() => fetchProspectRankHistory(), [])
   const back = () => window.history.back()
 
   const gate = AsyncGate({
@@ -118,6 +123,18 @@ export function PlayerHistoryTab({ id, asOf, sportId }) {
         <LevelProgressionCard
           levels={data.progression.levels}
           debutYear={bio.debut ? Number(bio.debut.slice(0, 4)) : undefined}
+        />
+      )}
+
+      {/* How the scouts saw him on the way: the same dossier as Path to the
+          Majors, so it sits right behind it. A player who has not debuted has
+          it on his Overview instead, beside his path. */}
+      {bio.debut && (
+        <ProspectRankHistoryCard
+          history={rankHistory.data}
+          playerId={bio.id}
+          debutYear={Number(bio.debut.slice(0, 4))}
+          currentRank={core.data.prospectRank}
         />
       )}
 

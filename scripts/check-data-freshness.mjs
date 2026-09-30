@@ -57,6 +57,7 @@ export const EXCEPT = {
   'game-notes-corroboration.json': 'hand-run audit sample, not a nightly product',
   'trade-deadline/': 'hand-run; the deadline passes once a year',
   'contracts-history/': 'hand-run from committed CSVs (ADR-0066)',
+  'prospect-rank-history.json': 'hand-run; the 2005-2024 rankings are frozen and the file carries no clock (#1111)',
   // Frozen ON PURPOSE, which is the one shape this guard cannot tell from a
   // dead generator. A level's pool is a list of games from a season that is
   // over, so it is checked once and then only re-joined against the prospect
