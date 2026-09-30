@@ -791,7 +791,7 @@ const BUDGETS = {
   // player page's Prospect rankings card (#1111). A generator RUNS on import, so
   // scripts/lib/ cannot hold it, and every other gen-*.mjs sits flat here. Its
   // pure half went to scripts/lib/prospect-rank-history.mjs (see that entry).
-  scripts: 124,
+  scripts: 118,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

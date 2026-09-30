@@ -46,8 +46,6 @@ tables is the reason this layer exists, so wire it in rather than adding
 another bespoke JSON merge. Uses `node:sqlite` (Node ≥22.5, stable since
 Node 26) rather than `better-sqlite3` — the workflows run generators with no
 `npm install` step, and a built-in avoids adding install latency.
-`migrate-json-to-sqlite.mjs` is the one-time backfill that seeded the dumps
-from the pre-migration JSON files; it's not part of any cron.
 
 ## The generator catalog lives in `docs/scripts/generators.md`
 
