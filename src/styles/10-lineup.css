@@ -315,6 +315,70 @@ button.starter__careervs {
   grid-template-columns: 1fr auto;
 }
 
+/* A hub-and-spokes reunion (GroupCard): the ANCHOR stands alone in the first
+   column behind a hairline rule and the spokes fill the rest; the shared
+   club's logo rides in the caption. The rule is what says "this player, and
+   his teammates" instead of a flat row of equals. */
+.teammate--hub {
+  grid-template-columns: auto 1fr;
+}
+
+.teammate__caption--logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1h);
+}
+
+.teammate__anchor {
+  padding-right: var(--space-2);
+  border-right: var(--bw-hair) solid var(--border-rule);
+  align-self: stretch;
+}
+
+/* "Facing a former club" (OldClubList): a tie made only on one of tonight's
+   two clubs, as one text line per player above the card grid. */
+.oldclub {
+  margin-bottom: var(--space-3);
+}
+
+.oldclub__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.oldclub__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1h) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.oldclub__text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-1h);
+  min-width: 0;
+  font-size: var(--fs-small);
+}
+
+.oldclub__name {
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+
+.oldclub__pos,
+.oldclub__club {
+  color: var(--text-caption);
+}
+
+.oldclub__club {
+  font-variant-numeric: tabular-nums;
+}
+
 /* A fixed-track grid rather than flex-wrap: flex-wrap + centering left a
    ragged number of headshots per row (a centered short last row reads as
    uneven next to the full rows above it) — a big reunion (see

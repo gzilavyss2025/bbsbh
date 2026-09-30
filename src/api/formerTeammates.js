@@ -100,6 +100,55 @@ export function formerTeammatePairs(data, teamIdA, teamIdB) {
   return pairs.sort((x, y) => y.score - x.score)
 }
 
+// Splits formerTeammatePairs() output into the ties worth a card and the OLD-
+// CLUB ties. A club that is one of tonight's two clubs only says "he used to
+// play here": Ali Sánchez's '25 Red Sox stint ties him to every Red Sox player
+// from that year, which drew one card with 15 headshots to state one fact.
+// Such a tie becomes one line for the player who LEFT that club; a pair that
+// also shares a third club keeps its card, with only the third club(s) on it.
+//
+// `a` is always the away player and `b` the home player (see the generator),
+// so a shared HOME club means `a` left it, and a shared AWAY club means `b` did.
+// Returns { pairs, oldClub }; oldClub is sorted by best score, of:
+//   { player: {id, name, pos}, rosterTeamId,            // who left, where he is now
+//     club: {teamId, teamName, level}, seasons: [...],   // the club he left
+//     mates, score }                                     // tonight's players he shared it with
+export function splitOldClubTies(pairs, awayTeamId, homeTeamId) {
+  const kept = []
+  const byPlayer = new Map()
+  for (const p of pairs ?? []) {
+    const isTonight = (c) => c.teamId === awayTeamId || c.teamId === homeTeamId
+    const neutral = p.clubs.filter((c) => !isTonight(c))
+    if (neutral.length > 0) {
+      kept.push(neutral.length === p.clubs.length ? p : { ...p, clubs: neutral })
+      continue
+    }
+    for (const club of p.clubs) {
+      const leftHome = club.teamId === homeTeamId
+      const player = leftHome ? p.a : p.b
+      const key = `${player.id}|${club.teamId}`
+      if (!byPlayer.has(key)) {
+        byPlayer.set(key, {
+          player,
+          rosterTeamId: leftHome ? awayTeamId : homeTeamId,
+          club: { teamId: club.teamId, teamName: club.teamName, level: club.level },
+          seasons: new Set(),
+          mates: new Set(),
+          score: 0,
+        })
+      }
+      const line = byPlayer.get(key)
+      for (const s of club.seasons) line.seasons.add(s)
+      line.mates.add((leftHome ? p.b : p.a).id)
+      line.score = Math.max(line.score, p.score)
+    }
+  }
+  const oldClub = [...byPlayer.values()]
+    .map((l) => ({ ...l, seasons: [...l.seasons].sort((x, y) => x - y), mates: l.mates.size }))
+    .sort((x, y) => y.score - x.score)
+  return { pairs: kept, oldClub }
+}
+
 const LEVEL_ORDER = { MLB: 5, AAA: 4, AA: 3, 'A+': 2, A: 1 }
 const LEVEL_RANK = (label) => LEVEL_ORDER[label] ?? 0
 
