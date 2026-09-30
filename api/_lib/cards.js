@@ -32,9 +32,13 @@
 
 import { playerCrawl, teamCrawl } from './crawl.js'
 import { clean, entitySegment, idFromSlug, matchupSlug, niceDate, teamAbbr, urlDateToApi } from './entity.js'
-import { fetchWithTimeout } from './http.js'
 
 const MLB = 'https://statsapi.mlb.com'
+// Every statsapi call here runs on an UNAUTHENTICATED path where a novel query
+// is a cache miss that fans out to a third-party host, so each one is bounded:
+// a slow or hostile host can't pin an edge invocation open past a crawler's own
+// patience. The budget covers the whole call, headers and body.
+const FETCH_TIMEOUT_MS = 4000
 // Every level resolveGame() searches across when matching a shared link's
 // matchup slug. Hand-copied from SEARCHABLE_SPORT_IDS in src/lib/teams.js —
 // this edge function is bundled separately from browser-facing src/, and a
@@ -51,7 +55,10 @@ const SPORT_LEVEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'ROK
 // --- statsapi fetch (server side, crawler-only) ----------------------------
 
 async function getJson(path) {
-  const res = await fetchWithTimeout(`${MLB}${path}`, { headers: { Accept: 'application/json' } })
+  const res = await fetch(`${MLB}${path}`, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  })
   if (!res.ok) throw new Error(`MLB ${res.status} for ${path}`)
   return res.json()
 }

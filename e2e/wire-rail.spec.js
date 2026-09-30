@@ -423,7 +423,7 @@ test('hovering a player name opens the card at the name, not the corner', async 
   // the hover card and left the trigger <button> with no box of its own.
   // PlayerLink's hover handler used to read that box straight off the
   // button; getBoundingClientRect() on a display:contents element is always
-  // all-zero, and playerHoverCardPosition (playerHoverPosition.js) clamps a
+  // all-zero, and hoverCardPosition (playerHoverPosition.js) clamps a
   // zero rect to (VIEWPORT_MARGIN, VIEWPORT_MARGIN) — the card landed in the
   // page's top-left corner regardless of which name was hovered.
   await page.setViewportSize({ width: TWO_COL_W, height: 900 })
