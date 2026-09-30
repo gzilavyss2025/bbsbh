@@ -131,7 +131,6 @@ function eachRun(rows, keyOf, onSegment) {
 // St. Louis. Keyed on its own site it split that visit in two and handed the
 // club a series opener on 2020-09-26 that nobody played — the phantom opener
 // this dataset must never invent.
-export { tagSeries } from '../../src/api/scheduleShape.js'
 
 // HOMESTANDS and ROAD TRIPS: consecutive games on the same side of the road.
 // A homestand is a run of home games however many opponents visit inside it; a

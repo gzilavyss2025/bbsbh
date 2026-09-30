@@ -18,7 +18,6 @@ import {
   homeVenueByTeam,
   siteOf,
   ledgerFor,
-  tagSeries,
   tagTrips,
   encodeRow,
   encodeDetailRow,
@@ -30,6 +29,7 @@ import {
 import { tagSeries as recordsTagSeries } from '../scripts/lib/team-records.mjs'
 import {
   seriesRuns,
+  tagSeries,
   ledgerOf,
   droughtFor,
   droughtsFor,
