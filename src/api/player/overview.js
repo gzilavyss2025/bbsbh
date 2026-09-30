@@ -19,7 +19,7 @@ import { buildCareerTimeline } from '../careerTimeline.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from '../war.js'
 import { fetchPlayerContract } from '../person/contracts.js'
 import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor, medianRatesFor } from '../savantPercentiles.js'
-import { fetchProspectTrend, prospectTrendById, prospectCardView } from '../prospectTrend.js'
+import { fetchProspectTrend, prospectTrendById, prospectCardView, decimalAge } from '../prospectTrend.js'
 import {
   awardsView,
   buildBlock,
@@ -154,7 +154,7 @@ export async function loadPlayerOverview(id, asOf) {
     currentActivitySportId !== 1
       ? prospectCardView(
           trendEntry,
-          typeof bio.age === 'number' ? bio.age : null,
+          decimalAge(bio.birthDate, prospectTrend?.generatedAt),
           prospectTrend?.levelAverageAge?.[currentActivitySportId] ?? null,
         )
       : null

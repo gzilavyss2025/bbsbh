@@ -37,6 +37,9 @@ export function benchmarkFor(snapshot, sportId, group) {
 // answer ("roughly X% through a typical stay"), not a percentile of the
 // population (that's the performance card's job, not this one's).
 //
+// `sampleSize` is his line at this level alone (snapshotRow,
+// scripts/lib/prospectPercentile.mjs), matching the one-level median.
+//
 // Returns null below the benchmark's own floor (no data for this level/group)
 // or when sampleSize isn't a real number yet.
 export function tenureFact(snapshot, sportId, group, sampleSize) {

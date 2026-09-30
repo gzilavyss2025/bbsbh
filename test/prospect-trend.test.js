@@ -11,6 +11,7 @@ import {
   LEVEL_STANDING_BANDS,
   deriveTrendMarks,
   ageEdgeFact,
+  decimalAge,
   prospectCardView,
   packProspectTrend,
   unpackProspectTrend,
@@ -259,6 +260,28 @@ test('ageEdgeFact is null without both a real age and a real level average', () 
   assert.equal(ageEdgeFact(null, 21), null)
   assert.equal(ageEdgeFact(19, null), null)
   assert.equal(ageEdgeFact(NaN, 21), null)
+})
+
+// #1278: the level average is a decimal (scripts/lib/prospectAgeBenchmark.mjs),
+// so the player's age must be one too. The file's own generatedAt is the clock.
+const GENERATED_AT = '2026-09-30T14:58:54.796Z'
+
+test('decimalAge uses the benchmark divisor and clock, and is null without a real birth date or clock', () => {
+  assert.equal(decimalAge('2000-02-10', GENERATED_AT).toFixed(2), '26.64')
+  assert.equal(decimalAge(null, GENERATED_AT), null)
+  assert.equal(decimalAge('not-a-date', GENERATED_AT), null)
+  assert.equal(decimalAge('2000-02-10', undefined), null)
+})
+
+test('a whole-year age turned a 0.6-year gap into "1.5 yrs younger"; the decimal age shows no fact', () => {
+  // Born 1999-11-01: 26.92 years old, statsapi currentAge 26. Level average 27.5.
+  assert.deepEqual(ageEdgeFact(26, 27.5), { years: 1.5, direction: 'younger' }) // the old feed
+  assert.equal(ageEdgeFact(decimalAge('1999-11-01', GENERATED_AT), 27.5), null)
+})
+
+test('Garrett Hawkins (AAA, level average 27.7): 1.1 yrs younger, not 1.7', () => {
+  const hawkins = decimalAge('2000-02-10', GENERATED_AT) // currentAge 26
+  assert.deepEqual(ageEdgeFact(hawkins, 27.7), { years: 1.1, direction: 'younger' })
 })
 
 // ---------------------------------------------------------------------------

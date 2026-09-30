@@ -178,12 +178,25 @@ export function movementState(movement) {
   }
 }
 
+// A birth date as decimal years at `asOf` — the ONE age formula behind the
+// Prospect Card's age fact. The level average (prospectAgeBenchmark.mjs) and
+// the player page both use it; the page passes the snapshot's `generatedAt`
+// as `asOf`, so both read one clock. statsapi's whole-year `currentAge` biased
+// the gap by up to a year (#1278). Null for a missing or bad date or clock.
+const MS_PER_YEAR = 365.2425 * 24 * 60 * 60 * 1000
+export function decimalAge(birthDate, asOf) {
+  if (!birthDate || asOf == null) return null
+  const years = (new Date(asOf).getTime() - new Date(birthDate).getTime()) / MS_PER_YEAR
+  return Number.isFinite(years) ? years : null
+}
+
 // The Prospect Card's age-vs-level fact: how many years younger/older a
 // player is than the average QUALIFIED player at his level
 // (gen-prospect-trend.mjs's `levelAverageAge`, itself a real birthDate
-// average, not an estimate). Renders only past a 1-year edge — a 0.3-year
-// gap is noise, not a fact worth a row, same "don't print false precision"
-// stance standingLabel's own Middle band already takes.
+// average, not an estimate); `ageYears` must be a decimal (decimalAge).
+// Renders only past a 1-year edge — a 0.3-year gap is noise, not a fact worth
+// a row, same "don't print false precision" stance standingLabel's own Middle
+// band already takes.
 const AGE_EDGE_FLOOR_YEARS = 1.0
 export function ageEdgeFact(ageYears, levelAverageAge) {
   if (!Number.isFinite(ageYears) || !Number.isFinite(levelAverageAge)) return null
