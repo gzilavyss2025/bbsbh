@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { loadUmpire } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useNav } from '../../lib/nav.js'
 import { gamePath, umpirePath } from '../../lib/route.js'
 import { UmpireTendencies } from './UmpireTendencies.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const HP_GAMES_LIMIT = 5
@@ -33,20 +34,8 @@ export function UmpireAccuracyModal({ id, onClose }) {
   const navigate = useNav()
   const { data } = useAsync(() => loadUmpire(id), [id])
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   const season = data?.accuracy?.season ?? null
   // A plate game's row lives in whichever level's byGamePk map covers it —

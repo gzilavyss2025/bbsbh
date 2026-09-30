@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { GameFinder } from './GameFinder.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // Bottom-sheet wrapper around GameFinder, opened from the footer's "Find a
 // past matchup" button so the two team pickers + results list don't have to
@@ -8,20 +9,8 @@ import { IconButton } from '../ui/control/IconButton.jsx'
 // backdrop tap close it, focus moves to the close button on open and back to
 // the trigger on close.
 export function GameFinderModal({ onClose }) {
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   return (
     <div

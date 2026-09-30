@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { sketchMarkVariants } from '../../lib/markSources.js'
 import { TeamLogo } from './TeamLogo.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // A large grayscale team mark blown up for pencil-sketching, shown when the
 // user taps a logo on a team page. Same tonal treatment as the printable Logo
@@ -20,23 +21,11 @@ export function LogoModal({ teamId, name, onClose }) {
   const variants = useMemo(() => sketchMarkVariants(teamId), [teamId])
   const [variant, setVariant] = useState(variants[0].key)
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   // Dialog focus contract: focus moves into the dialog on open (the close
   // button — the first and safest control) and back to the trigger on close,
   // so a keyboard/AT user isn't left focused on something under the scrim.
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   return (
     <div

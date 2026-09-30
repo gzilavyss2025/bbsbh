@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { atBatMarks } from './AtBatBox.jsx'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // The notation editor: tap a filled at-bat box on the scorecard and pencil
 // over what the sheet derived — the outcome box (top-left), the RBI box, and
@@ -29,20 +30,8 @@ export function ScorecardCellEditor({ card, note, onSave, onClear, onClose }) {
   const [rbi, setRbi] = useState(note?.rbi ?? marks.rbi)
   const [center, setCenter] = useState(note?.center ?? marks.center)
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const firstRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    firstRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(firstRef, onClose)
 
   const save = (e) => {
     e.preventDefault()

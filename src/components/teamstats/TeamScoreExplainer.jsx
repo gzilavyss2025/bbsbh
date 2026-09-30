@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { currentFormScoreFromGames, CURRENT_FORM_GAMES } from '../../api/teamScoreFormula.js'
 import { HOME_WIN_PROBABILITY } from '../../api/seasonScoreFormula.js'
 import { record, signed, scoreValue, rate3 } from './TeamScoreCard.jsx'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // Illustrative anchors for the "How this is calculated" modal — run through
 // the same formula the app scores real teams with (see teamScoreFormula.js),
@@ -18,20 +19,8 @@ const FORM_FLOOR = currentFormScoreFromGames({
 // contract as UmpireAccuracyModal (Escape + backdrop-tap close, focus moves
 // to the close button and back to the trigger on close).
 export function TeamScoreExplainer({ snapshot, surprise, grade, onClose }) {
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   const season = snapshot.season
 
