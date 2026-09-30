@@ -1145,7 +1145,9 @@ don't run these by hand.
   line. Same SQLite `player_snapshots` + self-join `movement` pattern as
   `gen-fever-radar.mjs`, source `prospect-trend`. Depends on
   `top-prospects.json` already existing; skips (not a failure) if that
-  snapshot is missing/empty. App reads it via `src/api/prospectTrend.js`.
+  snapshot is missing/empty. Writes the file packed
+  (`packProspectTrend`, `src/api/prospectTrend.js`; shape in `docs/api/static-data.md`).
+  App reads it via `src/api/prospectTrend.js`.
 
 ## Own-cadence generators (not the nightly batch)
 

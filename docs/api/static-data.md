@@ -917,6 +917,16 @@ for each generator; the reader modules:
   arrow only appears past a 5-point move, since a percentile wobbles a point
   or two on one good night.
 
+  The file is **packed** (#1269) because the phone parses all of it before the
+  pill shows: the week dates are stored once in `historyDates`, and a `history`
+  row is `[dateIndex, sportId, percentile]` (a fourth `qualified` item only on a
+  row where it is not "percentile is not null"; there is none today). `packed: 1`
+  is the version marker. `fetchProspectTrend()` unpacks once with
+  `unpackProspectTrend`, so every caller and selector sees plain `{ date,
+  sportId, percentile, qualified }` rows. `sportId` stays per row: a player who
+  moved level carries both. The reader still accepts the old plain shape until a
+  nightly run has written the packed one. 3.3 MB became 0.65 MB on disk.
+
   The board column is **`Standing vs level`** and sits last, after the season
   line. Each row names its metric and exact percentile, then gives the standing
   band, sample confidence, PA/IP, and meaningful movement. The five bands are
