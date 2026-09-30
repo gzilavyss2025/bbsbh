@@ -152,7 +152,6 @@ async function main() {
   const urlDate = apiDateToUrl(apiDate)
   const schedule = await getJson(`/api/v1/schedule?sportId=1&date=${apiDate}&hydrate=team`, {
     timeoutMs: REQUEST_TIMEOUT_MS,
-    tries: 1,
   })
   const games = (schedule.dates ?? []).flatMap((d) => d.games ?? [])
   if (games.length === 0) {
@@ -181,8 +180,11 @@ async function main() {
   }
 
   const rosterResults = await mapConcurrent(teamIds, CONCURRENCY, async (id) => {
+    // Best-effort: a failed roster only skips that club's player pages, so one
+    // try each keeps a slow night from adding minutes to the step.
     const data = await getJson(`/api/v1/teams/${id}/roster?rosterType=active`, {
       timeoutMs: REQUEST_TIMEOUT_MS,
+      tries: 1,
     })
     return (data.roster ?? [])
       .filter((r) => r.person?.id)
@@ -207,7 +209,7 @@ async function main() {
   }
   console.log(
     `${apiDate}: warmed ${ok}/${results.length} URL(s) across ${games.length} game(s), ` +
-      `${teamIds.size} team(s) — ${failed} failed (non-fatal, best-effort warming only)`,
+      `${teamIds.length} team(s) — ${failed} failed (non-fatal, best-effort warming only)`,
   )
 }
 

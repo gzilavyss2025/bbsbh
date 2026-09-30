@@ -360,8 +360,22 @@ test('the play-by-play request keeps eventType, the field the plate-appearance t
   assert.ok(PBP_FIELDS.split(',').includes('eventType'))
 })
 
-test('a missing play-by-play counts nothing rather than throwing', () => {
-  assert.deepEqual(battedAroundHalves(undefined), { away: 0, home: 0 })
+test('a missing play-by-play is unknown (null), so the game is fetched again, not stored as 0', () => {
+  // Review of #1295: 0/0 here was written to the row and marked ingested.
+  assert.equal(battedAroundHalves(undefined), null)
+  assert.equal(battedAroundHalves(null), null)
+  assert.deepEqual(battedAroundHalves([]), { away: 0, home: 0 })
+})
+
+test('a half ending on a top-level other_out after nine PAs is not batting around', () => {
+  const plays = [...Array.from({ length: 9 }, () => pa(2, 'top')), play(2, 'top', 'other_out')]
+  assert.deepEqual(battedAroundHalves(plays), { away: 0, home: 0 })
+})
+
+test('a lean feed with no eventType still counts its atBat plays', () => {
+  // Review of #1295: a feed that omits eventType must not read as 0 PAs.
+  const plays = Array.from({ length: 10 }, () => ({ result: { type: 'atBat' }, about: { inning: 5, halfInning: 'bottom' } }))
+  assert.deepEqual(battedAroundHalves(plays), { away: 0, home: 1 })
 })
 
 // ---------------------------------------------------------------------------

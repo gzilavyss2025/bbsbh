@@ -23,6 +23,7 @@ import {
   DOW_LOPSIDED,
   dowWhen,
 } from './checkpoints.js'
+import { selectRegulationInnings } from '../select.js'
 import { ordinal, isNum, clampScore, skewBonus, magnitudeOf, SCORE_BASE, otherSide, foldedRecordText, parseRecord } from './shared.js'
 // The league-rank clause, appended ONLY to the entering-tense wording below.
 // A folded sentence ("moved to 59-2") states tonight's record, which the rank
@@ -306,8 +307,7 @@ export function buildCloseGameNotes(feed, bundle, result) {
   const h = feed?.liveData?.linescore?.teams?.home?.runs
   if (typeof a !== 'number' || typeof h !== 'number') return []
   const oneRun = Math.abs(a - h) === 1
-  const scheduled = feed?.liveData?.linescore?.scheduledInnings ?? 9
-  const extras = (feed?.liveData?.linescore?.innings?.length ?? 0) > scheduled
+  const extras = (feed?.liveData?.linescore?.innings?.length ?? 0) > selectRegulationInnings(feed)
   const notes = []
   for (const side of ['away', 'home']) {
     const teamName = bundle[side]?.name

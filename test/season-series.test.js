@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { seasonSeriesCells, extraInningsOf } from '../src/api/seasonSeries.js'
+import { seasonSeriesCells } from '../src/api/seasonSeries.js'
+import { extraInningsOf, regulationInnings } from '../src/api/select.js'
 
 const NYM = 121
 const MIL = 158
@@ -105,4 +106,19 @@ test('extraInningsOf: falls back to nine when scheduledInnings is missing', () =
   assert.equal(extraInningsOf(9, null), null)
   assert.equal(extraInningsOf(10, undefined), 10)
   assert.equal(extraInningsOf(8, 7), 8)
+})
+
+test('extraInningsOf: a bad inning count is null, never a falsy value JSX would print', () => {
+  // Review of #1295: `{cell.extraInnings && …}` rendered a stray "0".
+  assert.equal(extraInningsOf(0, 7), null)
+  assert.equal(extraInningsOf(undefined, 9), null)
+  assert.equal(extraInningsOf(null, 9), null)
+})
+
+test("regulationInnings: the game's own length, else nine", () => {
+  assert.equal(regulationInnings(7), 7)
+  assert.equal(regulationInnings(9), 9)
+  assert.equal(regulationInnings(null), 9)
+  assert.equal(regulationInnings(undefined), 9)
+  assert.equal(regulationInnings(0), 9)
 })

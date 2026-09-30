@@ -4,6 +4,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'
+import { extraInningsOf } from '../api/select.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
@@ -45,7 +46,7 @@ function leagueRankPhrase(ctx, season) {
 function gameNote(game) {
   const total = game.away.runs + game.home.runs
   const margin = Math.abs(game.away.runs - game.home.runs)
-  if (game.innings > 9) return `${game.innings} innings · ${total} combined runs`
+  if (extraInningsOf(game.innings, game.scheduledInnings)) return `${game.innings} innings · ${total} combined runs`
   if (game.away.runs === 0 || game.home.runs === 0) return `Shutout · ${game.away.hits + game.home.hits} combined hits`
   if (margin === 1) return `One-run game · ${total} combined runs`
   return `${total} combined runs · ${game.away.hits + game.home.hits} combined hits`
@@ -433,7 +434,7 @@ export function FirstScorebookPage() {
                 <span><TeamLogo teamId={game.away.id} name={game.away.name} size={22} />{game.away.abbreviation}</span>
                 <strong>{game.away.runs}–{game.home.runs}</strong>
                 <span>{game.home.abbreviation}<TeamLogo teamId={game.home.id} name={game.home.name} size={22} /></span>
-                <span>{game.innings > 9 ? `${game.innings} inn.` : game.venue}</span>
+                <span>{extraInningsOf(game.innings, game.scheduledInnings) ? `${game.innings} inn.` : game.venue}</span>
               </ScorebookGameLink>
             </li>
           ))}

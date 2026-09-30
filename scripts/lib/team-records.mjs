@@ -420,10 +420,21 @@ export async function refreshRoleFacts(db, season, sportIds, fetchRoles) {
 // name, so `eventType` must be listed or the shared rule sees no PA at all.
 export const PBP_FIELDS = 'allPlays,about,inning,halfInning,result,type,eventType'
 
+// A play with NO eventType (a lean MiLB feed) cannot be typed either way, so it
+// counts as a PA when the feed calls it an 'atBat': the reading this rule had
+// before #1282, and better than silently counting the half as 0.
+//
+// No allPlays at all means the play-by-play fetch failed: that is null, not
+// 0/0, so the generator leaves the game unmarked and a later run fetches it
+// again. A stored 0 could only be fixed by a re-ingest.
+const countsAsPlateAppearance = (p) =>
+  p?.result?.eventType ? isPlateAppearance(p) : p?.result?.type === 'atBat'
+
 export function battedAroundHalves(allPlays, minBatters = 10) {
+  if (!Array.isArray(allPlays)) return null
   const perHalf = new Map()
-  for (const p of allPlays ?? []) {
-    if (!isPlateAppearance(p)) continue
+  for (const p of allPlays) {
+    if (!countsAsPlateAppearance(p)) continue
     const inning = p?.about?.inning
     const half = p?.about?.halfInning
     if (inning == null || !half) continue

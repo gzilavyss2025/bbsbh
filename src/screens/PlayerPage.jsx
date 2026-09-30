@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { loadPlayerCore } from '../api/player/core.js'
 import { loadPlayerOverview } from '../api/player/overview.js'
+import { fetchProspectRankHistory } from '../api/player/prospectRankHistory.js'
 import { fetchPersonStats } from '../api/person-fetch.js'
 import { SPORT_LABEL, isMlbTeamId } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -71,6 +73,13 @@ function draftLabel(draft, signedYear) {
 export function PlayerPage({ id, asOf, sportId }) {
   const core = useAsync(() => loadPlayerCore(id, asOf), [id, asOf])
   const overview = useAsync(() => loadPlayerOverview(id, asOf), [id, asOf])
+  // Start the prospect-rankings file now, beside the core load, not after it:
+  // the card fetches it itself only once it mounts, behind the gate, and would
+  // pop in a round trip late. The read is shared once per session, so the
+  // card's own call finds it already on its way (review of #1295).
+  useEffect(() => {
+    fetchProspectRankHistory()
+  }, [])
   const navigate = useNav()
   const back = () => window.history.back()
 

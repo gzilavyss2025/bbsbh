@@ -2,14 +2,7 @@
 // model, from `viewingTeamId`'s point of view. Pure — no fetch, easy to pin.
 
 import { teamAbbr } from '../lib/teams.js'
-
-// The inning count of a game that went past its OWN scheduled length, else
-// null. Read off `scheduledInnings` (fallback 9), not a fixed nine: Triple-A
-// plays seven-inning doubleheader games, so their eighth inning is an extra
-// inning (ADR-0075).
-export function extraInningsOf(innings, scheduledInnings) {
-  return innings && innings > (scheduledInnings ?? 9) ? innings : null
-}
+import { extraInningsOf } from './select.js'
 
 // The game matching `currentGamePk` NEVER carries a score, even if the feed
 // already reports it Final — that game's own result stays sealed until the

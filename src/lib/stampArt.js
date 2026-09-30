@@ -21,6 +21,8 @@
 // word — see `stampLabel` below for why it's gone rather than treat the doc
 // as still current.
 
+import { extraInningsOf } from '../api/select.js'
+
 // The canvas. viewBox-only in the component — nothing here sets width/height, so
 // CSS sizes a stamp in a grid and nothing fights its container.
 export const STAMP_SIZE = 300
@@ -266,8 +268,9 @@ export function runFontSize(awayRuns, homeRuns) {
 // Extra innings and a doubleheader's game number are real facts the ring/totals
 // don't carry, so they still fold in here; a plain nine-inning single game now
 // carries no footer text at all.
-export function stampLabel({ innings, gameNumber } = {}) {
-  const extras = Number.isInteger(innings) && innings > 9 ? `${innings} innings` : ''
+export function stampLabel({ innings, scheduledInnings, gameNumber } = {}) {
+  const extra = extraInningsOf(innings, scheduledInnings)
+  const extras = extra ? `${extra} innings` : ''
   const gm = Number.isInteger(gameNumber) && gameNumber > 1 ? `Game ${gameNumber}` : ''
   return [extras, gm].filter(Boolean).join(' — ')
 }

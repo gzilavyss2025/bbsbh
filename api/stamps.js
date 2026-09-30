@@ -142,6 +142,7 @@ async function fetchGameFinal(gamePk) {
     gameType: game.gameType ?? 'R',
     venue: game.venue?.name ?? '',
     innings,
+    scheduledInnings: Number.isInteger(line.scheduledInnings) ? line.scheduledInnings : null,
     homeBattedLast,
     status: 'Final',
     away,

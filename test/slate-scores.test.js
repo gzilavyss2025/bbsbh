@@ -112,7 +112,7 @@ test('fetchSlateScores maps each game to its runs + live inning', async () => {
             {
               gamePk: 777001,
               teams: { away: { score: 4 }, home: { score: 2 } },
-              linescore: { currentInning: 7, inningState: 'Bottom' },
+              linescore: { currentInning: 7, inningState: 'Bottom', scheduledInnings: 9 },
             },
           ],
         },
@@ -125,6 +125,7 @@ test('fetchSlateScores maps each game to its runs + live inning', async () => {
       homeScore: 2,
       currentInning: 7,
       inningState: 'Bottom',
+      scheduledInnings: 9,
     })
   } finally {
     globalThis.fetch = originalFetch
@@ -206,6 +207,20 @@ test('slateScoreLine: an extras Final marks F/{n}', () => {
   )
   assert.equal(out.state, 'F/11')
   assert.equal(out.final, true)
+})
+
+test('slateScoreLine: a seven-inning game that went to the 8th is F/8, a 7-inning Final is FINAL', () => {
+  // Review of #1295: a Triple-A doubleheader game is scheduled for seven.
+  const extras = slateScoreLine(
+    { awayScore: 3, homeScore: 2, currentInning: 8, inningState: 'End', scheduledInnings: 7 },
+    game('Final'),
+  )
+  assert.equal(extras.state, 'F/8')
+  const regulation = slateScoreLine(
+    { awayScore: 3, homeScore: 2, currentInning: 7, inningState: 'End', scheduledInnings: 7 },
+    game('Final'),
+  )
+  assert.equal(regulation.state, 'FINAL')
 })
 
 test('slateScoreLine: a lean feed with no runs yields no line', () => {

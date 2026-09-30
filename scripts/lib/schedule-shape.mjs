@@ -25,6 +25,8 @@
 // for at length — a changed definition of "road trip" must cost a re-export,
 // never a re-fetch.
 
+import { regulationInnings } from '../../src/api/select.js'
+
 // ---------------------------------------------------------------------------
 // Where a club actually played
 // ---------------------------------------------------------------------------
@@ -281,7 +283,7 @@ export function detailFacts({ innings, scheduledInnings, isHome }) {
   }
 
   let flags = 0
-  if (innings.length > (scheduledInnings ?? 9)) flags |= FLAG.extra
+  if (innings.length > regulationInnings(scheduledInnings)) flags |= FLAG.extra
   if (walkOff) flags |= isHome ? FLAG.walkOffWin : FLAG.walkOffLoss
   if ((isHome ? innings[0]?.h : innings[0]?.a) > 0) flags |= FLAG.scoredIn1st
   if (first === 1) flags |= FLAG.scoredFirst

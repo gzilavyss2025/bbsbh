@@ -594,12 +594,12 @@ export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1) {
 // nothing to leak. This one asks for the score-bearing set (each side's runs off
 // `teams.*.score`, plus the live inning/half off `linescore`) — the same footing
 // as fetchSeasonSeries above, which already returns Final scores. Returns a
-// { [gamePk]: { awayScore, homeScore, currentInning, inningState } } map;
+// { [gamePk]: { awayScore, homeScore, currentInning, inningState, scheduledInnings } } map;
 // degrades to {} on any failure and to null-valued fields on a lean MiLB feed,
 // per the graceful-degradation convention. NEVER call this unless the pass is on
 // (GameSelect gates it on `scoresUnlocked && isToday`).
 const SLATE_SCORES_FIELDS =
-  'dates,games,gamePk,teams,away,home,score,linescore,currentInning,inningState'
+  'dates,games,gamePk,teams,away,home,score,linescore,currentInning,inningState,scheduledInnings'
 
 export async function fetchSlateScores(dateStr, sportId = 1, leagueId = null) {
   if (!dateStr) return {}
@@ -616,6 +616,7 @@ export async function fetchSlateScores(dateStr, sportId = 1, leagueId = null) {
           homeScore: g.teams?.home?.score ?? null,
           currentInning: g.linescore?.currentInning ?? null,
           inningState: g.linescore?.inningState ?? null,
+          scheduledInnings: g.linescore?.scheduledInnings ?? null,
         }
       }
     }

@@ -95,6 +95,7 @@ export function revealStampFacts(feed) {
     gameType: gameData.game?.type ?? 'R',
     venue: gameData.venue?.name ?? '',
     innings,
+    scheduledInnings: Number.isInteger(line.scheduledInnings) ? line.scheduledInnings : null,
     homeBattedLast,
     status: gameData.status?.abstractGameState ?? '',
     away,

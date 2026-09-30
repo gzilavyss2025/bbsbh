@@ -220,6 +220,9 @@ test('the footer label folds extras and a doubleheader game number into one line
   // A rain-shortened game is still nine-or-fewer, so it stays silent too.
   assert.equal(stampLabel({ innings: 6, gameNumber: 1 }), '')
   assert.equal(stampLabel({}), '')
+  // Review of #1295: a seven-inning game's 8th is an extra inning.
+  assert.equal(stampLabel({ innings: 8, scheduledInnings: 7, gameNumber: 2 }), '8 innings — Game 2')
+  assert.equal(stampLabel({ innings: 7, scheduledInnings: 7, gameNumber: 2 }), 'Game 2')
 })
 
 test('the label steps down only as far as it has to', () => {
@@ -308,6 +311,7 @@ test('revealStampFacts reads the whole facts blob off a live feed', () => {
   assert.equal(facts.away.runs, 5)
   assert.equal(facts.home.runs, 3)
   assert.equal(facts.winnerId, 112)
+  assert.equal(facts.scheduledInnings, 9)
 })
 
 test('a home club that never batted in the last inning is not claimed to have', () => {
@@ -383,6 +387,7 @@ test('both producers of the facts blob agree on the same game', () => {
       },
     },
     linescore: {
+      scheduledInnings: 9,
       innings: NINE,
       teams: { away: { runs: 5, hits: 9, errors: 0 }, home: { runs: 3, hits: 7, errors: 1 } },
     },
@@ -390,7 +395,7 @@ test('both producers of the facts blob agree on the same game', () => {
   const fromSchedule = stampGameFacts(scheduleRow)
   const fromFeed = revealStampFacts(feedFixture({ innings: NINE }))
 
-  for (const key of ['gamePk', 'date', 'gameNumber', 'venue', 'innings', 'homeBattedLast', 'status', 'winnerId', 'sportId']) {
+  for (const key of ['gamePk', 'date', 'gameNumber', 'venue', 'innings', 'scheduledInnings', 'homeBattedLast', 'status', 'winnerId', 'sportId']) {
     assert.deepEqual(fromSchedule[key], fromFeed[key], `${key} must agree`)
   }
   assert.deepEqual(fromSchedule.away, fromFeed.away)

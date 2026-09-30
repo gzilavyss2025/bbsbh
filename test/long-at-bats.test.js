@@ -61,6 +61,16 @@ test('a baserunning play is not a plate appearance, though the feed types it as 
   assert.equal(isPlateAppearance({}), false)
 })
 
+test('a top-level play the block list never named is not a plate appearance either', () => {
+  // Review of #1295: statsapi's own eventTypes list flags each of these
+  // plateAppearance: false, and a block list let them through as PAs.
+  for (const code of ['other_out', 'defensive_indiff', 'pickoff_error_1b', 'runner_double_play', 'stolen_base']) {
+    assert.equal(isPlateAppearance(play(code, 1)), false, code)
+  }
+  assert.equal(isPlateAppearance(play('grounded_into_triple_play', 2)), true)
+  assert.equal(isPlateAppearance(play('sac_bunt', 1)), true)
+})
+
 test('a play with no pitchIndex counts no pitches rather than crashing', () => {
   assert.equal(pitchesIn(play('single', 5)), 5)
   assert.equal(pitchesIn({ result: { eventType: 'single' } }), 0)

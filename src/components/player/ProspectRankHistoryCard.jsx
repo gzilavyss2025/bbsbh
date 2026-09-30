@@ -13,9 +13,10 @@ import { Card } from '../ui/frame/Card.jsx'
 // that card; on the Overview of a player who has not debuted it follows it
 // there (screens/player/PlayerHistoryTab.jsx, screens/PlayerPage.jsx).
 //
-// The card loads its own frozen file (#1111), so a screen that never mounts it
-// (a debuted player's Overview, a pre-debut player's History tab) never fetches.
-// It renders nothing until the file arrives. WHAT the rows say, which source
+// The card reads its own frozen file (#1111) and renders nothing until it
+// arrives. The two screens that can draw it start that read at mount, beside
+// their core load, so the card is not a round trip late (review of #1295); the
+// read is shared once per session (api/staticJson.js). WHAT the rows say, which source
 // each year came from, where the debut falls and how the gap after the last
 // pulled season reads all live in api/player/prospectRankHistory.js, where they are pure and tested.
 // It names no source and no year: a label, a credit and the years covered all

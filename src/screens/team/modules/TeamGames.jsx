@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useLayoutEffect, useEffect } from 'react'
-import { extraInningsOf } from '../../../api/seasonSeries.js'
+import { extraInningsOf } from '../../../api/select.js'
 import { gamePath } from '../../../lib/route.js'
 import { useNav } from '../../../lib/nav.js'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
