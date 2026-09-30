@@ -12,6 +12,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 
 const DATE = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
 const FULL_DATE = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -54,14 +55,19 @@ function gameNote(game) {
   return `${total} combined runs · ${game.away.hits + game.home.hits} combined hits`
 }
 
-function ScorebookGameLink({ game, className = '', children }) {
+// `card` draws the tap tile on Card (a ledger button); without it, a plain button.
+function ScorebookGameLink({ game, className = '', card, children }) {
   const navigate = useNav()
-  return (
-    <button
-      type="button"
-      className={className}
-      onClick={() => navigate(gamePath(game.date, game.away.abbreviation, game.home.abbreviation, 'boxscore', game.gameNumber))}
-    >
+  const props = {
+    className,
+    onClick: () => navigate(gamePath(game.date, game.away.abbreviation, game.home.abbreviation, 'boxscore', game.gameNumber)),
+  }
+  return card ? (
+    <Card as="button" frame="ledger" body="flush" {...props}>
+      {children}
+    </Card>
+  ) : (
+    <button type="button" {...props}>
       {children}
     </button>
   )
@@ -277,7 +283,7 @@ export function FirstScorebookPage() {
         <ol className="scorebookstory__gamegrid">
           {data.excitingGames.slice(0, 6).map((game, index) => (
             <li key={game.gamePk}>
-              <ScorebookGameLink game={game} className="scorebookstory__gamecard">
+              <ScorebookGameLink game={game} card className="scorebookstory__gamecard">
                 <span className="scorebookstory__rank">{String(index + 1).padStart(2, '0')}</span>
                 <span className="scorebookstory__gamescore"><b>{game.gameScore.toFixed(1)}</b> Game Score</span>
                 <span className="scorebookstory__matchup">
@@ -304,7 +310,7 @@ export function FirstScorebookPage() {
           {data.performances.slice(0, 8).map((performance, index) => {
             const game = data.games.find((g) => g.gamePk === performance.gamePk)
             return (
-              <ScorebookGameLink key={`${performance.gamePk}-${performance.playerId}-${performance.type}`} game={game} className="scorebookstory__performer">
+              <ScorebookGameLink key={`${performance.gamePk}-${performance.playerId}-${performance.type}`} game={game} card className="scorebookstory__performer">
                 <span className="scorebookstory__performerRank">#{index + 1}</span>
                 <Headshot personId={performance.playerId} name={performance.name} teamId={performance.teamId} className="scorebookstory__shot" />
                 <span className="scorebookstory__performerText">
@@ -350,7 +356,7 @@ export function FirstScorebookPage() {
           note="Totals count only the games you scored, turning the book into its own miniature season."
         />
         <div className="scorebookstory__leaderboards">
-          <div className="scorebookstory__leaders">
+          <Card as="div" frame="ledger" body="flush" className="scorebookstory__leaders">
             <h3>At the plate</h3>
             <div className="scorebookstory__leaderhead"><span>Player</span><span>H</span><span>HR</span><span>RBI</span><span>AVG</span></div>
             {data.battingLeaders.slice(0, 8).map((player) => (
@@ -359,8 +365,8 @@ export function FirstScorebookPage() {
                 <span>{player.batting.hits}</span><span>{player.batting.homeRuns}</span><span>{player.batting.rbi}</span><span>{player.average.toFixed(3).replace(/^0/, '')}</span>
               </div>
             ))}
-          </div>
-          <div className="scorebookstory__leaders">
+          </Card>
+          <Card as="div" frame="ledger" body="flush" className="scorebookstory__leaders">
             <h3>On the mound</h3>
             <div className="scorebookstory__leaderhead"><span>Pitcher</span><span>IP</span><span>K</span><span>ER</span><span>WHIP</span></div>
             {data.pitchingLeaders.slice(0, 8).map((player) => {
@@ -373,7 +379,7 @@ export function FirstScorebookPage() {
                 </div>
               )
             })}
-          </div>
+          </Card>
         </div>
       </section>
 
@@ -383,7 +389,7 @@ export function FirstScorebookPage() {
           title="The Brewers’ rotation"
           note="Every pitcher who started for Milwaukee in these pages — his record, the team’s record behind him, and his ERA in those starts alone."
         />
-        <div className="scorebookstory__leaders">
+        <Card as="div" frame="ledger" body="flush" className="scorebookstory__leaders">
           <h3>Starting pitchers</h3>
           <div className="scorebookstory__leaderhead"><span>Pitcher</span><span>GS</span><span>Record</span><span>Team</span><span>ERA</span></div>
           {rotation.map((pitcher) => (
@@ -395,17 +401,17 @@ export function FirstScorebookPage() {
               <span>{pitcher.era?.toFixed(2) ?? DASH}</span>
             </div>
           ))}
-        </div>
+        </Card>
         {starterNuggets.length > 0 && (
           <div className="scorebookstory__nuggets">
             {starterNuggets.map((nugget) => (
-              <article className="scorebookstory__nugget" key={nugget.key}>
+              <Card as="article" frame="ledger" body="flush" className="scorebookstory__nugget" key={nugget.key}>
                 <span className="scorebookstory__nuggetstat">{nugget.stat}<small>{nugget.label}</small></span>
                 <div>
                   <strong>{nugget.headline}</strong>
                   <p className="scorebookstory__prose">{nugget.body}</p>
                 </div>
-              </article>
+              </Card>
             ))}
           </div>
         )}

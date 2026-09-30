@@ -110,9 +110,6 @@
 
 .mytally__pitch {
   padding: var(--space-4);
-  border: var(--bw-rule) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
 }
 
 .devicehandoff {
