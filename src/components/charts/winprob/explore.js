@@ -29,6 +29,13 @@ export function snapToMarker(fraction, count, markers, tolerance) {
   }
   return best ? best.idx : nearestWinProbEvent(fraction, count)
 }
+// Does a pointer move snap to a big-swing marker? A mouse HOVER does, like a
+// click, so a click on a marker stays put when the mouse drifts a pixel. A drag
+// (pointer captured) and any touch move do not, so a reader can still step play
+// by play through the crowd around a marker.
+export function moveSnaps(pointerType, captured) {
+  return pointerType === 'mouse' && !captured
+}
 // A touch on the chart selects only once it moves sideways past the slop; a
 // mostly vertical move is the page scrolling, which the chart must not follow.
 const TOUCH_SLOP = 8

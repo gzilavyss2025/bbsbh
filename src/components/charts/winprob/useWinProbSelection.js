@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { focusInput, followLatest, nearestWinProbEvent, snapToMarker, touchIntent } from './explore.js'
+import { focusInput, followLatest, moveSnaps, nearestWinProbEvent, snapToMarker, touchIntent } from './explore.js'
 
 // Which plotted play WinProbChart shows, and the slider's pointer and key
 // handlers. `plot` is the chart's viewBox geometry: { W, H, left, width }.
-// `markers` are the big-swing plays' indices: a click (not a drag) within
-// SNAP viewBox units of one selects it.
+// `markers` are the big-swing plays' indices: a click or a mouse hover (not a
+// drag) within SNAP viewBox units of one selects it (moveSnaps).
 //
 // `used` turns true on the reader's first pick, so the chart can drop its
 // how-to hint. `input` is 'pointer' or 'key', the last way the chart was
@@ -95,8 +95,9 @@ export function useWinProbSelection(count, plot, markers = []) {
           e.currentTarget.setPointerCapture(e.pointerId)
         }
         selectAtPointer(e)
-      } else if (e.pointerType === 'mouse' || e.currentTarget.hasPointerCapture(e.pointerId)) {
-        selectAtPointer(e)
+      } else {
+        const captured = e.currentTarget.hasPointerCapture(e.pointerId)
+        if (e.pointerType === 'mouse' || captured) selectAtPointer(e, moveSnaps(e.pointerType, captured))
       }
     },
     onPointerUp: (e) => {

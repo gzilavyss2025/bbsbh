@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { nearestWinProbEvent, winProbReadout, winProbChangeLabel, touchIntent, followLatest, snapToMarker, focusInput } from '../src/components/charts/winprob/explore.js'
+import { nearestWinProbEvent, winProbReadout, winProbChangeLabel, touchIntent, followLatest, snapToMarker, focusInput, moveSnaps } from '../src/components/charts/winprob/explore.js'
 import { winProbKeyColor, winProbKeyPair } from '../src/components/charts/winprob/keyColors.js'
 
 const FALLBACK = { primary: '#6B6558', secondary: '#938C7C', text: '#FBF6E9' }
@@ -99,4 +99,14 @@ test('focus that did not follow a pointer down on the slider is keyboard focus',
   assert.equal(focusInput(1000, 5000), 'key')
   // Focus that lands right after a pointer down (a click's own focus() or a tap's) draws no ring.
   assert.equal(focusInput(4900, 5000), 'pointer')
+})
+
+test('only a mouse hover snaps to a swing marker; a drag steps play by play', () => {
+  // Hover (no button, no capture): a 1px move after a click must not leave the marker.
+  assert.equal(moveSnaps('mouse', false), true)
+  // A mouse drag holds pointer capture and stays unsnapped.
+  assert.equal(moveSnaps('mouse', true), false)
+  // A touch drag captures the pointer and stays unsnapped.
+  assert.equal(moveSnaps('touch', true), false)
+  assert.equal(moveSnaps('touch', false), false)
 })
