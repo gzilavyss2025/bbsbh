@@ -77,6 +77,8 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | leg-advance-codes.test.js | 2 | src/api/playbyplay.js | ADVANCE_CODES (catcher-interference labeling) |
 | lib-helpers.test.js | 14 | format.js, dates.js, statTiers.js, runExpectancy.js | General lib grab-bag |
 | live-edge.test.js | 17 | liveEdge.js, select.js, revealProgressCore.js, scoresUnlocked.js | Follow-live-edge + reveal/unlock mechanism |
+| local-store-pins.test.js | 13 | src/hooks/useStamps.js, useBooks.js, preferences/usePreferences.js, useScoresUnlocked.js | What the four localStorage hooks put on a real device (#1308): key names, stored shape, the same-tab `storage` echo, and the private-mode degrade. Hooks are server-rendered once (no DOM in this suite) and their actions called on the dead render; writes inside a state updater are out of its reach |
+| local-store.test.js | 8 | src/lib/account/localStore.js | The shared guarded read/write/drop/notify: a read that fails answers `parse(null)`, a failed write is dropped, nothing throws with storage disabled or `StorageEvent` missing |
 | logbook-milestones.test.js | 18 | src/api/logbookMilestones.js | Game Log stamp-sheet collection-progress engine — generic slot-fill mechanics, the real clubs/parks registry entries, and the per-LEVEL roster off the static team snapshot (docs/design-inspiration.md §8) |
 | logbook-stats.test.js | 27 | src/api/logbookStats.js | Logbook retrospective Tier 1 — records, streaks, aggregates (ADR-0035) |
 | logo-mono.test.js | 25 | logoMono.js | Mono logo editor (ADR-0031) |
@@ -154,6 +156,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | scoreless-dow-callouts.test.js | 21 | src/api/callout-notes.js | Scoreless/day-of-week/pitch-pace callouts |
 | scores-unlocked.test.js | 20 | src/lib/scoresUnlocked.js | Scores Unlocked unlock timer + the 8am-anchored game day a consent records (ADR-0026) |
 | scoring-summary.test.js | 7 | src/api/boxscore/scoringSummary.js | The box score's Scoring summary — scoring plays grouped by half-inning with the club that batted, the man a row is about (the batter, unless a run scored with no RBI and he wasn't among the scorers), the score after each play, the LAST pitch's playId as the clip key, and a thin feed degrading to [] |
+| scroll-rail.test.js | 2 | src/hooks/scroll/useScrollRail.js | `jumpScrollLeft` assigns `scrollLeft` with smooth scrolling off and puts the prior `scroll-behavior` back |
 | season-score.test.js | 14 | scripts/gen-season-score.mjs, src/api/seasonScore.js, seasonScoreFormula.js | Season score / Marcel baseline / team-specific home-field factor |
 | season-series.test.js | 21 | src/api/seasonSeries.js | Season series cells and record: winner/loser and extras flags, postseason round tags, and the seal — the viewed game and every game after it (a later date, or a higher doubleheader game number) carry no score, and the record counts only earlier games |
 | skipped-bottom-half.test.js | 9 | src/api/select.js | selectSkippedBottomHalf, selectFinalHalfIndex |
