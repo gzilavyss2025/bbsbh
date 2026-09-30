@@ -65,6 +65,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'milb-history.json')
@@ -78,20 +79,6 @@ const END_YEAR = new Date().getFullYear()
 // included despite its high name-churn: real parent-org reassignment there is
 // rare and clean, not noisy.
 const LEVELS = [11, 12, 13, 14, 16]
-
-// Run `jobs` (thunks returning promises) with a bounded concurrency pool.
-async function pool(jobs, limit = 8) {
-  const results = new Array(jobs.length)
-  let next = 0
-  async function worker() {
-    while (next < jobs.length) {
-      const i = next++
-      results[i] = await jobs[i]()
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, jobs.length) }, worker))
-  return results
-}
 
 // The 30 real MLB orgs — a MiLB club's parentOrgId must be one of these for the
 // affiliation to count (drops Mexican League clubs, which statsapi classifies
@@ -115,7 +102,7 @@ async function main() {
       })
     }
   }
-  const snapshots = await pool(jobs, 8)
+  const snapshots = await mapConcurrent(jobs, 8, (job) => job(), { strict: true })
 
   // Group into per-club season records, keeping only MLB-org-affiliated clubs.
   const byClub = new Map() // id -> [{season, sportId, name, city, league, orgId, orgName}]

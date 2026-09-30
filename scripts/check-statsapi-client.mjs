@@ -43,8 +43,6 @@ export const EXEMPT = new Set(['scripts/lib/statsapi.mjs', 'scripts/check-statsa
 
 // Files that name the host and are NOT a way around the client. Each says why.
 export const ALLOWLIST = {
-  'scripts/probe-diffpatch.mjs':
-    'a probe that measures the raw response bytes and their gzip size, which getJson (parsed JSON only) cannot give',
   'scripts/check-feed-shape-drift.mjs':
     'its message names the host; the check re-fetches each fixture from the sourceUrl recorded in the fixture manifest',
   '.scratch/club-live-overlay/probe-degrade.mjs':

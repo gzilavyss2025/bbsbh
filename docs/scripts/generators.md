@@ -50,9 +50,8 @@ sleep of its own.
   beside it. Its pool turns a failed item into `null`, which a client must not
   do for every caller, and each generator sizes its own pool.
 - **Files that keep the host** sit in the guard's `ALLOWLIST`, each with a
-  reason. `probe-diffpatch.mjs` needs the raw response bytes.
-  `check-feed-shape-drift.mjs` re-fetches each fixture from the URL recorded in
-  its manifest.
+  reason. `check-feed-shape-drift.mjs` re-fetches each fixture from the URL
+  recorded in its manifest.
 
 ## Nightly-cron generators (`update-nightly-data.yml`)
 

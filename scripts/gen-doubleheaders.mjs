@@ -42,6 +42,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
+import { parseArgs } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'doubleheaders.json')
@@ -72,15 +73,6 @@ const FIELDS = [
   'isWinner',
   'venue',
 ].join(',')
-
-function parseArgs(argv) {
-  const args = {}
-  for (const a of argv) {
-    const m = /^--([^=]+)(?:=(.*))?$/.exec(a)
-    if (m) args[m[1]] = m[2] ?? true
-  }
-  return args
-}
 
 // A game statsapi has actually finished. 'F' is Final and 'O' is "Game Over" —
 // the state a just-ended game sits in for a few minutes before it is Final, and

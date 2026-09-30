@@ -46,12 +46,15 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { stateKey, re24Key } from '../src/lib/runExpectancy.js'
 import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'run-expectancy.json')
 const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
 
+// Strict on purpose: a bare `--flag` is ignored, so a mistyped value flag falls
+// back to its default. The shared parseArgs in lib/args.mjs would make it `true`.
 function parseArgs(argv) {
   const args = {}
   for (const a of argv) {
@@ -59,23 +62,6 @@ function parseArgs(argv) {
     if (m) args[m[1]] = m[2]
   }
   return args
-}
-
-async function mapWithConcurrency(items, limit, fn) {
-  const results = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        results[i] = await fn(items[i])
-      } catch {
-        results[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return results
 }
 
 // Every Final regular-season gamePk for one season. Same postponed-replay
@@ -205,10 +191,10 @@ for (const season of seasons) {
   // worker itself, rather than collecting all of a season's feeds (each
   // several hundred KB to a few MB) in memory before processing any of
   // them — a full season is 2000+ games, so buffering them all first was a
-  // real peak-memory problem. mapWithConcurrency's return value is unused
+  // real peak-memory problem. mapConcurrent's return value is unused
   // here; the accumulation IS the work.
   let done = 0
-  await mapWithConcurrency(pks, 6, async (pk) => {
+  await mapConcurrent(pks, 6, async (pk) => {
     const feed = await getJson(`/api/v1.1/game/${pk}/feed/live`)
     accumulateGame(feed, states, re24)
     gamesSwept++
