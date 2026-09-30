@@ -8,7 +8,9 @@
 //
 // Fire-and-forget by design: detached, unref'd, logged to a temp file, and the
 // hook itself always exits 0 immediately so it never blocks or fails the
-// worktree-add tool call. `npx playwright install chromium` is a no-op if the
+// worktree-add tool call. `--prefer-offline` makes npm use its local download
+// cache before it asks the registry, so repeat installs are faster.
+// `npx playwright install chromium` is a no-op if the
 // exact browser build is already cached (global cache, not per-worktree — see
 // playwright.config.js), so this is cheap on repeat worktrees too.
 import { readFileSync, existsSync, mkdtempSync, openSync } from 'node:fs'
@@ -59,8 +61,8 @@ try {
   const child = spawn(
     process.platform === 'win32' ? 'cmd.exe' : 'sh',
     process.platform === 'win32'
-      ? ['/c', 'npm install --no-audit --no-fund && npx playwright install chromium']
-      : ['-c', 'npm install --no-audit --no-fund && npx playwright install chromium'],
+      ? ['/c', 'npm install --prefer-offline --no-audit --no-fund && npx playwright install chromium']
+      : ['-c', 'npm install --prefer-offline --no-audit --no-fund && npx playwright install chromium'],
     { cwd: worktreePath, stdio: ['ignore', out, out], detached: true, windowsHide: true },
   )
   child.unref()
