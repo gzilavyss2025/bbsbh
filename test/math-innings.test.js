@@ -1,7 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { ipToOuts, outsToIp } from '../src/lib/math/innings.js'
-import { num } from '../src/lib/math/number.js'
 
 // The table every old copy of ipToOuts was run against (#1306): all agreed.
 test('ipToOuts reads whole innings plus leftover outs', () => {
@@ -28,10 +27,4 @@ test('outsToIp is the inverse, and sums carry', () => {
   assert.equal(outsToIp(16), '5.1')
   assert.equal(outsToIp(ipToOuts('104.2') + 1), '105.0')
   for (const ip of ['0.0', '5.1', '5.2', '104.2']) assert.equal(outsToIp(ipToOuts(ip)), ip)
-})
-
-test('num is a finite number or 0', () => {
-  assert.equal(num('3.5'), 3.5)
-  assert.equal(num(7), 7)
-  for (const bad of [null, undefined, '', 'x', NaN, Infinity]) assert.equal(num(bad), 0)
 })

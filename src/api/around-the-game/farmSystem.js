@@ -48,6 +48,7 @@
 // is not a score). Nothing here touches tonight's game.
 
 import { staticJson } from '../staticJson.js'
+import { clamp } from '../../lib/math/number.js'
 
 export const fetchFarmSystem = staticJson('/data/farm-system.json')
 
@@ -112,8 +113,6 @@ export const WEIGHT_PRESETS = [
   { key: 'scoreboard', label: 'Scoreboard', weights: { capital: 0.2, production: 0.8, youth: 0 } },
   { key: 'upside', label: 'Upside', weights: { capital: 0.45, production: 0.1, youth: 0.45 } },
 ]
-
-const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
 
 // ---- pillar math, one organisation at a time ----
 

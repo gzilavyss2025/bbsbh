@@ -7,3 +7,13 @@ export function num(x) {
   const n = Number(x)
   return Number.isFinite(n) ? n : 0
 }
+
+// `n` held within [lo, hi]. Needs lo <= hi; NaN stays NaN.
+export function clamp(n, lo, hi) {
+  return Math.max(lo, Math.min(hi, n))
+}
+
+// One decimal place: 1.25 -> 1.3.
+export function round1(n) {
+  return Math.round(n * 10) / 10
+}

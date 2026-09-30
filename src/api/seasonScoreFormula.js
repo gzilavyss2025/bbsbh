@@ -1,3 +1,5 @@
+import { clamp } from '../lib/math/number.js'
+
 // Vs. expectation's home-field constant and team-specific home-field factor.
 // Pulled out of scripts/gen-season-score.mjs (which imports node:fs and
 // statsapi and can't be bundled for the browser) so the "How this is
@@ -32,8 +34,6 @@ export const HOME_WIN_PROBABILITY = 0.54
 export const HOME_FIELD_PRIOR_GAMES = 480
 export const HOME_FIELD_FACTOR_MIN = 0.50
 export const HOME_FIELD_FACTOR_MAX = 0.60
-
-const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
 
 export function teamHomeFieldFactor(priorSeasonRecords) {
   let homeWins = 0, homeGames = 0, roadWins = 0, roadGames = 0

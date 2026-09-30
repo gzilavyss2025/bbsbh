@@ -1,3 +1,5 @@
+import { clamp, round1 } from '../lib/math/number.js'
+
 // The Team Score formula — 60% actual wins blended with 40% Pythagorean
 // "run-quality" wins, plus a park adjustment to that run differential and a
 // capped strength-of-schedule nudge (Season Quality only), centered on .500
@@ -93,8 +95,6 @@ export const LATE_SWING_PER_RUN = 0.06
 export const LATE_SWING_RUN_CAP = 4
 export const LATE_SWING_TOTAL_CAP = 1.5
 
-const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
-const round1 = (n) => Math.round(n * 10) / 10
 
 export function pythagoreanPct(runsScored, runsAllowed) {
   if (runsScored + runsAllowed <= 0) return 0.5

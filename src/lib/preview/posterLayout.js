@@ -1,3 +1,5 @@
+import { clamp } from '../math/number.js'
+
 // Where every block of the poster sits — pure arithmetic, no canvas, so the
 // composition is unit-testable (test/poster-layout.test.js) instead of being
 // discovered by looking at a PNG.
@@ -126,10 +128,6 @@ export function posterLayout(enabled, heights = {}) {
     // than painting them off the bottom edge.
     overflows: total + POSTER.gap * slots > fullRoom,
   }
-}
-
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value))
 }
 
 // The poster's content column: full width minus the page margins.
