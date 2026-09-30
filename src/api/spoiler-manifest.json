@@ -178,6 +178,13 @@
         "api/boxscore.js"
       ]
     },
+    "boxscore/scoringSummary.js": {
+      "class": "reveal-only",
+      "why": "Every scoring play of the game with its running score and the sentence that says who drove the run in. `computeScoringSummary` must run inside the box score's SealBox reveal, through revealBoxScore.js.",
+      "importers": [
+        "screens/boxscore/revealBoxScore.js"
+      ]
+    },
     "broadcast.js": {
       "class": "spoiler-free",
       "why": "Which network airs the game — known well before first pitch, same footing as the uniform and weather facts."

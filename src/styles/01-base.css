@@ -47,7 +47,7 @@
      - play-by-play copy and its feed-sourced siblings — `.pbp__desc`,
        `.pbp__subnote`, `.pbp__note`, `.pbp__notetext`, `.pbp__callout`,
        `.pitchernotice__eventtext` (mound visit / ejection / baserunning
-       notification cards), `.bs__potgDesc`, `.flipback__potg`,
+       notification cards), `.bs__potgDesc`, `.scoresum__desc`, `.flipback__potg`,
        `.psseries__potgDesc`
      - the pre-half callout cards' fun-fact line — `.prehalf__text`
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
