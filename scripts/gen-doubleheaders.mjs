@@ -42,7 +42,6 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
-import { withRetry } from './lib/net/retry.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'doubleheaders.json')
@@ -200,8 +199,9 @@ export function pairsFromGames(games, { hosts = null } = {}) {
 async function seasonPairs(season) {
   const path =
     `/api/v1/schedule?sportId=1&season=${season}&gameType=R&fields=${encodeURIComponent(FIELDS)}`
-  // One dropped socket in 23 requests must not cost the whole night.
-  const json = await withRetry(() => getJson(path))
+  // One dropped socket in 23 requests must not cost the whole night: getJson
+  // retries it (3 tries, 2000 ms x attempt).
+  const json = await getJson(path)
   const games = (json?.dates ?? []).flatMap((d) => (d.games ?? []).map((g) => ({ ...g, date: d.date })))
   return pairsFromGames(games)
 }

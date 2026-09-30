@@ -8,9 +8,9 @@ develops; this one asks what the teams that go deep in October have in
 common. `docs/team-success-research.md` is the framework behind it — the
 outcome ladder, the factor catalog, the statistical method — read that
 before adding a spike. This document is only the page's own conventions.
-Before a spike re-pulls statsapi for a panel, check
-`docs/agents/research-database.md` — the panel may already exist as a
-queryable view.
+**Before a spike pulls anything from statsapi, query what exists.** Read the
+catalog in `docs/agents/research-database.md`, then run
+`node scripts/research-db.mjs --sql "SELECT ..."`.
 
 **Kept as its own diary, not folded into the prospect one.** Different
 question, different commissioning ask, and a verdict vocabulary that may

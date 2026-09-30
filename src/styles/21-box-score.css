@@ -45,12 +45,9 @@
   color: var(--text-heading);
 }
 
+/* A Card (#1113, slice C5): the frame and its clip are the Card's. */
 .gamestory {
   margin-top: var(--space-4);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  overflow: hidden;
 }
 
 .gamestory__head {
@@ -264,11 +261,10 @@
   color: var(--text-heading);
 }
 
+/* Each box score sheet below is a Card (#1113, slice C5): the frame is the
+   Card's, and the block keeps its own inset and space. The six that sat on
+   page paper (--paper-1) take the Card's paper (Q3). */
 .bs__team {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   padding: var(--space-3) var(--space-3h) var(--space-2h);
 }
 
@@ -530,10 +526,6 @@
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-3) var(--space-3h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-1);
-  box-shadow: var(--shadow-card);
 }
 .bs__decision {
   display: flex;
@@ -561,10 +553,6 @@
    the description reads like a scorebook note, the inning tag trails it. */
 .bs__potg {
   padding: var(--space-3) var(--space-3h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-1);
-  box-shadow: var(--shadow-card);
   margin-bottom: 10px;
 }
 .bs__potgBody {
@@ -574,7 +562,7 @@
 }
 /* Compound with .shot/.shot--fallback (both classes Headshot always sets) so
    this reliably outranks the base .shot sizing — same pattern as
-   .playercard__shot below. Sized up from the three-stars/insight-note headshots
+   .playerline__shot below. Sized up from the three-stars/insight-note headshots
    (52px/26px) so the card's lead player reads as the card's focal point,
    matching the slate's Top Performers card treatment. */
 .shot.bs__potgShot {
@@ -728,10 +716,6 @@
    score, directly above the Game Buzz card, which shares this same seal. */
 .bs__insights {
   padding: var(--space-3) var(--space-3h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-1);
-  box-shadow: var(--shadow-card);
   margin-top: var(--space-3);
 }
 .bs__insightsTitle {
@@ -749,19 +733,15 @@
 
 /* The box score's own Statcast Leaders card — its own full-width row
    between the linescore column and the two team cards (see
-   BoxScoreBody), each superlative rendered as a .playercard__bucket +
-   .playercard__list, the same "baseball card" tile (headshot, team, stat
+   BoxScoreBody), each superlative rendered as a .playerline__bucket +
+   .playerline__list, the same "baseball card" tile (headshot, team, stat
    line) Top Performers uses (see PerformerCard.jsx) — so this card reads as
    the same idiom as that slate box rather than its own small tiles. Matches the
    frame of .bs__insights/.bs__stars beside it. */
 .bs__statcastCard {
   padding: var(--space-3) var(--space-3h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-1);
-  box-shadow: var(--shadow-card);
 }
-/* Phone: the three superlatives stack, same as any other playercard list.
+/* Phone: the three superlatives stack, same as any other playerline list.
    Desktop/ipad: one row, three columns wide (see the wide-layout block). */
 .bs__statcastRow {
   display: flex;
@@ -788,19 +768,17 @@
 
 /* One call-out note card: a headshot (or team logo(s), for a note about a
    club rather than a person) beside the player's name and the note itself
-   (a .pbp__callout, same star-marked strip as the innings view). Same card
-   chrome as .statcast__card so it reads as a sibling of the Statcast tiles
-   above it, but laid out as a row — there's a full sentence to fit, not just
-   a number. */
+   (a .pbp__callout, same star-marked strip as the innings view). A ledger
+   Card (#1113, slice C5) that keeps its own soft hairline edge and inset
+   shadow, laid out as a row — there's a full sentence to fit, not just a
+   number. */
 .bs__noteCard {
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-2);
   margin-bottom: 8px;
-  background: var(--paper-2);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
+  border-color: var(--border-hairline);
   box-shadow: var(--inset-cell);
   min-width: 0;
   break-inside: avoid;

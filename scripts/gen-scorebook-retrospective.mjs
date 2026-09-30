@@ -5,11 +5,11 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { contextNeutralPoints, gameScore as pitcherGameScore } from '../src/api/performanceScore.js'
+import { getJson } from './lib/statsapi.mjs'
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 const OUT = `${ROOT}/public/data/first-scorebook.json`
 const SCORE_FILE = `${ROOT}/public/data/game-score.json`
-const API = 'https://statsapi.mlb.com'
 const SEASON = 2026
 
 const ENTRIES = [
@@ -60,11 +60,6 @@ const teamMatches = (actual, wanted) => {
   const w = tidy(wanted)
   return a.includes(w) || w.includes(a) || (w === 'athletics' && a.includes('athletics'))
 }
-const fetchJson = async (path) => {
-  const res = await fetch(`${API}${path}`)
-  if (!res.ok) throw new Error(`${path}: ${res.status}`)
-  return res.json()
-}
 const addStats = (into, stats) => {
   for (const [key, value] of Object.entries(stats ?? {})) {
     if (typeof value === 'number') into[key] = (into[key] ?? 0) + value
@@ -108,12 +103,12 @@ async function mapLimit(items, limit, fn) {
 // the book. Boxscore-only (not the full live feed) keeps ~1,500 fetches fast.
 async function fetchLeagueStarterGameScores() {
   const asOf = new Date().toISOString().slice(0, 10)
-  const schedule = await fetchJson(`/api/v1/schedule?sportId=1&startDate=${SEASON}-01-01&endDate=${asOf}&gameType=R`)
+  const schedule = await getJson(`/api/v1/schedule?sportId=1&startDate=${SEASON}-01-01&endDate=${asOf}&gameType=R`)
   const gamePks = (schedule.dates ?? [])
     .flatMap((d) => d.games ?? [])
     .filter((g) => g.status?.abstractGameState === 'Final')
     .map((g) => g.gamePk)
-  const boxscores = await mapLimit(gamePks, 40, (gamePk) => fetchJson(`/api/v1/game/${gamePk}/boxscore`).catch(() => null))
+  const boxscores = await mapLimit(gamePks, 40, (gamePk) => getJson(`/api/v1/game/${gamePk}/boxscore`).catch(() => null))
   const scores = []
   for (const box of boxscores) {
     if (!box) continue
@@ -131,7 +126,7 @@ async function main() {
   const dates = [...new Set(ENTRIES.map(([date]) => date))]
   const schedule = new Map()
   for (const date of dates) {
-    const data = await fetchJson(`/api/v1/schedule?sportIds=1,12&date=${date}&hydrate=team,linescore`)
+    const data = await getJson(`/api/v1/schedule?sportIds=1,12&date=${date}&hydrate=team,linescore`)
     schedule.set(date, (data.dates ?? []).flatMap((d) => d.games ?? []))
   }
 
@@ -150,8 +145,8 @@ async function main() {
   })
 
   const [feeds, winProbs, leagueStarterGameScores] = await Promise.all([
-    Promise.all(resolved.map((g) => fetchJson(`/api/v1.1/game/${g.gamePk}/feed/live`))),
-    Promise.all(resolved.map((g) => fetchJson(`/api/v1/game/${g.gamePk}/winProbability`).catch(() => []))),
+    Promise.all(resolved.map((g) => getJson(`/api/v1.1/game/${g.gamePk}/feed/live`))),
+    Promise.all(resolved.map((g) => getJson(`/api/v1/game/${g.gamePk}/winProbability`).catch(() => []))),
     fetchLeagueStarterGameScores(),
   ])
   const playerTotals = new Map()

@@ -101,7 +101,7 @@ const BUDGETS = {
   'src/styles/09-team-info.css': 650, // 700 -> 650 at 609: .thub-card left for system/card.css (#1113, slice C0). 800 -> 700: the club band's rules moved to system/section-head.css (#1113, slice H1a). 700 -> 716: the innings view's lineup masthead (.lineupteam__name) joined the header-theme system (EnteringReference.jsx), the same `.is-themed`/`--bar-fill` triad .halfdefense__title already wore — one more selector in the same family, not a new one. 687 — the Ballpark card moved out to 57-ballpark-card.css
   'src/styles/10-lineup.css': 800, // 797
   'src/styles/12-sealbox.css': 1700, // 1639 — unified focus/stacked layout: dropped the unfocused page's .prehalf, .half__entering/.halfentering, .innings__reference/.innings__ref-*, .innings__rosters, and .innings__row2 rules
-  'src/styles/14-strike-zone.css': 1000, // 909 — both pitch-colour keys left (PitchColorsKey's button/modal and StrikeZoneLegend's swatch row); the pitch list names each dot beside it
+  'src/styles/14-strike-zone.css': 900, // 898 — the sheet's ✕ left for IconButton (system/button.css, #1209); both pitch-colour keys left earlier
   'src/styles/15-team-color-lab.css': 700, // 691
   'src/styles/17-identity-lab-workbench.css': 1300, // 1229 — stamp-ink rules
   'src/styles/20-charts.css': 700, // 684

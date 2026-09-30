@@ -12,6 +12,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { TeamLeaders } from '../components/teamstats/TeamLeaders.jsx'
@@ -27,7 +28,7 @@ import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
 function TeamCountBoard({ title, entries, favoriteTeamId }) {
   if (!entries.length) return null
   return (
-    <section className="psleaders__teamboard">
+    <Card body="flush" className="psleaders__teamboard">
       <SectionHead look="label">{title}</SectionHead>
       <ol className="psleaders__teamlist">
         {entries.map((e, i) => {
@@ -49,7 +50,7 @@ function TeamCountBoard({ title, entries, favoriteTeamId }) {
           )
         })}
       </ol>
-    </section>
+    </Card>
   )
 }
 
@@ -61,7 +62,7 @@ function TeamCountBoard({ title, entries, favoriteTeamId }) {
 function MvpAwardsBoard({ entries, favoriteTeamId }) {
   if (!entries.length) return null
   return (
-    <section className="psleaders__teamboard">
+    <Card body="flush" className="psleaders__teamboard">
       <SectionHead look="label">Multiple Series MVP Awards</SectionHead>
       <ol className="psleaders__mvplist">
         {entries.map((e, i) => {
@@ -86,7 +87,7 @@ function MvpAwardsBoard({ entries, favoriteTeamId }) {
           )
         })}
       </ol>
-    </section>
+    </Card>
   )
 }
 

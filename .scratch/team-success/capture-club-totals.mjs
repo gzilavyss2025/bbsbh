@@ -25,6 +25,7 @@
 import { writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT_PATH = join(__dirname, '..', '..', 'test', 'fixtures', 'roster-age-club-totals.json')
@@ -34,21 +35,6 @@ const ALL_MLB_TEAM_IDS = [
   134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 158,
 ]
 const SEASONS = Array.from({ length: 2025 - 2000 + 1 }, (_, i) => 2000 + i)
-
-async function fetchWithRetry(url, attempts = 4) {
-  let lastErr
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`statsapi ${res.status} ${url}`)
-      return await res.json()
-    } catch (err) {
-      lastErr = err
-      await new Promise((r) => setTimeout(r, 300 * (i + 1)))
-    }
-  }
-  throw lastErr
-}
 
 // "180.1" -> 180 + 1/3 (baseball's fractional-inning notation, not tenths).
 function parseInnings(ip) {
@@ -62,8 +48,8 @@ async function main() {
   for (const season of SEASONS) {
     for (const teamId of ALL_MLB_TEAM_IDS) {
       for (const group of ['hitting', 'pitching']) {
-        const json = await fetchWithRetry(
-          `https://statsapi.mlb.com/api/v1/teams/${teamId}/stats` +
+        const json = await getJson(
+          `/api/v1/teams/${teamId}/stats` +
             `?stats=season&group=${group}&season=${season}`,
         )
         const stat = json.stats?.[0]?.splits?.[0]?.stat

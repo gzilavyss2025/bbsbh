@@ -1,5 +1,6 @@
 // Per TAB: how long is each of Tally's five level tabs actually empty?
-const API = 'https://statsapi.mlb.com'
+import { getJson } from '../../../scripts/lib/statsapi.mjs'
+
 const SPORTS = [
   { id: 1, label: 'MLB' },
   { id: 11, label: 'AAA' },
@@ -25,9 +26,7 @@ function runs(days) {
 }
 
 for (const s of SPORTS) {
-  const j = await (await fetch(
-    `${API}/api/v1/schedule?sportId=${s.id}&startDate=${START}&endDate=${END}`,
-  )).json()
+  const j = await getJson(`/api/v1/schedule?sportId=${s.id}&startDate=${START}&endDate=${END}`)
   const seen = new Set()
   const byDate = new Map()
   const typesByDate = new Map()

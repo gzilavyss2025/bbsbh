@@ -5,9 +5,9 @@ test('both league brackets connect the seeded rounds at every viewport', async (
   const brackets = page.locator('.psrace__miniboard')
   await expect(brackets).toHaveCount(2)
   for (const bracket of await brackets.all()) {
-    const wc = bracket.locator('.psrace__round--wc .seedcard')
-    const ds = bracket.locator('.psrace__round--ds .seedcard')
-    const cs = bracket.locator('.psrace__round--cs .seedcard')
+    const wc = bracket.locator('.psrace__round--wc .seed')
+    const ds = bracket.locator('.psrace__round--ds .seed')
+    const cs = bracket.locator('.psrace__round--cs .seed')
     await expect(wc).toHaveCount(2)
     await expect(ds).toHaveCount(2)
     await expect(cs).toHaveCount(1)

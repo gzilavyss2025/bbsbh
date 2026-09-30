@@ -231,16 +231,14 @@
 .trrank__tile {
   display: flex;
   min-width: 0;
-  overflow: hidden;
   flex-direction: column;
-  border: var(--bw-hair) solid var(--border-rule);
   border-top: var(--bw-heavy) solid var(--trrank-edge);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
   color: var(--text-body);
-  text-decoration: none;
-  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
 }
 .trrank__tile:active {
   transform: scale(0.98);
@@ -390,6 +388,7 @@
   .trrank__tile:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-raised);
+    border-top-color: var(--trrank-edge);
   }
 }
 

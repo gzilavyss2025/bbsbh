@@ -9,6 +9,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 function ordinal(n) {
   const s = ['th', 'st', 'nd', 'rd']
@@ -93,14 +94,14 @@ export function SeriesLeaderBoard({ title, categories, byCategory }) {
     .filter((r) => r.entries.length > 0)
   if (ranked.length === 0) return null
   return (
-    <section className="psseries__lboard">
+    <Card body="flush" className="psseries__lboard">
       <SectionHead look="label">{title}</SectionHead>
       <div className="psseries__lrows">
         {ranked.map(({ category, entries }) => (
           <SeriesLeaderLine key={category.key} category={category} entries={entries} />
         ))}
       </div>
-    </section>
+    </Card>
   )
 }
 
@@ -175,14 +176,14 @@ export function RosterCard({ teamId, roster }) {
   const pitchers = roster?.pitchers ?? []
   if (positionPlayers.length === 0 && pitchers.length === 0) return null
   return (
-    <section className="psseries__rostercard">
+    <Card body="flush" className="psseries__rostercard">
       <div className="psseries__rosterhead">
         <TeamLogo teamId={teamId} name={teamClubNameShort(teamId)} size={24} />
         <span className="psseries__rosterteam">{teamClubNameShort(teamId)} roster</span>
       </div>
       {positionPlayers.length > 0 && <RosterGroup title="Position players" rows={positionPlayers} />}
       {pitchers.length > 0 && <RosterGroup title="Pitchers" rows={pitchers} />}
-    </section>
+    </Card>
   )
 }
 

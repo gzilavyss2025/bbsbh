@@ -38,3 +38,23 @@ test('withRetry pauses longer after each failure', async () => {
   )
   assert.deepEqual(pauses, [100, 200])
 })
+
+test('withRetry with shouldRetry stops at once on an error it will not retry', async () => {
+  let calls = 0
+  await assert.rejects(
+    withRetry(async () => { calls += 1; throw new Error('nope') }, { tries: 3, sleep: noSleep, shouldRetry: () => false }),
+    /nope/,
+  )
+  assert.equal(calls, 1)
+})
+
+test('withRetry with shouldRetry still retries the errors it accepts', async () => {
+  let calls = 0
+  const out = await withRetry(async () => {
+    calls += 1
+    if (calls < 3) throw new Error('transient')
+    return 'ok'
+  }, { tries: 3, sleep: noSleep, shouldRetry: (err) => err.message === 'transient' })
+  assert.equal(out, 'ok')
+  assert.equal(calls, 3)
+})

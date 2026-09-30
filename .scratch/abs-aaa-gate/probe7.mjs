@@ -1,7 +1,9 @@
 // What does gameData.absChallenges mean? Is `hasChallenges` a SYSTEM flag or
 // an "at least one challenge happened" flag? Probe across levels and states.
+import { getJson } from '../../scripts/lib/statsapi.mjs'
+
 async function look(pk, tag) {
-  const f = await (await fetch(`https://statsapi.mlb.com/api/v1.1/game/${pk}/feed/live`)).json()
+  const f = await getJson(`/api/v1.1/game/${pk}/feed/live`)
   let mj = 0
   for (const p of f.liveData?.plays?.allPlays ?? [])
     for (const r of [p.reviewDetails, ...(p.playEvents ?? []).map((e) => e.reviewDetails)].filter(Boolean))
@@ -14,7 +16,7 @@ async function look(pk, tag) {
 }
 // levels
 async function firstOf(sportId, date, pred = () => true, n = 3) {
-  const s = await (await fetch(`https://statsapi.mlb.com/api/v1/schedule?sportId=${sportId}&date=${date}`)).json()
+  const s = await getJson(`/api/v1/schedule?sportId=${sportId}&date=${date}`)
   return (s.dates?.[0]?.games ?? []).filter(pred).slice(0, n).map((g) => g.gamePk)
 }
 for (const [sid, date] of [[1, '2026-08-26'], [11, '2026-08-26'], [12, '2026-08-26'], [13, '2026-08-26'], [14, '2026-08-26']]) {

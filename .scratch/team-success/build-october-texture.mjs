@@ -38,6 +38,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const CACHE_PATH = join(__dirname, 'october-texture-cache.json')
@@ -54,19 +55,6 @@ const MIN_POSTSEASON_PITCHES = 50
 
 const cache = existsSync(CACHE_PATH) ? JSON.parse(readFileSync(CACHE_PATH, 'utf8')) : {}
 let dirty = 0
-
-async function getJson(url, tries = 5) {
-  for (let attempt = 0; attempt < tries; attempt++) {
-    try {
-      const res = await fetch(url, { headers: { 'User-Agent': 'bbsbh-research/1.0' } })
-      if (!res.ok) throw new Error(`http ${res.status}`)
-      return await res.json()
-    } catch (err) {
-      if (attempt === tries - 1) throw err
-      await new Promise((r) => setTimeout(r, 500 * 2 ** attempt))
-    }
-  }
-}
 
 async function cached(key, url) {
   if (cache[key] !== undefined) return cache[key]
@@ -97,7 +85,7 @@ async function teamSeasonPanel() {
   await pool(jobs, 6, async ({ season, group, gameType }) => {
     const json = await cached(
       `team|${season}|${group}|${gameType}`,
-      `https://statsapi.mlb.com/api/v1/teams/stats?season=${season}&sportIds=1` +
+      `/api/v1/teams/stats?season=${season}&sportIds=1` +
         `&stats=season&group=${group}&gameType=${gameType}`,
     )
     for (const split of json?.stats?.[0]?.splits ?? [])
@@ -118,7 +106,7 @@ async function playerSeasonPanel() {
   await pool(jobs, 6, async ({ season, group, gameType }) => {
     const json = await cached(
       `player|${season}|${group}|${gameType}`,
-      `https://statsapi.mlb.com/api/v1/stats?stats=season&group=${group}` +
+      `/api/v1/stats?stats=season&group=${group}` +
         `&season=${season}&gameType=${gameType}&playerPool=All&sportId=1&limit=4000`,
     )
     const splits = json?.stats?.[0]?.splits ?? []
@@ -159,7 +147,7 @@ async function arsenalPanel(playerRows) {
     for (const gameType of ['R', 'P']) {
       const json = await cached(
         `arsenal|${r.personId}|${r.season}|${gameType}`,
-        `https://statsapi.mlb.com/api/v1/people/${r.personId}/stats` +
+        `/api/v1/people/${r.personId}/stats` +
           `?stats=pitchArsenal&season=${r.season}&gameType=${gameType}`,
       )
       entry[gameType] = (json?.stats?.[0]?.splits ?? []).map((s) => ({

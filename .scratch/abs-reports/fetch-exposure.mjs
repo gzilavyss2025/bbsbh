@@ -1,11 +1,12 @@
 import { writeFile } from 'node:fs/promises'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 const out=[]
 for (const [sportId,level] of [[1,'MLB'],[11,'AAA']]) {
-  const t=await (await fetch(`https://statsapi.mlb.com/api/v1/teams?sportId=${sportId}&season=2026`)).json()
+  const t=await getJson(`/api/v1/teams?sportId=${sportId}&season=2026`)
   for (const team of t.teams) {
-    const u=`https://statsapi.mlb.com/api/v1/teams/${team.id}/roster?rosterType=fullSeason&season=2026`
+    const u=`/api/v1/teams/${team.id}/roster?rosterType=fullSeason&season=2026`
       +`&hydrate=person(stats(type=season,group=[hitting,fielding],season=2026,sportId=${sportId}))`
-    let r; for(let a=0;a<2;a++){try{r=await (await fetch(u)).json();break}catch(e){if(a)throw e}}
+    const r=await getJson(u)
     for (const p of r.roster??[]) {
       const person=p.person??{}
       const gs=person.stats??[]

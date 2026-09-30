@@ -332,30 +332,22 @@
   position: relative;
   display: inline-flex;
 }
+/* An IconButton (#1209, mark sm): an 18px ringed mark with the 44x44 tap area
+   the button draws itself. The ring and the ink are the skin's own properties. */
 .infopop__btn {
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  border: var(--bw-hair) solid var(--graphite-soft);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--text-on-ink);
+  --btn-edge: var(--graphite-soft);
+  --btn-ink: var(--text-on-ink);
+  --btn-fill-hover: transparent;
+  --btn-edge-hover: var(--text-on-ink);
+  border-width: var(--bw-hair);
   font-family: var(--font-body);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   font-style: italic;
-  line-height: var(--lh-solid);
-  text-align: center;
-  cursor: pointer;
 }
 .infopop__btn:hover,
 .infopop__btn:focus-visible {
-  border-color: var(--text-on-ink);
   color: var(--surface-inset);
-}
-.infopop__btn:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
 }
 .infopop__tip {
   position: absolute;

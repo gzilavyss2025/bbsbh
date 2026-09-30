@@ -35,6 +35,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const CACHE_PATH = join(__dirname, 'roster-age-deadline-cache.json')
@@ -77,21 +78,6 @@ function loadAgeLookup() {
   return { bySeasonGroup, bySeasonAny }
 }
 
-async function fetchWithRetry(url, attempts = 4) {
-  let lastErr
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`statsapi ${res.status} ${url}`)
-      return await res.json()
-    } catch (err) {
-      lastErr = err
-      await new Promise((r) => setTimeout(r, 300 * (i + 1)))
-    }
-  }
-  throw lastErr
-}
-
 // "180.1" -> 180 + 1/3, "180.2" -> 180 + 2/3 (baseball's fractional-inning
 // notation, not decimal tenths) — same as build-roster-age.mjs.
 function parseInnings(ip) {
@@ -115,10 +101,10 @@ async function fetchTeamSeasonGroup(cache, teamId, season, group) {
   const key = `${group}-${teamId}-${season}`
   if (cache[key]) return cache[key]
   const url =
-    `https://statsapi.mlb.com/api/v1/stats?stats=byDateRange&group=${group}` +
+    `/api/v1/stats?stats=byDateRange&group=${group}` +
     `&season=${season}&sportId=1&teamId=${teamId}&startDate=${season}-01-01` +
     `&endDate=${season}-07-31&limit=3000&playerPool=all`
-  const json = await fetchWithRetry(url)
+  const json = await getJson(url)
   const splits = (json.stats?.[0]?.splits ?? []).map((s) => slimSplit(s, group))
   cache[key] = splits
   return splits

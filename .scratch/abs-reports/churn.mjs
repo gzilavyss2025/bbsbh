@@ -26,6 +26,7 @@
 // every figure quoted in research.md §"Whether Triple-A is worth drawing".
 
 import { writeFile } from 'node:fs/promises'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const SEASON = 2026
 const MIN_PLATE_APPEARANCES = 200 // src/api/around-the-game/absExposure.js
@@ -44,25 +45,10 @@ const addDays = (s, n) => {
 }
 const min = (a, b) => (a < b ? a : b)
 
-async function getJson(url) {
-  let last
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`${res.status} ${url}`)
-      return await res.json()
-    } catch (err) {
-      last = err
-      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)))
-    }
-  }
-  throw last
-}
-
 // A window's hydrate, cut to one sport so a Triple-A club's promoted man does
 // not bring his major-league plate appearances back with him.
 const windowUrl = (teamId, sportId, start, end, withSeason) =>
-  `https://statsapi.mlb.com/api/v1/teams/${teamId}/roster?rosterType=fullSeason&season=${SEASON}` +
+  `/api/v1/teams/${teamId}/roster?rosterType=fullSeason&season=${SEASON}` +
   `&hydrate=person(stats(type=[${withSeason ? 'season,' : ''}byDateRange],group=hitting,` +
   `startDate=${start},endDate=${end},season=${SEASON},sportId=${sportId}))`
 
@@ -84,7 +70,7 @@ const report = { season: SEASON, asOf: TODAY, floor: MIN_PLATE_APPEARANCES, leve
 
 for (const [sportId, level] of LEVELS) {
   const seasons = await getJson(
-    `https://statsapi.mlb.com/api/v1/seasons?sportId=${sportId}&season=${SEASON}`,
+    `/api/v1/seasons?sportId=${sportId}&season=${SEASON}`,
   )
   const s = seasons.seasons?.[0] ?? {}
   const opened = s.regularSeasonStartDate
@@ -102,7 +88,7 @@ for (const [sportId, level] of LEVELS) {
   }
 
   const { teams } = await getJson(
-    `https://statsapi.mlb.com/api/v1/teams?sportId=${sportId}&season=${SEASON}`,
+    `/api/v1/teams?sportId=${sportId}&season=${SEASON}`,
   )
   console.log(`\n${level}: ${teams.length} clubs, opened ${opened}, last played ${lastPlayed}`)
   for (const [name, w] of Object.entries(windows)) {
@@ -287,7 +273,7 @@ for (const [, level] of LEVELS) {
 const aaa = report.levels.AAA
 const [lateStart, lateEnd] = aaa.windows.calendar.late
 const majors = await getJson(
-  `https://statsapi.mlb.com/api/v1/teams?sportId=1&season=${SEASON}`,
+  `/api/v1/teams?sportId=1&season=${SEASON}`,
 )
 const inMajorsLate = new Set()
 for (const team of majors.teams) {

@@ -42,6 +42,7 @@ import { fileURLToPath } from 'node:url'
 import { readdir, rm } from 'node:fs/promises'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { alumniByTeam, careerWarRanking, needsScan } from './lib/milb-alumni.mjs'
+import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const dataDir = join(here, '..', 'public', 'data')
@@ -83,12 +84,6 @@ async function careerWar() {
 
 // ---- one player's minor-league stints ---------------------------------------
 
-async function fetchJson(url) {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`)
-  return res.json()
-}
-
 // Every club this player appeared for below the majors, as
 // { [teamId]: { g, first, last } }, games summed across seasons and across the
 // hitting/pitching split (a pitcher's yearByYear carries both when he has hit).
@@ -97,11 +92,11 @@ async function scanPlayer(personId) {
   for (const sportId of SPORT_IDS) {
     for (const group of STAT_GROUPS) {
       const url =
-        `https://statsapi.mlb.com/api/v1/people/${personId}/stats` +
+        `/api/v1/people/${personId}/stats` +
         `?stats=yearByYear&group=${group}&sportId=${sportId}`
       let json
       try {
-        json = await fetchJson(url)
+        json = await getJson(url)
       } catch {
         continue // a level he never played is a 200 with no splits; this is a real failure, skipped
       }
@@ -162,8 +157,8 @@ async function fetchPeople(ids) {
   const out = new Map()
   for (let i = 0; i < ids.length; i += 100) {
     const batch = ids.slice(i, i + 100)
-    const json = await fetchJson(
-      `https://statsapi.mlb.com/api/v1/people?personIds=${batch.join(',')}&hydrate=currentTeam`,
+    const json = await getJson(
+      `/api/v1/people?personIds=${batch.join(',')}&hydrate=currentTeam`,
     )
     for (const p of json.people ?? []) {
       out.set(String(p.id), {

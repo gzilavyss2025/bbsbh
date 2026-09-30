@@ -20,6 +20,7 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
+import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'affiliates.json')
@@ -37,20 +38,15 @@ const season = new Date().getFullYear()
 const AFFILIATE_SPORT_IDS = [11, 12, 13, 14]
 
 async function fetchOrgIds() {
-  const url = `https://statsapi.mlb.com/api/v1/teams?sportId=1&activeStatus=Y`
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`teams sportId=1: HTTP ${res.status}`)
-  const json = await res.json()
+  const json = await getJson(`/api/v1/teams?sportId=1&activeStatus=Y`)
   return (json.teams ?? []).filter((t) => t.active === true).map((t) => t.id)
 }
 
 async function fetchAffiliateRows(orgIds) {
-  const url =
-    `https://statsapi.mlb.com/api/v1/teams/affiliates` +
-    `?teamIds=${orgIds.join(',')}&season=${season}&hydrate=venue(location)`
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`teams/affiliates: HTTP ${res.status}`)
-  const json = await res.json()
+  const json = await getJson(
+    `/api/v1/teams/affiliates` +
+      `?teamIds=${orgIds.join(',')}&season=${season}&hydrate=venue(location)`,
+  )
   return json.teams ?? []
 }
 

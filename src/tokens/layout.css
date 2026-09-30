@@ -38,6 +38,12 @@
      control drawn five ways. 34px still clears WCAG 2.5.8's 24px floor with
      room, and styles/system/button.css keeps two of them from touching. */
   --control-min: 34px;
+  /* The VISIBLE mark of an icon-only button (#1209). The tap area is always
+     --tap-min; only the round mark you see changes. --mark-md is a dismiss
+     mark in a card corner, --mark-sm the (i) that rides a navy bar. The
+     default mark is --tap-min itself, so it has no token of its own. */
+  --mark-md: 32px;
+  --mark-sm: 18px;
 
   /* Focus mode's console masthead — the anchored scorebug band
      (24-floating-nav-and-hud.css's `.gamehud--console`, ADR-0043). The band's

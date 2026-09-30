@@ -1,5 +1,6 @@
 import { openDb } from '../../scripts/lib/db.js'
 import { readFile } from 'node:fs/promises'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 const fin = JSON.parse(await readFile('.scratch/abs-reports/final-innings.json','utf8'))
 const db = await openDb()
 const games = db.prepare('SELECT * FROM abs_ingested_games').all()
@@ -14,7 +15,7 @@ for (const m of bad.slice(0, 6)) {
 }
 const pks = bad.slice(0, 3).map(m => m.game_pk)
 for (const pk of pks) {
-  const r = await (await fetch(`https://statsapi.mlb.com/api/v1.1/game/${pk}/feed/live`)).json()
+  const r = await getJson(`/api/v1.1/game/${pk}/feed/live`)
   const ls = r?.liveData?.linescore ?? {}
   console.log(`  FEED ${pk}: currentInning=${ls.currentInning} scheduled=${ls.scheduledInnings} innings=${(ls.innings??[]).length} state=${r?.gameData?.status?.detailedState}`)
 }

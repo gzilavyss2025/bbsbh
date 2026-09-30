@@ -10,6 +10,7 @@ import {
 } from '../../src/api/teamTransactions.js'
 import { feedWindow } from '../../src/api/transactions/leagueFeed.js'
 import { mergeLiveDays } from '../../src/api/transactions/clubFeed.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const endDate = process.argv[2] ?? new Date().toISOString().slice(0, 10)
 const window = feedWindow(endDate)
@@ -21,17 +22,13 @@ for (const [orgId, clubs] of Object.entries(affil.byOrgId ?? {})) {
   for (const club of clubs ?? []) if (club?.id != null) affilToOrg.set(club.id, Number(orgId))
 }
 
-const rows = (await (await fetch(
-  `https://statsapi.mlb.com/api/v1/transactions?startDate=${window.fetchStart}&endDate=${window.endDate}`,
-)).json()).transactions ?? []
+const rows = (await getJson(`/api/v1/transactions?startDate=${window.fetchStart}&endDate=${window.endDate}`)).transactions ?? []
 
 const ids = [...new Set(rows.map((t) => t.person?.id).filter((id) => id != null))]
 const positions = {}
 const debutedIds = new Set()
 for (let i = 0; i < ids.length; i += 100) {
-  const data = await (await fetch(
-    `https://statsapi.mlb.com/api/v1/people?personIds=${ids.slice(i, i + 100).join(',')}`,
-  )).json()
+  const data = await getJson(`/api/v1/people?personIds=${ids.slice(i, i + 100).join(',')}`)
   for (const p of data.people ?? []) {
     positions[p.id] = p.primaryPosition?.abbreviation || ''
     if (p.mlbDebutDate) debutedIds.add(p.id)

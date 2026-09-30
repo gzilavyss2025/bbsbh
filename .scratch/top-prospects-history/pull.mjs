@@ -28,6 +28,10 @@
 // other .scratch/*/pull.mjs feeds its own diary rather than a page. If a
 // future feature wants this on a real route, promote it to a
 // scripts/gen-*.mjs + public/data/ per scripts/CLAUDE.md's conventions.
+// UPDATE (#1111): that promotion happened. scripts/gen-prospect-rank-history.mjs
+// reads rows.json and seasons.json IN PLACE and writes
+// public/data/prospect-rank-history.json for the player page. Do not move or
+// rename the files in this folder.
 //
 // FAIL LOUD, NEVER SHORT. A season whose parsed ranks aren't the
 // contiguous range 1..max with no duplicate ranks or ids throws rather

@@ -10,7 +10,7 @@
 import { writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { getJson } from '../../src/api/statsapi.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const EXAMPLES = 5

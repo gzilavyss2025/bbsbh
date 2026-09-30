@@ -25,7 +25,7 @@
 import { writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { getJson } from '../../src/api/statsapi.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 import { txnDate } from '../../src/api/rehab-policy.js'
 import { dedupeTransactions, filterStoryworthy } from '../../src/api/teamTransactions.js'
 import { assignRowOwners, groupLeagueWide } from '../../src/api/transactions/league.js'

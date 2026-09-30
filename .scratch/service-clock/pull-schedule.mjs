@@ -7,12 +7,12 @@
 // real baseball where a normal season's third week sits.
 import { writeFile, readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 const out = {}
 for (let y = 2005; y <= 2025; y++) {
-  const r = await fetch(
-    `https://statsapi.mlb.com/api/v1/schedule?sportId=1&gameType=R&startDate=${y}-01-01&endDate=${y}-12-31&fields=dates,date,totalGames`,
+  const jj = await getJson(
+    `/api/v1/schedule?sportId=1&gameType=R&startDate=${y}-01-01&endDate=${y}-12-31&fields=dates,date,totalGames`,
   )
-  const jj = await r.json()
   const days = (jj.dates ?? []).map((d) => ({ date: d.date, games: d.totalGames }))
   out[y] = days
   const first = days[0]

@@ -20,12 +20,6 @@
    this app's own. The register is LABELS AND NUMBERS — no prose lives on this
    card, so nearly every string here is simply uppercase, which the global
    ALL-CAPS invariant already handles. See .scratch/umpire-tendencies/PRD.md. */
-.umptend {
-  background: var(--surface-card);
-  border: 1px solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
 .umptend__bar {
   border-radius: 0;
 }
@@ -312,6 +306,7 @@
 .umpmodal .umptend {
   border: 0;
   border-radius: 0;
+  box-shadow: none;
 }
 
 /* ------------------------------------------------- the lineup page's zone

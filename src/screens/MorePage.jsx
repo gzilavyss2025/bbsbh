@@ -7,6 +7,7 @@ import { MENU_GROUPS, isGuidePath } from '../lib/reportPages.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { DirectoryHeading } from '../components/chrome/DirectoryHeading.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 
 // "Everything" — every standalone page on the site, grouped, on one address.
 //
@@ -48,7 +49,7 @@ export function MorePage() {
 
       <div className="moredir__grid">
         {MENU_GROUPS.map((group) => (
-          <section key={group.id} className="moredir__card">
+          <Card key={group.id} frame="ledger" body="flush" className="moredir__card">
             <DirectoryHeading group={group} />
             <ul className="navdir__list">
               {group.pages.map((page) => {
@@ -69,7 +70,7 @@ export function MorePage() {
                 )
               })}
             </ul>
-          </section>
+          </Card>
         ))}
       </div>
 

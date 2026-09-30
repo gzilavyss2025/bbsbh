@@ -95,6 +95,14 @@ reference:
   and the old umpire kept the game's accuracy stats forever
   (`gen-umpire-accuracy.mjs`, fixed in `scripts/lib/umpire-accuracy-merge.mjs`).
 
+- **A generator reaches statsapi through `lib/statsapi.mjs`'s `getJson(path)`
+  and nothing else** — no `fetch`, no retry loop, no `statsapi.mlb.com` string
+  of its own (#1116). The client owns one retry policy (3 tries, 2000 ms x
+  attempt; network errors, 429 and 5xx), an opt-in `timeoutMs`, and the clear
+  DNS error for the Claude Code sandbox. `check-statsapi-client.mjs` fails lint
+  otherwise. `cachedGetJson` is a `.scratch` research cache: never in `scripts/`.
+  Detail: `docs/scripts/generators.md`.
+
 A generator file is a top-level script: importing one RUNS it. A helper inside
 one can therefore never be unit-tested, so a helper worth testing goes in
 `scripts/lib/` and the generator imports it (`lib/roster.mjs` is the worked
@@ -186,6 +194,13 @@ process automatically.
   RESOLVES import specifiers rather than substring-matching a basename, because
   `highlights.js` is a substring of `gamehighlights.js` and those two carry opposite
   classifications. See `src/api/CLAUDE.md` and the manifest's own header.
+- `check-statsapi-client.mjs` — fails a `.mjs`/`.js` file under `scripts/` or
+  `.scratch/` that names `statsapi.mlb.com` or `STATSAPI_BASE` on a code line
+  (comments are skipped), or names `cachedGetJson` inside `scripts/`. `src/`,
+  `api/`, `test/` and `e2e/` are out of scope: the browser has its own client.
+  A small `ALLOWLIST` holds the files that must keep the host, each with a reason;
+  a stale entry fails, like `check-dir-size.mjs`'s budgets. The matcher is pure
+  and tested in `test/statsapi-client-guard.test.js`.
 - `check-dir-size.mjs` — caps source files per directory (`MAX_FILES` 12) across
   `src/`, `api/`, `scripts/`, giving the "flat directories don't stay flat" rule in
   root `CLAUDE.md` the enforcement it never had (that rule was broken to 126 files

@@ -1,7 +1,8 @@
 // How long is the offseason REALLY? Count days with at least one professional
 // game in statsapi, across every sport Tally could plausibly show, over the
 // 2025-26 offseason.
-const API = 'https://statsapi.mlb.com'
+import { getJson } from '../../../scripts/lib/statsapi.mjs'
+
 const SPORTS = [
   { id: 1, label: 'MLB' },
   { id: 11, label: 'AAA' },
@@ -16,10 +17,9 @@ const END = '2026-04-05'
 
 const byDate = new Map()
 for (const s of SPORTS) {
-  const r = await fetch(
-    `${API}/api/v1/schedule?sportId=${s.id}&startDate=${START}&endDate=${END}`,
+  const j = await getJson(
+    `/api/v1/schedule?sportId=${s.id}&startDate=${START}&endDate=${END}`,
   )
-  const j = await r.json()
   const seen = new Set()
   for (const d of j.dates ?? []) {
     for (const g of d.games ?? []) {

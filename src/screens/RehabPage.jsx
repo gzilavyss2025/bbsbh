@@ -11,6 +11,7 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
@@ -69,7 +70,7 @@ export function RehabPage() {
         <>
           <div className="rehabgrid">
             {players.map((p) => (
-              <article className="rehabcard" key={p.playerId}>
+              <Card as="article" body="flush" className="rehabcard" key={p.playerId}>
                 <PlayerLink
                   id={p.playerId}
                   name={p.playerName}
@@ -122,7 +123,7 @@ export function RehabPage() {
                 {monthDay(p.since) && (
                   <p className="rehabcard__since">Since {monthDay(p.since)}</p>
                 )}
-              </article>
+              </Card>
             ))}
           </div>
           <p className="hint prospects__caption">

@@ -164,8 +164,8 @@ reference examples) rather than inventing a new one:
   situational roster use can join against it rather than re-deriving it.
 - **A spike that joins more than one factor's panel should query the shared
   database, not hand-roll a new join script.** `scripts/research-db.mjs`
-  registers every cached research panel from both diaries as a read-only
-  DuckDB view over its JSON file (`docs/agents/research-database.md`). Reuse
+  registers the research panels as read-only DuckDB views over their JSON
+  files (`docs/agents/research-database.md`, which is the catalog). Reuse
   an existing view for the join. Add a new one to the catalog when a spike
   produces a panel worth keeping.
 - **State statistical significance in win-shares-of-doubt terms in the
@@ -174,6 +174,10 @@ reference examples) rather than inventing a new one:
   governs method only.
 
 ## Planned order of spikes
+
+**Before a spike pulls anything from statsapi, query what exists.** The catalog
+in `docs/agents/research-database.md` lists every panel earlier spikes wrote,
+with its grain. Open it first.
 
 Not committed, just a reasoned starting point — revise this list as spikes
 land or a factor turns out to need more groundwork than expected:

@@ -131,7 +131,7 @@ export const ROUTES = [
   { name: 'salaries', path: '/salaries', shots: [{ name: 'page' }] },
   { name: 'standings', path: '/standings', shots: [{ name: 'page' }] },
   {
-    // The report page: the postseason race, whose `.seedcard` is one of the
+    // The report page: the postseason race, whose `.seed` is one of the
     // tight-sheet cards #1113 merges.
     name: 'postseason-race',
     path: '/postseason-race',

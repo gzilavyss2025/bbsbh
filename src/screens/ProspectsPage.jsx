@@ -14,6 +14,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { VsLevelSlider } from '../components/badges/VsLevelSlider.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
@@ -213,7 +214,7 @@ export function ProspectsPage() {
       />
 
       {allPlayers.length > 0 && (
-        <section className="prospects__filterdeck" aria-labelledby="prospect-filter-title">
+        <Card body="flush" className="prospects__filterdeck" aria-labelledby="prospect-filter-title">
           <div className="prospects__filterhead">
             <h2 id="prospect-filter-title">Filter prospects</h2>
             {hasActiveFilters && (
@@ -264,7 +265,7 @@ export function ProspectsPage() {
           <p className="prospects__active-summary" aria-live="polite">
             <span>{hasActiveFilters ? 'Active' : 'Showing'}</span> {filterSummary}
           </p>
-        </section>
+        </Card>
       )}
 
       {allPlayers.length > 0 && players.length === 0 && (

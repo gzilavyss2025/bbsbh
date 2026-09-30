@@ -265,18 +265,6 @@
   margin: 0;
 }
 
-.gamefindersheet__close {
-  flex: 0 0 auto;
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  border: none;
-  background: none;
-  color: var(--text-caption);
-  font-size: var(--fs-num-md);
-  cursor: pointer;
-  border-radius: var(--radius-pill);
-}
-
 /* ------------------------------------------------------ site search overlay
    SiteSearchModal's chrome — the merged player/club lookup reached from the
    header's search button on every screen (see SiteSearch.jsx).
@@ -393,19 +381,6 @@
   -webkit-appearance: none;
   appearance: none;
   display: none;
-}
-
-.searchfield__clear {
-  flex: 0 0 auto;
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  border: none;
-  background: none;
-  border-radius: var(--radius-pill);
-  color: var(--text-caption);
-  font-size: var(--fs-num-md);
-  line-height: var(--lh-solid);
-  cursor: pointer;
 }
 
 .searchoverlay__cancel {
@@ -686,18 +661,6 @@
 #root .favteamsheet__pitch {
   font-family: var(--font-read);
   text-transform: none; /* caps-exempt: welcome-modal headline + pitch read as natural sentences */
-}
-
-.favteamsheet__close {
-  flex: 0 0 auto;
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  border: none;
-  background: none;
-  color: var(--text-caption);
-  font-size: var(--fs-num-md);
-  cursor: pointer;
-  border-radius: var(--radius-pill);
 }
 
 .favteamsheet__pitch {

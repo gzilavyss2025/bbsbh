@@ -155,7 +155,7 @@ export function GameResultFace({
       </div>
       <Decisions decisions={box.decisions} />
       {showPerformer && (
-        <ul className="playercard__list flipback__perfcard">
+        <ul className="playerline__list flipback__perfcard">
           <PerformerCard entry={performer} />
         </ul>
       )}
@@ -355,7 +355,7 @@ function PlayOfTheGame({ potg, box }) {
           teamId={batterTeamId}
           className="flipback__potgShot"
         />
-        {batterPos && <span className="playercard__posbadge">{batterPos}</span>}
+        {batterPos && <span className="playerline__posbadge">{batterPos}</span>}
       </span>
       <div className="flipback__potgMain">
         <span className="flipback__potgLabel">

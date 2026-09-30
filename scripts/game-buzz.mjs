@@ -28,10 +28,11 @@
 // Find the gamePk in the app's feed URL, or:
 //   https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=YYYY-MM-DD
 
-const STATS = 'https://statsapi.mlb.com'
 // The unauthenticated Bluesky AppView. NB: the older `public.api.bsky.app`
 // host is now bot-blocked (returns a 403 splash) — `api.bsky.app` still serves
 // the read-only app.bsky.* XRPC methods with no token. Verified 2026-07-07.
+import { getJson } from './lib/statsapi.mjs'
+
 const BSKY = 'https://api.bsky.app/xrpc'
 const REDDIT_OAUTH = 'https://oauth.reddit.com'
 const REDDIT_TOKEN = 'https://www.reddit.com/api/v1/access_token'
@@ -57,7 +58,11 @@ const KEEP_LINKS = rest.includes('--keep-links')
 // ------------------------------------------------------- game window + names
 // The game's feed gives us everything: team names for the query and the real
 // first-pitch / last-play timestamps for the search window.
-const feed = await (await fetch(`${STATS}/api/v1.1/game/${gamePkArg}/feed/live`)).json()
+// An unknown gamePk is a 404: read it as "no team data" below, as before.
+const feed = await getJson(`/api/v1.1/game/${gamePkArg}/feed/live`).catch((err) => {
+  if (err.status === 404) return {}
+  throw err
+})
 const away = feed?.gameData?.teams?.away
 const home = feed?.gameData?.teams?.home
 if (!away?.teamName || !home?.teamName) {
@@ -145,7 +150,7 @@ const homeT = teamTerms(home)
 // post-game helper. Absent at most MiLB parks; degrade to just the starters.
 async function topPerformers() {
   try {
-    const wp = await (await fetch(`${STATS}/api/v1/game/${gamePkArg}/winProbability`)).json()
+    const wp = await getJson(`/api/v1/game/${gamePkArg}/winProbability`)
     if (!Array.isArray(wp)) return []
     const acc = new Map()
     const add = (p, v) => {

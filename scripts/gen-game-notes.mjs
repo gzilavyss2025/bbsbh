@@ -30,10 +30,10 @@ import { dirname, join } from 'node:path'
 import { readdir } from 'node:fs/promises'
 import { readJsonOr, writeShards } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
+import { getJson as getStatsapiJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'game-notes')
-const STATSAPI = 'https://statsapi.mlb.com'
 const DAPI = 'https://dapi.mlbinfra.com/v2/content/en-us/documents/'
 
 // How many recent notes to pull per team each run. 100 is the feed's actual
@@ -51,7 +51,7 @@ async function getJson(url) {
 }
 
 async function fetchMlbTeams() {
-  const data = await getJson(`${STATSAPI}/api/v1/teams?sportId=1`)
+  const data = await getStatsapiJson('/api/v1/teams?sportId=1')
   return (data.teams ?? []).map((t) => t.id).filter(Boolean)
 }
 

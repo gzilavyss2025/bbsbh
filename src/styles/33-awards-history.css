@@ -3,7 +3,7 @@
    rows newest-first. A season row's year sits in a narrow rail on the left
    (.awardhistory__seasonyear) rather than its own full-width row, so the year
    costs vertical rail space, not horizontal card space. Recipients render as
-   .playercard tiles — the app's own headshot idiom (position badge floated on
+   .playerline tiles — the app's own headshot idiom (position badge floated on
    the headshot's bottom-left corner, same as Top Performers/slate result
    cards; see PerformerCard.jsx) rather than a bespoke avatar.
    Three card treatments, by what a group actually has to show:
@@ -113,9 +113,9 @@
 }
 
 /* One recipient card. .awardhistory__card only carries the favorite-team
-   highlight below — sizing/layout is the shared .playercard (index.css
-   ~L7256). Compound (.playercard.awardhistory__card) so this can't drift
-   from the base tile if .playercard itself changes. */
+   highlight below — sizing/layout is the shared .playerline (index.css
+   ~L7256). Compound (.playerline.awardhistory__card) so this can't drift
+   from the base tile if .playerline itself changes. */
 .awardhistory__cards {
   list-style: none;
   margin: 0;
@@ -125,7 +125,7 @@
   gap: var(--space-2);
 }
 /* MVP/Cy Young/Rookie of the Year — the base tile, at the plain
-   .playercard size (no override needed). */
+   .playerline size (no override needed). */
 .awardhistory__cards--base {
   display: flex;
   flex-direction: column;
@@ -149,63 +149,63 @@
      expects. */
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
-.awardhistory__cards--dense .shot.playercard__shot {
+.awardhistory__cards--dense .shot.playerline__shot {
   width: var(--shot-md-w);
   height: var(--shot-md-h);
 }
-.awardhistory__cards--dense .playercard__name {
+.awardhistory__cards--dense .playerline__name {
   font-size: var(--fs-small);
   line-height: var(--lh-compact);
 }
-.awardhistory__cards--dense .playercard__stat {
+.awardhistory__cards--dense .playerline__stat {
   font-size: var(--fs-cell);
 }
 .awardhistory__namebreak {
   display: block;
 }
-.awardhistory__name--small .playercard__name {
+.awardhistory__name--small .playerline__name {
   font-size: var(--fs-caption);
 }
-.awardhistory__name--tiny .playercard__name {
+.awardhistory__name--tiny .playerline__name {
   font-size: var(--fs-caption);
 }
 /* A recipient the stats endpoint had nothing for (an incomplete/malformed
    season row — see gen-awards-history.mjs) falls back to this bigger,
    "fuller" headshot instead of a stat line, so a bare name+team card doesn't
    read as half-empty next to every other card's stat line. */
-.awardhistory__cards--full .playercard {
+.awardhistory__cards--full .playerline {
   padding: var(--space-2h);
   gap: var(--space-3);
 }
-.awardhistory__cards--full .shot.playercard__shot {
+.awardhistory__cards--full .shot.playerline__shot {
   width: var(--shot-lg-w);
   height: var(--shot-lg-h);
 }
-.awardhistory__cards--full .playercard__name {
+.awardhistory__cards--full .playerline__name {
   font-size: var(--fs-h3);
 }
-.awardhistory__cards--full .playercard__team {
+.awardhistory__cards--full .playerline__team {
   font-size: var(--fs-label);
 }
 /* All-MLB Team columns — same headshot size as Silver Slugger/Gold Glove's
    dense tile (both are "a roster of names," just First/Second Team's own
    two-column grid instead of .awardhistory__cards--dense's), a bit tighter
    on padding so two full rosters still sit side by side on a phone. */
-.awardhistory__cards--compact .playercard {
+.awardhistory__cards--compact .playerline {
   padding: var(--space-1h);
   gap: var(--space-2);
 }
-.awardhistory__cards--compact .shot.playercard__shot {
+.awardhistory__cards--compact .shot.playerline__shot {
   width: var(--shot-md-w);
   height: var(--shot-md-h);
 }
-.awardhistory__cards--compact .playercard__name {
+.awardhistory__cards--compact .playerline__name {
   font-size: var(--fs-ui);
 }
-.awardhistory__cards--compact .playercard__team {
+.awardhistory__cards--compact .playerline__team {
   font-size: var(--fs-label);
 }
-.awardhistory__cards--compact .playercard__stat {
+.awardhistory__cards--compact .playerline__stat {
   font-size: var(--fs-cell);
 }
 /* Same favorite-team highlight as .tlead__row--fav (--fav-accent, set inline
@@ -219,9 +219,9 @@
   display: inline-flex;
 }
 /* The team logo docks to its own column at the right edge of the CARD (not
-   just the end of the text) — the base .playercard__body has no flex-grow of
-   its own (it shrink-wraps to its content on every other .playercard surface,
-   which is what those want), so without this override .playercard__team's
+   just the end of the text) — the base .playerline__body has no flex-grow of
+   its own (it shrink-wraps to its content on every other .playerline surface,
+   which is what those want), so without this override .playerline__team's
    space-between only had the width of the longest line to work with and the
    logo landed right next to the name instead of at the card's edge.
    .awardhistory__teamname's `order: -1` pulls the name text ahead of the
@@ -230,10 +230,10 @@
    tighter dense/compact grids) rather than one fixed size everywhere — it's
    an inline size on TeamLogo's own <img>, so overriding it needs
    !important, same pattern as .player__herologo > .teamlogo. */
-.awardhistory__card .playercard__body {
+.awardhistory__card .playerline__body {
   flex: 1 1 auto;
 }
-.awardhistory__card .playercard__team {
+.awardhistory__card .playerline__team {
   justify-content: space-between;
 }
 .awardhistory__card .awardhistory__teamname {

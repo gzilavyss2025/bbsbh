@@ -132,7 +132,7 @@
 import { readFile, readdir, rm } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { getJson } from '../src/api/statsapi.js'
+import { getJson as statsapiJson } from './lib/statsapi.mjs'
 import { writeShards } from './lib/io.js'
 import { loadCenturyClub } from './lib/century-club.mjs'
 import { loadArsenalSide } from './lib/arsenal-side.mjs'
@@ -162,6 +162,10 @@ import { rankAllLevels } from '../src/api/callout-notes/rank.js'
 import { MILESTONE_DEFS, nearestMilestone } from '../src/api/person.js'
 import { tallyStarterRecord, starterCgShutoutCount } from './lib/pitcher-starts.mjs'
 import { corroboratedFor, loadCorroborationFile } from './lib/game-notes-corroboration.mjs'
+
+// The browser client this file used to import capped every call at 15 s; keep
+// that cap on the shared client, whose own default is none.
+const getJson = (path) => statsapiJson(path, { timeoutMs: 15_000 })
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'callouts')

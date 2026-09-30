@@ -306,7 +306,7 @@
 /* Top 100 prospect — an outline pill carrying the MLB mark (or the org's) and
    the rank (components/badges/ProspectPill.jsx). .prospect__tag draws nothing
    itself: it is the hook two context rules and the offseason spec hold on to
-   (.tlead__row, .tradecard__playerinfo, e2e/offseason-home.spec.js). */
+   (.tlead__row, .trade__playerinfo, e2e/offseason-home.spec.js). */
 .prospect__logo {
   width: 12px;
   height: 12px;
@@ -908,9 +908,6 @@
   align-items: center;
   gap: var(--space-1h);
   padding: var(--space-3) var(--space-3) var(--space-4);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
   text-align: center;
 }
 
@@ -995,7 +992,7 @@
 /* ============================================================
    Minors tab — Horizon card + Depth Chart card. Both are built from the
    same "broadcast lower-third" tile (.horizontile): headshot with a floated
-   position badge (same idiom as .playercard__posbadge/.prospectshowcase__
+   position badge (same idiom as .playerline__posbadge/.prospectshowcase__
    posbadge above), name + team crest, and a boxed stat tile on the trailing
    edge — the .phcard__tile idiom (72-player-hover-card.css) reused here as
    .horizontile__statbox rather than a second stat-box pattern. One card

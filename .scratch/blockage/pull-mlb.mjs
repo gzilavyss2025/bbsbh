@@ -2,25 +2,13 @@
 // One call per season per group returns every player's season split, so the
 // whole 2008-2024 MLB record costs ~51 requests.
 import { writeFileSync, existsSync, readFileSync } from 'node:fs'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const SEASONS = []
 for (let y = 2008; y <= 2024; y += 1) SEASONS.push(y)
 
 const CACHE = 'mlb-cache.json'
 const cache = existsSync(CACHE) ? JSON.parse(readFileSync(CACHE, 'utf8')) : {}
-
-async function get(url, tries = 3) {
-  for (let i = 0; i < tries; i += 1) {
-    try {
-      const r = await fetch(url)
-      if (!r.ok) throw new Error(`HTTP ${r.status}`)
-      return await r.json()
-    } catch (e) {
-      if (i === tries - 1) throw e
-      await new Promise((r) => setTimeout(r, 1500 * (i + 1)))
-    }
-  }
-}
 
 function splitsOf(json) {
   return json?.stats?.[0]?.splits || []
@@ -31,9 +19,9 @@ for (const season of SEASONS) {
     const key = `${season}:${group}`
     if (cache[key]) continue
     const url =
-      `https://statsapi.mlb.com/api/v1/stats?stats=season&group=${group}` +
+      `/api/v1/stats?stats=season&group=${group}` +
       `&season=${season}&sportId=1&gameType=R&playerPool=All&limit=8000`
-    const json = await get(url)
+    const json = await getJson(url)
     const total = json?.stats?.[0]?.totalSplits
     const splits = splitsOf(json)
     const rows = splits.map((s) => {

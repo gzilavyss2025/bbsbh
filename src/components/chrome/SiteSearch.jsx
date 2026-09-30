@@ -9,6 +9,7 @@ import { playerPath, teamPath } from '../../lib/route.js'
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // The site-wide search trigger — a persistent icon button (not an always-open
 // input; on a phone-width header there's no room to dock one, and this is the
@@ -302,10 +303,9 @@ export function SiteSearchModal({ onClose }) {
               aria-activedescendant={active ? optionId(active) : undefined}
             />
             {query !== '' && (
-              <button
-                type="button"
+              <IconButton
                 className="searchfield__clear"
-                aria-label="Clear search"
+                label="Clear search"
                 // Cancel the press so the field never loses focus — clearing
                 // the box should leave you typing, not dismiss the keyboard.
                 onPointerDown={(e) => e.preventDefault()}
@@ -315,7 +315,7 @@ export function SiteSearchModal({ onClose }) {
                 }}
               >
                 ✕
-              </button>
+              </IconButton>
             )}
           </div>
           <button type="button" className="searchoverlay__cancel" onClick={onClose}>

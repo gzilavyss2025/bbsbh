@@ -22,6 +22,7 @@ import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { GameResultFace } from '../components/game/GameResultFace.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../components/postseason/SeriesParts.jsx'
 import { monthDay } from '../components/postseason/monthDay.js'
 import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
@@ -140,7 +141,7 @@ export function PostseasonSeriesPage({ seriesId }) {
           linescore), and the series-wins total as the big right-hand figure.
           The World Series trophy folds into the band instead of floating
           above the card. */}
-      <section className="psseries__result">
+      <Card body="flush" className="psseries__result">
         <div className="psseries__banner">
           <h2 className="psseries__headline">
             {teamClubNameShort(winner.teamId)} win in {games.length}
@@ -189,7 +190,7 @@ export function PostseasonSeriesPage({ seriesId }) {
             )
           })}
         </div>
-      </section>
+      </Card>
 
       {/* Game-by-game log — the series as ONE continuous scorebook ledger
           rather than a stack of separate captioned cards: a double clay
@@ -214,7 +215,7 @@ export function PostseasonSeriesPage({ seriesId }) {
           the banner's seam wears. */}
       <section className="psseries__games">
         <SectionHead look="label">Game by game</SectionHead>
-        <div className="psseries__log">
+        <Card as="div" body="flush" className="psseries__log">
           <div className="psseries__logbody">
             {games.map((g, i) => {
               const card = cardsByPk?.[g.gamePk]
@@ -273,7 +274,7 @@ export function PostseasonSeriesPage({ seriesId }) {
               </div>
             </div>
           )}
-        </div>
+        </Card>
       </section>
 
       {(hasBatting || hasPitching) && (

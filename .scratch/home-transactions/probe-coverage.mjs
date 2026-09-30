@@ -11,7 +11,7 @@
 //      one club-day would make one player two stories.
 //
 // Run: node .scratch/home-transactions/probe-coverage.mjs [days]
-import { getJson } from '../../src/api/statsapi.js'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 import { txnDate, mentionsInjuredList } from '../../src/api/rehab-policy.js'
 
 const DAYS = Number(process.argv[2] ?? 60)

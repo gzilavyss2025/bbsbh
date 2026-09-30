@@ -64,12 +64,13 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'milb-history.json')
 const seedPath = join(here, 'milb-history-seed.json')
 
-const API = 'https://statsapi.mlb.com/api/v1'
+const API = '/api/v1'
 const START_YEAR = 2005 // statsapi's MiLB affiliate data is only clean from here on — see header
 const END_YEAR = new Date().getFullYear()
 // AAA / AA / A+ / A / Rookie(ACL+FCL+DSL) — every affiliate level. Matches
@@ -77,19 +78,6 @@ const END_YEAR = new Date().getFullYear()
 // included despite its high name-churn: real parent-org reassignment there is
 // rare and clean, not noisy.
 const LEVELS = [11, 12, 13, 14, 16]
-
-async function getJson(url, tries = 3) {
-  for (let i = 0; i < tries; i++) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      return await res.json()
-    } catch (err) {
-      if (i === tries - 1) throw new Error(`${url}: ${err.message}`)
-      await new Promise((r) => setTimeout(r, 400 * (i + 1)))
-    }
-  }
-}
 
 // Run `jobs` (thunks returning promises) with a bounded concurrency pool.
 async function pool(jobs, limit = 8) {

@@ -3,6 +3,11 @@
 Base URL: `https://statsapi.mlb.com/api/{ver}/...` (`ver` is almost always `v1`; a few
 endpoints have a `v1.1` variant — notably `game/{gamePk}/feed/live`).
 
+**From Node, use the one client.** Scripts in `scripts/` and `.scratch/` call this API through
+`getJson(path)` in `scripts/lib/statsapi.mjs` (retry policy, DNS-in-the-sandbox error, opt-in
+research cache), never with their own `fetch`. The browser uses `src/api/statsapi.js`.
+`docs/scripts/generators.md` has the rules.
+
 **Provenance / caveat.** This file started as a transcription from the community-maintained
 wiki at https://github.com/toddrob99/MLB-StatsAPI/wiki/Endpoints (MIT-licensed Python
 wrapper, ~820 stars, endpoint page last revised Mar 2025). That wiki states plainly that it

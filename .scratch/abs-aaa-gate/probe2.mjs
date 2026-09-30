@@ -1,5 +1,7 @@
+import { getJson } from '../../scripts/lib/statsapi.mjs'
+
 const pk = Number(process.argv[2])
-const feed = await (await fetch(`https://statsapi.mlb.com/api/v1.1/game/${pk}/feed/live`)).json()
+const feed = await getJson(`/api/v1.1/game/${pk}/feed/live`)
 for (const p of feed.liveData.plays.allPlays) {
   const locs = []
   if (p.reviewDetails?.reviewType === 'MJ') locs.push(['PLAY', p.reviewDetails])
