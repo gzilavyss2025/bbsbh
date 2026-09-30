@@ -18,31 +18,7 @@ import {
   gameLogFilename,
   tallyKeysIn,
 } from '../src/lib/account/localData.js'
-
-// A localStorage stand-in with the real `length`/`key(i)` enumeration shape —
-// which is the whole point, since that shape is what makes remove-while-
-// iterating a bug rather than a style note.
-function fakeStorage(seed = {}, { throwOnRead = false, refuse = () => false } = {}) {
-  const data = { ...seed }
-  return {
-    data,
-    get length() {
-      if (throwOnRead) throw new Error('SecurityError')
-      return Object.keys(data).length
-    },
-    key(i) {
-      if (throwOnRead) throw new Error('SecurityError')
-      return Object.keys(data)[i] ?? null
-    },
-    getItem(k) {
-      return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null
-    },
-    removeItem(k) {
-      if (refuse(k)) throw new Error('QuotaExceededError')
-      delete data[k]
-    },
-  }
-}
+import { fakeStorage } from './helpers/fakeStorage.js'
 
 // --------------------------------------------------------------------------
 // tallyKeysIn
