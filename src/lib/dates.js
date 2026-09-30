@@ -136,19 +136,6 @@ export function scorebookDate(apiDate) {
   })
 }
 
-// "July 5, 2026" — no weekday, for the box score page's title line. Same
-// parse/fallback as scorebookDate.
-export function longDate(apiDate) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return ''
-  const [y, m, d] = apiDate.split('-').map(Number)
-  const dt = new Date(y, m - 1, d)
-  return dt.toLocaleDateString(undefined, {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
 // Whether an apiDate ("YYYY-MM-DD") names a real calendar date — a Date
 // round-trip catches an out-of-range month/day (e.g. "2026-13-45" or
 // "2026-02-30") that a digit-count regex alone would let through. Backs the

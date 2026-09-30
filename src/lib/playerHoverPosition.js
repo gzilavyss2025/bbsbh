@@ -16,14 +16,11 @@ const ESTIMATED_CARD_HEIGHT = 210 // a card with the level/rehab pill line — t
 // -position CSS: clamped horizontally so the 300px card never runs past
 // either viewport edge, and flipped ABOVE the trigger when there isn't room
 // below but there is above.
-export function playerHoverCardPosition(rect, viewport) {
-  return hoverCardPosition(rect, viewport)
-}
-
-// The same clamp and flip for a popover of any size — the ball-flight card
+//
+// Works for a popover of any size: the ball-flight card
 // (components/charts/BallFlight.jsx) is a different shape off a different
 // trigger, and the arithmetic never depended on which card it was. `size`
-// defaults to the player card's own numbers, so its caller above is unchanged.
+// defaults to the player card's own numbers.
 export function hoverCardPosition(
   rect,
   viewport,

@@ -31,7 +31,7 @@ import {
   teamLogoUrl,
   treatmentBgColor,
   treatmentHeaderColorOverride,
-  treatmentTuningRecord,
+  treatmentTuning,
 } from '../../../../lib/teams.js'
 import { MLB_TEAM_COLORS } from '../../../../lib/brandColors.js'
 import {
@@ -197,7 +197,7 @@ export function identityGroups(teamId, { isMilb, treatment }) {
       fields: fieldsFrom('milbTuning', id, treatment, MILB_LOGO_POS_OVERRIDES[id]?.[treatment]),
     })
   } else {
-    const record = treatmentTuningRecord(teamId, treatment) ?? {}
+    const record = treatmentTuning(teamId, treatment) ?? {}
     // Main's fill is its own `bgHex`; every other treatment's is the `bg: true`
     // swatch in that treatment's colour store. One row on screen, two stores
     // underneath — see fields.js's tileBg dimension.

@@ -81,8 +81,8 @@
   color: var(--text-body);
   text-wrap: balance;
 }
-/* A park's own wordmark — one on file (LOGO_KEYS in ballparkArt.js) or the one
-   the owner uploaded from the card (`ballpark.{key}Wordmark`). Bounded so a
+/* A park's own wordmark — the one the owner uploaded from the card
+   (`ballpark.{key}Wordmark`). Bounded so a
    mark can't out-scale the photo beside it.
 
    TWO CEILINGS, BINDING TWO DIFFERENT SHAPES. A WIDE wordmark — the shape this

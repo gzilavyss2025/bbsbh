@@ -36,7 +36,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readFile } from 'node:fs/promises'
 import { parseCsv } from './lib/csv.mjs'
-import { resolveClubCode } from './lib/retrosheet-teams.mjs'
+import { resolveClubCode } from '../src/lib/contracts/clubCodes.js'
 import { matchRow, normalizeName } from './lib/contract-identity-match.mjs'
 import { contractRowKeys } from './lib/contract-row-key.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
@@ -57,16 +57,16 @@ async function loadPool(season) {
 // Resolves a club-code cell to a teamId, or null if the row carries no usable
 // team context (blank cell, or a "left MLB" sentinel like retired/KBO/NPB).
 // An actually UNKNOWN code (one this table has never seen) is a hard error --
-// scripts/lib/retrosheet-teams.mjs's crosswalk was built from every code
+// src/lib/contracts/clubCodes.js's crosswalk was built from every code
 // observed in these exact files, so a new miss means a new source export
 // needs the table extended, not a silent skip.
 function requireTeamId(code, context) {
   if (!code) return null
   const resolved = resolveClubCode(code)
-  if (resolved === null) {
-    throw new Error(`Unrecognized club code "${code}" (${context}) -- extend scripts/lib/retrosheet-teams.mjs`)
+  if (resolved === null || resolved.blank) {
+    throw new Error(`Unrecognized club code "${code}" (${context}) -- extend src/lib/contracts/clubCodes.js`)
   }
-  return resolved.leftMlb ? null : resolved.teamId
+  return resolved.teamId
 }
 
 async function candidatesFor(season, teamId) {

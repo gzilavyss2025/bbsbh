@@ -8,7 +8,6 @@ import {
   TOGGLES,
   ACTIONS,
   SURFACES,
-  ALLOWED_PROP_KEYS,
   buildToggleEventProps,
 } from '../src/lib/analytics.js'
 
@@ -19,7 +18,7 @@ test('buildToggleEventProps keeps a well-formed event to exactly the three props
     surface: SURFACES.SLATE,
   })
   assert.deepEqual(out, { toggle: 'scores_unlocked', action: 'confirm', surface: 'slate' })
-  assert.deepEqual(Object.keys(out).sort(), [...ALLOWED_PROP_KEYS].sort())
+  assert.deepEqual(Object.keys(out).sort(), ['action', 'surface', 'toggle'])
 })
 
 test('buildToggleEventProps STRIPS any game-identifying / score key', () => {
@@ -38,12 +37,6 @@ test('buildToggleEventProps STRIPS any game-identifying / score key', () => {
   assert.deepEqual(out, { toggle: 'scores_unlocked', action: 'dismiss', surface: 'slate' })
   for (const forbidden of ['gamePk', 'score', 'awayScore', 'homeScore', 'inning', 'revealedThrough']) {
     assert.ok(!(forbidden in out), `${forbidden} must not survive`)
-  }
-})
-
-test('the allowlist itself excludes every game-identifying key', () => {
-  for (const forbidden of ['gamePk', 'score', 'awayScore', 'homeScore', 'inning', 'revealedThrough', 'expiry']) {
-    assert.ok(!ALLOWED_PROP_KEYS.includes(forbidden), `${forbidden} not allowlisted`)
   }
 })
 

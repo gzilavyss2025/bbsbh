@@ -13,7 +13,6 @@ import test from 'node:test'
 import {
   SYNC_CHANNELS,
   initialSyncState,
-  isRecoverable,
   lastSyncedAt,
   normalizeSilentChannels,
   phaseForResponse,
@@ -69,12 +68,10 @@ test('the rollup is the worst channel — it can never say synced while one is f
 
 test('a 501 is unavailable, not an error — it is a supported deployment shape', () => {
   assert.equal(phaseForResponse(501), 'unavailable')
-  assert.equal(isRecoverable('unavailable'), false)
 
   assert.equal(phaseForResponse(401), 'error')
   assert.equal(phaseForResponse(500), 'error')
   assert.equal(phaseForResponse(undefined), 'error')
-  assert.equal(isRecoverable('error'), true)
 
   assert.equal(phaseForResponse(200), 'synced')
   assert.equal(phaseForResponse(204), 'synced')

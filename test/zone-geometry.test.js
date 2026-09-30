@@ -14,7 +14,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
-  EDGE, GRID, W, commandCell, inHeart, inZone, isChase, normalizePitch, sx, sy, viewCol,
+  EDGE, GRID, W, commandCell, inHeart, inZone, normalizePitch, sx, sy, viewCol,
 } from '../src/lib/zone/zoneGeometry.js'
 
 const TOP = 3.4
@@ -113,6 +113,4 @@ test('the heart is ONE cell, and it is not the whole zone', () => {
   assert.equal(inHeart(cellFor(0, 2.5)), true)          // middle-middle
   assert.equal(inHeart(cellFor(EDGE * 0.9, 2.5)), false) // on the black
   assert.equal(inZone(cellFor(EDGE * 0.9, 2.5)), true)   // and still a strike
-  assert.equal(isChase(cellFor(EDGE * 1.5, 2.5)), true)  // off the plate
-  assert.equal(isChase(cellFor(0, 2.5)), false)
 })

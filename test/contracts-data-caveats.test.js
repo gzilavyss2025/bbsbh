@@ -19,7 +19,6 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 import { parseCsv } from '../scripts/lib/csv.mjs'
-import { parseServiceTime } from '../src/lib/contracts/parseServiceTime.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = join(__dirname, '..', 'scripts', 'data', 'contracts')
@@ -443,9 +442,8 @@ test('deferred-money names carry an asterisk the join must strip', () => {
 // bare integers
 // The column lost its trailing zeros to a float round-trip, so a day part must
 // be reconstructed from the DECIMAL LENGTH. These tests pin the evidence for
-// that reading, because the reading is what parseServiceTime.js encodes and a
-// future export that changes the notation would otherwise ship a silently wrong
-// day count. The parser itself is covered in test/parse-service-time.test.js.
+// that reading, so a future export that changes the notation cannot ship a
+// silently wrong day count.
 
 const populatedMls = salaries.filter((r) => (r.mls ?? '').trim() !== '')
 const decimalOf = (cell) => cell.split('.')[1]
@@ -513,60 +511,6 @@ test('the one four-digit cell is Tim Beckham 2015, a typo and not a fourth notat
   // 2016 is a gain of exactly one full service year.
   const y2016 = salaries.find((r) => r.year === '2016' && r.player === 'Beckham, Tim')
   assert.equal(y2016.mls, '1.145')
-  assert.equal(parseServiceTime(y2016.mls).totalDays - parseServiceTime(four[0].mls).totalDays, 172)
-})
-
-// The 15 names the duplicate table above already resolved as two different men.
-// Luis García appears under both spellings the file uses, so 15 men need 16
-// strings — and each is asserted present, because a typo here would silently
-// weaken the exclusion instead of failing.
-const TWO_MEN_ONE_NAME = [
-  'Young, Chris', 'Smith, Will', 'García, Luis', 'Garcia, Luis', 'Castillo, Diego',
-  'Muncy, Max', 'Ortiz, Luis', 'Gonzalez, Miguel', 'Nunez, Abraham', 'Carpenter, Chris',
-  'Thompson, Rich', 'Taylor, Michael', 'Castro, Ramon', 'Sanchez, Angel', 'Smith, Kevin',
-  'Duffy, Matt',
-]
-
-test('a year-over-year continuity test finds the bad cells without the transaction wire', () => {
-  for (const name of TWO_MEN_ONE_NAME) {
-    assert.ok(salaries.some((r) => r.player === name), `${name} is not a name in salaries.csv`)
-  }
-
-  // One value per (name, season), taking the last row in file order. That pick
-  // only matters for the duplicate names below — every other man has one row a
-  // season — which is exactly why the dup-excluded figure is the one the doc
-  // quotes.
-  const byName = new Map()
-  for (const row of populatedMls) {
-    if (!byName.has(row.player)) byName.set(row.player, new Map())
-    byName.get(row.player).set(Number(row.year), parseServiceTime(row.mls).totalDays)
-  }
-
-  // A violation is a gain above a realistic 200-day season, or a gain below
-  // zero. Service time never falls, and no season banks 200 days.
-  const excluded = new Set(TWO_MEN_ONE_NAME)
-  let pairs = 0
-  let violations = 0
-  let cleanPairs = 0
-  let cleanViolations = 0
-  for (const [name, seasons] of byName) {
-    for (const [year, before] of seasons) {
-      if (!seasons.has(year + 1)) continue
-      const gain = seasons.get(year + 1) - before
-      const bad = gain > 200 || gain < 0
-      pairs++
-      if (bad) violations++
-      if (!excluded.has(name)) {
-        cleanPairs++
-        if (bad) cleanViolations++
-      }
-    }
-  }
-  assert.equal(pairs, 13291)
-  assert.equal(violations, 38)
-  assert.equal(cleanPairs, 13229)
-  assert.equal(cleanViolations, 26)
-  assert.equal(Math.round((100000 * cleanViolations) / cleanPairs) / 1000, 0.197)
 })
 
 test('1,745 of the 2,926 bare cells have no earlier mls to check them against', () => {

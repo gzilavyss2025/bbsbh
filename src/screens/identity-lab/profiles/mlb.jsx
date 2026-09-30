@@ -49,7 +49,7 @@ import {
   hasAlternate4,
   hasCityConnect,
   treatmentHeaderColorOverride,
-  treatmentTuningRecord,
+  treatmentTuning,
   defaultHomeTreatmentFor,
   defaultAwayTreatmentFor,
 } from '../../../lib/teams.js'
@@ -217,7 +217,7 @@ function resolveColorTriad(teamId, draft) {
 // independent set per treatment (Main included — see mlbColorRoles.js's
 // comment on why this is a separate thing from Main's club-wide triad).
 function resolveTreatmentColorSlots(teamId, treatment, draft) {
-  const landed = treatmentTuningRecord(teamId, treatment)?.colors ?? {}
+  const landed = treatmentTuning(teamId, treatment)?.colors ?? {}
   return TREATMENT_COLOR_ROLES.map((role) => ({
     role,
     label: TREATMENT_COLOR_ROLE_LABELS[role],
@@ -1485,7 +1485,7 @@ export const mlbProfile = {
     offDay: (teamId, fields) => offDayDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
     defaultLogos: (teamId, fields) => defaultLogosDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
     treatmentColors: (teamId, treatment, fields) =>
-      colorsDraftMatchesLanded(fields, treatmentTuningRecord(teamId, treatment)?.colors),
+      colorsDraftMatchesLanded(fields, treatmentTuning(teamId, treatment)?.colors),
   },
   buildAllChangesText,
   buildSaves,

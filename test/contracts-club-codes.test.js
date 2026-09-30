@@ -11,13 +11,7 @@ import { fileURLToPath } from 'node:url'
 
 import { parseCsv } from '../scripts/lib/csv.mjs'
 import {
-  CLUB_CODE_TO_TEAM_ID as PIPELINE_CODE_TO_TEAM_ID,
-  resolveClubCode as pipelineResolveClubCode,
-} from '../scripts/lib/retrosheet-teams.mjs'
-import {
   ALL_MLB_TEAM_IDS,
-  KNOWN_CLUB_CODES,
-  KNOWN_DESTINATION_CODES,
   resolveClubCode,
 } from '../src/lib/contracts/clubCodes.js'
 
@@ -48,11 +42,6 @@ function distinctCodes() {
   }
   return [...codes].sort()
 }
-
-// The raw destination tokens actually present in free_agency.csv, read
-// straight from the fixture rather than from either resolver's own table —
-// the reference point the drift test below checks BOTH modules against.
-const RAW_DESTINATION_CODES = ['KBO', 'MEX', 'NBP', 'NPB', 'dnp', 'retired']
 
 test('every distinct club code in the contracts CSVs resolves to a teamId or a named destination', () => {
   const unresolved = distinctCodes().filter((code) => resolveClubCode(code) === null)
@@ -102,7 +91,7 @@ test('a bare-object lookup risk (constructor/toString/etc.) never resolves to an
   }
 })
 
-test('resolution is case-insensitive, matching scripts/lib/retrosheet-teams.mjs', () => {
+test('resolution is case-insensitive', () => {
   assert.equal(resolveClubCode('mon')?.teamId, 120)
   assert.equal(resolveClubCode('Mon')?.teamId, 120)
   assert.equal(resolveClubCode('was')?.teamId, 120)
@@ -181,34 +170,3 @@ test('every resolved teamId is one of src/lib/teams.js\'s 30 current MLB ids', (
   }
 })
 
-test('agrees with scripts/lib/retrosheet-teams.mjs\'s team-code crosswalk, in both directions', () => {
-  // Direction 1: every code the PIPELINE knows resolves the same teamId here.
-  for (const [code, teamId] of Object.entries(PIPELINE_CODE_TO_TEAM_ID)) {
-    const resolved = resolveClubCode(code)
-    assert.equal(resolved?.teamId, teamId, `${code}: this module resolves ${resolved?.teamId}, retrosheet-teams.mjs resolves ${teamId}`)
-  }
-  // Direction 2: every code THIS module knows resolves the same teamId in
-  // the pipeline module — so a code added to only one table can't hide.
-  for (const code of KNOWN_CLUB_CODES) {
-    const mine = resolveClubCode(code)
-    const pipeline = pipelineResolveClubCode(code)
-    assert.equal(pipeline?.teamId, mine.teamId, `${code}: this module resolves ${mine.teamId}, retrosheet-teams.mjs resolves ${pipeline?.teamId}`)
-  }
-})
-
-test('agrees with scripts/lib/retrosheet-teams.mjs on which codes are non-MLB destinations', () => {
-  // The reference set comes from the CSVs themselves (RAW_DESTINATION_CODES),
-  // not from either module's internal table, so this cannot pass by both
-  // modules quietly sharing the same blind spot.
-  for (const code of RAW_DESTINATION_CODES) {
-    const mine = resolveClubCode(code)
-    const pipeline = pipelineResolveClubCode(code)
-    assert.ok(mine.destination != null, `${code}: this module does not resolve it to a destination`)
-    assert.equal(pipeline?.leftMlb, true, `${code}: retrosheet-teams.mjs does not treat it as leaving MLB`)
-  }
-  // And every destination code THIS module knows, the pipeline agrees is non-MLB.
-  for (const code of KNOWN_DESTINATION_CODES) {
-    const pipeline = pipelineResolveClubCode(code)
-    assert.equal(pipeline?.leftMlb, true, `${code}: retrosheet-teams.mjs does not treat it as leaving MLB`)
-  }
-})

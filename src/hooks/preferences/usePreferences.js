@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   PREFS_KEY,
-  adoptRemotePreferences,
+  normalizePreferences,
   applyRemotePreferences,
   preferenceValue,
   setPreference,
@@ -102,11 +102,12 @@ export function usePreferences() {
     [commit],
   )
 
-  // Replace the document wholesale — the 'adopt' strategy, for when the local
-  // one belongs to a different account on a shared device.
+  // Replace the document wholesale — the 'adopt' half of `mergeStrategyFor`,
+  // for when the local one belongs to a DIFFERENT account on a shared device,
+  // where merging would publish one user's club to another's account.
   const adoptRemote = useCallback(
     (remote) => {
-      commit(() => adoptRemotePreferences(remote))
+      commit(() => normalizePreferences(remote))
     },
     [commit],
   )

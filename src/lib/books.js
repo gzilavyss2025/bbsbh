@@ -208,15 +208,6 @@ export function listBooks(map) {
     .sort((a, b) => b.createdAt - a.createdAt)
 }
 
-// The live book with this id, or null. A tombstoned book answers null — a
-// caller asking "does this book exist" should get "no" for one the user
-// removed, the same way stampFor answers null for an un-stamped game.
-export function bookFor(map, id) {
-  if (!isBookId(id)) return null
-  const entry = map?.[id]
-  return entry && entry.state === 'on' ? entry : null
-}
-
 // Count of live books only — what MAX_BOOKS refusals check against. A
 // tombstoned book costs nothing against the cap; removing a book is supposed
 // to make room, not merely hide a book that still counts.
