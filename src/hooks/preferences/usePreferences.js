@@ -44,12 +44,6 @@ const writePreferences = (doc) => writePreferencesTo(browserStorage(), doc)
 export const readPrefsOwner = () => readOwnerFrom(browserStorage())
 export const writePrefsOwner = (userId) => writeOwnerTo(browserStorage(), userId)
 
-// The same-tab echo of the `storage` event (notifyStorage): several instances of
-// this hook really are mounted at once — the slate's level toggle, the header
-// avatar's club, a game view's keep-awake switch, and PreferencesCloudSync — and
-// the browser fires `storage` only in OTHER tabs.
-const notifyLocalChange = () => notifyStorage(PREFS_KEY)
-
 export function usePreferences() {
   const [prefs, setPrefs] = useState(readPreferences)
 
@@ -59,7 +53,7 @@ export function usePreferences() {
   // ---------------------------------------------------------------------
   // THE ECHO IS UNCONDITIONAL, AND THAT IS CURRENTLY LOAD-BEARING.
   // ---------------------------------------------------------------------
-  // `notifyLocalChange()` fires even when the transform changed nothing. That
+  // `notifyStorage(PREFS_KEY)` fires even when the transform changed nothing. That
   // looks like an obvious cleanup — move it inside the `next !== prev` branch
   // and stop repainting every consumer on every window focus (the pure layer's
   // `preserve` contract in lib/account/preferences.js promises exactly that).
@@ -84,7 +78,11 @@ export function usePreferences() {
       writePreferences(next)
       return next
     })
-    notifyLocalChange()
+    // The same-tab `storage` echo: several instances of this hook really are
+    // mounted at once — the slate's level toggle, the header avatar's club, a
+    // game view's keep-awake switch, and PreferencesCloudSync — and the browser
+    // fires `storage` only in OTHER tabs.
+    notifyStorage(PREFS_KEY)
   }, [])
 
   const set = useCallback(
