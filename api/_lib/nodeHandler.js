@@ -142,3 +142,11 @@ export function jsonResponse(res, body, status = 200, headers = {}) {
   }
   return new Response(payload, { status, headers: allHeaders })
 }
+
+// jsonResponse for per-user, auth-gated answers: never let a shared cache (or
+// the browser) hold one user's data and hand it to another request. Used by
+// account, books, preferences, reveal, spoiled-days and stamps. Never relax the
+// header — stamps.js answers carry a score.
+export function privateJson(res, body, status = 200) {
+  return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
+}

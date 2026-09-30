@@ -50,19 +50,12 @@ import {
   sanitizeCoverMark,
 } from '../src/lib/books.js'
 import { authenticateUser } from './_lib/auth.js'
-import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
+import { privateJson, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js/spoiled-days.js/stamps.js:
 // @clerk/backend's verifyToken pulls in internals Vercel's edge sandbox rejects.
 export const config = { runtime: 'nodejs' }
-
-// Per-user, auth-gated data — never let a shared cache (or the browser) hold
-// one user's books and hand them to another request.
-function reply(res, body, status = 200) {
-  return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
-}
-
 const booksKey = (userId) => `books:${userId}`
 
 // Re-validate whatever Redis hands back before it reaches a client: a
@@ -171,12 +164,12 @@ export async function listBooks(res, redis, userId) {
   } catch {
     stored = {}
   }
-  return reply(res, { books: Object.values(stored) })
+  return privateJson(res, { books: Object.values(stored) })
 }
 
 export async function postBook(req, res, redis, userId) {
   const body = await readJsonBody(req)
-  if (body == null) return reply(res, { error: 'invalid body' }, 400)
+  if (body == null) return privateJson(res, { error: 'invalid body' }, 400)
 
   const key = booksKey(userId)
   let existing = null
@@ -199,16 +192,16 @@ export async function postBook(req, res, redis, userId) {
 
   const refusal = bookRefusal({ id: body?.id, isNew, liveCount })
   if (refusal) {
-    return reply(res, { error: refusal.error, ...(refusal.limit ? { limit: refusal.limit } : {}) }, refusal.status)
+    return privateJson(res, { error: refusal.error, ...(refusal.limit ? { limit: refusal.limit } : {}) }, refusal.status)
   }
 
   const entry = bookEntry(body, existing, Date.now())
   await redis.hset(key, { [entry.id]: entry })
-  return reply(res, { book: entry }, isNew ? 201 : 200)
+  return privateJson(res, { book: entry }, isNew ? 201 : 200)
 }
 
 export async function deleteBook(res, redis, userId, id) {
-  if (!isBookId(id)) return reply(res, { error: 'id required' }, 400)
+  if (!isBookId(id)) return privateJson(res, { error: 'id required' }, 400)
 
   const key = booksKey(userId)
   let existing = null
@@ -219,22 +212,22 @@ export async function deleteBook(res, redis, userId, id) {
   }
   // Nothing to take back reads as success — removal is idempotent, same as
   // stamps.js's unmint.
-  if (!existing || existing.state === 'off') return reply(res, { ok: true })
+  if (!existing || existing.state === 'off') return privateJson(res, { ok: true })
 
   await redis.hset(key, { [id]: { ...existing, state: 'off', updatedAt: Date.now() } })
-  return reply(res, { ok: true })
+  return privateJson(res, { ok: true })
 }
 
 export default async function handler(req, res) {
   if (!['GET', 'POST', 'DELETE'].includes(req.method)) {
-    return reply(res, { error: 'method not allowed' }, 405)
+    return privateJson(res, { error: 'method not allowed' }, 405)
   }
 
   const redis = getRedis()
-  if (!redis) return reply(res, { error: 'sync not configured' }, 501)
+  if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
 
   const auth = await authenticateUser(req)
-  if (!auth.ok) return reply(res, { error: auth.error }, auth.status)
+  if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
   const userId = auth.userId
 
   if (req.method === 'GET') return listBooks(res, redis, userId)

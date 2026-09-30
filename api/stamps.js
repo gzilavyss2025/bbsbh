@@ -59,19 +59,12 @@ import {
   toGamePk,
 } from '../src/lib/stamps.js'
 import { authenticateUser } from './_lib/auth.js'
-import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
+import { privateJson, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js/spoiled-days.js:
 // @clerk/backend's verifyToken pulls in internals Vercel's edge sandbox rejects.
 export const config = { runtime: 'nodejs' }
-
-// Per-user, auth-gated, and score-bearing — the one response in this codebase
-// where a shared cache would leak an actual score. Never relax this header.
-function reply(res, body, status = 200) {
-  return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
-}
-
 const stampsKey = (userId, season) => `stamps:${userId}:${season}`
 const seasonsKey = (userId) => `stamps:${userId}:seasons`
 
@@ -344,14 +337,14 @@ export function stampEntry(body, game, existing, now) {
 // this is the one branch whose behaviour is the feature.
 export async function mint(req, res, redis, userId) {
   const body = await readJsonBody(req)
-  if (body == null) return reply(res, { error: 'invalid body' }, 400)
+  if (body == null) return privateJson(res, { error: 'invalid body' }, 400)
 
   const gamePk = toGamePk(body.gamePk)
-  if (gamePk == null) return reply(res, { error: 'gamePk required' }, 400)
+  if (gamePk == null) return privateJson(res, { error: 'gamePk required' }, 400)
 
   const game = await resolveGameFinal(redis, gamePk)
   const refusal = mintRefusal(game)
-  if (refusal) return reply(res, { error: refusal.error }, refusal.status)
+  if (refusal) return privateJson(res, { error: refusal.error }, refusal.status)
 
   const season = seasonFromDate(game.date)
   const key = stampsKey(userId, season)
@@ -382,7 +375,7 @@ export async function mint(req, res, redis, userId) {
       count = 0
     }
     if (count >= MAX_STAMPS_PER_SEASON) {
-      return reply(res, { error: 'season full', limit: MAX_STAMPS_PER_SEASON }, 409)
+      return privateJson(res, { error: 'season full', limit: MAX_STAMPS_PER_SEASON }, 409)
     }
   }
 
@@ -396,7 +389,7 @@ export async function mint(req, res, redis, userId) {
     // heading, never a stamp.
   }
 
-  return reply(res, { stamp: { gamePk, ...entry, game } }, reviving ? 201 : 200)
+  return privateJson(res, { stamp: { gamePk, ...entry, game } }, reviving ? 201 : 200)
 }
 
 // Un-stamp. Reversible, deliberately NOT ratcheted — the one place the Logbook
@@ -430,24 +423,24 @@ async function unmint(res, redis, userId, gamePk) {
     }
     if (!existing) continue
     await redis.hset(key, { [gamePk]: { ...existing, state: 'off', updatedAt: now } })
-    return reply(res, { ok: true })
+    return privateJson(res, { ok: true })
   }
   // Nothing to take back reads as success — un-stamping is idempotent.
-  return reply(res, { ok: true })
+  return privateJson(res, { ok: true })
 }
 
 export default async function handler(req, res) {
   if (!['GET', 'POST', 'DELETE'].includes(req.method)) {
-    return reply(res, { error: 'method not allowed' }, 405)
+    return privateJson(res, { error: 'method not allowed' }, 405)
   }
 
   const { searchParams } = requestUrl(req)
 
   const redis = getRedis()
-  if (!redis) return reply(res, { error: 'sync not configured' }, 501)
+  if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
 
   const auth = await authenticateUser(req)
-  if (!auth.ok) return reply(res, { error: auth.error }, auth.status)
+  if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
   const userId = auth.userId
 
   if (req.method === 'GET') {
@@ -460,7 +453,7 @@ export default async function handler(req, res) {
           count: (await readSeason(redis, userId, season)).length,
         })),
       )
-      return reply(res, { seasons: counts.filter((s) => s.count > 0) })
+      return privateJson(res, { seasons: counts.filter((s) => s.count > 0) })
     }
 
     // A keepsake collection with no way to take it with you is a bad promise,
@@ -472,17 +465,17 @@ export default async function handler(req, res) {
       const all = await Promise.all(
         seasons.map((s) => readSeason(redis, userId, s, { includeRemoved: true })),
       )
-      return reply(res, { stamps: all.flat() })
+      return privateJson(res, { stamps: all.flat() })
     }
 
     const season = Number(searchParams.get('season'))
-    if (!isSeasonNumber(season)) return reply(res, { error: 'season required' }, 400)
-    return reply(res, { season, stamps: await readSeason(redis, userId, season) })
+    if (!isSeasonNumber(season)) return privateJson(res, { error: 'season required' }, 400)
+    return privateJson(res, { season, stamps: await readSeason(redis, userId, season) })
   }
 
   if (req.method === 'POST') return mint(req, res, redis, userId)
 
   const gamePk = toGamePk(searchParams.get('gamePk'))
-  if (gamePk == null) return reply(res, { error: 'gamePk required' }, 400)
+  if (gamePk == null) return privateJson(res, { error: 'gamePk required' }, 400)
   return unmint(res, redis, userId, gamePk)
 }
