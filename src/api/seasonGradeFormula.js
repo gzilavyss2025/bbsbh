@@ -8,7 +8,6 @@ import { clamp, round1 } from '../lib/math/number.js'
 // league's genuinely elite clubs.
 export const SEASON_GRADE_ACHIEVEMENT_WEIGHT = 0.6
 
-
 export function seasonGradeFromScores(quality, surprise) {
   if (!Number.isFinite(quality) || !Number.isFinite(surprise)) return null
 

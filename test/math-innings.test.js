@@ -18,6 +18,7 @@ test('ipToOuts reads whole innings plus leftover outs', () => {
     [6, 18],
     ['5.', 15],
     ['x', 0],
+    ['5.10', 16], // the feed sends one digit after the dot; only the first counts
   ]
   for (const [input, outs] of table) assert.equal(ipToOuts(input), outs, `ipToOuts(${JSON.stringify(input)})`)
 })

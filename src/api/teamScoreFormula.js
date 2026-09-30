@@ -95,7 +95,6 @@ export const LATE_SWING_PER_RUN = 0.06
 export const LATE_SWING_RUN_CAP = 4
 export const LATE_SWING_TOTAL_CAP = 1.5
 
-
 export function pythagoreanPct(runsScored, runsAllowed) {
   if (runsScored + runsAllowed <= 0) return 0.5
   const rs = runsScored ** PythagoreanExponent

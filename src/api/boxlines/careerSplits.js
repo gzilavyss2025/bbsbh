@@ -86,6 +86,7 @@ export function careerSplitLine(stat, group) {
 // the unrounded sum is 1.1884 and would print 1.188. The suite pins this by
 // feeding one real split back through the merge and requiring MLB's own
 // published string out the other side.
+
 // A three-place rate the way a scorebook writes one: ".293", "1.189".
 function rate3(v) {
   const s = v.toFixed(3)
