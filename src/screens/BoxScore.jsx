@@ -32,7 +32,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { TeamTreatmentMark } from '../components/logo/TeamTreatmentMark.jsx'
 import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'
 import { UmpireAccuracyModal } from '../components/umpire/UmpireAccuracyModal.jsx'
-import { UmpireTierPill } from '../components/badges/UmpireTierPill.jsx'
+import { TierPill } from '../components/badges/TierPill.jsx'
 import { UmpireLink } from '../components/umpire/UmpireLink.jsx'
 import { ManagerLink } from '../components/team/ManagerLink.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
@@ -269,7 +269,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
       <UmpireLink id={hpId}>{u.hp}</UmpireLink>
       {hpAccuracy?.tier && (
         <button type="button" className="umps__tierbtn bs__tierbtn" onClick={() => setModalId(hpId)}>
-          <UmpireTierPill tier={hpAccuracy.tier} />
+          <TierPill tier={hpAccuracy.tier} />
         </button>
       )}
     </>
