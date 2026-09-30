@@ -18,7 +18,7 @@ import { Pill } from '../ui/control/Pill.jsx'
 // tonight's score. Spoiler-safe by construction, not by clamp.
 
 // Whether the notes are shown, persisted across visits like
-// useKeepAwakePreference (same shape, same degradation). Lives here rather than
+// the keep-awake preference (same shape, same degradation). Lives here rather than
 // in src/hooks/ only because that directory sits at its check-dir-size budget;
 // it is an ordinary preference hook otherwise.
 //

@@ -170,7 +170,7 @@
    FIGURES ON THIS SHEET TAKE --ls-num, here and in every mono run below. It is
    the app's own numeric role (typography.css's `.t-num`, and the shared
    mono-figure helper .lineup__jersey/.roster__jersey ride in
-   02-wordmark-lab.css); the scorecard had been setting mono without it, which
+   02-app-shell.css); the scorecard had been setting mono without it, which
    is why its figures read a shade tighter than the same numbers everywhere
    else. */
 .sc-sheet__jersey {

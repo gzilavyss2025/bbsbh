@@ -61,7 +61,6 @@
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
 //   '/between-innings-lab'              -> { name: 'between-innings-lab' }  (unlisted QA page)
-//   '/wordmark-lab'                     -> { name: 'wordmark-lab' }  (unlisted design study)
 //   '/design-lab'                       -> { name: 'design-lab' }  (unlisted design-system catalog)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/logbook'                           -> { name: 'logbook', season: null }  (your game stamps, newest season)
@@ -450,9 +449,6 @@ export function parseRoute(url) {
   // synthetic fixtures — no score/reveal content, safe to ship.
   if (parts.length === 1 && parts[0] === 'between-innings-lab')
     return { name: 'between-innings-lab' }
-  // Unlisted Tally brand study — no score/reveal content, safe to ship.
-  if (parts.length === 1 && parts[0] === 'wordmark-lab')
-    return { name: 'wordmark-lab' }
   // Unlisted catalog of the design system — every token, shared component and
   // card/pill block, drawn from invented fixtures. No score/reveal content,
   // safe to ship (issue #1112).

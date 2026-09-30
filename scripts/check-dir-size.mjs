@@ -1017,7 +1017,7 @@ const BUDGETS = {
   // +1 for PostseasonRacePage.jsx — the current-season "if it ended today"
   // bracket + Wild Card standings, same one-route-one-screen shape.
   // +1: NineKeysPage.jsx — one route, one screen, same as its neighbours.
-  'src/screens': 46,
+  'src/screens': 45,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.

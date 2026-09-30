@@ -30,7 +30,7 @@
 @import './tokens/effects.css';
 
 @import './styles/01-base.css';
-@import './styles/02-wordmark-lab.css';
+@import './styles/02-app-shell.css';
 @import './styles/03-slate-header.css';
 @import './styles/04-site-bar.css';
 @import './styles/04a-wire-dock.css';
