@@ -65,6 +65,9 @@ export async function teamWarSplits(ids, group, season, opts = {}) {
   const byTeam = {}
   const carried = []
   for (const id of ids) {
+    // The throw below is certain once carried passes the cap, and the shared
+    // client pauses ~6 s per failing player, so stop there, not after the last id.
+    if (carried.length / ids.length > MAX_CARRIED_RATIO) break
     let splits
     try {
       splits = await fetchTeamSplits(id, group, season, fetchOpts)

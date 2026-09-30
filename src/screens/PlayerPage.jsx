@@ -1,6 +1,5 @@
 import { loadPlayerCore } from '../api/player/core.js'
 import { loadPlayerOverview } from '../api/player/overview.js'
-import { fetchProspectRankHistory } from '../api/player/prospectRankHistory.js'
 import { fetchPersonStats } from '../api/person-fetch.js'
 import { SPORT_LABEL, isMlbTeamId } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -72,9 +71,6 @@ function draftLabel(draft, signedYear) {
 export function PlayerPage({ id, asOf, sportId }) {
   const core = useAsync(() => loadPlayerCore(id, asOf), [id, asOf])
   const overview = useAsync(() => loadPlayerOverview(id, asOf), [id, asOf])
-  // Its own load, outside the gate: a frozen file the card needs only for a
-  // player who has not debuted (#1111).
-  const rankHistory = useAsync(() => fetchProspectRankHistory(), [])
   const navigate = useNav()
   const back = () => window.history.back()
 
@@ -124,7 +120,6 @@ export function PlayerPage({ id, asOf, sportId }) {
           it the day he debuts. */}
       {!bio.debut && (
         <ProspectRankHistoryCard
-          history={rankHistory.data}
           playerId={bio.id}
           currentRank={core.data.prospectRank}
         />

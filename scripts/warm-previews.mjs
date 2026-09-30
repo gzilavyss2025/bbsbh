@@ -152,6 +152,7 @@ async function main() {
   const urlDate = apiDateToUrl(apiDate)
   const schedule = await getJson(`/api/v1/schedule?sportId=1&date=${apiDate}&hydrate=team`, {
     timeoutMs: REQUEST_TIMEOUT_MS,
+    tries: 1,
   })
   const games = (schedule.dates ?? []).flatMap((d) => d.games ?? [])
   if (games.length === 0) {

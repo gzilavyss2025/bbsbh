@@ -266,3 +266,22 @@ test('a failed call is never cached', async () => {
     await rm(dir, { recursive: true, force: true })
   }
 })
+
+// Review of #1287: the header promises network errors, 429 and 5xx only.
+test('isRetryable: a body that is not JSON, or a TypeError with no network cause, is final', () => {
+  assert.equal(isRetryable(new SyntaxError('Unexpected token < in JSON')), false)
+  assert.equal(isRetryable(new TypeError('Invalid URL')), false)
+  assert.equal(isRetryable(dropped()), true)
+})
+
+test('a 200 whose body is not JSON throws at once, with no second call', async () => {
+  const fetch = async () => ({ ok: true, status: 200, json: async () => JSON.parse('<html>') })
+  const { getJson } = createStatsapiClient({ fetch, sleep: noSleep })
+  await assert.rejects(() => getJson('/api/v1/teams'), SyntaxError)
+})
+
+test('tries: 1 on a call means one attempt, whatever the shared policy says', async () => {
+  const { fetch, getJson } = client([503])
+  await assert.rejects(() => getJson('/api/v1/teams', { tries: 1 }), /HTTP 503/)
+  assert.equal(fetch.calls.length, 1)
+})
