@@ -4,6 +4,7 @@
 // never renders a later season result. Missing data is a missing badge.
 
 import { staticJson } from './staticJson.js'
+import { latestAtOrBefore } from '../lib/math/snapshot.js'
 
 export const fetchSeasonScores = staticJson('/data/season-score.json', {
   fallback: { version: 1, generatedAt: null, seasons: {} },
@@ -11,9 +12,7 @@ export const fetchSeasonScores = staticJson('/data/season-score.json', {
 
 export function seasonScoreFor(data, teamId, season, cutoff) {
   const snapshots = data?.seasons?.[season]?.byTeamId?.[teamId]
-  if (!snapshots) return null
-  const eligible = Object.keys(snapshots).filter((date) => !cutoff || date <= cutoff).sort()
-  return eligible.length ? snapshots[eligible[eligible.length - 1]] : null
+  return snapshots ? latestAtOrBefore(snapshots, cutoff) : null
 }
 
 export function leagueSurpriseScoresFor(data, season, cutoff) {
@@ -21,8 +20,7 @@ export function leagueSurpriseScoresFor(data, season, cutoff) {
   if (!byTeamId) return []
   const rows = []
   for (const [teamId, snapshots] of Object.entries(byTeamId)) {
-    const eligible = Object.keys(snapshots).filter((date) => !cutoff || date <= cutoff).sort()
-    const score = eligible.length ? snapshots[eligible[eligible.length - 1]]?.score : null
+    const score = latestAtOrBefore(snapshots, cutoff)?.score
     if (score != null) rows.push({ teamId: Number(teamId), score })
   }
   return rows

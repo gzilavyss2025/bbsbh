@@ -1,5 +1,6 @@
 import { seasonGradeFor } from './seasonGradeFormula.js'
 import { staticJson } from './staticJson.js'
+import { latestAtOrBefore } from '../lib/math/snapshot.js'
 
 // Daily MLB team-quality snapshots. Like seasonScoreFor, this reader selects
 // only the latest snapshot at or before a Team Page's spoiler-safe cutoff.
@@ -7,14 +8,9 @@ export const fetchTeamScores = staticJson('/data/team-score.json', {
   fallback: { version: 1, generatedAt: null, seasons: {} },
 })
 
-function latestAt(snapshots, cutoff) {
-  const eligible = Object.keys(snapshots).filter((date) => !cutoff || date <= cutoff).sort()
-  return eligible.length ? snapshots[eligible[eligible.length - 1]] : null
-}
-
 export function teamScoreFor(data, teamId, season, cutoff) {
   const snapshots = data?.seasons?.[season]?.byTeamId?.[teamId]
-  return snapshots ? latestAt(snapshots, cutoff) : null
+  return snapshots ? latestAtOrBefore(snapshots, cutoff) : null
 }
 
 // Every team's score at the same cutoff, for the "how do we compare to the
@@ -27,7 +23,7 @@ export function leagueScoresFor(data, season, cutoff, statKey) {
   if (!byTeamId) return []
   const rows = []
   for (const [teamId, snapshots] of Object.entries(byTeamId)) {
-    const stat = latestAt(snapshots, cutoff)?.[statKey]
+    const stat = latestAtOrBefore(snapshots, cutoff)?.[statKey]
     if (stat?.score != null) {
       rows.push({ teamId: Number(teamId), score: stat.score, tiebreak: [stat.weightedWinsAbove500, stat.runDifferential] })
     }
@@ -43,9 +39,9 @@ export function leagueSeasonGradesFor(teamData, surpriseData, season, cutoff) {
   if (!byTeamId) return []
   const rows = []
   for (const [teamId, snapshots] of Object.entries(byTeamId)) {
-    const quality = latestAt(snapshots, cutoff)?.season
+    const quality = latestAtOrBefore(snapshots, cutoff)?.season
     const surpriseSnapshots = surpriseData?.seasons?.[season]?.byTeamId?.[teamId]
-    const surprise = surpriseSnapshots ? latestAt(surpriseSnapshots, cutoff) : null
+    const surprise = surpriseSnapshots ? latestAtOrBefore(surpriseSnapshots, cutoff) : null
     const grade = seasonGradeFor(quality, surprise)
     if (grade) {
       rows.push({
