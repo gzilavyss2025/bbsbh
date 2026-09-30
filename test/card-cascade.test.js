@@ -1799,7 +1799,7 @@ test('C6b: the ledger frames stay ledgers, and the ledger keeps the old .tradeca
 // .factgrid__grid).
 const C6C = [
   { css: '06b-offday-cards.css', sel: '.offday__tile', jsx: ['components/team/OffDaySection.jsx'], ns: 'offday__tile', as: 'button', accent: '--offday-accent' },
-  { css: '43-foul-tracker.css', sel: '.foulboard__hero', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulboard__hero', as: 'div' },
+  { css: '43-foul-tracker.css', sel: '.foulboard__hero', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulboard__hero', as: 'div', keep: ['overflow'] },
   { css: '43-foul-tracker.css', sel: '.foulavg', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulavg', as: 'div' },
   { css: '43-foul-tracker.css', sel: '.gamehigh-tiles', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'gamehigh-tiles', as: 'div', frame: 'ledger', ground: '.gamehigh-tiles__grid' },
   { css: '43-foul-tracker.css', sel: '.souvenir-row__tiles', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'souvenir-row__tiles', as: 'div', frame: 'ledger', ground: '.souvenir-row__tilegrid' },
@@ -1810,11 +1810,13 @@ const C6C = [
 ]
 
 test('C6c: no fouls, offseason or off-day block draws a second frame over its Card', () => {
-  for (const { css, sel } of C6C) {
+  for (const { css, sel, keep = [] } of C6C) {
     const bodies = bodiesOf(read(css), sel)
     assert.ok(bodies.length > 0, `${css}: a ${sel} rule`)
-    for (const body of bodies) assert.deepEqual(frameDecls(body), [], `${css}: ${sel} still draws its own frame`)
+    for (const body of bodies) assert.deepEqual(frameDecls(body, keep), [], `${css}: ${sel} still draws its own frame`)
   }
+  // The hero opts out of the clip, so its long name is cut by the board Card at 320px, as before.
+  assert.equal(decl(ruleBody(read('43-foul-tracker.css'), '.foulboard__hero') ?? '', 'overflow'), 'visible')
   // The clip is the Card's now, so the labelled record row no longer asks for it.
   assert.equal(decl(ruleBody(read('78-offseason.css'), '.srecord--labelled') ?? '', 'overflow'), undefined)
 })
@@ -1986,4 +1988,8 @@ test('C6c: the off-day tile is a Card button that keeps its club accent and its 
   const tile = ruleBody(css, '.offday__tile') ?? ''
   for (const prop of ['cursor', 'font', 'color']) assert.equal(decl(tile, prop), undefined, `.offday__tile leaves ${prop} to the Card`)
   assert.equal(decl(ruleBody(css, '.offday__tile:focus-visible') ?? '', 'outline'), undefined)
+  // The Card's hover tint eases in again: the tile's transition list names the ground.
+  const eases = bodiesOf(css, '.offday__tile').map((b) => decl(b, 'transition') ?? '')
+  assert.ok(eases.some((t) => /background-color/.test(t)), 'the hover tint eases in')
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{\s*\.offday__tile,[\s\S]*?transition: none;/)
 })

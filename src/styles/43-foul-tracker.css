@@ -230,9 +230,13 @@
    columns as a full-width tile strip, the same `.gamehigh-tiles`/`.stat`
    idiom Single-Game-Highs uses, so a page full of very different boards
    still shares one "here's the #1 player" shape. */
+/* overflow: visible opts out of the Card's clip: on a 320px phone the longest
+   name runs past the hero, and the board Card (not the hero) clips it at its
+   own edge, as it did before the hero was a Card. */
 .foulboard__hero {
   margin-bottom: 10px;
   padding: var(--space-2h) var(--space-3);
+  overflow: visible;
 }
 /* Same favorite-team tint as .sgh-row.is-me — a fan's team jumps out on the
    hero card the same way it does on every other row on this page. */
