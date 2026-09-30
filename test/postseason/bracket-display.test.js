@@ -5,7 +5,6 @@
 // postseason tests (test/postseason/fixtures.js) — a real, finished season.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { deriveBracket } from '../../src/api/postseason/bracket.js'
 import {
   aliveClubs,
   bracketOpensByItself,
@@ -19,9 +18,7 @@ import {
   seriesPlayingToday,
   winningSlotIndex,
 } from '../../src/lib/postseason/bracketDisplay.js'
-import { results, seriesWith, skeleton } from './fixtures.js'
-
-const bracket2025 = (cutoff) => deriveBracket(skeleton(2025), results(2025), cutoff)
+import { bracket2025, seriesWith } from './fixtures.js'
 
 test('seriesPlayingToday: heading into 2025-10-09, only MIL and LAD play — the decided/tied series do not', () => {
   const b = bracket2025('2025-10-09')

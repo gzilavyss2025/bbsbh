@@ -7,9 +7,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { deriveBracket } from '../../src/api/postseason/bracket.js'
-import { results, seriesWith, skeleton, winsOf } from './fixtures.js'
-
-const bracket2025 = (cutoff) => deriveBracket(skeleton(2025), results(2025), cutoff)
+import { bracket2025, results, seriesWith, skeleton, winsOf } from './fixtures.js'
 
 // ---------------------------------------------------------------------------
 // Known answers from 2025 (the issue's own list)
