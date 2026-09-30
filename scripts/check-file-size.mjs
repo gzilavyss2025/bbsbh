@@ -71,7 +71,6 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // improvement. The 24 entries below are the stylesheet's remaining real debt,
 // now itemised instead of hidden inside one number.
 const BUDGETS = {
-  'src/styles/02-wordmark-lab.css': 700, // 644
   // 600 -> 900 across steps 3 and 4 of the offseason home page (issues #1077,
   // #1078): the picked-game card, then the notebook note and the season-record
   // row. Growth this sheet was expected to take — check-dir-size.mjs's own

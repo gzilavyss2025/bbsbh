@@ -1,0 +1,23 @@
+/* ---------------------------------------------------------- app shell
+   The page frame and the shared mono-figure helper. */
+.app {
+  min-height: 100%;
+}
+
+.screen {
+  max-width: var(--app-width);
+  margin: 0 auto;
+  padding: 0 var(--app-gutter) calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+
+/* Shared mono-figure helper (scores, jerseys, counts). */
+.stat__v,
+.datenav__label,
+.lineup__jersey,
+.roster__jersey,
+.starter__jersey {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+}
+
