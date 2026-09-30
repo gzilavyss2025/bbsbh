@@ -382,7 +382,15 @@ test('a lean feed with no eventType still counts its atBat plays', () => {
 // Series
 // ---------------------------------------------------------------------------
 
-const g = (date, opp, venue, result = 'W') => ({ date, opp_id: opp, venue_id: venue, result })
+// Venue 5 is the club's own park, 99 is neutral ground, anywhere else is a road
+// park: the `site` the generator derives from the venue with siteOf.
+const g = (date, opp, venue, result = 'W') => ({
+  date,
+  opp_id: opp,
+  venue_id: venue,
+  site: venue === 5 ? 'home' : venue === 99 ? 'neutral' : 'away',
+  result,
+})
 
 test('a series is consecutive games against one club at one park', () => {
   const tagged = tagSeries([
@@ -402,6 +410,14 @@ test('a series is consecutive games against one club at one park', () => {
       [2, 2, false, true],
     ],
   )
+})
+
+test('a neutral-site game joins the series beside it instead of being its own', () => {
+  // The Little League Classic shape (#1283): MLB numbers it game 3 of the set.
+  const tagged = tagSeries([g('2026-08-16', 10, 5), g('2026-08-17', 10, 5), g('2026-08-18', 10, 99)])
+  assert.deepEqual(tagged.map((r) => r.seriesGame), [1, 2, 3])
+  assert.deepEqual(tagged.map((r) => r.seriesLength), [3, 3, 3])
+  assert.deepEqual(tagged.map((r) => r.finale), [false, false, true])
 })
 
 test('the same opponent at a different park is a new series, not a longer one', () => {

@@ -107,9 +107,9 @@ export function ledgerFor(games, teamId, homeVenues) {
 // ---------------------------------------------------------------------------
 
 // Walks `rows` once and calls `onSegment(indices)` at every point where `keyOf`
-// changes — the shared spine under both taggers below. `keyOf` returning null
-// drops a row out of the segmentation entirely WITHOUT ending the run around
-// it, which is the whole of the neutral-site rule in tagTrips.
+// changes — the spine under tagTrips. `keyOf` returning null drops a row out of
+// the segmentation entirely WITHOUT ending the run around it, which is the
+// whole of the neutral-site rule in tagTrips.
 function eachRun(rows, keyOf, onSegment) {
   const live = rows.map((_, i) => i).filter((i) => keyOf(rows[i]) != null)
   let start = 0
@@ -122,37 +122,16 @@ function eachRun(rows, keyOf, onSegment) {
   }
 }
 
-// SERIES: consecutive games against the same opponent in the same place.
-//
-// Derived from the ledger, NOT from the schedule feed's own seriesGameNumber /
-// gamesInSeries — the same call gen-team-records.mjs makes, for the same
-// reason. Those two fields describe the series as SCHEDULED: a rained-out
-// middle game leaves them describing a set that never happened, and a makeup
-// appended to a later trip still carries the original series' numbering. A
-// series here is what actually got played.
-//
-// Neutral-site games are transparent here for the same reason they are in
-// tagTrips, and the case that proved it is real: on 2020-09-25 the Brewers
-// played a designated HOME game against the Cardinals at Busch Stadium, a
-// COVID makeup relocated to save a trip. It sits in the middle of a four-game
-// Milwaukee visit to St. Louis. Keyed on its own site it split that visit in
-// two and handed the club a series opener on 2020-09-26 that nobody played —
-// which is precisely the phantom opener this dataset must never invent.
-export function tagSeries(rows) {
-  eachRun(
-    rows,
-    (r) => (r.site === 'neutral' ? null : `${r.opponentId}|${r.site}`),
-    (seg) => {
-      seg.forEach((i, n) => {
-        rows[i].seriesGame = n + 1
-        rows[i].seriesLength = seg.length
-        rows[i].seriesOpener = n === 0
-        rows[i].seriesFinale = n === seg.length - 1
-      })
-    },
-  )
-  return rows
-}
+// SERIES: `tagSeries` and the rule under it, `seriesRuns`, live in
+// src/api/scheduleShape.js — the one definition the reader and
+// gen-team-records.mjs share (#1283). A neutral-site game joins the series
+// beside it. The case that proved the neutral rule is real: on 2020-09-25 the
+// Brewers played a designated HOME game against the Cardinals at Busch
+// Stadium, a COVID makeup relocated to save a trip, in the middle of a visit to
+// St. Louis. Keyed on its own site it split that visit in two and handed the
+// club a series opener on 2020-09-26 that nobody played — the phantom opener
+// this dataset must never invent.
+export { tagSeries } from '../../src/api/scheduleShape.js'
 
 // HOMESTANDS and ROAD TRIPS: consecutive games on the same side of the road.
 // A homestand is a run of home games however many opponents visit inside it; a

@@ -553,7 +553,11 @@ don't run these by hand.
   Series boundaries, sweeps
   and getaway days come from the LEDGER, not the feed's `seriesGameNumber` /
   `gamesInSeries` — those describe the series as SCHEDULED, and a rained-out
-  middle game leaves them describing one that never happened. Daily division
+  middle game leaves them describing one that never happened. The cut is
+  `seriesRuns` in `src/api/scheduleShape.js`, shared with gen-schedule-shape
+  and the reader (same opponent, same side of the road, a neutral-site game
+  joins its neighbours; #1283). Each row's `site` comes from the
+  same home-park inference gen-schedule-shape uses. Daily division
   ranks are computed from the ledger too, since `/standings` carries no history
   and answers a completed season's `date=` query empty.
   **Verified against statsapi's own splits**, the free oracle this dataset
@@ -590,10 +594,11 @@ don't run these by hand.
   park is inferred PER SEASON as the venue it hosted most (clubs move — the A's
   and Rays both did in 2025 — and resolving a decade against `teams.json`'s
   current park files real home games as neutral ones). And a neutral-site game
-  is TRANSPARENT to every segmentation: MLB names one club "home" in London,
+  never splits a segmentation: MLB names one club "home" in London,
   Seoul and at the Field of Dreams, and a Brewers home game relocated to Busch
-  Stadium on 2020-09-25 sat inside a four-game visit to St. Louis — split on its
-  own site it invented a series opener nobody played. Shards carry no
+  Stadium on 2020-09-25 sat inside a visit to St. Louis — split on its
+  own site it invented a series opener nobody played. A road trip or homestand
+  skips it; a series counts it as a game (MLB: game 3 of 5 there). Shards carry no
   `generatedAt`, the same reason gen-milb-alumni.mjs's don't: thirty committed
   files on a nightly cron must not churn on a timestamp. Catalog, gate
   calibration and the rejected candidates: `docs/schedule-shape.md`. App reads it

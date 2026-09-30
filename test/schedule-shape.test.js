@@ -27,6 +27,7 @@ import {
   RESULT,
   FLAG,
 } from '../scripts/lib/schedule-shape.mjs'
+import { tagSeries as recordsTagSeries } from '../scripts/lib/team-records.mjs'
 import {
   ledgerOf,
   droughtFor,
@@ -48,6 +49,10 @@ const g = (date, awayId, homeId, venueId, awayScore, homeScore, gameNumber = 1) 
 const MIL = 158
 const CHC = 112
 const STL = 138
+const DET = 116
+const NYY = 147
+const DET_PARK = 2394
+const NYY_PARK = 3313
 const MIL_PARK = 32
 const CHC_PARK = 17
 const STL_PARK = 101
@@ -107,8 +112,9 @@ test('tagSeries splits on the opponent and on the side of the road', () => {
 test('a neutral-site game does not split the series around it', () => {
   // The real case: on 2020-09-25 the Brewers played a designated HOME game
   // against the Cardinals at Busch Stadium, a COVID makeup relocated to save a
-  // trip, in the middle of a four-game visit to St. Louis. Keyed on its own
-  // site it splits the visit and invents a series opener nobody played.
+  // trip, in the middle of a visit to St. Louis. Keyed on its own site it
+  // splits the visit and invents a series opener nobody played. MLB numbers the
+  // relocated game 3 of 5 in that series (#1283).
   const homeVenues = new Map([[MIL, MIL_PARK], [STL, STL_PARK]])
   const games = [
     g('09-24', MIL, STL, STL_PARK, 2, 4),
@@ -119,10 +125,37 @@ test('a neutral-site game does not split the series around it', () => {
   ]
   const rows = tagSeries(ledgerFor(games, MIL, homeVenues))
   const away = rows.filter((r) => r.site === 'away')
-  assert.deepEqual(away.map((r) => r.seriesGame), [1, 2, 3, 4], 'one four-game series')
+  assert.deepEqual(away.map((r) => r.seriesGame), [1, 2, 4, 5], 'one five-game series')
   assert.equal(rows.filter((r) => r.seriesOpener).length, 1, 'exactly one opener')
-  // The relocated game itself belongs to no series at all.
-  assert.equal(rows.find((r) => r.site === 'neutral').seriesGame, undefined)
+  // The relocated game is game 3 of that series, not a game with no series.
+  const relocated = rows.find((r) => r.site === 'neutral')
+  assert.deepEqual([relocated.seriesGame, relocated.seriesLength], [3, 5])
+})
+
+test('all three series callers agree on a neutral-site game inside a run (#1283)', () => {
+  // The 2024 Tigers shape: two at Comerica against the Yankees, the Little
+  // League Classic against them in Williamsport, then a road series. MLB
+  // numbers the Classic game 3 of a three-game series. The team-records
+  // generator called it a one-game series; the schedule-shape generator and
+  // the reader gave it no series at all.
+  const homeVenues = new Map([[DET, DET_PARK], [NYY, NYY_PARK], [MIL, MIL_PARK]])
+  const games = [
+    g('08-16', NYY, DET, DET_PARK, 1, 2),
+    g('08-17', NYY, DET, DET_PARK, 1, 3),
+    g('08-18', NYY, DET, 2735, 1, 4), // Williamsport: neither club's park
+    g('08-20', DET, MIL, MIL_PARK, 1, 5),
+    g('08-21', DET, MIL, MIL_PARK, 1, 6),
+  ]
+  const ledger = ledgerFor(games, DET, homeVenues)
+  const shape = tagSeries(ledger.map((r) => ({ ...r })))
+  const records = recordsTagSeries(
+    ledger.map((r) => ({ opp_id: r.opponentId, venue_id: r.source.venueId, site: r.site })),
+  )
+  const reader = ledgerOf({ teamId: DET, seasons: { 2026: ledger.map(encodeRow) } })
+  const want = [[1, 3], [2, 3], [3, 3], [1, 2], [2, 2]]
+  for (const rows of [shape, records, reader]) {
+    assert.deepEqual(rows.map((r) => [r.seriesGame, r.seriesLength]), want)
+  }
 })
 
 test('tagTrips cuts homestands and road trips, and a neutral game is transparent', () => {
