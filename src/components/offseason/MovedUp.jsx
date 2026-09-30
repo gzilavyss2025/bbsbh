@@ -86,7 +86,7 @@ export function MovedUp({ sportId, season }) {
         Players who moved up
       </SectionHead>
 
-      <Card as="div" frame="sheet" body="flush" className="movedup__card">
+      <Card as="div" body="flush" className="movedup__card">
         <table className="movedup__table">
           <thead>
             <tr>
