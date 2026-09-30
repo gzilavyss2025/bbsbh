@@ -55,7 +55,7 @@
   color: var(--text-caption);
 }
 
-.scorebookstory__kicker {
+.scorebookstory__note {
   margin: 66px 0 0;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -478,7 +478,7 @@
 
 @media (max-width: 700px) {
   .scorebookstory__cover { min-height: 410px; padding: 30px var(--space-6) 28px 62px; }
-  .scorebookstory__kicker { margin-top: 54px; }
+  .scorebookstory__note { margin-top: 54px; }
   .scorebookstory__cover h1 { font-size: clamp(50px, 17vw, 78px); }
   .scorebookstory__dateline { align-items: flex-start; font-size: var(--fs-cell); }
   .scorebookstory__tally { grid-template-columns: repeat(2, 1fr); margin-inline: var(--space-2); }

@@ -5,13 +5,11 @@
 # LANDED in slice H1a (#1113): the nine band rows (.metricbar, .metricbar__title, .is-themed .metricbar, the four hub heads and their themed rule, .player.is-themed .section__title--bar) are system/section-head.css now, so their rows left this file.
 # LANDED in slice H2 (#1113): .section__title (both SectionTitle components and 20 hand-written heads), .milestonewatch__title, .txcard__head, .rankgrp__title, .clubsseen__title, .coverpick__heading and the offseason section heads are SectionHead labels or rules now, so their rows left this file.
 # LANDED in slice H1b (#1113): the innings view and box score bands wear .sectionhead--band (club) or .sectionhead--band.sectionhead--house (no club) as PAINT on their own elements; their rows that no longer draw a band left this file. .abs__title, .statbox__title, .dueup__title, .lineupcard__title, .halfdefense__title, .marginnotes__title and .pitchers__title keep a row: their size and bleed are still their own.
-.wordmarklab__eyebrow, .wordmarklab__contextlabel, .wordmarklab__selection > span	lab	kicker	-	wordmark lab lines; the ledger renames .wordmarklab__eyebrow → __note (five different lines on one page)
+# LANDED in slice H3 (#1113): the ledger renames .sitemenusheet__eyebrow, .guidelink__eyebrow, .szmodal__eyebrow, .umpmodal__eyebrow, .tscoremodal__kicker, .scorebookstory__kicker, .introsheet__eyebrow, .bcast__eyebrow, .hitchart__eyebrow, .boxlines__kicker, .awardord__hd, .lookupdeck__heading and .gamelines__heading are done (as is .awardord__hd), and .betweeninnings__eyebrow is deleted, so their rows left this file, except the three titles, which keep a row under the new name (.awardord__title, .lookupdeck__title, .gamelines__title). The .wordmarklab__eyebrow and .trrank__eyebrow rows left too: census.mjs reads a rule as a head by its old second-line name, so the renamed rules are no longer head rows. Held: .derbycard__eyebrow and the pairs on .abouthero, .logbooklanding, .researchdiary and .stampstrip (two different second lines on one head); .contractcard__eyebrow (its __note name is taken).
 .topbar__title	title-keep	title	-	the app's page title in the top bar (35 files). A page title, not a section head
 .wiredock__title, .wiredock__note	label	label	H2	the wire dock's caps title + note in one rule — a label head with its note slot
 .derbycard__eyebrow	note	kicker	H3	ledger: → .gamecard__note ("All-Star Break"). Moves with .derbycard → .gamecard--derby; .gamecard stays bespoke, so a rename, not a SectionHead
 .derbycard__title	title-keep	title	-	the derby card's name in --fs-h3 on a .gamecard (bespoke) — stays with the slate card
-.sitemenusheet__eyebrow	note	kicker	H3	ledger: → .sitemenusheet__note ("Tally Baseball", the app's name)
-.guidelink__eyebrow	note	kicker	H3	ledger: → .guidelink__note (renders a prop)
 .teaminfo.is-themed > .teaminfo__head	bespoke	band	-	the TeamInfo club-name bar CHANGES SHAPE when themed (09-team-info.css:31) and carries Away/Home + the Game Notes button — a page masthead, not a section head. Its band recipe must still match H1's
 .brewblurb__title	label	label	H2	a small title inside the What's Brewing modal blurb
 .pregameboard__title	bespoke	title	-	the pre-game scoreboard's own title (PregameScoreboard.jsx) — part of a scoreboard graphic. SEAL SCOPE
@@ -22,8 +20,6 @@
 .dueup__title	band	band	H1	due-up band. Allowlisted
 .entering__title	band	band	H1	entering-lineup band. Renamed from .lineupcard__title with its block in slice C4; check-seal-scope did not name it by then
 .halfdefense__title	band	band	H1	defence band. Allowlisted
-.szmodal__eyebrow	note	kicker	H3	ledger: → .szmodal__note ("Pitch zone")
-.umpmodal__eyebrow	note	kicker	H3	ledger: → .umpmodal__note ("Plate accuracy")
 .sheet__title	title-keep	title	-	the bottom-sheet title (14 sheets) — modals stay bespoke (ADR-0037)
 .idlabhint__title	lab	title	-	identity lab hint modal title
 17-identity-lab-workbench.css:.idlab__barmock	lab	band	-	identity lab mock of the band (allowlisted: "previews the real one"). When H1 changes the band's recipe, this mock must follow
@@ -38,9 +34,6 @@
 .roster-sub__title	label	label	H2	an <h4> SUB-head inside a card body ("Position players · season WAR") — a second-level head: SectionHead needs a level, or this stays a namespace rule
 .levelprog__title	label	title	H2	the card's name in --fs-h3 INSIDE the card: "a card's name is its head" turns it into the label head
 .prospectcard__title	label	title	H2	same as .levelprog__title
-.tscoremodal__kicker	note	kicker	H3	ledger: → .tscoremodal__note ("How We Score It")
-.scorebookstory__kicker	note	kicker	H3	ledger: → .scorebookstory__note ("The 22 Scorebook")
-.awardord__hd	lab	plain	-	admin award-order editor (ledger: → .awardord__title)
 .animlab__title	lab	plain	-	animation lab
 .bilab__title	lab	plain	-	between-innings lab
 .stampcard__title	hold	plain	-	HOLD with .stampcard (ADR-0035)
@@ -49,7 +42,6 @@
 .logbooklanding__eyebrow, .logbooklanding__sectionhead > p, .logbooklanding__trustlabel	note	kicker	H3	ledger: → .logbooklanding__note (two lines). The other two selectors (a section-head line and the trust label) share the caps recipe; the section-head <p> is a second line too
 .mytally__title	title-keep	title	-	My Tally page title
 .mergereceipt__title	notice	title	-	merge receipt title — Notice (#1132)
-.introsheet__eyebrow	note	kicker	H3	ledger: → .introsheet__note (the step line in a modal)
 .moredir__title	title-keep	title	-	/more page title (--fs-display-md)
 .stampin__title	title-keep	title	-	Stamp In page title (ADR-0042)
 .bpadmin__title	lab	plain	-	ballpark admin gear
@@ -61,23 +53,19 @@
 .abouthero__kicker	note	kicker	H3	ledger: → .abouthero__note ("Keep score. Keep the surprise.")
 .abouthero__title	title-keep	plain	-	/about hero title
 .abouthead__title	title-keep	title	-	/about section masthead title (--fs-title-lg)
-.trrank__eyebrow, .trrank__detailgroup, .trrank__controltitle, .trrank__scopehead span, .trrank__related > span	note	kicker	H3	ledger: .trrank__eyebrow → .trrank__note (a data line). The other four selectors in this list are label heads (detail group, control title, scope head, related) — they go to H2 as label, not note
-.bcast__eyebrow	note	kicker	H3	ledger: → .bcast__note (a container: strand + slash + eyebrow)
 .bcast__title	title-keep	title	-	the broadcast masthead title (--fs-display-lg)
 .bcast-sec__title	rule	rule	H2	the ONLY rule-look head the shape test finds: a caps title whose ::after draws the trailing line. The critique's "STATCAST ——— PERCENTILE RANK" draws its rules another way — check it by eye in H2
-.hitchart__eyebrow	note	kicker	H3	ledger: → .hitchart__note (a ballpark name)
 .pitchslab__title	label	title	H2	pitch-mix card name in --fs-h3. Its sibling .pitchslab__head is on check-seal-scope's allowlist (69-pitch-arsenal.css): read why before touching the head
 .arsenal__title	label	label	H2	pitch arsenal caps label
-.lookupdeck__heading	lab	title	-	contract lookup (admin); ledger: → .lookupdeck__title
 .xl-entry__title	title-keep	title	-	Express Lane entry page title
 .xl-expand__title	title-keep	title	-	Express Lane pitch expand title
 .oseason__title	label	plain	H2	offseason page section heads (5 files) — #1113 comment 1 asks the offseason rows to take the lab's style
 .note__title	label	title	H2	offseason note card name (--fs-title-md) → the card's head
 .srecord__title	label	title	H2	offseason season-record card name → the card's head
-.boxlines__kicker	note	kicker	H3	ledger: → .boxlines__note (the built line "Game lines · name")
-.gamelines__heading	label	plain	H2	ledger: → .gamelines__title; the Game lines card label
-.betweeninnings__eyebrow	note	kicker	H3	ledger: RETIRED, not renamed — "Between Innings" inside .betweeninnings repeats the block's name. SEAL SCOPE
 .researchdiary__eyebrow	note	kicker	H3	ledger: → .researchdiary__note (research page)
 .researchdiary__title	lab	title	-	research diary title
 .sc-footer__title	bespoke	plain	-	the #22 scorecard footer — the scorecard is bespoke (inventory #1)
 .pbkt-ticket__head	bespoke	plain	-	the series line at the top of a bracket ticket (BracketFold.jsx), part of the ticket graphic like .last10__card, not a section head
+.awardord__title	lab	plain	-	admin award-order editor (ledger: → .awardord__title)
+.lookupdeck__title	lab	title	-	contract lookup (admin); ledger: → .lookupdeck__title
+.gamelines__title	label	plain	H2	ledger: → .gamelines__title; the Game lines card label

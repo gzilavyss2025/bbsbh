@@ -240,7 +240,7 @@
   background: var(--surface-card);
 }
 
-.sitemenusheet__eyebrow {
+.sitemenusheet__note {
   margin: 0 0 2px;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -358,7 +358,7 @@
   text-decoration: none;
 }
 
-.guidelink__eyebrow {
+.guidelink__note {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);

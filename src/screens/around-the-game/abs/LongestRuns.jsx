@@ -185,7 +185,7 @@ export function LongestRuns({ summary, clubs }) {
             <tr>
               <th className="team">
                 Player
-                <span className="rpt__sub">Longest run first</span>
+                <span className="rpt__note">Longest run first</span>
               </th>
               <th>Run</th>
               {/* THE SEASON BEHIND THE RUN, IN A HEAD THAT SAYS SO. It is what
@@ -193,7 +193,7 @@ export function LongestRuns({ summary, clubs }) {
                   it has to be on the row rather than in a note below the board. */}
               <th>
                 Won of called
-                <span className="rpt__sub">All season</span>
+                <span className="rpt__note">All season</span>
               </th>
             </tr>
           </thead>
@@ -207,7 +207,7 @@ export function LongestRuns({ summary, clubs }) {
                   <PlayerLink id={r.playerId} name={r.name}>
                     {r.name}
                   </PlayerLink>
-                  <span className="rpt__sub">
+                  <span className="rpt__note">
                     <TeamLink id={r.teamId} name={clubShort(clubs, r.teamId)}>
                       {clubShort(clubs, r.teamId)}
                     </TeamLink>

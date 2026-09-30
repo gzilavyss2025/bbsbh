@@ -149,7 +149,7 @@ export function UmpireTendencies({ umpire }) {
         <div className="umptend__who">
           {last && <div className="umptend__first">{first}</div>}
           <div className="umptend__last">{last || first}</div>
-          <div className="umptend__sub">
+          <div className="umptend__note">
             {games.length} {games.length === 1 ? 'game' : 'games'}
             {hpCount > 0 && ` · ${hpCount} behind the plate`}
           </div>

@@ -659,10 +659,10 @@
   text-transform: uppercase;
   color: var(--text-heading);
 }
-#root .note__lede {
+#root .note__note {
   text-transform: none; /* caps-exempt: the note's own question, not a label */
 }
-.note__lede {
+.note__note {
   margin: var(--space-2) 0 0;
   max-width: 40em;
   font-family: var(--font-body);

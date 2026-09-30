@@ -152,7 +152,7 @@ export function RanOut({ summary, clubs }) {
                 Club
                 {/* The band is a tie pile, so the head says the board is the
                     WHOLE of it rather than a ranked cut of it. */}
-                <span className="rpt__sub">Every one that emptied this early</span>
+                <span className="rpt__note">Every one that emptied this early</span>
               </th>
               <th>Out in</th>
               {/* THE DATE COMES BEFORE THE WIDE COLUMN. The board scrolls

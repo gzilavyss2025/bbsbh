@@ -331,7 +331,7 @@ export function RunDifferentialPage() {
                     <th>Club seasons</th>
                     <th>
                       +{threshold} or better
-                      <span className="rpt__sub">per 162</span>
+                      <span className="rpt__note">per 162</span>
                     </th>
                     <th>Won it all</th>
                     <th>Reached the World Series</th>
@@ -344,13 +344,13 @@ export function RunDifferentialPage() {
                     <tr key={era.key}>
                       <th scope="row" className="team">
                         <span className="rdiff__era">{era.label}</span>
-                        <span className="rpt__sub">{era.span}</span>
+                        <span className="rpt__note">{era.span}</span>
                       </th>
                       <td>{era.seasons.length}</td>
                       <td>{era.clubSeasons}</td>
                       <td>
                         {era.over}
-                        <span className="rpt__sub">{era.overPer162}</span>
+                        <span className="rpt__note">{era.overPer162}</span>
                       </td>
                       <EraRate part={era.ring} decided={era.decided} />
                       <EraRate part={era.ring + era.lostWS} decided={era.decided} />
@@ -433,7 +433,7 @@ function EraRate({ part, decided }) {
   return (
     <td>
       {part}
-      <span className="rpt__sub">{share == null ? '—' : `${share}%`}</span>
+      <span className="rpt__note">{share == null ? '—' : `${share}%`}</span>
     </td>
   )
 }

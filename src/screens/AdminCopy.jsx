@@ -370,7 +370,7 @@ function Editor({ onDirty, focus }) {
 
   return (
     <div className="admincopy__body">
-      <p className="admincopy__lede">
+      <p className="admincopy__note">
         Edit the wording of the spoiler-consent moments. Blank a box or tap Reset to fall back to
         the shipped default. Use <code>{'{time}'}</code> where the reset time should appear. Changes
         go live for everyone within about a minute of saving.

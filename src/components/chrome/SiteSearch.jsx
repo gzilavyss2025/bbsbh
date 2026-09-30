@@ -404,7 +404,7 @@ function ResultRow({ row, id, active, showCursor, onOpen, onHover }) {
       </span>
       <span className="searchoverlay__text">
         <span className="searchoverlay__name">{row.name}</span>
-        {row.sub && <span className="searchoverlay__sub">{row.sub}</span>}
+        {row.sub && <span className="searchoverlay__note">{row.sub}</span>}
       </span>
     </li>
   )

@@ -32,7 +32,7 @@ function FocusCard() {
     <article className="wordmarklab__option wordmarklab__option--focus" data-selected="true">
       <span className="wordmarklab__optionhead">
         <span>
-          <span className="wordmarklab__eyebrow">Selected direction</span>
+          <span className="wordmarklab__note">Selected direction</span>
           <strong>Scorer’s Asterisk</strong>
         </span>
         <span className="wordmarklab__pick">Refined</span>
@@ -59,7 +59,7 @@ function ContextMockups() {
   return (
     <section className="wordmarklab__contexts" aria-labelledby="contexts-title">
       <div className="wordmarklab__sectionhead">
-        <span className="wordmarklab__eyebrow">Live comparison</span>
+        <span className="wordmarklab__note">Live comparison</span>
         <h2 id="contexts-title">One mark, four working distances</h2>
         <p>
           These are intentionally ordinary placements. A wordmark earns the header by staying
@@ -127,7 +127,7 @@ export function WordmarkLab() {
       <main className="wordmarklab">
         <header className="wordmarklab__intro">
           <div>
-            <span className="wordmarklab__eyebrow">Brand study · optical refinement</span>
+            <span className="wordmarklab__note">Brand study · optical refinement</span>
             <h1>Clubhouse L1 scorer’s asterisk</h1>
             <p>
               The chosen direction, tightened around the details that decide whether it reads as one
@@ -146,7 +146,7 @@ export function WordmarkLab() {
 
         <section className="wordmarklab__current" aria-labelledby="current-title">
           <div>
-            <span className="wordmarklab__eyebrow">Current mark</span>
+            <span className="wordmarklab__note">Current mark</span>
             <h2 id="current-title">What the redraw needs to solve</h2>
           </div>
           <LegacyWordmark height={42} />
@@ -164,7 +164,7 @@ export function WordmarkLab() {
         <ContextMockups />
 
         <section className="wordmarklab__recommendation">
-          <span className="wordmarklab__eyebrow">My read</span>
+          <span className="wordmarklab__note">My read</span>
           <h2>The three parts now read as one line.</h2>
           <p>
             Every context now uses the same complete geometry as the approved large mark. Because

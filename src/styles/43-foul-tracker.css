@@ -35,9 +35,9 @@
   }
 }
 /* Baseline sentence above the Most/Fewest split — same "state the average
-   before the ranked outliers" idea as .foulavg__lede, reused as a one-liner
+   before the ranked outliers" idea as .foulavg__note, reused as a one-liner
    scoped to this one card rather than the whole page. No caps-exempt override
-   (see the ALL-CAPS INVARIANT block up top): like .foulavg__lede, this reads
+   (see the ALL-CAPS INVARIANT block up top): like .foulavg__note, this reads
    as shouted-caps scorebook copy rather than natural-case prose, consistent
    with every other number-bearing sentence on this page. */
 .foulboard__whiffavg {
@@ -336,7 +336,7 @@
 
 /* Season average fouls/game (SeasonAverageCard) — the hero stat leading the
    page, so the reader has a baseline before the leaderboards below start
-   ranking outliers against it. Reads as a sentence (.foulavg__lede) rather
+   ranking outliers against it. Reads as a sentence (.foulavg__note) rather
    than a bare number, since it's now carrying three figures (per game, per
    PA, per start) instead of one. The fill bar is a real proportion (share of
    an average game's pitches that got fouled off), not decoration — same
@@ -345,14 +345,14 @@
   margin-top: var(--space-3);
   padding: var(--space-3) var(--space-3h);
 }
-.foulavg__lede {
+.foulavg__note {
   margin: 0 0 10px;
   font-family: var(--font-body);
   font-size: var(--fs-body);
   line-height: var(--lh-prose);
   color: var(--text-body);
 }
-.foulavg__lede b {
+.foulavg__note b {
   font-variant-numeric: tabular-nums;
   font-weight: var(--w-bold);
   color: var(--text-heading);

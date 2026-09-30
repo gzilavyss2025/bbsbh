@@ -27,7 +27,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // the face announces nothing twice.
 //
 // `sub` — the position — sits ON THE NAME'S OWN LINE, immediately after it, at a
-// notch under the name's size. It rode under the nameplate as a `.rpt__sub`
+// notch under the name's size. It rode under the nameplate as a `.rpt__note`
 // block first, which put "CF" beneath the RANK, two columns from the man it
 // describes and reading as a second figure beside his place on the board.
 //

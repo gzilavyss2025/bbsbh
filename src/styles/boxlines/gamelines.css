@@ -95,7 +95,7 @@ button.gamelines__door,
   font-size: var(--fs-compact);
 }
 
-.gamelines__heading {
+.gamelines__title {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -290,7 +290,7 @@ button.gamelines__fam {
 
   /* And the longest heading, "How he got in", stops wrapping the head row to
      two lines. */
-  .gamelines__heading {
+  .gamelines__title {
     font-size: var(--fs-label);
   }
 }

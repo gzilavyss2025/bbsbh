@@ -164,11 +164,11 @@ export function BookCoverPicker({ book, onChange }) {
         {preview}
         <div className="coverpick__halves">
           <section className="coverpick__half">
-            <SectionHead className="coverpick__heading">Use a league logo</SectionHead>
+            <SectionHead className="coverpick__title">Use a league logo</SectionHead>
             <PresetGrid book={book} onChange={onChange} />
           </section>
           <section className="coverpick__half">
-            <SectionHead className="coverpick__heading">Use team colors</SectionHead>
+            <SectionHead className="coverpick__title">Use team colors</SectionHead>
             <LevelNav sportId={level} onChange={setLevelPick} />
             <Button
               size="control"
@@ -215,7 +215,7 @@ export function BookCoverPicker({ book, onChange }) {
 
       {step === 1 && usingClub && (
         <>
-          <SectionHead className="coverpick__heading">Pick a level</SectionHead>
+          <SectionHead className="coverpick__title">Pick a level</SectionHead>
           <LevelNav
             sportId={level}
             onChange={(sportId) => {
@@ -236,14 +236,14 @@ export function BookCoverPicker({ book, onChange }) {
 
       {step === 1 && !usingClub && (
         <>
-          <SectionHead className="coverpick__heading">Pick a color</SectionHead>
+          <SectionHead className="coverpick__title">Pick a color</SectionHead>
           <ColorRow book={book} onChange={onChange} />
         </>
       )}
 
       {step === 2 && usingClub && (
         <>
-          <SectionHead className="coverpick__heading">Pick a club</SectionHead>
+          <SectionHead className="coverpick__title">Pick a club</SectionHead>
           <ClubPicker
             teams={teams}
             value={book?.coverTeamId ?? null}

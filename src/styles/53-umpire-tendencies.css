@@ -67,7 +67,7 @@
   line-height: var(--lh-tight);
   margin-top: 2px;
 }
-.umptend__sub {
+.umptend__note {
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   letter-spacing: var(--ls-num);

@@ -88,7 +88,7 @@
        `.consent__changes`, `.consent__reset`, `.consent__humor` (the title +
        buttons stay uppercase, same shouted-heading/natural-case-body split
        as the Team Score modal above)
-     - the copy editor's natural-case fields + preview — `.admincopy__lede`,
+     - the copy editor's natural-case fields + preview — `.admincopy__note`,
        `.admincopy__help`, `.admincopy__input`, `.admincopy__historyWhen`,
        `.admincopy__previewBody/__previewHumor/__previewReset` (the admin types
        and previews sentence-case copy; labels + preview title stay uppercase)
@@ -106,11 +106,11 @@
        `.contractcard__sentence`, `.contractcard__foot` (the eyebrow, pill,
        runway labels and ticker all stay uppercase, same shouted-heading/
        natural-case-body split as the Team Score modal above)
-     - the Contract history ledger's sub-line — `.cthist__sub` (the kind, the
+     - the Contract history ledger's sub-line — `.cthist__note` (the kind, the
        year, the club, the value rail and the match badge all stay uppercase,
        the same split one more time)
      - Express Lane's sentences — the entry step's lede, section notes and
-       consent (`.xl-entry__lede`, `.xl-entry__hint`, `.xl-entry__consent`, in
+       consent (`.xl-entry__note`, `.xl-entry__hint`, `.xl-entry__consent`, in
        77a); the film band's messages `.xl-film__msg` and the pre-roll's
        sub-line `.xl__prerollsub` (in 77); and, in 77c beside the rules that
        draw them, the scoring deck's empty/held/holding lines

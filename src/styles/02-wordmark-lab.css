@@ -43,7 +43,7 @@
   line-height: var(--lh-prose);
 }
 
-.wordmarklab__eyebrow,
+.wordmarklab__note,
 .wordmarklab__contextlabel,
 .wordmarklab__selection > span {
   display: block;
@@ -519,7 +519,7 @@
   box-shadow: var(--shadow-raised);
 }
 
-.wordmarklab__recommendation .wordmarklab__eyebrow,
+.wordmarklab__recommendation .wordmarklab__note,
 .wordmarklab__recommendation h2,
 .wordmarklab__recommendation p {
   color: var(--text-on-ink);

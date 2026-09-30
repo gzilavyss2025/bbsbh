@@ -134,7 +134,7 @@ function Row({ row }) {
         ) : null}
       </span>
       {(supporting || row.note) && (
-        <span className="cthist__sub">
+        <span className="cthist__note">
           {supporting}
           {supporting && row.note ? ' · ' : null}
           {row.note && <em className="cthist__none">{row.note}</em>}

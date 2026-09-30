@@ -33,7 +33,7 @@ test('a cleared visitor sees step 1, with the exact copy, and no step 2 chrome',
   // indicator, and no dead '1 of 2'". The first version of this spec quoted
   // that sentence in its own header and then asserted the indicator was
   // PRESENT — pinning the violation instead of the rule.
-  await expect(dialog.locator('.introsheet__eyebrow')).toHaveCount(0)
+  await expect(dialog.locator('.introsheet__note')).toHaveCount(0)
   await expect(dialog.getByRole('heading', { name: 'Make Tally yours.' })).toBeVisible()
   await expect(dialog).toContainText(
     'Choose your club. We’ll pin its games—and its affiliates—to the top of every slate.',

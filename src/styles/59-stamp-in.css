@@ -20,7 +20,7 @@
   color: var(--text-heading);
 }
 
-.stampin__lede {
+.stampin__note {
   margin: 0 0 var(--space-4);
   max-width: 46ch;
   font-size: var(--fs-body);
