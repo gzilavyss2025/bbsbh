@@ -26,27 +26,12 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join, relative } from 'node:path'
 import { sectionHeadClassName, sectionHeadTitleTag } from '../src/lib/design/sectionHeadClass.js'
 import { cardAccentStyle, cardBodyClassName, cardClassName, cardHead, cardTag } from '../src/lib/design/cardClass.js'
+import { stripComments, ruleBody } from './helpers/css.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const STYLES = join(SRC, 'styles')
 
-const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '')
 const read = (rel) => stripComments(readFileSync(join(STYLES, rel), 'utf8'))
-
-function ruleBody(css, selector) {
-  let from = 0
-  for (;;) {
-    const at = css.indexOf(selector, from)
-    if (at === -1) return null
-    from = at + selector.length
-    const before = at === 0 ? '\n' : css[at - 1]
-    if (!'\n;}{,'.includes(before)) continue
-    let i = from
-    while (css[i] === ' ' || css[i] === '\n' || css[i] === '\r') i += 1
-    if (css[i] !== '{') continue
-    return css.slice(i + 1, css.indexOf('}', i))
-  }
-}
 
 const decl = (body, property) =>
   body
