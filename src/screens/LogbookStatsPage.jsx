@@ -18,6 +18,7 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
+import { Card } from '../components/ui/frame/Card.jsx'
 import { dateLabel, SectionHead } from './logbook/statsShared.jsx'
 import { RetrospectiveSections } from './logbook/RetrospectiveSections.jsx'
 import { LogbookMilestones } from './logbook/LogbookMilestones.jsx'
@@ -298,7 +299,7 @@ export function LogbookStatsPage({ bookId = null }) {
           ]}
         />
         <div className="logbookstats__splits">
-          <div>
+          <Card as="div" frame="ledger" body="flush" className="logbookstats__split">
             <span>Home vs. road</span>
             <strong>
               {homeRoad.homeWins}–{homeRoad.awayWins}
@@ -307,14 +308,14 @@ export function LogbookStatsPage({ bookId = null }) {
             {/* A stamp carries no attendance record, so this can only ever mean
                 which dugout won — never "games you saw in person". */}
             <small>Home clubs’ record in the games you logged</small>
-          </div>
-          <div>
+          </Card>
+          <Card as="div" frame="ledger" body="flush" className="logbookstats__split">
             <span>How you took them in</span>
             <strong>
               {stats.modes.watched}–{stats.modes.followed}
             </strong>
             <small>Watched vs. followed</small>
-          </div>
+          </Card>
         </div>
       </section>
 
@@ -353,7 +354,7 @@ export function LogbookStatsPage({ bookId = null }) {
           />
           <div className="logbookstats__streaks">
             {stats.longestWinStreak && (
-              <article>
+              <Card as="article" frame="ledger" body="flush" className="logbookstats__streak">
                 <TeamLogo
                   teamId={stats.longestWinStreak.teamId}
                   name={stats.longestWinStreak.name}
@@ -366,10 +367,10 @@ export function LogbookStatsPage({ bookId = null }) {
                 <small>
                   {dateLabel(stats.longestWinStreak.from)} — {dateLabel(stats.longestWinStreak.to)}
                 </small>
-              </article>
+              </Card>
             )}
             {stats.longestLossStreak && (
-              <article>
+              <Card as="article" frame="ledger" body="flush" className="logbookstats__streak">
                 <TeamLogo
                   teamId={stats.longestLossStreak.teamId}
                   name={stats.longestLossStreak.name}
@@ -382,7 +383,7 @@ export function LogbookStatsPage({ bookId = null }) {
                 <small>
                   {dateLabel(stats.longestLossStreak.from)} — {dateLabel(stats.longestLossStreak.to)}
                 </small>
-              </article>
+              </Card>
             )}
           </div>
         </section>
@@ -400,14 +401,14 @@ export function LogbookStatsPage({ bookId = null }) {
         />
         <div className="logbookstats__records">
           {stats.clubs.map((club) => (
-            <div key={club.id}>
+            <Card as="div" frame="ledger" body="flush" className="logbookstats__record" key={club.id}>
               <TeamLogo teamId={club.id} name={club.name} size={26} />
               <span>
                 <b>{club.abbreviation || club.name}</b>
                 <small>{club.games} {club.games === 1 ? 'game' : 'games'}</small>
               </span>
               <strong>{record(club)}</strong>
-            </div>
+            </Card>
           ))}
         </div>
       </section>

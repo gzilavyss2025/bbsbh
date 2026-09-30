@@ -13,6 +13,7 @@
 # LANDED in slice C6a (#1113): .seedcard (renamed .seed), .psseries__result, .psseries__log, .psseries__lboard, .psseries__rostercard, .psseries__upcominglist, .psleaders__teamboard, .allstarrosters__year, .allstarrosters__rows, .allstargame, .allstarlegacy__leadercard and .allstarlegacy__teamcard are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. .psseries__todaycard no longer exists: #1264 replaced that card with the slate GameCard, so its line left too. Every one is flush (each block keeps its own inset) and each head stays the first child. The two <ul>s sit in a flush Card div. .seed is a ledger; only the history page's tap tile is a Card button, and .seed sets overflow: visible so the bracket connectors show. .psseries__lrows and .psseries__rosterlist stay wells, and .allstarlegacy__rankrail stays a navigation strip.
 # LANDED in slice C6b (#1113): .rehabcard, .prospects__filterdeck, .milestonewatch-page__card, .umpage__card, .umpage__list, .mgrpage__card, .tradecard (renamed .trade), .umptend, .moredir__card, .aboutrule, .trrank__tile (a Card link), .payboard, .penpage__grid and .trrank__podiumcard are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. Every one takes body="flush" (each block has its own inset), and each head stays the first child. .umpage__list is a <ul> inside a flush Card div. .aboutrule and .penpage__grid are ledgers. .umptend keeps its house band and its four host overrides (.umpmodal, .teaminfo__topzone, .umptendfold, the umpire page).
 # LANDED in slice C6c (#1113): .offdaycard (renamed .offday__tile, a Card button with the --offday-accent accent), .foulboard__hero, .foulavg, .gamehigh-tiles, .souvenir-row__tiles, .springcount, .pgame__card, .srecord and .note__stories are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. Every one takes body="flush" (each block has its own inset), and each head stays where it was. .gamehigh-tiles and .souvenir-row__tiles are ledgers whose gap-rule grid (.gamehigh-tiles__grid, .souvenir-row__tilegrid) keeps its --border-rule ground inside the Card. .note__stories is an <ol> inside a flush Card div (.note__storybox holds its margin). .sgh-list took NO Card: it already sat in its board's Card, and a rule shed its frame, so it draws no frame now. The .movedup table, which had no frame, sits in a flush sheet Card (.movedup__card). .note__title and .srecord__title keep their rules until Gary picks a look (H2).
+# LANDED in slice C7 (#1113): .sitemenusheet__group, .scorebookstory__gamecard, .scorebookstory__performer, .scorebookstory__leaders, .scorebookstory__nugget, .logbookstats__split (was .logbookstats__splits div), .logbookstats__streak (was .logbookstats__streaks article), .logbookstats__record (was .logbookstats__records > div), .logbookstats__performer, .logbookstats__leaders, .mytally__pitch and .posterstudio__panel are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. Every one takes body="flush" (each block keeps its own inset); each head stays the first child. The game and performer tiles are Card buttons (ledger), drawn by ScorebookGameLink and LogbookGameLink when a caller passes card. The two leaders rules were only a frame, so they are gone. .sitemenusheet__group sits in a modal sheet that stays bespoke (ADR-0037). The three Logbook tag selectors became classes of their own.
 # REMOVED 2026-09-29: .logbook__seasons button and .bookmgmt__modes button went STALE. Their rules left the CSS (the logbook season buttons moved onto the one Button, ea7d0aed1; .bookmgmt__modes was dead code), so their rows left this file.
 .wordmarklab__colorlock	lab	sheet				C8	wordmark lab (/wordmark-lab), a dev page: the colour-lock panel
 .wordmarklab__option	lab	sheet	none	padded	C8	wordmark lab option tile; an <article> with its own hover — a lab specimen
@@ -38,7 +39,6 @@
 .gamefinder__result	control					a game-finder result row <button> with its own font-size and min-height
 .favteamsheet	modal					the favourite-team bottom sheet (FavoriteTeamModal): a sheet with safe-area padding and an entry animation — sheets stay bespoke (ADR-0037, critique "modals are correctly bespoke")
 .dirglyph	media					the site-menu directory glyph box (a small square with a left rule), an icon frame
-.sitemenusheet__group	card	sheet	none	padded	C7	a grouped block of links inside the site menu sheet. A card inside a modal; low traffic, lands last in C7
 .attendance__note	notice					a note paragraph with a pop-in animation on page ground (BoxScore + TeamInfo) — the Notice family (#1132)
 .fact__infonote	notice					an info note under a stat on the player page (AdvancedStatsCard), animated in — Notice family (#1132)
 .umptier__note	notice					the umpire-tier explainer note (UmpireTierGlyph) — Notice family (#1132)
@@ -101,10 +101,6 @@
 .psyearnav button	control					postseason year nav <button>
 .psseries__lrows	well					inset rows inside the series leaderboard
 .psseries__rosterlist	well					inset list inside the series roster card
-.scorebookstory__gamecard	card	ledger	none	padded	C7	a game card link on /first-scorebook: radius-sm + shadow → ledger by radius; Card as="a"
-.scorebookstory__performer	card	ledger	none	padded	C7	a performer link card on /first-scorebook: Card as="a"
-.scorebookstory__leaders	card	ledger	label	flush	C7	leaders block on /first-scorebook
-.scorebookstory__nugget	card	ledger	none	padded	C7	a fact nugget on /first-scorebook
 .allstarlegacy__rankrail	not-card					a positioned rank rail with a transition — a navigation strip, not a card
 .scorebug	bespoke					a broadcast scorebug replica on /fouls — a TV graphic, drawn on inset ground on purpose
 .seasonseries__nav	control					season-series strip arrow <button>
@@ -121,12 +117,7 @@
 .teamtabs__btn	control					the hub tab/jump bar button — Button family (#1130 tab slice, pill map note)
 .stampcard	hold					HOLD (ADR-0035): a stamp is a final score; the class sits on StampCollection.jsx (STAMP_ALLOWLIST). check-stamp-surfaces tracks JS identifiers, not this class, so a move would pass lint in silence
 .stampstrip	hold					HOLD (ADR-0035): the Game Log mint strip across the head of the revealed box score (StampGameButton.jsx, STAMP_ALLOWLIST)
-.logbookstats__splits div	card	ledger	none	padded	C7	a split tile on /logbook/stats. Stamp-ADJACENT: the page summarises the user's stamped games; it renders no stamp art and is not on STAMP_ALLOWLIST. Verify that before the slice
-.logbookstats__streaks article	card	ledger	outside:label	padded	C7	a streak tile on /logbook/stats (stamp-adjacent, see above)
 .logbookstats__toggle	control					a full-width toggle <button> on /logbook/stats
-.logbookstats__performer	card	ledger	none	padded	C7	a performer link card (LogbookGameLink) in the retrospective: Card as="a" (stamp-adjacent)
-.logbookstats__leaders	card	ledger	label	flush	C7	leaders block in the retrospective (stamp-adjacent)
-.logbookstats__records > div	card	ledger	none	padded	C7	a record tile on /logbook/stats (stamp-adjacent)
 .passportbook__blank	bespoke					a blank page of the passport book (ADR-0036) — book geometry, not a card
 .passportbook__nav button	control					passport book page-turn <button>
 .passportpage	bespoke					the ruled 2x4 passport page (finding 9 must-survive; PassportPage.jsx is on STAMP_ALLOWLIST)
@@ -136,7 +127,6 @@
 .mytally__choice	control					My Tally choice <button>
 .mytally__switch	control					My Tally row switch <button>
 .mytally__rowbtn	control					My Tally row <button>
-.mytally__pitch	card	sheet	outside:label	padded	C7	the sign-in pitch block on My Tally (ProfileAccount.jsx). Plain → sheet
 .mergereceipt	notice					the merge receipt aside on inset ground (MergeReceipt.jsx) — a Notice (#1132)
 .introsheet__reaction	well					an inset reaction box inside the intro sheet (a modal)
 .bookmgmt	panel					the body box inside BookManagementSheet (a sheet) — a panel in a modal
@@ -145,7 +135,6 @@
 .coverpick__step	control					cover picker step <button>
 .bpadmin .bpadmin__btn	control					ballpark admin <button> (admin gear)
 .posterstudio__sheet	bespoke					the poster preview paper in the poster studio (docs/preview-poster.md) — a print-sized artboard
-.posterstudio__panel	card	sheet	label	padded	C7	a control panel beside the poster. Plain → sheet
 .iddrawer__tile	control					identity drawer tile <button> (admin gear)
 .iddrawer__logomark	media					identity drawer logo frame
 .iddrawer__parkwash	media					identity drawer park-art frame

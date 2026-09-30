@@ -1993,3 +1993,176 @@ test('C6c: the off-day tile is a Card button that keeps its club accent and its 
   assert.ok(eases.some((t) => /background-color/.test(t)), 'the hover tint eases in')
   assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{\s*\.offday__tile,[\s\S]*?transition: none;/)
 })
+
+// ---- slice C7: account, logbook and chrome ----
+
+// Twelve blocks on the site menu, the First Scorebook, the Logbook stats page,
+// My Tally's sign-in pitch and the game-preview poster page. The Logbook
+// stats page is stamp-adjacent: it counts stamps and draws no stamp art, and
+// none of these files is a stamp surface (ADR-0035), so the slice moves boxes
+// and nothing else. Each block renders through Card with body="flush": each
+// keeps its own padding, which is not the padded body's, so its layout does
+// not move. Each head stays the Card's first child, as it was. `button` means
+// the tile is a <button> that navigates: the Card is rendered by the link
+// helper (ScorebookGameLink, LogbookGameLink) when a caller passes `card`.
+// `gone` means the block's whole rule was the frame, so it has no rule left.
+const C7 = [
+  { css: '08a-site-menu.css', sel: '.sitemenusheet__group', jsx: ['components/chrome/SiteMenu.jsx'], ns: 'sitemenusheet__group', keep: ['overflow'] },
+  { css: '42-first-scorebook.css', sel: '.scorebookstory__gamecard', jsx: ['screens/FirstScorebookPage.jsx'], ns: 'scorebookstory__gamecard', button: true, frame: 'ledger' },
+  { css: '42-first-scorebook.css', sel: '.scorebookstory__performer', jsx: ['screens/FirstScorebookPage.jsx'], ns: 'scorebookstory__performer', button: true, frame: 'ledger' },
+  { css: '42-first-scorebook.css', sel: '.scorebookstory__leaders', jsx: ['screens/FirstScorebookPage.jsx'], ns: 'scorebookstory__leaders', as: 'div', frame: 'ledger', gone: true },
+  { css: '42-first-scorebook.css', sel: '.scorebookstory__nugget', jsx: ['screens/FirstScorebookPage.jsx'], ns: 'scorebookstory__nugget', as: 'article', frame: 'ledger' },
+  { css: '48a-logbook-stats.css', sel: '.logbookstats__split', jsx: ['screens/LogbookStatsPage.jsx'], ns: 'logbookstats__split', as: 'div', frame: 'ledger' },
+  { css: '48a-logbook-stats.css', sel: '.logbookstats__streak', jsx: ['screens/LogbookStatsPage.jsx'], ns: 'logbookstats__streak', as: 'article', frame: 'ledger' },
+  { css: '48a-logbook-stats.css', sel: '.logbookstats__record', jsx: ['screens/LogbookStatsPage.jsx'], ns: 'logbookstats__record', as: 'div', frame: 'ledger' },
+  { css: '48a-logbook-stats.css', sel: '.logbookstats__performer', jsx: ['screens/logbook/RetrospectiveSections.jsx'], ns: 'logbookstats__performer', button: true, frame: 'ledger' },
+  { css: '48a-logbook-stats.css', sel: '.logbookstats__leaders', jsx: ['screens/logbook/RetrospectiveSections.jsx'], ns: 'logbookstats__leaders', as: 'div', frame: 'ledger', gone: true },
+  { css: '55-my-tally-account.css', sel: '.mytally__pitch', jsx: ['components/profile/ProfileAccount.jsx'], ns: 'mytally__pitch', as: 'div' },
+  { css: '62-game-preview.css', sel: '.posterstudio__panel', jsx: ['screens/GamePreview.jsx'], ns: 'posterstudio__panel', as: 'div' },
+]
+const C7_FILES = [...new Set(C7.flatMap(({ jsx }) => jsx)), 'screens/logbook/statsShared.jsx']
+const bareTagsC7 = (code, ns) =>
+  [...code.matchAll(/<(?:div|section|li|article|ul|ol|dl|a|button)\b([^>]*)>/g)].map((m) => m[1]).filter((attrs) => namesClass(attrs, ns))
+// The link helpers: the one place a tap tile's Card is drawn.
+const C7_HELPERS = [
+  { rel: 'screens/FirstScorebookPage.jsx', name: 'ScorebookGameLink' },
+  { rel: 'screens/logbook/statsShared.jsx', name: 'LogbookGameLink' },
+]
+
+test('C7: no account, logbook or chrome block draws a second frame over its Card, media queries too', () => {
+  for (const { css, sel, gone, keep = [] } of C7) {
+    const bodies = bodiesOf(read(css), sel)
+    if (gone) assert.equal(bodies.length, 0, `${css}: ${sel} was only a frame, so it has no rule`)
+    else assert.ok(bodies.length > 0, `${css}: a ${sel} rule`)
+    for (const body of bodies) assert.deepEqual(frameDecls(body, keep), [], `${css}: ${sel} still draws its own frame`)
+  }
+})
+
+// Card clips its edge, and a clipped grid item shrinks to a minimum height of 0.
+// The wide site menu lays its groups out in a grid inside a sheet of fixed
+// height, so a clipped group would be squeezed and cut. It does not clip.
+test('C7: a site-menu group does not clip, so the wide menu keeps its row heights', () => {
+  assert.equal(decl(ruleBody(read('08a-site-menu.css'), '.sitemenusheet__group') ?? '', 'overflow'), 'visible')
+  assert.match(read('08a-site-menu.css'), /@media \(min-width: 740px\)[\s\S]*\.sitemenusheet__scroll\s*\{[^}]*display: grid/)
+})
+
+test('C7: every block renders on Card, with its frame, a flush body and every copy moved', () => {
+  for (const { jsx, ns, as, frame, button } of C7) {
+    for (const rel of jsx) {
+      const code = src(rel)
+      assert.match(code, /import \{ Card \} from ["'][\w./]+\/ui\/frame\/Card\.jsx["']/, `${rel} imports Card`)
+      const uses = code.match(new RegExp(`className=\\{?["'\`]${ns}(?![\\w-])`, 'g')) ?? []
+      assert.ok(uses.length > 0, `${rel}: .${ns} is used`)
+      assert.deepEqual(bareTagsC7(code, ns), [], `${rel}: .${ns} is on a bare element`)
+      if (button) {
+        // Every caller passes `card`; the helper draws the Card button.
+        const callers = [...code.matchAll(/<(?:ScorebookGameLink|LogbookGameLink)\b([^>]*)>/g)].map((m) => m[1]).filter((a) => namesClass(a, ns))
+        assert.equal(callers.length, uses.length, `${rel}: every .${ns} goes through the link helper`)
+        for (const attrs of callers) assert.match(attrs, /\bcard\b/, `${rel}: .${ns} asks the helper for a Card`)
+      } else {
+        const tags = cardTags(code).filter((attrs) => namesClass(attrs, ns))
+        assert.equal(tags.length, uses.length, `${rel}: every .${ns} is a Card`)
+        for (const attrs of tags) {
+          assert.match(attrs, /body="flush"/, `${rel}: .${ns}'s Card keeps the block's own inset`)
+          if (frame) assert.match(attrs, new RegExp(`frame="${frame}"`), `${rel}: .${ns} is a ${frame}`)
+          else assert.doesNotMatch(attrs, /frame=/, `${rel}: .${ns} is a sheet (the default)`)
+          if (as) assert.match(attrs, new RegExp(`as="${as}"`), `${rel}: .${ns} is a Card ${as}`)
+          assert.doesNotMatch(attrs, /head=/, `${rel}: .${ns} keeps its head as the Card's first child, as before`)
+        }
+      }
+    }
+  }
+})
+
+test('C7: the game and performer tiles are Card buttons with no head, and keep onClick, disabled and type', () => {
+  for (const { rel, name } of C7_HELPERS) {
+    const code = src(rel)
+    const fn = code.slice(code.indexOf(`function ${name}`))
+    const card = fn.match(/<Card\b([^>]*)>/)
+    assert.ok(card, `${rel}: ${name} draws a Card`)
+    assert.match(card[1], /as="button"/)
+    assert.match(card[1], /frame="ledger"/)
+    assert.match(card[1], /body="flush"/)
+    assert.doesNotMatch(card[1], /head=/, 'a Card button takes no head')
+    assert.match(fn, /onClick:/)
+    // The plain button stays for the callers that do not pass `card`.
+    assert.match(fn, /<button\s+type="button"/, `${rel}: ${name} keeps its plain button`)
+  }
+  assert.match(src('screens/logbook/statsShared.jsx'), /disabled: !game/)
+})
+
+test('C7: each block keeps its own margin, inset and layout, from a rule that loads after card.css', () => {
+  const kept = [
+    ['08a-site-menu.css', '.sitemenusheet__group', 'padding', 'var(--space-3)'],
+    ['08a-site-menu.css', '.sitemenusheet__group + .sitemenusheet__group', 'margin-top', 'var(--space-2)'],
+    ['42-first-scorebook.css', '.scorebookstory__gamecard', 'display', 'grid'],
+    ['42-first-scorebook.css', '.scorebookstory__gamecard', 'padding', 'var(--space-4)'],
+    ['42-first-scorebook.css', '.scorebookstory__gamecard', 'min-height', '174px'],
+    ['42-first-scorebook.css', '.scorebookstory__performer', 'display', 'grid'],
+    ['42-first-scorebook.css', '.scorebookstory__performer', 'padding', 'var(--space-3) var(--space-3) 0'],
+    ['42-first-scorebook.css', '.scorebookstory__nugget', 'display', 'grid'],
+    ['42-first-scorebook.css', '.scorebookstory__nugget', 'padding', 'var(--space-3)'],
+    ['48a-logbook-stats.css', '.logbookstats__split', 'padding', 'var(--space-3)'],
+    ['48a-logbook-stats.css', '.logbookstats__streak', 'padding', 'var(--space-4) var(--space-3)'],
+    ['48a-logbook-stats.css', '.logbookstats__record', 'padding', 'var(--space-2) var(--space-3)'],
+    ['48a-logbook-stats.css', '.logbookstats__record', 'min-height', '50px'],
+    ['48a-logbook-stats.css', '.logbookstats__performer', 'padding', 'var(--space-3)'],
+    ['55-my-tally-account.css', '.mytally__pitch', 'padding', 'var(--space-4)'],
+    ['62-game-preview.css', '.posterstudio__panel', 'padding', 'var(--space-4)'],
+    ['62-game-preview.css', '.posterstudio__panel', 'display', 'grid'],
+  ]
+  for (const [css, sel, prop, value] of kept) {
+    assert.equal(decl(ruleBody(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)
+  }
+})
+
+test('C7: the game card keeps its lift and its dark edge on hover and focus, and eases the Card tint too', () => {
+  const css = read('42-first-scorebook.css')
+  const hover = ruleBody(css, '.scorebookstory__gamecard:hover,\n.scorebookstory__gamecard:focus-visible') ?? ''
+  assert.equal(decl(hover, 'transform'), 'translateY(-2px)')
+  assert.equal(decl(hover, 'border-color'), 'var(--text-heading)')
+  const base = ruleBody(css, '.scorebookstory__gamecard') ?? ''
+  assert.match(decl(base, 'transition') ?? '', /transform[^,]*,\s*border-color[^,]*,\s*background-color/)
+})
+
+test('C7: the three Logbook tile parents keep their grid, and each tile has a class of its own', () => {
+  const css = read('48a-logbook-stats.css')
+  for (const [parent, cols] of [['.logbookstats__splits', '1fr 1fr'], ['.logbookstats__streaks', '1fr 1fr'], ['.logbookstats__records', '1fr']]) {
+    const body = ruleBody(css, parent) ?? ''
+    assert.equal(decl(body, 'display'), 'grid', `${parent} stays a grid`)
+    assert.equal(decl(body, 'grid-template-columns'), cols)
+  }
+  // No rule styles a tile by its tag any more: a tag selector also hits nested elements.
+  for (const [, sel] of rules(css)) {
+    assert.doesNotMatch(sel, /logbookstats__splits\s+div|logbookstats__streaks\s+article|logbookstats__records\s*>\s*div/, `${sel} styles a tile by tag`)
+  }
+  const page = src('screens/LogbookStatsPage.jsx')
+  const tiles = (ns) => cardTags(page).filter((attrs) => namesClass(attrs, ns)).length
+  assert.equal(tiles('logbookstats__split'), 2, 'two split tiles')
+  assert.equal(tiles('logbookstats__streak'), 2, 'two streak tiles')
+  assert.equal(tiles('logbookstats__record'), 1, 'one record tile, in the clubs loop')
+})
+
+test('C7: the account, logbook and chrome files import no stamp art, and Card imports nothing stamp-related', () => {
+  for (const rel of C7_FILES) {
+    const code = src(rel)
+    assert.doesNotMatch(code.replace(/\/\/.*$/gm, ''), /GameStamp|StampGameButton/, `${rel} draws no stamp art`)
+  }
+  const card = src('components/ui/frame/Card.jsx').replace(/\/\/.*$/gm, '')
+  assert.doesNotMatch(card, /import[^\n]*stamp/i)
+})
+
+test('C7: the seal pin — no reveal-only import, SealBox or revealedThrough read moved', () => {
+  for (const rel of C7_FILES) {
+    const code = src(rel)
+    assert.doesNotMatch(code, /from ['"][./]+\/api\/(linescore|derive)\.js['"]/, `${rel} adds no reveal-only import`)
+    assert.doesNotMatch(code, /<SealBox|revealedThrough/, `${rel} adds no seal`)
+  }
+})
+
+test('C7: the poster panel title keeps its own rule', () => {
+  const body = ruleBody(read('62-game-preview.css'), '.posterstudio__title') ?? ''
+  assert.equal(decl(body, 'font-size'), 'var(--fs-h3)')
+  assert.equal(decl(body, 'text-transform'), 'uppercase')
+  assert.match(src('screens/GamePreview.jsx'), /<h2 className="posterstudio__title">Preview card<\/h2>/)
+})
