@@ -24,7 +24,7 @@
 import { mergeOverrides, sanitizeOverrides } from '../src/copy/registry.js'
 import { authenticateAdmin } from './_lib/adminAuth.js'
 import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
-import { getRedis } from './_lib/redis.js'
+import { getRedis, hashFromReply } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js: @clerk/backend's
 // verifyToken pulls in internals Vercel's edge sandbox rejects.
@@ -63,38 +63,8 @@ function copyRedis() {
   return getRedis({ automaticDeserialization: false })
 }
 
-// Pair Upstash's HGETALL reply into a `{ field: value }` object.
-//
-// WHY THIS IS NEEDED — the failure it was written for. `automaticDeserialization
-// : false` (above) does not only disable the JSON.parse the copy store wanted
-// gone. In @upstash/redis it replaces the client's whole deserializer with the
-// identity function, and for HGETALL that deserializer is ALSO what pairs
-// Redis's flat [field, value, field, value] reply into an object.
-//
-// So `redis.hgetall()` here answers an ARRAY. sanitizeOverrides walked it with
-// Object.entries, saw the ids "0"/"1"/"2"/"3", matched none of them against the
-// registry, and returned {} — every override in the store, for every surface,
-// invisible on every read. Writes were landing in Redis the whole time.
-//
-// It shipped, and stayed shipped, because an empty override map is exactly what
-// a deploy with no copy store looks like: the app renders shipped defaults and
-// nothing anywhere reports a failure. Same lesson as _lib/nodeHandler.js's
-// header — a graceful degrade hides a hard failure indefinitely, so the read
-// path needs a test against the shape the real client produces, which is what
-// test/api-copy-handler.test.js now pins.
-//
-// An object is passed through rather than rejected: if a future client version
-// pairs the hash up despite the flag, that must WIDEN what this endpoint reads
-// instead of breaking it.
-export function hashFromReply(reply) {
-  if (!reply || typeof reply !== 'object') return {}
-  if (!Array.isArray(reply)) return reply
-  const out = {}
-  // Step by two. A trailing unpaired field can't come from Redis, but ignoring
-  // one is cheaper than storing a field whose value is undefined.
-  for (let i = 0; i + 1 < reply.length; i += 2) out[String(reply[i])] = reply[i + 1]
-  return out
-}
+// Re-exported so test/api-copy-handler.test.js keeps pinning it from here.
+export { hashFromReply }
 
 // The admin gate (Clerk token + COPY_ADMIN_USER_IDS allowlist) lives in
 // _lib/adminAuth.js now that api/ballpark-photo.js shares it. Same behaviour,

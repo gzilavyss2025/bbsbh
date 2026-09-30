@@ -186,7 +186,7 @@ What let it live that long is the part worth keeping:
   cannot falsify it.
 
 The fix keeps the flag, whose reason still holds, and restores the pairing
-explicitly: `hashFromReply` in `api/copy.js`, used by both the public GET and
+explicitly: `hashFromReply` (now in `api/_lib/redis.js`), used by both the public GET and
 the POST's `prev` snapshot. It accepts an object unchanged, so a future client
 version that pairs the hash up despite the flag widens what the endpoint reads
 rather than breaking it. `test/api-copy-handler.test.js` drives the real handler

@@ -21,7 +21,7 @@ import {
   authenticateUser,
   bearerToken,
 } from '../api/_lib/auth.js'
-import { redisConfigFromEnv } from '../api/_lib/redis.js'
+import { hashFromReply, redisConfigFromEnv } from '../api/_lib/redis.js'
 import copyHandler from '../api/copy.js'
 import revealHandler, {
   isFullyWrappedUp,
@@ -889,4 +889,13 @@ test('the season cap still refuses when the live stamps reach it', async () => {
 
   assert.equal(res.statusCode, 409)
   assert.equal(res.json.error, 'season full')
+})
+
+// hashFromReply lives in _lib/redis.js and serves copy, identity,
+// contract-identity and page — all four read with automaticDeserialization off.
+test('hashFromReply pairs a flat HGETALL array, passes an object through, and answers {} for no data', () => {
+  assert.deepEqual(hashFromReply(['a', '1', 'b', '2']), { a: '1', b: '2' })
+  assert.deepEqual(hashFromReply({ a: '1' }), { a: '1' })
+  for (const empty of [null, undefined, [], '', 0]) assert.deepEqual(hashFromReply(empty), {})
+  assert.deepEqual(hashFromReply(['a', '1', 'orphan']), { a: '1' })
 })
