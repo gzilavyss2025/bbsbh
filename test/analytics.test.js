@@ -40,6 +40,17 @@ test('buildToggleEventProps STRIPS any game-identifying / score key', () => {
   }
 })
 
+// The allowlist is the key set buildToggleEventProps returns. Feed each
+// game-identifying key alongside a valid event: none may pass through.
+test('the allowlist itself excludes every game-identifying key', () => {
+  const valid = { toggle: TOGGLES.SCORES_UNLOCKED, action: ACTIONS.CONFIRM, surface: SURFACES.SLATE }
+  for (const forbidden of ['gamePk', 'score', 'awayScore', 'homeScore', 'inning', 'revealedThrough', 'expiry']) {
+    const out = buildToggleEventProps({ ...valid, [forbidden]: 1 })
+    assert.ok(!(forbidden in out), `${forbidden} not allowlisted`)
+    assert.deepEqual(Object.keys(out).sort(), ['action', 'surface', 'toggle'])
+  }
+})
+
 test('buildToggleEventProps rejects an unknown enum value (returns null)', () => {
   assert.equal(buildToggleEventProps({ toggle: 'everything', action: ACTIONS.CONFIRM, surface: SURFACES.SLATE }), null)
   assert.equal(buildToggleEventProps({ toggle: TOGGLES.SCORES_UNLOCKED, action: 'nuke', surface: SURFACES.SLATE }), null)
