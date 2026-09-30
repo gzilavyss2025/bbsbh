@@ -15,6 +15,7 @@ import {
   nextStepBoundary,
   stepCommitReady,
   focusWindows,
+  windowReliefPitcherId,
   stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,
@@ -29,7 +30,7 @@ import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
 import { BallFlight } from '../charts/BallFlight.jsx'
 import { PitchLadder } from '../scoring/PitchLadder.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
-import { PitcherNotice, PitcherPhoto } from './PitcherNotice.jsx'
+import { PitcherNotice, PitcherPhoto, ReliefRepeat } from './PitcherNotice.jsx'
 import { DepartureLineCard, FinalizedLineCard } from './PitcherHandoffCard.jsx'
 import { AtBatHero } from './AtBatHero.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
@@ -334,6 +335,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
 
   return (
     <div className="pbp">
+      {windowed && beatKey != null && <ReliefRepeat pitcher={pitchingChangePitcher(feed, windowReliefPitcherId(visibleEntries))} teamId={pitchingTeamId} teamName={pitchingName} />}
       {visibleEntries.map((entry, i) => {
         let node
         if (entry.kind === 'placed') {
@@ -475,8 +477,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           // most of these events are actually about.
           node = (
             <EventCard
-              code={EVENT_CODES[entry.eventType]}
-              runnerId={entry.playerId}
+              code={EVENT_CODES[entry.eventType]} runnerId={entry.playerId} pitchLabel={entry.pitchLabel}
               teamId={BASERUNNER_EVENTS.has(entry.eventType) ? battingTeamId : pitchingTeamId}
               segments={entry.segments}
             />
@@ -528,7 +529,6 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     </div>
   )
 }
-
 
 // The ink-set's two knobs, published to the CSS from beats.js so the numbers
 // have one home (see that file's TUNING note).

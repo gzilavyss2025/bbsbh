@@ -1023,6 +1023,17 @@
   font-size: var(--fs-cell);
   color: var(--text-caption);
 }
+/* Which pitch a steal / caught stealing / pickoff came on ("Pitch 3"), pushed to
+   the card's right edge — the same caption recipe as the "N left" tail above. */
+.pitchernotice__pitchno {
+  flex: none;
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
 /* An ejection/event card's sentence — same natural-case prose treatment as
    .pbp__note (exempted from the ALL-CAPS INVARIANT below), since it's a full
    sentence straight from the feed, not a caps token. */
