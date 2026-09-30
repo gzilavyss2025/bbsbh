@@ -12,6 +12,8 @@ import {
   deriveTrendMarks,
   ageEdgeFact,
   prospectCardView,
+  packProspectTrend,
+  unpackProspectTrend,
 } from '../src/api/prospectTrend.js'
 
 const SNAPSHOT = {
@@ -315,4 +317,73 @@ test('prospectCardView is state "qualified" with tier, confidence, and trend all
   assert.deepEqual(view.ageEdge, { years: 2.1, direction: 'younger' })
   assert.equal(view.trend.points.length, 2)
   assert.deepEqual(view.trend.promotions, [])
+})
+
+// ---------------------------------------------------------------------------
+// pack / unpack (#1269) — the file ships with the week dates stored once and
+// each history row as an array, because the phone parses the whole file.
+// ---------------------------------------------------------------------------
+
+const PLAIN = {
+  generatedAt: '2026-09-30T05:00:00.000Z',
+  dataThrough: '2026-09-30',
+  levelAverageAge: { 11: 26.1, 12: 24.2 },
+  players: [
+    {
+      playerId: 111,
+      group: 'hitting',
+      sportId: 11,
+      percentile: 72,
+      qualified: true,
+      sampleSize: 210,
+      populationSize: 84,
+      movement: { delta: 9, sinceDate: '2026-09-09' },
+      history: [
+        { date: '2026-09-02', sportId: 12, percentile: 50, qualified: true },
+        { date: '2026-09-09', sportId: 12, percentile: 63, qualified: true },
+        { date: '2026-09-30', sportId: 11, percentile: 72, qualified: true },
+      ],
+    },
+    {
+      playerId: 222,
+      group: 'pitching',
+      sportId: 12,
+      percentile: null,
+      qualified: false,
+      sampleSize: 9,
+      populationSize: 60,
+      movement: null,
+      history: [
+        { date: '2026-09-09', sportId: 12, percentile: null, qualified: false },
+        { date: '2026-09-30', sportId: 12, percentile: null, qualified: false },
+      ],
+    },
+  ],
+}
+
+test('pack then unpack gives back the same snapshot, row for row', () => {
+  assert.deepEqual(unpackProspectTrend(packProspectTrend(PLAIN)), PLAIN)
+})
+
+test('a qualified row with no percentile survives the round trip', () => {
+  const odd = structuredClone(PLAIN)
+  odd.players[0].history[1] = { date: '2026-09-09', sportId: 12, percentile: null, qualified: true }
+  assert.deepEqual(unpackProspectTrend(packProspectTrend(odd)), odd)
+})
+
+test('the packed shape is marked and does not repeat a date per row', () => {
+  const packed = packProspectTrend(PLAIN)
+  assert.ok(packed.packed)
+  assert.equal(JSON.stringify(packed).split('2026-09-09').length - 1, 1)
+})
+
+test('unpack returns an old-shape snapshot unchanged', () => {
+  assert.equal(unpackProspectTrend(PLAIN), PLAIN)
+})
+
+test('unpack tolerates null, {} and a packed snapshot with no players', () => {
+  assert.equal(unpackProspectTrend(null), null)
+  assert.deepEqual(unpackProspectTrend({}), {})
+  const empty = { ...PLAIN, players: [] }
+  assert.deepEqual(unpackProspectTrend(packProspectTrend(empty)), empty)
 })
