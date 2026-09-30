@@ -73,6 +73,7 @@ import {
   starterLine,
   isQualityStart,
   battedAroundHalves,
+  PBP_FIELDS,
   firstPitcherKind,
   refreshRoleFacts,
   roleKey,
@@ -101,7 +102,6 @@ const CHECKPOINT_EVERY = 300
 // fraction of it, and a season backfill is ten thousand of them.
 const BOX_FIELDS =
   'teams,away,home,teamStats,batting,homeRuns,pitchers,players,stats,pitching,inningsPitched,earnedRuns'
-const PBP_FIELDS = 'allPlays,about,inning,halfInning,result,type'
 // The two season numbers the opener inference needs and nothing else; the
 // unpruned bulk pitching line is ~40 fields per pitcher at the level.
 const ROLE_FIELDS = 'stats,splits,player,id,stat,gamesPlayed,gamesStarted'
