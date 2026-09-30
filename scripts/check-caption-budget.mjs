@@ -52,7 +52,10 @@ import { resolve, join } from 'node:path'
 // is --fs-label (126 -> 125). The win probability chart then lost its axes, and
 // the rule for the half-inning arrow beside an axis label (.winprob__inningarrow)
 // went with them (125 -> 124).
-const BUDGET = 124
+// 124 -> 123: the Former Teammates card became crossroads rows; its side
+// names, legend and "+N" button are labels (--fs-label), and the old cards'
+// caption rules went with them.
+const BUDGET = 123
 
 const stylesDir = resolve('src/styles')
 const sheets = []

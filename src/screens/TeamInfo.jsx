@@ -731,8 +731,8 @@ function TeamSections({
         pairs={teammatePairs}
         startingIds={startingIds}
         dayNight={dayNight}
-        awayTeamId={side === 'away' ? meta.id : oppMeta.id}
-        homeTeamId={side === 'away' ? oppMeta.id : meta.id}
+        away={side === 'away' ? meta : oppMeta}
+        home={side === 'away' ? oppMeta : meta}
       />
       <OrgTies ties={orgTies} />
     </>

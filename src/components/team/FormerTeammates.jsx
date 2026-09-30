@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { groupTeammateCards, splitOldClubTies } from '../../api/formerTeammates.js'
+import { teammateCrossroads } from '../../api/formerTeammates.js'
 import { splitDisplayName } from '../../api/person.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Headshot } from '../player/Headshot.jsx'
@@ -9,127 +9,65 @@ import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { SectionMasthead } from '../ui/SectionMasthead.jsx'
 
-// The lineup page's FORMER TEAMMATES card and its ORG TIES fallback (moved out
-// of TeamInfo.jsx). Spoiler-free: rosters and team-season history carry no
-// score, so both render openly like the opposing-pitcher line.
+// The lineup page's FORMER TEAMMATES card and its ORG TIES fallback.
+// Spoiler-free: rosters and team-season history carry no score, so both
+// render openly like the opposing-pitcher line.
 
-// Show only the first handful up front — a heavy shared history (two rosters
-// that have swapped a lot of players) can run to dozens of cards — and let a
-// button reveal the rest rather than dumping them all in the page's height.
-const TEAMMATES_SHOWN = 5
-// Cap the headshots inside one GROUP card (a big reunion can run to a dozen+
-// spokes) so the tile stays a glance, not a scroll of its own.
-const GROUP_MATES_SHOWN = 6
+// Rows shown before "Show N more clubs" — a heavy shared history (two rosters
+// that swapped a lot of players) can run to a dozen clubs.
+const ROWS_SHOWN = 6
+// Headshots on one side of one row before "+N" — a big reunion can put a
+// dozen players on one side of a single club.
+const FACES_SHOWN = 4
 
-// Pins a pair/group whose players are BOTH in tonight's starting lineups above
-// everything else, ranked score included — the connection is about to play
-// out for real, pitch by pitch, on the user's own scoresheet, which is a
-// better fact than anything the static score can express.
-const TONIGHT_BOOST = 1000
-
-function isCardTonight(card, startingIds) {
-  if (!startingIds) return false
-  if (card.kind === 'group') {
-    return startingIds.has(card.anchor.id) && card.mates.some((m) => startingIds.has(m.id))
-  }
-  return startingIds.has(card.a.id) && startingIds.has(card.b.id)
-}
-
-// "MLB teammates, Colorado Rockies ’17–’21" — the one-line story under a card,
-// and the ONLY place a card states its club's years (the logo above carries no
-// years, so the card says it once). A pair that shares a second club names it
-// too: "…; also AAA, Albuquerque Isotopes ’16". The global ALL-CAPS rule (see
-// index.css) renders it uppercase; write it in natural case here.
-function clubClause(club) {
-  const label = club.level === 'MLB' ? 'MLB teammates' : `${club.level} teammates`
-  return `${label}, ${club.teamName} ${seasonRange(club.seasons)}`
-}
-
-function pairCaption(clubs) {
-  const [first, second] = clubs
-  if (!first) return ''
-  if (!second) return clubClause(first)
-  return `${clubClause(first)}; also ${second.level}, ${second.teamName} ${seasonRange(second.seasons)}`
-}
-
-// "Goldschmidt’s MLB teammates, St. Louis Cardinals ’23–’24" — a group card
-// names its anchor, so the card says whose teammates the other faces were.
-function groupCaption(c) {
-  const { last } = splitDisplayName(c.anchor.name)
-  const level = c.club.level === 'MLB' ? 'MLB' : c.club.level
-  return `${last}’s ${level} teammates, ${c.club.teamName} ${seasonRange(c.seasons)}`
-}
-
-// One card per pair of players — one from each club — who were once
-// teammates on a THIRD club, tiling 2–3 to a row depending on width, ranked
-// by how interesting the connection is (see formerTeammatePairs' `score`). A
-// real hub-and-spokes reunion collapses into a single GROUP card (see
-// groupTeammateCards). A tie made only on one of tonight's two clubs is not a
-// card: it is one line in the "Facing a former club" list at the top (see
-// splitOldClubTies), since "he used to play here" needs no wall of faces.
-// Hidden when there are no ties. `pairs` is order-independent and deduped
-// (see formerTeammatePairs), so this reads the same on either club's page.
-export function FormerTeammates({ pairs, startingIds, dayNight, awayTeamId, homeTeamId }) {
+// The card as crossroads: one row per shared club (see teammateCrossroads),
+// the club's logo and years in the middle, tonight's away players on the left
+// and home players on the right, under a head that names each side. Two
+// sections: "Facing a former club" (the club is one of tonight's own, so the
+// row holds only the player who LEFT it, with a count on the other side) and
+// "Teammates elsewhere" (they met on a third club). A green position badge
+// marks a starter; a row that plays out tonight is pinned first.
+export function FormerTeammates({ pairs, startingIds, dayNight, away, home }) {
   const [showAll, setShowAll] = useState(false)
-  const { cards, oldClub } = useMemo(() => {
-    const split = splitOldClubTies(pairs, awayTeamId, homeTeamId)
-    const grouped = groupTeammateCards(split.pairs).map((c) => ({
-      ...c,
-      tonight: isCardTonight(c, startingIds),
-    }))
-    grouped.sort(
-      (x, y) =>
-        y.score + (y.tonight ? TONIGHT_BOOST : 0) - (x.score + (x.tonight ? TONIGHT_BOOST : 0)),
-    )
-    return { cards: grouped, oldClub: split.oldClub }
-  }, [pairs, startingIds, awayTeamId, homeTeamId])
-  // `pairs` always runs (away player, home player) — see formerTeammatePairs'
-  // header — so any id that ever shows up as an `a` belongs to the away club
-  // and any `b` to the home club, regardless of which side's page is asking.
-  // Feeds each headshot's solid team-color background (see TeammateHalf) so a
-  // headshot always reads as "this is a Team A face" at a glance.
-  const sideTeamId = useMemo(() => {
-    const awayIds = new Set(pairs.map((p) => p.a.id))
-    return (id) => (awayIds.has(id) ? awayTeamId : homeTeamId)
-  }, [pairs, awayTeamId, homeTeamId])
-  if (cards.length === 0 && oldClub.length === 0) return null
-  const shown = showAll ? cards : cards.slice(0, TEAMMATES_SHOWN)
-  const hidden = cards.length - shown.length
-  const startingLabel = dayNight === 'day' ? 'Starting today' : 'Starting tonight'
+  const { former, elsewhere } = useMemo(
+    () => teammateCrossroads(pairs, away.id, home.id, startingIds),
+    [pairs, away.id, home.id, startingIds],
+  )
+  const total = former.length + elsewhere.length
+  if (total === 0) return null
+  const cap = showAll ? total : ROWS_SHOWN
+  const formerShown = former.slice(0, cap)
+  const elsewhereShown = elsewhere.slice(0, Math.max(0, cap - formerShown.length))
+  const hidden = total - formerShown.length - elsewhereShown.length
+  const anyStarting = [...former, ...elsewhere].some((r) =>
+    [...r.away, ...r.home].some((p) => p.starting),
+  )
+  const sides = { away, home }
   const head = <SectionMasthead as="h3" title="Former teammates" />
   return (
     <Card className="metric teammates" head={head} body="flush">
       <div className="metric__body">
-        <OldClubList lines={oldClub} />
-        {/* A CSS multi-column "waterfall" rather than a grid: a big reunion card
-            can run much taller than a plain pair card, and a grid stretches
-            every OTHER card in that row to match. Each card just flows into
-            whichever column has room next, so one tall card never drags its
-            row-mates' height with it. */}
-        {shown.length > 0 && (
-          <ul className="teammates__grid">
-            {shown.map((c) =>
-              c.kind === 'group' ? (
-                <GroupCard
-                  key={`g-${c.anchor.id}-${c.club.teamId}`}
-                  card={c}
-                  startingLabel={startingLabel}
-                  sideTeamId={sideTeamId}
-                />
-              ) : (
-                <PairCard
-                  key={`${c.a.id}-${c.b.id}`}
-                  card={c}
-                  startingLabel={startingLabel}
-                  sideTeamId={sideTeamId}
-                />
-              ),
-            )}
-          </ul>
+        <div className="xroads__sides" aria-hidden="true">
+          <span className="xroads__sidename">
+            <TeamLogo teamId={away.id} name={away.teamName} size={20} />
+            {away.teamName}
+          </span>
+          <span className="xroads__sidename xroads__sidename--home">
+            {home.teamName}
+            <TeamLogo teamId={home.id} name={home.teamName} size={20} />
+          </span>
+        </div>
+        {anyStarting && (
+          <p className="xroads__legend">
+            <span className="xroads__legendmark" />
+            {dayNight === 'day' ? 'Starting today' : 'Starting tonight'}
+          </p>
         )}
+        <RowGroup title="Facing a former club" rows={formerShown} sides={sides} />
+        <RowGroup title="Teammates elsewhere" rows={elsewhereShown} sides={sides} />
         {hidden > 0 && (
           <Door layout="block" onClick={() => setShowAll(true)}>
-            Show {hidden} more former {hidden === 1 ? 'teammate' : 'teammates'}
+            Show {hidden} more {hidden === 1 ? 'club' : 'clubs'}
           </Door>
         )}
       </div>
@@ -137,96 +75,84 @@ export function FormerTeammates({ pairs, startingIds, dayNight, awayTeamId, home
   )
 }
 
-// "Facing a former club": one line per player who once played for one of
-// tonight's two clubs — "Ali Sánchez · C — Boston Red Sox ’25". The club's
-// logo leads the line, so the eye can find "the ex-Red Sox" at a glance.
-function OldClubList({ lines }) {
-  if (lines.length === 0) return null
+function RowGroup({ title, rows, sides }) {
+  if (rows.length === 0) return null
   return (
-    <section className="oldclub">
-      <SectionHead look="label">Facing a former club</SectionHead>
-      <ul className="oldclub__list">
-        {lines.map((l) => (
-          <li key={`${l.player.id}-${l.club.teamId}`} className="oldclub__row">
-            <TeamLogo teamId={l.club.teamId} name={l.club.teamName} size={24} />
-            <span className="oldclub__text">
-              <PlayerLink id={l.player.id} name={l.player.name} className="oldclub__name">
-                {l.player.name}
-              </PlayerLink>
-              {l.player.pos && <span className="oldclub__pos">{posLabel(l.player.pos)}</span>}
-              <span className="oldclub__club">
-                {l.club.level === 'MLB' ? '' : `${l.club.level} `}
-                {l.club.teamName} {seasonRange(l.seasons)}
-              </span>
-            </span>
-          </li>
+    <section className="xroads__group">
+      <SectionHead look="label">{title}</SectionHead>
+      <ul className="xroads__list">
+        {rows.map((r) => (
+          <CrossroadsRow key={`${r.kind}-${r.club.teamId}`} row={r} sides={sides} />
         ))}
       </ul>
     </section>
   )
 }
 
-// A plain 1-vs-1 former-teammate card: a tile on Card (#1113, slice C3).
-function PairCard({ card: c, startingLabel, sideTeamId }) {
+// One shared club: away side | club | home side. On a 'former' row one side
+// is empty by construction (nobody on that club LEFT it), so it carries the
+// count of its players he played with there instead.
+function CrossroadsRow({ row: r, sides }) {
   return (
-    <Card as="li" className="teammate" body="flush">
-      {c.tonight && <span className="teammate__badge">{startingLabel}</span>}
-      <TeammateHalf id={c.a.id} name={c.a.name} pos={c.a.pos} teamId={sideTeamId(c.a.id)} />
-      <div className="teammate__mid">
-        <div className="teammate__logos">
-          {c.clubs.slice(0, 2).map((club) => (
-            <TeamLogo key={club.teamId} teamId={club.teamId} name={club.teamName} size={28} />
-          ))}
-        </div>
+    <li className="xroads__row">
+      <Side players={r.away} row={r} club={sides.away} align="end" />
+      <div className="xroads__club">
+        <TeamLogo teamId={r.club.teamId} name={r.club.teamName} size={32} />
+        <span className="xroads__clubname">
+          {r.club.level === 'MLB' ? '' : `${r.club.level} `}
+          {r.club.teamName}
+        </span>
+        <span className="xroads__years">{seasonRange(r.seasons)}</span>
       </div>
-      <TeammateHalf id={c.b.id} name={c.b.name} pos={c.b.pos} teamId={sideTeamId(c.b.id)} />
-      <span className="teammate__caption">{pairCaption(c.clubs)}</span>
-    </Card>
+      <Side players={r.home} row={r} club={sides.home} align="start" />
+    </li>
   )
 }
 
-// A hub-and-spokes reunion card. The ANCHOR (the one player every other face
-// shared the club with) stands alone in the first column behind a rule, so
-// the card reads "this player, and his teammates" rather than a flat row of
-// equals. The club's logo rides in the caption, not a third column, so the
-// spokes keep the width for two headshots a row on a narrow tile. Starts capped to GROUP_MATES_SHOWN spokes with a "+N more
-// teammates" button that reveals the rest of the headshots in place.
-function GroupCard({ card: c, startingLabel, sideTeamId }) {
+function Side({ players, row, club, align }) {
   const [expanded, setExpanded] = useState(false)
-  const shownMates = expanded ? c.mates : c.mates.slice(0, GROUP_MATES_SHOWN)
-  const moreCount = c.mates.length - shownMates.length
+  if (players.length === 0) {
+    if (row.kind !== 'former' || row.mates === 0) return <div className={`xroads__side xroads__side--${align}`} />
+    return (
+      <div className={`xroads__side xroads__side--${align} xroads__side--note`}>
+        <span className="xroads__mates">
+          With {row.mates} of tonight&rsquo;s {club.teamName}
+        </span>
+      </div>
+    )
+  }
+  const shown = expanded ? players : players.slice(0, FACES_SHOWN)
+  const more = players.length - shown.length
   return (
-    <Card as="li" className="teammate teammate--hub" body="flush">
-      {c.tonight && <span className="teammate__badge">{startingLabel}</span>}
-      <div className="teammate__anchor">
-        <TeammateHalf
-          id={c.anchor.id}
-          name={c.anchor.name}
-          pos={c.anchor.pos}
-          teamId={sideTeamId(c.anchor.id)}
-        />
-      </div>
-      {/* WHOSE roster each face is on tonight gets easy to lose past a couple
-          of rows — hence the per-player club color (see TeammateHalf). */}
-      <div className="teammate__group">
-        {shownMates.map((m) => (
-          <TeammateHalf key={m.id} id={m.id} name={m.name} pos={m.pos} teamId={sideTeamId(m.id)} />
-        ))}
-      </div>
-      <span className="teammate__caption teammate__caption--logo">
-        <TeamLogo teamId={c.club.teamId} name={c.club.teamName} size={20} />
-        {groupCaption(c)}
-      </span>
-      {moreCount > 0 && (
-        <button
-          type="button"
-          className="teammate__groupmore"
-          onClick={() => setExpanded(true)}
-        >
-          +{moreCount} more {moreCount === 1 ? 'teammate' : 'teammates'}
+    <div className={`xroads__side xroads__side--${align}`}>
+      {shown.map((p) => (
+        <Face key={p.id} player={p} />
+      ))}
+      {more > 0 && (
+        <button type="button" className="xroads__more" onClick={() => setExpanded(true)}>
+          +{more}
         </button>
       )}
-    </Card>
+    </div>
+  )
+}
+
+// A small headshot over the surname, the roster position as a badge on its
+// corner — green when he starts.
+function Face({ player: p }) {
+  const { last } = splitDisplayName(p.name)
+  return (
+    <PlayerLink id={p.id} name={p.name} className="xroads__face">
+      <span className="teammate__shotwrap">
+        <Headshot personId={p.id} name={p.name} teamId={p.teamId} className="xroads__shot" />
+        {p.pos && (
+          <span className={`teammate__posbadge${p.starting ? ' teammate__posbadge--starting' : ''}`}>
+            {posLabel(p.pos)}
+          </span>
+        )}
+      </span>
+      <span className="xroads__surname">{last}</span>
+    </PlayerLink>
   )
 }
 
