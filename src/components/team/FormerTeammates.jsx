@@ -86,17 +86,13 @@ function RowGroup({ title, rows }) {
   )
 }
 
-// One shared club as a tile: away side | club | home side. On a 'former' row
-// one side is empty by construction (nobody on that club LEFT it). A tile with
-// three or more faces on a side spans two tile tracks where the card is wide.
+// One shared club: away side | club | home side, the club column centered
+// on every row. On a 'former' row one side is empty by construction (nobody
+// on that club LEFT it), and stays empty.
 function CrossroadsRow({ row: r }) {
-  const wide = Math.max(r.away.length, r.home.length) > 2
-  // An empty side takes no room: the tile closes up to faces | club (or
-  // club | faces), so the faces keep their side of the card.
-  const oneSide = r.away.length === 0 ? ' xroads__row--homeonly' : r.home.length === 0 ? ' xroads__row--awayonly' : ''
   return (
-    <li className={`xroads__row${wide ? ' xroads__row--wide' : ''}${oneSide}`}>
-      {r.away.length > 0 && <Side players={r.away} align="end" />}
+    <li className="xroads__row">
+      <Side players={r.away} align="end" />
       <div className="xroads__club">
         <TeamLogo teamId={r.club.teamId} name={r.club.teamName} size={32} />
         <span className="xroads__clubname">
@@ -105,7 +101,7 @@ function CrossroadsRow({ row: r }) {
         </span>
         <span className="xroads__years">{seasonRange(r.seasons)}</span>
       </div>
-      {r.home.length > 0 && <Side players={r.home} align="start" />}
+      <Side players={r.home} align="start" />
     </li>
   )
 }
