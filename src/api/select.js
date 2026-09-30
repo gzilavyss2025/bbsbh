@@ -751,18 +751,31 @@ function boxscoreJersey(feed, id) {
   return ''
 }
 
-// Regulation length of the game (7 for some MiLB / doubleheader games, else 9).
-// Spoiler-safe: it's a fixed structural number, never a score. Drives how many
-// inning columns the boxscore shows before extra innings unlock one at a time.
+// A game's regulation length: its own `scheduledInnings` (7 for a Triple-A
+// seven-inning doubleheader game, ADR-0075), else 9. Spoiler-safe: a fixed
+// structural number, never a score. THE one home of the fallback-9 rule, so
+// every "did it go to extras" check reads the same length (review of #1295).
+export function regulationInnings(scheduledInnings) {
+  const n = Number(scheduledInnings)
+  return Number.isInteger(n) && n > 0 ? n : 9
+}
+
+// The inning count of a game that went past its own regulation length, else
+// null — never 0 or undefined, so `{extra && …}` in JSX cannot print a "0".
+export function extraInningsOf(innings, scheduledInnings) {
+  return Number.isInteger(innings) && innings > regulationInnings(scheduledInnings) ? innings : null
+}
+
+// Regulation length of a live feed's game. Drives how many inning columns the
+// boxscore shows before extra innings unlock one at a time.
 export function selectRegulationInnings(feed) {
-  return feed?.liveData?.linescore?.scheduledInnings ?? 9
+  return regulationInnings(feed?.liveData?.linescore?.scheduledInnings)
 }
 
 // Number of innings the linescore knows about (drives the inning navigator).
 export function selectInningCount(feed) {
   const innings = feed?.liveData?.linescore?.innings ?? []
-  const scheduled = feed?.liveData?.linescore?.scheduledInnings ?? 9
-  return Math.max(innings.length, scheduled)
+  return Math.max(innings.length, selectRegulationInnings(feed))
 }
 
 // Coarse Live/Final state used by GameView's fetch and polling gates. The

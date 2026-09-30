@@ -1,5 +1,6 @@
 import '../../styles/31d-prospect-card.css'
-import { prospectRankView } from '../../api/player/prospectRankHistory.js'
+import { fetchProspectRankHistory, prospectRankView } from '../../api/player/prospectRankHistory.js'
+import { useAsync } from '../../hooks/useAsync.js'
 import { Card } from '../ui/frame/Card.jsx'
 
 // PROSPECT RANKINGS -- the years a man sat on a top-prospect list, and where
@@ -12,15 +13,19 @@ import { Card } from '../ui/frame/Card.jsx'
 // that card; on the Overview of a player who has not debuted it follows it
 // there (screens/player/PlayerHistoryTab.jsx, screens/PlayerPage.jsx).
 //
-// This file only draws. WHAT the rows say, which source each year came from,
-// where the debut falls and how the gap after the last pulled season reads all
-// live in api/player/prospectRankHistory.js, where they are pure and tested.
+// The card reads its own frozen file (#1111) and renders nothing until it
+// arrives. The two screens that can draw it start that read at mount, beside
+// their core load, so the card is not a round trip late (review of #1295); the
+// read is shared once per session (api/staticJson.js). WHAT the rows say, which source
+// each year came from, where the debut falls and how the gap after the last
+// pulled season reads all live in api/player/prospectRankHistory.js, where they are pure and tested.
 // It names no source and no year: a label, a credit and the years covered all
 // arrive in the data, so dropping a source from the file changes nothing here.
 //
 // Renders NOTHING for a player with no ranked year. That is most players -- 982
 // have any -- and a player page must be complete without this card.
-export function ProspectRankHistoryCard({ history, playerId, debutYear, currentRank }) {
+export function ProspectRankHistoryCard({ playerId, debutYear, currentRank }) {
+  const { data: history } = useAsync(() => fetchProspectRankHistory(), [])
   const view = prospectRankView({
     history,
     playerId,

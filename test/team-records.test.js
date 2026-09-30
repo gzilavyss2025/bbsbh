@@ -25,6 +25,7 @@ import {
   isQualityStart,
   starterLine,
   battedAroundHalves,
+  PBP_FIELDS,
   starterProfile,
   firstPitcherKind,
   firstPitchersOnFile,
@@ -317,7 +318,13 @@ test('a refresh that succeeds stores the ledger first pitchers and nobody else',
 // battedAroundHalves
 // ---------------------------------------------------------------------------
 
-const pa = (inning, halfInning) => ({ result: { type: 'atBat' }, about: { inning, halfInning } })
+// The feed's real shape: `result.type` is 'atBat' on EVERY top-level play,
+// the baserunning ones included (#1282), so only `eventType` tells them apart.
+const play = (inning, halfInning, eventType) => ({
+  result: { type: 'atBat', eventType },
+  about: { inning, halfInning },
+})
+const pa = (inning, halfInning) => play(inning, halfInning, 'single')
 
 test('ten batters in a half is batting around; nine is not', () => {
   const plays = [
@@ -327,19 +334,48 @@ test('ten batters in a half is batting around; nine is not', () => {
   assert.deepEqual(battedAroundHalves(plays), { away: 1, home: 0 })
 })
 
-test('top-level baserunning plays do not count as plate appearances', () => {
-  // allPlays interleaves steals and pickoffs with real PAs; counting them
-  // would turn a busy inning into a phantom bat-around.
+test('nine plate appearances plus an inning-ending caught stealing is not batting around', () => {
+  // #1282: the feed types the caught stealing 'atBat' too. gamePk 823594's
+  // top 3rd ends on pickoff_caught_stealing_2b, 3 PAs counted as 4.
   const plays = [
     ...Array.from({ length: 9 }, () => pa(1, 'bottom')),
-    { result: { type: 'runnerEvent' }, about: { inning: 1, halfInning: 'bottom' } },
-    { result: { type: 'runnerEvent' }, about: { inning: 1, halfInning: 'bottom' } },
+    play(1, 'bottom', 'caught_stealing_2b'),
   ]
   assert.deepEqual(battedAroundHalves(plays), { away: 0, home: 0 })
 })
 
-test('a missing play-by-play counts nothing rather than throwing', () => {
-  assert.deepEqual(battedAroundHalves(undefined), { away: 0, home: 0 })
+test('top-level baserunning plays and game advisories do not count as plate appearances', () => {
+  const plays = [
+    ...Array.from({ length: 9 }, () => pa(1, 'top')),
+    play(1, 'top', 'pickoff_caught_stealing_2b'),
+    play(1, 'top', 'wild_pitch'),
+    play(1, 'top', 'game_advisory'),
+  ]
+  assert.deepEqual(battedAroundHalves(plays), { away: 0, home: 0 })
+})
+
+test('the play-by-play request keeps eventType, the field the plate-appearance test reads', () => {
+  // statsapi's `fields` filter prunes nested keys by name too: without
+  // eventType the response carries result.type alone.
+  assert.ok(PBP_FIELDS.split(',').includes('eventType'))
+})
+
+test('a missing play-by-play is unknown (null), so the game is fetched again, not stored as 0', () => {
+  // Review of #1295: 0/0 here was written to the row and marked ingested.
+  assert.equal(battedAroundHalves(undefined), null)
+  assert.equal(battedAroundHalves(null), null)
+  assert.deepEqual(battedAroundHalves([]), { away: 0, home: 0 })
+})
+
+test('a half ending on a top-level other_out after nine PAs is not batting around', () => {
+  const plays = [...Array.from({ length: 9 }, () => pa(2, 'top')), play(2, 'top', 'other_out')]
+  assert.deepEqual(battedAroundHalves(plays), { away: 0, home: 0 })
+})
+
+test('a lean feed with no eventType still counts its atBat plays', () => {
+  // Review of #1295: a feed that omits eventType must not read as 0 PAs.
+  const plays = Array.from({ length: 10 }, () => ({ result: { type: 'atBat' }, about: { inning: 5, halfInning: 'bottom' } }))
+  assert.deepEqual(battedAroundHalves(plays), { away: 0, home: 1 })
 })
 
 // ---------------------------------------------------------------------------

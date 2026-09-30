@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { fetchPlayerContractHistory } from '../../api/contractsHistory.js'
 import { loadPlayerCore } from '../../api/player/core.js'
 import { loadPlayerHistory, loadPositionScope } from '../../api/player/history.js'
@@ -52,9 +52,13 @@ export function PlayerHistoryTab({ id, asOf, sportId }) {
   // Keyed on the player alone — a career's money is an open, season-long record
   // with no as-of cutoff over it (ADR-0034, ADR-0052).
   const contracts = useAsync(() => fetchPlayerContractHistory(id), [id])
-  // Also its own load, for the same reason: a frozen file that only a minority
-  // of players have a row in (#1111). The card renders nothing until it arrives.
-  const rankHistory = useAsync(() => fetchProspectRankHistory(), [])
+  // Start the prospect-rankings file now, beside the core load, not after it:
+  // the card fetches it itself only once it mounts, behind the gate, and would
+  // pop in a round trip late. The read is shared once per session, so the
+  // card's own call finds it already on its way (review of #1295).
+  useEffect(() => {
+    fetchProspectRankHistory()
+  }, [])
   const back = () => window.history.back()
 
   const gate = AsyncGate({
@@ -131,7 +135,6 @@ export function PlayerHistoryTab({ id, asOf, sportId }) {
           it on his Overview instead, beside his path. */}
       {bio.debut && (
         <ProspectRankHistoryCard
-          history={rankHistory.data}
           playerId={bio.id}
           debutYear={Number(bio.debut.slice(0, 4))}
           currentRank={core.data.prospectRank}

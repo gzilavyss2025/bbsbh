@@ -108,3 +108,19 @@ test('a stint with no war field is dropped rather than stored as zero', async ()
   const { byTeam } = await teamWarSplits([1], 'hitting', 2026, { fetchImpl, sleepImpl: noSleep })
   assert.deepEqual(byTeam[1], [{ teamId: 121, war: 0.4 }])
 })
+
+// Review of #1287: the shared client pauses 2 s + 4 s per failing player, so a
+// loop that judges the failure ratio only at the end takes ~6 s x every id
+// during an outage. Once the carried count passes the cap the throw is certain,
+// so the loop must stop there.
+test('an outage stops the loop as soon as the failure cap is passed', async () => {
+  const ids = Array.from({ length: 20 }, (_, i) => i + 1)
+  let calls = 0
+  const fetchImpl = async () => {
+    calls += 1
+    return boom
+  }
+  await assert.rejects(() => teamWarSplits(ids, 'hitting', 2026, { fetchImpl, sleepImpl: noSleep }), /outage/)
+  // 3 tries per player; the cap is 25% of 20 = 5, so player 6 is the one that trips it.
+  assert.equal(calls, 6 * 3)
+})

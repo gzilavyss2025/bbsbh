@@ -495,7 +495,7 @@ const SCHEDULE_FIELDS = `${GAME_CARDS_FIELDS},lineups,awayPlayers,homePlayers,of
 const HEAD_TO_HEAD_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id'
 const TEAM_SCHEDULE_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,teams,away,home,team,id,name,teamName,abbreviation,status,abstractGameState,isWinner,score,linescore,currentInning'
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,teams,away,home,team,id,name,teamName,abbreviation,status,abstractGameState,isWinner,score,linescore,currentInning,scheduledInnings'
 
 // Every regular-season meeting between two clubs in one season, for the
 // footer's "find a past matchup" search. The schedule endpoint has no
@@ -535,7 +535,7 @@ export async function fetchHeadToHead(teamAId, teamBId, season, sportId = 1) {
 }
 
 const SEASON_SERIES_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id,score,isWinner,venue,name,timeZone,tz,linescore,currentInning'
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id,score,isWinner,venue,name,timeZone,tz,linescore,currentInning,scheduledInnings'
 
 // Same lookup as fetchHeadToHead, but WITH each side's score, the venue's own
 // time zone, and (for a completed game) how many innings it actually ran —
@@ -574,6 +574,7 @@ export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1) {
           awayScore: final ? (awaySide?.score ?? null) : null,
           homeScore: final ? (homeSide?.score ?? null) : null,
           innings: final ? (g.linescore?.currentInning ?? null) : null,
+          scheduledInnings: g.linescore?.scheduledInnings ?? null,
           tzId: g.venue?.timeZone?.id ?? null,
         })
       }
@@ -593,12 +594,12 @@ export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1) {
 // nothing to leak. This one asks for the score-bearing set (each side's runs off
 // `teams.*.score`, plus the live inning/half off `linescore`) — the same footing
 // as fetchSeasonSeries above, which already returns Final scores. Returns a
-// { [gamePk]: { awayScore, homeScore, currentInning, inningState } } map;
+// { [gamePk]: { awayScore, homeScore, currentInning, inningState, scheduledInnings } } map;
 // degrades to {} on any failure and to null-valued fields on a lean MiLB feed,
 // per the graceful-degradation convention. NEVER call this unless the pass is on
 // (GameSelect gates it on `scoresUnlocked && isToday`).
 const SLATE_SCORES_FIELDS =
-  'dates,games,gamePk,teams,away,home,score,linescore,currentInning,inningState'
+  'dates,games,gamePk,teams,away,home,score,linescore,currentInning,inningState,scheduledInnings'
 
 export async function fetchSlateScores(dateStr, sportId = 1, leagueId = null) {
   if (!dateStr) return {}
@@ -615,6 +616,7 @@ export async function fetchSlateScores(dateStr, sportId = 1, leagueId = null) {
           homeScore: g.teams?.home?.score ?? null,
           currentInning: g.linescore?.currentInning ?? null,
           inningState: g.linescore?.inningState ?? null,
+          scheduledInnings: g.linescore?.scheduledInnings ?? null,
         }
       }
     }
@@ -705,6 +707,7 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCuto
         runs: resultVisible ? (mySide?.score ?? null) : null,
         oppRuns: resultVisible ? (oppSide?.score ?? null) : null,
         innings: resultVisible ? (g.linescore?.currentInning ?? null) : null,
+        scheduledInnings: g.linescore?.scheduledInnings ?? null,
         // Status only, never gated by `resultsCutoff` — "has this game left
         // Preview" carries no score, unlike `won`/`runs`/`innings` above, so
         // it needs no cutoff to stay spoiler-free. See allStartedGames' own

@@ -73,6 +73,7 @@ import {
   starterLine,
   isQualityStart,
   battedAroundHalves,
+  PBP_FIELDS,
   firstPitcherKind,
   refreshRoleFacts,
   roleKey,
@@ -101,7 +102,6 @@ const CHECKPOINT_EVERY = 300
 // fraction of it, and a season backfill is ten thousand of them.
 const BOX_FIELDS =
   'teams,away,home,teamStats,batting,homeRuns,pitchers,players,stats,pitching,inningsPitched,earnedRuns'
-const PBP_FIELDS = 'allPlays,about,inning,halfInning,result,type'
 // The two season numbers the opener inference needs and nothing else; the
 // unpruned bulk pitching line is ~40 fields per pitcher at the level.
 const ROLE_FIELDS = 'stats,splits,player,id,stat,gamesPlayed,gamesStarted'
@@ -204,15 +204,17 @@ async function candidatesFor(dates, existing) {
 
 // One game → the two rows it produces, one per club. Returns null when the
 // game's own feeds fail, so the gamePk stays unmarked and is retried next run
-// rather than being permanently missed.
+// rather than being permanently missed. That includes the play-by-play: the
+// row keeps the finished batted-around count, so a 0 written for a failed
+// fetch would stay wrong until someone re-ingests the game by hand.
 async function rowsForGame({ game, sportId, date }, hands) {
   const gamePk = game.gamePk
   const [box, pbp] = await Promise.all([
     getJson(`/api/v1/game/${gamePk}/boxscore?fields=${BOX_FIELDS}`),
-    // Best-effort: a missing play-by-play costs only the batted-around count,
-    // so it degrades to zero rather than dropping the whole game.
-    getJson(`/api/v1/game/${gamePk}/playByPlay?fields=${PBP_FIELDS}`).catch(() => null),
+    getJson(`/api/v1/game/${gamePk}/playByPlay?fields=${PBP_FIELDS}`),
   ])
+  const ba = battedAroundHalves(pbp?.allPlays)
+  if (!ba) return null
 
   const ls = game.linescore ?? {}
   const innings = inningRuns(ls)
@@ -227,7 +229,6 @@ async function rowsForGame({ game, sportId, date }, hands) {
     away: starterLine(box.teams?.away),
     home: starterLine(box.teams?.home),
   }
-  const ba = battedAroundHalves(pbp?.allPlays)
   const season = Number(date.slice(0, 4))
 
   const side = (isHome) => {

@@ -71,6 +71,7 @@ export function stampGameFacts(game) {
     gameType: game.gameType ?? 'R',
     venue: game.venue?.name ?? '',
     innings: rows.length,
+    scheduledInnings: Number.isInteger(line.scheduledInnings) ? line.scheduledInnings : null,
     homeBattedLast,
     status: game.status?.abstractGameState ?? '',
     away,

@@ -9,6 +9,8 @@
 // caps-exemption. Do not introduce natural-case words here without registering
 // an exemption in index.css (scripts/check-caps.mjs enforces it).
 
+import { extraInningsOf } from '../api/select.js'
+
 const STATE_ABBR = { top: 'TOP', middle: 'MID', bottom: 'BOT', end: 'END' }
 
 function liveInningLabel(entry) {
@@ -55,8 +57,8 @@ export function slateScoreLine(entry, game) {
   const final = state === 'Final'
   let stateToken
   if (final) {
-    const n = entry.currentInning
-    stateToken = Number.isFinite(n) && n > 9 ? `F/${n}` : 'FINAL'
+    const extra = extraInningsOf(entry.currentInning, entry.scheduledInnings)
+    stateToken = extra ? `F/${extra}` : 'FINAL'
   } else {
     stateToken = liveInningLabel(entry) || 'LIVE'
   }

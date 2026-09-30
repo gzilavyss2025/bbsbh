@@ -21,6 +21,7 @@ import { selectBoxscore, computePlayOfTheGame, positionLabel, battingStat } from
 import { gameScore } from './performanceScore.js'
 import { calloutsForGame } from './callouts.js'
 import { gamePath } from '../lib/route.js'
+import { selectRegulationInnings } from './select.js'
 
 // A signal's protagonist, when it has one — the batter/pitcher whose face and
 // stat line the "Face the Story" row shows next to the headline. team* comes
@@ -466,7 +467,8 @@ function buildGameEntries(entries, calloutsData) {
     const box = selectBoxscore(feed)
     const potg = computePlayOfTheGame(winProb, feed)
     const winnerIsHome = box.home.line.r > box.away.line.r
-    const extraInnings = Math.max(0, (box.innings?.length ?? 9) - 9)
+    const regulation = selectRegulationInnings(feed)
+    const extraInnings = Math.max(0, (box.innings?.length ?? regulation) - regulation)
     const signals = [
       noHitterSignal(box, feed),
       triplePlaySignal(feed),

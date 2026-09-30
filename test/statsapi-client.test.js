@@ -266,3 +266,40 @@ test('a failed call is never cached', async () => {
     await rm(dir, { recursive: true, force: true })
   }
 })
+
+// Review of #1287: a TypeError with no network cause (a bad URL) is final.
+// Review of #1295: a body that does not parse is retried, because a body cut
+// short or a transient CDN page is the flake the retry policy is for.
+test('isRetryable: a TypeError with no network cause is final; a body that does not parse is retried', () => {
+  assert.equal(isRetryable(new TypeError('Invalid URL')), false)
+  assert.equal(isRetryable(new SyntaxError('Unexpected end of JSON input')), true)
+  assert.equal(isRetryable(dropped()), true)
+})
+
+test('a 200 whose body is cut short is retried, and the next good body is returned', async () => {
+  let calls = 0
+  const fetch = async () => {
+    calls += 1
+    return { ok: true, status: 200, json: async () => JSON.parse(calls === 1 ? '{"teams":[' : '{"teams":[]}') }
+  }
+  const { getJson } = createStatsapiClient({ fetch, sleep: noSleep })
+  assert.deepEqual(await getJson('/api/v1/teams'), { teams: [] })
+  assert.equal(calls, 2)
+})
+
+test('a 200 whose body never parses throws a SyntaxError after the shared tries', async () => {
+  let calls = 0
+  const fetch = async () => {
+    calls += 1
+    return { ok: true, status: 200, json: async () => JSON.parse('<html>') }
+  }
+  const { getJson } = createStatsapiClient({ fetch, sleep: noSleep })
+  await assert.rejects(() => getJson('/api/v1/teams'), SyntaxError)
+  assert.equal(calls, RETRY_TRIES)
+})
+
+test('tries: 1 on a call means one attempt, whatever the shared policy says', async () => {
+  const { fetch, getJson } = client([503])
+  await assert.rejects(() => getJson('/api/v1/teams', { tries: 1 }), /HTTP 503/)
+  assert.equal(fetch.calls.length, 1)
+})

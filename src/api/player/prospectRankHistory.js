@@ -95,19 +95,19 @@ export function prospectRankView({ history, playerId, debutYear, currentRank, cu
   const credits = []
   for (const id of shown) for (const line of sources[id].credit ?? []) if (!credits.includes(line)) credits.push(line)
 
-  return { entries, credits, note: coverageNote(depths, currentSeason) }
+  return { entries, credits, note: coverageNote(depths, currentSeason, Number.isFinite(currentRank)) }
 }
 
 // "Lists cover 2005–2024 and today's list. A year with no line means he was not
 // on that year's list. There is no data for 2025." The last sentence appears
 // only while the history trails the current season, so the gap is never left to
 // read as a fall from the list.
-function coverageNote(depths, currentSeason) {
+function coverageNote(depths, currentSeason, hasToday) {
   const seasons = Object.keys(depths).map(Number).filter(Number.isFinite)
   if (!seasons.length) return ''
   const first = Math.min(...seasons)
   const last = Math.max(...seasons)
-  let note = `Lists cover ${first}–${last} and today's list. A year with no line means he was not on that year's list.`
+  let note = `Lists cover ${first}–${last}${hasToday ? " and today's list" : ''}. A year with no line means he was not on that year's list.`
   if (Number.isFinite(currentSeason) && currentSeason - 1 > last) {
     const gapStart = last + 1
     const gapEnd = currentSeason - 1

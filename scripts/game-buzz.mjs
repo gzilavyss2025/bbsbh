@@ -28,11 +28,11 @@
 // Find the gamePk in the app's feed URL, or:
 //   https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=YYYY-MM-DD
 
+import { getJson } from './lib/statsapi.mjs'
+
 // The unauthenticated Bluesky AppView. NB: the older `public.api.bsky.app`
 // host is now bot-blocked (returns a 403 splash) — `api.bsky.app` still serves
 // the read-only app.bsky.* XRPC methods with no token. Verified 2026-07-07.
-import { getJson } from './lib/statsapi.mjs'
-
 const BSKY = 'https://api.bsky.app/xrpc'
 const REDDIT_OAUTH = 'https://oauth.reddit.com'
 const REDDIT_TOKEN = 'https://www.reddit.com/api/v1/access_token'

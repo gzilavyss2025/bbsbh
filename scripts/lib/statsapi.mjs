@@ -11,18 +11,23 @@
 //
 // The argument is a PATH that starts with "/", never a full URL. GET
 // https://statsapi.mlb.com + path, throw on a non-2xx, return the parsed body.
-// An optional second argument, { timeoutMs }, aborts a try that has not answered
-// in that time (the abort is a network error, so it is retried like one). No
-// caller gets a timeout unless it asks: warm-previews.mjs asks for 8 s.
+// An optional second argument, { timeoutMs, tries }, aborts a try that has not
+// answered in that time (the abort is a network error, so it is retried like
+// one). No caller gets a timeout unless it asks: warm-previews.mjs asks for 8 s.
+// `tries` overrides the count below for ONE call. Use it only where a call is
+// best-effort and a retry would blow its time budget: warm-previews.mjs asks for
+// 1 on its per-club roster calls, so an 8 s timeout stays 8 s and not 30. Its
+// schedule call keeps the retries, because the whole script depends on it.
 //
 // RETRY POLICY, decided once, here. The same for every caller:
 //   - 3 tries, with a pause of 2000 ms x attempt between them (2 s, then 4 s,
 //     none after the last). These are the numbers gen-doubleheaders.mjs got
 //     after one dropped socket killed the 2026-09-29 nightly run.
-//   - Retried: a network error (a dropped socket, a truncated body, a DNS blip),
-//     HTTP 429, and HTTP 5xx.
-//   - Never retried: any other 4xx. A 404 or a 400 will answer the same way
-//     again, so it throws at once.
+//   - Retried: a network error (a dropped socket, a DNS blip), a 200 body that
+//     does not parse as JSON (a body cut short, an empty body, a transient CDN
+//     page), HTTP 429, and HTTP 5xx.
+//   - Never retried: any other 4xx, or a TypeError with no network cause (a bad
+//     URL). Each answers the same way again, so it throws at once.
 // The mechanism is scripts/lib/net/retry.mjs's withRetry. Do not write a second
 // loop in a script: change RETRY_TRIES / RETRY_DELAY_MS here, with a reason.
 //
@@ -72,10 +77,14 @@ export class StatsapiError extends Error {
   }
 }
 
-// One retryable set: any failure that is not an HTTP answer (a network error, a
-// body cut short) plus HTTP 429 and 5xx. Every other 4xx is final.
+// One retryable set: a failure that is not an HTTP answer and is not a caller
+// bug (a network error, a body that does not parse) plus HTTP 429 and 5xx.
+// Every other 4xx is final. A dropped socket is a TypeError WITH a `cause`; a
+// bad URL is a TypeError without one. A body cut short and a transient HTML page
+// served with a 200 are both a SyntaxError, and a new try can fix both.
 export function isRetryable(err) {
   if (err instanceof StatsapiError) return err.status === 429 || err.status >= 500
+  if (err instanceof TypeError && !err.cause) return false
   return true
 }
 
@@ -108,9 +117,9 @@ export function createStatsapiClient({
     return res.json()
   }
 
-  async function pull(path, timeoutMs) {
+  async function pull(path, timeoutMs, callTries = tries) {
     try {
-      return await withRetry(() => fetchOnce(path, timeoutMs), { tries, delayMs, sleep, shouldRetry: isRetryable })
+      return await withRetry(() => fetchOnce(path, timeoutMs), { tries: callTries, delayMs, sleep, shouldRetry: isRetryable })
     } catch (err) {
       throw explain(err, path)
     }
@@ -128,14 +137,14 @@ export function createStatsapiClient({
     return null
   }
 
-  async function getJson(path, { timeoutMs } = {}) {
+  async function getJson(path, { timeoutMs, tries: callTries } = {}) {
     if (typeof path !== 'string' || !path.startsWith('/')) {
       throw new Error(`statsapi getJson: the argument is a path and must start with "/", got ${JSON.stringify(path)}`)
     }
-    if (!cacheDir) return pull(path, timeoutMs)
+    if (!cacheDir) return pull(path, timeoutMs, callTries)
     const hit = await readCache(path)
     if (hit) return hit.body
-    const body = await pull(path, timeoutMs)
+    const body = await pull(path, timeoutMs, callTries)
     await mkdir(cacheDir, { recursive: true })
     await writeFile(cacheFile(path), JSON.stringify({ fetchedAt: now(), path, body }))
     return body
