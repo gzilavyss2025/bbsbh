@@ -6,6 +6,7 @@ import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { contextNeutralPoints, gameScore as pitcherGameScore } from '../src/api/performanceScore.js'
 import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 const OUT = `${ROOT}/public/data/first-scorebook.json`
@@ -81,22 +82,6 @@ const lineForBatter = (s) => {
 }
 const lineForPitcher = (s) => `${s.inningsPitched ?? '0.0'} IP, ${s.hits ?? 0} H, ${s.runs ?? 0} R, ${s.baseOnBalls ?? 0} BB, ${s.strikeOuts ?? 0} K`
 
-// Bounded-concurrency map — statsapi starts failing a large chunk of requests
-// once a few hundred are in flight at once, so a plain Promise.all(items.map)
-// over a full season's worth of boxscore fetches isn't reliable.
-async function mapLimit(items, limit, fn) {
-  const results = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const index = cursor++
-      results[index] = await fn(items[index])
-    }
-  }
-  await Promise.all(Array.from({ length: limit }, worker))
-  return results
-}
-
 // League-wide Game Score context for the book's pitching nuggets: every 2026
 // MLB starting pitcher's Bill James Game Score, so a start in the scorebook
 // can be placed against the whole season rather than just the other 31 in
@@ -108,7 +93,8 @@ async function fetchLeagueStarterGameScores() {
     .flatMap((d) => d.games ?? [])
     .filter((g) => g.status?.abstractGameState === 'Final')
     .map((g) => g.gamePk)
-  const boxscores = await mapLimit(gamePks, 40, (gamePk) => getJson(`/api/v1/game/${gamePk}/boxscore`).catch(() => null))
+  // Bounded: statsapi fails a large share of requests once a few hundred are in flight.
+  const boxscores = await mapConcurrent(gamePks, 40, (gamePk) => getJson(`/api/v1/game/${gamePk}/boxscore`).catch(() => null))
   const scores = []
   for (const box of boxscores) {
     if (!box) continue

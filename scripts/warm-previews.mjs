@@ -34,6 +34,7 @@
 
 import { fetchWithTimeout } from '../api/_lib/http.js'
 import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 
 const APP_ORIGIN = 'https://bbsbh.vercel.app'
 const REQUEST_TIMEOUT_MS = 8000
@@ -97,27 +98,6 @@ function matchupSlug(awayAbbr, homeAbbr, gameNumber = 1) {
   const base = `${(awayAbbr || '').toLowerCase()}${(homeAbbr || '').toLowerCase()}`
   return gameNumber > 1 ? `${base}-${gameNumber}` : base
 }
-
-// Run an async mapper across items with a small concurrency cap (be polite
-// to both statsapi and our own edge functions). Mirrors gen-milestones.mjs /
-// gen-vs-team-splits.mjs's helper of the same name.
-async function mapConcurrent(items, limit, mapper) {
-  const results = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        results[i] = await mapper(items[i], i)
-      } catch {
-        results[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return results
-}
-
 
 // Fetches a pretty preview page (warming its own cache entry as a side
 // effect) and, if it carries an og:image tag not already warmed this run,

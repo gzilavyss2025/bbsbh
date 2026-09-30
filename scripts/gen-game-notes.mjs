@@ -29,6 +29,7 @@
 import { dirname, join } from 'node:path'
 import { readdir } from 'node:fs/promises'
 import { readJsonOr, writeShards } from './lib/io.js'
+import { mapConcurrent } from './lib/concurrency.mjs'
 import { fileURLToPath } from 'node:url'
 import { getJson as getStatsapiJson } from './lib/statsapi.mjs'
 
@@ -91,25 +92,6 @@ function mergeNotes(existing = [], incoming = []) {
   return [...byUrl.values()].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
 }
 
-// Run an async fn across items with a small concurrency cap — be polite to the
-// feed rather than firing all 30 clubs at once.
-async function mapWithConcurrency(items, limit, fn) {
-  const results = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        results[i] = await fn(items[i])
-      } catch {
-        results[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return results
-}
-
 // --- main ---------------------------------------------------------------------
 // ENOENT → genuine first run; any other read/parse error (a corrupt committed
 // file) must abort, not silently rebuild from only the trailing window and
@@ -121,7 +103,7 @@ for (const f of await readdir(outDir).catch(() => [])) {
 }
 
 const teamIds = await fetchMlbTeams()
-const fetched = await mapWithConcurrency(teamIds, 6, async (id) => ({
+const fetched = await mapConcurrent(teamIds, 6, async (id) => ({
   id,
   notes: await fetchTeamNotes(id),
 }))

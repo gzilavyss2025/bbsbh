@@ -100,6 +100,7 @@ import { leanInputFromRows } from '../src/api/umpires.js'
 import { estimateGameConsistency } from '../src/lib/euz.js'
 import { pitchFavor } from '../src/lib/runExpectancy.js'
 import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import { mergeAccuracyRows } from './lib/umpire-accuracy-merge.mjs'
 
@@ -413,23 +414,6 @@ function aggregate(games) {
   return sum
 }
 
-async function mapWithConcurrency(items, limit, fn) {
-  const results = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        results[i] = await fn(items[i])
-      } catch {
-        results[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return results
-}
-
 // --- main ---------------------------------------------------------------------
 const args = parseArgs(process.argv.slice(2))
 const { startDate, endDate } = dateRange(args, DEFAULT_DAYS)
@@ -498,7 +482,7 @@ for (const { sportId, level } of LEVELS) {
   }
 }
 
-const rows = await mapWithConcurrency(targets, 6, async (t) => {
+const rows = await mapConcurrent(targets, 6, async (t) => {
   const feed = await getJson(`/api/v1.1/game/${t.gamePk}/feed/live`)
   const acc = computeGameAccuracy(feed)
   if (!acc) return null // park without pitch tracking — nothing to score

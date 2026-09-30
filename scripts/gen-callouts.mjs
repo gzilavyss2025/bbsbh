@@ -133,6 +133,7 @@ import { readFile, readdir, rm } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getJson as statsapiJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeShards } from './lib/io.js'
 import { loadCenturyClub } from './lib/century-club.mjs'
 import { loadArsenalSide } from './lib/arsenal-side.mjs'
@@ -409,25 +410,6 @@ const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
 function isBirthdayOn(birthDate, dateApi) {
   if (!birthDate) return false
   return birthDate.slice(5) === dateApi.slice(5)
-}
-
-// A tiny bounded-concurrency map so the per-hitter game-log sweep doesn't open
-// hundreds of sockets at once. Failures degrade to null for that item.
-async function mapPool(items, size, fn) {
-  const out = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        out[i] = await fn(items[i], i)
-      } catch {
-        out[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(size, items.length || 1) }, worker))
-  return out
 }
 
 // One club's 40-man roster with season hitting+pitching hydrated — the exact
@@ -1260,7 +1242,7 @@ const pitcherIdsByTeam = new Map() // teamId -> [personId]
 const allHitterIds = new Set()
 const allPitcherIds = new Set()
 
-await mapPool(teamIds, 6, async (teamId) => {
+await mapConcurrent(teamIds, 6, async (teamId) => {
   const sportId = teamMeta.get(teamId)?.sportId ?? MLB
   const roster = await fetchRoster(teamId, sportId)
   const pool = normalizeRosterToPool(roster, {
@@ -1279,7 +1261,7 @@ await mapPool(teamIds, 6, async (teamId) => {
     // club's 40-man roster with status 'RM' (Reassigned to Minors) alongside
     // his real, active listing on the affiliate — verified 2026-08-09,
     // Brandon Sproat (personId 687075) on both Milwaukee's and Nashville's
-    // roster fetch. teamIds' concurrent fan-out (mapPool above) makes write
+    // roster fetch. teamIds' concurrent fan-out (mapConcurrent) makes write
     // order a coin flip, so an unconditional last-write-wins is non-
     // deterministic; require the 'Active' row to win instead — same fix shape
     // as roster.mjs's dedupeRosterEntries, applied here rather than imported
@@ -1321,7 +1303,7 @@ for (const sportId of new Set([...teamMeta.values()].map((m) => m.sportId))) {
   rankIdsBySport.set(sportId, ids)
   for (const id of ids) rankSportById.set(id, sportId)
 }
-await mapPool([...rankSportById.keys()], 6, async (teamId) => {
+await mapConcurrent([...rankSportById.keys()], 6, async (teamId) => {
   scoringByTeam.set(teamId, await scoringRecord(teamId, rankSportById.get(teamId) ?? MLB))
 })
 const ranksByTeam = rankAllLevels(
@@ -1335,7 +1317,7 @@ const ranksByTeam = rankAllLevels(
 // doubleheader. Two independent endpoints per hitter, run together so the
 // concurrency cap covers both without a second full pass over the list.
 const hitterList = [...allHitterIds]
-const enrichList = await mapPool(hitterList, 8, (id) =>
+const enrichList = await mapConcurrent(hitterList, 8, (id) =>
   Promise.all([
     hitterEnrich(id, sportIdByPerson.get(id) ?? MLB),
     hitterSituational(id, sportIdByPerson.get(id) ?? MLB),
@@ -1353,7 +1335,7 @@ hitterList.forEach((id, i) => {
 // probable starters (a bullpen call-up can start; a reliever's own scoreless
 // streak/rest note fires whenever HE actually takes the mound tonight).
 const pitcherList = [...allPitcherIds]
-const pitcherEnrichList = await mapPool(pitcherList, 8, (id) =>
+const pitcherEnrichList = await mapConcurrent(pitcherList, 8, (id) =>
   pitcherEnrich(id, sportIdByPerson.get(id) ?? MLB, teamIdByPerson.get(id)),
 )
 const pitcherEnrichById = new Map()
@@ -1386,7 +1368,7 @@ const bullpenAvgBySport = {}
 const ttoById = new Map()
 {
   const ids = [...probableSport.keys()]
-  const results = await mapPool(ids, 6, (id) => ttoSplits(id, probableSport.get(id) ?? MLB))
+  const results = await mapConcurrent(ids, 6, (id) => ttoSplits(id, probableSport.get(id) ?? MLB))
   ids.forEach((id, i) => {
     if (results[i]) ttoById.set(id, results[i])
   })
@@ -1402,7 +1384,7 @@ const birthdayIds = [...birthDateById.keys()].filter(
     (sportIdByPerson.get(id) ?? MLB) === MLB && isBirthdayOn(birthDateById.get(id), targetApi),
 )
 const birthdayStatsById = new Map()
-await mapPool(birthdayIds, 4, async (id) => {
+await mapConcurrent(birthdayIds, 4, async (id) => {
   const line = await birthdayLine(id, birthDateById.get(id), debutById.get(id))
   if (line) birthdayStatsById.set(id, line)
 })

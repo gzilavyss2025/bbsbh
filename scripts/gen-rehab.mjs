@@ -19,6 +19,7 @@ import { fileURLToPath } from 'node:url'
 import { SPORT_LABEL } from '../src/lib/teams.js'
 import { txnDate, isRehabTxn, isRehabEndingTxn } from '../src/api/rehab-policy.js'
 import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -172,25 +173,6 @@ async function isStillRehabbing(row, position, level, season) {
   return gamesSince < REHAB_STALE_GAMES
 }
 
-// Run an async predicate across items with a small concurrency cap, keeping the
-// survivors in order (be polite to statsapi rather than firing dozens at once).
-async function keepConcurrent(items, limit, predicate) {
-  const keep = new Array(items.length).fill(false)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        keep[i] = await predicate(items[i])
-      } catch {
-        keep[i] = false
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return items.filter((_, i) => keep[i])
-}
-
 // --- main ---------------------------------------------------------------------
 const mlbIds = await fetchMlbTeamIds()
 const txns = (await getJson(`/api/v1/transactions?startDate=${daysAgo(REHAB_WINDOW_DAYS)}&endDate=${isoToday()}`)).transactions ?? []
@@ -202,9 +184,11 @@ const [positions, levels] = await Promise.all([
   fetchTeamLevels(candidates.map((r) => r.clubId)),
 ])
 const season = currentSeason()
-const active = await keepConcurrent(candidates, 8, (r) =>
+// A failed lookup drops the player (null), same as a rehab that has ended.
+const stillRehabbing = await mapConcurrent(candidates, 8, (r) =>
   isStillRehabbing(r, positions[r.playerId] || '', levels[r.clubId] ?? null, season),
 )
+const active = candidates.filter((_, i) => stillRehabbing[i])
 const players = active.map((r) => ({
   ...r,
   position: positions[r.playerId] || '',

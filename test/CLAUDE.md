@@ -33,6 +33,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | challenges.test.js | 23 | src/api/challenges.js | ABS challenge tracking — the per-play primitive and the half-clamp, plus which games run the system (`gameHasAbs` reads the feed's `gameData.absChallenges`, not a level) and the clamp re-proved on a captured Triple-A game |
 | comeback-wins.test.js | 13 | scripts/gen-comeback-wins.mjs, src/api/comebackWins.js | Comeback-wins card |
 | compute-batter-line.test.js | 5 | src/api/boxscore.js | Spoiler-safe batter line (never live pre-reveal) |
+| concurrency.test.js | 6 | scripts/lib/concurrency.mjs | The shared worker pool: input order and index, the `limit` cap, a failed item becoming `null` by default, and `{ strict: true }` rejecting instead (gen-manager-history, gen-milb-history, gen-mono-logos and the game-notes download rely on it) |
 | condensed-day-index.test.js | 14 | scripts/lib/highlights.mjs, src/api/gamePhotos.js | Day-index generation policy: condensed-cut selection (never the recap) + hero-photo pick for the slate's revealed result cards |
 | contract-view.test.js | 21 | src/api/person/contract/view.js | The Contract card's reading of one shard record: which regime leads the card, the arbitration/free-agency years read off the out-year codes (Super Two included), who the terms say holds an option, and the salary schedule's cash-only bars |
 | copy-registry.test.js | 36 | src/copy/registry.js | Admin-editable consent copy (ADR-0025/0026), MLB + MiLB ballpark field derivation |
