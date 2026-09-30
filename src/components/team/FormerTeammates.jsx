@@ -20,16 +20,21 @@ const ROWS_SHOWN = 6
 // The card as crossroads: one row per shared club (see teammateCrossroads),
 // the club's logo and years in the middle, tonight's away players on the left
 // and home players on the right, under a head that names each side. Two
-// sections: "Facing a former club" (the club is one of tonight's own, so the
-// row holds only the player who LEFT it) and
+// sections: "Facing a former club" (the club, or its farm club, is one of
+// tonight's own, so the row holds only the player who LEFT it; a row of only
+// farm-club stints reads "<club> system") and
 // "Teammates elsewhere" (they met on a third club). Every face shows: no
 // "+N" and no "with N of tonight's …" count. A green position badge
 // marks a starter; a row that plays out tonight is pinned first.
 export function FormerTeammates({ pairs, startingIds, dayNight, away, home }) {
   const [showAll, setShowAll] = useState(false)
   const { former, elsewhere } = useMemo(
-    () => teammateCrossroads(pairs, away.id, home.id, startingIds),
-    [pairs, away.id, home.id, startingIds],
+    () =>
+      teammateCrossroads(pairs, away.id, home.id, startingIds, {
+        [away.id]: away.teamName,
+        [home.id]: home.teamName,
+      }),
+    [pairs, away.id, home.id, away.teamName, home.teamName, startingIds],
   )
   const total = former.length + elsewhere.length
   if (total === 0) return null
