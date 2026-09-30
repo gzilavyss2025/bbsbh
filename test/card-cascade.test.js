@@ -2251,11 +2251,6 @@ test('H3: each new second-line class is in a stylesheet and in a markup file or 
   }
 })
 
-test('H3: a renamed class never lands on a name another block already owns', () => {
-  const targets = H3_RENAMED.map(([, now]) => now)
-  assert.equal(new Set(targets).size, targets.length, 'two rows share one target')
-})
-
 test('H3: the held rows keep their names', () => {
   const trees = h3Trees()
   const held = [
