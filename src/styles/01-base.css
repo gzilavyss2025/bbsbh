@@ -40,8 +40,9 @@
    cascade shouts anyway. The guard checks that too now: it compares each
    exempt rule's specificity against the blanket it sits under, which is how
    five long-shouting paragraphs were finally found (issue #769). The one
-   exemption WITHOUT `#root` is `.focusrail__sheet .marginnotes__text`, and it
-   is correct: ModalPortal renders that sheet outside #root, so it answers to
+   exemptions WITHOUT `#root` are `.focusrail__sheet .marginnotes__text` and
+   `.focusrail__sheet .winprob__ledger-desc`, and they are correct: ModalPortal
+   renders that sheet outside #root, so it answers to
    `.focusrail__sheet *` instead (focus/reference.css). The exceptions:
      - play-by-play copy and its feed-sourced siblings — `.pbp__desc`,
        `.pbp__subnote`, `.pbp__note`, `.pbp__notetext`, `.pbp__callout`,

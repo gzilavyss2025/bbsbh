@@ -471,11 +471,16 @@
   text-transform: uppercase;
 }
 
-/* …and the one exemption that lives inside it, re-stated for the same reason:
-   `20-charts.css` writes it as `#root .marginnotes__text`, which cannot match
-   out here. The ARMS tab's fun-fact line is a sentence and reads as one. */
+/* …and the two exemptions that live inside it, re-stated for the same reason:
+   `20-charts.css` writes them as `#root .marginnotes__text` and
+   `#root .winprob__ledger-desc`, which cannot match out here. The ARMS tab's
+   fun-fact line and the EXTRAS tab's swing descriptions are sentences and
+   read as them. */
 .focusrail__sheet .marginnotes__text {
   text-transform: none; /* caps-exempt: margin notes' fun-fact line reads as a natural sentence, exactly as it does inside #root */
+}
+.focusrail__sheet .winprob__ledger-desc {
+  text-transform: none; /* caps-exempt: a swing's feed-sourced play description reads as a natural sentence, exactly as it does inside #root */
 }
 
 .focusrail__sheethead {
