@@ -792,7 +792,10 @@ const BUDGETS = {
   // player page's Prospect rankings card (#1111). A generator RUNS on import, so
   // scripts/lib/ cannot hold it, and every other gen-*.mjs sits flat here. Its
   // pure half went to scripts/lib/prospect-rank-history.mjs (see that entry).
-  scripts: 118,
+  // +1 for check-all.mjs, the one runner behind `npm run lint` (#1310). It
+  // replaced a 29-command `&&` chain in package.json, so it belongs beside the
+  // guards it runs.
+  scripts: 119,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
