@@ -15,6 +15,7 @@ import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { VsLevelSlider } from '../components/badges/VsLevelSlider.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { Table } from '../components/ui/table/Table.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
@@ -79,7 +80,7 @@ function AssignmentCell({ player }) {
 function ProspectBoard({ players, trend, selectedId, onSelect }) {
   return (
     <div className="prospectboard-wrap">
-      <table className="prospectboard">
+      <Table className="prospectboard">
         <caption className="sr-only">MLB Pipeline Top 100 ranking with current level, season line, and standing versus level</caption>
         <thead>
           <tr>
@@ -113,7 +114,7 @@ function ProspectBoard({ players, trend, selectedId, onSelect }) {
             )
           })}
         </tbody>
-      </table>
+      </Table>
     </div>
   )
 }

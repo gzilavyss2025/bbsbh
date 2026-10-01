@@ -44,6 +44,11 @@
    before 06, for the same reason: a namespace rule that keeps a margin or a
    grid loads later and wins on order. */
 @import './styles/system/card.css';
+/* The TABLE — the one grid of figures with column names (#1132). Right after
+   the card and before 06, for the same reason: a namespace rule that keeps a
+   margin or a column width loads later and wins on order.
+   test/table-cascade.test.js pins the slot. */
+@import './styles/system/table.css';
 @import './styles/06-loader-and-cards.css';
 @import './styles/06a-gamecard-parkart.css';
 @import './styles/06b-offday-cards.css';
