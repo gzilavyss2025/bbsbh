@@ -102,9 +102,8 @@ test('normalizeGame carries no seriesStatus or leagueRecord from a postseason ro
 // --------------------------------------------------------------------------
 // 2. fetchSlateScores — the toggle-gated score fetch
 // --------------------------------------------------------------------------
-test('fetchSlateScores maps each game to its runs + live inning', async () => {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async () =>
+test('fetchSlateScores maps each game to its runs + live inning', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () =>
     response({
       dates: [
         {
@@ -117,29 +116,20 @@ test('fetchSlateScores maps each game to its runs + live inning', async () => {
           ],
         },
       ],
-    })
-  try {
-    const map = await fetchSlateScores('2026-07-24', 1)
-    assert.deepEqual(map[777001], {
-      awayScore: 4,
-      homeScore: 2,
-      currentInning: 7,
-      inningState: 'Bottom',
-      scheduledInnings: 9,
-    })
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+    }))
+  const map = await fetchSlateScores('2026-07-24', 1)
+  assert.deepEqual(map[777001], {
+    awayScore: 4,
+    homeScore: 2,
+    currentInning: 7,
+    inningState: 'Bottom',
+    scheduledInnings: 9,
+  })
 })
 
-test('fetchSlateScores degrades to {} on a failed request', async () => {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async () => response({ error: 'boom' }, 500)
-  try {
-    assert.deepEqual(await fetchSlateScores('2026-07-24', 1), {})
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+test('fetchSlateScores degrades to {} on a failed request', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () => response({ error: 'boom' }, 500))
+  assert.deepEqual(await fetchSlateScores('2026-07-24', 1), {})
 })
 
 test('fetchSlateScores returns {} without a date (never fetches)', async () => {
