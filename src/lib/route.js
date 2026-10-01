@@ -129,8 +129,7 @@ import {
   winterLeagueBySlug,
 } from './winter/leagues.js'
 
-// Newest season in src/api/tradeDeadline.js SEASONS (test/route.test.js pins
-// the match), kept here so this module needs no api import.
+// Newest SEASONS year in api/tradeDeadline.js (test/route.test.js pins it).
 const LATEST_TRADE_DEADLINE_SEASON = 2026
 
 // The slate's league, as a URL prefix. Two things are deliberately missing.
