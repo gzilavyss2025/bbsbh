@@ -19,7 +19,7 @@
 // indent. A modifier, not a bare element rule, so a block's own namespace
 // still wins on order.
 export const GAPS = ['tight', 'snug', 'base', 'loose', 'section']
-export const STACK_TAGS = ['div', 'section', 'article', 'aside', 'header', 'footer', 'nav', 'main', 'ul', 'ol', 'li', 'form', 'fieldset']
+export const STACK_TAGS = ['div', 'section', 'article', 'aside', 'header', 'footer', 'nav', 'main', 'ul', 'ol', 'li', 'form', 'fieldset', 'label']
 const LISTS = ['ul', 'ol']
 
 export function stackClassName({ gap = 'base', as = 'div', className = '' } = {}) {

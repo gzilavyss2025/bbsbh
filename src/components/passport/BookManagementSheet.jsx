@@ -2,6 +2,7 @@ import '../../styles/58-logbook-shelf.css'
 import { useState } from 'react'
 import { MAX_BOOK_SUBTITLE_LENGTH, MAX_BOOK_TITLE_LENGTH } from '../../lib/books.js'
 import { BookCoverPicker } from './BookCoverPicker.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // One book's SETTINGS — rename it, re-cover it, or remove it. Reachable from
 // two places by design: the shelf, when 2+ books already exist, and the
@@ -89,8 +90,8 @@ export function BookManagementSheet({
   }
 
   return (
-    <div className="bookmgmt" role="group" aria-label="Settings for this book">
-      <label className="bookmgmt__field">
+    <Stack gap="loose" className="bookmgmt" role="group" aria-label="Settings for this book">
+      <Stack gap="tight" as="label" className="bookmgmt__field">
         <span>Title</span>
         <input
           type="text"
@@ -103,8 +104,8 @@ export function BookManagementSheet({
             if (e.key === 'Enter') e.currentTarget.blur()
           }}
         />
-      </label>
-      <label className="bookmgmt__field">
+      </Stack>
+      <Stack gap="tight" as="label" className="bookmgmt__field">
         <span>Subtitle</span>
         <input
           type="text"
@@ -117,12 +118,12 @@ export function BookManagementSheet({
             if (e.key === 'Enter') e.currentTarget.blur()
           }}
         />
-      </label>
+      </Stack>
 
       <BookCoverPicker book={draft} onChange={(patch) => updateCover(book.id, patch)} />
 
       {confirmingRemove ? (
-        <div className="bookmgmt__confirm">
+        <Stack gap="snug" className="bookmgmt__confirm">
           <p>
             Remove “{book.title || 'Game Log'}”? Every stamp in it goes back to the
             tray, keeping its game, its note and its score — nothing is deleted, and
@@ -140,7 +141,7 @@ export function BookManagementSheet({
               Keep it
             </button>
           </div>
-        </div>
+        </Stack>
       ) : (
         <div className="bookmgmt__actions">
           <button type="button" className="btn btn--ghost" onClick={onClose}>
@@ -162,6 +163,6 @@ export function BookManagementSheet({
           another and you can remove this one.
         </p>
       )}
-    </div>
+    </Stack>
   )
 }

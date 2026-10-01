@@ -12,7 +12,8 @@ import { stackClassName } from '../../../lib/design/stackClass.js'
 //              takes 'section'.
 //   as         the element: 'div' (the default), 'section', 'article',
 //              'aside', 'header', 'footer', 'nav', 'main', 'form',
-//              'fieldset', or 'ul' / 'ol' / 'li' for a list.
+//              'fieldset', 'label' (a field: its caption stacked over its
+//              input), or 'ul' / 'ol' / 'li' for a list.
 //   className  the block's NAMESPACE, for its own parts. A namespace that
 //              sets its own gap, or alignment, loads later and wins on order.
 //   ...rest    passed to the element: id, aria-*, style, data-*.
