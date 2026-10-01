@@ -65,21 +65,16 @@ test('PAST_GAME_FEED_FIELDS covers every field the signals path reads', () => {
   }
 })
 
-test('fetchGameFeed appends fields= only when asked', async () => {
+test('fetchGameFeed appends fields= only when asked', async (t) => {
   // Intercept getJson's fetch to inspect the URL it builds; no network.
   const urls = []
-  const realFetch = globalThis.fetch
-  globalThis.fetch = async (url) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
     urls.push(String(url))
     return { ok: true, json: async () => ({}) }
-  }
-  try {
-    await fetchGameFeed(12345)
-    await fetchGameFeed(12345, { fields: ['a', 'b'] })
-    await fetchGameFeed(12345, { fields: 'a,b' })
-  } finally {
-    globalThis.fetch = realFetch
-  }
+  })
+  await fetchGameFeed(12345)
+  await fetchGameFeed(12345, { fields: ['a', 'b'] })
+  await fetchGameFeed(12345, { fields: 'a,b' })
   assert.ok(urls[0].endsWith('/feed/live'), `no-fields URL unchanged, got ${urls[0]}`)
   assert.ok(urls[1].endsWith('/feed/live?fields=a,b'), `array joins, got ${urls[1]}`)
   assert.ok(urls[2].endsWith('/feed/live?fields=a,b'), `string passes through, got ${urls[2]}`)

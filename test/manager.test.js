@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 import { fetchManager } from '../src/api/game.js'
 
 const response = (body) => ({
@@ -9,10 +9,9 @@ const response = (body) => ({
 })
 
 function withFetch(roster, run) {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async () => response({ roster })
+  const fetchMock = mock.method(globalThis, 'fetch', async () => response({ roster }))
   return run().finally(() => {
-    globalThis.fetch = originalFetch
+    fetchMock.mock.restore()
   })
 }
 

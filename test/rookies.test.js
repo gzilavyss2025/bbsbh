@@ -110,46 +110,31 @@ test('rookieShardKey buckets a personId into a padded two-digit shard', () => {
   assert.equal(rookieShardKey(605), '05')
 })
 
-test('fetchRookieRecord reads only that player\'s shard and caches it', async () => {
-  const originalFetch = globalThis.fetch
+test('fetchRookieRecord reads only that player\'s shard and caches it', async (t) => {
   const urls = []
-  globalThis.fetch = async (url) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
     urls.push(url)
     return {
       ok: true,
       status: 200,
       json: async () => ({ players: { 660271: { debutDate: '2019-05-01', rookieUntil: null } } }),
     }
-  }
-  try {
-    assert.deepEqual(await fetchRookieRecord(660271), {
-      debutDate: '2019-05-01',
-      rookieUntil: null,
-    })
-    assert.deepEqual(urls, ['/data/rookies/records/71.json'])
-    await fetchRookieRecord(660271)
-    assert.equal(urls.length, 1)
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  })
+  assert.deepEqual(await fetchRookieRecord(660271), {
+    debutDate: '2019-05-01',
+    rookieUntil: null,
+  })
+  assert.deepEqual(urls, ['/data/rookies/records/71.json'])
+  await fetchRookieRecord(660271)
+  assert.equal(urls.length, 1)
 })
 
-test('fetchRookieRecord degrades to null when the shard is missing', async () => {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async () => ({ ok: false, status: 404, json: async () => ({}) })
-  try {
-    assert.equal(await fetchRookieRecord(123456), null)
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+test('fetchRookieRecord degrades to null when the shard is missing', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () => ({ ok: false, status: 404, json: async () => ({}) }))
+  assert.equal(await fetchRookieRecord(123456), null)
 })
 
-test('fetchRookiesData degrades to an empty status map when the file is missing', async () => {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async () => ({ ok: false, status: 404, json: async () => ({}) })
-  try {
-    assert.deepEqual(await fetchRookiesData(), { generatedAt: null, players: {} })
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+test('fetchRookiesData degrades to an empty status map when the file is missing', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () => ({ ok: false, status: 404, json: async () => ({}) }))
+  assert.deepEqual(await fetchRookiesData(), { generatedAt: null, players: {} })
 })
