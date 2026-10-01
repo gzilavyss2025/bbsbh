@@ -203,6 +203,37 @@ test('snapshotRow: a promotion 30 PA ago leaves him unqualified at the new level
   assert.deepEqual([payload.sportId, payload.sampleSize, payload.qualified, payload.percentile], [11, 30, false, null])
 })
 
+// #1357. The population holds MLB's printed strings, and the player is in it.
+// His own line, summed by sumPitching/sumHitting, is a full-precision float. A
+// float a hair better than his printed value counted HIS OWN entry as worse:
+// +1 on 50 of 660 real rows (Justin Campbell, AAA: ERA 2.0769..., MLB "2.08",
+// stored 93, right answer 92).
+const levelSplit = (id, sportId, stat, position) => ({
+  player: { id }, sport: { id: sportId }, team: { id: 900 + sportId }, position: { abbreviation: position }, stat,
+})
+
+test('snapshotRow ranks a pitcher on his ERA as MLB prints it, so his own entry is not "worse" (#1357)', () => {
+  // 6 ER in 78 outs: 2.076923..., which MLB prints as "2.08".
+  const campbell = levelSplit(1, 11, { earnedRuns: 6, outs: 78, era: '2.08' }, 'P')
+  const others = [['1.50', 2], ['3.00', 3], ['4.00', 4]].map(([era, id]) => levelSplit(id, 11, { era, outs: 90 }, 'P'))
+  const populations = buildPopulations([], [campbell, ...others])
+  const [p] = combineToPool([], [campbell])
+  // Worse than 2.08: 3.00 and 4.00, 2 of 4. The float also beat his own 2.08: 75.
+  assert.equal(snapshotRow(p, populations).payload.percentile, 50)
+})
+
+test('snapshotRow ranks a hitter on his OPS as MLB prints it, not the float sum (#1357)', () => {
+  // OBP .298 + SLG .280 sums to 0.5780000000000001; MLB prints ".578".
+  const line = { plateAppearances: 168, atBats: 150, hits: 32, baseOnBalls: 18, totalBases: 42, ops: '.578' }
+  const hitter = levelSplit(1, 12, line, 'SS')
+  const others = [['.500', 2], ['.700', 3], ['.800', 4]].map(([ops, id]) => levelSplit(id, 12, { ops, plateAppearances: 200 }, 'SS'))
+  const populations = buildPopulations([hitter, ...others], [])
+  const [p] = combineToPool([hitter], [])
+  assert.equal(p.hitting.ops, 0.5780000000000001) // the float the bug ranked
+  // Worse than .578: .500 only, 1 of 4. The float also beat his own .578: 50.
+  assert.equal(snapshotRow(p, populations).payload.percentile, 25)
+})
+
 test('snapshotRow is null for a player with no line in either group', () => {
   assert.equal(snapshotRow({ position: 'C', hitting: null, pitching: null }, new Map()), null)
 })
