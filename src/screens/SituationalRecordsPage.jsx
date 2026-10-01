@@ -20,6 +20,7 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
 import { Button } from '../components/ui/control/Button.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { Table } from '../components/ui/table/Table.jsx'
 
 // One situational record, every club at one level, in rank order. The bare
 // route is a browse-first index: every split stays visible inside its
@@ -484,8 +485,8 @@ export function SituationalRecordsPage({
             </nav>
           )}
 
-          <div className="ledger-wrap trrank__tablewrap">
-            <table className="standings trrank">
+          <div className="trrank__tablewrap">
+            <Table label={`${metric.k} team rankings`} className="trrank">
               <caption className="sr-only">{metric.k} team rankings</caption>
               <thead>
                 <tr>
@@ -546,7 +547,7 @@ export function SituationalRecordsPage({
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
           </div>
         </main>
       )}

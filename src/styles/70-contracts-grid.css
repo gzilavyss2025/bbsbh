@@ -123,79 +123,40 @@
 }
 
 /* ----------------------------------------------------------- the matrix
-   The player column is pinned and the seasons scroll under it — the move
-   StandingsPage already makes with its club column, and for the same reason:
-   a row that loses its name mid-scroll stops being a row. The box around it
-   is a Card (sheet, flush body; #1113): its own margin-top: 0 overrides
+   The player column is pinned and the seasons scroll under it — the Table's
+   sticky column (system/table.css), and for the reason StandingsPage pins its
+   club column: a row that loses its name mid-scroll stops being a row. The box
+   around it is a Card (sheet, flush body; #1113): its own margin-top: 0 overrides
    .team-hub's per-card spacing rule (09-team-info.css), collapsed here
    against .ctr__wall's own margin-bottom rather than doubling it. */
 .ctr__card {
   margin-top: 0;
 }
-.ctr__scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
 .ctr__table {
-  width: 100%;
   min-width: 560px;
-  border-collapse: separate;
-  border-spacing: 0;
 }
-.ctr__table th,
-.ctr__table td {
-  white-space: nowrap;
+/* One hairline under every head cell. */
+.ctr__table thead th {
+  border-bottom: var(--bw-hair) solid var(--border-rule);
 }
 .ctr__namehead,
 .ctr__name {
-  position: sticky;
-  left: 0;
-  z-index: 1;
   text-align: left;
   min-width: 168px;
 }
-.ctr__namehead {
-  z-index: 2;
-  padding: var(--space-1h) var(--space-2h);
-  background: var(--bg-page);
-  border-bottom: var(--bw-hair) solid var(--border-rule);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
+.ctr__namehead,
 .ctr__agehead {
-  padding: var(--space-1h) var(--space-2);
-  text-align: right;
-  background: var(--bg-page);
-  border-bottom: var(--bw-hair) solid var(--border-rule);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
 }
 .ctr__age {
-  padding: var(--space-1h) var(--space-2);
-  text-align: right;
-  border-top: var(--bw-hair) solid var(--border-hairline);
   background: var(--surface-card);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   color: var(--text-caption);
 }
 .ctr__yearhead {
-  padding: var(--space-1h) var(--space-2h);
   vertical-align: bottom;
-  text-align: right;
-  background: var(--bg-page);
-  border-bottom: var(--bw-hair) solid var(--border-rule);
-  font-family: var(--font-display);
   font-size: var(--fs-small);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
@@ -205,8 +166,14 @@
   color: var(--award-ink);
 }
 
+/* A tinted row sets --table-pin, so its pinned first cell stays opaque in the
+   row's own tint (system/table.css). */
+.ctr__group {
+  --table-pin: var(--bg-page);
+}
 .ctr__group td {
   padding: var(--space-2) var(--space-2h) var(--space-1);
+  text-align: left;
   border-top: var(--bw-heavy) solid var(--navy);
   background: var(--bg-page);
   font-family: var(--font-display);
@@ -216,10 +183,11 @@
   text-transform: uppercase;
   color: var(--text-body);
 }
+/* The name is a word, not a figure: the Table's mono and tabular digits stop
+   at the cell (a tabular "9 y/$215M" runs 12px wider). */
 .ctr__name {
-  padding: var(--space-1h) var(--space-2h);
-  background: var(--surface-card);
-  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-body);
+  font-variant-numeric: normal;
 }
 .ctr__player {
   display: flex;
@@ -272,12 +240,6 @@
    call, and pencil hatch a year the club has no hold at all. That last one is
    the point of the whole grid — the hatch is where a book runs out. */
 .ctr__cell {
-  padding: var(--space-1h) var(--space-2h);
-  text-align: right;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-small);
   font-weight: var(--w-bold);
 }
 .ctr__cell--salary,
@@ -318,20 +280,22 @@
   text-transform: uppercase;
 }
 
+.ctr__subtotal {
+  --table-pin: var(--bg-page);
+}
 .ctr__subtotal td {
-  padding: var(--space-1) var(--space-2h);
-  text-align: right;
   border-top: var(--bw-hair) solid var(--border-rule);
   background: var(--bg-page);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
   font-size: var(--fs-cell);
   font-weight: var(--w-bold);
   color: var(--text-caption);
 }
+/* A subtotal label scrolls with its row, as it always has: only the player
+   column and the foot pin. Same weight as the Table's pin rule, loaded later. */
+.ctr__table .ctr__subtotal th:first-child {
+  position: static;
+}
 .ctr__subtotal th {
-  padding: var(--space-1) var(--space-2h);
-  text-align: right;
   border-top: var(--bw-hair) solid var(--border-rule);
   background: var(--bg-page);
   font-family: var(--font-display);
@@ -342,6 +306,9 @@
   color: var(--graphite-soft);
 }
 
+.ctr__foot {
+  --table-pin: var(--ink-0);
+}
 .ctr__foot th,
 .ctr__foot td {
   padding: var(--space-2h);
@@ -350,9 +317,6 @@
   color: var(--text-on-ink);
 }
 .ctr__foot th {
-  position: sticky;
-  left: 0;
-  z-index: 1;
   text-align: left;
   font-family: var(--font-display);
   font-size: var(--fs-small);
@@ -361,9 +325,6 @@
   text-transform: uppercase;
 }
 .ctr__foot td {
-  text-align: right;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
   font-size: var(--fs-num-md);
   font-weight: var(--w-bold);
 }

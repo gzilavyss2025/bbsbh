@@ -99,30 +99,22 @@
 /* THE ONLY WAY TO REACH A PLAYER PAGE FROM HERE — an SVG text node cannot be a
    link — and what gives the unlabelled dots their names. */
 .chal__board {
-  width: 100%;
   margin: var(--space-3) 0 0;
-  border-collapse: collapse;
 }
 
-.chal__board th,
-.chal__board td {
-  padding: var(--space-1h) 0;
-  text-align: right;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
-
+/* The head's navy rule is the one line between the head and the first row. */
 .chal__board thead th {
-  border-top: 0;
   border-bottom: var(--bw-heavy) solid var(--navy);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  white-space: nowrap;
 }
 
+.chal__board tbody tr:first-child > * {
+  border-top: 0;
+}
+
+/* The player is a word: it reads left, in the body face, and may wrap. */
 .chal__board th.chal__who {
   text-align: left;
+  white-space: normal;
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
   font-size: var(--fs-small);
@@ -131,10 +123,7 @@
 }
 
 .chal__board td {
-  font-family: var(--font-mono);
   font-size: var(--fs-compact);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-body);
 }
 
 .chal__floor {
@@ -142,6 +131,7 @@
   font-family: var(--font-body);
   font-size: var(--fs-small);
   letter-spacing: var(--ls-none);
+  text-transform: none;
   white-space: normal;
   color: var(--text-caption);
 }

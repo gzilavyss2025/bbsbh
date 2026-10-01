@@ -27,6 +27,7 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { teamAbbr, teamFullName, teamClubName, favoriteAccentColor } from '../lib/teams.js'
 import { Pill } from '../components/ui/control/Pill.jsx'
+import { Table } from '../components/ui/table/Table.jsx'
 
 // The Foul Tracker — season-long foul-ball counting nobody else publishes:
 // league leaders (total, per game, single-game highs), two-strike "spoiling",
@@ -387,32 +388,30 @@ function FoulLeaderBoard({ title, rows, cols, cells, featured = false, favoriteT
     <BoardCard title={title}>
       {lead && <FoulFeatured player={lead} favoriteTeamId={favoriteTeamId} positions={positions} />}
       {rows.length > 0 && (
-        <div className="ledger-wrap">
-          <table className="standings foulboard">
-            <thead>
-              <tr>
-                <th className="team">Player</th>
-                {cols.map((c) => (
-                  <th key={c}>{c}</th>
+        <Table frame="bare" label={title} className="foulboard">
+          <thead>
+            <tr>
+              <th className="team">Player</th>
+              {cols.map((c) => (
+                <th key={c}>{c}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={r.id} {...favRowProps(r.teamId, favoriteTeamId)}>
+                <td className="team">
+                  <span className="umprank__rank">{i + 1}</span>
+                  <PlayerLink id={r.id} className="foulboard__rowname">{r.name}</PlayerLink>
+                  <span className="foulboard__team">{teamAbbr({ id: r.teamId })}</span>
+                </td>
+                {cells(r).map((v, j) => (
+                  <td key={j}>{v}</td>
                 ))}
               </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => (
-                <tr key={r.id} {...favRowProps(r.teamId, favoriteTeamId)}>
-                  <td className="team">
-                    <span className="umprank__rank">{i + 1}</span>
-                    <PlayerLink id={r.id} className="foulboard__rowname">{r.name}</PlayerLink>
-                    <span className="foulboard__team">{teamAbbr({ id: r.teamId })}</span>
-                  </td>
-                  {cells(r).map((v, j) => (
-                    <td key={j}>{v}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </Table>
       )}
     </BoardCard>
   )
@@ -473,32 +472,30 @@ function FoulsPerWhiffColumn({ heading, hint, rows, favoriteTeamId }) {
       <p className="foulboard__whiffcol-heading">
         {heading} <span className="foulboard__whiffcol-hint">({hint})</span>
       </p>
-      <div className="foulboard__whiffcol-scroll">
-        <table className="standings foulboard">
-          <thead>
-            <tr>
-              <th className="team">Player</th>
-              <th>Fouls per whiff</th>
-              <th>Fouls</th>
-              <th>Whiffs</th>
+      <Table frame="bare" label={`Fouls per whiff, ${heading.toLowerCase()}`} className="foulboard">
+        <thead>
+          <tr>
+            <th className="team">Player</th>
+            <th>Fouls per whiff</th>
+            <th>Fouls</th>
+            <th>Whiffs</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={r.id} {...favRowProps(r.teamId, favoriteTeamId)}>
+              <td className="team">
+                <span className="umprank__rank">{i + 1}</span>
+                <PlayerLink id={r.id} className="foulboard__rowname">{r.name}</PlayerLink>
+                <span className="foulboard__team">{teamAbbr({ id: r.teamId })}</span>
+              </td>
+              <td>{(r.fouls / r.whiffs).toFixed(1)}</td>
+              <td>{r.fouls}</td>
+              <td>{r.whiffs}</td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <tr key={r.id} {...favRowProps(r.teamId, favoriteTeamId)}>
-                <td className="team">
-                  <span className="umprank__rank">{i + 1}</span>
-                  <PlayerLink id={r.id} className="foulboard__rowname">{r.name}</PlayerLink>
-                  <span className="foulboard__team">{teamAbbr({ id: r.teamId })}</span>
-                </td>
-                <td>{(r.fouls / r.whiffs).toFixed(1)}</td>
-                <td>{r.fouls}</td>
-                <td>{r.whiffs}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </Table>
     </div>
   )
 }
@@ -895,40 +892,38 @@ function ByInning({ league }) {
   const max = Math.max(...rows.map((r) => (r.pitches > 0 ? r.fouls / r.pitches : 0)))
   return (
     <BoardCard title="Foul rate by inning">
-      <div className="ledger-wrap">
-        <table className="standings foulboard">
-          <thead>
-            <tr>
-              <th className="team">Inning</th>
-              <th className="foulboard__barcol" aria-hidden="true"></th>
-              <th>All</th>
-              <th>Starters</th>
-              <th>Bullpen</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => {
-              const rate = r.pitches > 0 ? r.fouls / r.pitches : 0
-              const sp = r.vsStarter?.pitches > 0 ? r.vsStarter.fouls / r.vsStarter.pitches : null
-              const rp = r.vsReliever?.pitches > 0 ? r.vsReliever.fouls / r.vsReliever.pitches : null
-              return (
-                <tr key={r.inning}>
-                  <td className="team">{r.inning >= 10 ? '10+' : r.inning}</td>
-                  <td className="foulboard__barcol">
-                    <span
-                      className="foulboard__bar"
-                      style={{ width: max > 0 ? `${(rate / max) * 100}%` : 0 }}
-                    />
-                  </td>
-                  <td>{pct1(rate)}</td>
-                  <td>{sp == null ? '—' : pct1(sp)}</td>
-                  <td>{rp == null ? '—' : pct1(rp)}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+      <Table frame="bare" className="foulboard">
+        <thead>
+          <tr>
+            <th className="team">Inning</th>
+            <th className="foulboard__barcol" aria-hidden="true"></th>
+            <th>All</th>
+            <th>Starters</th>
+            <th>Bullpen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => {
+            const rate = r.pitches > 0 ? r.fouls / r.pitches : 0
+            const sp = r.vsStarter?.pitches > 0 ? r.vsStarter.fouls / r.vsStarter.pitches : null
+            const rp = r.vsReliever?.pitches > 0 ? r.vsReliever.fouls / r.vsReliever.pitches : null
+            return (
+              <tr key={r.inning}>
+                <td className="team">{r.inning >= 10 ? '10+' : r.inning}</td>
+                <td className="foulboard__barcol">
+                  <span
+                    className="foulboard__bar"
+                    style={{ width: max > 0 ? `${(rate / max) * 100}%` : 0 }}
+                  />
+                </td>
+                <td>{pct1(rate)}</td>
+                <td>{sp == null ? '—' : pct1(sp)}</td>
+                <td>{rp == null ? '—' : pct1(rp)}</td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </Table>
     </BoardCard>
   )
 }
@@ -1013,15 +1008,13 @@ function ByPitchType({ league, teamRates }) {
     })).filter((g) => g.rows.length > 0)
     return (
       <BoardCard title="Foul rate by pitch type">
-        <div className="ledger-wrap">
-          <table className="standings foulboard">
-            <tbody>
-              {groups.map((g) => (
-                <TeamPitchCategoryGroup key={g.category} group={g} />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table frame="bare" label="Foul rate by pitch type" className="foulboard">
+          <tbody>
+            {groups.map((g) => (
+              <TeamPitchCategoryGroup key={g.category} group={g} />
+            ))}
+          </tbody>
+        </Table>
       </BoardCard>
     )
   }
@@ -1043,15 +1036,13 @@ function ByPitchType({ league, teamRates }) {
   })).filter((g) => g.rows.length > 0)
   return (
     <BoardCard title="Foul rate by pitch type">
-      <div className="ledger-wrap">
-        <table className="standings foulboard">
-          <tbody>
-            {groups.map((g) => (
-              <PitchCategoryGroup key={g.category} group={g} />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table frame="bare" label="Foul rate by pitch type" className="foulboard">
+        <tbody>
+          {groups.map((g) => (
+            <PitchCategoryGroup key={g.category} group={g} />
+          ))}
+        </tbody>
+      </Table>
     </BoardCard>
   )
 }
@@ -1138,41 +1129,39 @@ function TeamBoard({ teams, favoriteTeamId }) {
   if (!teams || teams.length === 0) return null
   return (
     <BoardCard title="Team fouls per game">
-      <div className="ledger-wrap">
-        <table className="standings foulboard foulboard--teams">
-          <colgroup>
-            <col className="foulboard--teams__teamcol" />
-            <col />
-            <col />
-            <col />
-            <col />
-          </colgroup>
-          <thead>
-            <tr>
-              <th className="team">Team</th>
-              <th>Per game</th>
-              <th>Fouls</th>
-              <th>With 2 Strikes</th>
-              <th>% With 2 Strikes</th>
+      <Table frame="bare" className="foulboard foulboard--teams">
+        <colgroup>
+          <col className="foulboard--teams__teamcol" />
+          <col />
+          <col />
+          <col />
+          <col />
+        </colgroup>
+        <thead>
+          <tr>
+            <th className="team">Team</th>
+            <th>Per game</th>
+            <th>Fouls</th>
+            <th>With 2 Strikes</th>
+            <th>% With 2 Strikes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {teams.map((t, i) => (
+            <tr key={t.id} {...favRowProps(t.id, favoriteTeamId)}>
+              <td className="team">
+                <span className="umprank__rank">{i + 1}</span>
+                <TeamLogo teamId={t.id} name={teamAbbr({ id: t.id })} size={26} />
+                <span className="sr-only">{teamFullName(t.id)}</span>
+              </td>
+              <td>{(t.fouls / t.g).toFixed(1)}</td>
+              <td>{t.fouls.toLocaleString('en-US')}</td>
+              <td>{t.twoStrikeFouls.toLocaleString('en-US')}</td>
+              <td>{t.fouls > 0 ? pct1(t.twoStrikeFouls / t.fouls) : '—'}</td>
             </tr>
-          </thead>
-          <tbody>
-            {teams.map((t, i) => (
-              <tr key={t.id} {...favRowProps(t.id, favoriteTeamId)}>
-                <td className="team">
-                  <span className="umprank__rank">{i + 1}</span>
-                  <TeamLogo teamId={t.id} name={teamAbbr({ id: t.id })} size={26} />
-                  <span className="sr-only">{teamFullName(t.id)}</span>
-                </td>
-                <td>{(t.fouls / t.g).toFixed(1)}</td>
-                <td>{t.fouls.toLocaleString('en-US')}</td>
-                <td>{t.twoStrikeFouls.toLocaleString('en-US')}</td>
-                <td>{t.fouls > 0 ? pct1(t.twoStrikeFouls / t.fouls) : '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </Table>
     </BoardCard>
   )
 }
