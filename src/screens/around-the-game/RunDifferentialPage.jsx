@@ -274,7 +274,7 @@ export function RunDifferentialPage() {
                       <ClubCell
                         teamId={row.teamId}
                         name={teamClubNameShort(row.teamId)}
-                        sub={row.era ?? undefined}
+                        note={row.era ?? undefined}
                       />
                       <td>{row.season}</td>
                       <td>
@@ -386,7 +386,7 @@ export function RunDifferentialPage() {
                         <ClubCell
                           teamId={row.teamId}
                           name={teamClubNameShort(row.teamId)}
-                          sub={row.era ?? undefined}
+                          note={row.era ?? undefined}
                         />
                         <td>{row.season}</td>
                         <td>

@@ -199,7 +199,7 @@ export function FarmSystemPage() {
                         name={clubShort(clubs, r.orgId)}
                         rank={r.rank}
                         tab="minors"
-                        sub={`${r.prospects.length} ranked prospect${r.prospects.length === 1 ? '' : 's'}`}
+                        note={`${r.prospects.length} ranked prospect${r.prospects.length === 1 ? '' : 's'}`}
                       />
                       <td>
                         <BarCell value={r.index} min={0} max={100}>

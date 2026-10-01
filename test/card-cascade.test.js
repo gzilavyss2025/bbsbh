@@ -1791,7 +1791,7 @@ const C6C = [
   { css: '78-offseason.css', sel: '.springcount', jsx: ['components/offseason/WinterCalendar.jsx'], ns: 'springcount', as: 'aside', frame: 'ledger' },
   { css: '78-offseason.css', sel: '.pgame__card', jsx: ['components/offseason/PickedGame.jsx'], ns: 'pgame__card', as: 'div' },
   { css: '78-offseason.css', sel: '.srecord', jsx: ['components/offseason/SeasonRecord.jsx'], ns: 'srecord' },
-  { css: '78-offseason.css', sel: '.note__stories', jsx: ['components/offseason/LongAtBats.jsx'], ns: 'note__stories', mode: 'wrap', box: 'note__storybox' },
+  { css: '78-offseason.css', sel: '.seasonnote__stories', jsx: ['components/offseason/LongAtBats.jsx'], ns: 'seasonnote__stories', mode: 'wrap', box: 'seasonnote__storybox' },
 ]
 
 test('C6c: no fouls, offseason or off-day block draws a second frame over its Card', () => {
@@ -1852,10 +1852,10 @@ test('C6c: each block keeps its own margin and inset', () => {
     ['78-offseason.css', '.pgame__card', 'padding', 'var(--space-5) var(--space-4)'],
     ['78-offseason.css', '.srecord', 'margin-top', 'var(--space-6)'],
     ['78-offseason.css', '.srecord__body', 'padding', 'var(--space-4)'],
-    ['78-offseason.css', '.note__stories', 'list-style', 'none'],
-    ['78-offseason.css', '.note__stories', 'margin', '0'],
-    ['78-offseason.css', '.note__stories', 'padding', '0'],
-    ['78-offseason.css', '.note__storybox', 'margin-top', 'var(--space-4)'],
+    ['78-offseason.css', '.seasonnote__stories', 'list-style', 'none'],
+    ['78-offseason.css', '.seasonnote__stories', 'margin', '0'],
+    ['78-offseason.css', '.seasonnote__stories', 'padding', '0'],
+    ['78-offseason.css', '.seasonnote__storybox', 'margin-top', 'var(--space-4)'],
   ]
   for (const [css, sel, prop, value] of kept) {
     assert.equal(decl(ruleBody(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)
@@ -1925,10 +1925,10 @@ test('C6c: the moved-up table sits in a flush sheet Card and its head stays outs
 // The two names Gary keeps until he picks a look (H2, 2026-09-29).
 test('C6c: the big card names keep their rules', () => {
   const css = read('78-offseason.css')
-  assert.equal(decl(ruleBody(css, '.note__title') ?? '', 'font-size'), 'var(--fs-title-md)')
+  assert.equal(decl(ruleBody(css, '.seasonnote__title') ?? '', 'font-size'), 'var(--fs-title-md)')
   assert.equal(decl(ruleBody(css, '.srecord__title') ?? '', 'font-size'), 'var(--fs-title-sm)')
   assert.match(src('components/offseason/SeasonRecord.jsx'), /<h3 className="srecord__title">Season record<\/h3>/)
-  assert.match(src('components/offseason/LongAtBats.jsx'), /<h4 className="note__title">/)
+  assert.match(src('components/offseason/LongAtBats.jsx'), /<h4 className="seasonnote__title">/)
 })
 
 // The ADR-0084 rename. Strict, comments too. The naming ledger (docs/) keeps
@@ -2154,7 +2154,7 @@ test('C7: the poster panel title keeps its own rule', () => {
 // is a class that broke it. The block name stays unless the block itself is
 // renamed by another slice. Each old class is gone from src, e2e, scripts and
 // test, comments too; each new class is drawn by a stylesheet and used by a
-// markup file or by the lab catalog.
+// markup file or by the lab catalog, in code and not only in a comment.
 const H3_RENAMED = [
   // batch A: the four titles, the `__sub`, `__kicker`, `__eyebrow` and `__lede` rows
   ['awardord__hd', 'awardord__title'],
@@ -2185,34 +2185,50 @@ const H3_RENAMED = [
   ['admincopy__lede', 'admincopy__note'],
   ['clubsseen__lede', 'clubsseen__note'],
   ['foulavg__lede', 'foulavg__note'],
-  ['note__lede', 'note__note'],
+  // `note__note` repeated its block; the block is `.seasonnote` now (see below)
+  ['note__lede', 'seasonnote__note'],
   ['stampin__lede', 'stampin__note'],
   ['xl-entry__lede', 'xl-entry__note'],
   // batch B, step one: the entry's own note gives up the name the page-level lede takes
   ['dlab__note', 'dlabentry__note'],
   // batch B, step two: the page-level lede takes the freed name
   ['dlab__lede', 'dlab__note'],
+  // after #1339: a section title inside a modal body, not the head's second line
+  ['tscoremodal__subkicker', 'tscoremodal__sectiontitle'],
 ]
 
+// Two classes left with no successor: `.cover__sub` had no call site (its rule
+// and its seal-scope allowlist entry went together), and the between-innings
+// eyebrow repeated its block's name.
+const H3_DELETED = ['cover__sub', 'betweeninnings__eyebrow']
+
 // Text files of the four trees, this file excluded (it names the old classes).
+// Read once for the whole block.
 const H3_ROOT = join(SRC, '..')
 const H3_TEXT = ['.css', '.jsx', '.js', '.mjs', '.md']
+let h3Read
 const h3Trees = () =>
-  ['src', 'e2e', 'scripts', 'test'].flatMap((dir) =>
+  (h3Read ??= ['src', 'e2e', 'scripts', 'test'].flatMap((dir) =>
     files(join(H3_ROOT, dir), H3_TEXT)
       .map((rel) => `${dir}/${rel}`)
       .filter((rel) => rel !== 'test/card-cascade.test.js')
       .map((rel) => [rel, readFileSync(join(H3_ROOT, rel), 'utf8')]),
-  )
+  ))
 // `\b` is wrong here: `_` is a word character, so it does not exist before `__element`.
 // A modifier (`name--tight`) counts as the class; a longer name (`name-x`, `name_x`) does not.
 const h3Class = (name) => new RegExp(`(?<![A-Za-z0-9_-])${name}(?![a-z0-9_]|-[a-z0-9])`)
+// A file without its comments: the shared `/* */` stripper (which also takes
+// JSX's `{/* */}`), then each whole-line `//` comment. A `//` after code stays,
+// so a string that holds a URL is never cut.
+const h3Code = (text) => stripComments(text).replace(/^[ \t]*\/\/.*$/gm, '')
 
 test('H3: each old second-line class is gone from src, e2e, scripts and test, comments too', () => {
   const trees = h3Trees()
-  // A two-step row frees a name that the next row takes (`dlab__note`).
+  // A two-step row frees a name that the next row takes (`dlab__note`). The
+  // next test pins that step.
   const taken = new Set(H3_RENAMED.map(([, now]) => now))
-  for (const [old] of H3_RENAMED.filter(([o]) => !taken.has(o))) {
+  const gone = [...H3_RENAMED.map(([old]) => old).filter((old) => !taken.has(old)), ...H3_DELETED]
+  for (const old of gone) {
     const re = h3Class(old)
     assert.deepEqual(
       trees.filter(([, text]) => re.test(text)).map(([rel]) => rel),
@@ -2222,13 +2238,38 @@ test('H3: each old second-line class is gone from src, e2e, scripts and test, co
   }
 })
 
-test('H3: each new second-line class is in a stylesheet and in a markup file or the lab catalog', () => {
-  const trees = h3Trees()
+// Step one of the two-step. The loop above skips `dlab__note`, because step two
+// gives that name to the page-level lede, so a return to `<p className="dlab__note">`
+// for an ENTRY's note would pass it. An entry's note keeps its own name.
+test('H3: a design lab entry note wears .dlabentry__note, never the name the lede took', () => {
+  const jsx = h3Code(readFileSync(join(SRC, 'screens/designlab/Entry.jsx'), 'utf8'))
+  assert.deepEqual(
+    [...jsx.matchAll(/className="([^"]*)">\{note\}/g)].map((m) => m[1]),
+    ['dlabentry__note'],
+  )
+})
+
+test('H3: each new second-line class is in a stylesheet and in a markup file or the lab catalog, not only in a comment', () => {
+  const code = h3Trees()
+    .filter(([rel]) => rel.startsWith('src/'))
+    .map(([rel, text]) => [rel, h3Code(text)])
   for (const [, now] of H3_RENAMED) {
     const re = h3Class(now)
-    const hit = (ext) => trees.some(([rel, text]) => rel.startsWith('src/') && ext.test(rel) && re.test(text))
+    const hit = (ext) => code.some(([rel, text]) => ext.test(rel) && re.test(text))
     assert.ok(hit(/\.css$/), `.${now} has no rule`)
     assert.ok(hit(/\.jsx?$/), `.${now} is used by no markup and no lab entry`)
+  }
+})
+
+// After #1339 the block itself moved. `.note__note` repeated its block's name,
+// and `note` named no job (ADR-0084 clause 1): the block is one note about the
+// season that just finished, so it is `.seasonnote`, with every part. No class
+// of the old block is left, as an element, a modifier or the bare block.
+test('H3: the season note block is .seasonnote, and no .note class is left', () => {
+  const old = /(?<![A-Za-z0-9_-])note(__|--)[a-z]|className="note[ "]|'\.note[ ']/
+  assert.deepEqual(h3Trees().filter(([, text]) => old.test(text)).map(([rel]) => rel), [])
+  for (const rel of ['components/offseason/LongAtBats.jsx', 'components/offseason/YoungestRegulars.jsx']) {
+    assert.match(readFileSync(join(SRC, rel), 'utf8'), /<section className="seasonnote[ "]/)
   }
 })
 
@@ -2251,15 +2292,7 @@ test('H3: the held rows keep their names', () => {
   }
 })
 
-test('H3: .cover__sub is deleted, and the seal-scope allowlist no longer names it', () => {
-  const trees = h3Trees()
-  assert.deepEqual(trees.filter(([, text]) => h3Class('cover__sub').test(text)).map(([rel]) => rel), [])
-  assert.doesNotMatch(readFileSync(join(H3_ROOT, 'scripts/check-seal-scope.mjs'), 'utf8'), /cover__sub/)
-})
-
-test('H3: the between-innings eyebrow is retired, and the button is still named by its fact', () => {
-  const trees = h3Trees()
-  assert.deepEqual(trees.filter(([, text]) => h3Class('betweeninnings__eyebrow').test(text)).map(([rel]) => rel), [])
+test('H3: the between-innings button is still named by its fact', () => {
   const jsx = readFileSync(join(SRC, 'components/gamehud/BetweenInnings.jsx'), 'utf8')
   const button = jsx.slice(jsx.indexOf('<Card as="button"'), jsx.indexOf('</Card>'))
   // The name comes from the content: the progress count, the player and the fact.

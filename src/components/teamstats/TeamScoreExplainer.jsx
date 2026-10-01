@@ -44,7 +44,7 @@ export function TeamScoreExplainer({ snapshot, surprise, grade, onClose }) {
             baseball questions.
           </p>
 
-          <p className="tscoremodal__subkicker">Quality is the foundation</p>
+          <p className="tscoremodal__sectiontitle">Quality is the foundation</p>
           <p>
             Quality gives 60 percent of the weight to actual wins and 40 percent to the wins
             suggested by run differential — adjusted so a hitter&apos;s park or a pitcher&apos;s park
@@ -68,7 +68,7 @@ export function TeamScoreExplainer({ snapshot, surprise, grade, onClose }) {
             </dl>
           )}
 
-          <p className="tscoremodal__subkicker">Expectation measures the assignment</p>
+          <p className="tscoremodal__sectiontitle">Expectation measures the assignment</p>
           <p>
             Before Opening Day, every club gets a baseline from the consensus market win
             total; when that is unavailable, a regressed three-year record supplies a
@@ -89,7 +89,7 @@ export function TeamScoreExplainer({ snapshot, surprise, grade, onClose }) {
             </dl>
           )}
 
-          <p className="tscoremodal__subkicker">The adjustment respects baseball quality</p>
+          <p className="tscoremodal__sectiontitle">The adjustment respects baseball quality</p>
           <p>
             Surprise does not get averaged straight into Quality. Instead, it adjusts only
             the room between Quality and the top or bottom of the scale. That means a major
@@ -110,7 +110,7 @@ export function TeamScoreExplainer({ snapshot, surprise, grade, onClose }) {
             a score moves from five, the stronger the evidence behind the verdict.
           </p>
 
-          <p className="tscoremodal__subkicker">Current form stays a diagnostic</p>
+          <p className="tscoremodal__sectiontitle">Current form stays a diagnostic</p>
           <p>
             Last {CURRENT_FORM_GAMES} uses the same Quality recipe over only the most recent
             games. Even a perfect stretch is intentionally damped to {FORM_CEILING.score.toFixed(1)},

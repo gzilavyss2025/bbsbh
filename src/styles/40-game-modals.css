@@ -60,7 +60,7 @@
   color: var(--ink-2);
   font-style: italic;
 }
-.tscoremodal__subkicker {
+.tscoremodal__sectiontitle {
   margin: 18px 0 8px !important;
   color: var(--text-caption);
   font-family: var(--font-display);
@@ -96,13 +96,13 @@
 
 /* Only the prose paragraphs (and inline strong/em within them) read as
    natural sentences; the figures table (.tscoremodal__figs dt/dd) stays
-   shouted like every other card detail, and the section sub-kicker stays
-   shouted like the top kicker. */
+   shouted like every other card detail, and each section title
+   (.tscoremodal__sectiontitle) stays shouted like the head's note. */
 #root .tscoremodal__body p,
 #root .tscoremodal__body p * {
   text-transform: none; /* caps-exempt: Team Score modal's explainer paragraphs read as natural sentences */
 }
-#root .tscoremodal__body p.tscoremodal__subkicker {
+#root .tscoremodal__body p.tscoremodal__sectiontitle {
   text-transform: uppercase;
 }
 

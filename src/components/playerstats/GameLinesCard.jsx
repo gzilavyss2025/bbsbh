@@ -112,7 +112,7 @@ export function GameLinesCard({ personId, playerSurname, group, asOf }) {
     group,
     facet: row.facet ?? null,
     list: row.list ?? null,
-    kicker: row.kicker,
+    note: row.note,
     title: row.title(playerSurname),
     footNote: row.footNote ?? null,
     cutoff: asOf ?? null,

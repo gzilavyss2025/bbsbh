@@ -183,7 +183,7 @@ export function RanOut({ summary, clubs }) {
                   <ClubCell
                     teamId={n.teamId}
                     name={clubShort(clubs, n.teamId)}
-                    sub={
+                    note={
                       <>
                         {n.side === 'home' ? 'vs ' : 'at '}
                         <TeamLink id={n.oppId} name={clubShort(clubs, n.oppId)}>

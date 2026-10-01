@@ -29,11 +29,12 @@ Measured on `main` at `ba07d2c93`:
 | `__chip` elements | 23 |
 | of those, measurably tappable | **12** |
 | classes on the reject list of clause 3 | 59 |
-| classes this ADR's ledger renames or holds | **156** |
+| classes this ADR's ledger renames or holds | **157** |
 
 The last row is kept current. It was 143 at `ba07d2c93`. `.bs__noteMore` added
-one (#1130), and the `sheet` family added twelve (#1155), which the first count
-missed. The rows above it were not measured again.
+one (#1130), the `sheet` family added twelve (#1155), which the first count
+missed, and `.tscoremodal__subkicker` added one (#1113, after slice H3). The
+rows above it were not measured again.
 
 ## Decision
 

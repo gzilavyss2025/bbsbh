@@ -60,7 +60,7 @@
 .xl-entry__title	title-keep	title	-	Express Lane entry page title
 .xl-expand__title	title-keep	title	-	Express Lane pitch expand title
 .oseason__title	label	plain	H2	offseason page section heads (5 files) — #1113 comment 1 asks the offseason rows to take the lab's style
-.note__title	label	title	H2	offseason note card name (--fs-title-md) → the card's head
+.seasonnote__title	label	title	H2	offseason note card name (--fs-title-md) → the card's head
 .srecord__title	label	title	H2	offseason season-record card name → the card's head
 .researchdiary__eyebrow	note	kicker	H3	ledger: → .researchdiary__note (research page)
 .researchdiary__title	lab	title	-	research diary title

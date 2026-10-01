@@ -183,7 +183,7 @@ export function AttendancePage() {
                         name={clubShort(clubs, r.teamId)}
                         rank={r.rank}
                         tied={r.tied}
-                        sub={r.venue ?? 'Park not on file'}
+                        note={r.venue ?? 'Park not on file'}
                       />
                       {COLUMNS.map((c) =>
                         c.key === sortKey ? (

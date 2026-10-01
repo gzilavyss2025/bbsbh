@@ -36,11 +36,12 @@ import { resolve, join } from 'node:path'
 // #1134 in beside the split. Six rules were written on those branches while the
 // split was still open, so no author could have sent them to a role that did not
 // exist yet. Each was classified by hand at the merge: the three in the display
-// face (.note__table thead th, .note__org, .note__vallabel) moved to --fs-label,
-// which is what that face means here. The three left are the role's exact job --
-// body-face text too short to be a sentence (.note__pool, .note__vs,
-// .rdiff__out), and .note__pool has its own precedent one screen away in
-// .movedup__pool, which this budget already counts. A raise is NOT the way to
+// face (.seasonnote__table thead th, .seasonnote__org, .seasonnote__vallabel)
+// moved to --fs-label, which is what that face means here. The three left are
+// the role's exact job -- body-face text too short to be a sentence
+// (.seasonnote__pool, .seasonnote__vs, .rdiff__out), and .seasonnote__pool has
+// its own precedent one screen away in .movedup__pool, which this budget
+// already counts. A raise is NOT the way to
 // land a new rule: this one paid for concurrent work the ratchet could not see,
 // and the number goes down from here.
 //
