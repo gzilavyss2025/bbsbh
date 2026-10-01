@@ -22,11 +22,13 @@ each are below.
 
 | # | Gary's answer |
 | --- | --- |
-| Q1 | (open) |
-| Q2 | (open) |
-| Q3 | (open) |
-| Q4 | (open) |
-| Q5 | (open) |
+| Q1 | Yes: every wide table (2026-10-01). |
+| Q2 | Yes: move all 14; Nine Keys keeps its own (2026-10-01). |
+| Q3 | Yes: `bs__row--substitute` and `ledger__label` (2026-10-01). |
+| Q4 | Yes: leave all 8 (2026-10-01). |
+| Q5 | **No: make it a table** (2026-10-01). The Batting and Pitching blocks become two `Table`s with column names (Category, Leader, figure), in slice T3. |
+
+All five are answered. T1 and T2 can start.
 
 Some words used below:
 

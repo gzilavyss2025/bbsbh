@@ -29,7 +29,7 @@ census and spec after this one ships ("one family per PR").
 | migrating tables with a sticky first column | **29** (24 report boards, 3 Standings boards, the rolling line, the contract grid) |
 | migrating tables that scroll sideways | **48** |
 | migrating tables inside the spoiler scope | **7** (the rolling line, two pitchers tables, four box score grids) |
-| tables built from divs | **1** named (team leaders, a list, held: Q5); 22 row-grid rules listed apart |
+| tables built from divs | **1** named (team leaders): it becomes a real table in T3 (Q5); 22 row-grid rules listed apart |
 
 The issue's numbers were low for the same reason the card count was: it counted
 tables that carry a class somebody remembered, not `<table>` tags. Its padding
@@ -260,9 +260,21 @@ Card rule: **move the box, never the gate.**
 | `screens/boxscore/InningTally.jsx` (`.bs__grid--tally`) | the inning tally you score on (finding 8) |
 | `screens/sheet/ScoreSheet.jsx` (`.printsheet__grid`) | the PRINTABLE blank score sheet: millimetres, collapsed borders, borders only because print drops backgrounds. Same reason as the scorecard; not on the issue's list (Q4) |
 | design lab (4), identity lab (1), `/admin/research` and `/admin/contenders` (2) | tool pages (#1113 Q5's answer for cards; Q4 asks again for tables). `/game-notes-debug` is a lab page too, but it MIGRATES: it wears `.standings`, which T8 deletes. |
-| team leaders (`TeamLeadersLedger.jsx`) | a list of six "category, leader, value" rows with no column heads, already on `Card`. Nobody reads it down a column, so it is not a table (Q5). |
 
 ---
+
+## The team leaders become a table (Q5)
+
+Gary's answer to Q5 (2026-10-01): the team-leaders "Batting / Pitching" pair
+(`components/teamstats/TeamLeadersLedger.jsx`), a `<ul>` of flex rows today,
+becomes two `Table`s, one per block, each `frame="bare"` (the block's `Card`
+draws the box) and `density="row"`, with a head row naming the columns:
+Category, Leader, and the figure. The leader's position tag and injured mark
+stay in the Leader cell. A long name still ellipsises: the Leader column takes
+the free width. It is not gated (season aggregates, ADR-0034). It moves in T3
+only because its CSS (`.tledg__*`) lives in `23-box-score-detail.css`, which T3
+already edits; that partial sits near its `check-file-size` budget (692 of 700),
+so the table rules must replace the list rules, not add to them.
 
 ## The lab
 

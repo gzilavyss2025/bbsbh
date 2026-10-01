@@ -11,7 +11,7 @@ T8 move the rest, one family each. 57 tables move; 13 are held.
 | --- | --- | --- | --- | --- |
 | T1 | build `Table` + pilot | 2 | 11 | first, beside T2 |
 | T2 | `.bs__sub` and `.ledger__sub` renames | 0 | 9 | first, beside T1 |
-| T3 | the game surfaces (spoiler scope) | 7 | 9 | after T1 + T2 |
+| T3 | the game surfaces (spoiler scope) + team leaders | 7 + 1 list | 10 | after T1 + T2 |
 | T4 | the small ledgers | 6 | 11 | after T1 + T2 |
 | T5 | the report boards | 17 | 10 | after T1 |
 | T6 | ABS boards + Nine Keys | 9 | 11 | after T5 |
@@ -121,7 +121,12 @@ Shared partials, so the second PR rebases on the first: `68-around-the-game.css`
   table, and the four box score grids (bat, pit, totals, board). All `tight`;
   all `bare`, because each sits in a `Card` (or the handoff card's own wrap).
   The rolling line is `sticky`.
-- **Files (9):** `components/gamehud/RollingLine.jsx`,
+- **Also (Q5):** the team-leaders list (`TeamLeadersLedger.jsx`) becomes two
+  `Table`s with column names (spec.md, "The team leaders become a table"). It is
+  NOT in the spoiler scope. It rides here only because its CSS shares
+  `23-box-score-detail.css` with the box score totals.
+- **Files (10):** `components/teamstats/TeamLeadersLedger.jsx`,
+  `components/gamehud/RollingLine.jsx`,
   `components/inning/PitchersSection.jsx`,
   `components/playbyplay/PitcherHandoffCard.jsx`, `screens/BoxScore.jsx`,
   `styles/20-charts.css`, `styles/21-box-score.css`,
@@ -144,7 +149,10 @@ Shared partials, so the second PR rebases on the first: `68-around-the-game.css`
   step through a half), a later half with a pitching change (step through the halves from
   `/07072026/milstl-2/top5?nointro`) for the handoff card, `/07072026/milstl-2/scorecard?nointro` and the box score's
   inning tally (the held neighbours: must not change),
-  `/game/823035/express?nointro` (the rolling line in Express Lane).
+  `/game/823035/express?nointro` (the rolling line in Express Lane),
+  `/team/milwaukee-brewers-158?nointro` and
+  `/team/milwaukee-brewers-158/numbers?nointro` (the team leaders: three a side,
+  then six a side).
 
 ### T4 — the small ledgers
 

@@ -91,4 +91,4 @@ screens/research/ResearchDiaryPage.jsx#1	HOLD	-	no					/admin/research (Clerk-ad
 screens/contenders/ContenderDiaryPage.jsx#1	HOLD	-	no					/admin/contenders (Clerk-admin gated), the same .researchdiary__table. Q4.
 #
 # --- div-built tables (Part 4) ---
-div:tledg	HOLD	-	no					A ledger LIST, not a table: one figure a row and no column heads, so nobody reads down a column. Already on Card (#1113). Q5.
+div:tledg	MIGRATE	T3	no	row				Gary, 2026-10-01 (Q5): make it a table. Two Tables (Batting, Pitching) with column names, bare inside their Card, density row. Not gated (season aggregates, ADR-0034). Rides in T3 only because it shares 23-box-score-detail.css with the box score totals.
