@@ -18,15 +18,17 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { SPORT_LABEL } from '../src/lib/teams.js'
 import { isoToday } from '../src/lib/dates.js'
-import { txnDate, isRehabTxn, isRehabEndingTxn, REHAB_MAX_DAYS, isoDaysBetween } from '../src/api/rehab-policy.js'
+import { txnDate, isRehabTxn, rehabListRow } from '../src/api/rehab-policy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'rehab.json')
-// A rehab assignment can't run longer than ~30 days, so a 40-day transaction
-// window always contains the start of every currently-active stint.
+// An open stint has a rehab leg in the last 30 days (REHAB_MAX_DAYS), so a
+// 40-day league-wide window finds every CANDIDATE. It does not decide the
+// stint: each candidate's whole feed does (#1362), since the leg that started
+// his stint, or the row that ended it, can sit outside any window.
 const REHAB_WINDOW_DAYS = 40
 // The rehab club must have played FEWER than this many games since the player's
 // last appearance for them; at or beyond it the stint is treated as ended.
@@ -41,45 +43,30 @@ const daysAgo = (n) => {
 const currentSeason = () => new Date().getUTCFullYear()
 
 // --- transaction pass: who is on a rehab assignment right now -----------------
-// A rehab starts with an "Assigned" (ASG) row whose description says "rehab" and
-// ends when the player returns to the majors (recall / contract selection /
-// activation off the IL), is really sent down, is released/retired, or is
-// reassigned somewhere non-rehab. txnDate/isRehabTxn/isRehabEndingTxn: see
-// src/api/rehab-policy.js — shared with person.js's single-player detector.
+// The stint rule — when one starts, what ends it, the 30-day cap, the
+// same-day tie — is rehabListRow / openRehabStint in src/api/rehab-policy.js,
+// the ONE rule the player page's banner also calls, so the two agree (#1362).
 
-// From a flat league-wide transaction window, the players CURRENTLY on a
-// major-league rehab assignment — a big leaguer sent to a minor-league affiliate
-// whose stint hasn't been closed out and began at an MLB club. One row per
-// player, newest stint first.
-function selectActiveRehabAssignments(transactions, mlbIds) {
-  const byPlayer = new Map()
-  for (const t of transactions) {
-    const pid = t.person?.id
-    if (!pid || !txnDate(t)) continue
-    if (!byPlayer.has(pid)) byPlayer.set(pid, [])
-    byPlayer.get(pid).push(t)
+// The players with a rehab leg in the league-wide window: the candidates.
+function rehabCandidateIds(transactions) {
+  return [...new Set(transactions.filter((t) => isRehabTxn(t) && txnDate(t)).map((t) => t.person?.id).filter(Boolean))]
+}
+
+// One player's whole transaction feed, or null on a failed lookup (the player
+// is dropped, same as a rehab that has ended).
+async function fetchPlayerTransactions(personId) {
+  try {
+    return (await getJson(`/api/v1/transactions?playerId=${personId}`)).transactions ?? []
+  } catch {
+    return null
   }
-  const rows = []
-  for (const [pid, ts] of byPlayer) {
-    const lastEnd = ts.filter(isRehabEndingTxn).reduce((m, t) => (txnDate(t) > m ? txnDate(t) : m), '')
-    const run = ts.filter((t) => isRehabTxn(t) && txnDate(t) > lastEnd)
-    if (!run.length) continue
-    const mlbLeg = run.find((t) => mlbIds.has(t.fromTeam?.id))
-    if (!mlbLeg) continue
-    const latest = run.reduce((a, b) => (txnDate(a) >= txnDate(b) ? a : b))
-    const since = run.reduce((m, t) => (!m || txnDate(t) < m ? txnDate(t) : m), '')
-    const club = latest.toTeam
-    if (!club?.id) continue
-    rows.push({
-      playerId: pid,
-      playerName: latest.person?.fullName || '',
-      orgId: mlbLeg.fromTeam?.id ?? null,
-      orgName: mlbLeg.fromTeam?.name || '',
-      clubId: club.id,
-      clubName: club.name || '',
-      since,
-    })
-  }
+}
+
+// From the candidates' whole feeds, the players CURRENTLY on a major-league
+// rehab assignment, one row per player, newest stint first.
+async function selectActiveRehabAssignments(candidateIds, mlbIds, today) {
+  const feeds = await mapConcurrent(candidateIds, 8, fetchPlayerTransactions)
+  const rows = feeds.map((ts) => (ts ? rehabListRow(ts, mlbIds, today) : null)).filter(Boolean)
   rows.sort((a, b) =>
     a.since < b.since ? 1 : a.since > b.since ? -1 : a.playerName.localeCompare(b.playerName),
   )
@@ -168,9 +155,7 @@ async function isStillRehabbing(row, position, level, season) {
 // --- main ---------------------------------------------------------------------
 const mlbIds = await fetchMlbTeamIds()
 const txns = (await getJson(`/api/v1/transactions?startDate=${daysAgo(REHAB_WINDOW_DAYS)}&endDate=${isoToday()}`)).transactions ?? []
-const candidates = selectActiveRehabAssignments(txns, mlbIds).filter(
-  (r) => isoDaysBetween(r.since, isoToday()) <= REHAB_MAX_DAYS,
-)
+const candidates = await selectActiveRehabAssignments(rehabCandidateIds(txns), mlbIds, isoToday())
 const [positions, levels] = await Promise.all([
   fetchPositions(candidates.map((r) => r.playerId)),
   fetchTeamLevels(candidates.map((r) => r.clubId)),

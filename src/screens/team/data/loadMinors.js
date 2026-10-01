@@ -13,17 +13,16 @@ import { parentOrgHistory } from '../../../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../../../api/careerTimeline.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { SPORT_LABEL } from '../../../lib/teams.js'
+import { rate3 as sharedRate3 } from '../../../api/person/shared.js'
 import { seasonOf, affiliateCardsFrom, parentOrgIdOf } from './shared.js'
 
 const DASH = '—'
 
-// Same rate-stat formatting prospects.js's own statLineFrom uses (three
-// decimals, no leading zero — an OPS over 1.000 is left alone since the
-// regex only strips a leading zero immediately before the decimal point) —
-// kept as its own copy rather than an import for two formatters, same
-// cross-boundary-constant convention prospects.js's own header describes.
+// Same rate-stat formatting prospects.js's own statLineFrom uses: the shared
+// rate3 (three decimals, no leading zero, half up as MLB rounds, #1356), with
+// null and not the dash when there is no value.
 function rate3(v) {
-  return Number.isFinite(v) ? v.toFixed(3).replace(/^(-?)0(?=\.)/, '$1') : null
+  return Number.isFinite(v) ? sharedRate3(v) : null
 }
 function num2(v) {
   return Number.isFinite(v) ? v.toFixed(2) : null

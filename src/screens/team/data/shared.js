@@ -443,3 +443,31 @@ export function hiddenTeamTabs(team) {
   if (!team.league?.id) hidden.add('numbers')
   return hidden
 }
+
+// IS THE TEAM-RECORDS LEDGER WHOLE ENOUGH TO PRINT (#1363)? A Records card
+// (api/teamRecords.js) built on a fraction of a season says something false.
+// The Dominican Summer League files (sportId 16) hold about a fifth of each
+// season — DSL Brewers Blue 2026: 13 rows, 60 final games — so the Numbers tab
+// hides the card for such a club rather than print it. Not a backfill: that
+// was the decision on the issue.
+//
+// `schedule` is fetchTeamSchedule's rows, whose `won` is null for a game not
+// final or past the cutoff; `cutoff` is the page's YYYY-MM-DD (null: today).
+// Two allowances keep a real club's card up. The last LEDGER_LAG_DAYS before
+// the cutoff are not checked, since the nightly job runs before the day's
+// games. And a few missing games are allowed, at most one in ten (two at the
+// least): a box score that never arrived leaves a full-season club 0-5 games
+// short (2026, checked live at every level), and that is a ledger worth
+// reading.
+const LEDGER_LAG_DAYS = 2
+
+export function ledgerIsComplete(ledger, schedule, cutoff) {
+  if (!ledger) return false
+  const day = cutoff ?? isoToday()
+  const checkedThrough = new Date(Date.parse(`${day}T00:00:00Z`) - LEDGER_LAG_DAYS * 86400000)
+    .toISOString()
+    .slice(0, 10)
+  const played = (schedule ?? []).filter((g) => g.won != null && g.apiDate <= checkedThrough).length
+  const held = (ledger.games ?? []).filter((g) => g.d <= checkedThrough).length
+  return played - held <= Math.max(2, Math.floor(played / 10))
+}

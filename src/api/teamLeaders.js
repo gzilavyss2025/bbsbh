@@ -30,17 +30,15 @@
 
 import { ipToOuts, outsToIp } from '../lib/math/innings.js'
 import { num } from '../lib/math/number.js'
+import { rate3 } from './person/shared.js'
 
 const DASH = '—'
 
 // ---------------------------------------------------------------------------
 // Formatters (baseball display conventions)
 // ---------------------------------------------------------------------------
-// ".302" — three decimals, no leading zero.
-function rate3(v) {
-  if (!Number.isFinite(v)) return DASH
-  return v.toFixed(3).replace(/^(-?)0(?=\.)/, '$1')
-}
+// ".302" — three decimals, no leading zero, half up as MLB rounds: the shared
+// rate3 (person/shared.js, #1356), imported above.
 // "3.45" — two decimals (ERA, WHIP, rate-per-9, K/BB, P/IP).
 function num2(v) {
   if (!Number.isFinite(v)) return DASH

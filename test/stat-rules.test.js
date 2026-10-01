@@ -46,18 +46,31 @@ test('mlbOps adds the rounded halves: Judge is 1.145, not 1.144', () => {
   assert.equal(rate3(mlbOps(obp, slg)), '1.145')
 })
 
-test('mlbOps rounds each half the way rate3 prints it, so OPS = printed OBP + printed SLG', () => {
-  // 0.2345 is stored a hair under .2345, so rate3 prints '.234'. Math.round(v * 1000)
-  // made it .235, and the OPS no longer added up from the printed halves.
-  assert.equal(rate3(0.2345), '.234')
-  assert.equal(rate3(mlbOps(0.2345, 0.4)), '.634')
-  // OBP .0375 prints .037 and SLG .051375 prints .051: OPS must print .088, not .089.
-  assert.equal(rate3(0.0375), '.037')
+test('rate3 rounds an exact half UP, the way MLB prints it (#1356)', () => {
+  // 23/80 is .2875, stored as 0.28749999999999997. toFixed(3) printed .287;
+  // MLB prints .288 (Andrew Knizner and Brett Callahan, 2026 OBP).
+  assert.equal(rate3(23 / 80), '.288')
+  assert.equal(rate3(3 / 80), '.038')
+  assert.equal(rate3(469 / 2000), '.235') // .2345
+  assert.equal(rate3(116 / 320), '.363') // Enrique Bradfield Jr., 2026 SLG
+  assert.equal(rate3(41 / 80), '.513') // Anthony Potestio, 2026 OBP
+  // Not a half: rounds to the nearest as before.
   assert.equal(rate3(0.051375), '.051')
-  assert.equal(rate3(mlbOps(0.0375, 0.051375)), '.088')
+  assert.equal(rate3(1 / 3), '.333')
+  assert.equal(rate3(2 / 3), '.667')
+  assert.equal(rate3(0), '.000')
+  assert.equal(rate3(1), '1.000')
 })
 
-test('a real line at the boundary: 3 for 80 with 4 total bases prints OBP .037, SLG .050, OPS .087', () => {
+test('mlbOps adds the halves MLB prints, so OPS = printed OBP + printed SLG', () => {
+  // OBP .0375 prints .038 and SLG .051375 prints .051: OPS prints .089.
+  assert.equal(rate3(mlbOps(0.0375, 0.051375)), '.089')
+  assert.equal(rate3(mlbOps(469 / 2000, 0.4)), '.635')
+  // Knizner 2026: MLB .288 / .356 / .644.
+  assert.equal(rate3(mlbOps(23 / 80, 0.356)), '.644')
+})
+
+test('a real line at the boundary: 3 for 80 with 4 total bases prints OBP .038, SLG .050, OPS .088', () => {
   // Two stints (one stint passes through untouched): 40 AB, 2 H, 3 TB and 40 AB, 1 H, 1 TB.
   const stat = aggregateSplits(
     [
@@ -66,9 +79,45 @@ test('a real line at the boundary: 3 for 80 with 4 total bases prints OBP .037, 
     ],
     'hitting',
   )
-  assert.equal(stat.obp, '.037')
+  assert.equal(stat.obp, '.038')
+  assert.equal(stat.avg, '.038')
   assert.equal(stat.slg, '.050')
-  assert.equal(stat.ops, '.087')
+  assert.equal(stat.ops, '.088')
+})
+
+test('the computed homes print a 23-for-80 half as .288 (#1356)', () => {
+  const a = { atBats: 40, hits: 12, baseOnBalls: 0, hitByPitch: 0, sacFlies: 0, totalBases: 12, gamesPlayed: 10 }
+  const b = { atBats: 40, hits: 11, baseOnBalls: 0, hitByPitch: 0, sacFlies: 0, totalBases: 11, gamesPlayed: 10 }
+  // mergeCareerSplits: AVG 23/80, and OPS .288 + .288.
+  const merged = mergeCareerSplits(a, b, 'hitting')
+  assert.equal(merged.avg, '.288')
+  assert.equal(merged.ops, '.576')
+  // foldStats (Box Lines).
+  const rows = [
+    { gamePk: 1, date: '2026-04-01', counts: { atBats: 40, hits: 12 } },
+    { gamePk: 2, date: '2026-04-02', counts: { atBats: 40, hits: 11 } },
+  ]
+  const cells = Object.fromEntries(foldStats(rows, 'hitting').map((c) => [c.k, c.v]))
+  assert.equal(cells.AVG, '.288')
+  assert.equal(cells.OBP, '.288')
+  assert.equal(cells.SLG, '.288')
+  assert.equal(cells.OPS, '.576')
+  // sumHitting: OPS is the sum of the two printed halves.
+  assert.equal(rate3(sumHitting([{ stat: a }, { stat: b }]).ops), '.576')
+})
+
+test('no hand-rolled toFixed(3) rate formatter is left beside the shared rate3 (#1356)', () => {
+  for (const path of [
+    '../src/api/boxlines/fold.js',
+    '../src/api/teamLeaders.js',
+    '../src/api/prospects.js',
+    '../src/api/tradeDeadline.js',
+    '../src/screens/team/data/loadMinors.js',
+    '../scripts/gen-vs-team-splits.mjs',
+    '../scripts/gen-callouts.mjs',
+  ]) {
+    assert.doesNotMatch(rawSource(path), /toFixed\(3\)/, path)
+  }
 })
 
 test('eraOf and whipOf give null at zero outs and the usual figure otherwise', () => {
