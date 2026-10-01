@@ -101,15 +101,16 @@
   font-size: var(--fs-small);
   color: var(--text-body);
 }
-/* Zero extra weight (:where), so a family's `.rpt td` or a classed cell's
-   `.gnotes__date` wins on order and never on specificity. nowrap: a figure
+/* Zero extra weight (:where) on the cell, head and row rules, so a family's
+   `.rpt td` or a classed cell's `.gnotes__date` wins on order and never on
+   specificity. nowrap: a figure
    must not break at its en-dash. */
 .table__grid :where(th, td) {
   padding: var(--table-cell);
   text-align: right;
   white-space: nowrap;
 }
-.table__grid thead th {
+.table__grid :where(thead th) {
   background: var(--bg-page);
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -117,7 +118,7 @@
   text-transform: uppercase;
   color: var(--text-caption);
 }
-.table__grid tbody :is(th, td) {
+.table__grid :where(tbody th, tbody td) {
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
@@ -132,9 +133,9 @@
   z-index: 2;
   background: var(--bg-page);
 }
-.table--sheet.table--sticky .table__grid thead th:first-child {
+.table--sheet.table--sticky .table__grid thead tr:first-child th:first-child {
   border-top-left-radius: var(--radius-md);
 }
-.table--sheet.table--sticky .table__grid tbody tr:last-child td:first-child {
+.table--sheet.table--sticky .table__grid tbody tr:last-child :is(th, td):first-child {
   border-bottom-left-radius: var(--radius-md);
 }

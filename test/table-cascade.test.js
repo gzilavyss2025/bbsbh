@@ -103,6 +103,12 @@ test('the two densities are one custom property, read by one cell rule', () => {
   assert.match(cell[0][0], /^\.table__grid :where\(th, td\)$/, 'at zero extra weight, so a family rule wins on its own')
 })
 
+test('the head and row rules weigh nothing, so a family rule wins on order', () => {
+  const css = read('system/table.css')
+  assert.equal(decl(ruleBody(css, '.table__grid :where(thead th)'), 'text-transform'), 'uppercase')
+  assert.equal(decl(ruleBody(css, '.table__grid :where(tbody th, tbody td)'), 'border-top'), 'var(--bw-hair) solid var(--border-hairline)')
+})
+
 test('the sticky column is opaque, restates table-cell and keeps both rounded corners', () => {
   const css = read('system/table.css')
   const pin = ruleBody(css, '.table--sticky .table__grid :is(th, td):first-child')
@@ -112,11 +118,11 @@ test('the sticky column is opaque, restates table-cell and keeps both rounded co
   assert.equal(decl(pin, 'background'), 'var(--table-pin, var(--surface-card))', 'scrolled figures must not show through')
   assert.equal(decl(ruleBody(css, '.table--sticky .table__grid thead th:first-child'), 'z-index'), '2')
   assert.equal(
-    decl(ruleBody(css, '.table--sheet.table--sticky .table__grid thead th:first-child'), 'border-top-left-radius'),
+    decl(ruleBody(css, '.table--sheet.table--sticky .table__grid thead tr:first-child th:first-child'), 'border-top-left-radius'),
     'var(--radius-md)',
   )
   assert.equal(
-    decl(ruleBody(css, '.table--sheet.table--sticky .table__grid tbody tr:last-child td:first-child'), 'border-bottom-left-radius'),
+    decl(ruleBody(css, '.table--sheet.table--sticky .table__grid tbody tr:last-child :is(th, td):first-child'), 'border-bottom-left-radius'),
     'var(--radius-md)',
   )
 })
