@@ -45,7 +45,7 @@ export function monthDay(apiDate) {
   return m ? `${Number(m[1])}/${Number(m[2])}` : ''
 }
 
-export const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 // "Jul 5" — month name and day, no weekday and no year, read straight off the
 // YYYY-MM-DD (a trailing time or zone is ignored). The one spelling for a
