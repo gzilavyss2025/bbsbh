@@ -673,7 +673,7 @@ function TeamBlock({ side, theme }) {
           </thead>
           <tbody>
             {side.batters.map((b) => (
-              <tr key={b.id} className={b.isSub ? 'bs__sub' : ''}>
+              <tr key={b.id} className={b.isSub ? 'bs__row--substitute' : ''}>
                 <td className="bs__nameCol">
                   <span className="bs__player">
                     {b.mark && <span className="bs__mark">{b.mark}</span>}

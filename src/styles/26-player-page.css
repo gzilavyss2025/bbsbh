@@ -877,7 +877,7 @@
    opposing-defense card's namespace (`.lineup, .opp, .starter` in
    44-pre-game-cards.css), which once leaked its border/background/shadow/
    overflow:hidden onto every ledger's team/player column. */
-.ledger .ledger__sub {
+.ledger .ledger__label {
   color: var(--text-muted);
   font-family: var(--font-body);
 }
@@ -949,7 +949,7 @@
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
-.ledger tr.reg-subtotal .ledger__sub {
+.ledger tr.reg-subtotal .ledger__label {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-caps);

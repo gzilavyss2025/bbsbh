@@ -2196,6 +2196,10 @@ const H3_RENAMED = [
   ['dlab__lede', 'dlab__note'],
   // after #1339: a section title inside a modal body, not the head's second line
   ['tscoremodal__subkicker', 'tscoremodal__sectiontitle'],
+  // #1132 slice T2: not second lines. Both were held as "subtotal" names; `bs__sub` is a
+  // SUBSTITUTE batter's row and `ledger__sub` the ledger's second label column.
+  ['bs__sub', 'bs__row--substitute'],
+  ['ledger__sub', 'ledger__label'],
 ]
 
 // Two classes left with no successor: `.cover__sub` had no call site (its rule
@@ -2277,7 +2281,7 @@ test('H3: the season note block is .seasonnote, and no .note class is left', () 
 test('H3: the held rows keep their names', () => {
   const trees = h3Trees()
   const held = [
-    'wire__kicker', 'bs__sub', 'ledger__sub', // not a second line (#1113, #1132)
+    'wire__kicker', // not a second line (#1113)
     'contractcard__eyebrow', // `.contractcard__note` is the optioned caption, a different line
     // two different second lines on one head: needs a decision on the grammar
     'abouthero__kicker', 'abouthero__lede', 'derbycard__eyebrow', 'derbycard__sub',
