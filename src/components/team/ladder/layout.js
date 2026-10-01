@@ -94,7 +94,7 @@ const segR = (e) => `R${e.club}-${e.home}`
 // one club box may never have overlapped there (Andujar and Bauers both link to
 // the Yankees box, through two different pairs). `key` is `p<playerId>` or
 // `c<clubId>`. Returns { nodes, segments } (Sets of keys), or null for no trace.
-// ADR-0089.
+// ADR-0090.
 export function traceOf({ edges }, key) {
   if (!key) return null
   const hit = edges.filter((e) => [`p${e.away}`, `c${e.club}`, `p${e.home}`].includes(key))
@@ -108,7 +108,7 @@ export function traceOf({ edges }, key) {
 // AND this many px per column, and it must be shorter than the vertical one. A
 // small ladder keeps its columns at most SIDEWAYS_COL_MAX, centered. The width is the CARD's, measured, not the
 // viewport's: the same viewport can hold a one-column page or the spread
-// (ADR-0089).
+// (ADR-0090).
 export const SIDEWAYS_MIN = 840
 const SIDEWAYS_COL = 54
 const SIDEWAYS_COL_MAX = 96

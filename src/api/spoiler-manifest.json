@@ -1019,6 +1019,14 @@
         "screens/boxscore/revealBoxScore.js"
       ]
     },
+    "rotation/projectedStarters.js": {
+      "class": "spoiler-free",
+      "why": "Reads workload.json's completed appearances strictly before the game date and never touches the feed. Names a LIKELY starter by rest days since his last start; a pre-game guess from past games, same footing as workload.js. ADR-0089."
+    },
+    "rotation/liveStarters.js": {
+      "class": "spoiler-free",
+      "why": "Reads a few pitchers' game logs of COMPLETED games (every game type) and hands them to projectedStarters.js, which cuts them strictly before the game date. Never reads the feed. ADR-0089."
+    },
     "workload.js": {
       "class": "spoiler-free",
       "why": "Static workload.json — completed appearances only. All bucket math is relative to a caller-supplied asOfDate."

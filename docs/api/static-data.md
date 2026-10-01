@@ -502,6 +502,13 @@ for each generator; the reader modules:
   role baseline). Surfaces: `BullpenBoard` on the lineup pages (gated to
   slate-current games — the file describes "now"), the player page's
   `PitcherWorkloadCard`, and the laboring baseline for `pitcherHealth.js`.
+- `rotation/projectedStarters.js` + `rotation/liveStarters.js` — a LIKELY starter
+  when no probable pitcher is announced (ADR-0089). Spoiler-free. The file is
+  regular-season only and up to a day old, so `workload.json` only NAMES the
+  candidates (`rotationCandidateIds`); `projectFromLiveLogs` reads each one's game
+  log with every game type and `projectStarters` applies the rest rule. A failed
+  read drops that pitcher and never falls back to the file's own `apps`. Surface:
+  the Starting pitcher card (`ProjectedStarters.jsx`). MLB only.
 - `pitcherHealth.js` — IN-GAME pitching health, ADR-0009 footing like
   `pitchers.js` (gated by `revealedThrough`, never SealBox-wrapped):
   `laboringFor` (tonight's pitches/inning vs. his own season norm from

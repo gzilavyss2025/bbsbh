@@ -133,6 +133,23 @@ modal never blocks the first-visit slate. For a user-visible change, keep the
 server running for the maintainer's handoff as required by `AGENTS.md`; stop it
 only when no handoff is needed or when you must release the reserved port.
 
+## Cloud sessions: screenshots with live MLB data
+
+In a Claude Code cloud session (claude.ai/code), Chromium does not trust the
+agent proxy's certificate, so a plain Playwright page shows "Couldn't load
+games". Node's `fetch` does reach statsapi. `shot.mjs` (next to this file)
+relays every https request through Node and saves a JPEG you can Read:
+
+```bash
+npm run dev   # or reuse a running server
+node .claude/skills/run/shot.mjs "http://localhost:5173/?nointro" "$SCRATCH/home.jpg" 1440 1000 1
+node .claude/skills/run/shot.mjs "http://localhost:5173/?nointro" "$SCRATCH/home-phone.jpg" 390 844 1
+```
+
+Args: `url out [width=390] [height=844] [full=0|1]`. The script's header lists
+the three traps (CA, response headers, binary path). Do not turn off TLS
+checks to get around the proxy.
+
 ## Routes, so you don't have to derive them
 
 `/{MMDDYYYY}/{away}{home}/{section}` — team abbrs lowercased, game 2 of a

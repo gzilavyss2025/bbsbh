@@ -16,7 +16,7 @@ import {
   scrimAlpha,
   settleMs,
   velocityFrom,
-} from '../src/components/transactions/dockPhysics.js'
+} from '../src/components/ui/dock/dockPhysics.js'
 
 // The wire dock's feel, asserted. Everything WireDock.jsx does with a pointer
 // reduces to these functions, which is why they were pulled out of it: a sheet

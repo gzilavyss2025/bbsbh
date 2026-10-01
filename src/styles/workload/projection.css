@@ -1,0 +1,63 @@
+/* Likely starters (components/workload/ProjectedStarters.jsx) — what the card
+   shows in place of "Not posted yet." when no probable is announced. Dressed as
+   a guess: a label and a note around plain rows, no headshot, so it can never
+   be mistaken for the real starter's card. Sits directly in the card, so it
+   insets itself like the .hint above. */
+.projection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2h) var(--space-3);
+}
+.projection__label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.projection__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.projection__row {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.projection__name {
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-title-sm);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Rendered as a PlayerLink → .plink button, which resets weight/color to
+   `inherit` from a later partial — same fix as .plink.starter__name below. */
+.plink.projection__name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-align: left;
+}
+.projection__facts {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.projection__note {
+  margin: 0;
+  padding-top: var(--space-1);
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}

@@ -14,6 +14,14 @@ import { BracketFold } from './BracketFold.jsx'
 import { FullBracket } from './FullBracket.jsx'
 import { bracketOpensByItself } from '../../lib/postseason/bracketDisplay.js'
 
+// The finished series' ids, so a series box links to its finished page only
+// once postseason-history.json holds it (trap 7). Shared with the bracket rail
+// and dock, which draw the same FullBracket.
+export function useBracketHistoryIds() {
+  const history = useAsync(() => loadPostseasonHistory(), [])
+  return useMemo(() => historySeriesIds(history.data), [history.data])
+}
+
 // On a day with no postseason game (an off day, or the champion's days before
 // the offseason page), the full bracket is the page: it is always open, and
 // there is no door to close it (Gary, 2026-09-28). `autoOpen={false}` keeps it
@@ -30,8 +38,7 @@ export function PostseasonBracket({ bracket, cutoff, slateDate = null, autoOpen 
     setPrevCutoff(cutoff)
     setChoice(null)
   }
-  const history = useAsync(() => loadPostseasonHistory(), [])
-  const historyIds = useMemo(() => historySeriesIds(history.data), [history.data])
+  const historyIds = useBracketHistoryIds()
 
   if (!bracket) return null
   const alwaysOpen = autoOpen && bracketOpensByItself(bracket, slateDate)

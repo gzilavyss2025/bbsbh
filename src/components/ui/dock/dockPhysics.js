@@ -1,11 +1,11 @@
-// The wire dock's motion, as arithmetic. No DOM, no React, no time source —
+// The bottom dock's motion, as arithmetic. No DOM, no React, no time source —
 // every function here takes numbers and returns numbers, so the FEEL of the
 // drag is unit-testable (test/dock-physics.test.js) instead of being something
 // you can only assess by flicking a phone.
 //
 // That split is the point. A sheet reads as fluid because of four decisions —
 // where a flick lands, how hard an edge resists, which rest position wins, how
-// long the settle runs — and all four are pure. What is left in WireDock.jsx is
+// long the settle runs — and all four are pure. What is left in SheetDock.jsx is
 // only pointer plumbing.
 //
 // The coordinate system: `offset` is the sheet's translateY in CSS pixels,
@@ -16,7 +16,7 @@
 // How the sheet is sized against the viewport. The tallest detent stops short
 // of the top so the slate's date banner stays visible behind it — an open dock
 // must never read as a page of its own, because it is not one: the games are
-// still the page (see WireDock.jsx's header).
+// still the page (see SheetDock.jsx's header).
 export const SHEET_FRACTION = 0.92
 // The working position. Just over half the viewport, which on a 844pt iPhone
 // leaves four game rows legible above the sheet while showing five moves in it.
