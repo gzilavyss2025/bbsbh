@@ -6,7 +6,7 @@ import { HOVER_CARD_QUERY, useMediaQuery } from '../../../hooks/useMediaQuery.js
 import { TeamLogo } from '../../logo/TeamLogo.jsx'
 import { Headshot } from '../../player/Headshot.jsx'
 import { PlayerLink } from '../../player/PlayerLink.jsx'
-import { clubShortName, ladderGeometry, seasonRange, traceOf } from './layout.js'
+import { clubShortName, ladderGeometry, posLabel, seasonRange, traceOf } from './layout.js'
 
 // The Former Teammates card's diagram (#1352): away players, shared clubs and
 // home players, joined by a line per pair. Each player and each club shows once.
@@ -24,7 +24,10 @@ export function Ladder({ ladder, dayNight, away, home }) {
   const [width, setWidth] = useState(0)
   useEffect(() => {
     if (!node) return
-    const ro = new ResizeObserver(() => setWidth(node.clientWidth))
+    const measure = () => setWidth(node.clientWidth)
+    // No ResizeObserver: measure once. It reports once on observe() otherwise.
+    if (typeof ResizeObserver === 'undefined') return measure()
+    const ro = new ResizeObserver(measure)
     ro.observe(node)
     return () => ro.disconnect()
   }, [node])
@@ -49,8 +52,8 @@ export function Ladder({ ladder, dayNight, away, home }) {
     .sort((a, b) => Number(a.on) - Number(b.on)) // a lit line draws over the dim ones
 
   const badges = Object.values(ladder.players).map((p) => p.former).filter(Boolean)
-  const club = badges.find((f) => !f.farmOnly)
-  const farm = badges.find((f) => f.farmOnly)
+  const club = badges.some((f) => !f.farmOnly)
+  const farm = badges.some((f) => f.farmOnly)
   const sideName = (team) => (
     <span className="ladder__sidename">
       <TeamLogo teamId={team.id} name={team.teamName} size={20} />
@@ -76,17 +79,13 @@ export function Ladder({ ladder, dayNight, away, home }) {
         )}
         {club && (
           <span className="ladder__key">
-            <span className="ladder__badge">
-              <TeamLogo teamId={club.orgId} name={club.teamName} size={11} variant="cap" />
-            </span>
+            <span className="ladder__badge ladder__badge--key" />
             Played for the club
           </span>
         )}
         {farm && (
           <span className="ladder__key">
-            <span className="ladder__badge ladder__badge--farm">
-              <TeamLogo teamId={farm.orgId} name={farm.teamName} size={11} variant="cap" />
-            </span>
+            <span className="ladder__badge ladder__badge--farm ladder__badge--key" />
             Its farm system only
           </span>
         )}
@@ -96,7 +95,6 @@ export function Ladder({ ladder, dayNight, away, home }) {
         ref={setNode}
         className={`ladder${sideways ? ' ladder--sideways' : ''}${trace ? ' ladder--tracing' : ''}`}
         style={{ height: geo?.height }}
-        onMouseLeave={() => setPointed(null)}
       >
         {geo && (
           <>
@@ -121,6 +119,7 @@ export function Ladder({ ladder, dayNight, away, home }) {
                   aria-label={`${c.teamName}${c.level === 'MLB' ? '' : ` ${c.level}`}, ${seasonRange(c.seasons)}`}
                   onClick={() => pin(`c${id}`)}
                   onMouseEnter={() => point(`c${id}`)}
+                  onMouseLeave={() => point(null)}
                 >
                   <TeamLogo teamId={c.teamId} name={c.teamName} size={sideways ? 22 : 18} />
                   <span className="ladder__clubtext">
@@ -141,7 +140,7 @@ export function Ladder({ ladder, dayNight, away, home }) {
                 pinned={pinned === `p${id}`}
                 linked={hoverCapable || (pointed ?? pinned) === `p${id}`}
                 onPin={() => pin(`p${id}`)}
-                onPoint={() => point(`p${id}`)}
+                onPoint={(on) => point(on ? `p${id}` : null)}
               />
             ))}
             {geo.note && (
@@ -188,12 +187,17 @@ function PlayerNode({ p, side, box, cls, pinned, linked, onPin, onPoint }) {
     </span>
   )
   return (
-    <div className={`ladder__node ladder__player ladder__player--${side}${cls}`} style={box} onMouseEnter={onPoint}>
+    <div
+      className={`ladder__node ladder__player ladder__player--${side}${cls}`}
+      style={box}
+      onMouseEnter={() => onPoint(true)}
+      onMouseLeave={() => onPoint(false)}
+    >
       <button
         type="button"
         className="ladder__trace"
         aria-pressed={pinned}
-        aria-label={`${p.name}, ${posLabel(p.pos)}${formerLabel}`}
+        aria-label={[p.name, posLabel(p.pos)].filter(Boolean).join(', ') + formerLabel}
         onClick={onPin}
       >
         <Headshot personId={p.id} name={p.name} teamId={p.teamId} className="ladder__shot" />
@@ -209,7 +213,5 @@ function PlayerNode({ p, side, box, cls, pinned, linked, onPin, onPoint }) {
 }
 
 const surname = (p) => splitDisplayName(p.name).last
-// A pitcher's roster position is already "P" at the source; normalize anyway.
-const posLabel = (pos) => (pos === 'SP' || pos === 'RP' ? 'P' : pos)
 // [2019, 2022] -> "2019–2022", for screen readers.
-const yearSpan = (ys) => (ys.length > 1 ? `${ys[0]}–${ys[ys.length - 1]}` : `${ys[0]}`)
+const yearSpan = (ys) => (ys.length > 1 ? `${ys[0]}–${ys[ys.length - 1]}` : `${ys[0] ?? ''}`)

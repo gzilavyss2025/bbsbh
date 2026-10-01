@@ -8,7 +8,7 @@ import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { SectionMasthead } from '../ui/SectionMasthead.jsx'
 import { Ladder } from './ladder/Ladder.jsx'
-import { seasonRange } from './ladder/layout.js'
+import { posLabel, seasonRange } from './ladder/layout.js'
 
 // The lineup page's FORMER TEAMMATES card and its ORG TIES fallback.
 // Spoiler-free: rosters and team-season history carry no score, so both
@@ -83,11 +83,6 @@ export function OrgTies({ ties }) {
     </section>
   )
 }
-
-// A pitcher's roster position is already the plain "P" abbreviation (no
-// SP/RP split) at the source, but normalize defensively anyway — the badge
-// should never show anything longer than that for a pitcher.
-const posLabel = (pos) => (pos === 'SP' || pos === 'RP' ? 'P' : pos)
 
 // One player's headshot over his two-line name (first name small, surname
 // big) — the same treatment as the player page's hero, shrunk to fit a card —

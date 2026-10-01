@@ -105,11 +105,13 @@ export function traceOf({ edges }, key) {
 }
 
 // The sideways Ladder needs a card at least this wide (a tablet stays vertical)
-// AND this many px per column. The width is the CARD's, measured, not the
+// AND this many px per column, and it must be shorter than the vertical one. A
+// small ladder keeps its columns at most SIDEWAYS_COL_MAX, centered. The width is the CARD's, measured, not the
 // viewport's: the same viewport can hold a one-column page or the spread
 // (ADR-0089).
 export const SIDEWAYS_MIN = 840
 const SIDEWAYS_COL = 54
+const SIDEWAYS_COL_MAX = 96
 
 // Vertical: a 40px row per ladder row, three columns (player | club | player).
 // At 328px the columns are 92 | 30 | 84 | 30 | 92; wider, the player columns
@@ -146,7 +148,10 @@ export function ladderGeometry(ladder, width) {
   const { bands, rows } = ladderLayout(ladder)
   const { formerOnly, players: info } = ladder
   const columns = rows + formerOnly.length
-  const sideways = width >= SIDEWAYS_MIN && columns * SIDEWAYS_COL <= width
+  const gaps = Math.max(0, bands.length - 1) + (bands.length && formerOnly.length ? 1 : 0)
+  const tall = columns * ROW + gaps * BAND_GAP // the vertical Ladder's height
+  const short = TOP_H + 2 * GAP_H + MID_H + BOT_H // the sideways one's
+  const sideways = width >= SIDEWAYS_MIN && columns * SIDEWAYS_COL <= width && tall > short
   const players = []
   const clubs = []
   const dividers = []
@@ -155,7 +160,8 @@ export function ladderGeometry(ladder, width) {
   let height
 
   if (sideways) {
-    const col = width / columns
+    const col = Math.min(width / columns, SIDEWAYS_COL_MAX)
+    const x0 = (width - columns * col) / 2
     const midTop = TOP_H + GAP_H
     const botTop = midTop + MID_H + GAP_H
     height = botTop + BOT_H
@@ -165,8 +171,8 @@ export function ladderGeometry(ladder, width) {
       at[`p${id}`] = { x, y: side === 'away' ? TOP_H : botTop }
     }
     for (const b of bands) {
-      if (b.top) dividers.push({ x1: b.top * col, y1: 0, x2: b.top * col, y2: height })
-      const x = (pos) => (b.top + pos + 0.5) * col
+      if (b.top) dividers.push({ x1: x0 + b.top * col, y1: 0, x2: x0 + b.top * col, y2: height })
+      const x = (pos) => x0 + (b.top + pos + 0.5) * col
       for (const [id, pos] of Object.entries(b.L)) place(id, 'away', x(pos))
       for (const [id, pos] of Object.entries(b.R)) place(id, 'home', x(pos))
       for (const [id, pos] of Object.entries(b.C)) {
@@ -175,9 +181,10 @@ export function ladderGeometry(ladder, width) {
       }
     }
     if (formerOnly.length) {
-      if (rows) dividers.push({ x1: rows * col, y1: 0, x2: rows * col, y2: height })
-      formerOnly.forEach((id, i) => place(String(id), info[id].side, (rows + i + 0.5) * col))
-      note = { left: rows * col + 2, top: midTop, width: formerOnly.length * col - 4, height: MID_H }
+      const at0 = x0 + rows * col
+      if (rows) dividers.push({ x1: at0, y1: 0, x2: at0, y2: height })
+      formerOnly.forEach((id, i) => place(String(id), info[id].side, at0 + (i + 0.5) * col))
+      note = { left: at0 + 2, top: midTop, width: formerOnly.length * col - 4, height: MID_H }
     }
   } else {
     const side = Math.max(60, Math.min(132, (width - CLUB_W) / 2 - GUTTER))
@@ -241,6 +248,9 @@ export function clubShortName(shardName, current) {
   const city = current.name.slice(0, -current.teamName.length)
   return shardName.startsWith(city) ? shardName.slice(city.length) : shardName
 }
+
+// A pitcher's roster position is already "P" at the source; normalize anyway.
+export const posLabel = (pos) => (pos === 'SP' || pos === 'RP' ? 'P' : pos)
 
 // [2022, 2023] -> "’22–’23"; [2021] -> "’21". Non-contiguous years still read as
 // a min–max span (good enough for a caption).

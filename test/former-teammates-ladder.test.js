@@ -452,6 +452,23 @@ test('geometry: a wider vertical card widens the club boxes, up to 120px', () =>
   assert.ok(g.clubs.every((c) => c.box.width === 120 && c.box.left === (894 - 120) / 2))
 })
 
+test('geometry: sideways only when it is shorter than vertical', () => {
+  const one = teammateLadder([pair(story, mcmahon, [rockies])], AWAY, HOME)
+  assert.equal(ladderGeometry(one, 896).sideways, false, 'one 40px row beats a 352px diagram')
+})
+
+test('geometry: a small sideways ladder keeps narrow columns, centered', () => {
+  // Nine pairs on nine clubs: nine one-row bands, 432px tall when vertical.
+  const ties = Array.from({ length: 9 }, (_, i) =>
+    pair(player(100 + i, `Away ${i}`, AWAY), player(200 + i, `Home ${i}`, HOME), [club(300 + i, `Club ${i}`, [2020])]),
+  )
+  const g = ladderGeometry(teammateLadder(ties, AWAY, HOME), 896)
+  assert.equal(g.sideways, true)
+  assert.ok(g.players.every((p) => p.box.width === 96), 'a column is at most 96px')
+  const mid = (b) => b.left + b.width / 2
+  assert.equal((mid(g.clubs[0].box) + mid(g.clubs[8].box)) / 2, 448, 'the columns sit mid-card')
+})
+
 test('geometry: sideways is 352px tall, one column per ladder row plus the former-only column', () => {
   const g = ladderGeometry(PADRES_BREWERS, 896)
   assert.equal(g.height, 352)
