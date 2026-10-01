@@ -1,0 +1,164 @@
+{
+  "stats": [
+    {
+      "splits": [
+        {
+          "season": "2026",
+          "stat": {
+            "gamesPlayed": 1,
+            "gamesStarted": 0,
+            "wins": 0,
+            "losses": 0,
+            "saves": 0,
+            "holds": 0,
+            "era": "3.14",
+            "inningsPitched": "1.0",
+            "strikeOuts": 0,
+            "baseOnBalls": 0,
+            "whip": "0.97",
+            "hits": 0,
+            "runs": 0,
+            "earnedRuns": 0,
+            "numberOfPitches": 13,
+            "battersFaced": 3
+          },
+          "team": {
+            "id": 144
+          },
+          "sport": {
+            "id": 1
+          },
+          "opponent": {
+            "id": 113,
+            "name": "Cincinnati Reds"
+          },
+          "date": "2026-09-23",
+          "gameType": "R",
+          "isHome": true,
+          "isWin": true,
+          "game": {
+            "gamePk": 824868,
+            "gameNumber": 1
+          }
+        },
+        {
+          "season": "2026",
+          "stat": {
+            "gamesPlayed": 1,
+            "gamesStarted": 0,
+            "wins": 0,
+            "losses": 0,
+            "saves": 0,
+            "holds": 1,
+            "era": "3.09",
+            "inningsPitched": "1.0",
+            "strikeOuts": 1,
+            "baseOnBalls": 0,
+            "whip": "0.97",
+            "hits": 1,
+            "runs": 0,
+            "earnedRuns": 0,
+            "numberOfPitches": 10,
+            "battersFaced": 3
+          },
+          "team": {
+            "id": 144
+          },
+          "sport": {
+            "id": 1
+          },
+          "opponent": {
+            "id": 146,
+            "name": "Miami Marlins"
+          },
+          "date": "2026-09-26",
+          "gameType": "R",
+          "isHome": false,
+          "isWin": true,
+          "game": {
+            "gamePk": 823813,
+            "gameNumber": 1
+          }
+        },
+        {
+          "season": "2026",
+          "stat": {
+            "gamesPlayed": 1,
+            "gamesStarted": 0,
+            "wins": 1,
+            "losses": 0,
+            "saves": 0,
+            "holds": 0,
+            "era": "0.00",
+            "inningsPitched": "1.0",
+            "strikeOuts": 1,
+            "baseOnBalls": 0,
+            "whip": "0.00",
+            "hits": 0,
+            "runs": 0,
+            "earnedRuns": 0,
+            "numberOfPitches": 16,
+            "battersFaced": 3
+          },
+          "team": {
+            "id": 144
+          },
+          "sport": {
+            "id": 1
+          },
+          "opponent": {
+            "id": 143,
+            "name": "Philadelphia Phillies"
+          },
+          "date": "2026-09-29",
+          "gameType": "F",
+          "isHome": true,
+          "isWin": true,
+          "game": {
+            "gamePk": 849845,
+            "gameNumber": 1
+          }
+        },
+        {
+          "season": "2026",
+          "stat": {
+            "gamesPlayed": 1,
+            "gamesStarted": 0,
+            "wins": 0,
+            "losses": 0,
+            "saves": 0,
+            "holds": 0,
+            "era": "10.80",
+            "inningsPitched": "0.2",
+            "strikeOuts": 1,
+            "baseOnBalls": 0,
+            "whip": "1.20",
+            "hits": 2,
+            "runs": 2,
+            "earnedRuns": 2,
+            "numberOfPitches": 15,
+            "battersFaced": 4
+          },
+          "team": {
+            "id": 144
+          },
+          "sport": {
+            "id": 1
+          },
+          "opponent": {
+            "id": 143,
+            "name": "Philadelphia Phillies"
+          },
+          "date": "2026-09-30",
+          "gameType": "F",
+          "isHome": true,
+          "isWin": false,
+          "game": {
+            "gamePk": 849841,
+            "gameNumber": 1
+          }
+        }
+      ]
+    }
+  ]
+}

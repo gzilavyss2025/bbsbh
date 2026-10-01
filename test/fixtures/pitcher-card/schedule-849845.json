@@ -1,0 +1,18 @@
+{
+  "dates": [
+    {
+      "date": "2026-09-29",
+      "games": [
+        {
+          "gamePk": 849845,
+          "gameType": "F",
+          "gameNumber": 1,
+          "seriesGameNumber": 1,
+          "gamesInSeries": 3,
+          "officialDate": "2026-09-29",
+          "doubleHeader": "N"
+        }
+      ]
+    }
+  ]
+}

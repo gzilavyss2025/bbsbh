@@ -1,0 +1,69 @@
+{
+  "stats": [
+    {
+      "splits": [
+        {
+          "stat": {
+            "gamesPlayed": 1,
+            "gamesStarted": 0,
+            "wins": 1,
+            "losses": 0,
+            "saves": 0,
+            "holds": 0,
+            "era": "0.00",
+            "inningsPitched": "1.0",
+            "strikeOuts": 1,
+            "baseOnBalls": 0,
+            "whip": "0.00",
+            "hits": 0,
+            "runs": 0,
+            "earnedRuns": 0,
+            "numberOfPitches": 16,
+            "battersFaced": 3
+          },
+          "team": {
+            "id": 144,
+            "name": "Atlanta Braves"
+          },
+          "league": {
+            "id": 104,
+            "name": "National League",
+            "link": "/api/v1/league/104"
+          },
+          "sport": {
+            "id": 1
+          },
+          "numTeams": 1
+        },
+        {
+          "stat": {
+            "gamesPlayed": 1,
+            "gamesStarted": 0,
+            "wins": 1,
+            "losses": 0,
+            "saves": 0,
+            "holds": 0,
+            "era": "0.00",
+            "inningsPitched": "1.0",
+            "strikeOuts": 1,
+            "baseOnBalls": 0,
+            "whip": "0.00",
+            "hits": 0,
+            "runs": 0,
+            "earnedRuns": 0,
+            "numberOfPitches": 16,
+            "battersFaced": 3
+          },
+          "team": {
+            "id": 144,
+            "name": "Atlanta Braves"
+          },
+          "sport": {
+            "id": 0
+          },
+          "numTeams": 1
+        }
+      ]
+    }
+  ]
+}

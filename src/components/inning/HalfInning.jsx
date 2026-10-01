@@ -13,6 +13,7 @@ import { Card } from '../ui/frame/Card.jsx'
 import { PlayByPlay } from '../playbyplay/PlayByPlay.jsx'
 import { FielderNotice } from '../playbyplay/FielderNotice.jsx'
 import { PitcherNotice } from '../playbyplay/PitcherNotice.jsx'
+import { PitcherCard } from '../playbyplay/pitcherCard/PitcherCard.jsx'
 import { BatterNotice } from '../playbyplay/BatterNotice.jsx'
 import { FinalizedLineCard } from '../playbyplay/PitcherHandoffCard.jsx'
 import { UpNextBatters } from '../playbyplay/UpNextBatters.jsx'
@@ -172,6 +173,8 @@ export function HalfInning({
   // above `nowPitching`. Both still sit behind the caller's own
   // `revealed || isNextToReveal` gate at the render site.
   const showNowPitching = !windowed || (isFreshPitcher && !startedRevealing)
+  // The FULL card when the arm takes the mound (#1344); a carried-over arm keeps the header.
+  const NowPitching = isFreshPitcher ? PitcherCard : PitcherNotice
 
   // How many pitches he'd thrown in THIS GAME entering this half — clamped to
   // halfIndex(inning, half) - 1 (through the previous half only), which is
@@ -368,7 +371,9 @@ export function HalfInning({
             one-state announcement while windowed. See the comment above
             `nowPitching` for both halves of that. */}
         {(revealed || isNextToReveal) && nowPitching && showNowPitching && (
-          <PitcherNotice
+          <NowPitching
+            feed={feed}
+            relief={inning > 1}
             pitcher={nowPitching}
             teamId={battingSide === 'away' ? homeId : awayId}
             teamName={battingSide === 'away' ? homeName : awayName}

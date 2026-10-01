@@ -41,7 +41,7 @@ which sets no default params and no caching.
 | `game_boxscore` | `/api/v1/game/{gamePk}/boxscore` | none | `postseasonSeries.js:73` | **YES** |
 | `venue` | `/api/v1/venues/{venueId}` | `hydrate=location,fieldInfo` | `game.js:34` `fetchVenue` | no |
 | `team_coaches` | `/api/v1/teams/{teamId}/coaches` | `?season={season}` (optional) | `game.js:60` `fetchManager` | no |
-| `person_stats` (season) | `/api/v1/people/{personId}/stats` | `stats=season&group=pitching&season={y}[&sportId]` | `game.js:117` `fetchPitcherSeasonLine` | aggregate |
+| `person_stats` (byDateRange) | `/api/v1/people/{personId}/stats` | `stats=byDateRange&group=pitching&season={y}&startDate={y}-01-01&endDate={officialDate−1}&gameType={R or F,D,L,W}[&sportId]` (ADR-0088) | `game.js` `fetchPitcherSeasonLine` | aggregate |
 | `schedule` | `/api/v1/schedule` | `sportId&date&hydrate=team,venue(timezone),lineups,officials,probablePitcher` | `schedule.js:88` `fetchSchedule` | rows carry scores; **dropped in `normalizeGame`** |
 | `schedule` | `/api/v1/schedule` | `sportId&date&hydrate=team` (light) | `schedule.js:132` `resolveGame` | dropped |
 | `schedule` | `/api/v1/schedule` | `gamePks={csv}&hydrate=team` (batched) | `schedule.js:160` `fetchGamesByPk` | dropped |

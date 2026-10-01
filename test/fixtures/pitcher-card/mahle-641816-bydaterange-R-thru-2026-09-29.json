@@ -1,0 +1,88 @@
+{
+  "stats": [
+    {
+      "splits": [
+        {
+          "stat": {
+            "gamesPlayed": 9,
+            "gamesStarted": 9,
+            "wins": 4,
+            "losses": 1,
+            "saves": 0,
+            "holds": 0,
+            "era": "1.99",
+            "inningsPitched": "54.1",
+            "strikeOuts": 48,
+            "baseOnBalls": 9,
+            "whip": "0.96",
+            "hits": 43,
+            "runs": 14,
+            "earnedRuns": 12,
+            "numberOfPitches": 824,
+            "battersFaced": 210
+          },
+          "team": {
+            "id": 144,
+            "name": "Atlanta Braves"
+          },
+          "sport": {
+            "id": 1
+          },
+          "numTeams": 1
+        },
+        {
+          "stat": {
+            "gamesPlayed": 18,
+            "gamesStarted": 18,
+            "wins": 3,
+            "losses": 9,
+            "saves": 0,
+            "holds": 0,
+            "era": "5.13",
+            "inningsPitched": "94.2",
+            "strikeOuts": 89,
+            "baseOnBalls": 37,
+            "whip": "1.39",
+            "hits": 95,
+            "runs": 55,
+            "earnedRuns": 54,
+            "numberOfPitches": 1578,
+            "battersFaced": 404
+          },
+          "team": {
+            "id": 137,
+            "name": "San Francisco Giants"
+          },
+          "sport": {
+            "id": 1
+          },
+          "numTeams": 1
+        },
+        {
+          "stat": {
+            "gamesPlayed": 27,
+            "gamesStarted": 27,
+            "wins": 7,
+            "losses": 10,
+            "saves": 0,
+            "holds": 0,
+            "era": "3.99",
+            "inningsPitched": "149.0",
+            "strikeOuts": 137,
+            "baseOnBalls": 46,
+            "whip": "1.23",
+            "hits": 138,
+            "runs": 69,
+            "earnedRuns": 66,
+            "numberOfPitches": 2402,
+            "battersFaced": 614
+          },
+          "sport": {
+            "id": 0
+          },
+          "numTeams": 2
+        }
+      ]
+    }
+  ]
+}

@@ -244,12 +244,13 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
     async (f) => {
       const season = f.gameData?.game?.season
       const officialDate = f.gameData?.datetime?.officialDate
+      const gameNumber = f.gameData?.game?.gameNumber ?? 1
       const probables = f.gameData?.probablePitchers ?? {}
       const [awaySeason, homeSeason, awayLast, homeLast, awayVsOpp, homeVsOpp] = await Promise.all([
-        fetchPitcherSeasonLine(probables.away?.id, season, game.sportId),
-        fetchPitcherSeasonLine(probables.home?.id, season, game.sportId),
-        fetchPitcherLastGame(probables.away?.id, season, officialDate),
-        fetchPitcherLastGame(probables.home?.id, season, officialDate),
+        fetchPitcherSeasonLine(probables.away?.id, season, game.sportId, officialDate),
+        fetchPitcherSeasonLine(probables.home?.id, season, game.sportId, officialDate),
+        fetchPitcherLastGame(probables.away?.id, season, officialDate, gameNumber),
+        fetchPitcherLastGame(probables.home?.id, season, officialDate, gameNumber),
         // The away starter's opponent is the home club, and vice versa.
         fetchPitcherSeasonVsOpponent(probables.away?.id, season, game.home.id, officialDate, game.sportId),
         fetchPitcherSeasonVsOpponent(probables.home?.id, season, game.away.id, officialDate, game.sportId),
