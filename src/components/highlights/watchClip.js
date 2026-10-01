@@ -86,33 +86,33 @@ export async function resolveRawClip(playId, { fetchImpl = null, signal = null }
 
 // THE LOOKUP BOTH WATCH BUTTONS SHARE, as plain JS so a node test can drive it
 // (useWatchClip.js wraps it in React state). One lookup in flight at a time: a
-// newer `start` or a `cancel` aborts the older one, and an answer that lands
-// after that is dropped. It keeps NO cache — a hit is already kept by
-// clipUrlCache and a miss must not be (resolveRawClip says why).
+// `start` for another play or a `cancel` aborts the older one, and an answer
+// that lands after that is dropped. A `start` for the play already in flight
+// does nothing, so a double-tap sends one request, not a burst. It keeps NO
+// cache — a hit is already kept by clipUrlCache and a miss must not be
+// (resolveRawClip says why).
 //
-// `live` is set on the way IN (`mount`) as well as cleared on the way out
-// (`unmount`). A cleanup-only flag stays false forever after a remount
-// (StrictMode's double-invoke, or a real one), and every answer would then be
-// dropped with the sheet stuck on "Loading…". Same trap WatchCondensedButton
-// records.
+// `onResult(result, playId)` gets the play the answer is for.
 export function createClipLookup(onResult, resolve = resolveRawClip) {
   let controller = null
-  let live = true
+  let pending = null
   const cancel = () => {
     controller?.abort()
     controller = null
+    pending = null
   }
   return {
-    mount: () => { live = true },
-    unmount: () => { live = false; cancel() },
     cancel,
     async start(playId) {
+      if (controller && pending === playId) return
       cancel()
       const mine = (controller = new AbortController())
+      pending = playId
       const result = await resolve(playId, { signal: mine.signal })
-      if (!live || mine.signal.aborted) return
+      if (mine.signal.aborted) return
       controller = null
-      onResult(result)
+      pending = null
+      onResult(result, playId)
     },
   }
 }
