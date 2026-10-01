@@ -328,7 +328,7 @@ export function PlayerPage({ id, asOf, sportId }) {
           {!retired && showProspectCard && block.group === data.prospectCardGroup && (
             <ProspectCard
               view={data.prospectCard}
-              level={SPORT_LABEL[data.sportId] ?? ''}
+              level={SPORT_LABEL[data.prospectCardSportId] ?? ''}
               group={block.group}
               badge={{
                 rank: core.data.prospectRank,
