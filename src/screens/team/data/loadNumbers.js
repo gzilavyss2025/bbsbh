@@ -1,7 +1,7 @@
 import { fetchTeam, fetchStandings, fetchLeagueTeamStats, fetchTeamIL } from '../../../api/team.js'
 import { fetchTeamSchedule } from '../../../api/schedule.js'
 import { fetchComebackWins, comebackRatesFor } from '../../../api/comebackWins.js'
-import { fetchTeamRecords, ledgerIsComplete } from '../../../api/teamRecords.js'
+import { fetchTeamRecords } from '../../../api/teamRecords.js'
 import { fetchScheduleShape } from '../../../api/scheduleShape.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
 import { fetchRunValue, clubRunValue, clubBoard } from '../../../api/around-the-game/runValue.js'
@@ -19,7 +19,7 @@ import {
 } from '../../../api/uniforms.js'
 import { teamClubName } from '../../../lib/teams.js'
 import { dayOfWeekRecord } from '../modules/TeamStatsCard.jsx'
-import { seasonOf, cutoffFor, scoreCutoffFor, standingsRowsFor, injuredIdsFrom } from './shared.js'
+import { seasonOf, cutoffFor, scoreCutoffFor, standingsRowsFor, injuredIdsFrom, ledgerIsComplete } from './shared.js'
 
 const DASH = '—'
 

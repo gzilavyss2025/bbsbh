@@ -14,7 +14,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { ledgerIsComplete } from '../src/api/teamRecords.js'
+import { ledgerIsComplete } from '../src/screens/team/data/shared.js'
 
 // Schedule rows the way fetchTeamSchedule gives them: `won` is null for a game
 // not yet final or past the cutoff.
