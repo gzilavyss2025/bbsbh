@@ -1,14 +1,16 @@
 import { Entry, Group } from './Entry.jsx'
 
-// The REAL Stack and Cluster, and the real Card and Pill as the things they
-// arrange — never a copy of any of their markup.
+// The REAL Stack, Cluster and Grid, and the real Card and Pill as the things
+// they arrange — never a copy of any of their markup.
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Cluster } from '../../components/ui/layout/Cluster.jsx'
+import { Grid } from '../../components/ui/layout/Grid.jsx'
 import { Pill } from '../../components/ui/control/Pill.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 
 const PATH = 'src/components/ui/layout/Stack.jsx'
 const CLUSTER_PATH = 'src/components/ui/layout/Cluster.jsx'
+const GRID_PATH = 'src/components/ui/layout/Grid.jsx'
 
 // One column per gap, each a Stack of three ledger cards. The cards are the
 // ruler: the space between them is the whole of what the Stack draws. The
@@ -114,6 +116,75 @@ export function ClusterHalf() {
                 <span style={{ fontSize: '2rem' }}>.312</span>
               </Cluster>
               <p className="dlab__path">{align}</p>
+            </div>
+          ))}
+        </div>
+      </Entry>
+    </Group>
+  )
+}
+
+// The grid's ruler is a run of ledger cards. Three cells in a wide frame show
+// the one difference between filling and fitting; seven in a narrow one show
+// the gaps and the wrap. The widths belong to these frames, not to the Grid.
+function Cells({ n }) {
+  return Array.from({ length: n }, (_, i) => (
+    <Card key={i} as="div" frame="ledger">
+      {i + 1}
+    </Card>
+  ))
+}
+
+const GRID_GAPS = [
+  { gap: 'tight', note: '4px · --space-1' },
+  { gap: 'snug', note: '8px · default' },
+  { gap: 'base', note: '12px · --space-3' },
+  { gap: 'loose', note: '16px · --space-4' },
+]
+
+export function GridHalf() {
+  return (
+    <Group
+      title="The grid — as many columns as fit, no breakpoint (#1180)"
+      lede="Columns of at least `min`, an equal share of the row each. Not a layout you author: a label beside a value, a named area and a fixed three across keep their own rules. The anatomy is the header of src/styles/system/grid.css."
+    >
+      <Entry
+        title="Grid fill and fit"
+        path={GRID_PATH}
+        wide
+        note="Three cells, min 9rem, in a wide frame. The default FILLS: a short row keeps its column width, so one card does not stretch across the page. With fit, the empty columns collapse and the row stretches."
+      >
+        <div className="dlab__row" style={{ width: '100%' }}>
+          <div style={{ flex: '1 1 100%' }}>
+            <Grid min="9rem">
+              <Cells n={3} />
+            </Grid>
+            <p className="dlab__path">fill · the default</p>
+          </div>
+          <div style={{ flex: '1 1 100%' }}>
+            <Grid min="9rem" fit>
+              <Cells n={3} />
+            </Grid>
+            <p className="dlab__path">fit</p>
+          </div>
+        </div>
+      </Entry>
+      <Entry
+        title="Grid gap"
+        path={GRID_PATH}
+        wide
+        note="Seven cells, min 4rem, in a narrow frame so they wrap. The gap is the same in both directions: the Grid has no row gap, because only two of the 28 grids it replaces set one. min is a number (px), a length or a var(--token), and a grid narrower than min is one column, never an overflow."
+      >
+        <div className="dlab__row">
+          {GRID_GAPS.map(({ gap, note }) => (
+            <div key={gap} style={{ width: '12rem' }}>
+              <Grid min="4rem" gap={gap}>
+                <Cells n={7} />
+              </Grid>
+              <p className="dlab__path">
+                {gap}
+                <span className="dlab__count">{note}</span>
+              </p>
             </div>
           ))}
         </div>

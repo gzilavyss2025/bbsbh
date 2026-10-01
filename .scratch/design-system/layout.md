@@ -219,4 +219,13 @@ Follow the #1113 pattern. This is a proposal, not a decision.
 
 Build one part per PR, in this order: `Stack`, `Cluster`, `Grid`. Each PR adds
 the component, its rules in `src/styles/system/<part>.css`, a `/design-lab`
-specimen and a test. **`Stack` and `Cluster` are built** (this branch). `Cluster` also takes `align` (`start`, `center`, `baseline`), which was not in the sign-off: the census of 147 wrapping rows found 69 with no alignment, 41 `center`, 31 `baseline` and 5 `flex-start`, so a Cluster without it could not host half of them. Migrating the existing rules follows in sliced PRs.
+specimen and a test. **`Stack`, `Cluster` and `Grid` are built** (this branch). `Cluster` also takes `align` (`start`, `center`, `baseline`), which was not in the sign-off: the census of 147 wrapping rows found 69 with no alignment, 41 `center`, 31 `baseline` and 5 `flex-start`, so a Cluster without it could not host half of them. Migrating the existing rules follows in sliced PRs.
+
+`Grid` takes `min` (a length, default `9rem`), `gap` (the Stack's four steps)
+and `fit`. Two facts from the 28 grids shaped it: 17 use `auto-fill` and 11 use
+`auto-fit`, so it needs both (`fit` is the switch, filling is the default); and
+three of them cannot move at all, because their tracks are `minmax(0, 1fr)`,
+`minmax(58px, max-content)` or a fixed `64px`, none of which is "at least
+`min`, equal share". So the real target is 25 rules. It has no row gap: only 2
+of the 28 set two values. Left out of the sign-off, so say if you want it:
+`rowGap`, as on `Cluster`.

@@ -45,6 +45,10 @@
    Next to the stack, for the same reason: a block that keeps its own gap or
    alignment loads later and wins on order. */
 @import './styles/system/cluster.css';
+/* The GRID — as many columns of a minimum width as fit (#1180). Next to the
+   cluster, for the same reason: a block that keeps its own gap or columns
+   loads later and wins on order. */
+@import './styles/system/grid.css';
 /* The SECTION HEAD — the one head a section or a card wears (#1113). Before
    06, so every per-site partial that places a head (a bleed, a corner) loads
    after it and wins on order. test/card-cascade.test.js pins the slot. */
