@@ -278,6 +278,28 @@ export function prospectCardView(entry, ageYears, levelAverageAge, tenure = null
   }
 }
 
+// The Prospect Card for one player, as both player-page loaders build it
+// (src/api/player/analytics.js and overview.js). `snapshot` is the trend file,
+// `entry` his row in it (or null), `liveSportId` the level of his live team.
+// Returns the card's view and `sportId`, the level the card names.
+//
+// The percentile, population and tenure come from `entry.sportId`, so the
+// level label and the level-average age come from it too. The live team can be
+// at another level: a fall or winter club, or a promotion the nightly run has
+// not read yet. Core Jackson's card said "640 qualified WINTER hitters" for
+// the AA population (#1359). With no trend row, the live level is all there
+// is; with neither, null, and the caller prints no level.
+export function prospectCardFor(snapshot, entry, birthDate, liveSportId, tenure = null) {
+  const sportId = entry?.sportId ?? liveSportId ?? null
+  const view = prospectCardView(
+    entry,
+    decimalAge(birthDate, snapshot?.generatedAt),
+    snapshot?.levelAverageAge?.[sportId] ?? null,
+    tenure,
+  )
+  return { view, sportId }
+}
+
 // Turns a player's full `history` (gen-prospect-trend.mjs's export, oldest
 // first: { date, sportId, percentile, qualified, atLevel }) into what the Prospect
 // Card's expanded Trend panel draws — chart points, and the level-change

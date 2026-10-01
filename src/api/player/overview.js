@@ -19,7 +19,7 @@ import { buildCareerTimeline } from '../careerTimeline.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from '../war.js'
 import { fetchPlayerContract } from '../person/contracts.js'
 import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor, medianRatesFor } from '../savantPercentiles.js'
-import { fetchProspectTrend, prospectTrendById, prospectCardView, decimalAge } from '../prospectTrend.js'
+import { fetchProspectTrend, prospectTrendById, prospectCardFor } from '../prospectTrend.js'
 import {
   awardsView,
   buildBlock,
@@ -150,13 +150,10 @@ export async function loadPlayerOverview(id, asOf) {
   // PRIMARY group, so an untracked prospect isn't blank in a different way
   // than the Analytics tab is).
   const trendEntry = prospectTrend ? prospectTrendById(prospectTrend, bio.id) : null
-  const prospectCard =
+  // The card's level is the trend row's, not the live team's (#1359).
+  const card =
     currentActivitySportId !== 1
-      ? prospectCardView(
-          trendEntry,
-          decimalAge(bio.birthDate, prospectTrend?.generatedAt),
-          prospectTrend?.levelAverageAge?.[currentActivitySportId] ?? null,
-        )
+      ? prospectCardFor(prospectTrend, trendEntry, bio.birthDate, currentActivitySportId)
       : null
   const prospectCardGroup = trendEntry?.group ?? primaryGroup
 
@@ -204,7 +201,8 @@ export async function loadPlayerOverview(id, asOf) {
     debutBoxscorePath: debutGamePk ? links.path(debutGamePk) : null,
     progression,
     timeline,
-    prospectCard,
+    prospectCard: card?.view ?? null,
+    prospectCardSportId: card?.sportId ?? null,
     prospectCardGroup,
     awardLedger: awardsView(awards, endDate),
   }

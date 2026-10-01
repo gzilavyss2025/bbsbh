@@ -13,6 +13,7 @@ import {
   ageEdgeFact,
   decimalAge,
   prospectCardView,
+  prospectCardFor,
   packProspectTrend,
   unpackProspectTrend,
 } from '../src/api/prospectTrend.js'
@@ -358,6 +359,43 @@ test('prospectCardView is state "qualified" with tier, confidence, and trend all
   assert.deepEqual(view.ageEdge, { years: 2.1, direction: 'younger' })
   assert.equal(view.trend.points.length, 2)
   assert.deepEqual(view.trend.promotions, [])
+})
+
+// ---------------------------------------------------------------------------
+// prospectCardFor — #1359. The percentile and population come from the trend
+// row's level, so the level the card names and the level-average age must
+// come from that row too, not from his live team.
+// ---------------------------------------------------------------------------
+
+const CARD_SNAPSHOT = { generatedAt: '2026-10-01T05:00:00.000Z', levelAverageAge: { 12: 24.6, 13: 23.5 } }
+
+test('prospectCardFor names the trend row\'s level, not a fall-league live team (Core Jackson, #1359)', () => {
+  // Live team: Salt River Rafters (fall league, 17). Trend row: AA, 49th of 640.
+  const entry = { group: 'hitting', sportId: 12, percentile: 49, qualified: true, sampleSize: 103, populationSize: 640, history: [] }
+  const card = prospectCardFor(CARD_SNAPSHOT, entry, '2003-10-01', 17)
+  assert.equal(card.sportId, 12)
+  // levelAverageAge[17] does not exist; the AA average does: 24.6 - 23.0.
+  assert.deepEqual(card.view.ageEdge, { years: 1.6, direction: 'younger' })
+})
+
+test('prospectCardFor compares his age with the trend row\'s level average (Henry Lalane, #1359)', () => {
+  // Live team: Richmond (AA, 12). Trend row: A+, 70th of 793.
+  const entry = { group: 'pitching', sportId: 13, percentile: 70, qualified: true, sampleSize: 112, populationSize: 793, history: [] }
+  const card = prospectCardFor(CARD_SNAPSHOT, entry, '2004-01-01', 12)
+  assert.equal(card.sportId, 13)
+  // 22.75 against the A+ 23.5 is under the 1-year floor: no fact. Against the
+  // AA 24.6 it printed a false "1.9 yrs younger".
+  assert.equal(card.view.ageEdge, null)
+})
+
+test('prospectCardFor falls back to the live level with no trend row, and to null with neither', () => {
+  const card = prospectCardFor(CARD_SNAPSHOT, null, '2003-10-01', 12)
+  assert.equal(card.sportId, 12)
+  assert.equal(card.view.state, 'none')
+  assert.deepEqual(card.view.ageEdge, { years: 1.6, direction: 'younger' })
+  const bare = prospectCardFor(null, null, null, undefined)
+  assert.equal(bare.sportId, null)
+  assert.deepEqual(bare.view, { state: 'none', ageEdge: null })
 })
 
 // ---------------------------------------------------------------------------
