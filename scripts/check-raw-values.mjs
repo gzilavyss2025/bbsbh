@@ -70,9 +70,9 @@ const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 // ignored — see the header.
 export const BUDGETS = {
   hex: 26,
-  radius: 83,
-  motion: 58,
-  shadow: 42,
+  radius: 82,
+  motion: 56,
+  shadow: 41,
 }
 
 export const KINDS = Object.keys(BUDGETS)
