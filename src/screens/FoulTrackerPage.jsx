@@ -51,10 +51,10 @@ import { Table } from '../components/ui/table/Table.jsx'
 
 const pct1 = (x) => `${(x * 100).toFixed(1)}%`
 
-// A `.standings` <tr> or `.sgh-row`/`.gamehigh-row` <li>'s favorite-team
+// A `.foulboard` <tr> or `.sgh-row`/`.gamehigh-row` <li>'s favorite-team
 // highlight — same `is-me` class + `--fav-accent` inline var convention as
-// StandingsPage/TeamLeaders (see .standings tr.is-me, .tlead__row--fav in
-// index.css), reused as-is so a fan's team tints the same way here as
+// StandingsPage/TeamLeaders (see .foulboard tr.is-me in 43-foul-tracker.css,
+// .tlead__row--fav), reused as-is so a fan's team tints the same way here as
 // everywhere else in the app.
 function favRowProps(teamId, favoriteTeamId) {
   if (favoriteTeamId == null || teamId !== favoriteTeamId) return {}
@@ -472,7 +472,7 @@ function FoulsPerWhiffColumn({ heading, hint, rows, favoriteTeamId }) {
       <p className="foulboard__whiffcol-heading">
         {heading} <span className="foulboard__whiffcol-hint">({hint})</span>
       </p>
-      <Table frame="bare" label={`Fouls per whiff, ${heading.toLowerCase()}`} className="foulboard">
+      <Table frame="bare" label={`${heading} fouls per whiff`} className="foulboard">
         <thead>
           <tr>
             <th className="team">Player</th>
@@ -1091,8 +1091,8 @@ function TeamPitchCategoryGroup({ group }) {
 
 // One pitch-family's navy subheader row (spans the table), its OWN
 // repeated Pitch/Pitches/Foul%/Whiff% column header, then its pitch-type
-// rows — a real <tbody> boundary per group so the row-divider rules (owned by
-// .standings/.ledger's shared background gradient) don't have to special-case
+// rows — a real <tbody> boundary per group so the row-divider rules (the
+// Table's per-cell hairline, system/table.css) don't have to special-case
 // the subheaders visually. The column header repeats under every category
 // (rather than once at the table's top) since a reader scanning straight to
 // "Breaking balls" shouldn't have to scroll back up to remember which column

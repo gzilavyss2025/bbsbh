@@ -131,7 +131,6 @@
   font-family: var(--font-body);
   font-size: var(--fs-small);
   letter-spacing: var(--ls-none);
-  text-transform: none;
   white-space: normal;
   color: var(--text-caption);
 }

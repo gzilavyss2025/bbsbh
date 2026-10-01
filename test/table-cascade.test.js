@@ -763,7 +763,6 @@ test('T7: a moved board keeps its own margin, layout and bleed', () => {
 test('T7: a text cell says it is words, not figures', () => {
   const css = read('report/challenge-card.css')
   assert.equal(decl(ruleBody(css, '.chal__board th.chal__who') ?? '', 'white-space'), 'normal', 'a player name may wrap')
-  assert.equal(decl(ruleBody(css, '.chal__floor') ?? '', 'text-transform'), 'none', 'the floor note is a sentence inside an uppercase head')
   assert.equal(decl(rules(read('70-contracts-grid.css')).find(([sel]) => sel === '.ctr__name')?.[1] ?? '', 'font-family'), 'var(--font-body)', 'a player name is not a mono figure')
   assert.equal(decl(rules(read('70-contracts-grid.css')).find(([sel]) => sel === '.ctr__name')?.[1] ?? '', 'font-variant-numeric'), 'normal', 'the terms line is words with digits, not tabular figures')
 })
@@ -779,7 +778,7 @@ test('T7: the contract grid pins its name column and its foot, opaque, with one 
     assert.ok(!props(ruleBody(css, cls) ?? '').includes('padding'), `${cls} takes the row density, so it sets no padding`)
   }
   const own = (sel) => rules(css).find(([s]) => s.split(',').map((x) => x.trim()).includes(sel))?.[1] ?? ''
-  assert.equal(decl(own('.ctr__table .ctr__subtotal th:first-child'), 'position'), 'static', 'a subtotal label scrolls with its row: only the player column and the foot pin')
+  assert.equal(decl(own('.table--sticky .ctr__table .ctr__subtotal th:first-child'), 'position'), 'static', 'a subtotal label scrolls with its row: only the player column and the foot pin')
   assert.equal(decl(own('.ctr__cell--free'), 'padding'), '0', 'the hatched cell keeps its zero padding')
   assert.equal(decl(own('.ctr__foot td'), 'padding'), 'var(--space-2h)', 'the foot row keeps its own padding')
   assert.equal(decl(own('.ctr__group td'), 'text-align'), 'left', 'the band label reads left: the Table right-aligns a figure cell')

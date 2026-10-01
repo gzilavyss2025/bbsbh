@@ -291,8 +291,9 @@
   color: var(--text-caption);
 }
 /* A subtotal label scrolls with its row, as it always has: only the player
-   column and the foot pin. Same weight as the Table's pin rule, loaded later. */
-.ctr__table .ctr__subtotal th:first-child {
+   column and the foot pin. Heavier than the Table's pin rule, so load order
+   is not what wins. */
+.table--sticky .ctr__table .ctr__subtotal th:first-child {
   position: static;
 }
 .ctr__subtotal th {
