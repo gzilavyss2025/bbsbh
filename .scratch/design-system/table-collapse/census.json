@@ -1,0 +1,5680 @@
+{
+ "head": "3e72bb48a",
+ "rows": [
+  {
+   "key": "components/gamehud/RollingLine.jsx#1",
+   "file": "components/gamehud/RollingLine.jsx",
+   "line": 97,
+   "cls": ".rolling__grid",
+   "dynamic": false,
+   "partial": "20-charts.css",
+   "td": "6/0",
+   "tdRules": [
+    "20-charts.css:31"
+   ],
+   "th": "6/0",
+   "thRules": [
+    "20-charts.css:31"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "other",
+   "to": "tight",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rolling__team (20-charts.css:58)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".rolling__scroll (20-charts.css:12)"
+   ],
+   "gate": "revealedThrough per cell: revealInning (reveal-only, ADR-0001) runs only when the half's idx <= revealedThrough",
+   "verdict": "MIGRATE",
+   "slice": "T3",
+   "reason": "The rolling line score (innings viewer, Express Lane). Sticky team column (.rolling__team) in a Card that scrolls (.rolling__scroll). 6/0 today. The reveal check lives in the cell render: keep it byte for byte.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<Card .rolling__scroll>",
+    "<section .rolling>"
+   ],
+   "cellPads": [
+    {
+     "rule": "20-charts.css:31",
+     "sel": ".rolling__grid th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 0,
+      "bottom": 6,
+      "left": 0
+     }
+    },
+    {
+     "rule": "20-charts.css:31",
+     "sel": ".rolling__grid td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 0,
+      "bottom": 6,
+      "left": 0
+     }
+    },
+    {
+     "rule": "20-charts.css:58",
+     "sel": ".rolling__team",
+     "at": "",
+     "pad": {
+      "left": 12,
+      "right": 8
+     }
+    },
+    {
+     "rule": "20-charts.css:89",
+     "sel": ".rolling__grid td.rolling__cell",
+     "at": "",
+     "pad": {
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "components/inning/PitchersSection.jsx#1",
+   "file": "components/inning/PitchersSection.jsx",
+   "line": 46,
+   "cls": ".pitchers__grid",
+   "dynamic": false,
+   "partial": "20-charts.css",
+   "td": "6/1",
+   "tdRules": [
+    "20-charts.css:278"
+   ],
+   "th": "6/1",
+   "thRules": [
+    "20-charts.css:278"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "other",
+   "to": "tight",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "revealedThrough via computePitcherLines (ADR-0009): not a SealBox, and it must not become one",
+   "verdict": "MIGRATE",
+   "slice": "T3",
+   "reason": "The pitchers table in the innings reference rail. The file header says it is sized to fit a phone with no sideways scroll: 6/1 to tight 4/2 adds 2px a column over ten columns, so check 390px. Shares .pitchers__grid with the HELD scorecard (Scorecard.jsx#1): the .pitchers__grid base rule in 20-charts.css stays, or moves into scorecard/footer.css, in the same PR.",
+   "problems": [],
+   "contexts": [
+    ".focusrail .pitchers__grid th (focus/reference.css:354)",
+    ".focusrail .pitchers__grid td (focus/reference.css:354)"
+   ],
+   "ancestors": [
+    "<div .pitchers__team>",
+    "<Card .pitchers>"
+   ],
+   "cellPads": [
+    {
+     "rule": "20-charts.css:278",
+     "sel": ".pitchers__grid th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 1,
+      "bottom": 6,
+      "left": 1
+     }
+    },
+    {
+     "rule": "20-charts.css:278",
+     "sel": ".pitchers__grid td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 1,
+      "bottom": 6,
+      "left": 1
+     }
+    },
+    {
+     "rule": "20-charts.css:301",
+     "sel": ".pitchers__pitcher",
+     "at": "",
+     "pad": {
+      "left": 0,
+      "right": 6
+     }
+    }
+   ]
+  },
+  {
+   "key": "components/offseason/MovedUp.jsx#1",
+   "file": "components/offseason/MovedUp.jsx",
+   "line": 90,
+   "cls": ".movedup__table",
+   "dynamic": false,
+   "partial": "78-offseason.css",
+   "td": "6/0",
+   "tdRules": [
+    "78-offseason.css:416"
+   ],
+   "th": "6/0",
+   "thRules": [
+    "78-offseason.css:416"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "other",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T4",
+   "reason": "Offseason notebook at a minor level: players who moved up. In a Card. 6/0, with 12px on the first and last cell: those two edge rules stay in the namespace.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<Card .movedup__card>",
+    "<section .movedup>"
+   ],
+   "cellPads": [
+    {
+     "rule": "78-offseason.css:416",
+     "sel": ".movedup__table th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 0,
+      "bottom": 6,
+      "left": 0
+     }
+    },
+    {
+     "rule": "78-offseason.css:416",
+     "sel": ".movedup__table td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 0,
+      "bottom": 6,
+      "left": 0
+     }
+    },
+    {
+     "rule": "78-offseason.css:426",
+     "sel": ".movedup__table :is(th, td):first-child",
+     "at": "",
+     "pad": {
+      "left": 12
+     }
+    },
+    {
+     "rule": "78-offseason.css:429",
+     "sel": ".movedup__table :is(th, td):last-child",
+     "at": "",
+     "pad": {
+      "right": 12
+     }
+    }
+   ]
+  },
+  {
+   "key": "components/offseason/YoungestRegulars.jsx#1",
+   "file": "components/offseason/YoungestRegulars.jsx",
+   "line": 121,
+   "cls": ".seasonnote__table",
+   "dynamic": false,
+   "partial": "78-offseason.css",
+   "td": "6/0",
+   "tdRules": [
+    "78-offseason.css:684"
+   ],
+   "th": "6/0",
+   "thRules": [
+    "78-offseason.css:684"
+   ],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "other",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T4",
+   "reason": "Offseason notebook at a minor level: the youngest regulars. Bare, 6/0. Same partial as MovedUp (78-offseason.css).",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .seasonnote__main>",
+    "<div .seasonnote__body>",
+    "<section .seasonnote>"
+   ],
+   "cellPads": [
+    {
+     "rule": "78-offseason.css:684",
+     "sel": ".seasonnote__table th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 0,
+      "bottom": 6,
+      "left": 0
+     }
+    },
+    {
+     "rule": "78-offseason.css:684",
+     "sel": ".seasonnote__table td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 0,
+      "bottom": 6,
+      "left": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "components/playbyplay/PitcherHandoffCard.jsx#1",
+   "file": "components/playbyplay/PitcherHandoffCard.jsx",
+   "line": 79,
+   "cls": ".pitchers__grid",
+   "dynamic": false,
+   "partial": "20-charts.css",
+   "td": "6/1",
+   "tdRules": [
+    "20-charts.css:278"
+   ],
+   "th": "6/1",
+   "thRules": [
+    "20-charts.css:278"
+   ],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "other",
+   "to": "tight",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".pitcherhandoff__tablewrap (12-sealbox.css:884)"
+   ],
+   "gate": "pitcherLineAt cut at a revealed at-bat (api/pitchers.js); the departure card renders inside PlayByPlay's SealBox reveal, the finalized card only for the next half (HalfInning.jsx, isNextToReveal)",
+   "verdict": "MIGRATE",
+   "slice": "T3",
+   "reason": "Same markup as PitchersSection (.pitchers__grid). Scrolls in .pitcherhandoff__tablewrap (12-sealbox.css).",
+   "problems": [],
+   "contexts": [
+    ".focusrail .pitchers__grid th (focus/reference.css:354)",
+    ".focusrail .pitchers__grid td (focus/reference.css:354)"
+   ],
+   "ancestors": [
+    "<div .pitcherhandoff__tablewrap>"
+   ],
+   "cellPads": [
+    {
+     "rule": "20-charts.css:278",
+     "sel": ".pitchers__grid th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 1,
+      "bottom": 6,
+      "left": 1
+     }
+    },
+    {
+     "rule": "20-charts.css:278",
+     "sel": ".pitchers__grid td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 1,
+      "bottom": 6,
+      "left": 1
+     }
+    },
+    {
+     "rule": "20-charts.css:301",
+     "sel": ".pitchers__pitcher",
+     "at": "",
+     "pad": {
+      "left": 0,
+      "right": 6
+     }
+    }
+   ]
+  },
+  {
+   "key": "components/player/AwardsLedger.jsx#1",
+   "file": "components/player/AwardsLedger.jsx",
+   "line": 141,
+   "cls": ".awardtbl",
+   "dynamic": false,
+   "partial": "67-awards-ledger.css",
+   "td": "6/0",
+   "tdRules": [
+    "67-awards-ledger.css:141"
+   ],
+   "th": "8 0 4 0",
+   "thRules": [
+    "67-awards-ledger.css:130"
+   ],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "other",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T4",
+   "reason": "Player awards (History tab and player page). 6/0 cells, 8 0 4 0 head. Gains 8px a side (Q2).",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [],
+   "cellPads": [
+    {
+     "rule": "67-awards-ledger.css:130",
+     "sel": ".awardtbl th",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 0,
+      "bottom": 4,
+      "left": 0
+     }
+    },
+    {
+     "rule": "67-awards-ledger.css:141",
+     "sel": ".awardtbl td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 0,
+      "bottom": 6,
+      "left": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "components/player/Ledger.jsx#1",
+   "file": "components/player/Ledger.jsx",
+   "line": 30,
+   "cls": ".ledger",
+   "dynamic": true,
+   "partial": "26-player-page.css",
+   "td": "6/8",
+   "tdRules": [
+    "26-player-page.css:825"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "26-player-page.css:825"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T4",
+   "reason": "One tag, three callers: CareerRegister (Year, Team; leftCols 2) and SplitsSection x2 (leftCols 1). Scrolls in .ledger-wrap. Already row. The .ledger frame shares ONE declaration block with .standings (26-player-page.css): T4 takes .ledger out of that selector list and leaves .standings for T8.",
+   "problems": [],
+   "contexts": [
+    ".ledger tr.ledger__nested .yr (26-player-page.css:331)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap>"
+   ],
+   "cellPads": [
+    {
+     "rule": "26-player-page.css:825",
+     "sel": ".ledger th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "26-player-page.css:825",
+     "sel": ".ledger td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "26-player-page.css:990",
+     "sel": ".ledger th",
+     "at": "@media (max-width: 739.98px)",
+     "pad": {
+      "left": 6,
+      "right": 6
+     }
+    },
+    {
+     "rule": "26-player-page.css:990",
+     "sel": ".ledger td",
+     "at": "@media (max-width: 739.98px)",
+     "pad": {
+      "left": 6,
+      "right": 6
+     }
+    }
+   ]
+  },
+  {
+   "key": "components/playerstats/RecentFormCard.jsx#1",
+   "file": "components/playerstats/RecentFormCard.jsx",
+   "line": 45,
+   "cls": ".ledger .formtrend__table",
+   "dynamic": false,
+   "partial": "26-player-page.css",
+   "td": "6/8",
+   "tdRules": [
+    "26-player-page.css:825"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "26-player-page.css:825"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T4",
+   "reason": ".ledger .formtrend__table in its own .ledger-wrap. No rule names .formtrend__table, so it is the plain ledger look.",
+   "problems": [],
+   "contexts": [
+    ".ledger tr.ledger__nested .yr (26-player-page.css:331)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap>",
+    "<div .formtrend>"
+   ],
+   "cellPads": [
+    {
+     "rule": "26-player-page.css:825",
+     "sel": ".ledger th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "26-player-page.css:825",
+     "sel": ".ledger td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "26-player-page.css:990",
+     "sel": ".ledger th",
+     "at": "@media (max-width: 739.98px)",
+     "pad": {
+      "left": 6,
+      "right": 6
+     }
+    },
+    {
+     "rule": "26-player-page.css:990",
+     "sel": ".ledger td",
+     "at": "@media (max-width: 739.98px)",
+     "pad": {
+      "left": 6,
+      "right": 6
+     }
+    },
+    {
+     "rule": "26b-recent-form.css:23",
+     "sel": ".formtrend__barhead",
+     "at": "",
+     "pad": {
+      "left": 6,
+      "right": 6
+     }
+    },
+    {
+     "rule": "26b-recent-form.css:23",
+     "sel": ".formtrend .formtrend__bar",
+     "at": "",
+     "pad": {
+      "left": 6,
+      "right": 6
+     }
+    }
+   ]
+  },
+  {
+   "key": "components/salaries/ContractGrid.jsx#1",
+   "file": "components/salaries/ContractGrid.jsx",
+   "line": 61,
+   "cls": ".ctr__table",
+   "dynamic": false,
+   "partial": "70-contracts-grid.css",
+   "td": "—",
+   "tdRules": [],
+   "th": "—",
+   "thRules": [],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "other",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".ctr__namehead (70-contracts-grid.css:149)",
+    ".ctr__name (70-contracts-grid.css:149)",
+    ".ctr__foot th (70-contracts-grid.css:352)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ctr__scroll (70-contracts-grid.css:135)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T7",
+   "reason": "A club's Contracts tab. Sticky name column and scroll (.ctr__scroll) in a Card. Every cell is classed, so there is no plain cell: name and year heads 6/10, age 6/8, group 8 10 4, subtotal 4/10, foot 10/10. Seven recipes in one table; all but the group and foot rows snap to row.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .ctr__scroll>",
+    "<Card .ctr__card>"
+   ],
+   "cellPads": [
+    {
+     "rule": "70-contracts-grid.css:157",
+     "sel": ".ctr__namehead",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 10,
+      "bottom": 6,
+      "left": 10
+     }
+    },
+    {
+     "rule": "70-contracts-grid.css:169",
+     "sel": ".ctr__agehead",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "70-contracts-grid.css:181",
+     "sel": ".ctr__age",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "70-contracts-grid.css:192",
+     "sel": ".ctr__yearhead",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 10,
+      "bottom": 6,
+      "left": 10
+     }
+    },
+    {
+     "rule": "70-contracts-grid.css:208",
+     "sel": ".ctr__group td",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 10,
+      "bottom": 4,
+      "left": 10
+     }
+    },
+    {
+     "rule": "70-contracts-grid.css:219",
+     "sel": ".ctr__name",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 10,
+      "bottom": 6,
+      "left": 10
+     }
+    },
+    {
+     "rule": "70-contracts-grid.css:321",
+     "sel": ".ctr__subtotal td",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 10,
+      "bottom": 4,
+      "left": 10
+     }
+    },
+    {
+     "rule": "70-contracts-grid.css:332",
+     "sel": ".ctr__subtotal th",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 10,
+      "bottom": 4,
+      "left": 10
+     }
+    },
+    {
+     "rule": "70-contracts-grid.css:345",
+     "sel": ".ctr__foot th",
+     "at": "",
+     "pad": {
+      "top": 10,
+      "right": 10,
+      "bottom": 10,
+      "left": 10
+     }
+    },
+    {
+     "rule": "70-contracts-grid.css:345",
+     "sel": ".ctr__foot td",
+     "at": "",
+     "pad": {
+      "top": 10,
+      "right": 10,
+      "bottom": 10,
+      "left": 10
+     }
+    }
+   ]
+  },
+  {
+   "key": "components/scoring/ScorecardSheet.jsx#1",
+   "file": "components/scoring/ScorecardSheet.jsx",
+   "line": 223,
+   "cls": ".sc-sheet",
+   "dynamic": false,
+   "partial": "scorecard/grid.css",
+   "td": "—",
+   "tdRules": [],
+   "th": "4/0",
+   "thRules": [
+    "scorecard/grid.css:98"
+   ],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "other",
+   "to": "—",
+   "sticky": "yes",
+   "stickyHow": [
+    ".sc-sheet thead th (scorecard/grid.css:98)",
+    ".sc-sheet__name (scorecard/grid.css:134)",
+    ".sc-sheet__totals td (scorecard/grid.css:277)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".sc-sheet__scroll (scorecard/grid.css:64)"
+   ],
+   "gate": "the #22 grid: a loaded game is clamped by the caller (Scorecard.jsx)",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": ".sc-sheet - the scorecard grid (finding 8). Three sticky edges and CSS zoom.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .sc-sheet__scroll>",
+    "<div .sc-sheet__frame>"
+   ],
+   "cellPads": [
+    {
+     "rule": "scorecard/grid.css:98",
+     "sel": ".sc-sheet thead th",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 0,
+      "bottom": 4,
+      "left": 0
+     }
+    },
+    {
+     "rule": "scorecard/grid.css:134",
+     "sel": ".sc-sheet__name",
+     "at": "",
+     "pad": {
+      "top": 3,
+      "right": 4,
+      "bottom": 0,
+      "left": 8
+     }
+    },
+    {
+     "rule": "scorecard/grid.css:188",
+     "sel": ".sc-sheet__pos",
+     "at": "",
+     "pad": {
+      "top": 3
+     }
+    },
+    {
+     "rule": "scorecard/grid.css:240",
+     "sel": ".sc-sheet__cell",
+     "at": "",
+     "pad": {
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+     }
+    },
+    {
+     "rule": "scorecard/grid.css:252",
+     "sel": ".sc-sheet__sum",
+     "at": "",
+     "pad": {
+      "top": 3
+     }
+    },
+    {
+     "rule": "scorecard/grid.css:277",
+     "sel": ".sc-sheet__totals td",
+     "at": "",
+     "pad": {
+      "bottom": 3
+     }
+    },
+    {
+     "rule": "scorecard/grid.css:294",
+     "sel": ".sc-sheet__totals .sc-sheet__sum",
+     "at": "",
+     "pad": {
+      "top": 0
+     }
+    },
+    {
+     "rule": "scorecard/grid.css:354",
+     "sel": ".sc-sheet__totalscell",
+     "at": "",
+     "pad": {
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "components/teamstats/PostseasonOddsModal.jsx#1",
+   "file": "components/teamstats/PostseasonOddsModal.jsx",
+   "line": 50,
+   "cls": ".ledger .standings .psoddstable",
+   "dynamic": false,
+   "partial": "39-manager-page.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T8",
+   "reason": "ledger standings psoddstable in the Postseason odds sheet (opened from StandingsCard). It carries BOTH shared bases, so it moves with the last of them.",
+   "problems": [],
+   "contexts": [
+    ".ledger tr.ledger__nested .yr (26-player-page.css:331)",
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap>",
+    "<div .sheet .psoddsmodal>",
+    "<div .scrim>"
+   ],
+   "cellPads": [
+    {
+     "rule": "26-player-page.css:825",
+     "sel": ".ledger th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "26-player-page.css:825",
+     "sel": ".ledger td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "26-player-page.css:990",
+     "sel": ".ledger th",
+     "at": "@media (max-width: 739.98px)",
+     "pad": {
+      "left": 6,
+      "right": 6
+     }
+    },
+    {
+     "rule": "26-player-page.css:990",
+     "sel": ".ledger td",
+     "at": "@media (max-width: 739.98px)",
+     "pad": {
+      "left": 6,
+      "right": 6
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/BoxScore.jsx#1",
+   "file": "screens/BoxScore.jsx",
+   "line": 664,
+   "cls": ".bs__grid .bs__grid--bat",
+   "dynamic": false,
+   "partial": "21-box-score.css",
+   "td": "4/2",
+   "tdRules": [
+    "21-box-score.css:319"
+   ],
+   "th": "4/2",
+   "thRules": [
+    "21-box-score.css:319"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "tight",
+   "to": "tight",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".bs__scroll (21-box-score.css:299)"
+   ],
+   "gate": "inside the box score's one SealBox reveal render (selectBoxscore is called only there)",
+   "verdict": "MIGRATE",
+   "slice": "T3",
+   "reason": "Batting grid. In <Card className=bs__team body=flush>, so frame bare. Scrolls in .bs__scroll. Its substitute rows (.bs__sub, renamed in T2) indent under the starter.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .bs__scroll>",
+    "<Card .bs__team>"
+   ],
+   "cellPads": [
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid th",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid td",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21-box-score.css:339",
+     "sel": ".bs__nameCol",
+     "at": "",
+     "pad": {
+      "left": 0
+     }
+    },
+    {
+     "rule": "21-box-score.css:424",
+     "sel": ".bs__sub .bs__nameCol",
+     "at": "",
+     "pad": {
+      "left": 14
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/BoxScore.jsx#2",
+   "file": "screens/BoxScore.jsx",
+   "line": 729,
+   "cls": ".bs__grid .bs__grid--pit",
+   "dynamic": false,
+   "partial": "21-box-score.css",
+   "td": "4/2",
+   "tdRules": [
+    "21-box-score.css:319"
+   ],
+   "th": "4/2",
+   "thRules": [
+    "21-box-score.css:319"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "tight",
+   "to": "tight",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".bs__scroll (21-box-score.css:299)"
+   ],
+   "gate": "inside the box score's one SealBox reveal render",
+   "verdict": "MIGRATE",
+   "slice": "T3",
+   "reason": "Pitching grid. Same card and scroll as #1.",
+   "problems": [],
+   "contexts": [
+    ".bs__sub .bs__nameCol (21-box-score.css:424)"
+   ],
+   "ancestors": [
+    "<div .bs__scroll>",
+    "<Card .bs__team>"
+   ],
+   "cellPads": [
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid th",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid td",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21-box-score.css:339",
+     "sel": ".bs__nameCol",
+     "at": "",
+     "pad": {
+      "left": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/BoxScore.jsx#3",
+   "file": "screens/BoxScore.jsx",
+   "line": 868,
+   "cls": ".bs__grid .bs__grid--totals",
+   "dynamic": false,
+   "partial": "23-box-score-detail.css",
+   "td": "8/4",
+   "tdRules": [
+    "23-box-score-detail.css:500"
+   ],
+   "th": "8/4",
+   "thRules": [
+    "23-box-score-detail.css:500"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "other",
+   "to": "tight",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "inside the box score's one SealBox reveal render",
+   "verdict": "MIGRATE",
+   "slice": "T3",
+   "reason": "Team totals (.bs__grid--totals, 23-box-score-detail.css). 8/4 today. tight 4/2 is the box score's own density, but the change is visible (Q2).",
+   "problems": [],
+   "contexts": [
+    ".bs__sub .bs__nameCol (21-box-score.css:424)"
+   ],
+   "ancestors": [
+    "<Card .bs__totalsCard>"
+   ],
+   "cellPads": [
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid th",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid td",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21-box-score.css:339",
+     "sel": ".bs__nameCol",
+     "at": "",
+     "pad": {
+      "left": 0
+     }
+    },
+    {
+     "rule": "23-box-score-detail.css:500",
+     "sel": ".bs__grid--totals th",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 4,
+      "bottom": 8,
+      "left": 4
+     }
+    },
+    {
+     "rule": "23-box-score-detail.css:500",
+     "sel": ".bs__grid--totals td",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 4,
+      "bottom": 8,
+      "left": 4
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/BoxScore.jsx#4",
+   "file": "screens/BoxScore.jsx",
+   "line": 919,
+   "cls": ".bs__grid .bs__grid--board",
+   "dynamic": false,
+   "partial": "23-box-score-detail.css",
+   "td": "4/2",
+   "tdRules": [
+    "21-box-score.css:319"
+   ],
+   "th": "4/2",
+   "thRules": [
+    "21-box-score.css:319"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "tight",
+   "to": "tight",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".bs__scroll (21-box-score.css:299)"
+   ],
+   "gate": "inside the box score's one SealBox reveal render",
+   "verdict": "MIGRATE",
+   "slice": "T3",
+   "reason": "The line-score board (.bs__grid--board). Owned by 23-box-score-detail.css; its base cells come from 21-box-score.css.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .bs__scroll>",
+    "<Card .bs__board>"
+   ],
+   "cellPads": [
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid th",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid td",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "23-box-score-detail.css:532",
+     "sel": ".bs__grid .bs__boardName",
+     "at": "",
+     "pad": {
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/FoulTrackerPage.jsx#1",
+   "file": "screens/FoulTrackerPage.jsx",
+   "line": 391,
+   "cls": ".standings .foulboard",
+   "dynamic": false,
+   "partial": "43-foul-tracker.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T7",
+   "reason": "/fouls board: standings foulboard in a .ledger-wrap inside BoardCard (a Card), so frame bare. Already row.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap>",
+    "<Card .metric .foulboard-block>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/FoulTrackerPage.jsx#2",
+   "file": "screens/FoulTrackerPage.jsx",
+   "line": 477,
+   "cls": ".standings .foulboard",
+   "dynamic": false,
+   "partial": "29-team-transactions.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "bare",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".foulboard__whiffcol-scroll (43-foul-tracker.css:94)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T7",
+   "reason": "/fouls whiff column: standings foulboard in .foulboard__whiffcol-scroll, inside the same BoardCard (a Card further up than the three ancestors the census reads), so frame bare.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .foulboard__whiffcol-scroll>",
+    "<div .foulboard__whiffcol>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/FoulTrackerPage.jsx#3",
+   "file": "screens/FoulTrackerPage.jsx",
+   "line": 899,
+   "cls": ".standings .foulboard",
+   "dynamic": false,
+   "partial": "43-foul-tracker.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T7",
+   "reason": "As FoulTrackerPage.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap>",
+    "<Card .metric .foulboard-block>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/FoulTrackerPage.jsx#4",
+   "file": "screens/FoulTrackerPage.jsx",
+   "line": 1017,
+   "cls": ".standings .foulboard",
+   "dynamic": false,
+   "partial": "43-foul-tracker.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T7",
+   "reason": "As FoulTrackerPage.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap>",
+    "<Card .metric .foulboard-block>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/FoulTrackerPage.jsx#5",
+   "file": "screens/FoulTrackerPage.jsx",
+   "line": 1047,
+   "cls": ".standings .foulboard",
+   "dynamic": false,
+   "partial": "43-foul-tracker.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T7",
+   "reason": "As FoulTrackerPage.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap>",
+    "<Card .metric .foulboard-block>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/FoulTrackerPage.jsx#6",
+   "file": "screens/FoulTrackerPage.jsx",
+   "line": 1142,
+   "cls": ".standings .foulboard .foulboard--teams",
+   "dynamic": false,
+   "partial": "43-foul-tracker.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T7",
+   "reason": "standings foulboard foulboard--teams: the club board, as FoulTrackerPage.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap>",
+    "<Card .metric .foulboard-block>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/GameNotesDebugPage.jsx#1",
+   "file": "screens/GameNotesDebugPage.jsx",
+   "line": 73,
+   "cls": ".standings",
+   "dynamic": false,
+   "partial": "29-team-transactions.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T8",
+   "reason": "Unlisted QA page (/game-notes-debug). A lab page, but it wears the shared .standings class that T8 deletes, so it must move or lose its look.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/NineKeysPage.jsx#1",
+   "file": "screens/NineKeysPage.jsx",
+   "line": 102,
+   "cls": ".ninekeys__grid",
+   "dynamic": false,
+   "partial": "79-nine-keys.css",
+   "td": "0/0",
+   "tdRules": [
+    "79-nine-keys.css:125"
+   ],
+   "th": "8/4",
+   "thRules": [
+    "79-nine-keys.css:109"
+   ],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "other",
+   "to": "keep",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ninekeys__scroller (79-nine-keys.css:93)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T6",
+   "reason": "/nine-keys: a grid of true/false marks, clubs by keys. Body cells are 0/0 because each holds a drawn mark; heads 8/4. Frame, figures and head type move to Table; the cells keep their own size.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .ninekeys__scroller>"
+   ],
+   "cellPads": [
+    {
+     "rule": "79-nine-keys.css:109",
+     "sel": ".ninekeys__grid thead th",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 4,
+      "bottom": 8,
+      "left": 4
+     }
+    },
+    {
+     "rule": "79-nine-keys.css:120",
+     "sel": ".ninekeys__grid thead th:first-child",
+     "at": "",
+     "pad": {
+      "left": 12
+     }
+    },
+    {
+     "rule": "79-nine-keys.css:125",
+     "sel": ".ninekeys__grid tbody td",
+     "at": "",
+     "pad": {
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+     }
+    },
+    {
+     "rule": "79-nine-keys.css:125",
+     "sel": ".ninekeys__grid tbody th",
+     "at": "",
+     "pad": {
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/PostseasonRacePage.jsx#1",
+   "file": "screens/PostseasonRacePage.jsx",
+   "line": 283,
+   "cls": ".standings .standings--full .standings--wc",
+   "dynamic": false,
+   "partial": "31-wild-card.css",
+   "td": "6/6",
+   "tdRules": [
+    "30-standings.css:241"
+   ],
+   "th": "6/6",
+   "thRules": [
+    "30-standings.css:241"
+   ],
+   "frame": "sheet",
+   "frameHow": "wrap .standings-wrap 26-player-page.css:759",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T8",
+   "reason": "/postseason-race mini table: standings--full standings--wc in .standings-wrap.",
+   "problems": [],
+   "contexts": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap .standings-wrap .psrace__minitable>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "30-standings.css:241",
+     "sel": ".standings--full th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 6,
+      "bottom": 6,
+      "left": 6
+     }
+    },
+    {
+     "rule": "30-standings.css:241",
+     "sel": ".standings--full td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 6,
+      "bottom": 6,
+      "left": 6
+     }
+    },
+    {
+     "rule": "30-standings.css:267",
+     "sel": ".standings--full th",
+     "at": "@media (min-width: 740px)",
+     "pad": {
+      "top": 8,
+      "right": 8,
+      "bottom": 8,
+      "left": 8
+     }
+    },
+    {
+     "rule": "30-standings.css:267",
+     "sel": ".standings--full td",
+     "at": "@media (min-width: 740px)",
+     "pad": {
+      "top": 8,
+      "right": 8,
+      "bottom": 8,
+      "left": 8
+     }
+    },
+    {
+     "rule": "31-wild-card.css:17",
+     "sel": ".standings--wc tbody tr:first-child td",
+     "at": "",
+     "pad": {
+      "top": 6
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/ProspectsPage.jsx#1",
+   "file": "screens/ProspectsPage.jsx",
+   "line": 82,
+   "cls": ".prospectboard",
+   "dynamic": false,
+   "partial": "31e-prospect-board.css",
+   "td": "8/12",
+   "tdRules": [
+    "31e-prospect-board.css:48"
+   ],
+   "th": "8/12",
+   "thRules": [
+    "31e-prospect-board.css:19"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 31e-prospect-board.css:8",
+   "boxInBox": false,
+   "density": "other",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T1",
+   "reason": "PILOT. The /prospects board: a sheet in its own partial (31e-prospect-board.css), no sticky, no scroll. Its 8/12 cells snap to row (6/8): the one visible change in T1, and it proves the density snap. The @media (max-width 739px) copy of 8/12 goes too.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .prospectboard-wrap>"
+   ],
+   "cellPads": [
+    {
+     "rule": "31e-prospect-board.css:19",
+     "sel": ".prospectboard th",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 12,
+      "bottom": 8,
+      "left": 12
+     }
+    },
+    {
+     "rule": "31e-prospect-board.css:48",
+     "sel": ".prospectboard td",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 12,
+      "bottom": 8,
+      "left": 12
+     }
+    },
+    {
+     "rule": "31e-prospect-board.css:268",
+     "sel": ".prospectboard td",
+     "at": "@media (max-width: 739.98px)",
+     "pad": {
+      "top": 8,
+      "right": 12,
+      "bottom": 8,
+      "left": 12
+     }
+    },
+    {
+     "rule": "31e-prospect-board.css:275",
+     "sel": ".prospectboard__rank",
+     "at": "@media (max-width: 739.98px)",
+     "pad": {
+      "top": 12
+     }
+    },
+    {
+     "rule": "31e-prospect-board.css:302",
+     "sel": ".prospectboard__identity",
+     "at": "@media (max-width: 739.98px)",
+     "pad": {
+      "top": 12
+     }
+    },
+    {
+     "rule": "31e-prospect-board.css:319",
+     "sel": ".prospectboard__standingcell",
+     "at": "@media (max-width: 739.98px)",
+     "pad": {
+      "bottom": 12
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/Scorecard.jsx#1",
+   "file": "screens/Scorecard.jsx",
+   "line": 358,
+   "cls": ".pitchers__grid .sc-pitchers",
+   "dynamic": false,
+   "partial": "scorecard/footer.css",
+   "td": "6/2",
+   "tdRules": [
+    "20-charts.css:278",
+    "scorecard/footer.css:72"
+   ],
+   "th": "6/2",
+   "thRules": [
+    "20-charts.css:278",
+    "scorecard/footer.css:72"
+   ],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "other",
+   "to": "—",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "the #22 sheet's pitching lines, clamped by the caller's reveal (api/scorecardGame.js)",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": "scorecard/* - the sheet you score on (finding 8). It wears .pitchers__grid: see PitchersSection's note.",
+   "problems": [],
+   "contexts": [
+    ".focusrail .pitchers__grid th (focus/reference.css:354)",
+    ".focusrail .pitchers__grid td (focus/reference.css:354)"
+   ],
+   "ancestors": [
+    "<section .sc-footer__block .sc-footer__pitcher>",
+    "<footer .sc-footer>"
+   ],
+   "cellPads": [
+    {
+     "rule": "20-charts.css:278",
+     "sel": ".pitchers__grid th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 1,
+      "bottom": 6,
+      "left": 1
+     }
+    },
+    {
+     "rule": "20-charts.css:278",
+     "sel": ".pitchers__grid td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 1,
+      "bottom": 6,
+      "left": 1
+     }
+    },
+    {
+     "rule": "20-charts.css:301",
+     "sel": ".pitchers__pitcher",
+     "at": "",
+     "pad": {
+      "left": 0,
+      "right": 6
+     }
+    },
+    {
+     "rule": "scorecard/footer.css:72",
+     "sel": ".sc-pitchers th",
+     "at": "",
+     "pad": {
+      "left": 2,
+      "right": 2
+     }
+    },
+    {
+     "rule": "scorecard/footer.css:72",
+     "sel": ".sc-pitchers td",
+     "at": "",
+     "pad": {
+      "left": 2,
+      "right": 2
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/Scorecard.jsx#2",
+   "file": "screens/Scorecard.jsx",
+   "line": 441,
+   "cls": ".sc-scoreboard",
+   "dynamic": false,
+   "partial": "scorecard/footer.css",
+   "td": "—",
+   "tdRules": [],
+   "th": "—",
+   "thRules": [],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "other",
+   "to": "—",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "the #22 sheet's scoreboard: a half shows only once it clears the reveal clamp (scorecardScoreboard)",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": "scorecard/* - the sheet you score on (finding 8). No cell padding of its own.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [],
+   "cellPads": [
+    {
+     "rule": "scorecard/footer.css:113",
+     "sel": ".sc-scoreboard__team",
+     "at": "",
+     "pad": {
+      "left": 4
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/Scorecard.jsx#3",
+   "file": "screens/Scorecard.jsx",
+   "line": 486,
+   "cls": ".sc-scoreboard .sc-final",
+   "dynamic": false,
+   "partial": "scorecard/footer.css",
+   "td": "—",
+   "tdRules": [],
+   "th": "0 0 2 0",
+   "thRules": [
+    "scorecard/footer.css:168"
+   ],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "other",
+   "to": "—",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "the #22 sheet's final scoreboard, same clamp",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": "scorecard/* - the sheet you score on (finding 8).",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .sc-finalblock>"
+   ],
+   "cellPads": [
+    {
+     "rule": "scorecard/footer.css:113",
+     "sel": ".sc-scoreboard__team",
+     "at": "",
+     "pad": {
+      "left": 4
+     }
+    },
+    {
+     "rule": "scorecard/footer.css:168",
+     "sel": ".sc-final thead th",
+     "at": "",
+     "pad": {
+      "bottom": 2
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/SituationalRecordsPage.jsx#1",
+   "file": "screens/SituationalRecordsPage.jsx",
+   "line": 488,
+   "cls": ".standings .trrank",
+   "dynamic": false,
+   "partial": "situational-records/66a-detail.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "12/8",
+   "thRules": [
+    "situational-records/66a-detail.css:130",
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T7",
+   "reason": "/situational-records: standings trrank in .ledger-wrap .trrank__tablewrap. Its 12px-tall head and the 430px side squeeze stay in the namespace (66a-detail.css).",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap .trrank__tablewrap>",
+    "<main .trrank__detail>",
+    "<div .screen .trrank-page>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "situational-records/66a-detail.css:130",
+     "sel": ".trrank__tablewrap .trrank thead th",
+     "at": "",
+     "pad": {
+      "top": 12,
+      "bottom": 12
+     }
+    },
+    {
+     "rule": "situational-records/66a-detail.css:187",
+     "sel": ".trrank__tablewrap .standings th",
+     "at": "@media (max-width: 430px)",
+     "pad": {
+      "right": 6,
+      "left": 6
+     }
+    },
+    {
+     "rule": "situational-records/66a-detail.css:187",
+     "sel": ".trrank__tablewrap .standings td",
+     "at": "@media (max-width: 430px)",
+     "pad": {
+      "right": 6,
+      "left": 6
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/StandingsPage.jsx#1",
+   "file": "screens/StandingsPage.jsx",
+   "line": 400,
+   "cls": ".standings .standings--full .standings--wc",
+   "dynamic": true,
+   "partial": "31-wild-card.css",
+   "td": "6/6",
+   "tdRules": [
+    "30-standings.css:241"
+   ],
+   "th": "6/6",
+   "thRules": [
+    "30-standings.css:241"
+   ],
+   "frame": "sheet",
+   "frameHow": "wrap .standings-wrap 26-player-page.css:759",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T8",
+   "reason": "/standings wild card board: standings--full standings--wc in .standings-wrap (the sticky-cell border trick, 26-player-page.css). 6/6 on a phone and 8/8 from 740px: both snap to row (Q2).",
+   "problems": [],
+   "contexts": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap .standings-wrap>",
+    "<section .lgstand>",
+    "<div .standings-body .is-refreshing>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "30-standings.css:241",
+     "sel": ".standings--full th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 6,
+      "bottom": 6,
+      "left": 6
+     }
+    },
+    {
+     "rule": "30-standings.css:241",
+     "sel": ".standings--full td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 6,
+      "bottom": 6,
+      "left": 6
+     }
+    },
+    {
+     "rule": "30-standings.css:267",
+     "sel": ".standings--full th",
+     "at": "@media (min-width: 740px)",
+     "pad": {
+      "top": 8,
+      "right": 8,
+      "bottom": 8,
+      "left": 8
+     }
+    },
+    {
+     "rule": "30-standings.css:267",
+     "sel": ".standings--full td",
+     "at": "@media (min-width: 740px)",
+     "pad": {
+      "top": 8,
+      "right": 8,
+      "bottom": 8,
+      "left": 8
+     }
+    },
+    {
+     "rule": "31-wild-card.css:6",
+     "sel": ".wc-grouphead td",
+     "at": "",
+     "pad": {
+      "top": 12
+     }
+    },
+    {
+     "rule": "31-wild-card.css:17",
+     "sel": ".standings--wc tbody tr:first-child td",
+     "at": "",
+     "pad": {
+      "top": 6
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/StandingsPage.jsx#2",
+   "file": "screens/StandingsPage.jsx",
+   "line": 490,
+   "cls": ".standings .standings--full",
+   "dynamic": true,
+   "partial": "30-standings.css",
+   "td": "6/6",
+   "tdRules": [
+    "30-standings.css:241"
+   ],
+   "th": "6/6",
+   "thRules": [
+    "30-standings.css:241"
+   ],
+   "frame": "sheet",
+   "frameHow": "wrap .standings-wrap 26-player-page.css:759",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T8",
+   "reason": "/standings division boards: standings--full in .standings-wrap. Same trick.",
+   "problems": [],
+   "contexts": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap .standings-wrap>",
+    "<div .lgstand__div>",
+    "<section .lgstand>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "30-standings.css:241",
+     "sel": ".standings--full th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 6,
+      "bottom": 6,
+      "left": 6
+     }
+    },
+    {
+     "rule": "30-standings.css:241",
+     "sel": ".standings--full td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 6,
+      "bottom": 6,
+      "left": 6
+     }
+    },
+    {
+     "rule": "30-standings.css:267",
+     "sel": ".standings--full th",
+     "at": "@media (min-width: 740px)",
+     "pad": {
+      "top": 8,
+      "right": 8,
+      "bottom": 8,
+      "left": 8
+     }
+    },
+    {
+     "rule": "30-standings.css:267",
+     "sel": ".standings--full td",
+     "at": "@media (min-width: 740px)",
+     "pad": {
+      "top": 8,
+      "right": 8,
+      "bottom": 8,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/UmpireRankingsPage.jsx#1",
+   "file": "screens/UmpireRankingsPage.jsx",
+   "line": 60,
+   "cls": ".standings .umprank",
+   "dynamic": false,
+   "partial": "29-team-transactions.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T7",
+   "reason": "/umpires: standings umprank. No rule names .umprank itself; its parts live in 38-umpire-pages.css, and one (.standings .team > .umprank__rank) in 29-team-transactions.css.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/AttendancePage.jsx#1",
+   "file": "screens/around-the-game/AttendancePage.jsx",
+   "line": 168,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "standings rpt in <BoardScroller> (.ledger-wrap .rpt-region, the keyboard-reachable scroll). Sticky club cell .rpt th.team / td.team (68-around-the-game.css). Already row.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/AttendancePage.jsx#2",
+   "file": "screens/around-the-game/AttendancePage.jsx",
+   "line": 222,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "As AttendancePage.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/AttendancePage.jsx#3",
+   "file": "screens/around-the-game/AttendancePage.jsx",
+   "line": 259,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "As AttendancePage.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/BullpenPage.jsx#1",
+   "file": "screens/around-the-game/BullpenPage.jsx",
+   "line": 215,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "standings rpt in <BoardScroller>, sticky club cell. Already row.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/DoubleheadersPage.jsx#1",
+   "file": "screens/around-the-game/DoubleheadersPage.jsx",
+   "line": 182,
+   "cls": ".dh__drawer",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "4/10",
+   "tdRules": [
+    "68-around-the-game.css:1052"
+   ],
+   "th": "4/10",
+   "thRules": [
+    "68-around-the-game.css:1052"
+   ],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "other",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": ".dh__drawer: a table nested in a <td> of #2 (the opened row's games). Bare, 4/10. Snaps to row (Q2). It sits inside a sticky table that scrolls, so it takes no scroll of its own.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<td>",
+    "<tr .dh__drawerrow>"
+   ],
+   "cellPads": [
+    {
+     "rule": "68-around-the-game.css:1052",
+     "sel": ".dh__drawer th",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 10,
+      "bottom": 4,
+      "left": 10
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:1052",
+     "sel": ".dh__drawer td",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 10,
+      "bottom": 4,
+      "left": 10
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/DoubleheadersPage.jsx#2",
+   "file": "screens/around-the-game/DoubleheadersPage.jsx",
+   "line": 350,
+   "cls": ".standings .rpt .dh",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "standings rpt dh: the doubleheaders board. Its rows open a drawer (#1).",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/FarmSystemPage.jsx#1",
+   "file": "screens/around-the-game/FarmSystemPage.jsx",
+   "line": 184,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "standings rpt in <BoardScroller>, sticky club cell. Already row.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/FarmSystemPage.jsx#2",
+   "file": "screens/around-the-game/FarmSystemPage.jsx",
+   "line": 331,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "As FarmSystemPage.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/FarmSystemPage.jsx#3",
+   "file": "screens/around-the-game/FarmSystemPage.jsx",
+   "line": 356,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "As FarmSystemPage.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/PacePage.jsx#1",
+   "file": "screens/around-the-game/PacePage.jsx",
+   "line": 271,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "standings rpt in <BoardScroller>, sticky club cell. Already row.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>",
+    "<SlabRow>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/PacePage.jsx#2",
+   "file": "screens/around-the-game/PacePage.jsx",
+   "line": 342,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "As PacePage.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>",
+    "<SlabRow>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/RunDifferentialPage.jsx#1",
+   "file": "screens/around-the-game/RunDifferentialPage.jsx",
+   "line": 255,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "standings rpt in <BoardScroller>, sticky club cell. Already row.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/RunDifferentialPage.jsx#2",
+   "file": "screens/around-the-game/RunDifferentialPage.jsx",
+   "line": 326,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "As RunDifferentialPage.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/RunDifferentialPage.jsx#3",
+   "file": "screens/around-the-game/RunDifferentialPage.jsx",
+   "line": 374,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "As RunDifferentialPage.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/RunValuePage.jsx#1",
+   "file": "screens/around-the-game/RunValuePage.jsx",
+   "line": 190,
+   "cls": ".standings .rpt .rv__board .rv__board--main",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "standings rpt rv__board rv__board--main: the run value board (75-run-value.css). Sticky club cell.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<section .bcast-sec>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/RunValuePage.jsx#2",
+   "file": "screens/around-the-game/RunValuePage.jsx",
+   "line": 236,
+   "cls": ".standings .rpt .rv__board",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "standings rpt rv__board: a second run value board.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<div .rvleaders>",
+    "<BroadcastSection .bcast-sec>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/RunValuePage.jsx#3",
+   "file": "screens/around-the-game/RunValuePage.jsx",
+   "line": 262,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T5",
+   "reason": "standings rpt: a plain report board on /run-value.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>",
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/abs/ClubBoard.jsx#1",
+   "file": "screens/around-the-game/abs/ClubBoard.jsx",
+   "line": 56,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T6",
+   "reason": "/abs-challenges board: standings rpt in <BoardScroller>, sticky club cell. Already row.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/abs/LongestRuns.jsx#1",
+   "file": "screens/around-the-game/abs/LongestRuns.jsx",
+   "line": 183,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T6",
+   "reason": "As ClubBoard.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/abs/MissBands.jsx#1",
+   "file": "screens/around-the-game/abs/MissBands.jsx",
+   "line": 22,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T6",
+   "reason": "As ClubBoard.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/abs/PlayerBoards.jsx#1",
+   "file": "screens/around-the-game/abs/PlayerBoards.jsx",
+   "line": 33,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T6",
+   "reason": "As ClubBoard.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<div .rptpair>",
+    "<BroadcastSection .bcast-sec>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/abs/PlayerBoards.jsx#2",
+   "file": "screens/around-the-game/abs/PlayerBoards.jsx",
+   "line": 69,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T6",
+   "reason": "As ClubBoard.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<div .rptpair>",
+    "<BroadcastSection .bcast-sec>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/abs/RanOut.jsx#1",
+   "file": "screens/around-the-game/abs/RanOut.jsx",
+   "line": 148,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T6",
+   "reason": "As ClubBoard.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/abs/UmpireBoard.jsx#1",
+   "file": "screens/around-the-game/abs/UmpireBoard.jsx",
+   "line": 104,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T6",
+   "reason": "/abs-challenges umpire board. Its .rpt__between row (8px tall, a count of the middle) is a row variant and stays in the namespace.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:318",
+     "sel": ".rpt__between th",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "bottom": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:318",
+     "sel": ".rpt__between td",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "bottom": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/around-the-game/abs/WhoCalls.jsx#1",
+   "file": "screens/around-the-game/abs/WhoCalls.jsx",
+   "line": 36,
+   "cls": ".standings .rpt",
+   "dynamic": false,
+   "partial": "68-around-the-game.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "table 26-player-page.css:805",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "yes",
+   "stickyHow": [
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)"
+   ],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T6",
+   "reason": "As ClubBoard.jsx#1.",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<BoardScroller .ledger-wrap .rpt-region>",
+    "<BroadcastSection .bcast-sec>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "68-around-the-game.css:478",
+     "sel": ".rpt tbody th.team",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/boxscore/InningTally.jsx#1",
+   "file": "screens/boxscore/InningTally.jsx",
+   "line": 122,
+   "cls": ".bs__grid .bs__grid--tally",
+   "dynamic": false,
+   "partial": "21b-box-score-tally.css",
+   "td": "0/0",
+   "tdRules": [
+    "21b-box-score-tally.css:62"
+   ],
+   "th": "0 0 4 0",
+   "thRules": [
+    "21b-box-score-tally.css:62",
+    "21b-box-score-tally.css:67"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "other",
+   "to": "—",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".bs__scroll (21-box-score.css:299)"
+   ],
+   "gate": "inside the box score's SealBox reveal render",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": ".bs__grid--tally - the inning tally sheet (finding 8). It still wears .bs__grid, so T3 must leave the .bs__grid base rule (21-box-score.css) in place for it.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .bs__scroll .bs__tallyBody>",
+    "<Card .bs__tally>"
+   ],
+   "cellPads": [
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid th",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid td",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21b-box-score-tally.css:62",
+     "sel": ".bs__grid--tally th",
+     "at": "",
+     "pad": {
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+     }
+    },
+    {
+     "rule": "21b-box-score-tally.css:62",
+     "sel": ".bs__grid--tally td",
+     "at": "",
+     "pad": {
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+     }
+    },
+    {
+     "rule": "21b-box-score-tally.css:67",
+     "sel": ".bs__grid--tally thead th",
+     "at": "",
+     "pad": {
+      "bottom": 4
+     }
+    },
+    {
+     "rule": "21b-box-score-tally.css:81",
+     "sel": ".bs__tallyMeasure",
+     "at": "",
+     "pad": {
+      "right": 8
+     }
+    },
+    {
+     "rule": "21b-box-score-tally.css:103",
+     "sel": ".bs__tallyClub",
+     "at": "",
+     "pad": {
+      "right": 6
+     }
+    },
+    {
+     "rule": "21b-box-score-tally.css:169",
+     "sel": ".bs__tallyTotal",
+     "at": "",
+     "pad": {
+      "left": 6
+     }
+    },
+    {
+     "rule": "21b-box-score-tally.css:200",
+     "sel": ".bs__tallyMeasure",
+     "at": "@media (min-width: 740px)",
+     "pad": {
+      "right": 14
+     }
+    },
+    {
+     "rule": "21b-box-score-tally.css:204",
+     "sel": ".bs__tallyClub",
+     "at": "@media (min-width: 740px)",
+     "pad": {
+      "right": 10
+     }
+    },
+    {
+     "rule": "21b-box-score-tally.css:211",
+     "sel": ".bs__tallyTotal",
+     "at": "@media (min-width: 740px)",
+     "pad": {
+      "left": 10
+     }
+    },
+    {
+     "rule": "21b-box-score-tally.css:222",
+     "sel": ".bs__tallyMeasure",
+     "at": "@media (max-width: 359px)",
+     "pad": {
+      "right": 4
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/contenders/ContenderDiaryPage.jsx#1",
+   "file": "screens/contenders/ContenderDiaryPage.jsx",
+   "line": 64,
+   "cls": ".researchdiary__table",
+   "dynamic": false,
+   "partial": "research/diary.css",
+   "td": "8/12",
+   "tdRules": [
+    "research/diary.css:258"
+   ],
+   "th": "8/12",
+   "thRules": [
+    "research/diary.css:258"
+   ],
+   "frame": "sheet",
+   "frameHow": "wrap .researchdiary__tablewrap research/diary.css:244",
+   "boxInBox": false,
+   "density": "other",
+   "to": "—",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".researchdiary__tablewrap (research/diary.css:244)"
+   ],
+   "gate": "no",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": "/admin/contenders (Clerk-admin gated), the same .researchdiary__table. Q4.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .researchdiary__tablewrap>",
+    "<figure .researchdiary__figure>"
+   ],
+   "cellPads": [
+    {
+     "rule": "research/diary.css:258",
+     "sel": ".researchdiary__table th",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 12,
+      "bottom": 8,
+      "left": 12
+     }
+    },
+    {
+     "rule": "research/diary.css:258",
+     "sel": ".researchdiary__table td",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 12,
+      "bottom": 8,
+      "left": 12
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/designlab/buttons.jsx#1",
+   "file": "screens/designlab/buttons.jsx",
+   "line": 68,
+   "cls": ".bs__grid",
+   "dynamic": false,
+   "partial": "21-box-score.css",
+   "td": "4/2",
+   "tdRules": [
+    "21-box-score.css:319"
+   ],
+   "th": "4/2",
+   "thRules": [
+    "21-box-score.css:319"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "tight",
+   "to": "—",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "no",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": "Design lab demo that borrows the box score's .bs__grid. Lab page (#1113 Q5: leave the labs). The .bs__grid base stays for the tally, so the demo keeps drawing. Q4.",
+   "problems": [],
+   "contexts": [
+    ".bs__sub .bs__nameCol (21-box-score.css:424)"
+   ],
+   "ancestors": [
+    "<Card .dlab__neighbours>"
+   ],
+   "cellPads": [
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid th",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid td",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21-box-score.css:339",
+     "sel": ".bs__nameCol",
+     "at": "",
+     "pad": {
+      "left": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/designlab/buttons.jsx#2",
+   "file": "screens/designlab/buttons.jsx",
+   "line": 110,
+   "cls": ".dlab__matrix",
+   "dynamic": false,
+   "partial": "designlab/lab.css",
+   "td": "8/8",
+   "tdRules": [
+    "designlab/lab.css:470"
+   ],
+   "th": "8/8",
+   "thRules": [
+    "designlab/lab.css:470"
+   ],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "row",
+   "to": "—",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "no",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": ".dlab__matrix: the lab's own variant grid (designlab/lab.css). Lab page. Q4.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<Entry .animlab__entry>",
+    "<Group .dlab__group>"
+   ],
+   "cellPads": [
+    {
+     "rule": "designlab/lab.css:470",
+     "sel": ".dlab__matrix th",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 8,
+      "bottom": 8,
+      "left": 8
+     }
+    },
+    {
+     "rule": "designlab/lab.css:470",
+     "sel": ".dlab__matrix td",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 8,
+      "bottom": 8,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/designlab/components.jsx#1",
+   "file": "screens/designlab/components.jsx",
+   "line": 65,
+   "cls": ".bs__grid",
+   "dynamic": false,
+   "partial": "21-box-score.css",
+   "td": "4/2",
+   "tdRules": [
+    "21-box-score.css:319"
+   ],
+   "th": "4/2",
+   "thRules": [
+    "21-box-score.css:319"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "tight",
+   "to": "—",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "no",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": "Design lab demo on .bs__grid, as buttons.jsx#1. Q4.",
+   "problems": [],
+   "contexts": [
+    ".bs__sub .bs__nameCol (21-box-score.css:424)"
+   ],
+   "ancestors": [
+    "<Card>",
+    "<Themed>",
+    "<div .dlab__candidates>"
+   ],
+   "cellPads": [
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid th",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21-box-score.css:319",
+     "sel": ".bs__grid td",
+     "at": "",
+     "pad": {
+      "top": 4,
+      "right": 2,
+      "bottom": 4,
+      "left": 2
+     }
+    },
+    {
+     "rule": "21-box-score.css:339",
+     "sel": ".bs__nameCol",
+     "at": "",
+     "pad": {
+      "left": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/designlab/pills.jsx#1",
+   "file": "screens/designlab/pills.jsx",
+   "line": 124,
+   "cls": ".dlab__matrix",
+   "dynamic": false,
+   "partial": "designlab/lab.css",
+   "td": "8/8",
+   "tdRules": [
+    "designlab/lab.css:470"
+   ],
+   "th": "8/8",
+   "thRules": [
+    "designlab/lab.css:470"
+   ],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "row",
+   "to": "—",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "no",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": ".dlab__matrix, as buttons.jsx#2. Q4.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<Entry .animlab__entry>",
+    "<Group .dlab__group>"
+   ],
+   "cellPads": [
+    {
+     "rule": "designlab/lab.css:470",
+     "sel": ".dlab__matrix th",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 8,
+      "bottom": 8,
+      "left": 8
+     }
+    },
+    {
+     "rule": "designlab/lab.css:470",
+     "sel": ".dlab__matrix td",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 8,
+      "bottom": 8,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/game-notes/GameNotesArchivePage.jsx#1",
+   "file": "screens/game-notes/GameNotesArchivePage.jsx",
+   "line": 145,
+   "cls": ".gnotes",
+   "dynamic": false,
+   "partial": "report/game-notes.css",
+   "td": "6/8",
+   "tdRules": [
+    "report/game-notes.css:23"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "report/game-notes.css:23"
+   ],
+   "frame": "sheet",
+   "frameHow": "table report/game-notes.css:11",
+   "boxInBox": false,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T1",
+   "reason": "PILOT. .gnotes already IS the row recipe (6/8) on a sheet, in its own partial (report/game-notes.css), on a links-only page (/game-notes, #1258). Moving it should change no pixel: it proves Table draws today's look.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .screen>"
+   ],
+   "cellPads": [
+    {
+     "rule": "report/game-notes.css:23",
+     "sel": ".gnotes th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "report/game-notes.css:23",
+     "sel": ".gnotes td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/identity-lab/profiles/audit.jsx#1",
+   "file": "screens/identity-lab/profiles/audit.jsx",
+   "line": 273,
+   "cls": ".audittable",
+   "dynamic": false,
+   "partial": "18-uniforms-and-jerseys.css",
+   "td": "8/8",
+   "tdRules": [
+    "18-uniforms-and-jerseys.css:84"
+   ],
+   "th": "8/8",
+   "thRules": [
+    "18-uniforms-and-jerseys.css:84"
+   ],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "row",
+   "to": "—",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".audittable__scroll (18-uniforms-and-jerseys.css:74)"
+   ],
+   "gate": "no",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": "Identity lab (a dev-only curation tool). Q4.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .audittable__scroll>"
+   ],
+   "cellPads": [
+    {
+     "rule": "18-uniforms-and-jerseys.css:84",
+     "sel": ".audittable th",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 8,
+      "bottom": 8,
+      "left": 8
+     }
+    },
+    {
+     "rule": "18-uniforms-and-jerseys.css:84",
+     "sel": ".audittable td",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 8,
+      "bottom": 8,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/research/ResearchDiaryPage.jsx#1",
+   "file": "screens/research/ResearchDiaryPage.jsx",
+   "line": 74,
+   "cls": ".researchdiary__table",
+   "dynamic": false,
+   "partial": "research/diary.css",
+   "td": "8/12",
+   "tdRules": [
+    "research/diary.css:258"
+   ],
+   "th": "8/12",
+   "thRules": [
+    "research/diary.css:258"
+   ],
+   "frame": "sheet",
+   "frameHow": "wrap .researchdiary__tablewrap research/diary.css:244",
+   "boxInBox": false,
+   "density": "other",
+   "to": "—",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".researchdiary__tablewrap (research/diary.css:244)"
+   ],
+   "gate": "no",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": "/admin/research (Clerk-admin gated, so it cannot be checked locally). Q4.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<div .researchdiary__tablewrap>",
+    "<figure .researchdiary__figure>"
+   ],
+   "cellPads": [
+    {
+     "rule": "research/diary.css:258",
+     "sel": ".researchdiary__table th",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 12,
+      "bottom": 8,
+      "left": 12
+     }
+    },
+    {
+     "rule": "research/diary.css:258",
+     "sel": ".researchdiary__table td",
+     "at": "",
+     "pad": {
+      "top": 8,
+      "right": 12,
+      "bottom": 8,
+      "left": 12
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/sheet/ScoreSheet.jsx#1",
+   "file": "screens/sheet/ScoreSheet.jsx",
+   "line": 116,
+   "cls": ".printsheet__grid",
+   "dynamic": false,
+   "partial": "63-print-sheet.css",
+   "td": "—",
+   "tdRules": [],
+   "th": "—",
+   "thRules": [],
+   "frame": "bare",
+   "frameHow": "",
+   "boxInBox": false,
+   "density": "other",
+   "to": "—",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "no (blank by design: no cell can be filled from the feed, ScoreSheet.jsx header)",
+   "verdict": "HOLD",
+   "slice": "—",
+   "reason": "The PRINTABLE pre-pitch score sheet: a sheet you score on, in mm, border-collapse, borders only (print drops backgrounds). Same reason as scorecard/*, but not on the issue's list: decisions.md Q4.",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<section .printsheet__block>"
+   ],
+   "cellPads": [
+    {
+     "rule": "63-print-sheet.css:277",
+     "sel": ".ps-col-name",
+     "at": "",
+     "pad": {
+      "left": "1mm"
+     }
+    },
+    {
+     "rule": "63-print-sheet.css:301",
+     "sel": ".ps-cell",
+     "at": "",
+     "pad": {
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/team/modules/StandingsCard.jsx#1",
+   "file": "screens/team/modules/StandingsCard.jsx",
+   "line": 60,
+   "cls": ".standings",
+   "dynamic": false,
+   "partial": "29-team-transactions.css",
+   "td": "6/8",
+   "tdRules": [
+    "29-team-transactions.css:795"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "29-team-transactions.css:795"
+   ],
+   "frame": "sheet",
+   "frameHow": "draws its own box (table 26-player-page.css:805) INSIDE <Card frame=\"sheet\">: a box in a box today. Kept as a sheet; the nested-box issue decides (#1113 Q4: later)",
+   "boxInBox": true,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T8",
+   "reason": "Team hub division standings (Overview and Numbers). Plain .standings in a .ledger-wrap; the .standings frame draws a box INSIDE the Card (a box in a box). It stays a sheet until the nested-box issue (#1113 Q4: later).",
+   "problems": [],
+   "contexts": [
+    ".standings--full th.team (30-standings.css:276)",
+    ".standings--full td.team (30-standings.css:276)",
+    ".rpt th.team (68-around-the-game.css:459)",
+    ".rpt td.team (68-around-the-game.css:459)",
+    ".trrank__tablewrap .standings th (situational-records/66a-detail.css:187)",
+    ".trrank__tablewrap .standings td (situational-records/66a-detail.css:187)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap>",
+    "<Card .psodds-pill>"
+   ],
+   "cellPads": [
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "29-team-transactions.css:795",
+     "sel": ".standings td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/team/modules/TeamChallengeCard.jsx#1",
+   "file": "screens/team/modules/TeamChallengeCard.jsx",
+   "line": 162,
+   "cls": ".chal__board",
+   "dynamic": false,
+   "partial": "report/challenge-card.css",
+   "td": "6/0",
+   "tdRules": [
+    "report/challenge-card.css:107"
+   ],
+   "th": "6/0",
+   "thRules": [
+    "report/challenge-card.css:107"
+   ],
+   "frame": "bare",
+   "frameHow": "inside <Card frame=\"sheet\">: the card draws the box",
+   "boxInBox": false,
+   "density": "other",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "no",
+   "hscrollHow": [],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T7",
+   "reason": "The ABS challenge board on the team Numbers tab (report/challenge-card.css). In a Card. 6/0 today (Q2).",
+   "problems": [],
+   "contexts": [],
+   "ancestors": [
+    "<Card .chal>"
+   ],
+   "cellPads": [
+    {
+     "rule": "report/challenge-card.css:107",
+     "sel": ".chal__board th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 0,
+      "bottom": 6,
+      "left": 0
+     }
+    },
+    {
+     "rule": "report/challenge-card.css:107",
+     "sel": ".chal__board td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 0,
+      "bottom": 6,
+      "left": 0
+     }
+    }
+   ]
+  },
+  {
+   "key": "screens/team/modules/minors/ProspectsCard.jsx#1",
+   "file": "screens/team/modules/minors/ProspectsCard.jsx",
+   "line": 43,
+   "cls": ".ledger .prospecttable",
+   "dynamic": false,
+   "partial": "31-wild-card.css",
+   "td": "6/8",
+   "tdRules": [
+    "26-player-page.css:825"
+   ],
+   "th": "6/8",
+   "thRules": [
+    "26-player-page.css:825"
+   ],
+   "frame": "sheet",
+   "frameHow": "draws its own box (table 26-player-page.css:805) INSIDE <Card frame=\"sheet\">: a box in a box today. Kept as a sheet; the nested-box issue decides (#1113 Q4: later)",
+   "boxInBox": true,
+   "density": "row",
+   "to": "row",
+   "sticky": "no",
+   "stickyHow": [],
+   "hscroll": "yes",
+   "hscrollHow": [
+    ".ledger-wrap (26-player-page.css:737)"
+   ],
+   "gate": "no",
+   "verdict": "MIGRATE",
+   "slice": "T4",
+   "reason": "The org's prospect table on the parent club's Minors tab. Its .ledger frame draws a box INSIDE the Card: a box in a box. It stays a sheet until the nested-box issue (#1113 Q4: later). Its second column is .ledger__sub (renamed in T2).",
+   "problems": [],
+   "contexts": [
+    ".ledger tr.ledger__nested .yr (26-player-page.css:331)"
+   ],
+   "ancestors": [
+    "<div .ledger-wrap>",
+    "<Card>"
+   ],
+   "cellPads": [
+    {
+     "rule": "26-player-page.css:825",
+     "sel": ".ledger th",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "26-player-page.css:825",
+     "sel": ".ledger td",
+     "at": "",
+     "pad": {
+      "top": 6,
+      "right": 8,
+      "bottom": 6,
+      "left": 8
+     }
+    },
+    {
+     "rule": "26-player-page.css:990",
+     "sel": ".ledger th",
+     "at": "@media (max-width: 739.98px)",
+     "pad": {
+      "left": 6,
+      "right": 6
+     }
+    },
+    {
+     "rule": "26-player-page.css:990",
+     "sel": ".ledger td",
+     "at": "@media (max-width: 739.98px)",
+     "pad": {
+      "left": 6,
+      "right": 6
+     }
+    }
+   ]
+  }
+ ],
+ "rowGrids": [
+  {
+   "sel": ".lineup__row, .roster__row",
+   "at": "10-lineup.css:11",
+   "gtc": "24px 44px 1fr auto",
+   "headRow": false
+  },
+  {
+   "sel": ".xroads__sides, .xroads__row",
+   "at": "10-lineup.css:419",
+   "gtc": "1fr 76px 1fr",
+   "headRow": false
+  },
+  {
+   "sel": ".upnext__row",
+   "at": "12-sealbox.css:691",
+   "gtc": "repeat(3, 1fr)",
+   "headRow": false
+  },
+  {
+   "sel": ".dueup__row",
+   "at": "12-sealbox.css:1243",
+   "gtc": "repeat(3, 1fr)",
+   "headRow": false
+  },
+  {
+   "sel": ".umpmodal__grow",
+   "at": "14-strike-zone.css:439",
+   "gtc": "56px 1fr auto",
+   "headRow": false
+  },
+  {
+   "sel": ".pitchmix__row",
+   "at": "27-player-position-innings.css:198",
+   "gtc": "10px minmax(0, 1fr) max-content max-content",
+   "headRow": false
+  },
+  {
+   "sel": ".tstatrow",
+   "at": "31-wild-card.css:81",
+   "gtc": "1fr auto auto",
+   "headRow": false
+  },
+  {
+   "sel": ".thub-row",
+   "at": "31-wild-card.css:502",
+   "gtc": "40px 1fr auto auto auto",
+   "headRow": false
+  },
+  {
+   "sel": ".prankhist__row",
+   "at": "31d-prospect-card.css:410",
+   "gtc": "3.75rem minmax(0, 1fr) auto",
+   "headRow": false
+  },
+  {
+   "sel": ".psseries__rosterrow",
+   "at": "35-postseason-series.css:632",
+   "gtc": "32px 1fr auto auto",
+   "headRow": false
+  },
+  {
+   "sel": ".allstarrosters__row",
+   "at": "37-all-star-rosters.css:93",
+   "gtc": "22px 1fr auto",
+   "headRow": false
+  },
+  {
+   "sel": ".umpage__row",
+   "at": "38-umpire-pages.css:187",
+   "gtc": "40px 64px 1fr auto",
+   "headRow": false
+  },
+  {
+   "sel": ".scorebookstory__leaderhead, .scorebookstory__leaderrow",
+   "at": "42-first-scorebook.css:365",
+   "gtc": "minmax(135px, 1fr) repeat(4, 42px)",
+   "headRow": true
+  },
+  {
+   "sel": ".scorebookstory__ledgerrow",
+   "at": "42-first-scorebook.css:447",
+   "gtc": "30px 64px 92px 70px 92px minmax(100px, 1fr)",
+   "headRow": false
+  },
+  {
+   "sel": ".sgh-row.storypa-row",
+   "at": "43-foul-tracker.css:550",
+   "gtc": "auto minmax(0, 1fr) auto",
+   "headRow": false
+  },
+  {
+   "sel": ".gamehigh-row",
+   "at": "43-foul-tracker.css:695",
+   "gtc": "auto 1fr auto",
+   "headRow": false
+  },
+  {
+   "sel": ".logbookstats__tablehead, .logbookstats__row",
+   "at": "48a-logbook-stats.css:187",
+   "gtc": "1fr repeat(3, 44px)",
+   "headRow": true
+  },
+  {
+   "sel": ".logbookstats__leaderhead, .logbookstats__leaderrow",
+   "at": "48a-logbook-stats.css:440",
+   "gtc": "minmax(0, 1fr) repeat(4, 40px)",
+   "headRow": true
+  },
+  {
+   "sel": ".pitchslab__row",
+   "at": "69-pitch-arsenal.css:155",
+   "gtc": "minmax(0, 1fr) 82px 74px",
+   "headRow": false
+  },
+  {
+   "sel": ".arsenal__row",
+   "at": "69-pitch-arsenal.css:407",
+   "gtc": "minmax(120px, 180px) 1fr 7ch 1fr 74px",
+   "headRow": false
+  },
+  {
+   "sel": ".staffgrid__head, .staffgrid__row",
+   "at": "76-workload-marks.css:358",
+   "gtc": "minmax(72px, 1fr) minmax(0, 2fr) 32px",
+   "headRow": true
+  },
+  {
+   "sel": ".ninekeys__row",
+   "at": "79-nine-keys.css:305",
+   "gtc": "1fr auto auto",
+   "headRow": false
+  }
+ ]
+}

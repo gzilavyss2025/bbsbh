@@ -256,7 +256,8 @@ test('system/card.css is imported right after section-head.css and before 06', (
   const six = imports.indexOf('06-loader-and-cards.css')
   assert.ok(card !== -1, 'index.css should import system/card.css')
   assert.equal(card, head + 1, 'card.css sits right after section-head.css')
-  assert.equal(six, card + 1, 'card.css sits right before 06, so every namespace rule wins on order')
+  // system/table.css (#1132) sits between the card and 06; its own slot is pinned in table-cascade.test.js.
+  assert.deepEqual(imports.slice(card + 1, six), ['system/table.css'], 'only table.css sits between card.css and 06, so every namespace rule wins on order')
 })
 
 // ---- 8. one frame rule ----
@@ -2195,6 +2196,10 @@ const H3_RENAMED = [
   ['dlab__lede', 'dlab__note'],
   // after #1339: a section title inside a modal body, not the head's second line
   ['tscoremodal__subkicker', 'tscoremodal__sectiontitle'],
+  // #1132 slice T2: not second lines. Both were held as "subtotal" names; `bs__sub` is a
+  // SUBSTITUTE batter's row and `ledger__sub` the ledger's second label column.
+  ['bs__sub', 'bs__row--substitute'],
+  ['ledger__sub', 'ledger__label'],
 ]
 
 // Two classes left with no successor: `.cover__sub` had no call site (its rule
@@ -2276,7 +2281,7 @@ test('H3: the season note block is .seasonnote, and no .note class is left', () 
 test('H3: the held rows keep their names', () => {
   const trees = h3Trees()
   const held = [
-    'wire__kicker', 'bs__sub', 'ledger__sub', // not a second line (#1113, #1132)
+    'wire__kicker', // not a second line (#1113)
     'contractcard__eyebrow', // `.contractcard__note` is the optioned caption, a different line
     // two different second lines on one head: needs a decision on the grammar
     'abouthero__kicker', 'abouthero__lede', 'derbycard__eyebrow', 'derbycard__sub',

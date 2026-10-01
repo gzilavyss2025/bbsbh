@@ -343,7 +343,7 @@ deletion, a retired line, or `.wire__kicker`, which is not a second line.
 
 Two blocks carry `notice`; no block owns the `notice` base rule today, and
 #1132 builds one. Six states are written as modifiers, and two `__sub`
-classes are held because clause 3 does not reach them.
+classes were renamed for what they are, not for a head's second line (slice T2).
 
 | current class | clause(s) broken | target name | collapse issue | files that must move | hold + reason |
 | --- | --- | --- | --- | --- | --- |
@@ -355,6 +355,6 @@ classes are held because clause 3 does not reach them.
 | `.posinn__box--empty` | 4 | `.posinn__box.is-empty` | #1132 | `components/player/PositionInnings.jsx`, `styles/27-player-position-innings.css` | — |
 | `.xl-deck--empty` | 4 | `.xl-deck.is-empty` | #1132 | `screens/expresslane/ScoringDeck.jsx`, `styles/77c-express-lane-deck.css` | — |
 | `.stampstrip__mount--empty` | 4 | `.stampstrip__mount.is-empty` | #1132 | `components/logbook/StampGameButton.jsx`, `styles/48-stamp-strip.css` | — |
-| `.bs__sub` | 3 (does not apply) | hold | #1132 | 2 files — none move | HOLD — `__sub` here names a box-score SUBTOTAL row (`b.isSub`), not a head's second line, so clause 3 does not reach it. Renaming it to `.bs__row--subtotal` is #1132's Table work, not a grammar fix. |
-| `.ledger__sub` | 3 (does not apply) | hold | #1132 | 4 files — none move | HOLD — `__sub` here names a subtotal CELL (`tr.reg-subtotal .ledger__sub`), not a head's second line, so clause 3 does not reach it. Renaming it to `.ledger__cell--subtotal` is #1132's Table work. |
+| `.bs__sub` | 3 (does not apply) | `.bs__row--substitute` | #1132 | `screens/BoxScore.jsx`, `styles/21-box-score.css` | landed in #1132 slice T2 (2026-10-01), under a corrected reading. The row is not a subtotal: `b.isSub` marks a SUBSTITUTE batter's `<tr>` (a batting-order code that is not a whole hundred), indented under the starter he replaced. A variant, so `--substitute` (clause 4). |
+| `.ledger__sub` | 3 (does not apply) | `.ledger__label` | #1132 | `components/player/Ledger.jsx`, `screens/team/modules/minors/ProspectsCard.jsx`, `styles/26-player-page.css`, `styles/31-wild-card.css` | landed in #1132 slice T2 (2026-10-01), under a corrected reading. The cell is not a subtotal: it is the row's second label column (the club in a career register, the prospect's name on the Minors tab), written on every row. Only one of its two rules is about the subtotal row. An element, so `__label`. |
 

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 import { fetchPitcherSeasonVsOpponent } from '../src/api/game.js'
 
 // The shape /api/v1/people/{id}/stats?stats=gameLog&group=pitching really
@@ -18,14 +18,13 @@ const start = (date, opponentId, ip, extra = {}) => ({
 })
 
 function withGameLog(splits, run) {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async () => ({
+  const fetchMock = mock.method(globalThis, 'fetch', async () => ({
     ok: true,
     status: 200,
     json: async () => ({ stats: [{ splits }] }),
-  })
+  }))
   return run().finally(() => {
-    globalThis.fetch = originalFetch
+    fetchMock.mock.restore()
   })
 }
 

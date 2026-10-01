@@ -13,6 +13,7 @@
 // in the job log, and let the previous night's committed file stand.
 
 import { setTimeout as sleep } from 'node:timers/promises'
+import { round1 } from '../../src/lib/math/number.js'
 
 // A minimal CSV row parser — handles quoted fields with embedded commas
 // (e.g. "Whitlock, Garrett") and doubled-quote escaping. No npm dependency,
@@ -180,7 +181,8 @@ export function meanSdGrouped(rows, groupKey, valueKey, minRows = 15) {
 // One decimal is the storage precision. DISPLAY rounds to whole percentages
 // (src/api/matchup/notes.js) — a tenth of a point on a chase rate is a
 // database talking, not a game note — but the z-score wants the tenth.
-export const round1 = (n) => Math.round(n * 10) / 10
+// Re-exported: callers import round1 from here (same one-decimal rounding).
+export { round1 }
 
 // Median of an array of numbers — the value at the middle of the sorted list,
 // averaging the two middle values when the count is even. Used instead of a

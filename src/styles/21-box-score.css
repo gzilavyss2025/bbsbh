@@ -421,7 +421,7 @@
 }
 
 /* Substitute rows sit indented under their starter, like a printed box score. */
-.bs__sub .bs__nameCol {
+.bs__row--substitute .bs__nameCol {
   padding-left: var(--space-3h) !important;
 }
 

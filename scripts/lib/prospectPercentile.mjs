@@ -25,6 +25,16 @@ function metricFor(group, stat) {
   return Number(group === 'hitting' ? stat.ops : stat.era)
 }
 
+// A summed line's metric as MLB prints it: OPS to three places, ERA to two.
+// The population (qualifiedMetrics) holds MLB's printed strings, so a player's
+// own value must be rounded the same way before it is ranked against them
+// (#1357). Null stays null (sumPitching's ERA at no outs).
+function printedMetric(group, line) {
+  const v = group === 'hitting' ? line.ops : line.era
+  if (v == null || !Number.isFinite(Number(v))) return null
+  return Number(Number(v).toFixed(group === 'hitting' ? 3 : 2))
+}
+
 // Same field names (`plateAppearances`/`outs`) on both a raw statsapi split's
 // `stat` object and combineToPool's summed hitting/pitching line, so this one
 // check covers a whole level's population (via qualifiedMetrics below) AND a
@@ -98,11 +108,12 @@ export function buildPopulations(hitSplits, pitSplits) {
 }
 
 // value's percentile rank within population (0-100, rounded). `higherIsBetter`
-// is true for OPS, false for ERA. A value not present in — or better than
-// every member of — an empty population returns null rather than a
-// fabricated 0/100. Self-inclusion in `population` doesn't change the
-// result: counting values strictly worse than `value` is unaffected by
-// whether `value` itself is also a population member.
+// is true for OPS, false for ERA. An empty population returns null rather than
+// a fabricated 0/100. The ranked player is usually a member of `population`
+// too. His own entry does not count as worse ONLY when `value` is on the same
+// scale as the population: MLB's printed value (printedMetric below), not a
+// full-precision float. A float a hair better than his own printed entry
+// counts that entry as worse, +1 point (#1357).
 export function percentileRank(value, population, higherIsBetter) {
   if (!Number.isFinite(value) || !population.length) return null
   const worseCount = higherIsBetter
@@ -140,10 +151,26 @@ export function snapshotRow(p, populations) {
   const line = hitting ? sumHitting(levelSplits) : sumPitching(levelSplits)
   const qualified = meetsPlayingTimeFloor(group, line)
   const population = populations.get(populationKey(sportId, group)) ?? []
-  const metric = Number(hitting ? line.ops : line.era)
-  const percentile = qualified ? percentileRank(metric, population, hitting) : null
+  const metric = printedMetric(group, line)
+  const percentile = qualified && metric != null ? percentileRank(metric, population, hitting) : null
   const sampleSize = Number(hitting ? line.plateAppearances : line.outs) || 0
   return { group, payload: { sportId, percentile, qualified, sampleSize, populationSize: population.length, atLevel: true } }
+}
+
+// One stored snapshot (`date`, its parsed `payload`) as a row of the exported
+// `history`, the series the Prospect Card's trend chart draws. `atLevel` is
+// true only for a row read at one level (snapshotRow). A row written before
+// #1279 summed every level and has no `atLevel`, so it exports false, and the
+// chart drops it (deriveTrendMarks): joined to a one-level row, it drew a change
+// of method as a change in play (#1358).
+export function historyRow(date, payload) {
+  return {
+    date,
+    sportId: payload.sportId,
+    percentile: payload.percentile,
+    qualified: payload.qualified,
+    atLevel: payload.atLevel === true,
+  }
 }
 
 // A row's movement against an earlier snapshot (`prior`: { date, payload }).

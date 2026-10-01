@@ -48,7 +48,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fetchLevelSeasonStats, combineToPool } from '../src/api/statsLevels.js'
 import { packProspectTrend } from '../src/api/prospectTrend.js'
-import { buildPopulations, snapshotRow, movementSince } from './lib/prospectPercentile.mjs'
+import { buildPopulations, snapshotRow, movementSince, historyRow } from './lib/prospectPercentile.mjs'
 import { fetchLevelAverageAges } from './lib/prospectAgeBenchmark.mjs'
 import { openDb, dumpGroup } from './lib/db.js'
 import { writeJsonAtomic } from './lib/io.js'
@@ -116,10 +116,9 @@ function exportJson(db, today, levelAverageAge, asOf) {
       { ...payload, atLevel },
       prior && { date: prior.date, payload: JSON.parse(prior.payload_json) },
     )
-    const history = historyStmt.all(row.player_id, row.board, SOURCE).map((h) => {
-      const p = JSON.parse(h.payload_json)
-      return { date: h.date, sportId: p.sportId, percentile: p.percentile, qualified: p.qualified }
-    })
+    const history = historyStmt
+      .all(row.player_id, row.board, SOURCE)
+      .map((h) => historyRow(h.date, JSON.parse(h.payload_json)))
     return { playerId: row.player_id, group: row.board, ...payload, movement, history }
   })
   return { generatedAt: asOf.toISOString(), dataThrough: today, levelAverageAge, players }

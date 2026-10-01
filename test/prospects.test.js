@@ -1,4 +1,4 @@
-import { test } from 'node:test'
+import { test, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   prospectRankById,
@@ -133,14 +133,13 @@ const BASE = 'https://statsapi.mlb.com'
 const season = new Date().getFullYear()
 
 function stubFetch(routes) {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async (url) => {
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
     const hit = routes[url]
     if (!hit) throw new Error(`unexpected fetch: ${url}`)
     if (hit.fail) return { ok: false, status: hit.status ?? 404 }
     return { ok: true, status: 200, json: async () => hit.json }
-  }
-  return { restore: () => { globalThis.fetch = originalFetch } }
+  })
+  return { restore: () => fetchMock.mock.restore() }
 }
 
 const rosterUrl = (teamId, rosterType) => `${BASE}/api/v1/teams/${teamId}/roster?rosterType=${rosterType}`

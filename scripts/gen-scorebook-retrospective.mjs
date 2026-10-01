@@ -66,6 +66,7 @@ const addStats = (into, stats) => {
     if (typeof value === 'number') into[key] = (into[key] ?? 0) + value
   }
 }
+// Kept local: reads the whole fraction ("6.10" = 6 + 10), shared ipToOuts reads one digit.
 const ipOuts = (ip) => {
   const [whole, part] = String(ip ?? '0.0').split('.')
   return (Number(whole) || 0) * 3 + (Number(part) || 0)

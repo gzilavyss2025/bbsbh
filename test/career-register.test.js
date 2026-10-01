@@ -9,7 +9,7 @@
 // blends two levels into one row (careerRegisterView).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { resolveCurrentSeasonStat } from '../src/api/loadPlayer.js'
+import { resolveCurrentSeasonStat } from '../src/api/player/context.js'
 import { careerRegisterView, careerTimelineView } from '../src/api/person.js'
 import { SPORT_IDS } from '../src/lib/teams.js'
 
@@ -37,28 +37,23 @@ function mockDateRangeFetch() {
   }
 }
 
-test('resolveCurrentSeasonStat: the tile blends every MiLB level, but levelOnlyStat stays scoped to just the current level', async () => {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = mockDateRangeFetch()
-  try {
-    const { stat, sportId, levelOnlyStat } = await resolveCurrentSeasonStat({
-      id: 687726, group: 'pitching', season: 2026,
-      startDate: '2026-01-01', endDate: '2026-07-21',
-      sportId: SPORT_IDS.AAA, hasDebuted: false, levelStat: null,
-    })
+test('resolveCurrentSeasonStat: the tile blends every MiLB level, but levelOnlyStat stays scoped to just the current level', async (t) => {
+  t.mock.method(globalThis, 'fetch', mockDateRangeFetch())
+  const { stat, sportId, levelOnlyStat } = await resolveCurrentSeasonStat({
+    id: 687726, group: 'pitching', season: 2026,
+    startDate: '2026-01-01', endDate: '2026-07-21',
+    sportId: SPORT_IDS.AAA, hasDebuted: false, levelStat: null,
+  })
 
-    assert.equal(sportId, SPORT_IDS.AAA)
-    // The tile is a deliberate cross-level blend (AA's 19G/26.2IP + AAA's 1G/1.0IP).
-    assert.equal(stat.gamesPlayed, 20)
-    assert.equal(stat.inningsPitched, '27.2')
-    // The register's current-level row must NOT get that blend — only the
-    // AAA appearance belongs to the AAA row.
-    assert.equal(levelOnlyStat.gamesPlayed, 1)
-    assert.equal(levelOnlyStat.inningsPitched, '1.0')
-    assert.equal(levelOnlyStat.era, '0.00')
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  assert.equal(sportId, SPORT_IDS.AAA)
+  // The tile is a deliberate cross-level blend (AA's 19G/26.2IP + AAA's 1G/1.0IP).
+  assert.equal(stat.gamesPlayed, 20)
+  assert.equal(stat.inningsPitched, '27.2')
+  // The register's current-level row must NOT get that blend — only the
+  // AAA appearance belongs to the AAA row.
+  assert.equal(levelOnlyStat.gamesPlayed, 1)
+  assert.equal(levelOnlyStat.inningsPitched, '1.0')
+  assert.equal(levelOnlyStat.era, '0.00')
 })
 
 test('careerRegisterView: a same-season AA -> AAA promotion produces two independent rows, never a blended one', () => {

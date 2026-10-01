@@ -150,6 +150,13 @@ line, and renaming them to say "subtotal" is worth doing — but it belongs to
 #1132's `Table` work as a clarity fix, not here as a grammar break. A ledger
 that renamed them under clause 3 would be stating a rule the rule does not make.
 
+> **Correction, 2026-10-01 (#1132, slice T2).** Both readings above are wrong.
+> `.bs__sub` marks a **substitute** batter's row (`b.isSub`, a batting-order code
+> that is not a whole hundred), not a subtotal. `.ledger__sub` is the ledger's
+> **second label column** on every row, not a subtotal cell. They became
+> `.bs__row--substitute` and `.ledger__label`. The ledger rows say the same. The
+> text above stays as written.
+
 ## What the clauses deliberately do not reach
 
 **An element that names a shape.** Clause 1 binds a BLOCK name. `.bs__abscard`,

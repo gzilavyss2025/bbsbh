@@ -926,13 +926,23 @@ for each generator; the reader modules:
 
   The file is **packed** (#1269) because the phone parses all of it before the
   pill shows: the week dates are stored once in `historyDates`, and a `history`
-  row is `[dateIndex, sportId, percentile]` (a fourth `qualified` item only on a
-  row where it is not "percentile is not null"; there is none today). `packed: 1`
-  is the version marker. `fetchProspectTrend()` unpacks once with
-  `unpackProspectTrend`, so every caller and selector sees plain `{ date,
-  sportId, percentile, qualified }` rows. `sportId` stays per row: a player who
-  moved level carries both. The reader still accepts the old plain shape until a
-  nightly run has written the packed one. 3.3 MB became 0.65 MB on disk.
+  row is `[dateIndex, sportId, percentile]`. `packed: 2` is the version marker.
+  A fourth `flags` item comes only on a row that is not the usual case. The
+  usual case is "`qualified` is percentile is not null" and "`atLevel` is true".
+  `flags` is a bit set: `1` = `qualified`, `2` = `atLevel`. Version 1 (before
+  #1358) had no `atLevel`, and its fourth item was the `qualified` boolean.
+  `fetchProspectTrend()` unpacks once with `unpackProspectTrend`, so every
+  caller and selector sees plain `{ date, sportId, percentile, qualified,
+  atLevel }` rows. A version 1 row unpacks with `atLevel: false`. `sportId`
+  stays per row: a player who moved level carries both. The reader still
+  accepts the old plain shape until a nightly run has written the packed one.
+  3.3 MB became 0.65 MB on disk.
+
+  `atLevel` is true only on a row read at ONE level (`snapshotRow`). A row
+  written before #1279 summed his season over every level. `deriveTrendMarks`
+  drops every row without `atLevel: true`, so the trend chart never joins a
+  summed point to a one-level point. That join drew a change of method as a
+  change in play (Josue Briceño, AAA: 80, 80, then 8 — #1358).
 
   The board column is **`Standing vs level`** and sits last, after the season
   line. Each row names its metric and exact percentile, then gives the standing

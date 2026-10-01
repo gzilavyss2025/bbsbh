@@ -20,7 +20,7 @@
 // and the milestone career total.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { resolveCurrentSeasonStat } from '../src/api/loadPlayer.js'
+import { resolveCurrentSeasonStat } from '../src/api/player/context.js'
 import { aggregateSplits, careerRegisterView, mlbCareerThroughCutoff } from '../src/api/person.js'
 import { SPORT_IDS } from '../src/lib/teams.js'
 

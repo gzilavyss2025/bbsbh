@@ -1,8 +1,3 @@
-/* eslint-disable react-refresh/only-export-components -- a profile module's
-   public surface is its descriptor object, not the components inside it; the
-   components are local by design. Fast Refresh falls back to a full reload for
-   this dev-only lab, which is a fine trade for keeping each dimension's data,
-   copy text, and tiles in one readable file. */
 import { useEffect, useId, useState } from 'react'
 import { CopyBox } from '../../../components/ui/CopyBox.jsx'
 import { RecolorFilter } from '../../../components/charts/WinProbChart.jsx'

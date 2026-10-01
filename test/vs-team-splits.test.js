@@ -137,36 +137,31 @@ const SHARDS = {
   },
 }
 
-test('the club shards merge back into the whole-file shape, and are fetched once', async () => {
-  const originalFetch = globalThis.fetch
+test('the club shards merge back into the whole-file shape, and are fetched once', async (t) => {
   const urls = []
-  globalThis.fetch = async (url) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
     urls.push(url)
     const body = SHARDS[url]
     if (!body) throw new Error(`unexpected fetch ${url}`)
     return { ok: true, status: 200, json: async () => body }
-  }
-  try {
-    // A game reads exactly the two clubs playing — never the other 28.
-    const merged = await fetchVsTeamSplitsForTeams([158, 112])
-    assert.deepEqual(urls.sort(), [
-      '/data/vs-team-splits/112.json',
-      '/data/vs-team-splits/158.json',
-      '/data/vs-team-splits/index.json',
-    ])
-    assert.deepEqual(Object.keys(merged.players).sort(), ['1', '2'])
-    assert.equal(merged.season, 2026)
-    // The header from the index is merged in, so the pure view model that used
-    // to read the single file is unchanged.
-    assert.equal(vsTeamSplitsFor(merged, 1).preselectId, 112)
+  })
+  // A game reads exactly the two clubs playing — never the other 28.
+  const merged = await fetchVsTeamSplitsForTeams([158, 112])
+  assert.deepEqual(urls.sort(), [
+    '/data/vs-team-splits/112.json',
+    '/data/vs-team-splits/158.json',
+    '/data/vs-team-splits/index.json',
+  ])
+  assert.deepEqual(Object.keys(merged.players).sort(), ['1', '2'])
+  assert.equal(merged.season, 2026)
+  // The header from the index is merged in, so the pure view model that used
+  // to read the single file is unchanged.
+  assert.equal(vsTeamSplitsFor(merged, 1).preselectId, 112)
 
-    // A player page resolves his club through the index's `owner` map — and
-    // here both are already cached, so it costs no further request.
-    const calls = urls.length
-    const one = await fetchVsTeamSplitsForPlayer(1)
-    assert.equal(urls.length, calls)
-    assert.equal(one.players[1].teamId, 158)
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  // A player page resolves his club through the index's `owner` map — and
+  // here both are already cached, so it costs no further request.
+  const calls = urls.length
+  const one = await fetchVsTeamSplitsForPlayer(1)
+  assert.equal(urls.length, calls)
+  assert.equal(one.players[1].teamId, 158)
 })

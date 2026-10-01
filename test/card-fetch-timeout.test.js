@@ -7,17 +7,16 @@ import test from 'node:test'
 
 import { buildCard } from '../api/_lib/cards.js'
 
-test('a statsapi call that hangs is cut off and the card build resolves null', async () => {
-  const realFetch = globalThis.fetch
+test('a statsapi call that hangs is cut off and the card build resolves null', async (t) => {
   let signal = null
   // A real hung socket keeps the event loop alive. AbortSignal.timeout's own
   // timer does not, so stand in for the socket.
   const socket = setInterval(() => {}, 1000)
-  globalThis.fetch = (_url, init) =>
+  t.mock.method(globalThis, 'fetch', (_url, init) =>
     new Promise((_resolve, reject) => {
       signal = init?.signal ?? null
       signal?.addEventListener('abort', () => reject(signal.reason))
-    })
+    }))
   try {
     const started = Date.now()
     const card = await buildCard(new URLSearchParams({ route: 'team', id: '158' }), 'https://example.test')
@@ -27,22 +26,16 @@ test('a statsapi call that hangs is cut off and the card build resolves null', a
     assert.ok(elapsed >= 3500 && elapsed < 6000, `cut off near the 4s budget, took ${elapsed}ms`)
   } finally {
     clearInterval(socket)
-    globalThis.fetch = realFetch
   }
 })
 
-test('a statsapi call that answers in time builds the card', async () => {
-  const realFetch = globalThis.fetch
-  globalThis.fetch = async () =>
+test('a statsapi call that answers in time builds the card', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () =>
     new Response(JSON.stringify({ teams: [{ id: 158, name: 'Milwaukee Brewers', sport: { id: 1 }, league: { name: 'National League' } }] }), {
       status: 200,
       headers: { 'content-type': 'application/json' },
-    })
-  try {
-    const card = await buildCard(new URLSearchParams({ route: 'team', id: '158' }), 'https://example.test')
-    assert.equal(card.image, 'https://example.test/og-image.png')
-    assert.match(card.title, /Milwaukee Brewers/)
-  } finally {
-    globalThis.fetch = realFetch
-  }
+    }))
+  const card = await buildCard(new URLSearchParams({ route: 'team', id: '158' }), 'https://example.test')
+  assert.equal(card.image, 'https://example.test/og-image.png')
+  assert.match(card.title, /Milwaukee Brewers/)
 })

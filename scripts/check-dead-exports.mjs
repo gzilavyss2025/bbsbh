@@ -47,11 +47,10 @@
 //
 // Run by `npm run lint` (so it gates every push).
 
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { dirname, extname, join, relative, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { ROOT, walk } from './lib/walk.mjs'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 
 const CODE_EXT = new Set(['.js', '.jsx', '.mjs'])
 const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git', '.vercel'])
@@ -72,18 +71,7 @@ const ALLOWLIST = {
   'src/lib/wpa/wpaBandColors.js#WPA_PLOT_SIZE': 'Declared "exported so Team Identity Lab\'s WPA preview can render its tile pattern at TRUE size" — the lab does not currently read it (comment may be ahead of the wiring), flagged for a maintainer to confirm rather than deleted blind.',
 }
 
-function walk(dir, out = []) {
-  for (const entry of readdirSync(dir)) {
-    if (IGNORE_DIRS.has(entry)) continue
-    const full = join(dir, entry)
-    const st = statSync(full)
-    if (st.isDirectory()) walk(full, out)
-    else out.push(full)
-  }
-  return out
-}
-
-const allFiles = CORPUS_ROOTS.flatMap((root) => walk(join(ROOT, root)))
+const allFiles = CORPUS_ROOTS.flatMap((root) => walk(join(ROOT, root), { skip: IGNORE_DIRS }))
 const codeFiles = allFiles.filter((f) => CODE_EXT.has(extname(f)))
 const src = new Map(codeFiles.map((f) => [f, readFileSync(f, 'utf8')]))
 

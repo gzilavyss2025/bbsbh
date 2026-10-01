@@ -7,7 +7,7 @@
 // in particular repeats a person once per JERSEY NUMBER he wore in a season,
 // which is not documented anywhere and is the root of the first four tests.
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 import {
   dedupeStints,
   groupManagerialRecord,
@@ -183,8 +183,7 @@ test('lastManagerialStint skips assistant jobs held after he stopped managing', 
 
 // Route a stats request by group + sportId. `career` splits only.
 function withStatsFetch(byKey, run) {
-  const original = globalThis.fetch
-  globalThis.fetch = async (url) => {
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
     const u = new URL(url)
     const group = u.searchParams.get('group')
     const sportId = u.searchParams.get('sportId') ?? '1'
@@ -194,9 +193,9 @@ function withStatsFetch(byKey, run) {
       status: 200,
       json: async () => (stat ? { stats: [{ splits: [{ stat }] }] } : { stats: [{ splits: [] }] }),
     }
-  }
+  })
   return run().finally(() => {
-    globalThis.fetch = original
+    fetchMock.mock.restore()
   })
 }
 

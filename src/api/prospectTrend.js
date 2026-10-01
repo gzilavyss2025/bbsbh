@@ -11,8 +11,13 @@ const SNAPSHOT_URL = '/data/prospect-trend.json'
 const EMPTY_SNAPSHOT = { generatedAt: null, dataThrough: null, players: [] }
 
 // The file on disk is packed (#1269) so the phone parses 0.65 MB, not 3.2: week
-// dates once in `historyDates`, a history row as [dateIndex, sportId, percentile]
-// (+ `qualified` only when it is not "percentile is not null"), `packed: 1` as version.
+// dates once in `historyDates`, a history row as [dateIndex, sportId, percentile],
+// `packed: 2` as version. A 4th item, `flags`, comes only when the row is not the
+// usual case. The usual case is "qualified is percentile !== null" and
+// "atLevel is true". flags is a bit set: 1 = qualified, 2 = atLevel (#1358).
+// Version 1 had no atLevel, and its 4th item was the `qualified` boolean.
+const QUALIFIED = 1
+const AT_LEVEL = 2
 export function packProspectTrend(snapshot) {
   const historyDates = [...new Set(snapshot.players.flatMap((p) => p.history.map((h) => h.date)))].sort()
   const index = new Map(historyDates.map((date, i) => [date, i]))
@@ -20,28 +25,40 @@ export function packProspectTrend(snapshot) {
     ...p,
     history: p.history.map((h) => {
       const row = [index.get(h.date), h.sportId, h.percentile]
-      return h.qualified === (h.percentile !== null) ? row : [...row, h.qualified]
+      if (h.qualified === (h.percentile !== null) && h.atLevel === true) return row
+      return [...row, (h.qualified ? QUALIFIED : 0) | (h.atLevel === true ? AT_LEVEL : 0)]
     }),
   }))
-  return { ...snapshot, packed: 1, historyDates, players }
+  return { ...snapshot, packed: 2, historyDates, players }
+}
+
+// Version 1 rows carry no atLevel, so each one unpacks as atLevel: false. The
+// chart then drops it: a row with no proof that it read one level is not drawn
+// (deriveTrendMarks). The next nightly run writes version 2.
+function unpackRow(version, [i, sportId, percentile, extra], historyDates) {
+  const usual = percentile !== null
+  if (version === 1) {
+    return { date: historyDates[i], sportId, percentile, qualified: extra ?? usual, atLevel: false }
+  }
+  return {
+    date: historyDates[i],
+    sportId,
+    percentile,
+    qualified: extra == null ? usual : (extra & QUALIFIED) !== 0,
+    atLevel: extra == null ? true : (extra & AT_LEVEL) !== 0,
+  }
 }
 
 export function unpackProspectTrend(raw) {
   // Old shape passes through (#1269): drop this line once a nightly run has
   // written the packed shape. Until then a deploy and a nightly run work in either order.
-  if (raw?.packed !== 1) return raw
-  const { historyDates, players, ...rest } = raw
-  delete rest.packed
+  if (raw?.packed !== 1 && raw?.packed !== 2) return raw
+  const { historyDates, players, packed, ...rest } = raw
   return {
     ...rest,
     players: players.map((p) => ({
       ...p,
-      history: p.history.map(([i, sportId, percentile, qualified = percentile !== null]) => ({
-        date: historyDates[i],
-        sportId,
-        percentile,
-        qualified,
-      })),
+      history: p.history.map((row) => unpackRow(packed, row, historyDates)),
     })),
   }
 }
@@ -261,8 +278,30 @@ export function prospectCardView(entry, ageYears, levelAverageAge, tenure = null
   }
 }
 
+// The Prospect Card for one player, as both player-page loaders build it
+// (src/api/player/analytics.js and overview.js). `snapshot` is the trend file,
+// `entry` his row in it (or null), `liveSportId` the level of his live team.
+// Returns the card's view and `sportId`, the level the card names.
+//
+// The percentile, population and tenure come from `entry.sportId`, so the
+// level label and the level-average age come from it too. The live team can be
+// at another level: a fall or winter club, or a promotion the nightly run has
+// not read yet. Core Jackson's card said "640 qualified WINTER hitters" for
+// the AA population (#1359). With no trend row, the live level is all there
+// is; with neither, null, and the caller prints no level.
+export function prospectCardFor(snapshot, entry, birthDate, liveSportId, tenure = null) {
+  const sportId = entry?.sportId ?? liveSportId ?? null
+  const view = prospectCardView(
+    entry,
+    decimalAge(birthDate, snapshot?.generatedAt),
+    snapshot?.levelAverageAge?.[sportId] ?? null,
+    tenure,
+  )
+  return { view, sportId }
+}
+
 // Turns a player's full `history` (gen-prospect-trend.mjs's export, oldest
-// first: { date, sportId, percentile, qualified }) into what the Prospect
+// first: { date, sportId, percentile, qualified, atLevel }) into what the Prospect
 // Card's expanded Trend panel draws — chart points, and the level-change
 // events worth a marker on the axis. Pure: no chart math (that's the
 // component's job), just the two derived facts a raw history array doesn't
@@ -273,8 +312,16 @@ export function prospectCardView(entry, ageYears, levelAverageAge, tenure = null
 // connector, never an interpolated or fabricated value), same "omit under the
 // sample floor" rule PercentileStrip/ADR-0040 already established for a
 // single strip row, applied here across a time axis instead.
-export function deriveTrendMarks(history) {
-  if (!history?.length) return { points: [], promotions: [] }
+//
+// A row without `atLevel: true` is dropped, not drawn as a gap. Before #1279
+// each row summed his season over every level; the rows after it read one
+// level. Joined as one line, the change of method read as a change in play
+// (Josue Briceño, AAA: 80, 80, then 8 — #1358). A gap would still join them
+// with a dashed connector, so the old rows leave the series. A level change
+// across them has no point to stand on, so it is not a marker either.
+export function deriveTrendMarks(rawHistory) {
+  const history = (rawHistory ?? []).filter((h) => h.atLevel === true)
+  if (!history.length) return { points: [], promotions: [] }
   const points = history.map((h) => ({ date: h.date, percentile: h.qualified ? h.percentile : null }))
   const promotions = []
   for (let i = 1; i < history.length; i++) {

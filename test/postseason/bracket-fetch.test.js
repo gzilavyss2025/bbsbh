@@ -5,7 +5,7 @@
 // asks for every date but for no result field at all. Both are pinned here on
 // the URL itself, and the row normalizers on real captured answers.
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 import {
   dayBefore,
   fetchPostseasonResults,
@@ -81,12 +81,11 @@ test('skeletonRowsFrom keeps clubs and placeholders as the schedule names them',
 
 function stubFetch(body) {
   const calls = []
-  const prev = globalThis.fetch
-  globalThis.fetch = async (url) => {
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
     calls.push(String(url))
     return { ok: true, status: 200, json: async () => body }
-  }
-  return { calls, restore: () => (globalThis.fetch = prev) }
+  })
+  return { calls, restore: () => fetchMock.mock.restore() }
 }
 
 test('fetchPostseasonResults asks statsapi once, with the results URL', async () => {

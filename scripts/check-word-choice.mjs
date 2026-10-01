@@ -27,11 +27,10 @@
 //   word-choice-exempt
 // on the same line, and only for a name you do not control.
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..');
+import { ROOT, walk as walkFiles } from './lib/walk.mjs';
 
 const RULES = [{ banned: /playoffs?/gi, use: 'postseason' }];
 
@@ -45,21 +44,8 @@ const ROOT_FILES = ['CLAUDE.md', 'CONTEXT.md', 'README.md'];
 const EXTENSIONS = ['.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx', '.css', '.md', '.html'];
 const SKIP_DIRS = new Set(['node_modules', 'dist', '.git', 'coverage', 'test-results']);
 
-function walk(dir, out = []) {
-  let entries;
-  try {
-    entries = readdirSync(dir);
-  } catch {
-    return out; // an optional directory (e.g. .claude/) may not exist
-  }
-  for (const entry of entries) {
-    if (SKIP_DIRS.has(entry)) continue;
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) walk(full, out);
-    else if (EXTENSIONS.some((ext) => entry.endsWith(ext))) out.push(full);
-  }
-  return out;
-}
+// An optional directory (e.g. .claude/) may not exist, so the walk is tolerant.
+const walk = (dir) => walkFiles(dir, { skip: SKIP_DIRS, exts: EXTENSIONS, tolerant: true });
 
 const files = [
   ...DIRS.flatMap((d) => walk(join(ROOT, d))),

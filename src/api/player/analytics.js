@@ -25,7 +25,7 @@ import {
   heatView,
   similarPitchersFor,
 } from '../pitchArsenal.js'
-import { fetchProspectTrend, prospectTrendById, prospectCardView, decimalAge } from '../prospectTrend.js'
+import { fetchProspectTrend, prospectTrendById, prospectCardFor } from '../prospectTrend.js'
 import { fetchLevelTenure, tenureFact } from '../levelTenure.js'
 import {
   advancedHittingView,
@@ -165,14 +165,10 @@ export async function loadPlayerAnalytics(id, asOf) {
   const tenure = trendEntry
     ? tenureFact(levelTenure, trendEntry.sportId, trendEntry.group, trendEntry.sampleSize)
     : null
-  const prospectCard =
+  // The card's level is the trend row's, not the live team's (#1359).
+  const card =
     currentActivitySportId !== 1
-      ? prospectCardView(
-          trendEntry,
-          decimalAge(bio.birthDate, prospectTrend?.generatedAt),
-          prospectTrend?.levelAverageAge?.[currentActivitySportId] ?? null,
-          tenure,
-        )
+      ? prospectCardFor(prospectTrend, trendEntry, bio.birthDate, currentActivitySportId, tenure)
       : null
 
   // CATCHING — its own card, not a stat block, and not a swap for anything.
@@ -194,7 +190,8 @@ export async function loadPlayerAnalytics(id, asOf) {
     commandReceived,
     commandReceivedData,
     sportId: currentActivitySportId,
-    prospectCard,
+    prospectCard: card?.view ?? null,
+    prospectCardSportId: card?.sportId ?? null,
     prospectCardGroup: trendEntry?.group ?? primaryGroup,
   }
 }

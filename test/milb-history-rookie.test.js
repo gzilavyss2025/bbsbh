@@ -56,24 +56,19 @@ test('every Rookie-level club in the file only carries a real era list (no lengt
   }
 })
 
-test('parentOrgHistory (the Minors tab affiliation-history reader) surfaces a Rookie club real history', async () => {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async (url) => {
+test('parentOrgHistory (the Minors tab affiliation-history reader) surfaces a Rookie club real history', async (t) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
     assert.equal(url, '/data/milb-history.json')
     return { ok: true, status: 200, json: async () => fileJson }
-  }
-  try {
-    const history = await parentOrgHistory(413) // Greeneville Astros -> Reds
-    assert.deepEqual(
-      history.map((e) => [e.years, e.parentOrgId]),
-      [
-        [[2005, 2017], 117],
-        [[2018, 2018], 113],
-      ],
-    )
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  })
+  const history = await parentOrgHistory(413) // Greeneville Astros -> Reds
+  assert.deepEqual(
+    history.map((e) => [e.years, e.parentOrgId]),
+    [
+      [[2005, 2017], 117],
+      [[2018, 2018], 113],
+    ],
+  )
 })
 
 test('parentOrgHistory returns [] for a Rookie club that never changed org (the common case)', async () => {

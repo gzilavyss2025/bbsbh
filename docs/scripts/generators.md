@@ -1154,6 +1154,8 @@ don't run these by hand.
   population and the tenure benchmark each cover one level. A row carries
   `atLevel` so `movement` (`movementSince`) skips any earlier snapshot written
   before that rule; re-run the backfill once to bring old `history` onto it.
+  Each exported `history` row carries `atLevel` too (`historyRow`), and the
+  trend chart draws only the rows where it is true (#1358).
   Depends on
   `top-prospects.json` already existing; skips (not a failure) if that
   snapshot is missing/empty. Writes the file packed
