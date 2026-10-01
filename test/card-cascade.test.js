@@ -1791,7 +1791,7 @@ const C6C = [
   { css: '78-offseason.css', sel: '.springcount', jsx: ['components/offseason/WinterCalendar.jsx'], ns: 'springcount', as: 'aside', frame: 'ledger' },
   { css: '78-offseason.css', sel: '.pgame__card', jsx: ['components/offseason/PickedGame.jsx'], ns: 'pgame__card', as: 'div' },
   { css: '78-offseason.css', sel: '.srecord', jsx: ['components/offseason/SeasonRecord.jsx'], ns: 'srecord' },
-  { css: '78-offseason.css', sel: '.note__stories', jsx: ['components/offseason/LongAtBats.jsx'], ns: 'note__stories', mode: 'wrap', box: 'note__storybox' },
+  { css: '78-offseason.css', sel: '.seasonnote__stories', jsx: ['components/offseason/LongAtBats.jsx'], ns: 'seasonnote__stories', mode: 'wrap', box: 'seasonnote__storybox' },
 ]
 
 test('C6c: no fouls, offseason or off-day block draws a second frame over its Card', () => {
@@ -1852,10 +1852,10 @@ test('C6c: each block keeps its own margin and inset', () => {
     ['78-offseason.css', '.pgame__card', 'padding', 'var(--space-5) var(--space-4)'],
     ['78-offseason.css', '.srecord', 'margin-top', 'var(--space-6)'],
     ['78-offseason.css', '.srecord__body', 'padding', 'var(--space-4)'],
-    ['78-offseason.css', '.note__stories', 'list-style', 'none'],
-    ['78-offseason.css', '.note__stories', 'margin', '0'],
-    ['78-offseason.css', '.note__stories', 'padding', '0'],
-    ['78-offseason.css', '.note__storybox', 'margin-top', 'var(--space-4)'],
+    ['78-offseason.css', '.seasonnote__stories', 'list-style', 'none'],
+    ['78-offseason.css', '.seasonnote__stories', 'margin', '0'],
+    ['78-offseason.css', '.seasonnote__stories', 'padding', '0'],
+    ['78-offseason.css', '.seasonnote__storybox', 'margin-top', 'var(--space-4)'],
   ]
   for (const [css, sel, prop, value] of kept) {
     assert.equal(decl(ruleBody(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)
@@ -1925,10 +1925,10 @@ test('C6c: the moved-up table sits in a flush sheet Card and its head stays outs
 // The two names Gary keeps until he picks a look (H2, 2026-09-29).
 test('C6c: the big card names keep their rules', () => {
   const css = read('78-offseason.css')
-  assert.equal(decl(ruleBody(css, '.note__title') ?? '', 'font-size'), 'var(--fs-title-md)')
+  assert.equal(decl(ruleBody(css, '.seasonnote__title') ?? '', 'font-size'), 'var(--fs-title-md)')
   assert.equal(decl(ruleBody(css, '.srecord__title') ?? '', 'font-size'), 'var(--fs-title-sm)')
   assert.match(src('components/offseason/SeasonRecord.jsx'), /<h3 className="srecord__title">Season record<\/h3>/)
-  assert.match(src('components/offseason/LongAtBats.jsx'), /<h4 className="note__title">/)
+  assert.match(src('components/offseason/LongAtBats.jsx'), /<h4 className="seasonnote__title">/)
 })
 
 // The ADR-0084 rename. Strict, comments too. The naming ledger (docs/) keeps
@@ -2185,7 +2185,8 @@ const H3_RENAMED = [
   ['admincopy__lede', 'admincopy__note'],
   ['clubsseen__lede', 'clubsseen__note'],
   ['foulavg__lede', 'foulavg__note'],
-  ['note__lede', 'note__note'],
+  // `note__note` repeated its block; the block is `.seasonnote` now (see below)
+  ['note__lede', 'seasonnote__note'],
   ['stampin__lede', 'stampin__note'],
   ['xl-entry__lede', 'xl-entry__note'],
   // batch B, step one: the entry's own note gives up the name the page-level lede takes
@@ -2257,6 +2258,18 @@ test('H3: each new second-line class is in a stylesheet and in a markup file or 
     const hit = (ext) => code.some(([rel, text]) => ext.test(rel) && re.test(text))
     assert.ok(hit(/\.css$/), `.${now} has no rule`)
     assert.ok(hit(/\.jsx?$/), `.${now} is used by no markup and no lab entry`)
+  }
+})
+
+// After #1339 the block itself moved. `.note__note` repeated its block's name,
+// and `note` named no job (ADR-0084 clause 1): the block is one note about the
+// season that just finished, so it is `.seasonnote`, with every part. No class
+// of the old block is left, as an element, a modifier or the bare block.
+test('H3: the season note block is .seasonnote, and no .note class is left', () => {
+  const old = /(?<![A-Za-z0-9_-])note(__|--)[a-z]|className="note[ "]|'\.note[ ']/
+  assert.deepEqual(h3Trees().filter(([, text]) => old.test(text)).map(([rel]) => rel), [])
+  for (const rel of ['components/offseason/LongAtBats.jsx', 'components/offseason/YoungestRegulars.jsx']) {
+    assert.match(readFileSync(join(SRC, rel), 'utf8'), /<section className="seasonnote[ "]/)
   }
 })
 
