@@ -166,14 +166,12 @@ const GAME_TYPES = 'R,F,D,L,W'
 const reTable = await readJsonOr(reTablePath, null)
 if (!reTable) console.log('run-expectancy.json not found — favor will be null this run')
 
-// `label` names the failing item in the log. The pool carries game targets in
-// the sweep and bare club ids in --exposure, so it cannot assume a gamePk.
-const mapWithConcurrency = (items, limit, fn, label = (it) => `gamePk ${it?.gamePk}`) =>
+const mapWithConcurrency = (items, limit, fn) =>
   mapConcurrent(items, limit, async (item) => {
     try {
       return await fn(item)
     } catch (err) {
-      console.error(`${label(item)}: ${err.message}`)
+      console.error(`${item?.gamePk ?? item}: ${err.message}`)
       return null
     }
   })
