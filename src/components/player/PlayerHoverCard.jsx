@@ -4,7 +4,7 @@ import { Headshot } from './Headshot.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { usePlayerHoverStats } from '../../hooks/usePlayerHoverStats.js'
 import { subscribeHover, getHoverSnapshot, hideHoverNow } from '../../lib/playerHoverStore.js'
-import { playerHoverCardPosition } from '../../lib/playerHoverPosition.js'
+import { hoverCardPosition } from '../../lib/playerHoverPosition.js'
 import { teamPrimaryColor } from '../../lib/teams.js'
 import { Pill } from '../ui/control/Pill.jsx'
 
@@ -49,7 +49,7 @@ export function PlayerHoverCard() {
 
   if (!active || !rect || (!loading && !data)) return null
 
-  const pos = playerHoverCardPosition(rect, { width: window.innerWidth, height: window.innerHeight })
+  const pos = hoverCardPosition(rect, { width: window.innerWidth, height: window.innerHeight })
   const accent = data?.team ? teamPrimaryColor(data.team.id) : null
 
   return (

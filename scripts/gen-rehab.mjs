@@ -17,8 +17,10 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { SPORT_LABEL } from '../src/lib/teams.js'
-import { txnDate, isRehabTxn, isRehabEndingTxn } from '../src/api/rehab-policy.js'
+import { isoToday } from '../src/lib/dates.js'
+import { txnDate, isRehabTxn, isRehabEndingTxn, REHAB_MAX_DAYS, isoDaysBetween } from '../src/api/rehab-policy.js'
 import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -30,21 +32,12 @@ const REHAB_WINDOW_DAYS = 40
 // last appearance for them; at or beyond it the stint is treated as ended.
 // Counting contests (not days) clears a starter's 5–6-day turn with margin.
 const REHAB_STALE_GAMES = 7
-// MLB rule hard-caps a rehab assignment at 30 days. isStillRehabbing's
-// games-since-last-appearance check can't tell "still rehabbing" from "the
-// club's schedule lookup came back empty" (its catch returns []), which would
-// otherwise let a stint with a data gap run forever — this is the backstop:
-// any candidate whose stint started more than 30 days ago is dropped outright,
-// independent of what the game-log check finds.
-const REHAB_MAX_DAYS = 30
 
-const isoToday = () => new Date().toISOString().slice(0, 10)
 const daysAgo = (n) => {
   const d = new Date()
   d.setUTCDate(d.getUTCDate() - n)
   return d.toISOString().slice(0, 10)
 }
-const daysSince = (isoDate) => Math.round((Date.now() - new Date(`${isoDate}T00:00:00Z`)) / 86400000)
 const currentSeason = () => new Date().getUTCFullYear()
 
 // --- transaction pass: who is on a rehab assignment right now -----------------
@@ -172,39 +165,22 @@ async function isStillRehabbing(row, position, level, season) {
   return gamesSince < REHAB_STALE_GAMES
 }
 
-// Run an async predicate across items with a small concurrency cap, keeping the
-// survivors in order (be polite to statsapi rather than firing dozens at once).
-async function keepConcurrent(items, limit, predicate) {
-  const keep = new Array(items.length).fill(false)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        keep[i] = await predicate(items[i])
-      } catch {
-        keep[i] = false
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return items.filter((_, i) => keep[i])
-}
-
 // --- main ---------------------------------------------------------------------
 const mlbIds = await fetchMlbTeamIds()
 const txns = (await getJson(`/api/v1/transactions?startDate=${daysAgo(REHAB_WINDOW_DAYS)}&endDate=${isoToday()}`)).transactions ?? []
 const candidates = selectActiveRehabAssignments(txns, mlbIds).filter(
-  (r) => daysSince(r.since) <= REHAB_MAX_DAYS,
+  (r) => isoDaysBetween(r.since, isoToday()) <= REHAB_MAX_DAYS,
 )
 const [positions, levels] = await Promise.all([
   fetchPositions(candidates.map((r) => r.playerId)),
   fetchTeamLevels(candidates.map((r) => r.clubId)),
 ])
 const season = currentSeason()
-const active = await keepConcurrent(candidates, 8, (r) =>
+// A failed lookup drops the player (null), same as a rehab that has ended.
+const stillRehabbing = await mapConcurrent(candidates, 8, (r) =>
   isStillRehabbing(r, positions[r.playerId] || '', levels[r.clubId] ?? null, season),
 )
+const active = candidates.filter((_, i) => stillRehabbing[i])
 const players = active.map((r) => ({
   ...r,
   position: positions[r.playerId] || '',

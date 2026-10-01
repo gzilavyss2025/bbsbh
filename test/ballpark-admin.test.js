@@ -10,9 +10,9 @@
 //      parks, and the app would keep rendering perfectly on shipped defaults —
 //      nothing would look broken. mergeOverrides is the only thing standing
 //      between those two outcomes.
-//   2. THE NEW FIELDS RESOLVE IN THE RIGHT ORDER. A wordmark override has to beat
-//      a bundled LOGO_KEYS entry, and a text override has to beat the feed's
-//      park name, without either forcing the other.
+//   2. THE NEW FIELDS RESOLVE IN THE RIGHT ORDER. A wordmark override and a text
+//      override are independent: a text override has to beat the feed's park
+//      name without forcing the wordmark, and the reverse.
 //   3. THE UPLOAD ENDPOINT SNIFFS AND SCOPES. It accepts only real JPEG/PNG
 //      bytes, only for a park the registry knows, and only deletes blobs in our
 //      own store.

@@ -28,23 +28,10 @@
 // pool — an org's whole farm system — can badge each leader with his level;
 // null / ignored for a single-level pool.
 
+import { ipToOuts, outsToIp } from '../lib/math/innings.js'
+import { num } from '../lib/math/number.js'
+
 const DASH = '—'
-
-function num(x) {
-  const n = Number(x)
-  return Number.isFinite(n) ? n : 0
-}
-
-// Innings pitched ("104.1" = 104 ⅓) → outs, so playing-time comparisons and the
-// IP leaderboard sort linearly (raw "104.1" < "104.2" happens to work, but
-// "104.2" + one out is "105.0", not "104.3", so compare in outs to be safe).
-function ipToOuts(ip) {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return num(whole) * 3 + num(frac[0])
-}
-function outsToIp(outs) {
-  return `${Math.floor(outs / 3)}.${outs % 3}`
-}
 
 // ---------------------------------------------------------------------------
 // Formatters (baseball display conventions)
@@ -132,12 +119,12 @@ export const PITCHING_CATEGORIES = [
   { key: 'sv', label: 'Saves', short: 'SV', group: 'pitching', value: (s) => num(s.saves), format: int, sortDir: 'desc', qualified: false },
   { key: 'w', label: 'Wins', short: 'W', group: 'pitching', value: (s) => num(s.wins), format: int, sortDir: 'desc', qualified: false },
   { key: 'l', label: 'Fewest losses', short: 'L', group: 'pitching', value: (s) => num(s.losses), format: int, sortDir: 'asc', qualified: true },
-  { key: 'era', label: 'ERA', short: 'ERA', group: 'pitching', value: (s) => num(s.era), format: num2, sortDir: 'asc', qualified: true },
+  { key: 'era', label: 'ERA', short: 'ERA', group: 'pitching', value: (s) => (s.era == null ? null : num(s.era)), format: num2, sortDir: 'asc', qualified: true },
   { key: 'hr_p', label: 'Fewest HR allowed', short: 'HR', group: 'pitching', value: (s) => num(s.homeRuns), format: int, sortDir: 'asc', qualified: true },
   { key: 'hb', label: 'Fewest hit batters', short: 'HB', group: 'pitching', value: (s) => num(s.hitBatsmen), format: int, sortDir: 'asc', qualified: true },
   { key: 'bb_p', label: 'Fewest walks', short: 'BB', group: 'pitching', value: (s) => num(s.baseOnBalls), format: int, sortDir: 'asc', qualified: true },
   { key: 'so_p', label: 'Strikeouts', short: 'SO', group: 'pitching', value: (s) => num(s.strikeOuts), format: int, sortDir: 'desc', qualified: false },
-  { key: 'whip', label: 'WHIP', short: 'WHIP', group: 'pitching', value: (s) => num(s.whip), format: num2, sortDir: 'asc', qualified: true },
+  { key: 'whip', label: 'WHIP', short: 'WHIP', group: 'pitching', value: (s) => (s.whip == null ? null : num(s.whip)), format: num2, sortDir: 'asc', qualified: true },
   { key: 'avg_p', label: 'Opponent AVG', short: 'AVG', group: 'pitching', value: (s) => num(s.avg), format: rate3, sortDir: 'asc', qualified: true },
   { key: 'pip', label: 'Pitches per inning', short: 'P/IP', group: 'pitching', value: (s) => num(s.pitchesPerInning), format: num2, sortDir: 'asc', qualified: true },
   // QS (quality starts) — TODO: not in the season aggregate; needs a per-game

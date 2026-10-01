@@ -238,3 +238,31 @@ test('a stamp with no resolved boxscore contributes nothing rather than throwing
   assert.ok(result.performances.length > 0)
   assert.ok(!result.performances.some((p) => p.gamePk === 999))
 })
+
+// #1276: a starter who got nobody out has no ERA and no WHIP. The tables said
+// 0.00 and sorted him to the top as the best arm in the book.
+test('a starter with no outs has no ERA or WHIP, and sorts last in the rotation', () => {
+  const game = {
+    away: side(138, 'STL', []),
+    home: side(158, 'MIL', [
+      player({
+        id: 701,
+        name: 'Joe Rock',
+        teamId: 158,
+        teamAbbr: 'MIL',
+        pitching: pitchingLine({ gamesStarted: true, ip: '0.0', h: 3, r: 2, er: 2, bb: 1, pitches: 30 }),
+      }),
+    ]),
+  }
+  const stamps = [...STAMPS, stamp(103, '2026-04-09')]
+  const facts = { ...FACTS, 103: { date: '2026-04-09', winnerId: 158 } }
+  const { rotation, pitchingLeaders } = computeLogbookRetrospective(stamps, facts, { ...BOXSCORES, 103: game }, {})
+
+  const rock = rotation.find((p) => p.id === 701)
+  assert.equal(rock.era, null)
+  assert.equal(rock.whip, null)
+  assert.equal(rotation.at(-1).id, 701, 'the pitcher with no ERA sorts behind everyone who has one')
+  assert.equal(pitchingLeaders.find((p) => p.id === 701).whip, null)
+  // A starter who did get outs keeps his real value.
+  assert.equal(rotation.find((p) => p.id === 501).era, 3)
+})

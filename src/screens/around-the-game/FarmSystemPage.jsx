@@ -199,7 +199,7 @@ export function FarmSystemPage() {
                         name={clubShort(clubs, r.orgId)}
                         rank={r.rank}
                         tab="minors"
-                        sub={`${r.prospects.length} ranked prospect${r.prospects.length === 1 ? '' : 's'}`}
+                        note={`${r.prospects.length} ranked prospect${r.prospects.length === 1 ? '' : 's'}`}
                       />
                       <td>
                         <BarCell value={r.index} min={0} max={100}>
@@ -215,13 +215,13 @@ export function FarmSystemPage() {
                       </td>
                       <td>
                         {r.topRank ? `#${r.topRank}` : '—'}
-                        <span className="rpt__sub">
+                        <span className="rpt__note">
                           {r.prospects[0]?.name ?? 'None ranked'}
                         </span>
                       </td>
                       <td>
                         {r.record.w}-{r.record.l}
-                        <span className="rpt__sub">{pct3(r.pct)}</span>
+                        <span className="rpt__note">{pct3(r.pct)}</span>
                       </td>
                     </tr>
                   ))}

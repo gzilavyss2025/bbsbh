@@ -21,26 +21,7 @@ import {
   writeOwnerTo,
   writePreferencesTo,
 } from '../src/lib/account/preferencesStorage.js'
-
-// A localStorage stand-in whose reads and writes can be made to throw.
-function fakeStorage(seed = {}, { throwOnGet = false, throwOnSet = false } = {}) {
-  const data = { ...seed }
-  return {
-    data,
-    getItem(key) {
-      if (throwOnGet) throw new Error('SecurityError')
-      return Object.prototype.hasOwnProperty.call(data, key) ? data[key] : null
-    },
-    setItem(key, value) {
-      if (throwOnSet) throw new Error('QuotaExceededError')
-      data[key] = String(value)
-    },
-    removeItem(key) {
-      if (throwOnSet) throw new Error('QuotaExceededError')
-      delete data[key]
-    },
-  }
-}
+import { fakeStorage } from './helpers/fakeStorage.js'
 
 // --------------------------------------------------------------------------
 // The ordinary path

@@ -93,7 +93,7 @@ or chosen by hand about a subject that has no score — the same standing the co
 registry's SPOILER GUARD already grants these fields. No score-bearing surface
 gains an editor, and this ADR is not a licence to put one there.
 
-**The trademark caution survives.** `LOGO_KEYS` is empty because a park's
+**The trademark caution survives.** No park wordmark is bundled because a park's
 wordmark is usually a sponsor's registered trademark. The upload route does not
 change that; it only makes the slot reachable in seconds instead of a deploy.
 What goes in it is the owner's call and the owner's licence to hold.

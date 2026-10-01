@@ -590,7 +590,8 @@ export function formatHittingLine({ avg, homeRuns, rbi, strikeOuts, baseOnBalls,
 export function formatPitchingLine(role, { era, wins, losses, saves, inningsPitched, strikeOuts, baseOnBalls, battersFaced }) {
   const kPct = pct(strikeOuts, battersFaced)
   const bbPct = pct(baseOnBalls, battersFaced)
-  const parts = [`${Number.isFinite(era) ? era.toFixed(2) : '0.00'} ERA`]
+  // A null era (sumPitching at no outs, #1276) is a dash: 0.00 would say perfect.
+  const parts = [`${Number.isFinite(era) ? era.toFixed(2) : '—'} ERA`]
   if (role === 'SP') parts.push(`${wins ?? 0}-${losses ?? 0}`)
   if (role === 'CL') parts.push(`${saves ?? 0} SV`)
   parts.push(`${inningsPitched ?? '0.0'} IP`, `${kPct}% SO%`, `${bbPct}% BB%`)

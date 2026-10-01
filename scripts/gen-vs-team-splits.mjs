@@ -40,6 +40,9 @@ import { fileURLToPath } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
+import { mlbOps, eraOf, rate3 } from '../src/api/person/shared.js'
+import { num } from '../src/lib/math/number.js'
+import { ipToOuts, outsToIp } from '../src/lib/math/innings.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'vs-team-splits')
@@ -52,18 +55,7 @@ const isoDay = (offset = 0) => {
   return d.toISOString().slice(0, 10)
 }
 
-// Run an async mapper across items with a small concurrency cap, results in
-// order (be polite to statsapi). Mirrors gen-former-teammates.mjs's helper.
-const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
-
-// Innings pitched ("104.1" = 104 ⅓) <-> outs, so multi-game IP sums correctly.
-const ipToOuts = (ip) => {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return num(whole) * 3 + num(frac[0])
-}
-const outsToIp = (outs) => `${Math.floor(outs / 3)}.${outs % 3}`
-
-// --- stat-line formatting (self-contained copy of src/api/person.js's shape) --
+// --- stat-line formatting (same shape as src/api/person.js's lines) --
 const tag = (n, label) => {
   const v = num(n)
   if (!v) return null
@@ -105,9 +97,10 @@ function opsOf(b) {
   const obDen = b.ab + b.bb + b.hbp + b.sf
   const obp = obDen > 0 ? (b.h + b.bb + b.hbp) / obDen : 0
   const slg = b.ab > 0 ? b.tb / b.ab : 0
-  return (obp + slg).toFixed(3).replace(/^0/, '')
+  return rate3(mlbOps(obp, slg)) // MLB's own rounding, not the full-precision sum (#1275)
 }
-const eraOf = (er, outs) => (outs > 0 ? ((er * 27) / outs).toFixed(2) : '0.00')
+// '-.--' is statsapi's own mark for no ERA; 0.00 would say he was perfect (#1276).
+const eraText = (er, outs) => eraOf(er, outs)?.toFixed(2) ?? '-.--'
 
 // --- MLB team catalog + next opponent ----------------------------------------
 async function fetchMlbTeams() {
@@ -261,7 +254,7 @@ async function buildPlayerVs(personId, group, teamAbbr) {
     // `pa`/`bb`/`xbh` feed the vs-opponent callout's rate comparisons (see
     // src/api/callout-notes.js) — the player-page card doesn't read them.
     const car = isPitcher
-      ? { g: s.g, ip: outsToIp(s.outs), era: eraOf(s.er, s.outs), k: s.k, bb: s.bb }
+      ? { g: s.g, ip: outsToIp(s.outs), era: eraText(s.er, s.outs), k: s.k, bb: s.bb }
       : { g: s.g, pa: s.pa, ab: s.ab, h: s.h, avg: avgOf(s.h, s.ab), hr: s.hr, xbh: s.d + s.t + s.hr, rbi: s.rbi, bb: s.bb, ops: opsOf(s) }
     vs[oppId] = { car, last: b.last }
   }

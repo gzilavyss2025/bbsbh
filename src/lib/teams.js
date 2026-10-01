@@ -63,8 +63,10 @@ function swatchesFromColorStore(store) {
 
 // Every field of a (team, treatment) tuning record, or null. `treatment` uses
 // the jerseys.json vocabulary ('main' / 'alternate' / 'alternate-2…4' /
-// 'city-connect').
-function treatmentTuning(teamId, treatment) {
+// 'city-connect'). Exported for the Team Identity Lab's own "what's landed
+// right now" reads — every other caller should go through the named resolvers
+// below (treatmentOffsetX/Y, treatmentOriginY).
+export function treatmentTuning(teamId, treatment) {
   return treatmentRecord(MLB_TUNING_STORE, teamId, treatment)
 }
 
@@ -719,13 +721,6 @@ export function treatmentOffsetY(teamId, treatment) {
 // the mark's full size without clipping its top/sides.
 export function treatmentOriginY(teamId, treatment) {
   return treatmentTuning(teamId, treatment)?.originY ?? 'center'
-}
-
-// The whole tuning record for a (team, treatment), for the Team Identity Lab's
-// own "what's landed right now" reads — every other caller should go through
-// the named resolvers above.
-export function treatmentTuningRecord(teamId, treatment) {
-  return treatmentTuning(teamId, treatment)
 }
 
 // Per-team tuning for the Main/default logo tile — first designed on Team

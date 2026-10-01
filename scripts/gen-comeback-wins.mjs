@@ -34,6 +34,7 @@ import { writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
+import { parseArgs } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'comeback-wins.json')
@@ -41,15 +42,6 @@ const DEFAULT_DAYS = 3
 // The cumulative home win % (+ its `about` for nothing here, but kept minimal).
 // Only homeTeamWinProbability is read; pruning keeps each game's payload small.
 const WP_FIELDS = 'homeTeamWinProbability'
-
-function parseArgs(argv) {
-  const args = {}
-  for (const a of argv) {
-    const m = /^--([^=]+)(?:=(.*))?$/.exec(a)
-    if (m) args[m[1]] = m[2] ?? true
-  }
-  return args
-}
 
 const isoDay = (d) => d.toISOString().slice(0, 10)
 const args = parseArgs(process.argv.slice(2))

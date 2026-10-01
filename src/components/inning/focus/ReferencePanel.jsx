@@ -19,6 +19,7 @@ import { StatBox, AbsCard } from '../../gamehud/StatBox.jsx'
 import { WinProbChart } from '../../charts/WinProbChart.jsx'
 import { filmCanExist } from '../../../api/expresslane/eligibility.js'
 import { IconButton } from '../../ui/control/IconButton.jsx'
+import { useDialogFocus } from '../../../hooks/dialog/useDialogFocus.js'
 
 // Focus mode's reference shelf — lineups, the fielding diamond, the pitcher
 // tables, the benches (ADR-0043). This replaces ReferenceRail.jsx, which
@@ -523,12 +524,6 @@ function mergeNotes(preHalf, marginNotes, shownCounts) {
 }
 
 function RefSheet({ onClose, children }) {
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   // Scroll-lock the innings page behind the sheet — the same plain
   // `overflow: hidden` (never the position-fixed body trick, which loses the
   // reader's scroll offset) that SiteSearch.jsx uses, for the same reason
@@ -551,13 +546,7 @@ function RefSheet({ onClose, children }) {
   }, [])
 
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   return (
     <ModalPortal>

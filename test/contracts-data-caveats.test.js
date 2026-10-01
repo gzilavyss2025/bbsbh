@@ -19,7 +19,6 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 import { parseCsv } from '../scripts/lib/csv.mjs'
-import { parseServiceTime } from '../src/lib/contracts/parseServiceTime.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = join(__dirname, '..', 'scripts', 'data', 'contracts')
@@ -443,12 +442,29 @@ test('deferred-money names carry an asterisk the join must strip', () => {
 // bare integers
 // The column lost its trailing zeros to a float round-trip, so a day part must
 // be reconstructed from the DECIMAL LENGTH. These tests pin the evidence for
-// that reading, because the reading is what parseServiceTime.js encodes and a
-// future export that changes the notation would otherwise ship a silently wrong
-// day count. The parser itself is covered in test/parse-service-time.test.js.
+// that reading, so a future export that changes the notation cannot ship a
+// silently wrong day count.
 
 const populatedMls = salaries.filter((r) => (r.mls ?? '').trim() !== '')
 const decimalOf = (cell) => cell.split('.')[1]
+
+// A cell's service time in days, read the way this section argues: a full year
+// is 172 days, and the day part is rebuilt from its decimal LENGTH. Test-local
+// on purpose: no product code reads this column. A shape outside the five known
+// lengths throws, so a new notation fails loudly here.
+function mlsDays(cell) {
+  const [years, decimal = ''] = cell.trim().split('.')
+  const days =
+    decimal.length === 0 ? 0
+    : decimal.length === 1 ? Number(decimal) * 100 // ".1" is a stripped ".100"
+    : decimal.length === 2 ? Number(decimal) * 10 // ".12" is a stripped ".120"
+    : decimal.length === 3 ? Number(decimal)
+    : decimal.length === 4 ? Number(decimal.slice(1)) // Beckham's stray leading zero
+    : decimal.length === 15 ? Math.round(Number(`0.${decimal}`) * 1000) // float round-trip
+    : null
+  if (days === null || !/^\d+$/.test(years)) throw new Error(`unread mls shape: ${cell}`)
+  return Number(years) * 172 + days
+}
 
 test('19,308 mls cells split 16,382 dotted and 2,926 bare, with no third shape', () => {
   assert.equal(populatedMls.length, 19308)
@@ -513,7 +529,7 @@ test('the one four-digit cell is Tim Beckham 2015, a typo and not a fourth notat
   // 2016 is a gain of exactly one full service year.
   const y2016 = salaries.find((r) => r.year === '2016' && r.player === 'Beckham, Tim')
   assert.equal(y2016.mls, '1.145')
-  assert.equal(parseServiceTime(y2016.mls).totalDays - parseServiceTime(four[0].mls).totalDays, 172)
+  assert.equal(mlsDays(y2016.mls) - mlsDays(four[0].mls), 172)
 })
 
 // The 15 names the duplicate table above already resolved as two different men.
@@ -539,7 +555,7 @@ test('a year-over-year continuity test finds the bad cells without the transacti
   const byName = new Map()
   for (const row of populatedMls) {
     if (!byName.has(row.player)) byName.set(row.player, new Map())
-    byName.get(row.player).set(Number(row.year), parseServiceTime(row.mls).totalDays)
+    byName.get(row.player).set(Number(row.year), mlsDays(row.mls))
   }
 
   // A violation is a gain above a realistic 200-day season, or a gain below

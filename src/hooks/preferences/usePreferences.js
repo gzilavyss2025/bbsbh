@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   PREFS_KEY,
-  adoptRemotePreferences,
+  normalizePreferences,
   applyRemotePreferences,
   preferenceValue,
   setPreference,
@@ -13,6 +13,7 @@ import {
   writeOwnerTo,
   writePreferencesTo,
 } from '../../lib/account/preferencesStorage.js'
+import { notifyStorage } from '../../lib/account/localStore.js'
 
 // My Tally's preference store. Mirrors useStamps.js exactly: the rules are the
 // React-free core in src/lib/account/preferences.js (unit-tested there, and
@@ -43,19 +44,6 @@ const writePreferences = (doc) => writePreferencesTo(browserStorage(), doc)
 export const readPrefsOwner = () => readOwnerFrom(browserStorage())
 export const writePrefsOwner = (userId) => writeOwnerTo(browserStorage(), userId)
 
-// A same-tab echo of the `storage` event. The browser fires `storage` only in
-// OTHER tabs, and several instances of this hook really are mounted at once —
-// the slate's level toggle, the header avatar's club, a game view's keep-awake
-// switch, and PreferencesCloudSync. Same mechanism, and same reason, as
-// useStamps.js's notifyLocalChange.
-function notifyLocalChange() {
-  try {
-    window.dispatchEvent(new StorageEvent('storage', { key: PREFS_KEY }))
-  } catch {
-    // StorageEvent unavailable — cross-instance updates degrade to next render.
-  }
-}
-
 export function usePreferences() {
   const [prefs, setPrefs] = useState(readPreferences)
 
@@ -65,7 +53,7 @@ export function usePreferences() {
   // ---------------------------------------------------------------------
   // THE ECHO IS UNCONDITIONAL, AND THAT IS CURRENTLY LOAD-BEARING.
   // ---------------------------------------------------------------------
-  // `notifyLocalChange()` fires even when the transform changed nothing. That
+  // `notifyStorage(PREFS_KEY)` fires even when the transform changed nothing. That
   // looks like an obvious cleanup — move it inside the `next !== prev` branch
   // and stop repainting every consumer on every window focus (the pure layer's
   // `preserve` contract in lib/account/preferences.js promises exactly that).
@@ -90,7 +78,8 @@ export function usePreferences() {
       writePreferences(next)
       return next
     })
-    notifyLocalChange()
+    // The same-tab `storage` echo: see src/lib/account/localStore.js.
+    notifyStorage(PREFS_KEY)
   }, [])
 
   const set = useCallback(
@@ -110,11 +99,12 @@ export function usePreferences() {
     [commit],
   )
 
-  // Replace the document wholesale — the 'adopt' strategy, for when the local
-  // one belongs to a different account on a shared device.
+  // Replace the document wholesale — the 'adopt' half of `mergeStrategyFor`,
+  // for when the local one belongs to a DIFFERENT account on a shared device,
+  // where merging would publish one user's club to another's account.
   const adoptRemote = useCallback(
     (remote) => {
-      commit(() => adoptRemotePreferences(remote))
+      commit(() => normalizePreferences(remote))
     },
     [commit],
   )

@@ -10,7 +10,7 @@ import { PitcherWorkloadCard } from '../../components/playerstats/PitcherWorkloa
 import { RecentFormCard } from '../../components/playerstats/RecentFormCard.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './PlayerHubShell.jsx'
-import { monthDay } from './parts.jsx'
+import { monthDayName } from '../../lib/dates.js'
 
 // The player hub's STATS tab — `/player/{id}/stats`. What he has actually done:
 // the game log, the recent-form or workload card that summarizes it, the splits
@@ -49,7 +49,7 @@ export function PlayerStatsTab({ id, asOf, sportId }) {
               gameLog={block.gameLog}
               gameLogAlt={block.gameLogAlt}
               altLevel={block.gameLogAltLevel}
-              note={data.onRehab ? 'MLB + rehab' : asOf ? `entering ${monthDay(asOf)}` : 'entering today'}
+              note={data.onRehab ? 'MLB + rehab' : asOf ? `entering ${monthDayName(asOf)}` : 'entering today'}
             />
           )}
 

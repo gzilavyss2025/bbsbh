@@ -1,20 +1,12 @@
-import { useState, useRef, useMemo, useLayoutEffect, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useAsync } from '../../../../hooks/useAsync.js'
+import { useScrollRail } from '../../../../hooks/scroll/useScrollRail.js'
 import { fetchTeamHighlights, flattenPositiveClips } from '../../../../api/gamehighlights.js'
 import { HighlightSheet } from '../../../../components/playbyplay/HighlightSheet.jsx'
 import { HighlightClipCard } from '../../../../components/highlights/HighlightClipCard.jsx'
 import { MONTH_LABELS } from '../TeamStatsCard.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
-
-// A setup jump, not a user-visible scroll gesture — see TeamPhotosRail's own
-// copy of this helper for why `scroll-behavior: smooth` has to be bypassed.
-function jumpScrollLeft(el, value) {
-  const prev = el.style.scrollBehavior
-  el.style.scrollBehavior = 'auto'
-  el.scrollLeft = value
-  el.style.scrollBehavior = prev
-}
 
 // "Jul 9 @ STL" / "Jul 9 STL" (home game, no "@" — same isHome convention
 // GameStubCard's own opponent caption uses in TeamGames.jsx). `game` is a
@@ -58,68 +50,13 @@ export function TeamHighlightsRail({ teamId, games, limit = null }) {
   }, [data, limit])
   const gamesByPk = useMemo(() => new Map(games.map((g) => [g.gamePk, g])), [games])
 
-  const trackRef = useRef(null)
-  const userScrolledBackRef = useRef(false)
-  const [canScroll, setCanScroll] = useState(false)
-  const [atStart, setAtStart] = useState(true)
-  const [atEnd, setAtEnd] = useState(true)
   const [open, setOpen] = useState(null)
 
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const check = () => setCanScroll(el.scrollWidth > el.clientWidth + 1)
-    check()
-    const ro = new ResizeObserver(check)
-    ro.observe(el)
-    window.addEventListener('resize', check)
-    return () => {
-      ro.disconnect()
-      window.removeEventListener('resize', check)
-    }
-  }, [clips.length])
-
   // Re-snaps to the newest (rightmost) clip on mount and again once the
-  // (async) file load lands — guarded so a later layout change (e.g. a
-  // window resize flipping `canScroll`) can't yank the view back to the end
-  // after the user has actually scrolled.
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    if (!el || userScrolledBackRef.current || clips.length === 0) return
-    jumpScrollLeft(el, el.scrollWidth)
-  }, [clips.length, canScroll])
-
-  useEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const flagUserScroll = () => {
-      userScrolledBackRef.current = true
-    }
-    el.addEventListener('pointerdown', flagUserScroll)
-    el.addEventListener('wheel', flagUserScroll, { passive: true })
-    return () => {
-      el.removeEventListener('pointerdown', flagUserScroll)
-      el.removeEventListener('wheel', flagUserScroll)
-    }
-  }, [])
-
-  useEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const update = () => {
-      setAtStart(el.scrollLeft <= 1)
-      setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 1)
-    }
-    update()
-    el.addEventListener('scroll', update)
-    return () => el.removeEventListener('scroll', update)
-  }, [clips.length, canScroll])
-
-  const scroll = (dir) => {
-    const el = trackRef.current
-    if (!el) return
-    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
-  }
+  // (async) file load lands, until the user scrolls.
+  const { trackRef, canScroll, atStart, atEnd, scroll } = useScrollRail(clips.length, {
+    flagUserScroll: true,
+  })
 
   if (!loading && clips.length === 0) return null
 

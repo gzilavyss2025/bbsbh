@@ -118,7 +118,7 @@ export function UmpireBoard({ summary }) {
                   in full; the head says enough to stop the mistake. */}
               <th className="team">
                 Umpire
-                <span className="rpt__sub">
+                <span className="rpt__note">
                   Minimum {MIN_UMPIRE_GAMES} games · challenged pitches only
                 </span>
               </th>
@@ -129,7 +129,7 @@ export function UmpireBoard({ summary }) {
                   chart a reader has to guess the middle of. */}
               <th>
                 Per game
-                {league != null && <span className="rpt__sub">Against {num2(league)}</span>}
+                {league != null && <span className="rpt__note">Against {num2(league)}</span>}
               </th>
               <th>Overturned</th>
               <th>Overturn rate</th>

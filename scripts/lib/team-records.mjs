@@ -21,6 +21,8 @@
 // import them (the lib/roster.mjs convention).
 
 import { isPlateAppearance } from './long-at-bats.mjs'
+import { tagSeries as tagSharedSeries } from '../../src/api/scheduleShape.js'
+import { ipToOuts } from '../../src/lib/math/innings.js'
 
 // ---------------------------------------------------------------------------
 // Which games count
@@ -211,15 +213,6 @@ export function lastAtBatOutcome(innings, homeWon) {
 // ---------------------------------------------------------------------------
 // Pitching
 // ---------------------------------------------------------------------------
-
-// Innings pitched ("5.1" = 5⅓) → outs. Same conversion as the app's own
-// ipToOuts (src/screens/team/data/shared.js, api/teamLeaders.js); duplicated
-// here rather than imported because those live under src/ and carry JSX-era
-// imports a generator has no business loading.
-export function ipToOuts(ip) {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return (Number(whole) || 0) * 3 + (Number(frac[0]) || 0)
-}
 
 // A quality start: at least 6 innings, at most 3 earned runs. The standard
 // definition, and deliberately not a house variant.
@@ -456,41 +449,23 @@ export function battedAroundHalves(allPlays, minBatters = 10) {
 // ---------------------------------------------------------------------------
 
 // Groups one club's season rows into series and tags each row with its place
-// in one: `seriesGame` (1-based), `seriesLength`, `opener`, `finale`.
+// in one: `seriesGame` (1-based), `seriesLength`, `seriesOpener`, `seriesFinale`.
 //
 // DERIVED FROM THE LEDGER, not from the feed's own `seriesGameNumber` /
 // `gamesInSeries`. Those two describe the series as SCHEDULED; a rained-out
 // middle game leaves them describing a series that never happened, and a
 // makeup game appended to the next trip carries the old series' numbering. A
-// series here is what actually got played: consecutive games against the same
-// opponent at the same venue, with no other opponent in between. Both halves
-// of a doubleheader belong to the series they are played inside.
+// series here is what actually got played. The cut and the tags are `tagSeries`
+// (src/api/scheduleShape.js), the one definition shared with the schedule-shape
+// generator and the reader (#1283): same opponent, same side of the road, and
+// a neutral-site game joins the series beside it. Both halves of a
+// doubleheader belong to the series they are played inside.
 //
 // `rows` must be sorted by (date, gameNumber) ascending — the order
-// gen-team-records.mjs reads them out of SQLite in.
+// gen-team-records.mjs reads them out of SQLite in — and carry `opp_id` and
+// `site` ('home' | 'away' | 'neutral', from siteOf in schedule-shape.mjs).
 export function tagSeries(rows) {
-  let seriesStart = 0
-  const boundaries = []
-  for (let i = 1; i <= rows.length; i++) {
-    const prev = rows[i - 1]
-    const cur = rows[i]
-    const sameSeries =
-      cur != null && cur.opp_id === prev.opp_id && cur.venue_id === prev.venue_id
-    if (sameSeries) continue
-    boundaries.push([seriesStart, i - 1])
-    seriesStart = i
-  }
-  const tagged = rows.map((r) => ({ ...r }))
-  for (const [start, end] of boundaries) {
-    const length = end - start + 1
-    for (let i = start; i <= end; i++) {
-      tagged[i].seriesGame = i - start + 1
-      tagged[i].seriesLength = length
-      tagged[i].opener = i === start
-      tagged[i].finale = i === end
-    }
-  }
-  return tagged
+  return tagSharedSeries(rows.map((r) => ({ ...r, opponentId: r.opp_id })))
 }
 
 // A getaway day: the last game of a series that this club then LEAVES — its
@@ -501,7 +476,7 @@ export function tagSeries(rows) {
 // game is. A season's final game counts (there is no next venue to compare,
 // and everyone goes home), which is why the null case returns true.
 export function isGetawayDay(row, nextRow) {
-  if (!row.finale) return false
+  if (!row.seriesFinale) return false
   if (!nextRow) return true
   return nextRow.venue_id !== row.venue_id
 }
@@ -514,7 +489,7 @@ export function seriesSweeps(taggedRows, minGames = 2) {
   const bySeries = []
   let current = null
   for (const r of taggedRows) {
-    if (r.opener || current == null) {
+    if (r.seriesOpener || current == null) {
       current = { rows: [] }
       bySeries.push(current)
     }

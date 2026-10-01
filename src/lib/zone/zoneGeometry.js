@@ -129,8 +129,3 @@ export function inHeart(cell) {
   const mid = (GRID - 1) / 2
   return cell.col === mid && cell.row === mid
 }
-
-// Outside the rulebook zone entirely — the chase ring.
-export function isChase(cell) {
-  return Boolean(cell) && !inZone(cell)
-}

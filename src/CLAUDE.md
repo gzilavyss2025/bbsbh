@@ -422,7 +422,7 @@ The tiers are layered Carbon-style (ADR-0023): a **primitive** tier of raw value
 `spacing.css` is the generic 4px scale + radii + border widths, `colors.css`'s
 `--paper-*`/`--ink-*`/`--seal` — and a **semantic alias** tier components consume
 (`--bg-canvas`, `--text-body`, `--seal-cover`). App-specific component geometry (the
-`--cell-size`, the `--shot-*` headshot rungs, the `--app-width` frame) lives in
+the `--shot-*` headshot rungs, the `--app-width` frame) lives in
 `tokens/layout.css`, kept OUT of the primitive scale. There is deliberately **no** third
 component tier — promote a value only on high reuse or a guardable invariant. The metaphor
 is a paper scorebook: manila paper, navy ink, pencil graphite, kraft-tape amber for seals.

@@ -59,6 +59,7 @@ import {
   readMonoInkStoreWithOverrides,
   sourceVariantFor,
 } from './lib/mono-logo-art.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const teamsPath = join(here, '..', 'public', 'data', 'teams.json')
@@ -77,21 +78,6 @@ const onlyIds = (() => {
   return new Set(raw.split(',').map((s) => Number(s.trim())).filter(Boolean))
 })()
 const wantSheet = args.includes('--sheet')
-
-async function mapConcurrent(items, limit, fn) {
-  const out = new Array(items.length)
-  let next = 0
-  await Promise.all(
-    Array.from({ length: Math.min(limit, items.length) }, async () => {
-      for (;;) {
-        const i = next++
-        if (i >= items.length) return
-        out[i] = await fn(items[i])
-      }
-    }),
-  )
-  return out
-}
 
 // The two LEAGUE marks, which are not clubs and so are not in teams.json — the
 // same CDN serves them under the All-Star team ids the All-Star pages already
@@ -189,7 +175,7 @@ ${cells}</table>`
 
 const teams = await teamList()
 const inkStore = await readMonoInkStoreWithOverrides()
-const rows = await mapConcurrent(teams, CONCURRENCY, (team) => convert(team, inkStore))
+const rows = await mapConcurrent(teams, CONCURRENCY, (team) => convert(team, inkStore), { strict: true })
 
 await mkdir(outDir, { recursive: true })
 

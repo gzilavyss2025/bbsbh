@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useImageMissing } from './images/useImageMissing.js'
 import { wpaLogoFor, wpaLogoWithFallback } from '../lib/wpa/wpaLogo.js'
 
 // The mark a WPA band should tile for this (team, treatment), with the club's
@@ -18,30 +18,7 @@ import { wpaLogoFor, wpaLogoWithFallback } from '../lib/wpa/wpaLogo.js'
 // it at all. Hence the probe.
 export function useWpaLogo(teamId, treatment) {
   const { src } = wpaLogoFor(teamId, treatment)
-  const [missing, setMissing] = useState(false)
-  // Reset computed during render (not as the first line of the effect below)
-  // on a src change — see Headshot.jsx for the pattern.
-  const [prevSrc, setPrevSrc] = useState(src)
-  if (src !== prevSrc) {
-    setPrevSrc(src)
-    setMissing(false)
-  }
-
-  useEffect(() => {
-    if (!src) return undefined
-    // `live` guards the late-arriving error of a probe whose (team,
-    // treatment) has already been swapped out from under it — without it, a
-    // stale 404 would knock the CURRENT team's good art back to base.
-    let live = true
-    const probe = new Image()
-    probe.onerror = () => {
-      if (live) setMissing(true)
-    }
-    probe.src = src
-    return () => {
-      live = false
-    }
-  }, [src])
+  const missing = useImageMissing(src)
 
   // No URL to try at all (an unmapped club has no abbreviation, so there's no
   // procured path to build) is the same miss as a 404 — go to base either way.

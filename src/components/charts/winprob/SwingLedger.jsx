@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { ordinal } from '../../../lib/format.js'
 import { winProbChangeLabel } from './explore.js'
 import { winProbKeyPill } from './keyColors.js'
@@ -10,6 +11,9 @@ import { winProbKeyPill } from './keyColors.js'
 // change in the header's own numbers (explore.js wholeSwing); the ranking
 // stays on the raw delta.
 export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, clip, onPick, onWatch }) {
+  const { hasClip } = clip
+  // One film lookup per row when the plays or the film list change, not on every render.
+  const watchable = useMemo(() => bigPlays.map((p) => hasClip(p.playId)), [bigPlays, hasClip])
   if (bigPlays.length === 0) return null
   return (
     <div className="winprob__ledger">
@@ -23,7 +27,6 @@ export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, cli
           const chipText = winProbChangeLabel(stepAt(p.idx), home, away)
           const tag = `${p.half === 'top' ? '▲' : '▼'}${p.inning}`
           const isActive = activeIdx === p.idx
-          const watchable = clip.hasClip(p.playId)
           const halfWords = `${p.half === 'top' ? 'top' : 'bottom'} of the ${ordinal(p.inning)}`
           return (
             <li className={`winprob__ledger-row${isActive ? ' is-active' : ''}`} key={`bp-${p.idx}`}>
@@ -46,7 +49,7 @@ export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, cli
                 </span>
                 <span className="winprob__ledger-desc">{p.desc || `${abbr} rally`}</span>
               </button>
-              {watchable && (
+              {watchable[index] && (
                 <button
                   type="button"
                   className="winprob__ledger-watch"

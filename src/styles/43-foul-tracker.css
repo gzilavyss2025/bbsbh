@@ -35,9 +35,9 @@
   }
 }
 /* Baseline sentence above the Most/Fewest split — same "state the average
-   before the ranked outliers" idea as .foulavg__lede, reused as a one-liner
+   before the ranked outliers" idea as .foulavg__note, reused as a one-liner
    scoped to this one card rather than the whole page. No caps-exempt override
-   (see the ALL-CAPS INVARIANT block up top): like .foulavg__lede, this reads
+   (see the ALL-CAPS INVARIANT block up top): like .foulavg__note, this reads
    as shouted-caps scorebook copy rather than natural-case prose, consistent
    with every other number-bearing sentence on this page. */
 .foulboard__whiffavg {
@@ -117,9 +117,6 @@
 }
 .foulboard-block .sgh-list {
   margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4));
-  border: 0;
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
-  box-shadow: none;
 }
 /* A pitch-family subheader row (Foul Rate By Pitch Type) — a plain caption
    band, not another masthead, so it reads as an in-table grouping rather than
@@ -233,13 +230,13 @@
    columns as a full-width tile strip, the same `.gamehigh-tiles`/`.stat`
    idiom Single-Game-Highs uses, so a page full of very different boards
    still shares one "here's the #1 player" shape. */
+/* overflow: visible opts out of the Card's clip: on a 320px phone the longest
+   name runs past the hero, and the board Card (not the hero) clips it at its
+   own edge, as it did before the hero was a Card. */
 .foulboard__hero {
   margin-bottom: 10px;
   padding: var(--space-2h) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
+  overflow: visible;
 }
 /* Same favorite-team tint as .sgh-row.is-me — a fan's team jumps out on the
    hero card the same way it does on every other row on this page. */
@@ -339,7 +336,7 @@
 
 /* Season average fouls/game (SeasonAverageCard) — the hero stat leading the
    page, so the reader has a baseline before the leaderboards below start
-   ranking outliers against it. Reads as a sentence (.foulavg__lede) rather
+   ranking outliers against it. Reads as a sentence (.foulavg__note) rather
    than a bare number, since it's now carrying three figures (per game, per
    PA, per start) instead of one. The fill bar is a real proportion (share of
    an average game's pitches that got fouled off), not decoration — same
@@ -347,19 +344,15 @@
 .foulavg {
   margin-top: var(--space-3);
   padding: var(--space-3) var(--space-3h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
 }
-.foulavg__lede {
+.foulavg__note {
   margin: 0 0 10px;
   font-family: var(--font-body);
   font-size: var(--fs-body);
   line-height: var(--lh-prose);
   color: var(--text-body);
 }
-.foulavg__lede b {
+.foulavg__note b {
   font-variant-numeric: tabular-nums;
   font-weight: var(--w-bold);
   color: var(--text-heading);
@@ -510,11 +503,6 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
 }
 .sgh-row {
   display: flex;
@@ -564,7 +552,7 @@
   /* minmax(0, 1fr), not a bare 1fr — a bare 1fr's automatic min-width:auto
      refuses to shrink below the topline/scorebug's own content width, which
      on a narrow phone forced the whole grid wider than the card and clipped
-     the pitcher headshot clean off (.sgh-list's overflow:hidden hid the
+     the pitcher headshot clean off (the board Card's overflow:hidden hid the
      overflow instead of showing a scrollbar). minmax(0, …) lets the column
      actually shrink, so the ellipsis/wrap rules already on its children
      (sgh-name, sgh-sub, scorebug__prose, …) can do their job. */
@@ -808,16 +796,16 @@ button.gamehigh-matchup:active {
 }
 .gamehigh-tiles {
   grid-area: tiles;
+}
+/* The Card paints --surface-card, so the 1px rules between the tiles are this
+   grid's own ground, inside the Card. */
+.gamehigh-tiles__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1px;
   background: var(--border-rule);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  box-shadow: var(--inset-cell);
 }
-.gamehigh-tiles .stat {
+.gamehigh-tiles__grid .stat {
   border: none;
   border-radius: 0;
   box-shadow: none;
@@ -841,16 +829,14 @@ button.gamehigh-matchup:active {
    as .gamehigh-tiles' cells, just sized to their content instead of stretched
    across a full-width row beneath. */
 .souvenir-row__tiles {
-  display: flex;
   flex: none;
+}
+.souvenir-row__tilegrid {
+  display: flex;
   gap: 1px;
   background: var(--border-rule);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  box-shadow: var(--inset-cell);
 }
-.souvenir-row__tiles .stat {
+.souvenir-row__tilegrid .stat {
   border: none;
   border-radius: 0;
   box-shadow: none;

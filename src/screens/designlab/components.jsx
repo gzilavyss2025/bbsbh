@@ -237,8 +237,7 @@ export function ComponentHalf() {
       </Group>
 
       <Group
-        title="src/components/badges — 11 components, nine of them a pill"
-        lede="UmpireTierPill.jsx is a four-line re-export of TierPill.jsx, so eleven files are ten components."
+        title="src/components/badges — 10 components, nine of them a pill"
       >
         <Entry title="MilestonePill" path={`${BADGE_PATH}/MilestonePill.jsx`} verdict="Canonical pill" tone="canon">
           <MilestonePill text="3,000th hit" />
@@ -252,7 +251,7 @@ export function ComponentHalf() {
         <Entry title="DebutPill" path={`${BADGE_PATH}/DebutPill.jsx`} verdict="Leave" tone="leave" note="Carries the shell only — it holds an icon, not type.">
           <DebutPill debuted="2026-04-11" />
         </Entry>
-        <Entry title="TierPill" path={`${BADGE_PATH}/TierPill.jsx`} verdict="Merge — outline" tone="merge" note="All four tiers. UmpireTierPill.jsx re-exports this file unchanged.">
+        <Entry title="TierPill" path={`${BADGE_PATH}/TierPill.jsx`} verdict="Merge — outline" tone="merge" note="All four tiers.">
           <TierPill tier="elite" />
           <TierPill tier="good" />
           <TierPill tier="average" />

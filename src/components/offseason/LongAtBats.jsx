@@ -5,6 +5,7 @@ import { useRouteLink } from '../../lib/nav.js'
 import { monthDayShort } from '../../lib/dates.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Headshot } from '../player/Headshot.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // THE NOTEBOOK, AT MLB — one note about the season that just finished (issue
@@ -78,93 +79,95 @@ export function LongAtBats({ season }) {
   const next = Math.min(STEP, hidden)
 
   return (
-    <section className="note note--stories" aria-label={`Twelve-pitch at-bats in the ${season} season`}>
+    <section className="seasonnote seasonnote--stories" aria-label={`Twelve-pitch at-bats in the ${season} season`}>
       {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
           invariant is never a per-component .toUpperCase() (ADR-0017). */}
       <SectionHead as="h3" className="oseason__head" note={<>{season} season</>}>
         The notebook
       </SectionHead>
 
-      <div className="note__body">
-        <div className="note__figure">
-          <p className="note__n">{rows.length}</p>
-          <p className="note__under">
-            of <span className="note__against">{count(data.coverage.plateAppearances)}</span> plate
+      <div className="seasonnote__body">
+        <div className="seasonnote__figure">
+          <p className="seasonnote__n">{rows.length}</p>
+          <p className="seasonnote__under">
+            of <span className="seasonnote__against">{count(data.coverage.plateAppearances)}</span> plate
             appearances, in all{' '}
-            <span className="note__against">{count(data.coverage.games)}</span> games
+            <span className="seasonnote__against">{count(data.coverage.games)}</span> games
           </p>
         </div>
 
-        <div className="note__main">
-          <h4 className="note__title">The twelve-pitch at-bats</h4>
-          <p className="note__lede">
+        <div className="seasonnote__main">
+          <h4 className="seasonnote__title">The twelve-pitch at-bats</h4>
+          <p className="seasonnote__note">
             Every plate appearance of the season that took {data.threshold} pitches or more. Each
             one opens its game, sealed.
           </p>
 
-          <ol className="note__stories">
-            {shown.map((row) => (
-              <li className="note__story" key={`${row.pk}-${row.batter.id}-${row.pitches}`}>
-                <Headshot
-                  personId={row.batter.id}
-                  name={row.batter.name}
-                  teamId={row.batter.teamId}
-                  className="note__shot note__shot--batter"
-                />
+          <Card as="div" body="flush" className="seasonnote__storybox">
+            <ol className="seasonnote__stories">
+              {shown.map((row) => (
+                <li className="seasonnote__story" key={`${row.pk}-${row.batter.id}-${row.pitches}`}>
+                  <Headshot
+                    personId={row.batter.id}
+                    name={row.batter.name}
+                    teamId={row.batter.teamId}
+                    className="seasonnote__shot seasonnote__shot--batter"
+                  />
 
-                <div className="note__line">
-                  <div className="note__who">
-                    <div className="note__nameline">
-                      <PlayerLink id={row.batter.id} name={row.batter.name} className="note__name">
-                        {row.batter.name}
-                      </PlayerLink>
-                      <span className="note__club">{clubAbbr(row, row.batter.teamId)}</span>
+                  <div className="seasonnote__line">
+                    <div className="seasonnote__who">
+                      <div className="seasonnote__nameline">
+                        <PlayerLink id={row.batter.id} name={row.batter.name} className="seasonnote__name">
+                          {row.batter.name}
+                        </PlayerLink>
+                        <span className="seasonnote__club">{clubAbbr(row, row.batter.teamId)}</span>
+                      </div>
+                      {/* The phone's only copy of the pitcher's name — his own
+                          block on the right drops at 600px, and his face alone
+                          would not tell a reader who he is. */}
+                      <div className="seasonnote__vs">
+                        vs{' '}
+                        <PlayerLink id={row.pitcher.id} name={row.pitcher.name}>
+                          {row.pitcher.name}
+                        </PlayerLink>
+                      </div>
                     </div>
-                    {/* The phone's only copy of the pitcher's name — his own
-                        block on the right drops at 600px, and his face alone
-                        would not tell a reader who he is. */}
-                    <div className="note__vs">
-                      vs{' '}
-                      <PlayerLink id={row.pitcher.id} name={row.pitcher.name}>
-                        {row.pitcher.name}
-                      </PlayerLink>
+
+                    <span className="seasonnote__val">
+                      <span className="seasonnote__valn">{row.pitches}</span>
+                      <span className="seasonnote__vallabel">Pitches</span>
+                    </span>
+
+                    <div className="seasonnote__who seasonnote__who--pitcher">
+                      <div className="seasonnote__nameline">
+                        <PlayerLink id={row.pitcher.id} name={row.pitcher.name} className="seasonnote__name">
+                          {row.pitcher.name}
+                        </PlayerLink>
+                        <span className="seasonnote__club">{clubAbbr(row, row.pitcher.teamId)}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <span className="note__val">
-                    <span className="note__valn">{row.pitches}</span>
-                    <span className="note__vallabel">Pitches</span>
-                  </span>
+                  {/* The game, at its first lineup page — the same address the
+                      slate's own cards build, so it arrives sealed. */}
+                  {atBatGamePath(row) && (
+                    <a className="seasonnote__when" {...linkProps(atBatGamePath(row))}>
+                      {monthDayShort(row.date)}
+                      <span className="sr-only"> — open this game</span>
+                      <span aria-hidden="true">›</span>
+                    </a>
+                  )}
 
-                  <div className="note__who note__who--pitcher">
-                    <div className="note__nameline">
-                      <PlayerLink id={row.pitcher.id} name={row.pitcher.name} className="note__name">
-                        {row.pitcher.name}
-                      </PlayerLink>
-                      <span className="note__club">{clubAbbr(row, row.pitcher.teamId)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* The game, at its first lineup page — the same address the
-                    slate's own cards build, so it arrives sealed. */}
-                {atBatGamePath(row) && (
-                  <a className="note__when" {...linkProps(atBatGamePath(row))}>
-                    {monthDayShort(row.date)}
-                    <span className="sr-only"> — open this game</span>
-                    <span aria-hidden="true">›</span>
-                  </a>
-                )}
-
-                <Headshot
-                  personId={row.pitcher.id}
-                  name={row.pitcher.name}
-                  teamId={row.pitcher.teamId}
-                  className="note__shot note__shot--pitcher"
-                />
-              </li>
-            ))}
-          </ol>
+                  <Headshot
+                    personId={row.pitcher.id}
+                    name={row.pitcher.name}
+                    teamId={row.pitcher.teamId}
+                    className="seasonnote__shot seasonnote__shot--pitcher"
+                  />
+                </li>
+              ))}
+            </ol>
+          </Card>
 
           {(hidden > 0 || visible > LEAD_ROWS) && (
             <button
@@ -193,7 +196,7 @@ export function LongAtBats({ season }) {
           {/* Natural case, because it is a sentence — the app shouts everything
               by default (01-base.css's ALL-CAPS INVARIANT) and a surface with
               real prose on it has to opt out. */}
-          <p className="note__pool">
+          <p className="seasonnote__pool">
             Regular season only. A batter left mid-count by an inning-ending caught stealing
             starts a new at-bat next inning, and is counted as one.
           </p>

@@ -25,7 +25,7 @@ import { GUIDES_GROUP } from '../../lib/reportPages.js'
 // Never put one of these inside a SealBox reveal function. It carries no game
 // data at all, so it belongs where an unrevealed reader can still reach it —
 // that reader is the one who needs it most.
-export function GuideLink({ path, eyebrow = 'New to this?', className = '' }) {
+export function GuideLink({ path, note = 'New to this?', className = '' }) {
   const guide = GUIDES_GROUP.pages.find((page) => page.path === path)
   if (!guide) {
     if (import.meta.env?.DEV) {
@@ -36,7 +36,7 @@ export function GuideLink({ path, eyebrow = 'New to this?', className = '' }) {
 
   return (
     <a className={`guidelink ${className}`} href={guide.path}>
-      <span className="guidelink__eyebrow">{eyebrow}</span>
+      <span className="guidelink__note">{note}</span>
       <span className="guidelink__label">{guide.label}</span>
     </a>
   )

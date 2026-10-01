@@ -48,7 +48,7 @@ export function WhoCalls({ summary }) {
                 <th scope="row" className="team">
                   {ROLE_LABEL[r.role] ?? r.role}
                   {ROLE_CALL[r.role] ? (
-                    <span className="rpt__sub">
+                    <span className="rpt__note">
                       on a called {ROLE_CALL[r.role]}
                     </span>
                   ) : null}

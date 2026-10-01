@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { gameDayAt, isUnlocked, msUntilReset, nextResetAt } from '../lib/scoresUnlocked.js'
-import { readOwnerIn, writeOwnerIn } from '../lib/account/deviceOwner.js'
+import { localStore, readOwner, writeOwner } from '../lib/account/localStore.js'
 import {
   SPOILED_DAYS_KEY,
   SPOILED_DAYS_OWNER_KEY,
@@ -45,45 +45,10 @@ import {
 
 export const SCORES_UNLOCKED_KEY = 'bbsbh:scoresUnlocked'
 
-function readKey(key) {
-  try {
-    return window.localStorage.getItem(key)
-  } catch {
-    return null
-  }
-}
-
-function writeKey(key, value) {
-  try {
-    window.localStorage.setItem(key, value)
-  } catch {
-    // Private mode / storage disabled — the in-session state still applies to
-    // this tab, same degrade as every other preference hook.
-  }
-}
-
-function dropKey(key) {
-  try {
-    window.localStorage.removeItem(key)
-  } catch {
-    // ignore — the value is already treated as sealed
-  }
-}
-
-// A same-tab echo of the `storage` event. The browser fires `storage` only in
-// OTHER tabs, so without this, two mounted instances of this hook (the slate and
-// a game view, or the cloud-sync component) would not see each other's writes
-// until a reload. Dispatching the event ourselves lets the listener below serve
-// as the single refresh path for every source — another tab, this tab, or the
-// cloud merge — instead of each one needing its own wiring.
-function notifyLocalChange(key) {
-  try {
-    window.dispatchEvent(new StorageEvent('storage', { key }))
-  } catch {
-    // StorageEvent unavailable (very old browsers) — cross-instance updates
-    // degrade to next-render/next-load. Nothing is lost, only immediacy.
-  }
-}
+// Degrade to memory and the same-tab `storage` echo: see src/lib/account/localStore.js.
+// An unreadable pass reads as sealed.
+const passStore = localStore(SCORES_UNLOCKED_KEY, (raw) => raw, (value) => value)
+const daysStore = localStore(SPOILED_DAYS_KEY, parseSpoiledDays, serializeSpoiledDays)
 
 // The account this device's consent list was last held for, and the clear the
 // shared-device guard needs on it (OwnerGuards.jsx). The leak these
@@ -95,30 +60,17 @@ function notifyLocalChange(key) {
 // deliberately does not touch `bbsbh:scoresUnlocked`: an active pass is this
 // device's own running session, never synced and never anybody's account
 // (see preferences.js's "what is deliberately not in here").
-export function readSpoiledDaysOwner() {
-  try {
-    return readOwnerIn(window.localStorage, SPOILED_DAYS_OWNER_KEY)
-  } catch {
-    return ''
-  }
-}
-
-export function writeSpoiledDaysOwner(userId) {
-  try {
-    return writeOwnerIn(window.localStorage, SPOILED_DAYS_OWNER_KEY, userId)
-  } catch {
-    return false
-  }
-}
+export const readSpoiledDaysOwner = () => readOwner(SPOILED_DAYS_OWNER_KEY)
+export const writeSpoiledDaysOwner = (userId) => writeOwner(SPOILED_DAYS_OWNER_KEY, userId)
 
 export function clearSpoiledDays() {
-  writeKey(SPOILED_DAYS_KEY, serializeSpoiledDays([]))
-  notifyLocalChange(SPOILED_DAYS_KEY)
+  daysStore.write([])
+  daysStore.notify()
 }
 
 export function useScoresUnlocked() {
-  const [expiry, setExpiry] = useState(() => readKey(SCORES_UNLOCKED_KEY))
-  const [days, setDays] = useState(() => parseSpoiledDays(readKey(SPOILED_DAYS_KEY)))
+  const [expiry, setExpiry] = useState(passStore.read)
+  const [days, setDays] = useState(daysStore.read)
 
   // Re-read storage and normalize: an expired/garbage expiry is cleared and
   // collapsed to null, so `passActive` below can trust `expiry`. The day list is
@@ -133,7 +85,7 @@ export function useScoresUnlocked() {
   //     they notify. Reading it eagerly here is therefore already correct.
   //   - The DAY MAP is not. It is persisted from INSIDE the `setDays` updater
   //     below, which React runs at render time — after this listener has already
-  //     run. An eager `parseSpoiledDays(readKey(...))` would read the map as it
+  //     run. An eager `daysStore.read()` would read the map as it
   //     stood BEFORE the change and queue that stale value behind the change,
   //     so React would apply the updater and then revert it, leaving state stale
   //     while localStorage held the new value.
@@ -144,13 +96,13 @@ export function useScoresUnlocked() {
   // useStamps.js's storage listener — read from INSIDE the updater, which puts
   // the read after the write rather than in front of it.
   const refresh = useCallback(() => {
-    let cur = readKey(SCORES_UNLOCKED_KEY)
+    let cur = passStore.read()
     if (cur != null && !isUnlocked(cur)) {
-      dropKey(SCORES_UNLOCKED_KEY)
+      passStore.drop()
       cur = null
     }
     setExpiry(cur)
-    setDays(() => parseSpoiledDays(readKey(SPOILED_DAYS_KEY)))
+    setDays(daysStore.read)
   }, [])
 
   // Consent: start the pass AND record the current GAME day as a day the user
@@ -163,16 +115,16 @@ export function useScoresUnlocked() {
   // 1am consent permanently unseal a whole day of unplayed baseball.
   const enable = useCallback(() => {
     const at = String(nextResetAt())
-    writeKey(SCORES_UNLOCKED_KEY, at)
+    passStore.write(at)
     setExpiry(at)
     const day = gameDayAt()
     setDays((prev) => {
       const next = addSpoiledDay(prev, day)
-      writeKey(SPOILED_DAYS_KEY, serializeSpoiledDays(next))
+      daysStore.write(next)
       return next
     })
-    notifyLocalChange(SCORES_UNLOCKED_KEY)
-    notifyLocalChange(SPOILED_DAYS_KEY)
+    passStore.notify()
+    daysStore.notify()
   }, [])
 
   // Turning the pass off takes the consent back — this is what makes an
@@ -189,17 +141,17 @@ export function useScoresUnlocked() {
   // GameSelect.jsx. Ignored unless it is a real YYYY-MM-DD, because the profile
   // page wires this straight to onClick and would otherwise hand it an event.
   const disable = useCallback((alsoDay = null) => {
-    dropKey(SCORES_UNLOCKED_KEY)
+    passStore.drop()
     setExpiry(null)
     const day = gameDayAt()
     setDays((prev) => {
       let next = removeSpoiledDay(prev, day)
       if (isDayString(alsoDay)) next = removeSpoiledDay(next, alsoDay)
-      writeKey(SPOILED_DAYS_KEY, serializeSpoiledDays(next))
+      daysStore.write(next)
       return next
     })
-    notifyLocalChange(SCORES_UNLOCKED_KEY)
-    notifyLocalChange(SPOILED_DAYS_KEY)
+    passStore.notify()
+    daysStore.notify()
   }, [])
 
   // The only way a remote state map reaches local state (SpoiledDaysCloudSync).
@@ -209,7 +161,7 @@ export function useScoresUnlocked() {
   const mergeRemoteDays = useCallback((remote) => {
     setDays((prev) => {
       const next = applyRemoteStates(prev, remote)
-      writeKey(SPOILED_DAYS_KEY, serializeSpoiledDays(next))
+      daysStore.write(next)
       return next
     })
   }, [])

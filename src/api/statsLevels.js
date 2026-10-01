@@ -23,7 +23,10 @@
 
 import { getJson } from './statsapi.js'
 import { firstLast } from './person.js'
+import { mlbOps, eraOf, whipOf } from './person/shared.js'
 import { teamAbbr } from '../lib/teams.js'
+import { outsToIp } from '../lib/math/innings.js'
+import { num } from '../lib/math/number.js'
 import { fetchStaticTeams } from './teams-static.js'
 
 // A whole level's season lines for one group ('hitting'|'pitching'): one split
@@ -157,15 +160,9 @@ async function attachDisplayTeams(pool) {
   })
 }
 
-const num = (x) => {
-  const n = Number(x)
-  return Number.isFinite(n) ? n : 0
-}
 // Rate = numerator / denominator, guarded so an empty denominator is 0 (not
 // NaN/Infinity) — the descriptors' formatters expect a finite number.
 const rate = (n, d) => (d > 0 ? n / d : 0)
-// Outs → "X.Y" innings-pitched string (the shape teamLeaders' ipToOuts parses back).
-const outsToIp = (outs) => `${Math.floor(outs / 3)}.${outs % 3}`
 
 // Sum a player's hitting splits into one stat object shaped like the API's, with
 // the rate fields the descriptors read (avg/obp/slg/ops/babip) recomputed from
@@ -188,7 +185,7 @@ export function sumHitting(splits) {
   t.avg = rate(t.hits, t.atBats)
   t.slg = rate(t.totalBases, t.atBats)
   t.obp = rate(t.hits + t.baseOnBalls + t.hitByPitch, obDen)
-  t.ops = t.obp + t.slg
+  t.ops = mlbOps(t.obp, t.slg)
   t.babip = rate(t.hits - t.homeRuns, t.atBats - t.strikeOuts - t.homeRuns + t.sacFlies)
   return t
 }
@@ -210,8 +207,10 @@ export function sumPitching(splits) {
   }
   const ip = t.outs / 3
   t.inningsPitched = outsToIp(t.outs)
-  t.era = rate(t.earnedRuns * 9, ip)
-  t.whip = rate(t.baseOnBalls + t.hits, ip)
+  // null, not 0, at no outs: a pitcher with no out has no ERA, and a 0 would rank
+  // him first. Readers check for it (teamLeaders.js, prospects.js, loadMinors.js).
+  t.era = eraOf(t.earnedRuns, t.outs)
+  t.whip = whipOf(t.baseOnBalls, t.hits, t.outs)
   t.avg = rate(t.hits, t.atBats)
   t.pitchesPerInning = rate(t.numberOfPitches, ip)
   t.strikeoutsPer9Inn = rate(t.strikeOuts * 9, ip)

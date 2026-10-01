@@ -1,14 +1,17 @@
-import { useId, useRef } from 'react'
+import { useId, useMemo, useRef } from 'react'
 import { winProbSplit } from '../../api/winprob.js'
 import { winProbChangeLabel, winProbReadout, wholeSwing } from './winprob/explore.js'
 import { useWinProbSelection } from './winprob/useWinProbSelection.js'
 import { useSwingClip } from './winprob/useSwingClip.js'
 import { winProbKeyColor, winProbKeyPair, winProbKeyPill } from './winprob/keyColors.js'
 import { SwingLedger } from './winprob/SwingLedger.jsx'
+import { WinProbBands } from './winprob/WinProbBands.jsx'
+import { W, H, PLOT_L, PLOT_T, PLOT_B, PLOT_W, PLOT_H } from './winprob/plot.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 import { wpaBandColor, wpaBandPinstripeColor, wpaBandPinstripeBg, chipColorsFor } from '../../lib/wpa/wpaBandColors.js'
-import { wpaLogoLayout, wpaTilePlacements } from '../../lib/wpa/wpaLogo.js'
+import { wpaLogoLayout } from '../../lib/wpa/wpaLogo.js'
 import { isMlbTeamId } from '../../lib/teams.js'
+import { identityVersion } from '../../lib/identity/overlay.js'
 import { milbWpaLogoLayout, milbWpaBandColor, milbWpaBandPinstripeColor } from '../../lib/milbColors.js'
 import { useWpaLogo } from '../../hooks/useWpaLogo.js'
 import { useMilbWpaLogo } from '../../hooks/useMilbWpaLogo.js'
@@ -45,28 +48,9 @@ import { Card } from '../ui/frame/Card.jsx'
 // `partial` tags the innings-view instance as revealed events only; the box
 // score omits it.
 
-const W = 328
-const H = 220
-// No axis labels to clear room for (see the block comment above) — just a
-// small inset. The readout sits above the <svg>, not in this top pad,
-// and lib/wpa/wpaBandColors.js's WPA_PLOT_SIZE repeats these numbers. The
-// bands run the full width, edge to edge with the card (.winprob__svg bleeds
-// past the card's padding). Only the plays sit inside PAD_L/PAD_R, so a
-// numbered marker or the cursor at the first or last play is not cut off;
-// the line runs flat out to each edge.
-const PAD_L = 8
-const PAD_R = 8
-const PAD_T = 5
-const PAD_B = 5
-const PLOT_L = PAD_L
-const PLOT_R = W - PAD_R
-const PLOT_T = PAD_T
-const PLOT_B = H - PAD_B
-const PLOT_W = PLOT_R - PLOT_L
 // A swing marker's radius, and how far above (or below) its step it floats.
 const MARK_R = 7
 const MARK_LIFT = 15
-const PLOT_H = PLOT_B - PLOT_T
 
 // The step-and-repeat band texture — each tile a SOLID fill of that band's
 // own club color plus a copy of that club's own logo, the grid tilted and
@@ -96,55 +80,7 @@ const PLOT_H = PLOT_B - PLOT_T
 // of this file so it can stay component-only for Fast Refresh; the two dev
 // labs that preview this texture import the same helpers from there.
 
-// A repeating thin-line-on-white fill for an SVG `fill="url(#id)"` (or, as
-// used below, a `--band-color: url(#id)` CSS custom property feeding
-// `.winprob__patternbg { fill: var(--band-color) }`) — the same scorebook
-// pinstripe motif as `.colorlab__logobox--pinstripe`'s CSS
-// repeating-linear-gradient, just as an SVG pattern since a plain CSS
-// background doesn't apply to an SVG shape's `fill`. Tiled small (4x4) since
-// the WPA band's own logo tile is itself tiny.
-const PINSTRIPE_TILE = 4
-export function PinstripePattern({ id, color, bg = '#fff' }) {
-  return (
-    <pattern id={id} patternUnits="userSpaceOnUse" width={PINSTRIPE_TILE} height={PINSTRIPE_TILE}>
-      <rect width={PINSTRIPE_TILE} height={PINSTRIPE_TILE} fill={bg} />
-      <rect width={1} height={PINSTRIPE_TILE} fill={color} />
-    </pattern>
-  )
-}
-
-// The <filter> a wpaLogoFor `recolor` entry needs, or null for no override /
-// a 'swap' override (that one's already-recolored asset needs no filter at
-// all). 'flood': feFlood paints the override color, feComposite's
-// operator="in" clips that flood to the image's own alpha channel (its
-// silhouette) — the whole mark becomes one flat replacement color. 'outline':
-// feMorphology (dilate) grows a copy of that same silhouette outward by
-// `radius`, feFlood + feComposite paint JUST that outward ring in the
-// override color, then feMerge stacks it BEHIND (feMergeNode order = paint
-// order) the original artwork — a same-color halo just outside the mark's
-// existing edge, thickened if the mark already had one of its own (Phillies).
-export function RecolorFilter({ id, override }) {
-  if (!override || override.mode === 'swap') return null
-  if (override.mode === 'outline') {
-    return (
-      <filter id={id}>
-        <feMorphology in="SourceAlpha" operator="dilate" radius={override.radius} result="dilated" />
-        <feFlood floodColor={override.color} result="flood" />
-        <feComposite in="flood" in2="dilated" operator="in" result="outline" />
-        <feMerge>
-          <feMergeNode in="outline" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-    )
-  }
-  return (
-    <filter id={id}>
-      <feFlood floodColor={override.color} result="flood" />
-      <feComposite in="flood" in2="SourceAlpha" operator="in" />
-    </filter>
-  )
-}
+export { PinstripePattern, RecolorFilter } from './winprob/WinProbBands.jsx'
 
 export function WinProbChart({
   points,
@@ -221,6 +157,25 @@ export function WinProbChart({
   const homeLogo = homeMarkOverride ? homeMarkOverride.src : homeLogoResolved.src
   const homeLogoOverride = homeMarkOverride ? (homeMarkOverride.recolor ?? null) : homeLogoResolved.recolor
 
+  // Memoised so the band layer (WinProbBands) keeps the same props on a pointer
+  // move. `homeLayoutOverride` — Team Identity Lab's TreatmentWpaPreview draft
+  // (merged over the shipped WPA_LOGO_LAYOUT_OVERRIDES default, same shape
+  // wpaLogoLayout returns) — lets that page's scenario mockups show an
+  // in-progress edit live, without a second, drift-prone tile-rendering
+  // path. No other caller passes it, so every real game chart is unaffected.
+  // The layout tables refill in place when a club's identity overlay lands (App
+  // re-renders on that), so the version is a memo dep: a late overlay still
+  // reaches the tiles. Same as TeamHubShell's identityAt.
+  const identityAt = identityVersion()
+  const awayLayout = useMemo(
+    () => (awayMilb ? milbWpaLogoLayout(awayId, 'away') : wpaLogoLayout(awayId, awayTreat)),
+    [awayMilb, awayId, awayTreat, identityAt],
+  )
+  const homeLayout = useMemo(
+    () => homeLayoutOverride ?? (homeMilb ? milbWpaLogoLayout(homeId, 'home') : wpaLogoLayout(homeId, homeTreat)),
+    [homeLayoutOverride, homeMilb, homeId, homeTreat, identityAt],
+  )
+
   if (!points || points.length === 0) return null
 
   const away = awayAbbr || 'AWY'
@@ -231,20 +186,6 @@ export function WinProbChart({
   const split = winProbSplit([selected])
   const awayColors = chipColorsFor(awayId)
   const homeColors = chipColorsFor(homeId)
-  const awayLayout = awayMilb ? milbWpaLogoLayout(awayId, 'away') : wpaLogoLayout(awayId, awayTreat)
-  // `homeLayoutOverride` — Team Identity Lab's TreatmentWpaPreview draft
-  // (merged over the shipped WPA_LOGO_LAYOUT_OVERRIDES default, same shape
-  // wpaLogoLayout returns) — lets that page's scenario mockups show an
-  // in-progress edit live, without a second, drift-prone tile-rendering
-  // path. No other caller passes it, so every real game chart is
-  // unaffected.
-  const homeLayout = homeLayoutOverride ?? (homeMilb ? milbWpaLogoLayout(homeId, 'home') : wpaLogoLayout(homeId, homeTreat))
-  const awayTile = wpaTilePlacements(awayLayout)
-  const homeTile = wpaTilePlacements(homeLayout)
-  const awayPatternId = `winprob-away-${patternUid}`
-  const homePatternId = `winprob-home-${patternUid}`
-  const awayRecolorId = `winprob-recolor-away-${patternUid}`
-  const homeRecolorId = `winprob-recolor-home-${patternUid}`
   // The band's own fill: WPA_TREATMENT_BAND_COLOR_OVERRIDES /
   // BAND_COLOR_OVERRIDES for the handful of clubs whose primary chip color
   // isn't the right pick here, else the same chip color used everywhere
@@ -272,16 +213,12 @@ export function WinProbChart({
     : homeMilb
       ? null
       : wpaBandPinstripeBg(homeId, homeTreat)
-  const awayPinstripeId = `winprob-pinstripe-away-${patternUid}`
-  const homePinstripeId = `winprob-pinstripe-home-${patternUid}`
   const awaySolid = awayMilb ? milbWpaBandColor(awayId, 'away') : wpaBandColor(awayId, awayTreat)
   const homeSolid = homeBandOverride
     ? homeBandOverride.color
     : homeMilb
       ? milbWpaBandColor(homeId, 'home')
       : wpaBandColor(homeId, homeTreat)
-  const awayBandFill = awayPinstripe ? `url(#${awayPinstripeId})` : awaySolid
-  const homeBandFill = homePinstripe ? `url(#${homePinstripeId})` : homeSolid
   // The colour key (header swatches, change pill, swing pills) takes each
   // band's own colour, so a pill matches the band it describes
   // (winprob/keyColors.js). A pinstripe band keys on its line colour.
@@ -375,97 +312,22 @@ export function WinProbChart({
         aria-describedby={`winprob-help-${patternUid}`}
         {...svgHandlers}
       >
-        {/* Each band's step-and-repeat texture: a tile of a solid fill of
-            that band's own color (BAND_COLOR_OVERRIDES-aware) plus one copy
-            of that club's own logo (wpaLogoFor-resolved — see the block
-            comments up top for both). patternTransform (identical on
-            both patterns) tilts + shifts the shared tile grid off-axis, so
-            it reads as wallpaper rather than a grid anchored at the plot's
-            corner. patternUnits="userSpaceOnUse" plus matching x/y ties both
-            patterns to the SAME chart-coordinate origin, so — transform
-            included — the away and home tiles still line up into one
-            continuous grid across the seam between them. */}
-        <defs>
-          <RecolorFilter id={awayRecolorId} override={awayLogoOverride} />
-          <RecolorFilter id={homeRecolorId} override={homeLogoOverride} />
-          {awayPinstripe && (
-            <PinstripePattern id={awayPinstripeId} color={awayPinstripe} bg={awayPinstripeBg ?? undefined} />
-          )}
-          {homePinstripe && (
-            <PinstripePattern id={homePinstripeId} color={homePinstripe} bg={homePinstripeBg ?? undefined} />
-          )}
-          <pattern
-            id={awayPatternId}
-            patternUnits="userSpaceOnUse"
-            x={PLOT_L}
-            y={PLOT_T}
-            width={awayTile.tileW}
-            height={awayTile.tileH}
-            patternTransform={`rotate(${awayLayout.rotate}) translate(${awayLayout.offsetX} ${awayLayout.offsetY})`}
-            style={{ overflow: 'visible' }}
-          >
-            <rect
-              width={awayTile.tileW}
-              height={awayTile.tileH}
-              className="winprob__patternbg"
-              style={{ '--band-color': awayBandFill }}
-            />
-            {awayLogo &&
-              awayTile.images.map((img, i) => (
-                <image
-                  key={i}
-                  href={awayLogo}
-                  x={img.x}
-                  y={img.y}
-                  width={awayLayout.size}
-                  height={awayLayout.size}
-                  className="winprob__patternlogo"
-                  filter={awayLogoOverride && awayLogoOverride.mode !== 'swap' ? `url(#${awayRecolorId})` : undefined}
-                />
-              ))}
-          </pattern>
-          <pattern
-            id={homePatternId}
-            patternUnits="userSpaceOnUse"
-            x={PLOT_L}
-            y={PLOT_T}
-            width={homeTile.tileW}
-            height={homeTile.tileH}
-            patternTransform={`rotate(${homeLayout.rotate}) translate(${homeLayout.offsetX} ${homeLayout.offsetY})`}
-            style={{ overflow: 'visible' }}
-          >
-            <rect
-              width={homeTile.tileW}
-              height={homeTile.tileH}
-              className="winprob__patternbg"
-              style={{ '--band-color': homeBandFill }}
-            />
-            {homeLogo &&
-              homeTile.images.map((img, i) => (
-                <image
-                  key={i}
-                  href={homeLogo}
-                  x={img.x}
-                  y={img.y}
-                  width={homeLayout.size}
-                  height={homeLayout.size}
-                  className="winprob__patternlogo"
-                  filter={homeLogoOverride && homeLogoOverride.mode !== 'swap' ? `url(#${homeRecolorId})` : undefined}
-                />
-              ))}
-          </pattern>
-        </defs>
-
-        {/* Away band fills the whole plot; the home band is painted over it. */}
-        <rect
-          className="winprob__band winprob__band--away"
-          x={0}
-          y={PLOT_T}
-          width={W}
-          height={PLOT_H}
-          style={{ fill: `url(#${awayPatternId})` }}
+        <WinProbBands
+          uid={patternUid}
+          homeArea={homeArea}
+          awayLayout={awayLayout}
+          homeLayout={homeLayout}
+          awayLogo={awayLogo}
+          homeLogo={homeLogo}
+          awayLogoOverride={awayLogoOverride}
+          homeLogoOverride={homeLogoOverride}
+          awayPinstripe={awayPinstripe}
+          homePinstripe={homePinstripe}
+          awayPinstripeBg={awayPinstripeBg}
+          homePinstripeBg={homePinstripeBg}
+          awaySolid={awaySolid}
+          homeSolid={homeSolid}
         />
-        <path className="winprob__band winprob__band--home" d={homeArea} style={{ fill: `url(#${homePatternId})` }} />
 
         {/* The win-probability line itself. */}
         {/* An ink casing under the line keeps it readable on any band. */}

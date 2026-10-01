@@ -13,12 +13,7 @@
 // (percentage points of a win, ~10 points ≈ one run of value), so callers
 // just add them to a player's summed WPA.
 
-// The feed's "6.1" innings-pitched notation is whole innings + outs-past-the-
-// dot, NOT a decimal.
-export function ipToOuts(ip) {
-  const [whole, part] = String(ip ?? '0.0').split('.')
-  return (Number(whole) || 0) * 3 + (Number(part) || 0)
-}
+import { ipToOuts } from '../lib/math/innings.js'
 
 // Bill James Game Score from a pitching line: 40 + 2*outs + K - 2*H - 4*ER -
 // 2*(R-ER) - BB. An average start lands near 50; a gem in the 80s-90s.

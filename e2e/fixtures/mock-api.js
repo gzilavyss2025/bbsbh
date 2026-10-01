@@ -71,11 +71,7 @@ const IMAGE_FIXTURES = [
   },
 ]
 
-async function relayOrAbort(route, relay) {
-  if (!relay) {
-    await route.abort()
-    return
-  }
+async function relayOrAbort(route) {
   try {
     const res = await fetch(route.request().url())
     const body = Buffer.from(await res.arrayBuffer())
@@ -89,11 +85,9 @@ async function relayOrAbort(route, relay) {
   }
 }
 
-// Install once per test/page. `relay: false` makes any uncaptured request
-// abort instead of hitting the real network — useful for proving a spec is
-// fully offline-covered, but off by default so new endpoints don't silently
-// break specs that haven't been captured yet.
-export async function installMockApi(page, { relay = true } = {}) {
+// Install once per test/page. Uncaptured requests relay to the real network, so
+// new endpoints don't silently break specs that haven't been captured yet.
+export async function installMockApi(page) {
   await page.route('https://statsapi.mlb.com/**', async (route) => {
     const url = new URL(route.request().url())
     const fixture = API_FIXTURES.find((f) => f.test(url))
@@ -102,7 +96,7 @@ export async function installMockApi(page, { relay = true } = {}) {
       await route.fulfill({ json: body })
       return
     }
-    await relayOrAbort(route, relay)
+    await relayOrAbort(route)
   })
 
   await page.route(/mlbstatic\.com/, async (route) => {
@@ -112,6 +106,6 @@ export async function installMockApi(page, { relay = true } = {}) {
       await route.fulfill({ path: path.join(DIR, fixture.file), contentType: fixture.contentType })
       return
     }
-    await relayOrAbort(route, relay)
+    await relayOrAbort(route)
   })
 }

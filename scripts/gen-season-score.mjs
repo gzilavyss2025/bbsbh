@@ -18,6 +18,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
+import { parseArgs } from './lib/args.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { HOME_WIN_PROBABILITY, teamHomeFieldFactor } from '../src/api/seasonScoreFormula.js'
 
@@ -37,15 +38,6 @@ const addDays = (date, n) => {
   return isoDay(d)
 }
 const previousUtcDay = () => addDays(isoDay(new Date()), -1)
-
-function parseArgs(argv) {
-  const args = {}
-  for (const arg of argv) {
-    const match = /^--([^=]+)(?:=(.*))?$/.exec(arg)
-    if (match) args[match[1]] = match[2] ?? true
-  }
-  return args
-}
 
 // Converts team strength into a per-game expectation. Log-odds preserves the
 // relative gap between two projections, and the home-field factor applies

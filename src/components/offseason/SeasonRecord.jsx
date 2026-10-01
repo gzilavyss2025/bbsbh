@@ -2,6 +2,7 @@ import { useRouteLink } from '../../lib/nav.js'
 import { SPORT_IDS } from '../../lib/teams.js'
 import { usePostseasonBracket } from '../../hooks/postseason/usePostseasonBracket.js'
 import { PostseasonBracket } from '../bracket/PostseasonBracket.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { recordRowIsLabelled } from '../../lib/postseason/bracketDisplay.js'
 
 // THE SEASON RECORD — the one door on the offseason page that opens onto
@@ -64,7 +65,7 @@ export function SeasonRecord({ sportId, season, dateStr }) {
   const labelled = recordRowIsLabelled(champion)
 
   return (
-    <section className={`srecord${labelled ? ' srecord--labelled' : ''}`} aria-label={`The ${season} season record`}>
+    <Card body="flush" className={`srecord${labelled ? ' srecord--labelled' : ''}`} aria-label={`The ${season} season record`}>
       {/* A row with no champion on its face only links to results, so it
           keeps its tape and its warning (ADR-0081 addendum). The tape is
           hidden from the reading order; the warning is in words. */}
@@ -127,6 +128,6 @@ export function SeasonRecord({ sportId, season, dateStr }) {
           )}
         </div>
       </div>
-    </section>
+    </Card>
   )
 }

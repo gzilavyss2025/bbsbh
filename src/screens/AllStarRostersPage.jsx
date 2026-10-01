@@ -19,12 +19,7 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { favoriteAccentColor } from '../lib/teams.js'
 import { Door } from '../components/ui/control/Door.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-function monthDay(iso) {
-  const [, m, d] = (iso || '').split('-')
-  return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
-}
+import { monthDayName } from '../lib/dates.js'
 
 // How many most-recent seasons show by default, and how far back "Load
 // more" reaches in one press — a flat cutoff rather than incremental
@@ -233,7 +228,7 @@ export function AllStarRostersPage() {
   const scores = data?.scores ?? {}
   const mvps = data?.mvps ?? {}
   const venues = data?.venues ?? {}
-  const updated = monthDay(data?.generatedAt?.slice(0, 10))
+  const updated = monthDayName(data?.generatedAt)
 
   const visibleSeasons = expanded
     ? seasons.filter((y) => y >= LOAD_MORE_CUTOFF)

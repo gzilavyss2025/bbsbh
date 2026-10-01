@@ -9,6 +9,7 @@ import {
   parseIntro,
   serializeIntro,
 } from '../src/lib/account/intro.js'
+import { fakeStorage } from './helpers/fakeStorage.js'
 
 test('parseIntro degrades to null on anything malformed', () => {
   assert.equal(parseIntro(null), null)
@@ -59,29 +60,17 @@ test('serializeIntro defaults `now` to the real clock, and is always a valid doc
 // markIntroSeenIn — the writer the erase sheet needs
 // --------------------------------------------------------------------------
 
-function fakeStorage(initial = {}, { throwOnWrite = false } = {}) {
-  const map = { ...initial }
-  return {
-    map,
-    getItem: (k) => (k in map ? map[k] : null),
-    setItem: (k, v) => {
-      if (throwOnWrite) throw new Error('quota')
-      map[k] = String(v)
-    },
-  }
-}
-
 test('markIntroSeenIn writes a flag that hasSeenIntro then believes', () => {
   const storage = fakeStorage()
   assert.equal(markIntroSeenIn(storage, 1, 1234), true)
   assert.equal(hasSeenIntro(parseIntro(storage.getItem(INTRO_KEY))), true)
-  assert.deepEqual(JSON.parse(storage.map[INTRO_KEY]), { seen: true, step: 1, at: 1234 })
+  assert.deepEqual(JSON.parse(storage.data[INTRO_KEY]), { seen: true, step: 1, at: 1234 })
 })
 
 test('markIntroSeenIn survives storage that throws, and says it failed', () => {
   // Private mode. The erase sheet is navigating away regardless; the point is
   // that it must not throw on the way out.
-  assert.equal(markIntroSeenIn(fakeStorage({}, { throwOnWrite: true })), false)
+  assert.equal(markIntroSeenIn(fakeStorage({}, { throwOnSet: true })), false)
   assert.equal(markIntroSeenIn(null), false)
   assert.equal(markIntroSeenIn({}), false)
 })

@@ -290,7 +290,7 @@
   gap: 1px;
   min-width: 0;
 }
-.szmodal__eyebrow {
+.szmodal__note {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -401,7 +401,7 @@
   gap: 2px;
   min-width: 0;
 }
-.umpmodal__eyebrow {
+.umpmodal__note {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);

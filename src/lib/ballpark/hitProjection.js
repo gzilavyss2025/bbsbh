@@ -17,6 +17,7 @@
 // test/hitchart.test.js.
 
 import { HOME } from './ballparkGeometry.js'
+import { round1 } from '../math/number.js'
 
 // Exit velocity at or above which a batted ball is "hard hit" — MLB's own
 // Statcast definition.
@@ -40,8 +41,6 @@ export const HIT_COORD_ORIGIN = { x: 125.42, y: 198.27 }
 // against that same sample so a feed change that silently shifts every dot
 // fails the suite instead of the chart.
 export const HIT_COORD_FT_PER_UNIT = 2.51
-
-const round1 = (n) => Math.round(n * 10) / 10
 
 // A Gameday hit coordinate → a point in the ballpark diagram's SVG space. The
 // diagram maps FEET 1:1 to SVG units with home plate at HOME, +x toward right

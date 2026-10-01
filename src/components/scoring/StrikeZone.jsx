@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { EDGE, H, W, sx, sy } from '../../lib/zone/zoneGeometry.js'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
 // where it crossed the plate (pX/pZ, feet) against THIS batter's own zone
@@ -255,20 +256,8 @@ function ChallengeMark({ challenge }) {
 // `.turnscene` ancestor isolates its stacking context, so an unportalled scrim
 // renders BELOW the fixed floating bar (`.pagenav`). See ModalPortal.jsx.
 export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClose }) {
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   const name = `${batter?.last ?? ''}${batter?.first ? `, ${batter.first}` : ''}`.trim()
   return (
@@ -280,7 +269,7 @@ export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClos
         <div className="szmodal" role="dialog" aria-modal="true" aria-label={`Pitch zone for ${name || 'this at-bat'}`}>
           <div className="szmodal__head">
             <div className="szmodal__ttl">
-              <span className="szmodal__eyebrow">Pitch zone</span>
+              <span className="szmodal__note">Pitch zone</span>
               <span className="szmodal__name">{name || 'At-bat'}</span>
               {pitcher ? <span className="szmodal__vs">vs {pitcher}</span> : null}
             </div>

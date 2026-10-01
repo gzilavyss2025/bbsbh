@@ -16,7 +16,6 @@ import {
   gateFor,
   GATE_REASONS,
   isCovered,
-  JOB_STATES,
   markByteFailure,
   markComplete,
   markEvicted,
@@ -359,8 +358,11 @@ test('the status counts film AHEAD of the cursor and never the game', () => {
   )
 })
 
+// `blocked` is the world's doing (a full disk, a silent host); `paused` is the scorer's.
+const JOB_STATES = ['idle', 'running', 'paused', 'blocked', 'complete']
+
 test('every gate reason and every job state is one the catalogs name', () => {
-  // The two exported lists are what a surface switches on. A reason or a state
+  // The gate reasons are what a surface switches on. A reason or a state
   // that is not in them is one the screen has no wording for.
   const rows = [pitch(1), pitch(2), pitch(3), pitch(4), pitch(5), paperwork(1)]
   let job = jobWith(rows)

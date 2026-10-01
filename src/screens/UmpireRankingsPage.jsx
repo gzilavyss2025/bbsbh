@@ -6,7 +6,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { UmpireLink } from '../components/umpire/UmpireLink.jsx'
-import { UmpireTierPill } from '../components/badges/UmpireTierPill.jsx'
+import { TierPill } from '../components/badges/TierPill.jsx'
 import { HomePlateIcon } from '../components/badges/UmpireTierGlyph.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
@@ -82,7 +82,7 @@ export function UmpireRankingsPage() {
                     )}
                   </td>
                   <td>
-                    <UmpireTierPill tier={u.tier} />
+                    <TierPill tier={u.tier} />
                   </td>
                   <td>{pct1(u.accuracy)}</td>
                   <td>{u.games}</td>

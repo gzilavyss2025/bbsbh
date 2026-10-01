@@ -9,10 +9,6 @@
    ============================================================ */
 
 :root {
-  /* Cell sizing for the linescore grid */
-  --cell-size:  30px;   /* one inning box */
-  --cell-gap:   0px;    /* grid rules touch */
-
   /* Headshot size scale. Every headshot in the app (the shared <Headshot>
      component's .shot.* variants, plus the standalone .pitchernotice__shot)
      draws its box from one of these six rungs instead of a hand-tuned

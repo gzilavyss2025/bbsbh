@@ -28,6 +28,7 @@
 // Find the gamePk in the app's feed URL, or:
 //   https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=YYYY-MM-DD
 
+import { setTimeout as sleep } from 'node:timers/promises'
 import { getJson } from './lib/statsapi.mjs'
 
 // The unauthenticated Bluesky AppView. NB: the older `public.api.bsky.app`
@@ -236,8 +237,6 @@ function relevant(text, gate) {
   const hardTeams = [AW.hard, HM.hard].filter((m) => hit(m, text)).length
   return anyTeams >= 2 || (hardTeams >= 1 && BASEBALL.test(text))
 }
-
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 // ------------------------------------------------------------------- ranking
 // Engagement core: reshares/quotes signal "this told the story of the game"

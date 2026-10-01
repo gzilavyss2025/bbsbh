@@ -107,6 +107,7 @@ import { fileURLToPath } from 'node:url'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import {
   auditBank,
@@ -165,25 +166,15 @@ const GAME_TYPES = 'R,F,D,L,W'
 const reTable = await readJsonOr(reTablePath, null)
 if (!reTable) console.log('run-expectancy.json not found — favor will be null this run')
 
-// `label` names the failing item in the log. The pool carries game targets in
-// the sweep and bare club ids in --exposure, so it cannot assume a gamePk.
-async function mapWithConcurrency(items, limit, fn, label = (it) => `gamePk ${it?.gamePk}`) {
-  const results = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        results[i] = await fn(items[i])
-      } catch (err) {
-        console.error(`${label(items[i])}: ${err.message}`)
-        results[i] = null
-      }
+const mapWithConcurrency = (items, limit, fn) =>
+  mapConcurrent(items, limit, async (item) => {
+    try {
+      return await fn(item)
+    } catch (err) {
+      console.error(`${item?.gamePk ?? item}: ${err.message}`)
+      return null
     }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return results
-}
+  })
 
 const args = parseArgs(process.argv.slice(2))
 const { startDate, endDate } = dateRange(args, DEFAULT_DAYS)

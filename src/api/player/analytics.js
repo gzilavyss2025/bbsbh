@@ -25,7 +25,7 @@ import {
   heatView,
   similarPitchersFor,
 } from '../pitchArsenal.js'
-import { fetchProspectTrend, prospectTrendById, prospectCardView } from '../prospectTrend.js'
+import { fetchProspectTrend, prospectTrendById, prospectCardView, decimalAge } from '../prospectTrend.js'
 import { fetchLevelTenure, tenureFact } from '../levelTenure.js'
 import {
   advancedHittingView,
@@ -169,7 +169,7 @@ export async function loadPlayerAnalytics(id, asOf) {
     currentActivitySportId !== 1
       ? prospectCardView(
           trendEntry,
-          typeof bio.age === 'number' ? bio.age : null,
+          decimalAge(bio.birthDate, prospectTrend?.generatedAt),
           prospectTrend?.levelAverageAge?.[currentActivitySportId] ?? null,
           tenure,
         )

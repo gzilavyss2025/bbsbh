@@ -40,7 +40,7 @@ export function PlayerBoards({ summary, clubs }) {
                     question the right-hand floor raises about it. */}
                 <th className="team">
                   Most calls overturned
-                  <span className="rpt__sub">No minimum</span>
+                  <span className="rpt__note">No minimum</span>
                 </th>
                 <th>Won</th>
                 <th>Called</th>
@@ -53,7 +53,7 @@ export function PlayerBoards({ summary, clubs }) {
                     <PlayerLink id={p.playerId} name={p.name}>
                       {p.name}
                     </PlayerLink>
-                    <span className="rpt__sub">
+                    <span className="rpt__note">
                       {clubShort(clubs, p.teamId)} — {ROLE_LABEL[p.role] ?? p.role}
                     </span>
                   </th>
@@ -71,7 +71,7 @@ export function PlayerBoards({ summary, clubs }) {
               <tr>
                 <th className="team">
                   Best success rate
-                  <span className="rpt__sub">
+                  <span className="rpt__note">
                     Minimum {players.minChallenges} called · {commas(players.qualified)}{' '}
                     qualify
                   </span>
@@ -87,7 +87,7 @@ export function PlayerBoards({ summary, clubs }) {
                     <PlayerLink id={q.playerId} name={q.name}>
                       {q.name}
                     </PlayerLink>
-                    <span className="rpt__sub">
+                    <span className="rpt__note">
                       {clubShort(clubs, q.teamId)} — {ROLE_LABEL[q.role] ?? q.role}
                     </span>
                   </th>

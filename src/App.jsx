@@ -267,7 +267,6 @@ const BetweenInningsLab = lazyNamed(
   () => import('./screens/BetweenInningsLab.jsx'),
   'BetweenInningsLab',
 )
-const WordmarkLab = lazyNamed(() => import('./screens/WordmarkLab.jsx'), 'WordmarkLab')
 const DesignLab = lazyNamed(() => import('./screens/designlab/index.jsx'), 'DesignLab')
 const FirstScorebookPage = lazyNamed(
   () => import('./screens/FirstScorebookPage.jsx'),
@@ -474,8 +473,6 @@ export default function App() {
     content = <AnimationLab />
   } else if (route.name === 'between-innings-lab') {
     content = <BetweenInningsLab />
-  } else if (route.name === 'wordmark-lab') {
-    content = <WordmarkLab />
   } else if (route.name === 'design-lab') {
     content = <DesignLab />
   } else if (route.name === 'first-scorebook') {

@@ -40,6 +40,7 @@ import { CENTURY_CLUB_MIN, CENTURY_MPH, pitchFamily } from './pitchArsenal.js'
 // a pre-half note cannot be merged into one ranked list (ReferencePanel.jsx)
 // without the merge quietly favouring whichever surface capped its bonus higher.
 import { magnitudeOf, corroborationBonus } from './callout-notes.js'
+import { ipToOuts } from '../lib/math/innings.js'
 
 // Worthiness bases for this family, same 0–100 scale and clamp/skew idiom as
 // callout-notes.js's SCORE_BASE (kept local rather than imported — this
@@ -68,15 +69,6 @@ const SCORE_BASE = {
 }
 const clampScore = (n) => Math.max(0, Math.min(100, Math.round(n)))
 
-// Innings pitched ("6.1" = 6⅓) -> outs, so a 6.0-or-better check compares
-// linearly. Self-contained copy of the same helper used elsewhere (teamLeaders.js,
-// gen-callouts.mjs) — not exported from either.
-function ipToOuts(ip) {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  const w = Number(whole)
-  const f = Number(frac[0])
-  return (Number.isFinite(w) ? w : 0) * 3 + (Number.isFinite(f) ? f : 0)
-}
 const SIX_IP_OUTS = 18
 const TEN_K_THRESHOLD = 10
 

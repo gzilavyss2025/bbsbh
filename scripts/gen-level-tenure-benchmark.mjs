@@ -40,7 +40,7 @@
 // Run by hand: node scripts/gen-level-tenure-benchmark.mjs
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { ipToOuts } from '../src/api/rehab-policy.js'
+import { ipToOuts } from '../src/lib/math/innings.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'

@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { BallparkDiagram } from './BallparkDiagram.jsx'
 import { Facts, RankGroup } from './BallparkFacts.jsx'
 import { rankedDimensions } from '../../lib/ballpark/ballparkData.js'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // The Ballpark sheet: a to-scale ink sketch of the field (BallparkDiagram) over a
 // facts strip (built / roof / capacity) and the park's outfield distances + wall
@@ -15,20 +16,8 @@ import { rankedDimensions } from '../../lib/ballpark/ballparkData.js'
 export function BallparkModal({ venue, onClose }) {
   const data = rankedDimensions(venue)
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   if (!data) return null
   const distRows = data.rows.filter((r) => r.group === 'dist')

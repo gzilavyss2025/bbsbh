@@ -12,6 +12,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { TeamScoreExplainer } from './TeamScoreExplainer.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { isoToday } from '../../lib/dates.js'
 
 export const DASH = '—'
 const RANKSTRIP_VISIBLE = 5
@@ -67,10 +68,6 @@ const FORM_STORYLINES = {
   high: ["Can't lose right now", 'Nobody wants to see them right now', 'On one of those runs'],
   mid: ['The last 10 in a nutshell: fine', "A stretch that's hard to read", 'Treading water, not sinking'],
   low: ["Can't buy a win right now", 'Cold as it gets', 'Stuck in the mud'],
-}
-
-function isoToday() {
-  return new Date().toISOString().slice(0, 10)
 }
 
 // Deterministic per (day, team) index rather than a real RNG — same team

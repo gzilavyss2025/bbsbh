@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useImageMissing } from './images/useImageMissing.js'
 import { milbWpaMarkUrl } from '../lib/milbColors.js'
 import { teamLogoUrl } from '../lib/teams.js'
 
@@ -10,29 +10,7 @@ import { teamLogoUrl } from '../lib/teams.js'
 // this affiliate — falls back to the plain base mark, which every club has.
 export function useMilbWpaLogo(teamId, variant, draft) {
   const src = milbWpaMarkUrl(teamId, variant, draft)
-  const [missing, setMissing] = useState(false)
-  // Reset computed during render (not as the first line of the effect below)
-  // on a src change — see Headshot.jsx for the pattern.
-  const [prevSrc, setPrevSrc] = useState(src)
-  if (src !== prevSrc) {
-    setPrevSrc(src)
-    setMissing(false)
-  }
-
-  useEffect(() => {
-    if (!src) return undefined
-    // `live` guards the late-arriving error of a probe whose (team, variant)
-    // has already been swapped out from under it.
-    let live = true
-    const probe = new Image()
-    probe.onerror = () => {
-      if (live) setMissing(true)
-    }
-    probe.src = src
-    return () => {
-      live = false
-    }
-  }, [src])
+  const missing = useImageMissing(src)
 
   return { src: missing ? teamLogoUrl(teamId, 'base') : src, recolor: null }
 }

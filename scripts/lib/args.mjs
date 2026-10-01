@@ -1,13 +1,9 @@
-// Shared CLI arg parsing + trailing-window date math for the incremental
-// gen-*.mjs sweepers (gen-fouls.mjs, gen-pitch-arsenal.mjs,
-// gen-umpire-accuracy.mjs) — byte-identical before this extraction.
+// Shared CLI arg parsing + trailing-window date math for the gen-*.mjs
+// generators.
 //
-// parseArgs requires `--flag=value` (a bare `--flag` becomes `true`). This is
-// a STRICTER regex than gen-comeback-wins.mjs/gen-jerseys.mjs's own
-// parseArgs (`/^--([^=]+)(?:=(.*))?$/`, `=` optional) — those two scripts
-// keep their own copy rather than being folded in here, since switching their
-// regex would change how they parse a bare `--flag` (currently `undefined`
-// under this stricter form vs. `true` under theirs).
+// parseArgs reads `--flag=value` as a string and a bare `--flag` as `true`.
+// gen-rookies-backfill and gen-run-expectancy keep a stricter local copy that
+// ignores a bare `--flag`, so a mistyped value flag still falls back to its default.
 
 export function parseArgs(argv) {
   const args = {}

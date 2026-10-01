@@ -133,7 +133,7 @@
   font-weight: var(--w-regular);
   color: var(--text-body);
 }
-.cthist__sub {
+.cthist__note {
   grid-column: 1 / -1;
   margin-top: 2px;
   font-family: var(--font-body);
@@ -155,8 +155,8 @@
    `em` inside this line DIRECTLY, and a direct match beats an inherited value,
    so exempting only the span leaves "Not recorded" shouting inside a sentence
    that is not. */
-#root .cthist__sub,
-#root .cthist__sub * {
+#root .cthist__note,
+#root .cthist__note * {
   text-transform: none; /* caps-exempt: the card's one prose line, same idiom as .contractcard__foot */
 }
 /* "Terms not recorded" — the honest stand-in where a figure would be. Italic,

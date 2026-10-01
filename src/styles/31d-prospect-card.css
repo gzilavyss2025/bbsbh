@@ -508,8 +508,8 @@
    ALL-CAPS invariant (01-base.css). The coverage sentence and the credit lines
    are sentences, and shouting a licence name would misprint it. The `#root`
    prefix is what lets this out-rank `#root *`; the descendant half covers any
-   inline child. Same idiom as .cthist__sub. */
+   inline child. Same idiom as .cthist__note. */
 #root .prankhist__foot,
 #root .prankhist__foot * {
-  text-transform: none; /* caps-exempt: the card's prose foot, same idiom as .cthist__sub */
+  text-transform: none; /* caps-exempt: the card's prose foot, same idiom as .cthist__note */
 }

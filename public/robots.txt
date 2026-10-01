@@ -15,7 +15,6 @@ Disallow: /admin
 Disallow: /identity-lab
 Disallow: /scorecard-lab
 Disallow: /animation-lab
-Disallow: /wordmark-lab
 Disallow: /between-innings-lab
 Disallow: /game-notes-debug
 Disallow: /uniform-names

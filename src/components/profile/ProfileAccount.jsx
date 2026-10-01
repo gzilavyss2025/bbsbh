@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { SignInButton, SignOutButton, UserProfile, useAuth, useUser } from '@clerk/clerk-react'
 import { mergeReceiptLines } from '../../lib/account/mergeReceiptFlag.js'
 import { NEVER_SYNCED, SYNCED_ITEMS } from '../../lib/account/syncClaims.js'
+import { Card } from '../ui/frame/Card.jsx'
 import { DeviceHandoff } from './DeviceHandoff.jsx'
 import { EraseDataDialog } from './EraseDataDialog.jsx'
 import { MergeReceipt } from './MergeReceipt.jsx'
@@ -67,7 +68,7 @@ export function ProfileAccount({ status, counts, clubName }) {
     return (
       <section className="mytally__section mytally__account">
         <h2 className="mytally__sectiontitle">Account</h2>
-        <div className="mytally__pitch">
+        <Card as="div" body="flush" className="mytally__pitch">
           <DeviceHandoff className="mytally__handoff" />
           <p className="mytally__pitchlede caps-exempt">
             Everything on this page already works, on this device. An account carries the
@@ -93,7 +94,7 @@ export function ProfileAccount({ status, counts, clubName }) {
             leaderboard, no social feed. A score is never synced — only how far you have
             opened each game.
           </p>
-        </div>
+        </Card>
       </section>
     )
   }

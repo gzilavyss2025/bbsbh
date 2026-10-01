@@ -1,4 +1,5 @@
 import { getJson } from './statsapi.js'
+import { ipToOuts } from '../lib/math/innings.js'
 
 // Per-game batting/pitching lines and win-probability "moments" for the
 // Logbook retrospective's ported First Scorebook sections (ADR-0035).
@@ -52,11 +53,6 @@ async function mapLimit(items, limit, fn) {
 
 function uniquePks(gamePks) {
   return [...new Set((gamePks ?? []).map(Number).filter(Boolean))]
-}
-
-const ipOuts = (ip) => {
-  const [whole, part] = String(ip ?? '0.0').split('.')
-  return (Number(whole) || 0) * 3 + (Number(part) || 0)
 }
 
 // One side's appeared players, straight off the plain /boxscore response's
@@ -116,7 +112,7 @@ function oneSide(game, side) {
       pitching: pitchingAppeared
         ? {
             inningsPitched: s.inningsPitched ?? '0.0',
-            outs: ipOuts(s.inningsPitched),
+            outs: ipToOuts(s.inningsPitched),
             numberOfPitches: s.numberOfPitches ?? 0,
             battersFaced: s.battersFaced ?? 0,
             hits: s.hits ?? 0,

@@ -2,6 +2,7 @@ import { useCallback, useRef } from 'react'
 import { PAGE_ASPECT, STAMP_WIDTH, pageSlots } from '../../lib/passportLayout.js'
 import { GameStamp } from '../logbook/GameStamp.jsx'
 import { PassportWatermark } from './PassportWatermark.jsx'
+import { clamp } from '../../lib/math/number.js'
 
 // One page of the passport book (PassportBook.jsx) — the paper a stamp lands
 // on, and nothing else. No book chrome, no turn animation, no confirm UI.
@@ -76,8 +77,6 @@ function stampDate(date) {
   return year ? STAMP_DATE.format(new Date(year, month - 1, day)) : ''
 }
 
-const clamp01 = (n) => (n < 0 ? 0 : n > 1 ? 1 : n)
-
 // Where a tap landed, as fractions of the element's own box.
 //
 // Reads a touch point when the event carries one and falls back to the plain
@@ -95,8 +94,8 @@ function tapFractions(event, element) {
   const clientY = touch ? touch.clientY : event.clientY
   if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) return null
   return {
-    x: clamp01((clientX - rect.left) / rect.width),
-    y: clamp01((clientY - rect.top) / rect.height),
+    x: clamp((clientX - rect.left) / rect.width, 0, 1),
+    y: clamp((clientY - rect.top) / rect.height, 0, 1),
   }
 }
 

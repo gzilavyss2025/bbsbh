@@ -1,8 +1,10 @@
+import { clamp } from './math/number.js'
+
 // Where a stamp lands on a passport page — the Logbook book's geometry
 // (ADR-0035, the passport-book redesign).
 //
-// PURE, React-free, dependency-free, and the single source of truth for the
-// book's numbers. Every component under src/components/passport/ is a tracing
+// PURE, React-free, free of dependencies but lib/math's clamp, and the single
+// source of truth for the book's numbers. Every component under src/components/passport/ is a tracing
 // of this module: if a number describes WHERE something sits or HOW MANY fit,
 // it belongs here and is pinned by test/passport-layout.test.js, not tuned by
 // eye inside a JSX file.
@@ -94,8 +96,6 @@ export const MAX_TILT = 7
 // are treated as overlapping and the newcomer is nudged off. Slightly under a
 // full stamp width, so stamps may kiss — a passport's do — but not stack.
 export const MIN_SEPARATION = 0.26
-
-const clamp = (n, lo, hi) => (n < lo ? lo : n > hi ? hi : n)
 
 // The stamp's height as a fraction of the PAGE's height. The stamp is square,
 // so its height in page-fractions is its width scaled by the page's aspect.

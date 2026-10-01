@@ -83,3 +83,36 @@ export async function resolveRawClip(playId, { fetchImpl = null, signal = null }
   const src = await resolveClipUrl(playId, { fetchImpl, signal })
   return src ? { src, notice: '' } : { src: null, notice: NOT_POSTED }
 }
+
+// THE LOOKUP BOTH WATCH BUTTONS SHARE, as plain JS so a node test can drive it
+// (useWatchClip.js wraps it in React state). One lookup in flight at a time: a
+// `start` for another play or a `cancel` aborts the older one, and an answer
+// that lands after that is dropped. A `start` for the play already in flight
+// does nothing, so a double-tap sends one request, not a burst. It keeps NO
+// cache — a hit is already kept by clipUrlCache and a miss must not be
+// (resolveRawClip says why).
+//
+// `onResult(result, playId)` gets the play the answer is for.
+export function createClipLookup(onResult, resolve = resolveRawClip) {
+  let controller = null
+  let pending = null
+  const cancel = () => {
+    controller?.abort()
+    controller = null
+    pending = null
+  }
+  return {
+    cancel,
+    async start(playId) {
+      if (controller && pending === playId) return
+      cancel()
+      const mine = (controller = new AbortController())
+      pending = playId
+      const result = await resolve(playId, { signal: mine.signal })
+      if (mine.signal.aborted) return
+      controller = null
+      pending = null
+      onResult(result, playId)
+    },
+  }
+}

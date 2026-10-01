@@ -31,18 +31,12 @@
 
 import { isDayState, isDayString, MAX_SPOILED_DAYS } from '../src/lib/spoiledDays.js'
 import { authenticateUser } from './_lib/auth.js'
-import { jsonResponse, readJsonBody } from './_lib/nodeHandler.js'
+import { privateJson, readJsonBody } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js: @clerk/backend's
 // verifyToken pulls in internals Vercel's edge sandbox rejects.
 export const config = { runtime: 'nodejs' }
-
-// Per-user, auth-gated data — never let a shared cache (or the browser) hold one
-// user's consent record and hand it to another request.
-function reply(res, body, status = 200) {
-  return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
-}
 
 // Re-validate whatever Redis hands back before it reaches a client: a hand-edited
 // or cross-version hash can only ever yield known-shape days and states, never a
@@ -68,14 +62,14 @@ async function trim(redis, key, stored) {
 
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
-    return reply(res, { error: 'method not allowed' }, 405)
+    return privateJson(res, { error: 'method not allowed' }, 405)
   }
 
   const redis = getRedis()
-  if (!redis) return reply(res, { error: 'sync not configured' }, 501)
+  if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
 
   const auth = await authenticateUser(req)
-  if (!auth.ok) return reply(res, { error: auth.error }, auth.status)
+  if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
   const userId = auth.userId
 
   const key = `spoiled:${userId}`
@@ -87,18 +81,18 @@ export default async function handler(req, res) {
     } catch {
       stored = {}
     }
-    return reply(res, { days: stored })
+    return privateJson(res, { days: stored })
   }
 
   // POST — publish this device's decision about ONE day.
   const body = await readJsonBody(req)
   if (body == null) {
-    return reply(res, { error: 'invalid body' }, 400)
+    return privateJson(res, { error: 'invalid body' }, 400)
   }
   const day = body?.day
   const state = body?.state
   if (!isDayString(day) || !isDayState(state)) {
-    return reply(res, { error: 'day and state required' }, 400)
+    return privateJson(res, { error: 'day and state required' }, 400)
   }
 
   await redis.hset(key, { [day]: state })
@@ -109,5 +103,5 @@ export default async function handler(req, res) {
   } catch {
     stored = { [day]: state }
   }
-  return reply(res, { days: stored })
+  return privateJson(res, { days: stored })
 }

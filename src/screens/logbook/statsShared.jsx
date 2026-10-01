@@ -1,5 +1,6 @@
 import { useNav } from '../../lib/nav.js'
 import { gamePath } from '../../lib/route.js'
+import { Card } from '../../components/ui/frame/Card.jsx'
 
 // Small pieces shared between LogbookStatsPage.jsx and RetrospectiveSections.jsx
 // — split out rather than duplicated so the two can't drift, and rather than
@@ -39,16 +40,21 @@ export function gameTitle(game) {
 // the ported sections' equivalent of FirstScorebookPage's ScorebookGameLink,
 // reading THIS page's facts shape (api/logbook.js's stampGameFacts) instead
 // of that page's frozen archive.
-export function LogbookGameLink({ gamePk, facts, className = '', children }) {
+// `card` draws the tap tile on Card (a ledger button); without it, a plain button.
+export function LogbookGameLink({ gamePk, facts, className = '', card, children }) {
   const navigate = useNav()
   const game = facts?.[gamePk]
-  return (
-    <button
-      type="button"
-      className={className}
-      disabled={!game}
-      onClick={() => game && navigate(gamePath(game.date, game.away.abbreviation, game.home.abbreviation, 'boxscore', game.gameNumber))}
-    >
+  const props = {
+    className,
+    disabled: !game,
+    onClick: () => game && navigate(gamePath(game.date, game.away.abbreviation, game.home.abbreviation, 'boxscore', game.gameNumber)),
+  }
+  return card ? (
+    <Card as="button" frame="ledger" body="flush" {...props}>
+      {children}
+    </Card>
+  ) : (
+    <button type="button" {...props}>
       {children}
     </button>
   )

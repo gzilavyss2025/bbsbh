@@ -1,4 +1,5 @@
 import { defineConfig } from '@playwright/test'
+import { devScript } from './e2e/fixtures/dev-script.js'
 import { BASE, BRANCH, BRANCH_PORT } from './e2e/visual/setup.js'
 
 // The screenshot suite (issue #1177). `npm run visual` shoots every page in
@@ -25,8 +26,7 @@ if (BASE === BRANCH) {
   )
 }
 
-const DEV_SCRIPT =
-  { 5173: 'dev', 5172: 'dev:2', 5171: 'dev:3', 5170: 'dev:4', 5169: 'dev:5' }[BRANCH_PORT] ?? 'dev'
+const DEV_SCRIPT = devScript(BRANCH_PORT)
 
 export default defineConfig({
   testDir: './e2e/visual',

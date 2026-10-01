@@ -32,9 +32,13 @@
 
 import { playerCrawl, teamCrawl } from './crawl.js'
 import { clean, entitySegment, idFromSlug, matchupSlug, niceDate, teamAbbr, urlDateToApi } from './entity.js'
-import { fetchWithTimeout } from './http.js'
 
 const MLB = 'https://statsapi.mlb.com'
+// Every statsapi call here runs on an UNAUTHENTICATED path where a novel query
+// is a cache miss that fans out to a third-party host, so each one is bounded:
+// a slow or hostile host can't pin an edge invocation open past a crawler's own
+// patience. The budget covers the whole call, headers and body.
+const FETCH_TIMEOUT_MS = 4000
 // Every level resolveGame() searches across when matching a shared link's
 // matchup slug. Hand-copied from SEARCHABLE_SPORT_IDS in src/lib/teams.js —
 // this edge function is bundled separately from browser-facing src/, and a
@@ -51,7 +55,10 @@ const SPORT_LEVEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'ROK
 // --- statsapi fetch (server side, crawler-only) ----------------------------
 
 async function getJson(path) {
-  const res = await fetchWithTimeout(`${MLB}${path}`, { headers: { Accept: 'application/json' } })
+  const res = await fetch(`${MLB}${path}`, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  })
   if (!res.ok) throw new Error(`MLB ${res.status} for ${path}`)
   return res.json()
 }
@@ -136,7 +143,7 @@ async function resolveGame(apiDate, matchup) {
 // WRITING THE RENDERER BACK, which is the point: test/cards.test.js fails the
 // moment a card names a dynamic renderer again, so the CPU has to be spent on
 // purpose rather than drifting back in.
-function ogUrl(origin, _params) {
+function ogUrl(origin) {
   return `${origin}/og-image.png`
 }
 
@@ -157,15 +164,12 @@ async function playerCard(idSegment, origin) {
   const pos = posAbbr && posAbbr !== 'Unknown' ? posAbbr : ''
   const team = clean(p.currentTeam?.name || '')
   const sub = [team, pos].filter(Boolean).join(' · ')
-  // The club whose brand color paints the card's photo box — the MLB parent for
-  // a farmhand (so he gets his org's color), else his own club id.
-  const colorTeam = p.currentTeam?.parentOrgId ?? p.currentTeam?.id ?? ''
   return {
     title: `${name} — Tally Baseball`,
     description: sub
       ? `${sub}. Bio, career register, and season stats — a spoiler-safe scorecard companion.`
       : `Bio, career register, and season stats — a spoiler-safe scorecard companion.`,
-    image: ogUrl(origin, { type: 'player', id: String(id), name, sub, team: String(colorTeam) }),
+    image: ogUrl(origin),
     alt: sub ? `${name} — ${sub}` : name,
     // What canonicalUrl re-spells the address with. Built from the name statsapi
     // just returned, never from the segment the request arrived on.
@@ -177,32 +181,27 @@ async function playerCard(idSegment, origin) {
 // The team-hub tab a card is built for (see src/CLAUDE.md's "the team hub" —
 // Overview/bare `/team/{id}` is the untagged default, plus the five real
 // tabs). Exported so its shape is unit-testable without a network call —
-// each tab needs a non-empty eyebrow and a description that's actually about
-// that tab, not a copy-paste of another one.
+// each tab needs a description that's actually about that tab, not a
+// copy-paste of another one.
 export const TEAM_TABS = {
   leaders: {
     suffix: ' — Team Leaders',
-    eyebrow: 'TEAM LEADERS',
     description: (name) => `${name} statistical leaders — spoiler-safe. Every level, every category.`,
   },
   roster: {
     suffix: ' — Roster',
-    eyebrow: 'ROSTER',
     description: (name) => `${name} active roster, injured list, and 40-man — a spoiler-safe scorecard companion.`,
   },
   games: {
     suffix: ' — Games',
-    eyebrow: 'GAMES',
     description: (name) => `${name} schedule and every decided game this season — a spoiler-safe scorecard companion.`,
   },
   numbers: {
     suffix: ' — Numbers',
-    eyebrow: 'NUMBERS',
     description: (name) => `${name} standings, ranks, and leaders — a spoiler-safe scorecard companion.`,
   },
   minors: {
     suffix: ' — Minors',
-    eyebrow: 'MINORS',
     description: (name) => `${name} affiliates and top prospects — a spoiler-safe scorecard companion.`,
   },
 }
@@ -222,7 +221,6 @@ async function teamCard(idSegment, origin, { tab } = {}) {
   // Cosmetic descriptions still read the old league · division wording.
   const descBits = clean([t.league?.name, t.division?.name].filter(Boolean).join(' · '))
   const cfg = tab ? TEAM_TABS[tab] : null
-  const eyebrow = cfg?.eyebrow || ''
   return {
     title: `${name}${cfg?.suffix || ''} — Tally Baseball`,
     description: cfg
@@ -230,7 +228,7 @@ async function teamCard(idSegment, origin, { tab } = {}) {
       : descBits
         ? `${descBits}. Roster, leaders, and schedule — a spoiler-safe scorecard companion.`
         : `Roster, leaders, and schedule — a spoiler-safe scorecard companion.`,
-    image: ogUrl(origin, { type: 'team', id: String(id), name, sub, eyebrow }),
+    image: ogUrl(origin),
     alt: `${name}${sub ? ` — ${sub}` : ''}`,
     segment: entitySegment(id, name),
     crawl: teamCrawl(t, { id, name, level, league, tab }),
@@ -287,25 +285,12 @@ async function gameCard(date, matchup, origin) {
   if (!away?.id || !home?.id) return null
   const awayAbbr = teamAbbr(away)
   const homeAbbr = teamAbbr(home)
-  // Full nicknames for the card's text line ("BREWERS @ PIRATES"); abbreviations
-  // ride along only as the logo fallback if a mark fails to load.
-  const awayName = clean(away.teamName || away.name || awayAbbr)
-  const homeName = clean(home.teamName || home.name || homeAbbr)
   const gm = (g.gameNumber ?? 1) > 1 ? ` · Game ${g.gameNumber}` : ''
   const when = `${niceDate(apiDate)}${gm}`
   return {
     title: `${away.name} @ ${home.name} — ${niceDate(apiDate)}`,
     description: `Score this game by hand, spoiler-free: live lineups, umpires, and rosters — every run stays sealed until you tap to reveal it.`,
-    image: ogUrl(origin, {
-      type: 'game',
-      away: String(away.id),
-      home: String(home.id),
-      awayName,
-      homeName,
-      awayAbbr,
-      homeAbbr,
-      date: when,
-    }),
+    image: ogUrl(origin),
     alt: `${awayAbbr} @ ${homeAbbr} — ${when}`,
   }
 }
@@ -319,42 +304,41 @@ async function gameCard(date, matchup, origin) {
 // budget and a five-word tagline wastes it. A route with no `desc` keeps using
 // `sub` for both, which is right for a page whose whole pitch fits in a line.
 const GENERIC = {
-  leaders: { eyebrow: 'LEADERBOARDS', title: 'League Leaders', sub: 'Every level, every category — spoiler-safe.' },
-  standings: { eyebrow: 'STANDINGS', title: 'Standings', sub: 'MLB divisions and the wild-card race.' },
-  prospects: { eyebrow: 'PROSPECTS', title: 'Top Prospects', sub: 'The pipeline, ranked — a spoiler-safe scouting board.' },
-  rehab: { eyebrow: 'REHAB', title: 'Rehab Assignments', sub: 'Who is on a rehab stint, league-wide.' },
+  leaders: { title: 'League Leaders', sub: 'Every level, every category — spoiler-safe.' },
+  standings: { title: 'Standings', sub: 'MLB divisions and the wild-card race.' },
+  prospects: { title: 'Top Prospects', sub: 'The pipeline, ranked — a spoiler-safe scouting board.' },
+  rehab: { title: 'Rehab Assignments', sub: 'Who is on a rehab stint, league-wide.' },
   about: {
-    eyebrow: 'ABOUT',
     title: 'Tally Baseball',
     sub: 'Keep score. Keep the surprise.',
     metaTitle: 'About Tally Baseball — The Spoiler-Free Scorekeeping App',
     desc: 'Tally Baseball is a free, spoiler-free baseball app for keeping score by hand and watching on delay. Lineups, rosters and umpires open; the score stays sealed until you reveal it.',
   },
-  logos: { eyebrow: 'LOGO SHEET', title: 'Logo Sheet', sub: 'Printable grayscale marks for pencil-sketching.' },
-  'situational-records': { eyebrow: 'SITUATIONAL RECORDS', title: 'Situational Records', sub: 'Every club ranked in one situation at a time — spoiler-safe.' },
-  salaries: { eyebrow: 'LEAGUE SALARIES', title: 'League Salaries', sub: "Every club's payroll, and what the game's contracts commit." },
-  doubleheaders: { eyebrow: 'THE DOUBLE DIP', title: 'The Double Dip', sub: 'Every doubleheader since 2004, and who swept them.' },
-  'postseason-race': { eyebrow: 'POSTSEASON RACE', title: 'Postseason Race', sub: 'Division and wild-card standing, with elimination numbers.' },
-  fouls: { eyebrow: 'FOUL TRACKER', title: 'Foul Tracker', sub: 'Season foul-ball rates and single-game highs, league-wide.' },
-  milestones: { eyebrow: 'MILESTONE WATCH', title: 'Milestone Watch', sub: 'Every active player closing in on a round career number.' },
-  umpires: { eyebrow: 'UMPIRE RANKINGS', title: 'Umpire Rankings', sub: "Every home-plate umpire's season strike-zone accuracy." },
-  awards: { eyebrow: 'AWARDS HISTORY', title: 'Awards History', sub: 'MVP, Cy Young, Rookie of the Year, and more — five seasons back.' },
-  'postseason-history': { eyebrow: 'POSTSEASON HISTORY', title: 'Postseason History', sub: 'Every bracket back to 2000, series by series.' },
-  'postseason-leaders': { eyebrow: 'POSTSEASON LEADERS', title: 'Postseason Leaders', sub: 'Career postseason batting and pitching leaders since 2000.' },
-  'trade-deadline': { eyebrow: 'TRADE DEADLINE', title: 'Trade Deadline', sub: "This year's deadline moves, tracked as they happen." },
-  'all-star-rosters': { eyebrow: 'ALL-STAR GAME', title: 'All-Star Rosters', sub: 'Every All-Star roster, year over year back to 1933.' },
-  'all-star-legacy': { eyebrow: 'ALL-STAR LEGACY', title: 'All-Star Legacy', sub: 'Career All-Star selections and honors, franchise by franchise.' },
-  logbook: { eyebrow: 'GAME LOG', title: 'Game Log', sub: "A passport of the games you've scored — every stamp your own." },
-  'first-scorebook': { eyebrow: 'MY FIRST SCOREBOOK', title: 'My First Scorebook', sub: 'A season retrospective, built from the games you scored.' },
-  photos: { eyebrow: 'GAME PHOTOS', title: 'Game Photos', sub: 'An unsealed photo finder for any game — never a score.' },
+  logos: { title: 'Logo Sheet', sub: 'Printable grayscale marks for pencil-sketching.' },
+  'situational-records': { title: 'Situational Records', sub: 'Every club ranked in one situation at a time — spoiler-safe.' },
+  salaries: { title: 'League Salaries', sub: "Every club's payroll, and what the game's contracts commit." },
+  doubleheaders: { title: 'The Double Dip', sub: 'Every doubleheader since 2004, and who swept them.' },
+  'postseason-race': { title: 'Postseason Race', sub: 'Division and wild-card standing, with elimination numbers.' },
+  fouls: { title: 'Foul Tracker', sub: 'Season foul-ball rates and single-game highs, league-wide.' },
+  milestones: { title: 'Milestone Watch', sub: 'Every active player closing in on a round career number.' },
+  umpires: { title: 'Umpire Rankings', sub: "Every home-plate umpire's season strike-zone accuracy." },
+  awards: { title: 'Awards History', sub: 'MVP, Cy Young, Rookie of the Year, and more — five seasons back.' },
+  'postseason-history': { title: 'Postseason History', sub: 'Every bracket back to 2000, series by series.' },
+  'postseason-leaders': { title: 'Postseason Leaders', sub: 'Career postseason batting and pitching leaders since 2000.' },
+  'trade-deadline': { title: 'Trade Deadline', sub: "This year's deadline moves, tracked as they happen." },
+  'all-star-rosters': { title: 'All-Star Rosters', sub: 'Every All-Star roster, year over year back to 1933.' },
+  'all-star-legacy': { title: 'All-Star Legacy', sub: 'Career All-Star selections and honors, franchise by franchise.' },
+  logbook: { title: 'Game Log', sub: "A passport of the games you've scored — every stamp your own." },
+  'first-scorebook': { title: 'My First Scorebook', sub: 'A season retrospective, built from the games you scored.' },
+  photos: { title: 'Game Photos', sub: 'An unsealed photo finder for any game — never a score.' },
   // The broadcast reports (src/screens/around-the-game/). Each sub says what the page
   // MEASURES rather than what it is called, because these four are the pages
   // whose names alone give a reader the least — "Pace of Play" could be a
   // rules explainer, and "The Gate" could be anything.
-  attendance: { eyebrow: 'THE GATE', title: 'Attendance', sub: 'Every club ranked by the share of the park that fills.' },
-  pace: { eyebrow: 'THE CLOCK', title: 'Pace of Play', sub: 'How long each club’s games actually take, home and road.' },
-  'farm-system': { eyebrow: 'THE FARM REPORT', title: 'Farm System Index', sub: 'Thirty systems scored on talent, winning and youth.' },
-  bullpens: { eyebrow: 'THE PEN', title: 'Bullpen Availability', sub: 'All thirty bullpens, ranked by how much of each is left.' },
+  attendance: { title: 'Attendance', sub: 'Every club ranked by the share of the park that fills.' },
+  pace: { title: 'Pace of Play', sub: 'How long each club’s games actually take, home and road.' },
+  'farm-system': { title: 'Farm System Index', sub: 'Thirty systems scored on talent, winning and youth.' },
+  bullpens: { title: 'Bullpen Availability', sub: 'All thirty bullpens, ranked by how much of each is left.' },
 }
 
 function genericCard(route, origin) {
@@ -378,7 +362,7 @@ function genericCard(route, origin) {
     // Baseball" as the <title> and the og:title both.
     title: g.metaTitle || `${g.title} — Tally Baseball`,
     description: g.desc || g.sub,
-    image: ogUrl(origin, { type: 'generic', eyebrow: g.eyebrow, title: g.title, sub: g.sub }),
+    image: ogUrl(origin),
     alt: `${g.title} — ${g.sub}`,
   }
 }

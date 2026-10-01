@@ -12,12 +12,9 @@ import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { TeamLeaders } from '../components/teamstats/TeamLeaders.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
+import { isoToday } from '../lib/dates.js'
 
 const DASH = '—'
-
-function isoToday() {
-  return new Date().toISOString().slice(0, 10)
-}
 
 // The full per-category leaderboard for a team, on its own page (the team page
 // shows only a featured cross-section and links here via "See all ›"). Reuses

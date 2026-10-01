@@ -70,7 +70,7 @@
   line-height: var(--lh-solid);
   color: var(--album-foil);
 }
-.xl-entry__lede {
+.xl-entry__note {
   margin: 0;
   /* Wide enough to hold both sentences on one line where there is room, and
      balanced so that where there is not — a phone — the break falls at the
@@ -269,7 +269,7 @@
    INVARIANT's exemption list in 01-base.css. The `#root` prefix is required,
    or the rule loses to `#root *` and the marker reads as deliberate while the
    cascade shouts anyway. */
-#root .xl-entry__lede,
+#root .xl-entry__note,
 #root .xl-entry__hint,
 #root .xl-entry__consent {
   text-transform: none; /* caps-exempt: the entry step's lede, section notes and consent read as natural sentences, same shouted-heading/natural-case-body split as the spoiler-consent modal */

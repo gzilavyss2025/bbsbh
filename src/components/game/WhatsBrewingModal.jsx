@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Loader } from '../ui/Loader.jsx'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // What's Brewing — a bottom-sheet modal that surfaces the narrative blurbs from
 // a club's pre-game Game Notes PDF (Brewers: Hulk Logan, Don't Pitch to Mitch, …)
@@ -28,22 +29,10 @@ export function WhatsBrewingModal({ notes, teamId, title = 'Game Notes', onClose
     }
   }, [notes?.url, teamId])
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   // Same dialog focus contract as LogoModal: focus into the sheet on open, back
   // to the trigger on close.
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   const { loading, blurbs } = state
 

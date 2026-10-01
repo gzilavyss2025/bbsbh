@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { highlightPlaybacks } from '../../api/highlights.js'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { SaveClipButton } from '../highlights/SaveClipButton.jsx'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // The video-highlight player: opened from any "Watch" button in the app — a
 // revealed play (PlayByPlay.jsx), the box score's Play of the Game and video
@@ -38,20 +39,8 @@ import { SaveClipButton } from '../highlights/SaveClipButton.jsx'
 // carries the broadcast scorebug burned into the pixels, so it stays off here
 // as well.
 export function HighlightSheet({ item, src = null, loading = false, notice = '', title: fallbackTitle = '', onClose }) {
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   // Captions OFF by default. MLB's HLS manifests carry subtitle tracks, and
   // Safari/Chrome will auto-enable one whenever the viewer's OS caption

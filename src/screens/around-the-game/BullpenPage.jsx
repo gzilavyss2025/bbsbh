@@ -229,7 +229,7 @@ export function BullpenPage() {
                         teamId={r.teamId}
                         name={clubShort(clubs, r.teamId)}
                         rank={r.rank}
-                        sub={`${r.total} arms tracked`}
+                        note={`${r.total} arms tracked`}
                       />
                       <td>
                         <StatusMeter
@@ -241,7 +241,7 @@ export function BullpenPage() {
                       </td>
                       <td>
                         {r.counts.down}
-                        <span className="rpt__sub">{r.downPct.toFixed(0)}%</span>
+                        <span className="rpt__note">{r.downPct.toFixed(0)}%</span>
                       </td>
                       <td>
                         <BarCell value={r.perArm} min={barMin} max={barMax} tone="hot">
@@ -252,7 +252,7 @@ export function BullpenPage() {
                         {r.leader ? (
                           <>
                             <PlayerLink id={r.leader.personId}>{r.leader.name}</PlayerLink>
-                            <span className="rpt__sub">
+                            <span className="rpt__note">
                               {r.leader.last7dayPitches} pitches, {r.leader.last7dayApps} apps
                             </span>
                           </>

@@ -19,7 +19,7 @@
 // both. Its ratchet is set-only: 1, never back to 0.
 
 import { authenticateUser } from './_lib/auth.js'
-import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
+import { privateJson, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
 // Node.js runtime, NOT edge (unlike preview.js) — @clerk/backend's
@@ -28,12 +28,6 @@ import { getRedis } from './_lib/redis.js'
 // The handler below still uses the Web-standard Request/Response shape, which
 // Vercel's Node.js runtime supports the same as edge — only `config.runtime` changes.
 export const config = { runtime: 'nodejs' }
-
-// Per-user, auth-gated data — never let a shared cache (or the browser) hold one
-// user's reveal progress and hand it to another request.
-function reply(res, body, status = 200) {
-  return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
-}
 
 // A revealedThrough is a half-index; even a marathon extra-inning game stays
 // well under this. Bounds a malformed/hostile client so it can't store an
@@ -150,21 +144,21 @@ export function plannedWrites(body) {
 
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST' && req.method !== 'DELETE') {
-    return reply(res, { error: 'method not allowed' }, 405)
+    return privateJson(res, { error: 'method not allowed' }, 405)
   }
 
   const { searchParams } = requestUrl(req)
   const wantRecent = searchParams.get('recent') === '1'
   const gamePk = searchParams.get('gamePk')
   if (!wantRecent && (!gamePk || !/^\d+$/.test(gamePk))) {
-    return reply(res, { error: 'gamePk required' }, 400)
+    return privateJson(res, { error: 'gamePk required' }, 400)
   }
 
   const redis = getRedis()
-  if (!redis) return reply(res, { error: 'sync not configured' }, 501)
+  if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
 
   const auth = await authenticateUser(req)
-  if (!auth.ok) return reply(res, { error: auth.error }, auth.status)
+  if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
   const userId = auth.userId
 
   // GET ?recent=1 — the scorebook index, newest first. Any entry that's
@@ -173,7 +167,7 @@ export default async function handler(req, res) {
   // is the POST ratchet below never writing one back in the first place, but
   // this catches an entry an older client wrote before this check existed.
   if (wantRecent) {
-    if (req.method !== 'GET') return reply(res, { error: 'method not allowed' }, 405)
+    if (req.method !== 'GET') return privateJson(res, { error: 'method not allowed' }, 405)
     const bookKey = `scorebook:${userId}`
     const all = (await redis.hgetall(bookKey)) || {}
     const { games, done } = recentGamesView(all)
@@ -184,7 +178,7 @@ export default async function handler(req, res) {
         // Best-effort tidy; already excluded from THIS response either way.
       }
     }
-    return reply(res, { games })
+    return privateJson(res, { games })
   }
 
   // DELETE ?gamePk= — the manual half of "delete games from my pencil."
@@ -196,7 +190,7 @@ export default async function handler(req, res) {
   // other progress update.
   if (req.method === 'DELETE') {
     await redis.hdel(`scorebook:${userId}`, gamePk)
-    return reply(res, { ok: true })
+    return privateJson(res, { ok: true })
   }
 
   const key = `reveal:${userId}:${gamePk}`
@@ -230,17 +224,17 @@ export default async function handler(req, res) {
         // costs completeness on a future erase, never a mark.
       }
     }
-    return reply(res, { revealedThrough, boxRevealed })
+    return privateJson(res, { revealedThrough, boxRevealed })
   }
 
   // POST — ratchet: the stored value can only ever increase.
   const body = await readJsonBody(req)
   if (body == null) {
-    return reply(res, { error: 'invalid body' }, 400)
+    return privateJson(res, { error: 'invalid body' }, 400)
   }
   const plan = plannedWrites(body)
   if (plan.error) {
-    return reply(res, { error: plan.error }, 400)
+    return privateJson(res, { error: plan.error }, 400)
   }
   // The mark, when one was sent. `null` (a box-only POST) leaves the stored
   // integer exactly as it is — a reader who opened a box score has not scored a
@@ -308,5 +302,5 @@ export default async function handler(req, res) {
   // when this POST carried no mark — a box-only write reports on what it wrote
   // and stays quiet about what it did not touch, rather than inventing a -1 the
   // client might merge.
-  return reply(res, { revealedThrough: next, boxRevealed: plan.box })
+  return privateJson(res, { revealedThrough: next, boxRevealed: plan.box })
 }

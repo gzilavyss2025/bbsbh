@@ -7,7 +7,7 @@
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { ipToOuts } from '../../src/api/rehab-policy.js'
+import { ipToOuts } from '../../src/lib/math/innings.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const raw = JSON.parse(await readFile(join(here, 'raw.json'), 'utf8'))

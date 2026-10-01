@@ -6,6 +6,7 @@ import { useRouteLink } from '../../lib/nav.js'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 
 // ONE MORE GAME — the lead of the minor levels' offseason page, issue #1077.
 //
@@ -69,7 +70,7 @@ export function PickedGame({ sportId, season, dateStr }) {
 
   return (
     <section className="pgame" aria-label={`A ${label} game from the ${season} season`}>
-      <div className="pgame__card">
+      <Card as="div" body="flush" className="pgame__card">
         <div className="pgame__clubs">
           <Club club={game.away} />
           <span className="pgame__at">
@@ -110,7 +111,7 @@ export function PickedGame({ sportId, season, dateStr }) {
             Another game
           </button>
         </div>
-      </div>
+      </Card>
     </section>
   )
 }

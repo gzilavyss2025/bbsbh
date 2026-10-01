@@ -26,27 +26,12 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join, relative } from 'node:path'
 import { sectionHeadClassName, sectionHeadTitleTag } from '../src/lib/design/sectionHeadClass.js'
 import { cardAccentStyle, cardBodyClassName, cardClassName, cardHead, cardTag } from '../src/lib/design/cardClass.js'
+import { stripComments, ruleBody } from './helpers/css.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const STYLES = join(SRC, 'styles')
 
-const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '')
 const read = (rel) => stripComments(readFileSync(join(STYLES, rel), 'utf8'))
-
-function ruleBody(css, selector) {
-  let from = 0
-  for (;;) {
-    const at = css.indexOf(selector, from)
-    if (at === -1) return null
-    from = at + selector.length
-    const before = at === 0 ? '\n' : css[at - 1]
-    if (!'\n;}{,'.includes(before)) continue
-    let i = from
-    while (css[i] === ' ' || css[i] === '\n' || css[i] === '\r') i += 1
-    if (css[i] !== '{') continue
-    return css.slice(i + 1, css.indexOf('}', i))
-  }
-}
 
 const decl = (body, property) =>
   body
@@ -977,8 +962,8 @@ const C3 = [
       'components/game/GamePhotosStrip.jsx',
       'components/teamstats/BullpenBoard.jsx',
       'components/teamstats/SeasonSeriesStrip.jsx',
+      'components/team/FormerTeammates.jsx',
       'screens/FoulTrackerPage.jsx',
-      'screens/TeamInfo.jsx',
     ],
     ns: 'metric',
     head: true,
@@ -986,7 +971,7 @@ const C3 = [
   { css: '44-pre-game-cards.css', sel: '.lineup', jsx: ['screens/TeamInfo.jsx'], ns: 'lineup', head: true },
   { css: '44-pre-game-cards.css', sel: '.opp', jsx: ['screens/TeamInfo.jsx'], ns: 'opp', head: true },
   { css: '44-pre-game-cards.css', sel: '.starter', jsx: ['screens/TeamInfo.jsx'], ns: 'starter', head: true },
-  { css: '10-lineup.css', sel: '.teammate', jsx: ['screens/TeamInfo.jsx'], ns: 'teammate', as: 'li' },
+  { css: '10-lineup.css', sel: '.teammate', jsx: ['components/team/FormerTeammates.jsx'], ns: 'teammate', as: 'li' },
   { css: '10-lineup.css', sel: '.defdiamond', jsx: ['components/scoring/DefenseDiamond.jsx'], ns: 'defdiamond', as: 'div' },
   {
     css: '09-team-info.css',
@@ -1644,8 +1629,8 @@ const C6B = [
   { css: '76-workload-marks.css', sel: '.penpage__grid', jsx: ['screens/around-the-game/BullpenPage.jsx'], ns: 'penpage__grid', as: 'div', frame: 'ledger' },
 ]
 // Every plain element (not a Card) whose opening tag names the class.
-const bareTagsC6B = (code, ns) =>
-  [...code.matchAll(/<(?:div|section|li|article|ul|ol|dl|a|button)\b([^>]*)>/g)].map((m) => m[1]).filter((attrs) => namesClass(attrs, ns))
+const bareTags = (code, ns) =>
+  [...code.matchAll(/<(?:div|section|li|article|aside|ul|ol|dl|a|button)\b([^>]*)>/g)].map((m) => m[1]).filter((attrs) => namesClass(attrs, ns))
 
 test('C6b: no people, records or reference block draws a second frame over its Card', () => {
   for (const { css, sel, gone } of C6B) {
@@ -1671,7 +1656,7 @@ test('C6b: every block renders on Card, with its frame, no head prop and a flush
         assert.doesNotMatch(attrs, /head=/, `${rel}: .${ns} keeps its head as the Card's first child, as before`)
       }
       if (mode === 'card') {
-        assert.deepEqual(bareTagsC6B(code, ns), [], `${rel}: .${ns} is on a bare element`)
+        assert.deepEqual(bareTags(code, ns), [], `${rel}: .${ns} is on a bare element`)
       } else {
         // The list stays a <ul> inside the Card, and every one sits in one.
         const uses = code.match(new RegExp(`className=\\{?["'\`]${ns}(?![\\w-])`, 'g')) ?? []
@@ -1780,4 +1765,539 @@ test('C6b: the ledger frames stay ledgers, and the ledger keeps the old .tradeca
   assert.match(src('screens/around-the-game/BullpenPage.jsx'), /<Card as="div" frame="ledger" body="flush" className="penpage__grid"/)
   const ledger = readFileSync(join(SRC, '..', 'docs', 'design-system-naming.md'), 'utf8')
   assert.match(ledger, /\| `\.tradecard` \|/)
+})
+
+
+// ---- slice C6c: fouls, offseason and the off-day tile ----
+
+// Nine blocks that drew their own copy of the card, on the /fouls page, the
+// offseason pages and the slate's off-day row, plus the "Players who moved up"
+// table, which drew no frame at all. These pages open live (ADR-0034), and the
+// slice moves a box and nothing else. Each block keeps its own inset, which is
+// not the padded body's, so each takes body="flush" (C2 to C6b did the same).
+// Each head stays where it was: no head prop, no SectionHead edit. Modes:
+//   card  the Card IS the block and carries its class.
+//   wrap  the Card wraps the block's <ol>, which keeps its class and row rules
+//         (Card has no <ol>). The Card takes the margin the list had.
+// `ground` names the inner gap-rule grid that keeps its --border-rule ground:
+// the Card paints --surface-card, so the ground lives inside it (C2's
+// .factgrid__grid).
+const C6C = [
+  { css: '06b-offday-cards.css', sel: '.offday__tile', jsx: ['components/team/OffDaySection.jsx'], ns: 'offday__tile', as: 'button' },
+  { css: '43-foul-tracker.css', sel: '.foulboard__hero', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulboard__hero', as: 'div', keep: ['overflow'] },
+  { css: '43-foul-tracker.css', sel: '.foulavg', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulavg', as: 'div' },
+  { css: '43-foul-tracker.css', sel: '.gamehigh-tiles', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'gamehigh-tiles', as: 'div', frame: 'ledger', ground: '.gamehigh-tiles__grid' },
+  { css: '43-foul-tracker.css', sel: '.souvenir-row__tiles', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'souvenir-row__tiles', as: 'div', frame: 'ledger', ground: '.souvenir-row__tilegrid' },
+  { css: '78-offseason.css', sel: '.springcount', jsx: ['components/offseason/WinterCalendar.jsx'], ns: 'springcount', as: 'aside', frame: 'ledger' },
+  { css: '78-offseason.css', sel: '.pgame__card', jsx: ['components/offseason/PickedGame.jsx'], ns: 'pgame__card', as: 'div' },
+  { css: '78-offseason.css', sel: '.srecord', jsx: ['components/offseason/SeasonRecord.jsx'], ns: 'srecord' },
+  { css: '78-offseason.css', sel: '.seasonnote__stories', jsx: ['components/offseason/LongAtBats.jsx'], ns: 'seasonnote__stories', mode: 'wrap', box: 'seasonnote__storybox' },
+]
+
+test('C6c: no fouls, offseason or off-day block draws a second frame over its Card', () => {
+  for (const { css, sel, keep = [] } of C6C) {
+    const bodies = bodiesOf(read(css), sel)
+    assert.ok(bodies.length > 0, `${css}: a ${sel} rule`)
+    for (const body of bodies) assert.deepEqual(frameDecls(body, keep), [], `${css}: ${sel} still draws its own frame`)
+  }
+  // The hero opts out of the clip, so its long name is cut by the board Card at 320px, as before.
+  assert.equal(decl(ruleBody(read('43-foul-tracker.css'), '.foulboard__hero') ?? '', 'overflow'), 'visible')
+  // The clip is the Card's now, so the labelled record row no longer asks for it.
+  assert.equal(decl(ruleBody(read('78-offseason.css'), '.srecord--labelled') ?? '', 'overflow'), undefined)
+})
+
+test('C6c: every block renders on Card, with its frame and a flush body', () => {
+  for (const { jsx, ns, mode = 'card', as, frame, box } of C6C) {
+    for (const rel of jsx) {
+      const code = src(rel)
+      assert.match(code, /import \{ Card \} from ["'][\w./]+\/ui\/frame\/Card\.jsx["']/, `${rel} imports Card`)
+      const tags =
+        mode === 'wrap'
+          ? wrappingTags(code, ns)
+          : cardTags(code).filter((attrs) => namesClass(attrs, ns))
+      assert.ok(tags.length > 0, `${rel}: .${ns} renders ${mode === 'wrap' ? 'inside' : 'on'} a Card`)
+      for (const attrs of tags) {
+        assert.match(attrs, /body="flush"/, `${rel}: .${ns}'s Card keeps the block's own inset`)
+        if (frame) assert.match(attrs, new RegExp(`frame="${frame}"`), `${rel}: .${ns} is a ${frame}`)
+        else assert.doesNotMatch(attrs, /frame=/, `${rel}: .${ns} is a sheet (the default)`)
+        if (as) assert.match(attrs, new RegExp(`as="${as}"`), `${rel}: .${ns} is a Card ${as}`)
+        if (mode === 'wrap') assert.match(attrs, /as="div"/, `${rel}: the list sits in a Card div`)
+        if (box) assert.ok(namesClass(attrs, box), `${rel}: the Card carries .${box}`)
+        assert.doesNotMatch(attrs, /head=/, `${rel}: .${ns} keeps its head where it was`)
+      }
+      const bare = bareTags(code, ns)
+      if (mode === 'wrap') assert.ok(bare.every((a) => /^\s*className=/.test(a)), `${rel}: the list is a plain <ol>`)
+      else assert.deepEqual(bare, [], `${rel}: .${ns} is on a bare element`)
+    }
+  }
+})
+
+// Card owns no margin, and a flush body adds no inset, so each block keeps the
+// space and the inset that were its own, in its namespace rule.
+test('C6c: each block keeps its own margin and inset', () => {
+  const kept = [
+    ['06b-offday-cards.css', '.offday__tile', 'padding', 'var(--space-2) var(--space-1h)'],
+    ['06b-offday-cards.css', '.offday__tile', 'display', 'flex'],
+    ['43-foul-tracker.css', '.foulboard__hero', 'margin-bottom', '10px'],
+    ['43-foul-tracker.css', '.foulboard__hero', 'padding', 'var(--space-2h) var(--space-3)'],
+    ['43-foul-tracker.css', '.foulavg', 'margin-top', 'var(--space-3)'],
+    ['43-foul-tracker.css', '.foulavg', 'padding', 'var(--space-3) var(--space-3h)'],
+    ['43-foul-tracker.css', '.sgh-list', 'list-style', 'none'],
+    ['43-foul-tracker.css', '.sgh-list', 'margin', '0'],
+    ['43-foul-tracker.css', '.sgh-list', 'padding', '0'],
+    ['43-foul-tracker.css', '.gamehigh-tiles', 'grid-area', 'tiles'],
+    ['43-foul-tracker.css', '.souvenir-row__tiles', 'flex', 'none'],
+    ['78-offseason.css', '.springcount', 'margin-top', 'var(--space-6)'],
+    ['78-offseason.css', '.springcount', 'padding', 'var(--space-4)'],
+    ['78-offseason.css', '.pgame__card', 'padding', 'var(--space-5) var(--space-4)'],
+    ['78-offseason.css', '.srecord', 'margin-top', 'var(--space-6)'],
+    ['78-offseason.css', '.srecord__body', 'padding', 'var(--space-4)'],
+    ['78-offseason.css', '.seasonnote__stories', 'list-style', 'none'],
+    ['78-offseason.css', '.seasonnote__stories', 'margin', '0'],
+    ['78-offseason.css', '.seasonnote__stories', 'padding', '0'],
+    ['78-offseason.css', '.seasonnote__storybox', 'margin-top', 'var(--space-4)'],
+  ]
+  for (const [css, sel, prop, value] of kept) {
+    assert.equal(decl(ruleBody(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)
+  }
+})
+
+// .sgh-list is an <ol> that sits in a board's Card, under its masthead. The
+// board rule below already bled it to that Card's edge and shed its frame, so
+// the list's own frame never drew. The Card is the board's, and a second Card
+// round the list would draw a card inside a card: the list takes no Card.
+test('C6c: the souvenir lists sit in their board Card and draw no frame of their own', () => {
+  const css = read('43-foul-tracker.css')
+  for (const sel of ['.sgh-list', '.foulboard-block .sgh-list']) {
+    for (const body of bodiesOf(css, sel)) assert.deepEqual(frameDecls(body), [], `${sel} draws no frame`)
+  }
+  const board = src('screens/FoulTrackerPage.jsx')
+  assert.match(board, /<Card className="metric foulboard-block" head=\{head\} body="flush">/)
+  assert.equal((board.match(/<Card\b[^>]*>\s*<ol className="sgh-list"/g) ?? []).length, 0)
+})
+
+// The two gap-rule grids keep their --border-rule ground: the Card paints
+// --surface-card, so the 1px rules between the tiles are the grid's own ground,
+// inside the Card.
+test('C6c: the two tile grids keep their --border-rule ground inside a ledger Card', () => {
+  for (const { css, sel, ground } of C6C.filter((row) => row.ground)) {
+    const body = ruleBody(read(css), ground)
+    assert.ok(body, `${css}: a ${ground} rule`)
+    assert.equal(decl(body, 'background'), 'var(--border-rule)', `${ground} keeps the rule ground`)
+    assert.equal(decl(body, 'gap'), '1px', `${ground} keeps its 1px rules`)
+    const code = src('screens/FoulTrackerPage.jsx')
+    const ns = sel.slice(1)
+    const inner = ground.slice(1)
+    assert.match(
+      code,
+      new RegExp(`<Card\\b[^>]*className="${ns}"[^>]*>\\s*<div className="${inner}">`),
+      `${ns} holds ${inner} in a Card`,
+    )
+  }
+  const css = read('43-foul-tracker.css')
+  assert.ok(css.includes('.gamehigh-tiles__grid .stat'), 'the tile cells keep their reset')
+  assert.ok(css.includes('.souvenir-row__tilegrid .stat'), 'the tile cells keep their reset')
+})
+
+// The table had no frame. It takes the canonical sheet, which Gary approved on
+// #1113. The head stays above the Card, and the pool note and the "more" door
+// stay outside it.
+test('C6c: the moved-up table sits in a flush sheet Card and its head stays outside', () => {
+  const code = src('components/offseason/MovedUp.jsx')
+  assert.match(code, /import \{ Card \} from ["']..\/ui\/frame\/Card\.jsx["']/)
+  const m = code.match(/<\/SectionHead>\s*<Card\b([^>]*)>\s*<table className="movedup__table">[\s\S]*?<\/table>\s*<\/Card>/)
+  assert.ok(m, 'the table is the Card\'s only child, straight after the head')
+  assert.match(m[1], /as="div"/)
+  assert.doesNotMatch(m[1], /frame=/, 'the table is a sheet (the default)')
+  assert.match(m[1], /body="flush"/)
+  assert.doesNotMatch(m[1], /head=/)
+  assert.ok(namesClass(m[1], 'movedup__card'))
+  assert.match(code, /<\/Card>\s*\{\(hidden > 0 \|\| expanded\) && \(/, 'the "more" door is outside the Card')
+  const css = read('78-offseason.css')
+  assert.equal(decl(ruleBody(css, '.movedup__card') ?? '', 'margin-top'), 'var(--space-2)')
+  assert.equal(decl(ruleBody(css, '.movedup__table') ?? '', 'margin-top'), undefined, 'the gap is the Card\'s now')
+  // The Card is flush, so the first and last cell of a row keep the inset.
+  assert.ok(css.includes('.movedup__table :is(th, td):first-child'))
+  assert.ok(css.includes('.movedup__table :is(th, td):last-child'))
+  assert.doesNotMatch(css, /PROVISIONAL, in the same way the \.movedup|THE \.movedup ROWS ARE PROVISIONAL/)
+})
+
+// The two names Gary keeps until he picks a look (H2, 2026-09-29).
+test('C6c: the big card names keep their rules', () => {
+  const css = read('78-offseason.css')
+  assert.equal(decl(ruleBody(css, '.seasonnote__title') ?? '', 'font-size'), 'var(--fs-title-md)')
+  assert.equal(decl(ruleBody(css, '.srecord__title') ?? '', 'font-size'), 'var(--fs-title-sm)')
+  assert.match(src('components/offseason/SeasonRecord.jsx'), /<h3 className="srecord__title">Season record<\/h3>/)
+  assert.match(src('components/offseason/LongAtBats.jsx'), /<h4 className="seasonnote__title">/)
+})
+
+// The ADR-0084 rename. Strict, comments too. The naming ledger (docs/) keeps
+// the old name on purpose.
+const RETIRED_C6C = /(^|[^\w-])offdaycard(?![a-z0-9-])/
+test('C6c: .offdaycard is .offday__tile, gone from stylesheets, markup, comments, e2e, scripts and the lab', () => {
+  const root = join(SRC, '..')
+  const found = [
+    ...files(STYLES, ['.css']).map((rel) => join(STYLES, rel)),
+    ...files(SRC, ['.jsx', '.js', '.md']).map((rel) => join(SRC, rel)),
+    ...files(join(root, 'e2e'), ['.js', '.mjs']).map((rel) => join(root, 'e2e', rel)),
+    ...files(join(root, 'scripts'), ['.js', '.mjs', '.md']).map((rel) => join(root, 'scripts', rel)),
+  ].filter((abs) => RETIRED_C6C.test(readFileSync(abs, 'utf8')))
+  assert.deepEqual(found.map((abs) => relative(root, abs)), [])
+  assert.match(src('screens/designlab/catalog.js'), /cls: 'card card--sheet card--interactive offday__tile'/)
+  const ledger = readFileSync(join(root, 'docs', 'design-system-naming.md'), 'utf8')
+  assert.match(ledger, /\| `\.offdaycard` \|/)
+})
+
+// The parts carry the new namespace, and the tile still holds its club accent:
+// the hover tint mixes --offday-accent (ADR-0050), so the Card takes it by
+// NAME and the tile's own hover rule still reads it.
+test('C6c: the off-day tile is a Card button that keeps its club accent and its parts', () => {
+  const code = src('components/team/OffDaySection.jsx')
+  const tag = code.match(/<Card\b([^>]*)>/)?.[1] ?? ''
+  assert.match(tag, /as="button"/)
+  assert.match(tag, /accent="--offday-accent"/)
+  assert.match(tag, /onClick=\{onOpen\}/)
+  assert.match(tag, /aria-label=/)
+  assert.match(tag, /style=\{cardStyle\}/)
+  assert.match(code, /'--pin-accent'[\s\S]*'--offday-accent'/)
+  assert.match(code, /offday__tile--pinned/)
+  assert.match(code, /offday__logobox--pinstripe/)
+  for (const part of ['logobox', 'name', 'loc', 'mascot', 'pin']) assert.ok(code.includes(`offday__${part}`), `offday__${part}`)
+  const css = read('06b-offday-cards.css')
+  assert.ok(css.includes('var(--offday-accent, var(--field))'), 'the hover tint keeps its accent')
+  assert.ok(ruleBody(css, '.offday__tile--pinned'), 'the pinned state')
+  assert.ok(ruleBody(css, '.offday__logobox.offday__logobox--pinstripe'), 'the pinstripe box')
+  // The Card owns the tap target's face and its focus ring.
+  const tile = ruleBody(css, '.offday__tile') ?? ''
+  for (const prop of ['cursor', 'font', 'color']) assert.equal(decl(tile, prop), undefined, `.offday__tile leaves ${prop} to the Card`)
+  assert.equal(decl(ruleBody(css, '.offday__tile:focus-visible') ?? '', 'outline'), undefined)
+  // The Card's hover tint eases in again: the tile's transition list names the ground.
+  const eases = bodiesOf(css, '.offday__tile').map((b) => decl(b, 'transition') ?? '')
+  assert.ok(eases.some((t) => /background-color/.test(t)), 'the hover tint eases in')
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{\s*\.offday__tile,[\s\S]*?transition: none;/)
+})
+
+// ---- slice C7: account, logbook and chrome ----
+
+// Twelve blocks on the site menu, the First Scorebook, the Logbook stats page,
+// My Tally's sign-in pitch and the game-preview poster page. The Logbook
+// stats page is stamp-adjacent: it counts stamps and draws no stamp art, and
+// none of these files is a stamp surface (ADR-0035), so the slice moves boxes
+// and nothing else. Each block renders through Card with body="flush": each
+// keeps its own padding, which is not the padded body's, so its layout does
+// not move. Each head stays the Card's first child, as it was. `button` means
+// the tile is a <button> that navigates: the Card is rendered by the link
+// helper (ScorebookGameLink, LogbookGameLink) when a caller passes `card`.
+// `gone` means the block's whole rule was the frame, so it has no rule left.
+const C7 = [
+  { css: '08a-site-menu.css', sel: '.sitemenusheet__group', jsx: ['components/chrome/SiteMenu.jsx'], ns: 'sitemenusheet__group', keep: ['overflow'] },
+  { css: '42-first-scorebook.css', sel: '.scorebookstory__gamecard', jsx: ['screens/FirstScorebookPage.jsx'], ns: 'scorebookstory__gamecard', button: true, frame: 'ledger' },
+  { css: '42-first-scorebook.css', sel: '.scorebookstory__performer', jsx: ['screens/FirstScorebookPage.jsx'], ns: 'scorebookstory__performer', button: true, frame: 'ledger' },
+  { css: '42-first-scorebook.css', sel: '.scorebookstory__leaders', jsx: ['screens/FirstScorebookPage.jsx'], ns: 'scorebookstory__leaders', as: 'div', frame: 'ledger', gone: true },
+  { css: '42-first-scorebook.css', sel: '.scorebookstory__nugget', jsx: ['screens/FirstScorebookPage.jsx'], ns: 'scorebookstory__nugget', as: 'article', frame: 'ledger' },
+  { css: '48a-logbook-stats.css', sel: '.logbookstats__split', jsx: ['screens/LogbookStatsPage.jsx'], ns: 'logbookstats__split', as: 'div', frame: 'ledger' },
+  { css: '48a-logbook-stats.css', sel: '.logbookstats__streak', jsx: ['screens/LogbookStatsPage.jsx'], ns: 'logbookstats__streak', as: 'article', frame: 'ledger' },
+  { css: '48a-logbook-stats.css', sel: '.logbookstats__record', jsx: ['screens/LogbookStatsPage.jsx'], ns: 'logbookstats__record', as: 'div', frame: 'ledger' },
+  { css: '48a-logbook-stats.css', sel: '.logbookstats__performer', jsx: ['screens/logbook/RetrospectiveSections.jsx'], ns: 'logbookstats__performer', button: true, frame: 'ledger' },
+  { css: '48a-logbook-stats.css', sel: '.logbookstats__leaders', jsx: ['screens/logbook/RetrospectiveSections.jsx'], ns: 'logbookstats__leaders', as: 'div', frame: 'ledger', gone: true },
+  { css: '55-my-tally-account.css', sel: '.mytally__pitch', jsx: ['components/profile/ProfileAccount.jsx'], ns: 'mytally__pitch', as: 'div' },
+  { css: '62-game-preview.css', sel: '.posterstudio__panel', jsx: ['screens/GamePreview.jsx'], ns: 'posterstudio__panel', as: 'div' },
+]
+const C7_FILES = [...new Set(C7.flatMap(({ jsx }) => jsx)), 'screens/logbook/statsShared.jsx']
+// The link helpers: the one place a tap tile's Card is drawn.
+const C7_HELPERS = [
+  { rel: 'screens/FirstScorebookPage.jsx', name: 'ScorebookGameLink' },
+  { rel: 'screens/logbook/statsShared.jsx', name: 'LogbookGameLink' },
+]
+
+test('C7: no account, logbook or chrome block draws a second frame over its Card, media queries too', () => {
+  for (const { css, sel, gone, keep = [] } of C7) {
+    const bodies = bodiesOf(read(css), sel)
+    if (gone) assert.equal(bodies.length, 0, `${css}: ${sel} was only a frame, so it has no rule`)
+    else assert.ok(bodies.length > 0, `${css}: a ${sel} rule`)
+    for (const body of bodies) assert.deepEqual(frameDecls(body, keep), [], `${css}: ${sel} still draws its own frame`)
+  }
+})
+
+// Card clips its edge, and a clipped grid item shrinks to a minimum height of 0.
+// The wide site menu lays its groups out in a grid inside a sheet of fixed
+// height, so a clipped group would be squeezed and cut. It does not clip.
+test('C7: a site-menu group does not clip, so the wide menu keeps its row heights', () => {
+  assert.equal(decl(ruleBody(read('08a-site-menu.css'), '.sitemenusheet__group') ?? '', 'overflow'), 'visible')
+  assert.match(read('08a-site-menu.css'), /@media \(min-width: 740px\)[\s\S]*\.sitemenusheet__scroll\s*\{[^}]*display: grid/)
+})
+
+test('C7: every block renders on Card, with its frame, a flush body and every copy moved', () => {
+  for (const { jsx, ns, as, frame, button } of C7) {
+    for (const rel of jsx) {
+      const code = src(rel)
+      assert.match(code, /import \{ Card \} from ["'][\w./]+\/ui\/frame\/Card\.jsx["']/, `${rel} imports Card`)
+      const uses = code.match(new RegExp(`className=\\{?["'\`]${ns}(?![\\w-])`, 'g')) ?? []
+      assert.ok(uses.length > 0, `${rel}: .${ns} is used`)
+      assert.deepEqual(bareTags(code, ns), [], `${rel}: .${ns} is on a bare element`)
+      if (button) {
+        // Every caller passes `card`; the helper draws the Card button.
+        const callers = [...code.matchAll(/<(?:ScorebookGameLink|LogbookGameLink)\b([^>]*)>/g)].map((m) => m[1]).filter((a) => namesClass(a, ns))
+        assert.equal(callers.length, uses.length, `${rel}: every .${ns} goes through the link helper`)
+        for (const attrs of callers) assert.match(attrs, /\bcard\b/, `${rel}: .${ns} asks the helper for a Card`)
+      } else {
+        const tags = cardTags(code).filter((attrs) => namesClass(attrs, ns))
+        assert.equal(tags.length, uses.length, `${rel}: every .${ns} is a Card`)
+        for (const attrs of tags) {
+          assert.match(attrs, /body="flush"/, `${rel}: .${ns}'s Card keeps the block's own inset`)
+          if (frame) assert.match(attrs, new RegExp(`frame="${frame}"`), `${rel}: .${ns} is a ${frame}`)
+          else assert.doesNotMatch(attrs, /frame=/, `${rel}: .${ns} is a sheet (the default)`)
+          if (as) assert.match(attrs, new RegExp(`as="${as}"`), `${rel}: .${ns} is a Card ${as}`)
+          assert.doesNotMatch(attrs, /head=/, `${rel}: .${ns} keeps its head as the Card's first child, as before`)
+        }
+      }
+    }
+  }
+})
+
+test('C7: the game and performer tiles are Card buttons with no head, and keep onClick, disabled and type', () => {
+  for (const { rel, name } of C7_HELPERS) {
+    const code = src(rel)
+    const fn = code.slice(code.indexOf(`function ${name}`))
+    const card = fn.match(/<Card\b([^>]*)>/)
+    assert.ok(card, `${rel}: ${name} draws a Card`)
+    assert.match(card[1], /as="button"/)
+    assert.match(card[1], /frame="ledger"/)
+    assert.match(card[1], /body="flush"/)
+    assert.doesNotMatch(card[1], /head=/, 'a Card button takes no head')
+    assert.match(fn, /onClick:/)
+    // The plain button stays for the callers that do not pass `card`.
+    assert.match(fn, /<button\s+type="button"/, `${rel}: ${name} keeps its plain button`)
+  }
+  assert.match(src('screens/logbook/statsShared.jsx'), /disabled: !game/)
+})
+
+test('C7: each block keeps its own margin, inset and layout, from a rule that loads after card.css', () => {
+  const kept = [
+    ['08a-site-menu.css', '.sitemenusheet__group', 'padding', 'var(--space-3)'],
+    ['08a-site-menu.css', '.sitemenusheet__group + .sitemenusheet__group', 'margin-top', 'var(--space-2)'],
+    ['42-first-scorebook.css', '.scorebookstory__gamecard', 'display', 'grid'],
+    ['42-first-scorebook.css', '.scorebookstory__gamecard', 'padding', 'var(--space-4)'],
+    ['42-first-scorebook.css', '.scorebookstory__gamecard', 'min-height', '174px'],
+    ['42-first-scorebook.css', '.scorebookstory__performer', 'display', 'grid'],
+    ['42-first-scorebook.css', '.scorebookstory__performer', 'padding', 'var(--space-3) var(--space-3) 0'],
+    ['42-first-scorebook.css', '.scorebookstory__nugget', 'display', 'grid'],
+    ['42-first-scorebook.css', '.scorebookstory__nugget', 'padding', 'var(--space-3)'],
+    ['48a-logbook-stats.css', '.logbookstats__split', 'padding', 'var(--space-3)'],
+    ['48a-logbook-stats.css', '.logbookstats__streak', 'padding', 'var(--space-4) var(--space-3)'],
+    ['48a-logbook-stats.css', '.logbookstats__record', 'padding', 'var(--space-2) var(--space-3)'],
+    ['48a-logbook-stats.css', '.logbookstats__record', 'min-height', '50px'],
+    ['48a-logbook-stats.css', '.logbookstats__performer', 'padding', 'var(--space-3)'],
+    ['55-my-tally-account.css', '.mytally__pitch', 'padding', 'var(--space-4)'],
+    ['62-game-preview.css', '.posterstudio__panel', 'padding', 'var(--space-4)'],
+    ['62-game-preview.css', '.posterstudio__panel', 'display', 'grid'],
+  ]
+  for (const [css, sel, prop, value] of kept) {
+    assert.equal(decl(ruleBody(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)
+  }
+})
+
+test('C7: the game card keeps its lift and its dark edge on hover and focus, and eases the Card tint too', () => {
+  const css = read('42-first-scorebook.css')
+  const hover = ruleBody(css, '.scorebookstory__gamecard:hover,\n.scorebookstory__gamecard:focus-visible') ?? ''
+  assert.equal(decl(hover, 'transform'), 'translateY(-2px)')
+  assert.equal(decl(hover, 'border-color'), 'var(--text-heading)')
+  const base = ruleBody(css, '.scorebookstory__gamecard') ?? ''
+  assert.match(decl(base, 'transition') ?? '', /transform[^,]*,\s*border-color[^,]*,\s*background-color/)
+})
+
+test('C7: the three Logbook tile parents keep their grid, and each tile has a class of its own', () => {
+  const css = read('48a-logbook-stats.css')
+  for (const [parent, cols] of [['.logbookstats__splits', '1fr 1fr'], ['.logbookstats__streaks', '1fr 1fr'], ['.logbookstats__records', '1fr']]) {
+    const body = ruleBody(css, parent) ?? ''
+    assert.equal(decl(body, 'display'), 'grid', `${parent} stays a grid`)
+    assert.equal(decl(body, 'grid-template-columns'), cols)
+  }
+  // No rule styles a tile by its tag any more: a tag selector also hits nested elements.
+  for (const [, sel] of rules(css)) {
+    assert.doesNotMatch(sel, /logbookstats__splits\s+div|logbookstats__streaks\s+article|logbookstats__records\s*>\s*div/, `${sel} styles a tile by tag`)
+  }
+  const page = src('screens/LogbookStatsPage.jsx')
+  const tiles = (ns) => cardTags(page).filter((attrs) => namesClass(attrs, ns)).length
+  assert.equal(tiles('logbookstats__split'), 2, 'two split tiles')
+  assert.equal(tiles('logbookstats__streak'), 2, 'two streak tiles')
+  assert.equal(tiles('logbookstats__record'), 1, 'one record tile, in the clubs loop')
+})
+
+test('C7: the account, logbook and chrome files import no stamp art, and Card imports nothing stamp-related', () => {
+  for (const rel of C7_FILES) {
+    const code = src(rel)
+    assert.doesNotMatch(code.replace(/\/\/.*$/gm, ''), /GameStamp|StampGameButton/, `${rel} draws no stamp art`)
+  }
+  const card = src('components/ui/frame/Card.jsx').replace(/\/\/.*$/gm, '')
+  assert.doesNotMatch(card, /import[^\n]*stamp/i)
+})
+
+test('C7: the seal pin — no reveal-only import, SealBox or revealedThrough read moved', () => {
+  for (const rel of C7_FILES) {
+    const code = src(rel)
+    assert.doesNotMatch(code, /from ['"][./]+\/api\/(linescore|derive)\.js['"]/, `${rel} adds no reveal-only import`)
+    assert.doesNotMatch(code, /<SealBox|revealedThrough/, `${rel} adds no seal`)
+  }
+})
+
+test('C7: the poster panel title keeps its own rule', () => {
+  const body = ruleBody(read('62-game-preview.css'), '.posterstudio__title') ?? ''
+  assert.equal(decl(body, 'font-size'), 'var(--fs-h3)')
+  assert.equal(decl(body, 'text-transform'), 'uppercase')
+  assert.match(src('screens/GamePreview.jsx'), /<h2 className="posterstudio__title">Preview card<\/h2>/)
+})
+
+// ---- slice H3: the second lines ----
+//
+// ADR-0084: a head's second line is `__note` and its title is `__title`. Each row
+// is a class that broke it. The block name stays unless the block itself is
+// renamed by another slice. Each old class is gone from src, e2e, scripts and
+// test, comments too; each new class is drawn by a stylesheet and used by a
+// markup file or by the lab catalog, in code and not only in a comment.
+const H3_RENAMED = [
+  // batch A: the four titles, the `__sub`, `__kicker`, `__eyebrow` and `__lede` rows
+  ['awardord__hd', 'awardord__title'],
+  ['coverpick__heading', 'coverpick__title'],
+  ['gamelines__heading', 'gamelines__title'],
+  ['lookupdeck__heading', 'lookupdeck__title'],
+  ['cthist__sub', 'cthist__note'],
+  ['leaders__sub', 'leaders__note'],
+  ['mgrpage__sub', 'mgrpage__note'],
+  ['psoddsmodal__sub', 'psoddsmodal__note'],
+  ['rpt__sub', 'rpt__note'],
+  ['searchbox__sub', 'searchbox__note'],
+  ['searchoverlay__sub', 'searchoverlay__note'],
+  ['split__sub', 'split__note'],
+  ['umptend__sub', 'umptend__note'],
+  ['boxlines__kicker', 'boxlines__note'],
+  ['scorebookstory__kicker', 'scorebookstory__note'],
+  ['tscoremodal__kicker', 'tscoremodal__note'],
+  ['bcast__eyebrow', 'bcast__note'],
+  ['guidelink__eyebrow', 'guidelink__note'],
+  ['hitchart__eyebrow', 'hitchart__note'],
+  ['introsheet__eyebrow', 'introsheet__note'],
+  ['szmodal__eyebrow', 'szmodal__note'],
+  ['trrank__eyebrow', 'trrank__note'],
+  ['umpmodal__eyebrow', 'umpmodal__note'],
+  ['sitemenusheet__eyebrow', 'sitemenusheet__note'],
+  // `.wordmarklab__eyebrow` left with the Wordmark Lab study itself (#1326).
+  ['admincopy__lede', 'admincopy__note'],
+  ['clubsseen__lede', 'clubsseen__note'],
+  ['foulavg__lede', 'foulavg__note'],
+  // `note__note` repeated its block; the block is `.seasonnote` now (see below)
+  ['note__lede', 'seasonnote__note'],
+  ['stampin__lede', 'stampin__note'],
+  ['xl-entry__lede', 'xl-entry__note'],
+  // batch B, step one: the entry's own note gives up the name the page-level lede takes
+  ['dlab__note', 'dlabentry__note'],
+  // batch B, step two: the page-level lede takes the freed name
+  ['dlab__lede', 'dlab__note'],
+  // after #1339: a section title inside a modal body, not the head's second line
+  ['tscoremodal__subkicker', 'tscoremodal__sectiontitle'],
+]
+
+// Two classes left with no successor: `.cover__sub` had no call site (its rule
+// and its seal-scope allowlist entry went together), and the between-innings
+// eyebrow repeated its block's name.
+const H3_DELETED = ['cover__sub', 'betweeninnings__eyebrow']
+
+// Text files of the four trees, this file excluded (it names the old classes).
+// Read once for the whole block.
+const H3_ROOT = join(SRC, '..')
+const H3_TEXT = ['.css', '.jsx', '.js', '.mjs', '.md']
+let h3Read
+const h3Trees = () =>
+  (h3Read ??= ['src', 'e2e', 'scripts', 'test'].flatMap((dir) =>
+    files(join(H3_ROOT, dir), H3_TEXT)
+      .map((rel) => `${dir}/${rel}`)
+      .filter((rel) => rel !== 'test/card-cascade.test.js')
+      .map((rel) => [rel, readFileSync(join(H3_ROOT, rel), 'utf8')]),
+  ))
+// `\b` is wrong here: `_` is a word character, so it does not exist before `__element`.
+// A modifier (`name--tight`) counts as the class; a longer name (`name-x`, `name_x`) does not.
+const h3Class = (name) => new RegExp(`(?<![A-Za-z0-9_-])${name}(?![a-z0-9_]|-[a-z0-9])`)
+// A file without its comments: the shared `/* */` stripper (which also takes
+// JSX's `{/* */}`), then each whole-line `//` comment. A `//` after code stays,
+// so a string that holds a URL is never cut.
+const h3Code = (text) => stripComments(text).replace(/^[ \t]*\/\/.*$/gm, '')
+
+test('H3: each old second-line class is gone from src, e2e, scripts and test, comments too', () => {
+  const trees = h3Trees()
+  // A two-step row frees a name that the next row takes (`dlab__note`). The
+  // next test pins that step.
+  const taken = new Set(H3_RENAMED.map(([, now]) => now))
+  const gone = [...H3_RENAMED.map(([old]) => old).filter((old) => !taken.has(old)), ...H3_DELETED]
+  for (const old of gone) {
+    const re = h3Class(old)
+    assert.deepEqual(
+      trees.filter(([, text]) => re.test(text)).map(([rel]) => rel),
+      [],
+      `.${old} is still named`,
+    )
+  }
+})
+
+// Step one of the two-step. The loop above skips `dlab__note`, because step two
+// gives that name to the page-level lede, so a return to `<p className="dlab__note">`
+// for an ENTRY's note would pass it. An entry's note keeps its own name.
+test('H3: a design lab entry note wears .dlabentry__note, never the name the lede took', () => {
+  const jsx = h3Code(readFileSync(join(SRC, 'screens/designlab/Entry.jsx'), 'utf8'))
+  assert.deepEqual(
+    [...jsx.matchAll(/className="([^"]*)">\{note\}/g)].map((m) => m[1]),
+    ['dlabentry__note'],
+  )
+})
+
+test('H3: each new second-line class is in a stylesheet and in a markup file or the lab catalog, not only in a comment', () => {
+  const code = h3Trees()
+    .filter(([rel]) => rel.startsWith('src/'))
+    .map(([rel, text]) => [rel, h3Code(text)])
+  for (const [, now] of H3_RENAMED) {
+    const re = h3Class(now)
+    const hit = (ext) => code.some(([rel, text]) => ext.test(rel) && re.test(text))
+    assert.ok(hit(/\.css$/), `.${now} has no rule`)
+    assert.ok(hit(/\.jsx?$/), `.${now} is used by no markup and no lab entry`)
+  }
+})
+
+// After #1339 the block itself moved. `.note__note` repeated its block's name,
+// and `note` named no job (ADR-0084 clause 1): the block is one note about the
+// season that just finished, so it is `.seasonnote`, with every part. No class
+// of the old block is left, as an element, a modifier or the bare block.
+test('H3: the season note block is .seasonnote, and no .note class is left', () => {
+  const old = /(?<![A-Za-z0-9_-])note(__|--)[a-z]|className="note[ "]|'\.note[ ']/
+  assert.deepEqual(h3Trees().filter(([, text]) => old.test(text)).map(([rel]) => rel), [])
+  for (const rel of ['components/offseason/LongAtBats.jsx', 'components/offseason/YoungestRegulars.jsx']) {
+    assert.match(readFileSync(join(SRC, rel), 'utf8'), /<section className="seasonnote[ "]/)
+  }
+})
+
+test('H3: the held rows keep their names', () => {
+  const trees = h3Trees()
+  const held = [
+    'wire__kicker', 'bs__sub', 'ledger__sub', // not a second line (#1113, #1132)
+    'contractcard__eyebrow', // `.contractcard__note` is the optioned caption, a different line
+    // two different second lines on one head: needs a decision on the grammar
+    'abouthero__kicker', 'abouthero__lede', 'derbycard__eyebrow', 'derbycard__sub',
+    'logbooklanding__eyebrow', 'logbooklanding__lede', 'researchdiary__eyebrow', 'researchdiary__lede',
+    'stampstrip__eyebrow', 'stampstrip__lede',
+  ]
+  for (const name of held) {
+    const re = h3Class(name)
+    assert.ok(
+      trees.some(([rel, text]) => rel.startsWith('src/styles/') && re.test(text)),
+      `.${name} lost its rule`,
+    )
+  }
+})
+
+test('H3: the between-innings button is still named by its fact', () => {
+  const jsx = readFileSync(join(SRC, 'components/gamehud/BetweenInnings.jsx'), 'utf8')
+  const button = jsx.slice(jsx.indexOf('<Card as="button"'), jsx.indexOf('</Card>'))
+  // The name comes from the content: the progress count, the player and the fact.
+  // An aria-label would replace it and hide the fact from a screen reader.
+  assert.match(button, /betweeninnings__progress/)
+  assert.match(button, /\{card\.text\}/)
+  assert.doesNotMatch(button, /aria-label/)
 })

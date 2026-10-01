@@ -27,7 +27,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import handler, { hashFromReply } from '../api/copy.js'
+import handler from '../api/copy.js'
+import { hashFromReply } from '../api/_lib/redis.js'
+import { nodeRes } from './helpers/node-http.js'
 
 const PHOTO_URL =
   'https://store123.public.blob.vercel-storage.com/ballparks/fenwaypark-photo-Ab3xY9.jpg'
@@ -48,29 +50,10 @@ function wireReply(hash) {
   ])
 }
 
-// Minimal stand-ins for Node's (IncomingMessage, ServerResponse), matching the
-// helpers in test/api-books-handlers.test.js.
+// A fixed GET request, unlike helpers/node-http.js's nodeReq.
 function nodeReq() {
   return { method: 'GET', url: '/api/copy', headers: {} }
 }
-function nodeRes() {
-  const headers = {}
-  return {
-    statusCode: 0,
-    payload: null,
-    headers,
-    setHeader(k, v) {
-      headers[k] = v
-    },
-    end(p) {
-      this.payload = p
-    },
-    get json() {
-      return JSON.parse(this.payload)
-    },
-  }
-}
-
 // Answer every Upstash REST call with `result`, in the shape its HTTP client
 // reads (`ok`/`status`/`headers.get`/`text`).
 function stubFetch(result) {

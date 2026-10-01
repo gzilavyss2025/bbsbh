@@ -11,6 +11,8 @@
 // nothing about an MLB-context translation — see docs/adr (prospect-level
 // percentile decision) for why that scope was chosen over a traditional MLE.
 
+import { sumHitting, sumPitching } from '../../src/api/statsLevels.js'
+
 // Playing-time floors below which one hot/cold week can swing a percentile
 // wildly — a just-promoted or recently-injured prospect falls out entirely
 // rather than showing a noisy 99th-percentile-on-6-PAs badge.
@@ -118,4 +120,38 @@ export function primaryGroupFor(position, hasHitting, hasPitching) {
   if (hasPitching && !hasHitting) return 'pitching'
   if (!hasHitting && !hasPitching) return null
   return /P$/.test(position || '') ? 'pitching' : 'hitting'
+}
+
+// One snapshot row for a PoolPlayer, shared by gen-prospect-trend.mjs and its
+// backfill. The percentile population and the level-tenure median each cover
+// ONE level, so the row reads his line at his highest level in this group, not
+// `p.hitting`/`p.pitching` (combineToPool's sum over every level: Owen Ayers
+// is 538 PA, 165% of a stay, 91st; AAA alone is 208 PA, 64%, 38th — #1279).
+// Null when he has no line in his primary group. `atLevel` marks the rule, so
+// movementSince can tell these rows from the summed ones written before it.
+export function snapshotRow(p, populations) {
+  const group = primaryGroupFor(p.position, Boolean(p.hitting), Boolean(p.pitching))
+  if (!group) return null
+  const hitting = group === 'hitting'
+  const splits = (hitting ? p.hittingSplits : p.pitchingSplits).filter((s) => s.sport?.id)
+  if (!splits.length) return null
+  const sportId = Math.min(...splits.map((s) => s.sport.id)) // a LOWER id is a HIGHER level
+  const levelSplits = splits.filter((s) => s.sport.id === sportId)
+  const line = hitting ? sumHitting(levelSplits) : sumPitching(levelSplits)
+  const qualified = meetsPlayingTimeFloor(group, line)
+  const population = populations.get(populationKey(sportId, group)) ?? []
+  const metric = Number(hitting ? line.ops : line.era)
+  const percentile = qualified ? percentileRank(metric, population, hitting) : null
+  const sampleSize = Number(hitting ? line.plateAppearances : line.outs) || 0
+  return { group, payload: { sportId, percentile, qualified, sampleSize, populationSize: population.length, atLevel: true } }
+}
+
+// A row's movement against an earlier snapshot (`prior`: { date, payload }).
+// Null unless both rows read one level: a row from before #1279 summed every
+// level, so the gap would be a change of method, not of play (Owen Ayers: 91,
+// then 38 the night the rule shipped).
+export function movementSince(payload, prior) {
+  if (!payload.atLevel || !prior?.payload.atLevel) return null
+  if (payload.percentile == null || prior.payload.percentile == null) return null
+  return { delta: payload.percentile - prior.payload.percentile, sinceDate: prior.date }
 }

@@ -11,6 +11,7 @@
 //
 import { halfIndex } from './select.js'
 import { CENTURY_MPH } from './pitchArsenal.js'
+import { ipToOuts } from '../lib/math/innings.js'
 
 // The laboring index deliberately compares raw volume against the pitcher's
 // OWN season norm (pitches per inning) rather than weighting pitches by
@@ -34,11 +35,6 @@ const LABOR_RATIO = 1.15
 const VELO_DROP_FLAG = 1.5
 const MIN_ANCHOR_PITCHES = 5
 const MIN_CURRENT_PITCHES = 3
-
-function ipToOuts(ip) {
-  const [full, part] = String(ip ?? '0.0').split('.')
-  return (Number(full) || 0) * 3 + (Number(part) || 0)
-}
 
 // The laboring read for one Pitchers-table row (a `computePitcherLines` row,
 // already reveal-clamped) against his season baseline from workload.json.

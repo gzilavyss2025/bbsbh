@@ -42,7 +42,9 @@
 // looks at them. It counts rows boxlines/rows.js already approved, and a fold
 // can only ever describe a set the gate allowed.
 
-import { outsToIp } from '../person/shared.js'
+import { mlbOps, eraOf } from '../person/shared.js'
+import { outsToIp } from '../../lib/math/innings.js'
+import { num } from '../../lib/math/number.js'
 
 // What an entry's two figures are CALLED, in the order `foldLine` returns them
 // and the vocabulary the card's own columns already print (careerSplits.js's
@@ -50,11 +52,6 @@ import { outsToIp } from '../person/shared.js'
 export const LIST_COLUMNS = {
   hitting: ['G', 'AVG'],
   pitching: ['G', 'ERA'],
-}
-
-function num(v) {
-  const n = Number(v)
-  return Number.isFinite(n) ? n : 0
 }
 
 // Every counting stat a set of rows holds, added once. Both readers below take
@@ -133,18 +130,10 @@ export function foldLine(rows, group) {
     : { games: t.games, rate: t.atBats ? avg3(t.hits / t.atBats) : null }
 }
 
-// MLB'S OWN ROUNDING, copied deliberately: OPS is not OBP + SLG at full
-// precision. Each half is rounded to three places and THOSE are added, which is
-// how .559 + .630 comes to 1.189 where the unrounded sum is 1.1884 and would
-// print 1.188. careerSplits.js's merge does the same, and both are held to
-// MLB's own published strings.
-const round3 = (v) => Math.round(v * 1000) / 1000
-
-// Earned runs times nine, over innings — which is outs/3, so `* 27 / outs`.
 // Null and never "0.00" when he recorded no out: a zero there is a claim, and
-// it is not a true one.
+// it is not a true one (eraOf, person/shared.js).
 function era(t) {
-  return t.outs ? ((t.earnedRuns * 27) / t.outs).toFixed(2) : null
+  return eraOf(t.earnedRuns, t.outs)?.toFixed(2) ?? null
 }
 
 // THE WHOLE LINE, for the group a reader picked — counts first, then rates,
@@ -197,7 +186,7 @@ export function foldStats(rows, group) {
     { k: 'AVG', v: t.atBats ? avg3(t.hits / t.atBats) : null },
     { k: 'OBP', v: obp == null ? null : avg3(obp) },
     { k: 'SLG', v: slg == null ? null : avg3(slg) },
-    { k: 'OPS', v: obp == null || slg == null ? null : avg3(round3(obp) + round3(slg)) },
+    { k: 'OPS', v: obp == null || slg == null ? null : avg3(mlbOps(obp, slg)) },
   ]
 }
 

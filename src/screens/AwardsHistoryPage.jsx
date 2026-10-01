@@ -13,6 +13,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
+import { monthDayName } from '../lib/dates.js'
 
 // The two All-MLB families arrive from the generator as ordinary award
 // families (see gen-awards-history.mjs / MAJOR_AWARDS), but the page treats
@@ -28,12 +29,6 @@ const ALL_MLB_SECOND_KEY = 'All-MLB Second Team'
 // a full banner at 740px+.
 const LEAGUE_NAME = { AL: 'American League', NL: 'National League' }
 const LEAGUE_CLASS = { AL: 'awardhistory__leaguetag--al', NL: 'awardhistory__leaguetag--nl' }
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-function monthDay(iso) {
-  const [, m, d] = (iso || '').split('-')
-  return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
-}
 
 // "Pete Crow-Armstrong" -> ["Pete", "Crow-Armstrong"] (everything after the
 // first space) — same convention as PerformerCard.jsx's splitFirstLast, so
@@ -328,7 +323,7 @@ export function AwardsHistoryPage() {
   const { favoriteTeamId } = useFavoriteTeam()
   const [view, setView] = useState('award')
   const families = useMemo(() => data?.families ?? [], [data])
-  const updated = monthDay(data?.generatedAt?.slice(0, 10))
+  const updated = monthDayName(data?.generatedAt)
 
   const { hardware, allMlbFirst, allMlbSecond } = useMemo(() => {
     const first = families.find((f) => f.key === ALL_MLB_FIRST_KEY) ?? null

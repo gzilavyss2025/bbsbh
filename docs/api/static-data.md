@@ -83,8 +83,8 @@ for each generator; the reader modules:
 - `rehab.js` — the Rehab Assignments page, from `public/data/rehab.json`.
   Cost-driven: a league-wide transaction scan then per-candidate verification
   against his game log + rehab club's schedule to drop ended stints — dozens of
-  calls. `gen-rehab.mjs` (daily cron) keeps its own copy of the transaction-scan
-  logic, which mirrors `person.js`'s `detectRehabAssignment`.
+  calls. `gen-rehab.mjs` (daily cron) imports the transaction tests and the 30-day
+  cap from `rehab-policy.js`, shared with `person.js`'s `detectRehabAssignment`.
 - `milestones.js` — the Milestone Watch page + the player page's Milestone Watch
   card, from `public/data/milestones.json`. Cost-driven: a career-total + this
   season's pace pull per debuted player on any MLB org's full roster (active,
@@ -917,6 +917,16 @@ for each generator; the reader modules:
   arrow only appears past a 5-point move, since a percentile wobbles a point
   or two on one good night.
 
+  The file is **packed** (#1269) because the phone parses all of it before the
+  pill shows: the week dates are stored once in `historyDates`, and a `history`
+  row is `[dateIndex, sportId, percentile]` (a fourth `qualified` item only on a
+  row where it is not "percentile is not null"; there is none today). `packed: 1`
+  is the version marker. `fetchProspectTrend()` unpacks once with
+  `unpackProspectTrend`, so every caller and selector sees plain `{ date,
+  sportId, percentile, qualified }` rows. `sportId` stays per row: a player who
+  moved level carries both. The reader still accepts the old plain shape until a
+  nightly run has written the packed one. 3.3 MB became 0.65 MB on disk.
+
   The board column is **`Standing vs level`** and sits last, after the season
   line. Each row names its metric and exact percentile, then gives the standing
   band, sample confidence, PA/IP, and meaningful movement. The five bands are
@@ -932,7 +942,9 @@ for each generator; the reader modules:
   TYPICAL STAY at his level — `tenureFact` compares his current PA/outs
   (the same count `prospectTrend.js`'s `sampleSize` already carries, so the
   two never disagree) against the historical cohort's median, expressed as a
-  plain percent ("about 62% of a typical AA stay"). `ProspectCard` renders it
+  plain percent ("about 62% of a typical AA stay"). That count is his line at
+  his primary level alone, not his season summed over every level (#1279).
+  `ProspectCard` renders it
   as a "Time at level" fact beside the performance standing, in both the
   qualified and early-sample states — it's most useful in the early state,
   where it explains WHY the sample is still small rather than just saying so.

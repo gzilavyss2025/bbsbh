@@ -27,7 +27,7 @@ const repo = join(here, '..', '..')
 const j = async (p) => JSON.parse(await readFile(p, 'utf8'))
 
 // innings come back as "58.1" = 58 and 1/3. Reused rather than re-derived, the
-// same conversion src/api/rehab-policy.js's ipToOuts makes.
+// same conversion src/lib/math/innings.js's ipToOuts makes.
 function ipToInnings(ip) {
   if (ip == null) return 0
   const n = Number(ip)

@@ -94,7 +94,6 @@ export function BetweenInnings({
   return (
     <Card as="button" body="flush" className="betweeninnings" onClick={advance}>
       <div className="betweeninnings__label">
-        <span className="betweeninnings__eyebrow">Between Innings</span>
         <span className="betweeninnings__progress">
           {safeIdx} / {cards.length}
         </span>

@@ -13,7 +13,11 @@ import {
   primaryGroupFor,
   buildPopulations,
   populationKey,
+  snapshotRow,
+  movementSince,
 } from '../scripts/lib/prospectPercentile.mjs'
+import { combineToPool } from '../src/api/statsLevels.js'
+import { tenureFact } from '../src/api/levelTenure.js'
 
 const hitSplit = (ops, plateAppearances, id) => ({ stat: { ops, plateAppearances }, player: { id } })
 const pitSplit = (era, outs, id) => ({ stat: { era, outs }, player: { id } })
@@ -154,4 +158,69 @@ test('buildPopulations skips a split with no sport.id', () => {
   const hit = [{ ...hitSplit(0.9, MIN_PLATE_APPEARANCES, 1) }] // no sport field
   const populations = buildPopulations(hit, [])
   assert.equal(populations.size, 0)
+})
+
+// --------------------------------------------------------------------------
+// snapshotRow — #1279. Both benchmarks (the percentile population and the
+// level-tenure median) cover ONE level, so a prospect's row reads his line at
+// that level, not his season summed over every level he played.
+// Owen Ayers (689196), 2026 — real lines. Shipped: 538 PA, 165%, .929, 91st.
+// --------------------------------------------------------------------------
+const ayersSplit = (sportId, stat) => ({
+  player: { id: 689196, fullName: 'Owen Ayers' },
+  sport: { id: sportId },
+  team: { id: 100 + sportId },
+  position: { abbreviation: 'C' },
+  stat,
+})
+const AYERS_SPLITS = [
+  ayersSplit(11, { plateAppearances: 208, atBats: 174, hits: 43, doubles: 10, triples: 0, homeRuns: 3, baseOnBalls: 32, hitByPitch: 1, sacFlies: 1, totalBases: 62, strikeOuts: 45 }),
+  ayersSplit(12, { plateAppearances: 278, atBats: 230, hits: 70, doubles: 16, triples: 1, homeRuns: 16, baseOnBalls: 42, hitByPitch: 4, sacFlies: 2, totalBases: 136, strikeOuts: 69 }),
+  ayersSplit(13, { plateAppearances: 52, atBats: 43, hits: 16, doubles: 3, triples: 0, homeRuns: 6, baseOnBalls: 8, hitByPitch: 1, sacFlies: 0, totalBases: 37, strikeOuts: 11 }),
+]
+// 100 qualified AAA hitters: 38 below .721, 53 more below .929, 9 above.
+const AAA_OPS = [...Array(38).fill(0.6), ...Array(53).fill(0.8), ...Array(9).fill(0.95)]
+const AAA_BENCHMARK = { levels: { AAA: { hitting: { unit: 'pa', n: 355, median: 327, p75: 529, p90: 806 } } } }
+
+test('snapshotRow reads a three-level prospect at his AAA line only (Owen Ayers)', () => {
+  const [ayers] = combineToPool(AYERS_SPLITS, [])
+  const { group, payload } = snapshotRow(ayers, new Map([[populationKey(11, 'hitting'), AAA_OPS]]))
+  assert.equal(group, 'hitting')
+  assert.equal(payload.sportId, 11)
+  assert.equal(payload.sampleSize, 208) // not 538
+  assert.equal(payload.percentile, 38) // .721 — not the 91st a summed .929 earns
+  assert.equal(payload.populationSize, 100)
+  assert.equal(tenureFact(AAA_BENCHMARK, payload.sportId, group, payload.sampleSize).pct, 64) // not 165
+})
+
+test('snapshotRow: a promotion 30 PA ago leaves him unqualified at the new level, with that level\'s count', () => {
+  const splits = [
+    ayersSplit(12, { ...AYERS_SPLITS[1].stat }),
+    ayersSplit(11, { ...AYERS_SPLITS[0].stat, plateAppearances: 30 }),
+  ]
+  const [p] = combineToPool(splits, [])
+  const { payload } = snapshotRow(p, new Map([[populationKey(11, 'hitting'), AAA_OPS]]))
+  assert.deepEqual([payload.sportId, payload.sampleSize, payload.qualified, payload.percentile], [11, 30, false, null])
+})
+
+test('snapshotRow is null for a player with no line in either group', () => {
+  assert.equal(snapshotRow({ position: 'C', hitting: null, pitching: null }, new Map()), null)
+})
+
+// A row written before #1279 summed every level. Diffing it against a level-only
+// row would print a method change as a move (Ayers: 91 then 38 = "down 53").
+test('movementSince compares two rows that both read one level', () => {
+  const prior = { date: '2026-09-16', payload: { percentile: 50, atLevel: true } }
+  assert.deepEqual(movementSince({ percentile: 62, atLevel: true }, prior), { delta: 12, sinceDate: '2026-09-16' })
+})
+
+test('movementSince is null against a row from before the one-level rule', () => {
+  const prior = { date: '2026-09-16', payload: { percentile: 91 } }
+  assert.equal(movementSince({ percentile: 38, atLevel: true }, prior), null)
+})
+
+test('movementSince is null with no prior row or an unranked side', () => {
+  assert.equal(movementSince({ percentile: 38, atLevel: true }, undefined), null)
+  assert.equal(movementSince({ percentile: null, atLevel: true }, { date: 'd', payload: { percentile: 4, atLevel: true } }), null)
+  assert.equal(movementSince({ percentile: 4, atLevel: true }, { date: 'd', payload: { percentile: null, atLevel: true } }), null)
 })

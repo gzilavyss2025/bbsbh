@@ -261,17 +261,13 @@ test('the injected head carries a rel=canonical, and it agrees with og:url', () 
 })
 
 // Every team-hub tab (Overview is untagged; the other five pass `tab`) needs
-// its own eyebrow and a description that actually mentions the tab, so a
-// copy-pasted config entry can't silently describe the wrong tab.
-test('every team-hub tab has a distinct, non-empty eyebrow and description', () => {
+// a description that actually mentions the team, so a copy-pasted config entry
+// can't silently describe the wrong one.
+test('every team-hub tab has a description that names the team', () => {
   const tabs = Object.keys(TEAM_TABS)
   assert.deepEqual(tabs.sort(), ['games', 'leaders', 'minors', 'numbers', 'roster'].sort())
-  const eyebrows = new Set()
   for (const tab of tabs) {
     const cfg = TEAM_TABS[tab]
-    assert.ok(cfg.eyebrow, `${tab} needs a non-empty eyebrow`)
-    assert.ok(!eyebrows.has(cfg.eyebrow), `${tab}'s eyebrow "${cfg.eyebrow}" collides with another tab`)
-    eyebrows.add(cfg.eyebrow)
     const desc = cfg.description('Milwaukee Brewers')
     assert.ok(desc.includes('Milwaukee Brewers'), `${tab}'s description should mention the team name`)
   }

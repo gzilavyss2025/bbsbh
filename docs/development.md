@@ -179,31 +179,11 @@ routing parses the pathname only — so use it everywhere by habit.
 
 ### A cold dev server
 
-A dev server that has never served a route compiles it on the first navigation,
-because vite pre-transforms a module's static imports but never its dynamic
-ones, and every route in `App.jsx` is `lazy(() => import(...))`. A fresh
-worktree meets this on its first verification run, and it used to surface two
-ways, both of them lies: a bare `Test timeout of 30000ms exceeded` that names
-the code under test, and a `test.skip` whose reason claimed MLB had no data.
-
-Two things hold it now, and neither needs anything from a spec:
-
-- `e2e/global-setup.js` requests the app entry once after the server is up and
-  before the first test, so the dependency pre-bundle and the eager module graph
-  are not charged to whichever spec runs first. It prints how long it took.
-- `routeRendered` in `e2e/fixtures.js`, which every `page.goto` goes through,
-  waits for the route's own Suspense fallback (`loader--route`, named in
-  `App.jsx` for exactly this) to leave. Past that point a missing locator is
-  missing from the DATA, which is the only thing a skip may claim, and a route
-  that never renders fails by naming the fallback.
-
-**Do not "fix" this by warming the lazy routes too.** It was measured and it is
-slower: transforming the 169 modules under `src/screens` at server start
-competes with the three the first test asks for, and the first navigation to a
-route went from a 3.9s median to 5.9s over three cold starts each. Nor is
-`vite optimize` the answer — it is deprecated in vite 8, and a dep cache
-written by hand can leave the server re-optimising mid-run, which full-reloads
-the page and fails whatever dialog was open. See issue #1095.
+A fresh dev server compiles each lazy route on its first navigation, which used to
+show up as a false timeout or a false `test.skip` (issue #1095). Two places own the
+fix, and each holds its own reasoning: `e2e/global-setup.js` (warms the eager graph,
+and why it must not warm the lazy routes) and `routeRendered` in `e2e/fixtures.js`
+(waits for the route to draw).
 
 ## Testing Express Lane: `?nofilm`
 

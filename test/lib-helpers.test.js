@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { ordinal } from '../src/lib/format.js'
 import { nameFromChildren } from '../src/lib/nav.js'
-import { toApiDate, addDays, monthDay, humanDate, scorebookDate, longDate } from '../src/lib/dates.js'
+import { toApiDate, addDays, monthDay, humanDate, scorebookDate } from '../src/lib/dates.js'
 import { tierForZ, meanAndSd, TIER_LABELS } from '../src/lib/statTiers.js'
 import {
   stateKey,
@@ -66,14 +66,11 @@ test('the localized date formatters return a non-empty label for a real date', (
   // the year appears where the format includes it.
   assert.ok(humanDate('2026-07-05').length > 0)
   assert.match(scorebookDate('2026-07-05'), /2026/)
-  assert.match(longDate('2026-07-05'), /2026/)
 })
 
-test('scorebookDate and longDate fall back to empty string on a bad date', () => {
+test('scorebookDate falls back to empty string on a bad date', () => {
   assert.equal(scorebookDate(''), '')
   assert.equal(scorebookDate('2026-7-5'), '') // not zero-padded → rejected
-  assert.equal(longDate(null), '')
-  assert.equal(longDate('garbage'), '')
 })
 
 // --------------------------------------------------------------------------

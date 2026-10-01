@@ -4,8 +4,8 @@
 // across levels. See api/positionInnings scope loader for the fetch side, and
 // ../person.js's header for this module's overall spoiler footing.
 
-import { ipToOuts } from '../rehab-policy.js'
-import { num, outsToIp } from './shared.js'
+import { ipToOuts, outsToIp } from '../../lib/math/innings.js'
+import { num } from './shared.js'
 
 // The eight defensive spots plus the mound, in the diamond's render order.
 const FIELD_POSITIONS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'P']

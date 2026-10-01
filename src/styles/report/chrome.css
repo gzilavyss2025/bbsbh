@@ -119,7 +119,7 @@
 
 /* ---- a sub-line inside a column head ----------------------- */
 
-/* THE FLOOR RIDES IN THE HEAD IT QUALIFIES, which is a `.rpt__sub` in a
+/* THE FLOOR RIDES IN THE HEAD IT QUALIFIES, which is a `.rpt__note` in a
    `<thead>` cell — the first place in the app to put one there, and the reason
    this rule exists. `.rpt thead th` is nowrap so five figure heads each hold
    one line; a sub-line under a head is a sentence, and unbreakable it holds
@@ -129,10 +129,10 @@
    small display cap and not for a body-font caption, back to the flat tracking
    the same sub-line already gets in a body row.
 
-   Here rather than beside `.rpt__sub` in 68-around-the-game.css because a
+   Here rather than beside `.rpt__note` in 68-around-the-game.css because a
    sub-line in a HEAD is a report-board move, and that file is at its size cap
    (ADR-0038). */
-.rpt thead th .rpt__sub {
+.rpt thead th .rpt__note {
   white-space: normal;
   letter-spacing: var(--ls-none);
 }
