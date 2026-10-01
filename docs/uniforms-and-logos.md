@@ -56,8 +56,7 @@ Hat; Cardinals in Home Whites / Primary Red Hat. Takes a comma list of gamePks
 
 Uniform identity is spoiler-FREE: what a team wears reveals nothing about the
 score, and the assignment doesn't change as the game unfolds. Safe to fetch and
-render on the staging screens (TeamInfo / GameView masthead) or in the
-`scripts/game-buzz.mjs` GAME NOTES flow. The only wrinkle is timing: it may
+render on the staging screens (TeamInfo / GameView masthead). The only wrinkle is timing: it may
 still be empty when the user stages a game pregame, so render it
 behind the usual "not posted yet" fallback and let Refresh pick it up.
 

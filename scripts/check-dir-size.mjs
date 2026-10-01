@@ -794,7 +794,8 @@ const BUDGETS = {
   // +1 for check-all.mjs, the one runner behind `npm run lint` (#1310). It
   // replaced a 29-command `&&` chain in package.json, so it belongs beside the
   // guards it runs.
-  scripts: 119,
+  // -2: game-buzz.mjs and gen-scorebook-retrospective.mjs deleted (#1310).
+  scripts: 117,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
