@@ -47,7 +47,9 @@ function centerOn(strip, cell) {
 // were already decided when it started). The game this page is FOR, and every
 // game AFTER it, have their score blanked by seasonSeriesCells regardless of
 // what the feed says, so a replayed page never tells you how a series ended
-// (see its own header comment / the root spoiler-rule invariant).
+// (see its own header comment / the root spoiler-rule invariant). On a
+// postseason page a later postseason game is not drawn at all: whether an
+// "if necessary" card exists would give the series length away.
 // Renders nothing for a one-off interleague game (no real "series" to show)
 // or before the schedule loads.
 export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, sportId, currentGamePk }) {
@@ -67,7 +69,7 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
     [viewingTeamId, opponentId, season, sportId],
   )
 
-  const cells = seasonSeriesCells(games ?? [], viewingTeamId, currentGamePk)
+  const cells = seasonSeriesCells(games ?? [], viewingTeamId, currentGamePk, officialDate)
   const leadLabel = seriesLeadLabel(
     seasonSeriesRecord(cells, viewingTeamId, opponentId),
     viewingTeamId,

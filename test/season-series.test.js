@@ -163,8 +163,12 @@ const series = () => [
   post(33, 'W', 4, 2, 7, { innings: 11 }), post(34, 'W', 5, 0, 1),
 ]
 
+// The same five games as regular-season rows: those later cells are still
+// drawn, so they must be sealed.
+const regularSeries = () => series().map((g) => ({ ...g, gameType: 'R', seriesGameNumber: null }))
+
 test('seasonSeriesCells: games after the viewed game are sealed, games before keep their score', () => {
-  const cells = seasonSeriesCells(series(), MIL, 32)
+  const cells = seasonSeriesCells(regularSeries(), MIL, 32)
   const [g1, g2, g3, g4, g5] = cells
   for (const c of [g1, g2]) {
     assert.equal(c.final, true)
@@ -184,9 +188,15 @@ test('seasonSeriesCells: games after the viewed game are sealed, games before ke
     assert.equal(c.loserScore, null)
     assert.equal(c.extraInnings, null)
   }
-  // The schedule facts stay: the round tag and series game are not results.
-  assert.equal(g4.round, 'WS')
-  assert.equal(g4.seriesGame, 4)
+})
+
+test('seasonSeriesCells: a postseason page keeps the games before it with their round tag and score', () => {
+  const [g1, g2, g3] = seasonSeriesCells(series(), MIL, 32)
+  assert.equal(g1.round, 'WS')
+  assert.equal(g2.seriesGame, 2)
+  for (const c of [g1, g2]) assert.equal(c.hasScore, true)
+  assert.equal(g3.isCurrent, true)
+  assert.equal(g3.final, false)
 })
 
 test('seasonSeriesCells: a regular-season game after the viewed game is sealed too', () => {
@@ -213,6 +223,36 @@ test('seasonSeriesCells: with no current game in the list, nothing is sealed', (
   for (const pk of [undefined, null, 999]) {
     for (const c of seasonSeriesCells(series(), MIL, pk)) assert.equal(c.final, true)
   }
+})
+
+// MLB drops an unplayed "if necessary" postseason game from its schedule once a
+// series is decided, so a later card that EXISTS (or is missing) says how the
+// series ended, and so who won the viewed game. Later postseason games are not
+// drawn at all, blanked scores or not.
+test('seasonSeriesCells: a postseason page draws no later postseason card', () => {
+  const cells = seasonSeriesCells(series(), MIL, 32)
+  assert.deepEqual(cells.map((c) => c.gamePk), [30, 31, 32])
+})
+
+test('seasonSeriesCells: a postseason page keeps every earlier postseason card', () => {
+  const cells = seasonSeriesCells(series(), MIL, 34)
+  assert.deepEqual(cells.map((c) => c.gamePk), [30, 31, 32, 33, 34])
+  assert.equal(cells[3].final, true)
+})
+
+test('seasonSeriesCells: a regular-season page still draws a later postseason card', () => {
+  const games = [post(70, 'R', 1, 2, 3), post(71, 'D', 1, 1, 4)]
+  assert.deepEqual(seasonSeriesCells(games, MIL, 70).map((c) => c.gamePk), [70, 71])
+})
+
+// A page whose game is not in the fetched list (a spring-training or MiLB
+// postseason game) cannot tell which row is its own, so it seals every game
+// from its own date on.
+test('seasonSeriesCells: with the viewed game missing, games on or after its date are sealed', () => {
+  const games = [post(80, 'R', 1, 2, 3), post(81, 'R', 2, 1, 4), post(82, 'R', 3, 5, 0)]
+  const cells = seasonSeriesCells(games, MIL, 999, '2026-10-02')
+  assert.deepEqual(cells.map((c) => c.final), [true, false, false])
+  assert.equal(cells[2].winnerScore, null)
 })
 
 test('seasonSeriesRecord: counts only the regular-season games before the viewed game', () => {
