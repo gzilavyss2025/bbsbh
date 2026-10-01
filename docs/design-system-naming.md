@@ -8,19 +8,20 @@ and only there.** This file does not restate it. Two copies of a rule drift, and
 the copy a reader happens to open is the one they follow. Read the ADR for what
 the six clauses say and what each one rejects; read this file for what moves.
 
-Measured on `main` at `9a578dcb7`. **156 rows**, of which **9 are held**.
+Measured on `main` at `9a578dcb7`. **157 rows**, of which **9 are held**.
 
 One row was added after the measurement, by the rename that found it: see
 `.bs__noteMore` under #1130. Twelve more, the `sheet` family under #1113, were
-added by #1155 and measured on `main` at `ffd91507a`.
+added by #1155 and measured on `main` at `ffd91507a`. One more,
+`.tscoremodal__subkicker` under #1113, was found after slice H3 (#1339).
 
 | collapse issue | rows |
 | --- | --- |
 | Button and Door (#1130) | 26 |
 | Pill (#1131) | 33 |
-| SectionHead and Card (#1113) | 87 |
+| SectionHead and Card (#1113) | 88 |
 | Table, EmptyState and Notice (#1132) | 10 |
-| **total** | **156** |
+| **total** | **157** |
 
 ## How to read a row
 
@@ -231,7 +232,7 @@ elements are measurably tappable, and six states are written as modifiers.
 | `.pitcherhandoff__chip--open` | 4 | `.pitcherhandoff__chip.is-open` | #1131 | `styles/12-sealbox.css` | no literal call site — `PitcherHandoffCard.jsx` builds the name as `` `pitcherhandoff__chip--${bookOpen ? "open" : "closed"}` ``, so a grep-driven rename misses it and the rule silently stops applying. `--closed` moves with it. |
 | `.index-group__badge` | — (for #1114) | hold | #1131 | 1 file — none move | HOLD — `badge` is not one of clause 1's eight shape words, so no clause reaches this class. It is recorded because it draws the pill shape and #1114 counts shapes, not words. It is also the same surface as `.cta__go`: server-rendered landing copy styled from `public/learn.css`. |
 
-## SectionHead and Card — #1113 — 87 rows
+## SectionHead and Card — #1113 — 88 rows
 
 Twenty-nine blocks carry `card` without owning the base rule for it.
 `.card` (the Card component, which took over `.thub-card` in #1221) and
@@ -239,9 +240,9 @@ Twenty-nine blocks carry `card` without owning the base rule for it.
 carry `sheet` without owning the base rule for it; `.sheet` owns it and is not a
 row. They ride with #1113 because `Card`'s `frame="sheet"` is the one rule the
 word will name, and two of them already have `__eyebrow` rows here. The other
-forty-six rows are the head: four titles, thirty-nine second lines that
-become `__note`, one eyebrow retired, one orphan deleted, and one row
-#1113 must name.
+forty-seven rows are the head: four titles, thirty-nine second lines that
+become `__note`, one eyebrow retired, one orphan deleted, one section title
+inside a body, and one row #1113 must name.
 
 Every clause-3 row in this table landed in #1339 (slice H3 of #1113) as a
 class word only: the element and its rule did not change. A row says
@@ -299,6 +300,7 @@ deletion, a retired line, or `.wire__kicker`, which is not a second line.
 | `.boxlines__kicker` | 3 | `.boxlines__note` | #1113 | `components/boxlines/BoxLinesSheet.jsx`, `screens/animlab/motionDemos.jsx`, `styles/boxlines/boxlines.css`, `e2e/box-lines.spec.js` | landed in #1339. The line is built — `` `Game lines · ${picked.name}` ``, defaulting to the `kicker` prop. `BoxLinesSheet.jsx` says the kicker titles the sheet. |
 | `.scorebookstory__kicker` | 3 | `.scorebookstory__note` | #1113 | `screens/FirstScorebookPage.jsx`, `styles/42-first-scorebook.css` | landed in #1339. Holds "The 22 Scorebook" above `<h1>My First Scorebook</h1>` — a second line, not the title again. |
 | `.tscoremodal__kicker` | 3 | `.tscoremodal__note` | #1113 | `components/teamstats/TeamScoreExplainer.jsx`, `styles/40-game-modals.css` | landed in #1339. Holds "How We Score It" above the modal's own question-form title. |
+| `.tscoremodal__subkicker` | 3 | `.tscoremodal__sectiontitle` | #1113 | `components/teamstats/TeamScoreExplainer.jsx`, `styles/40-game-modals.css` | landed after #1339 (slice H3 of #1113), a class word only. Not the head's second line: it is the caps title of each of the four sections in the modal BODY ("Quality is the foundation"), so `__note` is wrong. It takes `__title` with the word for what it titles, as `.mytally__sectiontitle` and `.gamephotos__sectiontitle` do. |
 | `.wire__kicker` | 3 | #1113 names it | #1113 | `components/transactions/MoveRow.jsx`, `styles/04-site-bar.css`, `styles/25-wide-layout.css` | NOT the head's second line — this is a `<div>` that holds the move banner, the club link, the club mark and the type label. Clause 3 rejects the word `kicker`, but `__note` is the wrong target for a meta row. Judge it with the `Card` work. |
 | `.bcast__eyebrow` | 3 | `.bcast__note` | #1113 | `components/around-the-game/BroadcastMasthead.jsx`, `styles/68-around-the-game.css` | landed in #1339. A container, not a text line: it holds `.bcast__strand`, `.bcast__slash` and a dynamic `eyebrow`, and renders only when `strand` is set. |
 | `.betweeninnings__eyebrow` | 3 | retired — the line repeats the block's name | #1113 | `components/gamehud/BetweenInnings.jsx`, `styles/focus/console.css` | landed in #1339 (slice H3 of #1113): the element and its rule are deleted. The button keeps its name from its content (the progress count, the player and the fact), so it gets no `aria-label`: a label would replace that name and hide the fact from a screen reader. The label row now holds only the progress count, so it is no longer a `space-between` flex row: it sets `text-align: right`, and the count is a block so the row keeps the count's own line height. the one row of the twenty where the verdict holds: the line is "Between Innings" inside `.betweeninnings`. The other nineteen carry copy, data or a prop, and each says what it holds. |

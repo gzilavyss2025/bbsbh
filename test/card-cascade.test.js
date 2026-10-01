@@ -2192,6 +2192,8 @@ const H3_RENAMED = [
   ['dlab__note', 'dlabentry__note'],
   // batch B, step two: the page-level lede takes the freed name
   ['dlab__lede', 'dlab__note'],
+  // after #1339: a section title inside a modal body, not the head's second line
+  ['tscoremodal__subkicker', 'tscoremodal__sectiontitle'],
 ]
 
 // Two classes left with no successor: `.cover__sub` had no call site (its rule
