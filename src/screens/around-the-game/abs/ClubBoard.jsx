@@ -73,7 +73,7 @@ export function ClubBoard({ summary, clubs }) {
                   name={clubShort(clubs, r.teamId)}
                   rank={r.rank}
                   tied={r.tied}
-                  sub={`${commas(r.games)} games`}
+                  note={`${commas(r.games)} games`}
                 />
                 {TEAM_COLUMNS.map((c) =>
                   c.key === teamSortKey ? (

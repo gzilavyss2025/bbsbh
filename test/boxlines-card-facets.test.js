@@ -30,7 +30,7 @@ const GROUPS = ['hitting', 'pitching']
 // be doors (the nine batting-order slots, #998's thirty-six ballparks), folded
 // from the gated rows, each group naming its own facet. The checks below that
 // are about a facet read the facet doors; the list doors have their own, and
-// everything a READER meets — a label, a kicker, a heading, a key — is checked
+// everything a READER meets — a label, a note, a heading, a key — is checked
 // over both.
 const FACET_DOORS = CARD_FACETS.filter((r) => r.facet)
 const LIST_DOORS = CARD_FACETS.filter((r) => r.list)
@@ -195,10 +195,10 @@ test('a game with no lineup posted belongs to NEITHER lineup door', () => {
   }
 })
 
-test('every door is drawable: a label, a kicker, and a title of the player', () => {
+test('every door is drawable: a label, a note, and a title of the player', () => {
   for (const entry of CARD_FACETS) {
     assert.ok(entry.label, `${entry.key} needs a label`)
-    assert.ok(entry.kicker.startsWith('Game lines · '), `${entry.key} kicker: ${entry.kicker}`)
+    assert.ok(entry.note.startsWith('Game lines · '), `${entry.key} note: ${entry.note}`)
     assert.equal(typeof entry.title, 'function', `${entry.key} needs a title`)
     assert.ok(entry.title('Yelich').includes('Yelich'))
     assert.ok(entry.groups.length && entry.groups.every((g) => GROUPS.includes(g)))
@@ -208,7 +208,7 @@ test('every door is drawable: a label, a kicker, and a title of the player', () 
 test('"Box Lines" is the internal name and never reaches a reader', () => {
   // A user-visible string saying "box lines" stops the review (ADR-0069).
   for (const entry of CARD_FACETS) {
-    for (const text of [entry.label, entry.kicker, entry.title('Yelich'), entry.footNote ?? '']) {
+    for (const text of [entry.label, entry.note, entry.title('Yelich'), entry.footNote ?? '']) {
       assert.doesNotMatch(text, /box\s*lines/i, `"${text}" says the internal name`)
     }
   }

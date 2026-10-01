@@ -67,7 +67,7 @@
      - the signed-out Game Log pitch — `.logbooklanding .caps-exempt`
      - the Team Score modal's headline + explainer paragraphs —
        `.tscoremodal__title`, `.tscoremodal__body p` (+ inline children) —
-       the figures table and section sub-kicker stay shouted
+       the figures table and section titles stay shouted
      - the What's Brewing modal's Game Notes blurb prose — `.brewblurb__body`
        (the blurb title above it stays uppercase, same shouted-heading/
        natural-case-body split as the Team Score modal above)

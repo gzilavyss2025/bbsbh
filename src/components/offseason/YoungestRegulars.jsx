@@ -69,7 +69,7 @@ export function YoungestRegulars({ sportId, season }) {
   const youngest = players[0]
 
   return (
-    <section className="note" aria-label={`The youngest regulars in the ${season} ${league.name}`}>
+    <section className="seasonnote" aria-label={`The youngest regulars in the ${season} ${league.name}`}>
       {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
           invariant is never a per-component .toUpperCase() (ADR-0017). */}
       <SectionHead as="h3" className="oseason__head" note={<>{season} {league.name}</>}>
@@ -77,14 +77,14 @@ export function YoungestRegulars({ sportId, season }) {
       </SectionHead>
 
       {leagues.length > 1 && (
-        <div className="note__leagues" role="group" aria-label="League">
+        <div className="seasonnote__leagues" role="group" aria-label="League">
           {leagues.map((l) => {
             const on = l.leagueId === league.leagueId
             return (
               <button
                 key={l.leagueId}
                 type="button"
-                className={`note__league${on ? ' is-on' : ''}`}
+                className={`seasonnote__league${on ? ' is-on' : ''}`}
                 aria-pressed={on}
                 onClick={() => {
                   setPicked(l.leagueId)
@@ -98,27 +98,27 @@ export function YoungestRegulars({ sportId, season }) {
         </div>
       )}
 
-      <div className="note__body">
-        <div className="note__figure">
-          <p className="note__n">{years(youngest?.age)}</p>
+      <div className="seasonnote__body">
+        <div className="seasonnote__figure">
+          <p className="seasonnote__n">{years(youngest?.age)}</p>
           {/* The figure means nothing on its own — 21.1 is the youngest man in
               Triple-A and an ordinary High-A regular — so its own line carries
               the comparison the whole note is built on. */}
-          <p className="note__under">
+          <p className="seasonnote__under">
             years old, against{' '}
-            <span className="note__against">{years(league.averageAge)}</span> across the
-            league&rsquo;s <span className="note__against">{league.regulars}</span> regulars
+            <span className="seasonnote__against">{years(league.averageAge)}</span> across the
+            league&rsquo;s <span className="seasonnote__against">{league.regulars}</span> regulars
           </p>
         </div>
 
-        <div className="note__main">
-          <h4 className="note__title">Youngest regulars</h4>
-          <p className="note__note">
+        <div className="seasonnote__main">
+          <h4 className="seasonnote__title">Youngest regulars</h4>
+          <p className="seasonnote__note">
             Age on June 30 of the {season} season, against the average for the same league.
             Hitters only.
           </p>
 
-          <table className="note__table">
+          <table className="seasonnote__table">
             <thead>
               <tr>
                 <th scope="col">Hitter</th>
@@ -136,16 +136,16 @@ export function YoungestRegulars({ sportId, season }) {
                         {p.name}
                       </PlayerLink>
                       {p.orgId && (
-                        <span className="note__org">
+                        <span className="seasonnote__org">
                           <TeamLink id={p.orgId}>{p.orgName}</TeamLink>
                         </span>
                       )}
                     </th>
-                    <td className="note__age">{years(p.age)}</td>
+                    <td className="seasonnote__age">{years(p.age)}</td>
                     {/* Younger than the league is the interesting direction, so
                         it takes the ink — but the sign is in the text as well as
                         the colour, which is the app's no-colour-alone rule. */}
-                    <td className={`note__gap${gap < 0 ? ' is-under' : ''}`}>
+                    <td className={`seasonnote__gap${gap < 0 ? ' is-under' : ''}`}>
                       {gap === null ? '—' : gap > 0 ? `+${years(gap)}` : years(gap)}
                     </td>
                   </tr>
@@ -173,7 +173,7 @@ export function YoungestRegulars({ sportId, season }) {
               250-plate-appearance floor at one level quietly drops the players
               who were promoted out of it, which is most of the best young ones.
               A reader who knows that reads the note correctly. */}
-          <p className="note__pool">
+          <p className="seasonnote__pool">
             A regular is {data.regularPa}+ plate appearances in the {league.name}, so a player
             promoted out of it mid-season is not here.
           </p>

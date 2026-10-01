@@ -15,12 +15,7 @@
 # LANDED in slice C6c (#1113): .offdaycard (renamed .offday__tile, a Card button with the --offday-accent accent), .foulboard__hero, .foulavg, .gamehigh-tiles, .souvenir-row__tiles, .springcount, .pgame__card, .srecord and .note__stories are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. Every one takes body="flush" (each block has its own inset), and each head stays where it was. .gamehigh-tiles and .souvenir-row__tiles are ledgers whose gap-rule grid (.gamehigh-tiles__grid, .souvenir-row__tilegrid) keeps its --border-rule ground inside the Card. .note__stories is an <ol> inside a flush Card div (.note__storybox holds its margin). .sgh-list took NO Card: it already sat in its board's Card, and a rule shed its frame, so it draws no frame now. The .movedup table, which had no frame, sits in a flush sheet Card (.movedup__card). .note__title and .srecord__title keep their rules until Gary picks a look (H2).
 # LANDED in slice C7 (#1113): .sitemenusheet__group, .scorebookstory__gamecard, .scorebookstory__performer, .scorebookstory__leaders, .scorebookstory__nugget, .logbookstats__split (was .logbookstats__splits div), .logbookstats__streak (was .logbookstats__streaks article), .logbookstats__record (was .logbookstats__records > div), .logbookstats__performer, .logbookstats__leaders, .mytally__pitch and .posterstudio__panel are Card now (components/ui/frame/Card.jsx, styles/system/card.css); their rows left this file. Every one takes body="flush" (each block keeps its own inset); each head stays the first child. The game and performer tiles are Card buttons (ledger), drawn by ScorebookGameLink and LogbookGameLink when a caller passes card. The two leaders rules were only a frame, so they are gone. .sitemenusheet__group sits in a modal sheet that stays bespoke (ADR-0037). The three Logbook tag selectors became classes of their own.
 # REMOVED 2026-09-29: .logbook__seasons button and .bookmgmt__modes button went STALE. Their rules left the CSS (the logbook season buttons moved onto the one Button, ea7d0aed1; .bookmgmt__modes was dead code), so their rows left this file.
-.wordmarklab__colorlock	lab	sheet				C8	wordmark lab (/wordmark-lab), a dev page: the colour-lock panel
-.wordmarklab__option	lab	sheet	none	padded	C8	wordmark lab option tile; an <article> with its own hover — a lab specimen
-.wordmarklab__context	lab	sheet	none	flush	C8	wordmark lab context frame on page ground; holds a live mock of the slate
-.wordmarklab__levels span, .wordmarklab__levels b	not-card					level chips in the wordmark lab — a static tag drawn as a small ruled box, no content inside
-.wordmarklab__phonebody i	not-card					a grey skeleton bar inside the lab's phone mock (<i>, fixed width+height)
-.wordmarklab__pagecontent > div	not-card					a placeholder block inside the lab's phone mock (fixed width+height, no content)
+# REMOVED 2026-10-01: the six .wordmarklab__* rows went STALE. PR #1326 deleted the Wordmark Lab study (02-wordmark-lab.css and WordmarkLab.jsx), so no rule is left to match them.
 .datenav button	control					the slate's date arrows: <button> with its own font-size and min-height — Button family (#1130)
 .datenav__today	control					"Today" jump on the slate date bar: a <button>, caps label, min-height — Button family
 .daystate__chip--live	not-card					the slate LIVE chip: a --radius-sm tag with its own type. check-seal-scope allowlists its sibling .daystate__chip--live-on (03-slate-header.css) — leave both alone
@@ -158,7 +153,7 @@
 .cwb__pane	lab					contract workbench decision pane (admin)
 .cwb__primary, .cwb__danger, .cwb__mini, .cwb__use	control					contract workbench buttons (admin)
 .lookupdeck__panel	lab					contract lookup panel (admin)
-.note__when	control					an <a> date link inside a story — a Door or a Pill control
+.seasonnote__when	control					an <a> date link inside a story — a Door or a Pill control
 .boxlines__headline	well					inset headline strip inside the Box Lines sheet
 .boxline__series	not-card					a small inset tag on a box-line row
 .boxlines__stats	panel					gap-rule stats grid inside the Box Lines sheet (a modal)

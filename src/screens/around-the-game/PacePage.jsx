@@ -293,7 +293,7 @@ export function PacePage() {
                         name={clubShort(clubs, r.teamId)}
                         rank={board.rankable ? r.rank : null}
                         tied={board.rankable ? r.tied : false}
-                        sub={`${r.games} games`}
+                        note={`${r.games} games`}
                       />
                       <td>
                         <BarCell

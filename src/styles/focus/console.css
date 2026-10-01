@@ -370,13 +370,16 @@
   }
 }
 
+/* The label row holds one line, the progress count, on the right. The count is
+   a block, so the row is the count's own line box (11px type), the same height
+   the flex row gave it. As inline text it would sit on a line of the button's
+   larger inherited font, and the row would grow. */
 .betweeninnings__label {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  text-align: right;
   margin-bottom: var(--space-2);
 }
 .betweeninnings__progress {
+  display: block;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-cell);

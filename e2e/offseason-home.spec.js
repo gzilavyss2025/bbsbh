@@ -338,21 +338,21 @@ const AGE_SEASON = JSON.parse(
 
 test('the MLB page carries one note, and it is a count with its denominator', async ({ page }) => {
   await page.goto(AT_BAT_WINTER)
-  const note = page.locator('.note')
+  const note = page.locator('.seasonnote')
   await expect(note).toBeVisible()
-  await expect(note.locator('.note__title')).toHaveText('The twelve-pitch at-bats')
+  await expect(note.locator('.seasonnote__title')).toHaveText('The twelve-pitch at-bats')
 
   // A figure means nothing without the population it came out of, which is the
   // one rule research.md §7 puts on every note in this family.
-  const figure = Number(await note.locator('.note__n').innerText())
+  const figure = Number(await note.locator('.seasonnote__n').innerText())
   expect(figure).toBeGreaterThan(0)
-  await expect(note.locator('.note__under')).toContainText('plate appearances')
-  await expect(note.locator('.note__under')).toHaveCSS('text-transform', 'none')
+  await expect(note.locator('.seasonnote__under')).toContainText('plate appearances')
+  await expect(note.locator('.seasonnote__under')).toHaveCSS('text-transform', 'none')
 
   // Five rows up front, then ten a press. The whole census is still reachable —
   // the count on the figure IS the length of the list, or the note is claiming
   // something the rows cannot show — it just does not all arrive at once.
-  const rows = note.locator('.note__story')
+  const rows = note.locator('.seasonnote__story')
   const door = note.locator('.oseason__door')
   await expect(rows).toHaveCount(5)
   await door.click()
@@ -374,10 +374,10 @@ test('the MLB page carries one note, and it is a count with its denominator', as
 
 test('a note row says how LONG an at-bat was, never how it went', async ({ page }) => {
   await page.goto(AT_BAT_WINTER)
-  const row = page.locator('.note__story').first()
+  const row = page.locator('.seasonnote__story').first()
   await expect(row).toBeVisible()
   // Twelve is the floor, so every row is at or above it.
-  expect(Number(await row.locator('.note__valn').innerText())).toBeGreaterThanOrEqual(12)
+  expect(Number(await row.locator('.seasonnote__valn').innerText())).toBeGreaterThanOrEqual(12)
 
   // IT IS THE /fouls ROW, MINUS THE SCOREBUG. Both men's faces and both names,
   // which is what makes a long at-bat read as two people — and none of the
@@ -385,16 +385,16 @@ test('a note row says how LONG an at-bat was, never how it went', async ({ page 
   // this one is on the slate (ADR-0081). The scan is on the rows rather than the
   // whole note: the note's own footnote explains the inning-ending-caught-
   // stealing rule in words, and has to be allowed to.
-  await expect(row.locator('.note__shot')).toHaveCount(2)
-  await expect(row.locator('.note__name')).toHaveCount(2)
-  await expect(page.locator('.note__stories')).not.toContainText(
+  await expect(row.locator('.seasonnote__shot')).toHaveCount(2)
+  await expect(row.locator('.seasonnote__name')).toHaveCount(2)
+  await expect(page.locator('.seasonnote__stories')).not.toContainText(
     /strikeout|walk|home run|flyout|groundout|inning|final|won|lost|[0-9]+-[0-9]+/i,
   )
-  await expect(page.locator('.note .scorebug')).toHaveCount(0)
+  await expect(page.locator('.seasonnote .scorebug')).toHaveCount(0)
 
   // The row opens its game at the slate's own lineup address, so it arrives
   // sealed under the same reveal mark as any other game.
-  const href = await row.locator('.note__when').getAttribute('href')
+  const href = await row.locator('.seasonnote__when').getAttribute('href')
   expect(href).toMatch(/^\/\d{8}\/[a-z0-9-]+\/lineup1$/)
 })
 
@@ -402,26 +402,26 @@ test('a level note measures age against its own league, and says what its floor 
   page,
 }) => {
   await page.goto(`/higha/1012${AGE_SEASON}`)
-  const note = page.locator('.note')
+  const note = page.locator('.seasonnote')
   await expect(note).toBeVisible()
-  await expect(note.locator('.note__title')).toHaveText('Youngest regulars')
+  await expect(note.locator('.seasonnote__title')).toHaveText('Youngest regulars')
 
   // The youngest regular, and the league he is being measured against. The
   // whole note is the gap between those two numbers.
-  const youngest = Number(await note.locator('.note__n').innerText())
+  const youngest = Number(await note.locator('.seasonnote__n').innerText())
   expect(youngest).toBeGreaterThan(15)
   expect(youngest).toBeLessThan(30)
-  await expect(note.locator('.note__under')).toContainText('regulars')
+  await expect(note.locator('.seasonnote__under')).toContainText('regulars')
 
   // The first row IS that figure, and its gap is negative — below his league.
-  const first = note.locator('.note__table tbody tr').first()
-  await expect(first.locator('.note__age')).toHaveText(youngest.toFixed(1))
-  await expect(first.locator('.note__gap')).toContainText('−'.replace('−', '-'))
+  const first = note.locator('.seasonnote__table tbody tr').first()
+  await expect(first.locator('.seasonnote__age')).toHaveText(youngest.toFixed(1))
+  await expect(first.locator('.seasonnote__gap')).toContainText('−'.replace('−', '-'))
 
   // The floor is stated where a reader cannot miss it: a 250-PA floor at one
   // level drops the players who were promoted out of it, and a note that hid
   // that would be read as a ranking of the level's best young hitters.
-  const pool = note.locator('.note__pool')
+  const pool = note.locator('.seasonnote__pool')
   await expect(pool).toContainText('250')
   await expect(pool).toContainText('promoted')
   await expect(pool).toHaveCSS('text-transform', 'none')
@@ -429,19 +429,19 @@ test('a level note measures age against its own league, and says what its floor 
 
 test('the level note opens on one league of three, and changes on request', async ({ page }) => {
   await page.goto(`/higha/1012${AGE_SEASON}`)
-  const note = page.locator('.note')
+  const note = page.locator('.seasonnote')
   await expect(note).toBeVisible()
   // Three leagues at a level, and exactly one of them showing — no figure on
   // this page is ever computed across two (research.md §7).
-  const picks = note.locator('.note__league')
+  const picks = note.locator('.seasonnote__league')
   await expect(picks).toHaveCount(3)
-  await expect(note.locator('.note__league.is-on')).toHaveCount(1)
+  await expect(note.locator('.seasonnote__league.is-on')).toHaveCount(1)
 
   const named = await note.locator('.oseason__note').innerText()
   const other = picks.filter({ hasNot: page.locator('.is-on') }).first()
   await other.click()
   await expect(note.locator('.oseason__note')).not.toHaveText(named)
-  await expect(note.locator('.note__league.is-on')).toHaveCount(1)
+  await expect(note.locator('.seasonnote__league.is-on')).toHaveCount(1)
 })
 
 test('the season record is the one row on the page wearing kraft tape', async ({ page }) => {
