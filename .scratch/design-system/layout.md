@@ -219,4 +219,4 @@ Follow the #1113 pattern. This is a proposal, not a decision.
 
 Build one part per PR, in this order: `Stack`, `Cluster`, `Grid`. Each PR adds
 the component, its rules in `src/styles/system/<part>.css`, a `/design-lab`
-specimen and a test. **`Stack` is built** (this branch). Migrating the existing rules follows in sliced PRs.
+specimen and a test. **`Stack` and `Cluster` are built** (this branch). `Cluster` also takes `align` (`start`, `center`, `baseline`), which was not in the sign-off: the census of 147 wrapping rows found 69 with no alignment, 41 `center`, 31 `baseline` and 5 `flex-start`, so a Cluster without it could not host half of them. Migrating the existing rules follows in sliced PRs.
