@@ -45,6 +45,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeShardsWithStamp } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
+import { round1 } from '../src/lib/math/number.js'
 import {
   MIN_COMMAND_PITCHES,
   evenSample,
@@ -105,7 +106,6 @@ unmatched = index.size - kept
 // One decimal inch. The dots are drawn a few pixels across on a phone; a
 // thousandth of an inch of stored precision is three bytes a dot that no reader
 // can see, across ~200,000 dots.
-const round1 = (n) => Math.round(n * 10) / 10
 
 const entries = new Map() // shard key -> { season, pit: {} }
 let pitchers = 0

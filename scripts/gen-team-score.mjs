@@ -29,6 +29,7 @@ import { classifyLateGame } from '../src/api/lateGameSwing.js'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
+import { round1 } from '../src/lib/math/number.js'
 
 export { pythagoreanPct, qualityScoreFromGames, currentFormScoreFromGames }
 
@@ -42,7 +43,6 @@ const addDays = (date, n) => {
 }
 const previousUtcDay = () => addDays(isoDay(new Date()), -1)
 
-const round1 = (n) => Math.round(n * 10) / 10
 const round2 = (n) => Math.round(n * 100) / 100
 const round3 = (n) => Math.round(n * 1000) / 1000
 

@@ -65,6 +65,7 @@ import { readdir } from 'node:fs/promises'
 import { getJson } from './lib/statsapi.mjs'
 import { readJsonOr, writeJsonAtomic, writeSeasons, writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
+import { round1 } from '../src/lib/math/number.js'
 import { HARD_HIT_MPH } from '../src/lib/ballpark/hitProjection.js'
 import { parseArgs, dateRange, isoDay } from './lib/args.mjs'
 
@@ -214,7 +215,6 @@ export function aggregateGameSpray(feed, level) {
   return batters
 }
 
-const round1 = (n) => Math.round(n * 10) / 10
 
 // --- the accumulating store (exported for tests) -----------------------------
 //
