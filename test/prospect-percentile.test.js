@@ -15,6 +15,7 @@ import {
   populationKey,
   snapshotRow,
   movementSince,
+  historyRow,
 } from '../scripts/lib/prospectPercentile.mjs'
 import { combineToPool } from '../src/api/statsLevels.js'
 import { tenureFact } from '../src/api/levelTenure.js'
@@ -248,6 +249,18 @@ test('movementSince compares two rows that both read one level', () => {
 test('movementSince is null against a row from before the one-level rule', () => {
   const prior = { date: '2026-09-16', payload: { percentile: 91 } }
   assert.equal(movementSince({ percentile: 38, atLevel: true }, prior), null)
+})
+
+// #1358. The trend chart joined the summed rows to the first one-level row:
+// a change of method drawn as a change in play. Each exported history row
+// carries the rule it was read under, so the chart can drop the old ones.
+test('historyRow carries atLevel: true for a one-level snapshot', () => {
+  const row = historyRow('2026-10-01', { sportId: 11, percentile: 8, qualified: true, sampleSize: 59, atLevel: true })
+  assert.deepEqual(row, { date: '2026-10-01', sportId: 11, percentile: 8, qualified: true, atLevel: true })
+})
+
+test('historyRow carries atLevel: false for a snapshot written before the one-level rule', () => {
+  assert.equal(historyRow('2026-09-30', { sportId: 11, percentile: 80, qualified: true }).atLevel, false)
 })
 
 test('movementSince is null with no prior row or an unranked side', () => {

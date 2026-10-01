@@ -205,7 +205,7 @@ test('movementState uses the same five-point claim floor on every surface', () =
 // promotion/demotion markers from a player's raw history series.
 // ---------------------------------------------------------------------------
 
-const h = (date, sportId, percentile, qualified = true) => ({ date, sportId, percentile, qualified })
+const h = (date, sportId, percentile, qualified = true) => ({ date, sportId, percentile, qualified, atLevel: true })
 
 test('deriveTrendMarks plots a point per week, using null for an unqualified week', () => {
   const history = [h('2026-04-06', 12, 55), h('2026-04-13', 12, null, false), h('2026-04-20', 12, 62)]
@@ -232,6 +232,24 @@ test('deriveTrendMarks marks a demotion (sportId increases) as "down"', () => {
 test('deriveTrendMarks reports no promotions for a player who never changed levels', () => {
   const history = [h('2026-04-06', 12, 40), h('2026-04-13', 12, 45)]
   assert.deepEqual(deriveTrendMarks(history).promotions, [])
+})
+
+// #1358. Every row before 2026-10-01 summed the season over every level; the
+// 10-01 row was the first one-level row. Drawn as one line, the change of
+// method read as a change in play. Josue Briceño (800522), AAA: 80, 80, then 8.
+test('deriveTrendMarks drops summed-season rows, so they do not join the one-level point (#1358)', () => {
+  const summed = (date, sportId, percentile) => ({ date, sportId, percentile, qualified: true, atLevel: false })
+  const history = [summed('2026-09-29', 11, 80), summed('2026-09-30', 11, 80), h('2026-10-01', 11, 8)]
+  assert.deepEqual(deriveTrendMarks(history).points, [{ date: '2026-10-01', percentile: 8 }])
+})
+
+test('deriveTrendMarks drops a row with no atLevel field at all, the shape every row had before #1358', () => {
+  const old = (date, sportId, percentile) => ({ date, sportId, percentile, qualified: true })
+  const history = [old('2026-09-29', 13, 82), old('2026-09-30', 12, 82), h('2026-10-01', 12, 70)]
+  const { points, promotions } = deriveTrendMarks(history)
+  assert.deepEqual(points, [{ date: '2026-10-01', percentile: 70 }])
+  // A level change across the dropped rows has no point to stand on.
+  assert.deepEqual(promotions, [])
 })
 
 test('deriveTrendMarks degrades to empty arrays for a missing/empty history', () => {
@@ -323,8 +341,8 @@ test('prospectCardView is state "qualified" with tier, confidence, and trend all
     populationSize: 84,
     movement: { delta: 9, sinceDate: '2026-07-27' },
     history: [
-      { date: '2026-08-03', sportId: 12, percentile: 84, qualified: true },
-      { date: '2026-08-10', sportId: 12, percentile: 93, qualified: true },
+      { date: '2026-08-03', sportId: 12, percentile: 84, qualified: true, atLevel: true },
+      { date: '2026-08-10', sportId: 12, percentile: 93, qualified: true, atLevel: true },
     ],
   }
   const view = prospectCardView(entry, 19, 21.1)
@@ -362,9 +380,9 @@ const PLAIN = {
       populationSize: 84,
       movement: { delta: 9, sinceDate: '2026-09-09' },
       history: [
-        { date: '2026-09-02', sportId: 12, percentile: 50, qualified: true },
-        { date: '2026-09-09', sportId: 12, percentile: 63, qualified: true },
-        { date: '2026-09-30', sportId: 11, percentile: 72, qualified: true },
+        { date: '2026-09-02', sportId: 12, percentile: 50, qualified: true, atLevel: false },
+        { date: '2026-09-09', sportId: 12, percentile: 63, qualified: true, atLevel: true },
+        { date: '2026-09-30', sportId: 11, percentile: 72, qualified: true, atLevel: true },
       ],
     },
     {
@@ -377,8 +395,8 @@ const PLAIN = {
       populationSize: 60,
       movement: null,
       history: [
-        { date: '2026-09-09', sportId: 12, percentile: null, qualified: false },
-        { date: '2026-09-30', sportId: 12, percentile: null, qualified: false },
+        { date: '2026-09-09', sportId: 12, percentile: null, qualified: false, atLevel: false },
+        { date: '2026-09-30', sportId: 12, percentile: null, qualified: false, atLevel: true },
       ],
     },
   ],
@@ -390,8 +408,26 @@ test('pack then unpack gives back the same snapshot, row for row', () => {
 
 test('a qualified row with no percentile survives the round trip', () => {
   const odd = structuredClone(PLAIN)
-  odd.players[0].history[1] = { date: '2026-09-09', sportId: 12, percentile: null, qualified: true }
+  odd.players[0].history[1] = { date: '2026-09-09', sportId: 12, percentile: null, qualified: true, atLevel: true }
   assert.deepEqual(unpackProspectTrend(packProspectTrend(odd)), odd)
+})
+
+test('a one-level row and a summed-season row keep their atLevel through the round trip (#1358)', () => {
+  const back = unpackProspectTrend(packProspectTrend(PLAIN))
+  assert.deepEqual(back.players[0].history.map((r) => r.atLevel), [false, true, true])
+  assert.deepEqual(back.players[1].history.map((r) => r.atLevel), [false, true])
+})
+
+test('a file packed before #1358 has no atLevel, so unpack marks every row as not one-level', () => {
+  const v1 = {
+    generatedAt: '2026-10-01T05:00:00.000Z',
+    packed: 1,
+    historyDates: ['2026-09-30', '2026-10-01'],
+    players: [{ playerId: 800522, group: 'hitting', history: [[0, 11, 80], [1, 11, 8]] }],
+  }
+  const rows = unpackProspectTrend(v1).players[0].history
+  assert.deepEqual(rows.map((r) => r.atLevel), [false, false])
+  assert.deepEqual(deriveTrendMarks(rows).points, [])
 })
 
 test('the packed shape is marked and does not repeat a date per row', () => {

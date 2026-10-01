@@ -157,6 +157,22 @@ export function snapshotRow(p, populations) {
   return { group, payload: { sportId, percentile, qualified, sampleSize, populationSize: population.length, atLevel: true } }
 }
 
+// One stored snapshot (`date`, its parsed `payload`) as a row of the exported
+// `history`, the series the Prospect Card's trend chart draws. `atLevel` is
+// true only for a row read at one level (snapshotRow). A row written before
+// #1279 summed every level and has no `atLevel`, so it exports false, and the
+// chart drops it (deriveTrendMarks): joined to a one-level row, it drew a change
+// of method as a change in play (#1358).
+export function historyRow(date, payload) {
+  return {
+    date,
+    sportId: payload.sportId,
+    percentile: payload.percentile,
+    qualified: payload.qualified,
+    atLevel: payload.atLevel === true,
+  }
+}
+
 // A row's movement against an earlier snapshot (`prior`: { date, payload }).
 // Null unless both rows read one level: a row from before #1279 summed every
 // level, so the gap would be a change of method, not of play (Owen Ayers: 91,
