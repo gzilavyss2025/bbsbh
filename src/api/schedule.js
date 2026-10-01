@@ -548,12 +548,14 @@ const SEASON_SERIES_FIELDS =
 // at MLB, the postseason rounds (F/D/L/W) between the same two clubs, each
 // row carrying its gameType so the strip can tag it; MiLB stays 'R' because
 // its postseason codes were never checked. Same dedupe-by-gamePk handling as
-// fetchHeadToHead.
-export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1) {
+// fetchHeadToHead. `gameTypes` ('R') narrows it to the regular season: the
+// postseason series page asks for that, because on an off day a later
+// postseason card, or its absence, would say how the series ended (ADR-0087).
+export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1, gameTypes = null) {
   if (!teamAId || !teamBId || !season) return []
   try {
     const data = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&teamId=${teamAId}&season=${season}&gameType=${sportId === 1 ? 'R,F,D,L,W' : 'R'}&hydrate=venue(timezone),linescore&fields=${SEASON_SERIES_FIELDS}`,
+      `/api/v1/schedule?sportId=${sportId}&teamId=${teamAId}&season=${season}&gameType=${gameTypes ?? (sportId === 1 ? 'R,F,D,L,W' : 'R')}&hydrate=venue(timezone),linescore&fields=${SEASON_SERIES_FIELDS}`,
     )
     const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
     const byPk = new Map()

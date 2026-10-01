@@ -19,6 +19,7 @@ import { BATTING_CATEGORIES, int, rate3 } from './postseasonLeaders.js'
 import { startingPositionAbbr } from './select.js'
 import { rosterGroups } from './postseason/roster.js'
 import { outsToIp } from '../lib/math/innings.js'
+import { foldTeamTotals } from '../lib/postseason/seriesTotals.js'
 
 export { BATTING_CATEGORIES }
 
@@ -156,7 +157,8 @@ function buildRosters(rosterByTeam) {
 // thin a sample for the AVG floor) comes back as an empty array —
 // TeamLeaders already hides those rather than rendering an empty section.
 // Also returns each team's series roster (see rosterEntry/buildRosters
-// above), keyed by teamId.
+// above), keyed by teamId, and `totals`, each club's summed team batting and
+// pitching (lib/postseason/seriesTotals.js).
 export async function loadSeriesStats(games) {
   const boxscores = await Promise.all((games ?? []).map((g) => fetchGameBoxscore(g.gamePk)))
 
@@ -242,5 +244,7 @@ export async function loadSeriesStats(games) {
     batting: rankBatting(batting),
     pitching: rankPitching(pitching),
     rosters: buildRosters(rosterByTeam),
+    // Team sums from the same box scores, no extra request (seriesTotals.js).
+    totals: foldTeamTotals(boxscores),
   }
 }

@@ -1,0 +1,538 @@
+/* ------------------------------------------- postseason series: shared parts
+   The parts the live series page draws today and the finished series page
+   (PostseasonSeriesPage.jsx) can share: the park line in the game log, the
+   win-chance strip (SeriesFlow), the series totals (SeriesTotals), the leader
+   figure as a door (SeriesParts' LeaderDoor), the regular-season strip's label
+   head, and the Nine Keys cut (SeriesNineKeys). A lazy partial: a page that
+   draws them imports it after 35-postseason-series.css, so a rule here wins
+   on order at equal specificity. The live-only parts and the wide grid are in
+   series-live.css.
+
+   The same scorebook vocabulary as the banner, the game log and the leader
+   agate: label heads on a hairline, cards of paper, clay stat codes, mono
+   tabular figures, condensed caps for structure. No kraft token here: none of
+   these parts is a seal (ADR-0083, ADR-0087 d.3). */
+
+/* Each section spaces itself like .psseries__games: the label head owns the
+   18px above, the section owns the 12px below. */
+.psseries__flowsection,
+.psseries__totalssection,
+.psseries__keyssection,
+.seasonseries__section {
+  margin: 0 0 var(--space-3);
+}
+
+/* ---- Game log: the park after the date ---------------------------------- */
+/* The date, then the park, then the record AS OF the game at the right. The
+   park takes the slack and truncates first, so the status never wraps. */
+.psseries__entryhead .psseries__gamedate {
+  flex: none;
+}
+.psseries__gamevenue {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+/* ---- How the games went (the win-chance strip) ---------------------------- */
+.psseries__flowswitch {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+.psseries__flow {
+  padding: var(--space-2h) var(--space-3) var(--space-1h);
+}
+/* The readout: the game and whose chance on top, the low and the high under
+   it, and the door to that game's log entry at the right. */
+.psseries__flowreadout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 34px;
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-hair) dashed var(--border-hairline);
+}
+.psseries__flowreadout .door {
+  flex: none;
+}
+.psseries__flowtext {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.psseries__flowgame {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+.psseries__flowfacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.psseries__flowfact {
+  white-space: nowrap;
+}
+.psseries__flowpct {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+}
+/* The SVG is drawn at its box's own pixel width (SeriesFlow measures it). */
+.psseries__flowbox {
+  width: 100%;
+  overflow: hidden;
+}
+.psseries__flowplot {
+  display: block;
+  max-width: 100%;
+}
+/* A played panel: inset paper in a hairline frame. */
+.psseries__flowframe {
+  fill: var(--surface-inset);
+  stroke: var(--border-rule);
+  stroke-width: var(--bw-hair);
+}
+/* Today and the games ahead have no line, and never get one on this page:
+   an outline only. Today's dash is darker; later games are fainter. */
+.psseries__flowpanel--today .psseries__flowframe {
+  fill: none;
+  stroke: var(--text-caption);
+  stroke-dasharray: 4 3;
+}
+.psseries__flowpanel--ahead .psseries__flowframe {
+  fill: none;
+  stroke: var(--border-rule);
+  stroke-dasharray: 3 3;
+}
+.psseries__flowmid {
+  stroke: var(--text-caption);
+  stroke-width: var(--bw-hair);
+  stroke-dasharray: 2 3;
+}
+.psseries__flowline {
+  stroke: var(--text-heading);
+  stroke-width: var(--bw-heavy);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+/* The final out, in the winner's colour, ringed in paper so it reads on any
+   band fill and on the frame's edge. */
+.psseries__flowend {
+  stroke: var(--surface-card);
+  stroke-width: var(--bw-heavy);
+}
+.psseries__flowlabel {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  fill: var(--text-caption);
+}
+.psseries__flowempty {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  fill: var(--text-caption);
+}
+/* A panel with a line is a control: the pointer, a hover edge, and the
+   selection drawn as a heavy ink frame with an ink label. */
+.psseries__flowpanel[role='button'] {
+  cursor: pointer;
+  outline: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .psseries__flowpanel[role='button']:not(.is-selected):hover .psseries__flowframe {
+    stroke: var(--text-caption);
+  }
+}
+.psseries__flowpanel.is-selected .psseries__flowframe {
+  stroke: var(--text-heading);
+  stroke-width: var(--bw-heavy);
+}
+.psseries__flowpanel.is-selected .psseries__flowlabel {
+  fill: var(--text-heading);
+}
+.psseries__flowpanel:focus-visible .psseries__flowframe {
+  stroke: var(--focus-ring);
+  stroke-width: var(--bw-heavy);
+}
+
+/* ---- Series totals: a mirrored scorebook table ---------------------------- */
+.psseries__totals {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+}
+.psseries__totalstable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.psseries__totalstable thead td {
+  width: 72px;
+}
+.psseries__totalsclub {
+  padding: var(--space-1) var(--space-3) var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+  text-align: left;
+  white-space: nowrap;
+}
+.psseries__totalsclub > * {
+  vertical-align: middle;
+}
+.psseries__totalsclub > :first-child {
+  margin-right: var(--space-1h);
+}
+.psseries__totalsclub--right {
+  text-align: right;
+}
+/* BATTING / PITCHING: caps across all three columns, a hairline each side. */
+.psseries__totalsgroup th {
+  padding: var(--space-2h) 0 var(--space-1h);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+.psseries__totalsgroup th::before,
+.psseries__totalsgroup th::after {
+  content: '';
+  display: inline-block;
+  width: calc(50% - 48px);
+  margin: 0 var(--space-2);
+  vertical-align: middle;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.psseries__totalsrow > * {
+  height: 34px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.psseries__totalsgroup + .psseries__totalsrow > * {
+  border-top: none;
+}
+/* The scorer's code down the middle in clay: the voice of the leader board's
+   .psseries__lkey. */
+.psseries__totalskey {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--clay);
+  text-align: center;
+}
+.psseries__totalskey abbr {
+  text-decoration: none;
+  cursor: help;
+}
+.psseries__totalsval {
+  padding: 0 var(--space-3);
+  font-size: var(--fs-field);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+  text-align: left;
+}
+.psseries__totalsrow > .psseries__totalsval:last-child {
+  text-align: right;
+}
+/* The better figure of each pair inks darker and the other fades to the
+   caption grey; a tie leaves both in body ink. The hidden "(leads)" word says
+   it for a screen reader, so the emphasis is not colour alone. */
+.psseries__totalsrow:has(.psseries__totalsval--lead) .psseries__totalsval {
+  color: var(--text-caption);
+}
+.psseries__totalsrow:has(.psseries__totalsval--lead) .psseries__totalsval--lead {
+  color: var(--text-heading);
+}
+
+/* ---- Leader boards: the leader's figure is the door ----------------------- */
+.psseries__lboard .sectionhead__note {
+  color: var(--accent-link);
+}
+/* With doors, the name and the figure share ONE baseline (the club mark
+   stays centred on the name), and the runner-up line gets a little more air
+   so the figure's dotted rule never touches it. */
+.psseries__lboard .psseries__ltop {
+  align-items: baseline;
+}
+.psseries__lboard .psseries__ltop > :first-child {
+  align-self: center;
+}
+.psseries__lboard .psseries__lmain {
+  gap: var(--space-1h);
+}
+/* The name keeps its room: the door sizes to its figure and sits at the right
+   edge. Stated at `button.` specificity because .boxlines__door resets a
+   button whole (width 100% included) from a partial that may load later. */
+button.psseries__ldoor {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  width: auto;
+  margin-left: auto;
+  padding: 0;
+  gap: 1px;
+  align-items: baseline;
+}
+button.psseries__ldoor .psseries__lval {
+  margin-left: 0;
+  text-decoration: underline dotted var(--text-caption);
+  text-decoration-thickness: var(--bw-rule);
+  text-underline-offset: 3px;
+}
+/* The door mark at the figure's own size and baseline, one weight lighter. */
+.psseries__ldoormark {
+  font-family: var(--font-display);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-solid);
+  color: var(--accent-link);
+}
+/* A 44 x 44 hit area that moves no pixel of the line: it reaches up into the
+   row's top padding and only a few pixels down toward the runner-up line. */
+button.psseries__ldoor::after {
+  content: '';
+  position: absolute;
+  top: -16px;
+  bottom: -6px;
+  right: -8px;
+  left: min(-8px, calc(100% - 44px));
+}
+
+/* ---- Regular season strip ------------------------------------------------ */
+/* look="label" puts the label head above the card, as on every other section
+   here; the section owns the gap below (rule at the top), not the card. */
+.seasonseries__section > .seasonseries {
+  margin: 0;
+}
+
+/* ---- Nine Keys ------------------------------------------------------------ */
+.psseries__keys {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+}
+.psseries__keystable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.psseries__keystable thead th,
+.psseries__keyscale {
+  padding: var(--space-1) 0 var(--space-1h);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  text-align: center;
+}
+/* Column widths: the key label, a rank, the track, a rank. */
+.psseries__keystable thead th:first-child {
+  width: 92px;
+  text-align: left;
+}
+.psseries__keystable thead th:nth-child(2),
+.psseries__keystable thead th:last-child {
+  width: 48px;
+}
+.psseries__keystable thead th:nth-child(2) {
+  padding-right: var(--space-2);
+  text-align: right;
+}
+.psseries__keystable thead th:last-child {
+  padding-left: var(--space-2);
+  text-align: left;
+}
+/* The two club heads carry their track mark, so the dot and the ring read
+   as a legend: filled for the first club, open for the second. */
+.psseries__keystable thead th:nth-child(2)::before,
+.psseries__keystable thead th:last-child::after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  box-sizing: border-box;
+  border-radius: var(--radius-pill);
+  vertical-align: 1px;
+}
+.psseries__keystable thead th:nth-child(2)::before {
+  margin-right: var(--space-1);
+  background: var(--accent-primary);
+}
+.psseries__keystable thead th:last-child::after {
+  margin-left: var(--space-1);
+  border: var(--bw-heavy) solid var(--accent-primary);
+}
+.psseries__keyscale {
+  padding-inline: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-num);
+}
+.psseries__keyscale > span:first-child {
+  float: left;
+}
+.psseries__keyscale > span:last-child {
+  float: right;
+}
+.psseries__keyrow > * {
+  height: 32px;
+  padding: 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  vertical-align: middle;
+}
+.psseries__keyrow:first-child > * {
+  border-top: none;
+}
+.psseries__keylabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+  text-align: left;
+}
+.psseries__keyrank {
+  position: relative;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-num);
+  color: var(--text-body);
+}
+.psseries__keyrow > .psseries__keyrank:nth-child(2) {
+  padding-right: var(--space-2);
+  text-align: right;
+}
+.psseries__keyrow > .psseries__keyrank:last-child {
+  padding-left: var(--space-2);
+  text-align: left;
+}
+/* A failed key: clay ink, struck through with a pencil stroke (the Nine Keys
+   page's .ninekeys__cell--fail idiom). The hidden "(failed)" word says it for
+   a screen reader. */
+.psseries__keyrank--fail {
+  color: var(--accent-negative);
+}
+.psseries__keyrank--fail::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 30px;
+  height: var(--bw-rule);
+  background: var(--accent-negative);
+  transform: rotate(-14deg);
+}
+.psseries__keyrow > .psseries__keyrank--fail:nth-child(2)::after {
+  right: var(--space-1h);
+}
+.psseries__keyrow > .psseries__keyrank--fail:last-child::after {
+  left: var(--space-1h);
+}
+/* The 1-to-30 track: a pencil rule; the bar at 15 as a dashed tick with the
+   half past it shaded in the page's deeper manila; the first club a filled dot, the second an open ring. */
+.psseries__keytrack {
+  position: relative;
+}
+/* The marks are placed on an inner line inset 8px from each end, so a 1st or
+   a 30th never touches the rank beside it. */
+.psseries__keyline {
+  position: absolute;
+  inset: 0 var(--space-2);
+}
+.psseries__keyline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.psseries__keybar {
+  position: absolute;
+  top: 50%;
+  right: calc(-1 * var(--space-2));
+  height: 18px;
+  transform: translateY(-50%);
+  border-left: var(--bw-rule) dashed var(--text-caption);
+  background: var(--bg-canvas);
+}
+.psseries__keydot {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border-radius: var(--radius-pill);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 var(--bw-heavy) var(--surface-card);
+}
+.psseries__keydot--away {
+  z-index: 2;
+  background: var(--accent-primary);
+}
+.psseries__keydot--home {
+  z-index: 1;
+  border: var(--bw-heavy) solid var(--accent-primary);
+  background: var(--surface-card);
+}
+/* The tally and the verdict under the table. */
+.psseries__keytally {
+  margin: 0;
+  padding: var(--space-2h) 0 var(--space-1);
+  border-top: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.psseries__keyverdict {
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+
+/* Wide, the table gives the key names and the ranks more room, so a card the
+   page's full width does not stretch one long track between short columns. */
+@media (min-width: 740px) {
+  .psseries__keystable thead th:first-child {
+    width: 140px;
+  }
+  .psseries__keystable thead th:nth-child(2),
+  .psseries__keystable thead th:last-child {
+    width: 64px;
+  }
+}

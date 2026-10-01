@@ -144,3 +144,32 @@ on the MLB slate only:
 Decisions 1 to 4 hold for all three: each reads the same bracket, heading into
 its cutoff, with no seal and no kraft. A game in progress never moves the
 board. Yesterday's results do.
+
+## Addendum (2026-10-01): the live series page gets more of the series
+
+The live series page (`LiveSeriesPage.jsx`) adds eight parts: the starting
+pitchers, the park and the off-day or travel words on each game still to play,
+a win-chance strip ("How the games went"), the park on each game in the log,
+series totals, leader figures that open that player's game lines, the regular
+season head-to-head, and Nine Keys. The Former Teammates Ladder also shows on
+this page. Decisions 1 to 4 hold for all of them: no seal, no kraft, no Scores
+Unlocked read, and nothing from today's game or a later one.
+`docs/api/postseason.md` lists each part's reads.
+
+- **The head-to-head strip is regular season only** (`gameTypes="R"`). On an
+  off day the page has no game of its own, so the strip would draw a card for
+  every later postseason game the schedule still lists. Whether an "if
+  necessary" card is there says how the series ended (the trap in the addendum
+  above). The series' own games are on the page already.
+- **Probables hide on a past `?d=`.** For a game ahead, the schedule now names
+  the starter picked after that date. The rows ahead and the "Next game"
+  starters show probables only when the cutoff is today. Today's game keeps
+  its probables.
+- **An "if necessary" game has no park, pitcher, date or off-day line.** It has
+  no gamePk, so the page cannot ask for one, and its row must read the same
+  whether or not the game is played.
+- **The leader sheets end at the page's cutoff** and start at Game 1's date, so
+  a sheet cannot show a game that the page does not count.
+- The finished series page draws the parts that need only counted games: the
+  strip, the park line, the totals, the leader doors, the head-to-head strip
+  and Nine Keys (for the current season only).

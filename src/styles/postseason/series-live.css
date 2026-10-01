@@ -1,0 +1,324 @@
+/* ---------------------------------------------- live series page: new parts
+   (LiveSeriesPage.jsx): the starting pitchers, the rows still to play, and the
+   page's wide grid. A lazy partial, imported by the page after
+   35-postseason-series.css and series-parts.css (the parts the finished page
+   can share), so a rule here wins on order at equal specificity. 35 is near
+   its file cap and its rules are pinned by test/card-cascade.test.js: nothing
+   there moves, and this file adds only.
+
+   The same scorebook vocabulary as the banner, the game log and the leader
+   agate: label heads on a hairline, cards of paper, clay stat codes, mono
+   tabular figures, condensed caps for structure. No kraft token here: none of
+   these parts is a seal (ADR-0083, ADR-0087 d.3). */
+
+/* The section spaces itself like .psseries__games and .psseries__upcoming: the
+   label head owns the 18px above, the section owns the 12px below. */
+.psseries__startersection {
+  margin: 0 0 var(--space-3);
+}
+
+/* ---- Starting pitchers --------------------------------------------------- */
+/* One card, two starters. Stacked on a phone with a quiet "vs" rule between
+   them; side by side from 740px with the rule turned vertical. */
+.psseries__starters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.psseries__starter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2h);
+  min-width: 0;
+  padding: var(--space-3);
+}
+/* The head row: small headshot, the name over club and hand, the club mark
+   at the far right. */
+.psseries__starterhead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2h);
+  min-width: 0;
+}
+/* Compound with .shot (always set by Headshot) to outrank the base and the
+   wide .shot sizing, same convention as .psseries__mvpshot. */
+.shot.psseries__startershot {
+  flex: none;
+  width: var(--shot-xs-w);
+  height: var(--shot-xs-h);
+  border-radius: var(--radius-sm);
+}
+.shot.psseries__startershot.shot--fallback {
+  font-size: var(--fs-title-sm);
+}
+.psseries__starterwho {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.psseries__startername {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-title);
+  color: var(--text-heading);
+}
+/* Rendered as a PlayerLink (.plink resets font and colour to inherit from a
+   later partial), so restate the face at .plink specificity. */
+.plink.psseries__startername {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  text-align: left;
+}
+.psseries__starterclub {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1h);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+/* The throwing hand in the lineup card's green, as on .pitchernotice__hand. */
+.psseries__starterhand {
+  font-weight: var(--w-bold);
+  color: var(--field);
+}
+.psseries__startermark {
+  flex: none;
+}
+
+/* No probable posted: the club mark, the club, and the words in clay-deep
+   caps, the voice of the pitcher card's "Pitched yesterday" flag. The "Likely
+   starters" guess sits in a dashed inset slip under it, so it reads as a
+   pencilled note, never as the real card. */
+.psseries__starter--none .psseries__starterhead {
+  min-height: var(--shot-xs-h);
+}
+.psseries__starternote {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--clay-deep);
+}
+.psseries__starter .projection {
+  padding: var(--space-2h) var(--space-3);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+}
+.psseries__starter .projection__label {
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+.psseries__starter .projection__name,
+.psseries__starter .plink.projection__name {
+  font-size: var(--fs-body);
+}
+.psseries__starter .projection__note {
+  font-size: var(--fs-small);
+}
+
+/* The "vs" rule: a hairline across, the word in its gap. */
+.psseries__startersvs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.psseries__startersvs::before,
+.psseries__startersvs::after {
+  content: '';
+  flex: 1;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+@media (min-width: 740px) {
+  .psseries__starters {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+  .psseries__startersvs {
+    flex-direction: column;
+    padding: var(--space-3) 0;
+  }
+  .psseries__startersvs::before,
+  .psseries__startersvs::after {
+    border-top: none;
+    border-left: var(--bw-hair) solid var(--border-hairline);
+  }
+  .psseries__starter {
+    padding: var(--space-3) var(--space-4);
+  }
+}
+
+/* ---- Still to play -------------------------------------------------------- */
+/* The row keeps 35's game + date line and wraps to take a park line and a
+   probables line under it, each the full row wide. */
+.psseries__upcomingrow {
+  flex-wrap: wrap;
+  row-gap: 2px;
+}
+.psseries__upcomingmeta,
+.psseries__upcomingarms {
+  flex: 1 0 100%;
+  min-width: 0;
+}
+.psseries__upcomingmeta {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.psseries__upcomingarms {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--space-1h);
+  margin-top: 2px;
+  font-size: var(--fs-small);
+  line-height: var(--lh-compact);
+}
+.psseries__upcomingarms--none {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.psseries__arm {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  min-width: 0;
+  max-width: 100%;
+}
+.psseries__armclub {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--clay);
+}
+.psseries__armname,
+.plink.psseries__armname {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+}
+.psseries__armhand {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--field);
+}
+.psseries__arm--tba {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.psseries__armsep {
+  color: var(--text-caption);
+}
+
+/* ---- Wide layout (from 740px) --------------------------------------------- */
+/* The page turns into a two-column grid, so two pairs can sit side by side
+   with no change to the DOM order a phone reads: Today beside Still to play,
+   and Series totals beside Nine Keys (moved up with `order`, the method
+   48-stamp-strip.css uses). Every other child spans both columns.
+
+   A grid item does not collapse its margins with its neighbours, so each
+   child's bottom margin goes: the label head's 18px (inside each section)
+   and the top margins of the head-less blocks rebuild the block page's
+   rhythm, where those margins collapsed into the larger one. */
+@media (min-width: 740px) {
+  .pslive {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-3h);
+    align-items: start;
+  }
+  .pslive > * {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+  /* A grid item stretches by default; the Back control keeps its own width. */
+  .pslive > .player__back {
+    justify-self: start;
+  }
+  /* Today beside Still to play: everything after Still to play, and the
+     starters between them, drop below the pair. */
+  .pslive > .psseries__today:has(~ .psseries__upcoming) {
+    grid-column: 1;
+  }
+  .pslive > .psseries__today ~ .psseries__upcoming {
+    grid-column: 2;
+  }
+  .pslive > .psseries__upcoming ~ * {
+    order: 1;
+  }
+  .pslive > .psseries__today ~ .psseries__startersection:has(~ .psseries__upcoming) {
+    order: 1;
+  }
+  /* Series totals beside Nine Keys: the leaders and the regular season strip
+     between them drop below the pair. */
+  .pslive > .psseries__totalssection {
+    order: 2;
+  }
+  .pslive > .psseries__totalssection:has(~ .psseries__keyssection) {
+    grid-column: 1;
+  }
+  .pslive > .psseries__totalssection ~ .psseries__keyssection {
+    grid-column: 2;
+    order: 2;
+  }
+  .pslive > .psseries__totalssection ~ :not(.psseries__keyssection) {
+    order: 3;
+  }
+  /* A pair stretches to one height, so it reads as one row. */
+  .pslive > .psseries__today:has(~ .psseries__upcoming),
+  .pslive > .psseries__today ~ .psseries__upcoming,
+  .pslive > .psseries__totalssection:has(~ .psseries__keyssection),
+  .pslive > .psseries__totalssection ~ .psseries__keyssection {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+  }
+  .pslive > .psseries__today ~ .psseries__upcoming > .card,
+  .pslive > .psseries__totalssection:has(~ .psseries__keyssection) > .card,
+  .pslive > .psseries__totalssection ~ .psseries__keyssection > .card {
+    flex: 1 1 auto;
+  }
+  /* Side by side, the two tables share one height: the totals rows tighten a
+     little and the key rows open up, so neither card trails empty paper. */
+  .pslive > .psseries__totalssection:has(~ .psseries__keyssection) .psseries__totalsrow > * {
+    height: 36px;
+  }
+  .pslive > .psseries__totalssection ~ .psseries__keyssection .psseries__keyrow > * {
+    height: 40px;
+  }
+}

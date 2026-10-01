@@ -1426,7 +1426,7 @@ const C6A = [
   { css: '35-postseason-series.css', sel: '.psseries__log', jsx: ['screens/PostseasonSeriesPage.jsx', 'screens/postseason-live/LiveSeriesPage.jsx'], ns: 'psseries__log', as: 'div', gone: true },
   { css: '35-postseason-series.css', sel: '.psseries__lboard', jsx: ['components/postseason/SeriesParts.jsx'], ns: 'psseries__lboard' },
   { css: '35-postseason-series.css', sel: '.psseries__rostercard', jsx: ['components/postseason/SeriesParts.jsx'], ns: 'psseries__rostercard' },
-  { css: '35-postseason-series.css', sel: '.psseries__upcominglist', jsx: ['screens/postseason-live/LiveSeriesPage.jsx'], ns: 'psseries__upcominglist', mode: 'wrap', as: 'div' },
+  { css: '35-postseason-series.css', sel: '.psseries__upcominglist', jsx: ['components/postseason/StillToPlay.jsx'], ns: 'psseries__upcominglist', mode: 'wrap', as: 'div' },
   { css: '36-postseason-leaders.css', sel: '.psleaders__teamboard', jsx: ['screens/PostseasonLeadersPage.jsx'], ns: 'psleaders__teamboard' },
   { css: '37-all-star-rosters.css', sel: '.allstarrosters__year', jsx: ['screens/AllStarRostersPage.jsx'], ns: 'allstarrosters__year' },
   { css: '37-all-star-rosters.css', sel: '.allstarrosters__rows', jsx: ['screens/AllStarRostersPage.jsx'], ns: 'allstarrosters__rows', mode: 'wrap', as: 'div' },
@@ -1548,7 +1548,7 @@ test('C6a: the seed tile takes the Card focus ring', () => {
 // The two lists are lists inside a flush Card; the Card is a div.
 test('C6a: the upcoming games and the roster rows are <ul>s inside a flush Card div', () => {
   for (const [rel, ns] of [
-    ['screens/postseason-live/LiveSeriesPage.jsx', 'psseries__upcominglist'],
+    ['components/postseason/StillToPlay.jsx', 'psseries__upcominglist'],
     ['screens/AllStarRostersPage.jsx', 'allstarrosters__rows'],
   ]) {
     const code = src(rel)

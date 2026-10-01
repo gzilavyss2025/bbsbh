@@ -9,7 +9,9 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { fetchHighlights, classifyHighlight, isEligibleForPositiveFilter } from '../../api/highlights.js'
 import { fetchGameFeed } from '../../api/game.js'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
-import { teamClubNameShort } from '../../lib/teams.js'
+import { BoxLinesDoor } from '../boxlines/BoxLinesDoor.jsx'
+import { splitDisplayName } from '../../api/person.js'
+import { teamClubName, teamClubNameShort } from '../../lib/teams.js'
 import { ordinal } from '../../lib/format.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Headshot } from '../player/Headshot.jsx'
@@ -133,17 +135,29 @@ export function SeriesPlayOfTheGame({ potg, gamePk, awayAbbr, homeAbbr }) {
 // lines renders nothing at all. Title uses the same label head (SectionHead)
 // as "Game by game" above and the base TeamLeaders board it replaced, so the
 // page's section headers all read as one family.
-export function SeriesLeaderBoard({ title, categories, byCategory }) {
+//
+// `doors` (optional) turns each category's LEADER FIGURE into a door onto that
+// player's game lines for this series (BoxLinesDoor, ADR-0069), and says "See
+// all ›" once in the head, the way the Game lines card does (ADR-0073). It is
+//   { group: 'hitting' | 'pitching', cutoff, from, seriesName, roundTitle,
+//     opponentOf(clubId) }
+// `cutoff` is the date the sheet's rows must end before (the live page's own
+// cutoff, or the day after a finished series' last game) and `from` the date of
+// Game 1, so the rows are this series and nothing else. Only the leader's figure
+// is a door: the runner-ups' 11px figures are too small to tap.
+export function SeriesLeaderBoard({ title, categories, byCategory, doors = null }) {
   const ranked = categories
     .map((category) => ({ category, entries: byCategory[category.key] ?? [] }))
     .filter((r) => r.entries.length > 0)
   if (ranked.length === 0) return null
   return (
     <Card body="flush" className="psseries__lboard">
-      <SectionHead look="label">{title}</SectionHead>
+      <SectionHead look="label" note={doors ? 'See all ›' : undefined}>
+        {title}
+      </SectionHead>
       <div className="psseries__lrows">
         {ranked.map(({ category, entries }) => (
-          <SeriesLeaderLine key={category.key} category={category} entries={entries} />
+          <SeriesLeaderLine key={category.key} category={category} entries={entries} doors={doors} />
         ))}
       </div>
     </Card>
@@ -158,7 +172,7 @@ export function SeriesLeaderBoard({ title, categories, byCategory }) {
 // stat code says why this name is up top anyway (first by the ranker's
 // tiebreak, not sole leader). Deliberately no favoriteTeamId highlight — see
 // the component-level comment above.
-function SeriesLeaderLine({ category, entries }) {
+function SeriesLeaderLine({ category, entries, doors }) {
   const [leader, ...chasers] = entries
   const leaderTied = chasers.length > 0 && chasers[0].value === leader.value
   return (
@@ -182,7 +196,11 @@ function SeriesLeaderLine({ category, entries }) {
           <PlayerLink id={leader.id} className="psseries__lname">
             {leader.name}
           </PlayerLink>
-          <span className="psseries__lval">{leader.display}</span>
+          {doors ? (
+            <LeaderDoor leader={leader} category={category} doors={doors} />
+          ) : (
+            <span className="psseries__lval">{leader.display}</span>
+          )}
         </div>
         {chasers.length > 0 && (
           <p className="psseries__lchase">
@@ -206,6 +224,39 @@ function SeriesLeaderLine({ category, entries }) {
         )}
       </div>
     </div>
+  )
+}
+
+// The leader's figure as a door onto his game lines for this series. The sheet
+// takes the same cutoff as the page, so it cannot show a game the page does not
+// count (ADR-0087).
+function LeaderDoor({ leader, category, doors }) {
+  const surname = splitDisplayName(leader.name).last
+  const opponentId = doors.opponentOf(leader.teamId)
+  return (
+    <BoxLinesDoor
+      className="psseries__ldoor"
+      label={`${leader.name}, series leader in ${category.label}: ${leader.display}`}
+      face={
+        <>
+          <span className="psseries__lval">{leader.display}</span>
+          <span className="psseries__ldoormark" aria-hidden="true">
+            ›
+          </span>
+        </>
+      }
+      sheet={{
+        personId: leader.id,
+        playerSurname: surname,
+        group: doors.group,
+        opponentId,
+        opponentName: teamClubName(opponentId) ?? '',
+        facet: { kind: 'club', opponentId, postseasonFrom: doors.from },
+        note: `Game lines · ${doors.roundTitle}`,
+        title: `${surname} in the ${doors.seriesName}`,
+        cutoff: doors.cutoff,
+      }}
+    />
   )
 }
 

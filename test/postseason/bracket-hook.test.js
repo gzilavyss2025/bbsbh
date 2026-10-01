@@ -50,3 +50,24 @@ test('a bracket built for another cutoff is never handed back', () => {
   assert.equal(bracketFor(null, '2025-10-05'), null)
   assert.equal(bracketFor(built, null), null)
 })
+
+// The series pages' parts stand on the same footing (ADR-0087 d.3, d.4): no
+// seal, no kraft token, no read of Scores Unlocked.
+test('the series pages never seal and never read Scores Unlocked', () => {
+  const dir = (rel) =>
+    readdirSync(new URL(`../../src/${rel}/`, import.meta.url)).map((f) => new URL(`../../src/${rel}/${f}`, import.meta.url))
+  const files = [
+    ...dir('components/postseason'),
+    ...dir('screens/postseason-live'),
+    ...dir('styles/postseason'),
+    new URL('../../src/screens/PostseasonSeriesPage.jsx', import.meta.url),
+  ]
+  for (const url of files) {
+    const src = readFileSync(fileURLToPath(url), 'utf8')
+      .replace(/\/\/.*$/gm, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+    for (const banned of ['useScoresUnlocked', 'spoilersOffFor', 'SealBox', '--seal']) {
+      assert.ok(!src.includes(banned), `${fileURLToPath(url)} uses ${banned}`)
+    }
+  }
+})
