@@ -65,10 +65,13 @@ export function meetsStintCap(stat, group) {
 // 2026-07-15 with no return-to-action in between) closes the rehab the same
 // way an activation does: the club has made a new roster decision, so if
 // he's still — or later — rehabbing, that shows up as a fresh rehab-start
-// row, not a continuation of the one already being tracked. Shared by the
-// player page's single-player detector (person.js) and the league-wide Rehab
-// Assignments generator (gen-rehab.mjs), so both agree on when a rehab is over.
-export const REHAB_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET', 'TR'])
+// row, not a continuation of the one already being tracked.
+//
+// A move that takes him off the 40-man roster ends it too: designated for
+// assignment (DES, DFA), sent outright (OUT), claimed off waivers (CLW), or a
+// free agent (SFA). Zastryzny again, 2026: rehab 09-09, DES 09-17, OUT 09-19 —
+// without these codes the list kept him to the 30-day cap (#1361).
+export const REHAB_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET', 'TR', 'DES', 'DFA', 'OUT', 'CLW', 'SFA'])
 
 // MLB hard-caps a rehab assignment at 30 days. A stint with no closing row (a
 // missed transaction, or a schedule lookup that came back empty) would otherwise
@@ -129,6 +132,72 @@ export function isRehabEndingTxn(t) {
   if (REHAB_END_CODES.has(c)) return true
   if (c === 'ASG' && !isRehabTxn(t)) return true
   return c === 'SC' && mentionsInjuredList(t)
+}
+
+// --- THE OPEN STINT: one rule for the banner and the list (#1362) -------------
+// The player page's banner (detectRehabAssignment, person/activity.js) and the
+// Rehab Assignments list (gen-rehab.mjs, through rehabListRow) both call this,
+// so they agree on every day. Before, each found the stint its own way and
+// they disagreed for days (Beck Way, Gavin Stone, Blake Treinen, 2026).
+//
+// - THE END. The latest row that ends a stint (isRehabEndingTxn), with one
+//   exception: MLB often files a plain "assigned to X" ASG row on the SAME day
+//   as a rehab move (Treinen, 2026-08-18). That row is the bookkeeping of the
+//   rehab move, not a new assignment, so it does not end anything. Any other
+//   end on the same day as a rehab leg goes before the leg: the leg is open.
+// - THE START. The FIRST rehab leg after that end, so a move from one rehab
+//   club to the next (Way: NW Arkansas 08-18, Omaha 08-21) does not restart
+//   the 30 days. A leg more than REHAB_MAX_DAYS after the start cannot be the
+//   same assignment, so it starts a new one (Stone: 08-06, then 09-09).
+// - THE CAP. Open through day REHAB_MAX_DAYS after the start, closed after.
+// - NO WINDOW. The caller passes the player's whole feed (capped at `asOf`),
+//   never a cut window that can drop the leg that started the stint.
+//
+// `asOf` (YYYY-MM-DD) is the day to answer for; a stint never carries across a
+// season boundary. Returns { since, club, legs } — `legs` in date order, `club`
+// the latest leg's club — or null.
+const txnDay = (t) => txnDate(t).slice(0, 10)
+
+export function openRehabStint(transactions, asOf) {
+  const ts = (transactions ?? []).filter((t) => txnDate(t))
+  const legs = ts.filter(isRehabTxn).sort((a, b) => txnDay(a).localeCompare(txnDay(b)))
+  if (!legs.length) return null
+  const legDays = new Set(legs.map(txnDay))
+  const lastEnd = ts
+    .filter((t) => isRehabEndingTxn(t) && !(t.typeCode === 'ASG' && legDays.has(txnDay(t))))
+    .reduce((m, t) => (txnDay(t) > m ? txnDay(t) : m), '')
+  let run = []
+  for (const leg of legs) {
+    if (txnDay(leg) < lastEnd) continue
+    if (run.length && isoDaysBetween(txnDay(run[0]), txnDay(leg)) > REHAB_MAX_DAYS) run = []
+    run.push(leg)
+  }
+  if (!run.length) return null
+  const since = txnDay(run[0])
+  if (asOf && since.slice(0, 4) < asOf.slice(0, 4)) return null
+  if (asOf && isoDaysBetween(since, asOf) > REHAB_MAX_DAYS) return null
+  return { since, club: run[run.length - 1].toTeam ?? null, legs: run }
+}
+
+// The Rehab Assignments list's row for one player, from his whole transaction
+// feed, or null: a big leaguer (one leg came from an MLB club in `mlbIds`) on
+// an open stint. gen-rehab.mjs adds position and level, and drops a stint whose
+// club has played on without him (the 7-club-games rule needs game logs).
+export function rehabListRow(transactions, mlbIds, asOf) {
+  const stint = openRehabStint(transactions, asOf)
+  if (!stint?.club?.id) return null
+  const mlbLeg = stint.legs.find((t) => mlbIds.has(t.fromTeam?.id))
+  if (!mlbLeg) return null
+  const latest = stint.legs[stint.legs.length - 1]
+  return {
+    playerId: latest.person?.id ?? null,
+    playerName: latest.person?.fullName || '',
+    orgId: mlbLeg.fromTeam?.id ?? null,
+    orgName: mlbLeg.fromTeam?.name || '',
+    clubId: stint.club.id,
+    clubName: stint.club.name || '',
+    since: stint.since,
+  }
 }
 
 // --- injured-list WORDING -----------------------------------------------------

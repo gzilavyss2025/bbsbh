@@ -104,10 +104,11 @@ don't run these by hand.
   `generatedAt` on purpose — 120 committed files on a nightly cron must not all
   churn on a timestamp. App reads it via `fetchMilbAlumni` in `src/api/team.js`.
 - `gen-rehab.mjs` → `public/data/rehab.json` — the league-wide Rehab Assignments
-  list. Starts from a transaction scan, then verifies each candidate against his
-  game log + club's schedule to drop ended stints. Imports the transaction tests and
-  the 30-day cap (`REHAB_MAX_DAYS`) from `src/api/rehab-policy.js`, shared with
-  `person.js`'s `detectRehabAssignment`. The 7-club-games stale rule stays here.
+  list. A 40-day league scan finds the candidates; each candidate's WHOLE feed then
+  decides his stint through `rehabListRow` / `openRehabStint` in
+  `src/api/rehab-policy.js` — the one stint rule (start, end, same-day tie, 30-day
+  cap) that `person.js`'s `detectRehabAssignment` also calls (#1362). Then each is
+  verified against his game log + club's schedule; that 7-club-games rule stays here.
 - `gen-umpires.mjs` → `public/data/umpires/{season}/{personId}.json` + `umpires/seasons.json`
   — each MLB + AAA umpire's season game log, ONE FILE PER UMPIRE (readers want one man;
   the league-wide file hit 3.2 MB). A season store (ADR-0086): a run rebuilds only its
@@ -1005,8 +1006,8 @@ don't run these by hand.
   **rookies.json is the MASTER; the app reads the derived `rookies/` views instead**
   — `scripts/lib/rookie-shards.mjs`, called by both scripts, splits those by ROLE
   rather than by id (`docs/api/static-data.md` has why). Shares its crossing-detection
-  helpers with the backfill by deliberate small duplication (self-contained generators,
-  like `gen-rehab.mjs` mirroring `detectRehabAssignment`), not an import.
+  helpers with the backfill by deliberate small duplication (self-contained
+  generators), not an import.
 - `gen-season-score.mjs` → `public/data/season-score.json` — an MLB-only,
   date-keyed 0.0–10.0 Season Surprise Score. One normal run adds yesterday's
   snapshot; `--date` and `--from`/`--to` make a reproducible backfill. The
