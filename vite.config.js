@@ -510,11 +510,15 @@ export default defineConfig({
             // it: an LRU cap sized for a page-snapshot cache would evict a
             // visited page's data on the next player tap.
             urlPattern: ({ url }) =>
-              // Career WAR, coaching history, fouls, contracts and pitch mix, all bucketed
+              // Career WAR, coaching history, contracts and pitch mix, all bucketed
               // on personId % 100 like the rookie records.
-              /^\/data\/(?:war-history|manager-history|fouls|pitch-arsenal|player-contracts)\/\d{2}\.json$/.test(
+              /^\/data\/(?:war-history|manager-history|pitch-arsenal|player-contracts)\/\d{2}\.json$/.test(
                 url.pathname,
               ) ||
+              // A season store (ADR-0086): its seasons.json and one season's
+              // files, the league file beside the buckets. Each season adds its
+              // own URLs, so it belongs here, uncounted, not in the rule above.
+              /^\/data\/fouls\/(?:seasons|\d{4}\/[^/]+)\.json$/.test(url.pathname) ||
               // One file per MATCHUP, keyed by the two team ids ascending.
               /^\/data\/former-teammates\/\d+-\d+\.json$/.test(url.pathname) ||
               // One slim similarity pool per level.

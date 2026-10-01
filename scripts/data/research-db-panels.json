@@ -389,10 +389,6 @@
    "shipped UI data for a callout"
   ],
   [
-   "public/data/fouls.json",
-   "shipped UI data for the fouls card"
-  ],
-  [
    "public/data/game-notes-corroboration.json",
    "shipped UI data for game notes"
   ],

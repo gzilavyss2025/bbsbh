@@ -66,7 +66,7 @@ export async function fetchCallouts(urlDate, gamePks) {
 //       count over the trailing window (the workload note's peer figure),
 //     foulRate?:{ perPitch } — league fouls/pitch (4 decimals), the baseline
 //       for the "team is making the starter fight" note; MLB only, from the
-//       local fouls.json (gen-fouls.mjs), absent when that file is missing,
+//       local fouls/{season}/fouls.json (gen-fouls.mjs), absent when that file is missing,
 //     foulSpoilers?:{ [playerId]: { rank, perGame, fouls, g } } — this game's
 //       two clubs' hitters who rank in the league's top-10 foul-per-game board
 //       (qualified: g >= max(5, round(0.5·maxG)); rank 1-based, perGame to 1

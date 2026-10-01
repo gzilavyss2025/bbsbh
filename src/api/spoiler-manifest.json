@@ -341,7 +341,7 @@
     },
     "fouls.js": {
       "class": "spoiler-free",
-      "why": "Static fouls.json season aggregates over completed games, same footing as WAR. The LIVE per-half foul counters are in derive.js instead."
+      "why": "Static fouls/{season}/fouls.json season aggregates over completed games, same footing as WAR. The LIVE per-half foul counters are in derive.js instead."
     },
     "game.js": {
       "class": "spoiler-free",

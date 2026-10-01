@@ -24,7 +24,7 @@
 // scripts/gen-*.mjs` directly with no `npm install` step — a built-in avoids
 // adding install latency and avoids native-binary platform risk.
 import { DatabaseSync } from 'node:sqlite'
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { readFile, readdir, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -34,21 +34,28 @@ const dataDir = join(here, '..', 'data')
 
 // Add a new group when a new table lands (docs/adr/0021's Phase 2/3 tables).
 // A table belongs to exactly one group, matching the workflow that owns it.
+// A group's dump is `scripts/data/<group>.sql`.
+//
+// `bySeason: true` makes it a SEASON GROUP (ADR-0086, #1200): every table has
+// a `season` column, the live `<group>.sql` holds only the newest season, and
+// each older season is dumped ONCE to `<group>-<season>.sql`, at the first
+// dump that sees a newer season, and never rewritten. A nightly run then never
+// rewrites a completed season, and no one file grows past GitHub's 50 MB
+// warning. Until a newer season has rows, no frozen file exists.
 export const GROUPS = {
-  'team-snapshots': { file: join(dataDir, 'team-snapshots.sql'), tables: ['team_snapshots'] },
-  'player-snapshots': { file: join(dataDir, 'player-snapshots.sql'), tables: ['player_snapshots'] },
+  'team-snapshots': { tables: ['team_snapshots'] },
+  'player-snapshots': { tables: ['player_snapshots'] },
   // Both tables are written by the SAME single hand-run script
   // (gen-postseason-leaders.mjs) — there's no cross-cron collision risk to
   // isolate here, so one group covers both.
   'postseason-player-stats': {
-    file: join(dataDir, 'postseason-player-stats.sql'),
     tables: ['postseason_ingested_games', 'postseason_batting_totals', 'postseason_pitching_totals'],
   },
   // All six foul tables are written by the SAME single generator (gen-fouls.mjs)
   // on the nightly cron — no cross-cron collision to isolate, so one group
   // covers them all, same as postseason-player-stats above.
   fouls: {
-    file: join(dataDir, 'fouls.sql'),
+    bySeason: true,
     tables: [
       'foul_ingested_games',
       'foul_batter_totals',
@@ -65,19 +72,16 @@ export const GROUPS = {
   // Both comeback tables are written by the one nightly gen-comeback-wins.mjs —
   // one group, same as fouls/postseason above.
   'comeback-wins': {
-    file: join(dataDir, 'comeback-wins.sql'),
     tables: ['comeback_win_totals', 'comeback_ingested_games'],
   },
   // Written by the one nightly gen-jerseys.mjs — its own group (not folded
   // into an existing one) since no other generator ever writes this table.
   jerseys: {
-    file: join(dataDir, 'jerseys.sql'),
     tables: ['jerseys'],
   },
   // Both tables are written by the one nightly gen-pitch-arsenal.mjs — its
   // own group, same as jerseys above.
   'pitch-arsenal': {
-    file: join(dataDir, 'pitch-arsenal.sql'),
     tables: ['pitch_arsenal_totals', 'pitch_arsenal_ingested_games', 'pitch_command_cells', 'pitch_command_ingested_games'],
   },
   // All three tables are written by the one nightly gen-team-records.mjs — its
@@ -89,7 +93,6 @@ export const GROUPS = {
   // totals move every time he throws — but only for the arms that worked that
   // night, so its nightly diff is the same handful of lines.
   'team-records': {
-    file: join(dataDir, 'team-records.sql'),
     tables: ['team_record_games', 'team_record_ingested_games', 'team_record_pitcher_roles'],
   },
   // All three tables are written by the one nightly gen-abs-challenges.mjs —
@@ -100,25 +103,37 @@ export const GROUPS = {
   // append-only ledger, rewritten a club at a time, so its nightly diff is
   // every row of whichever clubs were swept rather than a handful of appends.
   'abs-challenges': {
-    file: join(dataDir, 'abs-challenges.sql'),
+    bySeason: true,
     tables: ['abs_challenges', 'abs_ingested_games', 'abs_player_exposure'],
   },
 }
 
 // Reconstitutes a fresh in-memory database: apply the schema, then replay
-// every group's committed dump on top (each a no-op before its file exists).
-export async function openDb() {
+// every group's committed dumps on top (each a no-op before its file exists):
+// a season group's frozen `<group>-<season>.sql` files, then its live file.
+export async function openDb(dir = dataDir) {
   const db = new DatabaseSync(':memory:')
   db.exec(await readFile(schemaPath, 'utf8'))
-  for (const group of Object.values(GROUPS)) {
-    try {
-      const dump = await readFile(group.file, 'utf8')
-      if (dump.trim()) db.exec(dump)
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err
+  const files = await readdir(dir).catch(() => [])
+  for (const name of Object.keys(GROUPS)) {
+    for (const f of [...files.filter((f) => isFrozenDump(name, f)).sort(), `${name}.sql`]) {
+      const dump = await readOr(join(dir, f))
+      if (dump?.trim()) db.exec(dump)
     }
   }
   return db
+}
+
+const isFrozenDump = (name, f) => f.startsWith(`${name}-`) && /^\d{4}\.sql$/.test(f.slice(name.length + 1))
+
+// A file's text, or null only when it does not exist.
+async function readOr(path) {
+  try {
+    return await readFile(path, 'utf8')
+  } catch (err) {
+    if (err.code === 'ENOENT') return null
+    throw err
+  }
 }
 
 function sqlLiteral(value) {
@@ -128,14 +143,11 @@ function sqlLiteral(value) {
   return `'${String(value).replace(/'/g, "''")}'`
 }
 
-// Re-dumps only the tables in `groupName` to its own file, as plain INSERT
-// statements ordered by primary key (a run's diff is just the new/changed
-// rows, not a full reshuffle). Never touches another group's dump file.
-export async function dumpGroup(db, groupName) {
-  const group = GROUPS[groupName]
-  if (!group) throw new Error(`unknown dump group: ${groupName}`)
+// The tables as plain INSERT statements ordered by primary key (a run's diff
+// is just the new/changed rows, not a full reshuffle), for one season or all.
+function dumpText(db, tables, season) {
   const lines = []
-  for (const table of group.tables) {
+  for (const table of tables) {
     const columns = db.prepare(`PRAGMA table_info(${table})`).all()
     const colNames = columns.map((c) => c.name)
     const pkNames = columns
@@ -143,14 +155,38 @@ export async function dumpGroup(db, groupName) {
       .sort((a, b) => a.pk - b.pk)
       .map((c) => c.name)
     const orderBy = pkNames.length ? pkNames.join(', ') : colNames[0]
-    const rows = db.prepare(`SELECT * FROM ${table} ORDER BY ${orderBy}`).all()
+    const where = season == null ? '' : 'WHERE season = ?'
+    const rows = db.prepare(`SELECT * FROM ${table} ${where} ORDER BY ${orderBy}`).all(...(season == null ? [] : [season]))
     for (const row of rows) {
       const values = colNames.map((c) => sqlLiteral(row[c]))
       lines.push(`INSERT INTO ${table} (${colNames.join(', ')}) VALUES (${values.join(', ')});`)
     }
   }
-  await mkdir(dataDir, { recursive: true })
-  await writeFile(group.file, lines.length ? lines.join('\n') + '\n' : '')
+  return lines.length ? lines.join('\n') + '\n' : ''
+}
+
+// Re-dumps only the tables in `groupName` to its own file(s). Never touches
+// another group's dump. A season group (see GROUPS) writes its newest season
+// to the live file and freezes each older season once. A frozen season whose
+// rows changed is an error, not a silent drop: delete its file on purpose to
+// re-freeze it.
+export async function dumpGroup(db, groupName, dir = dataDir) {
+  const group = GROUPS[groupName]
+  if (!group) throw new Error(`unknown dump group: ${groupName}`)
+  await mkdir(dir, { recursive: true })
+  if (!group.bySeason) return writeFile(join(dir, `${groupName}.sql`), dumpText(db, group.tables))
+  const seasons = [
+    ...new Set(group.tables.flatMap((t) => db.prepare(`SELECT DISTINCT season FROM ${t}`).all().map((r) => r.season))),
+  ].sort((a, b) => a - b)
+  const newest = seasons.pop()
+  for (const season of seasons) {
+    const file = join(dir, `${groupName}-${season}.sql`)
+    const text = dumpText(db, group.tables, season)
+    const frozen = await readOr(file)
+    if (frozen == null) await writeFile(file, text)
+    else if (frozen !== text) throw new Error(`${file} is frozen, but this run changed its ${season} rows`)
+  }
+  await writeFile(join(dir, `${groupName}.sql`), newest == null ? '' : dumpText(db, group.tables, newest))
 }
 
 // Convenience for one-time/hand-run scripts that touch every group (the

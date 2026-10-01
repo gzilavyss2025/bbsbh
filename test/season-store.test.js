@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { seasonsAfter, seasonToServe } from '../scripts/lib/io.js'
 
-const STORES = ['umpires', 'spray', 'umpire-accuracy']
+const STORES = ['umpires', 'spray', 'umpire-accuracy', 'fouls']
 const storeUrl = (store) => new URL(`../public/data/${store}/`, import.meta.url)
 
 test('a new season is added to the index, and the old one stays', () => {
@@ -59,4 +59,40 @@ test('the spray card reads the season that seasons.json names', async (t) => {
   const { fetchSprayFor } = await import('../src/api/spray.js?case=season')
   await fetchSprayFor(660271)
   assert.deepEqual(fetched, ['/data/spray/seasons.json', '/data/spray/2026/71.json'])
+})
+
+// --- per-season SQLite dumps (#1200) -------------------------------------------
+// A season group's live dump holds the newest season. An older season goes to
+// `<group>-<season>.sql` once, at the first dump that sees a newer season, and
+// is never rewritten.
+test('a season group dumps an older season once to its own frozen file', async () => {
+  const { openDb, dumpGroup } = await import('../scripts/lib/db.js')
+  const { mkdtempSync, readdirSync: ls, readFileSync: rd } = await import('node:fs')
+  const { tmpdir } = await import('node:os')
+  const { join } = await import('node:path')
+  const dir = mkdtempSync(join(tmpdir(), 'dump-'))
+  const rows = (db) => db.prepare('SELECT * FROM foul_team_totals ORDER BY season, team_id').all()
+
+  const db = await openDb(dir)
+  const add = db.prepare('INSERT INTO foul_team_totals (season, team_id, games, fouls, two_strike_fouls) VALUES (?, ?, ?, ?, ?)')
+  add.run(2026, 158, 162, 4000, 1500)
+  add.run(2027, 158, 1, 30, 10)
+  await dumpGroup(db, 'fouls', dir)
+
+  assert.deepEqual(ls(dir).sort(), ['fouls-2026.sql', 'fouls.sql'])
+  assert.match(rd(join(dir, 'fouls-2026.sql'), 'utf8'), /VALUES \(158, 2026, 162, 4000, 1500\)/)
+  assert.doesNotMatch(rd(join(dir, 'fouls-2026.sql'), 'utf8'), /2027/)
+  assert.doesNotMatch(rd(join(dir, 'fouls.sql'), 'utf8'), /2026/)
+  const reopened = await openDb(dir)
+  assert.deepEqual(rows(reopened), rows(db))
+
+  // A second dump, after more 2027 rows, leaves the frozen file as it was.
+  const frozen = rd(join(dir, 'fouls-2026.sql'), 'utf8')
+  reopened.prepare('UPDATE foul_team_totals SET games = 2 WHERE season = 2027').run()
+  await dumpGroup(reopened, 'fouls', dir)
+  assert.equal(rd(join(dir, 'fouls-2026.sql'), 'utf8'), frozen)
+
+  // A change to a frozen season fails loudly, so it is never dropped in silence.
+  reopened.prepare('UPDATE foul_team_totals SET games = 163 WHERE season = 2026').run()
+  await assert.rejects(dumpGroup(reopened, 'fouls', dir), /frozen/)
 })

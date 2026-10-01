@@ -96,7 +96,6 @@ export const EXCEPT = {
 // silent, which is the thing this whole script exists to stop. Left as-is
 // deliberately. A new generator should write a full `generatedAt` timestamp.
 export const STAMP_KEY = {
-  'fouls.json': 'asOf',
   'workload.json': 'asOf',
   // Sidecar written by the same gen-workload.mjs run, from the same `asOf`
   // variable as workload.json above — not a new stamp convention, the same one.

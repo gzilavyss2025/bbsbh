@@ -4,7 +4,7 @@
 import { readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { leanInputFromRows } from '../../src/api/umpires.js'
-import { readJsonOr, readSeasons, writeJsonAtomic, writeSeasons, writeShards } from './io.js'
+import { readJsonOr, readSeasons, writeJsonIfChanged, writeSeasons, writeShards } from './io.js'
 import { mergeReassignableRows } from './reassignable-merge.mjs'
 
 // Merge freshly-swept rows into the carried-forward `prevUmpires` map. MLB
@@ -218,10 +218,5 @@ async function writeAll(storeDir) {
       umpires[u.id] = { id: u.id, name: u.name, games: [...(umpires[u.id]?.games ?? []), ...u.games] }
     }
   }
-  const body = { seasons, umpires: aggregatesOf(umpires) }
-  const path = join(storeDir, 'all', SUMMARY)
-  const prev = await readJsonOr(path, {})
-  delete prev.generatedAt
-  if (JSON.stringify(prev) === JSON.stringify(body)) return
-  await writeJsonAtomic(path, { generatedAt: new Date().toISOString(), ...body })
+  await writeJsonIfChanged(join(storeDir, 'all', SUMMARY), { seasons, umpires: aggregatesOf(umpires) })
 }

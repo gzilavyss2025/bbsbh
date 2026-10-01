@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { aggregateGameFouls } from '../scripts/gen-fouls.mjs'
+import { mkdtempSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { openDb } from '../scripts/lib/db.js'
+import { aggregateGameFouls, exportFouls, foldGame, foulStatements, wipeTeamPitchTypes } from '../scripts/gen-fouls.mjs'
 import {
   batterFoulLine,
   pitcherFoulLine,
@@ -403,4 +407,77 @@ test('FOUL_PRIORS carries the literature constants for UI copy', () => {
   assert.equal(FOUL_PRIORS.hitProbOtherRoute2K, 0.102)
   assert.equal(FOUL_PRIORS.hitProbFoulRoute2K3Fouls, 0.335)
   assert.match(FOUL_PRIORS.source, /SABR/)
+})
+
+// --- the season store (ADR-0086, #1200) ----------------------------------------
+// Before, every foul table was keyed on the player (or club, inning, pitch
+// type) alone, and the upsert added the counts: the first 2027 game added onto
+// the 2026 totals and relabeled them 2027 (#1168).
+
+// One game: batter 10 (away) fouls `fouls` pitches off starter 200 (home).
+const gameFeed = (fouls) =>
+  feedWith([
+    play({ batter: 10, pitcher: 200, events: [...Array(fouls)].map(() => pitch('F', 1)).concat(pitch('S', 2)) }),
+  ])
+const foldInto = (db, gamePk, date, season, fouls) =>
+  foldGame(db, foulStatements(db), gamePk, date, season, aggregateGameFouls(gameFeed(fouls)))
+const withoutStamp = ({ asOf: _asOf, ...rest }) => rest
+const emptyDb = () => openDb(mkdtempSync(join(tmpdir(), 'fouls-')))
+
+test('a 2027 game leaves the 2026 foul totals alone, and 2027 holds only that game', async () => {
+  const db = await emptyDb()
+  foldInto(db, 1, '2026-09-01', 2026, 3)
+  foldInto(db, 2, '2026-09-02', 2026, 5)
+  const before = withoutStamp(exportFouls(db, 2026))
+
+  foldInto(db, 3, '2027-03-25', 2027, 2)
+
+  assert.deepEqual(withoutStamp(exportFouls(db, 2026)), before)
+  assert.equal(before.batters[10].g, 2)
+  assert.equal(before.batters[10].fouls, 8)
+  const s27 = exportFouls(db, 2027)
+  assert.equal(s27.season, 2027)
+  assert.equal(s27.gamesIngested, 1)
+  assert.equal(s27.coverageSince, '2027-03-25')
+  assert.equal(s27.batters[10].g, 1)
+  assert.equal(s27.batters[10].fouls, 2)
+  assert.equal(s27.pitchers[200].g, 1)
+  assert.equal(s27.teams[1].fouls, 2)
+  assert.equal(s27.league.totals.pitches, 3)
+  assert.deepEqual(s27.topFoulGames.map((g) => g.gamePk), [3])
+  assert.equal(s27.batters[10].bestPa.gamePk, 3)
+})
+
+test('the team pitch-type rebuild wipes only its own season', async () => {
+  const db = await emptyDb()
+  foldInto(db, 1, '2026-09-01', 2026, 3)
+  foldInto(db, 3, '2027-03-25', 2027, 2)
+  const targets = wipeTeamPitchTypes(db, 2027)
+  assert.deepEqual(targets.map((g) => g.game_pk), [3])
+  assert.deepEqual(exportFouls(db, 2027).teamPitchTypes, { batting: {}, pitching: {} })
+  assert.equal(exportFouls(db, 2026).teamPitchTypes.batting[1][0].fouls, 3)
+})
+
+test('all seasons add counts, keep the higher single-game high, and rebuild a share from counts', async () => {
+  const db = await emptyDb()
+  foldInto(db, 1, '2026-09-01', 2026, 6)
+  foldInto(db, 3, '2027-03-25', 2027, 2)
+  foldInto(db, 4, '2027-03-26', 2027, 1)
+  const all = exportFouls(db, null)
+  assert.deepEqual(all.seasons, [2026, 2027])
+  assert.equal(all.gamesIngested, 3)
+  assert.equal(all.coverageSince, '2026-09-01')
+  const b = all.batters[10]
+  assert.equal(b.g, 3)
+  assert.equal(b.fouls, 9)
+  assert.equal(b.maxGameFouls, 6)
+  assert.equal(b.maxGamePk, 1)
+  assert.equal(b.bestPa.gamePk, 1)
+  // isStarter is a share of appearances (starts * 2 > games), so it is rebuilt
+  // from the summed counts, never carried from one season's flag.
+  assert.equal(all.pitchers[200].g, 3)
+  assert.equal(all.pitchers[200].isStarter, true)
+  assert.equal(all.league.byPitchType[0].pitches, 12)
+  assert.equal(all.league.totals.fouls, 9)
+  assert.equal(all.topFoulGames.length, 3)
 })

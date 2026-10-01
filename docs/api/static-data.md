@@ -363,9 +363,9 @@ for each generator; the reader modules:
   franchise/repeat-MVP boards are plain rank lists (team-keyed, not the
   player-keyed pool `TeamLeaders` expects).
 
-- `fouls.js` — season foul-ball lines + leaders, from `public/data/fouls.json`
-  (`gen-fouls.mjs`) for the whole-league Foul Tracker page, and from
-  `public/data/fouls/{NN}.json` — the same batter/pitcher rows bucketed on
+- `fouls.js` — season foul-ball lines + leaders, from `public/data/fouls/{season}/fouls.json`
+  (`gen-fouls.mjs`; the season `fouls/seasons.json` names, ADR-0086) for the
+  whole-league Foul Tracker page, and from `public/data/fouls/{season}/{NN}.json` — the same batter/pitcher rows bucketed on
   `personId % 100` (`shardKey100`) — for the player page's one-man card, which
   used to pull 805 KB to draw four tiles and now reads ~2 KB
   (`fetchFoulsFor`). Completed-game aggregates → spoiler-free, no SealBox

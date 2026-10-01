@@ -226,7 +226,11 @@ const BUDGETS = {
   // and the finished one. They sit beside postseasonSeriesPath because the two
   // pages share one series id, and a second module would split that pair.
   'src/lib/route.js': 1000, // 970
-  'scripts/gen-fouls.mjs': 1000, // 996
+  // 1000 -> 1100: the season store (#1200, ADR-0086). Season in every key, a
+  // season-scoped team pitch-type wipe, and an all-seasons export that sums
+  // rows (combine) rather than averaging rates. The export and the counting
+  // rules it sums are the pair that must be read together.
+  'scripts/gen-fouls.mjs': 1100, // 1057
   // The sweep gained a batter-side dimension: the side is read off the matchup,
   // it keys the type buckets, and the export folds the sides back into the one
   // pitch a card reads (emptyBucket/foldRow/ttoPairs). Splitting the file would

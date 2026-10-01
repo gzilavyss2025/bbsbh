@@ -134,3 +134,14 @@ export async function writeSeasons(storeDir, season) {
   }
   return next
 }
+
+// Writes `body` under a fresh `generatedAt` only when it differs from the file
+// on disk, so a night that changes nothing leaves the file alone. For a season
+// store's all/ files (#1200), which every run rebuilds from every season.
+export async function writeJsonIfChanged(path, body) {
+  const prev = await readJsonOr(path, {})
+  delete prev.generatedAt
+  if (JSON.stringify(prev) === JSON.stringify(body)) return false
+  await writeJsonAtomic(path, { generatedAt: new Date().toISOString(), ...body })
+  return true
+}

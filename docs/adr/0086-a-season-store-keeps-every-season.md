@@ -83,3 +83,25 @@ rows. The merge base is the season's own folder. `writeAccuracyStore` in
 `test/umpire-accuracy-merge.test.js` pins it. The summary moved into a folder
 with no `index.json`, so `check-data-freshness.mjs` does not check it now. This
 is the same as `umpires/` and `spray/`: a frozen season must not count as stale.
+
+**Per-season dumps.** A SQLite group with `bySeason: true` (`scripts/lib/db.js`)
+dumps its newest season to the live `<group>.sql`. The first dump that sees a
+newer season writes each older season once to `<group>-<season>.sql`, and
+`openDb()` loads them all. A later run that changes a frozen season's rows
+fails, so a change is never dropped in silence: delete the frozen file on
+purpose to freeze it again. No frozen file exists until a newer season has
+rows. `test/season-store.test.js` pins this.
+
+**Fouls.** `season` is now the first column of the key of every accumulating
+foul table, and of each `ON CONFLICT`. `foul_batter_pa_high`,
+`foul_ingested_games` and `foul_game_totals` got a `season` column (2026 for
+every existing row: every ingested date was in 2026). A one-time migration
+copied each row to the new keys, and every row count and column sum of the ten
+tables came out the same. JSON: `fouls/{season}/fouls.json` and
+`fouls/{season}/{NN}.json` (before: `public/data/fouls.json` and
+`public/data/fouls/{NN}.json`), `fouls/seasons.json`, and `fouls/all/fouls.json`.
+`exportFouls(db, null)` builds `all/` from the rows: counts add, a `max_*`
+high keeps the higher game with its context, and `isStarter` comes from the
+summed starts and games. `--backfill-team-pitch-types` wipes and rebuilds one
+season (`--season`, default the newest). `fouls.json` lost its `asOf` freshness
+check, as the umpire accuracy summary did.

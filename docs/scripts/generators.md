@@ -295,13 +295,18 @@ don't run these by hand.
   full-season MiLB levels (each MiLB person-stats fetch must carry the level's
   `sportId` or the API silently returns the empty MLB line); career-derived families
   + standings splits stay MLB-only. A date is ~1 MB across ~76 files, out of
-  precache; a page reads one. Also reads the LOCAL `public/data/fouls.json` for two
+  precache; a page reads one. Also reads the LOCAL `public/data/fouls/{season}/fouls.json`
+  (the season `fouls/seasons.json` names) for two
   MLB-only keys — `foulSpoilers` (top-10 foul-per-game hitters on the clubs) and
   `foulRate.perPitch` (league baseline) — skipped gracefully if that file is
   absent. See `docs/callouts.md` + ADR-0014; extend this pipeline, don't build a
   parallel path.
-- `gen-fouls.mjs` → `fouls.json` (league, for `/fouls`) + `fouls/{NN}.json` (`personId
-  % 100`, for the player card) — season foul-ball aggregates (per batter/pitcher/team,
+- `gen-fouls.mjs` → `fouls/{season}/fouls.json` (league, for `/fouls`) +
+  `fouls/{season}/{NN}.json` (`personId % 100`, for the player card) + `fouls/seasons.json`
+  + `fouls/all/fouls.json` (every season, summed from rows). A season store (ADR-0086,
+  #1200): `season` leads every foul table's key, the dump splits by season
+  (`bySeason`, `fouls-<season>.sql` frozen), a run writes only the seasons it ingested
+  a game for, and `--backfill-team-pitch-types [--season=]` wipes one season. Season foul-ball aggregates (per batter/pitcher/team,
   two-strike fouls, single-game highs, league by-inning + by-pitch-type rates). SQLite-backed
   (`fouls` group, ADR-0021) APPEND-ONLY incremental sweep of Final MLB games'
   live feeds like `gen-umpire-accuracy.mjs` (`--days` trailing window;
