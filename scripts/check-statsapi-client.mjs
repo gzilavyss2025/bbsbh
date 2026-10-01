@@ -30,11 +30,11 @@
 //
 // Run by `npm run lint`.
 
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { pathToFileURL } from 'node:url'
+import { ROOT, walk } from './lib/walk.mjs'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 const ROOTS = ['scripts', '.scratch']
 const EXTS = ['.mjs', '.cjs', '.js']
 
@@ -97,16 +97,10 @@ export function findViolations(source, file = '') {
 
 export function listSources(root = ROOT, roots = ROOTS) {
   const out = []
-  const walk = (dir) => {
-    for (const name of readdirSync(dir)) {
-      if (name === 'node_modules' || name === '.git') continue
-      const path = join(dir, name)
-      const info = statSync(path)
-      if (info.isDirectory()) walk(path)
-      else if (EXTS.some((e) => name.endsWith(e))) out.push(norm(relative(root, path)))
-    }
+  const skip = new Set(['node_modules', '.git'])
+  for (const r of roots) {
+    for (const path of walk(join(root, r), { skip, exts: EXTS })) out.push(norm(relative(root, path)))
   }
-  for (const r of roots) walk(join(root, r))
   return out.sort()
 }
 

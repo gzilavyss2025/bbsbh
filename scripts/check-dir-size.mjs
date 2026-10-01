@@ -36,10 +36,9 @@
 // Run by `npm run lint` (so it gates every push).
 
 import { readdirSync, statSync } from 'node:fs'
-import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join, relative } from 'node:path'
+import { ROOT, walkDirs } from './lib/walk.mjs'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 
 // Roots to walk. Every directory beneath these is checked, counting only the
 // source files sitting DIRECTLY in it (subdirectories are their own entry).
@@ -992,7 +991,8 @@ const BUDGETS = {
   // (#1111): the row shape, the per-source credit table, and the one switch that
   // drops Baseball America's four seasons together with their credit lines. The
   // same testable-helper reason as its neighbours above.
-  'scripts/lib': 40,
+  // +1 for walk.mjs, the one directory walk the check-*.mjs guards share (#1310).
+  'scripts/lib': 41,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
@@ -1102,17 +1102,7 @@ const BUDGETS = {
   'src/lib/research/contenderDiary': 14,
 }
 
-const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git'])
-
-function walk(dir, out = []) {
-  out.push(dir)
-  for (const entry of readdirSync(join(ROOT, dir))) {
-    if (IGNORE_DIRS.has(entry)) continue
-    const rel = `${dir}/${entry}`
-    if (statSync(join(ROOT, rel)).isDirectory()) walk(rel, out)
-  }
-  return out
-}
+const walk = (dir) => walkDirs(join(ROOT, dir)).map((d) => relative(ROOT, d))
 
 function countSources(dir) {
   return readdirSync(join(ROOT, dir)).filter((entry) => {
