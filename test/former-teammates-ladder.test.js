@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { formerTeammatePairs, teammateLadder } from '../src/api/formerTeammates.js'
-import { ladderLayout } from '../src/components/team/ladder/layout.js'
+import { ladderGeometry, ladderLayout, SIDEWAYS_MIN, traceOf } from '../src/components/team/ladder/layout.js'
 
 const AWAY = 111
 const HOME = 147
@@ -18,6 +18,8 @@ const pair = (a, b, clubs, score = 50) => ({ a, b, clubs, score })
 const names = { [AWAY]: 'Boston Red Sox', [HOME]: 'New York Yankees' }
 
 const story = player(6, 'Trevor Story', AWAY, 'SS')
+const gray = player(10, 'Sonny Gray', AWAY)
+const cole = player(5, 'Gerrit Cole', HOME)
 const whitlock = player(2, 'Garrett Whitlock', AWAY)
 const ikf = player(4, 'Isiah Kiner-Falefa', AWAY, '2B')
 const contreras = player(9, 'Willson Contreras', AWAY, '1B')
@@ -29,6 +31,8 @@ const rockies = club(115, 'Colorado Rockies', [2017, 2021])
 const cardinals = club(138, 'St. Louis Cardinals', [2023, 2024])
 const scranton = (seasons, level = 'AAA') => farm(531, 'Scranton/Wilkes-Barre RailRiders', seasons, level, HOME)
 const redSox = (seasons) => club(AWAY, 'Boston Red Sox', seasons)
+const worcester = farm(533, 'Worcester Red Sox', [2022], 'AAA', AWAY)
+const yankees = (seasons) => club(HOME, 'New York Yankees', seasons)
 
 // A frozen shard, read through the same path the card uses.
 const fixture = (key, away, home) => {
@@ -278,4 +282,199 @@ test('layout: every node is placed once, and the bands stack without a gap', () 
 test('layout: crossings on the frozen shards', () => {
   assert.equal(totalCrossings(LAYOUTS[0][1]), 3)
   assert.equal(totalCrossings(LAYOUTS[1][1]), 29)
+})
+
+// --- carried over from the crossroads rows (teammateCrossroads, now gone) ---
+
+test('every pair on one third club shares its club node; a player in two pairs is one node', () => {
+  const l = teammateLadder([pair(contreras, goldschmidt, [cardinals], 99), pair(gray, goldschmidt, [cardinals], 60)], AWAY, HOME)
+  assert.deepEqual(Object.keys(l.clubs), ['138'])
+  assert.deepEqual(l.groups[0].away, [contreras.id, gray.id], 'best score first')
+  assert.deepEqual(l.groups[0].home, [goldschmidt.id])
+  assert.equal(l.groups[0].score, 99)
+})
+
+test('the player who left is found by org, from either side', () => {
+  const l = teammateLadder([pair(story, cole, [worcester])], AWAY, HOME, undefined, names)
+  assert.deepEqual(l.formerOnly, [cole.id], 'Cole left the Red Sox system')
+  assert.deepEqual(l.players[cole.id].former, {
+    orgId: AWAY,
+    teamName: 'Boston Red Sox system',
+    seasons: [2022],
+    farmOnly: true,
+  })
+  assert.equal(l.players[story.id], undefined)
+})
+
+test('a missing team name falls back to the shared club’s own name', () => {
+  const l = teammateLadder([pair(whitlock, volpe, [scranton([2019])])], AWAY, HOME)
+  assert.equal(l.players[whitlock.id].former.teamName, 'Scranton/Wilkes-Barre RailRiders')
+})
+
+test('a shard with no orgId files a farm club as an edge, as before', () => {
+  const bare = { ...scranton([2019]) }
+  delete bare.orgId
+  const l = teammateLadder([pair(whitlock, volpe, [bare])], AWAY, HOME, undefined, names)
+  assert.deepEqual(l.formerOnly, [])
+  assert.deepEqual(
+    l.edges.map((e) => e.club),
+    [531],
+  )
+  assert.equal(l.clubs[531].teamName, 'Scranton/Wilkes-Barre RailRiders')
+})
+
+test('a farm club of a THIRD org is an edge', () => {
+  const phillies = farm(1234, 'Lehigh Valley IronPigs', [2019], 'AAA', 143)
+  const l = teammateLadder([pair(story, mcmahon, [phillies])], AWAY, HOME, undefined, names)
+  assert.deepEqual(l.edges, [{ away: story.id, home: mcmahon.id, club: 1234, seasons: [2019] }])
+})
+
+test('former-only players run starters first, then best score first', () => {
+  // Pairs arrive best score first. Cole (id 5) outscores Kiner-Falefa (id 4).
+  const ties = [pair(story, cole, [worcester], 90), pair(ikf, sanchez, [yankees([2022])], 5)]
+  assert.deepEqual(teammateLadder(ties, AWAY, HOME, undefined, names).formerOnly, [cole.id, ikf.id])
+  const l = teammateLadder(ties, AWAY, HOME, new Set([ikf.id]), names)
+  assert.deepEqual(l.formerOnly, [ikf.id, cole.id], 'Kiner-Falefa starts')
+  assert.equal(l.players[ikf.id].starting, true)
+})
+
+test('a shard stored the other way round still badges the player who left', () => {
+  const bare = ({ id, name, pos }) => ({ id, name, pos })
+  const data = {
+    matchups: {
+      [`${AWAY}-${HOME}`]: {
+        teamA: HOME,
+        teamB: AWAY,
+        kind: 'teammates',
+        // a = Sánchez (on HOME), b = Whitlock (on AWAY); they shared AWAY '25.
+        rows: [{ a: bare(sanchez), b: bare(whitlock), score: 40, shared: [redSox([2025])] }],
+      },
+    },
+  }
+  const l = teammateLadder(formerTeammatePairs(data, AWAY, HOME), AWAY, HOME, undefined, names)
+  assert.deepEqual(l.formerOnly, [sanchez.id], 'Sánchez left the Red Sox; Whitlock is still one')
+  assert.equal(l.players[sanchez.id].side, 'home')
+})
+
+// #1353: a pair's club is chosen by level, then seasons shared, then recency.
+// Read through a shard so formerTeammatePairs does the sorting.
+const shownClub = (shared) => {
+  const bare = ({ id, name, pos }) => ({ id, name, pos })
+  const data = {
+    matchups: {
+      [`${AWAY}-${HOME}`]: {
+        teamA: AWAY,
+        teamB: HOME,
+        kind: 'teammates',
+        rows: [{ a: bare(story), b: bare(mcmahon), score: 50, shared }],
+      },
+    },
+  }
+  return teammateLadder(formerTeammatePairs(data, AWAY, HOME), AWAY, HOME).edges.map((e) => e.club)
+}
+
+test('two clubs at one level: the longer stint wins over the more recent one', () => {
+  const dodgers = club(119, 'Los Angeles Dodgers', [2019, 2020, 2021, 2022])
+  const cubs = club(112, 'Chicago Cubs', [2025])
+  assert.deepEqual(shownClub([cubs, dodgers]), [119])
+})
+
+test('level still comes first: one MLB season beats two AAA seasons', () => {
+  const mlb = club(115, 'Colorado Rockies', [2025])
+  const aaa = club(1234, 'Albuquerque Isotopes', [2023, 2024], 'AAA')
+  assert.deepEqual(shownClub([aaa, mlb]), [115])
+})
+
+test('same level and same season count: the more recent club still wins', () => {
+  const older = club(115, 'Colorado Rockies', [2017, 2018])
+  const newer = club(138, 'St. Louis Cardinals', [2023, 2024])
+  assert.deepEqual(shownClub([older, newer]), [138])
+})
+
+// --- the trace ---
+
+const ANDUJAR = 609280
+const BAUERS = 641343
+const SANCHEZ = 596142
+const WILSON = 669060
+const KING = 650633
+
+test('tracing a player lights only his real partners, never a clubmate he did not overlap', () => {
+  const t = traceOf(PADRES_BREWERS, `p${ANDUJAR}`)
+  for (const id of [ANDUJAR, SANCHEZ, BAUERS, WILSON]) assert.ok(t.nodes.has(`p${id}`), `p${id} lit`)
+  assert.ok(!t.nodes.has(`p${KING}`), 'King shares the Yankees box with Andujar but is not his pair')
+  assert.ok(t.segments.has(`R147-${SANCHEZ}`), 'Yankees to Sánchez')
+  assert.ok(t.segments.has(`R531-${BAUERS}`), 'Bauers lights through the RailRiders, their real tie')
+  assert.ok(!t.segments.has(`R147-${BAUERS}`), 'not through the Yankees: King’s tie, not Andujar’s')
+  assert.deepEqual(
+    [...t.nodes].filter((k) => k[0] === 'c').sort(),
+    ['c134', 'c147', 'c531'],
+  )
+})
+
+test('tracing a club lights every pair on it', () => {
+  const t = traceOf(PADRES_BREWERS, 'c147')
+  for (const id of [ANDUJAR, KING, SANCHEZ, BAUERS]) assert.ok(t.nodes.has(`p${id}`), `p${id} lit`)
+  assert.ok(t.segments.has(`R147-${BAUERS}`))
+  assert.ok(!t.segments.has(`R531-${BAUERS}`))
+})
+
+test('a former-only player traces to himself; no key traces nothing', () => {
+  assert.deepEqual([...traceOf(PADRES_BREWERS, 'p663604').nodes], ['p663604'])
+  assert.equal(traceOf(PADRES_BREWERS, null), null)
+})
+
+// --- the pixel geometry ---
+
+const columnsOf = (l) => ladderLayout(l).rows + l.formerOnly.length
+
+test('geometry: sideways only when the card is wide AND every column gets 54px', () => {
+  assert.equal(columnsOf(PADRES_BREWERS), 16)
+  assert.equal(columnsOf(RAYS_YANKEES), 19)
+  assert.equal(ladderGeometry(PADRES_BREWERS, 896).sideways, true)
+  assert.equal(ladderGeometry(RAYS_YANKEES, 896).sideways, false, '19 × 54 = 1026 > 896')
+  assert.equal(ladderGeometry(PADRES_BREWERS, 328).sideways, false)
+  assert.equal(ladderGeometry(PADRES_BREWERS, SIDEWAYS_MIN - 1).sideways, false, 'a tablet-width card stays vertical')
+})
+
+test('geometry: the phone columns are 92 | 30 | 84 | 30 | 92 at 328px', () => {
+  const g = ladderGeometry(PADRES_BREWERS, 328)
+  const lefts = (side) => [...new Set(g.players.filter((p) => p.side === side).map((p) => p.box.left))]
+  assert.deepEqual(lefts('away'), [0])
+  assert.deepEqual(lefts('home'), [236])
+  assert.ok(g.players.every((p) => p.box.width === 92 && p.box.height === 34))
+  assert.ok(g.clubs.every((c) => c.box.left === 122 && c.box.width === 84 && c.box.height === 30))
+})
+
+test('geometry: sideways is 352px tall, one column per ladder row plus the former-only column', () => {
+  const g = ladderGeometry(PADRES_BREWERS, 896)
+  assert.equal(g.height, 352)
+  assert.ok(g.players.every((p) => p.box.width === 56))
+})
+
+test('geometry: every node sits inside the card, and no two nodes in one lane overlap', () => {
+  for (const l of [PADRES_BREWERS, RAYS_YANKEES]) {
+    for (const width of [328, 600, 896, 1100]) {
+      const g = ladderGeometry(l, width)
+      for (const { box } of [...g.players, ...g.clubs]) {
+        assert.ok(box.left >= -1e-9 && box.left + box.width <= width + 1e-9, `inside ${width}px across`)
+        assert.ok(box.top >= 0 && box.top + box.height <= g.height, `inside ${g.height}px down`)
+      }
+      const lanes = [g.clubs, ...['away', 'home'].map((s) => g.players.filter((p) => p.side === s))]
+      const [start, size] = g.sideways ? ['left', 'width'] : ['top', 'height']
+      for (const lane of lanes) {
+        const spans = lane.map(({ box }) => [box[start], box[start] + box[size]]).sort((x, y) => x[0] - y[0])
+        spans.forEach(([s], i) => i && assert.ok(s >= spans[i - 1][1] - 1e-9, `overlap at ${width}px`))
+      }
+      assert.equal(g.players.length, Object.keys(l.players).length, 'every player drawn')
+      assert.equal(g.clubs.length, Object.keys(l.clubs).length, 'every club drawn')
+    }
+  }
+})
+
+test('geometry: one line per distinct player–club link', () => {
+  const g = ladderGeometry(PADRES_BREWERS, 328)
+  const keys = new Set(PADRES_BREWERS.edges.flatMap((e) => [`L${e.away}-${e.club}`, `R${e.club}-${e.home}`]))
+  assert.deepEqual(g.segments.map((s) => s.key).sort(), [...keys].sort())
+  assert.ok(g.segments.every((s) => /^M[\d.]+ [\d.]+ C/.test(s.d)))
 })

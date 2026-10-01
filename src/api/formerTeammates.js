@@ -279,7 +279,11 @@ export function teammateLadder(pairs, awayTeamId, homeTeamId, startingIds, teamN
   const clubs = {}
   const edges = []
   const scores = [] // scores[i] is edges[i]'s pair score
+  // `players` is keyed by numeric id, which an object lists in ascending order,
+  // not in the best-score-first order the pairs arrive in. `order` keeps that.
+  const order = []
   const node = (p) => {
+    if (!players[p.id]) order.push(p.id)
     players[p.id] ??= {
       id: p.id,
       name: p.name,
@@ -367,10 +371,7 @@ export function teammateLadder(pairs, awayTeamId, homeTeamId, startingIds, teamN
     edges,
     clubs,
     players,
-    formerOnly: Object.values(players)
-      .filter((n) => n.former && !onEdge.has(n.id))
-      .map((n) => n.id)
-      .sort(startersFirst),
+    formerOnly: order.filter((id) => players[id].former && !onEdge.has(id)).sort(startersFirst),
   }
 }
 
