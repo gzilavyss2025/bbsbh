@@ -1629,8 +1629,8 @@ const C6B = [
   { css: '76-workload-marks.css', sel: '.penpage__grid', jsx: ['screens/around-the-game/BullpenPage.jsx'], ns: 'penpage__grid', as: 'div', frame: 'ledger' },
 ]
 // Every plain element (not a Card) whose opening tag names the class.
-const bareTagsC6B = (code, ns) =>
-  [...code.matchAll(/<(?:div|section|li|article|ul|ol|dl|a|button)\b([^>]*)>/g)].map((m) => m[1]).filter((attrs) => namesClass(attrs, ns))
+const bareTags = (code, ns) =>
+  [...code.matchAll(/<(?:div|section|li|article|aside|ul|ol|dl|a|button)\b([^>]*)>/g)].map((m) => m[1]).filter((attrs) => namesClass(attrs, ns))
 
 test('C6b: no people, records or reference block draws a second frame over its Card', () => {
   for (const { css, sel, gone } of C6B) {
@@ -1656,7 +1656,7 @@ test('C6b: every block renders on Card, with its frame, no head prop and a flush
         assert.doesNotMatch(attrs, /head=/, `${rel}: .${ns} keeps its head as the Card's first child, as before`)
       }
       if (mode === 'card') {
-        assert.deepEqual(bareTagsC6B(code, ns), [], `${rel}: .${ns} is on a bare element`)
+        assert.deepEqual(bareTags(code, ns), [], `${rel}: .${ns} is on a bare element`)
       } else {
         // The list stays a <ul> inside the Card, and every one sits in one.
         const uses = code.match(new RegExp(`className=\\{?["'\`]${ns}(?![\\w-])`, 'g')) ?? []
@@ -1783,7 +1783,7 @@ test('C6b: the ledger frames stay ledgers, and the ledger keeps the old .tradeca
 // the Card paints --surface-card, so the ground lives inside it (C2's
 // .factgrid__grid).
 const C6C = [
-  { css: '06b-offday-cards.css', sel: '.offday__tile', jsx: ['components/team/OffDaySection.jsx'], ns: 'offday__tile', as: 'button', accent: '--offday-accent' },
+  { css: '06b-offday-cards.css', sel: '.offday__tile', jsx: ['components/team/OffDaySection.jsx'], ns: 'offday__tile', as: 'button' },
   { css: '43-foul-tracker.css', sel: '.foulboard__hero', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulboard__hero', as: 'div', keep: ['overflow'] },
   { css: '43-foul-tracker.css', sel: '.foulavg', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulavg', as: 'div' },
   { css: '43-foul-tracker.css', sel: '.gamehigh-tiles', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'gamehigh-tiles', as: 'div', frame: 'ledger', ground: '.gamehigh-tiles__grid' },
@@ -1825,9 +1825,7 @@ test('C6c: every block renders on Card, with its frame and a flush body', () => 
         if (box) assert.ok(namesClass(attrs, box), `${rel}: the Card carries .${box}`)
         assert.doesNotMatch(attrs, /head=/, `${rel}: .${ns} keeps its head where it was`)
       }
-      const bare = [...code.matchAll(/<(?:div|section|li|article|aside|ul|ol|dl|a|button)\b([^>]*)>/g)]
-        .map((m) => m[1])
-        .filter((attrs) => namesClass(attrs, ns))
+      const bare = bareTags(code, ns)
       if (mode === 'wrap') assert.ok(bare.every((a) => /^\s*className=/.test(a)), `${rel}: the list is a plain <ol>`)
       else assert.deepEqual(bare, [], `${rel}: .${ns} is on a bare element`)
     }
@@ -1910,7 +1908,7 @@ test('C6c: the moved-up table sits in a flush sheet Card and its head stays outs
   const m = code.match(/<\/SectionHead>\s*<Card\b([^>]*)>\s*<table className="movedup__table">[\s\S]*?<\/table>\s*<\/Card>/)
   assert.ok(m, 'the table is the Card\'s only child, straight after the head')
   assert.match(m[1], /as="div"/)
-  assert.match(m[1], /frame="sheet"/)
+  assert.doesNotMatch(m[1], /frame=/, 'the table is a sheet (the default)')
   assert.match(m[1], /body="flush"/)
   assert.doesNotMatch(m[1], /head=/)
   assert.ok(namesClass(m[1], 'movedup__card'))
@@ -2006,8 +2004,6 @@ const C7 = [
   { css: '62-game-preview.css', sel: '.posterstudio__panel', jsx: ['screens/GamePreview.jsx'], ns: 'posterstudio__panel', as: 'div' },
 ]
 const C7_FILES = [...new Set(C7.flatMap(({ jsx }) => jsx)), 'screens/logbook/statsShared.jsx']
-const bareTagsC7 = (code, ns) =>
-  [...code.matchAll(/<(?:div|section|li|article|ul|ol|dl|a|button)\b([^>]*)>/g)].map((m) => m[1]).filter((attrs) => namesClass(attrs, ns))
 // The link helpers: the one place a tap tile's Card is drawn.
 const C7_HELPERS = [
   { rel: 'screens/FirstScorebookPage.jsx', name: 'ScorebookGameLink' },
@@ -2038,7 +2034,7 @@ test('C7: every block renders on Card, with its frame, a flush body and every co
       assert.match(code, /import \{ Card \} from ["'][\w./]+\/ui\/frame\/Card\.jsx["']/, `${rel} imports Card`)
       const uses = code.match(new RegExp(`className=\\{?["'\`]${ns}(?![\\w-])`, 'g')) ?? []
       assert.ok(uses.length > 0, `${rel}: .${ns} is used`)
-      assert.deepEqual(bareTagsC7(code, ns), [], `${rel}: .${ns} is on a bare element`)
+      assert.deepEqual(bareTags(code, ns), [], `${rel}: .${ns} is on a bare element`)
       if (button) {
         // Every caller passes `card`; the helper draws the Card button.
         const callers = [...code.matchAll(/<(?:ScorebookGameLink|LogbookGameLink)\b([^>]*)>/g)].map((m) => m[1]).filter((a) => namesClass(a, ns))

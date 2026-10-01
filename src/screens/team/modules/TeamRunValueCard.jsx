@@ -6,6 +6,7 @@ import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../components/ui/frame/Card.jsx'
+import { ordinal } from '../../../lib/format.js'
 
 // The team hub's RUN VALUE card, on the Numbers tab — what this club's season
 // has been worth in runs, split four ways, and the men carrying it.
@@ -81,12 +82,4 @@ export function TeamRunValueCard({ data, clubName }) {
       </div>
     </Card>
   )
-}
-
-// Local ordinal. lib/format.js exports the shared one; this body is spelled
-// differently, so it was left as it is.
-function ordinal(n) {
-  const rest = n % 100
-  if (rest >= 11 && rest <= 13) return `${n}th`
-  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`
 }

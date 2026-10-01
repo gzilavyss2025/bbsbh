@@ -17,6 +17,7 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { SPORT_LABEL } from '../src/lib/teams.js'
+import { isoToday } from '../src/lib/dates.js'
 import { txnDate, isRehabTxn, isRehabEndingTxn, REHAB_MAX_DAYS, isoDaysBetween } from '../src/api/rehab-policy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
@@ -32,7 +33,6 @@ const REHAB_WINDOW_DAYS = 40
 // Counting contests (not days) clears a starter's 5–6-day turn with margin.
 const REHAB_STALE_GAMES = 7
 
-const isoToday = () => new Date().toISOString().slice(0, 10)
 const daysAgo = (n) => {
   const d = new Date()
   d.setUTCDate(d.getUTCDate() - n)

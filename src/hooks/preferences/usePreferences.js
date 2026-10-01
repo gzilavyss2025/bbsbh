@@ -78,10 +78,7 @@ export function usePreferences() {
       writePreferences(next)
       return next
     })
-    // The same-tab `storage` echo: several instances of this hook really are
-    // mounted at once — the slate's level toggle, the header avatar's club, a
-    // game view's keep-awake switch, and PreferencesCloudSync — and the browser
-    // fires `storage` only in OTHER tabs.
+    // The same-tab `storage` echo: see src/lib/account/localStore.js.
     notifyStorage(PREFS_KEY)
   }, [])
 

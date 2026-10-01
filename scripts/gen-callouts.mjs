@@ -161,7 +161,7 @@ import {
 // so the field this ranks over is the one rankClause names (see rank.js).
 import { rankAllLevels } from '../src/api/callout-notes/rank.js'
 import { MILESTONE_DEFS, nearestMilestone } from '../src/api/person.js'
-import { mlbOps, eraOf, rate3 } from '../src/api/person/shared.js'
+import { mlbOps, eraOf, rate3, num } from '../src/api/person/shared.js'
 import { tallyStarterRecord, starterCgShutoutCount } from './lib/pitcher-starts.mjs'
 import { corroboratedFor, loadCorroborationFile } from './lib/game-notes-corroboration.mjs'
 
@@ -401,8 +401,6 @@ const SPLIT_AVG_DEVIATION = 0.05
 // a career trend.
 const BIRTHDAY_MIN_GAMES = 2
 const BIRTHDAY_MIN_AB = 5
-
-const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
 
 // Whether a 'YYYY-MM-DD' birth date falls on the slate's own date — compared
 // by MM-DD only (a leap-year Feb 29 birthday just never matches in a non-leap
@@ -1032,10 +1030,8 @@ async function pitcherEnrich(personId, sportId, teamId) {
   const isReliever = reliefRows.length >= RELIEVER_MIN_G && reliefRows.length >= RELIEVER_START_RATIO * starts
   const pitchedYesterday = rows.some((s) => s.date === asOf)
 
-  const roundedEra = (er, outs) => {
-    const e = eraOf(er, outs)
-    return e == null ? null : Math.round(e * 100) / 100
-  }
+  // Callers pass outs > 0, so eraOf is never null here.
+  const roundedEra = (er, outs) => Math.round(eraOf(er, outs) * 100) / 100
   let backToBack = null
   if (isReliever) {
     const appearanceDates = new Set(rows.map((s) => s.date))

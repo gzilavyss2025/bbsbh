@@ -127,8 +127,6 @@ export function GameView({ game, section, onSection }) {
   // (battery cost of an always-on screen), persisted like the Game Score
   // preference; only actually held while the game is Live, released the rest
   // of the time (pregame staging, Final) regardless of the preference.
-  // Hold the screen-wake lock on a live game: one My Tally preference field,
-  // off by default (an always-on screen for a three-hour game costs battery).
   const { keepAwake, set } = usePreferences()
   const setKeepAwake = (value) => set('keepAwake', Boolean(value))
   const isLive = feed?.gameData?.status?.abstractGameState === 'Live'

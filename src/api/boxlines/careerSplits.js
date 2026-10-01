@@ -40,7 +40,7 @@
 // result, and those go through boxlines/rows.js's cutoff gate. Nothing here
 // takes a cutoff, because a career line does not have one.
 import { getJson } from '../statsapi.js'
-import { mlbOps, eraOf } from '../person/shared.js'
+import { mlbOps, eraOf, rate3 } from '../person/shared.js'
 import { outsToIp } from '../../lib/math/innings.js'
 import { num } from '../../lib/math/number.js'
 
@@ -81,18 +81,7 @@ export function careerSplitLine(stat, group) {
 // COUNTING stats and divides once, which is the definition of the combined
 // rate rather than an approximation of it.
 //
-// IT COPIES MLB'S OWN ARITHMETIC, INCLUDING ITS ROUNDING. OPS is not
-// OBP + SLG at full precision: MLB rounds each half to three places and adds
-// THOSE. Yelich's October reads .559 + .630 = 1.189 on MLB's own card, where
-// the unrounded sum is 1.1884 and would print 1.188. The suite pins this by
-// feeding one real split back through the merge and requiring MLB's own
-// published string out the other side.
-
-// A three-place rate the way a scorebook writes one: ".293", "1.189".
-function rate3(v) {
-  const s = v.toFixed(3)
-  return s.startsWith('0.') ? s.slice(1) : s
-}
+// OPS copies MLB's own rounding: see `mlbOps` in ../person/shared.js.
 
 export function mergeCareerSplits(a, b, group) {
   if (!a || !b) return a ?? b ?? null

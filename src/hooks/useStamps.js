@@ -39,13 +39,7 @@ import { localStore, readOwner, writeOwner } from '../lib/account/localStore.js'
 // is. The Logbook resolves runs, clubs, and venue from the game facts at render
 // time (src/api/logbook.js). Do not "cache the score here to save a fetch."
 
-// Private mode / storage disabled degrades to in-session memory — the
-// collection still works for this visit, same as every other local-first store.
-//
-// `notify` is a same-tab echo of the `storage` event: the browser fires it only
-// in OTHER tabs, so without it the two hook instances genuinely mounted at once
-// — the mint affordance inside a box score and the app-wide StampsCloudSync —
-// would not see each other's writes until a reload.
+// Degrade to memory and the same-tab `storage` echo: see src/lib/account/localStore.js.
 const store = localStore(STAMPS_KEY, parseStamps, serializeStamps)
 
 // The account this device's stamps were last merged from — see

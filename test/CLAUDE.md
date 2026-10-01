@@ -9,9 +9,7 @@ most files keep their fixtures inline (see "Fixtures" below for why).
 There is no index table. Test files are named after the module they cover: run
 `ls test/` or `git grep -l "<module>" test/` to find coverage. The spoiler invariant
 is pinned on a captured real game (`test/fixtures/game-823035.trimmed.json`, see
-`docs/testing.md`). Two soft consolidation candidates, not acted on:
-`milb-color-chain.test.js` + `milb-team-wiring.test.js`, and
-`scorecard-placed-runner.test.js` + `scorecard-sac-double-play.test.js`.
+`docs/testing.md`).
 
 
 ## Working with this suite without burning context

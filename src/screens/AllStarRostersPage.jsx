@@ -228,7 +228,7 @@ export function AllStarRostersPage() {
   const scores = data?.scores ?? {}
   const mvps = data?.mvps ?? {}
   const venues = data?.venues ?? {}
-  const updated = monthDayName(data?.generatedAt?.slice(0, 10))
+  const updated = monthDayName(data?.generatedAt)
 
   const visibleSeasons = expanded
     ? seasons.filter((y) => y >= LOAD_MORE_CUTOFF)

@@ -42,7 +42,7 @@ export function MilestoneWatchPage() {
   // chase listed twice (see groupMilestoneRows), so counting the raw rows
   // would report more milestones than the page actually draws.
   const chaseCount = groups.reduce((n, g) => n + g.milestones.length, 0)
-  const updated = monthDayName(data?.generatedAt?.slice(0, 10))
+  const updated = monthDayName(data?.generatedAt)
 
   return (
     <div className="screen">

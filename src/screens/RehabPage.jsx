@@ -31,7 +31,7 @@ export function RehabPage() {
   const [filterTeamId, setFilterTeamId] = useState(null)
   const allPlayers = data?.players ?? []
   const players = filterByTeam(allPlayers, filterTeamId, (p) => p.orgId)
-  const updated = monthDayName(data?.generatedAt?.slice(0, 10))
+  const updated = monthDayName(data?.generatedAt)
 
   return (
     <div className="screen">
