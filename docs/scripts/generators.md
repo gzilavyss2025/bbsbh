@@ -638,8 +638,13 @@ don't run these by hand.
   in a new logo file is the only step needed to light up a team, no code
   change. v2 idea, not built: guess a likely pre-posting treatment from
   accumulated history instead of always falling back to the base logo.
-- `gen-pitch-arsenal.mjs` → `pitch-arsenal/{NN}.json` (per-pitcher buckets) +
-  `pitch-arsenal-pool/{mlb,aaa}.json` (slim similarity pool, `docs/api/static-data.md`) —
+- `gen-pitch-arsenal.mjs` → `pitch-arsenal/{season}/{NN}.json` (per-pitcher buckets) +
+  `pitch-arsenal-pool/{season}/{mlb,aaa}.json` (slim similarity pool, `docs/api/static-data.md`)
+  + `pitch-command/{season}/{NN}.json` (the command grid), a `seasons.json` in each of the
+  three folders, and `pitch-arsenal-pool/all/{mlb,aaa}.json` (every season, summed from
+  rows). A season store (ADR-0086, #1200): `season` leads both totals tables' keys, the
+  dump splits by season (`pitch-arsenal-<season>.sql` frozen), the season and the
+  throwing hands come from the games, and a run with no new game writes nothing —
   each pitcher's season pitch mix (share + velocity per type), split `mlb`/`aaa` — every
   AAA park (like MLB's) feeds Hawk-Eye tracking, confirmed live against a real AAA
   gamePk's feed; AA and below carry none (same two-level split as `gen-umpire-accuracy`).
@@ -649,7 +654,7 @@ don't run these by hand.
   --sports=11` to backfill AAA alone into a file that already has MLB).
   SQLite-backed (`pitch-arsenal` group, ADR-0021); `pitch_arsenal_ingested_games`
   is the idempotency guard, keyed `(game_pk, level)`. `pitch_arsenal_totals` is
-  keyed `(person_id, level, code, stand)` — one row per side the BATTER stood
+  keyed `(season, person_id, level, code, stand)` — one row per side the BATTER stood
   on, `'L'`/`'R'`, or `'?'` when the feed named none. The side is in the KEY,
   unlike the times-through split's nine columns, because the two cross: a look
   has to be counted a side at a time. `'?'` is carried rather than dropped so

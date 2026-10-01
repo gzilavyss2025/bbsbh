@@ -120,3 +120,26 @@ newest season on file, not the calendar year, so on January 1 it re-reads last
 season's final rosters. `--rebuild` needs `--season` and clears only that one
 (`clearSeasonRows`). `abs/` is in `check-data-freshness.mjs`'s `EXCEPT`: a
 completed season must not count as stale.
+
+**Pitch arsenal, command and pools.** `season` now leads the keys of
+`pitch_arsenal_totals` and `pitch_command_cells`, and each `ON CONFLICT`; the
+command grid's read-modify-write reads the row of its own season. The two
+ingested-games ledgers got a `season` column. The migration kept every row:
+counts, column sums and a hash of every row came out the same. The
+`pitch-arsenal` group is a season group. JSON: `pitch-arsenal/{season}/{NN}.json`,
+`pitch-command/{season}/{NN}.json` and `pitch-arsenal-pool/{season}/{mlb,aaa}.json`,
+a `seasons.json` in each folder, and `pitch-arsenal-pool/all/{mlb,aaa}.json`. The
+pool carries `avgVelo`, a ratio, so `all/` is not built from the season pools:
+`exportPitchArsenal(db, hands, null)` folds every season's rows through the same
+sums (`velocity_sum` / `velocity_n`), and the pool is cut from that. The
+throwing hands come from the season being written, not the clock year.
+`century-club.mjs` and `arsenal-side.mjs` (the callouts' readers of the same
+table) read the newest season only, so they never add two seasons together.
+
+**In short.** On Opening Day 2027 none of the four stores adds a 2027 game onto
+2026. A store's first 2027 game opens a 2027 folder, its index moves `current`
+to 2027, and every 2026 file stays as it is. Until then, a run with no 2027
+game writes nothing. What this does not do: the app still reads only `current`
+(#1201 adds `all/` and a season picker, #1202), no season before 2026 is on
+file, and 35 other generators still take the season from the calendar year
+(row U12 in `docs/duplicate-derivations.md`, #1201).

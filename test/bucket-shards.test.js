@@ -16,7 +16,7 @@ import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 // seasons.json that names them and the one the app reads (`current`). The join
 // and the size ceiling hold in EVERY season folder; the floors count the
 // season the app serves.
-const SEASON_STORES = new Set(['spray', 'fouls'])
+const SEASON_STORES = new Set(['spray', 'fouls', 'pitch-arsenal', 'pitch-arsenal-pool'])
 const indexOf = (name) =>
   JSON.parse(readFileSync(new URL(`../public/data/${name}/seasons.json`, import.meta.url), 'utf8'))
 const folder = (name, season) => new URL(`../public/data/${name}/${season == null ? '' : `${season}/`}`, import.meta.url)

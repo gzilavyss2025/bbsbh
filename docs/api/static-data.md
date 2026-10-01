@@ -378,9 +378,10 @@ for each generator; the reader modules:
   bucket instead (reveal-only, surfaced in `StatBox` + the box-score digest).
 - `pitchArsenal.js` — each pitcher's season pitch-type mix (share of pitches +
   average velocity per type), from `gen-pitch-arsenal.mjs` in TWO shapes, because
-  its two readers want opposite things: `public/data/pitch-arsenal/{NN}.json`
+  its two readers want opposite things (each the season its own `seasons.json`
+  names, ADR-0086): `public/data/pitch-arsenal/{season}/{NN}.json`
   (buckets on `personId % 100`) for the opposing-starter card, which wants ONE
-  pitcher; and `public/data/pitch-arsenal-pool/{mlb,aaa}.json` for the player
+  pitcher; and `public/data/pitch-arsenal-pool/{season}/{mlb,aaa}.json` for the player
   page's similarity card, which genuinely needs a pool. The pool file is
   deliberately less than the buckets carry — one level (the two are never ranked
   against each other), only arms past `MIN_SIMILARITY_PITCHES` (the ranker drops

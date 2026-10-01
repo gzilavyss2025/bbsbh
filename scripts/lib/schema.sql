@@ -393,6 +393,12 @@ CREATE TABLE IF NOT EXISTS jerseys (
 -- single fastest of this type on file, so the upsert takes MAX(existing,
 -- new) rather than adding. Both feed the veloVariety/centuryClub/veloPeak
 -- callout families (docs/callouts.md).
+-- EVERY SEASON STAYS ON FILE (ADR-0086, #1200), as with the foul tables:
+-- `season` leads the key here and in pitch_command_cells, and both ingested
+-- ledgers carry it, so a 2027 pitch never adds onto 2026. The foul tables'
+-- "STORE SUMS, NOT AVERAGES" rule holds here too: velocity_sum / velocity_n,
+-- never an average; `max_velo` combines as the maximum; the command grid's
+-- CSV counters add element-wise.
 CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
   person_id       INTEGER NOT NULL,
   level           TEXT NOT NULL,
@@ -434,7 +440,7 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
   tto3_pitches      INTEGER NOT NULL DEFAULT 0,
   tto3_velocity_sum REAL    NOT NULL DEFAULT 0,
   tto3_velocity_n   INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (person_id, level, code, stand)
+  PRIMARY KEY (season, person_id, level, code, stand)
 );
 
 -- Idempotency guard, one row per (gamePk, level) — a gamePk only ever belongs
@@ -444,6 +450,7 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_ingested_games (
   game_pk INTEGER NOT NULL,
   level   TEXT NOT NULL,
   date    TEXT NOT NULL,
+  season  INTEGER NOT NULL,
   PRIMARY KEY (game_pk, level)
 );
 
@@ -474,7 +481,7 @@ CREATE TABLE IF NOT EXISTS pitch_command_cells (
   homers      TEXT NOT NULL,
   swings      TEXT NOT NULL,
   first_pitch TEXT NOT NULL,
-  PRIMARY KEY (person_id, level, code, stand)
+  PRIMARY KEY (season, person_id, level, code, stand)
 );
 
 -- The command sweep's OWN idempotency guard, deliberately separate from
@@ -487,6 +494,7 @@ CREATE TABLE IF NOT EXISTS pitch_command_ingested_games (
   game_pk INTEGER NOT NULL,
   level   TEXT NOT NULL,
   date    TEXT NOT NULL,
+  season  INTEGER NOT NULL,
   PRIMARY KEY (game_pk, level)
 );
 

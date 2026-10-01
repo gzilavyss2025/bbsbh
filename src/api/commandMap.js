@@ -15,16 +15,20 @@
 // command grid (src/lib/zone/zoneGeometry.js), whose middle nine cells are the
 // strike zone's own thirds.
 import { shardKey100 } from '../lib/shardKey.js'
-import { staticJsonBy } from './staticJson.js'
+import { currentSeasonOf, staticJsonBy } from './staticJson.js'
 import { GRID, inHeart, inZone } from '../lib/zone/zoneGeometry.js'
 
 export const fetchCommandShard = staticJsonBy((key) => `/data/pitch-command/${key}.json`, {
   fallback: null,
 })
 
+// A season store (ADR-0086): pitch-command/{season}/{NN}.json, the season
+// pitch-command/seasons.json names.
 export async function fetchCommandFor(personId) {
   if (personId == null) return null
-  const shard = await fetchCommandShard(shardKey100(personId))
+  const season = await currentSeasonOf('pitch-command')
+  if (season == null) return null
+  const shard = await fetchCommandShard(`${season}/${shardKey100(personId)}`)
   return shard?.pit?.[String(personId)] ?? null
 }
 

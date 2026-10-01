@@ -116,14 +116,13 @@ export const COLS = ['cells', 'whiffs', 'called', 'homers', 'swings', 'first_pit
 export function commandStmts(db) {
   const read = db.prepare(
     `SELECT ${COLS.join(', ')} FROM pitch_command_cells
-      WHERE person_id = ? AND level = ? AND code = ? AND stand = ?`,
+      WHERE season = ? AND person_id = ? AND level = ? AND code = ? AND stand = ?`,
   )
   const write = db.prepare(
     `INSERT INTO pitch_command_cells
        (person_id, level, code, stand, season, ${COLS.join(', ')})
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(person_id, level, code, stand) DO UPDATE SET
-       season = excluded.season,
+     ON CONFLICT(season, person_id, level, code, stand) DO UPDATE SET
        ${COLS.map((c) => `${c} = excluded.${c}`).join(',\n       ')}`,
   )
   return { read, write }
@@ -132,5 +131,5 @@ export function commandStmts(db) {
 export const parseCells = (csv) => (csv ? csv.split(',').map(Number) : new Array(GRID * GRID).fill(0))
 
 export const markCommandIngested = (db) =>
-  db.prepare('INSERT OR IGNORE INTO pitch_command_ingested_games (game_pk, level, date) VALUES (?, ?, ?)')
+  db.prepare('INSERT OR IGNORE INTO pitch_command_ingested_games (game_pk, level, date, season) VALUES (?, ?, ?, ?)')
 

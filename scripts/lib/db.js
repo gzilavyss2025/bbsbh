@@ -82,6 +82,7 @@ export const GROUPS = {
   // Both tables are written by the one nightly gen-pitch-arsenal.mjs — its
   // own group, same as jerseys above.
   'pitch-arsenal': {
+    bySeason: true,
     tables: ['pitch_arsenal_totals', 'pitch_arsenal_ingested_games', 'pitch_command_cells', 'pitch_command_ingested_games'],
   },
   // All three tables are written by the one nightly gen-team-records.mjs — its

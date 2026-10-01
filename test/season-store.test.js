@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { seasonsAfter, seasonToServe } from '../scripts/lib/io.js'
 
-const STORES = ['umpires', 'spray', 'umpire-accuracy', 'fouls', 'abs']
+const STORES = ['umpires', 'spray', 'umpire-accuracy', 'fouls', 'abs', 'pitch-arsenal', 'pitch-command', 'pitch-arsenal-pool']
 const storeUrl = (store) => new URL(`../public/data/${store}/`, import.meta.url)
 
 test('a new season is added to the index, and the old one stays', () => {
@@ -95,4 +95,22 @@ test('a season group dumps an older season once to its own frozen file', async (
   // A change to a frozen season fails loudly, so it is never dropped in silence.
   reopened.prepare('UPDATE foul_team_totals SET games = 163 WHERE season = 2026').run()
   await assert.rejects(dumpGroup(reopened, 'fouls', dir), /frozen/)
+})
+
+test('every season group\'s committed dumps survive an openDb round trip byte for byte', async () => {
+  // The 18 MB pitch-arsenal dump included: a re-dump of the rows on file must
+  // give back the same live file and the same frozen files, or a nightly run
+  // would rewrite a season it did not touch.
+  const { GROUPS, openDb, dumpGroup } = await import('../scripts/lib/db.js')
+  const { mkdtempSync, readdirSync: ls, readFileSync: rd } = await import('node:fs')
+  const { tmpdir } = await import('node:os')
+  const { join } = await import('node:path')
+  const db = await openDb()
+  const dir = mkdtempSync(join(tmpdir(), 'redump-'))
+  const committed = new URL('../scripts/data/', import.meta.url)
+  for (const [name, group] of Object.entries(GROUPS)) {
+    if (!group.bySeason) continue
+    await dumpGroup(db, name, dir)
+  }
+  for (const f of ls(dir)) assert.ok(rd(join(dir, f), 'utf8') === rd(new URL(f, committed), 'utf8'), `${f} changed`)
 })

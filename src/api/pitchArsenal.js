@@ -1,5 +1,6 @@
 import { similarPitchers } from '../lib/pitcherSimilarity.js'
 import { shardKey100 } from '../lib/shardKey.js'
+import { currentSeasonOf } from './staticJson.js'
 
 // Season pitch-type mix per pitcher, read from static same-origin files
 // precomputed nightly by
@@ -22,19 +23,24 @@ import { shardKey100 } from '../lib/shardKey.js'
 // the files change once a day):
 //
 //   • ONE PITCHER, everything about him — the opposing-starter card's mix bar.
-//     public/data/pitch-arsenal/{NN}.json, bucketed on `personId % 100`
+//     public/data/pitch-arsenal/{season}/{NN}.json, bucketed on `personId % 100`
 //     (shardKey100, the same join the rookie records use). ~12 KB.
 //   • THE WHOLE LEVEL, slimmed — the player page's "Pitches like" card, which
 //     ranks a man against every arm at his level and so genuinely needs a pool.
-//     public/data/pitch-arsenal-pool/{mlb,aaa}.json: ONE level (an MLB arm is
+//     public/data/pitch-arsenal-pool/{season}/{mlb,aaa}.json: ONE level (an MLB arm is
 //     never compared to a AAA arm), only arms past the similarity floor (an arm
 //     under it can never be a candidate), and no `description` strings (the
 //     ranking reads codes). 149 KB for MLB, 194 KB for AAA.
+//
+// Both are season stores (ADR-0086): each reads the season its own
+// seasons.json names.
 const shards = new Map()
 
 export async function fetchPitchArsenalFor(personId) {
   if (personId == null) return null
-  const key = shardKey100(personId)
+  const season = await currentSeasonOf('pitch-arsenal')
+  if (season == null) return null
+  const key = `${season}/${shardKey100(personId)}`
   if (!shards.has(key)) {
     shards.set(
       key,
@@ -49,7 +55,9 @@ export async function fetchPitchArsenalFor(personId) {
 const pools = new Map()
 
 export async function fetchPitchArsenalPool(isMlb) {
-  const level = isMlb ? 'mlb' : 'aaa'
+  const season = await currentSeasonOf('pitch-arsenal-pool')
+  if (season == null) return null
+  const level = `${season}/${isMlb ? 'mlb' : 'aaa'}`
   if (!pools.has(level)) {
     pools.set(
       level,
