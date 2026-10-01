@@ -448,6 +448,24 @@ test('deferred-money names carry an asterisk the join must strip', () => {
 const populatedMls = salaries.filter((r) => (r.mls ?? '').trim() !== '')
 const decimalOf = (cell) => cell.split('.')[1]
 
+// A cell's service time in days, read the way this section argues: a full year
+// is 172 days, and the day part is rebuilt from its decimal LENGTH. Test-local
+// on purpose: no product code reads this column. A shape outside the five known
+// lengths throws, so a new notation fails loudly here.
+function mlsDays(cell) {
+  const [years, decimal = ''] = cell.trim().split('.')
+  const days =
+    decimal.length === 0 ? 0
+    : decimal.length === 1 ? Number(decimal) * 100 // ".1" is a stripped ".100"
+    : decimal.length === 2 ? Number(decimal) * 10 // ".12" is a stripped ".120"
+    : decimal.length === 3 ? Number(decimal)
+    : decimal.length === 4 ? Number(decimal.slice(1)) // Beckham's stray leading zero
+    : decimal.length === 15 ? Math.round(Number(`0.${decimal}`) * 1000) // float round-trip
+    : null
+  if (days === null || !/^\d+$/.test(years)) throw new Error(`unread mls shape: ${cell}`)
+  return Number(years) * 172 + days
+}
+
 test('19,308 mls cells split 16,382 dotted and 2,926 bare, with no third shape', () => {
   assert.equal(populatedMls.length, 19308)
   const dotted = populatedMls.filter((r) => /^\d+\.\d+$/.test(r.mls))
@@ -511,6 +529,60 @@ test('the one four-digit cell is Tim Beckham 2015, a typo and not a fourth notat
   // 2016 is a gain of exactly one full service year.
   const y2016 = salaries.find((r) => r.year === '2016' && r.player === 'Beckham, Tim')
   assert.equal(y2016.mls, '1.145')
+  assert.equal(mlsDays(y2016.mls) - mlsDays(four[0].mls), 172)
+})
+
+// The 15 names the duplicate table above already resolved as two different men.
+// Luis García appears under both spellings the file uses, so 15 men need 16
+// strings — and each is asserted present, because a typo here would silently
+// weaken the exclusion instead of failing.
+const TWO_MEN_ONE_NAME = [
+  'Young, Chris', 'Smith, Will', 'García, Luis', 'Garcia, Luis', 'Castillo, Diego',
+  'Muncy, Max', 'Ortiz, Luis', 'Gonzalez, Miguel', 'Nunez, Abraham', 'Carpenter, Chris',
+  'Thompson, Rich', 'Taylor, Michael', 'Castro, Ramon', 'Sanchez, Angel', 'Smith, Kevin',
+  'Duffy, Matt',
+]
+
+test('a year-over-year continuity test finds the bad cells without the transaction wire', () => {
+  for (const name of TWO_MEN_ONE_NAME) {
+    assert.ok(salaries.some((r) => r.player === name), `${name} is not a name in salaries.csv`)
+  }
+
+  // One value per (name, season), taking the last row in file order. That pick
+  // only matters for the duplicate names below — every other man has one row a
+  // season — which is exactly why the dup-excluded figure is the one the doc
+  // quotes.
+  const byName = new Map()
+  for (const row of populatedMls) {
+    if (!byName.has(row.player)) byName.set(row.player, new Map())
+    byName.get(row.player).set(Number(row.year), mlsDays(row.mls))
+  }
+
+  // A violation is a gain above a realistic 200-day season, or a gain below
+  // zero. Service time never falls, and no season banks 200 days.
+  const excluded = new Set(TWO_MEN_ONE_NAME)
+  let pairs = 0
+  let violations = 0
+  let cleanPairs = 0
+  let cleanViolations = 0
+  for (const [name, seasons] of byName) {
+    for (const [year, before] of seasons) {
+      if (!seasons.has(year + 1)) continue
+      const gain = seasons.get(year + 1) - before
+      const bad = gain > 200 || gain < 0
+      pairs++
+      if (bad) violations++
+      if (!excluded.has(name)) {
+        cleanPairs++
+        if (bad) cleanViolations++
+      }
+    }
+  }
+  assert.equal(pairs, 13291)
+  assert.equal(violations, 38)
+  assert.equal(cleanPairs, 13229)
+  assert.equal(cleanViolations, 26)
+  assert.equal(Math.round((100000 * cleanViolations) / cleanPairs) / 1000, 0.197)
 })
 
 test('1,745 of the 2,926 bare cells have no earlier mls to check them against', () => {

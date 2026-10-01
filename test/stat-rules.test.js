@@ -46,6 +46,31 @@ test('mlbOps adds the rounded halves: Judge is 1.145, not 1.144', () => {
   assert.equal(rate3(mlbOps(obp, slg)), '1.145')
 })
 
+test('mlbOps rounds each half the way rate3 prints it, so OPS = printed OBP + printed SLG', () => {
+  // 0.2345 is stored a hair under .2345, so rate3 prints '.234'. Math.round(v * 1000)
+  // made it .235, and the OPS no longer added up from the printed halves.
+  assert.equal(rate3(0.2345), '.234')
+  assert.equal(rate3(mlbOps(0.2345, 0.4)), '.634')
+  // OBP .0375 prints .037 and SLG .051375 prints .051: OPS must print .088, not .089.
+  assert.equal(rate3(0.0375), '.037')
+  assert.equal(rate3(0.051375), '.051')
+  assert.equal(rate3(mlbOps(0.0375, 0.051375)), '.088')
+})
+
+test('a real line at the boundary: 3 for 80 with 4 total bases prints OBP .037, SLG .050, OPS .087', () => {
+  // Two stints (one stint passes through untouched): 40 AB, 2 H, 3 TB and 40 AB, 1 H, 1 TB.
+  const stat = aggregateSplits(
+    [
+      stint(158, { atBats: 40, hits: 2, baseOnBalls: 0, hitByPitch: 0, sacFlies: 0, totalBases: 3 }),
+      stint(147, { atBats: 40, hits: 1, baseOnBalls: 0, hitByPitch: 0, sacFlies: 0, totalBases: 1 }),
+    ],
+    'hitting',
+  )
+  assert.equal(stat.obp, '.037')
+  assert.equal(stat.slg, '.050')
+  assert.equal(stat.ops, '.087')
+})
+
 test('eraOf and whipOf give null at zero outs and the usual figure otherwise', () => {
   assert.equal(eraOf(2, 0), null)
   assert.equal(whipOf(1, 3, 0), null)

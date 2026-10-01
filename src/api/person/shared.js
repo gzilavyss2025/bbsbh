@@ -19,9 +19,12 @@ export function rate3(x) {
 
 // MLB'S OWN OPS: round OBP and SLG to three places, THEN add. Not their sum at
 // full precision, which differs from the published string for about one hitter
-// in four (Judge 2025: 1.145 from MLB, 1.144 from the full-precision sum; 673 of
-// 673 hitters match this way, #1275). Returns a number; print it with rate3.
-const round3 = (v) => Math.round(v * 1000) / 1000
+// in four (Judge 2025: 1.145 from MLB, 1.144 from the full-precision sum; #1275
+// checked the round-then-add rule against 673 hitters). Returns a number; print
+// it with rate3. Each half rounds with toFixed(3), the same call rate3 prints
+// with, so OPS always equals the printed OBP plus the printed SLG. Math.round(v
+// * 1000) differs at a .xxx5 boundary: OBP 0.2345 prints .234, but it gave .235.
+const round3 = (v) => Number(v.toFixed(3))
 export const mlbOps = (obp, slg) => round3(obp) + round3(slg)
 
 // ERA and WHIP from summed components. A pitcher who recorded no out has none:

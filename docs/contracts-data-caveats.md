@@ -384,7 +384,7 @@ finds 38 violations, **0.29%**. Excluding the 15 names this document already
 lists as two different men sharing one name, it is **26 of 13,229 = 0.197%**.
 That second figure is the one to quote: it does not depend on which of a
 duplicate pair's rows you pick.
-No test pins these figures now.
+`test/contracts-data-caveats.test.js` pins these figures and the Beckham 172-day gain.
 
 **1,745 of the 2,926 bare cells (59.6%) have no earlier populated `mls` cell for
 that player at all.** That is the at-risk population, and it is an **upper bound,
