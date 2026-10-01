@@ -239,7 +239,7 @@ family and ships green. The tools, all in `.scratch/design-system/layout/`:
   `display: flex`, `flex-direction: column` and a gap on the 4, 8, 12 or 16px
   step, behind a selector that is ONE class. It is SAFE when no other rule for
   the class sets display, flex or gap, and every JSX site is a static
-  `className` on a plain element. **Measured: 120 candidates, 79 safe.** The
+  `className` on a plain element. **Measured on `main` before S1: about 120 candidates and 79 safe; after S3 the corrected finder counts 113 and 68 (see the note on the finder below).** The
   other 24 of the 144 rules are not candidates because of their shape: a
   grouped or compound selector, a rule inside `@media`, or a rule that does not
   set `display: flex` itself. I did not sort the 24 by which. They are edited
@@ -255,6 +255,7 @@ family and ships green. The tools, all in `.scratch/design-system/layout/`:
 | --- | ---: | ---: | --- |
 | S1: awards history and postseason history | 4 | 6 | geometry identical on `/awards` and `/postseason-history`, 4 pages, 0 differences |
 | S2: `12-sealbox.css` (the scoring surfaces) | 7 | 9 | real surfaces identical on 4 anchor-game routes and states, and a synthetic check identical on all 7 (see below) |
+| S3: all-star rosters | 3 | 3 | geometry identical on `/all-star-rosters`, 4,822 elements at 390 and 760px, 0 differences |
 
 S1 moved `.awardhistory__years` (loose, 3 sites), `.awardhistory__leaguecol`,
 `.awardhistory__leagueyears` and `.pshistory__season` (base). `.awardhistory__leaguecol`
@@ -295,5 +296,27 @@ with the reveal mark preset (`geom.mjs` takes `MOCK=1`, `LS=…`, `STEPS=…`).
 I re-wrapped one comment (same words, 6 lines to 5) rather than widen the
 budget in `scripts/check-file-size.mjs`. A real fix is to split the file.
 
-68 safe candidates remain.
+68 safe candidates remain (corrected count, see S3).
+
+S3 moved `.allstarrosters__list`, `.allstarrosters__body` and
+`.allstarrosters__leagues` (`AllStarRostersPage.jsx`). Each keeps its own
+`margin-top`, `flex` or `min-width`. The page was captured with the mock relay
+(`MOCK=1`); all three classes render, 1, 10 and 10 times. The expanded "more
+seasons" state uses the same classes and was not captured separately.
+
+**A bug in the finder, found while picking S3.** `stack-candidates.mjs` and
+`census2.mjs` used postcss `rule.each(...)` with a callback that returns
+`false` for a non-matching node. postcss stops iterating when a callback
+returns `false`, so the scan of a rule ended at its first non-layout
+declaration or its first comment. Two effects: the `keeps` column was empty
+for any rule that opens with `display`, and a rule that opens with another
+property could hide its layout declarations from the "no other layout rule"
+test, so a rule could be called safe when it was not. Both scripts now use
+`walkDecls`. The corrected finder counts 113 candidates and 68 safe after S3.
+`census.mjs` was never affected (it uses an `if` block and returns nothing),
+so the census tables above stand. The "5 of them space children with a sibling
+margin" figure came from `census2.mjs`, which WAS affected, and is
+unverified. S1 and S2 are not at risk: each was checked by geometry, and a
+scan of the CSS now finds no remaining layout rule that names any of the 11
+migrated classes.
 

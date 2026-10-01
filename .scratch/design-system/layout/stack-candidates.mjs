@@ -39,7 +39,9 @@ for (const { f, root } of roots) {
       for (const m of sel.matchAll(/\.([A-Za-z_][\w-]*)/g)) {
         const cls = m[1]
         const layout = []
-        r.each((n) => n.type === 'decl' && LAYOUT.test(n.prop) && layout.push(n.prop))
+        r.walkDecls((n) => {
+          if (LAYOUT.test(n.prop)) layout.push(n.prop)
+        })
         const subject = /\.([A-Za-z_][\w-]*)(?=[^.\s>+~]*$)/.exec(sel.trim())?.[1] === cls
         if (!touches.has(cls)) touches.set(cls, [])
         touches.get(cls).push({ f, line: r.source.start.line, sel: sel.trim(), layout, subject, inMedia: r.parent.type === 'atrule' })
@@ -73,7 +75,9 @@ for (const { f, root } of roots) {
     if (r.parent.type === 'atrule') return
     if (!/^\.[A-Za-z_][\w-]*$/.test(r.selector.trim())) return
     const d = {}
-    r.each((n) => n.type === 'decl' && (d[n.prop] = n.value))
+    r.walkDecls((n) => {
+      d[n.prop] = n.value
+    })
     if (d.display !== 'flex' || d['flex-direction'] !== 'column' || d.gap == null) return
     const g = px(d.gap)
     if (!STEP[g]) return
@@ -81,7 +85,9 @@ for (const { f, root } of roots) {
     const others = touches.get(cls).filter((t) => !(t.f === f && t.line === r.source.start.line) && t.layout.length && t.subject)
     const s = sites(cls).filter((x) => !/^\s*\/\//.test(x.line) && !/^\s*\*/.test(x.line))
     const otherDecls = []
-    r.each((n) => n.type === 'decl' && !/^(display|flex-direction|gap)$/.test(n.prop) && otherDecls.push(n.prop))
+    r.walkDecls((n) => {
+      if (!/^(display|flex-direction|gap)$/.test(n.prop)) otherDecls.push(n.prop)
+    })
     rows.push({ cls, f, line: r.source.start.line, step: STEP[g], keeps: otherDecls, others, sites: s })
   })
 }
