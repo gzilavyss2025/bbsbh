@@ -179,8 +179,8 @@ Follow the #1113 pattern. This is a proposal, not a decision.
 - `src/components/ui/layout/` (new bucket: `Stack.jsx`, `Cluster.jsx`,
   `Grid.jsx`). `ui/` already has `control/` and `frame/`; layout is a third
   kind.
-- `src/styles/system/layout.css` for the rules, beside `card.css`.
-- `--space-section` goes in `src/tokens/spacing.css`.
+- `src/styles/system/stack.css` for the rules, one file per part (`cluster.css`, `grid.css` follow). It loads ahead of `section-head.css`: `test/card-cascade.test.js` pins the head, the card and 06 as adjacent imports.
+- `--space-section` goes in `src/tokens/layout.css`, not `spacing.css`: it is an alias, and `spacing.css` holds the primitive steps only.
 - Specimens on `/design-lab`, one per part (#1131 did this for Pill).
 - One part per PR. Cascade order is the contract (#1113): a rule moved into
   `system/` changes which rule wins at equal specificity. A wrong slice must
@@ -218,5 +218,5 @@ Follow the #1113 pattern. This is a proposal, not a decision.
 ## Next
 
 Build one part per PR, in this order: `Stack`, `Cluster`, `Grid`. Each PR adds
-the component, its rules in `src/styles/system/layout.css`, a `/design-lab`
-specimen and a test. Migrating the existing rules follows in sliced PRs.
+the component, its rules in `src/styles/system/<part>.css`, a `/design-lab`
+specimen and a test. **`Stack` is built** (this branch). Migrating the existing rules follows in sliced PRs.

@@ -6,6 +6,7 @@ import { CardHalf, PillHalf } from './blocks.jsx'
 import { ComponentHalf } from './components.jsx'
 import { ButtonHalf } from './buttons.jsx'
 import { PillSystemHalf } from './pills.jsx'
+import { StackHalf } from './layout.jsx'
 import { CARDS, PILLS } from './catalog.js'
 import { Button } from '../../components/ui/control/Button.jsx'
 import '../../styles/designlab/lab.css'
@@ -101,6 +102,7 @@ export function DesignLab() {
       >
         <ButtonHalf />
         <PillSystemHalf />
+        <StackHalf />
         <ComponentHalf />
       </Band>
 

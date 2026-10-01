@@ -1,0 +1,48 @@
+/* ---------------------------------------------------------------------------
+   STACK — children in a column, one step of space between them (#1180).
+   components/ui/layout/Stack.jsx draws it; lib/design/stackClass.js names its
+   classes.
+
+   WHAT IT OWNS: the column and the gap between children. WHAT IT DOES NOT
+   OWN: padding, margin, a frame, or how the children look. The space around a
+   stack is its parent's.
+
+   FIVE GAPS, four steps (signed off in .scratch/design-system/layout.md). The
+   modifier sets --stack-gap and the one base rule reads it, so a gap is
+   written once. `section` reads --space-section (tokens/layout.css), the
+   page-level gap, so one edit moves every page.
+
+   HERE IN THE ORDER, ahead of system/section-head.css and so before 06: a
+   block that keeps its own gap or alignment loads later and wins on order at
+   equal specificity. It is not between the card and 06, because
+   test/card-cascade.test.js pins the head, the card and 06 as adjacent. Every selector here is one class for that reason.
+   test/stack.test.js pins the slot.
+   --------------------------------------------------------------------------- */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap);
+}
+.stack--tight {
+  --stack-gap: var(--space-1);
+}
+.stack--snug {
+  --stack-gap: var(--space-2);
+}
+.stack--base {
+  --stack-gap: var(--space-3);
+}
+.stack--loose {
+  --stack-gap: var(--space-4);
+}
+.stack--section {
+  --stack-gap: var(--space-section);
+}
+
+/* A list: no marker, no indent. A modifier and not `ul.stack`, so a block's
+   own padding still wins on order. */
+.stack--list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
