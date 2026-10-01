@@ -24,7 +24,7 @@ export const fetchWorkload = staticJson('/data/workload.json')
 
 // Whole-day index for a 'YYYY-MM-DD' date (UTC midnight / 86400s), so day
 // differences and "strictly before" comparisons are plain integer math.
-const dayIndex = (s) => Math.floor(Date.parse(s + 'T00:00:00Z') / 86400000)
+export const dayIndex = (s) => Math.floor(Date.parse(s + 'T00:00:00Z') / 86400000)
 
 // The pitcher record, with apps guaranteed most-recent-first and restricted to
 // appearances STRICTLY BEFORE asOfDate. Returns null for an unknown pitcher.
