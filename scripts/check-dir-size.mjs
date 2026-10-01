@@ -39,7 +39,6 @@ import { readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { ROOT, walkDirs } from './lib/walk.mjs'
 
-
 // Roots to walk. Every directory beneath these is checked, counting only the
 // source files sitting DIRECTLY in it (subdirectories are their own entry).
 const ROOTS = ['src', 'api', 'scripts']
