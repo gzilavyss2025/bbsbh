@@ -92,7 +92,9 @@ for (const { f, root } of roots) {
   })
 }
 
-const safe = rows.filter((r) => !r.others.length && r.sites.length && r.sites.every((s) => s.inClassName && !s.dynamic && /^[a-z]+$/.test(s.tag)))
+// the elements <Stack> accepts: lib/design/stackClass.js STACK_TAGS
+const STACK_TAGS = ['div', 'section', 'article', 'aside', 'header', 'footer', 'nav', 'main', 'ul', 'ol', 'li', 'form', 'fieldset', 'label']
+const safe = rows.filter((r) => !r.others.length && r.sites.length && r.sites.every((s) => s.inClassName && !s.dynamic && STACK_TAGS.includes(s.tag)))
 if (process.argv.includes('--json')) console.log(JSON.stringify({ rows, safe: safe.map((r) => r.cls) }, null, 1))
 else {
   console.log(`candidates: ${rows.length}, with no other layout rule and static sites: ${safe.length}`)

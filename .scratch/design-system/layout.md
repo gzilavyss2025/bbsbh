@@ -256,6 +256,10 @@ family and ships green. The tools, all in `.scratch/design-system/layout/`:
 | S1: awards history and postseason history | 4 | 6 | geometry identical on `/awards` and `/postseason-history`, 4 pages, 0 differences |
 | S2: `12-sealbox.css` (the scoring surfaces) | 7 | 9 | real surfaces identical on 4 anchor-game routes and states, and a synthetic check identical on all 7 (see below) |
 | S3: all-star rosters | 3 | 3 | geometry identical on `/all-star-rosters`, 4,822 elements at 390 and 760px, 0 differences |
+| S4: manager page and ballpark ranks (`39-manager-page.css`) | 3 | 4 | geometry identical on `/manager/bruce-bochy-111136` and `/team/158`; synthetic identical |
+| S5: book cover picker (`60-book-cover-picker.css`) | 3 | 5 | geometry identical on `/logbook/new`, 261 and 370 elements |
+| S6: identity lab workbench (`17-identity-lab-workbench.css`) | 7 | 7 | geometry identical on `/identity-lab`, 1,029 elements |
+| S7: book management (`58-logbook-shelf.css`) | 3 | 6 | `/logbook/new` identical (the two field labels); synthetic identical for all three |
 
 S1 moved `.awardhistory__years` (loose, 3 sites), `.awardhistory__leaguecol`,
 `.awardhistory__leagueyears` and `.pshistory__season` (base). `.awardhistory__leaguecol`
@@ -319,4 +323,47 @@ margin" figure came from `census2.mjs`, which WAS affected, and is
 unverified. S1 and S2 are not at risk: each was checked by geometry, and a
 scan of the CSS now finds no remaining layout rule that names any of the 11
 migrated classes.
+
+## Slices S4 to S7
+
+Gary asked for all four families in one go; each is its own commit so a wrong
+slice reverts alone.
+
+- **S4** moved `.mgrpage__awards` and `.mgrpage__timeline` (two `ul`s that only
+  repeated the list reset, so both rules are deleted), and `.bpsheet__ranks` in
+  two files (`BallparkModal.jsx`, `BallparkCard.jsx`; it keeps its
+  `margin-top`). Real: `/manager/bruce-bochy-111136` draws both lists and
+  `/team/158` draws the rank sheet in the card. The modal copy of
+  `.bpsheet__ranks` is a click state I did not open; the synthetic check covers
+  its CSS.
+- **S5** moved `.coverpick` (2 sites), `.coverpick__half` (2, keeps
+  `min-width`) and `.coverpick__steps`. `/logbook/new` draws the steps at 390px
+  and the two halves at 760px.
+- **S6** moved seven rules on the dev-only identity lab. All seven render.
+  `.idlab__workbench` keeps its animation, `.idlab__field` keeps its sticky
+  position. `.idlab__barunit` carries event handlers, so I converted that one
+  by hand. The page diffs to zero twice, so the animation does not make the
+  capture noisy at rest. Sticky behaviour at scroll was not exercised: the
+  edit does not touch `position`.
+- **S7** moved `.bookmgmt`, `.bookmgmt__field` (4 `label` sites) and
+  `.bookmgmt__confirm`. `shelf__newtile` was **left alone**: it is a `button`
+  with an aspect-ratio and a font, a tile and not a stack.
+
+**`label` joined `Stack`'s elements.** A field is a caption stacked over an
+input, and 4 sites were `label`s. This is an addition to the part, in
+`lib/design/stackClass.js` and `Stack.jsx`; the test already derives its list
+from the helper. The finder now checks sites against the same element list, so
+a `button` or `span` host is no longer called safe (the first version accepted
+any lowercase tag). After S7 the finder counts 97 candidates and 44 safe.
+
+**A bad synthetic baseline, caught.** The first S7 synthetic run compared
+`block` against `flex` and reported differences. The cause: `58-logbook-shelf.css`
+is imported by the logbook components, so it is not loaded on `/design-lab`,
+and the "old" run had no CSS at all. `synth.mjs` now takes `ROUTE`, and the run
+that counts used `/logbook/new`, where the old rule gave `flex/column/16px`.
+Any synthetic check for a lazily imported stylesheet needs a route that loads
+it.
+
+Converter changes: it now keeps static string props (`role="group"`) and
+extra static classes. It still refuses an element with a handler or a spread.
 

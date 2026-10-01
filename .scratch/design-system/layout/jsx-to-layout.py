@@ -18,7 +18,7 @@ for spec in specs:
     gap, _, as_ = rest.partition(':')
     count = 0
     while True:
-        key = r'(?:\s+key=\{[^{}]*\})?'
+        key = r'(?:\s+(?:key=\{[^{}]*\}|(?!className)[\w-]+="[^"]*"))*'
         m = re.search(r'<([a-z]+)(%s)\s+className="((?:[\w-]+ )*%s(?: [\w-]+)*)"(%s)\s*>' % (key, re.escape(cls), key), text)
         if not m:
             break
