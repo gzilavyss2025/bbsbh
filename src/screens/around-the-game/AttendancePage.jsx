@@ -13,7 +13,7 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
 import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
 import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
-import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../components/ui/table/Table.jsx'
 import { BarCell, TrendStrip } from '../../components/around-the-game/BroadcastBar.jsx'
 
 // THE GATE — who is actually going to the ballpark.
@@ -164,52 +164,50 @@ export function AttendancePage() {
               ))}
             </div>
 
-            <BoardScroller label="Attendance board, every club ranked">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    <th className="team">Club</th>
-                    {COLUMNS.map((c) => (
-                      <th key={c.key}>{c.label}</th>
-                    ))}
-                    <th>By month</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
-                      <ClubCell
-                        teamId={r.teamId}
-                        name={clubShort(clubs, r.teamId)}
-                        rank={r.rank}
-                        tied={r.tied}
-                        note={r.venue ?? 'Park not on file'}
-                      />
-                      {COLUMNS.map((c) =>
-                        c.key === sortKey ? (
-                          <td key={c.key}>
-                            <BarCell value={r[c.key]} min={barMin} max={barMax}>
-                              {c.render(r)}
-                            </BarCell>
-                          </td>
-                        ) : (
-                          <td key={c.key}>{c.render(r)}</td>
-                        ),
-                      )}
-                      <td>
-                        <TrendStrip
-                          months={months}
-                          byMonth={r.byMonth}
-                          min={monthMin}
-                          max={monthMax}
-                          label={`${clubName(clubs, r.teamId)} attendance by month`}
-                        />
-                      </td>
-                    </tr>
+            <Table sticky label="Attendance board, every club ranked" className="rpt">
+              <thead>
+                <tr>
+                  <th className="team">Club</th>
+                  {COLUMNS.map((c) => (
+                    <th key={c.key}>{c.label}</th>
                   ))}
-                </tbody>
-              </table>
-            </BoardScroller>
+                  <th>By month</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
+                    <ClubCell
+                      teamId={r.teamId}
+                      name={clubShort(clubs, r.teamId)}
+                      rank={r.rank}
+                      tied={r.tied}
+                      note={r.venue ?? 'Park not on file'}
+                    />
+                    {COLUMNS.map((c) =>
+                      c.key === sortKey ? (
+                        <td key={c.key}>
+                          <BarCell value={r[c.key]} min={barMin} max={barMax}>
+                            {c.render(r)}
+                          </BarCell>
+                        </td>
+                      ) : (
+                        <td key={c.key}>{c.render(r)}</td>
+                      ),
+                    )}
+                    <td>
+                      <TrendStrip
+                        months={months}
+                        byMonth={r.byMonth}
+                        min={monthMin}
+                        max={monthMax}
+                        label={`${clubName(clubs, r.teamId)} attendance by month`}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
           </BroadcastSection>
 
           <BroadcastSection
@@ -218,35 +216,33 @@ export function AttendancePage() {
                   is by how much — a club whose weekend and weekday lines nearly meet sells the
                   same house whoever is in town and whenever they come."
           >
-            <BoardScroller label="Weekend and weekday attendance by club">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    <th className="team">Club</th>
-                    <th>Weekend</th>
-                    <th>Weekday</th>
-                    <th>Gap</th>
-                    <th>Day</th>
-                    <th>Night</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...rows]
-                    .filter((r) => r.weekend && r.weekday)
-                    .sort((a, b) => b.weekend.avg - b.weekday.avg - (a.weekend.avg - a.weekday.avg))
-                    .map((r) => (
-                      <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
-                        <ClubCell teamId={r.teamId} name={clubShort(clubs, r.teamId)} />
-                        <td>{commas(r.weekend.avg)}</td>
-                        <td>{commas(r.weekday.avg)}</td>
-                        <td>{commas(r.weekend.avg - r.weekday.avg)}</td>
-                        <td>{commas(r.day?.avg)}</td>
-                        <td>{commas(r.night?.avg)}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </BoardScroller>
+            <Table sticky label="Weekend and weekday attendance by club" className="rpt">
+              <thead>
+                <tr>
+                  <th className="team">Club</th>
+                  <th>Weekend</th>
+                  <th>Weekday</th>
+                  <th>Gap</th>
+                  <th>Day</th>
+                  <th>Night</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...rows]
+                  .filter((r) => r.weekend && r.weekday)
+                  .sort((a, b) => b.weekend.avg - b.weekday.avg - (a.weekend.avg - a.weekday.avg))
+                  .map((r) => (
+                    <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
+                      <ClubCell teamId={r.teamId} name={clubShort(clubs, r.teamId)} />
+                      <td>{commas(r.weekend.avg)}</td>
+                      <td>{commas(r.weekday.avg)}</td>
+                      <td>{commas(r.weekend.avg - r.weekday.avg)}</td>
+                      <td>{commas(r.day?.avg)}</td>
+                      <td>{commas(r.night?.avg)}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </Table>
           </BroadcastSection>
 
           <BroadcastSection
@@ -255,38 +251,36 @@ export function AttendancePage() {
                   dates is a small sample and a single sold-out weekend can carry one — read
                   it as who the town turns out for, not as a ranking."
           >
-            <BoardScroller label="Best-drawing opponents and quietest night by club">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    <th className="team">Home club</th>
-                    <th className="team">Best draws</th>
-                    <th>Quietest night</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
-                      <ClubCell teamId={r.teamId} name={clubShort(clubs, r.teamId)} />
-                      <td className="team">
-                        {r.topOpponents.map((o) => (
-                          <span key={o.teamId} className="rpt__note">
-                            {clubShort(clubs, o.teamId)} — {commas(o.avg)}
-                          </span>
-                        ))}
-                      </td>
-                      <td>
-                        {commas(r.worst)}
-                        <span className="rpt__note">
-                          {r.worstDate ? humanDate(r.worstDate) : ''}
-                          {r.worstOppId ? ` vs ${clubShort(clubs, r.worstOppId)}` : ''}
+            <Table sticky label="Best-drawing opponents and quietest night by club" className="rpt">
+              <thead>
+                <tr>
+                  <th className="team">Home club</th>
+                  <th className="team">Best draws</th>
+                  <th>Quietest night</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
+                    <ClubCell teamId={r.teamId} name={clubShort(clubs, r.teamId)} />
+                    <td className="team">
+                      {r.topOpponents.map((o) => (
+                        <span key={o.teamId} className="rpt__note">
+                          {clubShort(clubs, o.teamId)} — {commas(o.avg)}
                         </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </BoardScroller>
+                      ))}
+                    </td>
+                    <td>
+                      {commas(r.worst)}
+                      <span className="rpt__note">
+                        {r.worstDate ? humanDate(r.worstDate) : ''}
+                        {r.worstOppId ? ` vs ${clubShort(clubs, r.worstOppId)}` : ''}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
           </BroadcastSection>
 
           <section className="method">

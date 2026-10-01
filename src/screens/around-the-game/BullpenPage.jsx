@@ -16,7 +16,7 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
 import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
 import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
-import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../components/ui/table/Table.jsx'
 import { BarCell, StatusMeter } from '../../components/around-the-game/BroadcastBar.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 
@@ -211,60 +211,58 @@ export function BullpenPage() {
               ))}
             </ul>
 
-            <BoardScroller label="Bullpen board, every club ranked">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    <th className="team">Club</th>
-                    <th>Staff</th>
-                    <th>Down</th>
-                    <th>Load per arm</th>
-                    <th>Most used</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
-                      <ClubCell
-                        teamId={r.teamId}
-                        name={clubShort(clubs, r.teamId)}
-                        rank={r.rank}
-                        note={`${r.total} arms tracked`}
+            <Table sticky label="Bullpen board, every club ranked" className="rpt">
+              <thead>
+                <tr>
+                  <th className="team">Club</th>
+                  <th>Staff</th>
+                  <th>Down</th>
+                  <th>Load per arm</th>
+                  <th>Most used</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
+                    <ClubCell
+                      teamId={r.teamId}
+                      name={clubShort(clubs, r.teamId)}
+                      rank={r.rank}
+                      note={`${r.total} arms tracked`}
+                    />
+                    <td>
+                      <StatusMeter
+                        fresh={r.counts.fresh}
+                        limited={r.counts.limited}
+                        down={r.counts.down}
+                        label={`${clubName(clubs, r.teamId)} — ${r.counts.fresh} available, ${r.counts.limited} limited, ${r.counts.down} likely down`}
                       />
-                      <td>
-                        <StatusMeter
-                          fresh={r.counts.fresh}
-                          limited={r.counts.limited}
-                          down={r.counts.down}
-                          label={`${clubName(clubs, r.teamId)} — ${r.counts.fresh} available, ${r.counts.limited} limited, ${r.counts.down} likely down`}
-                        />
-                      </td>
-                      <td>
-                        {r.counts.down}
-                        <span className="rpt__note">{r.downPct.toFixed(0)}%</span>
-                      </td>
-                      <td>
-                        <BarCell value={r.perArm} min={barMin} max={barMax} tone="hot">
-                          {r.perArm}
-                        </BarCell>
-                      </td>
-                      <td className="team">
-                        {r.leader ? (
-                          <>
-                            <PlayerLink id={r.leader.personId}>{r.leader.name}</PlayerLink>
-                            <span className="rpt__note">
-                              {r.leader.last7dayPitches} pitches, {r.leader.last7dayApps} apps
-                            </span>
-                          </>
-                        ) : (
-                          '—'
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </BoardScroller>
+                    </td>
+                    <td>
+                      {r.counts.down}
+                      <span className="rpt__note">{r.downPct.toFixed(0)}%</span>
+                    </td>
+                    <td>
+                      <BarCell value={r.perArm} min={barMin} max={barMax} tone="hot">
+                        {r.perArm}
+                      </BarCell>
+                    </td>
+                    <td className="team">
+                      {r.leader ? (
+                        <>
+                          <PlayerLink id={r.leader.personId}>{r.leader.name}</PlayerLink>
+                          <span className="rpt__note">
+                            {r.leader.last7dayPitches} pitches, {r.leader.last7dayApps} apps
+                          </span>
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
           </BroadcastSection>
 
           <BroadcastSection

@@ -4,7 +4,7 @@ import { test, expect } from './fixtures.js'
 // WIDTH, which is the only width where the thing under test exists.
 //
 // WHY THIS SPEC EXISTS. Every one of these boards is wider than a phone and
-// scrolls horizontally inside `.ledger-wrap`, with the club column pinned so
+// scrolls horizontally inside its `Table` wrap (`.table`), with the club column pinned so
 // the numbers scroll under it. That pin was broken on the first version and
 // invisible in every desktop check: at 768px and up there is no overflow at
 // all, so the column is never exercised. On a 390px iPhone the pinned cell
@@ -14,9 +14,10 @@ import { test, expect } from './fixtures.js'
 // The cause is written up in styles/26-player-page.css: `position: sticky`
 // resolves against the nearest ancestor whose overflow is not `visible`, and
 // the shared `.standings` base sets `overflow: hidden` on the TABLE — which
-// never scrolls. `.ledger-wrap .rpt { overflow: visible }` is the fix. This
-// spec is what stops it regressing the next time someone touches either
-// stylesheet, because nothing about the failure is visible on a laptop.
+// never scrolls. `Table` (styles/system/table.css) cannot fall into it: the
+// grid is always `overflow: visible` and the wrap scrolls. This spec is what
+// stops it regressing the next time someone touches either stylesheet,
+// because nothing about the failure is visible on a laptop.
 //
 // Not CI-gated (`npm run e2e` is the browser verification harness, not part of
 // lint-and-build) — run it against a live dev server.
@@ -36,7 +37,7 @@ for (const board of BOARDS) {
     await page.setViewportSize(PHONE)
     await page.goto(board.path)
 
-    const wrap = page.locator('.ledger-wrap').first()
+    const wrap = page.locator('.table').first()
     await expect(wrap.locator('tbody tr').first()).toBeVisible()
 
     // The pin only means anything if there is something to scroll. If a board
@@ -72,7 +73,7 @@ test('The Clock: rows showing the same time carry the same rank', async ({ page 
   // Wait for the FULL board, not just its first row. `evaluateAll` does not
   // auto-wait, so reading it mid-render catches a half-populated table and the
   // comparison below becomes a comparison of two different sorts.
-  const body = page.locator('.ledger-wrap').first().locator('tbody tr')
+  const body = page.locator('.table').first().locator('tbody tr')
   await expect.poll(() => body.count(), { timeout: 10_000 }).toBeGreaterThan(25)
 
   const rows = await body.evaluateAll((trs) =>

@@ -387,11 +387,18 @@
 /* ---- shared report table ----------------------------------- */
 
 /* All four boards print the same shape — rank, club, then numeric
-   columns — so the treatment lives once here. It layers ON the app's
-   `.standings` table rather than replacing it: same borders and row
-   rhythm, with a heavier head rule and mono figures. */
+   columns — so the treatment lives once here. The seven report pages draw the
+   box, the cells and the sticky column on `Table` (styles/system/table.css);
+   this keeps what a report board IS: the club cell, a heavier head rule, the
+   favorite-club row. The eight /abs-challenges boards still wear
+   `standings rpt` inside BoardScroller (T6 moves them), so every rule they
+   read stays below.
+
+   THE PINNED CELL'S GROUND is the canvas, as it was: `Table` paints a pinned
+   cell from --table-pin (the card ground by default), and a row that tints
+   itself sets it. */
 .rpt {
-  width: 100%;
+  --table-pin: var(--bg-page);
 }
 
 /* THE STICKY COLUMN'S CONTAINING BLOCK. `position: sticky` resolves against
@@ -408,10 +415,7 @@
 }
 
 .rpt thead th {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  color: var(--text-caption);
   border-bottom: var(--bw-heavy) solid var(--navy);
   white-space: nowrap;
 }
@@ -481,12 +485,31 @@
   font-size: var(--fs-small);
   color: var(--text-body);
   letter-spacing: var(--ls-caps);
+  white-space: normal;
   padding: var(--space-1h) var(--space-2);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
 .rpt thead th.team {
   z-index: 2;
+}
+
+/* A BODY `td.team` (the Pen's "Most used", the Gate's "Best draws") took its
+   ink from `.standings td.team` and its flex children from `.standings
+   td.team > *`. The seven report pages left `.standings` for `Table`, so the
+   board says it again here. Same values: the ABS boards, still on
+   `.standings`, read the same twice. */
+.rpt td.team {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+.rpt td.team > * {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
 }
 
 .rpt__club {
@@ -503,6 +526,7 @@
 
 /* The reader's own club, wherever it lands on the board. */
 .rpt__row--mine {
+  --table-pin: var(--paper-3);
   background: var(--paper-3);
 }
 
@@ -742,8 +766,13 @@
    clean already — the fault needs a particular board geometry to show — so for
    those this is a guard, not a repair. It lives here rather than in
    report/chrome.css because this is the one stylesheet all seven report
-   screens import, and the rule belongs wherever `.rpt-region` is defined. */
-.rpt-region {
+   screens import, and the rule belongs wherever `.rpt-region` is defined.
+
+   The seven report pages now draw their board on `Table`, whose wrap is
+   `.bcast-sec .table`: it takes the same containment. At 390px, without it,
+   /doubleheaders sat 187px over the viewport and /run-value 8px over it. */
+.rpt-region,
+.bcast-sec .table {
   contain: paint;
 }
 
@@ -976,21 +1005,30 @@
   cursor: pointer;
 }
 
-.dh__row:hover td,
-.dh__row:hover th.team {
+.dh__row:hover {
+  --table-pin: var(--paper-2);
+}
+
+.dh__row:hover td {
   background: var(--paper-2);
 }
 
-.dh__row--open td,
-.dh__row--open th.team {
+.dh__row--open {
+  --table-pin: var(--paper-1);
+}
+
+.dh__row--open td {
   background: var(--paper-1);
 }
 
 /* The reader's own club keeps its clay edge and its own ground under both. */
+.dh__row.rpt__row--mine:hover,
+.dh__row--open.rpt__row--mine {
+  --table-pin: var(--paper-3);
+}
+
 .dh__row.rpt__row--mine:hover td,
-.dh__row.rpt__row--mine:hover th.team,
-.dh__row--open.rpt__row--mine td,
-.dh__row--open.rpt__row--mine th.team {
+.dh__row--open.rpt__row--mine td {
   background: var(--paper-3);
 }
 
@@ -1038,6 +1076,10 @@
 /* The year drawer. It is a table inside a cell that spans the whole board, and
    it is deliberately narrow and indented — a second full-width table under a
    row reads as the board losing its place. */
+.dh__drawerrow {
+  --table-pin: var(--paper-1);
+}
+
 .dh__drawerrow > td {
   padding: 0 0 var(--space-3);
   background: var(--paper-1);
@@ -1046,23 +1088,20 @@
 .dh__drawer {
   width: auto;
   margin-left: var(--space-4);
-  border-collapse: collapse;
 }
 
-.dh__drawer th,
-.dh__drawer td {
-  padding: var(--space-1) var(--space-2h);
-  font-family: var(--font-mono);
+/* The drawer sits INSIDE a `.rpt` board, so that board's cell rules reach it
+   by descent. These two win back what is the drawer's own: the cell size
+   (`.rpt td` says --fs-compact), and no rule on the head cell (`.rpt thead
+   th` draws the board's heavy navy rule, and `Table`'s row rule matches any
+   head cell under a tbody). The first body row's own hairline closes the head:
+   one line, where the old drawer stacked two. */
+.dh__drawer tbody :is(th, td) {
   font-size: var(--fs-cell);
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  white-space: nowrap;
 }
 
 .dh__drawer thead th {
-  font-family: var(--font-display);
-  color: var(--text-caption);
-  border-bottom: var(--bw-hair) solid var(--border-rule);
+  border: 0;
 }
 
 .dh__drawer tbody th {

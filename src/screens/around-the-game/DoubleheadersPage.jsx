@@ -17,7 +17,7 @@ import { BroadcastMasthead, BroadcastSection } from '../../components/around-the
 import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
 import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
-import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../components/ui/table/Table.jsx'
 import { YearRange } from '../../components/around-the-game/YearRange.jsx'
 
 // DOUBLEHEADER RECORDS — how clubs fare on the days they have to play twice.
@@ -179,7 +179,7 @@ function SeasonDrawer({ row, clubs, columns }) {
   return (
     <tr className="dh__drawerrow">
       <td colSpan={columns}>
-        <table className="dh__drawer">
+        <Table frame="bare" className="dh__drawer">
           <thead>
             <tr>
               <th>Year</th>
@@ -204,7 +204,7 @@ function SeasonDrawer({ row, clubs, columns }) {
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
       </td>
     </tr>
   )
@@ -346,83 +346,81 @@ export function DoubleheadersPage() {
             {rows.length === 0 ? (
               <p className="hint">No doubleheader was played in these years.</p>
             ) : (
-              <BoardScroller label="Doubleheader board, every club ranked">
-                <table className="standings rpt dh">
-                  <thead>
-                    <tr>
-                      <th className="team">Club</th>
-                      <th>DHs</th>
-                      <th>W-L</th>
-                      <th>Win pct</th>
-                      <th>Swept</th>
-                      <th>Swept by</th>
-                      <th>Split</th>
-                      <th>Most-met opponent</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((r) => (
-                      <Fragment key={r.teamId}>
-                        {/* THE WHOLE ROW OPENS THE YEARS. The button below is
-                            still the real control — it is what a keyboard
-                            reaches and what carries aria-expanded — but a
-                            reader who has just read across a row should not
-                            have to travel back to one small figure to open it.
-                            A click landing on a CONTROL is left alone. The club
-                            name is one: TeamLink renders a <button>, not an
-                            anchor (it navigates through the app's own router),
-                            so an `a`-only guard misses it and the row would
-                            toggle on its way out to the club page. The DHs
-                            button is the other. */}
-                        <tr
-                          className={`dh__row${r.teamId === favoriteTeamId ? ' rpt__row--mine' : ''}${
-                            openTeam === r.teamId ? ' dh__row--open' : ''
-                          }`}
-                          onClick={(e) => {
-                            if (e.target.closest('a, button')) return
-                            setOpenTeam(openTeam === r.teamId ? null : r.teamId)
-                          }}
-                        >
-                          <ClubCell
-                            teamId={r.teamId}
-                            name={clubShort(clubs, r.teamId)}
-                            rank={r.rank}
-                            tied={r.tied}
-                            tab="games"
-                          />
-                          <td>
-                            <button
-                              type="button"
-                              className="dh__open"
-                              aria-expanded={openTeam === r.teamId}
-                              onClick={() => setOpenTeam(openTeam === r.teamId ? null : r.teamId)}
-                            >
-                              {r.dh}
-                              <span className="dh__chev" aria-hidden="true">
-                                {openTeam === r.teamId ? '▾' : '▸'}
-                              </span>
-                              <span className="sr-only">
-                                {` doubleheaders — show ${clubShort(clubs, r.teamId)} by year`}
-                              </span>
-                            </button>
-                          </td>
-                          <td>
-                            {r.w}-{r.l}
-                          </td>
-                          <td>{r.pct ?? '—'}</td>
-                          <td>{r.sweeps || '—'}</td>
-                          <td>{r.sweptBy || '—'}</td>
-                          <td>{r.splits || '—'}</td>
-                          <OpponentCell top={r.top} clubs={clubs} />
-                        </tr>
-                        {openTeam === r.teamId && (
-                          <SeasonDrawer row={r} clubs={clubs} columns={COLUMN_COUNT} />
-                        )}
-                      </Fragment>
-                    ))}
-                  </tbody>
-                </table>
-              </BoardScroller>
+              <Table sticky label="Doubleheader board, every club ranked" className="rpt dh">
+                <thead>
+                  <tr>
+                    <th className="team">Club</th>
+                    <th>DHs</th>
+                    <th>W-L</th>
+                    <th>Win pct</th>
+                    <th>Swept</th>
+                    <th>Swept by</th>
+                    <th>Split</th>
+                    <th>Most-met opponent</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <Fragment key={r.teamId}>
+                      {/* THE WHOLE ROW OPENS THE YEARS. The button below is
+                          still the real control — it is what a keyboard
+                          reaches and what carries aria-expanded — but a
+                          reader who has just read across a row should not
+                          have to travel back to one small figure to open it.
+                          A click landing on a CONTROL is left alone. The club
+                          name is one: TeamLink renders a <button>, not an
+                          anchor (it navigates through the app's own router),
+                          so an `a`-only guard misses it and the row would
+                          toggle on its way out to the club page. The DHs
+                          button is the other. */}
+                      <tr
+                        className={`dh__row${r.teamId === favoriteTeamId ? ' rpt__row--mine' : ''}${
+                          openTeam === r.teamId ? ' dh__row--open' : ''
+                        }`}
+                        onClick={(e) => {
+                          if (e.target.closest('a, button')) return
+                          setOpenTeam(openTeam === r.teamId ? null : r.teamId)
+                        }}
+                      >
+                        <ClubCell
+                          teamId={r.teamId}
+                          name={clubShort(clubs, r.teamId)}
+                          rank={r.rank}
+                          tied={r.tied}
+                          tab="games"
+                        />
+                        <td>
+                          <button
+                            type="button"
+                            className="dh__open"
+                            aria-expanded={openTeam === r.teamId}
+                            onClick={() => setOpenTeam(openTeam === r.teamId ? null : r.teamId)}
+                          >
+                            {r.dh}
+                            <span className="dh__chev" aria-hidden="true">
+                              {openTeam === r.teamId ? '▾' : '▸'}
+                            </span>
+                            <span className="sr-only">
+                              {` doubleheaders — show ${clubShort(clubs, r.teamId)} by year`}
+                            </span>
+                          </button>
+                        </td>
+                        <td>
+                          {r.w}-{r.l}
+                        </td>
+                        <td>{r.pct ?? '—'}</td>
+                        <td>{r.sweeps || '—'}</td>
+                        <td>{r.sweptBy || '—'}</td>
+                        <td>{r.splits || '—'}</td>
+                        <OpponentCell top={r.top} clubs={clubs} />
+                      </tr>
+                      {openTeam === r.teamId && (
+                        <SeasonDrawer row={r} clubs={clubs} columns={COLUMN_COUNT} />
+                      )}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </Table>
             )}
           </BroadcastSection>
 
