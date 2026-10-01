@@ -109,11 +109,19 @@ export async function readSeasons(storeDir) {
   return readJsonOr(seasonsIndexPath(storeDir), { seasons: [], current: null })
 }
 
+// Pure: the season the app serves. Only a season with data is ever on file, so
+// it is the latest one on file: last season until the new season's first game
+// lands, whatever the date. `today` is in the signature so a test can pin that
+// the calendar does not decide it (#1200).
+export function seasonToServe(today, seasonsOnFile) {
+  return seasonsOnFile.length ? Math.max(...seasonsOnFile) : null
+}
+
 // Pure: the index after a run that WROTE data for `season`. A run with no data
 // does not call this, and leaves the index as it is.
 export function seasonsAfter(prev, season) {
   const seasons = [...new Set([...(prev?.seasons ?? []), season])].sort((a, b) => a - b)
-  return { seasons, current: seasons[seasons.length - 1] }
+  return { seasons, current: seasonToServe(null, seasons) }
 }
 
 // Writes the index only when it changes, so a normal night does not dirty it

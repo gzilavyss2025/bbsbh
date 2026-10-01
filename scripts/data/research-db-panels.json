@@ -449,10 +449,6 @@
    "shipped UI data for jersey art"
   ],
   [
-   "public/data/umpire-accuracy-summary.json",
-   "shipped UI data for the umpire accuracy page"
-  ],
-  [
    "public/data/workload.json",
    "shipped UI data: current season only"
   ],

@@ -149,13 +149,15 @@ for each generator; the reader modules:
   (`gen-umpire-accuracy.mjs`, same cron) adds each home-plate umpire's season
   called-pitch accuracy + a compact zone-tendency breakdown, keyed by the same
   personId. It ships in TWO shapes from one run, and between them
-  they ARE the season archive: `umpire-accuracy-summary.json`, every umpire's
-  season aggregates (~0.12 MB — the ranking pool the lineup page, the box score,
-  and the rankings table read), and `umpire-accuracy/{personId}.json`, one man's
-  scored game rows (~13 KB — the game log the detail page and the accuracy modal
-  draw). There is no league-wide archive file: it was ~2 MB by August, it was
-  both the merge base and a served file, and the row shards are the merge base
-  now, so the accumulated history has exactly one copy.
+  they ARE the season archive: `umpire-accuracy/{season}/umpire-accuracy-summary.json`,
+  every umpire's season aggregates (~0.12 MB — the ranking pool the lineup page, the
+  box score, and the rankings table read), and `umpire-accuracy/{season}/{personId}.json`,
+  one man's scored game rows (~13 KB — the game log the detail page and the
+  accuracy modal draw). The season is the one `umpire-accuracy/seasons.json`
+  names, via `currentSeasonOf` (ADR-0086); `umpire-accuracy/all/` is not read
+  yet (#1201). There is no league-wide archive file: it was ~2 MB by August, it
+  was both the merge base and a served file, and the row shards are the merge
+  base now, so the accumulated history has exactly one copy.
 
   The figure that kept the archive alive was the pitcher/hitter LEAN, which
   z-scores an umpire against the pool's per-game favor rows. Its ingredient is

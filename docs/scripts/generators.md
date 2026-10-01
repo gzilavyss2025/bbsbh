@@ -121,9 +121,13 @@ don't run these by hand.
   variable MiLB crews (two/three-man) all land in the log; `UMP_LABELS` maps every
   role incl. LF/RF, and `selectOfficials` (`src/api/select.js`) mirrors it for the
   live crew card.
-- `gen-umpire-accuracy.mjs` → `umpire-accuracy-summary.json` (aggregates, the ranking pool)
-  + `umpire-accuracy/{personId}.json` (one man's rows, and this job's own merge base — no
-  archive file) — COMPANION to `umpires.json`: each plate umpire's season called-pitch
+- `gen-umpire-accuracy.mjs` → `umpire-accuracy/{season}/umpire-accuracy-summary.json`
+  (aggregates, the ranking pool) + `umpire-accuracy/{season}/{personId}.json` (one man's
+  rows, and this job's own merge base — no archive file) + `umpire-accuracy/seasons.json`
+  + `umpire-accuracy/all/umpire-accuracy-summary.json` (every season, summed from rows).
+  A season store (ADR-0086, #1200): each row goes to its game's season folder, so the
+  first 2027 game never adds onto 2026, and a run with no scored game writes nothing
+  — COMPANION to `umpires.json`: each plate umpire's season called-pitch
   accuracy + zone tendencies. Needs each game's live feed (per-pitch `pX/pZ` vs the strike
   zone), so unlike `gen-umpires.mjs`'s one-call rebuild this is a feed fetch PER GAME, too
   costly to redo nightly. Runs APPEND-ONLY/incremental like `gen-game-notes.mjs`: each

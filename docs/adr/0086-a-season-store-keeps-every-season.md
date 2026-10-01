@@ -60,3 +60,26 @@ The helpers are `readSeasons`, `seasonsAfter` and `writeSeasons` in
   ledger for that season.
 - `umpires/` and `spray/` stay unstamped for `check-data-freshness.mjs`, as
   before: a frozen season must not count as stale.
+
+## The other four stores (#1200)
+
+Umpire accuracy, fouls, ABS and pitch arsenal had a different defect. They did
+not go blank on January 1. They added the new season onto the old one: the first
+2027 game would add to the 2026 totals and relabel them 2027 (#1168). The fix is
+the same rule. Each row goes to the folder of its game's season, never the
+calendar year. A season that is not complete keeps changing, and a completed
+season stays frozen. Each store also has an `all/` file for its league-wide
+files only. A run builds it from the rows or counts of every season, never as an
+average of two seasons' rates, and writes it only when its content changes. The
+app does not read `all/` yet (#1201). `seasonToServe(today, seasonsOnFile)` in
+`scripts/lib/io.js` names the rule that `seasonsAfter` uses: the latest season
+on file, whatever the date.
+
+**Umpire accuracy.** `umpire-accuracy/{season}/` holds the row shards and
+`umpire-accuracy-summary.json` (before: `public/data/umpire-accuracy-summary.json`).
+`all/umpire-accuracy-summary.json` runs the same aggregates over every season's
+rows. The merge base is the season's own folder. `writeAccuracyStore` in
+`scripts/lib/umpire-accuracy-merge.mjs` holds the rule, and
+`test/umpire-accuracy-merge.test.js` pins it. The summary moved into a folder
+with no `index.json`, so `check-data-freshness.mjs` does not check it now. This
+is the same as `umpires/` and `spray/`: a frozen season must not count as stale.

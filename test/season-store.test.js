@@ -5,9 +5,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { seasonsAfter } from '../scripts/lib/io.js'
+import { seasonsAfter, seasonToServe } from '../scripts/lib/io.js'
 
-const STORES = ['umpires', 'spray']
+const STORES = ['umpires', 'spray', 'umpire-accuracy']
 const storeUrl = (store) => new URL(`../public/data/${store}/`, import.meta.url)
 
 test('a new season is added to the index, and the old one stays', () => {
@@ -23,6 +23,14 @@ test('a new season is added to the index, and the old one stays', () => {
   })
   // A second night of the same season changes nothing.
   assert.deepEqual(seasonsAfter({ seasons: [2026], current: 2026 }, 2026), { seasons: [2026], current: 2026 })
+})
+
+test('the season served is the last one with a game, whatever the calendar says', () => {
+  // January 1: the new year has no game yet, so last season stays.
+  assert.equal(seasonToServe('2027-01-01', [2026]), 2026)
+  // The day after the first 2027 game lands on file, 2027 takes over.
+  assert.equal(seasonToServe('2027-03-26', [2026, 2027]), 2027)
+  assert.equal(seasonToServe('2027-01-01', []), null)
 })
 
 for (const store of STORES) {
