@@ -111,3 +111,12 @@ Final games too (`usePostseasonBracket(date, { live: true })`, and it refetches
 on foreground). A game still in progress counts only once it is Final. The
 switch is read in `GameSelect.jsx` and passed in; the bracket code still never
 reads it.
+
+## Addendum (2026-10-01): the lineup page's season-series strip draws no later postseason card
+
+The same "if necessary" trap reached the lineup page (found in a review of
+PR #1314). `seasonSeriesCells` blanked a later game's score, but still drew its
+card. A Game 3 card on a Game 2 page meant the series split; no Game 3 card meant
+a sweep. Either way the winner of the viewed game followed. On a postseason page
+a later postseason game is now not drawn at all. A page whose own game is not in
+the fetched list seals every game from its `officialDate` on.

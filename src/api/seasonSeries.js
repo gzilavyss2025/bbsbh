@@ -29,15 +29,28 @@ function isAfter(g, ref) {
 // every game AFTER it: on a replayed page, the later scores would tell you how
 // the series ended. A later game is drawn the way the current one is — no score,
 // no winner, no extra-innings flag. Games BEFORE it are already decided by the
-// time this one starts, so their scores show up front. With no `currentGamePk`
-// in the list, nothing is sealed.
-export function seasonSeriesCells(games, viewingTeamId, currentGamePk) {
-  const current = (games ?? []).find((g) => g.gamePk === currentGamePk)
-  return (games ?? []).map((g) => {
+// time this one starts, so their scores show up front.
+//
+// On a POSTSEASON page a later postseason game is not drawn at all. MLB drops an
+// unplayed "if necessary" game from its schedule once a series is decided, so a
+// later card that exists, or is missing, tells you how the series ended — and
+// who won this game — even with its score blanked.
+//
+// With no `currentGamePk` in the list (a spring-training or MiLB postseason
+// page) the page cannot tell which row is its own. `officialDate`, when given,
+// then seals every game on or after that date; without it, nothing is sealed.
+export function seasonSeriesCells(games, viewingTeamId, currentGamePk, officialDate) {
+  const all = games ?? []
+  const current = all.find((g) => g.gamePk === currentGamePk)
+  const rows = ROUND_TAG[current?.gameType]
+    ? all.filter((g) => !(ROUND_TAG[g.gameType] && isAfter(g, current)))
+    : all
+  const isSealed = (g) => (current ? isAfter(g, current) : Boolean(officialDate) && g.apiDate >= officialDate)
+  return rows.map((g) => {
     const isHome = g.homeId === viewingTeamId
     const opponentId = isHome ? g.awayId : g.homeId
     const isCurrent = g.gamePk === currentGamePk
-    const final = g.final && !isCurrent && !(current && isAfter(g, current))
+    const final = g.final && !isCurrent && !isSealed(g)
     const hasScores = final && g.awayScore != null && g.homeScore != null
     const winnerId = hasScores
       ? g.awayScore > g.homeScore
