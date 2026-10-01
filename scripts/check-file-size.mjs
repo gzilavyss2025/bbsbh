@@ -323,8 +323,6 @@ const BUDGETS = {
   // which is what made them the right thing to lift out; the markup, classes
   // and comments moved verbatim.
   'src/components/playbyplay/PlayByPlay.jsx': 800, // 705 — the at-bat card's third opener: a ball in play makes the base diamond a handle on where it went (components/charts/BallFlight.jsx)
-  // src/api/loadPlayer.js surrendered its entry the same way: it is a 20-line
-  // barrel over src/api/player/ now, one loader per tab of the player hub.
   'src/api/tradeDeadline.js': 700, // 629
   'src/App.jsx': 700, // 606 — mounts the one global PlayerHoverCard, same as SyncStatusProvider beside it. 701: the postseason series route branch (#1230, slice 6). 693: one /postseason/{id} route (SeriesRoute)
 }

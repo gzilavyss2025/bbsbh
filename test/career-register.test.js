@@ -9,7 +9,7 @@
 // blends two levels into one row (careerRegisterView).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { resolveCurrentSeasonStat } from '../src/api/loadPlayer.js'
+import { resolveCurrentSeasonStat } from '../src/api/player/context.js'
 import { careerRegisterView, careerTimelineView } from '../src/api/person.js'
 import { SPORT_IDS } from '../src/lib/teams.js'
 
