@@ -96,9 +96,11 @@ export function formerTeammatePairs(data, teamIdA, teamIdB) {
     const pairKey = row.a.id < row.b.id ? `${row.a.id}-${row.b.id}` : `${row.b.id}-${row.a.id}`
     if (seen.has(pairKey)) continue
     seen.add(pairKey)
+    // Level, then seasons shared (the longer stint is the stronger tie), then recency.
     const clubs = [...(row.shared ?? [])].sort(
       (x, y) =>
         LEVEL_RANK(y.level) - LEVEL_RANK(x.level) ||
+        y.seasons.length - x.seasons.length ||
         Math.max(...y.seasons) - Math.max(...x.seasons),
     )
     pairs.push({

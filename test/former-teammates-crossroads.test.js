@@ -243,3 +243,39 @@ test('on a MiLB matchup, tonight’s own club reads as itself, never as a “sys
   assert.equal(former[0].club.level, 'AAA')
   assert.deepEqual(ids(former[0].home), [left.id])
 })
+
+// #1353: a pair's shown club is chosen by level, then seasons shared, then
+// recency. Read through a shard so formerTeammatePairs does the sorting.
+const shownClub = (shared) => {
+  const bare = ({ id, name, pos }) => ({ id, name, pos })
+  const data = {
+    matchups: {
+      [`${AWAY}-${HOME}`]: {
+        teamA: AWAY,
+        teamB: HOME,
+        kind: 'teammates',
+        rows: [{ a: bare(story), b: bare(mcmahon), score: 50, shared }],
+      },
+    },
+  }
+  const { elsewhere } = teammateCrossroads(formerTeammatePairs(data, AWAY, HOME), AWAY, HOME)
+  return elsewhere.map((r) => r.club.teamId)
+}
+
+test('two clubs at one level: the longer stint wins over the more recent one', () => {
+  const dodgers = club(119, 'Los Angeles Dodgers', [2019, 2020, 2021, 2022])
+  const cubs = club(112, 'Chicago Cubs', [2025])
+  assert.deepEqual(shownClub([cubs, dodgers]), [119])
+})
+
+test('level still comes first: one MLB season beats two AAA seasons', () => {
+  const mlb = club(115, 'Colorado Rockies', [2025])
+  const aaa = club(1234, 'Albuquerque Isotopes', [2023, 2024], 'AAA')
+  assert.deepEqual(shownClub([aaa, mlb]), [115])
+})
+
+test('same level and same season count: the more recent club still wins', () => {
+  const older = club(115, 'Colorado Rockies', [2017, 2018])
+  const newer = club(138, 'St. Louis Cardinals', [2023, 2024])
+  assert.deepEqual(shownClub([older, newer]), [138])
+})
