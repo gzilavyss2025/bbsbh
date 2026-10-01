@@ -738,6 +738,9 @@ for each generator; the reader modules:
   costs no per-row logic at all; `monthsPlayed(data, { cutoff })` is the menu a
   selector offers, so a control can never name a month with no games behind it.
   The three levers compose — August, post-break, before a cutoff, is one filter.
+  `ledgerIsComplete(data, schedule, cutoff)` gates the card: a ledger more than
+  one game in ten short of the club's decided schedule (the Rookie DSL files hold
+  about a fifth of a season) is not shown at all (#1363).
   `lastOccurrence(data, predicate, { cutoff })` is the one query here that
   answers a DATE rather than a rate: the newest game matching a row's own
   predicate, as `{ date, opp, result }`. `opp` is a team ID — the shard carries

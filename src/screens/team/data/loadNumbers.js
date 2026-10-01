@@ -1,7 +1,7 @@
 import { fetchTeam, fetchStandings, fetchLeagueTeamStats, fetchTeamIL } from '../../../api/team.js'
 import { fetchTeamSchedule } from '../../../api/schedule.js'
 import { fetchComebackWins, comebackRatesFor } from '../../../api/comebackWins.js'
-import { fetchTeamRecords } from '../../../api/teamRecords.js'
+import { fetchTeamRecords, ledgerIsComplete } from '../../../api/teamRecords.js'
 import { fetchScheduleShape } from '../../../api/scheduleShape.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
 import { fetchRunValue, clubRunValue, clubBoard } from '../../../api/around-the-game/runValue.js'
@@ -197,7 +197,8 @@ export async function loadNumbers(id, asOf) {
     pitching,
     leaderPool,
     comeback,
-    teamRecords: teamRecordsData,
+    // A ledger that holds only part of the season is not shown (#1363).
+    teamRecords: ledgerIsComplete(teamRecordsData, schedule, standingsDate) ? teamRecordsData : null,
     scheduleShape: scheduleShapeData,
     // The card tallies rows itself (it owns the pre/post-break lever), so the
     // cutoff travels with the data rather than being applied here.
