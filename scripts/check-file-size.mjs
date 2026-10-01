@@ -98,7 +98,7 @@ const BUDGETS = {
   'src/styles/06-loader-and-cards.css': 800, // 900 -> 742: the off-day club tiles left for 06b-offday-cards.css, taking their hover/focus states with them
   'src/styles/08-site-shell.css': 800, // 900 -> 800 after the dead accountpitch rules went; 1000 -> 898: the footer's flat link-list rules left for 08a-site-menu.css, which holds the shared site-directory language the sheet, the footer and /more all read
   'src/styles/09-team-info.css': 650, // 700 -> 650 at 609: .thub-card left for system/card.css (#1113, slice C0). 800 -> 700: the club band's rules moved to system/section-head.css (#1113, slice H1a). 700 -> 716: the innings view's lineup masthead (.lineupteam__name) joined the header-theme system (EnteringReference.jsx), the same `.is-themed`/`--bar-fill` triad .halfdefense__title already wore — one more selector in the same family, not a new one. 687 — the Ballpark card moved out to 57-ballpark-card.css
-  'src/styles/10-lineup.css': 800, // 797
+  'src/styles/10-lineup.css': 700, // 800 -> 700 at 654: the Former Teammates card's crossroads rules went, and its Ladder lives in 10b-former-teammates.css (#1352)
   'src/styles/12-sealbox.css': 1700, // 1639 — unified focus/stacked layout: dropped the unfocused page's .prehalf, .half__entering/.halfentering, .innings__reference/.innings__ref-*, .innings__rosters, and .innings__row2 rules
   'src/styles/14-strike-zone.css': 900, // 898 — the sheet's ✕ left for IconButton (system/button.css, #1209); both pitch-colour keys left earlier
   'src/styles/15-team-color-lab.css': 700, // 691

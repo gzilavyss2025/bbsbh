@@ -58,7 +58,8 @@ import { resolve, join } from 'node:path'
 // (.tscoremodal__foot) had no element that used it, so it was deleted.
 // 123 -> 122: the Former Teammates card became crossroads rows; its side
 // names, legend and "+N" button are labels (--fs-label), and the old cards'
-// caption rules went with them.
+// caption rules went with them. The Ladder (#1352) then replaced those rows:
+// its "No other tie" note took the caption the rows' name rule gave up.
 const BUDGET = 122
 
 const stylesDir = resolve('src/styles')

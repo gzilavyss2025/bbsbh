@@ -272,7 +272,7 @@ export function ComponentHalf() {
         </Entry>
         <Entry title="Door" path={`${UI_PATH}/control/Door.jsx`} note="The app&#39;s one door — &quot;there is more behind this&quot;. Inline is the text link and writes its own chevron; block is the row that closes a list, and carries none.">
           <Door onClick={() => {}}>Game lines</Door>
-          <Door layout="block" onClick={() => {}}>Show 12 more former teammates</Door>
+          <Door layout="block" onClick={() => {}}>Show 12 more margin notes</Door>
         </Entry>
         <Entry title="InfoPopover" path={`${UI_PATH}/InfoPopover.jsx`} note="The tap-to-explain control. There are no native title tooltips in this app — they are invisible on touch.">
           <InfoPopover label="What is this?">A run expectancy figure, from the 24 base-out states.</InfoPopover>

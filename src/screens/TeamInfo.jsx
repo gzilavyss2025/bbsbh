@@ -7,6 +7,7 @@ import {
   selectGameInfo,
   selectOpposingPitcher,
   selectOpposingDefense,
+  selectHasStarted,
   selectBirthdayIds,
   lastFirst,
 } from '../api/select.js'
@@ -57,6 +58,8 @@ import { arsenalSidesView, arsenalTtoView, fetchPitchArsenalFor, pitchArsenalFor
 import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { BullpenBoard, useBullpenReveal, BullpenToggle } from '../components/teamstats/BullpenBoard.jsx'
+import { ProjectedStarters } from '../components/workload/ProjectedStarters.jsx'
+import { projectFromLiveLogs } from '../api/rotation/liveStarters.js'
 import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
 import { SPORT_LABEL, teamAbbr } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, mastheadMarkFor } from '../lib/headerTheme.js'
@@ -490,6 +493,21 @@ function TeamSections({
     const diff = Math.abs(new Date(`${d}T00:00:00Z`) - new Date(`${asOf}T00:00:00Z`))
     return diff <= 3 * 86400000 ? d : null
   }, [feed, workloadData])
+  // No probable pitcher announced and the game not yet started: a short list of
+  // likely starters from rest days (api/rotation/). The workload file only names
+  // the candidates — it is regular-season only, so each one's appearances are
+  // read live with every game type. Same freshness gate as the board above
+  // (`boardGameDate`) and the same MLB-only file, so a MiLB or archival game
+  // gets [] and keeps "Not posted yet." Until the live read lands, and if it
+  // fails, the card says that too rather than guess from the stale file.
+  const wantsProjection = !oppPitcher && !selectHasStarted(feed) && Boolean(workloadData && boardGameDate)
+  const { data: projectedStarters } = useAsync(
+    () =>
+      wantsProjection
+        ? projectFromLiveLogs(workloadData, oppMeta.id, boardGameDate)
+        : Promise.resolve([]),
+    [wantsProjection, workloadData, oppMeta.id, boardGameDate],
+  )
   // Ties between this matchup's two clubs — see formerTeammatePairs. Empty
   // for MiLB games / matchups outside the nightly build, which hides the card.
   const teammatePairs = useMemo(
@@ -556,6 +574,7 @@ function TeamSections({
     <>
       <OpposingStarterCard
         pitcher={oppPitcher}
+        projected={projectedStarters}
         pitcherLine={oppPitcherLine}
         careerVsOpp={oppPitcherCareerVsOpp}
         vsOpponentAbbr={vsOpponentAbbr}
@@ -736,6 +755,7 @@ function TeamSections({
 // alongside it); this replaces that row rather than duplicating it.
 function OpposingStarterCard({
   pitcher,
+  projected,
   pitcherLine,
   careerVsOpp,
   vsOpponentAbbr,
@@ -851,6 +871,8 @@ function OpposingStarterCard({
             />
           )}
         </div>
+      ) : projected?.length ? (
+        <ProjectedStarters rows={projected} />
       ) : (
         <p className="hint">Not posted yet.</p>
       )}

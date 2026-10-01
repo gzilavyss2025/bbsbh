@@ -1,6 +1,12 @@
 import '../../styles/35-postseason-series.css'
+import '../../styles/postseason/series-parts.css'
+import '../../styles/postseason/series-live.css'
+import { useMemo } from 'react'
 import { usePostseasonBracket } from '../../hooks/postseason/usePostseasonBracket.js'
-import { bestOfLine, cardLines, recordLine } from '../../api/postseason/text.js'
+import { bestOfLine, cardLines, recordLine, roundTitle } from '../../api/postseason/text.js'
+import { fetchUpcomingSeriesGames } from '../../api/postseason/upcoming.js'
+import { loadNineKeys } from '../../api/nineKeys.js'
+import { formerTeammatePairs, loadFormerTeammates } from '../../api/formerTeammates.js'
 import { fetchSeriesRoster, rosterReadDate } from '../../api/postseason/roster.js'
 import { loadSeriesStats, BATTING_CATEGORIES, SERIES_PITCHING_CATEGORIES } from '../../api/postseasonSeries.js'
 import { fetchGameCardsByPk, fetchSchedule } from '../../api/schedule.js'
@@ -8,6 +14,8 @@ import { computePlayOfTheGame } from '../../api/boxscore.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { usePastGameSignals } from '../../hooks/usePastGameSignals.js'
+import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
+import { dayShape } from '../../lib/postseason/dayShape.js'
 import { gamePath } from '../../lib/route.js'
 import { useNav } from '../../lib/nav.js'
 import { monthDayName, toApiDate } from '../../lib/dates.js'
@@ -21,8 +29,15 @@ import { GameResultFace } from '../../components/game/GameResultFace.jsx'
 import { GameCard } from '../../components/game/GameCard.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
-import { seriesGameBuckets, upcomingGameLabel } from './selectors.js'
+import { seriesGameBuckets } from './selectors.js'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../../components/postseason/SeriesParts.jsx'
+import { StillToPlay } from '../../components/postseason/StillToPlay.jsx'
+import { SeriesStarters } from '../../components/postseason/SeriesStarters.jsx'
+import { SeriesFlow } from '../../components/postseason/SeriesFlow.jsx'
+import { SeriesTotals } from '../../components/postseason/SeriesTotals.jsx'
+import { SeriesNineKeys } from '../../components/postseason/SeriesNineKeys.jsx'
+import { SeasonSeriesStrip } from '../../components/teamstats/SeasonSeriesStrip.jsx'
+import { FormerTeammates } from '../../components/team/FormerTeammates.jsx'
 import { seriesMark } from '../../lib/postseason/seriesMarks.js'
 import { SeriesMark } from '../../components/postseason/SeriesMark.jsx'
 
@@ -127,6 +142,48 @@ export function LiveSeriesPage({ seriesId, asOf }) {
     [gamePks],
   )
 
+  // The three game buckets, sorted once: counted results, today's game, the
+  // games still ahead (today excluded). Null-safe before the series loads.
+  const buckets = useMemo(() => seriesGameBuckets(series), [series])
+  const { favoriteTeamId } = useFavoriteTeam()
+
+  // The park and announced probables of today's game and every DATED game
+  // ahead. An "if necessary" game has no gamePk and is never asked for. The read
+  // carries no result field (api/postseason/upcoming.js).
+  const detailPks = [todayPk, ...buckets.upcoming.map((g) => g.gamePk)].filter(Boolean)
+  const { data: details } = useAsync(
+    () => fetchUpcomingSeriesGames(detailPks),
+    [detailPks.join(',')],
+  )
+  // Regular-season ranks for the Nine Keys cut, and the former-teammate shard
+  // for the two clubs (a static file; no shard for a matchup outside the
+  // nightly build's day window, which just hides the card).
+  const { data: nineKeys } = useAsync(() => loadNineKeys(), [])
+  const { data: teammatesData } = useAsync(
+    () => (rosterClubIds.length === 2 ? loadFormerTeammates(rosterClubIds[0], rosterClubIds[1]) : Promise.resolve(null)),
+    [rosterClubIds.join(',')],
+  )
+  // Announced probables for the games AHEAD show only on today's page: on a
+  // past `?d=` the schedule now names the starter who really pitched, picked
+  // after that date. Today's own game keeps its probables either way.
+  const showArms = cutoff === toApiDate(new Date())
+  // The next game the page can describe: today's, else (on today's page) the
+  // first DATED game ahead. Its announced starters feed the starters card and
+  // mark the ladder's starters.
+  const nextRow = buckets.today ?? (showArms ? buckets.upcoming.find((g) => g.gamePk) : null) ?? null
+  const nextDetail = nextRow?.gamePk ? (details?.[nextRow.gamePk] ?? null) : null
+  const startingKey = [nextDetail?.away?.id, nextDetail?.home?.id].filter(Boolean).join(',')
+  const startingIds = useMemo(() => new Set(startingKey ? startingKey.split(',').map(Number) : []), [startingKey])
+  const clubKey = rosterClubIds.join(',')
+  const teammatePairs = useMemo(() => {
+    const [a, b] = clubKey.split(',').map(Number)
+    return formerTeammatePairs(teammatesData, a, b)
+  }, [teammatesData, clubKey])
+  const homeIdByPk = useMemo(
+    () => Object.fromEntries(Object.entries(log?.cardsByPk ?? {}).map(([pk, c]) => [pk, c.home?.id])),
+    [log],
+  )
+
   useDocumentTitle(series ? `${bracket.season} ${series.name}` : null)
 
   const bracketGate = AsyncGate({
@@ -148,7 +205,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
   })
   if (seriesGate) return seriesGate
 
-  const { results, today, upcoming } = seriesGameBuckets(series)
+  const { results, today, upcoming } = buckets
   const { stats, cardsByPk, gameSignals } = log ?? EMPTY_LOG
   const hasBatting = stats && Object.values(stats.batting).some((v) => v.length > 0)
   const hasPitching = stats && Object.values(stats.pitching).some((v) => v.length > 0)
@@ -159,6 +216,32 @@ export function LiveSeriesPage({ seriesId, asOf }) {
       roster: declaredRosters?.[rosterClubIds.indexOf(club.id)] ?? stats?.rosters?.[club.id] ?? null,
     }))
     .filter(({ roster }) => roster)
+
+  // WHEN AND WHERE. The game before today's (or before the first row ahead),
+  // for the off-day and travel words.
+  const lastCounted = results.at(-1) ?? null
+  const afterCounted = lastCounted
+    ? { date: lastCounted.date, venueId: cardsByPk?.[lastCounted.gamePk]?.venue?.id ?? null }
+    : null
+  const todayDetail = today?.gamePk ? (details?.[today.gamePk] ?? null) : null
+  const todayWords = todayDetail
+    ? [`Game ${today.gameNumber}`, todayDetail.venue.name, dayShape(afterCounted, { date: cutoff, venueId: todayDetail.venue.id })]
+        .filter(Boolean)
+        .join(' · ')
+    : null
+  const beforeUpcoming = today ? { date: cutoff, venueId: todayDetail?.venue.id ?? null } : afterCounted
+  // Game 1's date bounds the leader sheets' rows to this series (with the
+  // cutoff as their end); with no counted game there is no board to open.
+  const seriesFrom = results[0]?.date ?? null
+  const leaderDoors = (group) =>
+    seriesFrom && {
+      group,
+      cutoff,
+      from: seriesFrom,
+      seriesName: series.name,
+      roundTitle: roundTitle(series),
+      opponentOf: (id) => clubs.find((c) => c.id !== id)?.id ?? null,
+    }
 
   return (
     <div className="screen psseries pslive">
@@ -223,7 +306,9 @@ export function LiveSeriesPage({ seriesId, asOf }) {
           gamePk on this page (root CLAUDE.md's spoiler rule). */}
       {today && todayGame && (
         <section className="psseries__today">
-          <SectionHead look="label">Today</SectionHead>
+          <SectionHead look="label" note={todayWords}>
+            Today
+          </SectionHead>
           <GameCard
             game={todayGame}
             postseasonLine={cardLines(todayGame, bracket)}
@@ -242,6 +327,36 @@ export function LiveSeriesPage({ seriesId, asOf }) {
         </section>
       )}
 
+      {!series.decided && nextDetail && (
+        <SeriesStarters
+          head={today ? 'Starting pitchers' : 'Next game'}
+          note={[`Game ${nextRow.gameNumber}`, today ? nextDetail.venue.name : monthDayName(nextDetail.date)]
+            .filter(Boolean)
+            .join(' · ')}
+          game={nextDetail}
+          season={bracket.season}
+          cutoff={cutoff}
+        />
+      )}
+
+      <StillToPlay
+        games={upcoming}
+        details={details}
+        previous={beforeUpcoming}
+        showArms={showArms}
+        formatDate={monthDayName}
+      />
+
+      {results.length > 0 && clubs.length === 2 && (
+        <SeriesFlow
+          series={buckets}
+          gameSignals={gameSignals}
+          homeIdByPk={homeIdByPk}
+          clubs={clubs}
+          defaultId={clubs.some((c) => c.id === favoriteTeamId) ? favoriteTeamId : clubs[1].id}
+        />
+      )}
+
       {results.length > 0 && (
         <section className="psseries__games">
           <SectionHead look="label">Game by game</SectionHead>
@@ -256,12 +371,13 @@ export function LiveSeriesPage({ seriesId, asOf }) {
                 const potg = signals ? computePlayOfTheGame(signals.winProb, signals.feed) : null
                 const isClincher = series.decided && i === results.length - 1
                 return (
-                  <article key={g.gameNumber} className="psseries__entry" aria-label={`Game ${g.gameNumber}`}>
+                  <article key={g.gameNumber} id={`game-${g.gameNumber}`} className="psseries__entry" aria-label={`Game ${g.gameNumber}`}>
                     <span className="psseries__gamenum" aria-hidden="true">
                       {g.gameNumber}
                     </span>
                     <div className="psseries__entryhead">
                       <span className="psseries__gamedate">{monthDayName(g.date)}</span>
+                      {card?.venue?.name && <span className="psseries__gamevenue">{card.venue.name}</span>}
                       <span className={`psseries__gamestatus${isClincher ? ' psseries__gamestatus--final' : ''}`}>
                         {recordAfterGame(series, i)}
                       </span>
@@ -294,40 +410,55 @@ export function LiveSeriesPage({ seriesId, asOf }) {
         </section>
       )}
 
-      {upcoming.length > 0 && (
-        <section className="psseries__upcoming">
-          <SectionHead look="label">Still to play</SectionHead>
-          <Card as="div" body="flush">
-            <ul className="psseries__upcominglist">
-              {upcoming.map((g) => (
-                <li key={g.gameNumber} className="psseries__upcomingrow">
-                  <span className="psseries__upcominggame">Game {g.gameNumber}</span>
-                  <span className="psseries__upcomingdate">{upcomingGameLabel(g, monthDayName)}</span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        </section>
-      )}
-
       {logLoading && !stats && results.length > 0 && <p className="hint">Loading the series so far…</p>}
       {logError && !stats && results.length > 0 && (
         <p className="hint hint--error">Couldn’t load this series’ leaders and rosters.</p>
       )}
 
+      {stats?.totals && clubs.length === 2 && <SeriesTotals totals={stats.totals} clubs={clubs} />}
+
       {(hasBatting || hasPitching) && (
         <div className="psseries__leaders">
           {hasBatting && (
-            <SeriesLeaderBoard title="Series batting leaders" categories={BATTING_CATEGORIES} byCategory={stats.batting} />
+            <SeriesLeaderBoard
+              title="Series batting leaders"
+              categories={BATTING_CATEGORIES}
+              byCategory={stats.batting}
+              doors={leaderDoors('hitting')}
+            />
           )}
           {hasPitching && (
             <SeriesLeaderBoard
               title="Series pitching leaders"
               categories={SERIES_PITCHING_CATEGORIES}
               byCategory={stats.pitching}
+              doors={leaderDoors('pitching')}
             />
           )}
         </div>
+      )}
+
+      {clubs.length === 2 && (
+        <>
+          <SeasonSeriesStrip
+            viewingTeamId={clubs[1].id}
+            opponentId={clubs[0].id}
+            officialDate={cutoff}
+            sportId={1}
+            gameTypes="R"
+            settled
+            look="label"
+            title="Regular season"
+          />
+          <SeriesNineKeys data={nineKeys} clubs={clubs} season={bracket.season} />
+          <FormerTeammates
+            pairs={teammatePairs}
+            startingIds={startingIds}
+            dayNight=""
+            away={{ id: clubs[0].id, teamName: teamClubNameShort(clubs[0].id) }}
+            home={{ id: clubs[1].id, teamName: teamClubNameShort(clubs[1].id) }}
+          />
+        </>
       )}
 
       {rosterCards.some(({ roster }) => roster.declared === false) && (

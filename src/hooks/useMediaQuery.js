@@ -11,6 +11,13 @@ export const WIDE_QUERY = '(min-width: 740px)'
 // (WIDE_QUERY's width) PLUS an actual mouse (hover: hover, pointer: fine), so
 // a wide touchscreen tablet — which would otherwise fire a synthetic
 // mouseenter on tap with no real "leave" — never triggers a fetch-on-hover.
+// The postseason bracket rail's own gate (BracketRail.jsx). The bracket's tree
+// is 358px wide, 70 more than the wire rail's column, and beside it the game
+// grid's 360px cards need a games column of at least that much — which a
+// window just over WIDE_QUERY does not have. Below this, a wide screen keeps
+// the bracket's fold above the cards instead.
+export const BRACKET_RAIL_QUERY = '(min-width: 1000px)'
+
 export const HOVER_CARD_QUERY = '(min-width: 740px) and (hover: hover) and (pointer: fine)'
 
 export function useMediaQuery(query) {

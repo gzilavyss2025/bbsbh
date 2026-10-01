@@ -14,7 +14,7 @@ import { usePromptDismiss } from '../hooks/preferences/usePromptDismiss.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { isPostseasonWindow } from '../lib/postseason/capSlateDate.js'
 import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
-import { offDayAliveTeams } from '../lib/postseason/bracketDisplay.js'
+import { bracketOpensByItself, offDayAliveTeams } from '../lib/postseason/bracketDisplay.js'
 import { cardLines } from '../api/postseason/text.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus, selectHasResult } from '../api/select.js'
@@ -22,6 +22,9 @@ import { GameCard } from '../components/game/GameCard.jsx'
 import { DerbyCard } from '../components/allstar/DerbyCard.jsx'
 import { PastGameFlipCard } from '../components/game/PastGameFlipCard.jsx'
 import { PostseasonBracket } from '../components/bracket/PostseasonBracket.jsx'
+import { BracketRail } from '../components/bracket/BracketRail.jsx'
+import { BracketDock } from '../components/bracket/BracketDock.jsx'
+import { SurvivorsBoard } from '../components/bracket/SurvivorsBoard.jsx'
 import { LevelNav } from '../components/team/LevelNav.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { TallyLockup } from '../components/chrome/TallyBrand.jsx'
@@ -41,7 +44,7 @@ import { useOffseason } from '../hooks/useOffseason.js'
 import { useWinter } from '../hooks/useWinter.js'
 import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
 import { WINTER_SPORT_ID, isWinterSport } from '../lib/winter/leagues.js'
-import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
+import { useMediaQuery, WIDE_QUERY, BRACKET_RAIL_QUERY } from '../hooks/useMediaQuery.js'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
@@ -183,13 +186,28 @@ export function GameSelect({
   // winter leagues — and a winter club has no roster wire worth reading in the
   // first place. Turning it off is the honest answer, not a missing feature.
   const showWire = !isWinterSport(sportId)
+  // OCTOBER (Gary, 2026-10-01: "Rail + board"). In the postseason window the
+  // MLB slate's rail and dock hold the BRACKET, and the wire steps aside: a
+  // free-agent election is not news beside a Game 3. The wire stays on every
+  // minor-league tab and on each club's page. The rail needs BRACKET_RAIL_QUERY
+  // (its tree is wider than the wire's column); between that and WIDE_QUERY the
+  // bracket keeps its fold above the cards. The dock holds it only on a day
+  // with a postseason game — on a day without one the full bracket is already
+  // the page (PostseasonBracket.jsx), and a dock would draw it twice.
+  const october = bracketCoversPage
+  const bracketRoom = useMediaQuery(BRACKET_RAIL_QUERY)
+  const bracketInRail = october && wide && bracketRoom
+  const bracketInDock =
+    october && !wide && Boolean(postseasonBracket.bracket) &&
+    !bracketOpensByItself(postseasonBracket.bracket, dateStr)
+  const wireOn = showWire && !october
   // The dock renders nothing on a quiet window, and only IT knows that (the
   // answer arrives with the fetch). It reports back so the slate pads its floor
   // for a rail that actually exists — see .screen--wiredock in
   // 04a-wire-dock.css, and note the padding is what keeps the dock off the
   // Reveal all results bar.
   const [dockPresent, setDockPresent] = useState(false)
-  const docked = showWire && !wide && dockPresent
+  const docked = (wireOn && !wide && dockPresent) || bracketInDock
   // The rail's copy of that arrangement, with the default flipped. The dock
   // opts IN to bottom padding once it knows it exists; the rail's shell has to
   // be wide from first paint, because widening it a beat later would slide the
@@ -197,7 +215,7 @@ export function GameSelect({
   // is reserved on what is known synchronously — and WireRail reports back only
   // to take it away, on a quiet window or a failed fetch. See WireRail.jsx.
   const [railPresent, setRailPresent] = useState(true)
-  const railed = showWire && wide && railPresent
+  const railed = wireOn && wide && railPresent
   // The rail ends where the games end (WireRail.jsx's fit). It measures this
   // column rather than the viewport, so the ref is handed down explicitly — a
   // querySelector inside the rail would hide the dependency from the one file
@@ -671,7 +689,7 @@ export function GameSelect({
     <div
       className={`screen screen--slate${coldLoad ? ' screen--coldload' : ''}${
         docked ? ' screen--wiredock' : ''
-      }${railed ? ' screen--wirerail' : ''}`}
+      }${railed ? ' screen--wirerail' : ''}${bracketInRail ? ' screen--bracketrail' : ''}`}
     >
       {/* Title + league toggle + search share one row: the Tally wordmark
           reloads THIS league's slate for today on the left (a full page load —
@@ -936,7 +954,7 @@ export function GameSelect({
               date in the window, off days included. On an off day this is
               the only thing here besides the chrome above (Gary's decision,
               2026-09-28: "the bracket is the whole page"). */}
-          {inPostseasonWindow && (
+          {inPostseasonWindow && !bracketInRail && !bracketInDock && (
             <PostseasonBracket
               bracket={postseasonBracket.bracket}
               cutoff={postseasonBracket.cutoff}
@@ -1046,7 +1064,17 @@ export function GameSelect({
             {/* Any idle club, the whole-league All-Star case included. In the
                 winter that is every club — and wide, it moves to the rail
                 (WinterRail.jsx, #1078). */}
-            {offDayTeams.length > 0 && !(wide && winter) && (
+            {/* In the postseason window the survivors' board takes this
+                slot instead: all twelve clubs, out ones included, with what
+                each does next (SurvivorsBoard.jsx). */}
+            {october && (
+              <SurvivorsBoard
+                bracket={postseasonBracket.bracket}
+                slateDate={dateStr}
+                favoriteTeamId={favoriteTeamId}
+              />
+            )}
+            {offDayTeams.length > 0 && !(wide && winter) && !october && (
               <OffDaySection
                 teams={offDayTeams}
                 favoriteTeamId={favoriteTeamId}
@@ -1065,13 +1093,22 @@ export function GameSelect({
             reports which back so the shell can give the reserved width up.
             WIDE ONLY: the phone's copy of this feed is the dock at the foot
             of this screen. See WireRail.jsx. */}
-        {showWire && wide && !winter && (
+        {wireOn && wide && !winter && (
           <WireRail
             endDate={dateStr}
             sportId={sportId}
             onPresence={setRailPresent}
             fitTo={gamesColRef}
             singleDay={!isToday}
+          />
+        )}
+
+        {/* October's copy of that column: the bracket (BracketRail.jsx). */}
+        {bracketInRail && (
+          <BracketRail
+            bracket={postseasonBracket.bracket}
+            cutoff={postseasonBracket.cutoff}
+            slateDate={dateStr}
           />
         )}
 
@@ -1130,7 +1167,14 @@ export function GameSelect({
           which keeps the slate's own content ahead of it for a screen reader.
           It publishes --wire-rail-h and reports whether it rendered at all;
           `docked` above turns that into the screen's bottom padding. */}
-      {showWire && !wide && !winter && (
+      {bracketInDock && (
+        <BracketDock
+          bracket={postseasonBracket.bracket}
+          cutoff={postseasonBracket.cutoff}
+          slateDate={dateStr}
+        />
+      )}
+      {wireOn && !wide && !winter && (
         <WireDock
           endDate={dateStr}
           sportId={sportId}

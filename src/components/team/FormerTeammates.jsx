@@ -1,142 +1,42 @@
-import { useMemo, useState } from 'react'
-import { teammateCrossroads } from '../../api/formerTeammates.js'
+import { useMemo } from 'react'
+import { teammateLadder } from '../../api/formerTeammates.js'
 import { splitDisplayName } from '../../api/person.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
-import { Door } from '../ui/control/Door.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { SectionMasthead } from '../ui/SectionMasthead.jsx'
+import { Ladder } from './ladder/Ladder.jsx'
+import { posLabel, seasonRange } from './ladder/layout.js'
 
 // The lineup page's FORMER TEAMMATES card and its ORG TIES fallback.
 // Spoiler-free: rosters and team-season history carry no score, so both
 // render openly like the opposing-pitcher line.
 
-// Rows shown before "Show N more clubs" — a heavy shared history (two rosters
-// that swapped a lot of players) can run to a dozen clubs.
-const ROWS_SHOWN = 6
-
-// The card as crossroads: one row per shared club (see teammateCrossroads),
-// the club's logo and years in the middle, tonight's away players on the left
-// and home players on the right, under a head that names each side. Two
-// sections: "Facing a former club" (the club, or its farm club, is one of
-// tonight's own, so the row holds only the player who LEFT it; a row of only
-// farm-club stints reads "<club> system") and
-// "Teammates elsewhere" (they met on a third club). Every face shows: no
-// "+N" and no "with N of tonight's …" count. A green position badge
-// marks a starter; a row that plays out tonight is pinned first.
+// The card as the Ladder (#1352, see teammateLadder): away players, the clubs
+// they shared, home players, a line per pair. Every player and every club shows
+// once, with no door and no "+N". A tie to tonight's own org is a badge on the
+// player who left it (solid: the club itself; dashed: its farm system only). A
+// green position badge marks a starter; a group with a pair who both start is
+// pinned first.
 export function FormerTeammates({ pairs, startingIds, dayNight, away, home }) {
-  const [showAll, setShowAll] = useState(false)
-  const { former, elsewhere } = useMemo(
+  const ladder = useMemo(
     () =>
-      teammateCrossroads(pairs, away.id, home.id, startingIds, {
+      teammateLadder(pairs, away.id, home.id, startingIds, {
         [away.id]: away.teamName,
         [home.id]: home.teamName,
       }),
     [pairs, away.id, home.id, away.teamName, home.teamName, startingIds],
   )
-  const total = former.length + elsewhere.length
-  if (total === 0) return null
-  const cap = showAll ? total : ROWS_SHOWN
-  const formerShown = former.slice(0, cap)
-  const elsewhereShown = elsewhere.slice(0, Math.max(0, cap - formerShown.length))
-  const hidden = total - formerShown.length - elsewhereShown.length
-  const anyStarting = [...former, ...elsewhere].some((r) =>
-    [...r.away, ...r.home].some((p) => p.starting),
-  )
+  if (Object.keys(ladder.players).length === 0) return null
   const head = <SectionMasthead as="h3" title="Former teammates" />
   return (
     <Card className="metric teammates" head={head} body="flush">
       <div className="metric__body">
-        <div className="xroads__sides" aria-hidden="true">
-          <span className="xroads__sidename">
-            <TeamLogo teamId={away.id} name={away.teamName} size={20} />
-            {away.teamName}
-          </span>
-          <span className="xroads__sidename xroads__sidename--home">
-            {home.teamName}
-            <TeamLogo teamId={home.id} name={home.teamName} size={20} />
-          </span>
-        </div>
-        {anyStarting && (
-          <p className="xroads__legend">
-            <span className="xroads__legendmark" />
-            {dayNight === 'day' ? 'Starting today' : 'Starting tonight'}
-          </p>
-        )}
-        <RowGroup title="Facing a former club" rows={formerShown} />
-        <RowGroup title="Teammates elsewhere" rows={elsewhereShown} />
-        {hidden > 0 && (
-          <Door layout="block" onClick={() => setShowAll(true)}>
-            Show {hidden} more {hidden === 1 ? 'club' : 'clubs'}
-          </Door>
-        )}
+        <Ladder ladder={ladder} dayNight={dayNight} away={away} home={home} />
       </div>
     </Card>
-  )
-}
-
-function RowGroup({ title, rows }) {
-  if (rows.length === 0) return null
-  return (
-    <section className="xroads__group">
-      <SectionHead look="label">{title}</SectionHead>
-      <ul className="xroads__list">
-        {rows.map((r) => (
-          <CrossroadsRow key={`${r.kind}-${r.club.teamId}`} row={r} />
-        ))}
-      </ul>
-    </section>
-  )
-}
-
-// One shared club: away side | club | home side, the club column centered
-// on every row. On a 'former' row one side is empty by construction (nobody
-// on that club LEFT it), and stays empty.
-function CrossroadsRow({ row: r }) {
-  return (
-    <li className="xroads__row">
-      <Side players={r.away} align="end" />
-      <div className="xroads__club">
-        <TeamLogo teamId={r.club.teamId} name={r.club.teamName} size={32} />
-        <span className="xroads__clubname">
-          {r.club.level === 'MLB' ? '' : `${r.club.level} `}
-          {r.club.teamName}
-        </span>
-        <span className="xroads__years">{seasonRange(r.seasons)}</span>
-      </div>
-      <Side players={r.home} align="start" />
-    </li>
-  )
-}
-
-function Side({ players, align }) {
-  return (
-    <div className={`xroads__side xroads__side--${align}`}>
-      {players.map((p) => (
-        <Face key={p.id} player={p} />
-      ))}
-    </div>
-  )
-}
-
-// A small headshot over the surname, the roster position as a badge on its
-// corner — green when he starts.
-function Face({ player: p }) {
-  const { last } = splitDisplayName(p.name)
-  return (
-    <PlayerLink id={p.id} name={p.name} className="xroads__face">
-      <span className="teammate__shotwrap">
-        <Headshot personId={p.id} name={p.name} teamId={p.teamId} className="xroads__shot" />
-        {p.pos && (
-          <span className={`teammate__posbadge${p.starting ? ' teammate__posbadge--starting' : ''}`}>
-            {posLabel(p.pos)}
-          </span>
-        )}
-      </span>
-      <span className="xroads__surname">{last}</span>
-    </PlayerLink>
   )
 }
 
@@ -184,11 +84,6 @@ export function OrgTies({ ties }) {
   )
 }
 
-// A pitcher's roster position is already the plain "P" abbreviation (no
-// SP/RP split) at the source, but normalize defensively anyway — the badge
-// should never show anything longer than that for a pitcher.
-const posLabel = (pos) => (pos === 'SP' || pos === 'RP' ? 'P' : pos)
-
 // One player's headshot over his two-line name (first name small, surname
 // big) — the same treatment as the player page's hero, shrunk to fit a card —
 // with his roster position as a small badge floating on the headshot's
@@ -207,13 +102,4 @@ function TeammateHalf({ id, name, pos, teamId }) {
       </span>
     </PlayerLink>
   )
-}
-
-// [2022, 2023] -> "’22–’23"; [2021] -> "’21". Non-contiguous years still read as
-// a min–max span (good enough for a caption).
-function seasonRange(seasons) {
-  const ys = [...(seasons ?? [])].sort((a, b) => a - b)
-  if (ys.length === 0) return ''
-  const yy = (y) => `’${String(y).slice(-2)}`
-  return ys.length === 1 ? yy(ys[0]) : `${yy(ys[0])}–${yy(ys[ys.length - 1])}`
 }

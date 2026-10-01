@@ -1,0 +1,218 @@
+/* The MLB slate in the postseason window (Gary's pick, 2026-10-01: "Rail +
+   board"). Three pieces, all component-imported because they only ever load on
+   the home slate in October:
+
+     .bracketrail   components/bracket/BracketRail.jsx — the bracket in the
+                    column the transactions rail holds the rest of the year.
+     .bracketdock   components/bracket/BracketDock.jsx — the phone's copy, in
+                    the shared bottom dock (ui/dock/SheetDock.jsx).
+     .psboard       components/bracket/SurvivorsBoard.jsx — all twelve clubs,
+                    in place of the Off Day grid.
+
+   A subdirectory partial because src/styles is at its flat-file budget
+   (scripts/check-dir-size.mjs). No --seal* token anywhere: the bracket's
+   surfaces carry no kraft tape (ADR-0087 decision 3). */
+
+/* ---------- the rail (wide, from BRACKET_RAIL_QUERY up) ---------- */
+
+/* 358 is FullBracket's own tree width (TREE_W), so the tree fits the column
+   exactly. The shell widens to match: the games column keeps the 928px it has
+   beside the wire rail, and 928 + 24 + 358 = 1310. */
+.screen--slate.screen--bracketrail {
+  max-width: 1310px;
+}
+
+.bracketrail {
+  flex: 0 0 auto;
+  width: 358px;
+  /* Level with the first card's top edge, as .wirerail does
+     (25-wide-layout.css) — the two move together. */
+  margin-top: 14px;
+}
+.bracketrail__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-bottom: var(--space-1h);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+}
+.bracketrail__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.bracketrail__note {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* .pbkt's own vertical margin is for a block in the games column; in the rail
+   the head above already spaces it. */
+.bracketrail__body.pbkt {
+  margin: 0;
+}
+
+/* ---------- the dock (phone) ---------- */
+
+.bracketdock__trophy {
+  display: inline-flex;
+  flex: none;
+}
+.wiredock--bracket .wiredock__list {
+  padding-top: var(--space-2);
+}
+.bracketdock__body.pbkt {
+  margin: 0;
+}
+
+/* ---------- the survivors' board ---------- */
+
+/* An outfield scoreboard: navy board, paper slots. The board is a block in the
+   games column, so its width is the column's and the slots divide it. */
+.psboard {
+  margin-top: var(--space-5);
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-2h);
+  background: var(--navy);
+  color: var(--text-on-ink);
+  border-radius: var(--radius-sm);
+}
+.psboard__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.psboard__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-black);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-on-ink);
+}
+.psboard__count {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+}
+.psboard__alive {
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-black);
+}
+
+.psboard__league {
+  display: grid;
+  grid-template-columns: var(--space-6) minmax(0, 1fr);
+  gap: var(--space-2);
+}
+/* The league's own white mark sits at the board's edge, where a painted
+   scoreboard puts the league name. */
+.psboard__lg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-black);
+  color: var(--text-on-ink);
+}
+.psboard__lgmark {
+  width: 100%;
+  height: auto;
+  max-height: var(--space-6);
+  object-fit: contain;
+}
+.psboard__slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-1h);
+}
+@media (min-width: 740px) {
+  .psboard__slots {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.psboard__slot {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: var(--space-1);
+  height: 100%;
+  padding: var(--space-2) var(--space-1);
+  text-align: center;
+  text-decoration: none;
+  background: var(--paper-2);
+  color: var(--ink-0);
+  border-radius: var(--radius-xs);
+}
+.psboard__slot:hover {
+  background: var(--paper-3);
+}
+.psboard__abbr {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-black);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+}
+.psboard__star {
+  margin-left: var(--space-1);
+  color: var(--clay);
+}
+.psboard__line {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-snug);
+  color: var(--ink-2);
+}
+
+/* Playing today: a clay ring, the board's one bright note. */
+.psboard__slot--today {
+  box-shadow: inset 0 0 0 var(--bw-heavy) var(--clay);
+}
+.psboard__slot--champion .psboard__line {
+  color: var(--field);
+  font-weight: var(--w-bold);
+}
+
+/* Out: the slot stays, turned gray, with a red pencil X over the mark. The
+   mark itself is already the gray knockout ClubMark draws for an eliminated
+   club, so the X is the only new ink. */
+.psboard__slot--out {
+  background: var(--rule);
+}
+.psboard__slot--out:hover {
+  background: var(--rule-soft);
+}
+.psboard__slot--out .psboard__abbr {
+  color: var(--ink-2);
+  /* strike-link-exempt: the abbreviation is plain text; the whole slot is the link */
+  text-decoration: line-through;
+}
+.psboard__slot--out::after {
+  content: "";
+  position: absolute;
+  top: var(--space-2);
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background:
+    linear-gradient(45deg, transparent 46%, var(--clay-deep) 46% 54%, transparent 54%),
+    linear-gradient(-45deg, transparent 46%, var(--clay-deep) 46% 54%, transparent 54%);
+}

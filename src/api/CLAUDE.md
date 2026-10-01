@@ -168,6 +168,8 @@ about WHERE THE MATH LIVES: the generators ship FACTS, and every ranking, rate,
 league comparison and weighted index is computed here, where it is pure,
 unit-tested and arguable. `docs/farm-index.md` argues the one that needs it.
 
+`rotation/` holds the likely-starter guess for a game with no announced probable (ADR-0089). `projectedStarters.js` is the pure rule; `liveStarters.js` feeds it live game logs, because `workload.json` is regular-season only. Never hand a card the file's own `apps`.
+
 `expresslane/` is the newest, and the spoiler line runs BETWEEN its two files
 rather than around them. `rail.js` is reveal-only: it is the ordered, complete
 event list for one half-inning, and its `description` / `result` / `pitch`

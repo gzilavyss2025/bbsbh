@@ -76,6 +76,8 @@
 @import './styles/08a-site-menu.css';
 @import './styles/09-team-info.css';
 @import './styles/10-lineup.css';
+@import './styles/10b-former-teammates.css';
+@import './styles/workload/projection.css';
 @import './styles/11-innings.css';
 @import './styles/11-pregame-scoreboard.css';
 @import './styles/12-sealbox.css';
@@ -267,6 +269,9 @@
      78-offseason             components/offseason/{OffseasonLead,
                               WinterCalendar}.jsx
      80-postseason-bracket    components/bracket/PostseasonBracket.jsx
+     postseason/home          components/bracket/{BracketRail,BracketDock,
+                              SurvivorsBoard}.jsx (a SUBDIRECTORY: src/styles
+                              is at its flat-file budget)
      report/charts            components/around-the-game/BroadcastBar.jsx
      report/chrome            screens/around-the-game/RunValuePage.jsx,
                               screens/around-the-game/AbsChallengesPage.jsx

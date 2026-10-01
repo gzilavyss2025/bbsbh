@@ -774,6 +774,10 @@
       "class": "cutoff-gated",
       "why": "The bracket's two statsapi reads, separate from fetchSchedule like fetchSlateScores. The results read asks only for dates BEFORE the cutoff (endDate is the day before) and only for `isWinner` and the game state: never runs, a score, a linescore, `seriesStatus` or `leagueRecord`, the last two being the state AFTER a game (trap 1). The skeleton read asks for every date but for no result field at all, not even the game state. The heading-into-the-date gate is the cutoff the caller passes; bracket.js applies it a second time."
     },
+    "postseason/upcoming.js": {
+      "class": "spoiler-free",
+      "why": "The live series page's read of the games still to play: each one's park and announced probable pitchers, and those pitchers' throwing hand. A probable pitcher and a park are not results. The caller hands it only DATED upcoming gamePks (never today's game, never an if-necessary game, which has no gamePk), and the field list asks for no state, score, winner, linescore, seriesStatus or leagueRecord, so even a wrong pk brings back no result. test/postseason/upcoming-games.test.js pins that list."
+    },
     "postseason/roster.js": {
       "class": "spoiler-free",
       "why": "A club's declared postseason roster: its active roster (`/teams/{id}/roster?rosterType=active&date=`) on the last date its series played by the cutoff. Names, jersey numbers and positions only; a roster move is not a result. statsapi has no postseason roster type. Before Game 1 day, the club's current roster on the cutoff date stands in."
@@ -1018,6 +1022,14 @@
         "screens/InningViewer.jsx",
         "screens/boxscore/revealBoxScore.js"
       ]
+    },
+    "rotation/projectedStarters.js": {
+      "class": "spoiler-free",
+      "why": "Reads workload.json's completed appearances strictly before the game date and never touches the feed. Names a LIKELY starter by rest days since his last start; a pre-game guess from past games, same footing as workload.js. ADR-0089."
+    },
+    "rotation/liveStarters.js": {
+      "class": "spoiler-free",
+      "why": "Reads a few pitchers' game logs of COMPLETED games (every game type) and hands them to projectedStarters.js, which cuts them strictly before the game date. Never reads the feed. ADR-0089."
     },
     "workload.js": {
       "class": "spoiler-free",

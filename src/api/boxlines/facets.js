@@ -72,6 +72,22 @@ export function facetPlan(facet) {
   switch (facet.kind) {
     case 'club':
       // The only facet that narrows the fetch: one club, a handful of games.
+      //
+      // `postseasonFrom` (an ISO date) turns it into ONE SERIES: the four
+      // rounds only, kept from that date on, so a player's earlier postseason
+      // meetings with the same club drop out. The series page's leader doors
+      // use it, handing the sheet the series' own cutoff (ADR-0087), so a row
+      // can only be a game that went Final before it.
+      if (facet.postseasonFrom) {
+        const from = String(facet.postseasonFrom)
+        return {
+          ...plan,
+          opponentId: facet.opponentId ?? null,
+          narrowsSplits: true,
+          gameTypes: [...POSTSEASON],
+          keep: (r) => r.date >= from,
+        }
+      }
       return { ...plan, opponentId: facet.opponentId ?? null, narrowsSplits: true }
     case 'venue':
       // WHICH PARK, off the SCHEDULE record's own venue and never off opponent

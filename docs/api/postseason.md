@@ -6,7 +6,8 @@ Per-module notes for `src/api/postseason/` and its hook,
 series page, 7: the champion) build on the shape below. It is their contract.
 
 Tier-3 reference. `src/api/CLAUDE.md` holds the rule for the directory, and
-`src/api/spoiler-manifest.json` classes all three modules `cutoff-gated`.
+`src/api/spoiler-manifest.json` classes `fetch.js`, `bracket.js` and `text.js`
+`cutoff-gated`, and `roster.js` and `upcoming.js` `spoiler-free`.
 Siblings: `live-game.md`, `static-data.md`, `account-layer.md`.
 
 ## The rule
@@ -31,6 +32,7 @@ The bracket shows each series **heading into the cutoff date**.
 | `bracket.js` | `deriveBracket(skeletonRows, resultRows, cutoffDate)`, pure. Also `seriesForGame` and `isClub`. |
 | `text.js` | `recordLine(series)`, `seriesLine(series, gameNumber)`, `gameStatusLine(series, gameNumber)` (the lineup band's "Game 2 · Braves Lead 1–0"), `bestOfLine(series)` (the live page's "Best of 3" banner before Game 1), `cardLines(game, bracket)`. |
 | `roster.js` | A club's declared postseason roster: `rosterUrl`, `seriesRosterDate`, `shapeRoster`, `fetchSeriesRoster`. Spoiler-free. |
+| `upcoming.js` | The live series page's games still to play: `upcomingUrl`, `handsUrl`, `shapeUpcoming`, `fetchUpcomingSeriesGames(gamePks)`. Each game's park and announced probable pitchers, and their hand. Spoiler-free. |
 | `src/hooks/postseason/usePostseasonBracket.js` | The hook, and `bracketCutoff(date, today)`. |
 
 ### The two reads (`fetch.js`)
@@ -176,6 +178,8 @@ Example: 2025 NLDS, heading into 2025-10-09.
 
 - `recordLine(series)`: "Game 1", "CHC leads 1–0", "Series tied 1–1", "Winner
   take all" (each club one win from the series), "TOR won 3–1" (decided).
+- `roundTitle(series)`: "NL Wild Card", "ALDS", "NLCS", "World Series".
+  The series pages' leader sheets use it for their note.
 - `seriesLine(series, gameNumber)`: "Game 2 · NL Wild Card", "Game 3 · ALDS",
   "Game 5 · NLCS", "Game 1 · World Series". Its own `roundTitle` drops the word
   "Series" from every round but the World Series itself (slice 4, Gary's copy
@@ -245,8 +249,47 @@ Spoiler-free: a roster move is not a result.
   which reads the history file and opens `PostseasonSeriesPage.jsx` or
   `screens/postseason-live/LiveSeriesPage.jsx`. The live page covers
   (slice 6): a series still in progress, or a decided 2026 series with nowhere
-  else to go yet (trap 7). It reads `series.games`/`cutoffGame`/`upcoming` and
-  fetches nothing for the cutoff date's own game.
+  else to go yet (trap 7). It reads `series.games`/`cutoffGame`/`upcoming`. For the cutoff
+  date's own game it reads only schedule rows with no result field (the slate
+  card, `upcoming.js`): never its box score, feed or win probability.
+
+## The games still to play (`upcoming.js`)
+
+`fetchUpcomingSeriesGames(gamePks)` reads `/schedule?gamePks=…&hydrate=probablePitcher,venue`
+and one `/people?personIds=…` for the hands. It returns
+`{ [gamePk]: { date, awayId, homeId, venue: { id, name }, away, home } }`, where
+`away`/`home` is `{ id, name, hand }` or `null` (no probable announced).
+Any failure returns `{}`, and the page draws its rows without the extra lines.
+
+- The caller hands it today's gamePk and the DATED upcoming ones only. An "if
+  necessary" game has no gamePk, so it never gets a park, a pitcher or a date.
+- The field list has no game state, score, winner, linescore, `seriesStatus`
+  or `leagueRecord`, so a wrong pk brings back no result.
+  `test/postseason/upcoming-games.test.js` pins both URLs.
+- Checked against live statsapi on 2026-10-01: the schedule's
+  `probablePitcher` has no hand; `people[].pitchHand.code` has it.
+
+## The series pages' parts
+
+The live page (`screens/postseason-live/LiveSeriesPage.jsx`) draws, top to
+bottom: the banner, Today, the starting pitchers (`SeriesStarters`), Still to
+play (`StillToPlay`), How the games went (`SeriesFlow`), Game by game (with
+each game's park), Series totals (`SeriesTotals`), the leader boards, the
+Regular season strip, Nine Keys (`SeriesNineKeys`), Former teammates and the
+rosters. The finished page (`PostseasonSeriesPage.jsx`) draws the parts that
+need only counted games: the flow, the park line, the totals, the leader doors,
+the Regular season strip and Nine Keys. From 740px the live page is a two-column
+grid (`styles/postseason/series-live.css`).
+
+| Part | Reads | Spoiler footing |
+| --- | --- | --- |
+| Still to play | `series.upcoming`, `upcoming.js` | A park, an off-day line (`lib/postseason/dayShape.js`) and probables for a DATED game only. Probables only when the cutoff is today: on a past `?d=` the schedule names the starter picked after that date. |
+| Starting pitchers | `upcoming.js`, `fetchPitcherSeasonLine`, `fetchPitcherLastGame`, `projectFromLiveLogs` | Today's game, or the next dated game on today's page only. Every line ends the day before the cutoff (ADR-0088). Never `PitcherCard`, which reads the game's feed. |
+| How the games went | `gameSignals` the log already loaded | A line for a counted game only (`lib/postseason/seriesFlow.js`). Today and later games are empty slots. The slot count is the bracket's own. |
+| Series totals | `loadSeriesStats(games).totals` | `{ [clubId]: { batting, pitching, games } }`, summed from the counted games' box scores (`lib/postseason/seriesTotals.js`). No extra request. |
+| Leader doors | the `club` facet with `postseasonFrom` (`api/boxlines/facets.js`) | The sheet gets the page's cutoff (the finished page: the day after the last game) and Game 1's date as `postseasonFrom`, so its rows are this series only. |
+| Regular season | `fetchSeasonSeries(…, 'R')` | Regular season only. See ADR-0087's 2026-10-01 addendum for why. |
+| Nine Keys | `public/data/nine-keys.json` | Regular-season ranks. Only when the file's season is the series' season (`lib/postseason/keysVerdict.js` writes the verdict). |
 
 ## Tests
 
@@ -254,6 +297,8 @@ Spoiler-free: a roster move is not a result.
 `capture.mjs` there): `bracket-cutoff`, `bracket-wiring`, `bracket-text`,
 `bracket-fetch`, `bracket-hook`, `live-series-selectors` (the live series
 page's pure game-bucket sort, slice 6), `series-roster` (the declared roster's
-date and its 26-player check). The route is in `test/route.test.js`,
+date and its 26-player check), `upcoming-games`, `day-shape`, `series-flow`,
+`series-totals`, `keys-verdict`. `bracket-hook` also scans the series pages'
+parts for a seal or a Scores Unlocked read. The route is in `test/route.test.js`,
 and the slate model's `seriesStatus`/`leagueRecord` guard in
 `test/slate-scores.test.js`.

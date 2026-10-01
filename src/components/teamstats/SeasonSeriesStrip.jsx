@@ -7,6 +7,7 @@ import { gamePath } from '../../lib/route.js'
 import { monthDayYear } from '../../lib/dates.js'
 import { teamClubName } from '../../lib/teams.js'
 import { SectionMasthead } from '../ui/SectionMasthead.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 
@@ -14,14 +15,18 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // right-aligned aside. MLB club nicknames only (teamClubName is null for a
 // MiLB id); nothing renders before either club has actually won a game, same
 // as the strip itself staying silent on a one-off interleague matchup.
-function seriesLeadLabel(record, teamAId, teamBId) {
+function seriesLeadLabel(record, teamAId, teamBId, settled = false) {
   const { aWins, bWins } = record
   if (aWins === 0 && bWins === 0) return null
-  if (aWins === bWins) return `Series tied at ${aWins}-${bWins}`
+  if (aWins === bWins) return settled ? `Split ${aWins}–${bWins}` : `Series tied at ${aWins}-${bWins}`
   const leaderId = aWins > bWins ? teamAId : teamBId
   const leaderName = teamClubName(leaderId)
   if (!leaderName) return null
-  return `${leaderName} lead series, ${Math.max(aWins, bWins)}-${Math.min(aWins, bWins)}`
+  const hi = Math.max(aWins, bWins)
+  const lo = Math.min(aWins, bWins)
+  // `settled`: the season's games are all played, so "lead" would be wrong.
+  // The settled form takes the en dash the series page's own records use.
+  return settled ? `${leaderName} won ${hi}–${lo}` : `${leaderName} lead series, ${hi}-${lo}`
 }
 
 // Scrolls `strip` so `cell` sits at its centre. `behavior: 'instant'` — the
@@ -52,7 +57,26 @@ function centerOn(strip, cell) {
 // "if necessary" card exists would give the series length away.
 // Renders nothing for a one-off interleague game (no real "series" to show)
 // or before the schedule loads.
-export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, sportId, currentGamePk }) {
+//
+// The postseason series page (ADR-0087) draws it with `gameTypes="R"`,
+// `settled`, `look="label"` and `title="Regular season"`: regular season games
+// only, because with no current game of its own on an off day the strip would
+// draw a card for every later postseason game the schedule still lists, and
+// whether an "if necessary" card exists says how the series ended; the lead
+// line in the past tense, because that season is over; and the page's plain
+// label head instead of the navy masthead, so the result banner stays the page's
+// one navy band.
+export function SeasonSeriesStrip({
+  viewingTeamId,
+  opponentId,
+  officialDate,
+  sportId,
+  currentGamePk,
+  gameTypes = null,
+  settled = false,
+  look = 'band',
+  title = 'Season series',
+}) {
   const navigate = useNav()
   const stripRef = useRef(null)
   const currentCellRef = useRef(null)
@@ -64,9 +88,9 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
   const { data: games } = useAsync(
     () =>
       viewingTeamId && opponentId && season
-        ? fetchSeasonSeries(viewingTeamId, opponentId, Number(season), sportId ?? 1)
+        ? fetchSeasonSeries(viewingTeamId, opponentId, Number(season), sportId ?? 1, gameTypes)
         : Promise.resolve([]),
-    [viewingTeamId, opponentId, season, sportId],
+    [viewingTeamId, opponentId, season, sportId, gameTypes],
   )
 
   const cells = seasonSeriesCells(games ?? [], viewingTeamId, currentGamePk, officialDate)
@@ -74,6 +98,7 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
     seasonSeriesRecord(cells, viewingTeamId, opponentId),
     viewingTeamId,
     opponentId,
+    settled,
   )
   const [canScroll, setCanScroll] = useState(false)
   // Which park the CURRENT game is at — every other cell whose game was
@@ -148,13 +173,16 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
     navigate(gamePath(cell.apiDate, awayAbbr, homeAbbr, cell.final ? 'boxscore' : 'lineup1', cell.gameNumber))
   }
 
-  const head = (
-    <SectionMasthead title="Season series" as="h3">
-      {leadLabel && <span className="seasonseries__lead">{leadLabel}</span>}
-    </SectionMasthead>
-  )
+  // The band head sits inside the card, as on the lineup page. The label head
+  // sits above it, as every label-headed section of the host page does.
+  const head =
+    look === 'label' ? null : (
+      <SectionMasthead title={title} as="h3">
+        {leadLabel && <span className="seasonseries__lead">{leadLabel}</span>}
+      </SectionMasthead>
+    )
 
-  return (
+  const card = (
     <Card className="metric seasonseries" head={head} body="flush">
       <div className="metric__body seasonseries__body">
         {canScroll && (
@@ -200,6 +228,15 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
         )}
       </div>
     </Card>
+  )
+  if (look !== 'label') return card
+  return (
+    <section className="seasonseries__section">
+      <SectionHead look="label" note={leadLabel}>
+        {title}
+      </SectionHead>
+      {card}
+    </section>
   )
 }
 
