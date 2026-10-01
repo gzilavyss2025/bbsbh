@@ -267,11 +267,6 @@
 .pbkt-box--bold {
   border: 3px double var(--accent-primary);
 }
-.pbkt-box--compact {
-  background: transparent;
-  border-style: dashed;
-  border-color: var(--graphite);
-}
 .pbkt-box__note {
   margin-top: 2px;
   font-family: var(--font-display);
