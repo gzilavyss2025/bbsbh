@@ -278,8 +278,7 @@ export function teammateLadder(pairs, awayTeamId, homeTeamId, startingIds, teamN
   const players = {}
   const clubs = {}
   const edges = []
-  const edgeScore = {} // best score of an edge a player is on
-  const clubScore = {}
+  const scores = [] // scores[i] is edges[i]'s pair score
   const node = (p) => {
     players[p.id] ??= {
       id: p.id,
@@ -292,7 +291,6 @@ export function teammateLadder(pairs, awayTeamId, homeTeamId, startingIds, teamN
     }
     return players[p.id]
   }
-  const raise = (map, key, score) => (map[key] = Math.max(map[key] ?? 0, score))
 
   for (const p of pairs ?? []) {
     const third = thirdClub(p, tonightOrg)
@@ -302,11 +300,10 @@ export function teammateLadder(pairs, awayTeamId, homeTeamId, startingIds, teamN
       node(away)
       node(home)
       edges.push({ away: away.id, home: home.id, club: third.teamId, seasons: [...third.seasons].sort((x, y) => x - y) })
-      const c = (clubs[third.teamId] ??= { ...third, seasons: new Set() })
+      scores.push(p.score)
+      const c = (clubs[third.teamId] ??= { teamId: third.teamId, teamName: third.teamName, level: third.level, seasons: new Set() })
       if (LEVEL_RANK(third.level) > LEVEL_RANK(c.level)) c.level = third.level
       for (const s of third.seasons) c.seasons.add(s)
-      for (const id of [away.id, home.id]) raise(edgeScore, id, p.score)
-      raise(clubScore, third.teamId, p.score)
       continue
     }
     for (const stint of p.clubs) {
@@ -321,9 +318,7 @@ export function teammateLadder(pairs, awayTeamId, homeTeamId, startingIds, teamN
     }
   }
   const sorted = (set) => [...set].sort((x, y) => x - y)
-  for (const c of Object.values(clubs)) {
-    c.seasons = sorted(c.seasons)
-  }
+  for (const c of Object.values(clubs)) c.seasons = sorted(c.seasons)
   for (const n of Object.values(players)) {
     if (n.former) {
       const { orgId, farmOnly } = n.former
@@ -344,33 +339,38 @@ export function teammateLadder(pairs, awayTeamId, homeTeamId, startingIds, teamN
     link(`p${e.home}`, `c${e.club}`)
   }
   const groups = new Map()
-  for (const e of edges) {
-    const g = groups.get(find(`c${e.club}`)) ?? { away: new Set(), clubs: new Set(), home: new Set(), pinned: false, score: 0 }
-    groups.set(find(`c${e.club}`), g)
+  const onEdge = new Set()
+  edges.forEach((e, i) => {
+    const root = find(`c${e.club}`)
+    const g = groups.get(root) ?? { away: new Set(), clubs: new Set(), home: new Set(), pinned: false, score: 0 }
+    groups.set(root, g)
     g.away.add(e.away)
     g.home.add(e.home)
     g.clubs.add(e.club)
     g.pinned ||= players[e.away].starting && players[e.home].starting
-    g.score = Math.max(g.score, edgeScore[e.away])
-  }
-  const byStartScore = (x, y) => Number(players[y].starting) - Number(players[x].starting) || edgeScore[y] - edgeScore[x]
+    g.score = Math.max(g.score, scores[i])
+    onEdge.add(e.away).add(e.home)
+  })
+  // Pairs arrive best score first, so a stable sort on `starting` leaves each
+  // list best score first inside it.
+  const startersFirst = (x, y) => Number(players[y].starting) - Number(players[x].starting)
   return {
     groups: [...groups.values()]
       .map((g) => ({
-        away: [...g.away].sort(byStartScore),
-        clubs: [...g.clubs].sort((x, y) => clubScore[y] - clubScore[x]),
-        home: [...g.home].sort(byStartScore),
+        away: [...g.away].sort(startersFirst),
+        clubs: [...g.clubs],
+        home: [...g.home].sort(startersFirst),
         pinned: g.pinned,
         score: g.score,
       }))
       .sort((x, y) => Number(y.pinned) - Number(x.pinned) || y.score - x.score),
     edges,
-    clubs: Object.fromEntries(Object.entries(clubs).map(([id, c]) => [id, { teamId: c.teamId, teamName: c.teamName, level: c.level, seasons: c.seasons }])),
+    clubs,
     players,
     formerOnly: Object.values(players)
-      .filter((n) => n.former && !(n.id in edgeScore))
-      .sort((x, y) => Number(y.starting) - Number(x.starting))
-      .map((n) => n.id),
+      .filter((n) => n.former && !onEdge.has(n.id))
+      .map((n) => n.id)
+      .sort(startersFirst),
   }
 }
 
