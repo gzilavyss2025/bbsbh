@@ -27,7 +27,7 @@ import { renderIndex, renderPage } from '../src/copy/landing/render.js'
 import { resolvePage } from '../src/copy/landing/schema.js'
 import { SITE_URL } from '../src/copy/landing/site.js'
 import { sanitizeOverrides } from '../src/copy/registry.js'
-import { getRedis } from './_lib/redis.js'
+import { getRedis, hashFromReply } from './_lib/redis.js'
 
 // Node, not edge: it shares api/copy.js's Redis client and its deliberate
 // `automaticDeserialization: false` handling.
@@ -52,19 +52,6 @@ async function readOverrides() {
   } catch {
     return {}
   }
-}
-
-// Pair Upstash's HGETALL reply into an object. See the long note on
-// `hashFromReply` in api/copy.js — with `automaticDeserialization: false` the
-// client's deserializer is replaced wholesale, and for HGETALL that deserializer
-// is also what pairs the flat [field, value, …] reply. Without this, every
-// override reads back as {} and every page silently shows shipped defaults.
-function hashFromReply(reply) {
-  if (!reply) return {}
-  if (!Array.isArray(reply)) return reply
-  const out = {}
-  for (let i = 0; i < reply.length - 1; i += 2) out[String(reply[i])] = reply[i + 1]
-  return out
 }
 
 // The `?edit` fork: hand back the SPA shell so the React editor route takes over

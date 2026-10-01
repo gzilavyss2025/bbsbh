@@ -16,9 +16,10 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { stripComments } from './helpers/css.js'
 
 const STYLES = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'styles')
-const read = (name) => readFileSync(join(STYLES, name), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+const read = (name) => stripComments(readFileSync(join(STYLES, name), 'utf8'))
 
 // The declaration block of a rule whose selector list contains `selector`
 // exactly — never a pseudo, a compound or a longer name that starts with it.

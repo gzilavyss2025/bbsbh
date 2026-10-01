@@ -11,7 +11,9 @@ import {
   MAX_ROWS_PER_MATCHUP,
   capRows,
   careerRequests,
+  historicalParentOrgAt,
   isShippedGame,
+  orgIdForShared,
   orgTiesApply,
   reduceCareer,
 } from '../scripts/lib/former-teammates.mjs'
@@ -105,4 +107,51 @@ test('a shard keeps only the top rows by score', () => {
   assert.equal(capRows(rows.slice(0, 5)).length, 5)
   // The card shows five before "show all"; the cap must sit well above that.
   assert.ok(MAX_ROWS_PER_MATCHUP >= 50)
+})
+
+// Each `shared` club entry carries `orgId`, its season-accurate parent org.
+// Fixture copied from public/data/milb-history.json: Scranton/Wilkes-Barre was
+// a Phillies club through 2006 and a Yankees club from 2007.
+const history = {
+  clubs: {
+    531: {
+      parentHistory: [
+        { years: [2005, 2006], parentOrgId: 143, parentOrgName: 'Philadelphia Phillies' },
+        { years: [2007, 2026], parentOrgId: 147, parentOrgName: 'New York Yankees' },
+      ],
+    },
+    533: {}, // Worcester: the file has no parentHistory for it
+  },
+}
+const orgOf = (teamId, season) => historicalParentOrgAt(history, teamId, season)?.id
+
+test('historicalParentOrgAt reads the era that holds the season', () => {
+  assert.deepEqual(historicalParentOrgAt(history, 531, 2006), { id: 143, name: 'Philadelphia Phillies' })
+  assert.deepEqual(historicalParentOrgAt(history, 531, 2007), { id: 147, name: 'New York Yankees' })
+})
+
+test('historicalParentOrgAt is null for a club or season the file does not cover', () => {
+  assert.equal(historicalParentOrgAt(history, 531, 2004), null)
+  assert.equal(historicalParentOrgAt(history, 533, 2019), null)
+  assert.equal(historicalParentOrgAt(history, 999, 2019), null)
+  assert.equal(historicalParentOrgAt({}, 531, 2019), null)
+})
+
+test('an MLB club writes no orgId; the reader matches it on teamId', () => {
+  assert.equal(orgIdForShared(111, [2019, 2020], orgOf), undefined)
+})
+
+test('a minor-league club maps to the parent for the stint’s own season', () => {
+  assert.equal(orgIdForShared(531, [2005], orgOf), 143)
+  assert.equal(orgIdForShared(531, [2015], orgOf), 147)
+})
+
+test('a club with several shared seasons takes the parent of its LATEST season', () => {
+  assert.equal(orgIdForShared(531, [2006, 2008], orgOf), 147)
+  assert.equal(orgIdForShared(531, [2008, 2006], orgOf), 147, 'input order does not matter')
+})
+
+test('a missing lookup writes no orgId', () => {
+  assert.equal(orgIdForShared(533, [2019], orgOf), undefined)
+  assert.equal(orgIdForShared(531, [2001], orgOf), undefined)
 })

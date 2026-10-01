@@ -15,6 +15,8 @@
 // the spokes happen to be listed in, and had room for only five of the six or
 // seven metrics a player actually has. ADR-0040 has the full argument.
 
+import { clamp } from './math/number.js'
+
 // Where the league-average reference rule sits. A property of the percentile
 // scale, not a tunable: on a percentile rank the average player is the 50th by
 // construction, which is what makes the reference a single ruled line down the
@@ -50,10 +52,6 @@ export function deviationBar(percentile) {
     // DIRECTION is already carried by position, so nothing depends on colour.
     side: dot < mid ? 'below' : 'above',
   }
-}
-
-function clamp(n, lo, hi) {
-  return Math.max(lo, Math.min(hi, n))
 }
 
 // Percentiles are integers, so every fraction here is a multiple of 0.01 and

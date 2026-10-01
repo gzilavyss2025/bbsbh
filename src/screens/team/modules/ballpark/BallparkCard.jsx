@@ -287,8 +287,8 @@ export function BallparkCard({ team, attendance }) {
         <div className="ballparkcard__title">
           {title.wordmark ? (
             // Unguarded, unlike the photo: `text` is always behind a wordmark
-            // (resolveParkName), so a bundled mark that fails falls back to the
-            // typeset name just as an override does, and neither can loop.
+            // (resolveParkName), so a wordmark that fails falls back to the
+            // typeset name, and it cannot loop.
             <img
               className="ballparkcard__logo"
               src={title.wordmark}

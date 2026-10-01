@@ -72,7 +72,7 @@ const ALLOWLIST = {
   'system/pill.css': ['.pill--seal'],
 
   // The cover, its copy, the tear.
-  '12-sealbox.css': ['.sealbox.cover', '.sealtear__face', '.cover__main', '.cover__sub'],
+  '12-sealbox.css': ['.sealbox.cover', '.sealtear__face', '.cover__main'],
 
   // The pencilled-in option year on a contract. Finding 9's must-survive list.
   // `.contractcard__seg--option` sets --seg-dot, a CUSTOM PROPERTY rather than

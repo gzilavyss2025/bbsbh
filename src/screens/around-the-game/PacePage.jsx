@@ -11,6 +11,7 @@ import {
 } from '../../api/around-the-game/gate.js'
 import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
 import { humanDate } from '../../lib/dates.js'
+import { commas } from './abs/format.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -45,7 +46,6 @@ import { BarCell, TrendStrip } from '../../components/around-the-game/BroadcastB
 //
 // SPOILER-FREE. A clock reading carries no result (api/around-the-game/gate.js).
 
-const commas = (n) => (n == null ? '—' : n.toLocaleString('en-US'))
 
 // EVERY DURATION ON THIS PAGE CARRIES ITS UNIT. A column of "2:49" is only
 // obviously hours-and-minutes to someone who already knows what the page is
@@ -293,7 +293,7 @@ export function PacePage() {
                         name={clubShort(clubs, r.teamId)}
                         rank={board.rankable ? r.rank : null}
                         tied={board.rankable ? r.tied : false}
-                        sub={`${r.games} games`}
+                        note={`${r.games} games`}
                       />
                       <td>
                         <BarCell
@@ -308,7 +308,7 @@ export function PacePage() {
                       <td>{asClock(r.median)}</td>
                       <td>
                         {r.over180Pct == null ? '—' : `${r.over180Pct.toFixed(1)}%`}
-                        <span className="rpt__sub">{r.over180} games</span>
+                        <span className="rpt__note">{r.over180} games</span>
                       </td>
                       <td>{r.over210}</td>
                       <td>
@@ -356,21 +356,21 @@ export function PacePage() {
                         <ClubCell teamId={r.teamId} name={clubShort(clubs, r.teamId)} />
                         <td>
                           {asClock(r.longest)}
-                          <span className="rpt__sub">
+                          <span className="rpt__note">
                             {r.longestDate ? humanDate(r.longestDate) : ''}
                             {r.longestOppId ? ` vs ${clubShort(clubs, r.longestOppId)}` : ''}
                           </span>
                         </td>
                         <td>
                           {asClock(r.shortest)}
-                          <span className="rpt__sub">
+                          <span className="rpt__note">
                             {r.shortestDate ? humanDate(r.shortestDate) : ''}
                             {r.shortestOppId ? ` vs ${clubShort(clubs, r.shortestOppId)}` : ''}
                           </span>
                         </td>
                         <td>
                           {asHours(r.delayMinutes)}
-                          <span className="rpt__sub">
+                          <span className="rpt__note">
                             {r.delayGames} game{r.delayGames === 1 ? '' : 's'}
                           </span>
                         </td>

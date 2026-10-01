@@ -35,7 +35,7 @@
 
 import { authenticateAdmin } from './_lib/adminAuth.js'
 import { jsonResponse, readJsonBody } from './_lib/nodeHandler.js'
-import { getRedis } from './_lib/redis.js'
+import { getRedis, hashFromReply } from './_lib/redis.js'
 
 export const config = { runtime: 'nodejs' }
 
@@ -65,18 +65,6 @@ function reply(res, body, status = 200, extraHeaders = {}) {
 // once, deliberately.
 function overridesRedis() {
   return getRedis({ automaticDeserialization: false })
-}
-
-// Deliberately a second copy of the same pairing helper api/copy.js and
-// api/identity.js each already have, not a shared import — see
-// api/identity.js's hashFromReply for why duplicating this one small
-// function is the correct choice.
-function hashFromReply(reply) {
-  if (!reply || typeof reply !== 'object') return {}
-  if (!Array.isArray(reply)) return reply
-  const out = {}
-  for (let i = 0; i + 1 < reply.length; i += 2) out[String(reply[i])] = reply[i + 1]
-  return out
 }
 
 // One override is either "the real id is X" or "reviewed, confirmed no

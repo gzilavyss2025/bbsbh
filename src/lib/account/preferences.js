@@ -323,13 +323,6 @@ export function applyRemotePreferences(local, remote) {
   return preserve(local, out)
 }
 
-// Replace the local document with a remote one outright. The `adopt` half of
-// `mergeStrategyFor` — used when the local document belongs to a DIFFERENT
-// account, where merging would publish one user's club to another's account.
-export function adoptRemotePreferences(remote) {
-  return normalizePreferences(remote)
-}
-
 // ---------------------------------------------------------------------------
 // WHY THIS IS A COMPARISON AND NOT A CHANGE LOG — the backfill gap
 // ---------------------------------------------------------------------------

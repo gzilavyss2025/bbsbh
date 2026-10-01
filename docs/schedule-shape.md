@@ -72,7 +72,7 @@ from the feed's own `seriesGameNumber` / `gamesInSeries` (those describe the
 schedule as *planned* — a rained-out middle game leaves them describing a series
 nobody played).
 
-- **Series** — consecutive games against the same opponent in the same place.
+- **Series** — consecutive games against the same opponent on the same side of the road (`seriesRuns` in `src/api/scheduleShape.js`, shared with `gen-team-records.mjs`). A neutral-site game joins the series beside it.
 - **Homestand** — a run of consecutive home games, however many opponents visit.
 - **Road trip** — a run of consecutive away games, however many cities it crosses.
 
@@ -82,8 +82,10 @@ the next March.
 ### Neutral-site games are transparent
 
 A game at neither club's park — London, Mexico City, Seoul, Tokyo, the Field of
-Dreams, and the 2020–21 COVID relocations — belongs to **no** series, stand or
-trip, and **does not break the run around it**.
+Dreams, and the 2020–21 COVID relocations — belongs to **no** stand or trip, and
+**does not break the run around it**. It does count as a game of the series it
+sits inside, as MLB numbers it: the 2024 Little League Classic is game 3 of the
+Yankees' set in Detroit (#1283).
 
 This is not fussiness. MLB names one club the "home" team at every one of those,
 and reading that designation literally hands a club a homestand it never had.
@@ -92,8 +94,8 @@ is fatal to a dataset whose whole job is saying when an opener was last won.
 
 The case that proved it is real and is pinned as a test: on **2020-09-25 the
 Brewers played a designated home game against the Cardinals at Busch Stadium**, a
-COVID makeup relocated to save a trip, sitting in the middle of a four-game
-Milwaukee visit to St. Louis. Keyed on its own site it split that visit in two
+COVID makeup relocated to save a trip, sitting in the middle of a Milwaukee
+visit to St. Louis (MLB: game 3 of 5). Keyed on its own site it split that visit in two
 and produced a phantom series opener on 2020-09-26.
 
 Each club's home park is inferred **per season** as the venue it hosted the most

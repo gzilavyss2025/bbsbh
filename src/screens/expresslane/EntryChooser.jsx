@@ -70,7 +70,7 @@ export function EntryChooser({ mode, onMode, plan, onPlan, onStart, busy = false
     <section className="xl-entry" aria-label="Start Express Lane">
       <header className="xl-entry__head">
         <h1 className="xl-entry__title">Express Lane</h1>
-        <p className="xl-entry__lede">
+        <p className="xl-entry__note">
           The pitches, not the broadcast. One play at a time.
         </p>
       </header>

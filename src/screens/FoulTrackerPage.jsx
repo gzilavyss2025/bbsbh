@@ -350,7 +350,7 @@ function FoulFeatured({ player, favoriteTeamId, positions }) {
   const { first, last } = splitDisplayName(player.name)
   const position = positions?.[player.id]
   return (
-    <div className={`foulboard__hero${isFavorite ? ' is-me' : ''}`} style={favStyle}>
+    <Card as="div" body="flush" className={`foulboard__hero${isFavorite ? ' is-me' : ''}`} style={favStyle}>
       <div className="foulboard__herotop">
         <Headshot personId={player.id} name={player.name} teamId={player.teamId} className="foulboard__heroshot" />
         <div className="foulboard__heroident">
@@ -373,7 +373,7 @@ function FoulFeatured({ player, favoriteTeamId, positions }) {
           className="foulboard__heroteam"
         />
       </div>
-    </div>
+    </Card>
   )
 }
 
@@ -738,20 +738,22 @@ function GameHighRow({ b, favoriteTeamId, gameLinks, positions }) {
           </span>
         )}
       </MatchupTag>
-      <div className="gamehigh-tiles">
-        <div className="stat">
-          <span className="stat__v">{b.maxGamePa || '—'}</span>
-          <span className="stat__k">PA</span>
+      <Card as="div" frame="ledger" body="flush" className="gamehigh-tiles">
+        <div className="gamehigh-tiles__grid">
+          <div className="stat">
+            <span className="stat__v">{b.maxGamePa || '—'}</span>
+            <span className="stat__k">PA</span>
+          </div>
+          <div className="stat">
+            <span className="stat__v">{b.maxGamePitches || '—'}</span>
+            <span className="stat__k">Pitches seen</span>
+          </div>
+          <div className="stat">
+            <span className="stat__v">{b.maxGameFouls}</span>
+            <span className="stat__k">Fouls</span>
+          </div>
         </div>
-        <div className="stat">
-          <span className="stat__v">{b.maxGamePitches || '—'}</span>
-          <span className="stat__k">Pitches seen</span>
-        </div>
-        <div className="stat">
-          <span className="stat__v">{b.maxGameFouls}</span>
-          <span className="stat__k">Fouls</span>
-        </div>
-      </div>
+      </Card>
     </li>
   )
 }
@@ -793,20 +795,22 @@ function SouvenirGameRow({ g, rank, gameLinks }) {
       <span className="umprank__rank">{rank}</span>
       {/* Both teams are already identified by the score badge's logos below —
           a separate name/logo column here was pure duplication. */}
-      <div className="souvenir-row__tiles">
-        <div className="stat">
-          <span className="stat__v">{g.awayFouls}</span>
-          <span className="stat__k">{teamClubName(g.awayTeamId)}</span>
+      <Card as="div" frame="ledger" body="flush" className="souvenir-row__tiles">
+        <div className="souvenir-row__tilegrid">
+          <div className="stat">
+            <span className="stat__v">{g.awayFouls}</span>
+            <span className="stat__k">{teamClubName(g.awayTeamId)}</span>
+          </div>
+          <div className="stat">
+            <span className="stat__v">{g.homeFouls}</span>
+            <span className="stat__k">{teamClubName(g.homeTeamId)}</span>
+          </div>
+          <div className="stat">
+            <span className="stat__v">{g.totalFouls}</span>
+            <span className="stat__k">Total</span>
+          </div>
         </div>
-        <div className="stat">
-          <span className="stat__v">{g.homeFouls}</span>
-          <span className="stat__k">{teamClubName(g.homeTeamId)}</span>
-        </div>
-        <div className="stat">
-          <span className="stat__v">{g.totalFouls}</span>
-          <span className="stat__k">Total</span>
-        </div>
-      </div>
+      </Card>
       {/* Same score+date badge idiom as GameHighRow above (gamehigh-matchup__score/
           __sep/__date) — a fan scanning both boards should recognize a final
           score in the same shape everywhere on this page, not a one-off. */}
@@ -864,8 +868,8 @@ function SeasonAverageCard({ data }) {
   const avgFoulsPerStart = totalStarts > 0 ? starterFouls / totalStarts : null
 
   return (
-    <div className="foulavg">
-      <p className="foulavg__lede">
+    <Card as="div" body="flush" className="foulavg">
+      <p className="foulavg__note">
         There are <b>{Math.round(avgPitches)}</b> pitches thrown in an average MLB game and{' '}
         <b>{Math.round(avgFouls)}</b> are fouled off ({pct1(foulRate)}). The average plate appearance features{' '}
         <b>{avgFoulsPerPA == null ? '—' : avgFoulsPerPA.toFixed(1)}</b> foul balls, and a starting pitcher averages{' '}
@@ -878,7 +882,7 @@ function SeasonAverageCard({ data }) {
       >
         <span className="foulavg__fill" style={{ width: `${Math.min(foulRate * 100, 100).toFixed(1)}%` }} />
       </div>
-    </div>
+    </Card>
   )
 }
 

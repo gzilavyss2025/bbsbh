@@ -55,13 +55,6 @@ export function isSyncPhase(value) {
   return typeof value === 'string' && SYNC_PHASES.includes(value)
 }
 
-// Only an `error` is worth offering a user any hope about. `unavailable` is the
-// deployment's shape, `local` and `off` are the user's own situation, and
-// neither is a fault to recover from.
-export function isRecoverable(phase) {
-  return phase === 'error'
-}
-
 // A channel that has never reported. `syncedAt` is kept separately from `at` so
 // a receipt can still say "last checked 4 minutes ago" WHILE showing an error —
 // which is the one moment that sentence is worth reading.

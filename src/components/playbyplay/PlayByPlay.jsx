@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   computeHalfInningFeed,
   pitchLadder,
@@ -50,7 +50,8 @@ import {
 } from './EventCards.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from '../scoring/StrikeZone.jsx'
 import { HighlightSheet } from './HighlightSheet.jsx'
-import { CLIP_PACKAGE, CLIP_RAW, watchClipSource, resolveRawClip } from '../highlights/watchClip.js'
+import { CLIP_PACKAGE, CLIP_RAW, watchClipSource } from '../highlights/watchClip.js'
+import { useWatchClip } from '../highlights/useWatchClip.js'
 import { filmCanExist } from '../../api/expresslane/eligibility.js'
 
 // Renders the play-by-play feed for one half-inning: one card per plate
@@ -538,30 +539,10 @@ const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_S
 function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false }) {
   const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, battedBall, live } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
-  const [highlightOpen, setHighlightOpen] = useState(false)
-  // The raw clip's two resolved outcomes, held apart on purpose. `clipSrc` is
-  // a hit and is kept — the Savant token is deterministic, so re-opening is
-  // free. `clipNotice` is a MISS and is thrown away on the next tap, because a
-  // miss says only that the clip had not published in the minute you asked;
-  // resolveClipUrl drops a miss for the same reason. Remembering one here
-  // would seal a play against its own film for the rest of the session.
-  const [clipSrc, setClipSrc] = useState(null)
-  const [clipNotice, setClipNotice] = useState('')
-  const [resolving, setResolving] = useState(false)
-  // Set on the way IN as well as cleared on the way out: a cleanup-only flag
-  // stays false forever after a remount (StrictMode's double-invoke, or a real
-  // one), and every post-await guard below would then bail with the sheet
-  // stuck on "Loading…". Same trap WatchCondensedButton records.
-  const liveRef = useRef(true)
-  const abortRef = useRef(null)
-  useEffect(() => {
-    liveRef.current = true
-    return () => {
-      liveRef.current = false
-      // The reader left the half while the lookup was in flight. Drop it.
-      abortRef.current?.abort()
-    }
-  }, [])
+  // The Watch sheet's state, shared with the swing list (useWatchClip.js): a
+  // raw clip's hit is kept by clipUrlCache, a MISS is not — it says only that
+  // the clip had not published in the minute you asked.
+  const { open: highlightOpen, src: clipSrc, notice: clipNotice, loading: resolving, openClip: openWatch, close: closeClip } = useWatchClip()
   // THE BEAT (ADR-0046), windowed cards only: the denotation cells below hold
   // blank for a CONSTANT 180ms and then land. It takes no argument off `entry`
   // and must never take one — a duration that varied with the play would
@@ -589,24 +570,9 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
   // pitch, and then only where raw clips exist for this game at all. See
   // watchClip.js: the button costs no network, only the tap does.
   const clipSource = watchClipSource(highlight, entry.playId, { filmEligible })
-  // ONE TAP, ONE REQUEST, and the sheet opens FIRST. The lookup is a few
-  // hundred milliseconds, and a tap that does nothing visible reads as broken,
-  // so the dialog takes the tap and then fills. A package needs no request at
-  // all — it is already in hand.
-  const openClip = async () => {
-    setHighlightOpen(true)
-    if (clipSource !== CLIP_RAW || clipSrc || resolving) return
-    setClipNotice('')
-    setResolving(true)
-    const controller = new AbortController()
-    abortRef.current = controller
-    const { src, notice } = await resolveRawClip(entry.playId, { signal: controller.signal })
-    abortRef.current = null
-    if (!liveRef.current) return
-    setClipSrc(src)
-    setClipNotice(notice)
-    setResolving(false)
-  }
+  // ONE TAP, ONE REQUEST, and the sheet opens FIRST. A package needs no request
+  // at all — it is already in hand.
+  const openClip = () => openWatch(true, clipSource === CLIP_RAW ? entry.playId : null)
   return (
     <div
       className={`pbp__atbat${hasZone ? '' : ' pbp__atbat--nozone'}${
@@ -792,7 +758,7 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
           src={clipSrc}
           loading={resolving}
           notice={clipNotice}
-          onClose={() => setHighlightOpen(false)}
+          onClose={closeClip}
         />
       )}
     </div>

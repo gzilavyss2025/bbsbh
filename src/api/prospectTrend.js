@@ -10,6 +10,42 @@
 const SNAPSHOT_URL = '/data/prospect-trend.json'
 const EMPTY_SNAPSHOT = { generatedAt: null, dataThrough: null, players: [] }
 
+// The file on disk is packed (#1269) so the phone parses 0.65 MB, not 3.2: week
+// dates once in `historyDates`, a history row as [dateIndex, sportId, percentile]
+// (+ `qualified` only when it is not "percentile is not null"), `packed: 1` as version.
+export function packProspectTrend(snapshot) {
+  const historyDates = [...new Set(snapshot.players.flatMap((p) => p.history.map((h) => h.date)))].sort()
+  const index = new Map(historyDates.map((date, i) => [date, i]))
+  const players = snapshot.players.map((p) => ({
+    ...p,
+    history: p.history.map((h) => {
+      const row = [index.get(h.date), h.sportId, h.percentile]
+      return h.qualified === (h.percentile !== null) ? row : [...row, h.qualified]
+    }),
+  }))
+  return { ...snapshot, packed: 1, historyDates, players }
+}
+
+export function unpackProspectTrend(raw) {
+  // Old shape passes through (#1269): drop this line once a nightly run has
+  // written the packed shape. Until then a deploy and a nightly run work in either order.
+  if (raw?.packed !== 1) return raw
+  const { historyDates, players, ...rest } = raw
+  delete rest.packed
+  return {
+    ...rest,
+    players: players.map((p) => ({
+      ...p,
+      history: p.history.map(([i, sportId, percentile, qualified = percentile !== null]) => ({
+        date: historyDates[i],
+        sportId,
+        percentile,
+        qualified,
+      })),
+    })),
+  }
+}
+
 // Session-memoized, same pattern as fetchTopProspects (prospects.js) and
 // fetchFeverRadar (feverRadar.js). Degrades to an empty snapshot on any
 // failure (404 before the first nightly run, network, malformed JSON) — no
@@ -18,7 +54,7 @@ let trendPromise = null
 export function fetchProspectTrend() {
   if (!trendPromise) {
     trendPromise = fetch(SNAPSHOT_URL)
-      .then((res) => (res.ok ? res.json() : EMPTY_SNAPSHOT))
+      .then((res) => (res.ok ? res.json().then(unpackProspectTrend) : EMPTY_SNAPSHOT))
       .catch(() => EMPTY_SNAPSHOT)
   }
   return trendPromise
@@ -142,12 +178,25 @@ export function movementState(movement) {
   }
 }
 
+// A birth date as decimal years at `asOf` — the ONE age formula behind the
+// Prospect Card's age fact. The level average (prospectAgeBenchmark.mjs) and
+// the player page both use it; the page passes the snapshot's `generatedAt`
+// as `asOf`, so both read one clock. statsapi's whole-year `currentAge` biased
+// the gap by up to a year (#1278). Null for a missing or bad date or clock.
+const MS_PER_YEAR = 365.2425 * 24 * 60 * 60 * 1000
+export function decimalAge(birthDate, asOf) {
+  if (!birthDate || asOf == null) return null
+  const years = (new Date(asOf).getTime() - new Date(birthDate).getTime()) / MS_PER_YEAR
+  return Number.isFinite(years) ? years : null
+}
+
 // The Prospect Card's age-vs-level fact: how many years younger/older a
 // player is than the average QUALIFIED player at his level
 // (gen-prospect-trend.mjs's `levelAverageAge`, itself a real birthDate
-// average, not an estimate). Renders only past a 1-year edge — a 0.3-year
-// gap is noise, not a fact worth a row, same "don't print false precision"
-// stance standingLabel's own Middle band already takes.
+// average, not an estimate); `ageYears` must be a decimal (decimalAge).
+// Renders only past a 1-year edge — a 0.3-year gap is noise, not a fact worth
+// a row, same "don't print false precision" stance standingLabel's own Middle
+// band already takes.
 const AGE_EDGE_FLOOR_YEARS = 1.0
 export function ageEdgeFact(ageYears, levelAverageAge) {
   if (!Number.isFinite(ageYears) || !Number.isFinite(levelAverageAge)) return null

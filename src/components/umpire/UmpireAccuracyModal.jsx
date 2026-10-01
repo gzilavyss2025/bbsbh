@@ -1,18 +1,14 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { loadUmpire } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useNav } from '../../lib/nav.js'
 import { gamePath, umpirePath } from '../../lib/route.js'
 import { UmpireTendencies } from './UmpireTendencies.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
+import { monthDayName } from '../../lib/dates.js'
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const HP_GAMES_LIMIT = 5
-
-function monthDay(iso) {
-  const [, m, d] = (iso || '').split('-')
-  return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
-}
 
 const pct1 = (x) => (x == null ? '' : `${(x * 100).toFixed(1)}%`)
 
@@ -33,20 +29,8 @@ export function UmpireAccuracyModal({ id, onClose }) {
   const navigate = useNav()
   const { data } = useAsync(() => loadUmpire(id), [id])
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   const season = data?.accuracy?.season ?? null
   // A plate game's row lives in whichever level's byGamePk map covers it —
@@ -91,7 +75,7 @@ export function UmpireAccuracyModal({ id, onClose }) {
           <div className="umpmodal__ttl">
             {!season && (
               <>
-                <span className="umpmodal__eyebrow">Plate accuracy</span>
+                <span className="umpmodal__note">Plate accuracy</span>
                 <span className="umpmodal__name">{data?.name ?? '…'}</span>
               </>
             )}
@@ -116,7 +100,7 @@ export function UmpireAccuracyModal({ id, onClose }) {
             <ul className="umpmodal__glist">
               {hpGames.map((g) => (
                 <li key={`${g.gamePk}-${g.gameNumber}`} className="umpmodal__grow">
-                  <span className="umpmodal__gdate">{monthDay(g.date)}</span>
+                  <span className="umpmodal__gdate">{monthDayName(g.date)}</span>
                   <span className="umpmodal__gmatchrow">
                     <button type="button" className="plink umpmodal__gmatch" onClick={() => openGame(g)}>
                       {g.awayAbbr} @ {g.homeAbbr}

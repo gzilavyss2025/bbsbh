@@ -84,7 +84,7 @@ export function HitChart({
   balls,
   venue,
   clubs = [],
-  eyebrow,
+  note,
   tag,
   variant = 'game',
   hardHitMph = DEFAULT_HARD_HIT_MPH,
@@ -138,7 +138,7 @@ export function HitChart({
     <Card as="div" body="flush" className={`hitchart hitchart--${isHalf ? 'half' : 'game'}`}>
       <div className="hitchart__head">
         <div>
-          <p className="hitchart__eyebrow">{eyebrow ?? venue}</p>
+          <p className="hitchart__note">{note ?? venue}</p>
           <h2 className="hitchart__headline">Hit chart</h2>
           <div className="hitchart__rule" />
         </div>

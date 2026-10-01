@@ -1,9 +1,10 @@
 import '../../styles/48d-stamp-detail.css'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { resolveStampArt } from '../../lib/ballpark/stampPrint.js'
 import { useCopy } from '../../copy/copyContext.js'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // A bigger read of one filled slot on the stamp sheet (StampSheet.jsx) — the
 // club or ballpark's own print, held under a soft, slowly-drifting spotlight
@@ -26,20 +27,8 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 export function StampDetailModal({ kind, slot, onClose }) {
   const { t } = useCopy()
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   if (!slot?.filled) return null
 

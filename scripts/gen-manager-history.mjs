@@ -47,6 +47,7 @@ import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // BUCKETED on `personId % 100` (shardKey100, imported from the app so the
@@ -81,21 +82,6 @@ const currentSeason = () => new Date().getUTCFullYear()
 const MANAGER_JOB_IDS = new Set(['MNGR', 'NTRM'])
 
 const CURRENT_ONLY = process.argv.includes('--current-only')
-
-// Run `jobs` (thunks returning promises) with a bounded concurrency pool —
-// same idiom as gen-milb-history.mjs.
-async function pool(jobs, limit = 8) {
-  const results = new Array(jobs.length)
-  let next = 0
-  async function worker() {
-    while (next < jobs.length) {
-      const i = next++
-      results[i] = await jobs[i]()
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, jobs.length) }, worker))
-  return results
-}
 
 // One team-season's coaching staff roster, or null on failure — a single
 // bad fetch (rate limit, a season a franchise didn't exist under this id,
@@ -151,7 +137,7 @@ async function sweepCoaches(teamIds, seasons) {
       jobs.push(async () => ({ teamId, season, roster: await fetchCoaches(teamId, season) }))
     }
   }
-  const results = await pool(jobs, 8)
+  const results = await mapConcurrent(jobs, 8, (job) => job(), { strict: true })
 
   const byPersonId = new Map()
   const teamSeasonManagers = new Map()
@@ -224,7 +210,7 @@ async function attachRecords(byPersonId, teamSeasonManagers, seed) {
     }
   }
 
-  const fetched = await pool(fetchJobs, 8)
+  const fetched = await mapConcurrent(fetchJobs, 8, (job) => job(), { strict: true })
   const gamesByTsKey = new Map(fetched.map((f) => [f.tsKey, f.games]))
 
   // Index every stint by (personId, teamId, season) so a record can be

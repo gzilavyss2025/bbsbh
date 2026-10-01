@@ -6,9 +6,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { deriveBracket } from '../../src/api/postseason/bracket.js'
 import { bestOfLine, cardLines, gameStatusLine, recordLine, seriesLine } from '../../src/api/postseason/text.js'
-import { results, seriesWith, skeleton } from './fixtures.js'
-
-const bracket2025 = (cutoff) => deriveBracket(skeleton(2025), results(2025), cutoff)
+import { bracket2025, seriesWith, skeleton } from './fixtures.js'
 
 test('test 5: "Game 1" before a series has a result', () => {
   const b = deriveBracket(skeleton(2026), [], '2026-09-29')

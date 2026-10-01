@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Card } from '../ui/frame/Card.jsx'
 import { useCopy } from '../../copy/copyContext.js'
 import { currentMilestone, daysBetween, parseWinterCalendar } from '../../lib/time/seasonPhase.js'
 import { monthDayShort } from '../../lib/dates.js'
@@ -98,7 +99,10 @@ export function WinterCountdown({ winter }) {
   if (days == null || days < 0) return null
 
   return (
-    <aside
+    <Card
+      as="aside"
+      frame="ledger"
+      body="flush"
       className="springcount"
       aria-label={spring ? 'Days until spring training' : 'Days until Opening Day'}
     >
@@ -109,6 +113,6 @@ export function WinterCountdown({ winter }) {
       <p className="springcount__day">
         {days === 1 ? 'day' : 'days'} — {monthDayShort(target)}
       </p>
-    </aside>
+    </Card>
   )
 }

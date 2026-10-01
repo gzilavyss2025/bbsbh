@@ -14,12 +14,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-function monthDay(iso) {
-  const [, m, d] = (iso || '').split('-')
-  return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
-}
+import { monthDayName } from '../lib/dates.js'
 
 // League-wide Milestone Watch: every debuted player in an MLB org (active, on
 // the IL, or in the minors) within reach of a
@@ -47,7 +42,7 @@ export function MilestoneWatchPage() {
   // chase listed twice (see groupMilestoneRows), so counting the raw rows
   // would report more milestones than the page actually draws.
   const chaseCount = groups.reduce((n, g) => n + g.milestones.length, 0)
-  const updated = monthDay(data?.generatedAt?.slice(0, 10))
+  const updated = monthDayName(data?.generatedAt)
 
   return (
     <div className="screen">

@@ -4,7 +4,7 @@
 // unit-testable — a generator file is a top-level script (importing one RUNS
 // it), so a helper worth testing lives here instead (see scripts/CLAUDE.md).
 import { levelSeasonStat } from '../../src/api/person.js'
-import { ipToOuts } from '../../src/api/rehab-policy.js'
+import { ipToOuts } from '../../src/lib/math/innings.js'
 
 export const ROOKIE_AB_LIMIT = 130
 export const ROOKIE_IP_OUTS_LIMIT = 150 // 50 IP == 150 outs

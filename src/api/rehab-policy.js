@@ -8,16 +8,8 @@
 // Pure — no fetching, no DOM. Every export here is meant to be imported, not
 // re-implemented; if a caller needs its own copy, extend this file instead.
 
-function num(x) {
-  const n = Number(x)
-  return Number.isFinite(n) ? n : 0
-}
-
-// Innings pitched ("104.1" = 104 ⅓) -> outs, so multi-stint lines sum right.
-export function ipToOuts(ip) {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return num(whole) * 3 + num(frac[0])
-}
+import { ipToOuts } from '../lib/math/innings.js'
+import { num } from '../lib/math/number.js'
 
 // A minor-league stint clears a workload threshold in whichever unit fits the
 // group and role: games played for a hitter, but EITHER innings pitched OR
@@ -74,10 +66,22 @@ export function meetsStintCap(stat, group) {
 // way an activation does: the club has made a new roster decision, so if
 // he's still — or later — rehabbing, that shows up as a fresh rehab-start
 // row, not a continuation of the one already being tracked. Shared by the
-// player page's single-player detector (person.js), the league-wide Rehab
-// Assignments generator (gen-rehab.mjs), and gen-former-teammates.mjs so all
-// three agree on when a rehab is over.
+// player page's single-player detector (person.js) and the league-wide Rehab
+// Assignments generator (gen-rehab.mjs), so both agree on when a rehab is over.
 export const REHAB_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET', 'TR'])
+
+// MLB hard-caps a rehab assignment at 30 days. A stint with no closing row (a
+// missed transaction, or a schedule lookup that came back empty) would otherwise
+// stay open for months, so a stint older than this is over whatever the feed
+// says. Day 30 is still open, day 31 is closed. The player page and gen-rehab.mjs
+// both apply it (#1280); the 7-club-games stale rule stays in gen-rehab.mjs
+// because it needs game logs.
+export const REHAB_MAX_DAYS = 30
+
+// Whole days from one ISO date (YYYY-MM-DD) to another.
+export function isoDaysBetween(fromIso, toIso) {
+  return Math.round((Date.parse(`${toIso}T00:00:00Z`) - Date.parse(`${fromIso}T00:00:00Z`)) / 86400000)
+}
 
 export function txnDate(t) {
   return t.effectiveDate || t.date || ''

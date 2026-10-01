@@ -25,7 +25,7 @@
   letter-spacing: var(--ls-num);
   color: var(--text-heading);
 }
-.mgrpage__sub {
+.mgrpage__note {
   margin: 4px 0 0;
   font-size: var(--fs-small);
   color: var(--text-caption);
@@ -542,7 +542,7 @@
   max-height: 86vh;
   overflow-y: auto;
 }
-.psoddsmodal__sub {
+.psoddsmodal__note {
   margin: 0 0 14px;
   color: var(--text-caption);
   font-family: var(--font-display);

@@ -22,24 +22,14 @@
 // and dropping that caption would put the app out of licence compliance. If you
 // replace a photo, replace its CREDITS entry in the same commit.
 //
-// LOGOS. Deliberately EMPTY on purpose, not unfinished. A ballpark's own
-// wordmark ("Fenway Park" script, the Coors Field mark) is a sponsor's
-// registered trademark; the copies floating around Wikipedia are uploaded under
-// fair-use claims that do not travel to a third-party site. So nothing is
-// bundled. The slot is real and ready: drop a file at
-// public/ballparks/logos/{key}.svg (or .png) and add its key to LOGO_KEYS, and
-// the card swaps the typeset name for it. Anything not listed falls back to the
-// typeset wordmark, which is the deliberate default for all 30 parks today.
-//
-// There are now TWO ways to fill that slot, and BUNDLED IS NOT THE PRIMARY ONE.
-// LOGO_KEYS is the deploy-time route above. The other is `ballpark.{key}
-// Wordmark` in the copy store, which the owner can set from the card itself —
-// and because that route can be exercised in production by one person in a few
-// seconds, it is the one that will actually get used. The override WINS over a
-// bundled key (resolveParkName below): a file committed to the repo is the
-// shipped default, and the copy store is how a default gets overridden
-// everywhere else in this app. The trademark caution above applies to both
-// routes equally — the licence question does not care which door the image came
+// LOGOS. None are bundled, on purpose. A ballpark's own wordmark ("Fenway Park"
+// script, the Coors Field mark) is a sponsor's registered trademark; the copies
+// floating around Wikipedia are uploaded under fair-use claims that do not
+// travel to a third-party site. The only way in is `ballpark.{key}Wordmark` in
+// the copy store, which the owner sets from the card itself (resolveParkName
+// below). Anything without one falls back to the typeset name, which is the
+// default for all 30 parks today. The trademark caution applies to whatever the
+// owner uploads: the licence question does not care which door the image came
 // through.
 
 // Normalize a venue name to a stable lookup key (mirrors ballparkData.js).
@@ -111,19 +101,6 @@ export const CREDITS = {
   yankeestadium: { artist: 'vtravelled.com', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File%3AYankee_Stadium_overhead_2010.jpg' },
 }
 
-// Parks whose own wordmark art is on file, with the extension it is stored as.
-// Empty by design — see the LOGOS note in the header before adding one.
-export const LOGO_KEYS = {}
-
-// Parks whose commemorative STAMP illustration is on file, with the extension
-// it is stored as. Same manifest shape as LOGO_KEYS above and for the same
-// reason: the browser cannot stat public/, so a committed file needs a listed
-// key before anything will ask for it. That is what lets the series land in
-// BATCHES — every park not listed here keeps rendering its photograph, so a
-// half-finished set is 8 stamps and 22 photos rather than 22 broken images.
-// Add a key in the SAME commit as its file, exactly as LOGO_KEYS requires.
-export const STAMP_KEYS = {}
-
 // The bundled photo for a park, or null when we have no art for it. Returns the
 // URL and the credit together because the caller may never render one without
 // the other (CC BY / CC BY-SA attribution).
@@ -132,13 +109,6 @@ export function ballparkPhoto(parkName) {
   const credit = CREDITS[key]
   if (!credit) return null
   return { src: `/ballparks/${key}.jpg`, credit }
-}
-
-// The park's own wordmark, or null to fall back to the typeset name.
-export function ballparkLogoUrl(parkName) {
-  const key = venueKey(parkName)
-  const ext = LOGO_KEYS[key]
-  return ext ? `/ballparks/logos/${key}.${ext}` : null
 }
 
 // The mobile-sized companion to a bundled photo — a ~480px WebP the slate
@@ -152,17 +122,6 @@ export function ballparkPhotoThumb(parkName) {
   const key = venueKey(parkName)
   if (!CREDITS[key]) return null
   return { src: `/ballparks/thumb/${key}.webp` }
-}
-
-// The commemorative stamp illustration for a park, or null when the series has
-// not reached it yet. Deliberately does NOT fall back to the photograph — the
-// caller decides that, because the two are not interchangeable everywhere: the
-// milestone shelf wants either, while a surface that needs a real photograph
-// must not be handed an illustration of one.
-export function ballparkStampArt(parkName) {
-  const key = venueKey(parkName)
-  const ext = STAMP_KEYS[key]
-  return ext ? { src: `/ballparks/stamp/${key}.${ext}` } : null
 }
 
 // One line of attribution, worded so it satisfies CC BY / CC BY-SA without
@@ -237,7 +196,7 @@ export function resolvePhoto(parkName, overrides = {}) {
 // assumption resolvePhoto makes.
 export function resolveParkName(parkName, overrides = {}) {
   const text = overrides.name || parkName || ''
-  return { text, wordmark: overrides.wordmark || ballparkLogoUrl(parkName) || null }
+  return { text, wordmark: overrides.wordmark || null }
 }
 
 // An override image that fails to LOAD has to fall back the same way an absent

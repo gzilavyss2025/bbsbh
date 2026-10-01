@@ -16,9 +16,7 @@
 // entity slug of ADR-0057 — warm the address a crawler will actually request,
 // which is the slugged one the canonical names, not the bare id it used to be),
 // same convention as gen-rehab.mjs mirroring person.js's transaction-scan logic
-// for anything that lives under src/ — but api/_lib/http.js has no such
-// boundary (plain fetch/AbortController, no edge-runtime-only API), so its
-// fetchWithTimeout is imported directly rather than re-copied a third time.
+// for anything that lives under src/.
 //
 // Rather than reconstructing the image URL by hand (which would duplicate —
 // and could drift from — api/_lib/cards.js's own card-building logic), each
@@ -32,8 +30,8 @@
 // stops matching silently — warmPage logs a warning in that case rather than
 // letting image-warm coverage quietly drop to zero with no signal.
 
-import { fetchWithTimeout } from '../api/_lib/http.js'
 import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 
 const APP_ORIGIN = 'https://bbsbh.vercel.app'
 const REQUEST_TIMEOUT_MS = 8000
@@ -98,33 +96,12 @@ function matchupSlug(awayAbbr, homeAbbr, gameNumber = 1) {
   return gameNumber > 1 ? `${base}-${gameNumber}` : base
 }
 
-// Run an async mapper across items with a small concurrency cap (be polite
-// to both statsapi and our own edge functions). Mirrors gen-milestones.mjs /
-// gen-vs-team-splits.mjs's helper of the same name.
-async function mapConcurrent(items, limit, mapper) {
-  const results = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        results[i] = await mapper(items[i], i)
-      } catch {
-        results[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return results
-}
-
-
 // Fetches a pretty preview page (warming its own cache entry as a side
 // effect) and, if it carries an og:image tag not already warmed this run,
 // warms that image URL too. Returns nothing meaningful — callers only care
 // about the counters below.
 async function warmPage(url, seenImages) {
-  const res = await fetchWithTimeout(url, undefined, REQUEST_TIMEOUT_MS)
+  const res = await fetch(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) })
   const outcome = { url, ok: res.ok, status: res.status }
   if (!res.ok) return [outcome]
   const text = await res.text()
@@ -140,7 +117,7 @@ async function warmPage(url, seenImages) {
   if (seenImages.has(imageUrl)) return [outcome]
   seenImages.add(imageUrl)
   try {
-    const imgRes = await fetchWithTimeout(imageUrl, undefined, REQUEST_TIMEOUT_MS)
+    const imgRes = await fetch(imageUrl, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) })
     return [outcome, { url: imageUrl, ok: imgRes.ok, status: imgRes.status }]
   } catch (err) {
     return [outcome, { url: imageUrl, ok: false, status: null, error: String(err) }]

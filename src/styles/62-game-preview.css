@@ -56,9 +56,6 @@
   gap: var(--space-3);
   align-content: start;
   padding: var(--space-4);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
 }
 
 .posterstudio__title {

@@ -112,7 +112,7 @@ export function GameLinesCard({ personId, playerSurname, group, asOf }) {
     group,
     facet: row.facet ?? null,
     list: row.list ?? null,
-    kicker: row.kicker,
+    note: row.note,
     title: row.title(playerSurname),
     footNote: row.footNote ?? null,
     cutoff: asOf ?? null,
@@ -198,7 +198,7 @@ export function GameLinesCard({ personId, playerSurname, group, asOf }) {
               <Card as="div" frame="ledger" body="flush">
                 <ul className="gamelines__rows">
                   <li className="gamelines__head">
-                    <h4 className="gamelines__heading">{section.title}</h4>
+                    <h4 className="gamelines__title">{section.title}</h4>
                     {columns.map((name) => (
                       <span className="gamelines__col" key={name}>
                         {name}

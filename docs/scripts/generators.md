@@ -50,9 +50,8 @@ sleep of its own.
   beside it. Its pool turns a failed item into `null`, which a client must not
   do for every caller, and each generator sizes its own pool.
 - **Files that keep the host** sit in the guard's `ALLOWLIST`, each with a
-  reason. `probe-diffpatch.mjs` needs the raw response bytes.
-  `check-feed-shape-drift.mjs` re-fetches each fixture from the URL recorded in
-  its manifest.
+  reason. `check-feed-shape-drift.mjs` re-fetches each fixture from the URL
+  recorded in its manifest.
 
 ## Nightly-cron generators (`update-nightly-data.yml`)
 
@@ -106,8 +105,9 @@ don't run these by hand.
   churn on a timestamp. App reads it via `fetchMilbAlumni` in `src/api/team.js`.
 - `gen-rehab.mjs` → `public/data/rehab.json` — the league-wide Rehab Assignments
   list. Starts from a transaction scan, then verifies each candidate against his
-  game log + club's schedule to drop ended stints. Keeps its own self-contained copy
-  of the transaction-scan logic (mirrors `person.js`'s `detectRehabAssignment`).
+  game log + club's schedule to drop ended stints. Imports the transaction tests and
+  the 30-day cap (`REHAB_MAX_DAYS`) from `src/api/rehab-policy.js`, shared with
+  `person.js`'s `detectRehabAssignment`. The 7-club-games stale rule stays here.
 - `gen-umpires.mjs` → `public/data/umpires/{season}/{personId}.json` + `umpires/seasons.json`
   — each MLB + AAA umpire's season game log, ONE FILE PER UMPIRE (readers want one man;
   the league-wide file hit 3.2 MB). A season store (ADR-0086): a run rebuilds only its
@@ -246,7 +246,8 @@ don't run these by hand.
   shard keeps its top 100 rows by score at EVERY level, so a Dominican game between
   two 60-man rosters (about 170 pairs) stays under the 40 KB hot-path ceiling. The
   pure rules live in `scripts/lib/former-teammates.mjs`
-  (`test/former-teammates.test.js`).
+  (`test/former-teammates.test.js`). Each minor-league `shared` club entry carries `orgId`: its
+  season-accurate parent org (omitted when unknown, and on an MLB club).
 - `gen-career-matchups.mjs` → `public/data/career-matchups.json` — for each
   upcoming GAME (MLB or MiLB), how every batter on a club has fared in his
   career against the OPPOSING club's probable starting pitcher. Keyed by
@@ -553,7 +554,11 @@ don't run these by hand.
   Series boundaries, sweeps
   and getaway days come from the LEDGER, not the feed's `seriesGameNumber` /
   `gamesInSeries` — those describe the series as SCHEDULED, and a rained-out
-  middle game leaves them describing one that never happened. Daily division
+  middle game leaves them describing one that never happened. The cut is
+  `seriesRuns` in `src/api/scheduleShape.js`, shared with gen-schedule-shape
+  and the reader (same opponent, same side of the road, a neutral-site game
+  joins its neighbours; #1283). Each row's `site` comes from the
+  same home-park inference gen-schedule-shape uses. Daily division
   ranks are computed from the ledger too, since `/standings` carries no history
   and answers a completed season's `date=` query empty.
   **Verified against statsapi's own splits**, the free oracle this dataset
@@ -590,10 +595,11 @@ don't run these by hand.
   park is inferred PER SEASON as the venue it hosted most (clubs move — the A's
   and Rays both did in 2025 — and resolving a decade against `teams.json`'s
   current park files real home games as neutral ones). And a neutral-site game
-  is TRANSPARENT to every segmentation: MLB names one club "home" in London,
+  never splits a segmentation: MLB names one club "home" in London,
   Seoul and at the Field of Dreams, and a Brewers home game relocated to Busch
-  Stadium on 2020-09-25 sat inside a four-game visit to St. Louis — split on its
-  own site it invented a series opener nobody played. Shards carry no
+  Stadium on 2020-09-25 sat inside a visit to St. Louis — split on its
+  own site it invented a series opener nobody played. A road trip or homestand
+  skips it; a series counts it as a game (MLB: game 3 of 5 there). Shards carry no
   `generatedAt`, the same reason gen-milb-alumni.mjs's don't: thirty committed
   files on a nightly cron must not churn on a timestamp. Catalog, gate
   calibration and the rejected candidates: `docs/schedule-shape.md`. App reads it
@@ -1143,9 +1149,16 @@ don't run these by hand.
   weekly-refreshed Pipeline rank, not replace it: a rank only moves when
   Pipeline re-ranks, this moves with the prospect's own current-season stat
   line. Same SQLite `player_snapshots` + self-join `movement` pattern as
-  `gen-fever-radar.mjs`, source `prospect-trend`. Depends on
+  `gen-fever-radar.mjs`, source `prospect-trend`. A row reads the prospect's
+  line at his primary level only (`snapshotRow`), because the percentile
+  population and the tenure benchmark each cover one level. A row carries
+  `atLevel` so `movement` (`movementSince`) skips any earlier snapshot written
+  before that rule; re-run the backfill once to bring old `history` onto it.
+  Depends on
   `top-prospects.json` already existing; skips (not a failure) if that
-  snapshot is missing/empty. App reads it via `src/api/prospectTrend.js`.
+  snapshot is missing/empty. Writes the file packed
+  (`packProspectTrend`, `src/api/prospectTrend.js`; shape in `docs/api/static-data.md`).
+  App reads it via `src/api/prospectTrend.js`.
 
 ## Own-cadence generators (not the nightly batch)
 

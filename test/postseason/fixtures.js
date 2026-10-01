@@ -13,6 +13,7 @@
 // (suspended 2008-10-27, resumed 2008-10-29).
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import { deriveBracket } from '../../src/api/postseason/bracket.js'
 import { resultRowsFrom, skeletonRowsFrom } from '../../src/api/postseason/fetch.js'
 
 const DIR = fileURLToPath(new URL('../fixtures/postseason/', import.meta.url))
@@ -28,6 +29,9 @@ export function skeleton(year) {
 export function results(year) {
   return year === 2026 ? [] : resultRowsFrom(rawFixture(`${year}-results`))
 }
+
+// The finished 2025 postseason as it read on `cutoff` (a YYYY-MM-DD date).
+export const bracket2025 = (cutoff) => deriveBracket(skeleton(2025), results(2025), cutoff)
 
 // The series in one league and round that holds the club with this
 // abbreviation. Reads the derived slots only, so a test can never find a

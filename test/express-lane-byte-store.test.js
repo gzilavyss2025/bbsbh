@@ -7,14 +7,11 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   checkoutClip,
-  clearGame,
   deleteClips,
   getClip,
   persistStorage,
   putClip,
-  stagedBytes,
   stagedPlayIds,
-  storageHeadroom,
 } from '../src/lib/expresslane/byteStore.js'
 
 // A stand-in for IndexedDB: enough of the shape for one object store with one
@@ -150,22 +147,6 @@ test('evicting nothing touches nothing', async () => {
   assert.equal(await deleteClips(823035, [], { idb }), 0)
 })
 
-test('clearing a game leaves the other game standing', async () => {
-  const idb = fakeIdb()
-  await putClip(823035, 'p1', blob(8), { idb })
-  await putClip(823914, 'p1', blob(8), { idb })
-  assert.equal(await clearGame(823035, { idb }), true)
-  assert.equal((await stagedPlayIds(823035, { idb })).size, 0)
-  assert.equal((await stagedPlayIds(823914, { idb })).size, 1)
-})
-
-test('bytes are reported and a count deliberately is not', async () => {
-  const idb = fakeIdb()
-  await putClip(823035, 'p1', blob(100), { idb })
-  await putClip(823035, 'p2', blob(50), { idb })
-  assert.equal(await stagedBytes(823035, { idb }), 150)
-})
-
 // --- refusals -------------------------------------------------------------
 
 test('a quota refusal is told apart from a failure, because the queue must be', async () => {
@@ -184,7 +165,6 @@ test('no IndexedDB at all degrades rather than throwing', async () => {
     assert.equal(await getClip(823035, 'p1', { idb }), null)
     assert.equal((await stagedPlayIds(823035, { idb })).size, 0)
     assert.equal(await deleteClips(823035, ['p1'], { idb }), 0)
-    assert.equal(await stagedBytes(823035, { idb }), 0)
   }
 })
 
@@ -202,32 +182,6 @@ test('a clip with no bytes is refused before it reaches the store', async () => 
   const idb = fakeIdb()
   assert.equal(await putClip(823035, 'p1', null, { idb }), 'failed')
   assert.equal(await putClip(823035, '', blob(8), { idb }), 'failed')
-})
-
-// --- the storage probe ----------------------------------------------------
-
-test('the probe reports headroom, and says when the browser told it nothing', async () => {
-  const known = await storageHeadroom({
-    storage: { estimate: async () => ({ quota: 1000, usage: 400 }) },
-  })
-  assert.deepEqual(known, { known: true, quota: 1000, usage: 400, free: 600 })
-
-  for (const storage of [undefined, {}, { estimate: async () => ({}) }]) {
-    const unknown = await storageHeadroom({ storage })
-    assert.equal(unknown.known, false, 'silence is not a refusal')
-    assert.equal(unknown.free, null)
-  }
-})
-
-test('a probe that throws reports unknown rather than stopping staging', async () => {
-  const result = await storageHeadroom({
-    storage: {
-      estimate: async () => {
-        throw new Error('no')
-      },
-    },
-  })
-  assert.equal(result.known, false)
 })
 
 test('persistence is asked for, and a refusal changes nothing', async () => {

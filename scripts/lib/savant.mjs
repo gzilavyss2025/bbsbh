@@ -12,6 +12,8 @@
 // gen-savant-percentiles.mjs's RAW_METRICS note). Check coverage, warn loudly
 // in the job log, and let the previous night's committed file stand.
 
+import { setTimeout as sleep } from 'node:timers/promises'
+
 // A minimal CSV row parser — handles quoted fields with embedded commas
 // (e.g. "Whitlock, Garrett") and doubled-quote escaping. No npm dependency,
 // matching the rest of scripts/'s self-contained convention.
@@ -134,7 +136,7 @@ export async function withRetry(label, attempts, fn) {
       last = err
       if (i < attempts - 1) {
         console.error(`${label}: ${err.message} — retry ${i + 1}/${attempts - 1}`)
-        await new Promise((r) => setTimeout(r, 2500 * (i + 1)))
+        await sleep(2500 * (i + 1))
       }
     }
   }

@@ -11,7 +11,7 @@ import { installMockApi } from './fixtures/mock-api.js'
 
 // This spec is pinned on the anchor game (823035), which mock-api.js has a
 // captured feed for — so it now runs on that offline snapshot instead of
-// live network. `relay: true` (the default) still covers any statsapi call
+// live network. The relay still covers any statsapi call
 // this page makes beyond feed/live, falling back to the same
 // relay-through-Node technique this file used to hand-roll (some sandboxes'
 // Chromium can't reach statsapi directly — CONNECTs reset by an egress

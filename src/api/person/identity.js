@@ -98,6 +98,7 @@ export function personBio(person) {
         ? `${person.height} · ${person.weight}`
         : person.height || DASH,
     age: person.currentAge ?? DASH,
+    birthDate: person.birthDate ?? null,
     born: born || DASH,
     debut: person.mlbDebutDate ?? '',
     draft: draftInfo(person),

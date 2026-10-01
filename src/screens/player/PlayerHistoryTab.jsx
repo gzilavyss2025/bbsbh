@@ -102,7 +102,7 @@ export function PlayerHistoryTab({ id, asOf, sportId }) {
                       <GameLink path={f.path} className="split__v">
                         {debutLabel(f.date)}
                       </GameLink>
-                      <span className="split__sub">
+                      <span className="split__note">
                         {f.batter ? (
                           <PlayerLink id={f.batter.id}>{f.batter.fullName}</PlayerLink>
                         ) : f.pitcher ? (

@@ -10,8 +10,8 @@ That last part is why this table is worth finishing, and then some: **only the 3
 MLB parks have bundled art at all.** Every minor-league park falls back to the
 graphite placeholder, so the AAA/AA/A+/A panes are captions and marks today. A
 minor-league park enters by exactly the same door as an MLB one below — a file in
-`public/ballparks/stamp/` plus its `STAMP_KEYS` entry, keyed on the venue name the
-static team snapshot carries (`public/data/teams.json`, `venueName`).
+`public/ballparks/stamp/` plus a manifest key (see below), keyed on the venue name
+the static team snapshot carries (`public/data/teams.json`, `venueName`).
 
 Today that image is the park's **photograph** (`ballparkPhotoThumb`). The intent is
 to replace it, a few parks at a time, with a **commemorative illustration** in the
@@ -23,12 +23,17 @@ prompt that makes one, and the table of the 30 substitutions that make a series.
 1. Generate the image (prompt below).
 2. Save it to `public/ballparks/stamp/{key}.webp`, using the venue key from the
    table — the same key `venueKey()` produces.
-3. Add `{key}: 'webp'` to `STAMP_KEYS` in `src/lib/ballpark/ballparkArt.js`, in the
-   **same commit as the file**.
+3. Add the key to a manifest in `src/lib/ballpark/ballparkArt.js`, in the **same
+   commit as the file**. The browser cannot stat `public/`, so a file needs a
+   listed key before anything asks for it.
 
-`ballparkStampArt()` returns null for anything not listed, and the shelf falls back
-to the photograph, so the series can land in batches without a broken image ever
-showing. There is no need to have all 30 before shipping the first.
+No stamp art is bundled yet, so the manifest (`STAMP_KEYS`) and its reader
+(`ballparkStampArt()`) were deleted as dead code. Re-add both with the first
+batch: `ballparkStampArt(key)` returns `{ src }` for a listed key and null
+otherwise, and `resolveStampArt` in `src/lib/ballpark/stampPrint.js` tries it
+before `resolvePhotoArt`. An unlisted park keeps its photograph, so the series
+can land in batches without a broken image ever showing. There is no need to
+have all 30 before shipping the first.
 
 ## What the frame already draws — do not generate these
 

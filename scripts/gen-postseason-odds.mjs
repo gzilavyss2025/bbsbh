@@ -19,6 +19,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
+import { parseArgs } from './lib/args.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -42,15 +43,6 @@ const addDays = (date, n) => {
   return isoDay(d)
 }
 const previousUtcDay = () => addDays(isoDay(new Date()), -1)
-
-function parseArgs(argv) {
-  const args = {}
-  for (const arg of argv) {
-    const match = /^--([^=]+)(?:=(.*))?$/.exec(arg)
-    if (match) args[match[1]] = match[2] ?? true
-  }
-  return args
-}
 
 // Same log-odds combiner as gen-season-score.mjs's expectedHomeWinProbability,
 // but on WIN PROBABILITIES directly rather than wins/162 — the strength inputs

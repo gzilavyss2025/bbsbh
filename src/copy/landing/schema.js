@@ -53,16 +53,6 @@
 // A page can also declare a top-level `sources` array. Source names and HTTPS
 // URLs are structural references, not editable prose. The renderer prints them
 // after the article body and adds their URLs to Article.citation in JSON-LD.
-export const SECTION_KINDS = Object.freeze([
-  'answer',
-  'prose',
-  'list',
-  'table',
-  'cta',
-  'faq',
-  'related',
-])
-
 // The editable slots each kind contributes, as `slotName -> { maxLength,
 // multiline, label }`. `body`, `items` and `faq` entries expand per index, so a
 // three-paragraph section yields `.p1`, `.p2`, `.p3`.

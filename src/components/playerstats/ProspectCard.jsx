@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import '../../styles/31d-prospect-card.css'
 import { dotFraction } from '../../lib/percentileStrip.js'
 import { SPORT_LABEL } from '../../lib/teams.js'
+import { outsToIp } from '../../lib/math/innings.js'
 import { confidenceLabel, movementState } from '../../api/prospectTrend.js'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { Card } from '../ui/frame/Card.jsx'
@@ -11,10 +12,6 @@ const PLOT_TOP = 26
 const PLOT_BOTTOM = 24
 const PLOT_LEFT = 38
 const PLOT_RIGHT = 14
-
-function outsToIp(outs) {
-  return `${Math.floor(outs / 3)}.${outs % 3}`
-}
 
 function sampleSizeLabel(metric, sampleSize) {
   return metric === 'OPS' ? `${sampleSize} PA` : `${outsToIp(sampleSize)} IP`

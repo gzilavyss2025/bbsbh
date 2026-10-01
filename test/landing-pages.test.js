@@ -16,7 +16,6 @@ import test from 'node:test'
 import { LANDING_GROUPS, LANDING_PAGES, pageBySlug } from '../src/copy/landing/pages/index.js'
 import { esc, renderIndex, renderPage } from '../src/copy/landing/render.js'
 import {
-  SECTION_KINDS,
   SLOT_LIMITS,
   pageSlots,
   resolvePage,
@@ -62,6 +61,8 @@ test('source references are safe, visible, and machine-readable', () => {
     }
   }
 })
+
+const SECTION_KINDS = ['answer', 'prose', 'list', 'table', 'cta', 'faq', 'related']
 
 // The renderer's switch has a `default: return ''` arm, so an unrecognised kind
 // does not throw — it silently renders nothing, and a whole section of a live

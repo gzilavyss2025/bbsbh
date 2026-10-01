@@ -791,7 +791,7 @@ const BUDGETS = {
   // player page's Prospect rankings card (#1111). A generator RUNS on import, so
   // scripts/lib/ cannot hold it, and every other gen-*.mjs sits flat here. Its
   // pure half went to scripts/lib/prospect-rank-history.mjs (see that entry).
-  scripts: 124,
+  scripts: 118,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -910,13 +910,12 @@ const BUDGETS = {
   // century-club.mjs above was, and it reads the SAME table: the show floors
   // and row shaping are unit-testable without a live DB, and gen-callouts.mjs
   // stays under its own line budget (ADR-0038).
-  // +3 for retrosheet-teams.mjs, contract-identity-match.mjs, and csv.mjs —
-  // the pure, unit-tested pieces of the contract-identity pipeline
-  // (ADR-0066): a flat club-code crosswalk, the name/position/service-time
-  // scoring, and the CSV reader for scripts/data/contracts/*.csv. All three
-  // are imported by scripts/gen-contracts-identity.mjs and tested without a
-  // live statsapi call, exactly the testable-helper convention this
-  // directory exists for.
+  // +2 for contract-identity-match.mjs and csv.mjs — the pure, unit-tested
+  // pieces of the contract-identity pipeline (ADR-0066): the
+  // name/position/service-time scoring, and the CSV reader for
+  // scripts/data/contracts/*.csv. Both are imported by
+  // scripts/gen-contracts-identity.mjs and tested without a live statsapi
+  // call, exactly the testable-helper convention this directory exists for.
   // +1 for war-splits.mjs — the retry and carry-forward half of gen-war.mjs's
   // ~180 per-player split requests, moved here for the same reason as every
   // entry above it: gen-war.mjs does its work at import, so this behavior was
@@ -991,7 +990,7 @@ const BUDGETS = {
   // (#1111): the row shape, the per-source credit table, and the one switch that
   // drops Baseball America's four seasons together with their credit lines. The
   // same testable-helper reason as its neighbours above.
-  'scripts/lib': 41,
+  'scripts/lib': 40,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
@@ -1017,7 +1016,7 @@ const BUDGETS = {
   // +1 for PostseasonRacePage.jsx — the current-season "if it ended today"
   // bracket + Wild Card standings, same one-route-one-screen shape.
   // +1: NineKeysPage.jsx — one route, one screen, same as its neighbours.
-  'src/screens': 46,
+  'src/screens': 45,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.

@@ -24,10 +24,7 @@
 
 import { halfIndex, personNameParts } from './select.js'
 import { NON_PA_EVENT_TYPES, GAME_ADVISORY_EVENT_TYPE } from './playbyplay.js'
-
-function outsToIp(outs) {
-  return `${Math.floor(outs / 3)}.${outs % 3}`
-}
+import { outsToIp } from '../lib/math/innings.js'
 
 // Local copy of playbyplay/shared.js's BASE_NUM (barrel-internal, not
 // re-exported) — this module lives outside playbyplay/, and the table is

@@ -43,9 +43,10 @@ export function statLineFor(position, statRow) {
     if (!t) return null
     return [
       { k: 'W-L', v: `${t.wins}-${t.losses}` },
-      { k: 'ERA', v: num2(t.era) },
+      // A pitcher with no outs has no ERA or WHIP (null, #1276): the dash.
+      { k: 'ERA', v: num2(t.era) ?? DASH },
       { k: 'K', v: String(t.strikeOuts) },
-      { k: 'WHIP', v: num2(t.whip) },
+      { k: 'WHIP', v: num2(t.whip) ?? DASH },
     ]
   }
   const t = statRow.hitting

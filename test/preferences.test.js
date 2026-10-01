@@ -15,7 +15,6 @@ import {
   LEVEL_SPORT_IDS,
   MAX_CLOCK_SKEW_MS,
   PREFS_KEY,
-  adoptRemotePreferences,
   applyRemotePreferences,
   clampUpdatedAt,
   isFieldName,
@@ -327,7 +326,7 @@ test('signed out, there is no remote to reconcile against', () => {
 test('adopting replaces the document outright, so nothing of the previous user survives', () => {
   const usersA = { club: { value: 158, updatedAt: 900 }, keepAwake: { value: true, updatedAt: 900 } }
   const usersBEmptyAccount = {}
-  const adopted = adoptRemotePreferences(usersBEmptyAccount)
+  const adopted = normalizePreferences(usersBEmptyAccount)
   assert.deepEqual(adopted, {})
   assert.equal(preferenceValue(adopted, 'club'), 158, 'falls back to the pinned club, not A’s')
   // And crucially: nothing left to publish into B's account.

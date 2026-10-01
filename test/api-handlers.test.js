@@ -21,6 +21,7 @@ import {
   authenticateUser,
   bearerToken,
 } from '../api/_lib/auth.js'
+import { privateJson } from '../api/_lib/nodeHandler.js'
 import { redisConfigFromEnv } from '../api/_lib/redis.js'
 import copyHandler from '../api/copy.js'
 import revealHandler, {
@@ -32,39 +33,7 @@ import revealHandler, {
 import spoiledDaysHandler from '../api/spoiled-days.js'
 import stampsHandler, { mint, mintRefusal, seasonRows, stampEntry } from '../api/stamps.js'
 import { MAX_STAMPS_PER_SEASON, applyRemoteStamps, isStamped } from '../src/lib/stamps.js'
-
-// A stand-in for Node's (IncomingMessage, ServerResponse) pair.
-function nodeReq(url, { method = 'GET', headers = {}, body } = {}) {
-  return { url, method, headers, body }
-}
-function nodeRes() {
-  const headers = {}
-  return {
-    statusCode: 0,
-    payload: null,
-    headers,
-    setHeader(k, v) {
-      headers[k] = v
-    },
-    end(p) {
-      this.payload = p
-    },
-    get json() {
-      return JSON.parse(this.payload)
-    },
-  }
-}
-
-async function call(handler, req) {
-  const res = nodeRes()
-  const returned = await handler(req, res)
-  // Node path writes through `res` and returns undefined; if a handler ever
-  // returns a Response instead, surface that rather than silently passing.
-  if (returned !== undefined) {
-    return { status: returned.status, json: await returned.json(), viaResponse: true }
-  }
-  return { status: res.statusCode, json: res.json, headers: res.headers }
-}
+import { nodeReq, nodeRes, call } from './helpers/node-http.js'
 
 // --------------------------------------------------------------------------
 // The regression: a bare path must not throw
@@ -889,4 +858,23 @@ test('the season cap still refuses when the live stamps reach it', async () => {
 
   assert.equal(res.statusCode, 409)
   assert.equal(res.json.error, 'season full')
+})
+
+// One wrapper for the eight per-user handlers (account, ballpark-photo, books,
+// identity-logo, preferences, reveal, spoiled-days, stamps): a shared cache must
+// never hold their answers.
+test('privateJson answers JSON with private, no-store, status 200 by default', () => {
+  const res = nodeRes()
+  privateJson(res, { ok: true })
+  assert.equal(res.statusCode, 200)
+  assert.equal(res.headers['cache-control'], 'private, no-store')
+  assert.equal(res.headers['content-type'], 'application/json')
+  assert.deepEqual(res.json, { ok: true })
+})
+
+test('privateJson keeps the status it is given', () => {
+  const res = nodeRes()
+  privateJson(res, { error: 'nope' }, 401)
+  assert.equal(res.statusCode, 401)
+  assert.equal(res.headers['cache-control'], 'private, no-store')
 })

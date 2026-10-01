@@ -15,7 +15,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { ipToOuts } from '../../src/api/rehab-policy.js'
+import { ipToOuts } from '../../src/lib/math/innings.js'
 import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))

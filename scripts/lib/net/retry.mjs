@@ -10,6 +10,8 @@
 // (statsapi's client does: network errors, 429 and 5xx only, never another
 // 4xx). The pause is `delayMs * attempt`, and there is none after the last try.
 
+import { setTimeout as defaultSleep } from 'node:timers/promises'
+
 export async function withRetry(
   fn,
   { tries = 3, delayMs = 2000, sleep = defaultSleep, shouldRetry = () => true } = {},
@@ -26,5 +28,3 @@ export async function withRetry(
   }
   throw lastErr
 }
-
-const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))

@@ -1,22 +1,11 @@
 import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react'
+import { jumpScrollLeft, useScrollRail } from '../../../../hooks/scroll/useScrollRail.js'
 import { fetchTeamPhotoBatch } from '../../../../api/gamePhotos.js'
 import { useNav } from '../../../../lib/nav.js'
 import { teamPhotosPath } from '../../../../lib/route.js'
 import { Door } from '../../../../components/ui/control/Door.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
-
-// A setup jump, not a user-visible scroll gesture — bypasses the track's own
-// `scroll-behavior: smooth` (index.css) so it lands instantly. Without this,
-// the animated glide from position 0 briefly leaves the leading-edge sentinel
-// on screen mid-flight, which the IntersectionObserver below reads as "scrolled
-// back" and grows the window before the user has touched anything.
-function jumpScrollLeft(el, value) {
-  const prev = el.style.scrollBehavior
-  el.style.scrollBehavior = 'auto'
-  el.scrollLeft = value
-  el.style.scrollBehavior = prev
-}
 
 const PHOTO_INITIAL_TARGET = 10
 const PHOTO_GROW_STEP = 10
@@ -66,13 +55,7 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 // rail's door everywhere it renders, not just in preview mode.
 export function TeamPhotosRail({ teamId, games, limit = null }) {
   const navigate = useNav()
-  const trackRef = useRef(null)
   const sentinelRef = useRef(null)
-  // Flips true the first time the user actually scrolls back (the sentinel
-  // fires) — see the two effects below. Named for what stops the auto-snap,
-  // not for "has the initial load finished," since the initial load can span
-  // several async batches with no single moment to key off of.
-  const userScrolledBackRef = useRef(false)
   const pendingGrowRef = useRef(null)
   const consumedRef = useRef(0)
   const photosRef = useRef([])
@@ -83,9 +66,6 @@ export function TeamPhotosRail({ teamId, games, limit = null }) {
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(false)
   const [exhausted, setExhausted] = useState(false)
-  const [canScroll, setCanScroll] = useState(false)
-  const [atStart, setAtStart] = useState(true)
-  const [atEnd, setAtEnd] = useState(true)
 
   useEffect(() => {
     activeRef.current = true
@@ -139,37 +119,14 @@ export function TeamPhotosRail({ teamId, games, limit = null }) {
     growPhotos(limit ?? PHOTO_INITIAL_TARGET, limit != null ? 1 : undefined)
   }, [growPhotos, limit])
 
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const check = () => setCanScroll(el.scrollWidth > el.clientWidth + 1)
-    check()
-    const ro = new ResizeObserver(check)
-    ro.observe(el)
-    window.addEventListener('resize', check)
-    return () => {
-      ro.disconnect()
-      window.removeEventListener('resize', check)
-    }
-  }, [photos.length])
-
-  // Opens pre-scrolled to the newest (rightmost) photo — mirrors
-  // LastTenGamesStrip's own mount-only jump, but `photos` starts empty (the
-  // first fetch hasn't landed yet), the initial load can span several async
-  // batches (growPhotos keeps walking backward until it hits
-  // PHOTO_INITIAL_TARGET), and `canScroll` flipping true (once there's
-  // enough content to overflow) shrinks the track to make room for the nav
-  // arrows, moving the true right edge. So rather than jump once on a single
-  // signal, this keeps re-snapping to the current end on every relevant
-  // change (new photos, canScroll settling) until the user actually scrolls
-  // back — at which point the sentinel handler below flips
-  // userScrolledBackRef and this stops for good, handing off to the
-  // pendingGrowRef effect's position-preserving compensation instead.
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    if (!el || userScrolledBackRef.current || photos.length === 0) return
-    jumpScrollLeft(el, el.scrollWidth)
-  }, [photos.length, canScroll])
+  // Opens pre-scrolled to the newest (rightmost) photo and keeps re-snapping
+  // as batches land, until the user scrolls back — the sentinel handler below
+  // flips userScrolledBackRef, handing off to the pendingGrowRef effect's
+  // position-preserving compensation. (The initial load can span several
+  // async batches, so there is no single moment to key a one-time jump off.)
+  const { trackRef, userScrolledBackRef, canScroll, atStart, atEnd, scroll } = useScrollRail(
+    photos.length,
+  )
 
   // Restores the pre-growth scroll position after older photos are prepended
   // (see pendingGrowRef below) — without it, prepending content shoves the
@@ -180,19 +137,7 @@ export function TeamPhotosRail({ teamId, games, limit = null }) {
     if (!el || !pending) return
     jumpScrollLeft(el, pending.scrollLeft + (el.scrollWidth - pending.scrollWidth))
     pendingGrowRef.current = null
-  }, [photos.length])
-
-  useEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const update = () => {
-      setAtStart(el.scrollLeft <= 1)
-      setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 1)
-    }
-    update()
-    el.addEventListener('scroll', update)
-    return () => el.removeEventListener('scroll', update)
-  }, [photos.length, canScroll])
+  }, [photos.length, trackRef])
 
   // Scrolling (or paging via the < button) into the sentinel at the front of
   // the track grows the window toward Opening Day. Preview mode (`limit`)
@@ -214,13 +159,7 @@ export function TeamPhotosRail({ teamId, games, limit = null }) {
     )
     io.observe(sentinel)
     return () => io.disconnect()
-  }, [exhausted, loading, growPhotos, limit])
-
-  const scroll = (dir) => {
-    const el = trackRef.current
-    if (!el) return
-    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
-  }
+  }, [exhausted, loading, growPhotos, limit, trackRef, userScrolledBackRef])
 
   // Preview mode never grows past its one batch, so "nothing here" is settled
   // the moment that batch's fetch finishes rather than waiting on `exhausted`

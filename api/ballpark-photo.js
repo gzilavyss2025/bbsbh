@@ -36,7 +36,7 @@
 
 import { FIELD_IDS } from '../src/copy/registry.js'
 import { authenticateAdmin } from './_lib/adminAuth.js'
-import { jsonResponse, readRawBody, requestUrl } from './_lib/nodeHandler.js'
+import { privateJson, readRawBody, requestUrl } from './_lib/nodeHandler.js'
 
 // Node runtime, not edge — @clerk/backend's verifyToken pulls in internals
 // Vercel's edge sandbox rejects. Same reason as api/copy.js.
@@ -167,23 +167,20 @@ export async function reclaimBlobs(urls, token) {
 }
 
 export default async function handler(req, res) {
-  const reply = (body, status = 200) =>
-    jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
-
-  if (req.method !== 'POST') return reply({ error: 'method not allowed' }, 405)
+  if (req.method !== 'POST') return privateJson(res, { error: 'method not allowed' }, 405)
 
   const token = process.env.BLOB_READ_WRITE_TOKEN
-  if (!token) return reply({ error: 'image store not configured' }, 501)
+  if (!token) return privateJson(res, { error: 'image store not configured' }, 501)
 
   const userId = await authenticateAdmin(req)
-  if (!userId) return reply({ error: 'forbidden' }, 403)
+  if (!userId) return privateJson(res, { error: 'forbidden' }, 403)
 
   const { searchParams } = requestUrl(req)
   const key = searchParams.get('key') || ''
   const kindName = searchParams.get('kind') || 'photo'
   const kind = Object.prototype.hasOwnProperty.call(KINDS, kindName) ? KINDS[kindName] : null
-  if (!kind) return reply({ error: 'unknown kind' }, 400)
-  if (!PARK_KEYS.has(key)) return reply({ error: 'unknown ballpark' }, 400)
+  if (!kind) return privateJson(res, { error: 'unknown kind' }, 400)
+  if (!PARK_KEYS.has(key)) return privateJson(res, { error: 'unknown ballpark' }, 400)
 
   const bytes = await readRawBody(req, kind.maxBytes)
   // readRawBody returns null for BOTH "nothing arrived" and "went over the
@@ -194,12 +191,12 @@ export default async function handler(req, res) {
   if (!bytes) {
     const declared = Number(req.headers?.['content-length'] ?? 0)
     return declared > kind.maxBytes
-      ? reply({ error: `image too large — the limit is ${Math.round(kind.maxBytes / 1000)} KB` }, 413)
-      : reply({ error: 'no image received' }, 400)
+      ? privateJson(res, { error: `image too large — the limit is ${Math.round(kind.maxBytes / 1000)} KB` }, 413)
+      : privateJson(res, { error: 'no image received' }, 400)
   }
 
   const sig = sniffImage(bytes)
-  if (!sig) return reply({ error: 'not a JPEG or PNG' }, 415)
+  if (!sig) return privateJson(res, { error: 'not a JPEG or PNG' }, 415)
 
   // Import lazily so the module still loads (and answers 501) on a deploy where
   // the dependency is present but the store is not — and so an unconfigured
@@ -222,7 +219,7 @@ export default async function handler(req, res) {
       cacheControlMaxAge: 31_536_000,
     })
   } catch {
-    return reply({ error: 'upload failed' }, 502)
+    return privateJson(res, { error: 'upload failed' }, 502)
   }
 
   // Best-effort cleanup of the image this one replaces. AFTER a successful put,
@@ -240,5 +237,5 @@ export default async function handler(req, res) {
     }
   }
 
-  return reply({ url: uploaded.url, field: kind.field(key) })
+  return privateJson(res, { url: uploaded.url, field: kind.field(key) })
 }

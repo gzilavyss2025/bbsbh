@@ -20,9 +20,12 @@
 // gen-fever-radar.mjs's 6 days: a stat percentile moves slower than a
 // third-party scouting radar's daily rank.
 //
-// Each row also carries `sampleSize` (PA or IP-outs — the same count the
-// qualification gate already computed) and `populationSize` (how many
-// players cleared the floor at his level), so a reader can weigh a 93rd
+// Every number on a row is read at his PRIMARY level alone (snapshotRow,
+// scripts/lib/prospectPercentile.mjs), never his season summed over every
+// level: the population and the level-tenure median each cover one level.
+// Each row also carries `sampleSize` (PA or IP-outs at that level — the same
+// count the qualification gate already computed) and `populationSize` (how
+// many players cleared the floor at his level), so a reader can weigh a 93rd
 // percentile on 41 PA differently from one on 400; `history` is every
 // snapshot this generator or scripts/gen-prospect-trend-backfill.mjs has ever
 // recorded for him, oldest first — the full season's-worth once the one-time
@@ -44,13 +47,8 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fetchLevelSeasonStats, combineToPool } from '../src/api/statsLevels.js'
-import {
-  meetsPlayingTimeFloor,
-  percentileRank,
-  primaryGroupFor,
-  buildPopulations,
-  populationKey,
-} from './lib/prospectPercentile.mjs'
+import { packProspectTrend } from '../src/api/prospectTrend.js'
+import { buildPopulations, snapshotRow, movementSince } from './lib/prospectPercentile.mjs'
 import { fetchLevelAverageAges } from './lib/prospectAgeBenchmark.mjs'
 import { openDb, dumpGroup } from './lib/db.js'
 import { writeJsonAtomic } from './lib/io.js'
@@ -92,7 +90,7 @@ const upsertSnapshot = (db) =>
 // over the table this generator itself has been filling in, same pattern as
 // gen-fever-radar.mjs's exportJson — plus the player's FULL recorded history
 // (today's row included), oldest first, for the trend chart.
-function exportJson(db, today, levelAverageAge) {
+function exportJson(db, today, levelAverageAge, asOf) {
   const rows = db
     .prepare(
       `SELECT player_id, board, payload_json FROM player_snapshots
@@ -106,7 +104,7 @@ function exportJson(db, today, levelAverageAge) {
      ORDER BY date ASC`,
   )
   const players = rows.map((row) => {
-    const payload = JSON.parse(row.payload_json)
+    const { atLevel, ...payload } = JSON.parse(row.payload_json)
     const prior = db
       .prepare(
         `SELECT date, payload_json FROM player_snapshots
@@ -114,20 +112,17 @@ function exportJson(db, today, levelAverageAge) {
          ORDER BY date DESC LIMIT 1`,
       )
       .get(row.player_id, row.board, SOURCE, today)
-    let movement = null
-    if (prior) {
-      const priorPayload = JSON.parse(prior.payload_json)
-      if (payload.percentile != null && priorPayload.percentile != null) {
-        movement = { delta: payload.percentile - priorPayload.percentile, sinceDate: prior.date }
-      }
-    }
+    const movement = movementSince(
+      { ...payload, atLevel },
+      prior && { date: prior.date, payload: JSON.parse(prior.payload_json) },
+    )
     const history = historyStmt.all(row.player_id, row.board, SOURCE).map((h) => {
       const p = JSON.parse(h.payload_json)
       return { date: h.date, sportId: p.sportId, percentile: p.percentile, qualified: p.qualified }
     })
     return { playerId: row.player_id, group: row.board, ...payload, movement, history }
   })
-  return { generatedAt: new Date().toISOString(), dataThrough: today, levelAverageAge, players }
+  return { generatedAt: asOf.toISOString(), dataThrough: today, levelAverageAge, players }
 }
 
 async function main() {
@@ -148,12 +143,13 @@ async function main() {
   // Every qualified player's age, averaged per level — the Prospect Card's
   // age-benchmark fact. A separate bulk call (birthDate isn't on a season
   // split), so it runs once here rather than per prospect.
-  const levelAverageAge = await fetchLevelAverageAges(hitSplits, pitSplits, LEVEL_SPORT_IDS)
+  const asOf = new Date() // also the file's generatedAt: the page ages each player to this same instant
+  const levelAverageAge = await fetchLevelAverageAges(hitSplits, pitSplits, LEVEL_SPORT_IDS, asOf)
 
-  // Each prospect attributed to his PRIMARY level (highest reached, multi-
-  // level lines summed) — the same combineToPool the app's own minors
-  // leaderboards trust, so a promoted prospect lands on his current level's
-  // line for free, no separate roster/affiliate lookup needed.
+  // Each prospect is filed at his PRIMARY level (highest reached) and read at
+  // his line there alone — snapshotRow, because the percentile population and
+  // the tenure benchmark both cover one level. combineToPool still finds him
+  // without a separate roster/affiliate lookup, as the app's minors boards do.
   const pool = combineToPool(hitSplits, pitSplits).filter((p) => prospectIds.has(p.id))
 
   const db = await openDb()
@@ -161,21 +157,14 @@ async function main() {
   const today = new Date().toISOString().slice(0, 10)
   let qualifiedCount = 0
   for (const p of pool) {
-    const group = primaryGroupFor(p.position, Boolean(p.hitting), Boolean(p.pitching))
-    if (!group) continue
-    const line = group === 'hitting' ? p.hitting : p.pitching
-    const qualified = meetsPlayingTimeFloor(group, line)
-    const population = populations.get(populationKey(p.sportId, group)) ?? []
-    const metric = Number(group === 'hitting' ? line.ops : line.era)
-    const percentile = qualified ? percentileRank(metric, population, group === 'hitting') : null
-    if (percentile != null) qualifiedCount++
-    const sampleSize = group === 'hitting' ? Number(line.plateAppearances) || 0 : Number(line.outs) || 0
-    const payload = { sportId: p.sportId, percentile, qualified, sampleSize, populationSize: population.length }
-    insert.run(today, p.id, group, SOURCE, JSON.stringify(payload))
+    const row = snapshotRow(p, populations)
+    if (!row) continue
+    if (row.payload.percentile != null) qualifiedCount++
+    insert.run(today, p.id, row.group, SOURCE, JSON.stringify(row.payload))
   }
   await dumpGroup(db, 'player-snapshots')
 
-  await writeJsonAtomic(out, exportJson(db, today, levelAverageAge))
+  await writeJsonAtomic(out, packProspectTrend(exportJson(db, today, levelAverageAge, asOf)))
   db.close()
   console.log(`wrote ${out} (${pool.length} prospects with a current-level line, ${qualifiedCount} qualified)`)
 }

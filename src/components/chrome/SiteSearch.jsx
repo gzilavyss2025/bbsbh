@@ -10,6 +10,7 @@ import { SPORT_LABEL } from '../../lib/teams.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // The site-wide search trigger — a persistent icon button (not an always-open
 // input; on a phone-width header there's no room to dock one, and this is the
@@ -204,23 +205,11 @@ export function SiteSearchModal({ onClose }) {
     [navigate, onClose, remember],
   )
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const inputRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    // Focusing here, in the effect that follows the trigger's own click, is
-    // still inside the user gesture as far as mobile Safari is concerned —
-    // which is what makes the keyboard actually come up.
-    inputRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  // Focusing here, in the effect that follows the trigger's own click, is
+  // still inside the user gesture as far as mobile Safari is concerned —
+  // which is what makes the keyboard actually come up.
+  useDialogFocus(inputRef, onClose)
 
   // Scroll-lock the document behind the overlay. Plain `overflow: hidden` (not
   // the position-fixed body trick) because it leaves the page's scroll offset
@@ -404,7 +393,7 @@ function ResultRow({ row, id, active, showCursor, onOpen, onHover }) {
       </span>
       <span className="searchoverlay__text">
         <span className="searchoverlay__name">{row.name}</span>
-        {row.sub && <span className="searchoverlay__sub">{row.sub}</span>}
+        {row.sub && <span className="searchoverlay__note">{row.sub}</span>}
       </span>
     </li>
   )

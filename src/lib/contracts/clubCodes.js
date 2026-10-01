@@ -18,24 +18,11 @@
 // "signed by Lotte Marines," the exact club-name pattern every other NPB row
 // uses), NPB, dnp ("did not play"), and retired.
 //
-// scripts/lib/retrosheet-teams.mjs solves a narrower version of this same
-// crosswalk for the build-time identity pipeline (gen-contracts-identity.mjs
-// and its siblings). Its CLUB_CODE_TO_TEAM_ID table agrees with the one
-// below, in both directions, on both the team codes and the destination
-// codes — test/contracts-club-codes.test.js cross-checks all of it so the
-// two can't silently drift — but it isn't imported here: src/ never pulls a
-// scripts/lib module into the client bundle (see src/api/prospects.js's
-// isPitcher for the same rule applied elsewhere). This file is the browser
-// (and test) side of the same crosswalk, kept local on purpose. It also
-// matches that module's case-insensitive lookup: an adversarial review
-// measured the drift directly, resolveClubCode('mon') and ('DNP') resolved
-// there but not here. Real rows in the CSVs are consistently cased, so this
-// only matters for a defensive caller, but the two modules should agree
-// rather than silently pick different answers for the same input.
-//
-// SEASON: the signature accepts `season` because a 2004 MON row is the
-// Montreal Expos and a 2006 WAS row is the Washington Nationals — different
-// clubs in baseball terms. But statsapi's own teamId is already
+// The build-time identity pipeline (scripts/gen-contracts-identity.mjs) imports
+// this same module; src/lib has no browser-only imports, so a script can.
+
+// SEASON: there is no season argument. A 2004 MON row is the Montreal Expos
+// and a 2006 WAS row is the Washington Nationals, but statsapi's own teamId is
 // FRANCHISE-persistent: it does not mint a new id when a club relocates or
 // renames (Montreal -> Washington, Florida -> Miami, California -> Anaheim ->
 // Los Angeles, Oakland -> "Athletics" all keep one id apiece). Confirmed
@@ -43,18 +30,12 @@
 // this resolver, .scratch/team-success/roster-age-cache.json, keys its
 // per-season rows as `hitting-{teamId}-{season}` / `pitching-{teamId}-{season}`
 // and uses teamId 120 for BOTH `-2004` (the Expos' last season) and `-2005`
-// through `-2006` (the Nationals' first seasons) — the exact same id, not two
-// different ones. Every other MON/WAS-shaped pair in the CSVs (FLA/MIA,
-// CAL/ANA/LAA, KC/KCA, SD/SDN, SF/SFN, STL/SLN, TB/TBA, OAK/ATH, NYM/NYN,
-// CHA/CHN) is the same kind of era-dependent alias for one franchise-
-// persistent id, confirmed by checking each pair's season ranges in the CSVs
-// (docs/adr territory, not guessed). So `season` stays in the signature for
-// the contract's documentation value and so a future ambiguous code has
-// somewhere to be resolved, but no code in today's data needs it to pick a
-// teamId — this function does not branch on it. A caller joining to
-// roster-age-cache.json by teamId gets the right row either way. If a future
-// export ever needs a code disambiguated by season, add that branch here and
-// grow the coverage test's fixtures to catch it.
+// through `-2006` (the Nationals' first seasons). Every other MON/WAS-shaped
+// pair in the CSVs (FLA/MIA, CAL/ANA/LAA, KC/KCA, SD/SDN, SF/SFN, STL/SLN,
+// TB/TBA, OAK/ATH, NYM/NYN, CHA/CHN) is the same kind of era-dependent alias
+// for one franchise-persistent id. If a future export ever needs a code
+// disambiguated by season, add the argument and that branch here, and grow the
+// coverage test's fixtures to catch it.
 
 import { ALL_MLB_TEAM_IDS, isMlbTeamId } from '../teams.js'
 
@@ -164,9 +145,8 @@ const BLANK = Object.freeze({ teamId: null, franchiseId: null, destination: null
 // this function did exactly that) would leave every caller unable to tell
 // "nothing was ever here" from "something here doesn't parse."
 //
-// Case-insensitive, matching scripts/lib/retrosheet-teams.mjs's lookup (see
-// file header) — every code is trimmed and uppercased before either table is
-// checked.
+// Case-insensitive — every code is trimmed and uppercased before either table
+// is checked.
 //
 // franchiseId is always equal to teamId in this app: statsapi's teamId is
 // already franchise-persistent (see the file header), so there is no
@@ -175,7 +155,7 @@ const BLANK = Object.freeze({ teamId: null, franchiseId: null, destination: null
 // read franchiseId and a caller who means "the exact statsapi team id used
 // to join stats" can read teamId, even though today they are the same
 // number.
-export function resolveClubCode(code, _season) {
+export function resolveClubCode(code) {
   const trimmed = typeof code === 'string' ? code.trim() : ''
   if (!trimmed) return BLANK
 
@@ -192,12 +172,6 @@ export function resolveClubCode(code, _season) {
 
   return null
 }
-
-// Exported so the drift test can walk this table's codes against
-// scripts/lib/retrosheet-teams.mjs in both directions, not just from that
-// module's table into this one.
-export const KNOWN_CLUB_CODES = Object.freeze([...CODE_TO_TEAM_ID.keys()])
-export const KNOWN_DESTINATION_CODES = Object.freeze([...CODE_TO_DESTINATION.keys()])
 
 // Re-exported so a caller of this module never needs a second import from
 // teams.js just to sanity-check a resolved teamId.

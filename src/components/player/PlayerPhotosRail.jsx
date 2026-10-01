@@ -1,16 +1,8 @@
 import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react'
+import { jumpScrollLeft, useScrollRail } from '../../hooks/scroll/useScrollRail.js'
 import { fetchGamePhotos, photosForPlayer, onlyPhotographer } from '../../api/gamePhotos.js'
 import { Door } from '../ui/control/Door.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
-
-// A setup jump, not a user-visible scroll gesture — see TeamPhotosRail's own
-// copy of this helper for why `scroll-behavior: smooth` has to be bypassed.
-function jumpScrollLeft(el, value) {
-  const prev = el.style.scrollBehavior
-  el.style.scrollBehavior = 'auto'
-  el.scrollLeft = value
-  el.style.scrollBehavior = prev
-}
 
 const PHOTO_INITIAL_TARGET = 10
 const PHOTO_GROW_STEP = 10
@@ -42,10 +34,8 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 // the cap, which resumes the normal unlimited walk-back exactly as if no
 // `limit` had been passed.
 export function PlayerPhotosRail({ personId, games, limit }) {
-  const trackRef = useRef(null)
   const sentinelRef = useRef(null)
   const [expanded, setExpanded] = useState(!limit)
-  const userScrolledBackRef = useRef(false)
   const pendingGrowRef = useRef(null)
   const consumedRef = useRef(0)
   const photosRef = useRef([])
@@ -56,9 +46,6 @@ export function PlayerPhotosRail({ personId, games, limit }) {
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(false)
   const [exhausted, setExhausted] = useState(false)
-  const [canScroll, setCanScroll] = useState(false)
-  const [atStart, setAtStart] = useState(true)
-  const [atEnd, setAtEnd] = useState(true)
 
   useEffect(() => {
     activeRef.current = true
@@ -114,25 +101,9 @@ export function PlayerPhotosRail({ personId, games, limit }) {
     growPhotos(expanded ? PHOTO_INITIAL_TARGET : limit)
   }, [growPhotos, expanded, limit])
 
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const check = () => setCanScroll(el.scrollWidth > el.clientWidth + 1)
-    check()
-    const ro = new ResizeObserver(check)
-    ro.observe(el)
-    window.addEventListener('resize', check)
-    return () => {
-      ro.disconnect()
-      window.removeEventListener('resize', check)
-    }
-  }, [photos.length])
-
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    if (!el || userScrolledBackRef.current || photos.length === 0) return
-    jumpScrollLeft(el, el.scrollWidth)
-  }, [photos.length, canScroll])
+  const { trackRef, userScrolledBackRef, canScroll, atStart, atEnd, scroll } = useScrollRail(
+    photos.length,
+  )
 
   useLayoutEffect(() => {
     const el = trackRef.current
@@ -140,19 +111,7 @@ export function PlayerPhotosRail({ personId, games, limit }) {
     if (!el || !pending) return
     jumpScrollLeft(el, pending.scrollLeft + (el.scrollWidth - pending.scrollWidth))
     pendingGrowRef.current = null
-  }, [photos.length])
-
-  useEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const update = () => {
-      setAtStart(el.scrollLeft <= 1)
-      setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 1)
-    }
-    update()
-    el.addEventListener('scroll', update)
-    return () => el.removeEventListener('scroll', update)
-  }, [photos.length, canScroll])
+  }, [photos.length, trackRef])
 
   useEffect(() => {
     const el = trackRef.current
@@ -169,13 +128,7 @@ export function PlayerPhotosRail({ personId, games, limit }) {
     )
     io.observe(sentinel)
     return () => io.disconnect()
-  }, [exhausted, loading, growPhotos, expanded])
-
-  const scroll = (dir) => {
-    const el = trackRef.current
-    if (!el) return
-    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
-  }
+  }, [exhausted, loading, growPhotos, expanded, trackRef, userScrolledBackRef])
 
   if (exhausted && photos.length === 0 && !loading) return null
   // Newest photos sit at the end of the array (see growPhotos' prepend and

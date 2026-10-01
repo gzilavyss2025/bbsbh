@@ -10,6 +10,7 @@
 
 import { mkdir, rename, stat, unlink, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { mapConcurrent } from './concurrency.mjs'
 
 const SAFE = /[^A-Za-z0-9_-]/g
 
@@ -94,11 +95,13 @@ export async function downloadMissing({
     return false
   })
 
-  let next = 0
   let done = 0
-  async function worker() {
-    while (next < unique.length) {
-      const row = unique[next++]
+  // strict: nothing in a row's own handling is meant to throw (a failed save is
+  // recorded below), so an error that does escape, such as onProgress, stops the run.
+  await mapConcurrent(
+    unique,
+    Math.max(1, concurrency),
+    async (row) => {
       if (await hasFile(join(dir, pdfPath(row)))) {
         out.skipped += 1
       } else {
@@ -111,8 +114,8 @@ export async function downloadMissing({
       }
       done += 1
       onProgress({ done, total: unique.length, ...out })
-    }
-  }
-  await Promise.all(Array.from({ length: Math.max(1, concurrency) }, worker))
+    },
+    { strict: true },
+  )
   return out
 }

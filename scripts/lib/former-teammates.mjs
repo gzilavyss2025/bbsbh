@@ -120,3 +120,22 @@ export const MAX_ROWS_PER_MATCHUP = 100
 export function capRows(rows, max = MAX_ROWS_PER_MATCHUP) {
   return [...rows].sort((x, y) => y.score - x.score).slice(0, max)
 }
+
+// A MiLB club's parent org AS OF one season, read from public/data/milb-history.json
+// (`milbHistory`). null for a club or season the file does not cover.
+export function historicalParentOrgAt(milbHistory, teamId, season) {
+  const club = milbHistory.clubs?.[String(teamId)]
+  const era = (club?.parentHistory ?? []).find((e) => season >= e.years[0] && season <= e.years[1])
+  return era ? { id: era.parentOrgId, name: era.parentOrgName } : null
+}
+
+// The `orgId` a shard's `shared` club entry carries: the club's season-accurate
+// parent org, so the card can file a farm club of tonight's club as a former
+// club (#1319). An MLB club writes none: it is its own org, and the reader
+// already matches a club on its `teamId`. A `shared` entry merges several
+// seasons of one club, and affiliations change, so a minor-league club takes
+// the parent of its LATEST shared season. `orgOf(teamId, season)` returns an
+// org id or undefined; undefined means no `orgId` is written (never a guess).
+export function orgIdForShared(teamId, seasons, orgOf) {
+  return orgOf(teamId, Math.max(...seasons))
+}

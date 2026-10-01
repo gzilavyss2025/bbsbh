@@ -7,6 +7,7 @@ import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { SPORT_LABEL } from '../../lib/teams.js'
+import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // PLAYERS WHO MOVED UP — the minor levels' offseason page, issue #1077.
@@ -85,58 +86,60 @@ export function MovedUp({ sportId, season }) {
         Players who moved up
       </SectionHead>
 
-      <table className="movedup__table">
-        <thead>
-          <tr>
-            <th scope="col">Player</th>
-            <th scope="col">Finished at</th>
-            <th scope="col">Org</th>
-          </tr>
-        </thead>
-        <tbody>
-          {shown.map((row) => {
-            // Null for both ranks when the snapshot's org for him disagrees
-            // with the board's: he was traded since the weekly scrape, and the
-            // badge would otherwise name the wrong club.
-            const badge = prospectBadge(prospects, row.id, row.orgId)
-            return (
-              <tr key={row.id}>
-                <th scope="row">
-                  <span className="movedup__who">
-                    <Headshot
-                      personId={row.id}
-                      name={row.name}
-                      teamId={row.orgId}
-                      isMlb={false}
-                      className="movedup__shot"
-                    />
-                    <span className="movedup__lines">
-                      <span className="movedup__name">
-                        <PlayerLink id={row.id} name={row.name}>
-                          {row.name}
-                        </PlayerLink>
-                        {row.position && <span className="movedup__pos">{row.position}</span>}
+      <Card as="div" body="flush" className="movedup__card">
+        <table className="movedup__table">
+          <thead>
+            <tr>
+              <th scope="col">Player</th>
+              <th scope="col">Finished at</th>
+              <th scope="col">Org</th>
+            </tr>
+          </thead>
+          <tbody>
+            {shown.map((row) => {
+              // Null for both ranks when the snapshot's org for him disagrees
+              // with the board's: he was traded since the weekly scrape, and the
+              // badge would otherwise name the wrong club.
+              const badge = prospectBadge(prospects, row.id, row.orgId)
+              return (
+                <tr key={row.id}>
+                  <th scope="row">
+                    <span className="movedup__who">
+                      <Headshot
+                        personId={row.id}
+                        name={row.name}
+                        teamId={row.orgId}
+                        isMlb={false}
+                        className="movedup__shot"
+                      />
+                      <span className="movedup__lines">
+                        <span className="movedup__name">
+                          <PlayerLink id={row.id} name={row.name}>
+                            {row.name}
+                          </PlayerLink>
+                          {row.position && <span className="movedup__pos">{row.position}</span>}
+                        </span>
+                        <ProspectPill {...badge} />
                       </span>
-                      <ProspectPill {...badge} />
                     </span>
-                  </span>
-                </th>
-                {/* The two ends of the season, not the whole path: a player who
-                    went A -> A+ -> AA -> AAA is read as "A to AAA", which is
-                    what a reader means by how far he got. */}
-                <td className="movedup__climb">
-                  {row.from.label} <span className="sr-only">to</span>
-                  <span aria-hidden="true"> → </span>
-                  <span className="movedup__to">{row.to.label}</span>
-                </td>
-                <td className="movedup__org">
-                  {row.orgId ? <TeamLink id={row.orgId}>{row.org}</TeamLink> : row.org}
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+                  </th>
+                  {/* The two ends of the season, not the whole path: a player who
+                      went A -> A+ -> AA -> AAA is read as "A to AAA", which is
+                      what a reader means by how far he got. */}
+                  <td className="movedup__climb">
+                    {row.from.label} <span className="sr-only">to</span>
+                    <span aria-hidden="true"> → </span>
+                    <span className="movedup__to">{row.to.label}</span>
+                  </td>
+                  <td className="movedup__org">
+                    {row.orgId ? <TeamLink id={row.orgId}>{row.org}</TeamLink> : row.org}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </Card>
 
       {(hidden > 0 || expanded) && (
         <button

@@ -12,30 +12,12 @@ import test from 'node:test'
 
 import { bookEntry, bookRefusal, deleteBook, listBooks, postBook } from '../api/books.js'
 import { MAX_BOOKS } from '../src/lib/books.js'
+import { nodeRes } from './helpers/node-http.js'
 
-// A stand-in for Node's (IncomingMessage, ServerResponse) pair, matching
-// api-handlers.test.js's own helpers.
+// This handler's request carries only a JSON body, unlike helpers/node-http.js's nodeReq.
 function nodeReq(body) {
   return { headers: { 'content-type': 'application/json' }, body }
 }
-function nodeRes() {
-  const headers = {}
-  return {
-    statusCode: 0,
-    payload: null,
-    headers,
-    setHeader(k, v) {
-      headers[k] = v
-    },
-    end(p) {
-      this.payload = p
-    },
-    get json() {
-      return JSON.parse(this.payload)
-    },
-  }
-}
-
 // Only the three Redis calls api/books.js actually makes.
 function fakeRedis(seed = {}) {
   const hashes = { ...seed }

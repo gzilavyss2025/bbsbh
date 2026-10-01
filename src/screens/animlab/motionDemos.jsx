@@ -173,7 +173,7 @@ export function BoxLinesEntrance() {
       >
         <div className="boxlines__head">
           <div>
-            <p className="boxlines__kicker">Game lines · regular season</p>
+            <p className="boxlines__note">Game lines · regular season</p>
             <h2 className="sheet__title boxlines__title">Surname vs the Club</h2>
           </div>
         </div>

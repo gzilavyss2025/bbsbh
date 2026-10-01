@@ -82,6 +82,7 @@ import {
   isGetawayDay,
   dailyDivisionRanks,
 } from './lib/team-records.mjs'
+import { homeVenueByTeam, siteOf } from './lib/schedule-shape.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'team-records')
@@ -355,8 +356,8 @@ function shipRow(r, getaway, roles) {
   put('dh', p.doubleHeader !== 'N' ? 1 : 0)
   put('sg', r.seriesGame)
   put('sl', r.seriesLength)
-  put('op', r.opener ? 1 : 0)
-  put('fi', r.finale ? 1 : 0)
+  put('op', r.seriesOpener ? 1 : 0)
+  put('fi', r.seriesFinale ? 1 : 0)
   put('ga', getaway ? 1 : 0)
   return row
 }
@@ -426,13 +427,21 @@ async function exportSeason(db, season, teamMeta, allStarDate) {
     db.prepare('SELECT * FROM team_record_pitcher_roles WHERE season = ?').all(season),
   )
 
-  // Unpack the payload once, and lift the two fields the ledger passes below
-  // actually navigate by — the series tagger compares venues, and a
-  // doubleheader needs its game number to order within a date. Sorting happens
-  // here rather than in SQL because both now live inside payload_json.
-  const rows = raw.map((r) => {
+  // Unpack the payload once, and lift the fields the ledger passes below
+  // navigate by — `site` for the series tagger (the home-park inference
+  // gen-schedule-shape uses), and a doubleheader's game number. Sorting happens
+  // here, not in SQL, because both live inside payload_json.
+  const unpacked = raw.map((r) => {
     const payload = JSON.parse(r.payload_json)
-    return { ...r, payload, venue_id: payload.venueId ?? null, game_number: payload.gameNumber ?? 1 }
+    return { ...r, payload, venue_id: payload.venueId ?? null }
+  })
+  const homeVenues = homeVenueByTeam(
+    unpacked.filter((r) => r.payload.isHome).map((r) => ({ homeId: r.team_id, venueId: r.venue_id })),
+  )
+  const rows = unpacked.map((r) => {
+    const [homeId, awayId] = r.payload.isHome ? [r.team_id, r.opp_id] : [r.opp_id, r.team_id]
+    const site = siteOf({ homeId, awayId, venueId: r.venue_id }, r.team_id, homeVenues)
+    return { ...r, game_number: r.payload.gameNumber ?? 1, site }
   })
 
   const byTeam = new Map()

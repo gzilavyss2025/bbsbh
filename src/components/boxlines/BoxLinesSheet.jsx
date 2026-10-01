@@ -1,6 +1,6 @@
 import '../../styles/boxlines/boxlines.css'
 import '../../styles/boxlines/listdoor.css'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { fetchBoxLines } from '../../api/boxlines/fetch.js'
 import { foldGroups, foldStats, LIST_COLUMNS } from '../../api/boxlines/fold.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -10,6 +10,7 @@ import { BoxLinesList } from './BoxLinesList.jsx'
 import { Stat } from '../gamehud/StatBox.jsx'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { IconButton } from '../ui/control/IconButton.jsx'
+import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // BOX LINES — the drilldown behind a summary stat line (ADR-0069). Tap a
 // line such as "Career vs MIL: 7 G, 34.0 IP, 3.44 ERA, 28 K, 17 BB" and this
@@ -20,11 +21,11 @@ import { IconButton } from '../ui/control/IconButton.jsx'
 // from the lineup page's Starting pitcher card.
 //
 // ONE SHELL, ANY FACET. The sheet is handed a `facet` (api/boxlines/facets.js)
-// — a club, a park, a month, day or night — and titles itself from `kicker`
+// — a club, a park, a month, day or night — and titles itself from `note`
 // and `title`. Both default to the club case, which is what the two doors
 // shipped so far ask for, so a caller that only wants "him against the
 // Brewers" still passes opponentId/opponentName and nothing else. "Box Lines"
-// is the INTERNAL name for this drilldown and never renders: the kicker says
+// is the INTERNAL name for this drilldown and never renders: the note says
 // "Game lines · {facet}", the vocabulary the body copy under it already uses.
 //
 // SPOILER FOOTING. This opens from the lineup page, a scoring surface, and
@@ -78,7 +79,7 @@ export function BoxLinesSheet({
   opponentName,
   facet = null,
   list = null,
-  kicker = 'Game lines · regular season',
+  note = 'Game lines · regular season',
   title,
   footNote = null,
   headline,
@@ -108,20 +109,8 @@ export function BoxLinesSheet({
     [personId, group, cutoff, facetKey],
   )
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const closeRef = useRef(null)
-  useEffect(() => {
-    const trigger = document.activeElement
-    closeRef.current?.focus()
-    return () => {
-      if (trigger instanceof HTMLElement) trigger.focus()
-    }
-  }, [])
+  useDialogFocus(closeRef, onClose)
 
   const rows = query.data
   const failed = !query.loading && rows === null
@@ -133,12 +122,12 @@ export function BoxLinesSheet({
     [listing, rows, list, group],
   )
   // Once a group is picked the sheet says which one, in all three places a
-  // reader reads: the kicker, the heading and the headline — which is the
+  // reader reads: the note, the heading and the headline — which is the
   // entry's own line, verbatim, the same contract a door's headline keeps.
   const heading = picked
     ? list.title(playerSurname, picked.name)
     : (title ?? `${playerSurname} vs the ${opponentName}`)
-  const kick = picked ? `Game lines · ${picked.name}` : kicker
+  const headNote = picked ? `Game lines · ${picked.name}` : note
   // A PICKED GROUP GETS THE WHOLE LINE, not the entry's two figures. The entry
   // is one row of a comparison and says what a column has room for; this is
   // where the reader came FOR the detail, so it folds the same rows into the
@@ -173,7 +162,7 @@ export function BoxLinesSheet({
                   ‹ Back
                 </button>
               )}
-              <p className="boxlines__kicker">{kick}</p>
+              <p className="boxlines__note">{headNote}</p>
               <h2 className="sheet__title boxlines__title">{heading}</h2>
             </div>
             <IconButton ref={closeRef} onClick={onClose} label="Close">

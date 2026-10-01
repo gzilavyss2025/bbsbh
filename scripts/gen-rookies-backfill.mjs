@@ -36,8 +36,8 @@ import { findCrossingSeason, crossingDateFromGameLog } from './lib/rookie-crossi
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'rookies.json')
 
-// Run an async mapper across items with a small concurrency cap (be polite to
-// statsapi). Mirrors gen-milestones.mjs's helper.
+// Strict on purpose: a bare `--flag` is ignored, so a mistyped value flag falls
+// back to its default. The shared parseArgs in lib/args.mjs would make it `true`.
 function parseArgs(argv) {
   const args = {}
   for (const a of argv) {

@@ -1,11 +1,6 @@
-const DASH = '—'
+import { rate3 } from '../../api/person/shared.js'
 
-// ".262" style rate: three decimals, no leading zero (baseball convention),
-// same idiom as person.js's rate3.
-function rate3(x) {
-  if (!Number.isFinite(x)) return DASH
-  return x.toFixed(3).replace(/^0(?=\.)/, '')
-}
+const DASH = '—'
 
 // The player page's "Batted ball" body: the hitter analog of PitchMix — a
 // one-glance mix bar (each contact type a segment, colored by the

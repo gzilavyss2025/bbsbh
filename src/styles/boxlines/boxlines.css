@@ -31,7 +31,7 @@
   gap: var(--space-3);
 }
 
-.boxlines__kicker {
+.boxlines__note {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-label);

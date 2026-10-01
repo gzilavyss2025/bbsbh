@@ -151,52 +151,12 @@
   margin: 0;
 }
 
-.clubsseen__lede {
+.clubsseen__note {
   margin: var(--space-1) 0 var(--space-4);
   font-family: var(--font-body);
   font-size: var(--fs-small);
   line-height: var(--lh-prose);
   color: var(--text-muted);
-}
-
-/* Fixed 5-across on a phone, which is the widest a 30-mark league grid reads as
-   one block rather than as a list; auto-fill above it, where there is room for
-   the club name beside each mark to breathe. */
-.clubsseen__grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: var(--space-3) var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 740px) {
-  .clubsseen__grid {
-    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-  }
-}
-
-/* A club not in your book is not an absence to fix — it is just the rest of the
-   league, held back so the ones you have sat with come forward. Greyed by
-   TeamLogo's own `bw` filter plus this fade, and said in words for anyone not
-   reading the colour (the .sr-only line in the component). */
-.clubsseen__club {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  opacity: 0.34;
-}
-
-.clubsseen__name {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  line-height: var(--lh-snug);
-  text-align: center;
-  color: var(--text-caption);
 }
 
 /* ---- the stamp collection card (screens/logbook/StampCollection.jsx) ----

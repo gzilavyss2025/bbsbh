@@ -228,64 +228,6 @@ export async function deleteClips(gamePk, playIds, { idb = globalThis.indexedDB 
   )
 }
 
-// Drop one game entirely — leaving Express Lane, or reclaiming space. The clip
-// index survives it, so re-entering the same game re-stages with no lookups.
-export async function clearGame(gamePk, { idb = globalThis.indexedDB } = {}) {
-  const ids = await stagedPlayIds(gamePk, { idb })
-  if (!ids.size) return true
-  return (await deleteClips(gamePk, ids, { idb })) === ids.size
-}
-
-// How much of one game is on the disk, in bytes.
-//
-// Safe to show, and the neighbouring figure is not. A byte total states how
-// much film is held; a COUNT of staged clips states how many plate appearances
-// the game has, which states whether it went to extra innings (ADR-0008). So
-// this returns bytes and there is deliberately no `stagedCount` beside it.
-export async function stagedBytes(gamePk, { idb = globalThis.indexedDB } = {}) {
-  return withStore(
-    idb,
-    'readonly',
-    (store, tx, done) => {
-      let request
-      try {
-        request = store.index(GAME_INDEX).getAll(Number(gamePk))
-      } catch {
-        done(0)
-        return
-      }
-      request.onsuccess = () => {
-        let total = 0
-        for (const row of request.result ?? []) total += Number(row?.size ?? 0) || 0
-        done(total)
-      }
-      request.onerror = () => done(0)
-    },
-    0,
-  )
-}
-
-// THE STORAGE PROBE, read before staging starts.
-//
-// `navigator.storage.estimate()` is PADDED AND ROUNDED on WebKit, on purpose,
-// so a site cannot fingerprint the disk. It will therefore not warn that the
-// disk is nearly full, and a caller must not present these numbers as exact.
-// They are worth reading anyway, because they do catch the device with no room
-// for the staging lead at all — the case worth stopping for.
-//
-// `known: false` means the browser told us nothing. That is not a refusal.
-export async function storageHeadroom({ storage = globalThis.navigator?.storage } = {}) {
-  const unknown = { known: false, quota: null, usage: null, free: null }
-  if (!storage?.estimate) return unknown
-  try {
-    const { quota, usage } = (await storage.estimate()) ?? {}
-    if (typeof quota !== 'number' || typeof usage !== 'number') return unknown
-    return { known: true, quota, usage, free: Math.max(0, quota - usage) }
-  } catch {
-    return unknown
-  }
-}
-
 // Ask the browser to hold this origin's storage through disk pressure. Safari
 // grants it to a Home Screen web app, which is the target here. It is a
 // request rather than a guarantee, and a false answer changes nothing about

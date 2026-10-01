@@ -12,14 +12,9 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { monthDayName } from '../lib/dates.js'
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
-
-function monthDay(iso) {
-  const [, m, d] = (iso || '').split('-')
-  return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
-}
 
 // Every big leaguer currently on a minor-league rehab assignment, league-wide, as
 // a grid of player cards — a headshot header, the player's name + position, then
@@ -36,7 +31,7 @@ export function RehabPage() {
   const [filterTeamId, setFilterTeamId] = useState(null)
   const allPlayers = data?.players ?? []
   const players = filterByTeam(allPlayers, filterTeamId, (p) => p.orgId)
-  const updated = monthDay(data?.generatedAt?.slice(0, 10))
+  const updated = monthDayName(data?.generatedAt)
 
   return (
     <div className="screen">
@@ -120,8 +115,8 @@ export function RehabPage() {
                   {p.level && <span className="reg-pill">{p.level}</span>}
                 </div>
 
-                {monthDay(p.since) && (
-                  <p className="rehabcard__since">Since {monthDay(p.since)}</p>
+                {monthDayName(p.since) && (
+                  <p className="rehabcard__since">Since {monthDayName(p.since)}</p>
                 )}
               </Card>
             ))}

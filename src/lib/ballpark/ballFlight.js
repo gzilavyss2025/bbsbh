@@ -23,6 +23,7 @@
 // bends a little and a towering popup bends a lot because they really do.
 
 import { HOME } from './ballparkGeometry.js'
+import { round1 } from '../math/number.js'
 
 // At or under this launch angle the ball is on the ground, drawn dead straight:
 // a grounder's landing coordinate is where a fielder got to it, and a bow over
@@ -39,8 +40,6 @@ export const GROUND_BALL_MAX_ANGLE = 10
 // nothing can bow off the top of the drawing.
 export const MAX_BOW_FRACTION = 0.55
 export const MAX_BOW_FT = 130
-
-const round1 = (n) => Math.round(n * 10) / 10
 
 // How deep the curve departs from the straight home→landing chord, in the same
 // units (= feet). `launchAngle` is degrees off the ground, MLB's own sign

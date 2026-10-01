@@ -1,8 +1,10 @@
 import { eligibleHighlightForPlay } from '../../api/highlights.js'
+import { DASH } from '../../api/person/shared.js'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { HighlightSheet } from '../../components/playbyplay/HighlightSheet.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
+import { Card } from '../../components/ui/frame/Card.jsx'
 import { dateLabel, SectionHead, gameTitle, LogbookGameLink } from './statsShared.jsx'
 
 // The Logbook retrospective's ported First Scorebook sections — best
@@ -34,6 +36,7 @@ export function RetrospectiveSections({ retro, facts, loading, momentClips, open
                 key={`${p.gamePk}-${p.playerId}-${p.type}`}
                 gamePk={p.gamePk}
                 facts={facts}
+                card
                 className="logbookstats__performer"
               >
                 <span className="logbookstats__performerRank">#{index + 1}</span>
@@ -92,7 +95,7 @@ export function RetrospectiveSections({ retro, facts, loading, momentClips, open
             note="Totals count only the games you’ve stamped, turning your book into its own miniature season."
           />
           <div className="logbookstats__leaderboards">
-            <div className="logbookstats__leaders">
+            <Card as="div" frame="ledger" body="flush" className="logbookstats__leaders">
               <h3>At the plate</h3>
               <div className="logbookstats__leaderhead">
                 <span>Player</span><span>H</span><span>HR</span><span>RBI</span><span>AVG</span>
@@ -110,8 +113,8 @@ export function RetrospectiveSections({ retro, facts, loading, momentClips, open
                   <span>{p.average.toFixed(3).replace(/^0/, '')}</span>
                 </div>
               ))}
-            </div>
-            <div className="logbookstats__leaders">
+            </Card>
+            <Card as="div" frame="ledger" body="flush" className="logbookstats__leaders">
               <h3>On the mound</h3>
               <div className="logbookstats__leaderhead">
                 <span>Pitcher</span><span>IP</span><span>K</span><span>ER</span><span>WHIP</span>
@@ -126,10 +129,10 @@ export function RetrospectiveSections({ retro, facts, loading, momentClips, open
                   <span>{p.pitching.inningsPitched}</span>
                   <span>{p.pitching.strikeOuts}</span>
                   <span>{p.pitching.earnedRuns}</span>
-                  <span>{p.whip.toFixed(2)}</span>
+                  <span>{p.whip?.toFixed(2) ?? DASH}</span>
                 </div>
               ))}
-            </div>
+            </Card>
           </div>
         </section>
       )}
@@ -141,7 +144,7 @@ export function RetrospectiveSections({ retro, facts, loading, momentClips, open
             title="Starting pitchers"
             note="Every pitcher who started a game you’ve stamped — his record, his team’s record behind him, and his line in those starts alone."
           />
-          <div className="logbookstats__leaders">
+          <Card as="div" frame="ledger" body="flush" className="logbookstats__leaders">
             <div className="logbookstats__leaderhead">
               <span>Pitcher</span><span>GS</span><span>Record</span><span>Team</span><span>ERA</span>
             </div>
@@ -155,14 +158,14 @@ export function RetrospectiveSections({ retro, facts, loading, momentClips, open
                 <span>{p.gamesStarted}</span>
                 <span>{p.wins}–{p.losses}</span>
                 <span>{p.teamWins}–{p.teamLosses}</span>
-                <span>{p.era.toFixed(2)}</span>
+                <span>{p.era?.toFixed(2) ?? DASH}</span>
                 <small className="logbookstats__leaderdetail">
                   {p.pitching.hits} H, {p.pitching.runs} R, {p.pitching.earnedRuns} ER, {p.pitching.baseOnBalls} BB,{' '}
                   {p.pitching.strikeOuts} SO · {Math.round(p.avgPitches)} pitches/start
                 </small>
               </div>
             ))}
-          </div>
+          </Card>
         </section>
       )}
 
@@ -173,7 +176,7 @@ export function RetrospectiveSections({ retro, facts, loading, momentClips, open
             title="Bullpen arms"
             note="Every reliever who pitched in a game you’ve stamped, across every appearance you’ve logged."
           />
-          <div className="logbookstats__leaders">
+          <Card as="div" frame="ledger" body="flush" className="logbookstats__leaders">
             <div className="logbookstats__leaderhead">
               <span>Pitcher</span><span>G</span><span>SV</span><span>HLD</span><span>ERA</span>
             </div>
@@ -187,14 +190,14 @@ export function RetrospectiveSections({ retro, facts, loading, momentClips, open
                 <span>{p.appearances}</span>
                 <span>{p.saves}</span>
                 <span>{p.holds}</span>
-                <span>{p.era.toFixed(2)}</span>
+                <span>{p.era?.toFixed(2) ?? DASH}</span>
                 <small className="logbookstats__leaderdetail">
                   {p.pitching.hits} H, {p.pitching.runs} R, {p.pitching.earnedRuns} ER, {p.pitching.baseOnBalls} BB,{' '}
                   {p.pitching.strikeOuts} SO
                 </small>
               </div>
             ))}
-          </div>
+          </Card>
         </section>
       )}
     </>

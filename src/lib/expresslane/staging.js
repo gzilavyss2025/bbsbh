@@ -68,11 +68,6 @@
 // would fire about once a game and erode into the fallback the gate was built
 // to remove.
 
-// Where a job is. `blocked` is the world's doing — a full disk, or a host that
-// has stopped answering. `paused` is the scorer's. Keeping them apart is what
-// lets the surface say something true about which one happened.
-export const JOB_STATES = ['idle', 'running', 'paused', 'blocked', 'complete']
-
 // What the gate says about one row. Only two of these hold the cursor.
 export const GATE_REASONS = [
   'ready', // the bytes are here

@@ -63,7 +63,7 @@
 /* The copy editor: the admin types and previews natural-case copy, so the
    inputs, help/lede prose, and the modal preview's body prose must render as
    typed. The field labels, group titles, and preview title stay uppercase. */
-#root .admincopy__lede,
+#root .admincopy__note,
 #root .admincopy__help,
 #root .admincopy__input,
 #root .admincopy__historyWhen,

@@ -1,5 +1,5 @@
 import { ballparkFor } from './ballparkData.js'
-import { ballparkStampArt, fieldIds, resolvePhoto, venueKey } from './ballparkArt.js'
+import { fieldIds, resolvePhoto, venueKey } from './ballparkArt.js'
 
 // What prints on one Game Log stamp-sheet slot, and what names it — shared by
 // the grid itself (components/logbook/StampSheet.jsx's PostageStamp) and the
@@ -20,9 +20,7 @@ export function resolveStampArt(slot, park, t, { full = false } = {}) {
   // header for why this fallback (raw feed name for an uncatalogued park) is
   // the right one.
   const name = park && slot.venueName ? ballparkFor(slot.venueName)?.name || slot.venueName : ''
-  const art = name
-    ? (ballparkStampArt(name) ?? resolvePhotoArt(name, t, full))
-    : null
+  const art = name ? resolvePhotoArt(name, t, full) : null
   const caption = park ? slot.venueName || slot.label : slot.label
   return { name, art, caption }
 }

@@ -2,7 +2,7 @@ import { lazy, Suspense, useMemo, useState } from 'react'
 import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
-import { useKeepAwakePreference } from '../hooks/preferences/useKeepAwakePreference.js'
+import { usePreferences } from '../hooks/preferences/usePreferences.js'
 import { gameSeriesHref, sectionToStep, stepToSection } from '../lib/route.js'
 import { selectGameStatus } from '../api/select.js'
 import { filmCanExist } from '../api/expresslane/eligibility.js'
@@ -127,7 +127,8 @@ export function GameView({ game, section, onSection }) {
   // (battery cost of an always-on screen), persisted like the Game Score
   // preference; only actually held while the game is Live, released the rest
   // of the time (pregame staging, Final) regardless of the preference.
-  const { keepAwake, setKeepAwake } = useKeepAwakePreference()
+  const { keepAwake, set } = usePreferences()
+  const setKeepAwake = (value) => set('keepAwake', Boolean(value))
   const isLive = feed?.gameData?.status?.abstractGameState === 'Live'
   useWakeLock(keepAwake && isLive)
 

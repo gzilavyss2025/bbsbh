@@ -108,14 +108,11 @@
   gap: var(--space-3);
 }
 
-.logbookstats__splits div {
+.logbookstats__split {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
 }
 
 .logbookstats__splits span {
@@ -147,15 +144,12 @@
   gap: var(--space-3);
 }
 
-.logbookstats__streaks article {
+.logbookstats__streak {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-4) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
   text-align: center;
 }
 
@@ -306,10 +300,6 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  text-align: left;
 }
 
 .logbookstats__performerRank {
@@ -437,13 +427,6 @@
   }
 }
 
-.logbookstats__leaders {
-  overflow: hidden;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-}
-
 .logbookstats__leaders h3 {
   margin: 0;
   padding: var(--space-2) var(--space-3);
@@ -530,16 +513,13 @@
   gap: var(--space-2);
 }
 
-.logbookstats__records > div {
+.logbookstats__record {
   display: grid;
   grid-template-columns: 26px minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-2);
   min-height: 50px;
   padding: var(--space-2) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
 }
 
 .logbookstats__records span {

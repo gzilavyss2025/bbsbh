@@ -32,6 +32,7 @@ import { selectCatchUpTarget, selectLiveHalf } from '../src/api/liveEdge.js'
 import { stepCommitReady } from '../src/api/playbyplay.js'
 import { catchUpMarkIn, offerCatchUp } from '../src/hooks/revealProgressCore.js'
 import { REVEAL_MARK_PREFIX } from '../src/lib/account/revealOwner.js'
+import { fakeStorage } from './helpers/fakeStorage.js'
 
 // A feed carrying nothing but the two structural facts these readers use: the
 // coarse game state and the linescore's own live inning. No runs anywhere in
@@ -128,17 +129,6 @@ test('entries with no plate appearance in them are not a half', () => {
 })
 
 // ------------------------------------------------------------- catch up to live
-
-function fakeStorage(initial = {}) {
-  const data = { ...initial }
-  return {
-    data,
-    getItem: (k) => (k in data ? data[k] : null),
-    setItem: (k, v) => {
-      data[k] = String(v)
-    },
-  }
-}
 
 test('catching up goes THROUGH the ratchet — forward only', () => {
   const key = `${REVEAL_MARK_PREFIX}777`

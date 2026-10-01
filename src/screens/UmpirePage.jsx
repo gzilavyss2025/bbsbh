@@ -13,8 +13,8 @@ import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Button } from '../components/ui/control/Button.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { monthDayName } from '../lib/dates.js'
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const TOP_VENUES_LIMIT = 5
 const HP_RECORDS_LIMIT = 10
 
@@ -28,11 +28,6 @@ const CTX_FULL = {
   L: 'League Championship Series',
   W: 'World Series',
   A: 'All-Star Game',
-}
-
-function monthDay(iso) {
-  const [, m, d] = (iso || '').split('-')
-  return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
 }
 
 // Every one of the 30 MLB clubs, ranked by games involving that club this
@@ -244,7 +239,7 @@ export function UmpirePage({ id }) {
                   className={`umpage__row ${isHpRow ? 'umpage__row--hp' : ''}`}
                 >
                   <span className="umpage__role">{g.role}</span>
-                  <span className="umpage__date">{monthDay(g.date)}</span>
+                  <span className="umpage__date">{monthDayName(g.date)}</span>
                   <button
                     type="button"
                     className="plink umpage__matchup"

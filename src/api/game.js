@@ -4,7 +4,8 @@
 import { getJson } from './statsapi.js'
 import { SPORT_LABEL, MILB_LEVELS, teamAbbr } from '../lib/teams.js'
 import { applyJsonPatch } from '../lib/jsonPatch.js'
-import { num, outsToIp } from './person/shared.js'
+import { num } from './person/shared.js'
+import { ipToOuts, outsToIp } from '../lib/math/innings.js'
 
 // `options.fields` (array or comma-string) opts a caller into a pruned
 // response — see PAST_GAME_FEED_FIELDS below for the one such caller. Omitted
@@ -509,11 +510,6 @@ export async function fetchPitcherLastGame(personId, season, cutoffDate, cutoffG
 // not "12.2" from naive decimal addition, which would read as 12 innings and 2
 // tenths). Returns null when he hasn't faced this opponent yet this season.
 // ---------------------------------------------------------------------------
-
-function ipToOuts(ip) {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return num(whole) * 3 + num(frac[0])
-}
 
 export async function fetchPitcherSeasonVsOpponent(personId, season, opponentTeamId, cutoffDate, sportId = 1) {
   if (!personId || !season || !opponentTeamId) return null
