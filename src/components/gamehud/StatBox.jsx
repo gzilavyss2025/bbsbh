@@ -12,13 +12,13 @@ import { Card } from '../ui/frame/Card.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PerformerCard } from '../player/PerformerCard.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 
-// The half's three Statcast superlatives, resolved to the "baseball card"
-// shape PerformerCard renders — same resolveCardPlayer lookup the box score's
-// whole-game superlatives and the day recap's Statcast Leaders use, so a
-// player with no boxscore entry (shouldn't happen; matchup.pitcher/batter are
-// always real game participants) degrades the same way theirs does: dropped
-// rather than shown with no name/headshot.
+// The half's three Statcast superlatives, resolved to the "baseball card" shape PerformerCard
+// renders — same resolveCardPlayer lookup the box score's whole-game superlatives and the day
+// recap's Statcast Leaders use, so a player with no boxscore entry (shouldn't happen;
+// matchup.pitcher/batter are always real game participants) degrades the same way theirs does:
+// dropped rather than shown with no name/headshot.
 function halfStatcastCards(feed, d) {
   return [
     d.maxVelo != null && {
@@ -156,12 +156,12 @@ export function StatBox({
                 return (
                   <div className="halfcast">
                     {cards.map(({ label, entry }) => (
-                      <div className="halfcast__row" key={label}>
+                      <Stack gap="tight" className="halfcast__row" key={label}>
                         <span className="halfcast__label">{label}</span>
                         <ul className="playerline__list">
                           <PerformerCard entry={entry} />
                         </ul>
-                      </div>
+                      </Stack>
                     ))}
                   </div>
                 )
@@ -290,7 +290,7 @@ export function AbsRow({ teamId, abbr, outcomes, showOpenPips = true }) {
         </span>
       </button>
       {expanded && hasChallenges && (
-        <ol className="abs__detail">
+        <Stack gap="tight" as="ol" className="abs__detail">
           {outcomes.map((o, i) => (
             <li key={i} className="abs__detailrow">
               <span className="abs__detailhalf">
@@ -304,7 +304,7 @@ export function AbsRow({ teamId, abbr, outcomes, showOpenPips = true }) {
               </span>
             </li>
           ))}
-        </ol>
+        </Stack>
       )}
     </div>
   )

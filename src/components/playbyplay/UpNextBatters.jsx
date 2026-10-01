@@ -1,6 +1,7 @@
 import { selectDueUpNow } from '../../api/dueup.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // Who's due up to face the entering pitcher, BEFORE any of this half is
 // revealed — three headshot columns, same "entering the half" spoiler-safety
@@ -17,12 +18,12 @@ export function UpNextBatters({ feed, inning, half, revealedThrough, teamId }) {
       <span className="upnext__title">Due up</span>
       <div className="upnext__row">
         {info.batters.map((b) => (
-          <div className="upnext__col" key={b.id}>
+          <Stack gap="tight" className="upnext__col" key={b.id}>
             <Headshot personId={b.id} name={b.last} teamId={teamId} className="upnext__shot" />
             <span className="upnext__name">
               <PlayerLink id={b.id}>{b.last}</PlayerLink>
             </span>
-          </div>
+          </Stack>
         ))}
       </div>
     </div>

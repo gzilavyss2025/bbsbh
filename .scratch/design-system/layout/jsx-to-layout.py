@@ -3,8 +3,8 @@
 
 usage: jsx-to-layout.py FILE PART CLASS=GAP[:as] ...   (PART is Stack, Cluster or Grid)
 
-Finds each JSX element whose className is EXACTLY the class (one static string
-and nothing else), swaps the opening tag, and swaps the matching closing tag by
+Finds each JSX element whose className is a static string holding the class
+(other plain classes beside it are kept as written), swaps the opening tag, and swaps the matching closing tag by
 counting nested same-name tags. Refuses when the opening tag has other props,
 when the closing tag cannot be matched, or when the class is not found. It
 never touches the CSS: that is a separate, reviewed edit.
@@ -18,7 +18,8 @@ for spec in specs:
     gap, _, as_ = rest.partition(':')
     count = 0
     while True:
-        m = re.search(r'<([a-z]+)\s+className="%s"\s*>' % re.escape(cls), text)
+        key = r'(?:\s+key=\{[^{}]*\})?'
+        m = re.search(r'<([a-z]+)(%s)\s+className="((?:[\w-]+ )*%s(?: [\w-]+)*)"(%s)\s*>' % (key, re.escape(cls), key), text)
         if not m:
             break
         tag = m.group(1)
@@ -43,7 +44,7 @@ for spec in specs:
             sys.exit(f'{path}: .{cls} is a <{tag}>; pass :{tag} to say so')
         attr = f' as="{tag}"' if tag != 'div' else ''
         gapattr = f' gap="{gap}"' if gap != ('base' if part == 'Stack' else 'snug') else ''
-        opening = f'<{part}{gapattr}{attr} className="{cls}">'
+        opening = f'<{part}{gapattr}{attr}{m.group(2)} className="{m.group(3)}"{m.group(4)}>'
         text = text[:m.start()] + opening + text[m.end():last.start()] + f'</{part}>' + text[last.end():]
         count += 1
     if not count:

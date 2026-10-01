@@ -13,6 +13,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../../lib/headerTheme.js'
 import { StruckLine } from '../scoring/StruckLine.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // The fielding team's defensive alignment ENTERING this half, drawn as the
 // scorebook diamond and captioned with the fielding side. Shows the state at
@@ -219,7 +220,7 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
         </button>
       )}
       {(bare || open) && (
-        <div className="entering__teams">
+        <Stack className="entering__teams">
           {leadSide != null ? (
             renderTeam(shown)
           ) : (
@@ -244,7 +245,7 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
               {teamFor(otherSide).name} lineup ›
             </button>
           )}
-        </div>
+        </Stack>
       )}
     </Card>
   )
@@ -275,7 +276,7 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
         <span className="lineupteam__namelabel">{name} Lineup</span>
         <TeamLogo teamId={teamId} name={name} size={20} variant="mono" crop="bar" className="sectionhead__mark" />
       </h5>
-      <ol className="entering__list">
+      <Stack gap="tight" as="ol" className="entering__list">
         {slots.map((s) => {
           const cur = s.entries[s.entries.length - 1] // standing occupant
           const upNextLabel = upNextLabels?.get(s.slot)
@@ -311,7 +312,7 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
             </li>
           )
         })}
-      </ol>
+      </Stack>
     </div>
   )
 }

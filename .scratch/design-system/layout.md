@@ -254,6 +254,7 @@ family and ships green. The tools, all in `.scratch/design-system/layout/`:
 | slice | rules | JSX sites | result |
 | --- | ---: | ---: | --- |
 | S1: awards history and postseason history | 4 | 6 | geometry identical on `/awards` and `/postseason-history`, 4 pages, 0 differences |
+| S2: `12-sealbox.css` (the scoring surfaces) | 7 | 9 | real surfaces identical on 4 anchor-game routes and states, and a synthetic check identical on all 7 (see below) |
 
 S1 moved `.awardhistory__years` (loose, 3 sites), `.awardhistory__leaguecol`,
 `.awardhistory__leagueyears` and `.pshistory__season` (base). `.awardhistory__leaguecol`
@@ -261,3 +262,38 @@ keeps its `min-width: 0` in its own rule; the other three rules were deleted.
 The By Year view of `/awards` (the third `__years` site) was checked for
 computed style only (flex, column, 16px), because its click state is not in the
 baseline run. 75 safe candidates remain.
+
+S2 moved `.abs__detail` (an `ol`), `.upnext__col`, `.halfcast__row`,
+`.pitcherhandoff` (2 sites), `.dueup__col`, `.entering__teams` and
+`.entering__list` (an `ol`). `.pitcherhandoff` was deleted outright. The other
+six keep the declarations that are theirs: `align-items`, `text-align`,
+`min-width` and padding. `.abs__detail` and `.entering__list` lost their
+`list-style` and `margin` to `Stack`'s list reset, and keep their own padding,
+which wins on order because `stack.css` loads first. These are scoring
+surfaces, but `Stack` renders nothing and reads no data, so no value reaches
+the DOM earlier or later than before. `check-seal-scope` and the spoiler
+manifest guard still pass.
+
+How S2 was checked. The anchor game (823035) comes from `e2e/fixtures/mock-api.js`
+with the reveal mark preset (`geom.mjs` takes `MOCK=1`, `LS=…`, `STEPS=…`).
+- **Real surfaces.** `dueup__col`, `pitcherhandoff` and `entering__*` render on
+  `top6`, `top7` and `bottom3`, and `entering__*` also on the Lineups tab. Each
+  route at 390 and 760px has zero differences (up to 4,732 elements per page).
+  Two runs of the same unchanged page also diff to zero, so the capture is
+  stable.
+- **Not reached.** `abs__detail`, `upnext__col` and `halfcast__row` did not
+  render in any state I found in the anchor game (no ABS challenge in the
+  fixture, no Statcast cards, and the due-up card only shows in a state I did
+  not reach). `synth.mjs` covers all seven instead: it builds each class on a
+  test element with the same children, once with the old markup and once with
+  the Stack classes, and compares rects and computed styles. 28 elements, zero
+  differences. **That proves the CSS is equivalent, not that the real page
+  draws it.** The three classes are plain `div` and `ol` hosts like the four
+  that were reached, so I rate the risk low.
+
+`StatBox.jsx` sat at the 600-line cap, so the new import line pushed it to 601.
+I re-wrapped one comment (same words, 6 lines to 5) rather than widen the
+budget in `scripts/check-file-size.mjs`. A real fix is to split the file.
+
+68 safe candidates remain.
+

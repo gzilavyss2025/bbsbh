@@ -241,12 +241,7 @@
    dots. Inset panel matches the row's own kraft-tinted surface (same idiom as
    .rolling__cell) rather than the card's plain paper. */
 .abs__detail {
-  list-style: none;
-  margin: 0;
   padding: var(--space-1) var(--space-3) var(--space-2h);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
   background: var(--paper-1);
 }
 .abs__detailrow {
@@ -694,10 +689,7 @@
   gap: var(--space-2h);
 }
 .upnext__col {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
   text-align: center;
   min-width: 0;
 }
@@ -786,9 +778,6 @@
   overflow: hidden;
 }
 .halfcast__row {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
   padding: var(--space-2h);
 }
 .halfcast__row + .halfcast__row {
@@ -864,15 +853,11 @@
 /* The two pitching-handoff cards (PitcherHandoffCard.jsx) — a departing
    pitcher's line frozen at the moment he's pulled, and, once his inherited
    runners resolve, his settled line. Same .pitchernotice--pbp outer chrome
-   as the tier-1 cards, stacked into a column: the .pitchernotice header row
+   as the tier-1 cards, stacked into a column by Stack (PitcherHandoffCard.jsx):
+   the .pitchernotice header row
    (reused as-is, nested rather than applied to the outer element, since a
    flex row can't also hold a full-width table below it) over the Arms tab's
    own .pitchers__grid table (20-charts.css). */
-.pitcherhandoff {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
 /* .pitchers__grid's table-layout:fixed splits its 10 columns evenly, sized
    for the Arms tab's FULL page width — nested in this narrower card on a
    phone, that same split left too little room per numeric column (confirmed
@@ -1246,10 +1231,7 @@
   gap: var(--space-2h);
 }
 .dueup__col {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
   text-align: center;
   min-width: 0;
 }
@@ -1346,9 +1328,6 @@
    with its number/position never has to wrap in a cramped column on a phone. */
 .entering__teams {
   padding: var(--space-3) var(--space-2h);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
 }
 
 /* Same navy-bar recipe as .halfdefense__title — a themed club recolors it via
@@ -1391,12 +1370,7 @@
 }
 
 .entering__list {
-  margin: 0;
   padding: 0 var(--space-2);
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
 }
 
 .entering__row {
