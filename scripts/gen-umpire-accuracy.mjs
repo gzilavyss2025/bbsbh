@@ -367,7 +367,7 @@ for (const { sportId, level } of LEVELS) {
       if (!hp?.official?.id) continue
       targets.push({
         // The season comes from the game, never the clock or the window (#1200).
-        season: Number(g.season),
+        season: Number(g.season ?? g.officialDate.slice(0, 4)),
         gamePk: g.gamePk,
         date: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
         level,

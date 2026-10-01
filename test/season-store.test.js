@@ -94,7 +94,35 @@ test('a season group dumps an older season once to its own frozen file', async (
 
   // A change to a frozen season fails loudly, so it is never dropped in silence.
   reopened.prepare('UPDATE foul_team_totals SET games = 163 WHERE season = 2026').run()
-  await assert.rejects(dumpGroup(reopened, 'fouls', dir), /frozen/)
+  await assert.rejects(dumpGroup(reopened, 'fouls', dir), /frozen.*REFREEZE=1/)
+  // A deliberate change (a backfill, a new column) re-freezes from the rows in
+  // memory, so nothing has to be deleted to get there.
+  process.env.REFREEZE = '1'
+  try {
+    await dumpGroup(reopened, 'fouls', dir)
+  } finally {
+    delete process.env.REFREEZE
+  }
+  assert.match(rd(join(dir, 'fouls-2026.sql'), 'utf8'), /VALUES \(158, 2026, 163, 4000, 1500\)/)
+})
+
+test('a frozen season never goes back into the live dump, even when the newest season empties', async () => {
+  const { openDb, dumpGroup } = await import('../scripts/lib/db.js')
+  const { mkdtempSync, readFileSync: rd } = await import('node:fs')
+  const { tmpdir } = await import('node:os')
+  const { join } = await import('node:path')
+  const dir = mkdtempSync(join(tmpdir(), 'dump-'))
+  const db = await openDb(dir)
+  const add = db.prepare('INSERT INTO foul_team_totals (season, team_id, games, fouls, two_strike_fouls) VALUES (?, ?, ?, ?, ?)')
+  add.run(2026, 158, 162, 4000, 1500)
+  add.run(2027, 158, 1, 30, 10)
+  await dumpGroup(db, 'fouls', dir)
+  // The one 2027 game is evicted (--recheck) or its season rebuilt.
+  db.prepare('DELETE FROM foul_team_totals WHERE season = 2027').run()
+  await dumpGroup(db, 'fouls', dir)
+  assert.equal(rd(join(dir, 'fouls.sql'), 'utf8'), '')
+  const rows = (await openDb(dir)).prepare('SELECT season, games FROM foul_team_totals').all()
+  assert.deepEqual(rows.map((r) => [r.season, r.games]), [[2026, 162]])
 })
 
 test('every season group\'s committed dumps survive an openDb round trip byte for byte', async () => {

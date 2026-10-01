@@ -385,6 +385,7 @@ if (args['export-only']) {
   const season = Number(
     args.season ?? db.prepare('SELECT MAX(season) AS s FROM abs_ingested_games').get().s,
   )
+  if (!season) throw new Error('no season on file: pass --season')
   let clubs = 0
   let people = 0
   for (const { sportId, level } of activeLevels) {
@@ -455,7 +456,7 @@ if (args['export-only']) {
         const hp = (g.officials ?? []).find((o) => o.officialType === 'Home Plate')
         targets.push({
           // The season comes from the game, never the clock (#1200).
-          season: Number(g.season),
+          season: Number(g.season ?? g.officialDate.slice(0, 4)),
           gamePk: g.gamePk,
           date: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
           level,

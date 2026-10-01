@@ -87,10 +87,14 @@ is the same as `umpires/` and `spray/`: a frozen season must not count as stale.
 **Per-season dumps.** A SQLite group with `bySeason: true` (`scripts/lib/db.js`)
 dumps its newest season to the live `<group>.sql`. The first dump that sees a
 newer season writes each older season once to `<group>-<season>.sql`, and
-`openDb()` loads them all. A later run that changes a frozen season's rows
-fails, so a change is never dropped in silence: delete the frozen file on
-purpose to freeze it again. No frozen file exists until a newer season has
-rows. `test/season-store.test.js` pins this.
+`openDb()` loads them all. A season with a frozen file never goes back into
+the live file, even when the newest season loses its last row. A later run
+that changes a frozen season's rows fails, so a change is never dropped in
+silence. When the change is on purpose (a backfill, a new column), rerun with
+`REFREEZE=1`: it rewrites the frozen file from the rows in memory. Never delete
+a frozen file to get there, because `openDb()` loads that season only from it.
+No frozen file exists until a newer season has rows. `test/season-store.test.js`
+pins this.
 
 **Fouls.** `season` is now the first column of the key of every accumulating
 foul table, and of each `ON CONFLICT`. `foul_batter_pa_high`,

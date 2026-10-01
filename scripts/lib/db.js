@@ -115,7 +115,10 @@ export const GROUPS = {
 export async function openDb(dir = dataDir) {
   const db = new DatabaseSync(':memory:')
   db.exec(await readFile(schemaPath, 'utf8'))
-  const files = await readdir(dir).catch(() => [])
+  const files = await readdir(dir).catch((err) => {
+    if (err.code === 'ENOENT') return []
+    throw err
+  })
   for (const name of Object.keys(GROUPS)) {
     for (const f of [...files.filter((f) => isFrozenDump(name, f)).sort(), `${name}.sql`]) {
       const dump = await readOr(join(dir, f))
@@ -167,10 +170,12 @@ function dumpText(db, tables, season) {
 }
 
 // Re-dumps only the tables in `groupName` to its own file(s). Never touches
-// another group's dump. A season group (see GROUPS) writes its newest season
-// to the live file and freezes each older season once. A frozen season whose
-// rows changed is an error, not a silent drop: delete its file on purpose to
-// re-freeze it.
+// another group's dump. A season group (see GROUPS) freezes each season below
+// its newest once, and a season with a frozen file never goes back into the
+// live file — the two would replay the same rows twice. A frozen season whose
+// rows changed is an error, never a silent drop. When the change is on
+// purpose (a backfill, a new column), REFREEZE=1 rewrites the frozen file from
+// the rows in memory, which openDb already loaded from it.
 export async function dumpGroup(db, groupName, dir = dataDir) {
   const group = GROUPS[groupName]
   if (!group) throw new Error(`unknown dump group: ${groupName}`)
@@ -179,15 +184,18 @@ export async function dumpGroup(db, groupName, dir = dataDir) {
   const seasons = [
     ...new Set(group.tables.flatMap((t) => db.prepare(`SELECT DISTINCT season FROM ${t}`).all().map((r) => r.season))),
   ].sort((a, b) => a - b)
-  const newest = seasons.pop()
+  let live = ''
   for (const season of seasons) {
     const file = join(dir, `${groupName}-${season}.sql`)
     const text = dumpText(db, group.tables, season)
     const frozen = await readOr(file)
-    if (frozen == null) await writeFile(file, text)
-    else if (frozen !== text) throw new Error(`${file} is frozen, but this run changed its ${season} rows`)
+    if (frozen == null && season === seasons.at(-1)) live = text
+    else if (frozen == null || process.env.REFREEZE === '1') await writeFile(file, text)
+    else if (frozen !== text) {
+      throw new Error(`${file} is frozen, but this run changed its ${season} rows. On purpose? Rerun with REFREEZE=1.`)
+    }
   }
-  await writeFile(join(dir, `${groupName}.sql`), newest == null ? '' : dumpText(db, group.tables, newest))
+  await writeFile(join(dir, `${groupName}.sql`), live)
 }
 
 // Convenience for one-time/hand-run scripts that touch every group (the

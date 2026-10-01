@@ -393,7 +393,7 @@ export function exportPitchArsenal(db, hands = {}, season = null) {
   // `vs` keeps L and R on their own for the side filter.
   const types = new Map()
   for (const r of db
-    .prepare(`SELECT * FROM pitch_arsenal_totals ${where} ORDER BY person_id, level, code, stand, season`)
+    .prepare(`SELECT * FROM pitch_arsenal_totals ${where} ORDER BY season, person_id, level, code, stand`)
     .all(...params)) {
     const entry = pit[r.person_id] ?? (pit[r.person_id] = { name: r.name, teamId: r.team_id, mlb: [], aaa: [] })
     entry.name = r.name
@@ -567,8 +567,10 @@ async function writeArsenal(db, hands, season) {
   for (const store of [outDir, outPools]) await writeSeasons(store, season)
 }
 
-// all/{mlb,aaa}.json, the pool over every season. No all/ copy of any bucket (#1200).
-async function writeAllPools(db, hands) {
+// all/{mlb,aaa}.json over every season, with every season's hands (newest wins), #1200.
+async function writeAllPools(db, handsFor) {
+  const seasons = db.prepare('SELECT DISTINCT season FROM pitch_arsenal_ingested_games ORDER BY season').all()
+  const hands = Object.assign({}, ...(await Promise.all(seasons.map((r) => handsFor(r.season)))))
   for (const [level, body] of Object.entries(poolsOf(exportPitchArsenal(db, hands, null)))) {
     await writeJsonIfChanged(join(outPools, 'all', `${level}.json`), body)
   }
@@ -595,12 +597,8 @@ async function main() {
 
   // Throwing hands for the season being written, never the clock year (#1200).
   const handsBySeason = new Map()
-  const handsFor = async (season) => {
-    if (!handsBySeason.has(season)) {
-      const hands = await fetchPitcherHands(LEVELS.map((l) => l.sportId), season)
-      console.log(`resolved ${season} throwing hand for ${Object.keys(hands).length} pitchers`)
-      handsBySeason.set(season, hands)
-    }
+  const handsFor = (season) => {
+    if (!handsBySeason.has(season)) handsBySeason.set(season, fetchPitcherHands(LEVELS.map((l) => l.sportId), season))
     return handsBySeason.get(season)
   }
   // The seasons this run wrote rows for; none means nothing is written (ADR-0086).
@@ -612,7 +610,7 @@ async function main() {
       await writeArsenal(db, await handsFor(season), season)
       await writeCommand(db, await handsFor(season), season)
     }
-    await writeAllPools(db, await handsFor(Math.max(...touched)))
+    await writeAllPools(db, handsFor)
   }
 
   // Re-export the JSON view from the rows already on file, with no sweep. The
@@ -621,9 +619,9 @@ async function main() {
   // re-fetching every ingested game's feed to change nothing in the database.
   if (args['export-only']) {
     const season = Number(args.season ?? db.prepare('SELECT MAX(season) AS s FROM pitch_arsenal_ingested_games').get().s)
-    const hands = await handsFor(season)
-    await writeArsenal(db, hands, season)
-    await writeAllPools(db, hands)
+    if (!season) throw new Error('no season on file: pass --season')
+    await writeArsenal(db, await handsFor(season), season)
+    await writeAllPools(db, handsFor)
     console.log(`wrote pitch-arsenal/${season}/ (export only — no games swept)`)
     db.close()
     return
@@ -656,7 +654,7 @@ async function main() {
         const need = { arsenal: !doneArsenal.has(key), command: !doneCommand.has(key) }
         if (!need.arsenal && !need.command) continue
         // The season comes from the game, never the clock (#1200).
-        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: Number(g.season), need })
+        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: Number(g.season ?? g.officialDate.slice(0, 4)), need })
       }
     }
   }

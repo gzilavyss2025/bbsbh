@@ -956,6 +956,7 @@ async function main() {
   //   node scripts/gen-fouls.mjs --backfill-team-pitch-types [--season=2026]
   if (args['backfill-team-pitch-types']) {
     const season = Number(args.season ?? db.prepare('SELECT MAX(season) AS s FROM foul_ingested_games').get().s)
+    if (!season) throw new Error('no season on file: pass --season')
     const targets = wipeTeamPitchTypes(db, season)
     touched.add(season)
     console.log(`--backfill-team-pitch-types: rebuilding from ${targets.length} already-ingested games`)
@@ -1016,7 +1017,7 @@ async function main() {
       if (d.date !== g.officialDate) continue
       if (existing.has(g.gamePk)) continue
       // The season comes from the game, never the clock (#1200).
-      pending.push({ gamePk: g.gamePk, date: g.officialDate, season: Number(g.season) })
+      pending.push({ gamePk: g.gamePk, date: g.officialDate, season: Number(g.season ?? g.officialDate.slice(0, 4)) })
     }
   }
   console.log(`${startDate}..${endDate}: ${pending.length} un-ingested Final MLB regular-season games`)
