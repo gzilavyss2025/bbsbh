@@ -3,9 +3,10 @@
    wearing the same navy/gold SectionMasthead the rest of the app's card
    sections use (Bullpen Health, batting order, opposing defense, …) —
    .foulboard-block only adds page-specific tweaks on top of the shared
-   Card / SectionHead band rules. Reuses .standings/.ledger-wrap ledger styling
-   (same right-aligned mono figures, left-aligned .team cell) for the tables;
-   only the muted team abbreviation riding a player's name and the by-inning
+   Card / SectionHead band rules. Every board is a bare Table (system/table.css) in
+   that Card, so its cells, head row and row rules are the Table's; this file
+   keeps the left-aligned .team name cell, the favorite-team tint, the group
+   rows and the bleed. Only the muted team abbreviation riding a player's name and the by-inning
    rate bar are specific to this page. No note/description copy under any
    board's title — deliberate, so a board reads as data first, and every
    board's table/list bleeds to the card's own edges below (rather than
@@ -55,11 +56,10 @@
 /* Fouls per whiff's Most/Fewest split — one card, two columns. Stacked below
    740px (same breakpoint as .foultracker__pair above); side by side on
    desktop with a hairline divider between them, since these are two views of
-   one stat rather than two unrelated boards sharing a row. Deliberately NOT
-   `.ledger-wrap` for the inner scroll container — `.foulboard-block
-   .ledger-wrap` below bleeds a ledger-wrap edge-to-edge under the card's own
-   padding, which is right for a single full-width table but would blow a
-   half-width column out past its own column. */
+   one stat rather than two unrelated boards sharing a row. Each column's Table
+   is NOT a direct child of the card body, so the bleed below (`> .table`) does
+   not reach it: that rule is right for a single full-width table but would
+   blow a half-width column out past its own column. */
 .foulboard__whiffsplit {
   display: flex;
   flex-direction: column;
@@ -91,29 +91,21 @@
 .foulboard__whiffcol-hint {
   font-weight: var(--w-regular);
 }
-.foulboard__whiffcol-scroll {
-  overflow-x: auto;
-}
-.foulboard-block .ledger-wrap {
+/* The Table's wrap bleeds edge to edge under the card's own padding. */
+.foulboard-block .metric__body > .table {
   margin: 0 calc(-1 * var(--space-4));
 }
-/* A ledger-wrap that opens a card (no featured hero above it, e.g. Foul Rate
+/* A Table that opens a card (no featured hero above it, e.g. Foul Rate
    By Pitch Type, Team Fouls Per Game, Foul Rate By Inning) also cancels
    .metric__body's own top padding — otherwise the table floats in a band
    of blank paper under the masthead before its own header row starts. Scoped
    to :first-child so a table that follows a FoulFeatured hero (which owns its
    own bottom margin already) keeps its normal top breathing room. */
-.foulboard-block .metric__body > .ledger-wrap:first-child {
+.foulboard-block .metric__body > .table:first-child {
   margin-top: calc(-1 * var(--space-3));
 }
-.foulboard-block .metric__body > .ledger-wrap:last-child {
+.foulboard-block .metric__body > .table:last-child {
   margin-bottom: calc(-1 * var(--space-4));
-}
-.foulboard-block .ledger-wrap .standings.foulboard {
-  border-left: 0;
-  border-right: 0;
-  border-radius: 0;
-  box-shadow: none;
 }
 .foulboard-block .sgh-list {
   margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4));
@@ -148,7 +140,7 @@
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 /* The repeated Pitch/Foul%/Pitches column header under each pitch-family
-   band — same look as .standings thead th, just living in a <tbody> row
+   band — same look as the Table's head row, just living in a <tbody> row
    instead of the table's single <thead> so it can repeat per group. */
 .foulboard__subhead th {
   text-align: right;
@@ -167,9 +159,39 @@
    — the "significant gap between batters' and pitchers' own foul rates" row
    highlight. Reuses the umpire favor-meter's own "outlier" amber wash
    (.favormeter--outlier) rather than inventing a new accent, set per-<td>
-   (not the <tr> itself) — same convention as .standings tr.is-me above. */
-.standings tr.foulboard__row--outlier td {
+   (not the <tr> itself) — same convention as .foulboard tr.is-me below. */
+.foulboard tr.foulboard__row--outlier td {
   background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+}
+/* The ranked-name cell: left-aligned, in the body face, with the rank, name and
+   club in a row. The favorite club's row tints to its own accent
+   (--fav-accent, set inline by favRowProps), as it does on every ledger. */
+.foulboard .team {
+  text-align: left;
+}
+/* A head or a group band names its columns in words, and may wrap: the
+   Table's figures may not. */
+.foulboard th {
+  white-space: normal;
+}
+.foulboard td.team {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+.foulboard td.team,
+.foulboard td.team > * {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+}
+.foulboard tr.is-me td {
+  background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, transparent);
+}
+.foulboard tr.is-me .team {
+  color: var(--fav-accent, var(--field-deep));
 }
 .foulboard__team {
   font-family: var(--font-mono);
@@ -192,7 +214,7 @@
 /* Names never wrap in this table now, so the rank/team-abbr siblings can go
    back to simple vertical centering against the (single-line) name and the
    team-fouls table's logo, rather than the umpire table's wrap-safe
-   top-align (.standings .team > .umprank__rank/.foulboard__team above). */
+   top-align (.umprank .team > .umprank__rank, 38-umpire-pages.css). */
 .foulboard .team > .umprank__rank,
 .foulboard .team > .foulboard__team {
   align-self: center;
@@ -514,7 +536,7 @@
 .sgh-row:first-child {
   border-top: none;
 }
-/* Same favorite-team highlight as .standings tr.is-me (--fav-accent, set
+/* Same favorite-team highlight as .foulboard tr.is-me (--fav-accent, set
    inline from favoriteAccentColor()) — a fan's team tints the same way in
    this list as it does in every ledger table on the page. */
 .sgh-row.is-me {
