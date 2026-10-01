@@ -6,7 +6,7 @@
 // hold the rulebook still and ask what a win or a loss changed (momentum.mjs),
 // turn one club's roster into how much baseball each man saw
 // (exposure.mjs), and turn the accumulated rows plus the swept-games ledger
-// into public/data/abs-challenges.json (export.mjs).
+// into public/data/abs/{season}/abs-challenges.json (export.mjs).
 //
 // THE SEAM BETWEEN THEM IS THE DISCIPLINE THE WHOLE JOB RESTS ON. The database
 // stores FACTS — one row per challenge, one row per game — and every split the
@@ -30,6 +30,7 @@ export {
   umpireCallFor,
   buildRow,
   challengeRowsForGame,
+  clearSeasonRows,
   isPlayedGame,
   PLAYED_CODE,
   ROLES,

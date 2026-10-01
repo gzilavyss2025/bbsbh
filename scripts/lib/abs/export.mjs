@@ -1,4 +1,4 @@
-// THE ACCUMULATED ROWS, TURNED INTO public/data/abs-challenges.json — the
+// THE ACCUMULATED ROWS, TURNED INTO public/data/abs/{season}/abs-challenges.json — the
 // export half of the pure code behind gen-abs-challenges.mjs. Its other half,
 // scripts/lib/abs/rows.mjs, turns one Final game's feed into the rows this
 // reads.
@@ -434,6 +434,10 @@ function rolesByPlayer(rows) {
   return out
 }
 
+// ONE SEASON, OR ALL OF THEM (ADR-0086, #1200). Each file is cut from its own
+// season's rows; `season` null is the all/ file, the same cut over every row.
+const ofSeason = (list, season) => (season == null ? (list ?? []) : (list ?? []).filter((r) => r.season === season))
+
 // The whole report file. Rows and games arrive as they come out of SQLite
 // (snake_case columns); the split by level happens here so a caller never has
 // to know which levels are on file.
@@ -442,7 +446,9 @@ function rolesByPlayer(rows) {
 // roster call is in the other file (buildExposureExport), because this one is
 // fetched by every visitor to /abs-challenges and that one is fetched by the
 // board that asks the question.
-export function buildExport(rows, games, { season, generatedAt } = {}) {
+export function buildExport(allRows, allGames, { season, generatedAt } = {}) {
+  const rows = ofSeason(allRows, season)
+  const games = ofSeason(allGames, season)
   const levels = {}
   const names = [...new Set([...games.map((g) => g.level), ...rows.map((r) => r.level)])].sort()
   for (const level of names) {
@@ -487,7 +493,9 @@ export function buildExport(rows, games, { season, generatedAt } = {}) {
 // is nothing he had the opportunity to do.
 //
 // The whole split, and the rule it generalises to, is docs/adr/0076.
-export function buildExposureExport(rows, exposure, { season, generatedAt } = {}) {
+export function buildExposureExport(allRows, allExposure, { season, generatedAt } = {}) {
+  const rows = ofSeason(allRows, season)
+  const exposure = ofSeason(allExposure, season)
   const levels = {}
   for (const level of [...new Set((exposure ?? []).map((e) => e.level))].sort()) {
     const seen = exposureByPlayer((exposure ?? []).filter((e) => e.level === level))
@@ -546,37 +554,37 @@ export function buildExposureExport(rows, exposure, { season, generatedAt } = {}
 export const EXPOSURE_CLUB_LEVELS = ['MLB', 'AAA']
 
 export function buildExposureClubsExport(
-  rows,
-  exposure,
+  allRows,
+  allExposure,
   { season, generatedAt, levels = EXPOSURE_CLUB_LEVELS } = {},
 ) {
+  const rows = ofSeason(allRows, season)
+  const exposure = ofSeason(allExposure, season)
   const out = {}
   for (const level of levels) {
-    const roles = rolesByPlayerTeam((rows ?? []).filter((r) => r.level === level))
+    const roles = rolesByPlayerTeam(rows.filter((r) => r.level === level))
+    // Folded per man per club (exposureByPlayer): a no-op inside one season,
+    // and across seasons it adds his seasons for that club, never lists him twice.
+    const rowsByTeam = Map.groupBy(exposure.filter((x) => x.level === level && x.team_id != null), (x) => x.team_id)
     const byTeam = {}
-    for (const e of (exposure ?? []).filter((x) => x.level === level)) {
-      if (e.team_id == null) continue
-      const seen = {
-        pitches: e.pitches ?? null,
-        plateAppearances: e.plate_appearances ?? null,
-        catcherInnings: e.catcher_innings ?? null,
-        catcherStarts: e.catcher_starts ?? null,
+    for (const [teamId, teamRows] of rowsByTeam) {
+      for (const [playerId, seen] of exposureByPlayer(teamRows)) {
+        // Same gate as the folded file: a man with no opportunity at all supports
+        // no rate and cannot answer the never-challenged question either.
+        if (!hasExposure(seen)) continue
+        const calls = roles.get(`${teamId}:${playerId}`) ?? {}
+        const key = String(teamId)
+        byTeam[key] = byTeam[key] ?? []
+        byTeam[key].push({
+          playerId,
+          name: seen.name,
+          pitches: seen.pitches,
+          plateAppearances: seen.plateAppearances,
+          catcherInnings: seen.catcherInnings,
+          asBatter: calls.batter ?? 0,
+          asCatcher: calls.catcher ?? 0,
+        })
       }
-      // Same gate as the folded file: a man with no opportunity at all supports
-      // no rate and cannot answer the never-challenged question either.
-      if (!hasExposure(seen)) continue
-      const calls = roles.get(`${e.team_id}:${e.player_id}`) ?? {}
-      const key = String(e.team_id)
-      byTeam[key] = byTeam[key] ?? []
-      byTeam[key].push({
-        playerId: e.player_id,
-        name: e.name ?? '',
-        pitches: seen.pitches,
-        plateAppearances: seen.plateAppearances,
-        catcherInnings: seen.catcherInnings,
-        asBatter: calls.batter ?? 0,
-        asCatcher: calls.catcher ?? 0,
-      })
     }
     for (const list of Object.values(byTeam)) list.sort((a, b) => a.playerId - b.playerId)
     out[level] = { byTeam }

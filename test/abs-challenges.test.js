@@ -51,6 +51,7 @@ import {
   buildExposureClubsExport,
   EXPOSURE_CLUB_LEVELS,
   MISS_BANDS,
+  clearSeasonRows,
 } from '../scripts/lib/abs/index.mjs'
 import {
   levelsIn,
@@ -1077,7 +1078,7 @@ test('exposureRates: no denominator is null, which is not the same as no challen
 // summarizeLevel — the export splits.
 // --------------------------------------------------------------------------
 const row = (over) => ({
-  game_pk: 1, seq: 0, level: 'MLB', date: '2026-04-01', team_id: 100, opp_id: 200,
+  game_pk: 1, seq: 0, season: 2026, level: 'MLB', date: '2026-04-01', team_id: 100, opp_id: 200,
   side: 'away', player_id: 11, player_name: 'A Hitter', role: 'batter',
   outcome: 'success', inning: 3, half: 'top', umpire_id: 7, umpire_name: 'An Umpire',
   call_type: 'strike', favor: -0.5, miss_inches: 0.5, ...over,
@@ -2337,4 +2338,59 @@ test('roleSpan: the two numbers that let a stat line replace a panel', () => {
   // Nothing to measure means no sentence, rather than an empty one.
   assert.equal(roleSpan(summary, 'catcher'), null)
   assert.equal(roleSpan(null, 'pitcher'), null)
+})
+
+// --- the season store (ADR-0086, #1200) ----------------------------------------
+// Before, the three files were cut from EVERY row on file with no season
+// filter: the first 2027 game would have joined the 2026 report, and a club's
+// board would have listed 2026 and 2027 players together (#1168).
+
+const r26 = [row({}), row({ seq: 1, outcome: 'fail' })]
+const g26 = [game({ challenges: 2 })]
+const e26 = [seenRow({})]
+const r27 = [row({ game_pk: 2, season: 2027, date: '2027-03-25' })]
+const g27 = [game({ game_pk: 2, season: 2027, date: '2027-03-25' })]
+const e27 = [seenRow({ season: 2027, pitches: 10, plate_appearances: 3 })]
+const cut = (season) => ({ season, generatedAt: 'now' })
+
+test('a 2027 game leaves the 2026 files alone, and 2027 holds only that game', () => {
+  const rows = [...r26, ...r27]
+  const games = [...g26, ...g27]
+  const seen = [...e26, ...e27]
+  assert.deepEqual(buildExport(rows, games, cut(2026)), buildExport(r26, g26, cut(2026)))
+  assert.deepEqual(buildExport(rows, games, cut(2027)), buildExport(r27, g27, cut(2027)))
+  assert.deepEqual(buildExposureExport(rows, seen, cut(2026)), buildExposureExport(r26, e26, cut(2026)))
+  assert.deepEqual(buildExposureExport(rows, seen, cut(2027)), buildExposureExport(r27, e27, cut(2027)))
+  assert.deepEqual(buildExposureClubsExport(rows, seen, cut(2026)), buildExposureClubsExport(r26, e26, cut(2026)))
+  assert.deepEqual(buildExposureClubsExport(rows, seen, cut(2027)), buildExposureClubsExport(r27, e27, cut(2027)))
+})
+
+test('all seasons sum a club board per man, never two rows for him', () => {
+  const all = buildExposureClubsExport([...r26, ...r27], [...e26, ...e27], cut(null))
+  const [man, ...more] = all.levels.MLB.byTeam['100']
+  assert.deepEqual(more, [])
+  assert.equal(man.pitches, 1010)
+  assert.equal(man.plateAppearances, 253)
+  assert.equal(man.asBatter, 3)
+})
+
+test('a rebuild wipes the challenge rows of one season only', async () => {
+  const { mkdtempSync } = await import('node:fs')
+  const { tmpdir } = await import('node:os')
+  const { join } = await import('node:path')
+  const { openDb } = await import('../scripts/lib/db.js')
+  const db = await openDb(mkdtempSync(join(tmpdir(), 'abs-')))
+  const add = db.prepare(
+    `INSERT INTO abs_challenges (game_pk, seq, season, date, level, team_id, side, role, outcome, inning, half)
+     VALUES (?, 0, ?, ?, 'MLB', 100, 'away', 'batter', 'success', 1, 'top')`,
+  )
+  const mark = db.prepare('INSERT INTO abs_ingested_games (game_pk, date, season, level) VALUES (?, ?, ?, \'MLB\')')
+  for (const [pk, season] of [[1, 2026], [2, 2027]]) {
+    add.run(pk, season, `${season}-04-01`)
+    mark.run(pk, `${season}-04-01`, season)
+  }
+  clearSeasonRows(db, 2027)
+  const left = (t) => db.prepare(`SELECT game_pk FROM ${t}`).all().map((r) => r.game_pk)
+  assert.deepEqual(left('abs_challenges'), [1])
+  assert.deepEqual(left('abs_ingested_games'), [1])
 })

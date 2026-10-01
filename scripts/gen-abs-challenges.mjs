@@ -1,4 +1,4 @@
-// Regenerates public/data/abs-challenges.json — every Automated Ball-Strike
+// Regenerates public/data/abs/{season}/abs-challenges.json — every Automated Ball-Strike
 // challenge of the season, at every level that runs the system, and the splits
 // the /abs-challenges report page reads
 // (src/api/around-the-game/absChallenges.js).
@@ -64,8 +64,8 @@
 //   node scripts/gen-abs-challenges.mjs --since=2026-03-26 --sports=11
 //   node scripts/gen-abs-challenges.mjs --export-only
 //   node scripts/gen-abs-challenges.mjs --recheck [--since=2026-03-26]
-//   node scripts/gen-abs-challenges.mjs --exposure [--sports=1]
-//   node scripts/gen-abs-challenges.mjs --rebuild --since=2026-03-26
+//   node scripts/gen-abs-challenges.mjs --exposure [--sports=1] [--season=2026]
+//   node scripts/gen-abs-challenges.mjs --rebuild --season=2026 --since=2026-03-26
 //
 // The --since form is the one-time backfill (2026-03-26 is Opening Day, and
 // there is no MLB history before it — the system did not exist). --sports
@@ -74,7 +74,8 @@
 // re-derives every split from the rows already on file and writes the JSON: it
 // is what a new cut of the data costs, because the database stores FACTS and
 // scripts/lib/abs/ derives everything else. --rebuild clears the challenge
-// tables first, for a schema change that makes old rows unusable.
+// tables of the one --season first, for a schema change that makes old rows
+// unusable; every other season stays on file.
 //
 // --exposure IS THE ONE FETCH THIS JOB MAKES THAT IS NOT A GAME. It reads one
 // fullSeason roster a club a level, about 60 calls, for how many pitches each
@@ -91,9 +92,15 @@
 // worse than one that is missing. It rides the nightly job for that reason
 // (.github/workflows/update-nightly-data.yml).
 //
-// TWO FILES COME OUT OF THIS JOB. public/data/abs-challenges.json is the report
-// page's; public/data/abs-exposure.json is the per-player denominator list,
-// kept separate because the report page reads none of it.
+// TWO FILES COME OUT OF THIS JOB (four, with the per-club cut a level).
+// abs-challenges.json is the report page's; abs-exposure.json is the
+// per-player denominator list, kept separate because the report page reads
+// none of it.
+//
+// A SEASON STORE (ADR-0086, #1200): all of them live in public/data/abs/{season}/,
+// beside abs/seasons.json (the season the app reads) and abs/all/ (the same
+// cuts over every season's rows). Each season's files are cut from that
+// season's rows alone, and a file is rewritten only when its content changes.
 //
 // Every pure part of this job — the per-game row derivation, the bank replay,
 // the chances denominator, the roster-to-exposure fold and every export split
@@ -104,7 +111,7 @@
 // rows written, JSON out.
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { readJsonOr, writeJsonAtomic } from './lib/io.js'
+import { readJsonOr, writeJsonIfChanged, writeSeasons } from './lib/io.js'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
@@ -115,6 +122,7 @@ import {
   buildExposureExport,
   buildExposureClubsExport,
   challengeRowsForGame,
+  clearSeasonRows,
   EXPOSURE_CLUB_LEVELS,
   exposureRowsFor,
   gameShape,
@@ -122,13 +130,14 @@ import {
 } from './lib/abs/index.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const out = join(here, '..', 'public', 'data', 'abs-challenges.json')
+const storeDir = join(here, '..', 'public', 'data', 'abs')
+const out = 'abs-challenges.json'
 // THE DENOMINATOR LIST IS A SECOND FILE, not a key in the first. The report
 // page reads none of it, and folding 1,558 players plus their rates into
 // abs-challenges.json took that file from 198 KB to 895 KB — seven hundred
 // kilobytes on every visit to /abs-challenges for data nothing on screen
 // shows. See buildExposureExport in scripts/lib/abs/export.mjs.
-const exposureOut = join(here, '..', 'public', 'data', 'abs-exposure.json')
+const exposureOut = 'abs-exposure.json'
 // AND THE SAME DENOMINATORS SPLIT BY CLUB, a THIRD file for the same reason
 // the second one exists: the team hub's challenge card is the only surface
 // that reads it, and abs-exposure.json is downloaded whole by every visitor to
@@ -138,8 +147,7 @@ const exposureOut = join(here, '..', 'public', 'data', 'abs-exposure.json')
 // tab reads ONE level, so a file holding both would make a major-league club
 // carry the Triple-A half — 129 KB — for nothing. The level is lowercased into
 // the name, which is the contract src/api/around-the-game/absExposure.js reads.
-const exposureClubsOut = (level) =>
-  join(here, '..', 'public', 'data', `abs-exposure-clubs-${level.toLowerCase()}.json`)
+const exposureClubsOut = (level) => `abs-exposure-clubs-${level.toLowerCase()}.json`
 const reTablePath = join(here, '..', 'public', 'data', 'run-expectancy.json')
 
 const DEFAULT_DAYS = 3
@@ -178,12 +186,14 @@ const mapWithConcurrency = (items, limit, fn) =>
 
 const args = parseArgs(process.argv.slice(2))
 const { startDate, endDate } = dateRange(args, DEFAULT_DAYS)
-const season = Number(endDate.slice(0, 4))
 
 const db = await openDb()
+// --rebuild wipes ONE season, named on purpose: every other season stays on
+// file (#1200), so there is no "clear everything" any more.
 if (args.rebuild) {
-  db.exec('DELETE FROM abs_challenges; DELETE FROM abs_ingested_games;')
-  console.log('--rebuild: cleared abs_challenges + abs_ingested_games')
+  if (!args.season) throw new Error('--rebuild needs --season=YYYY: it clears that one season')
+  clearSeasonRows(db, Number(args.season))
+  console.log(`--rebuild: cleared the ${args.season} abs_challenges + abs_ingested_games`)
 }
 
 const insertRow = db.prepare(
@@ -226,21 +236,28 @@ async function writeOut() {
   const exposure = db
     .prepare('SELECT * FROM abs_player_exposure ORDER BY level, team_id, player_id')
     .all()
-  const latest = games.reduce((m, g) => (g.season > m ? g.season : m), 0)
   // EVERY FILE, EVERY RUN. They are cut from the same tables, so writing one
   // without the others is how a season ends up with a report, a denominator
   // list and a club split that disagree about who played. The club split is
   // one file a level, so "every file" is two of those and not one.
-  await writeJsonAtomic(out, buildExport(rows, games, { season: latest || season }))
-  await writeJsonAtomic(
-    exposureOut,
-    buildExposureExport(rows, exposure, { season: latest || season }),
-  )
-  for (const level of EXPOSURE_CLUB_LEVELS) {
-    await writeJsonAtomic(
-      exposureClubsOut(level),
-      buildExposureClubsExport(rows, exposure, { season: latest || season, levels: [level] }),
-    )
+  //
+  // Every season on file, each cut from its own rows, then all/ over every
+  // row. writeJsonIfChanged leaves a file alone when only its stamp would
+  // move, so a completed season's folder does not change.
+  const seasons = [...new Set([...games, ...exposure].map((r) => r.season))].sort((a, b) => a - b)
+  const write = (dir, file, { generatedAt: _stamp, ...body }) => writeJsonIfChanged(join(dir, file), body)
+  for (const season of [...seasons, null]) {
+    const dir = join(storeDir, season == null ? 'all' : String(season))
+    const extra = season == null ? { seasons } : {}
+    await write(dir, out, { ...buildExport(rows, games, { season }), ...extra })
+    await write(dir, exposureOut, { ...buildExposureExport(rows, exposure, { season }), ...extra })
+    for (const level of EXPOSURE_CLUB_LEVELS) {
+      await write(dir, exposureClubsOut(level), {
+        ...buildExposureClubsExport(rows, exposure, { season, levels: [level] }),
+        ...extra,
+      })
+    }
+    if (season != null) await writeSeasons(storeDir, season)
   }
   // THE CHALLENGE BANK, CHECKED AGAINST EVERY ROW ON FILE. A club cannot spend
   // a challenge it does not hold, so a club-game the model cannot pay for
@@ -265,7 +282,7 @@ const activeLevels = sportsFilter ? ALL_LEVELS.filter((l) => sportsFilter.has(l.
 
 if (args['export-only']) {
   const { rows, games } = await writeOut()
-  console.log(`wrote ${out} — export only (${rows} challenges over ${games} games on file)`)
+  console.log(`wrote abs/ — export only (${rows} challenges over ${games} games on file)`)
   db.close()
 } else if (args.recheck) {
   // THE WAY BACK OUT OF AN APPEND-ONLY LEDGER. A game's status can change
@@ -362,6 +379,12 @@ if (args['export-only']) {
   //
   // Clubs are read in parallel and written serially, the same shape the game
   // sweep uses and for the same reason: node:sqlite writes are synchronous.
+  // The season the rosters are read for comes from the data, never the
+  // clock: the newest season with a game on file, unless --season names one.
+  // On January 1 that is still last season, which re-reads its final rosters.
+  const season = Number(
+    args.season ?? db.prepare('SELECT MAX(season) AS s FROM abs_ingested_games').get().s,
+  )
   let clubs = 0
   let people = 0
   for (const { sportId, level } of activeLevels) {
@@ -431,6 +454,8 @@ if (args['export-only']) {
         if (existing.has(String(g.gamePk))) continue
         const hp = (g.officials ?? []).find((o) => o.officialType === 'Home Plate')
         targets.push({
+          // The season comes from the game, never the clock (#1200).
+          season: Number(g.season),
           gamePk: g.gamePk,
           date: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
           level,
@@ -470,10 +495,9 @@ if (args['export-only']) {
       const umpId = t.umpId ?? boxHp?.official?.id ?? null
       const umpName = t.umpName || boxHp?.official?.fullName || ''
       const rows = challengeRowsForGame(feed, reTable)
-      const seasonOf = Number(t.date.slice(0, 4))
       for (const r of rows) {
         insertRow.run(
-          t.gamePk, r.seq, seasonOf, t.date, t.level, r.team_id, r.opp_id,
+          t.gamePk, r.seq, t.season, t.date, t.level, r.team_id, r.opp_id,
           r.side, r.player_id, r.player_name, r.role, r.outcome, r.inning, r.half,
           umpId, umpName, r.call_type, r.favor, r.miss_inches,
         )
@@ -481,7 +505,7 @@ if (args['export-only']) {
       // The game's length, off the feed already in hand — no extra call.
       const shape = gameShape(feed?.liveData?.linescore)
       markIngested.run(
-        t.gamePk, t.date, seasonOf, t.level, t.awayTeamId, t.homeTeamId, umpId, rows.length,
+        t.gamePk, t.date, t.season, t.level, t.awayTeamId, t.homeTeamId, umpId, rows.length,
         shape.finalInning, shape.bottomPlayed, shape.scheduledInnings,
       )
       ingested++
@@ -495,10 +519,15 @@ if (args['export-only']) {
     }
   }
 
-  const { rows, games } = await writeOut()
-  console.log(
-    `wrote ${out} — ${rows} challenges over ${games} games on file ` +
-      `(+${ingested} games, +${found} challenges this run)`,
-  )
+  // A run that took in no game writes nothing (ADR-0086).
+  if (!ingested) {
+    console.log('no new game — wrote nothing')
+  } else {
+    const { rows, games } = await writeOut()
+    console.log(
+      `wrote abs/ — ${rows} challenges over ${games} games on file ` +
+        `(+${ingested} games, +${found} challenges this run)`,
+    )
+  }
   db.close()
 }

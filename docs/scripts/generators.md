@@ -329,9 +329,14 @@ don't run these by hand.
   `att*` columns) needs a one-time `--rebuild` (wipe both tables, re-sweep) since
   old rows carry no attempts. App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
-- `gen-abs-challenges.mjs` → `public/data/abs-challenges.json`,
-  **`public/data/abs-exposure.json`** and
-  **`public/data/abs-exposure-clubs-{mlb,aaa}.json`** — **the written report is
+- `gen-abs-challenges.mjs` → `public/data/abs/{season}/abs-challenges.json`,
+  **`abs/{season}/abs-exposure.json`** and
+  **`abs/{season}/abs-exposure-clubs-{mlb,aaa}.json`**, plus `abs/seasons.json` and the
+  same four files over every season in `abs/all/`. A season store (ADR-0086, #1200):
+  each file is cut from its own season's rows (`buildExport`'s `season` filter), a
+  file is rewritten only when its content changes, the season comes from the
+  schedule game, `--exposure` reads the newest season on file (or `--season`),
+  and `--rebuild` needs `--season` and clears only that one. **The written report is
   `docs/abs-challenges.md`: the answer to each of the seven questions
   `/abs-challenges` asks, with the numbers and every caveat.** Every ABS
   (Automated Ball-Strike) CHALLENGE of the season, at both levels that run the

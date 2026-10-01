@@ -417,12 +417,20 @@ test('clubChallengeBoard: a Triple-A club is ranked inside Triple-A', () => {
   assert.equal(clubChallengeBoard(aaa, 400, 'batter'), null)
 })
 
+// A season store (ADR-0086): the folder of the season abs/seasons.json names,
+// which is the one the app reads.
+const servedAbs = (fs) => {
+  const store = new URL('../public/data/abs/', import.meta.url)
+  const { current } = JSON.parse(fs.readFileSync(new URL('seasons.json', store), 'utf8'))
+  return new URL(`${current}/`, store)
+}
+
 test('the shipped club files hold one level each, and every club draws', async () => {
   // A silent null here is a card that renders nothing and reads as a styling
   // bug. Not a snapshot of the figures — those move every night.
   const fs = await import('node:fs')
   for (const level of ['MLB', 'AAA']) {
-    const url = new URL(`../public/data/abs-exposure-clubs-${level.toLowerCase()}.json`, import.meta.url)
+    const url = new URL(`abs-exposure-clubs-${level.toLowerCase()}.json`, servedAbs(fs))
     const data = JSON.parse(fs.readFileSync(url, 'utf8'))
     assert.deepEqual(Object.keys(data.levels), [level], `${level} file carries another level`)
     const teamIds = Object.keys(data.levels[level].byTeam)
@@ -447,7 +455,7 @@ test('the shipped file answers both questions at both levels', async () => {
   // that the reader finds a usable board on each level and each kind, since a
   // silent null here draws nothing at all and looks like a styling bug.
   const fs = await import('node:fs')
-  const url = new URL('../public/data/abs-exposure.json', import.meta.url)
+  const url = new URL('abs-exposure.json', servedAbs(fs))
   const data = JSON.parse(fs.readFileSync(url, 'utf8'))
   for (const key of ['MLB', 'AAA']) {
     const shipped = exposureFor(data, key)

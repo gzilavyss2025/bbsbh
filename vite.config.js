@@ -518,7 +518,7 @@ export default defineConfig({
               // A season store (ADR-0086): its seasons.json and one season's
               // files, the league file beside the buckets. Each season adds its
               // own URLs, so it belongs here, uncounted, not in the rule above.
-              /^\/data\/fouls\/(?:seasons|\d{4}\/[^/]+)\.json$/.test(url.pathname) ||
+              /^\/data\/(?:fouls|abs)\/(?:seasons|\d{4}\/[^/]+)\.json$/.test(url.pathname) ||
               // One file per MATCHUP, keyed by the two team ids ascending.
               /^\/data\/former-teammates\/\d+-\d+\.json$/.test(url.pathname) ||
               // One slim similarity pool per level.

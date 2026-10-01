@@ -646,7 +646,8 @@ for each generator; the reader modules:
   average overall can still lead the league with the glove, which is what the
   four single-skill boards are for.
 - `around-the-game/absChallenges.js` — `/abs-challenges`, the season board for
-  the ABS Challenge System, from `public/data/abs-challenges.json`
+  the ABS Challenge System, from `public/data/abs/{season}/abs-challenges.json`
+  (the season `abs/seasons.json` names, ADR-0086)
   (`gen-abs-challenges.mjs`). MLB and Triple-A are separate levels on the page,
   never blended: two different leagues of hitters, catchers and umpires, and
   Triple-A has years of the rule MLB is in its first season of. The FILE ships
@@ -663,7 +664,7 @@ for each generator; the reader modules:
   judgment, not a run.
   THE GENERATOR WRITES A SECOND FILE THIS MODULE DOES NOT READ, and
   `around-the-game/absExposure.js` below is what reads it:
-  `public/data/abs-exposure.json`, one row per player-season per level carrying how
+  `public/data/abs/{season}/abs-exposure.json`, one row per player-season per level carrying how
   much baseball he saw (pitches, plate appearances, innings caught, starts
   behind the plate), his challenges split by the job he was doing, and the
   rates those make. It is separate because the report page shows none of it and
@@ -701,7 +702,7 @@ for each generator; the reader modules:
   by a counted index drifts from its own label the first time the data moves.
   The written report is `docs/abs-challenges.md`. Spoiler-free: plate
   appearances, pitches seen and innings caught over completed games.
-  IT READS A SECOND FILE TOO: `public/data/abs-exposure-clubs-{level}.json`,
+  IT READS A SECOND FILE TOO: `public/data/abs/{season}/abs-exposure-clubs-{level}.json`,
   the same sweep cut by `team_id` instead of folded across clubs, behind the
   team hub's challenge card (`clubChallengeBoard`). 93 KB for MLB and 128 KB for
   Triple-A against the folded list's 418, fetched by one club's Numbers tab and

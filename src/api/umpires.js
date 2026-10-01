@@ -1,5 +1,5 @@
 import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
-import { currentSeasonOf, staticJsonBy } from './staticJson.js'
+import { currentSeasonOf, seasonStaticJson } from './staticJson.js'
 
 // The umpire detail page's data — for a given umpire, every MLB and AAA game
 // he's worked this season plus which base he had — read from a static
@@ -251,15 +251,10 @@ async function loadRows(id) {
 // aggregates. Degrades to an empty pool, which costs a man his rank and his
 // lean but not his page.
 // A season store (ADR-0086): the season umpire-accuracy/seasons.json names.
-const NO_SUMMARY = { season: null, umpires: {} }
-const summaryFor = staticJsonBy((season) => `/data/umpire-accuracy/${season}/umpire-accuracy-summary.json`, {
+const loadAccuracySummary = seasonStaticJson('umpire-accuracy', 'umpire-accuracy-summary.json', {
   shape: (d) => ({ season: d.season ?? null, umpires: d.umpires ?? {} }),
-  fallback: NO_SUMMARY,
+  fallback: { season: null, umpires: {} },
 })
-async function loadAccuracySummary() {
-  const season = await currentSeasonOf('umpire-accuracy')
-  return season == null ? NO_SUMMARY : summaryFor(season)
-}
 
 // A umpire's season aggregate for a given level. MLB is the top-level `season`
 // (back-compat with the pre-AAA file shape); AAA is `seasonAAA`, null when he

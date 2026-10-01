@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { seasonsAfter, seasonToServe } from '../scripts/lib/io.js'
 
-const STORES = ['umpires', 'spray', 'umpire-accuracy', 'fouls']
+const STORES = ['umpires', 'spray', 'umpire-accuracy', 'fouls', 'abs']
 const storeUrl = (store) => new URL(`../public/data/${store}/`, import.meta.url)
 
 test('a new season is added to the index, and the old one stays', () => {

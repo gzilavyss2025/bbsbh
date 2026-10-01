@@ -1,5 +1,5 @@
 import { shardKey100 } from '../lib/shardKey.js'
-import { currentSeasonOf, staticJsonBy } from './staticJson.js'
+import { currentSeasonOf, seasonStaticJson } from './staticJson.js'
 
 // Season-long foul-ball aggregates, read from a static same-origin file
 // (public/data/fouls/{season}/fouls.json) precomputed nightly by scripts/gen-fouls.mjs (the
@@ -23,11 +23,7 @@ import { currentSeasonOf, staticJsonBy } from './staticJson.js'
 //
 // A season store (ADR-0086): both reads go to the season fouls/seasons.json
 // names, fouls/{season}/fouls.json and fouls/{season}/{NN}.json.
-const foulsFor = staticJsonBy((season) => `/data/fouls/${season}/fouls.json`)
-export async function fetchFouls() {
-  const season = await currentSeasonOf('fouls')
-  return season == null ? null : foulsFor(season)
-}
+export const fetchFouls = seasonStaticJson('fouls', 'fouls.json')
 
 // One player's slice — his own batter and pitcher rows, from the bucket he
 // falls in (`personId % 100`, shardKey100, the same join the rookie records and

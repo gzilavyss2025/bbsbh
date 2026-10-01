@@ -21,9 +21,10 @@
 // for 32 in 1,085. A page that printed 6.4 and stopped would have described a
 // hitter who does not exist.
 
-import { staticJson, staticJsonBy } from '../staticJson.js'
+import { currentSeasonOf, seasonStaticJson, staticJsonBy } from '../staticJson.js'
 
-export const fetchAbsExposure = staticJson('/data/abs-exposure.json')
+// A season store (ADR-0086): abs/{season}/, the season abs/seasons.json names.
+export const fetchAbsExposure = seasonStaticJson('abs', 'abs-exposure.json')
 
 // MINIMUM SAMPLES. A hitter with forty plate appearances who challenged twice
 // prints at a rate no full-season regular can reach, and a histogram built
@@ -265,7 +266,7 @@ export function exposureBoard(level, key) {
 // ONE FILE A LEVEL, memoized per level, because a club's hub tab reads one and
 // the two together are 222 KB. gen-abs-challenges.mjs writes the level
 // lowercased into the name; that spelling is the contract between the two.
-const fetchClubsFile = staticJsonBy((level) => `/data/abs-exposure-clubs-${level}.json`)
+const fetchClubsFile = staticJsonBy((key) => `/data/abs/${key}.json`)
 
 // THE LEVELS THIS CARD DRAWS, keyed by the sportId a team hub already knows.
 // The ABS rig itself stops here — AA and below run neither the system nor the
@@ -279,9 +280,10 @@ export function exposureClubLevelFor(sportId) {
 
 // Null rather than a rejected promise for a level with no file, so a caller
 // that asks for one can hand the answer straight to the card.
-export function fetchAbsExposureClubs(level) {
-  if (!level || !Object.values(CLUB_LEVEL_BY_SPORT).includes(level)) return Promise.resolve(null)
-  return fetchClubsFile(level.toLowerCase())
+export async function fetchAbsExposureClubs(level) {
+  if (!level || !Object.values(CLUB_LEVEL_BY_SPORT).includes(level)) return null
+  const season = await currentSeasonOf('abs')
+  return season == null ? null : fetchClubsFile(`${season}/abs-exposure-clubs-${level.toLowerCase()}`)
 }
 
 // The level names the FILE as well as the key inside it, and a file holds the

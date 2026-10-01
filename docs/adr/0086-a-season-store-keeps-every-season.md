@@ -105,3 +105,18 @@ high keeps the higher game with its context, and `isStarter` comes from the
 summed starts and games. `--backfill-team-pitch-types` wipes and rebuilds one
 season (`--season`, default the newest). `fouls.json` lost its `asOf` freshness
 check, as the umpire accuracy summary did.
+
+**ABS.** The three ABS tables already had `season`, so no key changed. The
+`abs-challenges` group is a season group, and its dump came out byte for byte
+the same. `buildExport`, `buildExposureExport` and `buildExposureClubsExport`
+(`scripts/lib/abs/export.mjs`) now cut the rows of the season they name;
+`season: null` is the `all/` cut over every row. The per-club file folds a
+man's rows per club (`exposureByPlayer`), so `all/` adds his seasons and never
+lists him twice. JSON: `abs/{season}/` holds `abs-challenges.json`,
+`abs-exposure.json` and `abs-exposure-clubs-{mlb,aaa}.json` (before: all four
+in `public/data/`), plus `abs/seasons.json` and `abs/all/`. Every file is
+written only when its content changes. `--exposure` reads the rosters of the
+newest season on file, not the calendar year, so on January 1 it re-reads last
+season's final rosters. `--rebuild` needs `--season` and clears only that one
+(`clearSeasonRows`). `abs/` is in `check-data-freshness.mjs`'s `EXCEPT`: a
+completed season must not count as stale.
