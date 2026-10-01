@@ -78,7 +78,8 @@ export async function loadFormerTeammates(teamIdA, teamIdB) {
 // player (a Division Series flips parks inside that window).
 //   { a: {id, name, pos, teamId}, b: {id, name, pos, teamId}, // the two players
 //     clubs: [{teamId, teamName, level, seasons:[…], orgId?}], // shared club(s); orgId =
-//       its season-accurate parent org (absent on shards written before #1319)
+//       a minor-league club's season-accurate parent org (absent on an MLB
+//       club, and on shards written before #1319)
 //     score: number }
 export function formerTeammatePairs(data, teamIdA, teamIdB) {
   if (!teamIdA || !teamIdB) return []
@@ -120,8 +121,10 @@ export function formerTeammatePairs(data, teamIdA, teamIdB) {
 //     man's MLB and farm years are one row. It holds the players who LEFT that
 //     org, on the side of the club they are on now; the other side stays empty
 //     rather than a wall of the players he played with there. When every stint
-//     in the row was in the minors it reads "<club> system" at the highest
-//     minor level shared; any MLB stint keeps the plain club name and MLB.
+//     in the row was on a farm club of tonight's club it reads "<club> system"
+//     at the highest minor level shared; a stint on tonight's club itself (an
+//     MLB year, or tonight's own MiLB club on a MiLB matchup) keeps the plain
+//     club name.
 //   - 'elsewhere': the players met on a THIRD club. A pair that shares a
 //     third club and one of tonight's clubs files under the third club only.
 //     A pair that shares two third clubs files under its best one (clubs[0]).
@@ -132,6 +135,9 @@ export function formerTeammatePairs(data, teamIdA, teamIdB) {
 //
 // `teamNames` ({ [teamId]: name }, optional) names the parent club of a
 // 'former' row; a missing name falls back to the shared club's own.
+// FormerTeammates passes each club's `teamName`, the nickname its side heads
+// show, so a row reads "Yankees" or "Yankees system", while an 'elsewhere' row
+// keeps the shard's full name ("Colorado Rockies").
 //
 // Returns { former: [...], elsewhere: [...] } of:
 //   { kind, club: {teamId, teamName, level}, seasons: [...],
@@ -153,6 +159,7 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds, t
         kind,
         teamId,
         top: stint,
+        farmOnly: true,
         seasons: new Set(),
         away: new Map(),
         home: new Map(),
@@ -162,6 +169,8 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds, t
     }
     const row = rows.get(key)
     if (LEVEL_RANK(stint.level) > LEVEL_RANK(row.top.level)) row.top = stint
+    // A stint on the row's club itself, not on one of its farm clubs.
+    if (stint.teamId === teamId) row.farmOnly = false
     for (const s of stint.seasons) row.seasons.add(s)
     return row
   }
@@ -194,13 +203,17 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds, t
     }
   }
 
-  // The row's club: its highest-level stint, named for the parent club (from
-  // `teamNames`, which only ever holds tonight's two clubs) when every stint
-  // was in the minors ("New York Yankees system"). No name given: the shared
-  // club's own name, unsuffixed, since "<farm club> system" would be wrong.
+  // The row's club: its highest-level stint, named from `teamNames` (which only
+  // ever holds tonight's two clubs, so an 'elsewhere' row never finds one). A
+  // row whose every stint was on a FARM club of tonight's club reads
+  // "<name> system" ("Yankees system"). A stint on tonight's club itself keeps
+  // the plain name: an MLB year, or any year on a MiLB matchup, where the
+  // shared club is tonight's MiLB club and has no farm system. No name given:
+  // the shared club's own name, unsuffixed, since "<farm club> system" would
+  // be wrong.
   const clubOf = (r) => {
-    const org = r.kind === 'former' ? teamNames?.[r.teamId] : undefined
-    const teamName = org ? (r.top.level === 'MLB' ? org : `${org} system`) : r.top.teamName
+    const org = teamNames?.[r.teamId]
+    const teamName = org ? (r.farmOnly ? `${org} system` : org) : r.top.teamName
     return { teamId: r.teamId, teamName, level: r.top.level }
   }
   const bySideScore = (x, y) => Number(y.starting) - Number(x.starting) || y.score - x.score

@@ -199,27 +199,29 @@ test('a newer tap supersedes the one still in flight', async () => {
   assert.deepEqual(got.map((r) => r.src), ['two.mp4'])
 })
 
-test('a remount does not leave the sheet on Loading', async () => {
-  // StrictMode runs an effect's cleanup and then its setup again. A flag that
-  // only cleanup touched would stay false, and every answer would be dropped.
+test('a double-tap on a play still resolving asks the host once', async () => {
+  // The clip host blocks a client that bursts (clipIndex.js). A second tap on
+  // the same play while its lookup is in flight must not send a second
+  // request, and must not abort the first one.
   const d = deferredResolve()
   const got = []
   const lookup = createClipLookup((r) => got.push(r), d.resolve)
-  lookup.mount()
-  lookup.unmount()
-  lookup.mount()
-  const tap = lookup.start('lk-remount')
-  d.waiting[0].done({ src: 'here.mp4', notice: '' })
-  await tap
-  assert.deepEqual(got.map((r) => r.src), ['here.mp4'])
+  const first = lookup.start('lk-double')
+  const second = lookup.start('lk-double')
+  assert.equal(d.waiting.length, 1, 'one request to the host')
+  assert.equal(d.waiting[0].opts.signal.aborted, false, 'the first lookup keeps going')
+  d.waiting[0].done({ src: 'double.mp4', notice: '' })
+  await Promise.all([first, second])
+  assert.deepEqual(got.map((r) => r.src), ['double.mp4'])
 })
 
 test('an unmounted lookup hands nothing back', async () => {
+  // The hook's effect cleanup is `cancel`.
   const d = deferredResolve()
   const got = []
   const lookup = createClipLookup((r) => got.push(r), d.resolve)
   const tap = lookup.start('lk-gone')
-  lookup.unmount()
+  lookup.cancel()
   d.waiting[0].done({ src: 'gone.mp4', notice: '' })
   await tap
   assert.deepEqual(got, [])

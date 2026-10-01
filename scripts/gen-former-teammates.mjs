@@ -439,7 +439,7 @@ function connectionsFor(awayIds, homeIds, careers, names, positions, peakWar, aw
         shared: [...shared.entries()]
           .map(([teamId, v]) => {
             const seasons = [...v.seasons].sort((x, y) => x - y)
-            const orgId = orgIdForShared(teamId, v.level, seasons, orgOf)
+            const orgId = orgIdForShared(teamId, seasons, orgOf)
             return { teamId, teamName: v.teamName, level: v.level, seasons, ...(orgId && { orgId }) }
           })
           // Highest level (MLB) first, then most recent.

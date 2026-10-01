@@ -356,8 +356,8 @@ function shipRow(r, getaway, roles) {
   put('dh', p.doubleHeader !== 'N' ? 1 : 0)
   put('sg', r.seriesGame)
   put('sl', r.seriesLength)
-  put('op', r.opener ? 1 : 0)
-  put('fi', r.finale ? 1 : 0)
+  put('op', r.seriesOpener ? 1 : 0)
+  put('fi', r.seriesFinale ? 1 : 0)
   put('ga', getaway ? 1 : 0)
   return row
 }

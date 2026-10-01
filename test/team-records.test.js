@@ -401,7 +401,7 @@ test('a series is consecutive games against one club at one park', () => {
     g('2026-04-06', 11, 7),
   ])
   assert.deepEqual(
-    tagged.map((r) => [r.seriesGame, r.seriesLength, r.opener, r.finale]),
+    tagged.map((r) => [r.seriesGame, r.seriesLength, r.seriesOpener, r.seriesFinale]),
     [
       [1, 3, true, false],
       [2, 3, false, false],
@@ -417,7 +417,7 @@ test('a neutral-site game joins the series beside it instead of being its own', 
   const tagged = tagSeries([g('2026-08-16', 10, 5), g('2026-08-17', 10, 5), g('2026-08-18', 10, 99)])
   assert.deepEqual(tagged.map((r) => r.seriesGame), [1, 2, 3])
   assert.deepEqual(tagged.map((r) => r.seriesLength), [3, 3, 3])
-  assert.deepEqual(tagged.map((r) => r.finale), [false, false, true])
+  assert.deepEqual(tagged.map((r) => r.seriesFinale), [false, false, true])
 })
 
 test('the same opponent at a different park is a new series, not a longer one', () => {

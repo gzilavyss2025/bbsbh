@@ -137,21 +137,21 @@ test('historicalParentOrgAt is null for a club or season the file does not cover
   assert.equal(historicalParentOrgAt({}, 531, 2019), null)
 })
 
-test('an MLB club is its own org', () => {
-  assert.equal(orgIdForShared(111, 'MLB', [2019, 2020], orgOf), 111)
+test('an MLB club writes no orgId; the reader matches it on teamId', () => {
+  assert.equal(orgIdForShared(111, [2019, 2020], orgOf), undefined)
 })
 
 test('a minor-league club maps to the parent for the stint’s own season', () => {
-  assert.equal(orgIdForShared(531, 'AAA', [2005], orgOf), 143)
-  assert.equal(orgIdForShared(531, 'AAA', [2015], orgOf), 147)
+  assert.equal(orgIdForShared(531, [2005], orgOf), 143)
+  assert.equal(orgIdForShared(531, [2015], orgOf), 147)
 })
 
 test('a club with several shared seasons takes the parent of its LATEST season', () => {
-  assert.equal(orgIdForShared(531, 'AAA', [2006, 2008], orgOf), 147)
-  assert.equal(orgIdForShared(531, 'AAA', [2008, 2006], orgOf), 147, 'input order does not matter')
+  assert.equal(orgIdForShared(531, [2006, 2008], orgOf), 147)
+  assert.equal(orgIdForShared(531, [2008, 2006], orgOf), 147, 'input order does not matter')
 })
 
 test('a missing lookup writes no orgId', () => {
-  assert.equal(orgIdForShared(533, 'AAA', [2019], orgOf), undefined)
-  assert.equal(orgIdForShared(531, 'AAA', [2001], orgOf), undefined)
+  assert.equal(orgIdForShared(533, [2019], orgOf), undefined)
+  assert.equal(orgIdForShared(531, [2001], orgOf), undefined)
 })

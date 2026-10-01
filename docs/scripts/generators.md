@@ -246,8 +246,8 @@ don't run these by hand.
   shard keeps its top 100 rows by score at EVERY level, so a Dominican game between
   two 60-man rosters (about 170 pairs) stays under the 40 KB hot-path ceiling. The
   pure rules live in `scripts/lib/former-teammates.mjs`
-  (`test/former-teammates.test.js`). Each `shared` club entry carries `orgId`: its
-  season-accurate parent org (omitted when unknown).
+  (`test/former-teammates.test.js`). Each minor-league `shared` club entry carries `orgId`: its
+  season-accurate parent org (omitted when unknown, and on an MLB club).
 - `gen-career-matchups.mjs` → `public/data/career-matchups.json` — for each
   upcoming GAME (MLB or MiLB), how every batter on a club has fared in his
   career against the OPPOSING club's probable starting pitcher. Keyed by
