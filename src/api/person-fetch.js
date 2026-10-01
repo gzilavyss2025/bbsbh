@@ -88,7 +88,7 @@ export async function fetchPositions(personIds) {
 // section rather than taking the page down.
 export async function fetchPersonStats(
   personId,
-  { type, group, season, startDate, endDate, sitCodes, sportId = 1 } = {},
+  { type, group, season, startDate, endDate, sitCodes, gameType, sportId = 1 } = {},
 ) {
   if (!personId || !type || !group) return []
   try {
@@ -97,6 +97,9 @@ export async function fetchPersonStats(
     if (startDate) params.push(`startDate=${startDate}`)
     if (endDate) params.push(`endDate=${endDate}`)
     if (sitCodes) params.push(`sitCodes=${sitCodes}`)
+    // Omitted, a gameLog answers the REGULAR season only; a caller that needs
+    // October names the types (`R,F,D,L,W`), as fetchPitcherLastGame does.
+    if (gameType) params.push(`gameType=${gameType}`)
     if (sportId && sportId !== 1) params.push(`sportId=${sportId}`)
     const data = await getJson(
       `/api/v1/people/${personId}/stats?${params.join('&')}`,
