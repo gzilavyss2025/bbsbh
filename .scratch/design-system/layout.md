@@ -229,3 +229,35 @@ three of them cannot move at all, because their tracks are `minmax(0, 1fr)`,
 `min`, equal share". So the real target is 25 rules. It has no row gap: only 2
 of the 28 set two values. Left out of the sign-off, so say if you want it:
 `rowGap`, as on `Cluster`.
+
+## Migration log
+
+Moving a rule onto a part is a CSS edit plus a JSX edit, so each slice is one
+family and ships green. The tools, all in `.scratch/design-system/layout/`:
+
+- `stack-candidates.mjs` lists the rules that can move. A candidate sets
+  `display: flex`, `flex-direction: column` and a gap on the 4, 8, 12 or 16px
+  step, behind a selector that is ONE class. It is SAFE when no other rule for
+  the class sets display, flex or gap, and every JSX site is a static
+  `className` on a plain element. **Measured: 120 candidates, 79 safe.** The
+  other 24 of the 144 rules are not candidates because of their shape: a
+  grouped or compound selector, a rule inside `@media`, or a rule that does not
+  set `display: flex` itself. I did not sort the 24 by which. They are edited
+  by hand.
+- `jsx-to-layout.py` swaps `<div className="x">` for `<Stack gap=… className="x">`
+  and the matching closing tag, and refuses an element with any other prop.
+- `geom.mjs` and `diffgeom.mjs` dump and compare every element's rect and
+  layout style at 390 and 760px. A migration that must move nothing must give
+  zero differences. This stands in for `npm run visual`, which runs only when
+  Gary asks.
+
+| slice | rules | JSX sites | result |
+| --- | ---: | ---: | --- |
+| S1: awards history and postseason history | 4 | 6 | geometry identical on `/awards` and `/postseason-history`, 4 pages, 0 differences |
+
+S1 moved `.awardhistory__years` (loose, 3 sites), `.awardhistory__leaguecol`,
+`.awardhistory__leagueyears` and `.pshistory__season` (base). `.awardhistory__leaguecol`
+keeps its `min-width: 0` in its own rule; the other three rules were deleted.
+The By Year view of `/awards` (the third `__years` site) was checked for
+computed style only (flex, column, 16px), because its click state is not in the
+baseline run. 75 safe candidates remain.

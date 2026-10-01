@@ -30,11 +30,6 @@
 .awardhistory__award {
   margin-top: var(--space-2);
 }
-.awardhistory__years {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
 /* Year rail (left) + content (right). Only ever has one child when the year
    isn't shown (the "By Year" view already names it in a SectionTitle) — the
    row layout is harmless there since a lone flex item just fills the width. */
@@ -297,15 +292,7 @@
   gap: var(--space-5);
 }
 .awardhistory__leaguecol {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
   min-width: 0;
-}
-.awardhistory__leagueyears {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
 }
 
 /* Wide viewport (iPad/desktop) — same 740px breakpoint as the rest of the app
@@ -365,11 +352,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-}
-.pshistory__season {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
 }
 .pshistory__seasonhead {
   display: flex;
