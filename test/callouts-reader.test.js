@@ -18,72 +18,52 @@ function mockFetch(bundlesByPath) {
   return { fn, asked }
 }
 
-test('one game costs one file', async () => {
-  const original = globalThis.fetch
+test('one game costs one file', async (t) => {
   const { fn, asked } = mockFetch({
     '/data/callouts/08042026/777.json': { gamePk: 777, leaders: {} },
     '/data/callouts/08042026/778.json': { gamePk: 778, leaders: {} },
   })
-  globalThis.fetch = fn
-  try {
-    const data = await fetchCallouts('08042026', [777])
-    assert.deepEqual(asked, ['/data/callouts/08042026/777.json'])
-    assert.equal(calloutsForGame(data, 777).gamePk, 777)
-    // The rest of the slate is not in hand, and was never asked for.
-    assert.equal(calloutsForGame(data, 778), null)
-  } finally {
-    globalThis.fetch = original
-  }
+  t.mock.method(globalThis, 'fetch', fn)
+  const data = await fetchCallouts('08042026', [777])
+  assert.deepEqual(asked, ['/data/callouts/08042026/777.json'])
+  assert.equal(calloutsForGame(data, 777).gamePk, 777)
+  // The rest of the slate is not in hand, and was never asked for.
+  assert.equal(calloutsForGame(data, 778), null)
 })
 
-test('a set of games comes back in one { games } map, deduped', async () => {
-  const original = globalThis.fetch
+test('a set of games comes back in one { games } map, deduped', async (t) => {
   const { fn, asked } = mockFetch({
     '/data/callouts/08052026/1.json': { gamePk: 1 },
     '/data/callouts/08052026/2.json': { gamePk: 2 },
   })
-  globalThis.fetch = fn
-  try {
-    const data = await fetchCallouts('08052026', [1, 2, 1])
-    assert.deepEqual(Object.keys(data.games).sort(), ['1', '2'])
-    assert.equal(asked.length, 2, 'a repeated gamePk must not be fetched twice')
-  } finally {
-    globalThis.fetch = original
-  }
+  t.mock.method(globalThis, 'fetch', fn)
+  const data = await fetchCallouts('08052026', [1, 2, 1])
+  assert.deepEqual(Object.keys(data.games).sort(), ['1', '2'])
+  assert.equal(asked.length, 2, 'a repeated gamePk must not be fetched twice')
 })
 
-test('a missing game degrades to no notes, not a broken view', async () => {
-  const original = globalThis.fetch
+test('a missing game degrades to no notes, not a broken view', async (t) => {
   const { fn } = mockFetch({ '/data/callouts/08062026/1.json': { gamePk: 1 } })
-  globalThis.fetch = fn
-  try {
-    // 2 has no file (an un-generated date, a MiLB game predating the sweep,
-    // a failed nightly run). 1 still resolves.
-    const data = await fetchCallouts('08062026', [1, 2])
-    assert.equal(calloutsForGame(data, 1).gamePk, 1)
-    assert.equal(calloutsForGame(data, 2), null)
+  t.mock.method(globalThis, 'fetch', fn)
+  // 2 has no file (an un-generated date, a MiLB game predating the sweep,
+  // a failed nightly run). 1 still resolves.
+  const data = await fetchCallouts('08062026', [1, 2])
+  assert.equal(calloutsForGame(data, 1).gamePk, 1)
+  assert.equal(calloutsForGame(data, 2), null)
 
-    globalThis.fetch = async () => {
-      throw new Error('offline')
-    }
-    assert.deepEqual(await fetchCallouts('08072026', [9]), { games: {} })
-  } finally {
-    globalThis.fetch = original
-  }
+  globalThis.fetch.mock.mockImplementation(async () => {
+    throw new Error('offline')
+  })
+  assert.deepEqual(await fetchCallouts('08072026', [9]), { games: {} })
 })
 
-test('no gamePks means no request at all', async () => {
-  const original = globalThis.fetch
+test('no gamePks means no request at all', async (t) => {
   let calls = 0
-  globalThis.fetch = async () => {
+  t.mock.method(globalThis, 'fetch', async () => {
     calls += 1
     return { ok: false, status: 404 }
-  }
-  try {
-    assert.deepEqual(await fetchCallouts('08082026', []), { games: {} })
-    assert.deepEqual(await fetchCallouts('', [1]), { games: {} })
-    assert.equal(calls, 0)
-  } finally {
-    globalThis.fetch = original
-  }
+  })
+  assert.deepEqual(await fetchCallouts('08082026', []), { games: {} })
+  assert.deepEqual(await fetchCallouts('', [1]), { games: {} })
+  assert.equal(calls, 0)
 })

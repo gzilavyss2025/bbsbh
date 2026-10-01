@@ -66,34 +66,29 @@ test('jerseyTreatmentFor looks up the compound key, null when absent', () => {
 // its cache is module-level singleton state; keep it that way rather than
 // adding a second call site elsewhere in the test suite.
 // --------------------------------------------------------------------------
-test('fetchJerseysData shares one in-flight request across concurrent callers', async () => {
-  const originalFetch = globalThis.fetch
+test('fetchJerseysData shares one in-flight request across concurrent callers', async (t) => {
   let calls = 0
-  globalThis.fetch = async () => {
+  t.mock.method(globalThis, 'fetch', async () => {
     calls++
     return { ok: true, status: 200, json: async () => ({ '2:120': 'alternate' }) }
-  }
-  try {
-    // Every GameCard on the home slate calls this on the same mount tick —
-    // simulate that with several concurrent callers before the first
-    // request resolves.
-    const [a, b, c] = await Promise.all([
-      fetchJerseysData(),
-      fetchJerseysData(),
-      fetchJerseysData(),
-    ])
-    assert.equal(calls, 1)
-    assert.deepEqual(a, { '2:120': 'alternate' })
-    assert.equal(a, b)
-    assert.equal(b, c)
+  })
+  // Every GameCard on the home slate calls this on the same mount tick —
+  // simulate that with several concurrent callers before the first
+  // request resolves.
+  const [a, b, c] = await Promise.all([
+    fetchJerseysData(),
+    fetchJerseysData(),
+    fetchJerseysData(),
+  ])
+  assert.equal(calls, 1)
+  assert.deepEqual(a, { '2:120': 'alternate' })
+  assert.equal(a, b)
+  assert.equal(b, c)
 
-    // Once resolved, a later caller hits the plain in-memory cache — still
-    // no second network request.
-    await fetchJerseysData()
-    assert.equal(calls, 1)
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  // Once resolved, a later caller hits the plain in-memory cache — still
+  // no second network request.
+  await fetchJerseysData()
+  assert.equal(calls, 1)
 })
 
 // --------------------------------------------------------------------------

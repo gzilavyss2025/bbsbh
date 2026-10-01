@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 import {
   classifyPhotoAsset,
   fetchGamePhotos,
@@ -14,12 +14,11 @@ function mockContentFetch(body) {
 }
 
 async function withMockedFetch(body, run) {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = mockContentFetch(body)
+  const fetchMock = mock.method(globalThis, 'fetch', mockContentFetch(body))
   try {
     await run()
   } finally {
-    globalThis.fetch = originalFetch
+    fetchMock.mock.restore()
   }
 }
 
@@ -28,16 +27,15 @@ async function withMockedFetch(body, run) {
 // to the `{input:{width,height}}` Cloudinary reports for it; an id left out
 // probes as a failure, which is the `unknown` path.
 function withMockedGame(body, shapes, run) {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async (url) => {
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
     const getinfo = /\/upload\/fl_getinfo\/(mlb\/.+)$/.exec(String(url))
     if (!getinfo) return { ok: true, status: 200, json: async () => body }
     const shape = shapes[getinfo[1]]
     if (!shape) return { ok: false, status: 404, json: async () => ({}) }
     return { ok: true, status: 200, json: async () => ({ input: shape }) }
-  }
+  })
   return Promise.resolve(run()).finally(() => {
-    globalThis.fetch = originalFetch
+    fetchMock.mock.restore()
   })
 }
 
@@ -161,15 +159,10 @@ test('fetchGamePhotos ignores non-mlbstatic strings and other CDN hosts', async 
   )
 })
 
-test('fetchGamePhotos degrades to [] when the content endpoint fails', async () => {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async () => ({ ok: false, status: 404, json: async () => ({}) })
-  try {
-    const photos = await fetchGamePhotos(999999)
-    assert.deepEqual(photos, [])
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+test('fetchGamePhotos degrades to [] when the content endpoint fails', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () => ({ ok: false, status: 404, json: async () => ({}) }))
+  const photos = await fetchGamePhotos(999999)
+  assert.deepEqual(photos, [])
 })
 
 // --- classification (see the module header for the field evidence) ---

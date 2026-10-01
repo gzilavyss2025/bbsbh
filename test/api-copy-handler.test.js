@@ -25,7 +25,7 @@
 // is what stops a future fix from deleting the flag and trading this bug for
 // the one it was added to prevent.
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 
 import handler from '../api/copy.js'
 import { hashFromReply } from '../api/_lib/redis.js'
@@ -57,15 +57,14 @@ function nodeReq() {
 // Answer every Upstash REST call with `result`, in the shape its HTTP client
 // reads (`ok`/`status`/`headers.get`/`text`).
 function stubFetch(result) {
-  const previous = globalThis.fetch
-  globalThis.fetch = async () => ({
+  const fetchMock = mock.method(globalThis, 'fetch', async () => ({
     ok: true,
     status: 200,
     headers: { get: () => null },
     text: async () => JSON.stringify({ result }),
-  })
+  }))
   return () => {
-    globalThis.fetch = previous
+    fetchMock.mock.restore()
   }
 }
 

@@ -185,40 +185,30 @@ test('csvForDownload is the CSV behind a UTF-8 byte-order mark, so Excel keeps t
 
 // One download per club: the team hub's button and the archive page read the
 // same shard, and must not fetch it twice.
-test('a shard is fetched once, whether the button or the archive page asks first', async () => {
-  const realFetch = globalThis.fetch
+test('a shard is fetched once, whether the button or the archive page asks first', async (t) => {
   const calls = []
-  globalThis.fetch = async (url) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
     calls.push(String(url))
     return new Response(JSON.stringify({ notes: [note('2026-01-05', 'Opening series')] }), { status: 200 })
-  }
-  try {
-    const hit = await resolveGameNotes(9991, '2026-01-05')
-    assert.equal(hit?.title, 'Opening series')
-    const shard = await fetchArchiveShard(9991)
-    assert.equal(shard.notes.length, 1)
-    assert.equal(calls.filter((u) => u.includes('/data/game-notes/9991.json')).length, 1)
-  } finally {
-    globalThis.fetch = realFetch
-  }
+  })
+  const hit = await resolveGameNotes(9991, '2026-01-05')
+  assert.equal(hit?.title, 'Opening series')
+  const shard = await fetchArchiveShard(9991)
+  assert.equal(shard.notes.length, 1)
+  assert.equal(calls.filter((u) => u.includes('/data/game-notes/9991.json')).length, 1)
 })
 
-test('the button swallows a failed shard, but the archive page still sees the error and can retry', async () => {
-  const realFetch = globalThis.fetch
+test('the button swallows a failed shard, but the archive page still sees the error and can retry', async (t) => {
   let ok = false
-  globalThis.fetch = async (url) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
     const host = new URL(String(url), 'https://tally.test').hostname
     if (host === 'dapi.mlbinfra.com') return new Response('{}', { status: 500 })
     return ok ? new Response(JSON.stringify({ notes: [] }), { status: 200 }) : new Response('', { status: 503 })
-  }
-  try {
-    assert.equal(await resolveGameNotes(9992, '2026-01-05'), null)
-    await assert.rejects(fetchArchiveShard(9992), /HTTP 503/)
-    ok = true
-    assert.deepEqual((await fetchArchiveShard(9992)).notes, [])
-  } finally {
-    globalThis.fetch = realFetch
-  }
+  })
+  assert.equal(await resolveGameNotes(9992, '2026-01-05'), null)
+  await assert.rejects(fetchArchiveShard(9992), /HTTP 503/)
+  ok = true
+  assert.deepEqual((await fetchArchiveShard(9992)).notes, [])
 })
 
 // The team hub's "Notes archive" link is the archive's only door. It sits beside
