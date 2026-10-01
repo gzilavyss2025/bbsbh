@@ -7,6 +7,7 @@ import { StampPlacementEditor } from '../editors/StampPlacementEditor.jsx'
 import { TwoBarsPanel } from './TwoBarsPanel.jsx'
 import { LogoShelf } from './LogoShelf.jsx'
 import { JerseyRack } from './JerseyRack.jsx'
+import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
 // One club's whole kit pulled out onto the bench: who it is, its two header
 // bars, every mark on file, every jersey on the rack, and one jersey open
@@ -68,7 +69,7 @@ export function ClubWorkbench({ profile, team, prev, next, onStepTeam, extras, d
   }
 
   return (
-    <div className="idlab__workbench">
+    <Stack gap="loose" className="idlab__workbench">
       <CrestStrip
         team={team}
         badge={profile.rowBadge?.(team.id)}
@@ -128,7 +129,7 @@ export function ClubWorkbench({ profile, team, prev, next, onStepTeam, extras, d
           on={on}
         />
       )}
-    </div>
+    </Stack>
   )
 }
 

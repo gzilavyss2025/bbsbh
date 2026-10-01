@@ -7,6 +7,7 @@ import { LogoDropZone } from '../LogoDropZone.jsx'
 import { liftStyle, useStyleCard } from '../styleClipboard.js'
 import { ColorSwatch } from './ColorSwatch.jsx'
 import { WearDates } from './WearDates.jsx'
+import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
 // One jersey on the bench: every knob that tunes it down the left, and the
 // three surfaces those knobs actually paint pinned down the right. The pinning
@@ -147,7 +148,7 @@ export function JerseyBench({
           {wearDates && <WearDates {...wearDates} label={label} name={position.name} />}
         </div>
 
-        <div className="idlab__field">
+        <Stack className="idlab__field">
           <div className="idlab__stage">
             {upload ? (
               <LogoDropZone {...upload} label={`${position.name} ${label}`}>
@@ -162,7 +163,7 @@ export function JerseyBench({
             )}
           </div>
 
-          <div className="idlab__benchbar">
+          <Stack gap="tight" className="idlab__benchbar">
             <HeaderBarMock
               teamId={teamId}
               name={headerPreview.name}
@@ -179,10 +180,10 @@ export function JerseyBench({
                 Edit it in Header bars above
               </a>
             </p>
-          </div>
+          </Stack>
 
           <WpaScenarios {...scenarios} />
-        </div>
+        </Stack>
       </div>
     </section>
   )
