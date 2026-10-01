@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T14:56:29.949Z",
+  "generatedAt": "2026-10-01T12:33:14.229Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -601,7 +601,7 @@
       "position": "RHP",
       "levelRaw": "ALL (2)",
       "statLine": "90.2 IP, 2.48 ERA, 91 SO",
-      "age": 18,
+      "age": 19,
       "number": null
     },
     {
@@ -655,7 +655,7 @@
     {
       "rank": 56,
       "playerId": 695491,
-      "name": "Joshua Báez",
+      "name": "Joshua Baez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -4455,7 +4455,7 @@
       "position": "RHP",
       "levelRaw": "ALL (2)",
       "statLine": "90.2 IP, 2.48 ERA, 91 SO",
-      "age": 18,
+      "age": 19,
       "topRank": 51
     },
     {
@@ -4827,7 +4827,7 @@
       "position": "RF",
       "levelRaw": "AAA",
       "statLine": ".287, 30 HR, 107 RBI",
-      "age": 23,
+      "age": 24,
       "topRank": null
     },
     {
@@ -7389,7 +7389,7 @@
     {
       "orgRank": 3,
       "playerId": 695491,
-      "name": "Joshua Báez",
+      "name": "Joshua Baez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -9027,7 +9027,7 @@
       "position": "SS",
       "levelRaw": "A",
       "statLine": ".176, 1 HR, 6 RBI",
-      "age": 18,
+      "age": 19,
       "topRank": null
     },
     {
@@ -10149,7 +10149,7 @@
     {
       "orgRank": 2,
       "playerId": 695684,
-      "name": "Elmer Rodríguez",
+      "name": "Elmer Rodriguez",
       "teamId": 147,
       "team": "nyy",
       "position": "RHP",
