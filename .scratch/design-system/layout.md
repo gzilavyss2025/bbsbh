@@ -186,11 +186,37 @@ Follow the #1113 pattern. This is a proposal, not a decision.
   `system/` changes which rule wins at equal specificity. A wrong slice must
   revert alone.
 
-## Decisions for Gary
+## Decisions (signed off by Gary, 2026-10-01)
 
-1. The Stack steps and their px values (table above).
-2. `--space-section`: 16px or 24px.
-3. Two-value gaps on Cluster: add a `rowGap` prop, or leave the 39 bespoke.
-4. Grid scope: `auto-fit` only (28 rules), or also the 40 fixed-count grids,
-   knowing those change behaviour.
-5. Half-steps and 18/20/32px: leave the 37 stacks bespoke for now.
+1. **Stack steps: 4, 8, 12, 16px only.** `tight`, `snug`, `base`, `loose`. No
+   24px step and no half-steps.
+2. **`--space-section` is 16px.** It is an alias of the 16px step, read by a
+   page's outer `Stack`. Pages look the same; a later change to the section gap
+   is still one edit.
+3. **Cluster gets a `rowGap` prop.** `gap` is the column gap. The 39 two-value
+   rows migrate with no visible change.
+4. **Grid covers `auto-fit` only.** The 28 rules that already use it. The other
+   259 stay authored by hand.
+5. **The 37 odd-gap stacks snap to the nearest step, ties round up.**
+
+   | from | to | rules |
+   | ---: | ---: | ---: |
+   | 6px | 8px | 22 |
+   | 10px | 12px | 5 |
+   | 14px | 16px | 1 |
+   | 18px | 16px | 4 |
+   | 20px | 16px | 4 |
+
+   Items 18px and 20px have no step above, so they go down to 16px. That is a
+   judgment call from me, not a point Gary signed off on.
+   **The one 32px stack does not snap.** A 32px to 16px move is 16px, not a
+   rounding. It stays bespoke. Tell me if you want it moved.
+
+   Every snap is a visible change. Run `npm run visual` on each migration
+   slice and list the changed pages in the PR body.
+
+## Next
+
+Build one part per PR, in this order: `Stack`, `Cluster`, `Grid`. Each PR adds
+the component, its rules in `src/styles/system/layout.css`, a `/design-lab`
+specimen and a test. Migrating the existing rules follows in sliced PRs.
