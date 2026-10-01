@@ -3,6 +3,7 @@ import { BallparkDiagram } from './BallparkDiagram.jsx'
 import { Facts, RankGroup } from './BallparkFacts.jsx'
 import { rankedDimensions } from '../../lib/ballpark/ballparkData.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // The Ballpark sheet: a to-scale ink sketch of the field (BallparkDiagram) over a
 // facts strip (built / roof / capacity) and the park's outfield distances + wall
@@ -44,10 +45,10 @@ export function BallparkModal({ venue, onClose }) {
           <Facts label="Capacity" value={data.capacity?.toLocaleString()} />
         </dl>
 
-        <div className="bpsheet__ranks">
+        <Stack gap="loose" className="bpsheet__ranks">
           <RankGroup title="Outfield distances" rows={distRows} />
           <RankGroup title="Wall heights" rows={wallRows} />
-        </div>
+        </Stack>
 
         <p className="bpsheet__foot">
           Distances from the MLB Stats API, ranked among the MLB parks · wall shapes
