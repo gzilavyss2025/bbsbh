@@ -120,3 +120,27 @@ card. A Game 3 card on a Game 2 page meant the series split; no Game 3 card mean
 a sweep. Either way the winner of the viewed game followed. On a postseason page
 a later postseason game is now not drawn at all. A page whose own game is not in
 the fetched list seals every game from its `officialDate` on.
+
+## Addendum (2026-10-01): in October the slate's rail holds the bracket
+
+Gary's call, after a concept review ("Rail + board"). In the postseason window,
+on the MLB slate only:
+
+- **The transactions wire steps aside.** Its rail (wide) and its dock (phone)
+  do not render. Roster moves are not news beside a Game 3. The wire stays on
+  every minor-league tab and on each club's page.
+- **The bracket takes the rail.** `BracketRail.jsx` draws `FullBracket` in the
+  right column from `BRACKET_RAIL_QUERY` (1000px) up. Its tree is 358px, so the
+  rail is wider than the wire's 288 and the shell widens to 1310px. Between
+  `WIDE_QUERY` and 1000px the fold stays above the cards, as before.
+- **The bracket takes the dock.** On a phone, on a day with a postseason game,
+  `BracketDock.jsx` holds the bracket in the same sheet the wire used
+  (`ui/dock/SheetDock.jsx`). On a day without one the full bracket is already
+  the page, so there is no dock.
+- **The survivors' board replaces the Off Day grid.** All twelve clubs in fixed
+  slots, each with its next game or the round it went out in
+  (`lib/postseason/survivors.js`).
+
+Decisions 1 to 4 hold for all three: each reads the same bracket, heading into
+its cutoff, with no seal and no kraft. A game in progress never moves the
+board. Yesterday's results do.

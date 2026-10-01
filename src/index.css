@@ -263,6 +263,9 @@
      78-offseason             components/offseason/{OffseasonLead,
                               WinterCalendar}.jsx
      80-postseason-bracket    components/bracket/PostseasonBracket.jsx
+     postseason/home          components/bracket/{BracketRail,BracketDock,
+                              SurvivorsBoard}.jsx (a SUBDIRECTORY: src/styles
+                              is at its flat-file budget)
      report/charts            components/around-the-game/BroadcastBar.jsx
      report/chrome            screens/around-the-game/RunValuePage.jsx,
                               screens/around-the-game/AbsChallengesPage.jsx
