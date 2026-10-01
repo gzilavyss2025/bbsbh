@@ -17,5 +17,5 @@ test('parseArgs keeps an empty value and a value with an equals sign', () => {
 })
 
 test('parseArgs ignores arguments that are not flags', () => {
-  assert.deepEqual(parseArgs(['node', 'file.mjs', '--k=v']), { k: 'v' })
+  assert.deepEqual(parseArgs(['node', 'file.mjs', '-x', '--k=v']), { k: 'v' })
 })

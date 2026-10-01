@@ -4,9 +4,16 @@
 // parseArgs reads `--flag=value` as a string and a bare `--flag` as `true`.
 // gen-rookies-backfill and gen-run-expectancy keep a stricter local copy that
 // ignores a bare `--flag`, so a mistyped value flag still falls back to its default.
-import { parseArgs as nodeParseArgs } from 'node:util'
 
-export const parseArgs = (args) => ({ ...nodeParseArgs({ args, strict: false }).values })
+export function parseArgs(argv) {
+  const args = {}
+  for (const a of argv) {
+    const m = /^--([^=]+)=(.*)$/.exec(a)
+    if (m) args[m[1]] = m[2]
+    else if (a.startsWith('--')) args[a.slice(2)] = true
+  }
+  return args
+}
 
 export const isoDay = (d) => d.toISOString().slice(0, 10)
 
