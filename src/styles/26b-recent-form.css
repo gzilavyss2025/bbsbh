@@ -23,6 +23,8 @@
 .formtrend__barhead,
 .formtrend .formtrend__bar {
   width: 30%;
+}
+.formtrend .formtrend__bar {
   padding-left: var(--space-1h);
   padding-right: var(--space-1h);
 }

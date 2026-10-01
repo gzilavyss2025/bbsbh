@@ -117,6 +117,7 @@ export function SplitsSection({ block, vsTeam, season, asOf, personId, playerSur
         <div className="player__seasonsplits">
           <SectionHead look="rule" note="full season">By handedness</SectionHead>
           <Ledger
+            label="Splits by handedness"
             leftCols={1}
             head={splitHead(block.group)}
             hideNarrow={NARROW_HIDE}
@@ -148,6 +149,7 @@ export function SplitsSection({ block, vsTeam, season, asOf, personId, playerSur
         <>
           <SectionHead look="rule" note="full season">Situational</SectionHead>
           <Ledger
+            label="Situational splits"
             leftCols={1}
             head={splitHead(block.group)}
             hideNarrow={NARROW_HIDE}

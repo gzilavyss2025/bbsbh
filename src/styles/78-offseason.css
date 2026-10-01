@@ -406,17 +406,20 @@
 .movedup__card {
   margin-top: var(--space-2);
 }
+.movedup__table :where(th, td) {
+  /* Table holds a cell to one line; a name wraps (the climb column says nowrap
+     again, and wins, because this rule weighs nothing). */
+  white-space: normal;
+}
 .movedup__table {
-  width: 100%;
-  border-collapse: collapse;
-  /* Two of the three columns are short and fixed in width; the player takes
-     what is left, which is what a name needs and a level path does not. */
-  table-layout: auto;
+  /* Names, not figures. Two of the three columns are short and fixed in
+     width; the player takes what is left, which is what a name needs and a
+     level path does not. */
+  font-family: inherit;
+  font-variant-numeric: normal;
 }
 .movedup__table th,
 .movedup__table td {
-  padding: var(--space-1h) 0;
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
   text-align: left;
   /* Middle, not baseline: the player cell is as tall as a headshot and the two
      short columns beside it would otherwise sit against the top rule. */
@@ -432,21 +435,10 @@
 .movedup__table thead th {
   /* The header row has no photo in it and reads better on its baseline. */
   vertical-align: baseline;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-  border-bottom-color: var(--rule);
 }
 /* Org is read as a right-hand column, so its heading follows it. */
 .movedup__table thead th:last-child {
   text-align: right;
-}
-.movedup__table tbody tr:last-child th,
-.movedup__table tbody tr:last-child td {
-  border-bottom: none;
 }
 .movedup__table tbody th {
   font-family: var(--font-body);
@@ -676,36 +668,25 @@
    of the same three facts per row, and a screen reader that reads "vs league,
    minus 3.1" is reading what the page means. */
 .seasonnote__table {
-  width: 100%;
   margin-top: var(--space-4);
-  border-collapse: collapse;
-  table-layout: auto;
+  /* Names, not figures. */
+  font-family: inherit;
+  font-variant-numeric: normal;
 }
+/* Table right-aligns and holds each cell to one line; the hitter and the club
+   under him read left and wrap (tbody th, below). */
 .seasonnote__table th,
 .seasonnote__table td {
-  padding: var(--space-1h) 0;
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
-  text-align: left;
   vertical-align: baseline;
 }
-.seasonnote__table thead th {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-  border-bottom-color: var(--rule);
+.seasonnote__table th {
+  text-align: left;
 }
-.seasonnote__table thead th:not(:first-child),
-.seasonnote__table td {
+.seasonnote__table thead th:not(:first-child) {
   text-align: right;
 }
-.seasonnote__table tbody tr:last-child th,
-.seasonnote__table tbody tr:last-child td {
-  border-bottom: none;
-}
 .seasonnote__table tbody th {
+  white-space: normal;
   font-family: var(--font-body);
   font-size: var(--fs-body);
   font-weight: var(--w-regular);

@@ -802,7 +802,6 @@
 .player .ledger td {
   text-transform: uppercase;
 }
-.ledger,
 .standings {
   width: 100%;
   /* `separate` (not `collapse`) so the sticky first column's row-divider
@@ -822,14 +821,10 @@
   overflow: hidden;
   box-shadow: var(--shadow-card);
 }
-.ledger th,
-.ledger td {
-  padding: var(--space-1h) var(--space-2);
-  font-size: var(--fs-small);
-  text-align: right;
-  /* Data cells are single tokens; keep them on one line so a value like the
-     pitcher W–L ("10–7") never wraps at its en-dash onto a second row. The
-     wrap lives on .ledger-wrap (horizontal scroll) instead. */
+/* The Postseason odds sheet still wears `.ledger standings` (T8 moves it onto
+   Table); its column names held one line under the old `.ledger th` rule, which
+   left with the three ledgers that moved. Delete this with the shared bases. */
+.ledger.standings th {
   white-space: nowrap;
 }
 /* Row dividers as ONE full-width line per row (a background gradient owned by
@@ -852,19 +847,7 @@
   background-size: 100% var(--bw-hair);
 }
 .ledger thead th {
-  border-top: none;
-  background: var(--bg-page);
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  font-size: var(--fs-label);
-  color: var(--text-caption);
   font-weight: var(--w-semibold);
-}
-.ledger td {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-body);
 }
 .ledger .lft {
   text-align: left;
@@ -986,11 +969,10 @@
     display: none;
   }
   /* Tighten the cell gutters on a phone so a dense 8-column pitcher register
-     fits the viewport without the last stat spilling into a horizontal scroll. */
-  .ledger th,
-  .ledger td {
-    padding-left: var(--space-1h);
-    padding-right: var(--space-1h);
+     fits the viewport without the last stat spilling into a horizontal scroll.
+     The Table reads its cell padding from this one property. */
+  .ledger {
+    --table-cell: var(--space-1h) var(--space-1h);
   }
 }
 /* The "converted to pitcher" note that sits above the stat blocks. (The
