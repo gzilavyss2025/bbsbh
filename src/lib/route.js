@@ -24,7 +24,7 @@
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
 //   '/postseason-race'                  -> { name: 'postseason-race' }
 //   '/postseason/{seriesId}?d='         -> { name: 'postseason-series', seriesId, asOf }
-//   '/trade-deadline'                   -> { name: 'trade-deadline' }  (redirects to the latest season)
+//   '/trade-deadline'                   -> { name: 'trade-deadline-season', season: <latest> }
 //   '/trade-deadline/{year}'            -> { name: 'trade-deadline-season', season: year }
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
@@ -128,6 +128,10 @@ import {
   winterLeagueById,
   winterLeagueBySlug,
 } from './winter/leagues.js'
+
+// Newest season in src/api/tradeDeadline.js SEASONS (test/route.test.js pins
+// the match), kept here so this module needs no api import.
+const LATEST_TRADE_DEADLINE_SEASON = 2026
 
 // The slate's league, as a URL prefix. Two things are deliberately missing.
 //
@@ -336,7 +340,7 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'postseason-race')
     return { name: 'postseason-race' }
   if (parts.length === 1 && parts[0] === 'trade-deadline')
-    return { name: 'trade-deadline' }
+    return { name: 'trade-deadline-season', season: LATEST_TRADE_DEADLINE_SEASON }
   if (parts.length === 1 && parts[0] === 'all-star-rosters')
     return { name: 'all-star-rosters' }
   if (parts.length === 1 && parts[0] === 'all-star-legacy')
@@ -556,10 +560,12 @@ export function parseRoute(url) {
   // The year matches the precomputed file's own name 1:1 (public/data/
   // trade-deadline/{year}.json) — no separate slug scheme, same idea as the
   // postseason series id above. A non-numeric segment falls back to the
-  // season index rather than stranding the page with nothing to show.
+  // latest season rather than stranding the page with nothing to show.
   if (parts.length === 2 && parts[0] === 'trade-deadline') {
     const season = Number(parts[1])
-    return Number.isFinite(season) ? { name: 'trade-deadline-season', season } : { name: 'trade-deadline' }
+    return Number.isFinite(season)
+      ? { name: 'trade-deadline-season', season }
+      : { name: 'trade-deadline-season', season: LATEST_TRADE_DEADLINE_SEASON }
   }
   // Umpires carry no spoiler-cutoff hint: assignments/dates are never
   // score-revealing, so unlike player/team links there's no `?d=`/`?s=` to parse.
