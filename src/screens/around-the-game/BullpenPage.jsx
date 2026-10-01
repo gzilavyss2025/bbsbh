@@ -229,7 +229,7 @@ export function BullpenPage() {
                         teamId={r.teamId}
                         name={clubShort(clubs, r.teamId)}
                         rank={r.rank}
-                        sub={`${r.total} arms tracked`}
+                        note={`${r.total} arms tracked`}
                       />
                       <td>
                         <StatusMeter

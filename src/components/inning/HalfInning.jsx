@@ -523,7 +523,7 @@ function HalfHitChart({ feed, inning, half, label, teamId }) {
       balls={balls}
       venue={feed?.gameData?.venue?.name ?? ''}
       variant="half"
-      eyebrow={`${label} ${ordinal(inning)}`}
+      note={`${label} ${ordinal(inning)}`}
     />
   )
 }

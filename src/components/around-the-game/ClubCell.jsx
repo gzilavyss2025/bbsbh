@@ -32,7 +32,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 //      `.standings td.team { display: flex }` rule would set exactly that. So
 //      the TD stays a table cell and the flex layout moves INSIDE it, which is
 //      what `.rpt__club` is for. Do not flatten this wrapper away.
-export function ClubCell({ teamId, name, rank, tied, sub, tab }) {
+export function ClubCell({ teamId, name, rank, tied, note, tab }) {
   return (
     <th scope="row" className="team">
       <span className="rpt__club">
@@ -47,7 +47,7 @@ export function ClubCell({ teamId, name, rank, tied, sub, tab }) {
           {name}
         </TeamLink>
       </span>
-      {sub ? <span className="rpt__note">{sub}</span> : null}
+      {note ? <span className="rpt__note">{note}</span> : null}
     </th>
   )
 }
