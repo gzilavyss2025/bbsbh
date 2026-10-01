@@ -250,6 +250,18 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   never mutates its `base` argument (see `../lib/jsonPatch.js`) and never
   throws, falling back to `null` (→ a normal `fetchGameFeed` call) on any
   apply failure or gamePk mismatch.
+  Two pitcher fetchers here feed the lineup pages' starter card and the full
+  Now Pitching card (#1344). Both stop BEFORE the game (ADR-0088):
+  `fetchPitcherSeasonLine(id, season, sportId, officialDate, { postseason })`
+  asks `stats=byDateRange` from Jan 1 to `officialDate − 1` (`gameType=R`, or
+  `F,D,L,W` for the postseason row), returns null with no date, and takes the
+  split with NO `team` key for a traded arm (the split order is not fixed).
+  `fetchPitcherLastGame(id, season, cutoffDate, cutoffGameNumber)` asks the
+  gameLog with `gameType=R,F,D,L,W`, keeps a game before the cutoff date or
+  on it with a lower `gameNumber` (doubleheader), and adds P, BF, R, the
+  gamePk, `gameNumber`, `gameType`, both clubs and, for a postseason game,
+  `seriesGameNumber` (one `/schedule?gamePk=` call — the split has none). It
+  returns no decision (W/L/SV/HLD, `isWin`).
 - `highlights.js` — video highlight clips (`/api/v1/game/{gamePk}/content`),
   joined to a specific play by matching a clip's `guid` to the terminal pitch
   event's `playId` in `feed/live` (the only reliable join key; verified live

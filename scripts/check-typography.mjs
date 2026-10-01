@@ -113,6 +113,10 @@ const SPACING_RESIDUE = {
   '69-pitch-arsenal.css': { 18: 3, 44: 1 },
   '72-club-transactions.css': { 18: 1 },
   '77-express-lane.css': { 18: 1 },
+  // The Now Pitching card's pitch tile pads 6px top, 7px bottom: the approved
+  // design (#1344), where the extra pixel balances the mono figure's descent
+  // against the 3px colour bar at the top. No token carries 7px.
+  'pitcher-card/card.css': { 7: 1 },
   'report/charts.css': { 36: 3 },
   'scorecard/footer.css': { 72: 1 },
 }

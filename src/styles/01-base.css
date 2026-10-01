@@ -128,7 +128,11 @@
      - the same page's picked-game card, where one sentence says why that game
        is being offered — `.pgame__why` (issue #1077). The club names, the
        parent orgs, the seal line, the date, the park and both buttons all stay
-       shouted, the same split one more time */
+       shouted, the same split one more time
+     - the Now Pitching card's (i) note — `.pcard__tip` (issue #1344,
+       pitcher-card/card.css): three sentences on how the pitch arcs are
+       drawn. The "Pitch mix" label it sits beside, the tiles and the scene's
+       bar all stay shouted, the same split one more time */
 #root * {
   text-transform: uppercase;
 }

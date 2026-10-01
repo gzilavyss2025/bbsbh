@@ -20,7 +20,10 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 // only ever passed by HalfInning.jsx's persistent card — a pre-pitch/mid-
 // inning change notice (StatBox.jsx / PlayByPlay.jsx's own uses of this same
 // component) has no natural "entering the half" moment to hang it on.
-export function PitcherNotice({ pitcher, teamId = null, teamName, className = '', label = 'Now pitching', entering = null }) {
+//
+// `flag`, when given, is the full Now Pitching card's note under the name —
+// "Pitched yesterday" or "Starter in relief" (pitcherCard/PitcherCard.jsx).
+export function PitcherNotice({ pitcher, teamId = null, teamName, className = '', label = 'Now pitching', entering = null, flag = null }) {
   if (!pitcher) return null
   return (
     <div className={`pitchernotice ${className}`}>
@@ -39,6 +42,7 @@ export function PitcherNotice({ pitcher, teamId = null, teamName, className = ''
             {pitcher.hand ? <span className="pitchernotice__hand">{pitcher.hand}HP</span> : null}
           </span>
         </span>
+        {flag && <span className="pitchernotice__flag">{flag}</span>}
       </div>
       {entering && (
         <span className="pitchernotice__entering">

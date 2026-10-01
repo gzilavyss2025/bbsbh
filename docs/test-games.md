@@ -197,6 +197,21 @@ league stays excluded.
 - **The last day of a winter**: `2026-02-02`, and `2026-02-03` for the day the
   tab is gone.
 
+## Now Pitching card: postseason relief, a traded starter
+
+**2026-09-29 and 2026-09-30, PHI @ ATL, NL Wild Card Gm 1 and Gm 2** —
+gamePks `849845` and `849841`
+Route bases: `/09292026/phiatl/` and `/09302026/phiatl/`
+
+The reference games for the full Now Pitching card (#1344, ADR-0088). Gm 2's
+season lines end 2026-09-29, so Gm 1 is in the postseason row. In Gm 2:
+Mahle (top 1) is a traded starter, so his row must be the combined line
+(27 GS, 7-10, 3.99), not his Braves split. Sánchez (bottom 1) has 4 days'
+rest. Lee (top 8) won Gm 1, so his postseason HLD is "–" and the card says no
+W. Iglesias enters mid top 8; Painter (bottom 8) is "Starter in relief";
+Fuentes enters mid top 9 with a folded "Other <1%" tile. The issue holds the
+full expected-value table.
+
 ## Categories not included (couldn't verify)
 
 Batting out of order and an overturned replay challenge were searched but

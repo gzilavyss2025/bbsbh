@@ -1,0 +1,326 @@
+/* The full Now Pitching card (#1344, components/playbyplay/pitcherCard/): the
+   PitcherNotice header, the season and postseason lines, the pitch scene and
+   tiles, and the last appearance. A SUBDIRECTORY because src/styles is a flat
+   directory at its own file ratchet (scripts/check-dir-size.mjs, ADR-0038).
+   Sizes follow the approved design canvas ("G series"); colours are tokens.
+   The card chrome is the caller's `.pitchernotice--pbp` (12-sealbox.css). */
+
+.pcard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2h);
+}
+.pcard .pitchernotice__body {
+  flex-grow: 1;
+}
+
+/* "Pitched yesterday" / "Starter in relief", right-aligned under the name. */
+.pitchernotice__flag {
+  align-self: flex-end;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--clay-deep);
+}
+
+/* One section: a dashed rule over it, its rows 4px apart. */
+.pcard__sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+.pcard__sec--mix {
+  gap: var(--space-1h);
+}
+
+/* Condensed labels; `--ink` for a heading-weight one. */
+.pcard__lbl {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  color: var(--text-caption);
+}
+.pcard__lbl--ink {
+  color: var(--text-heading);
+}
+
+/* Equal columns, the value over its label. */
+.pcard__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--pcard-cols, 7), minmax(0, 1fr));
+  column-gap: 2px;
+  text-align: center;
+}
+.pcard__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.pcard__val {
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body);
+}
+
+/* "Postseason", then a thin rule to the right edge. */
+.pcard__postrule {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  margin-top: 3px;
+}
+.pcard__postrule::after {
+  content: '';
+  flex: 1;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* ---- The scene ------------------------------------------------------------ */
+
+.pscene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 336 / 204;
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--rule-grid);
+}
+.pscene svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.pscene__sky { fill: var(--rule-grid); }
+.pscene__grass { fill: var(--field-outfield); }
+.pscene__mound { fill: var(--field-dirt); opacity: 0.75; }
+.pscene__dirt { fill: var(--field-dirt); opacity: 0.55; }
+.pscene__back,
+.pscene__edge {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  opacity: 0.35;
+}
+.pscene__front {
+  fill: var(--surface-inset);
+  fill-opacity: 0.35;
+  stroke: var(--accent-primary);
+  stroke-width: 1.5;
+}
+.pscene__grid {
+  stroke: var(--accent-primary);
+  stroke-width: 0.6;
+  opacity: 0.3;
+}
+.pscene__ghost polyline {
+  fill: none;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+.pscene__ghost .pscene__ring {
+  fill: none;
+  stroke-width: 1.2;
+  opacity: 0.55;
+}
+.pscene__trail line {
+  stroke-linecap: round;
+}
+.pscene__release { fill: var(--text-heading); }
+.pscene__ball {
+  fill: var(--surface-inset);
+  stroke: var(--text-heading);
+  stroke-width: 1;
+}
+.pscene__seam {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 1;
+}
+
+/* The navy bar: the pitch in flight and its speed, nothing else. */
+.pscene__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-2);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+.pscene__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.pscene__mph {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* One colour per family (pitchFamily), the same tokens as .pitchmix__seg. */
+.pcard .fill--fastball { background: var(--arsenal-fastball); }
+.pcard .fill--breaking { background: var(--arsenal-breaking); }
+.pcard .fill--offspeed { background: var(--arsenal-offspeed); }
+.pcard .fill--other { background: var(--arsenal-other); }
+.pcard .stroke--fastball { stroke: var(--arsenal-fastball); }
+.pcard .stroke--breaking { stroke: var(--arsenal-breaking); }
+.pcard .stroke--offspeed { stroke: var(--arsenal-offspeed); }
+.pcard .stroke--other { stroke: var(--arsenal-other); }
+
+/* ---- "Pitch mix" and its (i) note ----------------------------------------- */
+
+.pcard__mixlabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-top: 2px;
+}
+.pcard__info {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+/* A 32px target around a 16px glyph; the negative margin keeps the label row
+   from growing. */
+.pcard__infobtn {
+  display: grid;
+  place-items: center;
+  width: var(--space-8);
+  height: var(--space-8);
+  margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-1h)) calc(-1 * var(--space-2)) 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+.pcard__infobtn span {
+  display: grid;
+  place-items: center;
+  width: var(--space-4);
+  height: var(--space-4);
+  border: 1.3px solid var(--text-muted);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-read);
+  font-style: italic;
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-label);
+  line-height: var(--lh-solid);
+  color: var(--text-muted);
+}
+.pcard__tip {
+  display: none;
+  position: absolute;
+  z-index: 5;
+  top: 26px;
+  left: -4px;
+  width: 240px;
+  padding: var(--space-2) var(--space-2h);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-inset);
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-body);
+  font-size: var(--fs-label);
+  font-weight: var(--w-regular);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-none);
+  color: var(--text-body);
+}
+.pcard__info:hover .pcard__tip,
+.pcard__info:focus-within .pcard__tip,
+.pcard__tip.is-open {
+  display: block;
+}
+#root .pcard__tip {
+  /* Natural case, under the ALL-CAPS INVARIANT's sanctioned exemption
+     (01-base.css): three sentences that explain how the arcs are drawn read
+     as prose, not chrome. The "Pitch mix" label beside it stays shouted. */
+  text-transform: none; /* caps-exempt: the (i) note is a three-sentence explainer */
+}
+
+/* ---- Tiles ----------------------------------------------------------------- */
+
+.pcard__tiles {
+  display: grid;
+  grid-template-columns: repeat(var(--pcard-tile-cols, 5), minmax(0, 1fr));
+  gap: var(--space-1);
+}
+.pcard__tile {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: var(--space-1h) var(--space-1) 7px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-xs);
+}
+.pcard__tile.is-active {
+  border-color: var(--accent-primary);
+  background: var(--surface-inset);
+}
+.pcard__swatch {
+  display: block;
+  height: 3px;
+  border-radius: var(--radius-xs);
+}
+.pcard__tname {
+  min-height: 2.2em;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-title);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
+}
+.pcard__pct {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body);
+}
+.pcard__mph {
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+.pcard__unit {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+}
+
+/* ---- Last appearance -------------------------------------------------------- */
+
+.pcard__lasthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.pcard__gamelink {
+  color: var(--accent-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

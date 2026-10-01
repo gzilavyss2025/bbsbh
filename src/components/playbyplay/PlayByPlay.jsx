@@ -30,7 +30,8 @@ import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
 import { BallFlight } from '../charts/BallFlight.jsx'
 import { PitchLadder } from '../scoring/PitchLadder.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
-import { PitcherNotice, PitcherPhoto, ReliefRepeat } from './PitcherNotice.jsx'
+import { PitcherPhoto, ReliefRepeat } from './PitcherNotice.jsx'
+import { PitcherCard } from './pitcherCard/PitcherCard.jsx'
 import { DepartureLineCard, FinalizedLineCard } from './PitcherHandoffCard.jsx'
 import { AtBatHero } from './AtBatHero.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
@@ -362,7 +363,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           // A mid-inning pitching change renders as the same "now pitching" card
           // the stat slot shows for a between-halves change (see PitcherNotice),
           // headshot and all — falling back to the plain note only if the pitcher
-          // can't be resolved. Immediately below it, the arm going OUT gets his
+          // can't be resolved (the FULL card, #1344). Immediately below it, the arm going OUT gets his
           // own line frozen at this exact moment (DepartureLineCard) — see the
           // `handoffs` note above.
           const pitcher = pitchingChangePitcher(feed, entry.playerId)
@@ -372,8 +373,8 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
             : null
           node = pitcher ? (
             <>
-              <PitcherNotice
-                pitcher={pitcher}
+              <PitcherCard
+                feed={feed} relief pitcher={pitcher}
                 teamId={pitchingTeamId}
                 teamName={pitchingName}
                 className="pitchernotice--pbp"

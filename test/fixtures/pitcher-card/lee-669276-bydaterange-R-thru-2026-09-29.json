@@ -1,0 +1,64 @@
+{
+  "stats": [
+    {
+      "splits": [
+        {
+          "stat": {
+            "gamesPlayed": 71,
+            "gamesStarted": 0,
+            "wins": 6,
+            "losses": 1,
+            "saves": 0,
+            "holds": 31,
+            "era": "3.09",
+            "inningsPitched": "67.0",
+            "strikeOuts": 77,
+            "baseOnBalls": 17,
+            "whip": "0.97",
+            "hits": 48,
+            "runs": 25,
+            "earnedRuns": 23,
+            "numberOfPitches": 1054,
+            "battersFaced": 262
+          },
+          "team": {
+            "id": 144,
+            "name": "Atlanta Braves"
+          },
+          "sport": {
+            "id": 1
+          },
+          "numTeams": 1
+        },
+        {
+          "stat": {
+            "gamesPlayed": 71,
+            "gamesStarted": 0,
+            "wins": 6,
+            "losses": 1,
+            "saves": 0,
+            "holds": 31,
+            "era": "3.09",
+            "inningsPitched": "67.0",
+            "strikeOuts": 77,
+            "baseOnBalls": 17,
+            "whip": "0.97",
+            "hits": 48,
+            "runs": 25,
+            "earnedRuns": 23,
+            "numberOfPitches": 1054,
+            "battersFaced": 262
+          },
+          "team": {
+            "id": 144,
+            "name": "Atlanta Braves"
+          },
+          "sport": {
+            "id": 0
+          },
+          "numTeams": 1
+        }
+      ]
+    }
+  ]
+}

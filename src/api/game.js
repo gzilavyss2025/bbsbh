@@ -342,35 +342,59 @@ export function managerLabel(mgr) {
 
 // ---------------------------------------------------------------------------
 // A pitcher's season line — the "3.12 ERA · 9-4 · 142 K" you pencil next to
-// the opposing starter while staging. Season AGGREGATES, not this game's line,
-// so it's staging-safe; strictly speaking a final game's runs are already
-// folded into the season ERA, but that's a drift you'd need the before-value
-// to read anything from — never this game's score itself. `sportId` routes
-// MiLB pitchers to their own league's stats (statsapi defaults to MLB).
-// Verified against /api/v1/people/{id}/stats on 2026-07-07.
+// the opposing starter while staging, and the Now Pitching card's season and
+// postseason rows. It ENDS THE DAY BEFORE `officialDate`: `stats=season`
+// already holds a game in progress (verified 2026-09-30, Mahle's season line
+// equalled his line that night), which on the innings viewer is a spoiler
+// (ADR-0088). So this asks `byDateRange` from Jan 1 to the day before, and
+// returns null without a date to stop at. `postseason` swaps the regular
+// season for the four postseason game types. `sportId` routes MiLB pitchers
+// to their own league's stats (statsapi defaults to MLB).
+//
+// A traded pitcher gets one split per club PLUS the combined line, which is
+// the one with no `team` key. The order is not fixed (Mahle 2026: ATL, SF,
+// combined), so pick by the missing key, never by position. An arm with one
+// club has no keyless split; any split is then his whole line.
+// Verified against /api/v1/people/{id}/stats?stats=byDateRange on 2026-10-01.
 // ---------------------------------------------------------------------------
 
-export async function fetchPitcherSeasonLine(personId, season, sportId = 1) {
-  if (!personId || !season) return null
+export async function fetchPitcherSeasonLine(personId, season, sportId = 1, officialDate = null, { postseason = false } = {}) {
+  if (!personId || !season || !officialDate) return null
   try {
     const sport = sportId && sportId !== 1 ? `&sportId=${sportId}` : ''
+    const gameType = postseason ? 'F,D,L,W' : 'R'
     const data = await getJson(
-      `/api/v1/people/${personId}/stats?stats=season&group=pitching&season=${season}${sport}`,
+      `/api/v1/people/${personId}/stats?stats=byDateRange&group=pitching&season=${season}` +
+        `&startDate=${season}-01-01&endDate=${dayBefore(officialDate)}&gameType=${gameType}${sport}`,
     )
-    const stat = data.stats?.[0]?.splits?.[0]?.stat
+    const splits = data.stats?.[0]?.splits ?? []
+    const stat = (splits.find((s) => !s.team) ?? splits[0])?.stat
     if (!stat) return null
     return {
-      era: stat.era ?? '',
+      games: stat.gamesPlayed ?? 0,
+      gamesStarted: stat.gamesStarted ?? 0,
       wins: stat.wins ?? 0,
       losses: stat.losses ?? 0,
+      saves: stat.saves ?? 0,
+      holds: stat.holds ?? 0,
+      era: stat.era ?? '',
       inningsPitched: stat.inningsPitched ?? '',
       strikeOuts: stat.strikeOuts ?? 0,
+      baseOnBalls: stat.baseOnBalls ?? 0,
       whip: stat.whip ?? '',
     }
   } catch {
     // MiLB coverage gaps / pre-debut arms — the staging row just omits it.
     return null
   }
+}
+
+// "2026-09-30" -> "2026-09-29". UTC on both sides, so no time zone or DST
+// edge can move the day.
+function dayBefore(apiDate) {
+  const d = new Date(`${apiDate}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() - 1)
+  return d.toISOString().slice(0, 10)
 }
 
 // ---------------------------------------------------------------------------
@@ -384,9 +408,19 @@ export async function fetchPitcherSeasonLine(personId, season, sportId = 1) {
 // — and keeps whichever split has the latest date strictly BEFORE
 // `cutoffDate` (the officialDate of the game being staged). That cutoff is the
 // whole spoiler defense, same as person.js's gameLogView: it can never
-// resolve to tonight's own outing once the feed starts reflecting it. Falls
-// back to last season's log when the current season has no eligible start
-// yet (the first week or two of a new year).
+// resolve to tonight's own outing once the feed starts reflecting it. The one
+// exception on the cutoff day is a doubleheader: in game 2, game 1 (a lower
+// `cutoffGameNumber`) is an earlier appearance, so it counts. Falls back to
+// last season's log when the current season has no eligible start yet (the
+// first week or two of a new year).
+//
+// The log asks for `gameType=R,F,D,L,W`. Without it statsapi sends the
+// regular season only, and in October the Now Pitching card would show a
+// September game and miss "pitched yesterday". A postseason game also gets
+// its `seriesGameNumber` ("WC Gm 1"), which the split does not carry, from
+// the schedule. No decision (W/L/SV/HLD, `isWin`) is returned: in a series it
+// tells the reader how an earlier game ended.
+// Verified against the gameLog and schedule endpoints on 2026-10-01.
 // ---------------------------------------------------------------------------
 
 const LAST_GAME_SPORT_IDS = [1, ...MILB_LEVELS.map((l) => l.sportId)]
@@ -395,7 +429,7 @@ async function fetchGameLogSplits(personId, season, sportId) {
   try {
     const sport = sportId !== 1 ? `&sportId=${sportId}` : ''
     const data = await getJson(
-      `/api/v1/people/${personId}/stats?stats=gameLog&group=pitching&season=${season}${sport}`,
+      `/api/v1/people/${personId}/stats?stats=gameLog&group=pitching&season=${season}&gameType=R,F,D,L,W${sport}`,
     )
     return data.stats?.[0]?.splits ?? []
   } catch {
@@ -403,29 +437,53 @@ async function fetchGameLogSplits(personId, season, sportId) {
   }
 }
 
-export async function fetchPitcherLastGame(personId, season, cutoffDate) {
+async function fetchSeriesGameNumber(gamePk) {
+  try {
+    const data = await getJson(`/api/v1/schedule?gamePk=${gamePk}`)
+    return data.dates?.[0]?.games?.[0]?.seriesGameNumber ?? null
+  } catch {
+    return null
+  }
+}
+
+const POSTSEASON_TYPES = new Set(['F', 'D', 'L', 'W'])
+
+export async function fetchPitcherLastGame(personId, season, cutoffDate, cutoffGameNumber = 1) {
   if (!personId || !season) return null
+  const gameNumber = (s) => s.game?.gameNumber ?? 1
+  const before = (s) =>
+    !cutoffDate || s.date < cutoffDate || (s.date === cutoffDate && gameNumber(s) < cutoffGameNumber)
   for (const yr of [season, season - 1]) {
     const perLevel = await Promise.all(
       LAST_GAME_SPORT_IDS.map((sportId) => fetchGameLogSplits(personId, yr, sportId)),
     )
-    const eligible = perLevel
-      .flat()
-      .filter((s) => s.date && (!cutoffDate || s.date < cutoffDate))
+    const eligible = perLevel.flat().filter((s) => s.date && before(s))
     if (eligible.length === 0) continue
-    eligible.sort((a, b) => (a.date < b.date ? 1 : -1))
+    eligible.sort((a, b) => (a.date !== b.date ? (a.date < b.date ? 1 : -1) : gameNumber(b) - gameNumber(a)))
     const s = eligible[0]
     const st = s.stat ?? {}
+    const gamePk = s.game?.gamePk ?? null
     return {
       date: s.date,
+      gamePk,
+      gameNumber: gameNumber(s),
+      gameType: s.gameType ?? 'R',
+      seriesGameNumber: gamePk && POSTSEASON_TYPES.has(s.gameType) ? await fetchSeriesGameNumber(gamePk) : null,
+      team: teamAbbr(s.team ?? {}),
+      teamId: s.team?.id ?? null,
       opponent: teamAbbr(s.opponent ?? {}),
+      opponentId: s.opponent?.id ?? null,
       home: Boolean(s.isHome),
       // Blank for MLB (the common case) — a level tag only earns its keep
       // when it's NOT tonight's own level, same convention as gameLogView's
       // tagLevel option.
       level: s.sport?.id && s.sport.id !== 1 ? SPORT_LABEL[s.sport.id] ?? '' : '',
+      sportId: s.sport?.id ?? 1,
       inningsPitched: st.inningsPitched ?? '',
+      pitches: st.numberOfPitches ?? 0,
+      battersFaced: st.battersFaced ?? 0,
       hits: st.hits ?? 0,
+      runs: st.runs ?? 0,
       earnedRuns: st.earnedRuns ?? 0,
       strikeOuts: st.strikeOuts ?? 0,
       baseOnBalls: st.baseOnBalls ?? 0,
