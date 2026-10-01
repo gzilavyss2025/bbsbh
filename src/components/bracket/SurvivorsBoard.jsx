@@ -19,7 +19,9 @@ import { useRouteLink } from '../../lib/nav.js'
 import { teamPath } from '../../lib/route.js'
 import { survivorLine, survivorsBoard } from '../../lib/postseason/survivors.js'
 import { ClubMark } from './bracketParts.jsx'
+import { leagueMarkUrl } from '../passport/leagueMarks.js'
 
+const LEAGUE_MARK = { AL: 'al', NL: 'nl' }
 const LEAGUE_NAME = { AL: 'American League', NL: 'National League' }
 
 export function SurvivorsBoard({ bracket, slateDate, favoriteTeamId = null }) {
@@ -41,7 +43,11 @@ export function SurvivorsBoard({ bracket, slateDate, favoriteTeamId = null }) {
       </div>
       {board.leagues.map((league) => (
         <div key={league.key} className="psboard__league">
-          <span className="psboard__lg" aria-hidden="true">{league.key}</span>
+          <span className="psboard__lg" aria-hidden="true">
+            {LEAGUE_MARK[league.key]
+              ? <img src={leagueMarkUrl(LEAGUE_MARK[league.key])} alt="" className="psboard__lgmark" />
+              : league.key}
+          </span>
           <ul className="psboard__slots" aria-label={LEAGUE_NAME[league.key]}>
             {league.slots.map((slot) => {
               const line = survivorLine(slot, slateDate)

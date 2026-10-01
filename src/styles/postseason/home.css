@@ -111,19 +111,25 @@
 
 .psboard__league {
   display: grid;
-  grid-template-columns: var(--space-4) minmax(0, 1fr);
+  grid-template-columns: var(--space-6) minmax(0, 1fr);
   gap: var(--space-2);
 }
-/* The league letters run up the board's edge, as a painted scoreboard's do. */
+/* The league's own white mark sits at the board's edge, where a painted
+   scoreboard puts the league name. */
 .psboard__lg {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-black);
-  letter-spacing: var(--ls-wide);
   color: var(--text-on-ink);
+}
+.psboard__lgmark {
+  width: 100%;
+  height: auto;
+  max-height: var(--space-6);
+  object-fit: contain;
 }
 .psboard__slots {
   list-style: none;

@@ -37,6 +37,11 @@ const manifestPath = join(here, '..', 'src', 'lib', 'data', 'league-logo-manifes
 const MARKS = [
   { key: 'mlb', url: 'https://www.mlbstatic.com/team-logos/league-on-dark/1.svg' },
   { key: 'milb', url: 'https://www.mlbstatic.com/team-logos/league-on-dark/milb.svg' },
+  // The two MLB leagues, for the postseason Survivors' Board. mlbstatic has no
+  // on-dark art for them (league ids 103 AL / 104 NL), so the on-light art is
+  // re-inked to one colour the same way a club mark is.
+  { key: 'al', url: 'https://www.mlbstatic.com/team-logos/league-on-light/103.svg' },
+  { key: 'nl', url: 'https://www.mlbstatic.com/team-logos/league-on-light/104.svg' },
 ]
 
 // The two marks are very different shapes — MLB is a near-square 128x72 badge,
