@@ -33,7 +33,7 @@ scope document, link it rather than inlining it.
 
 ## Wayfinding operations
 
-Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
+Used by `/wayfinder`. The **map** is a file with one **child** file per ticket. No tracked `.scratch/` folder holds a map today. Only the child shape (`issues/NN-<slug>.md`) exists in the tree, as old notes. A new effort that uses `/wayfinder` creates both.
 
 - **Map**: `.scratch/<effort>/map.md` — the Notes / Decisions-so-far / Fog body.
 - **Child ticket**: `.scratch/<effort>/issues/NN-<slug>.md`, numbered from `01`, with the question in the body. A `Type:` line records the ticket type (`research`/`prototype`/`grilling`/`task`); a `Status:` line records `claimed`/`resolved`.
