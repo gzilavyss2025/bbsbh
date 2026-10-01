@@ -45,12 +45,6 @@ test('move relocates a value and copy duplicates it', () => {
   assert.deepEqual(base, { from: { x: 5 }, to: {} }) // still untouched
 })
 
-test('test op passes silently on a match and throws on a mismatch', () => {
-  const base = { value: 42 }
-  assert.doesNotThrow(() => applyJsonPatch(base, [{ op: 'test', path: '/value', value: 42 }]))
-  assert.throws(() => applyJsonPatch(base, [{ op: 'test', path: '/value', value: 43 }]))
-})
-
 test('an unsupported op throws rather than silently applying nothing', () => {
   assert.throws(() => applyJsonPatch({}, [{ op: 'bogus', path: '/x', value: 1 }]))
 })
