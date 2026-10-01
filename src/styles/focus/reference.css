@@ -346,14 +346,16 @@
    bigger share of the table and pays for it out of the numerals, which are the
    two- and three-character values that can afford a caption-size step and no
    side padding. Scoped to .focusrail: the same table on the stacked page and in
-   the box score has the room already and is left exactly as it was. */
+   the box score has the room already and is left exactly as it was. The cell's
+   height is Table's (tight); the rail only takes the side padding away. */
 .focusrail .pitchers__pitcher {
   width: 44%;
 }
 
 .focusrail .pitchers__grid th,
 .focusrail .pitchers__grid td {
-  padding: var(--space-1h) 0;
+  padding-left: 0;
+  padding-right: 0;
   font-size: var(--fs-label);
 }
 

@@ -2,14 +2,15 @@ import { useMemo } from 'react'
 import { computeLeaders, positionTag } from '../../api/teamLeaders.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { Table } from '../ui/table/Table.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { InjuredMark } from '../badges/InjuredMark.jsx'
 import { Door } from '../ui/control/Door.jsx'
 
 // TEAM LEADERS, LEDGER FORM — the team hub's own rendering of a club's
-// per-category leaders: two labelled blocks, BATTING over PITCHING, one ruled
-// row per category (short label, leader, value). No headshots, no runners-up,
-// no deck.
+// per-category leaders: two labelled blocks, BATTING over PITCHING, each a
+// Table with three named columns (Category, Leader, Stat) and one ruled row per
+// category (#1132, Q5). No headshots, no runners-up, no deck.
 //
 // It exists because the card board this replaced on the hub could not show both
 // halves of the game at once. TeamLeaders' featured card is ~180px tall, so the
@@ -91,27 +92,39 @@ export function TeamLeadersLedger({
         {blocks.map((block) => (
           <Card key={block.key} body="flush" className="tledg__block">
             <h4 className="tledg__block-title">{block.label}</h4>
-            <ul className="tledg__rows">
-              {block.rows.map(({ category, entry }) => {
-                const tag = positionTag(entry, category.group)
-                return (
-                  <li key={category.key} className="tledg__row">
-                    <span className="tledg__cat">{category.short}</span>
-                    {/* Name and tag share one flex child so the tag rides with
-                        the name and a long name still ellipsises against it,
-                        instead of the tag being pushed into the value. */}
-                    <span className="tledg__who">
-                      <PlayerLink id={entry.id} className="tledg__name">
-                        {entry.name}
-                      </PlayerLink>
-                      {tag && <span className="tledg__pos">{tag}</span>}
-                      <InjuredMark hurt={injuredIds?.has(entry.id)} />
-                    </span>
-                    <span className="tledg__val">{entry.display}</span>
-                  </li>
-                )
-              })}
-            </ul>
+            <Table frame="bare" density="row" className="tledg__rows">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Leader</th>
+                  <th>Stat</th>
+                </tr>
+              </thead>
+              <tbody>
+                {block.rows.map(({ category, entry }) => {
+                  const tag = positionTag(entry, category.group)
+                  return (
+                    <tr key={category.key}>
+                      <td className="tledg__cat">{category.short}</td>
+                      {/* Name and tag share one flex child so the tag rides
+                          with the name and a long name still ellipsises
+                          against it, instead of the tag being pushed into the
+                          figure. The cell takes the free width (max-width: 0). */}
+                      <td className="tledg__leader">
+                        <span className="tledg__who">
+                          <PlayerLink id={entry.id} className="tledg__name">
+                            {entry.name}
+                          </PlayerLink>
+                          {tag && <span className="tledg__pos">{tag}</span>}
+                          <InjuredMark hurt={injuredIds?.has(entry.id)} />
+                        </span>
+                      </td>
+                      <td className="tledg__val">{entry.display}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </Table>
           </Card>
         ))}
       </div>
