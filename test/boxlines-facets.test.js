@@ -281,3 +281,21 @@ test('a list facet without the flag still reads the regular season alone', () =>
     assert.equal(facetPlan(facet).gameTypes, null, `${facet.kind} widened without asking`)
   }
 })
+
+test('a club facet with postseasonFrom is one series: that club, October only, from Game 1 on', () => {
+  // The series page's leader doors (ADR-0087). The facet still narrows the log
+  // to ONE opponent, so it costs a handful of games, and it asks for the four
+  // rounds only. `keep` then drops an earlier meeting of the same two clubs
+  // (last year's division series) by date.
+  const plan = facetPlan({ kind: 'club', opponentId: 158, postseasonFrom: '2026-10-03' })
+  assert.equal(plan.opponentId, 158)
+  assert.equal(plan.narrowsSplits, true)
+  assert.deepEqual(plan.gameTypes, ['F', 'D', 'L', 'W'])
+  assert.equal(plan.keep(row({ date: '2026-10-03' })), true)
+  assert.equal(plan.keep(row({ date: '2026-10-05' })), true)
+  assert.equal(plan.keep(row({ date: '2025-10-04' })), false)
+  // A plain club facet is unchanged: regular season, no predicate.
+  const plain = facetPlan({ kind: 'club', opponentId: 158 })
+  assert.equal(plain.keep, null)
+  assert.equal(plain.gameTypes, null)
+})

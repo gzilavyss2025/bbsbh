@@ -1,4 +1,6 @@
 import '../styles/35-postseason-series.css'
+import '../styles/postseason/series-parts.css'
+import { useMemo } from 'react'
 import { loadPostseasonHistory } from '../api/postseasonHistory.js'
 import {
   loadSeriesStats,
@@ -7,10 +9,13 @@ import {
   SERIES_PITCHING_CATEGORIES,
 } from '../api/postseasonSeries.js'
 import { fetchGameCardsByPk } from '../api/schedule.js'
+import { loadNineKeys } from '../api/nineKeys.js'
+import { roundTitle } from '../api/postseason/text.js'
 import { computePlayOfTheGame } from '../api/boxscore.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { usePastGameSignals } from '../hooks/usePastGameSignals.js'
+import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { gamePath } from '../lib/route.js'
 import { teamClubNameShort } from '../lib/teams.js'
 import { TeamLink } from '../components/team/TeamLink.jsx'
@@ -24,7 +29,12 @@ import { GameResultFace } from '../components/game/GameResultFace.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../components/postseason/SeriesParts.jsx'
-import { monthDayName } from '../lib/dates.js'
+import { SeriesFlow } from '../components/postseason/SeriesFlow.jsx'
+import { SeriesTotals } from '../components/postseason/SeriesTotals.jsx'
+import { SeriesNineKeys } from '../components/postseason/SeriesNineKeys.jsx'
+import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
+import { historyFlowBuckets } from '../lib/postseason/seriesFlow.js'
+import { addDays, monthDayName, toApiDate } from '../lib/dates.js'
 import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
 import { seriesMarkForHistory } from '../lib/postseason/seriesMarks.js'
 
@@ -106,6 +116,11 @@ export function PostseasonSeriesPage({ seriesId }) {
   const back = () => window.history.back()
   const getSignals = usePastGameSignals()
   const { loading, error, data } = useAsync(() => loadSeries(seriesId, getSignals), [seriesId])
+  const { data: nineKeys } = useAsync(() => loadNineKeys(), [])
+  const { favoriteTeamId } = useFavoriteTeam()
+  const games = data?.series?.games
+  const flowBuckets = useMemo(() => historyFlowBuckets(games), [games])
+  const homeIdByPk = useMemo(() => Object.fromEntries((games ?? []).map((g) => [g.gamePk, g.homeTeamId])), [games])
 
   useDocumentTitle(data?.series ? `${data.series.year} ${data.series.label}` : null)
 
@@ -113,7 +128,7 @@ export function PostseasonSeriesPage({ seriesId }) {
   if (gate) return gate
 
   const { series, stats, cardsByPk, gameSignals } = data
-  const { teamA, teamB, winnerTeamId, mvp, label, year, isWorldSeries, games } = series
+  const { teamA, teamB, winnerTeamId, mvp, label, year, isWorldSeries } = series
   const winner = winnerTeamId === teamA.teamId ? teamA : teamB
   const loser = winnerTeamId === teamA.teamId ? teamB : teamA
   const hasBatting = Object.values(stats.batting).some((v) => v.length > 0)
@@ -121,6 +136,19 @@ export function PostseasonSeriesPage({ seriesId }) {
   // Who took each game, in order — feeds the hero ledger's per-game win cells.
   // Same away/home score comparison seriesStatusAfterGame already relies on.
   const gameWinnerIds = games.map((g) => (g.awayScore > g.homeScore ? g.awayTeamId : g.homeTeamId))
+  // The shared parts, in Game 1's away-then-home order (the series id's own).
+  const clubs = [{ id: teamA.teamId }, { id: teamB.teamId }]
+  // The leader sheets' rows: Game 1's date up to the day after the last game.
+  const lastDate = games.at(-1)?.date
+  const doors = (group) =>
+    lastDate && {
+      group,
+      cutoff: toApiDate(addDays(new Date(`${lastDate}T12:00:00`), 1)),
+      from: games[0].date,
+      seriesName: label,
+      roundTitle: roundTitle({ round: series.roundKey, league: series.leagueId === 103 ? 'AL' : 'NL' }),
+      opponentOf: (id) => (id === teamA.teamId ? teamB.teamId : teamA.teamId),
+    }
 
   return (
     <div className="screen psseries">
@@ -192,6 +220,14 @@ export function PostseasonSeriesPage({ seriesId }) {
         </div>
       </Card>
 
+      <SeriesFlow
+        series={flowBuckets}
+        gameSignals={gameSignals}
+        homeIdByPk={homeIdByPk}
+        clubs={clubs}
+        defaultId={[teamA.teamId, teamB.teamId].includes(favoriteTeamId) ? favoriteTeamId : teamB.teamId}
+      />
+
       {/* Game-by-game log — the series as ONE continuous scorebook ledger
           rather than a stack of separate captioned cards: a double clay
           margin rule down the left (the red margin line every paper ledger
@@ -226,7 +262,12 @@ export function PostseasonSeriesPage({ seriesId }) {
               const isClincher = i === games.length - 1
               const potg = signals ? computePlayOfTheGame(signals.winProb, signals.feed) : null
               return (
-                <article key={g.gameNumber} className="psseries__entry" aria-label={`Game ${g.gameNumber}`}>
+                <article
+                  key={g.gameNumber}
+                  id={`game-${g.gameNumber}`}
+                  className="psseries__entry"
+                  aria-label={`Game ${g.gameNumber}`}
+                >
                   {/* Decorative index stamp — the aria-label above already
                       names the game for assistive tech. */}
                   <span className="psseries__gamenum" aria-hidden="true">
@@ -234,6 +275,7 @@ export function PostseasonSeriesPage({ seriesId }) {
                   </span>
                   <div className="psseries__entryhead">
                     <span className="psseries__gamedate">{monthDayName(g.date)}</span>
+                    {card?.venue?.name && <span className="psseries__gamevenue">{card.venue.name}</span>}
                     <span
                       className={`psseries__gamestatus${isClincher ? ' psseries__gamestatus--final' : ''}`}
                     >
@@ -278,20 +320,40 @@ export function PostseasonSeriesPage({ seriesId }) {
         </Card>
       </section>
 
+      <SeriesTotals totals={stats.totals} clubs={clubs} />
+
       {(hasBatting || hasPitching) && (
         <div className="psseries__leaders">
           {hasBatting && (
-            <SeriesLeaderBoard title="Series batting leaders" categories={BATTING_CATEGORIES} byCategory={stats.batting} />
+            <SeriesLeaderBoard
+              title="Series batting leaders"
+              categories={BATTING_CATEGORIES}
+              byCategory={stats.batting}
+              doors={doors('hitting')}
+            />
           )}
           {hasPitching && (
             <SeriesLeaderBoard
               title="Series pitching leaders"
               categories={SERIES_PITCHING_CATEGORIES}
               byCategory={stats.pitching}
+              doors={doors('pitching')}
             />
           )}
         </div>
       )}
+
+      <SeasonSeriesStrip
+        viewingTeamId={teamB.teamId}
+        opponentId={teamA.teamId}
+        officialDate={games[0].date}
+        sportId={1}
+        gameTypes="R"
+        settled
+        look="label"
+        title="Regular season"
+      />
+      <SeriesNineKeys data={nineKeys} clubs={clubs} season={year} />
 
       <div className="psseries__rosters">
         <RosterCard teamId={winner.teamId} roster={stats.rosters[winner.teamId]} />

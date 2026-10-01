@@ -31,7 +31,7 @@ export function recordLine(series) {
 
 // "NL Wild Card", "ALDS", "NLCS", "World Series" — Gary's copy decision
 // (2026-09-28): every round but the World Series drops the word "Series".
-function roundTitle(series) {
+export function roundTitle(series) {
   if (series.round === 'worldseries') return 'World Series'
   if (series.round === 'wildcard') return `${series.league} Wild Card`
   if (series.round === 'division') return `${series.league}DS`
