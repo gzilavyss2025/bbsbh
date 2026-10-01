@@ -5,6 +5,7 @@ import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { Pill } from '../../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
+import { Table } from '../../../../components/ui/table/Table.jsx'
 
 const DASH = '—'
 // Org prospect list starts collapsed to the top 10, expandable to the full ~30.
@@ -39,44 +40,42 @@ export function ProspectsCard({ prospects, showAllProspects, onShowAll }) {
           </PlayerLink>
         ))}
       </div>
-      <div className="ledger-wrap">
-        <table className="ledger prospecttable">
-          <thead>
-            <tr>
-              <th className="lft">Rk</th>
-              <th className="lft">Player</th>
-              <th>Pos</th>
-              <th>Level</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(showAllProspects ? prospects : prospects.slice(0, PROSPECTS_PREVIEW_COUNT)).map((p) => {
-              const isTop = p.topRank != null
-              return (
-                <tr key={p.playerId}>
-                  <td className="lft yr">{p.orgRank}</td>
-                  <td className="lft ledger__label">
-                    <PlayerLink id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>
-                    {isTop && <Pill figure className="prospecttable__top">#{p.topRank}</Pill>}
-                  </td>
-                  <td>{p.position || DASH}</td>
-                  <td className="prospecttable__level">
-                    <span>{p.levelLabel || DASH}</span>
-                    {p.affiliateTeamId && (
-                      <TeamLogo teamId={p.affiliateTeamId} name={p.levelLabel} size={16} crop />
-                    )}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-        {!showAllProspects && prospects.length > PROSPECTS_PREVIEW_COUNT && (
-          <Door layout="block" onClick={onShowAll}>
-            Show all {prospects.length} prospects
-          </Door>
-        )}
-      </div>
+      <Table label="Org prospects" className="ledger prospecttable">
+        <thead>
+          <tr>
+            <th className="lft">Rk</th>
+            <th className="lft">Player</th>
+            <th>Pos</th>
+            <th>Level</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(showAllProspects ? prospects : prospects.slice(0, PROSPECTS_PREVIEW_COUNT)).map((p) => {
+            const isTop = p.topRank != null
+            return (
+              <tr key={p.playerId}>
+                <td className="lft yr">{p.orgRank}</td>
+                <td className="lft ledger__label">
+                  <PlayerLink id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>
+                  {isTop && <Pill figure className="prospecttable__top">#{p.topRank}</Pill>}
+                </td>
+                <td>{p.position || DASH}</td>
+                <td className="prospecttable__level">
+                  <span>{p.levelLabel || DASH}</span>
+                  {p.affiliateTeamId && (
+                    <TeamLogo teamId={p.affiliateTeamId} name={p.levelLabel} size={16} crop />
+                  )}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </Table>
+      {!showAllProspects && prospects.length > PROSPECTS_PREVIEW_COUNT && (
+        <Door layout="block" onClick={onShowAll}>
+          Show all {prospects.length} prospects
+        </Door>
+      )}
     </Card>
   )
 }

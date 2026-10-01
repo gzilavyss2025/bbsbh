@@ -1912,8 +1912,8 @@ test('C6c: the two tile grids keep their --border-rule ground inside a ledger Ca
 test('C6c: the moved-up table sits in a flush sheet Card and its head stays outside', () => {
   const code = src('components/offseason/MovedUp.jsx')
   assert.match(code, /import \{ Card \} from ["']..\/ui\/frame\/Card\.jsx["']/)
-  const m = code.match(/<\/SectionHead>\s*<Card\b([^>]*)>\s*<table className="movedup__table">[\s\S]*?<\/table>\s*<\/Card>/)
-  assert.ok(m, 'the table is the Card\'s only child, straight after the head')
+  const m = code.match(/<\/SectionHead>\s*<Card\b([^>]*)>\s*<Table\b(?=[^>]*\bframe="bare")(?=[^>]*\bclassName="movedup__table")[^>]*>[\s\S]*?<\/Table>\s*<\/Card>/)
+  assert.ok(m, 'the table is the Card\'s only child, straight after the head, and a bare Table (the Card draws the box)')
   assert.match(m[1], /as="div"/)
   assert.doesNotMatch(m[1], /frame=/, 'the table is a sheet (the default)')
   assert.match(m[1], /body="flush"/)

@@ -79,6 +79,7 @@ export function CareerRegister({ register }) {
         Career stats
       </SectionHead>
       <Ledger
+        label="Career stats"
         leftCols={2}
         head={['Year', 'Team', ...columns]}
         rows={ledgerRows}
