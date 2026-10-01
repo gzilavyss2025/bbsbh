@@ -1,0 +1,94 @@
+# Hand-checked calls for census.mjs, one row per table, keyed file#n (the nth <table in that file).
+# Columns (TAB-separated): key  verdict  slice  gate  to  frame  sticky  hscroll  reason
+# An empty cell keeps the machine value. to = the TARGET density: row (6/8) | tight (4/2) | keep (the namespace keeps its own cells; decisions.md Q2).
+# verdict: MIGRATE | HOLD | UNREVIEWED.  slice: T1..T8 (slices.md) | - none
+# gate: 'no' = outside the spoiler scope; otherwise HOW the spoiler rule reaches the table. A migrating slice keeps that gate exactly.
+#
+# --- T1: build Table + the pilot (no sticky, no scroll, no gate) ---
+screens/game-notes/GameNotesArchivePage.jsx#1	MIGRATE	T1	no	row				PILOT. .gnotes already IS the row recipe (6/8) on a sheet, in its own partial (report/game-notes.css), on a links-only page (/game-notes, #1258). Moving it should change no pixel: it proves Table draws today's look.
+screens/ProspectsPage.jsx#1	MIGRATE	T1	no	row				PILOT. The /prospects board: a sheet in its own partial (31e-prospect-board.css), no sticky, no scroll. Its 8/12 cells snap to row (6/8): the one visible change in T1, and it proves the density snap. The @media (max-width 739px) copy of 8/12 goes too.
+#
+# --- T3: the game surfaces (spoiler scope: move the box, never the gate) ---
+components/gamehud/RollingLine.jsx#1	MIGRATE	T3	revealedThrough per cell: revealInning (reveal-only, ADR-0001) runs only when the half's idx <= revealedThrough	tight				The rolling line score (innings viewer, Express Lane). Sticky team column (.rolling__team) in a Card that scrolls (.rolling__scroll). 6/0 today. The reveal check lives in the cell render: keep it byte for byte.
+components/inning/PitchersSection.jsx#1	MIGRATE	T3	revealedThrough via computePitcherLines (ADR-0009): not a SealBox, and it must not become one	tight				The pitchers table in the innings reference rail. The file header says it is sized to fit a phone with no sideways scroll: 6/1 to tight 4/2 adds 2px a column over ten columns, so check 390px. Shares .pitchers__grid with the HELD scorecard (Scorecard.jsx#1): the .pitchers__grid base rule in 20-charts.css stays, or moves into scorecard/footer.css, in the same PR.
+components/playbyplay/PitcherHandoffCard.jsx#1	MIGRATE	T3	pitcherLineAt cut at a revealed at-bat (api/pitchers.js); the departure card renders inside PlayByPlay's SealBox reveal, the finalized card only for the next half (HalfInning.jsx, isNextToReveal)	tight				Same markup as PitchersSection (.pitchers__grid). Scrolls in .pitcherhandoff__tablewrap (12-sealbox.css).
+screens/BoxScore.jsx#1	MIGRATE	T3	inside the box score's one SealBox reveal render (selectBoxscore is called only there)	tight				Batting grid. In <Card className=bs__team body=flush>, so frame bare. Scrolls in .bs__scroll. Its substitute rows (.bs__sub, renamed in T2) indent under the starter.
+screens/BoxScore.jsx#2	MIGRATE	T3	inside the box score's one SealBox reveal render	tight				Pitching grid. Same card and scroll as #1.
+screens/BoxScore.jsx#3	MIGRATE	T3	inside the box score's one SealBox reveal render	tight				Team totals (.bs__grid--totals, 23-box-score-detail.css). 8/4 today. tight 4/2 is the box score's own density, but the change is visible (Q2).
+screens/BoxScore.jsx#4	MIGRATE	T3	inside the box score's one SealBox reveal render	tight				The line-score board (.bs__grid--board). Owned by 23-box-score-detail.css; its base cells come from 21-box-score.css.
+#
+# --- T4: the small ledgers (player page, team minors, offseason notebook) ---
+components/player/Ledger.jsx#1	MIGRATE	T4	no	row				One tag, three callers: CareerRegister (Year, Team; leftCols 2) and SplitsSection x2 (leftCols 1). Scrolls in .ledger-wrap. Already row. The .ledger frame shares ONE declaration block with .standings (26-player-page.css): T4 takes .ledger out of that selector list and leaves .standings for T8.
+components/playerstats/RecentFormCard.jsx#1	MIGRATE	T4	no	row				.ledger .formtrend__table in its own .ledger-wrap. No rule names .formtrend__table, so it is the plain ledger look.
+screens/team/modules/minors/ProspectsCard.jsx#1	MIGRATE	T4	no	row				The org's prospect table on the parent club's Minors tab. Its .ledger frame draws a box INSIDE the Card: a box in a box. It stays a sheet until the nested-box issue (#1113 Q4: later). Its second column is .ledger__sub (renamed in T2).
+components/player/AwardsLedger.jsx#1	MIGRATE	T4	no	row				Player awards (History tab and player page). 6/0 cells, 8 0 4 0 head. Gains 8px a side (Q2).
+components/offseason/MovedUp.jsx#1	MIGRATE	T4	no	row				Offseason notebook at a minor level: players who moved up. In a Card. 6/0, with 12px on the first and last cell: those two edge rules stay in the namespace.
+components/offseason/YoungestRegulars.jsx#1	MIGRATE	T4	no	row				Offseason notebook at a minor level: the youngest regulars. Bare, 6/0. Same partial as MovedUp (78-offseason.css).
+#
+# --- T5: the report boards (around the game) ---
+screens/around-the-game/AttendancePage.jsx#1	MIGRATE	T5	no	row				standings rpt in <BoardScroller> (.ledger-wrap .rpt-region, the keyboard-reachable scroll). Sticky club cell .rpt th.team / td.team (68-around-the-game.css). Already row.
+screens/around-the-game/AttendancePage.jsx#2	MIGRATE	T5	no	row				As AttendancePage.jsx#1.
+screens/around-the-game/AttendancePage.jsx#3	MIGRATE	T5	no	row				As AttendancePage.jsx#1.
+screens/around-the-game/BullpenPage.jsx#1	MIGRATE	T5	no	row				standings rpt in <BoardScroller>, sticky club cell. Already row.
+screens/around-the-game/FarmSystemPage.jsx#1	MIGRATE	T5	no	row				standings rpt in <BoardScroller>, sticky club cell. Already row.
+screens/around-the-game/FarmSystemPage.jsx#2	MIGRATE	T5	no	row				As FarmSystemPage.jsx#1.
+screens/around-the-game/FarmSystemPage.jsx#3	MIGRATE	T5	no	row				As FarmSystemPage.jsx#1.
+screens/around-the-game/PacePage.jsx#1	MIGRATE	T5	no	row				standings rpt in <BoardScroller>, sticky club cell. Already row.
+screens/around-the-game/PacePage.jsx#2	MIGRATE	T5	no	row				As PacePage.jsx#1.
+screens/around-the-game/RunDifferentialPage.jsx#1	MIGRATE	T5	no	row				standings rpt in <BoardScroller>, sticky club cell. Already row.
+screens/around-the-game/RunDifferentialPage.jsx#2	MIGRATE	T5	no	row				As RunDifferentialPage.jsx#1.
+screens/around-the-game/RunDifferentialPage.jsx#3	MIGRATE	T5	no	row				As RunDifferentialPage.jsx#1.
+screens/around-the-game/RunValuePage.jsx#1	MIGRATE	T5	no	row				standings rpt rv__board rv__board--main: the run value board (75-run-value.css). Sticky club cell.
+screens/around-the-game/RunValuePage.jsx#2	MIGRATE	T5	no	row				standings rpt rv__board: a second run value board.
+screens/around-the-game/RunValuePage.jsx#3	MIGRATE	T5	no	row				standings rpt: a plain report board on /run-value.
+screens/around-the-game/DoubleheadersPage.jsx#2	MIGRATE	T5	no	row				standings rpt dh: the doubleheaders board. Its rows open a drawer (#1).
+screens/around-the-game/DoubleheadersPage.jsx#1	MIGRATE	T5	no	row				.dh__drawer: a table nested in a <td> of #2 (the opened row's games). Bare, 4/10. Snaps to row (Q2). It sits inside a sticky table that scrolls, so it takes no scroll of its own.
+#
+# --- T6: ABS boards + Nine Keys ---
+screens/around-the-game/abs/ClubBoard.jsx#1	MIGRATE	T6	no	row				/abs-challenges board: standings rpt in <BoardScroller>, sticky club cell. Already row.
+screens/around-the-game/abs/LongestRuns.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
+screens/around-the-game/abs/MissBands.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
+screens/around-the-game/abs/PlayerBoards.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
+screens/around-the-game/abs/PlayerBoards.jsx#2	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
+screens/around-the-game/abs/RanOut.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
+screens/around-the-game/abs/WhoCalls.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
+screens/around-the-game/abs/UmpireBoard.jsx#1	MIGRATE	T6	no	row				/abs-challenges umpire board. Its .rpt__between row (8px tall, a count of the middle) is a row variant and stays in the namespace.
+screens/NineKeysPage.jsx#1	MIGRATE	T6	no	keep				/nine-keys: a grid of true/false marks, clubs by keys. Body cells are 0/0 because each holds a drawn mark; heads 8/4. Frame, figures and head type move to Table; the cells keep their own size.
+#
+# --- T7: the other standalone boards ---
+screens/FoulTrackerPage.jsx#1	MIGRATE	T7	no	row				/fouls board: standings foulboard in a .ledger-wrap inside BoardCard (a Card), so frame bare. Already row.
+screens/FoulTrackerPage.jsx#2	MIGRATE	T7	no	row	bare			/fouls whiff column: standings foulboard in .foulboard__whiffcol-scroll, inside the same BoardCard (a Card further up than the three ancestors the census reads), so frame bare.
+screens/FoulTrackerPage.jsx#3	MIGRATE	T7	no	row				As FoulTrackerPage.jsx#1.
+screens/FoulTrackerPage.jsx#4	MIGRATE	T7	no	row				As FoulTrackerPage.jsx#1.
+screens/FoulTrackerPage.jsx#5	MIGRATE	T7	no	row				As FoulTrackerPage.jsx#1.
+screens/FoulTrackerPage.jsx#6	MIGRATE	T7	no	row				standings foulboard foulboard--teams: the club board, as FoulTrackerPage.jsx#1.
+screens/UmpireRankingsPage.jsx#1	MIGRATE	T7	no	row				/umpires: standings umprank. No rule names .umprank itself; its parts live in 38-umpire-pages.css, and one (.standings .team > .umprank__rank) in 29-team-transactions.css.
+screens/SituationalRecordsPage.jsx#1	MIGRATE	T7	no	row				/situational-records: standings trrank in .ledger-wrap .trrank__tablewrap. Its 12px-tall head and the 430px side squeeze stay in the namespace (66a-detail.css).
+components/salaries/ContractGrid.jsx#1	MIGRATE	T7	no	row				A club's Contracts tab. Sticky name column and scroll (.ctr__scroll) in a Card. Every cell is classed, so there is no plain cell: name and year heads 6/10, age 6/8, group 8 10 4, subtotal 4/10, foot 10/10. Seven recipes in one table; all but the group and foot rows snap to row.
+screens/team/modules/TeamChallengeCard.jsx#1	MIGRATE	T7	no	row				The ABS challenge board on the team Numbers tab (report/challenge-card.css). In a Card. 6/0 today (Q2).
+#
+# --- T8: Standings (the sticky boards). Last, because it deletes the shared .standings base ---
+screens/StandingsPage.jsx#1	MIGRATE	T8	no	row				/standings wild card board: standings--full standings--wc in .standings-wrap (the sticky-cell border trick, 26-player-page.css). 6/6 on a phone and 8/8 from 740px: both snap to row (Q2).
+screens/StandingsPage.jsx#2	MIGRATE	T8	no	row				/standings division boards: standings--full in .standings-wrap. Same trick.
+screens/PostseasonRacePage.jsx#1	MIGRATE	T8	no	row				/postseason-race mini table: standings--full standings--wc in .standings-wrap.
+screens/team/modules/StandingsCard.jsx#1	MIGRATE	T8	no	row				Team hub division standings (Overview and Numbers). Plain .standings in a .ledger-wrap; the .standings frame draws a box INSIDE the Card (a box in a box). It stays a sheet until the nested-box issue (#1113 Q4: later).
+components/teamstats/PostseasonOddsModal.jsx#1	MIGRATE	T8	no	row				ledger standings psoddstable in the Postseason odds sheet (opened from StandingsCard). It carries BOTH shared bases, so it moves with the last of them.
+screens/GameNotesDebugPage.jsx#1	MIGRATE	T8	no	row				Unlisted QA page (/game-notes-debug). A lab page, but it wears the shared .standings class that T8 deletes, so it must move or lose its look.
+#
+# --- HOLD ---
+screens/Scorecard.jsx#1	HOLD	-	the #22 sheet's pitching lines, clamped by the caller's reveal (api/scorecardGame.js)					scorecard/* - the sheet you score on (finding 8). It wears .pitchers__grid: see PitchersSection's note.
+screens/Scorecard.jsx#2	HOLD	-	the #22 sheet's scoreboard: a half shows only once it clears the reveal clamp (scorecardScoreboard)					scorecard/* - the sheet you score on (finding 8). No cell padding of its own.
+screens/Scorecard.jsx#3	HOLD	-	the #22 sheet's final scoreboard, same clamp					scorecard/* - the sheet you score on (finding 8).
+components/scoring/ScorecardSheet.jsx#1	HOLD	-	the #22 grid: a loaded game is clamped by the caller (Scorecard.jsx)					.sc-sheet - the scorecard grid (finding 8). Three sticky edges and CSS zoom.
+screens/boxscore/InningTally.jsx#1	HOLD	-	inside the box score's SealBox reveal render					.bs__grid--tally - the inning tally sheet (finding 8). It still wears .bs__grid, so T3 must leave the .bs__grid base rule (21-box-score.css) in place for it.
+screens/sheet/ScoreSheet.jsx#1	HOLD	-	no (blank by design: no cell can be filled from the feed, ScoreSheet.jsx header)					The PRINTABLE pre-pitch score sheet: a sheet you score on, in mm, border-collapse, borders only (print drops backgrounds). Same reason as scorecard/*, but not on the issue's list: decisions.md Q4.
+screens/designlab/buttons.jsx#1	HOLD	-	no					Design lab demo that borrows the box score's .bs__grid. Lab page (#1113 Q5: leave the labs). The .bs__grid base stays for the tally, so the demo keeps drawing. Q4.
+screens/designlab/components.jsx#1	HOLD	-	no					Design lab demo on .bs__grid, as buttons.jsx#1. Q4.
+screens/designlab/buttons.jsx#2	HOLD	-	no					.dlab__matrix: the lab's own variant grid (designlab/lab.css). Lab page. Q4.
+screens/designlab/pills.jsx#1	HOLD	-	no					.dlab__matrix, as buttons.jsx#2. Q4.
+screens/identity-lab/profiles/audit.jsx#1	HOLD	-	no					Identity lab (a dev-only curation tool). Q4.
+screens/research/ResearchDiaryPage.jsx#1	HOLD	-	no					/admin/research (Clerk-admin gated, so it cannot be checked locally). Q4.
+screens/contenders/ContenderDiaryPage.jsx#1	HOLD	-	no					/admin/contenders (Clerk-admin gated), the same .researchdiary__table. Q4.
+#
+# --- div-built tables (Part 4) ---
+div:tledg	HOLD	-	no					A ledger LIST, not a table: one figure a row and no column heads, so nobody reads down a column. Already on Card (#1113). Q5.
