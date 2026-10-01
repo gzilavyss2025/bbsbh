@@ -59,8 +59,9 @@
 // (mirroring src/api/milbHistory.js's historicalParentOrg — the 2021 MiLB
 // reorg means a naive "current org" lookup misattributes older stints), falling
 // back to a live current-team lookup when that file doesn't cover the
-// (team, season). See computeOrgTies/resolveCurrentOrg below (and
-// historicalParentOrgAt in lib/former-teammates.mjs); the client
+// (team, season), and to that season's own team record when the live parent
+// is 11 (a club that left affiliated ball, #1364). See resolveStintOrg in
+// lib/former-teammates.mjs; the client
 // (src/api/formerTeammates.js) just reads whichever of
 // `rows`/`orgTies` the matchup's `kind` says is populated — never both, so the
 // UI never has to choose between two card types for the same matchup.
@@ -75,7 +76,8 @@ import {
   MATCHUP_SPORT_IDS,
   capRows,
   careerRequests,
-  historicalParentOrgAt,
+  NO_MLB_ORG,
+  resolveStintOrg,
   isShippedGame,
   orgIdForShared,
   orgTiesApply,
@@ -267,14 +269,31 @@ async function resolveCurrentOrg(teamId, cache) {
   return org
 }
 
-// The org a career stint belonged to AS OF that stint's own season — the
-// season-accurate history file first (handles a since-reassigned MiLB
-// affiliate, e.g. the 2021 reorg), falling back to the live current-team
-// lookup for a (team, season) the file doesn't cover. An MLB stint's "org" is
-// simply the MLB club itself.
-async function resolveStintOrg(teamId, season, sportId, milbHistory, orgCache) {
-  if (sportId === 1) return { id: teamId }
-  return historicalParentOrgAt(milbHistory, teamId, season) ?? resolveCurrentOrg(teamId, orgCache)
+// A club's parent org IN ONE SEASON (`teams/{id}?season=`), or null. Asked
+// only for a club whose live parent is 11 (resolveStintOrg in
+// lib/former-teammates.mjs, #1364), cached per (team, season).
+const seasonOrgCache = new Map()
+async function resolveSeasonOrg(teamId, season) {
+  const key = `${teamId}|${season}`
+  if (seasonOrgCache.has(key)) return seasonOrgCache.get(key)
+  let org = null
+  try {
+    const t = (await getJson(`/api/v1/teams/${teamId}?season=${season}`)).teams?.[0]
+    if (t?.parentOrgId && t.parentOrgId !== NO_MLB_ORG) org = { id: t.parentOrgId, name: t.parentOrgName ?? '' }
+  } catch {
+    /* null: the live org stands */
+  }
+  seasonOrgCache.set(key, org)
+  return org
+}
+
+// The org a career stint belonged to AS OF that stint's own season: see
+// resolveStintOrg in lib/former-teammates.mjs.
+function stintOrg(teamId, season, sportId, milbHistory, orgCache) {
+  return resolveStintOrg(teamId, season, sportId, milbHistory, {
+    currentOrg: (id) => resolveCurrentOrg(id, orgCache),
+    seasonOrg: resolveSeasonOrg,
+  })
 }
 
 // How interesting a single-player org tie is — same level/recency shape as
@@ -311,7 +330,7 @@ async function orgTiesForRoster(rosterIds, rosterTeamId, oppOrg, careers, names,
       const season = Number(seasonStr)
       const club = career.clubs.get(teamId)
       if (!club) continue
-      const org = await resolveStintOrg(teamId, season, club.sportId, milbHistory, orgCache)
+      const org = await stintOrg(teamId, season, club.sportId, milbHistory, orgCache)
       if (!org || org.id !== oppOrg.id) continue
       const score = orgTieScore(club.level, season, peakWar.get(String(playerId)) ?? 0, currentYear)
       if (!best || score > best.score) {
@@ -513,7 +532,7 @@ const orgByStint = new Map()
 for (const { pairs: stints, clubs } of careers.values()) {
   for (const key of stints) {
     const [teamId, season] = key.split('|').map(Number)
-    const { id } = await resolveStintOrg(teamId, season, clubs.get(teamId).sportId, milbHistory, orgCache)
+    const { id } = await stintOrg(teamId, season, clubs.get(teamId).sportId, milbHistory, orgCache)
     if (id !== teamId) orgByStint.set(key, id)
   }
 }

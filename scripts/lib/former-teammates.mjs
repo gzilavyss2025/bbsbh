@@ -128,6 +128,27 @@ export function historicalParentOrgAt(milbHistory, teamId, season) {
   return era ? { id: era.parentOrgId, name: era.parentOrgName } : null
 }
 
+// statsapi's parent for a club with no MLB org: "Office of the Commissioner".
+export const NO_MLB_ORG = 11
+
+// The org a career stint belonged to AS OF that stint's own season. An MLB
+// stint's org is the MLB club itself. A MiLB stint asks the season-accurate
+// history file first (it handles a since-reassigned affiliate, e.g. the 2021
+// reorg), then the club's LIVE parent. A club that left affiliated ball after
+// the stint has live parent 11 (#1364: the Mississippi Braves of 2022 are the
+// Mississippi Mud Monsters now), so only then is that season's own team record
+// asked; with no answer there, the live org stands rather than a guess.
+// `currentOrg(teamId)` and `seasonOrg(teamId, season)` are the generator's
+// cached statsapi lookups, passed in so this stays testable.
+export async function resolveStintOrg(teamId, season, sportId, milbHistory, { currentOrg, seasonOrg }) {
+  if (sportId === 1) return { id: teamId }
+  const historical = historicalParentOrgAt(milbHistory, teamId, season)
+  if (historical) return historical
+  const current = await currentOrg(teamId)
+  if (current?.id !== NO_MLB_ORG) return current
+  return (await seasonOrg(teamId, season)) ?? current
+}
+
 // The `orgId` a shard's `shared` club entry carries: the club's season-accurate
 // parent org, so the card can file a farm club of tonight's club as a former
 // club (#1319). An MLB club writes none: it is its own org, and the reader
