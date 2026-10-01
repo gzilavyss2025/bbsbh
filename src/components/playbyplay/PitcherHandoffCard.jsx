@@ -1,5 +1,6 @@
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherPhoto } from './PitcherNotice.jsx'
+import { Table } from '../ui/table/Table.jsx'
 
 // The two pitching-handoff cards (ADR to follow — see pitcherHandoffs in
 // api/pitchers.js for the spoiler footing both rely on): a departing
@@ -37,7 +38,7 @@ export function DepartureLineCard({ line, teamId = null, bookOpen, inheritedCoun
           </span>
         </div>
       </div>
-      <PitcherLineTable line={line} />
+      <PitcherLineTable line={line} label={`Line at departure, ${displayName(line)}`} />
     </div>
   )
 }
@@ -59,7 +60,7 @@ export function FinalizedLineCard({ line, teamId = null }) {
           </span>
         </div>
       </div>
-      <PitcherLineTable line={line} />
+      <PitcherLineTable line={line} label={`Final line, ${displayName(line)}`} />
     </div>
   )
 }
@@ -71,46 +72,45 @@ export function FinalizedLineCard({ line, teamId = null }) {
 // narrower notification card, `table-layout: fixed`'s even column split
 // leaves too little room per numeric column on a phone (confirmed against a
 // real game: IP "0.1" and P "11" render with no visible gap between them,
-// reading as "0.111"). `.pitcherhandoff__tablewrap` scrolls horizontally
-// instead of letting the columns compress below a legible width.
-function PitcherLineTable({ line }) {
+// reading as "0.111"). Table's wrap scrolls horizontally instead of letting
+// the columns compress below a legible width. Both cards can show on one page
+// for the same pitcher, so each names its own scroll region (`label`).
+function PitcherLineTable({ line, label }) {
   return (
-    <div className="pitcherhandoff__tablewrap">
-      <table className="pitchers__grid">
-        <thead>
-          <tr>
-            <th className="pitchers__pitcher">Pitcher</th>
-            <th>R/L</th>
-            <th>IP</th>
-            <th>P</th>
-            <th>BF</th>
-            <th>H</th>
-            <th>R</th>
-            <th>ER</th>
-            <th>BB</th>
-            <th>K</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className="pitchers__pitcher">
-              <div className="pitchers__cell">
-                <span className="pitchers__pname">{displayName(line)}</span>
-                {line.jersey ? <span className="pitchers__num">{line.jersey}</span> : null}
-              </div>
-            </td>
-            <td>{line.hand || '—'}</td>
-            <td>{line.ip}</td>
-            <td>{line.pitches}</td>
-            <td>{line.bf}</td>
-            <td>{line.h}</td>
-            <td>{line.r}</td>
-            <td>{line.er}</td>
-            <td>{line.bb}</td>
-            <td>{line.k}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <Table frame="bare" density="tight" label={label} className="pitchers__grid">
+      <thead>
+        <tr>
+          <th className="pitchers__pitcher">Pitcher</th>
+          <th>R/L</th>
+          <th>IP</th>
+          <th>P</th>
+          <th>BF</th>
+          <th>H</th>
+          <th>R</th>
+          <th>ER</th>
+          <th>BB</th>
+          <th>K</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td className="pitchers__pitcher">
+            <div className="pitchers__cell">
+              <span className="pitchers__pname">{displayName(line)}</span>
+              {line.jersey ? <span className="pitchers__num">{line.jersey}</span> : null}
+            </div>
+          </td>
+          <td>{line.hand || '—'}</td>
+          <td>{line.ip}</td>
+          <td>{line.pitches}</td>
+          <td>{line.bf}</td>
+          <td>{line.h}</td>
+          <td>{line.r}</td>
+          <td>{line.er}</td>
+          <td>{line.bb}</td>
+          <td>{line.k}</td>
+        </tr>
+      </tbody>
+    </Table>
   )
 }

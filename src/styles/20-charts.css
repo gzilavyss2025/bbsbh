@@ -6,35 +6,18 @@
   margin-bottom: var(--space-4);
 }
 
-/* The scroller IS the Card (RollingLine.jsx, #1113 slice C4): system/card.css
-   draws the frame, and this later rule's overflow-x wins over the Card's clip
-   on the one axis that scrolls. */
-.rolling__scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.rolling__grid {
-  /* `separate` (not `collapse`) so the sticky first (team) column's row rule
-     stays pixel-aligned with the scrolling inning columns — see the long note
-     on `.standings`. Under `collapse` the shared border lands adrift beneath the
-     pinned cell, stepping every row rule at the seam. Zero spacing keeps the
-     cells flush, and every internal hairline here is a per-cell `border-bottom`
-     / `border-left`, so nothing doubles. */
-  border-collapse: separate;
-  border-spacing: 0;
-  width: 100%;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+/* The grid is a Table (#1132, slice T3): system/table.css draws the cells,
+   the head row, the row rules and the pinned team column, and its wrap is the
+   one scroller. The Card (.rolling__scroll) clips the corners; the wrap fills
+   it edge to edge, so the wrap's focus ring sits inside it. */
+.rolling__scroll .table:focus-visible {
+  outline-offset: calc(-1 * var(--bw-heavy));
 }
 
 .rolling__grid th,
 .rolling__grid td {
-  padding: var(--space-1h) 0;
   min-width: 24px;
   text-align: center;
-  font-size: var(--fs-small);
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
 /* Rule every inning off into its own bordered box — a fixed-width cell no
@@ -45,33 +28,20 @@
 }
 
 .rolling__grid thead th {
-  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
-  color: var(--text-caption);
 }
 
-.rolling__grid tbody tr:last-child th,
-.rolling__grid tbody tr:last-child td {
-  border-bottom: none;
-}
-
+/* A club name is words: it may wrap ("WHITE SOX"), where Table holds a
+   figure to one line. */
 .rolling__team {
   padding-left: var(--space-3) !important;
   padding-right: var(--space-2) !important;
   text-align: left !important;
+  white-space: normal;
   font-family: var(--font-display);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
-  position: sticky;
-  left: 0;
-  background: var(--surface-card);
-}
-
-.rolling__corner {
-  position: sticky;
-  left: 0;
-  background: var(--surface-card);
 }
 
 .rolling__tot {
@@ -267,31 +237,45 @@
   margin-top: 2px;
 }
 
+/* Two tables wear .pitchers__grid on Table (#1132, slice T3): this one and
+   the pitcher handoff card's. system/table.css draws their cells, head and row
+   rules. The HELD scorecard (Scorecard.jsx, .sc-pitchers) keeps the old
+   recipe: each :where(:not(.table__grid)) rule reaches only it, at the weight
+   it always had. */
 .pitchers__grid {
+  table-layout: fixed;
+}
+.pitchers__grid:where(:not(.table__grid)) {
   border-collapse: collapse;
   width: 100%;
-  table-layout: fixed;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
 .pitchers__grid th,
 .pitchers__grid td {
-  padding: var(--space-1h) 1px;
   text-align: center;
+}
+.pitchers__grid td {
+  font-size: var(--fs-compact);
+}
+.pitchers__grid:where(:not(.table__grid)) :is(th, td) {
+  padding: var(--space-1h) 1px;
   font-size: var(--fs-compact);
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
 .pitchers__grid thead th {
-  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
+}
+.pitchers__grid:where(:not(.table__grid)) thead th {
+  font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: var(--ls-title);
   color: var(--text-caption);
 }
 
-.pitchers__grid tbody tr:last-child td {
+.pitchers__grid:where(:not(.table__grid)) tbody tr:last-child td {
   border-bottom: none;
 }
 
