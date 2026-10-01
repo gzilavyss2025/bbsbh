@@ -19,7 +19,7 @@ import {
   BroadcastMasthead,
   BroadcastSection,
 } from '../../components/around-the-game/BroadcastMasthead.jsx'
-import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../components/ui/table/Table.jsx'
 import { BarCell, ColumnChart, roundTicks } from '../../components/around-the-game/BroadcastBar.jsx'
 import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
 import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
@@ -251,51 +251,49 @@ export function RunDifferentialPage() {
             note={`${rows.length} of them since ${data.firstSeason}, widest first. Runs per 162
                    games stretches a 154-game season, a strike year and 2020 onto one scale.`}
           >
-            <BoardScroller label={`Club seasons at plus ${threshold} runs or better`}>
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    <th className="team">Club</th>
-                    <th>Season</th>
-                    <th>Record</th>
-                    <th>Scored</th>
-                    <th>Allowed</th>
-                    <th>Margin</th>
-                    <th>Per 162</th>
-                    <th>What happened next</th>
+            <Table sticky label={`Club seasons at plus ${threshold} runs or better`} className="rpt">
+              <thead>
+                <tr>
+                  <th className="team">Club</th>
+                  <th>Season</th>
+                  <th>Record</th>
+                  <th>Scored</th>
+                  <th>Allowed</th>
+                  <th>Margin</th>
+                  <th>Per 162</th>
+                  <th>What happened next</th>
+                </tr>
+              </thead>
+              <tbody>
+                {shown.map((row) => (
+                  <tr
+                    key={`${row.season}-${row.teamId}`}
+                    className={row.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
+                  >
+                    <ClubCell
+                      teamId={row.teamId}
+                      name={teamClubNameShort(row.teamId)}
+                      note={row.era ?? undefined}
+                    />
+                    <td>{row.season}</td>
+                    <td>
+                      {row.w}–{row.l}
+                    </td>
+                    <td>{row.rs}</td>
+                    <td>{row.ra}</td>
+                    <td>
+                      <BarCell value={row.diff} min={0} max={widest}>
+                        +{row.diff}
+                      </BarCell>
+                    </td>
+                    <td>+{row.per162}</td>
+                    <td>
+                      <OutcomeCell row={row} />
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {shown.map((row) => (
-                    <tr
-                      key={`${row.season}-${row.teamId}`}
-                      className={row.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
-                    >
-                      <ClubCell
-                        teamId={row.teamId}
-                        name={teamClubNameShort(row.teamId)}
-                        note={row.era ?? undefined}
-                      />
-                      <td>{row.season}</td>
-                      <td>
-                        {row.w}–{row.l}
-                      </td>
-                      <td>{row.rs}</td>
-                      <td>{row.ra}</td>
-                      <td>
-                        <BarCell value={row.diff} min={0} max={widest}>
-                          +{row.diff}
-                        </BarCell>
-                      </td>
-                      <td>+{row.per162}</td>
-                      <td>
-                        <OutcomeCell row={row} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </BoardScroller>
+                ))}
+              </tbody>
+            </Table>
 
             {rows.length > OPENING_ROWS && (
               <div className="rpt-controls">
@@ -322,45 +320,43 @@ export function RunDifferentialPage() {
           >
             <RingChart eras={report.eras} />
 
-            <BoardScroller label="Outcomes by how deep the postseason ran">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    <th className="team">Era</th>
-                    <th>Seasons</th>
-                    <th>Club seasons</th>
-                    <th>
-                      +{threshold} or better
-                      <span className="rpt__note">per 162</span>
+            <Table sticky label="Outcomes by how deep the postseason ran" className="rpt">
+              <thead>
+                <tr>
+                  <th className="team">Era</th>
+                  <th>Seasons</th>
+                  <th>Club seasons</th>
+                  <th>
+                    +{threshold} or better
+                    <span className="rpt__note">per 162</span>
+                  </th>
+                  <th>Won it all</th>
+                  <th>Reached the World Series</th>
+                  <th>Out in one series</th>
+                  <th>Never got in</th>
+                </tr>
+              </thead>
+              <tbody>
+                {report.eras.map((era) => (
+                  <tr key={era.key}>
+                    <th scope="row" className="team">
+                      <span className="rdiff__era">{era.label}</span>
+                      <span className="rpt__note">{era.span}</span>
                     </th>
-                    <th>Won it all</th>
-                    <th>Reached the World Series</th>
-                    <th>Out in one series</th>
-                    <th>Never got in</th>
+                    <td>{era.seasons.length}</td>
+                    <td>{era.clubSeasons}</td>
+                    <td>
+                      {era.over}
+                      <span className="rpt__note">{era.overPer162}</span>
+                    </td>
+                    <EraRate part={era.ring} decided={era.decided} />
+                    <EraRate part={era.ring + era.lostWS} decided={era.decided} />
+                    <EraRate part={era.firstExit} decided={era.decided} />
+                    <EraRate part={era.missed} decided={era.decided} />
                   </tr>
-                </thead>
-                <tbody>
-                  {report.eras.map((era) => (
-                    <tr key={era.key}>
-                      <th scope="row" className="team">
-                        <span className="rdiff__era">{era.label}</span>
-                        <span className="rpt__note">{era.span}</span>
-                      </th>
-                      <td>{era.seasons.length}</td>
-                      <td>{era.clubSeasons}</td>
-                      <td>
-                        {era.over}
-                        <span className="rpt__note">{era.overPer162}</span>
-                      </td>
-                      <EraRate part={era.ring} decided={era.decided} />
-                      <EraRate part={era.ring + era.lostWS} decided={era.decided} />
-                      <EraRate part={era.firstExit} decided={era.decided} />
-                      <EraRate part={era.missed} decided={era.decided} />
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </BoardScroller>
+                ))}
+              </tbody>
+            </Table>
           </BroadcastSection>
 
           {report.missed.length > 0 && (
@@ -370,34 +366,32 @@ export function RunDifferentialPage() {
                     baseball simply went home. Every club here reached the bar and did not play
                     a postseason game${lastMissed ? `, and the last of them did it in ${lastMissed}` : ''}.`}
             >
-              <BoardScroller label="Clubs over the bar that played no postseason game">
-                <table className="standings rpt">
-                  <thead>
-                    <tr>
-                      <th className="team">Club</th>
-                      <th>Season</th>
-                      <th>Record</th>
-                      <th>Margin</th>
+              <Table sticky label="Clubs over the bar that played no postseason game" className="rpt">
+                <thead>
+                  <tr>
+                    <th className="team">Club</th>
+                    <th>Season</th>
+                    <th>Record</th>
+                    <th>Margin</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.missed.map((row) => (
+                    <tr key={`miss-${row.season}-${row.teamId}`}>
+                      <ClubCell
+                        teamId={row.teamId}
+                        name={teamClubNameShort(row.teamId)}
+                        note={row.era ?? undefined}
+                      />
+                      <td>{row.season}</td>
+                      <td>
+                        {row.w}–{row.l}
+                      </td>
+                      <td>+{row.diff}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {report.missed.map((row) => (
-                      <tr key={`miss-${row.season}-${row.teamId}`}>
-                        <ClubCell
-                          teamId={row.teamId}
-                          name={teamClubNameShort(row.teamId)}
-                          note={row.era ?? undefined}
-                        />
-                        <td>{row.season}</td>
-                        <td>
-                          {row.w}–{row.l}
-                        </td>
-                        <td>+{row.diff}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </BoardScroller>
+                  ))}
+                </tbody>
+              </Table>
             </BroadcastSection>
           )}
 

@@ -790,3 +790,128 @@ test('T7: no moved page reads a reveal-only module, a seal or a stamp', () => {
     assert.doesNotMatch(code, /api\/(linescore|derive)\.js|<SealBox|revealedThrough|from ['"][^'"]*stamp/i, `${jsx} stays outside the spoiler scope`)
   }
 })
+
+// ---- slice T5: the report boards ----
+
+// One row per page that moved in T5: `boards` is the count of `standings rpt`
+// tables that became a sticky, labelled sheet, and `bare` the count of tables
+// that became a bare, unlabelled one (the doubleheaders drawer).
+const T5 = [
+  { jsx: 'screens/around-the-game/AttendancePage.jsx', boards: 3, bare: 0 },
+  { jsx: 'screens/around-the-game/BullpenPage.jsx', boards: 1, bare: 0 },
+  { jsx: 'screens/around-the-game/DoubleheadersPage.jsx', boards: 1, bare: 1 },
+  { jsx: 'screens/around-the-game/FarmSystemPage.jsx', boards: 3, bare: 0 },
+  { jsx: 'screens/around-the-game/PacePage.jsx', boards: 2, bare: 0 },
+  { jsx: 'screens/around-the-game/RunDifferentialPage.jsx', boards: 3, bare: 0 },
+  { jsx: 'screens/around-the-game/RunValuePage.jsx', boards: 3, bare: 0 },
+]
+const T5_CSS = '68-around-the-game.css'
+const t5Rule = (css, sel) => rules(css).find(([s]) => s === sel)?.[1] ?? ''
+
+test('T5: every report board renders on a sticky, labelled Table and never on a bare <table>', () => {
+  let tables = 0
+  for (const { jsx, boards, bare } of T5) {
+    const code = src(jsx)
+    assert.match(code, /import \{ Table \} from ["'][\w./]+\/ui\/table\/Table\.jsx["']/, `${jsx} imports Table`)
+    assert.doesNotMatch(code, /<table\b/, `${jsx} has no bare <table>`)
+    assert.doesNotMatch(code, /BoardScroller/, `${jsx}: the Table is the scroller now`)
+    assert.doesNotMatch(code, /className="[^"]*(?<![\w-])standings(?![\w-])/, `${jsx}: no table wears .standings`)
+    const tags = [...code.matchAll(/<Table\b([^>]*)>/g)].map((m) => m[1])
+    const sheets = tags.filter((a) => /className="rpt(?![\w-])/.test(a))
+    assert.equal(sheets.length, boards, `${jsx}: ${boards} report boards`)
+    for (const a of sheets) {
+      assert.match(a, /\bsticky\b/, `${jsx}: a report board pins its club column`)
+      assert.match(a, /\blabel=/, `${jsx}: a report board scrolls sideways, so it has a label`)
+      assert.doesNotMatch(a, /\b(frame|density)=/, `${jsx}: a report board is a sheet at row density, the defaults`)
+    }
+    const drawers = tags.filter((a) => /className="dh__drawer"/.test(a))
+    assert.equal(drawers.length, bare, `${jsx}: ${bare} bare tables`)
+    for (const a of drawers) {
+      assert.match(a, /frame="bare"/, 'the drawer sits in a cell, which draws the box')
+      assert.doesNotMatch(a, /\b(sticky|label)\b/, 'the drawer never scrolls on its own')
+    }
+    tables += tags.length
+  }
+  assert.equal(tables, 17, 'T5 moves 17 tables')
+})
+
+test('T5: two boards on one page have two different labels', () => {
+  for (const { jsx } of T5) {
+    const labels = [...src(jsx).matchAll(/<Table\b[^>]*\blabel=(?:"([^"]*)"|\{`([^`]*)`\})/g)].map((m) => m[1] ?? m[2])
+    // RunValue builds four labels from one template, one per column.
+    assert.equal(new Set(labels).size, labels.length, `${jsx}: a duplicate label ${labels}`)
+  }
+})
+
+test('T5: the report namespace draws no frame and no head dress the Table already draws', () => {
+  const FRAME = ['border', 'border-radius', 'box-shadow', 'background', 'overflow', 'border-collapse', 'border-spacing', 'width']
+  // The ABS boards (T6) still wear `standings rpt`. `.rpt thead th` keeps what only it says (the
+  // label tracking, the heavy rule under the head, nowrap). `.rpt td`'s mono face and
+  // `.rpt tbody th.team`'s padding stay too: they out-weigh `.rpt__between`, the ABS umpire
+  // board's row. T6 deletes them with the board.
+  const HEAD = ['padding', 'background', 'font-family', 'font-size', 'color', 'text-transform']
+  for (const [sel, body] of rules(read(T5_CSS))) {
+    const names = props(body)
+    for (const part of sel.split(',').map((x) => x.trim())) {
+      if (part === '.rpt') for (const p of FRAME) assert.ok(!names.includes(p), `${T5_CSS}: .rpt still sets ${p}`)
+      if (part === '.rpt td') assert.ok(!names.includes('padding'), `${T5_CSS}: ${part} still sets padding`)
+      if (part === '.rpt thead th') for (const p of HEAD) assert.ok(!names.includes(p), `${T5_CSS}: ${part} still sets ${p}`)
+    }
+  }
+})
+
+test('T5: the report boards keep the club cell, its pin tint and the rules the ABS boards read', () => {
+  const css = read(T5_CSS)
+  // The pinned cell is opaque in the board's own canvas ground, and a favorite row pins its own tint.
+  assert.equal(decl(t5Rule(css, '.rpt'), '--table-pin'), 'var(--bg-page)')
+  assert.equal(decl(t5Rule(css, '.rpt__row--mine'), '--table-pin'), 'var(--paper-3)')
+  // The sticky club cell keeps display: table-cell and the flex stays on the child.
+  assert.equal(decl(t5Rule(css, '.rpt td.team, .rpt tbody th.team'), 'display'), 'table-cell')
+  assert.equal(decl(t5Rule(css, '.rpt__club'), 'display'), 'flex')
+  // Rules the eight ABS boards (T6) still need.
+  assert.equal(decl(t5Rule(css, '.ledger-wrap .rpt'), 'overflow'), 'visible')
+  assert.ok(rules(css).some(([sel, b]) => sel.split(', ').includes('.rpt-region') && decl(b, 'contain') === 'paint'))
+  assert.equal(decl(t5Rule(css, '.rpt thead th'), 'border-bottom'), 'var(--bw-heavy) solid var(--navy)')
+})
+
+test('T5: the report boards stay inside their page (the wrap paints its own containment)', () => {
+  const css = read(T5_CSS)
+  const body = rules(css).find(([sel]) => sel.split(', ').includes('.bcast-sec .table'))?.[1]
+  assert.ok(body, `${T5_CSS}: a .bcast-sec .table rule`)
+  assert.equal(decl(body, 'contain'), 'paint', 'a board wider than its wrap must not widen the page')
+})
+
+test('T5: the doubleheaders drawer keeps its indent and width, and its row tints the pinned cell', () => {
+  const css = read(T5_CSS)
+  assert.equal(decl(t5Rule(css, '.dh__drawer'), 'margin-left'), 'var(--space-4)')
+  assert.equal(decl(t5Rule(css, '.dh__drawer'), 'width'), 'auto')
+  for (const p of ['border-collapse', 'border', 'background', 'box-shadow']) {
+    assert.ok(!props(t5Rule(css, '.dh__drawer')).includes(p), `.dh__drawer still sets ${p}`)
+  }
+  for (const [sel, body] of rules(css)) {
+    if (/^\.dh__drawer (th|td|thead th|tbody th)/.test(sel)) {
+      for (const p of ['padding', 'font-family', 'background']) assert.ok(!props(body).includes(p), `${sel} still sets ${p}`)
+    }
+  }
+  // The drawer sits inside a `.rpt` board, whose heavy head rule would reach it; the first body row's rule is the one line.
+  assert.equal(decl(t5Rule(css, '.dh__drawer thead th'), 'border'), '0')
+  // The drawer row's cell is the first cell of its row, so the sticky rule pins it: it must keep its ground.
+  assert.equal(decl(t5Rule(css, '.dh__drawerrow'), '--table-pin'), 'var(--paper-1)')
+  // Rows that tint themselves tint the pinned cell by the custom property, not a rule the pin out-weighs.
+  assert.equal(decl(t5Rule(css, '.dh__row:hover'), '--table-pin'), 'var(--paper-2)')
+  assert.equal(decl(t5Rule(css, '.dh__row--open'), '--table-pin'), 'var(--paper-1)')
+})
+
+test('T5: the e2e club-cell pin finds the new wrap, not the old scroller', () => {
+  const spec = readFileSync(join(SRC, '..', 'e2e', 'around-the-game.spec.js'), 'utf8')
+  assert.doesNotMatch(spec, /locator\('\.ledger-wrap'\)/)
+  assert.match(spec, /locator\('\.table'\)\.first\(\)/)
+  assert.match(spec, /expect\(overflow, 'board should be wider than a phone'\)\.toBeGreaterThan\(0\)/)
+  assert.match(spec, /expect\(Math\.abs\(after\.x - before\.x\)\)\.toBeLessThan\(2\)/)
+})
+
+test('T5: the seal pin: no report page reads a reveal-only module or a seal', () => {
+  for (const { jsx } of T5) {
+    assert.doesNotMatch(src(jsx), /api\/(linescore|derive)\.js|<SealBox|revealedThrough|api\/stamps?\b/, `${jsx} is outside the spoiler scope and stays so`)
+  }
+})
