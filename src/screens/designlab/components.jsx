@@ -15,6 +15,7 @@ import { MasonryColumns } from '../../components/ui/MasonryColumns.jsx'
 import { SectionMasthead } from '../../components/ui/SectionMasthead.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
+import { Table } from '../../components/ui/table/Table.jsx'
 import { headerThemeClass, headerThemeFor, headerThemeStyle } from '../../lib/headerTheme.js'
 
 import { DebutPill } from '../../components/badges/DebutPill.jsx'
@@ -108,6 +109,65 @@ function CardDemo() {
   )
 }
 
+// The table in composition (#1132): a sheet with a sticky first column and
+// ten columns, wide enough to scroll at 390px so the pinned club can be checked
+// by eye (and, with a label, by keyboard); then a bare tight grid inside a
+// Card, which already draws the box. The figures are samples, drawn for the lab.
+const BOARD = [
+  ['Milwaukee', 162, 5601, 746, 1384, 191, 713, 521, 1320, '.247'],
+  ['Chicago', 162, 5530, 697, 1301, 180, 662, 498, 1411, '.235'],
+  ['Cincinnati', 162, 5575, 724, 1366, 175, 690, 530, 1388, '.245'],
+  ['Pittsburgh', 162, 5498, 640, 1259, 149, 611, 477, 1402, '.229'],
+  ['St. Louis', 162, 5562, 702, 1340, 160, 669, 505, 1295, '.241'],
+]
+const BOARD_HEADS = ['Club', 'G', 'AB', 'R', 'H', 'HR', 'RBI', 'BB', 'SO', 'AVG']
+
+function TableDemo() {
+  return (
+    <div className="dlab__tables">
+      <Table className="dlab__board" sticky label="Sample batting board, five clubs">
+        <thead>
+          <tr>
+            {BOARD_HEADS.map((h) => (
+              <th key={h}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {BOARD.map((row) => (
+            <tr key={row[0]}>
+              {row.map((cell, i) => (i === 0 ? <th key={i} scope="row">{cell}</th> : <td key={i}>{cell}</td>))}
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+      <Card frame="ledger" body="flush">
+        <Table className="dlab__board" frame="bare" density="tight">
+          <thead>
+            <tr>
+              <th>Pos</th>
+              <th>G</th>
+              <th>GS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>LF</td>
+              <td>112</td>
+              <td>108</td>
+            </tr>
+            <tr>
+              <td>CF</td>
+              <td>31</td>
+              <td>24</td>
+            </tr>
+          </tbody>
+        </Table>
+      </Card>
+    </div>
+  )
+}
+
 const sample = 'Bottom 9th, two out'
 
 function SectionHeadDemo() {
@@ -175,7 +235,7 @@ export function ComponentHalf() {
   return (
     <>
       <Group
-        title="src/components/ui — 14 shared components"
+        title="src/components/ui — 15 shared components"
         lede="The whole shared tier. Button and Door share control/, and Button has its own band above. Against 32 card blocks and 10 pill blocks, this is the ratio #1112 exists to state."
       >
         <Entry title="Loader" path={`${UI_PATH}/Loader.jsx`} note="The shared cold-load loader — a mini linescore whose cell cycles. size=&quot;inline&quot; here.">
@@ -198,6 +258,14 @@ export function ComponentHalf() {
           note="The one card (#1113). Two frames: the sheet (md radius, the card shadow) and the ledger (sm radius, no shadow). A head is a SectionHead or nothing; the body is padded or flush. As a link or a button, the whole card is the tap target and its accent tints the hover. Card owns no margin: the space between cards is the parent's."
         >
           <CardDemo />
+        </Entry>
+        <Entry
+          title="Table"
+          path={`${UI_PATH}/table/Table.jsx`}
+          wide
+          note="The one table (#1132). Two frames: the sheet (the wrap draws the box) and bare, for a table inside a Card. Two densities: row (6 by 8) and tight (4 by 2, the box score&#39;s). Sticky pins the first column: scroll the board at 390px and the club stays. A label makes the scroll region a Tab stop. Table owns no margin, and a column&#39;s width or a subtotal row is the block&#39;s own."
+        >
+          <TableDemo />
         </Entry>
         <Entry title="SectionMasthead" path={`${UI_PATH}/SectionMasthead.jsx`} note="A thin wrapper over the SectionHead band, kept for its sixteen call sites. No logo passed here, so it draws its undressed state.">
           <SectionMasthead title="Milwaukee" />

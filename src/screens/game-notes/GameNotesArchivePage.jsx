@@ -22,6 +22,7 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
+import { Table } from '../../components/ui/table/Table.jsx'
 
 // Every club's Game Notes PDF the archive holds, as one plain table with a link
 // to each (#1258). It replaces the Game Notes feed idea (#911): the feed showed
@@ -142,7 +143,7 @@ export function GameNotesArchivePage({ teamId: requestedId = null }) {
             {rows.length.toLocaleString('en-US')} {rows.length === 1 ? 'note' : 'notes'}
           </p>
           {rows.length > 0 && (
-            <table className="gnotes">
+            <Table className="gnotes">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -170,7 +171,7 @@ export function GameNotesArchivePage({ teamId: requestedId = null }) {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
           )}
           {left > 0 && (
             <div className="gnotes__more">
