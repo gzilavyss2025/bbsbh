@@ -12,19 +12,26 @@ export const NBSP = ' '
 export { num } from '../../lib/math/number.js'
 
 // ".302" style rate: three decimals, no leading zero (baseball convention).
+// Rounded half UP, the way MLB prints it: see round3.
 export function rate3(x) {
   if (!Number.isFinite(x)) return DASH
-  return x.toFixed(3).replace(/^0(?=\.)/, '')
+  return round3(x).toFixed(3).replace(/^0(?=\.)/, '')
 }
+
+// THREE PLACES, HALF UP, AS MLB ROUNDS. toFixed(3) does not do this: 23/80 is
+// .2875, but the float is 0.28749999999999997, so toFixed prints .287 where
+// MLB prints .288 (#1356: 16 of 4,189 2026 lines; this rule matched all of
+// them). A ratio of counts with a denominator under 100,000 is on a half or
+// at least 0.000005 of a thousandth away from one, so the 1e-7 nudge cancels
+// the float error and moves nothing else.
+export const round3 = (v) => (Math.sign(v) * Math.round(Math.abs(v) * 1000 + 1e-7)) / 1000
 
 // MLB'S OWN OPS: round OBP and SLG to three places, THEN add. Not their sum at
 // full precision, which differs from the published string for about one hitter
 // in four (Judge 2025: 1.145 from MLB, 1.144 from the full-precision sum; #1275
 // checked the round-then-add rule against 673 hitters). Returns a number; print
-// it with rate3. Each half rounds with toFixed(3), the same call rate3 prints
-// with, so OPS always equals the printed OBP plus the printed SLG. Math.round(v
-// * 1000) differs at a .xxx5 boundary: OBP 0.2345 prints .234, but it gave .235.
-const round3 = (v) => Number(v.toFixed(3))
+// it with rate3. Each half rounds with round3, the same rule rate3 prints with,
+// so OPS always equals the printed OBP plus the printed SLG.
 export const mlbOps = (obp, slg) => round3(obp) + round3(slg)
 
 // ERA and WHIP from summed components. A pitcher who recorded no out has none:

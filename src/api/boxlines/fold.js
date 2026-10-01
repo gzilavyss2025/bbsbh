@@ -42,7 +42,7 @@
 // looks at them. It counts rows boxlines/rows.js already approved, and a fold
 // can only ever describe a set the gate allowed.
 
-import { mlbOps, eraOf } from '../person/shared.js'
+import { mlbOps, eraOf, rate3 } from '../person/shared.js'
 import { outsToIp } from '../../lib/math/innings.js'
 import { num } from '../../lib/math/number.js'
 
@@ -106,11 +106,9 @@ function totals(rows, group) {
 
 // ".293" — three places, no leading zero, the way a scorebook writes an
 // average. The same shape careerSplits.js's own rate3 keeps, and for the same
-// reason: two renderings of one figure must not spell it two ways.
-function avg3(v) {
-  const s = v.toFixed(3)
-  return s.startsWith('0.') ? s.slice(1) : s
-}
+// reason: two renderings of one figure must not spell it two ways. Rounded half
+// up, as MLB rounds (#1356).
+const avg3 = rate3
 
 // ONE LINE OVER A SET OF ROWS: how many games, and the one rate that answers
 // "how well". A RATE IS NOT AN AVERAGE OF RATES — 1 for 4 and 2 for 2 is 3 for

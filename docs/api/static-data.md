@@ -83,8 +83,9 @@ for each generator; the reader modules:
 - `rehab.js` — the Rehab Assignments page, from `public/data/rehab.json`.
   Cost-driven: a league-wide transaction scan then per-candidate verification
   against his game log + rehab club's schedule to drop ended stints — dozens of
-  calls. `gen-rehab.mjs` (daily cron) imports the transaction tests and the 30-day
-  cap from `rehab-policy.js`, shared with `person.js`'s `detectRehabAssignment`.
+  calls. `gen-rehab.mjs` (daily cron) imports the one stint rule (`rehabListRow` /
+  `openRehabStint` in `rehab-policy.js`) that `person.js`'s `detectRehabAssignment`
+  also calls, so the list and the banner agree on every day (#1362).
 - `milestones.js` — the Milestone Watch page + the player page's Milestone Watch
   card, from `public/data/milestones.json`. Cost-driven: a career-total + this
   season's pace pull per debuted player on any MLB org's full roster (active,
@@ -741,6 +742,10 @@ for each generator; the reader modules:
   costs no per-row logic at all; `monthsPlayed(data, { cutoff })` is the menu a
   selector offers, so a control can never name a month with no games behind it.
   The three levers compose — August, post-break, before a cutoff, is one filter.
+  `ledgerIsComplete(data, schedule, cutoff)` (`src/screens/team/data/shared.js`,
+  beside its one caller) gates the card: a ledger more than
+  one game in ten short of the club's decided schedule (the Rookie DSL files hold
+  about a fifth of a season) is not shown at all (#1363).
   `lastOccurrence(data, predicate, { cutoff })` is the one query here that
   answers a DATE rather than a rate: the newest game matching a row's own
   predicate, as `{ date, opp, result }`. `opp` is a team ID — the shard carries

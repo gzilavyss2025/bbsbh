@@ -19,7 +19,7 @@ import {
 } from '../../../api/uniforms.js'
 import { teamClubName } from '../../../lib/teams.js'
 import { dayOfWeekRecord } from '../modules/TeamStatsCard.jsx'
-import { seasonOf, cutoffFor, scoreCutoffFor, standingsRowsFor, injuredIdsFrom } from './shared.js'
+import { seasonOf, cutoffFor, scoreCutoffFor, standingsRowsFor, injuredIdsFrom, ledgerIsComplete } from './shared.js'
 
 const DASH = '—'
 
@@ -197,7 +197,8 @@ export async function loadNumbers(id, asOf) {
     pitching,
     leaderPool,
     comeback,
-    teamRecords: teamRecordsData,
+    // A ledger that holds only part of the season is not shown (#1363).
+    teamRecords: ledgerIsComplete(teamRecordsData, schedule, standingsDate) ? teamRecordsData : null,
     scheduleShape: scheduleShapeData,
     // The card tallies rows itself (it owns the pre/post-break lever), so the
     // cutoff travels with the data rather than being applied here.

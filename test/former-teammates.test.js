@@ -16,6 +16,7 @@ import {
   orgIdForShared,
   orgTiesApply,
   reduceCareer,
+  resolveStintOrg,
 } from '../scripts/lib/former-teammates.mjs'
 
 const game = (leagueId) => ({ teams: { home: { team: { id: 1, league: { id: leagueId } } } } })
@@ -154,4 +155,47 @@ test('a club with several shared seasons takes the parent of its LATEST season',
 test('a missing lookup writes no orgId', () => {
   assert.equal(orgIdForShared(533, [2019], orgOf), undefined)
   assert.equal(orgIdForShared(531, [2001], orgOf), undefined)
+})
+
+// #1364: a stint on a farm club that later left affiliated ball. milb-history.json
+// does not cover it, and its LIVE parent is now 11 (no MLB org), so the stint
+// got org 11 and never filed under "Facing a former club". Rows from live
+// statsapi, 2026-10-01: teams/430 is now the Mississippi Mud Monsters, parent
+// 11; teams/430?season=2022 is the Mississippi Braves, parent 144 (Braves).
+const LIVE = { 430: { id: 11, name: 'Office of the Commissioner' }, 488: { id: 11, name: 'Office of the Commissioner' }, 556: { id: 158, name: 'Milwaukee Brewers' } }
+const BY_SEASON = {
+  '430|2022': { id: 144, name: 'Atlanta Braves' },
+  '488|2021': { id: 110, name: 'Baltimore Orioles' },
+  '567|2018': { id: 147, name: 'New York Yankees' },
+}
+function lookups() {
+  const calls = []
+  return {
+    calls,
+    currentOrg: async (teamId) => LIVE[teamId] ?? { id: 11, name: '' },
+    seasonOrg: async (teamId, season) => {
+      calls.push(`${teamId}|${season}`)
+      return BY_SEASON[`${teamId}|${season}`] ?? null
+    },
+  }
+}
+
+test('a stint on a since-reassigned farm club takes that season\'s parent, not org 11 (#1364)', async () => {
+  const l = lookups()
+  assert.equal((await resolveStintOrg(430, 2022, 12, { clubs: {} }, l)).id, 144)
+  assert.equal((await resolveStintOrg(488, 2021, 13, { clubs: {} }, l)).id, 110)
+  assert.equal((await resolveStintOrg(567, 2018, 12, { clubs: {} }, l)).id, 147)
+})
+
+test('the season lookup runs only when the live parent is 11', async () => {
+  const l = lookups()
+  // A current affiliate keeps the one live call.
+  assert.equal((await resolveStintOrg(556, 2025, 11, { clubs: {} }, l)).id, 158)
+  // The history file still comes first.
+  assert.equal((await resolveStintOrg(531, 2006, 12, history, l)).id, 143)
+  // An MLB stint is its own org.
+  assert.equal((await resolveStintOrg(144, 2022, 1, { clubs: {} }, l)).id, 144)
+  assert.deepEqual(l.calls, [])
+  // No season answer either: keep the live one rather than guess.
+  assert.equal((await resolveStintOrg(488, 2015, 13, { clubs: {} }, l)).id, 11)
 })

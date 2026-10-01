@@ -8,9 +8,7 @@ import {
   meetsStintCap,
   txnDate,
   isRehabTxn,
-  isRehabEndingTxn,
-  REHAB_MAX_DAYS,
-  isoDaysBetween,
+  openRehabStint,
   mentionsInjuredList,
   injuredListDays,
 } from '../rehab-policy.js'
@@ -28,37 +26,24 @@ import { careerRegisterView, levelSeasonStat, LEVEL_ORDER_DESC } from './careerR
 // starts with an "Assigned" (ASG) row whose description says "rehab" (verified
 // live: "sent RHP Coleman Crow on a rehab assignment to Nashville Sounds") and
 // ends when he returns to the majors — a recall, an activation off the MLB
-// injured list, a real option down, or any non-rehab reassignment. So: find the
-// most recent rehab ASG, and treat it as active only when no such closing move
-// is dated after it. The feed is already capped at the spoiler cutoff, so a
-// game-scoped view reflects his status AS OF that game (a big leaguer only, so
-// it's gated on debutYear). Returns the rehab club { id, name } or null — the
-// caller shows a banner and pins his current-activity sections to MLB, since a
-// rehabber is a major leaguer passing through the minors, not a demotion.
+// injured list, a real option down, a move off the 40-man roster, or any
+// non-rehab reassignment. The feed is already capped at the spoiler cutoff, so
+// a game-scoped view reflects his status AS OF that game (a big leaguer only,
+// so it's gated on debutYear). Returns the rehab club { id, name } or null —
+// the caller shows a banner and pins his current-activity sections to MLB,
+// since a rehabber is a major leaguer passing through the minors, not a
+// demotion.
 //
-// txnDate / isRehabTxn / isRehabEndingTxn: see
-// rehab-policy.js — shared with gen-rehab.mjs so the app's per-player detector
-// and the league-wide Rehab Assignments generator agree on when a rehab ends.
-//
-// An open stint also ends after REHAB_MAX_DAYS (rehab-policy.js), closing row or not.
-//
-// A rehab stint never carries ACROSS a season boundary, same reasoning as
-// detectInjuredList below: an uncaptured closing transaction from a prior
-// season must not keep painting today's (now-active) player with the amber
-// rehab banner. `asOf` is the same spoiler cutoff the caller already used to
-// cap the transactions feed.
+// Which stint is open, when it started, and when the 30-day cap closes it:
+// openRehabStint (rehab-policy.js), the ONE rule the league-wide Rehab
+// Assignments list (gen-rehab.mjs) also calls, so the banner and the list
+// agree on every day (#1362). That rule also keeps a stint from carrying
+// across a season boundary: an uncaptured closing row from a prior season must
+// not paint today's (now-active) player with the amber rehab banner.
 // ---------------------------------------------------------------------------
 export function detectRehabAssignment(transactions, debutYear, asOf) {
   if (!debutYear) return null
-  const rehabs = (transactions ?? []).filter((t) => isRehabTxn(t) && txnDate(t))
-  if (!rehabs.length) return null
-  const latest = rehabs.reduce((a, b) => (txnDate(a) >= txnDate(b) ? a : b))
-  const start = txnDate(latest)
-  if (asOf && start.slice(0, 4) < asOf.slice(0, 4)) return null
-  if (asOf && isoDaysBetween(start.slice(0, 10), asOf) > REHAB_MAX_DAYS) return null
-  const ends = (transactions ?? []).some((t) => txnDate(t) > start && isRehabEndingTxn(t))
-  if (ends) return null
-  const club = latest.toTeam
+  const club = openRehabStint(transactions, asOf)?.club
   return club?.id ? { id: club.id, name: club.name || '' } : null
 }
 
