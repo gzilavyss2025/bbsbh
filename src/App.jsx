@@ -27,11 +27,7 @@ function lazyNamed(loader, name) {
 // Clerk. Mounted app-wide rather than per screen: the consent it syncs is
 // site-wide, not per game.
 const SpoiledDaysCloudSync = isClerkEnabled
-  ? lazy(() =>
-      import('./components/sync/SpoiledDaysCloudSync.jsx').then((m) => ({
-        default: m.SpoiledDaysCloudSync,
-      })),
-    )
+  ? lazyNamed(() => import('./components/sync/SpoiledDaysCloudSync.jsx'), 'SpoiledDaysCloudSync')
   : null
 
 // Headless cross-device sync for the Logbook's game stamps (ADR-0035). Same
@@ -40,11 +36,7 @@ const SpoiledDaysCloudSync = isClerkEnabled
 // App-wide rather than per screen, because a stamp minted in a box score has to
 // publish even after the user navigates away from that game.
 const StampsCloudSync = isClerkEnabled
-  ? lazy(() =>
-      import('./components/sync/StampsCloudSync.jsx').then((m) => ({
-        default: m.StampsCloudSync,
-      })),
-    )
+  ? lazyNamed(() => import('./components/sync/StampsCloudSync.jsx'), 'StampsCloudSync')
   : null
 
 // Headless cross-device sync for the Game Log's named books — the cover half
@@ -54,11 +46,7 @@ const StampsCloudSync = isClerkEnabled
 // the same reason as StampsCloudSync: a book created or renamed inside the
 // Logbook has to keep publishing even after the user navigates away from it.
 const BooksCloudSync = isClerkEnabled
-  ? lazy(() =>
-      import('./components/sync/BooksCloudSync.jsx').then((m) => ({
-        default: m.BooksCloudSync,
-      })),
-    )
+  ? lazyNamed(() => import('./components/sync/BooksCloudSync.jsx'), 'BooksCloudSync')
   : null
 
 // Headless cross-device sync for the My Tally preference document — the club,
@@ -67,11 +55,7 @@ const BooksCloudSync = isClerkEnabled
 // only on a deploy that configures Clerk. App-wide because the level is changed
 // on the slate and the club from the header, which are different screens.
 const PreferencesCloudSync = isClerkEnabled
-  ? lazy(() =>
-      import('./components/sync/PreferencesCloudSync.jsx').then((m) => ({
-        default: m.PreferencesCloudSync,
-      })),
-    )
+  ? lazyNamed(() => import('./components/sync/PreferencesCloudSync.jsx'), 'PreferencesCloudSync')
   : null
 
 // The shared-device guard for the three channels whose local state is one key
@@ -86,9 +70,7 @@ const PreferencesCloudSync = isClerkEnabled
 // that surface's own network pull would decide after the score was on the page.
 // Its own header has the full argument.
 const OwnerGuards = isClerkEnabled
-  ? lazy(() =>
-      import('./components/sync/OwnerGuards.jsx').then((m) => ({ default: m.OwnerGuards })),
-    )
+  ? lazyNamed(() => import('./components/sync/OwnerGuards.jsx'), 'OwnerGuards')
   : null
 
 const AboutPage = lazyNamed(() => import('./screens/AboutPage.jsx'), 'AboutPage')
@@ -309,6 +291,64 @@ function currentUrl() {
   return window.location.pathname + window.location.search
 }
 
+// Routes whose screen takes no props. `profile` is deliberately NOT gated on
+// isClerkEnabled or on being signed in: settings are settings, and every one of
+// them works on this device with no account at all. The account section is the
+// only part that appears or disappears.
+const BARE_ROUTES = {
+  more: MorePage,
+  prospects: ProspectsPage,
+  rehab: RehabPage,
+  milestones: MilestoneWatchPage,
+  'awards-history': AwardsHistoryPage,
+  'postseason-history': PostseasonHistoryPage,
+  'nine-keys': NineKeysPage,
+  'postseason-leaders': PostseasonLeadersPage,
+  'postseason-race': PostseasonRacePage,
+  'all-star-rosters': AllStarRostersPage,
+  'all-star-legacy': AllStarLegacyPage,
+  standings: StandingsPage,
+  salaries: SalariesPage,
+  fouls: FoulTrackerPage,
+  'admin-research': ResearchDiaryPage,
+  'admin-contenders': ContenderDiaryPage,
+  'admin-contracts': ContractIdentityReviewPage,
+  profile: ProfilePage,
+  'umpire-rankings': UmpireRankingsPage,
+  attendance: AttendancePage,
+  pace: PacePage,
+  'farm-system': FarmSystemPage,
+  bullpens: BullpenPage,
+  doubleheaders: DoubleheadersPage,
+  'run-differential': RunDifferentialPage,
+  'abs-challenges': AbsChallengesPage,
+  'run-value': RunValuePage,
+  'game-notes-debug': GameNotesDebugPage,
+  'animation-lab': AnimationLab,
+  'between-innings-lab': BetweenInningsLab,
+  'design-lab': DesignLab,
+  'first-scorebook': FirstScorebookPage,
+}
+
+// Routes whose screen takes the same three hand-offs: the id, the cutoff hint
+// and the league.
+const ID_ROUTES = {
+  player: PlayerPage,
+  'player-stats': PlayerStatsTab,
+  'player-analytics': PlayerAnalyticsTab,
+  'player-history': PlayerHistoryTab,
+  team: TeamPage,
+  'team-leaders': TeamLeadersPage,
+  'team-roster': RosterTab,
+  'team-games': GamesTab,
+  'team-numbers': NumbersTab,
+  'team-contracts': ContractsTab,
+  'team-minors': MinorsTab,
+  'team-stamp-in': StampInPage,
+  'team-photos': TeamPhotosPage,
+  'team-transactions': TeamTransactionsPage,
+}
+
 // Top-level router over the History API (no react-router — see lib/route.js).
 // Anchored on the slate ('/') and the deep-linkable game section
 // ('/{date}/{matchup}/{section}'), plus the many standalone pages (logos,
@@ -363,71 +403,26 @@ export default function App() {
   }
 
   let content
-  if (route.name === 'logos') {
+  const Bare = BARE_ROUTES[route.name]
+  const IdPage = ID_ROUTES[route.name]
+  if (Bare) {
+    content = <Bare />
+  } else if (IdPage) {
+    content = <IdPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'logos') {
     content = <LogoSheet onBack={() => go('/')} />
   } else if (route.name === 'about') {
     content = <AboutPage onBack={() => go('/')} />
-  } else if (route.name === 'more') {
-    content = <MorePage />
-  } else if (route.name === 'prospects') {
-    content = <ProspectsPage />
-  } else if (route.name === 'rehab') {
-    content = <RehabPage />
-  } else if (route.name === 'milestones') {
-    content = <MilestoneWatchPage />
-  } else if (route.name === 'awards-history') {
-    content = <AwardsHistoryPage />
-  } else if (route.name === 'postseason-history') {
-    content = <PostseasonHistoryPage />
-  } else if (route.name === 'nine-keys') {
-    content = <NineKeysPage />
-  } else if (route.name === 'postseason-leaders') {
-    content = <PostseasonLeadersPage />
   } else if (route.name === 'postseason-series') {
     content = <SeriesRoute seriesId={route.seriesId} asOf={route.asOf} />
-  } else if (route.name === 'postseason-race') {
-    content = <PostseasonRacePage />
   } else if (route.name === 'trade-deadline-season') {
     content = <TradeDeadlineSeasonPage season={route.season} />
-  } else if (route.name === 'all-star-rosters') {
-    content = <AllStarRostersPage />
-  } else if (route.name === 'all-star-legacy') {
-    content = <AllStarLegacyPage />
-  } else if (route.name === 'standings') {
-    content = <StandingsPage />
-  } else if (route.name === 'salaries') {
-    content = <SalariesPage />
-  } else if (route.name === 'fouls') {
-    content = <FoulTrackerPage />
   } else if (route.name === 'admin') {
     content = (
       <AdminCopyPage onBack={() => go('/')} focus={route.focus} returnTo={route.returnTo} />
     )
-  } else if (route.name === 'admin-research') {
-    content = <ResearchDiaryPage />
-  } else if (route.name === 'admin-contenders') {
-    content = <ContenderDiaryPage />
-  } else if (route.name === 'admin-contracts') {
-    content = <ContractIdentityReviewPage />
-  } else if (route.name === 'profile') {
-    // Deliberately NOT gated on isClerkEnabled or on being signed in: settings
-    // are settings, and every one of them works on this device with no account
-    // at all. The account section is the only part that appears or disappears.
-    content = <ProfilePage />
-  } else if (route.name === 'player') {
-    content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'player-stats') {
-    content = <PlayerStatsTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'player-analytics') {
-    content = <PlayerAnalyticsTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'player-history') {
-    content = <PlayerHistoryTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'team') {
-    content = <TeamPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'umpire') {
     content = <UmpirePage id={route.id} />
-  } else if (route.name === 'umpire-rankings') {
-    content = <UmpireRankingsPage />
   } else if (route.name === 'situational-records') {
     content = (
       <SituationalRecordsPage
@@ -441,36 +436,10 @@ export default function App() {
         order={route.order}
       />
     )
-  } else if (route.name === 'attendance') {
-    content = <AttendancePage />
-  } else if (route.name === 'pace') {
-    content = <PacePage />
-  } else if (route.name === 'farm-system') {
-    content = <FarmSystemPage />
-  } else if (route.name === 'bullpens') {
-    content = <BullpenPage />
-  } else if (route.name === 'doubleheaders') {
-    content = <DoubleheadersPage />
-  } else if (route.name === 'run-differential') {
-    content = <RunDifferentialPage />
-  } else if (route.name === 'abs-challenges') {
-    content = <AbsChallengesPage />
-  } else if (route.name === 'run-value') {
-    content = <RunValuePage />
   } else if (route.name === 'manager') {
     content = <ManagerPage id={route.id} />
   } else if (route.name === 'game-notes') {
     content = <GameNotesArchivePage teamId={route.teamId} />
-  } else if (route.name === 'game-notes-debug') {
-    content = <GameNotesDebugPage />
-  } else if (route.name === 'animation-lab') {
-    content = <AnimationLab />
-  } else if (route.name === 'between-innings-lab') {
-    content = <BetweenInningsLab />
-  } else if (route.name === 'design-lab') {
-    content = <DesignLab />
-  } else if (route.name === 'first-scorebook') {
-    content = <FirstScorebookPage />
   } else if (route.name === 'logbook') {
     // `season: null` means "newest season with stamps" — only the local
     // collection knows which that is, so LogbookPage resolves it (see route.js).
@@ -499,24 +468,6 @@ export default function App() {
     content = <IdentityLab />
   } else if (route.name === 'uniform-names' && UniformNamesPage) {
     content = <UniformNamesPage />
-  } else if (route.name === 'team-leaders') {
-    content = <TeamLeadersPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'team-roster') {
-    content = <RosterTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'team-games') {
-    content = <GamesTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'team-numbers') {
-    content = <NumbersTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'team-contracts') {
-    content = <ContractsTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'team-minors') {
-    content = <MinorsTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'team-stamp-in') {
-    content = <StampInPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'team-photos') {
-    content = <TeamPhotosPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'team-transactions') {
-    content = <TeamTransactionsPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'leaders') {
     content = (
       <LeadersPage
