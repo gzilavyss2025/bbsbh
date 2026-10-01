@@ -7,6 +7,7 @@
 import { fetchAffiliates, fetchComplexAffiliates, fetchRosterIdsForTeams } from './team.js'
 import { loadCombinedPoolForTeams, sumHitting, sumPitching } from './statsLevels.js'
 import { SPORT_LABEL } from '../lib/teams.js'
+import { rate3 as sharedRate3 } from './person/shared.js'
 
 const SNAPSHOT_URL = '/data/top-prospects.json'
 const EMPTY_SNAPSHOT = { generatedAt: null, source: null, count: 0, players: [], orgProspects: [] }
@@ -113,12 +114,10 @@ export function prospectAffiliateMap(affiliateRosterIds) {
 const MLB_SPORT_ID = 1
 
 // A rate stat the way a broadcast prints it: three decimals, no leading
-// zero (".302"). Same convention teamLeaders.js's own rate3 uses — this file
-// keeps its own copy rather than importing a pool-ranking module for one
-// formatter (see postseasonLeaders.js/savantPercentiles.js/tradeDeadline.js,
-// which each do the same).
+// zero (".302"), rounded half up as MLB rounds: the shared rate3 (#1356),
+// with null and not the dash when there is no value.
 function rate3(v) {
-  return Number.isFinite(v) ? v.toFixed(3).replace(/^(-?)0(?=\.)/, '$1') : null
+  return Number.isFinite(v) ? sharedRate3(v) : null
 }
 // "3.45" — two decimals (ERA).
 function num2(v) {

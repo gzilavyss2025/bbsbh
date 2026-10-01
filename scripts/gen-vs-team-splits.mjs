@@ -92,7 +92,7 @@ function pitcherLine(st) {
 }
 
 // --- rate stats from summed components ---------------------------------------
-const avgOf = (h, ab) => (ab > 0 ? (h / ab).toFixed(3).replace(/^0/, '') : '.000')
+const avgOf = (h, ab) => (ab > 0 ? rate3(h / ab) : '.000')
 function opsOf(b) {
   const obDen = b.ab + b.bb + b.hbp + b.sf
   const obp = obDen > 0 ? (b.h + b.bb + b.hbp) / obDen : 0

@@ -925,7 +925,7 @@ function isNoteworthySplit(splitAvg, baselineAvg) {
 // recomputed rather than read from any one game log's own `avg`.
 function formatAvg(h, ab) {
   if (ab <= 0) return '.000'
-  return (h / ab).toFixed(3).replace(/^0/, '')
+  return rate3(h / ab)
 }
 
 // A hitter's CAREER line in games played on his own birthday, summed across

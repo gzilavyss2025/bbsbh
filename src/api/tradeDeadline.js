@@ -14,6 +14,7 @@
 // here is reveal-only — this module is as spoiler-free as teamTransactions.js.
 
 import { txnDate } from './rehab-policy.js'
+import { rate3 } from './person/shared.js'
 
 // ---------------------------------------------------------------------------
 // Season windows — trade deadline dates carry no API field (verified against
@@ -562,10 +563,10 @@ export function buildLevelGamesLine(levelGames) {
   return `${total} G (${present.map((l) => `${l.games} G at ${l.label}`).join(', ')})`
 }
 
-// ".302" style: three decimals, no leading zero (baseball convention) — same
-// shape as person.js's own (unexported) rate3.
+// ".302" style: three decimals, no leading zero, half up as MLB rounds — the
+// shared rate3 (#1356), with '.000' and not the dash when there is no value.
 function avg3(x) {
-  return Number.isFinite(x) ? x.toFixed(3).replace(/^0(?=\.)/, '') : '.000'
+  return Number.isFinite(x) ? rate3(x) : '.000'
 }
 
 function pct(n, d) {
