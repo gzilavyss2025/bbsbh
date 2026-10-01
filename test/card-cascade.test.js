@@ -2154,7 +2154,7 @@ test('C7: the poster panel title keeps its own rule', () => {
 // is a class that broke it. The block name stays unless the block itself is
 // renamed by another slice. Each old class is gone from src, e2e, scripts and
 // test, comments too; each new class is drawn by a stylesheet and used by a
-// markup file or by the lab catalog.
+// markup file or by the lab catalog, in code and not only in a comment.
 const H3_RENAMED = [
   // batch A: the four titles, the `__sub`, `__kicker`, `__eyebrow` and `__lede` rows
   ['awardord__hd', 'awardord__title'],
@@ -2194,25 +2194,38 @@ const H3_RENAMED = [
   ['dlab__lede', 'dlab__note'],
 ]
 
+// Two classes left with no successor: `.cover__sub` had no call site (its rule
+// and its seal-scope allowlist entry went together), and the between-innings
+// eyebrow repeated its block's name.
+const H3_DELETED = ['cover__sub', 'betweeninnings__eyebrow']
+
 // Text files of the four trees, this file excluded (it names the old classes).
+// Read once for the whole block.
 const H3_ROOT = join(SRC, '..')
 const H3_TEXT = ['.css', '.jsx', '.js', '.mjs', '.md']
+let h3Read
 const h3Trees = () =>
-  ['src', 'e2e', 'scripts', 'test'].flatMap((dir) =>
+  (h3Read ??= ['src', 'e2e', 'scripts', 'test'].flatMap((dir) =>
     files(join(H3_ROOT, dir), H3_TEXT)
       .map((rel) => `${dir}/${rel}`)
       .filter((rel) => rel !== 'test/card-cascade.test.js')
       .map((rel) => [rel, readFileSync(join(H3_ROOT, rel), 'utf8')]),
-  )
+  ))
 // `\b` is wrong here: `_` is a word character, so it does not exist before `__element`.
 // A modifier (`name--tight`) counts as the class; a longer name (`name-x`, `name_x`) does not.
 const h3Class = (name) => new RegExp(`(?<![A-Za-z0-9_-])${name}(?![a-z0-9_]|-[a-z0-9])`)
+// A file without its comments: the shared `/* */` stripper (which also takes
+// JSX's `{/* */}`), then each whole-line `//` comment. A `//` after code stays,
+// so a string that holds a URL is never cut.
+const h3Code = (text) => stripComments(text).replace(/^[ \t]*\/\/.*$/gm, '')
 
 test('H3: each old second-line class is gone from src, e2e, scripts and test, comments too', () => {
   const trees = h3Trees()
-  // A two-step row frees a name that the next row takes (`dlab__note`).
+  // A two-step row frees a name that the next row takes (`dlab__note`). The
+  // next test pins that step.
   const taken = new Set(H3_RENAMED.map(([, now]) => now))
-  for (const [old] of H3_RENAMED.filter(([o]) => !taken.has(o))) {
+  const gone = [...H3_RENAMED.map(([old]) => old).filter((old) => !taken.has(old)), ...H3_DELETED]
+  for (const old of gone) {
     const re = h3Class(old)
     assert.deepEqual(
       trees.filter(([, text]) => re.test(text)).map(([rel]) => rel),
@@ -2222,11 +2235,24 @@ test('H3: each old second-line class is gone from src, e2e, scripts and test, co
   }
 })
 
-test('H3: each new second-line class is in a stylesheet and in a markup file or the lab catalog', () => {
-  const trees = h3Trees()
+// Step one of the two-step. The loop above skips `dlab__note`, because step two
+// gives that name to the page-level lede, so a return to `<p className="dlab__note">`
+// for an ENTRY's note would pass it. An entry's note keeps its own name.
+test('H3: a design lab entry note wears .dlabentry__note, never the name the lede took', () => {
+  const jsx = h3Code(readFileSync(join(SRC, 'screens/designlab/Entry.jsx'), 'utf8'))
+  assert.deepEqual(
+    [...jsx.matchAll(/className="([^"]*)">\{note\}/g)].map((m) => m[1]),
+    ['dlabentry__note'],
+  )
+})
+
+test('H3: each new second-line class is in a stylesheet and in a markup file or the lab catalog, not only in a comment', () => {
+  const code = h3Trees()
+    .filter(([rel]) => rel.startsWith('src/'))
+    .map(([rel, text]) => [rel, h3Code(text)])
   for (const [, now] of H3_RENAMED) {
     const re = h3Class(now)
-    const hit = (ext) => trees.some(([rel, text]) => rel.startsWith('src/') && ext.test(rel) && re.test(text))
+    const hit = (ext) => code.some(([rel, text]) => ext.test(rel) && re.test(text))
     assert.ok(hit(/\.css$/), `.${now} has no rule`)
     assert.ok(hit(/\.jsx?$/), `.${now} is used by no markup and no lab entry`)
   }
@@ -2251,15 +2277,7 @@ test('H3: the held rows keep their names', () => {
   }
 })
 
-test('H3: .cover__sub is deleted, and the seal-scope allowlist no longer names it', () => {
-  const trees = h3Trees()
-  assert.deepEqual(trees.filter(([, text]) => h3Class('cover__sub').test(text)).map(([rel]) => rel), [])
-  assert.doesNotMatch(readFileSync(join(H3_ROOT, 'scripts/check-seal-scope.mjs'), 'utf8'), /cover__sub/)
-})
-
-test('H3: the between-innings eyebrow is retired, and the button is still named by its fact', () => {
-  const trees = h3Trees()
-  assert.deepEqual(trees.filter(([, text]) => h3Class('betweeninnings__eyebrow').test(text)).map(([rel]) => rel), [])
+test('H3: the between-innings button is still named by its fact', () => {
   const jsx = readFileSync(join(SRC, 'components/gamehud/BetweenInnings.jsx'), 'utf8')
   const button = jsx.slice(jsx.indexOf('<Card as="button"'), jsx.indexOf('</Card>'))
   // The name comes from the content: the progress count, the player and the fact.
