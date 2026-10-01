@@ -12,6 +12,7 @@ import { PassportCover } from './PassportCover.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { LEAGUE_MARK_LABELS, leagueMarkBox, leagueMarkUrl } from './leagueMarks.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // How a Game Log book's cover is chosen — the one picker, used by the
 // create-a-book page and by a book's Settings sheet, so the two can never
@@ -160,14 +161,14 @@ export function BookCoverPicker({ book, onChange }) {
 
   if (wide) {
     return (
-      <div className="coverpick">
+      <Stack gap="loose" className="coverpick">
         {preview}
         <div className="coverpick__halves">
-          <section className="coverpick__half">
+          <Stack as="section" className="coverpick__half">
             <SectionHead className="coverpick__title">Use a league logo</SectionHead>
             <PresetGrid book={book} onChange={onChange} />
-          </section>
-          <section className="coverpick__half">
+          </Stack>
+          <Stack as="section" className="coverpick__half">
             <SectionHead className="coverpick__title">Use team colors</SectionHead>
             <LevelNav sportId={level} onChange={setLevelPick} />
             <Button
@@ -184,14 +185,14 @@ export function BookCoverPicker({ book, onChange }) {
               onPick={(coverTeamId) => onChange({ coverMark: 'team', coverTeamId })}
               ariaLabel="Cover club"
             />
-          </section>
+          </Stack>
         </div>
-      </div>
+      </Stack>
     )
   }
 
   return (
-    <div className="coverpick">
+    <Stack gap="loose" className="coverpick">
       {preview}
       {step > 0 && (
         <button type="button" className="coverpick__back" onClick={() => setStep((n) => n - 1)}>
@@ -200,7 +201,7 @@ export function BookCoverPicker({ book, onChange }) {
       )}
 
       {step === 0 && (
-        <div className="coverpick__steps" role="group" aria-label="What goes on the cover">
+        <Stack className="coverpick__steps" role="group" aria-label="What goes on the cover">
           <button type="button" className="coverpick__step" onClick={() => pickMark('team')}>
             Use team colors
           </button>
@@ -210,7 +211,7 @@ export function BookCoverPicker({ book, onChange }) {
           <button type="button" className="coverpick__step" onClick={() => pickMark('milb')}>
             Use MiLB logo
           </button>
-        </div>
+        </Stack>
       )}
 
       {step === 1 && usingClub && (
@@ -252,6 +253,6 @@ export function BookCoverPicker({ book, onChange }) {
           />
         </>
       )}
-    </div>
+    </Stack>
   )
 }
