@@ -5,7 +5,7 @@ import { Card } from '../ui/frame/Card.jsx'
 import { useCalloutLedger } from '../../hooks/useCalloutLedger.js'
 
 // Show only the first handful up front and let a button reveal the rest —
-// same FormerTeammates/InsightsCard pattern (TeamInfo.jsx, BoxScore.jsx) as
+// same InsightsCard pattern (BoxScore.jsx) as
 // every other capped-list-with-more section on the page.
 const MARGIN_NOTES_SHOWN = 5
 

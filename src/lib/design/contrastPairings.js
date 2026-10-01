@@ -225,6 +225,10 @@ export const PAIRINGS = [
   { fg: 'navy', bg: 'surface-card', min: UI, note: 'spray direction bar, pull segment' },
   { fg: 'graphite', bg: 'surface-card', min: UI, note: 'spray direction bar, center segment' },
   { fg: 'graphite-soft', bg: 'surface-card', min: UI, note: 'spray direction bar, oppo segment' },
+  // The Former Teammates Ladder's lines (#1352) carry meaning, so they are held
+  // to the non-text bar (WCAG 1.4.11): the resting line, then the traced one.
+  { fg: 'graphite-soft', bg: 'surface-card', min: UI, note: 'former teammates ladder line' },
+  { fg: 'accent-primary', bg: 'surface-card', min: UI, note: 'former teammates ladder traced line' },
   // Adjacent segments are only 1.6-2.5:1 against each other — unavoidable in a
   // monotone ramp — so a paper hairline carries every boundary instead.
   { fg: 'surface-inset', bg: 'navy', min: UI, note: 'spray direction bar hairline, against pull' },

@@ -1,0 +1,278 @@
+/* Former teammates as the LADDER (components/team/ladder/Ladder.jsx, #1352).
+   layout.js computes every node's box in px from the card's measured width;
+   these rules dress the boxes. One svg under the nodes draws the lines. */
+.ladder__sides {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: var(--space-1h);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.ladder__sidename,
+.ladder__legend,
+.ladder__key {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
+
+.ladder__legend {
+  flex-wrap: wrap;
+  column-gap: var(--space-3);
+  row-gap: var(--space-1);
+  padding-top: var(--space-2);
+}
+
+.ladder__mark {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-xs);
+  background: var(--accent-positive);
+}
+
+.ladder {
+  position: relative;
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.ladder__lines {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* --graphite-soft clears 3:1 on card paper (WCAG 1.4.11, contrastPairings.js). */
+.ladder__line {
+  fill: none;
+  stroke: var(--graphite-soft);
+  stroke-width: 1.5;
+}
+
+.ladder__line--lit {
+  stroke: var(--accent-primary);
+  stroke-width: 2;
+}
+
+.ladder--tracing .ladder__line:not(.ladder__line--lit) {
+  opacity: 0.25;
+}
+
+.ladder__divider {
+  stroke: var(--border-hairline);
+  stroke-dasharray: 3 3;
+}
+
+.ladder__trace,
+.ladder__club {
+  appearance: none;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.ladder__trace {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.ladder__node,
+.ladder__note {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.ladder__node--dim {
+  opacity: 0.18;
+}
+
+/* A player: headshot at the end the line meets, then the text. The trace
+   button lays out like its node, so the text reads the same inside it or
+   beside it in the player's link. */
+.ladder__player,
+.ladder__trace {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  min-width: 0;
+}
+
+.ladder__player--away,
+.ladder__player--away .ladder__trace {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.ladder--sideways .ladder__player,
+.ladder--sideways .ladder__trace {
+  flex-direction: column;
+  justify-content: flex-start;
+  text-align: center;
+}
+
+.ladder--sideways .ladder__player--away,
+.ladder--sideways .ladder__player--away .ladder__trace {
+  flex-direction: column-reverse;
+}
+
+.ladder__trace,
+.ladder__link {
+  min-width: 0;
+}
+
+.shot.ladder__shot {
+  flex: none;
+  width: 24px;
+  height: 32px;
+  border-radius: var(--radius-xs);
+}
+
+.ladder--sideways .shot.ladder__shot {
+  width: 36px;
+  height: 48px;
+}
+
+.ladder__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ladder__player--away .ladder__text {
+  align-items: flex-end;
+}
+
+.ladder--sideways .ladder__text {
+  align-items: center;
+  max-width: 100%;
+}
+
+.ladder__surname,
+.ladder__clubname {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+
+/* A pinned player's name is his link: underline it so the second tap reads. */
+.ladder__link--pinned .ladder__surname {
+  text-decoration: underline dotted;
+}
+
+.ladder__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-cell);
+}
+
+.ladder--sideways .ladder__meta {
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ladder__pos,
+.ladder__years,
+.ladder__level {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-solid);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
+/* A starter: the position fills green (the legend names it). */
+.ladder__pos--starting {
+  padding: 1px 3px;
+  border-radius: var(--radius-xs);
+  background: var(--accent-positive);
+  color: var(--surface-card);
+}
+
+/* A tie to tonight's own org: the club's cap and years. Dashed: its farm
+   system only. */
+.ladder__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 15px;
+  padding: 0 var(--space-1) 0 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-body);
+  white-space: nowrap;
+}
+
+/* A sideways column is 54px or more; the badge's years must fit it. */
+.ladder--sideways .ladder__badge {
+  font-size: 0.82em;
+}
+
+.ladder__badge--farm {
+  border-style: dashed;
+}
+
+/* A club: logo, nickname and years in a small box; a minor-league level is a
+   tab on the box's top edge, so it never spills out of the box. */
+.ladder__club {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-1);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  font-size: var(--fs-cell);
+}
+
+.ladder--sideways .ladder__club {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.ladder__clubtext {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ladder__clubname {
+  font-size: var(--fs-label);
+}
+
+.ladder__level {
+  position: absolute;
+  top: -6px;
+  right: var(--space-1);
+  padding: 0 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  font-size: 0.75em;
+}
+
+.ladder__note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-caption);
+  font-style: italic;
+  line-height: var(--lh-compact);
+  text-align: center;
+  color: var(--text-caption);
+}

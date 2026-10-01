@@ -94,6 +94,7 @@ const segR = (e) => `R${e.club}-${e.home}`
 // one club box may never have overlapped there (Andujar and Bauers both link to
 // the Yankees box, through two different pairs). `key` is `p<playerId>` or
 // `c<clubId>`. Returns { nodes, segments } (Sets of keys), or null for no trace.
+// ADR-0089.
 export function traceOf({ edges }, key) {
   if (!key) return null
   const hit = edges.filter((e) => [`p${e.away}`, `c${e.club}`, `p${e.home}`].includes(key))
@@ -105,13 +106,14 @@ export function traceOf({ edges }, key) {
 
 // The sideways Ladder needs a card at least this wide (a tablet stays vertical)
 // AND this many px per column. The width is the CARD's, measured, not the
-// viewport's: the same viewport can hold a one-column page or the spread.
+// viewport's: the same viewport can hold a one-column page or the spread
+// (ADR-0089).
 export const SIDEWAYS_MIN = 840
 const SIDEWAYS_COL = 54
 
 // Vertical: a 40px row per ladder row, three columns (player | club | player).
 // At 328px the columns are 92 | 30 | 84 | 30 | 92; wider, the player columns
-// grow to 132 and the gutters take the rest.
+// grow to 132, the club column to 120, and the gutters take the rest.
 const ROW = 40
 const PLAYER_H = 34
 const CLUB_W = 84
@@ -179,7 +181,8 @@ export function ladderGeometry(ladder, width) {
     }
   } else {
     const side = Math.max(60, Math.min(132, (width - CLUB_W) / 2 - GUTTER))
-    const clubLeft = (width - CLUB_W) / 2
+    const clubW = Math.max(CLUB_W, Math.min(120, width - 2 * (side + GUTTER)))
+    const clubLeft = (width - clubW) / 2
     const place = (id, s, y) => {
       players.push({ id, side: s, box: { left: s === 'away' ? 0 : width - side, top: y - PLAYER_H / 2, width: side, height: PLAYER_H } })
       at[`p${id}`] = { x: s === 'away' ? side : width - side, y }
@@ -194,8 +197,8 @@ export function ladderGeometry(ladder, width) {
       for (const [id, pos] of Object.entries(b.L)) place(id, 'away', y(pos))
       for (const [id, pos] of Object.entries(b.R)) place(id, 'home', y(pos))
       for (const [id, pos] of Object.entries(b.C)) {
-        clubs.push({ id, box: { left: clubLeft, top: y(pos) - CLUB_H / 2, width: CLUB_W, height: CLUB_H } })
-        at[`c${id}`] = { in: { x: clubLeft, y: y(pos) }, out: { x: clubLeft + CLUB_W, y: y(pos) } }
+        clubs.push({ id, box: { left: clubLeft, top: y(pos) - CLUB_H / 2, width: clubW, height: CLUB_H } })
+        at[`c${id}`] = { in: { x: clubLeft, y: y(pos) }, out: { x: clubLeft + clubW, y: y(pos) } }
       }
       top += b.rows * ROW
     })
@@ -205,7 +208,7 @@ export function ladderGeometry(ladder, width) {
         top += BAND_GAP
       }
       formerOnly.forEach((id, i) => place(String(id), info[id].side, top + (i + 0.5) * ROW))
-      note = { left: clubLeft, top, width: CLUB_W, height: formerOnly.length * ROW }
+      note = { left: clubLeft, top, width: clubW, height: formerOnly.length * ROW }
       top += formerOnly.length * ROW
     }
     height = top
@@ -224,4 +227,26 @@ export function ladderGeometry(ladder, width) {
     line(segR(e), at[`c${e.club}`].out, at[`p${e.home}`])
   }
   return { sideways, height, players, clubs, segments, dividers, note }
+}
+
+// A club box's name: the nickname, as the club was called in those seasons.
+// `current` is the club's entry in public/data/teams.json ({ name, teamName }).
+// A shard name that ends in today's nickname takes it. Otherwise the club was
+// renamed: its city is its full name less its nickname, and the shard's name
+// less that city is the nickname then ("Binghamton Mets", not "Rumble Ponies").
+// No entry, or a city that does not match: the shard's full name.
+export function clubShortName(shardName, current) {
+  if (!current?.name?.endsWith(current.teamName)) return shardName
+  if (shardName.endsWith(current.teamName)) return current.teamName
+  const city = current.name.slice(0, -current.teamName.length)
+  return shardName.startsWith(city) ? shardName.slice(city.length) : shardName
+}
+
+// [2022, 2023] -> "’22–’23"; [2021] -> "’21". Non-contiguous years still read as
+// a min–max span (good enough for a caption).
+export function seasonRange(seasons) {
+  const ys = [...(seasons ?? [])].sort((a, b) => a - b)
+  if (ys.length === 0) return ''
+  const yy = (y) => `’${String(y).slice(-2)}`
+  return ys.length === 1 ? yy(ys[0]) : `${yy(ys[0])}–${yy(ys[ys.length - 1])}`
 }

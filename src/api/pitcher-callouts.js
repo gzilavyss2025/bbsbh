@@ -3,7 +3,7 @@
 // sides), same worthiness-scoring pattern as the pre-half strip
 // (prehalf-callouts.js): each candidate carries a `score`, sorted highest
 // first; MarginNotes.jsx caps how many render up front and reveals the rest
-// on tap (the FormerTeammates/InsightsCard "Show N more" pattern), so the
+// on tap (the InsightsCard "Show N more" pattern), so the
 // builder itself doesn't truncate. This used to be an UNSCORED plain-string
 // list wedged under each pitcher's row in the always-open Pitchers table
 // (see docs/callouts.md's "Pitchers table" section — it explicitly predated

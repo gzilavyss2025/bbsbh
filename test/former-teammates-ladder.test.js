@@ -1,13 +1,13 @@
-// THE FORMER TEAMMATES LADDER (teammateLadder + the band layout). Each player
-// and each club is one node; each pair is one edge on the club the crossroads
-// rows would pick; a tie to tonight's own org is a badge on the player, not an
-// edge. Real shards are frozen under test/fixtures/former-teammates/ (the live
-// ones leave the nightly window after three days).
+// THE FORMER TEAMMATES LADDER (teammateLadder + layout.js). Each player and
+// each club is one node; each pair is one edge on its best third club; a tie
+// to tonight's own org is a badge on the player, not an edge. Real shards are
+// frozen under test/fixtures/former-teammates/ (the live ones leave the
+// nightly window after three days).
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { formerTeammatePairs, teammateLadder } from '../src/api/formerTeammates.js'
-import { ladderGeometry, ladderLayout, SIDEWAYS_MIN, traceOf } from '../src/components/team/ladder/layout.js'
+import { clubShortName, ladderGeometry, ladderLayout, seasonRange, SIDEWAYS_MIN, traceOf } from '../src/components/team/ladder/layout.js'
 
 const AWAY = 111
 const HOME = 147
@@ -75,7 +75,7 @@ test('a pair on a third club and tonight’s club is one edge, on the third club
   assert.equal(l.players[story.id].former, null, 'no badge: the pair is already an edge')
 })
 
-test('Buehler & May file under the Dodgers ’19–’22, the club the crossroads rows pick', () => {
+test('Buehler & May file under the Dodgers ’19–’22, their longest MLB stint', () => {
   const edge = PADRES_BREWERS.edges.find((e) => [e.away, e.home].includes(621111))
   assert.equal(edge.club, 119)
   assert.deepEqual(edge.seasons, [2019, 2020, 2021, 2022])
@@ -446,6 +446,12 @@ test('geometry: the phone columns are 92 | 30 | 84 | 30 | 92 at 328px', () => {
   assert.ok(g.clubs.every((c) => c.box.left === 122 && c.box.width === 84 && c.box.height === 30))
 })
 
+test('geometry: a wider vertical card widens the club boxes, up to 120px', () => {
+  const g = ladderGeometry(RAYS_YANKEES, 894)
+  assert.equal(g.sideways, false)
+  assert.ok(g.clubs.every((c) => c.box.width === 120 && c.box.left === (894 - 120) / 2))
+})
+
 test('geometry: sideways is 352px tall, one column per ladder row plus the former-only column', () => {
   const g = ladderGeometry(PADRES_BREWERS, 896)
   assert.equal(g.height, 352)
@@ -477,4 +483,21 @@ test('geometry: one line per distinct player–club link', () => {
   const keys = new Set(PADRES_BREWERS.edges.flatMap((e) => [`L${e.away}-${e.club}`, `R${e.club}-${e.home}`]))
   assert.deepEqual(g.segments.map((s) => s.key).sort(), [...keys].sort())
   assert.ok(g.segments.every((s) => /^M[\d.]+ [\d.]+ C/.test(s.d)))
+})
+
+// --- the labels ---
+
+test('a club box shows the club’s nickname, kept as it was in those seasons', () => {
+  const mariners = { name: 'Seattle Mariners', teamName: 'Mariners' }
+  assert.equal(clubShortName('Seattle Mariners', mariners), 'Mariners')
+  const ponies = { name: 'Binghamton Rumble Ponies', teamName: 'Rumble Ponies' }
+  assert.equal(clubShortName('Binghamton Mets', ponies), 'Mets', 'the name it had then, less the city')
+  assert.equal(clubShortName('Oakland Athletics', { name: 'Athletics', teamName: 'Athletics' }), 'Athletics', 'a club with no city now')
+  assert.equal(clubShortName('Seattle Mariners', undefined), 'Seattle Mariners', 'an unknown club keeps the full name')
+})
+
+test('seasons read as a two-digit span', () => {
+  assert.equal(seasonRange([2023, 2022]), '’22–’23')
+  assert.equal(seasonRange([2021]), '’21')
+  assert.equal(seasonRange([]), '')
 })

@@ -459,7 +459,9 @@ const BUDGETS = {
   // during the postseason window (#1224, slice 5), component-imported by
   // PostseasonBracket.jsx rather than in src/index.css since it only ever
   // loads on that one screen during that one window.
-  'src/styles': 117,
+  // +1 for 10b-former-teammates.css — the Former Teammates Ladder (#1352).
+  // Its rules would have pushed 10-lineup.css two bands past its line cap.
+  'src/styles': 118,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
