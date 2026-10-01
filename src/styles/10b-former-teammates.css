@@ -124,6 +124,13 @@
   min-width: 0;
 }
 
+/* A sideways column centers its node; cap it so a long surname ellipsizes
+   instead of running into the next column. */
+.ladder--sideways .ladder__trace,
+.ladder--sideways .ladder__link {
+  max-width: 100%;
+}
+
 .shot.ladder__shot {
   flex: none;
   width: 24px;
