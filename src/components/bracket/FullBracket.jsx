@@ -1,7 +1,7 @@
 // The full bracket behind "Open the bracket" (#1224, slice 5) — Gary's
 // approved Concept D, built on Concept A's "back page": each league's Wild
 // Card -> Division -> LCS tree runs left to right in three columns, a
-// finished round shrinks to a compact strip, and elbow connector lines run
+// finished round keeps its pips and paper, and elbow connector lines run
 // pencil-gray until a series is decided, then ink navy into the next round.
 // The World Series sits centered below both leagues. Every value comes from
 // src/api/postseason/bracket.js's derived shape (docs/api/postseason.md);
@@ -32,33 +32,36 @@ const BOX = R * 2 // a two-row box, border drawn outside
 const GAP = 14
 const TREE_W = 358
 
-// Column widths by the league's current round: the active round is wide,
-// a finished one narrow, a future one in between (Concept A's own values).
+// Column widths: every box keeps its pips, finished or not, so each column has
+// a floor that holds a mark, an abbreviation and its round's pips (2/3/4). The
+// width left over goes to the league's current round.
+const COLUMN_FLOOR = { wc: 88, ds: 102, lcs: 116 }
+const COLUMN_NOW = { wildcard: 'wc', division: 'ds', lcs: 'lcs', done: 'lcs' }
 function columns(phase) {
-  if (phase === 'wildcard') return { wc: 124, ds: 104, lcs: 102 }
-  if (phase === 'division') return { wc: 64, ds: 148, lcs: 118 }
-  if (phase === 'lcs') return { wc: 64, ds: 84, lcs: 182 }
-  return { wc: 64, ds: 84, lcs: 94 } // done
+  const c = { ...COLUMN_FLOOR }
+  const now = COLUMN_NOW[phase]
+  if (now) c[now] += TREE_W - 2 * GAP - c.wc - c.ds - c.lcs
+  return c
 }
 
-// A connector's source point: the box's vertical middle unless it is both
-// compact AND decided, in which case it leaves from the winner's own row —
-// a compact box still draws both rows (winner plain, loser struck), so the
-// line has to pick one.
-function rowCenter(series, compact, top) {
+// A connector's source point: the box's vertical middle unless its round is
+// past AND it is decided, in which case it leaves from the winner's own row —
+// both rows are still drawn (winner plain, loser struck), so the line has to
+// pick one.
+function rowCenter(series, past, top) {
   const idx = winningSlotIndex(series)
-  if (idx === -1 || !compact) return top + R
+  if (idx === -1 || !past) return top + R
   return top + (idx === 0 ? R / 2 : R + R / 2)
 }
 
 // An elbow connector, bending at the middle x. Ink once the source series
-// is decided, pencil while it is still open — independent of compactness.
+// is decided, pencil while it is still open.
 function Elbow({ x1, y1, x2, y2, inked }) {
   const mx = x1 + (x2 - x1) / 2
   return <path d={`M${x1} ${y1} H${mx} V${y2} H${x2}`} className={inked ? 'pbkt-ink' : 'pbkt-pencil'} />
 }
 
-function BoxRow({ slot, series, bracket, compact, x, y, w }) {
+function BoxRow({ slot, series, bracket, x, y, w }) {
   const style = { left: x, top: y, width: w, height: R }
   if (!slot.club) {
     const feeder = feederSeries(bracket, slot.from)
@@ -73,9 +76,9 @@ function BoxRow({ slot, series, bracket, compact, x, y, w }) {
   const isWon = series.decided && series.winner.id === slot.club.id
   return (
     <div className={`pbkt-trow${isOut ? ' pbkt-trow--out' : isWon ? ' pbkt-trow--won' : ''}`} style={style}>
-      <ClubMark club={slot.club} eliminated={isOut} size={compact ? 14 : 16} />
+      <ClubMark club={slot.club} eliminated={isOut} size={16} />
       <span className="pbkt-trow__abbr">{slot.club.abbreviation}</span>
-      {!compact && <Pips winsNeeded={series.winsNeeded} wins={slot.wins} />}
+      <Pips winsNeeded={series.winsNeeded} wins={slot.wins} />
     </div>
   )
 }
@@ -108,9 +111,10 @@ function BoxNote({ series, x, y, w }) {
   return null
 }
 
-// One series box: two club rows (full, or compact once its round is past),
-// and a note. Every series taps through with slice 3's `seriesHref`.
-function SeriesBox({ series, bracket, cutoff, historyIds, x, y, w, compact, note }) {
+// One series box: two club rows and a note — the same box before, during and
+// after its round, so a finished series still shows how long it went. Every
+// series taps through with slice 3's `seriesHref`.
+function SeriesBox({ series, bracket, cutoff, historyIds, x, y, w, note }) {
   const linkProps = useRouteLink()
   const href = series.id ? seriesHref(series, cutoff, historyIds) : null
   const Wrapper = href ? 'a' : 'div'
@@ -124,13 +128,13 @@ function SeriesBox({ series, bracket, cutoff, historyIds, x, y, w, compact, note
   return (
     <>
       <Wrapper
-        className={`pbkt-box${compact ? ' pbkt-box--compact' : ''}${isDecidingGame(series) ? ' pbkt-box--bold' : ''}${series.decided ? ' pbkt-box--done' : ''}`}
+        className={`pbkt-box${isDecidingGame(series) ? ' pbkt-box--bold' : ''}${series.decided ? ' pbkt-box--done' : ''}`}
         style={{ left: x, top: y, width: w, height: BOX }}
         aria-label={label}
         {...wrapperProps}
       />
-      <BoxRow slot={series.slots[0]} series={series} bracket={bracket} compact={compact} x={x} y={y} w={w} />
-      <BoxRow slot={series.slots[1]} series={series} bracket={bracket} compact={compact} x={x} y={y + R} w={w} />
+      <BoxRow slot={series.slots[0]} series={series} bracket={bracket} x={x} y={y} w={w} />
+      <BoxRow slot={series.slots[1]} series={series} bracket={bracket} x={x} y={y + R} w={w} />
       {note}
     </>
   )
@@ -145,9 +149,8 @@ function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff,
   const xWC = 0
   const xDS = c.wc + GAP
   const xLCS = xDS + c.ds + GAP
-  const compactWC = phase !== 'wildcard'
-  const compactDS = phase === 'lcs' || phase === 'done'
-  const compactLCS = phase === 'done'
+  const wcPast = phase !== 'wildcard'
+  const dsPast = phase === 'lcs' || phase === 'done'
   // Per half: the Division box at 0, the Wild Card box under it.
   const HALF = 132
   const halves = [0, HALF + 12]
@@ -197,13 +200,13 @@ function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff,
                 {wc && (
                   <Elbow
                     x1={c.wc}
-                    y1={rowCenter(wc, compactWC, wcY(h))}
+                    y1={rowCenter(wc, wcPast, wcY(h))}
                     x2={xDS}
                     y2={dsY(h) + (dsFedRow === 0 ? R / 2 : R + R / 2)}
                     inked={wc.decided}
                   />
                 )}
-                {!compactWC && bye !== -1 && (
+                {!wcPast && bye !== -1 && (
                   <path
                     d={`M${c.wc - 30} ${dsY(h) + (bye === 0 ? R / 2 : R + R / 2)} H${xDS}`}
                     className="pbkt-pencil pbkt-dash"
@@ -211,7 +214,7 @@ function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff,
                 )}
                 <Elbow
                   x1={xDS + c.ds}
-                  y1={rowCenter(ds, compactDS, dsY(h))}
+                  y1={rowCenter(ds, dsPast, dsY(h))}
                   x2={xLCS}
                   y2={lcsY + (h === 0 ? R / 2 : R + R / 2)}
                   inked={ds.decided}
@@ -222,7 +225,7 @@ function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff,
         </svg>
         {lanes.map(({ ds, wc, h, bye }) => (
           <div key={ds.key}>
-            {!compactWC && bye !== -1 && (
+            {!wcPast && bye !== -1 && (
               <div
                 className="pbkt-bye"
                 style={{ left: 0, top: dsY(h) + (bye === 1 ? R : 0), width: c.wc - 36, height: R }}
@@ -239,7 +242,6 @@ function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff,
                 x={xWC}
                 y={wcY(h)}
                 w={c.wc}
-                compact={compactWC}
                 note={
                   <BoxNote series={wc} x={xWC} y={wcY(h) + BOX + 2} w={c.wc} />
                 }
@@ -253,7 +255,6 @@ function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff,
               x={xDS}
               y={dsY(h)}
               w={c.ds}
-              compact={compactDS}
               note={
                 <BoxNote
                   series={ds}
@@ -274,7 +275,6 @@ function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff,
             x={xLCS}
             y={lcsY}
             w={c.lcs}
-            compact={compactLCS}
             note={<BoxNote series={league.lcs} x={xLCS} y={lcsY + BOX + 2} w={c.lcs} />}
           />
         )}
@@ -295,8 +295,7 @@ function wsNoteText(series) {
 }
 
 // The World Series taps through like any other series (seriesHref), but it
-// is always drawn full — never the finished rounds' compact strip — since
-// it's the one band that also carries the champion treatment.
+// is the one band that also carries the champion treatment.
 function WorldSeriesBand({ bracket, cutoff, historyIds }) {
   const linkProps = useRouteLink()
   const ws = bracket.worldSeries
