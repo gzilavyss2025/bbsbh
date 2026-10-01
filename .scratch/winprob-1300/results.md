@@ -30,3 +30,20 @@ inside the memo), so that part would need a rewrite if someone revives it.
 
 Setup note: Chromium in this sandbox does not trust the egress proxy CA. `lib.mjs` has Node fetch each
 external request and hand the body to the page, so TLS checks stay on.
+
+## Second measurement: on top of the stack (PR #1340)
+
+Prompt 1's PR (#1323) was closed, not merged. Its commits are in the stack PR #1340
+(`claude/stack-open-prs`, `d96d3eb5e`). Same setup as above. Base is the stack tip, with the new `useSwingClip.js`.
+`WinProbChart.jsx` is the same file as on `main`, so the band layer part of the patch applied unchanged.
+The `hasClip` part was redone for the new hook: `useCallback` in `useSwingClip.js`, and one `useMemo` over the
+rows in `SwingLedger.jsx`. It passes lint (no `Map` write).
+
+| Variant (stack tip) | Median ms per commit (run 1 / run 2) | Commits per sweep |
+|---|---|---|
+| before | 10.2 / 9.7 | 72 |
+| band layer memo | 8.7 / 8.6 | 72 |
+| band layer memo + `hasClip` memo | 8.9 / 8.7 | 72 |
+
+Drop for the full change: about 12% (9.95 to 8.8 ms). The band layer alone gives about 13%. Under the 30% rule again.
+The machine was faster in this session, so compare rows inside one table only. No `src` change was kept.
