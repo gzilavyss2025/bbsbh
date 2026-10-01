@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { highlightForPlay } from '../../../api/highlights.js'
 import { CLIP_PACKAGE, CLIP_RAW, watchClipSource } from '../../highlights/watchClip.js'
 import { useWatchClip } from '../../highlights/useWatchClip.js'
@@ -23,10 +24,10 @@ import { useWatchClip } from '../../highlights/useWatchClip.js'
 export function useSwingClip({ highlights = null, filmEligible = true } = {}) {
   const { open, src, notice, loading, openClip: openWatch, close } = useWatchClip()
 
-  const sourceFor = (playId) => {
+  const sourceFor = useCallback((playId) => {
     const item = highlightForPlay(highlights, playId)
     return { item, kind: watchClipSource(item, playId, { filmEligible }) }
-  }
+  }, [highlights, filmEligible])
 
   const openClip = (playId, title) => {
     const { item, kind } = sourceFor(playId)
@@ -34,6 +35,6 @@ export function useSwingClip({ highlights = null, filmEligible = true } = {}) {
     openWatch({ playId, item: kind === CLIP_PACKAGE ? item : null, title }, kind === CLIP_RAW ? playId : null)
   }
 
-  const hasClip = (playId) => sourceFor(playId).kind != null
+  const hasClip = useCallback((playId) => sourceFor(playId).kind != null, [sourceFor])
   return { open, src, notice, loading, openClip, close, hasClip }
 }
