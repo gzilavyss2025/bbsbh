@@ -508,6 +508,21 @@
   gap: var(--space-3);
 }
 
+/* The Table demo: the stage is a wrapping flex row, so the demo takes the whole
+   row and may shrink below its board's width, and the board scrolls inside its
+   own wrap instead of widening the page. The club column reads left; Table
+   right-aligns figures. */
+.dlab__tables {
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.dlab__board :where(th, td):first-child {
+  text-align: left;
+}
+
 .dlab__row {
   display: flex;
   flex-wrap: wrap;

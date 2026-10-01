@@ -6,28 +6,17 @@
   margin-top: var(--space-4);
 }
 .prospectboard {
-  width: 100%;
-  border-spacing: 0;
-  border-collapse: separate;
-  overflow: hidden;
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
   table-layout: fixed;
 }
-.prospectboard th {
-  padding: var(--space-2) var(--space-3);
-  border-bottom: var(--bw-rule) solid var(--accent-primary);
-  background: var(--bg-page);
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  line-height: var(--lh-ui);
+/* Table right-aligns and holds every cell to one line; this board reads left
+   and lets a name or a line of stats wrap. */
+.prospectboard :where(th, td) {
   text-align: left;
-  text-transform: uppercase;
+  white-space: normal;
+}
+.prospectboard th {
+  border-bottom: var(--bw-rule) solid var(--accent-primary);
+  line-height: var(--lh-ui);
 }
 .prospectboard th:first-child {
   width: 76px;
@@ -46,12 +35,7 @@
   width: 30%;
 }
 .prospectboard td {
-  padding: var(--space-2) var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-hairline);
-  color: var(--text-body);
-  font-family: var(--font-mono);
   font-size: var(--fs-compact);
-  font-variant-numeric: tabular-nums;
   line-height: var(--lh-snug);
   vertical-align: middle;
 }
@@ -228,15 +212,17 @@
 }
 
 @media (max-width: 739.98px) {
-  .prospectboard-wrap {
-    overflow: visible;
-  }
-  .prospectboard {
-    display: block;
+  /* The cards draw their own boxes and shadows, so the Table's wrap gives up
+     its frame and its clip. */
+  .prospectboard-wrap .table {
     border: 0;
     border-radius: 0;
     background: transparent;
     box-shadow: none;
+    overflow: visible;
+  }
+  .prospectboard {
+    display: block;
   }
   .prospectboard thead {
     position: absolute;
@@ -268,9 +254,6 @@
   .prospectboard td {
     display: block;
     min-width: 0;
-    padding: var(--space-2) var(--space-3);
-    border: 0;
-    border-top: var(--bw-hair) solid var(--border-hairline);
   }
   .prospectboard__rank {
     grid-column: 1;
