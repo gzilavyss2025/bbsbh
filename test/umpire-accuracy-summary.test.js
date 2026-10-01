@@ -73,9 +73,9 @@ test('a row shard carries the name its own merge base will need', () => {
 // --- what the surfaces fetch --------------------------------------------------
 
 const fetched = []
-function stubFetch() {
+function stubFetch(t) {
   fetched.length = 0
-  globalThis.fetch = async (url) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
     fetched.push(url)
     const shard = /^\/data\/umpire-accuracy\/(\d+)\.json$/.exec(url)
     const body =
@@ -87,7 +87,7 @@ function stubFetch() {
           ? { id: Number(shard[1]), name: 'Ada Ump', games: ROWS[shard[1]] ?? [] }
           : UMPIRE_SHARD // /data/umpires/{season}/{id}.json — his assignment log
     return { ok: true, status: 200, json: async () => body }
-  }
+  })
 }
 
 const UMPIRE_SHARD = { id: 1, name: 'Ada Ump', season: 2026, generatedAt: 'x', games: [] }
@@ -127,8 +127,8 @@ const SUMMARY = {
 }
 const ROWS = { 1: [{ gamePk: 1, level: 'MLB', gameType: 'R', favorAway: 0.3, favorHome: 0.2 }] }
 
-test('the umpire page reads one aggregates file and one row shard', async () => {
-  stubFetch()
+test('the umpire page reads one aggregates file and one row shard', async (t) => {
+  stubFetch(t)
   const mod = await import('../src/api/umpires.js?case=page')
   const u = await mod.loadUmpire(1)
   assert.ok(u.accuracy, 'his aggregate')
@@ -149,8 +149,8 @@ test('the umpire page reads one aggregates file and one row shard', async () => 
   )
 })
 
-test('rankings and the one-line summary read the aggregates alone', async () => {
-  stubFetch()
+test('rankings and the one-line summary read the aggregates alone', async (t) => {
+  stubFetch(t)
   const mod = await import('../src/api/umpires.js?case=rank')
   const ranked = await mod.loadUmpireRankings()
   const one = await mod.umpireAccuracySummary(2)

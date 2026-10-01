@@ -19,7 +19,7 @@
 // The second half is the whole safety argument, so most of the cases below are
 // about what the recovery must NOT be able to do.
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 import { boxLineRows, scorelessGamePks } from '../src/api/boxlines/rows.js'
 import { fetchBoxLines } from '../src/api/boxlines/fetch.js'
 
@@ -228,8 +228,7 @@ test('the schedule record still wins where it has a score of its own', () => {
 // own linescore call answers with (or a thrown 404 when absent from the map).
 function stubApi({ personId, splits, games, linescores = {} }) {
   const calls = []
-  const previous = globalThis.fetch
-  globalThis.fetch = async (url) => {
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
     const path = String(url).replace('https://statsapi.mlb.com', '')
     calls.push(path)
     const ok = (json) => ({ ok: true, status: 200, json: async () => json })
@@ -247,12 +246,12 @@ function stubApi({ personId, splits, games, linescores = {} }) {
       return ok(linescores[pk])
     }
     throw new Error(`unstubbed ${path}`)
-  }
+  })
   return {
     calls,
     personId,
     restore() {
-      globalThis.fetch = previous
+      fetchMock.mock.restore()
     },
   }
 }

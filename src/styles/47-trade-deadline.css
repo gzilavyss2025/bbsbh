@@ -1,5 +1,5 @@
 /* ================================================================ trade deadline
-   TradeDeadlinePage (season index) + TradeDeadlineSeasonPage (per-year list) +
+   TradeDeadlineSeasonPage (per-year list) +
    TradeCard — a season-culminating historical report, same footing as Awards
    History/Postseason History (no SealBox: completed trades carry no score —
    see src/api/tradeDeadline.js's module header). Medal-amber (--award-*) marks

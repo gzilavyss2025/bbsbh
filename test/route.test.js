@@ -10,6 +10,7 @@
 // is who supplies `d`, not what `d` means.
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { SEASONS } from '../src/api/tradeDeadline.js'
 import {
   gameNotesPath,
   parseRoute,
@@ -252,13 +253,17 @@ test('umpire and manager routes carry no cutoff query (never score-revealing)', 
   assert.deepEqual(parseRoute('/manager/999'), { name: 'manager', id: '999' })
 })
 
-test('trade deadline routes: index, per-season, and a non-numeric season falls back to the index', () => {
-  assert.deepEqual(parseRoute('/trade-deadline'), { name: 'trade-deadline' })
+test('trade deadline routes: the bare path and a non-numeric season resolve to the latest season', () => {
+  const latest = Math.max(...SEASONS.map((s) => s.year))
+  assert.deepEqual(parseRoute('/trade-deadline'), { name: 'trade-deadline-season', season: latest })
   assert.deepEqual(parseRoute('/trade-deadline/2022'), {
     name: 'trade-deadline-season',
     season: 2022,
   })
-  assert.deepEqual(parseRoute('/trade-deadline/nope'), { name: 'trade-deadline' })
+  assert.deepEqual(parseRoute('/trade-deadline/nope'), {
+    name: 'trade-deadline-season',
+    season: latest,
+  })
 })
 
 // --------------------------------------------------------------------------

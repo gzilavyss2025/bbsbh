@@ -20,6 +20,8 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
+import { round1 } from '../src/lib/math/number.js'
+import { latestAtOrBefore } from '../src/lib/math/snapshot.js'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -30,7 +32,6 @@ const HOME_WIN_PROBABILITY = 0.54
 const DEFAULT_SIMS = 5000
 
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
-const round1 = (n) => Math.round(n * 10) / 10
 // Two decimals for the probability fields: at DEFAULT_SIMS the true
 // granularity is finer than 0.1%, and near the 0%/100% extremes that extra
 // digit is what lets the UI show "99.95%" instead of overstating certainty
@@ -190,13 +191,10 @@ async function loadTeamScores() {
   }
 }
 
-// Deliberate small duplicate of teamScore.js's teamScoreFor (self-contained
-// generator convention, same as gen-rehab.mjs mirroring person.js).
 function teamScoreSnapshot(teamScores, teamId, season, cutoff) {
   const snapshots = teamScores?.seasons?.[season]?.byTeamId?.[teamId]
   if (!snapshots) return null
-  const eligible = Object.keys(snapshots).filter((date) => date <= cutoff).sort()
-  return eligible.length ? snapshots[eligible[eligible.length - 1]] : null
+  return latestAtOrBefore(snapshots, cutoff) // cutoff is always an ISO day here
 }
 
 // Neutral-site win rate per team: team-score.json's weightedWins/games when

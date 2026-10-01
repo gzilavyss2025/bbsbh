@@ -969,68 +969,52 @@ function syntheticDays(count, startYear, startMonth) {
   return days
 }
 
-test('loadMoreTeamTransactions returns the current season, trimmed to a cutoff, and reports hasMore', async () => {
-  const originalFetch = globalThis.fetch
+test('loadMoreTeamTransactions returns the current season, trimmed to a cutoff, and reports hasMore', async (t) => {
   // 3 days after the cutoff (excluded) + 50 days at/before it (well over
   // PAGE_DAYS, so the page fills from this one file without touching another).
   const afterCutoff = syntheticDays(3, 2026, 12)
   const atOrBeforeCutoff = syntheticDays(50, 2026, 7)
-  globalThis.fetch = mockFetch({
+  t.mock.method(globalThis, 'fetch', mockFetch({
     9101: { 158: { days: [...afterCutoff, ...atOrBeforeCutoff] } },
-  })
-  try {
-    const cutoff = atOrBeforeCutoff[0].date
-    const page = await loadMoreTeamTransactions(158, { season: 9101, index: 0 }, cutoff)
-    assert.equal(page.days.length, 45)
-    assert.ok(page.days.every((d) => d.date <= cutoff))
-    assert.deepEqual(page.days.map((d) => d.date), atOrBeforeCutoff.slice(0, 45).map((d) => d.date))
-    assert.equal(page.cursor.season, 9101)
-    assert.equal(page.cursor.index, 45) // relative to the cutoff-filtered array, not the raw one
-    assert.equal(page.hasMore, true)
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  }))
+  const cutoff = atOrBeforeCutoff[0].date
+  const page = await loadMoreTeamTransactions(158, { season: 9101, index: 0 }, cutoff)
+  assert.equal(page.days.length, 45)
+  assert.ok(page.days.every((d) => d.date <= cutoff))
+  assert.deepEqual(page.days.map((d) => d.date), atOrBeforeCutoff.slice(0, 45).map((d) => d.date))
+  assert.equal(page.cursor.season, 9101)
+  assert.equal(page.cursor.index, 45) // relative to the cutoff-filtered array, not the raw one
+  assert.equal(page.hasMore, true)
 })
 
-test('loadMoreTeamTransactions crosses into the prior season once the current one is exhausted', async () => {
-  const originalFetch = globalThis.fetch
+test('loadMoreTeamTransactions crosses into the prior season once the current one is exhausted', async (t) => {
   const currentSeasonDays = syntheticDays(10, 2026, 4) // fewer than PAGE_DAYS
   const priorSeasonDays = syntheticDays(50, 2025, 9) // plenty left over after topping up the page
-  globalThis.fetch = mockFetch({
+  t.mock.method(globalThis, 'fetch', mockFetch({
     9201: { 158: { days: currentSeasonDays } },
     9200: { 158: { days: priorSeasonDays } },
-  })
-  try {
-    const page = await loadMoreTeamTransactions(158, { season: 9201, index: 0 }, null)
-    assert.equal(page.days.length, 45)
-    assert.deepEqual(
-      page.days.map((d) => d.date),
-      [...currentSeasonDays, ...priorSeasonDays.slice(0, 35)].map((d) => d.date),
-    )
-    assert.equal(page.cursor.season, 9200)
-    assert.equal(page.cursor.index, 35)
-    assert.equal(page.hasMore, true)
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  }))
+  const page = await loadMoreTeamTransactions(158, { season: 9201, index: 0 }, null)
+  assert.equal(page.days.length, 45)
+  assert.deepEqual(
+    page.days.map((d) => d.date),
+    [...currentSeasonDays, ...priorSeasonDays.slice(0, 35)].map((d) => d.date),
+  )
+  assert.equal(page.cursor.season, 9200)
+  assert.equal(page.cursor.index, 35)
+  assert.equal(page.hasMore, true)
 })
 
-test('loadMoreTeamTransactions reports hasMore:false once a season file 404s (no earlier history)', async () => {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = mockFetch({
+test('loadMoreTeamTransactions reports hasMore:false once a season file 404s (no earlier history)', async (t) => {
+  t.mock.method(globalThis, 'fetch', mockFetch({
     2026: { 158: { days: [{ date: '2026-04-01', stories: [] }] } },
-  })
-  try {
-    const page = await loadMoreTeamTransactions(158, { season: 2025, index: 0 }, null)
-    assert.deepEqual(page.days, [])
-    assert.equal(page.hasMore, false)
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  }))
+  const page = await loadMoreTeamTransactions(158, { season: 2025, index: 0 }, null)
+  assert.deepEqual(page.days, [])
+  assert.equal(page.hasMore, false)
 })
 
-test('a club with an EMPTY shard is not the end of its history — paging crosses that season', async () => {
-  const originalFetch = globalThis.fetch
+test('a club with an EMPTY shard is not the end of its history — paging crosses that season', async (t) => {
   // The generator writes a file for every org every season, so a club that
   // made no storyworthy move in 9301 has an empty one. Reading that as "no
   // more history" would hide the year before it — the one difference between
@@ -1038,23 +1022,18 @@ test('a club with an EMPTY shard is not the end of its history — paging crosse
   const priorSeasonDays = syntheticDays(3, 2024, 9)
   // A club id of its own: loadSeasonFile's session cache is keyed
   // season+club and shared across this file's tests.
-  globalThis.fetch = mockFetch({
+  t.mock.method(globalThis, 'fetch', mockFetch({
     2025: { 159: { days: [] } },
     2024: { 159: { days: priorSeasonDays } },
-  })
-  try {
-    const page = await loadMoreTeamTransactions(159, { season: 2025, index: 0 }, null)
-    assert.deepEqual(page.days.map((d) => d.date), priorSeasonDays.map((d) => d.date))
-    assert.equal(page.hasMore, false) // 2023 has no file at all — that is the end
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  }))
+  const page = await loadMoreTeamTransactions(159, { season: 2025, index: 0 }, null)
+  assert.deepEqual(page.days.map((d) => d.date), priorSeasonDays.map((d) => d.date))
+  assert.equal(page.hasMore, false) // 2023 has no file at all — that is the end
 })
 
-test('loadMoreTeamTransactions retries a transient season-file failure in the same session', async () => {
-  const originalFetch = globalThis.fetch
+test('loadMoreTeamTransactions retries a transient season-file failure in the same session', async (t) => {
   let currentSeasonCalls = 0
-  globalThis.fetch = async (url) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
     const season = Number(String(url).match(/team-transactions\/(\d+)\//)?.[1])
     if (season === 2026) {
       currentSeasonCalls += 1
@@ -1065,16 +1044,12 @@ test('loadMoreTeamTransactions retries a transient season-file failure in the sa
       }
     }
     return { ok: false, status: 404 }
-  }
-  try {
-    await assert.rejects(loadMoreTeamTransactions(158, { season: 2026, index: 0 }, null))
+  })
+  await assert.rejects(loadMoreTeamTransactions(158, { season: 2026, index: 0 }, null))
 
-    const retried = await loadMoreTeamTransactions(158, { season: 2026, index: 0 }, null)
-    assert.deepEqual(retried.days.map((d) => d.date), ['2026-07-15'])
-    assert.equal(currentSeasonCalls, 2)
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  const retried = await loadMoreTeamTransactions(158, { season: 2026, index: 0 }, null)
+  assert.deepEqual(retried.days.map((d) => d.date), ['2026-07-15'])
+  assert.equal(currentSeasonCalls, 2)
 })
 
 // ---------------------------------------------------------------------------

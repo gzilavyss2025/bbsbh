@@ -57,54 +57,39 @@ test('warByTeamFor returns null for missing/null current', () => {
 // place that exercises it (module-level singleton cache), same convention as
 // test/jerseys.test.js's fetchJerseysData suite.
 // --------------------------------------------------------------------------
-test('fetchWarData reads the static file and caches it across calls', async () => {
-  const originalFetch = globalThis.fetch
+test('fetchWarData reads the static file and caches it across calls', async (t) => {
   let calls = 0
-  globalThis.fetch = async (url) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
     calls++
     assert.equal(url, '/data/war.json')
     return { ok: true, status: 200, json: async () => ({ season: 2026, bat: { 1: 3 }, pit: {}, pa: {} }) }
-  }
-  try {
-    const first = await fetchWarData()
-    assert.deepEqual(first, { season: 2026, bat: { 1: 3 }, pit: {}, pa: {} })
-    const second = await fetchWarData()
-    assert.equal(second, first) // same cached object, no refetch
-    assert.equal(calls, 1)
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  })
+  const first = await fetchWarData()
+  assert.deepEqual(first, { season: 2026, bat: { 1: 3 }, pit: {}, pa: {} })
+  const second = await fetchWarData()
+  assert.equal(second, first) // same cached object, no refetch
+  assert.equal(calls, 1)
 })
 
 // --------------------------------------------------------------------------
 // fetchWarHistory — separate cache from fetchWarData, so it can be exercised
 // once more independently for the degrade-on-failure path.
 // --------------------------------------------------------------------------
-test('fetchWarHistory degrades to empty bat/pit maps on a non-ok response', async () => {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async () => ({ ok: false, status: 404 })
-  try {
-    assert.deepEqual(await fetchWarHistory(11), { bat: {}, pit: {} })
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+test('fetchWarHistory degrades to empty bat/pit maps on a non-ok response', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () => ({ ok: false, status: 404 }))
+  assert.deepEqual(await fetchWarHistory(11), { bat: {}, pit: {} })
 })
 
-test('fetchWarHistory asks for the player his bucket, and caches per bucket', async () => {
-  const originalFetch = globalThis.fetch
+test('fetchWarHistory asks for the player his bucket, and caches per bucket', async (t) => {
   const asked = []
-  globalThis.fetch = async (url) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
     asked.push(url)
     return { ok: true, status: 200, json: async () => ({ bat: {}, pit: {} }) }
-  }
-  try {
-    await fetchWarHistory(660271) // 660271 % 100 = 71
-    await fetchWarHistory(543037) // 543037 % 100 = 37
-    await fetchWarHistory(660271) // …cached, no second call
-    assert.deepEqual(asked, ['/data/war-history/71.json', '/data/war-history/37.json'])
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  })
+  await fetchWarHistory(660271) // 660271 % 100 = 71
+  await fetchWarHistory(543037) // 543037 % 100 = 37
+  await fetchWarHistory(660271) // …cached, no second call
+  assert.deepEqual(asked, ['/data/war-history/71.json', '/data/war-history/37.json'])
 })
 
 test('warShardKey is a zero-padded two-digit bucket, like the rookie records', () => {

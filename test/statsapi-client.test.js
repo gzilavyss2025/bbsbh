@@ -202,17 +202,12 @@ test('a client made with no cacheDir is cache-off: two calls, two fetches', asyn
   assert.equal(fetch.calls.length, 2)
 })
 
-test('the shared getJson never caches: two calls, two fetches, nothing written', async () => {
-  const realFetch = globalThis.fetch
+test('the shared getJson never caches: two calls, two fetches, nothing written', async (t) => {
   const fetch = scriptedFetch([{ n: 1 }])
-  globalThis.fetch = fetch
-  try {
-    assert.deepEqual(await getJson('/api/v1/x'), { n: 1 })
-    assert.deepEqual(await getJson('/api/v1/x'), { n: 1 })
-    assert.equal(fetch.calls.length, 2)
-  } finally {
-    globalThis.fetch = realFetch
-  }
+  t.mock.method(globalThis, 'fetch', fetch)
+  assert.deepEqual(await getJson('/api/v1/x'), { n: 1 })
+  assert.deepEqual(await getJson('/api/v1/x'), { n: 1 })
+  assert.equal(fetch.calls.length, 2)
 })
 
 test('the cache directory is git-ignored, and only cachedGetJson uses it', () => {

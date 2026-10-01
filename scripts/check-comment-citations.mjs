@@ -20,14 +20,12 @@
 //
 // Run by `npm run lint` (so it gates every push).
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { readFileSync } from 'node:fs'
+import { join, relative } from 'node:path'
+import { ROOT, walk as walkFiles } from './lib/walk.mjs'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 
 const ROOTS = ['src', 'api', 'scripts']
-const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git'])
 const SOURCE_EXT = ['.js', '.jsx', '.mjs']
 
 // Matches the letters "PR", optional space, a hash, then digits — case-
@@ -35,15 +33,8 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs']
 // URL (those are left alone; see header).
 const CITATION = /\bPR\s*#\d+/i
 
-function walk(dir, out = []) {
-  for (const entry of readdirSync(join(ROOT, dir))) {
-    if (IGNORE_DIRS.has(entry)) continue
-    const rel = `${dir}/${entry}`
-    if (statSync(join(ROOT, rel)).isDirectory()) walk(rel, out)
-    else if (SOURCE_EXT.some((ext) => entry.endsWith(ext))) out.push(rel)
-  }
-  return out
-}
+const walk = (dir) =>
+  walkFiles(join(ROOT, dir), { exts: SOURCE_EXT }).map((f) => relative(ROOT, f))
 
 // Scans a file's // and /* */ comment text only — not code, not string
 // literals — the same restriction the header promises.

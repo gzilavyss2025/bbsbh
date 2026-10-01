@@ -36,10 +36,8 @@
 // Run by `npm run lint` (so it gates every push).
 
 import { readdirSync, statSync } from 'node:fs'
-import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+import { join, relative } from 'node:path'
+import { ROOT, walkDirs } from './lib/walk.mjs'
 
 // Roots to walk. Every directory beneath these is checked, counting only the
 // source files sitting DIRECTLY in it (subdirectories are their own entry).
@@ -594,7 +592,7 @@ const BUDGETS = {
   // together or not at all. Flat beside milbPool.js for every reason that entry
   // gives, and read on the same visit by the same page.
   // +1: nineKeys.js, one more static-data reader beside its siblings.
-  'src/api': 114,
+  'src/api': 113,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -793,7 +791,10 @@ const BUDGETS = {
   // player page's Prospect rankings card (#1111). A generator RUNS on import, so
   // scripts/lib/ cannot hold it, and every other gen-*.mjs sits flat here. Its
   // pure half went to scripts/lib/prospect-rank-history.mjs (see that entry).
-  scripts: 118,
+  // +1 for check-all.mjs, the one runner behind `npm run lint` (#1310). It
+  // replaced a 29-command `&&` chain in package.json, so it belongs beside the
+  // guards it runs.
+  scripts: 119,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -992,7 +993,8 @@ const BUDGETS = {
   // (#1111): the row shape, the per-source credit table, and the one switch that
   // drops Baseball America's four seasons together with their credit lines. The
   // same testable-helper reason as its neighbours above.
-  'scripts/lib': 40,
+  // +1 for walk.mjs, the one directory walk the check-*.mjs guards share (#1310).
+  'scripts/lib': 41,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
@@ -1018,7 +1020,7 @@ const BUDGETS = {
   // +1 for PostseasonRacePage.jsx — the current-season "if it ended today"
   // bracket + Wild Card standings, same one-route-one-screen shape.
   // +1: NineKeysPage.jsx — one route, one screen, same as its neighbours.
-  'src/screens': 45,
+  'src/screens': 44,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.
@@ -1102,17 +1104,7 @@ const BUDGETS = {
   'src/lib/research/contenderDiary': 14,
 }
 
-const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git'])
-
-function walk(dir, out = []) {
-  out.push(dir)
-  for (const entry of readdirSync(join(ROOT, dir))) {
-    if (IGNORE_DIRS.has(entry)) continue
-    const rel = `${dir}/${entry}`
-    if (statSync(join(ROOT, rel)).isDirectory()) walk(rel, out)
-  }
-  return out
-}
+const walk = (dir) => walkDirs(join(ROOT, dir)).map((d) => relative(ROOT, d))
 
 function countSources(dir) {
   return readdirSync(join(ROOT, dir)).filter((entry) => {

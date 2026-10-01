@@ -3,7 +3,7 @@
 // snapshot or a live statsapi endpoint), so each test mocks globalThis.fetch
 // and restores it in a finally block, same convention as test/jerseys.test.js.
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 import {
   fetchTeam,
   fetchTeamRoster,
@@ -23,9 +23,8 @@ import {
 // requests it actually expects; anything unlisted throws loudly instead of
 // hanging, so a wiring mistake fails fast.
 function stubFetch(routes) {
-  const originalFetch = globalThis.fetch
   const calls = []
-  globalThis.fetch = async (url) => {
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
     calls.push(url)
     const hit = routes[url]
     if (!hit) throw new Error(`unexpected fetch: ${url}`)
@@ -33,8 +32,8 @@ function stubFetch(routes) {
     // exactly once instead of retrying with a delay.
     if (hit.fail) return { ok: false, status: hit.status ?? 404 }
     return { ok: true, status: 200, json: async () => hit.json }
-  }
-  return { calls, restore: () => { globalThis.fetch = originalFetch } }
+  })
+  return { calls, restore: () => fetchMock.mock.restore() }
 }
 
 // --------------------------------------------------------------------------

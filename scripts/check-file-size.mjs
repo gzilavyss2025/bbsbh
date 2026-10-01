@@ -42,18 +42,16 @@
 //
 // Run by `npm run lint` (so it gates every push).
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { readFileSync } from 'node:fs'
+import { join, relative } from 'node:path'
+import { ROOT, walk as walkFiles } from './lib/walk.mjs'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 
 const ROOTS = ['src', 'api', 'scripts']
 const MAX_LINES = 600
 // Budgets are rounded up to this granularity, so routine growth inside a band
 // costs nothing and only a meaningful jump forces an edit. See the header.
 const BAND = 100
-const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git'])
 const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 
 // Files already over the line, each pinned at its length rounded up to the next
@@ -325,21 +323,12 @@ const BUDGETS = {
   // which is what made them the right thing to lift out; the markup, classes
   // and comments moved verbatim.
   'src/components/playbyplay/PlayByPlay.jsx': 800, // 705 — the at-bat card's third opener: a ball in play makes the base diamond a handle on where it went (components/charts/BallFlight.jsx)
-  // src/api/loadPlayer.js surrendered its entry the same way: it is a 20-line
-  // barrel over src/api/player/ now, one loader per tab of the player hub.
   'src/api/tradeDeadline.js': 700, // 629
   'src/App.jsx': 700, // 606 — mounts the one global PlayerHoverCard, same as SyncStatusProvider beside it. 701: the postseason series route branch (#1230, slice 6). 693: one /postseason/{id} route (SeriesRoute)
 }
 
-function walk(dir, out = []) {
-  for (const entry of readdirSync(join(ROOT, dir))) {
-    if (IGNORE_DIRS.has(entry)) continue
-    const rel = `${dir}/${entry}`
-    if (statSync(join(ROOT, rel)).isDirectory()) walk(rel, out)
-    else if (SOURCE_EXT.some((ext) => entry.endsWith(ext))) out.push(rel)
-  }
-  return out
-}
+const walk = (dir) =>
+  walkFiles(join(ROOT, dir), { exts: SOURCE_EXT }).map((f) => relative(ROOT, f))
 
 // Count the editor-visible lines: split on newlines and drop a single trailing
 // empty, the same way check-claude-md.mjs does, so the two guards agree and the

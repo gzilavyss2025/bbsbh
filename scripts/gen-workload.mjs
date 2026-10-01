@@ -31,6 +31,8 @@ import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { clubPenCounts } from '../src/api/workload.js'
 import { getJson } from './lib/statsapi.mjs'
+import { num } from '../src/lib/math/number.js'
+import { ipToOuts } from '../src/lib/math/innings.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'workload.json')
@@ -48,13 +50,6 @@ const SP_MIN_STARTS = 5
 
 const todayIso = () => new Date().toISOString().slice(0, 10)
 
-const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
-
-// Innings pitched ("104.1" = 104 ⅓) -> outs, so season IP sums correctly.
-const ipToOuts = (ip) => {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return num(whole) * 3 + num(frac[0])
-}
 
 // Run an async mapper across items with a small concurrency cap, results in
 // order (be polite to statsapi). Mirrors gen-vs-team-splits.mjs's helper.
@@ -66,6 +61,7 @@ function meanSd(values) {
   const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / n
   return { mean: round1(mean), sd: round1(Math.sqrt(variance)), n }
 }
+// Kept local: null-safe (null -> null); the shared round1 would give NaN.
 const round1 = (x) => (x == null ? null : Math.round(x * 10) / 10)
 
 // Whole-day index for a 'YYYY-MM-DD' date (UTC midnight / 86400s).

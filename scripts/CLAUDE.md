@@ -138,6 +138,9 @@ process automatically.
 
 ## Lint guards (run by `npm run lint`, CI-enforced via `ci.yml`)
 
+`check-all.mjs` runs eslint and every guard below, in order. A new guard goes in its
+`GUARDS` list. Guards that walk the tree share `lib/walk.mjs`.
+
 - `check-caps.mjs` — guards the global ALL-CAPS invariant (no CSS `text-transform`
   sneaks a caps-defeating value back in). Two assertions, because the marker alone
   was never enough: a caps-defeating declaration needs a `caps-exempt` marker, AND

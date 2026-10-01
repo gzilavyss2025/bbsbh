@@ -41,13 +41,13 @@ for (const store of STORES) {
   })
 }
 
-test('the spray card reads the season that seasons.json names', async () => {
+test('the spray card reads the season that seasons.json names', async (t) => {
   const fetched = []
-  globalThis.fetch = async (url) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
     fetched.push(url)
     const body = url === '/data/spray/seasons.json' ? { seasons: [2026, 2027], current: 2026 } : { season: 2026, bat: {} }
     return { ok: true, status: 200, json: async () => body }
-  }
+  })
   const { fetchSprayFor } = await import('../src/api/spray.js?case=season')
   await fetchSprayFor(660271)
   assert.deepEqual(fetched, ['/data/spray/seasons.json', '/data/spray/2026/71.json'])

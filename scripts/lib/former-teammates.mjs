@@ -13,6 +13,7 @@
 // test/former-teammates.test.js pins all four. Pure: no fetching.
 import { meetsStintCap } from '../../src/api/rehab-policy.js'
 import { WINTER_LEAGUE_IDS, WINTER_SPORT_ID, isWinterSport } from '../../src/lib/winter/leagues.js'
+import { num } from '../../src/lib/math/number.js'
 
 // MiLB levels, high to low (AAA/AA/A+/A). Rookie/complex ball (16) is left out:
 // its huge, churny short-season rosters would match half a level as
@@ -52,8 +53,6 @@ export function careerRequests() {
   }
   return requests
 }
-
-const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
 
 // A player's career reduced to a Set of "teamId|season" strings, plus a
 // club-label lookup (teamId -> { name, level, sportId }) for the shared-team

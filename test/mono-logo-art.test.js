@@ -8,7 +8,7 @@
 // write-validator uses).
 
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 import { readMonoInkStore, readMonoInkStoreWithOverrides } from '../scripts/lib/mono-logo-art.mjs'
 
 // A team id the committed store carries no entry for, so these tests can't be
@@ -16,10 +16,9 @@ import { readMonoInkStore, readMonoInkStoreWithOverrides } from '../scripts/lib/
 const SCRATCH = '999999'
 
 function withFetch(impl, run) {
-  const original = globalThis.fetch
-  globalThis.fetch = impl
+  const fetchMock = mock.method(globalThis, 'fetch', impl)
   return run().finally(() => {
-    globalThis.fetch = original
+    fetchMock.mock.restore()
   })
 }
 

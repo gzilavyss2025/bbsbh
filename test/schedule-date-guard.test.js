@@ -6,20 +6,19 @@
 // one in the network panel. These tests pin the schedule guard: no date means
 // no schedule request, ever. The router half is in route.test.js.
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 import { fetchSchedule, resolveGame } from '../src/api/schedule.js'
 
 function withFetchSpy(run) {
   const calls = []
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async (url) => {
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
     calls.push(String(url))
     return { ok: true, status: 200, json: async () => ({ dates: [] }) }
-  }
+  })
   return Promise.resolve()
     .then(() => run(calls))
     .finally(() => {
-      globalThis.fetch = originalFetch
+      fetchMock.mock.restore()
     })
 }
 

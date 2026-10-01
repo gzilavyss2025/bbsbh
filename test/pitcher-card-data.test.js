@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../src/api/game.js'
 
 // The Now Pitching card's two fetchers, run against responses captured from
@@ -15,15 +15,14 @@ const EMPTY = { stats: [{ splits: [] }] }
 // A fetch stand-in that routes on the URL and records every request, so a test
 // can assert on WHAT was asked as well as on what came back.
 function withApi(route, run) {
-  const originalFetch = globalThis.fetch
   const urls = []
-  globalThis.fetch = async (url) => {
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
     urls.push(String(url))
     const body = route(String(url)) ?? EMPTY
     return { ok: true, status: 200, json: async () => body }
-  }
+  })
   return run(urls).finally(() => {
-    globalThis.fetch = originalFetch
+    fetchMock.mock.restore()
   })
 }
 

@@ -102,9 +102,7 @@ tab draws stays in that tab's own screen.
 
 ## The data layer (`src/api/player/`)
 
-`src/api/loadPlayer.js` is a barrel over this directory, the same shape
-`person.js` takes over `person/`, so no caller has to know which module a loader
-lives in.
+Callers import each loader from its own module here. There is no barrel.
 
 | Module | Feeds |
 | --- | --- |

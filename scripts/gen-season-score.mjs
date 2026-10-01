@@ -19,6 +19,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
+import { round1 } from '../src/lib/math/number.js'
 import { writeJsonAtomic } from './lib/io.js'
 import { HOME_WIN_PROBABILITY, teamHomeFieldFactor } from '../src/api/seasonScoreFormula.js'
 
@@ -29,7 +30,6 @@ const MLB_LEAGUES = [103, 104]
 const EARLY_SEASON_VARIANCE = 9 // keeps a 10-game hot streak below the ceiling
 
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
-const round1 = (n) => Math.round(n * 10) / 10
 const round3 = (n) => Math.round(n * 1000) / 1000
 const isoDay = (d) => d.toISOString().slice(0, 10)
 const addDays = (date, n) => {

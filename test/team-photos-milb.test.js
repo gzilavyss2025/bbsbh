@@ -4,7 +4,7 @@
 // page is reachable by URL too, so its loader must not hand a MiLB club a
 // season to walk. No schedule request, no games, nothing to fetch.
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 import { loadTeamPhotos } from '../src/screens/team/data/loadTeamPhotos.js'
 
 const TEAMS = {
@@ -16,17 +16,16 @@ const TEAMS = {
 
 function withFetchSpy(run) {
   const calls = []
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async (url) => {
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
     const u = String(url)
     calls.push(u)
     const body = u.includes('/data/teams.json') ? TEAMS : { dates: [] }
     return { ok: true, status: 200, json: async () => body }
-  }
+  })
   return Promise.resolve()
     .then(() => run(calls))
     .finally(() => {
-      globalThis.fetch = originalFetch
+      fetchMock.mock.restore()
     })
 }
 

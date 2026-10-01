@@ -124,10 +124,9 @@ test('normalizeGame leaves the national network empty on a row with no broadcast
 // One request per gamePk, shared across callers — a live Refresh re-runs the
 // lineup page's fetch on every feed change, and a broadcast assignment does
 // not move mid-game.
-test('fetchGameBroadcast asks statsapi once per game and reads it by gamePk', async () => {
+test('fetchGameBroadcast asks statsapi once per game and reads it by gamePk', async (t) => {
   const calls = []
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async (url) => {
+  t.mock.method(globalThis, 'fetch', async (url) => {
     calls.push(String(url))
     return {
       ok: true,
@@ -136,31 +135,22 @@ test('fetchGameBroadcast asks statsapi once per game and reads it by gamePk', as
         dates: [{ games: [{ gamePk: 823514, broadcasts: [tv('YES', 'home'), tv('BravesVision', 'away')] }] }],
       }),
     }
-  }
-  try {
-    const feed = { gamePk: 823514, gameData: { game: { pk: 823514 } } }
-    assert.equal(await fetchGameBroadcast(feed), 'YES · BravesVision')
-    assert.equal(await fetchGameBroadcast(feed), 'YES · BravesVision')
-    assert.equal(calls.length, 1)
-    assert.match(calls[0], /gamePk=823514/)
-    assert.match(calls[0], /hydrate=broadcasts\(all\)/)
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  })
+  const feed = { gamePk: 823514, gameData: { game: { pk: 823514 } } }
+  assert.equal(await fetchGameBroadcast(feed), 'YES · BravesVision')
+  assert.equal(await fetchGameBroadcast(feed), 'YES · BravesVision')
+  assert.equal(calls.length, 1)
+  assert.match(calls[0], /gamePk=823514/)
+  assert.match(calls[0], /hydrate=broadcasts\(all\)/)
 })
 
-test('fetchGameBroadcast degrades to no fact when the request fails', async () => {
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async () => {
+test('fetchGameBroadcast degrades to no fact when the request fails', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () => {
     throw new Error('offline')
-  }
-  try {
-    // A different gamePk from the test above, so the per-game cache there
-    // can't answer this one.
-    assert.equal(await fetchGameBroadcast({ gamePk: 999999 }), '')
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  })
+  // A different gamePk from the test above, so the per-game cache there
+  // can't answer this one.
+  assert.equal(await fetchGameBroadcast({ gamePk: 999999 }), '')
 })
 
 test('fetchGameBroadcast needs no gamePk to stay safe', async () => {

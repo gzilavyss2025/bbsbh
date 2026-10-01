@@ -14,7 +14,7 @@
 // for classifyPhotoAsset, since a hero-photo regression here is the same
 // classification bug wearing a different hat.
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import test, { mock } from 'node:test'
 import { condensedEntry, dayIndexEntry } from '../scripts/lib/highlights.mjs'
 import { pickHeroPhoto } from '../src/api/gamePhotos.js'
 
@@ -97,19 +97,18 @@ test('condensedEntry tolerates a missing image', () => {
 // "CONDENSED GAME" graphic poster on the slate's revealed result cards ---
 
 function withShapeProbe(shapes, run) {
-  const originalFetch = globalThis.fetch
   let probes = 0
-  globalThis.fetch = async (url) => {
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
     probes += 1
     const m = /\/upload\/fl_getinfo\/(mlb\/.+)$/.exec(String(url))
     const shape = m && shapes[m[1]]
     if (!shape) return { ok: false, status: 404, json: async () => ({}) }
     return { ok: true, status: 200, json: async () => ({ input: shape }) }
-  }
+  })
   return Promise.resolve(run())
     .then((result) => ({ result, probes }))
     .finally(() => {
-      globalThis.fetch = originalFetch
+      fetchMock.mock.restore()
     })
 }
 

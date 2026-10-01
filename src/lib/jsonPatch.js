@@ -7,8 +7,7 @@
 // IDENTITY (ADR-0007), so an in-place patcher would leave that cache
 // serving stale reveals after every poll. Verified against a real MLB feed's
 // diffPatch stream (op set: add/remove/replace/move/copy — see
-// .scratch/live-feed-diffpatch/findings.md); `test` is implemented too since
-// the wire format carries no documented contract on which ops can appear.
+// .scratch/live-feed-diffpatch/findings.md); any other op throws.
 
 function unescapePointerToken(token) {
   return token.replace(/~1/g, '/').replace(/~0/g, '~')
@@ -24,7 +23,7 @@ function getIn(root, tokens) {
   let node = root
   for (const token of tokens) {
     if (node == null) return undefined
-    node = Array.isArray(node) ? node[token === '-' ? node.length - 1 : Number(token)] : node[token]
+    node = Array.isArray(node) ? node[Number(token)] : node[token]
   }
   return node
 }
@@ -39,7 +38,7 @@ function setAt(container, token, value) {
 
 function removeAt(container, token) {
   if (Array.isArray(container)) {
-    return container.splice(token === '-' ? container.length - 1 : Number(token), 1)[0]
+    return container.splice(Number(token), 1)[0]
   }
   const value = container[token]
   delete container[token]
@@ -48,7 +47,7 @@ function removeAt(container, token) {
 
 function replaceAt(container, token, value) {
   if (Array.isArray(container)) {
-    container[token === '-' ? container.length - 1 : Number(token)] = value
+    container[Number(token)] = value
   } else {
     container[token] = value
   }
@@ -81,13 +80,6 @@ function applyOp(root, op) {
     case 'copy': {
       const fromTokens = parsePointer(op.from)
       setAt(parent, lastToken, structuredClone(getIn(root, fromTokens)))
-      return root
-    }
-    case 'test': {
-      const actual = getIn(root, tokens)
-      if (JSON.stringify(actual) !== JSON.stringify(op.value)) {
-        throw new Error(`JSON Patch test op failed at ${op.path}`)
-      }
       return root
     }
     default:

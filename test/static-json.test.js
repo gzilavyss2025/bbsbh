@@ -1,4 +1,4 @@
-import { test } from 'node:test'
+import { test, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { staticJson, staticJsonBy } from '../src/api/staticJson.js'
 
@@ -25,9 +25,8 @@ function countingFetch(bodyFor) {
 }
 
 test('concurrent callers share ONE request', async () => {
-  const original = globalThis.fetch
   const { fn, calls, release } = countingFetch(() => ({ n: 1 }))
-  globalThis.fetch = fn
+  const fetchMock = mock.method(globalThis, 'fetch', fn)
   try {
     const load = staticJson('/data/thing.json')
     const all = Promise.all([load(), load(), load(), load()])
@@ -39,14 +38,13 @@ test('concurrent callers share ONE request', async () => {
     assert.deepEqual(await load(), { n: 1 })
     assert.equal(calls.length, 1)
   } finally {
-    globalThis.fetch = original
+    fetchMock.mock.restore()
   }
 })
 
 test('the shape runs once, on the shared result', async () => {
-  const original = globalThis.fetch
   const { fn, release } = countingFetch(() => ({ players: [1, 2] }))
-  globalThis.fetch = fn
+  const fetchMock = mock.method(globalThis, 'fetch', fn)
   try {
     let shaped = 0
     const load = staticJson('/data/shaped.json', {
@@ -63,14 +61,13 @@ test('the shape runs once, on the shared result', async () => {
     assert.deepEqual(a, { players: [1, 2], count: 2 })
     assert.equal(a, b, 'both callers get the same object')
   } finally {
-    globalThis.fetch = original
+    fetchMock.mock.restore()
   }
 })
 
 test('a null fallback is memoized, not re-fetched forever', async () => {
-  const original = globalThis.fetch
   const { fn, calls, release } = countingFetch(() => undefined) // always 404
-  globalThis.fetch = fn
+  const fetchMock = mock.method(globalThis, 'fetch', fn)
   try {
     const load = staticJson('/data/missing.json') // fallback defaults to null
     const all = Promise.all([load(), load()])
@@ -80,14 +77,13 @@ test('a null fallback is memoized, not re-fetched forever', async () => {
     // A `if (value)` guard would refetch on every call, since null is falsy.
     assert.equal(calls.length, 1, `refetched a missing file ${calls.length} times`)
   } finally {
-    globalThis.fetch = original
+    fetchMock.mock.restore()
   }
 })
 
 test('a sharded set memoizes per key, and shares per key', async () => {
-  const original = globalThis.fetch
   const { fn, calls, release } = countingFetch((url) => ({ url }))
-  globalThis.fetch = fn
+  const fetchMock = mock.method(globalThis, 'fetch', fn)
   try {
     const load = staticJsonBy((key) => `/data/bucket/${key}.json`)
     const all = Promise.all([load(7), load(7), load(8), load('8')])
@@ -98,6 +94,6 @@ test('a sharded set memoizes per key, and shares per key', async () => {
     assert.equal(c, d, 'a numeric and a string key are the same shard')
     assert.notEqual(a.url, c.url)
   } finally {
-    globalThis.fetch = original
+    fetchMock.mock.restore()
   }
 })
