@@ -98,7 +98,7 @@ export function LongAtBats({ season }) {
 
         <div className="note__main">
           <h4 className="note__title">The twelve-pitch at-bats</h4>
-          <p className="note__lede">
+          <p className="note__note">
             Every plate appearance of the season that took {data.threshold} pitches or more. Each
             one opens its game, sealed.
           </p>

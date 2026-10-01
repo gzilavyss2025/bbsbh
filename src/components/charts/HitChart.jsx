@@ -138,7 +138,7 @@ export function HitChart({
     <Card as="div" body="flush" className={`hitchart hitchart--${isHalf ? 'half' : 'game'}`}>
       <div className="hitchart__head">
         <div>
-          <p className="hitchart__eyebrow">{eyebrow ?? venue}</p>
+          <p className="hitchart__note">{eyebrow ?? venue}</p>
           <h2 className="hitchart__headline">Hit chart</h2>
           <div className="hitchart__rule" />
         </div>

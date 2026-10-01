@@ -47,7 +47,7 @@ export function ClubCell({ teamId, name, rank, tied, sub, tab }) {
           {name}
         </TeamLink>
       </span>
-      {sub ? <span className="rpt__sub">{sub}</span> : null}
+      {sub ? <span className="rpt__note">{sub}</span> : null}
     </th>
   )
 }

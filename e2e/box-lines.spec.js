@@ -168,7 +168,7 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
   }
   // The four headings, in the card's own order. A heading with no door under it
   // does not render, so their presence also says every section has doors.
-  await expect(card.locator('.gamelines__heading')).toHaveText([
+  await expect(card.locator('.gamelines__title')).toHaveText([
     'Where',
     'When',
     'How he got in',
@@ -200,7 +200,7 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
 
   const sheet = page.getByRole('dialog', { name: /at home/ })
   await expect(sheet).toBeVisible()
-  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · at home')
+  await expect(sheet.locator('.boxlines__note')).toHaveText('Game lines · at home')
   await expect(sheet.locator('.boxlines__headline')).toHaveText(label)
 
   await expect
@@ -256,7 +256,7 @@ test('the Game lines card opens a facet sheet, and the facet actually narrows', 
   await postseason.click()
   const postSheet = page.getByRole('dialog', { name: /in the postseason/ })
   await expect(postSheet).toBeVisible()
-  await expect(postSheet.locator('.boxlines__kicker')).toHaveText('Game lines · postseason')
+  await expect(postSheet.locator('.boxlines__note')).toHaveText('Game lines · postseason')
   await expect
     .poll(async () => (await postSheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
     .toBe(true)
@@ -293,7 +293,7 @@ test('a month door and a weekday door each keep only their own dates', async ({ 
   const july = card.getByRole('button', { name: /^July: / })
   await july.click()
   const julySheet = page.getByRole('dialog', { name: /in July/ })
-  await expect(julySheet.locator('.boxlines__kicker')).toHaveText('Game lines · in July')
+  await expect(julySheet.locator('.boxlines__note')).toHaveText('Game lines · in July')
   await expect
     .poll(async () => (await julySheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
     .toBe(true)
@@ -317,7 +317,7 @@ test('a month door and a weekday door each keep only their own dates', async ({ 
   const sundayLabel = await sunday.getAttribute('aria-label')
   await sunday.click()
   const sundaySheet = page.getByRole('dialog', { name: /on Sundays/ })
-  await expect(sundaySheet.locator('.boxlines__kicker')).toHaveText('Game lines · on Sundays')
+  await expect(sundaySheet.locator('.boxlines__note')).toHaveText('Game lines · on Sundays')
   await expect(sundaySheet.locator('.boxlines__headline')).toHaveText(sundayLabel)
   await expect
     .poll(async () => (await sundaySheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
@@ -410,7 +410,7 @@ test('a hitter gets a pinch-hitting door, and a pitcher does not', async ({ page
   await pinch.click()
 
   const sheet = page.getByRole('dialog', { name: /as a pinch hitter/ })
-  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · pinch hitting')
+  await expect(sheet.locator('.boxlines__note')).toHaveText('Game lines · pinch hitting')
   await expect(sheet.locator('.boxlines__headline')).toHaveText(label)
   await expect
     .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 30_000 })
@@ -468,7 +468,7 @@ test('a hitter gets lineup doors that count games, and a pitcher gets none', asy
 
   await cameIn.click()
   const sheet = page.getByRole('dialog', { name: /off the bench/ })
-  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · off the bench')
+  await expect(sheet.locator('.boxlines__note')).toHaveText('Game lines · off the bench')
   await expect(sheet.locator('.boxlines__headline')).toHaveText(cameInLabel)
   await expect
     .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
@@ -530,7 +530,7 @@ test('the surface doors split a career, and the rows never exceed the door', asy
 
     await turf.click()
     const sheet = page.getByRole('dialog', { name: /on turf/ })
-    await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · on turf')
+    await expect(sheet.locator('.boxlines__note')).toHaveText('Game lines · on turf')
     await expect
       .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
       .toBe(true)
@@ -581,7 +581,7 @@ test('the batting-order door opens a list, and a slot opens its own rows', async
   await door.click()
 
   const sheet = page.locator('.boxlines')
-  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · by spot in the order')
+  await expect(sheet.locator('.boxlines__note')).toHaveText('Game lines · by spot in the order')
   // No headline over a list: there is no tapped line to quote.
   await expect(sheet.locator('.boxlines__headline')).toHaveCount(0)
   await expect
@@ -601,7 +601,7 @@ test('the batting-order door opens a list, and a slot opens its own rows', async
 
   // Tapping it shows the rows it counted — no request, the join is memoized.
   await first.click()
-  await expect(sheet.locator('.boxlines__kicker')).toHaveText(`Game lines · ${name}`)
+  await expect(sheet.locator('.boxlines__note')).toHaveText(`Game lines · ${name}`)
   // THE PICKED GROUP GETS THE WHOLE LINE, folded from the very rows under it —
   // the entry had room for two figures, this has room for twelve. Counts first,
   // then the slash line.
@@ -652,7 +652,7 @@ test('the batting-order door opens a list, and a slot opens its own rows', async
   // Back returns to the list, with every entry it had.
   await sheet.getByRole('button', { name: /Back/ }).click()
   await expect(sheet.locator('.boxlines-entry')).toHaveCount(slots)
-  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · by spot in the order')
+  await expect(sheet.locator('.boxlines__note')).toHaveText('Game lines · by spot in the order')
 
   // Escape still closes the whole sheet, and focus returns to the door.
   await page.keyboard.press('Escape')
@@ -686,7 +686,7 @@ test('the ballpark door opens a list, most games first, and a park opens its row
   await door.click()
 
   const sheet = page.locator('.boxlines')
-  await expect(sheet.locator('.boxlines__kicker')).toHaveText('Game lines · by ballpark')
+  await expect(sheet.locator('.boxlines__note')).toHaveText('Game lines · by ballpark')
   await expect
     .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })
     .toBe(true)
@@ -738,7 +738,7 @@ test('the ballpark door opens a list, most games first, and a park opens its row
   // The park he knows best opens the games he played there, and the entry
   // counted exactly those.
   await sheet.locator('.boxlines-entry').first().click()
-  await expect(sheet.locator('.boxlines__kicker')).toHaveText(`Game lines · ${parks[0].name}`)
+  await expect(sheet.locator('.boxlines__note')).toHaveText(`Game lines · ${parks[0].name}`)
   await expect(sheet.locator('.boxlines__title')).toContainText(parks[0].name)
   await expect
     .poll(async () => (await sheet.locator('.boxline--skel').count()) === 0, { timeout: 60_000 })

@@ -308,7 +308,7 @@ export function PacePage() {
                       <td>{asClock(r.median)}</td>
                       <td>
                         {r.over180Pct == null ? '—' : `${r.over180Pct.toFixed(1)}%`}
-                        <span className="rpt__sub">{r.over180} games</span>
+                        <span className="rpt__note">{r.over180} games</span>
                       </td>
                       <td>{r.over210}</td>
                       <td>
@@ -356,21 +356,21 @@ export function PacePage() {
                         <ClubCell teamId={r.teamId} name={clubShort(clubs, r.teamId)} />
                         <td>
                           {asClock(r.longest)}
-                          <span className="rpt__sub">
+                          <span className="rpt__note">
                             {r.longestDate ? humanDate(r.longestDate) : ''}
                             {r.longestOppId ? ` vs ${clubShort(clubs, r.longestOppId)}` : ''}
                           </span>
                         </td>
                         <td>
                           {asClock(r.shortest)}
-                          <span className="rpt__sub">
+                          <span className="rpt__note">
                             {r.shortestDate ? humanDate(r.shortestDate) : ''}
                             {r.shortestOppId ? ` vs ${clubShort(clubs, r.shortestOppId)}` : ''}
                           </span>
                         </td>
                         <td>
                           {asHours(r.delayMinutes)}
-                          <span className="rpt__sub">
+                          <span className="rpt__note">
                             {r.delayGames} game{r.delayGames === 1 ? '' : 's'}
                           </span>
                         </td>

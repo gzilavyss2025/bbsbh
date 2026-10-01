@@ -2147,3 +2147,124 @@ test('C7: the poster panel title keeps its own rule', () => {
   assert.equal(decl(body, 'text-transform'), 'uppercase')
   assert.match(src('screens/GamePreview.jsx'), /<h2 className="posterstudio__title">Preview card<\/h2>/)
 })
+
+// ---- slice H3: the second lines ----
+//
+// ADR-0084: a head's second line is `__note` and its title is `__title`. Each row
+// is a class that broke it. The block name stays unless the block itself is
+// renamed by another slice. Each old class is gone from src, e2e, scripts and
+// test, comments too; each new class is drawn by a stylesheet and used by a
+// markup file or by the lab catalog.
+const H3_RENAMED = [
+  // batch A: the four titles, the `__sub`, `__kicker`, `__eyebrow` and `__lede` rows
+  ['awardord__hd', 'awardord__title'],
+  ['coverpick__heading', 'coverpick__title'],
+  ['gamelines__heading', 'gamelines__title'],
+  ['lookupdeck__heading', 'lookupdeck__title'],
+  ['cthist__sub', 'cthist__note'],
+  ['leaders__sub', 'leaders__note'],
+  ['mgrpage__sub', 'mgrpage__note'],
+  ['psoddsmodal__sub', 'psoddsmodal__note'],
+  ['rpt__sub', 'rpt__note'],
+  ['searchbox__sub', 'searchbox__note'],
+  ['searchoverlay__sub', 'searchoverlay__note'],
+  ['split__sub', 'split__note'],
+  ['umptend__sub', 'umptend__note'],
+  ['boxlines__kicker', 'boxlines__note'],
+  ['scorebookstory__kicker', 'scorebookstory__note'],
+  ['tscoremodal__kicker', 'tscoremodal__note'],
+  ['bcast__eyebrow', 'bcast__note'],
+  ['guidelink__eyebrow', 'guidelink__note'],
+  ['hitchart__eyebrow', 'hitchart__note'],
+  ['introsheet__eyebrow', 'introsheet__note'],
+  ['szmodal__eyebrow', 'szmodal__note'],
+  ['trrank__eyebrow', 'trrank__note'],
+  ['umpmodal__eyebrow', 'umpmodal__note'],
+  ['sitemenusheet__eyebrow', 'sitemenusheet__note'],
+  // `.wordmarklab__eyebrow` left with the Wordmark Lab study itself (#1326).
+  ['admincopy__lede', 'admincopy__note'],
+  ['clubsseen__lede', 'clubsseen__note'],
+  ['foulavg__lede', 'foulavg__note'],
+  ['note__lede', 'note__note'],
+  ['stampin__lede', 'stampin__note'],
+  ['xl-entry__lede', 'xl-entry__note'],
+  // batch B, step one: the entry's own note gives up the name the page-level lede takes
+  ['dlab__note', 'dlabentry__note'],
+  // batch B, step two: the page-level lede takes the freed name
+  ['dlab__lede', 'dlab__note'],
+]
+
+// Text files of the four trees, this file excluded (it names the old classes).
+const H3_ROOT = join(SRC, '..')
+const H3_TEXT = ['.css', '.jsx', '.js', '.mjs', '.md']
+const h3Trees = () =>
+  ['src', 'e2e', 'scripts', 'test'].flatMap((dir) =>
+    files(join(H3_ROOT, dir), H3_TEXT)
+      .map((rel) => `${dir}/${rel}`)
+      .filter((rel) => rel !== 'test/card-cascade.test.js')
+      .map((rel) => [rel, readFileSync(join(H3_ROOT, rel), 'utf8')]),
+  )
+// `\b` is wrong here: `_` is a word character, so it does not exist before `__element`.
+// A modifier (`name--tight`) counts as the class; a longer name (`name-x`, `name_x`) does not.
+const h3Class = (name) => new RegExp(`(?<![A-Za-z0-9_-])${name}(?![a-z0-9_]|-[a-z0-9])`)
+
+test('H3: each old second-line class is gone from src, e2e, scripts and test, comments too', () => {
+  const trees = h3Trees()
+  // A two-step row frees a name that the next row takes (`dlab__note`).
+  const taken = new Set(H3_RENAMED.map(([, now]) => now))
+  for (const [old] of H3_RENAMED.filter(([o]) => !taken.has(o))) {
+    const re = h3Class(old)
+    assert.deepEqual(
+      trees.filter(([, text]) => re.test(text)).map(([rel]) => rel),
+      [],
+      `.${old} is still named`,
+    )
+  }
+})
+
+test('H3: each new second-line class is in a stylesheet and in a markup file or the lab catalog', () => {
+  const trees = h3Trees()
+  for (const [, now] of H3_RENAMED) {
+    const re = h3Class(now)
+    const hit = (ext) => trees.some(([rel, text]) => rel.startsWith('src/') && ext.test(rel) && re.test(text))
+    assert.ok(hit(/\.css$/), `.${now} has no rule`)
+    assert.ok(hit(/\.jsx?$/), `.${now} is used by no markup and no lab entry`)
+  }
+})
+
+test('H3: the held rows keep their names', () => {
+  const trees = h3Trees()
+  const held = [
+    'wire__kicker', 'bs__sub', 'ledger__sub', // not a second line (#1113, #1132)
+    'contractcard__eyebrow', // `.contractcard__note` is the optioned caption, a different line
+    // two different second lines on one head: needs a decision on the grammar
+    'abouthero__kicker', 'abouthero__lede', 'derbycard__eyebrow', 'derbycard__sub',
+    'logbooklanding__eyebrow', 'logbooklanding__lede', 'researchdiary__eyebrow', 'researchdiary__lede',
+    'stampstrip__eyebrow', 'stampstrip__lede',
+  ]
+  for (const name of held) {
+    const re = h3Class(name)
+    assert.ok(
+      trees.some(([rel, text]) => rel.startsWith('src/styles/') && re.test(text)),
+      `.${name} lost its rule`,
+    )
+  }
+})
+
+test('H3: .cover__sub is deleted, and the seal-scope allowlist no longer names it', () => {
+  const trees = h3Trees()
+  assert.deepEqual(trees.filter(([, text]) => h3Class('cover__sub').test(text)).map(([rel]) => rel), [])
+  assert.doesNotMatch(readFileSync(join(H3_ROOT, 'scripts/check-seal-scope.mjs'), 'utf8'), /cover__sub/)
+})
+
+test('H3: the between-innings eyebrow is retired, and the button is still named by its fact', () => {
+  const trees = h3Trees()
+  assert.deepEqual(trees.filter(([, text]) => h3Class('betweeninnings__eyebrow').test(text)).map(([rel]) => rel), [])
+  const jsx = readFileSync(join(SRC, 'components/gamehud/BetweenInnings.jsx'), 'utf8')
+  const button = jsx.slice(jsx.indexOf('<Card as="button"'), jsx.indexOf('</Card>'))
+  // The name comes from the content: the progress count, the player and the fact.
+  // An aria-label would replace it and hide the fact from a screen reader.
+  assert.match(button, /betweeninnings__progress/)
+  assert.match(button, /\{card\.text\}/)
+  assert.doesNotMatch(button, /aria-label/)
+})

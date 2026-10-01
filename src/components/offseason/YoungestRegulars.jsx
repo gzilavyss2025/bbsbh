@@ -113,7 +113,7 @@ export function YoungestRegulars({ sportId, season }) {
 
         <div className="note__main">
           <h4 className="note__title">Youngest regulars</h4>
-          <p className="note__lede">
+          <p className="note__note">
             Age on June 30 of the {season} season, against the average for the same league.
             Hitters only.
           </p>

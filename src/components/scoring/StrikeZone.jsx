@@ -269,7 +269,7 @@ export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClos
         <div className="szmodal" role="dialog" aria-modal="true" aria-label={`Pitch zone for ${name || 'this at-bat'}`}>
           <div className="szmodal__head">
             <div className="szmodal__ttl">
-              <span className="szmodal__eyebrow">Pitch zone</span>
+              <span className="szmodal__note">Pitch zone</span>
               <span className="szmodal__name">{name || 'At-bat'}</span>
               {pitcher ? <span className="szmodal__vs">vs {pitcher}</span> : null}
             </div>

@@ -19,7 +19,7 @@
   justify-content: space-between;
   gap: var(--space-3);
 }
-.tscoremodal__kicker {
+.tscoremodal__note {
   margin: 0;
   color: var(--text-caption);
   font-family: var(--font-display);

@@ -215,13 +215,13 @@ export function FarmSystemPage() {
                       </td>
                       <td>
                         {r.topRank ? `#${r.topRank}` : '—'}
-                        <span className="rpt__sub">
+                        <span className="rpt__note">
                           {r.prospects[0]?.name ?? 'None ranked'}
                         </span>
                       </td>
                       <td>
                         {r.record.w}-{r.record.l}
-                        <span className="rpt__sub">{pct3(r.pct)}</span>
+                        <span className="rpt__note">{pct3(r.pct)}</span>
                       </td>
                     </tr>
                   ))}

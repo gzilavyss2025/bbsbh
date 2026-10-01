@@ -44,7 +44,7 @@ export function PostseasonOddsModal({ divisionName, rows, onClose }) {
             ✕
           </button>
         </div>
-        <p className="psoddsmodal__sub">{divisionName}</p>
+        <p className="psoddsmodal__note">{divisionName}</p>
 
         <div className="ledger-wrap">
           <table className="ledger standings psoddstable">

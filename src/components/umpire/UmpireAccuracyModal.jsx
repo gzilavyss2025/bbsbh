@@ -75,7 +75,7 @@ export function UmpireAccuracyModal({ id, onClose }) {
           <div className="umpmodal__ttl">
             {!season && (
               <>
-                <span className="umpmodal__eyebrow">Plate accuracy</span>
+                <span className="umpmodal__note">Plate accuracy</span>
                 <span className="umpmodal__name">{data?.name ?? '…'}</span>
               </>
             )}

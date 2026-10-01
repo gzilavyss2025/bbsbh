@@ -88,7 +88,7 @@ export function ManagerPage({ id }) {
         <Headshot personId={id} name={name} teamId={headshotTeamId} coach className="mgrpage__shot" />
         <div className="mgrpage__ident">
           <h1 className="mgrpage__name">{name}</h1>
-          <p className="mgrpage__sub">{roleLine(stints)}</p>
+          <p className="mgrpage__note">{roleLine(stints)}</p>
         </div>
       </header>
 

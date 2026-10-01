@@ -301,7 +301,7 @@
 }
 
 /* The sample floor rides in the chart head it qualifies, the same move the
-   report boards make with a column head's `.rpt__sub`. */
+   report boards make with a column head's `.rpt__note`. */
 .colchart__panelsub {
   display: block;
   font-family: var(--font-body);

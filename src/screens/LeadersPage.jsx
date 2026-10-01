@@ -110,7 +110,7 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
               <TeamLogo teamId={org.id} name={org.name} size={40} />
               <div>
                 <h1 className="topbar__title">{org.name}</h1>
-                <p className="leaders__sub">Organization leaders · all levels</p>
+                <p className="leaders__note">Organization leaders · all levels</p>
               </div>
             </div>
           )}

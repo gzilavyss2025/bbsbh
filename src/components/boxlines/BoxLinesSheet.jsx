@@ -162,7 +162,7 @@ export function BoxLinesSheet({
                   ‹ Back
                 </button>
               )}
-              <p className="boxlines__kicker">{kick}</p>
+              <p className="boxlines__note">{kick}</p>
               <h2 className="sheet__title boxlines__title">{heading}</h2>
             </div>
             <IconButton ref={closeRef} onClick={onClose} label="Close">

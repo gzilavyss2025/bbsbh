@@ -51,7 +51,7 @@ export function ClubsSeen({ stamps = [], factsByPk = {} }) {
       <SectionHead as="h2" titleId="clubsseen-title" className="clubsseen__title">
         Clubs you’ve seen
       </SectionHead>
-      <p className="clubsseen__lede">
+      <p className="clubsseen__note">
         {count === 0
           ? 'Every club in the league. The ones you stamp a game of come up in their own colours.'
           : `${count} ${count === 1 ? 'club has' : 'clubs have'} turned up in your book.`}

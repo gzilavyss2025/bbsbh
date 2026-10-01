@@ -60,14 +60,6 @@
   text-transform: uppercase;
 }
 
-.cover__sub {
-  font-family: var(--font-body);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-semibold);
-  color: var(--seal-ink);
-  opacity: 0.82;
-}
-
 .statgrid {
   padding: var(--space-3h);
   display: flex;

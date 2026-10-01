@@ -270,14 +270,14 @@ export function AttendancePage() {
                       <ClubCell teamId={r.teamId} name={clubShort(clubs, r.teamId)} />
                       <td className="team">
                         {r.topOpponents.map((o) => (
-                          <span key={o.teamId} className="rpt__sub">
+                          <span key={o.teamId} className="rpt__note">
                             {clubShort(clubs, o.teamId)} — {commas(o.avg)}
                           </span>
                         ))}
                       </td>
                       <td>
                         {commas(r.worst)}
-                        <span className="rpt__sub">
+                        <span className="rpt__note">
                           {r.worstDate ? humanDate(r.worstDate) : ''}
                           {r.worstOppId ? ` vs ${clubShort(clubs, r.worstOppId)}` : ''}
                         </span>
