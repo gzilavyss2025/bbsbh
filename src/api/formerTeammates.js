@@ -148,12 +148,7 @@ export function formerTeammatePairs(data, teamIdA, teamIdB) {
 export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds, teamNames) {
   const rows = new Map()
   const starts = (id) => Boolean(startingIds?.has(id))
-  const sideOf = (player) =>
-    player.teamId === awayTeamId ? 'away' : player.teamId === homeTeamId ? 'home' : null
-  // Which of tonight's clubs a shared club belongs to: itself, or (a farm club)
-  // its parent org. A shard written before `orgId` falls back to `teamId` alone.
-  const tonightOrg = (c) =>
-    [c.teamId, c.orgId].find((id) => id === awayTeamId || id === homeTeamId)
+  const { sideOf, tonightOrg } = tonightClubs(awayTeamId, homeTeamId)
   const rowFor = (kind, teamId, stint) => {
     const key = `${kind}|${teamId}`
     if (!rows.has(key)) {
@@ -184,7 +179,7 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds, t
   }
 
   for (const p of pairs ?? []) {
-    const third = p.clubs.find((c) => !tonightOrg(c))
+    const third = thirdClub(p, tonightOrg)
     if (third) {
       const row = rowFor('elsewhere', third.teamId, third)
       place(row, p.a, p.score)
@@ -197,7 +192,7 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds, t
       // A 'former' row is keyed by the parent club, so an MLB year and a farm
       // year in one org are one row. The player NOT on that org now left it.
       const org = tonightOrg(club)
-      const left = p.a.teamId === org ? p.b : p.a
+      const left = leftOf(p, org)
       const row = rowFor('former', org, club)
       place(row, left, p.score)
       row.score = Math.max(row.score, p.score)
@@ -213,11 +208,7 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds, t
   // shared club is tonight's MiLB club and has no farm system. No name given:
   // the shared club's own name, unsuffixed, since "<farm club> system" would
   // be wrong.
-  const clubOf = (r) => {
-    const org = teamNames?.[r.teamId]
-    const teamName = org ? (r.farmOnly ? `${org} system` : org) : r.top.teamName
-    return { teamId: r.teamId, teamName, level: r.top.level }
-  }
+  const clubOf = (r) => ({ teamId: r.teamId, teamName: orgName(teamNames, r), level: r.top.level })
   const bySideScore = (x, y) => Number(y.starting) - Number(x.starting) || y.score - x.score
   const finished = [...rows.values()]
     .map((r) => ({
@@ -234,6 +225,152 @@ export function teammateCrossroads(pairs, awayTeamId, homeTeamId, startingIds, t
   return {
     former: finished.filter((r) => r.kind === 'former'),
     elsewhere: finished.filter((r) => r.kind === 'elsewhere'),
+  }
+}
+
+// The rules the crossroads rows and the Ladder share, so both pick the same club.
+// `sideOf`: a player's side of tonight's game, from the club he is on now.
+// `tonightOrg`: which of tonight's clubs a shared club belongs to: itself, or (a
+// farm club) its parent org. A shard written before `orgId` falls back to
+// `teamId` alone.
+function tonightClubs(awayTeamId, homeTeamId) {
+  return {
+    sideOf: (player) =>
+      player.teamId === awayTeamId ? 'away' : player.teamId === homeTeamId ? 'home' : null,
+    tonightOrg: (c) => [c.teamId, c.orgId].find((id) => id === awayTeamId || id === homeTeamId),
+  }
+}
+// The pair's club when they met on a THIRD club: its first one that is not
+// tonight's org (formerTeammatePairs sorts the best club first).
+const thirdClub = (pair, tonightOrg) => pair.clubs.find((c) => !tonightOrg(c))
+// Of a tie made on tonight's org, the player NOT on that org now: he left it.
+const leftOf = (pair, org) => (pair.a.teamId === org ? pair.b : pair.a)
+// A 'former' tie's club name: the parent's name from `teamNames` ("Yankees"), or
+// "Yankees system" when every stint was on a farm club; with no name given, the
+// shared club's own, unsuffixed. `r` is { teamId, farmOnly, top }.
+const orgName = (teamNames, r) => {
+  const org = teamNames?.[r.teamId]
+  return org ? (r.farmOnly ? `${org} system` : org) : r.top.teamName
+}
+
+// The Ladder: the same ties as teammateCrossroads, drawn as a link diagram in
+// which each player and each club shows ONCE. Same club choice, same
+// tonightOrg / "system" rules, same shard symmetry (a player's side comes from
+// his own `teamId`, never from the shard's key order). Differences:
+//   - a pair that met on a third club is one EDGE (away player -> club -> home
+//     player), not a row, so a player in several pairs is still one node;
+//   - a tie to tonight's own org is a badge on the player who LEFT it
+//     (`players[id].former`), not a section. A player whose only tie is such a
+//     badge has no edge and lands in `formerOnly`;
+//   - a group is a connected component of the player-club graph. Groups run
+//     pinned first (a pair who both start), then by best pair score.
+// `teamNames` names the badge's org, as in the crossroads rows.
+//
+// Returns:
+//   { groups: [{ away: [playerId], clubs: [clubId], home: [playerId], pinned, score }],
+//     edges: [{ away: playerId, home: playerId, club: clubId, seasons: [...] }],  // one per pair
+//     clubs: { [clubId]: { teamId, teamName, level, seasons: [...] } },           // union per club
+//     players: { [id]: { id, name, pos, teamId, starting, side, former } },
+//       // former: null | { orgId, teamName, seasons: [...], farmOnly }
+//     formerOnly: [playerId] }
+export function teammateLadder(pairs, awayTeamId, homeTeamId, startingIds, teamNames) {
+  const { sideOf, tonightOrg } = tonightClubs(awayTeamId, homeTeamId)
+  const players = {}
+  const clubs = {}
+  const edges = []
+  const edgeScore = {} // best score of an edge a player is on
+  const clubScore = {}
+  const node = (p) => {
+    players[p.id] ??= {
+      id: p.id,
+      name: p.name,
+      pos: p.pos,
+      teamId: p.teamId,
+      starting: Boolean(startingIds?.has(p.id)),
+      side: sideOf(p),
+      former: null,
+    }
+    return players[p.id]
+  }
+  const raise = (map, key, score) => (map[key] = Math.max(map[key] ?? 0, score))
+
+  for (const p of pairs ?? []) {
+    const third = thirdClub(p, tonightOrg)
+    if (third) {
+      const [away, home] = sideOf(p.a) === 'away' ? [p.a, p.b] : [p.b, p.a]
+      if (sideOf(away) !== 'away' || sideOf(home) !== 'home') continue
+      node(away)
+      node(home)
+      edges.push({ away: away.id, home: home.id, club: third.teamId, seasons: [...third.seasons].sort((x, y) => x - y) })
+      const c = (clubs[third.teamId] ??= { ...third, seasons: new Set() })
+      if (LEVEL_RANK(third.level) > LEVEL_RANK(c.level)) c.level = third.level
+      for (const s of third.seasons) c.seasons.add(s)
+      for (const id of [away.id, home.id]) raise(edgeScore, id, p.score)
+      raise(clubScore, third.teamId, p.score)
+      continue
+    }
+    for (const stint of p.clubs) {
+      const org = tonightOrg(stint)
+      const left = leftOf(p, org)
+      if (!sideOf(left)) continue
+      const n = node(left)
+      const f = (n.former ??= { orgId: org, teamId: org, farmOnly: true, top: stint, seasons: new Set() })
+      if (LEVEL_RANK(stint.level) > LEVEL_RANK(f.top.level)) f.top = stint
+      if (stint.teamId === org) f.farmOnly = false
+      for (const s of stint.seasons) f.seasons.add(s)
+    }
+  }
+  const sorted = (set) => [...set].sort((x, y) => x - y)
+  for (const c of Object.values(clubs)) {
+    c.seasons = sorted(c.seasons)
+  }
+  for (const n of Object.values(players)) {
+    if (n.former) {
+      const { orgId, farmOnly } = n.former
+      n.former = { orgId, teamName: orgName(teamNames, n.former), seasons: sorted(n.former.seasons), farmOnly }
+    }
+  }
+
+  // Connected components, by union-find over player ('p') and club ('c') keys.
+  const parent = {}
+  const find = (k) => (parent[k] === k ? k : (parent[k] = find(parent[k])))
+  const link = (a, b) => {
+    parent[a] ??= a
+    parent[b] ??= b
+    parent[find(a)] = find(b)
+  }
+  for (const e of edges) {
+    link(`p${e.away}`, `c${e.club}`)
+    link(`p${e.home}`, `c${e.club}`)
+  }
+  const groups = new Map()
+  for (const e of edges) {
+    const g = groups.get(find(`c${e.club}`)) ?? { away: new Set(), clubs: new Set(), home: new Set(), pinned: false, score: 0 }
+    groups.set(find(`c${e.club}`), g)
+    g.away.add(e.away)
+    g.home.add(e.home)
+    g.clubs.add(e.club)
+    g.pinned ||= players[e.away].starting && players[e.home].starting
+    g.score = Math.max(g.score, edgeScore[e.away])
+  }
+  const byStartScore = (x, y) => Number(players[y].starting) - Number(players[x].starting) || edgeScore[y] - edgeScore[x]
+  return {
+    groups: [...groups.values()]
+      .map((g) => ({
+        away: [...g.away].sort(byStartScore),
+        clubs: [...g.clubs].sort((x, y) => clubScore[y] - clubScore[x]),
+        home: [...g.home].sort(byStartScore),
+        pinned: g.pinned,
+        score: g.score,
+      }))
+      .sort((x, y) => Number(y.pinned) - Number(x.pinned) || y.score - x.score),
+    edges,
+    clubs: Object.fromEntries(Object.entries(clubs).map(([id, c]) => [id, { teamId: c.teamId, teamName: c.teamName, level: c.level, seasons: c.seasons }])),
+    players,
+    formerOnly: Object.values(players)
+      .filter((n) => n.former && !(n.id in edgeScore))
+      .sort((x, y) => Number(y.starting) - Number(x.starting))
+      .map((n) => n.id),
   }
 }
 
