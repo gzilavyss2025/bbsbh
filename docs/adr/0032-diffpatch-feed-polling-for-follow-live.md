@@ -19,6 +19,9 @@ position-player-pitching) full timestamp history at both real poll cadences,
 applying each diffPatch response and deep-comparing the merged result against
 a straight full-feed fetch at the same tick.
 
+> Amended (#1376): the probe script was deleted in #1329. To recover it, run
+> `git show f5a7e675:scripts/probe-diffpatch.mjs`.
+
 - **Correctness: clean.** 435 successful patch merges across an MLB and an
   AAA game, zero apply errors, zero semantic divergences.
 - **The payload win is cadence-dependent, and NOT what a single-hop pilot
