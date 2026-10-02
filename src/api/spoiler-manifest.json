@@ -328,7 +328,9 @@
       "class": "reveal-only",
       "why": "Express Lane's scoring deck — the batter's box and the boxes of the men standing on base, which is where a scorer writes a stolen base, a wild pitch and every hit that moves a runner already on. Every card carries its plate appearance's outcome, so this is callable only from inside a SealBox's reveal render function (ADR-0001/0002), the same footing as rail.js beside it. It re-derives nothing: computeHalfInningFeed already solved the hard half for at-bat stepping (ADR-0016), and this maps one rail row onto that function's own `stepCap` and reads the cards back out. THE CAP IS THE WHOLE POINT and is not optional. A runner's diamond shades the bases he legged out, so built from the finished half it would show his EVENTUAL fate — a man who reached first in the third would carry a fully shaded diamond the moment his own at-bat was revealed, telling the scorer the run came home before he had scored the play that drove it in. There is deliberately no variant of `expressDeck` that omits the cursor. Two containments ride along: the chip strip names only plate appearances already REACHED, since chips for ones still ahead would say how many batters are left to bat, and the deck is built one half-inning at a time for the same ADR-0008 reason the rail has no whole-game builder.",
       "importers": [
-        "hooks/useExpressLane.js"
+        "hooks/useExpressLane.js",
+        "lib/scorecard/situation.js",
+        "lib/scorecard/words.js"
       ]
     },
     "feverRadar.js": {

@@ -461,15 +461,16 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = -1
     tp += d.pitches
     perInning[inning] = {
       p: d.pitches,
-      // What the batting side DID with those pitches — swings and misses, and
-      // balls fouled off. The sheet's foot row shows P / WH / FO; `tp` (the
-      // running pitch total) and `lob` stay on the line because the scoreboard
-      // block and the tests read them, even though no cell prints them now.
+      // WH / FO: what the batting side DID with those pitches. No cell prints the
+      // rest; the scoreboard block, the lens bar's half totals and the tests read them.
       whiffs: d.whiffs,
       fouls: d.fouls,
       tp,
       lob: line?.leftOnBase ?? 0,
       runs: line?.runs ?? 0,
+      hits: line?.hits ?? 0,
+      // E is a FIELDING stat: the other club's node, this same half (ADR-0006).
+      errors: revealInning(feed, inning, battingSide === 'away' ? 'home' : 'away')?.errors ?? 0,
     }
   }
 
