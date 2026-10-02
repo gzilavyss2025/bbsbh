@@ -16,7 +16,7 @@
 // (regular season and postseason), balls in play only (hfPR, about 0.63 MB),
 // a 1 s pause between requests, 4 tries each. Each day is cached OUTSIDE the
 // repo (default: $TMPDIR/bbsbh-xwoba/{season}/), so a second run resumes. Only
-// a day before today with every game Final is pulled, and a reply with no rows
+// a day at least a day old with every game Final is pulled, and a reply with no rows
 // is a failure. Stop rule: 3 days in a row that fail every try stop the run,
 // and no table is written.
 //
@@ -50,7 +50,10 @@ else await build()
 async function build() {
   const sched = await getJson(`/api/v1/schedule?sportId=1&season=${season}&gameType=R,${POSTSEASON_GAME_TYPES}`)
   const days = (sched.dates ?? [])
-    .filter((d) => d.date < isoDay(new Date()) && d.games.every((g) => g.status?.abstractGameState === 'Final'))
+    // Every game over, at least one played (a rained-out day has no balls in
+    // play), and a day old, so Savant has posted the late games.
+    .filter((d) => d.date < isoDay(new Date(Date.now() - 864e5)) &&
+      d.games.every((g) => g.status?.abstractGameState === 'Final') && d.games.some((g) => g.status?.codedGameState === 'F'))
     .map((d) => d.date)
   await mkdir(cacheDir, { recursive: true })
   const balls = []
@@ -77,7 +80,7 @@ async function build() {
         continue
       }
       await sleep(1000)
-    }
+    } else streak = 0
     for (const r of csvObjects(gunzipSync(await readFile(file)).toString('utf8'))) {
       const ball = [num(r.launch_speed), num(r.launch_angle), num(r.estimated_woba_using_speedangle)]
       if (r.description === 'hit_into_play' && ball.every((v) => v != null)) balls.push(ball)
