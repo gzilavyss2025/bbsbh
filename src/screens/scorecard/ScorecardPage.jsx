@@ -295,6 +295,7 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
         edge={bar?.state === 'edge'}
         lastOpened={bar?.lastOpened ?? null}
         dock={dock}
+        carry={bar?.carry}
       />
       {bar && (
         <LensBar

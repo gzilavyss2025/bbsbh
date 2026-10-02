@@ -134,6 +134,9 @@
      sheet's top edge sits this far from the window's top (#724, L5). */
   --lens-dock-gap: 13px;
   --lens-sheet-top: 92px;
+  /* The carry strip's boxes are the sheet's own box at this share of the
+     sheet's zoom (#724, L6). */
+  --lens-carry-scale: 0.9;
 }
 
 /* --console-hud-h's desktop half — see the mobile value above for why this is

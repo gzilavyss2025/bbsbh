@@ -13,7 +13,11 @@
 //
 // `dock` is the one card under the frame (LensCards.jsx), its top a fixed gap
 // under the frame's bottom edge. Unlike the frame, it takes taps.
-export function LensFrame({ frame, dock = null }) {
+//
+// `carry` is the carry strip (CarryStrip.jsx), pinned in the top spacer band:
+// from the pane's top, under the sticky header, down to the frame (`padTop` is
+// that band's height). It takes no taps, so the pane still pans under it.
+export function LensFrame({ frame, dock = null, carry = null }) {
   if (!frame) return null
   return (
     <>
@@ -27,6 +31,11 @@ export function LensFrame({ frame, dock = null }) {
         aria-hidden="true"
         style={{ top: frame.top + frame.height, width: frame.left }}
       />
+      {carry && (
+        <div className="sc-lens__carry" style={{ top: frame.top - frame.padTop, maxHeight: frame.padTop }}>
+          {carry}
+        </div>
+      )}
       {dock && (
         <div className="sc-lens__dock" style={{ top: frame.top + frame.height }}>
           {dock}

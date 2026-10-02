@@ -55,6 +55,8 @@ export function Scorecard({
   lastOpened = null,
   // The card docked under the lens's frame, if any (lens/LensCards.jsx).
   dock = null,
+  // The boxes the carry strip holds, if any (lens/useLensBar.js).
+  carry = [],
 }) {
   // THE SHEET'S OWN WIDTH, measured by the grid and held to by everything
   // around it. On a wide screen the scorecard runs the whole window (ADR-0047's
@@ -105,6 +107,7 @@ export function Scorecard({
           edge={edge}
           lastOpened={lastOpened}
           dock={dock}
+          carry={carry}
         />
         <ScorecardFooter view={view} />
       </div>

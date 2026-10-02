@@ -157,3 +157,26 @@ notice and that button open the pitcher card in a bottom sheet.
 - **While the sheet is open, the seal, Unwrap and Turn do nothing**, as while
   the cell editor is open. The sheet is not portalled, so it keeps `#root`'s
   all-caps rule.
+
+## The carry strip (L6)
+
+When the batting order wraps, the pane scrolls far up the sheet and the last
+result and the runners' boxes leave the screen. The reader needs them to copy
+onto paper. A strip in the top spacer band shows them again.
+
+- **Which boxes.** `carryBoxes` (`src/lib/scorecard/carry.js`) names the last
+  opened box and each runner still on base, at most three. It reads only the
+  clamped view and `situation`, so it can name only a box already open (G8). A
+  test walks the captured game and checks this at each tap. A placed
+  extra-innings runner has no box of his own and is not carried.
+- **When it shows.** `carryShows` answers from rects that `useCarry` measures
+  with `getBoundingClientRect()` against the visible paper (under the sticky
+  header, over the foot row, right of the rail). It never reasons from row
+  numbers, because a bat-around inning widens into columns. The hook measures
+  again after each render and after each pan settles.
+- **Where it shows.** Only in the `sealed` and `edge` bar states. At a half
+  handoff the frame is on the next leadoff and nothing is carried.
+- **The look.** Each box is the sheet's own `AtBatBox`, drawn by CSS `zoom` at
+  `--lens-carry-scale` times the sheet's zoom. The strip takes no taps, so the
+  pane still pans under it. It is never kraft: it lifts no seal. It is a visual
+  copy, so it is `aria-hidden`; the sheet holds the same boxes.
