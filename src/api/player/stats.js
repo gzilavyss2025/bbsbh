@@ -45,6 +45,11 @@ export async function loadPlayerStats(id, asOf) {
     fetchVsTeamSplitsForPlayer(id),
   ])
 
+  // Started up front so each group's register can see the OTHER group's
+  // seasons (a two-way player's pitching gap in a year he batted is no
+  // missed season, #1393).
+  const ybyByGroup = new Map(groups.map((g) => [g, yearByYearFor(ctx, g)]))
+
   const results = await Promise.all(
     groups.map(async (group) => {
       // A rehabbing big leaguer's game log combines his MLB games with his
@@ -62,7 +67,7 @@ export async function loadPlayerStats(id, asOf) {
 
       const [current, yby, careerSplits, lrSplits, gameLogSplits, situationalSplits] = await Promise.all([
         currentSeasonFor(ctx, group),
-        yearByYearFor(ctx, group),
+        ybyByGroup.get(group),
         // The career total is pinned to `careerSportId` (MLB for anyone who has
         // debuted), so a now-in-the-minors big leaguer's major-league résumé
         // foots the register's MLB total.
@@ -99,6 +104,10 @@ export async function loadPlayerStats(id, asOf) {
       // recognize a true multi-organization year (for affiliate marks) and make
       // the same org-aware ordering fallback as Team history when the
       // transaction wire is sparse.
+      const otherYby = await Promise.all(groups.filter((g) => g !== group).map((g) => ybyByGroup.get(g)))
+      const otherGroupYears = otherYby.length
+        ? new Set(otherYby.flatMap((y) => [...y.mlbYbySplits, ...y.milbYbySplits]).map((s) => Number(s.season)))
+        : null
       const orgOf = await resolveCareerOrgs([...yby.mlbYbySplits, ...yby.milbYbySplits])
 
       const block = buildBlock({
@@ -125,6 +134,7 @@ export async function loadPlayerStats(id, asOf) {
         warByTeam: warByTeamFor(id, group, warCurrent) ?? {},
         transactions: txns,
         orgOf,
+        otherGroupYears,
       })
       block.situational = situationalSplitsView(situationalSplits, group)
       return { group, block }
