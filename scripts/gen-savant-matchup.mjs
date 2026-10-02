@@ -202,7 +202,7 @@ for (const [group, rows] of [['pit', pitArsenalRows], ['bat', batArsenalRows]]) 
 // est_woba rides the batter row for the Scout page. A renamed column comes back
 // blank, not as an error (scripts/lib/savant.mjs header): warn, keep the file.
 if (batArsenalRows.filter((r) => num(r.est_woba) != null).length < batArsenalRows.length / 2) {
-  console.error('WARNING: arsenal.bat.estWoba is mostly blank — selection id may have changed')
+  console.error('WARNING: arsenal.bat.estWoba is mostly blank — the est_woba column may have been renamed')
 }
 
 if (!Object.keys(arsenal.pit).length || !Object.keys(arsenal.bat).length) {
