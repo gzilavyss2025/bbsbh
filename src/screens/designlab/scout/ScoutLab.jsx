@@ -11,9 +11,10 @@ import { ScoutMap } from '../../../components/scout/ScoutMap.jsx'
 import { HeadToHead } from './HeadToHead.jsx'
 import { Matchup } from '../../../components/scout/Matchup.jsx'
 import { Choice } from '../../../components/scout/Choice.jsx'
-import { HITTERS, LEAGUE, PITCHER } from './fixture.js'
+import { HITTERS, LEAGUE_SUMS, PITCHER } from './fixture.js'
+import { expectedAll, expectedOn, hitterMap } from '../../scout/hitterBoard.js'
 import { REGIONS, regionLabel, rollUp, sidesInOrder } from '../../../lib/zone/regions.js'
-import { METRICS, band, expected, fmtCell, fmtMetric, hitterRegions, typeValue } from './model.js'
+import { METRICS, band, fmtMetric } from '../../../lib/scout/metrics.js'
 
 // THE MATCHUP SCOUT PROTOTYPE (issue #1408; spec docs/scout-design.md). A
 // design specimen on invented data, not the page: no route, no fetch, no
@@ -50,18 +51,6 @@ const pct = (x) => `${Math.round(x * 100)}`
 const toneOf = (b) => (b == null ? null : b < 0 ? `lo${-b}` : b > 0 ? `hi${b}` : 'mid')
 const Swatch = ({ tone }) => <svg className="scout__swatch" aria-hidden="true"><rect className={`scout__region scout__region--${tone}`} width="14" height="14" /></svg>
 
-// The league's rate per region, for the given types: the fixture's cell rates
-// averaged. The real sweep (#1411) stores league sums, read like a hitter's.
-function leagueRegions(codes, metric) {
-  const rates = codes.map((c) => LEAGUE[c][metric]).reduce(add).map((x) => x / codes.length)
-  const sums = rollUp(rates)
-  const sizes = rollUp(rates.map(() => 1))
-  return Object.fromEntries(REGIONS.map((r) => [r, sums[r] / sizes[r]]))
-}
-
-const sumCounters = (list) =>
-  list.reduce((acc, c) => Object.fromEntries(Object.keys(c).map((k) => [k, add(acc[k], c[k])])))
-
 // Everything the page draws, for one set of choices. `codes` is the pitch
 // types the maps pool: one type, or every type for All.
 function scout({ hitter, scope, hand, hitterHand, metric, stance, notPosted }) {
@@ -71,9 +60,6 @@ function scout({ hitter, scope, hand, hitterHand, metric, stance, notPosted }) {
   const counts = allCodes.map((code) => ({ code, pitches: sum(typeCells(code)), avgVelo: PITCHER.mph[code] }))
   const tiles = pitchTiles(counts.sort((a, b) => b.pitches - a.pitches))
   const types = tiles.filter((t) => !t.other && Number(t.pct) >= USAGE_FLOOR).slice(0, MAX_TYPES)
-
-  const hitterCounters = (codes) =>
-    sumCounters(scopesOf(scope).flatMap((s) => codes.flatMap((c) => (hand ? [hitterHand] : ['R', 'L']).map((h) => hitter.counters[s][c][h]))))
 
   function maps(codes) {
     const cells = codes.map(typeCells).reduce(add)
@@ -88,31 +74,20 @@ function scout({ hitter, scope, hand, hitterHand, metric, stance, notPosted }) {
         : { tone: `s${max ? Math.ceil((share[r] / max) * 4) : 0}`, value: pct(share[r]) }]),
     )
     if (notPosted) return { n, thin, regionN, share, pitcherCells }
-    const counters = hitterCounters(codes)
-    const hit = hitterRegions(counters, metric)
-    const league = leagueRegions(codes, metric)
-    const hitterCells = Object.fromEntries(
-      REGIONS.map((r) => {
-        const b = band(metric, hit[r].value, league[r])
-        return [r, b == null
-          ? { tone: 'gray', count: hit[r].n }
-          : { tone: toneOf(b), value: fmtCell(metric, hit[r].value), count: hit[r].n }]
-      }),
-    )
-    // The league line beside the answer is the league's flat rate for these
-    // pitch types, wherever they were thrown (Gary, item 12). The fixture
-    // averages its cell rates; the real store divides league sums.
-    const exp = thin ? null : expected(share, hit, typeValue(counters, metric))
-    const leagueExp = thin ? null : sum(codes.flatMap((c) => LEAGUE[c][metric])) / (codes.length * 25)
-    return { n, thin, regionN, share, pitcherCells, hit, hitterCells, exp, leagueExp, seen: sum(counters.pitches) }
+    // The hitter side is the page's own module (screens/scout/hitterBoard.js),
+    // run on the fixture: the prototype cannot drift from the page.
+    const h = hitterMap({ grid: hitter.counters, league: LEAGUE_SUMS, codes, hands: hand ? [hitterHand] : ['R', 'L'], scope, metric })
+    if (!h) return { n, thin, regionN, share, pitcherCells }
+    const exp = expectedOn({ thin, share }, h)
+    return { n, thin, regionN, share, pitcherCells, hit: h.hit, hitterCells: h.cells, exp, leagueExp: thin ? null : h.leagueFlat, seen: h.seen }
   }
 
-  // The overall line: each pilled type's expected value, weighted by usage.
+  // The overall line: each pilled type's expected value, weighed by usage.
   const byType = Object.fromEntries(types.map((t) => [t.code, maps([t.code])]))
-  const scored = types.filter((t) => byType[t.code].exp != null)
-  const covered = sum(scored.map((t) => Number(t.pct))) / 100
-  const weigh = (key) => (covered ? sum(scored.map((t) => Number(t.pct) * byType[t.code][key])) / 100 / covered : null)
-  return { tiles, types, byType, all: maps(allCodes), overall: weigh('exp'), overallLeague: weigh('leagueExp'), covered }
+  const overall = expectedAll(types, Object.fromEntries(
+    types.map((t) => [t.code, byType[t.code].exp != null ? { exp: byType[t.code].exp, league: byType[t.code].leagueExp } : null]),
+  ))
+  return { tiles, types, byType, all: maps(allCodes), overall: overall.value, overallLeague: overall.league, covered: overall.covered }
 }
 
 // `asOf`: the cutoff, when a host passes one (the standalone review build

@@ -24,8 +24,9 @@ const SCOPES = [['reg', 'Regular'], ['post', 'Postseason'], ['all', 'All']]
 // inclusive. `AsOfBanner` is the way to move it.
 //
 // Scope filters the rows by round, and the totals are rebuilt from the same
-// rows, so the line and the list cannot disagree. In Phase 1 Scope moves
-// this list only: the maps hold the regular season (Gary, item 9).
+// rows, so the line and the list cannot disagree. The Scope control sits here
+// only while the maps hold the regular season alone (Gary, item 9): once they
+// carry the postseason, it sits under the maps and moves both (`onScope` null).
 export function HeadToHead({ pitcherId, hitterId, cutoff, asOf, scope, onScope }) {
   const h2h = useAsync(() => fetchHeadToHead(hitterId, pitcherId, cutoff), [hitterId, pitcherId, cutoff])
   const pas = (h2h.data?.pas ?? []).filter((r) => scope === 'all' || (scope === 'reg') === (r.round === 'R'))
@@ -35,7 +36,7 @@ export function HeadToHead({ pitcherId, hitterId, cutoff, asOf, scope, onScope }
     <section className="scout__h2h" aria-label="Head to head">
       <SectionHead>Head to head</SectionHead>
       <AsOfBanner asOf={asOf} />
-      <Choice label="Scope" options={SCOPES} value={scope} onChange={onScope} />
+      {onScope && <Choice label="Scope" options={SCOPES} value={scope} onChange={onScope} />}
       {h2h.loading ? (
         <AsyncStatus loading hasData={false} />
       ) : failed ? (

@@ -71,12 +71,20 @@ const RATE = {
   whiff: (r, c, code) => 0.12 + 0.07 * r + (code === 'SL' || code === 'CU' ? 0.1 : 0),
   xwoba: (r, c, code) => (inner(r, c) ? 0.39 - 0.05 * Math.abs(2 - r) : 0.22) - (code === 'SL' ? 0.03 : 0),
 }
-export const LEAGUE = Object.fromEntries(
-  Object.keys(MIX).map((code) => [
-    code,
-    Object.fromEntries(Object.entries(RATE).map(([m, f]) => [m, cells((r, c) => f(r, c, code))])),
-  ]),
-)
+// The league as SUMS in the page's contract shape (screens/scout/hitterBoard.js):
+// { reg | post: { [code]: COUNTERS } }, noise-free, a large sample per cell.
+const leagueCounters = (code, n) => {
+  const pitches = cells(() => n)
+  const swings = pitches.map((p, i) => p * RATE.swing(Math.floor(i / 5), i % 5))
+  const whiffs = swings.map((sw, i) => sw * RATE.whiff(Math.floor(i / 5), i % 5, code))
+  const paEnd = pitches.map((p) => p * 0.27)
+  const wobaSum = paEnd.map((k, i) => k * RATE.xwoba(Math.floor(i / 5), i % 5, code))
+  return { pitches, swings, whiffs, paEnd, wobaSum }
+}
+export const LEAGUE_SUMS = {
+  reg: Object.fromEntries(Object.keys(MIX).map((code) => [code, leagueCounters(code, 4000)])),
+  post: Object.fromEntries(Object.keys(MIX).map((code) => [code, leagueCounters(code, 120)])),
+}
 
 // One hitter's counters for one type, pitcher hand and scope. `edge` tilts his
 // results: positive hits the inside half better (feed col 4 for a lefty).

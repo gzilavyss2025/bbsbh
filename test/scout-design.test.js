@@ -5,7 +5,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { REGIONS } from '../src/lib/zone/regions.js'
-import { band, expected, h2hBefore, h2hTotals, hitterRegions } from '../src/screens/designlab/scout/model.js'
+import { band, expected, hitterRegions } from '../src/lib/scout/metrics.js'
+import { h2hBefore, h2hTotals } from '../src/screens/designlab/scout/model.js'
 import { h2hRows } from '../src/screens/designlab/scout/fixture.js'
 import { isoToday } from '../src/lib/dates.js'
 

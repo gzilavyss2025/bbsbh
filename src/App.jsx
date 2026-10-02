@@ -435,6 +435,8 @@ export default function App() {
         view={route.view}
         scope={route.scope}
         pitch={route.pitch}
+        hand={route.hand}
+        metric={route.metric}
       />
     )
   } else if (route.name === 'umpire') {

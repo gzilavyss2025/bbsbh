@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-10-02
-**Issues:** #1408 (parent), #1410 (phase 1)
+**Issues:** #1408 (parent), #1410 (phase 1), #1411 (phase 2)
 
 ## Context
 
@@ -50,14 +50,27 @@ The regions are a read-time sum, so no shard changes. A map under
 `MIN_COMMAND_PITCHES` prints counts only. One season store at a time, so a
 map never pools 2025 with 2026.
 
-**6. Phase 1 shows the regular season on the maps, and says so.** The stores
-hold no postseason until #1411, so the maps wear a "Regular season" tag, and
-Scope moves only the head-to-head list (Gary, item 9). The hitter's slot
-prints his Savant board line per pitch type, labelled "xwOBA · Regular season"
-(Gary, item 15). There is no expected-value line until #1411 brings the hitter
-regions.
+**6. Scope moves the maps only when the stores hold a postseason.** A shard
+with `post` beside `pit` (ADR-0094) makes the board "scoped": Scope then sits
+under the maps and moves the maps and the list together, and the tag names
+the scope. A shard without `post` keeps the maps on the regular season, with a
+"Regular season" tag, and Scope sits on the list, the only thing it moves
+(Gary, item 9).
 
-**7. The address holds the choices.** `?view`, `?scope`, `?pitch` and `?d`
+**6a. The hitter's map comes from the hitter-grid store, or not at all.** With
+the #1411 Part B grid, the page draws the hitter's map in the same 13 regions,
+each coloured against the league's rate in the same region and pitch types,
+and joins the two maps into an expected value: the pitcher's share times the
+hitter's value, region by region (`src/screens/scout/hitterBoard.js`). Hand
+picks the pitcher hands his map reads; for a switch hitter "All" is off (Gary,
+item 1). Metric offers "xwOBA (est.)" only when the grid carries `wobaSum`.
+Without the grid, the hitter's slot prints his Savant board line per pitch
+type, labelled "xwOBA · Regular season" (Gary, item 15), and there is no
+expected value: with no hitter regions it would be his whole-type value, the
+same for every pitcher.
+
+**7. The address holds the choices.** `?view`, `?scope`, `?pitch`, `?hand`,
+`?metric` and `?d`
 (`src/lib/scout/route.js`). The view also persists in `localStorage`, never in
 My Tally (ADR-0039). The view toggle itself is ADR-0093.
 
@@ -71,9 +84,9 @@ My Tally (ADR-0039). The view toggle itself is ADR-0093.
 - `searchPeople`'s session cache keeps the whole result list, and each caller
   slices its own: the pickers fetch more rows than the site search, then filter
   by role.
-- The Design Lab prototype (`src/screens/designlab/scout/`) keeps the Phase 2
-  parts (the hitter map, Hand, Metric, the expected line) on invented data. It
-  imports the page's shared parts, so the two cannot drift.
+- The Design Lab prototype (`src/screens/designlab/scout/`) runs the page's own
+  hitter board (`hitterBoard.js`, `lib/scout/metrics.js`) on invented data, so
+  the two cannot drift.
 
 ## Alternatives weighed
 

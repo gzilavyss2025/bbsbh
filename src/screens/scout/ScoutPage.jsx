@@ -6,7 +6,7 @@ import { useNav } from '../../lib/nav.js'
 import { baseballToday } from '../../lib/time/standingsDates.js'
 import { scoutPath } from '../../lib/scout/path.js'
 import { stanceFor } from '../../lib/scout/roles.js'
-import { regionLabel, sidesInOrder } from '../../lib/zone/regions.js'
+import { METRICS } from '../../lib/scout/metrics.js'
 import { scenePitches } from '../../lib/pitcherCard/scene.js'
 import { arsenalFor } from '../../api/matchup/savant.js'
 import { MIN_COMMAND_PITCHES } from '../../api/commandMap.js'
@@ -20,33 +20,49 @@ import { Matchup } from '../../components/scout/Matchup.jsx'
 import { ScoutMap } from '../../components/scout/ScoutMap.jsx'
 import { loadScout } from './loadScout.js'
 import { pitcherBoard } from './board.js'
+import { hitterSide, metricsFor } from './hitterBoard.js'
+import { Answer, Key, Readout, Sides } from './MapParts.jsx'
 import { Pickers } from './Pickers.jsx'
 import { HitterLine } from './HitterLine.jsx'
 import { HeadToHead } from './HeadToHead.jsx'
 
-// THE MATCHUP SCOUT, PHASE 1 (#1410; design docs/scout-design.md, ADR-0093,
+// THE MATCHUP SCOUT (#1410, #1411; design docs/scout-design.md, ADR-0093,
 // ADR-0095). Pick a pitcher and a hitter. The page shows who is facing whom,
-// where the pitcher throws each pitch to this hitter's stance, the hitter's
-// line against each pitch, and every time they met.
+// where the pitcher throws each pitch to this hitter's stance, where the
+// hitter does damage against it, the expected value that joins the two, and
+// every time they met.
 //
 // AN OPEN SURFACE (ADR-0034): no SealBox, and none may be added. Everything
 // here is a season aggregate over final games, except the head-to-head list,
 // which holds back every game dated on or after its cutoff (HeadToHead.jsx).
 //
 // THE ADDRESS HOLDS THE CHOICES (lib/scout/route.js): `?view`, `?scope`,
-// `?pitch`, `?d`. A change replaces the address, so Back leaves the page
+// `?pitch`, `?hand`, `?metric`, `?d`. A change replaces the address, so Back leaves the page
 // rather than undoing a tap. The view also persists in localStorage
 // (ADR-0093), never in My Tally (ADR-0039).
 //
-// PHASE 1 LIMITS (Gary, item 9). The maps are the regular season (the stores
-// hold nothing else until #1411), so they wear a "Regular season" tag and
-// Scope moves the head-to-head list only. The hitter has no map yet: his slot
-// prints his line per pitch type (HitterLine.jsx). No expected value either:
-// with no hitter regions it would be his whole-type value, the same for every
-// pitcher.
+// SCOPE. Once the stores carry the postseason beside the regular season
+// (ADR-0094, `post` in each shard), Scope moves the maps and the list
+// together, and the control sits under the maps. Before that the maps wear a
+// "Regular season" tag and Scope sits on the list, the only thing it moves
+// (Gary, item 9; board.js).
+//
+// THE HITTER'S MAP (#1411 Part B, hitterBoard.js) comes from the hitter-grid
+// store. Until it is posted, his slot prints his Savant line per pitch type
+// (HitterLine.jsx), and there is no expected value: with no hitter regions it
+// would be his whole-type value, the same for every pitcher.
 
 const VIEWS = [['pitcher', 'Pitcher’s'], ['hitter', 'Hitter’s']]
 const VIEW_KEY = 'bbsbh:scout:view'
+// What the maps hold. Until the stores carry the postseason (ADR-0094), always
+// the regular season, whatever Scope says (Gary, item 9).
+const SCOPE_TAG = { reg: 'Regular season', post: 'Postseason', all: 'Regular season + postseason' }
+const SCOPES = [['reg', 'Regular'], ['post', 'Postseason'], ['all', 'All']]
+// A switch hitter's two stances are two maps, so "All" hands is off for him:
+// it would pool the third-base side as inside for one and away for the other
+// (spec, C; Gary, item 1).
+const HANDS = [[null, 'All'], ['R', 'vs R'], ['L', 'vs L']]
+const other = (h) => (h === 'R' ? 'L' : 'R')
 const noPicks = { pitcher: null, hitter: null }
 
 function storedView() {
@@ -58,7 +74,7 @@ function storedView() {
   }
 }
 
-export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, pitch }) {
+export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, pitch, hand: handParam, metric: metricParam }) {
   useDocumentTitle('Matchup Scout')
   const navigate = useNav()
   const [savedView, setSavedView] = useState(storedView)
@@ -80,14 +96,31 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
 
   const stance = data ? stanceFor(data.hitter.bats, data.pitcher.throws) : null
   const board = useMemo(
-    () => (data && stance ? pitcherBoard({ arsenal: data.arsenal, command: data.command, pitcherId: data.pitcher.id, stance }) : null),
-    [data, stance],
+    () => (data && stance ? pitcherBoard({ arsenal: data.arsenal, command: data.command, pitcherId: data.pitcher.id, stance, scope }) : null),
+    [data, stance, scope],
   )
   // A `?pitch=` this pitcher has no pill for falls back to All.
   const sel = board && pitch && board.byType[pitch] ? pitch : null
   const map = board ? (sel ? board.byType[sel] : board.all) : null
   const selType = sel ? board.types.find((t) => t.code === sel) : null
   const lefty = data?.pitcher.throws === 'L'
+
+  // The hitter's side. `hitterHand` is the pitcher hand his map reads; a
+  // switch hitter stands on the side opposite it, so his map can stand on a
+  // different side from the pitcher's (then the readout names the field side
+  // only, Gary item 11).
+  const grid = data?.grid ?? null
+  const switchHitter = data?.hitter.bats === 'S'
+  const hand = switchHitter ? handParam ?? data.pitcher.throws : handParam
+  const hitterStance = switchHitter ? other(hand) : data?.hitter.bats
+  const metrics = useMemo(() => metricsFor(grid), [grid])
+  const metric = metrics.includes(metricParam) ? metricParam : metrics[0]
+  const mapScope = board?.scoped ? scope : 'reg'
+  const side = useMemo(
+    () => hitterSide({ board, grid, league: data?.league, hands: hand ? [hand] : ['R', 'L'], scope: mapScope, metric }),
+    [board, grid, data, hand, mapScope, metric],
+  )
+  const hmap = side ? (sel ? side.byType[sel] : side.all) : null
   const scene = useMemo(
     () => (board ? scenePitches(sel ? board.tiles.filter((t) => t.code === sel) : board.types, lefty) : []),
     [board, sel, lefty],
@@ -103,7 +136,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
   // Every choice rewrites the address in place.
   const go = (patch, replace = true) => {
     const pair = data ? { pitcher: data.pitcher, hitter: data.hitter } : picks
-    navigate(scoutPath({ ...pair, view, scope, pitch: sel, d: asOf, ...patch }), { replace })
+    navigate(scoutPath({ ...pair, view, scope, pitch: sel, hand: handParam, metric: metricParam, d: asOf, ...patch }), { replace })
   }
   const setView = (v) => {
     try {
@@ -122,7 +155,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
       setChanging(false)
       setPicked(null)
       // A new pair is a new page: push, so Back returns to the old one.
-      go({ ...next, pitch: null }, false)
+      go({ ...next, pitch: null, hand: null }, false)
     }
   }
 
@@ -172,8 +205,27 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
                 </div>
               )}
 
+              {side && (
+                <Answer
+                  metric={metric}
+                  typeName={selType ? selType.name : 'All pitches'}
+                  mph={selType?.mph}
+                  value={sel ? hmap?.exp : side.overall.value}
+                  league={sel ? hmap?.league : side.overall.league}
+                  covered={sel ? null : side.overall.covered}
+                />
+              )}
+
               <div className="scout__controls">
                 <Choice label="View" options={VIEWS} value={view} onChange={setView} />
+                {side && (
+                  <Choice
+                    label="Metric"
+                    options={metrics.map((k) => [k, METRICS[k].label])}
+                    value={metric}
+                    onChange={(k) => go({ metric: k === metrics[0] ? null : k })}
+                  />
+                )}
               </div>
 
               {view === 'hitter' && scene.length > 0 && (
@@ -183,7 +235,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
               )}
 
               <p className="scout__season">
-                <Pill>Regular season</Pill>
+                <Pill>{board?.scoped ? SCOPE_TAG[scope] : SCOPE_TAG.reg}</Pill>
                 {data.season && <span className="scout__cap">{data.season}</span>}
               </p>
 
@@ -210,29 +262,60 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
                     <p className="hint scout__notposted">Not posted</p>
                   )}
                 </figure>
-                <figure className="scout__fig">
-                  <figcaption className="scout__cap">Hitter · {selType ? selType.name : 'by pitch'}</figcaption>
-                  <HitterLine line={arsenalFor(data.savant, data.hitter.id, 'batting')} types={board?.types ?? []} code={sel} />
-                </figure>
+                {side ? (
+                  <figure className="scout__fig">
+                    <figcaption className="scout__cap">Hitter · {METRICS[metric].label}</figcaption>
+                    {hmap ? (
+                      <>
+                        <ScoutMap
+                          view={view}
+                          stance={hitterStance}
+                          cells={hmap.cells}
+                          picked={picked}
+                          onSelect={(r) => setPicked((p) => (p === r ? null : r))}
+                          label={`${selType ? selType.name : 'All pitches'}: hitter’s ${METRICS[metric].label} by region, ${view} view`}
+                        />
+                        <Sides view={view} />
+                        <span className="scout__cap">{hmap.seen.toLocaleString()} pitches seen</span>
+                      </>
+                    ) : (
+                      <p className="hint scout__notposted">Not posted</p>
+                    )}
+                  </figure>
+                ) : (
+                  <figure className="scout__fig">
+                    <figcaption className="scout__cap">Hitter · {selType ? selType.name : 'by pitch'}</figcaption>
+                    <HitterLine line={arsenalFor(data.savant, data.hitter.id, 'batting')} types={board?.types ?? []} code={sel} />
+                  </figure>
+                )}
               </div>
 
-              {map && <Readout picked={picked} map={map} stance={stance} />}
+              {map && (
+                <Readout
+                  picked={picked}
+                  map={map}
+                  hit={hmap?.hit}
+                  metric={metric}
+                  stance={!side || stance === hitterStance ? stance : null}
+                />
+              )}
 
-              <div className="scout__key" aria-label="Colour scale">
-                <p className="scout__keyrow">
-                  <span className="scout__keylabel">Location share: less</span>
-                  {[1, 2, 3, 4].map((k) => (
-                    <svg key={k} className="scout__swatch" aria-hidden="true">
-                      <rect className={`scout__region scout__region--s${k}`} width="14" height="14" />
-                    </svg>
-                  ))}
-                  <span className="scout__keylabel">more</span>
-                </p>
-                <p className="scout__keyrow">
-                  <span className="scout__swatch scout__swatch--hatch" />
-                  <span className="scout__keylabel">Under {MIN_COMMAND_PITCHES} pitches: count only</span>
-                </p>
-              </div>
+              <Key metric={side ? metric : null} />
+
+              {(side || board?.scoped) && (
+                <div className="scout__controls">
+                  {side && (
+                    <Choice
+                      label="Hand"
+                      options={HANDS}
+                      value={hand}
+                      onChange={(h) => go({ hand: h })}
+                      disabledKey={switchHitter ? null : undefined}
+                    />
+                  )}
+                  {board?.scoped && <Choice label="Scope" options={SCOPES} value={scope} onChange={(k) => go({ scope: k })} />}
+                </div>
+              )}
             </section>
 
             <HeadToHead
@@ -241,37 +324,12 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
               cutoff={cutoff}
               asOf={asOf}
               scope={scope}
-              onScope={(s) => go({ scope: s })}
+              onScope={board?.scoped ? null : (s) => go({ scope: s })}
             />
           </div>
         </>
       )}
       <ReportFooter />
     </div>
-  )
-}
-
-// The map's two sides of the field, the one on the viewer's left first.
-// Never "left" or "right" (ADR-0077).
-function Sides({ view }) {
-  const [a, b] = sidesInOrder(view)
-  return (
-    <span className="scout__sides" aria-hidden="true"><span>{a}</span><span>{b}</span></span>
-  )
-}
-
-// A tapped region's exact figures: the pitcher's share and count. It keeps its
-// height when nothing is picked, so a tap never moves the maps.
-function Readout({ picked, map, stance }) {
-  if (!picked) return <p className="scout__readout"><span className="scout__cap">Tap a region for its numbers</span></p>
-  return (
-    <p className="scout__readout" aria-live="polite">
-      <span className="scout__readoutlabel">{regionLabel(picked, stance)}</span>
-      <span className="scout__readoutfact">
-        <span className="scout__cap">Pitcher</span>
-        <span className="scout__readoutvalue">{map.thin ? '—' : `${Math.round(map.share[picked] * 100)}%`}</span>
-        <span className="scout__cap">{map.regionN[picked].toLocaleString()} of {map.n.toLocaleString()} pitches</span>
-      </span>
-    </p>
   )
 }

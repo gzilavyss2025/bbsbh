@@ -1,10 +1,10 @@
-import { pitchArsenalFor } from '../../api/pitchArsenal.js'
 import { MIN_COMMAND_PITCHES } from '../../api/commandMap.js'
 import { pitchTiles } from '../../lib/pitcherCard/card.js'
 import { REGIONS, rollUp } from '../../lib/zone/regions.js'
 
-// THE SCOUT'S PITCHER BOARD (#1410): the pitch pills and the map for one
-// stance, from the nightly stores. Pure, so test/scout-board.test.js runs it.
+// THE SCOUT'S PITCHER BOARD (#1410, #1411): the pitch pills and the map for
+// one stance and one scope, from the nightly stores. Pure, so
+// test/scout-page.test.js runs it.
 //
 // The pills are the Now Pitching card's tiles (pitchTiles: integer shares that
 // add to 100, and mph). A type under USAGE_FLOOR percent gets no pill but
@@ -14,19 +14,60 @@ export const MAX_TYPES = 6
 
 const add = (a, b) => a.map((x, i) => x + (b[i] ?? 0))
 
-// `arsenal` is the pitch-arsenal shard, `command` this pitcher's pitch-command
-// entry, `stance` the side the hitter stands on ('L' | 'R'). Null when the
-// stores hold nothing for this pitcher against this stance ("Not posted").
-export function pitcherBoard({ arsenal, command, pitcherId, stance }) {
-  const rows = pitchArsenalFor(arsenal, pitcherId, true, stance)
-  const byCode = command?.mlb
-  if (!rows || !byCode) return null
+// SCOPE. Each shard keeps the regular season under `pit` and, since ADR-0094
+// (#1418), the MLB postseason under `post`, in the same shape. Regular reads
+// `pit`, Postseason `post`, All adds the two. A shard written before #1418 has
+// no `post`: then `scoped` is false, the maps hold the regular season whatever
+// Scope says, and the page keeps its "Regular season" tag (Gary, item 9).
+const PARTS = { reg: ['pit'], post: ['post'], all: ['pit', 'post'] }
+
+// `arsenal` is the pitch-arsenal shard, `command` the pitch-command shard (both
+// whole buckets), `stance` the side the hitter stands on ('L' | 'R'). Null when
+// the stores hold nothing for this pitcher, stance and scope ("Not posted").
+export function pitcherBoard({ arsenal, command, pitcherId, stance, scope = 'all' }) {
+  const scoped = Boolean(arsenal && command && 'post' in arsenal && 'post' in command)
+  const parts = scoped ? PARTS[scope] ?? PARTS.all : PARTS.reg
+  const rows = mergeRows(parts.map((k) => sideRows(arsenal?.[k]?.[pitcherId]?.mlb, stance)))
+  const cmds = parts.map((k) => command?.[k]?.[pitcherId]?.mlb).filter(Boolean)
+  if (!rows.length || !cmds.length) return null
+  const cellsOf = (code) => {
+    const list = cmds.map((m) => m[code]?.[stance]?.cells).filter(Boolean)
+    return list.length ? list.reduce(add) : null
+  }
   const tiles = pitchTiles(rows)
   const types = tiles.filter((t) => !t.other && Number(t.pct) >= USAGE_FLOOR).slice(0, MAX_TYPES)
-  const cellsOf = (code) => byCode[code]?.[stance]?.cells ?? null
   // All pools every type the command store holds for this stance, pill or not.
-  const allCodes = Object.keys(byCode).filter(cellsOf)
-  return { tiles, types, all: mapOf(allCodes.map(cellsOf)), byType: Object.fromEntries(types.map((t) => [t.code, mapOf([cellsOf(t.code)].filter(Boolean))])) }
+  const allCodes = [...new Set(cmds.flatMap((m) => Object.keys(m)))].filter(cellsOf)
+  return {
+    scoped,
+    tiles,
+    types,
+    codes: allCodes,
+    all: mapOf(allCodes.map(cellsOf)),
+    byType: Object.fromEntries(types.map((t) => [t.code, mapOf([cellsOf(t.code)].filter(Boolean))])),
+  }
+}
+
+// One side of the plate's rows from a pitch-arsenal entry's `vs` pairs
+// ([pitches, avgVelo]), the way pitchArsenalFor's sideRow reads them.
+function sideRows(types, stance) {
+  return (types ?? []).flatMap((t) => (t.vs?.[stance] ? [{ code: t.code, pitches: t.vs[stance][0], avgVelo: t.vs[stance][1] }] : []))
+}
+
+// Regular season plus postseason, one row per pitch type: pitches add, the
+// average velocity weighs each part by its pitches. Most-thrown first.
+function mergeRows(lists) {
+  const by = new Map()
+  for (const r of lists.flat()) {
+    const m = by.get(r.code) ?? { code: r.code, pitches: 0, velo: 0 }
+    m.pitches += r.pitches
+    m.velo += (r.avgVelo ?? 0) * r.pitches
+    by.set(r.code, m)
+  }
+  return [...by.values()]
+    .filter((m) => m.pitches > 0)
+    .map((m) => ({ code: m.code, pitches: m.pitches, avgVelo: m.velo / m.pitches }))
+    .sort((a, b) => b.pitches - a.pitches)
 }
 
 // One map: each region's share and count. Under MIN_COMMAND_PITCHES the whole
