@@ -7,6 +7,7 @@ import { useLens } from './lens/useLens.js'
 import { LensFrame } from './lens/LensFrame.jsx'
 import { CarryStrip } from './lens/CarryStrip.jsx'
 import { useCarry } from './lens/useCarry.js'
+import { LensTear } from './lens/motion/LensTear.jsx'
 
 // The main scorecard grid, in the #22 sheet's own column order: a sticky
 // PLAYER column (each row led by its batting-order number, closed by the
@@ -139,6 +140,11 @@ export function ScorecardSheet({
   // The boxes the carry strip holds (lens only; lib/scorecard/carry.js). The
   // sheet flags their cells `data-carry` and measures them (lens/useCarry.js).
   carry = [],
+  // The lens's one-shot motion after a tap (lens/motion/useLensMotion.js's `beat`,
+  // plus `moved`): the glide for useLens and the tear over the box the tap
+  // opened (`at`), neither under reduced motion (`still`), and the marker tint
+  // on the boxes of the runners that play moved, keyed on the tap (`n`).
+  motion = null,
 }) {
   const inLens = lens === 'lens'
   // Normalize both modes to a flat column list: each column knows its header
@@ -207,6 +213,7 @@ export function ScorecardSheet({
     tableRef,
     seat: `${grid?.frontier?.slot}:${grid?.frontier?.colIndex}:${flip?.inning}`,
     max: ZOOM_MAX,
+    glide: motion && !motion.still ? motion.n : null,
   })
   // The whole-sheet view opens at the fit zoom: the floor becomes the pick, as
   // if the reader had pressed − down to it. A pick, not the floor itself:
@@ -389,6 +396,12 @@ export function ScorecardSheet({
                         data-last={card != null && card.atBatIndex === lastOpened ? '' : undefined}
                         data-carry={card != null && carry.some((b) => b.atBatIndex === card.atBatIndex) ? '' : undefined}
                       >
+                        {card != null && motion?.moved.has(card.atBatIndex) && (
+                          <span key={motion.n} className="sc-lens__moved" aria-hidden="true" />
+                        )}
+                        {motion && !motion.still && motion.at === `${slot}:${col.colIndex}` && (
+                          <LensTear key={motion.n} seed={motion.seed} />
+                        )}
                         {isFrontier && edge ? (
                           <div className="sc-ab__atbat">At bat</div>
                         ) : isFrontier ? (

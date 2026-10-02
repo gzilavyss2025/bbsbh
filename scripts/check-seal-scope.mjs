@@ -103,7 +103,8 @@ const ALLOWLIST = {
   '30-standings.css': ['.standings-reveal'],
   '31-wild-card.css': ['.duepill'],
   '46-consent-modal.css': ['.consent__btn--confirm', '.modestrip'],
-  'scorecard/box.css': ['.sc-ab__seal', '.sc-ab__sealtext'],
+  // The lens's tear (#724 L7) wears the same face on its two flying halves.
+  'scorecard/box.css': ['.sc-ab__seal', '.sc-ab__sealtext', '.sc-lens__tearface', '.sc-lens__teartext'],
   // The lens bar's Unwrap button (ADR-0092): it lifts the same seal the frame
   // holds, through the same tap. The turn button beside it is navy.
   'scorecard/lens-bar.css': ['.sc-lensbar__unwrap', '.sc-lensbar__unwraptext'],

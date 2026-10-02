@@ -183,7 +183,8 @@
    will ink into. Tapping it is the live sheet's play verb (ScorecardPage).
    The hatch is the seal texture's diagonal stripe, drawn with the two seal
    tokens so it reads as the same tape. */
-.sc-ab__seal {
+.sc-ab__seal,
+.sc-lens__tearface {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -208,7 +209,8 @@
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-.sc-ab__sealtext {
+.sc-ab__sealtext,
+.sc-lens__teartext {
   padding: 2px var(--space-1h);
   border-radius: var(--radius-xs);
   background: var(--seal-cover);

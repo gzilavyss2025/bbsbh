@@ -202,6 +202,7 @@
 @import './styles/motion/strike.css';
 @import './styles/motion/playbyplay.css';
 @import './styles/motion/innings.css';
+@import './styles/motion/scorecard-lens.css';
 
 /* Focus mode — the innings viewer's scoring console (ADR-0043). A SUBDIRECTORY
    rather than three more numbered siblings: src/styles is a flat directory at

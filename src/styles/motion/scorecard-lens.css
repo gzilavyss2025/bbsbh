@@ -1,0 +1,155 @@
+/* ------------------------------------------------- motion / scorecard lens */
+/* THE PHONE LENS'S MOTION (#724 L7, ADR-0092). The lens itself, at rest, is
+   styles/scorecard/lens.css; this sheet is only what moves.
+
+   EVERY ONE-SHOT HERE STARTS ON A TAP (G13). The tear, the runner-move fade
+   and the page turn hang off useLensMotion's `beat` and `turning`, which only
+   a tap sets; a cold load, a poll, a return to the lens and a force-reveal
+   (the lens is off then) start none of them. The ink-in is box.css's own
+   `.sc-ab--fresh` press, unchanged. The glide is not CSS: it is useLens's
+   requestAnimationFrame tween, on --dur-glide.
+
+   BEFORE A TAP, NOTHING HERE DIFFERS BY THE SEALED RESULT (ADR-0046): the
+   breath is the same two cycles on every seal, and the turn the same two
+   beats at every handoff. After a tap the reader has opened the box, so the
+   fade may say which runners the play moved (G8). */
+
+/* ---- The tear ---- */
+/* Two copies of the seal's face (LensTear.jsx), cut along lib/sealTear.js's
+   shared split, fly off the box the tap just inked. The split runs ACROSS the
+   box, as on every seal in the app, and the halves leave sideways as the
+   #724 brief asks: the upper half to the left, the lower to the right, each
+   dropping a little and turning, gone in --dur-lens-tear. The face is the
+   seal's own (box.css), held still here. */
+.sc-lens__tear {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.sc-lens__tearhalf {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  animation-duration: var(--dur-lens-tear);
+  animation-timing-function: var(--ease-out);
+  animation-fill-mode: forwards;
+}
+.sc-lens__tearface {
+  animation: none;
+}
+.sc-lens__tearhalf--top {
+  animation-name: sc-lens-tear-left;
+}
+.sc-lens__tearhalf--bottom {
+  animation-name: sc-lens-tear-right;
+}
+@keyframes sc-lens-tear-left {
+  to {
+    opacity: 0;
+    transform: translate(-26px, 8px) rotate(-9deg);
+  }
+}
+@keyframes sc-lens-tear-right {
+  to {
+    opacity: 0;
+    transform: translate(26px, 8px) rotate(9deg);
+  }
+}
+
+/* ---- The runner-move fade ---- */
+/* The marker tint (lens.css) fades to the box's own fill over
+   --dur-highlight: the highlighter on the boxes of the runners the tap moved.
+   Keyed on the tap, so a runner moved twice in a row fades twice. */
+.sc-lens__moved {
+  animation: sc-lens-moved var(--dur-highlight) var(--ease-out) forwards;
+}
+@keyframes sc-lens-moved {
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---- The page turn ---- */
+/* At a handoff the pane goes out to the left, the page switches to the other
+   club, and the pane comes in from the right (useLensMotion's `turning`). The
+   frame and the ruler stay where they are, outside the pane, and the pane
+   seats at once while it is out: no glide in a turn.
+   The lens's box clips the pane's sideways slide: 28px of pane past the
+   window's edge made the page wider than the phone, and the browser moved the
+   page to show it, so the frame landed 37px low after every turn. */
+.scorecard-page--lens .sc-sheet__frame--lens {
+  overflow-x: clip;
+}
+.scorecard-page--turn-out .sc-sheet__scroll {
+  animation: sc-lens-turn-out var(--dur-turn-out) var(--ease-out) forwards;
+}
+.scorecard-page--turn-in .sc-sheet__scroll {
+  animation: sc-lens-turn-in var(--dur-turn-in) var(--ease-out);
+}
+@keyframes sc-lens-turn-out {
+  to {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+}
+@keyframes sc-lens-turn-in {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+
+/* ---- The seal's breath ---- */
+/* In the lens the seal breathes two full cycles (four 2.4s halves of
+   box.css's alternate breath), then holds still. It holds at full opacity
+   under the thumb: hover, press and focus. The desktop sheet keeps its breath
+   as it was. A seal that a poll brought (`--quiet`, the live edge) does not
+   breathe at all: the feed often runs ahead of the TV picture. */
+.sc-sheet--lens .sc-ab__seal {
+  animation-iteration-count: 4;
+}
+.sc-sheet--lens .sc-ab__seal:hover,
+.sc-sheet--lens .sc-ab__seal:active,
+.sc-sheet--lens .sc-ab__seal:focus-visible,
+.scorecard-page--quiet .sc-ab__seal {
+  animation: none;
+}
+
+/* ---- The cards and the pitcher sheet ---- */
+/* A card that docks under the frame after the lens is up fades in, a little
+   large to its size (LensFrame's useBecameTrue gate: not on a cold load). The
+   pitcher sheet, which mounts only on a tap, slides up. */
+.sc-lens__dock--fresh > * {
+  animation: sc-lens-card var(--dur-med) var(--ease-out);
+}
+@keyframes sc-lens-card {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+.sheet.sc-pitchsheet {
+  animation: sc-lens-sheet var(--dur-lens-sheet) var(--ease-out);
+}
+@keyframes sc-lens-sheet {
+  from {
+    transform: translateY(40px);
+  }
+}
+
+/* ---- Reduced motion ---- */
+/* No tear, no glide and no turn: the JS side reads motionIsReduced and starts
+   none of them. The cards and the sheet arrive at once under the blanket rules
+   (14-strike-zone.css for the OS query, 01-base.css for the in-app choice).
+   Those rules only SHORTEN an animation, and a shortened fade would drop the
+   runner tint at once, so the tint opts out of its fade here: it stays, still,
+   until the next tap. */
+@media (prefers-reduced-motion: reduce) {
+  .sc-lens__moved {
+    animation: none;
+  }
+}
+:root[data-motion='reduced'] .sc-lens__moved {
+  animation: none;
+}

@@ -169,3 +169,18 @@
 .sc-lensback .btn {
   box-shadow: var(--shadow-raised);
 }
+
+/* THE RUNNER-MOVE TINT: the highlighter on a box whose runner the newest tap
+   moved (ScorecardSheet's .sc-lens__moved, under the box's own marks). Its
+   fade is motion (motion/scorecard-lens.css); this is the mark itself, which
+   under reduced motion stays until the next tap. The cell holds it and the
+   tear (lens/motion/LensTear.jsx) in place. */
+.sc-sheet--lens .sc-sheet__cell {
+  position: relative;
+}
+.sc-lens__moved {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--marker) 45%, var(--surface-card));
+  pointer-events: none;
+}

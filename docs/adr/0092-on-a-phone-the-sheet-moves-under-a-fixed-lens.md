@@ -29,7 +29,8 @@ with the frontier outlined in navy and a floating "Back to the box".
 draws the table with CSS `zoom`, because `zoom` scales layout and keeps the
 sheet's three sticky edges (the rail, the inning header and the foot row)
 working. A `transform` would break all three. So the lens sets the pane's
-`scrollTop` and `scrollLeft`. In this slice the scroll is instant.
+`scrollTop` and `scrollLeft`. In this slice the scroll is instant; L7 makes
+it glide after a tap ("The motion", below).
 
 **3. Positions are measured, not computed.** An inning where the order bats
 around widens into extra columns. The rail stacks a line for each substitute,
@@ -180,3 +181,28 @@ onto paper. A strip in the top spacer band shows them again.
   `--lens-carry-scale` times the sheet's zoom. The strip takes no taps, so the
   pane still pans under it. It is never kraft: it lifts no seal. It is a visual
   copy, so it is `aria-hidden`; the sheet holds the same boxes.
+
+## The motion (L7)
+
+The lens moves only when the reader taps. `useLensMotion`
+(`src/components/scoring/lens/motion/`) holds a `beat` that a reveal tap sets and
+that clears when the reader leaves the lens or the page turns. The tear, the
+glide and the runner-move tint hang off it, so a cold load, a poll, a return
+visit and a force-reveal start none of them. `docs/motion.md` has the row for
+each motion and its gate.
+
+- **The glide scrolls the pane, never the sheet** (G1): a `requestAnimationFrame`
+  tween in `useLens`, `--dur-glide` on the `--ease-out` curve
+  (`src/lib/scorecard/glide.js`). Its clock starts at its first frame. A touch,
+  a wheel or a key on the pane stops it. Under reduced motion, at a turn and on
+  a cold load the seat is instant, as before.
+- **The tear is the app's one tear.** Two copies of the seal's face, cut along
+  `lib/sealTear.js`'s shared split, fly off the box just opened. That split
+  runs across the box, so the halves are upper and lower; they leave sideways,
+  on the brief's timing.
+- **The page turn moves the pane only.** The frame and the ruler stay. The
+  lens's box clips sideways, because 28px of pane past the window made the
+  phone's page wider and moved the frame 37px down after each turn.
+- **Before a tap nothing differs by the result** (ADR-0046): the breath is two
+  cycles on every seal, the turn is the same two beats, and the 700 ms tap lock
+  is unchanged. A seal that a poll brings at the live edge does not breathe.
