@@ -1,4 +1,5 @@
 import { MarkImage } from './MarkImage.jsx'
+import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
 // Every mark this club has on file, always in view while the club is open —
 // the CDN base mark, a hand-recolored Main override, each procured treatment
@@ -19,7 +20,7 @@ import { MarkImage } from './MarkImage.jsx'
 export function LogoShelf({ marks, onSelect }) {
   if (!marks?.length) return null
   return (
-    <section className="idlab__shelf" aria-label="Marks on file">
+    <Stack gap="snug" as="section" className="idlab__shelf" aria-label="Marks on file">
       <div className="idlab__shelfhead">
         <span className="colorlab__wpapreviewlabel">Marks on file</span>
         <span className="idlab__shelfcount">
@@ -55,6 +56,6 @@ export function LogoShelf({ marks, onSelect }) {
           </button>
         ))}
       </div>
-    </section>
+    </Stack>
   )
 }

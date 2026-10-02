@@ -3,6 +3,7 @@ import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // A preview of the OTHER team's next half: the first few spots due up, same
 // headshot-column presentation as UpNextBatters.jsx's own "Due up" card (no
@@ -25,12 +26,12 @@ export function DueUpNextCard({ feed, inning, half, revealedThrough, awayId, hom
       </span>
       <div className="dueup__row">
         {info.batters.map((b) => (
-          <div className="dueup__col" key={b.id}>
+          <Stack gap="tight" className="dueup__col" key={b.id}>
             <Headshot personId={b.id} name={b.last} teamId={teamId} className="dueup__shot" />
             <span className="dueup__name">
               <PlayerLink id={b.id}>{b.last}</PlayerLink>
             </span>
-          </div>
+          </Stack>
         ))}
       </div>
     </Card>

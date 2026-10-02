@@ -19,6 +19,7 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { favoriteAccentColor } from '../lib/teams.js'
 import { Door } from '../components/ui/control/Door.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { Stack } from '../components/ui/layout/Stack.jsx'
 import { monthDayName } from '../lib/dates.js'
 
 // How many most-recent seasons show by default, and how far back "Load
@@ -122,7 +123,7 @@ function RosterLeagues({ roster, effectiveTeamId, filtering }) {
   const leagues = LEAGUES.filter((l) => roster?.[l.key])
   if (!leagues.length) return null
   return (
-    <div className="allstarrosters__leagues">
+    <Stack className="allstarrosters__leagues">
       {leagues.map(({ key, name, headClass }) => {
         const bucket = roster[key]
         return (
@@ -149,7 +150,7 @@ function RosterLeagues({ roster, effectiveTeamId, filtering }) {
           </Card>
         )
       })}
-    </div>
+    </Stack>
   )
 }
 
@@ -164,7 +165,7 @@ function RosterYear({ year, roster, score, mvp, venue, card, navigate, effective
   return (
     <Card body="flush" className="allstarrosters__year">
       <span className="allstarrosters__yearnum">{year}</span>
-      <div className="allstarrosters__body">
+      <Stack gap="snug" className="allstarrosters__body">
         {score && (
           <div className="allstarrosters__game">
             <AllStarGameResult
@@ -190,7 +191,7 @@ function RosterYear({ year, roster, score, mvp, venue, card, navigate, effective
           </div>
         )}
         <RosterLeagues roster={roster} effectiveTeamId={effectiveTeamId} filtering={filtering} />
-      </div>
+      </Stack>
     </Card>
   )
 }
@@ -266,7 +267,7 @@ export function AllStarRostersPage() {
             onSelect={setFilterTeamId}
             ariaLabel="Filter rosters by team"
           />
-          <div className="allstarrosters__list">
+          <Stack gap="snug" className="allstarrosters__list">
             {visibleSeasons.map((year) => {
               const gamePk = games[year]
               const card = gamePk ? cards[gamePk] : null
@@ -285,7 +286,7 @@ export function AllStarRostersPage() {
                 />
               )
             })}
-          </div>
+          </Stack>
           {canLoadMore && (
             <Door layout="block" onClick={() => setExpanded(true)}>
               Load more (back to {LOAD_MORE_CUTOFF})

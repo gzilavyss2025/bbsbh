@@ -12,6 +12,7 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { Stack } from '../components/ui/layout/Stack.jsx'
 import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
 import { monthDayName } from '../lib/dates.js'
 
@@ -184,13 +185,13 @@ function SeasonRow({ year, recipients, favoriteTeamId }) {
 function LeagueRows({ league, rows }) {
   if (rows.length === 0) return null
   return (
-    <div className="awardhistory__leaguecol">
+    <Stack className="awardhistory__leaguecol">
       <div className={`awardhistory__leaguetag ${LEAGUE_CLASS[league]}`}>
         <span className="awardhistory__leaguetag-full">{LEAGUE_NAME[league]}</span>
         <span className="awardhistory__leaguetag-short">{league}</span>
       </div>
-      <div className="awardhistory__leagueyears">{rows}</div>
-    </div>
+      <Stack className="awardhistory__leagueyears">{rows}</Stack>
+    </Stack>
   )
 }
 
@@ -390,7 +391,7 @@ export function AwardsHistoryPage() {
                     {isLeagueSplit(family) ? (
                       <AwardFamilySplit years={years} yearsData={family.years} favoriteTeamId={favoriteTeamId} />
                     ) : (
-                      <div className="awardhistory__years">
+                      <Stack gap="loose" className="awardhistory__years">
                         {years.map((year) => (
                           <SeasonRow
                             key={year}
@@ -399,7 +400,7 @@ export function AwardsHistoryPage() {
                             favoriteTeamId={favoriteTeamId}
                           />
                         ))}
-                      </div>
+                      </Stack>
                     )}
                   </section>
                 )
@@ -408,7 +409,7 @@ export function AwardsHistoryPage() {
             {view === 'award' && hasAllMlb && (
               <section className="awardhistory__award" key="all-mlb-teams">
                 <SectionHead look="label">All-MLB Teams</SectionHead>
-                <div className="awardhistory__years">
+                <Stack gap="loose" className="awardhistory__years">
                   {allMlbYears.map((year) => (
                     <AllMlbYear
                       key={year}
@@ -418,7 +419,7 @@ export function AwardsHistoryPage() {
                       favoriteTeamId={favoriteTeamId}
                     />
                   ))}
-                </div>
+                </Stack>
               </section>
             )}
 
@@ -426,7 +427,7 @@ export function AwardsHistoryPage() {
               byYear.map(({ year, awards }) => (
                 <section className="awardhistory__award" key={year}>
                   <SectionHead look="label">{String(year)}</SectionHead>
-                  <div className="awardhistory__years">
+                  <Stack gap="loose" className="awardhistory__years">
                     {awards.map((a) =>
                       a.recipients.some((r) => r.league) ? (
                         <AwardYearSplit
@@ -456,7 +457,7 @@ export function AwardsHistoryPage() {
                         />
                       </div>
                     )}
-                  </div>
+                  </Stack>
                 </section>
               ))}
           </div>

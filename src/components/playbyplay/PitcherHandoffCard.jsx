@@ -1,5 +1,6 @@
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherPhoto } from './PitcherNotice.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 import { Table } from '../ui/table/Table.jsx'
 
 // The two pitching-handoff cards (ADR to follow — see pitcherHandoffs in
@@ -21,7 +22,7 @@ function displayName(line) {
 export function DepartureLineCard({ line, teamId = null, bookOpen, inheritedCount = 0 }) {
   if (!line) return null
   return (
-    <div className="pitcherhandoff pitchernotice--pbp">
+    <Stack gap="snug" className="pitcherhandoff pitchernotice--pbp">
       <div className="pitchernotice">
         <PitcherPhoto personId={line.id} name={displayName(line)} teamId={teamId} />
         <div className="pitchernotice__body">
@@ -39,14 +40,14 @@ export function DepartureLineCard({ line, teamId = null, bookOpen, inheritedCoun
         </div>
       </div>
       <PitcherLineTable line={line} label={`Line at departure, ${displayName(line)}`} />
-    </div>
+    </Stack>
   )
 }
 
 export function FinalizedLineCard({ line, teamId = null }) {
   if (!line) return null
   return (
-    <div className="pitcherhandoff pitchernotice--pbp">
+    <Stack gap="snug" className="pitcherhandoff pitchernotice--pbp">
       <div className="pitchernotice">
         <PitcherPhoto personId={line.id} name={displayName(line)} teamId={teamId} />
         <div className="pitchernotice__body">
@@ -61,7 +62,7 @@ export function FinalizedLineCard({ line, teamId = null }) {
         </div>
       </div>
       <PitcherLineTable line={line} label={`Final line, ${displayName(line)}`} />
-    </div>
+    </Stack>
   )
 }
 

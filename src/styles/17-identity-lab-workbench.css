@@ -1,8 +1,5 @@
 /* ------------------------------------------- team identity lab: workbench */
 .idlab__workbench {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
   padding-top: var(--space-3);
   animation: idlab-swap var(--dur-fast) var(--ease-out);
 }
@@ -98,11 +95,6 @@
 }
 
 /* ---- the two header bars ---- */
-.idlab__bars {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
 
 .idlab__barslead {
   margin: 0;
@@ -122,9 +114,6 @@
 .idlab__barunit {
   flex: 1 1 420px;
   min-width: 320px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   padding: var(--space-3);
   background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-rule);
@@ -359,10 +348,7 @@
 }
 
 .idlab__recolorout {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
 }
 
 /* Deliberately the same box as the picker beside it: before and after are only
@@ -777,9 +763,6 @@
 
 /* ---- the logo shelf ---- */
 .idlab__shelf {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   padding: var(--space-3);
   background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-rule);
@@ -1067,9 +1050,6 @@
   top: var(--space-2);
   align-self: start;
   order: -1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
   min-width: 0;
   max-height: 60vh;
   overflow-y: auto;
@@ -1118,11 +1098,6 @@
   color: var(--accent-primary);
 }
 
-.idlab__benchbar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
 
 .idlab__lineagecaption {
   margin: 0;

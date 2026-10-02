@@ -6,6 +6,7 @@ import { MAX_BOOK_SUBTITLE_LENGTH, MAX_BOOK_TITLE_LENGTH } from '../../lib/books
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { BookCoverPicker } from '../../components/passport/BookCoverPicker.jsx'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 // Starting a new Game Log book — its own full-page surface at /logbook/new,
 // not a sheet over the shelf.
@@ -65,7 +66,7 @@ export function NewBookPage({ createBook, placing = null, onCreated, onCancel })
         {placing ? ' It opens ready for the stamp you’re placing.' : ''}
       </p>
 
-      <label className="bookmgmt__field">
+      <Stack gap="tight" as="label" className="bookmgmt__field">
         <span>Title</span>
         <input
           type="text"
@@ -74,8 +75,8 @@ export function NewBookPage({ createBook, placing = null, onCreated, onCancel })
           value={draft.title}
           onChange={(e) => patch({ title: e.target.value })}
         />
-      </label>
-      <label className="bookmgmt__field">
+      </Stack>
+      <Stack gap="tight" as="label" className="bookmgmt__field">
         <span>Subtitle</span>
         <input
           type="text"
@@ -84,7 +85,7 @@ export function NewBookPage({ createBook, placing = null, onCreated, onCancel })
           value={draft.subtitle}
           onChange={(e) => patch({ subtitle: e.target.value })}
         />
-      </label>
+      </Stack>
 
       <BookCoverPicker book={draft} onChange={patch} />
 
