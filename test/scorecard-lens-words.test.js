@@ -261,6 +261,8 @@ test('no helper returns a name or an at-bat from past the clamp, at any step', (
       for (const card of Object.values(slot.cells)) {
         onSheet.add(card.atBatIndex ?? null)
         names.add(card.batter?.last ?? '')
+        names.add(card.runner?.last ?? '')
+        for (const pr of card.pinchRunners ?? []) names.add(pr.last ?? '')
       }
     }
     const cards = halfCards(after, inning)
@@ -278,6 +280,30 @@ test('no helper returns a name or an at-bat from past the clamp, at any step', (
       if (halfIndex(n, half) > step.through) assert.equal(halfTotals(after, n, half), null, where)
     }
   }
+})
+
+test('a runner is named as the sheet names him: the placed runner, and a pinch runner', () => {
+  // The extra-innings placed runner has no batter; his name is on `runner`.
+  const placed = { kind: 'placed', runnerId: 7, runner: { last: 'Contreras' }, reached: 2 }
+  const moves = runnerMoves([placed], [{ ...placed, reached: 3 }])
+  assert.equal(movesText(moves), 'Contreras to 3rd.')
+
+  // A pinch runner replaced the man who batted; the man on base is the last
+  // one in the chain (halfInningFeed adds him only once his notice is opened).
+  const hit = {
+    kind: 'atbat',
+    atBatIndex: 4,
+    batter: { last: 'Quillen' },
+    reached: 1,
+    pinchRunners: [{ id: 9, last: 'Smith', base: 1 }],
+  }
+  assert.equal(movesText(runnerMoves([hit], [{ ...hit, reached: 3 }])), 'Smith to 3rd.')
+  assert.equal(movesText(runnerMoves([hit], [{ ...hit, scored: true, reached: 4 }])), 'Smith scores.')
+  const view = { grid: { columns: { 0: { inning: 10 } }, slots: [{ cells: { 0: hit } }, { cells: { 0: placed } }] } }
+  assert.deepEqual(
+    situation(view, 10, 'top').runners.map((r) => `${r.name} ${r.base}`),
+    ['Smith 1', 'Contreras 2'],
+  )
 })
 
 // ---------------------------------------------------------------------------

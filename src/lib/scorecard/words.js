@@ -9,8 +9,8 @@
 // The runner reads reuse Express Lane's runnersOnBase / runnersDeparted. They
 // read only the cards they are given, which is exactly this footing.
 
-import { runnersDeparted, runnersOnBase } from '../../api/expresslane/runners.js'
-import { baseWord } from './situation.js'
+import { cardKey, runnersDeparted, runnersOnBase } from '../../api/expresslane/runners.js'
+import { baseWord, runnerName } from './situation.js'
 
 // The verbs in the #724 brief, section 4. An event not here falls back to the
 // feed's own eventType words ("force out"); this file adds no words of its own.
@@ -57,16 +57,14 @@ export function playWords(card) {
   return { name, verb, atBatIndex: card.atBatIndex ?? null, text: `${name || 'The batter'} ${verb}.` }
 }
 
-const keyOf = (card) => card.atBatIndex ?? `placed:${card.runnerId}`
-
 // What the newest step did to the men already on base: [{ name, kind: 'to' |
 // 'scores' | 'out', base, from, atBatIndex }], lead runner first. `base` is
 // where he went (4 = home); an out with no recorded base has `base: null`.
 // The batter's own box is not a move: playWords says it.
 export function runnerMoves(prevCards, nextCards) {
-  const was = new Map(runnersOnBase(prevCards).map(({ base, card }) => [keyOf(card), base]))
+  const was = new Map(runnersOnBase(prevCards).map(({ base, card }) => [cardKey(card), base]))
   const move = (card, kind, base, from) => ({
-    name: card.batter?.last ?? '',
+    name: runnerName(card),
     kind,
     base,
     from,
@@ -74,7 +72,7 @@ export function runnerMoves(prevCards, nextCards) {
   })
   const moves = []
   for (const { base, card } of runnersOnBase(nextCards)) {
-    const from = was.get(keyOf(card))
+    const from = was.get(cardKey(card))
     if (from != null && base > from) moves.push(move(card, 'to', base, from))
   }
   for (const { from, card, fate } of runnersDeparted(prevCards, nextCards)) {

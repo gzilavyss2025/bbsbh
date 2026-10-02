@@ -17,6 +17,12 @@ import { runnersOnBase } from '../../api/expresslane/runners.js'
 
 export const baseWord = (base) => ['', '1st', '2nd', '3rd', 'home'][base] ?? ''
 
+// The man on base as the sheet names him: the last pinch runner in the chain
+// (halfInningFeed adds one only once his notice is opened), else the placed
+// runner, else the batter.
+export const runnerName = (card) =>
+  card.pinchRunners?.at(-1)?.last ?? (card.kind === 'placed' ? card.runner?.last : card.batter?.last) ?? ''
+
 const halfLabel = ({ inning, half }) => `${half === 'bottom' ? 'Bottom' : 'Top'} ${inning}`
 
 // The opened boxes of one inning on this page, in the order they were batted.
@@ -40,7 +46,7 @@ export function situation(view, inning, half) {
   const cards = halfCards(view, inning)
   const runners = runnersOnBase(cards)
     .reverse()
-    .map(({ base, card }) => ({ base, name: card.batter?.last ?? '', atBatIndex: card.atBatIndex ?? null }))
+    .map(({ base, card }) => ({ base, name: runnerName(card), atBatIndex: card.atBatIndex ?? null }))
   return {
     inning,
     half,
