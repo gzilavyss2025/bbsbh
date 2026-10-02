@@ -505,6 +505,44 @@ CREATE TABLE IF NOT EXISTS pitch_command_ingested_games (
   PRIMARY KEY (game_pk, level)
 );
 
+-- The HITTER's half of the same sweep (#1411 Part B, ADR-0096): what a hitter
+-- did with each pitch, by where it was. One row per (hitter, level, pitch type,
+-- pitcher hand, side he stood on, scope); each counter is a 25-value CSV over
+-- the same 5x5 grid as pitch_command_cells. Sums only, never rates.
+--
+-- `pa_end` counts the pitches that ended a plate appearance and that an xwOBA
+-- mean counts (sac bunts and untracked balls in play are left out, as Savant's
+-- board leaves them out). `woba_fixed` sums the weights that need no estimate:
+-- 0.7 for a walk, a hit-by-pitch or catcher interference, 0 for the rest.
+-- `xwoba_bip` is the estimate summed over balls in play. It stays NULL until
+-- the owner picks the xwOBA route (a per-season lookup, or a Savant join).
+CREATE TABLE IF NOT EXISTS pitch_hitter_cells (
+  person_id  INTEGER NOT NULL,
+  level      TEXT NOT NULL,
+  code       TEXT NOT NULL,
+  p_throws   TEXT NOT NULL,
+  stand      TEXT NOT NULL,
+  season     INTEGER NOT NULL,
+  scope      TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  pitches    TEXT NOT NULL,
+  swings     TEXT NOT NULL,
+  whiffs     TEXT NOT NULL,
+  pa_end     TEXT NOT NULL,
+  woba_fixed TEXT NOT NULL,
+  xwoba_bip  TEXT,
+  PRIMARY KEY (season, scope, person_id, level, code, p_throws, stand)
+);
+
+-- Its own ledger, for the reason pitch_command_ingested_games gives: every
+-- game of the season was already in both other ledgers.
+CREATE TABLE IF NOT EXISTS pitch_hitter_ingested_games (
+  game_pk INTEGER NOT NULL,
+  level   TEXT NOT NULL,
+  date    TEXT NOT NULL,
+  season  INTEGER NOT NULL,
+  PRIMARY KEY (game_pk, level)
+);
+
 -- One row per (game, club) — the raw per-game FACTS every situational team
 -- record is summed from, at MLB, the four full-season MiLB levels, and Rookie
 -- (sportId 16, the complex leagues). Written by gen-team-records.mjs.

@@ -4,13 +4,13 @@ import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { openDb } from '../scripts/lib/db.js'
+import { bucketsOf } from '../scripts/lib/io.js'
 import { CELLS } from '../scripts/lib/command-grid.mjs'
 import { loadCenturyClub } from '../scripts/lib/century-club.mjs'
 import { loadArsenalSide } from '../scripts/lib/arsenal-side.mjs'
 import {
   aggregateGamePitchTypes,
   arsenalStatements,
-  bucketsOf,
   centuryRankMap,
   exportCommandMap,
   exportPitchArsenal,

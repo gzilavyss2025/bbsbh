@@ -38,13 +38,13 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
-import { writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
-import { shardKey100 } from '../src/lib/shardKey.js'
+import { bucketsOf, writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
 import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 import { CENTURY_CLUB_MIN, CENTURY_MPH } from '../src/api/pitchArsenal.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { CELLS, COLS, aggregateGameCommand, commandStmts, markCommandIngested, parseCells } from './lib/command-grid.mjs'
+import { aggregateGameHitters, foldHitters, hitterStmts, writeHitterGrid } from './lib/pitch/hitter-grid.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // TWO OUTPUTS, one per reader — see writeArsenal below and src/api/pitchArsenal.js.
@@ -231,26 +231,27 @@ export function arsenalStatements(db) {
     markCommand: markCommandIngested(db),
     commandRead: c.read,
     commandWrite: c.write,
+    ...hitterStmts(db),
   }
 }
 
 // Fetch the feed (the only await), then fold the whole game in as one atomic
 // synchronous transaction — same pattern as gen-fouls.mjs's ingestGame.
 // `need` says which halves of the sweep this game still owes. Both totals
-// tables ADD, so re-walking a game for the command grid must NOT fold its pitch
+// tables ADD, so re-walking a game for the command or hitter grid must NOT fold its pitch
 // types in a second time — that would silently double a season of arsenal
 // counts, and nothing downstream would look wrong until a share exceeded 100%.
 async function ingestGame(db, stmts, game) {
-  const need = game.need ?? { arsenal: true, command: true }
+  const need = game.need ?? { arsenal: true, command: true, hitter: true }
   const feed = await getJson(`/api/v1.1/game/${game.gamePk}/feed/live`)
   const pitchers = need.arsenal ? aggregateGamePitchTypes(feed) : new Map()
-  // Same feed, one more pass — the command grid costs no extra fetch.
+  // Same feed, more passes — the command and hitter grids cost no extra fetch.
   const command = need.command ? aggregateGameCommand(feed) : new Map()
-  foldGame(db, stmts, game, pitchers, command)
+  foldGame(db, stmts, game, pitchers, command, need.hitter ? aggregateGameHitters(feed) : new Map())
 }
 
 // The sync half of ingestGame: one game's aggregates into its own season's and scope's rows.
-export function foldGame(db, stmts, { gamePk, level, date, season, scope = 'R', need = { arsenal: true, command: true } }, pitchers, command) {
+export function foldGame(db, stmts, { gamePk, level, date, season, scope = 'R', need = { arsenal: true, command: true, hitter: true } }, pitchers, command, hitters = new Map()) {
   db.exec('BEGIN')
   try {
     for (const [id, p] of pitchers) {
@@ -278,6 +279,7 @@ export function foldGame(db, stmts, { gamePk, level, date, season, scope = 'R', 
     }
     if (need.arsenal) stmts.mark.run(gamePk, level, date, season)
     if (need.command) stmts.markCommand.run(gamePk, level, date, season)
+    foldHitters(stmts, { gamePk, level, date, season, scope, need }, hitters)
     db.exec('COMMIT')
   } catch (err) {
     db.exec('ROLLBACK')
@@ -522,19 +524,6 @@ export function exportCommandMap(db, season, scope = 'R') {
   return { season, pit }
 }
 
-// One bucket per `personId % 100`: `pit` is the regular season, as before; `post`
-// is the postseason in the same shape, beside it, so an old reader never sees it.
-export function bucketsOf(head, pit, post) {
-  const buckets = {}
-  for (const [field, entries] of [['pit', pit], ['post', post]]) {
-    for (const [id, entry] of Object.entries(entries)) {
-      const bucket = (buckets[shardKey100(id)] ??= { ...head, pit: {} })
-      ;(bucket[field] ??= {})[id] = entry
-    }
-  }
-  return Object.entries(buckets)
-}
-
 async function writeCommand(db, hands, season) {
   const pitOf = (scope) => Object.fromEntries(Object.entries(exportCommandMap(db, season, scope).pit)
     .filter(([, e]) => Object.keys(e.mlb).length || Object.keys(e.aaa).length)
@@ -613,6 +602,7 @@ async function main() {
     for (const season of touched) {
       await writeArsenal(db, await handsFor(season), season)
       await writeCommand(db, await handsFor(season), season)
+      await writeHitterGrid(db, season)
     }
     await writeAllPools(db, handsFor)
   }
@@ -631,16 +621,13 @@ async function main() {
     return
   }
 
-  // A game is done only when BOTH sweeps have had it. The arsenal pass had
-  // already ingested this season before locations were counted, so keying the
-  // skip on its table alone would leave the command grid empty until next
-  // season — the backfill would find nothing to do.
-  const doneArsenal = new Set(
-    db.prepare('SELECT game_pk, level FROM pitch_arsenal_ingested_games').all().map((r) => `${r.game_pk}:${r.level}`),
-  )
-  const doneCommand = new Set(
-    db.prepare('SELECT game_pk, level FROM pitch_command_ingested_games').all().map((r) => `${r.game_pk}:${r.level}`),
-  )
+  // A game is done only when EVERY sweep has had it. The arsenal pass had
+  // already ingested this season before locations (and then hitters) were
+  // counted, so keying the skip on its table alone would leave a later grid
+  // empty until next season — the backfill would find nothing to do.
+  const ledgers = Object.fromEntries(['arsenal', 'command', 'hitter'].map((k) => [k, new Set(
+    db.prepare(`SELECT game_pk, level FROM pitch_${k}_ingested_games`).all().map((r) => `${r.game_pk}:${r.level}`),
+  )]))
 
   // Same postponed-replay dedup as the other sweeps: keep only the officialDate bucket.
   const pending = []
@@ -653,8 +640,9 @@ async function main() {
         if (g.status?.abstractGameState !== 'Final') continue
         if (d.date !== g.officialDate) continue
         const key = `${g.gamePk}:${level}`
-        const need = { arsenal: !doneArsenal.has(key), command: !doneCommand.has(key) }
-        if (!need.arsenal && !need.command) continue
+        const need = Object.fromEntries(Object.entries(ledgers).map(([k, set]) => [k, !set.has(key)]))
+        need.hitter &&= level === 'mlb' // the hitter grid is MLB only for now (ADR-0096)
+        if (!Object.values(need).some(Boolean)) continue
         // The season comes from the game, never the clock (#1200).
         pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: Number(g.season ?? g.officialDate.slice(0, 4)), scope: POSTSEASON_GAME_TYPES.split(',').includes(g.gameType) ? 'P' : 'R', need })
       }

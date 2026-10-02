@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { rookieShardKey } from '../src/api/rookies.js'
 import { warShardKey } from '../src/api/war.js'
@@ -16,7 +16,7 @@ import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 // seasons.json that names them and the one the app reads (`current`). The join
 // and the size ceiling hold in EVERY season folder; the floors count the
 // season the app serves.
-const SEASON_STORES = new Set(['spray', 'fouls', 'pitch-arsenal', 'pitch-arsenal-pool', 'pitch-command'])
+const SEASON_STORES = new Set(['spray', 'fouls', 'pitch-arsenal', 'pitch-arsenal-pool', 'pitch-command', 'hitter-grid'])
 const indexOf = (name) =>
   JSON.parse(readFileSync(new URL(`../public/data/${name}/seasons.json`, import.meta.url), 'utf8'))
 const folder = (name, season) => new URL(`../public/data/${name}/${season == null ? '' : `${season}/`}`, import.meta.url)
@@ -114,5 +114,28 @@ test('a bucket stays small enough to be worth fetching alone', () => {
   ]) {
     const largest = Math.max(...dirs(name).flatMap((d) => list(name, d).map((f) => statSync(new URL(f, d)).size)))
     assert.ok(largest < ceiling * 1024, `${name}: largest bucket is ${Math.round(largest / 1024)} KB`)
+  }
+})
+
+// The hitter grid (ADR-0096). Its files are not on file until the first 2026
+// re-walk (#1411), so until then the dump must hold no hitter row either: a
+// grid in the dump with no files is a run that never wrote them.
+test('a hitter-grid bucket stays small enough to be worth fetching alone', () => {
+  if (!existsSync(new URL('../public/data/hitter-grid/seasons.json', import.meta.url))) {
+    const dump = readFileSync(new URL('../scripts/data/pitch-arsenal.sql', import.meta.url), 'utf8')
+    assert.doesNotMatch(dump, /^INSERT INTO pitch_hitter_cells /m)
+    return
+  }
+  // Measured 2026-10-02 on a copy (the regular season and the first 9
+  // postseason games, MLB only): largest 79,573 bytes. Room for the rest of
+  // the postseason without letting the shape quietly grow.
+  const ceiling = 100
+  const largest = Math.max(...dirs('hitter-grid').flatMap((d) => list('hitter-grid', d).map((f) => statSync(new URL(f, d)).size)))
+  assert.ok(largest < ceiling * 1024, `hitter-grid: largest bucket is ${Math.round(largest / 1024)} KB`)
+  for (const d of dirs('hitter-grid')) {
+    for (const f of list('hitter-grid', d)) {
+      const shard = read('hitter-grid', f, d)
+      for (const id of [...Object.keys(shard.bat), ...Object.keys(shard.post ?? {})]) assert.equal(shardKey100(id), f.slice(0, 2))
+    }
   }
 })

@@ -12,7 +12,7 @@ import { FOUL_CODES, WHIFF_CODES } from '../../src/api/playbyplay/pitchInfo.js'
 // exactly the drift that file's header warns about — so they are named here
 // once, beside the two it does export, and pinned by test/command-aggregate.test.js.
 const CALLED_STRIKE_COMMAND_CODES = new Set(['C', 'K', 'A', 'AB', 'AC'])
-const INPLAY_COMMAND_CODES = new Set(['D', 'X', 'E', 'J', 'Y', 'Z'])
+export const INPLAY_COMMAND_CODES = new Set(['D', 'X', 'E', 'J', 'Y', 'Z'])
 
 // ---------------------------------------------------------------------------
 // COMMAND — where he put it, as opposed to what he threw.

@@ -687,7 +687,15 @@ don't run these by hand.
   `DEFAULT 'R'`, so a dump line that names no scope loads as regular season. Every
   reader before ADR-0094 reads `'R'` only. Each bucket carries the postseason as
   `post`, beside `pit`, in the same shape. To backfill older postseason games, run
-  `--since=<first postseason date> --sports=1`. `pitch_arsenal_totals` is
+  `--since=<first postseason date> --sports=1`. The same sweep also writes the
+  hitter grid (ADR-0096): `hitter-grid/{season}/{NN}.json` (each hitter's 25-cell
+  sums by pitch type, pitcher hand and his own side, `bat` and `post`) and
+  `hitter-grid/{season}/league.json` (every hitter summed, the same shape), from
+  `pitch_hitter_cells` and its own ledger, `pitch_hitter_ingested_games`. A game
+  owes each of the three halves (`arsenal`, `command`, `hitter`) to its own ledger,
+  so a re-walk for one half never folds another twice. The first 2026 re-walk is
+  `--since=2026-03-20` with both levels (`--sports=1` would drop a Triple-A-only
+  pitcher's hand from the arsenal export). `pitch_arsenal_totals` is
   keyed `(season, scope, person_id, level, code, stand)` — one row per side the BATTER stood
   on, `'L'`/`'R'`, or `'?'` when the feed named none. The side is in the KEY,
   unlike the times-through split's nine columns, because the two cross: a look
