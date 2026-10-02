@@ -17,9 +17,10 @@
 // and changeable without regenerating the file. Same split gate.js keeps with
 // gen-gate.mjs.
 
-import { staticJson } from '../staticJson.js'
+import { seasonStaticJson } from '../staticJson.js'
 
-export const fetchAbsChallenges = staticJson('/data/abs-challenges.json')
+// A season store (ADR-0086): abs/{season}/, the season abs/seasons.json names.
+export const fetchAbsChallenges = seasonStaticJson('abs', 'abs-challenges.json')
 
 // The levels the system runs at, in the order the page offers them. MLB is
 // 2026's debut; Triple-A has run it for several seasons, which is why its

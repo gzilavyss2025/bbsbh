@@ -150,13 +150,15 @@ for each generator; the reader modules:
   (`gen-umpire-accuracy.mjs`, same cron) adds each home-plate umpire's season
   called-pitch accuracy + a compact zone-tendency breakdown, keyed by the same
   personId. It ships in TWO shapes from one run, and between them
-  they ARE the season archive: `umpire-accuracy-summary.json`, every umpire's
-  season aggregates (~0.12 MB — the ranking pool the lineup page, the box score,
-  and the rankings table read), and `umpire-accuracy/{personId}.json`, one man's
-  scored game rows (~13 KB — the game log the detail page and the accuracy modal
-  draw). There is no league-wide archive file: it was ~2 MB by August, it was
-  both the merge base and a served file, and the row shards are the merge base
-  now, so the accumulated history has exactly one copy.
+  they ARE the season archive: `umpire-accuracy/{season}/umpire-accuracy-summary.json`,
+  every umpire's season aggregates (~0.12 MB — the ranking pool the lineup page, the
+  box score, and the rankings table read), and `umpire-accuracy/{season}/{personId}.json`,
+  one man's scored game rows (~13 KB — the game log the detail page and the
+  accuracy modal draw). The season is the one `umpire-accuracy/seasons.json`
+  names, via `currentSeasonOf` (ADR-0086); `umpire-accuracy/all/` is not read
+  yet (#1201). There is no league-wide archive file: it was ~2 MB by August, it
+  was both the merge base and a served file, and the row shards are the merge
+  base now, so the accumulated history has exactly one copy.
 
   The figure that kept the archive alive was the pitcher/hitter LEAN, which
   z-scores an umpire against the pool's per-game favor rows. Its ingredient is
@@ -362,9 +364,9 @@ for each generator; the reader modules:
   franchise/repeat-MVP boards are plain rank lists (team-keyed, not the
   player-keyed pool `TeamLeaders` expects).
 
-- `fouls.js` — season foul-ball lines + leaders, from `public/data/fouls.json`
-  (`gen-fouls.mjs`) for the whole-league Foul Tracker page, and from
-  `public/data/fouls/{NN}.json` — the same batter/pitcher rows bucketed on
+- `fouls.js` — season foul-ball lines + leaders, from `public/data/fouls/{season}/fouls.json`
+  (`gen-fouls.mjs`; the season `fouls/seasons.json` names, ADR-0086) for the
+  whole-league Foul Tracker page, and from `public/data/fouls/{season}/{NN}.json` — the same batter/pitcher rows bucketed on
   `personId % 100` (`shardKey100`) — for the player page's one-man card, which
   used to pull 805 KB to draw four tiles and now reads ~2 KB
   (`fetchFoulsFor`). Completed-game aggregates → spoiler-free, no SealBox
@@ -377,9 +379,10 @@ for each generator; the reader modules:
   bucket instead (reveal-only, surfaced in `StatBox` + the box-score digest).
 - `pitchArsenal.js` — each pitcher's season pitch-type mix (share of pitches +
   average velocity per type), from `gen-pitch-arsenal.mjs` in TWO shapes, because
-  its two readers want opposite things: `public/data/pitch-arsenal/{NN}.json`
+  its two readers want opposite things (each the season its own `seasons.json`
+  names, ADR-0086): `public/data/pitch-arsenal/{season}/{NN}.json`
   (buckets on `personId % 100`) for the opposing-starter card, which wants ONE
-  pitcher; and `public/data/pitch-arsenal-pool/{mlb,aaa}.json` for the player
+  pitcher; and `public/data/pitch-arsenal-pool/{season}/{mlb,aaa}.json` for the player
   page's similarity card, which genuinely needs a pool. The pool file is
   deliberately less than the buckets carry — one level (the two are never ranked
   against each other), only arms past `MIN_SIMILARITY_PITCHES` (the ranker drops
@@ -645,7 +648,8 @@ for each generator; the reader modules:
   average overall can still lead the league with the glove, which is what the
   four single-skill boards are for.
 - `around-the-game/absChallenges.js` — `/abs-challenges`, the season board for
-  the ABS Challenge System, from `public/data/abs-challenges.json`
+  the ABS Challenge System, from `public/data/abs/{season}/abs-challenges.json`
+  (the season `abs/seasons.json` names, ADR-0086)
   (`gen-abs-challenges.mjs`). MLB and Triple-A are separate levels on the page,
   never blended: two different leagues of hitters, catchers and umpires, and
   Triple-A has years of the rule MLB is in its first season of. The FILE ships
@@ -662,7 +666,7 @@ for each generator; the reader modules:
   judgment, not a run.
   THE GENERATOR WRITES A SECOND FILE THIS MODULE DOES NOT READ, and
   `around-the-game/absExposure.js` below is what reads it:
-  `public/data/abs-exposure.json`, one row per player-season per level carrying how
+  `public/data/abs/{season}/abs-exposure.json`, one row per player-season per level carrying how
   much baseball he saw (pitches, plate appearances, innings caught, starts
   behind the plate), his challenges split by the job he was doing, and the
   rates those make. It is separate because the report page shows none of it and
@@ -700,7 +704,7 @@ for each generator; the reader modules:
   by a counted index drifts from its own label the first time the data moves.
   The written report is `docs/abs-challenges.md`. Spoiler-free: plate
   appearances, pitches seen and innings caught over completed games.
-  IT READS A SECOND FILE TOO: `public/data/abs-exposure-clubs-{level}.json`,
+  IT READS A SECOND FILE TOO: `public/data/abs/{season}/abs-exposure-clubs-{level}.json`,
   the same sweep cut by `team_id` instead of folded across clubs, behind the
   team hub's challenge card (`clubChallengeBoard`). 93 KB for MLB and 128 KB for
   Triple-A against the folded list's 418, fetched by one club's Numbers tab and

@@ -4,8 +4,9 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { leanInputFromRows } from '../src/api/umpires.js'
 
 // The season's accuracy data ships as two things, and between them they ARE the
-// archive that used to be one 2 MB file: umpire-accuracy-summary.json, every
-// umpire's season aggregates (the ranking pool), and umpire-accuracy/{id}.json,
+// archive that used to be one 2 MB file: umpire-accuracy/{season}/umpire-accuracy-
+// summary.json, every umpire's season aggregates (the ranking pool), and
+// umpire-accuracy/{season}/{id}.json,
 // one man's scored game rows (his game log). No surface loads the league's rows.
 //
 // That only holds while every figure a surface shows is derivable from the
@@ -13,16 +14,19 @@ import { leanInputFromRows } from '../src/api/umpires.js'
 // per-game, so the generator sums it into the aggregate as favorNet/
 // favorNetGames. These tests hold that seam.
 
-const root = new URL('../public/data/', import.meta.url)
+const data = new URL('../public/data/', import.meta.url)
+// A season store (ADR-0086): the app reads the season that seasons.json names.
+const { current } = JSON.parse(readFileSync(new URL('umpire-accuracy/seasons.json', data), 'utf8'))
+const root = new URL(`umpire-accuracy/${current}/`, data)
 const read = (p) => JSON.parse(readFileSync(new URL(p, root), 'utf8'))
 const summary = read('umpire-accuracy-summary.json')
-const rowFiles = readdirSync(new URL('umpire-accuracy/', root)).filter((f) => f.endsWith('.json'))
+const rowFiles = readdirSync(root).filter((f) => f.endsWith('.json') && f !== 'umpire-accuracy-summary.json')
 
 test('no league-wide archive is served', () => {
   // Deleting it is the point of the split: it was the merge base AND a served
   // file, and a second copy of an append-only history is a second thing that
   // can go stale. The generator reads the row shards back instead.
-  assert.throws(() => read('umpire-accuracy.json'), /ENOENT/)
+  assert.throws(() => JSON.parse(readFileSync(new URL('umpire-accuracy.json', data))), /ENOENT/)
 })
 
 test('the aggregates file stays small enough for a lineup page to load', () => {
@@ -41,7 +45,7 @@ test("each aggregate's lean matches the rows in that umpire's own shard", () => 
   // game log supports — so recompute it here from the shipped rows.
   let checked = 0
   for (const f of rowFiles) {
-    const shard = read(`umpire-accuracy/${f}`)
+    const shard = read(f)
     const rec = summary.umpires[String(shard.id)]
     assert.ok(rec, `${f}: rows with no aggregate`)
     for (const [key, level] of [
@@ -63,7 +67,7 @@ test('a row shard carries the name its own merge base will need', () => {
   // The shards are the generator's merge base now. Without the name, an umpire
   // who worked in April and not in tonight's window comes back nameless.
   for (const f of rowFiles) {
-    const shard = read(`umpire-accuracy/${f}`)
+    const shard = read(f)
     assert.equal(String(shard.id), f.replace('.json', ''), `${f}: id does not match its name`)
     assert.ok(shard.name, `${f}: no name`)
     assert.ok(Array.isArray(shard.games) && shard.games.length, `${f}: no rows`)
@@ -77,11 +81,11 @@ function stubFetch(t) {
   fetched.length = 0
   t.mock.method(globalThis, 'fetch', async (url) => {
     fetched.push(url)
-    const shard = /^\/data\/umpire-accuracy\/(\d+)\.json$/.exec(url)
+    const shard = /^\/data\/umpire-accuracy\/2026\/(\d+)\.json$/.exec(url)
     const body =
-      url === '/data/umpire-accuracy-summary.json'
+      url === '/data/umpire-accuracy/2026/umpire-accuracy-summary.json'
         ? SUMMARY
-        : url === '/data/umpires/seasons.json'
+        : url === '/data/umpires/seasons.json' || url === '/data/umpire-accuracy/seasons.json'
           ? { seasons: [2026], current: 2026 }
         : shard
           ? { id: Number(shard[1]), name: 'Ada Ump', games: ROWS[shard[1]] ?? [] }
@@ -141,8 +145,9 @@ test('the umpire page reads one aggregates file and one row shard', async (t) =>
   assert.deepEqual(
     [...new Set(fetched)].sort(),
     [
-      '/data/umpire-accuracy-summary.json',
-      '/data/umpire-accuracy/1.json',
+      '/data/umpire-accuracy/2026/1.json',
+      '/data/umpire-accuracy/2026/umpire-accuracy-summary.json',
+      '/data/umpire-accuracy/seasons.json',
       '/data/umpires/2026/1.json',
       '/data/umpires/seasons.json',
     ],
@@ -164,5 +169,10 @@ test('rankings and the one-line summary read the aggregates alone', async (t) =>
   )
   assert.equal(one.rank, 2)
   assert.equal(one.total, 2)
-  assert.deepEqual([...new Set(fetched)], ['/data/umpire-accuracy-summary.json'])
+  // The season index is memoized for the whole module, so the test above may
+  // already have read it. What matters is that no row shard is fetched.
+  assert.deepEqual(
+    [...new Set(fetched)].filter((url) => !url.endsWith('/seasons.json')),
+    ['/data/umpire-accuracy/2026/umpire-accuracy-summary.json'],
+  )
 })

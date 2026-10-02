@@ -3,8 +3,9 @@
 2026 is the first MLB season in which a player could argue a ball-strike call
 and win it on the spot. Triple-A has run the same system for several years.
 Nobody publishes what it has added up to across a season, so this repo does:
-`public/data/abs-challenges.json` is one row per review, folded into season
-boards, and `public/data/abs-exposure.json` is the denominator behind them —
+`public/data/abs/{season}/abs-challenges.json` is one row per review, folded into
+season boards, and `public/data/abs/{season}/abs-exposure.json` is the denominator
+behind them —
 how many pitches each man saw and how many innings he caught.
 
 This document is the written half. It holds the answer to each of the seven

@@ -269,3 +269,11 @@ export function challengeRowsForGame(feed, table) {
   return rows.map((r, i) => ({ ...r, seq: i }))
 }
 
+
+// THE REBUILD WIPES ONE SEASON. Every season stays on file (ADR-0086, #1200),
+// so `--rebuild` clears the challenge rows and the ledger of the season it is
+// about to sweep again, and leaves every other season as it was.
+export function clearSeasonRows(db, season) {
+  db.prepare('DELETE FROM abs_challenges WHERE season = ?').run(season)
+  db.prepare('DELETE FROM abs_ingested_games WHERE season = ?').run(season)
+}

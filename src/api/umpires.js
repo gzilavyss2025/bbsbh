@@ -1,5 +1,5 @@
 import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
-import { currentSeasonOf, staticJson } from './staticJson.js'
+import { currentSeasonOf, seasonStaticJson } from './staticJson.js'
 
 // The umpire detail page's data — for a given umpire, every MLB and AAA game
 // he's worked this season plus which base he had — read from a static
@@ -29,12 +29,12 @@ import { currentSeasonOf, staticJson } from './staticJson.js'
 //
 // TWO FILES, NO ARCHIVE. What the generator accumulates — every scored game row
 // of the season, ~2 MB by August — is a BUILD artifact and is not served. What
-// is served is what a surface reads: public/data/umpire-accuracy-summary.json,
-// every umpire's season aggregates (~0.12 MB, the ranking pool), and
-// public/data/umpire-accuracy/{personId}.json, one man's game rows (~13 KB, his
-// game log). The last figure that needed the league's rows was the
-// pitcher/hitter lean, and its per-game ingredient is now summed into the
-// aggregate at build time — see leanInputFromRows.
+// is served is what a surface reads: public/data/umpire-accuracy/{season}/
+// umpire-accuracy-summary.json, every umpire's season aggregates (~0.12 MB, the
+// ranking pool), and public/data/umpire-accuracy/{season}/{personId}.json, one
+// man's game rows (~13 KB, his game log). The last figure that needed the
+// league's rows was the pitcher/hitter lean, and its per-game ingredient is now
+// summed into the aggregate at build time — see leanInputFromRows.
 //
 // LEVELS: MLB + AAA (the two levels with the pitch tracking accuracy needs).
 // The two are kept STRICTLY SEPARATE, never blended: they run different regimes
@@ -233,8 +233,10 @@ async function loadRows(id) {
   if (rowsCached.has(id)) return rowsCached.get(id)
   let rows = []
   try {
-    const res = await fetch(`/data/umpire-accuracy/${id}.json`)
-    if (!res.ok) throw new Error(`umpire-accuracy/${id}.json ${res.status}`)
+    const season = await currentSeasonOf('umpire-accuracy')
+    if (season == null) throw new Error('umpire-accuracy/seasons.json has no current season')
+    const res = await fetch(`/data/umpire-accuracy/${season}/${id}.json`)
+    if (!res.ok) throw new Error(`umpire-accuracy/${season}/${id}.json ${res.status}`)
     rows = (await res.json()).games ?? []
   } catch {
     rows = []
@@ -248,7 +250,8 @@ async function loadRows(id) {
 // it is per-game: ranks, tiers, zone baselines and now the lean all come off
 // aggregates. Degrades to an empty pool, which costs a man his rank and his
 // lean but not his page.
-const loadAccuracySummary = staticJson('/data/umpire-accuracy-summary.json', {
+// A season store (ADR-0086): the season umpire-accuracy/seasons.json names.
+const loadAccuracySummary = seasonStaticJson('umpire-accuracy', 'umpire-accuracy-summary.json', {
   shape: (d) => ({ season: d.season ?? null, umpires: d.umpires ?? {} }),
   fallback: { season: null, umpires: {} },
 })

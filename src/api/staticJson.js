@@ -93,3 +93,13 @@ export function currentSeasonOf(store) {
   }
   return seasonIndexes.get(store)()
 }
+
+// One whole file of a season store, `/data/{store}/{current}/{file}`, memoized
+// like staticJson. `fallback` when the index or the file is missing.
+export function seasonStaticJson(store, file, { shape, fallback = null } = {}) {
+  const bySeason = staticJsonBy((season) => `/data/${store}/${season}/${file}`, { shape, fallback })
+  return async () => {
+    const season = await currentSeasonOf(store)
+    return season == null ? fallback : bySeason(season)
+  }
+}
