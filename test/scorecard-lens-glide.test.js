@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 
-import { EASE_OUT, easeOut, glideAt } from '../src/lib/scorecard/glide.js'
+import { EASE_OUT, durationMs, easeOut, glideAt } from '../src/lib/scorecard/glide.js'
 
 // The lens glide (#724, L7): after a tap the pane scrolls to the next sealed
 // box in a requestAnimationFrame tween on the --ease-out curve. These pin the
@@ -51,6 +51,15 @@ test('glideAt: a frame stamped before the start holds the start', () => {
 test('glideAt: runs backwards as well (a glide up the sheet)', () => {
   assert.equal(glideAt(400, 100, 300, 300), 100)
   assert.ok(glideAt(400, 100, 60, 300) < 400)
+})
+
+test('durationMs: reads a CSS time in ms or s, and falls back when it cannot', () => {
+  assert.equal(durationMs('300ms', 1), 300)
+  assert.equal(durationMs(' 300ms', 1), 300)
+  // A token written in seconds, as --dur-highlight is: not 0.3 ms.
+  assert.equal(durationMs('0.3s', 1), 300)
+  assert.equal(durationMs('', 300), 300)
+  assert.equal(durationMs('fast', 300), 300)
 })
 
 test('the --dur-glide token is 300ms', () => {

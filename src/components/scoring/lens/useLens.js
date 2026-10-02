@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react'
 import { lensFrame, lensOffset, lensZoom } from '../../../lib/scorecard/geometry.js'
-import { glideAt } from '../../../lib/scorecard/glide.js'
+import { durationMs, glideAt } from '../../../lib/scorecard/glide.js'
 
 // The lens's measure-and-seat loop (ADR-0092). ScorecardSheet calls it with
 // its pane and table; it returns the zoom to draw the table at and the frame's
@@ -127,7 +127,7 @@ export function useLens({ on, paneRef, tableRef, seat, max, glide = null }) {
 // Exported for the Animation Lab's live demo, which runs this same tween.
 const STOPS = ['touchstart', 'wheel', 'pointerdown', 'keydown']
 export function glideTo(pane, to) {
-  const ms = parseFloat(getComputedStyle(pane).getPropertyValue('--dur-glide')) || 300
+  const ms = durationMs(getComputedStyle(pane).getPropertyValue('--dur-glide'), 300)
   const from = { top: pane.scrollTop, left: pane.scrollLeft }
   // The clock starts at the first frame, not at the call: a slow render after
   // the tap then delays the glide, and does not eat into it.

@@ -33,6 +33,14 @@ function cubicBezier(x1, y1, x2, y2) {
 
 export const easeOut = cubicBezier(...EASE_OUT)
 
+// A CSS time (a token's computed value, `300ms` or `0.3s`) in ms, or
+// `fallback` when it is not one. parseFloat alone drops the unit, so a token
+// written in seconds would give a glide of 0.3 ms.
+export function durationMs(css, fallback) {
+  const m = /^\s*([\d.]+)(ms|s)\s*$/.exec(css)
+  return m ? Number(m[1]) * (m[2] === 's' ? 1000 : 1) : fallback
+}
+
 // The scroll position `elapsed` ms into a glide of `ms` from `from` to `to`.
 export function glideAt(from, to, elapsed, ms) {
   if (elapsed >= ms) return to

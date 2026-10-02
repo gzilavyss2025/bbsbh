@@ -27,9 +27,14 @@
    pane is at least nine rows tall and lets the page scroll, which would move
    the frame with the page. Bounded here, the pane is the one scroller. The vh
    line is the fallback for a browser without dvh, as in grid.css. */
+/* It clips sideways for the page turn (motion/scorecard-lens.css): 28px of
+   pane past the window's edge made the page wider than the phone, and the
+   browser moved the page to show it, so the frame landed 37px low after every
+   turn. */
 .sc-sheet__frame--lens {
   position: relative;
   margin-inline: calc(-1 * var(--app-gutter));
+  overflow-x: clip;
 }
 .sc-sheet__frame--lens .sc-sheet__scroll {
   height: calc(100vh - var(--lens-bar-h));

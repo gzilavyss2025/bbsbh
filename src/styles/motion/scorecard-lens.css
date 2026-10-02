@@ -74,13 +74,8 @@
 /* At a handoff the pane goes out to the left, the page switches to the other
    club, and the pane comes in from the right (useLensMotion's `turning`). The
    frame and the ruler stay where they are, outside the pane, and the pane
-   seats at once while it is out: no glide in a turn.
-   The lens's box clips the pane's sideways slide: 28px of pane past the
-   window's edge made the page wider than the phone, and the browser moved the
-   page to show it, so the frame landed 37px low after every turn. */
-.scorecard-page--lens .sc-sheet__frame--lens {
-  overflow-x: clip;
-}
+   seats at once while it is out: no glide in a turn. The lens's box clips
+   the sideways slide (scorecard/lens.css). */
 .scorecard-page--turn-out .sc-sheet__scroll {
   animation: sc-lens-turn-out var(--dur-turn-out) var(--ease-out) forwards;
 }
@@ -105,11 +100,18 @@
    box.css's alternate breath), then holds still. It holds at full opacity
    under the thumb: hover, press and focus. The desktop sheet keeps its breath
    as it was. A seal that a poll brought (`--quiet`, the live edge) does not
-   breathe at all: the feed often runs ahead of the TV picture. */
+   breathe at all: the feed often runs ahead of the TV picture.
+   The hover hold is for a real pointer only. On a touch screen :hover sticks
+   where the last tap was, and that is where the next seal comes to rest, so
+   the next seal would never breathe. */
 .sc-sheet--lens .sc-ab__seal {
   animation-iteration-count: 4;
 }
-.sc-sheet--lens .sc-ab__seal:hover,
+@media (hover: hover) {
+  .sc-sheet--lens .sc-ab__seal:hover {
+    animation: none;
+  }
+}
 .sc-sheet--lens .sc-ab__seal:active,
 .sc-sheet--lens .sc-ab__seal:focus-visible,
 .scorecard-page--quiet .sc-ab__seal {
