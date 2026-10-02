@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-01T15:28:03.361Z",
+  "generatedAt": "2026-10-02T14:45:11.963Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -1712,18 +1712,6 @@
     },
     {
       "orgRank": 20,
-      "playerId": 826536,
-      "name": "Brian Curley",
-      "teamId": 109,
-      "team": "ari",
-      "position": "RHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "116.0 IP, 5.28 ERA, 130 SO",
-      "age": 23,
-      "topRank": null
-    },
-    {
-      "orgRank": 21,
       "playerId": 703615,
       "name": "Jose Cabrera",
       "teamId": 109,
@@ -1735,7 +1723,7 @@
       "topRank": null
     },
     {
-      "orgRank": 22,
+      "orgRank": 21,
       "playerId": 684442,
       "name": "Kohl Drake",
       "teamId": 109,
@@ -1747,7 +1735,7 @@
       "topRank": null
     },
     {
-      "orgRank": 23,
+      "orgRank": 22,
       "playerId": 702258,
       "name": "Druw Jones",
       "teamId": 109,
@@ -1759,7 +1747,7 @@
       "topRank": null
     },
     {
-      "orgRank": 24,
+      "orgRank": 23,
       "playerId": 815154,
       "name": "Slade Caldwell",
       "teamId": 109,
@@ -1771,7 +1759,7 @@
       "topRank": null
     },
     {
-      "orgRank": 26,
+      "orgRank": 25,
       "playerId": 696277,
       "name": "Mason Marriott",
       "teamId": 109,
@@ -1783,7 +1771,7 @@
       "topRank": null
     },
     {
-      "orgRank": 28,
+      "orgRank": 27,
       "playerId": 808087,
       "name": "Junior Sanchez",
       "teamId": 109,
@@ -1795,7 +1783,19 @@
       "topRank": null
     },
     {
-      "orgRank": 29,
+      "orgRank": 27,
+      "playerId": 826536,
+      "name": "Brian Curley",
+      "teamId": 109,
+      "team": "ari",
+      "position": "RHP",
+      "levelRaw": "ALL (2)",
+      "statLine": "116.0 IP, 5.28 ERA, 130 SO",
+      "age": 23,
+      "topRank": null
+    },
+    {
+      "orgRank": 28,
       "playerId": 694211,
       "name": "Manuel Pena",
       "teamId": 109,
@@ -1807,7 +1807,7 @@
       "topRank": null
     },
     {
-      "orgRank": 30,
+      "orgRank": 29,
       "playerId": 808090,
       "name": "José Mejía",
       "teamId": 109,
@@ -1816,6 +1816,18 @@
       "levelRaw": "ALL (2)",
       "statLine": ".251, 7 HR, 57 RBI",
       "age": 21,
+      "topRank": null
+    },
+    {
+      "orgRank": 30,
+      "playerId": 807957,
+      "name": "Yassel Soler",
+      "teamId": 109,
+      "team": "ari",
+      "position": "3B",
+      "levelRaw": "A+",
+      "statLine": ".261, 13 HR, 71 RBI",
+      "age": 20,
       "topRank": null
     },
     {
@@ -1893,7 +1905,7 @@
     {
       "orgRank": 7,
       "playerId": 801725,
-      "name": "Luis De León",
+      "name": "Luis De Leon",
       "teamId": 110,
       "team": "bal",
       "position": "LHP",
@@ -7639,7 +7651,7 @@
       "topRank": null
     },
     {
-      "orgRank": 27,
+      "orgRank": 28,
       "playerId": 813668,
       "name": "Jack Gurevitch",
       "teamId": 138,
@@ -7651,7 +7663,7 @@
       "topRank": null
     },
     {
-      "orgRank": 28,
+      "orgRank": 29,
       "playerId": 824713,
       "name": "Andrew Williamson",
       "teamId": 138,
@@ -7663,7 +7675,7 @@
       "topRank": null
     },
     {
-      "orgRank": 29,
+      "orgRank": 30,
       "playerId": 815829,
       "name": "Ryan Mitchell",
       "teamId": 138,
@@ -7672,18 +7684,6 @@
       "levelRaw": "A",
       "statLine": ".231, 13 HR, 51 RBI",
       "age": 19,
-      "topRank": null
-    },
-    {
-      "orgRank": 30,
-      "playerId": 821299,
-      "name": "Caden Ferraro",
-      "teamId": 138,
-      "team": "stl",
-      "position": "OF",
-      "levelRaw": "A+",
-      "statLine": ".216, 3 HR, 12 RBI",
-      "age": 21,
       "topRank": null
     },
     {
@@ -10299,7 +10299,7 @@
       "position": "LHP",
       "levelRaw": "A+",
       "statLine": "22.2 IP, 1.99 ERA, 31 SO",
-      "age": 23,
+      "age": 24,
       "topRank": null
     },
     {

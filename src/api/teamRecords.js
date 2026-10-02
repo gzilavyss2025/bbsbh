@@ -506,7 +506,8 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all', month = null
     if (!byMonth.has(m)) byMonth.set(m, blank())
     fold(byMonth.get(m), g.r)
   }
-  const monthGroup = month ? null : {
+  // A postseason ledger skips it: October is most of it.
+  const monthGroup = month || data.postseason ? null : {
     title: 'By month',
     rows: [...byMonth.entries()]
       .sort((a, b) => a[0] - b[0])
@@ -558,6 +559,19 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all', month = null
   if (data.sportId === 1) {
     const leagueRows = namedRows(byLeague, names.leagues ?? {}, 'lg')
     if (leagueRows.length) opponentGroups.push({ title: 'By league', rows: leagueRows })
+  }
+
+  // A postseason ledger (src/api/postseason/records.js) has no division table,
+  // and its league line is each row's own `il` flag: the opponent map above
+  // would give a club that changed leagues one league across every year.
+  if (data.postseason) {
+    const own = blank()
+    const other = blank()
+    for (const g of games) fold(g.il === 1 ? other : own, g.r)
+    const rows = [['vs-own-league', 'Vs. own league', own], ['vs-other-league', 'Vs. other league', other]]
+      .map(([id, k, t]) => ({ id, k, played: t.wins + t.losses + t.ties, ...formatRecord(t) }))
+      .filter((r) => r.played > 0)
+    if (rows.length) opponentGroups.push({ title: 'By league', rows })
   }
 
   const seriesRecord = seriesRecordCounts(games)

@@ -588,6 +588,33 @@ don't run these by hand.
   linescore handling. Out of the PWA precache with no extra rule —
   `vite.config.js` opts `data/**.json` out unless a file is named.
   Backfill: `--since=YYYY-MM-DD [--until=…]`; `--sports=1` restricts the sweep.
+- `gen-postseason-records.mjs` → `public/data/postseason-records/{season}.json` (one
+  file per season, all clubs inside, ~15 KB) plus an `index.json` carrying
+  `generatedAt` and the seasons on file — the MLB postseason's twin of the
+  ledger above, 1995 (the Wild Card era) to now. Same row shape as
+  `gen-team-records.mjs`, so `src/api/teamRecords.js`'s `RECORD_GROUPS`
+  predicates read it unchanged; the shared ingest and ship steps live in
+  `scripts/lib/records/ingest.mjs` and the postseason-only half (candidates,
+  series tags, the `il` flag, the season file) in `scripts/lib/records/postseason.mjs`.
+  Facts-not-flags, SQLite-backed (`postseason-records` season group, its own
+  three tables so the two ledgers' dumps never share a file), APPEND-ONLY over
+  newly-Final games. Nightly cron, default sweep is the current season — one
+  schedule call, so outside October it only re-exports. Three things differ from
+  the regular-season ledger, each with its reason in `postseason.mjs`'s header:
+  a series is the games actually PLAYED between two clubs in one round (a
+  best-of-seven sweep has `sl` 4, not 7); there is no getaway day or division
+  rank; and `il` marks a game against the other league, read off each club's
+  league THAT season from the schedule's own `team.league`.
+  Each game row also carries `pk` (gamePk) and `gt` (round), and each season file an
+  `abbrs` map (club id to the abbreviation the schedule gave it THAT season), so the
+  game-lines sheet can name the game and spell its box-score address (`/10252003/flanyy/boxscore`).
+  Backfill: `node scripts/gen-postseason-records.mjs --seasons=1995-2025`
+  (~80 s, ~3,300 requests); `--export-only` rebuilds the files with no network.
+  A new STORED fact (the abbreviations were one) needs the games read again:
+  `REFREEZE=1 node scripts/gen-postseason-records.mjs --seasons=1995-2026 --refetch`.
+  REFREEZE lets the frozen season dumps change, on purpose.
+  Checked 2026-10-02 against `postseason-history.json`: all 224 series 2000-2025
+  match on games played and each club's wins (1995-1999 are not in that file).
 - `gen-schedule-shape.mjs` → `public/data/schedule-shape/{teamId}.json` — twelve
   seasons (2015 → now, `EARLIEST_SEASON`) of each club's schedule SHAPE: one row
   per game carrying date, opponent, side of the road and result, and nothing

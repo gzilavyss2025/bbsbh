@@ -662,9 +662,18 @@ const T7 = [
   {
     css: 'situational-records/66a-detail.css',
     ns: 'trrank',
-    jsx: 'screens/SituationalRecordsPage.jsx',
+    jsx: 'components/situational/SituationalBoard.jsx',
     want: [{ frame: 'sheet', label: true }],
     // The navy head and its 12px height are the broadcast board's own look (census, part 2).
+    keep: ['padding', 'background', 'color'],
+    gone: ['standings trrank', 'ledger-wrap'],
+  },
+  {
+    // One club's splits, on the postseason page: the same table, one per group.
+    css: 'situational-records/66a-detail.css',
+    ns: 'trrank',
+    jsx: 'components/situational/TeamRecordsList.jsx',
+    want: [{ frame: 'sheet', label: true }],
     keep: ['padding', 'background', 'color'],
     gone: ['standings trrank', 'ledger-wrap'],
   },

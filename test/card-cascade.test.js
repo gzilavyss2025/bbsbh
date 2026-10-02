@@ -1630,8 +1630,8 @@ const C6B = [
   { css: '59-more-directory.css', sel: '.moredir__card', jsx: ['screens/MorePage.jsx'], ns: 'moredir__card', frame: 'ledger' },
   { css: '65-about-page.css', sel: '.aboutrule', jsx: ['screens/AboutPage.jsx'], ns: 'aboutrule', as: 'article', frame: 'ledger', gone: true },
   // A link card: the whole tile is the tap target. It keeps its own heavy top edge.
-  { css: '66-situational-records.css', sel: '.trrank__tile', jsx: ['screens/SituationalRecordsPage.jsx'], ns: 'trrank__tile', as: 'a' },
-  { css: 'situational-records/66a-detail.css', sel: '.trrank__podiumcard', jsx: ['screens/SituationalRecordsPage.jsx'], ns: 'trrank__podiumcard', as: 'div' },
+  { css: '66-situational-records.css', sel: '.trrank__tile', jsx: ['components/situational/SituationalIndex.jsx'], ns: 'trrank__tile', as: 'a' },
+  { css: 'situational-records/66a-detail.css', sel: '.trrank__podiumcard', jsx: ['components/situational/SituationalBoard.jsx'], ns: 'trrank__podiumcard', as: 'div' },
   { css: '71-salaries-league.css', sel: '.payboard', jsx: ['components/salaries/SalaryBoard.jsx'], ns: 'payboard', gone: true },
   { css: '76-workload-marks.css', sel: '.penpage__grid', jsx: ['screens/around-the-game/BullpenPage.jsx'], ns: 'penpage__grid', as: 'div', frame: 'ledger' },
 ]

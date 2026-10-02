@@ -582,6 +582,43 @@ CREATE TABLE IF NOT EXISTS team_record_pitcher_roles (
   PRIMARY KEY (person_id, season, sport_id)
 );
 
+-- POSTSEASON RECORDS (gen-postseason-records.mjs -> public/data/postseason-records/).
+-- The same per-game FACTS as team_record_games above, for the MLB postseason
+-- only (gameType F, D, L, W), 1995 to now. Its own three tables in its own dump
+-- group, not rows in the regular-season ones: the two generators run on
+-- different cadences and a shared dump would let whichever pushed second
+-- overwrite the other's table (scripts/CLAUDE.md). payload_json carries the
+-- regular-season keys plus gameType, seriesGameNumber, leagueId and
+-- oppLeagueId; the export derives the series tags and the interleague flag.
+CREATE TABLE IF NOT EXISTS postseason_record_games (
+  game_pk      INTEGER NOT NULL,
+  team_id      INTEGER NOT NULL,
+  season       INTEGER NOT NULL,
+  sport_id     INTEGER NOT NULL,
+  date         TEXT NOT NULL,
+  opp_id       INTEGER NOT NULL,
+  result       TEXT NOT NULL,                -- 'W' | 'L' | 'T'
+  payload_json TEXT NOT NULL,
+  PRIMARY KEY (game_pk, team_id)
+);
+
+CREATE TABLE IF NOT EXISTS postseason_record_ingested_games (
+  game_pk INTEGER NOT NULL PRIMARY KEY,
+  date    TEXT NOT NULL,
+  season  INTEGER NOT NULL
+);
+
+-- Regular-season role facts for the arms that threw a postseason first pitch:
+-- an opener in October is judged against what that pitcher did all year.
+CREATE TABLE IF NOT EXISTS postseason_record_pitcher_roles (
+  person_id     INTEGER NOT NULL,
+  season        INTEGER NOT NULL,
+  sport_id      INTEGER NOT NULL,
+  games_played  INTEGER NOT NULL,
+  games_started INTEGER NOT NULL,
+  PRIMARY KEY (person_id, season, sport_id)
+);
+
 CREATE VIEW IF NOT EXISTS season_grade AS
 SELECT
   q.season, q.team_id, q.date,

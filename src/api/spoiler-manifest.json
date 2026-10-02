@@ -774,6 +774,10 @@
       "class": "spoiler-free",
       "why": "The live series page's read of the games still to play: each one's park and announced probable pitchers, and those pitchers' throwing hand. A probable pitcher and a park are not results. The caller hands it only DATED upcoming gamePks (never today's game, never an if-necessary game, which has no gamePk), and the field list asks for no state, score, winner, linescore, seriesStatus or leagueRecord, so even a wrong pk brings back no result. test/postseason/upcoming-games.test.js pins that list."
     },
+    "postseason/records.js": {
+      "class": "cutoff-gated",
+      "why": "Reads the per-season postseason ledgers (gen-postseason-records.mjs) and hands them to teamRecordsFor and the situational-record pivot, so it inherits teamRecords.js's footing whole, including the `cutoff = null` default: a bare call tallies every Final postseason game on file, tonight's included once the nightly lands. It computes no value those two do not. Open surface by rule (ADR-0034); nothing here is read on a scoring surface."
+    },
     "postseason/roster.js": {
       "class": "spoiler-free",
       "why": "A club's declared postseason roster: its active roster (`/teams/{id}/roster?rosterType=active&date=`) on the last date its series played by the cutoff. Names, jersey numbers and positions only; a roster move is not a result. statsapi has no postseason roster type. Before Game 1 day, the club's current roster on the cutoff date stands in."

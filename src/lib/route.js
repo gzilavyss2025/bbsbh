@@ -23,6 +23,7 @@
 //   '/nine-keys'                        -> { name: 'nine-keys' }
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
 //   '/postseason-race'                  -> { name: 'postseason-race' }
+//   '/postseason-records'               -> { name: 'postseason-records', asOf, season, view, team, category, metric, sort, order }
 //   '/postseason/{seriesId}?d='         -> { name: 'postseason-series', seriesId, asOf }
 //   '/trade-deadline'                   -> { name: 'trade-deadline-season', season: <latest> }
 //   '/trade-deadline/{year}'            -> { name: 'trade-deadline-season', season: year }
@@ -121,6 +122,7 @@
 // URL that may include a `?query`.
 
 import { REPORT_ROUTES } from './reportPages.js'
+import { parseRecordsRoute } from './postseason/recordsRoute.js'
 import { SPORT_IDS, teamFullName } from './teams.js'
 import {
   WINTER_LEAGUES,
@@ -398,22 +400,11 @@ export function parseRoute(url) {
   // Single-segment report pages — table in lib/reportPages.js, beside the menu
   // rows that link to them, so an address and its parse cannot drift.
   if (parts.length === 1 && REPORT_ROUTES[parts[0]]) return { name: REPORT_ROUTES[parts[0]] }
-  // Situational-record explorer. The old /team-records address remains an
-  // inbound alias for shared links; every path we emit uses the new name.
-  // The query carries scope plus optional category, metric, half, sort and
-  // order. The page validates each free-form value.
-  if (parts.length === 1 && (parts[0] === 'situational-records' || parts[0] === 'team-records'))
-    return {
-      name: 'situational-records',
-      asOf,
-      sportId,
-      category: q.get('category') || null,
-      metric: q.get('metric') || null,
-      half: q.get('half') || null,
-      month: q.get('month') || null,
-      sort: q.get('sort') || null,
-      order: q.get('order') || null,
-    }
+  // The two situational-record explorers (see postseason/recordsRoute.js).
+  if (parts.length === 1) {
+    const records = parseRecordsRoute(parts[0], q, { asOf, sportId })
+    if (records) return records
+  }
   // Dev-only scorecard harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'scorecard-lab')
     return { name: 'scorecard-lab' }

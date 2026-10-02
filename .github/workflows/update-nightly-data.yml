@@ -520,6 +520,15 @@ jobs:
         if: steps.teams.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-team-records.mjs
+      # The MLB postseason's twin of the ledger above (1995 to now, one file a
+      # season). Not gated on the teams step: it reads each club's league off
+      # the schedule's own per-season team data, never teams.json. The default
+      # sweep is the current season — one schedule call, so outside October it
+      # ingests nothing and only re-stamps public/data/postseason-records/index.json.
+      - name: Postseason situational records
+        id: postseason-records
+        continue-on-error: true
+        run: node scripts/gen-postseason-records.mjs
       # The multi-season schedule-shape ledger behind the Team hub's Last Time
       # card. Deliberately NOT gated on the teams step: it infers each club's
       # home park per season from that season's own games rather than reading
@@ -661,6 +670,7 @@ jobs:
           steps.farm-system.outcome == 'failure' ||
           steps.highlights.outcome == 'failure' ||
           steps.team-records.outcome == 'failure' ||
+          steps.postseason-records.outcome == 'failure' ||
           steps.schedule-shape.outcome == 'failure' ||
           steps.warm-previews.outcome == 'failure' ||
           steps.compress-logos.outcome == 'failure' ||
