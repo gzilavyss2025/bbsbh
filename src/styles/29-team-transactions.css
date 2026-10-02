@@ -830,11 +830,9 @@
    A pinned club cell must be opaque, so --table-pin mixes the same 10% into
    --surface-card instead of transparent: the same rendered colour over the
    card. Keep the two percentages equal. */
-.clubtable tr.is-me {
-  --table-pin: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card));
-}
 .clubtable tr.is-me td {
   background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, transparent);
+  --table-pin: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card));
 }
 .clubtable tr.is-me .team {
   color: var(--fav-accent, var(--field-deep));

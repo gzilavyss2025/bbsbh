@@ -1185,7 +1185,7 @@ test('T8: the Table pins the club column; the namespace keeps only its width and
   }
   assert.equal(decl(t8Rule('30-standings.css', '.clubtable--full .team'), 'min-width'), '116px', 'the pinned club column keeps its width')
   // The favorite row is opaque under the pin: the same 10% mixed into the card, not into transparent.
-  assert.equal(decl(t8Rule('29-team-transactions.css', '.clubtable tr.is-me'), '--table-pin'), 'color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card))')
+  assert.equal(decl(t8Rule('29-team-transactions.css', '.clubtable tr.is-me td'), '--table-pin'), 'color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card))')
   assert.equal(decl(t8Rule('29-team-transactions.css', '.clubtable tr.is-me td'), 'background'), 'color-mix(in srgb, var(--fav-accent, var(--field)) 10%, transparent)')
   // The wild card group row spans the board; its one cell is the first, so it keeps its page ground under the pin.
   assert.equal(decl(t8Rule('31-wild-card.css', '.wc-grouphead td'), '--table-pin'), 'var(--bg-page)')

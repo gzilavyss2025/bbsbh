@@ -2,7 +2,7 @@
 
 /* "Division leaders" / "Wild card" section labels, inline as a full-width row
    rather than a second <table> — one pinned club column and one scroll box for
-   the whole league. Its one cell is a first cell, so --table-pin keeps its ground. */
+   the whole league. Its one cell is a first cell, so the pin paints its ground. */
 .wc-grouphead td {
   font-family: var(--font-display);
   text-transform: uppercase;
@@ -10,7 +10,6 @@
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
-  background: var(--bg-page);
   --table-pin: var(--bg-page);
   border-top: none;
 }
