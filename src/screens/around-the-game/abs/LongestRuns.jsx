@@ -7,7 +7,7 @@ import {
 import { clubShort } from '../../../api/around-the-game/clubs.js'
 import { useFavoriteTeam } from '../../../hooks/preferences/useFavoriteTeam.js'
 import { BroadcastSection } from '../../../components/around-the-game/BroadcastMasthead.jsx'
-import { BoardScroller } from '../../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../../components/ui/table/Table.jsx'
 import { Slab, SlabRow } from '../../../components/around-the-game/StatSlab.jsx'
 import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
 import { TeamLink } from '../../../components/team/TeamLink.jsx'
@@ -179,60 +179,58 @@ export function LongestRuns({ summary, clubs }) {
         ))}
       </div>
 
-      <BoardScroller label={`Longest runs, ${lost ? 'losses' : 'wins'}, ${ROLE_CHIP[shown] ?? shown}`}>
-        <table className="standings rpt">
-          <thead>
-            <tr>
-              <th className="team">
-                Player
-                <span className="rpt__note">Longest run first</span>
+      <Table sticky label={`Longest runs, ${lost ? 'losses' : 'wins'}, ${ROLE_CHIP[shown] ?? shown}`} className="rpt">
+        <thead>
+          <tr>
+            <th className="team">
+              Player
+              <span className="rpt__note">Longest run first</span>
+            </th>
+            <th>Run</th>
+            {/* THE SEASON BEHIND THE RUN, IN A HEAD THAT SAYS SO. It is what
+                lets 10 of 14 and 16 of 90 read as different achievements, and
+                it has to be on the row rather than in a note below the board. */}
+            <th>
+              Won of called
+              <span className="rpt__note">All season</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {board.rows.map((r) => (
+            <tr
+              key={r.playerId}
+              className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
+            >
+              <th scope="row" className="team">
+                <PlayerLink id={r.playerId} name={r.name}>
+                  {r.name}
+                </PlayerLink>
+                <span className="rpt__note">
+                  <TeamLink id={r.teamId} name={clubShort(clubs, r.teamId)}>
+                    {clubShort(clubs, r.teamId)}
+                  </TeamLink>
+                </span>
+                <span
+                  className={`rptpips${lost ? ' rptpips--lost' : ''}`}
+                  role="img"
+                  aria-label={`${r.run} in a row`}
+                >
+                  {Array.from({ length: r.run }, (_, i) => (
+                    <span key={i} className="rptpips__pip" />
+                  ))}
+                </span>
               </th>
-              <th>Run</th>
-              {/* THE SEASON BEHIND THE RUN, IN A HEAD THAT SAYS SO. It is what
-                  lets 10 of 14 and 16 of 90 read as different achievements, and
-                  it has to be on the row rather than in a note below the board. */}
-              <th>
-                Won of called
-                <span className="rpt__note">All season</span>
-              </th>
+              <td>
+                <span className={`rptrun${lost ? ' rptrun--lost' : ''}`}>{commas(r.run)}</span>
+              </td>
+              <td>
+                {commas(r.success)} of {commas(r.n)}
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {board.rows.map((r) => (
-              <tr
-                key={r.playerId}
-                className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
-              >
-                <th scope="row" className="team">
-                  <PlayerLink id={r.playerId} name={r.name}>
-                    {r.name}
-                  </PlayerLink>
-                  <span className="rpt__note">
-                    <TeamLink id={r.teamId} name={clubShort(clubs, r.teamId)}>
-                      {clubShort(clubs, r.teamId)}
-                    </TeamLink>
-                  </span>
-                  <span
-                    className={`rptpips${lost ? ' rptpips--lost' : ''}`}
-                    role="img"
-                    aria-label={`${r.run} in a row`}
-                  >
-                    {Array.from({ length: r.run }, (_, i) => (
-                      <span key={i} className="rptpips__pip" />
-                    ))}
-                  </span>
-                </th>
-                <td>
-                  <span className={`rptrun${lost ? ' rptrun--lost' : ''}`}>{commas(r.run)}</span>
-                </td>
-                <td>
-                  {commas(r.success)} of {commas(r.n)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </BoardScroller>
+          ))}
+        </tbody>
+      </Table>
 
       {/* WHAT THE CUT HIDES. The file ships twelve rows and the whole
           distribution behind them, and this is the distribution's job: a reader

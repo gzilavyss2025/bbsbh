@@ -148,7 +148,7 @@
 
    `nowrap` because the line is a triple, not a sentence: wrapped, the miss
    figure lands under the man's name and reads as a second call. The board sits
-   in a `.ledger-wrap` scroller, so the width is already paid for. */
+   in a scrolling `Table` wrap, so the width is already paid for. */
 .rptfail {
   display: block;
   font-family: var(--font-body);

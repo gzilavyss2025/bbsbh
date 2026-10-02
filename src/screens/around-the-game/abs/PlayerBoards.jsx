@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { playerBoards, ROLE_LABEL } from '../../../api/around-the-game/absChallenges.js'
 import { clubShort } from '../../../api/around-the-game/clubs.js'
 import { BroadcastSection } from '../../../components/around-the-game/BroadcastMasthead.jsx'
-import { BoardScroller } from '../../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../../components/ui/table/Table.jsx'
 import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
 import { commas, pct1 } from './format.js'
 
@@ -29,75 +29,71 @@ export function PlayerBoards({ summary, clubs }) {
   return (
     <BroadcastSection title="The players">
       <div className="rptpair">
-        <BoardScroller label="Most overturned calls won">
-          <table className="standings rpt">
-            <thead>
-              <tr>
-                {/* Both heads carry a sub-line, and the left one says
-                    "no minimum" rather than saying nothing: it keeps
-                    the two headers the same height, so the two boards'
-                    rows line up across the pair, and it answers the
-                    question the right-hand floor raises about it. */}
-                <th className="team">
-                  Most calls overturned
-                  <span className="rpt__note">No minimum</span>
-                </th>
-                <th>Won</th>
-                <th>Called</th>
-              </tr>
-            </thead>
-            <tbody>
-              {players.byCount.map((p) => (
-                <tr key={p.playerId}>
-                  <th scope="row" className="team">
-                    <PlayerLink id={p.playerId} name={p.name}>
-                      {p.name}
-                    </PlayerLink>
-                    <span className="rpt__note">
-                      {clubShort(clubs, p.teamId)} — {ROLE_LABEL[p.role] ?? p.role}
-                    </span>
-                  </th>
-                  <td>{commas(p.success)}</td>
-                  <td>{commas(p.n)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </BoardScroller>
-
-        <BoardScroller label="Best challenge success rate">
-          <table className="standings rpt">
-            <thead>
-              <tr>
-                <th className="team">
-                  Best success rate
+        <Table sticky label="Most overturned calls won" className="rpt">
+          <thead>
+            <tr>
+              {/* Both heads carry a sub-line, and the left one says
+                  "no minimum" rather than saying nothing: it keeps
+                  the two headers the same height, so the two boards'
+                  rows line up across the pair, and it answers the
+                  question the right-hand floor raises about it. */}
+              <th className="team">
+                Most calls overturned
+                <span className="rpt__note">No minimum</span>
+              </th>
+              <th>Won</th>
+              <th>Called</th>
+            </tr>
+          </thead>
+          <tbody>
+            {players.byCount.map((p) => (
+              <tr key={p.playerId}>
+                <th scope="row" className="team">
+                  <PlayerLink id={p.playerId} name={p.name}>
+                    {p.name}
+                  </PlayerLink>
                   <span className="rpt__note">
-                    Minimum {players.minChallenges} called · {commas(players.qualified)}{' '}
-                    qualify
+                    {clubShort(clubs, p.teamId)} — {ROLE_LABEL[p.role] ?? p.role}
                   </span>
                 </th>
-                <th>Success</th>
-                <th>Called</th>
+                <td>{commas(p.success)}</td>
+                <td>{commas(p.n)}</td>
               </tr>
-            </thead>
-            <tbody>
-              {players.byRate.map((q) => (
-                <tr key={q.playerId}>
-                  <th scope="row" className="team">
-                    <PlayerLink id={q.playerId} name={q.name}>
-                      {q.name}
-                    </PlayerLink>
-                    <span className="rpt__note">
-                      {clubShort(clubs, q.teamId)} — {ROLE_LABEL[q.role] ?? q.role}
-                    </span>
-                  </th>
-                  <td>{pct1(q.rate)}</td>
-                  <td>{commas(q.n)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </BoardScroller>
+            ))}
+          </tbody>
+        </Table>
+
+        <Table sticky label="Best challenge success rate" className="rpt">
+          <thead>
+            <tr>
+              <th className="team">
+                Best success rate
+                <span className="rpt__note">
+                  Minimum {players.minChallenges} called · {commas(players.qualified)}{' '}
+                  qualify
+                </span>
+              </th>
+              <th>Success</th>
+              <th>Called</th>
+            </tr>
+          </thead>
+          <tbody>
+            {players.byRate.map((q) => (
+              <tr key={q.playerId}>
+                <th scope="row" className="team">
+                  <PlayerLink id={q.playerId} name={q.name}>
+                    {q.name}
+                  </PlayerLink>
+                  <span className="rpt__note">
+                    {clubShort(clubs, q.teamId)} — {ROLE_LABEL[q.role] ?? q.role}
+                  </span>
+                </th>
+                <td>{pct1(q.rate)}</td>
+                <td>{commas(q.n)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
       </div>
     </BroadcastSection>
   )

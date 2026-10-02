@@ -289,7 +289,7 @@
    points put the two back at equal visual weight. */
 /* No min-width of its own: it inherits .barcell's 84px so the revised column
    is exactly as wide as the plain number it replaced. This board already
-   scrolls sideways on a phone (BoardScroller), and a wider bar would push one
+   scrolls sideways on a phone (its Table wrap), and a wider bar would push one
    more column off the edge to buy nothing. */
 .barcell__axis {
   position: absolute;
@@ -317,8 +317,6 @@
    saying how many are in it is more honest than three dots. */
 .rpt__between th,
 .rpt__between td {
-  padding-top: var(--space-2);
-  padding-bottom: var(--space-2);
   font-family: var(--font-body);
   font-size: var(--fs-caption);
   color: var(--text-caption);
@@ -390,28 +388,13 @@
    columns — so the treatment lives once here. The seven report pages draw the
    box, the cells and the sticky column on `Table` (styles/system/table.css);
    this keeps what a report board IS: the club cell, a heavier head rule, the
-   favorite-club row. The eight /abs-challenges boards still wear
-   `standings rpt` inside BoardScroller (T6 moves them), so every rule they
-   read stays below.
+   favorite-club row. The /abs-challenges boards draw on `Table` too.
 
    THE PINNED CELL'S GROUND is the canvas, as it was: `Table` paints a pinned
    cell from --table-pin (the card ground by default), and a row that tints
    itself sets it. */
 .rpt {
   --table-pin: var(--bg-page);
-}
-
-/* THE STICKY COLUMN'S CONTAINING BLOCK. `position: sticky` resolves against
-   the nearest ancestor whose overflow is not `visible`, and the shared
-   `.standings` base sets `overflow: hidden` ON THE TABLE (to clip the header
-   row's corners) — so the table, which never scrolls, was the container and
-   the pinned cell slid off with everything else: at 390px `td.team` sat at
-   x = -261 once scrolled right, leaving eighteen rows of unattributable
-   numbers. 26-player-page.css:812 writes the trap up in full; `.standings-wrap`
-   is the same reset for the Standings board. Invisible above 768px, where
-   there is no overflow to scroll — e2e/around-the-game.spec.js pins it at 390. */
-.ledger-wrap .rpt {
-  overflow: visible;
 }
 
 .rpt thead th {
@@ -421,9 +404,7 @@
 }
 
 .rpt td {
-  font-family: var(--font-mono);
   font-size: var(--fs-compact);
-  font-variant-numeric: tabular-nums;
   vertical-align: middle;
 }
 
@@ -441,25 +422,14 @@
   color: var(--text-caption);
 }
 
-/* THE STICKY CLUB COLUMN. Thirty clubs and five numeric columns do not fit a
-   phone, and the app's answer to a wide ledger is .ledger-wrap's horizontal
-   scroll — which on a first draft of these boards scrolled the numbers away
-   and left a list of club names. Pinning the club cell lets the figures scroll
-   UNDER it, the same treatment .standings--full already gives its own team
-   column, and it inherits both of that one's hard-won caveats.
-   `border-collapse: separate` (set on .standings) is what keeps each row's
-   hairline aligned across the pinned/scrolling seam; and Safari drops
-   position:sticky on a cell whose own display is not table-cell, which the
-   shared `.standings td.team { display: flex }` sets — so the cell goes back to
-   a table cell and the flex moves onto .rpt__club inside it
-   (components/around-the-game/ClubCell.jsx).
-
-   The body cell is a `<th scope="row">` here rather than a `<td>`, which is why
-   these selectors name both: it is the cell that NAMES its row for a screen
-   reader. `.standings`'s own body-cell treatment is written for `td`, so the
-   rule below restates it — a bare tbody `th` would otherwise inherit the
-   browser default (bold, centred) and read as a stray header inside the
-   board. */
+/* THE STICKY CLUB COLUMN pins on `Table` (styles/system/table.css), which
+   pins the FIRST cell of a row. This rule keeps the floor for the name, and it
+   also pins a `.team` cell that is not first (/attendance's "Best draws"), as
+   it did before the boards moved. Safari drops position:sticky on a cell whose
+   own display is not table-cell, so the cell below keeps `display: table-cell`
+   and the flex lives on .rpt__club inside it
+   (components/around-the-game/ClubCell.jsx). The body cell is a
+   `<th scope="row">`, the cell that NAMES its row for a screen reader. */
 .rpt th.team,
 .rpt td.team {
   position: sticky;
@@ -475,10 +445,9 @@
   vertical-align: middle;
 }
 
-/* `.standings td.team`'s treatment, restated for the row-header cell — the
-   shared rule is written for `td` and cannot see this one. Body cells only:
-   the `thead` cell above is a plain column caption and keeps the muted
-   condensed header styling every other header in the row has. */
+/* The row-header cell's ink. Body cells only: the `thead` cell above is a
+   plain column caption and keeps the muted condensed header styling every
+   other header in the row has. */
 .rpt tbody th.team {
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
@@ -486,19 +455,14 @@
   color: var(--text-body);
   letter-spacing: var(--ls-caps);
   white-space: normal;
-  padding: var(--space-1h) var(--space-2);
-  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
 .rpt thead th.team {
   z-index: 2;
 }
 
-/* A BODY `td.team` (the Pen's "Most used", the Gate's "Best draws") took its
-   ink from `.standings td.team` and its flex children from `.standings
-   td.team > *`. The seven report pages left `.standings` for `Table`, so the
-   board says it again here. Same values: the ABS boards, still on
-   `.standings`, read the same twice. */
+/* A BODY `td.team` (the Pen's "Most used", the Gate's "Best draws"): its ink
+   and its flex children. */
 .rpt td.team {
   font-weight: var(--w-semibold);
   color: var(--text-body);
@@ -741,50 +705,27 @@
   margin-bottom: 0;
 }
 
-/* THE BOARD SCROLLER'S CONTAINMENT — why the whole page stopped sliding
-   sideways. A board wider than its scroller used to widen the ROOT: at 390px
+/* THE BOARD'S CONTAINMENT — why the whole page stopped sliding sideways. A
+   board wider than its scroller used to widen the ROOT: at 390px
    /doubleheaders sat 171px over the viewport and /run-value 2px over it, so
-   the page itself scrolled under a thumb. `overflow-x: auto` on `.rpt-region`
-   did not stop that on its own — it clips what the region PAINTS, but the
-   table's layout overflow still counted toward an ancestor's scrollable area,
-   and the root is the ancestor that shows it. A page that slides a few pixels
-   for no visible reason reads as broken in a way the cause never explains.
+   the page itself scrolled under a thumb. `overflow-x: auto` on the wrap did
+   not stop that on its own — it clips what the wrap PAINTS, but the table's
+   layout overflow still counted toward an ancestor's scrollable area, and the
+   root is the ancestor that shows it.
 
    `contain: paint` closes it. The box promises that nothing inside it paints
-   outside it, so the overflow stops at the region instead of propagating up.
-   Sticky columns still pin: the scroller is the scrollport the pinned cell
+   outside it, so the overflow stops at the wrap instead of propagating up.
+   Sticky columns still pin: the wrap is the scrollport the pinned cell
    resolves against, and it sits INSIDE the containment rather than across it.
-   At 390px, with every board scrolled fully right, `th.team` measures 0px from
-   its region's left edge — the same as before. Nothing on these pages paints
-   outside a board either: every bar, meter and strip is a positioned span its
-   own cell clips, and the player hover card is mounted at the app root
-   (App.jsx), not in the table.
+   Nothing on these pages paints outside a board either: every bar, meter and
+   strip is a positioned span its own cell clips, and the player hover card is
+   mounted at the app root (App.jsx), not in the table.
 
-   Measured at 390, 430, 900 and 1280: root scroll width equals the viewport on
-   all seven pages after this, against 171px and 131px of leak on
-   /doubleheaders and 2px on /run-value before it. Five of the seven measured
-   clean already — the fault needs a particular board geometry to show — so for
-   those this is a guard, not a repair. It lives here rather than in
-   report/chrome.css because this is the one stylesheet all seven report
-   screens import, and the rule belongs wherever `.rpt-region` is defined.
-
-   The seven report pages now draw their board on `Table`, whose wrap is
-   `.bcast-sec .table`: it takes the same containment. At 390px, without it,
-   /doubleheaders sat 187px over the viewport and /run-value 8px over it. */
-.rpt-region,
+   Every report and ABS board draws on `Table`, whose wrap is
+   `.bcast-sec .table`. At 390px, without it, /doubleheaders sat 187px over the
+   viewport and /run-value 8px over it. */
 .bcast-sec .table {
   contain: paint;
-}
-
-/* The board scroller's focus ring. `.ledger-wrap` was never focusable before
-   BoardScroller.jsx made it a keyboard-reachable region, so it had no focus
-   treatment at all — and a focus stop a keyboard user cannot see is barely
-   better than one that is not there. Uses the shared ring token, like every
-   other focus indicator in the app. */
-.rpt-region:focus-visible {
-  outline: var(--bw-heavy) solid var(--focus-ring);
-  outline-offset: var(--space-1);
-  border-radius: var(--radius-xs);
 }
 
 /* ---- the year slider (components/around-the-game/YearRange.jsx) ----

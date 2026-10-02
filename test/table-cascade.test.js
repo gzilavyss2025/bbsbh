@@ -17,7 +17,7 @@
 //      frame.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { DENSITIES, FRAMES, tableParts } from '../src/lib/design/tableClass.js'
@@ -852,22 +852,19 @@ test('T5: two boards on one page have two different labels', () => {
 
 test('T5: the report namespace draws no frame and no head dress the Table already draws', () => {
   const FRAME = ['border', 'border-radius', 'box-shadow', 'background', 'overflow', 'border-collapse', 'border-spacing', 'width']
-  // The ABS boards (T6) still wear `standings rpt`. `.rpt thead th` keeps what only it says (the
-  // label tracking, the heavy rule under the head, nowrap). `.rpt td`'s mono face and
-  // `.rpt tbody th.team`'s padding stay too: they out-weigh `.rpt__between`, the ABS umpire
-  // board's row. T6 deletes them with the board.
+  // `.rpt thead th` keeps what only it says (the label tracking, the heavy rule under the head, nowrap).
   const HEAD = ['padding', 'background', 'font-family', 'font-size', 'color', 'text-transform']
   for (const [sel, body] of rules(read(T5_CSS))) {
     const names = props(body)
     for (const part of sel.split(',').map((x) => x.trim())) {
       if (part === '.rpt') for (const p of FRAME) assert.ok(!names.includes(p), `${T5_CSS}: .rpt still sets ${p}`)
-      if (part === '.rpt td') assert.ok(!names.includes('padding'), `${T5_CSS}: ${part} still sets padding`)
+      if (part === '.rpt td') for (const p of ['padding', 'font-family']) assert.ok(!names.includes(p), `${T5_CSS}: ${part} still sets ${p}`)
       if (part === '.rpt thead th') for (const p of HEAD) assert.ok(!names.includes(p), `${T5_CSS}: ${part} still sets ${p}`)
     }
   }
 })
 
-test('T5: the report boards keep the club cell, its pin tint and the rules the ABS boards read', () => {
+test('T5: the report boards keep the club cell, its pin tint and the heavy head rule', () => {
   const css = read(T5_CSS)
   // The pinned cell is opaque in the board's own canvas ground, and a favorite row pins its own tint.
   assert.equal(decl(t5Rule(css, '.rpt'), '--table-pin'), 'var(--bg-page)')
@@ -875,9 +872,8 @@ test('T5: the report boards keep the club cell, its pin tint and the rules the A
   // The sticky club cell keeps display: table-cell and the flex stays on the child.
   assert.equal(decl(t5Rule(css, '.rpt td.team, .rpt tbody th.team'), 'display'), 'table-cell')
   assert.equal(decl(t5Rule(css, '.rpt__club'), 'display'), 'flex')
-  // Rules the eight ABS boards (T6) still need.
-  assert.equal(decl(t5Rule(css, '.ledger-wrap .rpt'), 'overflow'), 'visible')
-  assert.ok(rules(css).some(([sel, b]) => sel.split(', ').includes('.rpt-region') && decl(b, 'contain') === 'paint'))
+  // The scroller the ABS boards read is gone (T6a): no rule names it.
+  for (const [sel] of rules(css)) assert.doesNotMatch(sel, /\.ledger-wrap|\.rpt-region/, `${sel} names a removed scroller`)
   assert.equal(decl(t5Rule(css, '.rpt thead th'), 'border-bottom'), 'var(--bw-heavy) solid var(--navy)')
 })
 
@@ -920,6 +916,90 @@ test('T5: the e2e club-cell pin finds the new wrap, not the old scroller', () =>
 test('T5: the seal pin: no report page reads a reveal-only module or a seal', () => {
   for (const { jsx } of T5) {
     assert.doesNotMatch(src(jsx), /api\/(linescore|derive)\.js|<SealBox|revealedThrough|api\/stamps?\b/, `${jsx} is outside the spoiler scope and stays so`)
+  }
+})
+
+// ---- slice T6a: the ABS boards ----
+
+// One row per /abs-challenges page that moved in T6a: each `<Table>` it draws, by label. The label
+// is the text BoardScroller took, kept whole.
+const ABS = 'screens/around-the-game/abs/'
+const T6A = [
+  { jsx: 'ClubBoard.jsx', labels: ['Challenge board, every club'] },
+  { jsx: 'LongestRuns.jsx', labels: ["`Longest runs, ${lost ? 'losses' : 'wins'}, ${ROLE_CHIP[shown] ?? shown}`"] },
+  { jsx: 'MissBands.jsx', labels: ['Challenges by distance from the zone edge'] },
+  { jsx: 'PlayerBoards.jsx', labels: ['Most overturned calls won', 'Best challenge success rate'] },
+  { jsx: 'RanOut.jsx', labels: ["`Club-games that ran out in the ${ordinal(nights.earliest)} inning`"] },
+  { jsx: 'UmpireBoard.jsx', labels: ['Challenges against each plate umpire'] },
+  { jsx: 'WhoCalls.jsx', labels: ['Challenge success rate by who called for it'] },
+]
+const T6A_CSS = '68-around-the-game.css'
+const walk = (dir) =>
+  readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
+    d.isDirectory() ? walk(join(dir, d.name)) : [join(dir, d.name)],
+  )
+
+test('T6a: every ABS board renders on a sticky, labelled sheet Table and never on a bare <table>', () => {
+  let tables = 0
+  for (const { jsx, labels } of T6A) {
+    const code = src(ABS + jsx)
+    assert.match(code, /import \{ Table \} from ["'][\w./]+\/ui\/table\/Table\.jsx["']/, `${jsx} imports Table`)
+    assert.doesNotMatch(code, /<table\b/, `${jsx} has no bare <table>`)
+    assert.doesNotMatch(code, /className="[^"]*(?<![\w-])standings(?![\w-])/, `${jsx}: no table wears .standings`)
+    const tags = [...code.matchAll(/<Table\b([^>]*)>/g)].map((m) => m[1])
+    assert.equal(tags.length, labels.length, `${jsx}: ${labels.length} tables`)
+    tags.forEach((a, i) => {
+      assert.match(a, /\bsticky\b/, `${jsx}: a board pins its first column`)
+      assert.match(a, /className="rpt"/, `${jsx}: the namespace stays on the table`)
+      assert.doesNotMatch(a, /\b(frame|density)=/, `${jsx}: a sheet at row density, the defaults`)
+      const label = a.match(/\blabel=(?:"([^"]*)"|\{(`[^`]*`)\})/)
+      assert.ok(label, `${jsx}: a board that scrolls sideways has a label`)
+      assert.equal(label[1] ?? label[2], labels[i], `${jsx}: the label is the old BoardScroller text`)
+    })
+    assert.equal(new Set(labels).size, labels.length, `${jsx}: two boards, two labels`)
+    tables += tags.length
+  }
+  assert.equal(tables, 8, 'T6a moves 8 tables')
+})
+
+test('T6a: the umpire board keeps the id its button points at and names no BoardScroller', () => {
+  const code = src(ABS + 'UmpireBoard.jsx')
+  assert.match(code, /<Table\b[^>]*\bid=\{boardId\}/)
+  assert.match(code, /aria-controls=\{boardId\}/)
+  assert.doesNotMatch(code, /BoardScroller/)
+})
+
+test('T6a: no BoardScroller and no scroller class is left under src or e2e', () => {
+  assert.ok(!existsSync(join(SRC, 'components/around-the-game/BoardScroller.jsx')), 'BoardScroller.jsx is deleted')
+  const root = join(SRC, '..')
+  for (const file of [...walk(SRC), ...walk(join(root, 'e2e'))].filter((f) => /\.(jsx?|css|mjs)$/.test(f))) {
+    if (file.endsWith('table-cascade.test.js')) continue
+    assert.doesNotMatch(readFileSync(file, 'utf8'), /BoardScroller|rpt-region/, `${file} names a deleted scroller`)
+  }
+})
+
+test('T6a: the report namespace keeps no rule the ABS boards alone read', () => {
+  for (const [sel, body] of rules(read(T6A_CSS))) {
+    for (const part of sel.split(',').map((x) => x.trim())) {
+      assert.doesNotMatch(part, /\.standings \.rpt|\.ledger-wrap \.rpt|\.rpt-region/, `${part}: a scroller rule is back`)
+      // `.rpt td`'s mono face and `.rpt tbody th.team`'s padding out-weighed `.rpt__between`.
+      if (part === '.rpt tbody th.team') assert.ok(!props(body).includes('padding'), `${part} still sets padding`)
+    }
+  }
+})
+
+test('T6a: the umpire board keeps its middle row rule', () => {
+  const css = read(T6A_CSS)
+  const between = rules(css).find(([sel]) => sel === '.rpt__between th, .rpt__between td')?.[1]
+  assert.ok(between, `${T6A_CSS}: a .rpt__between row rule`)
+  // Its own padding never drew (the cell rules out-weighed it); a live one would grow the row 4px.
+  assert.ok(!props(between).some((p) => p.startsWith('padding')), 'a padding here would grow the row')
+  assert.equal(decl(between, 'background'), 'var(--paper-2)')
+})
+
+test('T6a: the ABS pages stay outside the seal', () => {
+  for (const { jsx } of T6A) {
+    assert.doesNotMatch(src(ABS + jsx), /api\/(linescore|derive)\.js|<SealBox|revealedThrough|api\/stamps?\b/, `${jsx} is outside the spoiler scope and stays so`)
   }
 })
 
