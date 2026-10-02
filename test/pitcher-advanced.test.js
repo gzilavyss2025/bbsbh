@@ -179,13 +179,27 @@ test('pitchingRanksView keeps top-10 ranks only, sorted, capped at four chips', 
       },
     },
   ])
-  assert.equal(view.league, 'NL')
+  assert.equal(view.length, 1)
+  assert.equal(view[0].league, 'NL')
+  assert.equal(view[0].club, null)
+  const { items } = view[0]
   // era 1, K 1, whip 2, avg 3, wins 7, IP 9 all qualify — capped to the top 4.
-  assert.equal(view.items.length, 4)
-  assert.deepEqual(view.items.map((i) => i.text), ['1st', '1st', '2nd', '3rd'])
-  assert.deepEqual(view.items.map((i) => i.label), ['ERA', 'K', 'WHIP', 'Opp. AVG'])
+  assert.equal(items.length, 4)
+  assert.deepEqual(items.map((i) => i.text), ['1st', '1st', '2nd', '3rd'])
+  assert.deepEqual(items.map((i) => i.label), ['ERA', 'K', 'WHIP', 'Opp. AVG'])
   // gamesStarted/balks are not curated rank stats, and 20th wouldn't qualify.
-  assert.ok(!view.items.some((i) => i.label === 'Wins' && i.rank === 20))
+  assert.ok(!items.some((i) => i.label === 'Wins' && i.rank === 20))
+})
+
+test('pitchingRanksView reads every league split, each labelled with its club', () => {
+  const view = pitchingRanksView([
+    { league: { name: 'American League' }, team: { id: 136 }, stat: {} },
+    { league: { name: 'National League' }, team: { id: 109 }, stat: { strikeOuts: 4 } },
+  ])
+  assert.equal(view.length, 1)
+  assert.equal(view[0].league, 'NL')
+  assert.equal(view[0].club, 'AZ')
+  assert.deepEqual(view[0].items.map((i) => `${i.text} ${i.label}`), ['4th K'])
 })
 
 test('pitchingRanksView returns null with no qualifying rank or no split', () => {
