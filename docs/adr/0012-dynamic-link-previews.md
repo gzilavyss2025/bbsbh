@@ -86,6 +86,10 @@ instead of waiting on all 5; and `api/preview.js` gives an unresolved card a
 much shorter cache lifetime (`s-maxage=30`) so a transient miss self-heals
 fast instead of sticking.
 
+> Amended (#1376): `api/_lib/http.js` was removed in #1336. The timeout is now
+> `AbortSignal.timeout(FETCH_TIMEOUT_MS)` in `api/_lib/cards.js`, pinned by
+> `test/card-fetch-timeout.test.js`. The rule is unchanged.
+
 Also added, since MLB's schedule is known well ahead of first pitch:
 `scripts/warm-previews.mjs`, a nightly best-effort pass that pre-warms the
 edge cache for the day's games/teams/rosters so the first real crawl is
