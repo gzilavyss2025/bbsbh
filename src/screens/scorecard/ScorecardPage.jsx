@@ -21,6 +21,7 @@ import { armWords, enteringDefense, frontierArmChange } from '../../lib/scorecar
 import { halfLabel } from '../../lib/scorecard/situation.js'
 import { ArmNotice, EnteringCard } from '../../components/scoring/lens/LensCards.jsx'
 import { PitcherSheet } from '../../components/scoring/lens/PitcherSheet.jsx'
+import { useLensMotion } from '../../components/scoring/lens/motion/useLensMotion.js'
 
 // The live scorecard — `/{date}/{matchup}/scorecard`, the Numbers Game "22"
 // sheet filled exactly as far as YOU have revealed, at any point in the game.
@@ -247,6 +248,16 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
     />
   ) : null
 
+  // THE LENS'S MOTION (lens/motion/useLensMotion.js has the gates): the tear, the
+  // glide and the runner-move tint start on a reveal tap and on nothing else;
+  // the page turn runs out, switches `side`, and runs in.
+  const motion = useLensMotion({
+    lens,
+    side,
+    frontier: view?.grid?.frontier,
+    edge: bar?.state === 'edge',
+  })
+
   // THE TAP LOCK (G6, ADR-0046). The seal, the bar's Unwrap and its Turn share
   // one 700 ms window after every reveal and every turn. The window is a
   // constant: it never reads what the tap did. While the cell editor or the
@@ -257,11 +268,27 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
     lastTap.current = Date.now()
     fn()
   }
-  const tapFrontier = inLens ? locked(onFrontierTap) : onFrontierTap
-  const turn = flip && (inLens ? { ...flip, onFlip: locked(flip.onFlip) } : flip)
+  const tapFrontier = inLens
+    ? locked(() => {
+        // The tear's seed: this game, and the step (the half and the count).
+        motion.tapped(feed?.gamePk, renderRevealedThrough + 1, stepInfo.count)
+        onFrontierTap()
+      })
+    : onFrontierTap
+  const turn = flip && (inLens ? { ...flip, onFlip: locked(() => motion.turn(flip.onFlip)) } : flip)
 
   return (
-    <div className={`scorecard-page ${lens === 'lens' ? 'scorecard-page--lens' : ''}`}>
+    <div
+      className={[
+        'scorecard-page',
+        inLens && 'scorecard-page--lens',
+        inLens && motion.turning && `scorecard-page--turn-${motion.turning}`,
+        inLens && motion.quiet && 'scorecard-page--quiet',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onAnimationEnd={motion.onAnimationEnd}
+    >
       <div className="scpage__bar">
         {lens !== 'lens' && (
           <div className="scpage__ctl" role="group" aria-label="Half of inning">
@@ -296,6 +323,7 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
         lastOpened={bar?.lastOpened ?? null}
         dock={dock}
         carry={bar?.carry}
+        motion={inLens && motion.beat ? { ...motion.beat, moved: new Set(bar?.moved) } : null}
       />
       {bar && (
         <LensBar

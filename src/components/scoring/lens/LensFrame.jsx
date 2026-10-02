@@ -1,3 +1,5 @@
+import { useBecameTrue } from '../../../hooks/motion/useBecameTrue.js'
+
 // The lens's two fixed marks (ADR-0092): the navy FRAME that holds the next
 // sealed box, and the RULER under the batter's row, from the pane's left edge
 // to the frame. Both sit over the pane, outside its scroll, so they never
@@ -12,12 +14,16 @@
 // which the reader can already see (G8).
 //
 // `dock` is the one card under the frame (LensCards.jsx), its top a fixed gap
-// under the frame's bottom edge. Unlike the frame, it takes taps.
+// under the frame's bottom edge. Unlike the frame, it takes taps. A card that
+// docks while the lens is up fades in (`--fresh`, motion/scorecard-lens.css);
+// one that is there on a cold load or a return to the lens does not
+// (useBecameTrue).
 //
 // `carry` is the carry strip (CarryStrip.jsx), pinned in the top spacer band:
 // from the pane's top, under the sticky header, down to the frame (`padTop` is
 // that band's height). It takes no taps, so the pane still pans under it.
 export function LensFrame({ frame, dock = null, carry = null }) {
+  const docked = useBecameTrue(Boolean(dock))
   if (!frame) return null
   return (
     <>
@@ -37,7 +43,7 @@ export function LensFrame({ frame, dock = null, carry = null }) {
         </div>
       )}
       {dock && (
-        <div className="sc-lens__dock" style={{ top: frame.top + frame.height }}>
+        <div className={`sc-lens__dock ${docked ? 'sc-lens__dock--fresh' : ''}`} style={{ top: frame.top + frame.height }}>
           {dock}
         </div>
       )}

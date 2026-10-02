@@ -1,4 +1,8 @@
 import '../../styles/boxlines/boxlines.css'
+import { useEffect, useRef } from 'react'
+import { AtBatBox } from '../../components/scoring/AtBatBox.jsx'
+import { LensTear } from '../../components/scoring/lens/motion/LensTear.jsx'
+import { glideTo } from '../../components/scoring/lens/useLens.js'
 import { PitchLadder } from '../../components/scoring/PitchLadder.jsx'
 import { PlayDiamond } from '../../components/scoring/PlayDiamond.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
@@ -207,6 +211,99 @@ export function BoxLinesEntrance() {
           </li>
         </ul>
       </div>
+    </div>
+  )
+}
+
+// THE SCORECARD LENS (#724 L7, ADR-0092), in the sheet's real classes: one
+// `.sc-sheet--lens` table under `.scorecard`, whose tokens size the cell. The
+// box is an invented double, RBI single, in the card fields AtBatBox reads.
+const DEMO_DOUBLE = { codeKind: 'hit', code: '2B', reached: 2, rbi: 1, ladder: DEMO_LADDER }
+
+function LensCells({ rows, paneRef = null, className = '' }) {
+  return (
+    <div className="scorecard">
+      <div className={`sc-sheet__scroll ${className}`} ref={paneRef}>
+        <table className="sc-sheet sc-sheet--lens">
+          <tbody>
+            {rows.map((cell, i) => (
+              <tr key={i}>
+                <td className="sc-sheet__cell">{cell}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function OpenedBox() {
+  return (
+    <>
+      <LensTear seed={421} />
+      <AtBatBox atbat={DEMO_DOUBLE} />
+    </>
+  )
+}
+
+function MovedBox() {
+  return (
+    <>
+      <span className="sc-lens__moved" aria-hidden="true" />
+      <AtBatBox atbat={{ codeKind: 'hit', code: '1B', reached: 3, ladder: DEMO_LADDER }} />
+    </>
+  )
+}
+
+// The tear alone, over the box it just opened: the frozen strip.
+export function LensTearDemo() {
+  return (
+    <LensCells
+      rows={[<OpenedBox key="box" />]}
+    />
+  )
+}
+
+// The tear AND the glide: a pane one box tall, the opened box over the next
+// seal. Play runs the real tween (useLens's glideTo), which a frozen frame
+// cannot hold: it is a scroll, not a CSS animation. It starts only in a
+// running stage, so the page's first load moves nothing.
+export function LensGlideDemo() {
+  const pane = useRef(null)
+  useEffect(() => {
+    const el = pane.current
+    if (!el?.closest('.animlab__live.is-running')) return undefined
+    return glideTo(el, { top: el.scrollHeight - el.clientHeight, left: 0 })
+  }, [])
+  return (
+    <LensCells
+      paneRef={pane}
+      className="animlab-lensglide"
+      rows={[
+        <OpenedBox key="box" />,
+        <span key="seal" className="sc-ab__seal">
+          <span className="sc-ab__sealtext">Tap</span>
+        </span>,
+      ]}
+    />
+  )
+}
+
+// A runner's box, the highlighter fading off it.
+export function LensMovedDemo() {
+  return (
+    <LensCells
+      rows={[<MovedBox key="box" />]}
+    />
+  )
+}
+
+// The page turn's two beats, on the page's real class hooks.
+export function LensTurnDemo({ beat }) {
+  return (
+    <div className={`scorecard-page scorecard-page--turn-${beat}`}>
+      <LensCells rows={[<AtBatBox key="box" atbat={DEMO_DOUBLE} />]} />
     </div>
   )
 }
