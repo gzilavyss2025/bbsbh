@@ -303,4 +303,9 @@ export const PAIRINGS = [
   // (#1B2A3A). The rail's paper focus ring is the ink-chip pair too.
   { fg: 'text-heading', bg: 'surface-inset', min: TEXT, note: 'band pill on a themed club band, under a pointer' },
   { fg: 'text-on-ink', bg: '#3F4B56', min: TEXT, note: 'records rail jump link on navy, under a pointer (text-on-ink 16%)' },
+  // THE SCORECARD LENS (ADR-0092, styles/scorecard/lens.css). The frontier
+  // row's rail cell is the inset paper. Its surname (text-heading) and its
+  // slot number and position (text-caption) are pairs already asserted above;
+  // the uniform number's green on that paper is new.
+  { fg: 'accent-positive', bg: 'surface-inset', min: TEXT, note: 'lens rail: frontier row uniform number' },
 ]
