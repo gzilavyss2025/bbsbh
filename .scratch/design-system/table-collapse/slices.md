@@ -18,6 +18,12 @@ T8 move the rest, one family each. 57 tables move; 13 are held.
 | T7 | the other standalone boards | 10 | 10 | after T1 |
 | T8 | Standings (sticky) + the shared bases | 6 | 11 | last |
 
+**Status, 2026-10-01.** Landed: T0 #1366, T1 #1369, T2 #1372. T3, T4, T5 and
+T7 are in the wave PR #1386 (slice PRs #1382, #1383, #1385 and #1384, merged into
+`claude/table-wave1-1132`). Open: T6 (after T5 is on `main`; `overrides.tsv`
+now also proposes the two postseason series tables added after T0 for it),
+T8 (last).
+
 Three slices count 11 files, one over the target of 10. In each, the extra file
 is a test, an e2e spec or a second partial that the move cannot skip.
 

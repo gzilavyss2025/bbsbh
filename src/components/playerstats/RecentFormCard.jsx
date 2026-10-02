@@ -2,6 +2,7 @@ import '../../styles/26b-recent-form.css'
 import { fetchHitterForm, hitterFormView } from '../../api/hitterForm.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Table } from '../ui/table/Table.jsx'
 
 // The player page's recent-form card for hitters: his last 7 / 15 / 30 games
 // read against his own full-season line — the hitter analog of
@@ -41,56 +42,54 @@ export function RecentFormCard({ playerId, asOf, season }) {
         Recent form
       </SectionHead>
 
-      <div className="ledger-wrap">
-        <table className="ledger formtrend__table">
-          <thead>
-            <tr>
-              <th className="lft">Window</th>
-              <th>PA</th>
-              <th>AVG</th>
-              <th>OPS</th>
+      <Table label="Recent form" className="ledger formtrend__table">
+        <thead>
+          <tr>
+            <th className="lft">Window</th>
+            <th>PA</th>
+            <th>AVG</th>
+            <th>OPS</th>
+            {view.hasBars && (
+              <>
+                {/* Empty, and hidden from the accessibility tree: every cell
+                    under it is itself aria-hidden (the bar is decoration over
+                    the +/− OPS column beside it), so an announced column head
+                    would lead a screen-reader user into a column with nothing
+                    in it. It used to print −.300 / 0 / +.300 tick labels,
+                    which sat in the same row as PA and AVG and so read as a
+                    third set of figures — a second scale for a quantity the
+                    column beside it already prints in full. */}
+                <th className="formtrend__barhead" aria-hidden="true" />
+                <th className="formtrend__deltahead">+/− OPS</th>
+              </>
+            )}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.key} className={r.isAnchor ? 'formtrend__anchor' : undefined}>
+              <td className="lft yr">{r.label}</td>
+              <td>{r.pa}</td>
+              <td>{r.avg}</td>
+              <td>{r.ops}</td>
               {view.hasBars && (
                 <>
-                  {/* Empty, and hidden from the accessibility tree: every cell
-                      under it is itself aria-hidden (the bar is decoration over
-                      the +/− OPS column beside it), so an announced column head
-                      would lead a screen-reader user into a column with nothing
-                      in it. It used to print −.300 / 0 / +.300 tick labels,
-                      which sat in the same row as PA and AVG and so read as a
-                      third set of figures — a second scale for a quantity the
-                      column beside it already prints in full. */}
-                  <th className="formtrend__barhead" aria-hidden="true" />
-                  <th className="formtrend__deltahead">+/− OPS</th>
+                  <td className="formtrend__bar">
+                    <DeviationBar row={r} />
+                  </td>
+                  {/* The season row's delta cell stays EMPTY. It used to
+                      print the word "baseline", which is the one piece of
+                      vocabulary on the card a casual fan would have to be
+                      taught; the row is already tinted, ruled off and
+                      labelled Season, and a blank cell in a signed column is
+                      read as zero by anyone who has looked at a ledger. */}
+                  <td className="formtrend__delta">{r.isAnchor ? '' : r.deltaText}</td>
                 </>
               )}
             </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.key} className={r.isAnchor ? 'formtrend__anchor' : undefined}>
-                <td className="lft yr">{r.label}</td>
-                <td>{r.pa}</td>
-                <td>{r.avg}</td>
-                <td>{r.ops}</td>
-                {view.hasBars && (
-                  <>
-                    <td className="formtrend__bar">
-                      <DeviationBar row={r} />
-                    </td>
-                    {/* The season row's delta cell stays EMPTY. It used to
-                        print the word "baseline", which is the one piece of
-                        vocabulary on the card a casual fan would have to be
-                        taught; the row is already tinted, ruled off and
-                        labelled Season, and a blank cell in a signed column is
-                        read as zero by anyone who has looked at a ledger. */}
-                    <td className="formtrend__delta">{r.isAnchor ? '' : r.deltaText}</td>
-                  </>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </Table>
 
       {/* The counting line for the widest window, as a caption under the table
           rather than a bordered chip. A card inside a card made the page read

@@ -9,6 +9,7 @@ import { TeamLink } from '../team/TeamLink.jsx'
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Table } from '../ui/table/Table.jsx'
 
 // PLAYERS WHO MOVED UP — the minor levels' offseason page, issue #1077.
 //
@@ -87,7 +88,7 @@ export function MovedUp({ sportId, season }) {
       </SectionHead>
 
       <Card as="div" body="flush" className="movedup__card">
-        <table className="movedup__table">
+        <Table frame="bare" className="movedup__table">
           <thead>
             <tr>
               <th scope="col">Player</th>
@@ -138,7 +139,7 @@ export function MovedUp({ sportId, season }) {
               )
             })}
           </tbody>
-        </table>
+        </Table>
       </Card>
 
       {(hidden > 0 || expanded) && (

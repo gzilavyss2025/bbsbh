@@ -21,7 +21,7 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
 import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
 import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
-import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../components/ui/table/Table.jsx'
 import { BarCell, TrendStrip } from '../../components/around-the-game/BroadcastBar.jsx'
 
 // THE CLOCK — how long a club's games take.
@@ -267,67 +267,65 @@ export function PacePage() {
               </p>
             )}
 
-            <BoardScroller label="Game length board, every club ranked">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    {/* The rank glyph lives inside the club cell, and "1" means
-                        slowest, quickest or rainiest depending on which chip is
-                        pressed. Say which, here, rather than leave a reader to
-                        remember a tap they made two scrolls ago. */}
-                    <th className="team">
-                      {board?.rankable ? `Club — ranked by ${board.sortLabel}` : 'Club'}
-                    </th>
-                    <th>Average ({HMM})</th>
-                    <th>Median ({HMM})</th>
-                    <th>Games 3:00+</th>
-                    <th>Games 3:30+</th>
-                    <th>By month ({HMM})</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
-                      <ClubCell
-                        teamId={r.teamId}
-                        name={clubShort(clubs, r.teamId)}
-                        rank={board.rankable ? r.rank : null}
-                        tied={board.rankable ? r.tied : false}
-                        note={`${r.games} games`}
+            <Table sticky label="Game length board, every club ranked" className="rpt">
+              <thead>
+                <tr>
+                  {/* The rank glyph lives inside the club cell, and "1" means
+                      slowest, quickest or rainiest depending on which chip is
+                      pressed. Say which, here, rather than leave a reader to
+                      remember a tap they made two scrolls ago. */}
+                  <th className="team">
+                    {board?.rankable ? `Club — ranked by ${board.sortLabel}` : 'Club'}
+                  </th>
+                  <th>Average ({HMM})</th>
+                  <th>Median ({HMM})</th>
+                  <th>Games 3:00+</th>
+                  <th>Games 3:30+</th>
+                  <th>By month ({HMM})</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
+                    <ClubCell
+                      teamId={r.teamId}
+                      name={clubShort(clubs, r.teamId)}
+                      rank={board.rankable ? r.rank : null}
+                      tied={board.rankable ? r.tied : false}
+                      note={`${r.games} games`}
+                    />
+                    <td>
+                      <BarCell
+                        value={r.avg}
+                        min={barMin}
+                        max={barMax}
+                        tone={r.avg > (league?.paceAvg ?? 0) ? 'hot' : 'cool'}
+                      >
+                        {asClock(r.avg)}
+                      </BarCell>
+                    </td>
+                    <td>{asClock(r.median)}</td>
+                    <td>
+                      {r.over180Pct == null ? '—' : `${r.over180Pct.toFixed(1)}%`}
+                      <span className="rpt__note">{r.over180} games</span>
+                    </td>
+                    <td>{r.over210}</td>
+                    <td>
+                      <TrendStrip
+                        months={months}
+                        byMonth={r.byMonth}
+                        min={monthMin}
+                        max={monthMax}
+                        label={`${clubName(clubs, r.teamId)} game length by month: ${monthLabel(
+                          months,
+                          r.byMonth,
+                        )}`}
                       />
-                      <td>
-                        <BarCell
-                          value={r.avg}
-                          min={barMin}
-                          max={barMax}
-                          tone={r.avg > (league?.paceAvg ?? 0) ? 'hot' : 'cool'}
-                        >
-                          {asClock(r.avg)}
-                        </BarCell>
-                      </td>
-                      <td>{asClock(r.median)}</td>
-                      <td>
-                        {r.over180Pct == null ? '—' : `${r.over180Pct.toFixed(1)}%`}
-                        <span className="rpt__note">{r.over180} games</span>
-                      </td>
-                      <td>{r.over210}</td>
-                      <td>
-                        <TrendStrip
-                          months={months}
-                          byMonth={r.byMonth}
-                          min={monthMin}
-                          max={monthMax}
-                          label={`${clubName(clubs, r.teamId)} game length by month: ${monthLabel(
-                            months,
-                            r.byMonth,
-                          )}`}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </BoardScroller>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
           </BroadcastSection>
 
           <BroadcastSection
@@ -338,47 +336,45 @@ export function PacePage() {
                   under each club that played it — the league’s longest night is one game, not
                   two."
           >
-            <BoardScroller label="Longest and shortest game by club">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    <th className="team">Club</th>
-                    <th>Longest ({HMM})</th>
-                    <th>Shortest ({HMM})</th>
-                    <th>Total delay</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...rows]
-                    .sort((a, b) => (b.longest ?? 0) - (a.longest ?? 0))
-                    .map((r) => (
-                      <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
-                        <ClubCell teamId={r.teamId} name={clubShort(clubs, r.teamId)} />
-                        <td>
-                          {asClock(r.longest)}
-                          <span className="rpt__note">
-                            {r.longestDate ? humanDate(r.longestDate) : ''}
-                            {r.longestOppId ? ` vs ${clubShort(clubs, r.longestOppId)}` : ''}
-                          </span>
-                        </td>
-                        <td>
-                          {asClock(r.shortest)}
-                          <span className="rpt__note">
-                            {r.shortestDate ? humanDate(r.shortestDate) : ''}
-                            {r.shortestOppId ? ` vs ${clubShort(clubs, r.shortestOppId)}` : ''}
-                          </span>
-                        </td>
-                        <td>
-                          {asHours(r.delayMinutes)}
-                          <span className="rpt__note">
-                            {r.delayGames} game{r.delayGames === 1 ? '' : 's'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </BoardScroller>
+            <Table sticky label="Longest and shortest game by club" className="rpt">
+              <thead>
+                <tr>
+                  <th className="team">Club</th>
+                  <th>Longest ({HMM})</th>
+                  <th>Shortest ({HMM})</th>
+                  <th>Total delay</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...rows]
+                  .sort((a, b) => (b.longest ?? 0) - (a.longest ?? 0))
+                  .map((r) => (
+                    <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
+                      <ClubCell teamId={r.teamId} name={clubShort(clubs, r.teamId)} />
+                      <td>
+                        {asClock(r.longest)}
+                        <span className="rpt__note">
+                          {r.longestDate ? humanDate(r.longestDate) : ''}
+                          {r.longestOppId ? ` vs ${clubShort(clubs, r.longestOppId)}` : ''}
+                        </span>
+                      </td>
+                      <td>
+                        {asClock(r.shortest)}
+                        <span className="rpt__note">
+                          {r.shortestDate ? humanDate(r.shortestDate) : ''}
+                          {r.shortestOppId ? ` vs ${clubShort(clubs, r.shortestOppId)}` : ''}
+                        </span>
+                      </td>
+                      <td>
+                        {asHours(r.delayMinutes)}
+                        <span className="rpt__note">
+                          {r.delayGames} game{r.delayGames === 1 ? '' : 's'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </Table>
           </BroadcastSection>
 
           <section className="method">

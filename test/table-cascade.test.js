@@ -227,3 +227,691 @@ test('T1: the seal pin: neither moved page reads a reveal-only module or a seal'
     assert.doesNotMatch(code, /api\/(linescore|derive)\.js|<SealBox|revealedThrough/, `${jsx} is outside the spoiler scope and stays so`)
   }
 })
+
+// ---- slice T3: the game surfaces and the team leaders ----
+//
+// Seven tables in the spoiler scope (the running line, the two pitchers tables,
+// the four box score grids) and the team leaders, a list that became two tables
+// (decisions Q5). Each renders on Table; its partial keeps only what the family
+// IS. Two HELD tables share a base class with a moved one: the scorecard wears
+// .pitchers__grid and the inning tally (and two lab demos) wear .bs__grid. Their
+// base rules stay, scoped with :where(:not(.table__grid)), so they reach only
+// the held tables, at the weight they always had.
+//
+// `ns` is the namespace class the table keeps (rules, tests and the spoiler e2e
+// invariants find it by name). `bases` are the class rules that reach the table:
+// none of them may draw a frame, pad a plain cell, dress the head or draw a
+// second row rule. `label` is the spoken name of a table that scrolls sideways
+// (decisions Q1), or null for one that never does. `apis` is the exact list of
+// api/ and stamp modules the file imports: the move adds none (ADR-0035).
+const T3 = [
+  {
+    jsx: 'components/gamehud/RollingLine.jsx',
+    ns: 'rolling__grid',
+    bases: [['20-charts.css', 'rolling__grid']],
+    attrs: ['frame="bare"', 'density="tight"', 'sticky'],
+    label: /label="Running line"/,
+    apis: ['../../api/select.js', '../../api/linescore.js'],
+  },
+  {
+    jsx: 'components/inning/PitchersSection.jsx',
+    ns: 'pitchers__grid',
+    bases: [['20-charts.css', 'pitchers__grid']],
+    attrs: ['frame="bare"', 'density="tight"'],
+    label: null,
+    apis: [],
+  },
+  {
+    jsx: 'components/playbyplay/PitcherHandoffCard.jsx',
+    ns: 'pitchers__grid',
+    bases: [['20-charts.css', 'pitchers__grid']],
+    attrs: ['frame="bare"', 'density="tight"'],
+    label: /label=\{label\}/,
+    apis: [],
+  },
+  {
+    jsx: 'screens/BoxScore.jsx',
+    ns: 'bs__grid bs__grid--bat',
+    bases: [['21-box-score.css', 'bs__grid'], ['21-box-score.css', 'bs__grid--bat']],
+    attrs: ['frame="bare"', 'density="tight"'],
+    label: /label=\{`Batting, \$\{side\.teamName\}`\}/,
+    apis: [
+      '../api/boxscore.js',
+      '../api/highlights.js',
+      '../api/expresslane/eligibility.js',
+      '../api/game.js',
+      '../api/defense.js',
+      '../api/select.js',
+      '../api/umpires.js',
+      '../api/challenges.js',
+      '../components/logbook/StampGameButton.jsx',
+      '../hooks/useStamps.js',
+    ],
+  },
+  {
+    jsx: 'screens/BoxScore.jsx',
+    ns: 'bs__grid bs__grid--pit',
+    bases: [['21-box-score.css', 'bs__grid'], ['21-box-score.css', 'bs__grid--pit']],
+    attrs: ['frame="bare"', 'density="tight"'],
+    label: /label=\{`Pitching, \$\{side\.teamName\}`\}/,
+  },
+  {
+    jsx: 'screens/BoxScore.jsx',
+    ns: 'bs__grid bs__grid--totals',
+    bases: [['21-box-score.css', 'bs__grid'], ['23-box-score-detail.css', 'bs__grid--totals']],
+    attrs: ['frame="bare"', 'density="tight"'],
+    label: null,
+  },
+  {
+    jsx: 'screens/BoxScore.jsx',
+    ns: 'bs__grid bs__grid--board',
+    bases: [['21-box-score.css', 'bs__grid'], ['23-box-score-detail.css', 'bs__grid--board']],
+    attrs: ['frame="bare"', 'density="tight"'],
+    label: /label="Line score"/,
+  },
+  {
+    jsx: 'components/teamstats/TeamLeadersLedger.jsx',
+    ns: 'tledg__rows',
+    bases: [['23-box-score-detail.css', 'tledg__rows']],
+    attrs: ['frame="bare"', 'density="row"'],
+    label: null,
+    apis: ['../../api/teamLeaders.js'],
+  },
+]
+// A selector that reaches only the HELD tables.
+const HELD = ':where(:not(.table__grid))'
+const tagsOf = (code) => [...code.matchAll(/<Table\b([^>]*)>/g)].map((m) => m[1])
+// The body of a rule that must exist, with a message that names it.
+const need = (css, sel) => {
+  const body = ruleBody(css, sel)
+  assert.ok(body !== null, `a ${sel} rule`)
+  return body
+}
+const esc = (s) => s.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&')
+
+test('T3: each moved table renders on Table, keeps its namespace and never sits on a bare <table>', () => {
+  for (const { jsx, ns, attrs, label } of T3) {
+    const code = src(jsx)
+    assert.match(code, /import \{ Table \} from ["'][\w./]+\/ui\/table\/Table\.jsx["']/, `${jsx} imports Table`)
+    assert.doesNotMatch(code, /<table\b/, `${jsx} has no bare <table>`)
+    const own = tagsOf(code).filter((a) => new RegExp(`className="${esc(ns)}"`).test(a))
+    assert.equal(own.length, 1, `${jsx}: .${ns} is on one <Table>`)
+    for (const a of attrs) assert.match(own[0], new RegExp(`(^|\\s)${esc(a)}(\\s|$)`), `${jsx}: .${ns} passes ${a}`)
+    if (!attrs.includes('sticky')) assert.doesNotMatch(own[0], /(^|\s)sticky(\s|$)/, `${jsx}: .${ns} pins no column`)
+    if (label) assert.match(own[0], label, `${jsx}: .${ns} scrolls sideways, so its wrap is a named Tab stop`)
+    else assert.doesNotMatch(own[0], /label=/, `${jsx}: .${ns} never scrolls, so it is no Tab stop`)
+  }
+})
+
+test('T3: two tables on one page never share a spoken name', () => {
+  const labels = tagsOf(src('screens/BoxScore.jsx'))
+    .map((a) => a.match(/label=(\{`[^`]*`\}|"[^"]*")/)?.[1])
+    .filter(Boolean)
+  assert.equal(labels.length, 3, 'bat, pit and the line score scroll; the totals card does not')
+  assert.equal(new Set(labels).size, 3)
+  // The departure card and the finalized card can show together, for the same
+  // pitcher: each passes its own name for the table.
+  const handoff = src('components/playbyplay/PitcherHandoffCard.jsx')
+  assert.match(handoff, /<PitcherLineTable line=\{line\} label=\{`Line at departure, \$\{displayName\(line\)\}`\} \/>/)
+  assert.match(handoff, /<PitcherLineTable line=\{line\} label=\{`Final line, \$\{displayName\(line\)\}`\} \/>/)
+})
+
+test('T3: no rule that reaches a moved table draws a frame, pads a plain cell, dresses the head or draws a row rule', () => {
+  const FRAME = ['border', 'border-radius', 'box-shadow', 'background', 'overflow', 'border-collapse', 'border-spacing', 'width']
+  const HEAD = ['padding', 'background', 'font-family', 'letter-spacing', 'text-transform', 'font-size', 'color']
+  const ROW = ['border-top', 'border-bottom', 'border']
+  for (const { bases } of T3) {
+    for (const [css, ns] of bases) {
+      for (const [sel, body] of rules(read(css))) {
+        const names = props(body)
+        for (const part of sel.split(',').map((x) => x.trim())) {
+          if (part.includes(HELD)) continue
+          // A plain cell: `.ns th`, `.ns td`, `.ns thead th`, `.ns tbody td`,
+          // `.ns :where(th, td)`, `.ns :is(th, td)`, `.ns tbody tr:last-child td`.
+          const plain = part.match(
+            new RegExp(String.raw`^\.${ns} (thead th|tbody td|tbody tr(:[\w-]+)? (th|td)|:where\(th, td\)|:is\(th, td\)|th|td)(:[\w-]+(\([^)]*\))?)?$`),
+          )
+          if (part === `.${ns}`) {
+            for (const p of FRAME) assert.ok(!names.includes(p), `${css}: .${ns} still sets ${p}`)
+          } else if (plain) {
+            for (const p of ['padding', ...ROW]) assert.ok(!names.includes(p), `${css}: ${part} still sets ${p}`)
+            if (/th$/.test(plain[1]) || plain[1] === 'th') for (const p of HEAD) assert.ok(!names.includes(p), `${css}: ${part} still sets ${p}`)
+          }
+        }
+      }
+    }
+  }
+})
+
+test('T3: the held scorecard and inning tally keep their base rules, at their old weight', () => {
+  const pit = read('20-charts.css')
+  assert.equal(decl(need(pit, `.pitchers__grid${HELD}`), 'border-collapse'), 'collapse')
+  assert.equal(decl(need(pit, `.pitchers__grid${HELD} :is(th, td)`), 'padding'), 'var(--space-1h) 1px')
+  assert.equal(decl(need(pit, `.pitchers__grid${HELD} thead th`), 'text-transform'), 'uppercase')
+  const bs = read('21-box-score.css')
+  assert.equal(decl(need(bs, `.bs__grid${HELD}`), 'border-collapse'), 'collapse')
+  assert.equal(decl(need(bs, `.bs__grid${HELD} :is(th, td)`), 'padding'), 'var(--space-1) 2px')
+  assert.equal(decl(need(bs, `.bs__grid${HELD} thead th`), 'text-transform'), 'uppercase')
+  // The held tables still wear the classes these rules hook on.
+  assert.match(src('screens/boxscore/InningTally.jsx'), /<table className="bs__grid bs__grid--tally">/)
+  assert.match(src('screens/boxscore/InningTally.jsx'), /className="bs__scroll bs__tallyBody"/)
+  assert.match(src('screens/Scorecard.jsx'), /<table className="pitchers__grid sc-pitchers">/)
+})
+
+test('T3: a moved table keeps its own margin, column widths and figure alignment', () => {
+  const kept = [
+    ['20-charts.css', '.rolling', 'margin-bottom', 'var(--space-4)'],
+    ['20-charts.css', '.rolling__grid td', 'min-width', '24px'],
+    ['20-charts.css', '.rolling__grid td', 'text-align', 'center'],
+    ['20-charts.css', '.rolling__grid td + td', 'border-left', 'var(--bw-hair) solid var(--border-hairline)'],
+    ['20-charts.css', '.rolling__grid td.rolling__cell', 'padding', '0'],
+    ['20-charts.css', '.pitchers__grid', 'table-layout', 'fixed'],
+    ['20-charts.css', '.pitchers__grid td', 'text-align', 'center'],
+    ['20-charts.css', '.pitchers__pitcher', 'width', '36%'],
+    ['12-sealbox.css', '.pitcherhandoff .pitchers__grid', 'min-width', '460px'],
+    ['21-box-score.css', '.bs__grid td', 'text-align', 'center'],
+    ['21-box-score.css', '.bs__team > .table + .table', 'margin-top', '14px'],
+    ['21-box-score.css', '.bs__grid--bat', 'table-layout', 'fixed'],
+    ['21-box-score.css', '.bs__totals td', 'border-top', 'var(--bw-rule) solid var(--border-rule)'],
+    ['23-box-score-detail.css', '.bs__grid--totals', 'table-layout', 'fixed'],
+    ['23-box-score-detail.css', '.bs__grid--totals td', 'width', '20%'],
+    ['23-box-score-detail.css', '.bs__totalsCard', 'padding', 'var(--space-2h) var(--space-3h) var(--space-3)'],
+    ['23-box-score-detail.css', '.bs__board', 'padding', 'var(--space-2h) var(--space-3h) var(--space-3)'],
+    ['23-box-score-detail.css', '.tledg__leader', 'max-width', '0'],
+    ['23-box-score-detail.css', '.tledg__leader', 'width', '100%'],
+    ['23-box-score-detail.css', '.tledg__who .tledg__name', 'text-overflow', 'ellipsis'],
+  ]
+  for (const [css, sel, prop, value] of kept) {
+    assert.equal(decl(need(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)
+  }
+})
+
+test('T3: the wrappers that only scrolled are gone; Table\'s wrap is the one scroller', () => {
+  for (const [css, sel] of [
+    ['12-sealbox.css', '.pitcherhandoff__tablewrap'],
+    ['20-charts.css', '.rolling__scroll'],
+    ['21-box-score.css', '.bs__scroll + .bs__scroll'],
+  ]) {
+    assert.equal(ruleBody(read(css), sel), null, `${css}: ${sel} is gone`)
+  }
+  assert.doesNotMatch(src('components/playbyplay/PitcherHandoffCard.jsx'), /pitcherhandoff__tablewrap/)
+  assert.doesNotMatch(src('screens/BoxScore.jsx'), /bs__scroll/, 'the tally keeps .bs__scroll; the box score grids scroll in Table')
+})
+
+test('T3: the line score draws each box once, with no doubled edge', () => {
+  // Table's grid is border-collapse: separate, so two touching boxes would each
+  // draw the shared edge. Each box draws its right and bottom edges; the head
+  // row adds the top.
+  const css = read('23-box-score-detail.css')
+  assert.equal(decl(need(css, '.bs__grid--board :is(.bs__boardInn, .bs__boardFinal)'), 'border-width'), '0 var(--bw-hair) var(--bw-hair) 0')
+  assert.equal(decl(need(css, '.bs__grid--board thead :is(.bs__boardInn, .bs__boardFinal)'), 'border-top-width'), 'var(--bw-hair)')
+})
+
+test('T3: the running line\'s focus ring sits inside the Card that clips it', () => {
+  assert.equal(decl(need(read('20-charts.css'), '.rolling__scroll .table:focus-visible'), 'outline-offset'), 'calc(-1 * var(--bw-heavy))')
+})
+
+test('T3: the team leaders are a table of words, with three named columns', () => {
+  const code = src('components/teamstats/TeamLeadersLedger.jsx')
+  assert.doesNotMatch(code, /<(ul|li)\b/, 'no list rows any more')
+  const heads = [...code.matchAll(/<th\b[^>]*>([^<]*)<\/th>/g)].map((m) => m[1])
+  assert.deepEqual(heads, ['Category', 'Leader', 'Stat'])
+  // The position tag and the injured mark ride in the Leader cell, beside the name.
+  assert.match(code, /<td className="tledg__leader">\s*<span className="tledg__who">[\s\S]*tledg__pos[\s\S]*<InjuredMark[\s\S]*<\/span>\s*<\/td>/)
+  const body = ruleBody(read('23-box-score-detail.css'), '.tledg__rows')
+  assert.equal(decl(body, 'font-family'), 'inherit', 'category and name are words, not mono figures')
+  assert.equal(decl(body, 'font-variant-numeric'), 'normal')
+})
+
+test('T3: the seal stays where it was: no gate moved and no api/ import added', () => {
+  for (const { jsx, apis } of T3) {
+    if (!apis) continue
+    const froms = [...src(jsx).matchAll(/from ['"]([^'"]+)['"]/g)].map((m) => m[1])
+    assert.deepEqual(froms.filter((f) => /\/api\/|stamp/i.test(f)), apis, `${jsx} imports exactly the api/ and stamp modules it did`)
+  }
+  // The running line reads a half only at or under the reveal mark, in the cell.
+  const rolling = src('components/gamehud/RollingLine.jsx')
+  assert.match(rolling, /if \(idx <= revealedThrough\) return revealInning\(feed, n, side\)/)
+  assert.match(rolling, /if \(battingIdx <= revealedThrough\) \{/)
+  assert.match(rolling, /if \(halfIndex\(n, fieldingHalf\) <= revealedThrough\) \{/)
+  // ADR-0009: the pitchers table is gated by the caller's lines, never a SealBox.
+  assert.doesNotMatch(src('components/inning/PitchersSection.jsx'), /<SealBox\b|import \{ SealBox|revealedThrough/)
+  // The box score's four grids render only inside the one reveal render, which
+  // reads the box score and nothing else reads it.
+  const box = src('screens/BoxScore.jsx')
+  assert.equal((box.match(/<SealBox\b/g) ?? []).length, 1, 'the box score keeps one SealBox')
+  assert.match(box, /\{\(\) => \{\s*const r = revealBoxScore\(revealCacheRef, feed,/)
+})
+
+// ---- slice T4: the small ledgers ----
+//
+// Six tables: the career register and the two splits (one tag, Ledger.jsx), the
+// recent-form table, the team page's prospects table, and the three small tables
+// that had no side space (awards, moved up, youngest regulars). `tag` finds the
+// <Table> by its className; `frame` and `label` are the expected props.
+const T4 = [
+  { css: '26-player-page.css', ns: 'ledger', jsx: 'components/player/Ledger.jsx', tag: 'className=\\{`ledger ', frame: 'sheet', label: true, gradient: true },
+  { css: '26b-recent-form.css', ns: 'formtrend__table', jsx: 'components/playerstats/RecentFormCard.jsx', tag: 'className="ledger formtrend__table"', frame: 'sheet', label: true },
+  { css: '31-wild-card.css', ns: 'prospecttable', jsx: 'screens/team/modules/minors/ProspectsCard.jsx', tag: 'className="ledger prospecttable"', frame: 'sheet', label: true },
+  { css: '67-awards-ledger.css', ns: 'awardtbl', jsx: 'components/player/AwardsLedger.jsx', tag: 'className="awardtbl"', frame: 'bare', label: false },
+  { css: '78-offseason.css', ns: 'movedup__table', jsx: 'components/offseason/MovedUp.jsx', tag: 'className="movedup__table"', frame: 'bare', label: false, words: true },
+  { css: '78-offseason.css', ns: 'seasonnote__table', jsx: 'components/offseason/YoungestRegulars.jsx', tag: 'className="seasonnote__table"', frame: 'bare', label: false, words: true },
+]
+
+test('T4: each small ledger renders on Table and never on a bare <table>', () => {
+  for (const { jsx, tag } of T4) {
+    const code = src(jsx)
+    assert.match(code, /import \{ Table \} from ["'][\w./]+\/ui\/table\/Table\.jsx["']/, `${jsx} imports Table`)
+    const own = [...code.matchAll(/<Table\b([^>]*)>/g)].map((m) => m[1]).filter((a) => new RegExp(tag).test(a))
+    assert.equal(own.length, 1, `${jsx}: ${tag} is on one <Table>`)
+    assert.doesNotMatch(code, /<table\b/, `${jsx} has no bare <table>`)
+    assert.doesNotMatch(code, /ledger-wrap/, `${jsx}: the scroll wrapper is the Table's wrap now`)
+  }
+})
+
+test('T4: frame, density, sticky and label are the ones the census set', () => {
+  for (const { jsx, tag, frame, label } of T4) {
+    const attrs = [...src(jsx).matchAll(/<Table\b([^>]*)>/g)].map((m) => m[1]).find((a) => new RegExp(tag).test(a)) ?? ''
+    if (frame === 'bare') assert.match(attrs, /frame="bare"/, `${jsx} sits in a Card or a card section: bare`)
+    else assert.doesNotMatch(attrs, /frame=/, `${jsx} is a sheet (the default)`)
+    assert.doesNotMatch(attrs, /density=|sticky/, `${jsx} is the row density, not sticky`)
+    if (label) assert.match(attrs, /label=/, `${jsx} scrolls sideways, so it has a label`)
+    else assert.doesNotMatch(attrs, /label=/, `${jsx} never scrolls, so it has no label`)
+  }
+})
+
+test('T4: the three Ledger callers each name their table, and the helper hands the name to Table', () => {
+  assert.match(src('components/player/Ledger.jsx'), /<Table\b[^>]*label=\{label\}/)
+  const names = [
+    ...src('components/player/CareerRegister.jsx').matchAll(/<Ledger\b[^>]*?label="([^"]+)"/g),
+    ...src('components/playerstats/SplitsSection.jsx').matchAll(/<Ledger\b[^>]*?label="([^"]+)"/g),
+  ].map((m) => m[1])
+  assert.equal(names.length, 3, 'three callers, three labels')
+  assert.equal(new Set(names).size, 3, 'two tables on one page get two different labels')
+})
+
+test('T4: a small ledger draws no frame, no cell padding, no head dress and no row rule of its own', () => {
+  const FRAME = ['border', 'border-radius', 'box-shadow', 'background', 'overflow', 'border-collapse', 'border-spacing', 'width']
+  const HEAD = ['padding', 'background', 'font-family', 'letter-spacing', 'text-transform', 'font-size', 'color', 'border-top', 'border-bottom']
+  for (const { css, ns, gradient } of T4) {
+    const fileRules = rules(read(css))
+    for (const [sel, body] of fileRules) {
+      const names = props(body)
+      for (const part of sel.split(',').map((x) => x.trim())) {
+        const plain = part.match(new RegExp(String.raw`^\.${ns} (thead th|tbody td|:where\(th, td\)|th|td)(:[\w-]+(\([^)]*\))?)?$`))
+        // The `.ledger` base also names the formtrend and prospect tables.
+        if (part === `.${ns}` && ns !== 'formtrend__table') {
+          for (const p of FRAME) assert.ok(!names.includes(p), `${css}: .${ns} still sets ${p}`)
+        } else if (plain) {
+          assert.ok(!names.includes('padding'), `${css}: ${part} still sets padding`)
+          // The ledger keeps ONE row rule, a gradient on the <tr>; its cells zero the Table's border-top.
+          if (gradient && part === '.ledger tbody td') continue
+          if (/th$/.test(plain[1])) for (const p of HEAD) assert.ok(!names.includes(p), `${css}: ${part} still sets ${p}`)
+          assert.ok(!names.includes('border-bottom'), `${css}: ${part} still draws a row rule`)
+          assert.ok(!names.includes('border-top'), `${css}: ${part} still draws a row rule`)
+        }
+      }
+    }
+  }
+})
+
+test('T4: .ledger left the frame block it shared with .standings, which T8 still deletes', () => {
+  const css = read('26-player-page.css')
+  const frame = rules(css).find(([, body]) => decl(body, 'box-shadow') === 'var(--shadow-card)' && decl(body, 'overflow') === 'hidden')
+  assert.ok(frame, 'the shared frame block still stands, for .standings')
+  assert.deepEqual(frame[0].split(',').map((s) => s.trim()), ['.standings'], 'only .standings keeps the frame')
+  for (const sel of ['.ledger-wrap', '.standings-wrap']) assert.ok(rules(css).some(([s]) => s === sel), `${sel} stays until T8`)
+  assert.equal(decl(ruleBody(css, '.ledger.standings th'), 'white-space'), 'nowrap', 'the Postseason odds sheet, still on the old base, keeps its one-line column names')
+})
+
+test('T4: the ledger keeps its footer, all-star, pencil, subtotal and nested rows, and its ONE gradient row rule', () => {
+  const css = read('26-player-page.css')
+  for (const sel of ['.ledger tfoot td', '.ledger tr.is-allstar td', '.ledger tr.reg-milb td', '.ledger tr.reg-subtotal td', '.ledger tr.ledger__nested .yr', '.ledger .ledger__label']) {
+    assert.ok(rules(css).some(([s]) => s.split(',').map((x) => x.trim()).includes(sel)), `${sel} stays in the namespace`)
+  }
+  assert.match(decl(ruleBody(css, '.ledger tbody tr'), 'background-image') ?? '', /^linear-gradient\(/, 'a row with a logo cell has a fractional height: one line per row')
+  assert.match(decl(ruleBody(css, '.ledger tbody td'), 'border-top') ?? '', /^(none|0)$/, 'so the cells draw none of their own')
+})
+
+test('T4: the phone ledger keeps its tighter side gutter through the Table\'s own custom property', () => {
+  const css = read('26-player-page.css')
+  const phone = rules(css).find(([s, b]) => s === '.ledger' && decl(b, '--table-cell') !== undefined)
+  assert.ok(phone, 'a .ledger rule sets --table-cell')
+  assert.equal(decl(phone[1], '--table-cell'), 'var(--space-1h) var(--space-1h)')
+})
+
+test('T4: a table of words says it is not a table of figures, and keeps its edge inset', () => {
+  for (const { css, ns, words } of T4.filter((t) => t.words)) {
+    const sheet = read(css)
+    const grid = ruleBody(sheet, `.${ns}`)
+    assert.equal(decl(grid, 'font-family'), 'inherit', `.${ns} holds names, not mono figures`)
+    assert.equal(decl(grid, 'font-variant-numeric'), 'normal')
+    assert.ok(words)
+    const wraps = rules(sheet).find(([s, b]) => s.startsWith(`.${ns} `) && /\bth\b/.test(s) && decl(b, 'white-space') === 'normal')
+    assert.ok(wraps, `.${ns} th wraps: a long name must not push the columns off a phone`)
+  }
+  const css = read('78-offseason.css')
+  assert.equal(decl(ruleBody(css, '.movedup__table :is(th, td):first-child'), 'padding-left'), 'var(--space-3)')
+  assert.equal(decl(ruleBody(css, '.movedup__table :is(th, td):last-child'), 'padding-right'), 'var(--space-3)')
+  assert.equal(decl(ruleBody(css, '.movedup__card'), 'margin-top'), 'var(--space-2)')
+  assert.equal(decl(ruleBody(css, '.seasonnote__table'), 'margin-top'), 'var(--space-4)')
+})
+
+test('T4: the awards table keeps its column widths and its left reading', () => {
+  const css = read('67-awards-ledger.css')
+  assert.equal(decl(ruleBody(css, '.awardtbl__yr'), 'width'), '62px')
+  assert.equal(decl(rules(css).find(([s]) => s.includes('.awardtbl__lg'))[1], 'width'), '52px')
+})
+
+test('T4: the seal pin: no moved ledger reads a reveal-only module or a seal', () => {
+  for (const { jsx } of T4) {
+    const code = src(jsx)
+    assert.doesNotMatch(code, /api\/(linescore|derive)\.js|<SealBox|revealedThrough/, `${jsx} is outside the spoiler scope and stays so`)
+  }
+})
+
+test('T4: the prospects table keeps the look it had in its Card: no extra sheet shadow', () => {
+  const body = rules(read('31-wild-card.css')).find(([sel]) => sel === '.table:has(> .prospecttable)')?.[1]
+  assert.ok(body, 'a rule reaches the Table wrap from .prospecttable')
+  assert.equal(decl(body, 'box-shadow'), 'none')
+})
+
+// ---- slice T7: the standalone boards ----
+//
+// The six /fouls boards, /umpires, /situational-records, a club's contract grid
+// and its ABS challenge board. One row per call site; `tags` is how many
+// <Table> tags in the file wear the namespace, in source order, and each `want`
+// is what that tag must say. Sticky is on for the contract grid only: no foul,
+// umpire or situational board pins a column. `keep` lists the dress the
+// board's own look still needs on a plain cell (named so a reader sees why).
+const T7 = [
+  {
+    css: '43-foul-tracker.css',
+    ns: 'foulboard',
+    jsx: 'screens/FoulTrackerPage.jsx',
+    want: [
+      { frame: 'bare', label: true },
+      { frame: 'bare', label: true },
+      { frame: 'bare', label: false },
+      { frame: 'bare', label: true },
+      { frame: 'bare', label: true },
+      { frame: 'bare', label: false },
+    ],
+    gone: ['standings foulboard', 'className="ledger-wrap"', 'foulboard__whiffcol-scroll'],
+  },
+  {
+    css: '38-umpire-pages.css',
+    ns: 'umprank',
+    jsx: 'screens/UmpireRankingsPage.jsx',
+    want: [{ frame: 'sheet', label: true }],
+    gone: ['standings umprank', 'ledger-wrap'],
+  },
+  {
+    css: 'situational-records/66a-detail.css',
+    ns: 'trrank',
+    jsx: 'screens/SituationalRecordsPage.jsx',
+    want: [{ frame: 'sheet', label: true }],
+    // The navy head and its 12px height are the broadcast board's own look (census, part 2).
+    keep: ['padding', 'background', 'color'],
+    gone: ['standings trrank', 'ledger-wrap'],
+  },
+  {
+    css: '70-contracts-grid.css',
+    ns: 'ctr__table',
+    jsx: 'components/salaries/ContractGrid.jsx',
+    want: [{ frame: 'bare', sticky: true, label: true }],
+    gone: ['ctr__scroll'],
+  },
+  {
+    css: 'report/challenge-card.css',
+    ns: 'chal__board',
+    jsx: 'screens/team/modules/TeamChallengeCard.jsx',
+    want: [{ frame: 'bare', label: false }],
+    gone: [],
+  },
+]
+
+const tableTags = (code, ns) => [...code.matchAll(/<Table\b([^>]*)>/g)].map((m) => m[1]).filter((a) => new RegExp(String.raw`className="${ns}(?![a-z0-9_-])`).test(a))
+
+test('T7: each board renders on Table with the frame, density, sticky and label the census gives it', () => {
+  for (const { jsx, ns, want, gone } of T7) {
+    const code = src(jsx)
+    assert.match(code, /import \{ Table \} from ["'][\w./]+\/ui\/table\/Table\.jsx["']/, `${jsx} imports Table`)
+    assert.doesNotMatch(code, /<table\b/, `${jsx} has no bare <table>`)
+    const tags = tableTags(code, ns)
+    assert.equal(tags.length, want.length, `${jsx}: ${want.length} <Table> tag(s) wear .${ns}`)
+    tags.forEach((a, i) => {
+      const { frame = 'sheet', sticky = false, label } = want[i]
+      assert.equal(a.match(/frame="(\w+)"/)?.[1] ?? 'sheet', frame, `${jsx} #${i + 1}: frame`)
+      assert.equal(a.match(/density="(\w+)"/)?.[1] ?? 'row', 'row', `${jsx} #${i + 1}: every T7 board is the row density`)
+      assert.equal(/\bsticky\b/.test(a), sticky, `${jsx} #${i + 1}: sticky`)
+      assert.equal(/\blabel=/.test(a), label, `${jsx} #${i + 1}: label`)
+    })
+    for (const g of gone) assert.ok(!code.includes(g), `${jsx} no longer carries "${g}"`)
+  }
+})
+
+test('T7: a moved board draws no frame, no cell padding and no head dress of its own', () => {
+  const FRAME = ['border', 'border-radius', 'box-shadow', 'background', 'overflow', 'border-collapse', 'border-spacing', 'width']
+  const HEAD = ['padding', 'background', 'font-family', 'letter-spacing', 'text-transform', 'font-size', 'color']
+  for (const { css, ns, keep = [] } of T7) {
+    for (const [sel, body] of rules(read(css))) {
+      const names = props(body)
+      for (const part of sel.split(',').map((x) => x.trim())) {
+        // Any rule whose last compound is a plain cell of this board: `.ns td`, `.wrap .ns thead th`, `@media` or not.
+        const plain = part.match(new RegExp(String.raw`(^|\s)\.${ns} (thead th|tbody td|:where\(th, td\)|th|td)(:[\w-]+(\([^)]*\))?)?$`))
+        if (part === `.${ns}`) {
+          for (const p of FRAME) assert.ok(!names.includes(p), `${css}: .${ns} still sets ${p}`)
+        } else if (plain) {
+          if (!keep.includes('padding')) assert.ok(!names.includes('padding'), `${css}: ${part} still sets padding`)
+          if (/th$/.test(plain[2])) for (const p of HEAD) if (!keep.includes(p)) assert.ok(!names.includes(p), `${css}: ${part} still sets ${p}`)
+        }
+      }
+    }
+  }
+})
+
+test('T7: no board takes its cells or its frame from the shared .standings or .ledger-wrap bases any more', () => {
+  for (const { css, ns } of T7) {
+    for (const [sel] of rules(read(css))) {
+      assert.doesNotMatch(sel, /\.standings(?![a-z0-9_-])/, `${css}: "${sel}" still hangs on .standings`)
+      assert.doesNotMatch(sel, new RegExp(String.raw`\.ledger-wrap(?![a-z0-9_-])`), `${css}: "${sel}" still hangs on .ledger-wrap`)
+    }
+    assert.ok(read(css).includes(`.${ns}`), `${css} still names .${ns}`)
+  }
+})
+
+test('T7: what the .standings base gave the ranked-name cell lives in the board\'s own namespace', () => {
+  // `.standings` set these on the cell; the boards left it. The 29 base stays (T8 deletes it).
+  for (const { css, ns } of [
+    { css: '43-foul-tracker.css', ns: 'foulboard' },
+    { css: '38-umpire-pages.css', ns: 'umprank' },
+    { css: 'situational-records/66a-detail.css', ns: 'trrank' },
+  ]) {
+    const all = rules(read(css))
+    const find = (sel) => all.find(([s]) => s.split(',').map((x) => x.trim()).includes(sel))?.[1]
+    assert.equal(decl(find(`.${ns} .team`) ?? '', 'text-align'), 'left', `${css}: .${ns} .team aligns left`)
+    const cell = find(`.${ns} td.team`) ?? ''
+    assert.equal(decl(cell, 'text-transform'), 'uppercase', `${css}: .${ns} td.team is the uppercase name cell`)
+    assert.equal(decl(cell, 'font-family'), 'var(--font-body)')
+    assert.equal(decl(find(`.${ns} td.team > *`) ?? '', 'display'), 'flex', `${css}: the name cell lays its parts out in a row`)
+    assert.equal(decl(find(ns === 'foulboard' ? '.foulboard th' : `.${ns} thead th`) ?? '', 'white-space'), 'normal', `${css}: a head may wrap, or a board that fit a phone starts to scroll`)
+  }
+  assert.equal(decl(rules(read('38-umpire-pages.css')).find(([s]) => s === '.umprank .team > .umprank__rank')?.[1] ?? '', 'align-self'), 'flex-start', 'the umpire rank rides the first line of a wrapped name')
+  // Only the foul boards mark the favorite club's row (the umpire and situational boards tint their own rows).
+  assert.match(decl(ruleBody(read('43-foul-tracker.css'), '.foulboard tr.is-me td') ?? '', 'background') ?? '', /--fav-accent/, 'the favorite-team row keeps its tint')
+  assert.ok(ruleBody(read('43-foul-tracker.css'), '.foulboard tr.foulboard__row--outlier td'), 'the outlier wash hangs on the board, not on .standings')
+})
+
+test('T7: a moved board keeps its own margin, layout and bleed', () => {
+  const fouls = read('43-foul-tracker.css')
+  const body = (css, sel) => ruleBody(css, sel) ?? ''
+  assert.equal(decl(body(fouls, '.foulboard--teams'), 'table-layout'), 'fixed')
+  assert.equal(decl(body(fouls, '.foulboard--teams__teamcol'), 'width'), '64px')
+  // The card bleeds its board edge to edge: the Table's wrap, not an old ledger-wrap.
+  assert.equal(decl(body(fouls, '.foulboard-block .metric__body > .table'), 'margin'), '0 calc(-1 * var(--space-4))')
+  assert.equal(decl(body(fouls, '.foulboard-block .metric__body > .table:first-child'), 'margin-top'), 'calc(-1 * var(--space-3))')
+  assert.equal(decl(body(fouls, '.foulboard-block .metric__body > .table:last-child'), 'margin-bottom'), 'calc(-1 * var(--space-4))')
+  assert.equal(ruleBody(fouls, '.foulboard-block .ledger-wrap'), null, 'the old bleed rule is gone')
+  assert.equal(decl(body(read('70-contracts-grid.css'), '.ctr__table'), 'min-width'), '560px')
+  assert.equal(decl(body(read('report/challenge-card.css'), '.chal__board'), 'margin'), 'var(--space-3) 0 0')
+  const trrank = read('situational-records/66a-detail.css')
+  assert.equal(decl(body(trrank, '.trrank__tablewrap .table'), 'box-shadow'), 'none', 'the raised shadow is the old wrapper\'s, so the Table wrap draws none inside it')
+  assert.equal(decl(body(trrank, '.trrank__tablewrap .trrank td'), 'height'), '44px')
+})
+
+test('T7: a text cell says it is words, not figures', () => {
+  const css = read('report/challenge-card.css')
+  assert.equal(decl(ruleBody(css, '.chal__board th.chal__who') ?? '', 'white-space'), 'normal', 'a player name may wrap')
+  assert.equal(decl(rules(read('70-contracts-grid.css')).find(([sel]) => sel === '.ctr__name')?.[1] ?? '', 'font-family'), 'var(--font-body)', 'a player name is not a mono figure')
+  assert.equal(decl(rules(read('70-contracts-grid.css')).find(([sel]) => sel === '.ctr__name')?.[1] ?? '', 'font-variant-numeric'), 'normal', 'the terms line is words with digits, not tabular figures')
+})
+
+test('T7: the contract grid pins its name column and its foot, opaque, with one rule', () => {
+  const css = read('70-contracts-grid.css')
+  assert.doesNotMatch(css, /position:\s*sticky/, 'Table pins the first column; the grid sets no sticky of its own')
+  for (const row of ['.ctr__group', '.ctr__subtotal', '.ctr__foot']) {
+    assert.ok(decl(ruleBody(css, row) ?? '', '--table-pin'), `${row} sets --table-pin, so the pinned cell is opaque in its own tint`)
+  }
+  assert.equal(ruleBody(css, '.ctr__scroll'), null, 'the old scroll wrapper is deleted with its rules')
+  for (const cls of ['.ctr__cell', '.ctr__age', '.ctr__agehead', '.ctr__yearhead', '.ctr__name', '.ctr__namehead', '.ctr__subtotal td', '.ctr__subtotal th']) {
+    assert.ok(!props(ruleBody(css, cls) ?? '').includes('padding'), `${cls} takes the row density, so it sets no padding`)
+  }
+  const own = (sel) => rules(css).find(([s]) => s.split(',').map((x) => x.trim()).includes(sel))?.[1] ?? ''
+  assert.equal(decl(own('.table--sticky .ctr__table .ctr__subtotal th:first-child'), 'position'), 'static', 'a subtotal label scrolls with its row: only the player column and the foot pin')
+  assert.equal(decl(own('.ctr__cell--free'), 'padding'), '0', 'the hatched cell keeps its zero padding')
+  assert.equal(decl(own('.ctr__foot td'), 'padding'), 'var(--space-2h)', 'the foot row keeps its own padding')
+  assert.equal(decl(own('.ctr__group td'), 'text-align'), 'left', 'the band label reads left: the Table right-aligns a figure cell')
+})
+
+test('T7: no moved page reads a reveal-only module, a seal or a stamp', () => {
+  for (const { jsx } of T7) {
+    const code = src(jsx)
+    assert.doesNotMatch(code, /api\/(linescore|derive)\.js|<SealBox|revealedThrough|from ['"][^'"]*stamp/i, `${jsx} stays outside the spoiler scope`)
+  }
+})
+
+// ---- slice T5: the report boards ----
+
+// One row per page that moved in T5: `boards` is the count of `standings rpt`
+// tables that became a sticky, labelled sheet, and `bare` the count of tables
+// that became a bare, unlabelled one (the doubleheaders drawer).
+const T5 = [
+  { jsx: 'screens/around-the-game/AttendancePage.jsx', boards: 3, bare: 0 },
+  { jsx: 'screens/around-the-game/BullpenPage.jsx', boards: 1, bare: 0 },
+  { jsx: 'screens/around-the-game/DoubleheadersPage.jsx', boards: 1, bare: 1 },
+  { jsx: 'screens/around-the-game/FarmSystemPage.jsx', boards: 3, bare: 0 },
+  { jsx: 'screens/around-the-game/PacePage.jsx', boards: 2, bare: 0 },
+  { jsx: 'screens/around-the-game/RunDifferentialPage.jsx', boards: 3, bare: 0 },
+  { jsx: 'screens/around-the-game/RunValuePage.jsx', boards: 3, bare: 0 },
+]
+const T5_CSS = '68-around-the-game.css'
+const t5Rule = (css, sel) => rules(css).find(([s]) => s === sel)?.[1] ?? ''
+
+test('T5: every report board renders on a sticky, labelled Table and never on a bare <table>', () => {
+  let tables = 0
+  for (const { jsx, boards, bare } of T5) {
+    const code = src(jsx)
+    assert.match(code, /import \{ Table \} from ["'][\w./]+\/ui\/table\/Table\.jsx["']/, `${jsx} imports Table`)
+    assert.doesNotMatch(code, /<table\b/, `${jsx} has no bare <table>`)
+    assert.doesNotMatch(code, /BoardScroller/, `${jsx}: the Table is the scroller now`)
+    assert.doesNotMatch(code, /className="[^"]*(?<![\w-])standings(?![\w-])/, `${jsx}: no table wears .standings`)
+    const tags = [...code.matchAll(/<Table\b([^>]*)>/g)].map((m) => m[1])
+    const sheets = tags.filter((a) => /className="rpt(?![\w-])/.test(a))
+    assert.equal(sheets.length, boards, `${jsx}: ${boards} report boards`)
+    for (const a of sheets) {
+      assert.match(a, /\bsticky\b/, `${jsx}: a report board pins its club column`)
+      assert.match(a, /\blabel=/, `${jsx}: a report board scrolls sideways, so it has a label`)
+      assert.doesNotMatch(a, /\b(frame|density)=/, `${jsx}: a report board is a sheet at row density, the defaults`)
+    }
+    const drawers = tags.filter((a) => /className="dh__drawer"/.test(a))
+    assert.equal(drawers.length, bare, `${jsx}: ${bare} bare tables`)
+    for (const a of drawers) {
+      assert.match(a, /frame="bare"/, 'the drawer sits in a cell, which draws the box')
+      assert.doesNotMatch(a, /\b(sticky|label)\b/, 'the drawer never scrolls on its own')
+    }
+    tables += tags.length
+  }
+  assert.equal(tables, 17, 'T5 moves 17 tables')
+})
+
+test('T5: two boards on one page have two different labels', () => {
+  for (const { jsx } of T5) {
+    const labels = [...src(jsx).matchAll(/<Table\b[^>]*\blabel=(?:"([^"]*)"|\{`([^`]*)`\})/g)].map((m) => m[1] ?? m[2])
+    // RunValue builds four labels from one template, one per column.
+    assert.equal(new Set(labels).size, labels.length, `${jsx}: a duplicate label ${labels}`)
+  }
+})
+
+test('T5: the report namespace draws no frame and no head dress the Table already draws', () => {
+  const FRAME = ['border', 'border-radius', 'box-shadow', 'background', 'overflow', 'border-collapse', 'border-spacing', 'width']
+  // The ABS boards (T6) still wear `standings rpt`. `.rpt thead th` keeps what only it says (the
+  // label tracking, the heavy rule under the head, nowrap). `.rpt td`'s mono face and
+  // `.rpt tbody th.team`'s padding stay too: they out-weigh `.rpt__between`, the ABS umpire
+  // board's row. T6 deletes them with the board.
+  const HEAD = ['padding', 'background', 'font-family', 'font-size', 'color', 'text-transform']
+  for (const [sel, body] of rules(read(T5_CSS))) {
+    const names = props(body)
+    for (const part of sel.split(',').map((x) => x.trim())) {
+      if (part === '.rpt') for (const p of FRAME) assert.ok(!names.includes(p), `${T5_CSS}: .rpt still sets ${p}`)
+      if (part === '.rpt td') assert.ok(!names.includes('padding'), `${T5_CSS}: ${part} still sets padding`)
+      if (part === '.rpt thead th') for (const p of HEAD) assert.ok(!names.includes(p), `${T5_CSS}: ${part} still sets ${p}`)
+    }
+  }
+})
+
+test('T5: the report boards keep the club cell, its pin tint and the rules the ABS boards read', () => {
+  const css = read(T5_CSS)
+  // The pinned cell is opaque in the board's own canvas ground, and a favorite row pins its own tint.
+  assert.equal(decl(t5Rule(css, '.rpt'), '--table-pin'), 'var(--bg-page)')
+  assert.equal(decl(t5Rule(css, '.rpt__row--mine'), '--table-pin'), 'var(--paper-3)')
+  // The sticky club cell keeps display: table-cell and the flex stays on the child.
+  assert.equal(decl(t5Rule(css, '.rpt td.team, .rpt tbody th.team'), 'display'), 'table-cell')
+  assert.equal(decl(t5Rule(css, '.rpt__club'), 'display'), 'flex')
+  // Rules the eight ABS boards (T6) still need.
+  assert.equal(decl(t5Rule(css, '.ledger-wrap .rpt'), 'overflow'), 'visible')
+  assert.ok(rules(css).some(([sel, b]) => sel.split(', ').includes('.rpt-region') && decl(b, 'contain') === 'paint'))
+  assert.equal(decl(t5Rule(css, '.rpt thead th'), 'border-bottom'), 'var(--bw-heavy) solid var(--navy)')
+})
+
+test('T5: the report boards stay inside their page (the wrap paints its own containment)', () => {
+  const css = read(T5_CSS)
+  const body = rules(css).find(([sel]) => sel.split(', ').includes('.bcast-sec .table'))?.[1]
+  assert.ok(body, `${T5_CSS}: a .bcast-sec .table rule`)
+  assert.equal(decl(body, 'contain'), 'paint', 'a board wider than its wrap must not widen the page')
+})
+
+test('T5: the doubleheaders drawer keeps its indent and width, and its row tints the pinned cell', () => {
+  const css = read(T5_CSS)
+  assert.equal(decl(t5Rule(css, '.dh__drawer'), 'margin-left'), 'var(--space-4)')
+  assert.equal(decl(t5Rule(css, '.dh__drawer'), 'width'), 'auto')
+  for (const p of ['border-collapse', 'border', 'background', 'box-shadow']) {
+    assert.ok(!props(t5Rule(css, '.dh__drawer')).includes(p), `.dh__drawer still sets ${p}`)
+  }
+  for (const [sel, body] of rules(css)) {
+    if (/^\.dh__drawer (th|td|thead th|tbody th)/.test(sel)) {
+      for (const p of ['padding', 'font-family', 'background']) assert.ok(!props(body).includes(p), `${sel} still sets ${p}`)
+    }
+  }
+  // The drawer sits inside a `.rpt` board, whose heavy head rule would reach it; the first body row's rule is the one line.
+  assert.equal(decl(t5Rule(css, '.dh__drawer thead th'), 'border'), '0')
+  // The drawer row's cell is the first cell of its row, so the sticky rule pins it: it must keep its ground.
+  assert.equal(decl(t5Rule(css, '.dh__drawerrow'), '--table-pin'), 'var(--paper-1)')
+  // Rows that tint themselves tint the pinned cell by the custom property, not a rule the pin out-weighs.
+  assert.equal(decl(t5Rule(css, '.dh__row:hover'), '--table-pin'), 'var(--paper-2)')
+  assert.equal(decl(t5Rule(css, '.dh__row--open'), '--table-pin'), 'var(--paper-1)')
+})
+
+test('T5: the e2e club-cell pin finds the new wrap, not the old scroller', () => {
+  const spec = readFileSync(join(SRC, '..', 'e2e', 'around-the-game.spec.js'), 'utf8')
+  assert.doesNotMatch(spec, /locator\('\.ledger-wrap'\)/)
+  assert.match(spec, /locator\('\.table'\)\.first\(\)/)
+  assert.match(spec, /expect\(overflow, 'board should be wider than a phone'\)\.toBeGreaterThan\(0\)/)
+  assert.match(spec, /expect\(Math\.abs\(after\.x - before\.x\)\)\.toBeLessThan\(2\)/)
+})
+
+test('T5: the seal pin: no report page reads a reveal-only module or a seal', () => {
+  for (const { jsx } of T5) {
+    assert.doesNotMatch(src(jsx), /api\/(linescore|derive)\.js|<SealBox|revealedThrough|api\/stamps?\b/, `${jsx} is outside the spoiler scope and stays so`)
+  }
+})

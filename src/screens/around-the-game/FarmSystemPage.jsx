@@ -19,7 +19,7 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
 import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
 import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
-import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../components/ui/table/Table.jsx'
 import { BarCell } from '../../components/around-the-game/BroadcastBar.jsx'
 
 // THE FARM REPORT — one number for how good an organisation's farm system is,
@@ -180,54 +180,52 @@ export function FarmSystemPage() {
               ))}
             </ul>
 
-            <BoardScroller label="Farm system index, every organisation ranked">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    <th className="team">Organisation</th>
-                    <th>Index</th>
-                    <th>Make-up</th>
-                    <th>Top name</th>
-                    <th>System record</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.orgId} className={r.orgId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
-                      <ClubCell
-                        teamId={r.orgId}
-                        name={clubShort(clubs, r.orgId)}
-                        rank={r.rank}
-                        tab="minors"
-                        note={`${r.prospects.length} ranked prospect${r.prospects.length === 1 ? '' : 's'}`}
+            <Table sticky label="Farm system index, every organisation ranked" className="rpt">
+              <thead>
+                <tr>
+                  <th className="team">Organisation</th>
+                  <th>Index</th>
+                  <th>Make-up</th>
+                  <th>Top name</th>
+                  <th>System record</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.orgId} className={r.orgId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
+                    <ClubCell
+                      teamId={r.orgId}
+                      name={clubShort(clubs, r.orgId)}
+                      rank={r.rank}
+                      tab="minors"
+                      note={`${r.prospects.length} ranked prospect${r.prospects.length === 1 ? '' : 's'}`}
+                    />
+                    <td>
+                      <BarCell value={r.index} min={0} max={100}>
+                        {r.index.toFixed(1)}
+                      </BarCell>
+                    </td>
+                    <td>
+                      <PillarBar
+                        pillars={r.pillars}
+                        weights={preset.weights}
+                        label={`${clubName(clubs, r.orgId)} — talent ${r.pillars.capital}, winning ${r.pillars.production}, youth ${r.pillars.youth}`}
                       />
-                      <td>
-                        <BarCell value={r.index} min={0} max={100}>
-                          {r.index.toFixed(1)}
-                        </BarCell>
-                      </td>
-                      <td>
-                        <PillarBar
-                          pillars={r.pillars}
-                          weights={preset.weights}
-                          label={`${clubName(clubs, r.orgId)} — talent ${r.pillars.capital}, winning ${r.pillars.production}, youth ${r.pillars.youth}`}
-                        />
-                      </td>
-                      <td>
-                        {r.topRank ? `#${r.topRank}` : '—'}
-                        <span className="rpt__note">
-                          {r.prospects[0]?.name ?? 'None ranked'}
-                        </span>
-                      </td>
-                      <td>
-                        {r.record.w}-{r.record.l}
-                        <span className="rpt__note">{pct3(r.pct)}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </BoardScroller>
+                    </td>
+                    <td>
+                      {r.topRank ? `#${r.topRank}` : '—'}
+                      <span className="rpt__note">
+                        {r.prospects[0]?.name ?? 'None ranked'}
+                      </span>
+                    </td>
+                    <td>
+                      {r.record.w}-{r.record.l}
+                      <span className="rpt__note">{pct3(r.pct)}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
 
             {r2 && (
               <p className="bcast-sec__note">
@@ -327,66 +325,62 @@ function OrgDetail({ row, clubs }) {
   if (!row) return null
   return (
     <>
-      <BoardScroller label="Affiliates of the selected organisation">
-        <table className="standings rpt">
-          <thead>
-            <tr>
-              <th className="team">{clubName(clubs, row.orgId)} — affiliates</th>
-              <th>Level</th>
-              <th>Record</th>
-              <th>Pct</th>
+      <Table sticky label="Affiliates of the selected organisation" className="rpt">
+        <thead>
+          <tr>
+            <th className="team">{clubName(clubs, row.orgId)} — affiliates</th>
+            <th>Level</th>
+            <th>Record</th>
+            <th>Pct</th>
+          </tr>
+        </thead>
+        <tbody>
+          {row.affiliates.map((a) => (
+            <tr key={a.id}>
+              <th scope="row" className="team">
+                {a.name}
+              </th>
+              <td>{a.level}</td>
+              <td>{a.w == null ? '—' : `${a.w}-${a.l}`}</td>
+              <td>{a.w == null || a.w + a.l === 0 ? '—' : pct3(a.w / (a.w + a.l))}</td>
             </tr>
-          </thead>
-          <tbody>
-            {row.affiliates.map((a) => (
-              <tr key={a.id}>
-                <th scope="row" className="team">
-                  {a.name}
-                </th>
-                <td>{a.level}</td>
-                <td>{a.w == null ? '—' : `${a.w}-${a.l}`}</td>
-                <td>{a.w == null || a.w + a.l === 0 ? '—' : pct3(a.w / (a.w + a.l))}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </BoardScroller>
+          ))}
+        </tbody>
+      </Table>
 
-      <BoardScroller label="Ranked prospects of the selected organisation">
-        <table className="standings rpt">
-          <thead>
+      <Table sticky label="Ranked prospects of the selected organisation" className="rpt">
+        <thead>
+          <tr>
+            <th className="team">Ranked prospects</th>
+            <th>Pos</th>
+            <th>Rank</th>
+            <th>Age</th>
+          </tr>
+        </thead>
+        <tbody>
+          {row.prospects.length === 0 ? (
             <tr>
-              <th className="team">Ranked prospects</th>
-              <th>Pos</th>
-              <th>Rank</th>
-              <th>Age</th>
+              <th scope="row" className="team">
+                None inside the published list
+              </th>
+              <td>—</td>
+              <td>—</td>
+              <td>—</td>
             </tr>
-          </thead>
-          <tbody>
-            {row.prospects.length === 0 ? (
-              <tr>
+          ) : (
+            row.prospects.map((p) => (
+              <tr key={p.playerId}>
                 <th scope="row" className="team">
-                  None inside the published list
+                  <PlayerLink id={p.playerId}>{p.name}</PlayerLink>
                 </th>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
+                <td>{p.position}</td>
+                <td>#{p.rank}</td>
+                <td>{p.age ?? '—'}</td>
               </tr>
-            ) : (
-              row.prospects.map((p) => (
-                <tr key={p.playerId}>
-                  <th scope="row" className="team">
-                    <PlayerLink id={p.playerId}>{p.name}</PlayerLink>
-                  </th>
-                  <td>{p.position}</td>
-                  <td>#{p.rank}</td>
-                  <td>{p.age ?? '—'}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </BoardScroller>
+            ))
+          )}
+        </tbody>
+      </Table>
     </>
   )
 }

@@ -21,7 +21,7 @@ import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
 import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
-import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../components/ui/table/Table.jsx'
 import { PlayerNameplate, RunCell } from '../../components/around-the-game/RunValueParts.jsx'
 
 // RUN VALUE LEADERS — the one board in this app where a centre fielder's glove,
@@ -181,43 +181,41 @@ export function RunValuePage() {
               </div>
             </div>
 
-            <BoardScroller label="Run value leaders">
-              {/* `rv__board--main` is the five-figure-column board only. The
-                  desktop column floor in 75-run-value.css is measured on THIS
-                  table's slack; the four single-skill boards share `rv__board`
-                  for the nameplate cell but have two columns and half the
-                  width, and must not take that floor. */}
-              <table className="standings rpt rv__board rv__board--main">
-                <thead>
-                  <tr>
-                    <th className="team">Player</th>
-                    <th>Total</th>
+            {/* `rv__board--main` is the five-figure-column board only. The
+                desktop column floor in 75-run-value.css is measured on THIS
+                table's slack; the four single-skill boards share `rv__board`
+                for the nameplate cell but have two columns and half the
+                width, and must not take that floor. */}
+            <Table sticky label="Run value leaders" className="rpt rv__board rv__board--main">
+              <thead>
+                <tr>
+                  <th className="team">Player</th>
+                  <th>Total</th>
+                  {COMPONENTS.map((c) => (
+                    <th key={c.key}>{shortHead(c)}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr
+                    key={r.id}
+                    className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
+                  >
+                    <PlayerNameplate
+                      player={r}
+                      rank={r.rank}
+                      tied={r.tied}
+                      sub={r.pos ?? undefined}
+                    />
+                    <RunCell value={r.value} strong />
                     {COMPONENTS.map((c) => (
-                      <th key={c.key}>{shortHead(c)}</th>
+                      <RunCell key={c.key} value={r[c.key]} />
                     ))}
                   </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r) => (
-                    <tr
-                      key={r.id}
-                      className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
-                    >
-                      <PlayerNameplate
-                        player={r}
-                        rank={r.rank}
-                        tied={r.tied}
-                        sub={r.pos ?? undefined}
-                      />
-                      <RunCell value={r.value} strong />
-                      {COMPONENTS.map((c) => (
-                        <RunCell key={c.key} value={r[c.key]} />
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </BoardScroller>
+                ))}
+              </tbody>
+            </Table>
 
             <dl className="rptkey">
               {COMPONENTS.map((c) => (
@@ -232,67 +230,63 @@ export function RunValuePage() {
           <BroadcastSection title="Best at one thing">
             <div className="rvleaders">
               {leaders.map((c) => (
-                <BoardScroller key={c.key} label={`${c.label} run value leaders`}>
-                  <table className="standings rpt rv__board">
-                    <thead>
-                      <tr>
-                        <th className="team">{c.label}</th>
-                        <th>Runs</th>
+                <Table key={c.key} sticky label={`${c.label} run value leaders`} className="rpt rv__board">
+                  <thead>
+                    <tr>
+                      <th className="team">{c.label}</th>
+                      <th>Runs</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {c.rows.map((r) => (
+                      <tr
+                        key={r.id}
+                        className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
+                      >
+                        <PlayerNameplate player={r} rank={r.rank} tied={r.tied} />
+                        <RunCell value={r.value} strong />
                       </tr>
-                    </thead>
-                    <tbody>
-                      {c.rows.map((r) => (
-                        <tr
-                          key={r.id}
-                          className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
-                        >
-                          <PlayerNameplate player={r} rank={r.rank} tied={r.tied} />
-                          <RunCell value={r.value} strong />
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </BoardScroller>
+                    ))}
+                  </tbody>
+                </Table>
               ))}
             </div>
           </BroadcastSection>
 
           <BroadcastSection title="By club">
-            <BoardScroller label="Run value by club">
-              <table className="standings rpt">
-                <thead>
-                  <tr>
-                    <th className="team">Club</th>
-                    <th>Total</th>
-                    {COMPONENTS.map((c) => (
-                      <th key={c.key}>{shortHead(c)}</th>
-                    ))}
-                    <th>Players</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {byClub.map((r) => (
-                    <tr
-                      key={r.teamId}
-                      className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
-                    >
-                      <ClubCell
-                        teamId={r.teamId}
-                        name={clubShort(clubs, r.teamId)}
-                        rank={r.rank}
-                        tied={r.tied}
-                        tab="numbers"
-                      />
-                      <RunCell value={r.value} strong />
-                      {COMPONENTS.map((c) => (
-                        <RunCell key={c.key} value={r[c.key]} />
-                      ))}
-                      <td className="rv__num">{r.n}</td>
-                    </tr>
+            <Table sticky label="Run value by club" className="rpt">
+              <thead>
+                <tr>
+                  <th className="team">Club</th>
+                  <th>Total</th>
+                  {COMPONENTS.map((c) => (
+                    <th key={c.key}>{shortHead(c)}</th>
                   ))}
-                </tbody>
-              </table>
-            </BoardScroller>
+                  <th>Players</th>
+                </tr>
+              </thead>
+              <tbody>
+                {byClub.map((r) => (
+                  <tr
+                    key={r.teamId}
+                    className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
+                  >
+                    <ClubCell
+                      teamId={r.teamId}
+                      name={clubShort(clubs, r.teamId)}
+                      rank={r.rank}
+                      tied={r.tied}
+                      tab="numbers"
+                    />
+                    <RunCell value={r.value} strong />
+                    {COMPONENTS.map((c) => (
+                      <RunCell key={c.key} value={r[c.key]} />
+                    ))}
+                    <td className="rv__num">{r.n}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
           </BroadcastSection>
 
           {/* THE SOURCE LINE, not a method essay. Four hundred words of "how

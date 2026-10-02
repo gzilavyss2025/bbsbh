@@ -877,13 +877,10 @@
    for the Arms tab's FULL page width — nested in this narrower card on a
    phone, that same split left too little room per numeric column (confirmed
    against a real game: "0.1" IP butted straight against "11" P with no
-   visible gap, reading as "0.111"). Scroll horizontally instead of letting
-   the columns compress below a legible width; the min-width is what actually
-   forces that — without it, `width: 100%` just shrinks to fit and there is
-   nothing to scroll. */
-.pitcherhandoff__tablewrap {
-  overflow-x: auto;
-}
+   visible gap, reading as "0.111"). Table's wrap scrolls horizontally instead
+   of letting the columns compress below a legible width; the min-width is what
+   actually forces that — without it, `width: 100%` just shrinks to fit and
+   there is nothing to scroll. */
 .pitcherhandoff .pitchers__grid {
   margin: 0;
   min-width: 460px;

@@ -120,13 +120,38 @@
   flex: 0 0 auto;
 }
 
+/* The wrapper lifts the board: a raised shadow, where the Table's own wrap
+   (system/table.css) would draw the card shadow. */
 .trrank__tablewrap {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-raised);
 }
-.trrank__tablewrap .trrank {
+.trrank__tablewrap .table {
   box-shadow: none;
 }
+/* The ranked-name cell: left-aligned, in the body face, with the rank and the
+   club in a row. */
+.trrank .team {
+  text-align: left;
+}
+/* A head names a column in words, and may wrap: the Table's figures may not. */
+.trrank thead th {
+  white-space: normal;
+}
+.trrank td.team {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+.trrank td.team,
+.trrank td.team > * {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+}
+/* The broadcast board's own head: navy, 12px tall. */
 .trrank__tablewrap .trrank thead th {
   padding-top: var(--space-3);
   padding-bottom: var(--space-3);
@@ -184,8 +209,8 @@
   .trrank__teamabbr {
     display: inline;
   }
-  .trrank__tablewrap .standings th,
-  .trrank__tablewrap .standings td {
+  .trrank__tablewrap .trrank th,
+  .trrank__tablewrap .trrank td {
     padding-right: var(--space-1h);
     padding-left: var(--space-1h);
   }

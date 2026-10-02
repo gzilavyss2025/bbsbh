@@ -6,7 +6,10 @@
 // MLB/MiLB totals, a `totals` array of `{ label, cells, className? }`.
 // `hideNarrow` is a set of whole-row column indices (matching `head`) that
 // collapse on a phone via CSS — the secondary stat columns the career register
-// sheds on a small screen.
+// sheds on a small screen. `label` names the scroll region (Table's label): every
+// caller passes one, so two ledgers on a page are two different Tab stops.
+
+import { Table } from '../ui/table/Table.jsx'
 
 export function Ledger({
   head,
@@ -17,6 +20,7 @@ export function Ledger({
   totals = null,
   hideNarrow = [],
   className = '',
+  label,
   ariaLabel,
   ariaDescribedBy,
 }) {
@@ -26,49 +30,48 @@ export function Ledger({
     [i === 0 ? 'lft yr' : i < leftCols ? 'lft ledger__label' : '', narrow(i)].filter(Boolean).join(' ')
   const footRows = totals ?? (total ? [{ label: totalLabel, cells: total }] : [])
   return (
-    <div className="ledger-wrap">
-      <table
-        className={`ledger ${className}`.trim()}
-        aria-label={ariaLabel}
-        aria-describedby={ariaDescribedBy}
-      >
-        <thead>
-          <tr>
-            {head.map((h, i) => (
-              <th key={h} className={[i < leftCols ? 'lft' : '', narrow(i)].filter(Boolean).join(' ')}>{h}</th>
-            ))}
+    <Table
+      label={label}
+      className={`ledger ${className}`.trim()}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+    >
+      <thead>
+        <tr>
+          {head.map((h, i) => (
+            <th key={h} className={[i < leftCols ? 'lft' : '', narrow(i)].filter(Boolean).join(' ')}>{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.key} className={[r.allStar && 'is-allstar', r.className].filter(Boolean).join(' ')}>
+            {r.cells.map((c, i) => {
+              const span = c && typeof c === 'object' && c.__ledgerSpan
+              return (
+                <td
+                  key={i}
+                  className={span ? `${cellClass(i)} ledger__span`.trim() : cellClass(i)}
+                  colSpan={span ? head.length - i : undefined}
+                >
+                  {span ? c.value : c}
+                </td>
+              )
+            })}
           </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.key} className={[r.allStar && 'is-allstar', r.className].filter(Boolean).join(' ')}>
-              {r.cells.map((c, i) => {
-                const span = c && typeof c === 'object' && c.__ledgerSpan
-                return (
-                  <td
-                    key={i}
-                    className={span ? `${cellClass(i)} ledger__span`.trim() : cellClass(i)}
-                    colSpan={span ? head.length - i : undefined}
-                  >
-                    {span ? c.value : c}
-                  </td>
-                )
-              })}
+        ))}
+      </tbody>
+      {footRows.length > 0 && (
+        <tfoot>
+          {footRows.map((t, ti) => (
+            <tr key={ti} className={`is-total ${t.className ?? ''}`.trim()}>
+              {[t.label, ...Array(leftCols - 1).fill(''), ...t.cells].map((c, i) => (
+                <td key={i} className={cellClass(i)}>{c}</td>
+              ))}
             </tr>
           ))}
-        </tbody>
-        {footRows.length > 0 && (
-          <tfoot>
-            {footRows.map((t, ti) => (
-              <tr key={ti} className={`is-total ${t.className ?? ''}`.trim()}>
-                {[t.label, ...Array(leftCols - 1).fill(''), ...t.cells].map((c, i) => (
-                  <td key={i} className={cellClass(i)}>{c}</td>
-                ))}
-              </tr>
-            ))}
-          </tfoot>
-        )}
-      </table>
-    </div>
+        </tfoot>
+      )}
+    </Table>
   )
 }

@@ -774,8 +774,9 @@ const C4 = [
     jsx: ['components/inning/RosterPanel.jsx', 'components/umpire/UmpireTendenciesFold.jsx'],
     ns: 'roster',
   },
-  // The Card IS the scroller: its own overflow-x wins over the Card's clip.
-  { css: '20-charts.css', sel: '.rolling__scroll', jsx: ['components/gamehud/RollingLine.jsx'], ns: 'rolling__scroll' },
+  // The Card only clips: the Table inside it is the scroller (#1132, slice T3),
+  // so the Card's own overflow-x rule is gone (`gone`).
+  { css: '20-charts.css', sel: '.rolling__scroll', jsx: ['components/gamehud/RollingLine.jsx'], ns: 'rolling__scroll', gone: true },
   { css: 'charts/winprob.css', sel: '.winprob', jsx: ['components/charts/WinProbChart.jsx'], ns: 'winprob' },
   { css: '20-charts.css', sel: '.marginnotes', jsx: ['components/inning/MarginNotes.jsx'], ns: 'marginnotes' },
   // ADR-0009: the table is gated by revealedThrough in the caller, not here.
@@ -840,10 +841,15 @@ test('C4: each block keeps its own margin and inset', () => {
   }
 })
 
-// The running line scrolls sideways. The Card is the scroller, so its own
-// overflow-x (a later partial) wins over the Card's clip on that axis.
+// The running line scrolls sideways. Its grid is a Table in the Card, and the
+// Table's wrap is the one scroller (#1132, slice T3): the Card only clips.
 test('C4: the running line is still a horizontal scroller', () => {
-  const body = ruleBody(read('20-charts.css'), '.rolling__scroll')
+  assert.match(
+    src('components/gamehud/RollingLine.jsx'),
+    /<Card as="div" body="flush" className="rolling__scroll">\s*<Table\b[^>]*\bclassName="rolling__grid"/,
+    'the grid sits on a Table, straight inside the Card',
+  )
+  const body = ruleBody(read('system/table.css'), '.table')
   assert.equal(decl(body, 'overflow-x'), 'auto')
   assert.equal(decl(body, '-webkit-overflow-scrolling'), 'touch')
 })
@@ -1906,8 +1912,8 @@ test('C6c: the two tile grids keep their --border-rule ground inside a ledger Ca
 test('C6c: the moved-up table sits in a flush sheet Card and its head stays outside', () => {
   const code = src('components/offseason/MovedUp.jsx')
   assert.match(code, /import \{ Card \} from ["']..\/ui\/frame\/Card\.jsx["']/)
-  const m = code.match(/<\/SectionHead>\s*<Card\b([^>]*)>\s*<table className="movedup__table">[\s\S]*?<\/table>\s*<\/Card>/)
-  assert.ok(m, 'the table is the Card\'s only child, straight after the head')
+  const m = code.match(/<\/SectionHead>\s*<Card\b([^>]*)>\s*<Table\b(?=[^>]*\bframe="bare")(?=[^>]*\bclassName="movedup__table")[^>]*>[\s\S]*?<\/Table>\s*<\/Card>/)
+  assert.ok(m, 'the table is the Card\'s only child, straight after the head, and a bare Table (the Card draws the box)')
   assert.match(m[1], /as="div"/)
   assert.doesNotMatch(m[1], /frame=/, 'the table is a sheet (the default)')
   assert.match(m[1], /body="flush"/)

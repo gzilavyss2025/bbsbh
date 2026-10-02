@@ -3,6 +3,7 @@ import { useNav, useLinkScope } from '../../lib/nav.js'
 import { playerPath } from '../../lib/route.js'
 import { PenDots } from '../workload/PenDots.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { Table } from '../ui/table/Table.jsx'
 
 // Running pitching lines for every pitcher who has appeared in a revealed
 // half-inning — a separate block per team, each led by the team name with its
@@ -43,7 +44,7 @@ export const PitchersSection = memo(function PitchersSection({ teams }) {
             {t.name}
             {t.penCounts && <PenDots counts={t.penCounts} size="sm" />}
           </h4>
-          <table className="pitchers__grid">
+          <Table frame="bare" density="tight" className="pitchers__grid">
             <thead>
               <tr>
                 <th className="pitchers__pitcher">Pitcher</th>
@@ -81,7 +82,7 @@ export const PitchersSection = memo(function PitchersSection({ teams }) {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </div>
       ))}
     </Card>

@@ -12,6 +12,7 @@ import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../components/ui/frame/Card.jsx'
+import { Table } from '../../../components/ui/table/Table.jsx'
 import { ordinal } from '../../../lib/format.js'
 
 // THE TEAM HUB'S CHALLENGE CARD, on the Numbers tab — who on this club argues
@@ -159,7 +160,7 @@ export function TeamChallengeCard({ data, teamId, clubName, level = 'MLB' }) {
         />
       ) : null}
 
-      <table className="chal__board">
+      <Table frame="bare" className="chal__board">
         <thead>
           <tr>
             <th className="chal__who">
@@ -190,7 +191,7 @@ export function TeamChallengeCard({ data, teamId, clubName, level = 'MLB' }) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
 
       {/* The one real sentence on the card, so it takes `.rptprose` — the name
           inside it needs `.rptprose .plink` for the reason report/chrome.css
