@@ -21,6 +21,11 @@
 //                           'League Championship Series' | 'World Series'
 //                event      Savant `events` ('single', 'strikeout', 'field_out', ...)
 //                description  the play's text, '' when Savant sends none
+//                pitchType  Savant pitch_type of the LAST pitch ('FF', 'SL', ...),
+//                           null when blank
+//                bbType     Savant bb_type of the ball in play ('ground_ball',
+//                           'fly_ball', 'line_drive', 'popup'), null when none
+//                           (a walk, a strikeout, a hit by pitch)
 //                pitches    tracked pitches in the plate appearance (rows with a
 //                           plate_x), a number; 0 for a walk by the pitch clock }
 //   totals   `totalsOf(pas)`:
@@ -119,6 +124,8 @@ export function plateAppearances(rows) {
       roundLabel: ROUND_LABELS[r.game_type] ?? r.game_type,
       event: r.events,
       description: r.des ?? '',
+      pitchType: r.pitch_type || null,
+      bbType: r.bb_type || null,
       pitches: pitches.get(keyOf(r)) ?? 0,
     }))
     .sort((a, b) => b.date.localeCompare(a.date) || b.gamePk - a.gamePk || b.atBat - a.atBat)

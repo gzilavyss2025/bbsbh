@@ -32,11 +32,11 @@ const COLE = fixture('judge-cole.csv')
 const VS_TOTAL = JSON.parse(fixture('vs-player-total.json'))
 
 // A synthetic Savant CSV: only the columns the module reads.
-const COLS = 'game_pk,at_bat_number,game_date,game_type,events,des,plate_x,stand,p_throws'
+const COLS = 'game_pk,at_bat_number,game_date,game_type,events,des,plate_x,stand,p_throws,pitch_type,bb_type'
 const csvRow = (o = {}) =>
   [
     o.game_pk ?? 1, o.at_bat_number ?? 1, o.game_date ?? '2025-04-08', o.game_type ?? 'R',
-    o.events ?? '', o.des ?? '', o.plate_x ?? '0.1', o.stand ?? 'R', o.p_throws ?? 'L',
+    o.events ?? '', o.des ?? '', o.plate_x ?? '0.1', o.stand ?? 'R', o.p_throws ?? 'L', o.pitch_type ?? '', o.bb_type ?? '',
   ].join(',')
 // A `today` that clamps nothing, so these tests do not depend on the clock.
 const FAR_FUTURE = '2099-01-01'
@@ -140,6 +140,42 @@ test('Judge vs Cole: 7 plate appearances, 3 regular season and 4 LCS', () => {
   assert.equal(pas.filter((p) => p.round === 'R').length, 3)
   assert.equal(pas.filter((p) => p.round === 'L').length, 4)
   assert.equal(pas.find((p) => p.round === 'L').roundLabel, 'League Championship Series')
+})
+
+// The last pitch's type and the batted-ball type, from the event row. The design
+// prints GO / FO / LO / PO for an out from bbType, and the pitch that ended it.
+const tally = (pas, field) => {
+  const t = {}
+  for (const p of pas) t[p[field]] = (t[p[field]] ?? 0) + 1
+  return t
+}
+
+test('Judge vs Verlander: the pitch type and batted-ball type of each plate appearance', () => {
+  const pas = plateAppearances(parseSavantRows(VERLANDER))
+  assert.deepEqual(tally(pas, 'pitchType'), { FF: 19, SL: 15, CU: 5, CH: 2 })
+  assert.deepEqual(tally(pas, 'bbType'), { fly_ball: 12, ground_ball: 7, line_drive: 6, popup: 3, null: 13 })
+  // The 13 with no batted ball are the 3 walks and 10 strikeouts.
+  assert.deepEqual(
+    [...new Set(pas.filter((p) => p.bbType === null).map((p) => p.event))].sort(),
+    ['strikeout', 'walk'],
+  )
+})
+
+test('Judge vs Cole: the pitch type and batted-ball type of each plate appearance', () => {
+  const pas = plateAppearances(parseSavantRows(COLE))
+  assert.deepEqual(tally(pas, 'pitchType'), { FF: 4, SL: 3 })
+  assert.deepEqual(tally(pas, 'bbType'), { fly_ball: 1, ground_ball: 2, popup: 1, null: 3 })
+})
+
+test('a blank pitch_type or bb_type is null, never an empty string', () => {
+  const [pa] = plateAppearances(parseSavantRows(csv(csvRow({ events: 'strikeout' }))))
+  assert.equal(pa.pitchType, null)
+  assert.equal(pa.bbType, null)
+  const [hit] = plateAppearances(
+    parseSavantRows(csv(csvRow({ events: 'field_out', pitch_type: 'CH', bb_type: 'popup' }))),
+  )
+  assert.equal(hit.pitchType, 'CH')
+  assert.equal(hit.bbType, 'popup')
 })
 
 test('a plate appearance is keyed by game_pk + at_bat_number', () => {
