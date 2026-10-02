@@ -258,3 +258,32 @@ A builder must also handle these:
 - **Round 5:** remove the sealed caption, "Rest of half", "Before the next pitch",
   "No outs" and the repeated pitch count; "41 PITCHES"; center the Next text;
   center ▲/▼ over the inning number.
+
+## 12. When the build is done: delete this folder
+
+This folder is scaffolding for the build. It must not outlive it. The PR that
+ships the last slice of #1389 also deletes `.scratch/innings-console-redesign/`.
+
+Before you delete it, move what must survive to the place that keeps it:
+
+1. **The design decisions** → an amendment to ADR-0043 (or a new ADR that
+   supersedes it): the bar with no "Rest of half", the bases strip, the pitch
+   track as numbers and X, the sheets, and the notation rulings Gary made in §6.
+2. **The rules Gary set (§5)** → `src/CLAUDE.md`, under the innings viewer, so
+   the next agent who touches the screen loads them.
+3. **The six test games (§3)** → `docs/test-games.md`, each with the moment it
+   exercises.
+4. **The feed gotchas (§7)** → the module headers they belong to
+   (`halfInningFeed.js`, `runnerNotes.js`, `challenges.js`, `expresslane/runners.js`)
+   or `docs/api/`, wherever a reader of that code will find them.
+5. **The spoiler guards (§8)** → `spoiler-manifest.json` and `src/api/CLAUDE.md`,
+   as the build adds each reveal-only read.
+
+Then delete the whole folder in the same PR, and say so in the PR body.
+
+- `mockup/` has no use once the real screen exists. The live canvas
+  (https://claude.ai/artifact/EaATo3vrecodgQTdWcSRF1) keeps the visual record.
+- `git log -- .scratch/innings-console-redesign/` keeps the history.
+- Check that nothing still links here: search the repo for
+  `innings-console-redesign`. #1389 links here too, so add a closing comment on
+  it that points to the ADR that replaced this folder.
