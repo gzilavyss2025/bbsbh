@@ -237,22 +237,23 @@
    would overflow — instead the phone shows the essentials (W/L/Pct/GB + run
    differential, the one compact "advanced" stat) with NO horizontal scroll,
    and the wide layout reveals the rest (home/away splits, runs for/against,
-   streak, last-ten). `.st-ext` columns are hidden below the breakpoint. */
-.standings--full th,
-.standings--full td {
-  padding: var(--space-1h) var(--space-1h);
-  font-size: var(--fs-compact);
-}
-.standings--full .st-ext {
+   streak, last-ten). `.st-ext` columns are hidden below the breakpoint. The
+   Table (system/table.css) draws the box, the cells and the pinned club
+   column; this is the board's own column set, type size and club width. */
+.clubtable--full .st-ext {
   display: none;
 }
+/* A board head may wrap to two lines, as it did on the old base: the Table
+   keeps every cell on one line, which would widen a scrolled board. */
+.clubtable--full thead th {
+  white-space: normal;
+}
 /* Opt-in escape hatch (StandingsPage's "More columns" toggle, phone-only):
-   reveal the extra columns anyway and let .ledger-wrap's existing
-   overflow-x:auto take over as real horizontal scroll — the sticky team
-   column (below) keeps the row identifiable while scrolled. Unguarded by the
-   740px query on purpose, so it also works below it; harmless at/above it
-   since .st-ext is already shown there regardless. */
-.standings--full.is-expanded .st-ext {
+   reveal the extra columns anyway and let the Table's wrap scroll sideways —
+   the pinned club column keeps the row identifiable while scrolled. Unguarded
+   by the 740px query on purpose, so it also works below it; harmless at/above
+   it since .st-ext is already shown there regardless. */
+.clubtable--full.is-expanded .st-ext {
   display: table-cell;
 }
 /* Wide layout shows the extra columns outright — moved here from
@@ -261,67 +262,23 @@
    is the only thing deciding them; splitting them across two files broke the
    moment this file became a per-route chunk that links after the core. */
 @media (min-width: 740px) {
-  .standings--full .st-ext {
+  .clubtable--full .st-ext {
     display: table-cell;
   }
-  .standings--full th,
-  .standings--full td {
-    padding: var(--space-2) var(--space-2);
-    font-size: var(--fs-small);
+}
+/* A phone board sets its figures a step smaller; the wide layout takes the
+   Table's own size. */
+@media (max-width: 739.98px) {
+  .clubtable--full td {
+    font-size: var(--fs-compact);
   }
 }
-/* Team column pinned as a safety net: the phone set fits without scroll, but a
-   large accessibility font (or a very long club name) can still force overflow,
-   and a stuck team name keeps the row readable when it does. */
-.standings--full th.team,
-.standings--full td.team {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  background: var(--surface-card);
+/* The club column is pinned (the Table's `sticky`) as a safety net: the phone
+   set fits without scroll, but a large accessibility font (or a very long club
+   name) can still force overflow, and a stuck team name keeps the row readable
+   when it does. */
+.clubtable--full .team {
   min-width: 116px;
-}
-/* Safari drops `position: sticky` on a table cell whose OWN `display` has
-   been changed away from `table-cell` (a WebKit quirk — Chromium tolerates
-   it fine, which is why this only ever showed up on an iPhone): the shared
-   `.standings td.team { display: flex }` above — needed by boards like Umpire
-   Rankings that lay a rank number and the name out as sibling children of the
-   cell itself — silently un-stuck this column while scrolling. Standings' own
-   `.team` cell has exactly one child (`TeamLink`, already flexed by the `> *`
-   half of that same rule), so putting the TD back to its native table-cell
-   display here costs nothing and restores stickiness. */
-.standings--full td.team {
-  display: table-cell;
-  vertical-align: middle;
-}
-.standings--full thead th.team {
-  z-index: 2;
-  background: var(--bg-page);
-  /* The wrap's own rounded top-left corner (.standings-wrap) clips a plain
-     static child fine, but a position:sticky element with its own z-index —
-     this cell — sits in its own compositor layer that some browsers don't
-     clip to an ancestor's border-radius. Left unrounded, its square corner
-     pokes a small notch of --bg-page (a visibly different tone from the
-     surrounding card) right where the outer curve should be, reading as a
-     stray misplaced rectangle. Round it directly instead of relying on the
-     ancestor's clip. */
-  border-top-left-radius: var(--radius-md);
-}
-.standings--full tbody tr:last-child td.team {
-  border-bottom-left-radius: var(--radius-md);
-}
-/* Solid (not the translucent row tint) so scrolled cells can't bleed through
-   the pinned column. With `border-collapse: separate` the cell keeps its own
-   `border-top` (from `.standings td`), so the row rule stays continuous across
-   the pinned/scrolling seam — no border hacks needed here. Same 10% as
-   `.standings tr.is-me td` above, just mixed directly into --surface-card
-   instead of transparent (mixing X% into transparent, then compositing over
-   a solid --surface-card background, is mathematically the same rendered
-   color as mixing that X% directly into --surface-card) — keep these two
-   percentages equal, or the pinned cell reads as a second, mismatched
-   highlight tint stacked on top of the row's own. */
-.standings--full tr.is-me td.team {
-  background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card));
 }
 
 
@@ -365,10 +322,10 @@
    clear of unreadable: the row is still the page's ordinary body ink at 62%,
    and the `e` chip on it does not fade, since that chip is the reason the row
    is dimmed at all. */
-.standings tr.is-eliminated td {
+.clubtable tr.is-eliminated td {
   opacity: 0.62;
 }
-.standings tr.is-eliminated .clinchmark {
+.clubtable tr.is-eliminated .clinchmark {
   opacity: 1;
 }
 

@@ -791,85 +791,55 @@
   white-space: nowrap;
 }
 
-/* standings */
-.standings th,
-.standings td {
-  padding: var(--space-1h) var(--space-2);
-  font-size: var(--fs-small);
-  text-align: right;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
-.standings thead th {
-  border-top: none;
-  background: var(--bg-page);
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  font-size: var(--fs-label);
-  color: var(--text-caption);
-}
-.standings td {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  /* Same reasoning as .ledger td: data cells are single tokens (a W-L split
-     like "35-15", a streak code like "W2") — never let one wrap at its
-     hyphen onto a second row. Auto table layout then sizes each column to
-     fit its widest one-line value instead of squeezing it into wrapping;
-     .ledger-wrap's horizontal scroll (or, on phone, the "More columns"
-     toggle) is what absorbs a table that ends up wider than the viewport. */
-  white-space: nowrap;
-}
-.standings .team {
+/* CLUB TABLE — one club a row (#1132, slice T8): the /standings boards, the
+   /postseason-race mini table, the team hub's division standings, the
+   Postseason odds sheet and the /game-notes-debug list. The Table
+   (system/table.css) draws the box, the cells, the head row and the row rule;
+   this is what a club table IS: its name cell, its favorite-team row and its
+   run-differential tones. */
+.clubtable .team {
   text-align: left;
 }
 /* Body cells only — a header `th.team` reads as a plain column caption like
-   every other header in the row (muted color, condensed font, via
-   `.standings thead th`), not the bold body-text emphasis a data row's
-   player/team name gets. */
-.standings td.team {
+   every other header in the row, not the bold body-text emphasis a data row's
+   team name gets. */
+.clubtable td.team {
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
   color: var(--text-body);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
-/* Body cells only — a header `th.team` is plain left-aligned text (no
-   rank/logo/name-abbr row to lay out), and `display: flex` on a `<th>`
-   overrides its native `table-cell` display, which is what makes it
-   auto-stretch to match a taller row (e.g. this board's own header row,
-   where "% With 2 Strikes" wraps to two lines). Flexing it anyway sized the
-   cell to its own single-line content instead, leaving a strip of the
-   card's white background exposed at the bottom of just that header cell. */
-.standings td.team,
-.standings td.team > * {
+/* Body cells only — `display: flex` on a `<th>` overrides its native
+   `table-cell` display, which is what makes it auto-stretch to match a taller
+   row. A pinned cell stays a table cell anyway: the Table's sticky rule
+   restates it (Safari drops sticky on any other display), and the `> *` half
+   flexes its one child. */
+.clubtable td.team,
+.clubtable td.team > * {
   display: flex;
   align-items: center;
   gap: var(--space-1h);
 }
-/* A name that wraps to two lines (a long surname on a narrow phone, e.g.
-   "Pete Crow-Armstrong") grows the .team row's height; align-items: center
-   above then floats the rank number and team-abbreviation siblings at the
-   row's vertical MIDDLE instead of by the name's first line, reading as a
-   stray gap between the name and its team. Pin those two side items to the
-   top of the row instead — a single-line name is unaffected (every sibling
-   is the same height already), so this only changes the wrapped case. */
-.standings .team > .umprank__rank,
-.standings .team > .foulboard__team {
-  align-self: flex-start;
-}
 /* The highlighted favorite-team row tints to that club's own accent
-   (--fav-accent, a per-team hex set inline by StandingsPage from
+   (--fav-accent, a per-team hex set inline by the row's caller from
    favoriteAccentColor() — see lib/teams.js), same convention as
    .gamecard--pinned / .tlead__row--fav, rather than a fixed green — an
    Orioles fan's row reads orange, a Reds fan's reads red. Falls back to the
-   original --field green for a pinned team with no known accent (MiLB). */
-.standings tr.is-me td {
+   original --field green for a pinned team with no known accent (MiLB).
+   A pinned club cell must be opaque, so --table-pin mixes the same 10% into
+   --surface-card instead of transparent: the same rendered colour over the
+   card. Keep the two percentages equal. */
+.clubtable tr.is-me {
+  --table-pin: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card));
+}
+.clubtable tr.is-me td {
   background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, transparent);
 }
-.standings tr.is-me .team {
+.clubtable tr.is-me .team {
   color: var(--fav-accent, var(--field-deep));
 }
-.standings td.standings__diff--positive {
+.clubtable td.standings__diff--positive {
   color: var(--accent-positive);
 }
 /* Home/Away split columns — phone width is too narrow for them alongside
@@ -883,13 +853,13 @@
     display: table-cell;
   }
 }
-.standings td.standings__diff--negative {
+.clubtable td.standings__diff--negative {
   color: var(--accent-negative);
 }
 /* Division magic-number column once a club has clinched (at least a tie for)
    its division — same "good news" tone as the positive run differential, bolded to read as a
    verdict rather than just another number. */
-.standings td.is-clinched {
+.clubtable td.is-clinched {
   color: var(--accent-positive);
   font-weight: var(--w-semibold);
 }

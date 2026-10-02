@@ -11,9 +11,9 @@ import { test, expect } from './fixtures.js'
 // slid to x = -261 and the board became eighteen rows of unattributable
 // numbers.
 //
-// The cause is written up in styles/26-player-page.css: `position: sticky`
+// The cause is written up in styles/system/table.css: `position: sticky`
 // resolves against the nearest ancestor whose overflow is not `visible`, and
-// the shared `.standings` base sets `overflow: hidden` on the TABLE — which
+// the old shared standings base set `overflow: hidden` on the TABLE — which
 // never scrolls. `Table` (styles/system/table.css) cannot fall into it: the
 // grid is always `overflow: visible` and the wrap scrolls. This spec is what
 // stops it regressing the next time someone touches either stylesheet,
