@@ -5,7 +5,9 @@ import { Table } from '../ui/table/Table.jsx'
 // rank in each among the clubs that played it. The by-team half of the
 // postseason page: the board for one split reads ACROSS clubs, this reads DOWN
 // one club. `groups` is teamRankRows' answer; `pathFor(metricId)` spells the
-// address of that split's full board.
+// address of that split's full board. `renderRecord(row)` optionally dresses
+// the W-L cell, as the board's does.
+
 function RankText({ row }) {
   if (row.rank == null) return <span className="trrank__ranktext">—</span>
   return (
@@ -16,7 +18,7 @@ function RankText({ row }) {
   )
 }
 
-export function TeamRecordsList({ groups, pathFor }) {
+export function TeamRecordsList({ groups, pathFor, renderRecord }) {
   const linkProps = useRouteLink()
   return (
     <div className="trrank__teamlist">
@@ -44,7 +46,7 @@ export function TeamRecordsList({ groups, pathFor }) {
                       {row.k}
                     </a>
                   </td>
-                  <td className="trrank__num">{row.v}</td>
+                  <td className="trrank__num">{renderRecord ? renderRecord(row) : row.v}</td>
                   <td className="trrank__num trrank__pct">{row.pct}</td>
                   <td className="trrank__num">
                     <RankText row={row} />

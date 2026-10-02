@@ -45,6 +45,15 @@ and its figure but takes no rank, the same as a club that never played the
 split (`minPlayed` in `rankMetric`). A single postseason has no floor: its
 samples are a handful of games for every club.
 
+**6. A record opens onto its games from the ledger, with no fetch.** Each W-L
+figure on the page is a door to a sheet of the games it counts, with final
+scores and a link to each box score (the player Box Lines, ADR-0069, drawn for
+a team). The ledger carries `pk`, `gt` and a per-season `abbrs` map for it. The
+abbreviations are stored because a box-score address is spelled from the
+schedule's abbreviations of that date (FLA, not today's MIA). The page is an
+open surface (ADR-0034) and its W-L already counts these games, so the sheet
+shows the scores; the box score itself stays sealed.
+
 ## Consequences
 
 - The postseason regenerates with `--export-only` and no network when a

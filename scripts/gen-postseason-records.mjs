@@ -24,6 +24,10 @@
 //   node scripts/gen-postseason-records.mjs                       # this season
 //   node scripts/gen-postseason-records.mjs --seasons=1995-2025   # the backfill
 //   node scripts/gen-postseason-records.mjs --export-only         # no network
+//   REFREEZE=1 node scripts/gen-postseason-records.mjs --seasons=1995-2025 --refetch
+//                                  # re-read games already on file, for a new
+//                                  # stored fact; REFREEZE lets the frozen
+//                                  # season dumps change, on purpose
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { writeShardsWithStamp } from './lib/io.js'
@@ -50,7 +54,7 @@ const CONCURRENCY = 6
 const CHECKPOINT_EVERY = 300
 const MLB = 1
 
-async function sweepSeason(db, season) {
+async function sweepSeason(db, season, { refetch = false } = {}) {
   let slate
   try {
     slate = await getJson(
@@ -61,9 +65,13 @@ async function sweepSeason(db, season) {
     console.error(`schedule ${season}: ${err.message}`)
     return
   }
-  const existing = new Set(
-    db.prepare('SELECT game_pk FROM postseason_record_ingested_games').all().map((r) => String(r.game_pk)),
-  )
+  // --refetch ignores the ingested guard and reads every Final game again,
+  // which is how a new fact reaches games already on file (see the header).
+  const existing = refetch
+    ? new Set()
+    : new Set(
+        db.prepare('SELECT game_pk FROM postseason_record_ingested_games').all().map((r) => String(r.game_pk)),
+      )
   const candidates = postseasonCandidates(slate, existing)
   console.log(`${season}: ${candidates.length} game(s) to ingest`)
   if (candidates.length === 0) return
@@ -120,7 +128,7 @@ async function main() {
 
   if (!args['export-only']) {
     for (const season of parseSeasons(args.seasons, new Date().getUTCFullYear())) {
-      await sweepSeason(db, season)
+      await sweepSeason(db, season, { refetch: Boolean(args.refetch) })
     }
   }
 

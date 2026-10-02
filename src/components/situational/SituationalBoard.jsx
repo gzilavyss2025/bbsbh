@@ -50,8 +50,10 @@ function LeadersSpotlight({ rows, metric }) {
 // `result` is rankMetric's answer, `group` the split's group
 // ({ title, key, metrics }) or null, `clubAbbr` a Map(teamId -> abbreviation)
 // for the "last time" column, and `pathFor` spells an address from
-// { category, metric, sort, order }.
-export function SituationalBoard({ result, group, pathFor, favoriteTeamId, clubAbbr, sortBy }) {
+// { category, metric, sort, order }. `renderRecord(row, metric)` optionally
+// dresses the W-L cell (the postseason page makes it a door to the games
+// behind it); without it the cell is the plain figure.
+export function SituationalBoard({ result, group, pathFor, favoriteTeamId, clubAbbr, sortBy, renderRecord }) {
   const navigate = useNav()
   const linkProps = useRouteLink()
   const metric = result.metric
@@ -180,7 +182,7 @@ export function SituationalBoard({ result, group, pathFor, favoriteTeamId, clubA
                   <td className="trrank__num">{row.value ?? '—'}</td>
                 ) : (
                   <>
-                    <td className="trrank__num">{row.v}</td>
+                    <td className="trrank__num">{renderRecord ? renderRecord(row, metric) : row.v}</td>
                     <td className="trrank__num trrank__pct">{row.pct}</td>
                     <td className="trrank__num">{row.played || '—'}</td>
                     {hasLast && (

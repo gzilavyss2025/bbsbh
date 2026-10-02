@@ -816,7 +816,11 @@ for each generator; the reader modules:
   entries `buildRankingIndex` takes, one season or every season merged per
   club (`ALL_SEASONS`); `resolveSeason` reads the `?season=` param against the
   seasons on file; `teamRankRows(index, teamId)` is the by-team view, one
-  club's every split with its rank among the clubs that played it. Each entry's
+  club's every split with its rank among the clubs that played it;
+  `gameRowsFor(entry, metricId, { cutoff })` is the list of games behind one
+  club's figure in one split, newest first, with each box-score address built
+  from that season's own abbreviations (the game-lines sheet,
+  `components/boxlines/GameLinesDoor.jsx`). Each entry's
   `data.postseason` flag is the switch `teamRecordsFor` and `buildRankingIndex`
   read: no by-month table, no season counts, and a "vs. own league / other
   league" row off each game's `il` flag. Cutoff-gated, same class and argument

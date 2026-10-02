@@ -6,6 +6,7 @@ import {
   MIN_GAMES,
   fetchPostseasonSeasons,
   fetchPostseasonEntries,
+  gameRowsFor,
   resolveSeason,
   resolveMinGames,
   teamRankRows,
@@ -24,6 +25,7 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { SituationalIndex, GROUP_KEYS } from '../../components/situational/SituationalIndex.jsx'
 import { SituationalBoard } from '../../components/situational/SituationalBoard.jsx'
 import { TeamRecordsList } from '../../components/situational/TeamRecordsList.jsx'
+import { GameLinesDoor } from '../../components/boxlines/GameLinesDoor.jsx'
 
 // The regular-season Situational Records page (SituationalRecordsPage.jsx),
 // over the MLB postseason: one split with every postseason club ranked, or one
@@ -158,6 +160,26 @@ export function PostseasonRecordsPage({
 
   const scopeLabel = season == null ? '' : seasonLabel(season)
 
+  // A W-L figure is a door to the games it counts. A split a club never played
+  // has no figure and stays a plain dash; the rows are built only on open.
+  const entryOf = useMemo(() => new Map((data?.entries ?? []).map((e) => [e.team.id, e])), [data])
+  const gamesDoor = (teamId, metricId, metricName, row) => {
+    const entry = entryOf.get(teamId)
+    if (!entry || !row.played) return row.v
+    return (
+      <GameLinesDoor
+        face={row.v}
+        label={`${entry.team.name}, ${metricName}, ${row.v}: the games`}
+        rows={() => gameRowsFor(entry, metricId, { cutoff })}
+        sheet={{
+          title: `${entry.team.name} · ${metricName}`,
+          note: `Game lines · ${scopeLabel}`,
+          headline: `${row.v} in ${row.played} game${row.played === 1 ? '' : 's'}`,
+        }}
+      />
+    )
+  }
+
   return (
     <div className="screen trrank-page">
       <SiteHeader />
@@ -257,6 +279,7 @@ export function PostseasonRecordsPage({
           <TeamRecordsList
             groups={teamGroups}
             pathFor={(metric) => pathFor({ view: null, metric, team: null, sort: null, order: null })}
+            renderRecord={(row) => gamesDoor(teamId, row.id, row.k, row)}
           />
         </main>
       )}
@@ -289,6 +312,7 @@ export function PostseasonRecordsPage({
           favoriteTeamId={favoriteTeamId}
           clubAbbr={clubAbbr}
           sortBy={sortBy}
+          renderRecord={(row, metric) => gamesDoor(row.teamId, metric.id, metric.k, row)}
         />
       )}
 

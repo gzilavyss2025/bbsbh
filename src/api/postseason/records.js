@@ -23,7 +23,10 @@
 // safety is the date the CALLER asks for. An open surface by rule (ADR-0034).
 
 import { staticJson, staticJsonBy } from '../staticJson.js'
+import { gamePath } from '../../lib/route.js'
+import { seriesAbbr } from '../boxlines/rows.js'
 import { fetchStaticTeams } from '../teams-static.js'
+import { RECORD_GROUPS } from '../teamRecords.js'
 import { rankMetric } from '../situationalRecordRankings.js'
 
 export const ALL_SEASONS = 'all'
@@ -76,7 +79,10 @@ export async function fetchPostseasonEntries(season, seasons) {
 // first. Split out so the merge is testable without a network.
 export function entriesFrom(teams, files) {
   const games = new Map()
+  // The abbreviation each club wore in each season, `{ [season]: { [id]: abbr } }`.
+  const abbrs = {}
   for (const file of files) {
+    if (file?.abbrs) abbrs[file.season] = file.abbrs
     for (const club of Object.values(file?.clubs ?? {})) {
       if (!games.has(club.teamId)) games.set(club.teamId, [])
       games.get(club.teamId).push(...club.games)
@@ -86,7 +92,7 @@ export function entriesFrom(teams, files) {
     .filter((team) => games.get(team.id)?.length)
     .map((team) => ({
       team,
-      data: { teamId: team.id, sportId: 1, postseason: true, allStarDate: null, games: games.get(team.id) },
+      data: { teamId: team.id, sportId: 1, postseason: true, allStarDate: null, abbrs, games: games.get(team.id) },
     }))
 }
 
@@ -123,4 +129,62 @@ export function teamRankRows(index, teamId, { sortBy = 'pct', minPlayed = 0 } = 
     if (rows.length) groups.push({ title: group.title, rows })
   }
   return groups
+}
+
+// ---------------------------------------------------------------------------
+// The games behind a record
+// ---------------------------------------------------------------------------
+
+// Every record id to the predicate that counts a game in it. RECORD_GROUPS owns
+// all of them but the two league rows, which teamRecordsFor writes itself off
+// the `il` flag (so they have no entry there).
+const PREDICATES = new Map([
+  ...RECORD_GROUPS.flatMap((g) => g.rows).map((r) => [r.id, r.p]),
+  ['vs-own-league', (g) => g.il !== 1],
+  ['vs-other-league', (g) => g.il === 1],
+])
+
+// The games that make one club's figure in one split, newest first, as the rows
+// the game-lines sheet draws (components/boxlines/BoxLineRow.jsx takes the same
+// shape the player Box Lines build). `entry` is one of entriesFrom's entries.
+//
+// It counts the same games the figure counted: the same predicate, and the same
+// `cutoff` teamRecordsFor applies, so a list can never hold a game its own W-L
+// leaves out, nor one dated after a `?d=` page's day. The box-score address is
+// built from the abbreviations the schedule gave the clubs THAT season. A game
+// the ledger holds no pk for, or no abbreviation, still lists, as text.
+export function gameRowsFor(entry, metricId, { cutoff = null } = {}) {
+  const match = PREDICATES.get(metricId)
+  if (!match) return []
+  const { team, data } = entry
+  const rows = []
+  for (const g of data.games) {
+    if (cutoff && g.d > cutoff) continue
+    if (!match(g)) continue
+    const season = Number(g.d.slice(0, 4))
+    const abbr = data.abbrs?.[season] ?? {}
+    const home = g.h === 1
+    const teamAbbr = abbr[team.id] ?? team.abbreviation ?? ''
+    const opponentAbbr = abbr[g.o] ?? ''
+    const [awayAbbr, homeAbbr] = home ? [opponentAbbr, teamAbbr] : [teamAbbr, opponentAbbr]
+    rows.push({
+      season,
+      date: g.d,
+      gamePk: g.pk ?? null,
+      home,
+      teamId: team.id,
+      teamAbbr,
+      opponentId: g.o,
+      opponentAbbr,
+      series: seriesAbbr(g.gt),
+      won: g.r === 'W',
+      runs: g.rs,
+      oppRuns: g.ra,
+      // The line under the score: the result in words and the game's place in
+      // its series. A team game has no player line to print there.
+      line: `${g.r === 'W' ? 'Win' : g.r === 'L' ? 'Loss' : 'Tie'}${g.sg ? ` · game ${g.sg}` : ''}`,
+      boxScorePath: awayAbbr && homeAbbr ? gamePath(g.d, awayAbbr, homeAbbr, 'boxscore') : null,
+    })
+  }
+  return rows.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.gamePk ?? 0) - (a.gamePk ?? 0)))
 }

@@ -16,7 +16,12 @@
 //   2. No getaway day and no division rank. Both are regular-season ideas
 //      (a club "leaves" a park; a division race has days) and neither means
 //      anything across a short series.
-//   3. An `il` flag — the opponent sat in the other league, which is the World
+//   3. A game's `pk` (its gamePk) and `gt` (the round: F, D, L, W), so a game
+//      list can name the exact game, and a per-season `abbrs` map (club id to
+//      the abbreviation the schedule gave it THAT season), so the list can
+//      spell the box-score address the way the schedule of that date does —
+//      FLA, not today's MIA, for a 2003 game. Today's teams.json would not.
+//   4. An `il` flag — the opponent sat in the other league, which is the World
 //      Series and nothing else. Read off the league each club belonged to THAT
 //      season (the schedule's own `team.league`), because a club can change
 //      leagues (Houston, 2013) and today's teams.json would call 2005 wrong.
@@ -63,13 +68,18 @@ export function postseasonCandidates(slate, existing) {
 // not flags: the series tags and `il` are derived at export, from these.
 export function addPostseasonFacts(rows, game) {
   const leagueOf = (side) => game.teams?.[side]?.team?.league?.id ?? null
+  const abbrOf = (side) => game.teams?.[side]?.team?.abbreviation ?? null
   const [away, home] = rows
   const shared = {
     gameType: game.gameType ?? null,
     seriesGameNumber: Number(game.seriesGameNumber) || null,
   }
-  Object.assign(away.payload, shared, { leagueId: leagueOf('away'), oppLeagueId: leagueOf('home') })
-  Object.assign(home.payload, shared, { leagueId: leagueOf('home'), oppLeagueId: leagueOf('away') })
+  Object.assign(away.payload, shared, {
+    leagueId: leagueOf('away'), oppLeagueId: leagueOf('home'), abbr: abbrOf('away'), oppAbbr: abbrOf('home'),
+  })
+  Object.assign(home.payload, shared, {
+    leagueId: leagueOf('home'), oppLeagueId: leagueOf('away'), abbr: abbrOf('home'), oppAbbr: abbrOf('away'),
+  })
   return rows
 }
 
@@ -102,15 +112,18 @@ export function tagPostseasonSeries(rows) {
   })
 }
 
-// One shipped postseason row: the regular-season row plus `il`.
+// One shipped postseason row: the regular-season row plus `pk`, `gt` and `il`.
 export function shipPostseasonRow(r, roles) {
   const row = shipRow(r, false, roles)
+  row.pk = r.game_pk
+  if (r.payload.gameType) row.gt = r.payload.gameType
   const { leagueId, oppLeagueId } = r.payload
   if (leagueId != null && oppLeagueId != null && leagueId !== oppLeagueId) row.il = 1
   return row
 }
 
-// A season's file: `{ season, clubs: { [teamId]: { teamId, leagueId, games } } }`.
+// A season's file:
+// `{ season, abbrs: { [teamId]: abbr }, clubs: { [teamId]: { teamId, leagueId, games } } }`.
 // `raw` is the season's stored rows, `roles` the `storedRoleFacts` map. Clubs
 // and games come out in a fixed order so an unchanged season re-exports
 // byte-identical.
@@ -122,17 +135,22 @@ export function buildSeasonFile(season, raw, roles) {
     byTeam.get(row.team_id).push(row)
   }
   const clubs = {}
+  const abbrs = {}
   for (const teamId of [...byTeam.keys()].sort((a, b) => a - b)) {
     const rows = byTeam.get(teamId).sort(
       (a, b) =>
         (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) ||
         (a.payload.gameNumber ?? 1) - (b.payload.gameNumber ?? 1),
     )
+    for (const r of rows) {
+      if (r.payload.abbr) abbrs[teamId] = r.payload.abbr
+      if (r.payload.oppAbbr && abbrs[r.opp_id] == null) abbrs[r.opp_id] = r.payload.oppAbbr
+    }
     clubs[teamId] = {
       teamId,
       leagueId: rows[0].payload.leagueId ?? null,
       games: tagPostseasonSeries(rows).map((t) => shipPostseasonRow(t, roles)),
     }
   }
-  return { season, clubs }
+  return { season, abbrs, clubs }
 }

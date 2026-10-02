@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
-import { entriesFrom, resolveSeason, resolveMinGames, teamRankRows, ALL_SEASONS, MIN_GAMES } from '../src/api/postseason/records.js'
+import { entriesFrom, gameRowsFor, resolveSeason, resolveMinGames, teamRankRows, ALL_SEASONS, MIN_GAMES } from '../src/api/postseason/records.js'
 import { teamRecordsFor } from '../src/api/teamRecords.js'
 import { buildRankingIndex, rankMetric } from '../src/api/situationalRecordRankings.js'
 
@@ -191,4 +191,76 @@ test('the floor reaches the team view’s ranks too', () => {
   const row = (id) => teamRankRows(index, 1, { minPlayed: id }).flatMap((g) => g.rows).find((r) => r.id === 'scored-4-plus')
   assert.deepEqual([row(0).rank, row(0).of], [1, 2])
   assert.deepEqual([row(5).rank, row(5).of], [null, 1])
+})
+
+// ---------------------------------------------------------------------------
+// The games behind a record
+// ---------------------------------------------------------------------------
+
+const withAbbr = (season, abbrs, ...clubs) => ({ ...file(season, ...clubs), abbrs })
+const sample = () =>
+  entriesFrom(
+    [{ id: 1, name: 'Alphas', abbreviation: 'ALP' }],
+    [
+      withAbbr(2003, { 1: 'FLA', 10: 'NYY' }, club(1, [
+        game({ d: '2003-10-21', pk: 11, gt: 'W', h: 1, sg: 3, r: 'L', rs: 1, ra: 6, sf: -1 }),
+        game({ d: '2003-10-25', pk: 13, gt: 'W', sg: 6, rs: 2, ra: 0, sf: 1 }),
+      ])),
+      withAbbr(2024, { 1: 'ALP', 10: 'BET' }, club(1, [game({ d: '2024-10-05', pk: 21, gt: 'D', sg: 1, sf: 1 })])),
+    ],
+  )[0]
+
+test('a record’s games are exactly the games its figure counted', () => {
+  const entry = sample()
+  const rows = gameRowsFor(entry, 'scored-first')
+  assert.deepEqual(rows.map((r) => r.gamePk), [21, 13])
+  // The figure the board prints for the same split.
+  const figure = teamRecordsFor(entry.data).groups.flatMap((g) => g.rows).find((r) => r.id === 'scored-first')
+  assert.equal(rows.length, figure.played)
+  assert.equal(rows.filter((r) => r.won).length, figure.wins)
+})
+
+test('rows are newest first and carry the round, score and series game', () => {
+  const rows = gameRowsFor(sample(), 'opp-scored-first')
+  assert.equal(rows.length, 1)
+  assert.deepEqual(
+    [rows[0].date, rows[0].series, rows[0].runs, rows[0].oppRuns, rows[0].won, rows[0].line],
+    ['2003-10-21', 'WS', 1, 6, false, 'Loss · game 3'],
+  )
+})
+
+test('the box-score address uses the abbreviations of THAT season, away first', () => {
+  const rows = gameRowsFor(sample(), 'scored-first')
+  const byPk = Object.fromEntries(rows.map((r) => [r.gamePk, r]))
+  assert.equal(byPk[13].boxScorePath, '/10252003/flanyy/boxscore') // road game: club first
+  assert.equal(byPk[21].boxScorePath, '/10052024/alpbet/boxscore') // the club's name changed since 2003
+  const home = gameRowsFor(sample(), 'opp-scored-first')[0]
+  assert.equal(home.boxScorePath, '/10212003/nyyfla/boxscore') // home game: opponent first
+  assert.equal(home.teamAbbr, 'FLA')
+  assert.equal(home.opponentAbbr, 'NYY')
+})
+
+test('a game with no abbreviation on file still lists, with no address', () => {
+  const entry = entriesFrom(teams, [file(2025, club(1, [game({ pk: 5, gt: 'L', sf: 1 })]))])[0]
+  const [row] = gameRowsFor(entry, 'scored-first')
+  assert.equal(row.boxScorePath, null)
+  assert.equal(row.teamAbbr, '')
+})
+
+test('the cutoff drops a game the same way the record does', () => {
+  const entry = sample()
+  assert.deepEqual(gameRowsFor(entry, 'scored-first', { cutoff: '2003-12-31' }).map((r) => r.gamePk), [13])
+  assert.deepEqual(gameRowsFor(entry, 'scored-first', { cutoff: '2003-10-24' }).map((r) => r.gamePk), [])
+})
+
+test('the league rows list the games the `il` flag splits', () => {
+  const entry = entriesFrom(teams, [
+    withAbbr(2025, { 1: 'ALP', 10: 'BET' }, club(1, [game({ pk: 1, gt: 'D' }), game({ pk: 2, gt: 'W', il: 1, d: '2025-10-25' })])),
+  ])[0]
+  assert.deepEqual(gameRowsFor(entry, 'vs-own-league').map((r) => r.gamePk), [1])
+  assert.deepEqual(gameRowsFor(entry, 'vs-other-league').map((r) => r.gamePk), [2])
+})
+
+test('an id that is not a record lists nothing', () => {
+  assert.deepEqual(gameRowsFor(sample(), 'not-a-record'), [])
 })

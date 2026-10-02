@@ -605,8 +605,14 @@ don't run these by hand.
   best-of-seven sweep has `sl` 4, not 7); there is no getaway day or division
   rank; and `il` marks a game against the other league, read off each club's
   league THAT season from the schedule's own `team.league`.
+  Each game row also carries `pk` (gamePk) and `gt` (round), and each season file an
+  `abbrs` map (club id to the abbreviation the schedule gave it THAT season), so the
+  game-lines sheet can name the game and spell its box-score address (`/10252003/flanyy/boxscore`).
   Backfill: `node scripts/gen-postseason-records.mjs --seasons=1995-2025`
   (~80 s, ~3,300 requests); `--export-only` rebuilds the files with no network.
+  A new STORED fact (the abbreviations were one) needs the games read again:
+  `REFREEZE=1 node scripts/gen-postseason-records.mjs --seasons=1995-2026 --refetch`.
+  REFREEZE lets the frozen season dumps change, on purpose.
   Checked 2026-10-02 against `postseason-history.json`: all 224 series 2000-2025
   match on games played and each club's wins (1995-1999 are not in that file).
 - `gen-schedule-shape.mjs` → `public/data/schedule-shape/{teamId}.json` — twelve

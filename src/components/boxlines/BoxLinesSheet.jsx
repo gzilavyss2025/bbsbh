@@ -253,7 +253,7 @@ export function BoxLinesSheet({
 
 // Whether row `i` sits on a banded season group: the first season is plain,
 // the second banded, and so on, so two games in one year read as one band.
-function seasonBand(rows, i) {
+export function seasonBand(rows, i) {
   let band = false
   for (let k = 1; k <= i; k++) if (rows[k].season !== rows[k - 1].season) band = !band
   return band

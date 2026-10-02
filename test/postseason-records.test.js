@@ -77,17 +77,20 @@ test('only played, new games with two clubs are candidates', () => {
   assert.equal(out[0].date, '2025-10-04')
 })
 
-test('a postseason row records round, series game and BOTH clubs’ leagues that season', () => {
+test('a postseason row records round, series game, and BOTH clubs’ leagues and abbreviations that season', () => {
   const rows = [
     { payload: {} }, // away
     { payload: {} }, // home
   ]
-  addPostseasonFacts(rows, game())
+  const withAbbr = game()
+  withAbbr.teams.away.team.abbreviation = 'FLA'
+  withAbbr.teams.home.team.abbreviation = 'NYY'
+  addPostseasonFacts(rows, withAbbr)
   assert.deepEqual(rows[0].payload, {
-    gameType: 'D', seriesGameNumber: 2, leagueId: 103, oppLeagueId: 104,
+    gameType: 'D', seriesGameNumber: 2, leagueId: 103, oppLeagueId: 104, abbr: 'FLA', oppAbbr: 'NYY',
   })
   assert.deepEqual(rows[1].payload, {
-    gameType: 'D', seriesGameNumber: 2, leagueId: 104, oppLeagueId: 103,
+    gameType: 'D', seriesGameNumber: 2, leagueId: 104, oppLeagueId: 103, abbr: 'NYY', oppAbbr: 'FLA',
   })
 })
 
@@ -189,6 +192,25 @@ test('only a game against the other league is interleague, by that season’s le
   assert.equal('il' in shipPostseasonRow(unknown, new Map()), false)
 })
 
+test('a shipped row names its game and its round', () => {
+  const t = tagPostseasonSeries([{ ...row(), game_pk: 18554, payload: payload() }])[0]
+  const shipped = shipPostseasonRow(t, new Map())
+  assert.equal(shipped.pk, 18554)
+  assert.equal(shipped.gt, 'W')
+  const none = tagPostseasonSeries([{ ...row(), game_pk: 1, payload: payload({ gameType: null }) }])[0]
+  assert.equal('gt' in shipPostseasonRow(none, new Map()), false)
+})
+
+test('a season file carries each club’s abbreviation for THAT season', () => {
+  const raw = [
+    stored(10, 20, '2003-10-01', payload({ abbr: 'FLA', oppAbbr: 'NYY' })),
+    stored(20, 10, '2003-10-01', payload({ isHome: true, abbr: 'NYY', oppAbbr: 'FLA' }), 'L'),
+  ]
+  assert.deepEqual(buildSeasonFile(2003, raw, new Map()).abbrs, { 10: 'FLA', 20: 'NYY' })
+  // A feed that carries no abbreviation gives an empty map, not a crash.
+  assert.deepEqual(buildSeasonFile(2003, [stored(10, 20, '2003-10-01', payload())], new Map()).abbrs, {})
+})
+
 test('a postseason row has no getaway day', () => {
   const t = tagPostseasonSeries([{ ...row(), payload: payload() }])[0]
   assert.equal('ga' in shipPostseasonRow(t, new Map()), false)
@@ -282,4 +304,27 @@ test('the 2025 postseason: 47 games, and the World Series is the only interleagu
   assert.equal(la.filter((g) => g.r === 'W').length, 4)
   assert.ok(la.every((g) => g.il === 1))
   assert.ok(clubs[119].games.filter((g) => g.o !== 141).every((g) => g.il == null))
+})
+
+test('every committed game names its pk and round, and every club its abbreviation', () => {
+  for (const f of seasonFiles) {
+    const { season, abbrs, clubs } = JSON.parse(readFileSync(new URL(f, dir), 'utf8'))
+    for (const club of Object.values(clubs)) {
+      assert.ok(abbrs[club.teamId], `${season}: no abbreviation for ${club.teamId}`)
+      for (const g of club.games) {
+        assert.ok(g.pk > 0, `${season}: a game with no pk`)
+        assert.ok('FDLW'.includes(g.gt), `${season}: bad round ${g.gt}`)
+        assert.ok(abbrs[g.o], `${season}: no abbreviation for opponent ${g.o}`)
+      }
+    }
+  }
+})
+
+test('a game appears once for each club under the same pk', () => {
+  for (const f of seasonFiles) {
+    const { clubs } = JSON.parse(readFileSync(new URL(f, dir), 'utf8'))
+    const counts = new Map()
+    for (const club of Object.values(clubs)) for (const g of club.games) counts.set(g.pk, (counts.get(g.pk) ?? 0) + 1)
+    assert.ok([...counts.values()].every((n) => n === 2), `${f}: a pk is not on exactly two clubs`)
+  }
 })
