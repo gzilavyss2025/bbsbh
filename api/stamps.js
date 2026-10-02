@@ -92,17 +92,26 @@ function sideFacts(side, lineSide) {
   }
 }
 
+// A game postponed and made up later comes back as the SAME gamePk on two dates,
+// and the postponed row still says abstractGameState 'Final' (#1342). Take the row
+// that was played; a game that never was falls back to its last row.
+function pickPlayedGame(dates, gamePk) {
+  const rows = (dates ?? []).flatMap((d) => d?.games ?? []).filter((g) => g?.gamePk === gamePk)
+  const played = rows.filter((g) => g?.status?.detailedState !== 'Postponed')
+  return (played.length ? played : rows).at(-1)
+}
+
 // The server fetches the score itself and never trusts a client's. Returns null
 // when the game can't be resolved at all, and a bare `{ gamePk, status }` when
 // it resolves but isn't Final — the caller turns each into its own error, which
 // is worth distinguishing ("no such game" vs. "not over yet").
-async function fetchGameFinal(gamePk) {
+export async function fetchGameFinal(gamePk) {
   let game
   try {
     const r = await fetch(SCHEDULE_URL(gamePk), { signal: AbortSignal.timeout(8000) })
     if (!r.ok) return null
     const json = await r.json()
-    game = json?.dates?.[0]?.games?.[0]
+    game = pickPlayedGame(json?.dates, gamePk)
   } catch {
     return null
   }

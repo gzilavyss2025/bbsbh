@@ -54,6 +54,19 @@ schedule's abbreviations of that date (FLA, not today's MIA). The page is an
 open surface (ADR-0034) and its W-L already counts these games, so the sheet
 shows the scores; the box score itself stays sealed.
 
+**7. The team view can drop its club filter.** "All teams" in the club picker
+(`?view=teams&team=all`) tallies every club's games as one ledger
+(`combinedEntry`), so each split reads how the whole field fared in it, with
+no rank column (there is nothing to rank against). The tally is the same
+`teamRecordsFor`, so a figure counts club-games: a game appears once for each
+club that played it, and the column is headed "Club games". A split both clubs
+always meet in one game (a day game, a one-run game, a series opener) would
+read an exact .500 whatever happened, so `SHARED_SPLITS` hides those rows; a
+test pins each one as dead even on the committed files, and pins that no other
+split is. The games list shows one row per club side, so it adds up to the
+figure. The series counts are skipped (two clubs in one series would share a
+key). Long lists show 100 games, then ask.
+
 ## Consequences
 
 - The postseason regenerates with `--export-only` and no network when a

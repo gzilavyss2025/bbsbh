@@ -229,6 +229,12 @@ export const PAIRINGS = [
   // to the non-text bar (WCAG 1.4.11): the resting line, then the traced one.
   { fg: 'graphite-soft', bg: 'surface-card', min: UI, note: 'former teammates ladder line' },
   { fg: 'accent-primary', bg: 'surface-card', min: UI, note: 'former teammates ladder traced line' },
+  // The arsenal "other" family (#1347) draws on the Now Pitching card, whose
+  // fill is --marker 16% over --surface-card (.pitchernotice--pbp). Neither
+  // reader parses color-mix(), so that composite is the literal #F8EECE,
+  // worked out by hand.
+  { fg: 'arsenal-other', bg: '#F8EECE', min: UI, note: 'arsenal other family on the Now Pitching card fill' },
+  { fg: 'arsenal-other', bg: 'surface-card', min: UI, note: 'arsenal other family on a raised card' },
   // Adjacent segments are only 1.6-2.5:1 against each other — unavoidable in a
   // monotone ramp — so a paper hairline carries every boundary instead.
   { fg: 'surface-inset', bg: 'navy', min: UI, note: 'spray direction bar hairline, against pull' },

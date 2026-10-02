@@ -43,7 +43,7 @@ export function parseRecordsRoute(name, q, { asOf, sportId }) {
 
 // A postseason-records address. `season` is a year or 'all' (absent means the
 // latest on file), `view` is 'teams' for the by-team view (absent means the
-// by-situation view), `team` a club id, `min` the all-years minimum games. A default is never written, so a link
+// by-situation view), `team` a club id or 'all' (every club together), `min` the all-years minimum games. A default is never written, so a link
 // that did not ask for something does not carry it.
 export function postseasonRecordsPath({ season, view, team, min, category, metric, sort, order, d } = {}) {
   const q = new URLSearchParams()

@@ -196,7 +196,7 @@
   --arsenal-fastball: #2F6E4F; /* outfield green — same ink as --field */
   --arsenal-breaking: #1B2A3A; /* navy */
   --arsenal-offspeed: #B4453A; /* clay */
-  --arsenal-other:    #938C7C; /* graphite-soft — knuckleball/eephus/etc */
+  --arsenal-other:    #857E6F; /* warm grey — knuckleball/eephus/etc. */
 
   /* ---- Pitch arsenal card ---- the player page's "Pitches" card
      (PitchMix.jsx) uses the same paper and scorebook inks as the rest of the

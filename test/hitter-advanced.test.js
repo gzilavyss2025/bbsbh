@@ -120,12 +120,41 @@ test('hittingRanksView keeps top-10 ranks only, sorted, capped at four chips', (
       },
     },
   ])
-  assert.equal(view.league, 'AL')
+  assert.equal(view.length, 1)
+  assert.equal(view[0].league, 'AL')
+  assert.equal(view[0].club, null)
   // HR 1, RBI 2, AVG 3, OPS 4 all qualify — SB (11th) and H (25th) don't.
-  assert.equal(view.items.length, 4)
-  assert.deepEqual(view.items.map((i) => i.text), ['1st', '2nd', '3rd', '4th'])
-  assert.deepEqual(view.items.map((i) => i.label), ['HR', 'RBI', 'AVG', 'OPS'])
-  assert.ok(!view.items.some((i) => i.label === 'SB' || i.label === 'H'))
+  const { items } = view[0]
+  assert.equal(items.length, 4)
+  assert.deepEqual(items.map((i) => i.text), ['1st', '2nd', '3rd', '4th'])
+  assert.deepEqual(items.map((i) => i.label), ['HR', 'RBI', 'AVG', 'OPS'])
+  assert.ok(!items.some((i) => i.label === 'SB' || i.label === 'H'))
+})
+
+// Eugenio Suárez 2025 (553993), checked live 2026-10-02: stats=rankings holds
+// one split per league, AL (SEA, empty stat) first, NL (ARI) second. Reading
+// splits[0] dropped his 5th-in-NL home runs.
+test('hittingRanksView reads every league split, each labelled with its club', () => {
+  const view = hittingRanksView([
+    { league: { id: 103, name: 'American League' }, team: { id: 136, name: 'Seattle Mariners' }, stat: {} },
+    {
+      league: { id: 104, name: 'National League' },
+      team: { id: 109, name: 'Arizona Diamondbacks' },
+      stat: { homeRuns: 5, hitByPitch: 6, rbi: 17, sacFlies: 16 },
+    },
+  ])
+  assert.equal(view.length, 1)
+  assert.equal(view[0].league, 'NL')
+  assert.equal(view[0].club, 'AZ')
+  assert.deepEqual(view[0].items.map((i) => `${i.text} ${i.label}`), ['5th HR'])
+})
+
+test('hittingRanksView keeps both leagues of a traded player, in API order', () => {
+  const view = hittingRanksView([
+    { league: { name: 'American League' }, team: { id: 136 }, stat: { rbi: 3 } },
+    { league: { name: 'National League' }, team: { id: 109 }, stat: { homeRuns: 5 } },
+  ])
+  assert.deepEqual(view.map((v) => [v.league, v.club]), [['AL', 'SEA'], ['NL', 'AZ']])
 })
 
 test('hittingRanksView returns null with no qualifying rank or no split', () => {
