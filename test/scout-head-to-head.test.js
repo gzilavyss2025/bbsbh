@@ -16,6 +16,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
+import { baseballToday } from '../src/lib/time/standingsDates.js'
 import {
   SAVANT_ROW_CAP,
   fetchHeadToHead,
@@ -37,12 +38,14 @@ const csvRow = (o = {}) =>
     o.game_pk ?? 1, o.at_bat_number ?? 1, o.game_date ?? '2025-04-08', o.game_type ?? 'R',
     o.events ?? '', o.des ?? '', o.plate_x ?? '0.1', o.stand ?? 'R', o.p_throws ?? 'L',
   ].join(',')
+// A `today` that clamps nothing, so these tests do not depend on the clock.
+const FAR_FUTURE = '2099-01-01'
 const csv = (...rows) => `${COLS}\n${rows.join('\n')}\n`
 
 // --------------------------------------------------------------- request ----
 
 test('savantUrl sends exactly the parameters #1410 lists, over HTTPS', () => {
-  const u = new URL(savantUrl(592450, 434378, '2026-10-02'))
+  const u = new URL(savantUrl(592450, 434378, '2026-10-02', FAR_FUTURE))
   assert.equal(u.protocol, 'https:')
   assert.equal(u.host, 'baseballsavant.mlb.com')
   assert.equal(u.pathname, '/statcast_search/csv')
@@ -59,11 +62,18 @@ test('savantUrl sends exactly the parameters #1410 lists, over HTTPS', () => {
 })
 
 test('game_date_lt is the day BEFORE the cutoff, because Savant bounds are inclusive', () => {
-  const lt = (cutoff) => new URL(savantUrl(1, 2, cutoff)).searchParams.get('game_date_lt')
+  const lt = (cutoff) => new URL(savantUrl(1, 2, cutoff, FAR_FUTURE)).searchParams.get('game_date_lt')
   assert.equal(lt('2026-10-02'), '2026-10-01')
   assert.equal(lt('2026-03-01'), '2026-02-28') // month end
   assert.equal(lt('2024-03-01'), '2024-02-29') // leap year
   assert.equal(lt('2026-01-01'), '2025-12-31') // year end
+})
+
+test('the cutoff is clamped to today, so a future or same-day cutoff never reads a live game', () => {
+  const lt = (cutoff) => new URL(savantUrl(1, 2, cutoff, '2026-10-02')).searchParams.get('game_date_lt')
+  assert.equal(lt('2026-10-02'), '2026-10-01') // today: yesterday is the last day read
+  assert.equal(lt('2026-12-01'), '2026-10-01') // a future ?d= clamps to today
+  assert.equal(lt('2026-09-20'), '2026-09-19') // an earlier cutoff stands
 })
 
 // ----------------------------------------------------------------- parser ---
@@ -79,6 +89,23 @@ test('rows with no plate_x (pitch-clock rows) are not pitches', () => {
     csvRow({ plate_x: '-1.2' }),
   )
   assert.equal(parseSavantRows(text).length, 2)
+})
+
+test('a pitch-clock row that ENDS a plate appearance is kept, but is not a pitch', () => {
+  // Real rows, Savant 2026-09-20: 'automatic_strike' ended a strikeout and
+  // 'automatic_ball' ended an intentional walk, both with no plate_x. Dropping
+  // them lost the plate appearance from the list and from every total.
+  const text = csv(
+    csvRow({ at_bat_number: 7, plate_x: '0.2' }),
+    csvRow({ at_bat_number: 7, plate_x: '', events: 'strikeout', des: 'Judge strikes out on automatic strike.' }),
+    csvRow({ at_bat_number: 8, plate_x: '', events: 'intent_walk' }),
+  )
+  const pas = plateAppearances(parseSavantRows(text))
+  assert.deepEqual(pas.map((p) => [p.atBat, p.event, p.pitches]).sort(), [[7, 'strikeout', 1], [8, 'intent_walk', 0]])
+  const t = totalsOf(pas)
+  assert.equal(t.pa, 2)
+  assert.equal(t.k, 1)
+  assert.equal(t.bb, 1)
 })
 
 test('a response at the 25,000-row cap throws, and counts rows BEFORE the skip', () => {
@@ -286,11 +313,22 @@ test('fetchHeadToHead returns the plate appearances and totals, from one request
   await withStubs({
     responses: [ok(VERLANDER)],
     run: async ({ calls }) => {
-      const h2h = await fetchHeadToHead(592450, 434378, '2026-10-02')
+      const h2h = await fetchHeadToHead(592450, 434378, '2026-09-20')
       assert.equal(h2h.pas.length, 41)
       assert.equal(h2h.totals.pa, 41)
       assert.equal(calls.length, 1)
-      assert.equal(new URL(calls[0]).searchParams.get('game_date_lt'), '2026-10-01')
+      assert.equal(new URL(calls[0]).searchParams.get('game_date_lt'), '2026-09-19')
+    },
+  })
+})
+
+test('fetchHeadToHead never sends a date on or after the baseball today', async () => {
+  await withStubs({
+    responses: [ok(`${COLS}\n`)],
+    run: async ({ calls }) => {
+      await fetchHeadToHead(1, 2, '2099-01-01')
+      const lt = new URL(calls[0]).searchParams.get('game_date_lt')
+      assert.ok(lt < baseballToday(), `${lt} is not before ${baseballToday()}`)
     },
   })
 })

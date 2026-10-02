@@ -21,8 +21,8 @@
 //                           'League Championship Series' | 'World Series'
 //                event      Savant `events` ('single', 'strikeout', 'field_out', ...)
 //                description  the play's text, '' when Savant sends none
-//                pitches    pitches thrown in the plate appearance (rows with a
-//                           plate_x), a number }
+//                pitches    tracked pitches in the plate appearance (rows with a
+//                           plate_x), a number; 0 for a walk by the pitch clock }
 //   totals   `totalsOf(pas)`:
 //              { pa, ab, h, hr, bb, k, hbp, sf, tb,       counts
 //                avg, obp, slg }                          raw ratios, or null when
@@ -34,13 +34,18 @@
 //
 // CUTOFF. `cutoff` is the first date held OUT ('YYYY-MM-DD'): today, or `?d=`.
 // Savant's date bounds are inclusive, so the request sends the day before it.
-// The page never asks Savant for today (the live-read leak, careerMatchups.js).
+// The module clamps a later cutoff to baseballToday() (US Pacific, the last zone
+// to roll over), so no caller can ask Savant for today (the live-read leak,
+// careerMatchups.js).
 //
 // THE TRAPS, all verified 2026-10-02:
 //   - Savant caps a response at 25,000 rows, keeps the newest, and sends no error.
 //     A pair never nears that, so a response that size is a bad query: throw.
 //   - It adds pitch-clock rows (description 'automatic_ball' / 'automatic_strike')
-//     with no plate_x. They are not pitches, so the parser drops them.
+//     with no plate_x. They are not pitches, so they never count in `pitches`
+//     and the parser drops them. EXCEPT a row that ends the plate appearance
+//     (a strike-three or ball-four by the clock, 2 of 6 such rows on 2026-09-20):
+//     it has `events`, so it stays, or the plate appearance vanishes.
 //   - Do not plot these pitches. Savant's 2026 plate_z frame differs from the feed's.
 //   - statsapi `vsPlayer` is not the source: it lists each plate appearance twice
 //     (a per-season entry and a `vsPlayerTotal` entry), so a sum doubles them.
@@ -50,7 +55,7 @@
 
 import { csvObjects } from '../../lib/csv/parse.js'
 import { isRealDate } from '../../lib/dates.js'
-import { shiftDays } from '../../lib/time/standingsDates.js'
+import { baseballToday, shiftDays } from '../../lib/time/standingsDates.js'
 import { HIT_EVENT_TYPES, NON_PA_EVENT_TYPES } from '../playbyplay/eventTypes.js'
 import { NON_AB_EVENTS } from '../scorecard/notation.js'
 
@@ -75,7 +80,7 @@ const NOT_A_PA = new Set([...NON_PA_EVENT_TYPES, 'truncated_pa'])
 // non-at-bats reuse HIT_EVENT_TYPES and NON_AB_EVENTS.
 const BASES = { single: 1, double: 2, triple: 3, home_run: 4 }
 
-export function savantUrl(hitterId, pitcherId, cutoff) {
+export function savantUrl(hitterId, pitcherId, cutoff, today = baseballToday()) {
   const params = new URLSearchParams({
     all: 'true',
     type: 'details',
@@ -83,25 +88,26 @@ export function savantUrl(hitterId, pitcherId, cutoff) {
     hfGT: 'R|F|D|L|W|',
     'batters_lookup[]': hitterId,
     'pitchers_lookup[]': pitcherId,
-    game_date_lt: shiftDays(cutoff, -1),
+    game_date_lt: shiftDays(cutoff < today ? cutoff : today, -1),
   })
   return `https://baseballsavant.mlb.com/statcast_search/csv?${params}`
 }
 
-// CSV text -> pitch rows. Throws at the cap, counting BEFORE the skip: the cap
-// is on rows Savant sent, not rows we keep.
+// CSV text -> rows. Throws at the cap, counting BEFORE the skip: the cap is on
+// rows Savant sent, not rows we keep. Keeps a row that has a location or ends a
+// plate appearance; a pitch-clock row that does neither is dropped.
 export function parseSavantRows(text) {
   const rows = csvObjects(text)
   if (rows.length >= SAVANT_ROW_CAP) {
     throw new Error(`Savant sent ${rows.length} rows, the ${SAVANT_ROW_CAP} cap: the query is too wide`)
   }
-  return rows.filter((r) => r.plate_x)
+  return rows.filter((r) => r.plate_x || r.events)
 }
 
 export function plateAppearances(rows) {
   const keyOf = (r) => `${r.game_pk}-${r.at_bat_number}`
   const pitches = new Map()
-  for (const r of rows) pitches.set(keyOf(r), (pitches.get(keyOf(r)) ?? 0) + 1)
+  for (const r of rows) if (r.plate_x) pitches.set(keyOf(r), (pitches.get(keyOf(r)) ?? 0) + 1)
   return rows
     .filter((r) => r.events && !NOT_A_PA.has(r.events))
     .map((r) => ({
@@ -113,7 +119,7 @@ export function plateAppearances(rows) {
       roundLabel: ROUND_LABELS[r.game_type] ?? r.game_type,
       event: r.events,
       description: r.des ?? '',
-      pitches: pitches.get(keyOf(r)),
+      pitches: pitches.get(keyOf(r)) ?? 0,
     }))
     .sort((a, b) => b.date.localeCompare(a.date) || b.gamePk - a.gamePk || b.atBat - a.atBat)
 }
@@ -141,7 +147,7 @@ export function totalsOf(pas) {
 }
 
 async function fetchText(url) {
-  const res = await fetch(url, { signal: AbortSignal.timeout(20_000) })
+  const res = await fetch(url, { signal: AbortSignal.timeout(15_000) })
   if (!res.ok) throw new Error(`Savant HTTP ${res.status}`)
   return res.text()
 }
