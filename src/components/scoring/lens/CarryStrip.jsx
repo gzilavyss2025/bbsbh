@@ -9,7 +9,7 @@ import { cellNote } from '../../../lib/scorecardNotes.js'
 // strip wraps and clips the rest: it must not cover the frame.
 export function CarryStrip({ boxes, notes, zoom }) {
   return (
-    <div className="sc-carry" role="group" aria-label="Carried from below" style={{ '--carry-zoom': zoom }}>
+    <div className="sc-carry" aria-hidden="true" style={{ '--carry-zoom': zoom }}>
       <p className="sc-carry__head">The order wrapped · carried from below</p>
       <div className="sc-carry__boxes">
         {boxes.map(({ atBatIndex, card, label }) => (
