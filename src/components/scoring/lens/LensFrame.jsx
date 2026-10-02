@@ -10,7 +10,10 @@
 // `frame` is useLens's measured place, in pane pixels. The frame's look is the
 // same before and after any result; it depends only on where the frontier is,
 // which the reader can already see (G8).
-export function LensFrame({ frame }) {
+//
+// `dock` is the one card under the frame (LensCards.jsx), its top a fixed gap
+// under the frame's bottom edge. Unlike the frame, it takes taps.
+export function LensFrame({ frame, dock = null }) {
   if (!frame) return null
   return (
     <>
@@ -24,6 +27,11 @@ export function LensFrame({ frame }) {
         aria-hidden="true"
         style={{ top: frame.top + frame.height, width: frame.left }}
       />
+      {dock && (
+        <div className="sc-lens__dock" style={{ top: frame.top + frame.height }}>
+          {dock}
+        </div>
+      )}
     </>
   )
 }

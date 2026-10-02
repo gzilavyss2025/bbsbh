@@ -17,6 +17,10 @@ import { PHONE_LENS_QUERY, lensOn } from '../../lib/scorecard/geometry.js'
 import { LensBack, LensBar } from '../../components/scoring/lens/LensBar.jsx'
 import { useLensBar } from '../../components/scoring/lens/useLensBar.js'
 import { tapLocked } from '../../lib/scorecard/bar.js'
+import { armWords, enteringDefense, frontierArmChange } from '../../lib/scorecard/arm.js'
+import { halfLabel } from '../../lib/scorecard/situation.js'
+import { ArmNotice, EnteringCard } from '../../components/scoring/lens/LensCards.jsx'
+import { PitcherSheet } from '../../components/scoring/lens/PitcherSheet.jsx'
 
 // The live scorecard — `/{date}/{matchup}/scorecard`, the Numbers Game "22"
 // sheet filled exactly as far as YOU have revealed, at any point in the game.
@@ -217,13 +221,39 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
     loading: loading && lastUpdated == null,
   })
 
+  // THE ARM AT THE FRONTIER (lib/scorecard/arm.js has the timing rule). It
+  // reads the feed, so it is caller-gated: it gets the REAL mark (G9). One card
+  // docks under the frame: the new-pitcher notice while the arm is fresh, else
+  // the Entering card until the half's first tap. Neither at a handoff, where
+  // the frame is still on the old page, nor while loading.
+  const arm = useMemo(
+    () => (inLens ? frontierArmChange(feed, revealedThrough, stepInfo) : null),
+    [inLens, feed, revealedThrough, stepInfo],
+  )
+  const [sheetArm, setSheetArm] = useState(null) // the arm the open pitcher sheet holds
+  // The sheet lives only in the lens. If the lens goes (a wider window, a tap
+  // on another tab), the sheet closes for good: it must not come back by itself
+  // with an old arm, or keep the tap lock on.
+  if (!inLens && sheetArm) setSheetArm(null)
+  const armSaid = armWords(arm)
+  const docks = bar?.state === 'sealed' || bar?.state === 'edge'
+  const dock = !docks ? null : arm?.fresh ? (
+    <ArmNotice feed={feed} arm={arm} onOpen={() => setSheetArm(arm)} />
+  ) : stepInfo.count === 0 ? (
+    <EnteringCard
+      title={`Entering ${halfLabel(stepInfo)}`}
+      pitcherLine={armSaid.line}
+      defense={enteringDefense(feed, revealedThrough, stepInfo.inning, stepInfo.half)}
+    />
+  ) : null
+
   // THE TAP LOCK (G6, ADR-0046). The seal, the bar's Unwrap and its Turn share
   // one 700 ms window after every reveal and every turn. The window is a
-  // constant: it never reads what the tap did. While the cell editor is open,
-  // none of the three does anything.
+  // constant: it never reads what the tap did. While the cell editor or the
+  // pitcher sheet is open, none of the three does anything.
   const lastTap = useRef(null)
   const locked = (fn) => () => {
-    if (editing || tapLocked(Date.now(), lastTap.current)) return
+    if (editing || sheetArm || tapLocked(Date.now(), lastTap.current)) return
     lastTap.current = Date.now()
     fn()
   }
@@ -264,6 +294,7 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
         lens={lens}
         edge={bar?.state === 'edge'}
         lastOpened={bar?.lastOpened ?? null}
+        dock={dock}
       />
       {bar && (
         <LensBar
@@ -274,8 +305,11 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
           onUnwrap={tapFrontier}
           onTurn={turn?.onFlip}
           onRefresh={onReload}
+          pitcher={arm ? armSaid.surname : null}
+          onPitcher={() => setSheetArm(arm)}
         />
       )}
+      {inLens && sheetArm && <PitcherSheet feed={feed} arm={sheetArm} onClose={() => setSheetArm(null)} />}
       {lens === 'whole' && <LensBack onBack={() => setWholeSheet(false)} />}
 
       {editing && (

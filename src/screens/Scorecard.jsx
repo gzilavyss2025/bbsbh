@@ -53,6 +53,8 @@ export function Scorecard({
   // The lens bar's facts about the grid, handed on to the sheet (lens/useLensBar.js).
   edge = false,
   lastOpened = null,
+  // The card docked under the lens's frame, if any (lens/LensCards.jsx).
+  dock = null,
 }) {
   // THE SHEET'S OWN WIDTH, measured by the grid and held to by everything
   // around it. On a wide screen the scorecard runs the whole window (ADR-0047's
@@ -102,6 +104,7 @@ export function Scorecard({
           lens={lens}
           edge={edge}
           lastOpened={lastOpened}
+          dock={dock}
         />
         <ScorecardFooter view={view} />
       </div>

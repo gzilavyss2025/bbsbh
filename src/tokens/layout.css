@@ -129,6 +129,11 @@
   --lens-bar-h: 168px;
   --lens-row-h: 52px;
   --lens-rail-w: 100px;
+  /* The card docked under the frame (the Entering card or the new-pitcher
+     notice) sits this far below the frame's bottom edge, and the pitcher
+     sheet's top edge sits this far from the window's top (#724, L5). */
+  --lens-dock-gap: 13px;
+  --lens-sheet-top: 92px;
 }
 
 /* --console-hud-h's desktop half — see the mobile value above for why this is

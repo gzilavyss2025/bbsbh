@@ -5,8 +5,8 @@ import { liveLine } from '../../../lib/scorecard/bar.js'
 // The lens's bottom bar (ADR-0092), fixed under the pane at its final height
 // (--lens-bar-h), because the frame's place is measured from the pane and the
 // pane ends where this bar starts. Three rows: line A in plain words, the
-// situation (the half's totals at a handoff), and the buttons. The pitcher
-// button joins the situation row later (#724, L5).
+// situation (the half's totals at a handoff) with the pitcher button on its
+// right, and the buttons.
 //
 // The state and every word come from useLensBar (lib/scorecard/bar.js has the
 // rules). This file only draws them. Its three taps are the page's own,
@@ -15,7 +15,11 @@ import { liveLine } from '../../../lib/scorecard/bar.js'
 //
 // [Sheet] leaves the lens for THIS VISIT only: the page holds it in React
 // state and stores nothing (ADR-0092 — the phone always opens in the lens).
-export function LensBar({ bar, checkedAt, refreshing, onSheet, onUnwrap, onTurn, onRefresh }) {
+//
+// `pitcher` is the arm's surname ('' when the feed has none), or null with no
+// arm to name; its button opens the pitcher sheet (`onPitcher`). Navy ink, no
+// kraft: it lifts no seal.
+export function LensBar({ bar, checkedAt, refreshing, onSheet, onUnwrap, onTurn, onRefresh, pitcher = null, onPitcher }) {
   const { state, lines, batter } = bar
   return (
     <div className="sc-lensbar">
@@ -24,7 +28,14 @@ export function LensBar({ bar, checkedAt, refreshing, onSheet, onUnwrap, onTurn,
       <p className="sc-lensbar__words" aria-live={state === 'edge' ? 'off' : 'polite'}>
         {state === 'edge' ? <CheckedLine name={batter} checkedAt={checkedAt} /> : lines.lineA}
       </p>
-      <p className="sc-lensbar__situation">{lines.situation}</p>
+      <div className="sc-lensbar__row">
+        <p className="sc-lensbar__situation">{lines.situation}</p>
+        {pitcher != null && (
+          <Button skin="ghost" className="sc-lensbar__pitcher" onClick={onPitcher}>
+            Pitching{pitcher ? <> · <u>{pitcher}</u></> : null} ›
+          </Button>
+        )}
+      </div>
       <div className="sc-lensbar__actions">
         <Button className="sc-lensbar__sheet" icon={<GridIcon />} onClick={onSheet}>
           Sheet

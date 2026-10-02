@@ -122,3 +122,38 @@ above and change none of them.
 - **The turn chip is navy.** `.sc-ab__fliptext` was kraft. The turn lifts no
   seal (ADR-0083), so it is navy on every width. Unwrap is the one kraft
   control in the bar, and the seal-scope guard lists it.
+
+## Amended by the pitcher cards (#724, slice L5)
+
+One card docks under the frame at a time: the new-pitcher notice, or at a
+leadoff the Entering card. The bar's row 2 gets "Pitching · Name ›", and the
+notice and that button open the pitcher card in a bottom sheet.
+
+- **When a pitching change shows.** `frontierArmChange`
+  (`src/lib/scorecard/arm.js`) follows ADR-0016's "What one step contains". A
+  change before a half's first pitch shows at that half's leadoff
+  (`selectPrePitchChanges`). A change between two plate appearances trails the
+  step that retires the batter before the new arm, so the notice shows right
+  after that tap and before his first batter opens. A change between pitches
+  (`midAtBat`) leads the next step: it shows only with the next tap, which also
+  opens the at-bat he finished, so it gets no notice. At a leadoff with no
+  change the arm is his club's starter in inning 1, else the arm who threw his
+  club's last play. Never the half's own first play: its pitcher is the one
+  who FINISHED that at-bat.
+- **It is caller-gated.** It reads the feed, so the page passes the real
+  `revealedThrough` (ADR-0003, ADR-0010). It answers null for any half but
+  `revealedThrough + 1`, and in that half it reads only the entries the step
+  cursor has opened. A test walks the captured game and checks, at each step,
+  that the arm it names has already entered by the gate.
+- **"Now pitching" only while the arm is fresh**: his entry is in view and his
+  first batter is still sealed, or he is his club's starter at its first
+  leadoff. Else "Pitching". This is stricter than `selectIsFreshPitcher`,
+  which compares with the previous half's starter and so calls a reliever who
+  came in mid-half and stays on new again at the next leadoff. `relief` is
+  `HalfInning.jsx`'s rule for a fresh arm. An arm who is not news (the bar's
+  button opens his card in any half) is a reliever only if he is not his
+  club's starter. The notice's flag reads only data that ends the day
+  before the game (ADR-0088).
+- **While the sheet is open, the seal, Unwrap and Turn do nothing**, as while
+  the cell editor is open. The sheet is not portalled, so it keeps `#root`'s
+  all-caps rule.
