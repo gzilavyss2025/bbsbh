@@ -305,7 +305,7 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = -1
       const slot = battingSlot(feed, battingSide, next.batterId)
       if (slot >= 1 && slot <= 9) {
         frontierSub = slotData[slot - 1].byInning[stepHere.inning]?.length ?? 0
-        frontier = { slot }
+        frontier = { slot, batter: next.batter ?? null }
       }
     }
   }

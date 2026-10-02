@@ -1,0 +1,125 @@
+/* ============================================================
+   SCORECARD / LENS BAR — the bottom bar (ADR-0092)
+   Fixed at its final height (--lens-bar-h): the frame's place is measured from
+   the pane, and the pane ends where this bar starts. Three rows: line A (plain
+   words, two lines at most), the situation, and the buttons.
+
+   Kraft is for one control here: Unwrap lifts a seal, so it wears the tape
+   (ADR-0083, check-seal-scope). Turn is navy: the turn lifts nothing.
+   The app draws all text in capitals (#root *); nothing here fights that.
+   ============================================================ */
+.sc-lensbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: calc(var(--lens-bar-h) + env(safe-area-inset-bottom));
+  padding: var(--space-2) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+  background: var(--surface-card);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+/* Line A. Two lines tall whether it holds one or two, so the rows under it
+   never move when the words change. */
+.sc-lensbar__words {
+  margin: 0;
+  height: calc(2 * var(--lh-ui) * var(--fs-body));
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+}
+
+/* The situation row. The pitcher button takes its right side in L5. */
+.sc-lensbar__situation {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  height: var(--tap-min);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+
+.sc-lensbar__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+.sc-lensbar__sheet,
+.sc-lensbar__main {
+  min-height: var(--lens-row-h);
+}
+.sc-lensbar__main {
+  flex: 1;
+}
+
+/* UNWRAP: the tape ground, the label on a solid chip, as the seal in the
+   frame. A ring outside the kraft, on paper, as the seal's (check-focus-ring). */
+.sc-lensbar__unwrap {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--lens-row-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: var(--seal-texture);
+}
+.sc-lensbar__unwrap:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.sc-lensbar__unwraptext {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-xs);
+  background: var(--seal-cover);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-seal);
+}
+
+/* THE LIVE EDGE: nothing to lift, so a dashed pencil pill and a Refresh, no
+   kraft. The Refresh is square, at the row's height. */
+.sc-lensbar__waiting {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--lens-row-h);
+  border: 2px dashed var(--graphite);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-lensbar__refresh {
+  flex: none;
+  width: var(--lens-row-h);
+  min-height: var(--lens-row-h);
+  padding: 0;
+}

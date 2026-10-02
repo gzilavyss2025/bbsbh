@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useRevealProgress } from '../../hooks/useRevealProgress.js'
 import { effectiveReveal } from '../../hooks/revealProgressCore.js'
 import { useScorecardNotes } from '../../hooks/useScorecardNotes.js'
@@ -15,6 +15,8 @@ import { useStampUnseal } from '../../hooks/useStamps.js'
 import { useMediaQuery } from '../../hooks/useMediaQuery.js'
 import { PHONE_LENS_QUERY, lensOn } from '../../lib/scorecard/geometry.js'
 import { LensBack, LensBar } from '../../components/scoring/lens/LensBar.jsx'
+import { useLensBar } from '../../components/scoring/lens/useLensBar.js'
+import { tapLocked } from '../../lib/scorecard/bar.js'
 
 // The live scorecard — `/{date}/{matchup}/scorecard`, the Numbers Game "22"
 // sheet filled exactly as far as YOU have revealed, at any point in the game.
@@ -202,6 +204,32 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
       }
     : null
 
+  // THE BAR'S WORDS AND STATE (lib/scorecard/bar.js). "Loading" is only the
+  // wait for a first feed: a poll or a Refresh keeps what is on screen, so the
+  // bar does not flicker to a disabled button every minute.
+  const inLens = lens === 'lens'
+  const bar = useLensBar({
+    on: inLens,
+    view,
+    side,
+    stepInfo,
+    flip,
+    loading: loading && lastUpdated == null,
+  })
+
+  // THE TAP LOCK (G6, ADR-0046). The seal, the bar's Unwrap and its Turn share
+  // one 700 ms window after every reveal and every turn. The window is a
+  // constant: it never reads what the tap did. While the cell editor is open,
+  // none of the three does anything.
+  const lastTap = useRef(null)
+  const locked = (fn) => () => {
+    if (editing || tapLocked(Date.now(), lastTap.current)) return
+    lastTap.current = Date.now()
+    fn()
+  }
+  const tapFrontier = inLens ? locked(onFrontierTap) : onFrontierTap
+  const turn = flip && (inLens ? { ...flip, onFlip: locked(flip.onFlip) } : flip)
+
   return (
     <div className={`scorecard-page ${lens === 'lens' ? 'scorecard-page--lens' : ''}`}>
       <div className="scpage__bar">
@@ -230,12 +258,24 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
         view={view}
         notes={notes}
         onCellTap={(card) => setEditing(card)}
-        onFrontierTap={onFrontierTap}
+        onFrontierTap={tapFrontier}
         fresh={fresh}
-        flip={flip}
+        flip={turn}
         lens={lens}
+        edge={bar?.state === 'edge'}
+        lastOpened={bar?.lastOpened ?? null}
       />
-      {lens === 'lens' && <LensBar onSheet={() => setWholeSheet(true)} />}
+      {bar && (
+        <LensBar
+          bar={bar}
+          checkedAt={lastUpdated}
+          refreshing={loading}
+          onSheet={() => setWholeSheet(true)}
+          onUnwrap={tapFrontier}
+          onTurn={turn?.onFlip}
+          onRefresh={onReload}
+        />
+      )}
       {lens === 'whole' && <LensBack onBack={() => setWholeSheet(false)} />}
 
       {editing && (

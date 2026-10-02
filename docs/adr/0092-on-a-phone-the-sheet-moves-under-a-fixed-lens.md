@@ -86,3 +86,36 @@ to the reveal sync (ADR-0022).
 - The Player/Pos header corner now stays over the inning numbers when the sheet
   pans. It lost on z-index to the header row before, which the lens made
   plain.
+
+## Amended by the bar (#724, slice L4)
+
+The bottom bar now has its three rows. The rules below add to the decisions
+above and change none of them.
+
+- **One state at a time** (`barState` in `src/lib/scorecard/bar.js`): `loading`,
+  `handoff`, `edge` or `sealed`. A turn that is due beats the live edge: the
+  reader turns first. `loading` is only the wait for a first feed. A poll or a
+  Refresh keeps what is on screen, so the bar never flickers to a disabled
+  button each minute.
+- **Line A and the situation read only open boxes.** The words, the runner
+  moves and the situation come from the clamped view (`words.js`,
+  `situation.js`). The one name that is not on an open box is the frontier
+  batter's, which the grid now carries (`grid.frontier.batter`). Who comes up
+  is a pre-pitch fact, as the lineup is (ADR-0003). A test taps through the
+  captured game and, at each step, swaps the result of the sealed at-bat. The
+  bar must not change (ADR-0046).
+- **A half's end stops on "Turn to Bottom N".** No auto-turn: that tap is the
+  moment to rule off the inning on paper. The half totals show only here,
+  after the half has committed (ADR-0006: E is the other club's fielding).
+- **The live edge shows no seal.** When the cursor meets the end of a half that
+  is still being played (ADR-0055), the lens draws a dashed pencil "At bat"
+  box in place of the seal and a "Waiting for the play" pill with Refresh. In
+  the lens the in-progress at-bat is not opened. The seal returns, with no
+  motion, on the poll that brings the next entry. The whole-sheet view and the
+  desktop sheet keep today's seal.
+- **One tap lock.** The seal, Unwrap and Turn share a 700 ms window after every
+  reveal and every turn (`tapLocked`). It is a constant and never reads the
+  result (ADR-0046). While the cell editor is open, none of the three acts.
+- **The turn chip is navy.** `.sc-ab__fliptext` was kraft. The turn lifts no
+  seal (ADR-0083), so it is navy on every width. Unwrap is the one kraft
+  control in the bar, and the seal-scope guard lists it.

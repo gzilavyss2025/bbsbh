@@ -50,6 +50,9 @@ export function Scorecard({
   // The phone lens (ADR-0092): 'lens' folds the header band and footer trio
   // away (the lens is the grid alone), 'whole' is the full sheet. ScorecardSheet.
   lens = null,
+  // The lens bar's facts about the grid, handed on to the sheet (lens/useLensBar.js).
+  edge = false,
+  lastOpened = null,
 }) {
   // THE SHEET'S OWN WIDTH, measured by the grid and held to by everything
   // around it. On a wide screen the scorecard runs the whole window (ADR-0047's
@@ -97,6 +100,8 @@ export function Scorecard({
           flip={flip}
           onWidth={holdToSheet}
           lens={lens}
+          edge={edge}
+          lastOpened={lastOpened}
         />
         <ScorecardFooter view={view} />
       </div>

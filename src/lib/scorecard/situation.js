@@ -23,7 +23,7 @@ export const baseWord = (base) => ['', '1st', '2nd', '3rd', 'home'][base] ?? ''
 export const runnerName = (card) =>
   card.pinchRunners?.at(-1)?.last ?? (card.kind === 'placed' ? card.runner?.last : card.batter?.last) ?? ''
 
-const halfLabel = ({ inning, half }) => `${half === 'bottom' ? 'Bottom' : 'Top'} ${inning}`
+export const halfLabel = ({ inning, half }) => `${half === 'bottom' ? 'Bottom' : 'Top'} ${inning}`
 
 // The opened boxes of one inning on this page, in the order they were batted.
 // The extra-innings placed runner has no atBatIndex and goes first.

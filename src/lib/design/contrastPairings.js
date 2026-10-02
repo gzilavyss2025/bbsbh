@@ -308,4 +308,10 @@ export const PAIRINGS = [
   // slot number and position (text-caption) are pairs already asserted above;
   // the uniform number's green on that paper is new.
   { fg: 'accent-positive', bg: 'surface-inset', min: TEXT, note: 'lens rail: frontier row uniform number' },
+  // The turn chip on the sheet, and the bar's Turn button: paper ink on navy.
+  // They were kraft before ADR-0092; the turn lifts no seal. The bar's other
+  // pairs (line A, the situation, the dashed waiting pill, Unwrap's chip) are
+  // asserted above: text-body, text-muted and text-caption on the raised card,
+  // and text-on-seal on both stripes of the kraft.
+  { fg: 'text-on-ink', bg: 'navy', min: TEXT, note: 'lens turn chip: paper ink on navy' },
 ]

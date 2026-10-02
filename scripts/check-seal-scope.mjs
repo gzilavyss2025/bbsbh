@@ -103,7 +103,10 @@ const ALLOWLIST = {
   '30-standings.css': ['.standings-reveal'],
   '31-wild-card.css': ['.duepill'],
   '46-consent-modal.css': ['.consent__btn--confirm', '.modestrip'],
-  'scorecard/box.css': ['.sc-ab__seal', '.sc-ab__sealtext', '.sc-ab__fliptext'],
+  'scorecard/box.css': ['.sc-ab__seal', '.sc-ab__sealtext'],
+  // The lens bar's Unwrap button (ADR-0092): it lifts the same seal the frame
+  // holds, through the same tap. The turn button beside it is navy.
+  'scorecard/lens-bar.css': ['.sc-lensbar__unwrap', '.sc-lensbar__unwraptext'],
 
   // "Score sealed" on the offseason notebook's picked game — the label that
   // says a result is still behind a cover.
