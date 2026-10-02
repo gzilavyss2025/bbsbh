@@ -1,6 +1,6 @@
 # The Matchup Scout mirrors to the catcher's view on request
 
-**Status:** Proposed (draft for #1410; an addendum to ADR-0077, scoped to one page)
+**Status:** Accepted (Gary approved the design on 2026-10-02; an addendum to ADR-0077, scoped to one page)
 **Date:** 2026-10-02
 **Issue:** #1408
 

@@ -1,10 +1,12 @@
 /* ============================================================
-   MATCHUP SCOUT PROTOTYPE — screens/designlab/scout/ScoutLab.jsx
+   MATCHUP SCOUT — screens/scout/ScoutPage.jsx (/scout, #1410) and its
+   Design Lab prototype, screens/designlab/scout/ScoutLab.jsx (#1408).
 
-   The design specimen for issue #1408 (spec: docs/scout-design.md). A
-   PER-ROUTE PARTIAL, loaded only by the Design Lab. Every selector is
-   .scout__*. Phase 1 (#1410) moves what it keeps into the page's own
-   partial; nothing else may hook these classes.
+   A PER-ROUTE PARTIAL in a subdirectory, because src/styles is at its file
+   budget (ADR-0038): imported by the two screens above, never by
+   src/index.css. Every selector is .scout__*; nothing else may hook these
+   classes. Spec: docs/scout-design.md. The .scout__lab and .scout__labbtn
+   rules are the prototype's own and draw nothing on the page.
 
    Two scales, one per map. The pitcher's map is the command map's clay ramp
    (26d-command-map.css): a share, sequential, one hue. The hitter's map
@@ -266,9 +268,63 @@
 }
 
 .scout__empty,
-.scout__pickbtn {
+.scout__labbtn {
   grid-column: 1 / -1;
   justify-self: start;
+}
+
+/* A picker slot: the house button, full width of its column, the name cut
+   short rather than wrapped. */
+.scout__pickbtn {
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The "Regular season" tag over the maps (Gary, item 9). */
+.scout__season {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+/* --- the hitter's slot in Phase 1: his line per pitch type --- */
+
+.scout__hitline {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.scout__hitfact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.scout__hitfact dd {
+  margin: 0;
+}
+
+.scout__hitvalue {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  color: var(--text-heading);
+}
+
+.scout__hittable th[scope='row'] {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-align: start;
 }
 
 /* --- the colour key: one row per scale --- */

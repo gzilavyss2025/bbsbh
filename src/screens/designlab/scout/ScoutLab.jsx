@@ -1,4 +1,4 @@
-import '../../../styles/designlab/scout.css'
+import '../../../styles/scout/scout.css'
 import { useCallback, useMemo, useState } from 'react'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { AsyncStatus } from '../../../components/ui/AsyncGate.jsx'
@@ -10,6 +10,7 @@ import { scenePitches } from '../../../lib/pitcherCard/scene.js'
 import { ScoutMap } from '../../../components/scout/ScoutMap.jsx'
 import { HeadToHead } from './HeadToHead.jsx'
 import { Matchup } from '../../../components/scout/Matchup.jsx'
+import { Choice } from '../../../components/scout/Choice.jsx'
 import { HITTERS, LEAGUE, PITCHER } from './fixture.js'
 import { REGIONS, regionLabel, rollUp, sidesInOrder } from '../../../lib/zone/regions.js'
 import { METRICS, band, expected, fmtCell, fmtMetric, hitterRegions, typeValue } from './model.js'
@@ -48,26 +49,6 @@ const scopesOf = (scope) => (scope === 'all' ? ['reg', 'post'] : [scope])
 const pct = (x) => `${Math.round(x * 100)}`
 const toneOf = (b) => (b == null ? null : b < 0 ? `lo${-b}` : b > 0 ? `hi${b}` : 'mid')
 const Swatch = ({ tone }) => <svg className="scout__swatch" aria-hidden="true"><rect className={`scout__region scout__region--${tone}`} width="14" height="14" /></svg>
-
-function Choice({ label, options, value, onChange, disabledKey }) {
-  return (
-    <div className="scout__control" role="group" aria-label={label}>
-      <span className="scout__controllabel">{label}</span>
-      {options.map(([k, text]) => (
-        <Pill
-          key={String(k)}
-          role="control"
-          fill="paper"
-          pressed={value === k}
-          disabled={disabledKey !== undefined && k === disabledKey}
-          onClick={() => onChange(k)}
-        >
-          {text}
-        </Pill>
-      ))}
-    </div>
-  )
-}
 
 // The league's rate per region, for the given types: the fixture's cell rates
 // averaged. The real sweep (#1411) stores league sums, read like a hitter's.
@@ -205,7 +186,7 @@ export function ScoutLab({ asOf: asOfProp }) {
             <input type="search" readOnly value="" placeholder="Search hitters" />
           </label>
           <p className="hint scout__empty">Pick a pitcher and a hitter</p>
-          <Pill role="control" fill="paper" className="scout__pickbtn" onClick={() => setState('pair')}>Use the invented pair</Pill>
+          <Pill role="control" fill="paper" className="scout__labbtn" onClick={() => setState('pair')}>Use the invented pair</Pill>
         </div>
       )}
 
