@@ -6,7 +6,8 @@ import { AsOfBanner } from '../../../components/seal/AsOfBanner.jsx'
 import { pitchLabel } from '../../../api/pitchArsenal.js'
 import { monthDayYear } from '../../../lib/dates.js'
 import { h2hRows } from './fixture.js'
-import { ROUND, h2hBefore, h2hTotals, resultShort } from './model.js'
+import { ROUND_TAG, resultShort } from '../../../lib/scout/format.js'
+import { h2hBefore, h2hTotals } from './model.js'
 
 // THE HEAD-TO-HEAD LIST: the total line, then one row per plate appearance,
 // newest first. Only games dated before `cutoff` (today, or ?d=) — the one
@@ -41,7 +42,7 @@ export function HeadToHead({ scope, cutoff, asOf, missing }) {
               {shown.map((r, i) => (
                 <tr key={i}>
                   <td>{monthDayYear(r.date)}</td>
-                  <td><Pill>{ROUND[r.gameType]}</Pill></td>
+                  <td><Pill>{ROUND_TAG[r.gameType]}</Pill></td>
                   <td>{resultShort(r)}</td>
                   <td>{pitchLabel(r.pitchType)}</td>
                   <td>{r.pitches}</td>

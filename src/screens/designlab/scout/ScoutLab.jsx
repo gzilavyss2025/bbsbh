@@ -7,13 +7,12 @@ import { MIN_COMMAND_PITCHES } from '../../../api/commandMap.js'
 import { isRealDate, isoToday } from '../../../lib/dates.js'
 import { pitchTiles } from '../../../lib/pitcherCard/card.js'
 import { scenePitches } from '../../../lib/pitcherCard/scene.js'
-import { ZoneMap } from './ZoneMap.jsx'
+import { ScoutMap } from '../../../components/scout/ScoutMap.jsx'
 import { HeadToHead } from './HeadToHead.jsx'
-import { Matchup } from './Matchup.jsx'
+import { Matchup } from '../../../components/scout/Matchup.jsx'
 import { HITTERS, LEAGUE, PITCHER } from './fixture.js'
-import {
-  METRICS, REGIONS, band, expected, fmtCell, fmtMetric, hitterRegions, regionLabel, rollUp, sidesInOrder, typeValue,
-} from './model.js'
+import { REGIONS, regionLabel, rollUp, sidesInOrder } from '../../../lib/zone/regions.js'
+import { METRICS, band, expected, fmtCell, fmtMetric, hitterRegions, typeValue } from './model.js'
 
 // THE MATCHUP SCOUT PROTOTYPE (issue #1408; spec docs/scout-design.md). A
 // design specimen on invented data, not the page: no route, no fetch, no
@@ -261,7 +260,7 @@ export function ScoutLab({ asOf: asOfProp }) {
             <div key={turns} className={`scout__maps${turns ? ' is-turning' : ''}`}>
               <figure className="scout__fig">
                 <figcaption className="scout__cap">Pitcher · location %</figcaption>
-                <ZoneMap view={view} stance={stance} cells={m.pitcherCells} picked={picked} onSelect={pick}
+                <ScoutMap view={view} stance={stance} cells={m.pitcherCells} picked={picked} onSelect={pick}
                   label={`${typeName}: pitcher’s location share by region, ${view} view`} />
                 <span className="scout__sides" aria-hidden="true"><span>{sides[0]}</span><span>{sides[1]}</span></span>
                 <span className="scout__cap">
@@ -272,7 +271,7 @@ export function ScoutLab({ asOf: asOfProp }) {
                 <figcaption className="scout__cap">Hitter · {METRICS[metric].label}</figcaption>
                 {m.hitterCells ? (
                   <>
-                    <ZoneMap view={view} stance={hitterStance} cells={m.hitterCells} picked={picked} onSelect={pick}
+                    <ScoutMap view={view} stance={hitterStance} cells={m.hitterCells} picked={picked} onSelect={pick}
                       label={`${typeName}: hitter’s ${METRICS[metric].label} by region, ${view} view`} />
                     <span className="scout__sides" aria-hidden="true"><span>{sides[0]}</span><span>{sides[1]}</span></span>
                     <span className="scout__cap">{m.seen.toLocaleString()} pitches seen</span>

@@ -1,7 +1,7 @@
 import { useId } from 'react'
-import { REGIONS, mapBox, platePoints, regionLabel, regionRect, stanceRect } from './model.js'
+import { REGIONS, mapBox, platePoints, regionLabel, regionRect, stanceRect } from '../../lib/zone/regions.js'
 
-// ONE 13-REGION MAP. `cells` maps a region id to { tone, value, count }:
+// ONE 13-REGION MAP (the Matchup Scout, #1408; geometry in lib/zone/regions.js). `cells` maps a region id to { tone, value, count }:
 // `tone` picks the fill class, `value` is the big figure, `count` the small
 // one. A region with no value is under the floor: pencil-hatched, count only —
 // a hatch, not a tint, so it can never read as a step of either colour scale.
@@ -17,7 +17,7 @@ import { REGIONS, mapBox, platePoints, regionLabel, regionRect, stanceRect } fro
 // (a navy frame); the tone classes stay on the rect, so the fill tweens when
 // a pill flips the data under it (scout.css). A figure is keyed on its value,
 // so a changed number remounts and inks in. No `title=` tooltip anywhere.
-export function ZoneMap({ view, stance, cells, label, picked, onSelect }) {
+export function ScoutMap({ view, stance, cells, label, picked, onSelect }) {
   const inner = ['r1c1', 'r3c3'].map((r) => regionRect(r, view))
   const fx = Math.min(inner[0].x, inner[1].x)
   const fr = Math.max(inner[0].x + inner[0].width, inner[1].x + inner[1].width)
