@@ -199,9 +199,14 @@
   );
   animation: sc-seal-breathe 2.4s var(--ease-standard) infinite alternate;
 }
+/* The ring sits OUTSIDE the kraft, on paper: field on kraft is 1.81:1, under the
+   3:1 of WCAG 1.4.11 (check-focus-ring pins it). It spills into the next cells,
+   so lift the seal above them or their paint covers the ring. */
 .sc-ab__seal:focus-visible {
+  position: relative;
+  z-index: 1;
   outline: 2px solid var(--focus-ring);
-  outline-offset: -2px;
+  outline-offset: 2px;
 }
 .sc-ab__sealtext {
   padding: 2px var(--space-1h);
