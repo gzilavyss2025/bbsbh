@@ -567,7 +567,7 @@ test('T4: .ledger left the frame block it shared with .standings, and T8 deleted
   const frame = rules(css).find(([, body]) => decl(body, 'box-shadow') === 'var(--shadow-card)' && decl(body, 'overflow') === 'hidden')
   assert.equal(frame, undefined, 'no table draws the old frame: the Table wrap does')
   for (const sel of ['.ledger-wrap', '.standings-wrap']) {
-    assert.ok(!rules(css).some(([s]) => new RegExp(String.raw`\${sel}(?![a-z0-9_-])`).test(s)), `${sel} is deleted (T8)`)
+    assert.ok(!rules(css).some(([s]) => new RegExp(`\\${sel}(?![a-z0-9_-])`).test(s)), `${sel} is deleted (T8)`)
   }
   assert.equal(ruleBody(css, '.ledger.standings th'), null, 'the odds sheet left the old base (T8)')
   // The odds sheet keeps its one-line column names: the Table sets nowrap on every cell, and no rule that reaches it wraps a head.
@@ -1184,9 +1184,9 @@ test('T8: the Table pins the club column; the namespace keeps only its width and
     }
   }
   assert.equal(decl(t8Rule('30-standings.css', '.clubtable--full .team'), 'min-width'), '116px', 'the pinned club column keeps its width')
-  // The favorite row is opaque under the pin: the same 10% mixed into the card, not into transparent.
+  // The favorite row is opaque under the pin: one tint, mixed into the card, paints every cell of the row.
   assert.equal(decl(t8Rule('29-team-transactions.css', '.clubtable tr.is-me td'), '--table-pin'), 'color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card))')
-  assert.equal(decl(t8Rule('29-team-transactions.css', '.clubtable tr.is-me td'), 'background'), 'color-mix(in srgb, var(--fav-accent, var(--field)) 10%, transparent)')
+  assert.equal(decl(t8Rule('29-team-transactions.css', '.clubtable tr.is-me td'), 'background'), 'var(--table-pin)')
   // The wild card group row spans the board; its one cell is the first, so it keeps its page ground under the pin.
   assert.equal(decl(t8Rule('31-wild-card.css', '.wc-grouphead td'), '--table-pin'), 'var(--bg-page)')
 })
@@ -1208,8 +1208,8 @@ test('T8: the club table keeps its name cell, its tones and the board\'s column 
   assert.equal(decl(t8Rule(board, '.clubtable--full thead th'), 'white-space'), 'normal', 'a board head may wrap, as it did on the old base')
   assert.equal(decl(t8Rule(board, '.clubtable--full td'), 'font-size'), 'var(--fs-compact)', 'a phone board keeps its compact figures')
   assert.equal(decl(t8Rule(board, '.clubtable tr.is-eliminated td'), 'opacity'), '0.62')
-  // The group row's 12px top pad never drew under the old board's own padding; the Table's 6px is the one it had.
-  assert.ok(!props(t8Rule('31-wild-card.css', '.wc-grouphead td')).includes('padding-top'), 'the group row takes the row density')
+  // The group row's 12px top pad and its label size never drew under the old board's own cell rules; it keeps what it showed.
+  for (const p of ['padding-top', 'font-size']) assert.ok(!props(t8Rule('31-wild-card.css', '.wc-grouphead td')).includes(p), `the group row takes the board's ${p}`)
   assert.equal(decl(t8Rule('39-manager-page.css', '.psoddstable thead th'), 'font-weight'), 'var(--w-semibold)', 'the odds sheet keeps its lighter head')
   // The mini table's space above it was the old wrapper's; it is the Table wrap's now.
   assert.equal(decl(t8Rule('70-postseason-race.css', '.psrace__league > .table'), 'margin-top'), 'var(--space-2)')
