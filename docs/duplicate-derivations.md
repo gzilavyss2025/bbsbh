@@ -78,18 +78,16 @@ Bucket codes: **A** = actual disagreement, **D** = deliberate difference,
 | D8 | A player's season age | `scripts/lib/youngest-regulars.mjs`: `ageOnJune30` (decimal); `.scratch/team-success/build-roster-age.mjs` (statsapi's integer `stat.age`) | Every player | The spike compares clubs with each other in one season, and its header says the integer is good enough for that. |
 | D9 | How far a winner came back | `src/api/dayHighlights.js` (lowest win probability, seeded at 50); `scripts/gen-comeback-wins.mjs`: `bothMinWinProbs` (true minimum) | A winner who never fell below 50 | The seed only matters below the threshold (deficit > 25), so the two agree on every game either one reports. |
 | D10 | ABS chances per inning | `.scratch/abs-reports/analysis.mjs`: `chancesByInning` (failures before the half); `scripts/lib/abs/chances.mjs`: `chancesByInning` (`replayBank`, extra-inning re-arm, `scheduled_innings`) | Extra innings, and innings 8–9 of a seven-inning game | The spike is the draft. ADR-0075 records the correction. Quote the export, not the spike. |
-| D11 | A player's WPA in one game | `src/api/boxscore.js`: `computeThreeStars` (WPA plus context-neutral points); `scripts/game-buzz.mjs`: `topPerformers` (WPA only) | A dominant start in a blowout | The WPA sum is the same formula. The three stars need ADR-0013's fix. The buzz script picks search terms, not stars. |
 | D12 | An umpire's called ball | `scripts/gen-umpire-accuracy.mjs`, `src/api/umpireFavor.js`, `src/api/derive.js` (`'B'`, `'*B'`); `src/api/playbyplay/pitchInfo.js`: `BALL_CODES` (adds pitchouts, HBP, intentional and automatic balls) | A pitchout or an automatic ball | Those codes move the count but are not a zone judgment. |
 
 ### Duplicates
 
 | # | Quantity | Homes (file: function) | Edge, if any | Which home should win |
 | --- | --- | --- | --- | --- |
-| U1 | Innings pitched to outs, and back | `src/lib/math/innings.js`: `ipToOuts`, `outsToIp` (one home since #1306). Copies left: `scripts/gen-workload.mjs`, `scripts/gen-vs-team-splits.mjs`, `scripts/gen-scorebook-retrospective.mjs`, `scripts/lib/pitcher-starts.mjs` (inline), `.scratch/*`; `scripts/lib/abs/exposure.mjs`: `inningsFromOuts` | All agree on real input. Only `"5.10"` differed, and the feed never sends it. `inningsFromOuts` rejects `".3"`; the others read it as 3 outs. | `src/lib/math/innings.js`. Keep `inningsFromOuts`'s strict parse. The generators left can import it. |
+| U1 | Innings pitched to outs, and back | `src/lib/math/innings.js`: `ipToOuts`, `outsToIp` (one home since #1306). Copies left: `scripts/gen-workload.mjs`, `scripts/gen-vs-team-splits.mjs`, `scripts/lib/pitcher-starts.mjs` (inline), `.scratch/*`; `scripts/lib/abs/exposure.mjs`: `inningsFromOuts` | All agree on real input. Only `"5.10"` differed, and the feed never sends it. `inningsFromOuts` rejects `".3"`; the others read it as 3 outs. | `src/lib/math/innings.js`. Keep `inningsFromOuts`'s strict parse. The generators left can import it. |
 | U2 | Is a play a plate appearance | `src/api/playbyplay/eventTypes.js`: `NON_PA_EVENT_TYPES`, `GAME_ADVISORY_EVENT_TYPE`; `scripts/lib/long-at-bats.mjs`: `isPlateAppearance`; `derive.js`, `callout-notes/tto.js`, `rollup.js`, `progress.js` skip the advisory check | A top-level `game_advisory` play. It exists only before the first pitch, so no revealed count moves. | Move `isPlateAppearance` into `eventTypes.js`. A8 (#1282) is the one copy that disagrees. |
 | U3 | Was a called pitch a missed call | `src/api/derive.js`: `isMissedCall`; `src/api/umpireFavor.js`: `selectUmpireFavor`, `missEdge`; `scripts/gen-umpire-accuracy.mjs`: `computeGameAccuracy`, `missRegion` (same body as `missEdge`) | A pitch with a corrupt pre-pitch count: `derive.js` drops it from the missed count, the generator counts it | A pure per-pitch helper in `src/lib/zone/`. The feed walks stay where they are: `derive.js` and `umpireFavor.js` stay reveal-only (ADR-0001). Only one pitch's geometry moves, and geometry is not a score. |
 | U4 | Base-out state, play by play | `scripts/gen-run-expectancy.mjs`: `accumulateGame`; `scripts/gen-umpire-accuracy.mjs`: `computeGameAccuracy`; `src/api/umpireFavor.js`: `selectUmpireFavor`; `scripts/lib/abs/rows.mjs`: `challengeRowsForGame` | None found | A pure step function in `src/lib/runExpectancy.js` beside the table code. The reveal-only walk in `umpireFavor.js` stays there. |
-| U5 | The big win-probability moments of a game | `src/api/logbookGameDetail.js` (`SWING_THRESHOLD` 18, `LATE_INNING` 8); `scripts/gen-scorebook-retrospective.mjs` (literals 18 and 8) | None | Export the two constants from `logbookGameDetail.js`. |
 | U6 | Quality start | `src/api/person/gameLog.js` (inline); `scripts/lib/team-records.mjs`: `isQualityStart` | None (18 outs, 3 ER) | `isQualityStart`, moved to `src/lib/`. |
 | U7 | Level tenure (first ascent) | `.scratch/level-benchmarks/analyze.mjs`: `reconstruct`; `scripts/gen-level-tenure-benchmark.mjs`: `reconstruct` | None. Both keep debut-year MiLB rows after the debut. | The generator. The spike is its source. |
 | U8 | A club's Team Score at a cutoff | `src/api/teamScore.js`: `teamScoreFor`; `scripts/gen-postseason-odds.mjs`: `teamScoreSnapshot` (says it is a deliberate copy) | None | `teamScore.js`. `src/api/CLAUDE.md` says a generator that needs app logic imports it. |
@@ -226,14 +224,6 @@ named. The text is exact.
 // SUPERSEDED by scripts/lib/abs/chances.mjs (docs/adr/0075). This draft counts
 // only the failures before the half. It never re-arms a club in extra innings
 // and never reads a seven-inning game's length. Quote the export, not this.
-```
-
-**`scripts/game-buzz.mjs`, above `topPerformers` (D11):**
-
-```js
-// WPA alone, not computeThreeStars (src/api/boxscore.js), which adds
-// context-neutral points (ADR-0013). This list picks search terms, and the
-// name that moved the win probability is the name social posts tag.
 ```
 
 **`scripts/gen-umpire-accuracy.mjs`, beside `const ballCall` (D12):**

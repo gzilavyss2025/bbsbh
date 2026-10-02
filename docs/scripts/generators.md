@@ -1370,10 +1370,6 @@ Re-run only to fold in a new season.
   it writes is hand-tuned afterwards in `/identity-lab`; methodology and the
   per-club confidence definitions live in `.scratch/milb-team-colors/README.md`.
   See `src/lib/CLAUDE.md` for how the pair resolves at render time.
-- `gen-scorebook-retrospective.mjs` → `public/data/first-scorebook.json` — the
-  one-off dataset behind `/first-scorebook`, a personal retrospective over a
-  fixed set of already-scored games. Hand-run by definition: its input is a
-  closed list, not a moving season.
 - `gen-contracts-shards.mjs` → `public/data/contracts-history/player/{00..99}.json`
   **and** `public/data/contracts-history/terms/{sourceFile}-{bucket}.json` — the
   join that puts real dollar terms behind a real player id. Reads the four
@@ -1559,11 +1555,6 @@ Re-run only to fold in a new season.
   `scripts/og-image.html` render an alternate generated-art version, kept in case we
   go back to it. The `og:*`/`twitter:*` tags in `index.html` point at the current
   `.jpg` (absolute URLs).
-- `game-buzz.mjs <gamePk>` — post-game: top social posts from the game's time window,
-  ranked by engagement, to seed handwritten GAME NOTES. FREE sources — Bluesky (no
-  auth) always, plus the Reddit game thread when `REDDIT_CLIENT_ID/SECRET` are set.
-  Deliberately a terminal script, NOT part of the app (game-night posts are spoilers).
-  Source scoping/queries: `docs/game-buzz.md`.
 - `gen-sitemap.mjs` → `public/sitemap.xml` — runs as part of `npm run build`. Lists
   the `/learn` guides plus the stable, public, non-scoring app routes, and
   deliberately lists NO game, date, player or team URL: a sitemap is a standing
