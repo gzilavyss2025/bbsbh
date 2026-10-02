@@ -10,7 +10,7 @@ import { openDb } from '../scripts/lib/db.js'
 import { bucketsOf } from '../scripts/lib/io.js'
 import { arsenalStatements, aggregateGamePitchTypes, exportCommandMap, exportPitchArsenal, foldGame } from '../scripts/gen-pitch-arsenal.mjs'
 import { aggregateGameCommand } from '../scripts/lib/command-grid.mjs'
-import { aggregateGameHitters, exportHitterGrid, leagueOf } from '../scripts/lib/pitch/hitter-grid.mjs'
+import { aggregateGameHitters, exportHitterGrid, hitterGamesMissing } from '../scripts/lib/pitch/hitter-grid.mjs'
 import { commandCell, normalizePitch } from '../src/lib/zone/zoneGeometry.js'
 import { fetchHitterGridFor, fetchHitterLeague, flatRates, hitterCounters } from '../src/api/scout/hitterGrid.js'
 
@@ -93,14 +93,18 @@ test('a ball in play is a PA end with no fixed weight; a sac bunt or an untracke
   assert.equal(r.pitches[at(UP)], 2)
 })
 
-test('no PA end for a baserunning play, or for a PA that ended on a call with no pitch', () => {
+test('no PA end for a baserunning play, an intentional walk, or a PA that ended on a call with no pitch', () => {
   const automatic = { isPitch: false, details: { call: { code: 'AC' } } }
   const out = aggregateGameHitters(feed([
     play([pitch(MID, 'B')], 'caught_stealing_2b'),
+    // A half can end on a runner out that NON_PA_EVENT_TYPES does not name.
+    play([pitch(MID, 'B')], 'other_out'),
+    // wOBA leaves an intentional walk out of its denominator.
+    play([pitch(MID, 'B')], 'intent_walk'),
     play([pitch(MID, 'S'), automatic], 'strikeout'),
   ]))
   const r = cellOf(out)
-  assert.equal(r.pitches[at(MID)], 2)
+  assert.equal(r.pitches[at(MID)], 4)
   assert.equal(sum(r.paEnd), 0)
 })
 
@@ -130,7 +134,7 @@ test('a game folds into the hitter rows of its own scope; the postseason never a
     foldGame(db, stmts, { gamePk, level: 'mlb', date: '2026-09-30', season: 2026, scope }, ...game(plays))
   fold(1, 'R', [atBat(MID), atBat(MID)])
   fold(2, 'R', [atBat(UP)])
-  const regular = exportHitterGrid(db, 2026, 'R')
+  const regular = exportHitterGrid(db, 2026, 'R').bat
   const counters = regular[9].mlb.FF.R.R
   assert.equal(counters.pitches[at(MID)], 2)
   assert.equal(counters.pitches[at(UP)], 1)
@@ -138,8 +142,8 @@ test('a game folds into the hitter rows of its own scope; the postseason never a
 
   // Same hitter, pitch type, hand and side: the one key a postseason row could overwrite.
   fold(3, 'P', [atBat(UP)])
-  assert.deepEqual(exportHitterGrid(db, 2026, 'R'), regular)
-  assert.equal(sum(exportHitterGrid(db, 2026, 'P')[9].mlb.FF.R.R.pitches), 1)
+  assert.deepEqual(exportHitterGrid(db, 2026, 'R').bat, regular)
+  assert.equal(sum(exportHitterGrid(db, 2026, 'P').bat[9].mlb.FF.R.R.pitches), 1)
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM pitch_hitter_ingested_games').get().n, 3)
 })
 
@@ -151,20 +155,23 @@ test('the hitter re-walk folds no pitch type and no command cell a second time',
   foldGame(db, stmts, { ...g, need: { arsenal: true, command: true, hitter: false } }, ...game(plays).slice(0, 2), new Map())
   const arsenal = exportPitchArsenal(db, {}, 2026).pit
   const grid = exportCommandMap(db, 2026)
-  assert.deepEqual(exportHitterGrid(db, 2026, 'R'), {})
+  assert.deepEqual(exportHitterGrid(db, 2026, 'R').bat, {})
+  // The arsenal has the game and the hitter grid does not: no hitter file may be written yet.
+  assert.equal(hitterGamesMissing(db, 2026), 1)
 
   // The re-walk: what ingestGame builds when only the hitter half is owed.
   foldGame(db, stmts, { ...g, need: { arsenal: false, command: false, hitter: true } }, new Map(), new Map(), game(plays)[2])
   assert.deepEqual(exportPitchArsenal(db, {}, 2026).pit, arsenal)
   assert.deepEqual(exportCommandMap(db, 2026), grid)
-  assert.equal(sum(exportHitterGrid(db, 2026, 'R')[9].mlb.FF.R.R.pitches), 2)
+  assert.equal(sum(exportHitterGrid(db, 2026, 'R').bat[9].mlb.FF.R.R.pitches), 2)
+  assert.equal(hitterGamesMissing(db, 2026), 0)
 })
 
 test('the export drops all-zero counters, and keeps the xwOBA numerator out until a route fills it', async () => {
   const db = await emptyDb()
   const stmts = arsenalStatements(db)
   foldGame(db, stmts, { gamePk: 1, level: 'mlb', date: '2026-06-01', season: 2026 }, ...game([play([pitch(MID, 'B')], 'walk')]))
-  assert.deepEqual(Object.keys(exportHitterGrid(db, 2026, 'R')[9].mlb.FF.R.R), ['pitches', 'paEnd', 'wobaFixed'])
+  assert.deepEqual(Object.keys(exportHitterGrid(db, 2026, 'R').bat[9].mlb.FF.R.R), ['pitches', 'paEnd', 'wobaFixed'])
   assert.equal(db.prepare('SELECT xwoba_bip FROM pitch_hitter_cells').get().xwoba_bip, null)
 })
 
@@ -176,11 +183,11 @@ test('the league is every hitter summed, in the same shape as one hitter', async
     play([pitch(MID, 'S')], 'strikeout', { batter: 7 }),
     play([pitch(UP, 'B')], 'walk', { batter: 7, stand: 'L', throws: 'L' }),
   ]))
-  const league = leagueOf(db, 2026, 'R')
+  const { league } = exportHitterGrid(db, 2026, 'R')
   assert.equal(league.mlb.FF.R.R.pitches[at(MID)], 2)
   assert.equal(league.mlb.FF.R.R.whiffs[at(MID)], 2)
   assert.equal(league.mlb.FF.L.L.wobaFixed[at(UP)], 0.7)
-  assert.deepEqual(leagueOf(db, 2026, 'P'), {})
+  assert.deepEqual(exportHitterGrid(db, 2026, 'P').league, {})
 })
 
 test('a hitter bucket keeps the postseason beside `bat`', () => {
@@ -225,6 +232,8 @@ test('flatRates is the whole-type rate per metric, wherever the pitch was thrown
   const c = hitterCounters(grid, { code: 'SL', scope: 'R' })
   assert.deepEqual(flatRates(c), { xwoba: null, whiff: 0, swing: 0.4 })
   assert.deepEqual(flatRates({ ...c, swings: z(0, 0) }), { xwoba: null, whiff: null, swing: 0 })
+  // A pitch type he never saw: no counters, so no rates, and no crash.
+  assert.equal(flatRates(hitterCounters(grid, { code: 'CU' })), null)
 })
 
 test('the reader reads one season, and degrades to null when the store is absent', async (t) => {

@@ -16,8 +16,8 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { GRID, commandCell, normalizePitch } from '../../../src/lib/zone/zoneGeometry.js'
 import { FOUL_CODES, WHIFF_CODES } from '../../../src/api/playbyplay/pitchInfo.js'
-import { GAME_ADVISORY_EVENT_TYPE, NON_PA_EVENT_TYPES } from '../../../src/api/playbyplay/eventTypes.js'
 import { INPLAY_COMMAND_CODES, parseCells } from '../command-grid.mjs'
+import { isPlateAppearance } from '../long-at-bats.mjs'
 import { bucketsOf, writeSeasons, writeShards } from '../io.js'
 
 const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'public', 'data', 'hitter-grid')
@@ -28,14 +28,19 @@ const COLS = ['pitches', 'swings', 'whiffs', 'pa_end', 'woba_fixed']
 // Savant's woba_value for the PA ends that need no estimate: 0.7 for these,
 // 0 for a strikeout and every other out (#1411, the Part C spike).
 const WOBA_07 = new Set(['walk', 'hit_by_pitch', 'catcher_interf'])
-// Balls in play that Savant's board leaves out of its xwOBA mean.
-const NO_ESTIMATE = new Set(['sac_bunt', 'sac_bunt_double_play'])
+// PA ends that an xwOBA mean leaves out: Savant's board skips sac bunts, and
+// wOBA gives an intentional walk no denominator.
+const NOT_IN_MEAN = new Set(['sac_bunt', 'sac_bunt_double_play', 'intent_walk'])
 const round = (v) => Math.round(v * 1e4) / 1e4
 const isHand = (c) => c === 'L' || c === 'R'
 
 // Pure: one game's feed -> Map `${hitterId}:${code}:${pitcherHand}:${stand}` ->
 // { pitches, swings, whiffs, paEnd, wobaFixed }, each 25 values. The hand and
 // the side come from the MATCHUP, so a switch hitter counts on the side he took.
+// ponytail: the play's final matchup names the hand, the side and the hitter for
+// every pitch of the play, as the pitcher grids do. A mid-PA reliever or pinch
+// hitter files the earlier pitches under the new man (0 such PAs in 8 sampled
+// games). Split the play at a substitution event if the counts ever drift.
 export function aggregateGameHitters(feed) {
   const out = new Map()
   for (const play of feed?.liveData?.plays?.allPlays ?? []) {
@@ -45,8 +50,8 @@ export function aggregateGameHitters(feed) {
     if (hitterId == null || !isHand(throws) || !isHand(stand)) continue
     const type = play.result?.eventType
     const events = play.playEvents ?? []
-    // A baserunning play is no plate appearance: the batter's at-bat goes on.
-    const isPa = type && !NON_PA_EVENT_TYPES.has(type) && type !== GAME_ADVISORY_EVENT_TYPE
+    // An allow list: a runner out that ends the half is no PA, and his at-bat goes on.
+    const isPa = isPlateAppearance(play) && !NOT_IN_MEAN.has(type)
     for (const e of events) {
       if (!e.isPitch) continue
       const code = e.details?.type?.code
@@ -69,7 +74,7 @@ export function aggregateGameHitters(feed) {
       if (!isPa || e !== events.at(-1)) continue
       if (inPlay && type !== 'catcher_interf') {
         const hit = e.hitData
-        if (NO_ESTIMATE.has(type) || typeof hit?.launchSpeed !== 'number' || typeof hit?.launchAngle !== 'number') continue
+        if (typeof hit?.launchSpeed !== 'number' || typeof hit?.launchAngle !== 'number') continue
       } else if (WOBA_07.has(type)) {
         b.wobaFixed[at] = round(b.wobaFixed[at] + 0.7)
       }
@@ -102,7 +107,7 @@ export function foldHitters(stmts, { gamePk, level, date, season, scope, need },
     const prior = stmts.hitterRead.get(...k)
     const merged = FIELDS.map((f, i) => {
       const was = parseCells(prior?.[COLS[i]])
-      return b[f].map((v, j) => round(v + was[j])).join(',')
+      return b[f].map((v, j) => round(v + (was[j] ?? 0))).join(',')
     })
     stmts.hitterWrite.run(...k, ...merged)
   }
@@ -123,26 +128,34 @@ function addRow(entry, r) {
   })
 }
 
-// Every hitter of one season and scope: { [hitterId]: entry }.
+// One season and scope: `bat`, { [hitterId]: entry }, and `league`, every
+// hitter's rows summed into ONE entry of the same shape, so the colour scale
+// reads it with the same reader as a hitter.
 export function exportHitterGrid(db, season, scope = 'R') {
   const bat = {}
-  for (const r of rowsOf(db, season, scope)) addRow((bat[r.person_id] ??= {}), r)
-  return bat
+  const league = {}
+  for (const r of rowsOf(db, season, scope)) {
+    addRow((bat[r.person_id] ??= {}), r)
+    addRow(league, r)
+  }
+  return { bat, league }
 }
 
-// The league: every hitter's rows summed into ONE entry of the same shape, so
-// the colour scale reads it with the same reader as a hitter.
-export function leagueOf(db, season, scope = 'R') {
-  const league = {}
-  for (const r of rowsOf(db, season, scope)) addRow(league, r)
-  return league
-}
+// MLB games the arsenal half has and the hitter half does not. Not 0 means the
+// season's re-walk has not run: a file from a few nights would read as the season.
+export const hitterGamesMissing = (db, season) => db.prepare(
+  `SELECT COUNT(*) AS n FROM pitch_arsenal_ingested_games a WHERE a.season = ? AND a.level = 'mlb'
+     AND NOT EXISTS (SELECT 1 FROM pitch_hitter_ingested_games h WHERE h.game_pk = a.game_pk AND h.level = a.level)`,
+).get(season).n
 
 // hitter-grid/{season}/{NN}.json ({ season, bat, post }) and league.json beside them.
+// Writes nothing until every MLB game of the season is in the hitter ledger.
 export async function writeHitterGrid(db, season) {
-  const [bat, post] = ['R', 'P'].map((scope) => exportHitterGrid(db, season, scope))
-  if (!Object.keys(bat).length && !Object.keys(post).length) return
-  const league = { season, bat: leagueOf(db, season, 'R'), post: leagueOf(db, season, 'P') }
-  await writeShards(join(outDir, String(season)), [...bucketsOf({ season }, bat, post, 'bat'), ['league', league]])
+  const missing = hitterGamesMissing(db, season)
+  if (missing) return console.log(`hitter-grid/${season}/ not written: ${missing} MLB games still owe the hitter half`)
+  const [reg, post] = ['R', 'P'].map((scope) => exportHitterGrid(db, season, scope))
+  if (!Object.keys(reg.bat).length) return
+  const league = { season, bat: reg.league, post: post.league }
+  await writeShards(join(outDir, String(season)), [...bucketsOf({ season }, reg.bat, post.bat, 'bat'), ['league', league]])
   await writeSeasons(outDir, season)
 }

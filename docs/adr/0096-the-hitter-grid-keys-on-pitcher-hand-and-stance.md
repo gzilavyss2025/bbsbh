@@ -45,10 +45,12 @@ that joins on the pitch (#1411, the Part C spike). The owner has not picked one.
      `src/api/playbyplay/`), the same as the pitcher grid. A foul tip is a
      swing, not a whiff.
    - `pa_end` counts the pitches that an xwOBA mean counts. A PA ends on the
-     last event of a play that is not a baserunning play. A PA that ended on a
-     call with no pitch has no PA-ending pitch. A sac bunt and a ball in play
-     with no exit velocity or launch angle are not counted, as Savant's board
-     does not count them.
+     last event of a play whose eventType is on the plate-appearance allow
+     list (`isPlateAppearance` in `scripts/lib/long-at-bats.mjs`). A PA that
+     ended on a call with no pitch has no PA-ending pitch. A sac bunt and a
+     ball in play with no exit velocity or launch angle are not counted, as
+     Savant's board does not count them. An intentional walk is not counted:
+     wOBA gives it no denominator.
    - `woba_fixed` is the part of the wOBA sum that needs no estimate: 0.7 for
      a walk, a hit-by-pitch or catcher interference, and 0 for a strikeout or
      another out (Savant's `woba_value`).
@@ -74,9 +76,14 @@ that joins on the pitch (#1411, the Part C spike). The owner has not picked one.
    `fetchHitterGridFor`, `fetchHitterLeague`, `hitterCounters` and
    `flatRates`. One season per read, never two (the 2026 zone is not the 2025
    zone).
-9. **No stamp.** `hitter-grid/` is in the `EXCEPT` list of
-   `check-data-freshness.mjs`, as `abs/` is. A season store does not change in
-   the winter, so a stamp would go stale every January.
+9. **No stamp.** `hitter-grid/` is a sharded season store, like
+   `pitch-command/`. A stamp would go stale every winter, when no game is
+   played. So `UNSTAMPED_BUDGET` in `check-data-freshness.mjs` goes from 22
+   to 23, as `scripts/CLAUDE.md` says for such a store.
+10. **No partial season.** `writeHitterGrid` writes nothing while an MLB game
+    of the season is in the arsenal ledger and not in the hitter ledger. So
+    the nightly cannot publish three days of hitter cells as the season before
+    the re-walk runs.
 
 ## Consequences
 

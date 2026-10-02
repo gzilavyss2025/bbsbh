@@ -75,7 +75,8 @@ const rate = (n, d) => (d > 0 ? n / d : null)
 
 // The whole-type rate per metric, wherever the pitch was thrown: the league's
 // flat line beside the expected value (docs/scout-design.md, Gary item 12).
-export const flatRates = (c) => ({
+// Null for null counters (hitterCounters found nothing).
+export const flatRates = (c) => c && ({
   xwoba: c.wobaSum ? rate(total(c.wobaSum), total(c.paEnd)) : null,
   whiff: rate(total(c.whiffs), total(c.swings)),
   swing: rate(total(c.swings), total(c.pitches)),

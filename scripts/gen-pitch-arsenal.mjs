@@ -615,6 +615,7 @@ async function main() {
     const season = Number(args.season ?? db.prepare('SELECT MAX(season) AS s FROM pitch_arsenal_ingested_games').get().s)
     if (!season) throw new Error('no season on file: pass --season')
     await writeArsenal(db, await handsFor(season), season)
+    await writeHitterGrid(db, season)
     await writeAllPools(db, handsFor)
     console.log(`wrote pitch-arsenal/${season}/ (export only — no games swept)`)
     db.close()
