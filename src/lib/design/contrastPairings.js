@@ -309,4 +309,24 @@ export const PAIRINGS = [
   // (#1B2A3A). The rail's paper focus ring is the ink-chip pair too.
   { fg: 'text-heading', bg: 'surface-inset', min: TEXT, note: 'band pill on a themed club band, under a pointer' },
   { fg: 'text-on-ink', bg: '#3F4B56', min: TEXT, note: 'records rail jump link on navy, under a pointer (text-on-ink 16%)' },
+  // THE SCORECARD LENS (ADR-0092, styles/scorecard/lens.css). The frontier
+  // row's rail cell is the inset paper. Its surname (text-heading) and its
+  // slot number and position (text-caption) are pairs already asserted above;
+  // the uniform number's green on that paper is new.
+  { fg: 'accent-positive', bg: 'surface-inset', min: TEXT, note: 'lens rail: frontier row uniform number' },
+  // The turn chip on the sheet, and the bar's Turn button: paper ink on navy.
+  // They were kraft before ADR-0092; the turn lifts no seal. The bar's other
+  // pairs (line A, the situation, the dashed waiting pill, Unwrap's chip) are
+  // asserted above: text-body, text-muted and text-caption on the raised card,
+  // and text-on-seal on both stripes of the kraft.
+  { fg: 'text-on-ink', bg: 'navy', min: TEXT, note: 'lens turn chip: paper ink on navy' },
+  // The lens's new-pitcher notice (#724, L5, lens-cards.css) on the tier-1
+  // notice ground, `color-mix(in srgb, var(--marker) 16%, var(--surface-card))`.
+  // The checker does not parse color-mix(), so #F8EECE is that mix by hand.
+  // The Entering card's three inks on the inset paper are asserted above.
+  { fg: 'text-heading', bg: '#F8EECE', min: TEXT, note: 'lens notice: label and name' },
+  { fg: 'clay', bg: '#F8EECE', min: TEXT, note: 'lens notice: uniform number' },
+  { fg: 'field', bg: '#F8EECE', min: TEXT, note: 'lens notice: throwing hand' },
+  { fg: 'clay-deep', bg: '#F8EECE', min: TEXT, note: 'lens notice: the entry flag' },
+  { fg: 'text-caption', bg: '#F8EECE', min: TEXT, note: 'lens notice: arsenal and last time out' },
 ]

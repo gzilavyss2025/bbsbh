@@ -232,8 +232,11 @@
   line-height: var(--sc-line-h);
 }
 
-/* The corner cells sit at both sticky intersections, so they outrank both. */
-.sc-sheet__corner {
+/* The corner cells sit at both sticky intersections, so they outrank both.
+   Written at the header rule's own weight: a bare .sc-sheet__corner lost to
+   `.sc-sheet thead th`'s z-index 2, so the inning numbers slid OVER the
+   Player/Pos corner as the sheet panned right. */
+.sc-sheet thead .sc-sheet__corner {
   z-index: 3;
 }
 
