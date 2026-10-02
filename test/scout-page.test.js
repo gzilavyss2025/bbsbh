@@ -125,18 +125,19 @@ test('a knuckle curve or slow curve reads the hitter’s curveball row, and says
   assert.deepEqual(boardRow(null, 'KC'), { row: null, as: 'CU' })
 })
 
-// --- the hitter board (#1411, phase 2), on the contract proposed there ---
+// --- the hitter board (#1411, phase 2), on the hitter-grid store (ADR-0096) ---
 
 const at12 = (n) => Array.from({ length: 25 }, (_, i) => (i === 12 ? n : 0))
-// One region's counters: the heart (r2c2) only.
-const counters = ({ pitches, swings, whiffs, paEnd, woba = null }) => ({
-  pitches: at12(pitches), swings: at12(swings), whiffs: at12(whiffs), paEnd: at12(paEnd),
-  wobaSum: woba == null ? null : at12(woba * paEnd),
+// One region's counters: the heart (r2c2) only, in the store's fields.
+const counters = ({ pitches, swings, whiffs, paEnd }) => ({
+  pitches: at12(pitches), swings: at12(swings), whiffs: at12(whiffs), paEnd: at12(paEnd), wobaFixed: at12(0),
 })
+// A store entry: { mlb: { [code]: { [pitcherHand]: { [stand]: counters } } } }.
+const entry = (byCode) => ({ mlb: byCode })
 
 test('sumCounters adds the parts, and keeps wobaSum only when every part has it', () => {
-  const a = counters({ pitches: 10, swings: 5, whiffs: 2, paEnd: 3, woba: 0.4 })
-  const b = counters({ pitches: 20, swings: 8, whiffs: 4, paEnd: 6 })
+  const a = { ...counters({ pitches: 10, swings: 5, whiffs: 2, paEnd: 3 }), wobaSum: at12(1.2) }
+  const b = { ...counters({ pitches: 20, swings: 8, whiffs: 4, paEnd: 6 }), wobaSum: null }
   const both = sumCounters([a, b])
   assert.equal(both.pitches[12], 30)
   assert.equal(both.wobaSum, null)
@@ -144,38 +145,48 @@ test('sumCounters adds the parts, and keeps wobaSum only when every part has it'
   assert.equal(sumCounters([]), null)
 })
 
-test('the xwOBA (est.) metric is offered only when the grid carries wobaSum', () => {
-  const withWoba = { reg: { FF: { R: counters({ pitches: 1, swings: 1, whiffs: 0, paEnd: 1, woba: 0.3 }) } } }
-  const without = { reg: { FF: { R: counters({ pitches: 1, swings: 1, whiffs: 0, paEnd: 1 }) } } }
-  assert.deepEqual(metricsFor(withWoba), ['xwoba', 'whiff', 'swing'])
-  assert.deepEqual(metricsFor(without), ['whiff', 'swing'])
+test('the xwOBA (est.) metric is off while the store carries no estimate', () => {
+  const grid = { season: 2026, reg: entry({ FF: { R: { R: counters({ pitches: 1, swings: 1, whiffs: 0, paEnd: 1 }) } } }), post: null }
+  assert.deepEqual(metricsFor(grid), ['whiff', 'swing'])
   assert.deepEqual(metricsFor(null), ['whiff', 'swing'])
 })
 
-test('the hitter map pools the asked hands and scopes, hatches under the floor, and bands against the league', () => {
+test('the hitter map pools the asked hand and scope, hatches under the floor, and bands against the league for his stance', () => {
   const grid = {
-    reg: { SL: { R: counters({ pitches: 40, swings: 20, whiffs: 10, paEnd: 8 }), L: counters({ pitches: 10, swings: 4, whiffs: 0, paEnd: 2 }) } },
-    post: { SL: { R: counters({ pitches: 5, swings: 3, whiffs: 3, paEnd: 1 }) } },
+    season: 2026,
+    reg: entry({ SL: { R: { R: counters({ pitches: 40, swings: 20, whiffs: 10, paEnd: 8 }) }, L: { R: counters({ pitches: 10, swings: 4, whiffs: 0, paEnd: 2 }) } } }),
+    post: entry({ SL: { R: { R: counters({ pitches: 5, swings: 3, whiffs: 3, paEnd: 1 }) } } }),
   }
-  const league = { reg: { SL: counters({ pitches: 1000, swings: 500, whiffs: 150, paEnd: 270 }) }, post: {} }
-  const reg = hitterMap({ grid, league, codes: ['SL'], hands: ['R', 'L'], scope: 'reg', metric: 'whiff' })
+  // The league's left-handed hitters whiff far more: a right-handed hitter is
+  // read against right-handed hitters only.
+  const league = {
+    season: 2026,
+    reg: entry({ SL: {
+      R: { R: counters({ pitches: 1000, swings: 500, whiffs: 150, paEnd: 270 }), L: counters({ pitches: 1000, swings: 500, whiffs: 400, paEnd: 270 }) },
+      L: { R: counters({ pitches: 500, swings: 250, whiffs: 75, paEnd: 135 }) },
+    } }),
+    post: null,
+  }
+  const reg = hitterMap({ grid, league, codes: ['SL'], hand: null, stand: 'R', scope: 'reg', metric: 'whiff' })
   assert.equal(reg.seen, 50)
   assert.ok(Math.abs(reg.hit.r2c2.value - 10 / 24) < 1e-9)
-  // 41.7% against the league's 30% in the same region: more than 10 points above.
+  // 41.7% against the right-handed league's 30% in the same region: more than 10 points above.
   assert.equal(reg.cells.r2c2.tone, 'hi2')
   assert.equal(reg.cells.r2c2.value, '42')
-  assert.ok(Math.abs(reg.leagueFlat - 0.3) < 1e-9, 'the flat league rate is its whole-type sum')
+  assert.ok(Math.abs(reg.leagueFlat - 0.3) < 1e-9, 'the flat league rate is its whole-type sum, for his stance')
   // A region with no swings is under the floor: hatched, count only.
   assert.deepEqual(reg.cells.r1c1, { tone: 'gray', count: 0 })
   // vs R only, regular season plus postseason: 23 swings, 13 whiffs.
-  const rAll = hitterMap({ grid, league, codes: ['SL'], hands: ['R'], scope: 'all', metric: 'whiff' })
+  const rAll = hitterMap({ grid, league, codes: ['SL'], hand: 'R', stand: 'R', scope: 'all', metric: 'whiff' })
   assert.equal(rAll.hit.r2c2.n, 23)
   // Postseason alone: 3 swings, under the floor of 10.
-  const post = hitterMap({ grid, league, codes: ['SL'], hands: ['R'], scope: 'post', metric: 'whiff' })
+  const post = hitterMap({ grid, league, codes: ['SL'], hand: 'R', stand: 'R', scope: 'post', metric: 'whiff' })
   assert.equal(post.hit.r2c2.value, null)
   assert.equal(post.typeVal, null)
-  // No wobaSum in the grid: no xwOBA map at all.
-  assert.equal(hitterMap({ grid, league, codes: ['SL'], hands: ['R'], scope: 'reg', metric: 'xwoba' }), null)
+  // The store has no xwOBA estimate yet: no xwOBA map at all.
+  assert.equal(hitterMap({ grid, league, codes: ['SL'], hand: 'R', stand: 'R', scope: 'reg', metric: 'xwoba' }), null)
+  // A pitch type he never saw: no map.
+  assert.equal(hitterMap({ grid, league, codes: ['CH'], hand: null, stand: 'R', scope: 'reg', metric: 'whiff' }), null)
 })
 
 test('the expected value joins the two maps, and the overall line weighs each pitch by its usage', () => {
@@ -196,14 +207,11 @@ test('the expected value joins the two maps, and the overall line weighs each pi
 test('the hitter side joins each pill and All to the pitcher board, and the overall line covers what it can score', () => {
   const board = pitcherBoard({ ...stores({ FF: 600, SL: 400 }), pitcherId: 1, stance: 'R' })
   assert.deepEqual(board.codes.sort(), ['FF', 'SL'], 'All pools every type the command store holds')
-  const grid = {
-    reg: {
-      FF: { R: counters({ pitches: 100, swings: 50, whiffs: 10, paEnd: 20 }) },
-      SL: { R: counters({ pitches: 80, swings: 40, whiffs: 20, paEnd: 15 }) },
-    },
-  }
-  const league = { reg: { FF: counters({ pitches: 1000, swings: 500, whiffs: 100, paEnd: 250 }) } }
-  const side = hitterSide({ board, grid, league, hands: ['R'], scope: 'reg', metric: 'whiff' })
+  const ff = counters({ pitches: 100, swings: 50, whiffs: 10, paEnd: 20 })
+  const sl = counters({ pitches: 80, swings: 40, whiffs: 20, paEnd: 15 })
+  const grid = { season: 2026, reg: entry({ FF: { R: { R: ff } }, SL: { R: { R: sl } } }), post: null }
+  const league = { season: 2026, reg: entry({ FF: { R: { R: counters({ pitches: 1000, swings: 500, whiffs: 100, paEnd: 250 }) } } }), post: null }
+  const side = hitterSide({ board, grid, league, hand: 'R', stand: 'R', scope: 'reg', metric: 'whiff' })
   // Every pitch sits in the heart, so each expected value is the heart's rate.
   assert.ok(Math.abs(side.byType.FF.exp - 0.2) < 1e-9)
   assert.ok(Math.abs(side.byType.SL.exp - 0.5) < 1e-9)
@@ -215,9 +223,9 @@ test('the hitter side joins each pill and All to the pitcher board, and the over
   assert.equal(side.overall.covered, 1)
   assert.equal(side.overall.league, null, 'one type with no league figure: no overall league figure')
   // No grid: no hitter side, and the page keeps its Phase 1 line.
-  assert.equal(hitterSide({ board, grid: null, league, hands: ['R'], scope: 'reg', metric: 'whiff' }), null)
+  assert.equal(hitterSide({ board, grid: null, league, hand: 'R', stand: 'R', scope: 'reg', metric: 'whiff' }), null)
   // A type the hitter never saw: no map for it, and the overall line covers the rest.
-  const fastOnly = hitterSide({ board, grid: { reg: { FF: grid.reg.FF } }, league, hands: ['R'], scope: 'reg', metric: 'whiff' })
+  const fastOnly = hitterSide({ board, grid: { ...grid, reg: entry({ FF: { R: { R: ff } } }) }, league, hand: 'R', stand: 'R', scope: 'reg', metric: 'whiff' })
   assert.equal(fastOnly.byType.SL, null)
   assert.ok(Math.abs(fastOnly.overall.covered - 0.6) < 1e-9)
   assert.ok(Math.abs(fastOnly.overall.value - 0.2) < 1e-9)

@@ -58,12 +58,14 @@ the scope. A shard without `post` keeps the maps on the regular season, with a
 (Gary, item 9).
 
 **6a. The hitter's map comes from the hitter-grid store, or not at all.** With
-the #1411 Part B grid, the page draws the hitter's map in the same 13 regions,
-each coloured against the league's rate in the same region and pitch types,
-and joins the two maps into an expected value: the pitcher's share times the
-hitter's value, region by region (`src/screens/scout/hitterBoard.js`). Hand
-picks the pitcher hands his map reads; for a switch hitter "All" is off (Gary,
-item 1). Metric offers "xwOBA (est.)" only when the grid carries `wobaSum`.
+the #1411 Part B grid (ADR-0096, `src/api/scout/hitterGrid.js`), the page draws
+the hitter's map in the same 13 regions, each coloured against the league's
+rate in the same region, pitch types, pitcher hand and stance. It joins the
+two maps into an expected value: the pitcher's share times the hitter's value,
+region by region (`src/screens/scout/hitterBoard.js`). Hand picks the pitcher
+hands his map reads; for a switch hitter "All" is off (Gary, item 1). Metric
+offers "xwOBA (est.)" only when the store carries the estimate (`wobaSum`,
+#1411 Part C); until then it offers Whiff % and Swing %.
 Without the grid, the hitter's slot prints his Savant board line per pitch
 type, labelled "xwOBA · Regular season" (Gary, item 15), and there is no
 expected value: with no hitter regions it would be his whole-type value, the

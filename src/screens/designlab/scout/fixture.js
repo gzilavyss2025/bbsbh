@@ -1,9 +1,10 @@
 // INVENTED DATA for the Matchup Scout prototype. No real player, no feed, no
 // Savant call: two made-up hitters and one made-up pitcher, generated from a
 // fixed seed so every load draws the same maps. The SHAPES are the real
-// stores' (pitch-command 5x5 counters per type and batter side; the planned
-// #1411 hitter counters per type, pitcher hand and scope), so Phase 1 can swap
-// in a reader without touching the components.
+// stores' (pitch-command 5x5 counters per type and batter side; the hitter
+// grid per type, pitcher hand and stance, ADR-0096), and the prototype runs
+// the page's own hitter board on them. Like the store, it carries `wobaFixed`
+// and no xwOBA estimate, so xwOBA (est.) is off here too until #1411 Part C.
 import { isoToday } from '../../../lib/dates.js'
 
 // mulberry32: a tiny seeded PRNG, so the fixture is stable across loads.
@@ -71,20 +72,24 @@ const RATE = {
   whiff: (r, c, code) => 0.12 + 0.07 * r + (code === 'SL' || code === 'CU' ? 0.1 : 0),
   xwoba: (r, c, code) => (inner(r, c) ? 0.39 - 0.05 * Math.abs(2 - r) : 0.22) - (code === 'SL' ? 0.03 : 0),
 }
-// The league as SUMS in the page's contract shape (screens/scout/hitterBoard.js):
-// { reg | post: { [code]: COUNTERS } }, noise-free, a large sample per cell.
+// One league counter set: noise-free, a large sample per cell.
 const leagueCounters = (code, n) => {
   const pitches = cells(() => n)
   const swings = pitches.map((p, i) => p * RATE.swing(Math.floor(i / 5), i % 5))
   const whiffs = swings.map((sw, i) => sw * RATE.whiff(Math.floor(i / 5), i % 5, code))
   const paEnd = pitches.map((p) => p * 0.27)
-  const wobaSum = paEnd.map((k, i) => k * RATE.xwoba(Math.floor(i / 5), i % 5, code))
-  return { pitches, swings, whiffs, paEnd, wobaSum }
+  const wobaFixed = paEnd.map((k, i) => k * RATE.xwoba(Math.floor(i / 5), i % 5, code))
+  return { pitches, swings, whiffs, paEnd, wobaFixed }
 }
-export const LEAGUE_SUMS = {
-  reg: Object.fromEntries(Object.keys(MIX).map((code) => [code, leagueCounters(code, 4000)])),
-  post: Object.fromEntries(Object.keys(MIX).map((code) => [code, leagueCounters(code, 120)])),
-}
+// The league in the hitter-grid store's shape (ADR-0096): every pitch type,
+// pitcher hand and hitter side.
+const leagueEntry = (n) => ({
+  mlb: Object.fromEntries(Object.keys(MIX).map((code) => [code, {
+    R: { R: leagueCounters(code, n), L: leagueCounters(code, n) },
+    L: { R: leagueCounters(code, n / 2), L: leagueCounters(code, n / 2) },
+  }])),
+})
+export const LEAGUE = { season: 2026, reg: leagueEntry(1000), post: leagueEntry(30) }
 
 // One hitter's counters for one type, pitcher hand and scope. `edge` tilts his
 // results: positive hits the inside half better (feed col 4 for a lefty).
@@ -94,33 +99,38 @@ function hitterCounters(code, n, seed, edge) {
   const swings = pitches.map((p, i) => Math.round(p * RATE.swing(Math.floor(i / 5), i % 5)))
   const whiffs = swings.map((s, i) => Math.round(s * Math.min(0.9, RATE.whiff(Math.floor(i / 5), i % 5, code) * (0.7 + 0.6 * r0()))))
   const paEnd = pitches.map((p) => Math.round(p * 0.27))
-  const wobaSum = paEnd.map((k, i) => {
+  const wobaFixed = paEnd.map((k, i) => {
     const c = i % 5
     const base = RATE.xwoba(Math.floor(i / 5), c, code)
     return k * Math.max(0.05, base + edge * (c - 2) * 0.025 + (r0() - 0.5) * 0.12)
   })
-  return { pitches, swings, whiffs, paEnd, wobaSum }
+  return { pitches, swings, whiffs, paEnd, wobaFixed }
 }
 
 const SEEN = { FF: 900, SL: 520, CH: 380, CU: 200, SI: 120 }
 const HAND_SIZE = { R: 1, L: 0.45 }
 const SCOPE_SHARE = { reg: 1, post: 0.05 }
 
+// One hitter in the hitter-grid reader's shape (fetchHitterGridFor):
+// { season, reg, post }, each { mlb: { [code]: { [hand]: { [stand]: counters } } } }.
+// A switch hitter stands opposite the pitcher's hand.
 function makeHitter(name, bats, seed, edge) {
-  const counters = {}
+  const grid = { season: 2026 }
   for (const scope of Object.keys(SCOPE_SHARE)) {
-    counters[scope] = {}
+    const mlb = {}
     for (const code of Object.keys(SEEN)) {
-      counters[scope][code] = {}
+      mlb[code] = {}
       for (const hand of ['R', 'L']) {
         const n = SEEN[code] * HAND_SIZE[hand] * SCOPE_SHARE[scope]
         // A switch hitter bats left against a right-hander: flip his tilt.
         const e = bats === 'S' && hand === 'L' ? -edge : edge
-        counters[scope][code][hand] = hitterCounters(code, n, seed + code.charCodeAt(0) * 7 + hand.charCodeAt(0), e)
+        const stand = bats === 'S' ? (hand === 'R' ? 'L' : 'R') : bats
+        mlb[code][hand] = { [stand]: hitterCounters(code, n, seed + code.charCodeAt(0) * 7 + hand.charCodeAt(0), e) }
       }
     }
+    grid[scope] = { mlb }
   }
-  return { name, bats, counters }
+  return { name, bats, grid }
 }
 
 export const HITTERS = {

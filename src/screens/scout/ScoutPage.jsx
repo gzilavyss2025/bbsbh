@@ -117,8 +117,8 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
   const metric = metrics.includes(metricParam) ? metricParam : metrics[0]
   const mapScope = board?.scoped ? scope : 'reg'
   const side = useMemo(
-    () => hitterSide({ board, grid, league: data?.league, hands: hand ? [hand] : ['R', 'L'], scope: mapScope, metric }),
-    [board, grid, data, hand, mapScope, metric],
+    () => hitterSide({ board, grid, league: data?.league, hand, stand: hitterStance, scope: mapScope, metric }),
+    [board, grid, data, hand, hitterStance, mapScope, metric],
   )
   const hmap = side ? (sel ? side.byType[sel] : side.all) : null
   const scene = useMemo(

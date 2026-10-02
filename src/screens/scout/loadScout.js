@@ -4,12 +4,14 @@ import { fetchCommandShard } from '../../api/commandMap.js'
 import { shardKey100 } from '../../lib/shardKey.js'
 import { currentSeasonOf } from '../../api/staticJson.js'
 import { fetchSavantMatchup } from '../../api/matchup/savant.js'
+import { fetchHitterGridFor, fetchHitterLeague } from '../../api/scout/hitterGrid.js'
 
 // EVERYTHING THE MATCHUP SCOUT DRAWS EXCEPT THE HEAD-TO-HEAD (#1410), in one
 // pass: both people (name, hands, club), the pitcher's mix and 5x5 command
 // shards from the nightly season stores (whole buckets, so the board can read
-// `post` beside `pit`, ADR-0094), and the hitter's per-pitch line from the
-// Savant board. All spoiler-free season aggregates over final
+// `post` beside `pit`, ADR-0094), the hitter's grid and the league's from the
+// same season store (ADR-0096), and the hitter's per-pitch line from the
+// Savant board, which the page shows while his grid is not posted. All spoiler-free season aggregates over final
 // games, on an open page (ADR-0034). The head-to-head is its own request
 // (api/scout/headToHead.js): it fails on its own, and the page says so.
 //
@@ -17,20 +19,17 @@ import { fetchSavantMatchup } from '../../api/matchup/savant.js'
 // Any one store missing is not a failure: the page shows "Not posted" there.
 export async function loadScout(pitcherId, hitterId) {
   const season = await currentSeasonOf('pitch-command')
-  const [pitcher, hitter, arsenal, command, savant] = await Promise.all([
+  const [pitcher, hitter, arsenal, command, savant, grid, league] = await Promise.all([
     fetchPerson(pitcherId),
     fetchPerson(hitterId),
     fetchPitchArsenalFor(pitcherId),
     season == null ? null : fetchCommandShard(`${season}/${shardKey100(pitcherId)}`),
     fetchSavantMatchup(),
+    // The pitch-command season, so the two maps never read different years.
+    season == null ? null : fetchHitterGridFor(hitterId, season),
+    season == null ? null : fetchHitterLeague(season),
   ])
   if (!pitcher || !hitter) return null
-  // THE HITTER GRID (#1411 Part B): `grid` = { reg, post } for this hitter and
-  // `league` = { reg, post }, both from the same season store as `command`
-  // (hitterBoard.js has the shape). Its reader lands with that store; until
-  // then both are null and the page keeps its Phase 1 hitter line.
-  const grid = null
-  const league = null
   return { pitcher: personOf(pitcher), hitter: personOf(hitter), arsenal, command, season, savant, grid, league }
 }
 

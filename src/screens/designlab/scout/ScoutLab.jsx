@@ -11,8 +11,8 @@ import { ScoutMap } from '../../../components/scout/ScoutMap.jsx'
 import { HeadToHead } from './HeadToHead.jsx'
 import { Matchup } from '../../../components/scout/Matchup.jsx'
 import { Choice } from '../../../components/scout/Choice.jsx'
-import { HITTERS, LEAGUE_SUMS, PITCHER } from './fixture.js'
-import { expectedAll, expectedOn, hitterMap } from '../../scout/hitterBoard.js'
+import { HITTERS, LEAGUE, PITCHER } from './fixture.js'
+import { expectedAll, expectedOn, hitterMap, metricsFor } from '../../scout/hitterBoard.js'
 import { REGIONS, regionLabel, rollUp, sidesInOrder } from '../../../lib/zone/regions.js'
 import { METRICS, band, fmtMetric } from '../../../lib/scout/metrics.js'
 
@@ -37,7 +37,6 @@ import { METRICS, band, fmtMetric } from '../../../lib/scout/metrics.js'
 const VIEWS = [['pitcher', 'Pitcher’s'], ['hitter', 'Hitter’s']]
 const SCOPES = [['reg', 'Regular'], ['post', 'Postseason'], ['all', 'All']]
 const HANDS = [[null, 'All'], ['R', 'vs R'], ['L', 'vs L']]
-const METRIC_OPTS = Object.entries(METRICS).map(([k, m]) => [k, m.label])
 const STATES = [['pair', 'Pair'], ['empty', 'Empty'], ['loading', 'Loading'], ['noh2h', 'No head-to-head'], ['notposted', 'Not posted']]
 const HITTER_OPTS = [['lefty', 'Bats L'], ['switch', 'Bats both']]
 const USAGE_FLOOR = 5 // percent: a type under it is in All, with no pill
@@ -53,7 +52,7 @@ const Swatch = ({ tone }) => <svg className="scout__swatch" aria-hidden="true"><
 
 // Everything the page draws, for one set of choices. `codes` is the pitch
 // types the maps pool: one type, or every type for All.
-function scout({ hitter, scope, hand, hitterHand, metric, stance, notPosted }) {
+function scout({ hitter, scope, hand, hitterHand, hitterStance, metric, stance, notPosted }) {
   const byScope = scopesOf(scope).map((s) => PITCHER.cells[s])
   const allCodes = Object.keys(PITCHER.mph)
   const typeCells = (code) => byScope.map((b) => b[code][stance]).reduce(add)
@@ -76,7 +75,7 @@ function scout({ hitter, scope, hand, hitterHand, metric, stance, notPosted }) {
     if (notPosted) return { n, thin, regionN, share, pitcherCells }
     // The hitter side is the page's own module (screens/scout/hitterBoard.js),
     // run on the fixture: the prototype cannot drift from the page.
-    const h = hitterMap({ grid: hitter.counters, league: LEAGUE_SUMS, codes, hands: hand ? [hitterHand] : ['R', 'L'], scope, metric })
+    const h = hitterMap({ grid: hitter.grid, league: LEAGUE, codes, hand: hand ? hitterHand : null, stand: hitterStance, scope, metric })
     if (!h) return { n, thin, regionN, share, pitcherCells }
     const exp = expectedOn({ thin, share }, h)
     return { n, thin, regionN, share, pitcherCells, hit: h.hit, hitterCells: h.cells, exp, leagueExp: thin ? null : h.leagueFlat, seen: h.seen }
@@ -98,7 +97,7 @@ export function ScoutLab({ asOf: asOfProp }) {
   const [view, setView] = useState('pitcher')
   const [scope, setScope] = useState('all')
   const [hand, setHand] = useState(null)
-  const [metric, setMetric] = useState('xwoba')
+  const [metricPick, setMetric] = useState(null)
   const [code, setCode] = useState(null)
   const [picked, setPicked] = useState(null)
   const [turns, setTurns] = useState(0)
@@ -112,6 +111,10 @@ export function ScoutLab({ asOf: asOfProp }) {
   const hitterHand = effHand ?? PITCHER.throws
   const stance = switchHitter ? other(PITCHER.throws) : hitter.bats
   const hitterStance = switchHitter ? other(hitterHand) : hitter.bats
+  // The page's rule: xwOBA (est.) only when the grid carries it (it does not
+  // until #1411 Part C), and a pick it cannot show falls back to the first.
+  const metrics = useMemo(() => metricsFor(hitter.grid), [hitter])
+  const metric = metrics.includes(metricPick) ? metricPick : metrics[0]
   const d = asOfProp !== undefined ? asOfProp : new URLSearchParams(window.location.search).get('d')
   const asOf = isRealDate(d) ? d : null
   const cutoff = asOf ?? isoToday()
@@ -120,8 +123,8 @@ export function ScoutLab({ asOf: asOfProp }) {
   const notPosted = state === 'notposted'
 
   const s = useMemo(
-    () => (loaded ? scout({ hitter, scope, hand: effHand, hitterHand, metric, stance, notPosted }) : null),
-    [loaded, hitter, scope, effHand, hitterHand, metric, stance, notPosted],
+    () => (loaded ? scout({ hitter, scope, hand: effHand, hitterHand, hitterStance, metric, stance, notPosted }) : null),
+    [loaded, hitter, scope, effHand, hitterHand, hitterStance, metric, stance, notPosted],
   )
   // A pill whose type left the list (a scope change) falls back to All.
   const sel = s && code && s.byType[code] ? code : null
@@ -204,7 +207,7 @@ export function ScoutLab({ asOf: asOfProp }) {
 
             <div className="scout__controls">
               <Choice label="View" options={VIEWS} value={view} onChange={turn} />
-              <Choice label="Metric" options={METRIC_OPTS} value={metric} onChange={setMetric} />
+              <Choice label="Metric" options={metrics.map((k) => [k, METRICS[k].label])} value={metric} onChange={setMetric} />
             </div>
 
             {view === 'hitter' && scene.length > 0 && (
