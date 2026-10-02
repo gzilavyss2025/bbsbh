@@ -51,6 +51,7 @@
 .sc-sheet--lens .sc-sheet__line {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: repeat(2, var(--sc-line-h));
   grid-template-areas:
     'num who who'
     '. pos jersey';
@@ -72,6 +73,12 @@
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
+}
+/* Each man's line is two lines tall in the compact rail, so his AB/H/R/RBI
+   take the same height and stay level with HIS name when a substitute's line
+   stacks under the starter's (grid.css: the three stacks stay registered). */
+.sc-sheet--lens .sc-sheet__sumline {
+  height: calc(2 * var(--sc-line-h));
 }
 /* The foot row's label wraps in the compact rail rather than running out
    over the first inning's figures. */
