@@ -399,6 +399,11 @@ CREATE TABLE IF NOT EXISTS jerseys (
 -- "STORE SUMS, NOT AVERAGES" rule holds here too: velocity_sum / velocity_n,
 -- never an average; `max_velo` combines as the maximum; the command grid's
 -- CSV counters add element-wise.
+-- `scope` splits the regular season ('R') from the MLB postseason ('P') in
+-- both tables (ADR-0094). It is the LAST column, with DEFAULT 'R', so an old
+-- dump line that names no scope loads as regular season. It is SECOND in the
+-- key, so the dump lists every regular-season row in its old order first. A
+-- reader that wants only the regular season must say `scope = 'R'`.
 CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
   person_id       INTEGER NOT NULL,
   level           TEXT NOT NULL,
@@ -440,7 +445,8 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
   tto3_pitches      INTEGER NOT NULL DEFAULT 0,
   tto3_velocity_sum REAL    NOT NULL DEFAULT 0,
   tto3_velocity_n   INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (season, person_id, level, code, stand)
+  scope             TEXT    NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  PRIMARY KEY (season, scope, person_id, level, code, stand)
 );
 
 -- Idempotency guard, one row per (gamePk, level) — a gamePk only ever belongs
@@ -481,7 +487,8 @@ CREATE TABLE IF NOT EXISTS pitch_command_cells (
   homers      TEXT NOT NULL,
   swings      TEXT NOT NULL,
   first_pitch TEXT NOT NULL,
-  PRIMARY KEY (season, person_id, level, code, stand)
+  scope       TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  PRIMARY KEY (season, scope, person_id, level, code, stand)
 );
 
 -- The command sweep's OWN idempotency guard, deliberately separate from
@@ -491,6 +498,44 @@ CREATE TABLE IF NOT EXISTS pitch_command_cells (
 -- until next season. Its own table lets the backfill re-walk the year once
 -- while the nightly arsenal pass keeps skipping what it has seen.
 CREATE TABLE IF NOT EXISTS pitch_command_ingested_games (
+  game_pk INTEGER NOT NULL,
+  level   TEXT NOT NULL,
+  date    TEXT NOT NULL,
+  season  INTEGER NOT NULL,
+  PRIMARY KEY (game_pk, level)
+);
+
+-- The HITTER's half of the same sweep (#1411 Part B, ADR-0096): what a hitter
+-- did with each pitch, by where it was. One row per (hitter, level, pitch type,
+-- pitcher hand, side he stood on, scope); each counter is a 25-value CSV over
+-- the same 5x5 grid as pitch_command_cells. Sums only, never rates.
+--
+-- `pa_end` counts the pitches that ended a plate appearance and that an xwOBA
+-- mean counts (sac bunts and untracked balls in play are left out, as Savant's
+-- board leaves them out). `woba_fixed` sums the weights that need no estimate:
+-- 0.7 for a walk, a hit-by-pitch or catcher interference, 0 for the rest.
+-- `xwoba_bip` is the estimate summed over balls in play. It stays NULL until
+-- the owner picks the xwOBA route (a per-season lookup, or a Savant join).
+CREATE TABLE IF NOT EXISTS pitch_hitter_cells (
+  person_id  INTEGER NOT NULL,
+  level      TEXT NOT NULL,
+  code       TEXT NOT NULL,
+  p_throws   TEXT NOT NULL,
+  stand      TEXT NOT NULL,
+  season     INTEGER NOT NULL,
+  scope      TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  pitches    TEXT NOT NULL,
+  swings     TEXT NOT NULL,
+  whiffs     TEXT NOT NULL,
+  pa_end     TEXT NOT NULL,
+  woba_fixed TEXT NOT NULL,
+  xwoba_bip  TEXT,
+  PRIMARY KEY (season, scope, person_id, level, code, p_throws, stand)
+);
+
+-- Its own ledger, for the reason pitch_command_ingested_games gives: every
+-- game of the season was already in both other ledgers.
+CREATE TABLE IF NOT EXISTS pitch_hitter_ingested_games (
   game_pk INTEGER NOT NULL,
   level   TEXT NOT NULL,
   date    TEXT NOT NULL,
