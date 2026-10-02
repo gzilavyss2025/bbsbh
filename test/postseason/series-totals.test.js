@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { foldTeamTotals, totalsRows } from '../../src/lib/postseason/seriesTotals.js'
+import { foldWhiffs } from '../../src/api/postseasonSeries.js'
 
 // teamStats as the real boxscore carries them (checked against gamePk 849845).
 const side = (id, bat, pit) => ({ team: { id }, teamStats: { batting: bat, pitching: pit } })
@@ -61,4 +62,86 @@ test('lower is better for walks allowed, earned runs and batter strikeouts; a ti
 
 test('a missing club gives no rows', () => {
   assert.deepEqual(totalsRows(foldTeamTotals([g1]), 143, 999), [])
+})
+
+// More fields, as the real boxscore carries them (checked against gamePk 849845).
+const full = (id, bat, pit) => side(id, bat, pit)
+const h1 = box(
+  full(
+    143,
+    { doubles: 1, triples: 0, homeRuns: 1, leftOnBase: 7, stolenBases: 2, caughtStealing: 1 },
+    { outs: 27, hits: 6, baseOnBalls: 3, strikeOuts: 9, numberOfPitches: 100, strikes: 65 },
+  ),
+  full(
+    144,
+    { doubles: 0, triples: 1, homeRuns: 0, leftOnBase: 10, stolenBases: 0, caughtStealing: 0 },
+    { outs: 27, hits: 8, baseOnBalls: 1, strikeOuts: 10, numberOfPitches: 120, strikes: 80 },
+  ),
+)
+
+test('extra-base hits, left on base and steals (caught stealing in brackets)', () => {
+  const rows = totalsRows(foldTeamTotals([h1]), 143, 144)
+  const bat = (code) => rows.find((g) => g.group === 'Batting').rows.find((r) => r.code === code)
+  assert.equal(bat('XBH').a, '2')
+  assert.equal(bat('XBH').b, '1')
+  assert.equal(bat('XBH').better, 'a')
+  // Fewer runners stranded is better.
+  assert.equal(bat('LOB').better, 'a')
+  assert.equal(bat('SB (CS)').a, '2 (1)')
+  assert.equal(bat('SB (CS)').b, '0 (0)')
+  assert.equal(bat('SB (CS)').better, 'a')
+})
+
+test('WHIP, K/9, BB/9 and strike % come from the sums', () => {
+  const rows = totalsRows(foldTeamTotals([h1]), 143, 144)
+  const pit = (code) => rows.find((g) => g.group === 'Pitching').rows.find((r) => r.code === code)
+  // 143: (3 + 6) * 3 / 27 = 1.00 ; 144: (1 + 8) * 3 / 27 = 1.00
+  assert.equal(pit('WHIP').a, '1.00')
+  assert.equal(pit('WHIP').better, null)
+  // 143: 9 SO per 27 outs = 9.0 ; 144: 10.0
+  assert.equal(pit('K/9').a, '9.0')
+  assert.equal(pit('K/9').better, 'b')
+  assert.equal(pit('BB/9').a, '3.0')
+  assert.equal(pit('BB/9').better, 'b')
+  assert.equal(pit('STR%').a, '65.0%')
+  assert.equal(pit('STR%').b, '66.7%')
+  assert.equal(pit('STR%').better, 'b')
+  // Pitches thrown lead nowhere.
+  assert.equal(pit('P').a, '100')
+  assert.equal(pit('P').better, null)
+})
+
+const feed = (away, home, halves) => ({
+  gameData: { teams: { away: { id: away }, home: { id: home } } },
+  liveData: {
+    plays: {
+      allPlays: halves.map(([halfInning, codes]) => ({
+        about: { halfInning },
+        playEvents: codes.map((c) => (c === 'x' ? { isPitch: false, details: {} } : { isPitch: true, details: { call: { code: c } } })),
+      })),
+    },
+  },
+})
+
+test('whiffs go to the club on the mound: a top half is the home club', () => {
+  const w = foldWhiffs([
+    feed(143, 144, [['top', ['S', 'B', 'W', 'F']], ['bottom', ['S', 'C', 'M', 'x']]]),
+    feed(144, 143, [['top', ['Q']], ['bottom', ['S', 'T']]]),
+  ])
+  // Game 1: top = 144 pitching (S, W = 2), bottom = 143 pitching (S, M = 2).
+  // Game 2: top = 143 pitching (Q = 1), bottom = 144 pitching (S = 1; T is a foul tip).
+  assert.deepEqual(w, { 143: 3, 144: 3 })
+})
+
+test('whiffs show a dash when any feed is missing, and never a false zero', () => {
+  assert.equal(foldWhiffs([feed(143, 144, []), null]), null)
+  assert.equal(foldWhiffs([]), null)
+  const rows = totalsRows(foldTeamTotals([h1], null), 143, 144)
+  const whiffs = rows.find((g) => g.group === 'Pitching').rows.find((r) => r.code === 'Whiffs')
+  assert.equal(whiffs.a, '—')
+  assert.equal(whiffs.better, null)
+  const counted = totalsRows(foldTeamTotals([h1], { 143: 12, 144: 9 }), 143, 144)
+  const w = counted.find((g) => g.group === 'Pitching').rows.find((r) => r.code === 'Whiffs')
+  assert.equal(w.a, '12')
+  assert.equal(w.better, 'a')
 })

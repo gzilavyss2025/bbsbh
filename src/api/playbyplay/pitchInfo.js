@@ -7,6 +7,10 @@
 
 import { personNameParts } from '../select.js'
 import { challengesForPlay } from '../challenges.js'
+import { WHIFF_CODES, pitchCallCode } from './eventTypes.js'
+
+// Both live in eventTypes.js (spoiler-free); re-exported so the barrel is unchanged.
+export { WHIFF_CODES, pitchCallCode }
 
 // THE CODE TABLE. Every call code MLB itself publishes at
 // https://statsapi.mlb.com/api/v1/pitchCodes, sorted into the categories this
@@ -22,12 +26,6 @@ import { challengesForPlay } from '../challenges.js'
 // Strikes taken without a swing: the umpire's call, and the automatic strikes
 // he awards on a violation. 'K' is the feed's own "Strike - Unknown".
 const CALLED_STRIKE_CODES = new Set(['C', 'K', 'A', 'AB', 'AC'])
-// He swung and missed: swinging, swinging (blocked), missed bunt, swinging on a
-// pitchout. Shared with derive.js's Whiffs total and scripts/gen-fouls.mjs.
-// Matches MLB's own swingMissStatus flag except for the two foul TIPS ('T',
-// 'O'), which it also flags but which this app counts as fouls — the catcher
-// caught them, and at two strikes they end the at-bat (see FOUL_ENDS_AB_CODES).
-export const WHIFF_CODES = new Set(['S', 'W', 'M', 'Q'])
 // Foul, foul bunt, foul tip, bunt foul tip, foul on a pitchout. Shared with
 // derive.js's per-half foul counters and scripts/gen-fouls.mjs (the season foul
 // sweep) so the code set never drifts between the live and precomputed tallies.
@@ -50,12 +48,6 @@ export const BALL_CODES = new Set(['B', '*B', 'H', 'I', 'P', 'V', 'VB', 'VC', 'V
 // reach a card only because pitchCardInfo asks for them by name — and they are
 // counted as a pitch by nobody.
 const AUTOMATIC_CODES = new Set(['A', 'AB', 'AC', 'V', 'VB', 'VC', 'VP', 'VS'])
-
-// A pitch event's call code, wherever this feed variant put it. Shared with
-// derive.js so the two never drift on the feed shape.
-export function pitchCallCode(e) {
-  return e?.details?.call?.code ?? e?.details?.code
-}
 
 // Classifies one call code into the five dots the card renders. An automatic
 // strike shares the called-strike dot (the umpire put it on the count either

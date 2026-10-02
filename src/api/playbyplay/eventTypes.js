@@ -105,3 +105,18 @@ export const STOPPAGE_EVENTS = new Set([
 // half currently being revealed), so the two can never classify the same
 // play differently.
 export const HIT_EVENT_TYPES = new Set(['single', 'double', 'triple', 'home_run'])
+
+// He swung and missed: swinging, swinging (blocked), missed bunt, swinging on a
+// pitchout. Shared with derive.js's Whiffs total, scripts/gen-fouls.mjs and the
+// series page's Whiffs row. Matches MLB's own swingMissStatus flag except for
+// the two foul TIPS ('T', 'O'), which it also flags but which this app counts
+// as fouls — the catcher caught them, and at two strikes they end the at-bat
+// (see FOUL_ENDS_AB_CODES in pitchInfo.js). A code table, no feed access, so it
+// lives in this spoiler-free file.
+export const WHIFF_CODES = new Set(['S', 'W', 'M', 'Q'])
+
+// A pitch event's call code, wherever this feed variant put it. Shared with
+// derive.js so the readers never drift on the feed shape.
+export function pitchCallCode(e) {
+  return e?.details?.call?.code ?? e?.details?.code
+}
