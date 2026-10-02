@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { missBands } from '../../../api/around-the-game/absChallenges.js'
 import { BroadcastSection } from '../../../components/around-the-game/BroadcastMasthead.jsx'
-import { BoardScroller } from '../../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../../components/ui/table/Table.jsx'
 import { BarCell } from '../../../components/around-the-game/BroadcastBar.jsx'
 import { commas, pct1 } from './format.js'
 
@@ -18,36 +18,34 @@ export function MissBands({ summary }) {
 
   return (
     <BroadcastSection title="How close was the call">
-      <BoardScroller label="Challenges by distance from the zone edge">
-        <table className="standings rpt">
-          <thead>
-            <tr>
-              <th className="team">Off the edge</th>
-              <th>Challenges</th>
-              <th>Share</th>
-              <th>Won</th>
-              <th>Success</th>
+      <Table sticky label="Challenges by distance from the zone edge" className="rpt">
+        <thead>
+          <tr>
+            <th className="team">Off the edge</th>
+            <th>Challenges</th>
+            <th>Share</th>
+            <th>Won</th>
+            <th>Success</th>
+          </tr>
+        </thead>
+        <tbody>
+          {bands.map((b) => (
+            <tr key={b.key}>
+              <th scope="row" className="team">
+                {b.label}
+              </th>
+              <td>{commas(b.n)}</td>
+              <td>
+                <BarCell value={b.share} min={0} max={bandMax || 1}>
+                  {pct1(b.share)}
+                </BarCell>
+              </td>
+              <td>{commas(b.success)}</td>
+              <td>{pct1(b.rate)}</td>
             </tr>
-          </thead>
-          <tbody>
-            {bands.map((b) => (
-              <tr key={b.key}>
-                <th scope="row" className="team">
-                  {b.label}
-                </th>
-                <td>{commas(b.n)}</td>
-                <td>
-                  <BarCell value={b.share} min={0} max={bandMax || 1}>
-                    {pct1(b.share)}
-                  </BarCell>
-                </td>
-                <td>{commas(b.success)}</td>
-                <td>{pct1(b.rate)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </BoardScroller>
+          ))}
+        </tbody>
+      </Table>
     </BroadcastSection>
   )
 }

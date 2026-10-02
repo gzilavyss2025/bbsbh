@@ -7,7 +7,7 @@ import {
   ROLE_LABEL,
 } from '../../../api/around-the-game/absChallenges.js'
 import { BroadcastSection } from '../../../components/around-the-game/BroadcastMasthead.jsx'
-import { BoardScroller } from '../../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../../components/ui/table/Table.jsx'
 import { BarCell } from '../../../components/around-the-game/BroadcastBar.jsx'
 import { commas, pct1 } from './format.js'
 
@@ -32,39 +32,37 @@ export function WhoCalls({ summary }) {
           took 233px — a quarter of the board — to say what the row label
           already implies. As a sub-line it costs nothing and the three
           numbers move left into the space it gave back. */}
-      <BoardScroller label="Challenge success rate by who called for it">
-        <table className="standings rpt">
-          <thead>
-            <tr>
-              <th className="team">Called by</th>
-              <th>Called</th>
-              <th>Won</th>
-              <th>Success</th>
+      <Table sticky label="Challenge success rate by who called for it" className="rpt">
+        <thead>
+          <tr>
+            <th className="team">Called by</th>
+            <th>Called</th>
+            <th>Won</th>
+            <th>Success</th>
+          </tr>
+        </thead>
+        <tbody>
+          {roles.map((r) => (
+            <tr key={r.role}>
+              <th scope="row" className="team">
+                {ROLE_LABEL[r.role] ?? r.role}
+                {ROLE_CALL[r.role] ? (
+                  <span className="rpt__note">
+                    on a called {ROLE_CALL[r.role]}
+                  </span>
+                ) : null}
+              </th>
+              <td>{commas(r.n)}</td>
+              <td>{commas(r.success)}</td>
+              <td>
+                <BarCell value={r.rate} min={0} max={roleMax || 1}>
+                  {pct1(r.rate)}
+                </BarCell>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {roles.map((r) => (
-              <tr key={r.role}>
-                <th scope="row" className="team">
-                  {ROLE_LABEL[r.role] ?? r.role}
-                  {ROLE_CALL[r.role] ? (
-                    <span className="rpt__note">
-                      on a called {ROLE_CALL[r.role]}
-                    </span>
-                  ) : null}
-                </th>
-                <td>{commas(r.n)}</td>
-                <td>{commas(r.success)}</td>
-                <td>
-                  <BarCell value={r.rate} min={0} max={roleMax || 1}>
-                    {pct1(r.rate)}
-                  </BarCell>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </BoardScroller>
+          ))}
+        </tbody>
+      </Table>
       {/* The anomaly line has to carry its own antecedent, its own rule
           and its own arithmetic.
 
