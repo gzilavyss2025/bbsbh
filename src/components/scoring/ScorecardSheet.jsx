@@ -125,6 +125,12 @@ export function ScorecardSheet({
   // so a fresh arrow every render re-attaches the observer every render.
   onWidth = null,
   lens = null,
+  // The lens bar's two facts about the grid (lens only): `edge` — the next box
+  // is a batter still up, so it draws as the dashed AT BAT box and not a seal
+  // (ADR-0092, ADR-0055) — and `lastOpened`, the atBatIndex of the newest open
+  // box, which keeps a bracket until the next tap.
+  edge = false,
+  lastOpened = null,
 }) {
   const inLens = lens === 'lens'
   // Normalize both modes to a flat column list: each column knows its header
@@ -371,8 +377,11 @@ export function ScorecardSheet({
                         key={col.key}
                         className={`sc-sheet__cell ${col.inningStart ? 'sc-sheet__cell--start' : ''} ${col.pad ? 'sc-sheet__cell--pad' : ''}`}
                         data-frontier={isFrontier || isFlip ? '' : undefined}
+                        data-last={card != null && card.atBatIndex === lastOpened ? '' : undefined}
                       >
-                        {isFrontier ? (
+                        {isFrontier && edge ? (
+                          <div className="sc-ab__atbat">At bat</div>
+                        ) : isFrontier ? (
                           <button
                             type="button"
                             className="sc-ab__seal"

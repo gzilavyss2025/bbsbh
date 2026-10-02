@@ -233,7 +233,7 @@
 /* The turn handoff, in the sheet's own LEADOFF box (see ScorecardSheet's
    `flip`): the unused cell under the mark that closed the half is where the
    eye lands, so the press to turn to the other club's page costs the sheet
-   no notation. Kraft on paper, the same tape as the frontier seal. Every
+   no notation. A navy chip on paper: it turns a page, it lifts no seal. Every
    older leadoff box stays blank. */
 .sc-ab__flip {
   display: flex;
@@ -251,14 +251,16 @@
 .sc-ab__fliptext {
   padding: 2px var(--space-1);
   border-radius: var(--radius-xs);
-  background: var(--seal-cover);
+  /* NAVY, not kraft: the turn lifts no seal (ADR-0083, ADR-0092). It is the
+     same navy as the bar's Turn button. */
+  background: var(--navy);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   line-height: var(--lh-solid);
   text-align: center;
-  color: var(--text-on-seal);
+  color: var(--text-on-ink);
 }
 
 /* The ink-in: a JUST-revealed box's marks settle onto the paper — outcome
