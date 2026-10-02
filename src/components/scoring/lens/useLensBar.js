@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { barLines, barState } from '../../../lib/scorecard/bar.js'
+import { carryBoxes } from '../../../lib/scorecard/carry.js'
 import { halfCards } from '../../../lib/scorecard/situation.js'
 import { runnerMoves } from '../../../lib/scorecard/words.js'
 
@@ -37,5 +38,8 @@ export function useLensBar({ on, view, side, stepInfo, flip, loading }) {
     }),
     batter: view.grid?.frontier ? (view.grid.frontier.batter?.last ?? '') : null,
     lastOpened: cards.at(-1)?.atBatIndex ?? null,
+    // The boxes the carry strip holds; none at a handoff, where the frame is
+    // on the leadoff box of the page the reader is about to turn to.
+    carry: state === 'sealed' || state === 'edge' ? carryBoxes(view, inning, stepInfo.half) : [],
   }
 }

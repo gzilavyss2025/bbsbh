@@ -5,6 +5,8 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { useLens } from './lens/useLens.js'
 import { LensFrame } from './lens/LensFrame.jsx'
+import { CarryStrip } from './lens/CarryStrip.jsx'
+import { useCarry } from './lens/useCarry.js'
 
 // The main scorecard grid, in the #22 sheet's own column order: a sticky
 // PLAYER column (each row led by its batting-order number, closed by the
@@ -134,6 +136,9 @@ export function ScorecardSheet({
   // The card docked under the frame (lens only): the Entering card or the
   // new-pitcher notice. LensFrame places it, as it places the frame.
   dock = null,
+  // The boxes the carry strip holds (lens only; lib/scorecard/carry.js). The
+  // sheet flags their cells `data-carry` and measures them (lens/useCarry.js).
+  carry = [],
 }) {
   const inLens = lens === 'lens'
   // Normalize both modes to a flat column list: each column knows its header
@@ -215,6 +220,7 @@ export function ScorecardSheet({
     if (lens === 'whole') setPick(0)
   }
   const zoom = inLens ? lensGeom?.zoom ?? 1 : Math.min(Math.max(pick ?? 1, floor), ZOOM_MAX)
+  const carrying = useCarry({ on: inLens && Boolean(lensGeom?.frame), paneRef, tableRef })
   const lensPad = (h) => (h ? { height: h / zoom } : undefined)
   const step = (factor) => setPick(Math.min(Math.max(zoom * factor, floor), ZOOM_MAX))
 
@@ -381,6 +387,7 @@ export function ScorecardSheet({
                         className={`sc-sheet__cell ${col.inningStart ? 'sc-sheet__cell--start' : ''} ${col.pad ? 'sc-sheet__cell--pad' : ''}`}
                         data-frontier={isFrontier || isFlip ? '' : undefined}
                         data-last={card != null && card.atBatIndex === lastOpened ? '' : undefined}
+                        data-carry={card != null && carry.some((b) => b.atBatIndex === card.atBatIndex) ? '' : undefined}
                       >
                         {isFrontier && edge ? (
                           <div className="sc-ab__atbat">At bat</div>
@@ -508,7 +515,13 @@ export function ScorecardSheet({
           </tfoot>
         </table>
       </div>
-      {inLens && <LensFrame frame={lensGeom?.frame} dock={dock} />}
+      {inLens && (
+        <LensFrame
+          frame={lensGeom?.frame}
+          dock={dock}
+          carry={carrying && <CarryStrip boxes={carry} notes={notes} zoom={lensGeom.zoom} />}
+        />
+      )}
     </div>
   )
 }
