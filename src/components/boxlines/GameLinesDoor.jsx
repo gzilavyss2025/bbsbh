@@ -5,7 +5,6 @@ import { IconButton } from '../ui/control/IconButton.jsx'
 import { Door } from '../ui/control/Door.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { BoxLineRow } from './BoxLineRow.jsx'
-import { seasonBand } from './BoxLinesSheet.jsx'
 
 // The door to the GAMES BEHIND A TEAM'S RECORD, on the postseason page: the
 // record's own figure ("8-3") as a door, and the sheet it opens, every game
@@ -39,6 +38,11 @@ export function GameLinesDoor({ face, label, rows, sheet }) {
   )
 }
 
+// How many games the sheet draws before it asks. A combined list can run to
+// a thousand rows (every club's day games, all years), which is a long wait
+// for a phone to lay out; a club's own list never reaches it.
+const PAGE = 100
+
 const ROUNDS = 'WC Wild Card Series · DS Division Series · LCS League Championship Series · WS World Series.'
 
 // `rows` is a function so the list is built on open, not on every render of
@@ -46,7 +50,17 @@ const ROUNDS = 'WC Wild Card Series · DS Division Series · LCS League Champion
 function GameLinesSheet({ title, note, headline, rows: makeRows, onClose }) {
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
-  const rows = useMemo(() => makeRows(), [makeRows])
+  const all = useMemo(() => makeRows(), [makeRows])
+  const [shown, setShown] = useState(PAGE)
+  const rows = useMemo(() => all.slice(0, shown), [all, shown])
+  // Alternates with each new season down the list (seasonBand's rule), in one pass.
+  const bands = useMemo(() => {
+    const out = []
+    rows.forEach((row, i) => {
+      out.push(i > 0 && (row.season !== rows[i - 1].season ? !out[i - 1] : out[i - 1]))
+    })
+    return out
+  }, [rows])
   return (
     <ModalPortal>
       <div
@@ -64,20 +78,29 @@ function GameLinesSheet({ title, note, headline, rows: makeRows, onClose }) {
             </IconButton>
           </div>
           {headline && <p className="boxlines__headline">{headline}</p>}
-          {rows.length === 0 ? (
+          {all.length === 0 ? (
             <p className="hint boxlines__hint">No games to list.</p>
           ) : (
             <>
               <ul className="boxlines__rows">
                 {rows.map((row, i) => (
                   <BoxLineRow
-                    key={row.gamePk ?? `${row.date}-${row.opponentId}`}
+                    key={`${row.gamePk ?? `${row.date}-${row.opponentId}`}-${row.teamId}`}
                     row={row}
                     showSeason={i === 0 || rows[i - 1].season !== row.season}
-                    band={seasonBand(rows, i)}
+                    band={bands[i]}
                   />
                 ))}
               </ul>
+              {all.length > shown && (
+                <Door
+                  layout="block"
+                  aria-label={`Show ${Math.min(PAGE, all.length - shown)} more games, ${all.length - shown} not yet shown`}
+                  onClick={() => setShown(shown + PAGE)}
+                >
+                  Show {Math.min(PAGE, all.length - shown)} more
+                </Door>
+              )}
               <p className="boxlines__foot">
                 {ROUNDS} Newest first. Each club’s runs come first. Tap a game for its box score.
               </p>
