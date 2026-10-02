@@ -383,6 +383,20 @@ export const PILLS = [
   },
 ]
 
+// ---------------------------------------------------------------------------
+// PROTOTYPES — a design proposal, not a shipped block. The one band on this
+// page that draws geometry of its own: its partial (styles/designlab/scout.css)
+// is the proposal, on invented data, and it leaves when the real page ships.
+export const PROTOTYPES = [
+  {
+    id: 'scout',
+    title: 'Matchup Scout (#1408)',
+    path: 'src/screens/designlab/scout/',
+    verdict: 'Prototype',
+    note: 'Spec: docs/scout-design.md. Thirteen regions, the pitcher’s and hitter’s mirror, every control and every state, on an invented pair. The head-to-head fixture has a row dated today; the cutoff must hide it.',
+  },
+]
+
 export const GROUP_TITLES = {
   sheet: 'The sheet — one box, ten names',
   dense: 'The tight sheet — --radius-sm, no shadow',

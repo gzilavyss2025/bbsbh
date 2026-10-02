@@ -295,4 +295,6 @@
                               partial cannot exist. Every selector in it is
                               .dlab__*, shared with no other partial, and only
                               that one unlisted route loads it.)
+     designlab/scout          screens/designlab/scout/ScoutLab.jsx (the
+                              Matchup Scout prototype, #1408 — .scout__* only)
    ------------------------------------------------------------ */

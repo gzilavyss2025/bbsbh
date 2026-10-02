@@ -1,0 +1,259 @@
+/* ============================================================
+   MATCHUP SCOUT PROTOTYPE — screens/designlab/scout/ScoutLab.jsx
+
+   The design specimen for issue #1408 (spec: docs/scout-design.md). A
+   PER-ROUTE PARTIAL, loaded only by the Design Lab. Every selector is
+   .scout__*. Phase 1 (#1410) moves what it keeps into the page's own
+   partial; nothing else may hook these classes.
+
+   Two scales, one per map. The pitcher's map is the command map's clay ramp
+   (26d-command-map.css): a share, sequential, one hue. The hitter's map
+   diverges around the league rate in the same region: navy below, medal
+   amber above, the recent-form bar's pair (26b-recent-form.css), because
+   neither end is good or bad on a page that serves both sides. Both ramps cap
+   at .40 so the figures stay readable on the darkest cell. Gray is "under the
+   floor": the region prints its count and no value.
+   ============================================================ */
+
+.scout,
+.scout__board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.scout__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Tablet and desktop: the house's 740px cut (25-wide-layout.css), where the
+   screen widens to 960px. The maps and their controls take the main column;
+   the head-to-head list becomes the rail beside them, so a reader flips
+   pitches without losing the history. */
+@media (min-width: 740px) {
+  .scout__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    align-items: start;
+  }
+  .scout__maps {
+    gap: var(--space-4);
+  }
+}
+
+.scout__lab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: var(--bw-hair) dashed var(--border-rule);
+}
+
+.scout__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.scout__control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1h);
+}
+
+.scout__controllabel,
+.scout__keylabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.scout__control .scout__controllabel {
+  min-width: 52px;
+}
+
+/* The pitch pills: one line that scrolls sideways on a phone, so flipping
+   pitches never pushes the maps down. The cut-off pill at the edge says
+   there is more. Wide screens have room, and wrap. */
+@media (max-width: 739.98px) {
+  .scout__control--scroll {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    /* Its pills must not widen the page: size the row from its parent. */
+    contain: inline-size;
+    scroll-snap-type: x proximity;
+    padding-block: var(--space-1);
+  }
+  .scout__control--scroll > * {
+    flex: none;
+    scroll-snap-align: start;
+  }
+}
+
+/* The Now Pitching scene keeps its card size on a wide screen. */
+.scout__board .pscene {
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
+}
+
+.scout__pickers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.scout__picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.scout__picker input {
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-field);
+  padding: var(--space-1h) var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+}
+
+/* --- the colour key: one row per scale --- */
+
+.scout__key {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.scout__keyrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.scout__swatch {
+  width: 14px;
+  height: 14px;
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+svg.scout__swatch {
+  border: 0;
+}
+.scout__keylabel + .scout__swatch {
+  margin-inline-start: var(--space-1);
+}
+
+/* --- the two maps --- */
+
+.scout__pilln {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.scout__control [aria-pressed='true'] .scout__pilln {
+  color: var(--text-on-ink);
+}
+
+.scout__maps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.scout__fig {
+  margin: 0;
+  min-width: 0;
+}
+
+.scout__map {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin-inline: auto;
+}
+
+.scout__cap {
+  display: block;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.scout__notposted {
+  text-align: center;
+}
+
+.scout__expect {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+}
+
+.scout__expectvalue {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  color: var(--text-heading);
+}
+
+/* --- the map's regions --- */
+
+.scout__region {
+  fill: var(--surface-card);
+  stroke: var(--border-hairline);
+  stroke-width: 0.8;
+}
+.scout__region--s1 { fill: var(--clay); fill-opacity: 0.1; }
+.scout__region--s2 { fill: var(--clay); fill-opacity: 0.2; }
+.scout__region--s3 { fill: var(--clay); fill-opacity: 0.3; }
+.scout__region--s4 { fill: var(--clay); fill-opacity: 0.4; }
+.scout__region--lo2 { fill: var(--allstar-blue); fill-opacity: 0.36; }
+.scout__region--lo1 { fill: var(--allstar-blue); fill-opacity: 0.16; }
+.scout__region--hi1 { fill: var(--award-line); fill-opacity: 0.2; }
+.scout__region--hi2 { fill: var(--award-line); fill-opacity: 0.4; }
+.scout__hatchground { fill: var(--surface-card); }
+.scout__hatch {
+  stroke: var(--graphite-soft);
+  stroke-width: 1.2;
+}
+
+/* A key swatch is a 14px SVG rect wearing the same region class. */
+.scout__swatch--hatch {
+  background: repeating-linear-gradient(45deg, var(--graphite-soft) 0 1px, var(--surface-card) 1px 4px);
+}
+
+.scout__frame {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 1.4;
+}
+
+.scout__box {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+}
+
+.scout__figure,
+.scout__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  text-anchor: middle;
+}
+.scout__figure { fill: var(--text-heading); }
+.scout__count { fill: var(--text-caption); }
