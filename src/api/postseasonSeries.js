@@ -20,6 +20,7 @@ import { startingPositionAbbr } from './select.js'
 import { rosterGroups } from './postseason/roster.js'
 import { outsToIp } from '../lib/math/innings.js'
 import { foldTeamTotals } from '../lib/postseason/seriesTotals.js'
+import { WHIFF_CODES, pitchCallCode } from './playbyplay/eventTypes.js'
 
 export { BATTING_CATEGORIES }
 
@@ -77,6 +78,44 @@ async function fetchGameBoxscore(gamePk) {
   } catch {
     return null
   }
+}
+
+// Swings and misses are in no box score; they come off the pitch calls. The
+// `fields=` list keeps the read to the club ids, each play's half, and each
+// pitch's call code, about 20 KB a game against the multi-MB full feed (the
+// same trick as person-fetch.js's scans). No result, run or score field is
+// named, so none arrives.
+const WHIFF_FEED_FIELDS =
+  'gameData,teams,away,home,id,liveData,plays,allPlays,about,halfInning,playEvents,isPitch,details,call,code'
+
+async function fetchGameWhiffFeed(gamePk) {
+  try {
+    return await getJson(`/api/v1.1/game/${gamePk}/feed/live?fields=${WHIFF_FEED_FIELDS}`)
+  } catch {
+    return null
+  }
+}
+
+// Whiffs by the club that pitched: a top half is the home club on the mound.
+// Returns { [clubId]: n }, or null when there is no feed or any one failed to
+// read, so the page shows "—" rather than a count that is short a game.
+export function foldWhiffs(feeds) {
+  if (!feeds?.length) return null
+  const out = {}
+  for (const feed of feeds) {
+    const away = feed?.gameData?.teams?.away?.id
+    const home = feed?.gameData?.teams?.home?.id
+    if (!away || !home) return null
+    out[away] ??= 0
+    out[home] ??= 0
+    for (const play of feed.liveData?.plays?.allPlays ?? []) {
+      const pitching = play.about?.halfInning === 'top' ? home : away
+      for (const e of play.playEvents ?? []) {
+        if (e.isPitch && WHIFF_CODES.has(pitchCallCode(e))) out[pitching] += 1
+      }
+    }
+  }
+  return out
 }
 
 // `uncapped: true` (HR, W, SV, ER — see SERIES_UNCAPPED_FLOOR) lifts the
@@ -158,9 +197,14 @@ function buildRosters(rosterByTeam) {
 // TeamLeaders already hides those rather than rendering an empty section.
 // Also returns each team's series roster (see rosterEntry/buildRosters
 // above), keyed by teamId, and `totals`, each club's summed team batting and
-// pitching (lib/postseason/seriesTotals.js).
+// pitching (lib/postseason/seriesTotals.js). The games must already be
+// counted ones (Final before the cutoff): the pitch-call read for whiffs is
+// the one place this module opens a game's feed.
 export async function loadSeriesStats(games) {
-  const boxscores = await Promise.all((games ?? []).map((g) => fetchGameBoxscore(g.gamePk)))
+  const [boxscores, whiffFeeds] = await Promise.all([
+    Promise.all((games ?? []).map((g) => fetchGameBoxscore(g.gamePk))),
+    Promise.all((games ?? []).map((g) => fetchGameWhiffFeed(g.gamePk))),
+  ])
 
   const batting = new Map()
   const pitching = new Map()
@@ -244,7 +288,8 @@ export async function loadSeriesStats(games) {
     batting: rankBatting(batting),
     pitching: rankPitching(pitching),
     rosters: buildRosters(rosterByTeam),
-    // Team sums from the same box scores, no extra request (seriesTotals.js).
-    totals: foldTeamTotals(boxscores),
+    // Team sums from the same box scores (seriesTotals.js), plus the whiff
+    // counts off each counted game's pitch calls.
+    totals: foldTeamTotals(boxscores, foldWhiffs(whiffFeeds)),
   }
 }

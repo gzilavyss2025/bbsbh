@@ -4,6 +4,8 @@ import { teamAbbr } from '../../lib/teams.js'
 import { Door } from '../ui/control/Door.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { InfoPopover } from '../ui/InfoPopover.jsx'
+import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { useRouteLink } from '../../lib/nav.js'
 
 // NINE KEYS (series page): where each club ranked among the 30 on nine
@@ -47,12 +49,18 @@ export function SeriesNineKeys({ data, clubs, season }) {
           <thead>
             <tr>
               <th scope="col">Key</th>
-              <th scope="col">{abbr(a.teamId)}</th>
+              <th scope="col">
+                <TeamLogo teamId={a.teamId} size={14} className="psseries__keyhead" />
+                {abbr(a.teamId)}
+              </th>
+              <th scope="col">
+                <TeamLogo teamId={b.teamId} size={14} className="psseries__keyhead" />
+                {abbr(b.teamId)}
+              </th>
               <td aria-hidden="true" className="psseries__keyscale">
                 <span>1st</span>
                 <span>30th</span>
               </td>
-              <th scope="col">{abbr(b.teamId)}</th>
             </tr>
           </thead>
           <tbody>
@@ -62,31 +70,37 @@ export function SeriesNineKeys({ data, clubs, season }) {
                   {k.label}
                 </th>
                 <Rank rank={a.ranks?.[k.id]} fail={failed(a, k.id)} />
+                <Rank rank={b.ranks?.[k.id]} fail={failed(b, k.id)} />
                 <td className="psseries__keytrack" aria-hidden="true">
                   <span className="psseries__keyline">
                     <span className="psseries__keybar" style={{ left: at(bar) }} />
-                    <KeyDot rank={a.ranks?.[k.id]} side="away" at={at} />
-                    <KeyDot rank={b.ranks?.[k.id]} side="home" at={at} />
+                    <KeyDot rank={a.ranks?.[k.id]} teamId={a.teamId} side="away" at={at} />
+                    <KeyDot rank={b.ranks?.[k.id]} teamId={b.teamId} side="home" at={at} />
                   </span>
                 </td>
-                <Rank rank={b.ranks?.[k.id]} fail={failed(b, k.id)} />
               </tr>
             ))}
           </tbody>
         </table>
         <p className="psseries__keytally">
           Failed · {abbr(a.teamId)} {a.failed?.length ?? 0} · {abbr(b.teamId)} {b.failed?.length ?? 0}
+          <InfoPopover label="What the failed-key count means" className="psseries__keyverdict">
+            {verdict}
+          </InfoPopover>
         </p>
-        <p className="psseries__keyverdict">{verdict}</p>
       </Card>
     </section>
   )
 }
 
 // No rank on file: no mark on the track (the rank cell says "—").
-function KeyDot({ rank, side, at }) {
+function KeyDot({ rank, teamId, side, at }) {
   if (rank == null) return null
-  return <span className={`psseries__keydot psseries__keydot--${side}`} style={{ left: at(rank) }} />
+  return (
+    <span className={`psseries__keydot psseries__keydot--${side}`} style={{ left: at(rank) }}>
+      <TeamLogo teamId={teamId} size={18} />
+    </span>
+  )
 }
 
 function Rank({ rank, fail }) {
