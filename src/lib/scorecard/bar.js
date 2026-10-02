@@ -21,13 +21,19 @@ import { movesText, playWords } from './words.js'
 export const LOCK_MS = 700
 export const tapLocked = (now, lastAt, ms = LOCK_MS) => lastAt != null && now - lastAt < ms
 
-export function barState({ loading, stepInfo, flip }) {
+// `frontier` is the clamped view's `grid.frontier`: the next at-bat, if the feed
+// has one, and whether it is still in progress (`live`).
+export function barState({ loading, stepInfo, flip, frontier = null }) {
   if (loading) return 'loading'
   if (!stepInfo) return null
   if (flip) return 'handoff'
-  // G10 / ADR-0055: the cursor has met the end of what the feed holds, and the
-  // half is not over. A finished half never reads as the edge.
-  return stepInfo.nextCount >= stepInfo.total && !stepInfo.halfOver ? 'edge' : 'sealed'
+  // G10 / ADR-0055: the cursor has met the end of what the feed holds, the
+  // half is not over, and no FINISHED at-bat waits there. A finished at-bat at
+  // the feed's end (the third out before the next half starts) is a seal like
+  // any other: holding it back would also make the wait's length tell how it
+  // ended. A finished half never reads as the edge.
+  const atEnd = stepInfo.nextCount >= stepInfo.total && !stepInfo.halfOver
+  return atEnd && (frontier == null || frontier.live) ? 'edge' : 'sealed'
 }
 
 const named = (b) => (b?.last ? `${b.jersey ? `#${b.jersey} ` : ''}${b.last}` : '')

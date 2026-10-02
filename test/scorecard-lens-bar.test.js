@@ -240,3 +240,62 @@ test('before the tap, the bar reads the same whatever the sealed at-bat turns ou
   }
   assert.ok(checked >= 20, `walked ${checked} steps`)
 })
+
+// ---------------------------------------------------------------------------
+// THE LIVE EDGE IS A BATTER STILL UP, not the last entry the feed holds
+// ---------------------------------------------------------------------------
+
+// The fixture cut after Top 1's last play (the third out), and marked live.
+// The next half has no play yet, so the half is not over (ADR-0055).
+function liveCut({ inProgress = false } = {}) {
+  const copy = structuredClone(FEED)
+  copy.gameData.status.abstractGameState = 'Live'
+  const plays = copy.liveData.plays.allPlays
+  const lastTop1 = plays.findLastIndex((p) => p.about.inning === 1 && p.about.halfInning === 'top')
+  copy.liveData.plays.allPlays = plays.slice(0, lastTop1 + 1)
+  if (inProgress) {
+    const p = copy.liveData.plays.allPlays.at(-1)
+    // The shape of a play still being pitched (verified live, gamePk 824238):
+    // isComplete false, and a result with its type but no event yet.
+    p.about.isComplete = false
+    p.result = { type: 'atBat' }
+    p.runners = []
+  }
+  return copy
+}
+
+// The bar for a reader who has opened every entry but the last one.
+function barAtLast(feed) {
+  let count = 0
+  let info
+  for (;;) {
+    info = scorecardStep(feed, -1, () => count)
+    if (info.nextCount >= info.total) break
+    count = info.nextCount
+  }
+  const view = scorecardFull({ feed }, 'top', { through: -1, step: { halfIdx: 0, count: info.count } })
+  const state = barState({ loading: false, stepInfo: info, flip: null, frontier: view.grid.frontier })
+  return { info, state, ...barLines({ state, view, stepInfo: info, flip: null, moves: [] }) }
+}
+
+test('a finished at-bat at the end of a live feed is sealed and opens, not "At bat"', () => {
+  const b = barAtLast(liveCut())
+  assert.equal(b.info.halfOver, false, 'the next half has not started')
+  assert.equal(b.state, 'sealed', 'the third out is in the feed: Unwrap must open it')
+  assert.match(b.label, /^Unwrap #\d+ \S+/)
+})
+
+test('the at-bat still in progress is the live edge', () => {
+  const b = barAtLast(liveCut({ inProgress: true }))
+  assert.equal(b.state, 'edge')
+  assert.equal(b.label, 'Waiting for the play')
+})
+
+test('after the last finished at-bat opens, a live half waits with no frontier', () => {
+  const feed = liveCut()
+  const total = scorecardStep(feed, -1, () => 0).total
+  const info = scorecardStep(feed, -1, () => total)
+  const view = scorecardFull({ feed }, 'top', { through: -1, step: { halfIdx: 0, count: total } })
+  assert.equal(view.grid.frontier, null)
+  assert.equal(barState({ loading: false, stepInfo: info, flip: null, frontier: view.grid.frontier }), 'edge')
+})

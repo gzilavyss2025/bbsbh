@@ -108,10 +108,13 @@ above and change none of them.
   moment to rule off the inning on paper. The half totals show only here,
   after the half has committed (ADR-0006: E is the other club's fielding).
 - **The live edge shows no seal.** When the cursor meets the end of a half that
-  is still being played (ADR-0055), the lens draws a dashed pencil "At bat"
-  box in place of the seal and a "Waiting for the play" pill with Refresh. In
-  the lens the in-progress at-bat is not opened. The seal returns, with no
-  motion, on the poll that brings the next entry. The whole-sheet view and the
+  is still being played (ADR-0055) and the next at-bat is still in progress
+  (`grid.frontier.live`), the lens draws a dashed pencil "At bat" box in place
+  of the seal and a "Waiting for the play" pill with Refresh. In the lens the
+  in-progress at-bat is not opened. The seal returns, with no motion, on the
+  poll that finishes it. A FINISHED at-bat at the feed's end (the third out
+  before the next half starts) is a seal like any other: holding it back would
+  make the wait's length tell how it ended. The whole-sheet view and the
   desktop sheet keep today's seal.
 - **One tap lock.** The seal, Unwrap and Turn share a 700 ms window after every
   reveal and every turn (`tapLocked`). It is a constant and never reads the

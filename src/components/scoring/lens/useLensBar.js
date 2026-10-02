@@ -20,7 +20,7 @@ export function useLensBar({ on, view, side, stepInfo, flip, loading }) {
   }
   if (!on || !view || !stepInfo) return null
 
-  const state = barState({ loading, stepInfo, flip })
+  const state = barState({ loading, stepInfo, flip, frontier: view.grid?.frontier })
   const inning = flip ? flip.inning : stepInfo.inning
   const cards = halfCards(view, inning)
   const moves =
