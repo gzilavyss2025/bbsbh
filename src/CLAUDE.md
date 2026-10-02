@@ -13,7 +13,7 @@ fetching, and the design system. The data layer has its own file
 Oct-Feb — `components/winter/`, ADR-0078) → `GameView` (site-home bar + away@home
 masthead of uniform-treatment tiles — the `TeamTreatmentMark` square the slate card
 shows — each opening the sketch modal) → `TeamInfo` (×2) → `InningViewer`.
-`LogoSheet` is a printable grayscale logo sheet, off the slate header. An empty slate gets a second page
+`LogoSheet` is a printable grayscale logo sheet, off the slate header. The **Matchup Scout** (`/scout`, `screens/scout/`) is one pitcher against one hitter: spec `docs/scout-design.md`, its view toggle ADR-0093, its Savant cutoff ADR-0095. An empty slate gets a second page
 state (`offseason/`): the wire at MLB (ADR-0074); at a level, dark from mid-September on ITS leagues' published dates (ADR-0079), a checked game to score and who moved up (ADR-0080). Both then carry one notebook note — twelve-pitch at-bats at MLB (the /fouls batter-vs-pitcher row, minus its scorebug), youngest regulars at a level — and the season record, the one door onto results: a label, never a seal, inward at MLB and out to MiLB.com below it — MLB's row also carries the postseason champion for the whole offseason, off slice 3's live bracket, with the full bracket one tap away (ADR-0081's addendum). Wide, the rail the wire left holds the countdown and the whole league (`WinterRail`) — ADR-0081.
 
 `TeamInfo`'s club-name bar and section mastheads are **themed** to the jersey that

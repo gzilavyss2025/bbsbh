@@ -136,9 +136,10 @@ export function arsenalSideFromRows(rows) {
   return out
 }
 
-// The newest season only, the same rule as loadCenturyClub (ADR-0086).
-export async function loadArsenalSide() {
-  const db = await openDb()
+// The newest season only, the same rule as loadCenturyClub (ADR-0086), and
+// the regular season only (ADR-0094).
+export async function loadArsenalSide(db = null) {
+  db ??= await openDb()
   const rows = db
     .prepare(
       // One row per pitcher/level/type/SIDE. Unlike century-club.mjs's read
@@ -146,7 +147,7 @@ export async function loadArsenalSide() {
       `SELECT person_id, level, code, stand, MIN(description) AS description,
               SUM(pitches) AS pitches
        FROM pitch_arsenal_totals
-       WHERE season = (SELECT MAX(season) FROM pitch_arsenal_totals)
+       WHERE season = (SELECT MAX(season) FROM pitch_arsenal_totals) AND scope = 'R'
        GROUP BY person_id, level, code, stand
        HAVING SUM(pitches) > 0`,
     )

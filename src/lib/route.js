@@ -47,6 +47,7 @@
 //   '/team/{name-id}'                   -> { name: 'team', id, asOf, sportId }
 //   '/umpire/{name-id}'                 -> { name: 'umpire', id }
 //   '/umpires'                          -> { name: 'umpire-rankings' }
+//   '/scout', '/scout/{pitcher}/{hitter}' -> { name: 'scout', ... }  (Matchup Scout; scout/route.js)
 //   '/situational-records'              -> { name: 'situational-records', asOf, sportId, metric, half, month }
 //                                          (one situational record, every club at one level, ranked.
 //                                           '?metric=' and '?half=' set the page's OPENING state only,
@@ -123,6 +124,7 @@
 
 import { REPORT_ROUTES } from './reportPages.js'
 import { parseRecordsRoute } from './postseason/recordsRoute.js'
+import { parseScoutRoute } from './scout/route.js'
 import { SPORT_IDS, teamFullName } from './teams.js'
 import {
   WINTER_LEAGUES,
@@ -536,6 +538,8 @@ export function parseRoute(url) {
       placing: toGamePkParam(q.get('place')),
     }
   }
+  const scout = parseScoutRoute(parts, q, { asOf, idFromSlug })
+  if (scout) return scout
   if (parts.length === 2 && parts[0] === 'player')
     return { name: 'player', id: idFromSlug(parts[1]), asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')

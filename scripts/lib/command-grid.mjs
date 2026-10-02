@@ -12,7 +12,7 @@ import { FOUL_CODES, WHIFF_CODES } from '../../src/api/playbyplay/pitchInfo.js'
 // exactly the drift that file's header warns about — so they are named here
 // once, beside the two it does export, and pinned by test/command-aggregate.test.js.
 const CALLED_STRIKE_COMMAND_CODES = new Set(['C', 'K', 'A', 'AB', 'AC'])
-const INPLAY_COMMAND_CODES = new Set(['D', 'X', 'E', 'J', 'Y', 'Z'])
+export const INPLAY_COMMAND_CODES = new Set(['D', 'X', 'E', 'J', 'Y', 'Z'])
 
 // ---------------------------------------------------------------------------
 // COMMAND — where he put it, as opposed to what he threw.
@@ -116,13 +116,13 @@ export const COLS = ['cells', 'whiffs', 'called', 'homers', 'swings', 'first_pit
 export function commandStmts(db) {
   const read = db.prepare(
     `SELECT ${COLS.join(', ')} FROM pitch_command_cells
-      WHERE season = ? AND person_id = ? AND level = ? AND code = ? AND stand = ?`,
+      WHERE season = ? AND scope = ? AND person_id = ? AND level = ? AND code = ? AND stand = ?`,
   )
   const write = db.prepare(
     `INSERT INTO pitch_command_cells
-       (person_id, level, code, stand, season, ${COLS.join(', ')})
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(season, person_id, level, code, stand) DO UPDATE SET
+       (person_id, level, code, stand, season, scope, ${COLS.join(', ')})
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(season, scope, person_id, level, code, stand) DO UPDATE SET
        ${COLS.map((c) => `${c} = excluded.${c}`).join(',\n       ')}`,
   )
   return { read, write }

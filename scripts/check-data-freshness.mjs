@@ -121,7 +121,10 @@ const DEFAULT_KEYS = ['generatedAt']
 // benefit (gen-schedule-shape.mjs records the same trap at its own write site).
 // Lowered 23 -> 22 when former-teammates/ started to write an index.json
 // (#1145), so the slot it freed cannot be reused in silence.
-export const UNSTAMPED_BUDGET = 22
+// Raised 22 -> 23 for hitter-grid/ (ADR-0096), a sharded season store like
+// pitch-command/ beside it: 101 shards a season, rewritten only when a game
+// lands. Its files arrive with the first 2026 re-walk.
+export const UNSTAMPED_BUDGET = 23
 
 const dig = (obj, dotted) => dotted.split('.').reduce((o, k) => (o == null ? o : o[k]), obj)
 

@@ -878,6 +878,14 @@
         "screens/scorecard/ScorecardPage.jsx"
       ]
     },
+    "scout/headToHead.js": {
+      "class": "spoiler-free",
+      "why": "Matchup Scout's pitcher-versus-hitter history from Savant's pitch-level CSV. Only games dated before the cutoff (today, or `?d=`): the request sends the day before it as an inclusive bound, so it never reads a live game. An open stat surface (ADR-0034). The service worker serves Savant NetworkOnly (ADR-0004)."
+    },
+    "scout/hitterGrid.js": {
+      "class": "spoiler-free",
+      "why": "The Matchup Scout's hitter-grid reader: a hitter's season sums per pitch type, pitcher hand and 5x5 cell (pitches, swings, whiffs, PA-ending pitches), over games already final, built by the nightly sweep before the day's games. A cell count is not a line and not a running score; same footing as commandMap.js. The Scout is an open surface (ADR-0034), so no SealBox and no cutoff."
+    },
     "search.js": {
       "class": "spoiler-free",
       "why": "The player/team directory search. Identity fields only."

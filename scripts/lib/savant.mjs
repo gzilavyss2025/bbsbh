@@ -14,65 +14,11 @@
 
 import { setTimeout as sleep } from 'node:timers/promises'
 import { round1 } from '../../src/lib/math/number.js'
+import { csvObjects, parseCsv } from '../../src/lib/csv/parse.js'
 
-// A minimal CSV row parser — handles quoted fields with embedded commas
-// (e.g. "Whitlock, Garrett") and doubled-quote escaping. No npm dependency,
-// matching the rest of scripts/'s self-contained convention.
-export function parseCsv(text) {
-  const rows = []
-  let row = []
-  let field = ''
-  let inQuotes = false
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i]
-    if (inQuotes) {
-      if (c === '"') {
-        if (text[i + 1] === '"') {
-          field += '"'
-          i++
-        } else {
-          inQuotes = false
-        }
-      } else {
-        field += c
-      }
-    } else if (c === '"') {
-      inQuotes = true
-    } else if (c === ',') {
-      row.push(field)
-      field = ''
-    } else if (c === '\n' || c === '\r') {
-      if (c === '\r' && text[i + 1] === '\n') i++
-      row.push(field)
-      field = ''
-      if (row.length > 1 || row[0] !== '') rows.push(row)
-      row = []
-    } else {
-      field += c
-    }
-  }
-  if (field !== '' || row.length) {
-    row.push(field)
-    rows.push(row)
-  }
-  return rows
-}
-
-// Rows -> array of objects keyed by header name, with the BOM and stray header
-// whitespace stripped. Savant's first column is literally named
-// "last_name, first_name" — quoted, with the comma inside — which is why the
-// parser above has to handle quoting at all.
-export function csvObjects(text) {
-  const rows = parseCsv(text.replace(/^﻿/, ''))
-  if (rows.length < 2) return []
-  const [header, ...data] = rows
-  const names = header.map((n) => n.trim())
-  return data.map((r) => {
-    const o = {}
-    names.forEach((n, i) => { o[n] = r[i] })
-    return o
-  })
-}
+// The CSV reader lives in src/lib/csv/ so the app can import it too (the Matchup
+// Scout head-to-head). Re-exported here so every generator's import stays as is.
+export { parseCsv, csvObjects }
 
 // '' / null / non-numeric -> null, so a blanked column reads as absent rather
 // than as 0. Every rate in this app degrades to "no note" on null.

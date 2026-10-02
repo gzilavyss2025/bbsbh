@@ -18,6 +18,7 @@
 
 import { readFile, writeFile, rename, mkdir, readdir, rm } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { shardKey100 } from '../../src/lib/shardKey.js'
 
 // Read + parse JSON, returning `fallback` only when the file does not exist.
 // Any other error (parse failure, permission, corrupt file) is rethrown.
@@ -63,6 +64,20 @@ export async function writeShards(dir, entries) {
     swept++
   }
   return { written: kept.size, swept }
+}
+
+// One bucket per `personId % 100`: `regular` names the regular-season key (`pit`
+// for the pitch stores, `bat` for the hitter grid); `post` is the postseason in
+// the same shape, beside it, so an old reader never sees it (ADR-0094).
+export function bucketsOf(head, reg, post, regular = 'pit') {
+  const buckets = {}
+  for (const [field, entries] of [[regular, reg], ['post', post]]) {
+    for (const [id, entry] of Object.entries(entries)) {
+      const bucket = (buckets[shardKey100(id)] ??= { ...head, [regular]: {} })
+      ;(bucket[field] ??= {})[id] = entry
+    }
+  }
+  return Object.entries(buckets)
 }
 
 // writeShards, plus an index.json in `dir` that carries the run's timestamp.
