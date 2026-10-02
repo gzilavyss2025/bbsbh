@@ -35,7 +35,9 @@ moves them together. A test checks a lattice of pitches in both views (Phase
 
 **4. Words name the side of the field.** Labels say "third-base side",
 "first-base side", "inside" or "away", never "left" or "right". They stay true
-in both views.
+in both views. The side labels under each map and the tapped region's name
+come from the same projection (`sidesInOrder`, `regionLabel`), and a test
+holds the words.
 
 **5. The Now Pitching scene shows in the Hitter's view only.** Its camera is
 behind the plate (`src/lib/pitcherCard/scene.js`), which is the Hitter's view.

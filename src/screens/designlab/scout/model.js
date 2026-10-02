@@ -75,22 +75,58 @@ export function regionRect(region, view) {
 // The batter's box: a right-handed hitter stands on the third-base side
 // (negative pX), a left-handed one on the first-base side. Projected, so the
 // mirror moves it with the cells.
+// 0.42 ft wide: room for the stance letter.
 export function stanceRect(stance, view) {
   const sign = stance === 'R' ? -1 : 1
-  const [x, width] = span(projX(sign * 1.25, view), projX(sign * 1.5, view))
+  const [x, width] = span(projX(sign * 1.2, view), projX(sign * 1.62, view))
   const y = sy(pzOf(Z_EDGES[1]))
   return { x, y, width, height: sy(pzOf(Z_EDGES[4])) - y }
 }
 
-// The map's viewBox: the ring plus whichever side the box is on.
+// Home plate, the zone's width, drawn under the low band. The pentagon is
+// symmetric about the zone's centre, so the mirror leaves it alone.
+export const PLATE_DEPTH = 9
+export function platePoints(view) {
+  const [x, width] = span(projX(-EDGE, view), projX(EDGE, view))
+  const y = sy(pzOf(Z_EDGES[5])) + 3
+  const mid = y + PLATE_DEPTH / 2
+  return [[x, y], [x + width, y], [x + width, mid], [x + width / 2, y + PLATE_DEPTH], [x, mid]]
+    .map((p) => p.join(',')).join(' ')
+}
+
+// The map's viewBox: the ring, the plate, and whichever side the box is on.
 export function mapBox(stance, view) {
   const xs = [projX(X_EDGES[0] * EDGE, view), projX(X_EDGES[5] * EDGE, view)]
   const s = stanceRect(stance, view)
   xs.push(s.x, s.x + s.width)
   const top = sy(pzOf(Z_EDGES[0]))
-  const bottom = sy(pzOf(Z_EDGES[5]))
+  const bottom = sy(pzOf(Z_EDGES[5])) + 3 + PLATE_DEPTH
   const x0 = Math.min(...xs) - 2
   return `${x0} ${top - 2} ${Math.max(...xs) - x0 + 2} ${bottom - top + 4}`
+}
+
+// The map's two sides, the one drawn on the viewer's left first. Field
+// sides, never "left" or "right" (ADR-0077).
+export const SIDE_LABEL = { side3b: '3B side', side1b: '1B side' }
+export const sidesInOrder = (view) =>
+  (regionRect('side1b', view).x < regionRect('side3b', view).x ? ['side1b', 'side3b'] : ['side3b', 'side1b'])
+    .map((r) => SIDE_LABEL[r])
+
+// A region's name for the readout line, from the hitter's stance: a right-
+// handed hitter's inside is the third-base side. Labels, not sentences.
+const ROW_WORD = { 1: 'Up', 2: 'Middle', 3: 'Down' }
+export function regionLabel(region, stance) {
+  const insideSide = stance === 'R' ? 'side3b' : 'side1b'
+  const inOrAway = (side) => (side === insideSide ? 'inside' : 'away')
+  if (region === 'high') return 'High · above the zone'
+  if (region === 'low') return 'Low · below the zone'
+  if (SIDE_LABEL[region]) return `Off the plate · ${inOrAway(region)} · ${SIDE_LABEL[region]}`
+  if (region === 'r2c2') return 'Heart'
+  const row = Number(region[1])
+  const col = Number(region[3])
+  if (col === 2) return `${ROW_WORD[row]} · middle`
+  const side = col === 1 ? 'side3b' : 'side1b'
+  return `${ROW_WORD[row]} · ${inOrAway(side)} · ${SIDE_LABEL[side]}`
 }
 
 // ---------------------------------------------------------------------------

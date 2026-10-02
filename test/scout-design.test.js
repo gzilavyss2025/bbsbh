@@ -11,7 +11,8 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { EDGE, GRID, commandCell, inZone, normalizePitch, sx, sy } from '../src/lib/zone/zoneGeometry.js'
 import {
-  NOMINAL, REGIONS, REGION_OF, band, drawCol, expected, h2hBefore, h2hTotals, hitterRegions, projX, regionRect, rollUp, stanceRect,
+  NOMINAL, REGIONS, REGION_OF, band, drawCol, expected, h2hBefore, h2hTotals, hitterRegions, platePoints, projX, regionLabel, regionRect,
+  rollUp, sidesInOrder, stanceRect,
 } from '../src/screens/designlab/scout/model.js'
 import { h2hRows } from '../src/screens/designlab/scout/fixture.js'
 import { isoToday } from '../src/lib/dates.js'
@@ -77,6 +78,24 @@ test('the pitcher’s view is the house view and the hitter’s view is its mirr
   assert.ok(stanceRect('R', 'hitter').x < zone('hitter'))
   assert.ok(stanceRect('L', 'pitcher').x < zone('pitcher'))
   assert.ok(Math.abs(regionRect('r2c2', 'pitcher').width - (sx(-EDGE) - sx(EDGE)) / 3) < 1e-9)
+})
+
+test('a region is named by row, inside or away from the hitter, and the side of the field — never left or right', () => {
+  // A right-handed hitter stands on the third-base side, so that side is inside for him.
+  assert.equal(regionLabel('r1c1', 'R'), 'Up · inside · 3B side')
+  assert.equal(regionLabel('r1c1', 'L'), 'Up · away · 3B side')
+  assert.equal(regionLabel('r3c3', 'L'), 'Down · inside · 1B side')
+  assert.equal(regionLabel('side1b', 'R'), 'Off the plate · away · 1B side')
+  assert.equal(regionLabel('r2c2', 'R'), 'Heart')
+  assert.equal(regionLabel('r2c2', 'L'), 'Heart')
+  for (const r of REGIONS) for (const st of ['R', 'L']) assert.doesNotMatch(regionLabel(r, st), /left|right/i, `${r} ${st}`)
+  // The side labels follow the drawing: first base on the viewer's left from behind the pitcher.
+  assert.deepEqual(sidesInOrder('pitcher'), ['1B side', '3B side'])
+  assert.deepEqual(sidesInOrder('hitter'), ['3B side', '1B side'])
+  // The plate is symmetric about the zone's centre, so both views draw the same shape.
+  const xs = (view) => platePoints(view).split(' ').map((p) => Number(p.split(',')[0])).sort((a, b) => a - b)
+  assert.deepEqual(xs('pitcher'), xs('hitter'))
+  assert.ok(Math.abs((xs('pitcher')[0] + xs('pitcher')[4]) / 2 - projX(0, 'pitcher')) < 1e-9)
 })
 
 test('a region under the floor has a count and no value, and no colour band', () => {
