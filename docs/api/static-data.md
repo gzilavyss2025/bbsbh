@@ -387,7 +387,10 @@ for each generator; the reader modules:
   deliberately less than the buckets carry — one level (the two are never ranked
   against each other), only arms past `MIN_SIMILARITY_PITCHES` (the ranker drops
   the rest anyway), and no `description` strings (it ranks on `code`). 692 KB
-  became 12 KB for the mix bar and 149/194 KB for the pool. Completed-game aggregates → spoiler-free, no
+  became 12 KB for the mix bar and 149/194 KB for the pool. Each bucket also has
+  `post`, the MLB postseason in the same shape as `pit`. The readers here read `pit`
+  only, so they show the regular season only (ADR-0094); the pool has no postseason.
+  The `pitch-command` buckets (`commandMap.js`) have the same `post` key. Completed-game aggregates → spoiler-free, no
   SealBox (same footing as `fouls.js`); MLB + AAA (`mlb`/`aaa` keys — AA and
   below carry no Hawk-Eye pitch tracking, so `pitchArsenalFor` just resolves
   to null there). `pitchArsenalFor(data, personId, isMlb, stand)` picks the level

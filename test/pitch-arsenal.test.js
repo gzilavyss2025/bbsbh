@@ -1,14 +1,16 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { mkdtempSync } from 'node:fs'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { openDb } from '../scripts/lib/db.js'
 import { CELLS } from '../scripts/lib/command-grid.mjs'
 import { loadCenturyClub } from '../scripts/lib/century-club.mjs'
+import { loadArsenalSide } from '../scripts/lib/arsenal-side.mjs'
 import {
   aggregateGamePitchTypes,
   arsenalStatements,
+  bucketsOf,
   centuryRankMap,
   exportCommandMap,
   exportPitchArsenal,
@@ -612,4 +614,67 @@ test('the century-club callouts read the newest season, never two seasons summed
   fold(1, 2026, 60, 101)
   fold(2, 2027, 12, 100.5)
   assert.equal((await loadCenturyClub(db)).get('mlb:100').count, 12)
+})
+
+// --- the postseason split (#1411 Part A, ADR-0094) ------------------------------
+// The sweep now reads MLB postseason games too. Their pitches go to rows with
+// scope 'P'. Every reader that existed before the split reads scope 'R' only,
+// so no existing card changes.
+
+test('an old dump row, which names no scope, loads as regular season', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'arsenal-old-dump-'))
+  writeFileSync(
+    join(dir, 'pitch-arsenal.sql'),
+    "INSERT INTO pitch_arsenal_totals (person_id, level, code, stand, season, name, team_id, description, pitches) VALUES (100, 'mlb', 'FF', 'R', 2026, 'Arm', 1, 'Four-Seam Fastball', 7);\n" +
+      "INSERT INTO pitch_command_cells (person_id, level, code, stand, season, cells, whiffs, called, homers, swings, first_pitch) VALUES (100, 'mlb', 'FF', 'R', 2026, '1', '0', '0', '0', '0', '0');\n",
+  )
+  const db = await openDb(dir)
+  assert.deepEqual({ ...db.prepare('SELECT scope, pitches FROM pitch_arsenal_totals').get() }, { scope: 'R', pitches: 7 })
+  assert.equal(db.prepare('SELECT scope FROM pitch_command_cells').get().scope, 'R')
+})
+
+test('a postseason game changes no regular-season reader, and its own rows hold only that game', async () => {
+  const db = await emptyDb()
+  const stmts = arsenalStatements(db)
+  const fold = (gamePk, scope, n, speed, cell) =>
+    foldGame(db, stmts, { gamePk, level: 'mlb', date: '2026-09-30', season: 2026, scope }, fourSeamers(n, speed), oneCell(cell))
+  fold(1, 'R', 200, 101, 12)
+  // What a shard or pool carries. gamesIngested counts every game in the
+  // ledger, the postseason included, but no file carries it.
+  const readers = async () => ({
+    arsenal: exportPitchArsenal(db, {}, 2026).pit,
+    all: poolsOf(exportPitchArsenal(db, {}, null)),
+    grid: exportCommandMap(db, 2026),
+    century: [...(await loadCenturyClub(db))],
+    side: await loadArsenalSide(db),
+  })
+  const before = await readers()
+
+  // Same pitcher, pitch type and batter side: the one key a postseason row
+  // could overwrite or add onto.
+  fold(2, 'P', 30, 101, 0)
+
+  assert.deepEqual(await readers(), before)
+  assert.equal(before.arsenal[100].mlb[0].pitches, 200)
+  const post = exportPitchArsenal(db, {}, 2026, 'P')
+  assert.equal(post.pit[100].mlb[0].pitches, 30)
+  assert.equal(post.pit[100].mlb[0].avgVelo, 101)
+  // A postseason century club is a few arms; a rank in it would mislead.
+  assert.equal(post.pit[100].centuryRank, undefined)
+  const postGrid = exportCommandMap(db, 2026, 'P')
+  assert.equal(postGrid.pit[100].mlb.FF.R.cells[0], 1)
+  assert.equal(postGrid.pit[100].mlb.FF.R.cells[12], 0)
+  assert.equal(exportCommandMap(db, 2026).pit[100].mlb.FF.R.cells[0], 0)
+})
+
+test('a bucket carries the postseason beside `pit`, never inside it', () => {
+  const regular = { 100: { name: 'Arm', mlb: [{ code: 'FF', pitches: 200 }], aaa: [] } }
+  const post = { 100: { name: 'Arm', mlb: [{ code: 'FF', pitches: 30 }], aaa: [] }, 201: { name: 'Rookie', mlb: [{ code: 'SL', pitches: 40 }], aaa: [] } }
+  const buckets = Object.fromEntries(bucketsOf({ season: 2026 }, regular, post))
+  assert.deepEqual(buckets['00'], { season: 2026, pit: regular, post: { 100: post[100] } })
+  // A man who pitched only in the postseason is not in `pit`, so a reader
+  // that knows only `pit` finds nothing, as before the split.
+  assert.deepEqual(buckets['01'], { season: 2026, pit: {}, post: { 201: post[201] } })
+  assert.equal(pitchArsenalFor(buckets['01'], 201, true), null)
+  assert.deepEqual(Object.fromEntries(bucketsOf({ season: 2026 }, regular, {})), { '00': { season: 2026, pit: regular } })
 })

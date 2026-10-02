@@ -16,7 +16,7 @@ import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 // seasons.json that names them and the one the app reads (`current`). The join
 // and the size ceiling hold in EVERY season folder; the floors count the
 // season the app serves.
-const SEASON_STORES = new Set(['spray', 'fouls', 'pitch-arsenal', 'pitch-arsenal-pool'])
+const SEASON_STORES = new Set(['spray', 'fouls', 'pitch-arsenal', 'pitch-arsenal-pool', 'pitch-command'])
 const indexOf = (name) =>
   JSON.parse(readFileSync(new URL(`../public/data/${name}/seasons.json`, import.meta.url), 'utf8'))
 const folder = (name, season) => new URL(`../public/data/${name}/${season == null ? '' : `${season}/`}`, import.meta.url)
@@ -38,10 +38,13 @@ test('every reader computes the same bucket', () => {
   assert.equal(shardKey100(null), '00')
 })
 
+// `post` is the postseason, beside `pit` in the same bucket (ADR-0094).
+const pitAndPost = (shard) => [...Object.keys(shard.pit ?? {}), ...Object.keys(shard.post ?? {})]
 for (const [name, pick] of [
   ['manager-history', (shard) => Object.keys(shard.byPersonId ?? {})],
   ['fouls', (shard) => [...Object.keys(shard.batters ?? {}), ...Object.keys(shard.pitchers ?? {})]],
-  ['pitch-arsenal', (shard) => Object.keys(shard.pit ?? {})],
+  ['pitch-arsenal', pitAndPost],
+  ['pitch-command', pitAndPost],
   ['spray', (shard) => Object.keys(shard.bat ?? {})],
 ]) {
   test(`every ${name} record sits in the bucket its reader will ask for`, () => {
@@ -90,7 +93,15 @@ test('a bucket stays small enough to be worth fetching alone', () => {
     // remaining trims would drop a side or drop the looks inside one — which
     // is the feature. Measured largest at 33 KB; this leaves the season's
     // remaining weeks room without letting the shape quietly double again.
+    // The postseason part (ADR-0094) adds about 0.7 KB per postseason arm to
+    // his bucket. Measured 2026-10-02 after the first 9 postseason games: the
+    // largest bucket went from 36,114 to 36,846 bytes, so 45 still holds.
     ['pitch-arsenal', 45],
+    // Twenty-five-value arrays per pitch type, per side, per counter. Measured
+    // largest 102,797 bytes on the regular season alone, and 104,099 with the
+    // first 9 postseason games (about 1.4 KB per postseason arm). This leaves
+    // the rest of the postseason room without letting the shape quietly grow.
+    ['pitch-command', 125],
     // Four times its neighbours' ceiling, and deliberately: a spray bucket
     // carries one ROW PER BALL IN PLAY rather than a handful of season totals,
     // which is ~2,000 rows in the busiest bucket. The eight columns are already

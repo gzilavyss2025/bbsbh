@@ -676,13 +676,19 @@ don't run these by hand.
   each pitcher's season pitch mix (share + velocity per type), split `mlb`/`aaa` — every
   AAA park (like MLB's) feeds Hawk-Eye tracking, confirmed live against a real AAA
   gamePk's feed; AA and below carry none (same two-level split as `gen-umpire-accuracy`).
-  APPEND-ONLY/incremental sweep of Final regular-season games' live feeds like
+  APPEND-ONLY/incremental sweep of Final games' live feeds (the regular season at both
+  levels, and the postseason at MLB only, ADR-0094) like
   `gen-fouls.mjs` (`--days` trailing window; `--since`/`--until` backfill;
   `--sports=1,11` restricts the sweep, its real use being `--since=…
   --sports=11` to backfill AAA alone into a file that already has MLB).
   SQLite-backed (`pitch-arsenal` group, ADR-0021); `pitch_arsenal_ingested_games`
-  is the idempotency guard, keyed `(game_pk, level)`. `pitch_arsenal_totals` is
-  keyed `(season, person_id, level, code, stand)` — one row per side the BATTER stood
+  is the idempotency guard, keyed `(game_pk, level)`. Both totals tables also key on
+  `scope`: `'R'` for the regular season, `'P'` for the postseason. The column has
+  `DEFAULT 'R'`, so a dump line that names no scope loads as regular season. Every
+  reader before ADR-0094 reads `'R'` only. Each bucket carries the postseason as
+  `post`, beside `pit`, in the same shape. To backfill older postseason games, run
+  `--since=<first postseason date> --sports=1`. `pitch_arsenal_totals` is
+  keyed `(season, scope, person_id, level, code, stand)` — one row per side the BATTER stood
   on, `'L'`/`'R'`, or `'?'` when the feed named none. The side is in the KEY,
   unlike the times-through split's nine columns, because the two cross: a look
   has to be counted a side at a time. `'?'` is carried rather than dropped so

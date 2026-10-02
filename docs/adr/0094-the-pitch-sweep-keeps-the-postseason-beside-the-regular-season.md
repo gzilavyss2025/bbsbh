@@ -1,0 +1,60 @@
+# The pitch sweep keeps the postseason beside the regular season
+
+**Status:** Accepted
+**Date:** 2026-10-02
+**Issue:** #1411 Part A (parent #1408)
+
+## Context
+
+The Matchup Scout (#1408) shows a pitcher's pitch mix and locations for the
+regular season, the postseason, or both. `gen-pitch-arsenal.mjs` read
+`gameType=R` only, so the store had no postseason pitches.
+
+Three things must not change:
+
+- Every existing card shows the regular season only.
+- The committed dump has 46,490 lines of 2026 regular-season data. A new key
+  must not need a re-walk of those games.
+- `exportCommandMap` writes `byCode[code][stand] = hand`, and
+  `exportPitchArsenal` adds every row of a pitch type. A postseason row in
+  either place would overwrite or add onto a regular-season row.
+
+## Decision
+
+1. **MLB reads its postseason.** The schedule request for sportId 1 asks for
+   `R,F,D,L,W`. Triple-A asks for `R` only, because its postseason game types
+   are not verified. The `Final` check and the `officialDate` de-duplication
+   do not change. The ledgers key on `game_pk`, so a postseason game is swept
+   once.
+2. **A `scope` column in the key.** `pitch_arsenal_totals` and
+   `pitch_command_cells` get `scope TEXT NOT NULL DEFAULT 'R'`, with a CHECK
+   for `'R'` or `'P'`. It is second in each key, after `season`. A game's
+   scope comes from its `gameType`. Two values, not one per round: the page
+   needs Regular, Postseason and All, and All is the sum of the two parts.
+3. **Old rows load as regular season.** A dump line names its columns, so a
+   line with no `scope` takes the default. No migration and no re-walk.
+4. **Old readers read `'R'` only.** Both exports take a scope and default to
+   `'R'`. The callout readers (`century-club.mjs`, `arsenal-side.mjs`) say
+   `scope = 'R'`. The similarity pools and `all/` stay regular season only.
+5. **The postseason is a new key beside `pit`.** Each `pitch-arsenal` and
+   `pitch-command` bucket keeps `pit` as before and adds `post`, the same shape
+   for the postseason. A reader that knows only `pit` never sees it. A pitcher
+   who threw only in the postseason is in `post` only.
+
+## Consequences
+
+- With the first 9 postseason games of 2026 swept on a copy, the output of
+  every existing reader was the same, byte for byte, as before (40 MB of reader
+  output, every pitcher, both levels, every side and pitch type).
+- The dump writes every column on every line. The first run after this
+  change rewrites the whole `scripts/data/pitch-arsenal.sql` once (18.7 MB to
+  about 19.2 MB, with no new rows). `test/season-store.test.js` compares a
+  re-dump with the committed dump, so the committed dump must have the
+  `scope` column before that test passes.
+- A postseason arm adds about 0.7 KB to his `pitch-arsenal` bucket and about
+  1.4 KB to his `pitch-command` bucket. `test/bucket-shards.test.js` now has a
+  `pitch-command` ceiling.
+- Phase 2 (#1411 Parts B to D) reads `post`. The hitter grid uses the same
+  `scope` column.
+- Older postseason games are outside the 3-day nightly window. Backfill them
+  by hand with `--since=<date> --sports=1`.

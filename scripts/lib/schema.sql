@@ -399,6 +399,11 @@ CREATE TABLE IF NOT EXISTS jerseys (
 -- "STORE SUMS, NOT AVERAGES" rule holds here too: velocity_sum / velocity_n,
 -- never an average; `max_velo` combines as the maximum; the command grid's
 -- CSV counters add element-wise.
+-- `scope` splits the regular season ('R') from the MLB postseason ('P') in
+-- both tables (ADR-0094). It is the LAST column, with DEFAULT 'R', so an old
+-- dump line that names no scope loads as regular season. It is SECOND in the
+-- key, so the dump lists every regular-season row in its old order first. A
+-- reader that wants only the regular season must say `scope = 'R'`.
 CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
   person_id       INTEGER NOT NULL,
   level           TEXT NOT NULL,
@@ -440,7 +445,8 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
   tto3_pitches      INTEGER NOT NULL DEFAULT 0,
   tto3_velocity_sum REAL    NOT NULL DEFAULT 0,
   tto3_velocity_n   INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (season, person_id, level, code, stand)
+  scope             TEXT    NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  PRIMARY KEY (season, scope, person_id, level, code, stand)
 );
 
 -- Idempotency guard, one row per (gamePk, level) — a gamePk only ever belongs
@@ -481,7 +487,8 @@ CREATE TABLE IF NOT EXISTS pitch_command_cells (
   homers      TEXT NOT NULL,
   swings      TEXT NOT NULL,
   first_pitch TEXT NOT NULL,
-  PRIMARY KEY (season, person_id, level, code, stand)
+  scope       TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  PRIMARY KEY (season, scope, person_id, level, code, stand)
 );
 
 -- The command sweep's OWN idempotency guard, deliberately separate from
