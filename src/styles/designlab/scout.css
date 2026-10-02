@@ -451,6 +451,9 @@ svg.scout__swatch {
 }
 .scout__figure,
 .scout__stance { fill: var(--text-heading); }
+/* ".381" in an 11px mono face is 26px; a 27px phone cell needs the tight
+   tracking the score figures already use. */
+.scout__figure { letter-spacing: var(--ls-tight-score); }
 .scout__count { fill: var(--text-caption); }
 
 /* --- motion --- */
@@ -487,7 +490,9 @@ svg.scout__swatch {
   from { opacity: 0.25; }
   to { opacity: 1; }
 }
+/* A half turn: the maps start edge-on and turn in already showing the new
+   view, so no mirrored digit is ever drawn (Gary, item 10). */
 @keyframes scout-turn {
-  from { transform: rotateY(180deg); }
+  from { transform: rotateY(-90deg); }
   to { transform: none; }
 }

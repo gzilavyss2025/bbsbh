@@ -115,18 +115,20 @@ export const sidesInOrder = (view) =>
 // A region's name for the readout line, from the hitter's stance: a right-
 // handed hitter's inside is the third-base side. Labels, not sentences.
 const ROW_WORD = { 1: 'Up', 2: 'Middle', 3: 'Down' }
+// `stance` null: the two maps draw different stances (a switch hitter with
+// the other hand picked), so "inside" would be true on one map only. The name
+// then says only the side of the field, which is true on both (Gary, item 11).
 export function regionLabel(region, stance) {
   const insideSide = stance === 'R' ? 'side3b' : 'side1b'
-  const inOrAway = (side) => (side === insideSide ? 'inside' : 'away')
+  const on = (side) => (stance ? `${side === insideSide ? 'inside' : 'away'} · ` : '') + SIDE_LABEL[side]
   if (region === 'high') return 'High · above the zone'
   if (region === 'low') return 'Low · below the zone'
-  if (SIDE_LABEL[region]) return `Off the plate · ${inOrAway(region)} · ${SIDE_LABEL[region]}`
+  if (SIDE_LABEL[region]) return `Off the plate · ${on(region)}`
   if (region === 'r2c2') return 'Heart'
   const row = Number(region[1])
   const col = Number(region[3])
   if (col === 2) return `${ROW_WORD[row]} · middle`
-  const side = col === 1 ? 'side3b' : 'side1b'
-  return `${ROW_WORD[row]} · ${inOrAway(side)} · ${SIDE_LABEL[side]}`
+  return `${ROW_WORD[row]} · ${on(col === 1 ? 'side3b' : 'side1b')}`
 }
 
 // ---------------------------------------------------------------------------
@@ -138,10 +140,9 @@ export const METRICS = {
   swing: { label: 'Swing %', num: 'swings', den: 'pitches', floor: 10, unit: 'pitches', near: 0.04, far: 0.1 },
 }
 
-// Inside a map cell there is room for three figures, not four: xwOBA drops
-// its leading point there (".381" prints "381"); the lines below the maps
-// keep it.
-export const fmtCell = (metric, v) => (metric === 'xwoba' ? String(Math.round(v * 1000)) : `${Math.round(v * 100)}`)
+// A map cell prints the same figure as the lines below it (".381"). The cell
+// is about 27 px wide on a phone, so its figures set tight (scout.css).
+export const fmtCell = (metric, v) => (metric === 'xwoba' ? v.toFixed(3).replace(/^0/, '') : `${Math.round(v * 100)}`)
 
 export const fmtMetric = (metric, v) =>
   v == null ? '—' : metric === 'xwoba' ? v.toFixed(3).replace(/^0/, '') : `${Math.round(v * 100)}`

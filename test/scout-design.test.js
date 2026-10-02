@@ -88,7 +88,10 @@ test('a region is named by row, inside or away from the hitter, and the side of 
   assert.equal(regionLabel('side1b', 'R'), 'Off the plate · away · 1B side')
   assert.equal(regionLabel('r2c2', 'R'), 'Heart')
   assert.equal(regionLabel('r2c2', 'L'), 'Heart')
-  for (const r of REGIONS) for (const st of ['R', 'L']) assert.doesNotMatch(regionLabel(r, st), /left|right/i, `${r} ${st}`)
+  // Two different stances on the two maps: the name keeps only the field side.
+  assert.equal(regionLabel('r1c1', null), 'Up · 3B side')
+  assert.equal(regionLabel('side1b', null), 'Off the plate · 1B side')
+  for (const r of REGIONS) for (const st of ['R', 'L', null]) assert.doesNotMatch(regionLabel(r, st), /left|right/i, `${r} ${st}`)
   // The side labels follow the drawing: first base on the viewer's left from behind the pitcher.
   assert.deepEqual(sidesInOrder('pitcher'), ['1B side', '3B side'])
   assert.deepEqual(sidesInOrder('hitter'), ['3B side', '1B side'])

@@ -119,11 +119,11 @@ function scout({ hitter, scope, hand, hitterHand, metric, stance, notPosted }) {
           : { tone: toneOf(b), value: fmtCell(metric, hit[r].value), count: hit[r].n }]
       }),
     )
-    // The league's expected value on the same locations: what this hitter's
-    // line is read against. Every league region has a rate, so no fallback.
-    const leagueCells = Object.fromEntries(REGIONS.map((r) => [r, { value: league[r] }]))
+    // The league line beside the answer is the league's flat rate for these
+    // pitch types, wherever they were thrown (Gary, item 12). The fixture
+    // averages its cell rates; the real store divides league sums.
     const exp = thin ? null : expected(share, hit, typeValue(counters, metric))
-    const leagueExp = thin ? null : expected(share, leagueCells, 0)
+    const leagueExp = thin ? null : sum(codes.flatMap((c) => LEAGUE[c][metric])) / (codes.length * 25)
     return { n, thin, regionN, share, pitcherCells, hit, hitterCells, exp, leagueExp, seen: sum(counters.pitches) }
   }
 
@@ -283,7 +283,7 @@ export function ScoutLab({ asOf: asOfProp }) {
               </figure>
             </div>
 
-            <Readout picked={picked} m={m} metric={metric} stance={stance} />
+            <Readout picked={picked} m={m} metric={metric} stance={stance === hitterStance ? stance : null} />
 
             <div className="scout__key" aria-label="Colour scale">
               <p className="scout__keyrow">

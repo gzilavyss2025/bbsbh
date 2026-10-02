@@ -101,9 +101,10 @@ so that "inside" means inside for each stance). Whiff per swing:
 
 At 375 px each map is about 150 px wide (two maps side by side). An inner
 cell is then about 27 px wide. Three mono figures at `--fs-cell` (11 px) fit
-in it. Four do not: ".381" touched the next cell in the first screenshot. So
-a cell prints xwOBA without its leading point ("381"). The expected line under
-the maps keeps the point (".263"). See "Open for Gary", item 2.
+in it. Four did not at normal letter spacing: ".381" touched the next cell in
+the first screenshot. With `--ls-tight-score` letter spacing, ".381" is 23.6
+units wide in a 27.1-unit cell (measured). So a cell prints ".381", the same
+form as the expected line (Gary, item 2).
 
 ## B. The two maps and the pitch type
 
@@ -174,7 +175,7 @@ PHONE (375 px)                              TABLET / DESKTOP (≥ 740 px, screen
 - Steps for xwOBA: ±.030 and ±.070. For whiff % and swing %: ±4 and ±10
   points. **Inference:** these are a starting point; tune them on real data.
 - Floors: 10 plate-appearance-ending pitches for xwOBA, 10 swings for whiff %,
-  10 pitches for swing % (see "Open for Gary", item 3). The pitcher map uses
+  10 pitches for swing % (Gary, item 3). The pitcher map uses
   `MIN_COMMAND_PITCHES` (50) from `src/api/commandMap.js`: under it, every
   region is hatched and prints its count.
 
@@ -224,7 +225,7 @@ PHONE (375 px)                              TABLET / DESKTOP (≥ 740 px, screen
   and away for the other. So for a switch hitter "All" is off, and Hand opens
   on this pitcher's hand. Each map draws the stance box of its own data. With
   "vs L" against a right-hander, the two maps show two different boxes. See
-  "Open for Gary", item 1.
+  Gary, item 1.
 - **Persistence (Phase 1).** View, Scope, Hand, Metric and Pitch go in the URL
   (`?view=hitter&scope=post&hand=r&metric=whiff&pitch=SL`) and in
   `localStorage`. Not in My Tally: its set is closed at four fields
@@ -422,57 +423,27 @@ The decisions in A-D stand.
 - **A sixth file for the readout.** It is one small function in
   `ScoutLab.jsx`; the directory holds six files of a ten-file budget.
 
-## Open for Gary
+## Decided by Gary (2026-10-02)
 
-1. **Switch hitter and "All" hands.** The prototype turns "All" off and opens
-   on this pitcher's hand. The alternative pools his two stances in an
-   inside/away frame, but then a stored cell no longer draws where it was
-   counted. Keep "All" off?
-2. **xwOBA in a map cell prints without its leading point** ("381"), because
-   four characters do not fit at phone size. The expected line keeps ".381".
-   Acceptable?
-3. **Swing % floor.** The spike set floors for whiff % and xwOBA only. I used
-   10 pitches for swing %. Confirm.
-4. **The expected line follows the metric** ("Expected whiff %"), so it is
-   always built from the map on screen. The issue defined it for xwOBA only.
-   Keep it for all three metrics?
-5. **Which hand feeds the expected line?** It uses the Hand control. With
-   "All", the hitter's half against left-handers counts too, although this
-   pitcher throws right. **Inference:** a "vs this pitcher's hand" value is
-   more relevant but thinner (47.8% of pitches above the xwOBA floor).
-6. **The Now Pitching scene in the Hitter's view only.** The lazier option
-   shows it in both views with a "from behind the plate" label. Which?
-7. **The date picker's floor.** `asOfBounds` stops at January 1 of the current
-   year, so the picker cannot set a cutoff in an earlier season. Verified: a
-   pick of 2025-10-08 became 2026-01-01. `?d=` in the URL still works. Widen
-   the floor for this page, or leave it?
-8. **Two different stance boxes** (a switch hitter with "vs L" against a
-   right-hander). Keep, or lock the hitter map to the matchup's stance?
-9. **Phase 1 tag.** Until #1411 ships, the maps say "Regular season" and Scope
-   moves only the list (#1408). The prototype shows the Phase 2 behaviour.
-10. **The flip's first frame.** For one frame the maps show the old picture
-    with mirrored digits, because a reflection mirrors text too. The
-    alternative is a half turn from edge-on (-90° to 0), which shows no
-    mirrored text and no old picture. Keep the full turn?
-11. **Region names for a switch hitter with "vs L".** The two maps then draw
-    two stances, and the readout names inside and away from the matchup's
-    stance (the pitcher map's). The hitter map's figures in that readout are
-    from his other stance. Print both names, or lock the hitter map to the
-    matchup's stance (item 8)?
-12. **The league line in the answer strip.** It is the league's expected
-    value on this pitcher's locations: the pitcher's shares × the league rate
-    per region, the same sum as the hitter's. **Inference:** this is the
-    fairest baseline, because it holds the locations fixed. Confirm, or use
-    the league's flat whole-type rate.
-13. **"Change" in Phase 1.** The prototype empties the pair. Phase 1 can open
-    the search fields with the pair still filled in. Which?
-14. **The in-flight pill.** With All selected in the Hitter's view the navy
-    edge walks the arsenal every 1.5 s. Keep, or light the pill only when
-    one pitch is selected?
-15. **The label of the Phase 1 hitter line.** Package B (#1415) stores
-    Savant's own `est_woba` per pitch type. That is Savant's xwOBA, not the
-    #1411 lookup estimate. **Proposal:** label it "xwOBA · Regular season",
-    and keep "xwOBA (est.)" for the #1411 lookup. Confirm.
+Gary answered every open item on 2026-10-02. These answers are the design.
+
+| # | Item | Decision |
+| --- | --- | --- |
+| 1 | Switch hitter and "All" hands | "All" is off. Hand opens on this pitcher's hand. |
+| 2 | xwOBA in a map cell | Print ".381" with its point, at 11 px, with `--ls-tight-score` letter spacing. The type scale stops at 11 px, so the font does not shrink. |
+| 3 | Swing % floor | 10 pitches. |
+| 4 | The expected line | It follows the Metric control (xwOBA (est.), whiff %, swing %). |
+| 5 | The hand that feeds the expected line | The Hand control, the same data as the hitter map on screen. |
+| 6 | The Now Pitching scene | Hitter's view only. |
+| 7 | The date picker's floor | No change. `?d=` in the URL still reaches an earlier season. |
+| 8 | Two different stance boxes | Keep. Each map draws the stance of its own data. |
+| 9 | Phase 1 scope | The maps carry a "Regular season" tag. Scope changes only the head-to-head list until #1411. |
+| 10 | The View flip | A half turn, -90° to 0. No mirrored digit shows. |
+| 11 | Region names when the stances differ | The readout names only the side of the field ("Up · 3B side"). It drops inside and away. |
+| 12 | The league value beside the answer | The league's flat rate for the pitch type, wherever it was thrown. The colour scale still compares each region with the league in that region. |
+| 13 | "Change" in Phase 1 | It reopens the search fields with the pair filled in. |
+| 14 | The in-flight pill | Keep. |
+| 15 | The label of the Phase 1 hitter line | "xwOBA · Regular season". "xwOBA (est.)" stays for the #1411 estimate. |
 
 ## The Phase 1 data boundary
 
