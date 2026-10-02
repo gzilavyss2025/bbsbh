@@ -8,7 +8,7 @@
    tables onto it.
 
    WHAT IT OWNS: the wrap (the scroll, the thin scrollbar, the sheet frame),
-   the grid, the cell padding from two densities, the figure type, the head
+   the grid, the cell padding from three densities, the figure type, the head
    row, the hairline above each body row, and the sticky first column.
    WHAT IT DOES NOT OWN: the space above and below a table (the parent's,
    #1180), a column width, one column's alignment, a favorite-team row, a
@@ -87,6 +87,11 @@
 }
 .table--tight {
   --table-cell: var(--space-1) 2px;
+}
+/* keep: the namespace pads its own cells. Zero, not unset: an unset property
+   would inherit a row table's padding from an ancestor. */
+.table--keep {
+  --table-cell: 0;
 }
 
 /* The figure type sits on the grid, so a text table sets its own face once

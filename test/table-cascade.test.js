@@ -94,10 +94,11 @@ test('the grid never frames, never clips and never changes a cell display', () =
   }
 })
 
-test('the two densities are one custom property, read by one cell rule', () => {
+test('the three densities are one custom property, read by one cell rule', () => {
   const css = read('system/table.css')
   assert.equal(decl(ruleBody(css, '.table--row'), '--table-cell'), 'var(--space-1h) var(--space-2)')
   assert.equal(decl(ruleBody(css, '.table--tight'), '--table-cell'), 'var(--space-1) 2px')
+  assert.equal(decl(ruleBody(css, '.table--keep'), '--table-cell'), '0', 'keep pads nothing: the namespace sets its own cells')
   const cell = rules(css).filter(([, body]) => decl(body, 'padding') === 'var(--table-cell)')
   assert.equal(cell.length, 1, 'one rule pads every cell')
   assert.match(cell[0][0], /^\.table__grid :where\(th, td\)$/, 'at zero extra weight, so a family rule wins on its own')
@@ -142,9 +143,15 @@ test('the helper names the wrap and the grid', () => {
 
 test('an unknown frame or density is a caller typo, and it throws', () => {
   assert.deepEqual(FRAMES, ['sheet', 'bare'])
-  assert.deepEqual(DENSITIES, ['row', 'tight'])
+  assert.deepEqual(DENSITIES, ['row', 'tight', 'keep'])
   assert.throws(() => tableParts({ frame: 'ledger' }), /unknown frame "ledger"/)
   assert.throws(() => tableParts({ density: 'loose' }), /unknown density "loose"/)
+})
+
+test('keep is a density that adds no padding, and any other name still throws', () => {
+  assert.equal(tableParts({ frame: 'bare', density: 'keep' }).wrap, 'table table--bare table--keep')
+  assert.throws(() => tableParts({ density: 'keeps' }), /unknown density "keeps"/)
+  assert.throws(() => tableParts({ density: '' }), /unknown density ""/)
 })
 
 test('a label makes the wrap a named, focusable region', () => {
@@ -993,5 +1000,86 @@ test('T6a: the umpire board keeps its middle row rule', () => {
 test('T6a: the ABS pages stay outside the seal', () => {
   for (const { jsx } of T6A) {
     assert.doesNotMatch(src(ABS + jsx), /api\/(linescore|derive)\.js|<SealBox|revealedThrough|api\/stamps?\b/, `${jsx} is outside the spoiler scope and stays so`)
+  }
+})
+
+// ---- slice T6b: Nine Keys and the series tables ----
+
+// One row per table that moved in T6b. Nine Keys keeps its own cells
+// (`density="keep"`): each holds a drawn mark. The two series tables
+// (`.psseries__keystable`, `.psseries__totalstable`) are HELD: see the PR.
+const T6B = [
+  {
+    jsx: 'screens/NineKeysPage.jsx',
+    css: '79-nine-keys.css',
+    ns: 'ninekeys__grid',
+    attrs: [/^(?![^]*\bframe=)/, /\bsticky\b/, /\blabel=\{caption\}/],
+  },
+]
+
+test('T6b: each table renders on Table at keep density and never on a bare <table>', () => {
+  for (const { jsx, ns, attrs } of T6B) {
+    const code = src(jsx)
+    assert.match(code, /import \{ Table \} from ["'][\w./]+\/ui\/table\/Table\.jsx["']/, `${jsx} imports Table`)
+    assert.doesNotMatch(code, /<table\b/, `${jsx} has no bare <table>`)
+    const own = [...code.matchAll(/<Table\b([^>]*)>/g)].map((m) => m[1]).filter((a) => new RegExp(`className="${ns}"`).test(a))
+    assert.equal(own.length, 1, `${jsx}: .${ns} is on one <Table>`)
+    assert.match(own[0], /\bdensity="keep"/, `${jsx}: the namespace sets its own cells`)
+    for (const a of attrs) assert.match(own[0], a, `${jsx}: ${a}`)
+  }
+})
+
+test('T6b: Nine Keys has no scroller of its own, and its two grids have two labels', () => {
+  const code = src('screens/NineKeysPage.jsx')
+  assert.doesNotMatch(code, /ninekeys__scroller/)
+  assert.doesNotMatch(read('79-nine-keys.css'), /ninekeys__scroller(?![a-z0-9-])/)
+  const calls = [...code.matchAll(/<KeyGrid caption=(?:"([^"]*)"|\{`([^`]*)`\})/g)].map((m) => m[1] ?? m[2])
+  assert.equal(new Set(calls).size, 2, 'the two grids are named apart, and the label is the caption')
+})
+
+test('T6b: a moved table draws no frame and no head dress of its own', () => {
+  const FRAME = ['border', 'border-radius', 'box-shadow', 'background', 'overflow', 'border-collapse', 'border-spacing', 'width']
+  const HEAD = ['background', 'font-family', 'letter-spacing', 'text-transform', 'font-size', 'color']
+  for (const { css, ns } of T6B) {
+    for (const [sel, body] of rules(read(css))) {
+      const names = props(body)
+      for (const part of sel.split(',').map((x) => x.trim())) {
+        if (part === `.${ns}`) for (const p of FRAME) assert.ok(!names.includes(p), `${css}: .${ns} still sets ${p}`)
+        // A keep table pads its own cells, so padding stays; the head's type and ground are the Table's.
+        else if (part === `.${ns} thead th`) for (const p of HEAD) assert.ok(!names.includes(p), `${css}: ${part} still sets ${p}`)
+      }
+    }
+  }
+})
+
+test('T6b: Nine Keys keeps its margin, its minimum width and its own cell size', () => {
+  const css = read('79-nine-keys.css')
+  const own = (sel) => rules(css).find(([s]) => s.split(',').map((x) => x.trim()).includes(sel))?.[1] ?? ''
+  assert.equal(decl(own('.ninekeys__section .table'), 'margin-top'), 'var(--space-3)')
+  assert.equal(decl(own('.ninekeys__grid'), 'min-width'), '720px')
+  assert.equal(decl(own('.ninekeys__cell'), 'width'), '58px')
+  assert.equal(decl(own('.ninekeys__mark'), 'padding'), 'var(--space-2) 0', 'the mark sets the row height')
+})
+
+test('T6b: the Nine Keys club cell is pinned by the Table, and a floor row tints the pin', () => {
+  const css = read('79-nine-keys.css')
+  const own = (sel) => rules(css).find(([s]) => s === sel)?.[1] ?? ''
+  for (const p of ['position', 'left', 'z-index', 'background']) assert.ok(!props(own('.ninekeys__club')).includes(p), `.ninekeys__club still sets ${p}`)
+  assert.equal(decl(own('.ninekeys__club'), 'text-align'), 'left', 'a club name is words, not a figure')
+  assert.equal(decl(own('.ninekeys__row--floor'), '--table-pin'), 'var(--surface-inset)')
+  // The Table draws each row rule on top of the cell; Nine Keys draws none under it, and none above the first row.
+  for (const [sel, body] of rules(css)) {
+    if (/^\.ninekeys__grid tbody/.test(sel)) assert.ok(!props(body).includes('border-bottom'), `${sel} still draws a row rule under the cell`)
+  }
+  assert.equal(decl(own('.ninekeys__grid tbody tr:first-child :is(td, th)'), 'border-top'), '0', 'the head\'s heavy rule is the line above the first row')
+  // The body cells pad nothing: keep is the whole rule, and no rule here sets a padding on a body cell.
+  for (const [sel, body] of rules(css)) {
+    if (/^\.ninekeys__(grid tbody|club|tally)/.test(sel)) assert.ok(!props(body).includes('padding'), `${sel} pads a body cell`)
+  }
+})
+
+test('T6b: the seal pin: Nine Keys reads no reveal-only module, seal or stamp', () => {
+  for (const { jsx } of T6B) {
+    assert.doesNotMatch(src(jsx), /api\/(linescore|derive)\.js|<SealBox|revealedThrough|api\/stamps?\b|from ['"][^'"]*stamp/i, `${jsx} stays outside the spoiler scope`)
   }
 })
