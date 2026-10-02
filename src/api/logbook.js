@@ -109,14 +109,21 @@ export async function fetchStampGames(gamePks, { signal } = {}) {
     }),
   )
 
+  // A game postponed and made up later is the SAME gamePk on two dates, and the
+  // postponed row still says 'Final' (#1342). The played row wins whatever the
+  // row order; a game that never was played keeps its postponed row.
   const out = {}
+  const postponed = {}
   for (const data of results) {
     for (const day of data?.dates ?? []) {
       for (const game of day.games ?? []) {
         const facts = stampGameFacts(game)
-        if (facts) out[facts.gamePk] = facts
+        if (!facts) continue
+        if (game.status?.detailedState === 'Postponed') postponed[facts.gamePk] = facts
+        else out[facts.gamePk] = facts
       }
     }
   }
+  for (const pk of Object.keys(postponed)) out[pk] ??= postponed[pk]
   return out
 }

@@ -108,20 +108,19 @@ function byTeamStints(splits) {
   return byTeam
 }
 
-// A career-register year between debut and now with literally no stat row
-// anywhere (MLB or MiLB) otherwise just vanishes from the table — reading as
-// "out of baseball" even when the real reason is a season-long injury (e.g.
-// Tommy John recovery). Cross-referencing the transaction feed for a
-// same-year IL placement is the one signal available with no new fetch (the
-// player page already pulls full career transactions, see fetchTransactions)
-// that separates "hurt all year" from a genuine gap (unsigned, holdout,
-// retired-then-returned) the app has no data to explain.
-function missingSeasonRows(presentYears, debutYear, currentSeason, transactions, group, retiredYear) {
+// A career-register year between debut and now with no stat row anywhere
+// (MLB or MiLB) would vanish, reading as "out of baseball" even when the cause
+// is a season-long injury (e.g. Tommy John). A same-year IL placement in the
+// transaction feed (already fetched, see fetchTransactions) separates "hurt
+// all year" from a gap the app cannot explain (unsigned, holdout, retired).
+// A year with a row in a two-way player's OTHER group is a season he played,
+// so it is never "missed": it reads "Did not pitch" / "Did not bat".
+function missingSeasonRows(presentYears, debutYear, currentSeason, transactions, group, retiredYear, otherGroupYears) {
   const rows = []
   const endSeason = retiredYear ? Math.min(currentSeason, retiredYear) : currentSeason
   for (let yr = debutYear; yr < endSeason; yr++) {
     if (presentYears.has(yr)) continue
-    const injured = (transactions ?? []).some(
+    const injured = !otherGroupYears?.has(yr) && (transactions ?? []).some(
       (t) => isIlPlacementTxn(t) && txnDate(t)?.slice(0, 4) === String(yr),
     )
     rows.push({
@@ -133,16 +132,12 @@ function missingSeasonRows(presentYears, debutYear, currentSeason, transactions,
       pill: '',
       teamIds: [],
       gap: true,
-      note: injured
-        ? 'Injured — missed season'
-        : group === 'pitching'
-          ? 'Did not pitch'
-          : 'Did not play',
+      note: injured ? 'Injured — missed season' : group === 'pitching' ? 'Did not pitch' : otherGroupYears?.has(yr) ? 'Did not bat' : 'Did not play',
     })
   }
   return rows
 }
-export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSplits, currentSeason, currentSportId, retiredYear = null, careerStat, warByYear = {}, warByTeam = {}, transactions = [], orgOf = null }) {
+export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSplits, currentSeason, currentSportId, retiredYear = null, careerStat, warByYear = {}, warByTeam = {}, transactions = [], orgOf = null, otherGroupYears = null }) {
   // Group every split (MLB + all MiLB levels) into season -> sportId -> rows.
   const bySeason = new Map()
   for (const s of [...(mlbSplits ?? []), ...(milbSplits ?? [])]) {
@@ -359,7 +354,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   // Gap years (see missingSeasonRows) slot into the same sorted ledger as the
   // real rows rather than a separate section — a missed season reads most
   // clearly inline, between the years on either side of it.
-  const gapRows = debutYear ? missingSeasonRows(presentYears, debutYear, cur, transactions, group, retiredYear) : []
+  const gapRows = debutYear ? missingSeasonRows(presentYears, debutYear, cur, transactions, group, retiredYear, otherGroupYears) : []
   const allRows = gapRows.length ? [...rows, ...gapRows].sort((a, b) => b.year - a.year) : rows
 
   return { columns, rows: allRows, totals }

@@ -216,16 +216,16 @@ export function PlayerPage({ id, asOf, sportId }) {
                 to the raw 1.63. Top-10 ranks only (see pitchingRanksView);
                 current-day only, so the strip vanishes under a spoiler asOf
                 (the loader skips the fetch). */}
-            {block.ranks && (
-              <p className="leaguerank">
-                {block.ranks.items.map((it) => (
+            {block.ranks?.map((r) => (
+              <p className="leaguerank" key={r.league}>
+                {r.items.map((it) => (
                   <Pill fill="paper" ink="--text-muted" className="leaguerank__tag" key={it.label}>
                     <strong className="leaguerank__ord">{it.text}</strong>
-                    {` ${block.ranks.league} · ${it.label}`}
+                    {` ${r.league} · ${it.label}${r.club ? ` · with ${r.club}` : ''}`}
                   </Pill>
                 ))}
               </p>
-            )}
+            ))}
 
             {/* An up-and-down player's OTHER level(s) this season (e.g. a big
                 leaguer's AAA line) — promoted beside the main tiles rather than

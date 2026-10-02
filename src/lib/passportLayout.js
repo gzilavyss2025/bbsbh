@@ -193,8 +193,8 @@ export function clampToSlot(x, y, slot) {
   const halfW = STAMP_WIDTH / 2
   const halfH = stampHeightFraction() / 2
   // A cell that somehow can't hold the mark centres it rather than inverting
-  // the bounds (`clamp` with lo > hi would answer `hi` and read as a sudden
-  // jump to the wrong edge).
+  // the bounds: `clamp` needs lo <= hi (lib/math/number.js), and with lo > hi
+  // it would answer `lo` and read as a sudden jump to the wrong edge.
   const lowX = slot.left + halfW
   const highX = slot.left + slot.width - halfW
   const lowY = slot.top + halfH
