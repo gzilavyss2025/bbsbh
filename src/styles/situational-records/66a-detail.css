@@ -231,3 +231,86 @@
   text-transform: uppercase;
   color: var(--text-caption);
 }
+
+/* The postseason page's extras (screens/PostseasonRecordsPage.jsx). */
+
+/* The link between the two explorers, set in the masthead under the
+   description. A link, not a control: it leaves the page. */
+.trrank__sibling {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  margin-top: var(--space-2);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.trrank__sibling:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring-band);
+  outline-offset: 2px;
+}
+
+/* A picker row: a caption and a native select. 16px is the iOS auto-zoom
+   floor, so the field takes --fs-field rather than a table-sized token. */
+.trrank__pick {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.trrank__pick span {
+  flex: 0 0 auto;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.trrank__select {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-field);
+}
+.trrank__select:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* One club's list of splits: a section per group, each a table. */
+/* minmax(0, 1fr), not the default auto track: an auto track grows to its
+   widest table and pushes the whole page sideways instead of letting the
+   table's own scroll region take it. */
+.trrank__teamlist {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+.trrank__ranktext {
+  white-space: nowrap;
+}
+.trrank__splitlink {
+  color: var(--text-heading);
+  text-decoration: none;
+}
+.trrank__splitlink:hover,
+.trrank__splitlink:focus-visible {
+  text-decoration: underline;
+}
+/* A split's name can run long ("Scoring in the bottom of the 3rd"): let it
+   wrap so the rank column stays on the phone instead of scrolling away. */
+.trrank__teamlist td.team {
+  white-space: normal;
+}

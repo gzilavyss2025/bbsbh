@@ -56,6 +56,7 @@ const PATHS_BEFORE_GROUPING = [
   '/run-differential',
   '/postseason-leaders',
   '/postseason-race',
+  '/postseason-records',
   '/trade-deadline',
   '/all-star-rosters',
   '/all-star-legacy',

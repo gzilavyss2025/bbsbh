@@ -185,6 +185,10 @@ const SituationalRecordsPage = lazyNamed(
   () => import('./screens/SituationalRecordsPage.jsx'),
   'SituationalRecordsPage',
 )
+const PostseasonRecordsPage = lazyNamed(
+  () => import('./screens/postseason-records/PostseasonRecordsPage.jsx'),
+  'PostseasonRecordsPage',
+)
 // The five broadcast report pages (src/screens/around-the-game/). Lazy like every
 // other screen, and they SHARE one stylesheet
 // (styles/68-around-the-game.css) which each of them imports — see that
@@ -432,6 +436,19 @@ export default function App() {
         metric={route.metric}
         half={route.half}
         month={route.month}
+        sort={route.sort}
+        order={route.order}
+      />
+    )
+  } else if (route.name === 'postseason-records') {
+    content = (
+      <PostseasonRecordsPage
+        asOf={route.asOf}
+        season={route.season}
+        view={route.view}
+        team={route.team}
+        category={route.category}
+        metric={route.metric}
         sort={route.sort}
         order={route.order}
       />

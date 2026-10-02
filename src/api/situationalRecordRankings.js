@@ -135,7 +135,9 @@ export function buildRankingIndex(entries, { cutoff = null, half = 'all', month 
         })
       }
     }
-    for (const metric of COUNT_METRICS) {
+    // The season counts (streaks, days in first, sweeps) are a regular-season
+    // idea; a postseason ledger carries none of them.
+    for (const metric of data.postseason ? [] : COUNT_METRICS) {
       addMetric({ id: metric.id, k: metric.k, group: COUNTS_GROUP, kind: 'count', better: metric.better })
       byMetric.get(metric.id).push({
         teamId: team.id,

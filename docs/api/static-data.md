@@ -809,6 +809,18 @@ for each generator; the reader modules:
   class and argument as `teamRecords.js`. Degrades to null with no file (every
   MiLB club), and the card hides. Catalog and calibration:
   `docs/schedule-shape.md`.
+- `postseason/records.js` — the MLB postseason's ledger
+  (`public/data/postseason-records/{season}.json`, `gen-postseason-records.mjs`)
+  handed to the same two modules above, for the `/postseason-records` page.
+  `fetchPostseasonEntries(season, seasons)` returns the `{ team, data }`
+  entries `buildRankingIndex` takes, one season or every season merged per
+  club (`ALL_SEASONS`); `resolveSeason` reads the `?season=` param against the
+  seasons on file; `teamRankRows(index, teamId)` is the by-team view, one
+  club's every split with its rank among the clubs that played it. Each entry's
+  `data.postseason` flag is the switch `teamRecordsFor` and `buildRankingIndex`
+  read: no by-month table, no season counts, and a "vs. own league / other
+  league" row off each game's `il` flag. Cutoff-gated, same class and argument
+  as `teamRecords.js`.
 - `situationalRecordRankings.js` — the same ledgers, PIVOTED: one split, every club at
   one level, ranked — the standalone `/situational-records` page
   (`screens/SituationalRecordsPage.jsx`), which every row of the Records card links
