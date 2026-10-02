@@ -532,14 +532,11 @@
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
 }
-/* The table itself reuses .standings/.ledger-wrap wholesale (base cell
-   styling + the is-me favorite-team tint) — .psoddstable only needs the
-   team-name cell's logo+name pairing, everything else rides the shared
-   ledger skin. */
-.psoddstable td.team {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1h);
+/* The table is a Table (#1132, slice T8) with the .clubtable name cell and
+   favorite-team tint; .psoddstable keeps only the lighter head it had as a
+   ledger. */
+.psoddstable thead th {
+  font-weight: var(--w-semibold);
 }
 .psoddsmodal__meta {
   margin: 10px 0 0;

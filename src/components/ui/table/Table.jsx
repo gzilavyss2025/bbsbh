@@ -8,7 +8,7 @@ import { tableParts } from '../../../lib/design/tableClass.js'
 //   frame    'sheet' (the default): the wrap draws the box. 'bare': no box,
 //            for a table inside a Card, which already draws one.
 //   density  'row' (the default): cells 6 by 8. 'tight': 4 by 2, the box
-//            score's.
+//            score's. 'keep': no padding, the namespace sets its own cells.
 //   sticky   the first column stays put while the rest scroll.
 //   label    names the scroll region and makes it a Tab stop, so a keyboard
 //            can scroll a wide table. Leave it off for a table that never

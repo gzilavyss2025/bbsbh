@@ -28,8 +28,8 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 //      (styles/68-around-the-game.css), which is the pattern the Standings
 //      board already uses — including its two hard-won caveats, both worth
 //      knowing before touching this markup: Safari drops position:sticky on a
-//      table cell whose own `display` is not `table-cell`, and the shared
-//      `.standings td.team { display: flex }` rule would set exactly that. So
+//      table cell whose own `display` is not `table-cell`, and a rule that
+//      flexes the name cell itself would set exactly that. So
 //      the TD stays a table cell and the flex layout moves INSIDE it, which is
 //      what `.rpt__club` is for. Do not flatten this wrapper away.
 export function ClubCell({ teamId, name, rank, tied, note, tab }) {

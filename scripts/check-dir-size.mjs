@@ -299,8 +299,8 @@ const BUDGETS = {
   // 31-wild-card.css; only the half toggle, the group subheadings and the
   // counts block are new.
   // +1 for `66-situational-records.css`: the standalone page that ranks one of
-  // that card's rows across a whole level. The table itself is `.standings`,
-  // shared with the standings and umpire boards, so only the control strip, the
+  // that card's rows across a whole level. The table itself wore `.standings`
+  // then, shared with the standings and umpire boards, so only the control strip, the
   // rank badge and two row states are new — and the page imports it itself.
   //
   // 89 -> 90 for `68-around-the-game.css`: ONE sheet for all FIVE pages in
@@ -330,7 +330,7 @@ const BUDGETS = {
   //
   // 95 -> 96 for `70-postseason-race.css`: PostseasonRacePage.jsx's own
   // layout, reusing .seed/.seedrow (34-postseason.css) and
-  // .standings/.lgstand (30-standings.css) rather than redeclaring them. It
+  // the standings board rules (30-standings.css) rather than redeclaring them. It
   // SHARES the 70 prefix with `70-contracts-grid.css` above — the two
   // branches picked the next free integer independently off the same base
   // count (93), the same harmless collision 62-/65-/69- already carry;

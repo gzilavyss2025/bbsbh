@@ -3,7 +3,7 @@ import { teamBoard, TEAM_SORTS } from '../../../api/around-the-game/absChallenge
 import { clubShort } from '../../../api/around-the-game/clubs.js'
 import { useFavoriteTeam } from '../../../hooks/preferences/useFavoriteTeam.js'
 import { BroadcastSection } from '../../../components/around-the-game/BroadcastMasthead.jsx'
-import { BoardScroller } from '../../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../../components/ui/table/Table.jsx'
 import { BarCell } from '../../../components/around-the-game/BroadcastBar.jsx'
 import { ClubCell } from '../../../components/around-the-game/ClubCell.jsx'
 import { commas, num2, pct1 } from './format.js'
@@ -52,45 +52,43 @@ export function ClubBoard({ summary, clubs }) {
         ))}
       </div>
 
-      <BoardScroller label="Challenge board, every club">
-        <table className="standings rpt">
-          <thead>
-            <tr>
-              <th className="team">Club</th>
-              {TEAM_COLUMNS.map((c) => (
-                <th key={c.key}>{c.label}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {teams.map((r) => (
-              <tr
-                key={r.teamId}
-                className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
-              >
-                <ClubCell
-                  teamId={r.teamId}
-                  name={clubShort(clubs, r.teamId)}
-                  rank={r.rank}
-                  tied={r.tied}
-                  note={`${commas(r.games)} games`}
-                />
-                {TEAM_COLUMNS.map((c) =>
-                  c.key === teamSortKey ? (
-                    <td key={c.key}>
-                      <BarCell value={r[c.key]} min={teamMin} max={teamMax}>
-                        {c.render(r)}
-                      </BarCell>
-                    </td>
-                  ) : (
-                    <td key={c.key}>{c.render(r)}</td>
-                  ),
-                )}
-              </tr>
+      <Table sticky label="Challenge board, every club" className="rpt">
+        <thead>
+          <tr>
+            <th className="team">Club</th>
+            {TEAM_COLUMNS.map((c) => (
+              <th key={c.key}>{c.label}</th>
             ))}
-          </tbody>
-        </table>
-      </BoardScroller>
+          </tr>
+        </thead>
+        <tbody>
+          {teams.map((r) => (
+            <tr
+              key={r.teamId}
+              className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
+            >
+              <ClubCell
+                teamId={r.teamId}
+                name={clubShort(clubs, r.teamId)}
+                rank={r.rank}
+                tied={r.tied}
+                note={`${commas(r.games)} games`}
+              />
+              {TEAM_COLUMNS.map((c) =>
+                c.key === teamSortKey ? (
+                  <td key={c.key}>
+                    <BarCell value={r[c.key]} min={teamMin} max={teamMax}>
+                      {c.render(r)}
+                    </BarCell>
+                  </td>
+                ) : (
+                  <td key={c.key}>{c.render(r)}</td>
+                ),
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </Table>
     </BroadcastSection>
   )
 }

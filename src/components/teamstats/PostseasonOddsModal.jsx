@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Table } from '../ui/table/Table.jsx'
 import { favoriteAccentColor } from '../../lib/teams.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
@@ -46,37 +47,35 @@ export function PostseasonOddsModal({ divisionName, rows, onClose }) {
         </div>
         <p className="psoddsmodal__note">{divisionName}</p>
 
-        <div className="ledger-wrap">
-          <table className="ledger standings psoddstable">
-            <thead>
-              <tr>
-                <th className="team lft">Team</th>
-                <th>Postseason</th>
-                <th>Division</th>
-                <th>Bye</th>
-                <th>Proj. W</th>
+        <Table label={`Postseason odds, ${divisionName}`} className="clubtable psoddstable">
+          <thead>
+            <tr>
+              <th className="team">Team</th>
+              <th>Postseason</th>
+              <th>Division</th>
+              <th>Bye</th>
+              <th>Proj. W</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr
+                key={r.id}
+                className={r.isMe ? 'is-me' : ''}
+                style={r.isMe ? { '--fav-accent': favoriteAccentColor(r.id) } : undefined}
+              >
+                <td className="team">
+                  <TeamLogo teamId={r.id} name={r.name} size={18} />
+                  {r.name}
+                </td>
+                <td>{pct(r.postseasonPct)}</td>
+                <td>{pct(r.divisionPct)}</td>
+                <td>{pct(r.byePct)}</td>
+                <td>{r.projectedWins ?? '—'}</td>
               </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr
-                  key={r.id}
-                  className={r.isMe ? 'is-me' : ''}
-                  style={r.isMe ? { '--fav-accent': favoriteAccentColor(r.id) } : undefined}
-                >
-                  <td className="team">
-                    <TeamLogo teamId={r.id} name={r.name} size={18} />
-                    {r.name}
-                  </td>
-                  <td>{pct(r.postseasonPct)}</td>
-                  <td>{pct(r.divisionPct)}</td>
-                  <td>{pct(r.byePct)}</td>
-                  <td>{r.projectedWins ?? '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </Table>
 
         {sims != null && <p className="psoddsmodal__meta">{sims.toLocaleString()} simulations</p>}
       </div>

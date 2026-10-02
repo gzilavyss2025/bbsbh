@@ -12,6 +12,7 @@ import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { ClinchMark, ClinchKey } from '../components/team/ClinchMark.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { Table } from '../components/ui/table/Table.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Door } from '../components/ui/control/Door.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
@@ -279,37 +280,35 @@ function aliveWildCard(lg) {
 function WildCardMiniTable({ lg }) {
   const rows = aliveWildCard(lg)
   return (
-    <div className="ledger-wrap standings-wrap psrace__minitable">
-      <table className="standings standings--full standings--wc">
-        <thead>
-          <tr>
-            <th className="team">Still alive</th>
-            <th>W</th>
-            <th>L</th>
-            <th>Pct</th>
-            <th>GB</th>
+    <Table sticky label={`${lg.name} wild card race`} className="clubtable clubtable--full">
+      <thead>
+        <tr>
+          <th className="team">Still alive</th>
+          <th>W</th>
+          <th>L</th>
+          <th>Pct</th>
+          <th>GB</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((t) => (
+          <tr key={t.id} className={t.wcCutoff ? 'wc-cutoff' : ''}>
+            <td className="team">
+              <TeamLink id={t.id} tab="numbers">
+                <TeamLogo teamId={t.id} name={t.name} size={18} />
+                {t.name}
+                <ClinchMark mark={t.clinch} />
+                <span className="wc-div">{t.division}</span>
+              </TeamLink>
+            </td>
+            <td>{t.w}</td>
+            <td>{t.l}</td>
+            <td>{t.pct}</td>
+            <td>{t.wcgb}</td>
           </tr>
-        </thead>
-        <tbody>
-          {rows.map((t) => (
-            <tr key={t.id} className={t.wcCutoff ? 'wc-cutoff' : ''}>
-              <td className="team">
-                <TeamLink id={t.id} tab="numbers">
-                  <TeamLogo teamId={t.id} name={t.name} size={18} />
-                  {t.name}
-                  <ClinchMark mark={t.clinch} />
-                  <span className="wc-div">{t.division}</span>
-                </TeamLink>
-              </td>
-              <td>{t.w}</td>
-              <td>{t.l}</td>
-              <td>{t.pct}</td>
-              <td>{t.wcgb}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        ))}
+      </tbody>
+    </Table>
   )
 }
 

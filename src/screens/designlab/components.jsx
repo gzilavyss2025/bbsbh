@@ -263,7 +263,7 @@ export function ComponentHalf() {
           title="Table"
           path={`${UI_PATH}/table/Table.jsx`}
           wide
-          note="The one table (#1132). Two frames: the sheet (the wrap draws the box) and bare, for a table inside a Card. Two densities: row (6 by 8) and tight (4 by 2, the box score&#39;s). Sticky pins the first column: scroll the board at 390px and the club stays. A label makes the scroll region a Tab stop. Table owns no margin, and a column&#39;s width or a subtotal row is the block&#39;s own."
+          note="The one table (#1132). Two frames: the sheet (the wrap draws the box) and bare, for a table inside a Card. Three densities: row (6 by 8), tight (4 by 2, the box score&#39;s) and keep (no padding: the block sets its own cells). Sticky pins the first column: scroll the board at 390px and the club stays. A label makes the scroll region a Tab stop. Table owns no margin, and a column&#39;s width or a subtotal row is the block&#39;s own."
         >
           <TableDemo />
         </Entry>

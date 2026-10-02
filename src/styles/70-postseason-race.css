@@ -79,7 +79,7 @@
 /* The condensed wild-card table under each league's bracket — tighter top
    margin than a full standalone section gets, since it's a continuation of
    the bracket above it, not its own page section. */
-.psrace__minitable {
+.psrace__league > .table {
   margin-top: var(--space-2);
 }
 

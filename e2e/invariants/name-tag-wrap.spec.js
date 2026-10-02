@@ -7,9 +7,9 @@ import { test, expect } from '../fixtures.js'
 // long enough name wraps to two lines — at which point the tag floats with a
 // stray gap above it instead of riding the name's top line.
 //
-// Two real instances of this shape were found and fixed (`.standings .team`,
-// `.gamehigh-who`, both now immune — see 29-team-transactions.css:887-897 and
-// 43-foul-tracker.css). The issue's open half asked for an audit of every other
+// Two real instances of this shape were found and fixed (the ranked name cell,
+// now `.umprank .team`, and `.gamehigh-who`, both now immune — see
+// 38-umpire-pages.css and 43-foul-tracker.css). The issue's open half asked for an audit of every other
 // screen with a name+tag row; that audit (issue #766, comment 2026-08-20) swept
 // ten routes with the DOM probe below and found nothing else broken. This spec
 // makes that one-time audit a standing check instead of a claim that ages.
