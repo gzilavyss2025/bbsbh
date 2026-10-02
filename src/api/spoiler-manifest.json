@@ -884,7 +884,7 @@
     },
     "scout/hitterGrid.js": {
       "class": "spoiler-free",
-      "why": "The Matchup Scout's hitter-grid reader: a hitter's season sums per pitch type, pitcher hand and 5x5 cell (pitches, swings, whiffs, PA-ending pitches), over games already final, built by the nightly sweep before the day's games. A cell count is not a line and not a running score; same footing as commandMap.js. The Scout is an open surface (ADR-0034), so no SealBox and no cutoff."
+      "why": "The Matchup Scout's hitter-grid reader: a hitter's season sums per pitch type, pitcher hand and 5x5 cell (pitches, swings, whiffs, PA-ending pitches, the xwOBA (est.) numerator), over games already final, built by the nightly sweep before the day's games. A cell count is not a line and not a running score; same footing as commandMap.js. The Scout is an open surface (ADR-0034), so no SealBox and no cutoff."
     },
     "search.js": {
       "class": "spoiler-free",

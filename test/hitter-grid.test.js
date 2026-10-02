@@ -10,7 +10,8 @@ import { openDb } from '../scripts/lib/db.js'
 import { bucketsOf } from '../scripts/lib/io.js'
 import { arsenalStatements, aggregateGamePitchTypes, exportCommandMap, exportPitchArsenal, foldGame } from '../scripts/gen-pitch-arsenal.mjs'
 import { aggregateGameCommand } from '../scripts/lib/command-grid.mjs'
-import { aggregateGameHitters, exportHitterGrid, hitterGamesMissing } from '../scripts/lib/pitch/hitter-grid.mjs'
+import { aggregateGameHitters, clearHitterSeason, exportHitterGrid, hitterGamesMissing } from '../scripts/lib/pitch/hitter-grid.mjs'
+import { fitTable, xwobaOf } from '../scripts/lib/pitch/xwoba.mjs'
 import { commandCell, normalizePitch } from '../src/lib/zone/zoneGeometry.js'
 import { fetchHitterGridFor, fetchHitterLeague, flatRates, hitterCounters } from '../src/api/scout/hitterGrid.js'
 
@@ -91,6 +92,27 @@ test('a ball in play is a PA end with no fixed weight; a sac bunt or an untracke
   assert.equal(r.wobaFixed[at(MID)], 0)
   assert.equal(r.paEnd[at(UP)], 0)
   assert.equal(r.pitches[at(UP)], 2)
+})
+
+// A one-value table: every ball in play estimates at 0.512.
+const TABLE = fitTable([[101.2, 14, 0.512], [101.2, 14, 0.512], [101.2, 14, 0.512]])
+
+test('a tracked ball in play adds the table\'s estimate in its cell; an untracked one adds nothing and is counted', () => {
+  const plays = [
+    play([pitch(MID, 'X', TRACKED)], 'single'),
+    play([pitch(UP, 'X', { launchSpeed: 88 })], 'field_out'),
+    play([pitch(UP, 'S')], 'strikeout'),
+  ]
+  const r = cellOf(aggregateGameHitters(feed(plays), TABLE))
+  assert.equal(r.xwobaBip[at(MID)], xwobaOf(TABLE, 101.2, 14))
+  assert.equal(r.xwobaBip[at(MID)], 0.512)
+  assert.equal(sum(r.xwobaBip), 0.512)
+  assert.equal(r.bipUntracked[at(UP)], 1)
+  assert.equal(r.paEnd[at(UP)], 1)
+  // No table for the season: the estimate is unknown, not 0. The untracked count needs no table.
+  const none = cellOf(aggregateGameHitters(feed(plays)))
+  assert.equal(none.xwobaBip, null)
+  assert.equal(none.bipUntracked[at(UP)], 1)
 })
 
 test('no PA end for a baserunning play, an intentional walk, or a PA that ended on a call with no pitch', () => {
@@ -175,6 +197,44 @@ test('the export drops all-zero counters, and keeps the xwOBA numerator out unti
   assert.equal(db.prepare('SELECT xwoba_bip FROM pitch_hitter_cells').get().xwoba_bip, null)
 })
 
+test('a game swept with no table leaves its rows\' xwOBA unknown, and the export says so', async () => {
+  const db = await emptyDb()
+  const stmts = arsenalStatements(db)
+  const plays = [play([pitch(MID, 'X', TRACKED)], 'single'), play([pitch(MID, 'B')], 'walk')]
+  const fold = (gamePk, table) => {
+    const f = feed(plays)
+    foldGame(db, stmts, { gamePk, level: 'mlb', date: '2026-06-01', season: 2026 },
+      aggregateGamePitchTypes(f), aggregateGameCommand(f), aggregateGameHitters(f, table))
+  }
+  fold(1, TABLE)
+  let out = exportHitterGrid(db, 2026, 'R')
+  assert.equal(out.xwoba, true)
+  assert.equal(out.bat[9].mlb.FF.R.R.xwobaBip[at(MID)], 0.512)
+  assert.equal(out.league.mlb.FF.R.R.xwobaBip[at(MID)], 0.512)
+  fold(2, null)
+  fold(3, TABLE)
+  // One game with no estimate makes the sum unknown: NULL stays NULL.
+  assert.equal(db.prepare('SELECT xwoba_bip FROM pitch_hitter_cells').get().xwoba_bip, null)
+  out = exportHitterGrid(db, 2026, 'R')
+  assert.equal(out.xwoba, false)
+  assert.equal(out.bat[9].mlb.FF.R.R.xwobaBip, undefined)
+  assert.equal(out.bat[9].mlb.FF.R.R.paEnd[at(MID)], 6)
+
+  // The fix: clear the season's hitter half, then re-walk with the table.
+  clearHitterSeason(db, 2026)
+  assert.equal(hitterGamesMissing(db, 2026), 3)
+  for (const gamePk of [1, 2, 3]) {
+    const f = feed(plays)
+    foldGame(db, stmts, { gamePk, level: 'mlb', date: '2026-06-01', season: 2026, need: { arsenal: false, command: false, hitter: true } },
+      new Map(), new Map(), aggregateGameHitters(f, TABLE))
+  }
+  out = exportHitterGrid(db, 2026, 'R')
+  assert.equal(out.xwoba, true)
+  assert.equal(out.bat[9].mlb.FF.R.R.xwobaBip[at(MID)], 1.536)
+  assert.equal(out.bat[9].mlb.FF.R.R.paEnd[at(MID)], 6)
+  assert.equal(hitterGamesMissing(db, 2026), 0)
+})
+
 test('the league is every hitter summed, in the same shape as one hitter', async () => {
   const db = await emptyDb()
   const stmts = arsenalStatements(db)
@@ -228,6 +288,20 @@ test('hitterCounters sums the scopes, hands and types asked for, and names the s
   assert.equal(hitterCounters({ season: 2026, reg: null, post: null }, {}), null)
 })
 
+test('with the season\'s xwOBA on file, wobaSum is wobaFixed plus the estimate, cell by cell', () => {
+  const withBip = { mlb: { FF: { R: { L: { pitches: z(0, 4), paEnd: z(0, 4), wobaFixed: z(0, 0.7), xwobaBip: z(0, 1.1), bipUntracked: z(0, 1) } } } } }
+  const covered = { season: 2026, reg: withBip, post: entry(3), xwoba: true }
+  const c = hitterCounters(covered, { code: 'FF', scope: 'R' })
+  assert.equal(c.wobaSum[0], 1.8)
+  assert.equal(sum(c.wobaSum), 1.8)
+  assert.equal(c.bipUntracked[0], 1)
+  assert.equal(flatRates(c).xwoba, 0.45)
+  // The postseason part has walks and no ball in play: its sum is its fixed part.
+  assert.equal(hitterCounters(covered, { code: 'FF', scope: 'P' }).wobaSum[0], 0.7)
+  // No flag, no sum, even when the file holds estimates.
+  assert.equal(hitterCounters({ ...covered, xwoba: undefined }, { code: 'FF' }).wobaSum, null)
+})
+
 test('flatRates is the whole-type rate per metric, wherever the pitch was thrown', () => {
   const c = hitterCounters(grid, { code: 'SL', scope: 'R' })
   assert.deepEqual(flatRates(c), { xwoba: null, whiff: 0, swing: 0.4 })
@@ -242,6 +316,7 @@ test('the reader reads one season, and degrades to null when the store is absent
     '/data/hitter-grid/seasons.json': { seasons: [2026], current: 2026 },
     '/data/hitter-grid/2026/71.json': { season: 2026, bat: { 660271: entry(5) }, post: {} },
     '/data/hitter-grid/2026/league.json': { season: 2026, bat: entry(500), post: entry(50) },
+    '/data/hitter-grid/2027/71.json': { season: 2027, xwoba: true, bat: { 660271: entry(5) }, post: {} },
   }
   t.mock.method(globalThis, 'fetch', async (url) => {
     fetched.push(url)
@@ -251,6 +326,8 @@ test('the reader reads one season, and degrades to null when the store is absent
   assert.deepEqual(await fetchHitterLeague(), { season: 2026, reg: entry(500), post: entry(50) })
   assert.equal(await fetchHitterGridFor(123), null)
   assert.equal(await fetchHitterGridFor(660271, 2025), null)
+  // The file says when the season's xwOBA is on file, and the grid carries it to hitterCounters.
+  assert.deepEqual(await fetchHitterGridFor(660271, 2027), { season: 2027, reg: entry(5), post: null, xwoba: true })
   assert.equal(await fetchHitterGridFor(null), null)
   assert.ok(fetched.includes('/data/hitter-grid/2026/71.json'))
 })

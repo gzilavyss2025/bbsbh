@@ -798,7 +798,9 @@ const BUDGETS = {
   // +1 for gen-postseason-records.mjs: a nightly generator, and every other
   // gen-*.mjs sits flat here because the cron runs it by path. Its pure halves
   // went to scripts/lib/records/ (a new subdirectory) so scripts/lib stays put.
-  scripts: 118,
+  // +1 for gen-xwoba-table.mjs, the hand-run xwOBA (est.) table (ADR-0097). A
+  // generator runs on import; its pure half went to scripts/lib/pitch/xwoba.mjs.
+  scripts: 119,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

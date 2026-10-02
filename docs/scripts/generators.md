@@ -695,7 +695,11 @@ don't run these by hand.
   owes each of the three halves (`arsenal`, `command`, `hitter`) to its own ledger,
   so a re-walk for one half never folds another twice. The first 2026 re-walk is
   `--since=2026-03-20` with both levels (`--sports=1` would drop a Triple-A-only
-  pitcher's hand from the arsenal export). `pitch_arsenal_totals` is
+  pitcher's hand from the arsenal export). Each ball in play adds its xwOBA (est.)
+  from `public/data/xwoba-table/{season}.json` (hand-run `gen-xwoba-table.mjs`,
+  below; ADR-0097). A game swept with no table leaves the row's `xwoba_bip` NULL, and
+  the export then writes no `xwobaBip` for that season. After a new table, re-walk the
+  hitter half: `--clear-hitters=<season> --since=<its first day>`. `pitch_arsenal_totals` is
   keyed `(season, scope, person_id, level, code, stand)` — one row per side the BATTER stood
   on, `'L'`/`'R'`, or `'?'` when the feed named none. The side is in the KEY,
   unlike the times-through split's nine columns, because the two cross: a look
@@ -1490,6 +1494,18 @@ Re-run only to fold in a new season.
   has to stay findable by the name the source printed, and `confidence` is what
   tells a caller not to join through it. Carries no dollar terms; those are in
   the `terms/` buckets above, on the same `rowKey`.
+
+- `gen-xwoba-table.mjs` → `public/data/xwoba-table/{season}.json` — the xwOBA (est.)
+  lookup on exit velocity and launch angle (ADR-0097): a 126 x 181 lattice (0 to 125
+  mph, -90 to 90 degrees) in thousandths, each cell the mean of Savant's
+  `estimated_woba_using_speedangle` over the smallest box around it that holds 3
+  balls (`scripts/lib/pitch/xwoba.mjs`). Source: Savant's search CSV, balls in play
+  only, one request per day with a Final MLB game, cached outside the repo, so a re-run
+  resumes. **Hand-run, NOT on the nightly cron**, and one table per season (a 2025 table
+  fails on 2026): `node scripts/gen-xwoba-table.mjs --season=2026`, then the hitter
+  re-walk in `gen-pitch-arsenal.mjs`. `--gate` checks the committed `hitter-grid/`
+  against Savant's pitch-arsenal-stats batter board (40+ PA: mean gap at most 0.006, at
+  most 1% of rows above 0.020, none above 0.040).
 
 ## Assets / off-app
 
