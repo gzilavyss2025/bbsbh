@@ -161,6 +161,9 @@ test('the live edge says who is batting and when it last looked; no totals', () 
   assert.equal(liveLine('Arceneaux', 102_000, 100_000), 'Checked just now · nothing new yet')
   assert.equal(liveLine('', 112_000, 100_000), 'A batter is up · checked 12 s ago')
   assert.equal(liveLine('Arceneaux', 112_000, null), 'Arceneaux is batting')
+  // No at-bat in the feed yet (the half's last one is open): nobody is up.
+  assert.equal(liveLine(null, 112_000, 100_000), 'Waiting for the next batter · checked 12 s ago')
+  assert.equal(liveLine(null, 112_000, null), 'Waiting for the next batter')
 })
 
 test('loading: no words, no situation, a disabled label', () => {

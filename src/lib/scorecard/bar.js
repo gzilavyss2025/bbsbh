@@ -69,10 +69,12 @@ export function barLines({ state, view, stepInfo, flip, moves, lineupPosted = tr
 }
 
 // The live edge's line A. A look under five seconds ago is "just now": the
-// reader pressed Refresh and nothing came.
+// reader pressed Refresh and nothing came. `name` is '' for a batter with no
+// name (minor league) and null when the feed holds no next at-bat at all.
 export function liveLine(name, now, checkedAt) {
-  if (checkedAt == null) return name ? `${name} is batting` : 'A batter is up'
+  const who = name == null ? 'Waiting for the next batter' : name ? `${name} is batting` : 'A batter is up'
+  if (checkedAt == null) return who
   const s = Math.max(0, Math.round((now - checkedAt) / 1000))
   if (s < 5) return 'Checked just now · nothing new yet'
-  return `${name ? `${name} is batting` : 'A batter is up'} · checked ${s < 60 ? `${s} s` : `${Math.floor(s / 60)} min`} ago`
+  return `${who} · checked ${s < 60 ? `${s} s` : `${Math.floor(s / 60)} min`} ago`
 }

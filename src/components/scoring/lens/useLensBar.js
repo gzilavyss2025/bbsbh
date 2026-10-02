@@ -35,7 +35,7 @@ export function useLensBar({ on, view, side, stepInfo, flip, loading }) {
       moves,
       lineupPosted: view.lineup.some((r) => r.name),
     }),
-    batter: view.grid?.frontier?.batter?.last ?? '',
+    batter: view.grid?.frontier ? (view.grid.frontier.batter?.last ?? '') : null,
     lastOpened: cards.at(-1)?.atBatIndex ?? null,
   }
 }
