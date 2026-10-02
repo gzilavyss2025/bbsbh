@@ -251,3 +251,36 @@ test('detectRehabAssignment: an open rehab ends after 30 days', () => {
   assert.deepEqual(detectRehabAssignment(asg('2026-06-30'), 2019, '2026-07-30'), { id: 553, name: 'Durham Bulls' })
   assert.equal(detectRehabAssignment(asg('2026-06-30'), 2019, '2026-07-31'), null)
 })
+
+// #1393: a two-way player's pitching register must not call a season "missed"
+// when he batted in it. Ohtani 2019: hit in 106 games, no pitching row, and an
+// IL placement that spring.
+test('a pitching gap in a year the other group has rows is "Did not pitch", never "missed season"', () => {
+  const pitchingSeason = (yr) => ({
+    season: String(yr),
+    sport: { id: 1 },
+    team: { id: 108, name: 'Los Angeles Angels' },
+    stat: { gamesPlayed: 10, gamesStarted: 10, wins: 4, losses: 2, inningsPitched: '51.2', strikeOuts: 61, baseOnBalls: 22, era: '3.31', whip: '1.16' },
+  })
+  const args = {
+    mlbSplits: [pitchingSeason(2018), pitchingSeason(2020)],
+    milbSplits: [],
+    group: 'pitching',
+    role: null,
+    debutYear: 2018,
+    currentSeason: 2020,
+    currentSportId: 1,
+    transactions: [
+      {
+        id: 2, typeCode: 'SC', date: '2019-03-28', effectiveDate: '2019-03-28',
+        person: { id: 660271, fullName: 'Shohei Ohtani' }, toTeam: { id: 108, name: 'Los Angeles Angels' },
+        description: 'Los Angeles Angels placed RHP Shohei Ohtani on the 10-day injured list. Right elbow.',
+      },
+    ],
+  }
+  const withOther = careerRegisterView({ ...args, otherGroupYears: new Set([2019]) })
+  assert.equal(withOther.rows.find((r) => r.gap).note, 'Did not pitch')
+  // Without the other group's years, a true all-year IL gap still reads as injured.
+  const alone = careerRegisterView(args)
+  assert.equal(alone.rows.find((r) => r.gap).note, 'Injured — missed season')
+})
