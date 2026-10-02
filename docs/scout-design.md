@@ -469,6 +469,35 @@ The decisions in A-D stand.
 14. **The in-flight pill.** With All selected in the Hitter's view the navy
     edge walks the arsenal every 1.5 s. Keep, or light the pill only when
     one pitch is selected?
+15. **The label of the Phase 1 hitter line.** Package B (#1415) stores
+    Savant's own `est_woba` per pitch type. That is Savant's xwOBA, not the
+    #1411 lookup estimate. **Proposal:** label it "xwOBA · Regular season",
+    and keep "xwOBA (est.)" for the #1411 lookup. Confirm.
+
+## The Phase 1 data boundary
+
+Gary approved this design on 2026-10-02. The data work for #1410 runs in
+other sessions (Package A: #1417, Package B: #1415). I sent them the notes
+below on 2026-10-02.
+
+- **Until #1411 ships, there are no hitter region counts.** So Phase 1 draws
+  the hitter map in its "Not posted" state. The right column shows the
+  hitter's line for the pitch type from `estWoba` (#1415), tagged "Regular
+  season".
+- **Phase 1 shows no expected line.** With no hitter regions, the sum gives
+  the hitter's whole-type value for every pitcher, which says nothing about
+  the pitcher.
+- **The head-to-head rows (#1417) need two more fields:** `pitchType` (the
+  last pitch's `pitch_type`) for the Pitch column, and `bbType` (`bb_type`)
+  for GO / FO / LO / PO. The list prints no Savant `des` sentence.
+- **Inference, not tested:** a plate appearance that ends on a pitch-clock
+  call has its `events` on a row with no `plate_x`. A parser that drops those
+  rows first loses that plate appearance. The plate_x filter must apply only
+  to the pitch count.
+- **The #1411 shape the maps read:** for each season, hitter, pitch type,
+  pitcher hand and scope (regular season or postseason), 25-cell sums of
+  pitches, swings, whiffs, PA-ending pitches and wOBA value. The colour scale
+  needs league sums of the same counters for each pitch type.
 
 ## What Phase 1 (#1410) can reuse
 
