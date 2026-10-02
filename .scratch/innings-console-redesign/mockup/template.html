@@ -1,0 +1,938 @@
+<title>Innings Console Studies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: a studio bench. The harmonized phone (and today's, for comparison)
+   on the left, the decision record on the right, on Tally's scorebook paper.
+   Single light theme on purpose: Tally ships one paper palette. */
+:root {
+  color-scheme: light;
+  /* Tally's own tokens (src/tokens/colors.css) */
+  --paper-0: #F6EFDC; --paper-2: #FBF6E9; --paper-3: #FFFDF6;
+  --ink-0: #0F1822; --ink-1: #1B2A3A; --ink-2: #3C4A5A;
+  --graphite: #6B6558; --graphite-soft: #938C7C;
+  --rule: #CBC1A7; --rule-soft: #DED6C0; --rule-grid: #EDE6D1;
+  --field: #2F6E4F; --field-soft: #E3EDE2; --field-out: #D8E6C9; --field-in: #A6C393; --dirt: #D6AA83;
+  --clay: #B4453A; --clay-deep: #8E332B; --clay-soft: #F3E0DB;
+  --navy: #1B2A3A;
+  --seal: #B5824A; --seal-ink: #1E1405; --seal-edge: #9A6A36;
+  --marker: #E9C33F;
+  --band-dim: #9AA6B2; --band-line: #34465A;
+  --strike-fill: color-mix(in srgb, #6B6558 15%, #FBF6E9);
+
+  --f-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-body: "Source Sans 3", "Source Sans Pro", system-ui, sans-serif;
+  --f-prose: "Lora", Georgia, "Times New Roman", serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  --r-1: 4px; --r-2: 8px; --r-3: 12px;
+  --phone-w: 390px; --phone-h: 820px;
+  --kraft: repeating-linear-gradient(135deg, transparent 0 7px, rgba(120, 78, 30, .22) 7px 8px);
+}
+* { box-sizing: border-box; }
+body {
+  background-color: var(--paper-0);
+  background-image: linear-gradient(var(--rule-grid) 1px, transparent 1px), linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink-1);
+  font: 15px/1.45 var(--f-body);
+  padding-inline: 16px;
+  padding-block: 20px 48px;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, select:focus-visible { outline: 2px solid var(--field); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- bench */
+.bench { max-width: 1260px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.bench > *, .stagewrap > * { min-width: 0; }
+.bench__head { display: grid; gap: 4px; }
+.bench__eyebrow { font: 700 13px/1 var(--f-display); letter-spacing: .14em; text-transform: uppercase; color: var(--clay); }
+.bench__title { font: 700 clamp(30px, 5vw, 44px)/1 var(--f-display); text-transform: uppercase; letter-spacing: .02em; color: var(--ink-0); margin: 0; text-wrap: balance; }
+.bench__sub { color: var(--ink-2); max-width: 72ch; margin: 2px 0 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; padding: 10px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: var(--r-2); }
+.seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.seg button, .ghost { border: 1px solid var(--rule); background: var(--paper-3); border-radius: var(--r-1); padding: 7px 11px; font: 700 14px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-1); }
+.seg button[aria-pressed="true"] { background: var(--navy); color: var(--paper-2); border-color: var(--navy); }
+.ctl { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; min-width: 0; }
+.ctl-label { font: 700 12px/1 var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--graphite); }
+select { font: 600 14px var(--f-body); color: var(--ink-1); background: var(--paper-3); border: 1px solid var(--rule); border-radius: var(--r-1); padding: 6px 8px; max-width: 100%; }
+.keys { font-size: 12.5px; color: var(--graphite); }
+.keys kbd { font: 600 11px var(--f-mono); border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 3px; padding: 0 4px; background: var(--paper-3); color: var(--ink-1); }
+
+.stagewrap { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 900px) { .stagewrap { grid-template-columns: minmax(0, 1fr); } }
+.phones { display: flex; gap: 22px; align-items: flex-start; justify-content: center; overflow-x: auto; padding-bottom: 8px; }
+.phonecol { display: grid; gap: 8px; justify-items: center; flex: 0 0 auto; }
+.phonecol__tag { font: 700 14px/1 var(--f-display); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+.phone { width: min(var(--phone-w), calc(100vw - 32px)); height: var(--phone-h); border-radius: 38px; padding: 10px; background: #1A1F26; box-shadow: 0 1px 0 #3a414b inset, 0 24px 48px -20px rgba(27, 42, 58, .45), 0 4px 10px rgba(27, 42, 58, .18); }
+.screen { height: 100%; border-radius: 29px; overflow: hidden; position: relative; display: flex; flex-direction: column; background-color: var(--paper-0); background-image: linear-gradient(var(--rule-grid) 1px, transparent 1px), linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px); background-size: 22px 22px; }
+.scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 10px 12px 18px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; }
+.scroll > * { flex-shrink: 0; }
+.today img { width: 100%; display: block; }
+
+/* --------------------------------------------------------- S1 header */
+.apphead { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; padding: 14px 14px 8px; border-bottom: 1px solid var(--rule); background: var(--paper-2); }
+.apphead__mark { width: 26px; height: 26px; border-radius: 6px; background: var(--clay); display: grid; place-items: center; color: var(--paper-3); font: 700 15px/1 var(--f-display); }
+.apphead__game { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.apphead__game img { width: 22px; height: 22px; border-radius: 5px; background: var(--navy); padding: 2px; }
+.apphead__game img + img { margin-left: -4px; }
+.apphead__title { font: 700 15px/1.05 var(--f-display); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-0); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.apphead__title small { display: block; font-size: 11px; color: var(--graphite); letter-spacing: .08em; }
+.halfnav { display: flex; align-items: center; gap: 2px; }
+.halfnav button { width: 28px; height: 28px; border: 1px solid var(--rule); border-radius: var(--r-1); background: var(--paper-3); font: 700 15px/1 var(--f-display); display: grid; place-items: center; padding: 0; }
+.halfnav button:disabled { opacity: .35; cursor: default; }
+.halfnav span { font: 700 14px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; min-width: 70px; text-align: center; color: var(--ink-0); }
+
+/* ---------------------------------------------------- the console band */
+.band { background: var(--navy); color: var(--paper-2); border-radius: var(--r-3); padding: 9px 12px 8px; display: grid; gap: 7px; border-bottom: 3px solid var(--seal); }
+.band__row { display: grid; grid-template-columns: 1fr auto auto; gap: 14px; align-items: center; }
+.band__score { display: grid; gap: 3px; }
+.band__score div { display: grid; grid-template-columns: 20px 1fr auto; gap: 7px; align-items: center; font: 700 17px/1 var(--f-display); letter-spacing: .06em; }
+.band__score img { width: 20px; height: 20px; }
+.band__score .r { font: 700 19px/1 var(--f-mono); min-width: 22px; text-align: right; }
+.band__score .is-up span:nth-child(2) { color: var(--seal); }
+.band__inn { display: grid; justify-items: center; gap: 3px; min-width: 26px; color: var(--band-dim); }
+.band__inn i { font-style: normal; font-size: 11px; line-height: 1; }
+.band__inn b { font: 700 24px/1 var(--f-display); color: var(--paper-2); }
+.band__sit { display: grid; justify-items: center; gap: 5px; }
+.outs { display: flex; gap: 5px; }
+.outs i { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--band-dim); }
+.outs i.on { background: var(--clay); border-color: var(--clay); }
+.band__now { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--band-line); padding-top: 7px; font: 600 13px/1.2 var(--f-body); color: var(--band-dim); }
+.band__now b { color: var(--paper-2); font: 700 14px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; }
+.band__tally { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--band-line); padding-top: 7px; }
+.band__tally div { display: grid; justify-items: center; gap: 3px; }
+.band__tally div + div { border-left: 1px solid var(--band-line); }
+.band__tally div.gap { border-left: 2px solid var(--seal); }
+.band__tally b { font: 700 18px/1 var(--f-mono); color: var(--paper-2); }
+.band__tally span { font: 700 10px/1 var(--f-display); letter-spacing: .12em; color: var(--band-dim); }
+
+/* ------------------------------------------------------- notice cards */
+.notices { display: grid; gap: 6px; }
+.notices__h { font: 700 11px/1 var(--f-display); letter-spacing: .14em; text-transform: uppercase; color: var(--graphite); }
+.notice { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; background: var(--paper-3); border: 1px solid var(--rule); border-left: 4px solid var(--clay); border-radius: var(--r-2); padding: 8px 10px; }
+.notice .head { width: 42px; height: 42px; }
+.notice__eyebrow { font: 700 11px/1 var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--clay-deep); }
+.notice__main { font: 700 18px/1.1 var(--f-display); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-0); }
+.notice__main small { font-size: 14px; color: var(--graphite); }
+.notice__how { font: 600 12.5px/1.3 var(--f-body); color: var(--ink-2); margin-top: 2px; }
+.notice__how b { font: 700 12px var(--f-mono); color: var(--clay-deep); }
+.notice--quiet { grid-template-columns: minmax(0, 1fr); border-left-color: var(--rule); padding: 6px 10px; }
+.notice--quiet .notice__how { margin: 0; }
+.notice--now { border-left-color: var(--navy); }
+.notice--now .notice__eyebrow { color: var(--graphite); }
+
+/* ------------------------------------------------------------ trail (A2) */
+.trail { display: flex; flex-wrap: wrap; gap: 5px; }
+.tile { position: relative; min-width: 56px; padding: 5px 7px 5px; border: 1px solid var(--rule); border-radius: var(--r-1); background: var(--paper-3); display: grid; gap: 3px; justify-items: center; }
+.tile .c { font: 700 17px/1 var(--f-mono); letter-spacing: -.02em; }
+.tile .n { font: 700 10.5px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; color: var(--graphite); max-width: 74px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tile .n b { color: var(--clay-deep); margin-right: 2px; }
+.tile sup { position: absolute; top: -6px; right: -5px; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--clay); background: var(--clay-soft); color: var(--clay-deep); font: 700 10px/13px var(--f-mono); text-align: center; }
+.tile.is-cur { background: var(--navy); border-color: var(--navy); }
+.tile.is-cur .c { color: var(--paper-3); }
+.tile.is-cur .n, .tile.is-cur .n b { color: var(--seal); }
+.tile.is-sealed { background-color: var(--seal); border-color: var(--seal-edge); background-image: var(--kraft); }
+.tile.is-sealed .c, .tile.is-sealed .n, .tile.is-sealed .n b { color: var(--seal-ink); }
+.c--hit { color: var(--field); } .c--error { color: var(--clay); } .c--reach { color: var(--ink-2); } .c--out { color: var(--ink-0); }
+.kback { display: inline-block; transform: scaleX(-1); }
+
+/* ------------------------------------------------- the #22 box (AtBatBox) */
+.sc-ab { position: relative; display: grid; grid-template-columns: 1fr auto; width: 96px; height: 84px; background: var(--paper-3); border: 1px solid var(--ink-2); }
+.sc-ab__main { position: relative; display: flex; flex-direction: column; align-items: center; padding: 3px 8px 3px 3px; }
+.sc-ab__head { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 100%; height: 15px; }
+.sc-ab__type, .sc-ab__rbi { display: flex; align-items: center; justify-content: center; border: 1px solid var(--rule-grid); border-radius: 2px; font: 700 10px/1 var(--f-mono); color: var(--ink-1); }
+.sc-ab__type--hit { color: var(--field); border: 1.5px solid var(--field); border-radius: 999px; background: var(--paper-0); }
+.sc-ab__type--error { color: var(--clay); }
+.sc-ab__diamond { position: relative; margin-top: 3px; }
+.sc-ab__diamond svg { display: block; }
+.sc-ab__center { position: absolute; top: 50%; left: 50%; translate: -50% -50%; padding: 0 1px; border-radius: 2px; background: var(--paper-3); font: 700 13px/1 var(--f-mono); white-space: nowrap; color: var(--graphite); }
+.sc-ab__center--interrupted { color: var(--graphite-soft); }
+.sc-ab__center--looking { transform: scaleX(-1); }
+.sc-ab__out { position: absolute; bottom: 6px; right: -8px; display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--clay); background: var(--clay-soft); font: 700 10px/1 var(--f-mono); color: var(--clay-deep); }
+.sc-ab__out:empty { display: none; }
+.sc-ab__strip { display: grid; grid-template-columns: 11px 8px 8px; }
+.sc-ab__balls, .sc-ab__strike { display: flex; flex-direction: column; align-items: center; gap: 1px; padding-top: 2px; overflow: hidden; border-left: 1px solid var(--rule-grid); }
+.sc-ab__balls { background: var(--paper-3); }
+.sc-ab__strike { background: var(--strike-fill); }
+.sc-ab__pip { font: 700 9px/1.15 var(--f-mono); color: var(--ink-1); }
+.sc-ab--halfend .sc-ab__strip::after { content: ""; position: absolute; right: 2px; bottom: 2px; width: 15px; height: 15px; background-image: linear-gradient(to bottom right, transparent calc(50% - 1px), var(--graphite) calc(50% - 1px), var(--graphite) calc(50% + 1px), transparent calc(50% + 1px)); }
+.sc-sub { position: absolute; z-index: 2; display: flex; pointer-events: none; }
+.sc-sub__rule { position: absolute; background: var(--clay); }
+.sc-sub__num { position: relative; font: 700 10px/1 var(--f-mono); color: var(--clay); }
+.sc-sub--pitcher { top: 0; left: 0; right: 0; height: 0; align-items: flex-end; padding-left: 3px; }
+.sc-sub--pitcher .sc-sub__rule { top: 0; left: 0; right: 0; height: 2px; }
+.sc-sub__num--pitcher { bottom: 2px; }
+.sc-sub--batter { top: 0; bottom: 0; left: 0; width: 0; align-items: center; justify-content: flex-end; }
+.sc-sub--batter .sc-sub__rule { top: 0; bottom: 0; left: 0; width: 2px; }
+.sc-sub__num--batter { right: 3px; padding: 0 1px; background: var(--paper-3); }
+.pd-adv { font: 700 11px var(--f-mono); fill: var(--graphite); }
+.pd-adv--err { fill: var(--clay-deep); }
+.pd-slot { font-size: 8px; fill: var(--ink-2); }
+.pd-out { font: 700 9px var(--f-mono); fill: var(--clay-deep); }
+.pd-pr { font: 700 10px var(--f-mono); fill: var(--clay-deep); }
+.sc-seal { width: 96px; height: 84px; background-color: var(--seal); background-image: var(--kraft); border: 1px solid var(--seal-edge); display: grid; place-items: center; text-align: center; color: var(--seal-ink); font: 700 9px/1.2 var(--f-display); letter-spacing: .1em; text-transform: uppercase; padding: 4px; }
+.sc-seal b { display: block; font-size: 12px; letter-spacing: .05em; }
+
+/* ---------------------------------------------------------------- hero */
+.hero { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; background: var(--paper-2); border: 1px solid var(--rule); border-radius: var(--r-3); padding: 12px; box-shadow: 0 2px 6px rgba(27, 42, 58, .07); }
+.hero__box { zoom: 1.3; }
+.hero__who { display: grid; gap: 6px; min-width: 0; }
+.hero__name { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; }
+.hero__name b { display: block; font: 700 20px/1 var(--f-display); letter-spacing: .03em; text-transform: uppercase; color: var(--ink-0); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hero__name span { font: 600 12.5px/1.3 var(--f-body); color: var(--graphite); }
+.hero__vs { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; border-top: 1px dashed var(--rule); padding-top: 6px; font: 600 12px/1.25 var(--f-body); color: var(--graphite); }
+.hero__vs b { font: 700 15px/1 var(--f-display); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-1); }
+.hero__vs .head { width: 30px; height: 30px; }
+.hero__line { font: 600 12.5px/1.3 var(--f-mono); color: var(--ink-1); letter-spacing: -.01em; }
+.hero__line span { display: block; font: 700 10px/1.2 var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--graphite); }
+.head { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: var(--rule-soft); border: 1px solid var(--rule); display: block; }
+.hero__beat { animation: beat .18s ease-out both; }
+
+/* ------------------------------------------------- the runner deck */
+.deck { display: grid; gap: 6px; }
+.deck__h { display: flex; justify-content: space-between; align-items: baseline; font: 700 11px/1 var(--f-display); letter-spacing: .14em; text-transform: uppercase; color: var(--graphite); }
+.deck__row { display: flex; gap: 10px; overflow-x: auto; padding: 3px 3px 5px; min-height: 136px; align-items: flex-start; scrollbar-width: thin; }
+.runner { display: grid; gap: 4px; justify-items: start; flex: 0 0 auto; }
+.runner .sc-ab { zoom: 1.2; }
+.runner__lab { font: 700 11px/1.15 var(--f-display); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-1); }
+.runner__lab b { color: var(--clay-deep); margin-right: 2px; }
+.runner__lab span { display: block; color: var(--graphite); letter-spacing: .08em; font-size: 10px; }
+.runner--scored .sc-ab { box-shadow: 0 0 0 2px var(--field); }
+.runner--scored .runner__lab span { color: var(--field); }
+.runner--out .sc-ab { box-shadow: 0 0 0 2px var(--clay); }
+.runner--out .runner__lab span { color: var(--clay-deep); }
+.runner--fresh .sc-ab { box-shadow: 0 0 0 2px var(--seal); }
+.deck__empty { font: 400 13px/1.4 var(--f-prose); font-style: italic; color: var(--graphite); align-self: center; padding: 0 4px; }
+
+/* --------------------------------------------------- pitch track (A4) */
+.track { background: var(--paper-3); border: 1px solid var(--rule); border-radius: var(--r-2); padding: 8px 8px 7px; display: grid; gap: 6px; }
+.track > span, .track__lanes > span { min-width: 0; }
+.track__labels > span { display: block; }
+.track__lanes, .track__events, .track__foot, .track__h { width: 100%; }
+.track__lanes { display: grid; }
+.track__events { display: grid; }
+.track__lanes { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 4px; }
+.track__labels { display: grid; grid-template-rows: 26px 26px 14px; align-items: center; font: 700 10px/1 var(--f-display); letter-spacing: .08em; color: var(--graphite); }
+.track__labels span { padding-left: 4px; }
+.track__labels span:nth-child(2) { background: var(--strike-fill); padding-block: 8px; border-radius: 3px 0 0 3px; }
+.track__cols { display: flex; overflow-x: auto; scrollbar-width: thin; }
+.tcol { display: grid; grid-template-rows: 26px 26px 14px; width: 28px; flex: 0 0 auto; justify-items: center; align-items: center; }
+.tcol:nth-child(odd) .lane-s, .tcol .lane-s { background: var(--strike-fill); width: 100%; height: 100%; display: grid; place-items: center; }
+.tcol .lane-b { width: 100%; height: 100%; display: grid; place-items: center; }
+.tcol small { font: 500 9.5px/1 var(--f-mono); color: var(--graphite); }
+.pp { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 700 10.5px/1 var(--f-mono); position: relative; }
+.pp { border: 1.5px solid var(--ink-2); background: var(--paper-3); color: var(--ink-0); }
+.pp--x { font-size: 13px; }
+.pp--abs-success { box-shadow: 0 0 0 2px var(--paper-3), 0 0 0 4px var(--field); }
+.pp--abs-fail { box-shadow: 0 0 0 2px var(--paper-3), 0 0 0 4px var(--clay); }
+.tflag { width: 0; flex: 0 0 auto; position: relative; }
+.tflag::before { content: ""; position: absolute; top: 0; bottom: 14px; left: -1px; width: 2px; background: var(--seal); }
+.tflag span { position: absolute; top: -2px; left: 50%; translate: -50% 0; white-space: nowrap; background-color: var(--seal); background-image: var(--kraft); color: var(--seal-ink); font: 700 9.5px/1 var(--f-mono); padding: 2px 3px; border-radius: 3px; z-index: 1; }
+.track__events { display: grid; gap: 3px; border-top: 1px dashed var(--rule); padding-top: 6px; }
+.track__events .ev { display: block; font: 600 12.5px/1.3 var(--f-body); color: var(--ink-1); }
+.track__events em { font: 700 11px var(--f-display); letter-spacing: .08em; text-transform: uppercase; font-style: normal; color: var(--seal-ink); background-color: var(--seal); background-image: var(--kraft); padding: 1px 4px; border-radius: 3px; margin-right: 5px; }
+.track__events b { font: 700 12px var(--f-mono); }
+.track__events .o { color: var(--clay-deep); }
+.track__foot { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font: 600 12px/1.2 var(--f-body); color: var(--graphite); border-top: 1px dashed var(--rule); padding-top: 6px; }
+.track__foot b { font: 700 12.5px var(--f-mono); color: var(--ink-1); }
+.track { cursor: pointer; text-align: left; width: 100%; font: inherit; color: inherit; }
+.track:hover { border-color: var(--graphite-soft); }
+.track__h { display: flex; justify-content: space-between; align-items: baseline; font: 700 11px/1 var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--graphite); }
+.track__h span:last-child { color: var(--field); letter-spacing: .08em; }
+.track__events .ok { color: var(--field); }
+.track__events .no { color: var(--clay-deep); }
+
+/* ------------------------------------------------- the pitch zone sheet */
+.zone { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 10px; align-items: start; }
+.zone svg { width: 100%; height: auto; display: block; background: var(--paper-3); border: 1px solid var(--rule); border-radius: var(--r-2); }
+.zone .dot { transform-box: fill-box; transform-origin: center; animation: pitchIn .55s cubic-bezier(.3, .7, .2, 1) both; }
+.zone .dot circle { fill: var(--paper-3); stroke: var(--ink-1); stroke-width: 1.8; }
+.zone .dot.is-strike circle { fill: var(--strike-fill); }
+.zone .dot.is-x circle { fill: var(--field-soft); stroke: var(--field); }
+.zone .dot text { font: 700 10px var(--f-mono); fill: var(--ink-0); }
+.zone .dot .ring-ok { fill: none; stroke: var(--field); stroke-width: 2; }
+.zone .dot .ring-no { fill: none; stroke: var(--clay); stroke-width: 2; }
+.zlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.zlist li { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 6px; align-items: center; padding: 4px 6px; border-radius: 4px; background: var(--paper-3); border: 1px solid var(--rule-soft); font: 600 12px/1.15 var(--f-body); animation: zrow .55s ease-out both; }
+.zlist li b { font: 700 11px var(--f-mono); }
+.zlist li span:nth-child(2) { min-width: 0; }
+.zlist li small { display: block; color: var(--graphite); font-size: 11px; }
+.zlist li em { font: 700 11px var(--f-mono); font-style: normal; color: var(--graphite); }
+.zone__foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.replay { border: 1px solid var(--rule); background: var(--paper-3); border-radius: var(--r-1); padding: 6px 10px; font: 700 13px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; }
+@keyframes pitchIn { 0% { transform: translate(var(--dx), var(--dy)) scale(.15); opacity: 0; } 25% { opacity: 1; } 100% { transform: none; opacity: 1; } }
+@keyframes zrow { from { opacity: .25; } to { opacity: 1; } }
+
+/* --------------------------------------------------------- review card */
+.review { display: grid; gap: 2px; border: 1px solid var(--rule); border-left: 4px solid var(--navy); border-radius: var(--r-2); background: var(--paper-3); padding: 7px 10px; }
+.review__eyebrow { font: 700 11px/1 var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--graphite); }
+.review__main { font: 700 16px/1.15 var(--f-display); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-0); }
+.review__main .ok { color: var(--field); }
+.review__main .no { color: var(--clay-deep); }
+
+/* ----------------------------------------------- the bases strip */
+.bases { display: flex; gap: 8px; align-items: flex-start; overflow-x: auto; padding: 3px 2px 5px; scrollbar-width: thin; }
+.slot { flex: 0 0 auto; display: grid; gap: 4px; justify-items: start; }
+.slot .sc-ab { zoom: 1.05; }
+.slot__lab { font: 700 11px/1.15 var(--f-display); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-1); }
+.slot__lab b { color: var(--clay-deep); margin-right: 2px; }
+.slot__lab span { display: block; color: var(--graphite); letter-spacing: .1em; font-size: 10px; }
+.slot--empty, .slot--batter { width: 46px; align-self: stretch; justify-items: center; align-content: center; border: 1.5px dashed var(--rule); border-radius: var(--r-2); padding: 8px 2px; text-align: center; font: 700 10.5px/1.2 var(--f-display); letter-spacing: .1em; text-transform: uppercase; color: var(--graphite-soft); }
+.slot--batter { border-style: solid; border-color: var(--seal); color: var(--seal-ink); background: color-mix(in srgb, var(--seal) 14%, var(--paper-3)); }
+.slot--scored .sc-ab { box-shadow: 0 0 0 2px var(--field); }
+.slot--scored .slot__lab span { color: var(--field); }
+.slot--out .sc-ab { box-shadow: 0 0 0 2px var(--clay); }
+.slot--out .slot__lab span { color: var(--clay-deep); }
+.slot--moved .sc-ab { box-shadow: 0 0 0 2px var(--seal); }
+.bases__div { flex: 0 0 auto; align-self: stretch; width: 0; border-left: 1.5px solid var(--rule); margin: 0 2px; }
+.baseglyph { width: 14px; height: 14px; border: 1.5px solid currentColor; transform: rotate(45deg); margin: 2px auto 4px; }
+.slot--batter .baseglyph { background: var(--seal); border-color: var(--seal-edge); }
+.bases--empty { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border: 1.5px dashed var(--rule); border-radius: var(--r-2); font: 700 12px/1 var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--graphite); }
+.bases--empty .glyphs { display: flex; gap: 9px; }
+.bases--empty .baseglyph { width: 10px; height: 10px; margin: 0; color: var(--graphite-soft); }
+.bases--empty .baseglyph.on { background: var(--seal); border-color: var(--seal-edge); }
+
+/* ABS bank pips in the band */
+.absp { display: inline-flex; gap: 3px; margin-left: 6px; vertical-align: middle; }
+.absp i { width: 6px; height: 6px; border-radius: 50%; border: 1.2px solid var(--band-dim); }
+.absp i.on { background: var(--paper-2); border-color: var(--paper-2); }
+.band__score div { grid-template-columns: 20px minmax(0, 1fr) auto; }
+.track--sealed .track__cols { min-height: 66px; background: linear-gradient(transparent 26px, var(--strike-fill) 26px 52px, transparent 52px); }
+.track__sealed { font: 400 13px/1.4 var(--f-prose); font-style: italic; color: var(--graphite); border-top: 1px dashed var(--rule); padding-top: 6px; }
+
+/* ------------------------------------------------- play sentence (A5) */
+.play { display: grid; gap: 5px; padding: 0 2px; }
+.play p { margin: 0; font: 400 16px/1.4 var(--f-prose); color: var(--ink-1); }
+.bip { font: 600 12px/1.3 var(--f-body); color: var(--graphite); display: flex; gap: 4px 10px; flex-wrap: wrap; }
+.bip b { font: 700 12.5px var(--f-mono); color: var(--ink-1); }
+
+/* -------------------------------------------------- reference chips + sheet */
+.refbar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.refbar button { border: 1px solid var(--rule); background: var(--paper-3); border-radius: var(--r-2); min-height: 40px; font: 700 14px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-1); }
+.refbar button[aria-expanded="true"] { background: var(--navy); color: var(--paper-2); border-color: var(--navy); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 72%; background: var(--paper-2); border-top: 1px solid var(--rule); border-radius: 18px 18px 0 0; box-shadow: 0 -12px 30px -10px rgba(27, 42, 58, .4); display: flex; flex-direction: column; z-index: 5; animation: sheet .22s ease-out both; }
+.sheet__head { display: flex; align-items: center; gap: 8px; padding: 10px 12px 8px; border-bottom: 1px solid var(--rule-soft); }
+.sheet__tabs { display: flex; gap: 4px; flex: 1; }
+.sheet__tabs button { border: 1px solid var(--rule); background: var(--paper-3); border-radius: var(--r-1); padding: 6px 10px; font: 700 13px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; }
+.sheet__tabs button[aria-pressed="true"] { background: var(--navy); color: var(--paper-2); border-color: var(--navy); }
+.sheet__close { border: 1px solid var(--rule); background: var(--paper-3); border-radius: var(--r-1); width: 32px; height: 30px; font: 700 16px/1 var(--f-display); }
+.sheet__body { flex: 1; overflow-y: auto; padding: 10px 12px 16px; display: grid; gap: 12px; align-content: start; }
+.scrim { position: absolute; inset: 0; background: rgba(15, 24, 34, .28); z-index: 4; border: 0; padding: 0; cursor: default; }
+.lu { border: 1px solid var(--rule); border-radius: var(--r-2); background: var(--paper-3); overflow: hidden; }
+.lu__h { display: flex; justify-content: space-between; align-items: center; padding: 6px 9px; background: var(--navy); color: var(--paper-2); font: 700 13px/1 var(--f-display); letter-spacing: .1em; text-transform: uppercase; }
+.lu__h span { color: var(--band-dim); font-size: 11px; }
+.lu__row { display: grid; grid-template-columns: 18px minmax(0, 1fr) 30px 28px; gap: 6px; align-items: center; padding: 5px 9px; border-top: 1px solid var(--rule-soft); font: 700 14px/1.1 var(--f-display); letter-spacing: .04em; text-transform: uppercase; }
+.lu__row:first-of-type { border-top: 0; }
+.lu__row .s { font: 700 11px var(--f-mono); color: var(--graphite); }
+.lu__row .p, .lu__row .j { font: 700 11px var(--f-mono); color: var(--graphite); text-align: right; }
+.lu__row .nm { display: grid; gap: 1px; min-width: 0; }
+.lu__row .nm s { color: var(--graphite-soft); font-size: 12px; text-decoration-thickness: 1.5px; }
+.lu__row .nm i { font-style: normal; color: var(--clay-deep); }
+.lu__row .nm i small { font: 600 10px var(--f-mono); color: var(--clay); margin-left: 4px; }
+.lu__row.is-up { background: color-mix(in srgb, var(--seal) 22%, var(--paper-3)); }
+.lu__row.is-at { background: color-mix(in srgb, var(--marker) 30%, var(--paper-3)); }
+.field { position: relative; aspect-ratio: 4 / 3; max-width: 100%; border: 1px solid var(--rule); border-radius: var(--r-2); overflow: hidden; background: var(--field-out); }
+.field svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.spot { position: absolute; translate: -50% 0; display: grid; justify-items: center; text-align: center; font: 700 12.5px/1.05 var(--f-display); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-0); white-space: nowrap; }
+.spot em { font: 700 9.5px/1 var(--f-mono); font-style: normal; color: var(--paper-3); background: var(--navy); border-radius: 3px; padding: 2px 3px; margin-bottom: 2px; }
+.spot s { color: var(--graphite); font-size: 10.5px; }
+.spot i { font-style: normal; color: var(--clay-deep); }
+.sheet__note { font: 400 13px/1.4 var(--f-prose); font-style: italic; color: var(--graphite); margin: 0; }
+
+/* ------------------------------------------------- linescore (S3) */
+.ls { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--paper-3); border: 1px solid var(--rule); border-radius: var(--r-2); overflow: hidden; table-layout: fixed; font: 700 12.5px/1 var(--f-mono); }
+.ls th, .ls td { height: 26px; text-align: center; border-left: 1px solid var(--rule-soft); padding: 0; }
+.ls th { font: 700 11px/1 var(--f-display); color: var(--graphite); letter-spacing: .06em; background: var(--paper-2); border-bottom: 1px solid var(--rule-soft); }
+.ls td:first-child, .ls th:first-child { border-left: 0; text-align: left; padding-left: 8px; width: 40px; font: 700 13px/1 var(--f-display); letter-spacing: .06em; color: var(--ink-0); }
+.ls .tot { width: 24px; background: var(--paper-2); }
+.ls .tot-first { border-left: 2px solid var(--rule); }
+.ls td.dot { color: var(--graphite-soft); font-weight: 500; }
+.ls td.is-cur { background: var(--navy); color: var(--paper-2); }
+.ls tr + tr td { border-top: 1px solid var(--rule-soft); }
+
+/* --------------------------------------------------------- bar (S2) */
+.bar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 10px 12px 18px; border-top: 1px solid var(--rule); background: var(--paper-2); position: relative; z-index: 6; }
+.bar button { border-radius: var(--r-2); min-height: 52px; padding: 6px 10px; border: 1px solid var(--rule); background: var(--paper-3); font: 700 16px/1.05 var(--f-display); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-1); }
+.bar .go { background-color: var(--seal); border-color: var(--seal-edge); color: var(--seal-ink); background-image: var(--kraft); display: grid; place-items: center; text-align: center; font-size: 18px; }
+.bar .go small { font: 600 12px/1 var(--f-body); letter-spacing: .02em; text-transform: none; }
+.bar .go:active { transform: translateY(1px); }
+.bar .go.is-next-half { background: var(--navy); background-image: none; color: var(--paper-2); border-color: var(--navy); }
+.bar button:disabled { opacity: .4; cursor: default; }
+
+/* ------------------------------------------------------------- notes */
+.notes { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.notes h2 { margin: 0; font: 700 26px/1 var(--f-display); text-transform: uppercase; letter-spacing: .03em; color: var(--ink-0); }
+.notes h3 { margin: 6px 0 0; font: 700 13px/1 var(--f-display); letter-spacing: .14em; text-transform: uppercase; color: var(--graphite); }
+.notes .lede { margin: 0; font: 400 16px/1.5 var(--f-prose); color: var(--ink-1); max-width: 64ch; }
+.chg { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.chg li { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: start; background: var(--paper-2); border: 1px solid var(--rule-soft); border-radius: var(--r-2); padding: 8px 11px; }
+.chg .id { font: 700 13px/1.2 var(--f-mono); color: var(--clay); padding-top: 2px; }
+.chg b { display: block; font: 700 15px/1.2 var(--f-display); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-0); margin-bottom: 2px; }
+.chg p { margin: 0; color: var(--ink-2); font-size: 14px; max-width: 64ch; }
+.verdicts { display: flex; flex-wrap: wrap; gap: 5px; }
+.verdicts span { font: 700 12px/1 var(--f-mono); padding: 5px 7px; border-radius: 4px; border: 1px solid var(--rule); background: var(--paper-3); }
+.verdicts .k { border-color: var(--field); color: var(--field); }
+.verdicts .a { border-color: var(--seal-edge); color: #7a5226; }
+.verdicts .d { color: var(--graphite-soft); text-decoration: line-through; }
+.notation { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--paper-2); border: 1px solid var(--rule-soft); border-radius: var(--r-2); overflow: hidden; }
+.notation th, .notation td { text-align: left; padding: 6px 10px; border-top: 1px solid var(--rule-soft); vertical-align: top; }
+.notation th { font: 700 11px/1 var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--graphite); border-top: 0; background: var(--paper-3); }
+.notation td:first-child { font: 700 13px var(--f-display); letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+.notation td:nth-child(2) { font: 700 13px var(--f-mono); color: var(--clay-deep); white-space: nowrap; }
+.notation .flag { font-size: 12px; color: #7a5226; }
+.tablewrap { overflow-x: auto; }
+.guard { font-size: 13.5px; color: var(--ink-2); border-left: 3px solid var(--field); padding: 6px 10px; background: var(--paper-3); max-width: 66ch; margin: 0; }
+.jump { display: flex; flex-wrap: wrap; gap: 6px; }
+.jump button { border: 1px solid var(--rule); background: var(--paper-3); border-radius: 999px; padding: 5px 10px; font: 600 13px/1.1 var(--f-body); color: var(--ink-1); text-align: left; }
+.jump button b { font: 700 12px var(--f-mono); color: var(--clay-deep); margin-right: 4px; }
+
+@keyframes beat { from { transform: scale(1.06); filter: brightness(1.08); } to { transform: none; filter: none; } }
+@keyframes sheet { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes rise { from { transform: translateY(5px); opacity: 0; } to { transform: none; opacity: 1; } }
+.anim .tcol { animation: rise .22s ease-out both; }
+.anim .slot { animation: rise .25s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .anim *, .hero__beat, .sheet, .zone .dot, .zlist li { animation: none !important; } }
+</style>
+
+<div class="bench">
+  <header class="bench__head">
+    <span class="bench__eyebrow">Tally · innings viewer · round 2</span>
+    <h1 class="bench__title">Innings Console Studies</h1>
+    <p class="bench__sub" id="sub"></p>
+  </header>
+
+  <div class="controls" role="toolbar" aria-label="Studio controls">
+    <div class="seg" id="views" role="group" aria-label="View"></div>
+    <div class="ctl"><label class="ctl-label" for="gameSel">Game</label><select id="gameSel"></select></div>
+    <div class="ctl"><label class="ctl-label" for="halfSel">Half</label><select id="halfSel"></select></div>
+    <div class="ctl"><button class="ghost" id="back" type="button">‹ Step back</button><button class="ghost" id="reset" type="button">Reset half</button></div>
+    <span class="keys"><kbd>Space</kbd> next at-bat · <kbd>←</kbd> back · <kbd>[</kbd> <kbd>]</kbd> half · <kbd>L</kbd> lineups · <kbd>F</kbd> field · <kbd>P</kbd> pitches</span>
+  </div>
+
+  <div class="stagewrap">
+    <div class="phones" id="phones"></div>
+    <aside class="notes" id="notes"></aside>
+  </div>
+</div>
+
+<script>
+const D = /*__DATA__*/null;
+const TODAY = "__TODAY__";
+const GAME_LABEL = {
+  823035: 'MIL @ STL · Jul 7 · Gm 2 — subs and pitching changes',
+  823166: 'MIN @ SF · Sep 22 — steal + E2, pickoff, caught stealing, ABS',
+  824546: 'DET @ CWS · Sep 20 — balk, wild pitch, passed ball, ABS by both clubs',
+  824624: 'MIA @ CHC · Sep 22 — manager challenges, 12 innings, automatic runner',
+  824951: 'LAA @ ATH · Sep 23 — pickoff caught stealing, challenge mid at-bat',
+  823169: 'MIN @ SF · Sep 21 — crew-chief home run review, ABS',
+};
+
+/* ---------------------------------------------------------------- state */
+const store = { get(k, d) { try { const v = localStorage.getItem('ics2:' + k); return v == null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem('ics2:' + k, JSON.stringify(v)); } catch {} } };
+const S = { view: store.get('view', 'H'), g: store.get('g', 1), half: store.get('half', 0), n: store.get('n', 1), sheet: null, tab: 'lineups', anim: false, beat: false };
+if (!D.games[S.g]) S.g = 0;
+if (!D.games[S.g].halves[S.half]) S.half = 0;
+
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const ord = (n) => n + (['th', 'st', 'nd', 'rd'][(n % 100 > 10 && n % 100 < 14) ? 0 : n % 10] || 'th');
+const halfName = (h) => `${h.half === 'top' ? 'Top' : 'Bot'} ${ord(h.inning)}`;
+const halfLong = (h) => `${h.half === 'top' ? 'Top' : 'Bottom'} ${ord(h.inning)}`;
+const BASE = { 1: '1st', 2: '2nd', 3: '3rd', 4: 'home', '1B': '1st', '2B': '2nd', '3B': '3rd', score: 'home' };
+const img = (id, cls = 'head') => D.img[id] ? `<img class="${cls}" src="${D.img[id]}" alt="">` : `<span class="${cls}"></span>`;
+const G = () => D.games[S.g];
+
+/* -------------------------------------------- PlayDiamond, ported 1:1 */
+const HOME = [50, 80], FIRST = [80, 50], SECOND = [50, 20], THIRD = [20, 50];
+const BASES = [HOME, FIRST, SECOND, THIRD, HOME];
+const LABELS = { 1: { x: 85, y: 53, a: 'start' }, 2: { x: 50, y: 13, a: 'middle' }, 3: { x: 19, y: 53, a: 'end' }, 4: { x: 50, y: 96, a: 'middle' } };
+const OUT_LABELS = { 1: { x: 99, y: 45, a: 'end' }, 2: { x: 50, y: 13, a: 'middle' }, 3: { x: 1, y: 45, a: 'start' }, 4: { x: 50, y: 96, a: 'middle' } };
+const PR_LABELS = { 1: { x: 84, y: 40, a: 'start' }, 2: { x: 58, y: 15, a: 'start' }, 3: { x: 16, y: 40, a: 'end' } };
+const midpt = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+function perp(a, b, p, len = 6) { const dx = b[0] - a[0], dy = b[1] - a[1], n = Math.hypot(dx, dy) || 1, ux = -dy / n, uy = dx / n; return [[p[0] - ux * len, p[1] - uy * len], [p[0] + ux * len, p[1] + uy * len]]; }
+function outLegBases(reached, outAt) {
+  if (outAt == null) return { traveled: reached, legA: null, legB: null };
+  if (outAt > reached) return { traveled: outAt - 1, legA: outAt - 1, legB: outAt };
+  return { traveled: reached, legA: Math.max(0, outAt - 1), legB: outAt };
+}
+function playDiamond(b, size = 52) {
+  const { reached = 0, scored = false, earned = true, legNotations = {}, outAt = null, outCode = '', prBase = null, prJersey = null, placedAt = null } = b || {};
+  const o = outLegBases(reached, outAt);
+  const traveled = scored ? 4 : o.traveled;
+  const ghost = placedAt != null ? Math.min(placedAt, 4) : 0;
+  const unearned = scored && !earned;
+  let outHalf = null, outTick = null;
+  if (outAt != null) { const a = BASES[o.legA], c = BASES[o.legB]; if (outAt > reached) { const m = midpt(a, c); outHalf = [a, m]; outTick = perp(a, c, m); } else outTick = perp(a, c, c); }
+  const pts = `${HOME} ${FIRST} ${SECOND} ${THIRD}`;
+  let s = `<svg width="${size}" height="${size}" viewBox="0 0 100 100" aria-hidden="true" style="overflow:visible">`;
+  if (scored) s += `<polygon points="${pts}" fill="#6B6558" stroke="${unearned ? '#B4453A' : '#6B6558'}" stroke-width="${unearned ? 2.5 : 2}" stroke-linejoin="round"/>`;
+  else {
+    s += `<polygon points="${pts}" fill="none" stroke="#CBC1A7" stroke-width="1.5" stroke-linejoin="round"/>`;
+    for (let i = ghost; i < traveled; i++) s += `<line x1="${BASES[i][0]}" y1="${BASES[i][1]}" x2="${BASES[i + 1][0]}" y2="${BASES[i + 1][1]}" stroke="#6B6558" stroke-width="3" stroke-linecap="round"/>`;
+  }
+  for (let i = 0; i < ghost; i++) s += `<line x1="${BASES[i][0]}" y1="${BASES[i][1]}" x2="${BASES[i + 1][0]}" y2="${BASES[i + 1][1]}" stroke="${scored ? '#FBF6E9' : '#938C7C'}" stroke-width="${scored ? 2 : 2.5}" stroke-linecap="round" stroke-dasharray="3 3"/>`;
+  if (outHalf) s += `<line x1="${outHalf[0][0]}" y1="${outHalf[0][1]}" x2="${outHalf[1][0]}" y2="${outHalf[1][1]}" stroke="#6B6558" stroke-width="3" stroke-linecap="round"/>`;
+  if (outTick) s += `<line x1="${outTick[0][0]}" y1="${outTick[0][1]}" x2="${outTick[1][0]}" y2="${outTick[1][1]}" stroke="#B4453A" stroke-width="2.5" stroke-linecap="round"/>`;
+  for (const [base, n] of Object.entries(legNotations)) {
+    const L = LABELS[base]; if (!L) continue;
+    s += `<text class="pd-adv ${/^E\d*$/.test(n.code || '') ? 'pd-adv--err' : ''}" x="${L.x}" y="${L.y}" text-anchor="${L.a}">${esc(n.code)}${n.slot != null ? `<tspan class="pd-slot" dy="-3">${n.slot}</tspan>` : ''}</text>`;
+  }
+  if (outAt != null && outCode && OUT_LABELS[outAt]) { const L = OUT_LABELS[outAt]; s += `<text class="pd-out" x="${L.x}" y="${L.y}" text-anchor="${L.a}">${esc(outCode)}</text>`; }
+  if (prBase != null && PR_LABELS[prBase]) { const L = PR_LABELS[prBase]; s += `<text class="pd-pr" x="${L.x}" y="${L.y}" text-anchor="${L.a}"><tspan x="${L.x}">PR</tspan>${prJersey ? `<tspan x="${L.x}" dy="9">${esc(prJersey)}</tspan>` : ''}</text>`; }
+  return s + '</svg>';
+}
+
+/* ---------------------------------------------- AtBatBox, ported 1:1 */
+function atBatBox(b, { halfend = false, pitcherJersey = null, subJersey = null } = {}) {
+  const ladder = b?.ladder ?? [];
+  const balls = ladder.filter((p) => p.side === 'ball'), strikes = ladder.filter((p) => p.side === 'strike');
+  const c1 = strikes.slice(0, 7), c2 = strikes.slice(7);
+  const kind = b?.kind ?? '';
+  const pip = (p) => `<span class="sc-ab__pip">${esc(p.label)}</span>`;
+  const center = b?.center ? `<span class="sc-ab__center ${kind === 'interrupted' ? 'sc-ab__center--interrupted' : ''} ${b.looking ? 'sc-ab__center--looking' : ''}">${esc(b.center)}</span>` : '';
+  return `<div class="sc-ab ${halfend ? 'sc-ab--halfend' : ''}">
+    ${pitcherJersey != null ? `<span class="sc-sub sc-sub--pitcher"><span class="sc-sub__num sc-sub__num--pitcher">${esc(pitcherJersey)}</span><span class="sc-sub__rule"></span></span>` : ''}
+    ${subJersey != null ? `<span class="sc-sub sc-sub--batter"><span class="sc-sub__rule"></span><span class="sc-sub__num sc-sub__num--batter">${esc(subJersey)}</span></span>` : ''}
+    <div class="sc-ab__main">
+      <div class="sc-ab__head"><span class="sc-ab__type ${kind === 'hit' ? 'sc-ab__type--hit' : kind === 'error' ? 'sc-ab__type--error' : ''}">${esc(b?.outcome ?? '')}</span><span class="sc-ab__rbi">${esc(b?.rbi ?? '')}</span></div>
+      <div class="sc-ab__diamond">${playDiamond(b, 52)}${center}</div>
+      <span class="sc-ab__out">${b?.outNumber ?? ''}</span>
+    </div>
+    <div class="sc-ab__strip"><span class="sc-ab__balls">${balls.map(pip).join('')}</span><span class="sc-ab__strike">${c1.map(pip).join('')}</span><span class="sc-ab__strike">${c2.map(pip).join('')}</span></div>
+  </div>`;
+}
+
+/* ------------------------------------------------------------- the view */
+function viewOf() {
+  const g = G(), h = g.halves[S.half], steps = h.steps, N = steps.length;
+  const n = Math.max(0, Math.min(S.n, N));
+  const bat = h.half === 'top' ? 'away' : 'home', fld = bat === 'away' ? 'home' : 'away';
+  const cur = n ? steps[n - 1] : null, next = n < N ? steps[n] : null, done = n >= N;
+  const score = cur ? { away: cur.away, home: cur.home } : { away: h.startAway, home: h.startHome };
+  const outs = cur ? Math.min(cur.outs, 3) : 0;
+  const bases = cur ? cur.bases : (next ? [1, 2, 3].map((x) => next.sealedRunners.some((r) => r.base === x)) : [false, false, false]);
+  const line = { away: [], home: [] }, H = { away: 0, home: 0 }, E = { away: 0, home: 0 };
+  for (let i = 0; i < S.half; i++) { const x = g.halves[i], s = x.half === 'top' ? 'away' : 'home', f = s === 'away' ? 'home' : 'away'; line[s][x.inning - 1] = x.line.r; H[s] += x.line.h; E[f] += x.line.e; }
+  const revealed = steps.slice(0, n);
+  line[bat][h.inning - 1] = (cur ? (bat === 'away' ? cur.away - h.startAway : cur.home - h.startHome) : 0);
+  H[bat] += revealed.filter((s) => s.codeKind === 'hit').length;
+  const tallies = (list) => list.reduce((t, s) => { t.p += s.track.length; t.wh += s.track.filter((p) => p.cat === 'whiff').length; t.fo += s.track.filter((p) => p.cat === 'foul').length; return t; }, { p: 0, wh: 0, fo: 0 });
+  // ABS bank: two a club, kept on an overturn, spent when the call stands; a club
+  // at zero gets one back entering each extra inning. Counted through the
+  // revealed point only (challenges.js reads it clamped the same way).
+  const bank = { away: 2, home: 2 };
+  for (let i = 0; i <= S.half; i++) {
+    const x = g.halves[i];
+    if (x.inning >= 10 && x.half === 'top') for (const k of ['away', 'home']) if (bank[k] === 0) bank[k] = 1;
+    for (const st of (i === S.half ? revealed : x.steps)) for (const p of st.track) if (p.ch && p.ch.outcome === 'fail') bank[p.ch.side] = Math.max(0, bank[p.ch.side] - 1);
+  }
+  return { g, h, steps, N, n, bat, fld, cur, next, done, score, outs, bases, line, H, E, revealed, bank, half: tallies(revealed), nextHalf: g.halves[S.half + 1] };
+}
+
+// TODAY'S LINES, through the revealed point only: every earlier half, plus
+// this half's revealed at-bats. Never a step ahead (the spoiler rule).
+const NOT_AB = /^(walk|intent_walk|hit_by_pitch|sac_fly|sac_bunt|sac_fly_double_play|catcher_interf)$/;
+function dayLines(v) {
+  const bat = {}, pit = {};
+  const B = (id) => (bat[id] ??= { pa: 0, ab: 0, h: 0, xbh: [], bb: 0, hbp: 0, k: 0, rbi: 0, r: 0, sf: 0 });
+  const P = (id) => (pit[id] ??= { outs: 0, h: 0, r: 0, er: 0, bb: 0, k: 0, hr: 0 });
+  for (let i = 0; i <= S.half; i++) {
+    const list = i === S.half ? v.revealed : v.g.halves[i].steps;
+    for (const st of list) {
+      const p = P(st.pitcher.id);
+      p.outs += Math.max(0, Math.min(st.outs, 3) - st.outsBefore);
+      for (const sc of st.scorers) { const q = P(sc.pid); q.r++; if (sc.earned) q.er++; B(sc.rid).r++; }
+      if (st.box.kind === 'interrupted') continue;
+      const b = B(st.batter.id), et = st.eventType || '';
+      b.pa++; b.rbi += st.rbi || 0;
+      if (!NOT_AB.test(et)) b.ab++;
+      if (st.codeKind === 'hit') { b.h++; p.h++; if (st.code !== '1B') b.xbh.push(st.code); if (st.code === 'HR') p.hr++; }
+      if (/walk/.test(et)) { b.bb++; p.bb++; }
+      if (et === 'hit_by_pitch') b.hbp++;
+      if (/^sac_fly/.test(et)) b.sf++;
+      if (/^strikeout/.test(et)) { b.k++; p.k++; }
+    }
+  }
+  return { bat, pit };
+}
+const times = (n, w) => (n > 1 ? `${n} ${w}` : w);
+function batLine(L, id) {
+  const b = L.bat[id];
+  if (!b || !b.pa) return 'First time up today';
+  const extra = [];
+  const cnt = {}; for (const x of b.xbh) cnt[x] = (cnt[x] || 0) + 1;
+  for (const [x, n] of Object.entries(cnt)) extra.push(times(n, x));
+  if (b.bb) extra.push(times(b.bb, 'BB'));
+  if (b.hbp) extra.push(times(b.hbp, 'HBP'));
+  if (b.sf) extra.push(times(b.sf, 'SF'));
+  if (b.k) extra.push(times(b.k, 'K'));
+  if (b.r) extra.push(times(b.r, 'R'));
+  if (b.rbi) extra.push(times(b.rbi, 'RBI'));
+  return [`${b.h}-${b.ab}`, ...extra].join(', ');
+}
+function pitLine(L, id, pc) {
+  const p = L.pit[id];
+  if (!p || (!p.outs && !p.h && !p.bb && !p.r && !pc)) return 'Has not thrown a pitch yet';
+  return `${Math.floor(p.outs / 3)}.${p.outs % 3} IP, ${p.h} H, ${p.r} R${p.er !== p.r ? ` (${p.er} ER)` : ''}, ${p.bb} BB, ${p.k} K${p.hr ? `, ${times(p.hr, 'HR')}` : ''} · ${pc} P`;
+}
+const slotWord = (n) => (n ? `Bats ${ord(n)}` : '');
+
+function basesSVG(b, size = 38) {
+  const sq = (x, y, on) => `<rect x="${x}" y="${y}" width="10" height="10" transform="rotate(45 ${x + 5} ${y + 5})" fill="${on ? '#B5824A' : 'none'}" stroke="${on ? '#B5824A' : '#9AA6B2'}" stroke-width="1.6"/>`;
+  return `<svg width="${size}" height="${size * .72}" viewBox="0 0 34 24" role="img" aria-label="Runners: ${['first', 'second', 'third'].filter((_, i) => b[i]).join(', ') || 'none'}">${sq(19, 10, b[0])}${sq(12, 3, b[1])}${sq(5, 10, b[2])}</svg>`;
+}
+const outsWord = (o) => (o === 0 ? 'No outs' : o === 1 ? '1 out' : `${o} outs`);
+const outsHTML = (o) => `<span class="outs" aria-label="${o} out">${[0, 1, 2].map((i) => `<i class="${i < o ? 'on' : ''}"></i>`).join('')}</span>`;
+
+function appHead(v) {
+  const g = v.g;
+  return `<div class="apphead"><span class="apphead__mark" aria-hidden="true">T</span>
+    <div class="apphead__game">${D.logo[g.away.id] ? `<img src="${D.logo[g.away.id]}" alt="">` : ''}${D.logo[g.home.id] ? `<img src="${D.logo[g.home.id]}" alt="">` : ''}<span class="apphead__title">${g.away.abbr} @ ${g.home.abbr}<small>${new Date(g.date + 'T12:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}${g.doubleHeader !== 'N' ? ' · Gm ' + g.gameNumber : ''}</small></span></div>
+    <div class="halfnav"><button type="button" data-act="prevHalf" ${S.half === 0 ? 'disabled' : ''} aria-label="Previous half">‹</button><span>${halfName(v.h)}</span><button type="button" data-act="nextHalf" ${v.nextHalf ? '' : 'disabled'} aria-label="Next half">›</button></div></div>`;
+}
+
+function band(v) {
+  const g = v.g;
+  const rows = ['away', 'home'].map((s) => `<div class="${s === v.bat ? 'is-up' : ''}">${D.logo[g[s].id] ? `<img src="${D.logo[g[s].id]}" alt="">` : '<span></span>'}<span>${g[s].abbr}<span class="absp" title="ABS challenges left: ${v.bank[s]}" aria-label="${v.bank[s]} ABS challenges left">${[0, 1].map((k) => `<i class="${k < v.bank[s] ? 'on' : ''}"></i>`).join('')}</span></span><span class="r">${v.score[s]}</span></div>`).join('');
+  let foot;
+  if (v.done) {
+    const t = v.half, l = v.h.line;
+    foot = `<div class="band__tally num">${[['R', l.r], ['H', l.h], ['E', l.e], ['LOB', l.lob]].map(([k, x]) => `<div><b>${x}</b><span>${k}</span></div>`).join('')}${[['P', t.p], ['WH', t.wh], ['FO', t.fo]].map(([k, x], i) => `<div class="${i === 0 ? 'gap' : ''}"><b>${x}</b><span>${k}</span></div>`).join('')}</div>`;
+  } else {
+    const nx = v.next;
+    foot = `<div class="band__now"><b class="num">${nx.pitcher.pcBefore} ${nx.pitcher.pcBefore === 1 ? 'pitch' : 'pitches'}</b></div>`;
+  }
+  return `<div class="band"><div class="band__row"><div class="band__score num">${rows}</div><div class="band__inn" aria-label="${halfLong(v.h)}"><i aria-hidden="true">${v.h.half === 'top' ? '▲' : '▼'}</i><b>${v.h.inning}</b></div><div class="band__sit">${basesSVG(v.bases)}${outsHTML(v.outs)}</div></div>${foot}</div>`;
+}
+
+/* notices: what changed before the next pitch (pre-pitch facts, ADR-0010) */
+function notices(v) {
+  const nx = v.next;
+  if (!nx) return '';
+  const cards = [];
+  const quiet = [];
+  for (const p of nx.pre) {
+    const t = p.eventType;
+    if (t === 'pitching_substitution') {
+      const m = p.text.match(/: (.+) replaces (.+)\.$/);
+      cards.push(`<div class="notice">${img(p.playerId)}<div><div class="notice__eyebrow">Pitching change · ${esc(v.g[v.fld].abbr)}</div><div class="notice__main">${esc(nx.pitcher.last)} <small>for ${esc(m ? m[2].split(' ').slice(-1)[0] : '')}</small></div><div class="notice__how">#${esc(nx.pitcher.jersey)} · ${nx.pitcher.hand}HP. Rule across the top of the next box: <b>${esc(nx.pitcher.jersey)}</b></div></div></div>`);
+    } else if (t === 'pinch_hitting') {
+      const m = p.text.match(/Pinch-hitter (.+) replaces (.+)\.$/);
+      cards.push(`<div class="notice">${img(p.playerId)}<div><div class="notice__eyebrow">Pinch hitter · ${esc(v.g[v.bat].abbr)}</div><div class="notice__main">${esc(nx.batter.last)} <small>for ${esc(m ? m[2].split(' ').slice(-1)[0] : '')}</small></div><div class="notice__how">${slotWord(nx.batter.slot)} · #${esc(nx.batter.jersey)}. Rule down the left of this box: <b>${esc(nx.batter.jersey)}</b></div></div></div>`);
+    } else if (t === 'pinch_running') {
+      const m = p.text.match(/Pinch-runner (.+) replaces (.+)\.$/);
+      const pr = nx.sealedRunners.find((r) => r.box.prJersey);
+      cards.push(`<div class="notice">${img(p.playerId)}<div><div class="notice__eyebrow">Pinch runner · ${esc(v.g[v.bat].abbr)}</div><div class="notice__main">${esc(m ? m[1].split(' ').slice(-1)[0] : '')} <small>for ${esc(m ? m[2].split(' ').slice(-1)[0] : '')}</small></div><div class="notice__how">${pr ? `Mark <b>PR ${esc(pr.box.prJersey)}</b> by ${BASE[pr.box.prBase]} on ${esc(pr.who.last)}’s box.` : esc(p.text)}</div></div></div>`);
+    } else if (t === 'mound_visit') {
+      quiet.push('Mound visit');
+    } else {
+      quiet.push(esc(p.text));
+    }
+  }
+  const placed = v.n === 0 ? nx.sealedRunners.find((r) => r.box.placedAt != null) : null;
+  if (placed) cards.push(`<div class="notice">${img(placed.who.id)}<div><div class="notice__eyebrow">Automatic runner · ${esc(v.g[v.bat].abbr)}</div><div class="notice__main">${esc(placed.who.last)} <small>on ${BASE[placed.base]}</small></div><div class="notice__how">Write <b>AR</b> in his box and dot the path to ${BASE[placed.base]}. His run is unearned.</div></div></div>`);
+  if (!cards.length && v.n === 0) {
+    const pi = nx.pitcher;
+    cards.push(`<div class="notice notice--now">${img(pi.id)}<div><div class="notice__eyebrow">Now pitching · ${esc(v.g[v.fld].abbr)}</div><div class="notice__main">${esc(pi.last)} <small>#${esc(pi.jersey)} · ${pi.hand}HP</small></div>${pi.pcBefore ? '' : '<div class="notice__how">First pitch of his day</div>'}</div></div>`);
+  }
+  const q = quiet.length ? `<div class="notice notice--quiet"><div class="notice__how">${[...new Set(quiet)].map((x) => x === 'Mound visit' && quiet.filter((y) => y === x).length > 1 ? `Mound visit ×${quiet.filter((y) => y === x).length}` : x).join('<br>')}</div></div>` : '';
+  if (!cards.length && !q) return '';
+  return `<div class="notices">${cards.join('')}${q}</div>`;
+}
+
+const codeOf = (s) => s.box.looking ? '<span class="kback">K</span>' : esc(s.code || s.box.outcome || '—');
+const codeCls = (s) => 'c--' + (s.box.looking ? 'out' : (s.codeKind || 'out'));
+function trail(v) {
+  const tiles = v.revealed.map((s, i) => { const isCur = i === v.n - 1 && !v.done; return `<span class="tile ${isCur ? 'is-cur' : ''}"><span class="c ${isCur ? '' : codeCls(s)}">${codeOf(s)}</span><span class="n">${esc(s.batter.last)}</span>${s.box.outNumber ? `<sup>${s.box.outNumber}</sup>` : ''}</span>`; }).join('');
+  const sealed = v.next ? `<span class="tile is-sealed" aria-label="Next at-bat, sealed"><span class="c">?</span><span class="n">Next</span></span>` : '';
+  return `<div class="trail">${tiles}${sealed}</div>`;
+}
+
+function handover(s) {
+  const pj = s.pre.some((p) => p.eventType === 'pitching_substitution') ? s.pitcher.jersey : null;
+  const bj = s.pre.some((p) => p.eventType === 'pinch_hitting') ? s.batter.jersey : null;
+  return { pitcherJersey: pj, subJersey: bj };
+}
+function heroWho(v, a, sealed) {
+  const L = dayLines(v);
+  const pc = sealed ? a.pitcher.pcBefore : a.pitcher.pcAfter;
+  return `<div class="hero__who"><div class="hero__name">${img(a.batter.id)}<div><b>${esc(a.batter.last)}</b><span>${[slotWord(a.batter.slot), esc(a.batter.pos), a.batter.jersey ? '#' + esc(a.batter.jersey) : ''].filter(Boolean).join(' · ')}</span></div></div>
+    <div class="hero__line"><span>Today</span>${esc(batLine(L, a.batter.id))}</div>
+    <div class="hero__vs">${img(a.pitcher.id)}<div>vs <b>${esc(a.pitcher.last)}</b> #${esc(a.pitcher.jersey)} · ${a.pitcher.hand}HP${sealed ? '' : `<br>${a.track.length} pitch${a.track.length === 1 ? '' : 'es'} this at-bat`}</div></div>
+    <div class="hero__line"><span>Today</span>${esc(pitLine(L, a.pitcher.id, pc))}</div></div>`;
+}
+function hero(v) {
+  // The hero holds the last revealed box until the next tap (ADR-0043's held
+  // state); before the half's first tap it is a kraft seal naming the batter.
+  const showing = v.cur;
+  const up = v.next;
+  if (!showing && up) {
+    return `<div class="hero"><div class="hero__box"><div class="sc-seal"><div>Sealed</div></div></div>${heroWho(v, up, true)}</div>`;
+  }
+  const a = showing;
+  return `<div class="hero"><div class="hero__box ${S.beat ? 'hero__beat' : ''}">${atBatBox(a.box, { halfend: a.endsHalf, ...handover(a) })}</div>
+    ${heroWho(v, a, false)}</div>`;
+}
+
+function bases(v) {
+  // Three fixed slots read like the field from behind home: 3rd, 2nd, 1st.
+  // A base holds a runner's #22 box, the batter (whose box is the hero), or
+  // nothing. Runners this play took off the bases stand at the left for one
+  // step so the run or the out can be marked.
+  let on = [], gone = [], batterAt = null, moved = new Set(), endsHalf = false;
+  if (v.cur) {
+    on = v.cur.runners; gone = v.cur.departed; endsHalf = v.cur.endsHalf;
+    const b = v.cur.box;
+    if (!endsHalf && b.reached >= 1 && b.reached <= 3 && !b.scored && b.outAt == null) batterAt = b.reached;
+    for (const m of v.cur.mid) for (const x of m.moves) moved.add(x.last);
+  } else if (v.next) on = v.next.sealedRunners;
+  if (!on.length && !gone.length && !batterAt) {
+    return `<div class="bases--empty" role="group" aria-label="Bases empty"><span class="glyphs"><i class="baseglyph"></i><i class="baseglyph"></i><i class="baseglyph"></i></span>Bases empty</div>`;
+  }
+  const slot = (base) => {
+    const r = on.find((x) => x.base === base);
+    if (r) return `<div class="slot ${moved.has(r.who.last) ? 'slot--moved' : ''}"><span class="slot__lab">${esc(r.who.last)}<span>${r.who.slot ? ord(r.who.slot) + ' · ' : ''}${endsHalf ? 'left on ' : 'on '}${BASE[base]}</span></span>${atBatBox(r.box)}</div>`;
+    if (batterAt === base) return `<div class="slot slot--batter"><i class="baseglyph"></i>${BASE[base]}<br>batter</div>`;
+    return `<div class="slot slot--empty"><i class="baseglyph"></i>${BASE[base]}</div>`;
+  };
+  const off = gone.map((d) => `<div class="slot slot--${d.fate}"><span class="slot__lab">${esc(d.who.last)}<span>${d.who.slot ? ord(d.who.slot) + ' · ' : ''}${d.fate === 'scored' ? 'scored' : 'out at ' + BASE[d.box.outAt]}</span></span>${atBatBox(d.box)}</div>`).join('');
+  return `<div class="bases" role="group" aria-label="Runners">${off}${off ? '<span class="bases__div"></span>' : ''}${slot(3)}${slot(2)}${slot(1)}</div>`;
+}
+
+function midLabel(m) { return m.pickoff ? (m.n > 0 ? `After pitch ${m.n}` : 'Before pitch 1') : `Pitch ${Math.max(m.n, 1)}`; }
+const OPP = { 'Ball': 'called strike', 'Called Strike': 'ball', 'Ball In Dirt': 'called strike' };
+function absLine(v, p, i) {
+  const club = v.g[p.ch.side].abbr, ok = p.ch.outcome === 'success';
+  const now = /strike/i.test(p.desc) ? 'called strike' : 'ball';
+  const was = ok ? (now === 'ball' ? 'called strike' : 'ball') : now;
+  return `<span class="ev"><em>Pitch ${i + 1} · ABS</em>${esc(p.ch.who)} (${club}) challenged a ${was}. <b class="${ok ? 'ok' : 'no'}">${ok ? `Overturned to ${now}` : 'Call stands'}</b>.</span>`;
+}
+function track(v) {
+  const a = v.cur;
+  if (!a) {
+    return `<div class="track track--sealed"><div class="track__h"><span>Pitches</span></div><div class="track__lanes"><div class="track__labels"><span>BALLS</span><span>STRIKES</span><span></span></div><span class="track__cols"></span></div></div>`;
+  }
+  const flagsAt = new Map();
+  for (const m of a.mid) { const k = m.pickoff ? m.n : Math.max(m.n, 1); if (!flagsAt.has(k)) flagsAt.set(k, []); flagsAt.get(k).push(m); }
+  const flag = (k) => flagsAt.has(k) ? `<span class="tflag"><span>${flagsAt.get(k).flatMap((m) => m.moves.map((x) => x.code.split(' ')[0])).join('·')}</span></span>` : '';
+  let cols = flag(0);
+  a.track.forEach((p, i) => {
+    const abs = p.ch ? ` pp--abs-${p.ch.outcome}` : '';
+    const pipH = `<span class="pp${p.label === 'X' ? ' pp--x' : ''}${abs}" title="${esc(p.desc)} · ${esc(p.type || '')} ${p.mph ?? ''}">${esc(p.label)}</span>`;
+    cols += `<span class="tcol" style="animation-delay:${i * 45}ms"><span class="lane-b">${p.side === 'ball' ? pipH : ''}</span><span class="lane-s">${p.side === 'strike' ? pipH : ''}</span><small>${p.label === 'X' ? '' : `${p.b}-${p.s}`}</small></span>`;
+    cols += flag(i + 1);
+  });
+  const lines = [];
+  for (const m of a.mid) lines.push(`<span class="ev"><em>${midLabel(m)}</em>${m.moves.map((x) => `${esc(x.last)} <b class="${x.out ? 'no' : ''}">${esc(x.code)}</b> ${x.out ? `out at ${BASE[x.outBase] || ''}` : `${BASE[x.from] || ''} → ${BASE[x.to] || ''}`}`).join(' · ')}${m.review ? ` · ${m.review.by === 'crew' ? 'Crew chief review' : esc(v.g[m.review.by].abbr) + ' challenged'} (${esc(m.review.what)}): <b class="${m.review.overturned ? 'ok' : 'no'}">${m.review.overturned ? 'overturned' : 'upheld'}</b>` : ''}</span>`);
+  a.track.forEach((p, i) => { if (p.ch) lines.push(absLine(v, p, i)); });
+  const t = { p: a.track.length, wh: a.track.filter((p) => p.cat === 'whiff').length, fo: a.track.filter((p) => p.cat === 'foul').length };
+  const hasLoc = a.track.some((p) => p.px != null);
+  return `<button type="button" class="track" data-sheet="pitches" aria-label="Pitches: open the strike zone">
+    <span class="track__h"><span>Pitches</span>${hasLoc ? '<span>Tap for the zone ›</span>' : ''}</span>
+    <span class="track__lanes"><span class="track__labels"><span>BALLS</span><span>STRIKES</span><span></span></span><span class="track__cols">${cols}</span></span>
+    ${lines.length ? `<span class="track__events">${lines.join('')}</span>` : ''}
+    <span class="track__foot num"><span>This at-bat · <b>${t.p}</b> P · <b>${t.wh}</b> WH · <b>${t.fo}</b> FO</span><span>Half · <b>${v.half.p}</b> · <b>${v.half.wh}</b> · <b>${v.half.fo}</b></span></span>
+  </button>`;
+}
+
+function play(v) {
+  const a = v.cur;
+  if (!a) return '';
+  const h = a.hit;
+  const bip = h && h.ev != null ? `<div class="bip"><span><b>${h.ev}</b> mph</span>${h.la != null ? `<span><b>${h.la}°</b></span>` : ''}${h.dist ? `<span><b>${h.dist}</b> ft</span>` : ''}${h.traj ? `<span>${esc(h.traj.replace(/_/g, ' '))}</span>` : ''}</div>` : '';
+  const rv = a.review;
+  const card = rv ? `<div class="review"><span class="review__eyebrow">${rv.by === 'crew' ? 'Crew chief review' : `Manager challenge · ${esc(v.g[rv.by].abbr)}`}</span><span class="review__main">${esc(rv.what)} · <span class="${rv.overturned ? 'ok' : 'no'}">call ${esc(rv.verdict)}</span></span></div>` : '';
+  const desc = rv ? a.desc.replace(/^.*?call on the field was \w+: /, '') : a.desc;
+  return `<div class="play">${card}<p>${esc(desc)}</p>${bip}</div>`;
+}
+
+function linescore(v) {
+  const n = Math.max(9, ...v.g.halves.map((x) => x.inning));
+  const cols = Array.from({ length: n }, (_, i) => i + 1);
+  const row = (side) => `<tr><td>${v.g[side].abbr}</td>${cols.map((c) => { const val = v.line[side][c - 1]; return `<td class="${val == null ? 'dot' : ''} ${side === v.bat && c === v.h.inning ? 'is-cur' : ''}">${val == null ? '·' : val}</td>`; }).join('')}<td class="tot tot-first">${v.score[side]}</td><td class="tot">${v.H[side]}</td><td class="tot">${v.E[side]}</td></tr>`;
+  return `<table class="ls num" aria-label="Running line"><thead><tr><th></th>${cols.map((c) => `<th>${c}</th>`).join('')}<th class="tot tot-first">R</th><th class="tot">H</th><th class="tot">E</th></tr></thead><tbody>${row('away')}${row('home')}</tbody></table>`;
+}
+
+function refbar() {
+  return `<div class="refbar">${[['lineups', 'Lineups'], ['field', 'Field'], ['pitches', 'Pitches']].map(([k, l]) => `<button type="button" data-sheet="${k}" aria-expanded="${S.sheet === k}">${l}</button>`).join('')}</div>`;
+}
+// The zone, drawn like the app's StrikeZone: the broadcast camera behind the
+// pitcher (x mirrored), plate half-width 0.708 ft, this batter's own zone.
+const ZW = 190, ZH = 238, ZPAD = 6, DX = [-1.55, 1.55], DZ = [0.4, 4.6];
+const zx = (px) => ZPAD + ((-px - DX[0]) / (DX[1] - DX[0])) * (ZW - 2 * ZPAD);
+const zy = (pz) => ZPAD + ((DZ[1] - pz) / (DZ[1] - DZ[0])) * (ZH - 2 * ZPAD);
+function zoneSheet(v) {
+  const a = v.cur;
+  if (!a) return `<p class="sheet__note">The pitch locations open with the at-bat.</p>`;
+  const pts = a.track.filter((p) => p.px != null);
+  if (!pts.length) return `<p class="sheet__note">No pitch tracking in this park.</p>`;
+  const med = (k) => { const xs = pts.map((p) => p[k]).filter((x) => x != null).sort((m, n) => m - n); return xs[xs.length >> 1]; };
+  const top = med('top'), bot = med('bot'), E = 0.708;
+  const x0 = zx(E), x1 = zx(-E), y0 = zy(top), y1 = zy(bot);
+  const grid = [1, 2].map((k) => `<line x1="${x0 + (x1 - x0) * k / 3}" y1="${y0}" x2="${x0 + (x1 - x0) * k / 3}" y2="${y1}" stroke="#CBC1A7"/><line x1="${x0}" y1="${y0 + (y1 - y0) * k / 3}" x2="${x1}" y2="${y0 + (y1 - y0) * k / 3}" stroke="#CBC1A7"/>`).join('');
+  const STEP = 650;
+  const dots = a.track.map((p, i) => {
+    if (p.px == null) return '';
+    const cx = zx(p.px), cy = zy(p.pz);
+    const dx = (ZW / 2 - cx).toFixed(1), dy = (ZH * 0.38 - cy).toFixed(1);
+    const ring = p.ch ? `<circle r="12" cx="${cx}" cy="${cy}" class="${p.ch.outcome === 'success' ? 'ring-ok' : 'ring-no'}"/>` : '';
+    return `<g class="dot ${p.side === 'strike' ? 'is-strike' : ''} ${p.label === 'X' ? 'is-x' : ''}" style="--dx:${dx}px;--dy:${dy}px;animation-delay:${i * STEP}ms">${ring}<circle r="9" cx="${cx}" cy="${cy}"/><text x="${cx}" y="${cy + 3.5}" text-anchor="middle">${esc(p.label)}</text></g>`;
+  }).join('');
+  const svg = `<svg viewBox="0 0 ${ZW} ${ZH}" role="img" aria-label="Pitch locations, broadcast view"><rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="#FBF6E9" stroke="#3C4A5A" stroke-width="1.5"/>${grid}<path d="M${zx(E)} ${ZH - 16} L${zx(-E)} ${ZH - 16} L${zx(-E)} ${ZH - 11} L${ZW / 2} ${ZH - 5} L${zx(E)} ${ZH - 11} Z" fill="#FFFDF6" stroke="#938C7C"/>${dots}</svg>`;
+  const list = a.track.map((p, i) => `<li style="animation-delay:${i * STEP}ms"><b>${esc(p.label)}</b><span>${esc(p.desc)}<small>${esc(p.type || '')}${p.mph ? ' · ' + p.mph : ''}${p.ch ? ` · ABS ${p.ch.outcome === 'success' ? 'overturned' : 'stands'}` : ''}</small></span><em>${p.label === 'X' ? '' : `${p.b}-${p.s}`}</em></li>`).join('');
+  return `<div class="zone" data-replay="${S.replay || 0}">${svg}<ol class="zlist">${list}</ol></div>
+    <div class="zone__foot"><span class="sheet__note">${esc(a.batter.last)} vs ${esc(a.pitcher.last)} · broadcast view, from behind the pitcher</span><button type="button" class="replay" data-replay>Replay</button></div>`;
+}
+function lineupCard(list, side, v, mark) {
+  const rows = list.map((s) => {
+    const live = s.entries.filter((e) => !e.replaced), gone = s.entries.filter((e) => e.replaced);
+    const top = live[live.length - 1] || s.entries[s.entries.length - 1];
+    const cls = mark && mark.slot === s.slot ? mark.cls : '';
+    return `<div class="lu__row ${cls}"><span class="s">${s.slot}</span><span class="nm">${gone.map((e) => `<s>${esc(e.last)}</s>`).join('')}${top.inning ? `<i>${esc(top.last)}<small>in ${ord(top.inning)}</small></i>` : `<span>${esc(top.last)}</span>`}</span><span class="p">${esc(top.pos)}</span><span class="j">#${esc(top.jersey)}</span></div>`;
+  }).join('');
+  return `<div class="lu"><div class="lu__h">${esc(v.g[side].name)}<span>${side === v.bat ? 'batting' : 'in the field'}</span></div>${rows}</div>`;
+}
+const SPOTS = { LF: [21, 14], CF: [50, 4], RF: [79, 14], SS: [32, 40], '2B': [68, 40], '3B': [17, 58], '1B': [83, 58], P: [50, 56], C: [50, 84] };
+function fieldCard(v) {
+  const spots = v.h.defense.map((p) => {
+    const at = SPOTS[p.pos]; if (!at) return '';
+    const live = p.entries.filter((e) => !e.replaced), top = live[live.length - 1] || p.entries[p.entries.length - 1];
+    const gone = p.entries.filter((e) => e.replaced);
+    return `<span class="spot" style="left:${at[0]}%;top:${at[1]}%"><em>${p.pos}</em>${gone.map((e) => `<s>${esc(e.last)}</s>`).join('')}${top.inning ? `<i>${esc(top.last)}</i>` : esc(top.last)}</span>`;
+  }).join('');
+  const svg = `<svg viewBox="0 0 400 300" preserveAspectRatio="none" aria-hidden="true"><path d="M200 290 L20 110 Q200 -60 380 110 Z" fill="#D8E6C9" stroke="#80A376" stroke-width="3"/><path d="M200 280 L120 200 L200 120 L280 200 Z" fill="#D6AA83"/><path d="M200 262 L136 200 L200 138 L264 200 Z" fill="#A6C393"/><circle cx="200" cy="200" r="11" fill="#D6AA83"/></svg>`;
+  return `<div class="field">${svg}${spots}</div>`;
+}
+function sheet(v) {
+  if (!S.sheet) return '';
+  const upSlot = v.next ? v.next.batter.slot : null, atSlot = v.cur && !v.done ? v.cur.batter.slot : null;
+  const body = S.sheet === 'pitches' ? zoneSheet(v) : S.sheet === 'lineups'
+    ? `${lineupCard(v.h.lineup, v.bat, v, upSlot ? { slot: upSlot, cls: 'is-up' } : atSlot ? { slot: atSlot, cls: 'is-at' } : null)}${lineupCard(v.h.lineupOpp, v.fld, v, null)}<p class="sheet__note">As they stood entering the ${halfLong(v.h).toLowerCase()}. Struck names left the game; red names came in.</p>`
+    : `${fieldCard(v)}<p class="sheet__note">${esc(v.g[v.fld].name)} in the field, entering the ${halfLong(v.h).toLowerCase()}. Red names are new to the position this inning.</p>`;
+  return `<button class="scrim" type="button" data-sheet="close" aria-label="Close"></button><div class="sheet" role="dialog" aria-label="Reference"><div class="sheet__head"><div class="sheet__tabs">${[['lineups', 'Lineups'], ['field', 'Field'], ['pitches', 'Pitches']].map(([k, l]) => `<button type="button" data-sheet="${k}" aria-pressed="${S.sheet === k}">${l}</button>`).join('')}</div><button class="sheet__close" type="button" data-sheet="close" aria-label="Close">×</button></div><div class="sheet__body">${body}</div></div>`;
+}
+
+function bar(v) {
+  if (v.done) return `<div class="bar"><button type="button" class="go is-next-half" data-act="nextHalf" ${v.nextHalf ? '' : 'disabled'}>${v.nextHalf ? halfLong(v.nextHalf) + ' ›' : 'Final'}</button></div>`;
+  return `<div class="bar"><button type="button" class="go" data-act="next">Next at-bat</button></div>`;
+}
+
+function harmonized(v) {
+  return `<div class="phone"><div class="screen ${S.anim ? 'anim' : ''}">${appHead(v)}<div class="scroll">${band(v)}${notices(v)}${trail(v)}${hero(v)}${bases(v)}${track(v)}${play(v)}${refbar()}${linescore(v)}</div>${sheet(v)}${bar(v)}</div></div>`;
+}
+function todayPhone() {
+  return `<div class="phone"><div class="screen"><div class="scroll today" style="padding:0">${TODAY ? `<img src="${TODAY}" alt="Today's innings viewer at 390px">` : ''}</div></div></div>`;
+}
+
+/* ---------------------------------------------------------------- notes */
+const VERDICTS = [
+  ['S1', 'k'], ['S2', 'k'], ['S3', 'k'], ['S4', 'k'], ['A1', 'k'], ['A2', 'a'], ['A3', 'd'], ['A4', 'a'], ['A5', 'k'],
+  ['B1', 'a'], ['B2', 'd'], ['B3', 'd'], ['B4', 'd'], ['C1', 'd'], ['C2', 'a'], ['C3', 'd'], ['C4', 'd'], ['D1', 'd'], ['D2', 'a'], ['D3', 'a'],
+];
+function notesHTML(v) {
+  const moments = [];
+  v.g.halves.forEach((h, hi) => h.steps.forEach((s, si) => {
+    const tags = [];
+    for (const m of s.mid) for (const x of m.moves) tags.push(x.code.split(' ')[0]);
+    for (const p of s.pre) if (/pitching_substitution|pinch_hitting|pinch_running/.test(p.eventType)) tags.push({ pitching_substitution: 'Pitching change', pinch_hitting: 'PH', pinch_running: 'PR' }[p.eventType]);
+    if (s.track.some((p) => p.ch)) tags.push('ABS');
+    if (s.review) tags.push(s.review.by === 'crew' ? 'Crew review' : 'Challenge');
+    if (s.mid.some((m) => m.review)) tags.push('Challenge');
+    if (si === 0 && s.sealedRunners.some((r) => r.box.placedAt != null)) tags.push('AR');
+    if (s.box.kind === 'interrupted') tags.push('Ends mid-AB');
+    if (tags.length) moments.push({ hi, si, label: `${halfName(h)} · ${s.batter.last}`, tags: [...new Set(tags)].join(' ') });
+  }));
+  return `<h2>H · Harmonized</h2>
+    <p class="lede">One screen built for copying onto the Numbers Game #22. The batter’s box and every runner’s box use the same marks as the app’s live #22 scorecard and Express Lane, from the same code. Steals, pickoffs, balks and wild pitches show on the runner’s own box, at the pitch they happened on.</p>
+    <h3>Jump to a moment in this game</h3>
+    <div class="jump">${moments.map((m) => `<button type="button" data-jump="${m.hi}:${m.si}"><b>${esc(m.tags)}</b>${esc(m.label)}</button>`).join('') || '<span class="sheet__note">No baserunning events or substitutions in this game.</span>'}</div>
+    <p class="guard">A jump stops just before that at-bat, sealed, so you can read the notices first and then tap Next.</p>
+    <h3>Top to bottom</h3>
+    <ul class="chg">
+      <li><span class="id">S1·A1</span><div><b>Header and console band</b><p>One-row header. The band holds score, inning, bases and outs, then who is up and the pitcher’s count. At the end of a half it shows the #22 foot row: R H E LOB, then P WH FO.</p></div></li>
+      <li><span class="id">S4 new</span><div><b>Notice cards</b><p>Pitching changes, pinch hitters and pinch runners get a card that says what to write: the jersey number for the rule across the top of the box, the rule down its left edge, or PR by the base. Defensive switches and mound visits get one quiet line. At the start of a half with no change, a Now Pitching card.</p></div></li>
+      <li><span class="id">A2</span><div><b>Trail</b><p>Each tile has the code, the name and the circled out number. The next at-bat is a sealed tile that says only "Next".</p></div></li>
+      <li><span class="id">new</span><div><b>Names, slots and numbers</b><p>The batter is named once, in the card. A batting-order slot always reads as an ordinal ("Bats 2nd") and a uniform number always carries # ("#12"), so the two cannot be confused.</p></div></li>
+      <li><span class="id">new</span><div><b>Today's lines</b><p>Under the batter: his line so far, box-score style ("1-2, 2B, BB, RBI"). Under the pitcher: IP, H, R (ER when different), BB, K and pitches. Both count only at-bats you have revealed, so they never run ahead of you. Runs go to the pitcher responsible for the runner, as the feed charges them.</p></div></li>
+      <li><span class="id">B1·D2</span><div><b>The batter’s #22 box</b><p>The app’s own AtBatBox at 1.6×: outcome box, RBI box, diamond with the fielding chain, out circle, ball and strike strip, the end-of-half slash and the red handover rules. Before the tap it is a kraft seal with the batter’s name.</p></div></li>
+      <li><span class="id">new</span><div><b>The bases</b><p>Three slots in field order: 3rd, 2nd, 1st. An occupied base holds that runner’s #22 box, with a kraft ring if he moved during this at-bat. An empty base is a small dashed glyph, and the batter’s own base points to his box above. With nobody on, the whole strip folds to one line. A runner who scored or was put out stands at the left for one step, ringed green or red.</p></div></li>
+      <li><span class="id">A4</span><div><b>Pitch track</b><p>The #22 strip on its side: pitch numbers in the ball lane or the strike lane, and X for the ball in play. Nothing else on the pips. A kraft flag marks a steal, pickoff, balk or wild pitch at the pitch it happened. An ABS challenge rings its pitch, green if overturned and red if the call stood, with a line that names who challenged.</p></div></li>
+      <li><span class="id">C2</span><div><b>Tap the track for the zone</b><p>Opens the strike zone from the broadcast camera, the way the app’s own StrikeZone draws it. The pitches come in one at a time, in order, with the list beside them. Replay runs it again. On a keyboard, press P.</p></div></li>
+      <li><span class="id">new</span><div><b>Challenges and reviews</b><p>The band shows each club’s ABS challenges left as two pips, counted only through what you have revealed. A manager challenge or crew-chief review of the play gets a card above the play sentence: what was reviewed and whether the call stood. A challenge during an at-bat, such as a tag on a steal, goes on that event’s line.</p></div></li>
+      <li><span class="id">A5</span><div><b>Play sentence</b><p>The feed’s description and a quiet batted-ball line.</p></div></li>
+      <li><span class="id">rails</span><div><b>Lineups and Field</b><p>Two chips open a sheet. Lineups shows both clubs as they stood entering the half, with the next batter highlighted. Field shows the defense on a diamond. Substitutes show in red, and the players they replaced are struck through.</p></div></li>
+      <li><span class="id">S3·S2</span><div><b>Running line and the bar</b><p>The linescore fits at 390px. One button, "Next at-bat", centered. Rest of half is gone, so a stray tap can never skip ahead.</p></div></li>
+    </ul>
+    <h3>Runner marks</h3>
+    <div class="tablewrap"><table class="notation"><thead><tr><th>Event</th><th>Mark</th><th>Note</th></tr></thead><tbody>
+      <tr><td>Stolen base</td><td>SB</td><td>At the base reached, no slot number.</td></tr>
+      <tr><td>Caught stealing</td><td>CS 2-6</td><td>Red tick on the path, out number circled.</td></tr>
+      <tr><td>Pickoff</td><td>PK 1-3</td><td class="flag">Convention choice: the app uses PK, not PO, because PO also means putout and pop-out.</td></tr>
+      <tr><td>Pickoff, caught stealing</td><td>PKCS 1-3-6</td><td class="flag">Not in the app yet. Today it collapses to PK. Recommended.</td></tr>
+      <tr><td>Balk / WP / PB / DI</td><td>BK · WP · PB · DI</td><td>No slot number.</td></tr>
+      <tr><td>Advanced by batter</td><td>1B⁴ · GO⁵</td><td class="flag">Convention choice: code plus the batter’s slot. Some scorers write the slot alone.</td></tr>
+      <tr><td>Scored</td><td>Solid diamond</td><td>Red outline if unearned. RBI goes in the batter’s box.</td></tr>
+      <tr><td>Error</td><td>E2</td><td class="flag">Check this: the E2 after Cox’s steal (MIN @ SF, bottom 1st) carries the batter’s slot. That may be a bug in the app’s leg codes.</td></tr>
+      <tr><td>Left on base</td><td>(path ends)</td><td>LOB counts in the foot row; the slash goes on the box that closed the half.</td></tr>
+    </tbody></table></div>
+    <h3>What came from round 1</h3>
+    <div class="verdicts">${VERDICTS.map(([id, k]) => `<span class="${k}" title="${k === 'k' ? 'kept' : k === 'a' ? 'adapted' : 'dropped'}">${id}</span>`).join('')}</div>
+    <p class="guard">Green: kept. Amber: adapted. Struck: dropped. Dropped: the code inside a drawn diamond (A3), the inning column (B2), the handwriting face (B3), the Retrosheet letters (B4), the night theme, banner and spray chart (C1, C3, C4), and the index cards (D1).</p>
+    <p class="guard">Spoiler rule: every box and runner path is built at the current step, never ahead. Moves during an at-bat appear only when you reveal that at-bat, and the Next button reads the same whether or not the next at-bat ends the half.</p>`;
+}
+
+/* ---------------------------------------------------------------- mount */
+function render() {
+  const v = viewOf();
+  S.n = v.n;
+  const phones = S.view === 'T' ? [['Today', todayPhone()]] : S.view === 'HT' ? [['H · Harmonized', harmonized(v)], ['Today (Jul 7, top 1st)', todayPhone()]] : [['', harmonized(v)]];
+  document.getElementById('phones').innerHTML = phones.map(([tag, html]) => `<div class="phonecol">${tag ? `<span class="phonecol__tag">${tag}</span>` : ''}${html}</div>`).join('');
+  document.getElementById('notes').innerHTML = notesHTML(v);
+  document.querySelectorAll('#views button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === S.view)));
+  document.getElementById('gameSel').value = S.g;
+  const hs = document.getElementById('halfSel');
+  hs.innerHTML = v.g.halves.map((h, i) => `<option value="${i}">${halfLong(h)} · ${h.steps.length} PA</option>`).join('');
+  hs.value = S.half;
+  document.getElementById('back').disabled = S.n === 0;
+  document.getElementById('sub').textContent = `Round 2: one harmonized screen, built for filling in a Numbers Game #22. Real plays from three games. ${GAME_LABEL[v.g.pk] || ''}. Now: ${halfLong(v.h)}, ${v.n} of ${v.N} revealed.`;
+  S.anim = false; S.beat = false;
+  store.set('view', S.view); store.set('g', S.g); store.set('half', S.half); store.set('n', S.n);
+}
+function act(a) {
+  const N = G().halves[S.half].steps.length;
+  if (a === 'next' && S.n < N) { S.n++; S.anim = true; S.beat = true; }
+  else if (a === 'back') S.n = Math.max(0, S.n - 1);
+  else if (a === 'reset') S.n = 0;
+  else if (a === 'nextHalf' && S.half < G().halves.length - 1) { S.half++; S.n = 0; }
+  else if (a === 'prevHalf' && S.half > 0) { S.half--; S.n = 0; }
+  render();
+}
+document.getElementById('views').innerHTML = [['H', 'H · Harmonized'], ['HT', 'H beside today'], ['T', 'Today']].map(([k, l]) => `<button type="button" data-v="${k}" aria-pressed="false">${l}</button>`).join('');
+document.getElementById('views').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { S.view = b.dataset.v; render(); } });
+document.getElementById('gameSel').innerHTML = D.games.map((g, i) => `<option value="${i}">${esc(GAME_LABEL[g.pk] || `${g.away.abbr} @ ${g.home.abbr}`)}</option>`).join('');
+document.getElementById('gameSel').addEventListener('change', (e) => { S.g = +e.target.value; S.half = 0; S.n = 0; S.sheet = null; render(); });
+document.getElementById('halfSel').addEventListener('change', (e) => { S.half = +e.target.value; S.n = 0; render(); });
+document.getElementById('back').addEventListener('click', () => act('back'));
+document.getElementById('reset').addEventListener('click', () => act('reset'));
+document.getElementById('phones').addEventListener('click', (e) => {
+  if (e.target.closest('[data-replay]') && e.target.closest('button')) { const z = document.querySelector('.zone'); if (z) { const c = z.cloneNode(true); z.replaceWith(c); } return; }
+  const sh = e.target.closest('[data-sheet]');
+  if (sh) { S.sheet = sh.dataset.sheet === 'close' ? null : (S.sheet === sh.dataset.sheet && (sh.closest('.refbar') || sh.classList.contains('track')) ? null : sh.dataset.sheet); render(); return; }
+  const b = e.target.closest('[data-act]'); if (b && !b.disabled) act(b.dataset.act);
+});
+document.getElementById('notes').addEventListener('click', (e) => { const b = e.target.closest('[data-jump]'); if (!b) return; const [hi, si] = b.dataset.jump.split(':').map(Number); S.half = hi; S.n = si; S.sheet = null; if (S.view === 'T') S.view = 'H'; render(); document.getElementById('phones').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('select, input, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); act('next'); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); act('back'); }
+  else if (e.key === ']') act('nextHalf');
+  else if (e.key === '[') act('prevHalf');
+  else if (e.key === 'l' || e.key === 'L') { S.sheet = S.sheet === 'lineups' ? null : 'lineups'; render(); }
+  else if (e.key === 'f' || e.key === 'F') { S.sheet = S.sheet === 'field' ? null : 'field'; render(); }
+  else if (e.key === 'p' || e.key === 'P') { S.sheet = S.sheet === 'pitches' ? null : 'pitches'; render(); }
+  else if (e.key === 'Escape') { S.sheet = null; render(); }
+});
+render();
+</script>
