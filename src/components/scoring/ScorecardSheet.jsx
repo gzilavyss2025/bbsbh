@@ -131,6 +131,9 @@ export function ScorecardSheet({
   // box, which keeps a bracket until the next tap.
   edge = false,
   lastOpened = null,
+  // The card docked under the frame (lens only): the Entering card or the
+  // new-pitcher notice. LensFrame places it, as it places the frame.
+  dock = null,
 }) {
   const inLens = lens === 'lens'
   // Normalize both modes to a flat column list: each column knows its header
@@ -505,7 +508,7 @@ export function ScorecardSheet({
           </tfoot>
         </table>
       </div>
-      {inLens && <LensFrame frame={lensGeom?.frame} />}
+      {inLens && <LensFrame frame={lensGeom?.frame} dock={dock} />}
     </div>
   )
 }

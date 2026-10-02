@@ -39,12 +39,20 @@
   color: var(--text-body);
 }
 
-/* The situation row. The pitcher button takes its right side in L5. A block,
-   not a flex box: text-overflow puts no ellipsis on a flex box's own text, so
-   a long totals line would be cut with no sign. The line height centres it. */
-.sc-lensbar__situation {
-  margin: 0;
+/* The situation row: the situation on the left, the pitcher button on the
+   right. The situation is a block, not a flex box: text-overflow puts no
+   ellipsis on a flex box's own text, so a long totals line would be cut with
+   no sign. The line height centres it. */
+.sc-lensbar__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   height: var(--tap-min);
+}
+.sc-lensbar__situation {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
   line-height: var(--tap-min);
   overflow: hidden;
   white-space: nowrap;
@@ -53,6 +61,17 @@
   font-size: var(--fs-small);
   letter-spacing: var(--ls-label);
   color: var(--text-muted);
+}
+/* "Pitching · Torres ›": a bare word at the row's height, its surname
+   underlined. Navy ink, never kraft: it lifts no seal (ADR-0083). */
+.sc-lensbar__pitcher {
+  flex: none;
+  max-width: 55%;
+  padding-inline: var(--space-2);
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
 }
 
 .sc-lensbar__actions {
