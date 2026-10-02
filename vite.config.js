@@ -699,6 +699,14 @@ export default defineConfig({
             method: 'GET',
           },
           {
+            // Matchup Scout's head-to-head (src/api/scout/headToHead.js). The
+            // cutoff date is the only guard against a live read, so the service
+            // worker must not add a cache of its own. Same rule as ADR-0004.
+            urlPattern: ({ url }) => url.hostname === 'baseballsavant.mlb.com',
+            handler: 'NetworkOnly',
+            method: 'GET',
+          },
+          {
             // Outdoor weather (see api/weather.js). Never cached so an "actual
             // at first pitch" reading stays live, same as the score endpoints.
             urlPattern: ({ url }) =>

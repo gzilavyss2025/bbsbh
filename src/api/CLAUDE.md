@@ -170,6 +170,8 @@ unit-tested and arguable. `docs/farm-index.md` argues the one that needs it.
 
 `rotation/` holds the likely-starter guess for a game with no announced probable (ADR-0089). `projectedStarters.js` is the pure rule; `liveStarters.js` feeds it live game logs, because `workload.json` is regular-season only. Never hand a card the file's own `apps`.
 
+`scout/` holds the Matchup Scout's data (#1408). `headToHead.js` is the one module so far: Savant's pitch-level CSV for one hitter and pitcher, read from the browser, with a cutoff date, clamped to today in US Pacific, that holds today back. Its header has the output shape and the Savant traps (the 25,000-row cap, the inclusive date bounds, rows with no `plate_x`). Savant is `NetworkOnly` in `vite.config.js`.
+
 `expresslane/` is the newest, and the spoiler line runs BETWEEN its two files
 rather than around them. `rail.js` is reveal-only: it is the ordered, complete
 event list for one half-inning, and its `description` / `result` / `pitch`

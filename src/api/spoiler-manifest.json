@@ -878,6 +878,10 @@
         "screens/scorecard/ScorecardPage.jsx"
       ]
     },
+    "scout/headToHead.js": {
+      "class": "spoiler-free",
+      "why": "Matchup Scout's pitcher-versus-hitter history from Savant's pitch-level CSV. Only games dated before the cutoff (today, or `?d=`): the request sends the day before it as an inclusive bound, so it never reads a live game. An open stat surface (ADR-0034). The service worker serves Savant NetworkOnly (ADR-0004)."
+    },
     "search.js": {
       "class": "spoiler-free",
       "why": "The player/team directory search. Identity fields only."
