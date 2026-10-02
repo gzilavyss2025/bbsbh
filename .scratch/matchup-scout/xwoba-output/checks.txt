@@ -1,0 +1,22 @@
+== (1) hfPR filter vs unfiltered, same day
+  2025-06-15: unfiltered 4294 rows 2.94 MB (text); filtered 743 rows 0.63 MB 0.6s; hit_into_play rows in the unfiltered day 743; same set of pitches: True; descriptions in filtered: {'hit_into_play': 743}
+  2026-05-10: unfiltered 4276 rows 2.93 MB (text); filtered 734 rows 0.63 MB 0.3s; hit_into_play rows in the unfiltered day 734; same set of pitches: True; descriptions in filtered: {'hit_into_play': 734}
+  2026-09-20: unfiltered 4265 rows 2.93 MB (text); filtered 720 rows 0.62 MB 0.3s; hit_into_play rows in the unfiltered day 720; same set of pitches: True; descriptions in filtered: {'hit_into_play': 720}
+
+== (2) walk / hit-by-pitch / strikeout values per season (PA-ending rows, woba_denom = 1)
+  2025 walk          n= 14795 woba_value {0.7: 14795} estimated_woba_using_speedangle {0.6915: 14795}
+  2025 hit_by_pitch  n=  1928 woba_value {0.7: 1928} estimated_woba_using_speedangle {0.7223: 1928}
+  2025 strikeout     n= 40493 woba_value {0.0: 40437, 0.7: 56} estimated_woba_using_speedangle {0.0: 40493}
+  2025 single        woba_value {0.9: 26053}
+  2025 double        woba_value {1.25: 7740}
+  2025 triple        woba_value {1.6: 627}
+  2025 home_run      woba_value {2.0: 5648}
+  2025 field_out     woba_value {0.0: 73990}
+  2026 walk          n= 15760 woba_value {0.7: 15760} estimated_woba_using_speedangle {0.6982: 15760}
+  2026 hit_by_pitch  n=  2117 woba_value {0.7: 2117} estimated_woba_using_speedangle {0.7292: 2117}
+  2026 strikeout     n= 40549 woba_value {0.0: 40497, 0.7: 52} estimated_woba_using_speedangle {0.0: 40549}
+  2026 single        woba_value {0.9: 26019}
+  2026 double        woba_value {1.25: 7487}
+  2026 triple        woba_value {1.6: 671}
+  2026 home_run      woba_value {2.0: 5565}
+  2026 field_out     woba_value {0.0: 73709}

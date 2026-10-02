@@ -1,0 +1,45 @@
+2025 balls in play with EV, LA, estimate: 126252
+2026 balls in play with EV, LA, estimate: 123813
+
+== 2025: exact keys 49126; keys seen >= 2 times 27273; of those, more than one distinct estimate 9838 (36.1%)
+   range (max-min) inside a multi-estimate key: median 0.022, p90 0.074, max 1.059
+   pooled MAD about the key mean (irreducible error of an (EV, LA)-only lookup): 0.0054 on 104399 balls
+
+== 2026: exact keys 48955; keys seen >= 2 times 26763; of those, more than one distinct estimate 9565 (35.7%)
+   range (max-min) inside a multi-estimate key: median 0.024, p90 0.072, max 0.943
+   pooled MAD about the key mean (irreducible error of an (EV, LA)-only lookup): 0.0054 on 101621 balls
+
+== 2025+2026 pooled: exact keys 64699; keys seen >= 2 times 41640; of those, more than one distinct estimate 36400 (87.4%)
+   range (max-min) inside a multi-estimate key: median 0.023, p90 0.083, max 1.136
+   pooled MAD about the key mean (irreducible error of an (EV, LA)-only lookup): 0.0170 on 227006 balls
+
+== Spread by bb_type (pooled, exact keys with >= 2 balls). MAD = mean abs deviation from the key mean.
+   ground_ball  balls 104732  MAD 0.0146 on  89996 repeated-key balls; keys with >1 estimate 18074/19192
+   line_drive   balls  59895  MAD 0.0159 on  57143 repeated-key balls; keys with >1 estimate 6860/7856
+   fly_ball     balls  67292  MAD 0.0240 on  63430 repeated-key balls; keys with >1 estimate 9231/11118
+   popup        balls  18145  MAD 0.0020 on  11848 repeated-key balls; keys with >1 estimate 2479/4275
+   (blank)      balls      1  MAD nan on      0 repeated-key balls; keys with >1 estimate 0/0
+
+== Does one more variable explain the spread? Same balls, groups of key vs key+variable (balls in key+variable groups of >= 2).
+   bb_type       n=222417  MAD key only 0.0171  key+bb_type 0.0169  ratio 0.99
+   hit_location  n=165951  MAD key only 0.0183  key+hit_location 0.0157  ratio 0.86
+   stand         n=206313  MAD key only 0.0177  key+stand 0.0162  ratio 0.91
+   season        n=206020  MAD key only 0.0168  key+season 0.0054  ratio 0.32
+   game_type     n=224336  MAD key only 0.0170  key+game_type 0.0170  ratio 1.00
+   p_throws      n=206921  MAD key only 0.0176  key+p_throws 0.0163  ratio 0.93
+   batter        n=  4483  MAD key only 0.0116  key+batter 0.0106  ratio 0.91
+
+== Same exact key in both seasons: does the estimate move between 2025 and 2026?
+   keys in both seasons: 33382; mean diff (2026-2025) +0.0055; mean |diff| 0.0292
+   keys with >= 2 balls in each season: 17837; mean diff +0.0078; mean |diff| 0.0346
+
+== Inside 2026 only: key vs key+variable on the same balls. A random 2-way label is the control (ratio shows the no-information value).
+   random label (control)               n= 84203  MAD key only 0.0054  key+variable 0.0049  ratio 0.91
+   bb_type                              n= 98808  MAD key only 0.0054  key+variable 0.0054  ratio 1.00
+   hit_location                         n= 60375  MAD key only 0.0051  key+variable 0.0045  ratio 0.90
+   stand                                n= 84212  MAD key only 0.0054  key+variable 0.0049  ratio 0.92
+   p_throws                             n= 85778  MAD key only 0.0053  key+variable 0.0050  ratio 0.94
+   game_type                            n=101203  MAD key only 0.0054  key+variable 0.0054  ratio 1.00
+   random label, LA < 10 only           n= 34038  MAD key only 0.0088  key+variable 0.0082  ratio 0.93
+   sprint-speed third, LA < 10 only     n= 28316  MAD key only 0.0072  key+variable 0.0046  ratio 0.64
+   sprint-speed third, LA >= 10 only    n= 42429  MAD key only 0.0030  key+variable 0.0025  ratio 0.84
