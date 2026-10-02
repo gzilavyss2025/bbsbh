@@ -46,11 +46,11 @@ Three things must not change:
 - With the first 9 postseason games of 2026 swept on a copy, the output of
   every existing reader was the same, byte for byte, as before (40 MB of reader
   output, every pitcher, both levels, every side and pitch type).
-- The dump writes every column on every line. The first run after this
-  change rewrites the whole `scripts/data/pitch-arsenal.sql` once (18.7 MB to
-  about 19.2 MB, with no new rows). `test/season-store.test.js` compares a
-  re-dump with the committed dump, so the committed dump must have the
-  `scope` column before that test passes.
+- The dump writes every column on every line, so the new column rewrites the
+  whole `scripts/data/pitch-arsenal.sql` once (18.7 MB to about 19.2 MB, with
+  no new rows). `test/season-store.test.js` compares a re-dump with the
+  committed dump, so the PR that adds the column also commits the migrated
+  dump, as #1200 did.
 - A postseason arm adds about 0.7 KB to his `pitch-arsenal` bucket and about
   1.4 KB to his `pitch-command` bucket. `test/bucket-shards.test.js` now has a
   `pitch-command` ceiling.
