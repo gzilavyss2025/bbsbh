@@ -151,6 +151,7 @@ export const PAGE_GROUPS = [
       // Unsettled: a leader board filed by era, while League Leaders is filed
       // by season. Same kind of page, two different groups.
       { label: 'Postseason Leaders', path: '/postseason-leaders' },
+      { label: 'Postseason Records', path: '/postseason-records' },
       { label: 'All-Star Legacy', path: '/all-star-legacy' },
       { label: 'Milestone Watch', path: '/milestones' },
       { label: 'Trade Deadline', path: '/trade-deadline' },
