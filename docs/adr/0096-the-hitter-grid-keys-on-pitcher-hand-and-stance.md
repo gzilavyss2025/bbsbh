@@ -57,7 +57,8 @@ that joins on the pitch (#1411, the Part C spike). The owner has not picked one.
 4. **xwOBA waits.** `xwoba_bip` holds the estimate summed over balls in play.
    It stays NULL, and the export does not write it. The reader gives
    `wobaSum: null`: `woba_fixed` alone would read as a low xwOBA. The route
-   that fills `xwoba_bip` is the owner's decision.
+   that fills `xwoba_bip` is the owner's decision. (The owner chose a
+   per-season lookup. ADR-0097 fills the column.)
 5. **Its own ledger.** `pitch_hitter_ingested_games`, for the reason
    `pitch_command_ingested_games` gives. A game owes each half (`arsenal`,
    `command`, `hitter`) to its own ledger, and `ingestGame` builds only the

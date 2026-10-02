@@ -514,8 +514,10 @@ CREATE TABLE IF NOT EXISTS pitch_command_ingested_games (
 -- mean counts (sac bunts and untracked balls in play are left out, as Savant's
 -- board leaves them out). `woba_fixed` sums the weights that need no estimate:
 -- 0.7 for a walk, a hit-by-pitch or catcher interference, 0 for the rest.
--- `xwoba_bip` is the estimate summed over balls in play. It stays NULL until
--- the owner picks the xwOBA route (a per-season lookup, or a Savant join).
+-- `bip_untracked` counts the balls in play that ended a PA with no exit
+-- velocity or launch angle (so not in `pa_end`). `xwoba_bip` sums the xwOBA
+-- (est.) of the tracked ones, from the table of the game's own season
+-- (ADR-0097). NULL when a game folded in had no table: the sum is unknown.
 CREATE TABLE IF NOT EXISTS pitch_hitter_cells (
   person_id  INTEGER NOT NULL,
   level      TEXT NOT NULL,
@@ -529,6 +531,7 @@ CREATE TABLE IF NOT EXISTS pitch_hitter_cells (
   whiffs     TEXT NOT NULL,
   pa_end     TEXT NOT NULL,
   woba_fixed TEXT NOT NULL,
+  bip_untracked TEXT NOT NULL DEFAULT '',
   xwoba_bip  TEXT,
   PRIMARY KEY (season, scope, person_id, level, code, p_throws, stand)
 );

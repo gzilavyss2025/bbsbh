@@ -29,6 +29,7 @@
 //   node scripts/gen-pitch-arsenal.mjs --since=2026-03-20 [--until=2026-07-19]
 //   node scripts/gen-pitch-arsenal.mjs --since=2026-03-20 --sports=11   # backfill AAA alone
 //   node scripts/gen-pitch-arsenal.mjs --export-only [--season=2026]    # re-export, no sweep
+//   node scripts/gen-pitch-arsenal.mjs --clear-hitters=2026 --since=2026-03-20   # hitter re-walk
 // The --since form is the one-time / full-season backfill; nightly runs use the
 // default trailing window. Checkpoints (dump + JSON export) every 100 games so a
 // long backfill resumes cleanly. --export-only rebuilds the JSON view from the
@@ -44,7 +45,8 @@ import { CENTURY_CLUB_MIN, CENTURY_MPH } from '../src/api/pitchArsenal.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { CELLS, COLS, aggregateGameCommand, commandStmts, markCommandIngested, parseCells } from './lib/command-grid.mjs'
-import { aggregateGameHitters, foldHitters, hitterStmts, writeHitterGrid } from './lib/pitch/hitter-grid.mjs'
+import { aggregateGameHitters, clearHitterSeason, foldHitters, hitterStmts, writeHitterGrid } from './lib/pitch/hitter-grid.mjs'
+import { readXwobaTable } from './lib/pitch/xwoba.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // TWO OUTPUTS, one per reader — see writeArsenal below and src/api/pitchArsenal.js.
@@ -247,7 +249,7 @@ async function ingestGame(db, stmts, game) {
   const pitchers = need.arsenal ? aggregateGamePitchTypes(feed) : new Map()
   // Same feed, more passes — the command and hitter grids cost no extra fetch.
   const command = need.command ? aggregateGameCommand(feed) : new Map()
-  foldGame(db, stmts, game, pitchers, command, need.hitter ? aggregateGameHitters(feed) : new Map())
+  foldGame(db, stmts, game, pitchers, command, need.hitter ? aggregateGameHitters(feed, readXwobaTable(game.season)) : new Map())
 }
 
 // The sync half of ingestGame: one game's aggregates into its own season's and scope's rows.
@@ -587,6 +589,7 @@ async function main() {
 
   const db = await openDb()
   const stmts = arsenalStatements(db)
+  if (args['clear-hitters']) clearHitterSeason(db, Number(args['clear-hitters'])) // re-walk after a new xwOBA table (ADR-0097)
 
   // Throwing hands for the season being written, never the clock year (#1200).
   const handsBySeason = new Map()

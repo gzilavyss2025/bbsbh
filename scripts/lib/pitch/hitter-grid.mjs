@@ -8,10 +8,11 @@
 // up into its 13 regions at read time (src/lib/zone/regions.js).
 // MLB only for now: gen-pitch-arsenal.mjs asks this half of an MLB game only.
 //
-// Counters per cell, all sums: pitches, swings, whiffs, PA-ending pitches, and
-// the fixed part of the wOBA numerator. The xwOBA estimate for a ball in play
-// is NOT here: the feed has none, and the route that supplies it is the
-// owner's call (#1411). `pitch_hitter_cells.xwoba_bip` waits for it.
+// Counters per cell, all sums: pitches, swings, whiffs, PA-ending pitches, the
+// fixed part of the wOBA numerator, balls in play with no launch data, and the
+// xwOBA (est.) of each tracked ball in play, from the table of the game's own
+// season (./xwoba.mjs, ADR-0097). With no table on file, that last one is
+// NULL: unknown, not 0.
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { GRID, commandCell, normalizePitch } from '../../../src/lib/zone/zoneGeometry.js'
@@ -19,12 +20,13 @@ import { FOUL_CODES, WHIFF_CODES } from '../../../src/api/playbyplay/pitchInfo.j
 import { INPLAY_COMMAND_CODES, parseCells } from '../command-grid.mjs'
 import { isPlateAppearance } from '../long-at-bats.mjs'
 import { bucketsOf, writeSeasons, writeShards } from '../io.js'
+import { xwobaOf } from './xwoba.mjs'
 
 const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'public', 'data', 'hitter-grid')
 
 // A counter's name in the file, and its column, index for index.
-const FIELDS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaFixed']
-const COLS = ['pitches', 'swings', 'whiffs', 'pa_end', 'woba_fixed']
+const FIELDS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaFixed', 'bipUntracked', 'xwobaBip']
+const COLS = ['pitches', 'swings', 'whiffs', 'pa_end', 'woba_fixed', 'bip_untracked', 'xwoba_bip']
 // Savant's woba_value for the PA ends that need no estimate: 0.7 for these,
 // 0 for a strikeout and every other out (#1411, the Part C spike).
 const WOBA_07 = new Set(['walk', 'hit_by_pitch', 'catcher_interf'])
@@ -34,14 +36,15 @@ const NOT_IN_MEAN = new Set(['sac_bunt', 'sac_bunt_double_play', 'intent_walk'])
 const round = (v) => Math.round(v * 1e4) / 1e4
 const isHand = (c) => c === 'L' || c === 'R'
 
-// Pure: one game's feed -> Map `${hitterId}:${code}:${pitcherHand}:${stand}` ->
-// { pitches, swings, whiffs, paEnd, wobaFixed }, each 25 values. The hand and
+// Pure: one game's feed and its season's xwOBA table (null: none) -> Map `${hitterId}:${code}:${pitcherHand}:${stand}` ->
+// { pitches, swings, whiffs, paEnd, wobaFixed, bipUntracked, xwobaBip }, each
+// 25 values, except xwobaBip: null with no table. The hand and
 // the side come from the MATCHUP, so a switch hitter counts on the side he took.
 // ponytail: the play's final matchup names the hand, the side and the hitter for
 // every pitch of the play, as the pitcher grids do. A mid-PA reliever or pinch
 // hitter files the earlier pitches under the new man (0 such PAs in 8 sampled
 // games). Split the play at a substitution event if the counts ever drift.
-export function aggregateGameHitters(feed) {
+export function aggregateGameHitters(feed, table = null) {
   const out = new Map()
   for (const play of feed?.liveData?.plays?.allPlays ?? []) {
     const hitterId = play.matchup?.batter?.id
@@ -60,7 +63,7 @@ export function aggregateGameHitters(feed) {
       const cell = code && commandCell(normalizePitch(c?.pX, c?.pZ, e.pitchData?.strikeZoneTop, e.pitchData?.strikeZoneBottom))
       if (!cell) continue
       const key = `${hitterId}:${code}:${throws}:${stand}`
-      if (!out.has(key)) out.set(key, Object.fromEntries(FIELDS.map((f) => [f, new Array(GRID * GRID).fill(0)])))
+      if (!out.has(key)) out.set(key, { ...Object.fromEntries(FIELDS.map((f) => [f, new Array(GRID * GRID).fill(0)])), ...(!table && { xwobaBip: null }) })
       const b = out.get(key)
       const at = cell.index
       const call = e.details?.call?.code
@@ -74,7 +77,11 @@ export function aggregateGameHitters(feed) {
       if (!isPa || e !== events.at(-1)) continue
       if (inPlay && type !== 'catcher_interf') {
         const hit = e.hitData
-        if (typeof hit?.launchSpeed !== 'number' || typeof hit?.launchAngle !== 'number') continue
+        if (typeof hit?.launchSpeed !== 'number' || typeof hit?.launchAngle !== 'number') {
+          b.bipUntracked[at] += 1
+          continue
+        }
+        if (table) b.xwobaBip[at] = round(b.xwobaBip[at] + xwobaOf(table, hit.launchSpeed, hit.launchAngle))
       } else if (WOBA_07.has(type)) {
         b.wobaFixed[at] = round(b.wobaFixed[at] + 0.7)
       }
@@ -90,7 +97,7 @@ export function hitterStmts(db) {
     hitterRead: db.prepare(`SELECT ${COLS.join(', ')} FROM pitch_hitter_cells WHERE ${key}`),
     hitterWrite: db.prepare(
       `INSERT INTO pitch_hitter_cells (season, scope, person_id, level, code, p_throws, stand, ${COLS.join(', ')})
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (${new Array(7 + COLS.length).fill('?').join(', ')})
        ON CONFLICT(season, scope, person_id, level, code, p_throws, stand) DO UPDATE SET
          ${COLS.map((c) => `${c} = excluded.${c}`).join(', ')}`,
     ),
@@ -106,6 +113,8 @@ export function foldHitters(stmts, { gamePk, level, date, season, scope, need },
     const k = [season, scope, Number(id), level, code, throws, stand]
     const prior = stmts.hitterRead.get(...k)
     const merged = FIELDS.map((f, i) => {
+      // NULL (a game with no xwOBA table) stays NULL: the sum is unknown.
+      if (b[f] == null || (prior && prior[COLS[i]] == null)) return null
       const was = parseCells(prior?.[COLS[i]])
       return b[f].map((v, j) => round(v + (was[j] ?? 0))).join(',')
     })
@@ -119,10 +128,12 @@ const rowsOf = (db, season, scope) =>
   db.prepare('SELECT * FROM pitch_hitter_cells WHERE season = ? AND scope = ? ORDER BY person_id, level, code, p_throws, stand').all(season, scope)
 
 // One row into an entry { [level]: { [code]: { [pitcherHand]: { [stand]: counters } } } },
-// adding onto what is there. An all-zero counter is left out.
-function addRow(entry, r) {
+// adding onto what is there. An all-zero counter is left out, and so is
+// xwobaBip unless every row of the season has it (`xwoba`).
+function addRow(entry, r, xwoba) {
   const into = ((((entry[r.level] ??= {})[r.code] ??= {})[r.p_throws] ??= {})[r.stand] ??= {})
   FIELDS.forEach((f, i) => {
+    if (f === 'xwobaBip' && !xwoba) return
     const arr = parseCells(r[COLS[i]])
     if (arr.some((v) => v > 0)) into[f] = arr.map((v, j) => round(v + (into[f]?.[j] ?? 0)))
   })
@@ -130,15 +141,26 @@ function addRow(entry, r) {
 
 // One season and scope: `bat`, { [hitterId]: entry }, and `league`, every
 // hitter's rows summed into ONE entry of the same shape, so the colour scale
-// reads it with the same reader as a hitter.
+// reads it with the same reader as a hitter. `xwoba`: every hitter row of the
+// season, both scopes, has its estimate. One NULL row and the season has none.
 export function exportHitterGrid(db, season, scope = 'R') {
+  const { n, unknown } = db.prepare(
+    'SELECT COUNT(*) AS n, COUNT(*) - COUNT(xwoba_bip) AS unknown FROM pitch_hitter_cells WHERE season = ?',
+  ).get(season)
+  const xwoba = n > 0 && unknown === 0
   const bat = {}
   const league = {}
   for (const r of rowsOf(db, season, scope)) {
-    addRow((bat[r.person_id] ??= {}), r)
-    addRow(league, r)
+    addRow((bat[r.person_id] ??= {}), r, xwoba)
+    addRow(league, r, xwoba)
   }
-  return { bat, league }
+  return { bat, league, xwoba }
+}
+
+// Forget a season's hitter half, so the next sweep re-walks it: after a new
+// xwOBA table, run `gen-pitch-arsenal.mjs --clear-hitters=<season> --since=<its first day>`.
+export function clearHitterSeason(db, season) {
+  for (const t of ['pitch_hitter_cells', 'pitch_hitter_ingested_games']) db.prepare(`DELETE FROM ${t} WHERE season = ?`).run(season)
 }
 
 // MLB games the arsenal half has and the hitter half does not. Not 0 means the
@@ -155,7 +177,8 @@ export async function writeHitterGrid(db, season) {
   if (missing) return console.log(`hitter-grid/${season}/ not written: ${missing} MLB games still owe the hitter half`)
   const [reg, post] = ['R', 'P'].map((scope) => exportHitterGrid(db, season, scope))
   if (!Object.keys(reg.bat).length) return
-  const league = { season, bat: reg.league, post: post.league }
-  await writeShards(join(outDir, String(season)), [...bucketsOf({ season }, reg.bat, post.bat, 'bat'), ['league', league]])
+  const head = { season, ...(reg.xwoba && { xwoba: true }) }
+  if (!reg.xwoba) console.log(`hitter-grid/${season}/ written with no xwOBA: a row has no estimate (no table, or swept before it)`)
+  await writeShards(join(outDir, String(season)), [...bucketsOf(head, reg.bat, post.bat, 'bat'), ['league', { ...head, bat: reg.league, post: post.league }]])
   await writeSeasons(outDir, season)
 }

@@ -56,6 +56,7 @@ export const EXCEPT = {
   'milb-history.json': 'hand-run backfill of completed MiLB seasons',
   'game-notes-corroboration.json': 'hand-run audit sample, not a nightly product',
   'trade-deadline/': 'hand-run; the deadline passes once a year',
+  'xwoba-table/': 'hand-run a few times a season (gen-xwoba-table.mjs, ADR-0097); a table holds for a month',
   'contracts-history/': 'hand-run from committed CSVs (ADR-0066)',
   'prospect-rank-history.json': 'hand-run; the 2005-2024 rankings are frozen and the file carries no clock (#1111)',
   // Frozen ON PURPOSE, which is the one shape this guard cannot tell from a

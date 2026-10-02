@@ -129,7 +129,10 @@ test('a hitter-grid bucket stays small enough to be worth fetching alone', () =>
   // Measured 2026-10-02 on a copy (the regular season and the first 9
   // postseason games, MLB only): largest 79,573 bytes. Room for the rest of
   // the postseason without letting the shape quietly grow.
-  const ceiling = 100
+  // ADR-0097 added xwobaBip and bipUntracked. Measured 2026-10-02 on a copy
+  // after the re-walk with the 2026 table: largest 100,703 bytes (xwobaBip
+  // 20,717 of them, bipUntracked 402). The same 20 KB of room as before.
+  const ceiling = 120
   const largest = Math.max(...dirs('hitter-grid').flatMap((d) => list('hitter-grid', d).map((f) => statSync(new URL(f, d)).size)))
   assert.ok(largest < ceiling * 1024, `hitter-grid: largest bucket is ${Math.round(largest / 1024)} KB`)
   for (const d of dirs('hitter-grid')) {

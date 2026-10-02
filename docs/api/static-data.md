@@ -391,7 +391,9 @@ for each generator; the reader modules:
   `post`, the MLB postseason in the same shape as `pit`. The readers here read `pit`
   only, so they show the regular season only (ADR-0094); the pool has no postseason.
   The `pitch-command` buckets (`commandMap.js`) have the same `post` key, and so do the
-  `hitter-grid` buckets (`scout/hitterGrid.js`, ADR-0096) beside `bat`. Completed-game aggregates → spoiler-free, no
+  `hitter-grid` buckets (`scout/hitterGrid.js`, ADR-0096) beside `bat`. A hitter-grid file
+  with `xwoba: true` holds `xwobaBip`, and `hitterCounters` then gives `wobaSum`
+  (ADR-0097); without it `wobaSum` is null. Completed-game aggregates → spoiler-free, no
   SealBox (same footing as `fouls.js`); MLB + AAA (`mlb`/`aaa` keys — AA and
   below carry no Hawk-Eye pitch tracking, so `pitchArsenalFor` just resolves
   to null there). `pitchArsenalFor(data, personId, isMlb, stand)` picks the level

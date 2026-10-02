@@ -12,24 +12,28 @@
 // An entry is { mlb: { [pitchCode]: { [pitcherHand]: { [stand]: counters } } } }:
 // MLB only for now; a Triple-A phase would add `aaa` beside it.
 // Counters are 25-value arrays over the 5x5 command grid (feed frame, the
-// commandCell order): pitches, swings, whiffs, paEnd, wobaFixed. Sums only.
-// An all-zero counter is absent.
+// commandCell order): pitches, swings, whiffs, paEnd, wobaFixed, bipUntracked
+// (balls in play with no launch data) and xwobaBip (the xwOBA (est.) of the
+// tracked ones, ADR-0097). Sums only. An all-zero counter is absent.
+// `xwoba: true` on a file says the season's xwobaBip is complete; without it
+// the file has no xwobaBip.
 import { shardKey100 } from '../../lib/shardKey.js'
 import { GRID } from '../../lib/zone/zoneGeometry.js'
 import { currentSeasonOf, staticJsonBy } from '../staticJson.js'
 
 const fetchFile = staticJsonBy((key) => `/data/hitter-grid/${key}.json`, { fallback: null })
-const asGrid = (season, reg, post) => (reg || post ? { season, reg: reg ?? null, post: post ?? null } : null)
+const asGrid = (season, reg, post, file) =>
+  reg || post ? { season, reg: reg ?? null, post: post ?? null, ...(file?.xwoba && { xwoba: true }) } : null
 
 // One season, never pooled with another (the 2026 zone is not the 2025 zone).
 // Pass the pitch-command season so both maps read the same one.
-// -> null | { season, reg: entry | null, post: entry | null }
+// -> null | { season, reg: entry | null, post: entry | null, xwoba?: true }
 export async function fetchHitterGridFor(personId, season) {
   if (personId == null) return null
   season ??= await currentSeasonOf('hitter-grid')
   if (season == null) return null
   const shard = await fetchFile(`${season}/${shardKey100(personId)}`)
-  return asGrid(season, shard?.bat?.[personId], shard?.post?.[personId])
+  return asGrid(season, shard?.bat?.[personId], shard?.post?.[personId], shard)
 }
 
 // Every hitter summed, the same shape as one hitter's grid.
@@ -37,18 +41,19 @@ export async function fetchHitterLeague(season) {
   season ??= await currentSeasonOf('hitter-grid')
   if (season == null) return null
   const league = await fetchFile(`${season}/league`)
-  return asGrid(season, league?.bat, league?.post)
+  return asGrid(season, league?.bat, league?.post, league)
 }
 
-const FIELDS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaFixed']
+const FIELDS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaFixed', 'bipUntracked', 'xwobaBip']
 
 // The counters for one view, summed. `scope` 'R' (regular season), 'P'
 // (postseason) or null (both); `hand` the pitcher's hand or null (both);
 // `stand` the hitter's side or null (both); `code` a pitch type or null (all).
 // `stands` names the sides in the sum: a switch hitter with both hands pooled
 // has two, and the league's colour scale should be read for his one.
-// `wobaSum` is null until the xwOBA estimate for a ball in play is on file
-// (ADR-0096): wobaFixed alone would read as a low xwOBA.
+// `wobaSum` is wobaFixed + xwobaBip, cell by cell, when the season's xwOBA is
+// on file (`grid.xwoba`), and null when not: wobaFixed alone would read as a
+// low xwOBA (ADR-0096, ADR-0097).
 // Null when nothing matches.
 export function hitterCounters(grid, { code = null, hand = null, stand = null, scope = null } = {}) {
   const out = Object.fromEntries(FIELDS.map((f) => [f, new Array(GRID * GRID).fill(0)]))
@@ -67,7 +72,10 @@ export function hitterCounters(grid, { code = null, hand = null, stand = null, s
       }
     }
   }
-  return stands.size ? { ...out, wobaSum: null, stands: [...stands].sort() } : null
+  if (!stands.size) return null
+  const { xwobaBip, ...counters } = out
+  const wobaSum = grid.xwoba ? out.wobaFixed.map((v, i) => v + xwobaBip[i]) : null
+  return { ...counters, wobaSum, stands: [...stands].sort() }
 }
 
 const total = (a) => a.reduce((x, y) => x + y, 0)
