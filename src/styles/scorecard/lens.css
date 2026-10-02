@@ -1,0 +1,169 @@
+/* ============================================================
+   SCORECARD / LENS — the phone lens (ADR-0092)
+   On a phone the scorecard opens zoomed onto the next sealed box, which sits
+   under a fixed navy frame. The sheet is the real sheet (grid.css, box.css):
+   this partial only folds it down to its grid, bounds the pane to the window,
+   draws the frame and the ruler, and pins the bottom bar. The pane SCROLLS the
+   frontier under the frame (components/scoring/lens/useLens.js); nothing here
+   transforms the sheet, because a transform breaks its three sticky edges.
+   Navy and paper only: kraft means a tap lifts a seal (ADR-0083), and the
+   frame, the ruler and the bar's [Sheet] lift nothing.
+   ============================================================ */
+
+/* The lens is the grid alone. The header band and the footer trio are in the
+   whole-sheet view, one tap away. */
+.scorecard--lens .sc-header,
+.scorecard--lens .sc-footer {
+  display: none;
+}
+
+/* Room under the pane for the fixed bar, so the page can bring the pane's top
+   to the window's top and the pane then fills the window down to the bar. */
+.scorecard-page--lens {
+  padding-bottom: calc(var(--lens-bar-h) + env(safe-area-inset-bottom));
+}
+
+/* THE PANE: edge to edge, and exactly the window above the bar (G3). Today's
+   pane is at least nine rows tall and lets the page scroll, which would move
+   the frame with the page. Bounded here, the pane is the one scroller. The vh
+   line is the fallback for a browser without dvh, as in grid.css. */
+.sc-sheet__frame--lens {
+  position: relative;
+  margin-inline: calc(-1 * var(--app-gutter));
+}
+.sc-sheet__frame--lens .sc-sheet__scroll {
+  height: calc(100vh - var(--lens-bar-h));
+  height: calc(100dvh - var(--lens-bar-h) - env(safe-area-inset-bottom));
+  max-height: none;
+  border: 0;
+  overscroll-behavior: contain;
+}
+
+/* THE COMPACT RAIL (G4): slot number and surname, with the position and the
+   uniform number on a second line under the name. The Pos column folds away,
+   so the rail plus two inning columns fill a phone at about 1.4x. */
+.sc-sheet--lens {
+  --sc-name-w: var(--lens-rail-w);
+}
+.sc-sheet--lens .sc-sheet__pos {
+  display: none;
+}
+.sc-sheet--lens .sc-sheet__line {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: repeat(2, var(--sc-line-h));
+  grid-template-areas:
+    'num who who'
+    '. pos jersey';
+  row-gap: 0;
+}
+.sc-sheet--lens .sc-sheet__slotnum {
+  grid-area: num;
+}
+.sc-sheet--lens .sc-sheet__who {
+  grid-area: who;
+}
+.sc-sheet--lens .sc-sheet__jersey {
+  grid-area: jersey;
+}
+.sc-sheet__linepos {
+  grid-area: pos;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* Each man's line is two lines tall in the compact rail, so his AB/H/R/RBI
+   take the same height and stay level with HIS name when a substitute's line
+   stacks under the starter's (grid.css: the three stacks stay registered). */
+.sc-sheet--lens .sc-sheet__sumline {
+  height: calc(2 * var(--sc-line-h));
+}
+/* The foot row's label wraps in the compact rail rather than running out
+   over the first inning's figures. */
+.sc-sheet--lens .sc-sheet__foot {
+  white-space: normal;
+}
+/* The frontier row's rail cell, a shade brighter: the row the ruler runs under. */
+.sc-sheet--lens tr:has([data-frontier]) .sc-sheet__name {
+  background: var(--surface-inset);
+}
+/* The pad column before inning 1: an empty box holds it at an inning
+   column's width, and is not drawn, so the column reads as blank paper. */
+.sc-sheet__cell--pad .sc-ab {
+  visibility: hidden;
+}
+/* The spacer rows above slot 1 and below slot 9: blank paper. */
+.sc-sheet__lenspad td {
+  background: var(--surface-inset);
+}
+.sc-sheet__lenspad .sc-sheet__name {
+  background: var(--surface-card);
+}
+
+/* THE FRAME and THE RULER. Placed by useLens in pane pixels, outside the
+   pane's scroll, so they never move. Click-through: the seal under the frame
+   is the real button (G5). The frame is the cell's own box, its border drawn
+   over the cell's edge, so the rail plus two columns still fit the pane. */
+.sc-lens__frame {
+  position: absolute;
+  z-index: 4;
+  box-sizing: border-box;
+  border: var(--lens-frame-bw) solid var(--navy);
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-raised);
+  pointer-events: none;
+}
+/* The ruler runs on the frontier row's bottom edge, level with the frame's
+   bottom border. */
+.sc-lens__ruler {
+  position: absolute;
+  left: 0;
+  z-index: 4;
+  height: var(--lens-frame-bw);
+  margin-top: calc(-1 * var(--lens-frame-bw));
+  background: var(--navy);
+  pointer-events: none;
+}
+
+/* THE BOTTOM BAR, fixed at its final height. Only [Sheet] in it for now. */
+.sc-lensbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: calc(var(--lens-bar-h) + env(safe-area-inset-bottom));
+  padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+  background: var(--surface-card);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.sc-lensbar__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+.sc-lensbar__sheet {
+  min-height: var(--lens-row-h);
+}
+
+/* THE WHOLE-SHEET VIEW: today's sheet, the frontier outlined in the frame's
+   navy, and a floating way back to the lens. */
+.sc-sheet--whole [data-frontier] {
+  outline: var(--lens-frame-bw) solid var(--navy);
+  outline-offset: calc(-1 * var(--lens-frame-bw));
+}
+.sc-lensback {
+  position: fixed;
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  left: 50%;
+  z-index: 10;
+  transform: translateX(-50%);
+}
+.sc-lensback .btn {
+  box-shadow: var(--shadow-raised);
+}

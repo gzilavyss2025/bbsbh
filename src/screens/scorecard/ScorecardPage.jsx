@@ -12,6 +12,9 @@ import { ScorecardCellEditor } from '../../components/scoring/ScorecardCellEdito
 import { RefreshButton } from '../TeamInfo.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { useStampUnseal } from '../../hooks/useStamps.js'
+import { useMediaQuery } from '../../hooks/useMediaQuery.js'
+import { PHONE_LENS_QUERY, lensOn } from '../../lib/scorecard/geometry.js'
+import { LensBack, LensBar } from '../../components/scoring/lens/LensBar.jsx'
 
 // The live scorecard — `/{date}/{matchup}/scorecard`, the Numbers Game "22"
 // sheet filled exactly as far as YOU have revealed, at any point in the game.
@@ -174,6 +177,22 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   // has already spent (see scorecardPlays' leadoffMarks). The button is on
   // the sheet either way; the Top/Bottom control above stays the manual way
   // over.
+  // THE PHONE LENS (ADR-0092): on a phone, with a frontier to hold and taps that
+  // commit, the sheet opens zoomed under a fixed frame over the next sealed box.
+  // [Sheet] leaves it for this visit only (state, never stored); under Scores
+  // Unlocked or a stamp there is no frontier, so the lens is off (G7).
+  // In the lens, `side` follows the frontier (G20): entering the lens turns to
+  // the frontier's page, the flip handoff turns it after that, and the manual
+  // Top/Bottom control waits in the whole-sheet view.
+  const phone = useMediaQuery(PHONE_LENS_QUERY)
+  const [wholeSheet, setWholeSheet] = useState(false)
+  const lens = lensOn({ phone, stepInfo, commitReveals }) ? (wholeSheet ? 'whole' : 'lens') : null
+  const [lensWas, setLensWas] = useState(null)
+  if (lensWas !== lens) {
+    setLensWas(lens)
+    if (lens === 'lens' && side !== stepInfo.side) setSide(stepInfo.side)
+  }
+
   const needsFlip = stepInfo != null && stepInfo.side !== side
   const flip = needsFlip
     ? {
@@ -184,23 +203,27 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
     : null
 
   return (
-    <div className="scorecard-page">
+    <div className={`scorecard-page ${lens === 'lens' ? 'scorecard-page--lens' : ''}`}>
       <div className="scpage__bar">
-        <div className="scpage__ctl" role="group" aria-label="Half of inning">
-          <Button size="control" pressed={side === 'top'} onClick={() => setSide('top')}>
-            Top
-          </Button>
-          <Button size="control" pressed={side === 'bottom'} onClick={() => setSide('bottom')}>
-            Bottom
-          </Button>
-        </div>
+        {lens !== 'lens' && (
+          <div className="scpage__ctl" role="group" aria-label="Half of inning">
+            <Button size="control" pressed={side === 'top'} onClick={() => setSide('top')}>
+              Top
+            </Button>
+            <Button size="control" pressed={side === 'bottom'} onClick={() => setSide('bottom')}>
+              Bottom
+            </Button>
+          </div>
+        )}
         <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />
       </div>
-      <p className="hint">
-        The sheet inks only what you’ve revealed. Tap the sealed box to score
-        the next at-bat right here, or a filled box to pencil over its
-        notation.
-      </p>
+      {lens !== 'lens' && (
+        <p className="hint">
+          The sheet inks only what you’ve revealed. Tap the sealed box to score
+          the next at-bat right here, or a filled box to pencil over its
+          notation.
+        </p>
+      )}
 
       <Scorecard
         side={side}
@@ -210,7 +233,10 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
         onFrontierTap={onFrontierTap}
         fresh={fresh}
         flip={flip}
+        lens={lens}
       />
+      {lens === 'lens' && <LensBar onSheet={() => setWholeSheet(true)} />}
+      {lens === 'whole' && <LensBack onBack={() => setWholeSheet(false)} />}
 
       {editing && (
         <ScorecardCellEditor
