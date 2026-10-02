@@ -1,5 +1,6 @@
-// Regenerates public/data/umpire-accuracy-summary.json + umpire-accuracy/{id}.json
-// (see the two outputs below) — for every home-plate umpire,
+// Regenerates public/data/umpire-accuracy/{season}/umpire-accuracy-summary.json +
+// umpire-accuracy/{season}/{id}.json (see the two outputs below; a season
+// store, ADR-0086, with seasons.json and an all/ summary) — for every home-plate umpire,
 // his season called-pitch accuracy (plus a compact zone-tendency breakdown),
 // aggregated from each game's per-pitch tracking data. Keyed by MLB Stats API
 // personId, the same id space as umpires.json / players.
@@ -91,32 +92,34 @@
 // Both are absent (not zero) on rows swept before this schema — a pre-schema
 // row and a game with genuinely no challenges must stay distinguishable, so
 // aggregate() counts contributing games rather than summing blindly.
-import { readFile, readdir, rm } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
 import { challengesForPlay } from '../src/api/challenges.js'
-import { leanInputFromRows } from '../src/api/umpires.js'
 import { estimateGameConsistency } from '../src/lib/euz.js'
 import { pitchFavor } from '../src/lib/runExpectancy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
-import { mergeAccuracyRows } from './lib/umpire-accuracy-merge.mjs'
+import { SUMMARY, writeAccuracyStore } from './lib/umpire-accuracy-merge.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
-// TWO OUTPUTS, and between them they ARE the archive — split by who asks.
-// Every umpire's season aggregates in one file (~0.12 MB: the ranking pool the
-// lineup page, the box score, and the rankings table read), and one file per
-// umpire holding just his scored game rows (~13 KB: his game log). Written from
-// the same `result` in the same run, so they cannot disagree.
+// TWO OUTPUTS per season, and between them they ARE the archive — split by who
+// asks. Every umpire's season aggregates in one file (~0.12 MB: the ranking
+// pool the lineup page, the box score, and the rankings table read), and one
+// file per umpire holding just his scored game rows (~13 KB: his game log).
+// Written from the same merge in the same run, so they cannot disagree.
 //
 // There is no league-wide archive file any more. It was ~2 MB by August, it was
 // the merge base AND a served file, and once the lean's ingredient moved into
 // the aggregate (see leanInputFromRows) nothing read it. The row shards are the
 // merge base now — one copy of the accumulated history, not two.
-const outSummary = join(here, '..', 'public', 'data', 'umpire-accuracy-summary.json')
-const outRows = join(here, '..', 'public', 'data', 'umpire-accuracy')
+//
+// A SEASON STORE (ADR-0086): umpire-accuracy/{season}/ holds both outputs,
+// umpire-accuracy/seasons.json names the season the app serves, and
+// umpire-accuracy/all/ holds the summary over every season (#1200). See
+// writeAccuracyStore.
+const storeDir = join(here, '..', 'public', 'data', 'umpire-accuracy')
 const reTablePath = join(here, '..', 'public', 'data', 'run-expectancy.json')
 // Loaded once at startup; null (favor degrades to 0/null everywhere) until
 // scripts/gen-run-expectancy.mjs has been hand-run at least once.
@@ -326,117 +329,9 @@ function computeGameAccuracy(feed) {
   }
 }
 
-// --- season aggregate from a umpire's game rows -------------------------------
-function aggregate(games) {
-  const sum = { games: games.length, called: 0, correct: 0, expanded: 0, squeezed: 0, high: 0, low: 0, inside: 0, outside: 0 }
-  const cellCalled = Array(9).fill(0)
-  const cellStrikeCall = Array(9).fill(0)
-  const cellMiss = Array(9).fill(0)
-  // Consistency/favor sum over only the games that carry them — an older row
-  // (swept before these schemas shipped) or a thin-sample game (consistent
-  // null, favorMagnitude null) simply contributes nothing, same degrade as
-  // the cell-grid arrays above.
-  let consistentSum = 0
-  let consistentCalledSum = 0
-  let favorMagnitudeSum = 0
-  let favorGames = 0
-  // Same degrade for the two Umpire Tendencies schemas. `challengeGames` is
-  // what keeps "swept before challenges were counted" distinct from "played a
-  // game nobody challenged" — a zero would collapse the two and quietly drag
-  // every challenges-per-game figure toward zero mid-migration.
-  const regionL = { high: 0, low: 0, inside: 0, outside: 0 }
-  const regionR = { high: 0, low: 0, inside: 0, outside: 0 }
-  let handedGames = 0
-  let challengeSum = 0
-  let challengeOverturnedSum = 0
-  let challengeGames = 0
-  for (const g of games) {
-    sum.called += g.called
-    sum.correct += g.correct
-    sum.expanded += g.expanded
-    sum.squeezed += g.squeezed
-    sum.high += g.high
-    sum.low += g.low
-    sum.inside += g.inside
-    sum.outside += g.outside
-    // Cell arrays only exist on rows swept after the zone-map schema shipped; an
-    // older row simply contributes nothing to the grid (its totals still count).
-    for (let i = 0; i < 9; i++) {
-      cellCalled[i] += g.cellCalled?.[i] ?? 0
-      cellStrikeCall[i] += g.cellStrikeCall?.[i] ?? 0
-      cellMiss[i] += g.cellMiss?.[i] ?? 0
-    }
-    if (g.consistent != null && g.consistentCalled != null) {
-      consistentSum += g.consistent
-      consistentCalledSum += g.consistentCalled
-    }
-    if (g.favorMagnitude != null) {
-      favorMagnitudeSum += g.favorMagnitude
-      favorGames++
-    }
-    if (g.missL && g.missR) {
-      for (const k of ['high', 'low', 'inside', 'outside']) {
-        regionL[k] += g.missL[k] ?? 0
-        regionR[k] += g.missR[k] ?? 0
-      }
-      handedGames++
-    }
-    if (g.challenges != null) {
-      challengeSum += g.challenges
-      challengeOverturnedSum += g.challengesOverturned ?? 0
-      challengeGames++
-    }
-  }
-  sum.accuracy = sum.called ? sum.correct / sum.called : null
-  sum.cellCalled = cellCalled
-  sum.cellStrikeCall = cellStrikeCall
-  sum.cellMiss = cellMiss
-  sum.consistency = consistentCalledSum ? consistentSum / consistentCalledSum : null
-  sum.favorMagnitude = favorGames ? favorMagnitudeSum : null
-  sum.favorPerGame = favorGames ? favorMagnitudeSum / favorGames : null
-  // The SIGNED companion — the pitcher/hitter lean's ingredient, summed here so
-  // the app can rank an umpire on it without downloading the league's game rows.
-  // leanInputFromRows is imported from the reader (src/api/umpires.js) rather
-  // than re-implemented, so build time and read time cannot drift; umpireLeanFor
-  // beside it does the division. `level` is passed even though `games` is
-  // already one level's rows — the filter is the guarantee, not the caller.
-  Object.assign(sum, leanInputFromRows(games, games[0]?.level ?? 'MLB'))
-  sum.missL = handedGames ? regionL : null
-  sum.missR = handedGames ? regionR : null
-  // `challengeGames` is carried, not just used: it is the denominator behind
-  // challengesPerGame, and it is NOT sum.games until every row has been
-  // re-swept. A reader that divides by sum.games instead understates the rate.
-  sum.challenges = challengeGames ? challengeSum : null
-  sum.challengesOverturned = challengeGames ? challengeOverturnedSum : null
-  sum.challengeGames = challengeGames || null
-  sum.challengesPerGame = challengeGames ? challengeSum / challengeGames : null
-  sum.overturnRate = challengeSum ? challengeOverturnedSum / challengeSum : null
-  return sum
-}
-
 // --- main ---------------------------------------------------------------------
 const args = parseArgs(process.argv.slice(2))
 const { startDate, endDate } = dateRange(args, DEFAULT_DAYS)
-const season = Number(endDate.slice(0, 4))
-
-// The MERGE BASE is the per-umpire row shards this job wrote last night — the
-// same files the app reads. There is no separate league-wide archive to keep in
-// step with them (there was; it was 2 MB, nothing read it, and a second copy of
-// an append-only history is a second thing that can go stale).
-//
-// ENOENT → genuine first run; a corrupt committed shard must abort rather than
-// silently rebuild the aggregate from only the last few days' finals and drop
-// the season's accumulated history, which is what readJsonOr guarantees.
-const prev = { umpires: {} }
-for (const f of await readdir(outRows).catch(() => [])) {
-  if (!f.endsWith('.json')) continue
-  const shard = await readJsonOr(join(outRows, f), null)
-  if (shard?.id != null) {
-    // `name` rides on the shard for exactly this reason: an umpire who worked in
-    // April and not in this run's window would otherwise come back nameless.
-    prev.umpires[shard.id] = { id: shard.id, name: shard.name, games: shard.games ?? [] }
-  }
-}
 
 // The levels swept, most-senior first. AAA rides along because its parks carry
 // the pitch tracking the score needs (see header); AA/below don't, so they stay
@@ -471,6 +366,8 @@ for (const { sportId, level } of LEVELS) {
       const hp = (g.officials ?? []).find((o) => o.officialType === 'Home Plate')
       if (!hp?.official?.id) continue
       targets.push({
+        // The season comes from the game, never the clock or the window (#1200).
+        season: Number(g.season ?? g.officialDate.slice(0, 4)),
         gamePk: g.gamePk,
         date: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
         level,
@@ -489,71 +386,13 @@ const rows = await mapConcurrent(targets, 6, async (t) => {
   return { ...t, acc }
 })
 
-// Merge every fresh row into the umpire it belongs to (mergeAccuracyRows'
-// header explains the crew-reassignment case this guards against).
-const priorGamePks = new Set(
-  Object.values(prev.umpires ?? {}).flatMap((u) => (u.games ?? []).map((g) => g.gamePk)),
-)
-const umpires = mergeAccuracyRows(prev.umpires, rows)
-const added = rows.filter((r) => r && !priorGamePks.has(r.gamePk)).length
-
-// Recompute each umpire's aggregates from his (merged) rows, split two ways.
-//   • By LEVEL (MLB vs AAA) — the two run different regimes and rank against
-//     different pools, so they never blend. A row predating the `level` tag is
-//     treated as MLB (the file was MLB-only before AAA was added).
-//   • By game CONTEXT — only REGULAR-SEASON (gameType R) rows feed the ranked
-//     `season`/`seasonAAA` aggregates. Postseason (F/D/L/W) rolls up into a
-//     separate, unranked `seasonPost`; the All-Star Game (A) is a low-stakes
-//     exhibition and counts toward no aggregate at all (it still appears in
-//     `games` for its per-game figure). A row predating the `gameType` tag is
-//     treated as regular season. See docs/adr for the exclude-from-rank rationale.
-const gameLevel = (g) => g.level ?? 'MLB'
-const gameCtx = (g) => g.gameType ?? 'R'
-const POSTSEASON = new Set(['F', 'D', 'L', 'W'])
-const result = {}
-for (const [id, u] of Object.entries(umpires)) {
-  const mlbReg = u.games.filter((g) => gameLevel(g) === 'MLB' && gameCtx(g) === 'R')
-  const aaaReg = u.games.filter((g) => gameLevel(g) === 'AAA' && gameCtx(g) === 'R')
-  const postGames = u.games.filter((g) => POSTSEASON.has(gameCtx(g)))
-  result[id] = {
-    id: u.id,
-    name: u.name,
-    season: aggregate(mlbReg),
-    seasonAAA: aaaReg.length ? aggregate(aaaReg) : null,
-    seasonPost: postGames.length ? aggregate(postGames) : null,
-    games: u.games,
-  }
+// Each row goes to its own season's folder (writeAccuracyStore; the reassigned-
+// game case is mergeAccuracyRows'). No scored row: nothing is written.
+const written = await writeAccuracyStore(storeDir, rows.filter(Boolean))
+for (const w of written) {
+  console.log(
+    `wrote ${w.season}/${SUMMARY} + ${w.umpires} row shards — ${w.games} games on file ` +
+      `(+${w.added} new)` + (w.swept ? `, swept ${w.swept} stale row shard(s)` : ''),
+  )
 }
-
-const generatedAt = new Date().toISOString()
-await writeJsonAtomic(outSummary, {
-  generatedAt,
-  season,
-  umpires: Object.fromEntries(
-    Object.entries(result).map(([id, { games, ...aggregates }]) => [id, aggregates]),
-  ),
-})
-// …and the other half of that split, one file per umpire: his scored game rows
-// alone. The umpire page and the lineup page's accuracy modal each draw ONE
-// man's rows, and these files are also this job's merge base next run, so the
-// accumulated history has exactly one copy.
-for (const [id, u] of Object.entries(result)) {
-  await writeJsonAtomic(join(outRows, `${id}.json`), { id: u.id, name: u.name, games: u.games })
-}
-// A row shard this run's merge purged (a game reassigned away, see
-// mergeAccuracyRows) must not survive on disk — it's this job's own merge
-// base next run, so a stale file left behind would reseed the ghost umpire
-// right back into `prev.umpires` once the reassigned game ages out of the
-// trailing --since window and can no longer trigger a fresh purge.
-let swept = 0
-for (const f of await readdir(outRows).catch(() => [])) {
-  if (!f.endsWith('.json') || result[f.replace('.json', '')]) continue
-  await rm(join(outRows, f))
-  swept++
-}
-const gamesTotal = Object.values(result).reduce((n, u) => n + u.games.length, 0)
-console.log(
-  `wrote ${outSummary} + ${Object.keys(result).length} row shards — ${gamesTotal} games on file ` +
-    `(+${added} new from ${startDate}..${endDate}, ${targets.length} finals swept)` +
-    (swept ? `, swept ${swept} stale row shard(s)` : ''),
-)
+console.log(`${targets.length} finals swept from ${startDate}..${endDate}` + (written.length ? '' : ' — no scored game, wrote nothing'))

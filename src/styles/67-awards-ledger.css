@@ -119,32 +119,24 @@
 .tier-minors.awardblk__count,
 .tier-minors.awardidx__ct { color: var(--kraft-board); }
 
-/* ---- the table ---- Same cell vocabulary as the box score's .bs__grid
-   (tight padding, tabular figures, a hairline under every row), at the
-   slightly larger size a three-column table can afford. */
+/* ---- the table ---- Drawn by Table (#1132): the cells, the head and the
+   hairline above each row. This keeps the gap under the tier rule, the names'
+   left reading and the row's baseline. */
 .awardtbl {
-  width: 100%;
-  border-collapse: collapse;
   margin-top: 2px;
+  /* Names and a chip, not figures: the face and size of the card around it. */
+  font-family: inherit;
+  font-size: 1em;
+  font-variant-numeric: normal;
 }
 .awardtbl th {
-  padding: var(--space-2) 0 var(--space-1);
   text-align: left;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-title);
-  text-transform: uppercase;
-  color: var(--text-caption);
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
-.awardtbl td {
-  padding: var(--space-1h) 0;
+/* Zero weight, so the AL/NL column below still wins its right alignment. */
+.awardtbl :where(td) {
+  text-align: left;
   vertical-align: baseline;
-  border-bottom: var(--bw-hair) solid var(--rule-grid);
-}
-.awardtbl tr:last-child td {
-  border-bottom: none;
+  white-space: normal;
 }
 .awardtbl__yr {
   width: 62px;

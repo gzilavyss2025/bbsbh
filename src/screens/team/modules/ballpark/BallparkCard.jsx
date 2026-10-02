@@ -14,6 +14,7 @@ import { Facts, RankGroup } from '../../../../components/ballpark/BallparkFacts.
 import { useBallparkDraft, useFocalPick } from './useBallparkDraft.js'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
+import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 
 // The Overview's Ballpark card. Two stacked rows: a HERO (a photograph of the
 // place beside its name) over the DETAILS (the field diagram beside the facts,
@@ -328,13 +329,13 @@ export function BallparkCard({ team, attendance }) {
             </dl>
             {attendance && <AttendanceFacts attendance={attendance} />}
             {note && <p className="ballparkcard__note">{note}</p>}
-            <div className="bpsheet__ranks">
+            <Stack gap="loose" className="bpsheet__ranks">
               <RankGroup
                 title="Outfield distances"
                 rows={park.rows.filter((r) => r.group === 'dist')}
               />
               <RankGroup title="Wall heights" rows={park.rows.filter((r) => r.group === 'wall')} />
-            </div>
+            </Stack>
           </div>
         </div>
       )}

@@ -40,8 +40,10 @@ test('every umpire with accuracy data has a shard to open', () => {
   // The detail page joins the two: aggregates from the accuracy summary, the
   // game log from the shard. An umpire in one file and not the other renders as
   // "no such umpire" on a link the app itself printed.
+  const accStore = new URL('../umpire-accuracy/', STORE)
+  const accSeason = JSON.parse(readFileSync(new URL('seasons.json', accStore), 'utf8')).current
   const acc = JSON.parse(
-    readFileSync(new URL('../umpire-accuracy-summary.json', STORE), 'utf8'),
+    readFileSync(new URL(`${accSeason}/umpire-accuracy-summary.json`, accStore), 'utf8'),
   )
   const have = new Set(shards.map((f) => f.replace('.json', '')))
   const missing = Object.keys(acc.umpires).filter((id) => !have.has(id))

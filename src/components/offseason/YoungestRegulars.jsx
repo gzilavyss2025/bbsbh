@@ -10,6 +10,7 @@ import {
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Table } from '../ui/table/Table.jsx'
 
 // THE NOTEBOOK, AT A FARM LEVEL — one note about the season that just finished
 // (issue #1078, step 4 of #1038).
@@ -118,7 +119,7 @@ export function YoungestRegulars({ sportId, season }) {
             Hitters only.
           </p>
 
-          <table className="seasonnote__table">
+          <Table frame="bare" className="seasonnote__table">
             <thead>
               <tr>
                 <th scope="col">Hitter</th>
@@ -152,7 +153,7 @@ export function YoungestRegulars({ sportId, season }) {
                 )
               })}
             </tbody>
-          </table>
+          </Table>
 
           {(hidden > 0 || expanded) && (
             <button

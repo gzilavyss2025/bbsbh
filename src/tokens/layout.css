@@ -9,6 +9,12 @@
    ============================================================ */
 
 :root {
+  /* The gap between a page's top-level sections (#1180). A page's outer Stack
+     reads it (gap="section"), so one edit moves every page. It is the 16px
+     step today: pages already separate sections by about that much, and a
+     larger section gap would change every page at once. */
+  --space-section: var(--space-4);
+
   /* Headshot size scale. Every headshot in the app (the shared <Headshot>
      component's .shot.* variants, plus the standalone .pitchernotice__shot)
      draws its box from one of these six rungs instead of a hand-tuned

@@ -5,6 +5,7 @@ import { HeaderBarMock, HeaderFields, UmpireCall } from '../editors/HeaderPrevie
 import { MastheadMarkEditor } from '../editors/MastheadMarkEditor.jsx'
 import { LogoDropZone } from '../LogoDropZone.jsx'
 import { MarkImage } from './MarkImage.jsx'
+import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
 // A club has two header bars, not one per jersey — Main's, which every
 // alternate also wears, and City Connect's (a MiLB level has Home's and
@@ -19,7 +20,7 @@ import { MarkImage } from './MarkImage.jsx'
 export function TwoBarsPanel({ units, onHover, onSelectWearer }) {
   if (!units.length) return null
   return (
-    <section className="idlab__bars" aria-label="Header bars">
+    <Stack gap="snug" as="section" className="idlab__bars" aria-label="Header bars">
       <p className="idlab__barslead">Header bars — every jersey wears one of these.</p>
       <div className="idlab__barsrow">
         {/* Keyed by club as well as slot: a unit now holds per-club state of its
@@ -35,7 +36,7 @@ export function TwoBarsPanel({ units, onHover, onSelectWearer }) {
           />
         ))}
       </div>
-    </section>
+    </Stack>
   )
 }
 
@@ -80,7 +81,8 @@ function BarUnit({ unit, onHover, onSelectWearer }) {
   )
 
   return (
-    <div
+    <Stack
+      gap="snug"
       className="idlab__barunit"
       id={unit.anchorId}
       tabIndex={-1}
@@ -170,6 +172,6 @@ function BarUnit({ unit, onHover, onSelectWearer }) {
           onPreview={setPanelOverride}
         />
       )}
-    </div>
+    </Stack>
   )
 }

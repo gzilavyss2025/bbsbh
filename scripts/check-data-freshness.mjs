@@ -78,6 +78,11 @@ export const EXCEPT = {
   // publishing a census that is short a thousand games.
   'long-at-bats/': 'frozen once a season ends; the file states its own coverage and fails closed',
   'youngest-regulars/': 'frozen per season by design; rewritten only when a league’s figures move',
+  // A season store (ADR-0086). Its files were four stamped top-level files
+  // until #1200 moved them into one folder per season. A completed season is
+  // frozen, and a file is rewritten only when its content changes, so an
+  // unchanged stamp is the healthy state here, as with milb-pool/ above.
+  'abs/': 'season store (ADR-0086): a completed season is frozen; files move only with their content',
 }
 
 // Where a dataset keeps its stamp, when it is not a top-level `generatedAt`.
@@ -96,7 +101,6 @@ export const EXCEPT = {
 // silent, which is the thing this whole script exists to stop. Left as-is
 // deliberately. A new generator should write a full `generatedAt` timestamp.
 export const STAMP_KEY = {
-  'fouls.json': 'asOf',
   'workload.json': 'asOf',
   // Sidecar written by the same gen-workload.mjs run, from the same `asOf`
   // variable as workload.json above — not a new stamp convention, the same one.

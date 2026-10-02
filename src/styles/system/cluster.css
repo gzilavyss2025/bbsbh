@@ -1,0 +1,65 @@
+/* ---------------------------------------------------------------------------
+   CLUSTER — children in a row that wraps, one step of space between them
+   (#1180). components/ui/layout/Cluster.jsx draws it;
+   lib/design/clusterClass.js names its classes.
+
+   WHAT IT OWNS: the wrapping row, the gap between items, the gap between
+   lines, and the cross-axis alignment. WHAT IT DOES NOT OWN: padding, margin,
+   a frame, how the children look, or how a line is justified. The space around
+   a cluster is its parent's.
+
+   THREE GAPS (signed off in .scratch/design-system/layout.md). The modifier
+   sets --cluster-gap and the one base rule reads it, for both directions. A
+   row modifier then sets row-gap itself, after the base, so the line gap
+   differs only where a caller asks. It is a plain declaration and not a custom
+   property on purpose: custom properties inherit, so a nested cluster with no
+   rowGap would read its parent's.
+
+   HERE IN THE ORDER, right after system/stack.css and so ahead of
+   system/section-head.css and 06: a block that keeps its own gap, alignment or
+   justification loads later and wins on order at equal specificity. Every
+   selector here is one class for that reason. test/cluster.test.js pins the
+   slot.
+   --------------------------------------------------------------------------- */
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cluster-gap);
+}
+.cluster--tight {
+  --cluster-gap: var(--space-1);
+}
+.cluster--snug {
+  --cluster-gap: var(--space-2);
+}
+.cluster--base {
+  --cluster-gap: var(--space-3);
+}
+
+.cluster--row-tight {
+  row-gap: var(--space-1);
+}
+.cluster--row-snug {
+  row-gap: var(--space-2);
+}
+.cluster--row-base {
+  row-gap: var(--space-3);
+}
+
+.cluster--align-start {
+  align-items: flex-start;
+}
+.cluster--align-center {
+  align-items: center;
+}
+.cluster--align-baseline {
+  align-items: baseline;
+}
+
+/* A list: no marker, no indent. A modifier and not `ul.cluster`, so a block's
+   own padding still wins on order. */
+.cluster--list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

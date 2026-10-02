@@ -45,14 +45,6 @@
   color: var(--text-caption);
 }
 
-.mgrpage__awards {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
 .mgrpage__award {
   display: flex;
   align-items: baseline;
@@ -179,14 +171,6 @@
   color: var(--text-caption);
 }
 
-.mgrpage__timeline {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
 .mgrpage__timelinerow {
   display: flex;
   align-items: center;
@@ -433,9 +417,6 @@
    rather than a top-to-bottom list that fights the outfield's own shape.
    Distances then walls, stacked (each strip wants its own full width). */
 .bpsheet__ranks {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
   margin-top: 14px;
 }
 

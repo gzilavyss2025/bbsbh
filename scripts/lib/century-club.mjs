@@ -33,8 +33,11 @@ export function centuryClubFromRows(rows) {
   return byKey
 }
 
-export async function loadCenturyClub() {
-  const db = await openDb()
+// The newest season on file is the one a callout means by "this season": the
+// table keeps every season (ADR-0086), and a GROUP BY over all of them would
+// add 2027 onto 2026.
+export async function loadCenturyClub(db = null) {
+  db ??= await openDb()
   const rows = db
     .prepare(
       // GROUPED, because pitch_arsenal_totals now holds one row per SIDE the
@@ -44,6 +47,7 @@ export async function loadCenturyClub() {
       `SELECT person_id, level, code, MIN(description) AS description,
               SUM(century_pitches) AS century_pitches, MAX(max_velo) AS max_velo
        FROM pitch_arsenal_totals
+       WHERE season = (SELECT MAX(season) FROM pitch_arsenal_totals)
        GROUP BY person_id, level, code
        HAVING SUM(century_pitches) > 0`,
     )

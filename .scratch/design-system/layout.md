@@ -1,0 +1,369 @@
+# Layout census: Stack, Cluster and Grid (#1180)
+
+First step of #1180. This file counts what the layout rules do. It proposes the
+gap steps. It builds nothing. Gary signs off on the proposals before any code
+lands, as #1128 did for spacing.
+
+Measured on `main` at `e7a783cf`, 2026-10-01, over every partial in
+`src/styles/` (including the subfolders). Re-derive with:
+
+```bash
+node .scratch/design-system/layout/census.mjs          # tallies
+node .scratch/design-system/layout/census.mjs --json   # every rule, for slicing
+node .scratch/design-system/layout/census2.mjs         # gap-less stacks, sibling margins
+```
+
+A "rule" is one selector list with its declarations, at any depth (a rule inside
+`@media` counts). Comments never count. `var(--space-N)` is resolved to its px
+value. Bespoke rules (`scorecard/*`, the box-score partials, `.bs__grid`) are
+counted but kept out of every "in scope" figure, as the issue says.
+
+## The headline, and why it is lower than the issue says
+
+The issue measured 367 / 291 / 160. This census finds more rules, because it
+also counts `column-reverse`, `flex-flow` shorthand and rules inside `@media`
+(54 of them):
+
+| pattern | all rules | bespoke | **in scope** | partials |
+| --- | ---: | ---: | ---: | ---: |
+| vertical stack (`flex-direction: column`) | 381 | 40 | **341** | 91 |
+| `display: grid` / `inline-grid` | 301 | 14 | **287** | 96 |
+| wrapping row (`flex-wrap: wrap`) | 163 | 14 | **149** | 74 |
+
+777 distinct rules in scope. But "818 rules to replace" overstates the work.
+Three findings matter:
+
+1. **A third of the stacks are not a spacing question.** 66 stacks set no gap,
+   and 91 more set 1-3px. Neither reads a section-sized token (see Stack).
+2. **Grid has a small real target.** Only 28 of the 287 grids use
+   `auto-fit`/`auto-fill`, the one shape the issue's `Grid` describes. The rest
+   fix their columns on purpose (see Grid).
+3. **The page-level section gap has no single owner today.** Pages do not share
+   a section wrapper. Spacing between sections sits in `margin-top` on the
+   section's own block (see Section gap).
+
+## Stack: 341 rules
+
+How many rules use each gap (`gap` or `row-gap`):
+
+| gap | rules | share | note |
+| ---: | ---: | ---: | --- |
+| none | 66 | 19% | 5 of them space children with a sibling margin instead |
+| 1-3px (0, 1, 2, 3) | 91 | 27% | optical hairlines: a label over a value |
+| 4px `--space-1` | 51 | 15% | |
+| 6px `--space-1h` | 22 | 6% | half-step |
+| 8px `--space-2` | 43 | 13% | |
+| 10px `--space-2h` | 5 | 1% | half-step |
+| 12px `--space-3` | 31 | 9% | |
+| 14px `--space-3h` | 1 | <1% | half-step |
+| 16px `--space-4` | 19 | 6% | |
+| 18px, 20px | 8 | 2% | 4 rules each; 18px is off the scale |
+| 24px `--space-6` | 3 | 1% | |
+| 32px `--space-8` | 1 | <1% | |
+
+Of the 341 rules, 95 write the gap as a raw px literal and 180 use a token.
+
+### What the data says
+
+- Four steps cover the heart: 4, 8, 12, 16 hold 144 rules, which is 42% of all
+  stacks and 78% of the 184 stacks that set a gap above 3px.
+- The issue guessed "3 or 4 gaps". The data agrees, with a fifth step for
+  sections.
+- The 91 hairline stacks (1-3px) are the "optical nudge" band that ADR-0085
+  already exempts under a ceiling. A `Stack` that owned them would need a
+  `--space-hair` token with no other use. Keep them bespoke.
+- The 66 gap-less stacks probably use `flex-direction: column` for alignment,
+  not for spacing (centering, `align-items`). I did not check each by hand.
+  **This is inference from the selector text.**
+
+### Proposed Stack steps
+
+| prop value | token | px | rules that already sit here |
+| --- | --- | ---: | ---: |
+| `tight` | `--space-1` | 4 | 51 |
+| `snug` | `--space-2` | 8 | 43 |
+| `base` | `--space-3` | 12 | 31 |
+| `loose` | `--space-4` | 16 | 19 |
+| `section` | `--space-section` | 16 or 24 (decision 2) | 3 at 24px |
+
+That is 144 exact matches on the four main steps, with no visible change when
+a rule migrates. Not covered: 28 half-step rules (6, 10, 14px), 8 rules at 18
+or 20px and 1 at 32px. Those 37 stay bespoke until the ADR-0085 follow-up
+decides on the odd band. The names are placeholders; the naming rule is
+`docs/design-system-naming.md`.
+
+## Cluster: 149 rules
+
+| gap | rules |
+| ---: | ---: |
+| 8px `--space-2` | 44 |
+| 12px `--space-3` | 22 |
+| 4px `--space-1` | 14 |
+| 6px `--space-1h` | 12 |
+| 10px | 2 |
+| 16px, 24px | 2 |
+| 0, 2px, 3px | 4 |
+| none | 10 |
+| **two values** (`row column`) | **39** |
+
+The 39 two-value gaps are the notable group: 26% of all wrapping rows. The
+commonest are `var(--space-2) var(--space-3)` (6), `var(--space-1)
+var(--space-2)` (5) and `var(--space-2) var(--space-4)` (4). A wrapped row
+often wants a tighter line gap than the gap between its items. A `Cluster`
+with one `gap` prop cannot say that.
+
+Proposed Cluster steps: `tight` 4, `snug` 8, `base` 12. They cover 80 rules
+(54%). Add a `rowGap` prop for the two-value rows (decision 3).
+
+## Grid: 287 rules
+
+| `grid-template-columns` | rules |
+| --- | ---: |
+| explicit track list (`1fr auto`, `64px 1fr`, mixed) | 125 |
+| none set (`grid-template-areas`, rows only, or set elsewhere) | 91 |
+| `repeat(N, …)`, a fixed count | 40 |
+| `auto-fit` / `auto-fill` | 28 |
+| `subgrid` | 3 |
+
+The 40 fixed-count grids are mostly `repeat(2, minmax(0, 1fr))` (13) and
+`repeat(3, 1fr)` (8). The 28 `auto-fit` grids use these minimum widths: 150px
+(4), 140px (3), 240px (2), and 19 other values at one rule each.
+
+### What the data says
+
+- **`Grid` replaces at most 28 + 40 = 68 of 287 rules.** The other 219 are
+  label/value rows, named areas and mixed tracks. They are layouts you author,
+  not "fit as many as you can". `Grid` should not try to absorb them.
+- The 40 fixed-count grids are a **behaviour change** if they move to
+  `auto-fit`. A stat strip that is always 3 across becomes 2 or 4 across by
+  width. That is a decision per surface, not a mechanical swap.
+- Gaps among grids: 8px (48), 12px (40), 16px (20), 10px (13), 4px (13), 20px
+  (11), none (90), two-value (14). The four main steps cover 121 rules.
+- 20px (11 rules) is the one grid gap with a cluster of its own. No stack or
+  cluster uses it.
+
+Proposed: `Grid` takes `min` (the column minimum, a length) and the same `gap`
+steps as Stack. Its default is `auto-fit`, no breakpoint, as the issue says.
+
+## Section gap
+
+I looked for a shared page wrapper and did not find one. No `.section` base
+rule exists. The page roots I checked (`.player`, `.team-hub`) set no `gap`
+between sections. Between-section space seems to come from `margin-top` on each
+section block. Margins of 16px or more, across all partials:
+
+| `margin-top` / `margin-bottom` | declarations |
+| --- | ---: |
+| `--space-4` (16px) | 44 + 14 |
+| `--space-5` (20px) | 11 + 3 |
+| `--space-6` (24px) | 9 + 3 |
+| `--space-8` (32px) | 2 |
+
+These count every margin of that size, not only margins between sections, so
+read them as an upper bound. **My reading (inference):** pages mostly separate
+sections by 16px, with a smaller group at 20-24px. I did not trace one page
+end to end.
+
+That gives two real options for `--space-section`:
+
+- **16px.** Matches what most pages do today. No visible change. But it equals
+  `loose`, so the token adds a name and no new step.
+- **24px.** A distinct, larger step that sets sections apart from the content
+  inside them. Every migrated page grows by 8px per section gap. The
+  screenshot suite (`npm run visual`, #1177) shows the change.
+
+## Where the code goes
+
+Follow the #1113 pattern. This is a proposal, not a decision.
+
+- `src/components/ui/layout/` (new bucket: `Stack.jsx`, `Cluster.jsx`,
+  `Grid.jsx`). `ui/` already has `control/` and `frame/`; layout is a third
+  kind.
+- `src/styles/system/stack.css` for the rules, one file per part (`cluster.css`, `grid.css` follow). It loads ahead of `section-head.css`: `test/card-cascade.test.js` pins the head, the card and 06 as adjacent imports.
+- `--space-section` goes in `src/tokens/layout.css`, not `spacing.css`: it is an alias, and `spacing.css` holds the primitive steps only.
+- Specimens on `/design-lab`, one per part (#1131 did this for Pill).
+- One part per PR. Cascade order is the contract (#1113): a rule moved into
+  `system/` changes which rule wins at equal specificity. A wrong slice must
+  revert alone.
+
+## Decisions (signed off by Gary, 2026-10-01)
+
+1. **Stack steps: 4, 8, 12, 16px only.** `tight`, `snug`, `base`, `loose`. No
+   24px step and no half-steps.
+2. **`--space-section` is 16px.** It is an alias of the 16px step, read by a
+   page's outer `Stack`. Pages look the same; a later change to the section gap
+   is still one edit.
+3. **Cluster gets a `rowGap` prop.** `gap` is the column gap. The 39 two-value
+   rows migrate with no visible change.
+4. **Grid covers `auto-fit` only.** The 28 rules that already use it. The other
+   259 stay authored by hand.
+5. **The 37 odd-gap stacks snap to the nearest step, ties round up.**
+
+   | from | to | rules |
+   | ---: | ---: | ---: |
+   | 6px | 8px | 22 |
+   | 10px | 12px | 5 |
+   | 14px | 16px | 1 |
+   | 18px | 16px | 4 |
+   | 20px | 16px | 4 |
+
+   Items 18px and 20px have no step above, so they go down to 16px. That is a
+   judgment call from me, not a point Gary signed off on.
+   **The one 32px stack does not snap.** A 32px to 16px move is 16px, not a
+   rounding. It stays bespoke. Tell me if you want it moved.
+
+   Every snap is a visible change. Run `npm run visual` on each migration
+   slice and list the changed pages in the PR body.
+
+## Next
+
+Build one part per PR, in this order: `Stack`, `Cluster`, `Grid`. Each PR adds
+the component, its rules in `src/styles/system/<part>.css`, a `/design-lab`
+specimen and a test. **`Stack`, `Cluster` and `Grid` are built** (this branch). `Cluster` also takes `align` (`start`, `center`, `baseline`), which was not in the sign-off: the census of 147 wrapping rows found 69 with no alignment, 41 `center`, 31 `baseline` and 5 `flex-start`, so a Cluster without it could not host half of them. Migrating the existing rules follows in sliced PRs.
+
+`Grid` takes `min` (a length, default `9rem`), `gap` (the Stack's four steps)
+and `fit`. Two facts from the 28 grids shaped it: 17 use `auto-fill` and 11 use
+`auto-fit`, so it needs both (`fit` is the switch, filling is the default); and
+three of them cannot move at all, because their tracks are `minmax(0, 1fr)`,
+`minmax(58px, max-content)` or a fixed `64px`, none of which is "at least
+`min`, equal share". So the real target is 25 rules. It has no row gap: only 2
+of the 28 set two values. Left out of the sign-off, so say if you want it:
+`rowGap`, as on `Cluster`.
+
+## Migration log
+
+Moving a rule onto a part is a CSS edit plus a JSX edit, so each slice is one
+family and ships green. The tools, all in `.scratch/design-system/layout/`:
+
+- `stack-candidates.mjs` lists the rules that can move. A candidate sets
+  `display: flex`, `flex-direction: column` and a gap on the 4, 8, 12 or 16px
+  step, behind a selector that is ONE class. It is SAFE when no other rule for
+  the class sets display, flex or gap, and every JSX site is a static
+  `className` on a plain element. **Measured on `main` before S1: about 120 candidates and 79 safe; after S3 the corrected finder counts 113 and 68 (see the note on the finder below).** The
+  other 24 of the 144 rules are not candidates because of their shape: a
+  grouped or compound selector, a rule inside `@media`, or a rule that does not
+  set `display: flex` itself. I did not sort the 24 by which. They are edited
+  by hand.
+- `jsx-to-layout.py` swaps `<div className="x">` for `<Stack gap=… className="x">`
+  and the matching closing tag, and refuses an element with any other prop.
+- `geom.mjs` and `diffgeom.mjs` dump and compare every element's rect and
+  layout style at 390 and 760px. A migration that must move nothing must give
+  zero differences. This stands in for `npm run visual`, which runs only when
+  Gary asks.
+
+| slice | rules | JSX sites | result |
+| --- | ---: | ---: | --- |
+| S1: awards history and postseason history | 4 | 6 | geometry identical on `/awards` and `/postseason-history`, 4 pages, 0 differences |
+| S2: `12-sealbox.css` (the scoring surfaces) | 7 | 9 | real surfaces identical on 4 anchor-game routes and states, and a synthetic check identical on all 7 (see below) |
+| S3: all-star rosters | 3 | 3 | geometry identical on `/all-star-rosters`, 4,822 elements at 390 and 760px, 0 differences |
+| S4: manager page and ballpark ranks (`39-manager-page.css`) | 3 | 4 | geometry identical on `/manager/bruce-bochy-111136` and `/team/158`; synthetic identical |
+| S5: book cover picker (`60-book-cover-picker.css`) | 3 | 5 | geometry identical on `/logbook/new`, 261 and 370 elements |
+| S6: identity lab workbench (`17-identity-lab-workbench.css`) | 7 | 7 | geometry identical on `/identity-lab`, 1,029 elements |
+| S7: book management (`58-logbook-shelf.css`) | 3 | 6 | `/logbook/new` identical (the two field labels); synthetic identical for all three |
+
+S1 moved `.awardhistory__years` (loose, 3 sites), `.awardhistory__leaguecol`,
+`.awardhistory__leagueyears` and `.pshistory__season` (base). `.awardhistory__leaguecol`
+keeps its `min-width: 0` in its own rule; the other three rules were deleted.
+The By Year view of `/awards` (the third `__years` site) was checked for
+computed style only (flex, column, 16px), because its click state is not in the
+baseline run. 75 safe candidates remain.
+
+S2 moved `.abs__detail` (an `ol`), `.upnext__col`, `.halfcast__row`,
+`.pitcherhandoff` (2 sites), `.dueup__col`, `.entering__teams` and
+`.entering__list` (an `ol`). `.pitcherhandoff` was deleted outright. The other
+six keep the declarations that are theirs: `align-items`, `text-align`,
+`min-width` and padding. `.abs__detail` and `.entering__list` lost their
+`list-style` and `margin` to `Stack`'s list reset, and keep their own padding,
+which wins on order because `stack.css` loads first. These are scoring
+surfaces, but `Stack` renders nothing and reads no data, so no value reaches
+the DOM earlier or later than before. `check-seal-scope` and the spoiler
+manifest guard still pass.
+
+How S2 was checked. The anchor game (823035) comes from `e2e/fixtures/mock-api.js`
+with the reveal mark preset (`geom.mjs` takes `MOCK=1`, `LS=…`, `STEPS=…`).
+- **Real surfaces.** `dueup__col`, `pitcherhandoff` and `entering__*` render on
+  `top6`, `top7` and `bottom3`, and `entering__*` also on the Lineups tab. Each
+  route at 390 and 760px has zero differences (up to 4,732 elements per page).
+  Two runs of the same unchanged page also diff to zero, so the capture is
+  stable.
+- **Not reached.** `abs__detail`, `upnext__col` and `halfcast__row` did not
+  render in any state I found in the anchor game (no ABS challenge in the
+  fixture, no Statcast cards, and the due-up card only shows in a state I did
+  not reach). `synth.mjs` covers all seven instead: it builds each class on a
+  test element with the same children, once with the old markup and once with
+  the Stack classes, and compares rects and computed styles. 28 elements, zero
+  differences. **That proves the CSS is equivalent, not that the real page
+  draws it.** The three classes are plain `div` and `ol` hosts like the four
+  that were reached, so I rate the risk low.
+
+`StatBox.jsx` sat at the 600-line cap, so the new import line pushed it to 601.
+I re-wrapped one comment (same words, 6 lines to 5) rather than widen the
+budget in `scripts/check-file-size.mjs`. A real fix is to split the file.
+
+68 safe candidates remain (corrected count, see S3).
+
+S3 moved `.allstarrosters__list`, `.allstarrosters__body` and
+`.allstarrosters__leagues` (`AllStarRostersPage.jsx`). Each keeps its own
+`margin-top`, `flex` or `min-width`. The page was captured with the mock relay
+(`MOCK=1`); all three classes render, 1, 10 and 10 times. The expanded "more
+seasons" state uses the same classes and was not captured separately.
+
+**A bug in the finder, found while picking S3.** `stack-candidates.mjs` and
+`census2.mjs` used postcss `rule.each(...)` with a callback that returns
+`false` for a non-matching node. postcss stops iterating when a callback
+returns `false`, so the scan of a rule ended at its first non-layout
+declaration or its first comment. Two effects: the `keeps` column was empty
+for any rule that opens with `display`, and a rule that opens with another
+property could hide its layout declarations from the "no other layout rule"
+test, so a rule could be called safe when it was not. Both scripts now use
+`walkDecls`. The corrected finder counts 113 candidates and 68 safe after S3.
+`census.mjs` was never affected (it uses an `if` block and returns nothing),
+so the census tables above stand. The "5 of them space children with a sibling
+margin" figure came from `census2.mjs`, which WAS affected, and is
+unverified. S1 and S2 are not at risk: each was checked by geometry, and a
+scan of the CSS now finds no remaining layout rule that names any of the 11
+migrated classes.
+
+## Slices S4 to S7
+
+Gary asked for all four families in one go; each is its own commit so a wrong
+slice reverts alone.
+
+- **S4** moved `.mgrpage__awards` and `.mgrpage__timeline` (two `ul`s that only
+  repeated the list reset, so both rules are deleted), and `.bpsheet__ranks` in
+  two files (`BallparkModal.jsx`, `BallparkCard.jsx`; it keeps its
+  `margin-top`). Real: `/manager/bruce-bochy-111136` draws both lists and
+  `/team/158` draws the rank sheet in the card. The modal copy of
+  `.bpsheet__ranks` is a click state I did not open; the synthetic check covers
+  its CSS.
+- **S5** moved `.coverpick` (2 sites), `.coverpick__half` (2, keeps
+  `min-width`) and `.coverpick__steps`. `/logbook/new` draws the steps at 390px
+  and the two halves at 760px.
+- **S6** moved seven rules on the dev-only identity lab. All seven render.
+  `.idlab__workbench` keeps its animation, `.idlab__field` keeps its sticky
+  position. `.idlab__barunit` carries event handlers, so I converted that one
+  by hand. The page diffs to zero twice, so the animation does not make the
+  capture noisy at rest. Sticky behaviour at scroll was not exercised: the
+  edit does not touch `position`.
+- **S7** moved `.bookmgmt`, `.bookmgmt__field` (4 `label` sites) and
+  `.bookmgmt__confirm`. `shelf__newtile` was **left alone**: it is a `button`
+  with an aspect-ratio and a font, a tile and not a stack.
+
+**`label` joined `Stack`'s elements.** A field is a caption stacked over an
+input, and 4 sites were `label`s. This is an addition to the part, in
+`lib/design/stackClass.js` and `Stack.jsx`; the test already derives its list
+from the helper. The finder now checks sites against the same element list, so
+a `button` or `span` host is no longer called safe (the first version accepted
+any lowercase tag). After S7 the finder counts 97 candidates and 44 safe.
+
+**A bad synthetic baseline, caught.** The first S7 synthetic run compared
+`block` against `flex` and reported differences. The cause: `58-logbook-shelf.css`
+is imported by the logbook components, so it is not loaded on `/design-lab`,
+and the "old" run had no CSS at all. `synth.mjs` now takes `ROUTE`, and the run
+that counts used `/logbook/new`, where the old rule gave `flex/column/16px`.
+Any synthetic check for a lazily imported stylesheet needs a route that loads
+it.
+
+Converter changes: it now keeps static string props (`role="group"`) and
+extra static classes. It still refuses an element with a handler or a spread.
+

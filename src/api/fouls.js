@@ -1,8 +1,8 @@
 import { shardKey100 } from '../lib/shardKey.js'
-import { staticJson } from './staticJson.js'
+import { currentSeasonOf, seasonStaticJson } from './staticJson.js'
 
 // Season-long foul-ball aggregates, read from a static same-origin file
-// (public/data/fouls.json) precomputed nightly by scripts/gen-fouls.mjs (the
+// (public/data/fouls/{season}/fouls.json) precomputed nightly by scripts/gen-fouls.mjs (the
 // build-time-fetch pattern — see src/api/CLAUDE.md and war.js). Foul balls are
 // not pre-totaled anywhere in the API, so the generator sweeps completed games'
 // play-by-play; this module just reads the shaped file and derives view models.
@@ -20,7 +20,10 @@ import { staticJson } from './staticJson.js'
 //
 // A player page does not. It shows one man's line, so it reads
 // fetchFoulsFor(personId) below and never touches this.
-export const fetchFouls = staticJson('/data/fouls.json')
+//
+// A season store (ADR-0086): both reads go to the season fouls/seasons.json
+// names, fouls/{season}/fouls.json and fouls/{season}/{NN}.json.
+export const fetchFouls = seasonStaticJson('fouls', 'fouls.json')
 
 // One player's slice — his own batter and pitcher rows, from the bucket he
 // falls in (`personId % 100`, shardKey100, the same join the rookie records and
@@ -34,7 +37,9 @@ const playerShards = new Map()
 
 export async function fetchFoulsFor(personId) {
   if (personId == null) return null
-  const key = shardKey100(personId)
+  const season = await currentSeasonOf('fouls')
+  if (season == null) return null
+  const key = `${season}/${shardKey100(personId)}`
   if (!playerShards.has(key)) {
     playerShards.set(
       key,

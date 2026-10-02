@@ -1,7 +1,7 @@
 // "Pitches like" — nearest neighbours in ARSENAL space: which other pitchers
 // throw the same mix of pitches, at the same speeds. Pure and self-contained
 // (no fetch, no DOM), driven entirely by the season pitch-type mix that
-// public/data/pitch-arsenal.json already carries — see src/api/pitchArsenal.js
+// public/data/pitch-arsenal-pool/{season}/{mlb,aaa}.json already carries — see src/api/pitchArsenal.js
 // for the reader and scripts/gen-pitch-arsenal.mjs for the sweep behind it.
 //
 // WHY RUNTIME, NOT A PRECOMPUTE. The pool is ~500 MLB arms with ~4 pitch types

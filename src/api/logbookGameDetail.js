@@ -16,10 +16,8 @@ import { ipToOuts } from '../lib/math/innings.js'
 // ===========================================================================
 // Why the PLAIN /boxscore and /winProbability endpoints, not feed/live
 // ===========================================================================
-// scripts/gen-scorebook-retrospective.mjs (First Scorebook's build-time
-// generator) fetches the full /feed/live per game, because it also needs
-// win-probability's play-by-play cross-reference for a live-game-style
-// context. This module runs at RUNTIME over an arbitrary, possibly large,
+// First Scorebook's one-off generator (since deleted; its output stays in
+// public/data/first-scorebook.json) fetched the full /feed/live per game. This module runs at RUNTIME over an arbitrary, possibly large,
 // user-specific game list, so it uses the two lighter standalone endpoints
 // instead — verified live 2026-08-10 (gamePk 823514) to carry everything
 // needed with no full-feed fetch at all:

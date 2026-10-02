@@ -227,7 +227,7 @@ const outDateDir = join(outDir, urlDate)
 
 // --- Foul spoilers + league foul rate (MLB only) -----------------------------
 //
-// Both derive from the LOCAL public/data/fouls.json — the season foul aggregates
+// Both derive from the LOCAL public/data/fouls/{season}/fouls.json — the season foul aggregates
 // gen-fouls.mjs writes (MLB only) — read ONCE from disk, never re-fetched. If the
 // file is missing or unparseable, foulSpoilerBoard comes back empty and
 // foulRatePerPitch null, so the two keys simply don't attach to any bundle
@@ -236,11 +236,13 @@ const outDateDir = join(outDir, urlDate)
 // batters, using the same relative games floor FoulTrackerPage.jsx applies:
 // g >= max(5, round(0.5 * maxGamesPlayed)), ranked by fouls/game. `foulRatePerPitch`
 // is league fouls / pitches (4 decimals), the per-MLB-game baseline like `bullpen`.
-const foulsPath = join(here, '..', 'public', 'data', 'fouls.json')
+// A season store (ADR-0086): the season fouls/seasons.json names.
+const foulsStore = join(here, '..', 'public', 'data', 'fouls')
 async function loadFoulData() {
   let data
   try {
-    data = JSON.parse(await readFile(foulsPath, 'utf8'))
+    const { current } = JSON.parse(await readFile(join(foulsStore, 'seasons.json'), 'utf8'))
+    data = JSON.parse(await readFile(join(foulsStore, String(current), 'fouls.json'), 'utf8'))
   } catch {
     return { foulSpoilerBoard: new Map(), foulRatePerPitch: null }
   }

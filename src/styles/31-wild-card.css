@@ -847,7 +847,12 @@
 }
 
 /* Team-page prospect table — an org's farm-system leaderboard, shown only on
-   the parent MLB club's own page (affiliate pages badge their rosters instead). */
+   the parent MLB club's own page (affiliate pages badge their rosters instead).
+   It sits in a Card, and the old .ledger-wrap clipped the ledger's own shadow,
+   so the Table's sheet shadow stays off here (a box in a box, still open). */
+.table:has(> .prospecttable) {
+  box-shadow: none;
+}
 .prospecttable .lft.ledger__label {
   display: flex;
   align-items: center;

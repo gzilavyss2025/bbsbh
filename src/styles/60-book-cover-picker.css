@@ -10,11 +10,6 @@
    here is a real PassportCover and the two must not fight over it. */
 
 /* ---- BookCoverPicker ---- */
-.coverpick {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
 
 /* The draft cover, kept on screen through every step. Narrower than a real
    shelf cover: it is a reference for the choice below it, not the book. */
@@ -58,9 +53,6 @@
 }
 
 .coverpick__half {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
   min-width: 0;
 }
 
@@ -140,12 +132,6 @@
 }
 
 /* ---- the phone stepper ---- */
-.coverpick__steps {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
 .coverpick__step {
   min-height: var(--tap-min);
   padding: var(--space-3) var(--space-4);

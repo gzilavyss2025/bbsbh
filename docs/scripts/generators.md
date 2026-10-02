@@ -122,9 +122,13 @@ don't run these by hand.
   variable MiLB crews (two/three-man) all land in the log; `UMP_LABELS` maps every
   role incl. LF/RF, and `selectOfficials` (`src/api/select.js`) mirrors it for the
   live crew card.
-- `gen-umpire-accuracy.mjs` → `umpire-accuracy-summary.json` (aggregates, the ranking pool)
-  + `umpire-accuracy/{personId}.json` (one man's rows, and this job's own merge base — no
-  archive file) — COMPANION to `umpires.json`: each plate umpire's season called-pitch
+- `gen-umpire-accuracy.mjs` → `umpire-accuracy/{season}/umpire-accuracy-summary.json`
+  (aggregates, the ranking pool) + `umpire-accuracy/{season}/{personId}.json` (one man's
+  rows, and this job's own merge base — no archive file) + `umpire-accuracy/seasons.json`
+  + `umpire-accuracy/all/umpire-accuracy-summary.json` (every season, summed from rows).
+  A season store (ADR-0086, #1200): each row goes to its game's season folder, so the
+  first 2027 game never adds onto 2026, and a run with no scored game writes nothing
+  — COMPANION to `umpires.json`: each plate umpire's season called-pitch
   accuracy + zone tendencies. Needs each game's live feed (per-pitch `pX/pZ` vs the strike
   zone), so unlike `gen-umpires.mjs`'s one-call rebuild this is a feed fetch PER GAME, too
   costly to redo nightly. Runs APPEND-ONLY/incremental like `gen-game-notes.mjs`: each
@@ -292,13 +296,18 @@ don't run these by hand.
   full-season MiLB levels (each MiLB person-stats fetch must carry the level's
   `sportId` or the API silently returns the empty MLB line); career-derived families
   + standings splits stay MLB-only. A date is ~1 MB across ~76 files, out of
-  precache; a page reads one. Also reads the LOCAL `public/data/fouls.json` for two
+  precache; a page reads one. Also reads the LOCAL `public/data/fouls/{season}/fouls.json`
+  (the season `fouls/seasons.json` names) for two
   MLB-only keys — `foulSpoilers` (top-10 foul-per-game hitters on the clubs) and
   `foulRate.perPitch` (league baseline) — skipped gracefully if that file is
   absent. See `docs/callouts.md` + ADR-0014; extend this pipeline, don't build a
   parallel path.
-- `gen-fouls.mjs` → `fouls.json` (league, for `/fouls`) + `fouls/{NN}.json` (`personId
-  % 100`, for the player card) — season foul-ball aggregates (per batter/pitcher/team,
+- `gen-fouls.mjs` → `fouls/{season}/fouls.json` (league, for `/fouls`) +
+  `fouls/{season}/{NN}.json` (`personId % 100`, for the player card) + `fouls/seasons.json`
+  + `fouls/all/fouls.json` (every season, summed from rows). A season store (ADR-0086,
+  #1200): `season` leads every foul table's key, the dump splits by season
+  (`bySeason`, `fouls-<season>.sql` frozen), a run writes only the seasons it ingested
+  a game for, and `--backfill-team-pitch-types [--season=]` wipes one season. Season foul-ball aggregates (per batter/pitcher/team,
   two-strike fouls, single-game highs, league by-inning + by-pitch-type rates). SQLite-backed
   (`fouls` group, ADR-0021) APPEND-ONLY incremental sweep of Final MLB games'
   live feeds like `gen-umpire-accuracy.mjs` (`--days` trailing window;
@@ -321,9 +330,14 @@ don't run these by hand.
   `att*` columns) needs a one-time `--rebuild` (wipe both tables, re-sweep) since
   old rows carry no attempts. App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
-- `gen-abs-challenges.mjs` → `public/data/abs-challenges.json`,
-  **`public/data/abs-exposure.json`** and
-  **`public/data/abs-exposure-clubs-{mlb,aaa}.json`** — **the written report is
+- `gen-abs-challenges.mjs` → `public/data/abs/{season}/abs-challenges.json`,
+  **`abs/{season}/abs-exposure.json`** and
+  **`abs/{season}/abs-exposure-clubs-{mlb,aaa}.json`**, plus `abs/seasons.json` and the
+  same four files over every season in `abs/all/`. A season store (ADR-0086, #1200):
+  each file is cut from its own season's rows (`buildExport`'s `season` filter), a
+  file is rewritten only when its content changes, the season comes from the
+  schedule game, `--exposure` reads the newest season on file (or `--season`),
+  and `--rebuild` needs `--season` and clears only that one. **The written report is
   `docs/abs-challenges.md`: the answer to each of the seven questions
   `/abs-challenges` asks, with the numbers and every caveat.** Every ABS
   (Automated Ball-Strike) CHALLENGE of the season, at both levels that run the
@@ -625,8 +639,13 @@ don't run these by hand.
   in a new logo file is the only step needed to light up a team, no code
   change. v2 idea, not built: guess a likely pre-posting treatment from
   accumulated history instead of always falling back to the base logo.
-- `gen-pitch-arsenal.mjs` → `pitch-arsenal/{NN}.json` (per-pitcher buckets) +
-  `pitch-arsenal-pool/{mlb,aaa}.json` (slim similarity pool, `docs/api/static-data.md`) —
+- `gen-pitch-arsenal.mjs` → `pitch-arsenal/{season}/{NN}.json` (per-pitcher buckets) +
+  `pitch-arsenal-pool/{season}/{mlb,aaa}.json` (slim similarity pool, `docs/api/static-data.md`)
+  + `pitch-command/{season}/{NN}.json` (the command grid), a `seasons.json` in each of the
+  three folders, and `pitch-arsenal-pool/all/{mlb,aaa}.json` (every season, summed from
+  rows). A season store (ADR-0086, #1200): `season` leads both totals tables' keys, the
+  dump splits by season (`pitch-arsenal-<season>.sql` frozen), the season and the
+  throwing hands come from the games, and a run with no new game writes nothing —
   each pitcher's season pitch mix (share + velocity per type), split `mlb`/`aaa` — every
   AAA park (like MLB's) feeds Hawk-Eye tracking, confirmed live against a real AAA
   gamePk's feed; AA and below carry none (same two-level split as `gen-umpire-accuracy`).
@@ -636,7 +655,7 @@ don't run these by hand.
   --sports=11` to backfill AAA alone into a file that already has MLB).
   SQLite-backed (`pitch-arsenal` group, ADR-0021); `pitch_arsenal_ingested_games`
   is the idempotency guard, keyed `(game_pk, level)`. `pitch_arsenal_totals` is
-  keyed `(person_id, level, code, stand)` — one row per side the BATTER stood
+  keyed `(season, person_id, level, code, stand)` — one row per side the BATTER stood
   on, `'L'`/`'R'`, or `'?'` when the feed named none. The side is in the KEY,
   unlike the times-through split's nine columns, because the two cross: a look
   has to be counted a side at a time. `'?'` is carried rather than dropped so
@@ -1370,10 +1389,6 @@ Re-run only to fold in a new season.
   it writes is hand-tuned afterwards in `/identity-lab`; methodology and the
   per-club confidence definitions live in `.scratch/milb-team-colors/README.md`.
   See `src/lib/CLAUDE.md` for how the pair resolves at render time.
-- `gen-scorebook-retrospective.mjs` → `public/data/first-scorebook.json` — the
-  one-off dataset behind `/first-scorebook`, a personal retrospective over a
-  fixed set of already-scored games. Hand-run by definition: its input is a
-  closed list, not a moving season.
 - `gen-contracts-shards.mjs` → `public/data/contracts-history/player/{00..99}.json`
   **and** `public/data/contracts-history/terms/{sourceFile}-{bucket}.json` — the
   join that puts real dollar terms behind a real player id. Reads the four
@@ -1559,11 +1574,6 @@ Re-run only to fold in a new season.
   `scripts/og-image.html` render an alternate generated-art version, kept in case we
   go back to it. The `og:*`/`twitter:*` tags in `index.html` point at the current
   `.jpg` (absolute URLs).
-- `game-buzz.mjs <gamePk>` — post-game: top social posts from the game's time window,
-  ranked by engagement, to seed handwritten GAME NOTES. FREE sources — Bluesky (no
-  auth) always, plus the Reddit game thread when `REDDIT_CLIENT_ID/SECRET` are set.
-  Deliberately a terminal script, NOT part of the app (game-night posts are spoilers).
-  Source scoping/queries: `docs/game-buzz.md`.
 - `gen-sitemap.mjs` → `public/sitemap.xml` — runs as part of `npm run build`. Lists
   the `/learn` guides plus the stable, public, non-scoring app routes, and
   deliberately lists NO game, date, player or team URL: a sitemap is a standing

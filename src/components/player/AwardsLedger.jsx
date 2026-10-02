@@ -6,6 +6,7 @@ import { teamAbbr, teamFullName, teamLogoUrl } from '../../lib/teams.js'
 import { Pill } from '../ui/control/Pill.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Table } from '../ui/table/Table.jsx'
 
 // Awards — the player page's career-honors section (api/person/awards.js's
 // awardsView). Replaces the Trophy Case, which promoted ONE honor to a marquee
@@ -138,7 +139,7 @@ function AwardTable({ category, boxed }) {
         <span className={`awardblk__count tier-${category.tier}`}>×{category.count}</span>
       </div>
       <span className={`awardblk__rule tier-${category.tier}`} aria-hidden="true" />
-      <table className="awardtbl">
+      <Table frame="bare" className="awardtbl">
         <thead>
           <tr>
             <th scope="col">Year</th>
@@ -161,7 +162,7 @@ function AwardTable({ category, boxed }) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
     </>
   )
   if (!boxed) return <section className="awardblk">{table}</section>

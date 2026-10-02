@@ -535,7 +535,7 @@ count — `(N PA)` — only when the batter's PA against the type is under 80
 - **foulSpoiler** — a league top-10 fouls-per-game batter steps in for his
   first PA ("MLB's No. 2 pitch-spoiler — 4.1 foul balls a game this season"),
   from the nightly `foulSpoilers` join (gen-callouts.mjs reads
-  `public/data/fouls.json`; qualification is the Foul Tracker page's own
+  `public/data/fouls/{season}/fouls.json`; qualification is the Foul Tracker page's own
   relative games floor). Roll-up: restated with tonight's tally once he
   actually spoiled a few ("Fouled off 6 tonight — he averages an MLB-best
   4.6 a game", ≥ 3 fouls tonight; same dedupeKey so the last word wins). MLB

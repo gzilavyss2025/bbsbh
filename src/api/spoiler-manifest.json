@@ -341,7 +341,7 @@
     },
     "fouls.js": {
       "class": "spoiler-free",
-      "why": "Static fouls.json season aggregates over completed games, same footing as WAR. The LIVE per-half foul counters are in derive.js instead."
+      "why": "Static fouls/{season}/fouls.json season aggregates over completed games, same footing as WAR. The LIVE per-half foul counters are in derive.js instead."
     },
     "game.js": {
       "class": "spoiler-free",
@@ -796,7 +796,7 @@
     },
     "postseasonSeries.js": {
       "class": "spoiler-free",
-      "why": "One series' game log, aggregated live from boxscores. `loadSeriesStats(games)` needs only each game's `gamePk`, so it also runs directly on the bracket module's `Series.games` (screens/postseason-live/LiveSeriesPage.jsx, #1230 slice 6), not only on postseason-history.json's completed series. Safe either way: postseason-history.json ships only completed postseasons, and bracket.js's `settle()` filters `Series.games` to games already Final BEFORE the cutoff (docs/api/postseason.md) — so no caller can hand this module a still-live or upcoming game, whichever source it reads from."
+      "why": "One series' game log, aggregated live from boxscores. `loadSeriesStats(games)` needs only each game's `gamePk`, so it also runs directly on the bracket module's `Series.games` (screens/postseason-live/LiveSeriesPage.jsx, #1230 slice 6), not only on postseason-history.json's completed series. Safe either way: postseason-history.json ships only completed postseasons, and bracket.js's `settle()` filters `Series.games` to games already Final BEFORE the cutoff (docs/api/postseason.md) — so no caller can hand this module a still-live or upcoming game, whichever source it reads from. It also reads each counted game's pitch calls (a `fields=`-pruned feed: club ids, half-innings and call codes, no result or score field) to count whiffs for the series totals."
     },
     "prehalf-callouts.js": {
       "class": "caller-gated",

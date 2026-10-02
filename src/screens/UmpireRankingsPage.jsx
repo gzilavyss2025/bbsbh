@@ -9,6 +9,7 @@ import { UmpireLink } from '../components/umpire/UmpireLink.jsx'
 import { TierPill } from '../components/badges/TierPill.jsx'
 import { HomePlateIcon } from '../components/badges/UmpireTierGlyph.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { Table } from '../components/ui/table/Table.jsx'
 
 const pct1 = (x) => `${(x * 100).toFixed(1)}%`
 
@@ -56,41 +57,39 @@ export function UmpireRankingsPage() {
       />
 
       {ranked.length > 0 && (
-        <div className="ledger-wrap">
-          <table className="standings umprank">
-            <thead>
-              <tr>
-                <th className="team">Umpire</th>
-                <th>Tier</th>
-                <th>Accuracy</th>
-                <th>Games</th>
+        <Table label="Home plate umpire accuracy" className="umprank">
+          <thead>
+            <tr>
+              <th className="team">Umpire</th>
+              <th>Tier</th>
+              <th>Accuracy</th>
+              <th>Games</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ranked.map((u) => (
+              <tr
+                key={u.id}
+                className={todayPlateIds.has(u.id) ? 'umprank__row--today' : undefined}
+              >
+                <td className="team">
+                  <span className="umprank__rank">{u.rank}</span>
+                  <UmpireLink id={u.id}>{u.name}</UmpireLink>
+                  {todayPlateIds.has(u.id) && (
+                    <span className="umprank__todaychip" role="img" aria-label="Behind the plate today">
+                      <HomePlateIcon />
+                    </span>
+                  )}
+                </td>
+                <td>
+                  <TierPill tier={u.tier} />
+                </td>
+                <td>{pct1(u.accuracy)}</td>
+                <td>{u.games}</td>
               </tr>
-            </thead>
-            <tbody>
-              {ranked.map((u) => (
-                <tr
-                  key={u.id}
-                  className={todayPlateIds.has(u.id) ? 'umprank__row--today' : undefined}
-                >
-                  <td className="team">
-                    <span className="umprank__rank">{u.rank}</span>
-                    <UmpireLink id={u.id}>{u.name}</UmpireLink>
-                    {todayPlateIds.has(u.id) && (
-                      <span className="umprank__todaychip" role="img" aria-label="Behind the plate today">
-                        <HomePlateIcon />
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    <TierPill tier={u.tier} />
-                  </td>
-                  <td>{pct1(u.accuracy)}</td>
-                  <td>{u.games}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </Table>
       )}
 
       <ReportFooter />

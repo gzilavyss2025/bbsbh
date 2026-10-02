@@ -4,9 +4,6 @@
    same visual language as .awardhistory__* (a season row, a league column,
    a recipient line), since both pages answer "who, grouped by season". */
 .allstarrosters__list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   margin-top: var(--space-2);
 }
 .allstarrosters__year {
@@ -24,9 +21,6 @@
   color: var(--text-heading);
 }
 .allstarrosters__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   flex: 1;
   min-width: 0;
 }
@@ -34,9 +28,6 @@
   width: 100%;
 }
 .allstarrosters__leagues {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
   min-width: 0;
 }
 /* Each league reuses the Team Page's "roster super-section" card

@@ -7,6 +7,7 @@ import { sanitizeSvgMarkup } from '../../../lib/svgSanitize.js'
 import { LOGO_VARIANTS, teamLogoUrl } from '../../../lib/teams.js'
 import { HexField } from '../HexField.jsx'
 import { saveCustomMark } from '../saveStores.js'
+import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
 // Build a club's missing jersey art out of the art it already has: pick a
 // source mark, repaint shapes one at a time, save the result under a name.
@@ -174,10 +175,10 @@ export function LogoRecolorEditor({ teamId, name, bars }) {
               }}
               dangerouslySetInnerHTML={{ __html: picker }}
             />
-            <div className="idlab__recolorout">
+            <Stack gap="tight" className="idlab__recolorout">
               <img className="idlab__recolorpreview" src={`data:image/svg+xml,${encodeURIComponent(recolored ?? '')}`} alt="" />
               <span className="idlab__monoinkbarlabel">Result</span>
-            </div>
+            </Stack>
           </div>
 
           <div className="idlab__recolorpalette">

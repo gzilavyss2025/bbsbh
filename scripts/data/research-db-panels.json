@@ -241,6 +241,10 @@
    "shipped UI data for the umpire accuracy page"
   ],
   [
+   "public/data/abs/",
+   "shipped UI data for the ABS page"
+  ],
+  [
    "public/data/glove-target/",
    "shipped UI data for the pitch-command surface"
   ],
@@ -317,22 +321,6 @@
    "shipped UI data; rookies.json is the registered summary"
   ],
   [
-   "public/data/abs-challenges.json",
-   "shipped UI data for the ABS page"
-  ],
-  [
-   "public/data/abs-exposure.json",
-   "shipped UI data for the ABS page"
-  ],
-  [
-   "public/data/abs-exposure-clubs-aaa.json",
-   "shipped UI data for the ABS page"
-  ],
-  [
-   "public/data/abs-exposure-clubs-mlb.json",
-   "shipped UI data for the ABS page"
-  ],
-  [
    "public/data/affiliates.json",
    "lookup table (club to affiliates); not a measurement"
   ],
@@ -389,10 +377,6 @@
    "shipped UI data for a callout"
   ],
   [
-   "public/data/fouls.json",
-   "shipped UI data for the fouls card"
-  ],
-  [
    "public/data/game-notes-corroboration.json",
    "shipped UI data for game notes"
   ],
@@ -447,10 +431,6 @@
   [
    "public/data/uniform-names.json",
    "shipped UI data for jersey art"
-  ],
-  [
-   "public/data/umpire-accuracy-summary.json",
-   "shipped UI data for the umpire accuracy page"
   ],
   [
    "public/data/workload.json",

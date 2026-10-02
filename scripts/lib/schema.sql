@@ -114,10 +114,18 @@ CREATE TABLE IF NOT EXISTS postseason_pitching_totals (
 -- foul-tracker.md — engines F1-F5). A completed game's fouls are immutable, so
 -- like postseason_* these tables accumulate via incrementing upserts as each
 -- game's live feed is swept, guarded by foul_ingested_games so a resumed/re-run
--- sweep never double-counts. Single-season (2026) by construction: the `season`
--- column is informational (overwritten to the latest ingested season); a genuine
--- new-season rebuild clears scripts/data/fouls.sql rather than adding a season
--- key to every primary key. Foul/whiff classification mirrors the live
+-- sweep never double-counts. EVERY SEASON STAYS ON FILE (ADR-0086, #1200):
+-- `season` is the first column of each accumulating table's primary key and of
+-- every ON CONFLICT in gen-fouls.mjs, so a 2027 game opens 2027 rows and never
+-- adds onto 2026. The two game-keyed tables (foul_ingested_games,
+-- foul_game_totals) carry `season` as a plain column, so the dump can split
+-- by it (scripts/lib/db.js, `bySeason`).
+--
+-- STORE SUMS, NOT AVERAGES. "All seasons" is a sum of these rows, so every
+-- count is stored as a count (pitches, fouls, whiffs, games, starts), and a
+-- rate is derived at export. A `max_*` column is a season high: "combined"
+-- means the maximum, with the columns that describe that same game. This rule
+-- holds for every new column in these tables. Foul/whiff classification mirrors the live
 -- derive.js path exactly via the shared FOUL_CODES/WHIFF_CODES/pitchCallCode in
 -- src/api/playbyplay.js, so the precomputed and live tallies can't drift.
 
@@ -139,7 +147,7 @@ CREATE TABLE IF NOT EXISTS postseason_pitching_totals (
 -- export time, these let the Single-Game Highs board show "when / against
 -- whom / final score / how much work" without a separate lookup.
 CREATE TABLE IF NOT EXISTS foul_batter_totals (
-  person_id          INTEGER PRIMARY KEY,
+  person_id          INTEGER NOT NULL,
   season             INTEGER NOT NULL,
   name               TEXT NOT NULL,
   team_id            INTEGER,
@@ -154,7 +162,8 @@ CREATE TABLE IF NOT EXISTS foul_batter_totals (
   max_game_pitches   INTEGER NOT NULL DEFAULT 0,
   max_game_opp_id    INTEGER,
   max_game_his_score INTEGER,
-  max_game_opp_score INTEGER
+  max_game_opp_score INTEGER,
+  PRIMARY KEY (season, person_id)
 );
 
 -- The single most-fouled PLATE APPEARANCE a batter has had all season (as
@@ -174,7 +183,8 @@ CREATE TABLE IF NOT EXISTS foul_batter_totals (
 -- of this exact plate appearance (not the batter's game/season total) — both
 -- feed the board's "Pitch N: <description>" line.
 CREATE TABLE IF NOT EXISTS foul_batter_pa_high (
-  person_id          INTEGER PRIMARY KEY,
+  person_id          INTEGER NOT NULL,
+  season             INTEGER NOT NULL,
   fouls              INTEGER NOT NULL DEFAULT 0,
   game_pk            INTEGER,
   pitcher_id         INTEGER,
@@ -192,7 +202,8 @@ CREATE TABLE IF NOT EXISTS foul_batter_pa_high (
   away_score         INTEGER,
   home_score         INTEGER,
   batting_team_id    INTEGER,
-  opponent_id        INTEGER
+  opponent_id        INTEGER,
+  PRIMARY KEY (season, person_id)
 );
 
 -- Fouls surrendered BY each pitcher, plus whiffs so the app can show the
@@ -202,7 +213,7 @@ CREATE TABLE IF NOT EXISTS foul_batter_pa_high (
 -- derived at export as starts*2 > games — stored as `starts` rather than a
 -- non-accumulable boolean so the incremental upsert stays correct.
 CREATE TABLE IF NOT EXISTS foul_pitcher_totals (
-  person_id  INTEGER PRIMARY KEY,
+  person_id  INTEGER NOT NULL,
   season     INTEGER NOT NULL,
   name       TEXT NOT NULL,
   team_id    INTEGER,
@@ -210,42 +221,46 @@ CREATE TABLE IF NOT EXISTS foul_pitcher_totals (
   starts     INTEGER NOT NULL DEFAULT 0,
   pitches    INTEGER NOT NULL DEFAULT 0,
   fouls      INTEGER NOT NULL DEFAULT 0,
-  whiffs     INTEGER NOT NULL DEFAULT 0
+  whiffs     INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (season, person_id)
 );
 
 -- Fouls BY each team's batters (team-level roll-up for the club foul boards).
 CREATE TABLE IF NOT EXISTS foul_team_totals (
-  team_id          INTEGER PRIMARY KEY,
+  team_id          INTEGER NOT NULL,
   season           INTEGER NOT NULL,
   games            INTEGER NOT NULL DEFAULT 0,
   fouls            INTEGER NOT NULL DEFAULT 0,
-  two_strike_fouls INTEGER NOT NULL DEFAULT 0
+  two_strike_fouls INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (season, team_id)
 );
 
 -- League-wide foul distribution by inning (innings 10+ folded into inning 10),
 -- split by whether the pitcher on the mound was his team's starter or a
 -- reliever — a cut that (per the research notes) isn't published anywhere.
 CREATE TABLE IF NOT EXISTS foul_league_innings (
-  inning              INTEGER PRIMARY KEY,
+  inning              INTEGER NOT NULL,
   season              INTEGER NOT NULL,
   pitches             INTEGER NOT NULL DEFAULT 0,
   fouls               INTEGER NOT NULL DEFAULT 0,
   pitches_vs_starter  INTEGER NOT NULL DEFAULT 0,
   fouls_vs_starter    INTEGER NOT NULL DEFAULT 0,
   pitches_vs_reliever INTEGER NOT NULL DEFAULT 0,
-  fouls_vs_reliever   INTEGER NOT NULL DEFAULT 0
+  fouls_vs_reliever   INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (season, inning)
 );
 
 -- League-wide foul rate by pitch type (details.type.code / .description).
 -- `whiffs` (swinging strikes) was added after the table's initial rows were
 -- ingested; a one-time backfill filled it in for already-ingested games.
 CREATE TABLE IF NOT EXISTS foul_pitch_types (
-  code        TEXT PRIMARY KEY,
+  code        TEXT NOT NULL,
   season      INTEGER NOT NULL,
   description TEXT NOT NULL,
   pitches     INTEGER NOT NULL DEFAULT 0,
   fouls       INTEGER NOT NULL DEFAULT 0,
-  whiffs      INTEGER NOT NULL DEFAULT 0
+  whiffs      INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (season, code)
 );
 
 -- Foul rate by pitch type, scoped to ONE team's own BATTERS (the pitch types
@@ -266,7 +281,7 @@ CREATE TABLE IF NOT EXISTS foul_team_pitch_types_batting (
   pitches     INTEGER NOT NULL DEFAULT 0,
   fouls       INTEGER NOT NULL DEFAULT 0,
   whiffs      INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (team_id, code)
+  PRIMARY KEY (season, team_id, code)
 );
 
 -- Same idea as foul_team_pitch_types_batting, but for a team's own PITCHERS —
@@ -282,14 +297,15 @@ CREATE TABLE IF NOT EXISTS foul_team_pitch_types_pitching (
   pitches     INTEGER NOT NULL DEFAULT 0,
   fouls       INTEGER NOT NULL DEFAULT 0,
   whiffs      INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (team_id, code)
+  PRIMARY KEY (season, team_id, code)
 );
 
 -- Idempotency guard: which gamePks have already been folded into the totals
 -- above (with the game's official date, so coverageSince is min(date)).
 CREATE TABLE IF NOT EXISTS foul_ingested_games (
   game_pk INTEGER PRIMARY KEY,
-  date    TEXT NOT NULL
+  date    TEXT NOT NULL,
+  season  INTEGER NOT NULL
 );
 
 -- Both teams' foul totals for ONE game (the "best souvenir odds" board: which
@@ -312,7 +328,8 @@ CREATE TABLE IF NOT EXISTS foul_game_totals (
   away_team_id INTEGER NOT NULL,
   away_fouls   INTEGER NOT NULL DEFAULT 0,
   away_score   INTEGER NOT NULL DEFAULT 0,
-  total_fouls  INTEGER NOT NULL DEFAULT 0
+  total_fouls  INTEGER NOT NULL DEFAULT 0,
+  season       INTEGER NOT NULL
 );
 
 -- Per-team, per-season COMEBACK counts (gen-comeback-wins.mjs), the numerator
@@ -376,6 +393,12 @@ CREATE TABLE IF NOT EXISTS jerseys (
 -- single fastest of this type on file, so the upsert takes MAX(existing,
 -- new) rather than adding. Both feed the veloVariety/centuryClub/veloPeak
 -- callout families (docs/callouts.md).
+-- EVERY SEASON STAYS ON FILE (ADR-0086, #1200), as with the foul tables:
+-- `season` leads the key here and in pitch_command_cells, and both ingested
+-- ledgers carry it, so a 2027 pitch never adds onto 2026. The foul tables'
+-- "STORE SUMS, NOT AVERAGES" rule holds here too: velocity_sum / velocity_n,
+-- never an average; `max_velo` combines as the maximum; the command grid's
+-- CSV counters add element-wise.
 CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
   person_id       INTEGER NOT NULL,
   level           TEXT NOT NULL,
@@ -417,7 +440,7 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
   tto3_pitches      INTEGER NOT NULL DEFAULT 0,
   tto3_velocity_sum REAL    NOT NULL DEFAULT 0,
   tto3_velocity_n   INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (person_id, level, code, stand)
+  PRIMARY KEY (season, person_id, level, code, stand)
 );
 
 -- Idempotency guard, one row per (gamePk, level) — a gamePk only ever belongs
@@ -427,6 +450,7 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_ingested_games (
   game_pk INTEGER NOT NULL,
   level   TEXT NOT NULL,
   date    TEXT NOT NULL,
+  season  INTEGER NOT NULL,
   PRIMARY KEY (game_pk, level)
 );
 
@@ -457,7 +481,7 @@ CREATE TABLE IF NOT EXISTS pitch_command_cells (
   homers      TEXT NOT NULL,
   swings      TEXT NOT NULL,
   first_pitch TEXT NOT NULL,
-  PRIMARY KEY (person_id, level, code, stand)
+  PRIMARY KEY (season, person_id, level, code, stand)
 );
 
 -- The command sweep's OWN idempotency guard, deliberately separate from
@@ -470,6 +494,7 @@ CREATE TABLE IF NOT EXISTS pitch_command_ingested_games (
   game_pk INTEGER NOT NULL,
   level   TEXT NOT NULL,
   date    TEXT NOT NULL,
+  season  INTEGER NOT NULL,
   PRIMARY KEY (game_pk, level)
 );
 

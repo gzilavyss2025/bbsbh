@@ -13,6 +13,7 @@ const isMultiYear = (terms) => Boolean(terms) && !/^\s*1\s*y/i.test(terms)
 import { CELL_LABELS } from '../../api/salaries.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { Table } from '../ui/table/Table.jsx'
 
 // The ledger itself: players down, seasons across, subtotals per band and one
 // club total at the foot — the shape a scorer already reads, and the shape the
@@ -57,81 +58,79 @@ export function ContractGrid({ ledger }) {
         </SectionHead>
       }
     >
-      <div className="ctr__scroll">
-        <table className="ctr__table">
-          <thead>
-            <tr>
-              <th scope="col" className="ctr__namehead">
-                Player
+      <Table frame="bare" sticky label="Commitment by season" className="ctr__table">
+        <thead>
+          <tr>
+            <th scope="col" className="ctr__namehead">
+              Player
+            </th>
+            <th scope="col" className="ctr__agehead">
+              Age
+            </th>
+            {years.map((year) => (
+              <th
+                key={year}
+                scope="col"
+                className={`ctr__yearhead${year === season ? ' ctr__yearhead--now' : ''}`}
+              >
+                {year}
               </th>
-              <th scope="col" className="ctr__agehead">
-                Age
-              </th>
-              {years.map((year) => (
-                <th
-                  key={year}
-                  scope="col"
-                  className={`ctr__yearhead${year === season ? ' ctr__yearhead--now' : ''}`}
-                >
-                  {year}
-                </th>
-              ))}
+            ))}
+          </tr>
+        </thead>
+        {groups.map((group) => (
+          <tbody key={group.key}>
+            <tr className="ctr__group">
+              <td colSpan={years.length + 2}>{group.label}</td>
             </tr>
-          </thead>
-          {groups.map((group) => (
-            <tbody key={group.key}>
-              <tr className="ctr__group">
-                <td colSpan={years.length + 2}>{group.label}</td>
-              </tr>
-              {group.players.map((player) => (
-                <tr key={player.id}>
-                  <th scope="row" className="ctr__name">
-                    <span className="ctr__player">
-                      <span className={`ctr__pos ctr__pos--${group.key}`}>{player.pos ?? '—'}</span>
-                      <span className="ctr__playername">
-                        <PlayerLink id={player.id}>{player.name}</PlayerLink>
-                        {isMultiYear(player.terms) && (
-                          <span className="ctr__terms">{player.terms}</span>
-                        )}
-                      </span>
+            {group.players.map((player) => (
+              <tr key={player.id}>
+                <th scope="row" className="ctr__name">
+                  <span className="ctr__player">
+                    <span className={`ctr__pos ctr__pos--${group.key}`}>{player.pos ?? '—'}</span>
+                    <span className="ctr__playername">
+                      <PlayerLink id={player.id}>{player.name}</PlayerLink>
+                      {isMultiYear(player.terms) && (
+                        <span className="ctr__terms">{player.terms}</span>
+                      )}
                     </span>
-                  </th>
-                  <td className="ctr__age">{player.age ?? DASH}</td>
-                  {player.cells.map((cell) => (
-                    <Cell key={cell.year} cell={cell} />
-                  ))}
-                </tr>
-              ))}
-              <tr className="ctr__subtotal">
-                <th scope="row" colSpan={2}>
-                  {group.label} subtotal
+                  </span>
                 </th>
-                {years.map((year) => (
-                  <td key={year}>
-                    {total(
-                      group.players.reduce(
-                        (sum, player) =>
-                          sum + (player.cells.find((cell) => cell.year === year)?.value ?? 0),
-                        0,
-                      ),
-                    )}
-                  </td>
+                <td className="ctr__age">{player.age ?? DASH}</td>
+                {player.cells.map((cell) => (
+                  <Cell key={cell.year} cell={cell} />
                 ))}
               </tr>
-            </tbody>
-          ))}
-          <tfoot>
-            <tr className="ctr__foot">
+            ))}
+            <tr className="ctr__subtotal">
               <th scope="row" colSpan={2}>
-                Club committed
+                {group.label} subtotal
               </th>
-              {totals.map((entry) => (
-                <td key={entry.year}>{total(entry.committed)}</td>
+              {years.map((year) => (
+                <td key={year}>
+                  {total(
+                    group.players.reduce(
+                      (sum, player) =>
+                        sum + (player.cells.find((cell) => cell.year === year)?.value ?? 0),
+                      0,
+                    ),
+                  )}
+                </td>
               ))}
             </tr>
-          </tfoot>
-        </table>
-      </div>
+          </tbody>
+        ))}
+        <tfoot>
+          <tr className="ctr__foot">
+            <th scope="row" colSpan={2}>
+              Club committed
+            </th>
+            {totals.map((entry) => (
+              <td key={entry.year}>{total(entry.committed)}</td>
+            ))}
+          </tr>
+        </tfoot>
+      </Table>
     </Card>
   )
 }

@@ -12,15 +12,19 @@ import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 // found — and nothing fails loudly when that happens. These tests are that
 // join, checked against the committed files.
 
-// spray is a season store (ADR-0086): its buckets sit in the folder of the
-// season that spray/seasons.json names, which is the one the app reads.
-const SEASON_STORES = new Set(['spray'])
-const currentOf = (name) =>
-  JSON.parse(readFileSync(new URL(`../public/data/${name}/seasons.json`, import.meta.url), 'utf8')).current
-const dir = (name) =>
-  new URL(`../public/data/${name}/${SEASON_STORES.has(name) ? `${currentOf(name)}/` : ''}`, import.meta.url)
-const list = (name) => readdirSync(dir(name)).filter((f) => f.endsWith('.json'))
-const read = (name, f) => JSON.parse(readFileSync(new URL(f, dir(name)), 'utf8'))
+// A season store (ADR-0086) keeps one folder per season, beside a
+// seasons.json that names them and the one the app reads (`current`). The join
+// and the size ceiling hold in EVERY season folder; the floors count the
+// season the app serves.
+const SEASON_STORES = new Set(['spray', 'fouls', 'pitch-arsenal', 'pitch-arsenal-pool'])
+const indexOf = (name) =>
+  JSON.parse(readFileSync(new URL(`../public/data/${name}/seasons.json`, import.meta.url), 'utf8'))
+const folder = (name, season) => new URL(`../public/data/${name}/${season == null ? '' : `${season}/`}`, import.meta.url)
+const dir = (name) => folder(name, SEASON_STORES.has(name) ? indexOf(name).current : null)
+const dirs = (name) => (SEASON_STORES.has(name) ? indexOf(name).seasons.map((s) => folder(name, s)) : [dir(name)])
+// Buckets only: a season folder also holds its league file (fouls.json).
+const list = (name, d = dir(name)) => readdirSync(d).filter((f) => /^\d\d\.json$/.test(f))
+const read = (name, f, d = dir(name)) => JSON.parse(readFileSync(new URL(f, d), 'utf8'))
 
 test('every reader computes the same bucket', () => {
   // The three exported names are one function; if they ever diverge, records
@@ -41,14 +45,15 @@ for (const [name, pick] of [
   ['spray', (shard) => Object.keys(shard.bat ?? {})],
 ]) {
   test(`every ${name} record sits in the bucket its reader will ask for`, () => {
-    const files = list(name)
-    assert.ok(files.length > 50, `${name}: only ${files.length} buckets`)
+    assert.ok(list(name).length > 50, `${name}: only ${list(name).length} buckets`)
     let records = 0
-    for (const f of files) {
-      const bucket = f.replace('.json', '')
-      for (const id of pick(read(name, f))) {
-        assert.equal(shardKey100(id), bucket, `${name}: ${id} is in ${f}`)
-        records++
+    for (const d of dirs(name)) {
+      for (const f of list(name, d)) {
+        const bucket = f.replace('.json', '')
+        for (const id of pick(read(name, f, d))) {
+          assert.equal(shardKey100(id), bucket, `${name}: ${id} is in ${f}`)
+          if (d.href === dir(name).href) records++
+        }
       }
     }
     assert.ok(records > 100, `${name}: only ${records} records across all buckets`)
@@ -96,7 +101,7 @@ test('a bucket stays small enough to be worth fetching alone', () => {
     // remaining weeks room without letting the shape quietly double.
     ['spray', 160],
   ]) {
-    const largest = Math.max(...list(name).map((f) => statSync(new URL(f, dir(name))).size))
+    const largest = Math.max(...dirs(name).flatMap((d) => list(name, d).map((f) => statSync(new URL(f, d)).size)))
     assert.ok(largest < ceiling * 1024, `${name}: largest bucket is ${Math.round(largest / 1024)} KB`)
   }
 })

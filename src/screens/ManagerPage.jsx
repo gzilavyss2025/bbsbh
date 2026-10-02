@@ -16,6 +16,7 @@ import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { Stack } from '../components/ui/layout/Stack.jsx'
 import { rate3 } from '../api/person/shared.js'
 
 // One person's career coaching page: a header (photo, current role or "last
@@ -113,14 +114,14 @@ function AwardsStrip({ awards }) {
   return (
     <Card body="flush" className="mgrpage__card">
       <h2 className="mgrpage__cardtitle">Awards</h2>
-      <ul className="mgrpage__awards">
+      <Stack gap="snug" as="ul" className="mgrpage__awards">
         {sorted.map((a, i) => (
           <li key={`${a.id}-${a.season}-${i}`} className="mgrpage__award">
             <span className="mgrpage__awardseason">{a.season}</span>
             <span className="mgrpage__awardname">{a.name}</span>
           </li>
         ))}
-      </ul>
+      </Stack>
     </Card>
   )
 }
@@ -278,7 +279,7 @@ function CoachingTimeline({ stints }) {
   return (
     <Card body="flush" className="mgrpage__card">
       <h2 className="mgrpage__cardtitle">Coaching career</h2>
-      <ul className="mgrpage__timeline">
+      <Stack gap="snug" as="ul" className="mgrpage__timeline">
         {stints.map((s, i) => (
           <li
             key={`${s.teamId}-${s.season}-${i}`}
@@ -295,7 +296,7 @@ function CoachingTimeline({ stints }) {
             )}
           </li>
         ))}
-      </ul>
+      </Stack>
     </Card>
   )
 }

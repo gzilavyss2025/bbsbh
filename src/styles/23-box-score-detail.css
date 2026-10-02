@@ -338,6 +338,7 @@
    in .tledg__blocks, a flex column with its own gap, not stacked sections. */
 .tledg__block {
   margin-top: 0;
+  padding-bottom: var(--space-1);
 }
 .tledg__block-title {
   margin: 0;
@@ -349,42 +350,45 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
 }
+/* Each block's body is a Table (#1132, Q5): three named columns, one ruled
+   row per category. Words, not mono figures, so it reads left; the Stat
+   column stays right, as Table sets figures. The first and last cells keep
+   the old list's 12px inset from the card's edge. */
 .tledg__rows {
-  list-style: none;
-  margin: 0;
-  padding: 0 var(--space-3) var(--space-1);
-  display: flex;
-  flex-direction: column;
+  font-family: inherit;
+  font-variant-numeric: normal;
 }
-/* border-TOP rather than bottom so the rule sits between rows and never draws
-   a stray line above the block's own bottom edge. */
-.tledg__row {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2h);
-  padding: var(--space-1h) 0;
-  border-top: var(--bw-hair) solid var(--border-hairline);
+.tledg__rows :where(th, td) {
+  text-align: left;
+  vertical-align: baseline;
 }
-.tledg__row:first-child {
-  border-top: none;
+.tledg__rows :where(th, td):first-child {
+  padding-left: var(--space-3);
+}
+.tledg__rows :where(th, td):last-child {
+  padding-right: var(--space-3);
+  text-align: right;
 }
 .tledg__cat {
-  flex: none;
-  width: 40px;
   font-family: var(--font-display);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-/* Name + position tag as one flex child, so the tag travels with the name and
-   the name (not the tag) is what gives way when the row runs out of room. */
+/* The Leader column takes the free width; max-width: 0 lets the cell shrink
+   below its content, so a long name ellipsises instead of widening the table.
+   Name + position tag ride as one flex child, so the tag travels with the
+   name and the name (not the tag) is what gives way. */
+.tledg__leader {
+  width: 100%;
+  max-width: 0;
+}
 .tledg__who {
-  flex: 1;
-  min-width: 0;
   display: flex;
   align-items: baseline;
   gap: var(--space-1h);
+  min-width: 0;
 }
 /* Source Sans at the app's NAME role — every player name in this app is
    --font-body at --fs-body/--w-semibold (.tlead__name-last, .playerline__name,
@@ -423,14 +427,13 @@
   color: var(--text-caption);
 }
 .tledg__val {
-  flex: none;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   color: var(--text-heading);
 }
-.tledg__row .ilmark {
+.tledg__who .ilmark {
   flex: none;
   font-size: var(--fs-caption);
 }
@@ -500,11 +503,9 @@
 .bs__grid--totals th,
 .bs__grid--totals td {
   width: 20%;
-  padding: var(--space-2) var(--space-1);
-  font-size: var(--fs-title-lg);
 }
-.bs__grid--totals thead th {
-  font-size: var(--fs-label);
+.bs__grid--totals td {
+  font-size: var(--fs-title-lg);
 }
 .bs__grid--totals .bs__nameCol {
   width: 20%;
@@ -525,10 +526,8 @@
 /* The club's logo, hard against the innings — shrink-to-fit so there's no
    dead gap between it and inning 1. Linked (TeamLink) to the team page. A
    fixed square footprint (rather than 1%-shrink-to-content) so the tile
-   below has a defined box to fill edge to edge, no gap on any side —
-   including the generic `.bs__grid td` bottom rule (overridden here at
-   higher specificity) and the first inning column's own left border, zeroed
-   below so the collapsed border between the two cells doesn't draw either. */
+   below has a defined box to fill edge to edge, no gap on any side — Table's
+   row rule included (overridden here at higher specificity). */
 .bs__grid .bs__boardName {
   width: 30px;
   height: 30px;
@@ -536,9 +535,6 @@
   text-align: left !important;
   padding: 0 !important;
   border: none;
-}
-.bs__boardName + .bs__boardInn {
-  border-left: none;
 }
 .bs__boardLogo {
   display: flex;
@@ -578,11 +574,21 @@
    line score is a quick-glance grid, not a headline number — at half the size
    of the old --fs-title-lg reading. Needs the two-class
    ".bs__grid--board .bs__boardInn" selector, not a bare ".bs__boardInn", to
-   out-specificity the generic ".bs__grid th, .bs__grid td" rule above. */
+   out-specificity the generic ".bs__grid td" rule in 21.
+   Table's grid is border-collapse: separate, so two touching boxes would each
+   draw the edge they share. Each box draws its right and bottom edges, and the
+   head row adds the top: one hairline per edge, and none to the left of
+   inning 1, beside the logo. */
 .bs__boardInn {
   width: 26px;
-  border: var(--bw-hair) solid var(--border-hairline);
   color: var(--text-body);
+}
+.bs__grid--board :is(.bs__boardInn, .bs__boardFinal) {
+  border: 0 solid var(--border-hairline);
+  border-width: 0 var(--bw-hair) var(--bw-hair) 0;
+}
+.bs__grid--board thead :is(.bs__boardInn, .bs__boardFinal) {
+  border-top-width: var(--bw-hair);
 }
 .bs__grid--board .bs__boardInn {
   font-size: var(--fs-compact);
@@ -622,7 +628,6 @@
    inning cells beside them. */
 .bs__grid--board .bs__boardFinal {
   width: 26px;
-  border: var(--bw-hair) solid var(--border-hairline);
   background: var(--paper-1);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);

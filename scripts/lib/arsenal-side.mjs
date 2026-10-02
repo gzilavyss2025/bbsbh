@@ -136,6 +136,7 @@ export function arsenalSideFromRows(rows) {
   return out
 }
 
+// The newest season only, the same rule as loadCenturyClub (ADR-0086).
 export async function loadArsenalSide() {
   const db = await openDb()
   const rows = db
@@ -145,6 +146,7 @@ export async function loadArsenalSide() {
       `SELECT person_id, level, code, stand, MIN(description) AS description,
               SUM(pitches) AS pitches
        FROM pitch_arsenal_totals
+       WHERE season = (SELECT MAX(season) FROM pitch_arsenal_totals)
        GROUP BY person_id, level, code, stand
        HAVING SUM(pitches) > 0`,
     )

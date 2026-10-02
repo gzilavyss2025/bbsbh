@@ -1,6 +1,20 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { aggregateGamePitchTypes, centuryRankMap, exportPitchArsenal } from '../scripts/gen-pitch-arsenal.mjs'
+import { mkdtempSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { openDb } from '../scripts/lib/db.js'
+import { CELLS } from '../scripts/lib/command-grid.mjs'
+import { loadCenturyClub } from '../scripts/lib/century-club.mjs'
+import {
+  aggregateGamePitchTypes,
+  arsenalStatements,
+  centuryRankMap,
+  exportCommandMap,
+  exportPitchArsenal,
+  foldGame,
+  poolsOf,
+} from '../scripts/gen-pitch-arsenal.mjs'
 import { pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, arsenalSidesView, MIN_ARSENAL_PITCHES, MIN_LOOK_SHIFT, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
 
 // --- helpers to build a tiny synthetic feed ----------------------------------
@@ -527,4 +541,75 @@ test('arsenalSidesView returns null when either side is no split', () => {
 
   const lopsided = dataWith(100, [sideRow('FF', 200, { L: [MIN_ARSENAL_PITCHES - 1, 94], R: [190, 95] })])
   assert.equal(arsenalSidesView(lopsided, 100, true), null, 'one side is no split, same rule the look filter follows')
+})
+
+// --- the season store (ADR-0086, #1200) ----------------------------------------
+// Before, both tables were keyed (person_id, level, code, stand) and the upsert
+// added the counts: the first 2027 pitch would have been added onto the 2026
+// totals and relabeled 2027 (#1168).
+
+const emptyDb = () => openDb(mkdtempSync(join(tmpdir(), 'arsenal-')))
+// One game: pitcher 100 throws `n` four-seamers at `speed` to a right-handed batter.
+const fourSeamers = (n, speed) =>
+  aggregateGamePitchTypes(
+    feedWith([play({ pitcher: 100, batter: 7, events: Array.from({ length: n }, () => pitch('FF', 'Four-Seam Fastball', speed)) })]),
+  )
+// One located four-seamer to a right-hander, in grid cell `cell`.
+const oneCell = (cell) =>
+  new Map([[100, new Map([['FF:R', Object.fromEntries(CELLS.map((f) => [f, Array.from({ length: 25 }, (_, i) => (f === 'cells' && i === cell ? 1 : 0))]))]])]])
+const folder = async () => {
+  const db = await emptyDb()
+  const stmts = arsenalStatements(db)
+  return {
+    db,
+    fold: (gamePk, season, n, speed, cell = 12) =>
+      foldGame(db, stmts, { gamePk, level: 'mlb', date: `${season}-04-01`, season }, fourSeamers(n, speed), oneCell(cell)),
+  }
+}
+const noStamp = ({ asOf: _asOf, ...rest }) => rest
+
+test('a 2027 game leaves the 2026 arsenal and command grid alone, and 2027 holds only that game', async () => {
+  const { db, fold } = await folder()
+  fold(1, 2026, 30, 95)
+  fold(2, 2026, 20, 96)
+  const before = noStamp(exportPitchArsenal(db, {}, 2026))
+  const gridBefore = exportCommandMap(db, 2026)
+
+  fold(3, 2027, 10, 90, 0)
+
+  assert.deepEqual(noStamp(exportPitchArsenal(db, {}, 2026)), before)
+  assert.deepEqual(exportCommandMap(db, 2026), gridBefore)
+  assert.equal(before.pit[100].mlb[0].pitches, 50)
+  assert.equal(gridBefore.pit[100].mlb.FF.R.cells[12], 2)
+  const a27 = exportPitchArsenal(db, {}, 2027)
+  assert.equal(a27.season, 2027)
+  assert.equal(a27.gamesIngested, 1)
+  assert.equal(a27.pit[100].mlb[0].pitches, 10)
+  assert.equal(a27.pit[100].mlb[0].avgVelo, 90)
+  const g27 = exportCommandMap(db, 2027)
+  assert.equal(g27.season, 2027)
+  assert.equal(g27.pit[100].mlb.FF.R.cells[0], 1)
+  assert.equal(g27.pit[100].mlb.FF.R.cells[12], 0)
+})
+
+test('the all/ pool sums every season from counts, never a mean of two averages', async () => {
+  const { db, fold } = await folder()
+  // 100 at 90 mph, then 300 at 98: the mean of the two averages is 94, the
+  // average over every pitch is (9000 + 29400) / 400 = 96.
+  fold(1, 2026, 100, 90)
+  fold(2, 2027, 300, 98)
+  const { mlb } = poolsOf(exportPitchArsenal(db, {}, null))
+  assert.deepEqual(mlb.seasons, [2026, 2027])
+  const [ff] = mlb.pit[100].types
+  assert.equal(ff.pitches, 400)
+  assert.equal(ff.avgVelo, 96)
+  // One season alone is under the similarity floor, so he is not in its pool.
+  assert.equal(poolsOf(exportPitchArsenal(db, {}, 2026)).mlb.pit[100], undefined)
+})
+
+test('the century-club callouts read the newest season, never two seasons summed', async () => {
+  const { db, fold } = await folder()
+  fold(1, 2026, 60, 101)
+  fold(2, 2027, 12, 100.5)
+  assert.equal((await loadCenturyClub(db)).get('mlb:100').count, 12)
 })

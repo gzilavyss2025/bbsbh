@@ -353,42 +353,19 @@ button.psseries__ldoor::after {
   color: var(--text-caption);
   text-align: center;
 }
-/* Column widths: the key label, a rank, the track, a rank. */
+/* Column widths: the key label, the two clubs' ranks side by side, then the track. */
 .psseries__keystable thead th:first-child {
   width: 92px;
   text-align: left;
 }
 .psseries__keystable thead th:nth-child(2),
-.psseries__keystable thead th:last-child {
-  width: 48px;
+.psseries__keystable thead th:nth-child(3) {
+  width: 52px;
 }
-.psseries__keystable thead th:nth-child(2) {
-  padding-right: var(--space-2);
-  text-align: right;
-}
-.psseries__keystable thead th:last-child {
-  padding-left: var(--space-2);
-  text-align: left;
-}
-/* The two club heads carry their track mark, so the dot and the ring read
-   as a legend: filled for the first club, open for the second. */
-.psseries__keystable thead th:nth-child(2)::before,
-.psseries__keystable thead th:last-child::after {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  box-sizing: border-box;
-  border-radius: var(--radius-pill);
-  vertical-align: 1px;
-}
-.psseries__keystable thead th:nth-child(2)::before {
+/* The two club heads carry the same logo as their track mark, a legend. */
+.psseries__keyhead {
   margin-right: var(--space-1);
-  background: var(--accent-primary);
-}
-.psseries__keystable thead th:last-child::after {
-  margin-left: var(--space-1);
-  border: var(--bw-heavy) solid var(--accent-primary);
+  vertical-align: -2px;
 }
 .psseries__keyscale {
   padding-inline: 2px;
@@ -430,14 +407,7 @@ button.psseries__ldoor::after {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-num);
   color: var(--text-body);
-}
-.psseries__keyrow > .psseries__keyrank:nth-child(2) {
-  padding-right: var(--space-2);
-  text-align: right;
-}
-.psseries__keyrow > .psseries__keyrank:last-child {
-  padding-left: var(--space-2);
-  text-align: left;
+  text-align: center;
 }
 /* A failed key: clay ink, struck through with a pencil stroke (the Nine Keys
    page's .ninekeys__cell--fail idiom). The hidden "(failed)" word says it for
@@ -449,27 +419,22 @@ button.psseries__ldoor::after {
   content: '';
   position: absolute;
   top: 50%;
+  left: 50%;
   width: 30px;
   height: var(--bw-rule);
   background: var(--accent-negative);
-  transform: rotate(-14deg);
-}
-.psseries__keyrow > .psseries__keyrank--fail:nth-child(2)::after {
-  right: var(--space-1h);
-}
-.psseries__keyrow > .psseries__keyrank--fail:last-child::after {
-  left: var(--space-1h);
+  transform: translate(-50%, -50%) rotate(-14deg);
 }
 /* The 1-to-30 track: a pencil rule; the bar at 15 as a dashed tick with the
-   half past it shaded in the page's deeper manila; the first club a filled dot, the second an open ring. */
+   half past it shaded in the page's deeper manila; each club a small logo, the first drawn over the second where ranks tie. */
 .psseries__keytrack {
   position: relative;
 }
 /* The marks are placed on an inner line inset 8px from each end, so a 1st or
-   a 30th never touches the rank beside it. */
+   a 30th never touches the edge of the card or the rank beside it. */
 .psseries__keyline {
   position: absolute;
-  inset: 0 var(--space-2);
+  inset: 0 var(--space-3);
 }
 .psseries__keyline::before {
   content: '';
@@ -491,21 +456,16 @@ button.psseries__ldoor::after {
 .psseries__keydot {
   position: absolute;
   top: 50%;
-  width: 10px;
-  height: 10px;
-  box-sizing: border-box;
-  border-radius: var(--radius-pill);
+  display: flex;
+  width: 18px;
+  height: 18px;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 var(--bw-heavy) var(--surface-card);
 }
 .psseries__keydot--away {
   z-index: 2;
-  background: var(--accent-primary);
 }
 .psseries__keydot--home {
   z-index: 1;
-  border: var(--bw-heavy) solid var(--accent-primary);
-  background: var(--surface-card);
 }
 /* The tally and the verdict under the table. */
 .psseries__keytally {
@@ -518,11 +478,39 @@ button.psseries__ldoor::after {
   letter-spacing: var(--ls-label);
   color: var(--text-heading);
 }
+/* The verdict sits behind an (i) after the tally. The popover is made for the
+   navy bars, so on paper it takes ink colors, and its tip spans the card. */
+.psseries__keytally {
+  position: relative;
+}
 .psseries__keyverdict {
-  margin: 0;
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
+  position: static;
+  margin-left: var(--space-1h);
+  vertical-align: middle;
+}
+.psseries__keyverdict .infopop__btn {
+  --btn-edge: var(--text-caption);
+  --btn-ink: var(--text-heading);
+  --btn-edge-hover: var(--text-heading);
+}
+.psseries__keyverdict .infopop__btn:hover,
+.psseries__keyverdict .infopop__btn:focus-visible {
+  color: var(--text-heading);
+}
+.psseries__keyverdict .infopop__tip {
+  top: auto;
+  bottom: calc(100% + var(--space-1h));
+  left: 0;
+  right: 0;
+  width: auto;
+  max-width: none;
+  font-family: var(--font-body);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-text);
   color: var(--text-body);
+}
+.psseries__keyverdict .infopop__tip::before {
+  display: none;
 }
 
 /* Wide, the table gives the key names and the ranks more room, so a card the
@@ -532,7 +520,7 @@ button.psseries__ldoor::after {
     width: 140px;
   }
   .psseries__keystable thead th:nth-child(2),
-  .psseries__keystable thead th:last-child {
+  .psseries__keystable thead th:nth-child(3) {
     width: 64px;
   }
 }

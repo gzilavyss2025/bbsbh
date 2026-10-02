@@ -109,11 +109,19 @@ export async function readSeasons(storeDir) {
   return readJsonOr(seasonsIndexPath(storeDir), { seasons: [], current: null })
 }
 
+// Pure: the season the app serves. Only a season with data is ever on file, so
+// it is the latest one on file: last season until the new season's first game
+// lands, whatever the date. `today` is in the signature so a test can pin that
+// the calendar does not decide it (#1200).
+export function seasonToServe(today, seasonsOnFile) {
+  return seasonsOnFile.length ? Math.max(...seasonsOnFile) : null
+}
+
 // Pure: the index after a run that WROTE data for `season`. A run with no data
 // does not call this, and leaves the index as it is.
 export function seasonsAfter(prev, season) {
   const seasons = [...new Set([...(prev?.seasons ?? []), season])].sort((a, b) => a - b)
-  return { seasons, current: seasons[seasons.length - 1] }
+  return { seasons, current: seasonToServe(null, seasons) }
 }
 
 // Writes the index only when it changes, so a normal night does not dirty it
@@ -125,4 +133,15 @@ export async function writeSeasons(storeDir, season) {
     await writeJsonAtomic(seasonsIndexPath(storeDir), { ...next, generatedAt: new Date().toISOString() })
   }
   return next
+}
+
+// Writes `body` under a fresh `generatedAt` only when it differs from the file
+// on disk, so a night that changes nothing leaves the file alone. For a season
+// store's all/ files (#1200), which every run rebuilds from every season.
+export async function writeJsonIfChanged(path, body) {
+  const prev = await readJsonOr(path, {})
+  delete prev.generatedAt
+  if (JSON.stringify(prev) === JSON.stringify(body)) return false
+  await writeJsonAtomic(path, { generatedAt: new Date().toISOString(), ...body })
+  return true
 }

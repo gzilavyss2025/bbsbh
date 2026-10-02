@@ -794,7 +794,8 @@ const BUDGETS = {
   // +1 for check-all.mjs, the one runner behind `npm run lint` (#1310). It
   // replaced a 29-command `&&` chain in package.json, so it belongs beside the
   // guards it runs.
-  scripts: 119,
+  // -2: game-buzz.mjs and gen-scorebook-retrospective.mjs deleted (#1310).
+  scripts: 117,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -929,7 +930,7 @@ const BUDGETS = {
   // -1 as abs-challenges.mjs left for scripts/lib/abs/ — the pure half of
   // gen-abs-challenges.mjs outgrew one file, so its two halves (one Final
   // game's feed to challenge rows; the accumulated rows to every split
-  // public/data/abs-challenges.json ships) are now rows.mjs and export.mjs
+  // public/data/abs/{season}/abs-challenges.json ships) are now rows.mjs and export.mjs
   // behind an index.mjs door. Both are still unit-tested without a live
   // statsapi call (test/abs-challenges.test.js), which is the testable-helper
   // convention this directory exists for. A SUBDIRECTORY is what the ABS

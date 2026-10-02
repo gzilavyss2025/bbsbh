@@ -300,16 +300,23 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
-.bs__scroll + .bs__scroll {
+/* The batting and pitching tables, when nothing stands between them. */
+.bs__team > .table + .table {
   margin-top: 14px;
 }
 
 /* No min-width: the tables size to fit the phone's content column rather than
    forcing a horizontal scroll. Tight cell padding + small tabular figures keep
    even the pitching table (nine numeric columns) inside the column; the name
-   auto-balances and wraps if a surname is long. .bs__scroll stays only as a
-   fallback for pathologically wide values. */
-.bs__grid {
+   auto-balances and wraps if a surname is long. Table's wrap (or, for the
+   tally, .bs__scroll) scrolls only for pathologically wide values.
+
+   Four grids wear .bs__grid on Table (#1132, slice T3): batting, pitching, the
+   totals card and the line score. system/table.css draws their cells, head
+   and row rules. The HELD inning tally (21b) and the two design-lab demos keep
+   the old recipe: each :where(:not(.table__grid)) rule reaches only them, at
+   the weight it always had. */
+.bs__grid:where(:not(.table__grid)) {
   border-collapse: collapse;
   width: 100%;
   font-family: var(--font-mono);
@@ -318,16 +325,23 @@
 
 .bs__grid th,
 .bs__grid td {
-  padding: var(--space-1) 2px;
   text-align: center;
+}
+.bs__grid td {
+  font-size: var(--fs-label);
+}
+.bs__grid:where(:not(.table__grid)) :is(th, td) {
+  padding: var(--space-1) 2px;
   font-size: var(--fs-label);
   white-space: nowrap;
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
 .bs__grid thead th {
-  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
+}
+.bs__grid:where(:not(.table__grid)) thead th {
+  font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: var(--ls-title);
   color: var(--text-caption);
@@ -474,7 +488,6 @@
 .bs__totals td {
   font-weight: var(--w-bold);
   color: var(--text-heading);
-  border-bottom: none;
   border-top: var(--bw-rule) solid var(--border-rule);
 }
 

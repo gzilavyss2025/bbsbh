@@ -16,6 +16,7 @@ import { Card } from '../components/ui/frame/Card.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { teamClubNameShort, teamFullName } from '../lib/teams.js'
 import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
+import { Stack } from '../components/ui/layout/Stack.jsx'
 import { seriesMark } from '../lib/postseason/seriesMarks.js'
 
 const AL = 103
@@ -341,7 +342,7 @@ function BracketStack({ season, onOpenSeries }) {
 
 function SeasonBracket({ season, onOpenSeries, wide }) {
   return (
-    <section className="pshistory__season">
+    <Stack as="section" className="pshistory__season">
       <div className="pshistory__seasonhead">
         <span className="pshistory__year">{season.year}</span>
         <TeamLink id={season.championTeamId} className="pshistory__champion">
@@ -368,7 +369,7 @@ function SeasonBracket({ season, onOpenSeries, wide }) {
       ) : (
         <BracketStack season={season} onOpenSeries={onOpenSeries} />
       )}
-    </section>
+    </Stack>
   )
 }
 

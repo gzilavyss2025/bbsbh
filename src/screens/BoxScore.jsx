@@ -14,6 +14,7 @@ import { umpireAccuracySummary } from '../api/umpires.js'
 import { selectChallengeState, gameHasAbs } from '../api/challenges.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { SealBox } from '../components/SealBox.jsx'
+import { Table } from '../components/ui/table/Table.jsx'
 import { GuideLink } from '../components/chrome/GuideLink.jsx'
 import { WinProbChart } from '../components/charts/WinProbChart.jsx'
 import { HitChartCard } from './boxscore/HitChartCard.jsx'
@@ -658,47 +659,45 @@ function TeamBlock({ side, theme }) {
     <Card body="flush" className={`bs__team ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <SectionMasthead as="h3" title={<TeamLink id={side.id}>{side.teamName}</TeamLink>} />
 
-      <div className="bs__scroll">
-        {/* Columns follow the #22 scorebook's batter-totals order (AB·R·H·RBI),
-            matching MLB.com, so each row transcribes straight across. */}
-        <table className="bs__grid bs__grid--bat">
-          <thead>
-            <tr>
-              <th className="bs__nameCol">Batting</th>
-              <th>AB</th>
-              <th>R</th>
-              <th>H</th>
-              <th>RBI</th>
+      {/* Columns follow the #22 scorebook's batter-totals order (AB·R·H·RBI),
+          matching MLB.com, so each row transcribes straight across. */}
+      <Table frame="bare" density="tight" label={`Batting, ${side.teamName}`} className="bs__grid bs__grid--bat">
+        <thead>
+          <tr>
+            <th className="bs__nameCol">Batting</th>
+            <th>AB</th>
+            <th>R</th>
+            <th>H</th>
+            <th>RBI</th>
+          </tr>
+        </thead>
+        <tbody>
+          {side.batters.map((b) => (
+            <tr key={b.id} className={b.isSub ? 'bs__row--substitute' : ''}>
+              <td className="bs__nameCol">
+                <span className="bs__player">
+                  {b.mark && <span className="bs__mark">{b.mark}</span>}
+                  <PlayerLink id={b.id} className="bs__pname">{b.name}</PlayerLink>
+                  {b.position && <NumPos num={b.num} pos={b.position} />}
+                </span>
+              </td>
+              <td>{b.ab}</td>
+              <td>{b.r}</td>
+              <td>{b.h}</td>
+              <td>{b.rbi}</td>
             </tr>
-          </thead>
-          <tbody>
-            {side.batters.map((b) => (
-              <tr key={b.id} className={b.isSub ? 'bs__row--substitute' : ''}>
-                <td className="bs__nameCol">
-                  <span className="bs__player">
-                    {b.mark && <span className="bs__mark">{b.mark}</span>}
-                    <PlayerLink id={b.id} className="bs__pname">{b.name}</PlayerLink>
-                    {b.position && <NumPos num={b.num} pos={b.position} />}
-                  </span>
-                </td>
-                <td>{b.ab}</td>
-                <td>{b.r}</td>
-                <td>{b.h}</td>
-                <td>{b.rbi}</td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="bs__totals">
-              <td className="bs__nameCol">Totals</td>
-              <td>{side.batTotals.ab}</td>
-              <td>{side.batTotals.r}</td>
-              <td>{side.batTotals.h}</td>
-              <td>{side.batTotals.rbi}</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr className="bs__totals">
+            <td className="bs__nameCol">Totals</td>
+            <td>{side.batTotals.ab}</td>
+            <td>{side.batTotals.r}</td>
+            <td>{side.batTotals.h}</td>
+            <td>{side.batTotals.rbi}</td>
+          </tr>
+        </tfoot>
+      </Table>
 
       {side.footnotes.length > 0 && (
         <ul className="bs__footnotes">
@@ -722,75 +721,73 @@ function TeamBlock({ side, theme }) {
         </div>
       ))}
 
-      <div className="bs__scroll">
-        {/* Columns match the #22 scorebook's pitcher table: throwing hand, IP,
-            pitch count, batters faced, then H·R·ER·BB·K. (SO is the scorebook's
-            K; HR/ERA/strike-split aren't on the sheet, so they're dropped.) */}
-        <table className="bs__grid bs__grid--pit">
-          <thead>
-            <tr>
-              <th className="bs__nameCol">Pitching</th>
-              <th>R/L</th>
-              <th>IP</th>
-              <th>P</th>
-              <th>BF</th>
-              <th>H</th>
-              <th>R</th>
-              <th>ER</th>
-              <th>BB</th>
-              <th>K</th>
+      {/* Columns match the #22 scorebook's pitcher table: throwing hand, IP,
+          pitch count, batters faced, then H·R·ER·BB·K. (SO is the scorebook's
+          K; HR/ERA/strike-split aren't on the sheet, so they're dropped.) */}
+      <Table frame="bare" density="tight" label={`Pitching, ${side.teamName}`} className="bs__grid bs__grid--pit">
+        <thead>
+          <tr>
+            <th className="bs__nameCol">Pitching</th>
+            <th>R/L</th>
+            <th>IP</th>
+            <th>P</th>
+            <th>BF</th>
+            <th>H</th>
+            <th>R</th>
+            <th>ER</th>
+            <th>BB</th>
+            <th>K</th>
+          </tr>
+        </thead>
+        <tbody>
+          {side.pitchers.map((p) => (
+            <tr key={p.id}>
+              <td className="bs__nameCol">
+                <span className="bs__player">
+                  <PlayerLink id={p.id} className="bs__pname">{p.name}</PlayerLink>
+                  {p.num !== '' && p.num != null && (
+                    <span className="bs__pos">
+                      <span className="bs__unum">{p.num}</span>
+                    </span>
+                  )}
+                  {p.dec && (
+                    <span
+                      className={`bs__dec bs__dec--${
+                        p.dec === 'L' ? 'loss' : 'win'
+                      }`}
+                    >
+                      {p.dec}
+                    </span>
+                  )}
+                </span>
+              </td>
+              <td className="bs__hand">{p.hand || '—'}</td>
+              <td>{p.ip}</td>
+              <td>{p.pitches}</td>
+              <td>{p.bf}</td>
+              <td>{p.h}</td>
+              <td>{p.r}</td>
+              <td>{p.er}</td>
+              <td>{p.bb}</td>
+              <td>{p.so}</td>
             </tr>
-          </thead>
-          <tbody>
-            {side.pitchers.map((p) => (
-              <tr key={p.id}>
-                <td className="bs__nameCol">
-                  <span className="bs__player">
-                    <PlayerLink id={p.id} className="bs__pname">{p.name}</PlayerLink>
-                    {p.num !== '' && p.num != null && (
-                      <span className="bs__pos">
-                        <span className="bs__unum">{p.num}</span>
-                      </span>
-                    )}
-                    {p.dec && (
-                      <span
-                        className={`bs__dec bs__dec--${
-                          p.dec === 'L' ? 'loss' : 'win'
-                        }`}
-                      >
-                        {p.dec}
-                      </span>
-                    )}
-                  </span>
-                </td>
-                <td className="bs__hand">{p.hand || '—'}</td>
-                <td>{p.ip}</td>
-                <td>{p.pitches}</td>
-                <td>{p.bf}</td>
-                <td>{p.h}</td>
-                <td>{p.r}</td>
-                <td>{p.er}</td>
-                <td>{p.bb}</td>
-                <td>{p.so}</td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="bs__totals">
-              <td className="bs__nameCol">Totals</td>
-              <td />
-              <td>{side.pitchTotals.ip}</td>
-              <td />
-              <td>{side.pitchTotals.bf}</td>
-              <td>{side.pitchTotals.h}</td>
-              <td>{side.pitchTotals.r}</td>
-              <td>{side.pitchTotals.er}</td>
-              <td>{side.pitchTotals.bb}</td>
-              <td>{side.pitchTotals.so}</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr className="bs__totals">
+            <td className="bs__nameCol">Totals</td>
+            <td />
+            <td>{side.pitchTotals.ip}</td>
+            <td />
+            <td>{side.pitchTotals.bf}</td>
+            <td>{side.pitchTotals.h}</td>
+            <td>{side.pitchTotals.r}</td>
+            <td>{side.pitchTotals.er}</td>
+            <td>{side.pitchTotals.bb}</td>
+            <td>{side.pitchTotals.so}</td>
+          </tr>
+        </tfoot>
+      </Table>
 
       {side.pitchNotes.length > 0 && (
         <div className="bs__notes">
@@ -865,7 +862,7 @@ function BoxDefense({ feed, sideKey, theme }) {
 function LineTotals({ away, home }) {
   return (
     <Card as="div" body="flush" className="bs__totalsCard">
-      <table className="bs__grid bs__grid--totals">
+      <Table frame="bare" density="tight" className="bs__grid bs__grid--totals">
         <thead>
           <tr>
             <th className="bs__nameCol">Team</th>
@@ -890,7 +887,7 @@ function LineTotals({ away, home }) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
     </Card>
   )
 }
@@ -915,70 +912,68 @@ function Scoreboard({ away, home, innings, onSection, treatments }) {
   ]
   return (
     <Card as="div" body="flush" className="bs__board">
-      <div className="bs__scroll">
-        <table className="bs__grid bs__grid--board">
-          <thead>
-            <tr>
-              <th className="bs__boardName" />
-              {innings.map((i) => (
-                <th key={i.num} className="bs__boardInn">
-                  {i.num}
-                </th>
-              ))}
-              <th className="bs__boardFinal">R</th>
-              <th className="bs__boardFinal">H</th>
-              <th className="bs__boardFinal">E</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(({ side, gameSide, cells, half }) => (
-              <tr key={side.teamName}>
-                <td className="bs__boardName">
-                  <TeamLink id={side.id} className="bs__boardLogo" ariaLabel={side.teamName}>
-                    <TeamTreatmentMark
-                      teamId={side.id}
-                      name={side.teamName}
-                      treatment={treatments?.[gameSide]}
-                      side={gameSide}
-                      size={24}
-                      block="bs__boardLogobox"
-                    />
-                  </TeamLink>
-                </td>
-                {cells.map((v, i) => {
-                  const played = typeof v === 'number'
-                  const scored = played && v > 0
-                  const label = `${half === 'bottom' ? 'Bottom' : 'Top'} ${ordinal(innings[i].num)}`
-                  return (
-                    <td
-                      key={innings[i].num}
-                      className={`bs__boardInn${
-                        scored ? ' bs__boardInn--scored' : ''
-                      }`}
-                    >
-                      {played && onSection ? (
-                        <button
-                          type="button"
-                          className="bs__boardCellBtn"
-                          onClick={() => onSection(stepToSection(2, innings[i].num, half))}
-                          aria-label={label}
-                        >
-                          {v}
-                        </button>
-                      ) : (
-                        v
-                      )}
-                    </td>
-                  )
-                })}
-                <td className="bs__boardFinal">{side.line.r}</td>
-                <td className="bs__boardFinal">{side.line.h}</td>
-                <td className="bs__boardFinal">{side.line.e}</td>
-              </tr>
+      <Table frame="bare" density="tight" label="Line score" className="bs__grid bs__grid--board">
+        <thead>
+          <tr>
+            <th className="bs__boardName" />
+            {innings.map((i) => (
+              <th key={i.num} className="bs__boardInn">
+                {i.num}
+              </th>
             ))}
-          </tbody>
-        </table>
-      </div>
+            <th className="bs__boardFinal">R</th>
+            <th className="bs__boardFinal">H</th>
+            <th className="bs__boardFinal">E</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(({ side, gameSide, cells, half }) => (
+            <tr key={side.teamName}>
+              <td className="bs__boardName">
+                <TeamLink id={side.id} className="bs__boardLogo" ariaLabel={side.teamName}>
+                  <TeamTreatmentMark
+                    teamId={side.id}
+                    name={side.teamName}
+                    treatment={treatments?.[gameSide]}
+                    side={gameSide}
+                    size={24}
+                    block="bs__boardLogobox"
+                  />
+                </TeamLink>
+              </td>
+              {cells.map((v, i) => {
+                const played = typeof v === 'number'
+                const scored = played && v > 0
+                const label = `${half === 'bottom' ? 'Bottom' : 'Top'} ${ordinal(innings[i].num)}`
+                return (
+                  <td
+                    key={innings[i].num}
+                    className={`bs__boardInn${
+                      scored ? ' bs__boardInn--scored' : ''
+                    }`}
+                  >
+                    {played && onSection ? (
+                      <button
+                        type="button"
+                        className="bs__boardCellBtn"
+                        onClick={() => onSection(stepToSection(2, innings[i].num, half))}
+                        aria-label={label}
+                      >
+                        {v}
+                      </button>
+                    ) : (
+                      v
+                    )}
+                  </td>
+                )
+              })}
+              <td className="bs__boardFinal">{side.line.r}</td>
+              <td className="bs__boardFinal">{side.line.h}</td>
+              <td className="bs__boardFinal">{side.line.e}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
     </Card>
   )
 }
