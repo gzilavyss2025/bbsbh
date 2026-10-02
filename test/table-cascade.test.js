@@ -933,7 +933,7 @@ const T6B = [
     jsx: 'screens/NineKeysPage.jsx',
     css: '79-nine-keys.css',
     ns: 'ninekeys__grid',
-    attrs: [/\bframe="sheet"|^(?![^]*\bframe=)/, /\bsticky\b/, /\blabel=\{caption\}/],
+    attrs: [/^(?![^]*\bframe=)/, /\bsticky\b/, /\blabel=\{caption\}/],
   },
 ]
 
@@ -992,12 +992,13 @@ test('T6b: the Nine Keys club cell is pinned by the Table, and a floor row tints
     if (/^\.ninekeys__grid tbody/.test(sel)) assert.ok(!props(body).includes('border-bottom'), `${sel} still draws a row rule under the cell`)
   }
   assert.equal(decl(own('.ninekeys__grid tbody tr:first-child :is(td, th)'), 'border-top'), '0', 'the head\'s heavy rule is the line above the first row')
-  // The body cells pad nothing and the mark sets the row height; no club or tally rule sets a dead padding under it.
-  for (const sel of ['.ninekeys__club', '.ninekeys__tally']) assert.ok(!rules(css).some(([s, body]) => s === sel && props(body).includes('padding')), `${sel} sets a padding the body rule would out-weigh`)
-  assert.equal(decl(own('.ninekeys__grid tbody :is(td, th)'), 'padding'), '0')
+  // The body cells pad nothing: keep is the whole rule, and no rule here sets a padding on a body cell.
+  for (const [sel, body] of rules(css)) {
+    if (/^\.ninekeys__(grid tbody|club|tally)/.test(sel)) assert.ok(!props(body).includes('padding'), `${sel} pads a body cell`)
+  }
 })
 
-test('T6b: the seal pin: Nine Keys reads no a reveal-only module, a seal or a stamp', () => {
+test('T6b: the seal pin: Nine Keys reads no reveal-only module, seal or stamp', () => {
   for (const { jsx } of T6B) {
     assert.doesNotMatch(src(jsx), /api\/(linescore|derive)\.js|<SealBox|revealedThrough|api\/stamps?\b|from ['"][^'"]*stamp/i, `${jsx} stays outside the spoiler scope`)
   }
