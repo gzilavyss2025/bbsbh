@@ -277,10 +277,17 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
                       <p className="hint scout__notposted">Not posted</p>
                     )}
                   </figure>
+                ) : grid || !board ? (
+                  // His map joins the pitcher's pitch types: with no pitcher
+                  // board for this scope, it has none to show.
+                  <figure className="scout__fig">
+                    <figcaption className="scout__cap">Hitter</figcaption>
+                    <p className="hint scout__notposted">Not posted</p>
+                  </figure>
                 ) : (
                   <figure className="scout__fig">
                     <figcaption className="scout__cap">Hitter · {selType ? selType.name : 'by pitch'}</figcaption>
-                    <HitterLine line={arsenalFor(data.savant, data.hitter.id, 'batting')} types={board?.types ?? []} code={sel} />
+                    <HitterLine line={arsenalFor(data.savant, data.hitter.id, 'batting')} types={board.types} code={sel} />
                   </figure>
                 )}
               </div>
