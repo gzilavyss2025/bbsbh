@@ -1,0 +1,5 @@
+2026: schedule days 187, Savant days 187, schedule games 2437, Savant games 2438
+days that differ: 3
+   ('2026-04-04', 14, 15, [], [824295])
+   ('2026-06-17', 15, 14, [824912], [])
+   ('2026-08-02', 14, 15, [], [824807])

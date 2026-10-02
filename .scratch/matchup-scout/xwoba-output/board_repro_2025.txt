@@ -1,0 +1,8 @@
+board rows 3543; reproduced groups 6043; board rows with no group 0
+Judge FF: board pa 159 est_woba 0.512 | mine pa 159 est 0.5122
+Judge SI: board pa 115 est_woba 0.542 | mine pa 115 est 0.5416
+Judge SL: board pa 110 est_woba 0.347 | mine pa 110 est 0.3469
+pa equal on 3543/3543 rows
+est_woba gap |mine - board| over 3543 rows: median 0.00024, max 0.0149; share <=0.0005 0.9949, <=0.002 0.9997, <=0.005 0.9997
+  board pa >= 10: n=3543 share within 0.002: 0.9997; max 0.0149
+  board pa >= 40: n=1590 share within 0.002: 1.0000; max 0.0005

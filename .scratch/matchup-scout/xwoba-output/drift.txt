@@ -1,0 +1,42 @@
+== Part 1: train on all earlier months of the same season, score the next month (MAE, n)
+  2025: 05: 0.0093 (n=21174) 06: 0.0087 (n=20388) 07: 0.0084 (n=18933) 08: 0.0080 (n=21556) 09: 0.0082 (n=18863) 10: 0.0075 (n=2129) 11: 0.0075 (n=68)
+  2026: 05: 0.0096 (n=21214) 06: 0.0093 (n=20093) 07: 0.0086 (n=18890) 08: 0.0082 (n=21278) 09: 0.0081 (n=18662) 10: 0.0108 (n=49)
+
+== Part 2: 2025-built table scored on 2026 balls
+  all: MAE 0.0329, mean signed (2026 - table) +0.0071
+  ground_ball  n= 51807 MAE 0.0260 mean signed +0.0036
+  line_drive   n= 29455 MAE 0.0350 mean signed +0.0077
+  fly_ball     n= 33397 MAE 0.0484 mean signed +0.0141
+  popup        n=  9153 MAE 0.0083 mean signed -0.0009
+  by exit velocity (mph):
+    0-60: n=  5666 MAE 0.0312 mean signed +0.0015
+    60-80: n= 24953 MAE 0.0194 mean signed -0.0018
+    80-95: n= 44995 MAE 0.0214 mean signed +0.0017
+    95-105: n= 37681 MAE 0.0469 mean signed +0.0101
+    105-130: n= 10518 MAE 0.0644 mean signed +0.0433
+  by launch angle (deg):
+    -90..0: n= 36401 MAE 0.0235 mean signed +0.0049
+    0..10: n= 17181 MAE 0.0328 mean signed -0.0009
+    10..25: n= 27177 MAE 0.0396 mean signed +0.0163
+    25..35: n= 15720 MAE 0.0662 mean signed +0.0244
+    35..50: n= 14071 MAE 0.0311 mean signed -0.0072
+    50..91: n= 13263 MAE 0.0072 mean signed -0.0010
+
+== Part 3: does one scale or shift close the gap? est2026 ~ a * table2025 + b, fitted on a random half of 2026, scored on the other half
+  fitted a=1.0427 b=-0.0080
+  held-out half: MAE 0.0328 -> 0.0334
+    ground_ball: MAE 0.0260 -> 0.0270
+    line_drive: MAE 0.0349 -> 0.0383
+    fly_ball: MAE 0.0486 -> 0.0453
+
+== Same exact key, mean estimate per season (keys with >= 5 balls in each season, 10 largest)
+  EV 105.2 LA    22: 2025 1.191 (n=17)  2026 1.242 (n=13)
+  EV 102.0 LA    22: 2025 0.748 (n=18)  2026 0.758 (n=9)
+  EV 102.2 LA    11: 2025 0.925 (n=16)  2026 0.912 (n=11)
+  EV 101.6 LA    15: 2025 0.664 (n=13)  2026 0.679 (n=14)
+  EV 103.9 LA    13: 2025 0.802 (n=10)  2026 0.875 (n=17)
+  EV 101.8 LA    13: 2025 0.892 (n=12)  2026 0.892 (n=15)
+  EV 103.4 LA     8: 2025 0.586 (n=11)  2026 0.666 (n=15)
+  EV 102.9 LA    20: 2025 0.610 (n=11)  2026 0.713 (n=15)
+  EV  90.9 LA    19: 2025 0.453 (n=15)  2026 0.471 (n=11)
+  EV 101.0 LA    14: 2025 0.817 (n=9)  2026 0.811 (n=17)

@@ -1,0 +1,2 @@
+2026-09-20 games checked 6 {'balls in play in feed': 307, 'joined to a hit_into_play row': 306, 'both have EV': 305, 'EV and LA equal': 305, 'joined row has an estimate': 305, 'key hits a row that is not hit_into_play': 1}
+2025-06-15 games checked 6 {'balls in play in feed': 292, 'joined to a hit_into_play row': 291, 'both have EV': 289, 'EV and LA equal': 289, 'joined row has an estimate': 287, 'key hits a row that is not hit_into_play': 1}
