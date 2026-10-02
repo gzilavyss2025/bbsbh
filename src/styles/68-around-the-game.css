@@ -911,7 +911,7 @@
    The cell is right-aligned like every other figure on the board, so the parts
    are laid out from the right — mark, name, then the count — and a tie prints
    two of them. `inline-flex` rather than `flex` on the cell itself: the cell is
-   a table cell whose alignment the shared `.standings` rules own, and turning
+   a table cell whose alignment the Table (system/table.css) owns, and turning
    it into a flex container would take that away. */
 .dh__oppclub {
   display: inline-flex;

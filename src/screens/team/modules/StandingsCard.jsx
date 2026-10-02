@@ -7,6 +7,7 @@ import { PostseasonOddsModal } from '../../../components/teamstats/PostseasonOdd
 import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../components/ui/frame/Card.jsx'
+import { Table } from '../../../components/ui/table/Table.jsx'
 
 // The three rows a preview shows: the club's own, plus the team above and the
 // team below it. A club at the top or bottom of its division still gets three
@@ -56,39 +57,37 @@ export function StandingsCard({ team, standings, asOf, divisionPostseasonOdds, p
           </SectionHead>
         }
       >
-        <div className="ledger-wrap">
-          <table className="standings">
-            <thead>
-              <tr>
-                <th className="team">Team</th>
-                <th>W</th><th>L</th><th>GB</th><th>Streak</th><th>L10</th>
-                <th className="standings__wide">Home</th>
-                <th className="standings__wide">Away</th>
-                <th>RD</th>
+        <Table label={`${team.division?.name || 'Division'} standings`} className="clubtable">
+          <thead>
+            <tr>
+              <th className="team">Team</th>
+              <th>W</th><th>L</th><th>GB</th><th>Streak</th><th>L10</th>
+              <th className="standings__wide">Home</th>
+              <th className="standings__wide">Away</th>
+              <th>RD</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((s) => (
+              <tr
+                key={s.id}
+                className={s.isMe ? 'is-me' : ''}
+                style={s.isMe ? { '--fav-accent': favoriteAccentColor(s.id) } : undefined}
+              >
+                <td className="team">
+                  <TeamLink id={s.isMe ? null : s.id}>
+                    <TeamLogo teamId={s.id} name={s.name} size={18} />{s.name}
+                  </TeamLink>
+                </td>
+                <td>{s.wins}</td><td>{s.losses}</td><td>{s.gb}</td>
+                <td>{s.streak}</td><td>{s.l10}</td>
+                <td className="standings__wide">{s.home}</td>
+                <td className="standings__wide">{s.away}</td>
+                <td className={s.diffTone}>{s.diff}</td>
               </tr>
-            </thead>
-            <tbody>
-              {rows.map((s) => (
-                <tr
-                  key={s.id}
-                  className={s.isMe ? 'is-me' : ''}
-                  style={s.isMe ? { '--fav-accent': favoriteAccentColor(s.id) } : undefined}
-                >
-                  <td className="team">
-                    <TeamLink id={s.isMe ? null : s.id}>
-                      <TeamLogo teamId={s.id} name={s.name} size={18} />{s.name}
-                    </TeamLink>
-                  </td>
-                  <td>{s.wins}</td><td>{s.losses}</td><td>{s.gb}</td>
-                  <td>{s.streak}</td><td>{s.l10}</td>
-                  <td className="standings__wide">{s.home}</td>
-                  <td className="standings__wide">{s.away}</td>
-                  <td className={s.diffTone}>{s.diff}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </Table>
       </Card>
 
       {showPostseasonOdds && (

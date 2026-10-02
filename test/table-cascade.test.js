@@ -562,13 +562,19 @@ test('T4: a small ledger draws no frame, no cell padding, no head dress and no r
   }
 })
 
-test('T4: .ledger left the frame block it shared with .standings, which T8 still deletes', () => {
+test('T4: .ledger left the frame block it shared with .standings, and T8 deleted that block and both wraps', () => {
   const css = read('26-player-page.css')
   const frame = rules(css).find(([, body]) => decl(body, 'box-shadow') === 'var(--shadow-card)' && decl(body, 'overflow') === 'hidden')
-  assert.ok(frame, 'the shared frame block still stands, for .standings')
-  assert.deepEqual(frame[0].split(',').map((s) => s.trim()), ['.standings'], 'only .standings keeps the frame')
-  for (const sel of ['.ledger-wrap', '.standings-wrap']) assert.ok(rules(css).some(([s]) => s === sel), `${sel} stays until T8`)
-  assert.equal(decl(ruleBody(css, '.ledger.standings th'), 'white-space'), 'nowrap', 'the Postseason odds sheet, still on the old base, keeps its one-line column names')
+  assert.equal(frame, undefined, 'no table draws the old frame: the Table wrap does')
+  for (const sel of ['.ledger-wrap', '.standings-wrap']) {
+    assert.ok(!rules(css).some(([s]) => new RegExp(`\\${sel}(?![a-z0-9_-])`).test(s)), `${sel} is deleted (T8)`)
+  }
+  assert.equal(ruleBody(css, '.ledger.standings th'), null, 'the odds sheet left the old base (T8)')
+  // The odds sheet keeps its one-line column names: the Table sets nowrap on every cell, and no rule that reaches it wraps a head.
+  assert.equal(decl(ruleBody(read('system/table.css'), '.table__grid :where(th, td)'), 'white-space'), 'nowrap')
+  for (const [sel, body] of [...rules(read('29-team-transactions.css')), ...rules(read('39-manager-page.css'))]) {
+    if (/(^|,\s*)\.(clubtable|psoddstable)( thead)? th(,|$)/.test(sel)) assert.notEqual(decl(body, 'white-space'), 'normal', `${sel} wraps the odds sheet's heads`)
+  }
 })
 
 test('T4: the ledger keeps its footer, all-star, pencil, subtotal and nested rows, and its ONE gradient row rule', () => {
@@ -729,7 +735,7 @@ test('T7: no board takes its cells or its frame from the shared .standings or .l
 })
 
 test('T7: what the .standings base gave the ranked-name cell lives in the board\'s own namespace', () => {
-  // `.standings` set these on the cell; the boards left it. The 29 base stays (T8 deletes it).
+  // `.standings` set these on the cell; the boards left it. T8 deleted that base.
   for (const { css, ns } of [
     { css: '43-foul-tracker.css', ns: 'foulboard' },
     { css: '38-umpire-pages.css', ns: 'umprank' },
@@ -1080,6 +1086,144 @@ test('T6b: the Nine Keys club cell is pinned by the Table, and a floor row tints
 
 test('T6b: the seal pin: Nine Keys reads no reveal-only module, seal or stamp', () => {
   for (const { jsx } of T6B) {
+    assert.doesNotMatch(src(jsx), /api\/(linescore|derive)\.js|<SealBox|revealedThrough|api\/stamps?\b|from ['"][^'"]*stamp/i, `${jsx} stays outside the spoiler scope`)
+  }
+})
+
+// ---- slice T8: Standings and the shared bases ----
+
+// One row per file that moved in T8. Every table is a club table: one club a
+// row, a `.team` name cell, sometimes a favorite-team row. `clubtable` is the
+// namespace on each; `extra` is the second class its tag must carry. All six
+// are sheets at row density and scroll sideways on a phone, so each has a label;
+// only the /standings boards and the /postseason-race mini table pin the club.
+const T8 = [
+  { jsx: 'screens/StandingsPage.jsx', tags: 2, sticky: true, extra: 'clubtable--full' },
+  { jsx: 'screens/PostseasonRacePage.jsx', tags: 1, sticky: true, extra: 'clubtable--full' },
+  { jsx: 'screens/team/modules/StandingsCard.jsx', tags: 1, sticky: false },
+  { jsx: 'components/teamstats/PostseasonOddsModal.jsx', tags: 1, sticky: false, extra: 'psoddstable' },
+  { jsx: 'screens/GameNotesDebugPage.jsx', tags: 1, sticky: false },
+]
+const T8_CSS = ['29-team-transactions.css', '30-standings.css', '31-wild-card.css', '39-manager-page.css']
+const T8_NS = ['clubtable', 'clubtable--full', 'psoddstable']
+const BASES = /(?<![a-z0-9_-])(standings|ledger-wrap|standings-wrap)(?![a-z0-9_-])/
+const t8Rule = (css, sel) => rules(read(css)).find(([s]) => s.split(',').map((x) => x.trim()).includes(sel))?.[1] ?? ''
+
+test('T8: each club table renders on Table with the frame, density, sticky and label the census gives it', () => {
+  let tables = 0
+  for (const { jsx, tags, sticky, extra } of T8) {
+    const code = src(jsx)
+    assert.match(code, /import \{ Table \} from ["'][\w./]+\/ui\/table\/Table\.jsx["']/, `${jsx} imports Table`)
+    assert.doesNotMatch(code, /<table\b/, `${jsx} has no bare <table>`)
+    const own = [...code.matchAll(/<Table\b([^>]*)>/g)].map((m) => m[1]).filter((a) => /className=\{?["`]clubtable(?![a-z0-9_-])/.test(a))
+    assert.equal(own.length, tags, `${jsx}: ${tags} <Table> tag(s) wear .clubtable`)
+    for (const a of own) {
+      assert.doesNotMatch(a, /\b(frame|density)=/, `${jsx}: a sheet at row density, the defaults`)
+      assert.equal(/\bsticky\b/.test(a), sticky, `${jsx}: sticky`)
+      assert.match(a, /\blabel=/, `${jsx}: a club table scrolls sideways on a phone, so it has a label`)
+      if (extra) assert.match(a, new RegExp(String.raw`className=\{?["\`][^"\`]*(?<![\w-])${extra}(?![\w-])`), `${jsx}: the tag keeps .${extra}`)
+    }
+    tables += own.length
+  }
+  assert.equal(tables, 6, 'T8 moves 6 tables')
+})
+
+test('T8: two boards on one page have two different labels', () => {
+  const labels = [...src('screens/StandingsPage.jsx').matchAll(/<Table\b[^>]*\blabel=\{`([^`]*)`\}/g)].map((m) => m[1])
+  assert.equal(labels.length, 2)
+  assert.equal(new Set(labels).size, 2, 'the division boards and the wild card boards are named apart')
+  for (const l of labels) assert.match(l, /\$\{/, 'each board names its own division or league')
+})
+
+test('T8: no JSX wears the shared bases, and no stylesheet names them', () => {
+  const files = walk(SRC)
+  for (const file of files.filter((f) => f.endsWith('.jsx'))) {
+    for (const [, cls] of readFileSync(file, 'utf8').matchAll(/className=\{?["'`]([^"'`]*)["'`]/g)) {
+      assert.doesNotMatch(cls, BASES, `${file}: className "${cls}" still wears a deleted base`)
+    }
+  }
+  for (const file of files.filter((f) => f.endsWith('.css'))) {
+    for (const [sel] of rules(stripComments(readFileSync(file, 'utf8')))) {
+      assert.doesNotMatch(sel, /\.(standings|ledger-wrap|standings-wrap)(?![a-z0-9_-])/, `${file}: "${sel}" names a deleted base`)
+    }
+  }
+})
+
+test('T8: the club table namespace draws no frame, no cell padding, no head dress and no row rule', () => {
+  const FRAME = ['border', 'border-radius', 'box-shadow', 'background', 'overflow', 'border-collapse', 'border-spacing', 'width']
+  const HEAD = ['padding', 'background', 'font-family', 'letter-spacing', 'text-transform', 'font-size', 'color', 'border-top']
+  for (const css of T8_CSS) {
+    for (const [sel, body] of rules(read(css))) {
+      const names = props(body)
+      for (const part of sel.split(',').map((x) => x.trim())) {
+        for (const ns of T8_NS) {
+          const plain = part.match(new RegExp(String.raw`(^|\s)\.${ns} (thead th|tbody td|th|td)$`))
+          if (part === `.${ns}`) for (const p of FRAME) assert.ok(!names.includes(p), `${css}: .${ns} still sets ${p}`)
+          else if (plain) {
+            for (const p of ['padding', 'border-top', 'border-bottom', 'font-family', 'white-space']) {
+              if (p === 'white-space' && part === '.clubtable--full thead th') continue
+              assert.ok(!names.includes(p), `${css}: ${part} still sets ${p}`)
+            }
+            if (/th$/.test(plain[2])) for (const p of HEAD) assert.ok(!names.includes(p), `${css}: ${part} still sets ${p}`)
+          }
+        }
+      }
+    }
+  }
+})
+
+test('T8: the Table pins the club column; the namespace keeps only its width and its tints', () => {
+  for (const css of T8_CSS) {
+    for (const [sel, body] of rules(read(css))) {
+      if (!/clubtable|psoddstable/.test(sel)) continue
+      for (const p of ['position', 'left', 'z-index', 'border-top-left-radius', 'border-bottom-left-radius']) {
+        assert.ok(!props(body).includes(p), `${css}: ${sel} still sets ${p}: the Table draws the pin`)
+      }
+      // Safari drops sticky on a cell that is not table-cell: the Table restates it, the namespace never flexes it back.
+      if (/clubtable--full/.test(sel)) assert.notEqual(decl(body, 'display'), 'flex', `${css}: ${sel} flexes a board cell`)
+    }
+  }
+  assert.equal(decl(t8Rule('30-standings.css', '.clubtable--full .team'), 'min-width'), '116px', 'the pinned club column keeps its width')
+  // The favorite row is opaque under the pin: one tint, mixed into the card, paints every cell of the row.
+  assert.equal(decl(t8Rule('29-team-transactions.css', '.clubtable tr.is-me td'), '--table-pin'), 'color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card))')
+  assert.equal(decl(t8Rule('29-team-transactions.css', '.clubtable tr.is-me td'), 'background'), 'var(--table-pin)')
+  // The wild card group row spans the board; its one cell is the first, so it keeps its page ground under the pin.
+  assert.equal(decl(t8Rule('31-wild-card.css', '.wc-grouphead td'), '--table-pin'), 'var(--bg-page)')
+})
+
+test('T8: the club table keeps its name cell, its tones and the board\'s column rules', () => {
+  const core = '29-team-transactions.css'
+  assert.equal(decl(t8Rule(core, '.clubtable .team'), 'text-align'), 'left')
+  const cell = t8Rule(core, '.clubtable td.team')
+  assert.equal(decl(cell, 'font-family'), 'var(--font-body)', 'a club name is words, not a mono figure')
+  assert.equal(decl(cell, 'text-transform'), 'uppercase')
+  assert.equal(decl(t8Rule(core, '.clubtable td.team > *'), 'display'), 'flex', 'the logo and the name sit in a row')
+  assert.equal(decl(t8Rule(core, '.clubtable tr.is-me .team'), 'color'), 'var(--fav-accent, var(--field-deep))')
+  assert.equal(decl(t8Rule(core, '.clubtable td.standings__diff--positive'), 'color'), 'var(--accent-positive)')
+  assert.equal(decl(t8Rule(core, '.clubtable td.standings__diff--negative'), 'color'), 'var(--accent-negative)')
+  assert.equal(decl(t8Rule(core, '.clubtable td.is-clinched'), 'font-weight'), 'var(--w-semibold)')
+  const board = '30-standings.css'
+  assert.equal(decl(t8Rule(board, '.clubtable--full .st-ext'), 'display'), 'none', 'a phone shows the essentials')
+  assert.equal(decl(t8Rule(board, '.clubtable--full.is-expanded .st-ext'), 'display'), 'table-cell', '"More columns" brings the rest back')
+  assert.equal(decl(t8Rule(board, '.clubtable--full thead th'), 'white-space'), 'normal', 'a board head may wrap, as it did on the old base')
+  assert.equal(decl(t8Rule(board, '.clubtable--full td'), 'font-size'), 'var(--fs-compact)', 'a phone board keeps its compact figures')
+  assert.equal(decl(t8Rule(board, '.clubtable tr.is-eliminated td'), 'opacity'), '0.62')
+  // The group row's 12px top pad and its label size never drew under the old board's own cell rules; it keeps what it showed.
+  for (const p of ['padding-top', 'font-size']) assert.ok(!props(t8Rule('31-wild-card.css', '.wc-grouphead td')).includes(p), `the group row takes the board's ${p}`)
+  assert.equal(decl(t8Rule('39-manager-page.css', '.psoddstable thead th'), 'font-weight'), 'var(--w-semibold)', 'the odds sheet keeps its lighter head')
+  // The mini table's space above it was the old wrapper's; it is the Table wrap's now.
+  assert.equal(decl(t8Rule('70-postseason-race.css', '.psrace__league > .table'), 'margin-top'), 'var(--space-2)')
+  assert.equal(ruleBody(read('70-postseason-race.css'), '.psrace__minitable'), null, 'the old wrapper rule is gone')
+})
+
+test('T8: the e2e standings check finds the club table, not the deleted base', () => {
+  const spec = readFileSync(join(SRC, '..', 'e2e', 'offseason-home.spec.js'), 'utf8')
+  assert.match(spec, /locator\('\.clubtable tbody tr'\)\.first\(\)\)\.toBeVisible\(\)/)
+  assert.doesNotMatch(spec, /locator\('\.standings tbody tr'\)/)
+})
+
+test('T8: the seal pin: no club table page reads a reveal-only module, a seal or a stamp', () => {
+  for (const { jsx } of T8) {
     assert.doesNotMatch(src(jsx), /api\/(linescore|derive)\.js|<SealBox|revealedThrough|api\/stamps?\b|from ['"][^'"]*stamp/i, `${jsx} stays outside the spoiler scope`)
   }
 })

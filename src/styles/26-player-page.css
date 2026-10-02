@@ -734,98 +734,10 @@
 }
 
 /* ---- data ledgers: game log & year-by-year (the card back) ---- */
-.ledger-wrap {
-  overflow-x: auto;
-}
-/* The table's own drop shadow is clipped by the wrap's overflow (needed for the
-   horizontal scroll), so the card shadow lives on the wrap itself — where it
-   renders outside the box and matches the page's other cards. */
-.player .ledger-wrap {
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-}
-/* Same card-look-on-the-wrap idea as .player .ledger-wrap above, but ALSO
-   resets the table's own overflow to visible (not just moves the shadow).
-   .standings's shared overflow:hidden (below) sits on the <table> itself, to
-   clip the header row's square corners to the table's own border-radius —
-   harmless for every other ledger table, but it breaks position:sticky's
-   containing-block chain for the sticky team column here: sticky computes
-   relative to the NEAREST ancestor whose overflow isn't visible, which with
-   overflow:hidden ON THE TABLE is the table itself (which never scrolls)
-   instead of .ledger-wrap (which does) — so the "stuck" column just slides
-   off with everything else. Only matters for the Standings boards, the one
-   ledger table with both a sticky column and real horizontal scroll wide
-   enough to use it (the "More columns" toggle, phone-only). */
-.standings-wrap {
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  /* Native horizontal scrollbars vary wildly across platforms — some
-     Android/Chromium builds render a thick classic bar complete with arrow
-     buttons, which clashes hard against the scorebook look. A thin
-     paper-toned track with a graphite thumb instead (Firefox's styling
-     hook — the ::-webkit-scrollbar rules below are Chromium/WebKit's). */
-  scrollbar-width: thin;
-  scrollbar-color: var(--text-caption) var(--bg-page);
-}
-.standings-wrap .standings--full {
-  overflow: visible;
-  /* The wrap above now owns the card chrome entirely — without resetting
-     these too, the table's OWN border-radius/border/box-shadow (still set
-     by the shared base .standings rule) render as a second, slightly
-     differently-curved rounded rect nested just inside the wrap's, since
-     `overflow: visible` no longer clips it away. Looks like a stray
-     duplicate element sitting in the corner rather than one clean edge. */
-  border-radius: 0;
-  border: none;
-  box-shadow: none;
-}
-.standings-wrap::-webkit-scrollbar {
-  height: 7px;
-}
-.standings-wrap::-webkit-scrollbar-track {
-  background: var(--bg-page);
-}
-.standings-wrap::-webkit-scrollbar-thumb {
-  background: var(--text-caption);
-  border-radius: var(--radius-pill);
-}
-.standings-wrap::-webkit-scrollbar-thumb:hover {
-  background: var(--text-body);
-}
-.standings-wrap::-webkit-scrollbar-button {
-  display: none;
-  width: 0;
-  height: 0;
-}
 /* Row copy ("vs"/"@" before the opponent) is written lowercase in JS; force it
    uppercase here rather than littering the markup with literal caps. */
 .player .ledger td {
   text-transform: uppercase;
-}
-.standings {
-  width: 100%;
-  /* `separate` (not `collapse`) so the sticky first column's row-divider
-     hairlines stay pixel-aligned with the scrolling columns'. Under `collapse`
-     the divider is a SHARED border owned by the table grid, and the sticky team
-     cell — promoted to its own paint layer — renders that border a pixel or two
-     adrift (and iOS/Chromium disagree on whether it paints at all), leaving a
-     visible step in every row rule at the column seam. With `separate` +
-     zero spacing every cell owns its own top border at the same box position,
-     so the rule is continuous across the seam. See the sticky team column
-     rules below. */
-  border-collapse: separate;
-  border-spacing: 0;
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
-}
-/* The Postseason odds sheet still wears `.ledger standings` (T8 moves it onto
-   Table); its column names held one line under the old `.ledger th` rule, which
-   left with the three ledgers that moved. Delete this with the shared bases. */
-.ledger.standings th {
-  white-space: nowrap;
 }
 /* Row dividers as ONE full-width line per row (a background gradient owned by
    the row) rather than a per-cell `border-top`. These are auto-layout tables,
