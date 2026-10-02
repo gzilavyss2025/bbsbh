@@ -8,7 +8,7 @@ import { parseRoute } from '../src/lib/route.js'
 import { scoutPath } from '../src/lib/scout/path.js'
 import { canHit, canPitch, stanceFor } from '../src/lib/scout/roles.js'
 import { ROUND_TAG, resultShort } from '../src/lib/scout/format.js'
-import { MAX_TYPES, USAGE_FLOOR, mapOf, pitcherBoard } from '../src/screens/scout/board.js'
+import { MAX_TYPES, USAGE_FLOOR, boardRow, mapOf, pitcherBoard } from '../src/screens/scout/board.js'
 import { MIN_COMMAND_PITCHES } from '../src/api/commandMap.js'
 
 const skubal = { id: 669373, name: 'Tarik Skubal' }
@@ -92,4 +92,13 @@ test('the head-to-head labels: round tags and scorebook shorthand, an out read f
   assert.equal(resultShort({ event: 'field_out', bbType: 'ground_ball' }), 'GO')
   assert.equal(resultShort({ event: 'field_out', bbType: 'popup' }), 'PO')
   assert.equal(resultShort({ event: 'force_out' }), 'Out')
+})
+
+test('a knuckle curve or slow curve reads the hitter’s curveball row, and says so', () => {
+  const line = { CU: { pa: 50 }, FF: { pa: 90 } }
+  assert.deepEqual(boardRow(line, 'KC'), { row: { pa: 50 }, as: 'CU' })
+  assert.deepEqual(boardRow(line, 'CS'), { row: { pa: 50 }, as: 'CU' })
+  assert.deepEqual(boardRow(line, 'FF'), { row: { pa: 90 }, as: null })
+  assert.deepEqual(boardRow(line, 'SL'), { row: null, as: null })
+  assert.deepEqual(boardRow(null, 'KC'), { row: null, as: 'CU' })
 })

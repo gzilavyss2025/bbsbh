@@ -47,3 +47,15 @@ export function mapOf(cellLists) {
   )
   return { n, thin, regionN, share, cells: cellsOut }
 }
+
+// The Savant board folds the knuckle curve and the slow curve into CU (the
+// #1408 spike, confirmed on savant-matchup.json: no KC row for any batter).
+// So a KC or CS pill reads the hitter's CU row, and says so.
+const BOARD_CODE = { KC: 'CU', CS: 'CU' }
+
+// The hitter's board row for one of the pitcher's types: { row, as }, where
+// `as` is the board's own code when it differs from the pill's, else null.
+export function boardRow(line, code) {
+  const as = BOARD_CODE[code] ?? null
+  return { row: line?.[as ?? code] ?? null, as }
+}

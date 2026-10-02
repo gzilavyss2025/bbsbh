@@ -305,6 +305,10 @@
   background: var(--surface-card);
 }
 
+.scout__hitas {
+  margin: 0 0 var(--space-1);
+}
+
 .scout__hitfact {
   display: flex;
   flex-direction: column;

@@ -1,5 +1,7 @@
 import { rate3 } from '../../api/person/shared.js'
 import { Table } from '../../components/ui/table/Table.jsx'
+import { pitchLabel } from '../../api/pitchArsenal.js'
+import { boardRow } from './board.js'
 
 // THE HITTER'S SIDE IN PHASE 1 (#1410). The hitter map needs the #1411 grid,
 // so until it ships this slot prints his line against each pitch type from
@@ -14,16 +16,19 @@ import { Table } from '../../components/ui/table/Table.jsx'
 // `line` is the hitter's arsenal map ({ FF: { estWoba, whiff, ba, pa } }),
 // `types` the pitcher's pilled types, `code` the selected one or null for All.
 export function HitterLine({ line, types, code }) {
-  const row = (c) => line?.[c] ?? null
+  const row = (c) => boardRow(line, c).row
   if (code) {
-    const r = row(code)
+    const { row: r, as } = boardRow(line, code)
     return (
-      <dl className="scout__hitline">
-        <Fact label="xwOBA" value={r?.estWoba != null ? rate3(r.estWoba) : '—'} />
-        <Fact label="Whiff %" value={r?.whiff != null ? Math.round(r.whiff) : '—'} />
-        <Fact label="BA" value={r?.ba != null ? rate3(r.ba) : '—'} />
-        <Fact label="PA" value={r?.pa ?? '—'} />
-      </dl>
+      <>
+        {as && <p className="scout__cap scout__hitas">as {pitchLabel(as)}</p>}
+        <dl className="scout__hitline">
+          <Fact label="xwOBA" value={r?.estWoba != null ? rate3(r.estWoba) : '—'} />
+          <Fact label="Whiff %" value={r?.whiff != null ? Math.round(r.whiff) : '—'} />
+          <Fact label="BA" value={r?.ba != null ? rate3(r.ba) : '—'} />
+          <Fact label="PA" value={r?.pa ?? '—'} />
+        </dl>
+      </>
     )
   }
   return (
