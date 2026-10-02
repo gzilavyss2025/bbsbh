@@ -58,10 +58,14 @@ shows the scores; the box score itself stays sealed.
 (`?view=teams&team=all`) tallies every club's games as one ledger
 (`combinedEntry`), so each split reads how the whole field fared in it, with
 no rank column (there is nothing to rank against). The tally is the same
-`teamRecordsFor`, so the combined figure is the sum of the clubs' figures. A
-split both clubs can meet in one game counts that game twice, once for each
-side, as a single club's figure counts it; the games list shows one row per
-club side, so it adds up to the figure. Long lists show 100 games, then ask.
+`teamRecordsFor`, so a figure counts club-games: a game appears once for each
+club that played it, and the column is headed "Club games". A split both clubs
+always meet in one game (a day game, a one-run game, a series opener) would
+read an exact .500 whatever happened, so `SHARED_SPLITS` hides those rows; a
+test pins each one as dead even on the committed files, and pins that no other
+split is. The games list shows one row per club side, so it adds up to the
+figure. The series counts are skipped (two clubs in one series would share a
+key). Long lists show 100 games, then ask.
 
 ## Consequences
 

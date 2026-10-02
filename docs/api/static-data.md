@@ -820,9 +820,11 @@ for each generator; the reader modules:
   `gameRowsFor(entry, metricId, { cutoff })` is the list of games behind one
   club's figure in one split, newest first, with each box-score address built
   from that season's own abbreviations (the game-lines sheet,
-  `components/boxlines/GameLinesDoor.jsx`); `combinedEntry(entries)` and
-  `gameRowsForAll` are the same two for ALL TEAMS, every club's games as one
-  ledger (the team view with its club filter removed). Each entry's
+  `components/boxlines/GameLinesDoor.jsx`); `combinedEntry(entries)`,
+  `combinedGroups` and `gameRowsForAll` are the same for ALL TEAMS, every
+  club's games as one ledger of club-games (the team view with its club filter
+  removed); `combinedGroups` drops `SHARED_SPLITS`, the splits both clubs
+  always meet together, which would all read .500. Each entry's
   `data.postseason` flag is the switch `teamRecordsFor` and `buildRankingIndex`
   read: no by-month table, no season counts, and a "vs. own league / other
   league" row off each game's `il` flag. Cutoff-gated, same class and argument

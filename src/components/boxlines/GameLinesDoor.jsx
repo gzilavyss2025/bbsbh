@@ -5,7 +5,6 @@ import { IconButton } from '../ui/control/IconButton.jsx'
 import { Door } from '../ui/control/Door.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { BoxLineRow } from './BoxLineRow.jsx'
-import { seasonBand } from './BoxLinesSheet.jsx'
 
 // The door to the GAMES BEHIND A TEAM'S RECORD, on the postseason page: the
 // record's own figure ("8-3") as a door, and the sheet it opens, every game
@@ -53,7 +52,15 @@ function GameLinesSheet({ title, note, headline, rows: makeRows, onClose }) {
   useDialogFocus(closeRef, onClose)
   const all = useMemo(() => makeRows(), [makeRows])
   const [shown, setShown] = useState(PAGE)
-  const rows = all.slice(0, shown)
+  const rows = useMemo(() => all.slice(0, shown), [all, shown])
+  // Alternates with each new season down the list (seasonBand's rule), in one pass.
+  const bands = useMemo(() => {
+    const out = []
+    rows.forEach((row, i) => {
+      out.push(i > 0 && (row.season !== rows[i - 1].season ? !out[i - 1] : out[i - 1]))
+    })
+    return out
+  }, [rows])
   return (
     <ModalPortal>
       <div
@@ -78,15 +85,19 @@ function GameLinesSheet({ title, note, headline, rows: makeRows, onClose }) {
               <ul className="boxlines__rows">
                 {rows.map((row, i) => (
                   <BoxLineRow
-                    key={`${row.gamePk ?? row.date}-${row.teamId}`}
+                    key={`${row.gamePk ?? `${row.date}-${row.opponentId}`}-${row.teamId}`}
                     row={row}
                     showSeason={i === 0 || rows[i - 1].season !== row.season}
-                    band={seasonBand(rows, i)}
+                    band={bands[i]}
                   />
                 ))}
               </ul>
               {all.length > shown && (
-                <Door layout="block" onClick={() => setShown(shown + PAGE)}>
+                <Door
+                  layout="block"
+                  aria-label={`Show ${Math.min(PAGE, all.length - shown)} more games, ${all.length - shown} not yet shown`}
+                  onClick={() => setShown(shown + PAGE)}
+                >
                   Show {Math.min(PAGE, all.length - shown)} more
                 </Door>
               )}

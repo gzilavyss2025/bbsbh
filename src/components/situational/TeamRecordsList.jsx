@@ -36,7 +36,7 @@ export function TeamRecordsList({ groups, pathFor, renderRecord, ranked = true }
                 <th className="team">Situation</th>
                 <th>W-L</th>
                 <th>Win pct</th>
-                <th>{ranked ? 'Rank' : 'Games'}</th>
+                <th>{ranked ? 'Rank' : 'Club games'}</th>
               </tr>
             </thead>
             <tbody>

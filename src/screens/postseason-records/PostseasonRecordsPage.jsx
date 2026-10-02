@@ -10,12 +10,12 @@ import {
   gameRowsFor,
   gameRowsForAll,
   combinedEntry,
+  combinedGroups,
   resolveSeason,
   resolveMinGames,
   teamRankRows,
 } from '../../api/postseason/records.js'
 import { buildRankingIndex, rankMetric } from '../../api/situationalRecordRankings.js'
-import { teamRecordsFor } from '../../api/teamRecords.js'
 import { cutoffFor } from '../team/data/shared.js'
 import { postseasonRecordsPath } from '../../lib/postseason/recordsRoute.js'
 import { situationalRecordsPath } from '../../lib/route.js'
@@ -40,7 +40,8 @@ import { GameLinesDoor } from '../../components/boxlines/GameLinesDoor.jsx'
 // Two views, one switch. "By situation" is the regular-season page's own shape:
 // the bare route is the index of splits, `?metric=` the focused board. "By
 // team" (`?view=teams`) reads down one club (`?team=`, else the reader's
-// favorite club if it has played, else the first club alphabetically).
+// favorite club if it has played, else the first club alphabetically), or down
+// every club together (`?team=all`).
 
 const SCOPE_NOTE = 'W–L records for every postseason club, split by game situation.'
 
@@ -118,8 +119,9 @@ export function PostseasonRecordsPage({
 
   // "All teams" is the team view with its club filter removed: every club's
   // games as one ledger, so the list reads how the whole field fared.
-  const allTeams = routeTeam === ALL_TEAMS
-  const combined = useMemo(() => combinedEntry(data?.entries ?? []), [data])
+  const allTeams = byTeam && routeTeam === ALL_TEAMS
+  const combined = useMemo(() => (allTeams ? combinedEntry(data?.entries ?? []) : null), [allTeams, data])
+  // A club id, or ALL_TEAMS for the combined ledger.
   const teamId = useMemo(() => {
     if (allTeams) return ALL_TEAMS
     const wanted = Number(routeTeam)
@@ -127,10 +129,10 @@ export function PostseasonRecordsPage({
     if (clubs.some((t) => t.id === favoriteTeamId)) return favoriteTeamId
     return clubs[0]?.id ?? null
   }, [allTeams, clubs, routeTeam, favoriteTeamId])
-  const team = allTeams ? combined.team : clubs.find((t) => t.id === teamId) ?? null
+  const team = allTeams ? combined?.team ?? null : clubs.find((t) => t.id === teamId) ?? null
   const teamGroups = useMemo(() => {
     if (!byTeam || teamId == null) return null
-    if (allTeams) return teamRecordsFor(combined.data, { cutoff })?.groups ?? null
+    if (allTeams) return combinedGroups(combined, { cutoff, minPlayed: minGames })
     return teamRankRows(index, teamId, { sortBy: 'pct', minPlayed: minGames })
   }, [index, byTeam, allTeams, combined, cutoff, teamId, minGames])
 
@@ -173,15 +175,15 @@ export function PostseasonRecordsPage({
   // A W-L figure is a door to the games it counts. A split a club never played
   // has no figure and stays a plain dash; the rows are built only on open.
   const entryOf = useMemo(() => new Map((data?.entries ?? []).map((e) => [e.team.id, e])), [data])
-  const gamesDoor = (teamId, metricId, metricName, row) => {
-    const entry = teamId === ALL_TEAMS ? combined : entryOf.get(teamId)
+  const gamesDoor = (id, metricId, metricName, row) => {
+    const entry = id === ALL_TEAMS ? combined : entryOf.get(id)
     if (!entry || !row.played) return row.v
     return (
       <GameLinesDoor
         face={row.v}
         label={`${entry.team.name}, ${metricName}, ${row.v}: the games`}
         rows={() =>
-          teamId === ALL_TEAMS
+          id === ALL_TEAMS
             ? gameRowsForAll(data.entries, metricId, { cutoff })
             : gameRowsFor(entry, metricId, { cutoff })
         }

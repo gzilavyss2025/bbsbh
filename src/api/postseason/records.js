@@ -26,7 +26,7 @@ import { staticJson, staticJsonBy } from '../staticJson.js'
 import { gamePath } from '../../lib/route.js'
 import { seriesAbbr } from '../boxlines/rows.js'
 import { fetchStaticTeams } from '../teams-static.js'
-import { RECORD_GROUPS } from '../teamRecords.js'
+import { RECORD_GROUPS, teamRecordsFor } from '../teamRecords.js'
 import { rankMetric } from '../situationalRecordRankings.js'
 
 export const ALL_SEASONS = 'all'
@@ -141,10 +141,10 @@ export function teamRankRows(index, teamId, { sortBy = 'pct', minPlayed = 0 } = 
 // removed: how the whole postseason field fared in each situation. It is the
 // same tally teamRecordsFor runs for a club, over every club's rows, so a row
 // reads "Scoring first: 812-294" for all of them together. A game appears once
-// for each club it was played by, and a split counts the clubs that met it, so
-// a split both clubs can meet in one game (a day game, a one-run game) counts
-// the game twice, once as a win and once as a loss. That is the same rule a
-// single club's figure follows; it is why those splits sit at exactly .500.
+// for each club that played it, so the figures count CLUB-games, not games.
+//
+// Not an entry gameRowsFor can read: it has no abbreviations and no numeric
+// team id. The games behind an All teams figure come from gameRowsForAll.
 // `entries` is entriesFrom's answer.
 export function combinedEntry(entries) {
   return {
@@ -156,6 +156,45 @@ export function combinedEntry(entries) {
       games: entries.flatMap((e) => e.data.games),
     },
   }
+}
+
+// The splits both clubs in a game always meet together: a day game, a one-run
+// game, a series opener. Over every club each such game is counted once as a
+// win and once as a loss, so the row reads an exact .500 whatever happened.
+// That is no information, so the All teams view leaves these rows out. A test
+// pins that each one is dead even on the committed files, so a split that stops
+// being shared (or a new one that is) shows up there.
+export const SHARED_SPLITS = new Set([
+  'hits-even',
+  'tied-6',
+  'tied-7',
+  'tied-8',
+  'one-run',
+  'two-run',
+  'extra-innings',
+  'last-at-bat',
+  'walk-off-game',
+  'day-game',
+  'night-game',
+  'series-opener',
+  'series-finale',
+  'vs-own-league',
+  'vs-other-league',
+])
+
+// The All teams record groups: teamRecordsFor over the combined ledger, less
+// the shared splits and any split under `minPlayed` club-games, the way a single
+// club's list honors the all-years floor. Null when nothing is left. The series
+// counts are skipped: they key a series by opponent and opener date, which two
+// clubs in one series would share.
+export function combinedGroups(combined, { cutoff = null, minPlayed = 0 } = {}) {
+  const groups = teamRecordsFor(combined.data, { cutoff, series: false })?.groups ?? []
+  return groups
+    .map((group) => ({
+      title: group.title,
+      rows: group.rows.filter((row) => !SHARED_SPLITS.has(row.id) && row.played >= minPlayed),
+    }))
+    .filter((group) => group.rows.length)
 }
 
 // ---------------------------------------------------------------------------
@@ -220,8 +259,8 @@ const newestFirst = (a, b) =>
   a.date < b.date ? 1 : a.date > b.date ? -1 : (b.gamePk ?? 0) - (a.gamePk ?? 0) || a.teamId - b.teamId
 
 // The same list for ALL TEAMS: every club's row in the split, so the list adds
-// up to the combined figure above it (a game both clubs met is two rows, one
-// from each club's side, as its figure counts it twice).
+// up to the combined figure above it (a game both clubs met, such as two teams
+// that each scored 4+, is two rows, one from each club's side).
 export function gameRowsForAll(entries, metricId, opts) {
   return entries.flatMap((e) => gameRowsFor(e, metricId, opts)).sort(newestFirst)
 }

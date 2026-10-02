@@ -356,10 +356,10 @@ export function longestStreaks(games) {
 // which is what "complete" means below.
 function completeSeries(games) {
   const bySeries = new Map()
-  for (const g of games) {
+  for (let i = 0; i < games.length; i++) {
+    const g = games[i]
     if (!g.sl || g.sl < 2) continue
-    const openerIndex = games.indexOf(g) - (g.sg - 1)
-    const opener = games[openerIndex]
+    const opener = games[i - (g.sg - 1)]
     if (!opener) continue
     const key = `${g.o}-${opener.d}`
     if (!bySeries.has(key)) bySeries.set(key, { len: g.sl, rows: [] })
@@ -475,7 +475,7 @@ export const COUNT_METRICS = [
 // `data` is the fetched shard; `cutoff` is the dated page's day-before cutoff
 // (null on a live page); `half` is one of HALVES' keys. Returns null when the
 // club has no file or no games inside the filter, and the card then hides.
-export function teamRecordsFor(data, { cutoff = null, half = 'all', month = null } = {}) {
+export function teamRecordsFor(data, { cutoff = null, half = 'all', month = null, series = true } = {}) {
   if (!data?.games?.length) return null
   const allStarDate = data.allStarDate ?? null
   const games = filterGames(data, { cutoff, half, month })
@@ -574,7 +574,9 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all', month = null
     if (rows.length) opponentGroups.push({ title: 'By league', rows })
   }
 
-  const seriesRecord = seriesRecordCounts(games)
+  // `series` false skips the series counts, for a ledger of several clubs'
+  // games in a row where a series is not one run of rows (postseason/records.js).
+  const seriesRecord = series ? seriesRecordCounts(games) : { won: 0, lost: 0 }
 
   return {
     allStarDate,
@@ -588,7 +590,7 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all', month = null
       walkOffLosses: games.filter((g) => g.wo === -1).length,
       shutoutsThrown: games.filter((g) => g.ra === 0).length,
       shutoutsSuffered: games.filter((g) => g.rs === 0).length,
-      ...sweepCounts(games),
+      ...(series ? sweepCounts(games) : { swept: 0, sweptBy: 0 }),
       seriesWon: seriesRecord.won,
       seriesLost: seriesRecord.lost,
       streaks: longestStreaks(games),

@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
-import { entriesFrom, gameRowsFor, gameRowsForAll, combinedEntry, ALL_TEAMS, resolveSeason, resolveMinGames, teamRankRows, ALL_SEASONS, MIN_GAMES } from '../src/api/postseason/records.js'
+import { entriesFrom, gameRowsFor, gameRowsForAll, combinedEntry, combinedGroups, SHARED_SPLITS, ALL_TEAMS, resolveSeason, resolveMinGames, teamRankRows, ALL_SEASONS, MIN_GAMES } from '../src/api/postseason/records.js'
 import { teamRecordsFor } from '../src/api/teamRecords.js'
 import { buildRankingIndex, rankMetric } from '../src/api/situationalRecordRankings.js'
 
@@ -292,14 +292,29 @@ test('the combined ledger is every club’s games, named for all of them', () =>
   assert.equal(all.data.games.length, 4)
 })
 
-test('a split’s combined record is the sum of the clubs’ records in it', () => {
+test('the combined groups leave out the splits both clubs always share', () => {
   const entries = field()
-  const rowOf = (data, id) => teamRecordsFor(data).groups.flatMap((g) => g.rows).find((r) => r.id === id)
-  const combined = rowOf(combinedEntry(entries).data, 'scored-first')
-  const parts = entries.map((e) => rowOf(e.data, 'scored-first'))
-  assert.equal(combined.wins, parts.reduce((n, r) => n + r.wins, 0))
-  assert.equal(combined.losses, parts.reduce((n, r) => n + r.losses, 0))
-  assert.equal(combined.v, '2-1')
+  const ids = combinedGroups(combinedEntry(entries)).flatMap((g) => g.rows.map((r) => r.id))
+  assert.ok(ids.includes('scored-first'))
+  assert.ok(!ids.includes('day-game'), 'a day game is a win and a loss in one game')
+  assert.ok(!ids.includes('one-run'))
+  assert.ok(!ids.includes('vs-own-league'))
+})
+
+test('the combined groups honor the all-years floor, and drop a group it empties', () => {
+  const entries = field()
+  const rows = (minPlayed) => combinedGroups(combinedEntry(entries), { minPlayed }).flatMap((g) => g.rows)
+  const first = (minPlayed) => rows(minPlayed).find((r) => r.id === 'scored-first')
+  assert.equal(first(0).played, 3)
+  assert.equal(first(3).played, 3)
+  assert.equal(first(4), undefined)
+  assert.deepEqual(combinedGroups(combinedEntry(entries), { minPlayed: 99 }), [])
+})
+
+test('the series counts are skipped for a ledger of several clubs', () => {
+  const entries = field()
+  const counts = teamRecordsFor(combinedEntry(entries).data, { series: false }).counts
+  assert.deepEqual([counts.swept, counts.sweptBy, counts.seriesWon, counts.seriesLost], [0, 0, 0, 0])
 })
 
 test('the all-teams list adds up to its figure and runs newest first', () => {
@@ -322,24 +337,32 @@ test('a game both clubs met is listed once for each club', () => {
   assert.deepEqual(rows.map((r) => [r.gamePk, r.teamId, r.won]), [[9, 1, true], [9, 2, false]])
 })
 
-test('on the committed files every split’s combined games equal the clubs’ summed', () => {
+const committed = () => {
   const dir = new URL('../public/data/postseason-records/', import.meta.url)
   const seasons = JSON.parse(readFileSync(new URL('index.json', dir), 'utf8')).seasons
   const files = seasons.map((s) => JSON.parse(readFileSync(new URL(`${s}.json`, dir), 'utf8')))
   const allTeams = [...new Set(files.flatMap((f) => Object.keys(f.clubs)))].map((id) => ({ id: Number(id), name: `Club ${id}` }))
-  const entries = entriesFrom(allTeams, files)
-  const combined = teamRecordsFor(combinedEntry(entries).data)
-  for (const group of combined.groups) {
-    for (const r of group.rows) {
-      const sum = entries.reduce(
-        (n, e) => n + (teamRecordsFor(e.data).groups.flatMap((g) => g.rows).find((x) => x.id === r.id)?.played ?? 0),
-        0,
-      )
-      assert.equal(r.played, sum, `${r.id}: combined ${r.played} vs summed ${sum}`)
-      if (r.id === 'scored-first') assert.equal(gameRowsForAll(entries, r.id).length, r.played)
-    }
+  return entriesFrom(allTeams, files)
+}
+
+test('on the committed files every shared split is dead even, and no other is', () => {
+  const entries = committed()
+  const rows = teamRecordsFor(combinedEntry(entries).data).groups.flatMap((g) => g.rows)
+  for (const r of rows) {
+    const even = r.wins === r.losses
+    if (SHARED_SPLITS.has(r.id)) assert.ok(even, `${r.id} is listed as shared but reads ${r.v}`)
+    else assert.ok(!even, `${r.id} reads an even ${r.v}: add it to SHARED_SPLITS if both clubs always meet it`)
   }
-  // The decisive splits: the club that scored first wins more often than not.
-  const first = combined.groups.flatMap((g) => g.rows).find((r) => r.id === 'scored-first')
+})
+
+test('on the committed files the list behind each combined figure has that many games', () => {
+  const entries = committed()
+  const groups = combinedGroups(combinedEntry(entries))
+  assert.ok(groups.length > 0)
+  for (const r of groups.flatMap((g) => g.rows)) {
+    assert.equal(gameRowsForAll(entries, r.id).length, r.played, r.id)
+  }
+  // The decisive split: the club that scored first wins more often than not.
+  const first = groups.flatMap((g) => g.rows).find((r) => r.id === 'scored-first')
   assert.ok(first.rate > 0.5 && first.rate < 0.9, `scored-first win rate ${first.rate}`)
 })
