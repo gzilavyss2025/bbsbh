@@ -16,17 +16,16 @@ const add = (a, b) => a.map((x, i) => x + (b[i] ?? 0))
 
 // SCOPE. Each shard keeps the regular season under `pit` and, since ADR-0094
 // (#1418), the MLB postseason under `post`, in the same shape. Regular reads
-// `pit`, Postseason `post`, All adds the two. A shard written before #1418 has
-// no `post`: then `scoped` is false, the maps hold the regular season whatever
-// Scope says, and the page keeps its "Regular season" tag (Gary, item 9).
+// `pit`, Postseason `post`, All adds the two. The sweep writes `post` into a
+// bucket only when one of its pitchers threw in the postseason, so a missing
+// `post` is an empty postseason: Postseason is "Not posted", All is regular.
 const PARTS = { reg: ['pit'], post: ['post'], all: ['pit', 'post'] }
 
 // `arsenal` is the pitch-arsenal shard, `command` the pitch-command shard (both
 // whole buckets), `stance` the side the hitter stands on ('L' | 'R'). Null when
 // the stores hold nothing for this pitcher, stance and scope ("Not posted").
 export function pitcherBoard({ arsenal, command, pitcherId, stance, scope = 'all' }) {
-  const scoped = Boolean(arsenal && command && 'post' in arsenal && 'post' in command)
-  const parts = scoped ? PARTS[scope] ?? PARTS.all : PARTS.reg
+  const parts = PARTS[scope] ?? PARTS.all
   const rows = mergeRows(parts.map((k) => sideRows(arsenal?.[k]?.[pitcherId]?.mlb, stance)))
   const cmds = parts.map((k) => command?.[k]?.[pitcherId]?.mlb).filter(Boolean)
   if (!rows.length || !cmds.length) return null
@@ -39,7 +38,6 @@ export function pitcherBoard({ arsenal, command, pitcherId, stance, scope = 'all
   // All pools every type the command store holds for this stance, pill or not.
   const allCodes = [...new Set(cmds.flatMap((m) => Object.keys(m)))].filter(cellsOf)
   return {
-    scoped,
     tiles,
     types,
     codes: allCodes,

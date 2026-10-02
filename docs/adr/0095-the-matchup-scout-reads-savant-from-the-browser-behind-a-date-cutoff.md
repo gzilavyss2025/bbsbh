@@ -50,12 +50,14 @@ The regions are a read-time sum, so no shard changes. A map under
 `MIN_COMMAND_PITCHES` prints counts only. One season store at a time, so a
 map never pools 2025 with 2026.
 
-**6. Scope moves the maps only when the stores hold a postseason.** A shard
-with `post` beside `pit` (ADR-0094) makes the board "scoped": Scope then sits
-under the maps and moves the maps and the list together, and the tag names
-the scope. A shard without `post` keeps the maps on the regular season, with a
-"Regular season" tag, and Scope sits on the list, the only thing it moves
-(Gary, item 9).
+**6. Scope moves the maps and the list together.** The stores keep the MLB
+postseason under `post` beside the regular season (ADR-0094), and the page
+ships with them, so Scope sits under the maps and the tag over the maps names
+the scope. The sweep writes `post` into a bucket only when one of its
+pitchers threw in the postseason, so a missing `post` is an empty postseason:
+Postseason shows "Not posted", All shows the regular season. (Gary's item 9
+tagged the maps "Regular season" while the stores held no postseason; that
+state never reaches production.)
 
 **6a. The hitter's map comes from the hitter-grid store, or not at all.** With
 the #1411 Part B grid (ADR-0096, `src/api/scout/hitterGrid.js`), the page draws

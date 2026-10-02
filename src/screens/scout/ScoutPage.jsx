@@ -41,11 +41,8 @@ import { HeadToHead } from './HeadToHead.jsx'
 // rather than undoing a tap. The view also persists in localStorage
 // (ADR-0093), never in My Tally (ADR-0039).
 //
-// SCOPE. Once the stores carry the postseason beside the regular season
-// (ADR-0094, `post` in each shard), Scope moves the maps and the list
-// together, and the control sits under the maps. Before that the maps wear a
-// "Regular season" tag and Scope sits on the list, the only thing it moves
-// (Gary, item 9; board.js).
+// SCOPE moves the maps and the list together (the stores keep the postseason
+// beside the regular season, ADR-0094), and the tag over the maps names it.
 //
 // THE HITTER'S MAP (#1411 Part B, hitterBoard.js) comes from the hitter-grid
 // store. Until it is posted, his slot prints his Savant line per pitch type
@@ -54,8 +51,7 @@ import { HeadToHead } from './HeadToHead.jsx'
 
 const VIEWS = [['pitcher', 'Pitcher’s'], ['hitter', 'Hitter’s']]
 const VIEW_KEY = 'bbsbh:scout:view'
-// What the maps hold. Until the stores carry the postseason (ADR-0094), always
-// the regular season, whatever Scope says (Gary, item 9).
+// What the maps hold.
 const SCOPE_TAG = { reg: 'Regular season', post: 'Postseason', all: 'Regular season + postseason' }
 const SCOPES = [['reg', 'Regular'], ['post', 'Postseason'], ['all', 'All']]
 // A switch hitter's two stances are two maps, so "All" hands is off for him:
@@ -115,10 +111,9 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
   const hitterStance = switchHitter ? other(hand) : data?.hitter.bats
   const metrics = useMemo(() => metricsFor(grid), [grid])
   const metric = metrics.includes(metricParam) ? metricParam : metrics[0]
-  const mapScope = board?.scoped ? scope : 'reg'
   const side = useMemo(
-    () => hitterSide({ board, grid, league: data?.league, hand, stand: hitterStance, scope: mapScope, metric }),
-    [board, grid, data, hand, hitterStance, mapScope, metric],
+    () => hitterSide({ board, grid, league: data?.league, hand, stand: hitterStance, scope, metric }),
+    [board, grid, data, hand, hitterStance, scope, metric],
   )
   const hmap = side ? (sel ? side.byType[sel] : side.all) : null
   const scene = useMemo(
@@ -235,7 +230,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
               )}
 
               <p className="scout__season">
-                <Pill>{board?.scoped ? SCOPE_TAG[scope] : SCOPE_TAG.reg}</Pill>
+                <Pill>{SCOPE_TAG[scope]}</Pill>
                 {data.season && <span className="scout__cap">{data.season}</span>}
               </p>
 
@@ -302,20 +297,18 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
 
               <Key metric={side ? metric : null} />
 
-              {(side || board?.scoped) && (
-                <div className="scout__controls">
-                  {side && (
-                    <Choice
-                      label="Hand"
-                      options={HANDS}
-                      value={hand}
-                      onChange={(h) => go({ hand: h })}
-                      disabledKey={switchHitter ? null : undefined}
-                    />
-                  )}
-                  {board?.scoped && <Choice label="Scope" options={SCOPES} value={scope} onChange={(k) => go({ scope: k })} />}
-                </div>
-              )}
+              <div className="scout__controls">
+                {side && (
+                  <Choice
+                    label="Hand"
+                    options={HANDS}
+                    value={hand}
+                    onChange={(h) => go({ hand: h })}
+                    disabledKey={switchHitter ? null : undefined}
+                  />
+                )}
+                <Choice label="Scope" options={SCOPES} value={scope} onChange={(k) => go({ scope: k })} />
+              </div>
             </section>
 
             <HeadToHead
@@ -324,7 +317,6 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
               cutoff={cutoff}
               asOf={asOf}
               scope={scope}
-              onScope={board?.scoped ? null : (s) => go({ scope: s })}
             />
           </div>
         </>

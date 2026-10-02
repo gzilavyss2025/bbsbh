@@ -10,9 +10,7 @@ import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { AsOfBanner } from '../../components/seal/AsOfBanner.jsx'
-import { Choice } from '../../components/scout/Choice.jsx'
 
-const SCOPES = [['reg', 'Regular'], ['post', 'Postseason'], ['all', 'All']]
 
 // THE HEAD-TO-HEAD LIST (#1410): every past plate appearance between the two,
 // regular season and postseason, newest first, under one total line.
@@ -24,10 +22,9 @@ const SCOPES = [['reg', 'Regular'], ['post', 'Postseason'], ['all', 'All']]
 // inclusive. `AsOfBanner` is the way to move it.
 //
 // Scope filters the rows by round, and the totals are rebuilt from the same
-// rows, so the line and the list cannot disagree. The Scope control sits here
-// only while the maps hold the regular season alone (Gary, item 9): once they
-// carry the postseason, it sits under the maps and moves both (`onScope` null).
-export function HeadToHead({ pitcherId, hitterId, cutoff, asOf, scope, onScope }) {
+// rows, so the line and the list cannot disagree. The Scope control sits
+// under the maps and moves both (ScoutPage.jsx).
+export function HeadToHead({ pitcherId, hitterId, cutoff, asOf, scope }) {
   const h2h = useAsync(() => fetchHeadToHead(hitterId, pitcherId, cutoff), [hitterId, pitcherId, cutoff])
   const pas = (h2h.data?.pas ?? []).filter((r) => scope === 'all' || (scope === 'reg') === (r.round === 'R'))
   const t = totalsOf(pas)
@@ -36,7 +33,6 @@ export function HeadToHead({ pitcherId, hitterId, cutoff, asOf, scope, onScope }
     <section className="scout__h2h" aria-label="Head to head">
       <SectionHead>Head to head</SectionHead>
       <AsOfBanner asOf={asOf} />
-      {onScope && <Choice label="Scope" options={SCOPES} value={scope} onChange={onScope} />}
       {h2h.loading ? (
         <AsyncStatus loading hasData={false} />
       ) : failed ? (

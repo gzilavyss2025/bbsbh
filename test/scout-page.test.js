@@ -84,19 +84,20 @@ test('no stores for this stance is "Not posted", never an empty map', () => {
   assert.equal(pitcherBoard({ arsenal: null, command, pitcherId: 1, stance: 'R' }), null)
 })
 
-test('with a postseason in the stores, Scope picks the maps’ pitches; without one, the maps stay regular', () => {
+test('Scope picks the maps’ pitches; a pitcher with no postseason pitches has no postseason map', () => {
   const both = stores({ FF: 300, SL: 100 }, { FF: 20, SL: 20 })
   const at = (scope) => pitcherBoard({ ...both, pitcherId: 1, stance: 'R', scope })
   assert.equal(at('reg').all.n, 400)
   assert.equal(at('post').all.n, 40)
   assert.equal(at('all').all.n, 440)
-  assert.equal(at('all').scoped, true)
   // Velocity across the two parts weighs each by its pitches: (300*90 + 20*96) / 320.
   assert.equal(at('all').types.find((t) => t.code === 'FF').mph, '90.4')
-  const old = stores({ FF: 300, SL: 100 })
-  const plain = pitcherBoard({ ...old, pitcherId: 1, stance: 'R', scope: 'post' })
-  assert.equal(plain.scoped, false)
-  assert.equal(plain.all.n, 400, 'a shard with no post key keeps the regular season')
+  // The sweep writes `post` into a bucket only when one of its pitchers threw
+  // in the postseason (bucketsOf), so a bucket with no `post` is a real empty
+  // postseason, never an old shard: Postseason is "Not posted", All is regular.
+  const regOnly = stores({ FF: 300, SL: 100 })
+  assert.equal(pitcherBoard({ ...regOnly, pitcherId: 1, stance: 'R', scope: 'post' }), null)
+  assert.equal(pitcherBoard({ ...regOnly, pitcherId: 1, stance: 'R', scope: 'all' }).all.n, 400)
 })
 
 test('a map under the pitch floor prints counts only, never a share', () => {
