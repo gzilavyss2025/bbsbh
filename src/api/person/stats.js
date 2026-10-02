@@ -4,6 +4,7 @@
 import { ipToOuts, outsToIp } from '../../lib/math/innings.js'
 import { DASH, num, rate3, mlbOps, eraOf, whipOf } from './shared.js'
 import { ordinal } from './teamPage.js'
+import { teamAbbr } from '../../lib/teams.js'
 
 // ---------------------------------------------------------------------------
 // Stat aggregation
@@ -332,22 +333,38 @@ const RANK_STATS = [
 const RANK_FLOOR = 10
 const RANK_MAX_CHIPS = 4
 
-export function pitchingRanksView(splits) {
-  const s = (splits ?? [])[0]
-  if (!s?.stat) return null
-  const leagueName = s.league?.name ?? ''
-  const league =
-    leagueName === 'National League' ? 'NL' : leagueName === 'American League' ? 'AL' : leagueName
-  const items = []
-  for (const [key, label] of RANK_STATS) {
-    const rank = Number(s.stat[key])
-    if (Number.isFinite(rank) && rank >= 1 && rank <= RANK_FLOOR) {
-      items.push({ label, rank, text: ordinal(rank) })
+// One chip group per league split. A player traded across leagues gets one
+// split per league, each ranking only the games for that league's club, and the
+// API's order is arbitrary — so every split is read, never `[0]`. A traded
+// player's groups carry `club` (the tiles total both clubs, so a bare "5th NL"
+// would overclaim); a one-split player's `club` is null. Returns null when no
+// split holds a top-10 rank.
+function ranksView(splits, stats) {
+  const list = (splits ?? []).filter((s) => s?.stat)
+  const groups = []
+  for (const s of list) {
+    const items = []
+    for (const [key, label] of stats) {
+      const rank = Number(s.stat[key])
+      if (Number.isFinite(rank) && rank >= 1 && rank <= RANK_FLOOR) {
+        items.push({ label, rank, text: ordinal(rank) })
+      }
     }
+    if (!items.length) continue
+    items.sort((a, b) => a.rank - b.rank)
+    const leagueName = s.league?.name ?? ''
+    groups.push({
+      league:
+        leagueName === 'National League' ? 'NL' : leagueName === 'American League' ? 'AL' : leagueName,
+      club: list.length > 1 ? teamAbbr(s.team) : null,
+      items: items.slice(0, RANK_MAX_CHIPS),
+    })
   }
-  if (!items.length) return null
-  items.sort((a, b) => a.rank - b.rank)
-  return { league, items: items.slice(0, RANK_MAX_CHIPS) }
+  return groups.length ? groups : null
+}
+
+export function pitchingRanksView(splits) {
+  return ranksView(splits, RANK_STATS)
 }
 
 // Hitting counterpart to pitchingRanksView — same top-10-only gate and chip
@@ -364,19 +381,5 @@ const HITTING_RANK_STATS = [
 ]
 
 export function hittingRanksView(rankSplits) {
-  const s = (rankSplits ?? [])[0]
-  if (!s?.stat) return null
-  const leagueName = s.league?.name ?? ''
-  const league =
-    leagueName === 'National League' ? 'NL' : leagueName === 'American League' ? 'AL' : leagueName
-  const items = []
-  for (const [key, label] of HITTING_RANK_STATS) {
-    const rank = Number(s.stat[key])
-    if (Number.isFinite(rank) && rank >= 1 && rank <= RANK_FLOOR) {
-      items.push({ label, rank, text: ordinal(rank) })
-    }
-  }
-  if (!items.length) return null
-  items.sort((a, b) => a.rank - b.rank)
-  return { league, items: items.slice(0, RANK_MAX_CHIPS) }
+  return ranksView(rankSplits, HITTING_RANK_STATS)
 }
