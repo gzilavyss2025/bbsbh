@@ -150,7 +150,9 @@ notice and that button open the pitcher card in a bottom sheet.
   leadoff. Else "Pitching". This is stricter than `selectIsFreshPitcher`,
   which compares with the previous half's starter and so calls a reliever who
   came in mid-half and stays on new again at the next leadoff. `relief` is
-  `HalfInning.jsx`'s rule. The notice's flag reads only data that ends the day
+  `HalfInning.jsx`'s rule for a fresh arm. An arm who is not news (the bar's
+  button opens his card in any half) is a reliever only if he is not his
+  club's starter. The notice's flag reads only data that ends the day
   before the game (ADR-0088).
 - **While the sheet is open, the seal, Unwrap and Turn do nothing**, as while
   the cell editor is open. The sheet is not portalled, so it keeps `#root`'s

@@ -21,8 +21,10 @@
 // `fresh` is true while the arm's entry is in view and his first batter is
 // still sealed: the notice shows, and the card's label is "Now pitching". At a
 // leadoff with no change, only a starter in inning 1 is fresh. `relief` is the pitcher card's own
-// flag (HalfInning.jsx's `inning > 1`, and true for any change made inside a
-// half, as PlayByPlay.jsx passes it). `team` is the fielding club, for the
+// flag (HalfInning.jsx's `inning > 1` for a change at a leadoff, and true for
+// any change made inside a half, as PlayByPlay.jsx passes it). An arm who is
+// not news (the bar's button opens his card in any half) is a reliever only
+// if he is not his club's starter. `team` is the fielding club, for the
 // card's "for the {club}" and its logo fallback.
 
 import { halfIndex, selectPrePitchChanges } from '../../api/select.js'
@@ -49,7 +51,7 @@ export function frontierArmChange(feed, revealedThrough, at) {
     if (change) return arm(change.playerId, true, true)
     // Else the arm who finished that at-bat, a midAtBat change included.
     const id = opened[lastAtBat].pitcher?.id
-    return arm(id, false, inning > 1 || id !== starterId(feed, fielding))
+    return arm(id, false, id !== starterId(feed, fielding))
   }
 
   // Nothing of the half is open yet: the leadoff.
@@ -68,7 +70,8 @@ export function frontierArmChange(feed, revealedThrough, at) {
   const last = (feed.liveData?.plays?.allPlays ?? []).findLast(
     (p) => p?.about?.inning === inning - 1 && p?.about?.halfInning === half,
   )
-  return arm(last?.matchup?.pitcher?.id, false)
+  const id = last?.matchup?.pitcher?.id
+  return arm(id, false, id !== starterId(feed, fielding))
 }
 
 // The club's starter: the boxscore lists its arms in the order they pitched,

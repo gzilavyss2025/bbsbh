@@ -69,6 +69,18 @@ test('a reliever who came in mid-half and stays is not news at the next leadoff 
   assert.equal(arm.fresh, false)
 })
 
+test('the starter still on the mound is no reliever after inning 1 (823035 Dobbins)', () => {
+  // The bar's button opens his card in any half. `relief` drives the card's
+  // "Starter in relief" and "Pitched yesterday", so it must stay false for the
+  // man who started the game: at a leadoff, and in the middle of a half.
+  const leadoff = frontierArmChange(FEED, before(6, 'top'), at(6, 'top', 0))
+  assert.equal(leadoff.pitcher.id, 690928)
+  assert.equal(leadoff.relief, false)
+  const mid = frontierArmChange(FEED, before(3, 'top'), at(3, 'top', nextStepBoundary(entries(FEED, 3, 'top'), 0)))
+  assert.equal(mid.pitcher.id, 690928)
+  assert.equal(mid.relief, false)
+})
+
 // ---------------------------------------------------------------------------
 // Mid-half: the change trails the step before the new arm's first batter
 // ---------------------------------------------------------------------------

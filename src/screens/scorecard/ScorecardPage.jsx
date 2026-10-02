@@ -231,6 +231,10 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
     [inLens, feed, revealedThrough, stepInfo],
   )
   const [sheetArm, setSheetArm] = useState(null) // the arm the open pitcher sheet holds
+  // The sheet lives only in the lens. If the lens goes (a wider window, a tap
+  // on another tab), the sheet closes for good: it must not come back by itself
+  // with an old arm, or keep the tap lock on.
+  if (!inLens && sheetArm) setSheetArm(null)
   const armSaid = armWords(arm)
   const docks = bar?.state === 'sealed' || bar?.state === 'edge'
   const dock = !docks ? null : arm?.fresh ? (
