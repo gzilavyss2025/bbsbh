@@ -8,6 +8,7 @@ import { LensFrame } from './lens/LensFrame.jsx'
 import { CarryStrip } from './lens/CarryStrip.jsx'
 import { useCarry } from './lens/useCarry.js'
 import { LensTear } from './lens/motion/LensTear.jsx'
+import { moveKey } from '../../lib/scorecard/words.js'
 
 // The main scorecard grid, in the #22 sheet's own column order: a sticky
 // PLAYER column (each row led by its batting-order number, closed by the
@@ -396,7 +397,7 @@ export function ScorecardSheet({
                         data-last={card != null && card.atBatIndex === lastOpened ? '' : undefined}
                         data-carry={card != null && carry.some((b) => b.atBatIndex === card.atBatIndex) ? '' : undefined}
                       >
-                        {card != null && motion?.moved.has(card.atBatIndex) && (
+                        {card != null && motion?.moved.has(moveKey(card)) && (
                           <span key={motion.n} className="sc-lens__moved" aria-hidden="true" />
                         )}
                         {motion && !motion.still && motion.at === `${slot}:${col.colIndex}` && (

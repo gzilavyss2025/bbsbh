@@ -13,7 +13,7 @@ import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import { scorecardFull, scorecardStep } from '../src/api/scorecardGame.js'
 import { halfIndex } from '../src/api/select.js'
-import { movesText, playWords, runnerMoves } from '../src/lib/scorecard/words.js'
+import { moveKey, movesText, playWords, runnerMoves } from '../src/lib/scorecard/words.js'
 import {
   halfCards,
   halfTotals,
@@ -287,6 +287,10 @@ test('a runner is named as the sheet names him: the placed runner, and a pinch r
   const placed = { kind: 'placed', runnerId: 7, runner: { last: 'Contreras' }, reached: 2 }
   const moves = runnerMoves([placed], [{ ...placed, reached: 3 }])
   assert.equal(movesText(moves), 'Contreras to 3rd.')
+  // The tint finds his box by the move's key, not by an atBatIndex he lacks
+  // (L10 review: `moved.has(undefined)` never matched him).
+  assert.equal(moves[0].key, moveKey(placed))
+  assert.equal(moves[0].key, 'placed:7')
 
   // A pinch runner replaced the man who batted; the man on base is the last
   // one in the chain (halfInningFeed adds him only once his notice is opened).

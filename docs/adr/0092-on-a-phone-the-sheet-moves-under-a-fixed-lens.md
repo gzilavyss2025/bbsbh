@@ -206,3 +206,26 @@ each motion and its gate.
 - **Before a tap nothing differs by the result** (ADR-0046): the breath is two
   cycles on every seal, the turn is the same two beats, and the 700 ms tap lock
   is unchanged. A seal that a poll brings at the live edge does not breathe.
+
+## The final review (L10)
+
+The whole-feature review found three faults at the live edge and fixed them.
+They change no decision above.
+
+- **A spent half commits by itself.** Live, the reader can open a half's third
+  out before the next half starts. The cursor then parks at the end of the half
+  (ADR-0055). When a poll brings the next half, every box is open and no seal is
+  left, so the bar offered an Unwrap with nothing under the frame, and the
+  desktop sheet had no seal and no turn at all. `scorecardStep` now reports
+  `spent` (the innings viewer's own `stepCommitReady`), and the page commits the
+  half before paint, as the innings viewer's `onStepComplete` does. The commit
+  shows nothing the reader has not opened.
+- **A pitching change the feed adds after the tap still shows.** A change made
+  before a pitch trails the step it follows. If the feed adds it after the
+  reader opened that step, it sits at the cursor instead. `frontierArmChange`
+  now reads the notes at the cursor that the step would have held (each made
+  before a pitch, up to the next at-bat). A change between pitches stays behind
+  the cursor.
+- **The runner-move tint finds the placed runner.** It matched boxes by
+  `atBatIndex`, which the extra-innings placed runner does not have. It now
+  matches by the same card key the runner logic uses.

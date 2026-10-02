@@ -6,7 +6,9 @@
 // persisted mark and `at` the scorecard page's own step (scorecardStep at that
 // mark: { inning, half, count }). It checks the first itself and answers null
 // for any other half (G9, ADR-0003, ADR-0010). Inside that half it reads only
-// what the cursor has opened (`entries.slice(0, count)`), never past it.
+// what the cursor has opened (`entries.slice(0, count)`), never past it. The
+// one exception is the live edge: a pitching change made before a pitch, which
+// the feed added after the tap that would have opened it (see `leadingNotes`).
 //
 // WHEN A CHANGE BECOMES VISIBLE (ADR-0016, "What one step contains"; G19):
 //   - LEADOFF. A change at the head of a half is announced before its first
@@ -41,13 +43,22 @@ export function frontierArmChange(feed, revealedThrough, at) {
     return pitcher ? { pitcher, fresh, relief, team } : null
   }
 
-  const opened = computeHalfInningFeed(feed, inning, half, half === 'top' ? 'away' : 'home').slice(0, count)
+  const all = computeHalfInningFeed(feed, inning, half, half === 'top' ? 'away' : 'home')
+  const opened = all.slice(0, count)
   const lastAtBat = opened.findLastIndex((e) => e.kind === 'atbat')
   if (lastAtBat >= 0) {
     // A change in the notes that trail the newest opened at-bat is news.
-    const change = opened
-      .slice(lastAtBat + 1)
-      .findLast((e) => e.eventType === 'pitching_substitution' && e.playerId != null)
+    const change =
+      opened.slice(lastAtBat + 1).findLast(isChange) ??
+      // THE LIVE EDGE. A change that the feed adds AFTER the reader opened the
+      // at-bat before it is not in that step: it sits at the cursor, at the
+      // head of the next step. Had the feed held it at the tap, the step would
+      // have ended after it (nextStepBoundary takes every note made before a
+      // pitch). So read the notes at the cursor up to the first that is
+      // `midAtBat` or the next at-bat, and no further: the same notes, so the
+      // same fact the finished game shows after that tap. A change between
+      // pitches stays behind the cursor.
+      leadingNotes(all, count).findLast(isChange)
     if (change) return arm(change.playerId, true, true)
     // Else the arm who finished that at-bat, a midAtBat change included.
     const id = opened[lastAtBat].pitcher?.id
@@ -72,6 +83,16 @@ export function frontierArmChange(feed, revealedThrough, at) {
   )
   const id = last?.matchup?.pitcher?.id
   return arm(id, false, id !== starterId(feed, fielding))
+}
+
+const isChange = (e) => e.eventType === 'pitching_substitution' && e.playerId != null
+
+// The notes at the cursor that nextStepBoundary would have put in the step
+// just opened: from `count`, while each is a note made before a pitch.
+function leadingNotes(entries, count) {
+  const notes = []
+  for (let i = count; i < entries.length && entries[i].kind === 'event' && !entries[i].midAtBat; i++) notes.push(entries[i])
+  return notes
 }
 
 // The club's starter: the boxscore lists its arms in the order they pitched,

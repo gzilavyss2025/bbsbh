@@ -106,6 +106,46 @@ test('a mid-half change shows after the tap that retires the batter before him (
   assert.equal(next.fresh, false)
 })
 
+// The live edge: the feed adds the change after the tap (L10 review)
+//
+// The reader is caught up and opens Vaughn's walk (top 6, atBatIndex 39) when
+// the feed ends there. The next poll brings Shuster's entry, made before his
+// first pitch, and Bauers's at-bat still in progress. The change is now at the
+// cursor, not behind it. It is the same fact the finished game shows right after
+// that tap, so the notice must show here too, and the bar must name Shuster.
+function liveTo(atBatIndex, { cut = Infinity } = {}) {
+  const feed = structuredClone(FEED)
+  const plays = feed.liveData.plays.allPlays.filter((p) => p.about.atBatIndex <= atBatIndex)
+  const last = plays.at(-1)
+  last.playEvents = last.playEvents.slice(0, cut)
+  if (cut !== Infinity) last.about.isComplete = false
+  feed.liveData.plays.allPlays = plays
+  feed.gameData.status = { ...feed.gameData.status, abstractGameState: 'Live', detailedState: 'In Progress' }
+  return feed
+}
+
+test('at the live edge, a change the feed adds after the tap still shows (823035 top 6)', () => {
+  // The tap, with the feed ending at Vaughn's walk.
+  const thenFeed = liveTo(39)
+  const count = nextStepBoundary(entries(thenFeed, 6, 'top'), 0)
+  const before6 = frontierArmChange(thenFeed, before(6, 'top'), at(6, 'top', count))
+  assert.equal(before6.pitcher.id, 690928, 'Dobbins, until the feed says more')
+  assert.equal(before6.fresh, false)
+  // The poll: Bauers's at-bat begins with the change, before any pitch.
+  const change = FEED.liveData.plays.allPlays[40].playEvents.findIndex(
+    (e) => e.details?.eventType === 'pitching_substitution',
+  )
+  const nowFeed = liveTo(40, { cut: change + 1 })
+  const list = entries(nowFeed, 6, 'top')
+  // The visit and the change are AT the cursor now, both before a pitch.
+  const head = list.slice(count, list.findIndex((e, i) => i >= count && e.kind === 'atbat'))
+  assert.deepEqual(head.map((e) => [e.eventType, e.midAtBat]), [['mound_visit', false], ['pitching_substitution', false]])
+  const now = frontierArmChange(nowFeed, before(6, 'top'), at(6, 'top', count))
+  assert.equal(now.pitcher.id, 694363, 'Shuster')
+  assert.equal(now.fresh, true)
+  assert.equal(now.relief, true)
+})
+
 // ---------------------------------------------------------------------------
 // Between pitches: a midAtBat change leads the NEXT step
 // ---------------------------------------------------------------------------

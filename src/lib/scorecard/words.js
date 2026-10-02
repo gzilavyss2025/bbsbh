@@ -57,8 +57,13 @@ export function playWords(card) {
   return { name, verb, atBatIndex: card.atBatIndex ?? null, text: `${name || 'The batter'} ${verb}.` }
 }
 
+// Which box a move belongs to, for the runner-move tint: `pa:{atBatIndex}`, or
+// `placed:{runnerId}` for the extra-innings placed runner, who took no plate
+// appearance and so has no atBatIndex to match on.
+export const moveKey = cardKey
+
 // What the newest step did to the men already on base: [{ name, kind: 'to' |
-// 'scores' | 'out', base, from, atBatIndex }], lead runner first. `base` is
+// 'scores' | 'out', base, from, atBatIndex, key }], lead runner first. `base` is
 // where he went (4 = home); an out with no recorded base has `base: null`.
 // The batter's own box is not a move: playWords says it.
 export function runnerMoves(prevCards, nextCards) {
@@ -69,6 +74,8 @@ export function runnerMoves(prevCards, nextCards) {
     base,
     from,
     atBatIndex: card.atBatIndex ?? null,
+    // The box to tint (moveKey): the placed runner has no atBatIndex.
+    key: cardKey(card),
   })
   const moves = []
   for (const { base, card } of runnersOnBase(nextCards)) {

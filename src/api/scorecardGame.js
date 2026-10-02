@@ -39,7 +39,7 @@ import {
   halfIndex,
 } from './select.js'
 import { scorecardView } from './loadScorecard.js'
-import { computeHalfInningFeed, battingSlot, pitchLadder, nextStepBoundary } from './playbyplay.js'
+import { computeHalfInningFeed, battingSlot, pitchLadder, nextStepBoundary, stepCommitReady } from './playbyplay.js'
 import { revealInning, revealTotals } from './linescore.js'
 import { computeDerivedByInning, revealDerived } from './derive.js'
 import { computePitcherLines } from './pitchers.js'
@@ -74,9 +74,9 @@ function lastPlayedHalfIndex(feed) {
 //   total     — entries in the stepped half so far (grows live via Refresh)
 //   nextCount — the cursor after one more step (one plate appearance plus
 //               the notes trailing it — nextStepBoundary's bundling)
-//   halfOver  — the half has actually ENDED (the game moved past it, or is
-//               Final): stepping past `total` may then commit the whole half
-//               (revealTo); a still-live half instead waits for new entries.
+//   halfOver  — the half has ENDED (the game moved past it, or is Final), so a
+//               step past `total` commits it (revealTo); a live half waits.
+//   spent     — all open and over: the page commits it (stepCommitReady).
 export function scorecardStep(feed, through, countFor = () => 0) {
   if (!feed) return null
   const idx = through + 1
@@ -86,9 +86,8 @@ export function scorecardStep(feed, through, countFor = () => 0) {
   const battingSide = half === 'top' ? 'away' : 'home'
   const entries = computeHalfInningFeed(feed, inning, half, battingSide)
   if (entries.length === 0) return null
-  // The persisted cursor for THIS half (0 for any other half — the caller
-  // hands in useRevealProgress's own atBatCountFor, so the sheet and the
-  // innings viewer read one mark).
+  // The persisted cursor for THIS half (0 for any other): the caller hands in
+  // useRevealProgress's atBatCountFor, so the sheet and the viewer read one mark.
   const count = countFor(inning, half)
   return {
     inning,
@@ -98,6 +97,7 @@ export function scorecardStep(feed, through, countFor = () => 0) {
     total: entries.length,
     nextCount: nextStepBoundary(entries, count),
     halfOver: idx < last || selectIsFinal(feed),
+    spent: stepCommitReady(entries, count, !(idx < last || selectIsFinal(feed))),
   }
 }
 

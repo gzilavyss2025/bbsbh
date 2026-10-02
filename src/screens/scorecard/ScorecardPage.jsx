@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useRevealProgress } from '../../hooks/useRevealProgress.js'
 import { effectiveReveal } from '../../hooks/revealProgressCore.js'
 import { useScorecardNotes } from '../../hooks/useScorecardNotes.js'
@@ -165,6 +165,19 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
     else revealAtBat(inning, half, nextCount)
   }
 
+  // A SPENT HALF commits by itself (scorecardStep's `spent`). Live, the reader
+  // can open a half's third out before the next half starts; the half is not
+  // over yet, so that tap only parks the cursor at the end (ADR-0055). When a
+  // poll then brings the next half, every box of this one is already open and
+  // no seal is left to tap, so the sheet would wait for a tap it cannot take.
+  // The innings viewer commits here on its own (onStepComplete); so does this
+  // page. It shows nothing the reader has not opened, and it runs before paint,
+  // so the lens goes straight to its "Turn to" handoff. Under a force-reveal
+  // `stepInfo` is null and `commitReveals` false: nothing commits.
+  useLayoutEffect(() => {
+    if (stepInfo?.spent && commitReveals) revealTo(stepInfo.inning, stepInfo.half)
+  }, [stepInfo, commitReveals, revealTo])
+
   // The turn handoff: the next at-bat belongs to the OTHER club's page of
   // the book. It rides the sheet, not a banner over it — the leads-off-next
   // diagonal of the half that JUST ended becomes the button that flips.
@@ -237,6 +250,12 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   // with an old arm, or keep the tap lock on.
   if (!inLens && sheetArm) setSheetArm(null)
   const armSaid = armWords(arm)
+  // The Entering card's defense line walks the whole game's plays, so it runs
+  // once per step, not on every render (a poll, a motion beat, the sheet).
+  const defense = useMemo(
+    () => (inLens && stepInfo?.count === 0 ? enteringDefense(feed, revealedThrough, stepInfo.inning, stepInfo.half) : ''),
+    [inLens, feed, revealedThrough, stepInfo],
+  )
   const docks = bar?.state === 'sealed' || bar?.state === 'edge'
   const dock = !docks ? null : arm?.fresh ? (
     <ArmNotice feed={feed} arm={arm} onOpen={() => setSheetArm(arm)} />
@@ -244,7 +263,7 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
     <EnteringCard
       title={`Entering ${halfLabel(stepInfo)}`}
       pitcherLine={armSaid.line}
-      defense={enteringDefense(feed, revealedThrough, stepInfo.inning, stepInfo.half)}
+      defense={defense}
     />
   ) : null
 

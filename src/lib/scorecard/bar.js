@@ -27,6 +27,10 @@ export function barState({ loading, stepInfo, flip, frontier = null }) {
   if (loading) return 'loading'
   if (!stepInfo) return null
   if (flip) return 'handoff'
+  // Every box of the half is open and the half has ended: the page commits it
+  // before paint (scorecardStep's `spent`). Nothing is left to unwrap, so the
+  // bar must not offer it.
+  if (stepInfo.spent) return 'loading'
   // G10 / ADR-0055: the cursor has met the end of what the feed holds, the
   // half is not over, and no FINISHED at-bat waits there. A finished at-bat at
   // the feed's end (the third out before the next half starts) is a seal like

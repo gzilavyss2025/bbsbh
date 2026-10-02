@@ -302,3 +302,27 @@ test('after the last finished at-bat opens, a live half waits with no frontier',
   assert.equal(view.grid.frontier, null)
   assert.equal(barState({ loading: false, stepInfo: info, flip: null, frontier: view.grid.frontier }), 'edge')
 })
+
+// L10 review: the reader opened the third out while the half was live, and a
+// poll then brought the next half's first play. Every box of Top 1 is open,
+// the half is over, and no seal is left: the half is SPENT. The bar must not
+// offer "Unwrap the next at-bat" (the frame holds no seal), and the page
+// commits the half on its own, as the innings viewer does (stepCommitReady).
+test('a spent half (all open, then the next half starts) is not a seal to unwrap', () => {
+  const parked = liveCut()
+  const total = scorecardStep(parked, -1, () => 0).total
+  assert.equal(scorecardStep(parked, -1, () => total).spent, false, 'live: the cursor parks, nothing commits')
+
+  const next = structuredClone(parked)
+  next.liveData.plays.allPlays.push(structuredClone(FEED.liveData.plays.allPlays[next.liveData.plays.allPlays.length]))
+  const info = scorecardStep(next, -1, () => total)
+  assert.equal(info.halfOver, true, 'the next half has a play now')
+  assert.equal(info.spent, true)
+  const view = scorecardFull({ feed: next }, 'top', { through: -1, step: { halfIdx: 0, count: total } })
+  assert.equal(view.grid.frontier, null, 'no seal on the sheet')
+  assert.equal(barState({ loading: false, stepInfo: info, flip: null, frontier: null }), 'loading')
+
+  // A half with boxes still sealed is never spent, live or over.
+  assert.equal(scorecardStep(next, -1, () => 0).spent, false)
+  assert.equal(scorecardStep(FEED, -1, () => 0).spent, false)
+})
