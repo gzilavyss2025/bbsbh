@@ -96,6 +96,13 @@ export const GROUPS = {
   'team-records': {
     tables: ['team_record_games', 'team_record_ingested_games', 'team_record_pitcher_roles'],
   },
+  // The MLB postseason's per-game ledger, written by the one
+  // gen-postseason-records.mjs. A season group: 1995 to now is thirty-odd
+  // seasons and a completed postseason never changes, so each is frozen once.
+  'postseason-records': {
+    bySeason: true,
+    tables: ['postseason_record_games', 'postseason_record_ingested_games', 'postseason_record_pitcher_roles'],
+  },
   // All three tables are written by the one nightly gen-abs-challenges.mjs —
   // its own group, same as jerseys/pitch-arsenal/team-records above. The row
   // table stays small (one row per ABS challenge, a few thousand a season

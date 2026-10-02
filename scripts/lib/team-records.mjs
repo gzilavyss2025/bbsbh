@@ -366,19 +366,26 @@ export function mergeRoleFacts(stored, snapshots, wanted = null) {
 // generator calls this AFTER its sweep, since tonight's games can introduce a
 // first pitcher nobody had seen and the wanted set is read off the ledger as
 // it then stands.
-export async function refreshRoleFacts(db, season, sportIds, fetchRoles) {
+//
+// `tables` names the ledger and role tables, defaulting to the regular
+// season's; the postseason ledger keeps its own pair in its own dump group.
+export async function refreshRoleFacts(
+  db,
+  season,
+  sportIds,
+  fetchRoles,
+  tables = { games: 'team_record_games', roles: 'team_record_pitcher_roles' },
+) {
   const wanted = firstPitchersOnFile(
-    db.prepare('SELECT sport_id, payload_json FROM team_record_games WHERE season = ?').all(season),
+    db.prepare(`SELECT sport_id, payload_json FROM ${tables.games} WHERE season = ?`).all(season),
   )
-  const stored = storedRoleFacts(
-    db.prepare('SELECT * FROM team_record_pitcher_roles WHERE season = ?').all(season),
-  )
+  const stored = storedRoleFacts(db.prepare(`SELECT * FROM ${tables.roles} WHERE season = ?`).all(season))
   const snapshots = []
   for (const sportId of sportIds) snapshots.push({ sportId, roles: await fetchRoles(sportId, season) })
   const failed = snapshots.filter((s) => !s.roles).map((s) => s.sportId)
   const merged = mergeRoleFacts(stored, snapshots, wanted)
   const put = db.prepare(
-    `INSERT OR REPLACE INTO team_record_pitcher_roles
+    `INSERT OR REPLACE INTO ${tables.roles}
        (person_id, season, sport_id, games_played, games_started) VALUES (?, ?, ?, ?, ?)`,
   )
   for (const f of merged.values()) put.run(f.personId, season, f.sportId, f.gamesPlayed, f.gamesStarted)
