@@ -3,15 +3,19 @@ import '../../styles/situational-records/66a-detail.css'
 import { useMemo } from 'react'
 import {
   ALL_SEASONS,
+  ALL_TEAMS,
   MIN_GAMES,
   fetchPostseasonSeasons,
   fetchPostseasonEntries,
   gameRowsFor,
+  gameRowsForAll,
+  combinedEntry,
   resolveSeason,
   resolveMinGames,
   teamRankRows,
 } from '../../api/postseason/records.js'
 import { buildRankingIndex, rankMetric } from '../../api/situationalRecordRankings.js'
+import { teamRecordsFor } from '../../api/teamRecords.js'
 import { cutoffFor } from '../team/data/shared.js'
 import { postseasonRecordsPath } from '../../lib/postseason/recordsRoute.js'
 import { situationalRecordsPath } from '../../lib/route.js'
@@ -112,17 +116,23 @@ export function PostseasonRecordsPage({
     ? overviewGroups.find((group) => group.key === routeCategory) ?? null
     : null
 
+  // "All teams" is the team view with its club filter removed: every club's
+  // games as one ledger, so the list reads how the whole field fared.
+  const allTeams = routeTeam === ALL_TEAMS
+  const combined = useMemo(() => combinedEntry(data?.entries ?? []), [data])
   const teamId = useMemo(() => {
+    if (allTeams) return ALL_TEAMS
     const wanted = Number(routeTeam)
     if (clubs.some((t) => t.id === wanted)) return wanted
     if (clubs.some((t) => t.id === favoriteTeamId)) return favoriteTeamId
     return clubs[0]?.id ?? null
-  }, [clubs, routeTeam, favoriteTeamId])
-  const team = clubs.find((t) => t.id === teamId) ?? null
-  const teamGroups = useMemo(
-    () => (byTeam && teamId != null ? teamRankRows(index, teamId, { sortBy: 'pct', minPlayed: minGames }) : null),
-    [index, byTeam, teamId, minGames],
-  )
+  }, [allTeams, clubs, routeTeam, favoriteTeamId])
+  const team = allTeams ? combined.team : clubs.find((t) => t.id === teamId) ?? null
+  const teamGroups = useMemo(() => {
+    if (!byTeam || teamId == null) return null
+    if (allTeams) return teamRecordsFor(combined.data, { cutoff })?.groups ?? null
+    return teamRankRows(index, teamId, { sortBy: 'pct', minPlayed: minGames })
+  }, [index, byTeam, allTeams, combined, cutoff, teamId, minGames])
 
   useDocumentTitle(
     byTeam && team
@@ -164,13 +174,17 @@ export function PostseasonRecordsPage({
   // has no figure and stays a plain dash; the rows are built only on open.
   const entryOf = useMemo(() => new Map((data?.entries ?? []).map((e) => [e.team.id, e])), [data])
   const gamesDoor = (teamId, metricId, metricName, row) => {
-    const entry = entryOf.get(teamId)
+    const entry = teamId === ALL_TEAMS ? combined : entryOf.get(teamId)
     if (!entry || !row.played) return row.v
     return (
       <GameLinesDoor
         face={row.v}
         label={`${entry.team.name}, ${metricName}, ${row.v}: the games`}
-        rows={() => gameRowsFor(entry, metricId, { cutoff })}
+        rows={() =>
+          teamId === ALL_TEAMS
+            ? gameRowsForAll(data.entries, metricId, { cutoff })
+            : gameRowsFor(entry, metricId, { cutoff })
+        }
         sheet={{
           title: `${entry.team.name} · ${metricName}`,
           note: `Game lines · ${scopeLabel}`,
@@ -252,6 +266,7 @@ export function PostseasonRecordsPage({
               value={teamId ?? ''}
               onChange={(e) => navigate(pathFor({ team: e.target.value }))}
             >
+              <option value={ALL_TEAMS}>All teams</option>
               {clubs.map((club) => (
                 <option key={club.id} value={club.id}>{club.name}</option>
               ))}
@@ -274,12 +289,17 @@ export function PostseasonRecordsPage({
           <section className="trrank__detailhead">
             <span className="trrank__detailgroup">{scopeLabel}</span>
             <h2>{team.name}</h2>
-            <p>Record and rank among the postseason clubs that played each split.</p>
+            <p>
+              {allTeams
+                ? 'Every postseason club together: how the whole field fared in each split.'
+                : 'Record and rank among the postseason clubs that played each split.'}
+            </p>
           </section>
           <TeamRecordsList
             groups={teamGroups}
             pathFor={(metric) => pathFor({ view: null, metric, team: null, sort: null, order: null })}
             renderRecord={(row) => gamesDoor(teamId, row.id, row.k, row)}
+            ranked={!allTeams}
           />
         </main>
       )}

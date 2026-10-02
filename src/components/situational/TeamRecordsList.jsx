@@ -6,7 +6,8 @@ import { Table } from '../ui/table/Table.jsx'
 // postseason page: the board for one split reads ACROSS clubs, this reads DOWN
 // one club. `groups` is teamRankRows' answer; `pathFor(metricId)` spells the
 // address of that split's full board. `renderRecord(row)` optionally dresses
-// the W-L cell, as the board's does.
+// the W-L cell, as the board's does. `ranked` false is the combined list of
+// every club: nothing to rank against, so the Rank column gives way to Games.
 
 function RankText({ row }) {
   if (row.rank == null) return <span className="trrank__ranktext">—</span>
@@ -18,7 +19,7 @@ function RankText({ row }) {
   )
 }
 
-export function TeamRecordsList({ groups, pathFor, renderRecord }) {
+export function TeamRecordsList({ groups, pathFor, renderRecord, ranked = true }) {
   const linkProps = useRouteLink()
   return (
     <div className="trrank__teamlist">
@@ -35,7 +36,7 @@ export function TeamRecordsList({ groups, pathFor, renderRecord }) {
                 <th className="team">Situation</th>
                 <th>W-L</th>
                 <th>Win pct</th>
-                <th>Rank</th>
+                <th>{ranked ? 'Rank' : 'Games'}</th>
               </tr>
             </thead>
             <tbody>
@@ -49,7 +50,7 @@ export function TeamRecordsList({ groups, pathFor, renderRecord }) {
                   <td className="trrank__num">{renderRecord ? renderRecord(row) : row.v}</td>
                   <td className="trrank__num trrank__pct">{row.pct}</td>
                   <td className="trrank__num">
-                    <RankText row={row} />
+                    {ranked ? <RankText row={row} /> : row.played}
                   </td>
                 </tr>
               ))}

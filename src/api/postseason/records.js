@@ -30,6 +30,8 @@ import { RECORD_GROUPS } from '../teamRecords.js'
 import { rankMetric } from '../situationalRecordRankings.js'
 
 export const ALL_SEASONS = 'all'
+// The team view's "no club filter" choice: every postseason club's games as one.
+export const ALL_TEAMS = 'all'
 
 const fetchIndex = staticJson('/data/postseason-records/index.json', { fallback: null })
 // staticJsonBy memoizes on String(key); the key is the season.
@@ -132,6 +134,31 @@ export function teamRankRows(index, teamId, { sortBy = 'pct', minPlayed = 0 } = 
 }
 
 // ---------------------------------------------------------------------------
+// All teams
+// ---------------------------------------------------------------------------
+
+// Every club's games as ONE ledger, for the team view with its club filter
+// removed: how the whole postseason field fared in each situation. It is the
+// same tally teamRecordsFor runs for a club, over every club's rows, so a row
+// reads "Scoring first: 812-294" for all of them together. A game appears once
+// for each club it was played by, and a split counts the clubs that met it, so
+// a split both clubs can meet in one game (a day game, a one-run game) counts
+// the game twice, once as a win and once as a loss. That is the same rule a
+// single club's figure follows; it is why those splits sit at exactly .500.
+// `entries` is entriesFrom's answer.
+export function combinedEntry(entries) {
+  return {
+    team: { id: ALL_TEAMS, name: 'All teams' },
+    data: {
+      sportId: 1,
+      postseason: true,
+      allStarDate: null,
+      games: entries.flatMap((e) => e.data.games),
+    },
+  }
+}
+
+// ---------------------------------------------------------------------------
 // The games behind a record
 // ---------------------------------------------------------------------------
 
@@ -186,5 +213,15 @@ export function gameRowsFor(entry, metricId, { cutoff = null } = {}) {
       boxScorePath: awayAbbr && homeAbbr ? gamePath(g.d, awayAbbr, homeAbbr, 'boxscore') : null,
     })
   }
-  return rows.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.gamePk ?? 0) - (a.gamePk ?? 0)))
+  return rows.sort(newestFirst)
+}
+
+const newestFirst = (a, b) =>
+  a.date < b.date ? 1 : a.date > b.date ? -1 : (b.gamePk ?? 0) - (a.gamePk ?? 0) || a.teamId - b.teamId
+
+// The same list for ALL TEAMS: every club's row in the split, so the list adds
+// up to the combined figure above it (a game both clubs met is two rows, one
+// from each club's side, as its figure counts it twice).
+export function gameRowsForAll(entries, metricId, opts) {
+  return entries.flatMap((e) => gameRowsFor(e, metricId, opts)).sort(newestFirst)
 }
