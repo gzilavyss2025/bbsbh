@@ -1013,7 +1013,11 @@ don't run these by hand.
   type's own league mean (`WHIFF_REGRESS_K` = 50 pitches) rather than applying
   a second, stricter sample floor — a flat floor tuned for four-seamers would
   starve the splitter and sweeper notes, which is most of this family's value.
-  `ba` is carried on the batter row for display color only, never scored. See
+  `ba` is carried on the batter row for display color only, never scored. The
+  batter row also carries `estWoba` (the board's `est_woba`, 3 places, `null`
+  when blank) for the Scout page (#1410). The board is regular season only, and
+  `estWoba` is thin like `ba`: show the `pa` beside it. A file written before
+  the field existed has no `estWoba` key, so readers must accept `undefined`. See
   `docs/callouts.md`, "Matchup callouts".
 - `gen-workload.mjs` → `public/data/workload.json` — per-pitcher recent
   workload: last-12 appearance list (date/pitches/started), season totals, SP/RP
