@@ -20,13 +20,12 @@
 //
 // `fresh` is true while the arm's entry is in view and his first batter is
 // still sealed: the notice shows, and the card's label is "Now pitching". At a
-// leadoff with no change it is HalfInning.jsx's own rule (selectIsFreshPitcher),
-// so the lens and the innings viewer agree. `relief` is the pitcher card's own
+// leadoff with no change, only a starter in inning 1 is fresh. `relief` is the pitcher card's own
 // flag (HalfInning.jsx's `inning > 1`, and true for any change made inside a
 // half, as PlayByPlay.jsx passes it). `team` is the fielding club, for the
 // card's "for the {club}" and its logo fallback.
 
-import { halfIndex, selectIsFreshPitcher, selectPrePitchChanges } from '../../api/select.js'
+import { halfIndex, selectPrePitchChanges } from '../../api/select.js'
 import { computeHalfInningFeed, pitchingChangePitcher } from '../../api/playbyplay.js'
 
 export function frontierArmChange(feed, revealedThrough, at) {
@@ -58,16 +57,18 @@ export function frontierArmChange(feed, revealedThrough, at) {
     (c) => c.eventType === 'pitching_substitution',
   )
   if (change) return arm(change.pitcher.id, true)
-  // No change: the club's starter in inning 1, else the arm who threw his
-  // club's last play, in a half already committed. Never this half's first
-  // play: its pitcher is whoever FINISHED that at-bat, which a change between
-  // its pitches would give away. Fresh by HalfInning.jsx's own rule
-  // (selectIsFreshPitcher): a starter taking the mound is news.
+  // No change: in inning 1 the club's starter, who takes the mound and so is
+  // news, as HalfInning.jsx's isFreshPitcher says. Else the arm who threw his
+  // club's last play, in a half already committed: he stays on, so he is not
+  // news. (selectIsFreshPitcher compares with the previous half's STARTER, so
+  // it would call a reliever who came in mid-half new again here.) Never this
+  // half's first play: its pitcher is whoever FINISHED that at-bat, which a
+  // change between its pitches would give away.
+  if (inning === 1) return arm(starterId(feed, fielding), true)
   const last = (feed.liveData?.plays?.allPlays ?? []).findLast(
     (p) => p?.about?.inning === inning - 1 && p?.about?.halfInning === half,
   )
-  const id = inning > 1 ? last?.matchup?.pitcher?.id : starterId(feed, fielding)
-  return arm(id, selectIsFreshPitcher(feed, inning, half, revealedThrough, id))
+  return arm(last?.matchup?.pitcher?.id, false)
 }
 
 // The club's starter: the boxscore lists its arms in the order they pitched,

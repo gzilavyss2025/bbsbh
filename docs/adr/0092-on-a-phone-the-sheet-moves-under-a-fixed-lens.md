@@ -145,9 +145,11 @@ notice and that button open the pitcher card in a bottom sheet.
   `revealedThrough + 1`, and in that half it reads only the entries the step
   cursor has opened. A test walks the captured game and checks, at each step,
   that the arm it names has already entered by the gate.
-- **The label is the innings viewer's.** "Now pitching" only while the arm is
-  fresh: his entry is in view and his first batter is still sealed, or, at a
-  leadoff, `selectIsFreshPitcher` says so. Else "Pitching". `relief` is
+- **"Now pitching" only while the arm is fresh**: his entry is in view and his
+  first batter is still sealed, or he is his club's starter at its first
+  leadoff. Else "Pitching". This is stricter than `selectIsFreshPitcher`,
+  which compares with the previous half's starter and so calls a reliever who
+  came in mid-half and stays on new again at the next leadoff. `relief` is
   `HalfInning.jsx`'s rule. The notice's flag reads only data that ends the day
   before the game (ADR-0088).
 - **While the sheet is open, the seal, Unwrap and Turn do nothing**, as while

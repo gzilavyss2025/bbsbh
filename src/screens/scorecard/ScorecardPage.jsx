@@ -231,13 +231,14 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
     [inLens, feed, revealedThrough, stepInfo],
   )
   const [sheetArm, setSheetArm] = useState(null) // the arm the open pitcher sheet holds
+  const armSaid = armWords(arm)
   const docks = bar?.state === 'sealed' || bar?.state === 'edge'
   const dock = !docks ? null : arm?.fresh ? (
     <ArmNotice feed={feed} arm={arm} onOpen={() => setSheetArm(arm)} />
   ) : stepInfo.count === 0 ? (
     <EnteringCard
       title={`Entering ${halfLabel(stepInfo)}`}
-      pitcherLine={armWords(arm).line}
+      pitcherLine={armSaid.line}
       defense={enteringDefense(feed, revealedThrough, stepInfo.inning, stepInfo.half)}
     />
   ) : null
@@ -300,7 +301,7 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
           onUnwrap={tapFrontier}
           onTurn={turn?.onFlip}
           onRefresh={onReload}
-          pitcher={arm ? armWords(arm).surname : null}
+          pitcher={arm ? armSaid.surname : null}
           onPitcher={() => setSheetArm(arm)}
         />
       )}

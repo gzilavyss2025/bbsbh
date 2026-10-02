@@ -60,6 +60,15 @@ test('a leadoff with no change names the arm who closed his club’s last half, 
   assert.ok(first.team.name)
 })
 
+test('a reliever who came in mid-half and stays is not news at the next leadoff (823035 top 7)', () => {
+  // Shuster came in during top 6 and threw its last play. Top 7 opens with
+  // him: no pre-pitch change, so the Entering card, not the notice. (Top 7's
+  // own change to Graceffo comes later, inside the half.)
+  const arm = frontierArmChange(FEED, before(7, 'top'), at(7, 'top', 0))
+  assert.equal(arm.pitcher.id, 694363)
+  assert.equal(arm.fresh, false)
+})
+
 // ---------------------------------------------------------------------------
 // Mid-half: the change trails the step before the new arm's first batter
 // ---------------------------------------------------------------------------
