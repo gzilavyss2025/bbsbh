@@ -200,7 +200,12 @@ function sortKey(row, metric, sortBy) {
 // Clubs with no answer are appended after the ranked ones with `rank: null`, so
 // the table still shows all thirty and the reader can see WHO has never been in
 // the split — which is often the interesting part of a rare one.
-export function rankMetric(index, metricId, { sortBy = 'pct', order } = {}) {
+//
+// `minPlayed` keeps a thin sample off the top of a board: a club with fewer
+// games than that in a W-L split keeps its row and its figure but cannot be
+// ranked, the way a club that never played the split cannot. A count has no
+// games to count, so it ignores the option.
+export function rankMetric(index, metricId, { sortBy = 'pct', order, minPlayed = 0 } = {}) {
   const metric = index.metrics.get(metricId)
   if (!metric) return null
   const dir = order ?? defaultOrder()
@@ -210,7 +215,8 @@ export function rankMetric(index, metricId, { sortBy = 'pct', order } = {}) {
   const ranked = []
   const unranked = []
   for (const row of present) {
-    const key = sortKey(row, metric, sortBy)
+    const thin = metric.kind !== 'count' && row.played < minPlayed
+    const key = thin ? null : sortKey(row, metric, sortBy)
     ;(key == null ? unranked : ranked).push({ ...row, key })
   }
   // Tie-breaks after the key itself: more wins, then fewer losses, then the

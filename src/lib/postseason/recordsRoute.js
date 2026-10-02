@@ -34,6 +34,7 @@ export function parseRecordsRoute(name, q, { asOf, sportId }) {
       season: q.get('season') || null,
       view: q.get('view') || null,
       team: q.get('team') || null,
+      min: q.get('min') || null,
       ...shared,
     }
   }
@@ -42,14 +43,16 @@ export function parseRecordsRoute(name, q, { asOf, sportId }) {
 
 // A postseason-records address. `season` is a year or 'all' (absent means the
 // latest on file), `view` is 'teams' for the by-team view (absent means the
-// by-situation view), `team` a club id. A default is never written, so a link
+// by-situation view), `team` a club id, `min` the all-years minimum games. A default is never written, so a link
 // that did not ask for something does not carry it.
-export function postseasonRecordsPath({ season, view, team, category, metric, sort, order, d } = {}) {
+export function postseasonRecordsPath({ season, view, team, min, category, metric, sort, order, d } = {}) {
   const q = new URLSearchParams()
   if (d) q.set('d', d)
   if (season) q.set('season', String(season))
   if (view === 'teams') q.set('view', 'teams')
   if (view === 'teams' && team) q.set('team', String(team))
+  // The all-years floor on games in a split; 0 or absent is "any".
+  if (Number(min) > 0) q.set('min', String(min))
   if (category) q.set('category', category)
   if (metric) q.set('metric', metric)
   if (sort && sort !== 'pct') q.set('sort', sort)

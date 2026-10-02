@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
-import { entriesFrom, resolveSeason, teamRankRows, ALL_SEASONS } from '../src/api/postseason/records.js'
+import { entriesFrom, resolveSeason, resolveMinGames, teamRankRows, ALL_SEASONS, MIN_GAMES } from '../src/api/postseason/records.js'
 import { teamRecordsFor } from '../src/api/teamRecords.js'
 import { buildRankingIndex, rankMetric } from '../src/api/situationalRecordRankings.js'
 
@@ -147,4 +147,48 @@ test('all seasons since 1995 pivot into one board with the Dodgers on it', () =>
   const la = teamRankRows(index, 119)
   const mine = la.flatMap((g) => g.rows).find((r) => r.id === 'scored-first')
   assert.equal(mine.rank, board.ranked.find((r) => r.teamId === 119).rank)
+})
+
+// ---------------------------------------------------------------------------
+// The all-years minimum-games floor
+// ---------------------------------------------------------------------------
+
+test('only the all-years board takes a minimum, and only a menu value', () => {
+  assert.deepEqual(MIN_GAMES, [0, 3, 5, 10])
+  assert.equal(resolveMinGames('5', ALL_SEASONS), 5)
+  assert.equal(resolveMinGames('4', ALL_SEASONS), 0) // off the menu
+  assert.equal(resolveMinGames('banana', ALL_SEASONS), 0)
+  assert.equal(resolveMinGames(undefined, ALL_SEASONS), 0)
+  assert.equal(resolveMinGames('5', 2025), 0) // a single postseason
+  assert.equal(resolveMinGames('5', null), 0) // still loading
+})
+
+const thin = () =>
+  buildRankingIndex(
+    entriesFrom(teams, [
+      file(
+        2025,
+        club(1, [game({ rs: 5 }), game({ rs: 5 }), game({ rs: 5 })]), // 3-0
+        club(2, [...Array.from({ length: 13 }, () => game({ rs: 5 })), game({ rs: 5, r: 'L' })]), // 13-1
+      ),
+    ]),
+  )
+
+test('with no floor a 3-0 club outranks 13-1', () => {
+  const result = rankMetric(thin(), 'scored-4-plus')
+  assert.deepEqual(result.ranked.map((r) => [r.teamId, r.rank]), [[1, 1], [2, 2]])
+})
+
+test('a floor keeps a thin club’s row and figure but takes its rank', () => {
+  const result = rankMetric(thin(), 'scored-4-plus', { minPlayed: 5 })
+  assert.deepEqual(result.ranked.map((r) => [r.teamId, r.rank]), [[2, 1], [1, null]])
+  assert.equal(result.of, 1)
+  assert.equal(result.ranked[1].v, '3-0')
+})
+
+test('the floor reaches the team view’s ranks too', () => {
+  const index = thin()
+  const row = (id) => teamRankRows(index, 1, { minPlayed: id }).flatMap((g) => g.rows).find((r) => r.id === 'scored-4-plus')
+  assert.deepEqual([row(0).rank, row(0).of], [1, 2])
+  assert.deepEqual([row(5).rank, row(5).of], [null, 1])
 })

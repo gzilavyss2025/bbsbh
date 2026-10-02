@@ -37,9 +37,13 @@ game.
 clubs and about 40 games, so a season is about 15 KB. The all-years view reads
 32 small files, not three hundred club files.
 
-**5. No minimum sample.** Any club with one game in a split is ranked, as on
-the regular-season page. A 3-0 club therefore tops an all-years board ahead of
-13-1. A minimum-games control is a later, additive change if this reads wrong.
+**5. No minimum sample, except a floor on the all-years board.** Any club
+with one game in a split is ranked, as on the regular-season page. Over all
+years that puts a 3-0 club ahead of 13-1, so that view alone offers a floor
+(`?min=3|5|10`, "Any games" by default). A club under the floor keeps its row
+and its figure but takes no rank, the same as a club that never played the
+split (`minPlayed` in `rankMetric`). A single postseason has no floor: its
+samples are a handful of games for every club.
 
 ## Consequences
 

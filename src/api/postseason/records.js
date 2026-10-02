@@ -48,6 +48,17 @@ export function resolveSeason(value, seasons) {
   return seasons.at(-1) ?? null
 }
 
+// The minimum-games chips the all-years board offers. 0 is "any".
+export const MIN_GAMES = [0, 3, 5, 10]
+
+// Reads a `?min=` value. Only the all-years board takes one: a single
+// postseason is already a handful of games a club, so a floor there would just
+// hide clubs. Anything off the menu is "any".
+export function resolveMinGames(value, season) {
+  const n = Number(value)
+  return season === ALL_SEASONS && MIN_GAMES.includes(n) ? n : 0
+}
+
 // Every postseason club's ledger for one season, or for all of them merged per
 // club (dates ascend across seasons, which is the order teamRecordsFor's
 // series counting walks). A club with no postseason game in the span is
@@ -88,13 +99,13 @@ export function entriesFrom(teams, files) {
 // Returns [{ title, rows: [{ id, k, v, pct, played, rank, tied, of, last }] }]
 // in the print order the league view uses, or null when the club has no
 // postseason game in the span.
-export function teamRankRows(index, teamId, { sortBy = 'pct' } = {}) {
+export function teamRankRows(index, teamId, { sortBy = 'pct', minPlayed = 0 } = {}) {
   if (!index.teams.some((t) => t.id === teamId)) return null
   const groups = []
   for (const group of index.groups) {
     const rows = []
     for (const metric of group.metrics) {
-      const result = rankMetric(index, metric.id, { sortBy })
+      const result = rankMetric(index, metric.id, { sortBy, minPlayed })
       const mine = result?.ranked.find((r) => r.teamId === teamId)
       if (!mine || !mine.played) continue
       rows.push({

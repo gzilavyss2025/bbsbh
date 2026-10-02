@@ -14,6 +14,7 @@ test('a bare postseason-records address parses to every default', () => {
     season: null,
     view: null,
     team: null,
+    min: null,
     category: null,
     metric: null,
     sort: null,
@@ -75,4 +76,11 @@ test('the regular-season explorer still parses its own query, and its old alias'
     )
   }
   assert.equal(parseRoute(situationalRecordsPath({ metric: 'lead-8' })).metric, 'lead-8')
+})
+
+test('the all-years minimum rides the query and is never written at zero', () => {
+  assert.equal(parseRoute('/postseason-records?season=all&min=5').min, '5')
+  assert.equal(postseasonRecordsPath({ season: 'all', min: 5 }), '/postseason-records?season=all&min=5')
+  assert.equal(postseasonRecordsPath({ season: 'all', min: 0 }), '/postseason-records?season=all')
+  assert.equal(postseasonRecordsPath({ season: 'all', min: null }), '/postseason-records?season=all')
 })

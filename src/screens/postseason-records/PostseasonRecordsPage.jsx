@@ -3,9 +3,11 @@ import '../../styles/situational-records/66a-detail.css'
 import { useMemo } from 'react'
 import {
   ALL_SEASONS,
+  MIN_GAMES,
   fetchPostseasonSeasons,
   fetchPostseasonEntries,
   resolveSeason,
+  resolveMinGames,
   teamRankRows,
 } from '../../api/postseason/records.js'
 import { buildRankingIndex, rankMetric } from '../../api/situationalRecordRankings.js'
@@ -45,6 +47,7 @@ export function PostseasonRecordsPage({
   season: routeSeason,
   view: routeView,
   team: routeTeam,
+  min: routeMin,
   category: routeCategory,
   metric: routeMetric,
   sort: routeSort,
@@ -68,6 +71,8 @@ export function PostseasonRecordsPage({
   }, [routeSeason])
   const seasons = data?.seasons ?? []
   const season = data?.season ?? null
+  // The all-years floor on games in a split; 0 everywhere else.
+  const minGames = resolveMinGames(routeMin, season)
 
   const index = useMemo(() => buildRankingIndex(data?.entries ?? [], { cutoff }), [data, cutoff])
   const clubs = useMemo(
@@ -86,17 +91,17 @@ export function PostseasonRecordsPage({
       : index.groups[0]?.metrics[0]?.id ?? null
     : null
   const result = useMemo(
-    () => (resolvedId ? rankMetric(index, resolvedId, { sortBy, order }) : null),
-    [index, resolvedId, sortBy, order],
+    () => (resolvedId ? rankMetric(index, resolvedId, { sortBy, order, minPlayed: minGames }) : null),
+    [index, resolvedId, sortBy, order, minGames],
   )
   const overviewGroups = useMemo(
     () => index.groups.map((group, groupIndex) => ({
       ...group,
       key: GROUP_KEYS[group.title] ?? group.title,
       order: groupIndex + 1,
-      results: group.metrics.map((metric) => rankMetric(index, metric.id)).filter(Boolean),
+      results: group.metrics.map((metric) => rankMetric(index, metric.id, { minPlayed: minGames })).filter(Boolean),
     })),
-    [index],
+    [index, minGames],
   )
   const activeGroup = resolvedId
     ? overviewGroups.find((group) => group.metrics.some((item) => item.id === resolvedId))
@@ -113,8 +118,8 @@ export function PostseasonRecordsPage({
   }, [clubs, routeTeam, favoriteTeamId])
   const team = clubs.find((t) => t.id === teamId) ?? null
   const teamGroups = useMemo(
-    () => (byTeam && teamId != null ? teamRankRows(index, teamId, { sortBy: 'pct' }) : null),
-    [index, byTeam, teamId],
+    () => (byTeam && teamId != null ? teamRankRows(index, teamId, { sortBy: 'pct', minPlayed: minGames }) : null),
+    [index, byTeam, teamId, minGames],
   )
 
   useDocumentTitle(
@@ -135,6 +140,7 @@ export function PostseasonRecordsPage({
     season: nextSeason = routeSeason,
     view: nextView = routeView,
     team: nextTeam = teamId,
+    min: nextMin = minGames,
     sort: nextSort = sortBy,
     order: nextOrder = order,
   } = {}) => postseasonRecordsPath({
@@ -143,6 +149,7 @@ export function PostseasonRecordsPage({
     season: nextSeason,
     view: nextView,
     team: nextTeam,
+    min: nextSeason === ALL_SEASONS ? nextMin : null,
     sort: nextMetric ? nextSort : null,
     order: nextMetric ? nextOrder : null,
     d: asOf,
@@ -183,6 +190,21 @@ export function PostseasonRecordsPage({
               ))}
             </select>
           </label>
+        )}
+        {season === ALL_SEASONS && (
+          <div className="trrank__chips" role="group" aria-label="Minimum games in a split">
+            {MIN_GAMES.map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={`trrank__chip${n === minGames ? ' is-on' : ''}`}
+                aria-pressed={n === minGames}
+                onClick={() => navigate(pathFor({ min: n }))}
+              >
+                {n === 0 ? 'Any games' : `${n}+ games`}
+              </button>
+            ))}
+          </div>
         )}
         <div className="trrank__chips" role="group" aria-label="View">
           {[

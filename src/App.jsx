@@ -447,6 +447,7 @@ export default function App() {
         season={route.season}
         view={route.view}
         team={route.team}
+        min={route.min}
         category={route.category}
         metric={route.metric}
         sort={route.sort}
