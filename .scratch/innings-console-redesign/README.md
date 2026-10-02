@@ -1,7 +1,7 @@
 # Innings console redesign — handoff
 
 Status: design agreed with Gary over five rounds on 2026-10-01 and 2026-10-02.
-Nothing is built in the app yet. The GitHub issue that tracks the build links here.
+Nothing is built in the app yet. The build is tracked in issue #1389, which links here.
 
 This folder holds everything the design session learned, so an agent can build
 it without the session. Read this file first, then open the design canvas.
