@@ -14,7 +14,8 @@
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { hitterCounters } from '../../../src/api/scout/hitterGrid.js'
+import { flatRates, hitterCounters } from '../../../src/api/scout/hitterGrid.js'
+import { clamp } from '../../../src/lib/math/number.js'
 
 const EV_MAX = 125
 const LA_MIN = -90
@@ -23,7 +24,6 @@ const NE = EV_MAX + 1
 const NL = LA_MAX - LA_MIN + 1
 const K = 3
 
-const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi)
 const ci = (ev) => clamp(Math.round(ev), 0, EV_MAX)
 const cj = (la) => clamp(Math.round(la), LA_MIN, LA_MAX) - LA_MIN
 
@@ -86,7 +86,6 @@ export function readXwobaTable(season) {
 // it folds KC and CS into CU. Each gap is grid minus board.
 export const GATE = { minPa: 40, mean: 0.006, over: 0.02, share: 0.01, max: 0.04 }
 const FOLD = { CU: ['CU', 'KC', 'CS'] }
-const total = (a) => a.reduce((x, y) => x + y, 0)
 
 // board: CSV rows { player_id, pitch_type, pa, est_woba }; shard: { xwoba, bat }.
 export function gateRows(board, shard) {
@@ -94,15 +93,10 @@ export function gateRows(board, shard) {
   let missing = 0
   for (const r of board) {
     if (!(Number(r.pa) >= GATE.minPa)) continue
-    let num = 0
-    let den = 0
-    for (const code of FOLD[r.pitch_type] ?? [r.pitch_type]) {
-      const c = hitterCounters({ reg: shard.bat?.[r.player_id], xwoba: shard.xwoba }, { code, scope: 'R' })
-      if (!c?.wobaSum) continue
-      num += total(c.wobaSum)
-      den += total(c.paEnd)
-    }
-    if (den > 0) gaps.push(num / den - Number(r.est_woba))
+    const all = shard.bat?.[r.player_id]?.mlb ?? {}
+    const mlb = Object.fromEntries((FOLD[r.pitch_type] ?? [r.pitch_type]).filter((c) => all[c]).map((c) => [c, all[c]]))
+    const xwoba = flatRates(hitterCounters({ reg: { mlb }, xwoba: shard.xwoba }, { scope: 'R' }))?.xwoba
+    if (xwoba != null) gaps.push(xwoba - Number(r.est_woba))
     else missing += 1
   }
   return { gaps, missing }
@@ -111,7 +105,7 @@ export function gateRows(board, shard) {
 export function gateVerdict(gaps) {
   const abs = gaps.map(Math.abs)
   const n = abs.length
-  const mean = n ? total(abs) / n : null
+  const mean = n ? abs.reduce((x, y) => x + y, 0) / n : null
   const over = abs.filter((g) => g > GATE.over).length
   const max = n ? Math.max(...abs) : null
   const pass = n > 0 && mean <= GATE.mean && over <= GATE.share * n && max <= GATE.max

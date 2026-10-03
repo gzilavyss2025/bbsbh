@@ -44,7 +44,8 @@ export async function fetchHitterLeague(season) {
   return asGrid(season, league?.bat, league?.post, league)
 }
 
-const FIELDS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaFixed', 'bipUntracked', 'xwobaBip']
+// The counters, in file order. The generator imports this list.
+export const FIELDS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaFixed', 'bipUntracked', 'xwobaBip']
 
 // The counters for one view, summed. `scope` 'R' (regular season), 'P'
 // (postseason) or null (both); `hand` the pitcher's hand or null (both);

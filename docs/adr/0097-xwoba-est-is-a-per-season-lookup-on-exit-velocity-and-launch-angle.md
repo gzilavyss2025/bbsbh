@@ -74,7 +74,9 @@ batter board:
 - The league's regular-season xwOBA (est.) is .314 over 181,958 PA-ending
   pitches. 494 balls in play were not tracked.
 - The largest hitter-grid bucket grows from 79,573 to 100,703 bytes (20,717 of
-  them for `xwobaBip`). `test/bucket-shards.test.js` sets 120 KB.
+  them for `xwobaBip`). That is 1.7 KB under the 100 KB ceiling in
+  `test/bucket-shards.test.js`. The ceiling does not change here; the rest of
+  the postseason may need a higher one, and that is the owner's decision.
 - `scripts/data/pitch-arsenal.sql` grows to 27,722,987 bytes after the
   re-walk (25,997,417 without the estimate, ADR-0096). The committed dump does
   not change in this ADR's PR: it holds no hitter row yet.

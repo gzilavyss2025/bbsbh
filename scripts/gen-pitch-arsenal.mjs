@@ -589,7 +589,10 @@ async function main() {
 
   const db = await openDb()
   const stmts = arsenalStatements(db)
-  if (args['clear-hitters']) clearHitterSeason(db, Number(args['clear-hitters'])) // re-walk after a new xwOBA table (ADR-0097)
+  if (args['clear-hitters']) { // re-walk after a new xwOBA table (ADR-0097): the whole season, MLB in the run
+    if (!args.since || !LEVELS.some((l) => l.level === 'mlb')) throw new Error('--clear-hitters needs --since=<first day> and MLB')
+    clearHitterSeason(db, Number(args['clear-hitters']))
+  }
 
   // Throwing hands for the season being written, never the clock year (#1200).
   const handsBySeason = new Map()

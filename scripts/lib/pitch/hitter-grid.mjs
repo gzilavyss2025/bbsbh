@@ -21,12 +21,12 @@ import { INPLAY_COMMAND_CODES, parseCells } from '../command-grid.mjs'
 import { isPlateAppearance } from '../long-at-bats.mjs'
 import { bucketsOf, writeSeasons, writeShards } from '../io.js'
 import { xwobaOf } from './xwoba.mjs'
+import { FIELDS } from '../../../src/api/scout/hitterGrid.js'
 
 const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'public', 'data', 'hitter-grid')
 
-// A counter's name in the file, and its column, index for index.
-const FIELDS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaFixed', 'bipUntracked', 'xwobaBip']
-const COLS = ['pitches', 'swings', 'whiffs', 'pa_end', 'woba_fixed', 'bip_untracked', 'xwoba_bip']
+// A counter's name in the file (the reader's list), and its column, index for index.
+const COLS = FIELDS.map((f) => f.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`))
 // Savant's woba_value for the PA ends that need no estimate: 0.7 for these,
 // 0 for a strikeout and every other out (#1411, the Part C spike).
 const WOBA_07 = new Set(['walk', 'hit_by_pitch', 'catcher_interf'])
