@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-02T14:45:11.963Z",
+  "generatedAt": "2026-10-03T13:23:58.544Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -18,18 +18,6 @@
     },
     {
       "rank": 2,
-      "playerId": 815888,
-      "name": "Leo De Vries",
-      "teamId": 133,
-      "team": "oak",
-      "position": "SS",
-      "levelRaw": "AA",
-      "statLine": ".290, 13 HR, 55 RBI",
-      "age": 19,
-      "number": "83"
-    },
-    {
-      "rank": 3,
       "playerId": 808265,
       "name": "Franklin Arias",
       "teamId": 111,
@@ -41,16 +29,28 @@
       "number": null
     },
     {
-      "rank": 4,
-      "playerId": 816113,
-      "name": "Eli Willits",
-      "teamId": 120,
-      "team": "was",
+      "rank": 3,
+      "playerId": 815888,
+      "name": "Leo De Vries",
+      "teamId": 133,
+      "team": "oak",
       "position": "SS",
-      "levelRaw": "ALL (3)",
-      "statLine": ".265, 14 HR, 75 RBI",
-      "age": 18,
-      "number": null
+      "levelRaw": "AA",
+      "statLine": ".290, 13 HR, 55 RBI",
+      "age": 19,
+      "number": "83"
+    },
+    {
+      "rank": 4,
+      "playerId": 800543,
+      "name": "Josue De Paula",
+      "teamId": 119,
+      "team": "la",
+      "position": "DH",
+      "levelRaw": "ALL (2)",
+      "statLine": ".305, 28 HR, 111 RBI",
+      "age": 21,
+      "number": "95"
     },
     {
       "rank": 5,
@@ -66,42 +66,30 @@
     },
     {
       "rank": 6,
-      "playerId": 800543,
-      "name": "Josue De Paula",
-      "teamId": 119,
-      "team": "la",
-      "position": "DH",
-      "levelRaw": "ALL (2)",
-      "statLine": ".305, 28 HR, 111 RBI",
-      "age": 21,
-      "number": "95"
+      "playerId": 816113,
+      "name": "Eli Willits",
+      "teamId": 120,
+      "team": "was",
+      "position": "SS",
+      "levelRaw": "ALL (3)",
+      "statLine": ".265, 14 HR, 75 RBI",
+      "age": 18,
+      "number": null
     },
     {
       "rank": 7,
-      "playerId": 815825,
-      "name": "Seth Hernandez",
-      "teamId": 134,
-      "team": "pit",
-      "position": "RHP",
+      "playerId": 829034,
+      "name": "Josuar Gonzalez",
+      "teamId": 137,
+      "team": "sf",
+      "position": "SS",
       "levelRaw": "ALL (2)",
-      "statLine": "74.0 IP, 2.43 ERA, 118 SO",
-      "age": 20,
+      "statLine": ".351, 5 HR, 59 RBI",
+      "age": 18,
       "number": null
     },
     {
       "rank": 8,
-      "playerId": 815549,
-      "name": "Ryan Sloan",
-      "teamId": 136,
-      "team": "sea",
-      "position": "RHP",
-      "levelRaw": "AA",
-      "statLine": "101.1 IP, 3.73 ERA, 128 SO",
-      "age": 20,
-      "number": null
-    },
-    {
-      "rank": 9,
       "playerId": 806964,
       "name": "Sebastian Walcott",
       "teamId": 140,
@@ -113,7 +101,43 @@
       "number": null
     },
     {
+      "rank": 9,
+      "playerId": 815825,
+      "name": "Seth Hernandez",
+      "teamId": 134,
+      "team": "pit",
+      "position": "RHP",
+      "levelRaw": "ALL (2)",
+      "statLine": "74.0 IP, 2.43 ERA, 118 SO",
+      "age": 20,
+      "number": null
+    },
+    {
       "rank": 10,
+      "playerId": 823787,
+      "name": "Rainiel Rodriguez",
+      "teamId": 138,
+      "team": "stl",
+      "position": "C",
+      "levelRaw": "ALL (2)",
+      "statLine": ".324, 27 HR, 87 RBI",
+      "age": 19,
+      "number": null
+    },
+    {
+      "rank": 11,
+      "playerId": 815549,
+      "name": "Ryan Sloan",
+      "teamId": 136,
+      "team": "sea",
+      "position": "RHP",
+      "levelRaw": "AA",
+      "statLine": "101.1 IP, 3.73 ERA, 128 SO",
+      "age": 20,
+      "number": null
+    },
+    {
+      "rank": 12,
       "playerId": 815690,
       "name": "Grady Emerson",
       "teamId": 139,
@@ -122,30 +146,6 @@
       "levelRaw": "A",
       "statLine": ".176, 0 HR, 3 RBI",
       "age": 18,
-      "number": null
-    },
-    {
-      "rank": 11,
-      "playerId": 800604,
-      "name": "Roch Cholowsky",
-      "teamId": 145,
-      "team": "cws",
-      "position": "SS",
-      "levelRaw": "A+",
-      "statLine": ".167, 1 HR, 10 RBI",
-      "age": 21,
-      "number": null
-    },
-    {
-      "rank": 12,
-      "playerId": 815394,
-      "name": "Theo Gillen",
-      "teamId": 139,
-      "team": "tb",
-      "position": "OF",
-      "levelRaw": "ALL (2)",
-      "statLine": ".315, 22 HR, 91 RBI",
-      "age": 21,
       "number": null
     },
     {
@@ -162,6 +162,42 @@
     },
     {
       "rank": 14,
+      "playerId": 800604,
+      "name": "Roch Cholowsky",
+      "teamId": 145,
+      "team": "cws",
+      "position": "SS",
+      "levelRaw": "A+",
+      "statLine": ".167, 1 HR, 10 RBI",
+      "age": 21,
+      "number": null
+    },
+    {
+      "rank": 15,
+      "playerId": 808234,
+      "name": "Eduardo Quintero",
+      "teamId": 119,
+      "team": "la",
+      "position": "OF",
+      "levelRaw": "ALL (2)",
+      "statLine": ".308, 13 HR, 70 RBI",
+      "age": 21,
+      "number": null
+    },
+    {
+      "rank": 16,
+      "playerId": 815394,
+      "name": "Theo Gillen",
+      "teamId": 139,
+      "team": "tb",
+      "position": "OF",
+      "levelRaw": "ALL (2)",
+      "statLine": ".315, 22 HR, 91 RBI",
+      "age": 21,
+      "number": null
+    },
+    {
+      "rank": 17,
       "playerId": 701527,
       "name": "Mike Sirota",
       "teamId": 119,
@@ -173,31 +209,7 @@
       "number": "8"
     },
     {
-      "rank": 15,
-      "playerId": 829034,
-      "name": "Josuar Gonzalez",
-      "teamId": 137,
-      "team": "sf",
-      "position": "SS",
-      "levelRaw": "ALL (2)",
-      "statLine": ".351, 5 HR, 59 RBI",
-      "age": 18,
-      "number": null
-    },
-    {
-      "rank": 16,
-      "playerId": 823787,
-      "name": "Rainiel Rodriguez",
-      "teamId": 138,
-      "team": "stl",
-      "position": "C",
-      "levelRaw": "ALL (2)",
-      "statLine": ".324, 27 HR, 87 RBI",
-      "age": 19,
-      "number": null
-    },
-    {
-      "rank": 17,
+      "rank": 18,
       "playerId": 822518,
       "name": "Vahn Lackey",
       "teamId": 142,
@@ -205,18 +217,6 @@
       "position": "C",
       "levelRaw": "ALL (2)",
       "statLine": ".250, 3 HR, 16 RBI",
-      "age": 21,
-      "number": null
-    },
-    {
-      "rank": 18,
-      "playerId": 808234,
-      "name": "Eduardo Quintero",
-      "teamId": 119,
-      "team": "la",
-      "position": "OF",
-      "levelRaw": "ALL (2)",
-      "statLine": ".308, 13 HR, 70 RBI",
       "age": 21,
       "number": null
     },
@@ -402,18 +402,6 @@
     },
     {
       "rank": 34,
-      "playerId": 806258,
-      "name": "Thomas White",
-      "teamId": 146,
-      "team": "mia",
-      "position": "LHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "24.2 IP, 4.01 ERA, 35 SO",
-      "age": 22,
-      "number": null
-    },
-    {
-      "rank": 35,
       "playerId": 805796,
       "name": "Arjun Nimmala",
       "teamId": 108,
@@ -425,7 +413,7 @@
       "number": null
     },
     {
-      "rank": 36,
+      "rank": 35,
       "playerId": 815824,
       "name": "Josiah Hartshorn",
       "teamId": 112,
@@ -437,7 +425,7 @@
       "number": null
     },
     {
-      "rank": 37,
+      "rank": 36,
       "playerId": 835727,
       "name": "Eric Booth Jr.",
       "teamId": 110,
@@ -449,7 +437,7 @@
       "number": null
     },
     {
-      "rank": 38,
+      "rank": 37,
       "playerId": 806039,
       "name": "Drew Burress",
       "teamId": 133,
@@ -461,7 +449,7 @@
       "number": null
     },
     {
-      "rank": 39,
+      "rank": 38,
       "playerId": 807080,
       "name": "Eric Hartman",
       "teamId": 144,
@@ -473,7 +461,7 @@
       "number": null
     },
     {
-      "rank": 40,
+      "rank": 39,
       "playerId": 807284,
       "name": "Cam Caminiti",
       "teamId": 144,
@@ -485,7 +473,7 @@
       "number": null
     },
     {
-      "rank": 41,
+      "rank": 40,
       "playerId": 824604,
       "name": "Liam Doyle",
       "teamId": 138,
@@ -497,7 +485,7 @@
       "number": null
     },
     {
-      "rank": 42,
+      "rank": 41,
       "playerId": 703197,
       "name": "Michael Arroyo",
       "teamId": 136,
@@ -509,7 +497,7 @@
       "number": "96"
     },
     {
-      "rank": 43,
+      "rank": 42,
       "playerId": 803285,
       "name": "Tyler Bremner",
       "teamId": 108,
@@ -521,7 +509,7 @@
       "number": null
     },
     {
-      "rank": 44,
+      "rank": 43,
       "playerId": 815929,
       "name": "Jhonny Level",
       "teamId": 137,
@@ -533,7 +521,7 @@
       "number": null
     },
     {
-      "rank": 45,
+      "rank": 44,
       "playerId": 800614,
       "name": "Bryce Rainer",
       "teamId": 116,
@@ -545,7 +533,7 @@
       "number": null
     },
     {
-      "rank": 46,
+      "rank": 45,
       "playerId": 809254,
       "name": "Anthony Eyanson",
       "teamId": 110,
@@ -557,19 +545,7 @@
       "number": null
     },
     {
-      "rank": 47,
-      "playerId": 806958,
-      "name": "Felnin Celesten",
-      "teamId": 136,
-      "team": "sea",
-      "position": "SS",
-      "levelRaw": "ALL (2)",
-      "statLine": ".273, 16 HR, 64 RBI",
-      "age": 21,
-      "number": null
-    },
-    {
-      "rank": 48,
+      "rank": 46,
       "playerId": 805207,
       "name": "Caden Bodine",
       "teamId": 139,
@@ -581,7 +557,19 @@
       "number": "18"
     },
     {
-      "rank": 50,
+      "rank": 47,
+      "playerId": 806258,
+      "name": "Thomas White",
+      "teamId": 146,
+      "team": "mia",
+      "position": "LHP",
+      "levelRaw": "ALL (2)",
+      "statLine": "24.2 IP, 4.01 ERA, 35 SO",
+      "age": 22,
+      "number": null
+    },
+    {
+      "rank": 49,
       "playerId": 702281,
       "name": "Robby Snelling",
       "teamId": 146,
@@ -593,7 +581,7 @@
       "number": "61"
     },
     {
-      "rank": 51,
+      "rank": 50,
       "playerId": 830402,
       "name": "Kendry Chourio",
       "teamId": 118,
@@ -602,6 +590,18 @@
       "levelRaw": "ALL (2)",
       "statLine": "90.2 IP, 2.48 ERA, 91 SO",
       "age": 19,
+      "number": null
+    },
+    {
+      "rank": 51,
+      "playerId": 814409,
+      "name": "Seaver King",
+      "teamId": 120,
+      "team": "was",
+      "position": "SS",
+      "levelRaw": "ALL (2)",
+      "statLine": ".303, 21 HR, 74 RBI",
+      "age": 23,
       "number": null
     },
     {
@@ -630,198 +630,6 @@
     },
     {
       "rank": 54,
-      "playerId": 701364,
-      "name": "Jamie Arnold",
-      "teamId": 133,
-      "team": "oak",
-      "position": "LHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "118.1 IP, 3.50 ERA, 130 SO",
-      "age": 22,
-      "number": null
-    },
-    {
-      "rank": 55,
-      "playerId": 809707,
-      "name": "Charlie Condon",
-      "teamId": 115,
-      "team": "col",
-      "position": "1B",
-      "levelRaw": "AAA",
-      "statLine": ".273, 27 HR, 98 RBI",
-      "age": 23,
-      "number": null
-    },
-    {
-      "rank": 56,
-      "playerId": 695491,
-      "name": "Joshua Baez",
-      "teamId": 138,
-      "team": "stl",
-      "position": "LF",
-      "levelRaw": "ALL (2)",
-      "statLine": ".251, 41 HR, 108 RBI",
-      "age": 23,
-      "number": "22"
-    },
-    {
-      "rank": 57,
-      "playerId": 816111,
-      "name": "Tate Southisene",
-      "teamId": 144,
-      "team": "atl",
-      "position": "SS",
-      "levelRaw": "ALL (3)",
-      "statLine": ".278, 12 HR, 46 RBI",
-      "age": 19,
-      "number": null
-    },
-    {
-      "rank": 58,
-      "playerId": 805795,
-      "name": "Aidan Miller",
-      "teamId": 143,
-      "team": "phi",
-      "position": "SS",
-      "levelRaw": "ALL (2)",
-      "statLine": ".333, 0 HR, 2 RBI",
-      "age": 22,
-      "number": null
-    },
-    {
-      "rank": 59,
-      "playerId": 815814,
-      "name": "Billy Carlson",
-      "teamId": 145,
-      "team": "cws",
-      "position": "SS",
-      "levelRaw": "ALL (2)",
-      "statLine": ".252, 0 HR, 21 RBI",
-      "age": 20,
-      "number": null
-    },
-    {
-      "rank": 60,
-      "playerId": 804109,
-      "name": "Aiva Arquette",
-      "teamId": 146,
-      "team": "mia",
-      "position": "SS",
-      "levelRaw": "ALL (2)",
-      "statLine": ".272, 12 HR, 48 RBI",
-      "age": 22,
-      "number": null
-    },
-    {
-      "rank": 62,
-      "playerId": 807083,
-      "name": "Nathan Flewelling",
-      "teamId": 139,
-      "team": "tb",
-      "position": "C",
-      "levelRaw": "A+",
-      "statLine": ".243, 21 HR, 67 RBI",
-      "age": 19,
-      "number": null
-    },
-    {
-      "rank": 63,
-      "playerId": 689981,
-      "name": "River Ryan",
-      "teamId": 116,
-      "team": "det",
-      "position": "RHP",
-      "levelRaw": "ALL (3)",
-      "statLine": "45.1 IP, 4.37 ERA, 53 SO",
-      "age": 28,
-      "number": "77"
-    },
-    {
-      "rank": 64,
-      "playerId": 813075,
-      "name": "Jacob Lombard",
-      "teamId": 146,
-      "team": "mia",
-      "position": "SS",
-      "levelRaw": "A",
-      "statLine": ".220, 4 HR, 17 RBI",
-      "age": 19,
-      "number": null
-    },
-    {
-      "rank": 65,
-      "playerId": 703186,
-      "name": "Jarlin Susana",
-      "teamId": 120,
-      "team": "was",
-      "position": "RHP",
-      "levelRaw": "ALL (3)",
-      "statLine": "20.1 IP, 6.20 ERA, 37 SO",
-      "age": 22,
-      "number": "49"
-    },
-    {
-      "rank": 66,
-      "playerId": 800522,
-      "name": "Josue Briceño",
-      "teamId": 116,
-      "team": "det",
-      "position": "C",
-      "levelRaw": "ALL (4)",
-      "statLine": ".250, 9 HR, 29 RBI",
-      "age": 22,
-      "number": null
-    },
-    {
-      "rank": 67,
-      "playerId": 815843,
-      "name": "Josh Hammond",
-      "teamId": 118,
-      "team": "kc",
-      "position": "SS",
-      "levelRaw": "A",
-      "statLine": ".286, 5 HR, 39 RBI",
-      "age": 20,
-      "number": null
-    },
-    {
-      "rank": 68,
-      "playerId": 814409,
-      "name": "Seaver King",
-      "teamId": 120,
-      "team": "was",
-      "position": "SS",
-      "levelRaw": "ALL (2)",
-      "statLine": ".303, 21 HR, 74 RBI",
-      "age": 23,
-      "number": null
-    },
-    {
-      "rank": 69,
-      "playerId": 815785,
-      "name": "Braylon Doughty",
-      "teamId": 114,
-      "team": "cle",
-      "position": "RHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "109.2 IP, 4.10 ERA, 123 SO",
-      "age": 20,
-      "number": null
-    },
-    {
-      "rank": 70,
-      "playerId": 806071,
-      "name": "Jonny Farmelo",
-      "teamId": 136,
-      "team": "sea",
-      "position": "OF",
-      "levelRaw": "ALL (2)",
-      "statLine": ".251, 17 HR, 69 RBI",
-      "age": 22,
-      "number": null
-    },
-    {
-      "rank": 71,
       "playerId": 701339,
       "name": "Marek Houston",
       "teamId": 142,
@@ -833,19 +641,151 @@
       "number": null
     },
     {
-      "rank": 72,
-      "playerId": 702679,
-      "name": "Demetrio Crisantes",
-      "teamId": 109,
-      "team": "ari",
-      "position": "2B",
-      "levelRaw": "ALL (4)",
-      "statLine": ".292, 10 HR, 53 RBI",
+      "rank": 55,
+      "playerId": 701364,
+      "name": "Jamie Arnold",
+      "teamId": 133,
+      "team": "oak",
+      "position": "LHP",
+      "levelRaw": "ALL (2)",
+      "statLine": "118.1 IP, 3.50 ERA, 130 SO",
       "age": 22,
       "number": null
     },
     {
-      "rank": 73,
+      "rank": 56,
+      "playerId": 809707,
+      "name": "Charlie Condon",
+      "teamId": 115,
+      "team": "col",
+      "position": "1B",
+      "levelRaw": "AAA",
+      "statLine": ".273, 27 HR, 98 RBI",
+      "age": 23,
+      "number": null
+    },
+    {
+      "rank": 57,
+      "playerId": 695491,
+      "name": "Joshua Báez",
+      "teamId": 138,
+      "team": "stl",
+      "position": "LF",
+      "levelRaw": "ALL (2)",
+      "statLine": ".251, 41 HR, 108 RBI",
+      "age": 23,
+      "number": "22"
+    },
+    {
+      "rank": 58,
+      "playerId": 816111,
+      "name": "Tate Southisene",
+      "teamId": 144,
+      "team": "atl",
+      "position": "SS",
+      "levelRaw": "ALL (3)",
+      "statLine": ".278, 12 HR, 46 RBI",
+      "age": 19,
+      "number": null
+    },
+    {
+      "rank": 59,
+      "playerId": 805795,
+      "name": "Aidan Miller",
+      "teamId": 143,
+      "team": "phi",
+      "position": "SS",
+      "levelRaw": "ALL (2)",
+      "statLine": ".333, 0 HR, 2 RBI",
+      "age": 22,
+      "number": null
+    },
+    {
+      "rank": 60,
+      "playerId": 806958,
+      "name": "Felnin Celesten",
+      "teamId": 136,
+      "team": "sea",
+      "position": "SS",
+      "levelRaw": "ALL (2)",
+      "statLine": ".273, 16 HR, 64 RBI",
+      "age": 21,
+      "number": null
+    },
+    {
+      "rank": 61,
+      "playerId": 804109,
+      "name": "Aiva Arquette",
+      "teamId": 146,
+      "team": "mia",
+      "position": "SS",
+      "levelRaw": "ALL (2)",
+      "statLine": ".272, 12 HR, 48 RBI",
+      "age": 22,
+      "number": null
+    },
+    {
+      "rank": 63,
+      "playerId": 807083,
+      "name": "Nathan Flewelling",
+      "teamId": 139,
+      "team": "tb",
+      "position": "C",
+      "levelRaw": "A+",
+      "statLine": ".243, 21 HR, 67 RBI",
+      "age": 19,
+      "number": null
+    },
+    {
+      "rank": 64,
+      "playerId": 689981,
+      "name": "River Ryan",
+      "teamId": 116,
+      "team": "det",
+      "position": "RHP",
+      "levelRaw": "ALL (3)",
+      "statLine": "45.1 IP, 4.37 ERA, 53 SO",
+      "age": 28,
+      "number": "77"
+    },
+    {
+      "rank": 65,
+      "playerId": 813075,
+      "name": "Jacob Lombard",
+      "teamId": 146,
+      "team": "mia",
+      "position": "SS",
+      "levelRaw": "A",
+      "statLine": ".220, 4 HR, 17 RBI",
+      "age": 19,
+      "number": null
+    },
+    {
+      "rank": 66,
+      "playerId": 703186,
+      "name": "Jarlin Susana",
+      "teamId": 120,
+      "team": "was",
+      "position": "RHP",
+      "levelRaw": "ALL (3)",
+      "statLine": "20.1 IP, 6.20 ERA, 37 SO",
+      "age": 22,
+      "number": "49"
+    },
+    {
+      "rank": 67,
+      "playerId": 815785,
+      "name": "Braylon Doughty",
+      "teamId": 114,
+      "team": "cle",
+      "position": "RHP",
+      "levelRaw": "ALL (2)",
+      "statLine": "109.2 IP, 4.10 ERA, 123 SO",
+      "age": 20,
+      "number": null
+    },
+    {
+      "rank": 68,
       "playerId": 800473,
       "name": "Jefferson Rojas",
       "teamId": 121,
@@ -857,7 +797,19 @@
       "number": null
     },
     {
-      "rank": 74,
+      "rank": 69,
+      "playerId": 804530,
+      "name": "Joseph Dzierwa",
+      "teamId": 110,
+      "team": "bal",
+      "position": "LHP",
+      "levelRaw": "ALL (2)",
+      "statLine": "131.0 IP, 2.27 ERA, 149 SO",
+      "age": 22,
+      "number": null
+    },
+    {
+      "rank": 70,
       "playerId": 807291,
       "name": "Caden Scarborough",
       "teamId": 140,
@@ -869,19 +821,7 @@
       "number": null
     },
     {
-      "rank": 75,
-      "playerId": 703596,
-      "name": "Karson Milbrandt",
-      "teamId": 146,
-      "team": "mia",
-      "position": "RHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "111.1 IP, 5.42 ERA, 132 SO",
-      "age": 22,
-      "number": null
-    },
-    {
-      "rank": 76,
+      "rank": 71,
       "playerId": 821100,
       "name": "Justin Gonzales",
       "teamId": 111,
@@ -893,7 +833,7 @@
       "number": null
     },
     {
-      "rank": 77,
+      "rank": 72,
       "playerId": 829037,
       "name": "Kevin Alvarez",
       "teamId": 117,
@@ -905,7 +845,7 @@
       "number": null
     },
     {
-      "rank": 78,
+      "rank": 73,
       "playerId": 836353,
       "name": "Francisco Renteria",
       "teamId": 143,
@@ -917,7 +857,7 @@
       "number": null
     },
     {
-      "rank": 79,
+      "rank": 74,
       "playerId": 821181,
       "name": "Juneiker Caceres",
       "teamId": 114,
@@ -929,7 +869,7 @@
       "number": null
     },
     {
-      "rank": 80,
+      "rank": 75,
       "playerId": 828237,
       "name": "Cooper Flemming",
       "teamId": 139,
@@ -941,7 +881,7 @@
       "number": null
     },
     {
-      "rank": 81,
+      "rank": 76,
       "playerId": 825412,
       "name": "Angeibel Gomez",
       "teamId": 118,
@@ -953,7 +893,7 @@
       "number": null
     },
     {
-      "rank": 82,
+      "rank": 77,
       "playerId": 703448,
       "name": "Cam Cannarella",
       "teamId": 146,
@@ -965,7 +905,7 @@
       "number": null
     },
     {
-      "rank": 83,
+      "rank": 78,
       "playerId": 828076,
       "name": "Dax Kilby",
       "teamId": 147,
@@ -977,7 +917,7 @@
       "number": null
     },
     {
-      "rank": 84,
+      "rank": 79,
       "playerId": 804560,
       "name": "Charles Davalan",
       "teamId": 119,
@@ -985,6 +925,66 @@
       "position": "OF",
       "levelRaw": "ALL (2)",
       "statLine": ".291, 24 HR, 72 RBI",
+      "age": 22,
+      "number": null
+    },
+    {
+      "rank": 80,
+      "playerId": 699024,
+      "name": "Leo Bernal",
+      "teamId": 138,
+      "team": "stl",
+      "position": "C",
+      "levelRaw": "ALL (2)",
+      "statLine": ".279, 21 HR, 98 RBI",
+      "age": 22,
+      "number": "13"
+    },
+    {
+      "rank": 81,
+      "playerId": 815814,
+      "name": "Billy Carlson",
+      "teamId": 145,
+      "team": "cws",
+      "position": "SS",
+      "levelRaw": "ALL (2)",
+      "statLine": ".252, 0 HR, 21 RBI",
+      "age": 20,
+      "number": null
+    },
+    {
+      "rank": 82,
+      "playerId": 815843,
+      "name": "Josh Hammond",
+      "teamId": 118,
+      "team": "kc",
+      "position": "SS",
+      "levelRaw": "A",
+      "statLine": ".286, 5 HR, 39 RBI",
+      "age": 20,
+      "number": null
+    },
+    {
+      "rank": 83,
+      "playerId": 806071,
+      "name": "Jonny Farmelo",
+      "teamId": 136,
+      "team": "sea",
+      "position": "OF",
+      "levelRaw": "ALL (2)",
+      "statLine": ".251, 17 HR, 69 RBI",
+      "age": 22,
+      "number": null
+    },
+    {
+      "rank": 84,
+      "playerId": 702679,
+      "name": "Demetrio Crisantes",
+      "teamId": 109,
+      "team": "ari",
+      "position": "2B",
+      "levelRaw": "ALL (4)",
+      "statLine": ".292, 10 HR, 53 RBI",
       "age": 22,
       "number": null
     },
@@ -1002,30 +1002,18 @@
     },
     {
       "rank": 86,
-      "playerId": 804530,
-      "name": "Joseph Dzierwa",
-      "teamId": 110,
-      "team": "bal",
-      "position": "LHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "131.0 IP, 2.27 ERA, 149 SO",
+      "playerId": 800522,
+      "name": "Josue Briceño",
+      "teamId": 116,
+      "team": "det",
+      "position": "C",
+      "levelRaw": "ALL (4)",
+      "statLine": ".250, 9 HR, 29 RBI",
       "age": 22,
       "number": null
     },
     {
       "rank": 88,
-      "playerId": 829162,
-      "name": "Steele Hall",
-      "teamId": 113,
-      "team": "cin",
-      "position": "SS",
-      "levelRaw": "ALL (2)",
-      "statLine": ".259, 11 HR, 54 RBI",
-      "age": 19,
-      "number": null
-    },
-    {
-      "rank": 89,
       "playerId": 689196,
       "name": "Owen Ayers",
       "teamId": 112,
@@ -1037,19 +1025,7 @@
       "number": null
     },
     {
-      "rank": 90,
-      "playerId": 815832,
-      "name": "Xavier Neyens",
-      "teamId": 117,
-      "team": "hou",
-      "position": "3B",
-      "levelRaw": "ALL (2)",
-      "statLine": ".231, 20 HR, 55 RBI",
-      "age": 19,
-      "number": null
-    },
-    {
-      "rank": 91,
+      "rank": 89,
       "playerId": 809092,
       "name": "Murf Gray",
       "teamId": 134,
@@ -1061,7 +1037,7 @@
       "number": null
     },
     {
-      "rank": 92,
+      "rank": 90,
       "playerId": 804526,
       "name": "Nolan Perry",
       "teamId": 141,
@@ -1073,7 +1049,7 @@
       "number": null
     },
     {
-      "rank": 94,
+      "rank": 92,
       "playerId": 827267,
       "name": "Caden Hunter",
       "teamId": 110,
@@ -1085,7 +1061,7 @@
       "number": null
     },
     {
-      "rank": 95,
+      "rank": 93,
       "playerId": 815816,
       "name": "Brady Ebel",
       "teamId": 158,
@@ -1097,7 +1073,7 @@
       "number": null
     },
     {
-      "rank": 96,
+      "rank": 94,
       "playerId": 827408,
       "name": "Ramon Marquez",
       "teamId": 137,
@@ -1109,7 +1085,7 @@
       "number": null
     },
     {
-      "rank": 97,
+      "rank": 95,
       "playerId": 702610,
       "name": "Ike Irish",
       "teamId": 110,
@@ -1121,7 +1097,7 @@
       "number": null
     },
     {
-      "rank": 98,
+      "rank": 96,
       "playerId": 804858,
       "name": "Bryan Rincon",
       "teamId": 143,
@@ -1133,19 +1109,7 @@
       "number": null
     },
     {
-      "rank": 99,
-      "playerId": 699024,
-      "name": "Leo Bernal",
-      "teamId": 138,
-      "team": "stl",
-      "position": "C",
-      "levelRaw": "ALL (2)",
-      "statLine": ".279, 21 HR, 98 RBI",
-      "age": 22,
-      "number": "13"
-    },
-    {
-      "rank": 100,
+      "rank": 97,
       "playerId": 828685,
       "name": "Taitn Gray",
       "teamId": 139,
@@ -1153,6 +1117,42 @@
       "position": "1B",
       "levelRaw": "ALL (2)",
       "statLine": ".299, 9 HR, 57 RBI",
+      "age": 19,
+      "number": null
+    },
+    {
+      "rank": 98,
+      "playerId": 820986,
+      "name": "Hayden Alvarez",
+      "teamId": 108,
+      "team": "ana",
+      "position": "OF",
+      "levelRaw": "ALL (2)",
+      "statLine": ".289, 12 HR, 62 RBI",
+      "age": 19,
+      "number": null
+    },
+    {
+      "rank": 99,
+      "playerId": 821150,
+      "name": "Enddy Azocar",
+      "teamId": 110,
+      "team": "bal",
+      "position": "CF",
+      "levelRaw": "ALL (3)",
+      "statLine": ".295, 21 HR, 86 RBI",
+      "age": 19,
+      "number": null
+    },
+    {
+      "rank": 100,
+      "playerId": 815832,
+      "name": "Xavier Neyens",
+      "teamId": 117,
+      "team": "hou",
+      "position": "3B",
+      "levelRaw": "ALL (2)",
+      "statLine": ".231, 20 HR, 55 RBI",
       "age": 19,
       "number": null
     }
@@ -1192,7 +1192,7 @@
       "levelRaw": "ALL (5)",
       "statLine": ".263, 16 HR, 51 RBI",
       "age": 20,
-      "topRank": 35
+      "topRank": 34
     },
     {
       "orgRank": 2,
@@ -1204,7 +1204,7 @@
       "levelRaw": "ALL (2)",
       "statLine": "72.2 IP, 4.33 ERA, 100 SO",
       "age": 22,
-      "topRank": 43
+      "topRank": 42
     },
     {
       "orgRank": 3,
@@ -1216,7 +1216,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".289, 12 HR, 62 RBI",
       "age": 19,
-      "topRank": null
+      "topRank": 98
     },
     {
       "orgRank": 5,
@@ -1504,7 +1504,7 @@
       "levelRaw": "ALL (4)",
       "statLine": ".292, 10 HR, 53 RBI",
       "age": 22,
-      "topRank": 72
+      "topRank": 84
     },
     {
       "orgRank": 2,
@@ -1840,7 +1840,7 @@
       "levelRaw": "A",
       "statLine": ".284, 0 HR, 9 RBI",
       "age": 18,
-      "topRank": 37
+      "topRank": 36
     },
     {
       "orgRank": 2,
@@ -1852,7 +1852,7 @@
       "levelRaw": "ALL (3)",
       "statLine": "99.1 IP, 1.54 ERA, 141 SO",
       "age": 21,
-      "topRank": 46
+      "topRank": 45
     },
     {
       "orgRank": 3,
@@ -1864,7 +1864,7 @@
       "levelRaw": "ALL (2)",
       "statLine": "131.0 IP, 2.27 ERA, 149 SO",
       "age": 22,
-      "topRank": 86
+      "topRank": 69
     },
     {
       "orgRank": 4,
@@ -1876,7 +1876,7 @@
       "levelRaw": "ALL (3)",
       "statLine": "103.0 IP, 2.01 ERA, 151 SO",
       "age": 22,
-      "topRank": 94
+      "topRank": 92
     },
     {
       "orgRank": 5,
@@ -1888,10 +1888,22 @@
       "levelRaw": "A+",
       "statLine": ".286, 16 HR, 59 RBI",
       "age": 22,
-      "topRank": 97
+      "topRank": 95
     },
     {
       "orgRank": 6,
+      "playerId": 821150,
+      "name": "Enddy Azocar",
+      "teamId": 110,
+      "team": "bal",
+      "position": "CF",
+      "levelRaw": "ALL (3)",
+      "statLine": ".295, 21 HR, 86 RBI",
+      "age": 19,
+      "topRank": 99
+    },
+    {
+      "orgRank": 7,
       "playerId": 825582,
       "name": "Nate George",
       "teamId": 110,
@@ -1903,7 +1915,7 @@
       "topRank": null
     },
     {
-      "orgRank": 7,
+      "orgRank": 8,
       "playerId": 801725,
       "name": "Luis De Leon",
       "teamId": 110,
@@ -1915,7 +1927,7 @@
       "topRank": null
     },
     {
-      "orgRank": 8,
+      "orgRank": 9,
       "playerId": 814450,
       "name": "Wehiwa Aloy",
       "teamId": 110,
@@ -1924,18 +1936,6 @@
       "levelRaw": "ALL (2)",
       "statLine": ".288, 25 HR, 92 RBI",
       "age": 22,
-      "topRank": null
-    },
-    {
-      "orgRank": 9,
-      "playerId": 821150,
-      "name": "Enddy Azocar",
-      "teamId": 110,
-      "team": "bal",
-      "position": "CF",
-      "levelRaw": "ALL (3)",
-      "statLine": ".295, 21 HR, 86 RBI",
-      "age": 19,
       "topRank": null
     },
     {
@@ -2176,7 +2176,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".323, 25 HR, 91 RBI",
       "age": 20,
-      "topRank": 3
+      "topRank": 2
     },
     {
       "orgRank": 2,
@@ -2188,7 +2188,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".266, 19 HR, 69 RBI",
       "age": 19,
-      "topRank": 76
+      "topRank": 71
     },
     {
       "orgRank": 3,
@@ -2524,7 +2524,7 @@
       "levelRaw": "ALL (3)",
       "statLine": ".284, 23 HR, 112 RBI",
       "age": 19,
-      "topRank": 36
+      "topRank": 35
     },
     {
       "orgRank": 2,
@@ -2536,7 +2536,7 @@
       "levelRaw": "ALL (3)",
       "statLine": ".289, 25 HR, 82 RBI",
       "age": 25,
-      "topRank": 89
+      "topRank": 88
     },
     {
       "orgRank": 3,
@@ -2571,7 +2571,7 @@
       "position": "RHP",
       "levelRaw": "ALL (3)",
       "statLine": "42.2 IP, 6.75 ERA, 50 SO",
-      "age": 24,
+      "age": 25,
       "topRank": null
     },
     {
@@ -2848,7 +2848,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".259, 11 HR, 54 RBI",
       "age": 19,
-      "topRank": 88
+      "topRank": null
     },
     {
       "orgRank": 3,
@@ -3184,7 +3184,7 @@
       "levelRaw": "ALL (2)",
       "statLine": "109.2 IP, 4.10 ERA, 123 SO",
       "age": 20,
-      "topRank": 69
+      "topRank": 67
     },
     {
       "orgRank": 3,
@@ -3196,7 +3196,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".301, 11 HR, 52 RBI",
       "age": 19,
-      "topRank": 79
+      "topRank": 74
     },
     {
       "orgRank": 4,
@@ -3520,7 +3520,7 @@
       "levelRaw": "AAA",
       "statLine": ".273, 27 HR, 98 RBI",
       "age": 23,
-      "topRank": 55
+      "topRank": 56
     },
     {
       "orgRank": 5,
@@ -3832,7 +3832,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".260, 19 HR, 72 RBI",
       "age": 21,
-      "topRank": 45
+      "topRank": 44
     },
     {
       "orgRank": 3,
@@ -3844,7 +3844,7 @@
       "levelRaw": "ALL (3)",
       "statLine": "45.1 IP, 4.37 ERA, 53 SO",
       "age": 28,
-      "topRank": 63
+      "topRank": 64
     },
     {
       "orgRank": 4,
@@ -3856,7 +3856,7 @@
       "levelRaw": "ALL (4)",
       "statLine": ".250, 9 HR, 29 RBI",
       "age": 22,
-      "topRank": 66
+      "topRank": 86
     },
     {
       "orgRank": 5,
@@ -4156,7 +4156,7 @@
       "levelRaw": "A",
       "statLine": ".261, 11 HR, 57 RBI",
       "age": 18,
-      "topRank": 77
+      "topRank": 72
     },
     {
       "orgRank": 2,
@@ -4168,7 +4168,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".231, 20 HR, 55 RBI",
       "age": 19,
-      "topRank": 90
+      "topRank": 100
     },
     {
       "orgRank": 3,
@@ -4468,22 +4468,10 @@
       "levelRaw": "ALL (2)",
       "statLine": "90.2 IP, 2.48 ERA, 91 SO",
       "age": 19,
-      "topRank": 51
+      "topRank": 50
     },
     {
       "orgRank": 2,
-      "playerId": 815843,
-      "name": "Josh Hammond",
-      "teamId": 118,
-      "team": "kc",
-      "position": "SS",
-      "levelRaw": "A",
-      "statLine": ".286, 5 HR, 39 RBI",
-      "age": 20,
-      "topRank": 67
-    },
-    {
-      "orgRank": 3,
       "playerId": 825412,
       "name": "Angeibel Gomez",
       "teamId": 118,
@@ -4492,7 +4480,19 @@
       "levelRaw": "ROK",
       "statLine": ".361, 9 HR, 38 RBI",
       "age": 17,
-      "topRank": 81
+      "topRank": 76
+    },
+    {
+      "orgRank": 3,
+      "playerId": 815843,
+      "name": "Josh Hammond",
+      "teamId": 118,
+      "team": "kc",
+      "position": "SS",
+      "levelRaw": "A",
+      "statLine": ".286, 5 HR, 39 RBI",
+      "age": 20,
+      "topRank": 82
     },
     {
       "orgRank": 4,
@@ -4768,22 +4768,10 @@
       "levelRaw": "ALL (2)",
       "statLine": ".305, 28 HR, 111 RBI",
       "age": 21,
-      "topRank": 6
+      "topRank": 4
     },
     {
       "orgRank": 2,
-      "playerId": 701527,
-      "name": "Mike Sirota",
-      "teamId": 119,
-      "team": "la",
-      "position": "CF",
-      "levelRaw": "ALL (3)",
-      "statLine": ".307, 17 HR, 62 RBI",
-      "age": 23,
-      "topRank": 14
-    },
-    {
-      "orgRank": 3,
       "playerId": 808234,
       "name": "Eduardo Quintero",
       "teamId": 119,
@@ -4792,7 +4780,19 @@
       "levelRaw": "ALL (2)",
       "statLine": ".308, 13 HR, 70 RBI",
       "age": 21,
-      "topRank": 18
+      "topRank": 15
+    },
+    {
+      "orgRank": 3,
+      "playerId": 701527,
+      "name": "Mike Sirota",
+      "teamId": 119,
+      "team": "la",
+      "position": "CF",
+      "levelRaw": "ALL (3)",
+      "statLine": ".307, 17 HR, 62 RBI",
+      "age": 23,
+      "topRank": 17
     },
     {
       "orgRank": 4,
@@ -4828,7 +4828,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".291, 24 HR, 72 RBI",
       "age": 22,
-      "topRank": 84
+      "topRank": 79
     },
     {
       "orgRank": 7,
@@ -5116,22 +5116,10 @@
       "levelRaw": "ALL (3)",
       "statLine": ".265, 14 HR, 75 RBI",
       "age": 18,
-      "topRank": 4
+      "topRank": 6
     },
     {
       "orgRank": 3,
-      "playerId": 703186,
-      "name": "Jarlin Susana",
-      "teamId": 120,
-      "team": "was",
-      "position": "RHP",
-      "levelRaw": "ALL (3)",
-      "statLine": "20.1 IP, 6.20 ERA, 37 SO",
-      "age": 22,
-      "topRank": 65
-    },
-    {
-      "orgRank": 4,
       "playerId": 814409,
       "name": "Seaver King",
       "teamId": 120,
@@ -5140,7 +5128,19 @@
       "levelRaw": "ALL (2)",
       "statLine": ".303, 21 HR, 74 RBI",
       "age": 23,
-      "topRank": 68
+      "topRank": 51
+    },
+    {
+      "orgRank": 4,
+      "playerId": 703186,
+      "name": "Jarlin Susana",
+      "teamId": 120,
+      "team": "was",
+      "position": "RHP",
+      "levelRaw": "ALL (3)",
+      "statLine": "20.1 IP, 6.20 ERA, 37 SO",
+      "age": 22,
+      "topRank": 66
     },
     {
       "orgRank": 5,
@@ -5416,7 +5416,7 @@
       "levelRaw": "ALL (3)",
       "statLine": ".274, 27 HR, 93 RBI",
       "age": 21,
-      "topRank": 73
+      "topRank": 68
     },
     {
       "orgRank": 2,
@@ -5764,7 +5764,7 @@
       "levelRaw": "AA",
       "statLine": ".290, 13 HR, 55 RBI",
       "age": 19,
-      "topRank": 2
+      "topRank": 3
     },
     {
       "orgRank": 2,
@@ -5776,7 +5776,7 @@
       "levelRaw": "A",
       "statLine": ".291, 7 HR, 16 RBI",
       "age": 21,
-      "topRank": 38
+      "topRank": 37
     },
     {
       "orgRank": 3,
@@ -5788,7 +5788,7 @@
       "levelRaw": "ALL (2)",
       "statLine": "118.1 IP, 3.50 ERA, 130 SO",
       "age": 22,
-      "topRank": 54
+      "topRank": 55
     },
     {
       "orgRank": 4,
@@ -6076,7 +6076,7 @@
       "levelRaw": "ALL (2)",
       "statLine": "74.0 IP, 2.43 ERA, 118 SO",
       "age": 20,
-      "topRank": 7
+      "topRank": 9
     },
     {
       "orgRank": 2,
@@ -6100,7 +6100,7 @@
       "levelRaw": "ALL (3)",
       "statLine": ".305, 32 HR, 97 RBI",
       "age": 22,
-      "topRank": 91
+      "topRank": 89
     },
     {
       "orgRank": 5,
@@ -6736,7 +6736,7 @@
       "levelRaw": "AA",
       "statLine": "101.1 IP, 3.73 ERA, 128 SO",
       "age": 20,
-      "topRank": 8
+      "topRank": 11
     },
     {
       "orgRank": 3,
@@ -6748,22 +6748,10 @@
       "levelRaw": "ALL (3)",
       "statLine": ".289, 19 HR, 85 RBI",
       "age": 21,
-      "topRank": 42
+      "topRank": 41
     },
     {
       "orgRank": 4,
-      "playerId": 806958,
-      "name": "Felnin Celesten",
-      "teamId": 136,
-      "team": "sea",
-      "position": "SS",
-      "levelRaw": "ALL (2)",
-      "statLine": ".273, 16 HR, 64 RBI",
-      "age": 21,
-      "topRank": 47
-    },
-    {
-      "orgRank": 5,
       "playerId": 703155,
       "name": "Lazaro Montes",
       "teamId": 136,
@@ -6775,6 +6763,18 @@
       "topRank": 53
     },
     {
+      "orgRank": 5,
+      "playerId": 806958,
+      "name": "Felnin Celesten",
+      "teamId": 136,
+      "team": "sea",
+      "position": "SS",
+      "levelRaw": "ALL (2)",
+      "statLine": ".273, 16 HR, 64 RBI",
+      "age": 21,
+      "topRank": 60
+    },
+    {
       "orgRank": 6,
       "playerId": 806071,
       "name": "Jonny Farmelo",
@@ -6784,7 +6784,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".251, 17 HR, 69 RBI",
       "age": 22,
-      "topRank": 70
+      "topRank": 83
     },
     {
       "orgRank": 7,
@@ -7048,7 +7048,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".351, 5 HR, 59 RBI",
       "age": 18,
-      "topRank": 15
+      "topRank": 7
     },
     {
       "orgRank": 2,
@@ -7084,7 +7084,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".311, 18 HR, 87 RBI",
       "age": 19,
-      "topRank": 44
+      "topRank": 43
     },
     {
       "orgRank": 5,
@@ -7096,7 +7096,7 @@
       "levelRaw": "ALL (3)",
       "statLine": "69.0 IP, 2.22 ERA, 105 SO",
       "age": 21,
-      "topRank": 96
+      "topRank": 94
     },
     {
       "orgRank": 6,
@@ -7384,7 +7384,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".324, 27 HR, 87 RBI",
       "age": 19,
-      "topRank": 16
+      "topRank": 10
     },
     {
       "orgRank": 2,
@@ -7396,19 +7396,19 @@
       "levelRaw": "AA",
       "statLine": "103.0 IP, 3.76 ERA, 130 SO",
       "age": 22,
-      "topRank": 41
+      "topRank": 40
     },
     {
       "orgRank": 3,
       "playerId": 695491,
-      "name": "Joshua Baez",
+      "name": "Joshua Báez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
       "levelRaw": "ALL (2)",
       "statLine": ".251, 41 HR, 108 RBI",
       "age": 23,
-      "topRank": 56
+      "topRank": 57
     },
     {
       "orgRank": 4,
@@ -7420,7 +7420,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".279, 21 HR, 98 RBI",
       "age": 22,
-      "topRank": 99
+      "topRank": 80
     },
     {
       "orgRank": 5,
@@ -7515,7 +7515,7 @@
       "position": "RHP",
       "levelRaw": "ALL (2)",
       "statLine": "101.1 IP, 3.82 ERA, 130 SO",
-      "age": 19,
+      "age": 20,
       "topRank": null
     },
     {
@@ -7696,7 +7696,7 @@
       "levelRaw": "A",
       "statLine": ".176, 0 HR, 3 RBI",
       "age": 18,
-      "topRank": 10
+      "topRank": 12
     },
     {
       "orgRank": 2,
@@ -7708,7 +7708,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".315, 22 HR, 91 RBI",
       "age": 21,
-      "topRank": 12
+      "topRank": 16
     },
     {
       "orgRank": 3,
@@ -7720,7 +7720,7 @@
       "levelRaw": "ALL (4)",
       "statLine": ".342, 17 HR, 99 RBI",
       "age": 22,
-      "topRank": 48
+      "topRank": 46
     },
     {
       "orgRank": 4,
@@ -7732,7 +7732,7 @@
       "levelRaw": "A+",
       "statLine": ".243, 21 HR, 67 RBI",
       "age": 19,
-      "topRank": 62
+      "topRank": 63
     },
     {
       "orgRank": 5,
@@ -7744,7 +7744,7 @@
       "levelRaw": "A",
       "statLine": ".298, 11 HR, 79 RBI",
       "age": 20,
-      "topRank": 80
+      "topRank": 75
     },
     {
       "orgRank": 6,
@@ -7756,7 +7756,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".299, 9 HR, 57 RBI",
       "age": 19,
-      "topRank": 100
+      "topRank": 97
     },
     {
       "orgRank": 7,
@@ -8020,7 +8020,7 @@
       "levelRaw": "ALL (3)",
       "statLine": ".325, 10 HR, 21 RBI",
       "age": 20,
-      "topRank": 9
+      "topRank": 8
     },
     {
       "orgRank": 2,
@@ -8032,7 +8032,7 @@
       "levelRaw": "ALL (2)",
       "statLine": "52.1 IP, 5.16 ERA, 52 SO",
       "age": 21,
-      "topRank": 74
+      "topRank": 70
     },
     {
       "orgRank": 4,
@@ -8356,7 +8356,7 @@
       "levelRaw": "ALL (3)",
       "statLine": "82.2 IP, 2.50 ERA, 117 SO",
       "age": 23,
-      "topRank": 92
+      "topRank": 90
     },
     {
       "orgRank": 3,
@@ -8680,7 +8680,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".250, 3 HR, 16 RBI",
       "age": 21,
-      "topRank": 17
+      "topRank": 18
     },
     {
       "orgRank": 3,
@@ -8704,7 +8704,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".312, 12 HR, 60 RBI",
       "age": 22,
-      "topRank": 71
+      "topRank": 54
     },
     {
       "orgRank": 5,
@@ -8992,7 +8992,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".333, 0 HR, 2 RBI",
       "age": 22,
-      "topRank": 58
+      "topRank": 59
     },
     {
       "orgRank": 3,
@@ -9004,7 +9004,7 @@
       "levelRaw": "ROK",
       "statLine": ".379, 11 HR, 55 RBI",
       "age": 17,
-      "topRank": 78
+      "topRank": 73
     },
     {
       "orgRank": 4,
@@ -9016,7 +9016,7 @@
       "levelRaw": "AA",
       "statLine": ".267, 26 HR, 67 RBI",
       "age": 22,
-      "topRank": 98
+      "topRank": 96
     },
     {
       "orgRank": 5,
@@ -9268,7 +9268,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".249, 26 HR, 74 RBI",
       "age": 20,
-      "topRank": 39
+      "topRank": 38
     },
     {
       "orgRank": 2,
@@ -9280,7 +9280,7 @@
       "levelRaw": "ALL (2)",
       "statLine": "114.2 IP, 3.38 ERA, 125 SO",
       "age": 20,
-      "topRank": 40
+      "topRank": 39
     },
     {
       "orgRank": 3,
@@ -9292,7 +9292,7 @@
       "levelRaw": "ALL (3)",
       "statLine": ".278, 12 HR, 46 RBI",
       "age": 19,
-      "topRank": 57
+      "topRank": 58
     },
     {
       "orgRank": 5,
@@ -9544,7 +9544,7 @@
       "levelRaw": "A+",
       "statLine": ".167, 1 HR, 10 RBI",
       "age": 21,
-      "topRank": 11
+      "topRank": 14
     },
     {
       "orgRank": 2,
@@ -9568,7 +9568,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".252, 0 HR, 21 RBI",
       "age": 20,
-      "topRank": 59
+      "topRank": 81
     },
     {
       "orgRank": 6,
@@ -9820,22 +9820,10 @@
       "levelRaw": "ALL (2)",
       "statLine": "24.2 IP, 4.01 ERA, 35 SO",
       "age": 22,
-      "topRank": 34
+      "topRank": 47
     },
     {
       "orgRank": 2,
-      "playerId": 804109,
-      "name": "Aiva Arquette",
-      "teamId": 146,
-      "team": "mia",
-      "position": "SS",
-      "levelRaw": "ALL (2)",
-      "statLine": ".272, 12 HR, 48 RBI",
-      "age": 22,
-      "topRank": 60
-    },
-    {
-      "orgRank": 3,
       "playerId": 702281,
       "name": "Robby Snelling",
       "teamId": 146,
@@ -9844,7 +9832,19 @@
       "levelRaw": "ALL (2)",
       "statLine": "34.0 IP, 2.38 ERA, 46 SO",
       "age": 22,
-      "topRank": 50
+      "topRank": 49
+    },
+    {
+      "orgRank": 3,
+      "playerId": 804109,
+      "name": "Aiva Arquette",
+      "teamId": 146,
+      "team": "mia",
+      "position": "SS",
+      "levelRaw": "ALL (2)",
+      "statLine": ".272, 12 HR, 48 RBI",
+      "age": 22,
+      "topRank": 61
     },
     {
       "orgRank": 4,
@@ -9856,22 +9856,10 @@
       "levelRaw": "A",
       "statLine": ".220, 4 HR, 17 RBI",
       "age": 19,
-      "topRank": 64
+      "topRank": 65
     },
     {
       "orgRank": 5,
-      "playerId": 703596,
-      "name": "Karson Milbrandt",
-      "teamId": 146,
-      "team": "mia",
-      "position": "RHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "111.1 IP, 5.42 ERA, 132 SO",
-      "age": 22,
-      "topRank": 75
-    },
-    {
-      "orgRank": 6,
       "playerId": 703448,
       "name": "Cam Cannarella",
       "teamId": 146,
@@ -9880,7 +9868,19 @@
       "levelRaw": "ALL (3)",
       "statLine": ".324, 15 HR, 57 RBI",
       "age": 23,
-      "topRank": 82
+      "topRank": 77
+    },
+    {
+      "orgRank": 6,
+      "playerId": 703596,
+      "name": "Karson Milbrandt",
+      "teamId": 146,
+      "team": "mia",
+      "position": "RHP",
+      "levelRaw": "ALL (2)",
+      "statLine": "111.1 IP, 5.42 ERA, 132 SO",
+      "age": 22,
+      "topRank": null
     },
     {
       "orgRank": 7,
@@ -10144,7 +10144,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".242, 4 HR, 26 RBI",
       "age": 19,
-      "topRank": 83
+      "topRank": 78
     },
     {
       "orgRank": 2,
@@ -10492,7 +10492,7 @@
       "levelRaw": "ALL (2)",
       "statLine": ".252, 10 HR, 71 RBI",
       "age": 19,
-      "topRank": 95
+      "topRank": 93
     },
     {
       "orgRank": 5,
