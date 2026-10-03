@@ -1,13 +1,14 @@
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
-import { Band } from './Entry.jsx'
+import { Band, Entry } from './Entry.jsx'
 import { TokenHalf } from './tokens.jsx'
 import { CardHalf, PillHalf } from './blocks.jsx'
 import { ComponentHalf } from './components.jsx'
 import { ButtonHalf } from './buttons.jsx'
 import { PillSystemHalf } from './pills.jsx'
 import { ClusterHalf, GridHalf, StackHalf } from './layout.jsx'
-import { CARDS, PILLS } from './catalog.js'
+import { CARDS, PILLS, PROTOTYPES } from './catalog.js'
+import { ScoutLab } from './scout/ScoutLab.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import '../../styles/designlab/lab.css'
 
@@ -66,6 +67,7 @@ export function DesignLab() {
         <Button size="control" className="dlab__jumplink" href="#components">Components</Button>
         <Button size="control" className="dlab__jumplink" href="#cards">Cards</Button>
         <Button size="control" className="dlab__jumplink" href="#pills">Pills</Button>
+        <Button size="control" className="dlab__jumplink" href="#prototypes">Prototypes</Button>
       </nav>
 
       <section className="dlab__verdictbox">
@@ -122,6 +124,18 @@ export function DesignLab() {
         lede="A much simpler story than the cards, and the one to collapse first."
       >
         <PillHalf />
+      </Band>
+
+      <Band
+        id="prototypes"
+        title="Five — prototypes"
+        lede="A proposal on invented data. Unlike every specimen above, it is not what ships: it is what a spec asks for, drawn so it can be judged on a phone."
+      >
+        {PROTOTYPES.map((p) => (
+          <Entry key={p.id} title={p.title} path={p.path} verdict={p.verdict} tone="hold" note={p.note} wide>
+            {p.id === 'scout' && <ScoutLab />}
+          </Entry>
+        ))}
       </Band>
     </div>
   )

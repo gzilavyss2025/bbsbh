@@ -61,6 +61,7 @@ const MIN_QUERY = 2
 // normal typing burst is one request rather than six.
 const SEARCH_DEBOUNCE_MS = 180
 const PLAYER_LIMIT = 10
+const PICK_FETCH_LIMIT = 30
 const TEAM_LIMIT = 6
 // A stable empty list, so "no query, nothing to show" is the same reference
 // every render — see the sticky-results note in SiteSearchModal.
@@ -97,8 +98,14 @@ const NO_PLAYERS = []
 //
 // It keeps the rest of the dialog contract: Escape closes, focus moves to the
 // field on open and back to the trigger on close.
+//
+// PICK MODE (`pick`, the Matchup Scout's two pickers, #1410). The same surface,
+// so the pickers keep every keyboard rule above rather than growing a second
+// search box: players only, filtered by `pick.accept`, no recents, and a tap
+// hands the person to `pick.onPick` instead of opening his page.
+// `pick` is { label, placeholder, accept(person), onPick(person) }.
 // ---------------------------------------------------------------------------
-export function SiteSearchModal({ onClose }) {
+export function SiteSearchModal({ onClose, pick = null }) {
   const navigate = useNav()
   const { recent, remember, clear } = useRecentSearches()
   const [query, setQuery] = useState('')
@@ -106,8 +113,9 @@ export function SiteSearchModal({ onClose }) {
   const hasQuery = trimmed.length >= MIN_QUERY
   const debounced = useDebouncedValue(hasQuery ? trimmed : '', SEARCH_DEBOUNCE_MS)
 
-  const people = useAsync(() => searchPeople(debounced, PLAYER_LIMIT), [debounced])
-  const directory = useAsync(fetchTeamDirectory, [])
+  // Pick mode filters by role after the fetch, so it asks for more rows first.
+  const people = useAsync(() => searchPeople(debounced, pick ? PICK_FETCH_LIMIT : PLAYER_LIMIT), [debounced])
+  const directory = useAsync(() => (pick ? Promise.resolve([]) : fetchTeamDirectory()), [])
 
   // Hold the previous query's rows while the next request is in flight instead
   // of blanking to a spinner. Typing a name is a series of near-identical
@@ -129,8 +137,8 @@ export function SiteSearchModal({ onClose }) {
   // request to spare, and waiting on the debounce just to filter an array
   // already in hand would make the screen feel slower than the thumb driving it.
   const teams = useMemo(
-    () => (hasQuery ? searchTeams(directory.data ?? [], trimmed, TEAM_LIMIT) : []),
-    [directory.data, hasQuery, trimmed],
+    () => (hasQuery && !pick ? searchTeams(directory.data ?? [], trimmed, TEAM_LIMIT) : []),
+    [directory.data, hasQuery, trimmed, pick],
   )
 
   const searching = hasQuery && (people.loading || debounced !== trimmed)
@@ -156,6 +164,12 @@ export function SiteSearchModal({ onClose }) {
   )
 
   const groups = useMemo(() => {
+    if (pick) {
+      const rows = hasQuery
+        ? players.filter(pick.accept).slice(0, PLAYER_LIMIT).map((p) => ({ ...playerRow(p), person: p }))
+        : []
+      return rows.length ? [{ id: 'players', label: pick.label, rows }] : []
+    }
     if (!hasQuery) {
       return recent.length ? [{ id: 'recent', label: 'Recent', rows: recent.map(toRow) }] : []
     }
@@ -163,7 +177,7 @@ export function SiteSearchModal({ onClose }) {
     const teamGroup = { id: 'teams', label: 'Teams', rows: teams.map(teamRow) }
     const ordered = teamsFirst ? [teamGroup, playerGroup] : [playerGroup, teamGroup]
     return ordered.filter((g) => g.rows.length > 0)
-  }, [hasQuery, players, teams, teamsFirst, recent])
+  }, [hasQuery, players, teams, teamsFirst, recent, pick])
 
   const rows = useMemo(() => groups.flatMap((g) => g.rows), [groups])
   const noResults = hasQuery && !searching && rows.length === 0
@@ -194,6 +208,11 @@ export function SiteSearchModal({ onClose }) {
   const open = useCallback(
     (row) => {
       if (!row) return
+      if (pick) {
+        onClose()
+        pick.onPick(row.person)
+        return
+      }
       remember({ kind: row.kind, id: row.id, name: row.name, sub: row.sub })
       onClose()
       navigate(
@@ -202,7 +221,7 @@ export function SiteSearchModal({ onClose }) {
           : playerPath(row.id, { name: row.name }),
       )
     },
-    [navigate, onClose, remember],
+    [navigate, onClose, remember, pick],
   )
 
   const inputRef = useRef(null)
@@ -256,7 +275,7 @@ export function SiteSearchModal({ onClose }) {
         className="searchoverlay__panel"
         role="dialog"
         aria-modal="true"
-        aria-label="Search players and teams"
+        aria-label={pick ? pick.label : 'Search players and teams'}
       >
         <form
           className="searchoverlay__bar"
@@ -276,8 +295,8 @@ export function SiteSearchModal({ onClose }) {
               inputMode="search"
               enterKeyHint="go"
               className="searchfield__input"
-              placeholder="Players or teams"
-              aria-label="Search players and teams"
+              placeholder={pick ? pick.placeholder : 'Players or teams'}
+              aria-label={pick ? pick.label : 'Search players and teams'}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={onFieldKeyDown}

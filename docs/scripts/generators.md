@@ -676,13 +676,31 @@ don't run these by hand.
   each pitcher's season pitch mix (share + velocity per type), split `mlb`/`aaa` — every
   AAA park (like MLB's) feeds Hawk-Eye tracking, confirmed live against a real AAA
   gamePk's feed; AA and below carry none (same two-level split as `gen-umpire-accuracy`).
-  APPEND-ONLY/incremental sweep of Final regular-season games' live feeds like
+  APPEND-ONLY/incremental sweep of Final games' live feeds (the regular season at both
+  levels, and the postseason at MLB only, ADR-0094) like
   `gen-fouls.mjs` (`--days` trailing window; `--since`/`--until` backfill;
   `--sports=1,11` restricts the sweep, its real use being `--since=…
   --sports=11` to backfill AAA alone into a file that already has MLB).
   SQLite-backed (`pitch-arsenal` group, ADR-0021); `pitch_arsenal_ingested_games`
-  is the idempotency guard, keyed `(game_pk, level)`. `pitch_arsenal_totals` is
-  keyed `(season, person_id, level, code, stand)` — one row per side the BATTER stood
+  is the idempotency guard, keyed `(game_pk, level)`. Both totals tables also key on
+  `scope`: `'R'` for the regular season, `'P'` for the postseason. The column has
+  `DEFAULT 'R'`, so a dump line that names no scope loads as regular season. Every
+  reader before ADR-0094 reads `'R'` only. Each bucket carries the postseason as
+  `post`, beside `pit`, in the same shape. To backfill older postseason games, run
+  `--since=<first postseason date> --sports=1`. The same sweep also writes the
+  hitter grid (ADR-0096): `hitter-grid/{season}/{NN}.json` (each hitter's 25-cell
+  sums by pitch type, pitcher hand and his own side, `bat` and `post`) and
+  `hitter-grid/{season}/league.json` (every hitter summed, the same shape), from
+  `pitch_hitter_cells` and its own ledger, `pitch_hitter_ingested_games`. A game
+  owes each of the three halves (`arsenal`, `command`, `hitter`) to its own ledger,
+  so a re-walk for one half never folds another twice. The first 2026 re-walk is
+  `--since=2026-03-20` with both levels (`--sports=1` would drop a Triple-A-only
+  pitcher's hand from the arsenal export). Each ball in play adds its xwOBA (est.)
+  from `public/data/xwoba-table/{season}.json` (hand-run `gen-xwoba-table.mjs`,
+  below; ADR-0097). A game swept with no table leaves the row's `xwoba_bip` NULL, and
+  the export then writes no `xwobaBip` for that season. After a new table, re-walk the
+  hitter half: `--clear-hitters=<season> --since=<its first day>`. `pitch_arsenal_totals` is
+  keyed `(season, scope, person_id, level, code, stand)` — one row per side the BATTER stood
   on, `'L'`/`'R'`, or `'?'` when the feed named none. The side is in the KEY,
   unlike the times-through split's nine columns, because the two cross: a look
   has to be counted a side at a time. `'?'` is carried rather than dropped so
@@ -1013,7 +1031,11 @@ don't run these by hand.
   type's own league mean (`WHIFF_REGRESS_K` = 50 pitches) rather than applying
   a second, stricter sample floor — a flat floor tuned for four-seamers would
   starve the splitter and sweeper notes, which is most of this family's value.
-  `ba` is carried on the batter row for display color only, never scored. See
+  `ba` is carried on the batter row for display color only, never scored. The
+  batter row also carries `estWoba` (the board's `est_woba`, 3 places, `null`
+  when blank) for the Scout page (#1410). The board is regular season only, and
+  `estWoba` is thin like `ba`: show the `pa` beside it. A file written before
+  the field existed has no `estWoba` key, so readers must accept `undefined`. See
   `docs/callouts.md`, "Matchup callouts".
 - `gen-workload.mjs` → `public/data/workload.json` — per-pitcher recent
   workload: last-12 appearance list (date/pitches/started), season totals, SP/RP
@@ -1472,6 +1494,18 @@ Re-run only to fold in a new season.
   has to stay findable by the name the source printed, and `confidence` is what
   tells a caller not to join through it. Carries no dollar terms; those are in
   the `terms/` buckets above, on the same `rowKey`.
+
+- `gen-xwoba-table.mjs` → `public/data/xwoba-table/{season}.json` — the xwOBA (est.)
+  lookup on exit velocity and launch angle (ADR-0097): a 126 x 181 lattice (0 to 125
+  mph, -90 to 90 degrees) in thousandths, each cell the mean of Savant's
+  `estimated_woba_using_speedangle` over the smallest box around it that holds 3
+  balls (`scripts/lib/pitch/xwoba.mjs`). Source: Savant's search CSV, balls in play
+  only, one request per day with a Final MLB game, cached outside the repo, so a re-run
+  resumes. **Hand-run, NOT on the nightly cron**, and one table per season (a 2025 table
+  fails on 2026): `node scripts/gen-xwoba-table.mjs --season=2026`, then the hitter
+  re-walk in `gen-pitch-arsenal.mjs`. `--gate` checks the committed `hitter-grid/`
+  against Savant's pitch-arsenal-stats batter board (40+ PA: mean gap at most 0.006, at
+  most 1% of rows above 0.020, none above 0.040).
 
 ## Assets / off-app
 

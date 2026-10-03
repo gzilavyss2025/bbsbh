@@ -29,6 +29,7 @@
 //   node scripts/gen-pitch-arsenal.mjs --since=2026-03-20 [--until=2026-07-19]
 //   node scripts/gen-pitch-arsenal.mjs --since=2026-03-20 --sports=11   # backfill AAA alone
 //   node scripts/gen-pitch-arsenal.mjs --export-only [--season=2026]    # re-export, no sweep
+//   node scripts/gen-pitch-arsenal.mjs --clear-hitters=2026 --since=2026-03-20   # hitter re-walk
 // The --since form is the one-time / full-season backfill; nightly runs use the
 // default trailing window. Checkpoints (dump + JSON export) every 100 games so a
 // long backfill resumes cleanly. --export-only rebuilds the JSON view from the
@@ -38,12 +39,14 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
-import { writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
-import { shardKey100 } from '../src/lib/shardKey.js'
+import { bucketsOf, writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
 import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 import { CENTURY_CLUB_MIN, CENTURY_MPH } from '../src/api/pitchArsenal.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
+import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { CELLS, COLS, aggregateGameCommand, commandStmts, markCommandIngested, parseCells } from './lib/command-grid.mjs'
+import { aggregateGameHitters, clearHitterSeason, foldHitters, hitterStmts, writeHitterGrid } from './lib/pitch/hitter-grid.mjs'
+import { readXwobaTable } from './lib/pitch/xwoba.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // TWO OUTPUTS, one per reader — see writeArsenal below and src/api/pitchArsenal.js.
@@ -189,12 +192,12 @@ export function aggregateGamePitchTypes(feed) {
 const upsertPitchType = (db) =>
   db.prepare(
     `INSERT INTO pitch_arsenal_totals
-       (person_id, level, code, stand, season, name, team_id, description, pitches, velocity_sum, velocity_n, century_pitches, max_velo,
+       (person_id, level, code, stand, season, scope, name, team_id, description, pitches, velocity_sum, velocity_n, century_pitches, max_velo,
         tto1_pitches, tto1_velocity_sum, tto1_velocity_n,
         tto2_pitches, tto2_velocity_sum, tto2_velocity_n,
         tto3_pitches, tto3_velocity_sum, tto3_velocity_n)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(season, person_id, level, code, stand) DO UPDATE SET
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(season, scope, person_id, level, code, stand) DO UPDATE SET
        name = excluded.name,
        team_id = excluded.team_id,
        description = excluded.description,
@@ -230,33 +233,34 @@ export function arsenalStatements(db) {
     markCommand: markCommandIngested(db),
     commandRead: c.read,
     commandWrite: c.write,
+    ...hitterStmts(db),
   }
 }
 
 // Fetch the feed (the only await), then fold the whole game in as one atomic
 // synchronous transaction — same pattern as gen-fouls.mjs's ingestGame.
 // `need` says which halves of the sweep this game still owes. Both totals
-// tables ADD, so re-walking a game for the command grid must NOT fold its pitch
+// tables ADD, so re-walking a game for the command or hitter grid must NOT fold its pitch
 // types in a second time — that would silently double a season of arsenal
 // counts, and nothing downstream would look wrong until a share exceeded 100%.
 async function ingestGame(db, stmts, game) {
-  const need = game.need ?? { arsenal: true, command: true }
+  const need = game.need ?? { arsenal: true, command: true, hitter: true }
   const feed = await getJson(`/api/v1.1/game/${game.gamePk}/feed/live`)
   const pitchers = need.arsenal ? aggregateGamePitchTypes(feed) : new Map()
-  // Same feed, one more pass — the command grid costs no extra fetch.
+  // Same feed, more passes — the command and hitter grids cost no extra fetch.
   const command = need.command ? aggregateGameCommand(feed) : new Map()
-  foldGame(db, stmts, game, pitchers, command)
+  foldGame(db, stmts, game, pitchers, command, need.hitter ? aggregateGameHitters(feed, readXwobaTable(game.season)) : new Map())
 }
 
-// The sync half of ingestGame: one game's aggregates into its own season's rows.
-export function foldGame(db, stmts, { gamePk, level, date, season, need = { arsenal: true, command: true } }, pitchers, command) {
+// The sync half of ingestGame: one game's aggregates into its own season's and scope's rows.
+export function foldGame(db, stmts, { gamePk, level, date, season, scope = 'R', need = { arsenal: true, command: true, hitter: true } }, pitchers, command, hitters = new Map()) {
   db.exec('BEGIN')
   try {
     for (const [id, p] of pitchers) {
       for (const [key, t] of p.types) {
         const [code, stand] = key.split(':')
         stmts.pitchType.run(
-          id, level, code, stand, season, p.name, p.teamId, t.description,
+          id, level, code, stand, season, scope, p.name, p.teamId, t.description,
           t.pitches, t.velocitySum, t.velocityN, t.centuryPitches, t.maxVelo,
           t.tto[0].pitches, t.tto[0].velocitySum, t.tto[0].velocityN,
           t.tto[1].pitches, t.tto[1].velocitySum, t.tto[1].velocityN,
@@ -267,16 +271,17 @@ export function foldGame(db, stmts, { gamePk, level, date, season, need = { arse
     for (const [id, byKey] of command) {
       for (const [key, b] of byKey) {
         const [code, stand] = key.split(':')
-        const prior = stmts.commandRead.get(season, id, level, code, stand)
+        const prior = stmts.commandRead.get(season, scope, id, level, code, stand)
         const merged = CELLS.map((f, i) => {
           const was = parseCells(prior?.[COLS[i]])
           return Array.from(b[f], (v, j) => v + (was[j] ?? 0)).join(',')
         })
-        stmts.commandWrite.run(id, level, code, stand, season, ...merged)
+        stmts.commandWrite.run(id, level, code, stand, season, scope, ...merged)
       }
     }
     if (need.arsenal) stmts.mark.run(gamePk, level, date, season)
     if (need.command) stmts.markCommand.run(gamePk, level, date, season)
+    foldHitters(stmts, { gamePk, level, date, season, scope, need }, hitters)
     db.exec('COMMIT')
   } catch (err) {
     db.exec('ROLLBACK')
@@ -377,9 +382,9 @@ const foldRow = (acc, r) => {
   return acc
 }
 
-// One season's export, or (`season` null) every season's rows folded through the
-// same sums: the all/ pool's source, never a mean of two seasons' averages.
-export function exportPitchArsenal(db, hands = {}, season = null) {
+// One season's export, or (`season` null) every season's summed rows (all/'s source,
+// never a mean of averages). One scope: 'R' or 'P' (ADR-0094).
+export function exportPitchArsenal(db, hands = {}, season = null, scope = 'R') {
   const one = season != null
   const where = one ? 'WHERE season = ?' : ''
   const params = one ? [season] : []
@@ -393,8 +398,8 @@ export function exportPitchArsenal(db, hands = {}, season = null) {
   // `vs` keeps L and R on their own for the side filter.
   const types = new Map()
   for (const r of db
-    .prepare(`SELECT * FROM pitch_arsenal_totals ${where} ORDER BY season, person_id, level, code, stand`)
-    .all(...params)) {
+    .prepare(`SELECT * FROM pitch_arsenal_totals WHERE scope = ? ${one ? 'AND season = ?' : ''} ORDER BY season, person_id, level, code, stand`)
+    .all(scope, ...params)) {
     const entry = pit[r.person_id] ?? (pit[r.person_id] = { name: r.name, teamId: r.team_id, mlb: [], aaa: [] })
     entry.name = r.name
     entry.teamId = r.team_id
@@ -466,7 +471,7 @@ export function exportPitchArsenal(db, hands = {}, season = null) {
   // who have never touched 100 would put almost everyone in a tie for last and
   // say nothing. Per LEVEL, never pooled — the same rule the rest of this
   // file follows.
-  for (const level of ['mlb', 'aaa']) {
+  for (const level of scope === 'R' ? ['mlb', 'aaa'] : []) { // never in the postseason: a cohort of a few arms
     const counts = []
     for (const [id, entry] of Object.entries(pit)) {
       const n = (entry[level] ?? []).reduce((sum, t) => sum + (t.century ?? 0), 0)
@@ -502,10 +507,10 @@ export function exportPitchArsenal(db, hands = {}, season = null) {
 // { L: {...}, R: {...} } } }, where each hand carries the six 25-value arrays.
 // Zero-only arrays are dropped — a pitch type he never threw to lefties is
 // absent rather than twenty-five zeroes.
-export function exportCommandMap(db, season) {
+export function exportCommandMap(db, season, scope = 'R') {
   const rows = db
-    .prepare('SELECT * FROM pitch_command_cells WHERE season = ? ORDER BY person_id, level, code, stand')
-    .all(season)
+    .prepare('SELECT * FROM pitch_command_cells WHERE season = ? AND scope = ? ORDER BY person_id, level, code, stand')
+    .all(season, scope)
   const pit = {}
   for (const r of rows) {
     const entry = pit[r.person_id] ?? (pit[r.person_id] = { mlb: {}, aaa: {} })
@@ -522,15 +527,10 @@ export function exportCommandMap(db, season) {
 }
 
 async function writeCommand(db, hands, season) {
-  const data = exportCommandMap(db, season)
-  const buckets = new Map()
-  for (const [id, entry] of Object.entries(data.pit)) {
-    if (!Object.keys(entry.mlb).length && !Object.keys(entry.aaa).length) continue
-    const key = shardKey100(id)
-    if (!buckets.has(key)) buckets.set(key, { season: data.season, pit: {} })
-    buckets.get(key).pit[id] = { throws: hands[id] ?? null, ...entry }
-  }
-  await writeShards(join(outCommand, String(season)), [...buckets])
+  const pitOf = (scope) => Object.fromEntries(Object.entries(exportCommandMap(db, season, scope).pit)
+    .filter(([, e]) => Object.keys(e.mlb).length || Object.keys(e.aaa).length)
+    .map(([id, e]) => [id, { throws: hands[id] ?? null, ...e }]))
+  await writeShards(join(outCommand, String(season)), bucketsOf({ season }, pitOf('R'), pitOf('P')))
   await writeSeasons(outCommand, season)
 }
 
@@ -556,13 +556,8 @@ export function poolsOf(data) {
 
 async function writeArsenal(db, hands, season) {
   const data = exportPitchArsenal(db, hands, season)
-  const buckets = new Map()
-  for (const [id, entry] of Object.entries(data.pit ?? {})) {
-    const key = shardKey100(id)
-    if (!buckets.has(key)) buckets.set(key, { season: data.season, asOf: data.asOf, pit: {} })
-    buckets.get(key).pit[id] = entry
-  }
-  await writeShards(join(outDir, String(season)), [...buckets])
+  const buckets = bucketsOf({ season, asOf: data.asOf }, data.pit, exportPitchArsenal(db, hands, season, 'P').pit)
+  await writeShards(join(outDir, String(season)), buckets)
   await writeShards(join(outPools, String(season)), Object.entries(poolsOf(data)))
   for (const store of [outDir, outPools]) await writeSeasons(store, season)
 }
@@ -577,11 +572,11 @@ async function writeAllPools(db, handsFor) {
 }
 
 // --- CLI ---------------------------------------------------------------------
-// The levels swept, most-senior first — see header for why AAA rides along
-// and AA/below don't.
+// The levels swept, most-senior first (see header for why AA/below don't). MLB
+// also reads its postseason (ADR-0094); Triple-A's postseason types are unverified.
 const ALL_LEVELS = [
-  { sportId: 1, level: 'mlb' },
-  { sportId: 11, level: 'aaa' },
+  { sportId: 1, level: 'mlb', gameTypes: `R,${POSTSEASON_GAME_TYPES}` },
+  { sportId: 11, level: 'aaa', gameTypes: 'R' },
 ]
 
 async function main() {
@@ -594,6 +589,10 @@ async function main() {
 
   const db = await openDb()
   const stmts = arsenalStatements(db)
+  if (args['clear-hitters']) { // re-walk after a new xwOBA table (ADR-0097): the whole season, MLB in the run
+    if (!args.since || !LEVELS.some((l) => l.level === 'mlb')) throw new Error('--clear-hitters needs --since=<first day> and MLB')
+    clearHitterSeason(db, Number(args['clear-hitters']))
+  }
 
   // Throwing hands for the season being written, never the clock year (#1200).
   const handsBySeason = new Map()
@@ -609,6 +608,7 @@ async function main() {
     for (const season of touched) {
       await writeArsenal(db, await handsFor(season), season)
       await writeCommand(db, await handsFor(season), season)
+      await writeHitterGrid(db, season)
     }
     await writeAllPools(db, handsFor)
   }
@@ -621,44 +621,41 @@ async function main() {
     const season = Number(args.season ?? db.prepare('SELECT MAX(season) AS s FROM pitch_arsenal_ingested_games').get().s)
     if (!season) throw new Error('no season on file: pass --season')
     await writeArsenal(db, await handsFor(season), season)
+    await writeHitterGrid(db, season)
     await writeAllPools(db, handsFor)
     console.log(`wrote pitch-arsenal/${season}/ (export only — no games swept)`)
     db.close()
     return
   }
 
-  // A game is done only when BOTH sweeps have had it. The arsenal pass had
-  // already ingested this season before locations were counted, so keying the
-  // skip on its table alone would leave the command grid empty until next
-  // season — the backfill would find nothing to do.
-  const doneArsenal = new Set(
-    db.prepare('SELECT game_pk, level FROM pitch_arsenal_ingested_games').all().map((r) => `${r.game_pk}:${r.level}`),
-  )
-  const doneCommand = new Set(
-    db.prepare('SELECT game_pk, level FROM pitch_command_ingested_games').all().map((r) => `${r.game_pk}:${r.level}`),
-  )
+  // A game is done only when EVERY sweep has had it. The arsenal pass had
+  // already ingested this season before locations (and then hitters) were
+  // counted, so keying the skip on its table alone would leave a later grid
+  // empty until next season — the backfill would find nothing to do.
+  const ledgers = Object.fromEntries(['arsenal', 'command', 'hitter'].map((k) => [k, new Set(
+    db.prepare(`SELECT game_pk, level FROM pitch_${k}_ingested_games`).all().map((r) => `${r.game_pk}:${r.level}`),
+  )]))
 
-  // Regular season only, both levels. Same postponed-replay dedup as the other
-  // sweeps: a replayed game is listed under both dates; keep only the
-  // officialDate bucket.
+  // Same postponed-replay dedup as the other sweeps: keep only the officialDate bucket.
   const pending = []
-  for (const { sportId, level } of LEVELS) {
+  for (const { sportId, level, gameTypes } of LEVELS) {
     const schedule = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&startDate=${startDate}&endDate=${endDate}&gameType=R`,
+      `/api/v1/schedule?sportId=${sportId}&startDate=${startDate}&endDate=${endDate}&gameType=${gameTypes}`,
     )
     for (const d of schedule.dates ?? []) {
       for (const g of d.games ?? []) {
         if (g.status?.abstractGameState !== 'Final') continue
         if (d.date !== g.officialDate) continue
         const key = `${g.gamePk}:${level}`
-        const need = { arsenal: !doneArsenal.has(key), command: !doneCommand.has(key) }
-        if (!need.arsenal && !need.command) continue
+        const need = Object.fromEntries(Object.entries(ledgers).map(([k, set]) => [k, !set.has(key)]))
+        need.hitter &&= level === 'mlb' // the hitter grid is MLB only for now (ADR-0096)
+        if (!Object.values(need).some(Boolean)) continue
         // The season comes from the game, never the clock (#1200).
-        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: Number(g.season ?? g.officialDate.slice(0, 4)), need })
+        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: Number(g.season ?? g.officialDate.slice(0, 4)), scope: POSTSEASON_GAME_TYPES.split(',').includes(g.gameType) ? 'P' : 'R', need })
       }
     }
   }
-  console.log(`${startDate}..${endDate}: ${pending.length} un-ingested Final regular-season games across ${LEVELS.length} level(s)`)
+  console.log(`${startDate}..${endDate}: ${pending.length} un-ingested Final games across ${LEVELS.length} level(s)`)
 
   let done = 0
   const queue = [...pending]

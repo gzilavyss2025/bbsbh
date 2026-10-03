@@ -79,11 +79,14 @@ export const GROUPS = {
   jerseys: {
     tables: ['jerseys'],
   },
-  // Both tables are written by the one nightly gen-pitch-arsenal.mjs — its
+  // Every table here is written by the one nightly gen-pitch-arsenal.mjs — its
   // own group, same as jerseys above.
   'pitch-arsenal': {
     bySeason: true,
-    tables: ['pitch_arsenal_totals', 'pitch_arsenal_ingested_games', 'pitch_command_cells', 'pitch_command_ingested_games'],
+    tables: [
+      'pitch_arsenal_totals', 'pitch_arsenal_ingested_games', 'pitch_command_cells', 'pitch_command_ingested_games',
+      'pitch_hitter_cells', 'pitch_hitter_ingested_games',
+    ],
   },
   // All three tables are written by the one nightly gen-team-records.mjs — its
   // own group, same as jerseys/pitch-arsenal above. The largest group by row

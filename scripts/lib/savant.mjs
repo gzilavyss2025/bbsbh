@@ -14,65 +14,11 @@
 
 import { setTimeout as sleep } from 'node:timers/promises'
 import { round1 } from '../../src/lib/math/number.js'
+import { csvObjects, parseCsv } from '../../src/lib/csv/parse.js'
 
-// A minimal CSV row parser — handles quoted fields with embedded commas
-// (e.g. "Whitlock, Garrett") and doubled-quote escaping. No npm dependency,
-// matching the rest of scripts/'s self-contained convention.
-export function parseCsv(text) {
-  const rows = []
-  let row = []
-  let field = ''
-  let inQuotes = false
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i]
-    if (inQuotes) {
-      if (c === '"') {
-        if (text[i + 1] === '"') {
-          field += '"'
-          i++
-        } else {
-          inQuotes = false
-        }
-      } else {
-        field += c
-      }
-    } else if (c === '"') {
-      inQuotes = true
-    } else if (c === ',') {
-      row.push(field)
-      field = ''
-    } else if (c === '\n' || c === '\r') {
-      if (c === '\r' && text[i + 1] === '\n') i++
-      row.push(field)
-      field = ''
-      if (row.length > 1 || row[0] !== '') rows.push(row)
-      row = []
-    } else {
-      field += c
-    }
-  }
-  if (field !== '' || row.length) {
-    row.push(field)
-    rows.push(row)
-  }
-  return rows
-}
-
-// Rows -> array of objects keyed by header name, with the BOM and stray header
-// whitespace stripped. Savant's first column is literally named
-// "last_name, first_name" — quoted, with the comma inside — which is why the
-// parser above has to handle quoting at all.
-export function csvObjects(text) {
-  const rows = parseCsv(text.replace(/^﻿/, ''))
-  if (rows.length < 2) return []
-  const [header, ...data] = rows
-  const names = header.map((n) => n.trim())
-  return data.map((r) => {
-    const o = {}
-    names.forEach((n, i) => { o[n] = r[i] })
-    return o
-  })
-}
+// The CSV reader lives in src/lib/csv/ so the app can import it too (the Matchup
+// Scout head-to-head). Re-exported here so every generator's import stays as is.
+export { parseCsv, csvObjects }
 
 // '' / null / non-numeric -> null, so a blanked column reads as absent rather
 // than as 0. Every rate in this app degrades to "no note" on null.
@@ -221,4 +167,43 @@ export function medianRates(pctMap, rawMap, keys, floor) {
     if (values.length >= floor) out[key] = median(values)
   }
   return out
+}
+
+const BATTER_PA_MIN = 40 // plate appearances vs one pitch type, gates a hitter's rows (the payload-size floor, docs/scratch spec)
+// Regression weight, in PITCHES SEEN — whiff is already ~94% stable, so it
+// barely needs regressing toward the pitch type's own league mean. K=200
+// collapsed the prototype to 3 notes across 6 games and lost every good one;
+// K=50 gave 9, about 1.5 a game — the right volume for a 2-5 slot surface.
+const WHIFF_REGRESS_K = 50
+
+export const regress = (raw, n, leagueMean) =>
+  leagueMean == null ? raw : (raw * n + leagueMean * WHIFF_REGRESS_K) / (n + WHIFF_REGRESS_K)
+
+// A single global "pitches seen" floor makes this ALL FASTBALL — a splitter
+// specialist's batters never clear a floor tuned for four-seamers. The
+// regression above (toward the TYPE's own mean, weighted by pitches seen)
+// is what keeps a thin-sample curveball or sweeper row honest instead of
+// excluding it outright; the flat PA_MIN here is the payload-size floor only.
+export function batterArsenalMap(rows, leagueBat) {
+  const map = {}
+  for (const r of rows) {
+    const id = r.player_id
+    const type = r.pitch_type
+    if (!id || !type) continue
+    const pa = num(r.pa)
+    const pitches = num(r.pitches)
+    const whiff = num(r.whiff_percent)
+    const ba = num(r.ba)
+    const estWoba = num(r.est_woba)
+    if (pa == null || pitches == null || whiff == null || pa < BATTER_PA_MIN) continue
+    const lg = leagueBat[type]?.m
+    if (!map[id]) map[id] = {}
+    map[id][type] = {
+      whiff: round1(regress(whiff, pitches, lg)),
+      ba: ba == null ? null : Math.round(ba * 1000) / 1000,
+      estWoba: estWoba == null ? null : Math.round(estWoba * 1000) / 1000,
+      pa,
+    }
+  }
+  return map
 }

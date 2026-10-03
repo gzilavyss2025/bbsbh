@@ -34,7 +34,7 @@ export async function searchPeople(query, limit = 8) {
   const q = (query ?? '').trim()
   if (q.length < 2) return []
   const key = q.toLowerCase()
-  if (searchPeopleCache.has(key)) return searchPeopleCache.get(key)
+  if (searchPeopleCache.has(key)) return searchPeopleCache.get(key).slice(0, limit)
   try {
     const data = await getJson(
       `/api/v1/people/search?names=${encodeURIComponent(q)}&hydrate=currentTeam`,
@@ -45,15 +45,19 @@ export async function searchPeople(query, limit = 8) {
         name: p.fullName ?? '',
         active: !!p.active,
         pos: p.primaryPosition?.abbreviation ?? '',
+        // The Matchup Scout's pickers filter on the position CODE ('1'
+        // pitcher, 'Y' two-way; lib/scout/roles.js).
+        posCode: p.primaryPosition?.code ?? '',
         team: p.active ? p.currentTeam?.name ?? '' : 'Retired',
       }))
       .sort((a, b) => Number(b.active) - Number(a.active))
-      .slice(0, limit)
     if (searchPeopleCache.size >= MAX_SEARCH_CACHE) {
       searchPeopleCache.delete(searchPeopleCache.keys().next().value)
     }
+    // The cache keeps the whole list and each caller slices its own: the
+    // Scout's pickers ask for more rows than the site search, then filter.
     searchPeopleCache.set(key, result)
-    return result
+    return result.slice(0, limit)
   } catch {
     return []
   }

@@ -1,0 +1,558 @@
+/* ============================================================
+   MATCHUP SCOUT — screens/scout/ScoutPage.jsx (/scout, #1410) and its
+   Design Lab prototype, screens/designlab/scout/ScoutLab.jsx (#1408).
+
+   A PER-ROUTE PARTIAL in a subdirectory, because src/styles is at its file
+   budget (ADR-0038): imported by the two screens above, never by
+   src/index.css. Every selector is .scout__*; nothing else may hook these
+   classes. Spec: docs/scout-design.md. The .scout__lab and .scout__labbtn
+   rules are the prototype's own and draw nothing on the page.
+
+   Two scales, one per map. The pitcher's map is the command map's clay ramp
+   (26d-command-map.css): a share, sequential, one hue. The hitter's map
+   diverges around the league rate in the same region: navy below, medal
+   amber above, the recent-form bar's pair (26b-recent-form.css), because
+   neither end is good or bad on a page that serves both sides. Both ramps cap
+   at .40 so the figures stay readable on the darkest cell. Gray is "under the
+   floor": the region prints its count and no value.
+
+   MOTION, at the end of this file, is one moment per tap: a pill tap tweens
+   the fills and inks in the figures that changed; a View tap turns the two
+   maps over, because the mirror IS the other side of the same card. Nothing
+   plays on a cold load, and nothing plays under prefers-reduced-motion.
+   ============================================================ */
+
+.scout,
+.scout__board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.scout__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Tablet and desktop: the house's 740px cut (25-wide-layout.css), where the
+   screen widens to 960px. The maps and their controls take the main column;
+   the head-to-head list becomes the rail beside them, so a reader flips
+   pitches without losing the history. */
+@media (min-width: 740px) {
+  .scout__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    align-items: start;
+  }
+  .scout__maps {
+    gap: var(--space-4);
+  }
+  .scout__controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+  /* The pair keeps the main column's width: two faces a screen apart are
+     not a matchup. */
+  .scout__pairrow {
+    max-width: 560px;
+  }
+}
+
+.scout__lab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: var(--bw-hair) dashed var(--border-rule);
+}
+
+/* --- the pair: two house headshots, a name and a hand each --- */
+
+.scout__pair {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.scout__pairrow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.scout__side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  text-align: center;
+}
+
+/* Compound with .shot/.shot--fallback (both set by Headshot) so this outranks
+   the base .shot sizing, the convention every headshot host follows. The
+   monogram is sized for the md frame, not the player page's display size. */
+.shot.scout__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+}
+.shot.scout__shot.shot--fallback {
+  font-size: var(--fs-h2);
+}
+
+.scout__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
+}
+
+.scout__hand,
+.scout__vs {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* --- controls --- */
+
+.scout__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.scout__control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1h);
+}
+
+.scout__controllabel,
+.scout__keylabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.scout__control .scout__controllabel {
+  min-width: 52px;
+}
+
+/* The pitch pills: one line that scrolls sideways on a phone, so flipping
+   pitches never pushes the maps down. The cut-off pill at the edge says
+   there is more. Wide screens have room, and wrap. */
+@media (max-width: 739.98px) {
+  .scout__control--scroll {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    /* Its pills must not widen the page: size the row from its parent. */
+    contain: inline-size;
+    scroll-snap-type: x proximity;
+    padding-block: var(--space-1);
+  }
+  .scout__control--scroll > * {
+    flex: none;
+    scroll-snap-align: start;
+  }
+}
+
+/* A pitch pill carries its usage as a bar along its foot, in the family's
+   colour (the arsenal tokens the Now Pitching tiles and the scene's arcs
+   use), so the arsenal reads at a glance before any number does. The bar
+   is a child of the Pill, positioned off it; the pill's own skin is not
+   touched (test/pill-cascade.test.js). Selected, the bar goes paper, because
+   the breaking-ball navy would vanish on the navy fill. */
+.scout__pitchbtn {
+  position: relative;
+  overflow: hidden;
+}
+.scout__pitchbtn.is-inflight {
+  --pill-edge: var(--accent-primary);
+}
+.scout__usage {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--border-hairline);
+}
+.scout__usage::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: calc(var(--usage, 0) * 1%);
+  background: var(--arsenal-other);
+}
+.scout__pitchbtn[data-family='fastball'] .scout__usage::after { background: var(--arsenal-fastball); }
+.scout__pitchbtn[data-family='breaking'] .scout__usage::after { background: var(--arsenal-breaking); }
+.scout__pitchbtn[data-family='offspeed'] .scout__usage::after { background: var(--arsenal-offspeed); }
+.scout__pitchbtn[aria-pressed='true'] .scout__usage { background: transparent; }
+.scout__pitchbtn[aria-pressed='true'] .scout__usage::after { background: var(--text-on-ink); }
+
+.scout__pilln {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.scout__control [aria-pressed='true'] .scout__pilln {
+  color: var(--text-on-ink);
+}
+
+/* --- the answer: the expected line, read against the league --- */
+
+.scout__answer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+}
+.scout__answer > .scout__controllabel {
+  flex-basis: 100%;
+}
+.scout__answervalue {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  color: var(--text-heading);
+}
+.scout__answerleague {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* --- the Now Pitching scene keeps its card size on a wide screen --- */
+
+.scout__scene {
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
+}
+
+/* --- the pickers (the empty state) --- */
+
+.scout__pickers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.scout__picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.scout__picker input {
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-field);
+  padding: var(--space-1h) var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+}
+
+.scout__empty,
+.scout__labbtn {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+/* A picker slot: the house button, full width of its column, the name cut
+   short rather than wrapped. */
+.scout__pickbtn {
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The "Regular season" tag over the maps (Gary, item 9). */
+.scout__season {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+/* --- the hitter's slot in Phase 1: his line per pitch type --- */
+
+.scout__hitline {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.scout__hitas {
+  margin: 0 0 var(--space-1);
+}
+
+.scout__hitfact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.scout__hitfact dd {
+  margin: 0;
+}
+
+.scout__hitvalue {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  color: var(--text-heading);
+}
+
+.scout__hittable th[scope='row'] {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-align: start;
+}
+
+/* --- the colour key: one row per scale --- */
+
+.scout__key {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.scout__keyrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.scout__swatch {
+  width: 14px;
+  height: 14px;
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+svg.scout__swatch {
+  border: 0;
+}
+.scout__keylabel + .scout__swatch {
+  margin-inline-start: var(--space-1);
+}
+
+/* --- the two maps --- */
+
+.scout__maps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.scout__fig {
+  margin: 0;
+  min-width: 0;
+}
+
+.scout__map,
+.scout__sides {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin-inline: auto;
+}
+
+/* The side-of-field labels under a map, in the order that view draws them. */
+.scout__sides {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.scout__cap {
+  display: block;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.scout__notposted {
+  text-align: center;
+}
+
+/* --- the readout: a tapped region's exact figures --- */
+
+.scout__readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-4);
+  min-height: var(--control-min);
+  margin: 0;
+  padding: var(--space-1h) 0;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+.scout__readoutlabel {
+  flex-basis: 100%;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.scout__readoutfact {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1h);
+}
+.scout__readoutvalue {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  color: var(--text-heading);
+}
+
+/* --- the map's regions --- */
+
+.scout__regionbtn {
+  cursor: pointer;
+}
+.scout__regionbtn:focus {
+  outline: none;
+}
+/* Keyboard focus draws the ring token as the region's own stroke: an
+   outline on an SVG group does not draw in every browser. */
+.scout__regionbtn:focus-visible .scout__region {
+  stroke: var(--focus-ring);
+  stroke-width: 2;
+}
+
+.scout__region {
+  fill: var(--surface-card);
+  stroke: var(--border-hairline);
+  stroke-width: 0.8;
+}
+.scout__region--s1 { fill: var(--clay); fill-opacity: 0.1; }
+.scout__region--s2 { fill: var(--clay); fill-opacity: 0.2; }
+.scout__region--s3 { fill: var(--clay); fill-opacity: 0.3; }
+.scout__region--s4 { fill: var(--clay); fill-opacity: 0.4; }
+.scout__region--lo2 { fill: var(--allstar-blue); fill-opacity: 0.36; }
+.scout__region--lo1 { fill: var(--allstar-blue); fill-opacity: 0.16; }
+.scout__region--hi1 { fill: var(--award-line); fill-opacity: 0.2; }
+.scout__region--hi2 { fill: var(--award-line); fill-opacity: 0.4; }
+.scout__hatchground { fill: var(--surface-card); }
+.scout__hatch {
+  stroke: var(--graphite-soft);
+  stroke-width: 1.2;
+}
+
+/* A key swatch is a 14px SVG rect wearing the same region class. */
+.scout__swatch--hatch {
+  background: repeating-linear-gradient(45deg, var(--graphite-soft) 0 1px, var(--surface-card) 1px 4px);
+}
+
+.scout__frame {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 1.4;
+}
+
+/* The picked region: a navy frame over the fills, never a fill of its own,
+   so the colour scale under it stays readable. */
+.scout__pick {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.scout__plate {
+  fill: var(--surface-inset);
+  stroke: var(--graphite-soft);
+  stroke-width: 1;
+}
+
+/* The batter's box: a pencilled strip on the side his stance puts him. */
+.scout__box {
+  fill: var(--surface-inset);
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+}
+
+.scout__figure,
+.scout__count,
+.scout__stance {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  text-anchor: middle;
+}
+.scout__figure,
+.scout__stance { fill: var(--text-heading); }
+/* ".381" in an 11px mono face is 26px; a 27px phone cell needs the tight
+   tracking the score figures already use. */
+.scout__figure { letter-spacing: var(--ls-tight-score); }
+.scout__count { fill: var(--text-caption); }
+
+/* --- motion --- */
+
+/* A pill, Metric, Hand or Scope tap: the fills tween to the new tones
+   (SVG fill is animatable), the figures whose value changed remount
+   (ZoneMap keys them on the value) and ink in from quarter ink, and the
+   usage bars settle. Nothing rests under full opacity. */
+@media (prefers-reduced-motion: no-preference) {
+  .scout__region {
+    transition: fill var(--dur-med) var(--ease-standard), fill-opacity var(--dur-med) var(--ease-standard);
+  }
+  .scout__usage::after {
+    transition: width var(--dur-slow) var(--ease-standard);
+  }
+  .scout__figure,
+  .scout__count,
+  .scout__answervalue {
+    animation: scout-ink var(--dur-med) var(--ease-out);
+  }
+
+  /* A View tap turns the maps over. The maps remount with the new view
+     drawn, start turned 180° about their vertical axis (which IS the old
+     view's picture) and turn to face the reader. The flip tokens are the
+     FlipCard's. Keyed on the tap count, so a cold load never turns. */
+  .scout__board {
+    perspective: 1200px;
+  }
+  .scout__maps.is-turning {
+    animation: scout-turn var(--dur-flip) var(--ease-flip);
+  }
+}
+@keyframes scout-ink {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}
+/* A half turn: the maps start edge-on and turn in already showing the new
+   view, so no mirrored digit is ever drawn (Gary, item 10). */
+@keyframes scout-turn {
+  from { transform: rotateY(-90deg); }
+  to { transform: none; }
+}

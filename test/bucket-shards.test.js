@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { rookieShardKey } from '../src/api/rookies.js'
 import { warShardKey } from '../src/api/war.js'
@@ -16,7 +16,7 @@ import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 // seasons.json that names them and the one the app reads (`current`). The join
 // and the size ceiling hold in EVERY season folder; the floors count the
 // season the app serves.
-const SEASON_STORES = new Set(['spray', 'fouls', 'pitch-arsenal', 'pitch-arsenal-pool'])
+const SEASON_STORES = new Set(['spray', 'fouls', 'pitch-arsenal', 'pitch-arsenal-pool', 'pitch-command', 'hitter-grid'])
 const indexOf = (name) =>
   JSON.parse(readFileSync(new URL(`../public/data/${name}/seasons.json`, import.meta.url), 'utf8'))
 const folder = (name, season) => new URL(`../public/data/${name}/${season == null ? '' : `${season}/`}`, import.meta.url)
@@ -38,10 +38,13 @@ test('every reader computes the same bucket', () => {
   assert.equal(shardKey100(null), '00')
 })
 
+// `post` is the postseason, beside `pit` in the same bucket (ADR-0094).
+const pitAndPost = (shard) => [...Object.keys(shard.pit ?? {}), ...Object.keys(shard.post ?? {})]
 for (const [name, pick] of [
   ['manager-history', (shard) => Object.keys(shard.byPersonId ?? {})],
   ['fouls', (shard) => [...Object.keys(shard.batters ?? {}), ...Object.keys(shard.pitchers ?? {})]],
-  ['pitch-arsenal', (shard) => Object.keys(shard.pit ?? {})],
+  ['pitch-arsenal', pitAndPost],
+  ['pitch-command', pitAndPost],
   ['spray', (shard) => Object.keys(shard.bat ?? {})],
 ]) {
   test(`every ${name} record sits in the bucket its reader will ask for`, () => {
@@ -90,7 +93,15 @@ test('a bucket stays small enough to be worth fetching alone', () => {
     // remaining trims would drop a side or drop the looks inside one — which
     // is the feature. Measured largest at 33 KB; this leaves the season's
     // remaining weeks room without letting the shape quietly double again.
+    // The postseason part (ADR-0094) adds about 0.7 KB per postseason arm to
+    // his bucket. Measured 2026-10-02 after the first 9 postseason games: the
+    // largest bucket went from 36,114 to 36,846 bytes, so 45 still holds.
     ['pitch-arsenal', 45],
+    // Twenty-five-value arrays per pitch type, per side, per counter. Measured
+    // largest 102,797 bytes on the regular season alone, and 104,099 with the
+    // first 9 postseason games (about 1.4 KB per postseason arm). This leaves
+    // the rest of the postseason room without letting the shape quietly grow.
+    ['pitch-command', 125],
     // Four times its neighbours' ceiling, and deliberately: a spray bucket
     // carries one ROW PER BALL IN PLAY rather than a handful of season totals,
     // which is ~2,000 rows in the busiest bucket. The eight columns are already
@@ -103,5 +114,32 @@ test('a bucket stays small enough to be worth fetching alone', () => {
   ]) {
     const largest = Math.max(...dirs(name).flatMap((d) => list(name, d).map((f) => statSync(new URL(f, d)).size)))
     assert.ok(largest < ceiling * 1024, `${name}: largest bucket is ${Math.round(largest / 1024)} KB`)
+  }
+})
+
+// The hitter grid (ADR-0096). Its files are not on file until the first 2026
+// re-walk (#1411), so until then the dump must hold no hitter row either: a
+// grid in the dump with no files is a run that never wrote them.
+test('a hitter-grid bucket stays small enough to be worth fetching alone', () => {
+  if (!existsSync(new URL('../public/data/hitter-grid/seasons.json', import.meta.url))) {
+    const dump = readFileSync(new URL('../scripts/data/pitch-arsenal.sql', import.meta.url), 'utf8')
+    assert.doesNotMatch(dump, /^INSERT INTO pitch_hitter_cells /m)
+    return
+  }
+  // Measured 2026-10-02 on a copy (the regular season and the first 9
+  // postseason games, MLB only): largest 79,573 bytes. Room for the rest of
+  // the postseason without letting the shape quietly grow.
+  // ADR-0097 added xwobaBip and bipUntracked. Measured 2026-10-02 on a copy
+  // after the re-walk with the 2026 table: largest 100,703 bytes (xwobaBip
+  // 20,717 of them, bipUntracked 402). Gary accepted 120 KB: it keeps the
+  // 20 KB of postseason room that Part B left.
+  const ceiling = 120
+  const largest = Math.max(...dirs('hitter-grid').flatMap((d) => list('hitter-grid', d).map((f) => statSync(new URL(f, d)).size)))
+  assert.ok(largest < ceiling * 1024, `hitter-grid: largest bucket is ${Math.round(largest / 1024)} KB`)
+  for (const d of dirs('hitter-grid')) {
+    for (const f of list('hitter-grid', d)) {
+      const shard = read('hitter-grid', f, d)
+      for (const id of [...Object.keys(shard.bat), ...Object.keys(shard.post ?? {})]) assert.equal(shardKey100(id), f.slice(0, 2))
+    }
   }
 })

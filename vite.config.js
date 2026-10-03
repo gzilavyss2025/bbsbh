@@ -518,7 +518,7 @@ export default defineConfig({
               // A season store (ADR-0086): its seasons.json and one season's
               // files, the league file beside the buckets. Each season adds its
               // own URLs, so it belongs here, uncounted, not in the rule above.
-              /^\/data\/(?:fouls|abs|pitch-arsenal|pitch-arsenal-pool|pitch-command)\/(?:seasons|\d{4}\/[^/]+)\.json$/.test(url.pathname) ||
+              /^\/data\/(?:fouls|abs|pitch-arsenal|pitch-arsenal-pool|pitch-command|hitter-grid)\/(?:seasons|\d{4}\/[^/]+)\.json$/.test(url.pathname) ||
               // One file per MATCHUP, keyed by the two team ids ascending.
               /^\/data\/former-teammates\/\d+-\d+\.json$/.test(url.pathname) ||
               // One video-highlight file per club.
@@ -695,6 +695,14 @@ export default defineConfig({
           },
           {
             urlPattern: ({ url }) => url.hostname === 'statsapi.mlb.com',
+            handler: 'NetworkOnly',
+            method: 'GET',
+          },
+          {
+            // Matchup Scout's head-to-head (src/api/scout/headToHead.js). The
+            // cutoff date is the only guard against a live read, so the service
+            // worker must not add a cache of its own. Same rule as ADR-0004.
+            urlPattern: ({ url }) => url.hostname === 'baseballsavant.mlb.com',
             handler: 'NetworkOnly',
             method: 'GET',
           },

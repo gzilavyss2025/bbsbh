@@ -33,7 +33,7 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
-import { fetchCustomBoard, fetchArsenalBoard, meanSd, meanSdGrouped, num, round1 } from './lib/savant.mjs'
+import { fetchCustomBoard, fetchArsenalBoard, batterArsenalMap, regress, meanSd, meanSdGrouped, num, round1 } from './lib/savant.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'savant-matchup.json')
@@ -155,16 +155,6 @@ if (!Object.keys(bat).length || !Object.keys(pit).length) {
 // scored and never compared to a baseline.
 const PITCH_USAGE_MIN = 15 // percent of a pitcher's OWN pitches — "a pitch he throws 4% of the time isn't what this at-bat is about"
 const PITCH_THROWN_MIN = 150 // pitches thrown, gates a pitcher's own pitch rows
-const BATTER_PA_MIN = 40 // plate appearances vs one pitch type, gates a hitter's rows (the payload-size floor, docs/scratch spec)
-// Regression weight, in PITCHES SEEN — whiff is already ~94% stable, so it
-// barely needs regressing toward the pitch type's own league mean. K=200
-// collapsed the prototype to 3 notes across 6 games and lost every good one;
-// K=50 gave 9, about 1.5 a game — the right volume for a 2-5 slot surface.
-const WHIFF_REGRESS_K = 50
-
-const regress = (raw, n, leagueMean) =>
-  leagueMean == null ? raw : (raw * n + leagueMean * WHIFF_REGRESS_K) / (n + WHIFF_REGRESS_K)
-
 const [pitArsenalRows, batArsenalRows] = [
   await fetchArsenalBoard('pitcher', { season }),
   await fetchArsenalBoard('batter', { season }),
@@ -198,34 +188,7 @@ function pitcherArsenalMap(rows) {
   return map
 }
 
-// A single global "pitches seen" floor makes this ALL FASTBALL — a splitter
-// specialist's batters never clear a floor tuned for four-seamers. The
-// regression above (toward the TYPE's own mean, weighted by pitches seen)
-// is what keeps a thin-sample curveball or sweeper row honest instead of
-// excluding it outright; the flat PA_MIN here is the payload-size floor only.
-function batterArsenalMap(rows) {
-  const map = {}
-  for (const r of rows) {
-    const id = r.player_id
-    const type = r.pitch_type
-    if (!id || !type) continue
-    const pa = num(r.pa)
-    const pitches = num(r.pitches)
-    const whiff = num(r.whiff_percent)
-    const ba = num(r.ba)
-    if (pa == null || pitches == null || whiff == null || pa < BATTER_PA_MIN) continue
-    const lg = arsenalLeague.bat[type]?.m
-    if (!map[id]) map[id] = {}
-    map[id][type] = {
-      whiff: round1(regress(whiff, pitches, lg)),
-      ba: ba == null ? null : Math.round(ba * 1000) / 1000,
-      pa,
-    }
-  }
-  return map
-}
-
-const arsenal = { pit: pitcherArsenalMap(pitArsenalRows), bat: batterArsenalMap(batArsenalRows) }
+const arsenal = { pit: pitcherArsenalMap(pitArsenalRows), bat: batterArsenalMap(batArsenalRows, arsenalLeague.bat) }
 
 let arsenalThin = 0
 for (const [group, rows] of [['pit', pitArsenalRows], ['bat', batArsenalRows]]) {
@@ -234,6 +197,12 @@ for (const [group, rows] of [['pit', pitArsenalRows], ['bat', batArsenalRows]]) 
     console.error(`WARNING: arsenal.${group}.whiff is ${filled}/${rows.length} filled — selection id may have changed`)
     arsenalThin++
   }
+}
+
+// est_woba rides the batter row for the Scout page. A renamed column comes back
+// blank, not as an error (scripts/lib/savant.mjs header): warn, keep the file.
+if (batArsenalRows.filter((r) => num(r.est_woba) != null).length < batArsenalRows.length / 2) {
+  console.error('WARNING: arsenal.bat.estWoba is mostly blank — the est_woba column may have been renamed')
 }
 
 if (!Object.keys(arsenal.pit).length || !Object.keys(arsenal.bat).length) {

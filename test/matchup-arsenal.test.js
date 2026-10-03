@@ -3,6 +3,7 @@ import test from 'node:test'
 import { buildArsenalNote } from '../src/api/matchup/arsenal.js'
 import { arsenalRatesFor, arsenalFor, arsenalLeagueFor, arsenalZScore } from '../src/api/matchup/savant.js'
 import { SHORT_MAX } from '../src/api/matchup/voice.js'
+import { batterArsenalMap } from '../scripts/lib/savant.mjs'
 
 // Representative per-pitch-type league baselines — not a live probe (this
 // family's real numbers are re-probed at generation time per the issue's own
@@ -37,6 +38,34 @@ const WEAK = [{ whiff: 57, ba: 0.22, pa: 60 }, { usage: 20, whiff: 18 }]
 const NEITHER = [{ whiff: 10, ba: 0.2, pa: 80 }, { usage: 20, whiff: 24 }]
 // A smaller mismatch than MISMATCH — both sides just clear T, for the scoring test.
 const MILD_MISMATCH = [{ whiff: 41, ba: 0.25, pa: 100 }, { usage: 20, whiff: 37.5 }]
+
+// --- the hitter's est. wOBA per pitch type (generator + reader) --------------
+
+// One Savant board row, as parseCsv returns it: every value is a string.
+const boardRow = (over = {}) => ({
+  player_id: '592450', pitch_type: 'FF', pa: '120', pitches: '400', whiff_percent: '22.0',
+  ba: '.281', est_woba: '.4237', ...over,
+})
+
+test('batterArsenalMap carries est_woba as a number rounded to 3 places', () => {
+  const row = batterArsenalMap([boardRow()], {})[592450].FF
+  assert.equal(row.estWoba, 0.424)
+  assert.equal(row.pa, 120)
+})
+
+test('a blank est_woba column gives null and does not drop the row', () => {
+  const row = batterArsenalMap([boardRow({ est_woba: '' })], {})[592450].FF
+  assert.equal(row.estWoba, null)
+  assert.equal(row.whiff, 22) // the rest of the row still ships
+})
+
+test('the reader returns estWoba, and tolerates a file written before the field existed', () => {
+  const now = { arsenal: { bat: { 1: { FF: { whiff: 22, ba: 0.281, pa: 120, estWoba: 0.424 } } } } }
+  const old = { arsenal: { bat: { 1: { FF: { whiff: 22, ba: 0.281, pa: 120 } } } } }
+  assert.equal(arsenalRatesFor(now, 1, 'FF', 'batting').estWoba, 0.424)
+  assert.doesNotThrow(() => arsenalRatesFor(old, 1, 'FF', 'batting'))
+  assert.equal(arsenalRatesFor(old, 1, 'FF', 'batting').estWoba, undefined)
+})
 
 // --- the readers -------------------------------------------------------------
 

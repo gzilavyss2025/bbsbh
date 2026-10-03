@@ -177,6 +177,7 @@ const TeamTransactionsPage = lazyNamed(
 )
 const LeadersPage = lazyNamed(() => import('./screens/LeadersPage.jsx'), 'LeadersPage')
 const UmpirePage = lazyNamed(() => import('./screens/UmpirePage.jsx'), 'UmpirePage')
+const ScoutPage = lazyNamed(() => import('./screens/scout/ScoutPage.jsx'), 'ScoutPage')
 const UmpireRankingsPage = lazyNamed(
   () => import('./screens/UmpireRankingsPage.jsx'),
   'UmpireRankingsPage',
@@ -424,6 +425,19 @@ export default function App() {
   } else if (route.name === 'admin') {
     content = (
       <AdminCopyPage onBack={() => go('/')} focus={route.focus} returnTo={route.returnTo} />
+    )
+  } else if (route.name === 'scout') {
+    content = (
+      <ScoutPage
+        pitcherId={route.pitcherId}
+        hitterId={route.hitterId}
+        asOf={route.asOf}
+        view={route.view}
+        scope={route.scope}
+        pitch={route.pitch}
+        hand={route.hand}
+        metric={route.metric}
+      />
     )
   } else if (route.name === 'umpire') {
     content = <UmpirePage id={route.id} />

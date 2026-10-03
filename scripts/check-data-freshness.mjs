@@ -56,6 +56,7 @@ export const EXCEPT = {
   'milb-history.json': 'hand-run backfill of completed MiLB seasons',
   'game-notes-corroboration.json': 'hand-run audit sample, not a nightly product',
   'trade-deadline/': 'hand-run; the deadline passes once a year',
+  'xwoba-table/': 'hand-run a few times a season (gen-xwoba-table.mjs, ADR-0097); a table holds for a month',
   'contracts-history/': 'hand-run from committed CSVs (ADR-0066)',
   'prospect-rank-history.json': 'hand-run; the 2005-2024 rankings are frozen and the file carries no clock (#1111)',
   // Frozen ON PURPOSE, which is the one shape this guard cannot tell from a
@@ -121,7 +122,10 @@ const DEFAULT_KEYS = ['generatedAt']
 // benefit (gen-schedule-shape.mjs records the same trap at its own write site).
 // Lowered 23 -> 22 when former-teammates/ started to write an index.json
 // (#1145), so the slot it freed cannot be reused in silence.
-export const UNSTAMPED_BUDGET = 22
+// Raised 22 -> 23 for hitter-grid/ (ADR-0096), a sharded season store like
+// pitch-command/ beside it: 101 shards a season, rewritten only when a game
+// lands. Its files arrive with the first 2026 re-walk.
+export const UNSTAMPED_BUDGET = 23
 
 const dig = (obj, dotted) => dotted.split('.').reduce((o, k) => (o == null ? o : o[k]), obj)
 
