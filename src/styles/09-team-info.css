@@ -134,6 +134,14 @@
 .team-hub :where(.card):not(:where(.card .card)) {
   margin-top: var(--space-4);
 }
+/* A card that is a direct child of a Stack is spaced by that Stack (the Roster
+   tab, #1180), whatever margin its namespace carries: .roster-super sets its
+   own 16px, which the All-Star rosters page relies on. Three classes beat
+   both. The rules above stay for the other tabs: Overview, Games, Numbers
+   and Minors hold blocks a Stack would move. */
+.team-hub .stack > .card {
+  margin-top: 0;
+}
 
 
 /* Transactions carries a swipeable deck that deliberately bleeds past the
