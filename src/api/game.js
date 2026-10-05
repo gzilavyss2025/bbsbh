@@ -359,7 +359,7 @@ export function managerLabel(mgr) {
 // Verified against /api/v1/people/{id}/stats?stats=byDateRange on 2026-10-01.
 // ---------------------------------------------------------------------------
 
-export async function fetchPitcherSeasonLine(personId, season, sportId = 1, officialDate = null, { postseason = false } = {}) {
+async function readPitcherSeasonLine(personId, season, sportId = 1, officialDate = null, { postseason = false } = {}) {
   if (!personId || !season || !officialDate) return null
   try {
     const sport = sportId && sportId !== 1 ? `&sportId=${sportId}` : ''
@@ -451,7 +451,7 @@ async function fetchSeriesGameNumber(gamePk) {
 
 const POSTSEASON_TYPES = new Set(['F', 'D', 'L', 'W'])
 
-export async function fetchPitcherLastGame(personId, season, cutoffDate, cutoffGameNumber = 1) {
+async function readPitcherLastGame(personId, season, cutoffDate, cutoffGameNumber = 1) {
   if (!personId || !season) return null
   const gameNumber = (s) => s.game?.gameNumber ?? 1
   const before = (s) =>
@@ -547,3 +547,19 @@ export async function fetchPitcherSeasonVsOpponent(personId, season, opponentTea
     baseOnBalls,
   }
 }
+
+// Both reads end the day before the game (ADR-0088), so one answer holds for the
+// whole session. Memoize the REQUEST, as staticJson does: the Lens notice and
+// the pitcher sheet's card ask for the same arm, and the second ask must not
+// go to the network again. A failure is kept too, as there.
+function memoRequest(read) {
+  const seen = new Map()
+  return (...args) => {
+    const key = JSON.stringify(args)
+    if (!seen.has(key)) seen.set(key, read(...args))
+    return seen.get(key)
+  }
+}
+
+export const fetchPitcherSeasonLine = memoRequest(readPitcherSeasonLine)
+export const fetchPitcherLastGame = memoRequest(readPitcherLastGame)

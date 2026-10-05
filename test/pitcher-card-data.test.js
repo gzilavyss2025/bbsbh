@@ -278,3 +278,30 @@ test('in game 1 of a doubleheader, neither game of that day counts', async () =>
   const last = await withApi(dhRoute, () => fetchPitcherLastGame(1, 2026, '2026-07-04', 1))
   assert.equal(last, null)
 })
+
+// ---- One request per arm (#1429) -------------------------------------------
+
+test('a second ask for the same pitcher, game and date makes no new request', async () => {
+  await withApi(
+    () => fixture('lee-669276-bydaterange-R-thru-2026-09-29'),
+    async (urls) => {
+      // An id no other test uses, so this test owns its cache entries.
+      const [line1, last1] = await Promise.all([
+        fetchPitcherSeasonLine(900001, 2026, 1, '2026-09-30'),
+        fetchPitcherLastGame(900001, 2026, '2026-09-30', 1),
+      ])
+      const asked = urls.length
+      assert.ok(asked > 0)
+      const [line2, last2] = await Promise.all([
+        fetchPitcherSeasonLine(900001, 2026, 1, '2026-09-30'),
+        fetchPitcherLastGame(900001, 2026, '2026-09-30', 1),
+      ])
+      assert.equal(urls.length, asked)
+      assert.deepEqual(line2, line1)
+      assert.deepEqual(last2, last1)
+      // A different game date is a different question.
+      await fetchPitcherSeasonLine(900001, 2026, 1, '2026-10-01')
+      assert.equal(urls.length, asked + 1)
+    },
+  )
+})
