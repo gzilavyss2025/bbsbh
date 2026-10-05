@@ -38,6 +38,8 @@
 // parks carry no pitch-tracking so gen-umpire-accuracy.mjs can't score them.
 // Game dates/assignments carry no score, so the file is spoiler-free.
 // Run by hand: node scripts/gen-umpires.mjs [--season=2026]
+// 2023 to 2025 were written this way once (#1202, the season views' backfill).
+// The nightly run passes no season, so it rebuilds only the current one.
 import { dirname, join } from 'node:path'
 import { readdir, rm } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'

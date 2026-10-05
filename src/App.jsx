@@ -411,10 +411,14 @@ export default function App() {
   let content
   const Bare = BARE_ROUTES[route.name]
   const IdPage = ID_ROUTES[route.name]
+  // `seasonYear` and `vs` are a season view's season (#1202, lib/route.js's
+  // seasonParams); undefined on every other route, and ignored there.
   if (Bare) {
-    content = <Bare />
+    content = <Bare seasonYear={route.seasonYear} vs={route.vs} />
   } else if (IdPage) {
-    content = <IdPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
+    content = (
+      <IdPage id={route.id} asOf={route.asOf} sportId={route.sportId} seasonYear={route.seasonYear} vs={route.vs} />
+    )
   } else if (route.name === 'logos') {
     content = <LogoSheet onBack={() => go('/')} />
   } else if (route.name === 'about') {
@@ -441,7 +445,7 @@ export default function App() {
       />
     )
   } else if (route.name === 'umpire') {
-    content = <UmpirePage id={route.id} />
+    content = <UmpirePage id={route.id} seasonYear={route.seasonYear} vs={route.vs} />
   } else if (route.name === 'situational-records') {
     content = (
       <SituationalRecordsPage

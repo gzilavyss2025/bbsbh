@@ -176,5 +176,48 @@ its own positional `season`.)
   opposing-starter arsenal, the pitcher card, and every umpire surface on a lineup,
   box score, preview or innings page. An old 2026 game still reads 2026 after 2027
   starts. A spring 2027 game reads 2026 until 2027 is on file.
-- The URL and the picker are #1202. Until then, the umpire modal on an old game
-  shows that game's season, and its "Full umpire page" link shows the current one.
+- The URL and the picker are #1202 (the next addendum). The umpire modal's "Full
+  umpire page" link now opens the game's season.
+
+## Addendum (#1202): the season views
+
+Gary's answers to the four #1199 questions (2026-10-05): all surfaces in one PR;
+"all" is 2026 onward, except umpire assignments, which go back to 2023; compare is
+a change column with a side-by-side toggle on a board, and the two seasons stacked
+on one person's card; the winter default is the last complete season, which is
+`current` in `seasons.json`.
+
+- **The address.** A season view takes one more path segment, a year or `all`,
+  and a compare season as `?vs={year}`: `/fouls/2026`, `/fouls/all`,
+  `/fouls/2027?vs=2026`. The five views are `/fouls`, `/umpires`,
+  `/abs-challenges`, `/umpire/{name-id}` and `/player/{name-id}/analytics`.
+  `src/lib/seasons/route.js` parses and builds them. A malformed year is dropped,
+  so the page shows the current season. A well-formed year that is not on file
+  is also the current season: `src/lib/seasons/view.js`'s `resolveSeasonView`
+  uses the same rule as `seasonFolderOf`.
+- **The picker** is `components/season/SeasonPicker.jsx`: Pill controls (a pill
+  control filters the content under it, #1131). It shows only when a store has
+  more than one season. The "all" choice is labelled with its years
+  ("All 2026–2027"), never only "All".
+- **Compare.** A board adds one column beside its main figure:
+  `boardCompare` words a change with what it compares ("+3.1% vs 2026"), or prints
+  the other season's figure in side-by-side mode. A row with no row in the vs
+  season gets a dash, never a zero. A person's card stacks the two seasons
+  (`components/season/SeasonStack.jsx`), each with the card's own empty line.
+- **The player's Analytics tab** moves four cards: Foul balls, Pitches, Spray map
+  and Pitches like. Every other card on the tab is the current season. The current
+  season's Pitches card stays statsapi's mix; another season reads the
+  pitch-arsenal shard (`arsenalMixRows`, `loadArsenalSeason`). The tab reads the
+  fouls index for the season list, because one nightly run writes all six stores.
+- **The umpire backfill.** `umpires/2023` to `umpires/2025` were written once by
+  hand (`node scripts/gen-umpires.mjs --season=YYYY`). The nightly run rebuilds
+  only the current season. Accuracy starts in 2026, so `api/umpires.js`'s
+  `beforeAccuracy` gives a season BEFORE the accuracy store's first season no
+  accuracy at all. `seasonFolderOf`'s fallback to `current` is for a season AFTER
+  the last on file (a spring game page), and it would put 2026 accuracy on a 2024
+  page.
+- **Not yet.** No surface writes `fouls/all/fouls.json` until the nightly run does;
+  until then `/fouls/all` shows the board's normal empty state. Only 2026 is on
+  file in five of the six stores, so their pickers stay hidden until 2027 data
+  lands. `test/season-view.test.js` and `test/umpire-season-backfill.test.js` hold
+  the two-season fixtures.

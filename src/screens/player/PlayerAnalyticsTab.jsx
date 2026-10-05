@@ -1,5 +1,9 @@
 import { loadPlayerCore } from '../../api/player/core.js'
-import { loadPlayerAnalytics } from '../../api/player/analytics.js'
+import { loadArsenalSeason, loadPlayerAnalytics } from '../../api/player/analytics.js'
+import { playerTabPath } from '../../lib/route.js'
+import { useSeasonView } from '../../hooks/seasons/useSeasonView.js'
+import { SeasonPicker } from '../../components/season/SeasonPicker.jsx'
+import { SeasonStack } from '../../components/season/SeasonStack.jsx'
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { StatcastPercentiles } from '../../components/charts/StatcastPercentiles.jsx'
@@ -29,9 +33,31 @@ import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 // Role-agnostic, like every other tab here: a pitcher's page renders this same
 // shelf, and the `blocks.map` two-block shape is what lets a two-way player have
 // one of each.
-export function PlayerAnalyticsTab({ id, asOf, sportId }) {
+//
+// A SEASON VIEW (#1202): `seasonYear` (a year or 'all') and `vs` come from the
+// address ('/player/{name-id}/analytics/2026?vs=2025'). The picker moves the
+// four cards that read a season store — Foul balls, Pitches, Spray map,
+// Pitches like — and says so; every other card here is the current season
+// from statsapi or Savant. The six stores are written by one nightly run, so
+// the fouls index stands for all four. Compare stacks the two seasons inside
+// each card (SeasonStack).
+export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs }) {
   const core = useAsync(() => loadPlayerCore(id, asOf), [id, asOf])
   const analytics = useAsync(() => loadPlayerAnalytics(id, asOf), [id, asOf])
+  const view = useSeasonView('fouls', { seasonYear, vs })
+  // The current season's Pitches card is statsapi's (loadPlayerAnalytics). A
+  // past season, or all of them, reads the pitch-arsenal store instead.
+  const picked = view != null && view.shown !== view.current ? view.shown : null
+  const pitching = analytics.data?.blocks?.find((b) => b.group === 'pitching') ?? null
+  const isMlb = pitching?.tileSportId === 1
+  const shelf = useAsync(
+    () => (pitching && picked != null ? loadArsenalSeason(id, isMlb, { seasonYear: picked }) : Promise.resolve(null)),
+    [id, pitching != null, isMlb, picked],
+  )
+  const vsShelf = useAsync(
+    () => (pitching && view?.vs != null ? loadArsenalSeason(id, isMlb, { seasonYear: view.vs }) : Promise.resolve(null)),
+    [id, pitching != null, isMlb, view?.vs],
+  )
   const back = () => window.history.back()
 
   const gate = AsyncGate({
@@ -62,8 +88,23 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
         data.prospectCard.ageEdge),
   )
 
+  const label = view?.label
+  // Until the index lands, the address's own season (the reader resolves it).
+  const season = { seasonYear: view?.shown ?? seasonYear, label, vs: view?.vs ?? null }
+  const pathFor = (o) => playerTabPath(id, 'analytics', { name: bio.fullName, d: asOf, s: sportId, ...o })
+  // A pitching block's Pitches card and "Pitches like" for the picked season:
+  // the loader's own block for the current season, else the store's shelf.
+  const arsenalOf = (block) =>
+    picked == null
+      ? { arsenal: block.arsenal, heat: block.heat, tto: block.arsenalTto, sides: block.arsenalSides, similar: block.similar }
+      : shelf.data
+
   return (
     <PlayerHubShell core={core.data} asOf={asOf} sportId={sportId} active="analytics">
+      <SeasonPicker view={view} pathFor={pathFor} />
+      {view?.seasons?.length > 1 && (
+        <p className="hint">The season changes four cards: Foul balls, Pitches, Spray map and Pitches like.</p>
+      )}
       {blocks.map((block) => (
         <section key={block.group}>
           {/* The tab bar names this section now, so there is no umbrella
@@ -111,19 +152,14 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
           {/* Season foul-ball line (gen-fouls.mjs) — a current-day-only
               card that hides under a spoiler asOf cutoff, like the
               Milestone Watch projection. */}
-          <FoulCard playerId={bio.id} group={block.group} asOf={asOf} />
+          <FoulCard playerId={bio.id} group={block.group} asOf={asOf} {...season} />
 
-          {block.arsenal && (
-            <>
-              <SectionHead look="rule" note="share of pitches · avg velo">Pitches</SectionHead>
-              <PitchMix
-                arsenal={block.arsenal}
-                heat={block.heat}
-                tto={block.arsenalTto}
-                sides={block.arsenalSides}
-              />
-            </>
-          )}
+          <PitchesCard
+            mine={block.group === 'pitching' ? arsenalOf(block) : null}
+            then={block.group === 'pitching' ? vsShelf.data : null}
+            label={label}
+            vs={season.vs}
+          />
 
           {/* Directly under the arsenal it completes: that card says WHAT he
               throws and HOW HARD, this says WHERE HE PUTS IT. Below Triple-A
@@ -177,7 +213,7 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
               (it owns its own section title and its own fetch) and it stands
               itself down for a pitcher, a spoiler `asOf`, or a batter under
               the balls-in-play floor. */}
-          <SprayMapSection playerId={bio.id} group={block.group} asOf={asOf} />
+          <SprayMapSection playerId={bio.id} group={block.group} asOf={asOf} {...season} />
 
           {/* Directly under the mix it's derived from — the three players
               whose own profile looks most like the rows just above, which
@@ -189,13 +225,10 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
               NO section note, unlike its neighbours: what "closest" is
               measured on now lives in the card's own legend, which names the
               actual inputs (SimilarPlayerGrid.jsx). */}
-          {block.similar?.length > 0 && (
-            block.group === 'pitching' ? (
-              <>
-                <SectionHead look="rule">Pitches like</SectionHead>
-                <SimilarPitchers similar={block.similar} />
-              </>
-            ) : (
+          {block.group === 'pitching' ? (
+            <PitchesLike mine={arsenalOf(block)?.similar} then={vsShelf.data?.similar} label={label} vs={season.vs} />
+          ) : (
+            block.similar?.length > 0 && (
               <>
                 <SectionHead look="rule">Hits like</SectionHead>
                 <SimilarHitters similar={block.similar} />
@@ -224,5 +257,56 @@ export function PlayerAnalyticsTab({ id, asOf, sportId }) {
         </section>
       )}
     </PlayerHubShell>
+  )
+}
+
+// The Pitches card for the picked season (`mine`, from arsenalOf), and with a
+// compare, the vs season's under it (`then`). No card when neither season has
+// a mix: the card's own empty state.
+function PitchesCard({ mine, then, label, vs }) {
+  if (!mine?.arsenal && !then?.arsenal) return null
+  const mix = (a) => a?.arsenal && <PitchMix arsenal={a.arsenal} heat={a.heat} tto={a.tto} sides={a.sides} />
+  return (
+    <>
+      <SectionHead look="rule" note={label ? `${label} · share of pitches · avg velo` : 'share of pitches · avg velo'}>
+        Pitches
+      </SectionHead>
+      {vs == null ? (
+        mix(mine)
+      ) : (
+        <SeasonStack
+          empty="Too few pitches on file"
+          seasons={[
+            { year: label, body: mix(mine) },
+            { year: vs, body: mix(then) },
+          ]}
+        />
+      )}
+    </>
+  )
+}
+
+// "Pitches like" for the picked season, stacked over the vs season's on a
+// compare. The pool is that season's, so the three names can change.
+function PitchesLike({ mine, then, label, vs }) {
+  if (!mine?.length && !then?.length) return null
+  const list = (s) => (s?.length > 0 ? <SimilarPitchers similar={s} /> : null)
+  return (
+    <>
+      <SectionHead look="rule" note={label || undefined}>
+        Pitches like
+      </SectionHead>
+      {vs == null ? (
+        list(mine)
+      ) : (
+        <SeasonStack
+          empty="No close match on file"
+          seasons={[
+            { year: label, body: list(mine) },
+            { year: vs, body: list(then) },
+          ]}
+        />
+      )}
+    </>
   )
 }

@@ -4,6 +4,7 @@ import { fetchFoulsFor, batterFoulLine, pitcherFoulLine } from '../../api/fouls.
 import { useAsync } from '../../hooks/useAsync.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { FactGrid } from '../ui/frame/FactGrid.jsx'
+import { SeasonStack } from '../season/SeasonStack.jsx'
 
 // The player page's foul-ball card — his season foul line from the nightly
 // gen-fouls.mjs sweep, batter or pitcher flavored to match the stat block
@@ -11,19 +12,57 @@ import { FactGrid } from '../ui/frame/FactGrid.jsx'
 // precompute can't be cut to a historical `asOf`, so a spoiler-scoped page
 // (linked from a sealed game) hides it — same rule the Milestone Watch
 // projection follows. Null data (MiLB, file missing, no line) → no card.
-export function FoulCard({ playerId, group, asOf }) {
+//
+// A season view (#1202): `seasonYear` (a year or 'all') and `label` (the years
+// it covers) are the Analytics tab's picked season; `vs` stacks a second
+// season under it. With neither season's line, no card.
+export function FoulCard({ playerId, group, asOf, seasonYear, label, vs = null }) {
   const navigate = useNav()
   const skip = !!asOf
   // His bucket, not the league — see fetchFoulsFor.
   const { data } = useAsync(
-    () => (skip ? Promise.resolve(null) : fetchFoulsFor(playerId)),
-    [skip, playerId],
+    () => (skip ? Promise.resolve(null) : fetchFoulsFor(playerId, { seasonYear })),
+    [skip, playerId, seasonYear],
   )
-  if (skip || !data) return null
+  const { data: before } = useAsync(
+    () => (skip || vs == null ? Promise.resolve(null) : fetchFoulsFor(playerId, { seasonYear: vs })),
+    [skip, playerId, vs],
+  )
+  if (skip) return null
 
-  const line = group === 'pitching' ? pitcherFoulLine(data, playerId) : batterFoulLine(data, playerId)
-  if (!line) return null
+  const lineOf = (d) => (!d ? null : group === 'pitching' ? pitcherFoulLine(d, playerId) : batterFoulLine(d, playerId))
+  const line = lineOf(data)
+  const prev = vs == null ? null : lineOf(before)
+  if (!line && !prev) return null
 
+  return (
+    <div className="foulcard">
+      <SectionHead look="rule" note={label || 'this season'}>
+        Foul balls
+      </SectionHead>
+      {vs == null ? (
+        <FoulTiles line={line} group={group} />
+      ) : (
+        <SeasonStack
+          empty="No foul balls on file"
+          seasons={[
+            { year: label, body: line && <FoulTiles line={line} group={group} /> },
+            { year: vs, body: prev && <FoulTiles line={prev} group={group} /> },
+          ]}
+        />
+      )}
+      <button
+        type="button"
+        className="plink foulcard__door"
+        onClick={() => navigate(foulsPath({ seasonYear, vs }))}
+      >
+        League foul tracker ›
+      </button>
+    </div>
+  )
+}
+
+function FoulTiles({ line, group }) {
   const tiles =
     group === 'pitching'
       ? [
@@ -37,24 +76,15 @@ export function FoulCard({ playerId, group, asOf }) {
           { k: 'At 2 strikes', v: line.twoStrikeFouls },
           { k: 'Game high', v: line.maxGameFouls ?? '—' },
         ]
-
   return (
-    <div className="foulcard">
-      <SectionHead look="rule" note="this season">
-        Foul balls
-      </SectionHead>
-      <FactGrid>
-        {tiles.map((t) => (
-          <div className="fact" key={t.k}>
-            <dt className="fact__label">{t.k}</dt>
-            <dd className="fact__value">{t.v}</dd>
-          </div>
-        ))}
-      </FactGrid>
-      <button type="button" className="plink foulcard__door" onClick={() => navigate(foulsPath())}>
-        League foul tracker ›
-      </button>
-    </div>
+    <FactGrid>
+      {tiles.map((t) => (
+        <div className="fact" key={t.k}>
+          <dt className="fact__label">{t.k}</dt>
+          <dd className="fact__value">{t.v}</dd>
+        </div>
+      ))}
+    </FactGrid>
   )
 }
 

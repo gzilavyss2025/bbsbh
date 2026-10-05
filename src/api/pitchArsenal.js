@@ -119,6 +119,25 @@ export function pitchArsenalFor(data, personId, isMlb, stand = null) {
     .sort((a, b) => b.pitches - a.pitches)
 }
 
+// The player page's Pitches card on a PICKED season (#1202). The live card
+// reads statsapi's pitchArsenal (person/advanced.js's arsenalView) for the
+// current season; a past season, or every season combined, comes from this
+// store. Same rows, so the card changes nothing: { code, name, velo, usage (a
+// fraction), count }, most-thrown first. Null under the same floor as
+// pitchArsenalFor — a season he did not pitch is no card, never zeros.
+export function arsenalMixRows(data, personId, isMlb) {
+  const rows = pitchArsenalFor(data, personId, isMlb)
+  return rows
+    ? rows.map((t) => ({
+        code: t.code,
+        name: t.description || t.code,
+        velo: t.avgVelo ?? null,
+        usage: t.pct / 100,
+        count: t.pitches,
+      }))
+    : null
+}
+
 // One pitch type as ONE side of the plate saw it, unpacked from the `vs` pair
 // the generator writes: [pitches, avgVelo] and, when that side reached past a
 // first look, its own times-through pairs. Null for a side he never threw this

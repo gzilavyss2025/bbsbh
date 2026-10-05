@@ -96,6 +96,12 @@ function seasonIndexOf(store) {
   return seasonIndexes.get(store)()
 }
 
+// The whole index, `{ seasons, current }`, for a page's season picker
+// (lib/seasons/view.js's resolveSeasonView).
+export function seasonIndex(store) {
+  return seasonIndexOf(store)
+}
+
 // The season a store serves when the caller names none, or null.
 export async function currentSeasonOf(store) {
   return (await seasonIndexOf(store)).current

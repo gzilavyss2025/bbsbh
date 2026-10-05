@@ -1,7 +1,7 @@
 // This page's own partial, kept out of the core sheet (src/index.css) so only
 // /fouls pays for it. It loads after the core, which is the order it had there.
 import '../styles/43-foul-tracker.css'
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { fetchFouls, topFoulGames, teamPitchTypeRates } from '../api/fouls.js'
 import { fetchGamesByPk } from '../api/schedule.js'
 import { fetchPositions } from '../api/person-fetch.js'
@@ -10,7 +10,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { monthDayYear, weekdayAbbr, isWithinDays } from '../lib/dates.js'
 import { ordinal } from '../lib/format.js'
-import { gamePath } from '../lib/route.js'
+import { foulsPath, gamePath } from '../lib/route.js'
 import { useNav } from '../lib/nav.js'
 import { filterByTeam } from '../lib/teamFilter.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
@@ -28,6 +28,9 @@ import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { teamAbbr, teamFullName, teamClubName, favoriteAccentColor } from '../lib/teams.js'
 import { Pill } from '../components/ui/control/Pill.jsx'
 import { Table } from '../components/ui/table/Table.jsx'
+import { SeasonPicker } from '../components/season/SeasonPicker.jsx'
+import { useSeasonView } from '../hooks/seasons/useSeasonView.js'
+import { boardCompare } from '../lib/seasons/view.js'
 
 // The Foul Tracker — season-long foul-ball counting nobody else publishes:
 // league leaders (total, per game, single-game highs), two-strike "spoiling",
@@ -61,9 +64,19 @@ function favRowProps(teamId, favoriteTeamId) {
   return { className: 'is-me', style: { '--fav-accent': favoriteAccentColor(teamId) } }
 }
 
-export function FoulTrackerPage() {
+// A season view (#1202): `seasonYear` and `vs` come from the address.
+export function FoulTrackerPage({ seasonYear, vs }) {
   useDocumentTitle('Foul Tracker')
-  const { loading, error, data } = useAsync(() => fetchFouls(), [])
+  const view = useSeasonView('fouls', { seasonYear, vs })
+  const shown = view?.shown
+  const fouls = useAsync(() => (view ? fetchFouls({ seasonYear: shown }) : Promise.resolve(null)), [view != null, shown])
+  const { error, data } = fouls
+  const loading = !view || fouls.loading
+  const { data: prev } = useAsync(() => (view?.vs ? fetchFouls({ seasonYear: view.vs }) : Promise.resolve(null)), [view?.vs])
+  const [mode, setMode] = useState('change')
+  // A board's compare column: its figure, found again in the vs season.
+  const cmp = (group, format, value) =>
+    prev ? boardCompare({ vs: view.vs, mode, format, value, prevOf: (r) => prev[group]?.[r.id] }) : null
   const { favoriteTeamId } = useFavoriteTeam()
   const [filterTeamId, setFilterTeamId] = useState(null)
 
@@ -122,8 +135,10 @@ export function FoulTrackerPage() {
         <h1 className="topbar__title">Foul Tracker</h1>
       </header>
 
+      <SeasonPicker view={view} pathFor={foulsPath} mode={mode} onMode={setMode} />
+
       <p className="hint foultracker__intro">
-        {data?.season ?? 'This'} season’s foul balls, counted from every MLB game’s
+        {view?.label || 'This'} {shown === 'all' ? 'seasons’' : 'season’s'} foul balls, counted from every MLB game’s
         pitch-by-pitch{data?.gamesIngested ? ` (${data.gamesIngested} games so far)` : ''}.
         Fouls hit <em>at</em> two strikes are tracked separately — they’re the ones that
         extend at-bats, and batters who reach two strikes by fouling hit .291 in those
@@ -156,6 +171,7 @@ export function FoulTrackerPage() {
             rows={boards.batterTotal}
             cols={['Fouls', 'Per game', 'With 2 Strikes']}
             cells={(b) => [b.fouls, (b.fouls / b.g).toFixed(1), b.twoStrikeFouls]}
+            compare={cmp('batters', 'count', (b) => b.fouls)}
             featured
             favoriteTeamId={highlightTeamId}
             positions={positions}
@@ -165,6 +181,7 @@ export function FoulTrackerPage() {
             rows={boards.batterRate}
             cols={['Per game', 'Fouls', 'With 2 Strikes']}
             cells={(b) => [(b.fouls / b.g).toFixed(2), b.fouls, b.twoStrikeFouls]}
+            compare={cmp('batters', 'dec2', (b) => b.fouls / b.g)}
             featured
             favoriteTeamId={highlightTeamId}
             positions={positions}
@@ -202,6 +219,7 @@ export function FoulTrackerPage() {
             rows={boards.pitcherRate}
             cols={['Foul%', 'Fouls']}
             cells={(p) => [pct1(p.fouls / p.pitches), p.fouls]}
+            compare={cmp('pitchers', 'pct', (p) => p.fouls / p.pitches)}
             featured
             favoriteTeamId={highlightTeamId}
             positions={positions}
@@ -211,6 +229,7 @@ export function FoulTrackerPage() {
             rows={boards.pitcherRateLow}
             cols={['Foul%', 'Fouls']}
             cells={(p) => [pct1(p.fouls / p.pitches), p.fouls]}
+            compare={cmp('pitchers', 'pct', (p) => p.fouls / p.pitches)}
             featured
             favoriteTeamId={highlightTeamId}
             positions={positions}
@@ -225,7 +244,11 @@ export function FoulTrackerPage() {
 
           <ByInning league={boards.league} />
           <ByPitchType league={boards.league} teamRates={boards.teamPitchTypeRates} />
-          <TeamBoard teams={boards.teamRows} favoriteTeamId={highlightTeamId} />
+          <TeamBoard
+            teams={boards.teamRows}
+            favoriteTeamId={highlightTeamId}
+            compare={cmp('teams', 'dec2', (t) => t.fouls / t.g)}
+          />
         </>
       )}
 
@@ -381,7 +404,8 @@ function FoulFeatured({ player, favoriteTeamId, positions }) {
 // `featured`: additionally spotlights rank 1 in a FoulFeatured headshot card
 // above the table — the table still lists him at rank 1 too, so a reader
 // scanning the ledger alone still sees the full ranking.
-function FoulLeaderBoard({ title, rows, cols, cells, featured = false, favoriteTeamId, positions }) {
+// `compare` (seasons/view.js's boardCompare): one column beside the first figure (#1202).
+function FoulLeaderBoard({ title, rows, cols, cells, compare, featured = false, favoriteTeamId, positions }) {
   if (!rows || rows.length === 0) return null
   const lead = featured ? rows[0] : null
   return (
@@ -392,8 +416,11 @@ function FoulLeaderBoard({ title, rows, cols, cells, featured = false, favoriteT
           <thead>
             <tr>
               <th className="team">Player</th>
-              {cols.map((c) => (
-                <th key={c}>{c}</th>
+              {cols.map((c, j) => (
+                <Fragment key={c}>
+                  <th>{c}</th>
+                  {j === 0 && compare && <th>{compare.head}</th>}
+                </Fragment>
               ))}
             </tr>
           </thead>
@@ -406,7 +433,10 @@ function FoulLeaderBoard({ title, rows, cols, cells, featured = false, favoriteT
                   <span className="foulboard__team">{teamAbbr({ id: r.teamId })}</span>
                 </td>
                 {cells(r).map((v, j) => (
-                  <td key={j}>{v}</td>
+                  <Fragment key={j}>
+                    <td>{v}</td>
+                    {j === 0 && compare && <td>{compare.cell(r)}</td>}
+                  </Fragment>
                 ))}
               </tr>
             ))}
@@ -1125,7 +1155,7 @@ function PitchCategoryGroup({ group }) {
   )
 }
 
-function TeamBoard({ teams, favoriteTeamId }) {
+function TeamBoard({ teams, favoriteTeamId, compare }) {
   if (!teams || teams.length === 0) return null
   return (
     <BoardCard title="Team fouls per game">
@@ -1141,6 +1171,7 @@ function TeamBoard({ teams, favoriteTeamId }) {
           <tr>
             <th className="team">Team</th>
             <th>Per game</th>
+            {compare && <th>{compare.head}</th>}
             <th>Fouls</th>
             <th>With 2 Strikes</th>
             <th>% With 2 Strikes</th>
@@ -1155,6 +1186,7 @@ function TeamBoard({ teams, favoriteTeamId }) {
                 <span className="sr-only">{teamFullName(t.id)}</span>
               </td>
               <td>{(t.fouls / t.g).toFixed(1)}</td>
+              {compare && <td>{compare.cell(t)}</td>}
               <td>{t.fouls.toLocaleString('en-US')}</td>
               <td>{t.twoStrikeFouls.toLocaleString('en-US')}</td>
               <td>{t.fouls > 0 ? pct1(t.twoStrikeFouls / t.fouls) : '—'}</td>

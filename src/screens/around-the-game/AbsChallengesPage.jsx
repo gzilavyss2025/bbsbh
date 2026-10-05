@@ -32,6 +32,10 @@ import { PlayerBoards } from './abs/PlayerBoards.jsx'
 import { UmpireBoard } from './abs/UmpireBoard.jsx'
 import { MissBands } from './abs/MissBands.jsx'
 import { BiggestOverturn } from './abs/BiggestOverturn.jsx'
+import { absChallengesPath } from '../../lib/route.js'
+import { seasonDelta, seasonValue } from '../../lib/seasons/view.js'
+import { useSeasonView } from '../../hooks/seasons/useSeasonView.js'
+import { SeasonPicker } from '../../components/season/SeasonPicker.jsx'
 
 // THE CHALLENGE SYSTEM — the first season anybody could argue with the plate
 // umpire and win on the spot.
@@ -81,11 +85,23 @@ import { BiggestOverturn } from './abs/BiggestOverturn.jsx'
 
 const ABS_PATH = '/abs-challenges'
 
-export function AbsChallengesPage() {
+// A season view (#1202): `seasonYear` and `vs` come from the address. Compare
+// adds a line under each headline figure and a column to the club board; the
+// sections below it show the chosen season alone.
+export function AbsChallengesPage({ seasonYear, vs }) {
   useDocumentTitle('ABS Challenges')
   const [level, setLevel] = useState('MLB')
+  const view = useSeasonView('abs', { seasonYear, vs })
+  const year = view?.shown
+  const [mode, setMode] = useState('change')
 
-  const { loading, error, data } = useAsync(() => fetchAbsChallenges(), [])
+  const challenges = useAsync(() => (view ? fetchAbsChallenges({ seasonYear: year }) : Promise.resolve(null)), [view != null, year])
+  const { error, data } = challenges
+  const loading = !view || challenges.loading
+  const { data: prevData } = useAsync(
+    () => (view?.vs ? fetchAbsChallenges({ seasonYear: view.vs }) : Promise.resolve(null)),
+    [view?.vs],
+  )
   // MLB and Triple-A both, because both run the system and both are on the
   // board. Club ids never collide across levels, so one lookup covers them.
   const { data: clubs } = useAsync(() => loadClubs([1, 11]), [])
@@ -96,13 +112,18 @@ export function AbsChallengesPage() {
   // that section for the same reason `clubs` is: the page owns what this page
   // downloads, and a board that fetched for itself would be invisible from
   // here. Nothing else waits on it — the section draws once it lands.
-  const { data: exposure } = useAsync(() => fetchAbsExposure(), [])
+  const { data: exposure } = useAsync(() => (view ? fetchAbsExposure({ seasonYear: year }) : Promise.resolve(null)), [view != null, year])
 
   const levels = useMemo(() => levelsIn(data), [data])
   const shown = levels.some((l) => l.key === level) ? level : (levels[0]?.key ?? 'MLB')
   const summary = summaryFor(data, shown)
 
   const big = summary?.biggest ?? null
+  // The same level in the compare season, or null.
+  const prev = summaryFor(prevData, shown)
+  const versus = (cur, before, format) =>
+    !prev ? null : mode === 'side' ? `${view.vs}: ${seasonValue(before, format)}` : seasonDelta(cur, before, view.vs, format) ?? `none in ${view.vs}`
+  const withVs = (note, line) => (line ? `${note} · ${line}` : note)
 
   return (
     <div className="screen">
@@ -114,7 +135,7 @@ export function AbsChallengesPage() {
         title="ABS Challenges"
         meta={[
           { label: 'Level', value: shown === 'AAA' ? 'Triple-A' : 'MLB' },
-          { label: 'Season', value: data?.season ?? '—' },
+          { label: view?.shown === 'all' ? 'Seasons' : 'Season', value: view?.label || '—' },
           {
             label: 'Through',
             value: summary?.lastDate ? humanDateWithYear(summary.lastDate) : '—',
@@ -122,6 +143,8 @@ export function AbsChallengesPage() {
           { label: 'Games', value: commas(summary?.games) },
         ]}
       />
+
+      <SeasonPicker view={view} pathFor={absChallengesPath} mode={mode} onMode={setMode} />
 
       <AsyncStatus
         loading={loading}
@@ -155,19 +178,20 @@ export function AbsChallengesPage() {
               tone="lead"
               value={num1(summary.runsRecovered)}
               label="Runs put back"
-              note={`Over ${commas(summary.success)} overturned calls`}
+              note={withVs(`Over ${commas(summary.success)} overturned calls`, versus(summary.runsRecovered, prev?.runsRecovered, 'dec1'))}
             />
             <Slab
               value={pct1(summary.successRate)}
               label="Challenges won"
-              note={`${commas(summary.success)} of ${commas(summary.total)}`}
+              note={withVs(`${commas(summary.success)} of ${commas(summary.total)}`, versus(summary.successRate, prev?.successRate, 'pct'))}
             />
             <Slab
               value={num2(summary.perGame)}
               label="Challenges per game"
-              note={`${pct1(
-                summary.games ? summary.gamesWithChallenge / summary.games : null,
-              )} of ${commas(summary.games)} games had one`}
+              note={withVs(
+                `${pct1(summary.games ? summary.gamesWithChallenge / summary.games : null)} of ${commas(summary.games)} games had one`,
+                versus(summary.perGame, prev?.perGame, 'dec2'),
+              )}
             />
             <Slab
               value={big ? num2(big.runs) : '—'}
@@ -191,7 +215,7 @@ export function AbsChallengesPage() {
               boards' men again, ranked on how long they stayed right. */}
           <WhoCalls summary={summary} />
           <WhenTheyCall summary={summary} />
-          <ClubBoard summary={summary} clubs={clubs} />
+          <ClubBoard summary={summary} clubs={clubs} prev={prev} vs={view.vs} mode={mode} />
           <RanOut summary={summary} clubs={clubs} />
           <PlayerBoards summary={summary} clubs={clubs} />
           <LongestRuns summary={summary} clubs={clubs} />
