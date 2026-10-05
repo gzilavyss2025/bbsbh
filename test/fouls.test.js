@@ -442,6 +442,10 @@ test('a 2027 game leaves the 2026 foul totals alone, and 2027 holds only that ga
   assert.equal(s27.batters[10].g, 1)
   assert.equal(s27.batters[10].fouls, 2)
   assert.equal(s27.pitchers[200].g, 1)
+  // Starts ride the row, so a client sum of seasons can rebuild isStarter
+  // exactly as the all/ file does (#1201).
+  assert.equal(s27.pitchers[200].gs, 1)
+  assert.equal(exportFouls(db, null).pitchers[200].gs, 3)
   assert.equal(s27.teams[1].fouls, 2)
   assert.equal(s27.league.totals.pitches, 3)
   assert.deepEqual(s27.topFoulGames.map((g) => g.gamePk), [3])

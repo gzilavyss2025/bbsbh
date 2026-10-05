@@ -5,6 +5,7 @@ import {
   selectTeamMeta,
   selectOfficials,
   selectGameInfo,
+  selectGameSeason,
   selectOpposingPitcher,
   selectOpposingDefense,
   selectHasStarted,
@@ -128,7 +129,7 @@ export function TeamInfo({
   const hpId = useMemo(() => officials.find((o) => o.role === 'HP')?.id ?? null, [officials])
   // The GAME's season, not the store's current one (#1201): an old 2026 game
   // still shows 2026 after 2027 starts.
-  const gameSeason = feed?.gameData?.game?.season ?? null
+  const gameSeason = selectGameSeason(feed)
   const { data: hpUmpire } = useAsync(
     () => (hpId != null ? loadUmpire(hpId, { seasonYear: gameSeason }) : Promise.resolve(null)),
     [hpId, gameSeason],
@@ -435,7 +436,7 @@ function TeamSections({
   const { data: oppTeamIdentity } = useAsync(() => fetchTeam(oppMeta.id), [oppMeta.id])
   const orgTeamId = teamIdentity?.parentOrgId ?? meta.id
   const oppOrgTeamId = oppTeamIdentity?.parentOrgId ?? oppMeta.id
-  const season = feed?.gameData?.game?.season
+  const season = selectGameSeason(feed)
   const oppPitcher = useMemo(
     () => selectOpposingPitcher(feed, side, { includeDerivedStarter: true }),
     [feed, side],
@@ -456,8 +457,8 @@ function TeamSections({
   // MLB + AAA only; a lower-level starter's lookup just resolves to null. Fetched
   // HERE by his id, not handed down from useGameData: this is the only card that
   // draws it, and it wants one man's bucket rather than the league's. The
-  // GAME's season (#1201): a first start of a new season reads that season and
-  // shows the "not enough pitches" state, never last season's mix.
+  // GAME's season (#1201), or the latest on file in spring training, before the
+  // new season has any (staticJson.js's seasonFolderOf).
   const { data: arsenalShard } = useAsync(
     () => fetchPitchArsenalFor(oppPitcher?.id, { seasonYear: season }),
     [oppPitcher?.id, season],

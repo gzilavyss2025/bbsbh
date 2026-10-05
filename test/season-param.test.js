@@ -55,7 +55,7 @@ test('seasonFolderOf: nothing is current, a year must be on file, all is all', a
   assert.equal(await seasonFolderOf('spray'), 2027)
   assert.equal(await seasonFolderOf('spray', 2026), 2026)
   assert.equal(await seasonFolderOf('spray', '2026'), 2026) // a feed's season is a string
-  assert.equal(await seasonFolderOf('spray', 1850), null)
+  assert.equal(await seasonFolderOf('spray', 1850), 2027) // not on file: the latest
   assert.equal(await seasonFolderOf('spray', 'all'), 'all')
 })
 
@@ -65,14 +65,16 @@ test('a reader with a year reads that folder; with no year, the current one', as
   assert.deepEqual((await urlsOf(() => fetchSprayFor(202))).urls, ['/data/spray/2027/02.json'])
 })
 
-test('a year not on file reads nothing and resolves to the fallback', async () => {
+test('a year not on file reads the latest season, never nothing', async () => {
+  // A spring-training game of a new season: the stores sweep no spring games,
+  // so that year is not on file until Opening Day. The card shows last season,
+  // as it did before #1201.
   const { fetchFoulsFor, fetchFouls } = await import('../src/api/fouls.js')
-  const one = await urlsOf(() => fetchFoulsFor(303, { seasonYear: 2025 }))
-  assert.equal(one.value, null)
-  assert.deepEqual(one.urls, [])
-  const board = await urlsOf(() => fetchFouls({ seasonYear: 2025 }))
-  assert.equal(board.value, null)
-  assert.deepEqual(board.urls, [])
+  const one = await urlsOf(() => fetchFoulsFor(303, { seasonYear: 2028 }))
+  assert.deepEqual(one.urls, ['/data/fouls/2027/03.json'])
+  assert.equal(one.value.season, 2027)
+  const board = await urlsOf(() => fetchFouls({ seasonYear: 1850 }))
+  assert.equal(board.value.season, 2027)
 })
 
 test("a leader board's 'all' reads the all/ file, and a missing one is the fallback", async () => {

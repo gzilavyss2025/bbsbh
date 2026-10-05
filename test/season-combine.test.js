@@ -93,6 +93,17 @@ test('fouls pitcher: counts add, and the seasons vote on isStarter with their ga
   assert.equal(combineFoulPitcher([{ ...starter, g: 10 }, { ...reliever, g: 30 }]).isStarter, false)
 })
 
+test('fouls pitcher: with starts on every season, isStarter is the all/ file\'s exact rule', () => {
+  // 16 starts in 30 games, then 0 in 10: 16 of 40 is not a majority, though
+  // the 30-game season alone was a starter's.
+  const out = combineFoulPitcher([
+    { name: 'P', g: 30, gs: 16, pitches: 0, fouls: 0, whiffs: 0, isStarter: true },
+    { name: 'P', g: 10, gs: 0, pitches: 0, fouls: 0, whiffs: 0, isStarter: false },
+  ])
+  assert.equal(out.gs, 16)
+  assert.equal(out.isStarter, false)
+})
+
 test('fouls shard: one man, both groups, the shape batterFoulLine reads', () => {
   const shards = [
     { batters: { 7: batter({ g: 2, fouls: 3 }) }, pitchers: {} },

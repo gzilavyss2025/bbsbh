@@ -1,6 +1,6 @@
 import { similarPitchers } from '../lib/pitcherSimilarity.js'
 import { shardKey100 } from '../lib/shardKey.js'
-import { readSeasonShard, seasonFolderOf } from './staticJson.js'
+import { readSeasonShard, seasonFolderOf, staticJsonBy } from './staticJson.js'
 import { combineArsenalEntries } from '../lib/seasons/combine.js'
 
 // Season pitch-type mix per pitcher, read from static same-origin files
@@ -37,20 +37,7 @@ import { combineArsenalEntries } from '../lib/seasons/combine.js'
 // 'all', or nothing for the season its own seasons.json names
 // (staticJson.js's seasonFolderOf). A game page passes the GAME's season, so
 // an old 2026 game still shows 2026 after 2027 starts.
-const shards = new Map()
-
-function arsenalShard(season, personId) {
-  const key = `${season}/${shardKey100(personId)}`
-  if (!shards.has(key)) {
-    shards.set(
-      key,
-      fetch(`/data/pitch-arsenal/${key}.json`)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-    )
-  }
-  return shards.get(key)
-}
+const arsenalShard = staticJsonBy((key) => `/data/pitch-arsenal/${key}.json`)
 
 // 'all' adds his seasons (lib/seasons/combine.js), regular season and
 // postseason apart, into the shard's own `{ pit, post }` shape.
@@ -64,28 +51,19 @@ export async function fetchPitchArsenalFor(personId, { seasonYear } = {}) {
   return readSeasonShard(
     'pitch-arsenal',
     seasonYear,
-    (season) => arsenalShard(season, personId),
+    (season) => arsenalShard(`${season}/${shardKey100(personId)}`),
     (shards, seasons) => ({ season: null, seasons, pit: combined(shards, 'pit'), post: combined(shards, 'post') }),
   )
 }
 
-const pools = new Map()
+const pool = staticJsonBy((key) => `/data/pitch-arsenal-pool/${key}.json`)
 
 // 'all' reads pitch-arsenal-pool/all/, which the nightly run folds from the
 // velocity sums, never from the season pools' means.
 export async function fetchPitchArsenalPool(isMlb, { seasonYear } = {}) {
   const season = await seasonFolderOf('pitch-arsenal-pool', seasonYear)
   if (season == null) return null
-  const level = `${season}/${isMlb ? 'mlb' : 'aaa'}`
-  if (!pools.has(level)) {
-    pools.set(
-      level,
-      fetch(`/data/pitch-arsenal-pool/${level}.json`)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-    )
-  }
-  return pools.get(level)
+  return pool(`${season}/${isMlb ? 'mlb' : 'aaa'}`)
 }
 
 // A minimum sample so a two-pitch relief cameo doesn't render a misleadingly

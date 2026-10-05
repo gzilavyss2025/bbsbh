@@ -108,10 +108,13 @@ export async function seasonsOf(store) {
 
 // THE ONE RULE FOR "WHICH SEASON" (#1201). A reader of a season store takes
 // `{ seasonYear }`: a year, `'all'`, or nothing. Nothing means `current`. A
-// year must be on file, or the reader resolves to its fallback without a
-// fetch: a 2027 game before 2027 has data reads nothing, not a 404. `'all'` is
-// the store's `all/` folder, which holds only the league-wide files; a reader
-// of ONE player's shard adds the seasons up instead (readSeasonShard).
+// year that is not on file means `current` too. The stores sweep no spring
+// training, so a new season's year is not on file until Opening Day: a spring
+// 2027 game page reads 2026, as it did before #1201, and never a blank card or
+// a 404. The same holds for an index memoized before the nightly run added a
+// season. `'all'` is the store's `all/` folder, which holds only the
+// league-wide files; a reader of ONE player's shard adds the seasons up
+// instead (readSeasonShard).
 //
 // The argument is `seasonYear`, never `season`: in umpires.js `u.season` is an
 // umpire's season AGGREGATE, and `season.season` must not be able to happen.
@@ -122,12 +125,12 @@ export async function seasonFolderOf(store, seasonYear) {
   const { seasons, current } = await seasonIndexOf(store)
   if (seasonYear == null) return current
   const year = Number(seasonYear)
-  return seasons.includes(year) ? year : null
+  return seasons.includes(year) ? year : current
 }
 
 // One whole file of a season store, `/data/{store}/{folder}/{file}`, memoized
 // like staticJson. The loader takes `{ seasonYear }` (see seasonFolderOf).
-// `fallback` when the index, the season or the file is missing; an `all/` file
+// `fallback` when the index or the file is missing; an `all/` file
 // is not on disk until the first nightly run writes it.
 export function seasonStaticJson(store, file, { shape, fallback = null } = {}) {
   const bySeason = staticJsonBy((folder) => `/data/${store}/${folder}/${file}`, { shape, fallback })

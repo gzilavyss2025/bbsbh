@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { buildPreviewModel } from '../api/gamePreview.js'
-import { selectOfficials } from '../api/select.js'
+import { selectGameSeason, selectOfficials } from '../api/select.js'
 import { loadUmpire } from '../api/umpires.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useCopy } from '../copy/copyContext.js'
@@ -65,7 +65,7 @@ export function GamePreview({ feed, starterLines, broadcast, callouts, treatment
   // useGameData: this is the only surface that wants it for a game, and
   // loadUmpire reads static nightly files, so it costs one cached read.
   const plateId = useMemo(() => selectOfficials(feed).find((o) => o.role === 'HP')?.id ?? null, [feed])
-  const seasonYear = feed?.gameData?.game?.season ?? null
+  const seasonYear = selectGameSeason(feed)
   const umpire = useAsync(
     () => (plateId ? loadUmpire(plateId, { seasonYear }) : Promise.resolve(null)),
     [plateId, seasonYear],

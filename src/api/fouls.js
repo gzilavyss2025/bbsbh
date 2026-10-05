@@ -1,5 +1,5 @@
 import { shardKey100 } from '../lib/shardKey.js'
-import { readSeasonShard, seasonStaticJson } from './staticJson.js'
+import { readSeasonShard, seasonStaticJson, staticJsonBy } from './staticJson.js'
 import { combineFoulShards } from '../lib/seasons/combine.js'
 
 // Season-long foul-ball aggregates, read from a static same-origin file
@@ -36,20 +36,7 @@ export const fetchFouls = seasonStaticJson('fouls', 'fouls.json')
 // 2 KB instead of 805 KB: the player page's card is four tiles off one row, and
 // the season file is mostly 625 other batters and a 251 KB table of the year's
 // foul-heaviest games that only /fouls draws.
-const playerShards = new Map()
-
-function playerShard(season, personId) {
-  const key = `${season}/${shardKey100(personId)}`
-  if (!playerShards.has(key)) {
-    playerShards.set(
-      key,
-      fetch(`/data/fouls/${key}.json`)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-    )
-  }
-  return playerShards.get(key)
-}
+const playerShard = staticJsonBy((key) => `/data/fouls/${key}.json`)
 
 // 'all' adds his seasons (lib/seasons/combine.js) into the same
 // `{ batters, pitchers }` shape, holding only him.
@@ -58,7 +45,7 @@ export async function fetchFoulsFor(personId, { seasonYear } = {}) {
   return readSeasonShard(
     'fouls',
     seasonYear,
-    (season) => playerShard(season, personId),
+    (season) => playerShard(`${season}/${shardKey100(personId)}`),
     (shards, seasons) => ({ season: null, seasons, ...combineFoulShards(shards, personId) }),
   )
 }

@@ -82,17 +82,24 @@ export function combineFoulBatter(slices) {
   return out
 }
 
-// `isStarter` is a majority of appearances. The shard keeps the flag, not the
-// starts, so the seasons vote with their games: a starter in a 30-game season
-// and a reliever in a 10-game one is a starter.
+// `isStarter` is a majority of appearances: summed starts against summed games,
+// the all/ file's own rule, when every season's row carries `gs`. A row written
+// before `gs` existed (gen-fouls.mjs, #1201) has only the flag, so then the
+// seasons vote with their games: a starter in a 30-game season and a reliever
+// in a 10-game one is a starter.
 export function combineFoulPitcher(slices) {
   const rows = present(slices)
   if (!rows.length) return null
   const last = latest(rows)
   const out = { name: last.name, teamId: last.teamId }
   for (const k of PITCHER_COUNTS) out[k] = sumOf(rows, k)
-  const starterGames = rows.reduce((n, r) => n + (r.isStarter ? (r.g ?? 0) : 0), 0)
-  out.isStarter = starterGames * 2 > out.g
+  if (rows.every((r) => r.gs != null)) {
+    out.gs = sumOf(rows, 'gs')
+    out.isStarter = out.gs * 2 > out.g
+  } else {
+    const starterGames = rows.reduce((n, r) => n + (r.isStarter ? (r.g ?? 0) : 0), 0)
+    out.isStarter = starterGames * 2 > out.g
+  }
   return out
 }
 

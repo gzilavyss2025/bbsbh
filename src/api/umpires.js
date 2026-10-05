@@ -1,5 +1,5 @@
 import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
-import { readSeasonShard, seasonStaticJson, staticJsonBy } from './staticJson.js'
+import { readSeasonShard, seasonFolderOf, seasonStaticJson, staticJsonBy } from './staticJson.js'
 import { joinGameRows } from '../lib/seasons/combine.js'
 
 // The umpire detail page's data — for a given umpire, every MLB and AAA game
@@ -300,7 +300,9 @@ function seasonForLevel(u, level) {
 // rows: the lean's per-game ingredient is summed at build time into the
 // aggregate's favorNet/favorNetGames (see leanInputFromRows).
 async function accuracyIndex(level = 'MLB', seasonYear) {
-  const memoKey = `${seasonYear ?? 'current'}:${level}`
+  // Keyed on the folder the year resolves to, so "current" and the current
+  // year spelled out share one index.
+  const memoKey = `${await seasonFolderOf('umpire-accuracy', seasonYear)}:${level}`
   const memo = indexCached.get(memoKey)
   if (memo) return memo
   const { umpires } = await loadAccuracySummary({ seasonYear })

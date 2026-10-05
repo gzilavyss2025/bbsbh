@@ -150,10 +150,13 @@ file, and 35 other generators still take the season from the calendar year
 
 ## Addendum (#1201): one season parameter
 
-Every reader of a season store now takes `{ seasonYear }`: a year, `'all'`, or
-nothing. `seasonFolderOf(store, seasonYear)` in `src/api/staticJson.js` is the one
-rule. Nothing means `current`. A year must be in `seasons`, or the reader returns
-its fallback and fetches nothing. `'all'` is the `all/` folder.
+Every reader of the six stores above now takes `{ seasonYear }`: a year, `'all'`,
+or nothing. `seasonFolderOf(store, seasonYear)` in `src/api/staticJson.js` is the
+one rule. Nothing means `current`. A year that is not in `seasons` also means
+`current`: the stores sweep no spring training, so a new season's year is not on
+file until Opening Day, and a spring game page shows last season, as it did
+before. `'all'` is the `all/` folder. (`hitter-grid/` is a later store and keeps
+its own positional `season`.)
 
 - **League files** (the foul board, the umpire accuracy summary, the ABS files, the
   arsenal pools) read their `all/` copy for `'all'`. An `all/` file that is not on
@@ -162,12 +165,16 @@ its fallback and fetches nothing. `'all'` is the `all/` folder.
   each season on file, and `src/lib/seasons/combine.js` adds them: counts add, a
   high keeps its game, a mean is weighted by its count, names come from the latest
   season. The shard keeps `avgVelo`, not the velocity sums, so the arsenal's
-  combined mean is exact only to the file's 0.1 mph rounding. The command grid
+  combined mean is exact only to the file's 0.1 mph rounding. A foul pitcher row
+  now carries `gs` (starts), so a combined `isStarter` uses the `all/` file's own
+  rule (summed starts against summed games). A row from before `gs` falls back to
+  a vote of the seasons, weighted by games. The command grid
   takes a year only; no surface draws a combined grid.
 - **The name is `seasonYear`**, because `u.season` in `umpires.js` is an umpire's
   aggregate.
-- **A game page reads the game's season** (`feed.gameData.game.season`): the
+- **A game page reads the game's season** (`selectGameSeason(feed)`): the
   opposing-starter arsenal, the pitcher card, and every umpire surface on a lineup,
-  box score, preview or innings page. On a new season's first day the game's season
-  has no data yet, so these show their normal empty state, not last season.
-- The URL and the picker are #1202.
+  box score, preview or innings page. An old 2026 game still reads 2026 after 2027
+  starts. A spring 2027 game reads 2026 until 2027 is on file.
+- The URL and the picker are #1202. Until then, the umpire modal on an old game
+  shows that game's season, and its "Full umpire page" link shows the current one.
