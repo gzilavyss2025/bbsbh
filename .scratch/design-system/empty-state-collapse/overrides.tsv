@@ -11,8 +11,6 @@
 .prospectcard__emptylabel	empty	MIGRATE	E5	inner line	the label line of .prospectcard__empty. It has no rule of its own today (only the word); it becomes EmptyState `label`
 .prospectcard__emptynote	empty	MIGRATE	E5	inner line	the note line of .prospectcard__empty; becomes EmptyState `note`
 .refpanel__empty	empty	MIGRATE	E3	box	already THE target look (a dashed hairline inset, graphite display caps). Inside the innings viewer: the armsEmpty test stays in ReferencePanel.jsx untouched
-.trec__empty	empty	MIGRATE	E4	label	team hub Records card: no games in this stretch of the season yet. A caption-size line today; becomes EmptyState size compact
-.hzntile__nostat	empty	MIGRATE	E4	hint + own class	Minors Horizon tile: one line where the tile stat goes; size compact
 .vsteam__none	empty	MIGRATE	E5	hint + own class	player page splits vs a team: no career meetings
 .prospects__empty	empty	MIGRATE	E7	box	/prospects filter result: a SOLID box with a Clear filters button. Goes dashed (the dashed-rule fix); the button becomes the `action` slot
 .payboard__empty	empty	MIGRATE	E7	box	/salaries board: a solid top rule. e2e/salaries.spec.js finds it by this class, so it stays on the element as the namespace
@@ -181,12 +179,6 @@ components/boxlines/BoxLinesSheet.jsx#3	empty	MIGRATE	E3	hint + own class	Box Li
 components/boxlines/GameLinesDoor.jsx#1	empty	MIGRATE	E3	hint + own class	Box Lines door sheet: no games to list. Same gate note
 #
 # --- SITES — E4 team hub, E5 player page ---
-screens/team/modules/records/RecordsCard.jsx#1	empty	MIGRATE	E4	label	compact
-screens/team/modules/minors/HorizonCard.jsx#1	empty	MIGRATE	E4	hint + own class	compact, inside a tile
-screens/team/modules/minors/DepthChartCard.jsx#1	empty	MIGRATE	E4	bare hint	compact: no level-relative read yet
-screens/team/ContractsTab.jsx#2	empty	MIGRATE	E4	bare hint	a minor-league club: no ledger, and why. One line
-screens/team/ContractsTab.jsx#3	empty	MIGRATE	E4	bare hint	ledger not published yet
-screens/team/StampInPage.jsx#1	empty	MIGRATE	E4	bare hint	Stamp In with no games posted. Copy only: no stamp art (ADR-0035)
 components/playerstats/SplitsVsTeam.jsx#1	empty	MIGRATE	E5	hint + own class	compact
 #
 # --- SITES — E6 standalone pages (a bare .hint today, no CSS) ---
@@ -283,7 +275,7 @@ screens/postseason-live/LiveSeriesPage.jsx#1	error	n/a
 screens/postseason-live/LiveSeriesPage.jsx#3	error	n/a			
 screens/profile/sections/ClubSection.jsx#1	error	n/a			
 screens/scout/ScoutPage.jsx#3	error	n/a			
-screens/team/StampInPage.jsx#2	error	n/a			
+screens/team/StampInPage.jsx#1	error	n/a			
 components/game/GameFinder.jsx#1	error	n/a			
 components/game/PastGameFlipCard.jsx#2	error	n/a			
 components/playbyplay/HighlightSheet.jsx#2	error	HOLD			the notice a caller passes (a clip not posted or not playable) inside the held 16:9 frame
@@ -337,7 +329,7 @@ screens/profile/sections/DataSection.jsx#2	caveat	n/a
 screens/profile/sections/DataSection.jsx#3	caveat	n/a			
 screens/scorecard/ScorecardPage.jsx#2	caveat	n/a			
 screens/sheet/ScoreSheetPage.jsx#1	caveat	n/a			
-screens/team/ContractsTab.jsx#4	caveat	n/a			
+screens/team/ContractsTab.jsx#2	caveat	n/a			
 screens/around-the-game/abs/AfterAWin.jsx#1	caveat	n/a			the ABS report prose (.rptprose) under a board
 screens/around-the-game/abs/AfterAWin.jsx#2	caveat	n/a			the ABS report prose (.rptprose) under a board
 screens/around-the-game/abs/AfterAWin.jsx#3	caveat	n/a			the ABS report prose (.rptprose) under a board
