@@ -430,4 +430,62 @@ wild card and the workload partials.
 
 1. **`Cluster` keeps its `align` prop.**
 2. **`Grid` gets no `rowGap`.** The 2 grids that need two gap values stay hand-written.
-3. **`Stack gap="section"` gets a pilot on `/salaries`.** One page, its own slice, geometry checked. Not started.
+3. **`Stack gap="section"` gets a pilot on `/salaries`.** One page, its own slice, geometry checked. Run on 2026-10-05: **stopped, not migrated.** See "Section gap pilot" below.
+
+## Section gap pilot (`/salaries`, 2026-10-05)
+
+**Result: stopped before any code change. The page does not space its sections at
+16px today. It spaces them at 0px.** A `Stack gap="section"` around them adds
+space. It cannot replace a margin, because there is none to remove.
+
+The top-level children of `.screen` on `/salaries` (`SalariesPage.jsx`), measured
+with computed styles at 390 and 760px:
+
+| child | margin-top | margin-bottom | between sections? |
+| --- | ---: | ---: | --- |
+| `.sitebar`, `.topbar` | 0 | 0 | no: the page header |
+| `.vsteam__tray` (club rail) | 8px | 8px | no: its own control margin |
+| `.card.payboard` (Highest paid players) | 0 | 0 | section |
+| `.payowed` (Most committed) | 0 | 0 | section |
+| `.payclubs` (Club payrolls) | 0 | 0 | section |
+| `.posspend` (Spend by position) | 0 | 0 | section |
+| `.paysource` (source line) | 16px | 0 | no: a note under the last section |
+| `.sitefooter` | 32px | 0 | no: the page footer |
+
+The four sections touch edge to edge: each top is the previous bottom (at 390px,
+856, 1239 and 2379). The CSS agrees: `71-salaries-league.css` sets no margin on
+`.payowed`, `.payclubs` or `.posspend`, and `system/card.css` says a card owns no
+margin. The 16px above `.paysource` is a note margin, and it stays.
+
+**The trial.** I wrapped the four sections in one `Stack gap="section"`, with no
+margin to remove. BEFORE was captured twice with `FREEZE=1 BLOCKIMG=1` and
+`?nointro`; the two runs are identical (890 elements at 390 and 760px), so the
+capture is stable. AFTER gave 891 elements (the wrapper) and a page 48px taller at
+both widths: 4855 to 4903px at 390, 3522 to 3570px at 760. That is 3 gaps of
+16px. Zero differences is not met, so I reverted the edit. This branch holds no
+code change.
+
+**What this means for the plan.**
+- The "Section gap" census above was wrong for this page. It counted margins of 16px
+  or more across all partials and read them as an upper bound for "pages separate
+  sections by 16px". On `/salaries` the true figure is 0px. **Inference, not
+  checked:** other pages built from flush cards and bands (the club ledger, the
+  Contracts tab) may do the same. I traced one page only.
+- `gap="section"` is 16px, and `Stack` has no 0px step. So this page cannot adopt it
+  with no visible change. The sections would also stop touching, which changes the
+  look of a page built as one ledger.
+
+**Options for Gary** (not decided here):
+1. Accept the change: +16px between each pair of sections on `/salaries`, +48px in
+   all. Then run `npm run visual` on the page and list the route in the PR.
+2. Pick a page that does space its sections with a `margin-top` of 16px, and pilot
+   there. Finding one needs a trace; the census does not name pages.
+3. Leave `gap="section"` unused for now. The token and the prop stay.
+
+**Not checked.** I did not look at any other page. I did not run `npm run visual` or
+`npm run e2e`. I did not judge by eye whether 16px between the sections looks right, because
+the pilot stopped first.
+
+**Other pages that reuse these blocks (step 5).** `SourceLine` is also used by the
+team Contracts tab (`ContractsTab.jsx`). The other three blocks and `.payowed` are
+used on `/salaries` only. No file was changed, so nothing else moves.
