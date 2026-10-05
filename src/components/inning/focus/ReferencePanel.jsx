@@ -13,6 +13,7 @@ import { DefenseSection, LineupSection } from '../EnteringReference.jsx'
 import { MarginNotes } from '../MarginNotes.jsx'
 import { PitchersSection } from '../PitchersSection.jsx'
 import { RosterPanel } from '../RosterPanel.jsx'
+import { EmptyState } from '../../ui/state/EmptyState.jsx'
 import { ExtrasFacts } from './ExtrasFacts.jsx'
 import { UmpireTendenciesFold } from '../../umpire/UmpireTendenciesFold.jsx'
 import { StatBox, AbsCard } from '../../gamehud/StatBox.jsx'
@@ -462,7 +463,7 @@ function Section({
           check-caps.mjs), and a full sentence shouted in caps reads far worse
           than four words do. */}
       {armsEmpty ? (
-        <p className="refpanel__empty">No pitching lines yet</p>
+        <EmptyState>No pitching lines yet</EmptyState>
       ) : (
         <>
           <MarginNotes notes={notes} feed={feed} bundle={callouts} halfIdx={armsHalfIdx} />

@@ -396,23 +396,6 @@
   border-left: none;
 }
 
-/* A section with genuinely nothing in it yet (ReferencePanel's `armsEmpty`) — a
-   caption on paper, so the column reads as "nothing here yet" rather than as a
-   panel that failed to load. */
-.refpanel__empty {
-  margin: 0;
-  padding: var(--space-4);
-  border: var(--bw-hair) dashed var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  text-align: center;
-}
-
 /* ------------------------------------- the EXTRAS tab's fill-in facts */
 /* ExtrasFacts.jsx — the clubs, the crew, and the game, in the lineup page's own
    .factgrid / .umps__list chrome so the two surfaces print the same fact the
