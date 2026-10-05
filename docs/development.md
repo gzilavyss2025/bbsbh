@@ -348,6 +348,28 @@ before they authenticate, so the same curl probe diagnoses them:
 `curl -X DELETE https://bbsbh.vercel.app/api/account` each answer `501 sync not
 configured` on a deploy with no store and `401` on one where the store is live.
 
+## The quiet design flag
+
+A model that is too weak or too strong for design work costs quality or usage. Two
+small scripts show this without interrupting anyone. The ladder they use is step 5 of
+`.claude/skills/improve-prompt`.
+
+- **The hook** (`.claude/hooks/design-work-flag.mjs`, `PostToolUse` on `Edit|Write`)
+  writes a flag file under `~/.claude/rung-flags/` when an edit lands in a design file:
+  CSS under `src/`, `src/components/ui/`, or `src/screens/designlab/`. A hook cannot read
+  the model, so it only says that design work is happening.
+- **The status line** (`.claude/statusline-rung.mjs`) shows the model, the effort and the
+  ladder rung, for example `Sonnet 5.5 medium r3`. It reads the flag. For 30 minutes after
+  a design edit, the model segment turns amber when the rung is below 3 (`low for design`)
+  or 9 and above (`more than design needs`). Nothing else changes colour.
+- **Set up the status line** on a machine once: copy `.claude/statusline-rung.mjs` to
+  `~/.claude/statusline-command.mjs`, then set `statusLine.command` in
+  `~/.claude/settings.json` to `node C:/Users/<you>/.claude/statusline-command.mjs`. Use
+  forward slashes: on Windows the command runs through Git Bash, and Git Bash drops
+  backslashes. The script uses Node, not `jq`. Keep the copy in step with this file.
+- The rung comes from the model id and the effort the status line receives. A model that
+  is off the ladder (Sonnet 5, Opus 4.8) shows no rung and never turns amber.
+
 ## CI
 
 `.github/workflows/ci.yml` runs `npm run lint` + `npm run build` on every PR and
