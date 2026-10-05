@@ -1,0 +1,155 @@
+{
+ "stats": [
+  {
+   "splits": [
+    {
+     "season": "2018",
+     "team": {
+      "id": 158
+     },
+     "stat": {
+      "gamesPlayed": 1,
+      "gamesStarted": 0,
+      "wins": 0,
+      "losses": 0,
+      "saves": 0,
+      "holds": 0,
+      "inningsPitched": "3.0",
+      "strikeOuts": 6,
+      "baseOnBalls": 3,
+      "hits": 0,
+      "earnedRuns": 0,
+      "era": "0.00",
+      "whip": "1.00"
+     }
+    },
+    {
+     "season": "2020",
+     "team": {
+      "id": 158
+     },
+     "stat": {
+      "gamesPlayed": 1,
+      "gamesStarted": 0,
+      "wins": 0,
+      "losses": 0,
+      "saves": 0,
+      "holds": 0,
+      "inningsPitched": "1.0",
+      "strikeOuts": 1,
+      "baseOnBalls": 0,
+      "hits": 1,
+      "earnedRuns": 1,
+      "era": "9.00",
+      "whip": "1.00"
+     }
+    },
+    {
+     "season": "2021",
+     "team": {
+      "id": 158
+     },
+     "stat": {
+      "gamesPlayed": 1,
+      "gamesStarted": 1,
+      "wins": 0,
+      "losses": 0,
+      "saves": 0,
+      "holds": 0,
+      "inningsPitched": "4.0",
+      "strikeOuts": 5,
+      "baseOnBalls": 1,
+      "hits": 3,
+      "earnedRuns": 0,
+      "era": "0.00",
+      "whip": "1.00"
+     }
+    },
+    {
+     "season": "2023",
+     "team": {
+      "id": 158
+     },
+     "stat": {
+      "gamesPlayed": 1,
+      "gamesStarted": 1,
+      "wins": 0,
+      "losses": 1,
+      "saves": 0,
+      "holds": 0,
+      "inningsPitched": "5.0",
+      "strikeOuts": 5,
+      "baseOnBalls": 2,
+      "hits": 3,
+      "earnedRuns": 4,
+      "era": "7.20",
+      "whip": "1.00"
+     }
+    },
+    {
+     "season": "2024",
+     "team": {
+      "id": 158
+     },
+     "stat": {
+      "gamesPlayed": 2,
+      "gamesStarted": 1,
+      "wins": 0,
+      "losses": 0,
+      "saves": 0,
+      "holds": 1,
+      "inningsPitched": "5.0",
+      "strikeOuts": 5,
+      "baseOnBalls": 1,
+      "hits": 2,
+      "earnedRuns": 3,
+      "era": "5.40",
+      "whip": "0.60"
+     }
+    },
+    {
+     "season": "2025",
+     "team": {
+      "id": 158
+     },
+     "stat": {
+      "gamesPlayed": 2,
+      "gamesStarted": 2,
+      "wins": 1,
+      "losses": 1,
+      "saves": 0,
+      "holds": 0,
+      "inningsPitched": "9.2",
+      "strikeOuts": 15,
+      "baseOnBalls": 5,
+      "hits": 7,
+      "earnedRuns": 5,
+      "era": "4.66",
+      "whip": "1.24"
+     }
+    },
+    {
+     "season": "2025",
+     "team": {
+      "id": 158
+     },
+     "stat": {
+      "gamesPlayed": 1,
+      "gamesStarted": 1,
+      "wins": 0,
+      "losses": 1,
+      "saves": 0,
+      "holds": 0,
+      "inningsPitched": "5.2",
+      "strikeOuts": 4,
+      "baseOnBalls": 1,
+      "hits": 5,
+      "earnedRuns": 3,
+      "era": "4.76",
+      "whip": "1.06"
+     }
+    }
+   ]
+  }
+ ]
+}
