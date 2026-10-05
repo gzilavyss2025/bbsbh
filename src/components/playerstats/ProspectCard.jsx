@@ -6,6 +6,7 @@ import { outsToIp } from '../../lib/math/innings.js'
 import { confidenceLabel, movementState } from '../../api/prospectTrend.js'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { EmptyState } from '../ui/state/EmptyState.jsx'
 
 const CHART_H = 140
 const PLOT_TOP = 26
@@ -113,25 +114,32 @@ export function ProspectCard({ view, level, badge, group, preview = false }) {
 
 function EmptyStanding({ level }) {
   return (
-    <div className="prospectcard__empty">
-      <span className="prospectcard__emptylabel">Standing vs level</span>
-      <p>No qualified comparison{level ? ` at ${level}` : ''} yet</p>
-    </div>
+    <EmptyState label="Standing vs level">
+      No qualified comparison{level ? ` at ${level}` : ''} yet
+    </EmptyState>
   )
 }
 
 function EarlyStanding({ view, level }) {
   const tenure = tenureLabel(view.tenure)
   return (
-    <div className="prospectcard__empty">
-      <span className="prospectcard__emptylabel">{view.metric}{level ? ` vs ${level}` : ''}</span>
-      <p>Early sample — {sampleSizeLabel(view.metric, view.sampleSize)}</p>
-      <span className="prospectcard__emptynote">
-        {sampleSizeLabel(view.metric, view.floor)} needed to join the qualified {level ? `${level} ` : ''}
-        {comparisonGroup(view.metric)} population.
-      </span>
-      {tenure && <span className="prospectcard__emptynote">{tenure}</span>}
-    </div>
+    <EmptyState
+      label={`${view.metric}${level ? ` vs ${level}` : ''}`}
+      note={
+        <>
+          {sampleSizeLabel(view.metric, view.floor)} needed to join the qualified {level ? `${level} ` : ''}
+          {comparisonGroup(view.metric)} population.
+          {tenure && (
+            <>
+              <br />
+              {tenure}
+            </>
+          )}
+        </>
+      }
+    >
+      Early sample — {sampleSizeLabel(view.metric, view.sampleSize)}
+    </EmptyState>
   )
 }
 
