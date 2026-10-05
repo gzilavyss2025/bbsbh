@@ -5,6 +5,7 @@ import {
   availabilityFor,
   workloadVsBaseline,
   bullpenStatusCounts,
+  foldGameLog,
 } from '../src/api/workload.js'
 
 // Synthetic workload.json-shaped data. `apps` are most-recent-first, each
@@ -163,4 +164,32 @@ test('bullpenStatusCounts: empty / missing input is all zeros', () => {
   assert.deepEqual(bullpenStatusCounts(undefined), { fresh: 0, limited: 0, down: 0 })
   // An unrecognized status doesn't crash or leak a key.
   assert.deepEqual(bullpenStatusCounts(['fresh', 'unknown']), { fresh: 1, limited: 0, down: 0 })
+})
+
+// --- foldGameLog: postseason is workload, not season totals ---------------------
+const split = (d, gameType, p, extra = {}) => ({
+  date: d,
+  gameType,
+  stat: { numberOfPitches: p, gamesPlayed: 1, inningsPitched: '1.0', ...extra },
+})
+
+test('foldGameLog: October outings reach apps but not the regular-season totals', () => {
+  const { season, allApps } = foldGameLog([
+    split('2026-09-28', 'R', 20),
+    split('2026-10-01', 'F', 15),
+    split('2026-10-05', 'D', 25, { gamesStarted: 1 }),
+  ])
+  assert.deepEqual(
+    allApps.map((a) => a.d),
+    ['2026-09-28', '2026-10-01', '2026-10-05'],
+  )
+  assert.equal(allApps[2].gs, 1)
+  assert.equal(season.g, 1)
+  assert.equal(season.gs, 0)
+  assert.equal(season.pitches, 20)
+})
+
+test('foldGameLog: undated splits are dropped and an empty log is safe', () => {
+  assert.equal(foldGameLog([{ gameType: 'R', stat: {} }]).allApps.length, 0)
+  assert.equal(foldGameLog(undefined).season.g, 0)
 })
