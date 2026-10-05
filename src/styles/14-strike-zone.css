@@ -417,10 +417,10 @@
   color: var(--text-heading);
 }
 
-.umpmodal__hint {
-  margin: 4px 0 0;
-  font-size: var(--fs-compact);
-  color: var(--text-muted);
+/* The no-data EmptyState (#1132): the head above already keeps 12px, so the
+   namespace only holds the "behind the plate" list off its edge. */
+.umpmodal__empty {
+  margin-bottom: var(--space-3);
 }
 .umpmodal__gtitle {
   margin: 0 0 6px;

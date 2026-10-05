@@ -9,11 +9,10 @@
 .txpage__empty	empty	MIGRATE	E1	bare hint	PILOT (the issue names it): a bare .hint plus a margin. DONE in E1: the site renders <EmptyState className="txpage__empty">. The rule stays as the namespace margin (no Stack spaces the page)
 .emptystate	other	n/a			the component's own class. Census sees it only inside a namespace margin rule: E2 adds `.slatebody__main > .emptystate:first-child` (05-masthead-nav.css), because the slate's empty line lost .hint padding and sat flush under the date row
 .vsteam__none	empty	MIGRATE	E5	hint + own class	DONE in E5: player page splits vs a team: no career meetings
-.prospects__empty	empty	MIGRATE	E7	box	/prospects filter result: a SOLID box with a Clear filters button. Goes dashed (the dashed-rule fix); the button becomes the `action` slot
-.payboard__empty	empty	MIGRATE	E7	box	/salaries board: a solid top rule. e2e/salaries.spec.js finds it by this class, so it stays on the element as the namespace
-.stampsheet__empty	empty	MIGRATE	E7	label	the stamp sheet: ONE element says loading OR empty. Split: the empty branch becomes EmptyState, the loading branch keeps its line
-.oseason__quiet	empty	MIGRATE	E7	label	offseason lead on the empty slate: ONE element says loading OR empty. Same split as .stampsheet__empty
-.umpmodal__hint	empty	MIGRATE	E7	label	umpire accuracy modal: no data for this umpire. Used once; the rule goes
+.prospects__empty	empty	MIGRATE	E7	box	/prospects filter result: a SOLID box with a Clear filters button. Goes dashed (the dashed-rule fix); the button becomes the `action` slot. DONE in E7: <EmptyState className="prospects__empty" role="status"> with a Button in `action`; the rule keeps only the margin (no Stack spaces the page)
+.payboard__empty	empty	MIGRATE	E7	box	/salaries board: a solid top rule. e2e/salaries.spec.js finds it by this class, so it stays on the element as the namespace. DONE in E7: <EmptyState className="payboard__empty">; the rule keeps only a margin off the flush Card edges
+.oseason__empty	empty	MIGRATE	E7	label	offseason lead: was .oseason__quiet, ONE element for loading OR empty. DONE in E7: split. The loading line is .oseason__loading (unchanged look, role="status"); the empty branch is <EmptyState className="oseason__empty" role="status">, and the rule keeps only its margin-top
+.umpmodal__empty	empty	MIGRATE	E7	label	umpire accuracy modal: was .umpmodal__hint (its rule is gone). DONE in E7: <EmptyState className="umpmodal__empty">; the rule keeps only a margin-bottom above the "behind the plate" list. The data && !season test is unchanged
 .scout__notposted	empty	MIGRATE	E8	hint + own class	the Matchup Scout: a chart slot with nothing posted; size compact. The lab copy (ScoutLab.jsx) is a tool page and keeps the class, so the rule stays until the lab moves or goes. DONE in E8: the Scout page renders EmptyState size compact; only the lab wears this class
 #
 # --- SELECTORS — true empty states held ---
@@ -185,11 +184,10 @@ screens/RehabPage.jsx#2	caveat	n/a
 screens/GamePhotosPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
 #
 # --- SITES — E7 the boxed and mixed ones ---
-screens/ProspectsPage.jsx#2	empty	MIGRATE	E7	box	solid box + Clear filters button: dashed + `action`
-components/salaries/SalaryBoard.jsx#1	empty	MIGRATE	E7	box	e2e/salaries.spec.js reads .payboard__empty: pass it as className
-components/umpire/UmpireAccuracyModal.jsx#1	empty	MIGRATE	E7	label	inside a modal opened from the box score's umpire card: no plate data. Not a score
-components/logbook/StampSheet.jsx#1	empty	MIGRATE	E7	label	split the loading branch off first
-components/offseason/OffseasonLead.jsx#1	empty	MIGRATE	E7	label	split the loading branch off first
+screens/ProspectsPage.jsx#2	empty	MIGRATE	E7	box	solid box + Clear filters button: dashed + `action`. DONE in E7
+components/salaries/SalaryBoard.jsx#1	empty	MIGRATE	E7	box	e2e/salaries.spec.js reads .payboard__empty: pass it as className. DONE in E7
+components/umpire/UmpireAccuracyModal.jsx#1	empty	MIGRATE	E7	label	inside a modal opened from the box score's umpire card: no plate data. Not a score. DONE in E7
+components/offseason/OffseasonLead.jsx#1	empty	MIGRATE	E7	label	split the loading branch off first. DONE in E7: the empty branch is EmptyState; the loading line is .oseason__loading
 #
 # --- SITES — E8 the Matchup Scout and the Game Log ---
 screens/scout/ScoutPage.jsx#1	loading	n/a			AsyncStatus with no emptyMessage: loading and error only. E8 moved the "Pick a pitcher and a hitter" prompt above it onto EmptyState, so this key shifted down by one
@@ -365,7 +363,7 @@ screens/team/modules/records/InningScoringGrid.jsx#1	mark	n/a
 # --- SITES — placeholders, controls, other ---
 components/gamehud/Scorebug.jsx#1	placeholder	n/a			
 components/logbook/StampDetailModal.jsx#1	placeholder	n/a			
-components/logbook/StampSheet.jsx#2	placeholder	n/a			
+components/logbook/StampSheet.jsx#1	placeholder	n/a			the stamp photo slot (.postagestamp__photo--empty). Was #2: E7 moved the not-posted line onto a classless EmptyState (the loading line is .stampsheet__loading), which drops out of the census, so this key shifted
 components/passport/PassportBook.jsx#1	placeholder	n/a			
 components/passport/PassportBook.jsx#2	placeholder	n/a			
 components/logbook/StampGameButton.jsx#1	placeholder	n/a			

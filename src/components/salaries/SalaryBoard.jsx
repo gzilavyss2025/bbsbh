@@ -3,6 +3,7 @@ import { teamChipColors } from '../../lib/teams.js'
 import { Money } from './Money.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { EmptyState } from '../ui/state/EmptyState.jsx'
 
 // Highest paid players, filtered two ways at once — by club from the rail above
 // the page, by position from the chips under this masthead. Rank, club-colour
@@ -48,7 +49,7 @@ export function SalaryBoard({ players, positions, position, onPosition, context,
       </div>
 
       {players.length === 0 && (
-        <p className="payboard__empty">No salaried player at this club and position.</p>
+        <EmptyState className="payboard__empty">No salaried player at this club and position.</EmptyState>
       )}
 
       {players.map((player, index) => {

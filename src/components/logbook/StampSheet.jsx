@@ -10,6 +10,7 @@ import { useCopy } from '../../copy/copyContext.js'
 import { LEVELS } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
+import { EmptyState } from '../ui/state/EmptyState.jsx'
 import { StampDetailModal } from './StampDetailModal.jsx'
 
 // THE STAMP SHEET — the clubs and the ballparks in your book, drawn as two
@@ -104,10 +105,10 @@ export function StampSheet({ stamps = [], factsByPk = {}, counts = false }) {
         ))}
       </div>
 
-      {empty ? (
-        <p className="stampsheet__empty">
-          {staticTeams.loading ? 'Loading this level’s clubs.' : 'This level’s clubs are not posted yet.'}
-        </p>
+      {empty && staticTeams.loading ? (
+        <p className="stampsheet__loading">Loading this level’s clubs.</p>
+      ) : empty ? (
+        <EmptyState>This level’s clubs are not posted yet.</EmptyState>
       ) : (
         <div className="stampsheet__panes">
           {milestones.map((milestone) => (

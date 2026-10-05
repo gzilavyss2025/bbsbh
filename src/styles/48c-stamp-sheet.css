@@ -47,7 +47,8 @@
   font-size: var(--fs-small);
 }
 
-.stampsheet__empty {
+/* The loading line only. The not-posted line is an EmptyState (#1132). */
+.stampsheet__loading {
   margin: 0;
   font-family: var(--font-body);
   font-size: var(--fs-small);

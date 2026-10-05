@@ -16,6 +16,8 @@ import { VsLevelSlider } from '../components/badges/VsLevelSlider.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { Table } from '../components/ui/table/Table.jsx'
+import { Button } from '../components/ui/control/Button.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
@@ -269,10 +271,13 @@ export function ProspectsPage() {
       )}
 
       {allPlayers.length > 0 && players.length === 0 && (
-        <div className="prospects__empty" role="status">
-          <p>No Top 100 prospects match those filters.</p>
-          <button type="button" className="prospects__reset" onClick={resetFilters}>Clear filters</button>
-        </div>
+        <EmptyState
+          className="prospects__empty"
+          role="status"
+          action={<Button onClick={resetFilters}>Clear filters</Button>}
+        >
+          No Top 100 prospects match those filters.
+        </EmptyState>
       )}
 
       {players.length > 0 && (

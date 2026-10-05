@@ -146,11 +146,11 @@
   letter-spacing: var(--ls-tight-display);
   color: var(--text-heading);
 }
+/* The board's EmptyState (#1132) sits in a flush Card, so the namespace
+   holds it off the card's edges. e2e/salaries.spec.js finds it by this
+   class. */
 .payboard__empty {
-  padding: var(--space-5) var(--space-4);
-  border-top: var(--bw-hair) solid var(--border-hairline);
-  font-size: var(--fs-body);
-  color: var(--text-caption);
+  margin: var(--space-3);
 }
 
 /* A bar in the club's own primary, capped with its secondary — the same
