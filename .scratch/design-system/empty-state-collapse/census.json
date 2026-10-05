@@ -1,5 +1,5 @@
 {
- "head": "14b7cbf50",
+ "head": "7e07e83cf",
  "selectors": [
   {
    "key": ".admincopy__help",
@@ -797,7 +797,6 @@
     "screens/team/StampInPage.jsx#1",
     "screens/team/StampInPage.jsx#2",
     "screens/team/TeamPhotosPage.jsx#2",
-    "screens/team/TeamTransactionsPage.jsx#1",
     "screens/team/modules/minors/DepthChartCard.jsx#1",
     "screens/team/modules/minors/HorizonCard.jsx#1"
    ],
@@ -2807,7 +2806,7 @@
    "job": "empty",
    "verdict": "MIGRATE",
    "slice": "E1",
-   "reason": "PILOT (the issue names it): a bare .hint plus a margin. Its rule (72-club-transactions.css) goes; EmptyState owns the inset",
+   "reason": "PILOT (the issue names it): a bare .hint plus a margin. DONE in E1: the site renders <EmptyState className=\"txpage__empty\">. The rule stays as the namespace margin (no Stack spaces the page)",
    "shape": "bare hint",
    "border": "none",
    "childBorder": "",
@@ -2816,7 +2815,7 @@
    "ground": "",
    "pad": "",
    "rules": [
-    "72-club-transactions.css:102"
+    "72-club-transactions.css:105"
    ],
    "dashedAnywhere": false,
    "sites": [
@@ -3183,7 +3182,7 @@
  "sites": [
   {
    "key": "App.jsx#1",
-   "line": 642,
+   "line": 644,
    "tag": "p",
    "cls": ".hint .hint--error",
    "copy": "Couldn’t load the schedule. Check your connection and try again.",
@@ -3199,7 +3198,7 @@
   },
   {
    "key": "App.jsx#2",
-   "line": 657,
+   "line": 659,
    "tag": "p",
    "cls": ".hint .hint--error",
    "copy": "Couldn’t find that game. It may not be on the schedule for that date.",
@@ -6271,7 +6270,7 @@
   },
   {
    "key": "screens/designlab/components.jsx#1",
-   "line": 245,
+   "line": 276,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "",
@@ -7679,17 +7678,17 @@
   },
   {
    "key": "screens/team/TeamTransactionsPage.jsx#1",
-   "line": 160,
-   "tag": "p",
-   "cls": ".hint .txpage__empty",
+   "line": 161,
+   "tag": "EmptyState",
+   "cls": ".txpage__empty",
    "copy": "No roster moves posted for this club yet.",
    "props": "",
    "job": "empty",
    "verdict": "MIGRATE",
    "slice": "E1",
-   "shape": "hint + own class",
+   "shape": "label",
    "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
+   "tokens": "· · · ·",
    "surface": "",
    "gated": false
   },
@@ -8020,7 +8019,7 @@
   "screens/team/RosterTab.jsx:31",
   "screens/team/StampInPage.jsx:96",
   "screens/team/TeamPhotosPage.jsx:43",
-  "screens/team/TeamTransactionsPage.jsx:63"
+  "screens/team/TeamTransactionsPage.jsx:64"
  ],
  "dashed": [
   {
