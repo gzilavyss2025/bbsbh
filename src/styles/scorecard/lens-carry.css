@@ -1,0 +1,69 @@
+/* ============================================================
+   SCORECARD / LENS CARRY STRIP — pinned at the top of the pane (#724, L6)
+   When the batting order wraps, the last result and the runners' boxes are off
+   screen. The strip shows them in the pane's top spacer band (useLens's
+   `padTop`), from the sticky header down to the frame, never over the frame:
+   LensFrame sets its top and its max-height. The boxes are the sheet's own
+   AtBatBox, zoomed by CSS to the sheet's zoom times --lens-carry-scale.
+   Paper, ink and navy only: kraft means a tap lifts a seal (ADR-0083), and the
+   strip lifts nothing. It takes no taps, so the pane pans under it.
+   ============================================================ */
+
+.sc-lens__carry {
+  position: absolute;
+  right: var(--space-4);
+  left: var(--space-4);
+  z-index: 4;
+  margin-top: var(--space-2);
+  overflow: hidden;
+  pointer-events: none;
+}
+.sc-carry {
+  box-sizing: border-box;
+  padding: var(--space-2);
+  background: var(--surface-inset);
+  border: var(--bw-rule) solid var(--ink-2);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-raised);
+}
+.sc-carry__head {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.sc-carry__boxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.sc-carry__item {
+  /* As wide as the box, so a long label wraps rather than widens its column. */
+  width: calc(var(--sc-cell-w) * var(--carry-zoom, 1) * var(--lens-carry-scale));
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.sc-carry__label {
+  flex: 1;
+  margin-bottom: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  color: var(--text-muted);
+}
+/* The real box, at the sheet's size. A cell's size, drawn by `zoom` as the
+   sheet is, so the marks keep their proportions. */
+.sc-carry__box {
+  width: var(--sc-cell-w);
+  height: var(--sc-cell-h);
+  zoom: calc(var(--carry-zoom, 1) * var(--lens-carry-scale));
+  background: var(--surface-card);
+  outline: var(--bw-hair) solid var(--rule-grid);
+}

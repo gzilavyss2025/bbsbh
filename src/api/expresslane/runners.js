@@ -133,7 +133,7 @@ export function runnersOnBase(entries, { excludeAtBatIndex = null } = {}) {
 // them: the extra-innings automatic runner never took a plate appearance, so
 // `atBatIndex` is undefined for him and every placement in a game would share
 // it. Same shape the foot strip and the deck already key their cards on.
-function cardKey(card) {
+export function cardKey(card) {
   return card.kind === 'placed' ? `placed:${card.runnerId}` : `pa:${card.atBatIndex}`
 }
 

@@ -89,6 +89,17 @@
      mount, never loops. */
   --dur-highlight: 1.6s;
 
+  /* The scorecard lens (ADR-0092, styles/motion/scorecard-lens.css). The
+     glide is the pane's scroll to the next sealed box after a tap, a JS tween
+     that reads this token (components/scoring/lens/useLens.js). The tear is
+     the seal's two halves flying off the box just opened. The turn takes the
+     pane out to the left and back in from the right at a half's handoff. */
+  --dur-glide:       300ms;
+  --dur-lens-tear:   180ms;
+  --dur-turn-out:    160ms;
+  --dur-turn-in:     200ms;
+  --dur-lens-sheet:  260ms;
+
   /* Sealed cover — kraft tape look, reused via background */
   --seal-texture: repeating-linear-gradient(
       -45deg,

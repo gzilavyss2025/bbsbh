@@ -1,0 +1,114 @@
+/* ============================================================
+   SCORECARD / LENS CARDS — under the frame, and the pitcher sheet (#724, L5)
+   One card docks under the lens's frame at a time (LensCards.jsx): the
+   new-pitcher notice, or at a leadoff the Entering card. useLens places the
+   frame in pane pixels and LensFrame puts the dock's top at the frame's bottom
+   edge; this partial adds the gap and the side insets. The pitcher sheet is
+   the app's own bottom sheet (.scrim/.sheet), from --lens-sheet-top down.
+   Paper, ink, navy and the notice tint only: kraft means a tap lifts a seal
+   (ADR-0083), and nothing here lifts one.
+   ============================================================ */
+
+.sc-lens__dock {
+  position: absolute;
+  right: var(--space-4);
+  left: var(--space-4);
+  z-index: 5;
+  margin-top: var(--lens-dock-gap);
+}
+
+/* THE ENTERING CARD: the brightest paper, a soft ink rule, raised. */
+.sc-entering {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: var(--surface-inset);
+  border: var(--bw-rule) solid var(--ink-2);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-raised);
+}
+.sc-entering p {
+  margin: 0;
+}
+.sc-entering__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.sc-entering__pitcher {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  color: var(--text-body);
+}
+.sc-entering__defense {
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  color: var(--text-muted);
+}
+
+/* THE NEW-PITCHER NOTICE: the play-by-play's own notice card
+   (.pitchernotice--pbp, 12-sealbox.css), as one button. The dock owns its
+   place, so the card's feed margin goes; the body grows, and the way into the
+   sheet sits on the right after a dashed rule. */
+.sc-armnotice {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  box-shadow: var(--shadow-raised);
+}
+.sc-armnotice:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.sc-armnotice .pitchernotice__body {
+  flex: 1;
+}
+.sc-armnotice__more {
+  flex: none;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  max-width: 30%;
+  padding-left: var(--space-3);
+  border-left: var(--bw-hair) dashed var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* THE PITCHER SHEET: from --lens-sheet-top to the window's foot. The card
+   scrolls; the navy way back stays at the foot. The vh line is the fallback
+   for a browser without dvh, as in grid.css. */
+.sheet.sc-pitchsheet {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--lens-sheet-top));
+  height: calc(100dvh - var(--lens-sheet-top));
+  padding: 0;
+  overflow: hidden;
+}
+.sc-pitchsheet__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-3) 0;
+}
+.sc-pitchsheet__foot {
+  padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+  border-top: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+}
+.sc-pitchsheet__foot .btn {
+  width: 100%;
+  min-height: var(--lens-row-h);
+}

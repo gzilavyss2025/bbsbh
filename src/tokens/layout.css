@@ -117,6 +117,26 @@
      .skel__ball) — its own component-scoped size rather than borrowing a
      --fs-* typography role for an unrelated icon dimension. */
   --skel-ball-size: 56px;
+
+  /* The scorecard's phone lens (ADR-0092, styles/scorecard/lens.css): the
+     fixed navy frame over the next sealed box, and the bottom bar under it.
+     The bar's height is fixed now because the frame's place is measured from
+     the pane, and the pane ends where the bar starts. The rail width is the
+     sheet's natural (unzoomed) one: slot number and surname, with the position
+     and number under the name, so the rail plus two inning columns fill a
+     phone at about 1.4x. */
+  --lens-frame-bw: 3px;
+  --lens-bar-h: 168px;
+  --lens-row-h: 52px;
+  --lens-rail-w: 100px;
+  /* The card docked under the frame (the Entering card or the new-pitcher
+     notice) sits this far below the frame's bottom edge, and the pitcher
+     sheet's top edge sits this far from the window's top (#724, L5). */
+  --lens-dock-gap: 13px;
+  --lens-sheet-top: 92px;
+  /* The carry strip's boxes are the sheet's own box at this share of the
+     sheet's zoom (#724, L6). */
+  --lens-carry-scale: 0.9;
 }
 
 /* --console-hud-h's desktop half — see the mobile value above for why this is

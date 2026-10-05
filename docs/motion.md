@@ -82,6 +82,30 @@ is one.
 | `strike.css` | #981 | The drawn cross-out, all four sites |
 | `playbyplay.css` | #982 | The four-beat write-on |
 | `innings.css` | #978, #983 | The live-edge dot's breath and the frontier seal's |
+| `scorecard-lens.css` | #724 (L7) | The phone lens (ADR-0092): the tear, the runner-move fade, the page turn, the two-cycle seal breath, the docked card's fade and the pitcher sheet's slide. The glide is beside it in JS |
+
+### The scorecard lens (#724, L7)
+
+One row per motion. The tear, the glide and the runner tint hang off
+`useLensMotion`'s `beat`, which only a reveal tap sets and which clears when
+the reader leaves the lens or the page turns: the existing `armed` gate, made
+narrower. The turn runs on its own tap. The docked card's fade is the one on
+`useBecameTrue`, and the ink-in keeps its set diff, unchanged.
+
+| Motion | Spec | Gate |
+| --- | --- | --- |
+| Tear | Two copies of the seal's face, cut along `lib/sealTear.js`'s shared split (seeded from the gamePk and the step), fly off the box just inked: 180 ms (`--dur-lens-tear`), `--ease-out`, upper half `translate(-26px, 8px) rotate(-9deg)`, lower half mirrored, to opacity 0. In the cell, so they ride the glide | `beat`, keyed on the tap; unmounts on `animationend` |
+| Glide | The pane's scroll to the next seal, 300 ms (`--dur-glide`), a rAF tween on `--ease-out` (`lib/scorecard/glide.js`, pinned to the token by a test). A touch, wheel or key stops it | `beat.n` new to `useLens`; null under reduced motion, at a turn, on a cold load, a poll and a return |
+| Ink-in | `.sc-ab--fresh`, unchanged (box.css) | `armed` + the `fresh` set diff |
+| Runner-move fade | The marker tint (`color-mix(--marker 45%)`) to the box's fill, 1.6 s (`--dur-highlight`), on the boxes of the runners the tap moved (`runnerMoves`) | `beat`; the tint span is keyed on the tap, so a runner moved twice fades twice |
+| Page turn | Out 160 ms (`--dur-turn-out`, opacity 0 + `translateX(-28px)`), switch `side`, in 200 ms (`--dur-turn-in`) from `translateX(28px)`. The pane only; the frame stays. No glide in a turn | The Turn tap; `animationend` steps it |
+| Seal breath | In the lens, 4 iterations of `sc-seal-breathe` (2 full cycles), then still. Held under press and focus, and under hover only where the pointer can hover (`(hover: hover)`): on a touch screen :hover sticks where the last tap was, which is where the next seal comes to rest. The desktop sheet breathes as before | None needed: the same on every seal (ADR-0046). A seal a poll brings at the live edge does not breathe (`--quiet`) |
+| Cards | A docked card fades in 220 ms (`--dur-med`), opacity + `scale(1.04)` → 1 | `useBecameTrue(dock)` in `LensFrame`: not on a cold load or a return to the lens. A card a poll brings is an arrival, and it fades |
+| Pitcher sheet | Slides up 260 ms (`--dur-lens-sheet`) from `translateY(40px)` | Mounts only on a tap |
+
+Reduced motion: no tear, no glide, no turn (the JS reads `motionIsReduced`);
+the cards and the sheet arrive at once under the blanket rules; the runner tint
+opts out of the blanket and stays, still, until the next tap.
 
 ## Two idle loops, one beat
 

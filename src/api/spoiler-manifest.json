@@ -326,9 +326,11 @@
     },
     "expresslane/runners.js": {
       "class": "reveal-only",
-      "why": "Express Lane's scoring deck — the batter's box and the boxes of the men standing on base, which is where a scorer writes a stolen base, a wild pitch and every hit that moves a runner already on. Every card carries its plate appearance's outcome, so this is callable only from inside a SealBox's reveal render function (ADR-0001/0002), the same footing as rail.js beside it. It re-derives nothing: computeHalfInningFeed already solved the hard half for at-bat stepping (ADR-0016), and this maps one rail row onto that function's own `stepCap` and reads the cards back out. THE CAP IS THE WHOLE POINT and is not optional. A runner's diamond shades the bases he legged out, so built from the finished half it would show his EVENTUAL fate — a man who reached first in the third would carry a fully shaded diamond the moment his own at-bat was revealed, telling the scorer the run came home before he had scored the play that drove it in. There is deliberately no variant of `expressDeck` that omits the cursor. Two containments ride along: the chip strip names only plate appearances already REACHED, since chips for ones still ahead would say how many batters are left to bat, and the deck is built one half-inning at a time for the same ADR-0008 reason the rail has no whole-game builder.",
+      "why": "Express Lane's scoring deck — the batter's box and the boxes of the men standing on base, which is where a scorer writes a stolen base, a wild pitch and every hit that moves a runner already on. Every card carries its plate appearance's outcome, so this is callable only from inside a SealBox's reveal render function (ADR-0001/0002), the same footing as rail.js beside it. It re-derives nothing: computeHalfInningFeed already solved the hard half for at-bat stepping (ADR-0016), and this maps one rail row onto that function's own `stepCap` and reads the cards back out. THE CAP IS THE WHOLE POINT and is not optional. A runner's diamond shades the bases he legged out, so built from the finished half it would show his EVENTUAL fate — a man who reached first in the third would carry a fully shaded diamond the moment his own at-bat was revealed, telling the scorer the run came home before he had scored the play that drove it in. There is deliberately no variant of `expressDeck` that omits the cursor. Two containments ride along: the chip strip names only plate appearances already REACHED, since chips for ones still ahead would say how many batters are left to bat, and the deck is built one half-inning at a time for the same ADR-0008 reason the rail has no whole-game builder. Widened 2026-10-02 for lib/scorecard/situation.js and lib/scorecard/words.js (the phone lens bar, #724, ADR-0092), which call it at the scorecard page's render top level, outside a SealBox. That is safe for one reason: they pass it only the scorecard's CLAMPED cards (halfCards of the view scorecardFull built at the reader's own step cursor), so every card it reads is a box already open on the sheet. They never hand it the feed or computeHalfInningFeed's output.",
       "importers": [
-        "hooks/useExpressLane.js"
+        "hooks/useExpressLane.js",
+        "lib/scorecard/situation.js",
+        "lib/scorecard/words.js"
       ]
     },
     "feverRadar.js": {
@@ -634,7 +636,7 @@
     },
     "playbyplay.js": {
       "class": "reveal-only",
-      "why": "The per-plate-appearance feed barrel. Result descriptions give away outs, hits and runs. Its constant re-exports (event types, pitch call codes) are the spoiler-free part, shared with the Node generators; every whole-feed walk behind it is not. Widened 2026-09-10 for api/expresslane/runners.js, and the reason is that it is the OPPOSITE of a new reveal path: Express Lane needs a runner's diamond to be true as of the cursor and never past it, and computeHalfInningFeed's `stepCap` is the only thing in the app that does that. A second derivation would have been a second place for a later play to leak back onto an earlier card. The importer is reveal-only itself and renders nothing.",
+      "why": "The per-plate-appearance feed barrel. Result descriptions give away outs, hits and runs. Its constant re-exports (event types, pitch call codes) are the spoiler-free part, shared with the Node generators; every whole-feed walk behind it is not. Widened 2026-09-10 for api/expresslane/runners.js, and the reason is that it is the OPPOSITE of a new reveal path: Express Lane needs a runner's diamond to be true as of the cursor and never past it, and computeHalfInningFeed's `stepCap` is the only thing in the app that does that. A second derivation would have been a second place for a later play to leak back onto an earlier card. The importer is reveal-only itself and renders nothing. Widened 2026-10-02 for lib/scorecard/arm.js (the phone lens's pitcher at the frontier, #724) on the same footing: it reads computeHalfInningFeed only up to the scorecard's own step cursor (`slice(0, count)`) for the half at revealedThrough + 1, and answers null for any other half.",
       "importers": [
         "api/boxscore.js",
         "api/callout-notes/inningAndStarter.js",
@@ -648,7 +650,8 @@
         "api/pitchers.js",
         "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",
-        "components/playbyplay/PlayByPlay.jsx"
+        "components/playbyplay/PlayByPlay.jsx",
+        "lib/scorecard/arm.js"
       ]
     },
     "playbyplay/advanceCode.js": {
