@@ -67,6 +67,19 @@ test('a dated page drops that season and later, and foots the rows it keeps', ()
   assert.equal(v.totals[0].cells[0], 13)
 })
 
+test('two Octobers with the same small line both count in a dated page’s footer', () => {
+  // aggregateSplits drops a repeat of the same line, a guard for the API's duplicate
+  // byDateRange row. Year-by-year rows from different seasons are not duplicates.
+  const same = { gamesPlayed: 1, atBats: 0, hits: 0, strikeOuts: 0 }
+  const v = postseasonRegisterView({
+    yby: [hit(2019, 147, same), hit(2021, 147, same), hit(2023, 147, same)],
+    career: CAREER,
+    group: 'hitting',
+    asOf: '2025-09-20',
+  })
+  assert.equal(v.totals[0].cells[0], 3)
+})
+
 test('a dated page with one season left has no footer', () => {
   const v = postseasonRegisterView({ yby: YBY, career: CAREER, group: 'hitting', asOf: '2025-09-20' })
   assert.deepEqual(v.rows.map((r) => r.year), [2022])
@@ -97,6 +110,21 @@ test('it asks for gameType=P at the MLB level, year by year and career', async (
   assert.ok(calls.some((u) => /stats=yearByYear/.test(u) && /gameType=P/.test(u)))
   assert.ok(calls.some((u) => /stats=career/.test(u) && /gameType=P/.test(u)))
   assert.ok(calls.every((u) => /group=hitting/.test(u) && !/sportId=/.test(u)))
+})
+
+test('a dated page skips the career request, since its footer is rebuilt from the rows', async () => {
+  const calls = []
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
+    calls.push(String(url))
+    return { ok: true, status: 200, json: async () => ({ stats: [{ splits: [] }] }) }
+  })
+  try {
+    await fetchPostseasonRegister(592450, 'hitting', { asOf: '2025-09-20' })
+  } finally {
+    fetchMock.mock.restore()
+  }
+  assert.equal(calls.length, 1)
+  assert.match(calls[0], /stats=yearByYear/)
 })
 
 test('a player who never debuted asks nothing', async () => {

@@ -9,6 +9,7 @@ import { getJson } from './statsapi.js'
 import { fetchStaticTeams } from './teams-static.js'
 import { postseasonThrough } from './scheduleGames.js'
 import { isoToday, toApiDate } from '../lib/dates.js'
+import { baseballToday } from '../lib/time/standingsDates.js'
 import { WINTER_LEAGUE_IDS, WINTER_SPORT_ID } from '../lib/winter/leagues.js'
 
 // Normalize a raw schedule game into the shape our cards need. Exported so
@@ -747,17 +748,17 @@ export async function fetchTeamSchedule(
 }
 
 // The day of the game a team page was opened from: the day after its
-// `resultsCutoff` on a dated link, else today. Today is the EARLIER of the UTC
-// and the local date, since the evening hours are already "tomorrow" in UTC and
-// tomorrow's card must not draw while tonight's game is still unseen.
+// `resultsCutoff` on a dated link, else today. Today is the EARLIEST of the UTC,
+// the local and the Pacific date, since the evening hours are already "tomorrow"
+// in UTC (and after midnight in the East) while a late West-coast game is still
+// on, and tomorrow's card must not draw while tonight's game is still unseen
+// (ADR-0087).
 function pageDay(resultsCutoff) {
   if (resultsCutoff) {
     const [y, m, d] = resultsCutoff.split('-').map(Number)
     return new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10)
   }
-  const utc = isoToday()
-  const local = toApiDate()
-  return utc < local ? utc : local
+  return [isoToday(), toApiDate(), baseballToday()].sort()[0]
 }
 
 // recentDecidedGames / allDecidedGames / allStartedGames — the pure post-fetch

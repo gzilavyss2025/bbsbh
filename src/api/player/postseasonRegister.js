@@ -23,11 +23,12 @@ import { aggregateSplits, hitterTiles, pitcherTiles } from '../person/stats.js'
 import { DASH } from '../person/shared.js'
 import { registerColumns, yearByYearCells } from '../person/careerRegister.js'
 
-export async function fetchPostseasonRegister(personId, group, { hasDebuted = true } = {}) {
+export async function fetchPostseasonRegister(personId, group, { hasDebuted = true, asOf = null } = {}) {
   if (!personId || !group || !hasDebuted) return null
+  // A dated page rebuilds its footer from the rows it keeps, so the career line is never read.
   const [yby, careerSplits] = await Promise.all([
     fetchPersonStats(personId, { type: 'yearByYear', group, gameType: 'P' }),
-    fetchPersonStats(personId, { type: 'career', group, gameType: 'P' }),
+    asOf ? [] : fetchPersonStats(personId, { type: 'career', group, gameType: 'P' }),
   ])
   return { yby, career: careerSplits[0]?.stat ?? null }
 }
@@ -54,7 +55,7 @@ export function postseasonRegisterView({ yby, career, group, asOf = null, showSa
 
   const totals = []
   if (rows.length > 1) {
-    const stat = cutYear == null && career ? career : aggregateSplits(splits, group)
+    const stat = cutYear == null && career ? career : aggregateSplits(splits, group, { dedupe: false })
     if (stat) totals.push({ label: 'Postseason', cells: yearByYearCells(stat, group, showSaves) })
   }
   return { columns: registerColumns(group, showSaves), rows, totals }
@@ -63,7 +64,7 @@ export function postseasonRegisterView({ yby, career, group, asOf = null, showSa
 // Fetch, shape, and name each row's club (the splits carry an id and a name, never
 // an abbreviation).
 export async function loadPostseasonRegister(personId, group, { hasDebuted = true, asOf = null, showSaves = false } = {}) {
-  const raw = await fetchPostseasonRegister(personId, group, { hasDebuted })
+  const raw = await fetchPostseasonRegister(personId, group, { hasDebuted, asOf })
   if (!raw) return null
   const view = postseasonRegisterView({ ...raw, group, asOf, showSaves })
   if (!view) return null

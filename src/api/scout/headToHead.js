@@ -163,27 +163,35 @@ const HALF = { Top: 'top', Bot: 'bottom' }
 export function plateAppearances(rows) {
   const keyOf = (r) => `${r.game_pk}-${r.at_bat_number}`
   const lists = new Map()
-  for (const r of rows) if (r.plate_x) lists.set(keyOf(r), [...(lists.get(keyOf(r)) ?? []), pitchOf(r)])
-  const listOf = (r) => (lists.get(keyOf(r)) ?? []).sort((a, b) => (a.n ?? 0) - (b.n ?? 0))
+  for (const r of rows) {
+    if (!r.plate_x) continue
+    const k = keyOf(r)
+    if (!lists.has(k)) lists.set(k, [])
+    lists.get(k).push(pitchOf(r))
+  }
+  for (const list of lists.values()) list.sort((a, b) => (a.n ?? 0) - (b.n ?? 0))
   return rows
     .filter((r) => r.events && !NOT_A_PA.has(r.events))
-    .map((r) => ({
-      key: keyOf(r),
-      gamePk: Number(r.game_pk),
-      atBat: Number(r.at_bat_number),
-      date: r.game_date,
-      round: r.game_type,
-      roundLabel: ROUND_LABELS[r.game_type] ?? r.game_type,
-      event: r.events,
-      description: r.des ?? '',
-      pitchType: r.pitch_type || null,
-      bbType: r.bb_type || null,
-      pitches: listOf(r).length,
-      pitchList: listOf(r),
-      inning: num(r.inning),
-      half: HALF[r.inning_topbot] ?? null,
-      stand: r.stand || null,
-    }))
+    .map((r) => {
+      const pitchList = lists.get(keyOf(r)) ?? []
+      return {
+        key: keyOf(r),
+        gamePk: Number(r.game_pk),
+        atBat: Number(r.at_bat_number),
+        date: r.game_date,
+        round: r.game_type,
+        roundLabel: ROUND_LABELS[r.game_type] ?? r.game_type,
+        event: r.events,
+        description: r.des ?? '',
+        pitchType: r.pitch_type || null,
+        bbType: r.bb_type || null,
+        pitches: pitchList.length,
+        pitchList,
+        inning: num(r.inning),
+        half: HALF[r.inning_topbot] ?? null,
+        stand: r.stand || null,
+      }
+    })
     .sort((a, b) => b.date.localeCompare(a.date) || b.gamePk - a.gamePk || b.atBat - a.atBat)
 }
 

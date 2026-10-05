@@ -97,7 +97,7 @@ function main() {
   process.stdout.write(render(input, flagIsFresh(input?.session_id)))
 }
 
-if (process.argv[1] && import.meta.url === new URL(`file:///${process.argv[1].replace(/\\/g, '/')}`).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     main()
   } catch {

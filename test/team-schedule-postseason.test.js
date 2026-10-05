@@ -103,3 +103,18 @@ test('postseasonThrough keeps regular-season rows and rows on or before the day'
     [1, 2, 4],
   )
 })
+
+// ADR-0087: the page's own day is the baseball today (US Pacific, the last US zone to roll
+// over), not the viewer's UTC or local date. At 12:30 a.m. Eastern on Oct 6 a late game is
+// still on in the West; Oct 6's "if necessary" row must stay hidden, because it vanishes
+// from the feed the moment the series ends.
+test('with no dated link, a postseason row for tomorrow in Pacific time is not returned', () => {
+  mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-06T04:30:00Z') })
+  return withSchedule(
+    [row(1, '2026-10-05', 'D', { final: true }), row(2, '2026-10-06', 'D')],
+    async () => {
+      const games = await fetchTeamSchedule(158, 2026, 1, null)
+      assert.deepEqual(games.map((g) => g.gamePk), [1])
+    },
+  ).finally(() => mock.timers.reset())
+})

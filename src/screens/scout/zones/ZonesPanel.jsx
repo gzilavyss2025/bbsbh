@@ -24,7 +24,7 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
   const crowd = stance === 'L' ? 'lefties' : 'righties'
   const names = { hitter: data.hitter.last, pitcher: data.pitcher.last }
   const typeName = selType ? selType.name : 'All pitches'
-  const callout = !sel && metric === 'xwoba' ? zoneCallout({ board, side: xside, stance, names }) : null
+  const callout = !sel && metric === 'xwoba' ? zoneCallout({ board, side: xside, stance, hitterStance, names }) : null
   const pick = (r) => onPick((p) => (p === r ? null : r))
   return (
     <section className="scout__panel" aria-label="Zones">

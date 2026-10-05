@@ -145,6 +145,17 @@ test('the Zones callout: the hottest spots, by region name, and the pitcher’s 
   assert.equal(zoneCallout({ board: { ...board, all: { ...board.all, thin: true } }, side: sides.xwoba, stance: 'R', names: NAMES }), null)
 })
 
+test('the Zones callout names no inside or away when the two maps draw different stances', async () => {
+  const { zoneCallout } = await import('../src/screens/scout/zones/callout.js')
+  // A switch hitter with the other hand picked: the pitcher board is drawn for R and the
+  // hitter map for L, so "inside" would be true on one map only (regionLabel, stance null).
+  const text = textOf(zoneCallout({ board, side: sides.xwoba, stance: 'R', hitterStance: 'L', names: NAMES }))
+  assert.ok(!/\b(inside|away)\b/.test(text), text)
+  assert.match(text, /3B side/)
+  // The same stance on both maps keeps the words.
+  assert.match(textOf(zoneCallout({ board, side: sides.xwoba, stance: 'R', hitterStance: 'R', names: NAMES })), /inside/)
+})
+
 test('a pitch that favors the pitcher, and a board too thin to judge, read as plain sentences', () => {
   const rows = [
     { name: 'Fastball', pct: '56', who: 'hitter', band: 1 },

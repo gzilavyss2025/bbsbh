@@ -3,6 +3,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import path from 'node:path'
+import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { isDesignPath, flagFileFor } from '../.claude/hooks/design-work-flag.mjs'
 
 test('CSS under src, UI primitives and the design lab count as design work', () => {
@@ -87,4 +89,15 @@ test('render keeps the folder, context and rate limits, and never throws on empt
   assert.doesNotMatch(line, /\x1b\[33m/)
   assert.ok(render({}, false).length > 0)
   assert.match(render({ model: { id: 'claude-sonnet-5-5' }, effort: { level: 'low' } }, true), /\x1b\[33m.*low for design/)
+})
+
+// The hook runs the file as a script, so the main-module guard must match a POSIX path
+// (`file:///${argv[1]}` builds four slashes there and the line printed nothing).
+test('run as a script, the status line prints its line', () => {
+  const script = fileURLToPath(new URL('../.claude/statusline-rung.mjs', import.meta.url))
+  const out = spawnSync(process.execPath, [script], {
+    input: JSON.stringify({ cwd: '/x', model: { id: 'claude-sonnet-5-5' }, effort: { level: 'medium' } }),
+    encoding: 'utf8',
+  }).stdout
+  assert.match(out, /Sonnet 5\.5 medium r3/)
 })
