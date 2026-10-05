@@ -8,13 +8,20 @@
 // check-caps.mjs (zero deps, run by `npm run lint`, so it gates every push).
 //
 // THE NESTED FILES ARE ALSO A TAX, just a conditional one. A nested CLAUDE.md
-// loads in full the moment anyone works in its directory, which for src/api/
-// and scripts/ is most sessions — so "move it to the nested file" was only ever
-// half a fix, and the nested files grew to 741 and 646 lines with nothing
-// watching. They now carry BUDGETS, on the same ratchet rule as
-// check-dir-size.mjs: pinned at today's count, editable DOWNWARD only, and a
-// file that drops below its budget must tighten it in the same commit so the
-// number never quietly stops meaning anything.
+// loads the first time Claude reads a file in its folder (and its parent
+// folders' files load with it), then stays for the session. So a rule belongs
+// in the deepest folder that every edit it governs passes through (ADR-0098),
+// and a big nested file costs every session that touches its folder. They carry
+// BUDGETS, on the same ratchet rule as check-dir-size.mjs: pinned at today's
+// count, editable DOWNWARD only, and a file that drops below its budget must
+// tighten it in the same commit so the number never quietly stops meaning
+// anything.
+//
+// LINES ARE NOT THE WHOLE COST. A table row can hold thousands of characters
+// on one line, so a line cap cannot see it: src/components/CLAUDE.md was 74
+// lines and 30,038 characters. Each file also has a character cap, 80 times its
+// line cap. No file needs a character budget today; add one, downward only,
+// when a file must exceed its cap.
 //
 // A NOTE ON MERGE ORDER, learned the same way check-dir-size.mjs learned it.
 // These numbers are measured against the tree the branch was cut from, so a
@@ -26,78 +33,76 @@
 //
 // If this fails, DON'T just raise the cap. The tier below is the answer: move
 // per-module detail into docs/* (which loads by reference, not by navigation)
-// and leave a pointer. src/api/CLAUDE.md is the worked example — it went from
-// 756 lines to 123 by moving its catalog into docs/api/, keeping only the
-// spoiler rule that you must read BEFORE touching anything in that directory.
+// or a deeper nested file, and leave a pointer. src/api/CLAUDE.md is the worked
+// example: it moved its catalog into docs/api/ and kept only the spoiler rule
+// that you must read BEFORE touching anything in that directory.
+//
+// The nested files are found by walking the tree, so a new one cannot skip the
+// caps by being left off a list. scripts/check-claude-md-facts.mjs checks that
+// the root file lists them all.
 
 import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+import { join, relative } from 'node:path'
+import { ROOT, DEFAULT_SKIP, walk } from './lib/walk.mjs'
 
 const ROOT_MAX = 200
+const ROOT_MAX_CHARS = ROOT_MAX * 80
 
 // Ceiling for a nested CLAUDE.md with no budget entry. Deliberately generous
 // against the root's 200: a nested file is paid for only when you work there.
 const NESTED_MAX = 250
+const NESTED_MAX_CHARS = NESTED_MAX * 80
 
 // Nested files already over the line, pinned at their measured count. Edit
 // DOWNWARD as work lands; never upward. A new entry here is a deliberate
 // decision that belongs in a PR description, not a reflex to make lint green.
 const BUDGETS = {
-  // scripts/CLAUDE.md is GONE from this table, and that is the outcome the
-  // entry was here to produce. It carried 667 lines, two thirds of them a
-  // per-generator catalog; that catalog is `docs/scripts/generators.md` now
-  // and the file sits at 196, under NESTED_MAX with room to spare. Re-adding
-  // an entry for it means the catalog started growing back into it.
-  //
   // Screens, routing, the design system, and the UI half of the spoiler rule.
-  'src/CLAUDE.md': 450,
-  // The club-identity data model and the dev-only lab that writes it.
-  'src/lib/CLAUDE.md': 385,
+  'src/CLAUDE.md': 255,
+  // The club-identity data model; the stores moved to src/lib/data/.
+  'src/lib/CLAUDE.md': 264,
 }
 
-const NESTED = [
-  'src/CLAUDE.md',
-  'src/api/CLAUDE.md',
-  'src/lib/CLAUDE.md',
-  'src/components/CLAUDE.md',
-  'scripts/CLAUDE.md',
-  'test/CLAUDE.md',
-]
+// `.claude` holds the other agents' worktrees, each with a copy of every file.
+const SKIP = new Set([...DEFAULT_SKIP, '.claude'])
 
-function lineCount(path) {
-  const parts = readFileSync(join(ROOT, path), 'utf8').split('\n')
+function measure(path) {
+  const text = readFileSync(join(ROOT, path), 'utf8')
+  const parts = text.split('\n')
   if (parts.length && parts[parts.length - 1] === '') parts.pop()
-  return parts.length
+  return { lines: parts.length, chars: text.length }
 }
+
+const NESTED = walk(ROOT, { skip: SKIP, exts: ['CLAUDE.md'] })
+  .map((f) => relative(ROOT, f).split('\\').join('/'))
+  .filter((f) => f !== 'CLAUDE.md')
+  .sort()
 
 const problems = []
 
-const rootLines = lineCount('CLAUDE.md')
-if (rootLines > ROOT_MAX) {
+const root = measure('CLAUDE.md')
+if (root.lines > ROOT_MAX) {
   problems.push(
-    `root CLAUDE.md is ${rootLines} lines (max ${ROOT_MAX}). It loads on EVERY ` +
+    `root CLAUDE.md is ${root.lines} lines (max ${ROOT_MAX}). It loads on EVERY ` +
       'session — move detail into a nested CLAUDE.md or docs/* and leave a pointer.',
+  )
+}
+if (root.chars > ROOT_MAX_CHARS) {
+  problems.push(
+    `root CLAUDE.md is ${root.chars} characters (max ${ROOT_MAX_CHARS}). A long line ` +
+      'costs as much as many short ones — move detail into a nested CLAUDE.md or docs/*.',
   )
 }
 
 for (const file of NESTED) {
-  let lines
-  try {
-    lines = lineCount(file)
-  } catch {
-    problems.push(`${file} is named in this guard's nested list but no longer exists.`)
-    continue
-  }
+  const { lines, chars } = measure(file)
   const budget = BUDGETS[file]
   if (budget == null) {
     if (lines > NESTED_MAX) {
       problems.push(
-        `${file} is ${lines} lines (max ${NESTED_MAX}). It loads in full whenever ` +
-          'anyone works in that directory. Move per-module detail into docs/* and ' +
-          'leave a pointer — src/api/CLAUDE.md is the worked example.',
+        `${file} is ${lines} lines (max ${NESTED_MAX}). It loads in full the first ` +
+          'time Claude reads a file in that folder. Move per-module detail into docs/* ' +
+          'or a deeper nested file and leave a pointer — src/api/CLAUDE.md is the worked example.',
       )
     }
   } else if (lines > budget) {
@@ -112,11 +117,17 @@ for (const file of NESTED) {
         'progress is recorded and the number keeps meaning something.',
     )
   }
+  if (chars > NESTED_MAX_CHARS) {
+    problems.push(
+      `${file} is ${chars} characters (max ${NESTED_MAX_CHARS}). A long table row or ` +
+        'paragraph hides under a line cap — split it, or move the reference into docs/*.',
+    )
+  }
 }
 
 for (const file of Object.keys(BUDGETS)) {
   if (!NESTED.includes(file)) {
-    problems.push(`${file} has a budget but is not in this guard's nested list.`)
+    problems.push(`${file} has a budget but no such nested CLAUDE.md exists.`)
   }
 }
 
@@ -133,6 +144,6 @@ if (problems.length) {
 
 const budgeted = Object.keys(BUDGETS).length
 console.log(
-  `✓ CLAUDE.md LEANNESS RULE holds — root is ${rootLines}/${ROOT_MAX} lines; ` +
+  `✓ CLAUDE.md LEANNESS RULE holds — root is ${root.lines}/${ROOT_MAX} lines; ` +
     `${NESTED.length - budgeted} nested files under ${NESTED_MAX}, ${budgeted} on a shrinking budget.`,
 )
