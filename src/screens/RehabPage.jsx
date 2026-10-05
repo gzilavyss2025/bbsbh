@@ -9,6 +9,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
@@ -57,7 +58,7 @@ export function RehabPage() {
       )}
 
       {allPlayers.length > 0 && players.length === 0 && (
-        <p className="hint hint--prose">No players from that club are on a rehab assignment right now.</p>
+        <EmptyState role="status">No players from that club are on a rehab assignment right now.</EmptyState>
       )}
 
       {players.length > 0 && (

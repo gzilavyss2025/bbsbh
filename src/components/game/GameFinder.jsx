@@ -5,6 +5,7 @@ import { useNav } from '../../lib/nav.js'
 import { gamePath } from '../../lib/route.js'
 import { TeamSearchBox } from '../team/TeamSearchBox.jsx'
 import { Loader } from '../ui/Loader.jsx'
+import { EmptyState } from '../ui/state/EmptyState.jsx'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const SEASONS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - i)
@@ -79,7 +80,7 @@ export function GameFinder() {
         <>
           {h2h.loading && <Loader size="inline" message="Looking up games…" />}
           {!h2h.loading && games.length === 0 && (
-            <p className="hint">No {season} games between these two.</p>
+            <EmptyState>No {season} games between these two.</EmptyState>
           )}
           {games.length > 0 && (
             <ul className="gamefinder__results">

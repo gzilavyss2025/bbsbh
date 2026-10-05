@@ -9,6 +9,7 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 const CURRENT_YEAR = new Date().getFullYear()
@@ -137,7 +138,7 @@ export function GamePhotosPage({ initialGamePk = null } = {}) {
               )}
             </div>
 
-            {!teamId && <p className="hint hint--prose">Pick a club above to browse its games.</p>}
+            {!teamId && <EmptyState>Pick a club above to browse its games.</EmptyState>}
 
             {teamId && (
               <>

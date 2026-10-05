@@ -144,12 +144,11 @@ components/playerstats/ProspectCard.jsx#2	empty	MIGRATE	E5	label+note	label + li
 #
 # --- SITES — E2 AsyncStatus empty branch (one change moves every emptyMessage) ---
 # components/ui/AsyncGate.jsx#4 (the one AsyncStatus empty line): DONE in E2. It renders <EmptyState> now, so the census no longer sees a hint there and the row is gone.
-screens/AllStarLegacyPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/AllStarLegacyPage.jsx#2	error	n/a			
 screens/AllStarRostersPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
 screens/AwardsHistoryPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
 screens/FoulTrackerPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
 screens/GamePhotosPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
-screens/GamePhotosPage.jsx#3	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
 screens/LogoSheet.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
 screens/MilestoneWatchPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
 screens/NineKeysPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
@@ -190,17 +189,11 @@ screens/team/ContractsTab.jsx#3	empty	MIGRATE	E4	bare hint	ledger not published 
 screens/team/StampInPage.jsx#1	empty	MIGRATE	E4	bare hint	Stamp In with no games posted. Copy only: no stamp art (ADR-0035)
 components/playerstats/SplitsVsTeam.jsx#1	empty	MIGRATE	E5	hint + own class	compact
 #
-# --- SITES — E6 standalone pages (a bare .hint today, no CSS) ---
-screens/AllStarLegacyPage.jsx#1	empty	MIGRATE	E6	bare hint	club filter: no All-Stars
-screens/MilestoneWatchPage.jsx#2	empty	MIGRATE	E6	bare hint	club filter
-screens/RehabPage.jsx#2	empty	MIGRATE	E6	bare hint	club filter
-screens/LeadersPage.jsx#1	empty	MIGRATE	E6	bare hint	no leaders for this scope yet
-screens/around-the-game/DoubleheadersPage.jsx#2	empty	MIGRATE	E6	bare hint	year filter
-screens/TradeDeadlineSeasonPage.jsx#2	empty	MIGRATE	E6	bare hint	club filter: the copy reads as a sentence but it IS the empty state of the filtered list
-screens/UmpirePage.jsx#1	empty	MIGRATE	E6	bare hint	no games behind the plate
-screens/SalariesPage.jsx#2	empty	MIGRATE	E6	bare hint	league salaries not published
-screens/GamePhotosPage.jsx#1	empty	MIGRATE	E6	bare hint	nothing picked yet: a prompt is the empty state of a picker page
-components/game/GameFinder.jsx#2	empty	MIGRATE	E6	bare hint	no games between the two clubs
+# --- SITES — E6 standalone pages: all 10 moved sites left the census; these rows are shifted keys re-read in E6 ---
+screens/AllStarLegacyPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/MilestoneWatchPage.jsx#2	caveat	n/a			
+screens/RehabPage.jsx#2	caveat	n/a			
+screens/GamePhotosPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
 #
 # --- SITES — E7 the boxed and mixed ones ---
 screens/ProspectsPage.jsx#2	empty	MIGRATE	E7	box	solid box + Clear filters button: dashed + `action`
@@ -276,7 +269,7 @@ components/profile/EraseDataDialog.jsx#1	error	n/a
 components/ui/AsyncGate.jsx#1	error	n/a			
 components/ui/AsyncGate.jsx#2	error	n/a			
 components/ui/AsyncGate.jsx#3	error	n/a			
-screens/AllStarLegacyPage.jsx#3	error	n/a			
+screens/AllStarLegacyPage.jsx#3	caveat	n/a			
 screens/FirstScorebookPage.jsx#1	error	n/a			
 screens/PostseasonSeriesPage.jsx#1	error	n/a			
 screens/game-notes/GameNotesArchivePage.jsx#2	error	n/a			
@@ -305,7 +298,6 @@ components/profile/ProfileAccount.jsx#2	caveat	n/a
 components/scoring/ScorecardCellEditor.jsx#1	caveat	n/a			
 components/team/FormerTeammates.jsx#1	caveat	n/a			
 components/team/ladder/Ladder.jsx#1	caveat	n/a			
-screens/AllStarLegacyPage.jsx#4	caveat	n/a			
 screens/AllStarRostersPage.jsx#2	caveat	n/a			
 screens/AwardsHistoryPage.jsx#2	caveat	n/a			
 screens/FirstScorebookPage.jsx#2	caveat	n/a			
@@ -314,14 +306,12 @@ screens/FoulTrackerPage.jsx#3	caveat	n/a
 screens/GamePreview.jsx#2	caveat	n/a			
 screens/LogbookCollection.jsx#2	caveat	n/a			
 screens/LogbookStatsPage.jsx#2	caveat	n/a			
-screens/MilestoneWatchPage.jsx#3	caveat	n/a			
 screens/NineKeysPage.jsx#2	caveat	n/a			
 screens/PlayerPage.jsx#1	caveat	n/a			
 screens/PostseasonLeadersPage.jsx#1	caveat	n/a			
 screens/PostseasonLeadersPage.jsx#2	caveat	n/a			
 screens/PostseasonRacePage.jsx#4	caveat	n/a			
 screens/ProspectsPage.jsx#3	caveat	n/a			
-screens/RehabPage.jsx#3	caveat	n/a			
 screens/UmpireRankingsPage.jsx#1	caveat	n/a			
 screens/around-the-game/PacePage.jsx#2	caveat	n/a			
 screens/around-the-game/abs/PlayerBoards.jsx#1	caveat	n/a			
