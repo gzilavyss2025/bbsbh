@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { seasonIndex } from '../../api/staticJson.js'
+import { seasonIndexOf } from '../../api/staticJson.js'
 import { resolveSeasonView } from '../../lib/seasons/view.js'
 import { useAsync } from '../useAsync.js'
 
@@ -9,7 +9,7 @@ import { useAsync } from '../useAsync.js'
 // lib/seasons/view.js. A page fetches `shown` (and `vs`, to compare) with the
 // store's own reader, which takes the same `{ seasonYear }`.
 export function useSeasonView(store, { seasonYear, vs } = {}) {
-  const { data: index } = useAsync(() => seasonIndex(store), [store])
+  const { data: index } = useAsync(() => seasonIndexOf(store), [store])
   return useMemo(
     () => (index ? resolveSeasonView(index, { seasonYear, vs }) : null),
     [index, seasonYear, vs],

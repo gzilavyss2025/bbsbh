@@ -1,5 +1,5 @@
 import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
-import { readSeasonShard, seasonFolderOf, seasonsOf, seasonStaticJson, staticJsonBy } from './staticJson.js'
+import { readSeasonShard, seasonFolderOf, seasonStaticJson, staticJsonBy } from './staticJson.js'
 import { joinGameRows } from '../lib/seasons/combine.js'
 
 // The umpire detail page's data — for a given umpire, every MLB and AAA game
@@ -242,7 +242,6 @@ function load(id, seasonYear) {
 // file, and `[]` for an umpire with no pitch-tracked plate work (MiLB below AAA,
 // or a run before the generator wrote the file) — absence of rows, not an error.
 async function loadRows(id, seasonYear) {
-  if (await beforeAccuracy(seasonYear)) return []
   const rows = await readSeasonShard(
     'umpire-accuracy',
     seasonYear,
@@ -269,17 +268,11 @@ const loadAccuracySummary = seasonStaticJson('umpire-accuracy', 'umpire-accuracy
 // THE TWO STORES START IN DIFFERENT SEASONS. Assignments go back to 2023 (the
 // #1202 backfill: one schedule request a season). Pitch calls were first
 // scored in 2026, and an old season would need every game re-read. So a season
-// BEFORE the accuracy store's first has no accuracy at all. seasonFolderOf's
-// fallback to the current season is for a year AFTER the last on file (a
-// spring game page reads last season); applied to 2024 it would print 2026's
-// accuracy, rank and zone map beside 2024's games.
-async function beforeAccuracy(seasonYear) {
-  if (seasonYear == null || seasonYear === 'all') return false
-  const seasons = await seasonsOf('umpire-accuracy')
-  return seasons.length > 0 && Number(seasonYear) < Math.min(...seasons)
-}
-async function accuracySummary(seasonYear) {
-  return (await beforeAccuracy(seasonYear)) ? NO_SUMMARY : loadAccuracySummary({ seasonYear })
+// BEFORE the accuracy store's first has no accuracy at all: seasonFolderOf
+// gives that year no folder, so a 2024 page reads NO_SUMMARY and no rows, never
+// 2026's accuracy, rank and zone map beside 2024's games.
+function accuracySummary(seasonYear) {
+  return loadAccuracySummary({ seasonYear })
 }
 
 // A umpire's season aggregate for a given level. MLB is the top-level `season`
@@ -320,7 +313,7 @@ function seasonForLevel(u, level) {
 async function accuracyIndex(level = 'MLB', seasonYear) {
   // Keyed on the folder the year resolves to, so "current" and the current
   // year spelled out share one index.
-  const folder = (await beforeAccuracy(seasonYear)) ? 'none' : await seasonFolderOf('umpire-accuracy', seasonYear)
+  const folder = await seasonFolderOf('umpire-accuracy', seasonYear)
   const memoKey = `${folder}:${level}`
   const memo = indexCached.get(memoKey)
   if (memo) return memo
@@ -516,7 +509,7 @@ export async function loadUmpire(id, { seasonYear } = {}) {
     // that wrote it.
     ...u,
     // The seasons the accuracy figures cover, which are not always the games'
-    // (see beforeAccuracy): 'all' joins games from 2023 and accuracy from
+    // (see accuracySummary): 'all' joins games from 2023 and accuracy from
     // 2026. Empty when there is no accuracy for this season.
     accuracySeasons: summary.seasons ?? (summary.season != null ? [summary.season] : []),
     accuracy,

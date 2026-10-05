@@ -86,8 +86,8 @@ reads of `teams.json` and eight of `milb-history.json` on a single load. Each
 reader still owns its own `shape` and `fallback`; nothing else changes.
 
 **The six #1200 season stores' readers take `{ seasonYear }`** (a year, `'all'`, or
-nothing for `current`; a year not on file reads `current`), resolved by
-`seasonFolderOf` in `staticJson.js`. Never `season`: in `umpires.js` that is an
+nothing for `current`; a year after the last reads `current`, a year before the
+first reads nothing), resolved by `seasonFolderOf` in `staticJson.js`. Never `season`: in `umpires.js` that is an
 umpire's aggregate. A game page passes `selectGameSeason(feed)`. `scout/hitterGrid.js`
 is not one of the six and still takes a positional season.
 `'all'` reads a league file's `all/` copy; one player's `'all'` is a sum in

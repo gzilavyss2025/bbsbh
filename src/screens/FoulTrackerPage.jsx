@@ -247,7 +247,7 @@ export function FoulTrackerPage({ seasonYear, vs }) {
           <TeamBoard
             teams={boards.teamRows}
             favoriteTeamId={highlightTeamId}
-            compare={cmp('teams', 'dec2', (t) => t.fouls / t.g)}
+            compare={cmp('teams', 'dec1', (t) => t.fouls / t.g)}
           />
         </>
       )}

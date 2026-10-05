@@ -5,7 +5,7 @@
 // arsenalView): { code, name, velo, usage (a fraction), count }.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { arsenalMixRows } from '../src/api/pitchArsenal.js'
+import { arsenalLevelOf, arsenalMixRows } from '../src/api/pitchArsenal.js'
 
 const shard = {
   pit: {
@@ -31,4 +31,16 @@ test('a season he did not pitch, or one under the sample floor, is no card, neve
   assert.equal(arsenalMixRows(shard, 999, true), null)
   assert.equal(arsenalMixRows(shard, 404, false), null) // 3 Triple-A pitches
   assert.equal(arsenalMixRows(null, 404, true), null)
+})
+
+// The level comes from the picked season's own shard, not the level he pitches
+// at now (#1202): a man in Triple-A in 2025 and MLB in 2026 has a 2025
+// card from his AAA mix, never an empty MLB one.
+test("a past season's level is the one he threw the most pitches at that season", () => {
+  assert.equal(arsenalLevelOf(shard, 404), true) // 100 MLB, 3 AAA
+  const aaaYear = { pit: { 7: { mlb: [{ code: 'FF', pitches: 4 }], aaa: [{ code: 'FF', pitches: 40 }, { code: 'CU', pitches: 20 }] } } }
+  assert.equal(arsenalLevelOf(aaaYear, 7), false)
+  assert.equal(arsenalLevelOf(aaaYear, '7'), false)
+  assert.equal(arsenalLevelOf(shard, 999), null)
+  assert.equal(arsenalLevelOf(null, 404), null)
 })

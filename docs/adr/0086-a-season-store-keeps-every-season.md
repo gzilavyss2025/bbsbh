@@ -152,10 +152,11 @@ file, and 35 other generators still take the season from the calendar year
 
 Every reader of the six stores above now takes `{ seasonYear }`: a year, `'all'`,
 or nothing. `seasonFolderOf(store, seasonYear)` in `src/api/staticJson.js` is the
-one rule. Nothing means `current`. A year that is not in `seasons` also means
+one rule. Nothing means `current`. A year after the last in `seasons` also means
 `current`: the stores sweep no spring training, so a new season's year is not on
 file until Opening Day, and a spring game page shows last season, as it did
-before. `'all'` is the `all/` folder. (`hitter-grid/` is a later store and keeps
+before. A year before the first (or in a gap) means nothing on file (changed in
+the #1202 addendum below). `'all'` is the `all/` folder. (`hitter-grid/` is a later store and keeps
 its own positional `season`.)
 
 - **League files** (the foul board, the umpire accuracy summary, the ABS files, the
@@ -194,7 +195,9 @@ on one person's card; the winter default is the last complete season, which is
   `src/lib/seasons/route.js` parses and builds them. A malformed year is dropped,
   so the page shows the current season. A well-formed year that is not on file
   is also the current season: `src/lib/seasons/view.js`'s `resolveSeasonView`
-  uses the same rule as `seasonFolderOf`.
+  treats a bad address as no year. That is a page rule, not a reader rule: a
+  reader gives a year before the store's first no folder (see the backfill note
+  below).
 - **The picker** is `components/season/SeasonPicker.jsx`: Pill controls (a pill
   control filters the content under it, #1131). It shows only when a store has
   more than one season. The "all" choice is labelled with its years
@@ -211,11 +214,12 @@ on one person's card; the winter default is the last complete season, which is
   fouls index for the season list, because one nightly run writes all six stores.
 - **The umpire backfill.** `umpires/2023` to `umpires/2025` were written once by
   hand (`node scripts/gen-umpires.mjs --season=YYYY`). The nightly run rebuilds
-  only the current season. Accuracy starts in 2026, so `api/umpires.js`'s
-  `beforeAccuracy` gives a season BEFORE the accuracy store's first season no
-  accuracy at all. `seasonFolderOf`'s fallback to `current` is for a season AFTER
-  the last on file (a spring game page), and it would put 2026 accuracy on a 2024
-  page.
+  only the current season. Accuracy starts in 2026, so a season BEFORE the
+  accuracy store's first has no accuracy at all. `seasonFolderOf`'s fallback to
+  `current` is only for a season AFTER the last on file (a spring game page); a
+  year before the first, or in a gap, has no folder (#1202). Without that,
+  a 2024 page would show 2026 accuracy, and a 2025 game page would show a
+  pitcher's 2026 arsenal.
 - **Not yet.** No surface writes `fouls/all/fouls.json` until the nightly run does;
   until then `/fouls/all` shows the board's normal empty state. Only 2026 is on
   file in five of the six stores, so their pickers stay hidden until 2027 data
