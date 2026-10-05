@@ -551,15 +551,27 @@ export async function fetchPitcherSeasonVsOpponent(personId, season, opponentTea
 // Both reads end the day before the game (ADR-0088), so one answer holds for the
 // whole session. Memoize the REQUEST, as staticJson does: the Lens notice and
 // the pitcher sheet's card ask for the same arm, and the second ask must not
-// go to the network again. A failure is kept too, as there.
+// go to the network again. A null answer (a failed read, or an arm with no line)
+// is NOT kept, so a transient error is retried on the next ask.
+const memos = []
 function memoRequest(read) {
   const seen = new Map()
+  memos.push(seen)
   return (...args) => {
     const key = JSON.stringify(args)
-    if (!seen.has(key)) seen.set(key, read(...args))
+    if (!seen.has(key)) {
+      const asked = read(...args).then((value) => {
+        if (value == null) seen.delete(key)
+        return value
+      })
+      seen.set(key, asked)
+    }
     return seen.get(key)
   }
 }
+
+// For tests: forget every kept answer.
+export const resetPitcherReads = () => memos.forEach((m) => m.clear())
 
 export const fetchPitcherSeasonLine = memoRequest(readPitcherSeasonLine)
 export const fetchPitcherLastGame = memoRequest(readPitcherLastGame)

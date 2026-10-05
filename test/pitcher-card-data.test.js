@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test, { mock } from 'node:test'
-import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../src/api/game.js'
+import { fetchPitcherLastGame, fetchPitcherSeasonLine, resetPitcherReads } from '../src/api/game.js'
 import { fetchPitcherPostseasonCareer } from '../src/api/postseason/pitcherCareer.js'
 
 // The Now Pitching card's two fetchers, run against responses captured from
@@ -16,6 +16,7 @@ const EMPTY = { stats: [{ splits: [] }] }
 // A fetch stand-in that routes on the URL and records every request, so a test
 // can assert on WHAT was asked as well as on what came back.
 function withApi(route, run) {
+  resetPitcherReads() // the reads are memoized per session; each test starts cold
   const urls = []
   const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
     urls.push(String(url))
@@ -283,25 +284,39 @@ test('in game 1 of a doubleheader, neither game of that day counts', async () =>
 
 test('a second ask for the same pitcher, game and date makes no new request', async () => {
   await withApi(
-    () => fixture('lee-669276-bydaterange-R-thru-2026-09-29'),
+    (url) =>
+      url.includes('byDateRange') ? fixture('lee-669276-bydaterange-R-thru-2026-09-29') : leeRoute(url),
     async (urls) => {
-      // An id no other test uses, so this test owns its cache entries.
       const [line1, last1] = await Promise.all([
-        fetchPitcherSeasonLine(900001, 2026, 1, '2026-09-30'),
-        fetchPitcherLastGame(900001, 2026, '2026-09-30', 1),
+        fetchPitcherSeasonLine(669276, 2026, 1, '2026-09-30'),
+        fetchPitcherLastGame(669276, 2026, '2026-09-30', 1),
       ])
       const asked = urls.length
       assert.ok(asked > 0)
       const [line2, last2] = await Promise.all([
-        fetchPitcherSeasonLine(900001, 2026, 1, '2026-09-30'),
-        fetchPitcherLastGame(900001, 2026, '2026-09-30', 1),
+        fetchPitcherSeasonLine(669276, 2026, 1, '2026-09-30'),
+        fetchPitcherLastGame(669276, 2026, '2026-09-30', 1),
       ])
       assert.equal(urls.length, asked)
       assert.deepEqual(line2, line1)
       assert.deepEqual(last2, last1)
       // A different game date is a different question.
-      await fetchPitcherSeasonLine(900001, 2026, 1, '2026-10-01')
+      await fetchPitcherSeasonLine(669276, 2026, 1, '2026-10-01')
       assert.equal(urls.length, asked + 1)
+    },
+  )
+})
+
+test('a null answer is not kept, so the next ask goes back to the network', async () => {
+  let body = EMPTY
+  await withApi(
+    () => body,
+    async (urls) => {
+      assert.equal(await fetchPitcherSeasonLine(900002, 2026, 1, '2026-09-30'), null)
+      body = fixture('lee-669276-bydaterange-R-thru-2026-09-29')
+      const line = await fetchPitcherSeasonLine(900002, 2026, 1, '2026-09-30')
+      assert.ok(line)
+      assert.equal(urls.length, 2)
     },
   )
 })
