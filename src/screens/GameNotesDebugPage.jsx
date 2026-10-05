@@ -7,6 +7,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { Table } from '../components/ui/table/Table.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { WhatsBrewingModal } from '../components/game/WhatsBrewingModal.jsx'
 
@@ -69,46 +70,44 @@ export function GameNotesDebugPage() {
       />
 
       {!notesState.loading && Object.keys(notesById).length > 0 && (
-        <div className="ledger-wrap">
-          <table className="standings">
-            <thead>
-              <tr>
-                <th className="team">Team</th>
-                <th>Layout</th>
-                <th>Note date</th>
-                <th>Modal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {teams.map((t) => {
-                const notes = notesById[t.id]
-                return (
-                  <tr key={t.id}>
-                    <td className="team">
-                      <TeamLogo teamId={t.id} name={t.name} size={22} />
-                      {t.name}
-                    </td>
-                    <td>{t.calibrated ? t.layout || '—' : 'not calibrated'}</td>
-                    <td>{notes?.date ?? '—'}</td>
-                    <td>
-                      {notes?.url ? (
-                        <button
-                          type="button"
-                          className="btn btn--ghost"
-                          onClick={() => setOpenTeamId(t.id)}
-                        >
-                          Open ›
-                        </button>
-                      ) : (
-                        '—'
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <Table label="Game Notes by club" className="clubtable">
+          <thead>
+            <tr>
+              <th className="team">Team</th>
+              <th>Layout</th>
+              <th>Note date</th>
+              <th>Modal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {teams.map((t) => {
+              const notes = notesById[t.id]
+              return (
+                <tr key={t.id}>
+                  <td className="team">
+                    <TeamLogo teamId={t.id} name={t.name} size={22} />
+                    {t.name}
+                  </td>
+                  <td>{t.calibrated ? t.layout || '—' : 'not calibrated'}</td>
+                  <td>{notes?.date ?? '—'}</td>
+                  <td>
+                    {notes?.url ? (
+                      <button
+                        type="button"
+                        className="btn btn--ghost"
+                        onClick={() => setOpenTeamId(t.id)}
+                      >
+                        Open ›
+                      </button>
+                    ) : (
+                      '—'
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </Table>
       )}
 
       {openTeamId && openNotes && (

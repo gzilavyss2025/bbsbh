@@ -7,7 +7,7 @@ import {
   MIN_UMPIRE_GAMES,
 } from '../../../api/around-the-game/absChallenges.js'
 import { BroadcastSection } from '../../../components/around-the-game/BroadcastMasthead.jsx'
-import { BoardScroller } from '../../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../../components/ui/table/Table.jsx'
 import { DivergingBarCell } from '../../../components/around-the-game/BroadcastBar.jsx'
 import { UmpireLink } from '../../../components/umpire/UmpireLink.jsx'
 import { commas, num2, pct1 } from './format.js'
@@ -100,63 +100,61 @@ export function UmpireBoard({ summary }) {
         ))}
       </div>
 
-      <BoardScroller label="Challenges against each plate umpire">
-        <table className="standings rpt" id={boardId}>
-          <thead>
-            <tr>
-              {/* The floor rides in the column head it qualifies, where a
-                  reader meets it while reading the column, instead of in
-                  a paragraph above the board.
+      <Table sticky label="Challenges against each plate umpire" className="rpt" id={boardId}>
+        <thead>
+          <tr>
+            {/* The floor rides in the column head it qualifies, where a
+                reader meets it while reading the column, instead of in
+                a paragraph above the board.
 
-                  SO DOES THE DENOMINATOR, in three words. This board is
-                  the one thing on the page that can be misread against
-                  another page — /umpire-rankings scores every called
-                  pitch of a man's season, this scores only the pitches
-                  somebody thought were wrong — and a reader who takes
-                  one for the other has the wrong idea of an umpire, not
-                  just a wrong figure. The source line at the foot says it
-                  in full; the head says enough to stop the mistake. */}
-              <th className="team">
-                Umpire
-                <span className="rpt__note">
-                  Minimum {MIN_UMPIRE_GAMES} games · challenged pitches only
-                </span>
-              </th>
-              <th>Games</th>
-              <th>Challenged</th>
-              {/* The baseline the bar is drawn from, named in the head it
-                  belongs to. A diverging bar with an unlabelled centre is a
-                  chart a reader has to guess the middle of. */}
-              <th>
-                Per game
-                {league != null && <span className="rpt__note">Against {num2(league)}</span>}
-              </th>
-              <th>Overturned</th>
-              <th>Overturn rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            {showAll ? (
-              umps.map(Row)
-            ) : (
-              <>
-                {head.map(Row)}
-                {between > 0 && (
-                  <tr className="rpt__between">
-                    <th scope="row" className="team">
-                      {commas(between)} more between them
-                    </th>
-                    <td colSpan={5} />
-                  </tr>
-                )}
-                {tail.map(Row)}
-              </>
-            )}
-          </tbody>
-        </table>
-      </BoardScroller>
+                SO DOES THE DENOMINATOR, in three words. This board is
+                the one thing on the page that can be misread against
+                another page — /umpire-rankings scores every called
+                pitch of a man's season, this scores only the pitches
+                somebody thought were wrong — and a reader who takes
+                one for the other has the wrong idea of an umpire, not
+                just a wrong figure. The source line at the foot says it
+                in full; the head says enough to stop the mistake. */}
+            <th className="team">
+              Umpire
+              <span className="rpt__note">
+                Minimum {MIN_UMPIRE_GAMES} games · challenged pitches only
+              </span>
+            </th>
+            <th>Games</th>
+            <th>Challenged</th>
+            {/* The baseline the bar is drawn from, named in the head it
+                belongs to. A diverging bar with an unlabelled centre is a
+                chart a reader has to guess the middle of. */}
+            <th>
+              Per game
+              {league != null && <span className="rpt__note">Against {num2(league)}</span>}
+            </th>
+            <th>Overturned</th>
+            <th>Overturn rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {showAll ? (
+            umps.map(Row)
+          ) : (
+            <>
+              {head.map(Row)}
+              {between > 0 && (
+                <tr className="rpt__between">
+                  <th scope="row" className="team">
+                    {commas(between)} more between them
+                  </th>
+                  <td colSpan={5} />
+                </tr>
+              )}
+              {tail.map(Row)}
+            </>
+          )}
+        </tbody>
+      </Table>
 
-      {/* UNDER THE BOARD, NOT IN IT. The table sits inside a BoardScroller, and
+      {/* UNDER THE BOARD, NOT IN IT. The table scrolls sideways in its own wrap, and
           a control placed in a scrolling box travels out from under the finger
           reaching for it. It appears only when there is a middle to open —
           a Triple-A board thin enough to be returned whole has nothing to

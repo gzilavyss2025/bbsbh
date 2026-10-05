@@ -5,6 +5,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { Table } from '../components/ui/table/Table.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { ordinal } from '../lib/format.js'
@@ -98,23 +99,21 @@ function GridRow({ row, keys, bar, limit, lead, meta, floor }) {
 
 function KeyGrid({ caption, keys, children }) {
   return (
-    <div className="ninekeys__scroller">
-      <table className="ninekeys__grid">
-        <caption className="sr-only">{caption}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Club</th>
-            {keys.map((key) => (
-              <th key={key.id} scope="col">
-                {key.label}
-              </th>
-            ))}
-            <th scope="col">Failed</th>
-          </tr>
-        </thead>
-        <tbody>{children}</tbody>
-      </table>
-    </div>
+    <Table className="ninekeys__grid" density="keep" sticky label={caption}>
+      <caption className="sr-only">{caption}</caption>
+      <thead>
+        <tr>
+          <th scope="col">Club</th>
+          {keys.map((key) => (
+            <th key={key.id} scope="col">
+              {key.label}
+            </th>
+          ))}
+          <th scope="col">Failed</th>
+        </tr>
+      </thead>
+      <tbody>{children}</tbody>
+    </Table>
   )
 }
 
