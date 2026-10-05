@@ -22,6 +22,7 @@ import { teamClubName } from '../../lib/teams.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { ConsentModal } from '../../components/seal/ConsentModal.jsx'
 import { GameResultFace } from '../../components/game/GameResultFace.jsx'
 import { BoxScoreSkeleton } from '../../components/game/BoxScoreSkeleton.jsx'
@@ -123,7 +124,7 @@ function StampInSeason({ teamId, asOf, onBack }) {
       </p>
 
       {games.length === 0 ? (
-        <p className="hint">No games posted yet for this season.</p>
+        <EmptyState>No games posted yet for this season.</EmptyState>
       ) : (
         <ol className="stampin__list">
           {games.map((game) => (

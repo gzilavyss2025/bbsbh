@@ -42,6 +42,13 @@ export function halfCards(view, inning) {
 // bases held, low to high; `runners` names the man on each, for the carry
 // strip. An out's number is the feed's own count in the half, so the highest
 // one is the outs so far.
+//
+// THIS IS A COPY, on purpose, of deriveLiveState (api/playbyplay/entriesView.js),
+// which the innings viewer's scorebug uses. That one reads the half's feed
+// entries; this one may read only the clamped cards (the header above, and the
+// spoiler manifest's entry for expresslane/runners.js), so one helper cannot
+// serve both. test/scorecard-lens-situation-parity.test.js walks a real game and
+// fails if the two ever give a different answer. Fix both, or neither.
 export function situation(view, inning, half) {
   const cards = halfCards(view, inning)
   const runners = runnersOnBase(cards)

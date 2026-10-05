@@ -155,7 +155,6 @@ export function BullpenPage() {
         hasData={rows.length > 0}
         errorMessage="Couldn’t load pitcher workload. Try again."
         emptyMessage="No recent pitcher workload on file."
-        emptyProse
       />
 
       {rows.length > 0 && (

@@ -12,6 +12,7 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
 import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
@@ -267,7 +268,6 @@ export function DoubleheadersPage() {
         hasData={Boolean(bounds)}
         errorMessage="Couldn’t load doubleheaders. Try again."
         emptyMessage="No doubleheaders on file yet."
-        emptyProse
       />
 
       {bounds && (
@@ -344,7 +344,7 @@ export function DoubleheadersPage() {
             )}
 
             {rows.length === 0 ? (
-              <p className="hint">No doubleheader was played in these years.</p>
+              <EmptyState>No doubleheader was played in these years.</EmptyState>
             ) : (
               <Table sticky label="Doubleheader board, every club ranked" className="rpt dh">
                 <thead>

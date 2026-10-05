@@ -79,7 +79,6 @@ export function UmpireRankingsPage({ seasonYear, vs }) {
         hasData={ranked.length > 0}
         errorMessage="Couldn’t load umpire rankings. Try again."
         emptyMessage="No umpire accuracy data available yet."
-        emptyProse
       />
 
       {ranked.length > 0 && (

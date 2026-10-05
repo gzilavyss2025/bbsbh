@@ -62,6 +62,11 @@
    margin or a column width loads later and wins on order.
    test/table-cascade.test.js pins the slot. */
 @import './styles/system/table.css';
+/* The EMPTY STATE — the one block that says "nothing here" (#1132). Right
+   after the table and before 06, for the same reason: a namespace rule that
+   keeps a margin loads later and wins on order.
+   test/empty-state-cascade.test.js pins the slot. */
+@import './styles/system/empty-state.css';
 @import './styles/06-loader-and-cards.css';
 @import './styles/06a-gamecard-parkart.css';
 @import './styles/06b-offday-cards.css';

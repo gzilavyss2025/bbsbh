@@ -43,6 +43,7 @@ import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
 import { homeVenueByTeam, ledgerFor, encodeRow, encodeDetailRow, detailFacts } from './lib/schedule-shape.mjs'
+import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT_DIR = join(ROOT, 'public', 'data', 'schedule-shape')
@@ -149,7 +150,9 @@ async function fetchSeason(season, withDetail) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
-  const thisYear = new Date().getFullYear()
+  // The season in play (#1465): a season with no games yet would move the
+  // detail window off the last played season.
+  const thisYear = await fetchSeasonInPlay()
   const seasons = args.season
     ? [Number(args.season)]
     : range(Math.max(EARLIEST_SEASON, Number(args.since) || EARLIEST_SEASON), thisYear)

@@ -153,7 +153,6 @@ export function FoulTrackerPage({ seasonYear, vs }) {
         hasData={!!boards}
         errorMessage="Couldn’t load the foul data. Try again."
         emptyMessage="No foul data generated yet."
-        emptyProse
       />
 
       {boards && (

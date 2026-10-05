@@ -113,9 +113,6 @@
    `.animlab__frame …` selector below whenever a new animated component is
    added to this page. */
 .animlab__entry {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   padding: var(--space-4) 0;
   border-top: var(--bw-hair) solid var(--border-rule);
 }
@@ -189,10 +186,7 @@
   gap: var(--space-2);
 }
 .animlab__frame {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
 }
 .animlab__framebox {
   padding: var(--space-2h);
@@ -309,9 +303,6 @@
 /* BETWEEN INNINGS LAB (src/screens/BetweenInningsLab.jsx) — same section
    shape as Animation Lab above, catalog rather than animation review. */
 .bilab__entry {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   padding: var(--space-4) 0;
   border-top: var(--bw-hair) solid var(--border-rule);
 }

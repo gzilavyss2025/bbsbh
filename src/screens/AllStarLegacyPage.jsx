@@ -12,6 +12,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
 import { Door } from '../components/ui/control/Door.jsx'
@@ -143,7 +144,7 @@ function TeamLegacyCard({ teamId, rank, honorees, cardRef }) {
           )}
         </>
       ) : (
-        <p className="hint">No one on the current roster has ever been named an All-Star.</p>
+        <EmptyState>No one on the current roster has ever been named an All-Star.</EmptyState>
       )}
     </Card>
   )
@@ -297,7 +298,6 @@ export function AllStarLegacyPage() {
         errorMessage="Couldn’t load All-Star Legacy. Try again."
         staleErrorMessage="Couldn’t load current rosters — the leader board and team lists below may be incomplete."
         emptyMessage="No All-Star history is available right now."
-        emptyProse
       />
 
       {hasRosters && (

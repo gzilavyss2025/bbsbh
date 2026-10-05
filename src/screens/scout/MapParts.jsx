@@ -1,6 +1,7 @@
 import { MIN_COMMAND_PITCHES } from '../../api/commandMap.js'
 import { METRICS, band, fmtMetric } from '../../lib/scout/metrics.js'
 import { regionLabel, sidesInOrder } from '../../lib/zone/regions.js'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 // THE PARTS AROUND THE SCOUT'S TWO MAPS: the side labels under each, the
 // answer line above them, the readout for a tapped region, and the key. The
@@ -81,7 +82,7 @@ export function Readout({ picked, map, hit, metric, stance }) {
 export function Key({ metric }) {
   const m = metric ? METRICS[metric] : null
   return (
-    <div className="scout__key" aria-label="Colour scale">
+    <Stack gap="tight" className="scout__key" aria-label="Colour scale">
       <p className="scout__keyrow">
         <span className="scout__keylabel">Location share: less</span>
         {[1, 2, 3, 4].map((k) => <Swatch key={k} tone={`s${k}`} />)}
@@ -100,6 +101,6 @@ export function Key({ metric }) {
           Under {MIN_COMMAND_PITCHES} pitches{m ? `, or ${m.floor} ${m.unit}` : ''}: count only
         </span>
       </p>
-    </div>
+    </Stack>
   )
 }

@@ -11,6 +11,7 @@ import { Headshot } from '../components/player/Headshot.jsx'
 import { MasonryColumns } from '../components/ui/MasonryColumns.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
@@ -57,7 +58,6 @@ export function MilestoneWatchPage() {
         hasData={allRows.length > 0}
         errorMessage="Couldn’t load Milestone Watch. Try again."
         emptyMessage="No one is within range of a career milestone right now."
-        emptyProse
       />
 
       {allRows.length > 0 && (
@@ -69,7 +69,7 @@ export function MilestoneWatchPage() {
       )}
 
       {allRows.length > 0 && rows.length === 0 && (
-        <p className="hint hint--prose">No one on that club is within range of a career milestone right now.</p>
+        <EmptyState role="status">No one on that club is within range of a career milestone right now.</EmptyState>
       )}
 
       {rows.length > 0 && (

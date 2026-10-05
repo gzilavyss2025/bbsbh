@@ -69,6 +69,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
+import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'run-differential.json')
@@ -295,7 +296,7 @@ async function main() {
     process.argv.slice(2).map((a) => a.replace(/^--/, '').split('=')),
   )
   const from = Number(args.from) || FIRST_SEASON
-  const to = Number(args.to) || new Date().getUTCFullYear()
+  const to = Number(args.to) || (await fetchSeasonInPlay()) // not the calendar year (#1465)
   const floor = Number(args.floor) || FLOOR
 
   const calendar = await seasonCalendar()

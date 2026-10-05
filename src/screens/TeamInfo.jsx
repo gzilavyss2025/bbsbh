@@ -66,6 +66,7 @@ import { SPORT_LABEL, teamAbbr } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, mastheadMarkFor } from '../lib/headerTheme.js'
 import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -883,7 +884,9 @@ function OpposingStarterCard({
       ) : projected?.length ? (
         <ProjectedStarters rows={projected} />
       ) : (
-        <p className="hint">Not posted yet.</p>
+        <EmptyState size="compact" className="starter__empty">
+          Not posted yet.
+        </EmptyState>
       )}
     </Card>
   )

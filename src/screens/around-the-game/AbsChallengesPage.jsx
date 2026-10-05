@@ -152,7 +152,6 @@ export function AbsChallengesPage({ seasonYear, vs }) {
         hasData={(summary?.total ?? 0) > 0}
         errorMessage="Couldn’t load the challenge board. Try again."
         emptyMessage="No challenges on file for this season yet."
-        emptyProse
       />
 
       {summary && summary.total > 0 && (

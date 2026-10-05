@@ -16,6 +16,8 @@ import { SectionMasthead } from '../../components/ui/SectionMasthead.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
+import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
+import { Button } from '../../components/ui/control/Button.jsx'
 import { headerThemeClass, headerThemeFor, headerThemeStyle } from '../../lib/headerTheme.js'
 
 import { DebutPill } from '../../components/badges/DebutPill.jsx'
@@ -170,6 +172,35 @@ function TableDemo() {
 
 const sample = 'Bottom 9th, two out'
 
+// The empty state in composition (#1132): the text alone, as most empty sites
+// are; the full shape, a label, a note and one action; and the compact size
+// inside a Card tile. The copy is invented for the lab and says what is
+// missing, never what happened.
+function EmptyStateDemo() {
+  return (
+    <div className="dlab__candidates">
+      <EmptyState>No roster moves posted for this club yet.</EmptyState>
+      <EmptyState
+        label="Standing vs level"
+        note="300 PA needed to join the qualified population."
+        action={<Button size="control" onClick={() => {}}>Clear filters</Button>}
+      >
+        No qualified comparison yet.
+      </EmptyState>
+      <Card
+        frame="ledger"
+        head={
+          <SectionHead look="label" as="span">
+            Compact, in a Card tile
+          </SectionHead>
+        }
+      >
+        <EmptyState size="compact">Not posted yet.</EmptyState>
+      </Card>
+    </div>
+  )
+}
+
 function SectionHeadDemo() {
   return (
     <>
@@ -235,7 +266,7 @@ export function ComponentHalf() {
   return (
     <>
       <Group
-        title="src/components/ui — 15 shared components"
+        title="src/components/ui — 16 shared components"
         lede="The whole shared tier. Button and Door share control/, and Button has its own band above. Against 32 card blocks and 10 pill blocks, this is the ratio #1112 exists to state."
       >
         <Entry title="Loader" path={`${UI_PATH}/Loader.jsx`} note="The shared cold-load loader — a mini linescore whose cell cycles. size=&quot;inline&quot; here.">
@@ -266,6 +297,14 @@ export function ComponentHalf() {
           note="The one table (#1132). Two frames: the sheet (the wrap draws the box) and bare, for a table inside a Card. Three densities: row (6 by 8), tight (4 by 2, the box score&#39;s) and keep (no padding: the block sets its own cells). Sticky pins the first column: scroll the board at 390px and the club stays. A label makes the scroll region a Tab stop. Table owns no margin, and a column&#39;s width or a subtotal row is the block&#39;s own."
         >
           <TableDemo />
+        </Entry>
+        <Entry
+          title="EmptyState"
+          path={`${UI_PATH}/state/EmptyState.jsx`}
+          wide
+          note="The one empty state (#1132). A dashed hairline inset with no ground of its own, and graphite copy: the label in the display caps, the text and the note in the body face. Two sizes: block (16 all round, the default) and compact (8 by 12, for a tile or a chart slot). The label, the note and the action render only when given; the action is one Button or one Door. EmptyState owns no margin and never decides when a thing is empty: the caller&#39;s test does."
+        >
+          <EmptyStateDemo />
         </Entry>
         <Entry title="SectionMasthead" path={`${UI_PATH}/SectionMasthead.jsx`} note="A thin wrapper over the SectionHead band, kept for its sixteen call sites. No logo passed here, so it draws its undressed state.">
           <SectionMasthead title="Milwaukee" />

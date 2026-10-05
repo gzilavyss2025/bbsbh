@@ -151,6 +151,17 @@ async function main() {
   // without a separate roster/affiliate lookup, as the app's minors boards do.
   const pool = combineToPool(hitSplits, pitSplits).filter((p) => prospectIds.has(p.id))
 
+  // DO NOT REPLACE A SEASON WITH AN EMPTY ONE (#1465), the gen-minors-leaders.mjs
+  // rule. `season` is the calendar year, so from January 1 until the minor
+  // levels open, every level returns no line. exportJson reads only TODAY's
+  // snapshots, so the file would be written with `players: []` every night of
+  // the winter. An empty pool is "nothing new", not an answer: keep the board on
+  // disk, and record no snapshot. The new season takes over with its first line.
+  if (pool.length === 0) {
+    console.log(`skipped ${out} — ${season} returned no prospect lines, keeping the board already on disk`)
+    return
+  }
+
   const db = await openDb()
   const insert = upsertSnapshot(db)
   const today = new Date().toISOString().slice(0, 10)

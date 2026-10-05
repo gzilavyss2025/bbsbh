@@ -110,7 +110,10 @@ const PHRASE = /^\s*(No|Nothing|None|Not posted|Not yet|Not announced|Not listed
 
 // ---------- CSS: every rule, in cascade order ----------
 const importOrder = [...read('src/index.css').matchAll(/@import\s+['"]\.\/([^'"]+)['"]/g)].map((m) => `src/${m[1]}`)
-const cssFiles = walk('src/styles', /\.css$/)
+// EmptyState's own files (E1) are the TARGET, not a candidate: its classes carry
+// the word "empty" and would count as 7 new selectors and 4 new sites.
+const TARGET = /^src\/(styles\/system\/empty-state\.css|components\/ui\/state\/)/
+const cssFiles = walk('src/styles', /\.css$/).filter((f) => !TARGET.test(f))
 const orderOf = (f) => { const i = importOrder.indexOf(f); return i < 0 ? 1000 + cssFiles.indexOf(f) : i }
 const atChain = (node) => { const o = []; for (let p = node.parent; p && p.type !== 'root'; p = p.parent) if (p.type === 'atrule') o.unshift(`@${p.name} ${p.params}`); return o }
 const rules = []
@@ -314,7 +317,7 @@ for (const [surf, page] of Object.entries(SURFACE_PAGES)) {
 }
 const surfaceOf = (f) => (SURFACES.find(([, re]) => re.test(f)) || [])[0] || viaImport.get(f) || ''
 
-const jsxFiles = walk('src', /\.jsx$/)
+const jsxFiles = walk('src', /\.jsx$/).filter((f) => !TARGET.test(f))
 const FOLD_MAX = 800 // characters of JSX between the outer tag and its close
 const sites = []
 const phraseClasses = new Set()

@@ -11,6 +11,10 @@ import { fileURLToPath } from 'node:url'
 // The repo root, two levels above scripts/lib/.
 export const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..', '..')
 
+// A path with `/` separators on every platform. Node gives `\\` on Windows, but
+// the guards' budget keys and the tests' endsWith checks are written with `/`.
+export const toPosix = (p) => p.replaceAll('\\', '/')
+
 export const DEFAULT_SKIP = new Set(['node_modules', 'dist', '.git'])
 
 function entriesOf(dir, tolerant) {

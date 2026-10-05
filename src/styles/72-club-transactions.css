@@ -99,6 +99,9 @@
   }
 }
 
+/* The page's empty state (EmptyState, #1132) owns its inset and copy, never
+   its margin. No Stack spaces this page, so the namespace keeps the space
+   between the inset, the top bar and the footer. */
 .txpage__empty {
   margin: 20px 0;
 }

@@ -283,7 +283,6 @@ export function PostseasonRecordsPage({
         hasData={index.groups.length > 0}
         errorMessage="Couldn’t load postseason records. Try again."
         emptyMessage="No postseason games on file for this span yet."
-        emptyProse
       />
 
       {!loading && !error && byTeam && teamGroups && (

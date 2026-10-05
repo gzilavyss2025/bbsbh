@@ -169,11 +169,11 @@
   /* The edge, the corners and the shadow are the Card's (.starter, #1113 slice
      C3), so the masthead caps one card cleanly. */
 }
-/* No-pitcher fallback sits directly in the card (not the padded body), so inset
-   it to match. */
-.starter > .hint {
-  margin: 0;
-  padding: var(--space-2h) var(--space-3);
+/* The no-pitcher EmptyState (#1132, E3) sits directly in the card (the body
+   is flush), so it insets itself from the card's edges. Only a margin: the
+   dashed box is EmptyState's own. */
+.starter__empty {
+  margin: var(--space-2h) var(--space-3);
 }
 
 .shot.starter__shot {

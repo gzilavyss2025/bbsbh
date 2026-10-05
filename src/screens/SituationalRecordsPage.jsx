@@ -185,7 +185,6 @@ export function SituationalRecordsPage({
         hasData={index.groups.length > 0}
         errorMessage="Couldn’t load situational records. Try again."
         emptyMessage="No situational records on file for this level yet."
-        emptyProse
       />
 
       {!loading && !error && index.groups.length > 0 && !result && (

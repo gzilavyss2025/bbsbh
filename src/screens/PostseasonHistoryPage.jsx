@@ -422,7 +422,6 @@ export function PostseasonHistoryPage() {
         hasData={seasons.length > 0}
         errorMessage="Couldn’t load Postseason History. Try again."
         emptyMessage="No postseason history is available right now."
-        emptyProse
       />
 
       {seasons.length > 0 && wide && (

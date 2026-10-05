@@ -75,7 +75,6 @@
 }
 
 .prospectcard__metric,
-.prospectcard__emptylabel,
 .prospectcard__fact dt,
 .prospectcard__age > span {
   display: block;
@@ -105,23 +104,6 @@
   padding: var(--space-3) var(--space-4);
   font-size: var(--fs-ui);
   color: var(--text-body);
-}
-
-.prospectcard__empty p {
-  margin-top: var(--space-1);
-  font-family: var(--font-display);
-  font-size: var(--fs-h3);
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-}
-
-.prospectcard__emptynote {
-  display: block;
-  margin-top: var(--space-1);
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  line-height: var(--lh-ui);
-  color: var(--text-caption);
 }
 
 .prospectcard__lead {

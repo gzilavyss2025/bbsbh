@@ -3,6 +3,7 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BetweenInnings } from '../components/gamehud/BetweenInnings.jsx'
 import { halfIndex } from '../api/select.js'
 import { weekdayFromDate } from '../api/callout-notes.js'
+import { Stack } from '../components/ui/layout/Stack.jsx'
 
 const GAME_DATE = '2026-07-07'
 const DOW = weekdayFromDate(GAME_DATE)
@@ -79,32 +80,32 @@ export function BetweenInningsLab() {
         else in the app.
       </p>
 
-      <section className="bilab__entry">
+      <Stack gap="snug" as="section" className="bilab__entry">
         <h2 className="bilab__title">Grid, no facts available — tap does nothing (not a button)</h2>
         <BetweenInnings feed={feed()} bundle={minimalBundle} marginNotes={[]} inning={1} half="top" revealedThrough={0} gameDate={GAME_DATE} battingSide="away" getDerived={() => ({})} />
-      </section>
+      </Stack>
 
-      <section className="bilab__entry">
+      <Stack gap="snug" as="section" className="bilab__entry">
         <h2 className="bilab__title">Tap the grid — person-scoped fact (headshot)</h2>
         <BetweenInnings feed={feed()} bundle={minimalBundle} marginNotes={[headshotNote]} inning={1} half="top" revealedThrough={0} gameDate={GAME_DATE} battingSide="away" getDerived={() => ({})} />
-      </section>
+      </Stack>
 
-      <section className="bilab__entry">
+      <Stack gap="snug" as="section" className="bilab__entry">
         <h2 className="bilab__title">Tap the grid — team-level fact (no avatar slot)</h2>
         <BetweenInnings feed={feed({ probables: false })} bundle={{ away: bundle.away, teamRecords: { away: bundle.teamRecords.away } }} marginNotes={[]} inning={1} half="top" revealedThrough={0} gameDate={GAME_DATE} battingSide="away" getDerived={() => ({})} />
-      </section>
+      </Stack>
 
-      <section className="bilab__entry">
+      <Stack gap="snug" as="section" className="bilab__entry">
         <h2 className="bilab__title">Tap the grid — missing photo (fallback chain: photo → logo → monogram)</h2>
         <BetweenInnings feed={feed()} bundle={minimalBundle} marginNotes={[fallbackNote]} inning={1} half="top" revealedThrough={0} gameDate={GAME_DATE} battingSide="away" getDerived={() => ({})} />
-      </section>
+      </Stack>
 
-      <section className="bilab__entry">
+      <Stack gap="snug" as="section" className="bilab__entry">
         <h2 className="bilab__title">Tap-through — cycles every fact, then returns to the grid</h2>
         <BetweenInnings feed={feed({ probables: false })} bundle={minimalBundle} marginNotes={cycleNotes} inning={1} half="top" revealedThrough={0} gameDate={GAME_DATE} battingSide="away" getDerived={() => ({})} />
-      </section>
+      </Stack>
 
-      <section className="bilab__entry">
+      <Stack gap="snug" as="section" className="bilab__entry">
         <h2 className="bilab__title">Scenario — quiet half (top 6, 1-2-3 inning)</h2>
         <BetweenInnings
           feed={feed()} bundle={bundle}
@@ -112,25 +113,25 @@ export function BetweenInningsLab() {
           inning={6} half="top" revealedThrough={halfIndex(6, 'top')} gameDate={GAME_DATE}
           battingSide="away" getDerived={() => ({})}
         />
-      </section>
+      </Stack>
 
-      <section className="bilab__entry">
+      <Stack gap="snug" as="section" className="bilab__entry">
         <h2 className="bilab__title">Scenario — loud half (bottom 4, pitching change, 5 runs)</h2>
         <BetweenInnings
           feed={feed()} bundle={bundle} marginNotes={cycleNotes}
           inning={4} half="bottom" revealedThrough={halfIndex(4, 'bottom')} gameDate={GAME_DATE}
           battingSide="home" getDerived={() => ({})}
         />
-      </section>
+      </Stack>
 
-      <section className="bilab__entry">
+      <Stack gap="snug" as="section" className="bilab__entry">
         <h2 className="bilab__title">Scenario — first hold of the game (top 1, sub-5 pool)</h2>
         <BetweenInnings
           feed={feed()} bundle={bundle} marginNotes={[]}
           inning={1} half="top" revealedThrough={halfIndex(1, 'top')} gameDate={GAME_DATE}
           battingSide="away" getDerived={() => ({})}
         />
-      </section>
+      </Stack>
     </div>
   )
 }
