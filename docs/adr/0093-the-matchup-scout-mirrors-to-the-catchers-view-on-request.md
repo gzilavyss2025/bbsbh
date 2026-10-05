@@ -42,6 +42,9 @@ holds the words.
 **5. The Now Pitching scene shows in the Hitter's view only.** Its camera is
 behind the plate (`src/lib/pitcherCard/scene.js`), which is the Hitter's view.
 In the Pitcher's view its arcs would break the other way from the maps.
+*Superseded by ADR-0099 (2026-10-05, #1490):* the scene now plays in both
+views. The Pitcher's view has its own centre-field camera, so its arcs break
+the same way as the maps.
 
 **6. The choice persists in the URL and in `localStorage`**, not in My Tally,
 whose set is closed at four fields (ADR-0039).
@@ -53,6 +56,8 @@ whose set is closed at four fields (ADR-0039).
   accepted.
 - A future page that wants the same control needs its own decision. This ADR
   does not make the toggle a house pattern.
+- Decision 5 is superseded by ADR-0099: the scene plays in both views, with
+  a second camera for the Pitcher's view and a placed mound.
 - This is a presentation decision. It changes nothing about which numbers
   reach the DOM, or when. The Scout is an open surface (ADR-0034).
 

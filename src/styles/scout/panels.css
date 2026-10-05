@@ -1,0 +1,363 @@
+/* ============================================================
+   MATCHUP SCOUT, THE RESTRUCTURE (#1490) — screens/scout/ScoutPage.jsx and its
+   Edge and Zones panels (edge/, zones/). A per-route partial beside scout.css,
+   imported by ScoutPage.jsx only. Every selector is .scout__*.
+
+   The page, top to bottom: the context chips, the scene with its control
+   bar, the pitch pills, the three tabs, the panel. From 740px the scene and
+   the pills hold a left column that stays in view while the panel scrolls.
+
+   Two tones carry "who it favors" on the Edge tab: clay for the hitter, the
+   All-Star blue for the pitcher, graphite for neither. The same pair as the
+   hitter map's diverging scale, so the words and the maps read alike.
+   ============================================================ */
+
+/* --- layout --- */
+
+.scout__stage,
+.scout__main,
+.scout__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+@media (min-width: 740px) {
+  .scout__body {
+    grid-template-columns: minmax(300px, 400px) minmax(0, 1fr);
+  }
+  .scout__stage {
+    position: sticky;
+    top: var(--space-3);
+  }
+  .scout__stage .scout__control--scroll {
+    flex-wrap: wrap;
+  }
+}
+
+/* --- the context chips: season and scope, the sample, the filter sheet --- */
+
+.scout__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1h);
+  margin: 0;
+}
+
+/* --- the scene's control bar: what plays, and the View --- */
+
+.scout__scene .pscene {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.scout__scenebar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1h) var(--space-2);
+  border-bottom-left-radius: var(--radius-xs);
+  border-bottom-right-radius: var(--radius-xs);
+  background: var(--accent-primary);
+}
+.scout__scenecap {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+}
+.scout__seg {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+/* --- the tabs --- */
+
+.scout__tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.scout__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  min-height: var(--control-min);
+  padding: var(--space-1h) var(--space-1);
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--text-caption);
+  cursor: pointer;
+}
+.scout__tab[aria-selected='true'] {
+  border-bottom-color: var(--clay);
+  color: var(--text-heading);
+}
+.scout__tab:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.scout__tabname {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.scout__tabsub {
+  font-family: var(--font-body);
+  font-size: var(--fs-cell);
+}
+
+/* --- the shared small type --- */
+
+.scout__kicker {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.scout__note {
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+}
+
+/* --- EDGE: the verdict --- */
+
+.scout__verdict {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+.scout__lean {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-title);
+  color: var(--text-heading);
+}
+.scout__leanname--hitter { color: var(--clay); }
+.scout__leanname--pitcher { color: var(--allstar-blue); }
+.scout__verdictline {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+.scout__verdictline strong,
+.scout__callout strong {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.scout__verdictrule {
+  width: 100%;
+  margin: var(--space-1) 0;
+  border: 0;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+
+/* --- EDGE: the ledger, one row per pill, a dot plot on one scale --- */
+
+.scout__ledgerhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+.scout__ledgertitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.scout__ledgerkey {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.scout__keytick,
+.scout__keydot,
+.scout__keyusage {
+  display: inline-block;
+  margin-inline-start: var(--space-1);
+}
+.scout__keytick { width: 2px; height: 12px; background: var(--text-caption); }
+.scout__keydot { width: 10px; height: 10px; border-radius: var(--radius-pill); background: var(--text-heading); }
+.scout__keyusage { width: 14px; height: 3px; background: var(--arsenal-fastball); }
+
+.scout__ledger {
+  display: flex;
+  flex-direction: column;
+}
+.scout__lrow {
+  display: grid;
+  grid-template-columns: minmax(84px, 1fr) minmax(0, 2fr) minmax(88px, auto);
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-1h);
+  border: 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  border-inline-start: 3px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.scout__lrow[aria-pressed='true'] {
+  border-inline-start-color: var(--accent-primary);
+  background: var(--surface-inset);
+}
+.scout__lrow:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.scout__lname {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.scout__lpitch {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.scout__lsub,
+.scout__lvs {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.scout__lplot {
+  position: relative;
+  height: 30px;
+}
+.scout__laxis {
+  position: absolute;
+  inset-inline: 0;
+  top: 11px;
+  height: 1px;
+  background: var(--border-rule);
+}
+.scout__lgap {
+  position: absolute;
+  top: 9px;
+  height: 5px;
+  opacity: 0.35;
+  background: var(--graphite-soft);
+}
+.scout__ltick {
+  position: absolute;
+  top: 3px;
+  width: 2px;
+  height: 17px;
+  margin-inline-start: -1px;
+  background: var(--text-caption);
+}
+.scout__ldot {
+  position: absolute;
+  top: 6px;
+  width: 11px;
+  height: 11px;
+  margin-inline-start: -5.5px;
+  border: 1.5px solid var(--surface-card);
+  border-radius: var(--radius-pill);
+  background: var(--graphite-soft);
+}
+.scout__lrow[data-tone='hitter'] .scout__lgap,
+.scout__lrow[data-tone='hitter'] .scout__ldot { background: var(--clay); }
+.scout__lrow[data-tone='pitcher'] .scout__lgap,
+.scout__lrow[data-tone='pitcher'] .scout__ldot { background: var(--allstar-blue); }
+.scout__lusage {
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--arsenal-other);
+}
+.scout__lrow[data-family='fastball'] .scout__lusage { background: var(--arsenal-fastball); }
+.scout__lrow[data-family='breaking'] .scout__lusage { background: var(--arsenal-breaking); }
+.scout__lrow[data-family='offspeed'] .scout__lusage { background: var(--arsenal-offspeed); }
+.scout__ltag {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: end;
+}
+.scout__lword {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.scout__lrow[data-tone='hitter'] .scout__lword { color: var(--clay); }
+.scout__lrow[data-tone='pitcher'] .scout__lword { color: var(--allstar-blue); }
+
+/* --- ZONES: whose map is whose, the "%" in a cell, the callout --- */
+
+.scout__figcap {
+  margin-block-end: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-snug);
+  color: var(--text-heading);
+}
+/* The "%" after a region's figure: smaller than the number, so ".381" and
+   "24%" fit the same 27px cell (docs/scout-design.md A). */
+.scout__unit {
+  font-size: 0.7em;
+}
+.scout__callout {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-inline-start: 3px solid var(--award-line);
+  background: var(--surface-card);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+
+/* --- the filter sheet --- */
+
+.scout__sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* --- natural case for the Scout's sentences --- */
+
+/* The Edge verdict, the Zones callout, the Meetings play text and notes are
+   sentences, written to be read rather than skimmed (#1490). Natural case,
+   under the ALL-CAPS INVARIANT's sanctioned exemption (01-base.css lists
+   them): every heading, label, tab, chip, figure and pill around them stays
+   shouted, the same split as the Command Received note. The `*` reaches the
+   bold figures inside a sentence. */
+#root .scout__verdictline,
+#root .scout__verdictline *,
+#root .scout__callout,
+#root .scout__callout *,
+#root .scout__play,
+#root .scout__note {
+  text-transform: none; /* caps-exempt: the Scout's generated sentences read as prose */
+}

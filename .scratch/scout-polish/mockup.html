@@ -1,0 +1,853 @@
+<title>Matchup Scout Polish</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: a phone-width mockup of the proposed page beside the notes for the
+   tab on screen; the restructure options and open decisions run below.
+   One deliberate theme: Tally's paper scorebook (src/tokens/colors.css). */
+:root {
+  color-scheme: light;
+  --paper-0: #F6EFDC; --paper-2: #FBF6E9; --paper-3: #FFFDF6;
+  --ink-0: #0F1822; --ink-1: #1B2A3A; --ink-2: #3C4A5A;
+  --graphite: #6B6558; --graphite-soft: #938C7C;
+  --rule: #CBC1A7; --rule-soft: #DED6C0;
+  --clay: #B4453A; --clay-soft: #F3E0DB;
+  --field: #2F6E4F; --field-soft: #E3EDE2;
+  --navy: #1B2A3A; --allstar: #1D4E8F; --award: #C79A3E;
+  --fam-fb: #2F6E4F; --fam-br: #1B2A3A; --fam-os: #B4453A;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "Source Sans 3", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--paper-0); color: var(--ink-1); font: 16px/1.5 var(--font-body); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; }
+h1, h2, h3 { font-family: var(--font-display); color: var(--ink-0); text-wrap: balance; margin: 0; letter-spacing: .01em; }
+h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.05; text-transform: uppercase; }
+h2 { font-size: 26px; text-transform: uppercase; }
+h3 { font-size: 19px; text-transform: uppercase; letter-spacing: .03em; }
+p { margin: 0; }
+a { color: var(--allstar); }
+.eyebrow { font: 600 12px/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--graphite); }
+.lede { max-width: 66ch; color: var(--ink-2); margin-top: 10px; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.cap { font-size: 12.5px; color: var(--graphite); }
+.qtags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.qtag { border: 1px solid var(--rule); background: var(--paper-2); border-radius: 999px; padding: 3px 11px; font-size: 13px; color: var(--ink-2); }
+.qtag b { color: var(--clay); font-family: var(--font-mono); font-weight: 600; margin-right: 4px; }
+
+.stage { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 36px; margin-top: 30px; align-items: start; }
+@media (max-width: 860px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- the phone ---------- */
+.phone { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); background: var(--paper-0); border: 1px solid var(--rule); border-radius: 22px; box-shadow: 0 1px 0 var(--paper-3) inset, 0 14px 40px -24px rgba(15, 24, 34, .55); overflow: hidden; max-width: 400px; width: 100%; margin-inline: auto; }
+@media (max-width: 860px) { .phone { position: static; } }
+.ph-top { background: var(--navy); color: var(--paper-3); padding: 10px 14px; display: flex; justify-content: space-between; align-items: baseline; }
+.ph-top b { font: 700 18px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; }
+.ph-top span { font-size: 12px; opacity: .75; }
+.ph-body { padding: 12px 12px 18px; display: grid; gap: 12px; }
+.mu { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.who.r { flex-direction: row-reverse; text-align: right; }
+.mono-badge { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 700 15px/1 var(--font-display); color: var(--paper-3); }
+.who b { display: block; font: 700 17px/1.05 var(--font-display); text-transform: uppercase; color: var(--ink-0); }
+.who small { font-size: 12px; color: var(--graphite); }
+.vs { font: 600 12px/1 var(--font-display); color: var(--graphite); letter-spacing: .1em; }
+.ctx { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.chip { font-size: 12px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--rule); background: var(--paper-2); color: var(--ink-2); }
+.chip--btn { cursor: pointer; font: inherit; font-size: 12px; color: var(--allstar); border-color: color-mix(in srgb, var(--allstar) 35%, var(--rule)); }
+.chip--btn:hover { background: var(--paper-3); }
+
+.scene-card { background: var(--navy); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; position: relative; }
+.scene-card canvas { display: block; width: 100%; height: auto; aspect-ratio: 336 / 204; }
+.scene-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 8px 8px; }
+.scene-bar .lbl { color: var(--paper-3); font: 600 12px/1.2 var(--font-body); opacity: .85; min-width: 0; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--paper-2); flex: none; }
+.seg button { font: 600 12.5px/1 var(--font-body); padding: 7px 10px; border: 0; background: transparent; color: var(--ink-2); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink-1); color: var(--paper-3); }
+.seg--dark { border-color: rgba(255, 253, 246, .3); background: transparent; }
+.seg--dark button { color: var(--paper-3); }
+.seg--dark button[aria-pressed="true"] { background: var(--paper-3); color: var(--ink-0); }
+button:focus-visible, a:focus-visible, .pill:focus-visible { outline: 2px solid var(--award); outline-offset: 2px; }
+
+.pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.pill { flex: none; cursor: pointer; font: 600 13px/1 var(--font-body); padding: 7px 10px 9px; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper-2); color: var(--ink-1); position: relative; }
+.pill small { font-family: var(--font-mono); font-weight: 400; color: var(--graphite); margin-left: 3px; }
+.pill[aria-pressed="true"] { border-color: var(--ink-1); background: var(--paper-3); box-shadow: 0 0 0 1px var(--ink-1) inset; }
+.pill i { position: absolute; left: 8px; right: 8px; bottom: 3px; height: 2px; background: var(--rule-soft); border-radius: 2px; }
+.pill i::after { content: ""; display: block; height: 100%; width: calc(var(--u) * 1%); background: var(--fam); border-radius: 2px; }
+
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--rule); }
+.tabs button { font: 700 15px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; background: none; border: 0; padding: 10px 4px 9px; color: var(--graphite); cursor: pointer; border-bottom: 3px solid transparent; }
+.tabs button[aria-selected="true"] { color: var(--ink-0); border-bottom-color: var(--clay); }
+.tabs small { display: block; font: 400 11px/1.2 var(--font-body); letter-spacing: 0; text-transform: none; margin-top: 3px; }
+.panel { display: grid; gap: 12px; }
+
+.verdict { background: var(--paper-3); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; }
+.verdict .k { font: 600 11px/1 var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--graphite); }
+.verdict .big { font: 700 28px/1 var(--font-display); text-transform: uppercase; color: var(--ink-0); }
+.verdict .big em { font-style: normal; color: var(--clay); }
+.verdict p { font-size: 14.5px; color: var(--ink-2); }
+.verdict hr { border: 0; border-top: 1px dashed var(--rule); margin: 4px 0; width: 100%; }
+
+.ledger { display: grid; gap: 2px; }
+.lrow { display: grid; grid-template-columns: 74px minmax(0, 1fr) 76px; gap: 8px; align-items: center; padding: 7px 6px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; background: none; text-align: left; font: inherit; color: inherit; width: 100%; }
+.lrow:hover { background: var(--paper-2); }
+.lrow[aria-pressed="true"] { background: var(--paper-3); border-color: var(--rule); }
+.lname b { display: block; font-size: 14px; }
+.lname small { font: 11.5px/1.2 var(--font-mono); color: var(--graphite); }
+.lplot { position: relative; height: 26px; }
+.lplot .axis { position: absolute; left: 0; right: 0; top: 13px; height: 1px; background: var(--rule); }
+.lplot .lg { position: absolute; top: 5px; width: 2px; height: 16px; background: var(--graphite); }
+.lplot .gap { position: absolute; top: 11px; height: 5px; border-radius: 3px; }
+.lplot .dot { position: absolute; top: 7px; width: 13px; height: 13px; border-radius: 50%; margin-left: -6.5px; border: 2px solid var(--paper-3); box-shadow: 0 0 0 1px var(--ink-1); }
+.lplot .usage { position: absolute; left: 0; bottom: -1px; height: 3px; background: var(--fam); opacity: .55; border-radius: 2px; }
+.ltag { font: 600 11.5px/1.15 var(--font-body); text-align: right; }
+.ltag span { display: block; font: 400 11px/1.2 var(--font-mono); color: var(--graphite); }
+.tone-h { color: var(--clay); } .tone-p { color: var(--allstar); } .tone-e { color: var(--graphite); }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11.5px; color: var(--graphite); align-items: center; }
+.legend i { display: inline-block; vertical-align: middle; margin-right: 4px; }
+
+.maps { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.maps figure { margin: 0; display: grid; gap: 4px; }
+.maps figcaption { font: 600 12px/1.25 var(--font-body); color: var(--ink-2); min-height: 30px; }
+.maps svg { width: 100%; height: auto; display: block; }
+.sides { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--graphite); }
+.region { stroke: var(--rule); stroke-width: .6; cursor: pointer; }
+.region.picked { stroke: var(--ink-0); stroke-width: 1.6; }
+.rtxt { font: 600 8.5px var(--font-mono); fill: var(--ink-1); pointer-events: none; text-anchor: middle; dominant-baseline: middle; }
+.rtxt .pc { font-size: 6px; font-weight: 400; }
+.rtxt.n { font-weight: 400; font-size: 6.5px; fill: var(--graphite); }
+.readout { min-height: 54px; border: 1px dashed var(--rule); border-radius: 10px; padding: 8px 10px; font-size: 13.5px; color: var(--ink-2); }
+.readout b { color: var(--ink-0); }
+.callout { background: var(--paper-3); border-left: 3px solid var(--award); padding: 8px 10px; font-size: 13.5px; color: var(--ink-2); border-radius: 0 8px 8px 0; }
+
+.facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.fact { background: var(--paper-3); border: 1px solid var(--rule-soft); border-radius: 8px; padding: 7px 6px; text-align: center; }
+.fact b { display: block; font: 600 17px/1.1 var(--font-mono); color: var(--ink-0); }
+.fact b small { font-size: 11px; font-weight: 400; color: var(--graphite); }
+.fact b small { white-space: nowrap; }
+.fact span { display: block; line-height: 1.25; margin-top: 3px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--graphite); }
+.facts--3 { grid-template-columns: repeat(3, 1fr); }
+.mixbar { display: grid; gap: 5px; }
+.mixrow { display: grid; grid-template-columns: 76px 1fr; gap: 8px; align-items: center; font-size: 12px; color: var(--graphite); }
+.stack { display: flex; height: 14px; border-radius: 4px; overflow: hidden; background: var(--rule-soft); }
+.stack span { display: block; height: 100%; font: 600 9px/14px var(--font-mono); color: var(--paper-3); text-align: center; overflow: hidden; white-space: nowrap; }
+.pa { border: 1px solid var(--rule); background: var(--paper-2); border-radius: 12px; padding: 10px; display: grid; gap: 8px; }
+.pa-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.pa-head b { font: 700 16px/1.1 var(--font-display); text-transform: uppercase; color: var(--ink-0); }
+.pa-head span { font-size: 12px; color: var(--graphite); white-space: nowrap; }
+.pa p { font-size: 13px; color: var(--ink-2); }
+.seq { display: flex; gap: 6px; flex-wrap: wrap; }
+.pbtn { cursor: pointer; border: 1px solid var(--rule); background: var(--paper-3); border-radius: 8px; padding: 5px 7px; font: inherit; display: grid; gap: 1px; min-width: 56px; text-align: left; }
+.pbtn:hover { border-color: var(--ink-2); }
+.pbtn .t { font: 600 12px/1.1 var(--font-body); color: var(--ink-0); display: flex; gap: 4px; align-items: center; }
+.pbtn .t i { width: 8px; height: 8px; border-radius: 50%; background: var(--fam); display: inline-block; }
+.pbtn .m { font: 10.5px/1.2 var(--font-mono); color: var(--graphite); }
+.pbtn .c { font: 600 10.5px/1.2 var(--font-body); }
+.call-ball { color: var(--field); } .call-strike { color: var(--clay); } .call-foul { color: var(--ink-2); } .call-play { color: var(--allstar); }
+
+/* sheet + modal */
+dialog { border: 0; padding: 0; background: transparent; max-width: 100vw; }
+dialog::backdrop { background: rgba(15, 24, 34, .45); }
+.sheet { width: min(400px, calc(100vw - 32px)); background: var(--paper-0); border-radius: 16px; padding: 16px; display: grid; gap: 14px; border: 1px solid var(--rule); }
+.sheet .row { display: grid; gap: 6px; }
+.sheet .row > span { font: 600 11px/1 var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--graphite); }
+.sheet .seg { justify-self: start; }
+.sheet footer { display: flex; justify-content: flex-end; }
+.btn { font: 600 14px/1 var(--font-body); padding: 9px 14px; border-radius: 8px; border: 1px solid var(--ink-1); background: var(--ink-1); color: var(--paper-3); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn--ghost { background: transparent; color: var(--ink-1); }
+.pm { width: min(400px, calc(100vw - 32px)); background: var(--paper-0); border-radius: 16px; border: 1px solid var(--rule); overflow: hidden; }
+.pm-head { padding: 12px 14px 8px; display: flex; justify-content: space-between; align-items: start; gap: 8px; }
+.pm-head b { display: block; font: 700 22px/1.05 var(--font-display); text-transform: uppercase; color: var(--ink-0); }
+.pm-head small { font-size: 12.5px; color: var(--graphite); }
+.pm-x { background: none; border: 0; font-size: 22px; line-height: 1; cursor: pointer; color: var(--graphite); padding: 2px 6px; }
+.pm-body { padding: 0 14px 14px; display: grid; gap: 10px; }
+.pm-grid { display: grid; grid-template-columns: minmax(0, 1fr) 112px; gap: 10px; align-items: start; }
+.pm-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.pm-nav { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.film { border: 1px dashed var(--rule); border-radius: 10px; padding: 8px 10px; font-size: 13px; color: var(--ink-2); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* ---------- notes ---------- */
+.notes { display: grid; gap: 18px; min-width: 0; }
+.note { background: var(--paper-2); border: 1px solid var(--rule-soft); border-radius: 14px; padding: 18px 20px; display: grid; gap: 10px; }
+.note ul, .note ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.note li { max-width: 68ch; }
+.note .src { font-size: 13px; color: var(--graphite); }
+.tag { display: inline-block; font: 600 10.5px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; padding: 3px 6px; border-radius: 4px; vertical-align: 2px; margin-right: 4px; }
+.tag--v { background: var(--field-soft); color: var(--field); }
+.tag--i { background: var(--clay-soft); color: var(--clay); }
+.tag--adr { background: #E4E9F2; color: var(--allstar); }
+table.cmp { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.cmp th, table.cmp td { border-bottom: 1px solid var(--rule-soft); padding: 6px 8px; text-align: left; vertical-align: top; }
+table.cmp th { font: 600 11px/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--graphite); }
+.scroll-x { overflow-x: auto; }
+
+.below { margin-top: 48px; display: grid; gap: 22px; }
+.opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 860px) { .opts { grid-template-columns: minmax(0, 1fr); } }
+.opt { background: var(--paper-2); border: 1px solid var(--rule-soft); border-radius: 14px; padding: 16px; display: grid; gap: 10px; align-content: start; }
+.opt.rec { border-color: var(--ink-1); background: var(--paper-3); }
+.opt .badge { justify-self: start; font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--paper-3); background: var(--ink-1); padding: 4px 7px; border-radius: 4px; }
+.wire { font: 11.5px/1.35 var(--font-mono); background: var(--paper-0); border: 1px solid var(--rule-soft); border-radius: 8px; padding: 10px; white-space: pre; overflow-x: auto; color: var(--ink-2); }
+.opt ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
+.pm-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 700px) { .pm-list { grid-template-columns: minmax(0, 1fr); } }
+.foot { margin-top: 36px; font-size: 13px; color: var(--graphite); max-width: 80ch; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">Tally Baseball · Matchup Scout · polish study</p>
+  <h1>Pivetta vs. Chourio, restructured</h1>
+  <p class="lede">A working mockup of the scout page with the same features, put in a new order. It uses the real numbers for this pair from the app's 2026 stores, and the real pitches from their one meeting (Sep 22, 2025). Tap around on the phone. The notes beside it change with the tab.</p>
+  <div class="qtags">
+    <span class="qtag"><b>Q1</b>Do his pitches play into the hitter's strengths?</span>
+    <span class="qtag"><b>Q2</b>What did past meetings look like, pitch by pitch?</span>
+    <span class="qtag"><b>Q3</b>Pitch animation in both views</span>
+    <span class="qtag"><b>+</b>Link from the at-bat flow: <a href="https://github.com/gzilavyss2025/bbsbh/issues/1486">gzilavyss2025/bbsbh#1486</a></span>
+  </div>
+
+  <div class="stage">
+    <!-- ================= PHONE ================= -->
+    <div class="phone" aria-label="Proposed Matchup Scout, phone width">
+      <div class="ph-top"><b>Matchup Scout</b><span>tallybb.com/scout/…?view=hitter</span></div>
+      <div class="ph-body">
+        <div class="mu">
+          <div class="who"><span class="mono-badge" style="background:#2F241D">NP</span><div><b>Pivetta</b><small>RHP · SD</small></div></div>
+          <span class="vs">VS</span>
+          <div class="who r"><span class="mono-badge" style="background:#12284B">JC</span><div><b>Chourio</b><small>Bats R · MIL</small></div></div>
+        </div>
+        <div class="ctx">
+          <span class="chip">2026 · Regular season</span>
+          <span class="chip" id="sampleChip"></span>
+          <button class="chip chip--btn" id="openFilters" type="button">Hand · Scope · Metric ▾</button>
+        </div>
+
+        <div class="scene-card">
+          <canvas id="scene" width="336" height="204" aria-label="Pitch flight animation"></canvas>
+          <div class="scene-bar">
+            <span class="lbl" id="sceneLbl"></span>
+            <div class="seg seg--dark" role="group" aria-label="View">
+              <button type="button" data-view="pitcher">Pitcher’s</button>
+              <button type="button" data-view="hitter">Hitter’s</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pills" id="pills" role="group" aria-label="Pitch"></div>
+
+        <div class="tabs" role="tablist">
+          <button role="tab" data-tab="edge" type="button">Edge<small>who it favors</small></button>
+          <button role="tab" data-tab="zones" type="button">Zones<small>where</small></button>
+          <button role="tab" data-tab="meet" type="button">Meetings<small>pitch by pitch</small></button>
+        </div>
+
+        <section class="panel" data-panel="edge" id="edgePanel"></section>
+        <section class="panel" data-panel="zones" id="zonesPanel" hidden></section>
+        <section class="panel" data-panel="meet" id="meetPanel" hidden></section>
+      </div>
+    </div>
+
+    <!-- ================= NOTES ================= -->
+    <div class="notes">
+      <div class="note" data-note="edge">
+        <p class="eyebrow">Edge tab · answers Q1</p>
+        <h2>Lead with a verdict, then show the ledger</h2>
+        <p>Today the top of the page is one figure: <span class="mono">Expected xwOBA (est.) .332 · League .308 · 72% of pitches</span>. It does not say who that number favors, and "72% of pitches" is not explained. The Edge tab says it in words first, then shows the per-pitch evidence.</p>
+        <ul>
+          <li><b>Two lenses, kept apart.</b> <i>By pitch type</i>: his result on each of Pivetta's pitches against the league's result on that pitch. <i>By location</i>: the page's existing expected value, which weighs each region by where Pivetta throws.</li>
+          <li><b>The ledger is one row per pill.</b> The tick is the league. The dot is Chourio. The bar under the row is Pivetta's usage. Tap a row: the pill, the scene, and the Zones maps follow.</li>
+          <li><b>The words come from the existing bands.</b> "Even" is inside <span class="mono">±.030</span> xwOBA (±4 pts for whiff and swing). "Slight" is to <span class="mono">±.070</span> (±10 pts). "Clear" is past it. These are the colour steps in <span class="mono">lib/scout/metrics.js</span>, so the words and the map colours agree.</li>
+          <li><b>"72% of pitches" becomes a reason.</b> The cutter (44 pitches to righties) and curve (24) are under the 50-pitch map floor, so the location lens leaves them out. The page should name them.</li>
+        </ul>
+        <p class="src"><span class="tag tag--v">Verified</span>All figures come from the app's own pure functions (<span class="mono">pitcherBoard</span>, <span class="mono">hitterSide</span>) run on the 2026 stores in the repo on Oct 5. The per-type values (<span class="mono">typeVal</span>, <span class="mono">leagueFlat</span>) already exist in <span class="mono">hitterBoard.js</span>. This needs no new data.</p>
+        <p class="src"><span class="tag tag--adr">Reverses a choice</span><span class="mono">MapParts.jsx</span> says the answer strip is "a figure, never a sentence." A verdict line changes that. It needs your approval.</p>
+        <p class="src"><span class="tag tag--i">Inference</span>Pivetta threw only 263 pitches to righties in the 2026 store. The page should show the sample size next to the verdict (the chip at the top does this).</p>
+      </div>
+
+      <div class="note" data-note="zones" hidden>
+        <p class="eyebrow">Zones tab · today's maps, clearer</p>
+        <h2>Same two maps, plainer captions</h2>
+        <ul>
+          <li><b>Nothing is removed.</b> The two 13-region maps, the tap readout, the metric switch, Hand and Scope all stay. Hand, Scope and Metric move into one sheet behind the chip at the top. The chip shows the current choices.</li>
+          <li><b>Captions say what the map means.</b> "Where Pivetta throws to righties" and "Where Chourio does damage", in place of "Pitcher · location %" and "Hitter · xwOBA (est.)".</li>
+          <li><b>A callout joins the two maps.</b> It adds up Pivetta's share in Chourio's hottest regions and in his coldest regions. Today you must compare 26 cells by eye.</li>
+          <li><b>The View control moves onto the scene.</b> The scene is now the thing it changes first, and it plays in both views (Q3).</li>
+        </ul>
+        <p class="src"><span class="tag tag--v">Verified</span>Region values and colour steps come from <span class="mono">hitterSide</span> output for this pair. Chourio's middle and middle-inside cells read <span class="mono">.604</span> and <span class="mono">.602</span>. Pivetta puts 8% there.</p>
+      </div>
+
+      <div class="note" data-note="meet" hidden>
+        <p class="eyebrow">Meetings tab · answers Q2</p>
+        <h2>Every pitch, and each one opens like the Express Lane</h2>
+        <ul>
+          <li><b>The data is already on the wire.</b> The page's Savant request returns every pitch row. <span class="mono">plateAppearances()</span> then keeps only the last pitch of each plate appearance. Keep all the rows: type, mph, spin, count, call, location and the flight terms (<span class="mono">vx0 … az</span>).</li>
+          <li><b>The modal draws the real flight</b> from those terms. The scene above uses league-average shapes, so this is the only place on the page that shows his actual pitches.</li>
+          <li><b>Film.</b> The game feed gives a <span class="mono">playId</span> for each pitch. The Express Lane resolver (<span class="mono">clipIndex.js</span>) turns a playId into an mp4. The modal would play it inline. This mockup can only link out, because the artifact frame blocks MLB video.</li>
+          <li><b>The mix line compares</b> what he saw in the meeting with Pivetta's 2026 mix to righties.</li>
+        </ul>
+        <p class="src"><span class="tag tag--v">Verified</span>Savant returned 12 pitch rows for this pair. The game feed for gamePk 776222 has a playId on all 12 pitches.</p>
+        <p class="src"><span class="tag tag--i">Inference</span><span class="mono">headToHead.js</span> warns: "Do not plot these pitches. Savant's 2026 plate_z frame differs from the feed's." The modal plots each pitch against the zone top and bottom from its own Savant row, never on the season maps. Check this before you build it.</p>
+        <p class="src"><span class="tag tag--i">Inference</span>The date cutoff still holds back every game on or after today. A playId lookup reads the feed of a final, past game. That reader still needs its own spoiler classification in <span class="mono">spoiler-manifest.json</span>.</p>
+      </div>
+
+      <div class="note">
+        <p class="eyebrow">Scene · answers Q3</p>
+        <h2>The animation, in both views</h2>
+        <p>Today the scene shows only in the Hitter's view. ADR-0093 (decision 5) explains why: its camera stands behind the plate, so in the Pitcher's view its arcs would break the other way from the maps.</p>
+        <p>The mockup draws the Now Pitching card's own stage (sky, grass, the mound, the plate dirt and the zone box) in both views. The fix is a second camera, not a flipped picture. The mockup's Pitcher's view uses a centre-field camera: high, far back and with a long lens, like the telecast. The arcs then break the same way as the maps below them. Toggle the view on the scene to compare.</p>
+        <p class="src"><span class="tag tag--adr">ADR change</span>This amends ADR-0093 decision 5. <span class="mono">scene.js</span> needs a second projection and a test that a pitch to the first-base side lands on the same side as the map in each view.</p>
+        <p class="src"><span class="tag tag--i">Inference</span>The scene's arcs are league-average shapes for each pitch type at his speed (the <span class="mono">MOVE</span> table). The caption should say "typical shape".</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= BELOW ================= -->
+  <section class="below">
+    <div>
+      <p class="eyebrow">Navigation</p>
+      <h2>Three ways to structure the page</h2>
+      <p class="lede">All three keep every feature. They differ in what you see first and how much you tap.</p>
+    </div>
+    <div class="opts">
+      <article class="opt rec">
+        <span class="badge">Recommended · the mockup</span>
+        <h3>A. Verdict first, three tabs</h3>
+        <div class="wire">Header · sample chip · filters ▾
+┌ scene (both views) ──────┐
+└──────────────────────────┘
+(All)(Fastball 49%)(Sweeper 23%)…
+ EDGE │ ZONES │ MEETINGS
+ verdict + ledger
+ ─ or ─ two maps + callout
+ ─ or ─ PA cards → pitch modal</div>
+        <ul>
+          <li>The scene and pills stay fixed. Only the bottom half changes.</li>
+          <li>Each tab answers one question.</li>
+          <li>Cost: Meetings is one tap away. Today it is at the bottom of the scroll.</li>
+        </ul>
+      </article>
+      <article class="opt">
+        <h3>B. One scroll, in question order</h3>
+        <div class="wire">Header · filters ▾
+1 Who has the edge
+  verdict · ledger
+2 Where
+  scene · pills (sticky)
+  two maps · callout
+3 When they met
+  PA cards → pitch modal</div>
+        <ul>
+          <li>No tabs. Section heads are the questions.</li>
+          <li>The pills stick to the top while the maps are on screen.</li>
+          <li>Cost: a long page on a phone. The scene sits below the fold.</li>
+        </ul>
+      </article>
+      <article class="opt">
+        <h3>C. One card per pitch</h3>
+        <div class="wire">Header · verdict line
+◀ FASTBALL · 49% · 93.9 ▶
+  scene: this pitch only
+  ledger line: .391 vs .330
+  two mini maps
+  in their meeting: 7 seen
+◀ swipe to SWEEPER ▶</div>
+        <ul>
+          <li>Reads like a scouting report: "here is what is coming".</li>
+          <li>The h2h pitches sort under each pitch type.</li>
+          <li>Cost: the All-pitches view and the totals need their own card.</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="note">
+      <p class="eyebrow">Smaller polish, any structure</p>
+      <div class="pm-list">
+        <ul>
+          <li><b>One filter sheet.</b> Today five controls sit in three places (View and Metric above the maps, Hand and Scope below them). One chip opens one sheet.</li>
+          <li><b>Show the sample.</b> "263 pitches to righties" near the top. The thin-sample hatch now appears only on the maps.</li>
+          <li><b>Name the left-out pitches.</b> Replace "72% of pitches" with "Leaves out cutter and curve: too few to righties".</li>
+        </ul>
+        <ul>
+          <li><b>Contact quality on the meetings line.</b> 0-for-3 hides two hard lineouts (105.2 and 100.8 mph). Show average exit velocity and xwOBA on contact (.543).</li>
+          <li><b>Default Hand to the pitcher's hand.</b> For a one-sided hitter the hitter map pools both hands today. "vs RHP" is the matchup. This changes behaviour, so it is your call.</li>
+          <li><b>Label the scope split.</b> The maps are 2026. The meetings are every season. Say so on each.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note">
+      <p class="eyebrow">Decisions this needs</p>
+      <div class="scroll-x">
+      <table class="cmp">
+        <thead><tr><th>Decision</th><th>Touches</th><th>Why it is yours</th></tr></thead>
+        <tbody>
+          <tr><td>Page structure: A, B or C</td><td><span class="mono">ScoutPage.jsx</span>, <span class="mono">scout.css</span></td><td>Sets what a reader sees first.</td></tr>
+          <tr><td>A verdict sentence over the figure</td><td><span class="mono">MapParts.jsx</span> (Answer)</td><td>Reverses "a figure, never a sentence".</td></tr>
+          <tr><td>The scene in the Pitcher's view, with a centre-field camera</td><td>ADR-0093 decision 5, <span class="mono">scene.js</span></td><td>Amends an accepted ADR.</td></tr>
+          <tr><td>Per-pitch meetings with film</td><td><span class="mono">headToHead.js</span>, Express Lane clip resolver, spoiler manifest</td><td>A new feed reader on an open page. It also needs the plot-frame check.</td></tr>
+          <tr><td>Hand defaults to the pitcher's hand</td><td><span class="mono">ScoutPage.jsx</span></td><td>Changes what a shared link shows.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <p class="foot">Sources: Tally's 2026 nightly stores in the repo (<span class="mono">pitch-command</span>, <span class="mono">pitch-arsenal</span>, <span class="mono">hitter-grid</span>), read on Oct 5, 2026 through the scout's own board functions. Baseball Savant's Statcast search for batter 694192 vs pitcher 601713 before Oct 4, 2026 (12 pitches, 3 plate appearances, Sep 22, 2025, Brewers at Padres). The MLB Stats API game feed for gamePk 776222 (playIds). Scene arcs use the league-average movement table in <span class="mono">src/lib/pitcherCard/scene.js</span>. The mockup's Hand and Scope controls are for show; the Metric control works.</p>
+  </section>
+</div>
+
+<dialog id="filters">
+  <form method="dialog" class="sheet">
+    <h3>Filters</h3>
+    <div class="row"><span>Hitter's map: pitcher hand</span><div class="seg" id="fHand"><button type="button" aria-pressed="true">All</button><button type="button">vs RHP</button><button type="button">vs LHP</button></div></div>
+    <div class="row"><span>Scope</span><div class="seg" id="fScope"><button type="button" aria-pressed="true">Regular</button><button type="button">Postseason</button><button type="button">All</button></div></div>
+    <div class="row"><span>Metric</span><div class="seg" id="fMetric"></div></div>
+    <p class="cap">One sheet holds the three controls that today sit above and below the maps.</p>
+    <footer><button class="btn" value="close">Done</button></footer>
+  </form>
+</dialog>
+
+<dialog id="pitchModal" aria-label="Pitch detail">
+  <div class="pm">
+    <div class="pm-head"><div><small id="pmKicker"></small><b id="pmTitle"></b><small id="pmSub"></small></div><button class="pm-x" id="pmClose" type="button" aria-label="Close">×</button></div>
+    <div class="pm-body">
+      <div class="scene-card"><canvas id="pmScene" width="336" height="204" aria-label="This pitch's real flight"></canvas>
+        <div class="scene-bar"><span class="lbl" id="pmSceneLbl">Real flight, from Statcast</span>
+          <div class="seg seg--dark" role="group" aria-label="Speed"><button type="button" data-speed="1">Real</button><button type="button" data-speed="4">¼ speed</button></div>
+        </div>
+      </div>
+      <div class="pm-grid">
+        <div class="pm-stats" id="pmStats"></div>
+        <svg id="pmZone" viewBox="0 0 112 132" aria-label="Plate location"></svg>
+      </div>
+      <p id="pmDes" class="cap"></p>
+      <div class="film"><span>In the app the clip plays here, as in the Express Lane.</span><a class="btn btn--ghost" id="pmFilm" target="_blank" rel="noopener">Watch on Savant ↗</a></div>
+      <div class="pm-nav"><button class="btn btn--ghost" id="pmPrev" type="button">‹ Previous</button><span class="cap" id="pmPos"></span><button class="btn btn--ghost" id="pmNext" type="button">Next ›</button></div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const D = {"types":[{"code":"FF","name":"Fastball","family":"fastball","pct":"49","mph":"93.9"},{"code":"ST","name":"Sweeper","family":"breaking","pct":"23","mph":"81.6"},{"code":"FC","name":"Cutter","family":"fastball","pct":"17","mph":"90.8"},{"code":"CU","name":"Curveball","family":"breaking","pct":"9","mph":"79.1"}],"pmap":{"ALL":{"n":263,"thin":false,"share":{"high":0.335,"low":0.11,"side3b":0.015,"side1b":0.179,"r1c1":0.065,"r1c2":0.042,"r1c3":0.03,"r2c1":0.015,"r2c2":0.057,"r2c3":0.061,"r3c1":0.015,"r3c2":0.03,"r3c3":0.046},"regionN":{"high":88,"low":29,"side3b":4,"side1b":47,"r1c1":17,"r1c2":11,"r1c3":8,"r2c1":4,"r2c2":15,"r2c3":16,"r3c1":4,"r3c2":8,"r3c3":12}},"FF":{"n":130,"thin":false,"share":{"high":0.477,"low":0.023,"side3b":0.008,"side1b":0.154,"r1c1":0.054,"r1c2":0.062,"r1c3":0.046,"r2c1":0.015,"r2c2":0.046,"r2c3":0.038,"r3c1":0.015,"r3c2":0.023,"r3c3":0.038},"regionN":{"high":62,"low":3,"side3b":1,"side1b":20,"r1c1":7,"r1c2":8,"r1c3":6,"r2c1":2,"r2c2":6,"r2c3":5,"r3c1":2,"r3c2":3,"r3c3":5}},"ST":{"n":61,"thin":false,"share":{"high":0.246,"low":0.262,"side3b":0,"side1b":0.213,"r1c1":0.016,"r1c2":0.016,"r1c3":0,"r2c1":0,"r2c2":0.049,"r2c3":0.066,"r3c1":0.016,"r3c2":0.049,"r3c3":0.066},"regionN":{"high":15,"low":16,"side3b":0,"side1b":13,"r1c1":1,"r1c2":1,"r1c3":0,"r2c1":0,"r2c2":3,"r2c3":4,"r3c1":1,"r3c2":3,"r3c3":4}},"FC":{"n":44,"thin":true,"share":{"high":0.205,"low":0.068,"side3b":0,"side1b":0.227,"r1c1":0.091,"r1c2":0.023,"r1c3":0.045,"r2c1":0.023,"r2c2":0.136,"r2c3":0.091,"r3c1":0,"r3c2":0.045,"r3c3":0.045},"regionN":{"high":9,"low":3,"side3b":0,"side1b":10,"r1c1":4,"r1c2":1,"r1c3":2,"r2c1":1,"r2c2":6,"r2c3":4,"r3c1":0,"r3c2":2,"r3c3":2}},"CU":{"n":24,"thin":true,"share":{"high":0.083,"low":0.292,"side3b":0.083,"side1b":0.167,"r1c1":0.125,"r1c2":0.042,"r1c3":0,"r2c1":0.042,"r2c2":0,"r2c3":0.125,"r3c1":0,"r3c2":0,"r3c3":0.042},"regionN":{"high":2,"low":7,"side3b":2,"side1b":4,"r1c1":3,"r1c2":1,"r1c3":0,"r2c1":1,"r2c2":0,"r2c3":3,"r3c1":0,"r3c2":0,"r3c3":1}}},"hit":{"xwoba":{"overall":{"value":0.3321313069110555,"league":0.3075525762142408,"covered":0.72},"ALL":{"cells":{"high":{"tone":"mid","value":".319","count":57},"low":{"tone":"mid","value":".302","count":32},"side3b":{"tone":"mid","value":".331","count":58},"side1b":{"tone":"lo1","value":".237","count":35},"r1c1":{"tone":"hi2","value":".385","count":23},"r1c2":{"tone":"mid","value":".369","count":27},"r1c3":{"tone":"lo2","value":".211","count":24},"r2c1":{"tone":"hi2","value":".602","count":25},"r2c2":{"tone":"hi2","value":".604","count":31},"r2c3":{"tone":"mid","value":".343","count":26},"r3c1":{"tone":"hi1","value":".385","count":21},"r3c2":{"tone":"mid","value":".359","count":27},"r3c3":{"tone":"lo2","value":".177","count":16}},"seen":1563},"FF":{"cells":{"high":{"tone":"mid","value":".312","count":35},"low":{"tone":"gray","count":5},"side3b":{"tone":"hi1","value":".385","count":21},"side1b":{"tone":"mid","value":".318","count":11},"r1c1":{"tone":"hi2","value":".453","count":11},"r1c2":{"tone":"gray","count":8},"r1c3":{"tone":"lo1","value":".248","count":13},"r2c1":{"tone":"gray","count":6},"r2c2":{"tone":"hi2","value":".638","count":17},"r2c3":{"tone":"mid","value":".334","count":10},"r3c1":{"tone":"gray","count":3},"r3c2":{"tone":"gray","count":5},"r3c3":{"tone":"gray","count":4}},"seen":610,"exp":0.34818689390407553,"league":0.3297263244169585,"typeVal":0.3905771812080537,"leagueFlat":0.3297263244169585},"ST":{"cells":{"high":{"tone":"gray","count":4},"low":{"tone":"gray","count":7},"side3b":{"tone":"gray","count":5},"side1b":{"tone":"gray","count":8},"r1c1":{"tone":"gray","count":3},"r1c2":{"tone":"gray","count":3},"r1c3":{"tone":"gray","count":4},"r2c1":{"tone":"gray","count":3},"r2c2":{"tone":"gray","count":3},"r2c3":{"tone":"gray","count":7},"r3c1":{"tone":"gray","count":2},"r3c2":{"tone":"gray","count":3},"r3c3":{"tone":"gray","count":2}},"seen":225,"exp":0.2979259259259259,"league":0.26031285178236396,"typeVal":0.2979259259259259,"leagueFlat":0.26031285178236396},"FC":{"cells":{"high":{"tone":"gray","count":5},"low":{"tone":"gray","count":4},"side3b":{"tone":"gray","count":4},"side1b":{"tone":"gray","count":4},"r1c1":{"tone":"gray","count":4},"r1c2":{"tone":"gray","count":5},"r1c3":{"tone":"gray","count":4},"r2c1":{"tone":"gray","count":4},"r2c2":{"tone":"gray","count":4},"r2c3":{"tone":"gray","count":5},"r3c1":{"tone":"gray","count":2},"r3c2":{"tone":"gray","count":4},"r3c3":{"tone":"gray","count":4}},"seen":204,"exp":null,"league":null,"typeVal":0.38762264150943393,"leagueFlat":0.3373811451706188},"CU":{"cells":{"high":{"tone":"gray","count":0},"low":{"tone":"gray","count":7},"side3b":{"tone":"gray","count":1},"side1b":{"tone":"gray","count":3},"r1c1":{"tone":"gray","count":0},"r1c2":{"tone":"gray","count":2},"r1c3":{"tone":"gray","count":0},"r2c1":{"tone":"gray","count":2},"r2c2":{"tone":"gray","count":0},"r2c3":{"tone":"gray","count":2},"r3c1":{"tone":"gray","count":3},"r3c2":{"tone":"gray","count":4},"r3c3":{"tone":"gray","count":1}},"seen":112,"exp":null,"league":null,"typeVal":0.26652000000000003,"leagueFlat":0.2611441624365482}},"whiff":{"overall":{"value":0.3266192907138126,"league":0.2265670529003592,"covered":0.72},"ALL":{"cells":{"high":{"tone":"hi1","value":"37","count":130},"low":{"tone":"mid","value":"50","count":48},"side3b":{"tone":"mid","value":"14","count":98},"side1b":{"tone":"hi2","value":"46","count":69},"r1c1":{"tone":"mid","value":"13","count":47},"r1c2":{"tone":"lo1","value":"9","count":46},"r1c3":{"tone":"mid","value":"17","count":54},"r2c1":{"tone":"mid","value":"4","count":48},"r2c2":{"tone":"hi1","value":"15","count":59},"r2c3":{"tone":"lo1","value":"7","count":46},"r3c1":{"tone":"mid","value":"10","count":30},"r3c2":{"tone":"lo1","value":"5","count":43},"r3c3":{"tone":"hi2","value":"26","count":27}},"seen":1563},"FF":{"cells":{"high":{"tone":"hi1","value":"40","count":89},"low":{"tone":"gray","count":2},"side3b":{"tone":"hi2","value":"19","count":31},"side1b":{"tone":"lo1","value":"20","count":15},"r1c1":{"tone":"hi1","value":"21","count":24},"r1c2":{"tone":"lo1","value":"10","count":20},"r1c3":{"tone":"mid","value":"22","count":36},"r2c1":{"tone":"hi1","value":"15","count":13},"r2c2":{"tone":"mid","value":"11","count":27},"r2c3":{"tone":"mid","value":"11","count":19},"r3c1":{"tone":"gray","count":3},"r3c2":{"tone":"gray","count":9},"r3c3":{"tone":"gray","count":3}},"seen":610,"exp":0.2887412523756252,"league":0.19238404961334116,"typeVal":0.24398625429553264,"leagueFlat":0.19238404961334116},"ST":{"cells":{"high":{"tone":"gray","count":8},"low":{"tone":"mid","value":"64","count":14},"side3b":{"tone":"gray","count":7},"side1b":{"tone":"hi2","value":"52","count":27},"r1c1":{"tone":"gray","count":4},"r1c2":{"tone":"gray","count":2},"r1c3":{"tone":"gray","count":8},"r2c1":{"tone":"gray","count":6},"r2c2":{"tone":"gray","count":4},"r2c3":{"tone":"lo2","value":"0","count":11},"r3c1":{"tone":"gray","count":5},"r3c2":{"tone":"gray","count":8},"r3c3":{"tone":"gray","count":7}},"seen":225,"exp":0.40731598108647277,"league":0.2993917120770498,"typeVal":0.27927927927927926,"leagueFlat":0.2993917120770498},"FC":{"cells":{"high":{"tone":"hi1","value":"43","count":14},"low":{"tone":"lo1","value":"50","count":12},"side3b":{"tone":"mid","value":"20","count":10},"side1b":{"tone":"hi2","value":"75","count":16},"r1c1":{"tone":"gray","count":4},"r1c2":{"tone":"gray","count":9},"r1c3":{"tone":"gray","count":7},"r2c1":{"tone":"gray","count":6},"r2c2":{"tone":"hi2","value":"33","count":12},"r2c3":{"tone":"gray","count":8},"r3c1":{"tone":"gray","count":2},"r3c2":{"tone":"gray","count":6},"r3c3":{"tone":"gray","count":7}},"seen":204,"exp":null,"league":null,"typeVal":0.2831858407079646,"leagueFlat":0.22039450259915971},"CU":{"cells":{"high":{"tone":"gray","count":0},"low":{"tone":"hi1","value":"64","count":11},"side3b":{"tone":"gray","count":4},"side1b":{"tone":"gray","count":4},"r1c1":{"tone":"gray","count":1},"r1c2":{"tone":"gray","count":1},"r1c3":{"tone":"gray","count":0},"r2c1":{"tone":"gray","count":3},"r2c2":{"tone":"gray","count":0},"r2c3":{"tone":"gray","count":4},"r3c1":{"tone":"gray","count":4},"r3c2":{"tone":"gray","count":5},"r3c3":{"tone":"gray","count":3}},"seen":112,"exp":null,"league":null,"typeVal":0.25,"leagueFlat":0.2922033118675253}},"swing":{"overall":{"value":0.4561056236129635,"league":0.48360048729711574,"covered":0.72},"ALL":{"cells":{"high":{"tone":"hi1","value":"41","count":315},"low":{"tone":"mid","value":"22","count":223},"side3b":{"tone":"hi2","value":"62","count":159},"side1b":{"tone":"mid","value":"30","count":228},"r1c1":{"tone":"mid","value":"72","count":65},"r1c2":{"tone":"lo2","value":"67","count":69},"r1c3":{"tone":"hi1","value":"74","count":73},"r2c1":{"tone":"mid","value":"73","count":66},"r2c2":{"tone":"lo1","value":"68","count":87},"r2c3":{"tone":"lo2","value":"50","count":92},"r3c1":{"tone":"hi1","value":"63","count":48},"r3c2":{"tone":"lo1","value":"54","count":80},"r3c3":{"tone":"mid","value":"47","count":58}},"seen":1563},"FF":{"cells":{"high":{"tone":"hi1","value":"46","count":194},"low":{"tone":"lo1","value":"4","count":45},"side3b":{"tone":"hi2","value":"63","count":49},"side1b":{"tone":"lo1","value":"20","count":75},"r1c1":{"tone":"mid","value":"80","count":30},"r1c2":{"tone":"lo2","value":"69","count":29},"r1c3":{"tone":"hi2","value":"90","count":40},"r2c1":{"tone":"hi1","value":"76","count":17},"r2c2":{"tone":"hi1","value":"82","count":33},"r2c3":{"tone":"lo2","value":"42","count":45},"r3c1":{"tone":"gray","count":7},"r3c2":{"tone":"lo2","value":"31","count":29},"r3c3":{"tone":"lo2","value":"18","count":17}},"seen":610,"exp":0.46956635624953125,"league":0.49684825597234356,"typeVal":0.47704918032786886,"leagueFlat":0.49684825597234356},"ST":{"cells":{"high":{"tone":"hi2","value":"35","count":23},"low":{"tone":"lo1","value":"23","count":60},"side3b":{"tone":"hi2","value":"64","count":11},"side1b":{"tone":"hi1","value":"51","count":53},"r1c1":{"tone":"gray","count":6},"r1c2":{"tone":"gray","count":5},"r1c3":{"tone":"hi2","value":"80","count":10},"r2c1":{"tone":"gray","count":9},"r2c2":{"tone":"gray","count":9},"r2c3":{"tone":"hi2","value":"85","count":13},"r3c1":{"tone":"gray","count":7},"r3c2":{"tone":"hi1","value":"73","count":11},"r3c3":{"tone":"gray","count":8}},"seen":225,"exp":0.4274284106046232,"league":0.4553769801194564,"typeVal":0.49333333333333335,"leagueFlat":0.4553769801194564},"FC":{"cells":{"high":{"tone":"hi1","value":"39","count":36},"low":{"tone":"hi2","value":"39","count":31},"side3b":{"tone":"hi2","value":"91","count":11},"side1b":{"tone":"mid","value":"39","count":41},"r1c1":{"tone":"gray","count":5},"r1c2":{"tone":"hi1","value":"82","count":11},"r1c3":{"tone":"lo2","value":"54","count":13},"r2c1":{"tone":"gray","count":9},"r2c2":{"tone":"hi1","value":"86","count":14},"r2c3":{"tone":"lo2","value":"62","count":13},"r3c1":{"tone":"gray","count":5},"r3c2":{"tone":"gray","count":6},"r3c3":{"tone":"gray","count":9}},"seen":204,"exp":null,"league":null,"typeVal":0.553921568627451,"leagueFlat":0.491013986013986},"CU":{"cells":{"high":{"tone":"lo1","value":"0","count":11},"low":{"tone":"lo1","value":"29","count":38},"side3b":{"tone":"gray","count":9},"side1b":{"tone":"mid","value":"27","count":15},"r1c1":{"tone":"gray","count":3},"r1c2":{"tone":"gray","count":3},"r1c3":{"tone":"gray","count":4},"r2c1":{"tone":"gray","count":4},"r2c2":{"tone":"gray","count":1},"r2c3":{"tone":"gray","count":6},"r3c1":{"tone":"gray","count":5},"r3c2":{"tone":"gray","count":8},"r3c3":{"tone":"gray","count":5}},"seen":112,"exp":null,"league":null,"typeVal":0.35714285714285715,"leagueFlat":0.41032416363893737}}},"h2h":{"date":"2025-09-22","gamePk":776222,"note":"Padres at Brewers? see teams","pas":[{"ab":2,"pitches":[{"n":1,"code":"FF","name":"4-Seam Fastball","mph":92.9,"desc":"called_strike","b":0,"s":0,"px":0.4446023044347701,"pz":3.1765661739623927,"szt":3.47119314207729,"szb":1.59989359703763,"ev":"","ls":null,"la":null,"xw":null,"inn":1,"vx0":4.681659060107464,"vy0":-135.09268181637415,"vz0":-7.5221877356370515,"ax":-4.857150851917067,"ay":28.591294504008502,"az":-9.946841300028124,"rx":-1.1,"rz":6.9,"ry":53.88,"spin":2332.0,"pfx":-0.31,"pfz":1.7,"playId":"9cd06a58-d994-39f0-972a-cd12cc850e46","des":""},{"n":2,"code":"ST","name":"Sweeper","mph":83.4,"desc":"swinging_strike","b":0,"s":1,"px":0.7735444536202227,"pz":1.9592854817093648,"szt":3.34,"szb":1.59,"ev":"","ls":null,"la":null,"xw":null,"inn":1,"vx0":2.7752605701814392,"vy0":-121.3936692921406,"vz0":-6.13803120461221,"ax":9.457730653494247,"ay":22.482901329989783,"az":-23.559925201387344,"rx":-1.28,"rz":6.73,"ry":53.78,"spin":2436.0,"pfx":1.0,"pfz":0.77,"playId":"298499dc-3271-3e88-a917-fe85cabdd010","des":""},{"n":3,"code":"ST","name":"Sweeper","mph":83.6,"desc":"hit_into_play","b":0,"s":2,"px":0.9588274508827714,"pz":1.865479054515423,"szt":3.34,"szb":1.59,"ev":"field_out","ls":95.0,"la":-12.0,"xw":0.183,"inn":1,"vx0":3.159558746222955,"vy0":-121.62480931160479,"vz0":-6.281371154897302,"ax":7.506277230582958,"ay":23.858195976338514,"az":-25.673459292355698,"rx":-1.1,"rz":6.89,"ry":53.83,"spin":2363.0,"pfx":0.82,"pfz":0.55,"playId":"4801cb3b-c786-3eea-a4c5-08daf51e8e5e","des":"Jackson Chourio grounds out, shortstop Jose Iglesias to first baseman Luis Arraez."}]},{"ab":21,"pitches":[{"n":1,"code":"ST","name":"Sweeper","mph":80.6,"desc":"foul","b":0,"s":0,"px":0.8428097824659571,"pz":3.1300362469583547,"szt":3.34,"szb":1.59,"ev":"","ls":75.0,"la":55.0,"xw":null,"inn":3,"vx0":2.6535226463187422,"vy0":-117.3409188989856,"vz0":-1.611151595287612,"ax":11.650233635420888,"ay":23.15593462468335,"az":-30.76477761842042,"rx":-1.48,"rz":6.74,"ry":53.93,"spin":2360.0,"pfx":1.32,"pfz":0.14,"playId":"11c016fa-9d21-39c5-8cb1-b4f3e45df045","des":""},{"n":2,"code":"FF","name":"4-Seam Fastball","mph":92.5,"desc":"swinging_strike","b":0,"s":1,"px":0.6705462272109044,"pz":3.4269751636590007,"szt":3.34,"szb":1.59,"ev":"","ls":null,"la":null,"xw":null,"inn":3,"vx0":4.229306441666565,"vy0":-134.4340696659247,"vz0":-6.808522199636282,"ax":-1.7460517025992646,"ay":32.34241570128648,"az":-10.267863508739197,"rx":-0.92,"rz":6.92,"ry":53.7,"spin":2368.0,"pfx":-0.06,"pfz":1.7,"playId":"26ee9b6b-602a-3f7b-957f-5aa31022f8b7","des":""},{"n":3,"code":"FF","name":"4-Seam Fastball","mph":93.8,"desc":"foul","b":0,"s":2,"px":0.9162283385815838,"pz":3.4812354946862456,"szt":3.34,"szb":1.59,"ev":"","ls":84.3,"la":59.0,"xw":null,"inn":3,"vx0":4.576728203950857,"vy0":-136.44370073012595,"vz0":-6.792831933520352,"ax":-2.2715099746917295,"ay":32.06254239442421,"az":-10.798774255508613,"rx":-0.75,"rz":6.94,"ry":53.66,"spin":2346.0,"pfx":-0.1,"pfz":1.61,"playId":"b9b52820-fe11-375d-88fe-4982831e694f","des":""},{"n":4,"code":"CU","name":"Curveball","mph":78.8,"desc":"foul","b":0,"s":2,"px":0.7904696032671165,"pz":1.694422901368113,"szt":3.34,"szb":1.59,"ev":"","ls":68.3,"la":72.0,"xw":null,"inn":3,"vx0":2.4692715491592048,"vy0":-114.69333968954544,"vz0":-1.5933468177325043,"ax":5.470424191663558,"ay":24.190077411232963,"az":-43.800133142997325,"rx":-0.92,"rz":6.76,"ry":53.75,"spin":2794.0,"pfx":0.69,"pfz":-1.34,"playId":"6f61bd6f-17d5-3f8b-a40a-35a34820d009","des":""},{"n":5,"code":"FF","name":"4-Seam Fastball","mph":92.7,"desc":"hit_into_play","b":0,"s":2,"px":-0.16409474848537714,"pz":3.423378030832156,"szt":3.34,"szb":1.59,"ev":"field_out","ls":105.2,"la":19.0,"xw":0.6652777777777777,"inn":3,"vx0":3.309916206456013,"vy0":-134.8004040609417,"vz0":-6.327855954554759,"ax":-5.066708073156526,"ay":30.402984121421248,"az":-11.487848836525007,"rx":-1.15,"rz":6.79,"ry":53.81,"spin":2340.0,"pfx":-0.36,"pfz":1.6,"playId":"71406a25-bf7a-3149-b7ad-181d9a120a78","des":"Jackson Chourio lines out sharply to center fielder Jackson Merrill."}]},{"ab":36,"pitches":[{"n":1,"code":"FF","name":"4-Seam Fastball","mph":91.6,"desc":"foul","b":0,"s":0,"px":-0.09600771742709409,"pz":3.367578044509218,"szt":3.34,"szb":1.59,"ev":"","ls":77.6,"la":35.0,"xw":null,"inn":5,"vx0":2.4251708948891677,"vy0":-133.22667169315923,"vz0":-6.045603899137006,"ax":-0.2965044434228101,"ay":31.91332226417501,"az":-13.820556829933096,"rx":-1.07,"rz":6.85,"ry":53.73,"spin":2311.0,"pfx":0.02,"pfz":1.45,"playId":"824f1d6f-596f-3093-9760-357328bf158f","des":""},{"n":2,"code":"FF","name":"4-Seam Fastball","mph":91.8,"desc":"foul","b":0,"s":1,"px":0.28994289890938757,"pz":3.6397862450770306,"szt":3.34,"szb":1.59,"ev":"","ls":88.5,"la":68.0,"xw":null,"inn":5,"vx0":3.824000916329472,"vy0":-133.52361157392724,"vz0":-5.595666195544089,"ax":-4.149800355321793,"ay":31.94210706372765,"az":-13.906226088211472,"rx":-0.97,"rz":6.93,"ry":53.68,"spin":2163.0,"pfx":-0.27,"pfz":1.45,"playId":"f44855bc-ce0a-389b-a002-a3c1f6d579fa","des":""},{"n":3,"code":"FF","name":"4-Seam Fastball","mph":91.3,"desc":"ball","b":0,"s":2,"px":1.2700520946065794,"pz":2.4179676232305276,"szt":3.4217862922651,"szb":1.64012760906135,"ev":"","ls":null,"la":null,"xw":null,"inn":5,"vx0":5.879076113376574,"vy0":-132.66907119649213,"vz0":-8.496482706705033,"ax":-2.9472101511962263,"ay":26.18080828303728,"az":-13.795250145277958,"rx":-0.91,"rz":6.87,"ry":53.61,"spin":2138.0,"pfx":-0.15,"pfz":1.42,"playId":"4134298a-29af-36a1-a622-7a06d66d4b0e","des":""},{"n":4,"code":"CU","name":"Curveball","mph":77.6,"desc":"hit_into_play","b":1,"s":2,"px":0.6887228696927741,"pz":2.7008149125167247,"szt":3.34,"szb":1.59,"ev":"field_out","ls":100.8,"la":10.0,"xw":0.781,"inn":5,"vx0":2.2022889087143604,"vy0":-112.89897132817131,"vz0":0.6337377972783846,"ax":4.924991780837352,"ay":22.863261199906947,"az":-44.29752298382481,"rx":-0.87,"rz":6.87,"ry":53.69,"spin":2611.0,"pfx":0.63,"pfz":-1.39,"playId":"c5f33726-f827-313d-a20e-62b6a935489b","des":"Jackson Chourio lines out sharply to shortstop Jose Iglesias. Throwing error by shortstop Jose Iglesias."}]}]},"totals":{"pa":3,"ab":3,"h":0,"hr":0,"bb":0,"k":0,"hbp":0,"sf":0,"tb":0,"avg":0,"obp":0,"slg":0}};
+
+const FAMILY = { FF: 'fastball', SI: 'fastball', FC: 'fastball', ST: 'breaking', SL: 'breaking', CU: 'breaking', KC: 'breaking', SV: 'breaking', CH: 'offspeed', FS: 'offspeed' };
+const FAM_CSS = { fastball: 'var(--fam-fb)', breaking: 'var(--fam-br)', offspeed: 'var(--fam-os)', other: 'var(--graphite)' };
+const FAM_ON_NAVY = { fastball: '#7CC79C', breaking: '#A9C3EA', offspeed: '#F09A88', other: '#CFC7B4' };
+const famOf = (c) => FAMILY[c] || 'other';
+const NAME = Object.fromEntries(D.types.map((t) => [t.code, t.name]));
+const METRICS = {
+  xwoba: { label: 'xwOBA (est.)', near: 0.03, far: 0.07, favors: 'hitter', fmt: (v) => v.toFixed(3).replace(/^0/, ''), unit: '' },
+  whiff: { label: 'Whiff %', near: 0.04, far: 0.10, favors: 'pitcher', fmt: (v) => String(Math.round(v * 100)), unit: '%' },
+  swing: { label: 'Swing %', near: 0.04, far: 0.10, favors: null, fmt: (v) => String(Math.round(v * 100)), unit: '%' },
+};
+const state = { view: 'hitter', sel: null, metric: 'xwoba', tab: 'edge', picked: null };
+
+// ---------------------------------------------------------------- cameras
+const W = 336, H = 204, PLATE_Y = 17 / 12;
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const norm = (a) => { const l = Math.hypot(...a); return [a[0] / l, a[1] / l, a[2] / l]; };
+const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+function camera(view) {
+  // Hitter's: scene.js's camera, 6 ft behind the plate, 4 ft up, looking at the mound.
+  // Pitcher's: a centre-field telecast camera, high and far, long lens.
+  const c = view === 'hitter'
+    ? { C: [0, PLATE_Y - 6, 4], T: [0, 60, 4], F: 410, cx: W / 2, cy: 26 }
+    : { C: [0, 420, 16], T: [0, 0, 2.6], F: 9000, cx: W / 2, cy: 82 };
+  const f = norm(sub(c.T, c.C)); const r = norm([f[1], -f[0], 0]); const u = cross(r, f);
+  return (p) => { const v = sub(p, c.C); const d = dot(v, f); return [c.cx + (c.F * dot(v, r)) / d, c.cy - (c.F * dot(v, u)) / d, c.F / d]; };
+}
+
+// ---------------------------------------------------------------- flights
+// League-average shapes (scene.js MOVE / SPOT), at his speed, for a right-hander.
+const MOVE = { FF: [15.7, 7.8, -1], SI: [7.5, 15.1, -1], FC: [8.0, 2.6, 1], SL: [1.3, 3.8, 1], ST: [1.0, 13.5, 1], CU: [-10.3, 9.1, 1], CH: [3.8, 14.2, -1], FS: [2.9, 11.3, -1] };
+const SPOT = { FF: [0, 3.0], SI: [-0.45, 2.0], FC: [0.35, 2.5], SL: [0.55, 1.7], ST: [0.85, 2.1], CU: [0.25, 1.5], CH: [-0.4, 1.6], FS: [-0.15, 1.45] };
+const REL = [-1.05, 54, 6.85]; // Pivetta's release, the mean of his 12 Savant rows
+function genericFlight(code, mph) {
+  const [ivb, hb, side] = MOVE[code]; const [ex, ez] = SPOT[code];
+  const T = 60.5 / (mph * 1.467); const drop = 0.5 * 32.17 * T * T;
+  const M = [(hb / 12) * side, 0, ivb / 12 - drop];
+  const E = [ex, PLATE_Y, ez];
+  const A = sub(sub(E, M), REL);
+  return { T, at: (t) => [REL[0] + A[0] * t + M[0] * t * t, REL[1] + A[1] * t, REL[2] + A[2] * t + M[2] * t * t] };
+}
+function realFlight(p) {
+  const root = (c) => { const a = 0.5 * p.ay, b = p.vy0; return (-b - Math.sqrt(b * b - 4 * a * c)) / (2 * a); };
+  const tp = root(50 - PLATE_Y), tr = root(50 - p.ry);
+  const x0 = p.px - p.vx0 * tp - 0.5 * p.ax * tp * tp, z0 = p.pz - p.vz0 * tp - 0.5 * p.az * tp * tp;
+  const pos = (t) => [x0 + p.vx0 * t + 0.5 * p.ax * t * t, 50 + p.vy0 * t + 0.5 * p.ay * t * t, z0 + p.vz0 * t + 0.5 * p.az * t * t];
+  return { T: tp - tr, at: (u) => pos(tr + u * (tp - tr)) };
+}
+
+// ---------------------------------------------------------------- scene renderer
+// The Now Pitching card's stage (PitchScene.jsx, pitcher-card/card.css): sky over
+// grass, the mound, the plate dirt, the zone as a box over the plate, a navy bar
+// naming the pitch. Drawn through either camera, so the Pitcher's view gets the
+// same stage from centre field.
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const STAGE_INK = { sky: '#EDE6D1', grass: '#D8E6C9', dirt: '#D6AA83', muted: '#3C4A5A', navy: '#1B2A3A', paper: '#FFFDF6', clay: '#B4453A', chalk: '#FFF8E9' };
+const FAM_HEX = { fastball: '#2F6E4F', breaking: '#1B2A3A', offspeed: '#B4453A', other: '#857E6F' };
+const BAR_H = 26;
+function makeScene(canvas) {
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  canvas.width = W * dpr; canvas.height = H * dpr; ctx.scale(dpr, dpr);
+  const s = { flights: [], view: 'hitter', speed: 3, loop: true, zone: [1.6, 3.5], raf: 0, onActive: null };
+  const path = (P, pts) => { ctx.beginPath(); pts.forEach((q, i) => { const [x, y] = P(q); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); };
+  const circle = (cx, cy, r, z = 0, n = 48) => Array.from({ length: n + 1 }, (_, i) => [cx + r * Math.cos((i / n) * 2 * Math.PI), cy + r * Math.sin((i / n) * 2 * Math.PI), z]);
+  function backdrop(P, view) {
+    ctx.fillStyle = STAGE_INK.sky; ctx.fillRect(0, 0, W, H);
+    if (view === 'hitter') {
+      // The Now Pitching card's stage, as scene.js stage() builds it.
+      const horizon = P([0, 1e6, 4])[1];
+      ctx.fillStyle = STAGE_INK.grass; ctx.fillRect(0, horizon, W, H);
+      const m = P([0, 60.5, 0.83]), mr = P([9, 60.5, 0.83])[0] - m[0];
+      ctx.beginPath(); ctx.ellipse(W / 2, m[1], mr, 4, 0, 0, Math.PI * 2); ctx.fillStyle = 'rgba(214,170,131,.75)'; ctx.fill();
+      const dirtCy = P([0, 13 + PLATE_Y, 0])[1] + 180;
+      ctx.beginPath(); ctx.ellipse(W / 2, dirtCy, 280, 180, 0, 0, Math.PI * 2); ctx.fillStyle = 'rgba(214,170,131,.55)'; ctx.fill();
+    } else {
+      // Centre field: grass, the plate circle,
+      // and the back of the mound in the foreground under the pitcher.
+      ctx.fillStyle = STAGE_INK.grass; ctx.fillRect(0, 0, W, H);
+      path(P, circle(0, 0.7, 13, 0)); ctx.fillStyle = 'rgba(214,170,131,.55)'; ctx.fill();
+      ctx.beginPath(); ctx.ellipse(W / 2, H - BAR_H + 24, 190, 40, 0, 0, Math.PI * 2); ctx.fillStyle = 'rgba(214,170,131,.75)'; ctx.fill();
+      ctx.fillStyle = STAGE_INK.chalk; ctx.fillRect(W / 2 - 20, H - BAR_H - 9, 40, 3);
+    }
+    // Batter's boxes and the plate.
+    for (const sx of [-1, 1]) { path(P, [[sx * 1.2, 3, 0], [sx * 3.2, 3, 0], [sx * 3.2, -3, 0], [sx * 1.2, -3, 0], [sx * 1.2, 3, 0]]); ctx.strokeStyle = 'rgba(255,248,233,.9)'; ctx.lineWidth = 1; ctx.stroke(); }
+    path(P, [[-0.708, PLATE_Y, 0], [0.708, PLATE_Y, 0], [0.708, 0.708, 0], [0, 0, 0], [-0.708, 0.708, 0]]); ctx.closePath(); ctx.fillStyle = STAGE_INK.paper; ctx.fill();
+    // The zone: a box from the front of the plate (y 17/12) to its back point (y 0).
+    const [b, t] = s.zone, X = 17 / 24;
+    const face = (y) => [[-X, y, t], [X, y, t], [X, y, b], [-X, y, b], [-X, y, t]];
+    ctx.globalAlpha = 0.35; ctx.strokeStyle = STAGE_INK.muted; ctx.lineWidth = 1;
+    path(P, face(0)); ctx.stroke();
+    for (const [x, z] of [[-X, t], [X, t], [X, b], [-X, b]]) { path(P, [[x, PLATE_Y, z], [x, 0, z]]); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+    path(P, face(PLATE_Y)); ctx.fillStyle = 'rgba(255,253,246,.35)'; ctx.fill(); ctx.strokeStyle = STAGE_INK.navy; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.globalAlpha = 0.3; ctx.lineWidth = 0.6;
+    for (const k of [1, 2]) {
+      path(P, [[-X + (2 * X * k) / 3, PLATE_Y, t], [-X + (2 * X * k) / 3, PLATE_Y, b]]); ctx.stroke();
+      path(P, [[-X, PLATE_Y, b + ((t - b) * k) / 3], [X, PLATE_Y, b + ((t - b) * k) / 3]]); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    // Release point.
+    const [rx, ry] = P(REL); ctx.beginPath(); ctx.arc(rx, ry, 2, 0, Math.PI * 2); ctx.fillStyle = STAGE_INK.navy; ctx.fill();
+  }
+  function bar(fl) {
+    ctx.fillStyle = STAGE_INK.navy; ctx.fillRect(0, H - BAR_H, W, BAR_H);
+    if (!fl) return;
+    ctx.fillStyle = STAGE_INK.paper; ctx.textBaseline = 'middle';
+    ctx.font = '700 15px "Barlow Condensed", "Arial Narrow", sans-serif'; ctx.textAlign = 'left'; ctx.fillText(fl.name.toUpperCase(), 9, H - BAR_H / 2);
+    ctx.font = '12px "JetBrains Mono", monospace'; ctx.textAlign = 'right'; ctx.fillText(`${fl.mph} mph`, W - 9, H - BAR_H / 2);
+  }
+  function draw(activeIdx, u) {
+    const P = camera(s.view);
+    backdrop(P, s.view);
+    s.flights.forEach((fl, i) => {
+      const col = FAM_HEX[famOf(fl.code)];
+      const active = i === activeIdx;
+      const end = active ? u : 1;
+      const pts = []; for (let k = 0; k <= 40; k++) pts.push(fl.at((k / 40) * end));
+      if (!active) {
+        // Ghost: his other pitches stay on as faint lines with an end ring.
+        ctx.globalAlpha = 0.45; path(P, pts); ctx.strokeStyle = col; ctx.lineWidth = 1.3; ctx.lineCap = 'round'; ctx.stroke();
+        const [x, y, sc] = P(fl.at(1)); ctx.globalAlpha = 0.55; ctx.beginPath(); ctx.arc(x, y, Math.max(2, Math.min(7, (sc * 0.242) / 2)), 0, Math.PI * 2); ctx.lineWidth = 1.2; ctx.stroke();
+        ctx.globalAlpha = 1; return;
+      }
+      // Trail that thickens as the ball comes closer.
+      for (let k = 0; k < pts.length - 1; k++) {
+        const a = P(pts[k]), b2 = P(pts[k + 1]);
+        ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b2[0], b2[1]);
+        ctx.globalAlpha = 0.25 + 0.6 * (k / 40); ctx.strokeStyle = col; ctx.lineWidth = Math.max(1, b2[2] * 0.242 * 0.62); ctx.lineCap = 'round'; ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      const [x, y, sc] = P(fl.at(end)); const r = Math.max(2, Math.min(7.5, (sc * 0.242) / 2));
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = STAGE_INK.paper; ctx.fill(); ctx.strokeStyle = STAGE_INK.navy; ctx.lineWidth = 1; ctx.stroke();
+      if (r > 3) for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x + sd * r * 0.55, y - r * 0.75); ctx.quadraticCurveTo(x + sd * r * 0.1, y, x + sd * r * 0.55, y + r * 0.75); ctx.strokeStyle = STAGE_INK.clay; ctx.stroke(); }
+    });
+    bar(s.flights[activeIdx] || s.flights[0]);
+  }
+  function play() {
+    cancelAnimationFrame(s.raf);
+    if (!s.flights.length) { draw(-1, 0); return; }
+    if (reduced) { draw(0, 1); return; }
+    let i = 0, t0 = performance.now();
+    s.onActive?.(s.flights[0].code);
+    const tick = (now) => {
+      const fl = s.flights[i]; const dur = fl.T * 1000 * s.speed; const hold = 900;
+      const e = now - t0; const u = Math.min(1, e / dur);
+      draw(i, u);
+      if (e > dur + hold) {
+        if (i + 1 < s.flights.length) { i++; t0 = now; s.onActive?.(s.flights[i].code); }
+        else if (s.loop) { i = 0; t0 = now; s.onActive?.(s.flights[0].code); }
+      }
+      s.raf = requestAnimationFrame(tick);
+    };
+    s.raf = requestAnimationFrame(tick);
+  }
+  s.set = (o) => { Object.assign(s, o); play(); };
+  s.stop = () => cancelAnimationFrame(s.raf);
+  return s;
+}
+
+// ---------------------------------------------------------------- helpers
+const $ = (q, el = document) => el.querySelector(q);
+const h = (tag, attrs = {}, html = '') => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); e.innerHTML = html; return e; };
+const pct = (x) => Math.round(x * 100);
+const fmtU = (m, v) => METRICS[m].fmt(v) + METRICS[m].unit;
+function band(m, v, lg) { if (v == null || lg == null) return null; const d = v - lg; const { near, far } = METRICS[m]; return Math.abs(d) < near ? 0 : Math.sign(d) * (Math.abs(d) < far ? 1 : 2); }
+function whoFavors(m, b) { if (!b) return 'even'; const f = METRICS[m].favors; if (!f) return b > 0 ? 'more' : 'less'; return (b > 0) === (f === 'hitter') ? 'hitter' : 'pitcher'; }
+function fmtDiff(m, d) { return m === 'xwoba' ? (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(3).replace(/^0/, '') : (d >= 0 ? '+' : '−') + Math.abs(Math.round(d * 100)) + ' pts'; }
+
+// ---------------------------------------------------------------- the shell
+const scene = makeScene($('#scene'));
+scene.onActive = (code) => {
+  document.querySelectorAll('#pills .pill').forEach((p) => p.style.outline = p.dataset.code === code && !state.sel ? '2px solid var(--award)' : '');
+};
+function sceneFlights() {
+  const types = state.sel ? D.types.filter((t) => t.code === state.sel) : D.types;
+  return types.filter((t) => MOVE[t.code]).map((t) => ({ code: t.code, name: t.name, mph: t.mph, ...genericFlight(t.code, +t.mph) }));
+}
+function renderScene() {
+  scene.set({ flights: sceneFlights(), view: state.view, speed: 3, loop: true, zone: [1.6, 3.5] });
+  const t = state.sel ? D.types.find((x) => x.code === state.sel) : null;
+  $('#sceneLbl').textContent = (t ? t.name : 'His mix, in turn') + ' · typical shape · ⅓ speed';
+  document.querySelectorAll('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === state.view)));
+}
+function renderPills() {
+  const row = $('#pills'); row.innerHTML = '';
+  const all = h('button', { class: 'pill', type: 'button', 'aria-pressed': String(!state.sel) }, 'All');
+  all.onclick = () => select(null); row.append(all);
+  for (const t of D.types) {
+    const b = h('button', { class: 'pill', type: 'button', 'data-code': t.code, 'aria-pressed': String(state.sel === t.code), style: `--fam:${FAM_CSS[famOf(t.code)]};--u:${t.pct}` }, `${t.name}<small>${t.pct}%</small><i></i>`);
+    b.onclick = () => select(t.code); row.append(b);
+  }
+}
+function select(code) { state.sel = code; state.picked = null; renderPills(); renderScene(); renderEdge(); renderZones(); }
+$('#sampleChip').textContent = `${D.pmap.ALL.n} pitches to righties`;
+
+// ---------------------------------------------------------------- EDGE
+function ledgerRows(m) {
+  return D.types.map((t) => {
+    const x = D.hit[m][t.code]; const v = x?.typeVal, lg = x?.leagueFlat;
+    const b = band(m, v, lg);
+    return { t, v, lg, b, who: whoFavors(m, b), d: v != null && lg != null ? v - lg : null };
+  });
+}
+function renderEdge() {
+  const P = $('#edgePanel'); P.innerHTML = '';
+  // Verdict on xwOBA by pitch type
+  const rows = ledgerRows('xwoba');
+  const share = (who) => rows.filter((r) => r.who === who).reduce((s, r) => s + +r.t.pct, 0);
+  const hS = share('hitter'), pS = share('pitcher');
+  const lean = hS > pS && hS >= 50 ? ['Lean', 'Chourio'] : pS > hS && pS >= 50 ? ['Lean', 'Pivetta'] : ['Close to', 'even'];
+  const hitterTypes = rows.filter((r) => r.who === 'hitter');
+  const ov = D.hit.xwoba.overall;
+  const excluded = D.types.filter((t) => D.pmap[t.code]?.thin).map((t) => `${t.name.toLowerCase()} (${D.pmap[t.code].n})`);
+  // where his hottest/coldest regions meet Pivetta's share
+  const cells = D.hit.xwoba.ALL.cells, sh = D.pmap.ALL.share;
+  const hot = Object.keys(cells).filter((r) => cells[r].tone === 'hi2'), cold = Object.keys(cells).filter((r) => /^lo/.test(cells[r].tone));
+  const sum = (rs) => pct(rs.reduce((s, r) => s + sh[r], 0));
+  const wh = ledgerRows('whiff').filter((r) => r.who === 'pitcher');
+  const v = h('div', { class: 'verdict' }, `
+    <span class="k">By pitch type · xwOBA (est.)</span>
+    <span class="big">${lean[0]} <em>${lean[1]}</em></span>
+    <p>He beats the league on ${hitterTypes.length} of Pivetta's ${rows.length} pitches (${hitterTypes.map((r) => r.t.name.toLowerCase()).join(', ')}). Those are <b>${hS}%</b> of what Pivetta throws to righties. No pitch favors Pivetta on contact quality.</p>
+    ${wh.length ? `<p>Swing and miss is Pivetta's way in: Chourio whiffs more than the league on the ${wh.map((r) => `${r.t.name.toLowerCase()} (${pct(r.v)}% vs ${pct(r.lg)}%)`).join(' and ')}.</p>` : ''}
+    <hr>
+    <span class="k">By location · the page's expected value</span>
+    <p><b class="mono">${METRICS.xwoba.fmt(ov.value)}</b> vs league <b class="mono">${METRICS.xwoba.fmt(ov.league)}</b> on the same spots. Pivetta puts ${sum(hot)}% of his pitches in Chourio's hottest regions and ${sum(cold)}% where Chourio is below league. ${excluded.length ? `Leaves out the ${excluded.join(' and ')}: too few to righties for a map.` : ''}</p>`);
+  P.append(v);
+
+  // Ledger
+  const m = state.metric; const L = ledgerRows(m);
+  const vals = L.flatMap((r) => [r.v, r.lg]).filter((x) => x != null);
+  const lo = Math.min(...vals) - (m === 'xwoba' ? 0.03 : 0.05), hi = Math.max(...vals) + (m === 'xwoba' ? 0.03 : 0.05);
+  const X = (x) => ((x - lo) / (hi - lo)) * 100;
+  const head = h('div', { class: 'legend' }, `<b style="color:var(--ink-0);font-size:12.5px">Chourio vs league, ${METRICS[m].label}</b><span><i style="width:2px;height:12px;background:var(--graphite)"></i>league</span><span><i style="width:10px;height:10px;border-radius:50%;background:var(--ink-1)"></i>Chourio</span><span><i style="width:14px;height:3px;background:var(--fam-fb)"></i>usage</span>`);
+  P.append(head);
+  const L2 = h('div', { class: 'ledger' });
+  for (const r of L) {
+    const tone = r.who === 'hitter' ? 'tone-h' : r.who === 'pitcher' ? 'tone-p' : 'tone-e';
+    const word = r.b == null ? 'Too few' : r.who === 'even' ? 'Even' : r.who === 'more' || r.who === 'less' ? `Swings ${r.who}` : `${Math.abs(r.b) === 2 ? 'Clear' : 'Slight'} · ${r.who === 'hitter' ? 'Chourio' : 'Pivetta'}`;
+    const col = r.who === 'hitter' ? 'var(--clay)' : r.who === 'pitcher' ? 'var(--allstar)' : 'var(--graphite-soft)';
+    const left = r.v != null ? Math.min(X(r.v), X(r.lg)) : 0, wdt = r.v != null ? Math.abs(X(r.v) - X(r.lg)) : 0;
+    const b = h('button', { class: 'lrow', type: 'button', 'aria-pressed': String(state.sel === r.t.code), style: `--fam:${FAM_CSS[famOf(r.t.code)]}` }, `
+      <span class="lname"><b>${r.t.name}</b><small>${r.t.pct}% · ${r.t.mph} mph</small></span>
+      <span class="lplot"><span class="axis"></span>${r.v != null ? `<span class="gap" style="left:${left}%;width:${wdt}%;background:${col};opacity:.35"></span><span class="lg" style="left:${X(r.lg)}%"></span><span class="dot" style="left:${X(r.v)}%;background:${col}"></span>` : ''}<span class="usage" style="width:${r.t.pct}%"></span></span>
+      <span class="ltag ${tone}">${word}<span>${r.v != null ? `${fmtU(m, r.v)} vs ${fmtU(m, r.lg)}` : '—'}</span></span>`);
+    b.onclick = () => select(state.sel === r.t.code ? null : r.t.code);
+    L2.append(b);
+  }
+  P.append(L2);
+  const seg = h('div', { class: 'seg', role: 'group', 'aria-label': 'Ledger metric' });
+  for (const k of Object.keys(METRICS)) { const bb = h('button', { type: 'button', 'aria-pressed': String(k === m) }, METRICS[k].label.replace(' (est.)', '')); bb.onclick = () => setMetric(k); seg.append(bb); }
+  const foot = h('div', { class: 'legend' }); foot.append(seg); foot.append(h('span', {}, 'Whole-pitch rates, 2026 regular season, both pitcher hands.'));
+  P.append(foot);
+}
+function setMetric(k) { state.metric = k; renderEdge(); renderZones(); renderFilterMetric(); }
+
+// ---------------------------------------------------------------- ZONES
+const REGION_CELLS = (() => { const o = {}; for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) { const k = r === 0 ? 'high' : r === 4 ? 'low' : c === 0 ? 'side3b' : c === 4 ? 'side1b' : `r${r}c${c}`; (o[k] ||= []).push([r, c]); } return o; })();
+const P_TONE = { s1: 'rgba(180,69,58,.10)', s2: 'rgba(180,69,58,.20)', s3: 'rgba(180,69,58,.30)', s4: 'rgba(180,69,58,.40)' };
+const H_TONE = { lo2: 'rgba(29,78,143,.36)', lo1: 'rgba(29,78,143,.16)', mid: '#FBF6E9', hi1: 'rgba(199,154,62,.20)', hi2: 'rgba(199,154,62,.40)' };
+function regionName(k) {
+  // Chourio bats right: the third-base side is inside.
+  if (k === 'high') return 'Above the zone'; if (k === 'low') return 'Below the zone';
+  if (k === 'side3b') return 'Off the inside edge'; if (k === 'side1b') return 'Off the outside edge';
+  const r = +k[1], c = +k[3];
+  return `${['Up', 'Middle', 'Down'][r - 1]} · ${['inside', 'middle', 'away'][c - 1]}`;
+}
+function mapSvg(kind) {
+  const S = 22, pad = 4, sz = 5 * S + pad * 2;
+  const holder = document.createElement('div');
+  const code = state.sel || 'ALL';
+  const pm = D.pmap[code];
+  const hm = D.hit[state.metric][code];
+  const defs = `<defs><pattern id="hatch-${kind}" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="4" fill="#FBF6E9"/><line x1="0" y1="0" x2="0" y2="4" stroke="#938C7C" stroke-width="1"/></pattern></defs>`;
+  let body = defs;
+  const maxShare = Math.max(...Object.values(pm.share));
+  for (const [k, cells] of Object.entries(REGION_CELLS)) {
+    const cols = cells.map(([, c]) => (state.view === 'hitter' ? c : 4 - c)), rows = cells.map(([r]) => r);
+    const x = pad + Math.min(...cols) * S, y = pad + Math.min(...rows) * S, w = (Math.max(...cols) - Math.min(...cols) + 1) * S, hh = (Math.max(...rows) - Math.min(...rows) + 1) * S;
+    let fill, txt = '', sub = '';
+    if (kind === 'p') {
+      const s = pm.share[k]; const step = pm.thin ? null : s === 0 ? null : `s${Math.min(4, Math.max(1, Math.ceil((s / maxShare) * 4)))}`;
+      fill = pm.thin ? `url(#hatch-p)` : step ? P_TONE[step] : '#FBF6E9'; txt = pm.thin ? '' : `${pct(s)}<tspan class="pc">%</tspan>`; sub = pm.thin ? String(pm.regionN[k]) : '';
+    } else {
+      const c = hm.cells[k]; const has = c && c.value != null && c.tone !== 'under';
+      fill = has ? H_TONE[c.tone] || '#FBF6E9' : `url(#hatch-h)`; txt = has ? c.value + (METRICS[state.metric].unit ? '<tspan class="pc">%</tspan>' : '') : ''; sub = has ? '' : String(c?.count ?? 0);
+    }
+    const cx = x + w / 2, cy = y + hh / 2;
+    body += `<rect class="region${state.picked === k ? ' picked' : ''}" data-r="${k}" x="${x}" y="${y}" width="${w}" height="${hh}" fill="${fill}"/>`;
+    if (txt) body += `<text class="rtxt" x="${cx}" y="${cy}">${txt}</text>`;
+    if (sub) body += `<text class="rtxt n" x="${cx}" y="${cy}">${sub}</text>`;
+  }
+  // the zone outline and the batter's box on the third-base side
+  body += `<rect x="${pad + S}" y="${pad + S}" width="${3 * S}" height="${3 * S}" fill="none" stroke="#1B2A3A" stroke-width="1.2"/>`;
+  holder.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${sz} ${sz + 2}" role="img" aria-label="${kind === 'p' ? 'Pitcher location share' : 'Hitter result'} by region">${body}</svg>`;
+  const svg = holder.firstChild;
+  svg.addEventListener('click', (e) => { const r = e.target.closest('[data-r]'); if (!r) return; state.picked = state.picked === r.dataset.r ? null : r.dataset.r; renderZones(); });
+  return svg;
+}
+function renderZones() {
+  const P = $('#zonesPanel'); P.innerHTML = '';
+  const code = state.sel || 'ALL'; const pm = D.pmap[code]; const hm = D.hit[state.metric][code];
+  const t = state.sel ? D.types.find((x) => x.code === state.sel) : null;
+  const sides = state.view === 'hitter' ? ['3B side · inside', '1B side · away'] : ['1B side · away', '3B side · inside'];
+  const maps = h('div', { class: 'maps' });
+  const f1 = h('figure', {}, `<figcaption>Where Pivetta throws ${t ? `the ${t.name.toLowerCase()}` : ''} to righties · % of pitches</figcaption>`);
+  f1.append(mapSvg('p')); f1.append(h('div', { class: 'sides' }, `<span>${sides[0]}</span><span>${sides[1]}</span>`)); f1.append(h('span', { class: 'cap' }, `${pm.thin ? 'Under 50 pitches · ' : ''}${pm.n} pitches`));
+  const f2 = h('figure', {}, `<figcaption>Where Chourio does damage · ${METRICS[state.metric].label}</figcaption>`);
+  f2.append(mapSvg('h')); f2.append(h('div', { class: 'sides' }, `<span>${sides[0]}</span><span>${sides[1]}</span>`)); f2.append(h('span', { class: 'cap' }, `${hm.seen ?? D.hit[state.metric].ALL.seen ?? ''} pitches seen`));
+  maps.append(f1, f2); P.append(maps);
+  const ro = h('div', { class: 'readout', 'aria-live': 'polite' });
+  if (!state.picked) ro.innerHTML = 'Tap a region on either map. Both maps answer for the same spot.';
+  else {
+    const k = state.picked; const c = hm.cells[k];
+    ro.innerHTML = `<b>${regionName(k)}</b><br>Pivetta: <b class="mono">${pm.thin ? '—' : pct(pm.share[k]) + '%'}</b> of pitches (${pm.regionN[k]} of ${pm.n}). Chourio: <b class="mono">${c && c.value != null && c.tone !== 'under' ? c.value + METRICS[state.metric].unit : '—'}</b> ${METRICS[state.metric].label}${c && (c.value == null || c.tone === 'under') ? ` (only ${c.count}, under the floor)` : ''}.`;
+  }
+  P.append(ro);
+  if (!state.sel && state.metric === 'xwoba') {
+    const cells = D.hit.xwoba.ALL.cells, sh = D.pmap.ALL.share;
+    const hot = Object.keys(cells).filter((r) => cells[r].tone === 'hi2');
+    P.append(h('p', { class: 'callout' }, `Chourio's three hottest spots (${hot.map((r) => regionName(r).toLowerCase()).join('; ')}) get <b>${pct(hot.reduce((s, r) => s + sh[r], 0))}%</b> of Pivetta's pitches. His most common spot is above the zone (<b>${pct(sh.high)}%</b>), where Chourio is at league level.`));
+  }
+  const key = h('div', { class: 'legend' }, `<span>Pivetta: <i style="width:10px;height:10px;background:${P_TONE.s1}"></i><i style="width:10px;height:10px;background:${P_TONE.s4}"></i> less → more</span><span>Chourio vs league: <i style="width:10px;height:10px;background:${H_TONE.lo2}"></i><i style="width:10px;height:10px;background:${H_TONE.mid};outline:1px solid var(--rule)"></i><i style="width:10px;height:10px;background:${H_TONE.hi2}"></i> below → above</span><span><i style="width:10px;height:10px;background:repeating-linear-gradient(45deg,#FBF6E9 0 2px,#938C7C 2px 3px)"></i>too few: count only</span>`);
+  P.append(key);
+}
+
+// ---------------------------------------------------------------- MEETINGS
+const CALL = { called_strike: ['Called strike', 'strike'], swinging_strike: ['Swinging strike', 'strike'], swinging_strike_blocked: ['Swinging strike', 'strike'], foul: ['Foul', 'foul'], foul_tip: ['Foul tip', 'strike'], ball: ['Ball', 'ball'], blocked_ball: ['Ball', 'ball'], hit_into_play: ['In play', 'play'] };
+const ALL_PITCHES = D.h2h.pas.flatMap((pa, i) => pa.pitches.map((p) => ({ ...p, paIdx: i, of: pa.pitches.length })));
+const ord = (n) => n + (['th', 'st', 'nd', 'rd'][((n % 100) - 20) % 10] || ['th', 'st', 'nd', 'rd'][n % 100] || 'th');
+function resultOf(pa) { const last = pa.pitches[pa.pitches.length - 1]; return { last, text: last.des.replace(/^Jackson Chourio /, '').replace(/\.\s*$/, '') }; }
+function renderMeet() {
+  const P = $('#meetPanel'); P.innerHTML = '';
+  const t = D.totals;
+  const inPlay = ALL_PITCHES.filter((p) => p.ls != null && p.desc === 'hit_into_play');
+  const ev = inPlay.reduce((s, p) => s + p.ls, 0) / inPlay.length, xw = inPlay.reduce((s, p) => s + p.xw, 0) / inPlay.length;
+  P.append(h('p', { class: 'cap' }, `Every meeting before today, all seasons. One game: Sep 22, 2025, Brewers at Padres.`));
+  P.append(h('div', { class: 'facts' }, `<div class="fact"><b>${t.h}-for-${t.ab}</b><span>${t.pa} PA</span></div><div class="fact"><b>${ALL_PITCHES.length}</b><span>pitches</span></div><div class="fact"><b>${ev.toFixed(1)}<small> mph</small></b><span>Avg exit velocity</span></div><div class="fact"><b>${xw.toFixed(3).replace(/^0/, '')}</b><span>xwOBA on contact</span></div>`));
+  // mix: meeting vs 2026 to righties
+  const seen = {}; ALL_PITCHES.forEach((p) => seen[p.code] = (seen[p.code] || 0) + 1);
+  const stack = (shares) => `<div class="stack">${D.types.map((ty) => { const s = shares[ty.code] || 0; return s ? `<span style="width:${s}%;background:${FAM_CSS[famOf(ty.code)]};opacity:${ty.code === 'FC' ? .75 : 1}" title="${ty.name} ${s}%">${s >= 22 ? ty.name + ' ' + s + '%' : s >= 9 ? s + '%' : ''}</span>` : ''; }).join('')}</div>`;
+  const meetShare = Object.fromEntries(Object.entries(seen).map(([k, v]) => [k, Math.round((v / ALL_PITCHES.length) * 100)]));
+  const seasonShare = Object.fromEntries(D.types.map((ty) => [ty.code, Math.round(D.pmap[ty.code].n / D.pmap.ALL.n * 100)]));
+  P.append(h('div', { class: 'mixbar' }, `<div class="mixrow"><span>In the meeting</span>${stack(meetShare)}</div><div class="mixrow"><span>2026 to RHH</span>${stack(seasonShare)}</div><div class="legend">${D.types.map((ty) => `<span><i style="width:10px;height:10px;border-radius:2px;background:${FAM_CSS[famOf(ty.code)]};opacity:${ty.code === 'FC' ? .75 : 1}"></i>${ty.name}</span>`).join('')}</div><span class="cap">He saw no cutters in 2025. Pivetta now throws it ${seasonShare.FC}% of the time to righties.</span>`));
+  D.h2h.pas.forEach((pa, i) => {
+    const { last, text } = resultOf(pa);
+    const card = h('div', { class: 'pa' }, `<div class="pa-head"><b>${ord(last.inn)} inning</b><span>${pa.pitches.length} pitches</span></div><p>${text}.</p>${last.ls != null ? `<div class="facts facts--3"><div class="fact"><b>${last.ls.toFixed(1)}<small> mph</small></b><span>Exit velocity</span></div><div class="fact"><b>${last.la}°</b><span>Launch angle</span></div><div class="fact"><b>${last.xw != null ? last.xw.toFixed(3).replace(/^0/, '') : '—'}</b><span>xwOBA on contact</span></div></div>` : ''}`);
+    const seq = h('div', { class: 'seq' });
+    pa.pitches.forEach((p) => {
+      const [label, cls] = CALL[p.desc] || [p.desc, 'foul'];
+      const b = h('button', { class: 'pbtn', type: 'button', style: `--fam:${FAM_CSS[famOf(p.code)]}`, 'aria-label': `Pitch ${p.n}: ${NAME[p.code] || p.name}, ${p.mph} mph, ${label}` }, `<span class="t"><i></i>${p.n}. ${NAME[p.code] || p.name}</span><span class="m">${p.mph.toFixed(1)} mph · ${p.b}-${p.s} count</span><span class="c call-${cls}">${label}</span>`);
+      b.onclick = () => openPitch(ALL_PITCHES.findIndex((q) => q.paIdx === i && q.n === p.n));
+      seq.append(b);
+    });
+    card.append(seq); P.append(card);
+  });
+}
+
+// ---------------------------------------------------------------- pitch modal
+const pmScene = makeScene($('#pmScene'));
+let pmIdx = 0, pmSpeed = 4;
+function zoneSvg(p) {
+  // 112 x 132: 1 ft = 40 px; plate centre at x 56; z from 0.6 to 4.6 ft.
+  const X = (px) => 56 + (state.view === 'hitter' ? px : -px) * 40, Z = (pz) => 132 - (pz - 1.2) * 40 + 0;
+  const cx = X(p.px), cy = Z(p.pz);
+  const box = `<rect x="${X(-0.83) < X(0.83) ? X(-0.83) : X(0.83)}" y="${Z(p.szt)}" width="${Math.abs(X(0.83) - X(-0.83))}" height="${Z(p.szb) - Z(p.szt)}" fill="#FBF6E9" stroke="#1B2A3A" stroke-width="1.2"/>`;
+  const thirds = [1, 2].map((k) => { const x = X(-0.83 + (1.66 * k) / 3); const y = Z(p.szb + ((p.szt - p.szb) * k) / 3); return `<line x1="${x}" x2="${x}" y1="${Z(p.szt)}" y2="${Z(p.szb)}" stroke="#DED6C0"/><line x1="${X(-0.83)}" x2="${X(0.83)}" y1="${y}" y2="${y}" stroke="#DED6C0"/>`; }).join('');
+  const sideL = state.view === 'hitter' ? 'inside' : 'away', sideR = state.view === 'hitter' ? 'away' : 'inside';
+  return `${box}${thirds}<circle cx="${cx}" cy="${cy}" r="5" fill="${getComputedStyle(document.body).getPropertyValue(famOf(p.code) === 'fastball' ? '--fam-fb' : famOf(p.code) === 'breaking' ? '--fam-br' : '--fam-os')}" stroke="#FFFDF6" stroke-width="1.5"/><text x="4" y="128" font-size="9" fill="#6B6558" font-family="Source Sans 3">${sideL}</text><text x="108" y="128" font-size="9" fill="#6B6558" text-anchor="end" font-family="Source Sans 3">${sideR}</text>`;
+}
+function openPitch(i) {
+  pmIdx = i; const p = ALL_PITCHES[i]; const pa = D.h2h.pas[p.paIdx]; const last = pa.pitches[pa.pitches.length - 1];
+  const [label, cls] = CALL[p.desc] || [p.desc, 'foul'];
+  $('#pmKicker').textContent = `${ord(last.inn)} inning · pitch ${p.n} of ${p.of} · count ${p.b}-${p.s}`;
+  $('#pmTitle').textContent = `${NAME[p.code] || p.name} · ${p.mph.toFixed(1)} mph`;
+  $('#pmSub').innerHTML = `<span class="call-${cls}" style="font-weight:600">${label}</span>${p.ev ? ` · ${p.ev.replace(/_/g, ' ')}` : ''}`;
+  const stats = [['Spin rate', `${Math.round(p.spin)}<small> rpm</small>`], ['Horizontal break', `${Math.abs(p.pfx * 12).toFixed(0)}<small> in</small>`], ['Vertical break', `${(p.pfz * 12).toFixed(0)}<small> in</small>`]];
+  if (p.ls != null) stats.push(['Exit velocity', `${p.ls.toFixed(1)}<small> mph</small>`], ['Launch angle', `${p.la}°`], ['xwOBA on contact', p.xw != null ? p.xw.toFixed(3).replace(/^0/, '') : '—']);
+  $('#pmStats').innerHTML = stats.map(([k, v]) => `<div class="fact"><b>${v}</b><span>${k}</span></div>`).join('');
+  $('#pmZone').innerHTML = zoneSvg(p);
+  $('#pmDes').textContent = p.desc === 'hit_into_play' ? p.des : `Statcast row: ${p.desc.replace(/_/g, ' ')}.`;
+  $('#pmFilm').href = `https://baseballsavant.mlb.com/sporty-videos?playId=${p.playId}`;
+  $('#pmPos').textContent = `${i + 1} of ${ALL_PITCHES.length}`;
+  $('#pmPrev').disabled = i === 0; $('#pmNext').disabled = i === ALL_PITCHES.length - 1;
+  document.querySelectorAll('[data-speed]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.speed === pmSpeed)));
+  $('#pmSceneLbl').textContent = `Real flight · ${state.view === 'hitter' ? 'Hitter’s' : 'Pitcher’s'} view`;
+  const dlg = $('#pitchModal'); if (!dlg.open) dlg.showModal();
+  pmScene.set({ flights: [{ code: p.code, name: NAME[p.code] || p.name, mph: p.mph.toFixed(1), ...realFlight(p) }], view: state.view, speed: pmSpeed, loop: true, zone: [p.szb, p.szt] });
+}
+$('#pmPrev').onclick = () => openPitch(pmIdx - 1);
+$('#pmNext').onclick = () => openPitch(pmIdx + 1);
+$('#pmClose').onclick = () => $('#pitchModal').close();
+$('#pitchModal').addEventListener('close', () => pmScene.stop());
+$('#pitchModal').addEventListener('click', (e) => { if (e.target.id === 'pitchModal') e.target.close(); });
+document.querySelectorAll('[data-speed]').forEach((b) => b.onclick = () => { pmSpeed = +b.dataset.speed; openPitch(pmIdx); });
+
+// ---------------------------------------------------------------- tabs, view, filters
+function setTab(tab) {
+  state.tab = tab;
+  document.querySelectorAll('[data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  document.querySelectorAll('[data-panel]').forEach((p) => p.hidden = p.dataset.panel !== tab);
+  document.querySelectorAll('[data-note]').forEach((p) => p.hidden = p.dataset.note !== tab);
+  try { localStorage.setItem('scoutPolish:tab', tab); } catch {}
+}
+document.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => setTab(b.dataset.tab));
+document.querySelectorAll('[data-view]').forEach((b) => b.onclick = () => { state.view = b.dataset.view; renderScene(); renderZones(); });
+$('#openFilters').onclick = () => $('#filters').showModal();
+function renderFilterMetric() {
+  const seg = $('#fMetric'); seg.innerHTML = '';
+  for (const k of Object.keys(METRICS)) { const b = h('button', { type: 'button', 'aria-pressed': String(state.metric === k) }, METRICS[k].label); b.onclick = () => setMetric(k); seg.append(b); }
+}
+for (const id of ['#fHand', '#fScope']) $(id).querySelectorAll('button').forEach((b, _, all) => b.onclick = () => all.forEach((x) => x.setAttribute('aria-pressed', String(x === b))));
+
+renderPills(); renderScene(); renderEdge(); renderZones(); renderMeet(); renderFilterMetric();
+let startTab = 'edge'; try { startTab = localStorage.getItem('scoutPolish:tab') || 'edge'; } catch {}
+setTab(['edge', 'zones', 'meet'].includes(startTab) ? startTab : 'edge');
+</script>

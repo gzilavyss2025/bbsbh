@@ -442,6 +442,7 @@ export default function App() {
         pitch={route.pitch}
         hand={route.hand}
         metric={route.metric}
+        tab={route.tab}
       />
     )
   } else if (route.name === 'umpire') {
