@@ -47,6 +47,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic, readJsonOr } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
+import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const dataDir = join(here, '..', 'public', 'data')
@@ -133,7 +134,8 @@ async function fetchLevelRecords(season) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
-  const season = Number(args.season) || new Date().getUTCFullYear()
+  // The season in play (#1465): the calendar year has no standings until April.
+  const season = Number(args.season) || (await fetchSeasonInPlay())
 
   const affiliates = await readJsonOr(join(dataDir, 'affiliates.json'), null)
   const prospects = await readJsonOr(join(dataDir, 'top-prospects.json'), null)

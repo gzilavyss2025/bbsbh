@@ -73,6 +73,12 @@ are rules rather than reference:
   otherwise. `cachedGetJson` is a `.scratch` research cache: never in `scripts/`.
   Detail: `docs/scripts/generators.md`.
 
+- **A nightly generator picks its default season with `lib/time/season-in-play.mjs`**,
+  not `new Date().getFullYear()` (#1465). From January 1 to Opening Day the calendar
+  names a season with no games, and an unguarded generator writes an empty file over
+  the finished one. Keep the calendar year only where it is the right meaning (a game
+  date's season), and skip the write when a season returns no data.
+
 A generator file is a top-level script: importing one RUNS it. A helper inside
 one can therefore never be unit-tested, so a helper worth testing goes in
 `scripts/lib/` and the generator imports it (`lib/roster.mjs` is the worked

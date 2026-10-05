@@ -94,7 +94,7 @@ Bucket codes: **A** = actual disagreement, **D** = deliberate difference,
 | U9 | The league's ABS challenge rate | `src/api/around-the-game/absExposure.js`: `leagueBaseline` and `clubRate` over every club | A player with challenges and no exposure: counted in one, dropped in the other | One function. The gap today is 6.392 against 6.391 per 1,000 pitches, below the printed precision. |
 | U10 | A player's ABS challenge rate | `scripts/lib/abs/exposure.mjs`: `exposureRates`; `absExposure.js`: `clubChallengeBoard` (`players[].rate`) | None | The shipped per-player field. |
 | U11 | Median and quantile | `scripts/gen-gate.mjs`: `median` (rounds an even pair); `scripts/lib/salaries.mjs`, `scripts/lib/opencommand.mjs`, `scripts/lib/savant.mjs` (`round1`): `median`; `scripts/gen-level-tenure-benchmark.mjs`: `percentile`; `absExposure.js`: `quantile`; `src/api/workload.js` (upper middle) | Even-length lists and storage precision | Low value. Each precision is stated where it lives. Collapse only if one of them moves. |
-| U12 | Which season a job is about | the calendar year (`getFullYear` or `getUTCFullYear`) in 36 generators; `scripts/lib/long-at-bats.mjs`: `noteSeasonFor` and `src/lib/time/seasonPhase.js`: `offseasonPhase` in 4; `scripts/gen-workload.mjs`: `SEASON = 2026` | January 1. A calendar-year job can open an empty season (the trap `noteSeasonFor` names). `gen-workload.mjs` stays on 2026. | The season-store work (#1200, #1201) owns this. |
+| U12 | Which season a job is about | `scripts/lib/time/season-in-play.mjs`: `fetchSeasonInPlay` in 9 nightly generators (war, savant-percentiles, workload, gate, attendance, farm-system, doubleheaders, run-differential, schedule-shape); `noteSeasonFor` and `offseasonPhase` in 4; the calendar year in the rest | Closed by #1465 for the nightly jobs that broke on January 1. The rest keep the calendar year on purpose: they skip a season with no data (umpires, spray, minors-leaders, prospect-trend, postseason-records, the OpenCommand three), or the calendar year is the right meaning (callouts, rehab, milestones, affiliates, team-transactions, war-history, run-expectancy). | `seasonInPlay`: this year from Opening Day, last year before it. |
 
 ## Checked: one home
 
@@ -117,7 +117,6 @@ These have one home, and every other caller imports it. I found no copy.
 These have one home each, so they are not in the buckets. No issue was opened.
 
 - **Rookie limit: reach or exceed.** `scripts/lib/rookie-crossing.mjs` (`findCrossingSeason`, `crossingDateFromGameLog`) ends rookie status at `>= 130` AB or `>= 150` outs. MLB's rule says "exceeded" 130 AB or 50 IP, and `src/api/person/transactions.js` prints "Exceeded". A player with exactly 130 AB splits them. The 45-day active-roster clause is not modelled.
-- **`gen-workload.mjs` has `SEASON = 2026` as a literal** (U12).
 - **`docs/scripts/generators.md` is stale on `gen-rehab.mjs`.** It says the script keeps its own copy of the transaction scan. It imports `rehab-policy.js` now. (Named in #1280.)
 - **`averageAge` in `scripts/lib/youngest-regulars.mjs`** averages ages that `ageOnJune30` already rounded to 0.1. The error is 0.05 years at most.
 

@@ -43,6 +43,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
+import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'doubleheaders.json')
@@ -201,7 +202,7 @@ async function seasonPairs(season) {
 async function main() {
   const args = parseArgs(process.argv.slice(2))
   const from = Number(args.from) || FIRST_SEASON
-  const to = Number(args.to) || new Date().getUTCFullYear()
+  const to = Number(args.to) || (await fetchSeasonInPlay()) // not the calendar year (#1465)
 
   const seasons = {}
   let incompleteTotal = 0
