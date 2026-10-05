@@ -15,6 +15,7 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsOfBanner } from '../components/seal/AsOfBanner.jsx'
 import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { TeamLeaders } from '../components/teamstats/TeamLeaders.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
@@ -128,9 +129,9 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
         )}
 
         {!hasLeaders ? (
-          <p className="hint hint--prose">
+          <EmptyState>
             No leaders to show here yet — season stats aren’t posted for this scope.
-          </p>
+          </EmptyState>
         ) : (
           <TeamLeaders
             pool={pool}
