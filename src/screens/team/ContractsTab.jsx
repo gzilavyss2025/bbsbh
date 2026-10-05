@@ -12,6 +12,7 @@ import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadContracts } from './data/loadContracts.js'
 import { hiddenTeamTabs } from './data/shared.js'
 import { Card } from '../../components/ui/frame/Card.jsx'
+import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 
 // The club's book: what it owes, to whom, and for how long — players down the
 // page, seasons across it. Its own tab rather than a card on Numbers, because a
@@ -74,13 +75,11 @@ export function ContractsTab({ id, asOf, sportId }) {
       />
 
       {data?.isMilb && (
-        <p className="hint">
-          Contract terms are published for the major leagues only, so this club has no ledger.
-        </p>
+        <EmptyState>Contract terms are published for the major leagues only, so this club has no ledger.</EmptyState>
       )}
 
       {data && !data.isMilb && !ledger && (
-        <p className="hint">This club’s contract ledger has not been published yet.</p>
+        <EmptyState>This club’s contract ledger has not been published yet.</EmptyState>
       )}
 
       {ledger && (

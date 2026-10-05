@@ -9,6 +9,7 @@ import { useNav } from '../lib/nav.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Button } from '../components/ui/control/Button.jsx'
@@ -220,9 +221,9 @@ export function UmpirePage({ id }) {
       </div>
 
       {shown.length === 0 ? (
-        <p className="hint">
+        <EmptyState>
           {hpOnly ? 'No games behind the plate this season.' : 'No games recorded this season.'}
-        </p>
+        </EmptyState>
       ) : (
         <Card as="div" body="flush">
           <ul className="umpage__list">

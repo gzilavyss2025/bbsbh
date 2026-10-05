@@ -487,6 +487,13 @@ export function selectOfficials(feed) {
     .map((t) => ({ role: UMP_LABELS[t] ?? t, name: byType[t]?.fullName, id: byType[t]?.id ?? null }))
 }
 
+// The season the game belongs to, as the feed spells it ('2026'), or null. A
+// game page hands it to the season-store readers as `seasonYear` (#1201), so
+// an old game reads its own season's umpire and arsenal files.
+export function selectGameSeason(feed) {
+  return feed?.gameData?.game?.season ?? null
+}
+
 // Venue / weather / attendance / first pitch. MLB populates these; MiLB may
 // not, so every field is optional.
 export function selectGameInfo(feed) {

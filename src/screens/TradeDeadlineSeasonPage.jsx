@@ -8,9 +8,11 @@ import { tradeDeadlinePath, tradeDeadlineSeasonPath } from '../lib/route.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { TradeCard } from '../components/transactions/TradeCard.jsx'
+import { Stack } from '../components/ui/layout/Stack.jsx'
 
 // Newest year first, matching the season index page's own tile order.
 const SEASON_YEARS = [...SEASONS].map((s) => s.year).sort((a, b) => b - a)
@@ -112,22 +114,22 @@ export function TradeDeadlineSeasonPage({ season }) {
       )}
 
       {allTrades.length > 0 && trades.length === 0 && (
-        <p className="hint hint--prose">That club made no trades within this season’s deadline window.</p>
+        <EmptyState role="status">That club made no trades within this season’s deadline window.</EmptyState>
       )}
 
       {trades.length > 0 && (
-        <div className="tradedl__list">
+        <Stack className="tradedl__list">
           {groups.map((group) => (
             <section key={group.date}>
               <h2 className="tradedl__daterail">{monthDayYear(group.date)}</h2>
-              <div className="tradedl__list">
+              <Stack className="tradedl__list">
                 {group.trades.map((trade) => (
                   <TradeCard key={trade.id} trade={trade} />
                 ))}
-              </div>
+              </Stack>
             </section>
           ))}
-        </div>
+        </Stack>
       )}
 
       <ReportFooter />

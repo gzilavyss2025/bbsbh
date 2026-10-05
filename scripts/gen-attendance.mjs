@@ -60,6 +60,7 @@ import { writeJsonAtomic } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
 import { toRow } from './gen-gate.mjs'
 import { ballparkFor } from '../src/lib/ballpark/ballparkData.js'
+import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'attendance.json')
@@ -174,7 +175,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2))
   const seasons = args.seasons
     ? String(args.seasons).split(',').map(Number)
-    : [Number(args.season) || new Date().getUTCFullYear()]
+    : [Number(args.season) || (await fetchSeasonInPlay())] // not the calendar year (#1465)
 
   const file = { generatedAt: new Date().toISOString(), selloutFill: SELLOUT_FILL, seasons: {} }
   let games = 0

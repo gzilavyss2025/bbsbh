@@ -7,7 +7,7 @@ import { InningTally } from './boxscore/InningTally.jsx'
 import { ScoringSummary } from './boxscore/ScoringSummary.jsx'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
-import { selectOfficials, selectIsFinal } from '../api/select.js'
+import { selectGameSeason, selectOfficials, selectIsFinal } from '../api/select.js'
 import { stepToSection } from '../lib/route.js'
 import { ordinal } from '../lib/format.js'
 import { umpireAccuracySummary } from '../api/umpires.js'
@@ -258,7 +258,9 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
   const awayTheme = headerThemeFor(box.away.id, themeKeyFor(box.away.id, 'away', winProbTreatment?.away))
   const homeTheme = headerThemeFor(box.home.id, themeKeyFor(box.home.id, 'home', winProbTreatment?.home))
   const hpId = officialIdByRole.HP ?? null
-  const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId), [hpId])
+  // The game's season (#1201), so an old box score reads its own year.
+  const seasonYear = selectGameSeason(feed)
+  const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId, { seasonYear }), [hpId, seasonYear])
   const [modalId, setModalId] = useState(null)
   // An umpire fill-in field's value, linked to their page when the crew list
   // resolved an id for that role (degrades to plain text otherwise — see
@@ -426,7 +428,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
         <ThreeStars stars={stars} />
       </section>
 
-      {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
+      {modalId != null && <UmpireAccuracyModal id={modalId} seasonYear={seasonYear} onClose={() => setModalId(null)} />}
     </div>
   )
 })

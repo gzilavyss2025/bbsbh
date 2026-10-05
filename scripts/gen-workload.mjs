@@ -32,12 +32,14 @@ import { writeJsonAtomic } from './lib/io.js'
 import { clubPenCounts, foldGameLog } from '../src/api/workload.js'
 import { getJson } from './lib/statsapi.mjs'
 import { num } from '../src/lib/math/number.js'
+import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'workload.json')
 // The slate's sidecar — thirty rows of counts, written beside the full store.
 const summaryOut = join(here, '..', 'public', 'data', 'workload-summary.json')
-const SEASON = 2026
+// The season in play (#1465), not a literal year: Opening Day turns it.
+const SEASON = await fetchSeasonInPlay()
 
 // Number of most-recent appearances stored per pitcher (feeds the 1/3/10 buckets
 // in the reader with headroom, and the availability board's day-window scans).

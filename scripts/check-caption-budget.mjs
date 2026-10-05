@@ -60,7 +60,8 @@ import { resolve, join } from 'node:path'
 // names, legend and "+N" button are labels (--fs-label), and the old cards'
 // caption rules went with them. The Ladder (#1352) then replaced those rows:
 // its "No other tie" note took the caption the rows' name rule gave up.
-const BUDGET = 122
+// 122 -> 121: the Records card empty line (.trec__empty) moved onto EmptyState (#1132, E4).
+const BUDGET = 121
 
 const stylesDir = resolve('src/styles')
 const sheets = []

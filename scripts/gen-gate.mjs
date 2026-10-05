@@ -59,6 +59,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
+import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'gate.json')
@@ -365,7 +366,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2))
   const seasons = args.seasons
     ? String(args.seasons).split(',').map(Number)
-    : [Number(args.season) || new Date().getUTCFullYear()]
+    : [Number(args.season) || (await fetchSeasonInPlay())] // not the calendar year (#1465)
 
   const file = { generatedAt: new Date().toISOString(), seasons: {} }
   for (const season of seasons) {

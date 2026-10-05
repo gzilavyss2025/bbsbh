@@ -26,9 +26,11 @@ const pct1 = (x) => (x == null ? '' : `${(x * 100).toFixed(1)}%`)
 // the trigger on close. Everything shown is a ball/strike judgment count or a
 // date/matchup already public on the umpire page — no score — so it sits
 // outside any seal.
-export function UmpireAccuracyModal({ id, onClose }) {
+//
+// `seasonYear` is the season of the game it opens from (#1201).
+export function UmpireAccuracyModal({ id, seasonYear, onClose }) {
   const navigate = useNav()
-  const { data } = useAsync(() => loadUmpire(id), [id])
+  const { data } = useAsync(() => loadUmpire(id, { seasonYear }), [id, seasonYear])
 
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)

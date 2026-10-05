@@ -19,6 +19,7 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { dateLabel, SectionHead } from './logbook/statsShared.jsx'
 import { RetrospectiveSections } from './logbook/RetrospectiveSections.jsx'
 import { LogbookMilestones } from './logbook/LogbookMilestones.jsx'
@@ -223,10 +224,10 @@ export function LogbookStatsPage({ bookId = null }) {
           </button>
           <h1 className="topbar__title">{title}</h1>
         </header>
-        <p className="hint hint--prose">
+        <EmptyState>
           No stamps yet. Reveal a game’s box score and stamp it — once a few are in
           the book, this is where it adds up.
-        </p>
+        </EmptyState>
         <ReportFooter />
       </div>
     )

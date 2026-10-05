@@ -12,6 +12,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
 import { Door } from '../components/ui/control/Door.jsx'
@@ -143,7 +144,7 @@ function TeamLegacyCard({ teamId, rank, honorees, cardRef }) {
           )}
         </>
       ) : (
-        <p className="hint">No one on the current roster has ever been named an All-Star.</p>
+        <EmptyState>No one on the current roster has ever been named an All-Star.</EmptyState>
       )}
     </Card>
   )

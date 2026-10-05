@@ -21,6 +21,7 @@ import {
 } from '../lib/passportLayout.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { GameStamp } from '../components/logbook/GameStamp.jsx'
 import { ClubsSeen } from '../components/logbook/ClubsSeen.jsx'
 import { StampCollection } from './logbook/StampCollection.jsx'
@@ -28,6 +29,7 @@ import { PassportBook } from '../components/passport/PassportBook.jsx'
 import { PassportCover } from '../components/passport/PassportCover.jsx'
 import { BookOrderControl } from '../components/passport/BookOrderControl.jsx'
 import { BookManagementSheet } from '../components/passport/BookManagementSheet.jsx'
+import { Stack } from '../components/ui/layout/Stack.jsx'
 
 // One open Game Log book — the topbar, the tray, the passport book itself,
 // and the season grid below it (ADR-0035, ADR-0036). Split out of
@@ -343,16 +345,16 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
       )}
 
       {total === 0 ? (
-        <p className="hint hint--prose">
+        <EmptyState>
           No stamps yet. Reveal a game’s box score and stamp it — it lands here, and
           you choose where on the page it goes.
-        </p>
+        </EmptyState>
       ) : (
         <>
           {/* Shown only when it holds something, so a fully-arranged book
               carries no chrome for it. */}
           {tray.length > 0 && !placingPk && (
-            <section className="logbook__tray" aria-label="Stamps waiting to be placed">
+            <Stack as="section" className="logbook__tray" aria-label="Stamps waiting to be placed">
               <p className="logbook__traylede">
                 {tray.length} {tray.length === 1 ? 'stamp is' : 'stamps are'} waiting
                 for a page.
@@ -399,7 +401,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
               >
                 Place them all for me
               </button>
-            </section>
+            </Stack>
           )}
 
           {/* A placed stamp's options. Tapping a stamp in the book opens this

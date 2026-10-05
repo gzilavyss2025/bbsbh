@@ -1,5 +1,6 @@
-import { currentSeasonOf, staticJsonBy } from './staticJson.js'
+import { readSeasonShard, staticJsonBy } from './staticJson.js'
 import { shardKey100 } from '../lib/shardKey.js'
+import { combineSprayEntries } from '../lib/seasons/combine.js'
 import { HIT_COORD_ORIGIN } from '../lib/ballpark/hitProjection.js'
 
 // The season spray map's reader — where one batter's balls in play landed, and
@@ -44,10 +45,21 @@ import { HIT_COORD_ORIGIN } from '../lib/ballpark/hitProjection.js'
 // spray card can read these same shards rather than sweeping the season twice.
 const shard = staticJsonBy((key) => `/data/spray/${key}.json`, { fallback: null })
 
-export async function fetchSprayFor(personId) {
+// `{ seasonYear }` is a year, 'all', or nothing for the current season
+// (staticJson.js's seasonFolderOf). 'all' adds his seasons into one entry, in
+// the shard's own shape, so sprayView reads it unchanged.
+export async function fetchSprayFor(personId, { seasonYear } = {}) {
   if (personId == null) return null
-  const season = await currentSeasonOf('spray')
-  return season == null ? null : shard(`${season}/${shardKey100(personId)}`)
+  const key = shardKey100(personId)
+  return readSeasonShard(
+    'spray',
+    seasonYear,
+    (season) => shard(`${season}/${key}`),
+    (shards, seasons) => {
+      const entry = combineSprayEntries(shards.map((d) => entryFor(d, personId)))
+      return entry && { season: null, seasons, bat: { [personId]: entry } }
+    },
+  )
 }
 
 // The card floor: how many balls in play a season needs before a spray map is

@@ -15,18 +15,20 @@
 // command grid (src/lib/zone/zoneGeometry.js), whose middle nine cells are the
 // strike zone's own thirds.
 import { shardKey100 } from '../lib/shardKey.js'
-import { currentSeasonOf, staticJsonBy } from './staticJson.js'
+import { seasonFolderOf, staticJsonBy } from './staticJson.js'
 import { GRID, inHeart, inZone } from '../lib/zone/zoneGeometry.js'
 
 export const fetchCommandShard = staticJsonBy((key) => `/data/pitch-command/${key}.json`, {
   fallback: null,
 })
 
-// A season store (ADR-0086): pitch-command/{season}/{NN}.json, the season
-// pitch-command/seasons.json names.
-export async function fetchCommandFor(personId) {
-  if (personId == null) return null
-  const season = await currentSeasonOf('pitch-command')
+// A season store (ADR-0086): pitch-command/{season}/{NN}.json. `{ seasonYear }`
+// is a year, or nothing for the season pitch-command/seasons.json names. One
+// season only: 'all' resolves to null, because no surface draws a combined
+// grid yet (#1202 does not list one).
+export async function fetchCommandFor(personId, { seasonYear } = {}) {
+  if (personId == null || seasonYear === 'all') return null
+  const season = await seasonFolderOf('pitch-command', seasonYear)
   if (season == null) return null
   const shard = await fetchCommandShard(`${season}/${shardKey100(personId)}`)
   return shard?.pit?.[String(personId)] ?? null

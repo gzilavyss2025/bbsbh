@@ -20,9 +20,9 @@
 //
 // APPEND-ONLY / incremental, same shape as gen-pitch-arsenal.mjs: each run
 // sweeps a trailing window of dates and ingests only newly-Final games not
-// already on file (team_record_ingested_games is the guard). A Final game's
-// box score is immutable, so the nightly cost is the ~65 games that actually
-// finished, never the season.
+// already on file (team_record_ingested_games is the guard). The nightly cost
+// is the ~65 games that actually finished, never the season. The price: a
+// statsapi correction to a game already on file waits for a re-ingest.
 //
 // THREE calls per game, no more: the date's schedule (bulk, one per date per
 // level, carrying the full linescore), the box score (team home runs and both
@@ -60,7 +60,8 @@ import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import {
-  isPlayedFinal,
+  isPlayedGame,
+  uniqueByGamePk,
   refreshRoleFacts,
   storedRoleFacts,
   tagSeries,
@@ -105,7 +106,7 @@ function datesBetween(startDate, endDate) {
 
 // Final regular-season games in the window, at every swept level, that aren't
 // already on file. A Postponed or Cancelled row reads "Final" too, keeps its
-// original date in the feed and carries no linescore, so isPlayedFinal drops
+// original date in the feed and carries no linescore, so isPlayedGame drops
 // it rather than ingesting it as a 0-0 tie.
 async function candidatesFor(dates, existing) {
   const out = []
@@ -121,7 +122,7 @@ async function candidatesFor(dates, existing) {
         continue
       }
       for (const g of (slate.dates ?? []).flatMap((d) => d.games ?? [])) {
-        if (!isPlayedFinal(g)) continue
+        if (!isPlayedGame(g)) continue
         if (existing.has(String(g.gamePk))) continue
         const away = g.teams?.away?.team
         const home = g.teams?.home?.team
@@ -130,7 +131,7 @@ async function candidatesFor(dates, existing) {
       }
     }
   }
-  return out
+  return uniqueByGamePk(out)
 }
 
 

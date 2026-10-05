@@ -556,6 +556,14 @@
   padding-bottom: var(--space-1h);
 }
 
+/* The "Not posted yet." EmptyState (#1132, E3). The body has no side padding,
+   so the dashed box insets itself; with the body's own bottom padding it sits
+   the same distance from the rule above and the card's edge below. Only a
+   margin: the box is EmptyState's own. */
+.roster__empty {
+  margin: var(--space-2h) var(--space-3) var(--space-1);
+}
+
 .roster__group {
   font-family: var(--font-display);
   font-size: var(--fs-label);

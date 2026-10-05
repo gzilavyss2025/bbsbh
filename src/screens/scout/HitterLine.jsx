@@ -2,6 +2,7 @@ import { rate3 } from '../../api/person/shared.js'
 import { Table } from '../../components/ui/table/Table.jsx'
 import { pitchLabel } from '../../api/pitchArsenal.js'
 import { boardRow } from './board.js'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 // THE HITTER'S SIDE IN PHASE 1 (#1410). The hitter map needs the #1411 grid,
 // so until it ships this slot prints his line against each pitch type from
@@ -54,9 +55,9 @@ export function HitterLine({ line, types, code }) {
 
 function Fact({ label, value }) {
   return (
-    <div className="scout__hitfact">
+    <Stack gap="tight" className="scout__hitfact">
       <dt className="scout__controllabel">{label}</dt>
       <dd className="scout__hitvalue">{value}</dd>
-    </div>
+    </Stack>
   )
 }

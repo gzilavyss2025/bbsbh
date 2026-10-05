@@ -20,6 +20,7 @@ import assert from 'node:assert/strict'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { toPosix } from '../scripts/lib/walk.mjs'
 import { ALIGNS, CLUSTER_TAGS, GAPS, clusterClassName } from '../src/lib/design/clusterClass.js'
 import { stripComments, ruleBody } from './helpers/css.js'
 
@@ -59,7 +60,7 @@ test('.cluster is a wrapping row with one gap, and no other stylesheet draws it'
   assert.match(base, /flex-wrap:\s*wrap/)
   assert.match(base, /gap:\s*var\(--cluster-gap\)/)
   for (const f of cssFiles(STYLES)) {
-    if (f.endsWith('system/cluster.css')) continue
+    if (toPosix(f).endsWith('system/cluster.css')) continue
     const css = stripComments(readFileSync(f, 'utf8'))
     assert.equal(ruleBody(css, '.cluster'), null, `${f} should not redraw .cluster`)
   }

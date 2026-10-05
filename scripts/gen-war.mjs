@@ -58,10 +58,13 @@ import { fileURLToPath } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
 import { teamWarSplits } from './lib/war-splits.mjs'
 import { getJson } from './lib/statsapi.mjs'
+import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'war.json')
-const season = new Date().getFullYear()
+// The season in play, not the calendar year (#1465): on January 1 the calendar
+// names a season with no games, and this file would be written empty.
+const season = await fetchSeasonInPlay()
 
 // The committed war.json, used ONLY to carry a traded player's per-team split
 // forward when statsapi flakes on his one request (see lib/war-splits.mjs).

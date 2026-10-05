@@ -367,3 +367,205 @@ it.
 Converter changes: it now keeps static string props (`role="group"`) and
 extra static classes. It still refuses an element with a handler or a spread.
 
+
+## Slices S8 to S13
+
+Six more families, one commit each. 20 rules on 31 JSX sites. The finder counts
+**50 safe candidates on `main` before S8** (the log above said about 44; I did not
+trace the gap, and the script was not changed) and **30 after S13**. 84 candidates in
+all. No odd-gap stack, `Cluster` or `Grid` was touched. No open PR edits any file
+here (#1448 touches `App.jsx`, `Headshot.jsx` and `PitcherNotice.jsx` only).
+
+| slice | rules | JSX sites | result |
+| --- | ---: | ---: | --- |
+| S8: Matchup Scout (`scout/scout.css`) | 6 | 9 | `/scout` and `/design-lab` identical; synthetic identical for all |
+| S9: site search (`08-site-shell.css`) | 3 | 3 | search overlay (recent shelf) and past-matchup finder identical on `/` with the mock |
+| S10: animation and between-innings labs (`46-consent-modal.css`) | 3 | 10 | both lab routes identical, 5,028 and 290 elements |
+| S11: Game Log (`48-logbook.css`, `49-passport-book.css`) | 4 | 4 | 4 states identical with one seeded stamp, up to 817 elements |
+| S12: salaries (`70-contracts-grid.css`, `71-salaries-league.css`) | 2 | 2 | `/salaries` and `/team/158/contracts` identical |
+| S13: trade deadline (`47-trade-deadline.css`) | 2 | 3 | `/trade-deadline` and `/trade-deadline/2025` identical; `.trade__stack` synthetic only |
+
+**What could not be checked.** The headless browser cannot load live MLB data in
+the cloud container: the proxy re-signs TLS and Chromium rejects the certificate. I
+did not work around that. So no route that needs a live `statsapi` response was
+captured. Consequences:
+- S8: the real pair view (`/scout/{pitcher}/{hitter}`) never drew. `.scout__hitfact`
+  has no real capture; `.scout__pair`, `.scout__side` and `.scout__key` are covered
+  by their `/design-lab` specimen (Matchup and ScoutLab sites), not by the real page.
+  `synth.mjs` (on `/scout`) is identical for all seven hosts.
+- S13: `.trade__stack` (the trade card) did not render on any offline route.
+  `synth.mjs` proves the CSS, not the page.
+- S9: a search with typed results (a Players or Teams group) was not reached; only the
+  Recent group was.
+- No spoiler-scope surface was touched (the Game Log stamp art sits behind its own
+  gate; `Stack` only wraps it).
+
+**Hard sites.** Converted by hand: `.searchoverlay__results` (id and `aria-busy` on
+several lines; its CSS rule also holds a comment), `.animlab__frame` (a `style`
+prop), `.passportbook` (a key handler).
+
+**Capture noise, and the tool changes that remove it.** Unchanged code gave
+different geometry in four places. `geom.mjs` now has `FREEZE=1` (animations off:
+`/animation-lab` differed on 246 elements between two runs), `BLOCKIMG=1` (every
+image request aborted, then wait for images to settle: a header logo raced its
+fallback on `/team/158/contracts`) and a `{"clickText":"…"}` step. Two noise sources
+are NOT removed: the `Loader` specimen on `/design-lab` moves 2.4px between runs
+(S8), and five off-screen team-switcher logo elements on `/team/158/contracts@390`
+still differed between two unchanged runs (S12). Both AFTER runs of S12 matched the
+BEFORE run exactly. `/trade-deadline/2025@760` gave 3665 elements once (S13); two
+more runs gave 3666, the BEFORE count. A clean BEFORE/AFTER pair needs the same
+flags on both runs. For S12, BEFORE was captured from the stashed, unmigrated
+code. Three helpers were added: `add-import.py`, `strip-css.py` and `whois.mjs`
+(names the element behind a diff path).
+
+**Left for Gary** (not decided here): keep or drop `Cluster`'s `align` prop; add a
+`rowGap` to `Grid`; use `Stack gap="section"` on a page. Not done: the 37 odd-gap
+stacks, the 32px stack, Cluster and Grid migrations. Left unmigrated because they
+are safe but did not fit a one-or-two-partial family this round: scoring-surface
+rules (`.starter__info`, `.pbp`, `.consolebar__tallygroup`, `.trailstrip`,
+`.refpanel__body`, `.pcard__sec` and others), the admin contract pages, standings,
+wild card and the workload partials.
+
+## Decisions on the open questions (Gary, 2026-10-05)
+
+1. **`Cluster` keeps its `align` prop.**
+2. **`Grid` gets no `rowGap`.** The 2 grids that need two gap values stay hand-written.
+3. **`Stack gap="section"` gets a pilot on `/salaries`.** One page, its own slice, geometry checked. Run on 2026-10-05: `/salaries` **stopped, not migrated** (see "Section gap pilot"). Gary then chose the team hub; its Roster tab is **migrated**, the other tabs are not (see "Section gap pilot, second run").
+
+## Section gap pilot (`/salaries`, 2026-10-05)
+
+**Result: stopped before any code change. The page does not space its sections at
+16px today. It spaces them at 0px.** A `Stack gap="section"` around them adds
+space. It cannot replace a margin, because there is none to remove.
+
+The top-level children of `.screen` on `/salaries` (`SalariesPage.jsx`), measured
+with computed styles at 390 and 760px:
+
+| child | margin-top | margin-bottom | between sections? |
+| --- | ---: | ---: | --- |
+| `.sitebar`, `.topbar` | 0 | 0 | no: the page header |
+| `.vsteam__tray` (club rail) | 8px | 8px | no: its own control margin |
+| `.card.payboard` (Highest paid players) | 0 | 0 | section |
+| `.payowed` (Most committed) | 0 | 0 | section |
+| `.payclubs` (Club payrolls) | 0 | 0 | section |
+| `.posspend` (Spend by position) | 0 | 0 | section |
+| `.paysource` (source line) | 16px | 0 | no: a note under the last section |
+| `.sitefooter` | 32px | 0 | no: the page footer |
+
+The four sections touch edge to edge: each top is the previous bottom (at 390px,
+856, 1239 and 2379). The CSS agrees: `71-salaries-league.css` sets no margin on
+`.payowed`, `.payclubs` or `.posspend`, and `system/card.css` says a card owns no
+margin. The 16px above `.paysource` is a note margin, and it stays.
+
+**The trial.** I wrapped the four sections in one `Stack gap="section"`, with no
+margin to remove. BEFORE was captured twice with `FREEZE=1 BLOCKIMG=1` and
+`?nointro`; the two runs are identical (890 elements at 390 and 760px), so the
+capture is stable. AFTER gave 891 elements (the wrapper) and a page 48px taller at
+both widths: 4855 to 4903px at 390, 3522 to 3570px at 760. That is 3 gaps of
+16px. Zero differences is not met, so I reverted the edit. This branch holds no
+code change.
+
+**What this means for the plan.**
+- The "Section gap" census above was wrong for this page. It counted margins of 16px
+  or more across all partials and read them as an upper bound for "pages separate
+  sections by 16px". On `/salaries` the true figure is 0px. **Inference, not
+  checked:** other pages built from flush cards and bands (the club ledger, the
+  Contracts tab) may do the same. I traced one page only.
+- `gap="section"` is 16px, and `Stack` has no 0px step. So this page cannot adopt it
+  with no visible change. The sections would also stop touching, which changes the
+  look of a page built as one ledger.
+
+**Options for Gary** (not decided here):
+1. Accept the change: +16px between each pair of sections on `/salaries`, +48px in
+   all. Then run `npm run visual` on the page and list the route in the PR.
+2. Pick a page that does space its sections with a `margin-top` of 16px, and pilot
+   there. Finding one needs a trace; the census does not name pages.
+3. Leave `gap="section"` unused for now. The token and the prop stay.
+
+**Not checked in this run.** I did not look at any other page (the second run below did). I did not run `npm run visual` or
+`npm run e2e`. I did not judge by eye whether 16px between the sections looks right, because
+the pilot stopped first.
+
+**Other pages that reuse these blocks (step 5).** `SourceLine` is also used by the
+team Contracts tab (`ContractsTab.jsx`). The other three blocks and `.payowed` are
+used on `/salaries` only. No file was changed, so nothing else moves.
+
+## Section gap pilot, second run: the team hub (2026-10-05)
+
+Gary chose "pilot on another page", and then "migrate the whole hub". **Result: the
+Roster tab is migrated with zero differences. The other tabs are not, because a
+Stack would change them.** The shared hub margin rule stays.
+
+**The trace.** I measured the top-level children of `.screen` on about 40 routes at
+390px (computed margins and gaps; live data for the hub). Sections spaced by 16px:
+only the team hub, through one rule, `.team-hub :where(.card):not(:where(.card
+.card))` in `09-team-info.css`, whose comment says the space is the parent's "until
+#1180 gives the parent a Stack". Every other page I traced spaces its sections
+at some other step, so `gap="section"` (16px) would change it:
+
+| page | gap between sections |
+| --- | ---: |
+| `/salaries` | 0px |
+| `/attendance`, `/pace-of-play`, `/farm-system-rankings`, `/bullpen-availability`, `/doubleheaders`, `/run-differential` | 32px |
+| `/nine-keys` | 24px |
+| `/all-star-legacy` | 20px |
+| `/design-lab` | 40px |
+| `/first-scorebook` | 58px |
+| `/rehab`, `/milestones`, `/awards` | one section, nothing to space |
+
+**What changed.** `RosterTab.jsx` wraps its four cards in one `Stack gap="section"`
+(the as-of banner stays outside, after it). `09-team-info.css` gets one rule,
+`.team-hub .stack > .card { margin-top: 0 }`. Three classes beat the namespace
+rules `.roster-super` and `.tstats`, which each set their own 16px. I first deleted
+those two margins instead, and `/all-star-rosters` (which draws `.roster-super`)
+moved 320px and `/design-lab` 16px, so I reverted that. Nothing else in the hub
+reads the new rule yet.
+
+**Checked.** BEFORE was captured twice with `geom.mjs` (`FREEZE=1 BLOCKIMG=1
+PROXY=1`, `?nointro`, 390 and 760px) and the two runs match. After the edit:
+
+| route | result |
+| --- | --- |
+| `/team/158/roster`, `/team/556/roster`, `/team/111/roster`, `/team/147/roster` | 0 differences at 390 and 760px |
+| `/team/158/roster?d=2026-07-15` (dated, with the banner) | 0 differences |
+| `/team/158`, `/games`, `/numbers`, `/contracts`, `/minors`, `/leaders`; `/team/556`, `/numbers`, `/minors` | unchanged |
+| `/all-star-rosters`, `/design-lab` | unchanged |
+
+"0 differences" counts every element's rect and layout style, with two known
+exceptions that are not layout. (1) The wrapper itself is one new element. (2)
+Chrome reports `min-width` as `0px` on a block and `auto` on a flex item, so each
+of the 3 or 4 cards in the Stack reads `0px` before and `auto` after. The rects
+are equal. Off-screen club-switcher logos also flip between `img` and `span`
+between two unchanged runs (known from S12); I did not count them.
+
+**Why the other tabs are not migrated.**
+- **Numbers.** A trial gave +20px at 390 and 760px. The `.tledg` block (team
+  leaders) is 18px from its neighbour today, not 16: its head has an 18px top
+  margin that collapses out through the block. In a Stack it does not collapse,
+  so the gap is 16 + 4 + 18.
+- **Minors, on a minor-league club.** A trial gave +16px on `/team/556/minors`
+  for the same reason: the Affiliation history section opens with an 18px head
+  margin. The Brewers' Minors tab has no such section and matched, so the tab
+  passes on MLB clubs and fails on minor-league ones.
+- **Overview and Games.** I did not run a trial. Their cards sit between doors and
+  a transactions card with other spacing (`.thub__door` 8px above and 16px below,
+  `.txcard` 14px both ways, one card 8px above and 14px below, `.tledg` 18px). One
+  Stack would add 16px to each of those gaps.
+- **Contracts.** One section and some hints with 14px margins. No gap to move.
+
+These trials were reverted. A way forward, not decided here: give the 18px head
+margin its own place (the SectionHead's leak, `system/section-head.css`), and
+group each card with its door, so a tab becomes a few Stacks. Then the shared rule
+can go.
+
+**Tool change.** `geom.mjs` takes `PROXY=1`: the browser goes through `HTTPS_PROXY`
+with `localhost` bypassed, and waits 3s for live data. The container had no CA in
+the browser trust store (NSS), so I installed `libnss3-tools` and added
+`/root/.ccr/agent-proxy-ca.crt` with `certutil`. Certificate checks stay on. This
+is per container: a new session needs the same two steps. A live page can change
+between runs, so capture BEFORE twice first.
+
+**Not checked.** The "Season" roster toggle (a click state) and a Roster tab at a
+width other than 390 and 760px. Four clubs only; a club whose injured list is
+empty, or one with no bullpen card, was not singled out. I did not run `npm run
+visual` or `npm run e2e`.
