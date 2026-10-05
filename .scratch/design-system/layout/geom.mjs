@@ -5,6 +5,7 @@
 //      MOCK=1   serve the anchor game (823035) from e2e/fixtures/mock-api.js, offline
 //      LS='{"bbsbh:reveal:823035":"99"}'   localStorage entries set before the page loads
 //      STEPS='[{"tab":"Arms"},{"clickAll":".abs__rowbtn:not([disabled])"}]'   clicks to reach a state
+//      a step can also be {"clickText":"Find a past"}: click the first button whose name matches
 //      CLASSES='a,b'   also print how many elements of each class the route drew
 // Run it before and after a migration, then diff with diffgeom.mjs. It is the
 // substitute for `npm run visual` (which runs only when Gary asks) for a change
@@ -27,6 +28,7 @@ for (const route of routes) {
     await p.waitForTimeout(800)
     for (const st of steps) {
       if (st.tab) await p.getByRole('tab', { name: new RegExp(st.tab, 'i') }).first().click().catch(() => {})
+      if (st.clickText) await p.getByRole('button', { name: new RegExp(st.clickText, 'i') }).first().click().catch(() => {})
       if (st.clickAll) await p.evaluate((sel) => document.querySelectorAll(sel).forEach((e) => e.click()), st.clickAll)
       await p.waitForTimeout(400)
     }
