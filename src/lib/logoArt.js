@@ -14,7 +14,8 @@
 // it authoritatively before anything is written. One implementation, so a file
 // the UI accepts can't be one the server refuses.
 //
-// See src/lib/CLAUDE.md for the manifest this feeds and the upload contract.
+// See src/lib/data/CLAUDE.md for the manifest this feeds and docs/identity-lab.md for the
+// upload contract.
 
 import { ALL_MLB_TEAM_IDS, teamAbbr } from './teams.js'
 import LOGO_ART from './data/logo-art.json' with { type: 'json' }

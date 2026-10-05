@@ -1,5 +1,5 @@
 // Multi-device reveal sync — one narrow, authenticated Vercel function
-// (see docs/adr/ and the root CLAUDE.md Architecture section). Stores a
+// (see docs/adr/ and api/CLAUDE.md). Stores a
 // single integer per (Clerk userId, gamePk): the same revealedThrough
 // high-water mark useRevealProgress.js already keeps in localStorage. Never
 // a score itself — only how far a signed-in user has revealed, mirrored

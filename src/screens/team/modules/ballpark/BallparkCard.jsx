@@ -19,7 +19,7 @@ import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 // The Overview's Ballpark card. Two stacked rows: a HERO (a photograph of the
 // place beside its name) over the DETAILS (the field diagram beside the facts,
 // the note, and the ranked dimensions). Both rows collapse to a single column
-// below 740px — the app's one responsive breakpoint, src/CLAUDE.md.
+// below 740px — the app's one responsive breakpoint (src/tokens/layout.css).
 //
 // Same underlying content as the lineup page's BallparkModal, laid out inline
 // rather than behind a tap: this IS the full detail view here, not a preview.

@@ -41,7 +41,7 @@ import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 // Home/Away hand-tuning that used to sit here as four literals), so the Team
 // Identity Lab can write an edit straight back rather than handing over a
 // snippet to paste (ADR-0029). They're re-exported raw for that lab; every
-// resolver in this file reads the derived tables. See src/lib/CLAUDE.md for
+// resolver in this file reads the derived tables. See src/lib/data/CLAUDE.md for
 // the schema.
 // Registered so an affiliate's Home/Away tile tuning and its header triad can
 // be retuned at runtime from that club's own team page
@@ -252,7 +252,7 @@ export function milbHeaderColorsFor(teamId, variant, draft) {
 // Coverage for the curated Home/Away marks (PRD 4.3), read from the same
 // upload-rebuilt manifest logoArt.js's MLB path uses — never from a per-tile
 // 404, which with 120 affiliates × 2 sides would fire hundreds of them per
-// page (see the /__dev/team-logo upload's manifest note, src/lib/CLAUDE.md).
+// page (see the /__dev/team-logo upload's manifest note, docs/identity-lab.md).
 // A team/side with no entry here just keeps wearing today's tinted CDN base
 // mark — the design that lets this ship with zero art procured yet.
 const MILB_ART_COVERAGE = {

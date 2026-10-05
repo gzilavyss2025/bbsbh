@@ -1,0 +1,30 @@
+# src/components/playbyplay — notification cards, casing, color, button copy (ADR-0017)
+
+Every mid-inning "something happened" moment in `PlayByPlay.jsx` sorts into one
+of three tiers — a fresh/changed actor (`PitcherNotice`/`FielderNotice`/
+`PinchRunNotice`/`BatterNotice` — a mid-inning pinch hitter gets the same "now
+batting" notice the pre-pitch staged list shows, for symmetry with every other
+substitution type), a team/administrative event (mound visit, ejection), or a
+baserunning/misc event with no plate appearance of its own (steal, wild pitch,
+balk, …) — and all three render in the *same* kraft-amber
+`.pitchernotice.pitchernotice--pbp` card, distinguished by what's inside (a
+headshot vs. a scorer's-shorthand code) rather than a colored accent rail.
+Read ADR-0017 before touching any of `PlayByPlay.jsx`'s notification
+components, `MoundVisitBar` (in `EventCards.jsx`), or `HalfInning.jsx`'s
+`PrePitchChanges` — it also covers the `--accent-positive`/`--accent-negative`
+color pairing, and the button/label conventions (chevron vs. destination-named
+link, "Reveal" always visible, accessible name contains the visible word).
+
+## The files
+
+`DelayNotice` (a function in `EventCards.jsx`) cards a stoppage only when it came to
+something, and names the man who left rather than the batter the feed names (ADR-0060).
+
+**`pitcherCard/`** (`PitcherCard`, `SeasonLines`, `PitchMix`, `PitchScene`,
+`LastAppearance`) is the FULL Now Pitching card (#1344): only where an arm takes the
+mound — `HalfInning`'s card at `isFreshPitcher` and `PlayByPlay`'s mid-half
+`pitching_substitution` card; the persistent header and `ReliefRepeat` stay
+`PitcherNotice` alone. Its stat lines end the day before the game (ADR-0088). The pure
+model (role rule, tiles, scene math) is `lib/pitcherCard/`, so `npm test` can pin it.
+`PitchScene` draws through refs from a rAF loop — never React state per frame — stops off
+screen, and stays still under reduced motion.

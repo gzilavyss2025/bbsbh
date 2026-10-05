@@ -18,7 +18,7 @@ inside a `SealBox`'s reveal render function, never at render top-level or in an
 eager `useMemo` (ADR-0001). `highlights.js`'s join (`highlightsByPlayId`) is
 reveal-only in the same sense — a video clip's title/description narrate the
 play's outcome, so the map is built inside `HalfInning`'s `SealBox` reveal
-function (next to `revealDerived`), never at `InningViewer`'s top level; the
+function, never at `InningViewer`'s top level; the
 fetch itself (`fetchHighlights`) is safe eagerly with respect to spoilers,
 same as `game.js`'s `fetchWinProbability` — a raw fetch result produces no DOM
 on its own — but `useGameData` still waits to fire either until its consuming
@@ -47,20 +47,13 @@ what it buys is that a spoiler audit is a diff against that file rather than a
 re-trace of the whole graph. The motivating case is in the manifest's own header:
 `loadScorecard.js`'s header claimed for months that the module read only spoiler-free
 data while importing `revealInning`/`revealTotals` two lines below it. Prose can be
-wrong; this cannot be wrong silently.
+wrong; this cannot be wrong silently. Start from the manifest, not from a grep: it
+answers "what is this and who may import it" in one line, and `docs/api/` answers
+"how does it work". A module's own header is the third step, not the first.
 
-**This classification is about the SCORING surfaces only** — the slate's score
-cells, the lineup pages, the innings viewer, the box score. Most modules here
-feed OPEN surfaces instead (season and career stats, team and player pages,
-leader boards, standings), correctly need no seal at all, and say so; a season
-aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
-"no `SealBox`" on one of those as an omission waiting to be fixed, and don't add
-one — that is the mistake ADR-0034 undid.
-
-**Start from the manifest, not from a grep.** For any module in this directory,
-`spoiler-manifest.json` answers "what is this and who may import it" in one line,
-and `docs/api/` answers "how does it work". Reading a module's own header is the
-third step, not the first — a header can be wrong, as `loadScorecard.js`'s was.
+**This classification is about the SCORING surfaces only** (root `CLAUDE.md` has the
+scope). Most modules here feed OPEN surfaces and correctly need no seal. Do not add a
+`SealBox` to one of those: that is the mistake ADR-0034 undid.
 
 ## The build-time-fetch pattern
 
@@ -70,13 +63,11 @@ cron, `.github/workflows/update-nightly-data.yml`; a couple are hand-run). The
 driver is either an **unofficial/bulk source** (WAR) or **cost** (everything that
 would need dozens of statsapi calls per page load). `war.js` is the template.
 `docs/scripts/generators.md` documents each GENERATOR; `docs/api/static-data.md` documents
-each READER. `contractsHistory.js` reads sharded `public/data/contracts-history/`
-chunks and joins an admin's identity correction live at read time, never on
-rebuild — ADR-0067 has the reasoning.
+each READER.
 
 Three rules that keep biting. A file that grows without bound (the rookie
-dataset, the vs-team splits, per-date `callouts/*.json`) is kept OUT of the PWA
-precache and fetched at runtime — see `vite.config.js`. For a hand-seeded
+dataset, the vs-team splits, per-date `callouts/*.json`) gets a runtime caching
+rule in `vite.config.js`, never the precache. For a hand-seeded
 generator (`milb-history`, `mono-ink`, the highlight blocklist) you **edit the
 seed, never the output**. And **a static file is sized against the ONE surface
 that opens it, not against the dataset**: the whole-league file is the easy
@@ -112,29 +103,18 @@ existing split file covers it (`vs-team-splits`, the API's own `statSplits`, per
 
 ## Conventions
 
-- **Verify a new field path against a real response.** The feed shape is
-  undocumented; `statsapi.js`'s header names the gamePk each path was checked
-  against. Don't guess, and record what you checked it against.
-- **MiLB degrades, it doesn't crash.** Minor-league feeds (sportIds 11–14) often
-  miss lineups, weather, coaches and logos. Every selector falls back to
-  `''`/`null`/`—` and the caller renders "not posted yet".
 - **A sportId is not always a league.** sportId 17 holds SEVEN winter leagues,
   and Tally ships four of them (ADR-0078). A bare `sportId=17` call is mostly
   the wrong league — on three sampled dates it answered 15 games across four
   leagues where `&leagueId=119` answered exactly the three AFL ones — so every
   winter call carries a `leagueId`: `fetchSchedule`, `fetchTeams`,
-  `fetchSlateScores`, `fetchNextGameDate` and `fetchWinterCalendar` all take
-  one, and it is `null` for the five ordinary levels, which leaves their URLs
-  unchanged. The one call that cannot be scoped at runtime is the club list, so
+  `fetchSlateScores` and `fetchNextGameDate` all take one, and it is `null` for
+  the five ordinary levels, which leaves their URLs unchanged. `fetchWinterCalendar(season)`
+  takes none: it loops `WINTER_LEAGUE_IDS`. The one call that cannot be scoped at runtime is the club list, so
   it is not made at runtime: `gen-teams.mjs` fetches the four leagues by id at
   BUILD time and writes them as `bySportId[17]`, each club carrying its own
   `leagueId`. The rule that decides which four is in `lib/winter/leagues.js` —
   ship no league whose data would make the app state something false.
-- **A generator that needs app logic imports it** rather than keeping a second
-  copy (`gen-minors-leaders.mjs` imports `combineToPool`/`computeLeaders`;
-  `gen-milestones.mjs` imports the projection math from `person.js`). The
-  deliberate exceptions are self-contained scripts that mirror a small helper —
-  see `docs/scripts/generators.md`.
 
 ## Where the per-module notes live
 
@@ -149,53 +129,30 @@ one you need:
 | `docs/api/account-layer.md` | `src/lib/account/` — the per-user state that crosses a signed-in user's devices (ADR-0039, ADR-0026). |
 | `docs/api/postseason.md` | `postseason/` — the running postseason's bracket heading into a cutoff date: its two reads, the skeleton it may not trust, and the shape the UI reads. |
 
-`around-the-game/` is the fourth subdirectory and the odd one out: it holds no
-new fetching and no new spoiler footing, only the spoiler-FREE readers behind
-the pages listed under **Around the game**
-(`src/screens/around-the-game/`) — one a page, except `/abs-challenges`, whose
-denominators are a second file and so a second reader (`absExposure.js`,
-ADR-0076). It is named for the group a reader sees rather
-than for what it is made of, and that is deliberate: it was called `reports/`
-first, which collided with `reportPages.js` / `ReportFooter.jsx` /
-`check-report-pages.mjs` — all of which predate it and mean EVERY standalone
-page, Standings and League Leaders included. One word, two scopes, in one
-codebase. The label moved for the same reason (see `lib/reportPages.js`), and
-the paths followed it. Two of them read files
-their own generators ship (`gate.js`, `farmSystem.js`); one re-runs an existing
-module's rules across the whole league (`bullpen.js` over `workload.js`); one is
-the club-name join all three share (`clubs.js`). The rule that directory adds is
-about WHERE THE MATH LIVES: the generators ship FACTS, and every ranking, rate,
-league comparison and weighted index is computed here, where it is pure,
-unit-tested and arguable. `docs/farm-index.md` argues the one that needs it.
+`around-the-game/` holds the spoiler-FREE readers behind the Around the game pages: `around-the-game/CLAUDE.md`.
 
-`rotation/` holds the likely-starter guess for a game with no announced probable (ADR-0089). `projectedStarters.js` is the pure rule; `liveStarters.js` feeds it live game logs, because `workload.json` is regular-season only. Never hand a card the file's own `apps`.
+`rotation/` holds the likely-starter guess for a game with no announced probable
+(ADR-0089). `projectedStarters.js` is the pure rule; `liveStarters.js` feeds it live
+game logs, because `workload.json` is regular-season only. Never hand a card the file's
+own `apps`.
 
-`scout/` holds the Matchup Scout's data (#1408). `headToHead.js` is the one module so far: Savant's pitch-level CSV for one hitter and pitcher, read from the browser, with a cutoff date, clamped to today in US Pacific, that holds today back. Its header has the output shape and the Savant traps (the 25,000-row cap, the inclusive date bounds, rows with no `plate_x`). Savant is `NetworkOnly` in `vite.config.js`.
+`scout/` holds the Matchup Scout's data (#1408). `headToHead.js` reads Savant's
+pitch-level CSV for one hitter and pitcher from the browser, with a cutoff date, clamped
+to today in US Pacific, that holds today back. Its header has the output shape and the
+Savant traps (the 25,000-row cap, the inclusive date bounds, rows with no `plate_x`).
+Savant is `NetworkOnly` in `vite.config.js`. `hitterGrid.js` reads the nightly
+hitter-grid shards (ADR-0096, ADR-0097); it is spoiler-FREE, with season sums over Final
+games.
 
-`expresslane/` is the newest, and the spoiler line runs BETWEEN its two files
-rather than around them. `rail.js` is reveal-only: it is the ordered, complete
-event list for one half-inning, and its `description` / `result` / `pitch`
-fields narrate the play. `clipIndex.js` is spoiler-free: URLs, a poster and a
-duration, no prose and no result. Two rules that directory adds, both stated in
-those headers and neither enforceable by the manifest. The rail takes ONE
-half-inning per call and has no whole-game builder, because a game-wide rail
-states how many innings the game ran and so whether it went to extras
-(ADR-0008). And a poster URL is safe while the PICTURE is not — every frame
-carries the broadcast scorebug burned into the pixels — so a poster may render
-only inside an already-revealed play, and never as the placeholder for the next
-clip. Tier 3 — the staging queue, the film gate and the on-device byte store —
-is NOT here: it holds no baseball, only playIds and Blobs, so it lives in
-`src/lib/expresslane/` (`staging.js`, `byteStore.js`, `runner.js`, `hold.js`).
-`hold.js` is the one to read before touching the deck: a play with film on the
-screen arrives HELD, and the hold is a CAP rather than a cover — it hands
-`expressDeck` the cursor row with `isTerminal: false`, so the box, the chip and
-the runners' diamonds are never computed (ADR-0071).
-`.scratch/express-lane/PRD.md` carries the reasoning and the measurements.
+`expresslane/` holds the Express Lane rail and clip index: `expresslane/CLAUDE.md`.
 
-The three older subdirectories — `person/`, `playbyplay/`, `callout-notes/` — carry
+The subdirectories with their own CLAUDE.md are `around-the-game/`, `boxlines/`,
+`expresslane/`, and `transactions/`. `person/`, `playbyplay/`, and `callout-notes/` carry
 their notes in each file's own header plus a barrel file that explains the split
-(`playbyplay.js`, `callout-notes.js`, `person.js`). Read the barrel first; it is
-the one that states the directory's shared spoiler footing.
+(`playbyplay.js`, `callout-notes.js`, `person.js`). Read the barrel first; it states the
+directory's shared spoiler footing. `boxscore/`, `matchup/`, `player/`, `postseason/`
+(`docs/api/postseason.md`), and `scorecard/` have only their file headers and the
+manifest.
 
 Related research docs, worth reading before wiring a NEW source:
 - `docs/data-enrichment.md` — verified (July 2026) catalog of free, CORS-open
@@ -206,29 +163,6 @@ Related research docs, worth reading before wiring a NEW source:
   `/api/v1/transactions`: every field, all 22 type codes and the thirteen
   distinct events hiding inside two of them, how the wire repeats itself, and
   the 40-man/26-man roster rules the sentences encode but never state. Read it
-  before touching `teamTransactions.js` or building anything league-wide. The
-  pipeline sits in six files along five seams: `transactions/vocabulary.js`
-  answers *is this row news, and whose?*; `teamTransactions.js` decides which
-  rows belong in one story; `transactions/cutline.js` turns a story into words;
-  `transactions/league.js` runs the whole thing once per OWNING club over
-  the entire league, for the home feed; and `transactions/leagueFeed.js` is the
-  LIVE reader beside the build-time-fetch pattern above — the home slate's
-  rolling roster wire reads on page load, because a feed claiming "the last
-  three days" fed from a nightly file is up to a day behind. The window is
-  three days and NOT two: two means today and yesterday, which is 48 hours only
-  late in the evening (`WINDOW_DAYS`, and `FETCH_DAYS` is backtested against
-  it — read the header before moving either). A league-wide feed is
-  never a merge of the thirty per-club files — §11 of the wire doc has the
-  measurements, §12 what the live read costs. Two traps there: the fetch is
-  WIDER than the window it shows (the endpoint filters on a row's filed date,
-  the grouper buckets by its effective one — ADR-0058), and the `/people`
-  prefilter is safe only because `leagueCandidateIds` is a superset of the
-  final rows. `transactions/clubFeed.js` is the sixth: the club card reads the
-  nightly file for the season and lays a live three-day window over its newest
-  days, so a move filed at noon reaches the club's own page as fast as it
-  reaches the wire. It re-runs the club pipeline rather than filtering the
-  league feed — that feed gives a trade ONE owner, so filtered to one club a
-  deal the club sold in would vanish from its own page. Safe to merge because
-  the grouping is a function of its rows alone (`groupIntoStories` orders a
-  day by row id first) and because the join is by DAY, never by story.
+  before touching `teamTransactions.js` or building anything league-wide. The pipeline
+  (six files, five seams): `transactions/CLAUDE.md`.
 - `docs/MLB_STATS_API.md` — the endpoint reference.

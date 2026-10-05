@@ -42,7 +42,7 @@ export const MLB_TEAM_COLORS_STORE = registerIdentityStore('mlb-team-colors', ML
 
 // Re-exported for the Team Identity Lab, which reads, edits, and POSTs the
 // whole store as one file (ADR-0029). Every resolver below reads the derived
-// table instead. Schema in src/lib/CLAUDE.md.
+// table instead. Schema in src/lib/data/CLAUDE.md.
 //
 // MLB_TEAM_COLORS is the OVERLAID view — a table that refills in place when a
 // save lands — so `stampInk.js`, the lab, and the resolvers here all read one
@@ -60,7 +60,7 @@ export const MLB_TEAM_COLORS = liveStore(MLB_TEAM_COLORS_STORE)
 // accent table is hand-picked for a DIFFERENT purpose (distinctiveness), so
 // this couldn't reuse its data even if it wanted to. Sourced from
 // mlb-team-colors.json (ADR-0029) so the Team Identity Lab can edit and save a
-// club's triad directly — see src/lib/CLAUDE.md.
+// club's triad directly — see src/lib/data/CLAUDE.md.
 export const TEAM_COLOR_PAIRS = byTeam(MLB_TEAM_COLORS_STORE, (e) =>
   e.primary && e.secondary ? [e.primary, e.secondary] : undefined,
 )

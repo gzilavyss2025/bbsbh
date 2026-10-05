@@ -35,7 +35,7 @@ const CITY_CONNECT_STORE = registerIdentityStore('city-connect-colors', CITY_CON
 // has one thing to read, edit, and POST as a whole file. Everything else in
 // this module reads it through the derived tables below, which keep the exact
 // shapes (and the exact resolver semantics) the app had when these were JS
-// literals. See src/lib/CLAUDE.md for the store's schema.
+// literals. See src/lib/data/CLAUDE.md for the store's schema.
 //
 // The OVERLAID view rather than the raw file, so the lab and the app cannot
 // disagree about what is landed. Under `vite dev` the overlay is always empty —

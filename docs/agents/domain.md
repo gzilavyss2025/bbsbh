@@ -9,9 +9,10 @@ Guidance is split by how often it's needed, so the always-loaded file stays lean
 - **Root `CLAUDE.md`** — always loaded every session: the project one-liner, the
   spoiler-rule invariant, the high-level map, and pointers. Kept under 200 lines
   (guarded by `scripts/check-claude-md.mjs`).
-- **Nested `CLAUDE.md`** — `src/`, `src/api/`, `scripts/`: subsystem detail that
-  Claude Code loads only when it navigates into that directory. Put per-module /
-  per-script detail here, not in root.
+- **Nested `CLAUDE.md`** — one per folder that has its own rules (root `CLAUDE.md`
+  lists them): subsystem detail that Claude Code loads the first time it reads a file
+  in that folder, then keeps for the session. Put per-module / per-script detail
+  here, not in root.
 - **`docs/*` + `docs/adr/` + `CONTEXT.md`** — reference material and rationale,
   read on demand.
 

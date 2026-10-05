@@ -1,6 +1,6 @@
 // Shared readers for the hand-tuned identity stores in src/lib/data/*.json —
 // the per-team, per-treatment records the Team Identity Lab edits and writes
-// back to disk in dev (ADR-0029). See src/lib/CLAUDE.md for the schema.
+// back to disk in dev (ADR-0029). See src/lib/data/CLAUDE.md for the schema.
 //
 // Every store has the same outer shape:
 //

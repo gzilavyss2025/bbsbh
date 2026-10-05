@@ -1044,3 +1044,9 @@ for each generator; the reader modules:
   `.scratch/game-photos-by-subject/` (PRD + issue 01) is still open for a
   surface with no such list already loaded (a player page, say) — read that
   doc, including its note on what shipped without it, before building it.
+
+## `contractsHistory.js`
+
+`contractsHistory.js` reads sharded `public/data/contracts-history/`
+chunks and joins an admin's identity correction live at read time, never on
+rebuild — ADR-0067 has the reasoning.

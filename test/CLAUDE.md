@@ -11,13 +11,12 @@ There is no index table. Test files are named after the module they cover: run
 is pinned on a captured real game (`test/fixtures/game-823035.trimmed.json`, see
 `docs/testing.md`).
 
-
 ## Working with this suite without burning context
 
 - **Run narrow when debugging.** `node --test test/foo.test.js` (or
   `npm run test:verbose -- test/foo.test.js`-style single-file invocation) instead of
   the full `npm test` when chasing one failure — keeps output to one file's worth of
-  noise instead of ~1000 tests' worth.
+  noise instead of about 5,500 tests' worth.
 - **`npm test` uses the `dot` reporter** (one char per test, not one line) to keep a
   full-suite passing run's output small. `npm run test:verbose` reruns with the
   per-test `spec`-style reporter when you actually want test names (e.g. finding
@@ -33,7 +32,8 @@ is pinned on a captured real game (`test/fixtures/game-823035.trimmed.json`, see
 - **A captured feed goes in `test/fixtures/` with the script that built it.** A WHOLE
   real game is the exception to the rule above: it is far too big to read inline and
   its value is that it is unedited. `game-823035.trimmed.json` (MLB, the spoiler
-  invariant), `game-815863.trimmed.json` (Triple-A, the ABS challenge clamp) and
+  invariant), `game-822740.trimmed.json` (Twins at Nationals, the catcher-of-record
+  join), `game-815863.trimmed.json` (Triple-A, the ABS challenge clamp) and
   `game-820258.trimmed.json` (Single-A at the one park that runs challenges and
   reports no bank) are all field-trimmed to the paths the selectors under test read,
   and all rebuilt by a committed script under `.scratch/` rather than by hand — the
@@ -41,8 +41,8 @@ is pinned on a captured real game (`test/fixtures/game-823035.trimmed.json`, see
   from disk, so it stays offline.
 - **A hook is exercised through one server render.** `callout-ledger.test.js` reads
   `useCalloutLedgerValue` by rendering a probe component with
-  `react-dom/server`'s `renderToStaticMarkup`. That is the only React in the suite,
-  and it stays node-only — no DOM, no browser, no timers. Prefer a pure module
+  `react-dom/server`'s `renderToStaticMarkup`. `local-store-pins.test.js` also renders through `react-dom/server`
+  (`renderToString`). That is all the React in the suite, and it stays node-only — no DOM, no browser, no timers. Prefer a pure module
   (`revealProgressCore.js` is the pattern) when a hook's logic can live in one; use
   the probe only when the value the hook returns IS the thing under test.
 - **Prefer asserting the field(s) under test, not the whole object**, when adding new

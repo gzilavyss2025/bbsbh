@@ -39,20 +39,12 @@ Both vocabularies bottom out in the same three-step resolution, in
 `milbColorPair` adds step 3. One ordering, two endings — a caller that must paint
 something reads the second, a caller whose contract is "no known colour, render
 something else" (`teamTintColor`, `teamStripeGradient`, `teamChipColors`) reads
-the first. Do not add a third ending.
-
-Until July 2026 there were **two** mechanisms that could not agree: the headshot
-tint jumped straight to step 2 and never saw the affiliate (a Durham Bulls
-headshot tinted with its parent Rays' colour), while the logo tile read step 1
-and had no step 2 at all. Collapsing them is why every MiLB headshot,
-`PitcherNotice`, and off-day card now reads as the affiliate's own identity.
+the first. Do not add a third ending: two chains once disagreed about an
+affiliate's colour.
 
 `brandColors.js` sits *below* both `teams.js` and `milbColors.js` because
 `milbColors.js` already reaches `teams.js` directly (`teamLogoUrl`) — putting the
-chain in either one and importing the other closes an import cycle. (That reach
-used to be described as transitive, through `wpaLogo.js`; it is a direct import
-now that `milbColors.js` takes its two WPA constants from `wpa/wpaDefaults.js`
-instead. The cycle argument is unchanged.)
+chain in either one and importing the other closes an import cycle.
 
 An affiliate research never resolved a hex for carries `"found": false` and **no
 `pair`**, so it falls to step 2 rather than wearing an invented colour; three do
@@ -76,7 +68,8 @@ own `note`.
 | `logoMono.js` | The one-colour knockout marks for navy mastheads (ADR-0031) |
 | `monoInk.js` | The hand-picked per-SHAPE corrections to that conversion (`data/mono-ink.json`) |
 | `stampLogoTuning.js` | Where that knockout mark sits inside a Logbook stamp's mark slot, per side (`data/stamp-logo-tuning.json`, ADR-0035's amendment) |
-| `stampInk.js` | Which colour a Logbook stamp is pressed in — the WINNING club's darkest brand colour, floored for contrast against the page's paper (ADR-0036's second addendum). The one module here that reads game state; see "The rule that must not drift" below |
+| `stampInkTuning.js` | A club's hand-picked stamp ink (`data/stamp-ink.json`), read at RENDER time like `stampLogoTuning.js`, so a retune restyles every stamp already minted |
+| `stampInk.js` | Which colour a Logbook stamp is pressed in — the WINNING club's darkest brand colour (or the `stampInkTuning.js` pick), floored for contrast against the page's paper (ADR-0036's second addendum). The one module here that reads game state; see "The rule that must not drift" below |
 | `logoRecolor.js` | Repainting individual shapes in full color — how a club's missing jersey art gets built |
 | `customMarks.js` | The library of those recolored marks, and which treatment wears one — plus each BAR's own pasted-SVG masthead mark (Main, City Connect, MiLB's one bar), under synthetic keys (`data/custom-marks.json`; ADR-0031's addendum) |
 
@@ -87,80 +80,7 @@ in all three, so there is one answer, not three.
 
 ## The hand-tuned stores (`src/lib/data/*.json`)
 
-Values tuned by eye — an edge-bleed scale, a nudge, a band colour, a header
-triad — live on disk as JSON rather than as JS literals, so the Team Identity
-Lab can write an edit straight back instead of handing over a snippet to paste
-(ADR-0029).
-
-| File | Read by |
-| --- | --- |
-| `mlb-treatment-tuning.json` | `teams.js` |
-| `milb-treatment-tuning.json` | `milbColors.js` |
-| `milb-colors.json` | `brandColors.js` |
-| `mlb-team-colors.json` | `brandColors.js`, `teams.js` |
-| `mono-ink.json` | `monoInk.js` (overlay-aware, ADR-0054) — and `scripts/gen-mono-logos.mjs`, which is what actually changes the served art, on its own schedule |
-| `stamp-logo-tuning.json` | `stampLogoTuning.js` → `components/GameStamp.jsx` — the one store read at RENDER time |
-| `wpa-tuning.json` | `wpa/wpaLogo.js`, `wpa/wpaBandColors.js` — deliberately NOT reachable from the eager entry graph; see `wpa/wpaDefaults.js` |
-
-Every store has the same outer shape:
-
-```json
-{ "<teamId>": { "name": "…", "treatments": { "<key>": { …fields, "note": "…" } } } }
-```
-
-`name` and `note` are the per-entry comments these tables carried as literals,
-kept as data so a 900-line JSON diff still says which club moved and why a value
-is odd. **No resolver reads either one** — they exist for humans, and the lab
-renders `note` as an editable field so rationale is authored in the tool rather
-than lost on the first write.
-
-**Two stores have no `treatments`** — they hold a fact about the CLUB, not about
-one of its jersey treatments. `test/identity-lab-stores.test.js` keeps them in
-its `TEAM_LEVEL_STORES` list so they still get every outer-shape guard.
-
-`milb-colors.json` — an affiliate has a single identity, not a per-treatment one:
-
-```json
-{ "546": { "name": "…", "level": "Double-A", "pair": ["#e03a3e", "#003263"],
-           "third": "#cbccce", "confidence": "low", "source": "…", "note": "…" } }
-```
-
-`mlb-team-colors.json` — a club's brand colours, the store behind
-`TEAM_COLOR_PAIRS`, `TEAM_COLORS`, and `teamColorExtras`, plus the club-level
-(not per-treatment) `offDayTreatment` pick `offDayTreatmentFor` reads for
-`OffDaySection.jsx`'s tile — absent means Main — and the same idea per side,
-`defaultHomeTreatment`/`defaultAwayTreatment` (`defaultHomeTreatmentFor`/
-`defaultAwayTreatmentFor`), which `defaultTreatmentFor` consults before its own
-Friday/City-Connect heuristic — absent means "guess" rather than "Main":
-
-```json
-{ "158": { "name": "…", "primary": "#12284B", "secondary": "#FFC52F",
-           "accent": "#FFC52F", "offDayTreatment": "alternate",
-           "defaultHomeTreatment": "city-connect", "defaultAwayTreatment": "main",
-           "extras": [{ "label": "Powder Blue", "hex": "#6CACE4" }], "note": "…" } }
-```
-
-**`accent` is not a third brand colour**, and conflating the two is the mistake
-this schema exists to prevent. It is the hand-picked *distinctiveness* hex — the
-one that makes two clubs on a slate card tell apart — so for 27 of 30 clubs it
-deliberately restates that club's own `primary` or `secondary`, and only the
-Guardians, Rays, and Blue Jays carry a hue the pair doesn't. A club's real
-third-or-later colours are `extras`, researched against Wikipedia infoboxes and
-teamcolorcodes.com and skipped rather than guessed where sources disagreed (14
-clubs have one). Every colour field is optional; **a role the club lacks is an
-absent field, never `""`** — the dev-save validator rejects the empty string, and
-the lab's `applyColorsDraft` deletes rather than blanks
-(`src/screens/identity-lab/profiles/mlbColorRoles.js`).
-
-In `milb-colors.json`, `pair` is the only field a resolver reads. `third`/`confidence`/`source`/`note`
-are provenance, and `found: false` (mutually exclusive with `pair`, enforced by
-the dev-save validator and by `test/identity-lab-stores.test.js`) marks a club
-research resolved nothing for.
-
-`tuningStore.js` holds the readers. Each consuming module rebuilds the exact
-`{ [teamId]: { [treatment]: value } }` table it used to declare inline, so every
-resolver below it — and every test pinning one — is untouched by the move. **The
-store is the authoring format; those tables are still the lookup format.**
+Store schemas, the reader table, and the colour-field rules: `src/lib/data/CLAUDE.md`.
 
 Two things to know before editing:
 
@@ -176,18 +96,12 @@ Two things to know before editing:
 
 ## Editing a value — two paths, one set of stores
 
-Run `npm run dev`, open `/identity-lab`, tune, hit Save; the store is rewritten
-sorted by team id and the page hot-reloads off the landed value. That endpoint
-exists only under `vite dev` — ADR-0029 has the allowlist and the four layers.
-
-The second takes no deploy: an admin gear on `/team/{id}` writes a RUNTIME override
-that `src/lib/identity/`'s overlay layers under these same readers, so every
-resolver here answers with it and none changed signature (ADR-0050). Id grammar,
-traps and the two save gates: `docs/identity-overrides.md`.
+Two ways to edit a stored value (the lab and the team hub gear): `docs/identity-lab.md`.
 
 ## Stamp placement (`stampLogoTuning.js` + `data/stamp-logo-tuning.json`)
 
-The Logbook stamp letterboxes each club's knockout mark into one 150×150 slot
+The stamp art is locked and lives as pure math in `lib/stampArt.js`, with one tunable
+part. The Logbook stamp letterboxes each club's knockout mark into one 150×150 slot
 (`lib/stampArt.js`'s `MARK_BOX`). One slot has to hold a portrait cap logo, a
 square roundel and a wide wordmark, so a club may carry
 `{ scale, offsetX, offsetY, rotation }` — picked by eye in `/identity-lab`'s
@@ -198,6 +112,10 @@ the two slots are not mirror images: each bleeds off the opposite edge of the
 clip circle, so the nudge that rescues one can ruin the other. MLB and every
 MiLB level read the same store — it is keyed by team id and knows nothing about
 levels.
+
+`components/logbook/GameStamp.jsx` draws it. `StampPlacementEditor.jsx` is the fifth of six
+names on that component's allowlist in `scripts/check-stamp-surfaces.mjs`, and the only
+one whose game is a fabricated literal.
 
 Three things to know before touching it, all recorded in ADR-0035's amendment:
 
@@ -221,31 +139,7 @@ hand-procured art checked into `public/team-logos/{treatment}/{ABBR}.png`.
 `logoArt.js` holds the standard those files meet — **512×512, PNG, under
 400 KB** — derived from the art already on disk rather than invented.
 
-Drag a PNG onto a tile in `/identity-lab` and it lands there. **The upload
-contract**, in one place because PR 4's MiLB art builds directly on it:
-
-| | |
-| --- | --- |
-| Endpoint | `POST /__dev/team-logo?teamId={id}&treatment={key}`, raw PNG bytes as the body |
-| Destination | resolved server-side — directory from `LOGO_TREATMENT_DIRS`, filename from `teamAbbr`. **A request never supplies a path.** |
-| Rejected | not a PNG, not exactly 512×512, over the cap — each with the reason, shown inline on the tile |
-| Accepted-with-a-note | a PNG carrying no alpha channel (six committed files have none and render fine, so it's said once, not refused) |
-| Response | `{ file, url, caveat }` |
-| Side effect | `src/lib/data/logo-art.json` is rebuilt from disk |
-
-A sibling endpoint reuses one already-uploaded mark on another of the same
-club's treatments instead of procuring/uploading it again — the lab's "Copy
-here" control next to Replace art on every tile: `POST
-/__dev/team-logo-copy?teamId={id}&from={key}&to={key}`, no body — the bytes
-travel server-side, read off whatever `from` already has on disk, and land
-through the exact same validate/write/rebuild-the-manifest path as a real
-upload. Same response shape, plus a 404 (`no art uploaded for "{from}" yet`)
-when the source tile is itself empty.
-
-Validation reads the PNG header by hand — width and height are big-endian
-uint32s at bytes 16 and 20 of the IHDR chunk — so there is **no image library
-and no new dependency**. The same functions run in the browser (instant, specific
-rejection) and in Node (the authoritative check), so the two can't disagree.
+Upload contract and validation: `docs/identity-lab.md`.
 
 Two things that surprise people:
 
@@ -271,12 +165,7 @@ Existing `.svg` art stays as it is — the standard governs new uploads.
 
 ## Recolored marks (`customMarks.js` + `data/custom-marks.json`)
 
-Uploading isn't the only way a treatment gets a mark. The CDN carries no
-alternate or City Connect art, and the real thing is often the SAME shapes in
-another palette — so `/identity-lab`'s **Logo art** editor recolors a source
-mark shape by shape (`logoRecolor.js`, sharing `logoMono.js`'s shape numbering
-so a shape means one thing in both editors) and saves the result to the club's
-library under a name.
+How a recolored mark gets made: `docs/identity-lab.md`.
 
 Two rules make this safe to use on a club whose art someone already procured:
 
@@ -294,17 +183,9 @@ Both halves are written server-side only (`scripts/lib/dev-custom-marks.mjs`),
 because the library is derived from what's actually in
 `public/team-logos/custom/` and two writers is how a manifest starts lying.
 
-## `TeamLogo`'s own fallback chain
+## `TeamLogo` — the base variant is override-blind
 
-Curated-art coverage is partial by design (§ above), so the component every
-consumer renders through (`src/components/TeamLogo.jsx`) degrades in its own
-two steps, independent of the colour chain: a requested `variant` that 404s
-retries the plain `base` mlbstatic mark; no id, no base mark, or the base also
-failing draws a single-letter monogram. Never a broken-image icon, and asking
-for a mark a club happens to lack (the same 8-club City Connect gap PR 2/3
-found, or a not-yet-uploaded MiLB side) quietly falls back rather than
-erroring. This is orthogonal to `logo-art.json` — the manifest is a record for
-`test/logo-upload.test.js`, not something `TeamLogo` consults.
+`TeamLogo`'s own fallback chain (a 404 retries the base mark, then a monogram): `docs/identity-lab.md`.
 
 **`variant: 'base'` (the default, and every bare `<TeamLogo>`) is intentionally
 override-blind.** `teamLogoUrl`'s `'base'` branch returns the plain mlbstatic CDN
@@ -331,7 +212,7 @@ that game — **ADR-0030**. `headerThemeFor(teamId, treatment)` is the one
 resolver between the two header tables and that one surface; it answers `null`
 for an uncovered pair, and the CSS fallbacks (`var(--bar-fill, var(--navy))`)
 keep an unthemed page byte-identical to how it rendered before the feature
-existed. Coverage is partial on purpose (71 pairs today) — the resolver never
+existed. Coverage is partial on purpose (73 pairs today) — the resolver never
 synthesises a triad, because an unreviewed colour pair on a real page is exactly
 what the guard below can't vouch for.
 
@@ -343,9 +224,7 @@ Connect asymmetry. MiLB's `milbHeaderColorOverride` (`milbColors.js`) sends
 two, unlike Position/WPA, which still tune independently per side.
 
 The triad is `{ bar, accent, onBar }`: the bar's fill, its kraft-tape bottom
-edge, the ink on it. It was `{ blue, gold, font }` until ADR-0030 — names that
-described the *default navy chrome's* own colours and stopped meaning anything
-once a club's bar was red.
+edge, the ink on it. (Renamed from `{ blue, gold, font }` in ADR-0030: those named the default navy chrome.)
 
 **`scripts/check-contrast.mjs` asserts `onBar` against `bar` at WCAG AA for
 every entry in both stores**, and `test/header-theme.test.js` repeats it. That
@@ -379,7 +258,7 @@ who won — to ink a Logbook stamp. The rule above is about surfaces the user ha
 NOT revealed; a stamp exists only for a game its owner already finished
 revealing (ADR-0035), and it prints that game's final score in numerals, so the
 ink is not telling anyone anything. It is safe because of WHERE it can render,
-not because of what it computes: its only caller is `GameStamp.jsx`, and that
-component's import sites are an allowlist enforced by
+not because of what it computes: its callers are `GameStamp.jsx` and the lab's `StampPlacementEditor.jsx`, and
+that component's import sites are an allowlist enforced by
 `scripts/check-stamp-surfaces.mjs`. **Importing it anywhere else is a spoiler
 bug**, not a style choice.
