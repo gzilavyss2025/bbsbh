@@ -11,6 +11,9 @@
 //      BLOCKIMG=1 aborts every image request, so an <img> ends in the same state on every run
 //      (a logo that races its fallback makes two runs of unchanged code differ)
 //      CLASSES='a,b'   also print how many elements of each class the route drew
+//      PROXY=1 sends the browser through HTTPS_PROXY (localhost bypassed), so a route that needs live statsapi
+//      can load. Chromium must trust the proxy CA: add /root/.ccr/agent-proxy-ca.crt to ~/.pki/nssdb with certutil.
+//      Certificate checks stay ON. A live page can change between runs, so capture BEFORE twice and diff them first.
 // Run it before and after a migration, then diff with diffgeom.mjs. It is the
 // substitute for `npm run visual` (which runs only when Gary asks) for a change
 // that must move nothing: every element's rect and layout style, at 390 and 760.
@@ -21,7 +24,10 @@ const mock = process.env.MOCK ? (await import(new URL('../../../e2e/fixtures/moc
 const ls = process.env.LS ? JSON.parse(process.env.LS) : null
 const steps = process.env.STEPS ? JSON.parse(process.env.STEPS) : []
 const classes = (process.env.CLASSES || '').split(',').filter(Boolean)
-const b = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium' })
+const b = await chromium.launch({
+  executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium',
+  ...(process.env.PROXY ? { proxy: { server: process.env.HTTPS_PROXY, bypass: 'localhost,127.0.0.1' } } : {}),
+})
 const res = {}
 for (const route of routes) {
   for (const w of [390, 760]) {
@@ -31,7 +37,7 @@ for (const route of routes) {
     if (ls) await p.addInitScript((kv) => { for (const [k, v] of Object.entries(kv)) localStorage.setItem(k, v) }, ls)
     await p.goto(`${process.env.BASE || 'http://localhost:5173'}${route}${route.includes('?') ? '&' : '?'}nointro`, { waitUntil: 'networkidle' })
     if (process.env.FREEZE) await p.addStyleTag({ content: '*,*::before,*::after{animation:none!important;transition:none!important}' })
-    await p.waitForTimeout(800)
+    await p.waitForTimeout(process.env.PROXY ? 3000 : 800)
     if (process.env.BLOCKIMG) { await p.waitForFunction(() => [...document.images].every((i) => i.complete), null, { timeout: 5000 }).catch(() => {}); await p.waitForTimeout(600) }
     for (const st of steps) {
       if (st.tab) await p.getByRole('tab', { name: new RegExp(st.tab, 'i') }).first().click().catch(() => {})

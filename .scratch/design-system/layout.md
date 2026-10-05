@@ -430,7 +430,7 @@ wild card and the workload partials.
 
 1. **`Cluster` keeps its `align` prop.**
 2. **`Grid` gets no `rowGap`.** The 2 grids that need two gap values stay hand-written.
-3. **`Stack gap="section"` gets a pilot on `/salaries`.** One page, its own slice, geometry checked. Run on 2026-10-05: **stopped, not migrated.** See "Section gap pilot" below.
+3. **`Stack gap="section"` gets a pilot on `/salaries`.** One page, its own slice, geometry checked. Run on 2026-10-05: `/salaries` **stopped, not migrated** (see "Section gap pilot"). Gary then chose the team hub; its Roster tab is **migrated**, the other tabs are not (see "Section gap pilot, second run").
 
 ## Section gap pilot (`/salaries`, 2026-10-05)
 
@@ -482,10 +482,90 @@ code change.
    there. Finding one needs a trace; the census does not name pages.
 3. Leave `gap="section"` unused for now. The token and the prop stay.
 
-**Not checked.** I did not look at any other page. I did not run `npm run visual` or
+**Not checked in this run.** I did not look at any other page (the second run below did). I did not run `npm run visual` or
 `npm run e2e`. I did not judge by eye whether 16px between the sections looks right, because
 the pilot stopped first.
 
 **Other pages that reuse these blocks (step 5).** `SourceLine` is also used by the
 team Contracts tab (`ContractsTab.jsx`). The other three blocks and `.payowed` are
 used on `/salaries` only. No file was changed, so nothing else moves.
+
+## Section gap pilot, second run: the team hub (2026-10-05)
+
+Gary chose "pilot on another page", and then "migrate the whole hub". **Result: the
+Roster tab is migrated with zero differences. The other tabs are not, because a
+Stack would change them.** The shared hub margin rule stays.
+
+**The trace.** I measured the top-level children of `.screen` on about 40 routes at
+390px (computed margins and gaps; live data for the hub). Sections spaced by 16px:
+only the team hub, through one rule, `.team-hub :where(.card):not(:where(.card
+.card))` in `09-team-info.css`, whose comment says the space is the parent's "until
+#1180 gives the parent a Stack". Every other page I traced spaces its sections
+at some other step, so `gap="section"` (16px) would change it:
+
+| page | gap between sections |
+| --- | ---: |
+| `/salaries` | 0px |
+| `/attendance`, `/pace-of-play`, `/farm-system-rankings`, `/bullpen-availability`, `/doubleheaders`, `/run-differential` | 32px |
+| `/nine-keys` | 24px |
+| `/all-star-legacy` | 20px |
+| `/design-lab` | 40px |
+| `/first-scorebook` | 58px |
+| `/rehab`, `/milestones`, `/awards` | one section, nothing to space |
+
+**What changed.** `RosterTab.jsx` wraps its four cards in one `Stack gap="section"`
+(the as-of banner stays outside, after it). `09-team-info.css` gets one rule,
+`.team-hub .stack > .card { margin-top: 0 }`. Three classes beat the namespace
+rules `.roster-super` and `.tstats`, which each set their own 16px. I first deleted
+those two margins instead, and `/all-star-rosters` (which draws `.roster-super`)
+moved 320px and `/design-lab` 16px, so I reverted that. Nothing else in the hub
+reads the new rule yet.
+
+**Checked.** BEFORE was captured twice with `geom.mjs` (`FREEZE=1 BLOCKIMG=1
+PROXY=1`, `?nointro`, 390 and 760px) and the two runs match. After the edit:
+
+| route | result |
+| --- | --- |
+| `/team/158/roster`, `/team/556/roster`, `/team/111/roster`, `/team/147/roster` | 0 differences at 390 and 760px |
+| `/team/158/roster?d=2026-07-15` (dated, with the banner) | 0 differences |
+| `/team/158`, `/games`, `/numbers`, `/contracts`, `/minors`, `/leaders`; `/team/556`, `/numbers`, `/minors` | unchanged |
+| `/all-star-rosters`, `/design-lab` | unchanged |
+
+"0 differences" counts every element's rect and layout style, with two known
+exceptions that are not layout. (1) The wrapper itself is one new element. (2)
+Chrome reports `min-width` as `0px` on a block and `auto` on a flex item, so each
+of the 3 or 4 cards in the Stack reads `0px` before and `auto` after. The rects
+are equal. Off-screen club-switcher logos also flip between `img` and `span`
+between two unchanged runs (known from S12); I did not count them.
+
+**Why the other tabs are not migrated.**
+- **Numbers.** A trial gave +20px at 390 and 760px. The `.tledg` block (team
+  leaders) is 18px from its neighbour today, not 16: its head has an 18px top
+  margin that collapses out through the block. In a Stack it does not collapse,
+  so the gap is 16 + 4 + 18.
+- **Minors, on a minor-league club.** A trial gave +16px on `/team/556/minors`
+  for the same reason: the Affiliation history section opens with an 18px head
+  margin. The Brewers' Minors tab has no such section and matched, so the tab
+  passes on MLB clubs and fails on minor-league ones.
+- **Overview and Games.** I did not run a trial. Their cards sit between doors and
+  a transactions card with other spacing (`.thub__door` 8px above and 16px below,
+  `.txcard` 14px both ways, one card 8px above and 14px below, `.tledg` 18px). One
+  Stack would add 16px to each of those gaps.
+- **Contracts.** One section and some hints with 14px margins. No gap to move.
+
+These trials were reverted. A way forward, not decided here: give the 18px head
+margin its own place (the SectionHead's leak, `system/section-head.css`), and
+group each card with its door, so a tab becomes a few Stacks. Then the shared rule
+can go.
+
+**Tool change.** `geom.mjs` takes `PROXY=1`: the browser goes through `HTTPS_PROXY`
+with `localhost` bypassed, and waits 3s for live data. The container had no CA in
+the browser trust store (NSS), so I installed `libnss3-tools` and added
+`/root/.ccr/agent-proxy-ca.crt` with `certutil`. Certificate checks stay on. This
+is per container: a new session needs the same two steps. A live page can change
+between runs, so capture BEFORE twice first.
+
+**Not checked.** The "Season" roster toggle (a click state) and a Roster tab at a
+width other than 390 and 760px. Four clubs only; a club whose injured list is
+empty, or one with no bullpen card, was not singled out. I did not run `npm run
+visual` or `npm run e2e`.
