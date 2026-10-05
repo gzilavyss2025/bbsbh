@@ -10,6 +10,7 @@ import { BoxLinesList } from './BoxLinesList.jsx'
 import { Stat } from '../gamehud/StatBox.jsx'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { IconButton } from '../ui/control/IconButton.jsx'
+import { EmptyState } from '../ui/state/EmptyState.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // BOX LINES — the drilldown behind a summary stat line (ADR-0069). Tap a
@@ -206,9 +207,9 @@ export function BoxLinesSheet({
           )}
 
           {rows && rows.length === 0 && (
-            <p className="hint boxlines__hint">
+            <EmptyState className="boxlines__empty">
               {cutoff ? `No game lines before ${humanDateWithYear(cutoff)}.` : 'No game lines yet.'}
-            </p>
+            </EmptyState>
           )}
 
           {/* THE GROUPS, not the rows. Tapping one asks the same join its own

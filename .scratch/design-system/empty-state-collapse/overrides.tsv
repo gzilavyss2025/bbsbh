@@ -11,7 +11,6 @@
 .prospectcard__empty	empty	MIGRATE	E5	label+note	The issue names it: a label, a line and a note, the three-line shape (the lab entry proves it first, in E1). Its child rule `.prospectcard__empty p` goes
 .prospectcard__emptylabel	empty	MIGRATE	E5	inner line	the label line of .prospectcard__empty. It has no rule of its own today (only the word); it becomes EmptyState `label`
 .prospectcard__emptynote	empty	MIGRATE	E5	inner line	the note line of .prospectcard__empty; becomes EmptyState `note`
-.refpanel__empty	empty	MIGRATE	E3	box	already THE target look (a dashed hairline inset, graphite display caps). Inside the innings viewer: the armsEmpty test stays in ReferencePanel.jsx untouched
 .trec__empty	empty	MIGRATE	E4	label	team hub Records card: no games in this stretch of the season yet. A caption-size line today; becomes EmptyState size compact
 .hzntile__nostat	empty	MIGRATE	E4	hint + own class	Minors Horizon tile: one line where the tile stat goes; size compact
 .vsteam__none	empty	MIGRATE	E5	hint + own class	player page splits vs a team: no career meetings
@@ -45,7 +44,7 @@
 .hint--prose	caveat	HOLD		label	the body-face caveat line. Its empty sites move; the caveat sites keep it
 .hint--error	error	n/a		label	the error line: the Notice census (#1132, after this one) owns it
 .hint__link	other	n/a	E9	label	DEAD: no use in src, e2e, test, scripts or api. Delete in the cleanup slice
-.boxlines__hint	loading	n/a		label	Box Lines status line: loading and error keep it; only the empty line moves (E3)
+.boxlines__hint	loading	n/a		label	Box Lines status line: loading and error keep it; the two empty lines moved to EmptyState in E3 (.boxlines__empty)
 #
 # --- SELECTORS — loading, error, control, caveat (look-alikes) ---
 .loader__blank	loading	n/a		box	a Loader part (the blank line under the pencil)
@@ -175,11 +174,14 @@ screens/team/TeamPhotosPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMe
 screens/GameSelect.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage (No games scheduled.) ON THE SLATE. A day with no games carries no score; the empty test is the schedule length, not a game state. DONE in E2: GameSelect passes no emptyProse; the empty test is unchanged
 #
 # --- SITES — E3 the spoiler surfaces ---
-components/inning/focus/ReferencePanel.jsx#1	empty	MIGRATE	E3	box	innings viewer, gated file. armsEmpty (ReferencePanel.jsx:446) is computed from the half's margin notes and pitcher rows, which arrive reveal-clamped. Keep the test byte for byte; only the <p> changes
-components/inning/RosterPanel.jsx#1	empty	MIGRATE	E3	bare hint	lineups and the innings rail: the lineup is not posted. A pre-game fact, no score
-screens/TeamInfo.jsx#1	empty	MIGRATE	E3	bare hint	the lineup page starter card: not posted yet. Today `.starter > .hint` (10-lineup.css) insets it; that rule goes
-components/boxlines/BoxLinesSheet.jsx#3	empty	MIGRATE	E3	hint + own class	Box Lines carries final scores (ADR-0069); its gate is api/boxlines/rows.js. The empty test reads the gated rows: keep it where it is
-components/boxlines/GameLinesDoor.jsx#1	empty	MIGRATE	E3	hint + own class	Box Lines door sheet: no games to list. Same gate note
+# DONE in E3 and gone from the census: the .refpanel__empty rule (removed) and its site, components/inning/focus/ReferencePanel.jsx#1, which renders <EmptyState> with no namespace (the rail's flex gap spaces it). The armsEmpty test is unchanged.
+.roster__empty	empty	MIGRATE	E3	bare hint	DONE in E3: the namespace of RosterPanel.jsx's "Not posted yet." EmptyState. Its rule (13-play-by-play.css) is a margin only: .roster__body has no side padding
+.starter__empty	empty	MIGRATE	E3	bare hint	DONE in E3: the namespace of the starter card's "Not posted yet." EmptyState (TeamInfo.jsx). Its rule (10-lineup.css) is a margin only, in place of `.starter > .hint`: the card body is flush
+.boxlines__empty	empty	MIGRATE	E3	hint + own class	DONE in E3: the namespace of the two Box Lines empties (BoxLinesSheet.jsx, GameLinesDoor.jsx). Its rule (boxlines.css) is the status line's top margin only
+components/inning/RosterPanel.jsx#1	empty	MIGRATE	E3	bare hint	lineups and the innings rail: the lineup is not posted. A pre-game fact, no score. DONE in E3: the site renders <EmptyState size="compact" className="roster__empty">; the empty test is unchanged
+screens/TeamInfo.jsx#1	empty	MIGRATE	E3	bare hint	the lineup page starter card: not posted yet. Today `.starter > .hint` (10-lineup.css) insets it; that rule went. DONE in E3: the site renders <EmptyState size="compact" className="starter__empty">; the empty test is unchanged
+components/boxlines/BoxLinesSheet.jsx#3	empty	MIGRATE	E3	hint + own class	Box Lines carries final scores (ADR-0069); its gate is api/boxlines/rows.js. The empty test reads the gated rows: keep it where it is. DONE in E3: the site renders <EmptyState className="boxlines__empty">; the empty test is unchanged
+components/boxlines/GameLinesDoor.jsx#1	empty	MIGRATE	E3	hint + own class	Box Lines door sheet: no games to list. Same gate note. DONE in E3: the site renders <EmptyState className="boxlines__empty">; the empty test is unchanged
 #
 # --- SITES — E4 team hub, E5 player page ---
 screens/team/modules/records/RecordsCard.jsx#1	empty	MIGRATE	E4	label	compact
