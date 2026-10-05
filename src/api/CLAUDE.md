@@ -148,7 +148,9 @@ own `apps`.
 pitch-level CSV for one hitter and pitcher from the browser, with a cutoff date, clamped
 to today in US Pacific, that holds today back. Its header has the output shape and the
 Savant traps (the 25,000-row cap, the inclusive date bounds, rows with no `plate_x`).
-Savant is `NetworkOnly` in `vite.config.js`. `hitterGrid.js` reads the nightly
+Savant is `NetworkOnly` in `vite.config.js`. `playIds.js` (cutoff-gated) maps a past
+meeting's pitches to playIds for the pitch modal's film, from a play-by-play pruned to
+four fields. `hitterGrid.js` reads the nightly
 hitter-grid shards (ADR-0096, ADR-0097); it is spoiler-FREE, with season sums over Final
 games.
 

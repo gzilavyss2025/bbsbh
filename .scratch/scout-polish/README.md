@@ -1,6 +1,8 @@
 # Matchup Scout polish — working files
 
-The tracker is the GitHub issue that links here. These are its supporting files.
+The tracker is GitHub issue #1490; it is built in the PR that carries this folder
+(the spec is `docs/scout-design.md` F, the scene decision ADR-0099). These are its
+supporting files.
 
 - `mockup.html` — the reviewed mockup (Gary, 2026-10-05). It is a single, self-contained page:
   open it in a browser (`npx vite preview` is not needed; a `file://` open works, but the
