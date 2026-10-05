@@ -24,3 +24,9 @@ the wrong shape for a whole season and a grid is the wrong shape for a preview.
 A tab's secondary modules render as full cards, same as its headline module —
 no collapsed/shelved state. Every tab path goes through `teamTabPath` →
 `linkQuery`, so a dated link keeps its `?d=` across a tab switch.
+
+**The club schedule runs into October.** `fetchTeamSchedule` returns the postseason rounds at
+MLB, each row tagged `gameType`, so the Games tab, Last 10, Stamp In and the photo pages list
+them. A number that must reconcile with a regular-season ledger (the day-of-week record, the
+Records card's completeness check in `loadNumbers.js`) filters on `gameType === 'R'` first. A
+postseason row dated after the page's own day is never returned (ADR-0087).

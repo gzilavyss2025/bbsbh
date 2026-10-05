@@ -7,6 +7,8 @@ import { matchupSlug } from '../lib/route.js'
 import { BROADCAST_FIELDS, BROADCAST_HYDRATE, nationalName } from './broadcast.js'
 import { getJson } from './statsapi.js'
 import { fetchStaticTeams } from './teams-static.js'
+import { postseasonThrough } from './scheduleGames.js'
+import { isoToday, toApiDate } from '../lib/dates.js'
 import { WINTER_LEAGUE_IDS, WINTER_SPORT_ID } from '../lib/winter/leagues.js'
 
 // Normalize a raw schedule game into the shape our cards need. Exported so
@@ -495,7 +497,7 @@ const SCHEDULE_FIELDS = `${GAME_CARDS_FIELDS},lineups,awayPlayers,homePlayers,of
 const HEAD_TO_HEAD_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id'
 const TEAM_SCHEDULE_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,teams,away,home,team,id,name,teamName,abbreviation,status,abstractGameState,isWinner,score,linescore,currentInning,scheduledInnings'
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,gameType,doubleHeader,teams,away,home,team,id,name,teamName,abbreviation,status,abstractGameState,isWinner,score,linescore,currentInning,scheduledInnings'
 
 // Every regular-season meeting between two clubs in one season, for the
 // footer's "find a past matchup" search. The schedule endpoint has no
@@ -676,13 +678,27 @@ export async function fetchTodayPlateUmpireIds(dateStr, sportId = 1) {
 // it under this same gate rather than a new one, since anything visible to
 // `won` is equally safe for the number next to it. `hydrate=team,linescore`
 // gets real abbreviations (instead of the teamAbbr() name-derived fallback)
-// and each final's actual inning count. Regular season only ('R'), like
-// fetchHeadToHead. Degrades to [].
-export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCutoff = null) {
+// and each final's actual inning count. At MLB it holds the postseason rounds
+// (F/D/L/W) as well as the regular season, each row tagged with its `gameType`,
+// because October is when the games matter most. MiLB stays 'R': its postseason
+// codes were never checked. A postseason row dated after the page's own day is
+// dropped, because an "if necessary" game's presence would say how the series
+// went (ADR-0087). A caller that must reconcile with a regular-season ledger
+// (the day-of-week record, the Records card's completeness check) filters on
+// `gameType === 'R'` itself. `regularSeasonOnly: true` skips the postseason
+// request. Degrades to [].
+export async function fetchTeamSchedule(
+  teamId,
+  season,
+  sportId = 1,
+  resultsCutoff = null,
+  { regularSeasonOnly = false } = {},
+) {
   if (!teamId || !season) return []
+  const withPostseason = !regularSeasonOnly && sportId === 1
   try {
     const data = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&season=${season}&gameType=R&hydrate=team,linescore&fields=${TEAM_SCHEDULE_FIELDS}`,
+      `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&season=${season}&gameType=${withPostseason ? 'R,F,D,L,W' : 'R'}&hydrate=team,linescore&fields=${TEAM_SCHEDULE_FIELDS}`,
     )
     const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
     const byPk = new Map()
@@ -703,6 +719,7 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCuto
         gamePk: g.gamePk,
         apiDate,
         gameNumber: g.gameNumber ?? 1,
+        gameType: g.gameType ?? 'R',
         doubleHeader: g.doubleHeader ?? 'N',
         isHome,
         away: { abbreviation: teamAbbr(away) },
@@ -720,12 +737,27 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCuto
         started: g.status?.abstractGameState !== 'Preview',
       })
     }
-    return [...byPk.values()].sort(
+    const sorted = [...byPk.values()].sort(
       (x, y) => new Date(x.apiDate) - new Date(y.apiDate) || x.gameNumber - y.gameNumber,
     )
+    return withPostseason ? postseasonThrough(sorted, pageDay(resultsCutoff)) : sorted
   } catch {
     return []
   }
+}
+
+// The day of the game a team page was opened from: the day after its
+// `resultsCutoff` on a dated link, else today. Today is the EARLIER of the UTC
+// and the local date, since the evening hours are already "tomorrow" in UTC and
+// tomorrow's card must not draw while tonight's game is still unseen.
+function pageDay(resultsCutoff) {
+  if (resultsCutoff) {
+    const [y, m, d] = resultsCutoff.split('-').map(Number)
+    return new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10)
+  }
+  const utc = isoToday()
+  const local = toApiDate()
+  return utc < local ? utc : local
 }
 
 // recentDecidedGames / allDecidedGames / allStartedGames — the pure post-fetch

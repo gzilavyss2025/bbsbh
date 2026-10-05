@@ -19,6 +19,7 @@ import {
   stampInGames,
 } from '../../lib/stampIn.js'
 import { teamClubName } from '../../lib/teams.js'
+import { seriesAbbr } from '../../api/boxlines/rows.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
@@ -226,6 +227,7 @@ function StampInRow({ game, getSignals, stamped, seasonFull, onStamp }) {
         {opponent && (
           <span className="stampin__opp">
             {game.isHome ? 'vs' : 'at'} {opponent}
+            {seriesAbbr(game.gameType) && ` \u00b7 ${seriesAbbr(game.gameType)}`}
           </span>
         )}
       </div>
