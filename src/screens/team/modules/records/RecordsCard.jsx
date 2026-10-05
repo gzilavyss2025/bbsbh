@@ -6,6 +6,7 @@ import { InningScoringGrid } from './InningScoringGrid.jsx'
 import '../../../../styles/65-team-records.css'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
+import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'
 
 // The Numbers tab's Records card: this club's W-L in ~50 situations, grouped
 // by subject, plus the season counts that are not records (come-from-behind
@@ -167,7 +168,7 @@ export function RecordsCard({ data, cutoff }) {
             </div>
           ))
         ) : (
-          <p className="trec__empty">No games in this stretch of the season yet.</p>
+          <EmptyState size="compact">No games in this stretch of the season yet.</EmptyState>
         )}
         {records && (
           <div className="trec__group">

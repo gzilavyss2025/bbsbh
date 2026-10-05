@@ -5,6 +5,7 @@ import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { Pill } from '../../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
+import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'
 import { ordinal } from '../../../../lib/format.js'
 
 const DASH = '—'
@@ -115,7 +116,7 @@ export function DepthChartCard({ depthChart }) {
               ))}
             </ul>
           ) : (
-            <p className="hint">Too early for a level-relative read at this position.</p>
+            <EmptyState size="compact">Too early for a level-relative read at this position.</EmptyState>
           )}
         </div>
       </div>
