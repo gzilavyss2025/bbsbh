@@ -86,10 +86,8 @@ erase forgets — leaving it behind would re-open a box score on the next visit 
 a device the user had just wiped. It never deletes `game:final:{gamePk}`,
 which is a shared, immutable cache of public facts belonging to no user.
 
-**`api/` now holds nine functions of the Hobby plan's twelve.** That is not a
-crisis and it is the last time one should be added casually — the next feature
-that wants an endpoint should first ask whether it can ride an existing
-handler's query string.
+**`api/` holds fourteen functions** (root `CLAUDE.md` keeps the count). Add one only
+after asking whether the feature can ride an existing handler's query string.
 
 ## The sync seam
 

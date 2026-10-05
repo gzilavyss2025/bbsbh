@@ -40,8 +40,8 @@ list says what each guard checks.
 - `check-raw-values.mjs` — a ratchet on the `src/styles/` declarations that write a
   colour hex, a `border-radius` length, a transition/animation time, or a
   `box-shadow` literal instead of reading a token (#1178). Per-kind budgets, same
-  shape as `check-caption-budget.mjs`: growth fails, a drop warns until you lower
-  the budget in the same PR. Each count is taken two ways (regex and a character
+  shape as `check-caption-budget.mjs`; a drop only warns until you lower the budget.
+  Each count is taken two ways (regex and a character
   scanner) and must agree.
 - `check-strike-links.mjs` — every rule that draws a `line-through` must name
   `.plink` in its selector list, because a player name is a `<button
@@ -80,11 +80,8 @@ list says what each guard checks.
 - `check-dir-size.mjs` — caps source files per directory (`MAX_FILES` 12) across
   `src/`, `api/`, `scripts/`, giving the "flat directories don't stay flat" rule in
   root `CLAUDE.md` the enforcement it never had (that rule was broken to 126 files
-  in `src/components`). A **ratchet**: the directories already over the line (14 entries today)
-  carry a `BUDGETS` entry pinned at today's count, editable DOWNWARD only, and it
-  fails if one grows past its budget *or* shrinks below it without the number being
-  tightened in the same commit — so a cleanup has to record itself and the table can
-  only shrink. See ADR-0038.
+  in `src/components`). A **ratchet** (the rule is in `scripts/CLAUDE.md`): each directory already over
+  the line carries a `BUDGETS` entry pinned at today's count. See ADR-0038.
 - `check-file-size.mjs` — caps lines per source file (`MAX_LINES` 600, between p90
   and p99 of the repo's source files), to catch the next 2,620-line `person.js`
   while splitting it is still cheap. Deliberately a **weaker** ratchet than its

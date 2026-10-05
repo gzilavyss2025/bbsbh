@@ -5,7 +5,7 @@
 // race a cold, statsapi-contested resolution. See
 // docs/adr/0012-dynamic-link-previews.md.
 //
-// NOT a gen-*.mjs data generator (see scripts/CLAUDE.md's naming convention):
+// NOT a gen-*.mjs data generator (see docs/scripts/generators.md, which lists it as not a data generator):
 // it writes no public/data/* file, so it's out of the nightly job's commit
 // step. It's also the one script here that talks to bbsbh.vercel.app itself
 // rather than only statsapi — pure best-effort cache warming, never a hard

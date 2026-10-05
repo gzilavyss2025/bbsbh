@@ -94,7 +94,8 @@ else claims('the team hub tab count', /(\w+)-tab hub/i, (tabs[1].match(/key:/g) 
 
 function nestedDirs(dir, out = []) {
   for (const name of readdirSync(dir)) {
-    if (name === 'node_modules' || name === '.git' || name === 'dist') continue
+    // `.claude` holds other agents' worktrees, each with a copy of every CLAUDE.md.
+    if (name === 'node_modules' || name === '.git' || name === 'dist' || name === '.claude') continue
     const full = join(dir, name)
     if (!statSync(full).isDirectory()) continue
     if (existsSync(join(full, 'CLAUDE.md'))) out.push(`${full.slice(ROOT.length + 1).split(sep).join('/')}/`)

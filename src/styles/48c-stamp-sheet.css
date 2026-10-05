@@ -287,7 +287,7 @@
 /* The knockout mark, sitting where a stamp's face value sits — a small
    cream roundel in the upper-right corner, re-inking the flat one-color
    mark (ADR-0031) dark the same way a themed masthead does against a light
-   fill (src/CLAUDE.md's "already-flat silhouette is the one safe case"). */
+   fill (ADR-0030's last section: an already-flat silhouette is the one safe case). */
 .postagestamp__mark {
   position: absolute;
   top: var(--space-1);
