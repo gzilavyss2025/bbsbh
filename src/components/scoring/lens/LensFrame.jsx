@@ -19,12 +19,16 @@ import { useBecameTrue } from '../../../hooks/motion/useBecameTrue.js'
 // one that is there on a cold load or a return to the lens does not
 // (useBecameTrue).
 //
-// `carry` is the carry strip (CarryStrip.jsx), pinned in the top spacer band:
-// from the pane's top, under the sticky header, down to the frame (`padTop` is
-// that band's height). It takes no taps, so the pane still pans under it.
+// `carry` is the carry strip (CarryStrip.jsx). It takes the larger band of
+// paper beside the frame (useLens's `bandAbove` and `bandBelow`): above, from
+// the sticky header down to the frame, when the frame sits at its seat; below,
+// under the docked card and over the foot row, when the frame rides up near
+// the top of the order. Never over the frame. It takes no taps, so the pane
+// still pans under it.
 export function LensFrame({ frame, dock = null, carry = null }) {
   const docked = useBecameTrue(Boolean(dock))
   if (!frame) return null
+  const below = carry && frame.bandBelow > frame.bandAbove
   return (
     <>
       <div
@@ -37,14 +41,15 @@ export function LensFrame({ frame, dock = null, carry = null }) {
         aria-hidden="true"
         style={{ top: frame.top + frame.height, width: frame.left }}
       />
-      {carry && (
-        <div className="sc-lens__carry" style={{ top: frame.top - frame.padTop, maxHeight: frame.padTop }}>
+      {carry && !below && (
+        <div className="sc-lens__carry" style={{ top: frame.top - frame.bandAbove, maxHeight: frame.bandAbove }}>
           {carry}
         </div>
       )}
-      {dock && (
-        <div className={`sc-lens__dock ${docked ? 'sc-lens__dock--fresh' : ''}`} style={{ top: frame.top + frame.height }}>
-          {dock}
+      {(dock || below) && (
+        <div className="sc-lens__under" style={{ top: frame.top + frame.height, maxHeight: frame.bandBelow }}>
+          {dock && <div className={`sc-lens__dock ${docked ? 'sc-lens__dock--fresh' : ''}`}>{dock}</div>}
+          {below && <div className="sc-lens__carry sc-lens__carry--below">{carry}</div>}
         </div>
       )}
     </>

@@ -26,8 +26,9 @@ import { durationMs, glideAt } from '../../../lib/scorecard/glide.js'
 // stops a running one where it is.
 //
 // Each pass settles one thing and returns, so the loop is stable: the zoom
-// first (it changes every measured size), then the frame and the two spacers
-// (they change where the rows are), then the seat. The seat runs only when the
+// first (it changes every measured size), then the frame and the spacer below
+// slot 9, then the seat. The frame reads the frontier box's place in the
+// content, which no scroll changes, so seating cannot move it again. The seat runs only when the
 // frontier or the frame moved (`seat` plus the frame), so a poll that brings
 // nothing new, or a reader who pans to look at an older box, is left alone.
 // When it seats, it also brings the pane's top to the window's top: the lens
@@ -70,12 +71,16 @@ export function useLens({ on, paneRef, tableRef, seat, max, glide = null }) {
       return
     }
 
+    // The frontier box's place in the content (at scroll 0): near the top of
+    // the order the frame rides up to it (lensFrame's "seat and ride").
     const frame = lensFrame({
       paneHeight: pane.clientHeight,
       headerHeight: table.tHead.getBoundingClientRect().height,
+      footHeight: table.querySelector('tfoot td')?.getBoundingClientRect().height ?? 0,
       railRight,
       cellWidth: cellRect.width,
       cellHeight: cellRect.height,
+      cellTop: target ? cellRect.top - inner.top + pane.scrollTop : null,
     })
     const was = geom?.frame
     if (!was || Object.keys(frame).some((k) => Math.abs(frame[k] - was[k]) > 0.5)) {

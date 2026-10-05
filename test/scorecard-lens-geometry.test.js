@@ -50,21 +50,54 @@ test('lensZoom: no pane width yet gives no zoom change (1)', () => {
   assert.equal(lensZoom({ paneWidth: 0, railWidth: 100, cellWidth: 86, max: 1.5 }), 1)
 })
 
-test('lensFrame: top at 54% of the pane, over the SECOND column after the rail', () => {
-  const f = lensFrame({ paneHeight: 600, headerHeight: 30, railRight: 143, cellWidth: 123, cellHeight: 129 })
+// The pane in these: 600px tall, a 30px sticky header, a 40px foot row,
+// 129px rows. `cellTop` is the frontier box's top in the pane's content
+// (scroll 0). There is no spacer above slot 1, so row 1's box is at 30.
+const PANE = { paneHeight: 600, headerHeight: 30, footHeight: 40, railRight: 143, cellWidth: 123, cellHeight: 129 }
+
+test('lensFrame: a box deep in the order sits at the seat, 54% down, over the SECOND column', () => {
+  const f = lensFrame({ ...PANE, cellTop: 30 + 5 * 129 })
   assert.deepEqual(f, {
     top: 324,
     left: 266, // rail (143) + one column (123): the previous inning shows to the left
     width: 123,
     height: 129,
-    padTop: 294, // row 1 can reach the frame: frame top minus the header
-    padBottom: 276, // row 9 can reach the frame: pane height minus frame top
+    padBottom: 276, // row 9 can reach the seat: pane height minus the seat
+    bandAbove: 294, // the paper between the header and the frame
+    bandBelow: 107, // between the frame's bottom (453) and the foot row (560)
   })
 })
 
-test('lensFrame: no negative spacer when the header is taller than the frame top', () => {
-  const f = lensFrame({ paneHeight: 40, headerHeight: 30, railRight: 100, cellWidth: 80, cellHeight: 80 })
-  assert.equal(f.padTop, 0)
+test('lensFrame: the top of the order rides above the seat, so no blank paper shows over row 1', () => {
+  // Row 1 leads off: the frame sits on row 1 itself, under the header.
+  const one = lensFrame({ ...PANE, cellTop: 30 })
+  assert.equal(one.top, 30)
+  assert.equal(one.bandAbove, 0)
+  assert.equal(one.bandBelow, 600 - 40 - (30 + 129))
+  // Row 2, then row 3: the frame moves down one row a tap.
+  assert.equal(lensFrame({ ...PANE, cellTop: 159 }).top, 159)
+  assert.equal(lensFrame({ ...PANE, cellTop: 288 }).top, 288)
+  // Row 4 is past the seat: the frame stops there and the sheet scrolls.
+  assert.equal(lensFrame({ ...PANE, cellTop: 417 }).top, 324)
+  // A ride never puts the frame under the sticky header.
+  assert.equal(lensFrame({ ...PANE, cellTop: 12 }).top, 30)
+})
+
+test('lensFrame: a riding frame needs no scroll, and a seated one scrolls as before', () => {
+  const at = (cellTop) => {
+    const frame = lensFrame({ ...PANE, cellTop })
+    return lensOffset({ cellRect: { top: cellTop, left: 266 }, paneRect: { top: 0, left: 0 }, scrollTop: 0, scrollLeft: 0, frame }).top
+  }
+  assert.equal(at(30), 0)
+  assert.equal(at(288), 0)
+  assert.equal(at(30 + 5 * 129), 30 + 5 * 129 - 324)
+})
+
+test('lensFrame: no frontier box measured yet sits at the seat, and no band is negative', () => {
+  assert.equal(lensFrame({ ...PANE, cellTop: null }).top, 324)
+  const tiny = lensFrame({ paneHeight: 40, headerHeight: 30, footHeight: 20, railRight: 100, cellWidth: 80, cellHeight: 80, cellTop: 30 })
+  assert.equal(tiny.bandAbove, 0)
+  assert.equal(tiny.bandBelow, 0)
 })
 
 test('lensOffset: puts a measured cell under the frame', () => {

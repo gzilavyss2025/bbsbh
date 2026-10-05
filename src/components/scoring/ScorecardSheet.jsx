@@ -58,8 +58,9 @@ import { moveKey } from '../../lib/scorecard/words.js'
 //
 // `lens` is the phone lens (ADR-0092, components/scoring/lens/): 'lens' draws
 // the compact rail at the lens's measured zoom, with a blank pad column before
-// inning 1 and a spacer row above slot 1 and below slot 9, so any box can
-// scroll under the fixed frame; 'whole' is today's sheet at its fit zoom with
+// inning 1 and a spacer row below slot 9, so any box can reach the frame (a
+// box near the top of the order has the frame ride up to it, with no blank
+// paper over row 1); 'whole' is today's sheet at its fit zoom with
 // the frontier outlined. The seal cell and the flip cell carry `data-frontier`
 // in both, so the lens finds the frontier by measuring the DOM.
 const SUMMARY = ['AB', 'H', 'R', 'RBI']
@@ -308,12 +309,6 @@ export function ScorecardSheet({
             </tr>
           </thead>
           <tbody>
-            {inLens && (
-              <tr className="sc-sheet__lenspad" aria-hidden="true">
-                <td className="sc-sheet__name" style={lensPad(lensGeom?.frame?.padTop)} />
-                <td colSpan={columns.length + SUMMARY.length} />
-              </tr>
-            )}
             {SLOTS.map((slot, i) => {
               const row = slotRow(grid, lineup, i)
               return (

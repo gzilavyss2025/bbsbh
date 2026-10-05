@@ -14,6 +14,7 @@ import {
   BreathDemo,
   LensGlideDemo,
   LensMovedDemo,
+  LensRideDemo,
   LensTearDemo,
   LensTurnDemo,
   LineupDemo,
@@ -423,12 +424,13 @@ export function AnimationLab() {
       </Entry>
 
       <Entry
-        title="Scorecard lens — tear, glide, runner fade, page turn"
+        title="Scorecard lens — tear, glide, ride, runner fade, page turn"
         note={
           <>
             The phone scorecard (ADR-0092, styles/motion/scorecard-lens.css). A tap inks the box at
             once; the seal&rsquo;s two halves fly off it in 180ms while the pane glides the next seal
-            under the frame in 300ms (a scroll tween: Play shows it, a frozen frame cannot). The
+            under the frame in 300ms (a scroll tween: Play shows it, a frozen frame cannot). Near the
+            top of the order the frame rides down a row instead, on the same 300ms. The
             boxes of runners the play moved fade from the highlighter in 1.6s. At a handoff the pane
             goes out left in 160ms and comes in from the right in 200ms. All of it starts on a tap.
           </>
@@ -436,6 +438,7 @@ export function AnimationLab() {
         live={
           <div className="animlab__strikerow">
             <LensGlideDemo />
+            <LensRideDemo />
             <LensMovedDemo />
             <LensTurnDemo beat="in" />
           </div>

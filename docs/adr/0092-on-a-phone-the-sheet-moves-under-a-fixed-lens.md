@@ -245,3 +245,15 @@ three more faults. None is a spoiler. They change no decision above.
 - **Leaving the lens mid-turn still turns the page.** If the reader taps
   [Sheet] or turns the phone during the out beat, its `animationend` never
   comes. The switch now runs at once (`lib/scorecard/turn.js`).
+- **No blank paper over the order (Gary, 2026-10-05).** This changes decision
+  5. The spacer above slot 1 let row 1 reach the frame, but at each leadoff by
+  the top of the order it showed as a band of blank paper over the sheet.
+  The spacer is gone. The frame's place is now a SEAT, 54% down the pane, for
+  every box that can reach it. A box nearer the top keeps its place on the
+  sheet and the frame RIDES up to it: on row 1 it sits under the header, then
+  it moves down one row a tap, on the glide's time, until it reaches the seat.
+  The cost: for those boxes the seal is not at one place on the screen.
+  Unwrap in the bar does not move. The frame still depends only on where the
+  frontier is (ADR-0046). The carry strip takes the larger band of paper
+  beside the frame: above it at the seat, under the docked card when the frame
+  rides.

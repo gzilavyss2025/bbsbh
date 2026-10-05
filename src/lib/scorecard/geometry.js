@@ -37,22 +37,36 @@ export function lensZoom({ paneWidth, railWidth, cellWidth, max }) {
 }
 
 // Where the frame sits in the pane (pane pixels, from the pane's top-left
-// inner corner), and the two spacers that let any row reach it (G3): scroll
-// cannot go negative, so row 1 needs `padTop` of paper above it, and row 9
-// needs `padBottom` below it.
+// inner corner), and the spacer that lets row 9 reach it (G3): scroll cannot
+// go past the content, so row 9 needs `padBottom` of paper below it.
+//
+// THE SEAT AND THE RIDE (Gary, 2026-10-05). The frame's place is the SEAT,
+// 54% down the pane, for every box that can reach it. A box near the top of
+// the order cannot: scroll cannot go negative. That box keeps its own place
+// on the sheet and the frame RIDES up to it: on row 1 it sits under the
+// header, then it moves down one row a tap until it reaches the seat, and the
+// sheet scrolls from there. Before this, a spacer above slot 1 let row 1 reach
+// the seat, and it showed as a band of blank paper over the order.
+// `cellTop` is the frontier box's top in the pane's content (its place at
+// scroll 0), or null before it is measured.
+//
+// `bandAbove` and `bandBelow` are the paper above the frame (under the
+// header) and below it (over the foot row): the carry strip takes the larger.
 //
 // The frame is over the SECOND column after the rail, so the previous inning
 // shows to its left. In inning 1 the sheet's own blank pad column takes that
 // place, and the frame does not move.
-export function lensFrame({ paneHeight, headerHeight, railRight, cellWidth, cellHeight }) {
-  const top = Math.round(paneHeight * FRAME_AT)
+export function lensFrame({ paneHeight, headerHeight, footHeight = 0, railRight, cellWidth, cellHeight, cellTop = null }) {
+  const seat = Math.round(paneHeight * FRAME_AT)
+  const top = cellTop == null ? seat : Math.min(seat, Math.max(Math.round(cellTop), headerHeight))
   return {
     top,
     left: railRight + cellWidth,
     width: cellWidth,
     height: cellHeight,
-    padTop: Math.max(top - headerHeight, 0),
-    padBottom: Math.max(paneHeight - top, 0),
+    padBottom: Math.max(paneHeight - seat, 0),
+    bandAbove: Math.max(top - headerHeight, 0),
+    bandBelow: Math.max(paneHeight - footHeight - (top + cellHeight), 0),
   }
 }
 

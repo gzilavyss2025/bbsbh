@@ -1,5 +1,5 @@
 import '../../styles/boxlines/boxlines.css'
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AtBatBox } from '../../components/scoring/AtBatBox.jsx'
 import { LensTear } from '../../components/scoring/lens/motion/LensTear.jsx'
 import { glideTo } from '../../components/scoring/lens/useLens.js'
@@ -220,9 +220,9 @@ export function BoxLinesEntrance() {
 // box is an invented double, RBI single, in the card fields AtBatBox reads.
 const DEMO_DOUBLE = { codeKind: 'hit', code: '2B', reached: 2, rbi: 1, ladder: DEMO_LADDER }
 
-function LensCells({ rows, paneRef = null, className = '' }) {
+function LensCells({ rows, paneRef = null, className = '', sheetClass = '', children = null }) {
   return (
-    <div className="scorecard">
+    <div className={`scorecard ${sheetClass}`}>
       <div className={`sc-sheet__scroll ${className}`} ref={paneRef}>
         <table className="sc-sheet sc-sheet--lens">
           <tbody>
@@ -234,6 +234,7 @@ function LensCells({ rows, paneRef = null, className = '' }) {
           </tbody>
         </table>
       </div>
+      {children}
     </div>
   )
 }
@@ -287,6 +288,38 @@ export function LensGlideDemo() {
         </span>,
       ]}
     />
+  )
+}
+
+// The ride: near the top of the order the frame moves down one row on the
+// glide's time, and the sheet stays put (lib/scorecard/geometry.js).
+export function LensRideDemo() {
+  const pane = useRef(null)
+  const [at, setAt] = useState(null)
+  // A layout effect, so the frame paints on row 1 before it rides to row 2.
+  useLayoutEffect(() => {
+    // The frame sits on a measured cell, as useLens's does.
+    const cells = pane.current?.querySelectorAll('.sc-sheet__cell') ?? []
+    const on = (cell) => ({ top: cell.offsetTop, width: cell.offsetWidth, height: cell.offsetHeight })
+    if (cells.length < 2) return undefined
+    setAt(on(cells[0]))
+    if (!pane.current.closest('.animlab__live.is-running')) return undefined
+    const id = requestAnimationFrame(() => requestAnimationFrame(() => setAt(on(cells[1]))))
+    return () => cancelAnimationFrame(id)
+  }, [])
+  return (
+    <LensCells
+      paneRef={pane}
+      sheetClass="animlab-lensride"
+      rows={[
+        <AtBatBox key="box" atbat={DEMO_DOUBLE} />,
+        <span key="seal" className="sc-ab__seal">
+          <span className="sc-ab__sealtext">Tap</span>
+        </span>,
+      ]}
+    >
+      {at && <div className="sc-lens__frame" style={{ ...at, left: 0 }} />}
+    </LensCells>
   )
 }
 
