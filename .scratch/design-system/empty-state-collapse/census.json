@@ -1,5 +1,5 @@
 {
- "head": "7e07e83cf",
+ "head": "1830a9feb",
  "selectors": [
   {
    "key": ".admincopy__help",
@@ -130,13 +130,41 @@
    "gated": false
   },
   {
+   "key": ".boxlines__empty",
+   "cls": "boxlines__empty",
+   "word": "empty",
+   "job": "empty",
+   "verdict": "MIGRATE",
+   "slice": "E3",
+   "reason": "DONE in E3: the namespace of the two Box Lines empties (BoxLinesSheet.jsx, GameLinesDoor.jsx). Its rule (boxlines.css) is the status line's top margin only",
+   "shape": "hint + own class",
+   "border": "none",
+   "childBorder": "",
+   "tokens": "· · · ·",
+   "childTokens": "",
+   "ground": "",
+   "pad": "",
+   "rules": [
+    "boxlines/boxlines.css:225"
+   ],
+   "dashedAnywhere": false,
+   "sites": [
+    "components/boxlines/BoxLinesSheet.jsx#3",
+    "components/boxlines/GameLinesDoor.jsx#1"
+   ],
+   "surfaces": [
+    "lineups"
+   ],
+   "gated": false
+  },
+  {
    "key": ".boxlines__hint",
    "cls": "boxlines__hint",
    "word": "hint",
    "job": "loading",
    "verdict": "n/a",
    "slice": "",
-   "reason": "Box Lines status line: loading and error keep it; only the empty line moves (E3)",
+   "reason": "Box Lines status line: loading and error keep it; the two empty lines moved to EmptyState in E3 (.boxlines__empty)",
    "shape": "label",
    "border": "none",
    "childBorder": "",
@@ -151,9 +179,7 @@
    "dashedAnywhere": false,
    "sites": [
     "components/boxlines/BoxLinesSheet.jsx#1",
-    "components/boxlines/BoxLinesSheet.jsx#2",
-    "components/boxlines/BoxLinesSheet.jsx#3",
-    "components/boxlines/GameLinesDoor.jsx#1"
+    "components/boxlines/BoxLinesSheet.jsx#2"
    ],
    "surfaces": [
     "lineups"
@@ -360,7 +386,7 @@
    "ground": "--bg-page",
    "pad": "0",
    "rules": [
-    "70-contracts-grid.css:262"
+    "70-contracts-grid.css:259"
    ],
    "dashedAnywhere": false,
    "sites": [
@@ -560,6 +586,29 @@
    "gated": false
   },
   {
+   "key": ".emptystate",
+   "cls": "emptystate",
+   "word": "empty",
+   "job": "other",
+   "verdict": "n/a",
+   "slice": "",
+   "reason": "the component's own class. Census sees it only inside a namespace margin rule: E2 adds `.slatebody__main > .emptystate:first-child` (05-masthead-nav.css), because the slate's empty line lost .hint padding and sat flush under the date row",
+   "shape": "label",
+   "border": "none",
+   "childBorder": "",
+   "tokens": "· · · ·",
+   "childTokens": "",
+   "ground": "",
+   "pad": "",
+   "rules": [
+    "05-masthead-nav.css:645 ctx"
+   ],
+   "dashedAnywhere": false,
+   "sites": [],
+   "surfaces": [],
+   "gated": false
+  },
+  {
    "key": ".foulboard__whiffcol-hint",
    "cls": "foulboard__whiffcol-hint",
    "word": "hint",
@@ -678,8 +727,7 @@
    "rules": [
     "05-masthead-nav.css:606",
     "05-masthead-nav.css:630 ctx",
-    "05-masthead-nav.css:649 ctx",
-    "10-lineup.css:174 ctx",
+    "05-masthead-nav.css:637 ctx",
     "26-player-page.css:52 ctx"
    ],
    "dashedAnywhere": false,
@@ -688,26 +736,19 @@
     "App.jsx#2",
     "components/boxlines/BoxLinesSheet.jsx#1",
     "components/boxlines/BoxLinesSheet.jsx#2",
-    "components/boxlines/BoxLinesSheet.jsx#3",
-    "components/boxlines/GameLinesDoor.jsx#1",
     "components/charts/CommandMap.jsx#1",
     "components/charts/GloveTarget.jsx#1",
     "components/game/GameFinder.jsx#1",
-    "components/game/GameFinder.jsx#2",
     "components/game/PastGameFlipCard.jsx#1",
     "components/game/PastGameFlipCard.jsx#2",
-    "components/inning/RosterPanel.jsx#1",
     "components/passport/BookManagementSheet.jsx#1",
-    "components/playerstats/SplitsVsTeam.jsx#1",
     "components/profile/EraseDataDialog.jsx#1",
     "components/team/FormerTeammates.jsx#1",
     "components/ui/AsyncGate.jsx#1",
     "components/ui/AsyncGate.jsx#2",
     "components/ui/AsyncGate.jsx#3",
-    "components/ui/AsyncGate.jsx#4",
-    "screens/AllStarLegacyPage.jsx#1",
+    "screens/AllStarLegacyPage.jsx#2",
     "screens/AllStarLegacyPage.jsx#3",
-    "screens/AllStarLegacyPage.jsx#4",
     "screens/AllStarRostersPage.jsx#2",
     "screens/AnimationLab.jsx#1",
     "screens/AwardsHistoryPage.jsx#2",
@@ -715,26 +756,17 @@
     "screens/FirstScorebookPage.jsx#1",
     "screens/FoulTrackerPage.jsx#1",
     "screens/GameNotesDebugPage.jsx#1",
-    "screens/GamePhotosPage.jsx#1",
-    "screens/LeadersPage.jsx#1",
     "screens/LogbookCollection.jsx#1",
-    "screens/LogbookCollection.jsx#2",
     "screens/LogbookStatsPage.jsx#1",
-    "screens/LogbookStatsPage.jsx#2",
     "screens/MilestoneWatchPage.jsx#2",
-    "screens/MilestoneWatchPage.jsx#3",
     "screens/PlayerPage.jsx#1",
     "screens/PostseasonLeadersPage.jsx#1",
     "screens/PostseasonLeadersPage.jsx#2",
     "screens/PostseasonSeriesPage.jsx#1",
     "screens/ProspectsPage.jsx#3",
     "screens/RehabPage.jsx#2",
-    "screens/RehabPage.jsx#3",
-    "screens/SalariesPage.jsx#2",
     "screens/ScorecardLab.jsx#1",
     "screens/ScorecardLab.jsx#2",
-    "screens/TeamInfo.jsx#1",
-    "screens/TradeDeadlineSeasonPage.jsx#2",
     "screens/UmpirePage.jsx#1",
     "screens/UmpireRankingsPage.jsx#1",
     "screens/UniformNamesPage.jsx#1",
@@ -742,7 +774,6 @@
     "screens/UniformNamesPage.jsx#3",
     "screens/UniformNamesPage.jsx#4",
     "screens/animlab/Entry.jsx#1",
-    "screens/around-the-game/DoubleheadersPage.jsx#2",
     "screens/around-the-game/PacePage.jsx#2",
     "screens/around-the-game/abs/AfterAWin.jsx#1",
     "screens/around-the-game/abs/AfterAWin.jsx#2",
@@ -777,6 +808,7 @@
     "screens/logbook/NewBookPage.jsx#1",
     "screens/logbook/NewBookPage.jsx#2",
     "screens/logbook/RetrospectiveSections.jsx#1",
+    "screens/player/PlayerAnalyticsTab.jsx#1",
     "screens/player/PlayerHubShell.jsx#1",
     "screens/postseason-live/LiveSeriesPage.jsx#1",
     "screens/postseason-live/LiveSeriesPage.jsx#2",
@@ -784,21 +816,10 @@
     "screens/postseason-live/LiveSeriesPage.jsx#4",
     "screens/profile/sections/ClubSection.jsx#1",
     "screens/scorecard/ScorecardPage.jsx#2",
-    "screens/scout/HeadToHead.jsx#2",
-    "screens/scout/HeadToHead.jsx#3",
-    "screens/scout/ScoutPage.jsx#1",
-    "screens/scout/ScoutPage.jsx#3",
-    "screens/scout/ScoutPage.jsx#4",
-    "screens/scout/ScoutPage.jsx#5",
-    "screens/scout/ScoutPage.jsx#6",
+    "screens/scout/ScoutPage.jsx#2",
     "screens/team/ContractsTab.jsx#2",
-    "screens/team/ContractsTab.jsx#3",
-    "screens/team/ContractsTab.jsx#4",
     "screens/team/StampInPage.jsx#1",
-    "screens/team/StampInPage.jsx#2",
-    "screens/team/TeamPhotosPage.jsx#2",
-    "screens/team/modules/minors/DepthChartCard.jsx#1",
-    "screens/team/modules/minors/HorizonCard.jsx#1"
+    "screens/team/TeamPhotosPage.jsx#2"
    ],
    "surfaces": [
     "lineups",
@@ -847,8 +868,8 @@
     "screens/identity-lab/profiles/milb.jsx#1",
     "screens/postseason-live/LiveSeriesPage.jsx#1",
     "screens/postseason-live/LiveSeriesPage.jsx#3",
-    "screens/scout/ScoutPage.jsx#3",
-    "screens/team/StampInPage.jsx#2"
+    "screens/scout/ScoutPage.jsx#2",
+    "screens/team/StampInPage.jsx#1"
    ],
    "surfaces": [
     "slate",
@@ -877,19 +898,11 @@
    "dashedAnywhere": false,
    "sites": [
     "components/passport/BookManagementSheet.jsx#1",
-    "components/ui/AsyncGate.jsx#4",
     "screens/AnimationLab.jsx#1",
     "screens/BetweenInningsLab.jsx#1",
     "screens/GameNotesDebugPage.jsx#1",
-    "screens/GamePhotosPage.jsx#1",
-    "screens/LeadersPage.jsx#1",
     "screens/LogbookCollection.jsx#1",
-    "screens/LogbookCollection.jsx#2",
     "screens/LogbookStatsPage.jsx#1",
-    "screens/LogbookStatsPage.jsx#2",
-    "screens/MilestoneWatchPage.jsx#2",
-    "screens/RehabPage.jsx#2",
-    "screens/TradeDeadlineSeasonPage.jsx#2",
     "screens/animlab/Entry.jsx#1",
     "screens/designlab/index.jsx#1",
     "screens/game-notes/GameNotesArchivePage.jsx#1",
@@ -898,33 +911,8 @@
     "screens/logbook/RetrospectiveSections.jsx#1",
     "screens/player/PlayerHubShell.jsx#1"
    ],
-   "surfaces": [
-    "slate (via GameSelect.jsx)"
-   ],
-   "gated": true
-  },
-  {
-   "key": ".hint__link",
-   "cls": "hint__link",
-   "word": "hint",
-   "job": "other",
-   "verdict": "n/a",
-   "slice": "E9",
-   "reason": "DEAD: no use in src, e2e, test, scripts or api. Delete in the cleanup slice",
-   "shape": "label",
-   "border": "none",
-   "childBorder": "",
-   "tokens": "--accent-link · · ·",
-   "childTokens": "",
-   "ground": "none",
-   "pad": "0",
-   "rules": [
-    "05-masthead-nav.css:636"
-   ],
-   "dashedAnywhere": false,
-   "sites": [],
    "surfaces": [],
-   "gated": false
+   "gated": true
   },
   {
    "key": ".hlsheet__empty",
@@ -980,31 +968,6 @@
    "surfaces": [
     "innings"
    ],
-   "gated": false
-  },
-  {
-   "key": ".hzntile__nostat",
-   "cls": "hzntile__nostat",
-   "word": "nostat",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E4",
-   "reason": "Minors Horizon tile: one line where the tile stat goes; size compact",
-   "shape": "hint + own class",
-   "border": "none",
-   "childBorder": "",
-   "tokens": "· · · ·",
-   "childTokens": "",
-   "ground": "",
-   "pad": "",
-   "rules": [
-    "31-wild-card.css:1190"
-   ],
-   "dashedAnywhere": false,
-   "sites": [
-    "screens/team/modules/minors/HorizonCard.jsx#1"
-   ],
-   "surfaces": [],
    "gated": false
   },
   {
@@ -1502,8 +1465,8 @@
    "ground": "",
    "pad": "",
    "rules": [
-    "48-logbook.css:91",
-    "48-logbook.css:107"
+    "48-logbook.css:88",
+    "48-logbook.css:101"
    ],
    "dashedAnywhere": true,
    "sites": [
@@ -1593,22 +1556,22 @@
    "gated": false
   },
   {
-   "key": ".oseason__quiet",
-   "cls": "oseason__quiet",
-   "word": "quiet",
+   "key": ".oseason__empty",
+   "cls": "oseason__empty",
+   "word": "empty",
    "job": "empty",
    "verdict": "MIGRATE",
    "slice": "E7",
-   "reason": "offseason lead on the empty slate: ONE element says loading OR empty. Same split as .stampsheet__empty",
+   "reason": "offseason lead: was .oseason__quiet, ONE element for loading OR empty. DONE in E7: split. The loading line is .oseason__loading (unchanged look, role=\"status\"); the empty branch is <EmptyState className=\"oseason__empty\" role=\"status\">, and the rule keeps only its margin-top",
    "shape": "label",
    "border": "none",
    "childBorder": "",
-   "tokens": "--text-caption --font-body --fs-body ·",
+   "tokens": "· · · ·",
    "childTokens": "",
    "ground": "",
    "pad": "",
    "rules": [
-    "78-offseason.css:97"
+    "78-offseason.css:105"
    ],
    "dashedAnywhere": false,
    "sites": [
@@ -1633,7 +1596,7 @@
    "ground": "--surface-card",
    "pad": "",
    "rules": [
-    "49-passport-book.css:84"
+    "49-passport-book.css:78"
    ],
    "dashedAnywhere": false,
    "sites": [
@@ -1658,7 +1621,7 @@
    "ground": "",
    "pad": "",
    "rules": [
-    "49-passport-book.css:77"
+    "49-passport-book.css:71"
    ],
    "dashedAnywhere": false,
    "sites": [
@@ -1683,7 +1646,7 @@
    "ground": "",
    "pad": "",
    "rules": [
-    "49-passport-book.css:456"
+    "49-passport-book.css:450"
    ],
    "dashedAnywhere": true,
    "sites": [
@@ -1699,16 +1662,16 @@
    "job": "empty",
    "verdict": "MIGRATE",
    "slice": "E7",
-   "reason": "/salaries board: a solid top rule. e2e/salaries.spec.js finds it by this class, so it stays on the element as the namespace",
+   "reason": "/salaries board: a solid top rule. e2e/salaries.spec.js finds it by this class, so it stays on the element as the namespace. DONE in E7: <EmptyState className=\"payboard__empty\">; the rule keeps only a margin off the flush Card edges",
    "shape": "box",
-   "border": "solid (border-top)",
+   "border": "none",
    "childBorder": "",
-   "tokens": "--text-caption · --fs-body ·",
+   "tokens": "· · · ·",
    "childTokens": "",
    "ground": "",
-   "pad": "--space-5 --space-4",
+   "pad": "",
    "rules": [
-    "71-salaries-league.css:149"
+    "71-salaries-league.css:152"
    ],
    "dashedAnywhere": false,
    "sites": [
@@ -1859,11 +1822,11 @@
    "ground": "repeating-linear-gradient( 135deg, --border-rule 0, --border-rule 1px, transparent 1px, transparent 6px )",
    "pad": "",
    "rules": [
-    "48c-stamp-sheet.css:238"
+    "48c-stamp-sheet.css:239"
    ],
    "dashedAnywhere": false,
    "sites": [
-    "components/logbook/StampSheet.jsx#2"
+    "components/logbook/StampSheet.jsx#1"
    ],
    "surfaces": [],
    "gated": false
@@ -1997,100 +1960,22 @@
    "gated": false
   },
   {
-   "key": ".prospectcard__empty",
-   "cls": "prospectcard__empty",
-   "word": "empty",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E5",
-   "reason": "The issue names it: a label, a line and a note, the three-line shape (the lab entry proves it first, in E1). Its child rule `.prospectcard__empty p` goes",
-   "shape": "label+note",
-   "border": "none",
-   "childBorder": "",
-   "tokens": "· · · ·",
-   "childTokens": "--text-body --font-display --fs-h3 --w-semibold",
-   "ground": "",
-   "pad": "",
-   "rules": [
-    "31d-prospect-card.css:110"
-   ],
-   "dashedAnywhere": false,
-   "sites": [
-    "components/playerstats/ProspectCard.jsx#1",
-    "components/playerstats/ProspectCard.jsx#2"
-   ],
-   "surfaces": [],
-   "gated": false
-  },
-  {
-   "key": ".prospectcard__emptylabel",
-   "cls": "prospectcard__emptylabel",
-   "word": "empty",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E5",
-   "reason": "the label line of .prospectcard__empty. It has no rule of its own today (only the word); it becomes EmptyState `label`",
-   "shape": "inner line",
-   "border": "none",
-   "childBorder": "",
-   "tokens": "--text-caption --font-display --fs-label --w-semibold",
-   "childTokens": "",
-   "ground": "",
-   "pad": "",
-   "rules": [
-    "31d-prospect-card.css:77"
-   ],
-   "dashedAnywhere": false,
-   "sites": [
-    "components/playerstats/ProspectCard.jsx#1",
-    "components/playerstats/ProspectCard.jsx#2"
-   ],
-   "surfaces": [],
-   "gated": false
-  },
-  {
-   "key": ".prospectcard__emptynote",
-   "cls": "prospectcard__emptynote",
-   "word": "empty",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E5",
-   "reason": "the note line of .prospectcard__empty; becomes EmptyState `note`",
-   "shape": "inner line",
-   "border": "none",
-   "childBorder": "",
-   "tokens": "--text-caption --font-body --fs-small ·",
-   "childTokens": "",
-   "ground": "",
-   "pad": "",
-   "rules": [
-    "31d-prospect-card.css:118"
-   ],
-   "dashedAnywhere": false,
-   "sites": [
-    "components/playerstats/ProspectCard.jsx#2"
-   ],
-   "surfaces": [],
-   "gated": false
-  },
-  {
    "key": ".prospects__empty",
    "cls": "prospects__empty",
    "word": "empty",
    "job": "empty",
    "verdict": "MIGRATE",
    "slice": "E7",
-   "reason": "/prospects filter result: a SOLID box with a Clear filters button. Goes dashed (the dashed-rule fix); the button becomes the `action` slot",
+   "reason": "/prospects filter result: a SOLID box with a Clear filters button. Goes dashed (the dashed-rule fix); the button becomes the `action` slot. DONE in E7: <EmptyState className=\"prospects__empty\" role=\"status\"> with a Button in `action`; the rule keeps only the margin (no Stack spaces the page)",
    "shape": "box",
-   "border": "solid (border)",
+   "border": "none",
    "childBorder": "",
-   "tokens": "--text-body · · ·",
-   "childTokens": "· · · ·",
-   "ground": "--surface-card",
-   "pad": "--space-3",
+   "tokens": "· · · ·",
+   "childTokens": "",
+   "ground": "",
+   "pad": "",
    "rules": [
-    "31c-prospect-filters.css:249",
-    "31c-prospect-filters.css:260"
+    "31c-prospect-filters.css:252"
    ],
    "dashedAnywhere": false,
    "sites": [
@@ -2227,33 +2112,6 @@
    "gated": false
   },
   {
-   "key": ".refpanel__empty",
-   "cls": "refpanel__empty",
-   "word": "empty",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E3",
-   "reason": "already THE target look (a dashed hairline inset, graphite display caps). Inside the innings viewer: the armsEmpty test stays in ReferencePanel.jsx untouched",
-   "shape": "box",
-   "border": "dashed (border)",
-   "childBorder": "",
-   "tokens": "--text-caption --font-display --fs-label --w-semibold",
-   "childTokens": "",
-   "ground": "--surface-card",
-   "pad": "--space-4",
-   "rules": [
-    "focus/reference.css:402"
-   ],
-   "dashedAnywhere": true,
-   "sites": [
-    "components/inning/focus/ReferencePanel.jsx#1"
-   ],
-   "surfaces": [
-    "innings"
-   ],
-   "gated": true
-  },
-  {
    "key": ".revealsplit__btn--quiet",
    "cls": "revealsplit__btn--quiet",
    "word": "quiet",
@@ -2304,6 +2162,33 @@
    ],
    "surfaces": [
     "innings"
+   ],
+   "gated": true
+  },
+  {
+   "key": ".roster__empty",
+   "cls": "roster__empty",
+   "word": "empty",
+   "job": "empty",
+   "verdict": "MIGRATE",
+   "slice": "E3",
+   "reason": "DONE in E3: the namespace of RosterPanel.jsx's \"Not posted yet.\" EmptyState. Its rule (13-play-by-play.css) is a margin only: .roster__body has no side padding",
+   "shape": "bare hint",
+   "border": "none",
+   "childBorder": "",
+   "tokens": "· · · ·",
+   "childTokens": "",
+   "ground": "",
+   "pad": "",
+   "rules": [
+    "13-play-by-play.css:563"
+   ],
+   "dashedAnywhere": false,
+   "sites": [
+    "components/inning/RosterPanel.jsx#1"
+   ],
+   "surfaces": [
+    "lineups"
    ],
    "gated": true
   },
@@ -2404,7 +2289,7 @@
    "ground": "",
    "pad": "",
    "rules": [
-    "scout/scout.css:270"
+    "scout/scout.css:255"
    ],
    "dashedAnywhere": false,
    "sites": [
@@ -2420,7 +2305,7 @@
    "job": "empty",
    "verdict": "MIGRATE",
    "slice": "E8",
-   "reason": "the Matchup Scout: a chart slot with nothing posted; size compact. The lab copy (ScoutLab.jsx) is a tool page and keeps the class, so the rule stays until the lab moves or goes",
+   "reason": "the Matchup Scout: a chart slot with nothing posted; size compact. The lab copy (ScoutLab.jsx) is a tool page and keeps the class, so the rule stays until the lab moves or goes. DONE in E8: the Scout page renders EmptyState size compact; only the lab wears this class",
    "shape": "hint + own class",
    "border": "none",
    "childBorder": "",
@@ -2429,14 +2314,11 @@
    "ground": "",
    "pad": "",
    "rules": [
-    "scout/scout.css:403"
+    "scout/scout.css:377"
    ],
    "dashedAnywhere": false,
    "sites": [
-    "screens/designlab/scout/ScoutLab.jsx#3",
-    "screens/scout/ScoutPage.jsx#4",
-    "screens/scout/ScoutPage.jsx#5",
-    "screens/scout/ScoutPage.jsx#6"
+    "screens/designlab/scout/ScoutLab.jsx#3"
    ],
    "surfaces": [],
    "gated": false
@@ -2457,7 +2339,7 @@
    "ground": "",
    "pad": "--space-2 --space-2h",
    "rules": [
-    "08-site-shell.css:99"
+    "08-site-shell.css:96"
    ],
    "dashedAnywhere": false,
    "sites": [
@@ -2482,7 +2364,7 @@
    "ground": "",
    "pad": "--space-2 2px",
    "rules": [
-    "08-site-shell.css:494"
+    "08-site-shell.css:482"
    ],
    "dashedAnywhere": false,
    "sites": [
@@ -2595,31 +2477,6 @@
    "gated": false
   },
   {
-   "key": ".stampsheet__empty",
-   "cls": "stampsheet__empty",
-   "word": "empty",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E7",
-   "reason": "the stamp sheet: ONE element says loading OR empty. Split: the empty branch becomes EmptyState, the loading branch keeps its line",
-   "shape": "label",
-   "border": "none",
-   "childBorder": "",
-   "tokens": "--text-muted --font-body --fs-small ·",
-   "childTokens": "",
-   "ground": "",
-   "pad": "",
-   "rules": [
-    "48c-stamp-sheet.css:50"
-   ],
-   "dashedAnywhere": false,
-   "sites": [
-    "components/logbook/StampSheet.jsx#1"
-   ],
-   "surfaces": [],
-   "gated": false
-  },
-  {
    "key": ".stampstrip__mount--empty",
    "cls": "stampstrip__mount--empty",
    "word": "empty",
@@ -2675,28 +2532,30 @@
    "gated": false
   },
   {
-   "key": ".trec__empty",
-   "cls": "trec__empty",
+   "key": ".starter__empty",
+   "cls": "starter__empty",
    "word": "empty",
    "job": "empty",
    "verdict": "MIGRATE",
-   "slice": "E4",
-   "reason": "team hub Records card: no games in this stretch of the season yet. A caption-size line today; becomes EmptyState size compact",
-   "shape": "label",
+   "slice": "E3",
+   "reason": "DONE in E3: the namespace of the starter card's \"Not posted yet.\" EmptyState (TeamInfo.jsx). Its rule (10-lineup.css) is a margin only, in place of `.starter > .hint`: the card body is flush",
+   "shape": "bare hint",
    "border": "none",
    "childBorder": "",
-   "tokens": "--text-caption · --fs-caption ·",
+   "tokens": "· · · ·",
    "childTokens": "",
    "ground": "",
-   "pad": "--space-3 --space-2",
+   "pad": "",
    "rules": [
-    "65-team-records.css:137"
+    "10-lineup.css:175"
    ],
    "dashedAnywhere": false,
    "sites": [
-    "screens/team/modules/records/RecordsCard.jsx#1"
+    "screens/TeamInfo.jsx#1"
    ],
-   "surfaces": [],
+   "surfaces": [
+    "lineups"
+   ],
    "gated": false
   },
   {
@@ -2715,7 +2574,7 @@
    "ground": "",
    "pad": "",
    "rules": [
-    "65-team-records.css:207"
+    "65-team-records.css:200"
    ],
    "dashedAnywhere": false,
    "sites": [
@@ -2825,22 +2684,22 @@
    "gated": false
   },
   {
-   "key": ".umpmodal__hint",
-   "cls": "umpmodal__hint",
-   "word": "hint",
+   "key": ".umpmodal__empty",
+   "cls": "umpmodal__empty",
+   "word": "empty",
    "job": "empty",
    "verdict": "MIGRATE",
    "slice": "E7",
-   "reason": "umpire accuracy modal: no data for this umpire. Used once; the rule goes",
+   "reason": "umpire accuracy modal: was .umpmodal__hint (its rule is gone). DONE in E7: <EmptyState className=\"umpmodal__empty\">; the rule keeps only a margin-bottom above the \"behind the plate\" list. The data && !season test is unchanged",
    "shape": "label",
    "border": "none",
    "childBorder": "",
-   "tokens": "--text-muted · --fs-compact ·",
+   "tokens": "· · · ·",
    "childTokens": "",
    "ground": "",
    "pad": "",
    "rules": [
-    "14-strike-zone.css:420"
+    "14-strike-zone.css:422"
    ],
    "dashedAnywhere": false,
    "sites": [
@@ -2885,7 +2744,7 @@
    "job": "empty",
    "verdict": "MIGRATE",
    "slice": "E5",
-   "reason": "player page splits vs a team: no career meetings",
+   "reason": "DONE in E5: player page splits vs a team: no career meetings",
    "shape": "hint + own class",
    "border": "none",
    "childBorder": "",
@@ -3182,7 +3041,7 @@
  "sites": [
   {
    "key": "App.jsx#1",
-   "line": 644,
+   "line": 648,
    "tag": "p",
    "cls": ".hint .hint--error",
    "copy": "Couldn’t load the schedule. Check your connection and try again.",
@@ -3198,7 +3057,7 @@
   },
   {
    "key": "App.jsx#2",
-   "line": 659,
+   "line": 663,
    "tag": "p",
    "cls": ".hint .hint--error",
    "copy": "Couldn’t find that game. It may not be on the schedule for that date.",
@@ -3470,7 +3329,7 @@
   },
   {
    "key": "components/boxlines/BoxLinesSheet.jsx#1",
-   "line": 195,
+   "line": 196,
    "tag": "p",
    "cls": ".hint .boxlines__hint",
    "copy": "Pulling his game lines…",
@@ -3486,7 +3345,7 @@
   },
   {
    "key": "components/boxlines/BoxLinesSheet.jsx#2",
-   "line": 201,
+   "line": 202,
    "tag": "p",
    "cls": ".hint .boxlines__hint",
    "copy": "Couldn’t pull his game lines. Try again in a moment.",
@@ -3502,9 +3361,9 @@
   },
   {
    "key": "components/boxlines/BoxLinesSheet.jsx#3",
-   "line": 209,
-   "tag": "p",
-   "cls": ".hint .boxlines__hint",
+   "line": 210,
+   "tag": "EmptyState",
+   "cls": ".boxlines__empty",
    "copy": "{cutoff ? `No game lines before ${…}.` : 'No game lines yet.'}",
    "props": "",
    "job": "empty",
@@ -3512,15 +3371,15 @@
    "slice": "E3",
    "shape": "hint + own class",
    "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
+   "tokens": "· · · ·",
    "surface": "lineups",
    "gated": false
   },
   {
    "key": "components/boxlines/GameLinesDoor.jsx#1",
-   "line": 82,
-   "tag": "p",
-   "cls": ".hint .boxlines__hint",
+   "line": 83,
+   "tag": "EmptyState",
+   "cls": ".boxlines__empty",
    "copy": "No games to list.",
    "props": "",
    "job": "empty",
@@ -3528,7 +3387,7 @@
    "slice": "E3",
    "shape": "hint + own class",
    "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
+   "tokens": "· · · ·",
    "surface": "lineups",
    "gated": false
   },
@@ -3678,7 +3537,7 @@
   },
   {
    "key": "components/chrome/SiteSearch.jsx#1",
-   "line": 343,
+   "line": 345,
    "tag": "p",
    "cls": ".searchoverlay__hint",
    "copy": "No matches for “{…}”.",
@@ -3694,7 +3553,7 @@
   },
   {
    "key": "components/game/GameFinder.jsx#1",
-   "line": 59,
+   "line": 60,
    "tag": "p",
    "cls": ".hint",
    "copy": "Pick two different teams.",
@@ -3702,22 +3561,6 @@
    "job": "error",
    "verdict": "n/a",
    "slice": "",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "components/game/GameFinder.jsx#2",
-   "line": 82,
-   "tag": "p",
-   "cls": ".hint",
-   "copy": "No {…} games between these two.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E6",
    "shape": "bare hint",
    "border": "none",
    "tokens": "--text-muted · --fs-ui ·",
@@ -3806,9 +3649,9 @@
   },
   {
    "key": "components/inning/RosterPanel.jsx#1",
-   "line": 82,
-   "tag": "p",
-   "cls": ".hint",
+   "line": 84,
+   "tag": "EmptyState",
+   "cls": ".roster__empty",
    "copy": "Not posted yet.",
    "props": "",
    "job": "empty",
@@ -3816,24 +3659,8 @@
    "slice": "E3",
    "shape": "bare hint",
    "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
+   "tokens": "· · · ·",
    "surface": "lineups",
-   "gated": true
-  },
-  {
-   "key": "components/inning/focus/ReferencePanel.jsx#1",
-   "line": 465,
-   "tag": "p",
-   "cls": ".refpanel__empty",
-   "copy": "No pitching lines yet",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E3",
-   "shape": "box",
-   "border": "dashed (border)",
-   "tokens": "--text-caption --font-display --fs-label --w-semibold",
-   "surface": "innings",
    "gated": true
   },
   {
@@ -3886,23 +3713,7 @@
   },
   {
    "key": "components/logbook/StampSheet.jsx#1",
-   "line": 108,
-   "tag": "p",
-   "cls": ".stampsheet__empty",
-   "copy": "Loading this level’s clubs. / This level’s clubs are not posted yet.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E7",
-   "shape": "label",
-   "border": "none",
-   "tokens": "--text-muted --font-body --fs-small ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "components/logbook/StampSheet.jsx#2",
-   "line": 215,
+   "line": 216,
    "tag": "div",
    "cls": ".postagestamp__photo .postagestamp__photo--empty",
    "copy": ")}",
@@ -3918,17 +3729,17 @@
   },
   {
    "key": "components/offseason/OffseasonLead.jsx#1",
-   "line": 94,
-   "tag": "p",
-   "cls": ".oseason__quiet",
-   "copy": "{loading ? 'Reading the wire…' : `No moves filed in the last ${…} days.`}",
+   "line": 97,
+   "tag": "EmptyState",
+   "cls": ".oseason__empty",
+   "copy": "{`No moves filed in the last ${…} days.`}",
    "props": "",
    "job": "empty",
    "verdict": "MIGRATE",
    "slice": "E7",
    "shape": "label",
    "border": "none",
-   "tokens": "--text-caption --font-body --fs-body ·",
+   "tokens": "· · · ·",
    "surface": "",
    "gated": false
   },
@@ -3950,7 +3761,7 @@
   },
   {
    "key": "components/passport/PassportBook.jsx#1",
-   "line": 200,
+   "line": 201,
    "tag": "div",
    "cls": ".passportbook__empty",
    "copy": ") : (",
@@ -3966,7 +3777,7 @@
   },
   {
    "key": "components/passport/PassportBook.jsx#2",
-   "line": 202,
+   "line": 203,
    "tag": "div",
    "cls": ".passportbook__blank",
    "copy": ") } return (",
@@ -4126,39 +3937,7 @@
   },
   {
    "key": "components/playerstats/ProspectCard.jsx#1",
-   "line": 116,
-   "tag": "div",
-   "cls": ".prospectcard__empty",
-   "copy": "No qualified comparison{level ? ` at ${…}` : ''} yet",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E5",
-   "shape": "label+note",
-   "border": "none",
-   "tokens": "· · · ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "components/playerstats/ProspectCard.jsx#2",
-   "line": 126,
-   "tag": "div",
-   "cls": ".prospectcard__empty",
-   "copy": "",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E5",
-   "shape": "label+note",
-   "border": "none",
-   "tokens": "· · · ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "components/playerstats/ProspectCard.jsx#3",
-   "line": 182,
+   "line": 190,
    "tag": "dd",
    "cls": ".prospectcard__move .prospectcard__move--*",
    "copy": "No comparison period yet",
@@ -4174,9 +3953,9 @@
   },
   {
    "key": "components/playerstats/SplitsVsTeam.jsx#1",
-   "line": 160,
-   "tag": "p",
-   "cls": ".hint .vsteam__none",
+   "line": 161,
+   "tag": "EmptyState",
+   "cls": ".vsteam__none",
    "copy": "No career meetings{sel ? ` vs the ${…}` : ''}.",
    "props": "",
    "job": "empty",
@@ -4184,7 +3963,7 @@
    "slice": "E5",
    "shape": "hint + own class",
    "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
+   "tokens": "· · · ·",
    "surface": "",
    "gated": false
   },
@@ -4350,8 +4129,8 @@
   },
   {
    "key": "components/salaries/SalaryBoard.jsx#1",
-   "line": 51,
-   "tag": "p",
+   "line": 52,
+   "tag": "EmptyState",
    "cls": ".payboard__empty",
    "copy": "No salaried player at this club and position.",
    "props": "",
@@ -4359,8 +4138,8 @@
    "verdict": "MIGRATE",
    "slice": "E7",
    "shape": "box",
-   "border": "solid (border-top)",
-   "tokens": "--text-caption · --fs-body ·",
+   "border": "none",
+   "tokens": "· · · ·",
    "surface": "",
    "gated": false
   },
@@ -4462,7 +4241,7 @@
   },
   {
    "key": "components/team/TeamSearchBox.jsx#1",
-   "line": 59,
+   "line": 60,
    "tag": "li",
    "cls": ".searchbox__hint",
    "copy": "No teams found.",
@@ -4510,7 +4289,7 @@
   },
   {
    "key": "components/ui/AsyncGate.jsx#1",
-   "line": 28,
+   "line": 29,
    "tag": "p",
    "cls": ".hint .hint--error",
    "copy": "{error ? `Couldn’t load this ${…}. Try again.` : `${…} not found.`}",
@@ -4526,7 +4305,7 @@
   },
   {
    "key": "components/ui/AsyncGate.jsx#2",
-   "line": 67,
+   "line": 69,
    "tag": "p",
    "cls": ".hint .hint--error",
    "copy": "{…}",
@@ -4542,7 +4321,7 @@
   },
   {
    "key": "components/ui/AsyncGate.jsx#3",
-   "line": 80,
+   "line": 82,
    "tag": "p",
    "cls": ".hint .hint--error",
    "copy": "{…}",
@@ -4553,22 +4332,6 @@
    "shape": "bare hint",
    "border": "none",
    "tokens": "--clay · --fs-ui ·",
-   "surface": "slate (via GameSelect.jsx)",
-   "gated": false
-  },
-  {
-   "key": "components/ui/AsyncGate.jsx#4",
-   "line": 86,
-   "tag": "p",
-   "cls": ".hint .hint--prose",
-   "copy": "{…}",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E2",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted --font-body --fs-ui --w-semibold",
    "surface": "slate (via GameSelect.jsx)",
    "gated": false
   },
@@ -4606,9 +4369,9 @@
   },
   {
    "key": "components/umpire/UmpireAccuracyModal.jsx#1",
-   "line": 89,
-   "tag": "p",
-   "cls": ".umpmodal__hint",
+   "line": 92,
+   "tag": "EmptyState",
+   "cls": ".umpmodal__empty",
    "copy": "No plate-accuracy data on file for this umpire yet.",
    "props": "",
    "job": "empty",
@@ -4616,7 +4379,7 @@
    "slice": "E7",
    "shape": "label",
    "border": "none",
-   "tokens": "--text-muted · --fs-compact ·",
+   "tokens": "· · · ·",
    "surface": "boxscore (via BoxScore.jsx)",
    "gated": false
   },
@@ -4670,23 +4433,7 @@
   },
   {
    "key": "screens/AllStarLegacyPage.jsx#1",
-   "line": 146,
-   "tag": "p",
-   "cls": ".hint",
-   "copy": "No one on the current roster has ever been named an All-Star.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E6",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/AllStarLegacyPage.jsx#2",
-   "line": 293,
+   "line": 294,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{hasRosters && (",
@@ -4701,7 +4448,7 @@
    "gated": false
   },
   {
-   "key": "screens/AllStarLegacyPage.jsx#3",
+   "key": "screens/AllStarLegacyPage.jsx#2",
    "line": 316,
    "tag": "p",
    "cls": ".hint",
@@ -4717,7 +4464,7 @@
    "gated": false
   },
   {
-   "key": "screens/AllStarLegacyPage.jsx#4",
+   "key": "screens/AllStarLegacyPage.jsx#3",
    "line": 341,
    "tag": "p",
    "cls": ".hint .prospects__caption",
@@ -4750,7 +4497,7 @@
   },
   {
    "key": "screens/AllStarRostersPage.jsx#2",
-   "line": 295,
+   "line": 294,
    "tag": "p",
    "cls": ".hint .prospects__caption",
    "copy": "Updated {…}.",
@@ -4766,7 +4513,7 @@
   },
   {
    "key": "screens/AnimationLab.jsx#1",
-   "line": 53,
+   "line": 54,
    "tag": "p",
    "cls": ".hint .hint--prose",
    "copy": "Every decorative animation in the app, with its stages frozen underneath for review. Each stage rests on its f",
@@ -4782,7 +4529,7 @@
   },
   {
    "key": "screens/AnimationLab.jsx#2",
-   "line": 553,
+   "line": 554,
    "tag": "span",
    "cls": ".loader__blank",
    "copy": "",
@@ -4798,7 +4545,7 @@
   },
   {
    "key": "screens/AnimationLab.jsx#3",
-   "line": 559,
+   "line": 560,
    "tag": "span",
    "cls": ".loader__blank",
    "copy": "",
@@ -4830,7 +4577,7 @@
   },
   {
    "key": "screens/AwardsHistoryPage.jsx#2",
-   "line": 464,
+   "line": 463,
    "tag": "p",
    "cls": ".hint .prospects__caption",
    "copy": "Updated {…}.",
@@ -4846,7 +4593,7 @@
   },
   {
    "key": "screens/BetweenInningsLab.jsx#1",
-   "line": 77,
+   "line": 78,
    "tag": "p",
    "cls": ".hint .hint--prose",
    "copy": "The post-half hold, against synthetic fixtures. Unlisted — not linked from anywhere else in the app.",
@@ -4894,10 +4641,10 @@
   },
   {
    "key": "screens/FoulTrackerPage.jsx#1",
-   "line": 125,
+   "line": 140,
    "tag": "p",
    "cls": ".hint .foultracker__intro",
-   "copy": "This season’s foul balls, counted from every MLB game’s pitch-by-pitch{data?.gamesIngested ? ` (${…} games so ",
+   "copy": "This all / seasons’ / season’s foul balls, counted from every MLB game’s pitch-by-pitch{data?.gamesIngested ? ",
    "props": "",
    "job": "caveat",
    "verdict": "n/a",
@@ -4910,7 +4657,7 @@
   },
   {
    "key": "screens/FoulTrackerPage.jsx#2",
-   "line": 135,
+   "line": 150,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{boards && (",
@@ -4926,7 +4673,7 @@
   },
   {
    "key": "screens/FoulTrackerPage.jsx#3",
-   "line": 473,
+   "line": 502,
    "tag": "span",
    "cls": ".foulboard__whiffcol-hint",
    "copy": "({…})",
@@ -4974,23 +4721,7 @@
   },
   {
    "key": "screens/GamePhotosPage.jsx#1",
-   "line": 140,
-   "tag": "p",
-   "cls": ".hint .hint--prose",
-   "copy": "Pick a club above to browse its games.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E6",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted --font-body --fs-ui --w-semibold",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/GamePhotosPage.jsx#2",
-   "line": 144,
+   "line": 145,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{games.length > 0 && (",
@@ -5005,8 +4736,8 @@
    "gated": false
   },
   {
-   "key": "screens/GamePhotosPage.jsx#3",
-   "line": 197,
+   "key": "screens/GamePhotosPage.jsx#2",
+   "line": 198,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{photos.length > 0 && (",
@@ -5022,7 +4753,7 @@
   },
   {
    "key": "screens/GamePreview.jsx#1",
-   "line": 145,
+   "line": 149,
    "tag": "label",
    "cls": ".posterstudio__check--waiting .posterstudio__check",
    "copy": "",
@@ -5038,7 +4769,7 @@
   },
   {
    "key": "screens/GamePreview.jsx#2",
-   "line": 174,
+   "line": 178,
    "tag": "p",
    "cls": ".posterstudio__hint",
    "copy": "On a phone this opens the share sheet, where Save Image puts it in Photos. On a computer it downloads.",
@@ -5085,40 +4816,8 @@
    "gated": false
   },
   {
-   "key": "screens/LeadersPage.jsx#1",
-   "line": 131,
-   "tag": "p",
-   "cls": ".hint .hint--prose",
-   "copy": "No leaders to show here yet — season stats aren’t posted for this scope.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E6",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted --font-body --fs-ui --w-semibold",
-   "surface": "",
-   "gated": false
-  },
-  {
    "key": "screens/LogbookCollection.jsx#1",
-   "line": 346,
-   "tag": "p",
-   "cls": ".hint .hint--prose",
-   "copy": "No stamps yet. Reveal a game’s box score and stamp it — it lands here, and you choose where on the page it goe",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E8",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted --font-body --fs-ui --w-semibold",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/LogbookCollection.jsx#2",
-   "line": 481,
+   "line": 483,
    "tag": "p",
    "cls": ".hint .hint--prose",
    "copy": "This page holds {…}. Turn to a new one, or add one from the corner.",
@@ -5134,23 +4833,7 @@
   },
   {
    "key": "screens/LogbookStatsPage.jsx#1",
-   "line": 226,
-   "tag": "p",
-   "cls": ".hint .hint--prose",
-   "copy": "No stamps yet. Reveal a game’s box score and stamp it — once a few are in the book, this is where it adds up.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E8",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted --font-body --fs-ui --w-semibold",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/LogbookStatsPage.jsx#2",
-   "line": 270,
+   "line": 271,
    "tag": "p",
    "cls": ".hint .hint--prose",
    "copy": "{…} stamp is / stamps are still resolving / not available offline — the totals below leave it / them out.",
@@ -5182,7 +4865,7 @@
   },
   {
    "key": "screens/MilestoneWatchPage.jsx#1",
-   "line": 54,
+   "line": 55,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{allRows.length > 0 && (",
@@ -5198,22 +4881,6 @@
   },
   {
    "key": "screens/MilestoneWatchPage.jsx#2",
-   "line": 72,
-   "tag": "p",
-   "cls": ".hint .hint--prose",
-   "copy": "No one on that club is within range of a career milestone right now.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E6",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted --font-body --fs-ui --w-semibold",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/MilestoneWatchPage.jsx#3",
    "line": 112,
    "tag": "p",
    "cls": ".hint .prospects__caption",
@@ -5422,7 +5089,7 @@
   },
   {
    "key": "screens/PostseasonRacePage.jsx#6",
-   "line": 385,
+   "line": 384,
    "tag": "p",
    "cls": ".psrace__tbdcaption",
    "copy": "The bracket isn’t reseeded after the Wild Card round, so each Division Series pairing is already set — just wa",
@@ -5454,7 +5121,7 @@
   },
   {
    "key": "screens/ProspectsPage.jsx#1",
-   "line": 208,
+   "line": 210,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{allPlayers.length > 0 && (",
@@ -5470,8 +5137,8 @@
   },
   {
    "key": "screens/ProspectsPage.jsx#2",
-   "line": 273,
-   "tag": "div",
+   "line": 274,
+   "tag": "EmptyState",
    "cls": ".prospects__empty",
    "copy": "No Top 100 prospects match those filters.",
    "props": "",
@@ -5479,14 +5146,14 @@
    "verdict": "MIGRATE",
    "slice": "E7",
    "shape": "box",
-   "border": "solid (border)",
-   "tokens": "--text-body · · ·",
+   "border": "none",
+   "tokens": "· · · ·",
    "surface": "",
    "gated": false
   },
   {
    "key": "screens/ProspectsPage.jsx#3",
-   "line": 287,
+   "line": 291,
    "tag": "p",
    "cls": ".hint .prospects__caption",
    "copy": "Pipeline rank stays fixed when the board is filtered. Standing compares OPS or ERA with qualified players at t",
@@ -5502,7 +5169,7 @@
   },
   {
    "key": "screens/RehabPage.jsx#1",
-   "line": 43,
+   "line": 44,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{allPlayers.length > 0 && (",
@@ -5518,22 +5185,6 @@
   },
   {
    "key": "screens/RehabPage.jsx#2",
-   "line": 61,
-   "tag": "p",
-   "cls": ".hint .hint--prose",
-   "copy": "No players from that club are on a rehab assignment right now.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E6",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted --font-body --fs-ui --w-semibold",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/RehabPage.jsx#3",
    "line": 124,
    "tag": "p",
    "cls": ".hint .prospects__caption",
@@ -5550,7 +5201,7 @@
   },
   {
    "key": "screens/SalariesPage.jsx#1",
-   "line": 67,
+   "line": 68,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{data == null && !league.loading && !league.error && (",
@@ -5561,22 +5212,6 @@
    "shape": "bare hint",
    "border": "none",
    "tokens": "· · · ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/SalariesPage.jsx#2",
-   "line": 75,
-   "tag": "p",
-   "cls": ".hint",
-   "copy": "League salaries have not been published yet.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E6",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
    "surface": "",
    "gated": false
   },
@@ -5646,9 +5281,9 @@
   },
   {
    "key": "screens/TeamInfo.jsx#1",
-   "line": 877,
-   "tag": "p",
-   "cls": ".hint",
+   "line": 887,
+   "tag": "EmptyState",
+   "cls": ".starter__empty",
    "copy": "Not posted yet.",
    "props": "",
    "job": "empty",
@@ -5656,13 +5291,13 @@
    "slice": "E3",
    "shape": "bare hint",
    "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
+   "tokens": "· · · ·",
    "surface": "lineups",
    "gated": false
   },
   {
    "key": "screens/TradeDeadlineSeasonPage.jsx#1",
-   "line": 95,
+   "line": 97,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{allTrades.length > 0 && (",
@@ -5677,31 +5312,15 @@
    "gated": false
   },
   {
-   "key": "screens/TradeDeadlineSeasonPage.jsx#2",
-   "line": 116,
-   "tag": "p",
-   "cls": ".hint .hint--prose",
-   "copy": "That club made no trades within this season’s deadline window.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E6",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted --font-body --fs-ui --w-semibold",
-   "surface": "",
-   "gated": false
-  },
-  {
    "key": "screens/UmpirePage.jsx#1",
-   "line": 223,
+   "line": 169,
    "tag": "p",
    "cls": ".hint",
-   "copy": "No games behind the plate this season. / No games recorded this season.",
+   "copy": "{…}: {…} game / games, {…} behind the plate. Pitch-call accuracy is on file only for Triple-A. The game log sh",
    "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E6",
+   "job": "caveat",
+   "verdict": "n/a",
+   "slice": "",
    "shape": "bare hint",
    "border": "none",
    "tokens": "--text-muted · --fs-ui ·",
@@ -5710,10 +5329,10 @@
   },
   {
    "key": "screens/UmpireRankingsPage.jsx#1",
-   "line": 41,
+   "line": 67,
    "tag": "p",
    "cls": ".hint",
-   "copy": "{data?.season ? `${…} season ` : 'Season '} called-pitch accuracy for every plate umpire with at least a handf",
+   "copy": "{view?.label ? `${…} $all / seasons / season ` : 'Season '} called-pitch accuracy for every plate umpire with ",
    "props": "",
    "job": "caveat",
    "verdict": "n/a",
@@ -5726,7 +5345,7 @@
   },
   {
    "key": "screens/UmpireRankingsPage.jsx#2",
-   "line": 50,
+   "line": 76,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{ranked.length > 0 && (",
@@ -5806,7 +5425,7 @@
   },
   {
    "key": "screens/animlab/Entry.jsx#1",
-   "line": 81,
+   "line": 82,
    "tag": "p",
    "cls": ".hint .hint--prose",
    "copy": "{…}",
@@ -5822,7 +5441,7 @@
   },
   {
    "key": "screens/around-the-game/AbsChallengesPage.jsx#1",
-   "line": 126,
+   "line": 149,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{summary && summary.total > 0 && (",
@@ -5870,7 +5489,7 @@
   },
   {
    "key": "screens/around-the-game/DoubleheadersPage.jsx#1",
-   "line": 264,
+   "line": 265,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{bounds && (",
@@ -5881,22 +5500,6 @@
    "shape": "bare hint",
    "border": "none",
    "tokens": "· · · ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/around-the-game/DoubleheadersPage.jsx#2",
-   "line": 347,
-   "tag": "p",
-   "cls": ".hint",
-   "copy": "No doubleheader was played in these years.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E6",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
    "surface": "",
    "gated": false
   },
@@ -5918,7 +5521,7 @@
   },
   {
    "key": "screens/around-the-game/FarmSystemPage.jsx#2",
-   "line": 217,
+   "line": 216,
    "tag": "span",
    "cls": ".rpt__note",
    "copy": "None ranked",
@@ -5934,7 +5537,7 @@
   },
   {
    "key": "screens/around-the-game/FarmSystemPage.jsx#3",
-   "line": 363,
+   "line": 362,
    "tag": "th",
    "cls": ".team",
    "copy": "None inside the published list",
@@ -5966,7 +5569,7 @@
   },
   {
    "key": "screens/around-the-game/PacePage.jsx#2",
-   "line": 262,
+   "line": 261,
    "tag": "p",
    "cls": ".hint",
    "copy": "Only {…} games apiece so far. That is too few to tell these clubs apart — the gaps below are smaller than the ",
@@ -6318,7 +5921,7 @@
   },
   {
    "key": "screens/designlab/scout/ScoutLab.jsx#1",
-   "line": 166,
+   "line": 167,
    "tag": "p",
    "cls": ".hint .scout__empty",
    "copy": "Pick a pitcher and a hitter",
@@ -6334,7 +5937,7 @@
   },
   {
    "key": "screens/designlab/scout/ScoutLab.jsx#2",
-   "line": 171,
+   "line": 172,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "} {loaded && (",
@@ -6350,7 +5953,7 @@
   },
   {
    "key": "screens/designlab/scout/ScoutLab.jsx#3",
-   "line": 239,
+   "line": 240,
    "tag": "p",
    "cls": ".hint .scout__notposted",
    "copy": "Not posted yet",
@@ -6366,7 +5969,7 @@
   },
   {
    "key": "screens/designlab/scout/ScoutLab.jsx#4",
-   "line": 271,
+   "line": 272,
    "tag": "p",
    "cls": ".hint .scout__fixture",
    "copy": "Invented players · invented numbers · no feed",
@@ -7166,8 +6769,8 @@
   },
   {
    "key": "screens/logbook/StampCollection.jsx#1",
-   "line": 100,
-   "tag": "div",
+   "line": 101,
+   "tag": "Stack",
    "cls": ".logbook__pending",
    "copy": "",
    "props": "",
@@ -7177,6 +6780,22 @@
    "shape": "label+note",
    "border": "dashed (border)",
    "tokens": "--text-caption --font-mono --fs-small ·",
+   "surface": "",
+   "gated": false
+  },
+  {
+   "key": "screens/player/PlayerAnalyticsTab.jsx#1",
+   "line": 112,
+   "tag": "p",
+   "cls": ".hint",
+   "copy": "{…}",
+   "props": "",
+   "job": "caveat",
+   "verdict": "n/a",
+   "slice": "",
+   "shape": "bare hint",
+   "border": "none",
+   "tokens": "--text-muted · --fs-ui ·",
    "surface": "",
    "gated": false
   },
@@ -7342,7 +6961,7 @@
   },
   {
    "key": "screens/scorecard/ScorecardPage.jsx#1",
-   "line": 300,
+   "line": 309,
    "tag": "div",
    "cls": ".scorecard-page .scorecard-page--lens .scorecard-page--quiet .scorecard-page--turn-*",
    "copy": "",
@@ -7358,7 +6977,7 @@
   },
   {
    "key": "screens/scorecard/ScorecardPage.jsx#2",
-   "line": 325,
+   "line": 334,
    "tag": "p",
    "cls": ".hint",
    "copy": "The sheet inks only what you’ve revealed. Tap the sealed box to score the next at-bat right here, or a filled ",
@@ -7374,7 +6993,7 @@
   },
   {
    "key": "screens/scout/HeadToHead.jsx#1",
-   "line": 37,
+   "line": 38,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": ") : failed ? (",
@@ -7389,56 +7008,8 @@
    "gated": false
   },
   {
-   "key": "screens/scout/HeadToHead.jsx#2",
-   "line": 39,
-   "tag": "p",
-   "cls": ".hint",
-   "copy": "No head-to-head on file",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E8",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/scout/HeadToHead.jsx#3",
-   "line": 41,
-   "tag": "p",
-   "cls": ".hint",
-   "copy": "No meetings before {…}",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E8",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
    "key": "screens/scout/ScoutPage.jsx#1",
-   "line": 173,
-   "tag": "p",
-   "cls": ".hint",
-   "copy": "Pick a pitcher and a hitter",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E8",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/scout/ScoutPage.jsx#2",
-   "line": 174,
+   "line": 175,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "} {hasPair && !load.loading && !data &&",
@@ -7453,8 +7024,8 @@
    "gated": false
   },
   {
-   "key": "screens/scout/ScoutPage.jsx#3",
-   "line": 175,
+   "key": "screens/scout/ScoutPage.jsx#2",
+   "line": 176,
    "tag": "p",
    "cls": ".hint .hint--error",
    "copy": "Couldn’t load this pair",
@@ -7465,54 +7036,6 @@
    "shape": "bare hint",
    "border": "none",
    "tokens": "--clay · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/scout/ScoutPage.jsx#4",
-   "line": 257,
-   "tag": "p",
-   "cls": ".hint .scout__notposted",
-   "copy": "Not posted",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E8",
-   "shape": "hint + own class",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/scout/ScoutPage.jsx#5",
-   "line": 277,
-   "tag": "p",
-   "cls": ".hint .scout__notposted",
-   "copy": "Not posted",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E8",
-   "shape": "hint + own class",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/scout/ScoutPage.jsx#6",
-   "line": 285,
-   "tag": "p",
-   "cls": ".hint .scout__notposted",
-   "copy": "Not posted",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E8",
-   "shape": "hint + own class",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
    "surface": "",
    "gated": false
   },
@@ -7534,7 +7057,7 @@
   },
   {
    "key": "screens/team/ContractsTab.jsx#1",
-   "line": 69,
+   "line": 70,
    "tag": "AsyncStatus",
    "cls": "—",
    "copy": "{data?.isMilb && (",
@@ -7550,39 +7073,7 @@
   },
   {
    "key": "screens/team/ContractsTab.jsx#2",
-   "line": 77,
-   "tag": "p",
-   "cls": ".hint",
-   "copy": "Contract terms are published for the major leagues only, so this club has no ledger.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E4",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/team/ContractsTab.jsx#3",
-   "line": 83,
-   "tag": "p",
-   "cls": ".hint",
-   "copy": "This club’s contract ledger has not been published yet.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E4",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/team/ContractsTab.jsx#4",
-   "line": 122,
+   "line": 121,
    "tag": "p",
    "cls": ".hint",
    "copy": "The book falls {…} between {…} and {…}.",
@@ -7614,23 +7105,7 @@
   },
   {
    "key": "screens/team/StampInPage.jsx#1",
-   "line": 126,
-   "tag": "p",
-   "cls": ".hint",
-   "copy": "No games posted yet for this season.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E4",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/team/StampInPage.jsx#2",
-   "line": 261,
+   "line": 262,
    "tag": "p",
    "cls": ".hint .hint--error",
    "copy": "Couldn’t load this game’s result.",
@@ -7933,38 +7408,6 @@
    "gated": false
   },
   {
-   "key": "screens/team/modules/minors/DepthChartCard.jsx#1",
-   "line": 118,
-   "tag": "p",
-   "cls": ".hint",
-   "copy": "Too early for a level-relative read at this position.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E4",
-   "shape": "bare hint",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
-   "key": "screens/team/modules/minors/HorizonCard.jsx#1",
-   "line": 58,
-   "tag": "p",
-   "cls": ".hint .hzntile__nostat",
-   "copy": "No full-season line at this level yet.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E4",
-   "shape": "hint + own class",
-   "border": "none",
-   "tokens": "--text-muted · --fs-ui ·",
-   "surface": "",
-   "gated": false
-  },
-  {
    "key": "screens/team/modules/records/InningScoringGrid.jsx#1",
    "line": 29,
    "tag": "span",
@@ -7979,45 +7422,29 @@
    "tokens": "--text-caption · · ·",
    "surface": "",
    "gated": false
-  },
-  {
-   "key": "screens/team/modules/records/RecordsCard.jsx#1",
-   "line": 170,
-   "tag": "p",
-   "cls": ".trec__empty",
-   "copy": "No games in this stretch of the season yet.",
-   "props": "",
-   "job": "empty",
-   "verdict": "MIGRATE",
-   "slice": "E4",
-   "shape": "label",
-   "border": "none",
-   "tokens": "--text-caption · --fs-caption ·",
-   "surface": "",
-   "gated": false
   }
  ],
  "gateCalls": [
-  "components/ui/AsyncGate.jsx:10",
-  "screens/LeadersPage.jsx:85",
+  "components/ui/AsyncGate.jsx:11",
+  "screens/LeadersPage.jsx:86",
   "screens/ManagerPage.jsx:74",
   "screens/PlayerPage.jsx:87",
   "screens/PostseasonSeriesPage.jsx:127",
   "screens/TeamLeadersPage.jsx:43",
   "screens/TeamPage.jsx:66",
-  "screens/UmpirePage.jsx:104",
-  "screens/player/PlayerAnalyticsTab.jsx:37",
+  "screens/UmpirePage.jsx:139",
+  "screens/player/PlayerAnalyticsTab.jsx:65",
   "screens/player/PlayerHistoryTab.jsx:64",
   "screens/player/PlayerStatsTab.jsx:28",
   "screens/postseason-live/LiveSeriesPage.jsx:189",
   "screens/postseason-live/LiveSeriesPage.jsx:198",
   "screens/postseason-live/SeriesRoute.jsx:15",
-  "screens/team/ContractsTab.jsx:43",
+  "screens/team/ContractsTab.jsx:44",
   "screens/team/GamesTab.jsx:29",
   "screens/team/MinorsTab.jsx:33",
   "screens/team/NumbersTab.jsx:35",
-  "screens/team/RosterTab.jsx:31",
-  "screens/team/StampInPage.jsx:96",
+  "screens/team/RosterTab.jsx:32",
+  "screens/team/StampInPage.jsx:97",
   "screens/team/TeamPhotosPage.jsx:43",
   "screens/team/TeamTransactionsPage.jsx:64"
  ],
@@ -8271,7 +7698,7 @@
    "guess": "?"
   },
   {
-   "at": "31d-prospect-card.css:173",
+   "at": "31d-prospect-card.css:155",
    "file": "31d-prospect-card.css",
    "sel": ".prospectcard__track::before",
    "how": "border-left: var(--bw-hair) dotted var(--text-caption)",
@@ -8279,7 +7706,7 @@
    "guess": "?"
   },
   {
-   "at": "31d-prospect-card.css:418",
+   "at": "31d-prospect-card.css:400",
    "file": "31d-prospect-card.css",
    "sel": ".prankhist__row + .prankhist__row",
    "how": "border-top: var(--bw-hair) dotted var(--rule-grid)",
@@ -8343,7 +7770,7 @@
    "guess": "?"
   },
   {
-   "at": "47-trade-deadline.css:241",
+   "at": "47-trade-deadline.css:232",
    "file": "47-trade-deadline.css",
    "sel": ".trade__considerationicon",
    "how": "border: var(--bw-hair) dashed var(--border-rule)",
@@ -8351,7 +7778,7 @@
    "guess": "?"
   },
   {
-   "at": "48-logbook.css:91",
+   "at": "48-logbook.css:88",
    "file": "48-logbook.css",
    "sel": ".logbook__pending",
    "how": "border: var(--bw-rule) dashed var(--border-rule)",
@@ -8379,7 +7806,7 @@
    "guess": "?"
   },
   {
-   "at": "49-passport-book.css:322",
+   "at": "49-passport-book.css:316",
    "file": "49-passport-book.css",
    "sel": ".passportpage__cell",
    "how": "border: var(--bw-hair) dashed var(--border-rule)",
@@ -8387,7 +7814,7 @@
    "guess": "?"
   },
   {
-   "at": "49-passport-book.css:456",
+   "at": "49-passport-book.css:450",
    "file": "49-passport-book.css",
    "sel": ".passportpage__pending",
    "how": "border: var(--bw-rule) dashed var(--border-rule)",
@@ -8397,7 +7824,7 @@
    "guess": "provisional? (inference)"
   },
   {
-   "at": "49-passport-book.css:500",
+   "at": "49-passport-book.css:494",
    "file": "49-passport-book.css",
    "sel": ".passportpage__addpage",
    "how": "border: var(--bw-hair) dashed var(--border-rule)",
@@ -8405,7 +7832,7 @@
    "guess": "door? (inference)"
   },
   {
-   "at": "49-passport-book.css:555",
+   "at": "49-passport-book.css:549",
    "file": "49-passport-book.css",
    "sel": ".passportpage__crosshair",
    "how": "border: var(--bw-hair) dashed var(--text-caption)",
@@ -8413,7 +7840,7 @@
    "guess": "?"
   },
   {
-   "at": "49-passport-book.css:898",
+   "at": "49-passport-book.css:892",
    "file": "49-passport-book.css",
    "sel": ".logbook__tray",
    "how": "border: var(--bw-hair) dashed var(--border-rule)",
@@ -8421,7 +7848,7 @@
    "guess": "?"
   },
   {
-   "at": "49-passport-book.css:998",
+   "at": "49-passport-book.css:989",
    "file": "49-passport-book.css",
    "sel": ".logbook__order",
    "how": "border: var(--bw-hair) dashed var(--border-rule)",
@@ -8493,7 +7920,7 @@
    "guess": "door? (inference)"
   },
   {
-   "at": "65-team-records.css:228",
+   "at": "65-team-records.css:221",
    "file": "65-team-records.css",
    "sel": ".trecinn__last",
    "how": "border-bottom: var(--bw-hair) dotted var(--border-rule)",
@@ -8613,7 +8040,7 @@
    "guess": "?"
   },
   {
-   "at": "boxlines/boxlines.css:376",
+   "at": "boxlines/boxlines.css:383",
    "file": "boxlines/boxlines.css",
    "sel": ".vsteam__door",
    "how": "border-top: var(--bw-hair) dashed var(--border-rule)",
@@ -8634,16 +8061,6 @@
    "sel": ".dlab__entry",
    "how": "border: var(--bw-hair) dashed var(--border-rule)",
    "cand": [],
-   "guess": "?"
-  },
-  {
-   "at": "focus/reference.css:402",
-   "file": "focus/reference.css",
-   "sel": ".refpanel__empty",
-   "how": "border: var(--bw-hair) dashed var(--border-rule)",
-   "cand": [
-    "refpanel__empty"
-   ],
    "guess": "?"
   },
   {
@@ -8721,7 +8138,7 @@
    "guess": "?"
   },
   {
-   "at": "scout/scout.css:409",
+   "at": "scout/scout.css:383",
    "file": "scout/scout.css",
    "sel": ".scout__readout",
    "how": "border-top: var(--bw-hair) dashed var(--border-rule)",

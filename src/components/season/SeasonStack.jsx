@@ -1,4 +1,5 @@
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { EmptyState } from '../ui/state/EmptyState.jsx'
 
 // TWO SEASONS, ONE ABOVE THE OTHER (#1202): a player card's compare view
 // (#1199, question 3). A board compares many men in a change column; one man's
@@ -11,9 +12,9 @@ export function SeasonStack({ seasons, empty }) {
     <section key={year}>
       <SectionHead as="h4">{year}</SectionHead>
       {body ?? (
-        <p className="hint">
+        <EmptyState size="compact">
           {empty} in {year}.
-        </p>
+        </EmptyState>
       )}
     </section>
   ))

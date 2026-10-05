@@ -132,7 +132,7 @@ export function UmpirePage({ id, seasonYear, vs }) {
         <SiteHeader />
         <BackBtn onClick={back} />
         {picker}
-        <p className="hint">No games on file for this umpire in {view.label}.</p>
+        <EmptyState>No games on file for this umpire in {view.label}.</EmptyState>
       </div>
     )
   }
