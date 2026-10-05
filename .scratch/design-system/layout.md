@@ -367,3 +367,61 @@ it.
 Converter changes: it now keeps static string props (`role="group"`) and
 extra static classes. It still refuses an element with a handler or a spread.
 
+
+## Slices S8 to S13
+
+Six more families, one commit each. 20 rules on 31 JSX sites. The finder counts
+**50 safe candidates on `main` before S8** (the log above said about 44; I did not
+trace the gap, and the script was not changed) and **30 after S13**. 84 candidates in
+all. No odd-gap stack, `Cluster` or `Grid` was touched. No open PR edits any file
+here (#1448 touches `App.jsx`, `Headshot.jsx` and `PitcherNotice.jsx` only).
+
+| slice | rules | JSX sites | result |
+| --- | ---: | ---: | --- |
+| S8: Matchup Scout (`scout/scout.css`) | 6 | 9 | `/scout` and `/design-lab` identical; synthetic identical for all |
+| S9: site search (`08-site-shell.css`) | 3 | 3 | search overlay (recent shelf) and past-matchup finder identical on `/` with the mock |
+| S10: animation and between-innings labs (`46-consent-modal.css`) | 3 | 10 | both lab routes identical, 5,028 and 290 elements |
+| S11: Game Log (`48-logbook.css`, `49-passport-book.css`) | 4 | 4 | 4 states identical with one seeded stamp, up to 817 elements |
+| S12: salaries (`70-contracts-grid.css`, `71-salaries-league.css`) | 2 | 2 | `/salaries` and `/team/158/contracts` identical |
+| S13: trade deadline (`47-trade-deadline.css`) | 2 | 3 | `/trade-deadline` and `/trade-deadline/2025` identical; `.trade__stack` synthetic only |
+
+**What could not be checked.** The headless browser cannot load live MLB data in
+the cloud container: the proxy re-signs TLS and Chromium rejects the certificate. I
+did not work around that. So no route that needs a live `statsapi` response was
+captured. Consequences:
+- S8: the real pair view (`/scout/{pitcher}/{hitter}`) never drew. `.scout__hitfact`
+  has no real capture; `.scout__pair`, `.scout__side` and `.scout__key` are covered
+  by their `/design-lab` specimen (Matchup and ScoutLab sites), not by the real page.
+  `synth.mjs` (on `/scout`) is identical for all seven hosts.
+- S13: `.trade__stack` (the trade card) did not render on any offline route.
+  `synth.mjs` proves the CSS, not the page.
+- S9: a search with typed results (a Players or Teams group) was not reached; only the
+  Recent group was.
+- No spoiler-scope surface was touched (the Game Log stamp art sits behind its own
+  gate; `Stack` only wraps it).
+
+**Hard sites.** Converted by hand: `.searchoverlay__results` (id and `aria-busy` on
+several lines; its CSS rule also holds a comment), `.animlab__frame` (a `style`
+prop), `.passportbook` (a key handler).
+
+**Capture noise, and the tool changes that remove it.** Unchanged code gave
+different geometry in four places. `geom.mjs` now has `FREEZE=1` (animations off:
+`/animation-lab` differed on 246 elements between two runs), `BLOCKIMG=1` (every
+image request aborted, then wait for images to settle: a header logo raced its
+fallback on `/team/158/contracts`) and a `{"clickText":"…"}` step. Two noise sources
+are NOT removed: the `Loader` specimen on `/design-lab` moves 2.4px between runs
+(S8), and five off-screen team-switcher logo elements on `/team/158/contracts@390`
+still differed between two unchanged runs (S12). Both AFTER runs of S12 matched the
+BEFORE run exactly. `/trade-deadline/2025@760` gave 3665 elements once (S13); two
+more runs gave 3666, the BEFORE count. A clean BEFORE/AFTER pair needs the same
+flags on both runs. For S12, BEFORE was captured from the stashed, unmigrated
+code. Three helpers were added: `add-import.py`, `strip-css.py` and `whois.mjs`
+(names the element behind a diff path).
+
+**Left for Gary** (not decided here): keep or drop `Cluster`'s `align` prop; add a
+`rowGap` to `Grid`; use `Stack gap="section"` on a page. Not done: the 37 odd-gap
+stacks, the 32px stack, Cluster and Grid migrations. Left unmigrated because they
+are safe but did not fit a one-or-two-partial family this round: scoring-surface
+rules (`.starter__info`, `.pbp`, `.consolebar__tallygroup`, `.trailstrip`,
+`.refpanel__body`, `.pcard__sec` and others), the admin contract pages, standings,
+wild card and the workload partials.
