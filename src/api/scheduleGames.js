@@ -6,6 +6,16 @@
 // header on that field) — nothing in this file reaches the network or
 // re-derives either.
 
+// Drops a postseason row dated after `through` (YYYY-MM-DD, the day of the game
+// the page was opened from). An "if necessary" game leaves the schedule the
+// moment a series ends (ADR-0087), so its card, or the lack of one, would say
+// how the series went. A regular-season row, or an untagged one, always stays:
+// the full season was never a secret. Only fetchTeamSchedule's postseason option
+// calls this.
+export function postseasonThrough(schedule, through) {
+  return schedule.filter((g) => !g.gameType || g.gameType === 'R' || g.apiDate <= through)
+}
+
 // The Last 10 Games card's window (TeamPage.jsx's LastTenGamesStrip) — the
 // most recently DECIDED games from a team's fetchTeamSchedule() list, oldest
 // -> newest (the list is already sorted ascending). Filters on `won != null`,

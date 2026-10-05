@@ -27,7 +27,18 @@
 //                           'fly_ball', 'line_drive', 'popup'), null when none
 //                           (a walk, a strikeout, a hit by pitch)
 //                pitches    tracked pitches in the plate appearance (rows with a
-//                           plate_x), a number; 0 for a walk by the pitch clock }
+//                           plate_x), a number; 0 for a walk by the pitch clock
+//                pitchList  those same pitches, in pitch_number order (#1490):
+//                           { n, code, mph, call, balls, strikes, px, pz,
+//                             szTop, szBot, spin, pfxX, pfxZ, vx0, vy0, vz0,
+//                             ax, ay, az, release: [x, y, z], launchSpeed,
+//                             launchAngle, xwoba }, each a number or null
+//                           (`code` and `call` are Savant's pitch_type and
+//                           description strings). The CSV has no playId:
+//                           scout/playIds.js finds it in the game feed.
+//                inning     the inning of the plate appearance's last row, or null
+//                half       'top' | 'bottom' | null
+//                stand      the side the batter stood on, 'L' | 'R' | null }
 //   totals   `totalsOf(pas)`:
 //              { pa, ab, h, hr, bb, k, hbp, sf, tb,       counts
 //                avg, obp, slg }                          raw ratios, or null when
@@ -51,7 +62,9 @@
 //     and the parser drops them. EXCEPT a row that ends the plate appearance
 //     (a strike-three or ball-four by the clock, 2 of 6 such rows on 2026-09-20):
 //     it has `events`, so it stays, or the plate appearance vanishes.
-//   - Do not plot these pitches. Savant's 2026 plate_z frame differs from the feed's.
+//   - Do not plot these pitches on the feed-frame maps. Savant's 2026 plate_z
+//     frame differs from the feed's. The pitch modal draws each pitch against
+//     its OWN row's sz_top / sz_bot, so the frames agree there (#1490).
 //   - statsapi `vsPlayer` is not the source: it lists each plate appearance twice
 //     (a per-season entry and a `vsPlayerTotal` entry), so a sum doubles them.
 //
@@ -109,25 +122,76 @@ export function parseSavantRows(text) {
   return rows.filter((r) => r.plate_x || r.events)
 }
 
+// A CSV cell as a number, or null when blank or not a number.
+const num = (v) => {
+  if (v == null || v === '') return null
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+}
+
+// One tracked pitch, in the shape the pitch modal reads (header, `pitchList`).
+export function pitchOf(r) {
+  return {
+    n: num(r.pitch_number),
+    code: r.pitch_type || null,
+    mph: num(r.release_speed),
+    call: r.description || null,
+    balls: num(r.balls),
+    strikes: num(r.strikes),
+    px: num(r.plate_x),
+    pz: num(r.plate_z),
+    szTop: num(r.sz_top),
+    szBot: num(r.sz_bot),
+    spin: num(r.release_spin_rate),
+    pfxX: num(r.pfx_x),
+    pfxZ: num(r.pfx_z),
+    vx0: num(r.vx0),
+    vy0: num(r.vy0),
+    vz0: num(r.vz0),
+    ax: num(r.ax),
+    ay: num(r.ay),
+    az: num(r.az),
+    release: [num(r.release_pos_x), num(r.release_pos_y), num(r.release_pos_z)],
+    launchSpeed: num(r.launch_speed),
+    launchAngle: num(r.launch_angle),
+    xwoba: num(r.estimated_woba_using_speedangle),
+  }
+}
+
+const HALF = { Top: 'top', Bot: 'bottom' }
+
 export function plateAppearances(rows) {
   const keyOf = (r) => `${r.game_pk}-${r.at_bat_number}`
-  const pitches = new Map()
-  for (const r of rows) if (r.plate_x) pitches.set(keyOf(r), (pitches.get(keyOf(r)) ?? 0) + 1)
+  const lists = new Map()
+  for (const r of rows) {
+    if (!r.plate_x) continue
+    const k = keyOf(r)
+    if (!lists.has(k)) lists.set(k, [])
+    lists.get(k).push(pitchOf(r))
+  }
+  for (const list of lists.values()) list.sort((a, b) => (a.n ?? 0) - (b.n ?? 0))
   return rows
     .filter((r) => r.events && !NOT_A_PA.has(r.events))
-    .map((r) => ({
-      key: keyOf(r),
-      gamePk: Number(r.game_pk),
-      atBat: Number(r.at_bat_number),
-      date: r.game_date,
-      round: r.game_type,
-      roundLabel: ROUND_LABELS[r.game_type] ?? r.game_type,
-      event: r.events,
-      description: r.des ?? '',
-      pitchType: r.pitch_type || null,
-      bbType: r.bb_type || null,
-      pitches: pitches.get(keyOf(r)) ?? 0,
-    }))
+    .map((r) => {
+      const pitchList = lists.get(keyOf(r)) ?? []
+      return {
+        key: keyOf(r),
+        gamePk: Number(r.game_pk),
+        atBat: Number(r.at_bat_number),
+        date: r.game_date,
+        round: r.game_type,
+        roundLabel: ROUND_LABELS[r.game_type] ?? r.game_type,
+        event: r.events,
+        description: r.des ?? '',
+        pitchType: r.pitch_type || null,
+        bbType: r.bb_type || null,
+        pitches: pitchList.length,
+        pitchList,
+        inning: num(r.inning),
+        half: HALF[r.inning_topbot] ?? null,
+        stand: r.stand || null,
+      }
+    })
     .sort((a, b) => b.date.localeCompare(a.date) || b.gamePk - a.gamePk || b.atBat - a.atBat)
 }
 

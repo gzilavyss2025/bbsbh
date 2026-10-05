@@ -289,7 +289,11 @@ export function LogbookStatsPage({ bookId = null }) {
         <SectionHead
           eyebrow="The shape of the book"
           title="How your games finished"
-          note={`${stats.runsPerGame.toFixed(1)} runs a game across everything you logged.`}
+          note={`${stats.runsPerGame.toFixed(1)} runs a game across everything you logged${
+            stats.postseasonGames > 0
+              ? `, including ${stats.postseasonGames} postseason ${stats.postseasonGames === 1 ? 'game' : 'games'}`
+              : ''
+          }.`}
         />
         <Tally
           items={[

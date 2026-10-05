@@ -21,6 +21,10 @@ export const fmtCell = (metric, v) => (metric === 'xwoba' ? v.toFixed(3).replace
 export const fmtMetric = (metric, v) =>
   v == null ? '—' : metric === 'xwoba' ? v.toFixed(3).replace(/^0/, '') : `${Math.round(v * 100)}`
 
+// A rate in running text or a readout, with its unit: ".391" for xwOBA (est.),
+// "24%" for Whiff % and Swing % (#1490: every percentage ends in "%").
+export const fmtValue = (metric, v) => (v == null ? '—' : metric === 'xwoba' ? fmtMetric(metric, v) : `${fmtMetric(metric, v)}%`)
+
 // Per region: { value, n } with value null under the floor.
 export function hitterRegions(counters, metric) {
   const m = METRICS[metric]

@@ -329,4 +329,16 @@ export const PAIRINGS = [
   { fg: 'field', bg: '#F8EECE', min: TEXT, note: 'lens notice: throwing hand' },
   { fg: 'clay-deep', bg: '#F8EECE', min: TEXT, note: 'lens notice: the entry flag' },
   { fg: 'text-caption', bg: '#F8EECE', min: TEXT, note: 'lens notice: arsenal and last time out' },
+  // THE MATCHUP SCOUT (#1490, styles/scout/panels.css and meetings.css). The
+  // Edge ledger's tags and the lean name: clay for the hitter's side, the
+  // All-Star blue for the pitcher's. The Meetings pitch calls: clay for a
+  // strike, field green for a ball, the All-Star blue for a ball in play. All
+  // on the card paper. The mix bars print paper ink on each family's colour;
+  // the warm grey "other" segment prints no label (the legend names it).
+  { fg: 'clay', bg: 'surface-card', min: TEXT, note: 'scout: hitter-side tag, strike call' },
+  { fg: 'allstar-blue', bg: 'surface-card', min: TEXT, note: 'scout: pitcher-side tag, in-play call' },
+  { fg: 'field', bg: 'surface-card', min: TEXT, note: 'scout: ball call' },
+  { fg: 'text-on-ink', bg: 'arsenal-fastball', min: TEXT, note: 'scout mix bar: fastball segment label' },
+  { fg: 'text-on-ink', bg: 'arsenal-breaking', min: TEXT, note: 'scout mix bar: breaking segment label' },
+  { fg: 'text-on-ink', bg: 'arsenal-offspeed', min: TEXT, note: 'scout mix bar: offspeed segment label' },
 ]

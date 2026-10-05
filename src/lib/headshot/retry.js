@@ -16,15 +16,26 @@ const RETRY_PAUSE_MS = 2000
 // A step is one try. Each photo source gets two: step 2n is source n as is,
 // step 2n+1 is source n again with a marker, which is a new cache key and so
 // cannot be answered by a bad cached copy of the first try.
-export function headshotStepUrl(sources, step) {
-  const url = sources?.[Math.floor(step / 2)]
+//
+// `quickFirst` gives the FIRST source one try only. It is for a player with a
+// fallback photo behind a silo that a prospect usually lacks (a clean 404): the
+// silo's pause-and-retry cost about 2 s before the milb face showed. A dropped
+// connection on that one try still lands on the next source, which keeps its
+// own retry. The steps after the first shift down by one.
+const logicalStep = (step, quickFirst) => (quickFirst && step > 0 ? step + 1 : step)
+
+export function headshotStepUrl(sources, step, quickFirst = false) {
+  const n = logicalStep(step, quickFirst)
+  const url = sources?.[Math.floor(n / 2)]
   if (!url) return null
-  if (step % 2 === 0) return url
+  if (n % 2 === 0) return url
   return `${url}${url.includes('?') ? '&' : '?'}retry=1`
 }
 
 // How long to wait before moving PAST a failed step: a first try is retried
-// after a pause; a failed retry moves straight on to the next source.
-export function headshotStepDelay(step) {
-  return step % 2 === 0 ? RETRY_PAUSE_MS : 0
+// after a pause; a failed retry moves straight on to the next source. A
+// `quickFirst` first try has no retry to wait for.
+export function headshotStepDelay(step, quickFirst = false) {
+  if (quickFirst && step === 0) return 0
+  return logicalStep(step, quickFirst) % 2 === 0 ? RETRY_PAUSE_MS : 0
 }

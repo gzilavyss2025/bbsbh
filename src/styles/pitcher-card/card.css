@@ -105,6 +105,15 @@
 .pscene__grass { fill: var(--field-outfield); }
 .pscene__mound { fill: var(--field-dirt); opacity: 0.75; }
 .pscene__dirt { fill: var(--field-dirt); opacity: 0.55; }
+/* The Matchup Scout's Pitcher's view only (PitcherStage, ADR-0099): the
+   batter's boxes in chalk, the plate, and the rubber on the placed mound. */
+.pscene__chalk {
+  fill: none;
+  stroke: var(--surface-inset);
+  stroke-width: 1;
+}
+.pscene__plate,
+.pscene__rubber { fill: var(--surface-inset); }
 .pscene__back,
 .pscene__edge {
   fill: none;

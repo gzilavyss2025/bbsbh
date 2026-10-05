@@ -532,14 +532,14 @@ test('T4: frame, density, sticky and label are the ones the census set', () => {
   }
 })
 
-test('T4: the three Ledger callers each name their table, and the helper hands the name to Table', () => {
+test('T4: the four Ledger callers each name their table, and the helper hands the name to Table', () => {
   assert.match(src('components/player/Ledger.jsx'), /<Table\b[^>]*label=\{label\}/)
   const names = [
     ...src('components/player/CareerRegister.jsx').matchAll(/<Ledger\b[^>]*?label="([^"]+)"/g),
     ...src('components/playerstats/SplitsSection.jsx').matchAll(/<Ledger\b[^>]*?label="([^"]+)"/g),
   ].map((m) => m[1])
-  assert.equal(names.length, 3, 'three callers, three labels')
-  assert.equal(new Set(names).size, 3, 'two tables on one page get two different labels')
+  assert.equal(names.length, 4, 'four callers, four labels')
+  assert.equal(new Set(names).size, 4, 'two tables on one page get two different labels')
 })
 
 test('T4: a small ledger draws no frame, no cell padding, no head dress and no row rule of its own', () => {

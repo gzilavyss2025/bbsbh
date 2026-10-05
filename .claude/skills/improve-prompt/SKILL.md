@@ -39,23 +39,61 @@ lowest effort that can do that job well. Do these steps in order.
    alone: a fresh agent with no memory of the others can run it. Each prompt
    states what it needs from an earlier prompt (a branch, a file, a merged PR)
    and what it hands to the next. Mark prompts that can run in parallel.
-5. **Pick model and effort for each prompt.** Pick the cheapest row that fits
-   the hardest step in that prompt.
+5. **Pick model and effort for each prompt.** Pick the cheapest rung that fits
+   the hardest step in that prompt. The ladder runs from cheapest to strongest.
+   Haiku 4.5 has no effort setting: it errors if you send one, so never state an
+   effort for it. The other three models take low, medium, high, xhigh and max.
 
-   | Work in the prompt | Model | Effort |
+   | Rung | Model + effort | Work in the prompt |
    |---|---|---|
-   | Mechanical: rename, move, format, bump a version, run a script, look up a fact | Haiku 4.5 | low |
-   | Clear spec in known code: add a test, small fix with known cause, docs, a data refresh | Sonnet 5.5 | low or medium |
-   | Normal feature or fix across a few files, with some judgment | Sonnet 5.5 | medium or high |
-   | Design, unknown-cause debugging, cross-cutting refactor, security, code review, an ADR | Opus 5.5 | high |
-   | Very hard or high-risk: subtle concurrency, data loss risk, a large migration plan | Opus 5.5 | xhigh or max |
-   | Hardest reasoning or long autonomous work, where Opus 5.5 at xhigh is not enough | Fable 5.1 | medium or high |
+   | 1 | Haiku 4.5 | Mechanical: rename, move, format, bump a version, run a generator script, look up a fact, list PRs or worktrees |
+   | 2 | Sonnet 5.5, low | Quick edit, docs, a data refresh, a copy or typography tweak |
+   | 3 | Sonnet 5.5, medium | **The everyday rung.** Add a test for known behavior, fix with a known cause, a slice that follows an existing pattern, agentic coding with a clear spec |
+   | 4 | Sonnet 5.5, high | A feature across several files with some judgment; a test-first bug fix where the cause takes digging |
+   | 5 | Sonnet 5.5, xhigh | Hard coding work where high gave a shallow result |
+   | 6 | Opus 5.5, medium | Review, a design question, or an ADR draft that is not subtle |
+   | 7 | Opus 5.5, high | Unknown-cause debugging, cross-cutting refactor, security review, any change to the spoiler rule |
+   | 8 | Opus 5.5, xhigh | High-risk or subtle work: stored user data, cache bugs, two tabs writing at once, a large migration plan |
+   | 9 | Opus 5.5, max | Only after xhigh failed, or when one wrong answer is very costly |
+   | 10 | Fable 5.1, medium or high | Only when Opus 5.5 at xhigh is not enough: the hardest reasoning or long autonomous work |
 
    API price per million tokens (input / output): Haiku 4.5 $1 / $5, Sonnet 5.5
    $2 / $10, Opus 5.5 $4 / $20, Fable 5.1 $10 / $50. Fable 5.1 costs 2.5 times
-   as much as Opus 5.5, so pick it only when a row above cannot do the job.
-   Before you move up a model, try the same model at a higher effort. Always
-   state the effort: Opus 5.5 defaults to medium, not high.
+   as much as Opus 5.5, so pick it only when a rung above cannot do the job.
+
+   Rules for the ladder:
+   - Do not skip medium. Most repo work has a spec, nested `CLAUDE.md` files and
+     tests that catch mistakes, so rung 3 covers most of it. Start there for
+     normal work, not at xhigh.
+   - Move up one rung at a time, and only when the result is weak. Raise the
+     effort on the same model before you change model.
+   - xhigh is a normal setting for hard coding work, not a last resort. Do not
+     use xhigh or max for mechanical work, and do not use max in a fan-out run.
+   - Sonnet 5.5 at xhigh costs half as much per token as Opus 5.5 at xhigh. No
+     measured data says how Sonnet 5.5 at xhigh compares with Opus 5.5 at medium
+     or high. Treat rungs 5 to 7 as a judgment call and test on a real task.
+   - Always state the effort. Opus 5.5 defaults to medium, Sonnet 5.5 and
+     Fable 5.1 default to high, so an unstated effort picks different rungs.
+   - A spoiler-rule change never goes below rung 7.
+   - Design work: more effort does not make a design better or more varied. Pick
+     the rung by kind of work, then spend on checking, not on thinking.
+
+     | Design work | Rung |
+     |---|---|
+     | Design-system code that follows a spec (token swap, a slice with a known pattern) | 3, or 4 when the slice merges many rules |
+     | Build a screen or card from a direction that is already settled | 4 |
+     | Explore directions for something new | 3, as a propose-3-or-4-directions step, then build only the one chosen |
+     | Hard visual problem: club-colour band layout, animation timing, a first try that failed | 5, or 7 |
+     | Design decision or ADR (naming, a token tier, how the seal looks) | 7 |
+     | Screenshots, dev server, list of what changed | 1, or 2 |
+     | Judge whether it looks right | 3 or 4, never rung 1 |
+
+     Split the decision from the build: one prompt picks the direction, a cheaper
+     prompt builds it. Name the palette and type, or point at the tokens in
+     `src/styles/`, so the model does not fall back to its default house style.
+   - In a multi-agent run, match each phase: Haiku for survey and grep passes,
+     Sonnet 5.5 medium for checks that need judgment, Sonnet 5.5 high or Opus 5.5
+     high for synthesis and docs that must read well.
 
    Give one line of reason for each pick. If the author named a model, keep it
    unless it is clearly too weak or too costly, and say why you changed it.

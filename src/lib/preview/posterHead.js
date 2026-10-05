@@ -242,6 +242,32 @@ function drawBrandBar(ctx, model, palette) {
   })
 }
 
+// A postseason game's round and game number ("ALDS \u00b7 Game 3"), as a navy tab hanging
+// from the brand bar, centred between the two club tiles. Drawn outside the head's
+// stretch translate, like the bar, so it stays attached to it. A round name and a
+// game number are pregame facts; the poster is a public image, so nothing about a
+// series' record ever goes in `model.round` (ADR-0087). Nothing is drawn for any
+// other game.
+const ROUND_TAB = { height: 46, maxText: 280, spacing: 3, pad: 24 }
+
+function drawRoundTab(ctx, model, palette) {
+  if (!model.round) return
+  const label = caps(model.round)
+  const font = FONT.display(26)
+  ctx.font = font
+  const run = [...label].reduce((w, ch) => w + ctx.measureText(ch).width + ROUND_TAB.spacing, -ROUND_TAB.spacing)
+  const width = Math.min(run, ROUND_TAB.maxText) + ROUND_TAB.pad * 2
+  const cx = POSTER.width / 2
+  rect(ctx, cx - width / 2, HEAD.barHeight, width, ROUND_TAB.height, palette.navy)
+  track(ctx, label, cx, HEAD.barHeight + 32, {
+    font,
+    fill: palette.onInk,
+    spacing: ROUND_TAB.spacing,
+    align: 'center',
+    maxWidth: ROUND_TAB.maxText,
+  })
+}
+
 // The ballpark and the first pitch, then the conditions under them.
 function drawDateline(ctx, model, palette) {
   const cx = POSTER.width / 2
@@ -299,4 +325,5 @@ export function drawHead(ctx, model, art, palette, head) {
   ctx.restore()
 
   drawBrandBar(ctx, model, palette)
+  drawRoundTab(ctx, model, palette)
 }

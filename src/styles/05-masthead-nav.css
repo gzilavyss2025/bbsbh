@@ -631,20 +631,8 @@
   text-transform: none; /* caps-exempt: identity lab hint paragraphs read as natural sentences */
 }
 
-/* An inline text-link riding inside a .hint paragraph — underlined, no
-   button chrome, so it reads as part of the sentence. */
-.hint__link {
-  padding: 0;
-  border: none;
-  background: none;
-  font: inherit;
-  color: var(--accent-link);
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 /* On the slate every bit of copy reads in scorebook all-caps — the shared hint
-   and button text (loading / no games / error / Retry) are uppercased here only,
+   and button text (loading / error / Retry) are uppercased here only,
    leaving the same classes as-is on every other screen. */
 .screen--slate .hint,
 .screen--slate .btn {

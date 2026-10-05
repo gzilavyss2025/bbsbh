@@ -1,0 +1,340 @@
+/* ============================================================
+   MATCHUP SCOUT, THE MEETINGS TAB AND THE PITCH MODAL (#1490) —
+   screens/scout/meetings/. A per-route partial beside scout.css, imported by
+   ScoutPage.jsx only. Every selector is .scout__*.
+
+   Every number sits in a labelled box (.scout__fact): the value in mono, a
+   unit as a smaller inline <small>, a plain label under it. A pitch button
+   carries its family as a small dot, never a code. A call is coloured by
+   what it did: clay a strike, field green a ball, All-Star blue in play.
+   The film is the Express Lane's own pane (expresslane/FilmPane.jsx).
+   ============================================================ */
+
+/* --- the labelled number boxes --- */
+
+.scout__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+  gap: var(--space-1h);
+}
+.scout__facts--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.scout__fact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: var(--space-2) var(--space-1);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  text-align: center;
+}
+.scout__factvalue {
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.scout__factunit {
+  font-size: var(--fs-cell);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+}
+.scout__factsub {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.scout__factlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+}
+
+/* --- the mix: the meetings against the season, full names in the key --- */
+
+.scout__mix {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-1h) var(--space-2);
+}
+.scout__mixlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.scout__mixbar {
+  display: flex;
+  height: 18px;
+  overflow: hidden;
+  border-radius: var(--radius-xs);
+  background: var(--border-hairline);
+}
+.scout__mixseg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  color: var(--text-on-ink);
+  background: var(--arsenal-other);
+}
+.scout__mixkey,
+.scout__mixnote {
+  grid-column: 1 / -1;
+}
+.scout__mixkey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+.scout__mixkeyitem::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-inline-end: var(--space-1);
+  border-radius: var(--radius-xs);
+  background: var(--arsenal-other);
+}
+.scout__mixseg[data-family='fastball'],
+.scout__mixkeyitem[data-family='fastball']::before { background: var(--arsenal-fastball); }
+.scout__mixseg[data-family='breaking'],
+.scout__mixkeyitem[data-family='breaking']::before { background: var(--arsenal-breaking); }
+.scout__mixseg[data-family='offspeed'],
+.scout__mixkeyitem[data-family='offspeed']::before { background: var(--arsenal-offspeed); }
+/* A second (third) pitch of one family wears paper stripes over the family's
+   colour, so a fastball and a cutter read apart in the bars and the key. The
+   label sits on the solid colour between the stripes' thin lines. */
+.scout__mixseg[data-shade='1'],
+.scout__mixkeyitem[data-shade='1']::before {
+  background-image: repeating-linear-gradient(45deg, color-mix(in srgb, var(--text-on-ink) 30%, transparent) 0 2px, transparent 2px 6px);
+}
+.scout__mixseg[data-shade='2'],
+.scout__mixkeyitem[data-shade='2']::before {
+  background-image: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--text-on-ink) 30%, transparent) 0 2px, transparent 2px 6px);
+}
+
+/* --- the list: games, then one card per plate appearance --- */
+
+.scout__game {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.scout__gamehead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.scout__pa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+.scout__pahead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.scout__patitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.scout__pameta {
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+.scout__play {
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+.scout__pitches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-1h);
+}
+.scout__pbtn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  min-height: var(--control-min);
+  padding: var(--space-1h) var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.scout__pbtn:hover {
+  border-color: var(--text-caption);
+}
+.scout__pbtn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.scout__pbtnname {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+/* The family dot before the name: the pitch's family, never its code. */
+.scout__pbtnname::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-inline-end: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--arsenal-other);
+}
+.scout__pbtn[data-family='fastball'] .scout__pbtnname::before { background: var(--arsenal-fastball); }
+.scout__pbtn[data-family='breaking'] .scout__pbtnname::before { background: var(--arsenal-breaking); }
+.scout__pbtn[data-family='offspeed'] .scout__pbtnname::before { background: var(--arsenal-offspeed); }
+.scout__pbtnsub {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.scout__pbtncall,
+.scout__pmcall {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+[data-tone='strike'].scout__pbtncall,
+[data-tone='strike'].scout__pmcall { color: var(--clay); }
+[data-tone='ball'].scout__pbtncall,
+[data-tone='ball'].scout__pmcall { color: var(--field); }
+[data-tone='play'].scout__pbtncall,
+[data-tone='play'].scout__pmcall { color: var(--allstar-blue); }
+
+/* --- the pitch modal --- */
+
+.scout__pm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100dvh - 2 * var(--space-3));
+  overflow-y: auto;
+  padding: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-raised);
+}
+.scout__pmhead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.scout__pmtitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+.scout__pmcall {
+  margin: 0;
+}
+.scout__pmclose {
+  flex: none;
+  min-width: var(--control-min);
+  min-height: var(--control-min);
+  border: 0;
+  background: none;
+  color: var(--text-caption);
+  font-size: var(--fs-num-md);
+  cursor: pointer;
+}
+.scout__pmclose:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+.scout__pm .scout__scene {
+  max-width: none;
+}
+.scout__pmbody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  align-items: center;
+  gap: var(--space-3);
+}
+.scout__pmzone {
+  width: 100%;
+  height: auto;
+}
+.scout__pmbox {
+  fill: var(--surface-inset);
+  stroke: var(--text-heading);
+  stroke-width: 1.2;
+}
+.scout__pmgrid {
+  stroke: var(--border-rule);
+  stroke-width: 1;
+}
+.scout__pmdot {
+  fill: var(--arsenal-other);
+  stroke: var(--surface-card);
+  stroke-width: 1.5;
+}
+.scout__pmdot[data-family='fastball'] { fill: var(--arsenal-fastball); }
+.scout__pmdot[data-family='breaking'] { fill: var(--arsenal-breaking); }
+.scout__pmdot[data-family='offspeed'] { fill: var(--arsenal-offspeed); }
+.scout__pmside {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  fill: var(--text-caption);
+}
+.scout__pm .xl-film {
+  border-radius: var(--radius-sm);
+}
+.scout__pmfoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.scout__pmpos {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}

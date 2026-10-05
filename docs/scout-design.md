@@ -146,12 +146,13 @@ PHONE (375 px)                              TABLET / DESKTOP (≥ 740 px, screen
 3. **Usage % and mph come from `pitchTiles`** (`src/lib/pitcherCard/card.js`),
    the Now Pitching card's helper. The integer shares add to 100, as on that
    card. Velocity shows under the pitcher map when one type is selected.
-4. **The Now Pitching scene** (`PitchScene.jsx`) plays above the maps **in the
-   Hitter's view only**, and only the selected pitch (all pills' pitches for
-   All). **Verified** in `src/lib/pitcherCard/scene.js`: its camera stands 6 ft
-   behind the plate and looks at the mound, and `+x` is the catcher's right.
-   That is the Hitter's view. In the Pitcher's view the arcs would break the
-   other way from the maps below them.
+4. **The Now Pitching scene** (`PitchScene.jsx`) plays the selected pitch
+   (all pills' pitches for All) **in both views** (ADR-0099, #1490; this item
+   said "Hitter's view only" until then, ADR-0093 decision 5). The Hitter's
+   view is the card's camera (`scene.js`: 6 ft behind the plate, `+x` the
+   catcher's right). The Pitcher's view is a centre-field camera
+   (`camera.js`), so `+x` lands on the viewer's left, as on the maps. Its mound
+   is placed at the foot of the frame, not projected (ADR-0099 decision 4).
 5. **Expected line.** "Expected {metric} · {pitch} · {mph}" in the answer
    strip above the maps (section E moved it there). For one type: the sum
    over regions of (pitcher share × hitter value). A thin region uses the
@@ -190,8 +191,9 @@ PHONE (375 px)                              TABLET / DESKTOP (≥ 740 px, screen
   serves both sides of the matchup. "Above league" is not good or bad.
 - **A gray tint for "under the floor".** In the screenshot it read as a step
   of the navy scale. A hatch cannot read as a colour step.
-- **The scene in both views.** The arcs would contradict the maps in the
-  Pitcher's view.
+- **The scene in both views** (rejected 2026-10-02, then adopted 2026-10-05,
+  ADR-0099). With the card's one camera, the arcs would contradict the maps in
+  the Pitcher's view. A second camera removed that objection.
 
 ## C. Controls and states
 
@@ -318,6 +320,8 @@ The decisions in A-D stand.
    still a `Pill role="control"` row with a label.
    *Rejected:* one block of four rows under the maps. A thumb on a phone had
    to scroll past the maps to flip the view, then back up to see it.
+   *Changed in F (#1490):* View moved onto the scene's bar, and Hand, Scope
+   and Metric moved into one filter sheet behind a chip that names them.
 4. **Tap a region for its exact figures.** Each region on both maps is a
    button (`role="button"`, `aria-pressed`, keyboard Enter/Space). A tap
    picks the region on both maps (a navy frame) and the readout line under
@@ -417,11 +421,104 @@ The decisions in A-D stand.
 ### Not done, and why
 
 - **A sentence under the answer** ("He throws the slider away, where the
-  hitter is cold"). The page prints numbers, maps and labels, and generates
-  no sentences.
+  hitter is cold"). The page printed numbers, maps and labels, and generated
+  no sentences. *Changed in F (#1490):* the Edge tab's verdict writes the
+  figures out in sentences. The answer strip on the Zones tab stays a figure.
 - **Collapsing the Lab rows.** They are prototype-only and leave in Phase 1.
 - **A sixth file for the readout.** It is one small function in
   `ScoutLab.jsx`; the directory holds six files of a ten-file budget.
+
+## F. The restructure (#1490, Gary, 2026-10-05)
+
+Gary's asks: keep every feature, make the page clearer, and add analysis. Do
+the pitcher's pitches match up well or badly with what the hitter does well
+against (Q1)? What was the pitch mix in past meetings, and can each pitch play
+in its own modal, like the Express Lane (Q2)? Can the scene play in both views
+(Q3)? He chose **Structure A** over one long scroll and over one card per
+pitch. The reviewed mockup and its data are in `.scratch/scout-polish/`.
+
+### The page, top to bottom
+
+```
+Matchup strip (with Change)
+Chips: "2026 · Regular season" · "263 pitches to righties" · [Hand · Scope · Metric ▾]
+Pitch scene, both views; its bar: what plays · [Pitcher's | Hitter's]
+Pitch pills: (All)(Fastball 49%)(Sweeper 23%)(Cutter 17%)(Curveball 9%)
+Tabs: EDGE (who it favors) | ZONES (where) | MEETINGS (pitch by pitch)
+```
+
+1. **The scene and the pills stay in place.** Only the panel under the tabs
+   changes. The scene, the pills, the ledger and the maps share one selection
+   (`?pitch=`). The tab persists in `?tab=edge|zones|meet` (absent is edge).
+2. **One filter sheet** holds Hand, Scope and Metric (`FilterSheet.jsx`). The
+   chip's label sums up the choices. View is not in the sheet: it sits on the
+   scene's bar (ADR-0099). Hand still defaults to both hands for a one-sided
+   hitter (Gary did not approve a change).
+3. **At 740 px and wider** the scene and the pills hold a sticky left column;
+   the tabs and the panel take the right.
+
+### EDGE: who the matchup favors (`edge/edge.js`, pure)
+
+- **The verdict, by pitch type.** Each pill reads `hitterSide(...)`
+  `.byType[code].typeVal` (his whole-type rate) against `.leagueFlat` (the
+  league's, same hand, stance and scope). No new data. `band` gives 0 Even,
+  ±1 Slight, ±2 Clear, the map colours' scale. For xwOBA (est.) higher favors
+  the hitter; for Whiff % higher favors the pitcher; Swing % favors nobody.
+  The headline sums the usage of the types that favor each side: "Lean
+  {name}" when that sum is ahead and at least 50, else "Close to even". It
+  reads xwOBA (est.), or Whiff % when the grid has no estimate. A whiff line
+  names the types where Whiff % favors the pitcher.
+- **The verdict, by location.** The page's expected value against the
+  league's, the share of the pitcher's pitches in the hitter's hottest (hi2)
+  and below-league (lo1, lo2) regions, and the pilled types whose pitcher map
+  is thin ("Leaves out the cutter (44) and curveball (24)"). That replaces the
+  bare "72% of pitches" beside the answer.
+- **The ledger.** One row per pill, a dot plot on one scale per metric: a
+  tick for the league, a dot for the hitter, a bar between in the side's tone
+  (clay the hitter, All-Star blue the pitcher, graphite neither), and the
+  usage bar in the family's colour. A row tap selects the pitch.
+- **No hitter grid** (Phase 1): no verdict and no ledger. The panel prints his
+  Savant line per pitch type (`HitterLine.jsx`). It invents no comparison.
+- A null rate prints "Too few", never zero.
+
+### ZONES: today's maps, clearer
+
+The maps, the readout, the key and the answer strip stay. The captions say
+whose map is whose ("Where Pivetta throws to righties · % of pitches", "Where
+Chourio does damage · xwOBA (est.)"). Every share and every Whiff % and Swing %
+figure ends in "%", set at 0.7 em in a map cell. On All + xwOBA (est.) a
+callout under the readout names the hitter's hottest regions (`regionLabel`,
+never "left" or "right") and the pitcher's busiest one.
+
+### MEETINGS: pitch by pitch (`meetings/`)
+
+- `headToHead.js` keeps each plate appearance's pitches (`pitchList`), its
+  inning, half and stance. `pitches` stays the count.
+- A facts row ("0-for-3", pitches, Avg exit velocity, xwOBA on contact) and the
+  old slash line. Two mix bars: the meetings against this season's mix to the
+  stance, with full names in the key and a note for a pitch he never saw.
+- One card per plate appearance; games newest first, plate appearances in game
+  order inside a game. A ball in play gets Exit velocity, Launch angle and
+  xwOBA on contact boxes. Each pitch is a button: name, mph, count, the call.
+- **The pitch modal:** the real flight (`camera.js` `realFlight`) in the
+  page's scene and view, Real or ¼ speed; Spin rate, Horizontal break,
+  Vertical break; a mini zone drawn against the row's own `sz_top`/`sz_bot`;
+  the play text on the last pitch; and the film, as the Express Lane plays it
+  (`scout/playIds.js`, then `resolveClipUrl`, then `FilmPane`). Prev and Next
+  walk the list; "8 of 12" counts the list.
+- **Verified, 2026-10-05:** drawn against its own row's zone, a 2026 Savant
+  pitch agrees with the umpire's call 94.3% of the time (1,101 called pitches
+  to Chourio). So the modal needs no normalised zone.
+
+### Formatting
+
+- Full pitch names (`board.types[].name`, else `pitchLabel`). No code reaches
+  visible text.
+- Every percentage ends in "%"; xwOBA never takes one. Units say "mph", "°",
+  "rpm", "in". Every number box has a plain label.
+- **Rounding:** sums use the unrounded shares. So the test pair reads 25% (67
+  of 263) where the mockup read 26%, and 33% (88 of 263) where it read 34%;
+  the map cells print the same 33%.
 
 ## Decided by Gary (2026-10-02)
 
@@ -434,7 +531,7 @@ Gary answered every open item on 2026-10-02. These answers are the design.
 | 3 | Swing % floor | 10 pitches. |
 | 4 | The expected line | It follows the Metric control (xwOBA (est.), whiff %, swing %). |
 | 5 | The hand that feeds the expected line | The Hand control, the same data as the hitter map on screen. |
-| 6 | The Now Pitching scene | Hitter's view only. |
+| 6 | The Now Pitching scene | Hitter's view only. *Changed 2026-10-05 (#1490, ADR-0099): both views.* |
 | 7 | The date picker's floor | No change. `?d=` in the URL still reaches an earlier season. |
 | 8 | Two different stance boxes | Keep. Each map draws the stance of its own data. |
 | 9 | Phase 1 scope | The maps carry a "Regular season" tag. Scope changes only the head-to-head list until #1411. |

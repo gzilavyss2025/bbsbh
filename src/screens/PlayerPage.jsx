@@ -227,6 +227,18 @@ export function PlayerPage({ id, asOf, sportId }) {
               </p>
             ))}
 
+            {/* This October to date, over the same window as the tiles above
+                (api/player/postseasonRegister.js). The row does not exist until
+                he has played a postseason game. */}
+            {block.postseason && (
+              <div className="player__otherlevel">
+                <SectionHead look="rule" note={`${block.postseason.games} G`}>
+                  {`${data.currentYear} Postseason`}
+                </SectionHead>
+                <StatGrid tiles={block.postseason.tiles} />
+              </div>
+            )}
+
             {/* An up-and-down player's OTHER level(s) this season (e.g. a big
                 leaguer's AAA line) — promoted beside the main tiles rather than
                 read off the career register on the Stats tab. Full-season

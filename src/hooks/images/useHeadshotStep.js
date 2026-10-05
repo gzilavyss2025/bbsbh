@@ -24,7 +24,10 @@ export function useHeadshotStep(identityKey, sources, info) {
   }, [identityKey])
   useEffect(() => () => clearTimeout(timer.current), [])
 
-  const url = headshotStepUrl(sources, step)
+  // Two or more photo sources means silo then milb (a MiLB/unknown club): the
+  // silo gets one try, since a prospect's silo is usually a plain 404.
+  const quickFirst = (sources?.length ?? 0) > 1
+  const url = headshotStepUrl(sources, step, quickFirst)
   const infoRef = useRef(info)
   useLayoutEffect(() => {
     infoRef.current = info
@@ -35,10 +38,10 @@ export function useHeadshotStep(identityKey, sources, info) {
     const advance = () => {
       if (keyRef.current === key) setStep((s) => (s === step ? s + 1 : s))
     }
-    const delay = headshotStepDelay(step)
+    const delay = headshotStepDelay(step, quickFirst)
     if (delay) timer.current = setTimeout(advance, delay)
     else advance()
-  }, [step, url])
+  }, [step, url, quickFirst])
 
   return { url, onError }
 }

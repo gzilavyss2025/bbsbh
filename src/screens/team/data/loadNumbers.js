@@ -144,7 +144,11 @@ export async function loadNumbers(id, asOf) {
   const comeback =
     comebackData && comebackData.thresholds.some((t) => t.wins > 0) ? comebackData : null
 
-  const dayOfWeek = schedule.some((g) => g.won != null) ? dayOfWeekRecord(schedule) : null
+  // The schedule now runs into October. The day-of-week record and the Records
+  // card's completeness check reconcile with regular-season ledgers (standings,
+  // gen-team-records), so they count the 'R' rows only.
+  const regularSchedule = schedule.filter((g) => g.gameType === 'R')
+  const dayOfWeek = regularSchedule.some((g) => g.won != null) ? dayOfWeekRecord(regularSchedule) : null
 
   // The club's own run value ledger plus where it stands among the clubs — the
   // ranking is derived here, in the reader, never shipped in the file (see
@@ -198,7 +202,7 @@ export async function loadNumbers(id, asOf) {
     leaderPool,
     comeback,
     // A ledger that holds only part of the season is not shown (#1363).
-    teamRecords: ledgerIsComplete(teamRecordsData, schedule, standingsDate) ? teamRecordsData : null,
+    teamRecords: ledgerIsComplete(teamRecordsData, regularSchedule, standingsDate) ? teamRecordsData : null,
     scheduleShape: scheduleShapeData,
     // The card tallies rows itself (it owns the pre/post-break lever), so the
     // cutoff travels with the data rather than being applied here.

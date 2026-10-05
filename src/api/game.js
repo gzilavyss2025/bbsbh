@@ -440,7 +440,7 @@ async function fetchGameLogSplits(personId, season, sportId) {
   }
 }
 
-async function fetchSeriesGameNumber(gamePk) {
+export async function fetchSeriesGameNumber(gamePk) {
   try {
     const data = await getJson(`/api/v1/schedule?gamePk=${gamePk}`)
     return data.dates?.[0]?.games?.[0]?.seriesGameNumber ?? null

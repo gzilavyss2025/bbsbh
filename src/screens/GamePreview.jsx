@@ -3,6 +3,7 @@ import { buildPreviewModel } from '../api/gamePreview.js'
 import { selectGameSeason, selectOfficials } from '../api/select.js'
 import { loadUmpire } from '../api/umpires.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useGameRound } from '../hooks/postseason/useGameRound.js'
 import { useCopy } from '../copy/copyContext.js'
 import { drawPoster } from '../lib/preview/drawPoster.js'
 import { loadPosterArt } from '../lib/preview/posterArt.js'
@@ -71,9 +72,10 @@ export function GamePreview({ feed, starterLines, broadcast, callouts, treatment
     [plateId, seasonYear],
   )
 
+  const round = useGameRound(feed)
   const model = useMemo(
-    () => buildPreviewModel(feed, { starterLines, broadcast, callouts, umpire: umpire.data }),
-    [feed, starterLines, broadcast, callouts, umpire.data],
+    () => buildPreviewModel(feed, { starterLines, broadcast, callouts, umpire: umpire.data, round }),
+    [feed, starterLines, broadcast, callouts, umpire.data, round],
   )
 
   // Art and fonts both have to be in hand BEFORE the first paint — a canvas

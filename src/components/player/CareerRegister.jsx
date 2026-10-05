@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useAsync } from '../../hooks/useAsync.js'
+import { loadPostseasonRegister } from '../../api/player/postseasonRegister.js'
 import { spanCell } from '../../lib/ledger.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Ledger } from './Ledger.jsx'
@@ -89,6 +91,43 @@ export function CareerRegister({ register }) {
           cells: total.cells,
           className: total.tier === 'mlb' ? 'reg-mlb' : 'reg-milb',
         }))}
+      />
+    </>
+  )
+}
+
+// The register's October half: one row per postseason year, then the career line.
+// A sibling export rather than a file of its own, because it is the same table
+// over the same columns and this folder is at its file budget. It fetches for
+// itself and draws nothing until it has a row, so a player who never reached
+// October (or has not debuted) has no card and no empty heading. `showSaves` is
+// the closer test, so a closer's two tables read alike.
+export function PostseasonRegister({ personId, group, hasDebuted, asOf, showSaves }) {
+  const { data } = useAsync(
+    () => loadPostseasonRegister(personId, group, { hasDebuted, asOf, showSaves }),
+    [personId, group, hasDebuted, asOf, showSaves],
+  )
+  if (!data) return null
+  const { columns, rows, totals } = data
+  const hideNarrow = columns
+    .map((column, index) => (NARROW_HIDE_COLS.has(column) ? index + 2 : -1))
+    .filter((index) => index >= 0)
+  return (
+    <>
+      <SectionHead look="band" club bleed>
+        Postseason stats
+      </SectionHead>
+      <Ledger
+        label="Postseason stats"
+        leftCols={2}
+        head={['Year', 'Team', ...columns]}
+        rows={rows.map((row) => ({
+          key: row.key,
+          className: 'reg-mlb',
+          cells: [<>{row.year}</>, <>{row.team || DASH}</>, ...row.cells],
+        }))}
+        hideNarrow={hideNarrow}
+        totals={totals.map((total) => ({ label: total.label, cells: total.cells, className: 'reg-mlb' }))}
       />
     </>
   )

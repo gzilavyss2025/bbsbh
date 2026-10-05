@@ -300,8 +300,10 @@ don't run these by hand.
   (the season `fouls/seasons.json` names) for two
   MLB-only keys — `foulSpoilers` (top-10 foul-per-game hitters on the clubs) and
   `foulRate.perPitch` (league baseline) — skipped gracefully if that file is
-  absent. See `docs/callouts.md` + ADR-0014; extend this pipeline, don't build a
-  parallel path.
+  absent. A date older than ~10 days MOVES from `public/` to
+  `scripts/data/callouts-archive/{MMDDYYYY}/` (committed, never shipped), so the
+  bundle behind every night's Margin Notes is kept. See `docs/callouts.md` + ADR-0014;
+  extend this pipeline, don't build a parallel path.
 - `gen-fouls.mjs` → `fouls/{season}/fouls.json` (league, for `/fouls`) +
   `fouls/{season}/{NN}.json` (`personId % 100`, for the player card) + `fouls/seasons.json`
   + `fouls/all/fouls.json` (every season, summed from rows). A season store (ADR-0086,
@@ -1331,7 +1333,9 @@ Re-run only to fold in a new season.
 - `gen-awards-history.mjs` → `public/data/awards-history.json` — who won each major
   MLB award (MVP, Cy Young, Rookie of the Year, Silver Slugger, Gold Glove, Platinum
   Glove, Reliever of the Year, Comeback Player, Hank Aaron, Roberto Clemente, All-MLB
-  First/Second Team) over the last 5 seasons, grouped by award then by season. Loops
+  First/Second Team, plus the World Series MVP and the two LCS MVPs) over the last 5
+  seasons, grouped by award then by season. The postseason MVPs carry no stat line, since
+  the page's line is regular season. Hand-run, not a cron. Loops
   `MAJOR_AWARDS`' ids (imported straight from `src/api/person.js`, not duplicated, so
   this page can't drift from what the player page's own Awards section counts as
   hardware) × season through `GET /api/v1/awards/{awardId}/recipients?season=YYYY`.

@@ -44,16 +44,20 @@ export function withoutMultiTeamAggregate(splits) {
 function statSig(s) {
   return [s.atBats, s.hits, s.inningsPitched, s.strikeOuts, s.gamesPlayed].join('|')
 }
-export function aggregateSplits(splits, group) {
+// `dedupe: false` skips the repeat-line guard, for rows that are different seasons
+// and never the API's duplicate (a postseason year-by-year footer).
+export function aggregateSplits(splits, group, { dedupe = true } = {}) {
   const stats = withoutMultiTeamAggregate(splits).map((s) => s.stat).filter(Boolean)
   if (stats.length === 0) return null
   const seen = new Set()
-  const uniq = stats.filter((s) => {
-    const sig = statSig(s)
-    if (seen.has(sig)) return false
-    seen.add(sig)
-    return true
-  })
+  const uniq = dedupe
+    ? stats.filter((s) => {
+        const sig = statSig(s)
+        if (seen.has(sig)) return false
+        seen.add(sig)
+        return true
+      })
+    : stats
   if (uniq.length === 1) return uniq[0]
   const sum = (k) => uniq.reduce((t, s) => t + num(s[k]), 0)
   if (group === 'pitching') {

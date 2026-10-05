@@ -5,6 +5,7 @@ import { shardKey100 } from '../../lib/shardKey.js'
 import { currentSeasonOf } from '../../api/staticJson.js'
 import { fetchSavantMatchup } from '../../api/matchup/savant.js'
 import { fetchHitterGridFor, fetchHitterLeague } from '../../api/scout/hitterGrid.js'
+import { lastName } from '../../api/select.js'
 
 // EVERYTHING THE MATCHUP SCOUT DRAWS EXCEPT THE HEAD-TO-HEAD (#1410), in one
 // pass: both people (name, hands, club), the pitcher's mix and 5x5 command
@@ -36,6 +37,8 @@ export async function loadScout(pitcherId, hitterId) {
 const personOf = (p) => ({
   id: p.id,
   name: p.fullName ?? '',
+  // The surname the Edge tab's sentences use ("Lean Chourio").
+  last: lastName(p) || (p.fullName ?? ''),
   throws: p.pitchHand?.code ?? '',
   bats: p.batSide?.code ?? '',
   teamId: p.currentTeam?.id ?? null,

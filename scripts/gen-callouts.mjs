@@ -129,7 +129,7 @@
 // Runs for TOMORROW's slate by default (the games it precomputes); pass a
 // YYYY-MM-DD as argv[2] to (re)generate a specific date by hand:
 //   node scripts/gen-callouts.mjs 2026-07-10
-import { readFile, readdir, rm } from 'node:fs/promises'
+import { mkdir, readFile, readdir, rename, rm } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getJson as statsapiJson } from './lib/statsapi.mjs'
@@ -1622,17 +1622,24 @@ console.log(
   `wrote ${outDateDir} (${written} games across MLB+MiLB, ${swept} swept, ${hitterList.length} hitters and ${pitcherList.length} pitchers swept, ${ttoById.size} TTO splits)`,
 )
 
-// Prune old per-date directories so the committed folder stays small — keep
-// anything from the last ~10 days onward (a game scored a few days late still
-// finds its files; older ones are unreachable slate history).
+// Move old per-date directories out of public/ so the shipped folder stays small —
+// keep anything from the last ~10 days onward (a game scored a few days late still
+// finds its files). Older ones are unreachable slate history, but they are the only
+// record of what the Margin Notes could say that night, so they MOVE to
+// scripts/data/callouts-archive/ (committed, never shipped) rather than get deleted.
 const keepFrom = iso(new Date(target.getTime() - 10 * DAY_MS)).replace(/-/g, '')
+const archiveDir = join(here, 'data', 'callouts-archive')
 try {
   for (const name of await readdir(outDir)) {
     const m = name.match(/^(\d{2})(\d{2})(\d{4})$/)
     if (!m) continue
     const ymd = `${m[3]}${m[1]}${m[2]}` // YYYYMMDD
-    if (ymd < keepFrom) await rm(join(outDir, name), { recursive: true })
+    if (ymd >= keepFrom) continue
+    await mkdir(archiveDir, { recursive: true })
+    const dest = join(archiveDir, name)
+    await rm(dest, { recursive: true, force: true }) // a re-run replaces, never nests
+    await rename(join(outDir, name), dest)
   }
 } catch {
-  /* pruning is best-effort */
+  /* archiving is best-effort */
 }

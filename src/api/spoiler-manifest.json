@@ -753,6 +753,10 @@
       "class": "spoiler-free",
       "why": "The player hub's Overview tab loader — the fact grid, the contract card, the season tiles with their rank chips and promoted other-level rows, Milestone Watch, and four preview doors into the other tabs (a trimmed game log, a Statcast/prospect teaser, an awards-chip strip). Season aggregates and a cutoff-filtered game log, over completed games."
     },
+    "player/postseasonRegister.js": {
+      "class": "spoiler-free",
+      "why": "The player hub's postseason stats — the Stats tab's card (one career-aggregate row per postseason year, statsapi stats=yearByYear and career, gameType=P) and the Overview's postseason-to-date tile row (byDateRange gameType=P, over the same window as the season tiles) — over completed games. A stat line is not a score (ADR-0034). On a dated page it drops the as-of season and every later one, since that year's October may hold games past the date, and foots the rows it keeps."
+    },
     "player/prospectRankHistory.js": {
       "class": "spoiler-free",
       "why": "The player page's Prospect rankings card: the years a man sat on a top-prospect list, from a frozen 2005-2024 file. A scout's ranking of a player, not a fact about a game, so it opens live (ADR-0034). It names no source and no year itself; labels, credits and coverage all come from the file."
@@ -888,6 +892,10 @@
     "scout/headToHead.js": {
       "class": "spoiler-free",
       "why": "Matchup Scout's pitcher-versus-hitter history from Savant's pitch-level CSV. Only games dated before the cutoff (today, or `?d=`): the request sends the day before it as an inclusive bound, so it never reads a live game. An open stat surface (ADR-0034). The service worker serves Savant NetworkOnly (ADR-0004)."
+    },
+    "scout/playIds.js": {
+      "class": "cutoff-gated",
+      "why": "The Matchup Scout pitch modal's film lookup (#1490): the playId of each pitch in one PAST meeting, from the statsapi play-by-play pruned by `fields=` to atBatIndex, isPitch and playId, so no score, count, result or text reaches the browser. Safe only for the date asked: `fetchPlayIds` refuses a game dated on or after the cutoff (today, or `?d=`) or on or after the baseball today, so it never reads a live game. Its callers hand it only games the head-to-head already listed under the same cutoff. The clip it leads to carries a scorebug: on this open page (ADR-0034) that is a final, past game's score (ADR-0095)."
     },
     "scout/hitterGrid.js": {
       "class": "spoiler-free",

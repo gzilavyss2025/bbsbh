@@ -120,6 +120,15 @@
   padding-bottom: 2mm;
   border-bottom: var(--bw-rule) solid var(--ps-rule);
 }
+.printsheet__round {
+  margin: 0 0 1mm;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-title);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
 .printsheet__matchup {
   display: flex;
   flex-wrap: wrap;

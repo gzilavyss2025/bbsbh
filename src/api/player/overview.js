@@ -33,6 +33,7 @@ import {
   positionPlayerPastNote,
 } from '../person.js'
 import { boxscoreLinks, currentSeasonFor, playerContext, yearByYearFor } from './context.js'
+import { fetchPostseasonSeason, postseasonTilesView } from './postseasonRegister.js'
 
 // The game-log preview's row count — see docs/player-hub.md.
 const PREVIEW_GAME_LOG_LIMIT = 3
@@ -41,7 +42,7 @@ export async function loadPlayerOverview(id, asOf) {
   const ctx = await playerContext(id, asOf)
   if (!ctx) return null
   const {
-    bio, txns, groups, primaryGroup, season, cutoff, endDate, debutYear, currentActivitySportId, liveSportId,
+    bio, txns, groups, primaryGroup, season, startDate, cutoff, endDate, debutYear, currentActivitySportId, liveSportId,
   } = ctx
 
   // WAR (MLB calc, MLB-only), Statcast percentiles and the prospect-trend
@@ -70,7 +71,7 @@ export async function loadPlayerOverview(id, asOf) {
   const [results, debutSplits, convHittingMilb] = await Promise.all([
     Promise.all(
       groups.map(async (group) => {
-        const [current, yby, rankSplits, gameLogSplits] = await Promise.all([
+        const [current, yby, rankSplits, gameLogSplits, postseasonSplits] = await Promise.all([
           currentSeasonFor(ctx, group),
           // The promoted other-level rows and Milestone Watch's cutoff-safe
           // career total both read these; nothing else on this tab does.
@@ -88,6 +89,11 @@ export async function loadPlayerOverview(id, asOf) {
             type: 'gameLog', group, season, sportId: currentActivitySportId,
             gameType: currentActivitySportId === 1 ? MLB_LOG_GAME_TYPES : undefined,
           }),
+          // This October to date, over the SAME window as the tiles (the page's
+          // own cutoff), so it is never ahead of them. MLB only.
+          currentActivitySportId === 1
+            ? fetchPostseasonSeason(id, group, { season, startDate, endDate, hasDebuted: Boolean(bio.debut) })
+            : Promise.resolve([]),
         ])
         const { seasonSplits, stat: tileStat, sportId: tileSportId, levelOnlyStat, levelOnlySplits } = current
         const block = buildBlock({
@@ -114,6 +120,7 @@ export async function loadPlayerOverview(id, asOf) {
         // Same attach-after-buildBlock pattern the old loader used: the rank
         // strip and the two previews ride the block rather than widening a
         // pure shaper's signature.
+        block.postseason = postseasonTilesView(postseasonSplits, group, block.role)
         block.ranks = group === 'pitching' ? pitchingRanksView(rankSplits) : hittingRanksView(rankSplits)
         block.gameLogPreview = gameLogView(gameLogSplits, group, cutoff, PREVIEW_GAME_LOG_LIMIT)
         // The door's own count — the season's real game total, never the 3

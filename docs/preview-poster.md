@@ -43,6 +43,10 @@ opacities, both clubs' uniform-treatment tiles, place-over-nickname, and the
 park's name promoted from a hover reveal to the poster's dateline. Under it:
 start time, city, roof (only when it isn't Open), weather, broadcast.
 
+A postseason game also wears its round: a navy tab hanging from the brand bar,
+"ALDS · GAME 3" (`model.round`, from `useGameRound`). Round name and game number only.
+The poster is a public image, so a series record never goes in it (ADR-0087).
+
 The readiness pips are deliberately **not** carried over — see ADR-0045.
 
 Everything below the head is **two cards per row**, never one card with two
