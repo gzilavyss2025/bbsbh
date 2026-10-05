@@ -36,13 +36,13 @@
 }
 
 /* Tablet and desktop: the house's 740px cut (25-wide-layout.css), where the
-   screen widens to 960px. The maps and their controls take the main column;
-   the head-to-head list becomes the rail beside them, so a reader flips
-   pitches without losing the history. */
+   screen widens to 960px. The scene and the pitch pills hold the left
+   column and stay in view; the tabs and their panel take the right, so a
+   reader flips pitches without losing the panel (#1490; columns in
+   panels.css). */
 @media (min-width: 740px) {
   .scout__body {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
     align-items: start;
   }
   .scout__maps {
@@ -267,14 +267,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* The "Regular season" tag over the maps (Gary, item 9). */
-.scout__season {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin: 0;
 }
 
 /* --- the hitter's slot in Phase 1: his line per pitch type --- */

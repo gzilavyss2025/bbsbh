@@ -1,5 +1,5 @@
-import { memo, useEffect, useRef } from 'react'
-import { BAR_TOP, SCENE_H, SCENE_W, releasePoint, sceneFrame, stage } from '../../../lib/pitcherCard/scene.js'
+import { memo, useEffect, useMemo, useRef } from 'react'
+import { BAR_TOP, SCENE_H, SCENE_W, SLOW, pitcherStage, releasePoint, sceneFrame, stage } from '../../../lib/pitcherCard/scene.js'
 
 const STAGE = stage()
 const SEGMENTS = 40 // one per step of the model's path (scene.js N)
@@ -16,7 +16,12 @@ const f1 = (v) => v.toFixed(1)
 // the card is off screen (IntersectionObserver) and never starts under
 // `prefers-reduced-motion: reduce`, where the first pitch shows at full length.
 // `onActive(idx)` fires only when the pitch in flight changes.
-export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onActive }) {
+//
+// THE MATCHUP SCOUT'S EXTRAS (#1490, ADR-0099), all off by default, so the Now
+// Pitching card draws exactly as before: `view` 'pitcher' draws from the
+// centre-field camera on PitcherStage; `slow` is the slow-motion factor (1 =
+// real speed); `zone` [bottom, top] ft draws a real pitch's own zone.
+export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onActive, view = 'hitter', slow = SLOW, zone }) {
   const ghostRefs = useRef([])
   const segRefs = useRef([])
   const ballRef = useRef(null)
@@ -29,7 +34,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
   useEffect(() => {
     let shownIdx = -1
     const draw = (elapsed) => {
-      const { idx, progress } = sceneFrame(pitches, elapsed)
+      const { idx, progress } = sceneFrame(pitches, elapsed, slow)
       const p = pitches[idx]
       if (idx !== shownIdx) {
         shownIdx = idx
@@ -37,7 +42,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
         segRefs.current.forEach((s) => s?.setAttribute('class', `stroke--${p.family}`))
         if (barNameRef.current) barNameRef.current.textContent = p.name
         if (barMphRef.current) barMphRef.current.textContent = `${p.mph} mph`
-        onActive(idx)
+        onActive?.(idx)
       }
       const m = progress * SEGMENTS
       const whole = Math.floor(m)
@@ -100,10 +105,11 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
       stop()
       io.disconnect()
     }
-  }, [pitches, onActive])
+  }, [pitches, onActive, slow])
 
-  const [rx, ry] = releasePoint(lefty)
-  const { front: fr, back: bk } = STAGE
+  const [rx, ry] = pitches[0]?.pts[0] ?? releasePoint(lefty, view)
+  const hitterStage = useMemo(() => (zone ? stage(zone) : STAGE), [zone])
+  const { front: fr, back: bk } = hitterStage
   const edges = [
     [fr.x, fr.y, bk.x, bk.y],
     [fr.x + fr.w, fr.y, bk.x + bk.w, bk.y],
@@ -122,9 +128,10 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
       ref={sceneRef}
       className="pscene"
       role="img"
-      aria-label={`Behind-the-plate drawing of ${name}’s pitches: ${pitches.map((p) => p.name).join(', ')}.`}
+      aria-label={`${view === 'pitcher' ? 'Centre-field' : 'Behind-the-plate'} drawing of ${name}’s pitches: ${pitches.map((p) => p.name).join(', ')}.`}
     >
       <svg viewBox={`0 0 ${SCENE_W} ${SCENE_H}`} aria-hidden="true" focusable="false">
+        {view === 'pitcher' ? <PitcherStage zone={zone} /> : <>
         <rect className="pscene__sky" x="0" y="0" width={SCENE_W} height={SCENE_H} />
         <rect className="pscene__grass" x="0" y={f1(STAGE.horizon)} width={SCENE_W} height={SCENE_H} />
         <ellipse className="pscene__mound" cx={SCENE_W / 2} cy={f1(STAGE.mound.y)} rx={f1(STAGE.mound.rx)} ry="4" />
@@ -137,6 +144,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
         {grid.map(([x1, y1, x2, y2], i) => (
           <line key={`g${i}`} className="pscene__grid" x1={f1(x1)} y1={f1(y1)} x2={f1(x2)} y2={f1(y2)} />
         ))}
+        </>}
         {pitches.map((p, j) => {
           const end = p.pts[p.pts.length - 1]
           return (
@@ -167,3 +175,30 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
     </div>
   )
 })
+
+const pts = (list) => list.map(([x, y]) => `${f1(x)},${f1(y)}`).join(' ')
+
+// The Pitcher's view: the card's stage seen from centre field (scene.js
+// `pitcherStage`). Projected: the plate dirt, the batter's boxes, the plate
+// and the zone box. Placed: the mound and rubber at the foot of the frame
+// (ADR-0099). Same classes and tokens as the card's stage.
+function PitcherStage({ zone }) {
+  const s = useMemo(() => pitcherStage(zone), [zone])
+  const line = ([a, b], key, className) => (
+    <line key={key} className={className} x1={f1(a[0])} y1={f1(a[1])} x2={f1(b[0])} y2={f1(b[1])} />
+  )
+  return (
+    <>
+      <rect className="pscene__grass" x="0" y="0" width={SCENE_W} height={SCENE_H} />
+      <polygon className="pscene__dirt" points={pts(s.dirt)} />
+      {s.boxes.map((b, i) => <polygon key={`b${i}`} className="pscene__chalk" points={pts(b)} />)}
+      <polygon className="pscene__plate" points={pts(s.plate)} />
+      <polygon className="pscene__back" points={pts(s.back)} />
+      {s.edges.map((e, i) => line(e, `e${i}`, 'pscene__edge'))}
+      <polygon className="pscene__front" points={pts(s.front)} />
+      {s.grid.map((g, i) => line(g, `g${i}`, 'pscene__grid'))}
+      <ellipse className="pscene__mound" cx={s.mound.cx} cy={s.mound.cy} rx={s.mound.rx} ry={s.mound.ry} />
+      <rect className="pscene__rubber" x={s.rubber.x} y={s.rubber.y} width={s.rubber.w} height={s.rubber.h} />
+    </>
+  )
+}

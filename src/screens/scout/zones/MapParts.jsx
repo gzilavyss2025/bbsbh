@@ -1,7 +1,7 @@
-import { MIN_COMMAND_PITCHES } from '../../api/commandMap.js'
-import { METRICS, band, fmtMetric } from '../../lib/scout/metrics.js'
-import { regionLabel, sidesInOrder } from '../../lib/zone/regions.js'
-import { Stack } from '../../components/ui/layout/Stack.jsx'
+import { MIN_COMMAND_PITCHES } from '../../../api/commandMap.js'
+import { METRICS, band, fmtValue } from '../../../lib/scout/metrics.js'
+import { regionLabel, sidesInOrder } from '../../../lib/zone/regions.js'
+import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
 // THE PARTS AROUND THE SCOUT'S TWO MAPS: the side labels under each, the
 // answer line above them, the readout for a tapped region, and the key. The
@@ -28,21 +28,26 @@ export function Sides({ view }) {
 }
 
 // THE ANSWER: the expected value on the selected pitch (or the usage-weighed
-// line for All), read against the league's. A figure, never a sentence.
-export function Answer({ metric, typeName, mph, value, league, covered }) {
+// line for All), read against the league's. Here it stays a figure; the Edge
+// tab's verdict writes the same figure out as a sentence (#1490, Gary's
+// mockup review; docs/scout-design.md E). `leftOut` names the pilled types
+// whose pitcher map is too thin to weigh, in place of a bare "72% of pitches".
+export function Answer({ metric, typeName, mph, value, league, leftOut }) {
   return (
     <div className="scout__answer">
       <span className="scout__controllabel">
         Expected {METRICS[metric].label} · {typeName}{mph ? ` · ${mph} mph` : ''}
       </span>
-      <span key={value} className="scout__answervalue">{fmtMetric(metric, value)}</span>
+      <span key={value} className="scout__answervalue">{fmtValue(metric, value)}</span>
       {value != null && league != null && (
         <span className="scout__answerleague">
           <Swatch tone={toneOf(band(metric, value, league))} />
-          <span className="scout__cap">League {fmtMetric(metric, league)}</span>
+          <span className="scout__cap">League {fmtValue(metric, league)}</span>
         </span>
       )}
-      {covered != null && value != null && <span className="scout__cap">{pct(covered)}% of pitches</span>}
+      {leftOut?.length > 0 && value != null && (
+        <span className="scout__cap">Leaves out {leftOut.map((t) => `${t.name} (${t.n})`).join(', ')}: too few for a map</span>
+      )}
     </div>
   )
 }
@@ -68,7 +73,7 @@ export function Readout({ picked, map, hit, metric, stance }) {
       {h && (
         <span className="scout__readoutfact">
           <span className="scout__cap">Hitter</span>
-          <span className="scout__readoutvalue">{under ? '—' : fmtMetric(metric, h.value)}</span>
+          <span className="scout__readoutvalue">{under ? '—' : fmtValue(metric, h.value)}</span>
           <span className="scout__cap">{under ? `${h.n} of ${METRICS[metric].floor} ${unit}` : `${h.n.toLocaleString()} ${unit}`}</span>
         </span>
       )}

@@ -449,6 +449,7 @@ test('each plate appearance keeps its pitches in pitch_number order, with the fi
   ])
   assert.equal(pa.inning, 7)
   assert.equal(pa.half, 'bottom')
+  assert.equal(pa.stand, 'R')
   const last = pa.pitchList.at(-1)
   assert.equal(last.balls, 1)
   assert.equal(last.strikes, 2)

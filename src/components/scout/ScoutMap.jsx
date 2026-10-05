@@ -17,7 +17,11 @@ import { REGIONS, mapBox, platePoints, regionLabel, regionRect, stanceRect } fro
 // (a navy frame); the tone classes stay on the rect, so the fill tweens when
 // a pill flips the data under it (scout.css). A figure is keyed on its value,
 // so a changed number remounts and inks in. No `title=` tooltip anywhere.
-export function ScoutMap({ view, stance, cells, label, picked, onSelect }) {
+//
+// `unit` '%' sets a percent sign after each figure, in a smaller size than the
+// number (#1490): the pitcher's share always, the hitter's Whiff % and Swing %.
+// xwOBA (est.) takes none.
+export function ScoutMap({ view, stance, cells, label, picked, onSelect, unit = '' }) {
   const inner = ['r1c1', 'r3c3'].map((r) => regionRect(r, view))
   const fx = Math.min(inner[0].x, inner[1].x)
   const fr = Math.max(inner[0].x + inner[0].width, inner[1].x + inner[1].width)
@@ -36,7 +40,7 @@ export function ScoutMap({ view, stance, cells, label, picked, onSelect }) {
         const c = cells[r]
         const cx = x + width / 2
         const cy = y + height / 2
-        const figure = c.value ?? (c.count != null ? `${c.count}, under the floor` : '')
+        const figure = c.value != null ? `${c.value}${unit}` : c.count != null ? `${c.count}, under the floor` : ''
         return (
           <g
             key={r}
@@ -57,7 +61,9 @@ export function ScoutMap({ view, stance, cells, label, picked, onSelect }) {
               style={c.tone === 'gray' ? { fill: `url(#${hatch})` } : undefined} />
             {c.value != null ? (
               <>
-                <text key={`v${c.value}`} className="scout__figure" x={cx} y={c.count != null ? cy - 2 : cy + 4}>{c.value}</text>
+                <text key={`v${c.value}`} className="scout__figure" x={cx} y={c.count != null ? cy - 2 : cy + 4}>
+                  {c.value}{unit && <tspan className="scout__unit">{unit}</tspan>}
+                </text>
                 {c.count != null && <text key={`n${c.count}`} className="scout__count" x={cx} y={cy + 10}>{c.count}</text>}
               </>
             ) : (

@@ -37,7 +37,8 @@
 //                           description strings). The CSV has no playId:
 //                           scout/playIds.js finds it in the game feed.
 //                inning     the inning of the plate appearance's last row, or null
-//                half       'top' | 'bottom' | null }
+//                half       'top' | 'bottom' | null
+//                stand      the side the batter stood on, 'L' | 'R' | null }
 //   totals   `totalsOf(pas)`:
 //              { pa, ab, h, hr, bb, k, hbp, sf, tb,       counts
 //                avg, obp, slg }                          raw ratios, or null when
@@ -181,6 +182,7 @@ export function plateAppearances(rows) {
       pitchList: listOf(r),
       inning: num(r.inning),
       half: HALF[r.inning_topbot] ?? null,
+      stand: r.stand || null,
     }))
     .sort((a, b) => b.date.localeCompare(a.date) || b.gamePk - a.gamePk || b.atBat - a.atBat)
 }
