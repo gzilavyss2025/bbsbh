@@ -425,3 +425,9 @@ are safe but did not fit a one-or-two-partial family this round: scoring-surface
 rules (`.starter__info`, `.pbp`, `.consolebar__tallygroup`, `.trailstrip`,
 `.refpanel__body`, `.pcard__sec` and others), the admin contract pages, standings,
 wild card and the workload partials.
+
+## Decisions on the open questions (Gary, 2026-10-05)
+
+1. **`Cluster` keeps its `align` prop.**
+2. **`Grid` gets no `rowGap`.** The 2 grids that need two gap values stay hand-written.
+3. **`Stack gap="section"` gets a pilot on `/salaries`.** One page, its own slice, geometry checked. Not started.
