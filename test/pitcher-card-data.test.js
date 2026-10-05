@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test, { mock } from 'node:test'
 import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../src/api/game.js'
+import { fetchPitcherPostseasonCareer } from '../src/api/postseason/pitcherCareer.js'
 
 // The Now Pitching card's two fetchers, run against responses captured from
 // statsapi.mlb.com on 2026-10-01 (test/fixtures/pitcher-card/, trimmed to the
@@ -134,6 +135,50 @@ test('the season line carries every column the card can show', async () => {
       whip: '0.97',
     },
   )
+})
+
+// ---- All-time postseason line ----------------------------------------------
+
+// Peralta, captured 2026-10-05: seven postseason splits across six Octobers
+// (2025 comes as two, one per round, neither keyless), no 2026 games yet.
+// Hand sums: 9 G, 6 GS, 100 outs, 16 ER, 21 H, 13 BB, 41 K.
+test('the all-time postseason line sums every earlier October and rebuilds the rates', async () => {
+  const line = await withApi(
+    () => fixture('peralta-642547-yearbyyear-post'),
+    () => fetchPitcherPostseasonCareer(642547, 2026, null),
+  )
+  assert.equal(line.games, 9)
+  assert.equal(line.gamesStarted, 6)
+  assert.equal(line.inningsPitched, '33.1')
+  assert.equal(line.era, '4.32')
+  assert.equal(line.whip, '1.02')
+  assert.equal(line.strikeOuts, 41)
+  assert.equal(line.baseOnBalls, 13)
+})
+
+test('this season joins the all-time line only through the cutoff-gated line it is handed', async () => {
+  const urls = []
+  const thisSeason = { games: 1, gamesStarted: 1, wins: 0, losses: 0, saves: 0, holds: 0, inningsPitched: '2.0', strikeOuts: 3, baseOnBalls: 0, hits: 1, earnedRuns: 1 }
+  const line = await withApi(
+    (url) => (urls.push(url), fixture('peralta-642547-yearbyyear-post')),
+    () => fetchPitcherPostseasonCareer(642547, 2026, thisSeason),
+  )
+  assert.equal(line.games, 10)
+  assert.equal(line.inningsPitched, '35.1')
+  assert.equal(line.earnedRuns, 17)
+  assert.equal(new URL(urls[0]).searchParams.get('stats'), 'yearByYear')
+})
+
+test('a season at or after the cutoff year is never read from yearByYear', async () => {
+  const line = await withApi(
+    () => fixture('peralta-642547-yearbyyear-post'),
+    () => fetchPitcherPostseasonCareer(642547, 2025, null),
+  )
+  assert.equal(line.games, 6) // 2018-2024 only; both 2025 splits are left out
+})
+
+test('no postseason games, ever, is no all-time line', async () => {
+  assert.equal(await withApi(() => EMPTY, () => fetchPitcherPostseasonCareer(1, 2026, null)), null)
 })
 
 test('no split (a debut) is no line', async () => {

@@ -1,4 +1,5 @@
 import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../../api/game.js'
+import { fetchPitcherPostseasonCareer } from '../../api/postseason/pitcherCareer.js'
 import { fetchWorkload } from '../../api/workload.js'
 import { projectFromLiveLogs } from '../../api/rotation/liveStarters.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -14,7 +15,8 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 
 // STARTING PITCHERS (live series page): both probable starters for the next
-// game, his hand, his season line, his postseason line and his last start.
+// game, his hand, his season line, his postseason line (this year, then all-time)
+// and his last start.
 //
 // SPOILER FOOTING (ADR-0088, ADR-0087). Every line ends the DAY BEFORE the
 // cutoff (fetchPitcherSeasonLine), the last appearance is strictly before it
@@ -62,11 +64,14 @@ function Starter({ clubId, arm, season, cutoff, restOn, gameNumber }) {
       fetchPitcherSeasonLine(arm.id, season, 1, cutoff, { postseason: true }),
       fetchPitcherLastGame(arm.id, season, cutoff, gameNumber),
     ])
-    return { line, post, last }
+    const career = await fetchPitcherPostseasonCareer(arm.id, season, post)
+    return { line, post, career, last }
   }, [arm?.id, season, cutoff, gameNumber])
   if (!arm) return <NoStarter clubId={clubId} club={club} restOn={restOn} />
   const role = pitcherRole(data?.line)
   const hasPost = (data?.post?.games ?? 0) > 0
+  // A second row only when it says more than the first: his earlier Octobers.
+  const hasCareer = (data?.career?.games ?? 0) > (data?.post?.games ?? 0)
   return (
     <article className="psseries__starter" aria-label={`${club} starter, ${arm.name}`}>
       <div className="psseries__starterhead">
@@ -88,9 +93,17 @@ function Starter({ clubId, arm, season, cutoff, restOn, gameNumber }) {
           {hasPost && (
             <>
               <div className="pcard__postrule">
-                <span className="pcard__lbl pcard__lbl--ink">Postseason</span>
+                <span className="pcard__lbl pcard__lbl--ink">{season} postseason</span>
               </div>
               <StatGrid cells={seasonCells(role, data.post, { postseason: true })} />
+            </>
+          )}
+          {hasCareer && (
+            <>
+              <div className="pcard__postrule">
+                <span className="pcard__lbl pcard__lbl--ink">All-time postseason</span>
+              </div>
+              <StatGrid cells={seasonCells(role, data.career, { postseason: true })} />
             </>
           )}
         </div>

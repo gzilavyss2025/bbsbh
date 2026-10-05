@@ -777,6 +777,10 @@
       "class": "spoiler-free",
       "why": "The live series page's read of the games still to play: each one's park and announced probable pitchers, and those pitchers' throwing hand. A probable pitcher and a park are not results. The caller hands it only DATED upcoming gamePks (never today's game, never an if-necessary game, which has no gamePk), and the field list asks for no state, score, winner, linescore, seriesStatus or leagueRecord, so even a wrong pk brings back no result. test/postseason/upcoming-games.test.js pins that list."
     },
+    "postseason/pitcherCareer.js": {
+      "class": "spoiler-free",
+      "why": "A starter's all-time postseason line for the live series page: finished prior seasons (yearByYear) plus the cutoff-gated line it is handed. Never stats=career, which counts a game in progress. ADR-0088."
+    },
     "postseason/records.js": {
       "class": "cutoff-gated",
       "why": "Reads the per-season postseason ledgers (gen-postseason-records.mjs) and hands them to teamRecordsFor and the situational-record pivot, so it inherits teamRecords.js's footing whole, including the `cutoff = null` default: a bare call tallies every Final postseason game on file, tonight's included once the nightly lands. It computes no value those two do not. Open surface by rule (ADR-0034); nothing here is read on a scoring surface."

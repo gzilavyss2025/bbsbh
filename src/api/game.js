@@ -383,6 +383,8 @@ export async function fetchPitcherSeasonLine(personId, season, sportId = 1, offi
       strikeOuts: stat.strikeOuts ?? 0,
       baseOnBalls: stat.baseOnBalls ?? 0,
       whip: stat.whip ?? '',
+      hits: stat.hits ?? 0,
+      earnedRuns: stat.earnedRuns ?? 0,
     }
   } catch {
     // MiLB coverage gaps / pre-debut arms — the staging row just omits it.
