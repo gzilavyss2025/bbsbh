@@ -240,9 +240,18 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   // docks under the frame: the new-pitcher notice while the arm is fresh, else
   // the Entering card until the half's first tap. Neither at a handoff, where
   // the frame is still on the old page, nor while loading.
+  // Keyed on the step's primitive fields, not the `stepInfo` object: a poll
+  // makes a new `stepInfo` even when the step did not move. `feed` stays in the
+  // deps on purpose, since a poll can bring a change at the cursor.
+  const stepInning = stepInfo?.inning
+  const stepHalf = stepInfo?.half
+  const stepCount = stepInfo?.count
   const arm = useMemo(
-    () => (inLens ? frontierArmChange(feed, revealedThrough, stepInfo) : null),
-    [inLens, feed, revealedThrough, stepInfo],
+    () =>
+      inLens
+        ? frontierArmChange(feed, revealedThrough, { inning: stepInning, half: stepHalf, count: stepCount })
+        : null,
+    [inLens, feed, revealedThrough, stepInning, stepHalf, stepCount],
   )
   const [sheetArm, setSheetArm] = useState(null) // the arm the open pitcher sheet holds
   // The sheet lives only in the lens. If the lens goes (a wider window, a tap
@@ -251,10 +260,10 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   if (!inLens && sheetArm) setSheetArm(null)
   const armSaid = armWords(arm)
   // The Entering card's defense line walks the whole game's plays, so it runs
-  // once per step, not on every render (a poll, a motion beat, the sheet).
+  // once per step and per new feed (a poll), not on a motion beat or the sheet.
   const defense = useMemo(
-    () => (inLens && stepInfo?.count === 0 ? enteringDefense(feed, revealedThrough, stepInfo.inning, stepInfo.half) : ''),
-    [inLens, feed, revealedThrough, stepInfo],
+    () => (inLens && stepCount === 0 ? enteringDefense(feed, revealedThrough, stepInning, stepHalf) : ''),
+    [inLens, feed, revealedThrough, stepInning, stepHalf, stepCount],
   )
   const docks = bar?.state === 'sealed' || bar?.state === 'edge'
   const dock = !docks ? null : arm?.fresh ? (
