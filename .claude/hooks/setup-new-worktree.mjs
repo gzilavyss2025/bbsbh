@@ -58,18 +58,22 @@ try {
   const logFile = path.join(logDir, 'setup.log')
   const out = openSync(logFile, 'a')
 
+  // A cloud container ships Chromium preinstalled (PLAYWRIGHT_BROWSERS_PATH), so
+  // it must not download another copy.
+  const install = 'npm install --prefer-offline --no-audit --no-fund'
+  const cmdLine =
+    process.env.CLAUDE_CODE_REMOTE === 'true' ? install : `${install} && npx playwright install chromium`
+
   const child = spawn(
     process.platform === 'win32' ? 'cmd.exe' : 'sh',
-    process.platform === 'win32'
-      ? ['/c', 'npm install --prefer-offline --no-audit --no-fund && npx playwright install chromium']
-      : ['-c', 'npm install --prefer-offline --no-audit --no-fund && npx playwright install chromium'],
+    process.platform === 'win32' ? ['/c', cmdLine] : ['-c', cmdLine],
     { cwd: worktreePath, stdio: ['ignore', out, out], detached: true, windowsHide: true },
   )
   child.unref()
 
   process.stderr.write(
-    `Detected new worktree at ${worktreePath} — running npm install + ` +
-      `playwright install chromium in the background (log: ${logFile}).\n`,
+    `Detected new worktree at ${worktreePath} — running ` +
+      `${cmdLine.replace(/ --prefer-offline --no-audit --no-fund/, '')} in the background (log: ${logFile}).\n`,
   )
 } catch {
   // A setup hook must never break the tool call that triggered it.
