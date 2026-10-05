@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { GameStamp } from '../../components/logbook/GameStamp.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 // Every stamp you hold, season by season — the grid that has always sat below
 // the book, now behind a disclosure and CLOSED when the page loads.
@@ -83,7 +84,7 @@ export function StampCollection({
             {stamps.map((entry) => {
               const game = factsByPk[entry.gamePk]
               return (
-                <li className="logbook__cell" key={entry.gamePk}>
+                <Stack gap="snug" as="li" className="logbook__cell" key={entry.gamePk}>
                   {game ? (
                     <button
                       type="button"
@@ -97,10 +98,10 @@ export function StampCollection({
                     // keepsake still belongs to the user, so it holds its place
                     // with what the local record itself carries rather than
                     // vanishing from the grid.
-                    <div className="logbook__pending">
+                    <Stack gap="tight" className="logbook__pending">
                       <span>{monthDay(entry.date)}</span>
                       <small>{loading ? 'Loading' : 'Not available offline'}</small>
-                    </div>
+                    </Stack>
                   )}
                   <p className="logbook__caption">
                     <span>{monthDay(entry.date)}</span>
@@ -128,7 +129,7 @@ export function StampCollection({
                     )}
                   </p>
                   {entry.note && <p className="logbook__note">{entry.note}</p>}
-                </li>
+                </Stack>
               )
             })}
           </ul>

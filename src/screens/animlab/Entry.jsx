@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Button } from '../../components/ui/control/Button.jsx'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 // ---------------------------------------------------------------------------
 // ONE ENTRY ON THE ANIMATION LAB: the title and its Play control, the prose,
@@ -55,7 +56,7 @@ export function Entry({ title, note, live, hover = false, children }) {
   }
 
   return (
-    <section className="animlab__entry">
+    <Stack gap="snug" as="section" className="animlab__entry">
       <div className="animlab__head">
         <h2 className="animlab__title">{title}</h2>
         {!hover && (
@@ -88,6 +89,6 @@ export function Entry({ title, note, live, hover = false, children }) {
         {live}
       </div>
       {children}
-    </section>
+    </Stack>
   )
 }

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { SiteSearchModal } from '../../components/chrome/SiteSearch.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { canHit, canPitch } from '../../lib/scout/roles.js'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 const SLOTS = {
   pitcher: { label: 'Pitcher', pick: 'Pick a pitcher', placeholder: 'Search pitchers', accept: canPitch },
@@ -23,12 +24,12 @@ export function Pickers({ pitcher, hitter, onPick }) {
   return (
     <div className="scout__pickers">
       {Object.entries(SLOTS).map(([role, slot]) => (
-        <div key={role} className="scout__picker">
+        <Stack gap="tight" key={role} className="scout__picker">
           <span className="scout__controllabel">{slot.label}</span>
           <Button size="control" className="scout__pickbtn" onClick={() => setOpen(role)}>
             {picks[role]?.name || slot.placeholder}
           </Button>
-        </div>
+        </Stack>
       ))}
       {open && (
         <SiteSearchModal

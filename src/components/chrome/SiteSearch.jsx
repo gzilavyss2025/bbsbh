@@ -11,6 +11,7 @@ import { Headshot } from '../player/Headshot.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // The site-wide search trigger — a persistent icon button (not an always-open
 // input; on a phone-width header there's no room to dock one, and this is the
@@ -335,7 +336,8 @@ export function SiteSearchModal({ onClose, pick = null }) {
           {searching && <span className="searchoverlay__progressbar" />}
         </div>
 
-        <div
+        <Stack
+          gap="loose"
           className="searchoverlay__results"
           id={`${uid}-results`}
           aria-busy={searching || undefined}
@@ -343,7 +345,7 @@ export function SiteSearchModal({ onClose, pick = null }) {
           {noResults && <p className="searchoverlay__hint">No matches for “{trimmed}”.</p>}
 
           {groups.map((group) => (
-            <section key={group.id} className="searchoverlay__group">
+            <Stack gap="tight" as="section" key={group.id} className="searchoverlay__group">
               <div className="searchoverlay__grouphead">
                 <h3 className="searchoverlay__grouptitle">{group.label}</h3>
                 {group.id === 'recent' && (
@@ -368,9 +370,9 @@ export function SiteSearchModal({ onClose, pick = null }) {
                   />
                 ))}
               </ul>
-            </section>
+            </Stack>
           ))}
-        </div>
+        </Stack>
 
         <p className="sr-only" role="status" aria-live="polite">
           {hasQuery && !searching ? `${rows.length} results` : ''}

@@ -1,5 +1,6 @@
 import { moneyLabel } from './Money.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // Position spend on a field, not in a pie. The shape of a roster is spatial —
 // every reader already knows where a shortstop stands — so the money goes where
@@ -88,7 +89,7 @@ export function PositionSpend({ positions, note }) {
           })}
         </div>
 
-        <div className="posspend__list">
+        <Stack gap="snug" className="posspend__list">
           {positions.map((entry) => (
             <div key={entry.pos} className="posspend__row">
               <span className="posspend__label">{OFF_FIELD_LABELS[entry.pos] ?? entry.pos}</span>
@@ -99,7 +100,7 @@ export function PositionSpend({ positions, note }) {
             </div>
           ))}
           {note && <p className="paysource">{note}</p>}
-        </div>
+        </Stack>
       </div>
     </section>
   )
