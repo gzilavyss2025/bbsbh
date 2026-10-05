@@ -1,7 +1,9 @@
-// The player page's Postseason stats card: one row per October a player reached,
-// newest first, and his career postseason line under them. The career register
-// (api/person/careerRegister.js) is regular season only, so this is where a
-// player's October shows in a table.
+// The player page's postseason stats, in two shapes. The Stats tab's Postseason
+// stats card: one row per October a player reached, newest first, and his career
+// postseason line under them. The career register (api/person/careerRegister.js)
+// is regular season only, so this is where a player's October shows in a table.
+// The Overview's "postseason to date" tile row (`fetchPostseasonSeason` and
+// `postseasonTilesView` at the foot): this year's October beside the season tiles.
 //
 // Both reads are statsapi's own postseason aggregate, gameType=P: `yearByYear`
 // gives one row per postseason year with every round folded together, and
@@ -17,7 +19,8 @@
 // out. The API career line then includes games past the date, so the footer is
 // rebuilt from the rows that stay.
 import { fetchPersonStats, fetchTeamAbbrevs } from '../person-fetch.js'
-import { aggregateSplits } from '../person/stats.js'
+import { aggregateSplits, hitterTiles, pitcherTiles } from '../person/stats.js'
+import { DASH } from '../person/shared.js'
 import { registerColumns, yearByYearCells } from '../person/careerRegister.js'
 
 export async function fetchPostseasonRegister(personId, group, { hasDebuted = true } = {}) {
@@ -67,4 +70,28 @@ export async function loadPostseasonRegister(personId, group, { hasDebuted = tru
   const abbrevs = await fetchTeamAbbrevs([...new Set(view.rows.flatMap((r) => r.teamIds))])
   for (const r of view.rows) r.team = r.teamIds.map((id) => abbrevs[id]).filter(Boolean).join('/')
   return view
+}
+
+// This year's postseason to date, date-cut by the API itself: byDateRange takes
+// gameType=P and counts only games inside [startDate, endDate] (checked live
+// 2026-10-05). The caller passes the same window as the season tiles beside it, so
+// a dated page, or a game in progress, never moves it. MLB only (a player who has
+// not debuted asks nothing), and the API emits each row twice, which
+// aggregateSplits folds.
+export async function fetchPostseasonSeason(personId, group, { season, startDate, endDate, hasDebuted = true } = {}) {
+  if (!personId || !group || !season || !hasDebuted) return []
+  return fetchPersonStats(personId, { type: 'byDateRange', group, season, startDate, endDate, gameType: 'P' })
+}
+
+// The tile row: the season tiles' own four (WAR is a regular-season figure and
+// drops out), then OPS for a bat or WHIP for an arm. Null until he has played a
+// postseason game, so the row does not exist before October.
+export function postseasonTilesView(splits, group, role = null) {
+  const stat = aggregateSplits(splits ?? [], group)
+  if (!stat || !(Number(stat.gamesPlayed) > 0)) return null
+  const tiles =
+    group === 'pitching'
+      ? [...pitcherTiles(stat, role).slice(0, 4), { k: 'WHIP', v: stat.whip ?? DASH }]
+      : [...hitterTiles(stat).slice(0, 4), { k: 'OPS', v: stat.ops ?? DASH }]
+  return { games: Number(stat.gamesPlayed), tiles }
 }

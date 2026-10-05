@@ -755,7 +755,7 @@
     },
     "player/postseasonRegister.js": {
       "class": "spoiler-free",
-      "why": "The player hub's Postseason stats card on the Stats tab — one career-aggregate row per postseason year (statsapi stats=yearByYear and career, gameType=P) over completed games. A stat line is not a score (ADR-0034). On a dated page it drops the as-of season and every later one, since that year's October may hold games past the date, and foots the rows it keeps."
+      "why": "The player hub's postseason stats — the Stats tab's card (one career-aggregate row per postseason year, statsapi stats=yearByYear and career, gameType=P) and the Overview's postseason-to-date tile row (byDateRange gameType=P, over the same window as the season tiles) — over completed games. A stat line is not a score (ADR-0034). On a dated page it drops the as-of season and every later one, since that year's October may hold games past the date, and foots the rows it keeps."
     },
     "player/prospectRankHistory.js": {
       "class": "spoiler-free",

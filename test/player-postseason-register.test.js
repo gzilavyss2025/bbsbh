@@ -7,7 +7,12 @@
 // own gameType 'P'. The career line is `stats=career&gameType=P`.
 import assert from 'node:assert/strict'
 import test, { mock } from 'node:test'
-import { fetchPostseasonRegister, postseasonRegisterView } from '../src/api/player/postseasonRegister.js'
+import {
+  fetchPostseasonRegister,
+  fetchPostseasonSeason,
+  postseasonRegisterView,
+  postseasonTilesView,
+} from '../src/api/player/postseasonRegister.js'
 
 const hit = (season, teamId, stat) => ({
   season: String(season),
@@ -107,4 +112,52 @@ test('a player who never debuted asks nothing', async () => {
     fetchMock.mock.restore()
   }
   assert.deepEqual(calls, [])
+})
+
+// ---------------------------------------------------------------------------
+// The Overview's "postseason to date" tile row. byDateRange with gameType=P is
+// date-cut by the API (checked live 2026-10-05: Skubal, endDate 2026-10-02 ->
+// no rows, 2026-10-04 -> his one start) and emits the same row twice.
+// ---------------------------------------------------------------------------
+const bat = { gamesPlayed: 3, atBats: 11, hits: 4, avg: '.364', homeRuns: 1, rbi: 2, strikeOuts: 3, ops: '1.010', totalBases: 8 }
+const arm = { gamesPlayed: 1, gamesStarted: 1, wins: 1, losses: 0, saves: 0, era: '1.50', inningsPitched: '6.0', strikeOuts: 7, whip: '0.67' }
+
+test('a hitter\u2019s tiles are AVG, HR, RBI, SO and OPS, with the duplicate API row folded', () => {
+  const v = postseasonTilesView([{ stat: bat }, { stat: { ...bat } }], 'hitting')
+  assert.deepEqual(v.tiles.map((t) => [t.k, t.v]), [['AVG', '.364'], ['HR', '1'], ['RBI', '2'], ['SO', '3'], ['OPS', '1.010']])
+  assert.equal(v.games, 3)
+})
+
+test('a pitcher\u2019s tiles are W\u2013L, IP, ERA, K and WHIP; a closer leads with saves', () => {
+  const sp = postseasonTilesView([{ stat: arm }], 'pitching', 'SP')
+  assert.deepEqual(sp.tiles.map((t) => [t.k, t.v]), [['W\u2013L', '1\u20130'], ['IP', '6.0'], ['ERA', '1.50'], ['K', '7'], ['WHIP', '0.67']])
+  const cl = postseasonTilesView([{ stat: { ...arm, saves: 2 } }], 'pitching', 'CL')
+  assert.deepEqual([cl.tiles[0].k, cl.tiles[0].v], ['SV', '2'])
+})
+
+test('no postseason game yet means no tiles', () => {
+  assert.equal(postseasonTilesView([], 'hitting'), null)
+  assert.equal(postseasonTilesView(null, 'hitting'), null)
+  assert.equal(postseasonTilesView([{ stat: { ...bat, gamesPlayed: 0 } }], 'hitting'), null)
+})
+
+test('the tile read is date-cut: byDateRange with gameType=P and the page\u2019s own window', async () => {
+  const calls = []
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
+    calls.push(String(url))
+    return { ok: true, status: 200, json: async () => ({ stats: [{ splits: [{ stat: bat }] }] }) }
+  })
+  try {
+    const out = await fetchPostseasonSeason(669373, 'pitching', { season: 2026, startDate: '2026-01-01', endDate: '2026-10-04' })
+    assert.equal(out.length, 1)
+    const none = await fetchPostseasonSeason(1, 'pitching', { season: 2026, startDate: '2026-01-01', endDate: '2026-10-04', hasDebuted: false })
+    assert.deepEqual(none, [])
+  } finally {
+    fetchMock.mock.restore()
+  }
+  assert.equal(calls.length, 1)
+  assert.match(calls[0], /stats=byDateRange/)
+  assert.match(calls[0], /gameType=P/)
+  assert.match(calls[0], /startDate=2026-01-01/)
+  assert.match(calls[0], /endDate=2026-10-04/)
 })
