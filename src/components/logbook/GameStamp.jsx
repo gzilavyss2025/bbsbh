@@ -24,7 +24,7 @@ import {
   markBoxX,
   ringLayout,
   runFontSize,
-  stampDateText,
+  stampBottomText,
   stampIds,
   stampLabel,
   stampRingInverted,
@@ -121,10 +121,12 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
 
   const ids = stampIds(instanceId ?? game.gamePk)
   const venueText = game.venue ?? ''
-  // A postseason game substitutes its series line for the date in the same
-  // bottom-arc slot rather than stacking a second line — the ring only ever
-  // carries one thing there.
-  const bottomText = seriesText || stampDateText(game.date)
+  // A postseason game puts its round beside a short date in the same bottom-arc
+  // slot ("ALDS \u00b7 Oct 3, 2026") rather than stacking a second line — the ring only
+  // ever carries one thing there. The round is derived from the facts blob itself
+  // (stampArt.js's stampSeriesText), so every caller gets it; `seriesText` is only an
+  // explicit override.
+  const bottomText = stampBottomText(game, seriesText)
   const ring = ringLayout(venueText, bottomText)
   const label = stampLabel(game)
   const labelFont = labelType(label)

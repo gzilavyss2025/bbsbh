@@ -20,6 +20,15 @@ show a club's whole played season, and the four things that keep it contained),
 where the build deliberately departed from it), and `src/CLAUDE.md` for the
 component wiring.
 
+**An October stamp names its round.** The bottom arc of a postseason stamp reads
+"ALDS · Oct 3, 2026" (`stampBottomText`, `src/lib/stampArt.js`). The round comes from
+the facts blob's `gameType` and `leagueId`, which all three producers write (the
+server, the Logbook's schedule read and the box score's live feed). It carries no game
+number, because the live feed has none and a stamp must read the same whichever
+producer resolved it. A cached blob from before `leagueId` was stored keeps its long
+date. The Game Log stats page counts the postseason games in your book beside its
+runs-a-game line.
+
 ---
 
 ## 1. The product, in one pass

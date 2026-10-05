@@ -1,7 +1,7 @@
 // The Awards History page's data — who won each major MLB award (MVP, Cy
 // Young, Rookie of the Year, Silver Slugger, Gold Glove, Platinum Glove,
 // Reliever of the Year, Comeback Player, Hank Aaron, Roberto Clemente,
-// All-MLB First/Second Team) over the last several seasons, read from a
+// All-MLB First/Second Team, World Series MVP, LCS MVP) over the last several seasons, read from a
 // static same-origin file (public/data/awards-history.json) rather than
 // computed live.
 //
