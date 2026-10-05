@@ -1,35 +1,26 @@
 import { useEffect, useState } from 'react'
 import { clearHeadshotLog, readHeadshotLog } from '../../lib/headshot/log.js'
 
-// TEMPORARY (issue #1446): a read-out of the on-device headshot log, shown
-// only when the page was opened with `?headshotlog`, so a "?" seen on a phone
-// can be traced without dev tools. Holds ids, URLs and flags — never a score.
-// Remove with src/lib/headshot/log.js once the cause is fixed.
-const FLAG = 'bbsbh:headshotlog:panel'
-
-function wanted() {
-  try {
-    if (new URLSearchParams(window.location.search).has('headshotlog')) {
-      window.sessionStorage.setItem(FLAG, '1')
-    }
-    return window.sessionStorage.getItem(FLAG) === '1'
-  } catch {
-    return false
-  }
-}
-
+// TEMPORARY (issue #1446): a read-out of the on-device headshot log. It shows
+// a small "Headshot log" button on its own as soon as the log holds an entry
+// (a failed load, or a logo or monogram drawn where a face was expected), so
+// a "?" seen on a phone can be traced without dev tools or a URL flag. Holds
+// ids, URLs and flags, never a score. Remove with src/lib/headshot/log.js once
+// the cause is fixed.
 export function HeadshotLogPanel() {
-  const [on] = useState(wanted)
   const [open, setOpen] = useState(false)
   const [log, setLog] = useState([])
   useEffect(() => {
-    if (!on || !open) return undefined
-    const read = () => setLog(readHeadshotLog())
+    const read = () =>
+      setLog((prev) => {
+        const next = readHeadshotLog()
+        return next.length === prev.length && next.at(-1)?.at === prev.at(-1)?.at ? prev : next
+      })
     read()
     const t = setInterval(read, 2000)
     return () => clearInterval(t)
-  }, [on, open])
-  if (!on) return null
+  }, [])
+  if (!log.length) return null
   const lines = log.map((e) => {
     const { at, ...rest } = e
     return `${new Date(at).toLocaleTimeString()} ${JSON.stringify(rest)}`
