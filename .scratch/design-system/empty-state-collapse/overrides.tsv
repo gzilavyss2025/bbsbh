@@ -37,7 +37,6 @@
 .hint	caveat	HOLD		bare hint	the shared status line: 115 sites carry it for loading, error, caveat AND empty. Only its empty sites move. The rule stays for the rest
 .hint--prose	caveat	HOLD		label	the body-face caveat line. Its empty sites move; the caveat sites keep it
 .hint--error	error	n/a		label	the error line: the Notice census (#1132, after this one) owns it
-.hint__link	other	n/a	E9	label	DEAD: no use in src, e2e, test, scripts or api. Delete in the cleanup slice
 .boxlines__hint	loading	n/a		label	Box Lines status line: loading and error keep it; the two empty lines moved to EmptyState in E3 (.boxlines__empty)
 #
 # --- SELECTORS — loading, error, control, caveat (look-alikes) ---
@@ -436,3 +435,5 @@ screens/team/modules/identity/IdentityMonoField.jsx#3	tool	n/a			tool page: lab,
 screens/team/modules/identity/IdentityMonoField.jsx#4	tool	n/a			tool page: lab, admin or a dev curation screen (#1113 Q5 answer: leave them)
 screens/team/modules/identity/IdentityWpaBandField.jsx#1	tool	n/a			tool page: lab, admin or a dev curation screen (#1113 Q5 answer: leave them)
 screens/team/modules/identity/IdentityWpaPreview.jsx#1	tool	n/a			tool page: lab, admin or a dev curation screen (#1113 Q5 answer: leave them)
+screens/UmpirePage.jsx#1	caveat	n/a			a summary line for a season that has games: counts, then whether pitch-call accuracy is on file. It sits above the data, not in place of it. The empty line above it ("No games on file for this umpire in a season") moved to EmptyState in E9: a late site from #1202 (season views), landed after the plan
+screens/player/PlayerAnalyticsTab.jsx#1	caveat	n/a			the cards hint under the season picker: a note about the cards below it, shown only when data is on screen. Added by #1202 (season views)
