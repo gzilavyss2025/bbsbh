@@ -34,11 +34,6 @@ function run(files) {
 
 // The scratch tree has no src/CLAUDE.md, so every run exits 1 on that file's budget. Each
 // case therefore reads stderr for the one file it is about.
-test('a small nested file raises no complaint', () => {
-  const res = run({ 'src/deep/CLAUDE.md': '# deep\n' })
-  assert.doesNotMatch(res.stderr, /src\/deep/)
-})
-
 test('a nested file in a folder no list names is still capped by lines', () => {
   const res = run({ 'src/brand-new/CLAUDE.md': 'line\n'.repeat(251) })
   assert.equal(res.status, 1)

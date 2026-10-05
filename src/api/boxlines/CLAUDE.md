@@ -24,7 +24,8 @@ beside it.
 - **The card is a table** (ADR-0073). Every door prints the same five figures, named
   ONCE at each section's head (`DOOR_COLUMNS`), with five cells per door (`doorCells`).
   `label` stops being visible: it becomes the sheet's headline and the button's
-  accessible name. The house `See all ›` is said once, under the card title.
+  accessible name. The house `See all ›` is said once, under the card title. Adding a
+  facet needs nothing here: the columns are the group's, not the door's.
 - **The suite pins two rules.** The cells and `careerSplitLine` must quote the same five
   figures in the same order (the door is the only place the card and the sheet meet).
   `DOOR_EMPHASIS` must ink a RATE: a pitcher's fifth column is `BB`, a hitter's is OPS,
