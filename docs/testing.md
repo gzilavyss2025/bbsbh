@@ -66,6 +66,9 @@ Prefer a hand-built minimal fixture (`test/fixtures/mini-game.js`) for
 unit-level assertions where you want to control exactly one behavior; use the
 captured real feed for "does the real shape still parse" confidence.
 
+`.claude/skills/run.md` documents this loop end to end. `e2e/smoke.spec.js` is
+the one long-lived example spec; write and delete throwaway specs alongside it.
+
 ## Browser harness — `npm run e2e` (only when Gary asks)
 
 Playwright specs under `e2e/`. This is a **verification harness**, not a

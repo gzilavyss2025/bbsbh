@@ -90,3 +90,23 @@ which is a shared, immutable cache of public facts belonging to no user.
 crisis and it is the last time one should be added casually — the next feature
 that wants an endpoint should first ask whether it can ride an existing
 handler's query string.
+
+## The sync seam
+
+**The sync seam.** `components/sync/SyncStatusProvider.jsx` mounts
+unconditionally in `App.jsx` (it touches no Clerk API) as an external store, so
+a sync report re-renders only what reads it; the four headless `*CloudSync`
+components `report()` from the `catch` blocks they already had — the catches
+still swallow, they just stopped being silent. The reducer and the
+`unavailable` (501, a supported deploy state) vs `error` distinction live in
+`src/lib/account/syncStatus.js` (see `src/api/CLAUDE.md`).
+
+## Onboarding
+
+Onboarding is the same subsystem's other half: `lib/account/intro.js`
+(`bbsbh:intro`, the first-visit flag that replaced the old
+"`bbsbh:favoriteTeam` exists" proxy) and `lib/account/prompts.js`
+(`bbsbh:prompts`, the bounded one-shot map behind the contextual prompts).
+Both are pure, both return the **same object reference** when nothing changed,
+and both are one-directional — a dismissal never re-fires. Nothing about them
+syncs: a dismissal is a fact about this browser, not the account.
