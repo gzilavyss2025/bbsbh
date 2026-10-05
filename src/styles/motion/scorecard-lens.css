@@ -57,6 +57,17 @@
   }
 }
 
+/* ---- The ride ---- */
+/* Near the top of the order the frame cannot sit at its seat, so it rides on
+   the box (lib/scorecard/geometry.js's lensFrame): one row down a tap until it
+   reaches the seat. It moves on the glide's time and curve, so the frame and
+   the sheet move as one beat. The ruler and the cards under it go with it. */
+.sc-lens__frame,
+.sc-lens__ruler,
+.sc-lens__under {
+  transition: top var(--dur-glide) var(--ease-out);
+}
+
 /* ---- The runner-move fade ---- */
 /* The marker tint (lens.css) fades to the box's own fill over
    --dur-highlight: the highlighter on the boxes of the runners the tap moved.

@@ -1,9 +1,10 @@
 /* ============================================================
    SCORECARD / LENS CARRY STRIP — pinned at the top of the pane (#724, L6)
    When the batting order wraps, the last result and the runners' boxes are off
-   screen. The strip shows them in the pane's top spacer band (useLens's
-   `padTop`), from the sticky header down to the frame, never over the frame:
-   LensFrame sets its top and its max-height. The boxes are the sheet's own
+   screen. The strip takes the larger band of paper beside the frame (useLens's
+   `bandAbove`, `bandBelow`): from the sticky header down to the frame, or under
+   the docked card when the frame rides near the top of the order. Never over
+   the frame: LensFrame sets its place and its max-height. The boxes are the sheet's own
    AtBatBox, zoomed by CSS to the sheet's zoom times --lens-carry-scale.
    Paper, ink and navy only: kraft means a tap lifts a seal (ADR-0083), and the
    strip lifts nothing. It takes no taps, so the pane pans under it.
@@ -17,6 +18,13 @@
   margin-top: var(--space-2);
   overflow: hidden;
   pointer-events: none;
+}
+/* Below the frame, the strip is the last item of LensFrame's `__under` column,
+   which sets the band's max-height; the strip gives way to it. */
+.sc-lens__carry--below {
+  position: static;
+  flex: 0 1 auto;
+  min-height: 0;
 }
 .sc-carry {
   box-sizing: border-box;

@@ -110,7 +110,8 @@ _Avoid_: current play, latest inning
 **Lens**:
 The live scorecard's phone mode (`/{date}/{matchup}/scorecard` at phone width,
 ADR-0092). A fixed navy frame holds the next sealed box in one place on the
-screen, and the sheet scrolls under it after each tap. A bottom bar says the
+screen (the seat), and the sheet scrolls under it after each tap. Near the top
+of the order, where no box can reach the seat, the frame rides on the box. A bottom bar says the
 last opened play in words and holds Unwrap, the same reveal as the seal. It is
 not a reveal path of its own, and it is off under a force-reveal.
 _Avoid_: zoom mode, focus mode (the innings viewer's windowed mode)

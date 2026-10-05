@@ -440,3 +440,7 @@
 .animlab-lensglide {
   height: var(--sc-cell-h);
 }
+/* The ride demo: the frame over a two-row strip, placed on a measured cell. */
+.animlab-lensride {
+  position: relative;
+}

@@ -99,7 +99,8 @@
 .sc-sheet__cell--pad .sc-ab {
   visibility: hidden;
 }
-/* The spacer rows above slot 1 and below slot 9: blank paper. */
+/* The spacer row below slot 9, so row 9 can reach the seat: blank paper. (No
+   row above slot 1: there the frame rides up to the box, lensFrame.) */
 .sc-sheet__lenspad td {
   background: var(--surface-inset);
 }

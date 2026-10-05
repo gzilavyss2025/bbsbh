@@ -2,19 +2,28 @@
    SCORECARD / LENS CARDS — under the frame, and the pitcher sheet (#724, L5)
    One card docks under the lens's frame at a time (LensCards.jsx): the
    new-pitcher notice, or at a leadoff the Entering card. useLens places the
-   frame in pane pixels and LensFrame puts the dock's top at the frame's bottom
-   edge; this partial adds the gap and the side insets. The pitcher sheet is
+   frame in pane pixels and LensFrame puts a column (`__under`) at the frame's
+   bottom edge: the dock, then the carry strip when the frame rides near the
+   top of the order. This partial adds the gap and the side insets. The pitcher sheet is
    the app's own bottom sheet (.scrim/.sheet), from --lens-sheet-top down.
    Paper, ink, navy and the notice tint only: kraft means a tap lifts a seal
    (ADR-0083), and nothing here lifts one.
    ============================================================ */
 
-.sc-lens__dock {
+.sc-lens__under {
   position: absolute;
   right: var(--space-4);
   left: var(--space-4);
   z-index: 5;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+/* The dock keeps its size; only a carry strip below it gives way to the band. */
+.sc-lens__dock {
+  flex: none;
   margin-top: var(--lens-dock-gap);
+  pointer-events: auto;
 }
 
 /* THE ENTERING CARD: the brightest paper, a soft ink rule, raised. */
