@@ -589,9 +589,11 @@ CREATE TABLE IF NOT EXISTS team_record_games (
   PRIMARY KEY (game_pk, team_id)
 );
 
--- Idempotency guard. A Final game's box score is immutable, so an ingested
--- gamePk is never refetched — this is what keeps the nightly run at the ~65
--- games that actually finished rather than a season-wide re-walk.
+-- Idempotency guard. An ingested gamePk is never refetched — this is what
+-- keeps the nightly run at the ~65 games that actually finished rather than a
+-- season-wide re-walk. statsapi does correct a Final game later (errors, hits,
+-- now and then a run), and the ledger keeps the first version until a
+-- re-ingest (docs/scripts/generators.md).
 CREATE TABLE IF NOT EXISTS team_record_ingested_games (
   game_pk INTEGER NOT NULL PRIMARY KEY,
   date    TEXT NOT NULL,

@@ -515,11 +515,14 @@ don't run these by hand.
   roughly 4.5%. SQLite-backed (`team-records` group,
   ADR-0021), APPEND-ONLY over newly-Final games; `team_record_ingested_games` is
   the idempotency guard, so the nightly cost is the ~65 games that finished,
-  never the season. A changed INGEST-time fact (the batted-around count, which
-  the row stores finished) cannot be fixed with `--export-only`: delete that
-  season's `team_record_ingested_games` rows, dump the group, and sweep the
-  season's dates again (`--since`/`--until`). That is how #1296 applied #1295's
-  plate-appearance rule to 2026. The `team_record_games` table is **seven columns plus a `payload_json`**, not
+  never the season. `--export-only` does not change a fact that the row stores
+  at ingest (the batted-around count) or a statsapi correction to a game on
+  file. To apply one, re-ingest the season: delete its
+  `team_record_ingested_games` rows, dump the group, and sweep its dates again
+  (`--since`/`--until`). Then make sure that every `team_record_games` row has
+  a mark. A game that the sweep skips (a failed fetch, a changed status) keeps
+  its old row with no mark, and the nightly window never looks at it again.
+  #1296 re-ingested 2026 this way. The `team_record_games` table is **seven columns plus a `payload_json`**, not
   thirty-one, and the schema comment says why: `dumpGroup` repeats every column
   NAME on every row, so a six-level season would otherwise have committed
   megabytes of column names.
