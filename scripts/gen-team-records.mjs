@@ -61,6 +61,7 @@ import { parseArgs, dateRange } from './lib/args.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import {
   isPlayedGame,
+  uniqueByGamePk,
   refreshRoleFacts,
   storedRoleFacts,
   tagSeries,
@@ -130,7 +131,7 @@ async function candidatesFor(dates, existing) {
       }
     }
   }
-  return out
+  return uniqueByGamePk(out)
 }
 
 
