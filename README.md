@@ -29,6 +29,12 @@ innings viewer, and the box score. Everything else about baseball opens live —
 season and career stats, player and team pages, leaderboards, and standings. A
 stat line is not a score.
 
+The postseason bracket is the one place a result shows without a tap, so it
+follows its own rule. The bracket, the series line on each slate card, and the
+series pages show each series as it stood heading into the day on screen. A game
+counts only after it went final on an earlier day. Last night's results are
+visible; tonight's never are.
+
 Three opt-in doors lift the seal, and you have to ask for each one:
 
 - **Scores Unlocked** — a site-wide pass for the day you agree to spoil. Use it
@@ -48,12 +54,19 @@ Three opt-in doors lift the seal, and you have to ask for each one:
 
 **Pick your game.** The app opens on the day's slate. Switch between the majors
 and the four full-season minor-league levels (AAA, AA, A+, A) with the toggle at
-the top, and step a day forward or back. The Brewers sit pinned to the top. Each
-card gives you the start time and the game state, but never the score — not even
+the top, and step a day forward or back. Your favorite club sits pinned to the
+top (the Brewers, until you pick another). From October to February, a WINTER
+tab adds the Arizona Fall League and the Mexican, Venezuelan, and Dominican
+winter leagues. Each card gives you the start time and the game state, but never the score — not even
 for a game that ended last week. A readiness pill tells you which pieces your
 scorebook needs are posted yet: both lineups, the umpires, and the starting
 pitchers. Alongside the slate, a live wire lists roster moves league-wide —
-trades, signings, injuries, call-ups — as they happen.
+trades, signings, injuries, call-ups — as they happen. In the postseason, the
+wire gives way to the bracket: a ticket for each series with its round and
+length, the full tree one tap away, and a board of the clubs still alive. Tap a
+series to open its page: both clubs' rosters, the starters, the leaders, the
+play of the game, and what is still to play. In the offseason, the slate shows
+the wire and a countdown to spring training.
 
 **Check the teams.** Before first pitch, page through each club: the batting
 order with numbers and positions, the starting pitcher with a season line and
@@ -100,7 +113,11 @@ game turns the whole lineup card into a Numbers Game "22" sheet you can fill on
 screen, one at-bat at a time, in step with your own reveals. Before first
 pitch, the same game gives you a printable pre-pitch scorecard for filling in
 by hand, and a shareable preview card with both lineups and the day's matchup —
-neither one carries a score.
+neither one carries a score. On a phone, the live scorecard holds the next
+sealed box under a fixed frame, so the box you tap never moves: the sheet slides
+under it. A bar below the frame says in plain words where the game stands in
+your reveals, names the pitcher, and has a **Sheet** button that shows the whole
+card.
 
 **Score a game you missed, from the film.** Every pitch of a major-league game
 has a clip of its own, back to 2016, and **Express Lane** turns them into a
@@ -127,9 +144,10 @@ finish from the catcher's target, and a plot of where they actually landed
 around it. A catcher gets the other side of the same question — how close the
 pitchers he caught came to the target he set. A "Path to the Majors" strip
 traces every level the player climbed, timelines list every club and every
-transaction, and "firsts" link to the game of a first hit or a first win. A
-contract history lists each arbitration case, extension, and free-agent deal by
-season, with what it paid. Prospects, All-Stars, rehab
+transaction, and "firsts" link to the game of a first hit or a first win.
+Postseason games appear in the game log. A contract history lists each
+arbitration case, extension, and free-agent deal by season, with what it paid.
+Prospects, All-Stars, rehab
 assignments, and Injured List stints are all flagged.
 
 **Team pages.** Tap a logo for the club hub: Overview, Roster, Games, Numbers,
@@ -142,7 +160,15 @@ its last shutout, its last road-trip-opener win — across a decade of games. A
 minor-league club also shows its parent organization, its affiliation history,
 and the farm system. From the Games tab, two more pages open: the club's full
 season of professional game photos, and its whole season of roster moves as
-one scrollable ledger.
+one scrollable ledger. The Numbers tab adds a card on how often the club's
+players challenge the plate umpire's calls. A **Notes archive** button on the
+hub opens every club's Game Notes files as a plain list of links. It never shows
+the text inside them.
+
+**Any season.** Foul Tracker, Umpire Rankings, ABS Challenges, each umpire's
+page, and a player's Analytics tab carry a season picker. Choose one season,
+all seasons combined, or one season set against another. Each choice is its own
+address, so you can share it.
 
 **Standings** open *through yesterday*, so today's games cannot spoil you. One
 tap brings in today. You can also scrub back to any earlier date.
@@ -161,6 +187,7 @@ Standalone reference pages, all reachable from the menu and the slate footer:
 | Run Value Leaders | Bat, glove, legs, and arm, added up on one scale of runs |
 | Situational Records | One record at a time, every club at a level, ranked |
 | Salaries | Who is paid the most, and what each club spends |
+| Matchup Scout | Pick a pitcher and a hitter: where he throws each pitch, where the hitter does damage against it, and every time they met |
 | Foul Tracker | Season foul-ball boards for batters and pitchers, plus the top foul games |
 | Umpire Rankings | Every qualifying plate umpire, ranked by called-pitch accuracy, plus a page per umpire |
 | ABS Challenges | The season board for the Automated Ball-Strike challenge system |
@@ -174,6 +201,9 @@ Standalone reference pages, all reachable from the menu and the slate footer:
 | Milestone Watch | Career counting stats in reach this season, with projections |
 | Awards History | Past award winners |
 | Postseason History / Leaders | Series by series, plus all-time postseason leaders |
+| Postseason Records | Win-loss records by game situation for every postseason club since 1995 |
+| Nine Keys | Nine season measures, and how many of them every champion since 2000 passed |
+| Run Differential | What happens to a club that outscores the league by 200 runs, back to 1901 |
 | Trade Deadline | Deadline moves, by season |
 | All Star Game / Legacy | Rosters for the current game, and the history behind it |
 | Logo Sheet | A grayscale sheet of every club at one level, to trace into your book |
