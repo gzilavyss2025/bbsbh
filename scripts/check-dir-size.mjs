@@ -37,7 +37,7 @@
 
 import { readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
-import { ROOT, walkDirs } from './lib/walk.mjs'
+import { ROOT, toPosix, walkDirs } from './lib/walk.mjs'
 
 // Roots to walk. Every directory beneath these is checked, counting only the
 // source files sitting DIRECTLY in it (subdirectories are their own entry).
@@ -1114,7 +1114,7 @@ const BUDGETS = {
   'src/lib/research/contenderDiary': 14,
 }
 
-const walk = (dir) => walkDirs(join(ROOT, dir)).map((d) => relative(ROOT, d))
+const walk = (dir) => walkDirs(join(ROOT, dir)).map((d) => toPosix(relative(ROOT, d)))
 
 function countSources(dir) {
   return readdirSync(join(ROOT, dir)).filter((entry) => {

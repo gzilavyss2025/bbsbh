@@ -20,6 +20,7 @@ import assert from 'node:assert/strict'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { toPosix } from '../scripts/lib/walk.mjs'
 import { GAPS, GRID_TAGS, gridClassName, gridMinStyle } from '../src/lib/design/gridClass.js'
 import { stripComments, ruleBody } from './helpers/css.js'
 
@@ -66,7 +67,7 @@ test('.grid is a grid with one gap, and no other stylesheet draws it', () => {
   assert.match(base, /gap:\s*var\(--grid-gap\)/)
   assert.match(base, /--grid-min:\s*9rem/, 'the default minimum lives on the base rule')
   for (const f of cssFiles(STYLES)) {
-    if (f.endsWith('system/grid.css')) continue
+    if (toPosix(f).endsWith('system/grid.css')) continue
     const css = stripComments(readFileSync(f, 'utf8'))
     assert.equal(ruleBody(css, '.grid'), null, `${f} should not redraw .grid`)
   }

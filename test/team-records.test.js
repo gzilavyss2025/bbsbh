@@ -15,6 +15,7 @@ import {
   inningRuns,
   isPlayedFinal,
   isPlayedGame,
+  uniqueByGamePk,
   encodeInnings,
   decodeInnings,
   scoredFirstSide,
@@ -893,4 +894,12 @@ test('the committed ledger carries no tie that was never played', () => {
     .split('\n')
     .filter((line) => line.startsWith('INSERT INTO team_record_games') && line.includes(", 'T', ") && line.includes('"innings":[]'))
   assert.deepEqual(phantoms.slice(0, 3), [], `${phantoms.length} rows are a 0-0 tie with no innings: a cancelled or postponed game`)
+})
+
+test('uniqueByGamePk keeps each gamePk once, first listing wins', () => {
+  const a = { game: { gamePk: 1 }, date: '2026-05-01' }
+  const dup = { game: { gamePk: 1 }, date: '2026-05-02' }
+  const b = { game: { gamePk: 2 }, date: '2026-05-02' }
+  assert.deepEqual(uniqueByGamePk([a, dup, b]), [a, b])
+  assert.deepEqual(uniqueByGamePk([]), [])
 })

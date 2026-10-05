@@ -48,6 +48,20 @@ export function isPlayedGame(game) {
   return isPlayedFinal(game) || game?.status?.codedGameState === 'O'
 }
 
+// One entry per gamePk, first one wins. A game can sit on two schedule dates
+// (a suspended game, or an `officialDate` that differs from the slate's date),
+// and every duplicate costs a fetch pair downstream. `INSERT OR REPLACE`
+// already merges the rows, so this only saves requests (#1466).
+export function uniqueByGamePk(candidates) {
+  const seen = new Set()
+  return candidates.filter(({ game }) => {
+    const pk = String(game?.gamePk)
+    if (seen.has(pk)) return false
+    seen.add(pk)
+    return true
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Linescore
 // ---------------------------------------------------------------------------
