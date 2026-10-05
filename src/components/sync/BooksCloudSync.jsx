@@ -3,7 +3,7 @@ import { useAuth } from '@clerk/clerk-react'
 import { readBooksOwner, useBooks, writeBooksOwner } from '../../hooks/useBooks.js'
 import { booksToPublish } from '../../lib/books.js'
 import { mergeStrategyFor } from '../../lib/account/preferences.js'
-import { phaseForResponse, reasonForResponse } from '../../lib/account/syncStatus.js'
+import { phaseForResponse, reasonForResponse, syncOutcome } from '../../lib/account/syncStatus.js'
 import { useSyncReport } from './SyncStatusProvider.jsx'
 
 // Headless — renders nothing, only runs the effects. Only ever mounted when
@@ -243,18 +243,7 @@ export function BooksCloudSync() {
           }
         }),
       )
-      // `null` is a success, a number is an HTTP failure, `undefined` is a
-      // throw. `find` cannot be used here: it returns `undefined` both for
-      // "no failure" and for "a network failure", which are opposite answers.
-      const failures = outcomes.filter((outcome) => outcome !== null)
-      if (failures.length === 0) {
-        report('books', 'synced')
-      } else {
-        const status = failures.find((outcome) => outcome !== undefined)
-        report('books', status === undefined ? 'error' : phaseForResponse(status), {
-          reason: status === undefined ? 'network' : reasonForResponse(status),
-        })
-      }
+      report('books', ...syncOutcome(outcomes))
     })()
   }, [isSignedIn, userId, getToken, books, report])
 

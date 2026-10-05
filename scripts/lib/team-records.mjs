@@ -39,6 +39,15 @@ export function isPlayedFinal(game) {
   return game?.status?.codedGameState === 'F'
 }
 
+// The regular-season sweep's gate: isPlayedFinal, or 'O' (Game Over, Completed
+// Early). Most games move from 'O' to 'F' within minutes, but some stay at 'O'
+// for good, with a full line and a winner (three 2026 Rookie games did), and
+// the 'F'-only gate never ingests them. The postseason ledger keeps the
+// 'F'-only gate: it runs while the games are still being played.
+export function isPlayedGame(game) {
+  return isPlayedFinal(game) || game?.status?.codedGameState === 'O'
+}
+
 // ---------------------------------------------------------------------------
 // Linescore
 // ---------------------------------------------------------------------------
@@ -406,8 +415,7 @@ export async function refreshRoleFacts(
 // is the stricter reading and the one that makes the count mean something.
 // The row stores the finished COUNT, not the per-half PAs, so a changed
 // definition here does not reach games already on file through --export-only:
-// those games must be re-ingested (delete their team_record_ingested_games
-// marks and run a sweep over their dates).
+// re-ingest those games (docs/scripts/generators.md has the steps).
 //
 // Counts plays with long-at-bats.mjs's `isPlateAppearance`, the shared rule.
 // allPlays interleaves top-level baserunning plays (steals, pickoffs, balks,

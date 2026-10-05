@@ -257,7 +257,6 @@ export function AllStarRostersPage() {
         hasData={seasons.length > 0}
         errorMessage="Couldn’t load All-Star Rosters. Try again."
         emptyMessage="No All-Star roster history is available right now."
-        emptyProse
       />
 
       {seasons.length > 0 && (

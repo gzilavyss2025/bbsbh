@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { fetchTeamDirectory, searchTeams } from '../../api/search.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { SPORT_LABEL } from '../../lib/teams.js'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // Team-name search box â€” GameFinder's club picker. Picking a result hands the
 // chosen team back via `onPick` â€” how GameFinder lets someone choose two
@@ -23,7 +24,7 @@ export function TeamSearchBox({ label = 'Find a team', placeholder = 'Team nameâ
   }
 
   return (
-    <div className="searchbox">
+    <Stack gap="tight" className="searchbox">
       <label className="searchbox__label">{label}</label>
       {selected ? (
         <div className="searchbox__chosen">
@@ -74,6 +75,6 @@ export function TeamSearchBox({ label = 'Find a team', placeholder = 'Team nameâ
           )}
         </>
       )}
-    </div>
+    </Stack>
   )
 }

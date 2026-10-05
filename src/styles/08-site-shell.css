@@ -15,9 +15,6 @@
 /* --------------------------------------------------------------- searchbox */
 .searchbox {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
   flex: 1 1 0;
   min-width: 0;
 }
@@ -444,15 +441,6 @@
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   padding: var(--space-2) 0 calc(var(--space-6) + env(safe-area-inset-bottom));
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.searchoverlay__group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
 }
 
 /* Sticky so the group a row belongs to stays named while the list scrolls

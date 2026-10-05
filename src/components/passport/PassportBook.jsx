@@ -4,6 +4,7 @@ import { MAX_PAGES, PAGE_ASPECT, stampsOnPage } from '../../lib/passportLayout.j
 import { useMediaQuery } from '../../hooks/useMediaQuery.js'
 import { PassportPage } from './PassportPage.jsx'
 import { usePageTurn } from './usePageTurn.js'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // The passport book — the shell PassportPage sits inside, and the leaf that
 // turns between openings. See usePageTurn.js's header for why this is not
@@ -261,7 +262,7 @@ export function PassportBook({
   const backEntry = leaving && (forward ? current.left : leaving.left)
 
   return (
-    <div
+    <Stack
       className="passportbook"
       role="group"
       aria-label="Passport book"
@@ -342,6 +343,6 @@ export function PassportBook({
           Next ›
         </button>
       </nav>
-    </div>
+    </Stack>
   )
 }

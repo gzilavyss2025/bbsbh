@@ -359,7 +359,7 @@ export function managerLabel(mgr) {
 // Verified against /api/v1/people/{id}/stats?stats=byDateRange on 2026-10-01.
 // ---------------------------------------------------------------------------
 
-export async function fetchPitcherSeasonLine(personId, season, sportId = 1, officialDate = null, { postseason = false } = {}) {
+async function readPitcherSeasonLine(personId, season, sportId = 1, officialDate = null, { postseason = false } = {}) {
   if (!personId || !season || !officialDate) return null
   try {
     const sport = sportId && sportId !== 1 ? `&sportId=${sportId}` : ''
@@ -451,7 +451,7 @@ async function fetchSeriesGameNumber(gamePk) {
 
 const POSTSEASON_TYPES = new Set(['F', 'D', 'L', 'W'])
 
-export async function fetchPitcherLastGame(personId, season, cutoffDate, cutoffGameNumber = 1) {
+async function readPitcherLastGame(personId, season, cutoffDate, cutoffGameNumber = 1) {
   if (!personId || !season) return null
   const gameNumber = (s) => s.game?.gameNumber ?? 1
   const before = (s) =>
@@ -547,3 +547,31 @@ export async function fetchPitcherSeasonVsOpponent(personId, season, opponentTea
     baseOnBalls,
   }
 }
+
+// Both reads end the day before the game (ADR-0088), so one answer holds for the
+// whole session. Memoize the REQUEST, as staticJson does: the Lens notice and
+// the pitcher sheet's card ask for the same arm, and the second ask must not
+// go to the network again. A null answer (a failed read, or an arm with no line)
+// is NOT kept, so a transient error is retried on the next ask.
+const memos = []
+function memoRequest(read) {
+  const seen = new Map()
+  memos.push(seen)
+  return (...args) => {
+    const key = JSON.stringify(args)
+    if (!seen.has(key)) {
+      const asked = read(...args).then((value) => {
+        if (value == null) seen.delete(key)
+        return value
+      })
+      seen.set(key, asked)
+    }
+    return seen.get(key)
+  }
+}
+
+// For tests: forget every kept answer.
+export const resetPitcherReads = () => memos.forEach((m) => m.clear())
+
+export const fetchPitcherSeasonLine = memoRequest(readPitcherSeasonLine)
+export const fetchPitcherLastGame = memoRequest(readPitcherLastGame)

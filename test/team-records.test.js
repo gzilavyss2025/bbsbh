@@ -14,6 +14,7 @@ import { DatabaseSync } from 'node:sqlite'
 import {
   inningRuns,
   isPlayedFinal,
+  isPlayedGame,
   encodeInnings,
   decodeInnings,
   scoredFirstSide,
@@ -867,6 +868,23 @@ test('isPlayedFinal takes a played game and refuses a cancelled or postponed one
   assert.equal(isPlayedFinal(g('Final', 'Postponed', 'D')), false)
   assert.equal(isPlayedFinal(g('Live', 'In Progress', 'I')), false)
   assert.equal(isPlayedFinal({}), false)
+})
+
+// A game can stay at 'O' for good. Three 2026 Rookie games did (844158 "Game
+// Over", 848239 "Game Over", 848309 "Completed Early" for lightning), each with
+// a full line and a winner, weeks after they ended. An 'F'-only gate never
+// ingested the first one, and a re-ingest left the other two with no mark.
+test('isPlayedGame takes a game that stays at Game Over or Completed Early', () => {
+  const g = (abstractGameState, detailedState, codedGameState) => ({
+    status: { abstractGameState, detailedState, codedGameState },
+  })
+  assert.equal(isPlayedGame(g('Final', 'Final', 'F')), true)
+  assert.equal(isPlayedGame(g('Final', 'Game Over', 'O')), true)
+  assert.equal(isPlayedGame(g('Final', 'Completed Early', 'O')), true)
+  assert.equal(isPlayedGame(g('Final', 'Cancelled', 'C')), false)
+  assert.equal(isPlayedGame(g('Final', 'Postponed', 'D')), false)
+  assert.equal(isPlayedGame(g('Live', 'In Progress', 'I')), false)
+  assert.equal(isPlayedGame({}), false)
 })
 
 test('the committed ledger carries no tie that was never played', () => {

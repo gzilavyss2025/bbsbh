@@ -372,7 +372,6 @@ export function PostseasonRacePage() {
         hasData={leagues.length > 0}
         errorMessage="Couldn’t load the postseason race. Try again."
         emptyMessage="No standings are available yet this season."
-        emptyProse
       />
 
       {al && nl && (

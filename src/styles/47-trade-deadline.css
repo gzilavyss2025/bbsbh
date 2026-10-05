@@ -46,9 +46,6 @@
   letter-spacing: var(--ls-caps);
 }
 .tradedl__list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
   margin: var(--space-2) 0 var(--space-6);
 }
 
@@ -89,12 +86,6 @@
 /* 3+-team fallback (a real one is the 2024-07-29 Dodgers/White Sox/
    Cardinals blockbuster — see tradeDeadline.js's grouping header): one
    stacked row per club rather than forcing extra teams into two columns. */
-.trade__stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
 .trade__side {
   display: flex;
   flex-direction: column;

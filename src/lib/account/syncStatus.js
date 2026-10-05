@@ -170,3 +170,16 @@ export function reasonForResponse(status) {
   if (!Number.isInteger(status)) return 'network'
   return 'unknown'
 }
+
+// What a batch of publishes should report, as `report(channel, ...syncOutcome(outcomes))`.
+// Each outcome is `null` for a success, an HTTP status for a failure, or
+// `undefined` for a throw. A throw is NOT "no failure": `find` returns
+// `undefined` for both, which are opposite answers, so this filters first. An
+// HTTP status beats a throw because it says more.
+export function syncOutcome(outcomes) {
+  const failures = outcomes.filter((outcome) => outcome !== null)
+  if (failures.length === 0) return ['synced', {}]
+  const status = failures.find((outcome) => outcome !== undefined)
+  if (status === undefined) return ['error', { reason: 'network' }]
+  return [phaseForResponse(status), { reason: reasonForResponse(status) }]
+}
