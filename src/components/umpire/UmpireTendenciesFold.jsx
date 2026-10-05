@@ -24,9 +24,10 @@ import { UmpireTendencies } from './UmpireTendencies.jsx'
 // apology.
 export function UmpireTendenciesFold({ feed }) {
   const plateId = useMemo(() => selectOfficials(feed).find((o) => o.role === 'HP')?.id ?? null, [feed])
+  const seasonYear = feed?.gameData?.game?.season ?? null
   const { data } = useAsync(
-    () => (plateId != null ? loadUmpire(plateId) : Promise.resolve(null)),
-    [plateId],
+    () => (plateId != null ? loadUmpire(plateId, { seasonYear }) : Promise.resolve(null)),
+    [plateId, seasonYear],
   )
   const [open, setOpen] = useState(true)
 

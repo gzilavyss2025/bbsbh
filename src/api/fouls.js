@@ -1,5 +1,6 @@
 import { shardKey100 } from '../lib/shardKey.js'
-import { currentSeasonOf, seasonStaticJson } from './staticJson.js'
+import { readSeasonShard, seasonStaticJson } from './staticJson.js'
+import { combineFoulShards } from '../lib/seasons/combine.js'
 
 // Season-long foul-ball aggregates, read from a static same-origin file
 // (public/data/fouls/{season}/fouls.json) precomputed nightly by scripts/gen-fouls.mjs (the
@@ -22,7 +23,9 @@ import { currentSeasonOf, seasonStaticJson } from './staticJson.js'
 // fetchFoulsFor(personId) below and never touches this.
 //
 // A season store (ADR-0086): both reads go to the season fouls/seasons.json
-// names, fouls/{season}/fouls.json and fouls/{season}/{NN}.json.
+// names, fouls/{season}/fouls.json and fouls/{season}/{NN}.json. Both take
+// `{ seasonYear }` (a year, 'all', or nothing for the current season); 'all'
+// reads fouls/all/fouls.json, which the nightly run builds from the rows.
 export const fetchFouls = seasonStaticJson('fouls', 'fouls.json')
 
 // One player's slice — his own batter and pitcher rows, from the bucket he
@@ -35,10 +38,7 @@ export const fetchFouls = seasonStaticJson('fouls', 'fouls.json')
 // foul-heaviest games that only /fouls draws.
 const playerShards = new Map()
 
-export async function fetchFoulsFor(personId) {
-  if (personId == null) return null
-  const season = await currentSeasonOf('fouls')
-  if (season == null) return null
+function playerShard(season, personId) {
   const key = `${season}/${shardKey100(personId)}`
   if (!playerShards.has(key)) {
     playerShards.set(
@@ -49,6 +49,18 @@ export async function fetchFoulsFor(personId) {
     )
   }
   return playerShards.get(key)
+}
+
+// 'all' adds his seasons (lib/seasons/combine.js) into the same
+// `{ batters, pitchers }` shape, holding only him.
+export async function fetchFoulsFor(personId, { seasonYear } = {}) {
+  if (personId == null) return null
+  return readSeasonShard(
+    'fouls',
+    seasonYear,
+    (season) => playerShard(season, personId),
+    (shards, seasons) => ({ season: null, seasons, ...combineFoulShards(shards, personId) }),
+  )
 }
 
 // Qualifier floors for the leaderboards, exported so a caller (or a test) can

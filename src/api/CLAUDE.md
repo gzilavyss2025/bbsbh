@@ -85,6 +85,12 @@ before the first resolves fires its own copy. That cost the player page fourteen
 reads of `teams.json` and eight of `milb-history.json` on a single load. Each
 reader still owns its own `shape` and `fallback`; nothing else changes.
 
+**A season store's reader takes `{ seasonYear }`** (a year, `'all'`, or nothing for
+`current`), resolved by `seasonFolderOf` in `staticJson.js`. Never `season`: in
+`umpires.js` that is an umpire's aggregate. A game page passes the game's season.
+`'all'` reads a league file's `all/` copy; one player's `'all'` is a sum in
+`lib/seasons/combine.js` (ADR-0086, #1201).
+
 ## Callouts
 
 The callout families (`callouts.js` and the nightly `gen-callouts.mjs`) are

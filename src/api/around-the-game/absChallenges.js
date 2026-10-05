@@ -19,7 +19,8 @@
 
 import { seasonStaticJson } from '../staticJson.js'
 
-// A season store (ADR-0086): abs/{season}/, the season abs/seasons.json names.
+// A season store (ADR-0086): abs/{season}/. Takes `{ seasonYear }`: a year,
+// 'all' (abs/all/), or nothing for the season abs/seasons.json names.
 export const fetchAbsChallenges = seasonStaticJson('abs', 'abs-challenges.json')
 
 // The levels the system runs at, in the order the page offers them. MLB is

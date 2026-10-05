@@ -78,28 +78,76 @@ export function staticJsonBy(urlFor, { shape = (d) => d, fallback = null } = {})
   }
 }
 
-// The season a SEASON STORE serves (ADR-0086): `current` from
-// `/data/{store}/seasons.json`, or null when the index is missing. A season
-// store keeps one folder per season, and `current` is the latest season with
-// data, so on January 1 it still names last season. Read it, then fetch
-// `/data/{store}/{current}/…`. Memoized per store, like every read here.
+// A SEASON STORE's index (ADR-0086), `/data/{store}/seasons.json`:
+// `{ seasons, current }`. `current` is the latest season with data, so on
+// January 1 it still names last season. Memoized per store, like every read
+// here; `{ seasons: [], current: null }` when the index is missing.
 const seasonIndexes = new Map()
-export function currentSeasonOf(store) {
+function seasonIndexOf(store) {
   if (!seasonIndexes.has(store)) {
     seasonIndexes.set(
       store,
-      staticJson(`/data/${store}/seasons.json`, { shape: (d) => d?.current ?? null, fallback: null }),
+      staticJson(`/data/${store}/seasons.json`, {
+        shape: (d) => ({ seasons: d?.seasons ?? [], current: d?.current ?? null }),
+        fallback: { seasons: [], current: null },
+      }),
     )
   }
   return seasonIndexes.get(store)()
 }
 
-// One whole file of a season store, `/data/{store}/{current}/{file}`, memoized
-// like staticJson. `fallback` when the index or the file is missing.
+// The season a store serves when the caller names none, or null.
+export async function currentSeasonOf(store) {
+  return (await seasonIndexOf(store)).current
+}
+
+// Every season on file in a store, oldest first.
+export async function seasonsOf(store) {
+  return (await seasonIndexOf(store)).seasons
+}
+
+// THE ONE RULE FOR "WHICH SEASON" (#1201). A reader of a season store takes
+// `{ seasonYear }`: a year, `'all'`, or nothing. Nothing means `current`. A
+// year must be on file, or the reader resolves to its fallback without a
+// fetch: a 2027 game before 2027 has data reads nothing, not a 404. `'all'` is
+// the store's `all/` folder, which holds only the league-wide files; a reader
+// of ONE player's shard adds the seasons up instead (readSeasonShard).
+//
+// The argument is `seasonYear`, never `season`: in umpires.js `u.season` is an
+// umpire's season AGGREGATE, and `season.season` must not be able to happen.
+//
+// -> a folder name (a year or 'all'), or null when there is nothing to read.
+export async function seasonFolderOf(store, seasonYear) {
+  if (seasonYear === 'all') return 'all'
+  const { seasons, current } = await seasonIndexOf(store)
+  if (seasonYear == null) return current
+  const year = Number(seasonYear)
+  return seasons.includes(year) ? year : null
+}
+
+// One whole file of a season store, `/data/{store}/{folder}/{file}`, memoized
+// like staticJson. The loader takes `{ seasonYear }` (see seasonFolderOf).
+// `fallback` when the index, the season or the file is missing; an `all/` file
+// is not on disk until the first nightly run writes it.
 export function seasonStaticJson(store, file, { shape, fallback = null } = {}) {
-  const bySeason = staticJsonBy((season) => `/data/${store}/${season}/${file}`, { shape, fallback })
-  return async () => {
-    const season = await currentSeasonOf(store)
-    return season == null ? fallback : bySeason(season)
+  const bySeason = staticJsonBy((folder) => `/data/${store}/${folder}/${file}`, { shape, fallback })
+  return async ({ seasonYear } = {}) => {
+    const folder = await seasonFolderOf(store, seasonYear)
+    return folder == null ? fallback : bySeason(folder)
   }
+}
+
+// One player's (or one umpire's) slice of a sharded season store, for
+// `{ seasonYear }`. `readOne(season)` reads that season's slice, or null. For
+// `'all'` it reads every season on file and hands the slices, oldest first, to
+// `combine(slices, seasons)` — a pure sum from lib/seasons/combine.js. There is
+// no `all/` shard: the client adds one man's seasons, never a league's.
+export async function readSeasonShard(store, seasonYear, readOne, combine) {
+  if (seasonYear === 'all') {
+    const seasons = await seasonsOf(store)
+    if (!seasons.length) return null
+    return combine(await Promise.all(seasons.map(readOne)), seasons)
+  }
+  const folder = await seasonFolderOf(store, seasonYear)
+  return folder == null ? null : readOne(folder)
 }

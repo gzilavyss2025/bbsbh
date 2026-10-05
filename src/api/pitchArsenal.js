@@ -1,6 +1,7 @@
 import { similarPitchers } from '../lib/pitcherSimilarity.js'
 import { shardKey100 } from '../lib/shardKey.js'
-import { currentSeasonOf } from './staticJson.js'
+import { readSeasonShard, seasonFolderOf } from './staticJson.js'
+import { combineArsenalEntries } from '../lib/seasons/combine.js'
 
 // Season pitch-type mix per pitcher, read from static same-origin files
 // precomputed nightly by
@@ -32,14 +33,13 @@ import { currentSeasonOf } from './staticJson.js'
 //     under it can never be a candidate), and no `description` strings (the
 //     ranking reads codes). 149 KB for MLB, 194 KB for AAA.
 //
-// Both are season stores (ADR-0086): each reads the season its own
-// seasons.json names.
+// Both are season stores (ADR-0086). Each takes `{ seasonYear }`: a year,
+// 'all', or nothing for the season its own seasons.json names
+// (staticJson.js's seasonFolderOf). A game page passes the GAME's season, so
+// an old 2026 game still shows 2026 after 2027 starts.
 const shards = new Map()
 
-export async function fetchPitchArsenalFor(personId) {
-  if (personId == null) return null
-  const season = await currentSeasonOf('pitch-arsenal')
-  if (season == null) return null
+function arsenalShard(season, personId) {
   const key = `${season}/${shardKey100(personId)}`
   if (!shards.has(key)) {
     shards.set(
@@ -52,10 +52,29 @@ export async function fetchPitchArsenalFor(personId) {
   return shards.get(key)
 }
 
+// 'all' adds his seasons (lib/seasons/combine.js), regular season and
+// postseason apart, into the shard's own `{ pit, post }` shape.
+export async function fetchPitchArsenalFor(personId, { seasonYear } = {}) {
+  if (personId == null) return null
+  const id = String(personId)
+  const combined = (shards, block) => {
+    const entry = combineArsenalEntries(shards.map((s) => s?.[block]?.[id] ?? null))
+    return entry ? { [id]: entry } : {}
+  }
+  return readSeasonShard(
+    'pitch-arsenal',
+    seasonYear,
+    (season) => arsenalShard(season, personId),
+    (shards, seasons) => ({ season: null, seasons, pit: combined(shards, 'pit'), post: combined(shards, 'post') }),
+  )
+}
+
 const pools = new Map()
 
-export async function fetchPitchArsenalPool(isMlb) {
-  const season = await currentSeasonOf('pitch-arsenal-pool')
+// 'all' reads pitch-arsenal-pool/all/, which the nightly run folds from the
+// velocity sums, never from the season pools' means.
+export async function fetchPitchArsenalPool(isMlb, { seasonYear } = {}) {
+  const season = await seasonFolderOf('pitch-arsenal-pool', seasonYear)
   if (season == null) return null
   const level = `${season}/${isMlb ? 'mlb' : 'aaa'}`
   if (!pools.has(level)) {

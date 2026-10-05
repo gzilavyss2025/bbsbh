@@ -126,9 +126,12 @@ export function TeamInfo({
   // page-top zone below. Static nightly files, memoized in api/umpires.js —
   // the accuracy modal and the EXTRAS-tab drawer read the same load.
   const hpId = useMemo(() => officials.find((o) => o.role === 'HP')?.id ?? null, [officials])
+  // The GAME's season, not the store's current one (#1201): an old 2026 game
+  // still shows 2026 after 2027 starts.
+  const gameSeason = feed?.gameData?.game?.season ?? null
   const { data: hpUmpire } = useAsync(
-    () => (hpId != null ? loadUmpire(hpId) : Promise.resolve(null)),
-    [hpId],
+    () => (hpId != null ? loadUmpire(hpId, { seasonYear: gameSeason }) : Promise.resolve(null)),
+    [hpId, gameSeason],
   )
   const info = useMemo(() => selectGameInfo(feed), [feed])
   // Null for a club with no curated triad, which leaves every bar below on the
@@ -197,7 +200,7 @@ export function TeamInfo({
                 alone at the end of the grid — see the ESPN-sourced fetch in
                 GameView). The home page's grid is already even without it. */}
             {side === 'away' && <Fact label="Broadcast" value={broadcast} />}
-            <UmpiresCard officials={officials} />
+            <UmpiresCard officials={officials} seasonYear={gameSeason} />
           </FactGrid>
 
           {/* The preview card and the blank sheet: two plain doors on one line
@@ -452,8 +455,13 @@ function TeamSections({
   // The opposing starter's season pitch-type mix (see api/pitchArsenal.js) —
   // MLB + AAA only; a lower-level starter's lookup just resolves to null. Fetched
   // HERE by his id, not handed down from useGameData: this is the only card that
-  // draws it, and it wants one man's bucket rather than the league's.
-  const { data: arsenalShard } = useAsync(() => fetchPitchArsenalFor(oppPitcher?.id), [oppPitcher?.id])
+  // draws it, and it wants one man's bucket rather than the league's. The
+  // GAME's season (#1201): a first start of a new season reads that season and
+  // shows the "not enough pitches" state, never last season's mix.
+  const { data: arsenalShard } = useAsync(
+    () => fetchPitchArsenalFor(oppPitcher?.id, { seasonYear: season }),
+    [oppPitcher?.id, season],
+  )
   const oppArsenal = useMemo(
     () => pitchArsenalFor(arsenalShard, oppPitcher?.id, isMlb),
     [arsenalShard, oppPitcher?.id, isMlb],

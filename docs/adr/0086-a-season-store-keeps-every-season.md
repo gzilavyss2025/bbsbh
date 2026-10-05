@@ -147,3 +147,27 @@ game writes nothing. What this does not do: the app still reads only `current`
 (#1201 adds `all/` and a season picker, #1202), no season before 2026 is on
 file, and 35 other generators still take the season from the calendar year
 (row U12 in `docs/duplicate-derivations.md`, #1201).
+
+## Addendum (#1201): one season parameter
+
+Every reader of a season store now takes `{ seasonYear }`: a year, `'all'`, or
+nothing. `seasonFolderOf(store, seasonYear)` in `src/api/staticJson.js` is the one
+rule. Nothing means `current`. A year must be in `seasons`, or the reader returns
+its fallback and fetches nothing. `'all'` is the `all/` folder.
+
+- **League files** (the foul board, the umpire accuracy summary, the ABS files, the
+  arsenal pools) read their `all/` copy for `'all'`. An `all/` file that is not on
+  disk yet gives the reader's fallback.
+- **One player's shard** has no `all/` copy. `readSeasonShard` reads his slice from
+  each season on file, and `src/lib/seasons/combine.js` adds them: counts add, a
+  high keeps its game, a mean is weighted by its count, names come from the latest
+  season. The shard keeps `avgVelo`, not the velocity sums, so the arsenal's
+  combined mean is exact only to the file's 0.1 mph rounding. The command grid
+  takes a year only; no surface draws a combined grid.
+- **The name is `seasonYear`**, because `u.season` in `umpires.js` is an umpire's
+  aggregate.
+- **A game page reads the game's season** (`feed.gameData.game.season`): the
+  opposing-starter arsenal, the pitcher card, and every umpire surface on a lineup,
+  box score, preview or innings page. On a new season's first day the game's season
+  has no data yet, so these show their normal empty state, not last season.
+- The URL and the picker are #1202.
