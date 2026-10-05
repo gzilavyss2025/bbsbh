@@ -889,6 +889,10 @@
       "class": "spoiler-free",
       "why": "Matchup Scout's pitcher-versus-hitter history from Savant's pitch-level CSV. Only games dated before the cutoff (today, or `?d=`): the request sends the day before it as an inclusive bound, so it never reads a live game. An open stat surface (ADR-0034). The service worker serves Savant NetworkOnly (ADR-0004)."
     },
+    "scout/playIds.js": {
+      "class": "cutoff-gated",
+      "why": "The Matchup Scout pitch modal's film lookup (#1490): the playId of each pitch in one PAST meeting, from the statsapi play-by-play pruned by `fields=` to atBatIndex, isPitch and playId, so no score, count, result or text reaches the browser. Safe only for the date asked: `fetchPlayIds` refuses a game dated on or after the cutoff (today, or `?d=`) or on or after the baseball today, so it never reads a live game. Its callers hand it only games the head-to-head already listed under the same cutoff. The clip it leads to carries a scorebug: on this open page (ADR-0034) that is a final, past game's score (ADR-0095)."
+    },
     "scout/hitterGrid.js": {
       "class": "spoiler-free",
       "why": "The Matchup Scout's hitter-grid reader: a hitter's season sums per pitch type, pitcher hand and 5x5 cell (pitches, swings, whiffs, PA-ending pitches, the xwOBA (est.) numerator), over games already final, built by the nightly sweep before the day's games. A cell count is not a line and not a running score; same footing as commandMap.js. The Scout is an open surface (ADR-0034), so no SealBox and no cutoff."

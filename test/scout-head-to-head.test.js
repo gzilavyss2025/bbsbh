@@ -432,3 +432,58 @@ test('fetchHeadToHead returns null for a missing id or a garbled cutoff, without
     },
   })
 })
+
+// ------------------------------------------------------- pitch by pitch ----
+// #1490: each plate appearance keeps its own pitches, for the Meetings tab.
+// `pitches` stays the count (the shape above); the list is `pitchList`.
+
+test('each plate appearance keeps its pitches in pitch_number order, with the fields the pitch modal reads', () => {
+  const pas = plateAppearances(parseSavantRows(COLE))
+  // Judge vs Cole, game 599359, at-bat 62: Savant sends it newest pitch first.
+  const pa = pas.find((p) => p.key === '599359-62')
+  assert.deepEqual(pa.pitchList.map((p) => [p.n, p.code, p.call]), [
+    [1, 'FF', 'foul'],
+    [2, 'FF', 'ball'],
+    [3, 'KC', 'called_strike'],
+    [4, 'SL', 'swinging_strike'],
+  ])
+  assert.equal(pa.inning, 7)
+  assert.equal(pa.half, 'bottom')
+  const last = pa.pitchList.at(-1)
+  assert.equal(last.balls, 1)
+  assert.equal(last.strikes, 2)
+  assert.equal(last.release[1], 54.46)
+  assert.equal(last.vy0, -132.414828221647)
+  for (const key of ['mph', 'px', 'pz', 'szTop', 'szBot', 'spin', 'pfxX', 'pfxZ', 'vx0', 'vz0', 'ax', 'ay', 'az']) {
+    assert.equal(typeof last[key], 'number', key)
+  }
+  // A strikeout puts no ball in play.
+  assert.equal(last.launchSpeed, null)
+  assert.equal(last.launchAngle, null)
+})
+
+test('the pitch count and the pitches list agree, and a pitch-clock row is never a pitch', () => {
+  for (const pa of plateAppearances(parseSavantRows(VERLANDER))) assert.equal(pa.pitchList.length, pa.pitches)
+  const text = csv(
+    csvRow({ at_bat_number: 7, plate_x: '0.2' }),
+    csvRow({ at_bat_number: 7, plate_x: '', events: 'strikeout' }),
+  )
+  const [pa] = plateAppearances(parseSavantRows(text))
+  assert.equal(pa.pitches, 1)
+  assert.deepEqual(pa.pitchList.map((p) => p.px), [0.2])
+  assert.equal(totalsOf([pa]).pa, 1)
+})
+
+test('a ball in play carries its exit velocity, launch angle and xwOBA on contact; a blank is null', () => {
+  const pas = plateAppearances(parseSavantRows(COLE))
+  const inPlay = pas.flatMap((p) => p.pitchList).filter((p) => p.call === 'hit_into_play')
+  assert.ok(inPlay.length > 0)
+  for (const p of inPlay) {
+    assert.equal(typeof p.launchSpeed, 'number')
+    assert.equal(typeof p.launchAngle, 'number')
+  }
+  const [pa] = plateAppearances(parseSavantRows(csv(csvRow({ events: 'strikeout' }))))
+  assert.equal(pa.pitchList[0].mph, null)
+  assert.equal(pa.pitchList[0].launchSpeed, null)
+  assert.equal(pa.inning, null)
+})
