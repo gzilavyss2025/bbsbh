@@ -300,8 +300,10 @@ don't run these by hand.
   (the season `fouls/seasons.json` names) for two
   MLB-only keys — `foulSpoilers` (top-10 foul-per-game hitters on the clubs) and
   `foulRate.perPitch` (league baseline) — skipped gracefully if that file is
-  absent. See `docs/callouts.md` + ADR-0014; extend this pipeline, don't build a
-  parallel path.
+  absent. A date older than ~10 days MOVES from `public/` to
+  `scripts/data/callouts-archive/{MMDDYYYY}/` (committed, never shipped), so the
+  bundle behind every night's Margin Notes is kept. See `docs/callouts.md` + ADR-0014;
+  extend this pipeline, don't build a parallel path.
 - `gen-fouls.mjs` → `fouls/{season}/fouls.json` (league, for `/fouls`) +
   `fouls/{season}/{NN}.json` (`personId % 100`, for the player card) + `fouls/seasons.json`
   + `fouls/all/fouls.json` (every season, summed from rows). A season store (ADR-0086,
