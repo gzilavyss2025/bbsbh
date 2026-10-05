@@ -8,10 +8,7 @@
 # --- SELECTORS — true empty states that migrate ---
 .txpage__empty	empty	MIGRATE	E1	bare hint	PILOT (the issue names it): a bare .hint plus a margin. DONE in E1: the site renders <EmptyState className="txpage__empty">. The rule stays as the namespace margin (no Stack spaces the page)
 .emptystate	other	n/a			the component's own class. Census sees it only inside a namespace margin rule: E2 adds `.slatebody__main > .emptystate:first-child` (05-masthead-nav.css), because the slate's empty line lost .hint padding and sat flush under the date row
-.prospectcard__empty	empty	MIGRATE	E5	label+note	The issue names it: a label, a line and a note, the three-line shape (the lab entry proves it first, in E1). Its child rule `.prospectcard__empty p` goes
-.prospectcard__emptylabel	empty	MIGRATE	E5	inner line	the label line of .prospectcard__empty. It has no rule of its own today (only the word); it becomes EmptyState `label`
-.prospectcard__emptynote	empty	MIGRATE	E5	inner line	the note line of .prospectcard__empty; becomes EmptyState `note`
-.vsteam__none	empty	MIGRATE	E5	hint + own class	player page splits vs a team: no career meetings
+.vsteam__none	empty	MIGRATE	E5	hint + own class	DONE in E5: player page splits vs a team: no career meetings
 .prospects__empty	empty	MIGRATE	E7	box	/prospects filter result: a SOLID box with a Clear filters button. Goes dashed (the dashed-rule fix); the button becomes the `action` slot
 .payboard__empty	empty	MIGRATE	E7	box	/salaries board: a solid top rule. e2e/salaries.spec.js finds it by this class, so it stays on the element as the namespace
 .stampsheet__empty	empty	MIGRATE	E7	label	the stamp sheet: ONE element says loading OR empty. Split: the empty branch becomes EmptyState, the loading branch keeps its line
@@ -136,8 +133,6 @@
 #
 # --- SITES — E1 the pilot ---
 screens/team/TeamTransactionsPage.jsx#1	empty	MIGRATE	E1		PILOT, DONE in E1. /team/{id}/transactions with no moves: a minor-league club, such as /team/nashville-sounds-556/transactions
-components/playerstats/ProspectCard.jsx#1	empty	MIGRATE	E5	label+note	label + line (no qualified comparison)
-components/playerstats/ProspectCard.jsx#2	empty	MIGRATE	E5	label+note	label + line + two notes: the early-sample standing. Waiting for a sample is the provisional kind of empty
 #
 # --- SITES — E2 AsyncStatus empty branch (one change moves every emptyMessage) ---
 # components/ui/AsyncGate.jsx#4 (the one AsyncStatus empty line): DONE in E2. It renders <EmptyState> now, so the census no longer sees a hint there and the row is gone.
@@ -182,7 +177,7 @@ components/boxlines/BoxLinesSheet.jsx#3	empty	MIGRATE	E3	hint + own class	Box Li
 components/boxlines/GameLinesDoor.jsx#1	empty	MIGRATE	E3	hint + own class	Box Lines door sheet: no games to list. Same gate note. DONE in E3: the site renders <EmptyState className="boxlines__empty">; the empty test is unchanged
 #
 # --- SITES — E4 team hub, E5 player page ---
-components/playerstats/SplitsVsTeam.jsx#1	empty	MIGRATE	E5	hint + own class	compact
+components/playerstats/SplitsVsTeam.jsx#1	empty	MIGRATE	E5	hint + own class	DONE in E5: compact
 #
 # --- SITES — E6 standalone pages (a bare .hint today, no CSS) ---
 screens/AllStarLegacyPage.jsx#1	empty	MIGRATE	E6	bare hint	club filter: no All-Stars
@@ -371,7 +366,7 @@ components/charts/WinProbChart.jsx#1	mark	n/a
 components/player/AwardsLedger.jsx#1	mark	n/a			
 components/player/AwardsLedger.jsx#2	mark	n/a			
 components/player/PositionInnings.jsx#1	mark	n/a			
-components/playerstats/ProspectCard.jsx#3	mark	n/a			
+components/playerstats/ProspectCard.jsx#1	mark	n/a			
 components/postseason/StillToPlay.jsx#1	mark	n/a			
 components/salaries/ContractGrid.jsx#1	mark	n/a			
 components/salaries/ContractGrid.jsx#2	mark	n/a			

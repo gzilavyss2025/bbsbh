@@ -5,6 +5,7 @@ import { vsTeamDoorLabel } from '../../api/vsTeamSplits.js'
 import { teamLocationName, teamClubName } from '../../lib/teams.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { EmptyState } from '../ui/state/EmptyState.jsx'
 
 // SPLITS VS TEAM — a player's career line against a chosen opponent, with a
 // finger-scrollable strip of every MLB club's logo to pick a different one
@@ -157,9 +158,9 @@ export function SplitsVsTeam({ vsTeam, season, asOf, personId, playerSurname }) 
           )}
         </>
       ) : (
-        <p className="hint vsteam__none">
+        <EmptyState size="compact" className="vsteam__none">
           No career meetings{sel ? ` vs the ${sel.name}` : ''}.
-        </p>
+        </EmptyState>
       )}
 
       {last && (
