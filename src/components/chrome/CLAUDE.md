@@ -16,6 +16,10 @@ is the iOS auto-zoom floor, not a taste call. The recents shelf is pure and
 shape-gated in `lib/recentSearches.js` (identity fields only, never a score) with
 `hooks/useRecentSearches.js` over it; `e2e/site-search.spec.js` is the guard.
 
-## Bucket notes
+## The files
 
-`BackBtn` sits here rather than in `ui/` because it's page furniture that knows about route history, not a context-free primitive. `FooterParts` holds the two blocks both footers end with (the grouped directory, the legal blurb) — the page LIST is passed in as a prop, so each footer keeps its own `lib/reportPages.js` import and `check-report-pages.mjs` keeps guarding both
+`BackBtn` sits here rather than in `ui/` because it's page furniture that knows about
+route history, not a context-free primitive. `FooterParts` holds the two blocks both
+footers end with (the grouped directory, the legal blurb) — the page LIST is passed in as
+a prop, so each footer keeps its own `lib/reportPages.js` import and
+`check-report-pages.mjs` keeps guarding both.

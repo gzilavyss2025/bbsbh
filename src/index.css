@@ -10,7 +10,7 @@
    A partial that only one lazy screen (or one component only that screen
    mounts) ever uses is therefore imported by that screen instead, and Vite
    emits it as a per-route CSS chunk — see the "Per-route partials" list at the
-   bottom of this file. Order is still the contract (src/CLAUDE.md), and TWO
+   bottom of this file. Order is still the contract (src/styles/CLAUDE.md), and TWO
    things had to hold before a partial could leave:
      1. No OTHER partial shares an identical selector with it, at any position —
         a route chunk's <link> lands after this sheet, so a rule that used to

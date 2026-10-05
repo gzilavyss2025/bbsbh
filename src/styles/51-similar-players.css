@@ -9,7 +9,7 @@
    block is a self-contained component, not another player-page odd job.
 
    ON BEING NUMBERED LAST. The convention is to add a partial at the position
-   its rules belong in (see src/CLAUDE.md) — beside 26/27 — and this one is
+   its rules belong in (see src/styles/CLAUDE.md) — beside 26/27 — and this one is
    deliberately not, for two reasons. Its ONE ordering dependency is `.plink`
    (26-player-page.css), which it overrides, and being later satisfies that
    more safely than being adjacent. And inserting at 27 would renumber

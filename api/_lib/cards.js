@@ -178,7 +178,7 @@ async function playerCard(idSegment, origin) {
   }
 }
 
-// The team-hub tab a card is built for (see src/CLAUDE.md's "the team hub" —
+// The team-hub tab a card is built for (see src/screens/team/CLAUDE.md —
 // Overview/bare `/team/{id}` is the untagged default, plus the five real
 // tabs). Exported so its shape is unit-testable without a network call —
 // each tab needs a description that's actually about that tab, not a

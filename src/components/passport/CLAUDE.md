@@ -49,10 +49,12 @@ you place by tapping the page. Three rules, each with a reason:
   card's un-minted preview stays graphite). No winner, or a club with no colour
   on file, means no property and the book's own navy.
 
-`PassportPage.jsx` is the ONE name added to `scripts/check-stamp-surfaces.mjs`'s
-allowlist since that guard was written — justified because a page's entire input
-is the user's own collection. `/logbook/stats` renders no stamp art and stays
-off it. Read ADR-0036 before adding a third name; the multi-book split
-(ADR-0041) renamed the `LogbookPage.jsx` entry to `LogbookCollection.jsx` rather
-than adding one, and `StampCollection.jsx` joined it the same way (read that
-script). `LogbookShelf.jsx`/`BookManagementSheet.jsx` draw no stamp art.
+`PassportPage.jsx` is on the `GameStamp.jsx` allowlist in
+`scripts/check-stamp-surfaces.mjs`. That list holds six names: `StampGameButton.jsx`,
+`LogbookCollection.jsx`, `StampCollection.jsx`, `PassportPage.jsx`,
+`StampPlacementEditor.jsx`, and `IdentityStampPreview.jsx`. `PassportPage.jsx` earned its
+place because a page's entire input is the user's own collection. `/logbook/stats` renders
+no stamp art and stays off it. Read ADR-0036 before adding a name; the multi-book split
+(ADR-0041) renamed the `LogbookPage.jsx` entry to `LogbookCollection.jsx` rather than
+adding one, and `StampCollection.jsx` joined it the same way (read that script).
+`LogbookShelf.jsx`/`BookManagementSheet.jsx` draw no stamp art.

@@ -93,13 +93,14 @@ handler's query string.
 
 ## The sync seam
 
-**The sync seam.** `components/sync/SyncStatusProvider.jsx` mounts
+`components/sync/SyncStatusProvider.jsx` mounts
 unconditionally in `App.jsx` (it touches no Clerk API) as an external store, so
-a sync report re-renders only what reads it; the four headless `*CloudSync`
+a sync report re-renders only what reads it; the six headless `*CloudSync`
 components `report()` from the `catch` blocks they already had — the catches
 still swallow, they just stopped being silent. The reducer and the
 `unavailable` (501, a supported deploy state) vs `error` distinction live in
-`src/lib/account/syncStatus.js` (see `src/api/CLAUDE.md`).
+`src/lib/account/syncStatus.js` (its entry is under **The modules**). The one trap on
+the receipt, `normalizeSilentChannels`, is in `src/screens/profile/CLAUDE.md`.
 
 ## Onboarding
 

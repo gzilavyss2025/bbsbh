@@ -1,6 +1,6 @@
 # src/api/around-the-game — the Around the game readers
 
-`around-the-game/` is the fourth subdirectory and the odd one out: it holds no
+`around-the-game/` is the odd one out among the `src/api/` subdirectories: it holds no
 new fetching and no new spoiler footing, only the spoiler-FREE readers behind
 the pages listed under **Around the game**
 (`src/screens/around-the-game/`) — one a page, except `/abs-challenges`, whose

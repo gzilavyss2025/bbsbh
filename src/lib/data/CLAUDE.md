@@ -5,14 +5,26 @@ triad — live on disk as JSON rather than as JS literals, so the Team Identity
 Lab can write an edit straight back instead of handing over a snippet to paste
 (ADR-0029).
 
+Paths below are relative to `src/lib/`. `identity/stores.js` imports every store the
+lab or the runtime overlay edits.
+
 | File | Read by |
 | --- | --- |
 | `mlb-treatment-tuning.json` | `teams.js` |
 | `milb-treatment-tuning.json` | `milbColors.js` |
 | `milb-colors.json` | `brandColors.js` |
-| `mlb-team-colors.json` | `brandColors.js`, `teams.js` |
+| `mlb-team-colors.json` | `brandColors.js` (`teams.js` reaches it through there), `stampInk.js` |
+| `alt-colors.json`, `alt2-colors.json`, `alt3-colors.json`, `alt4-colors.json`, `city-connect-colors.json` | `teams.js` |
 | `mono-ink.json` | `monoInk.js` (overlay-aware, ADR-0054) — and `scripts/gen-mono-logos.mjs`, which is what actually changes the served art, on its own schedule |
-| `stamp-logo-tuning.json` | `stampLogoTuning.js` → `components/GameStamp.jsx` — the one store read at RENDER time |
+| `mono-logo-manifest.json` | `teams.js`; written by `scripts/gen-mono-logos.mjs` |
+| `logo-art.json` | `logoArt.js`, `markSources.js`, `milbColors.js`, `teams.js`; rebuilt from disk by an upload or `scripts/gen-logo-art.mjs` |
+| `custom-marks.json` | `customMarks.js`; written only by `scripts/lib/dev-custom-marks.mjs` |
+| `logo-url-overrides.json` | `identity/logoUrlOverrides.js` |
+| `league-logo-manifest.json` | `components/passport/leagueMarks.js`; written by `scripts/gen-league-logos.mjs` |
+| `milb-ballparks.json` | `copy/registry.js`, the team hub's `BallparkCard.jsx`; written by `scripts/gen-milb-ballparks.mjs` |
+| `park-wash-tuning.json` | `ballpark/parkWash.js` |
+| `stamp-logo-tuning.json` | `stampLogoTuning.js` → `components/logbook/GameStamp.jsx` — read at RENDER time |
+| `stamp-ink.json` | `stampInkTuning.js` → `stampInk.js` → `components/logbook/GameStamp.jsx` — also read at RENDER time, so a retune restyles every minted stamp |
 | `wpa-tuning.json` | `wpa/wpaLogo.js`, `wpa/wpaBandColors.js` — deliberately NOT reachable from the eager entry graph; see `wpa/wpaDefaults.js` |
 
 Every store has the same outer shape:
@@ -55,11 +67,12 @@ Friday/City-Connect heuristic — absent means "guess" rather than "Main":
 
 **`accent` is not a third brand colour**, and conflating the two is the mistake
 this schema exists to prevent. It is the hand-picked *distinctiveness* hex — the
-one that makes two clubs on a slate card tell apart — so for 27 of 30 clubs it
-deliberately restates that club's own `primary` or `secondary`, and only the
-Guardians, Rays, and Blue Jays carry a hue the pair doesn't. A club's real
+one that makes two clubs on a slate card tell apart — so for 23 of 30 clubs it
+deliberately restates that club's own `primary` or `secondary`, and only seven
+(Diamondbacks, Guardians, Pirates, Rays, Blue Jays, Yankees, Brewers) carry a hue the
+pair doesn't. A club's real
 third-or-later colours are `extras`, researched against Wikipedia infoboxes and
-teamcolorcodes.com and skipped rather than guessed where sources disagreed (14
+teamcolorcodes.com and skipped rather than guessed where sources disagreed (5
 clubs have one). Every colour field is optional; **a role the club lacks is an
 absent field, never `""`** — the dev-save validator rejects the empty string, and
 the lab's `applyColorsDraft` deletes rather than blanks

@@ -40,8 +40,10 @@ The two leader renderings share `computeLeaders` and the descriptors, not a box 
 
 ## `umpire/`
 
-the Tendencies card and its hosts — the modal, the lineup page's top zone (TeamInfo renders it beside the one fact grid, which the crew's `UmpiresCard` cells share), and focus mode's EXTRAS-tab drawer (`UmpireTendenciesFold`). The tier pill/glyph live in `badges/` — shared with Game Score rankings
+Umpire-specific surfaces: the Tendencies card and its hosts — the modal, the lineup page's top zone (TeamInfo renders it beside the one fact grid, which the crew's `UmpiresCard` cells share), and focus mode's EXTRAS-tab drawer (`UmpireTendenciesFold`). The tier pill/glyph live in `badges/` — shared with Game Score rankings
 
 ## `workload/`
 
-shared by six surfaces (the slate card, the lineup page's board, the player page's mound card, The Pen, the team hub's Roster tab, the innings viewer's ARMS tab). One palette, ticked to the app's own tired thresholds, so a shaded cell and a "likely down" tag can never tell different stories about one outing — every one of them reads a single `tiredFlagsFor` evaluation. `DayStrip` is a CSS grid rather than a flex row on purpose: the rest rail is placed by grid column, so it covers the cells AND the gaps at any width. Their ink is global (`styles/76-workload-marks.css`), not component-imported, because a slate card's dots cannot wait on a route chunk
+The four marks that draw `api/workload.js` without a sentence, shared by six surfaces (the slate card, the lineup page's board, the player page's mound card, The Pen, the team hub's Roster tab, the innings viewer's ARMS tab). One palette, ticked to the app's own tired thresholds, so a shaded cell and a "likely down" tag can never tell different stories about one outing — every one of them reads a single `tiredFlagsFor` evaluation. `DayStrip` is a CSS grid rather than a flex row on purpose: the rest rail is placed by grid column, so it covers the cells AND the gaps at any width. Their ink is global (`styles/76-workload-marks.css`), not component-imported, because a slate card's dots cannot wait on a route chunk
+
+`ProjectedStarters` is the Starting pitcher card's "Likely starters" guess when no probable is announced (ADR-0089): a labeled list, never an announced-looking card.

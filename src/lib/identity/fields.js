@@ -272,7 +272,7 @@ export const IDENTITY_DIMENSIONS = {
   },
 
   // Club-level brand colours and the three treatment picks that ride with them.
-  // `extras` is deliberately NOT here (see src/lib/CLAUDE.md): nothing on the
+  // `extras` is deliberately NOT here (see src/lib/data/CLAUDE.md): nothing on the
   // team hub renders a club's extras, so an editor for them here would be a
   // control with no visible effect on the page that holds it — which is the one
   // thing this placement is supposed to guarantee. They stay in /identity-lab,

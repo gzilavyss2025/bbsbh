@@ -10,12 +10,21 @@ balk, …) — and all three render in the *same* kraft-amber
 `.pitchernotice.pitchernotice--pbp` card, distinguished by what's inside (a
 headshot vs. a scorer's-shorthand code) rather than a colored accent rail.
 Read ADR-0017 before touching any of `PlayByPlay.jsx`'s notification
-components, `MoundVisitPips`, or `HalfInning.jsx`'s `PrePitchChanges` — it
-also covers the casing rule (no per-component `.toUpperCase()`, guarded by
-`scripts/check-name-casing.mjs`), the `--accent-positive`/`--accent-negative`
+components, `MoundVisitBar` (in `EventCards.jsx`), or `HalfInning.jsx`'s
+`PrePitchChanges` — it also covers the `--accent-positive`/`--accent-negative`
 color pairing, and the button/label conventions (chevron vs. destination-named
 link, "Reveal" always visible, accessible name contains the visible word).
 
-## Bucket notes
+## The files
 
-`DelayNotice` cards a stoppage only when it came to something, and names the man who left rather than the batter the feed names (ADR-0060). **`pitcherCard/`** (`PitcherCard`, `SeasonLines`, `PitchMix`, `PitchScene`, `LastAppearance`) is the FULL Now Pitching card (#1344): only where an arm takes the mound — `HalfInning`'s card at `isFreshPitcher` and `PlayByPlay`'s mid-half `pitching_substitution` card; the persistent header and `ReliefRepeat` stay `PitcherNotice` alone. Its stat lines end the day before the game (ADR-0088). The pure model (role rule, tiles, scene math) is `lib/pitcherCard/`, so `npm test` can pin it. `PitchScene` draws through refs from a rAF loop — never React state per frame — stops off screen, and stays still under reduced motion
+`DelayNotice` (a function in `EventCards.jsx`) cards a stoppage only when it came to
+something, and names the man who left rather than the batter the feed names (ADR-0060).
+
+**`pitcherCard/`** (`PitcherCard`, `SeasonLines`, `PitchMix`, `PitchScene`,
+`LastAppearance`) is the FULL Now Pitching card (#1344): only where an arm takes the
+mound — `HalfInning`'s card at `isFreshPitcher` and `PlayByPlay`'s mid-half
+`pitching_substitution` card; the persistent header and `ReliefRepeat` stay
+`PitcherNotice` alone. Its stat lines end the day before the game (ADR-0088). The pure
+model (role rule, tiles, scene math) is `lib/pitcherCard/`, so `npm test` can pin it.
+`PitchScene` draws through refs from a rAF loop — never React state per frame — stops off
+screen, and stays still under reduced motion.

@@ -1,3 +1,33 @@
-# src/components/boxlines — Box Lines
+# src/components/boxlines — Box Lines (ADR-0069)
 
-**Box Lines** — the reusable drilldown behind a summary stat line (ADR-0069): tap the line, see the game-by-game rows that add up to it, each linking to that game's box score. That is the name to use in a prompt: "make the box lines open from X, showing Y" — and ONLY in a prompt: **"Box Lines" is internal and never renders.** On the page the door says the house `See all ›` (`ui/control/Door.jsx`'s words) and the sheet's head note says `Game lines · {facet}`, which is the vocabulary the sheet's own hints already use ("Pulling his game lines…"). `BoxLinesDoor` is a FULL button reset, padding included — the UA's `padding: 1px 6px` used to start the line's ink 6px right of the rows above it — so a host that wants its row's vertical dress back states it at `button.` specificity (`.starter__careervs` in 10-lineup.css); hover draws the design canvas's outline, pointer devices only. One shell for every facet, and since #997 it is handed one: `sheet.facet` (`api/boxlines/facets.js`) plus an optional `note` and `title`, both defaulting to the club case so a caller that names only an opponent needs nothing new. It opens from TWO doors, both worded by `api/vsTeamSplits.js`'s `vsTeamDoorLabel` so they cannot disagree: the lineup page's "Career vs MIL" line (pitcher vs the club he faces) and the player page's Splits vs team card, where the door is keyed on the picked club so a new pick remounts it closed. A `.scrim`/`.sheet` dialog through `ModalPortal` — bottom sheet on a phone, off the right edge when wide (`.scrim--boxlines`) — NOT the wire's rail/dock, which are ambient and non-modal by design. Holds no date logic: rows arrive already gated from `api/boxlines/rows.js` (cutoff-gated), and a row it was not handed does not exist. **Since #1048 the sheet has a SECOND MODE.** A door handed a `list` descriptor instead of a facet opens on the GROUPS — the nine spots in the batting order (#1048), a career's 36 ballparks (#998) — folded from the same gated rows by `api/boxlines/fold.js` and drawn by `BoxLinesList` as a two-column grid (games, and AVG or ERA), the same vocabulary the Game lines card's table uses. Tap a group and the sheet re-renders in rows mode for that group's facet, headed by **twelve** figures folded from those same rows (`foldStats` — a hitter's counts then his slash line, a pitcher's counts then ERA/WHIP/K9, drawn with the shared `Stat` cell the player page's own grid uses);  `‹ Back` returns to the list, Escape still closes, focus still returns to the door. **It costs no requests**: the join is memoized per (person, group, cutoff, gameTypes), so every group reads the rows the listing pass already fetched. A list sheet has no headline (there is no tapped line to quote) until a group is picked, when the headline is that entry's own line, verbatim — `BoxLinesDoor`'s `headline` defaults to `label` and a list door passes null. The gate is untouched: a list folds rows it was handed, so it can only ever describe games the cutoff allowed. Alternatives weighed for the name: Stubs (reads as a code stub in a prompt), Receipts (already My Tally's sync receipt)
+The reusable drilldown behind a summary stat line: tap the line, see the game-by-game
+rows that add up to it, each linking to that game's box score. The facet registry is
+`src/api/boxlines/CLAUDE.md`. The name's history and the lit doors: `docs/box-lines.md`.
+
+- **"Box Lines" is internal and never renders.** Use the name only in a prompt: "make the
+  box lines open from X, showing Y". On the page the door says the house `See all ›`
+  (`ui/control/Door.jsx`'s words) and the sheet's head note says `Game lines · {facet}`.
+- **`BoxLinesDoor` is a FULL button reset, padding included.** A host that wants its row's
+  vertical dress back states it at `button.` specificity (`.starter__careervs` in
+  `10-lineup.css`). Hover draws the design canvas's outline, pointer devices only.
+- **One shell for every facet.** It is handed `sheet.facet` plus an optional `note` and
+  `title`, both defaulting to the club case.
+- **Two doors, one wording.** The lineup page's "Career vs MIL" line and the player page's
+  Splits vs team card both take their label from `api/vsTeamSplits.js`'s `vsTeamDoorLabel`,
+  so they cannot disagree. The player page keys its door on the picked club, so a new pick
+  remounts it closed.
+- **It is a modal sheet.** A `.scrim`/`.sheet` dialog through `ModalPortal`: a bottom sheet
+  on a phone, off the right edge when wide (`.scrim--boxlines`). It is NOT the wire's
+  rail/dock, which are ambient and non-modal by design.
+- **It holds no date logic.** Rows arrive already gated from `api/boxlines/rows.js`
+  (cutoff-gated), and a row it was not handed does not exist. A list folds only rows it
+  was handed, so it can only describe games the cutoff allowed.
+- **A list sheet is the second mode.** A door handed a `list` descriptor instead of a
+  facet opens on the GROUPS, folded by `api/boxlines/fold.js` and drawn by `BoxLinesList`
+  as a two-column grid (games, and AVG or ERA), the vocabulary the Game lines card's table
+  uses. A group opens in rows mode for that group's facet, headed by twelve figures
+  (`foldStats`, drawn with the shared `Stat` cell). `‹ Back` returns to the list, Escape
+  still closes, and focus still returns to the door. A list sheet has no headline until a
+  group is picked, when the headline is that entry's own line, verbatim: `BoxLinesDoor`'s
+  `headline` defaults to `label`, and a list door passes null. The join is memoized per
+  (person, group, cutoff, gameTypes).

@@ -10,8 +10,8 @@ No feed fetch, no `src/api/*` game-module import, no linescore, no stamp fact,
 no number that came out of a ballpark. Counts of your own things are the only
 numbers on it, which is why this screen needs no seal reasoning at all. Two
 mechanical checks hold the line and both must keep passing:
-`src/screens/profile/` and `src/components/profile/` are on
-`check-stamp-surfaces.mjs`'s **forbidden** directory list (narrowed to
+`src/screens/profile/`, `src/components/profile/`, and `src/components/account/` are on
+`check-stamp-surfaces.mjs`'s **forbidden** directory list (`FORBIDDEN_ART_DIRS`, narrowed to
 `GameStamp` / `StampGameButton`, so a stamp COUNT stays legal and stamp ART does
 not — ADR-0035's containment argument), and
 `e2e/invariants/profile-no-scores.spec.js` asserts the rendered DOM carries no
@@ -31,11 +31,10 @@ constraint, not a preference.
 
 ## The receipt trap
 
-One trap:
-`ProfilePage`'s **`normalizeStatus`** exists because `RevealCloudSync` mounts
+`normalizeSilentChannels` (`lib/account/syncStatus.js`) exists because `RevealCloudSync` mounts
 inside `InningViewer`, so on `/profile` the `reveal` channel has never spoken —
 and `rollupSync` (worst channel wins) would turn that into "This device." for a
 signed-in user. A channel that never reported (`at == null`) is given the
 account's own **phase, and only its phase**, never a `syncedAt`, so nothing
 claims a "last checked" it never had. Read that function's header before
-touching the receipt.
+touching the receipt. `components/account/MergeReceiptStrip.jsx` calls it too.

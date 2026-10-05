@@ -23,7 +23,7 @@ contract**, in one place because PR 4's MiLB art builds directly on it:
 | Endpoint | `POST /__dev/team-logo?teamId={id}&treatment={key}`, raw PNG bytes as the body |
 | Destination | resolved server-side — directory from `LOGO_TREATMENT_DIRS`, filename from `teamAbbr`. **A request never supplies a path.** |
 | Rejected | not a PNG, not exactly 512×512, over the cap — each with the reason, shown inline on the tile |
-| Accepted-with-a-note | a PNG carrying no alpha channel (six committed files have none and render fine, so it's said once, not refused) |
+| Accepted-with-a-note | a PNG carrying no alpha channel (118 of the 148 files in `logo-art.json` have none and render fine, so it's said once, not refused) |
 | Response | `{ file, url, caveat }` |
 | Side effect | `src/lib/data/logo-art.json` is rebuilt from disk |
 
@@ -52,8 +52,8 @@ library under a name.
 
 ## `TeamLogo`'s own fallback chain
 
-Curated-art coverage is partial by design (§ above), so the component every
-consumer renders through (`src/components/TeamLogo.jsx`) degrades in its own
+Curated-art coverage is partial by design (`src/lib/CLAUDE.md`, "The curated art"), so the component every
+consumer renders through (`src/components/logo/TeamLogo.jsx`) degrades in its own
 two steps, independent of the colour chain: a requested `variant` that 404s
 retries the plain `base` mlbstatic mark; no id, no base mark, or the base also
 failing draws a single-letter monogram. Never a broken-image icon, and asking

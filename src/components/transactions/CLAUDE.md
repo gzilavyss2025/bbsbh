@@ -1,3 +1,49 @@
 # src/components/transactions — roster-move surfaces
 
-The home slate's rolling three-day league feed (issue #772, `api/transactions/leagueFeed.js`) has **two presentations split by width, and never both at once** — and **neither stands in the slate's flow**, which is the whole shape of the split: wide, `WireRail` runs down the right of the games — one column, no scroller of its own, so the wheel always belongs to the slate (ADR-0062); on a phone there is no sideways room, so `WireDock` is a bottom-anchored sheet with three detents (rail / half / full) that puts the wire under a thumb (ADR-0061). Either way the games keep the fold — the in-flow card these replaced ran 658px of a 900px window and pushed every game card below it. `GameSelect` picks at `WIDE_QUERY`. **`MoveRow` draws a move for both**, so the two can't drift; the rail asks for its `compact` variant (no photo rail, banner up in the kicker — 288px will not hold a face column and a readable sentence). **The rail fits itself to the games column** and puts the rest behind one control, so the wire fills the page and never lengthens it — a three-day window runs 41-65 stories against a games column of ~1,900px. The sheet itself is `ui/dock/SheetDock.jsx` (shared with `bracket/BracketDock`), and `ui/dock/dockPhysics.js` is the drag's arithmetic, pure and unit-tested (`test/dock-physics.test.js`) because a sheet's feel is otherwise only assessable by flicking a phone. Neither reuses `TeamTransactionsCard`: that deck sits under a club's own name, so `stripLeadingClub` takes the club out of every cutline — drop those cards on a league-wide feed and half read "Sent LHP Kent Emanuel outright to Louisville Bats" with no subject at all. Naming the club is the sentence's missing half here, which is why each row leads with a colour spine, a mark and an abbreviation. Both are a ledger rather than a deck because a real 48 hours holds ~35 stories and the worst of a measured month held 125 — the wrong shape for a swipe on the busiest page in the app. Two things only a browser can see, and both have specs: the rail's layout — that the games start level with it, that its fit ends on a whole row at the games' foot, and that the shell widens only for a rail that exists (`e2e/wire-rail.spec.js`) — and the dock's floor, where the slate pads its bottom by the rail's MEASURED height so the Reveal all results bar, a seal control, can never end up under it (`e2e/wire-dock.spec.js`). **The club surfaces reuse the primitives, never the layout.** `MoveRow` is where the tone maps, the dateline and the cutline renderer live for every surface, wire and club alike — the deck and the club ledger page (`screens/team/TeamTransactionsPage.jsx`) held byte-identical private copies until they were folded in. A club's card is `TxStory`, shared BY the deck and that page, and it carries no dateline of its own: both surfaces group by day around it (the deck's `DayTab`, the page's heading), which took 950 of 3,199 repeated datelines off the club surfaces — 29.7% of cards restated the date of the card before them. The wire's club chip goes to that page, not to the Games tab: the deck IS on that tab, as its last section under four others
+## The wire: two presentations, never both at once
+
+The home slate's rolling three-day league feed (issue #772,
+`api/transactions/leagueFeed.js`) has **two presentations split by width, and never both
+at once** — and **neither stands in the slate's flow**, which is the whole shape of the
+split. `GameSelect` picks at `WIDE_QUERY`.
+
+- **Wide:** `WireRail` runs down the right of the games — one column, no scroller of its
+  own, so the wheel always belongs to the slate (ADR-0062).
+- **Phone:** there is no sideways room, so `WireDock` is a bottom-anchored sheet with three
+  detents (rail / half / full) that puts the wire under a thumb (ADR-0061).
+- Either way the games keep the fold: the in-flow card these replaced ran 658px of a 900px
+  window and pushed every game card below it.
+- **`MoveRow` draws a move for both**, so the two can't drift. The rail asks for its
+  `compact` variant (no photo rail, banner up in the kicker — 288px will not hold a face
+  column and a readable sentence).
+- **The rail fits itself to the games column** and puts the rest behind one control, so the
+  wire fills the page and never lengthens it. A three-day window runs 41-65 stories against
+  a games column of ~1,900px.
+- The sheet itself is `ui/dock/SheetDock.jsx` (shared with `bracket/BracketDock`).
+  `ui/dock/dockPhysics.js` is the drag's arithmetic, pure and unit-tested
+  (`test/dock-physics.test.js`), because a sheet's feel is otherwise only assessable by
+  flicking a phone.
+- Neither reuses `TeamTransactionsCard`. That deck sits under a club's own name, so
+  `stripLeadingClub` takes the club out of every cutline; on a league-wide feed half the
+  cards would read "Sent LHP Kent Emanuel outright to Louisville Bats" with no subject at
+  all. Naming the club is the sentence's missing half here, which is why each row leads
+  with a colour spine, a mark and an abbreviation.
+- Both are a ledger rather than a deck because a real 48 hours holds ~35 stories and the
+  worst of a measured month held 125 — the wrong shape for a swipe on the busiest page in
+  the app.
+- Two things only a browser can see, and both have specs: the rail's layout — that the
+  games start level with it, that its fit ends on a whole row at the games' foot, and that
+  the shell widens only for a rail that exists (`e2e/wire-rail.spec.js`) — and the dock's
+  floor, where the slate pads its bottom by the rail's MEASURED height so the Reveal all
+  results bar, a seal control, can never end up under it (`e2e/wire-dock.spec.js`).
+
+## The club surfaces reuse the primitives, never the layout
+
+`MoveRow` is where the tone maps, the dateline and the cutline renderer live for every
+surface, wire and club alike — the deck and the club ledger page
+(`screens/team/TeamTransactionsPage.jsx`) held byte-identical private copies until they
+were folded in. A club's card is `TxStory`, shared BY the deck and that page, and it
+carries no dateline of its own: both surfaces group by day around it (the deck's `DayTab`,
+the page's heading), which took 950 of 3,199 repeated datelines off the club surfaces —
+29.7% of cards restated the date of the card before them. The wire's club chip goes to that
+page, not to the Games tab: the deck IS on that tab, as its last section under four others.

@@ -158,7 +158,7 @@ function isMilbColorStore(parsed) {
 // yet — absent means "guess") — the Team Identity Lab's editable counterpart
 // to teams.js's real TEAM_COLOR_PAIRS/TEAM_COLORS/teamColorExtras/
 // offDayTreatmentFor/defaultHomeTreatmentFor/defaultAwayTreatmentFor
-// resolvers, which read this store (src/lib/CLAUDE.md). Team-level, no
+// resolvers, which read this store (src/lib/data/CLAUDE.md). Team-level, no
 // `treatments` — same footing as milb-colors.json, since none of these vary
 // by treatment the way a logo tile's tuning does.
 //

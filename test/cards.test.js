@@ -63,7 +63,7 @@ test('an empty list resolves to null immediately', async () => {
 
 // Coverage gap fixed here: vercel.json's rewrite list (and this switch) had
 // drifted behind REPORT_PAGES (src/lib/reportPages.js) and the team-hub's
-// five tabs (ADR-0034, src/CLAUDE.md) — 12 report pages and 4 team tabs fell
+// five tabs (ADR-0034, src/screens/team/CLAUDE.md) — 12 report pages and 4 team tabs fell
 // through to the static default card with no dynamic resolution attempted at
 // all, confirmed live against production. These routes build with no
 // statsapi call (genericCard is pure), so they're testable without mocking

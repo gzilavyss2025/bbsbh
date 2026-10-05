@@ -7,30 +7,10 @@ plus the lint guards. Most `gen-*.mjs` run on the nightly GitHub Actions cron
 is immutable. Each generator's READER module is documented in
 `docs/api/static-data.md`; this file documents the generators.
 
-## Everyday commands
+## The SQLite data layer (`scripts/lib/schema.sql`, `scripts/lib/db.js`)
 
-```bash
-npm install
-npm run dev        # dev server (fixed port 5173, strictPort)
-npm run build      # production build → dist/
-npm run preview    # serve the built app
-npm run lint       # eslint + guard scripts (caps, casing, typography, contrast, claude-md, …)
-npm test           # node:test unit suite (pure logic; CI-gated)
-npm run e2e        # playwright — only when Gary asks (hook-enforced)
-```
-
-CI (`ci.yml`) runs lint + `npm test` + build. `npm test` is a pure-logic unit suite;
-it is not a substitute for the browser check. Verify user-visible changes by running
-`npm run dev` and exercising the
-game-select → team-info → innings flow against a live or recent game.
-`docs/test-games.md` has a pack of real, verified gamePks with rare in-game events
-(triple play, immaculate inning, position player pitching, suspended/resumed game,
-etc.).
-
-## The SQLite data layer (`lib/schema.sql`, `lib/db.js`)
-
-`gen-team-score.mjs`, `gen-season-score.mjs`, and `gen-postseason-leaders.mjs`
-write into a shared SQLite database instead of hand-rolling their own JSON
+The generators that call `openDb()` (for example `gen-team-score.mjs`,
+`gen-season-score.mjs`, and `gen-postseason-leaders.mjs`) write into a shared SQLite database instead of hand-rolling their own JSON
 read-merge-write cycle, then export the same JSON shapes the reader modules
 already expect — see `docs/adr/0021`. `openDb()` reconstitutes an in-memory
 database from committed TEXT dumps (`scripts/data/*.sql`, plain `INSERT`
@@ -42,22 +22,15 @@ whichever workflow pushes second to a shared file would overwrite the other's
 table with a stale copy. Add a new table = add a new group in `db.js` +
 extend `schema.sql`; a new generator that needs to join against existing
 tables is the reason this layer exists, so wire it in rather than adding
-another bespoke JSON merge. Uses `node:sqlite` (Node ≥22.5, stable since
-Node 26) rather than `better-sqlite3` — the workflows run generators with no
+another bespoke JSON merge. Uses `node:sqlite` (Node ≥22.5) rather than `better-sqlite3` — the workflows run generators with no
 `npm install` step, and a built-in avoids adding install latency.
 A `bySeason` group keeps every season, one frozen dump per old season (ADR-0086).
 
-## The generator catalog lives in `docs/scripts/generators.md`
+## Generator rules
 
-One entry per `gen-*.mjs` — what it writes, where the data comes from, and its
-own traps — grouped by cadence (nightly cron / own cadence / hand-run /
-assets). It moved out of this file because it was two thirds of a document that
-loads IN FULL for every session that works in this directory, and per-generator
-detail is reference you look up, not a rule you must hold before touching
-anything here. Same split `src/api/CLAUDE.md` made into `docs/api/`.
-
-Four things about that catalog belong HERE, because they are rules rather than
-reference:
+The catalog is `docs/scripts/generators.md`: one entry per `gen-*.mjs`, grouped by cadence
+(nightly cron / own cadence / hand-run / assets). Four rules belong HERE, because they
+are rules rather than reference:
 
 - **Wire a new generator into the cron that runs it, in the same commit.** A
   nightly step is three edits to `.github/workflows/update-nightly-data.yml`,
@@ -66,10 +39,9 @@ reference:
   computes the file and throws it away; miss the third and a broken generator
   reports green. Both have happened (see that workflow's own header).
 - **A generator that is NOT on a cron must say what runs it.** The catalog's
-  cadence groups are the record. `gen-postseason-odds.mjs` sat in neither group
-  for months while its own header said "Normal nightly use appends yesterday's
-  snapshot" — the Team hub's odds card served a twenty-three-day-old snapshot,
-  quietly, because a date-keyed file has no way to look stale.
+  cadence groups are the record. A date-keyed file has no way to look stale, so one
+  generator on no cron served a twenty-three-day-old snapshot quietly (the story is the
+  head of `docs/scripts/generators.md`).
 - **A new nightly dataset needs a stamp in `check-data-freshness.mjs`, in the
   same commit.** Write a top-level `generatedAt` (preferred); only a sharded
   store where a per-shard stamp would rewrite every file nightly for no
@@ -106,7 +78,7 @@ one can therefore never be unit-tested, so a helper worth testing goes in
 `scripts/lib/` and the generator imports it (`lib/roster.mjs` is the worked
 example).
 
-## Local-environment reporters (read-only; run by `session-start.sh`)
+## Local-environment reporters (read-only; run by `.claude/hooks/session-start.sh`)
 
 Both report and never act. The acting counterparts are on-demand skills that
 confirm every target with the maintainer first — deliberate, because multiple
@@ -132,6 +104,15 @@ Guard catalog (one entry per guard): `docs/scripts/tooling.md`.
 
 ## Rules every guard follows
 
-- Fix a failure by retuning the hex, never by lowering the threshold. See ADR-0023.
-- Move detail to `docs/*` and leave a pointer; don't raise a cap.
-- Stale allowlist entries fail too, the same ratchet rule `check-dir-size.mjs` uses.
+- **A ratchet only moves down.** A budget, an allowlist or a cap is pinned at today's
+  count. Growth fails, and a shrink must tighten the entry in the same commit
+  (`check-dir-size`, `check-file-size`, `check-caption-budget`, `check-raw-values`,
+  `check-claude-md`). A stale allowlist entry fails too, the same ratchet rule
+  `check-dir-size.mjs` uses.
+- **Rebase onto `main` and re-measure before you merge a change to a budget.** A count
+  taken on a branch that sits behind `main` goes stale.
+- **Fix a failure by retuning, never by lowering a threshold or raising a cap.** Retune
+  the hex, never lower the threshold (ADR-0023). If `check-claude-md` fails, move detail
+  to `docs/*` and leave a pointer; don't raise a cap.
+- **An exemption names its marker and a reason.** The CSS and JSX markers are in
+  `src/styles/CLAUDE.md`.
