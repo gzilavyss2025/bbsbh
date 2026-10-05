@@ -90,31 +90,22 @@
 }
 
 /* --- the rank grid --- */
-.ninekeys__scroller {
-  overflow-x: auto;
+/* The Table draws the frame, the scroll, the figure type, the head type and
+   the rule above each row; the grid keeps its width and its own cell size. */
+.ninekeys__section .table {
   margin-top: var(--space-3);
-  border: 1px solid var(--rule);
-  background: var(--surface-card);
 }
 
 .ninekeys__grid {
-  border-collapse: collapse;
-  width: 100%;
   min-width: 720px;
-  font-family: var(--font-mono);
   font-size: var(--fs-cell);
-  font-variant-numeric: tabular-nums;
 }
 
 .ninekeys__grid thead th {
-  font-family: var(--font-display);
-  font-size: var(--fs-small);
   text-align: center;
   padding: var(--space-2) var(--space-1);
   vertical-align: bottom;
   border-bottom: 2px solid var(--ink-0);
-  color: var(--ink-0);
-  white-space: nowrap;
 }
 
 .ninekeys__grid thead th:first-child {
@@ -122,25 +113,13 @@
   padding-left: var(--space-3);
 }
 
-.ninekeys__grid tbody td,
-.ninekeys__grid tbody th {
-  border-bottom: 1px solid var(--rule-soft);
-  padding: 0;
-}
-
-.ninekeys__grid tbody tr:last-child td,
-.ninekeys__grid tbody tr:last-child th {
-  border-bottom: 0;
+/* The head's heavy rule is the line above the first row. */
+.ninekeys__grid tbody tr:first-child :is(td, th) {
+  border-top: 0;
 }
 
 .ninekeys__club {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background: var(--surface-card);
   text-align: left;
-  padding: var(--space-2) var(--space-3);
-  white-space: nowrap;
   border-right: 1px solid var(--rule);
   font-weight: var(--w-regular);
 }
@@ -216,7 +195,6 @@
   text-align: center;
   width: 72px;
   border-left: 1px solid var(--rule);
-  padding: var(--space-1) var(--space-1);
   color: var(--ink-1);
 }
 
@@ -291,7 +269,9 @@
 }
 
 /* champion rows that sit exactly at the limit */
-.ninekeys__row--floor .ninekeys__club,
+.ninekeys__row--floor {
+  --table-pin: var(--surface-inset);
+}
 .ninekeys__row--floor .ninekeys__cell {
   background: var(--surface-inset);
 }

@@ -3,6 +3,12 @@ import { AtBatBox } from './AtBatBox.jsx'
 import { cellNote } from '../../lib/scorecardNotes.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Button } from '../ui/control/Button.jsx'
+import { useLens } from './lens/useLens.js'
+import { LensFrame } from './lens/LensFrame.jsx'
+import { CarryStrip } from './lens/CarryStrip.jsx'
+import { useCarry } from './lens/useCarry.js'
+import { LensTear } from './lens/motion/LensTear.jsx'
+import { moveKey } from '../../lib/scorecard/words.js'
 
 // The main scorecard grid, in the #22 sheet's own column order: a sticky
 // PLAYER column (each row led by its batting-order number, closed by the
@@ -49,6 +55,14 @@ import { Button } from '../ui/control/Button.jsx'
 // where the reader's eye lands when a half closes and it is empty by
 // definition, so the handoff costs the sheet no notation. Every older
 // leadoff box stays blank.
+//
+// `lens` is the phone lens (ADR-0092, components/scoring/lens/): 'lens' draws
+// the compact rail at the lens's measured zoom, with a blank pad column before
+// inning 1 and a spacer row below slot 9, so any box can reach the frame (a
+// box near the top of the order has the frame ride up to it, with no blank
+// paper over row 1); 'whole' is today's sheet at its fit zoom with
+// the frontier outlined. The seal cell and the flip cell carry `data-frontier`
+// in both, so the lens finds the frontier by measuring the DOM.
 const SUMMARY = ['AB', 'H', 'R', 'RBI']
 const SLOTS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 // The foot row's three readings, in the order the sheet prints them — written
@@ -115,7 +129,26 @@ export function ScorecardSheet({
   // dependency of `measure` below, which the ResizeObserver is subscribed with,
   // so a fresh arrow every render re-attaches the observer every render.
   onWidth = null,
+  lens = null,
+  // The lens bar's two facts about the grid (lens only): `edge` — the next box
+  // is a batter still up, so it draws as the dashed AT BAT box and not a seal
+  // (ADR-0092, ADR-0055) — and `lastOpened`, the atBatIndex of the newest open
+  // box, which keeps a bracket until the next tap.
+  edge = false,
+  lastOpened = null,
+  // The card docked under the frame (lens only): the Entering card or the
+  // new-pitcher notice. LensFrame places it, as it places the frame.
+  dock = null,
+  // The boxes the carry strip holds (lens only; lib/scorecard/carry.js). The
+  // sheet flags their cells `data-carry` and measures them (lens/useCarry.js).
+  carry = [],
+  // The lens's one-shot motion after a tap (lens/motion/useLensMotion.js's `beat`,
+  // plus `moved`): the glide for useLens and the tear over the box the tap
+  // opened (`at`), neither under reduced motion (`still`), and the marker tint
+  // on the boxes of the runners that play moved, keyed on the tap (`n`).
+  motion = null,
 }) {
+  const inLens = lens === 'lens'
   // Normalize both modes to a flat column list: each column knows its header
   // label (an inning number on its first sub-column, else blank), whether it
   // starts an inning (for the divider rule), and its source inning.
@@ -134,6 +167,12 @@ export function ScorecardSheet({
         inningStart: true,
         inning: n,
       }))
+  // The lens's pad column: blank ruled paper before inning 1, so inning 1's
+  // boxes can reach the frame over the SECOND column like every other inning.
+  // Its boxes are empty and hidden (lens.css), so it is as wide as a real one.
+  if (inLens) {
+    columns.unshift({ key: 'lens-pad', colIndex: null, label: '', inningStart: true, pad: true })
+  }
 
   // HAS ANYTHING BEEN SCORED ON THIS SHEET? The four sums are honest at zero —
   // nothing revealed really is nothing charged — but a scorer does not write
@@ -170,7 +209,28 @@ export function ScorecardSheet({
   // Full size is the opening view — one region of the sheet, read at the size
   // it was drawn — unless the whole sheet already fits, in which case there is
   // nothing to zoom out of.
-  const zoom = Math.min(Math.max(pick ?? 1, floor), ZOOM_MAX)
+  const lensGeom = useLens({
+    on: inLens,
+    paneRef,
+    tableRef,
+    seat: `${grid?.frontier?.slot}:${grid?.frontier?.colIndex}:${flip?.inning}`,
+    max: ZOOM_MAX,
+    glide: motion && !motion.still ? motion.n : null,
+  })
+  // The whole-sheet view opens at the fit zoom: the floor becomes the pick, as
+  // if the reader had pressed − down to it. A pick, not the floor itself:
+  // the page is capped to the sheet's own width, so a zoom tied to the floor
+  // would shrink the pane, then the floor, then the pane, without end. A pick
+  // of 0 asks `measure` for it, because the floor measured in the lens was
+  // for the lens's own layout (compact rail, pad column, a wider pane).
+  const [lensWas, setLensWas] = useState(lens)
+  if (lensWas !== lens) {
+    setLensWas(lens)
+    if (lens === 'whole') setPick(0)
+  }
+  const zoom = inLens ? lensGeom?.zoom ?? 1 : Math.min(Math.max(pick ?? 1, floor), ZOOM_MAX)
+  const carrying = useCarry({ on: inLens && Boolean(lensGeom?.frame), paneRef, tableRef })
+  const lensPad = (h) => (h ? { height: h / zoom } : undefined)
   const step = (factor) => setPick(Math.min(Math.max(zoom * factor, floor), ZOOM_MAX))
 
   const measure = useCallback(() => {
@@ -182,6 +242,7 @@ export function ScorecardSheet({
     if (!natural || !pane.clientWidth) return
     const next = Math.min(1, Math.max(pane.clientWidth - FIT_SLACK, 1) / natural)
     setFloor((was) => (Math.abs(was - next) > 0.005 ? next : was))
+    setPick((p) => (p === 0 ? next : p))
     // The DRAWN width, not the natural one: the header holds to the columns as
     // they are being read, so pulling the zoom back pulls the band in with it.
     onWidth?.(drawn)
@@ -197,30 +258,32 @@ export function ScorecardSheet({
   }, [measure])
 
   return (
-    <div className="sc-sheet__frame">
-      <div className="sc-zoom" role="group" aria-label="Sheet zoom">
-        <Button
-          size="control"
-          className="sc-zoom__btn"
-          onClick={() => step(1 / ZOOM_STEP)}
-          disabled={zoom <= floor + 0.001}
-          aria-label="Zoom out"
-        >
-          −
-        </Button>
-        <span className="sc-zoom__pct">{Math.round(zoom * 100)}%</span>
-        <Button
-          size="control"
-          className="sc-zoom__btn"
-          onClick={() => step(ZOOM_STEP)}
-          disabled={zoom >= ZOOM_MAX - 0.001}
-          aria-label="Zoom in"
-        >
-          +
-        </Button>
-      </div>
+    <div className={`sc-sheet__frame ${inLens ? 'sc-sheet__frame--lens' : ''}`}>
+      {!inLens && (
+        <div className="sc-zoom" role="group" aria-label="Sheet zoom">
+          <Button
+            size="control"
+            className="sc-zoom__btn"
+            onClick={() => step(1 / ZOOM_STEP)}
+            disabled={zoom <= floor + 0.001}
+            aria-label="Zoom out"
+          >
+            −
+          </Button>
+          <span className="sc-zoom__pct">{Math.round(zoom * 100)}%</span>
+          <Button
+            size="control"
+            className="sc-zoom__btn"
+            onClick={() => step(ZOOM_STEP)}
+            disabled={zoom >= ZOOM_MAX - 0.001}
+            aria-label="Zoom in"
+          >
+            +
+          </Button>
+        </div>
+      )}
       <div className="sc-sheet__scroll" ref={paneRef}>
-        <table className="sc-sheet" ref={tableRef} style={{ zoom }}>
+        <table className={`sc-sheet ${lens ? `sc-sheet--${lens}` : ''}`} ref={tableRef} style={{ zoom }}>
           <thead>
             <tr>
               <th className="sc-sheet__name sc-sheet__corner" scope="col">
@@ -279,8 +342,11 @@ export function ScorecardSheet({
                             button, and falls back to a plain span with the same
                             class when a row has no id to link to. */}
                         <PlayerLink id={line.id} className="sc-sheet__who">
-                          {line.name}
+                          {inLens ? line.name.split(',')[0] : line.name}
                         </PlayerLink>
+                        {/* The compact rail writes the position under the
+                            name, since its Pos column is folded away. */}
+                        {inLens && <span className="sc-sheet__linepos">{line.pos}</span>}
                         <span className="sc-sheet__jersey">{line.jersey}</span>
                       </span>
                     ))}
@@ -321,9 +387,20 @@ export function ScorecardSheet({
                     return (
                       <td
                         key={col.key}
-                        className={`sc-sheet__cell ${col.inningStart ? 'sc-sheet__cell--start' : ''}`}
+                        className={`sc-sheet__cell ${col.inningStart ? 'sc-sheet__cell--start' : ''} ${col.pad ? 'sc-sheet__cell--pad' : ''}`}
+                        data-frontier={isFrontier || isFlip ? '' : undefined}
+                        data-last={card != null && card.atBatIndex === lastOpened ? '' : undefined}
+                        data-carry={card != null && carry.some((b) => b.atBatIndex === card.atBatIndex) ? '' : undefined}
                       >
-                        {isFrontier ? (
+                        {card != null && motion?.moved.has(moveKey(card)) && (
+                          <span key={motion.n} className="sc-lens__moved" aria-hidden="true" />
+                        )}
+                        {motion && !motion.still && motion.at === `${slot}:${col.colIndex}` && (
+                          <LensTear key={motion.n} seed={motion.seed} />
+                        )}
+                        {isFrontier && edge ? (
+                          <div className="sc-ab__atbat">At bat</div>
+                        ) : isFrontier ? (
                           <button
                             type="button"
                             className="sc-ab__seal"
@@ -370,6 +447,12 @@ export function ScorecardSheet({
                 </tr>
               )
             })}
+            {inLens && (
+              <tr className="sc-sheet__lenspad" aria-hidden="true">
+                <td className="sc-sheet__name" style={lensPad(lensGeom?.frame?.padBottom)} />
+                <td colSpan={columns.length + SUMMARY.length} />
+              </tr>
+            )}
           </tbody>
           {/* The #22's foot row: PITCHES · WHIFFS · FOULS under each inning's
               first column (a widened inning's extra columns stay blank, same as
@@ -441,6 +524,13 @@ export function ScorecardSheet({
           </tfoot>
         </table>
       </div>
+      {inLens && (
+        <LensFrame
+          frame={lensGeom?.frame}
+          dock={dock}
+          carry={carrying && <CarryStrip boxes={carry} notes={notes} zoom={lensGeom.zoom} />}
+        />
+      )}
     </div>
   )
 }

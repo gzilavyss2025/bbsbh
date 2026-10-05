@@ -18,11 +18,19 @@ T8 move the rest, one family each. 57 tables move; 13 are held.
 | T7 | the other standalone boards | 10 | 10 | after T1 |
 | T8 | Standings (sticky) + the shared bases | 6 | 11 | last |
 
-**Status, 2026-10-01.** Landed: T0 #1366, T1 #1369, T2 #1372. T3, T4, T5 and
-T7 are in the wave PR #1386 (slice PRs #1382, #1383, #1385 and #1384, merged into
-`claude/table-wave1-1132`). Open: T6 (after T5 is on `main`; `overrides.tsv`
-now also proposes the two postseason series tables added after T0 for it),
-T8 (last).
+**Status, 2026-10-02.** Landed: T0 #1366, T1 #1369, T2 #1372; T3, T4, T5 and
+T7 in the wave PR #1386 (slice PRs #1382, #1383, #1385 and #1384). T6 and T8
+are in the second wave PR, from `claude/table-wave2-1132` (slice PRs #1395 T6a,
+#1396 T6b and #1400 T8). Every table in this plan has moved or is held. Open in
+#1132: EmptyState and Notice.
+
+**T6 split in two.** The two postseason series tables came after T0, so T6 grew
+to 11 tables and 14 files. It split on a clean seam, with no shared product file:
+T6a, the eight ABS boards (and `BoardScroller.jsx` deleted), and T6b, the Nine
+Keys grid and a third density, `keep`. T6b HELD both series tables (Gary
+confirmed, 2026-10-02): on `Table` the head band covers only part of their head
+row, and cells change alignment and face. T8 renamed the `.standings` namespace
+to `.clubtable`, because no JSX may keep the base it deletes.
 
 Three slices count 11 files, one over the target of 10. In each, the extra file
 is a test, an e2e spec or a second partial that the move cannot skip.
@@ -214,6 +222,8 @@ Shared partials, so the second PR rebases on the first: `68-around-the-game.css`
   board uses them. `BoardScroller`'s focus ring moves to `table.css` (T1).
   `.rpt__between` stays a namespace row rule.
 - **Routes:** `/abs-challenges?nointro`, `/nine-keys?nointro`.
+- **Landed as two slices:** T6a #1395 (the ABS boards) and T6b #1396 (Nine
+  Keys, the `keep` density; the two series tables HELD). See the status block.
 
 ### T7 — the other standalone boards
 

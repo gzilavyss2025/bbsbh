@@ -47,6 +47,18 @@ export function Scorecard({
   onFrontierTap = null,
   fresh = null,
   flip = null,
+  // The phone lens (ADR-0092): 'lens' folds the header band and footer trio
+  // away (the lens is the grid alone), 'whole' is the full sheet. ScorecardSheet.
+  lens = null,
+  // The lens bar's facts about the grid, handed on to the sheet (lens/useLensBar.js).
+  edge = false,
+  lastOpened = null,
+  // The card docked under the lens's frame, if any (lens/LensCards.jsx).
+  dock = null,
+  // The boxes the carry strip holds, if any (lens/useLensBar.js).
+  carry = [],
+  // The lens's one-shot motion, if a tap set any going (lens/motion/useLensMotion.js).
+  motion = null,
 }) {
   // THE SHEET'S OWN WIDTH, measured by the grid and held to by everything
   // around it. On a wide screen the scorecard runs the whole window (ADR-0047's
@@ -72,7 +84,7 @@ export function Scorecard({
     // WIDER than the column it is read in (that is what the zoom control is
     // for), and a band held to the grid's width would run off the screen.
     <div
-      className="scorecard"
+      className={`scorecard ${lens === 'lens' ? 'scorecard--lens' : ''}`}
       style={sheetWidth ? { '--sc-sheet-w': `${Math.round(sheetWidth)}px` } : undefined}
     >
       {/* THE PAGE. `.scorecard` is only the room the sheet is allowed to run
@@ -93,6 +105,12 @@ export function Scorecard({
           fresh={fresh}
           flip={flip}
           onWidth={holdToSheet}
+          lens={lens}
+          edge={edge}
+          lastOpened={lastOpened}
+          dock={dock}
+          carry={carry}
+          motion={motion}
         />
         <ScorecardFooter view={view} />
       </div>

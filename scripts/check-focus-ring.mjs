@@ -86,6 +86,17 @@ for (const { rel, raw } of sheets) {
   if (!selector.includes(':focus-visible')) continue
 
   const bodyStart = rule.index + selector.length + 1 // '{' consumed
+  // The scorecard seal sits on kraft: a negative offset puts the ring on the
+  // kraft (field on kraft is 1.81:1, under the 3:1 of WCAG 1.4.11). Keep it on paper.
+  const sealOffset = /(?:^|[\s,])\.sc-ab__seal:focus-visible\s*$/.test(selector)
+    ? body.match(/outline-offset\s*:\s*(-[^;]+);/)
+    : null
+  if (sealOffset) {
+    errors.push(
+      `${rel}:${lineAt(bodyStart + sealOffset.index)}: outline-offset: ${sealOffset[1].trim()}; — ` +
+        'the seal ring would sit on the kraft (1.81:1). Use a positive offset so it sits on paper',
+    )
+  }
   declRe.lastIndex = 0
   let decl
   while ((decl = declRe.exec(body))) {

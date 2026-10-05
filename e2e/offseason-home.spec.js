@@ -491,7 +491,7 @@ test('the standings page a record opens onto is not empty in the winter', async 
   await page.goto('/standings')
   await expect(page.locator('.standings-ctrl__mode')).toHaveText('Final')
   await expect(page.getByText('No standings available')).toHaveCount(0)
-  await expect(page.locator('.standings tbody tr').first()).toBeVisible()
+  await expect(page.locator('.clubtable tbody tr').first()).toBeVisible()
   // And its date controls are put away — there is nothing to scrub to when the
   // record is the record, and every one of those buttons would come back empty.
   await expect(page.locator('.standings-jumps[aria-label="Standings date"]')).toHaveCount(0)

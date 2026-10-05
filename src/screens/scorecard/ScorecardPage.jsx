@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useRevealProgress } from '../../hooks/useRevealProgress.js'
 import { effectiveReveal } from '../../hooks/revealProgressCore.js'
 import { useScorecardNotes } from '../../hooks/useScorecardNotes.js'
@@ -12,6 +12,16 @@ import { ScorecardCellEditor } from '../../components/scoring/ScorecardCellEdito
 import { RefreshButton } from '../TeamInfo.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { useStampUnseal } from '../../hooks/useStamps.js'
+import { useMediaQuery } from '../../hooks/useMediaQuery.js'
+import { PHONE_LENS_QUERY, lensOn } from '../../lib/scorecard/geometry.js'
+import { LensBack, LensBar } from '../../components/scoring/lens/LensBar.jsx'
+import { useLensBar } from '../../components/scoring/lens/useLensBar.js'
+import { tapLocked } from '../../lib/scorecard/bar.js'
+import { armWords, enteringDefense, frontierArmChange } from '../../lib/scorecard/arm.js'
+import { halfLabel } from '../../lib/scorecard/situation.js'
+import { ArmNotice, EnteringCard } from '../../components/scoring/lens/LensCards.jsx'
+import { PitcherSheet } from '../../components/scoring/lens/PitcherSheet.jsx'
+import { useLensMotion } from '../../components/scoring/lens/motion/useLensMotion.js'
 
 // The live scorecard — `/{date}/{matchup}/scorecard`, the Numbers Game "22"
 // sheet filled exactly as far as YOU have revealed, at any point in the game.
@@ -155,6 +165,19 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
     else revealAtBat(inning, half, nextCount)
   }
 
+  // A SPENT HALF commits by itself (scorecardStep's `spent`). Live, the reader
+  // can open a half's third out before the next half starts; the half is not
+  // over yet, so that tap only parks the cursor at the end (ADR-0055). When a
+  // poll then brings the next half, every box of this one is already open and
+  // no seal is left to tap, so the sheet would wait for a tap it cannot take.
+  // The innings viewer commits here on its own (onStepComplete); so does this
+  // page. It shows nothing the reader has not opened, and it runs before paint,
+  // so the lens goes straight to its "Turn to" handoff. Under a force-reveal
+  // `stepInfo` is null and `commitReveals` false: nothing commits.
+  useLayoutEffect(() => {
+    if (stepInfo?.spent && commitReveals) revealTo(stepInfo.inning, stepInfo.half)
+  }, [stepInfo, commitReveals, revealTo])
+
   // The turn handoff: the next at-bat belongs to the OTHER club's page of
   // the book. It rides the sheet, not a banner over it — the leads-off-next
   // diagonal of the half that JUST ended becomes the button that flips.
@@ -174,6 +197,22 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   // has already spent (see scorecardPlays' leadoffMarks). The button is on
   // the sheet either way; the Top/Bottom control above stays the manual way
   // over.
+  // THE PHONE LENS (ADR-0092): on a phone, with a frontier to hold and taps that
+  // commit, the sheet opens zoomed under a fixed frame over the next sealed box.
+  // [Sheet] leaves it for this visit only (state, never stored); under Scores
+  // Unlocked or a stamp there is no frontier, so the lens is off (G7).
+  // In the lens, `side` follows the frontier (G20): entering the lens turns to
+  // the frontier's page, the flip handoff turns it after that, and the manual
+  // Top/Bottom control waits in the whole-sheet view.
+  const phone = useMediaQuery(PHONE_LENS_QUERY)
+  const [wholeSheet, setWholeSheet] = useState(false)
+  const lens = lensOn({ phone, stepInfo, commitReveals }) ? (wholeSheet ? 'whole' : 'lens') : null
+  const [lensWas, setLensWas] = useState(null)
+  if (lensWas !== lens) {
+    setLensWas(lens)
+    if (lens === 'lens' && side !== stepInfo.side) setSide(stepInfo.side)
+  }
+
   const needsFlip = stepInfo != null && stepInfo.side !== side
   const flip = needsFlip
     ? {
@@ -183,34 +222,143 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
       }
     : null
 
+  // THE BAR'S WORDS AND STATE (lib/scorecard/bar.js). "Loading" is only the
+  // wait for a first feed: a poll or a Refresh keeps what is on screen, so the
+  // bar does not flicker to a disabled button every minute.
+  const inLens = lens === 'lens'
+  const bar = useLensBar({
+    on: inLens,
+    view,
+    side,
+    stepInfo,
+    flip,
+    loading: loading && lastUpdated == null,
+  })
+
+  // THE ARM AT THE FRONTIER (lib/scorecard/arm.js has the timing rule). It
+  // reads the feed, so it is caller-gated: it gets the REAL mark (G9). One card
+  // docks under the frame: the new-pitcher notice while the arm is fresh, else
+  // the Entering card until the half's first tap. Neither at a handoff, where
+  // the frame is still on the old page, nor while loading.
+  const arm = useMemo(
+    () => (inLens ? frontierArmChange(feed, revealedThrough, stepInfo) : null),
+    [inLens, feed, revealedThrough, stepInfo],
+  )
+  const [sheetArm, setSheetArm] = useState(null) // the arm the open pitcher sheet holds
+  // The sheet lives only in the lens. If the lens goes (a wider window, a tap
+  // on another tab), the sheet closes for good: it must not come back by itself
+  // with an old arm, or keep the tap lock on.
+  if (!inLens && sheetArm) setSheetArm(null)
+  const armSaid = armWords(arm)
+  // The Entering card's defense line walks the whole game's plays, so it runs
+  // once per step, not on every render (a poll, a motion beat, the sheet).
+  const defense = useMemo(
+    () => (inLens && stepInfo?.count === 0 ? enteringDefense(feed, revealedThrough, stepInfo.inning, stepInfo.half) : ''),
+    [inLens, feed, revealedThrough, stepInfo],
+  )
+  const docks = bar?.state === 'sealed' || bar?.state === 'edge'
+  const dock = !docks ? null : arm?.fresh ? (
+    <ArmNotice feed={feed} arm={arm} onOpen={() => setSheetArm(arm)} />
+  ) : stepInfo.count === 0 ? (
+    <EnteringCard
+      title={`Entering ${halfLabel(stepInfo)}`}
+      pitcherLine={armSaid.line}
+      defense={defense}
+    />
+  ) : null
+
+  // THE LENS'S MOTION (lens/motion/useLensMotion.js has the gates): the tear, the
+  // glide and the runner-move tint start on a reveal tap and on nothing else;
+  // the page turn runs out, switches `side`, and runs in.
+  const motion = useLensMotion({
+    lens,
+    side,
+    frontier: view?.grid?.frontier,
+    edge: bar?.state === 'edge',
+  })
+
+  // THE TAP LOCK (G6, ADR-0046). The seal, the bar's Unwrap and its Turn share
+  // one 700 ms window after every reveal and every turn. The window is a
+  // constant: it never reads what the tap did. While the cell editor or the
+  // pitcher sheet is open, none of the three does anything.
+  const lastTap = useRef(null)
+  const locked = (fn) => () => {
+    if (editing || sheetArm || tapLocked(Date.now(), lastTap.current)) return
+    lastTap.current = Date.now()
+    fn()
+  }
+  const tapFrontier = inLens
+    ? locked(() => {
+        // The tear's seed: this game, and the step (the half and the count).
+        motion.tapped(feed?.gamePk, renderRevealedThrough + 1, stepInfo.count)
+        onFrontierTap()
+      })
+    : onFrontierTap
+  const turn = flip && (inLens ? { ...flip, onFlip: locked(() => motion.turn(flip.onFlip)) } : flip)
+
   return (
-    <div className="scorecard-page">
+    <div
+      className={[
+        'scorecard-page',
+        inLens && 'scorecard-page--lens',
+        inLens && motion.turning && `scorecard-page--turn-${motion.turning}`,
+        inLens && motion.quiet && 'scorecard-page--quiet',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onAnimationEnd={motion.onAnimationEnd}
+    >
       <div className="scpage__bar">
-        <div className="scpage__ctl" role="group" aria-label="Half of inning">
-          <Button size="control" pressed={side === 'top'} onClick={() => setSide('top')}>
-            Top
-          </Button>
-          <Button size="control" pressed={side === 'bottom'} onClick={() => setSide('bottom')}>
-            Bottom
-          </Button>
-        </div>
+        {lens !== 'lens' && (
+          <div className="scpage__ctl" role="group" aria-label="Half of inning">
+            <Button size="control" pressed={side === 'top'} onClick={() => setSide('top')}>
+              Top
+            </Button>
+            <Button size="control" pressed={side === 'bottom'} onClick={() => setSide('bottom')}>
+              Bottom
+            </Button>
+          </div>
+        )}
         <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />
       </div>
-      <p className="hint">
-        The sheet inks only what you’ve revealed. Tap the sealed box to score
-        the next at-bat right here, or a filled box to pencil over its
-        notation.
-      </p>
+      {lens !== 'lens' && (
+        <p className="hint">
+          The sheet inks only what you’ve revealed. Tap the sealed box to score
+          the next at-bat right here, or a filled box to pencil over its
+          notation.
+        </p>
+      )}
 
       <Scorecard
         side={side}
         view={view}
         notes={notes}
         onCellTap={(card) => setEditing(card)}
-        onFrontierTap={onFrontierTap}
+        onFrontierTap={tapFrontier}
         fresh={fresh}
-        flip={flip}
+        flip={turn}
+        lens={lens}
+        edge={bar?.state === 'edge'}
+        lastOpened={bar?.lastOpened ?? null}
+        dock={dock}
+        carry={bar?.carry}
+        motion={inLens && motion.beat ? { ...motion.beat, moved: new Set(bar?.moved) } : null}
       />
+      {bar && (
+        <LensBar
+          bar={bar}
+          checkedAt={lastUpdated}
+          refreshing={loading}
+          onSheet={() => setWholeSheet(true)}
+          onUnwrap={tapFrontier}
+          onTurn={turn?.onFlip}
+          onRefresh={onReload}
+          pitcher={arm ? armSaid.surname : null}
+          onPitcher={() => setSheetArm(arm)}
+        />
+      )}
+      {inLens && sheetArm && <PitcherSheet feed={feed} arm={sheetArm} onClose={() => setSheetArm(null)} />}
+      {lens === 'whole' && <LensBack onBack={() => setWholeSheet(false)} />}
 
       {editing && (
         <ScorecardCellEditor

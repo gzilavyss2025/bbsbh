@@ -145,6 +145,10 @@
 @import './styles/scorecard/box.css';
 @import './styles/scorecard/page.css';
 @import './styles/scorecard/footer.css';
+@import './styles/scorecard/lens.css';
+@import './styles/scorecard/lens-bar.css';
+@import './styles/scorecard/lens-cards.css';
+@import './styles/scorecard/lens-carry.css';
 @import './styles/44-pre-game-cards.css';
 @import './styles/46-consent-modal.css';
 @import './styles/48-stamp-strip.css';
@@ -198,6 +202,7 @@
 @import './styles/motion/strike.css';
 @import './styles/motion/playbyplay.css';
 @import './styles/motion/innings.css';
+@import './styles/motion/scorecard-lens.css';
 
 /* Focus mode — the innings viewer's scoring console (ADR-0043). A SUBDIRECTORY
    rather than three more numbered siblings: src/styles is a flat directory at

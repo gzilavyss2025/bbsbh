@@ -1,21 +1,17 @@
 /* ---- Wild Card board ------------------------------------------------------ */
 
 /* "Division leaders" / "Wild card" section labels, inline as a full-width row
-   rather than a second <table> — keeps one sticky team column and one
-   horizontal-scroll container for the whole league instead of two. */
+   rather than a second <table> — one pinned club column and one scroll box for
+   the whole league. Its one cell is a first cell, so --table-pin keeps its ground. */
 .wc-grouphead td {
-  padding-top: var(--space-3);
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
   background: var(--bg-page);
+  --table-pin: var(--bg-page);
   border-top: none;
-}
-.standings--wc tbody tr:first-child td {
-  padding-top: var(--space-1h);
 }
 /* The short division tag riding next to a team name in the pooled wild-card
    list (teams aren't grouped by division here, so the badge is the only cue
@@ -40,14 +36,14 @@
      rather than stretching into sparse cells, and let the extra columns show.
      840px (not the original 760px, sized for a 12-column table that also
      allowed data cells to wrap) is the smallest cap, with a little headroom,
-     the current 15-column Division board fits without .ledger-wrap's
+     the current 15-column Division board fits without the Table wrap's
      horizontal-scroll fallback kicking in now that cells are nowrap —
      verified against the table's actual rendered min-content width, not
      guessed. */
   .screen.standings-screen {
     max-width: 840px;
   }
-  /* The two `.standings--full` wide-layout rules that used to live here moved
+  /* The two `.clubtable--full` wide-layout rules that used to live here moved
      to 30-standings.css. They override that file's phone defaults at EQUAL
      specificity, so load order alone decides the winner — and 30 is now a
      per-route chunk that links AFTER this core sheet, which silently inverted
@@ -848,7 +844,7 @@
 
 /* Team-page prospect table — an org's farm-system leaderboard, shown only on
    the parent MLB club's own page (affiliate pages badge their rosters instead).
-   It sits in a Card, and the old .ledger-wrap clipped the ledger's own shadow,
+   It sits in a Card, and its old scroll wrapper clipped the ledger's own shadow,
    so the Table's sheet shadow stays off here (a box in a box, still open). */
 .table:has(> .prospecttable) {
   box-shadow: none;

@@ -13,7 +13,7 @@ import { ordinal } from '../../../lib/format.js'
 import { useRouteLink } from '../../../lib/nav.js'
 import { gamePath } from '../../../lib/route.js'
 import { BroadcastSection } from '../../../components/around-the-game/BroadcastMasthead.jsx'
-import { BoardScroller } from '../../../components/around-the-game/BoardScroller.jsx'
+import { Table } from '../../../components/ui/table/Table.jsx'
 import { ColumnChart, roundTicks } from '../../../components/around-the-game/BroadcastBar.jsx'
 import { ClubCell } from '../../../components/around-the-game/ClubCell.jsx'
 import { Slab, SlabRow } from '../../../components/around-the-game/StatSlab.jsx'
@@ -142,104 +142,100 @@ export function RanOut({ summary, clubs }) {
         ) : null}
       </p>
 
-      <BoardScroller
-        label={`Club-games that ran out in the ${ordinal(nights.earliest)} inning`}
-      >
-        <table className="standings rpt">
-          <thead>
-            <tr>
-              <th className="team">
-                Club
-                {/* The band is a tie pile, so the head says the board is the
-                    WHOLE of it rather than a ranked cut of it. */}
-                <span className="rpt__note">Every one that emptied this early</span>
-              </th>
-              <th>Out in</th>
-              {/* THE DATE COMES BEFORE THE WIDE COLUMN. The board scrolls
-                  sideways on a phone under a pinned club cell, so the order of
-                  the columns decides what a reader meets first: club, inning
-                  and the link to the game, with the six facts about the two
-                  lost challenges after them. */}
-              <th>Date</th>
-              <th>Who lost them</th>
-            </tr>
-          </thead>
-          <tbody>
-            {nights.band.map((n) => {
-              // A club emptied by ONE MAN ASKING TWICE is the shape inside the
-              // band worth marking. It is read off the row rather than counted
-              // in the caption: the count goes stale between the writing and
-              // the merge, and the row is where a reader wants it anyway.
-              const oneMan =
-                n.fails.length > 1 &&
-                n.fails.every((f) => f.playerId != null && f.playerId === n.fails[0].playerId)
-              const link = games?.[n.gamePk]
-              const date = monthDayShort(n.date)
-              return (
-                <tr
-                  key={`${n.gamePk}-${n.teamId}`}
-                  className={n.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
-                >
-                  <ClubCell
-                    teamId={n.teamId}
-                    name={clubShort(clubs, n.teamId)}
-                    note={
-                      <>
-                        {n.side === 'home' ? 'vs ' : 'at '}
-                        <TeamLink id={n.oppId} name={clubShort(clubs, n.oppId)}>
-                          {clubShort(clubs, n.oppId)}
-                        </TeamLink>
-                      </>
-                    }
-                  />
-                  <td>
-                    {n.half === 'top' ? 'Top' : 'Bot'} {n.inning}
-                  </td>
-                  <td>
-                    {/* The game link degrades to a plain date rather than to a
-                        crash or a dead button: the schedule lookup is a second
-                        request and can fail on its own. */}
-                    {link ? (
-                      <a
-                        className="plink"
-                        {...linkProps(
-                          gamePath(
-                            link.apiDate,
-                            link.awayAbbr,
-                            link.homeAbbr,
-                            'boxscore',
-                            link.gameNumber,
-                          ),
-                        )}
-                      >
-                        {date}
-                      </a>
-                    ) : (
-                      date
-                    )}
-                  </td>
-                  <td>
-                    {n.fails.map((f, i) => (
-                      <span key={`${f.playerId ?? 'x'}-${i}`} className="rptfail">
-                        <PlayerLink id={f.playerId} name={f.playerName}>
-                          {f.playerName}
-                        </PlayerLink>
-                        {' · '}
-                        {f.callType ?? '—'}
-                        {' · '}
-                        <span className="rptfail__miss">{inches(f.missInches)}</span>
-                      </span>
-                    ))}
-                    {oneMan ? (
-                      <span className="rptfail rptmark">Both on one man</span>
-                    ) : null}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </BoardScroller>
+      <Table sticky label={`Club-games that ran out in the ${ordinal(nights.earliest)} inning`} className="rpt">
+        <thead>
+          <tr>
+            <th className="team">
+              Club
+              {/* The band is a tie pile, so the head says the board is the
+                  WHOLE of it rather than a ranked cut of it. */}
+              <span className="rpt__note">Every one that emptied this early</span>
+            </th>
+            <th>Out in</th>
+            {/* THE DATE COMES BEFORE THE WIDE COLUMN. The board scrolls
+                sideways on a phone under a pinned club cell, so the order of
+                the columns decides what a reader meets first: club, inning
+                and the link to the game, with the six facts about the two
+                lost challenges after them. */}
+            <th>Date</th>
+            <th>Who lost them</th>
+          </tr>
+        </thead>
+        <tbody>
+          {nights.band.map((n) => {
+            // A club emptied by ONE MAN ASKING TWICE is the shape inside the
+            // band worth marking. It is read off the row rather than counted
+            // in the caption: the count goes stale between the writing and
+            // the merge, and the row is where a reader wants it anyway.
+            const oneMan =
+              n.fails.length > 1 &&
+              n.fails.every((f) => f.playerId != null && f.playerId === n.fails[0].playerId)
+            const link = games?.[n.gamePk]
+            const date = monthDayShort(n.date)
+            return (
+              <tr
+                key={`${n.gamePk}-${n.teamId}`}
+                className={n.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}
+              >
+                <ClubCell
+                  teamId={n.teamId}
+                  name={clubShort(clubs, n.teamId)}
+                  note={
+                    <>
+                      {n.side === 'home' ? 'vs ' : 'at '}
+                      <TeamLink id={n.oppId} name={clubShort(clubs, n.oppId)}>
+                        {clubShort(clubs, n.oppId)}
+                      </TeamLink>
+                    </>
+                  }
+                />
+                <td>
+                  {n.half === 'top' ? 'Top' : 'Bot'} {n.inning}
+                </td>
+                <td>
+                  {/* The game link degrades to a plain date rather than to a
+                      crash or a dead button: the schedule lookup is a second
+                      request and can fail on its own. */}
+                  {link ? (
+                    <a
+                      className="plink"
+                      {...linkProps(
+                        gamePath(
+                          link.apiDate,
+                          link.awayAbbr,
+                          link.homeAbbr,
+                          'boxscore',
+                          link.gameNumber,
+                        ),
+                      )}
+                    >
+                      {date}
+                    </a>
+                  ) : (
+                    date
+                  )}
+                </td>
+                <td>
+                  {n.fails.map((f, i) => (
+                    <span key={`${f.playerId ?? 'x'}-${i}`} className="rptfail">
+                      <PlayerLink id={f.playerId} name={f.playerName}>
+                        {f.playerName}
+                      </PlayerLink>
+                      {' · '}
+                      {f.callType ?? '—'}
+                      {' · '}
+                      <span className="rptfail__miss">{inches(f.missInches)}</span>
+                    </span>
+                  ))}
+                  {oneMan ? (
+                    <span className="rptfail rptmark">Both on one man</span>
+                  ) : null}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </Table>
     </BroadcastSection>
   )
 }

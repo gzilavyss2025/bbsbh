@@ -12,6 +12,11 @@ import {
   AtMarkDemo,
   BoxLinesEntrance,
   BreathDemo,
+  LensGlideDemo,
+  LensMovedDemo,
+  LensRideDemo,
+  LensTearDemo,
+  LensTurnDemo,
   LineupDemo,
   RiffleDemo,
   StrikeDemo,
@@ -416,6 +421,46 @@ export function AnimationLab() {
             </Frame>
           ))}
         </div>
+      </Entry>
+
+      <Entry
+        title="Scorecard lens — tear, glide, ride, runner fade, page turn"
+        note={
+          <>
+            The phone scorecard (ADR-0092, styles/motion/scorecard-lens.css). A tap inks the box at
+            once; the seal&rsquo;s two halves fly off it in 180ms while the pane glides the next seal
+            under the frame in 300ms (a scroll tween: Play shows it, a frozen frame cannot). Near the
+            top of the order the frame rides down a row instead, on the same 300ms. The
+            boxes of runners the play moved fade from the highlighter in 1.6s. At a handoff the pane
+            goes out left in 160ms and comes in from the right in 200ms. All of it starts on a tap.
+          </>
+        }
+        live={
+          <div className="animlab__strikerow">
+            <LensGlideDemo />
+            <LensRideDemo />
+            <LensMovedDemo />
+            <LensTurnDemo beat="in" />
+          </div>
+        }
+      >
+        {[
+          ['The 180ms tear', 'tear', [0, 60, 120, 180], () => <LensTearDemo />],
+          ['The 1.6s runner fade', 'moved', [0, 400, 800, 1200, 1600], () => <LensMovedDemo />],
+          ['The turn: out, 160ms', 'out', [0, 60, 120, 160], () => <LensTurnDemo beat="out" />],
+          ['The turn: in, 200ms', 'in', [0, 60, 120, 200], () => <LensTurnDemo beat="in" />],
+        ].map(([label, key, stops, demo]) => (
+          <div key={key}>
+            <span className="animlab__stagelabel">{label}</span>
+            <div className="animlab__frozen">
+              {stops.map((ms) => (
+                <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
+                  {demo()}
+                </Frame>
+              ))}
+            </div>
+          </div>
+        ))}
       </Entry>
     </div>
   )

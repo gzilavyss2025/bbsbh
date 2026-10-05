@@ -1,4 +1,8 @@
 import '../../styles/boxlines/boxlines.css'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { AtBatBox } from '../../components/scoring/AtBatBox.jsx'
+import { LensTear } from '../../components/scoring/lens/motion/LensTear.jsx'
+import { glideTo } from '../../components/scoring/lens/useLens.js'
 import { PitchLadder } from '../../components/scoring/PitchLadder.jsx'
 import { PlayDiamond } from '../../components/scoring/PlayDiamond.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
@@ -207,6 +211,132 @@ export function BoxLinesEntrance() {
           </li>
         </ul>
       </div>
+    </div>
+  )
+}
+
+// THE SCORECARD LENS (#724 L7, ADR-0092), in the sheet's real classes: one
+// `.sc-sheet--lens` table under `.scorecard`, whose tokens size the cell. The
+// box is an invented double, RBI single, in the card fields AtBatBox reads.
+const DEMO_DOUBLE = { codeKind: 'hit', code: '2B', reached: 2, rbi: 1, ladder: DEMO_LADDER }
+
+function LensCells({ rows, paneRef = null, className = '', sheetClass = '', children = null }) {
+  return (
+    <div className={`scorecard ${sheetClass}`}>
+      <div className={`sc-sheet__scroll ${className}`} ref={paneRef}>
+        <table className="sc-sheet sc-sheet--lens">
+          <tbody>
+            {rows.map((cell, i) => (
+              <tr key={i}>
+                <td className="sc-sheet__cell">{cell}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+function OpenedBox() {
+  return (
+    <>
+      <LensTear seed={421} />
+      <AtBatBox atbat={DEMO_DOUBLE} />
+    </>
+  )
+}
+
+function MovedBox() {
+  return (
+    <>
+      <span className="sc-lens__moved" aria-hidden="true" />
+      <AtBatBox atbat={{ codeKind: 'hit', code: '1B', reached: 3, ladder: DEMO_LADDER }} />
+    </>
+  )
+}
+
+// The tear alone, over the box it just opened: the frozen strip.
+export function LensTearDemo() {
+  return (
+    <LensCells
+      rows={[<OpenedBox key="box" />]}
+    />
+  )
+}
+
+// The tear AND the glide: a pane one box tall, the opened box over the next
+// seal. Play runs the real tween (useLens's glideTo), which a frozen frame
+// cannot hold: it is a scroll, not a CSS animation. It starts only in a
+// running stage, so the page's first load moves nothing.
+export function LensGlideDemo() {
+  const pane = useRef(null)
+  useEffect(() => {
+    const el = pane.current
+    if (!el?.closest('.animlab__live.is-running')) return undefined
+    return glideTo(el, { top: el.scrollHeight - el.clientHeight, left: 0 })
+  }, [])
+  return (
+    <LensCells
+      paneRef={pane}
+      className="animlab-lensglide"
+      rows={[
+        <OpenedBox key="box" />,
+        <span key="seal" className="sc-ab__seal">
+          <span className="sc-ab__sealtext">Tap</span>
+        </span>,
+      ]}
+    />
+  )
+}
+
+// The ride: near the top of the order the frame moves down one row on the
+// glide's time, and the sheet stays put (lib/scorecard/geometry.js).
+export function LensRideDemo() {
+  const pane = useRef(null)
+  const [at, setAt] = useState(null)
+  // A layout effect, so the frame paints on row 1 before it rides to row 2.
+  useLayoutEffect(() => {
+    // The frame sits on a measured cell, as useLens's does.
+    const cells = pane.current?.querySelectorAll('.sc-sheet__cell') ?? []
+    const on = (cell) => ({ top: cell.offsetTop, width: cell.offsetWidth, height: cell.offsetHeight })
+    if (cells.length < 2) return undefined
+    setAt(on(cells[0]))
+    if (!pane.current.closest('.animlab__live.is-running')) return undefined
+    const id = requestAnimationFrame(() => requestAnimationFrame(() => setAt(on(cells[1]))))
+    return () => cancelAnimationFrame(id)
+  }, [])
+  return (
+    <LensCells
+      paneRef={pane}
+      sheetClass="animlab-lensride"
+      rows={[
+        <AtBatBox key="box" atbat={DEMO_DOUBLE} />,
+        <span key="seal" className="sc-ab__seal">
+          <span className="sc-ab__sealtext">Tap</span>
+        </span>,
+      ]}
+    >
+      {at && <div className="sc-lens__frame" style={{ ...at, left: 0 }} />}
+    </LensCells>
+  )
+}
+
+// A runner's box, the highlighter fading off it.
+export function LensMovedDemo() {
+  return (
+    <LensCells
+      rows={[<MovedBox key="box" />]}
+    />
+  )
+}
+
+// The page turn's two beats, on the page's real class hooks.
+export function LensTurnDemo({ beat }) {
+  return (
+    <div className={`scorecard-page scorecard-page--turn-${beat}`}>
+      <LensCells rows={[<AtBatBox key="box" atbat={DEMO_DOUBLE} />]} />
     </div>
   )
 }

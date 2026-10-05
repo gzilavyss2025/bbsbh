@@ -45,15 +45,15 @@
 # LANDED in slice T5, PR #1385	screens/around-the-game/DoubleheadersPage.jsx#1	MIGRATE	T5	no	row				.dh__drawer: a table nested in a <td> of #2 (the opened row's games). Bare, 4/10. Snaps to row (Q2). It sits inside a sticky table that scrolls, so it takes no scroll of its own.
 #
 # --- T6: ABS boards + Nine Keys ---
-screens/around-the-game/abs/ClubBoard.jsx#1	MIGRATE	T6	no	row				/abs-challenges board: standings rpt in <BoardScroller>, sticky club cell. Already row.
-screens/around-the-game/abs/LongestRuns.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
-screens/around-the-game/abs/MissBands.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
-screens/around-the-game/abs/PlayerBoards.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
-screens/around-the-game/abs/PlayerBoards.jsx#2	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
-screens/around-the-game/abs/RanOut.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
-screens/around-the-game/abs/WhoCalls.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
-screens/around-the-game/abs/UmpireBoard.jsx#1	MIGRATE	T6	no	row				/abs-challenges umpire board. Its .rpt__between row (8px tall, a count of the middle) is a row variant and stays in the namespace.
-screens/NineKeysPage.jsx#1	MIGRATE	T6	no	keep				/nine-keys: a grid of true/false marks, clubs by keys. Body cells are 0/0 because each holds a drawn mark; heads 8/4. Frame, figures and head type move to Table; the cells keep their own size.
+# LANDED in slice T6a, PR #1395	screens/around-the-game/abs/ClubBoard.jsx#1	MIGRATE	T6	no	row				/abs-challenges board: standings rpt in <BoardScroller>, sticky club cell. Already row.
+# LANDED in slice T6a, PR #1395	screens/around-the-game/abs/LongestRuns.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
+# LANDED in slice T6a, PR #1395	screens/around-the-game/abs/MissBands.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
+# LANDED in slice T6a, PR #1395	screens/around-the-game/abs/PlayerBoards.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
+# LANDED in slice T6a, PR #1395	screens/around-the-game/abs/PlayerBoards.jsx#2	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
+# LANDED in slice T6a, PR #1395	screens/around-the-game/abs/RanOut.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
+# LANDED in slice T6a, PR #1395	screens/around-the-game/abs/WhoCalls.jsx#1	MIGRATE	T6	no	row				As ClubBoard.jsx#1.
+# LANDED in slice T6a, PR #1395	screens/around-the-game/abs/UmpireBoard.jsx#1	MIGRATE	T6	no	row				/abs-challenges umpire board. Its .rpt__between row (8px tall, a count of the middle) is a row variant and stays in the namespace.
+# LANDED in slice T6b, PR #1396	screens/NineKeysPage.jsx#1	MIGRATE	T6	no	keep				/nine-keys: a grid of true/false marks, clubs by keys. Body cells are 0/0 because each holds a drawn mark; heads 8/4. Frame, figures and head type move to Table; the cells keep their own size.
 #
 # --- T7: the other standalone boards ---
 # LANDED in slice T7, PR #1384	screens/FoulTrackerPage.jsx#1	MIGRATE	T7	no	row				/fouls board: standings foulboard in a .ledger-wrap inside BoardCard (a Card), so frame bare. Already row.
@@ -68,12 +68,12 @@ screens/NineKeysPage.jsx#1	MIGRATE	T6	no	keep				/nine-keys: a grid of true/fals
 # LANDED in slice T7, PR #1384	screens/team/modules/TeamChallengeCard.jsx#1	MIGRATE	T7	no	row				The ABS challenge board on the team Numbers tab (report/challenge-card.css). In a Card. 6/0 today (Q2).
 #
 # --- T8: Standings (the sticky boards). Last, because it deletes the shared .standings base ---
-screens/StandingsPage.jsx#1	MIGRATE	T8	no	row				/standings wild card board: standings--full standings--wc in .standings-wrap (the sticky-cell border trick, 26-player-page.css). 6/6 on a phone and 8/8 from 740px: both snap to row (Q2).
-screens/StandingsPage.jsx#2	MIGRATE	T8	no	row				/standings division boards: standings--full in .standings-wrap. Same trick.
-screens/PostseasonRacePage.jsx#1	MIGRATE	T8	no	row				/postseason-race mini table: standings--full standings--wc in .standings-wrap.
-screens/team/modules/StandingsCard.jsx#1	MIGRATE	T8	no	row				Team hub division standings (Overview and Numbers). Plain .standings in a .ledger-wrap; the .standings frame draws a box INSIDE the Card (a box in a box). It stays a sheet until the nested-box issue (#1113 Q4: later).
-components/teamstats/PostseasonOddsModal.jsx#1	MIGRATE	T8	no	row				ledger standings psoddstable in the Postseason odds sheet (opened from StandingsCard). It carries BOTH shared bases, so it moves with the last of them.
-screens/GameNotesDebugPage.jsx#1	MIGRATE	T8	no	row				Unlisted QA page (/game-notes-debug). A lab page, but it wears the shared .standings class that T8 deletes, so it must move or lose its look.
+# LANDED in slice T8, PR #1400	screens/StandingsPage.jsx#1	MIGRATE	T8	no	row				/standings wild card board: standings--full standings--wc in .standings-wrap (the sticky-cell border trick, 26-player-page.css). 6/6 on a phone and 8/8 from 740px: both snap to row (Q2).
+# LANDED in slice T8, PR #1400	screens/StandingsPage.jsx#2	MIGRATE	T8	no	row				/standings division boards: standings--full in .standings-wrap. Same trick.
+# LANDED in slice T8, PR #1400	screens/PostseasonRacePage.jsx#1	MIGRATE	T8	no	row				/postseason-race mini table: standings--full standings--wc in .standings-wrap.
+# LANDED in slice T8, PR #1400	screens/team/modules/StandingsCard.jsx#1	MIGRATE	T8	no	row				Team hub division standings (Overview and Numbers). Plain .standings in a .ledger-wrap; the .standings frame draws a box INSIDE the Card (a box in a box). It stays a sheet until the nested-box issue (#1113 Q4: later).
+# LANDED in slice T8, PR #1400	components/teamstats/PostseasonOddsModal.jsx#1	MIGRATE	T8	no	row				ledger standings psoddstable in the Postseason odds sheet (opened from StandingsCard). It carries BOTH shared bases, so it moves with the last of them.
+# LANDED in slice T8, PR #1400	screens/GameNotesDebugPage.jsx#1	MIGRATE	T8	no	row				Unlisted QA page (/game-notes-debug). A lab page, but it wears the shared .standings class that T8 deletes, so it must move or lose its look.
 #
 # --- HOLD ---
 screens/Scorecard.jsx#1	HOLD	-	the #22 sheet's pitching lines, clamped by the caller's reveal (api/scorecardGame.js)					scorecard/* - the sheet you score on (finding 8). It wears .pitchers__grid: see PitchersSection's note.
@@ -95,5 +95,5 @@ div:tledg	MIGRATE	T3	no	row				LANDED in slice T3, PR #1382: now two Table eleme
 #
 # --- Added after T0 (found on 2026-10-01 by the wave-1 census run; see the wave-1 PR) ---
 components/ui/table/Table.jsx#1	HOLD	-	no					The Table primitive's own <table> (T1, PR #1369). It is the component every slice moves onto, not a table site to move.
-components/postseason/SeriesNineKeys.jsx#1	MIGRATE	T6	no	keep				Added after T0 (ffc284767, the postseason series page). The series page's Nine Keys strip: a rank track drawn in each row, like the Nine Keys grid (NineKeysPage.jsx#1), so it keeps its own cells (keep). In a Card: bare. Proposed for T6 beside the Nine Keys grid; T6 confirms it, or Gary holds it.
-components/postseason/SeriesTotals.jsx#1	MIGRATE	T6	no	keep				Added after T0 (ffc284767, the postseason series page). Series totals: a mirrored two-club comparison (club, figure, label, figure, club) in grouped tbodies, not a rank board. In a Card: bare. Its cells are its own layout (keep). Proposed for T6 beside the series Nine Keys strip; T6 confirms it, or Gary holds it.
+components/postseason/SeriesNineKeys.jsx#1	HOLD	-	no	keep				Added after T0 (ffc284767, the postseason series page). The series page's Nine Keys strip: a rank track drawn in each row, like the Nine Keys grid (NineKeysPage.jsx#1), so it keeps its own cells (keep). In a Card: bare. HELD in slice T6b (PR #1396); Gary confirmed the hold on 2026-10-02. On Table, the shared head band covers only part of this head row, and cells change alignment and face. Hiding that needs more override rules than the move deletes.
+components/postseason/SeriesTotals.jsx#1	HOLD	-	no	keep				Added after T0 (ffc284767, the postseason series page). Series totals: a mirrored two-club comparison (club, figure, label, figure, club) in grouped tbodies, not a rank board. In a Card: bare. Its cells are its own layout (keep). HELD in slice T6b (PR #1396); Gary confirmed the hold on 2026-10-02. On Table, the shared head band covers only part of this head row, and cells change alignment and face. Hiding that needs more override rules than the move deletes.
