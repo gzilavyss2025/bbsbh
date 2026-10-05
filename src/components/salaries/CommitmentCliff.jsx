@@ -1,5 +1,6 @@
 import { moneyLabel } from './Money.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // One bar per season the source covers, drawn against the tallest of them. This
 // is the club ledger's headline graphic and the reason the page exists: a book
@@ -18,7 +19,7 @@ export function CommitmentCliff({ totals, scale }) {
       </SectionHead>
       <div className="cliff__row">
         {totals.map((entry) => (
-          <div key={entry.year} className="cliff__col">
+          <Stack gap="tight" key={entry.year} className="cliff__col">
             <span className="cliff__value">{moneyLabel(entry.committed)}</span>
             <span className="cliff__track">
               {/* Percentage height, not a class per bucket: the bar IS the
@@ -27,7 +28,7 @@ export function CommitmentCliff({ totals, scale }) {
               <span className="cliff__bar" style={{ height: `${(entry.committed / max) * 100}%` }} />
             </span>
             <span className="cliff__year">{entry.year}</span>
-          </div>
+          </Stack>
         ))}
       </div>
     </div>

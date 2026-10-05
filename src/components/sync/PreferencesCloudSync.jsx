@@ -7,6 +7,7 @@ import {
 } from '../../hooks/preferences/usePreferences.js'
 import { mergeStrategyFor, preferencesToPublish } from '../../lib/account/preferences.js'
 import { phaseForResponse, reasonForResponse } from '../../lib/account/syncStatus.js'
+import { useRefetchOnFocus } from '../../hooks/sync/useRefetchOnFocus.js'
 import { useSyncReport } from './SyncStatusProvider.jsx'
 
 // Headless — renders nothing, only runs the effects. Only ever mounted when
@@ -142,23 +143,9 @@ export function PreferencesCloudSync() {
     pull()
   }, [isLoaded, isSignedIn, userId, pull, report])
 
-  // A phone and a laptop are both open; the phone changes the club. Without
-  // this, the laptop shows the old one until someone reloads it — which is the
-  // whole promise of the feature, quietly unmet. Re-pull whenever this device
-  // comes back to the foreground, which is exactly when a user looks at it.
-  useEffect(() => {
-    if (!isSignedIn) return undefined
-    const onFocus = () => {
-      if (document.visibilityState === 'hidden') return
-      pull()
-    }
-    window.addEventListener('focus', onFocus)
-    document.addEventListener('visibilitychange', onFocus)
-    return () => {
-      window.removeEventListener('focus', onFocus)
-      document.removeEventListener('visibilitychange', onFocus)
-    }
-  }, [isSignedIn, pull])
+  // Re-pull when this device comes back to the foreground (another device may
+  // have changed the club meanwhile).
+  useRefetchOnFocus(isSignedIn, pull)
 
   // Publish what the server is missing.
   useEffect(() => {

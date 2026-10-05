@@ -3,6 +3,7 @@ import { useMemo, useRef, useState } from 'react'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
 import { Door } from '../ui/control/Door.jsx'
+import { EmptyState } from '../ui/state/EmptyState.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { BoxLineRow } from './BoxLineRow.jsx'
 
@@ -79,7 +80,7 @@ function GameLinesSheet({ title, note, headline, rows: makeRows, onClose }) {
           </div>
           {headline && <p className="boxlines__headline">{headline}</p>}
           {all.length === 0 ? (
-            <p className="hint boxlines__hint">No games to list.</p>
+            <EmptyState className="boxlines__empty">No games to list.</EmptyState>
           ) : (
             <>
               <ul className="boxlines__rows">

@@ -11,6 +11,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { TradeCard } from '../components/transactions/TradeCard.jsx'
+import { Stack } from '../components/ui/layout/Stack.jsx'
 
 // Newest year first, matching the season index page's own tile order.
 const SEASON_YEARS = [...SEASONS].map((s) => s.year).sort((a, b) => b - a)
@@ -98,7 +99,6 @@ export function TradeDeadlineSeasonPage({ season }) {
         hasData={allTrades.length > 0}
         errorMessage="Couldn’t load this season’s trades. Try again."
         emptyMessage="No trades within the deadline window for this season."
-        emptyProse
       />
 
       {allTrades.length > 0 && (
@@ -117,18 +117,18 @@ export function TradeDeadlineSeasonPage({ season }) {
       )}
 
       {trades.length > 0 && (
-        <div className="tradedl__list">
+        <Stack className="tradedl__list">
           {groups.map((group) => (
             <section key={group.date}>
               <h2 className="tradedl__daterail">{monthDayYear(group.date)}</h2>
-              <div className="tradedl__list">
+              <Stack className="tradedl__list">
                 {group.trades.map((trade) => (
                   <TradeCard key={trade.id} trade={trade} />
                 ))}
-              </div>
+              </Stack>
             </section>
           ))}
-        </div>
+        </Stack>
       )}
 
       <ReportFooter />

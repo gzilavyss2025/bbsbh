@@ -2,7 +2,7 @@
    shows in place of "Not posted yet." when no probable is announced. Dressed as
    a guess: a label and a note around plain rows, no headshot, so it can never
    be mistaken for the real starter's card. Sits directly in the card, so it
-   insets itself like the .hint above. */
+   insets itself like the starter card's EmptyState (.starter__empty). */
 .projection {
   display: flex;
   flex-direction: column;

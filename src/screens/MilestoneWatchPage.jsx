@@ -57,7 +57,6 @@ export function MilestoneWatchPage() {
         hasData={allRows.length > 0}
         errorMessage="Couldn’t load Milestone Watch. Try again."
         emptyMessage="No one is within range of a career milestone right now."
-        emptyProse
       />
 
       {allRows.length > 0 && (

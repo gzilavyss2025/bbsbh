@@ -211,7 +211,6 @@ export function ProspectsPage() {
         hasData={allPlayers.length > 0}
         errorMessage="Couldn’t load prospect rankings. Try again."
         emptyMessage="Prospect rankings aren’t available right now — check back later."
-        emptyProse
       />
 
       {allPlayers.length > 0 && (

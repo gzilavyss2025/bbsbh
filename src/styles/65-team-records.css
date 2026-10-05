@@ -134,13 +134,6 @@ button.tstatrow__k.trec__rank,
   outline-offset: 2px;
 }
 
-.trec__empty {
-  margin: 0;
-  padding: var(--space-3) var(--space-2);
-  color: var(--text-caption);
-  font-size: var(--fs-caption);
-}
-
 /* The month lever, under the half toggle. Same pill control, deliberately —
    both answer "over which stretch of the season?", and mixing a pill group
    with a dropdown would have read as two unrelated controls. Up to eight pills

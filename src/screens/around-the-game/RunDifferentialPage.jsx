@@ -188,7 +188,6 @@ export function RunDifferentialPage() {
         hasData={rows.length > 0}
         errorMessage="Couldn’t load the run differential board. Try again."
         emptyMessage="No club seasons on file at this margin."
-        emptyProse
       />
 
       {report && rows.length > 0 && (

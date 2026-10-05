@@ -21,9 +21,11 @@
 // for 32 in 1,085. A page that printed 6.4 and stopped would have described a
 // hitter who does not exist.
 
-import { currentSeasonOf, seasonStaticJson, staticJsonBy } from '../staticJson.js'
+import { seasonFolderOf, seasonStaticJson, staticJsonBy } from '../staticJson.js'
 
-// A season store (ADR-0086): abs/{season}/, the season abs/seasons.json names.
+// A season store (ADR-0086): abs/{season}/. Every reader here takes
+// `{ seasonYear }`: a year, 'all' (abs/all/, built from the rows), or nothing
+// for the season abs/seasons.json names.
 export const fetchAbsExposure = seasonStaticJson('abs', 'abs-exposure.json')
 
 // MINIMUM SAMPLES. A hitter with forty plate appearances who challenged twice
@@ -280,9 +282,9 @@ export function exposureClubLevelFor(sportId) {
 
 // Null rather than a rejected promise for a level with no file, so a caller
 // that asks for one can hand the answer straight to the card.
-export async function fetchAbsExposureClubs(level) {
+export async function fetchAbsExposureClubs(level, { seasonYear } = {}) {
   if (!level || !Object.values(CLUB_LEVEL_BY_SPORT).includes(level)) return null
-  const season = await currentSeasonOf('abs')
+  const season = await seasonFolderOf('abs', seasonYear)
   return season == null ? null : fetchClubsFile(`${season}/abs-exposure-clubs-${level.toLowerCase()}`)
 }
 

@@ -3,7 +3,8 @@ import { useAuth } from '@clerk/clerk-react'
 import { readStampsOwner, useStamps, writeStampsOwner } from '../../hooks/useStamps.js'
 import { stampsToPublish } from '../../lib/stamps.js'
 import { mergeStrategyFor } from '../../lib/account/preferences.js'
-import { phaseForResponse, reasonForResponse } from '../../lib/account/syncStatus.js'
+import { phaseForResponse, reasonForResponse, syncOutcome } from '../../lib/account/syncStatus.js'
+import { useRefetchOnFocus } from '../../hooks/sync/useRefetchOnFocus.js'
 import { useSyncReport } from './SyncStatusProvider.jsx'
 
 // Headless — renders nothing, only runs the effects. Only ever mounted when
@@ -158,23 +159,9 @@ export function StampsCloudSync() {
     pull()
   }, [isSignedIn, pull, report])
 
-  // A phone and a laptop are both open; the phone stamps a game. Without this,
-  // the laptop shows the old collection until someone reloads it — which is the
-  // whole promise of the feature, quietly unmet. Re-pull whenever this device
-  // comes back to the foreground, which is exactly when a user looks at it.
-  useEffect(() => {
-    if (!isSignedIn) return undefined
-    const onFocus = () => {
-      if (document.visibilityState === 'hidden') return
-      pull()
-    }
-    window.addEventListener('focus', onFocus)
-    document.addEventListener('visibilitychange', onFocus)
-    return () => {
-      window.removeEventListener('focus', onFocus)
-      document.removeEventListener('visibilitychange', onFocus)
-    }
-  }, [isSignedIn, pull])
+  // Re-pull when this device comes back to the foreground (another device may
+  // have stamped a game meanwhile).
+  useRefetchOnFocus(isSignedIn, pull)
 
   useEffect(() => {
     if (!isSignedIn) return
@@ -252,20 +239,7 @@ export function StampsCloudSync() {
           }
         }),
       )
-      // `null` is a success, a number is an HTTP failure, `undefined` is a
-      // throw. `find` cannot be used here: it returns `undefined` both for "no
-      // failure" and for "a network failure", which are opposite answers.
-      const failures = outcomes.filter((outcome) => outcome !== null)
-      if (failures.length === 0) {
-        report('stamps', 'synced')
-      } else {
-        const status = failures.find((outcome) => outcome !== undefined)
-        report(
-          'stamps',
-          status === undefined ? 'error' : phaseForResponse(status),
-          { reason: status === undefined ? 'network' : reasonForResponse(status) },
-        )
-      }
+      report('stamps', ...syncOutcome(outcomes))
     })()
   }, [isSignedIn, userId, getToken, stamps, report])
 

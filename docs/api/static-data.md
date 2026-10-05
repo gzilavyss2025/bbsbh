@@ -155,8 +155,9 @@ for each generator; the reader modules:
   box score, and the rankings table read), and `umpire-accuracy/{season}/{personId}.json`,
   one man's scored game rows (~13 KB — the game log the detail page and the
   accuracy modal draw). The season is the one `umpire-accuracy/seasons.json`
-  names, via `currentSeasonOf` (ADR-0086); `umpire-accuracy/all/` is not read
-  yet (#1201). There is no league-wide archive file: it was ~2 MB by August, it
+  names, via `currentSeasonOf` (ADR-0086). Every reader here takes
+  `{ seasonYear }` (#1201): `'all'` reads `umpire-accuracy/all/` for the summary and
+  joins one man's season row shards. There is no league-wide archive file: it was ~2 MB by August, it
   was both the merge base and a served file, and the row shards are the merge
   base now, so the accumulated history has exactly one copy.
 

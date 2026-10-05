@@ -3,7 +3,7 @@ import { useAuth } from '@clerk/clerk-react'
 import { readSpoiledDaysOwner, useScoresUnlocked } from '../../hooks/useScoresUnlocked.js'
 import { dayStatesToPublish } from '../../lib/spoiledDays.js'
 import { mergeStrategyFor } from '../../lib/account/preferences.js'
-import { phaseForResponse, reasonForResponse } from '../../lib/account/syncStatus.js'
+import { phaseForResponse, reasonForResponse, syncOutcome } from '../../lib/account/syncStatus.js'
 import { useSyncReport } from './SyncStatusProvider.jsx'
 
 // Headless — renders nothing, only runs the effects. Only ever mounted when
@@ -172,12 +172,7 @@ export function SpoiledDaysCloudSync() {
             }),
           ),
         )
-        const failed = replies.find((r) => !r.ok)
-        report(
-          'spoiledDays',
-          failed ? phaseForResponse(failed.status) : 'synced',
-          failed ? { reason: reasonForResponse(failed.status) } : {},
-        )
+        report('spoiledDays', ...syncOutcome(replies.map((r) => (r.ok ? null : r.status))))
       } catch {
         // A failed publish costs this device nothing — its own local state is
         // already correct, and the next pull's comparison finds these again.

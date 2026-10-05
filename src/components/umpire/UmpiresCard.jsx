@@ -28,9 +28,11 @@ import { UmpireLink } from './UmpireLink.jsx'
 // — it just had no answer short of navigating away to his page. The modal's
 // own "Full umpire page" button keeps that route one tap further on, so
 // nothing was taken away by making the name open a sheet instead.
-export function UmpiresCard({ officials }) {
+//
+// `seasonYear` is the game's season (#1201), so an old game reads its own year.
+export function UmpiresCard({ officials, seasonYear }) {
   const hpId = useMemo(() => officials.find((o) => o.role === 'HP')?.id ?? null, [officials])
-  const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId), [hpId])
+  const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId, { seasonYear }), [hpId, seasonYear])
   const [modalId, setModalId] = useState(null)
 
   if (officials.length === 0) return null
@@ -54,7 +56,7 @@ export function UmpiresCard({ officials }) {
           </dd>
         </div>
       ))}
-      {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
+      {modalId != null && <UmpireAccuracyModal id={modalId} seasonYear={seasonYear} onClose={() => setModalId(null)} />}
     </>
   )
 }

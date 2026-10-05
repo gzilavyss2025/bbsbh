@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { selectOfficials } from '../../api/select.js'
+import { selectGameSeason, selectOfficials } from '../../api/select.js'
 import { loadUmpire } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { Card } from '../ui/frame/Card.jsx'
@@ -24,9 +24,10 @@ import { UmpireTendencies } from './UmpireTendencies.jsx'
 // apology.
 export function UmpireTendenciesFold({ feed }) {
   const plateId = useMemo(() => selectOfficials(feed).find((o) => o.role === 'HP')?.id ?? null, [feed])
+  const seasonYear = selectGameSeason(feed)
   const { data } = useAsync(
-    () => (plateId != null ? loadUmpire(plateId) : Promise.resolve(null)),
-    [plateId],
+    () => (plateId != null ? loadUmpire(plateId, { seasonYear }) : Promise.resolve(null)),
+    [plateId, seasonYear],
   )
   const [open, setOpen] = useState(true)
 

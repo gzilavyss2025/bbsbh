@@ -297,7 +297,6 @@ export function AllStarLegacyPage() {
         errorMessage="Couldn’t load All-Star Legacy. Try again."
         staleErrorMessage="Couldn’t load current rosters — the leader board and team lists below may be incomplete."
         emptyMessage="No All-Star history is available right now."
-        emptyProse
       />
 
       {hasRosters && (

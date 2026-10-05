@@ -15,6 +15,7 @@ import { HITTERS, LEAGUE, PITCHER } from './fixture.js'
 import { expectedAll, expectedOn, hitterMap, metricsFor } from '../../scout/hitterBoard.js'
 import { REGIONS, regionLabel, rollUp, sidesInOrder } from '../../../lib/zone/regions.js'
 import { METRICS, band, fmtMetric } from '../../../lib/scout/metrics.js'
+import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
 // THE MATCHUP SCOUT PROTOTYPE (issue #1408; spec docs/scout-design.md). A
 // design specimen on invented data, not the page: no route, no fetch, no
@@ -146,23 +147,23 @@ export function ScoutLab({ asOf: asOfProp }) {
 
   return (
     <div className="scout">
-      <div className="scout__lab">
+      <Stack gap="snug" className="scout__lab">
         <Choice label="Lab" options={STATES} value={state} onChange={setState} />
         <Choice label="Fixture" options={HITTER_OPTS} value={who} onChange={(k) => { setWho(k); setHand(null) }} />
-      </div>
+      </Stack>
 
       {pickedPair ? (
         <Matchup pitcher={PITCHER} hitter={hitter} onChange={() => setState('empty')} />
       ) : (
         <div className="scout__pickers">
-          <label className="scout__picker">
+          <Stack gap="tight" as="label" className="scout__picker">
             <span className="scout__controllabel">Pitcher</span>
             <input type="search" readOnly value="" placeholder="Search pitchers" />
-          </label>
-          <label className="scout__picker">
+          </Stack>
+          <Stack gap="tight" as="label" className="scout__picker">
             <span className="scout__controllabel">Hitter</span>
             <input type="search" readOnly value="" placeholder="Search hitters" />
-          </label>
+          </Stack>
           <p className="hint scout__empty">Pick a pitcher and a hitter</p>
           <Pill role="control" fill="paper" className="scout__labbtn" onClick={() => setState('pair')}>Use the invented pair</Pill>
         </div>
@@ -243,7 +244,7 @@ export function ScoutLab({ asOf: asOfProp }) {
 
             <Readout picked={picked} m={m} metric={metric} stance={stance === hitterStance ? stance : null} />
 
-            <div className="scout__key" aria-label="Colour scale">
+            <Stack gap="tight" className="scout__key" aria-label="Colour scale">
               <p className="scout__keyrow">
                 <span className="scout__keylabel">Location share: less</span>
                 {[1, 2, 3, 4].map((k) => <Swatch key={k} tone={`s${k}`} />)}
@@ -258,7 +259,7 @@ export function ScoutLab({ asOf: asOfProp }) {
                 <span className="scout__swatch scout__swatch--hatch" />
                 <span className="scout__keylabel">Under {METRICS[metric].floor} {METRICS[metric].unit}: count only</span>
               </p>
-            </div>
+            </Stack>
 
             <div className="scout__controls">
               <Choice label="Hand" options={HANDS} value={effHand} onChange={setHand} disabledKey={switchHitter ? null : undefined} />

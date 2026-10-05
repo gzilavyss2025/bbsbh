@@ -22,6 +22,7 @@ import {
   StrikeDemo,
   WriteOnDemo,
 } from './animlab/motionDemos.jsx'
+import { Stack } from '../components/ui/layout/Stack.jsx'
 
 // Unlisted QA page (see route.js), reachable only by direct URL
 // (/animation-lab). Every decorative animation in the app gets its own entry:
@@ -523,10 +524,10 @@ function InkSetDemo() {
 function Frame({ label, delayMs, children }) {
   const style = delayMs != null ? { '--animlab-delay': `${-delayMs}ms` } : undefined
   return (
-    <div className="animlab__frame" style={style}>
+    <Stack gap="tight" className="animlab__frame" style={style}>
       <div className="animlab__framebox">{children}</div>
       <span className="animlab__framelabel">{label}</span>
-    </div>
+    </Stack>
   )
 }
 
