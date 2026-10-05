@@ -254,3 +254,8 @@ test('a hitter line on the poster counts only what he brought into tonight', () 
   assert.equal(batting.rbi, 45, 'an RBI is a run driven in — tonight’s three cannot show')
   assert.equal(batting.stolenBases, 14)
 })
+
+test('a postseason round rides the model as given, and is blank otherwise', () => {
+  assert.equal(buildPreviewModel(finishedFeed()).round, '')
+  assert.equal(buildPreviewModel(finishedFeed(), { round: 'NLCS \u00b7 Game 4' }).round, 'NLCS \u00b7 Game 4')
+})

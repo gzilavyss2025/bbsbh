@@ -27,11 +27,11 @@ const FILES = {
   },
 }
 
-const ROUND_BY_GAME_TYPE = { F: 'wildcard', D: 'division', L: 'lcs', W: 'worldseries' }
-const LEAGUE_BY_ID = { 103: 'AL', 104: 'NL' }
+export const ROUND_BY_GAME_TYPE = { F: 'wildcard', D: 'division', L: 'lcs', W: 'worldseries' }
+export const LEAGUE_BY_ID = { 103: 'AL', 104: 'NL' }
 
 // The words a mark stands for — the same round titles the slate card prints.
-function altFor(round, league) {
+export function altFor(round, league) {
   if (round === 'worldseries') return 'World Series'
   if (round === 'wildcard') return `${league} Wild Card`
   if (round === 'division') return `${league}DS`

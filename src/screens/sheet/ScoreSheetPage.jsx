@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { buildSheetModel } from './sheetModel.js'
+import { useGameRound } from '../../hooks/postseason/useGameRound.js'
 import { ScoreSheet } from './ScoreSheet.jsx'
 import { PrintSheetButton } from './PrintSheetButton.jsx'
 import '../../styles/63-print-sheet.css'
@@ -19,9 +20,12 @@ import '../../styles/63-print-sheet.css'
 // `GameView` already has all three in hand for every section of the game, so
 // opening the sheet costs no request at all.
 export function ScoreSheetPage({ feed, managers, scorebookWeather }) {
+  // "ALDS \u00b7 Game 3" for a postseason game, '' otherwise. A pregame fact, so it prints
+  // for any game (lib/postseason/gameRound.js).
+  const round = useGameRound(feed)
   const model = useMemo(
-    () => buildSheetModel(feed, { managers, weather: scorebookWeather }),
-    [feed, managers, scorebookWeather],
+    () => buildSheetModel(feed, { managers, weather: scorebookWeather, round }),
+    [feed, managers, scorebookWeather, round],
   )
 
   // Marks the document while this route is mounted, so the print stylesheet can

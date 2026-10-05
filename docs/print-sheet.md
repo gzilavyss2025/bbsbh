@@ -43,6 +43,12 @@ props from `GameView` (`useGameData`'s `managers` and `weather`), so opening the
 sheet costs **no request** — every input is already in hand for whatever section of
 the game you came from.
 
+One more input arrives as a prop, like the managers: `round`, "ALDS · Game 3" for a
+postseason game and `''` for any other (`useGameRound`, `lib/postseason/gameRound.js`).
+The feed names the round and the home club's league; the schedule row names the series
+game number. Both are pregame facts and print on the sheet's first line. A series
+record ("leads 2-1") is a result and never goes on the sheet (ADR-0087).
+
 Three modules are off limits, and two guards enforce it rather than this paragraph:
 
 - `api/linescore.js` and `api/derive.js` are reveal-only and carry an `importers`
