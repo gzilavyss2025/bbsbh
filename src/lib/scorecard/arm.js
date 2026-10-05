@@ -38,8 +38,10 @@ export function frontierArmChange(feed, revealedThrough, at) {
   const fielding = half === 'top' ? 'home' : 'away'
   const club = feed.gameData?.teams?.[fielding] ?? {}
   const team = { id: club.id ?? null, name: club.clubName ?? club.teamName ?? '' }
+  // `id` is a player id, or a pitcher already built (the leadoff change's own,
+  // so its boxscore jersey matches the innings viewer's card).
   const arm = (id, fresh, relief = inning > 1) => {
-    const pitcher = pitchingChangePitcher(feed, id)
+    const pitcher = typeof id === 'object' && id ? id : pitchingChangePitcher(feed, id)
     return pitcher ? { pitcher, fresh, relief, team } : null
   }
 
@@ -69,7 +71,7 @@ export function frontierArmChange(feed, revealedThrough, at) {
   const change = selectPrePitchChanges(feed, inning, half, revealedThrough).findLast(
     (c) => c.eventType === 'pitching_substitution',
   )
-  if (change) return arm(change.pitcher.id, true)
+  if (change) return arm(change.pitcher, true)
   // No change: in inning 1 the club's starter, who takes the mound and so is
   // news, as HalfInning.jsx's isFreshPitcher says. Else the arm who threw his
   // club's last play, in a half already committed: he stays on, so he is not

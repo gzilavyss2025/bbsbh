@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
 import { sealTearSeed } from '../../../../lib/sealTear.js'
+import { TURN_IDLE, turnStep } from '../../../../lib/scorecard/turn.js'
 
 // The lens's one-shot motion (#724 L7, docs/motion.md): what a tap in the lens
 // sets going, and nothing else. The look of each beat is CSS
@@ -25,7 +26,9 @@ import { sealTearSeed } from '../../../../lib/sealTear.js'
 // THE PAGE TURN. `turn(fn)` runs the turn's out beat, then `fn` (the side
 // switch), then the in beat; `onAnimationEnd` steps it. Under reduced motion
 // `fn` runs at once. The tap lock (ScorecardPage) is a constant 700 ms, longer
-// than both beats, and it never reads what the tap did (ADR-0046).
+// than both beats, and it never reads what the tap did (ADR-0046). The steps
+// are lib/scorecard/turn.js's turnStep: if the reader leaves the lens in the
+// out beat, the switch still runs, at once (the out beat's end never comes).
 //
 // THE QUIET SEAL. At the live edge the frontier is the AT BAT box. When a poll
 // brings that at-bat's end, the seal takes the box's place with no breath
@@ -33,14 +36,18 @@ import { sealTearSeed } from '../../../../lib/sealTear.js'
 // for a tap. The next tap moves the frontier, and the next seal breathes.
 export function useLensMotion({ lens, side, frontier, edge }) {
   const taps = useRef(0)
-  const afterOut = useRef(null)
   const [beat, setBeat] = useState(null)
-  const [turning, setTurning] = useState(null)
+  const [turn, setTurn] = useState(TURN_IDLE)
+  const step = (event) => {
+    const next = turnStep(turn, event)
+    setTurn(next)
+    next.run?.()
+  }
   const [was, setWas] = useState({ lens, side })
   if (was.lens !== lens || was.side !== side) {
     setWas({ lens, side })
     setBeat(null)
-    if (was.lens !== lens) setTurning(null)
+    if (was.lens !== lens) step({ type: 'leave' })
   }
 
   const at = frontier ? `${frontier.slot}:${frontier.colIndex}` : null
@@ -49,7 +56,7 @@ export function useLensMotion({ lens, side, frontier, edge }) {
 
   return {
     beat,
-    turning,
+    turning: turn.turning,
     quiet: !edge && edgeAt === `${side}:${at}`,
     tapped(gamePk, halfIndex, count) {
       taps.current += 1
@@ -58,15 +65,10 @@ export function useLensMotion({ lens, side, frontier, edge }) {
     },
     turn(fn) {
       if (motionIsReduced()) return fn()
-      afterOut.current = fn
-      setTurning('out')
+      step({ type: 'start', fn })
     },
     onAnimationEnd(e) {
-      if (e.animationName === 'sc-lens-turn-out' && afterOut.current) {
-        afterOut.current()
-        afterOut.current = null
-        setTurning('in')
-      } else if (e.animationName === 'sc-lens-turn-in') setTurning(null)
+      step({ type: 'end', name: e.animationName })
     },
   }
 }

@@ -86,11 +86,43 @@ test('playWords says each mapped result with the brief’s verb', () => {
   assert.equal(said('field_out', 'PO').verb, 'popped out')
 })
 
-test('an unmapped event falls back to the feed’s own event words', () => {
-  const step = stepFor(6, 'top', 'Pratt') // Pratt forces Bauers at second
+test('a force out reads as a sentence (823035 top 6: Pratt forces Bauers at second)', () => {
+  const step = stepFor(6, 'top', 'Pratt')
   const words = playWords(halfCards(step.after, 6).at(-1))
-  assert.equal(words.verb, 'force out')
-  assert.equal(words.text, 'Pratt force out.')
+  assert.equal(words.verb, 'hit into a force out')
+  assert.equal(words.text, 'Pratt hit into a force out.')
+})
+
+test('every common out and reach the feed names reads as a sentence, not the raw event', () => {
+  const said = (eventType, outType) =>
+    playWords({ kind: 'atbat', eventType, outType, batter: { last: 'Okafor' } }).text
+  assert.equal(said('sac_fly'), 'Okafor hit a sacrifice fly.')
+  assert.equal(said('sac_fly_double_play'), 'Okafor hit a sacrifice fly into a double play.')
+  assert.equal(said('sac_bunt'), 'Okafor laid down a sacrifice bunt.')
+  assert.equal(said('sac_bunt_double_play'), 'Okafor bunted into a double play.')
+  assert.equal(said('force_out'), 'Okafor hit into a force out.')
+  assert.equal(said('double_play'), 'Okafor hit into a double play.')
+  assert.equal(said('triple_play'), 'Okafor hit into a triple play.')
+  assert.equal(said('strikeout_triple_play'), 'Okafor struck out.')
+  assert.equal(said('catcher_interf'), 'Okafor reached on catcher’s interference.')
+  assert.equal(said('batter_interference'), 'Okafor was out for interference.')
+  assert.equal(said('fan_interference'), 'Okafor reached on fan interference.')
+  assert.equal(said('other_out'), 'Okafor was out.')
+  // A field_out whose out kind is not one of the four batted-ball kinds
+  // (classifyOut reads 'DP', 'SF', 'SAC' or '' off the description).
+  assert.equal(said('field_out', 'DP'), 'Okafor hit into a double play.')
+  assert.equal(said('field_out', 'SF'), 'Okafor hit a sacrifice fly.')
+  assert.equal(said('field_out', 'SAC'), 'Okafor laid down a sacrifice bunt.')
+  assert.equal(said('field_out', ''), 'Okafor was out.')
+})
+
+test('an event the words do not know still reads as a line, not a broken sentence', () => {
+  const words = playWords({ kind: 'atbat', eventType: 'runner_double_play', batter: { last: 'Okafor' } })
+  assert.equal(words.text, 'Okafor: runner double play.')
+  assert.equal(
+    playWords({ kind: 'atbat', eventType: 'runner_double_play', batter: {} }).text,
+    'The batter: runner double play.',
+  )
 })
 
 test('playWords names the fielder on an error, and says a double play', () => {
