@@ -1,5 +1,6 @@
 import { shardKey100 } from '../lib/shardKey.js'
-import { currentSeasonOf, seasonStaticJson } from './staticJson.js'
+import { readSeasonShard, seasonStaticJson, staticJsonBy } from './staticJson.js'
+import { combineFoulShards } from '../lib/seasons/combine.js'
 
 // Season-long foul-ball aggregates, read from a static same-origin file
 // (public/data/fouls/{season}/fouls.json) precomputed nightly by scripts/gen-fouls.mjs (the
@@ -22,7 +23,9 @@ import { currentSeasonOf, seasonStaticJson } from './staticJson.js'
 // fetchFoulsFor(personId) below and never touches this.
 //
 // A season store (ADR-0086): both reads go to the season fouls/seasons.json
-// names, fouls/{season}/fouls.json and fouls/{season}/{NN}.json.
+// names, fouls/{season}/fouls.json and fouls/{season}/{NN}.json. Both take
+// `{ seasonYear }` (a year, 'all', or nothing for the current season); 'all'
+// reads fouls/all/fouls.json, which the nightly run builds from the rows.
 export const fetchFouls = seasonStaticJson('fouls', 'fouls.json')
 
 // One player's slice — his own batter and pitcher rows, from the bucket he
@@ -33,22 +36,18 @@ export const fetchFouls = seasonStaticJson('fouls', 'fouls.json')
 // 2 KB instead of 805 KB: the player page's card is four tiles off one row, and
 // the season file is mostly 625 other batters and a 251 KB table of the year's
 // foul-heaviest games that only /fouls draws.
-const playerShards = new Map()
+const playerShard = staticJsonBy((key) => `/data/fouls/${key}.json`)
 
-export async function fetchFoulsFor(personId) {
+// 'all' adds his seasons (lib/seasons/combine.js) into the same
+// `{ batters, pitchers }` shape, holding only him.
+export async function fetchFoulsFor(personId, { seasonYear } = {}) {
   if (personId == null) return null
-  const season = await currentSeasonOf('fouls')
-  if (season == null) return null
-  const key = `${season}/${shardKey100(personId)}`
-  if (!playerShards.has(key)) {
-    playerShards.set(
-      key,
-      fetch(`/data/fouls/${key}.json`)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-    )
-  }
-  return playerShards.get(key)
+  return readSeasonShard(
+    'fouls',
+    seasonYear,
+    (season) => playerShard(`${season}/${shardKey100(personId)}`),
+    (shards, seasons) => ({ season: null, seasons, ...combineFoulShards(shards, personId) }),
+  )
 }
 
 // Qualifier floors for the leaderboards, exported so a caller (or a test) can

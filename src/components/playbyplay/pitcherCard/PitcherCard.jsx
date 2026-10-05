@@ -53,7 +53,7 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
         isPostseason(gameType) ? fetchPitcherSeasonLine(id, season, sportId, officialDate, { postseason: true }) : null,
         fetchPitcherLastGame(id, season, officialDate, gameNumber),
         // MLB and AAA only: AA and below carry no pitch tracking.
-        sportId === 1 || sportId === 11 ? fetchPitchArsenalFor(id) : null,
+        sportId === 1 || sportId === 11 ? fetchPitchArsenalFor(id, { seasonYear: season }) : null,
       ])
       return { line, post, last, shard }
     },

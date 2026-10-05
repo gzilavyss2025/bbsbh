@@ -754,6 +754,7 @@ export function exportFouls(db, season) {
       pitches: r.pitches,
       fouls: r.fouls,
       whiffs: r.whiffs,
+      gs: r.starts, // so a client sum of seasons rebuilds isStarter exactly (#1201)
       isStarter: r.starts * 2 > r.games, // majority of appearances were starts
     }
   }
