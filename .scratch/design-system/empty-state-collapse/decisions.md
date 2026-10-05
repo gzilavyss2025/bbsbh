@@ -2,9 +2,8 @@
 
 ## The four questions
 
-Each line gives my recommendation first, then the cost. If you agree with all
-four, say "all four as recommended", and E1 can start. The details for each are
-below.
+Each line gives my recommendation first, then the cost. Gary chose the
+recommendation for all four (2026-10-05); the answers are in the table below.
 
 1. **Q1. Do the 29 "nothing on file" lines change in one step?** Recommended:
    **yes**. One shared line in the code draws all 29; it becomes the new empty
@@ -24,10 +23,12 @@ below.
 
 | # | Gary's answer |
 | --- | --- |
-| Q1 | |
-| Q2 | |
-| Q3 | |
-| Q4 | |
+| Q1 | Yes: one step, through `AsyncStatus` (2026-10-05). E2 goes ahead. |
+| Q2 | Yes: dashed, no fill, body face (2026-10-05). |
+| Q3 | Yes: two sizes, `block` and `compact` (2026-10-05). |
+| Q4 | Yes: hold all six groups (2026-10-05). |
+
+All four are answered. E1 can start.
 
 Some words used below:
 

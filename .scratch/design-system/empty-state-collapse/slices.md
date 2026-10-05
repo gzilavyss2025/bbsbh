@@ -13,7 +13,7 @@ held.
 | slice | what | sites | files | runs |
 | --- | --- | --- | --- | --- |
 | E1 | build `EmptyState` + lab + pilot | 1 | 10 | first |
-| E2 | `AsyncStatus`'s empty branch | 30 (1 line + 29 callers) | 11 | after E1, once Q1 is answered |
+| E2 | `AsyncStatus`'s empty branch | 30 (1 line + 29 callers) | 11 | after E1 |
 | E3 | the spoiler surfaces | 5 | 8 | after E1 |
 | E4 | the team hub | 6 | 7 | after E1 |
 | E5 | the player page | 3 | 4 | after E1 |
@@ -29,8 +29,9 @@ E2 counts 11 files, one over the target of 10. Ten of them lose one prop
 
 ## Before any slice
 
-1. Gary answers `decisions.md`. Q2 (the look) and Q3 (the sizes) change what E1
-   builds; Q1 decides whether E2 exists; Q4 decides the hold list.
+1. Done: Gary answered `decisions.md` on 2026-10-05, all four as recommended.
+   E1 builds the dashed, no-fill, body-face look in two sizes; E2 exists; the
+   hold list stands.
 2. Re-run `node .scratch/design-system/empty-state-collapse/census.mjs` on the
    current `main`. A site added since E0 prints as UNREVIEWED; an override that
    no longer matches prints STALE. Fix both before slicing. Keys are `file#n`,
@@ -104,7 +105,7 @@ E1 (EmptyState + pilot) ──┬─ E2 AsyncStatus ── E6 standalone pages �
   posted, so the empty state does not show there today. Find a club with none
   (early in a season, or a minor-league club: not checked) or check the lab.
 
-### E2 — `AsyncStatus`'s empty branch (if Q1 is yes)
+### E2 — `AsyncStatus`'s empty branch (Q1: yes)
 
 - **Rows:** `components/ui/AsyncGate.jsx#4` (the one line) and the 29
   `AsyncStatus` call sites with an `emptyMessage`. Census Part 2, slice E2.
