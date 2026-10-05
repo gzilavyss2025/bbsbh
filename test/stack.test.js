@@ -18,6 +18,7 @@ import assert from 'node:assert/strict'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { toPosix } from '../scripts/lib/walk.mjs'
 import { GAPS, STACK_TAGS, stackClassName } from '../src/lib/design/stackClass.js'
 import { stripComments, ruleBody } from './helpers/css.js'
 
@@ -56,7 +57,7 @@ test('.stack is a column with one gap, and no other stylesheet draws it', () => 
   assert.match(base, /flex-direction:\s*column/)
   assert.match(base, /gap:\s*var\(--stack-gap\)/)
   for (const f of cssFiles(STYLES)) {
-    if (f.endsWith('system/stack.css')) continue
+    if (toPosix(f).endsWith('system/stack.css')) continue
     const css = stripComments(readFileSync(f, 'utf8'))
     assert.equal(ruleBody(css, '.stack'), null, `${f} should not redraw .stack`)
   }

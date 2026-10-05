@@ -7,6 +7,7 @@ import { fetchLeagueSalaries, salaryBoard, boardPositions } from '../api/salarie
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
@@ -72,7 +73,7 @@ export function SalariesPage() {
       />
 
       {data == null && !league.loading && !league.error && (
-        <p className="hint">League salaries have not been published yet.</p>
+        <EmptyState>League salaries have not been published yet.</EmptyState>
       )}
 
       {data && (

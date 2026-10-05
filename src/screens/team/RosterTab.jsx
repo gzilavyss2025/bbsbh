@@ -9,6 +9,7 @@ import { RosterProjection } from './modules/RosterProjection.jsx'
 import { CurrentRosterCard } from './modules/CurrentRosterCard.jsx'
 import { InjuredListCard } from './modules/InjuredListCard.jsx'
 import { BullpenHealthCard } from './modules/BullpenHealthCard.jsx'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 // Roster tab: the season roster projection (full, at the top — this is the
 // tab's headline), then the 40-man Current Roster and the Injured List, each
@@ -82,34 +83,36 @@ export function RosterTab({ id, asOf, sportId }) {
       active="roster"
       hiddenTabs={hiddenTeamTabs(identity.data.team)}
     >
-      {(preferredLineup.length > 0 || substitutes.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
-        <RosterProjection
-          hasRecentRoster={hasRecentRoster}
-          showRecentRoster={showRecentRoster}
-          onShowSeason={() => setSeasonRosterTeamId(teamId)}
-          onShowCurrent={() => setSeasonRosterTeamId(null)}
-          rosterLineup={rosterLineup}
-          rosterSubs={rosterSubs}
-          rosterSP={rosterSP}
-          rosterBullpen={rosterBullpen}
-          injuredIds={injuredIds}
-          season={season}
-          isMilb={isMilb}
-        />
-      )}
+      <Stack gap="section">
+        {(preferredLineup.length > 0 || substitutes.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
+          <RosterProjection
+            hasRecentRoster={hasRecentRoster}
+            showRecentRoster={showRecentRoster}
+            onShowSeason={() => setSeasonRosterTeamId(teamId)}
+            onShowCurrent={() => setSeasonRosterTeamId(null)}
+            rosterLineup={rosterLineup}
+            rosterSubs={rosterSubs}
+            rosterSP={rosterSP}
+            rosterBullpen={rosterBullpen}
+            injuredIds={injuredIds}
+            season={season}
+            isMilb={isMilb}
+          />
+        )}
 
-      {/* The club's pen over its last seven days — self-fetching and
-          self-hiding, so a MiLB affiliate (absent from workload.json) and a
-          club with no recent relief work both simply render nothing. */}
-      <BullpenHealthCard teamId={teamId} />
+        {/* The club's pen over its last seven days — self-fetching and
+            self-hiding, so a MiLB affiliate (absent from workload.json) and a
+            club with no recent relief work both simply render nothing. */}
+        <BullpenHealthCard teamId={teamId} />
 
-      {(position.length > 0 || pitchers.length > 0) && (
-        <CurrentRosterCard position={position} pitchers={pitchers} season={season} isMilb={isMilb} sportId={sportId} />
-      )}
+        {(position.length > 0 || pitchers.length > 0) && (
+          <CurrentRosterCard position={position} pitchers={pitchers} season={season} isMilb={isMilb} sportId={sportId} />
+        )}
 
-      {injured.length > 0 && (
-        <InjuredListCard injured={injured} season={season} showInjured onShowInjured={() => {}} />
-      )}
+        {injured.length > 0 && (
+          <InjuredListCard injured={injured} season={season} showInjured onShowInjured={() => {}} />
+        )}
+      </Stack>
     </TeamHubShell>
   )
 }

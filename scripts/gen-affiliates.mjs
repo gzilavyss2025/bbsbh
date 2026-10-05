@@ -16,6 +16,14 @@
 // single page load). src/api/team.js reads this file first and only falls
 // back to the live per-org call when the file is missing, stale for the
 // requested season, or doesn't cover the org.
+//
+// DO NOT REPLACE A SEASON WITH AN EMPTY ONE (#1478; same rule as
+// gen-minors-leaders.mjs). `season` is the calendar year, and in early January
+// statsapi may have no alignment for the new year yet. An empty `byOrgId` is
+// "nothing new to say", so the file on disk is kept and a line is logged. A
+// PARTIAL result (fewer orgs than the last run) is still written: the reader
+// falls back to the live per-org call for any org the file misses, so a
+// partial file costs a request, never a wrong answer. Decided 2026-10-05.
 // Run by hand: node scripts/gen-affiliates.mjs
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -72,5 +80,9 @@ for (const list of Object.values(byOrgId)) {
   list.sort((a, b) => AFFILIATE_SPORT_IDS.indexOf(a.sportId) - AFFILIATE_SPORT_IDS.indexOf(b.sportId))
 }
 
-await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), season, byOrgId })
-console.log(`wrote ${out} (${Object.keys(byOrgId).length} orgs)`)
+if (Object.keys(byOrgId).length === 0) {
+  console.log(`skipped ${out} — ${season} returned no affiliates, keeping the file already on disk`)
+} else {
+  await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), season, byOrgId })
+  console.log(`wrote ${out} (${Object.keys(byOrgId).length} orgs)`)
+}

@@ -8,6 +8,7 @@ import { tradeDeadlinePath, tradeDeadlineSeasonPath } from '../lib/route.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { TradeCard } from '../components/transactions/TradeCard.jsx'
@@ -113,7 +114,7 @@ export function TradeDeadlineSeasonPage({ season }) {
       )}
 
       {allTrades.length > 0 && trades.length === 0 && (
-        <p className="hint hint--prose">That club made no trades within this season’s deadline window.</p>
+        <EmptyState role="status">That club made no trades within this season’s deadline window.</EmptyState>
       )}
 
       {trades.length > 0 && (

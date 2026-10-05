@@ -44,7 +44,7 @@
 
 import { readFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
-import { ROOT, walk as walkFiles } from './lib/walk.mjs'
+import { ROOT, toPosix, walk as walkFiles } from './lib/walk.mjs'
 
 
 const ROOTS = ['src', 'api', 'scripts']
@@ -332,7 +332,7 @@ const BUDGETS = {
 }
 
 const walk = (dir) =>
-  walkFiles(join(ROOT, dir), { exts: SOURCE_EXT }).map((f) => relative(ROOT, f))
+  walkFiles(join(ROOT, dir), { exts: SOURCE_EXT }).map((f) => toPosix(relative(ROOT, f)))
 
 // Count the editor-visible lines: split on newlines and drop a single trailing
 // empty, the same way check-claude-md.mjs does, so the two guards agree and the
