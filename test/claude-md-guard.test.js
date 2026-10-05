@@ -34,6 +34,12 @@ function run(files) {
 
 // The scratch tree has no src/CLAUDE.md, so every run exits 1 on that file's budget. Each
 // case therefore reads stderr for the one file it is about.
+test('a small nested file raises no complaint', () => {
+  const res = run({ 'src/deep/CLAUDE.md': '# deep\n' })
+  assert.equal(res.status, 1, 'the missing src/CLAUDE.md budget still fails the run')
+  assert.doesNotMatch(res.stderr, /src\/deep/)
+})
+
 test('a nested file in a folder no list names is still capped by lines', () => {
   const res = run({ 'src/brand-new/CLAUDE.md': 'line\n'.repeat(251) })
   assert.equal(res.status, 1)
@@ -54,5 +60,6 @@ test('the root file has a character cap too', () => {
 
 test('another agent\'s worktree under .claude is not walked', () => {
   const res = run({ '.claude/worktrees/other/CLAUDE.md': 'line\n'.repeat(300) })
+  assert.equal(res.status, 1, 'the guard ran (the missing src/CLAUDE.md budget fails it)')
   assert.doesNotMatch(res.stderr, /worktrees/)
 })

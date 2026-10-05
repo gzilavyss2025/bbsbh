@@ -13,7 +13,7 @@ lab or the runtime overlay edits.
 | `mlb-treatment-tuning.json` | `teams.js` |
 | `milb-treatment-tuning.json` | `milbColors.js` |
 | `milb-colors.json` | `brandColors.js` |
-| `mlb-team-colors.json` | `brandColors.js` (`teams.js` reaches it through there), `stampInk.js` |
+| `mlb-team-colors.json` | `brandColors.js` (`teams.js` reaches it through there), `stampInk.js`, and `api/transactions/leagueFeed.js` (imported directly) |
 | `alt-colors.json`, `alt2-colors.json`, `alt3-colors.json`, `alt4-colors.json`, `city-connect-colors.json` | `teams.js` |
 | `mono-ink.json` | `monoInk.js` (overlay-aware, ADR-0054) — and `scripts/gen-mono-logos.mjs`, which is what actually changes the served art, on its own schedule |
 | `mono-logo-manifest.json` | `teams.js`; written by `scripts/gen-mono-logos.mjs` |
@@ -21,7 +21,7 @@ lab or the runtime overlay edits.
 | `custom-marks.json` | `customMarks.js`; written only by `scripts/lib/dev-custom-marks.mjs` |
 | `logo-url-overrides.json` | `identity/logoUrlOverrides.js` |
 | `league-logo-manifest.json` | `components/passport/leagueMarks.js`; written by `scripts/gen-league-logos.mjs` |
-| `milb-ballparks.json` | `copy/registry.js`, the team hub's `BallparkCard.jsx`; written by `scripts/gen-milb-ballparks.mjs` |
+| `milb-ballparks.json` | `copy/registry.js`; written by `scripts/gen-milb-ballparks.mjs` |
 | `park-wash-tuning.json` | `ballpark/parkWash.js` |
 | `stamp-logo-tuning.json` | `stampLogoTuning.js` → `components/logbook/GameStamp.jsx` — read at RENDER time |
 | `stamp-ink.json` | `stampInkTuning.js` → `stampInk.js` → `components/logbook/GameStamp.jsx` — also read at RENDER time, so a retune restyles every minted stamp |
