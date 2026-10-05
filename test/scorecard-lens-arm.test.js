@@ -45,6 +45,21 @@ test('a change at the head of a half shows at its leadoff (823035 top 8: Torres)
   assert.equal(after.fresh, false)
 })
 
+test('a leadoff change keeps the game jersey the innings viewer shows, not his usual number', () => {
+  // A reliever new to the club (a trade, a call-up) can wear a number in the
+  // boxscore that is not his person.primaryNumber. The innings viewer's card
+  // reads selectPrePitchChanges' own pitcher (boxscore jersey first), so the
+  // lens must name the same man the same way.
+  const feed = structuredClone(FEED)
+  feed.liveData.boxscore.teams.home.players.ID663494.jerseyNumber = '77'
+  const arm = frontierArmChange(feed, before(8, 'top'), at(8, 'top', 0))
+  const viewer = selectPrePitchChanges(feed, 8, 'top', before(8, 'top')).find(
+    (c) => c.eventType === 'pitching_substitution',
+  )
+  assert.equal(arm.pitcher.jersey, '77')
+  assert.deepEqual(arm.pitcher, viewer.pitcher)
+})
+
 test('a leadoff with no change names the arm who closed his club’s last half, or the starter', () => {
   // Top 9: Torres finished top 8 and stays. Nothing is new.
   const arm = frontierArmChange(FEED, before(9, 'top'), at(9, 'top', 0))

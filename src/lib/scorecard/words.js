@@ -12,8 +12,11 @@
 import { cardKey, runnersDeparted, runnersOnBase } from '../../api/expresslane/runners.js'
 import { baseWord, runnerName } from './situation.js'
 
-// The verbs in the #724 brief, section 4. An event not here falls back to the
-// feed's own eventType words ("force out"); this file adds no words of its own.
+// The verbs in the #724 brief, section 4, and the other outs and reaches the
+// feed sends in most games (sacrifices, force outs, double plays,
+// interference), so line A is a sentence. An event not here still falls back
+// to the feed's own eventType words, set off as a label ("Okafor: runner
+// double play."), never a broken sentence.
 const VERBS = {
   single: 'singled',
   double: 'doubled',
@@ -27,10 +30,32 @@ const VERBS = {
   grounded_into_double_play: 'grounded into a double play',
   fielders_choice: 'reached on a fielder’s choice',
   fielders_choice_out: 'reached on a fielder’s choice',
+  sac_fly: 'hit a sacrifice fly',
+  sac_fly_double_play: 'hit a sacrifice fly into a double play',
+  sac_bunt: 'laid down a sacrifice bunt',
+  sac_bunt_double_play: 'bunted into a double play',
+  force_out: 'hit into a force out',
+  double_play: 'hit into a double play',
+  triple_play: 'hit into a triple play',
+  strikeout_triple_play: 'struck out',
+  catcher_interf: 'reached on catcher’s interference',
+  batter_interference: 'was out for interference',
+  fan_interference: 'reached on fan interference',
+  other_out: 'was out',
 }
 // A field_out takes its verb from the out kind the sheet already prints
 // (classifyOut, card.outType).
-const OUT_VERBS = { GO: 'grounded out', FO: 'flied out', LO: 'lined out', PO: 'popped out' }
+// classifyOut can also read a double play or a sacrifice off the description;
+// any other field_out is just an out.
+const OUT_VERBS = {
+  GO: 'grounded out',
+  FO: 'flied out',
+  LO: 'lined out',
+  PO: 'popped out',
+  DP: 'hit into a double play',
+  SF: 'hit a sacrifice fly',
+  SAC: 'laid down a sacrifice bunt',
+}
 // The fielder by scorebook number, for "reached on an error by the shortstop".
 // Not select.js's POSITION_LOWER: that map names the position ("first base"),
 // and this line needs the man ("first baseman").
@@ -43,8 +68,8 @@ function verbFor(card) {
     const fielder = FIELDERS[Number(String(card.code ?? '').slice(1))]
     return fielder ? `reached on an error by the ${fielder}` : 'reached on an error'
   }
-  if (et === 'field_out' && OUT_VERBS[card.outType]) return OUT_VERBS[card.outType]
-  return VERBS[et] ?? et.replaceAll('_', ' ')
+  if (et === 'field_out') return OUT_VERBS[card.outType] ?? 'was out'
+  return VERBS[et] ?? null
 }
 
 // The opened box in words: { name, verb, atBatIndex, text }, or null for a box
@@ -54,7 +79,10 @@ export function playWords(card) {
   if (card?.kind !== 'atbat' || card.interrupted || !card.eventType) return null
   const name = card.batter?.last ?? ''
   const verb = verbFor(card)
-  return { name, verb, atBatIndex: card.atBatIndex ?? null, text: `${name || 'The batter'} ${verb}.` }
+  const who = name || 'The batter'
+  // An unknown event: the feed's own words as a label, not as a verb.
+  const text = verb ? `${who} ${verb}.` : `${who}: ${card.eventType.replaceAll('_', ' ')}.`
+  return { name, verb: verb ?? card.eventType.replaceAll('_', ' '), atBatIndex: card.atBatIndex ?? null, text }
 }
 
 // Which box a move belongs to, for the runner-move tint: `pa:{atBatIndex}`, or

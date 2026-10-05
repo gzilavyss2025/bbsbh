@@ -229,3 +229,19 @@ They change no decision above.
 - **The runner-move tint finds the placed runner.** It matched boxes by
   `atBatIndex`, which the extra-innings placed runner does not have. It now
   matches by the same card key the runner logic uses.
+
+## The stack review (2026-10-05)
+
+A review of the stack that carries this feature into `main` (PR #1427) found
+three more faults. None is a spoiler. They change no decision above.
+
+- **The bar's words are always a sentence.** Sacrifices, force outs, double
+  plays and interference printed the feed's raw event ("Okafor sac fly.").
+  They now have verbs, a `field_out` of no batted-ball kind reads "was out",
+  and an event with no verb reads as a label ("Okafor: runner double play.").
+- **A leadoff change keeps its game jersey.** The notice rebuilt the pitcher
+  from his person record. It now takes `selectPrePitchChanges`' own pitcher,
+  as the innings viewer's card does, so both name the same number.
+- **Leaving the lens mid-turn still turns the page.** If the reader taps
+  [Sheet] or turns the phone during the out beat, its `animationend` never
+  comes. The switch now runs at once (`lib/scorecard/turn.js`).
