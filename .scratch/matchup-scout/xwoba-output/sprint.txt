@@ -1,0 +1,14 @@
+sprint-speed rows: {'2025': 579, '2026': 567}
+balls with a sprint speed: {'2025': 125523, '2026': 122915}
+
+correlation of residual with batter sprint speed, and OLS slope (xwOBA per ft/s):
+  ground ball, EV < 85 (weak)    | 2025: n= 21512 r=+0.744 slope=+0.0093 | 2026: n= 21637 r=+0.692 slope=+0.0088
+  ground ball, EV 85+            | 2025: n= 31088 r=+0.652 slope=+0.0092 | 2026: n= 29810 r=+0.653 slope=+0.0093
+  ground ball, all               | 2025: n= 52600 r=+0.685 slope=+0.0092 | 2026: n= 51447 r=+0.668 slope=+0.0091
+  line drive                     | 2025: n= 30299 r=+0.019 slope=+0.0002 | 2026: n= 29268 r=+0.003 slope=+0.0000
+  fly ball                       | 2025: n= 33688 r=+0.012 slope=+0.0003 | 2026: n= 33138 r=+0.002 slope=+0.0000
+  popup                          | 2025: n=  8936 r=+0.043 slope=+0.0001 | 2026: n=  9061 r=+0.004 slope=+0.0000
+  LA < 10 (any type)             | 2025: n= 54747 r=+0.663 slope=+0.0087 | 2026: n= 53219 r=+0.647 slope=+0.0087
+
+weak ground balls: slope +0.0093 per ft/s fitted on 2025. 2026 MAE of the neighbour estimate 0.0122 -> 0.0091 with the sprint-speed term
+all 2026 balls with a speed: MAE 0.0084; weak ground balls are 21637 of 122915 (17.6%)
