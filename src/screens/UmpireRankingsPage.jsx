@@ -101,7 +101,7 @@ export function UmpireRankingsPage({ seasonYear, vs }) {
               >
                 <td className="team">
                   <span className="umprank__rank">{u.rank}</span>
-                  <UmpireLink id={u.id} seasonYear={seasonYear}>
+                  <UmpireLink id={u.id} seasonYear={shown}>
                     {u.name}
                   </UmpireLink>
                   {todayPlateIds.has(u.id) && (

@@ -109,3 +109,20 @@ export function boardCompare({ vs, mode, format, value, prevOf }) {
     },
   }
 }
+
+// The Analytics tab's line under the picker: the cards the season moves, in
+// page order. Foul balls and the Spray map hide on a spoiler-scoped `asOf`
+// page, the Spray map is a hitter's, and the two Pitches cards a pitcher's.
+// Null when the picker moves no card.
+const COUNT_WORDS = ['', 'one card', 'two cards', 'three cards', 'four cards']
+export function seasonCardsHint({ asOf, hitting, pitching }) {
+  const cards = [
+    !asOf && 'Foul balls',
+    pitching && 'Pitches',
+    !asOf && hitting && 'Spray map',
+    pitching && 'Pitches like',
+  ].filter(Boolean)
+  if (!cards.length) return null
+  const list = cards.length === 1 ? cards[0] : `${cards.slice(0, -1).join(', ')} and ${cards.at(-1)}`
+  return `The season changes ${COUNT_WORDS[cards.length]}: ${list}.`
+}

@@ -11,6 +11,7 @@ import {
   compareOptions,
   compareColumn,
   boardCompare,
+  seasonCardsHint,
 } from '../src/lib/seasons/view.js'
 
 const TWO = { seasons: [2026, 2027], current: 2027 }
@@ -127,4 +128,16 @@ test('a board compare finds each row in the vs season, and a row it cannot find 
   // A 2027 rookie has no 2026 row: no change, not a zero change.
   assert.equal(cmp.cell({ id: 8, fouls: 90, g: 30 }), '—')
   assert.equal(boardCompare({ vs: null, mode: 'change', format: 'dec2', value: () => 1, prevOf: () => null }), null)
+})
+
+// The Analytics tab names only the cards the picker really moves (#1202): a
+// hitter has no Pitches card, and a spoiler-scoped `asOf` page hides
+// Foul balls and the Spray map.
+test('the season hint names only the cards that follow the season', () => {
+  const both = { asOf: null, hitting: true, pitching: true }
+  assert.equal(seasonCardsHint(both), 'The season changes four cards: Foul balls, Pitches, Spray map and Pitches like.')
+  assert.equal(seasonCardsHint({ ...both, pitching: false }), 'The season changes two cards: Foul balls and Spray map.')
+  assert.equal(seasonCardsHint({ ...both, hitting: false }), 'The season changes three cards: Foul balls, Pitches and Pitches like.')
+  assert.equal(seasonCardsHint({ asOf: '2026-07-05', hitting: true, pitching: false }), null)
+  assert.equal(seasonCardsHint({ asOf: '2026-07-05', hitting: false, pitching: true }), 'The season changes two cards: Pitches and Pitches like.')
 })

@@ -1,8 +1,8 @@
 // The umpire-assignment backfill (#1202): assignments are on file from 2023,
 // pitch-call accuracy only from 2026. A season view of an older year must show
-// that year's games and NO accuracy. staticJson.js's seasonFolderOf sends a
-// year not on file to the current season, so without a guard a 2024 umpire
-// page would print 2026's accuracy, rank and zone map beside 2024's games.
+// that year's games and NO accuracy. If staticJson.js's seasonFolderOf sent a
+// year before the store's first to the current season, a 2024 umpire page
+// would print 2026's accuracy, rank and zone map beside 2024's games.
 import { test, before, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { mock } from 'node:test'

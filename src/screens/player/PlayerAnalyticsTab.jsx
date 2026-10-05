@@ -4,6 +4,7 @@ import { playerTabPath } from '../../lib/route.js'
 import { useSeasonView } from '../../hooks/seasons/useSeasonView.js'
 import { SeasonPicker } from '../../components/season/SeasonPicker.jsx'
 import { SeasonStack } from '../../components/season/SeasonStack.jsx'
+import { seasonCardsHint } from '../../lib/seasons/view.js'
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { StatcastPercentiles } from '../../components/charts/StatcastPercentiles.jsx'
@@ -48,15 +49,16 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs }) {
   // The current season's Pitches card is statsapi's (loadPlayerAnalytics). A
   // past season, or all of them, reads the pitch-arsenal store instead.
   const picked = view != null && view.shown !== view.current ? view.shown : null
+  // The level is the one he pitched at in that season (loadArsenalSeason), not
+  // the current season's tile level.
   const pitching = analytics.data?.blocks?.find((b) => b.group === 'pitching') ?? null
-  const isMlb = pitching?.tileSportId === 1
   const shelf = useAsync(
-    () => (pitching && picked != null ? loadArsenalSeason(id, isMlb, { seasonYear: picked }) : Promise.resolve(null)),
-    [id, pitching != null, isMlb, picked],
+    () => (pitching && picked != null ? loadArsenalSeason(id, { seasonYear: picked }) : Promise.resolve(null)),
+    [id, pitching != null, picked],
   )
   const vsShelf = useAsync(
-    () => (pitching && view?.vs != null ? loadArsenalSeason(id, isMlb, { seasonYear: view.vs }) : Promise.resolve(null)),
-    [id, pitching != null, isMlb, view?.vs],
+    () => (pitching && view?.vs != null ? loadArsenalSeason(id, { seasonYear: view.vs }) : Promise.resolve(null)),
+    [id, pitching != null, view?.vs],
   )
   const back = () => window.history.back()
 
@@ -89,6 +91,11 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs }) {
   )
 
   const label = view?.label
+  const cardsHint = seasonCardsHint({
+    asOf,
+    hitting: blocks.some((b) => b.group === 'hitting'),
+    pitching: pitching != null,
+  })
   // Until the index lands, the address's own season (the reader resolves it).
   const season = { seasonYear: view?.shown ?? seasonYear, label, vs: view?.vs ?? null }
   const pathFor = (o) => playerTabPath(id, 'analytics', { name: bio.fullName, d: asOf, s: sportId, ...o })
@@ -102,9 +109,7 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs }) {
   return (
     <PlayerHubShell core={core.data} asOf={asOf} sportId={sportId} active="analytics">
       <SeasonPicker view={view} pathFor={pathFor} />
-      {view?.seasons?.length > 1 && (
-        <p className="hint">The season changes four cards: Foul balls, Pitches, Spray map and Pitches like.</p>
-      )}
+      {view?.seasons?.length > 1 && cardsHint && <p className="hint">{cardsHint}</p>}
       {blocks.map((block) => (
         <section key={block.group}>
           {/* The tab bar names this section now, so there is no umbrella

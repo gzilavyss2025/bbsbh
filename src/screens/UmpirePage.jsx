@@ -100,7 +100,8 @@ function hpTeamRecords(games) {
 // A season view (#1202): `seasonYear` and `vs` come from the address. The
 // seasons are the ASSIGNMENT store's, which goes back to 2023; pitch-call
 // accuracy starts in 2026, so an older season shows his games and no
-// Tendencies card (api/umpires.js's beforeAccuracy). Compare stacks the two
+// Tendencies card (staticJson.js's seasonFolderOf gives a year before the
+// accuracy store's first no folder). Compare stacks the two
 // seasons in one small table (UmpireSeasonCompare).
 export function UmpirePage({ id, seasonYear, vs }) {
   const view = useSeasonView('umpires', { seasonYear, vs })
@@ -122,7 +123,9 @@ export function UmpirePage({ id, seasonYear, vs }) {
   const pathFor = (season) => umpirePath(id, data?.name, season)
   const picker = <SeasonPicker view={view} pathFor={pathFor} />
   // A season he did not work: keep the picker, so the reader can pick another.
-  if (!loading && !error && !data && seasonYear != null) {
+  // That includes a bare /umpire/{id} for a man with no current-season games:
+  // his backfilled seasons are one tap away (#1202).
+  if (!loading && !error && !data && (seasonYear != null || view.seasons?.length > 1)) {
     return (
       <div className="screen umpire">
         <SiteHeader />
@@ -163,8 +166,10 @@ export function UmpirePage({ id, seasonYear, vs }) {
             <h1 className="topbar__title">{data.name}</h1>
           </header>
           <p className="hint">
-            {view.label}: {games.length} {games.length === 1 ? 'game' : 'games'}, {hpCount} behind the plate. No
-            pitch-call accuracy on file for this season.
+            {view.label}: {games.length} {games.length === 1 ? 'game' : 'games'}, {hpCount} behind the plate.{' '}
+            {data.accuracyAAA?.season?.called
+              ? 'Pitch-call accuracy is on file only for Triple-A. The game log shows it.'
+              : 'No pitch-call accuracy on file for this season.'}
           </p>
         </>
       )}

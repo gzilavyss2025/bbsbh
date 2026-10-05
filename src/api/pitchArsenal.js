@@ -119,6 +119,17 @@ export function pitchArsenalFor(data, personId, isMlb, stand = null) {
     .sort((a, b) => b.pitches - a.pitches)
 }
 
+// Which level a picked season's card reads: true for MLB, false for Triple-A,
+// null when he is not in the shard. The level he threw the most pitches at in
+// THAT season, never the level he pitches at now — a man in Triple-A in 2025
+// and MLB in 2026 has a 2025 card from his AAA mix (#1202).
+export function arsenalLevelOf(data, personId) {
+  const entry = data?.pit?.[personId]
+  if (!entry) return null
+  const count = (types) => (types ?? []).reduce((sum, t) => sum + (t.pitches ?? 0), 0)
+  return count(entry.mlb) >= count(entry.aaa)
+}
+
 // The player page's Pitches card on a PICKED season (#1202). The live card
 // reads statsapi's pitchArsenal (person/advanced.js's arsenalView) for the
 // current season; a past season, or every season combined, comes from this

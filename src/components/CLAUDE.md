@@ -48,6 +48,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `salaries/` | `SalaryBoard`, `ClubPayrolls`, `ContractGrid`, `Money` | The money pages (ADR-0052): open surfaces, no seal |
 | `scoring/` | `AtBatBox`, `ScorecardSheet`, `PlayDiamond`, `DefenseDiamond`, `StrikeZone`, `StruckLine`, `lens/` | The scorebook-diamond drawing family. `StruckLine` is the one strike wrapper. `StrikeZone` is drawn from the camera behind the pitcher (ADR-0077) |
 | `scout/` | `Matchup`, `ScoutMap`, `Choice` | The Matchup Scout's parts (`docs/scout-design.md`) |
+| `season/` | `SeasonPicker`, `SeasonStack` | The season views' shared parts (ADR-0086, #1202). **`SeasonPicker` is the one season picker**; a page that takes a season renders it, never a second one |
 | `seal/` | `ConsentModal`, `AsOfBanner` | Spoiler-consent surfaces that aren't `SealBox` itself |
 | `situational/` | `SituationalBoard`, `SituationalIndex`, `TeamRecordsList` | The situational team-record boards: every club ranked on one split |
 | `sync/` | `RevealCloudSync`, `StampsCloudSync`, `SyncStatusProvider`, `OwnerGuards` | Headless multi-device cloud-sync components (ADR-0022/0026/0035/0036/0041/0049). `OwnerGuards` is app-wide on purpose |
