@@ -1,6 +1,7 @@
 import { SiteHeader } from '../chrome/SiteHeader.jsx'
 import { BackBtn } from '../chrome/BackBtn.jsx'
 import { Loader } from './Loader.jsx'
+import { EmptyState } from './state/EmptyState.jsx'
 
 // The cold-load loading/error/not-found screen shared by PlayerPage and
 // TeamPage: while there's no data yet, show "Loading {noun}…"; if the fetch
@@ -37,7 +38,7 @@ export function AsyncGate({ loading, error, data, screenClass, noun, onBack }) {
 // The inline counterpart to AsyncGate, for screens whose chrome (header,
 // controls, an already-rendered list shell) stays on screen regardless of
 // fetch state — only a status region needs to switch between a loader, an
-// error hint, an empty hint, or nothing. Unlike AsyncGate this is real JSX,
+// error hint, an empty state, or nothing. Unlike AsyncGate this is real JSX,
 // dropped in place among a screen's other elements rather than replacing the
 // whole render.
 //
@@ -49,7 +50,9 @@ export function AsyncGate({ loading, error, data, screenClass, noun, onBack }) {
 // via `onRetry`; a STALE error (data already on screen, e.g. a live-game
 // Refresh or a Standings date-jump that failed) shows a smaller non-blocking
 // notice via `staleErrorMessage` — omit it to render nothing for that case, matching
-// screens where that combination can't happen.
+// screens where that combination can't happen. The empty branch is the shared
+// EmptyState (#1132): a dashed inset, no `.hint` padding, so the parent owns
+// the space around it.
 export function AsyncStatus({
   loading,
   error,
@@ -57,7 +60,6 @@ export function AsyncStatus({
   errorMessage = 'Couldn’t load. Try again.',
   staleErrorMessage,
   emptyMessage,
-  emptyProse = false,
   onRetry,
 }) {
   if (loading && !hasData) return <Loader />
@@ -83,7 +85,7 @@ export function AsyncStatus({
     )
   }
   if (!loading && !error && !hasData && emptyMessage) {
-    return <p className={emptyProse ? 'hint hint--prose' : 'hint'}>{emptyMessage}</p>
+    return <EmptyState>{emptyMessage}</EmptyState>
   }
   return null
 }

@@ -3,6 +3,7 @@ import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
+import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'
 
 const DASH = '—'
 
@@ -55,7 +56,7 @@ function PromotionTile({ p }) {
           </div>
         </div>
       </div>
-      {p.stats ? <StatGrid stats={p.stats} /> : <p className="hint hzntile__nostat">No full-season line at this level yet.</p>}
+      {p.stats ? <StatGrid stats={p.stats} /> : <EmptyState size="compact">No full-season line at this level yet.</EmptyState>}
     </Card>
   )
 }

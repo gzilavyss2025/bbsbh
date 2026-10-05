@@ -387,7 +387,6 @@ export function StandingsPage() {
         hasData={shown.length > 0}
         errorMessage="Couldn’t load standings. Try again."
         emptyMessage="No standings available for this date."
-        emptyProse
       />
 
       <div className={refreshing ? 'standings-body is-refreshing' : 'standings-body'}>

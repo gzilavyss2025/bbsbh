@@ -219,6 +219,13 @@ a.boxline__link:focus-visible {
   color: var(--text-muted);
 }
 
+/* The two empty lines (no game lines; no games to list) are an EmptyState
+   (#1132, E3). They keep the status line's gap under the head, and nothing
+   else: the loading and error lines above keep .boxlines__hint. */
+.boxlines__empty {
+  margin: var(--space-2h) 0 0;
+}
+
 .boxlines__retry {
   margin-top: 12px;
   align-self: flex-start;

@@ -140,7 +140,6 @@ export function PostseasonLeadersPage() {
         hasData={hasAnything}
         errorMessage="Couldn’t load Postseason Leaders. Try again."
         emptyMessage="No postseason leaders are available right now."
-        emptyProse
       />
 
       {hasTeamLeaders && (

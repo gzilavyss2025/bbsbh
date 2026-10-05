@@ -374,7 +374,6 @@ export function AwardsHistoryPage() {
         hasData={families.length > 0}
         errorMessage="Couldn’t load Awards History. Try again."
         emptyMessage="No award history is available right now."
-        emptyProse
       />
 
       {families.length > 0 && (

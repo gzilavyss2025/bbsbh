@@ -1187,9 +1187,6 @@
   font-size: var(--fs-cell);
   color: var(--award-ink);
 }
-.hzntile__nostat {
-  margin: 0;
-}
 
 /* The stat-line grid — the hover card's own .phcard__stats/.phcard__tile
    recipe, reused under Horizon-scoped names rather than a third boxed-stat

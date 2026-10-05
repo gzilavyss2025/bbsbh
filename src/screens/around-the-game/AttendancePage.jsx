@@ -109,7 +109,6 @@ export function AttendancePage() {
         hasData={rows.length > 0}
         errorMessage="Couldn’t load attendance. Try again."
         emptyMessage="No attendance on file for this season yet."
-        emptyProse
       />
 
       {rows.length > 0 && (

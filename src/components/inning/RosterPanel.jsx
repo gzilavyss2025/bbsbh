@@ -6,6 +6,7 @@ import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from 
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { EmptyState } from '../ui/state/EmptyState.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { RookiePill } from '../badges/RookiePill.jsx'
 
@@ -79,7 +80,11 @@ export const RosterPanel = memo(function RosterPanel({ title, roster, teamId = n
       </button>
       {open && (
         <div className="roster__body">
-          {empty && <p className="hint">Not posted yet.</p>}
+          {empty && (
+            <EmptyState size="compact" className="roster__empty">
+              Not posted yet.
+            </EmptyState>
+          )}
 
           {shows('bullpen') && roster.bullpen.length > 0 && (
             <>

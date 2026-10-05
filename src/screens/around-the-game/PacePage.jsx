@@ -157,7 +157,6 @@ export function PacePage() {
         hasData={rows.length > 0}
         errorMessage="Couldn’t load game times. Try again."
         emptyMessage="No completed games on file for this season yet."
-        emptyProse
       />
 
       {rows.length > 0 && (

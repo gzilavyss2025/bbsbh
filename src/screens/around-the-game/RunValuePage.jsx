@@ -127,7 +127,6 @@ export function RunValuePage() {
         hasData={everyone.length > 0}
         errorMessage="Couldn’t load the run value board. Try again."
         emptyMessage="No run values on file for this season yet."
-        emptyProse
       />
 
       {everyone.length > 0 && (
