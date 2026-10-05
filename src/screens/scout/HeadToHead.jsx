@@ -9,6 +9,7 @@ import { FactGrid } from '../../components/ui/frame/FactGrid.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { AsOfBanner } from '../../components/seal/AsOfBanner.jsx'
 
 
@@ -36,9 +37,9 @@ export function HeadToHead({ pitcherId, hitterId, cutoff, asOf, scope }) {
       {h2h.loading ? (
         <AsyncStatus loading hasData={false} />
       ) : failed ? (
-        <p className="hint">No head-to-head on file</p>
+        <EmptyState>No head-to-head on file</EmptyState>
       ) : pas.length === 0 ? (
-        <p className="hint">No meetings before {humanDateWithYear(cutoff)}</p>
+        <EmptyState>No meetings before {humanDateWithYear(cutoff)}</EmptyState>
       ) : (
         <>
           <FactGrid className="scout__totals">
