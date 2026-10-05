@@ -14,7 +14,7 @@
 .stampsheet__empty	empty	MIGRATE	E7	label	the stamp sheet: ONE element says loading OR empty. Split: the empty branch becomes EmptyState, the loading branch keeps its line
 .oseason__quiet	empty	MIGRATE	E7	label	offseason lead on the empty slate: ONE element says loading OR empty. Same split as .stampsheet__empty
 .umpmodal__hint	empty	MIGRATE	E7	label	umpire accuracy modal: no data for this umpire. Used once; the rule goes
-.scout__notposted	empty	MIGRATE	E8	hint + own class	the Matchup Scout: a chart slot with nothing posted; size compact. The lab copy (ScoutLab.jsx) is a tool page and keeps the class, so the rule stays until the lab moves or goes
+.scout__notposted	empty	MIGRATE	E8	hint + own class	the Matchup Scout: a chart slot with nothing posted; size compact. The lab copy (ScoutLab.jsx) is a tool page and keeps the class, so the rule stays until the lab moves or goes. DONE in E8: the Scout page renders EmptyState size compact; only the lab wears this class
 #
 # --- SELECTORS — true empty states held ---
 .psseries__flowempty	empty	HOLD		label	an SVG <text> inside the series flow chart. EmptyState renders HTML, not SVG
@@ -192,14 +192,9 @@ components/logbook/StampSheet.jsx#1	empty	MIGRATE	E7	label	split the loading bra
 components/offseason/OffseasonLead.jsx#1	empty	MIGRATE	E7	label	split the loading branch off first
 #
 # --- SITES — E8 the Matchup Scout and the Game Log ---
-screens/scout/HeadToHead.jsx#2	empty	MIGRATE	E8	bare hint	no head-to-head
-screens/scout/HeadToHead.jsx#3	empty	MIGRATE	E8	bare hint	no head-to-head
-screens/scout/ScoutPage.jsx#1	empty	MIGRATE	E8	bare hint	nothing picked yet (a prompt)
-screens/scout/ScoutPage.jsx#4	empty	MIGRATE	E8	hint + own class	a chart slot with nothing posted; compact
-screens/scout/ScoutPage.jsx#5	empty	MIGRATE	E8	hint + own class	a chart slot with nothing posted; compact
-screens/scout/ScoutPage.jsx#6	empty	MIGRATE	E8	hint + own class	a chart slot with nothing posted; compact
-screens/LogbookCollection.jsx#1	empty	MIGRATE	E8	bare hint	no stamps yet. Copy only (ADR-0035)
-screens/LogbookStatsPage.jsx#1	empty	MIGRATE	E8	bare hint	no stamps yet. Copy only (ADR-0035)
+screens/scout/ScoutPage.jsx#1	loading	n/a			AsyncStatus with no emptyMessage: loading and error only. E8 moved the "Pick a pitcher and a hitter" prompt above it onto EmptyState, so this key shifted down by one
+screens/LogbookCollection.jsx#1	caveat	n/a			the page-full line. DONE in E8: the "No stamps yet" line above it renders EmptyState (copy only, ADR-0035), so this key shifted
+screens/LogbookStatsPage.jsx#1	caveat	n/a			the pending-stamps line. DONE in E8: the "No stamps yet" line renders EmptyState (copy only, ADR-0035), so this key shifted
 #
 # --- SITES — empty, held ---
 components/chrome/SiteSearch.jsx#1	empty	HOLD			the no-result line of a search combobox: it lives in the listbox and is announced as its status, not a block on a page
@@ -246,7 +241,7 @@ screens/SalariesPage.jsx#1	loading	n/a			AsyncStatus with no emptyMessage: loadi
 screens/team/ContractsTab.jsx#1	loading	n/a			AsyncStatus with no emptyMessage: loading and error only
 screens/team/NumbersTab.jsx#1	loading	n/a			AsyncStatus with no emptyMessage: loading and error only
 screens/scout/HeadToHead.jsx#1	loading	n/a			AsyncStatus with no emptyMessage: loading and error only
-screens/scout/ScoutPage.jsx#2	loading	n/a			AsyncStatus with no emptyMessage: loading and error only
+screens/scout/ScoutPage.jsx#2	error	n/a			the pair failed to load. Key shifted after E8
 screens/game-notes/GameNotesArchivePage.jsx#3	loading	n/a			AsyncStatus with no emptyMessage: loading and error only
 #
 # --- SITES — error (the Notice census) ---
@@ -265,7 +260,6 @@ screens/game-notes/GameNotesArchivePage.jsx#2	error	n/a
 screens/postseason-live/LiveSeriesPage.jsx#1	error	n/a			
 screens/postseason-live/LiveSeriesPage.jsx#3	error	n/a			
 screens/profile/sections/ClubSection.jsx#1	error	n/a			
-screens/scout/ScoutPage.jsx#3	error	n/a			
 screens/team/StampInPage.jsx#1	error	n/a			
 components/game/GameFinder.jsx#1	error	n/a			
 components/game/PastGameFlipCard.jsx#2	error	n/a			
@@ -293,8 +287,6 @@ screens/FirstScorebookPage.jsx#2	caveat	n/a
 screens/FoulTrackerPage.jsx#1	caveat	n/a			
 screens/FoulTrackerPage.jsx#3	caveat	n/a			
 screens/GamePreview.jsx#2	caveat	n/a			
-screens/LogbookCollection.jsx#2	caveat	n/a			
-screens/LogbookStatsPage.jsx#2	caveat	n/a			
 screens/NineKeysPage.jsx#2	caveat	n/a			
 screens/PlayerPage.jsx#1	caveat	n/a			
 screens/PostseasonLeadersPage.jsx#1	caveat	n/a			

@@ -14,6 +14,7 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Pill } from '../../components/ui/control/Pill.jsx'
+import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { PitchScene } from '../../components/playbyplay/pitcherCard/PitchScene.jsx'
 import { Choice } from '../../components/scout/Choice.jsx'
 import { Matchup } from '../../components/scout/Matchup.jsx'
@@ -170,7 +171,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
           onPick={onPick}
         />
       )}
-      {!hasPair && <p className="hint">Pick a pitcher and a hitter</p>}
+      {!hasPair && <EmptyState>Pick a pitcher and a hitter</EmptyState>}
       {hasPair && load.loading && <AsyncStatus loading hasData={false} />}
       {hasPair && !load.loading && !data && <p className="hint hint--error">Couldn’t load this pair</p>}
 
@@ -254,7 +255,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
                       </span>
                     </>
                   ) : (
-                    <p className="hint scout__notposted">Not posted</p>
+                    <EmptyState size="compact">Not posted</EmptyState>
                   )}
                 </figure>
                 {side ? (
@@ -274,7 +275,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
                         <span className="scout__cap">{hmap.seen.toLocaleString()} pitches seen</span>
                       </>
                     ) : (
-                      <p className="hint scout__notposted">Not posted</p>
+                      <EmptyState size="compact">Not posted</EmptyState>
                     )}
                   </figure>
                 ) : grid || !board ? (
@@ -282,7 +283,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
                   // board for this scope, it has none to show.
                   <figure className="scout__fig">
                     <figcaption className="scout__cap">Hitter</figcaption>
-                    <p className="hint scout__notposted">Not posted</p>
+                    <EmptyState size="compact">Not posted</EmptyState>
                   </figure>
                 ) : (
                   <figure className="scout__fig">

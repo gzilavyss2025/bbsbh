@@ -21,6 +21,7 @@ import {
 } from '../lib/passportLayout.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { GameStamp } from '../components/logbook/GameStamp.jsx'
 import { ClubsSeen } from '../components/logbook/ClubsSeen.jsx'
 import { StampCollection } from './logbook/StampCollection.jsx'
@@ -344,10 +345,10 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
       )}
 
       {total === 0 ? (
-        <p className="hint hint--prose">
+        <EmptyState>
           No stamps yet. Reveal a game’s box score and stamp it — it lands here, and
           you choose where on the page it goes.
-        </p>
+        </EmptyState>
       ) : (
         <>
           {/* Shown only when it holds something, so a fully-arranged book
