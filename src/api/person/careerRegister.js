@@ -19,7 +19,14 @@ import { isIlPlacementTxn } from './activity.js'
 // closes with the rate pair K/BB and WHIP. The narrower secondary columns (GS,
 // K, BB) drop out on a phone (see CareerRegister's hideNarrow), so the
 // essentials stay legible there.
-function yearByYearCells(st, group, showSaves) {
+// The register's column heads for a group, in the order yearByYearCells fills them.
+export function registerColumns(group, showSaves) {
+  return group === 'pitching'
+    ? ['G', 'GS', showSaves ? 'SV' : 'W–L', 'ERA', 'IP', 'K', 'BB', 'WHIP']
+    : ['G', 'AB', 'AVG', 'HR', 'RBI']
+}
+
+export function yearByYearCells(st, group, showSaves) {
   if (group === 'pitching') {
     const lead = showSaves ? num(st.saves) : `${num(st.wins)}–${num(st.losses)}`
     return [
@@ -346,9 +353,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     })
   }
 
-  const baseColumns = group === 'pitching'
-    ? ['G', 'GS', showSaves ? 'SV' : 'W–L', 'ERA', 'IP', 'K', 'BB', 'WHIP']
-    : ['G', 'AB', 'AVG', 'HR', 'RBI']
+  const baseColumns = registerColumns(group, showSaves)
   const columns = showWar ? [...baseColumns, 'WAR'] : baseColumns
 
   // Gap years (see missingSeasonRows) slot into the same sorted ledger as the
