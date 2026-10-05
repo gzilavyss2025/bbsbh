@@ -150,3 +150,17 @@ _Avoid_: lineup (ambiguous with the printed lineup-card screen)
 A player's true starting fielding position, independent of any position he's
 moved to since. Determines roster-card membership and position labels.
 _Avoid_: box position, current position
+
+### Names
+
+**Game Log**:
+The collection of the games a user has stamped, and the screen that holds it. Every
+user-visible string says Game Log. The code name is `logbook`: the route
+(`/logbook`), modules, CSS classes, and storage keys.
+_Avoid_: Logbook in any user-visible string
+
+**Box Lines**:
+The drilldown behind a summary stat line: tap the line and see the game-by-game rows that
+add up to it. An internal name for prompts and code; it never renders. The page says
+"See all" and "Game lines".
+_Avoid_: Stubs, Receipts

@@ -193,7 +193,7 @@ function headerSlotFor(treatment) {
 
 // A team's Main-treatment Primary/Secondary/Accent, landed value with any live
 // draft layered on top — mlb-team-colors.json is the one source both the tile
-// and teams.js's real TEAM_COLOR_PAIRS/TEAM_COLORS resolvers read (src/lib/CLAUDE.md),
+// and teams.js's real TEAM_COLOR_PAIRS/TEAM_COLORS resolvers read (src/lib/data/CLAUDE.md),
 // so an edit here and the real app tint can never disagree. Always three
 // slots, in role order, even when a role is blank — editing needs a stable
 // slot-to-role mapping, which a dedup/filter (the old teamColorSwatches) can't

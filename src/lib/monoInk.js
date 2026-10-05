@@ -8,7 +8,7 @@
 // stale mark). Hand-editing one would survive exactly until the next nightly
 // run. Pins live here instead, and the generator applies them — the same
 // authoring-format / lookup-format split the tuning stores use
-// (src/lib/CLAUDE.md), one layer further back: here the lookup format is the
+// (src/lib/data/CLAUDE.md), one layer further back: here the lookup format is the
 // art itself.
 //
 // Picked by eye in /identity-lab's Knockout mark editor, which writes this file

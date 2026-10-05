@@ -116,7 +116,7 @@ const BUDGETS = {
   //
   // 56 -> 57 for `53-umpire-tendencies.css`, and the reason is the same one
   // the two entries above give: this directory is a NUMBERED CASCADE, the
-  // prefix IS the cascade position ("order is the contract", src/CLAUDE.md),
+  // prefix IS the cascade position ("order is the contract", src/styles/CLAUDE.md),
   // so the guard's usual remedy of a subdirectory would break the single
   // property the whole scheme rests on. The file exists because the Umpire
   // Tendencies card pushed 38-umpire-pages.css past check-file-size.mjs's

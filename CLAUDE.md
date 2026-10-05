@@ -1,7 +1,5 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## What this is
 
 **Tally Baseball** (repo name `bbsbh`) is a PWA for scoring baseball by hand. It is
@@ -16,13 +14,30 @@ React 19 + Vite, phone-first (iPhone), installable PWA with Vercel backend.
 
 This file loads into every session and stays loaded for the whole session. Its size
 is a fixed token cost per session. **Keep it lean**: stay under **200 lines**.
-`scripts/check-claude-md.mjs` enforces this cap; `npm run lint` runs the check in CI.
-Detail lives in three tiers, most specific first:
+`scripts/check-claude-md.mjs` enforces this cap, a character cap, and a cap on every
+nested file; `npm run lint` runs the check in CI. Detail lives in three tiers, most
+specific first:
 
-- **Nested `CLAUDE.md`** files — `src/`, `src/api/`, `src/components/`, `src/lib/`,
-  `scripts/`, `test/`. Claude Code loads one only when it opens that directory, so the
-  detail costs tokens on demand, not every session. Put per-module prose there.
-- **`docs/*` and `docs/adr/`** — reference catalogs and the *why* behind decisions.
+- **Nested `CLAUDE.md`** files. One loads the first time Claude reads a file in its
+  folder, then stays for the session, and its parent files load with it. So put a rule
+  in the deepest folder that every edit it governs passes through (ADR-0098). The
+  guard finds them on disk; the facts guard checks this list.
+  - `api/` — the Vercel functions, one line each.
+  - `src/` — screen flow, routing, fetching, the design system, and the UI half of the
+    spoiler rule. Folder detail sits below it: `src/screens/team/` (the six-tab hub),
+    `src/screens/profile/` (My Tally), `src/styles/`, `src/components/`, and in that
+    folder `src/components/ui/`, `src/components/boxlines/`, `src/components/chrome/`,
+    `src/components/logbook/`, `src/components/offseason/`, `src/components/passport/`,
+    `src/components/playbyplay/`, and `src/components/transactions/`.
+  - `src/api/` — the data layer's RULE: the reveal-only vs. spoiler-free split
+    (`spoiler-manifest.json`) and the build-time-fetch pattern. Folder detail:
+    `src/api/around-the-game/`, `src/api/boxlines/`, `src/api/expresslane/`, and
+    `src/api/transactions/`.
+  - `src/lib/` — club identity: colours, logo treatments, stamp ink. The stores:
+    `src/lib/data/`.
+  - `scripts/` — generator and guard rules. `test/` — the unit suite.
+- **`docs/*` and `docs/adr/`** — reference catalogs (per-module notes in `docs/api/`) and
+  the *why* behind decisions.
 - **`CONTEXT.md`** — the domain glossary the spoiler and architecture prose relies on.
 
 When you want to add detail here, add it to the right tier instead and leave a
@@ -71,10 +86,7 @@ holds that port, use the next numbered script: `npm run dev:2` through `dev:5`
 `vite.config.js` has the rationale and the tally-nfl band split.
 
 `scripts/gen-*.mjs` are the data generators (WAR, rehab, umpires, callouts, and more);
-`docs/scripts/generators.md` catalogs them. The `npm test` unit suite (`test/*.test.js`,
-CI-gated) covers the pure data layer: reveal-only derivations, spoiler gates,
-routing, and run-expectancy/tiering math, including the spoiler invariant pinned on a
-captured real-game feed (`docs/testing.md`). This suite does not replace the
+`docs/scripts/generators.md` catalogs them. The `npm test` suite does not replace the
 browser-level check. For anything user-visible, also check it in `npm run dev`
 against a live or recent game. `docs/test-games.md` lists verified gamePks with
 rare in-game events; `.claude/skills/run/` documents that loop.
@@ -105,29 +117,23 @@ device you own (ADR-0049). A fifth is a call. `docs/adr/` has the *why* — read
 
 Inside that scope, two conventions enforce it structurally:
 
-1. **Reveal-only modules** (`src/api/linescore.js`, `src/api/derive.js`) are callable
-   only inside a `SealBox`'s reveal render function — never at render top-level or in an
-   eager `useMemo` (ADR-0001). Contrast `src/api/select.js`, spoiler-**free**. Between
-   them sit **caller-gated pre-pitch selectors** (`selectPrePitchChanges`,
-   `defenseEntering`, `lineupEntering`), spoiler-free only for the half the user has
-   reached (`halfIndex <= revealedThrough + 1`) — ADR-0003/0010. Rule in
-   `src/api/CLAUDE.md`, catalog `docs/api/`, UI `src/CLAUDE.md`.
+1. **Reveal-only modules** (`src/api/linescore.js`, `derive.js`, `hitchart.js`) are
+   callable only inside a `SealBox`'s reveal render function — never at render top-level
+   or in an eager `useMemo` (ADR-0001). `src/api/select.js` is spoiler-**free**; the
+   caller-gated selectors between them are ADR-0003/0010. The classes are in
+   `src/api/CLAUDE.md`, the catalog in `docs/api/`, the UI half in `src/CLAUDE.md`.
 
 2. **`src/components/SealBox.jsx`** takes `children` as a render function and
    calls it only once revealed. Reveal is one-directional. Re-sealing on inning
-   navigation works because the parent remounts with `key={inning}` (see
-   `InningViewer.jsx`) (ADR-0002).
+   navigation works because the parent remounts with a key of inning and half (see
+   `src/screens/InningViewer.jsx`) (ADR-0002).
 
 The PWA service worker uses `NetworkOnly` for `statsapi.mlb.com` (`vite.config.js`),
 so a stale, spoiler-revealing score is never served from cache (ADR-0004).
 
-Three gotchas each caused a real spoiler bug and are now ADRs: roster-card
-membership and position labels (ADR-0005); per-inning `errors` being a *fielding*
-stat, not a score (ADR-0006); and `useRef` caches of reveal-only derivations that
-must key on the `feed` object (ADR-0007). **The Pitchers table** is gated by
-`revealedThrough` directly, not wrapped in a `SealBox` (ADR-0009). **Extra innings
-never spoil** — only `regulation` innings show up front; extras unlock one at a
-time as `revealedThrough` advances (ADR-0008). Both are detailed in `src/CLAUDE.md`.
+Three gotchas each caused a real spoiler bug: roster cards (ADR-0005), per-inning
+`errors` (ADR-0006), and `useRef` caches (ADR-0007). Two more rules: the Pitchers table
+(ADR-0009) and extra innings (ADR-0008). `src/CLAUDE.md` has all five.
 
 ## Architecture (map)
 
@@ -138,33 +144,10 @@ so the spoiler rule still holds on return. A same-device tab picks up another ta
 reveal through a `storage` listener in `useRevealProgress.js`.
 
 **Fourteen Vercel functions live in `api/`**, each inert when unconfigured;
-**thirteen never render or fetch a score.** Link previews (`preview.js` + `_lib/cards.js`)
-render Open Graph cards, failing safe to the default (ADR-0012). Reveal sync (Clerk-gated) mirrors
-`revealedThrough` via `reveal.js` + Upstash Redis, ratcheted both sides (ADR-0022);
-`spoiled-days.js` mirrors which DAYS the user consented to spoil — consent, reversible (ADR-0026).
-`copy.js` + `src/copy/` store editable wording — and, since ADR-0063, the player page's award
-weight order — behind a cached read and an allowlisted write, edited at `/admin` or ON the page that
-renders it (the Ballpark gear, whose `ballpark-photo.js` puts images in Vercel Blob, ADR-0025/0044). `identity.js` + `src/lib/identity/` overlay a CLUB's
-identity under the pure resolvers, gated twice on WCAG AA; `identity-logo.js` takes a mark's
-BYTES the same way, feeding the overlay's `logo` URLs (ADR-0050, `docs/identity-overrides.md`).
-`contract-identity.js` mirrors one-off id corrections for the historical-contract crosswalk (ADR-0066). **My Tally**'s `preferences.js` + `src/lib/account/` mirror a CLOSED four-field set, last-write-wins;
-`account.js` erases every per-user key (ADR-0039). The Game Log's `books.js` mirrors the shelf — a
-cover's title, club and mark, never a stamp (ADR-0041). `game-story.js` is a CORS hop to MLB.com's
-team RSS feeds, which send none. `page.js` + `src/copy/landing/` server-render `/learn` for AI
-crawlers, which run no JS (ADR-0053). **The fourteenth stores a score, by design**: the Game Log's
-stamps (`stamps.js`, `src/lib/stamps.js`) — safe because of WHERE stamp art may render
-(`check-stamp-surfaces`), not a mint-time check (ADR-0035). Voice: `docs/game-log.md`.
-
-Two of those nested files carry the architecture detail, loaded when you work there:
-- **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →
-  InningViewer`), routing (`src/lib/route.js`, `src/App.jsx`), fetching (`useAsync`),
-  the token-based design system, and the UI-side spoiler enforcement. `/team/{id}` is a
-  six-tab hub; each tab is a real route that loads only its own data (ADR-0034).
-- **`src/api/CLAUDE.md`** — the data layer's RULE, not its catalog: the reveal-only vs.
-  spoiler-free split (machine-readable in `spoiler-manifest.json`), the
-  **build-time-fetch pattern** (static `public/data/*.json` precomputed by
-  `scripts/gen-*.mjs`), and the conventions. Per-module notes live a tier down in
-  `docs/api/` (`live-game`, `static-data`, `account-layer`), loaded on reference.
+**thirteen never render or fetch a score.** **The fourteenth stores a score, by design**:
+the Game Log's stamps (`stamps.js`, `src/lib/stamps.js`), safe because of WHERE stamp art
+may render (`check-stamp-surfaces`), not a mint-time check (ADR-0035). The other
+thirteen, each with its ADR: `api/CLAUDE.md`.
 
 ## Conventions to follow
 
@@ -178,12 +161,11 @@ Two of those nested files carry the architecture detail, loaded when you work th
 - **Verify feed field paths against a live game.** The MLB feed shape is
   undocumented; `src/api/statsapi.js` notes which paths were checked against
   gamePk. Confirm a new field against a real response; do not guess.
-- **Styling is a token-based design system.** `src/index.css` holds only `@import`s:
-  `src/tokens/*.css`, then the ordered `src/styles/*.css` partials where the rules live.
-  The metaphor is a paper scorebook (manila paper, navy ink, pencil graphite, kraft-tape
-  amber seals). Use semantic CSS variables, not raw hex. See `src/CLAUDE.md`.
+- **Styling is a token-based design system** (a paper scorebook). Use semantic CSS
+  variables, not raw hex. Rules: `src/CLAUDE.md` and `src/styles/CLAUDE.md`.
 - **Flat directories don't stay flat.** Subdivide a directory before roughly its
-  10th file; `check-dir-size`/`check-file-size` enforce this (ADR-0038).
+  10th file; `check-dir-size` fails past 12 (`MAX_FILES`) and `check-file-size` caps
+  file length (ADR-0038).
 
 ## Agent skills
 
@@ -193,8 +175,6 @@ Two of those nested files carry the architecture detail, loaded when you work th
   `ready-for-human` / `wontfix`, used as-is. See `docs/agents/triage-labels.md`.
 - **Domain docs** — single-context: one `CONTEXT.md` + `docs/adr/`. See
   `docs/agents/domain.md`.
-- **Callouts / Team Leaders** — catalog (families, triggers, surfaces, gates,
-  worthiness) is `docs/callouts.md`; the tense rule is ADR-0014. They come from the
-  nightly `gen-callouts.mjs` precompute — extend it, do not build a parallel path.
-  See `docs/scripts/generators.md` + `docs/api/`.
-- **Writing style** — ASD-STE100 governs chat replies, authored docs, and commit/PR text here, always on; the house word list (say "postseason", never "playoffs") is enforced by `check-word-choice`. See `docs/agents/writing-style.md`. <!-- word-choice-exempt: states the rule -->
+- **Writing style** — ASD-STE100 governs chat replies, authored docs, and commit/PR
+  text here, always on. See `docs/agents/writing-style.md`.
+  The house word list is enforced by `check-word-choice`: say "postseason", never "playoffs". <!-- word-choice-exempt: states the rule -->

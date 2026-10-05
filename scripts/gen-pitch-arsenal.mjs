@@ -6,7 +6,7 @@
 // WHY MLB + AAA, NOT JUST MLB. Every AAA park (like MLB's) feeds Hawk-Eye pitch
 // tracking — confirmed live against a real AAA gamePk's feed, same
 // `playEvents[].details.type.code` + `.pitchData.startSpeed` fields MLB carries
-// (see scripts/CLAUDE.md's gen-umpire-accuracy.mjs entry for the same fact,
+// (see docs/scripts/generators.md's gen-umpire-accuracy.mjs entry for the same fact,
 // established there first). AA and below carry no pitch-type data at all, so
 // this script never sweeps them — same two-level split as gen-umpire-accuracy.mjs
 // (`level: 'mlb' | 'aaa'`, kept SEPARATE rather than blended, since they're

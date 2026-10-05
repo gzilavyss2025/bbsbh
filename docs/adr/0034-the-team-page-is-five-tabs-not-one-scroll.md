@@ -1,5 +1,9 @@
 # The team page is five tabs, not one scroll
 
+> **Amended 2026-10-05.** The hub has six tabs: a Contracts tab joined the five (ADR-0052).
+> The title and the text below keep the count at the time of the decision. Draft ADR-0082
+> would supersede this one.
+
 `/team/{id}` had grown to twenty top-level modules. Every one of them wore the
 same `.thub-card` chrome, they ran in one uninterrupted vertical scroll, and
 there was no navigation of any kind — no tabs, no anchors, not so much as a

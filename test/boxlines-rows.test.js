@@ -315,7 +315,7 @@ test('a hitter row carries the positions he played, in order', () => {
 })
 
 test('a hitter row with no positions is an empty list, never null or a crash', () => {
-  // MiLB feeds drop fields MLB's carry (src/CLAUDE.md's degradation rule), and
+  // MiLB feeds drop fields MLB's carry (root CLAUDE.md's MiLB degradation rule), and
   // a null here would throw in the facet rather than keep nothing.
   const rows = boxLineRows({
     splits: [

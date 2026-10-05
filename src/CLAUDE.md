@@ -1,25 +1,22 @@
 # src — the app shell
 
-React 18 + Vite SPA, phone-first. This file covers screens, routing,
-fetching, and the design system. The data layer has its own file
-(`src/api/CLAUDE.md`), as does club identity — colours, logo treatments, the
-`src/lib/data/*.json` stores, and their two editors: the dev-only lab
-(`src/lib/CLAUDE.md`) and the team hub's gear, whose runtime overlay is
-`docs/identity-overrides.md`. Root `CLAUDE.md` has the spoiler rule and the map.
+React 19 + Vite SPA, phone-first. This file covers screens, routing, fetching, the
+design system, and the UI half of the spoiler rule. Folder rules sit in nested files
+(root `CLAUDE.md` lists them). The data layer is `src/api/CLAUDE.md`. Club identity —
+colours, logo treatments, the `src/lib/data/*.json` stores — is `src/lib/CLAUDE.md`;
+its two editors are the dev-only lab (`docs/identity-lab.md`) and the team hub's gear
+(`docs/identity-overrides.md`). Root `CLAUDE.md` has the spoiler rule and the map.
 
 ## Screens (`src/screens/`)
 
-`GameSelect` (slate; its MLB/AAA/AA/A+/A rail grows a sixth `WINTER` tab, second,
-Oct-Feb — `components/winter/`, ADR-0078) → `GameView` (site-home bar + away@home
+`GameSelect` (slate) → `GameView` (site-home bar + away@home
 masthead of uniform-treatment tiles — the `TeamTreatmentMark` square the slate card
 shows — each opening the sketch modal) → `TeamInfo` (×2) → `InningViewer`.
-`LogoSheet` is a printable grayscale logo sheet, off the slate header. The **Matchup Scout** (`/scout`, `screens/scout/`) is one pitcher against one hitter: spec `docs/scout-design.md`, its view toggle ADR-0093, its Savant cutoff ADR-0095. An empty slate gets a second page
-state (`offseason/`): the wire at MLB (ADR-0074); at a level, dark from mid-September on ITS leagues' published dates (ADR-0079), a checked game to score and who moved up (ADR-0080). Both then carry one notebook note — twelve-pitch at-bats at MLB (the /fouls batter-vs-pitcher row, minus its scorebug), youngest regulars at a level — and the season record, the one door onto results: a label, never a seal, inward at MLB and out to MiLB.com below it — MLB's row also carries the postseason champion for the whole offseason, off slice 3's live bracket, with the full bracket one tap away (ADR-0081's addendum). Wide, the rail the wire left holds the countdown and the whole league (`WinterRail`) — ADR-0081.
+`LogoSheet` is a printable grayscale logo sheet, off the slate header. The **Matchup Scout** (`/scout`, `screens/scout/`) is one pitcher against one hitter: spec `docs/scout-design.md`, its view toggle ADR-0093, its Savant cutoff ADR-0095. An empty slate gets a second page state (`src/components/offseason/`): `src/components/offseason/CLAUDE.md`.
 
 `TeamInfo`'s club-name bar and section mastheads are **themed** to the jersey that
-club wears that game (ADR-0030) — three CSS properties from `lib/headerTheme.js`,
-whose only inputs are `(teamId, treatment)`: identity, never game state
-(`src/lib/CLAUDE.md`). The Starting pitcher card resolves the triad a second time
+club wears that game (ADR-0030) — five CSS properties from `lib/headerTheme.js`,
+which reads identity only, never game state (`src/lib/CLAUDE.md`). The Starting pitcher card resolves the triad a second time
 against the OTHER club (it shows the opposing starter), scoped to its `<section>`.
 Themed surfaces are picked per ELEMENT, not per page: **a club may colour a card
 that identifies the club** (box score and innings view included), never a control,
@@ -27,29 +24,7 @@ cover, or seal-state report — ADR-0030's 2026-08-10 addendum replaces that rul
 
 ### The team hub (`/team/{id}`, `src/screens/team/`)
 
-Not one page — a pinned identity header (`TeamHubShell`, fed by the deliberately
-cheap `loadTeamIdentity`) plus **five tabs, each a real route**: Overview
-(`TeamPage.jsx`, the bare `/team/{id}`), Roster, Games, Numbers, Minors
-(`MinorsTab.jsx`, formerly "Org"), plus the pre-existing `/team/{id}/leaders`.
-**Each tab loads only its own data** — one `data/load{Tab}.js` per tab, never
-a shared mega-fetch; that is the whole point, not an implementation detail
-(ADR-0034, which also records why the old twenty-module scroll was split and
-why the loaders were briefly duplicated).
-
-Where things live: roster projection / 40-man / injured list → Roster; schedule,
-every decided game, photos, transactions → Games; standings, batting + pitching
-ranks, leaders, jerseys, day-of-week, comebacks → Numbers; affiliates, prospects,
-affiliation history → Minors. The Overview holds **previews only**, each ending in
-a `.thub__door` link to the tab that owns it, and each is a `preview`/`limit` prop
-on the same module the tab renders in full — never a parallel component. The one
-pair that isn't literally the same component still lives in one module:
-`modules/TeamGames.jsx` exports the Overview's `LastTenGames` rail and the Games
-tab's `AllGames` grid over one shared ticket-stub card, since a sideways rail is
-the wrong shape for a whole season and a grid is the wrong shape for a preview.
-
-A tab's secondary modules render as full cards, same as its headline module —
-no collapsed/shelved state. Every tab path goes through `teamTabPath` →
-`linkQuery`, so a dated link keeps its `?d=` across a tab switch. The hub itself
+Tabs, loaders, and where things live: `src/screens/team/CLAUDE.md`. The hub itself
 opens on **current** stats — links out of a game stopped stamping that cutoff on
 (ADR-0034's "The cutoff is opt-in now"); `?d=` still applies when a URL carries
 one, and `components/seal/AsOfBanner.jsx` is the way IN (a date picker on a live
@@ -81,61 +56,7 @@ rewrites all non-asset paths to `index.html` so those links resolve on Vercel.
 
 ## My Tally (`/profile`, `src/screens/profile/`, ADR-0039)
 
-The page that reports on **you** rather than on baseball: club, device
-behaviour, your ledger, what syncs, and what you consented to see. One sentence
-governs it —
-
-> **`/profile` renders no game data at all.**
-
-No feed fetch, no `src/api/*` game-module import, no linescore, no stamp fact,
-no number that came out of a ballpark. Counts of your own things are the only
-numbers on it, which is why this screen needs no seal reasoning at all. Two
-mechanical checks hold the line and both must keep passing:
-`src/screens/profile/` and `src/components/profile/` are on
-`check-stamp-surfaces.mjs`'s **forbidden** directory list (narrowed to
-`GameStamp` / `StampGameButton`, so a stamp COUNT stays legal and stamp ART does
-not — ADR-0035's containment argument), and
-`e2e/invariants/profile-no-scores.spec.js` asserts the rendered DOM carries no
-score-shaped token and that the page issues **zero** requests to
-`statsapi.mlb.com`. That last one is why the club strip here reads the
-same-origin static club file (`api/teams-static.js`) instead of statsapi.
-
-Shape: `ProfilePage.jsx` is the shell and owns every hook read; the four
-`sections/*` are presentational. `components/profile/ProfileAccount.jsx` is the
-**only** file under either directory that touches Clerk — dynamically imported
-behind `isClerkEnabled`, the same pattern `RevealCloudSync` and
-`LogbookAccountGate` use, never a conditionally-called hook (Clerk's hooks throw
-with no provider ancestor). Clerk's `<UserProfile routing="virtual" />` mounts
-*inside* the page behind a collapsed disclosure: `route.js` has no wildcard and
-path routing would need Clerk to own `/profile/*`, so virtual routing is a
-constraint, not a preference.
-
-**`ClubPicker.jsx` (`components/account/`) is the one club strip.** It takes
-`teams` as a prop and fetches nothing; `/profile` and the first-visit intro both
-render it, from different sources on purpose. Do not grow a second one.
-
-**The sync seam.** `components/sync/SyncStatusProvider.jsx` mounts
-unconditionally in `App.jsx` (it touches no Clerk API) as an external store, so
-a sync report re-renders only what reads it; the four headless `*CloudSync`
-components `report()` from the `catch` blocks they already had — the catches
-still swallow, they just stopped being silent. The reducer and the
-`unavailable` (501, a supported deploy state) vs `error` distinction live in
-`src/lib/account/syncStatus.js` (see `src/api/CLAUDE.md`). One trap:
-`ProfilePage`'s **`normalizeStatus`** exists because `RevealCloudSync` mounts
-inside `InningViewer`, so on `/profile` the `reveal` channel has never spoken —
-and `rollupSync` (worst channel wins) would turn that into "This device." for a
-signed-in user. A channel that never reported (`at == null`) is given the
-account's own **phase, and only its phase**, never a `syncedAt`, so nothing
-claims a "last checked" it never had. Read that function's header before
-touching the receipt.
-
-Onboarding is the same subsystem's other half: `lib/account/intro.js`
-(`bbsbh:intro`, the first-visit flag that replaced the old
-"`bbsbh:favoriteTeam` exists" proxy) and `lib/account/prompts.js`
-(`bbsbh:prompts`, the bounded one-shot map behind the contextual prompts).
-Both are pure, both return the **same object reference** when nothing changed,
-and both are one-directional — a dismissal never re-fires. Nothing about them
-syncs: a dismissal is a fact about this browser, not the account.
+`/profile` renders no game data at all. Rules: `src/screens/profile/CLAUDE.md`.
 
 ## Admin-editable copy (`src/copy/`)
 
@@ -172,16 +93,21 @@ refactoring. Nothing on an open surface (player and team pages, leader boards,
 standings) is gated here, and **adding a gate there is a regression, not a
 hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
 
+Three gotchas each caused a real spoiler bug and are now ADRs: roster-card
+membership and position labels (ADR-0005); per-inning `errors` being a *fielding*
+stat, not a score (ADR-0006); and `useRef` caches of reveal-only derivations that
+must key on the `feed` object (ADR-0007).
+
 - **`src/components/SealBox.jsx`** takes `children` as a render function, invoked
   only once revealed; reveal is one-directional, and re-sealing on inning
-  navigation works by the parent remounting with `key={`${inning}-${half}`}`
-  (see `InningViewer.jsx`/`screens/innings/InningPage.jsx`) (ADR-0002).
+  navigation works by the parent remounting with `key={`${pageInning}-${pageHalf}`}`
+  (see `src/screens/InningViewer.jsx`) (ADR-0002).
 - The **defense diamond** and both teams' **lineup cards** render *outside* the
   seal as the pre-scoring reference (above it while sealed, below the play-by-play
   once revealed), gated to `revealed || isNextToReveal` (ADR-0010). The data comes
   from the caller-gated pre-pitch selectors in `src/api/` (see `src/api/CLAUDE.md`).
 - **The Pitchers table** (`src/api/pitchers.js` → `computePitcherLines`, rendered by
-  `PitchersSection` in `InningViewer.jsx`) is gated by the same `revealedThrough`
+  `components/inning/PitchersSection.jsx`) is gated by the same `revealedThrough`
   high-water mark as the seals rather than wrapped in a `SealBox` (ADR-0009). A
   pure numeric stat grid — the season-context/health prose now lives in **Margin Notes**
   (`MarginNotes.jsx`, same reveal-clamp footing), a ranked digest over both teams' arms that
@@ -224,11 +150,6 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   between pitches (`midAtBat`), or any steal/pickoff, which leads its own step and window (ADR-0016's amendment). A step therefore ends
   mid-play, which is why the pinch-runner pencil-in keys on its notice's index rather
   than the play's `visible` gate — read ADR-0016 before touching `nextStepBoundary`.
-  Either choice's **tap target is the dead space around it**: `.pagenav` is click-through,
-  so a missed thumb landed on the card under the fade. `.pagenav--innings .btn::after`
-  (`styles/24-floating-nav-and-hud.css`) claims the bar around each button — split between
-  the pair, Refresh excepted — offsets from the button, not the bar (else the area
-  re-collapses mid-tap under `.btn:active`). `e2e/reveal-hit-area.spec.js` pins it.
 - **The console** (ADR-0043): anchored scorebug band, wrapping trail, tabbed
   reference, `RollingLine` demoted but NEVER removed — every half, live or
   historical. Only the play-by-play varies: **windowed** (one at-bat) vs.
@@ -259,39 +180,15 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   `StampGameButton.jsx` renders **inside** the box score's `SealBox` reveal
   render function (`screens/BoxScore.jsx`), which is what puts a stamp out of
   reach until you open the box score — ADR-0002 again, used a third time. That
-  gate is the render **function**, not a position on the page: the affordance is
-  a thin strip across the HEAD of the revealed sheet (ADR-0035's third
-  amendment), and it stays ONE row — mount, a line of copy, one action — with
-  everything a minted stamp additionally offers behind its `Details` disclosure.
-  It is the first child of the box score's one section on every width; the box
-  score's phone order (`48-stamp-strip.css`) is CSS `order`, not a second render. That
-  host `SealBox` has an `onReveal` since ADR-0049, but only for a real TAP: it writes
+  gate is the render **function**, not a position on the page; the strip's layout is in
+  `src/components/logbook/CLAUDE.md`. That host `SealBox` has an `onReveal` since ADR-0049, but only for a real TAP: it writes
   `bbsbh:boxreveal:{gamePk}`, one bit that re-opens this page and nothing else, withheld under
   the pass and under a stamp — either would record a permanent mark for a seal nobody touched,
   and neither may ever reach `revealedThrough`. `GameStamp.jsx` (the art) and
   `StampGameButton.jsx` may be imported only from their allowlists —
   `scripts/check-stamp-surfaces.mjs` fails `npm run lint` otherwise, and
-  `e2e/invariants/logbook-stamp.spec.js` is its runtime half. The collection
-  (`screens/LogbookCollection.jsx`, `/logbook` + `/logbook/{season}` — a user
-  may hold more than one book, ADR-0041) and its store
-  (`hooks/useStamps.js` over the pure `lib/stamps.js`) are **local-first**: a
-  signed-out user has a real Logbook on that device, holding no scores at all —
-  the facts are resolved at render time by `api/logbook.js`. `StampsCloudSync`
-  mirrors the collection across a signed-in user's devices; its header records
-  why the old pre-mint reveal-mark push could never satisfy the retired gate.
-  The stamp ART is locked (PR #502) and lives as pure math in `lib/stampArt.js`,
-  with **one tunable part**: where a club's knockout mark sits in its slot
-  (`lib/stampLogoTuning.js` + `data/stamp-logo-tuning.json`, tuned in
-  `/identity-lab`'s Stamp placement editor — the third name on the containment
-  guard's allowlist, and the only one whose game is a fabricated literal). Read
-  ADR-0035's amendment first: that store is consulted on every render, so
-  retuning a club restyles its stamps in every Logbook that already holds one.
-  The stamp's **ink** is the winning club's darkest brand colour
-  (`lib/stampInk.js` → the `--stamp-ink` property `.gamestamp` falls back from) —
-  the one module in `src/lib/` that colours anything from game state, contained
-  by the same allowlist and safe for the same reason (ADR-0036's second
-  addendum); do not import it anywhere else. A **minor-league** game inverts the
-  ring band — same ink, same silhouette (`stampRingInverted`, ADR-0036's fourth).
+  `e2e/invariants/logbook-stamp.spec.js` is its runtime half. The collection and its local-first store: `src/components/logbook/CLAUDE.md`.
+  The stamp art, its one tunable store, and its ink: `src/lib/CLAUDE.md`.
 - **The forward page-turn transition** (`src/components/page-turn/`) mounts an
   inert preview of the destination half — real (possibly still-sealed)
   content — underneath the active one during the animation. `SealBox`'s own
@@ -300,123 +197,34 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   callbacks (`onReveal`/`onStepInfo`) so the preview can't
   itself advance `revealedThrough` or double-report a step. Not a second
   reveal boundary — see ADR-0024. **Box Lines** (`components/boxlines/`) carries final scores on the lineup page; its gate is `api/boxlines/rows.js`, not the sheet — ADR-0069.
+- **Express Lane posters** (`src/api/expresslane/`): a poster URL is safe while the
+  PICTURE is not — every frame carries the broadcast scorebug burned into the pixels —
+  so a poster may render only inside an already-revealed play, and never as the
+  placeholder for the next clip.
 
-## The Logbook's passport book (`src/components/passport/`, ADR-0036)
+## Components with folder rules
 
-`/logbook` is a passport book: a club-coloured cover, cream pages, and stamps
-you place by tapping the page. Three rules, each with a reason:
-
-- **Geometry lives in `src/lib/passportLayout.js`**, not in these components.
-  Capacity, page aspect, margins, the deterministic per-game tilt, the
-  collision nudge and the auto-layout are all pure and unit-tested
-  (`test/passport-layout.test.js`). A component that types a coordinate has put
-  it somewhere nothing can check. Two conversions in that module are easy to
-  invert and one already was: a y-fraction converts to width-units by
-  **dividing** by `PAGE_ASPECT`, while a stamp's width-fraction converts to a
-  height-fraction by **multiplying**.
-- **A placement is `{ bookId, page, x, y, tilt }` with x/y as FRACTIONS**,
-  stored on the stamp record and synced (`src/lib/stamps.js`). Pixels would be
-  a fact about one screen; the same book has to render on a phone page and a
-  desktop spread, and on both of one user's devices. A book is separate
-  metadata (`src/lib/books.js` + `hooks/useBooks.js`) never holding the
-  collection itself — every device always has at least one (`DEFAULT_BOOK_ID`),
-  so `/logbook` opens it directly for as long as it's the only one; two or more
-  surface `LogbookShelf.jsx` instead. `passportLayout.js` needed no bookId
-  awareness at all — every function there already took a `stamps` array, and
-  the caller pre-filters it to one book first. ADR-0041.
-- **Minting and placing are separate.** The mint stays in the box score's
-  `SealBox` (ADR-0035); placing happens here via `?place={gamePk}`. An unplaced
-  stamp waits in the book's tray, so abandoning the flow never loses a keepsake.
-- **A placement is editable, and a move IS the placing flow.** Tapping a placed
-  stamp opens its options bar (open the game, move it, back to the tray) instead
-  of navigating; "Move it" re-enters placing mode on a stamp that already has a
-  placement. `placeStamp` was always a move as much as a first placement, so the
-  only things a move adds are `otherPlacementsOn`/`pageIsFullFor` in
-  `passportLayout.js` — the stamp must not collide with, or be counted against,
-  its OWN current spot. Do not build a second placement path.
-- **One thing in this book moves on its own**: the stamp you just confirmed
-  plays `passport-stamp-land` once — held above the paper, accelerating down
-  (`--ease-press`, the system's only ease-IN, because a stamp is *pushed*),
-  compressing 4% on impact, releasing to rest. Cleared by `animationend` so the
-  duration lives in the CSS alone, skipped rather than slowed under reduced
-  motion, and deliberately NOT fired by "place them all for me".
-- **The page is RULED into eight boxes** (`pageSlots()`, 2 across × 4 down),
-  drawn faintly so a blank page says where a stamp goes; it comes up while
-  placing and settles back after. `PAGE_CAPACITY` is `PAGE_COLUMNS * PAGE_ROWS`
-  and auto-layout fills those same boxes, so the guide, the tidy-up and "this
-  page holds 8" cannot disagree. It is a **guide, not a snap** — the tap still
-  decides (ADR-0036 rejected snapping and still does). The grid also absorbed
-  the dashed margin guide that used to be drawn on the tap target.
-- **A stamp is pressed in the winner's ink** — `lib/stampInk.js`, published as
-  `--stamp-ink` so any rule that sets `color` outright still wins (the mint
-  card's un-minted preview stays graphite). No winner, or a club with no colour
-  on file, means no property and the book's own navy.
-
-`PassportPage.jsx` is the ONE name added to `scripts/check-stamp-surfaces.mjs`'s
-allowlist since that guard was written — justified because a page's entire input
-is the user's own collection. `/logbook/stats` renders no stamp art and stays
-off it. Read ADR-0036 before adding a third name; the multi-book split
-(ADR-0041) renamed the `LogbookPage.jsx` entry to `LogbookCollection.jsx` rather
-than adding one, and `StampCollection.jsx` joined it the same way (read that
-script). `LogbookShelf.jsx`/`BookManagementSheet.jsx` draw no stamp art.
-
-## Notification cards, casing, color, and button copy (ADR-0017)
-
-Every mid-inning "something happened" moment in `PlayByPlay.jsx` sorts into one
-of three tiers — a fresh/changed actor (`PitcherNotice`/`FielderNotice`/
-`PinchRunNotice`/`BatterNotice` — a mid-inning pinch hitter gets the same "now
-batting" notice the pre-pitch staged list shows, for symmetry with every other
-substitution type), a team/administrative event (mound visit, ejection), or a
-baserunning/misc event with no plate appearance of its own (steal, wild pitch,
-balk, …) — and all three render in the *same* kraft-amber
-`.pitchernotice.pitchernotice--pbp` card, distinguished by what's inside (a
-headshot vs. a scorer's-shorthand code) rather than a colored accent rail.
-Read ADR-0017 before touching any of `PlayByPlay.jsx`'s notification
-components, `MoundVisitPips`, or `HalfInning.jsx`'s `PrePitchChanges` — it
-also covers the casing rule (no per-component `.toUpperCase()`, guarded by
-`scripts/check-name-casing.mjs`), the `--accent-positive`/`--accent-negative`
-color pairing, and the button/label conventions (chevron vs. destination-named
-link, "Reveal" always visible, accessible name contains the visible word).
-
-## Site search is the one dialog that isn't a sheet (ADR-0037)
-
-`SiteSearchModal` (`components/chrome/SiteSearch.jsx`) is a full-screen, top-anchored
-surface (`.searchoverlay`), **not** the shared `.scrim`/`.sheet` bottom sheet
-every other dialog here uses. Not a style choice: a docked sheet is positioned
-against the layout viewport, which an on-screen keyboard does not shrink, so the
-field and every result sat behind the keyboard the moment the field auto-focused.
-Read ADR-0037 before consolidating it back. Three things there are load-bearing —
-`useVisualViewport` sizing the overlay to the visible rectangle (no CSS unit
-reports where a keyboard starts; `100dvh` tracks browser chrome, not the
-keyboard), the document scroll lock, and a result row cancelling its own
-`pointerdown` so the keyboard can't retract mid-tap and reflow a different row
-under the finger. It is deliberately **not** portalled: the ALL-CAPS invariant is
-a `#root *` rule, and a portal to `<body>` lands outside it. `--fs-field` (16px)
-is the iOS auto-zoom floor, not a taste call. The recents shelf is pure and
-shape-gated in `lib/recentSearches.js` (identity fields only, never a score) with
-`hooks/useRecentSearches.js` over it; `e2e/site-search.spec.js` is the guard.
+- **The Logbook's passport book** (ADR-0036): `src/components/passport/CLAUDE.md`.
+- **Notification cards, casing, color, and button copy** (ADR-0017):
+  `src/components/playbyplay/CLAUDE.md`.
+- **Site search is the one dialog that isn't a sheet.** Do not consolidate it into
+  `.scrim`/`.sheet` (ADR-0037): `src/components/chrome/CLAUDE.md`.
 
 ## Design system (`src/styles/*` + `src/tokens/*`)
 
-**Look before you add a partial:** `/design-lab` renders every token, component and card/pill block — 31 cards against 12 shared components is what not looking cost (verdicts: `.scratch/design-system/inventory.md`). **Name a block for its job, never its shape:** the six-clause grammar is ADR-0084, and the 156 classes that break it — with the collapse issue that renames each — are the ledger in `docs/design-system-naming.md`. **One control, one door:** a button acts on this page and is `.btn` (`styles/system/button.css`, `ui/control/Button.jsx` — `size` tap/control, `skin` outline/ink/ghost/danger/seal, selected is `aria-pressed`); a door opens more and is `.door` (`system/door.css`). Never hand-draw a third.
+**Look before you add a partial:** `/design-lab` renders every token, component and
+card/pill block (verdicts: `.scratch/design-system/inventory.md`).
 
-`src/index.css` holds **no rules** — a banner comment and `@import`s: the six
-`src/tokens/*.css` files, then the `src/styles/NN-name.css` partials in cascade order.
-It is the **core** sheet, not every partial: `main.jsx` imports it, so every line
-render-blocks every route, and a partial only one lazy screen uses is imported by that
-screen instead (a per-route chunk; 521 KB blocking → 368 KB). Files stay in
-`src/styles/`, guards unchanged; index.css says which left, who owns each, and why.
+**Name a block for its job, never its shape:** the six-clause grammar is ADR-0084. The
+157 classes that break it, with the collapse issue that renames each, are the ledger in
+`docs/design-system-naming.md`.
 
-**Order is the contract.** The numeric prefix IS the cascade — later partials
-override earlier ones at equal specificity. Never reorder the `@import` list to
-tidy it; add a new partial where its rules belong, not at the end. To find a rule,
-grep `src/styles/` — the names say which surface each covers, and `motion/` is the
-animation layer (motion only, before `focus/`; **`docs/motion.md`**).
+**One control, one door:** a button acts on this page and is `.btn`
+(`styles/system/button.css`, `ui/control/Button.jsx` — `size` tap/control, `skin`
+outline/ink/ghost/danger/seal, selected is `aria-pressed`); a door opens more and is
+`.door` (`system/door.css`). Never hand-draw a third.
 
-`check-typography.mjs`, `check-focus-ring.mjs` and `check-strike-links.mjs` walk the
-whole directory TREE (subdirectories included), so a new partial is covered the moment
-it exists — and each fails loudly if pointed at rules-free files, which caught the
-first split rather than silently disabling them.
+`src/index.css` holds only imports; the partial order and the guards that walk it: `src/styles/CLAUDE.md`.
 
 The tiers are layered Carbon-style (ADR-0023): a **primitive** tier of raw values —
 `spacing.css` is the generic 4px scale + radii + border widths, `colors.css`'s
@@ -440,11 +248,8 @@ interior detail is drawn in a light fill into an unreadable blob. Read ADR-0031
 before changing how any of these render; the conversion itself lives in
 `src/lib/logoMono.js`.
 
-Type size, weight, leading, and tracking must use the semantic roles in
-`tokens/typography.css`; `scripts/check-typography.mjs` rejects ad hoc values. Small
-text is split BY JOB: `--fs-label` 12px display labels, `--fs-cell` 11px mono figures,
-`--fs-small` 13px running copy; `--fs-caption` is short body-face text only, and
-`scripts/check-caption-budget.mjs` only ever lets its count shrink. Focus rings use `var(--focus-ring)`/`var(--ring)`, on a band `--focus-ring-band`+`--ring-band` (`check-focus-ring.mjs`); text-on-
-background pairings hold WCAG AA (`check-contrast.mjs`) — ADR-0023. The ALL-CAPS
+Type, focus rings, and contrast use token roles: `src/styles/CLAUDE.md`.
+
+The ALL-CAPS
 invariant (`src/styles/01-base.css`) is guarded by `scripts/check-caps.mjs` and
 `scripts/check-name-casing.mjs` (no per-component `.toUpperCase()`; ADR-0017).
