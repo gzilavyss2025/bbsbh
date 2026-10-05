@@ -19,6 +19,7 @@ import {
   reasonForResponse,
   reduceSync,
   rollupSync,
+  syncOutcome,
 } from '../src/lib/account/syncStatus.js'
 
 const report = (state, channel, phase, extra = {}) =>
@@ -153,4 +154,25 @@ test('with no account at all every channel reads off, not a borrowed success', (
   const out = normalizeSilentChannels(initialSyncState(false))
   for (const channel of SYNC_CHANNELS) assert.equal(out[channel].phase, 'off')
   assert.equal(rollupSync(out), 'off')
+})
+
+// The publish half of every sync channel judges its replies here. `null` is a
+// success, a number is an HTTP failure, `undefined` is a throw — and a throw is
+// NOT "no failure", which is the mistake a bare `find` would make.
+test('syncOutcome: every publish landed reads synced', () => {
+  assert.deepEqual(syncOutcome([null, null]), ['synced', {}])
+  assert.deepEqual(syncOutcome([]), ['synced', {}])
+})
+
+test('syncOutcome: a 501 among the replies reads unavailable, not error', () => {
+  assert.deepEqual(syncOutcome([null, 501]), ['unavailable', { reason: 'server' }])
+})
+
+test('syncOutcome: an HTTP failure wins over a throw, so the status is kept', () => {
+  assert.deepEqual(syncOutcome([undefined, 401]), ['error', { reason: 'auth' }])
+  assert.deepEqual(syncOutcome([500]), ['error', { reason: 'server' }])
+})
+
+test('syncOutcome: a throw alone is a network error, never synced', () => {
+  assert.deepEqual(syncOutcome([null, undefined]), ['error', { reason: 'network' }])
 })
