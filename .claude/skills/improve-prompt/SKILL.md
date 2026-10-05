@@ -75,6 +75,22 @@ lowest effort that can do that job well. Do these steps in order.
    - Always state the effort. Opus 5.5 defaults to medium, Sonnet 5.5 and
      Fable 5.1 default to high, so an unstated effort picks different rungs.
    - A spoiler-rule change never goes below rung 7.
+   - Design work: more effort does not make a design better or more varied. Pick
+     the rung by kind of work, then spend on checking, not on thinking.
+
+     | Design work | Rung |
+     |---|---|
+     | Design-system code that follows a spec (token swap, a slice with a known pattern) | 3, or 4 when the slice merges many rules |
+     | Build a screen or card from a direction that is already settled | 4 |
+     | Explore directions for something new | 3, as a propose-3-or-4-directions step, then build only the one chosen |
+     | Hard visual problem: club-colour band layout, animation timing, a first try that failed | 5, or 7 |
+     | Design decision or ADR (naming, a token tier, how the seal looks) | 7 |
+     | Screenshots, dev server, list of what changed | 1, or 2 |
+     | Judge whether it looks right | 3 or 4, never rung 1 |
+
+     Split the decision from the build: one prompt picks the direction, a cheaper
+     prompt builds it. Name the palette and type, or point at the tokens in
+     `src/styles/`, so the model does not fall back to its default house style.
    - In a multi-agent run, match each phase: Haiku for survey and grep passes,
      Sonnet 5.5 medium for checks that need judgment, Sonnet 5.5 high or Opus 5.5
      high for synthesis and docs that must read well.
