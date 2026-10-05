@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { loadUmpire } from '../api/umpires.js'
 import { UmpireTendencies } from '../components/umpire/UmpireTendencies.jsx'
-import { gamePath } from '../lib/route.js'
+import { gamePath, umpirePath } from '../lib/route.js'
 import { ALL_MLB_TEAM_IDS, teamClubName } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -15,6 +15,10 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Button } from '../components/ui/control/Button.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { monthDayName } from '../lib/dates.js'
+import { seasonRangeLabel } from '../lib/seasons/view.js'
+import { useSeasonView } from '../hooks/seasons/useSeasonView.js'
+import { SeasonPicker } from '../components/season/SeasonPicker.jsx'
+import { UmpireSeasonCompare } from '../components/umpire/UmpireSeasonCompare.jsx'
 
 const TOP_VENUES_LIMIT = 5
 const HP_RECORDS_LIMIT = 10
@@ -93,8 +97,23 @@ function hpTeamRecords(games) {
 // dates and who-worked-what carry no score, so — unlike the player/team pages
 // this mirrors — there's no spoiler cutoff to thread through: the page just
 // shows the umpire's whole season.
-export function UmpirePage({ id }) {
-  const { loading, error, data } = useAsync(() => loadUmpire(id), [id])
+//
+// A season view (#1202): `seasonYear` and `vs` come from the address. The
+// seasons are the ASSIGNMENT store's, which goes back to 2023; pitch-call
+// accuracy starts in 2026, so an older season shows his games and no
+// Tendencies card (staticJson.js's seasonFolderOf gives a year before the
+// accuracy store's first no folder). Compare stacks the two
+// seasons in one small table (UmpireSeasonCompare).
+export function UmpirePage({ id, seasonYear, vs }) {
+  const view = useSeasonView('umpires', { seasonYear, vs })
+  const year = view?.shown
+  const umpire = useAsync(() => (view ? loadUmpire(id, { seasonYear: year }) : Promise.resolve(null)), [id, view != null, year])
+  const { error, data } = umpire
+  const loading = !view || umpire.loading
+  const { data: then } = useAsync(
+    () => (view?.vs ? loadUmpire(id, { seasonYear: view.vs }) : Promise.resolve(null)),
+    [id, view?.vs],
+  )
   const navigate = useNav()
   const [hpOnly, setHpOnly] = useState(false)
   const [showAllVenues, setShowAllVenues] = useState(false)
@@ -102,6 +121,21 @@ export function UmpirePage({ id }) {
   useDocumentTitle(data?.name || null)
 
   const back = () => window.history.back()
+  const pathFor = (season) => umpirePath(id, data?.name, season)
+  const picker = <SeasonPicker view={view} pathFor={pathFor} />
+  // A season he did not work: keep the picker, so the reader can pick another.
+  // That includes a bare /umpire/{id} for a man with no current-season games:
+  // his backfilled seasons are one tap away (#1202).
+  if (!loading && !error && !data && (seasonYear != null || view.seasons?.length > 1)) {
+    return (
+      <div className="screen umpire">
+        <SiteHeader />
+        <BackBtn onClick={back} />
+        {picker}
+        <p className="hint">No games on file for this umpire in {view.label}.</p>
+      </div>
+    )
+  }
   const gate = AsyncGate({ loading, error, data, screenClass: 'umpire', noun: 'umpire', onBack: back })
   if (gate) return gate
 
@@ -123,11 +157,28 @@ export function UmpirePage({ id }) {
     <div className="screen umpire">
       <SiteHeader />
       <BackBtn onClick={back} />
-
+      {picker}
+      {/* The Tendencies card names him. A season with no pitch-call accuracy
+          (before 2026, or a Triple-A-only umpire) has no card, so the name and
+          the season go here instead. */}
+      {!data.accuracy?.season?.called && (
+        <>
+          <header className="topbar">
+            <h1 className="topbar__title">{data.name}</h1>
+          </header>
+          <p className="hint">
+            {view.label}: {games.length} {games.length === 1 ? 'game' : 'games'}, {hpCount} behind the plate.{' '}
+            {data.accuracyAAA?.season?.called
+              ? 'Pitch-call accuracy is on file only for Triple-A. The game log shows it.'
+              : 'No pitch-call accuracy on file for this season.'}
+          </p>
+        </>
+      )}
+      {view.vs != null && <UmpireSeasonCompare now={data} then={then} year={year} vsYear={view.vs} />}
 
       <div className="umpage__toprow">
         <div className="umpage__tendcol">
-          <UmpireTendencies umpire={data} />
+          <UmpireTendencies umpire={data} label={seasonRangeLabel(data.accuracySeasons)} />
         </div>
         <div className="umpage__sidecol">
           {teams.length > 0 && (

@@ -18,6 +18,8 @@ import {
   similarHittersFor,
 } from '../savantPercentiles.js'
 import {
+  arsenalLevelOf,
+  arsenalMixRows,
   arsenalSidesView,
   arsenalTtoView,
   fetchPitchArsenalFor,
@@ -193,5 +195,29 @@ export async function loadPlayerAnalytics(id, asOf) {
     prospectCard: card?.view ?? null,
     prospectCardSportId: card?.sportId ?? null,
     prospectCardGroup: trendEntry?.group ?? primaryGroup,
+  }
+}
+
+// ONE PICKED SEASON of the pitching shelf's season-store cards (#1202): the
+// Pitches card (mix, heat band, times-through and side splits) and "Pitches
+// like". The tab calls this for a season other than the current one, and for
+// the vs season of a compare; the current season stays on loadPlayerAnalytics
+// above, whose mix is statsapi's. `seasonYear` is a year or 'all'. Null when he
+// threw too few pitches that season: the card's own empty state. The level is
+// the one he pitched at in THAT season (arsenalLevelOf), so the pool waits on
+// the shard.
+export async function loadArsenalSeason(id, { seasonYear } = {}) {
+  const shard = await fetchPitchArsenalFor(id, { seasonYear })
+  const isMlb = arsenalLevelOf(shard, id)
+  if (isMlb == null) return null
+  const pool = await fetchPitchArsenalPool(isMlb, { seasonYear })
+  const arsenal = arsenalMixRows(shard, id, isMlb)
+  if (!arsenal) return null
+  return {
+    arsenal,
+    heat: heatView(shard, id, isMlb),
+    tto: arsenalTtoView(shard, id, isMlb),
+    sides: arsenalSidesView(shard, id, isMlb),
+    similar: similarPitchersFor(pool, id),
   }
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { loadUmpireRankings } from '../api/umpires.js'
 import { fetchTodayPlateUmpireIds } from '../api/schedule.js'
 import { toApiDate } from '../lib/dates.js'
@@ -10,6 +11,10 @@ import { TierPill } from '../components/badges/TierPill.jsx'
 import { HomePlateIcon } from '../components/badges/UmpireTierGlyph.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Table } from '../components/ui/table/Table.jsx'
+import { umpireRankingsPath } from '../lib/route.js'
+import { SeasonPicker } from '../components/season/SeasonPicker.jsx'
+import { useSeasonView } from '../hooks/seasons/useSeasonView.js'
+import { boardCompare } from '../lib/seasons/view.js'
 
 const pct1 = (x) => `${(x * 100).toFixed(1)}%`
 
@@ -20,9 +25,28 @@ const pct1 = (x) => `${(x * 100).toFixed(1)}%`
 // this needs no SealBox. A row for an umpire slated behind the plate TODAY
 // gets a highlight + chip (fetchTodayPlateUmpireIds) — a schedule assignment,
 // same spoiler-free footing as the rest of this page.
-export function UmpireRankingsPage() {
+//
+// A season view (#1202): `seasonYear` and `vs` come from the address. The
+// highlight is TODAY's plate, so it lights a row whatever season is shown.
+export function UmpireRankingsPage({ seasonYear, vs }) {
   useDocumentTitle('Home Plate Umpire Rankings')
-  const { loading, error, data } = useAsync(() => loadUmpireRankings(), [])
+  const view = useSeasonView('umpire-accuracy', { seasonYear, vs })
+  const shown = view?.shown
+  const rankings = useAsync(
+    () => (view ? loadUmpireRankings({ seasonYear: shown }) : Promise.resolve(null)),
+    [view != null, shown],
+  )
+  const { error, data } = rankings
+  const loading = !view || rankings.loading
+  const { data: prev } = useAsync(
+    () => (view?.vs ? loadUmpireRankings({ seasonYear: view.vs }) : Promise.resolve(null)),
+    [view?.vs],
+  )
+  const [mode, setMode] = useState('change')
+  const prevById = new Map((prev?.ranked ?? []).map((u) => [u.id, u]))
+  const compare = prev
+    ? boardCompare({ vs: view.vs, mode, format: 'pct', value: (u) => u.accuracy, prevOf: (u) => prevById.get(u.id) })
+    : null
   const { data: todayIds } = useAsync(
     () => fetchTodayPlateUmpireIds(toApiDate()),
     [],
@@ -38,8 +62,10 @@ export function UmpireRankingsPage() {
         <h1 className="topbar__title">Home Plate Umpire Rankings</h1>
       </header>
 
+      <SeasonPicker view={view} pathFor={umpireRankingsPath} mode={mode} onMode={setMode} />
+
       <p className="hint">
-        {data?.season ? `${data.season} season ` : 'Season '}
+        {view?.label ? `${view.label} ${shown === 'all' ? 'seasons' : 'season'} ` : 'Season '}
         called-pitch accuracy for every plate umpire with at least a handful of starts behind
         the plate. Tiers are set by standard deviation from the league mean, not an even split —
         {spread != null
@@ -62,6 +88,7 @@ export function UmpireRankingsPage() {
               <th className="team">Umpire</th>
               <th>Tier</th>
               <th>Accuracy</th>
+              {compare && <th>{compare.head}</th>}
               <th>Games</th>
             </tr>
           </thead>
@@ -73,7 +100,9 @@ export function UmpireRankingsPage() {
               >
                 <td className="team">
                   <span className="umprank__rank">{u.rank}</span>
-                  <UmpireLink id={u.id}>{u.name}</UmpireLink>
+                  <UmpireLink id={u.id} seasonYear={shown}>
+                    {u.name}
+                  </UmpireLink>
                   {todayPlateIds.has(u.id) && (
                     <span className="umprank__todaychip" role="img" aria-label="Behind the plate today">
                       <HomePlateIcon />
@@ -84,6 +113,7 @@ export function UmpireRankingsPage() {
                   <TierPill tier={u.tier} />
                 </td>
                 <td>{pct1(u.accuracy)}</td>
+                {compare && <td>{compare.cell(u)}</td>}
                 <td>{u.games}</td>
               </tr>
             ))}

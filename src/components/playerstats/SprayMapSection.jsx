@@ -2,6 +2,7 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { SprayMap } from '../charts/SprayMap.jsx'
 import { fetchSprayFor, sprayView } from '../../api/spray.js'
 import { useAsync } from '../../hooks/useAsync.js'
+import { SeasonStack } from '../season/SeasonStack.jsx'
 
 // The player page's mount for the season spray map. Self-fetching like
 // FoulCard and MilestoneWatchCard: it reads the batter's own bucket
@@ -18,21 +19,40 @@ import { useAsync } from '../../hooks/useAsync.js'
 //   • under the card's balls-in-play floor (MIN_SPRAY_BIP), where the dots
 //     would be anecdotes.
 //
+// A season view (#1202), like FoulCard: `seasonYear` and `label` are the
+// picked season, and `vs` stacks a second season's map under it.
+//
 // Deliberately ONE self-contained block, title and all, so the whole card
 // relocates as a two-line move when the player page is split into tabs.
-export function SprayMapSection({ playerId, group, asOf }) {
+export function SprayMapSection({ playerId, group, asOf, seasonYear, label, vs = null }) {
   const skip = !!asOf || group !== 'hitting'
   const { data } = useAsync(
-    () => (skip ? Promise.resolve(null) : fetchSprayFor(playerId)),
-    [skip, playerId],
+    () => (skip ? Promise.resolve(null) : fetchSprayFor(playerId, { seasonYear })),
+    [skip, playerId, seasonYear],
+  )
+  const { data: before } = useAsync(
+    () => (skip || vs == null ? Promise.resolve(null) : fetchSprayFor(playerId, { seasonYear: vs })),
+    [skip, playerId, vs],
   )
   const view = skip ? null : sprayView(data, playerId)
-  if (!view) return null
+  const prev = skip || vs == null ? null : sprayView(before, playerId)
+  if (!view && !prev) return null
 
+  const note = label ? `${label} · where his hits land` : 'where his hits land'
   return (
     <>
-      <SectionHead look="rule" note="where his hits land">Spray map</SectionHead>
-      <SprayMap view={view} />
+      <SectionHead look="rule" note={note}>Spray map</SectionHead>
+      {vs == null ? (
+        <SprayMap view={view} />
+      ) : (
+        <SeasonStack
+          empty="Too few balls in play on file"
+          seasons={[
+            { year: label, body: view && <SprayMap view={view} /> },
+            { year: vs, body: prev && <SprayMap view={prev} /> },
+          ]}
+        />
+      )}
     </>
   )
 }

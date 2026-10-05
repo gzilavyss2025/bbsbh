@@ -83,7 +83,9 @@ export function staticJsonBy(urlFor, { shape = (d) => d, fallback = null } = {})
 // January 1 it still names last season. Memoized per store, like every read
 // here; `{ seasons: [], current: null }` when the index is missing.
 const seasonIndexes = new Map()
-function seasonIndexOf(store) {
+// The whole index is what a page's season picker reads
+// (lib/seasons/view.js's resolveSeasonView).
+export function seasonIndexOf(store) {
   if (!seasonIndexes.has(store)) {
     seasonIndexes.set(
       store,
@@ -108,11 +110,13 @@ export async function seasonsOf(store) {
 
 // THE ONE RULE FOR "WHICH SEASON" (#1201). A reader of a season store takes
 // `{ seasonYear }`: a year, `'all'`, or nothing. Nothing means `current`. A
-// year that is not on file means `current` too. The stores sweep no spring
+// year AFTER the last on file means `current` too. The stores sweep no spring
 // training, so a new season's year is not on file until Opening Day: a spring
 // 2027 game page reads 2026, as it did before #1201, and never a blank card or
 // a 404. The same holds for an index memoized before the nightly run added a
-// season. `'all'` is the store's `all/` folder, which holds only the
+// season. A year BEFORE the first on file (or in a gap) means nothing: the
+// store never covered it, and `current` would print 2026's figures beside a
+// 2024 game (#1202). `'all'` is the store's `all/` folder, which holds only the
 // league-wide files; a reader of ONE player's shard adds the seasons up
 // instead (readSeasonShard).
 //
@@ -125,7 +129,8 @@ export async function seasonFolderOf(store, seasonYear) {
   const { seasons, current } = await seasonIndexOf(store)
   if (seasonYear == null) return current
   const year = Number(seasonYear)
-  return seasons.includes(year) ? year : current
+  if (seasons.includes(year)) return year
+  return seasons.length > 0 && year > Math.max(...seasons) ? current : null
 }
 
 // One whole file of a season store, `/data/{store}/{folder}/{file}`, memoized

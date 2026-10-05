@@ -22,7 +22,10 @@ import { umpirePath } from '../../lib/route.js'
 // almost no caller has to say anything. A caller whose children are ART (a
 // headshot, a club mark) has no string to borrow and should pass `name`
 // explicitly; without it the link still works, just at the bare-id address.
-export function UmpireLink({ id, name, className = '', onOpen = null, children }) {
+//
+// `seasonYear` opens the page on that season (#1202), so a 2025 board links to
+// each man's 2025 page. Left out, the page opens on the current season.
+export function UmpireLink({ id, name, seasonYear, className = '', onOpen = null, children }) {
   const navigate = useNav()
   if (!id) {
     return <span className={className}>{children}</span>
@@ -31,7 +34,7 @@ export function UmpireLink({ id, name, className = '', onOpen = null, children }
     <button
       type="button"
       className={`plink ${className}`}
-      onClick={onOpen ?? (() => navigate(umpirePath(id, name ?? nameFromChildren(children))))}
+      onClick={onOpen ?? (() => navigate(umpirePath(id, name ?? nameFromChildren(children), { seasonYear })))}
     >
       {children}
     </button>

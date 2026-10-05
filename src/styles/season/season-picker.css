@@ -1,0 +1,15 @@
+/* THE SEASON PICKER (#1202, components/season/SeasonPicker.jsx): up to three
+   labelled rows of Pill controls. The pills draw themselves (system/pill.css);
+   a Stack spaces the rows; this sets only the block's margin and the row labels. Imported by the component, so
+   only a season view pays for it. */
+.seasonpick {
+  margin-block: var(--space-3);
+}
+
+.seasonpick__label {
+  min-width: 64px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}

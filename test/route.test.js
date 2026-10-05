@@ -39,6 +39,9 @@ import {
   teamPhotosPath,
   situationalRecordsPath,
   umpirePath,
+  umpireRankingsPath,
+  foulsPath,
+  absChallengesPath,
   gamePhotosPath,
   logbookPath,
   logbookStatsPath,
@@ -1174,4 +1177,111 @@ test('/game-notes?team=all is the every-club pick, and gameNotesPath writes it',
   assert.deepEqual(parseRoute('/game-notes?team=all'), { name: 'game-notes', teamId: 'all' })
   assert.equal(gameNotesPath('all'), '/game-notes?team=all')
   assert.deepEqual(parseRoute(gameNotesPath('all')), { name: 'game-notes', teamId: 'all' })
+})
+
+// --------------------------------------------------------------------------
+// The season views (#1202): a season-store page carries its season as a path
+// segment and a compare season as `?vs=`. No segment is the current season, so
+// the bare address keeps the exact shape it always had. A bad year is no year:
+// the page falls back to the current season.
+// --------------------------------------------------------------------------
+const SEASON_PAGES = [
+  ['/fouls', { name: 'fouls' }],
+  ['/umpires', { name: 'umpire-rankings' }],
+  ['/abs-challenges', { name: 'abs-challenges' }],
+  ['/umpire/pat-hoberg-427044', { name: 'umpire', id: '427044' }],
+  [
+    '/player/william-contreras-661388/analytics',
+    { name: 'player-analytics', id: '661388', asOf: null, sportId: null },
+  ],
+]
+
+test('a season-store page with no season segment is the current season', () => {
+  for (const [path, route] of SEASON_PAGES) assert.deepEqual(parseRoute(path), route, path)
+})
+
+test('a season segment is one season, and "all" is every season on file', () => {
+  for (const [path, route] of SEASON_PAGES) {
+    assert.deepEqual(parseRoute(`${path}/2026`), { ...route, seasonYear: 2026 }, path)
+    assert.deepEqual(parseRoute(`${path}/all`), { ...route, seasonYear: 'all' }, path)
+  }
+})
+
+test('?vs= compares the shown season with another one', () => {
+  for (const [path, route] of SEASON_PAGES) {
+    assert.deepEqual(
+      parseRoute(`${path}/2027?vs=2026`),
+      { ...route, seasonYear: 2027, vs: 2026 },
+      path,
+    )
+    // No segment is the current season, which the page knows and the address
+    // does not: the compare season still rides along.
+    assert.deepEqual(parseRoute(`${path}?vs=2026`), { ...route, vs: 2026 }, path)
+  }
+})
+
+test('a bad year falls back to the current season, and a bad ?vs= is no compare', () => {
+  for (const [path, route] of SEASON_PAGES) {
+    for (const bad of ['nope', '1200', '9999', '2026.5', '20260', 'ALL']) {
+      assert.deepEqual(parseRoute(`${path}/${bad}`), route, `${path}/${bad}`)
+      assert.deepEqual(parseRoute(`${path}/2027?vs=${bad}`), { ...route, seasonYear: 2027 }, bad)
+    }
+    // Compare is two seasons. "All" is already every season, and a season
+    // against itself is no comparison.
+    assert.deepEqual(parseRoute(`${path}/all?vs=2026`), { ...route, seasonYear: 'all' }, path)
+    assert.deepEqual(parseRoute(`${path}/2026?vs=2026`), { ...route, seasonYear: 2026 }, path)
+  }
+})
+
+test('the player season segment rides the cutoff query, and only the Analytics tab takes one', () => {
+  assert.deepEqual(parseRoute('/player/661388/analytics/2026?d=2026-07-05&s=11&vs=2025'), {
+    name: 'player-analytics',
+    id: '661388',
+    asOf: '2026-07-05',
+    sportId: 11,
+    seasonYear: 2026,
+    vs: 2025,
+  })
+  // Another tab takes no season: a fourth segment there is not a season view.
+  assert.equal('seasonYear' in parseRoute('/player/661388/stats/2026'), false)
+})
+
+test('the season path builders write the segment and the compare query', () => {
+  assert.equal(foulsPath(), '/fouls')
+  assert.equal(foulsPath({ seasonYear: 2026 }), '/fouls/2026')
+  assert.equal(foulsPath({ seasonYear: 'all' }), '/fouls/all')
+  assert.equal(foulsPath({ seasonYear: 2027, vs: 2026 }), '/fouls/2027?vs=2026')
+  // "All" and a season against itself carry no compare.
+  assert.equal(foulsPath({ seasonYear: 'all', vs: 2026 }), '/fouls/all')
+  assert.equal(foulsPath({ seasonYear: 2026, vs: 2026 }), '/fouls/2026')
+  assert.equal(umpireRankingsPath(), '/umpires')
+  assert.equal(umpireRankingsPath({ seasonYear: 2025 }), '/umpires/2025')
+  assert.equal(absChallengesPath({ seasonYear: 'all' }), '/abs-challenges/all')
+  assert.equal(umpirePath(427044, 'Pat Hoberg', { seasonYear: 2024 }), '/umpire/pat-hoberg-427044/2024')
+  assert.equal(umpirePath(427044, null, { seasonYear: 2026, vs: 2025 }), '/umpire/427044/2026?vs=2025')
+  assert.equal(
+    playerTabPath(661388, 'analytics', { name: 'William Contreras', seasonYear: 2026, vs: 2025, d: '2026-07-05' }),
+    '/player/william-contreras-661388/analytics/2026?d=2026-07-05&vs=2025',
+  )
+  assert.equal(playerTabPath(661388, 'analytics', { seasonYear: 'all' }), '/player/661388/analytics/all')
+  // Only the Analytics tab is a season view.
+  assert.equal(playerTabPath(661388, 'stats', { seasonYear: 2026 }), '/player/661388/stats')
+})
+
+test('every season path round-trips through parseRoute', () => {
+  const opts = [{}, { seasonYear: 2026 }, { seasonYear: 'all' }, { seasonYear: 2027, vs: 2026 }]
+  for (const o of opts) {
+    const want = { ...(o.seasonYear != null && { seasonYear: o.seasonYear }), ...(o.vs != null && { vs: o.vs }) }
+    assert.deepEqual(parseRoute(foulsPath(o)), { name: 'fouls', ...want })
+    assert.deepEqual(parseRoute(umpireRankingsPath(o)), { name: 'umpire-rankings', ...want })
+    assert.deepEqual(parseRoute(absChallengesPath(o)), { name: 'abs-challenges', ...want })
+    assert.deepEqual(parseRoute(umpirePath(427044, 'Pat Hoberg', o)), { name: 'umpire', id: '427044', ...want })
+    assert.deepEqual(parseRoute(playerTabPath(661388, 'analytics', o)), {
+      name: 'player-analytics',
+      id: '661388',
+      asOf: null,
+      sportId: null,
+      ...want,
+    })
+  }
 })

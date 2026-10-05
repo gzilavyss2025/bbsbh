@@ -121,7 +121,7 @@ export function UmpireAccuracyModal({ id, seasonYear, onClose }) {
         )}
 
         {data && (
-          <button type="button" className="btn btn--ink btn--next umpmodal__full" onClick={() => { onClose(); navigate(umpirePath(id, data?.name)) }}>
+          <button type="button" className="btn btn--ink btn--next umpmodal__full" onClick={() => { onClose(); navigate(umpirePath(id, data?.name, { seasonYear: data?.season ?? seasonYear })) }}>
             Full umpire page
           </button>
         )}

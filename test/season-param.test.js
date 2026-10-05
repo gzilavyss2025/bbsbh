@@ -55,7 +55,8 @@ test('seasonFolderOf: nothing is current, a year must be on file, all is all', a
   assert.equal(await seasonFolderOf('spray'), 2027)
   assert.equal(await seasonFolderOf('spray', 2026), 2026)
   assert.equal(await seasonFolderOf('spray', '2026'), 2026) // a feed's season is a string
-  assert.equal(await seasonFolderOf('spray', 1850), 2027) // not on file: the latest
+  assert.equal(await seasonFolderOf('spray', 2028), 2027) // after the last: the latest
+  assert.equal(await seasonFolderOf('spray', 1850), null) // before the first: nothing
   assert.equal(await seasonFolderOf('spray', 'all'), 'all')
 })
 
@@ -65,7 +66,7 @@ test('a reader with a year reads that folder; with no year, the current one', as
   assert.deepEqual((await urlsOf(() => fetchSprayFor(202))).urls, ['/data/spray/2027/02.json'])
 })
 
-test('a year not on file reads the latest season, never nothing', async () => {
+test('a year after the last on file reads the latest season, never nothing', async () => {
   // A spring-training game of a new season: the stores sweep no spring games,
   // so that year is not on file until Opening Day. The card shows last season,
   // as it did before #1201.
@@ -73,8 +74,26 @@ test('a year not on file reads the latest season, never nothing', async () => {
   const one = await urlsOf(() => fetchFoulsFor(303, { seasonYear: 2028 }))
   assert.deepEqual(one.urls, ['/data/fouls/2027/03.json'])
   assert.equal(one.value.season, 2027)
-  const board = await urlsOf(() => fetchFouls({ seasonYear: 1850 }))
+  const board = await urlsOf(() => fetchFouls({ seasonYear: 2028 }))
   assert.equal(board.value.season, 2027)
+})
+
+test('a year before the first on file reads nothing, never another season', async () => {
+  // A 2025 game page asks a store that starts in 2026. The latest season would
+  // print 2026's figures under the 2025 game, so the card has nothing to show.
+  const { fetchFoulsFor, fetchFouls } = await import('../src/api/fouls.js')
+  const { fetchSprayFor } = await import('../src/api/spray.js')
+  const { fetchPitchArsenalFor } = await import('../src/api/pitchArsenal.js')
+  for (const call of [
+    () => fetchFoulsFor(303, { seasonYear: 2025 }),
+    () => fetchFouls({ seasonYear: 2025 }),
+    () => fetchSprayFor(101, { seasonYear: '2025' }),
+    () => fetchPitchArsenalFor(404, { seasonYear: 2025 }),
+  ]) {
+    const { value, urls } = await urlsOf(call)
+    assert.equal(value, null)
+    assert.deepEqual(urls, [])
+  }
 })
 
 test("a leader board's 'all' reads the all/ file, and a missing one is the fallback", async () => {

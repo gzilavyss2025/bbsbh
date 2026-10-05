@@ -47,6 +47,8 @@
 //   '/team/{name-id}'                   -> { name: 'team', id, asOf, sportId }
 //   '/umpire/{name-id}'                 -> { name: 'umpire', id }
 //   '/umpires'                          -> { name: 'umpire-rankings' }
+//   '/fouls' '/umpires' '/abs-challenges' '/umpire/{name-id}' '/player/{name-id}/analytics'
+//     + '/{year|all}?vs={year}'         -> + { seasonYear, vs }  (a season view; seasons/route.js)
 //   '/scout', '/scout/{pitcher}/{hitter}' -> { name: 'scout', ... }  (Matchup Scout; scout/route.js)
 //   '/situational-records'              -> { name: 'situational-records', asOf, sportId, metric, half, month }
 //                                          (one situational record, every club at one level, ranked.
@@ -125,6 +127,7 @@
 import { REPORT_ROUTES } from './reportPages.js'
 import { parseRecordsRoute } from './postseason/recordsRoute.js'
 import { parseScoutRoute } from './scout/route.js'
+import { parseSeasonRoute, seasonPath } from './seasons/route.js'
 import { SPORT_IDS, teamFullName } from './teams.js'
 import {
   WINTER_LEAGUES,
@@ -328,6 +331,8 @@ export function parseRoute(url) {
       ? { name: 'home', date, sportId: sport, ...league }
       : { name: 'home', sportId: sport, ...league }
   }
+  const season = parseSeasonRoute(parts, q, { asOf, sportId, idFromSlug })
+  if (season) return season
   if (parts.length === 1 && parts[0] === 'logos') return { name: 'logos' }
   if (parts.length === 1 && parts[0] === 'about') return { name: 'about' }
   if (parts.length === 1 && parts[0] === 'more') return { name: 'more' }
@@ -349,7 +354,6 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'all-star-legacy')
     return { name: 'all-star-legacy' }
   if (parts.length === 1 && parts[0] === 'standings') return { name: 'standings' }
-  if (parts.length === 1 && parts[0] === 'fouls') return { name: 'fouls' }
   // Admin copy editor — the site owner tunes consent-pop-up wording here. Not
   // linked from anywhere in the app; reachable by URL and gated to a Clerk
   // admin (see AdminCopy.jsx + api/copy.js). Parsed regardless so a stray
@@ -398,7 +402,6 @@ export function parseRoute(url) {
   // A stray '/profile/x' therefore falls through to the slate, same forgiving
   // shape as every other unknown second segment here.
   if (parts.length === 1 && parts[0] === 'profile') return { name: 'profile' }
-  if (parts.length === 1 && parts[0] === 'umpires') return { name: 'umpire-rankings' }
   // Single-segment report pages — table in lib/reportPages.js, beside the menu
   // rows that link to them, so an address and its parse cannot drift.
   if (parts.length === 1 && REPORT_ROUTES[parts[0]]) return { name: REPORT_ROUTES[parts[0]] }
@@ -563,8 +566,6 @@ export function parseRoute(url) {
   }
   // Umpires carry no spoiler-cutoff hint: assignments/dates are never
   // score-revealing, so unlike player/team links there's no `?d=`/`?s=` to parse.
-  if (parts.length === 2 && parts[0] === 'umpire')
-    return { name: 'umpire', id: idFromSlug(parts[1]) }
   // Managers carry no spoiler-cutoff hint either — a coaching career/awards
   // record is never score-revealing, same footing as umpires above.
   if (parts.length === 2 && parts[0] === 'manager')
@@ -809,10 +810,11 @@ export function playerPath(id, opts = {}) {
 // reason: a player page opened at a dated URL must keep `?d=`/`?s=` across a tab
 // switch, or one visit would answer "entering July 5" on one tab and "today" on
 // the next.
+// The Analytics tab also takes `seasonYear` and `vs` (#1202).
 export function playerTabPath(id, tab, opts = {}) {
-  return tab === 'overview'
-    ? playerPath(id, opts)
-    : `/player/${entitySegment(id, opts.name)}/${tab}${linkQuery(opts)}`
+  if (tab === 'overview') return playerPath(id, opts)
+  const base = `/player/${entitySegment(id, opts.name)}/${tab}`
+  return tab === 'analytics' ? seasonPath(base, opts, linkQuery(opts)) : `${base}${linkQuery(opts)}`
 }
 export function teamPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}${linkQuery(opts)}`
@@ -861,8 +863,11 @@ export function tradeDeadlinePath() {
 export function tradeDeadlineSeasonPath(year) {
   return `/trade-deadline/${year}`
 }
-export function umpirePath(id, name) {
-  return `/umpire/${entitySegment(id, name)}`
+export function umpirePath(id, name, season = {}) {
+  return seasonPath(`/umpire/${entitySegment(id, name)}`, season)
+}
+export function umpireRankingsPath(season = {}) {
+  return seasonPath('/umpires', season)
 }
 // The league-wide view of ONE situational record. `metric` is a row id from
 // teamRecords.js's RECORD_GROUPS / COUNT_METRICS, `half` a HALVES key — this is
@@ -887,8 +892,8 @@ export function situationalRecordsPath({ category, metric, half, month, sort, or
 export function managerPath(id, name) {
   return `/manager/${entitySegment(id, name)}`
 }
-export function foulsPath() {
-  return '/fouls'
+export function foulsPath(season = {}) {
+  return seasonPath('/fouls', season)
 }
 // The league run value board. No arguments: the role filter and the club filter
 // are page state, not an address, the same call StandingsPage and the four
@@ -898,8 +903,8 @@ export function runValuePath() {
 }
 // The league ABS challenge board, for the same reason and with the same shape:
 // the level chip and every board's sort are page state, not an address.
-export function absChallengesPath() {
-  return '/abs-challenges'
+export function absChallengesPath(season = {}) {
+  return seasonPath('/abs-challenges', season)
 }
 export function gamePhotosPath(gamePk) {
   return `/photos/${gamePk}`

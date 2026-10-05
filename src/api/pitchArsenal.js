@@ -119,6 +119,36 @@ export function pitchArsenalFor(data, personId, isMlb, stand = null) {
     .sort((a, b) => b.pitches - a.pitches)
 }
 
+// Which level a picked season's card reads: true for MLB, false for Triple-A,
+// null when he is not in the shard. The level he threw the most pitches at in
+// THAT season, never the level he pitches at now — a man in Triple-A in 2025
+// and MLB in 2026 has a 2025 card from his AAA mix (#1202).
+export function arsenalLevelOf(data, personId) {
+  const entry = data?.pit?.[personId]
+  if (!entry) return null
+  const count = (types) => (types ?? []).reduce((sum, t) => sum + (t.pitches ?? 0), 0)
+  return count(entry.mlb) >= count(entry.aaa)
+}
+
+// The player page's Pitches card on a PICKED season (#1202). The live card
+// reads statsapi's pitchArsenal (person/advanced.js's arsenalView) for the
+// current season; a past season, or every season combined, comes from this
+// store. Same rows, so the card changes nothing: { code, name, velo, usage (a
+// fraction), count }, most-thrown first. Null under the same floor as
+// pitchArsenalFor — a season he did not pitch is no card, never zeros.
+export function arsenalMixRows(data, personId, isMlb) {
+  const rows = pitchArsenalFor(data, personId, isMlb)
+  return rows
+    ? rows.map((t) => ({
+        code: t.code,
+        name: t.description || t.code,
+        velo: t.avgVelo ?? null,
+        usage: t.pct / 100,
+        count: t.pitches,
+      }))
+    : null
+}
+
 // One pitch type as ONE side of the plate saw it, unpacked from the `vs` pair
 // the generator writes: [pitches, avgVelo] and, when that side reached past a
 // first look, its own times-through pairs. Null for a side he never threw this

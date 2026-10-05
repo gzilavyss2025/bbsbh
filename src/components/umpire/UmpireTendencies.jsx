@@ -113,7 +113,9 @@ function Tile({ label, value, sup }) {
   )
 }
 
-export function UmpireTendencies({ umpire }) {
+// `label` names the seasons the figures cover ('2026', or '2026–2027' for a
+// combined view, #1202); it defaults to the shard's own season.
+export function UmpireTendencies({ umpire, label = umpire?.season }) {
   const season = umpire?.accuracy?.season
   // Same guard PlateAccuracyCard uses: an umpire with no plate-accuracy record
   // (MiLB, or the nightly sweep hasn't reached him) gets no card at all rather
@@ -137,7 +139,7 @@ export function UmpireTendencies({ umpire }) {
         house
         as="h2"
         className="umptend__bar"
-        note={umpire.season && <span className="umptend__season">{umpire.season}</span>}
+        note={label && <span className="umptend__season">{label}</span>}
       >
         Umpire tendencies
       </SectionHead>
@@ -193,7 +195,7 @@ export function UmpireTendencies({ umpire }) {
           went on promising freshness it had no way to check. A date can be
           read and disbelieved; a claim cannot. */}
       <div className="umptend__prov">
-        {umpire.season && `${umpire.season} season · `}
+        {label && `${label} season${String(label).includes('–') ? 's' : ''} · `}
         {season.games} scored {season.games === 1 ? 'game' : 'games'}
         {umpire.generatedAt && ` · updated ${humanDate(umpire.generatedAt.slice(0, 10))}`}
       </div>

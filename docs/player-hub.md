@@ -19,6 +19,7 @@ loader imports.
 | `/player/{slug-id}` | `player` | `src/screens/PlayerPage.jsx` (Overview) |
 | `/player/{slug-id}/stats` | `player-stats` | `src/screens/player/PlayerStatsTab.jsx` |
 | `/player/{slug-id}/analytics` | `player-analytics` | `src/screens/player/PlayerAnalyticsTab.jsx` |
+| `/player/{slug-id}/analytics/{year\|all}?vs={year}` | `player-analytics` + `seasonYear`, `vs` | the same tab, on a picked season (#1202, ADR-0086) |
 | `/player/{slug-id}/history` | `player-history` | `src/screens/player/PlayerHistoryTab.jsx` |
 
 The Overview is the bare address, exactly as `TeamPage.jsx` is the team hub's —
