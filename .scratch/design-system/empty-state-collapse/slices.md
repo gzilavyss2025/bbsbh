@@ -27,6 +27,10 @@ E2 counts 11 files, one over the target of 10. Ten of them lose one prop
 
 ---
 
+**After E1:** `prompts-e2-e8.md` corrects this plan. `emptyProse` has 23
+callers, not 10, so E2 is 24 files, and E7 also waits for E2. Read its "What
+E1 taught" before any slice.
+
 ## Before any slice
 
 1. Done: Gary answered `decisions.md` on 2026-10-05, all four as recommended.

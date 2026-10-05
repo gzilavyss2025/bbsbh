@@ -14,6 +14,7 @@ import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { Door } from '../../components/ui/control/Door.jsx'
+import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { loadTransactions } from './data/loadTransactions.js'
 
 // ===========================================================================
@@ -157,7 +158,7 @@ function ClubLedger({ team, asOf, first, onBack }) {
       </header>
 
       {days.length === 0 ? (
-        <p className="hint txpage__empty">No roster moves posted for this club yet.</p>
+        <EmptyState className="txpage__empty">No roster moves posted for this club yet.</EmptyState>
       ) : (
         <div className="txpage__days">
           {visible.map((day) => (
