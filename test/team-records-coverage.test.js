@@ -58,5 +58,8 @@ test('no ledger is not complete; no decided game yet is nothing to check', () =>
 
 test('the Numbers tab drops an incomplete ledger before the card sees it', () => {
   const src = readFileSync(new URL('../src/screens/team/data/loadNumbers.js', import.meta.url), 'utf8')
-  assert.match(src, /ledgerIsComplete\(teamRecordsData, schedule, /)
+  // The schedule runs into October; the ledger holds regular-season games only, so the
+  // check must be handed the 'R' rows or a club's postseason games would hide its card.
+  assert.match(src, /ledgerIsComplete\(teamRecordsData, regularSchedule, /)
+  assert.match(src, /regularSchedule = schedule\.filter\(\(g\) => g\.gameType === 'R'\)/)
 })

@@ -2,6 +2,8 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
   DEFAULT_AWARD_ORDER,
+  MAJOR_AWARDS,
+  isPostseasonAward,
   awardChipsView,
   awardLeague,
   awardsView,
@@ -237,4 +239,21 @@ test('a custom order re-leads the chips exactly as it re-leads the tables', () =
 
 test('no awards means no chips', () => {
   assert.deepEqual(awardChipsView([], DEFAULT_AWARD_ORDER, 3), [])
+})
+
+// The league-wide Awards History page loops MAJOR_AWARDS (scripts/gen-awards-history.mjs), so
+// an award that is not on this list never reaches it. The postseason MVPs are majors, and
+// they are decided in October. Ids and labels checked live 2026-10-05 (2025: Yamamoto,
+// Guerrero Jr., Ohtani).
+test('the World Series MVP and both LCS MVPs are majors, under the labels the ledger already uses', () => {
+  assert.equal(MAJOR_AWARDS.WSMVP, 'World Series MVP')
+  assert.equal(MAJOR_AWARDS.ALCSMVP, 'LCS MVP')
+  assert.equal(MAJOR_AWARDS.NLCSMVP, 'LCS MVP')
+  assert.equal(rankKeyOf({ id: 'WSMVP', name: 'Willie Mays World Series MVP' }), 'World Series MVP')
+  assert.equal(rankKeyOf({ id: 'NLCSMVP', name: 'NLCS MVP' }), 'LCS MVP')
+})
+
+test('a postseason award is named, so the history page does not print a regular-season line under it', () => {
+  for (const id of ['WSMVP', 'ALCSMVP', 'NLCSMVP']) assert.equal(isPostseasonAward(id), true)
+  for (const id of ['ALMVP', 'ALCY', 'MLBRC', 'ASMVP', undefined]) assert.equal(isPostseasonAward(id), false)
 })

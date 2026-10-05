@@ -54,6 +54,8 @@ export const BLOWOUT_MARGIN = 5
 // src/api/logbook.js for the other half of that shape.
 export const REGULATION_INNINGS = 9
 
+const POSTSEASON_TYPES = new Set(['F', 'D', 'L', 'W'])
+
 // The empty result, so a caller destructures the same shape whether the
 // collection is empty, still resolving, or complete. Every list is a list and
 // every count is a number — the page never has to null-check a field.
@@ -68,6 +70,7 @@ function emptyStats() {
     oneRunGames: 0,
     shutouts: 0,
     extraInningGames: 0,
+    postseasonGames: 0,
     blowouts: 0,
     dateRange: null,
     seasons: [],
@@ -253,6 +256,10 @@ export function computeLogbookStats(stamps, gameFacts) {
     if (Number.isInteger(game.innings) && game.innings > REGULATION_INNINGS) {
       out.extraInningGames += 1
     }
+    // October, by the game type both producers already write (F/D/L/W). Counted
+    // beside the book, never split out of it: a postseason game you stamped is a game
+    // you sat through.
+    if (POSTSEASON_TYPES.has(game.gameType)) out.postseasonGames += 1
 
     // Home vs. road, read as "which dugout won the games you logged". A stamp
     // carries no attendance record, so this can never mean "games you saw in

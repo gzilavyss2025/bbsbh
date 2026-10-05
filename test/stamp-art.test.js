@@ -51,6 +51,8 @@ import { stampLogoTuning, stampLogoTuningRecord } from '../src/lib/stampLogoTuni
 import STAMP_LOGO_TUNING from '../src/lib/data/stamp-logo-tuning.json' with { type: 'json' }
 import { revealStampFacts } from '../src/api/linescore.js'
 import { stampGameFacts } from '../src/api/logbook.js'
+import { stampBottomText, stampSeriesText } from '../src/lib/stampArt.js'
+import { fetchGameFinal } from '../api/stamps.js'
 
 // --------------------------------------------------------------------------
 // Geometry
@@ -449,4 +451,89 @@ test('the band covers everything it has to knock out', () => {
   assert.ok(ARC_BOTTOM_R - RING_FONT_SIZE >= BAND_INNER_R, 'date caps must stay inside the band')
   // The separator diamonds are 12px tall, centred on the ring.
   assert.ok(DIAMOND_R + 6 <= BAND_OUTER_R && DIAMOND_R - 6 >= BAND_INNER_R)
+})
+
+// --------------------------------------------------------------------------
+// October — the round on the ring
+// --------------------------------------------------------------------------
+// A postseason stamp names its round beside the date in the bottom arc ("ALDS \u00b7 Oct 3,
+// 2026"). The round comes from two facts every producer carries: `gameType` and the home
+// club's `leagueId` (the live feed has no series game number, so none is printed: a stamp
+// must read the same whichever producer resolved it). Both are pregame facts.
+test('each round is named from the game type and the home club\u2019s league', () => {
+  assert.equal(stampSeriesText({ gameType: 'F', leagueId: 103 }), 'AL WC')
+  assert.equal(stampSeriesText({ gameType: 'F', leagueId: 104 }), 'NL WC')
+  assert.equal(stampSeriesText({ gameType: 'D', leagueId: 103 }), 'ALDS')
+  assert.equal(stampSeriesText({ gameType: 'D', leagueId: 104 }), 'NLDS')
+  assert.equal(stampSeriesText({ gameType: 'L', leagueId: 103 }), 'ALCS')
+  assert.equal(stampSeriesText({ gameType: 'L', leagueId: 104 }), 'NLCS')
+  assert.equal(stampSeriesText({ gameType: 'W', leagueId: 103 }), 'World Series')
+  assert.equal(stampSeriesText({ gameType: 'W' }), 'World Series')
+})
+
+test('a regular-season game, or a blob written before the league was stored, names no round', () => {
+  assert.equal(stampSeriesText({ gameType: 'R', leagueId: 103 }), '')
+  assert.equal(stampSeriesText({ gameType: 'S', leagueId: 103 }), '')
+  assert.equal(stampSeriesText({ gameType: 'A', leagueId: 103 }), '')
+  assert.equal(stampSeriesText({ gameType: 'D' }), '') // an old cached blob: the date stays
+  assert.equal(stampSeriesText(null), '')
+})
+
+test('the bottom arc is the round and a short date for October, and the long date for any other game', () => {
+  const oct = { gameType: 'D', leagueId: 103, date: '2026-10-03' }
+  assert.equal(stampBottomText(oct), 'ALDS \u00b7 Oct 3, 2026')
+  assert.equal(stampBottomText({ ...oct, gameType: 'W' }), 'World Series \u00b7 Oct 3, 2026')
+  assert.equal(stampBottomText({ gameType: 'R', date: '2026-08-02' }), 'Sunday, August 2, 2026')
+  assert.equal(stampBottomText({ gameType: 'D' }), '') // no league and no date: nothing to print
+  // an explicit series line (the prop GameStamp always had) still wins over the derived one
+  assert.equal(stampBottomText(oct, 'NLCS'), 'NLCS \u00b7 Oct 3, 2026')
+  // the longest case stays inside the room the longest regular-season date already takes
+  assert.ok(stampBottomText({ gameType: 'W', date: '2026-10-30' }).length <= stampDateText('2026-09-30').length)
+})
+
+test('both producers carry the home club\u2019s league, and agree on it', () => {
+  const feed = feedFixture({ innings: NINE })
+  feed.gameData.teams.home.league = { id: 103 }
+  const scheduleRow = {
+    gamePk: 778241,
+    officialDate: '2026-08-02',
+    gameNumber: 1,
+    gameType: 'D',
+    venue: { name: 'American Family Field' },
+    status: { abstractGameState: 'Final' },
+    teams: {
+      away: { team: { id: 112, abbreviation: 'CHC', name: 'Chicago Cubs' } },
+      home: { team: { id: 158, abbreviation: 'MIL', name: 'Milwaukee Brewers', league: { id: 103 }, sport: { id: 1 } } },
+    },
+    linescore: { scheduledInnings: 9, innings: NINE, teams: { away: { runs: 5 }, home: { runs: 3 } } },
+  }
+  assert.equal(revealStampFacts(feed).leagueId, 103)
+  assert.equal(stampGameFacts(scheduleRow).leagueId, 103)
+  assert.equal(revealStampFacts(feedFixture({ innings: NINE })).leagueId, null)
+  assert.equal(stampGameFacts({ ...scheduleRow, teams: { away: scheduleRow.teams.away, home: { team: { id: 158 } } } }).leagueId, null)
+})
+
+test('the server\u2019s own facts producer carries the league too', async () => {
+  const game = {
+    gamePk: 849829,
+    officialDate: '2026-10-03',
+    gameNumber: 1,
+    gameType: 'D',
+    venue: { name: 'Progressive Field' },
+    status: { abstractGameState: 'Final', detailedState: 'Final' },
+    teams: {
+      away: { team: { id: 145, abbreviation: 'CWS', name: 'Chicago White Sox' }, score: 3, isWinner: true },
+      home: { team: { id: 114, abbreviation: 'CLE', name: 'Cleveland Guardians', league: { id: 103 }, sport: { id: 1 } }, score: 2, isWinner: false },
+    },
+    linescore: { scheduledInnings: 9, innings: NINE, teams: { away: { runs: 3 }, home: { runs: 2 } } },
+  }
+  const real = globalThis.fetch
+  globalThis.fetch = async () => ({ ok: true, json: async () => ({ dates: [{ games: [game] }] }) })
+  try {
+    const facts = await fetchGameFinal(849829)
+    assert.equal(facts.gameType, 'D')
+    assert.equal(facts.leagueId, 103)
+  } finally {
+    globalThis.fetch = real
+  }
 })

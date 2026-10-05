@@ -55,6 +55,10 @@ function SheetHead({ model }) {
   const [away, home] = model.clubs
   return (
     <header className="printsheet__head">
+      {/* The round and game number, for a postseason game only. The sheet is
+          pencilled in at the ballpark, and "ALDS Game 3" is the first thing a
+          scorer writes at the top of a postseason page. */}
+      {model.round && <p className="printsheet__round">{model.round}</p>}
       <h2 className="printsheet__matchup">
         <span className="printsheet__club">{away.name || 'Visitors'}</span>
         <span className="printsheet__at" aria-hidden="true">

@@ -37,7 +37,7 @@
 // Run by hand: node scripts/gen-awards-history.mjs
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { MAJOR_AWARDS } from '../src/api/person.js'
+import { MAJOR_AWARDS, isPostseasonAward } from '../src/api/person.js'
 import { teamFullName } from '../src/lib/teams.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
@@ -126,6 +126,10 @@ function formatStatLine(group, stat) {
 const statLineJobs = []
 for (const r of results) {
   if (!r || !r.recipients.length) continue
+  // A postseason MVP is decided on a series, so the regular-season line this pass
+  // fetches would read as the reason he won. Those recipients carry no statLine
+  // (the page renders a recipient without one), and keep the recipients endpoint's own team.
+  if (isPostseasonAward(r.awardId)) continue
   for (const rec of r.recipients) statLineJobs.push({ rec, season: r.season })
 }
 await mapConcurrent(statLineJobs, 8, async ({ rec, season }) => {

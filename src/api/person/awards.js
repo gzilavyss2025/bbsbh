@@ -32,6 +32,10 @@ export const MAJOR_AWARDS = {
   ALMVP: 'MVP', NLMVP: 'MVP',
   ALCY: 'Cy Young', NLCY: 'Cy Young',
   ALROY: 'Rookie of the Year', NLROY: 'Rookie of the Year',
+  // The postseason MVPs, decided in October. Labels match the player ledger's own
+  // (they were curated there first); ids and recipients checked live 2026-10-05.
+  WSMVP: 'World Series MVP',
+  ALCSMVP: 'LCS MVP', NLCSMVP: 'LCS MVP',
   ALSS: 'Silver Slugger', NLSS: 'Silver Slugger',
   ALGG: 'Gold Glove', NLGG: 'Gold Glove',
   ALPG: 'Platinum Glove', NLPG: 'Platinum Glove',
@@ -43,6 +47,14 @@ export const MAJOR_AWARDS = {
   MLBAFIRST: 'All-MLB First Team', MLBSECOND: 'All-MLB Second Team',
 }
 
+// Awards decided on a postseason series. A regular-season stat line printed under one of
+// these (the Awards History page prints one per recipient) would read as the reason he won.
+const POSTSEASON_AWARD_IDS = new Set(['WSMVP', 'ALCSMVP', 'NLCSMVP'])
+
+export function isPostseasonAward(id) {
+  return POSTSEASON_AWARD_IDS.has(id)
+}
+
 // Curated beyond MAJOR_AWARDS: ids whose feed `name` carries a sponsor or a
 // namesake that reads as noise in a table header ("Willie Mays World Series
 // MVP"), or an AL/NL pair that should collapse the same way MAJOR_AWARDS does.
@@ -52,8 +64,6 @@ export const MAJOR_AWARDS = {
 const CURATED = {
   ...MAJOR_AWARDS,
   MLBHOF: 'Hall of Fame',
-  WSMVP: 'World Series MVP',
-  ALCSMVP: 'LCS MVP', NLCSMVP: 'LCS MVP',
   ALMOY: 'Manager of the Year', NLMOY: 'Manager of the Year',
   ASMVP: 'All-Star Game MVP',
   DHOY: 'Outstanding DH of the Year',

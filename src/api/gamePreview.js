@@ -295,6 +295,10 @@ export function buildPreviewModel(feed, extras = {}) {
   const broadcast = extras.broadcast ?? ''
   const umpire = extras.umpire ?? null
   const callouts = extras.callouts ?? null
+  // "ALDS \u00b7 Game 3" for a postseason game (hooks/postseason/useGameRound.js), '' for any
+  // other. A round name and a game number are pregame facts; a series record is a
+  // result and must never be passed in (ADR-0087). The poster is a public image.
+  const round = extras.round ?? ''
   const info = selectGameInfo(feed)
   const officials = selectOfficials(feed)
   const venue = feed?.gameData?.venue ?? {}
@@ -307,6 +311,7 @@ export function buildPreviewModel(feed, extras = {}) {
   return {
     date: posterDateParts(info.officialDate),
     officialDate: info.officialDate,
+    round,
     // The scheduled start is the only time value that exists before the
     // lineups post (selectGameInfo's own note), so it leads; `firstPitch`
     // only ever appears once the game is under way.

@@ -22,6 +22,7 @@
 // as still current.
 
 import { extraInningsOf } from '../api/select.js'
+import { LEAGUE_BY_ID } from './postseason/seriesMarks.js'
 
 // The canvas. viewBox-only in the component — nothing here sets width/height, so
 // CSS sizes a stamp in a grid and nothing fights its container.
@@ -312,6 +313,36 @@ export function stampDateText(date) {
   const [year, month, day] = String(date ?? '').split('-').map(Number)
   if (!year || !month || !day) return ''
   return RING_DATE.format(new Date(year, month - 1, day))
+}
+
+const RING_DATE_SHORT = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
+// A postseason game's round, as the bottom arc prints it: "AL WC", "ALDS", "ALCS",
+// "World Series". Built from the two facts every producer of the blob carries, the game
+// type and the home club's league id, so a stamp reads the same whichever resolved it.
+// A blob written before `leagueId` was stored (the server's cache is immutable) names no
+// round for a league round, and the stamp keeps its date. Both facts are pregame: no
+// series record, and no game number, which the live feed does not carry.
+const STAMP_ROUND = { F: (lg) => `${lg} WC`, D: (lg) => `${lg}DS`, L: (lg) => `${lg}CS`, W: () => 'World Series' }
+
+export function stampSeriesText(game) {
+  const name = STAMP_ROUND[game?.gameType]
+  if (!name) return ''
+  const league = LEAGUE_BY_ID[game.leagueId]
+  if (!league && game.gameType !== 'W') return ''
+  return name(league)
+}
+
+// The whole bottom arc. An October game puts its round beside a SHORT date ("ALDS \u00b7 Oct 3,
+// 2026"), which keeps the keepsake dated and still fits the room the longest long date
+// ("Wednesday, September 30, 2026") already takes. Any other game prints the long date.
+// `seriesText` is an explicit override of the derived round, for a caller that has one.
+export function stampBottomText(game, seriesText = '') {
+  const series = seriesText || stampSeriesText(game)
+  if (!series) return stampDateText(game?.date)
+  const [year, month, day] = String(game?.date ?? '').split('-').map(Number)
+  const short = year && month && day ? RING_DATE_SHORT.format(new Date(year, month - 1, day)) : ''
+  return [series, short].filter(Boolean).join(' \u00b7 ')
 }
 
 // Every id inside one stamp's <defs> — masks, the clip path, the wear filter,

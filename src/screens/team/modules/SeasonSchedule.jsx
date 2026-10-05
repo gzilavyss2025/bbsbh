@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { gamePath, teamStampInPath } from '../../../lib/route.js'
 import { useNav } from '../../../lib/nav.js'
+import { seriesAbbr } from '../../../api/boxlines/rows.js'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
@@ -24,10 +25,10 @@ function SeriesStrip({ games, allStarGame, refDate }) {
     const out = []
     for (const g of games) {
       const last = out[out.length - 1]
-      if (last && last.opponent.id === g.opponent.id) {
+      if (last && last.opponent.id === g.opponent.id && last.round === seriesAbbr(g.gameType)) {
         last.games.push(g)
       } else {
-        out.push({ opponent: g.opponent, games: [g] })
+        out.push({ opponent: g.opponent, round: seriesAbbr(g.gameType), games: [g] })
       }
     }
     return out
@@ -76,7 +77,10 @@ function SeriesStrip({ games, allStarGame, refDate }) {
           <div key={it.key} className={`sstrip__series${isCurrent ? ' sstrip__series--current' : ''}`}>
             <div className="sstrip__opp" title={it.opponent.name}>
               <TeamLogo teamId={it.opponent.id} name={it.opponent.name} size={18} />
-              <span className="sstrip__opplabel">{it.opponent.abbreviation}</span>
+              <span className="sstrip__opplabel">
+                {it.opponent.abbreviation}
+                {it.round && ` \u00b7 ${it.round}`}
+              </span>
             </div>
             <div className="sstrip__cells">
               {it.games.map((g) => {
@@ -89,7 +93,7 @@ function SeriesStrip({ games, allStarGame, refDate }) {
                     type="button"
                     className={`sstrip__cell${g.isHome ? ' sstrip__cell--home' : ''}${resultClass}`}
                     onClick={() => openGame(g)}
-                    title={`${g.apiDate} · ${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}${resultLabel}`}
+                    title={`${g.apiDate} · ${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${seriesAbbr(g.gameType) ? ` · ${seriesAbbr(g.gameType)}` : ''}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}${resultLabel}`}
                   />
                 )
               })}

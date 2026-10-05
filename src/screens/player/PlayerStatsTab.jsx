@@ -2,7 +2,7 @@ import { loadPlayerCore } from '../../api/player/core.js'
 import { splitDisplayName } from '../../api/person.js'
 import { loadPlayerStats } from '../../api/player/stats.js'
 import { useAsync } from '../../hooks/useAsync.js'
-import { CareerRegister } from '../../components/player/CareerRegister.jsx'
+import { CareerRegister, PostseasonRegister } from '../../components/player/CareerRegister.jsx'
 import { GameLog } from '../../components/player/GameLog.jsx'
 import { SplitsSection, hasSplits } from '../../components/playerstats/SplitsSection.jsx'
 import { GameLinesCard } from '../../components/playerstats/GameLinesCard.jsx'
@@ -103,6 +103,16 @@ export function PlayerStatsTab({ id, asOf, sportId }) {
           />
 
           {block.register && <CareerRegister register={block.register} />}
+
+          {/* Postseason stats — the register's October half (api/player/postseasonRegister.js).
+              Draws nothing for a player with no postseason. */}
+          <PostseasonRegister
+            personId={bio.id}
+            group={block.group}
+            hasDebuted={Boolean(bio.debut)}
+            asOf={asOf}
+            showSaves={block.role === 'CL'}
+          />
         </section>
       ))}
     </PlayerHubShell>

@@ -45,12 +45,16 @@ one tab and "today" on the next.
 - **Overview** — who he is now. The fact grid (including age at retirement for
   a retired player), the Contract card, each stat
   block's current-season tiles with their league-rank chips and any other level
-  he has played at this year, Milestone Watch, and the season's Photos and
+  he has played at this year, a **postseason to date** tile row once he has played
+  an October game (same date window as the tiles), Milestone Watch, and the season's Photos and
   Highlights rails. A player who has **not debuted** leads instead with his
   career timeline and Path to the Majors: that IS his page.
 - **Stats** — what he has done. The game log with its level toggle, the recent
   form (hitter) or workload (pitcher) card that summarizes it, the splits, and
-  the career register.
+  the career register, with the **Postseason stats** card under it: one row per
+  October he reached, and his career postseason line
+  (`api/player/postseasonRegister.js`, statsapi `gameType=P`; it draws nothing for a
+  player with no postseason, and on a dated page drops the as-of season and later).
 - **Analytics** — what is under those numbers, for players who are not retired.
   The Prospect card below the
   majors — a level-relative OPS/ERA standing (`prospectTrend.js`) alongside how

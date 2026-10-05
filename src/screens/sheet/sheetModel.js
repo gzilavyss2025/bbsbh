@@ -125,7 +125,9 @@ function clubBlock(feed, side, managers) {
 // outdoor scorebook reading; both are optional and both degrade to a blank line.
 // Returns null with no feed, so the page can render nothing rather than a sheet
 // of empty strings that looks like a load succeeded.
-export function buildSheetModel(feed, { managers = null, weather = null } = {}) {
+// `round` is "ALDS \u00b7 Game 3" for a postseason game (hooks/postseason/useGameRound.js),
+// '' for any other. It is a round name and a game number, never a series record.
+export function buildSheetModel(feed, { managers = null, weather = null, round = '' } = {}) {
   if (!feed) return null
 
   const info = selectGameInfo(feed)
@@ -135,6 +137,7 @@ export function buildSheetModel(feed, { managers = null, weather = null } = {}) 
     // fact, so the two can't disagree about tonight's game.
     firstPitch: info.firstPitch || info.scheduledTime || '',
     officialDate: info.officialDate,
+    round,
     date: scorebookDate(info.officialDate),
     venue: info.venue || '',
     // The outdoor reading from the park's lat/lon; the box score's own weather is

@@ -85,6 +85,7 @@ export {
   DEFAULT_AWARD_ORDER,
   awardLeague,
   awardsView,
+  isPostseasonAward,
   rankAwards,
   rankKeyOf,
   parseAwardOrder,

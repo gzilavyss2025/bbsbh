@@ -93,6 +93,8 @@ export function revealStampFacts(feed) {
     gameNumber: Number.isInteger(gameData.game?.gameNumber) ? gameData.game.gameNumber : 1,
     sportId: gameData.teams?.home?.sport?.id ?? 1,
     gameType: gameData.game?.type ?? 'R',
+    // The home club's league, so a postseason stamp can name its round (stampArt.js).
+    leagueId: gameData.teams?.home?.league?.id ?? null,
     venue: gameData.venue?.name ?? '',
     innings,
     scheduledInnings: Number.isInteger(line.scheduledInnings) ? line.scheduledInnings : null,

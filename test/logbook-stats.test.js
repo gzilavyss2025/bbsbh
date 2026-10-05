@@ -354,3 +354,35 @@ test('a game with no decisions recorded adds no pitcher rows', () => {
   const out = computeLogbookStats([stamp(6, '2026-04-15')], FACTS)
   assert.deepEqual(out.pitchers, [])
 })
+
+// --------------------------------------------------------------------------
+// October
+// --------------------------------------------------------------------------
+// The book counts every game you stamped, October included: it never filtered by game
+// type, and a postseason game is a game you sat through. What it could not do was say
+// how many of them were October. `gameType` is already on the facts blob (both producers
+// write it), so that count needs no new field.
+test('postseason games are counted by the facts\u2019 game type, wild card through World Series', () => {
+  assert.equal(stats().postseasonGames, 0)
+  const october = {
+    ...FACTS,
+    ...Object.fromEntries(
+      [[1, 'F'], [2, 'D'], [3, 'L'], [4, 'W']].map(([pk, type]) => [pk, { ...FACTS[pk], gameType: type }]),
+    ),
+    5: { ...FACTS[5], gameType: 'S' }, // spring: not October
+    6: { ...FACTS[6], gameType: 'A' }, // All-Star: not October
+  }
+  const out = computeLogbookStats(STAMPS, october)
+  assert.equal(out.postseasonGames, 4)
+  assert.equal(out.games, 8) // the book still counts them all
+})
+
+test('a postseason game whose facts have not resolved is pending, not a postseason game', () => {
+  const partial = { ...FACTS, 1: { ...FACTS[1], gameType: 'D' } }
+  delete partial[1]
+  assert.equal(computeLogbookStats(STAMPS, partial).postseasonGames, 0)
+})
+
+test('the empty shape carries the field', () => {
+  assert.equal(computeLogbookStats([], {}).postseasonGames, 0)
+})

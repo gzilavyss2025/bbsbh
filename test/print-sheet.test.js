@@ -249,3 +249,8 @@ test('the printed at-bat grid is empty — the sheet component fills no cell', (
   assert.equal(body, '<span className="ps-cell__diamond" aria-hidden="true" />')
   assert.equal(SHEET_INNINGS, 11)
 })
+
+test('a postseason round rides the model, and is blank for any other game', () => {
+  assert.equal(buildSheetModel(stagedFeed()).round, '')
+  assert.equal(buildSheetModel(stagedFeed(), { round: 'ALDS \u00b7 Game 3' }).round, 'ALDS \u00b7 Game 3')
+})
