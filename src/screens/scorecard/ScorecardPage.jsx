@@ -14,6 +14,7 @@ import { Button } from '../../components/ui/control/Button.jsx'
 import { useStampUnseal } from '../../hooks/useStamps.js'
 import { useMediaQuery } from '../../hooks/useMediaQuery.js'
 import { PHONE_LENS_QUERY, lensOn } from '../../lib/scorecard/geometry.js'
+import { usePollBrought } from '../../components/scoring/lens/usePollBrought.js'
 import { LensBack, LensBar } from '../../components/scoring/lens/LensBar.jsx'
 import { useLensBar } from '../../components/scoring/lens/useLensBar.js'
 import { tapLocked } from '../../lib/scorecard/bar.js'
@@ -259,6 +260,9 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   // with an old arm, or keep the tap lock on.
   if (!inLens && sheetArm) setSheetArm(null)
   const armSaid = armWords(arm)
+  // Whether the newest poll brought a new entry or a new arm, so the live line
+  // never says "nothing new yet" after a pitching change (#1468).
+  const brought = usePollBrought(lastUpdated, { total: stepInfo?.total ?? 0, armId: arm?.pitcher?.id ?? null })
   // The Entering card's defense line walks the whole game's plays, so it runs
   // once per step and per new feed (a poll), not on a motion beat or the sheet.
   const defense = useMemo(
@@ -357,6 +361,7 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
         <LensBar
           bar={bar}
           checkedAt={lastUpdated}
+          brought={brought}
           refreshing={loading}
           onSheet={() => setWholeSheet(true)}
           onUnwrap={tapFrontier}

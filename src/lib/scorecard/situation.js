@@ -66,6 +66,9 @@ export function situation(view, inning, half) {
 export function situationText(s) {
   if (!s) return ''
   const outs = s.outs === 0 ? 'no outs' : s.outs === 1 ? '1 out' : `${s.outs} outs`
+  // Three outs end the half: runners left on base are not on a base for the
+  // next play, so the line names no bases (#1468). The handoff's totals carry LOB.
+  if (s.outs >= 3) return `${halfLabel(s)} · ${outs}`
   const bases = s.bases.length ? `on ${s.bases.map(baseWord).join(', ')}` : 'bases empty'
   return `${halfLabel(s)} · ${outs} · ${bases}`
 }

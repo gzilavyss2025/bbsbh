@@ -11,9 +11,9 @@ import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import { scorecardFull, scorecardStep } from '../src/api/scorecardGame.js'
 import { halfIndex } from '../src/api/select.js'
-import { halfCards } from '../src/lib/scorecard/situation.js'
+import { halfCards, situationText } from '../src/lib/scorecard/situation.js'
 import { runnerMoves } from '../src/lib/scorecard/words.js'
-import { barLines, barState, liveLine, tapLocked } from '../src/lib/scorecard/bar.js'
+import { barLines, barState, liveLine, pollBrought, tapLocked } from '../src/lib/scorecard/bar.js'
 
 const FEED = JSON.parse(
   readFileSync(new URL('./fixtures/game-823035.trimmed.json', import.meta.url), 'utf8'),
@@ -325,4 +325,85 @@ test('a spent half (all open, then the next half starts) is not a seal to unwrap
   // A half with boxes still sealed is never spent, live or over.
   assert.equal(scorecardStep(next, -1, () => 0).spent, false)
   assert.equal(scorecardStep(FEED, -1, () => 0).spent, false)
+})
+
+// ---------------------------------------------------------------------------
+// #1468 — two wrong lines in the bar
+// ---------------------------------------------------------------------------
+
+test('#1468: a half with three outs never says "3 outs" with runners "on" a base', () => {
+  // Before the next half starts, the feed has the third out and nothing after it.
+  // The runners left on base are not on a base for the next play.
+  const over = { inning: 1, half: 'top', outs: 3, bases: [2], runners: [] }
+  assert.equal(situationText(over), 'Top 1 · 3 outs')
+  assert.doesNotMatch(situationText({ ...over, bases: [1, 2, 3] }), /\bon\b|bases/)
+  // Fewer than three outs keeps the bases.
+  assert.equal(situationText({ ...over, outs: 2 }), 'Top 1 · 2 outs · on 2nd')
+})
+
+test('#1468: the live line says "nothing new yet" only when the poll brought nothing', () => {
+  // A look under five seconds ago, and the poll brought a change.
+  assert.equal(liveLine('Arceneaux', 102_000, 100_000, true), 'Arceneaux is batting · checked just now')
+  assert.equal(liveLine('', 102_000, 100_000, true), 'A batter is up · checked just now')
+  assert.equal(liveLine(null, 102_000, 100_000, true), 'Waiting for the next batter · checked just now')
+  // No change, or the caller does not say: today's line.
+  assert.equal(liveLine('Arceneaux', 102_000, 100_000, false), 'Checked just now · nothing new yet')
+  assert.equal(liveLine('Arceneaux', 102_000, 100_000), 'Checked just now · nothing new yet')
+  // Past five seconds the news flag changes nothing.
+  assert.equal(liveLine('Arceneaux', 112_000, 100_000, true), 'Arceneaux is batting · checked 12 s ago')
+})
+
+test('#1468: pollBrought sees a new entry or a new arm, and nothing else', () => {
+  const was = { total: 5, armId: 7 }
+  assert.equal(pollBrought(null, was), false, 'the first look has nothing to compare')
+  assert.equal(pollBrought(was, { total: 5, armId: 7 }), false)
+  assert.equal(pollBrought(was, { total: 6, armId: 7 }), true, 'a new entry, such as a pitching change note')
+  assert.equal(pollBrought(was, { total: 5, armId: 9 }), true, 'a new arm')
+})
+
+// ---------------------------------------------------------------------------
+// #1469 — a minor-league next batter with no batting slot
+// ---------------------------------------------------------------------------
+
+// The fixture with the first batter's batting order removed, as a minor-league
+// feed often has it when the lineup is missing.
+function noSlotFeed() {
+  const copy = structuredClone(FEED)
+  const first = copy.liveData.plays.allPlays[0].matchup.batter.id
+  for (const side of ['home', 'away']) {
+    delete copy.liveData.boxscore.teams[side].players[`ID${first}`]?.battingOrder
+  }
+  return copy
+}
+
+test('#1469: a next batter with no batting slot still gives a frontier, and a bar that unwraps', () => {
+  const feed = noSlotFeed()
+  const info = scorecardStep(feed, -1, () => 0)
+  const view = scorecardFull({ feed }, 'top', { through: -1, step: { halfIdx: 0, count: 0 } })
+  const frontier = view.grid.frontier
+  assert.notEqual(frontier, null, 'a sealed at-bat exists, so there is a frontier')
+  // It names no row and no column: there is no cell to draw. The bar's Unwrap is the way in.
+  assert.deepEqual(frontier, { slot: null, batter: null, live: false, colIndex: null })
+
+  const state = barState({ loading: false, stepInfo: info, flip: null, frontier })
+  assert.equal(state, 'sealed', 'not the live edge')
+  const b = barLines({ state, view, stepInfo: info, flip: null, moves: [], lineupPosted: false })
+  assert.equal(b.label, 'Unwrap the next at-bat')
+})
+
+test('#1469: the no-slot frontier carries nothing of the sealed at-bat', () => {
+  const feed = noSlotFeed()
+  const play = feed.liveData.plays.allPlays[0]
+  const view = scorecardFull({ feed }, 'top', { through: -1, step: { halfIdx: 0, count: 0 } })
+  const text = JSON.stringify(view)
+  for (const secret of [play.result.description, play.result.event, play.matchup.batter.fullName]) {
+    if (secret) assert.ok(!text.includes(secret), `the view leaked "${secret}"`)
+  }
+  assert.equal(halfCards(view, 1).length, 0, 'no box is open before the tap')
+})
+
+test('#1469: a batter with a slot is unchanged', () => {
+  const view = scorecardFull({ feed: FEED }, 'top', { through: -1, step: { halfIdx: 0, count: 0 } })
+  assert.ok(view.grid.frontier.slot >= 1)
+  assert.ok(view.grid.frontier.colIndex >= 0)
 })

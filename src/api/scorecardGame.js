@@ -303,10 +303,10 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = -1
     const next = entries.slice(stepHere.count).find((e) => e.kind === 'atbat')
     if (next) {
       const slot = battingSlot(feed, battingSide, next.batterId)
-      if (slot >= 1 && slot <= 9) {
-        frontierSub = slotData[slot - 1].byInning[stepHere.inning]?.length ?? 0
-        frontier = { slot, batter: next.batter ?? null, live: next.live != null }
-      }
+      const seated = slot >= 1 && slot <= 9
+      if (seated) frontierSub = slotData[slot - 1].byInning[stepHere.inning]?.length ?? 0
+      // No batting slot (minor league): no box to draw, still a sealed frontier (#1469).
+      frontier = { slot: seated ? slot : null, batter: seated ? (next.batter ?? null) : null, live: next.live != null, colIndex: null }
     }
   }
 
@@ -317,14 +317,14 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = -1
   for (const inning of innings) {
     let width = 1
     for (const s of slotData) width = Math.max(width, s.byInning[inning]?.length ?? 0)
-    if (frontier != null && stepHere?.inning === inning) {
+    if (frontierSub != null && stepHere?.inning === inning) {
       width = Math.max(width, frontierSub + 1)
     }
     for (let sub = 0; sub < width; sub += 1) {
       columns.push({ inning, sub, inningStart: sub === 0 })
     }
   }
-  if (frontier != null) {
+  if (frontierSub != null) {
     frontier.colIndex = columns.findIndex(
       (c) => c.inning === stepHere.inning && c.sub === frontierSub,
     )
