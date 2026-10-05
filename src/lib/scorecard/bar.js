@@ -72,13 +72,20 @@ export function barLines({ state, view, stepInfo, flip, moves, lineupPosted = tr
   return { lineA, situation: now, label }
 }
 
+// Did the last poll bring anything the live edge shows? `was` and `now` are
+// `{ total, armId }`: the half's entry count (a pitching change is a note, so it
+// counts) and the arm at the frontier. `was` is null before the first look.
+export const pollBrought = (was, now) => was != null && (was.total !== now.total || was.armId !== now.armId)
+
 // The live edge's line A. A look under five seconds ago is "just now": the
-// reader pressed Refresh and nothing came. `name` is '' for a batter with no
+// reader pressed Refresh. "Nothing new yet" shows only when the poll brought
+// nothing (`brought` false, see pollBrought); else the line reads as an older
+// look does, without that claim (#1468). `name` is '' for a batter with no
 // name (minor league) and null when the feed holds no next at-bat at all.
-export function liveLine(name, now, checkedAt) {
+export function liveLine(name, now, checkedAt, brought = false) {
   const who = name == null ? 'Waiting for the next batter' : name ? `${name} is batting` : 'A batter is up'
   if (checkedAt == null) return who
   const s = Math.max(0, Math.round((now - checkedAt) / 1000))
-  if (s < 5) return 'Checked just now · nothing new yet'
+  if (s < 5) return brought ? `${who} · checked just now` : 'Checked just now · nothing new yet'
   return `${who} · checked ${s < 60 ? `${s} s` : `${Math.floor(s / 60)} min`} ago`
 }

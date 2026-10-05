@@ -104,7 +104,13 @@ above and change none of them.
   batter's, which the grid now carries (`grid.frontier.batter`). Who comes up
   is a pre-pitch fact, as the lineup is (ADR-0003). A test taps through the
   captured game and, at each step, swaps the result of the sealed at-bat. The
-  bar must not change (ADR-0046).
+  bar must not change (ADR-0046). A batter with no batting slot (a minor-league
+  feed with no lineup) has no row, so the grid has no box for him. The frontier
+  still exists (`slot` and `colIndex` null, `batter` null) and the bar says
+  "Unwrap the next at-bat". Only the bar can unwrap it: the frame has no seal.
+- **Three outs name no bases.** After the third out the situation reads
+  "Top 1 · 3 outs", never "3 outs · on 2nd": the half is over, and the
+  handoff's LOB carries the runners.
 - **A half's end stops on "Turn to Bottom N".** No auto-turn: that tap is the
   moment to rule off the inning on paper. The half totals show only here,
   after the half has committed (ADR-0006: E is the other club's fielding).
@@ -116,7 +122,10 @@ above and change none of them.
   poll that finishes it. A FINISHED at-bat at the feed's end (the third out
   before the next half starts) is a seal like any other: holding it back would
   make the wait's length tell how it ended. The whole-sheet view and the
-  desktop sheet keep today's seal.
+  desktop sheet keep today's seal. Line A reads "Checked just now · nothing new
+  yet" in the 5 s after Refresh only if the poll changed neither the half's
+  entry count nor the arm at the frontier (`pollBrought`); else it drops that
+  claim.
 - **One tap lock.** The seal, Unwrap and Turn share a 700 ms window after every
   reveal and every turn (`tapLocked`). It is a constant and never reads the
   result (ADR-0046). While the cell editor is open, none of the three acts.

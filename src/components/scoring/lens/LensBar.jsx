@@ -19,14 +19,14 @@ import { liveLine } from '../../../lib/scorecard/bar.js'
 // `pitcher` is the arm's surname ('' when the feed has none), or null with no
 // arm to name; its button opens the pitcher sheet (`onPitcher`). Navy ink, no
 // kraft: it lifts no seal.
-export function LensBar({ bar, checkedAt, refreshing, onSheet, onUnwrap, onTurn, onRefresh, pitcher = null, onPitcher }) {
+export function LensBar({ bar, checkedAt, brought = false, refreshing, onSheet, onUnwrap, onTurn, onRefresh, pitcher = null, onPitcher }) {
   const { state, lines, batter } = bar
   return (
     <div className="sc-lensbar">
       {/* Polite, so a reader with a screen reader hears the play they just
           opened. Not at the live edge: that line ticks with the clock. */}
       <p className="sc-lensbar__words" aria-live={state === 'edge' ? 'off' : 'polite'}>
-        {state === 'edge' ? <CheckedLine name={batter} checkedAt={checkedAt} /> : lines.lineA}
+        {state === 'edge' ? <CheckedLine name={batter} checkedAt={checkedAt} brought={brought} /> : lines.lineA}
       </p>
       <div className="sc-lensbar__row">
         <p className="sc-lensbar__situation">{lines.situation}</p>
@@ -72,13 +72,13 @@ export function LensBar({ bar, checkedAt, refreshing, onSheet, onUnwrap, onTurn,
 
 // "Arceneaux is batting · checked 12 s ago". The clock ticks here, in the one
 // state that shows it; the poll's own timing is the page's and never changes.
-function CheckedLine({ name, checkedAt }) {
+function CheckedLine({ name, checkedAt, brought }) {
   const [now, setNow] = useState(Date.now)
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 5000)
     return () => clearInterval(id)
   }, [])
-  return liveLine(name, now, checkedAt)
+  return liveLine(name, now, checkedAt, brought)
 }
 
 // The whole-sheet view's way back: a floating navy button over today's sheet.
