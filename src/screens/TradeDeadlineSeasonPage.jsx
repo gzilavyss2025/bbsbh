@@ -98,7 +98,6 @@ export function TradeDeadlineSeasonPage({ season }) {
         hasData={allTrades.length > 0}
         errorMessage="Couldn’t load this season’s trades. Try again."
         emptyMessage="No trades within the deadline window for this season."
-        emptyProse
       />
 
       {allTrades.length > 0 && (

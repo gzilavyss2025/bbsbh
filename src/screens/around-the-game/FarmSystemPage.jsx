@@ -115,7 +115,6 @@ export function FarmSystemPage() {
         hasData={rows.length > 0}
         errorMessage="Couldn’t load the farm system data. Try again."
         emptyMessage="No farm system data on file yet."
-        emptyProse
       />
 
       {rows.length > 0 && (

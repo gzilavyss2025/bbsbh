@@ -267,7 +267,6 @@ export function DoubleheadersPage() {
         hasData={Boolean(bounds)}
         errorMessage="Couldn’t load doubleheaders. Try again."
         emptyMessage="No doubleheaders on file yet."
-        emptyProse
       />
 
       {bounds && (

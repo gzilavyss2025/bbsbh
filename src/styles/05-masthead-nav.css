@@ -651,3 +651,9 @@
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
 }
+/* The slate's empty line is an EmptyState now (#1132, E2): it has no .hint
+   padding, and it is the first child of .slatebody__main, so it would sit flush
+   under the date row. This margin gives back the 12px the .hint padding had. */
+.slatebody__main > .emptystate:first-child {
+  margin-top: var(--space-3);
+}
