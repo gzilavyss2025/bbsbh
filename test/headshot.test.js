@@ -48,6 +48,21 @@ test('headshotStepDelay: waits before a retry, never before the next source', ()
   assert.equal(headshotStepDelay(3), 0)
 })
 
+test('quickFirst: the first source gets one try, then milb gets its usual two', () => {
+  // A prospect's silo is usually a clean 404, so retrying it only delays the
+  // milb face. Steps: silo, milb, milb retry, then no photo.
+  assert.equal(headshotStepUrl([SILO, MILB], 0, true), SILO)
+  assert.equal(headshotStepUrl([SILO, MILB], 1, true), MILB)
+  assert.equal(headshotStepUrl([SILO, MILB], 2, true), `${MILB}?retry=1`)
+  assert.equal(headshotStepUrl([SILO, MILB], 3, true), null)
+})
+
+test('quickFirst: no pause after the silo miss, the pause stays before the milb retry', () => {
+  assert.equal(headshotStepDelay(0, true), 0)
+  assert.ok(headshotStepDelay(1, true) >= 1000)
+  assert.equal(headshotStepDelay(2, true), 0)
+})
+
 test('headshots load as CORS images, so the service worker can cache them', () => {
   // A no-cors <img> yields an opaque response, which Workbox's CacheFirst
   // refuses to store (only status 200 is cached). Every headshot host sends
