@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../../lib/teams.js'
+import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
+import { logHeadshotEvent } from '../../lib/headshot/log.js'
+import { useHeadshotStep } from '../../hooks/images/useHeadshotStep.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 
 // The "now pitching" notification card — the entering pitcher's headshot beside
@@ -82,7 +85,6 @@ export function ReliefRepeat({ pitcher, teamId, teamName }) {
 export function PitcherPhoto({ personId, name, teamId = null }) {
   const mlb = isMlbTeamId(teamId)
   const sources = headshotSources(personId, { mlb })
-  const [rung, setRung] = useState(0)
   const [logoFailed, setLogoFailed] = useState(false)
   // Reset fallback progress on identity change, computed during render (not
   // in an effect) — see Headshot.jsx for the same pattern and rationale.
@@ -90,11 +92,19 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
   const [prevIdentityKey, setPrevIdentityKey] = useState(identityKey)
   if (identityKey !== prevIdentityKey) {
     setPrevIdentityKey(identityKey)
-    setRung(0)
     setLogoFailed(false)
   }
-  const url = sources[rung] ?? null
+  // Two tries per photo source, the retry after a pause (headshot/retry.js).
+  const stepInfo = { component: 'PitcherPhoto', personId, teamId, hasName: Boolean(name) }
+  const { url, onError: onPhotoError } = useHeadshotStep(identityKey, sources, stepInfo)
   const logoUrl = !url && teamId && !logoFailed ? teamLogoUrl(teamId) : null
+  const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?' // caps-js-exempt
+  // Issue #1446's trace: note every time a real face is NOT what's drawn.
+  useEffect(() => {
+    if (url || (logoUrl && !personId)) return
+    logHeadshotEvent({ kind: logoUrl ? 'logo-shown' : 'monogram-shown', ...stepInfo, shown: logoUrl ? 'logo' : monogram })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stepInfo is rebuilt each render; these are its inputs
+  }, [url, logoUrl, personId, teamId, name])
   const bg = teamTintColor(teamId)
 
   if (!url) {
@@ -117,7 +127,6 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
         </span>
       )
     }
-    const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?' // caps-js-exempt
     return (
       <span className="pitchernotice__shot pitchernotice__shot--fallback" aria-hidden="true">
         {monogram}
@@ -132,7 +141,8 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
         alt=""
         loading="lazy"
         decoding="async"
-        onError={() => setRung((r) => r + 1)}
+        onError={onPhotoError}
+        crossOrigin={HEADSHOT_CROSS_ORIGIN}
         aria-hidden="true"
       />
     </span>

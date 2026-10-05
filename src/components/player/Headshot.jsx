@@ -1,5 +1,8 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../../lib/teams.js'
+import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
+import { logHeadshotEvent } from '../../lib/headshot/log.js'
+import { useHeadshotStep } from '../../hooks/images/useHeadshotStep.js'
 
 // A person's headshot, keyed by the person id we already carry. Walks a
 // fallback chain, each rung using the CDN WITHOUT its `d_people:generic`
@@ -56,13 +59,12 @@ export function Headshot({
   onFallback,
   hideFallback = false,
 }) {
-  // Ordered photo-source URLs for this person; we advance one rung per
-  // 404/error via `rung`, then fall through to logo/monogram below. The rung
+  // Ordered photo-source URLs for this person; each gets two tries, then the
+  // chain falls through to logo/monogram below. The rung
   // policy (which of silo/milb/coach, and in what order) lives in
   // headshotSources so it can be unit-tested without a DOM.
   const mlb = isMlb ?? isMlbTeamId(teamId)
   const sources = headshotSources(personId, { coach, mlb })
-  const [rung, setRung] = useState(0)
   // 'primary' -> teamId's own mark; 'fallback' -> fallbackTeamId's; 'failed'
   // -> neither loaded, render the monogram.
   const [logoStage, setLogoStage] = useState('primary')
@@ -74,13 +76,15 @@ export function Headshot({
   const [prevIdentityKey, setPrevIdentityKey] = useState(identityKey)
   if (identityKey !== prevIdentityKey) {
     setPrevIdentityKey(identityKey)
-    setRung(0)
     setLogoStage('primary')
   }
+  // Each photo source gets two tries (a retry after a pause) before the chain
+  // moves on — see headshot/retry.js.
+  const stepInfo = { component: 'Headshot', personId, teamId, hasName: Boolean(name) }
+  const { url: photoUrl, onError: onPhotoError } = useHeadshotStep(identityKey, sources, stepInfo)
 
   // A single-letter monogram fallback, not a re-uppercase of displayed text.
   const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?' // caps-js-exempt
-  const photoUrl = sources[rung] ?? null
   const bg = teamTintColor(teamId)
   const logoTeamId =
     logoStage === 'primary' ? teamId : logoStage === 'fallback' ? fallbackTeamId : null
@@ -97,6 +101,12 @@ export function Headshot({
   useEffect(() => {
     onFallbackRef.current?.(photoUrl ? null : logoUrl ? 'logo' : 'monogram')
   }, [photoUrl, logoUrl])
+  // Issue #1446's trace: note every time a real face is NOT what's drawn.
+  useEffect(() => {
+    if (photoUrl || (logoUrl && !personId)) return
+    logHeadshotEvent({ kind: logoUrl ? 'logo-shown' : 'monogram-shown', ...stepInfo, shown: logoUrl ? 'logo' : monogram })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stepInfo is rebuilt each render; these are its inputs
+  }, [photoUrl, logoUrl, personId, teamId, name])
 
   if (!photoUrl) {
     // The caller has its own plan for a missing photo (e.g. a clean full
@@ -139,7 +149,8 @@ export function Headshot({
         alt=""
         loading="lazy"
         decoding="async"
-        onError={() => setRung((r) => r + 1)}
+        onError={onPhotoError}
+        crossOrigin={HEADSHOT_CROSS_ORIGIN}
         aria-hidden="true"
       />
     </span>

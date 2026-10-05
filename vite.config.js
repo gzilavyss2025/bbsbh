@@ -604,7 +604,10 @@ export default defineConfig({
             // src/components/playbyplay/) paints from disk after the first
             // fetch; InningViewer's prefetchHeadshots warms a game's whole
             // roster the moment stepping begins, so this rule is what makes
-            // that warm actually stick. Scoped to the mlb-photos path
+            // that warm actually stick. Headshot <img>s and the prefetch load
+            // with crossOrigin (lib/headshot/retry.js): a no-cors <img> yields an
+            // opaque response, which CacheFirst never stores (only 200s are).
+            // Scoped to the mlb-photos path
             // specifically (not the whole img.mlbstatic.com host) so it
             // never picks up gamePhotos.js's mlb-images originals, which run
             // several MB each and belong to a standalone, unsealed page with
