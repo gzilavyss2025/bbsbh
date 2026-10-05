@@ -42,8 +42,8 @@ Check status and diffs before you edit. Isolate your work by branch or worktree.
 and coordinate on any file another agent may be using. Never reset, stash, overwrite, or
 reformat someone else's work. In a fresh context, fetch and list worktrees and open PRs
 before you pick a base branch: independent work starts from current `origin/main`; work
-needing an unmerged PR must name and deliberately base on that PR branch. Record branch,
-worktree, and PR state in your handoff, so the next context resumes safely.
+needing an unmerged PR must name and deliberately base on that PR branch. Record that
+state in your handoff. **Cloud sessions** (`CLAUDE_CODE_REMOTE`): `docs/development.md`.
 
 For a user-visible change, start the first free reserved localhost dev server, load
 the exact route you changed, and keep the server running. Put that clickable local

@@ -18,6 +18,32 @@ Never push directly to `main`, invoke `vercel deploy`, or enable an ad hoc previ
 without explicit maintainer authorization. Merging to `main` is the production
 deployment trigger and is intentionally controlled by the maintainer.
 
+## Cloud sessions (claude.ai/code)
+
+A cloud session runs in its own throwaway container, with a fresh clone. The
+environment sets `CLAUDE_CODE_REMOTE=true`. Most of this file is written for local
+sessions that share one machine. In the cloud, these rules change:
+
+- **Branch.** Use the branch the session gives you (`claude/<name>-<id>`). Do not
+  create your own. It starts at current `origin/main`. Start a new session from
+  `main` for each task. After its PR merges, do not reuse that branch.
+- **No worktree.** Nobody else shares the container, so edit in the primary checkout.
+  The `block-primary-checkout-edit` hook skips cloud sessions for this reason.
+  Local sessions still need a worktree.
+- **No `gh` CLI.** Use the GitHub MCP tools instead (for example,
+  `list_pull_requests` and `pull_request_read`) to list and read PRs.
+- **No housekeeping.** Skip `/start-day`, `/clean-worktrees` and `/clean-dev-servers`.
+  There are no stale worktrees or servers in a new container.
+- **Handoff is the PR.** Push before you stop, because the container is discarded.
+  Put the base SHA, the files touched, and how you verified in the PR description.
+  Write "not applicable (cloud)" for the worktree and the local URL.
+- **Verification.** A localhost URL in the container is not reachable from the
+  maintainer's devices. Verify in the container (unit tests, lint, and the preinstalled
+  Chromium) and give the exact route (and `gamePk`, if one applies) so the maintainer
+  can check it locally. Keep `?nointro` on every test URL.
+- **Branch cleanup.** Merged `claude/*` branches pile up on GitHub. Enable "Automatically
+  delete head branches" in the repository settings.
+
 ## Fresh-context startup checklist
 
 A new Claude or Codex context must not assume that the directory it opened is the

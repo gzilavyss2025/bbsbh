@@ -24,6 +24,10 @@ function findGitEntry(startDir) {
   }
 }
 
+// A cloud session (claude.ai/code) runs in a private, throwaway container.
+// Nobody else shares its checkout, so editing the primary checkout is safe.
+if (process.env.CLAUDE_CODE_REMOTE === 'true') process.exit(0)
+
 let input = ''
 process.stdin.on('data', (chunk) => { input += chunk })
 process.stdin.on('end', () => {
