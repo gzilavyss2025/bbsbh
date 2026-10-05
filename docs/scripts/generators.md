@@ -1041,7 +1041,9 @@ don't run these by hand.
   workload: last-12 appearance list (date/pitches/started), season totals, SP/RP
   role inference, league mean/SD baselines per role, and winning/losing-record
   team cohort means (descriptive color only). Full nightly rebuild from each
-  active-roster pitcher's season gameLog; MLB only. All bucket math (last
+  active-roster pitcher's season gameLog (`R,F,D,L,W`: the appearance list takes
+  October, the season totals, role and baseline floors stay regular season —
+  `foldGameLog` in the reader); MLB only. All bucket math (last
   1/3/10, consecutive days, availability rules) lives in the reader
   `src/api/workload.js`, computed relative to a caller-supplied date.
 - `gen-milestones.mjs` → `public/data/milestones.json` — the league-wide Milestone

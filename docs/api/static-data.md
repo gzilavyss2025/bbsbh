@@ -509,12 +509,15 @@ for each generator; the reader modules:
   (1/3/10-appearance buckets, days spanned, consecutive-day pattern),
   `availabilityFor` (rule-based fresh/limited/down with human-readable
   reasons — ESPN-published thresholds), `workloadVsBaseline` (vs. own norm +
-  role baseline). Surfaces: `BullpenBoard` on the lineup pages (gated to
+  role baseline). `apps` takes every game type (`R,F,D,L,W`), so October relief
+  work counts toward rest days and the board; `season`, `role` and the baseline
+  floors stay regular-season only, so a postseason cameo cannot re-class a
+  pitcher or move a league mean. Surfaces: `BullpenBoard` on the lineup pages (gated to
   slate-current games — the file describes "now"), the player page's
   `PitcherWorkloadCard`, and the laboring baseline for `pitcherHealth.js`.
 - `rotation/projectedStarters.js` + `rotation/liveStarters.js` — a LIKELY starter
   when no probable pitcher is announced (ADR-0089). Spoiler-free. The file is
-  regular-season only and up to a day old, so `workload.json` only NAMES the
+  up to a day old (and was regular-season only before 2026-10-05), so `workload.json` only NAMES the
   candidates (`rotationCandidateIds`); `projectFromLiveLogs` reads each one's game
   log with every game type and `projectStarters` applies the rest rule. A failed
   read drops that pitcher and never falls back to the file's own `apps`. Surface:

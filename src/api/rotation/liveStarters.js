@@ -1,10 +1,11 @@
 // Likely starters from LIVE game logs — the read the card uses.
 //
 // projectedStarters.js is the pure rule. This file feeds it the right rows.
-// workload.json cannot be that source: it keeps REGULAR-SEASON appearances only
-// (gen-workload.mjs filters gameType 'R') and is up to a day old. On 2026-10-01
-// that listed Chris Sale as rested ("7 days rest, 9/23") for a game whose series
-// he had opened on 9/29. So the file only NAMES the candidates (active-roster
+// workload.json cannot be that source: it is up to a day old, and until it took
+// the postseason into its `apps` (gen-workload.mjs, 2026-10-05) it kept
+// REGULAR-SEASON appearances only. On 2026-10-01 that listed Chris Sale as
+// rested ("7 days rest, 9/23") for a game whose series he had opened on 9/29.
+// So the file only NAMES the candidates (active-roster
 // pitchers with a recent start), and each one's appearances are read live, with
 // every game type, the way fetchPitcherLastGame does (ADR-0088).
 //

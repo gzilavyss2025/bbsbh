@@ -3,11 +3,11 @@
 // apps: [{ d, p, gs }] } } }` — workload.json's shape — and does day math.
 //
 // WHERE THE ROWS COME FROM matters more than the rule. Do not hand this
-// workload.json's own `apps` to a card: that file keeps regular-season games
-// only and is up to a day old, so in October it shows a pitcher who started
-// game 1 of the series as fully rested (that happened on 2026-10-01, with Chris
-// Sale). `liveStarters.js` is the caller to use: it reads live game logs with
-// every game type and passes them here.
+// workload.json's own `apps` to a card: that file is up to a day old, and until
+// 2026-10-05 it kept regular-season games only, so in October it showed a
+// pitcher who started game 1 of the series as fully rested (that happened on
+// 2026-10-01, with Chris Sale). `liveStarters.js` is the caller to use: it reads
+// live game logs with every game type and passes them here.
 //
 // Spoiler class: spoiler-FREE. Every input is a COMPLETED appearance strictly
 // before the game's date (the same gate `priorApps` in workload.js uses), so a

@@ -18,12 +18,42 @@
 // from .scratch/metric-engines/pitch-workload.md live here.
 
 import { staticJson } from './staticJson.js'
-import { outsToIp } from '../lib/math/innings.js'
+import { ipToOuts, outsToIp } from '../lib/math/innings.js'
+import { num } from '../lib/math/number.js'
 
 export const fetchWorkload = staticJson('/data/workload.json')
 
 // Whole-day index for a 'YYYY-MM-DD' date (UTC midnight / 86400s), so day
 // differences and "strictly before" comparisons are plain integer math.
+// A pitcher's gameLog splits (oldest-first, any mix of game types) folded into
+// the two things workload.json keeps. `allApps` takes EVERY dated split —
+// October included, because a postseason outing is real rest-day workload.
+// `season` takes regular-season splits only (gameType 'R'), so the role and the
+// baseline floors cannot be moved by a postseason cameo. gen-workload.mjs calls
+// this; it lives here because a generator is a top-level script and cannot be
+// unit-tested (test/workload.test.js).
+export function foldGameLog(splits) {
+  const season = { g: 0, gs: 0, pitches: 0, outs: 0, bf: 0, strikes: 0 }
+  const allApps = []
+  for (const s of splits ?? []) {
+    if (!s?.date) continue
+    const st = s.stat ?? {}
+    const gs = num(st.gamesStarted)
+    if (s.gameType === 'R') {
+      season.g += num(st.gamesPlayed) || 1
+      season.gs += gs
+      season.pitches += num(st.numberOfPitches)
+      season.outs += ipToOuts(st.inningsPitched)
+      season.bf += num(st.battersFaced)
+      season.strikes += num(st.strikes)
+    }
+    const app = { d: s.date, p: num(st.numberOfPitches) }
+    if (gs) app.gs = 1
+    allApps.push(app)
+  }
+  return { season, allApps }
+}
+
 export const dayIndex = (s) => Math.floor(Date.parse(s + 'T00:00:00Z') / 86400000)
 
 // The pitcher record, with apps guaranteed most-recent-first and restricted to

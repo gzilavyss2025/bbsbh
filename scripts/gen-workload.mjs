@@ -29,10 +29,9 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
-import { clubPenCounts } from '../src/api/workload.js'
+import { clubPenCounts, foldGameLog } from '../src/api/workload.js'
 import { getJson } from './lib/statsapi.mjs'
 import { num } from '../src/lib/math/number.js'
-import { ipToOuts } from '../src/lib/math/innings.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'workload.json')
@@ -43,6 +42,11 @@ const SEASON = 2026
 // Number of most-recent appearances stored per pitcher (feeds the 1/3/10 buckets
 // in the reader with headroom, and the availability board's day-window scans).
 const APPS_KEPT = 12
+
+// Regular season, wild card, division, league and world series — the same list
+// rotation/liveStarters.js asks for. Never the umbrella 'P': a pitching log
+// echoes the type asked for into every row (src/api/boxlines/rows.js).
+const GAME_TYPES = 'R,F,D,L,W'
 
 // Qualifying floors for a pitcher to count toward the league baselines.
 const RP_MIN_APPS = 8
@@ -109,26 +113,13 @@ async function fetchActivePitchers(teamId) {
 // --- per-pitcher gameLog -> apps + season totals + role ----------------------
 async function buildPitcher(personId) {
   const data = await getJson(
-    `/api/v1/people/${personId}/stats?stats=gameLog&group=pitching&season=${SEASON}`,
+    `/api/v1/people/${personId}/stats?stats=gameLog&group=pitching&season=${SEASON}&gameType=${GAME_TYPES}`,
   )
-  // Splits arrive oldest-first; regular season only (gameType 'R').
-  const splits = (data.stats?.[0]?.splits ?? []).filter((s) => s.gameType === 'R' && s.date)
+  // Each row keeps its own gameType when a list is asked for (verified
+  // 2026-10-05: Skubal 2025 -> R x31, F x1, D x2). foldGameLog splits the use.
+  const splits = data.stats?.[0]?.splits ?? []
 
-  const season = { g: 0, gs: 0, pitches: 0, outs: 0, bf: 0, strikes: 0 }
-  const allApps = []
-  for (const s of splits) {
-    const st = s.stat ?? {}
-    const gs = num(st.gamesStarted)
-    season.g += num(st.gamesPlayed) || 1
-    season.gs += gs
-    season.pitches += num(st.numberOfPitches)
-    season.outs += ipToOuts(st.inningsPitched)
-    season.bf += num(st.battersFaced)
-    season.strikes += num(st.strikes)
-    const app = { d: s.date, p: num(st.numberOfPitches) }
-    if (gs) app.gs = 1
-    allApps.push(app)
-  }
+  const { season, allApps } = foldGameLog(splits)
 
   // Most-recent-first, last APPS_KEPT.
   const apps = allApps.slice(-APPS_KEPT).reverse()
