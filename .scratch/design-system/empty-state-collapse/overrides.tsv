@@ -7,6 +7,7 @@
 #
 # --- SELECTORS — true empty states that migrate ---
 .txpage__empty	empty	MIGRATE	E1	bare hint	PILOT (the issue names it): a bare .hint plus a margin. DONE in E1: the site renders <EmptyState className="txpage__empty">. The rule stays as the namespace margin (no Stack spaces the page)
+.emptystate	other	n/a			the component's own class. Census sees it only inside a namespace margin rule: E2 adds `.slatebody__main > .emptystate:first-child` (05-masthead-nav.css), because the slate's empty line lost .hint padding and sat flush under the date row
 .prospectcard__empty	empty	MIGRATE	E5	label+note	The issue names it: a label, a line and a note, the three-line shape (the lab entry proves it first, in E1). Its child rule `.prospectcard__empty p` goes
 .prospectcard__emptylabel	empty	MIGRATE	E5	inner line	the label line of .prospectcard__empty. It has no rule of its own today (only the word); it becomes EmptyState `label`
 .prospectcard__emptynote	empty	MIGRATE	E5	inner line	the note line of .prospectcard__empty; becomes EmptyState `note`
@@ -142,36 +143,36 @@ components/playerstats/ProspectCard.jsx#1	empty	MIGRATE	E5	label+note	label + li
 components/playerstats/ProspectCard.jsx#2	empty	MIGRATE	E5	label+note	label + line + two notes: the early-sample standing. Waiting for a sample is the provisional kind of empty
 #
 # --- SITES — E2 AsyncStatus empty branch (one change moves every emptyMessage) ---
-components/ui/AsyncGate.jsx#4	empty	MIGRATE	E2	bare hint	THE one line every AsyncStatus emptyMessage renders through. E2 changes this line; the call sites below move with it and change no code (except dropping emptyProse)
-screens/AllStarLegacyPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/AllStarRostersPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/AwardsHistoryPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/FoulTrackerPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/GamePhotosPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/GamePhotosPage.jsx#3	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/LogoSheet.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/MilestoneWatchPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/NineKeysPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/PostseasonHistoryPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/PostseasonLeadersPage.jsx#3	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/PostseasonRacePage.jsx#5	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/ProspectsPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/RehabPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/SituationalRecordsPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/StandingsPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/TradeDeadlineSeasonPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/UmpireRankingsPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/around-the-game/AbsChallengesPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/around-the-game/AttendancePage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/around-the-game/BullpenPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/around-the-game/DoubleheadersPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/around-the-game/FarmSystemPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/around-the-game/PacePage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/around-the-game/RunDifferentialPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/around-the-game/RunValuePage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/postseason-records/PostseasonRecordsPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/team/TeamPhotosPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4
-screens/GameSelect.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage (No games scheduled.) ON THE SLATE. A day with no games carries no score; the empty test is the schedule length, not a game state
+# components/ui/AsyncGate.jsx#4 (the one AsyncStatus empty line): DONE in E2. It renders <EmptyState> now, so the census no longer sees a hint there and the row is gone.
+screens/AllStarLegacyPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/AllStarRostersPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/AwardsHistoryPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/FoulTrackerPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/GamePhotosPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/GamePhotosPage.jsx#3	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/LogoSheet.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/MilestoneWatchPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/NineKeysPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/PostseasonHistoryPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/PostseasonLeadersPage.jsx#3	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/PostseasonRacePage.jsx#5	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/ProspectsPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/RehabPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/SituationalRecordsPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/StandingsPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/TradeDeadlineSeasonPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/UmpireRankingsPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/around-the-game/AbsChallengesPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/around-the-game/AttendancePage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/around-the-game/BullpenPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/around-the-game/DoubleheadersPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/around-the-game/FarmSystemPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/around-the-game/PacePage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/around-the-game/RunDifferentialPage.jsx#2	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/around-the-game/RunValuePage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/postseason-records/PostseasonRecordsPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/team/TeamPhotosPage.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage: moves with AsyncGate.jsx#4. DONE in E2
+screens/GameSelect.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage (No games scheduled.) ON THE SLATE. A day with no games carries no score; the empty test is the schedule length, not a game state. DONE in E2: GameSelect passes no emptyProse; the empty test is unchanged
 #
 # --- SITES — E3 the spoiler surfaces ---
 components/inning/focus/ReferencePanel.jsx#1	empty	MIGRATE	E3	box	innings viewer, gated file. armsEmpty (ReferencePanel.jsx:446) is computed from the half's margin notes and pitcher rows, which arrive reveal-clamped. Keep the test byte for byte; only the <p> changes

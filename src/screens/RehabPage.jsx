@@ -46,7 +46,6 @@ export function RehabPage() {
         hasData={allPlayers.length > 0}
         errorMessage="Couldn’t load rehab assignments. Try again."
         emptyMessage="No players are on a rehab assignment right now."
-        emptyProse
       />
 
       {allPlayers.length > 0 && (
