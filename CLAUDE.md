@@ -143,11 +143,11 @@ directly. Each game's reveal high-water mark (`revealedThrough`) persists in
 so the spoiler rule still holds on return. A same-device tab picks up another tab's
 reveal through a `storage` listener in `useRevealProgress.js`.
 
-**Fourteen Vercel functions live in `api/`**, each inert when unconfigured;
-**thirteen never render or fetch a score.** **The fourteenth stores a score, by design**:
+**Fifteen Vercel functions live in `api/`**, each inert when unconfigured;
+**fourteen never render or fetch a score.** **The fifteenth stores a score, by design**:
 the Game Log's stamps (`stamps.js`, `src/lib/stamps.js`), safe because of WHERE stamp art
 may render (`check-stamp-surfaces`), not a mint-time check (ADR-0035). The other
-thirteen, each with its ADR: `api/CLAUDE.md`.
+fourteen, each with its ADR: `api/CLAUDE.md`.
 
 ## Conventions to follow
 

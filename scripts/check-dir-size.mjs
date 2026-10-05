@@ -75,7 +75,11 @@ const BUDGETS = {
   // (`_lib/fonts.js`, `_lib/logos.js`) — see that ADR's third amendment. A URL
   // really did disappear here, which is what makes tightening this safe: no
   // client ever asked for `/api/og` except the warm pass, and it stopped.
-  api: 14,
+  //
+  // 14 -> 15 for `headshot-report.js`, TEMPORARY (issue #1446): the receiver
+  // for the background "?" report. It is deleted, and this goes back to 14, as
+  // soon as the cause of the "?" is found. A URL like every other file here.
+  api: 15,
   // The 51 stylesheet partials src/index.css @imports in order. This one is a
   // deliberate exception rather than a directory awaiting subdivision: the files
   // are an ORDERED SEQUENCE, not independent modules, and the numeric prefix is

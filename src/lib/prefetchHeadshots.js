@@ -1,4 +1,5 @@
 import { realHeadshotUrl } from './teams.js'
+import { HEADSHOT_CROSS_ORIGIN } from './headshot/retry.js'
 
 // Warms the browser's HTTP cache — and, via vite.config.js's CacheFirst rule
 // for img.mlbstatic.com, the service worker's own cache — for a batch of
@@ -22,6 +23,8 @@ export function prefetchHeadshots(ids, width = 320) {
     if (!url) continue
     const img = new Image()
     img.decoding = 'async'
+    // Same CORS mode as the on-screen <img>, so the service worker can cache it.
+    img.crossOrigin = HEADSHOT_CROSS_ORIGIN
     img.src = url
   }
 }
