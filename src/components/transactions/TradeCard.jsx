@@ -6,6 +6,7 @@ import { Headshot } from '../player/Headshot.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { teamFullName } from '../../lib/teams.js'
 import { Card } from '../ui/frame/Card.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // The stats-to-date block under a traded player's name — one line for an MLB
 // player (role-gated hitting/SP/RP/CL line), or a MiLB player's three lines
@@ -181,11 +182,11 @@ export function TradeCard({ trade }) {
           <TeamSide side={trade.teams[1]} />
         </div>
       ) : (
-        <div className="trade__stack">
+        <Stack className="trade__stack">
           {trade.teams.map((side) => (
             <TeamSide key={side.teamId} side={side} />
           ))}
-        </div>
+        </Stack>
       )}
       {trade.cutline.map((line, i) => (
         <p className="trade__cutline" key={i}>
