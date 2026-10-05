@@ -246,19 +246,11 @@
   color: var(--accent-positive);
 }
 
+/* The filter result's EmptyState (#1132): the dashed inset and its Clear
+   filters Button are the component's. The page has no Stack, so the
+   namespace keeps the space above and below. */
 .prospects__empty {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
   margin: var(--space-4) 0;
-  padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-body);
-}
-.prospects__empty p {
-  margin: 0;
 }
 @media (min-width: 740px) {
   .prospects__header {

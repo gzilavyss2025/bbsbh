@@ -5,6 +5,7 @@ import { useNav } from '../../lib/nav.js'
 import { gamePath, umpirePath } from '../../lib/route.js'
 import { UmpireTendencies } from './UmpireTendencies.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
+import { EmptyState } from '../ui/state/EmptyState.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { monthDayName } from '../../lib/dates.js'
 
@@ -86,7 +87,7 @@ export function UmpireAccuracyModal({ id, onClose }) {
         </div>
 
         {data && !season && (
-          <p className="umpmodal__hint">No plate-accuracy data on file for this umpire yet.</p>
+          <EmptyState className="umpmodal__empty">No plate-accuracy data on file for this umpire yet.</EmptyState>
         )}
 
         {/* The Tendencies card carries the zone map now, beside the phrase that

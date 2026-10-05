@@ -93,12 +93,17 @@
 }
 
 /* The wire is silent while it loads and on a failure — a habit that suits a
-   margin and not a lead, where it would leave a bare heading over nothing. */
-.oseason__quiet {
+   margin and not a lead, where it would leave a bare heading over nothing.
+   So the lead says which: this loading line, or the EmptyState below it
+   (#1132), which keeps only the same space under the heading. */
+.oseason__loading {
   margin: var(--space-4) 0 0;
   font-family: var(--font-body);
   font-size: var(--fs-body);
   color: var(--text-caption);
+}
+.oseason__empty {
+  margin: var(--space-4) 0 0;
 }
 
 /* ---------------------------------------------------------------------------

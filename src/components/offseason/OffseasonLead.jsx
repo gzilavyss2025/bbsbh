@@ -7,6 +7,7 @@ import { SeasonRecord } from './SeasonRecord.jsx'
 import { WinterCalendar } from './WinterCalendar.jsx'
 import { useCopy } from '../../copy/copyContext.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { EmptyState } from '../ui/state/EmptyState.jsx'
 
 // THE OFFSEASON LEAD — the same roster wire, promoted.
 //
@@ -90,12 +91,12 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
             </button>
           )}
         </>
+      ) : loading ? (
+        <p className="oseason__loading" role="status">Reading the wire…</p>
       ) : (
-        <p className="oseason__quiet" role="status">
-          {loading
-            ? 'Reading the wire…'
-            : `No moves filed in the last ${windowDaysFor(sportId)} days.`}
-        </p>
+        <EmptyState className="oseason__empty" role="status">
+          {`No moves filed in the last ${windowDaysFor(sportId)} days.`}
+        </EmptyState>
       )}
 
       {/* One note about the season the wire has just stopped covering, and the
