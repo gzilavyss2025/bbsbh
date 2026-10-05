@@ -145,6 +145,12 @@ export const POSTSEASON = ['F', 'D', 'L', 'W']
 // with 'P' would otherwise get a full sheet for a hitter and an empty one for
 // a pitcher, with nothing on either to say why. Everything else passes
 // through: an unknown type is left alone and simply matches no row.
+// Every game type a player-page game log asks for at the MLB level, as the
+// comma list statsapi takes: the regular season plus the four postseason
+// rounds. Each row keeps its OWN gameType under a list (verified 2026-10-05,
+// Skubal 2025: R x31, F x1, D x2), which is what lets `seriesAbbr` name a round.
+export const MLB_LOG_GAME_TYPES = [...REGULAR_SEASON, ...POSTSEASON].join(',')
+
 export function askableGameTypes(types) {
   const list = types?.length ? types : REGULAR_SEASON
   return [...new Set(list.flatMap((t) => (t === 'P' ? POSTSEASON : [t])))]

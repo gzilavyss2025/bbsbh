@@ -58,6 +58,7 @@ export function GameLog({ gameLog, gameLogAlt, altLevel, note, limit }) {
                   {r.home ? 'vs' : '@'}{' '}
                   <GameLink path={r.boxscorePath}>{r.opp}</GameLink>
                   {r.level && <span className="gamelog__level">{r.level}</span>}
+                  {r.series && <span className="gamelog__level" title="Postseason">{r.series}</span>}
                   {r.qs && <span className="gamelog__qs" title="Quality start">QS</span>}
                 </span>
               </div>

@@ -16,6 +16,7 @@
 
 import { fetchPersonStats, fetchMilbYearByYear, fetchPlayerAwards } from '../person-fetch.js'
 import { buildCareerTimeline } from '../careerTimeline.js'
+import { MLB_LOG_GAME_TYPES } from '../boxlines/rows.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from '../war.js'
 import { fetchPlayerContract } from '../person/contracts.js'
 import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor, medianRatesFor } from '../savantPercentiles.js'
@@ -83,7 +84,10 @@ export async function loadPlayerOverview(id, asOf) {
           // tiles, same cutoff rule the full Stats-tab log applies
           // (gameLogView), just asked for at this tab's own preview size
           // rather than the Stats tab's "last 6/8".
-          fetchPersonStats(id, { type: 'gameLog', group, season, sportId: currentActivitySportId }),
+          fetchPersonStats(id, {
+            type: 'gameLog', group, season, sportId: currentActivitySportId,
+            gameType: currentActivitySportId === 1 ? MLB_LOG_GAME_TYPES : undefined,
+          }),
         ])
         const { seasonSplits, stat: tileStat, sportId: tileSportId, levelOnlyStat, levelOnlySplits } = current
         const block = buildBlock({

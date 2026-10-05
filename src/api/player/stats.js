@@ -16,6 +16,7 @@ import {
   fetchTeamAbbrevs,
 } from '../person-fetch.js'
 import { resolveCareerOrgs } from '../careerTimeline.js'
+import { MLB_LOG_GAME_TYPES } from '../boxlines/rows.js'
 import { fetchWarData, fetchWarHistory, warByYearFor, warByTeamFor } from '../war.js'
 import { fetchVsTeamSplitsForPlayer, vsTeamSplitsFor } from '../vsTeamSplits.js'
 import {
@@ -57,13 +58,17 @@ export async function loadPlayerStats(id, asOf) {
       // everyone else's is a single-level log at his current-activity level.
       const gameLogPromise = onRehab
         ? Promise.all([
-            fetchPersonStats(id, { type: 'gameLog', group, season, sportId: 1 }),
+            fetchPersonStats(id, { type: 'gameLog', group, season, sportId: 1, gameType: MLB_LOG_GAME_TYPES }),
             fetchMilbGameLog(id, group, season),
           ]).then(([mlb, milb]) => [
             ...mlb.map((s) => ({ ...s, sport: s.sport ?? { id: 1 } })),
             ...milb,
           ])
-        : fetchPersonStats(id, { type: 'gameLog', group, season, sportId: currentActivitySportId })
+        : fetchPersonStats(id, {
+            type: 'gameLog', group, season, sportId: currentActivitySportId,
+            // October counts at the MLB level only; a minor-league log has no such rounds.
+            gameType: currentActivitySportId === 1 ? MLB_LOG_GAME_TYPES : undefined,
+          })
 
       const [current, yby, careerSplits, lrSplits, gameLogSplits, situationalSplits] = await Promise.all([
         currentSeasonFor(ctx, group),

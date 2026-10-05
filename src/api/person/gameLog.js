@@ -5,6 +5,7 @@
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { monthDay } from '../../lib/dates.js'
 import { ipToOuts } from '../../lib/math/innings.js'
+import { seriesAbbr } from '../boxlines/rows.js'
 import { DASH, NBSP, num } from './shared.js'
 
 // ---------------------------------------------------------------------------
@@ -89,6 +90,9 @@ export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false
         // leaguer's combined MLB + MiLB log); a single-level log leaves it blank
         // so every row isn't stamped with a redundant "MLB".
         level: tagLevel ? SPORT_LABEL[s.sport?.id] ?? '' : '',
+        // A postseason game wears its round (WC/DS/LCS/WS); '' for the regular
+        // season, so most rows carry no pill at all.
+        series: seriesAbbr(s.gameType),
         line: group === 'pitching' ? pitcherLine(st) : hitterLine(st),
         // Quality start (6+ IP, ≤3 ER, as a starter) — a small pill beside the
         // opponent so a run of strong starts reads at a glance.
