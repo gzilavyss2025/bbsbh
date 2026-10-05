@@ -692,3 +692,172 @@ Final handoff
    merged yet, say which, and say that E9 waits for it. Add the prompt to
    prompts-e2-e8.md (rename nothing).
 ```
+
+---
+
+## What E2 to E8 did (2026-10-05)
+
+All seven ran as subagents of the E1 session, STACKED, not from `main`:
+
+| slice | PR | base | test file |
+| --- | --- | --- | --- |
+| E1 | #1456 | main | `test/empty-state-cascade.test.js` |
+| E2 | #1463 | `claude/empty-state-e1` | `test/empty-state-e2.test.js` |
+| E3 | #1464 | `claude/empty-state-e1` | `test/empty-state-e3.test.js` |
+| E4 | #1462 | `claude/empty-state-e1` | `test/empty-state-e4.test.js` |
+| E5 | #1461 | `claude/empty-state-e1` | `test/empty-state-e5.test.js` |
+| E6 | #1474 | `claude/empty-state-e2` | `test/empty-state-e6.test.js` |
+| E7 | #1476 | `claude/empty-state-e2` | `test/empty-state-e7.test.js` |
+| E8 | #1460 | `claude/empty-state-e1` | `test/empty-state-e8.test.js` |
+
+Merge order: #1456 into main; retarget #1463, #1464, #1462, #1461 and #1460
+to main and merge them; then retarget #1474 and #1476 to main and merge them.
+Expect small conflicts in `overrides.tsv` (every slice edited its own rows,
+some next to each other). No slice committed `census.md` or `census.json`.
+
+What they found, for E9:
+
+- **A moved site often leaves the census.** A site with no namespace class
+  drops out, and its override prints STALE: the fix was to DELETE the row,
+  not mark it DONE. Keys are `file#n`, so each move shifted the keys below it
+  (E5 found a value mark mislabelled as a migrating empty by a shifted key).
+- **New margin-only namespace classes** (each a margin, never a frame):
+  `.txpage__empty` (E1), `.roster__empty`, `.starter__empty`,
+  `.boxlines__empty` (E3), `.vsteam__none` (E5), `.prospects__empty`,
+  `.payboard__empty`, `.umpmodal__empty`, `.oseason__empty` (E7), and the
+  slate rule `.slatebody__main > .emptystate:first-child` in
+  `05-masthead-nav.css` (E2). `overrides.tsv` has an `.emptystate` row
+  (other, n/a) for the slate rule.
+- **Deleted rules:** `.refpanel__empty` (E3), `.starter > .hint` (E3),
+  `.trec__empty`, `.hzntile__nostat` (E4), the `.prospectcard__empty*` rules
+  (E5), the solid `.prospects__empty` box, `.payboard__empty`'s top rule,
+  `.umpmodal__hint` (E7).
+- **New loading-line classes** from E7's splits: `.stampsheet__loading` and
+  `.oseason__loading` (the old rules renamed, same declarations). They belong
+  to the loading/Notice family, not EmptyState.
+- **Budgets.** E4 lowered `scripts/check-caption-budget.mjs` BUDGET 122 to
+  121 (it deleted `.trec__empty`). No other slice changed a budget. After all
+  merges the count must be measured again.
+- **Kept on purpose:** `.scout__notposted` (the lab's scout harness wears
+  it); the `.boxlines__hint` loading and error lines; All-Star Legacy has no
+  `role="status"` (its empty line sits in 30 cards on load).
+- **Not seen live** (data on file, or the feed unreachable): the Records card,
+  the Horizon tile, the depth chart's "Too early", Stamp In empty (E4); the
+  prospect card states (E5); the roster, starter-card and Box Lines empties
+  (E3: real CSS checked by injected markup); `/trade-deadline`,
+  `/doubleheaders`, `/salaries` league line, the umpire page, the game
+  finder, the `/photos` prompt (E6; it shows only with no favourite club);
+  the Scout's head-to-head and chart slots (E8); about 19 AsyncStatus pages
+  whose data is on file (E2).
+- **Environment.** The reserved dev ports were often held by other
+  worktrees' servers (E6 used 5168, E7 used 5165). Headless Chromium cannot
+  reach statsapi.mlb.com through the proxy: E3 and E7 relayed statsapi calls
+  through Node with `page.route`. The scratchpad is shared between agents:
+  use your own subfolder.
+
+## E9 — clean-up
+
+Model and effort: Sonnet 5.5 (`claude-sonnet-5-5`), high. It is mostly
+mechanical, but it merges eight slices' census edits, decides which rules are
+dead by reading each one, and re-measures two lint ratchets.
+
+```text
+Task: build slice E9 (clean-up) of the EmptyState collapse for GitHub issue
+#1132 (gzilavyss2025/bbsbh): regenerate the census, delete the rules that are
+dead now that every site has moved, re-measure the lint budgets, update the
+docs, and post the status on #1132. Do NOT start the Notice family. #1132
+stays open (Notice is its third family): the PR says "Part of #1132".
+
+Context
+- The plan is on main in .scratch/design-system/empty-state-collapse/:
+  spec.md, slices.md (E9), decisions.md, overrides.tsv, census.mjs, and
+  prompts-e2-e8.md. Read "What E2 to E8 did" there first: the PR table, the
+  merge order, the new namespace classes, the deleted rules, the budgets and
+  the "not seen live" list.
+- E1 to E8 are PRs #1456, #1463, #1464, #1462, #1461, #1474, #1476, #1460.
+  E9 waits until ALL eight are merged into main.
+- Each slice has its own test file (test/empty-state-cascade.test.js for E1,
+  test/empty-state-e2.test.js to e8.test.js). No slice committed census.md
+  or census.json.
+- Gary's answers (2026-10-05): Q1 AsyncStatus in one step (E2). Q2 a dashed
+  hairline inset, no fill, graphite copy. Q3 two sizes, block and compact.
+  Q4 all six hold groups stay held (Express Lane, the search boxes, the
+  bracket fold, the series chart, the farm-system row, tool pages).
+
+Before you start
+1. Read CLAUDE.md, src/CLAUDE.md, src/components/ui/CLAUDE.md,
+   src/styles/CLAUDE.md, spec.md, slices.md (E9) and prompts-e2-e8.md.
+2. Fetch origin. List open PRs and worktrees. Confirm each of the eight PRs
+   is merged, and that origin/main has src/components/ui/state/EmptyState.jsx
+   and all eight test files. If one is not merged, stop and say which.
+   Base your branch on current origin/main. Check status and diffs before
+   you edit.
+3. Run node .scratch/design-system/empty-state-collapse/census.mjs. It must
+   end "unreviewed 0" with no STALE line. The slices merged eight sets of
+   override edits: read every UNREVIEWED and STALE row and fix it by reading
+   the site (keys are file#n and shifted many times). A moved site with no
+   namespace class has no row: delete a STALE row, do not mark it DONE.
+
+Build
+- Delete .hint__link (05-masthead-nav.css): dead before this work (no use in
+  src, e2e, test, scripts or api). Check again first.
+- Find each candidate rule that no site wears any more and delete it. Decide
+  each by reading the JSX and CSS, never by the grep alone. Check at least:
+  .hint--prose (E2 removed its AsyncStatus use; other sites may still wear
+  it), .screen--slate .hint (other slate hints may still use it),
+  .boxlines__hint (still the loading and error lines: keep). Keep every rule
+  a held page wears (.scout__notposted stays while the lab wears it). Keep
+  each margin-only namespace rule listed in prompts-e2-e8.md.
+- Do not touch .stampsheet__loading, .oseason__loading or .prospects__reset:
+  they are loading lines and a control, not empty states. List them in the
+  #1132 status as input for the Notice family and a later Button pass.
+- Lint budgets: run npm run lint. Re-measure scripts/check-caption-budget.mjs
+  and the scripts/check-raw-values.mjs budgets (#1178). Lower each budget to
+  the new count, never below it, with a one-line comment naming #1132 E9.
+- Tests: keep all eight test files and every pin. If a pin names a rule you
+  delete, change it to assert the rule is gone; never loosen it. Optionally
+  fold the eight files into test/empty-state-cascade.test.js only if every
+  pin moves unchanged.
+- Docs: src/components/ui/CLAUDE.md, confirm the state/ line still says what
+  EmptyState is. If any nested CLAUDE.md, docs/ file or ADR names a deleted
+  class, update it. Keep every CLAUDE.md under its cap (npm run lint checks).
+- Census: re-run until "unreviewed 0", no STALE. Commit census.md and
+  census.json (regenerated, never hand-edited) and overrides.tsv.
+- Status on #1132 (slices.md E9): one comment with what moved (count by
+  slice and the PR numbers), what is held and why (Q4), the rules deleted,
+  the budgets before and after, the "not seen live" list, and that Notice is
+  next. End it with the Claude Code attribution footer.
+
+Rules
+- Spoiler rule: EmptyState fetches, computes and gates nothing. Deleting a
+  CSS rule must not change what a sealed surface shows: check the innings
+  viewer and the box score before and after.
+- Follow docs/agents/writing-style.md (ASD-STE100) and the house word list
+  ("postseason").
+- Run npm run lint; echo "exit=$?", npm test and npm run build. All green.
+- User-visible: start the first free reserved dev server (npm run dev, or
+  dev:2 to dev:5; check each port with ss first, other worktrees often hold
+  them). Load at 390px and 900px, with ?nointro on every URL:
+  /design-lab?nointro (the EmptyState entry),
+  /team/nashville-sounds-556/transactions?nointro,
+  /team/nashville-sounds-556/contracts?nointro, /leaders?nointro,
+  /all-star-legacy?nointro, /scout?nointro, /logbook/stats?nointro,
+  /07072026/milstl-2/top1?nointro (the Arms tab), and
+  /07072026/milstl-2/boxscore?nointro (must stay sealed). Headless Chromium
+  cannot reach statsapi.mlb.com through the proxy: relay those calls through
+  Node with page.route (E3 and E7 did), and launch with
+  executablePath '/opt/pw-browsers/chromium'. Keep the server running.
+- Do not run npm run e2e or npm run visual unless Gary asks. Say that the
+  "not seen live" list is the input for #1177's screenshot suite.
+- Commit, push to your assigned branch, and open a draft PR whose body says
+  "Part of #1132", never "Closes #1132". List the routes for #1177. Do not
+  push to main.
+
+Final handoff
+1. What you deleted, the budgets before and after, the census result, the
+   #1132 comment link, the clickable local URLs, and what you did not check.
+2. A one-paragraph note on what the Notice census (the third #1132 family)
+   should start from: the 21 error lines, .stampsheet__loading,
+   .oseason__loading, and any loading line E9 found. Do not write the Notice
+   prompts.
+```
