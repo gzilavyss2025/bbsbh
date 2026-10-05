@@ -86,9 +86,9 @@ export function scorecardStep(feed, through, countFor = () => 0) {
   const battingSide = half === 'top' ? 'away' : 'home'
   const entries = computeHalfInningFeed(feed, inning, half, battingSide)
   if (entries.length === 0) return null
-  // The persisted cursor for THIS half (0 for any other): the caller hands in
-  // useRevealProgress's atBatCountFor, so the sheet and the viewer read one mark.
+  // This half's persisted cursor (0 for any other), from useRevealProgress's atBatCountFor.
   const count = countFor(inning, half)
+  const halfOver = idx < last || selectIsFinal(feed)
   return {
     inning,
     half,
@@ -96,8 +96,8 @@ export function scorecardStep(feed, through, countFor = () => 0) {
     count,
     total: entries.length,
     nextCount: nextStepBoundary(entries, count),
-    halfOver: idx < last || selectIsFinal(feed),
-    spent: stepCommitReady(entries, count, !(idx < last || selectIsFinal(feed))),
+    halfOver,
+    spent: stepCommitReady(entries, count, !halfOver),
   }
 }
 

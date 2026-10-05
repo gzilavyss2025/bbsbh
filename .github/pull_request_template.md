@@ -31,7 +31,7 @@ rule" section of CLAUDE.md + docs/adr/.
 ## Verification
 
 <!--
-No CI-enforced test suite here — verify by exercising the real flow.
+`npm test` is CI-gated (`lint-and-build` runs lint, `npm test` and build). Also verify by exercising the real flow.
 Note: this sandbox usually can't reach statsapi.mlb.com from a headless
 browser, so live-game screenshots often aren't possible — say how you
 verified instead (`e2e/fixtures/mock-api.js` for a spec pinned to the anchor
@@ -41,6 +41,7 @@ it's a sandbox limitation, not something a visible browser fixes.
 -->
 
 - [ ] `npm run lint` passes
+- [ ] `npm test` passes
 - [ ] `npm run build` passes
 - [ ] Exercised the affected flow in `npm run dev` against a live or recent game — <!-- gamePk / how -->
 <!-- Run `npm run e2e` only when Gary asks for it. -->
