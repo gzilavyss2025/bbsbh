@@ -545,3 +545,56 @@
   font-size: var(--fs-cell);
 }
 
+/* Coaching tree: manager box, short stem, staff wrapping below. Plain flex. */
+.coachtree__top,
+.coachtree__node {
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+}
+.coachtree__top {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-inset);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.coachtree__stem {
+  width: 0;
+  height: var(--space-3);
+  margin: 0 auto;
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+.coachtree__row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+.coachtree__node {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-2h);
+  font-size: var(--fs-small);
+}
+.coachtree__name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+.coachtree__meta {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.coachtree__more {
+  margin-top: var(--space-2);
+  text-align: center;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+.coachtree__more > summary { cursor: pointer; margin-bottom: var(--space-2); }

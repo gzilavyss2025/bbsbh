@@ -1,5 +1,6 @@
 import {
   loadManagerHistory,
+  coachedUnder,
   groupManagerialRecord,
   currentStint,
   lastManagerialStint,
@@ -12,6 +13,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
+import { CoachingTree } from '../components/team/CoachingTree.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
@@ -27,10 +29,11 @@ import { rate3 } from '../api/person/shared.js'
 // career and its awards carry no live game's score, same footing as the
 // umpire/milestone pages.
 async function loadManager(id) {
-  const [{ stints, generatedAt }, bio, awards] = await Promise.all([
+  const [{ stints, generatedAt }, bio, awards, staff] = await Promise.all([
     loadManagerHistory(id),
     fetchPerson(id),
     fetchPlayerAwards(id),
+    coachedUnder(id),
   ])
   if (!bio && stints.length === 0) return null
   // His own playing career keys off primaryPosition (a former pitcher's stats
@@ -45,7 +48,7 @@ async function loadManager(id) {
   const playingTeams = playing
     ? await fetchPlayingTimeline(id, playing.group, debutYear)
     : null
-  return { bio, awards, stints, generatedAt, playing, playingTeams }
+  return { bio, awards, stints, staff, generatedAt, playing, playingTeams }
 }
 
 function seasonLabel(startSeason, endSeason) {
@@ -74,7 +77,7 @@ export function ManagerPage({ id }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'manager', noun: 'manager', onBack: back })
   if (gate) return gate
 
-  const { bio, awards, stints, playing, playingTeams } = data
+  const { bio, awards, stints, staff, playing, playingTeams } = data
   const name = bio?.fullName || 'Manager'
   const active = currentStint(stints)
   const headshotTeamId = active?.teamId ?? stints[stints.length - 1]?.teamId ?? null
@@ -100,6 +103,8 @@ export function ManagerPage({ id }) {
       {playingTeams?.length > 0 && <PlayingTeams entries={playingTeams} />}
 
       {record.length > 0 && <RecordTable rows={record} />}
+
+      <CoachingTree name={name} staff={staff} />
 
       {stints.length > 0 && <CoachingTimeline stints={stints} />}
     </div>
