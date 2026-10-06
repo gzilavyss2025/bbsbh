@@ -1162,8 +1162,14 @@ don't run these by hand.
   coaching career rather than his managerial stints alone (Pat Murphy was a
   Padres bench coach years before he managed the Brewers; both belong). The cron
   runs **`--current-only`**: this season, all 30 clubs, ~30 calls, MERGED into
-  the existing shards so the hand-run full backfill (2000-present, ~800 calls)
-  survives. Per-stint W-L for a club-season with more than one manager can't be
+  the existing shards so the hand-run backfill survives. The backfill covers
+  `MANAGER_HISTORY_FIRST_SEASON` (`src/api/managers.js`, 1969 since 2026-10-06) to
+  now: ~2,000 calls for a full rebuild, about 25 s. **Hand-run** (no cron runs it):
+  `node scripts/gen-manager-history.mjs` rebuilds; `--from=YYYY --to=YYYY` merges one
+  slice; `--out=DIR` writes to DIR for a measuring run. 1969 is where the unseeded
+  shared seasons stay under 150 (148 added; 1968 would make 152, 1901 about 300).
+  The API answers back to 1901, so lower the constant and run `--from` to go further.
+  Per-stint W-L for a club-season with more than one manager can't be
   split from the coaches endpoint alone (no dates, no ordering), so
   `scripts/manager-transitions-seed.json` supplies the transition date and a
   season with no seed entry is appended to
