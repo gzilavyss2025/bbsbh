@@ -45,8 +45,9 @@ for (const [file, copy, status] of SITES) {
   })
 }
 
-test('E6: the game finder keeps its two-teams error as a hint, not an empty state', () => {
-  assert.match(src('components/game/GameFinder.jsx'), /<p className="hint">Pick two different teams\.<\/p>/)
+test('E6: the game finder keeps its two-teams error as a Notice (N3), not an empty state', () => {
+  const code = src('components/game/GameFinder.jsx')
+  assert.match(code, /<Notice tone="caution" role="status" size="compact" className="gamefinder__notice">\s*Pick two different teams\.\s*<\/Notice>/)
 })
 
 test('E6: the empty tests stay (an empty line shows when its own test says so)', () => {

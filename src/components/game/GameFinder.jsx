@@ -6,6 +6,7 @@ import { gamePath } from '../../lib/route.js'
 import { TeamSearchBox } from '../team/TeamSearchBox.jsx'
 import { Loader } from '../ui/Loader.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
+import { Notice } from '../ui/state/Notice.jsx'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const SEASONS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - i)
@@ -57,7 +58,11 @@ export function GameFinder() {
         <TeamSearchBox placeholder="Second team…" onPick={setTeamB} selected={teamB} />
       </div>
 
-      {sameTeam && <p className="hint">Pick two different teams.</p>}
+      {sameTeam && (
+        <Notice tone="caution" role="status" size="compact" className="gamefinder__notice">
+          Pick two different teams.
+        </Notice>
+      )}
 
       {teamA && teamB && !sameTeam && (
         <div className="gamefinder__season">
