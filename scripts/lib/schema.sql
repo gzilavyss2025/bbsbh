@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS postseason_pitching_totals (
 -- derive.js path exactly via the shared FOUL_CODES/WHIFF_CODES/pitchCallCode in
 -- src/api/playbyplay.js, so the precomputed and live tallies can't drift.
 --
--- SCOPE (ADR-0100, as ADR-0094 did for the pitch sweep). `scope` splits the
+-- SCOPE (ADR-0101, as ADR-0094 did for the pitch sweep). `scope` splits the
 -- regular season ('R') from the MLB postseason ('P'). It is the LAST column
 -- with DEFAULT 'R', so an old dump line that names no scope loads as regular
 -- season, and it is SECOND in each key (after `season`). The two game-keyed

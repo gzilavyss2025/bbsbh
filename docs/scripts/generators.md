@@ -319,7 +319,7 @@ don't run these by hand.
   drift; two-strike detection carries the PRE-pitch count forward across
   non-PA plays (the `count`-is-post-pitch off-by-one). App reads it via
   `src/api/fouls.js` (Foul Tracker page, player-page card). The MLB postseason is
-  swept too, kept BESIDE the regular season by a `scope` key (`R`/`P`, ADR-0100): the
+  swept too, kept BESIDE the regular season by a `scope` key (`R`/`P`, ADR-0101): the
   files gain a `post` key only once a postseason game is on file, and no reader sums it
   in. Backfill old postseason games by hand with `--since=<first postseason date>`.
 - `gen-comeback-wins.mjs` → `public/data/comeback-wins.json` — per-team,
