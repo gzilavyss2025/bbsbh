@@ -382,7 +382,9 @@ for each generator; the reader modules:
   (`fetchFoulsFor`). Completed-game aggregates → spoiler-free, no SealBox
   (same footing as WAR); MLB only. A `post` key beside the regular season holds the
   postseason, same shape (ADR-0102); `foulsInScope`/`hasPostseason` pick one for the
-  page's Regular season / Postseason toggle. Feeds the Foul Tracker page (`/fouls`,
+  page's Regular season / Postseason toggle. `compareFoulsInScope` reads the compare
+  season in the same scope and gives `null` for a season with no postseason, never its
+  regular season; `foulCardView` is the pure half of `FoulCard`. Feeds the Foul Tracker page (`/fouls`,
   `FoulTrackerPage.jsx`) and the player page's `FoulCard` (current-day only —
   the precompute can't be cut to a spoiler `asOf`, so the card hides under
   one, same rule as the Milestone Watch projection). `FOUL_PRIORS` carries the

@@ -26,7 +26,7 @@ import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './PlayerHubShell.jsx'
 import { Pill } from '../../components/ui/control/Pill.jsx'
 import { useNav } from '../../lib/nav.js'
-import { pitchScopeOf } from '../../lib/seasons/route.js'
+import { pitchScopeOf, vsPitchScope } from '../../lib/seasons/route.js'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 
 // The Pitches and Command cards' SCOPE (#1503): Regular, Postseason or All, the
@@ -86,9 +86,14 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: s
         : Promise.resolve(null),
     [id, pitching != null, picked, shelfScope],
   )
+  // The compare card reads the scope the main card landed on, never the raw pick.
+  const vsScope = vsPitchScope({ picked, shelfScope, shelfLoading: shelf.loading, shelfServed: shelf.data?.scope })
   const vsShelf = useAsync(
-    () => (pitching && view?.vs != null ? loadArsenalSeason(id, { seasonYear: view.vs, scope: wanted }) : Promise.resolve(null)),
-    [id, pitching != null, view?.vs, wanted],
+    () =>
+      pitching && view?.vs != null && vsScope != null
+        ? loadArsenalSeason(id, { seasonYear: view.vs, scope: vsScope })
+        : Promise.resolve(null),
+    [id, pitching != null, view?.vs, vsScope],
   )
   const hasPost = picked == null ? pitching?.hasPost === true : shelf.data?.hasPost === true
   const scopeNow = picked == null ? (hasPost ? wanted : 'reg') : shelf.data?.scope ?? 'reg'

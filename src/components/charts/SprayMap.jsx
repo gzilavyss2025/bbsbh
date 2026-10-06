@@ -1,7 +1,7 @@
 import { useId, useMemo, useState } from 'react'
 import { HOME } from '../../lib/ballpark/ballparkGeometry.js'
 import { HARD_HIT_MPH, hitCoordToSvg } from '../../lib/ballpark/hitProjection.js'
-import { SCOPES, directionCaption, directionMix, hrNote, splitBalls } from '../../api/spray.js'
+import { SCOPES, directionCaption, directionMix, hrNote, splitBalls, sprayScopeOf } from '../../api/spray.js'
 import { Card } from '../ui/frame/Card.jsx'
 import { FactGrid } from '../ui/frame/FactGrid.jsx'
 
@@ -124,7 +124,7 @@ export function SprayMap({ view: regular }) {
   const clipId = `spray-fair-${uid}`
   const blurId = `spray-blur-${uid}`
 
-  const [scope, setScope] = useState('R')
+  const [wantScope, setScope] = useState('R')
   const [split, setSplit] = useState('all')
   const [hardOnly, setHardOnly] = useState(false)
 
@@ -132,7 +132,8 @@ export function SprayMap({ view: regular }) {
   // October balls in play (sprayView's `scoped`), so a hitter with none gets no
   // control. The postseason is shown BESIDE the regular season, never folded
   // into it, so the default is always Regular.
-  const view = (scope !== 'R' && regular.scoped?.[scope]) || regular
+  const scope = sprayScopeOf(regular, wantScope)
+  const view = (scope !== 'R' && regular.scoped[scope]) || regular
   const scopes = regular.scoped ? SCOPES : []
 
   const chosen = view.splits.find((s) => s.key === split) ?? view.splits[0]

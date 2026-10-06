@@ -6,6 +6,7 @@ import { arsenalScoped, pitchArsenalFor, postPitchesOf, heatView } from '../src/
 import { combineCommandEntries } from '../src/lib/seasons/combine.js'
 import { commandView } from '../src/api/commandMap.js'
 import { parseRoute, playerTabPath } from '../src/lib/route.js'
+import { vsPitchScope } from '../src/lib/seasons/route.js'
 
 const cells = (n) => Array.from({ length: 25 }, (_, i) => (i === 12 ? n : 0))
 const data = () => ({
@@ -91,4 +92,17 @@ test('the scope rides the address: absent is Regular, a bad value is dropped', (
   assert.equal('scope' in at('?scope=bogus'), false)
   assert.match(playerTabPath(669373, 'analytics', { scope: 'post' }), /\?scope=post$/)
   assert.doesNotMatch(playerTabPath(669373, 'analytics', { scope: 'reg' }), /scope/)
+})
+
+test('the compare card loads under the scope the main card landed on', () => {
+  // Current season: the control already collapsed a man with no October pitches to Regular.
+  assert.equal(vsPitchScope({ picked: null, shelfScope: 'reg' }), 'reg')
+  assert.equal(vsPitchScope({ picked: null, shelfScope: 'post' }), 'post')
+  // A picked past season: wait for the shelf, then follow what it served. A saved
+  // 'post' for a season with no postseason was served as Regular, and the compare
+  // card must not read a postseason the main card is not showing.
+  assert.equal(vsPitchScope({ picked: 2024, shelfScope: 'post', shelfLoading: true }), null)
+  assert.equal(vsPitchScope({ picked: 2024, shelfScope: 'post', shelfLoading: false, shelfServed: 'reg' }), 'reg')
+  assert.equal(vsPitchScope({ picked: 2024, shelfScope: 'post', shelfLoading: false, shelfServed: 'post' }), 'post')
+  assert.equal(vsPitchScope({ picked: 2024, shelfScope: 'all', shelfLoading: false, shelfServed: undefined }), 'reg')
 })

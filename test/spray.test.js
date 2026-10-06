@@ -36,6 +36,7 @@ import {
   splitBalls,
   splitTotals,
   sprayAngle,
+  sprayScopeOf,
   sprayView,
 } from '../src/api/spray.js'
 
@@ -514,4 +515,17 @@ test('the sweep writes the columns decodeSprayBalls reads', () => {
   assert.equal(ball.side, 'L')
   assert.equal(ball.level, 'aaa')
   assert.equal(ball.pitcherId, 500001)
+})
+
+test('a picked scope the card cannot serve falls back to Regular, so the footer never says postseason over regular balls', () => {
+  // SprayMap keeps the picked scope in state across a season change. The new
+  // season may have no October balls (no `scoped`): the view is then the regular
+  // card, and the scope it reports must be Regular too.
+  const regular = { splits: [], levels: ['mlb'] }
+  assert.equal(sprayScopeOf(regular, 'P'), 'R')
+  assert.equal(sprayScopeOf(regular, 'A'), 'R')
+  const withPost = { ...regular, scoped: { P: { splits: [] }, A: { splits: [] } } }
+  assert.equal(sprayScopeOf(withPost, 'P'), 'P')
+  assert.equal(sprayScopeOf(withPost, 'A'), 'A')
+  assert.equal(sprayScopeOf(withPost, 'R'), 'R')
 })

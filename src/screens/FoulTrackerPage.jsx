@@ -2,7 +2,7 @@
 // /fouls pays for it. It loads after the core, which is the order it had there.
 import '../styles/43-foul-tracker.css'
 import { Fragment, useMemo, useState } from 'react'
-import { fetchFouls, foulsInScope, hasPostseason, topFoulGames, teamPitchTypeRates } from '../api/fouls.js'
+import { compareFoulsInScope, fetchFouls, foulsInScope, hasPostseason, topFoulGames, teamPitchTypeRates } from '../api/fouls.js'
 import { fetchGamesByPk } from '../api/schedule.js'
 import { fetchPositions } from '../api/person-fetch.js'
 import { splitDisplayName } from '../api/person.js'
@@ -77,7 +77,7 @@ export function FoulTrackerPage({ seasonYear, vs }) {
   const data = useMemo(() => foulsInScope(seasonData, post ? 'P' : 'R'), [seasonData, post])
   const loading = !view || fouls.loading
   const { data: prevSeason } = useAsync(() => (view?.vs ? fetchFouls({ seasonYear: view.vs }) : Promise.resolve(null)), [view?.vs])
-  const prev = useMemo(() => foulsInScope(prevSeason, post ? 'P' : 'R'), [prevSeason, post])
+  const prev = useMemo(() => compareFoulsInScope(prevSeason, post ? 'P' : 'R'), [prevSeason, post])
   const [mode, setMode] = useState('change')
   // A board's compare column: its figure, found again in the vs season.
   const cmp = (group, format, value) =>

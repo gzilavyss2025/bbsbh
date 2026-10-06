@@ -7,6 +7,8 @@ import { openDb } from '../scripts/lib/db.js'
 import { aggregateGameFouls, exportFouls, exportFoulStore, foldGame, foulStatements, scopeOfGameType, wipeTeamPitchTypes } from '../scripts/gen-fouls.mjs'
 import {
   foulsInScope,
+  compareFoulsInScope,
+  foulCardView,
   hasPostseason,
   batterFoulLine,
   pitcherFoulLine,
@@ -572,4 +574,43 @@ test('without a postseason, every scope is the regular season and the toggle sta
   assert.equal(hasPostseason({ ...data, post: { gamesIngested: 0 } }), false)
   assert.equal(foulsInScope(data, 'P'), data)
   assert.equal(foulsInScope(null, 'P'), null)
+})
+
+// --- the postseason beside the regular season: review fixes (stack review) -----
+
+test('a postseason-only player still gets the card, with no regular line to draw', () => {
+  // FoulCard.jsx cannot be imported by the suite, so what it decides lives here.
+  // A reliever used only in October has a `post` line and no regular one: the card
+  // must show (the toggle is the way in) and must not hand a null line to its tiles.
+  const data = { pitchers: {}, post: { gamesIngested: 3, pitchers: { 7: { pitches: 30, fouls: 5, whiffs: 2, g: 2 } } } }
+  const v = foulCardView({ data, before: null, group: 'pitching', playerId: 7, vs: null, wantPost: false })
+  assert.equal(v.show, true)
+  assert.equal(v.hasPost, true)
+  assert.equal(v.line, null, 'the regular view has nothing to draw: the card prints an empty note, not tiles')
+  const post = foulCardView({ data, before: null, group: 'pitching', playerId: 7, vs: null, wantPost: true })
+  assert.equal(post.line.fouls, 5)
+})
+
+test('a player with no line in either scope gets no card', () => {
+  const data = { batters: {}, post: { gamesIngested: 3, batters: {} } }
+  assert.equal(foulCardView({ data, before: null, group: 'hitting', playerId: 1, vs: null, wantPost: true }).show, false)
+})
+
+test('the card reads the compare season in the same scope as the main one', () => {
+  const data = { batters: { 1: { fouls: 50, g: 100 } }, post: { gamesIngested: 3, batters: { 1: { fouls: 4, g: 3 } } } }
+  const before = { batters: { 1: { fouls: 60, g: 120 } } }
+  const reg = foulCardView({ data, before, group: 'hitting', playerId: 1, vs: 2025, wantPost: false })
+  assert.equal(reg.prev.fouls, 60)
+  const post = foulCardView({ data, before, group: 'hitting', playerId: 1, vs: 2025, wantPost: true })
+  assert.equal(post.line.fouls, 4)
+  assert.equal(post.prev, null, 'a season with no postseason has no October line to compare against')
+})
+
+test('compareFoulsInScope: a compare season with no postseason compares against nothing under Postseason', () => {
+  const old = { season: 2024, gamesIngested: 100, batters: { 1: { fouls: 60 } } }
+  assert.equal(compareFoulsInScope(old, 'P'), null, 'never its regular season under another name')
+  assert.equal(compareFoulsInScope(old, 'R'), old)
+  const withPost = { ...old, post: { gamesIngested: 2, batters: { 1: { fouls: 3 } } } }
+  assert.equal(compareFoulsInScope(withPost, 'P').batters[1].fouls, 3)
+  assert.equal(compareFoulsInScope(null, 'P'), null)
 })

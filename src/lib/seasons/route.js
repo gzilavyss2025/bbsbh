@@ -40,6 +40,17 @@ function seasonSegment(base, { seasonYear, vs } = {}) {
 const PITCH_SCOPES = new Set(['post', 'all'])
 export const pitchScopeOf = (v) => (PITCH_SCOPES.has(v) ? v : null)
 
+// The scope the COMPARE season's Pitches card loads under: the one the main card
+// landed on, so the two never differ. On the current season the control has
+// already collapsed a man with no October pitches to Regular (`shelfScope`). On a
+// picked past season the shelf serves Regular when that season has no postseason,
+// whatever was saved, so follow what it served; null while it is still loading.
+export function vsPitchScope({ picked, shelfScope, shelfLoading = false, shelfServed }) {
+  if (picked == null) return shelfScope
+  if (shelfLoading) return null
+  return shelfServed ?? 'reg'
+}
+
 // `query` is a query the address already carries ('?d=…&s=…', a player
 // page's cutoff hints); `vs` joins it.
 export function seasonPath(base, season, query = '') {

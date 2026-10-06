@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNav } from '../../lib/nav.js'
 import { foulsPath } from '../../lib/route.js'
-import { fetchFoulsFor, batterFoulLine, pitcherFoulLine } from '../../api/fouls.js'
+import { fetchFoulsFor, foulCardView } from '../../api/fouls.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { FactGrid } from '../ui/frame/FactGrid.jsx'
+import { EmptyState } from '../ui/state/EmptyState.jsx'
 import { SeasonStack } from '../season/SeasonStack.jsx'
 import { PartOfSeason } from '../season/PartOfSeason.jsx'
 
@@ -37,13 +38,8 @@ export function FoulCard({ playerId, group, asOf, seasonYear, label, vs = null }
   const [wantPost, setWantPost] = useState(false)
   if (skip) return null
 
-  const lineIn = (d) => (!d ? null : group === 'pitching' ? pitcherFoulLine(d, playerId) : batterFoulLine(d, playerId))
-  const hasPost = !!(lineIn(data?.post) || lineIn(before?.post))
-  const post = wantPost && hasPost
-  const lineOf = (d) => lineIn(post ? d?.post : d)
-  const line = lineOf(data)
-  const prev = vs == null ? null : lineOf(before)
-  if (!line && !prev && !hasPost) return null
+  const { hasPost, post, line, prev, show } = foulCardView({ data, before, group, playerId, vs, wantPost })
+  if (!show) return null
 
   return (
     <div className="foulcard">
@@ -52,7 +48,11 @@ export function FoulCard({ playerId, group, asOf, seasonYear, label, vs = null }
       </SectionHead>
       {hasPost && <PartOfSeason postseason={post} onChange={setWantPost} />}
       {vs == null ? (
-        <FoulTiles line={line} group={group} />
+        line ? (
+          <FoulTiles line={line} group={group} />
+        ) : (
+          <EmptyState size="compact">No foul balls on file in the regular season.</EmptyState>
+        )
       ) : (
         <SeasonStack
           empty="No foul balls on file"

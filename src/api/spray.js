@@ -239,6 +239,11 @@ export const SCOPES = [
   ['A', 'All'],
 ]
 
+// The scope a card can actually show for a view. The reader's pick lives in state
+// and outlasts a season change; the new season may carry no October balls (no
+// `scoped`), and the card is then the regular one. Report Regular for it too.
+export const sprayScopeOf = (view, want) => (want !== 'R' && view?.scoped?.[want] ? want : 'R')
+
 // One scope's card body over an entry, or null for an entry with no balls in
 // play at all. The card floor is NOT applied here — see sprayView.
 function viewOf(entry, personId, bip) {
