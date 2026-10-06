@@ -81,6 +81,11 @@ export const EXCEPT = {
   // that quietly stopped in July takes the note off the page rather than
   // publishing a census that is short a thousand games.
   'long-at-bats/': 'frozen once a season ends; the file states its own coverage and fails closed',
+  // notable/ is the same shape as long-at-bats/ above: a nightly run refreshes only the
+  // season in play, every older season is frozen, and each file's `coverage` block (the
+  // seasons swept and the date the data runs through) is its own clock. A feat is rare, so
+  // an unchanged file is the healthy state, and a stamp would rewrite it nightly for nothing.
+  'notable/': 'the season in play is refreshed nightly, older seasons are frozen; each file states its own coverage and carries no clock',
   'youngest-regulars/': 'frozen per season by design; rewritten only when a league’s figures move',
   // A season store (ADR-0086). Its files were four stamped top-level files
   // until #1200 moved them into one folder per season. A completed season is

@@ -1,0 +1,5 @@
+{"coverage":{"seasons":[2025],"through":"2025-11-01","leagues":["AL","NL"],"gameTypes":["R","F","D","L","W"]},"rows":[
+{"gamePk":776763,"officialDate":"2025-08-12","gameType":"R","gameNumber":1,"away":{"id":119,"abbr":"LAD","name":"Los Angeles Dodgers","runs":6},"home":{"id":108,"abbr":"LAA","name":"Los Angeles Angels","runs":7},"side":"home"},
+{"gamePk":778183,"officialDate":"2025-04-25","gameType":"R","gameNumber":1,"away":{"id":121,"abbr":"NYM","name":"New York Mets","runs":4},"home":{"id":120,"abbr":"WSH","name":"Washington Nationals","runs":5},"side":"home"},
+{"gamePk":778442,"officialDate":"2025-04-05","gameType":"R","gameNumber":1,"away":{"id":133,"abbr":"ATH","name":"Athletics","runs":7},"home":{"id":115,"abbr":"COL","name":"Colorado Rockies","runs":4},"side":"home"}
+]}

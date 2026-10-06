@@ -233,6 +233,15 @@ jobs:
         id: long-at-bats
         continue-on-error: true
         run: node scripts/gen-long-at-bats.mjs
+      # Notable games: the no-hitters, cycles and triple plays behind /notable (D4,
+      # .scratch/old-games). With no flags it sweeps only the season in play, about 70
+      # calls; the full history (1901 to now) is a hand run (docs/scripts/generators.md).
+      # Nothing reads these files yet (ADR-0076). Staged by the `git add -A -- public …`
+      # below, and the file states its own coverage, so it has no generatedAt.
+      - name: Notable games
+        id: notable
+        continue-on-error: true
+        run: node scripts/gen-notable.mjs
       # MUST stay after "Teams": it joins each farm club onto its parent
       # organisation through public/data/teams.json, the same read
       # gen-minors-leaders.mjs makes.
@@ -633,6 +642,7 @@ jobs:
           steps.minors-leaders.outcome == 'failure' ||
           steps.milb-pool.outcome == 'failure' ||
           steps.long-at-bats.outcome == 'failure' ||
+          steps.notable.outcome == 'failure' ||
           steps.youngest-regulars.outcome == 'failure' ||
           steps.callouts.outcome == 'failure' ||
           steps.former-teammates.outcome == 'failure' ||
