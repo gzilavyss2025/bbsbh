@@ -53,7 +53,7 @@ import { RookiePill } from '../components/badges/RookiePill.jsx'
 import { DebutPill } from '../components/badges/DebutPill.jsx'
 import { milestoneTextFor } from '../api/callouts.js'
 import { arsenalSidesView, arsenalTtoView, fetchPitchArsenalFor, pitchArsenalFor } from '../api/pitchArsenal.js'
-import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
+import { StarterMix } from '../components/playbyplay/pitcherCard/StarterMix.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { BullpenBoard, useBullpenReveal, BullpenToggle } from '../components/teamstats/BullpenBoard.jsx'
 import { ProjectedStarters } from '../components/workload/ProjectedStarters.jsx'
@@ -848,15 +848,15 @@ function OpposingStarterCard({
               />
             )}
           </div>
-          {/* Fills the wide layout's open right half (see .starter__arsenal
-              in index.css) — hidden below the wide breakpoint, where there's
-              no room for it next to the headshot + info column. */}
+          {/* Wide: the list and the pitch scene as a band under this row.
+              Phone: a "Watch his pitches" door that opens the scene in a sheet. */}
           {arsenal && (
-            <PitchArsenalMix
+            <StarterMix
               arsenal={arsenal}
               tto={arsenalTto}
               sides={arsenalSides}
-              className="starter__arsenal"
+              lefty={pitcher.hand === 'L'}
+              name={pitcher.name}
             />
           )}
         </div>

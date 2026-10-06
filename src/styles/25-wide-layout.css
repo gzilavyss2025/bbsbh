@@ -353,30 +353,31 @@
     grid-template-columns: 1fr;
   }
 
-  /* ---- opposing-starter card, wide layout: the pitch-mix bar (see
-     .starter__arsenal above) fills the open space next to the
-     name/badges/stats column, which otherwise stretches full width for no
-     reason — cap it so the mix has real room rather than a sliver.
-
-     The body's own centering goes with it. A five- or six-pitch arsenal is the
-     tallest thing in the card, and centering floated the headshot + name +
-     season line + last outing down its middle, leaving a ragged gap above the
-     face. Top-aligned, the two columns start on the same line no matter how many
-     pitches the arm throws. Only inside this breakpoint: below it the mix is
-     display:none and the headshot has nothing to be taller than it, so the base
-     rule's `align-items: center` still reads best there. */
+  /* ---- opposing-starter card, wide layout: the pitch mix is a band under the
+     headshot + info row — the list left, the animated scene (StarterMix.jsx)
+     filling the right column, which sets the arcs' size. A starter with no arc
+     to draw gets the list alone, full width. */
   .starter__body {
     align-items: flex-start;
   }
   .starter__info {
-    flex: 0 1 320px;
-  }
-  .starter__arsenal {
-    display: block;
     flex: 1;
-    min-width: 0;
-    padding-left: var(--space-4);
-    border-left: var(--bw-hair) solid var(--border-hairline);
+  }
+  .starter__mix {
+    flex: 0 0 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--space-5);
+    padding-top: var(--space-3);
+    border-top: var(--bw-hair) solid var(--border-hairline);
+  }
+  .starter__mix:not(:has(.starter__scene)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* The pitch the scene is playing (StarterMix's `activeCode`). */
+  .starter__mix .arsenal__row.is-active {
+    background: var(--surface-inset);
   }
 
   /* ---- innings, wide layout. Refresh rides in the floating bottom bar above
