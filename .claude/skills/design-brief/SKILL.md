@@ -43,8 +43,13 @@ marked "(Recommended)". If the task already answers a question, skip it.
    - The direction: the chosen reference, or the order to propose 3 or 4 and stop.
    - The tokens, components and screens to copy, by path.
    - The rules from `references/design-rules.md` that apply to this page, and no others.
-   - How to check: the dev-server route with `?nointro`, the width, and what to look at.
-     The agent hands Gary the local link.
+   - The widths. Every design covers phone (390 px), iPad portrait (820 px), iPad landscape
+     (1180 px) and desktop (1440 px), not phone alone. Read the page's CSS for its breakpoints
+     (`src/styles/25-wide-layout.css` holds the wide ones) and say what each width does. A
+     direction prompt proposes each layout as a phone plus wide pair. iPad is touch: nothing
+     may need hover.
+   - How to check: the dev-server route with `?nointro`, a screenshot at each width, and what
+     to look at. The agent hands Gary the local link (a cloud agent sends the screenshots).
    - Done means: the guards in `npm run lint` pass, `npm test` passes, the page looks right
      at about 390 px, and the PR targets `main` from a task branch. The agent never pushes
      to `main`.
@@ -54,8 +59,12 @@ marked "(Recommended)". If the task already answers a question, skip it.
    its design rungs: explore directions on Sonnet 5.5 medium, build from a settled
    direction on Sonnet 5.5 high, a design decision or a spoiler-adjacent page on Opus 5.5
    high. Give one line of reason for each.
-7. **Offer the grade.** Ask whether Gary wants `improve-prompt` to grade the result. Do not
-   run it unasked.
+7. **Grade the prompts.** Always run the `improve-prompt` skill on the prompts you wrote, before
+   you show them. It checks each repo claim (routes, paths, line numbers, class names, who uses
+   a component), grades the set, and rewrites it. Show Gary the graded result: the grade, the
+   fixes, and the final prompts. Do not show the ungraded draft as the answer. When a prompt
+   changes a page for more than one width, it must name each width and say how to take each
+   screenshot.
 
 ## Output
 
