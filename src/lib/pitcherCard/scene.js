@@ -53,6 +53,9 @@ export const SCENE_W = 336
 export const SCENE_H = 204
 // The navy name bar covers the scene's bottom 27 px; no path may go under it.
 export const BAR_TOP = 177
+// The at-bat replay's frame (AtBatReplay.jsx): tall enough for the plate on the
+// ground under the zone, with its bar BELOW the drawing instead of over it.
+export const REPLAY_H = 312
 
 // Camera: 6 ft behind the front of the plate, 4 ft high, looking at the mound.
 // x = ft right of the plate's centre, y = ft toward the mound from the front of
@@ -131,22 +134,40 @@ const HOLD = 0.9 // s at the plate
 // the hold), so the rhythm does not change with the speed. `elapsed` null (no
 // clock yet, or reduced motion) shows the first pitch at full length. `slow`
 // is the slow-motion factor: 1 is real speed (the Scout's pitch modal).
-export function sceneFrame(pitches, elapsed, slow = SLOW) {
+// `once` (the at-bat replay) plays the list through one time and then rests on
+// its last pitch at full length, `done: true`, where the card loops.
+export function sceneFrame(pitches, elapsed, slow = SLOW, once = false) {
   if (elapsed == null || pitches.length === 0) return { idx: 0, progress: 1 }
   const slot = Math.max(...pitches.map((p) => p.T)) * slow + HOLD
+  if (once && elapsed >= slot * pitches.length) return { idx: pitches.length - 1, progress: 1, done: true }
   const idx = Math.floor(elapsed / slot) % pitches.length
   return { idx, progress: Math.min(1, (elapsed % slot) / (pitches[idx].T * slow)) }
 }
+
+// The ground both views share, in ft on the field (x, y): the 13-ft plate
+// dirt circle, the plate, and both batter's boxes. `flat` projects a list of
+// [x, y, z = 0] points through P to [screen x, screen y].
+const X = 17 / 24
+const ring = (cx, cy, r, n = 48) => Array.from({ length: n }, (_, i) => [cx + r * Math.cos((i / n) * 2 * Math.PI), cy + r * Math.sin((i / n) * 2 * Math.PI)])
+const PLATE = [[-X, YP], [X, YP], [X, X], [0, 0], [-X, X]]
+const BOXES = [-1, 1].map((sx) => [[sx * 1.2, 3], [sx * 3.2, 3], [sx * 3.2, -3], [sx * 1.2, -3]])
+const flat = (P, pts) => pts.map(([x, y, z = 0]) => P(x, y, z).slice(0, 2))
 
 // The fixed ground and zone: sky over grass at the horizon, the mound, the
 // plate dirt, and the zone as a box between the front (y = 17/12) and back
 // (y = 0) of the plate. Each face is { x, y, w, h }. `zone` is [bottom, top]
 // in ft; the card's nominal zone by default.
+//
+// The card draws `dirtCy`, a flat ellipse. The at-bat replay (REPLAY_H) draws
+// the PROJECTED ground instead: the dirt circle (its near half is behind the
+// camera, so only the part 1 ft or more in front of it is kept; the polygon
+// closes far below the frame), the plate, the boxes, and two `drops` from the
+// zone's bottom front corners to the plate's, so the box stands on the plate.
 export function stage(zone = [1.6, 3.5]) {
   const [bot, top] = zone
   const face = (y) => {
-    const a = proj(-17 / 24, y, top)
-    const b = proj(17 / 24, y, bot)
+    const a = proj(-X, y, top)
+    const b = proj(X, y, bot)
     return { x: a[0], y: a[1], w: b[0] - a[0], h: b[1] - a[1] }
   }
   const mound = proj(0, 60.5, 0.83)
@@ -154,7 +175,11 @@ export function stage(zone = [1.6, 3.5]) {
     horizon: proj(0, 1e6, 4)[1],
     mound: { y: mound[1], rx: proj(9, 60.5, 0.83)[0] - mound[0] },
     dirtCy: proj(0, 13 + 17 / 12, 0)[1] + 180,
-    front: face(17 / 12),
+    dirt: flat(proj, ring(0, 0.7, 13, 96).filter(([, y]) => y > -5)),
+    plate: flat(proj, PLATE),
+    boxes: BOXES.map((b) => flat(proj, b)),
+    drops: [-X, X].map((x) => flat(proj, [[x, YP, bot], [x, YP]])),
+    front: face(YP),
     back: face(0),
   }
 }
@@ -166,13 +191,10 @@ export function stage(zone = [1.6, 3.5]) {
 // frame with the rubber on it. No honest camera shows the mound and a
 // readable zone at once in this frame, so the zone camera is honest and the
 // mound is there for orientation. Every shape is a list of [x, y] points.
-const ring = (cx, cy, r, n = 48) => Array.from({ length: n }, (_, i) => [cx + r * Math.cos((i / n) * 2 * Math.PI), cy + r * Math.sin((i / n) * 2 * Math.PI)])
 export function pitcherStage(zone = [1.6, 3.5]) {
   const P = projFor('pitcher')
-  const flat = (pts) => pts.map(([x, y, z = 0]) => P(x, y, z).slice(0, 2))
   const [bot, top] = zone
-  const X = 17 / 24
-  const face = (y) => flat([[-X, y, top], [X, y, top], [X, y, bot], [-X, y, bot]])
+  const face = (y) => flat(P, [[-X, y, top], [X, y, top], [X, y, bot], [-X, y, bot]])
   const front = face(YP)
   const back = face(0)
   const lerp = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k]
@@ -183,9 +205,9 @@ export function pitcherStage(zone = [1.6, 3.5]) {
     [lerp(tl, bl, k / 3), lerp(tr, br, k / 3)],
   ])
   return {
-    dirt: flat(ring(0, 0.7, 13).map(([x, y]) => [x, y, 0])),
-    boxes: [-1, 1].map((sx) => flat([[sx * 1.2, 3], [sx * 3.2, 3], [sx * 3.2, -3], [sx * 1.2, -3]])),
-    plate: flat([[-X, YP], [X, YP], [X, X], [0, 0], [-X, X]]),
+    dirt: flat(P, ring(0, 0.7, 13)),
+    boxes: BOXES.map((b) => flat(P, b)),
+    plate: flat(P, PLATE),
     front,
     back,
     edges: front.map((p, i) => [p, back[i]]),

@@ -49,7 +49,9 @@ import {
   MoundVisitBar,
 } from './EventCards.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from '../scoring/StrikeZone.jsx'
-import { AtBatReplay } from './pitcherCard/AtBatReplay.jsx'
+import { ReplayCell, ReplaySheet, useReplayPitches } from './pitcherCard/AtBatReplay.jsx'
+import { Button } from '../ui/control/Button.jsx'
+import { WIDE_QUERY, useMediaQuery } from '../../hooks/useMediaQuery.js'
 import { HighlightSheet } from './HighlightSheet.jsx'
 import { CLIP_PACKAGE, CLIP_RAW, watchClipSource } from '../highlights/watchClip.js'
 import { useWatchClip } from '../highlights/useWatchClip.js'
@@ -540,6 +542,13 @@ const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_S
 function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false }) {
   const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, battedBall, live } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
+  // The at-bat replay (AtBatReplay.jsx), in one place at a time: inside the
+  // zone cell on wide, in a sheet a phone opens on demand. Null at an untracked
+  // park or under reduced motion, where the zone plot and list are the account.
+  const replay = useReplayPitches(pitchDetails)
+  const wide = useMediaQuery(WIDE_QUERY)
+  const [replayOpen, setReplayOpen] = useState(false)
+  if (wide && replayOpen) setReplayOpen(false) // the sheet is a phone's; it must not reopen by itself
   // The Watch sheet's state, shared with the swing list (useWatchClip.js): a
   // raw clip's hit is kept by clipUrlCache, a MISS is not — it says only that
   // the clip had not published in the minute you asked.
@@ -667,6 +676,11 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
               <span className="pbp__hllabel">Watch</span>
             </button>
           )}
+          {replay && !wide && (
+            <Button size="control" className="pbp__replaybtn" onClick={() => setReplayOpen(true)} aria-label={`Replay the pitches to ${batter.last}`}>
+              Replay
+            </Button>
+          )}
         </div>
         <div className="pbp__side">
           <PitchLadder ladder={pitchLadder(pitches)} />
@@ -735,18 +749,21 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
           Just the pitches and their plot — the batter/pitcher matchup is
           already named in the card to the left. Collapses away entirely at
           parks with no pitch tracking. */}
-      {hasZone && (
-        <div className="pbp__zonecell">
-          <PitchList pitchDetails={pitchDetails} />
-          <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--inline" />
+      {(hasZone || (replay && wide)) && (
+        <div className={`pbp__zonecell${replay && wide ? ' pbp__zonecell--replay' : ''}`}>
+          {replay && wide ? (
+            <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} pitches={replay} />
+          ) : (
+            <>
+              <PitchList pitchDetails={pitchDetails} />
+              <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--inline" />
+            </>
+          )}
         </div>
       )}
-      {/* The at-bat's pitches, replayed inline along their measured paths. After
-          the zone cell so the card and the zone keep their row on the wide
-          grid, and the replay takes the full row under them. Draws nothing at
-          an untracked park or under reduced motion, where the zone plot and
-          list are the whole account (AtBatReplay.jsx). */}
-      <AtBatReplay pitchDetails={pitchDetails} pitcher={pitcher} />
+      {replayOpen && replay && !wide && (
+        <ReplaySheet pitchDetails={pitchDetails} pitches={replay} batter={batter} pitcher={pitcher} onClose={() => setReplayOpen(false)} />
+      )}
       {zoneOpen && hasZone && (
         <StrikeZoneModal
           pitchDetails={pitchDetails}
