@@ -343,10 +343,15 @@ CREATE TABLE IF NOT EXISTS foul_game_totals (
 -- immutable, so these accumulate via incrementing upserts as each newly-Final
 -- MLB game is swept, guarded by comeback_ingested_games so a resumed or re-run
 -- sweep never double-counts. `wins` is the team's total ingested wins (context
--- for the buckets); the (team_id, season) key lets seasons coexist.
+-- for the buckets); the (team_id, season, scope) key lets seasons coexist.
+-- `scope` splits the regular season ('R') from the MLB postseason ('P'), as in
+-- pitch_arsenal_totals (ADR-0094). DEFAULT 'R' means an old dump line that names
+-- no scope loads as regular season, so no rebuild. A reader that wants only the
+-- regular season must say `scope = 'R'`.
 CREATE TABLE IF NOT EXISTS comeback_win_totals (
   team_id INTEGER NOT NULL,
   season  INTEGER NOT NULL,
+  scope   TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
   wins    INTEGER NOT NULL DEFAULT 0,
   sub10   INTEGER NOT NULL DEFAULT 0,
   sub20   INTEGER NOT NULL DEFAULT 0,
@@ -354,7 +359,7 @@ CREATE TABLE IF NOT EXISTS comeback_win_totals (
   att10   INTEGER NOT NULL DEFAULT 0,
   att20   INTEGER NOT NULL DEFAULT 0,
   att30   INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (team_id, season)
+  PRIMARY KEY (team_id, season, scope)
 );
 
 -- Idempotency guard for comeback_win_totals: which gamePks are already folded in.

@@ -90,6 +90,23 @@ function ComebackRail({ t, teamId, clubName }) {
     </div>
   )
 }
+// The club's October figures, as raw counts beside (never inside) the rails: a few
+// high-leverage games are a different population from a 162-game rate.
+function PostseasonRows({ post }) {
+  return (
+    <div className="cbk__post">
+      <div className="cbk__label">Comeback wins in the postseason</div>
+      {post.thresholds.map((t) => (
+        <div key={t.key} className="cbk__head">
+          <span className="cbk__label">{CBK_LABELS[t.key]}</span>
+          <span className="cbk__of">
+            {t.wins} of {t.att} {t.att === 1 ? 'attempt' : 'attempts'}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
 export function ComebackCard({ data, teamId, clubName }) {
   return (
     <Card
@@ -136,6 +153,7 @@ export function ComebackCard({ data, teamId, clubName }) {
             )
           })}
         </div>
+        {data.post && <PostseasonRows post={data.post} />}
       </div>
     </Card>
   )

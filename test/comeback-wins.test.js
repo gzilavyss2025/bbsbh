@@ -2,8 +2,14 @@
 // (gen-comeback-wins.mjs) and the reader/selectors (src/api/comebackWins.js).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { winnerMinWinProb, bothMinWinProbs, comebackBuckets } from '../scripts/gen-comeback-wins.mjs'
-import { comebackWinsFor, leagueComebackWinsFor, comebackRatesFor } from '../src/api/comebackWins.js'
+import { DatabaseSync } from 'node:sqlite'
+import { readFileSync } from 'node:fs'
+import {
+  winnerMinWinProb, bothMinWinProbs, comebackBuckets, scopeOf, exportJson,
+} from '../scripts/gen-comeback-wins.mjs'
+import {
+  comebackWinsFor, leagueComebackWinsFor, comebackRatesFor, comebackPostFor,
+} from '../src/api/comebackWins.js'
 
 const wp = (...homes) => homes.map((h) => ({ homeTeamWinProbability: h }))
 
@@ -136,4 +142,62 @@ test('comebackRatesFor: null row → null; a threshold never reached → null ra
     seasons: { 2026: { byTeamId: { 200: { sub10: 0, sub20: 0, sub30: 0, att10: 0, att20: 0, att30: 0, wins: 5 } } } },
   }
   assert.equal(comebackRatesFor(zero, 200, 2026).thresholds[0].rate, null)
+})
+
+// --------------------------------------------------------------------------
+// postseason scope — beside the regular season, never inside it (ADR-0094).
+// --------------------------------------------------------------------------
+test('scopeOf: postseason game types are P, everything else R', () => {
+  for (const t of ['F', 'D', 'L', 'W']) assert.equal(scopeOf(t), 'P')
+  for (const t of ['R', 'S', undefined]) assert.equal(scopeOf(t), 'R')
+})
+
+function openSchemaDb() {
+  const db = new DatabaseSync(':memory:')
+  db.exec(readFileSync(new URL('../scripts/lib/schema.sql', import.meta.url), 'utf8'))
+  return db
+}
+
+test('export: a postseason row never overwrites or adds onto a regular-season row', () => {
+  const db = openSchemaDb()
+  const ins = db.prepare(
+    `INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  )
+  ins.run(110, 2026, 'R', 90, 5, 9, 14, 20, 30, 40)
+  ins.run(110, 2026, 'P', 4, 1, 1, 2, 2, 3, 3)
+  ins.run(111, 2026, 'P', 0, 0, 0, 0, 1, 1, 1) // October-only row, no regular row
+  const out = exportJson(db).seasons[2026]
+  // The old key holds the regular season only, exactly as before.
+  assert.deepEqual(out.byTeamId[110], {
+    sub10: 5, sub20: 9, sub30: 14, att10: 20, att20: 30, att30: 40, wins: 90,
+  })
+  assert.equal(out.byTeamId[111], undefined)
+  assert.deepEqual(out.post.byTeamId[110], {
+    sub10: 1, sub20: 1, sub30: 2, att10: 2, att20: 3, att30: 3, wins: 4,
+  })
+  assert.equal(out.post.byTeamId[111].att10, 1)
+})
+
+test('schema: a dump line that names no scope loads as regular season', () => {
+  const db = openSchemaDb()
+  db.exec(
+    'INSERT INTO comeback_win_totals (team_id, season, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (1, 2026, 2, 0, 0, 0, 0, 0, 0)',
+  )
+  assert.equal(db.prepare('SELECT scope FROM comeback_win_totals').get().scope, 'R')
+  assert.equal(exportJson(db).seasons[2026].post, undefined)
+})
+
+test('reader: postseason figures sit beside the rates and leave them unchanged', () => {
+  const withPost = structuredClone(DATA)
+  withPost.seasons[2026].post = {
+    byTeamId: { 110: { sub10: 1, sub20: 1, sub30: 2, att10: 2, att20: 3, att30: 3, wins: 4 } },
+  }
+  const before = comebackRatesFor(DATA, 110, 2026)
+  const after = comebackRatesFor(withPost, 110, 2026)
+  assert.deepEqual(after.thresholds, before.thresholds)
+  assert.equal(before.post, null)
+  assert.equal(after.post.wins, 4)
+  assert.deepEqual(after.post.thresholds[0], { key: 'sub10', pct: 10, wins: 1, att: 2 })
+  assert.equal(comebackPostFor(withPost, 111, 2026), null)
 })

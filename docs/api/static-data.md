@@ -561,7 +561,10 @@ for each generator; the reader modules:
   baseline `leagueRate` (`Σsub/Σatt`) and a count-based `rank`/`of`/`tied` (raw
   win count, sample-size-proof — a rate rank would let a 1-of-1 club top it).
   `comebackWinsFor` selects one raw row; `leagueComebackWinsFor` is the legacy
-  `{ teamId, stat }` count shape (still exported for reuse). Spoiler-free (a
+  `{ teamId, stat }` count shape (still exported for reuse). The postseason is a
+  separate `seasons[y].post.byTeamId`; `comebackPostFor` reads it as raw `wins`/`att`
+  counts (no rate, no baseline) and `comebackRatesFor` returns it as `post` (null
+  for a club that missed October); the card shows it under the rails. Spoiler-free (a
   Final-games aggregate, same footing as WAR) — no `SealBox`; the card renders
   only when the club has at least one comeback win.
 - `attendance.js` — the Ballpark card's attendance stats, from
