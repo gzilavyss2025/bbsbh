@@ -177,6 +177,8 @@ fourteen, each with its ADR: `api/CLAUDE.md`.
   `ready-for-human` / `wontfix`, used as-is. See `docs/agents/triage-labels.md`.
 - **Domain docs** — single-context: one `CONTEXT.md` + `docs/adr/`. See
   `docs/agents/domain.md`.
+- **Peer sites** — when Gary asks what other baseball sites do that is cool, start from
+  `docs/peer-sites.md` and add to it.
 - **Writing style** — ASD-STE100 governs chat replies, authored docs, and commit/PR
   text here, always on. See `docs/agents/writing-style.md`.
   The house word list is enforced by `check-word-choice`: say "postseason", never "playoffs". <!-- word-choice-exempt: states the rule -->

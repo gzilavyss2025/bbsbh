@@ -8,6 +8,8 @@ sites."** Every finding below is a NAMED, specific external product or
 technique, not generic dashboard advice, paired with a concrete mapping to a
 type of data this app already has or plausibly could.
 
+For baseball sites (what peer sites do), see `docs/peer-sites.md`.
+
 **How to use this doc.** Read it before starting a fresh external-research pass
 for a new feature idea — extend it rather than re-deriving the same ground.
 It is a seed list, not a backlog: nothing here is committed work unless a
