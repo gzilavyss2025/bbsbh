@@ -12,6 +12,7 @@ import { fetchSeasonScores, leagueSurpriseScoresFor, seasonScoreFor } from '../.
 import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor } from '../../../api/teamScore.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
 import { fetchAttendance, attendanceRatesFor } from '../../../api/attendance.js'
+import { franchiseFor } from '../../../api/franchiseHistory.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { loadClubTransactionsPage } from '../../../api/transactions/clubFeed.js'
 import {
@@ -89,6 +90,7 @@ export async function loadOverview(id, asOf) {
     transactionsPage,
     milbAlumni,
     attendanceData,
+    franchise,
   ] = await Promise.all([
     team.league?.id ? fetchStandings(team.league.id, season, cutoff) : Promise.resolve([]),
     // Degrades to null on a thin MiLB feed (see fetchManager's own try/catch) —
@@ -131,6 +133,8 @@ export async function loadOverview(id, asOf) {
     isMilb ? fetchMilbAlumni(id) : Promise.resolve({ minGames: null, players: [] }),
     // Ballpark card's attendance stats — MLB only (the generator is).
     isMilb ? Promise.resolve(null) : fetchAttendance(),
+    // The franchise history under it — MLB only (the file is). One ~1 KB shard.
+    isMilb ? Promise.resolve(null) : franchiseFor(id),
   ])
 
   const standingsRows = standingsRowsFor(standings, team, id)
@@ -198,5 +202,6 @@ export async function loadOverview(id, asOf) {
     milbAlumni,
     // Ballpark card's attendance stats.
     attendance: isMilb ? null : attendanceRatesFor(attendanceData, id, season),
+    franchise,
   }
 }

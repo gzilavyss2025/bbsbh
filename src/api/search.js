@@ -49,6 +49,7 @@ export async function searchPeople(query, limit = 8) {
         // pitcher, 'Y' two-way; lib/scout/roles.js).
         posCode: p.primaryPosition?.code ?? '',
         team: p.active ? p.currentTeam?.name ?? '' : 'Retired',
+        years: yearsPlayed(p),
       }))
       .sort((a, b) => Number(b.active) - Number(a.active))
     if (searchPeopleCache.size >= MAX_SEARCH_CACHE) {
@@ -61,6 +62,27 @@ export async function searchPeople(query, limit = 8) {
   } catch {
     return []
   }
+}
+
+// The years a person played, from fields this endpoint already returns:
+// "2019-" while active, "2012-2024" once done. '' with no debut on file (MiLB)
+// or no last game for a retired player.
+export function yearsPlayed(p) {
+  const from = (p?.mlbDebutDate ?? '').slice(0, 4)
+  if (!from) return ''
+  if (p.active) return `${from}-`
+  const to = (p.lastPlayedDate ?? '').slice(0, 4)
+  if (!to) return ''
+  return to === from ? from : `${from}-${to}`
+}
+
+// Keep `years` only on rows whose trimmed, lower-case name another row shares,
+// so two Will Smiths tell apart and every other row stays as it was.
+export function disambiguateNames(rows) {
+  const key = (r) => r.name.trim().toLowerCase() // caps-js-exempt
+  const seen = new Map()
+  for (const r of rows) seen.set(key(r), (seen.get(key(r)) ?? 0) + 1)
+  return rows.map((r) => (seen.get(key(r)) > 1 ? r : { ...r, years: '' }))
 }
 
 // Every active club across every searchable level, fetched once and cached

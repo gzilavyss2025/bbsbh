@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
-import { searchPeople, fetchTeamDirectory, searchTeams } from '../../api/search.js'
+import { searchPeople, fetchTeamDirectory, searchTeams, disambiguateNames } from '../../api/search.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue.js'
 import { useRecentSearches } from '../../hooks/useRecentSearches.js'
@@ -167,14 +167,14 @@ export function SiteSearchModal({ onClose, pick = null }) {
   const groups = useMemo(() => {
     if (pick) {
       const rows = hasQuery
-        ? players.filter(pick.accept).slice(0, PLAYER_LIMIT).map((p) => ({ ...playerRow(p), person: p }))
+        ? disambiguateNames(players).filter(pick.accept).slice(0, PLAYER_LIMIT).map((p) => ({ ...playerRow(p), person: p }))
         : []
       return rows.length ? [{ id: 'players', label: pick.label, rows }] : []
     }
     if (!hasQuery) {
       return recent.length ? [{ id: 'recent', label: 'Recent', rows: recent.map(toRow) }] : []
     }
-    const playerGroup = { id: 'players', label: 'Players', rows: players.map(playerRow) }
+    const playerGroup = { id: 'players', label: 'Players', rows: disambiguateNames(players).map(playerRow) }
     const teamGroup = { id: 'teams', label: 'Teams', rows: teams.map(teamRow) }
     const ordered = teamsFirst ? [teamGroup, playerGroup] : [playerGroup, teamGroup]
     return ordered.filter((g) => g.rows.length > 0)
@@ -432,7 +432,7 @@ function playerRow(p) {
     kind: 'player',
     id: p.id,
     name: p.name,
-    sub: [p.pos, p.team, p.active ? '' : 'Retired'].filter(Boolean).join(' · '),
+    sub: [p.pos, p.team, p.active ? '' : 'Retired', p.years].filter(Boolean).join(' · '),
   }
 }
 
