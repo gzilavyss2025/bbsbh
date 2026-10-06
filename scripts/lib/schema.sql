@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS team_snapshots (
   PRIMARY KEY (season, team_id, date, metric)
 );
 
--- One dated row per (player, board) on an external prospect/scouting board —
--- currently Fever Baseball's breakout/fade radar (gen-fever-radar.mjs).
+-- One dated row per (player, board) on a prospect/scouting board —
+-- currently bbsbh's own level-relative prospect trend (gen-prospect-trend.mjs).
 -- `payload_json` carries that source's own fields verbatim (rank, metrics)
 -- so a source's schema tweak never needs a migration here, same convention
 -- as team_snapshots. Its own group (not folded into team_snapshots) because

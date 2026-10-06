@@ -369,10 +369,6 @@
    "derived from top-prospects.json and standings for a page; no new measurement"
   ],
   [
-   "public/data/fever-radar.json",
-   "shipped UI data for the home page"
-  ],
-  [
    "public/data/first-scorebook.json",
    "shipped UI data for a callout"
   ],

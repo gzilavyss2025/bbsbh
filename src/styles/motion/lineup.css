@@ -21,12 +21,11 @@
    for motion. It carries to .roster__row unchanged, which is the same list
    shape in the innings viewer's roster panel.
 
-   ANCHORED TO bottom: 0, NEVER A FIXED HEIGHT. An open Breakout or Cooling
-   RadarPill note wraps its row onto extra lines (.radarpill__note takes
-   `flex: 1 0 100%` inside the namewrap — see 10-lineup.css's `:has()`
-   overrides), and a rule positioned off a height would float mid-row on
-   exactly those rows. `align-items: start` on the row is load-bearing for the
-   same case and is not touched here.
+   ANCHORED TO bottom: 0, NEVER A FIXED HEIGHT. A note that opens inside the
+   namewrap (`flex: 1 0 100%`) wraps its row onto extra lines, and a rule
+   positioned off a height would float mid-row on exactly those rows.
+   `align-items: start` on the row is load-bearing for the same case and is
+   not touched here.
 
    The row is `position: relative` for the first time here rather than in
    10-lineup.css, because nothing but this pseudo-element needs it.

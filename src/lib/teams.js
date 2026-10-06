@@ -1087,7 +1087,7 @@ export function teamStripeGradient(teamId) {
 
 // A club's single primary brand color (the first of TEAM_COLOR_PAIRS), for
 // contexts that want one team-identity hex rather than a two-tone stripe
-// (e.g. RadarPill's pressed-glyph state, or a solid hover fill). Returns
+// (e.g. a solid hover fill). Returns
 // null for a team with no known pair.
 export function teamPrimaryColor(teamId) {
   return resolveTeamColorPair(teamId)?.[0] ?? null

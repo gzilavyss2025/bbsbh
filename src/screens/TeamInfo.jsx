@@ -51,10 +51,7 @@ import { ProspectPill } from '../components/badges/ProspectPill.jsx'
 import { MilestonePill } from '../components/badges/MilestonePill.jsx'
 import { RookiePill } from '../components/badges/RookiePill.jsx'
 import { DebutPill } from '../components/badges/DebutPill.jsx'
-import { RadarPill } from '../components/badges/RadarPill.jsx'
 import { milestoneTextFor } from '../api/callouts.js'
-import { radarEntryFor } from '../api/feverRadar.js'
-import { savantPercentilesFor, qualifiedCount } from '../api/savantPercentiles.js'
 import { arsenalSidesView, arsenalTtoView, fetchPitchArsenalFor, pitchArsenalFor } from '../api/pitchArsenal.js'
 import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
@@ -105,8 +102,6 @@ export function TeamInfo({
   vsTeam,
   prospectsData,
   rookiesData,
-  feverRadarData,
-  savantPercentilesData,
   formerTeammatesData,
   careerMatchupsData,
   workloadData,
@@ -244,8 +239,6 @@ export function TeamInfo({
         vsTeam={vsTeam}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
-        feverRadarData={feverRadarData}
-        savantPercentilesData={savantPercentilesData}
         formerTeammatesData={formerTeammatesData}
         careerMatchupsData={careerMatchupsData}
         workloadData={workloadData}
@@ -409,8 +402,6 @@ function TeamSections({
   vsTeam,
   prospectsData,
   rookiesData,
-  feverRadarData,
-  savantPercentilesData,
   formerTeammatesData,
   careerMatchupsData,
   workloadData,
@@ -650,12 +641,6 @@ function TeamSections({
                     <MilestonePill text={milestoneTextFor(callouts, p.id)} />
                     <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                     <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
-                    <RadarPill
-                      entry={radarEntryFor(feverRadarData, p.id)}
-                      teamId={meta.id}
-                      evPercentile={savantPercentilesFor(savantPercentilesData, p.id, 'batting')?.ev ?? null}
-                      evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
-                    />
                     <BirthdayCake show={birthdayIds.has(p.id)} />
                     {/* Inside the namewrap, not beside it: the note is a flex
                         child that takes a full-width basis, which is what puts
@@ -692,12 +677,6 @@ function TeamSections({
                         <ProspectPill {...prospectBadge(prospectsData, p.id, orgTeamId)} />
                         <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                         <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
-                        <RadarPill
-                          entry={radarEntryFor(feverRadarData, p.id)}
-                          teamId={meta.id}
-                          evPercentile={savantPercentilesFor(savantPercentilesData, p.id, 'batting')?.ev ?? null}
-                          evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
-                        />
                         <BirthdayCake show={birthdayIds.has(p.id)} />
                         {/* Most visits to this page happen BEFORE the
                             lineup posts, when this roster list is the whole

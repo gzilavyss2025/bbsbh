@@ -1176,13 +1176,6 @@ don't run these by hand.
   a record attached and the page prints the others as phantom "Shared season"
   rows. `src/api/managers.js` dedupes again on read, for shards written before
   the fix. App reads it via `src/api/managers.js`.
-- `gen-fever-radar.mjs` → `public/data/fever-radar.json` — a nightly snapshot of
-  Fever Baseball's (feverbaseball.com) breakout/fade prospect radar. A THIRD-
-  PARTY scouting opinion, displayed attributed and kept deliberately apart from
-  bbsbh's own callouts: every callout family is a fact reconciled against the
-  official MLB record, and a model output can't be reconciled that way, so it
-  gets its own clearly-sourced surface (a `RadarPill`) instead of a rank in the
-  callout worthiness table. App reads it via `src/api/feverRadar.js`.
 - `fever/gen-player-contracts.mjs` → `public/data/player-contracts/{00..99}.json` —
   Fever Baseball's current contract feed, reduced from its league-wide payload
   into player-ID shards for the profile-page Contract card. The generator
@@ -1228,8 +1221,8 @@ don't run these by hand.
   `scripts/lib/prospectPercentile.mjs`'s header. Meant to complement the
   weekly-refreshed Pipeline rank, not replace it: a rank only moves when
   Pipeline re-ranks, this moves with the prospect's own current-season stat
-  line. Same SQLite `player_snapshots` + self-join `movement` pattern as
-  `gen-fever-radar.mjs`, source `prospect-trend`. A row reads the prospect's
+  line. SQLite `player_snapshots` + self-join `movement` pattern,
+  source `prospect-trend`. A row reads the prospect's
   line at his primary level only (`snapshotRow`), because the percentile
   population and the tenure benchmark each cover one level. A row carries
   `atLevel` so `movement` (`movementSince`) skips any earlier snapshot written

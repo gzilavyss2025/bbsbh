@@ -3,11 +3,9 @@ import { TierPill } from './TierPill.jsx'
 import { TIER_LABELS } from '../../lib/statTiers.js'
 
 // The lineup Umpires card's HP accuracy indicator, as a tap glyph rather
-// than an upfront "Below Average" pill wrapping the name row — same
-// unfold-in-place move as RadarPill's scouting glyph (see RadarPill.jsx),
-// but the dot stays tier-colored at rest (unlike RadarPill's neutral ink)
-// since that at-a-glance color read is the whole point in this tight card;
-// tapping just adds his rank. Full depth (zone map, accuracy %, tendency,
+// than an upfront "Below Average" pill wrapping the name row — the dot stays
+// tier-colored at rest, since that at-a-glance color read is the whole point
+// in this tight card; tapping just adds his rank. Full depth (zone map, accuracy %, tendency,
 // last five games) still lives one more tap away via onFullBreakdown, which
 // opens the existing UmpireAccuracyModal — this note is deliberately just
 // the tier tag + rank, not a second copy of the modal's numbers. The icon is

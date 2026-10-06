@@ -479,7 +479,7 @@ const BUDGETS = {
   // logbookStats.js the same "narrow reimplementation, own file" pattern
   // those two already use rather than growing either past the file-size cap.
   // +1 for prospectTrend.js — the reader for gen-prospect-trend.mjs's
-  // level-relative OPS/ERA percentile, sibling to prospects.js/feverRadar.js,
+  // level-relative OPS/ERA percentile, sibling to prospects.js,
   // not folded into either (different data, different generator).
   // +1 for careerTimeline.js — the Team history rail's fetch side, split OUT of
   // person-fetch.js when that file hit its own size budget. It cannot go in
@@ -596,7 +596,7 @@ const BUDGETS = {
   // together or not at all. Flat beside milbPool.js for every reason that entry
   // gives, and read on the same visit by the same page.
   // +1: nineKeys.js, one more static-data reader beside its siblings.
-  'src/api': 113,
+  'src/api': 112,
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -804,7 +804,7 @@ const BUDGETS = {
   // went to scripts/lib/records/ (a new subdirectory) so scripts/lib stays put.
   // +1 for gen-xwoba-table.mjs, the hand-run xwOBA (est.) table (ADR-0097). A
   // generator runs on import; its pure half went to scripts/lib/pitch/xwoba.mjs.
-  scripts: 119,
+  scripts: 118,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

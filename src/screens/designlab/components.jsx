@@ -379,11 +379,6 @@ export function ComponentHalf() {
         <Entry title="VsLevelSlider" path={`${BADGE_PATH}/VsLevelSlider.jsx`}>
           <SliderDemo />
         </Entry>
-        <Entry
-          title="RadarPill"
-          path={`${BADGE_PATH}/RadarPill.jsx`}
-          note="Not rendered. It reads a precomputed Fever Radar entry (a board, a playerId and a movement), and inventing one would put a made-up board on the page. Its .radarpill class owns no base rule — it is a namespace, like the card namespaces."
-        />
       </Group>
 
       <Group
