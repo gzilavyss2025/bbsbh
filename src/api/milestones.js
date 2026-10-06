@@ -24,6 +24,10 @@ export const loadMilestoneWatch = staticJson('/data/milestones.json', {
   fallback: { players: [], season: null, generatedAt: null },
 })
 
+// The one note that stands in for every ETA while the postseason is on (#1438).
+export const MILESTONE_PAUSE_NOTE =
+  'The regular season is over. Projections resume next spring.'
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 // A future-season projection is just the year (per the product ask — a
