@@ -209,6 +209,10 @@ async function seasonNames(season) {
 // postponed copy of a game played the next day; keeping it would either invent
 // a result or hide one. Deduplication keeps whichever copy of a gamePk carries
 // the decision, which is why the filter runs after the map and not before.
+//
+// The query uses `gameTypes=` (plural). statsapi honors both `gameType=` and
+// `gameTypes=` and filters the schedule the same way (checked live, season 2025:
+// F,D,L,W returned only those types; an unknown code returned nothing).
 async function seasonPostseason(season) {
   const data = await getJson(
     `/api/v1/schedule?sportId=1&season=${season}&gameTypes=F,D,L,W&fields=${SCHEDULE_FIELDS}`,
