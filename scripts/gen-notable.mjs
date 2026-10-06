@@ -23,6 +23,12 @@
 // leave a ghost row). It writes after each season, so an interrupted history run keeps
 // what it finished. A season with no games writes nothing.
 //
+// THE RETROSHEET CROSS-CHECK is a second mode, a hand run that WRITES NOTHING:
+//   node scripts/gen-notable.mjs --check-retrosheet --nohitters=DIR --tripleplays=DIR [--index=DIR] [--report=FILE]
+// It reads Retrosheet's no-hitter and triple-play lists (extracted by hand, outside the
+// repo, ADR-0100) and reports each game where Retrosheet and the index disagree. A person
+// adds a seed row for a true miss (D3). Code: lib/notable/retro-*.mjs; steps: the catalog.
+//
 // scripts/notable-seed.json holds the hand-seeded additions (D3): a feat the API misses,
 // such as the 2023-08-18 triple play that only the box score text holds. The generator
 // merges it and the output is never edited by hand.
@@ -42,6 +48,7 @@ import { normalizeArgv, seasonsFromArgs, unknownFlags } from './lib/notable/cli.
 import {
   KINDS, applySeed, emptyDoc, mergeCoverage, mergeRows, serializeDoc,
 } from './lib/notable/merge.mjs'
+import { runRetroCheck } from './lib/notable/retro-run.mjs'
 import { sweepSeason } from './lib/notable/sweep.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -51,6 +58,7 @@ const parsed = parseArgs(normalizeArgv(process.argv.slice(2)))
 const stray = unknownFlags(parsed)
 if (stray.length) throw new Error(`unknown flag: --${stray.join(', --')}`)
 if (parsed.out === true) throw new Error('--out takes a folder: --out=DIR')
+if (parsed['check-retrosheet']) process.exit(await runRetroCheck(parsed))
 const outDir = parsed.out ? resolve(parsed.out) : join(root, 'public', 'data', 'notable')
 // The season in play is the default, and it costs one call: ask only when a flag leaves
 // the last season open. Otherwise the calendar year is the cap on what a flag may name.

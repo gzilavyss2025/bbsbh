@@ -249,6 +249,35 @@ don't run these by hand.
   leagues, game types) is its own clock. The pure half is `scripts/lib/notable/`;
   `test/notable.test.js` reads the committed files and fails on any key off the allowlist
   (`ALLOWED_KEYS` in `lib/notable/merge.mjs`).
+  **The Retrosheet cross-check** is a second mode of the same file, a hand run that **writes
+  nothing** (ADR-0100). It reports each no-hitter and triple play where Retrosheet and the
+  index disagree. A person reads the report, and a person edits `scripts/notable-seed.json`
+  for a true miss (D3). Cycles are out: Retrosheet has no cycle list (`cycles.zip` is a copy
+  of `3HR.zip`). *Download* each list into its own new, empty folder OUTSIDE the repo, and
+  unzip it there: `node scripts/lib/open-data/download.mjs https://www.retrosheet.org/downloads/nohitters.zip DIR`
+  and the same for `tripleplays.zip`. Only `gameinfo.csv` and `teamstats.csv` are read. *Run*:
+  `node scripts/gen-notable.mjs --check-retrosheet --nohitters=DIR --tripleplays=DIR [--index=DIR] [--report=FILE]`.
+  Either list may be left out. `--index` defaults to `public/data/notable`. `--report` writes
+  the JSON, and a path inside the repo is refused. Exit 0 when the inputs parse, whatever the
+  labels say; exit 1 for a missing file or a lost column. *Matching* needs no team-code table:
+  the same official date and the same away and home runs (either game of a doubleheader day),
+  and the same side. The index's `side` is the club that DID the feat, so a no-hitter's side is
+  the club that threw it, which is the club WITHOUT the 0 hits. Every Retrosheet game gets
+  one label, and the API is called (one schedule call for each date, cached) only for a game
+  the index does not explain:
+  `matched` (an index row of the same kind matches), `side-differs` (the game matches, the
+  side does not), `out-of-scope-type` (Retrosheet says exhibition or All-Star; also an API
+  game with two AL or NL clubs and a game type the index does not keep), `season-not-swept`
+  (the season is not in the index's coverage block, so every game before 1901 lands here),
+  `dropped-league` (the API has a game with that date and score, and a club was not in the AL
+  or NL that season, D6), `not-in-api` (the API has no played game with that date and score:
+  Federal League games (D7), and a Negro league game the API scores differently), `missed`
+  (the API has a played AL or NL game with that date and score, and the index does not hold
+  it: a **seed candidate**). A `missed` row can be a score coincidence with an unrelated game
+  (the join has no club check), so check the clubs on both sides of the line before you seed
+  it. `index-only` lists the index rows, in a season both sources cover, that Retrosheet does
+  not hold; it is not an error. Code: `lib/notable/retro-{check,report,run}.mjs`; tests:
+  `test/notable-retro-check.test.js`.
 - `gen-youngest-regulars.mjs` → `public/data/youngest-regulars/{11,12,13,14}.json` —
   how old each minor league's regulars were, for the same note one level down.
   Four small calls per level: one `/league` for the three leagues, one
