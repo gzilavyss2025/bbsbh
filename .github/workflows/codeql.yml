@@ -1,0 +1,40 @@
+name: CodeQL
+
+# Advanced setup, replacing GitHub's "default setup". Default setup always scans
+# every pull request and cannot be narrowed. This app is a read-only client plus
+# a few small Vercel functions, and `ci.yml` is the required gate, so CodeQL runs
+# on `main` and weekly instead of on each PR. Findings land in the Security tab.
+#
+# Turn off default setup (Settings > Advanced Security > CodeQL analysis) before
+# or right after this file merges. Both at once is an error.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '38 2 * * 4' # weekly, Thursday 02:38 UTC (same slot default setup used)
+  workflow_dispatch: {}
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write # upload results
+      contents: read
+      actions: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # Interpreted languages need no build. Python is left out on purpose:
+        # every tracked .py file is a throwaway under .scratch/.
+        language: [actions, javascript-typescript]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:${{ matrix.language }}

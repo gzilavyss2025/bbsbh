@@ -62,6 +62,19 @@ cite the ADR. Do not push it.
 `CLAUDE.md` stays under 200 lines (`scripts/check-claude-md.mjs`). If a push changes
 structure, check that the nested `CLAUDE.md` and `docs/adr/` entry still match.
 
+## Auto-merge (PRs that do not deploy)
+
+Gary allowed auto-merge for a PR that causes no Vercel deployment. Such a PR changes
+none of these paths, the same list `scripts/vercel-ignore-build.sh` uses: `src`,
+`public`, `index.html`, `package.json`, `package-lock.json`, `vite.config.js`,
+`vercel.json`, `api`. So workflow, docs, test, script and `.claude` changes qualify.
+
+- Check the PR's changed files against that list first. If any path matches, do not enable it.
+- Enable with `enable_pr_auto_merge`. It merges only after `lint-and-build` is green.
+- This covers only PRs you opened in this session. It never covers a PR that deploys,
+  which keeps Gary's batch-merge timing (`docs/development.md`).
+- If the call fails because the repo setting "Allow auto-merge" is off, say so once. Do not retry.
+
 ## Never
 
 - Push to `main`, or trigger a Vercel deployment.

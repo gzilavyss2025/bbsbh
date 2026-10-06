@@ -14,6 +14,13 @@ on:
 permissions:
   contents: read
 
+# Agent sessions push a branch several times in a row. Only the newest push of a
+# pull request needs a result, so cancel the older runs. Runs on `main` are never
+# cancelled: each merge commit keeps its own result.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   lint-and-build:
     runs-on: ubuntu-latest

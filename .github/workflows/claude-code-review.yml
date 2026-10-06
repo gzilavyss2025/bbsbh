@@ -2,16 +2,19 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
+    # Not `synchronize`: agent sessions push often, and a review of every
+    # half-finished push costs a run each. Review once, when the PR is ready.
+    types: [opened, ready_for_review]
+    # Only code that can leak a spoiler or touch a server function. Data-only
+    # and docs-only PRs are covered by ci.yml.
+    paths:
+      - "src/**"
+      - "api/**"
 
 jobs:
   claude-review:
+    # Draft PRs wait for `ready_for_review`.
+    if: github.event.pull_request.draft == false
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||
