@@ -59,6 +59,8 @@ export const EXCEPT = {
   'xwoba-table/': 'hand-run a few times a season (gen-xwoba-table.mjs, ADR-0097); a table holds for a month',
   'contracts-history/': 'hand-run from committed CSVs (ADR-0066)',
   'family-ties/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
+  'on-this-day/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
+  'birthplaces/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
   'franchise-history/': 'hand-run; a season adds one span at most, and the files carry no clock',
   'prospect-rank-history.json': 'hand-run; the 2005-2024 rankings are frozen and the file carries no clock (#1111)',
   'league-averages.json': 'hand-run; a finished season never changes and the file carries no clock',

@@ -1562,6 +1562,24 @@ Re-run only to fold in a new season.
   no MLBAM match keeps the name and a null id. No clock: a re-run writes the same
   bytes. The pure half is `scripts/lib/open-data/family-ties.mjs`. Reader:
   `src/api/person/family/family.js`.
+- `gen-bio-history.mjs` → `public/data/on-this-day/{MM-DD}.json` and
+  `public/data/birthplaces/{ab}.json` — two datasets from Retrosheet's `biofile0.csv`,
+  joined to MLBAM ids through the Chadwick register (ADR-0100). **Hand-run, NOT on a
+  cron**: re-run only after Retrosheet publishes a new `biodata.zip`. Nothing in it
+  downloads. Fetch and unzip as for `gen-family-ties.mjs`, then run
+  `node scripts/gen-bio-history.mjs <biofile0.csv> <people-*.csv ...>` (`--out <dir>`
+  and `--out-places <dir>` write elsewhere). Only a player counts (a row with a
+  `debut_p`). A player with no MLBAM id is dropped and counted. No deaths. Dates are
+  `YYYYMMDD`; a date with month or day `00` is no date. On-this-day: one file per
+  calendar day (366, the largest 21 KB; a month's file was 415 KB), `{ credit, born,
+  debuted }`, each entry `{ personId, name, year }` (the birth year in `born`, the
+  debut year in `debuted`), oldest first. A missing birthdate keeps the debut. Birthplaces:
+  `{ credit, places: { 'city|place': [{ personId, name, year|null }] } }`, one file per
+  first two letters of the city (229, the largest 93 KB, `sa`). The key is lower-case
+  city + `|` + lower-case state name for a US birth, country for any other. A missing
+  city, or a US birth with no state, is out of this one and counted. No clock: a
+  re-run writes the same bytes. The pure half is `scripts/lib/open-data/bio-shards.mjs`.
+  Readers: `src/api/history/onThisDay.js`, `src/api/history/birthplaces.js`.
 
 ## Assets / off-app
 

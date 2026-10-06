@@ -560,6 +560,14 @@
       "class": "spoiler-free",
       "why": "The year-by-year career register. Season lines."
     },
+    "history/onThisDay.js": {
+      "class": "spoiler-free",
+      "why": "Static on-this-day/{MM-DD}.json: who was born and who debuted on a calendar day in past years, from Retrosheet's biographical files (ADR-0100). History about people, with no game, score or reveal state. Open surface (ADR-0034); no SealBox."
+    },
+    "history/birthplaces.js": {
+      "class": "spoiler-free",
+      "why": "Static birthplaces/{ab}.json: players grouped by birth city, from Retrosheet's biographical files (ADR-0100). Where a man was born says nothing about a game. Open surface (ADR-0034); no SealBox."
+    },
     "person/family/family.js": {
       "class": "spoiler-free",
       "why": "Static family-ties/{NN}.json: who a player's father, brother or son is, from Retrosheet's biographical files (ADR-0100). History about people, with no game, score or reveal state. Open surface (ADR-0034); no SealBox."
