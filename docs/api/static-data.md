@@ -956,7 +956,9 @@ for each generator; the reader modules:
   man is to this player (his Father, his Son). A null `personId` means the relative has
   no MLBAM id: show the name, link nothing. `fetchFamilyShard(key)` returns the whole
   shard, whose `credit` lines (Retrosheet and the Chadwick register) print beside the
-  data. Spoiler-free: history about people, no game state.
+  data. `familyBand(personId)` is the player page's read: the entries ordered parents,
+  brothers, sons, rest (`orderFamily`), plus the credit lines, or `null` with no relatives.
+  `FamilyBand` draws it on the History tab. Spoiler-free: history about people, no game state.
 - `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
   `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Not a third
   party, not attributed, and not an MLE —

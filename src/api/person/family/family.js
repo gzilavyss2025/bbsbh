@@ -21,3 +21,21 @@ export async function familyOf(personId) {
   const shard = await fetchFamilyShard(shardKey100(personId))
   return shard?.players?.[String(personId)] ?? []
 }
+
+// The band's order: parents, then brothers, then sons, then everyone else. A
+// stable sort keeps the file's own order (relation, then name) inside a group.
+const GROUP = new Map([
+  ...['Father', 'Step Father'].map((r) => [r, 0]),
+  ...['Brother', 'Half Brother', 'Step Brother'].map((r) => [r, 1]),
+  ...['Son', 'Step Son'].map((r) => [r, 2]),
+])
+export const orderFamily = (entries) => [...entries].sort((a, b) => (GROUP.get(a.relation) ?? 3) - (GROUP.get(b.relation) ?? 3))
+
+// The band's one read: the ordered entries plus the shard's credit lines, which
+// must print beside them. null when he has no relatives on file.
+export async function familyBand(personId) {
+  if (personId == null) return null
+  const shard = await fetchFamilyShard(shardKey100(personId))
+  const entries = shard?.players?.[String(personId)]
+  return entries?.length ? { entries: orderFamily(entries), credit: shard.credit ?? [] } : null
+}

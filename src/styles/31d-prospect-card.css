@@ -495,3 +495,33 @@
 #root .prankhist__foot * {
   text-transform: none; /* caps-exempt: the card's prose foot, same idiom as .cthist__note */
 }
+
+/* ---- FamilyBand: one row per relative -- avatar, name, relation pill ---- */
+.famband__row {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--space-3);
+  padding: var(--space-1) 0;
+}
+
+.famband__row + .famband__row {
+  border-top: var(--bw-hair) dotted var(--rule-grid);
+}
+
+.famband__shot {
+  width: 2rem;
+  height: 2rem;
+}
+
+.famband__name {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-body);
+}
