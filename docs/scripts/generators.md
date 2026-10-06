@@ -1014,7 +1014,7 @@ don't run these by hand.
   Ships per-club aggregates only — month splits, day/night, weekend/weekday,
   top-drawing opponents, the extremes with their dates — never a per-game
   table; every rank, fill rate and league comparison is derived in
-  `src/api/around-the-game/gate.js`. `--season=`/`--seasons=` for a past year. MLB
+  `src/api/around-the-game/gate.js` (`postseasonBoard` feeds the page's Postseason section). `--season=`/`--seasons=` for a past year. MLB
   regular season, Final games only. Spoiler-free.
 - `gen-farm-system.mjs` → `public/data/farm-system.json` — the facts behind
   `/farm-system-rankings` (The Farm Report): every organisation's four full-season affiliates

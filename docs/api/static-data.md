@@ -606,6 +606,10 @@ for each generator; the reader modules:
   listed figure, not a turnstile cap. `postseasonGate(data, season)` returns the
   separate `postseason` block (gate only, home club; never mixed into the
   season figures); pace of play stays regular season on purpose (#1439).
+  `postseasonBoard(data, season)` shapes that block for the page: games, through date,
+  league line, and one row per October club ranked only against the other October
+  clubs. `AttendancePage` draws it as a "Postseason" section and only when it is
+  non-null. The Ballpark card (`attendance.js`) stays regular season.
   `paceBoard(data, season, sortBy)` is the
   same shape over game length, plus the three-hour/three-and-a-half-hour
   counts and the delay totals. `asClock` renders minutes the way baseball says

@@ -19,6 +19,7 @@ import {
   latestSeason,
   monthsIn,
   postseasonGate,
+  postseasonBoard,
 } from '../src/api/around-the-game/gate.js'
 
 const game = (over = {}) => ({
@@ -365,4 +366,32 @@ test('postseasonGate reads the separate block, or null', () => {
   assert.deepEqual(postseasonGate(data, 2026), { games: 2 })
   assert.equal(postseasonGate(data, 2025), null)
   assert.equal(postseasonGate(null, 2026), null)
+})
+
+test('postseasonBoard ranks October clubs only, on the postseason block alone', () => {
+  const g = (avg, n) => ({ games: n, total: avg * n, avg, high: { n: avg + 10, date: '2026-10-03', oppId: 9 } })
+  const data = {
+    seasons: {
+      2026: {
+        league: { attAvg: 30000 },
+        clubs: { 1: { venue: 'A', gate: g(1000, 80) }, 2: { venue: 'B', gate: g(2000, 80) }, 3: { venue: 'C', gate: g(3000, 80) } },
+        postseason: {
+          games: 5,
+          through: '2026-10-05',
+          league: { attGames: 5, attAvg: 41000, attMedian: 41000, attTotal: 205000 },
+          clubs: { 1: { venue: 'A', gate: g(40000, 3) }, 2: { venue: 'B', gate: g(43000, 2) } },
+        },
+      },
+      2025: {},
+    },
+  }
+  const b = postseasonBoard(data, 2026)
+  assert.equal(b.games, 5)
+  assert.equal(b.through, '2026-10-05')
+  assert.deepEqual(b.league, { attGames: 5, attAvg: 41000, attMedian: 41000, attTotal: 205000 })
+  // club 3 never played in October: absent, and the regular-season figures never enter
+  assert.deepEqual(b.rows.map((r) => [r.teamId, r.rank, r.avg, r.best]), [[2, 1, 43000, 43010], [1, 2, 40000, 40010]])
+  assert.equal(b.rows[0].venue, 'B')
+  assert.equal(postseasonBoard(data, 2025), null)
+  assert.equal(postseasonBoard(null, 2026), null)
 })

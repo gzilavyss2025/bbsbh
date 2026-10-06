@@ -1,6 +1,6 @@
 import '../../styles/68-around-the-game.css'
 import { useMemo, useState } from 'react'
-import { fetchGate, gateBoard, GATE_SORTS, latestSeason, monthsIn } from '../../api/around-the-game/gate.js'
+import { fetchGate, gateBoard, GATE_SORTS, latestSeason, monthsIn, postseasonBoard } from '../../api/around-the-game/gate.js'
 import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
 import { humanDate } from '../../lib/dates.js'
 import { commas } from './abs/format.js'
@@ -13,6 +13,8 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
 import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
 import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
+import { Card } from '../../components/ui/frame/Card.jsx'
+import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
 import { BarCell, TrendStrip } from '../../components/around-the-game/BroadcastBar.jsx'
 
@@ -61,6 +63,10 @@ export function AttendancePage() {
     () => (data && season ? gateBoard(data, season, sortBy) : null),
     [data, season, sortBy],
   )
+
+  // A separate block, read on its own: no postseason crowd reaches a season
+  // rank, average or league line above. Null before October.
+  const post = useMemo(() => (data && season ? postseasonBoard(data, season) : null), [data, season])
 
   const rows = board?.rows ?? []
   const league = board?.league
@@ -281,6 +287,58 @@ export function AttendancePage() {
               </tbody>
             </Table>
           </BroadcastSection>
+
+          {post && (
+            <BroadcastSection
+              title="Postseason"
+              note={`${commas(post.games)} postseason home dates with a crowd on file, through
+                    ${post.through ? humanDate(post.through) : '—'}. Kept apart from every figure
+                    above: clubs are ranked here only against the other clubs that played in
+                    October.`}
+            >
+              <SlabRow>
+                <Slab value={commas(post.league?.attAvg)} label="Postseason average" />
+                <Slab value={commas(post.league?.attTotal)} label="Postseason tickets" />
+              </SlabRow>
+              {post.rows.length > 0 ? (
+                <Card as="div" frame="ledger" body="flush">
+                  <Table sticky label="Postseason attendance by club" className="rpt">
+                    <thead>
+                      <tr>
+                        <th className="team">Club</th>
+                        <th>Games</th>
+                        <th>Average</th>
+                        <th>Total</th>
+                        <th>Best</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {post.rows.map((r) => (
+                        <tr key={r.teamId} className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
+                          <ClubCell
+                            teamId={r.teamId}
+                            name={clubShort(clubs, r.teamId)}
+                            rank={r.rank}
+                            tied={r.tied}
+                            note={r.venue ?? 'Park not on file'}
+                          />
+                          <td>{commas(r.games)}</td>
+                          <td>{commas(r.avg)}</td>
+                          <td>{commas(r.total)}</td>
+                          <td>
+                            {commas(r.best)}
+                            <span className="rpt__note">{r.bestDate ? humanDate(r.bestDate) : ''}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </Card>
+              ) : (
+                <EmptyState>No postseason home crowds on file yet.</EmptyState>
+              )}
+            </BroadcastSection>
+          )}
 
           <section className="method">
             <h2>How this was counted</h2>
