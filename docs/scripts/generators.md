@@ -877,6 +877,10 @@ don't run these by hand.
   backfill 51 seconds instead of an hour. A decided game that yields no tracked
   contact is counted and reported at the end for that reason — a silent zero is
   how a 30x saving turns into an empty dataset nobody notices.
+  (4) **MLB also sweeps its postseason** (`R,F,D,L,W`; Triple-A stays `R`) into a
+  `post` map beside `bat` in each bucket, never blended (ADR-0101). Old
+  postseason games are outside the nightly window: backfill by hand with
+  `--since=<date> --sports=1`; the 2026 run covered 2026-09-28 to 2026-10-06.
   Two filters worth knowing: **decided games only, never today's**
   (`abstractGameState === 'Final'` AND an officialDate strictly before today),
   which is the card's whole spoiler footing; and `detailedState === 'Cancelled'`

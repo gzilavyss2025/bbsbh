@@ -41,6 +41,15 @@ import { HIT_COORD_ORIGIN } from '../lib/ballpark/hitProjection.js'
 // when its diamonds fall short of them. A card that derived its totals from
 // what it could draw would under-report a man's home runs forever, silently.
 //
+// THE POSTSEASON IS A SECOND MAP BESIDE `bat`. A bucket may also carry
+// `post: { [batterId]: entry }`, the same entry shape over MLB postseason games
+// (ADR-0101). It is a new key rather than a column so a reader that knows only
+// `bat` is unchanged, and it is never blended into `bat`: a home-run chart and a
+// hard-hit rate read as season facts, and twelve October balls folded into five
+// hundred would be invisible. The card shows Regular, Postseason or All; All is
+// the two entries added, never a third stored row. A bucket with no postseason
+// batter has no `post` key at all.
+//
 // The stored `pitcherId` is for nobody on this card. It rides so a pitcher-side
 // spray card can read these same shards rather than sweeping the season twice.
 const shard = staticJsonBy((key) => `/data/spray/${key}.json`, { fallback: null })
@@ -57,7 +66,9 @@ export async function fetchSprayFor(personId, { seasonYear } = {}) {
     (season) => shard(`${season}/${key}`),
     (shards, seasons) => {
       const entry = combineSprayEntries(shards.map((d) => entryFor(d, personId)))
-      return entry && { season: null, seasons, bat: { [personId]: entry } }
+      const post = combineSprayEntries(shards.map((d) => entryFor(d, personId, 'post')))
+      if (!entry && !post) return null
+      return { season: null, seasons, bat: entry ? { [personId]: entry } : {}, ...(post && { post: { [personId]: post } }) }
     },
   )
 }
@@ -91,9 +102,9 @@ const CENTER_BAND_DEG = 15
 // One batter's stored entry, or null. Ids arrive from the app as numbers and
 // sit in JSON as strings, so both spellings are tried — the same lookup
 // fouls.js's `batterFoulLine` makes.
-function entryFor(data, personId) {
+function entryFor(data, personId, part = 'bat') {
   if (personId == null) return null
-  return data?.bat?.[personId] ?? data?.bat?.[String(personId)] ?? null
+  return data?.[part]?.[personId] ?? data?.[part]?.[String(personId)] ?? null
 }
 
 // The compact rows as objects. Called once per view; every filter downstream
@@ -221,18 +232,21 @@ const SPLITS = [
   ['L', 'vs LHP'],
 ]
 
-// One batter's whole card, or null when he has no entry or falls under the card
-// floor. The component filters `balls` per chip; everything else here is
-// already the number it will print.
-export function sprayView(data, personId) {
-  const entry = entryFor(data, personId)
-  if (!entry) return null
+// The scopes, in the order the control shows them.
+export const SCOPES = [
+  ['R', 'Regular'],
+  ['P', 'Postseason'],
+  ['A', 'All'],
+]
 
+// One scope's card body over an entry, or null for an entry with no balls in
+// play at all. The card floor is NOT applied here — see sprayView.
+function viewOf(entry, personId, bip) {
   const splits = SPLITS.map(([key, label]) => {
     const totals = splitTotals(entry, key)
     return { key, label, ...totals, thin: key !== 'all' && totals.bip < MIN_SPLIT_BIP }
   })
-  if (splits[0].bip < MIN_SPRAY_BIP) return null
+  if (splits[0].bip < bip) return null
 
   const balls = decodeSprayBalls(entry)
   // Majors first, always, so a call-up's card reads MLB + AAA rather than in
@@ -251,4 +265,29 @@ export function sprayView(data, personId) {
     balls,
     splits,
   }
+}
+
+// One batter's whole card, or null when he has no regular-season entry or falls
+// under the card floor. The component filters `balls` per chip; everything else
+// here is already the number it will print.
+//
+// THE REGULAR SEASON IS THE CARD. The floor and the card's very existence are
+// decided on `bat`, exactly as before the postseason was stored, so every card
+// that opened still opens and every one that did not still does not. The
+// postseason hangs off it as `scoped.P` and `scoped.A`, present ONLY for a
+// batter with at least one postseason ball in play: a hitter with none gets no
+// control. Those two take no card floor, because October is a handful of games
+// and a floor would hide the very balls the reader came to see; a thin sample
+// shows as grayed split chips, with its own counts, as a thin split always has.
+export function sprayView(data, personId) {
+  const entry = entryFor(data, personId)
+  if (!entry) return null
+  const view = viewOf(entry, personId, MIN_SPRAY_BIP)
+  if (!view) return null
+
+  const post = entryFor(data, personId, 'post')
+  const postView = post && viewOf(post, personId, 1)
+  if (!postView) return view
+  const all = viewOf(combineSprayEntries([entry, post]), personId, 1)
+  return { ...view, scoped: { P: postView, A: all } }
 }
