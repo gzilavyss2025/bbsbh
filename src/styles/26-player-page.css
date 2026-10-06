@@ -134,6 +134,10 @@
   /* Not loaded yet, or failed and waiting to retry: never paint the browser's
      broken-image glyph (useImgReady). */
   visibility: hidden;
+  /* Out of flow, so a photo still loading never pushes the logo base layer
+     off-centre inside the grid. */
+  position: absolute;
+  inset: 0;
 }
 .shot--fallback {
   display: grid;
@@ -157,6 +161,7 @@
    .shot img rule sets for real photos, and scale() grows from the box center,
    so the mark sits dead-center in the (unchanged 3:4) headshot space. */
 .shot--logo {
+  position: relative;
   display: grid;
   place-items: center;
   background: var(--surface-inset);

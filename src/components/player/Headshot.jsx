@@ -90,9 +90,19 @@ export function Headshot({
   const bg = teamTintColor(teamId)
   const logoTeamId =
     logoStage === 'primary' ? teamId : logoStage === 'fallback' ? fallbackTeamId : null
-  const logoUrl = !photoUrl && logoTeamId ? teamLogoUrl(logoTeamId) : null
+  // The club logo is the BASE layer: it shows from the first paint, and the
+  // photo takes over once it has actually loaded. So a slow, failed or
+  // retrying photo is never an empty frame or a broken-image glyph. The silo
+  // is a transparent cutout, so the logo is dropped (not left underneath) when
+  // the photo shows.
+  const underlayUrl = logoTeamId ? teamLogoUrl(logoTeamId) : null
+  // `logoUrl` keeps its old meaning for the callbacks and log below: the logo
+  // is what's DRAWN because there is no photo.
+  const logoUrl = !photoUrl ? underlayUrl : null
   const photoReady = useImgReady(photoUrl)
-  const logoReady = useImgReady(logoUrl)
+  const logoReady = useImgReady(underlayUrl)
+  const photoShown = Boolean(photoUrl) && photoReady.pending === undefined
+  const showLogo = Boolean(underlayUrl) && !photoShown
 
   // Optional: lets a caller react to "no real photo" — e.g. moving a detail
   // normally anchored to the photo (a position tag) into plain text instead
@@ -112,34 +122,11 @@ export function Headshot({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- stepInfo is rebuilt each render; these are its inputs
   }, [photoUrl, logoUrl, personId, teamId, name])
 
-  if (!photoUrl) {
-    // The caller has its own plan for a missing photo (e.g. a clean full
-    // TeamLogo instead of this boxed/clipped one) — still report via
-    // onFallback above, just render nothing of our own.
-    if (hideFallback) return null
-    if (logoUrl) {
-      return (
-        <span
-          className={`shot shot--logo ${className}`}
-          style={bg ? { backgroundColor: bg } : undefined}
-          aria-hidden="true"
-        >
-          <img
-            key={logoUrl}
-            src={logoUrl}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            data-pending={logoReady.pending}
-            onLoad={logoReady.onLoad}
-            onError={() =>
-              setLogoStage((s) => (s === 'primary' && fallbackTeamId ? 'fallback' : 'failed'))
-            }
-            aria-hidden="true"
-          />
-        </span>
-      )
-    }
+  // The caller has its own plan for a missing photo (e.g. a clean full
+  // TeamLogo instead of this boxed/clipped one) — still report via onFallback
+  // above, just render nothing of our own.
+  if (!photoUrl && hideFallback) return null
+  if (!photoUrl && !underlayUrl) {
     return (
       <span className={`shot shot--fallback ${className}`} aria-hidden="true">
         {monogram}
@@ -148,19 +135,40 @@ export function Headshot({
   }
 
   return (
-    <span className={`shot ${className}`} style={bg ? { backgroundColor: bg } : undefined}>
-      <img
-        key={photoUrl}
-        src={photoUrl}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        data-pending={photoReady.pending}
-        onLoad={photoReady.onLoad}
-        onError={onPhotoError}
-        crossOrigin={HEADSHOT_CROSS_ORIGIN}
-        aria-hidden="true"
-      />
+    <span
+      className={`shot ${showLogo ? 'shot--logo ' : ''}${className}`}
+      style={bg ? { backgroundColor: bg } : undefined}
+      aria-hidden="true"
+    >
+      {photoUrl && (
+        <img
+          key={photoUrl}
+          src={photoUrl}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          data-pending={photoReady.pending}
+          onLoad={photoReady.onLoad}
+          onError={onPhotoError}
+          crossOrigin={HEADSHOT_CROSS_ORIGIN}
+          aria-hidden="true"
+        />
+      )}
+      {showLogo && (
+        <img
+          key={underlayUrl}
+          src={underlayUrl}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          data-pending={logoReady.pending}
+          onLoad={logoReady.onLoad}
+          onError={() =>
+            setLogoStage((st) => (st === 'primary' && fallbackTeamId ? 'fallback' : 'failed'))
+          }
+          aria-hidden="true"
+        />
+      )}
     </span>
   )
 }
