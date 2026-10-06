@@ -108,11 +108,22 @@ export function combineFoulPitcher(slices) {
 export function combineFoulShards(shards, personId) {
   const id = String(personId)
   const pick = (group) => (shards ?? []).map((s) => s?.[group]?.[id] ?? null)
-  const batter = combineFoulBatter(pick('batters'))
-  const pitcher = combineFoulPitcher(pick('pitchers'))
+  const one = (rows, combine) => {
+    const row = combine(rows)
+    return row ? { [id]: row } : {}
+  }
+  // The postseason rides beside, never summed in (ADR-0101): a `post` shard
+  // slice per season, combined on its own, and kept only when he has a line.
+  const postOf = (group) => (shards ?? []).map((s) => s?.post?.[group]?.[id] ?? null)
+  const post = {
+    batters: one(postOf('batters'), combineFoulBatter),
+    pitchers: one(postOf('pitchers'), combineFoulPitcher),
+  }
+  const hasPost = Object.keys(post.batters).length + Object.keys(post.pitchers).length > 0
   return {
-    batters: batter ? { [id]: batter } : {},
-    pitchers: pitcher ? { [id]: pitcher } : {},
+    batters: one(pick('batters'), combineFoulBatter),
+    pitchers: one(pick('pitchers'), combineFoulPitcher),
+    ...(hasPost ? { post } : {}),
   }
 }
 

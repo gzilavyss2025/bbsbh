@@ -52,7 +52,7 @@ the same problem for the pitch sweep. Three things must not change:
 - `/fouls` has a Regular season / Postseason toggle, shown once `post` exists
   (`PartOfSeason`, `foulsInScope` in `src/api/fouls.js`). The postseason view
   lowers the board floors (2 games, 60 pitches), since a club plays few October
-  games. The player's `FoulCard` is a later change; it reads `post` in the bucket.
+  games. The player's `FoulCard` has the same toggle, reading the `post` slice of his bucket (`combineFoulShards` combines it beside the regular season for "all").
 - Older postseason games are outside the 3-day nightly window. Backfill them by
   hand with `node scripts/gen-fouls.mjs --since=<first postseason date>`.
 - Spoiler rule: a foul total over Final games says nothing about a game still
