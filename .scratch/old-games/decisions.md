@@ -24,6 +24,7 @@ Gary answered all 13 in the session for prompt 15b. Each section below ends with
 | D11 | Link the earlier game | No link at first | Yes |
 | D12 | Where a shelf row opens | Box score, sealed | Yes |
 | D13 | Postseason events | Include them | Yes |
+| D14 | When a game page says "no play-by-play" | Only for a season before 1960 | Yes |
 
 ## D1. What opens a sealed old game
 
@@ -194,3 +195,20 @@ gzilavyss2025/bbsbh#1570.
 2. **Regular season only.** Against: the shelf would leave out the most famous games.
 
 **Decided:** D13 option 1, include them.
+
+## D14. When a game page says "no play-by-play" (added 2026-10-06, prompt 2a)
+
+Before 1941, a played game with 0 plays is normal, and a notice says nothing about the
+game. From 1960 on, a played game with 0 plays is almost always a forfeit, so a notice
+before a reveal hints at the result.
+
+1. **Recommended: only for a season before 1960.** A modern forfeit keeps its sealed
+   innings pages, as today. Cost: a rare 1960+ game with no plays still offers empty
+   innings pages.
+2. **Any played game.** One rule for every era. Cost: a modern forfeit's lineup page
+   hints at the result.
+3. **The notice inside the seal.** Nothing leaks, but before 1941 every half is a tap
+   into an empty page.
+
+**Decided:** D14 option 1, only before 1960.
+
