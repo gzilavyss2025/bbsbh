@@ -44,7 +44,7 @@ I measured these on `origin/main` at `9d01ade71`. N0 measured `1be24feeb`.
      sit between `card.css` and 06),
    - `test/table-cascade.test.js:60-70` (only `empty-state.css` sits between
      `table.css` and 06).
-5. **The file count is 12, not 10.** The 3 pins above are the extra files. This is
+5. **The file count is 12 (13 with a raw-value budget), not 10.** The 3 pins above are the extra files. This is
    the same thing E1 did. The docs (`decisions.md`, `overrides.tsv`, `slices.md`,
    `spec.md`) do not count toward the target.
 6. **Skills now in the repo:** `steward` (drive a PR to mergeable), `stack-prs`
@@ -68,6 +68,10 @@ change the model.
 ### The prompt
 
 ```text
+Use the ponytail skill at level full. Reuse what the repo already has before you
+write anything new. (Ponytail never overrides the spoiler rule, test-first or
+check-dir-size.)
+
 Task: build slice N1 of the Notice collapse for GitHub issue #1132
 (gzilavyss2025/bbsbh). First ask Gary the five design decisions with the
 AskUserQuestion tool, one question at a time. Then build the Notice component, its
@@ -105,10 +109,11 @@ Before you start (read and look; no edits yet)
    .scratch/design-system/notice-collapse/: prompt-n1.md ("What changed since N0"),
    spec.md (sections 3 to 6, 8, 10, 14 and 15), slices.md (N1 and "If Gary answers
    otherwise") and decisions.md. Then read the EmptyState files named above.
-2. Fetch origin. List open PRs and worktrees. Base your branch on current
-   origin/main (the branch your session was given; start it fresh from origin/main:
-   the earlier N0 branch was merged and deleted). Check status and diffs before you
-   edit. Other agents may work at once: never reset, stash or reformat their work.
+2. Fetch origin. List open PRs and worktrees. Work on the branch your session was
+   given. If it was not given one, make `claude/notice-n1` from current origin/main
+   (the earlier N0 branch was merged and deleted). Run `git merge-base --is-ancestor
+   origin/main HEAD`: if it fails, merge origin/main first. Check status and diffs
+   before you edit. Other agents may work at once: never reset, stash or reformat their work.
 3. Run `node .scratch/design-system/notice-collapse/census.mjs --dump` ALWAYS WITH
    --dump while you read it (without it the script rewrites census.md and
    census.json).
@@ -163,7 +168,7 @@ Q1  header "Look"
     - "Per tone": "A bar for info and error, a wash for event and caution. Two looks
       inside one component."
 Q2  header "Errors"
-    question: "Does a one-line error get a box, or stay coloured text? About 45
+    question: "Does a one-line error get a box, or stay coloured text? About 42
     screens change, the slate among them."
     options:
     - "A box (Recommended)": "Every error becomes a Notice with tone error: pale clay
@@ -228,9 +233,12 @@ How each answer bends the build:
   component and noticeParts() only. Frame only: build both; noticeClass({ tone,
   size, className }) returns the frame class string for a caller that owns its root
   (the pitcher cards and one <button>, from N6). Its test pins it.
-- Q4 three: no tone caution (the pilot uses error). Other names: use Gary's names in
+- Q4 three: no tone caution (the pilot uses error). If Q2 is also "text stays",
+  there is no error tone either: STOP and ask Gary which tone the pilot takes.
+  Other names: use Gary's names in
   the class names, the props, the lab, the tests and the docs.
-Files (target 10; 12 here, see "What changed since N0"):
+Files (target 10; 12 here, 13 if the pilot lowers a check-raw-values.mjs budget; see
+"What changed since N0"):
 1. src/components/ui/state/Notice.jsx — `<Notice tone label icon action size
    className {...rest}>text</Notice>`; root `div.notice.notice--{tone}.notice--{size}`
    with `__icon`, `__body` (`__label`, `__text`) and `__action`, each rendered only
@@ -278,8 +286,10 @@ class; otherwise it keeps only a margin. Delete the declarations the Notice now
 draws (colour, font) from styles/62-game-preview.css and, if that deletes a raw
 value, lower the matching scripts/check-raw-values.mjs budget (#1178).
 
-Tests first. Add the pilot's pins to section 5 of test/notice-cascade.test.js and
-watch them FAIL before the move. Never delete, skip or loosen an assertion to make a
+Tests first, for the whole slice. Write test/notice-cascade.test.js (all five
+sections, the pilot's pins included) and the three moved import-order pins BEFORE
+Notice.jsx, notice.css, noticeClass.js and the index.css line. Watch them FAIL, then
+build until they pass. Never delete, skip or loosen an assertion to make a
 check pass.
 
 Step 6 — verify
@@ -294,7 +304,8 @@ Step 6 — verify
   entry) and /07072026/milstl-2/preview?nointro (the pilot; turn on three full
   sections so the line shows; say "not seen" if it does not). Headless Chromium
   cannot reach statsapi.mlb.com through the proxy: relay those calls through Node
-  with page.route, and launch with executablePath '/opt/pw-browsers/chromium'. Use
+  with page.route, and launch with executablePath '/opt/pw-browsers/chromium'
+  (cloud session; on a local machine use its own Chromium and plain probes). Use
   your own subfolder of the scratchpad. Keep the dev server running and put the
   clickable local URL in the handoff.
 - Do not run npm run e2e or npm run visual unless Gary asks.
@@ -302,13 +313,18 @@ Step 6 — verify
 Step 7 — review, commit, PR
 - Use the ponytail skill while you build. When the code is done, run ponytail-review
   and /code-review (medium) on your diff, and fix what they find.
-- Re-run the census (no --dump): it must end `unreviewed 0`, no STALE. Mark the
+- Re-run the census (no --dump): it must end `unreviewed 0`, no STALE. That run
+  rewrites census.md and census.json: restore them with
+  `git checkout -- .scratch/design-system/notice-collapse/census.md
+  .scratch/design-system/notice-collapse/census.json` before you commit. Mark the
   moved pilot row "DONE in N1" in overrides.tsv, or delete it if the site dropped
   out of the census (read the STALE list; never delete it blind).
 - Commit to your assigned branch and push. Open a DRAFT PR whose body says
   "Part of #1132", mirrors .github/pull_request_template.md, lists the routes for
   #1177's screenshot suite, says what you could not see, and states the five
-  answers. Subscribe to its activity. Do not push to main.
+  answers. Subscribe to its activity. Do not push to main and do not merge: Gary
+  merges. Wait for the `lint-and-build` check (about 5 to 15 minutes). If it fails,
+  follow the steward skill.
 
 Handoff
 1. Append a "N1 as built" section to slices.md: the API as built (the exact
