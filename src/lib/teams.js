@@ -971,7 +971,7 @@ export function coachHeadshotUrl(personId, width = 320) {
 //   • MiLB / prospect players (`mlb` false): silo → milb. The milb rung is a
 //     real, RECENT minor-league face for a prospect whose MLB `silo` studio
 //     shot 404s — exactly the case that rung exists for.
-//   • MAJOR-LEAGUE players (`mlb` true): silo ONLY. An established MLB player's
+//   • MAJOR-LEAGUE players (`mlb` true): silo ONLY (plus the coach rung below). An established MLB player's
 //     `milb` variant is a years-old prospect photo in the wrong team's cap;
 //     since the MLB `silo` studio shot is the one that can lag or briefly 404
 //     (regeneration, a trade), letting a momentary silo miss fall to that
@@ -981,14 +981,17 @@ export function coachHeadshotUrl(personId, width = 320) {
 //     (neutral, current) instead. A brand-new call-up with no silo yet shows
 //     the club logo rather than his recent MiLB face — an accepted, rare trade
 //     for never mis-capping a regular.
+//   • Every player ends on the `coach` rung. A retired player now on a staff
+//     (Matsui, Burrell, Bush — verified live) has no silo/milb but does have a
+//     coach photo; for everyone else it is one more clean 404 before the logo.
 // `mlb` is a plain boolean the caller decides (Headshot derives it from the
 // player's ACTUAL team, not the display teamId — a prospect's card tints with
 // his parent MLB org but must still keep the milb rung).
 export function headshotSources(personId, { coach = false, mlb = false } = {}) {
   if (!personId) return []
   if (coach) return [coachHeadshotUrl(personId)]
-  if (mlb) return [realHeadshotUrl(personId)]
-  return [realHeadshotUrl(personId), milbHeadshotUrl(personId)]
+  if (mlb) return [realHeadshotUrl(personId), coachHeadshotUrl(personId)]
+  return [realHeadshotUrl(personId), milbHeadshotUrl(personId), coachHeadshotUrl(personId)]
 }
 
 // ---------------------------------------------------------------------------
