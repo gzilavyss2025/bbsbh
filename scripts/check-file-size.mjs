@@ -93,7 +93,7 @@ const BUDGETS = {
   // row: it renders between the rail and the club strip it scopes.
   'src/styles/03-slate-header.css': 650, // 602
   'src/styles/05-masthead-nav.css': 700, // 697 — current player-page masthead and level-progression rules after CareerTimeline moved to 05a
-  'src/styles/06-loader-and-cards.css': 810, // 800 -> 810 at 807: .asyncstatus__notice (#1132, N4) sits by the loader, its sibling branch, and must load after system/notice.css. 900 -> 742: the off-day club tiles left for 06b-offday-cards.css, taking their hover/focus states with them
+  'src/styles/06-loader-and-cards.css': 800, // 900 -> 742: the off-day club tiles left for 06b-offday-cards.css, taking their hover/focus states with them
   'src/styles/08-site-shell.css': 800, // 900 -> 800 after the dead accountpitch rules went; 1000 -> 898: the footer's flat link-list rules left for 08a-site-menu.css, which holds the shared site-directory language the sheet, the footer and /more all read
   'src/styles/09-team-info.css': 650, // 700 -> 650 at 609: .thub-card left for system/card.css (#1113, slice C0). 800 -> 700: the club band's rules moved to system/section-head.css (#1113, slice H1a). 700 -> 716: the innings view's lineup masthead (.lineupteam__name) joined the header-theme system (EnteringReference.jsx), the same `.is-themed`/`--bar-fill` triad .halfdefense__title already wore — one more selector in the same family, not a new one. 687 — the Ballpark card moved out to 57-ballpark-card.css
   'src/styles/10-lineup.css': 700, // 800 -> 700 at 654: the Former Teammates card's crossroads rules went, and its Ladder lives in 10b-former-teammates.css (#1352)

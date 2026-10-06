@@ -163,8 +163,10 @@ test('Box Lines draws its error on Notice with Try again as the action; the load
 // ---- 4. the namespace margins ----
 
 test('.asyncstatus__notice gives back the 12px the .hint padding gave, after notice.css so it wins', () => {
-  const body = ruleBody(css('06-loader-and-cards.css'), '.asyncstatus__notice')
-  assert.ok(body, 'the rule exists in 06, which loads after system/notice.css')
+  const body = ruleBody(css('08-site-shell.css'), '.asyncstatus__notice')
+  assert.ok(body, 'the rule exists in 08-site-shell.css')
+  const order = [...readFileSync(join(SRC, 'index.css'), 'utf8').matchAll(/@import '\.\/styles\/([^']+)';/g)].map((m) => m[1])
+  assert.ok(order.indexOf('08-site-shell.css') > order.indexOf('system/notice.css'), 'it loads after system/notice.css, so .notice { margin: 0 } does not win')
   assert.equal(decl(body, 'margin'), 'var(--space-3) 0', '.hint had padding: var(--space-3) 2px')
   assert.equal(decl(ruleBody(css('05-masthead-nav.css'), '.hint'), 'padding'), 'var(--space-3) 2px', 'the number the margin copies')
 })
