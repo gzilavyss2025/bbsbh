@@ -41,6 +41,9 @@ did, and end with a short list of what needs him.
    changes. Report any two PRs that touch the same file. Those are the likely
    conflicts.
 3. **Build the stack.** Branch `stack/<YYYY-MM-DD>` from current `origin/main`.
+   **Cloud session:** build on the session's own `claude/<name>` branch instead. A
+   cloud session may push only there. Reset it to current `origin/main` first, and
+   read `stack/<date>` below as that branch.
    Merge each PR head in order with `git merge --no-ff origin/<head>`. Do not
    rebase and do not squash here. Each PR stays one visible merge commit.
    - **Conflict in a lockfile or generated file:** regenerate it with the repo
@@ -56,7 +59,8 @@ did, and end with a short list of what needs him.
    Fix any failure the merge caused. Fix failures one PR caused in that PR's
    code, not by loosening a test. Never skip, delete, or weaken a test
    (CLAUDE.md, "Test discipline").
-5. **Open the stack PR.** Push the branch with `git push -u origin stack/<date>`.
+5. **Open the stack PR.** Push the branch with `git push -u origin stack/<date>` (the session branch in a
+   cloud session).
    Open one **draft** PR to `main`. Look for a PR template first
    (`.github/pull_request_template.md`) and fill it in. The body lists each
    source PR with its title and link, the merge order, and any PR left out.
