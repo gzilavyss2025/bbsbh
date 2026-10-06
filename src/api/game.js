@@ -394,7 +394,7 @@ async function readPitcherSeasonLine(personId, season, sportId = 1, officialDate
 
 // "2026-09-30" -> "2026-09-29". UTC on both sides, so no time zone or DST
 // edge can move the day.
-function dayBefore(apiDate) {
+export function dayBefore(apiDate) {
   const d = new Date(`${apiDate}T00:00:00Z`)
   d.setUTCDate(d.getUTCDate() - 1)
   return d.toISOString().slice(0, 10)

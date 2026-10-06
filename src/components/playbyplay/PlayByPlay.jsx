@@ -359,6 +359,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           node = (
             <AtBatCard
               entry={entry}
+              gameDate={feed?.gameData?.datetime?.officialDate}
               battingTeamId={battingTeamId}
               pitchingTeamId={pitchingTeamId}
               calloutCtx={{ bundle: callouts, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress }}
@@ -546,7 +547,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
 // have one home (see that file's TUNING note).
 const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }
 
-function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false, replayLast = false }) {
+function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false, replayLast = false }) {
   const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, battedBall, live } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   // The at-bat replay (AtBatReplay.jsx), in one place at a time: inside the
@@ -603,6 +604,7 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
         batter={batter}
         pitcher={pitcher}
         pinchRunners={pinchRunners}
+        gameDate={gameDate}
         battingTeamId={battingTeamId}
         pitchingTeamId={pitchingTeamId}
       />

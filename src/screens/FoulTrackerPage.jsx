@@ -2,7 +2,7 @@
 // /fouls pays for it. It loads after the core, which is the order it had there.
 import '../styles/43-foul-tracker.css'
 import { Fragment, useMemo, useState } from 'react'
-import { fetchFouls, topFoulGames, teamPitchTypeRates } from '../api/fouls.js'
+import { compareFoulsInScope, fetchFouls, foulsInScope, hasPostseason, topFoulGames, teamPitchTypeRates } from '../api/fouls.js'
 import { fetchGamesByPk } from '../api/schedule.js'
 import { fetchPositions } from '../api/person-fetch.js'
 import { splitDisplayName } from '../api/person.js'
@@ -27,6 +27,7 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { teamAbbr, teamFullName, teamClubName, favoriteAccentColor } from '../lib/teams.js'
 import { Pill } from '../components/ui/control/Pill.jsx'
+import { PartOfSeason } from '../components/season/PartOfSeason.jsx'
 import { Table } from '../components/ui/table/Table.jsx'
 import { SeasonPicker } from '../components/season/SeasonPicker.jsx'
 import { useSeasonView } from '../hooks/seasons/useSeasonView.js'
@@ -70,9 +71,13 @@ export function FoulTrackerPage({ seasonYear, vs }) {
   const view = useSeasonView('fouls', { seasonYear, vs })
   const shown = view?.shown
   const fouls = useAsync(() => (view ? fetchFouls({ seasonYear: shown }) : Promise.resolve(null)), [view != null, shown])
-  const { error, data } = fouls
+  const { error, data: seasonData } = fouls
+  const [wantPost, setWantPost] = useState(false)
+  const post = wantPost && hasPostseason(seasonData)
+  const data = useMemo(() => foulsInScope(seasonData, post ? 'P' : 'R'), [seasonData, post])
   const loading = !view || fouls.loading
-  const { data: prev } = useAsync(() => (view?.vs ? fetchFouls({ seasonYear: view.vs }) : Promise.resolve(null)), [view?.vs])
+  const { data: prevSeason } = useAsync(() => (view?.vs ? fetchFouls({ seasonYear: view.vs }) : Promise.resolve(null)), [view?.vs])
+  const prev = useMemo(() => compareFoulsInScope(prevSeason, post ? 'P' : 'R'), [prevSeason, post])
   const [mode, setMode] = useState('change')
   // A board's compare column: its figure, found again in the vs season.
   const cmp = (group, format, value) =>
@@ -80,22 +85,17 @@ export function FoulTrackerPage({ seasonYear, vs }) {
   const { favoriteTeamId } = useFavoriteTeam()
   const [filterTeamId, setFilterTeamId] = useState(null)
 
-  const boards = useMemo(() => buildBoards(data, filterTeamId), [data, filterTeamId])
+  const boards = useMemo(() => buildBoards(data, filterTeamId, post), [data, filterTeamId, post])
 
-  // The favorite-team "is-me" tint (favRowProps below) is redundant, and
-  // actively overwhelming, once the team filter has restricted every visible
-  // row to one club — if that club IS the favorite, nearly every row lights
-  // up, drowning out the ranking it's supposed to accent. Only light rows up
-  // when the page is showing the whole league.
+  // The favorite-team "is-me" tint (favRowProps below) drowns the ranking once
+  // the team filter has narrowed every row to one club. Only tint when the page
+  // shows the whole league.
   const highlightTeamId = filterTeamId == null ? favoriteTeamId : null
 
-  // Single-Game-Highs' AND Best Souvenir Odds' score/date badges both link out
-  // to a box score — the precompute only carries each's gamePk (see
-  // gen-fouls.mjs's max_game_pk / foul_game_totals), not which side was
-  // home/away, so one batched schedule lookup (shared by both boards) resolves
-  // the away/home abbreviations gamePath needs. Same fetchGamesByPk batching
-  // loadPlayer.js uses for its own game-log deep links. Degrades to {} on
-  // failure — a plain, non-clickable date badge, not a crash.
+  // Single-Game-Highs' and Best Souvenir Odds' badges link to a box score. The
+  // precompute carries only each gamePk, so one batched schedule lookup (shared
+  // by both boards) resolves the away/home abbreviations gamePath needs. Falls
+  // back to {}: a plain, non-clickable date badge, not a crash.
   const gameLinkPks = useMemo(
     () => [
       ...(boards?.gameHighs ?? []).map((b) => b.maxGamePk),
@@ -105,14 +105,9 @@ export function FoulTrackerPage({ seasonYear, vs }) {
   )
   const { data: gameLinks } = useAsync(() => fetchGamesByPk(gameLinkPks), [gameLinkPks])
 
-  // The four leaderboards' #1 leaders (hero cards, see FoulFeatured) plus
-  // every Single-Game-Highs row (GameHighRow, styled the same way) get a
-  // position + team name under their name — the precompute has no position
-  // (it's aggregated purely from feed pitch/PA counts, not roster data), so a
-  // batched people lookup fills in just this handful of ids rather than
-  // adding position to every one of the hundreds of rows gen-fouls.mjs
-  // ingests. Degrades to {} on failure — both callers already treat a
-  // missing position as "don't show the position".
+  // The four #1 leaders (FoulFeatured) and every Single-Game-Highs row get a
+  // position under their name. The precompute has none, so a batched people
+  // lookup fills in just these ids. Falls back to {}: no position shown.
   const positionIds = useMemo(
     () =>
       [
@@ -138,12 +133,14 @@ export function FoulTrackerPage({ seasonYear, vs }) {
       <SeasonPicker view={view} pathFor={foulsPath} mode={mode} onMode={setMode} />
 
       <p className="hint foultracker__intro">
-        {view?.label || 'This'} {shown === 'all' ? 'seasons’' : 'season’s'} foul balls, counted from every MLB game’s
+        {view?.label || 'This'} {shown === 'all' ? 'seasons’' : 'season’s'} {post ? 'postseason' : ''} foul balls, counted from every MLB game’s
         pitch-by-pitch{data?.gamesIngested ? ` (${data.gamesIngested} games so far)` : ''}.
         Fouls hit <em>at</em> two strikes are tracked separately — they’re the ones that
         extend at-bats, and batters who reach two strikes by fouling hit .291 in those
         counts against .102 for everyone else (SABR, 1945–2015).
       </p>
+
+      {hasPostseason(seasonData) && <PartOfSeason postseason={post} onChange={setWantPost} />}
 
       {boards && <SeasonAverageCard data={data} />}
 
@@ -238,6 +235,7 @@ export function FoulTrackerPage({ seasonYear, vs }) {
             mostRows={boards.pitcherFoulsPerWhiff}
             fewestRows={boards.pitcherFoulsPerWhiffLow}
             avg={boards.pitcherFoulsPerWhiffAvg}
+            minPitches={boards.minPitches}
             favoriteTeamId={highlightTeamId}
           />
 
@@ -263,26 +261,28 @@ export function FoulTrackerPage({ seasonYear, vs }) {
 // league's max games played so switching teams never changes what counts as
 // "enough games this season," and NOT the league-wide by-inning/by-pitch-type
 // tables (see `league` below), which carry no team dimension to filter.
-function buildBoards(data, teamId = null) {
+// `post` shrinks the floors: a club plays few October games.
+function buildBoards(data, teamId = null, post = false) {
   const allBatters = Object.entries(data?.batters ?? {}).map(([id, b]) => ({ id, ...b }))
   if (allBatters.length === 0) return null
   const allPitchers = Object.entries(data?.pitchers ?? {}).map(([id, p]) => ({ id, ...p }))
 
   // Playing-time floors scale with the season so the page works in April too.
   const maxG = Math.max(...allBatters.map((b) => b.g))
-  const minGames = Math.max(5, Math.round(maxG * 0.5))
+  const minGames = Math.max(post ? 2 : 5, Math.round(maxG * 0.5))
+  const minPitches = post ? 60 : 300
 
   const batters = filterByTeam(allBatters, teamId, (b) => b.teamId)
   const pitchers = filterByTeam(allPitchers, teamId, (p) => p.teamId)
   const qualified = batters.filter((b) => b.g >= minGames)
-  const qualifiedP = pitchers.filter((p) => (p.pitches ?? 0) >= 300)
+  const qualifiedP = pitchers.filter((p) => (p.pitches ?? 0) >= minPitches)
   const foulsPerWhiffPool = qualifiedP.filter((p) => p.whiffs > 0)
 
   // Always the whole league's qualifying pool, ignoring `teamId` — the
   // Most/Fewest cutoff below (pitcherFoulsPerWhiffAvg) has to hold steady
   // when a team filter narrows the page, or switching teams would redraw the
   // very line that decides which side a pitcher falls on.
-  const leagueFoulsPerWhiffPool = allPitchers.filter((p) => (p.pitches ?? 0) >= 300 && p.whiffs > 0)
+  const leagueFoulsPerWhiffPool = allPitchers.filter((p) => (p.pitches ?? 0) >= minPitches && p.whiffs > 0)
   const pitcherFoulsPerWhiffAvg =
     leagueFoulsPerWhiffPool.length > 0
       ? leagueFoulsPerWhiffPool.reduce((s, p) => s + p.fouls, 0) /
@@ -294,6 +294,7 @@ function buildBoards(data, teamId = null) {
 
   return {
     minGames,
+    minPitches,
     batterTotal: top(batters, (b) => b.fouls),
     batterRate: top(qualified, (b) => b.fouls / b.g),
     gameHighs: top(
@@ -461,7 +462,7 @@ function FoulLeaderBoard({ title, rows, cols, cells, compare, featured = false, 
 // both extremes against, the same "state the baseline before the outliers"
 // idea as SeasonAverageCard leading the whole page — one sentence, shared by
 // both columns below it, rather than repeating the number per side.
-function FoulsPerWhiffBoard({ mostRows, fewestRows, avg, favoriteTeamId }) {
+function FoulsPerWhiffBoard({ mostRows, fewestRows, avg, minPitches, favoriteTeamId }) {
   const hasMost = mostRows && mostRows.length > 0
   const hasFewest = fewestRows && fewestRows.length > 0
   if (!hasMost && !hasFewest) return null
@@ -469,7 +470,7 @@ function FoulsPerWhiffBoard({ mostRows, fewestRows, avg, favoriteTeamId }) {
     <BoardCard title="Fouls per whiff — pitchers">
       {avg != null && (
         <p className="foulboard__whiffavg">
-          Qualified pitchers (300+ pitches, 1+ whiff) average <b>{avg.toFixed(1)}</b> fouls per whiff — every ranked
+          Qualified pitchers ({minPitches}+ pitches, 1+ whiff) average <b>{avg.toFixed(1)}</b> fouls per whiff — every ranked
           pitcher below is well off that middle.
         </p>
       )}

@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { Ledger } from '../player/Ledger.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Pill } from '../ui/control/Pill.jsx'
 import { SplitsVsTeam } from './SplitsVsTeam.jsx'
 import { spanCell } from '../../lib/ledger.js'
 
@@ -77,8 +79,8 @@ function splitCells(side) {
 // rather than an arithmetic claim about them, which is also the better reading
 // order for a reference in any case. "Season", not "All", for the same reason:
 // "all" means all the rows here, and it isn't.
-function referenceRow(all) {
-  return all ? { key: 'all', className: 'ledger__ref', cells: ['Season', ...splitCells(all)] } : null
+function referenceRow(all, label = 'Season') {
+  return all ? { key: 'all', className: 'ledger__ref', cells: [label, ...splitCells(all)] } : null
 }
 
 // The situational rows with a spanning label above each family. `family` comes
@@ -107,25 +109,50 @@ function situationalRows(rows, reference) {
 }
 
 export function hasSplits(block, vsTeam) {
-  return Boolean(block.splits || block.situational || (vsTeam && block.group === vsTeam.group))
+  return Boolean(block.splits || block.situational || block.postseason?.splits || block.postseason?.situational || (vsTeam && block.group === vsTeam.group))
+}
+
+// The Regular / Postseason switch. The two scopes sit side by side and are never
+// blended: a vs-L line over 600 PA must not move for 12 October PA. It shows only
+// when the player has a postseason table to switch to (the loader asks nothing on
+// a dated page, so a dated page never has one), and Regular is the default.
+function ScopeSwitch({ scope, onScope }) {
+  return (
+    <div className="player__splitscope" role="group" aria-label="Splits scope">
+      <span className="player__splitscopelabel">Scope</span>
+      {[['reg', 'Regular'], ['post', 'Postseason']].map(([k, text]) => (
+        <Pill key={k} role="control" fill="paper" pressed={scope === k} onClick={() => onScope(k)}>{text}</Pill>
+      ))}
+    </div>
+  )
 }
 
 export function SplitsSection({ block, vsTeam, season, asOf, personId, playerSurname }) {
+  const [pickedScope, setScope] = useState('reg')
+  const post = block.postseason
+  const canSwitch = Boolean(post?.splits || post?.situational)
+  const scope = canSwitch ? pickedScope : 'reg'
+  const inPost = scope === 'post'
+  const splits = inPost ? post.splits : block.splits
+  const situational = inPost ? post.situational : block.situational
+  const note = inPost ? 'postseason' : 'full season'
+  const refLabel = inPost ? 'Postseason' : 'Season'
   return (
     <>
-      {block.splits && (
+      {canSwitch && <ScopeSwitch scope={scope} onScope={setScope} />}
+      {splits && (
         <div className="player__seasonsplits">
-          <SectionHead look="rule" note="full season">By handedness</SectionHead>
+          <SectionHead look="rule" note={note}>By handedness</SectionHead>
           <Ledger
             label="Splits by handedness"
             leftCols={1}
             head={splitHead(block.group)}
             hideNarrow={NARROW_HIDE}
             rows={[
-              referenceRow(block.splits.all),
+              referenceRow(splits.all, refLabel),
               ...[
-                { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: block.splits.left },
-                { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: block.splits.right },
+                { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: splits.left },
+                { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: splits.right },
               ].map(({ key, label, side }) => ({ key, cells: [label, ...splitCells(side)] })),
             ].filter(Boolean)}
           />
@@ -145,15 +172,15 @@ export function SplitsSection({ block, vsTeam, season, asOf, personId, playerSur
           (26-player-page.css) — the worst possible setting for the one sentence
           a reader was meant to actually read. A family rule and an indent say
           it in the table's own grammar. */}
-      {block.situational && (
+      {situational && (
         <>
-          <SectionHead look="rule" note="full season">Situational</SectionHead>
+          <SectionHead look="rule" note={note}>Situational</SectionHead>
           <Ledger
             label="Situational splits"
             leftCols={1}
             head={splitHead(block.group)}
             hideNarrow={NARROW_HIDE}
-            rows={situationalRows(block.situational.rows, referenceRow(block.situational.all))}
+            rows={situationalRows(situational.rows, referenceRow(situational.all, refLabel))}
           />
         </>
       )}

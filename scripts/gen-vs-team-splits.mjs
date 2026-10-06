@@ -116,7 +116,8 @@ async function fetchMlbTeams() {
 }
 
 // Each club's next scheduled game's opponent (soonest game with date >= today),
-// so the card can pre-select it. Regular season isn't forced — any game counts.
+// so the card can pre-select it. No gameType filter here — any game counts, postseason
+// included. The career splits below (buildPlayerVs) are regular season only, on purpose.
 async function fetchNextOpponents(teamIds) {
   const nextByTeam = {} // teamId -> { date, oppId }
   let data

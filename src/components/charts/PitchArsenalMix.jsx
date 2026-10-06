@@ -45,6 +45,9 @@ const SIDE_LABEL = { L: 'LHB', R: 'RHB' }
 // own. Renders nothing if there's no arsenal (below the qualifier floor, or
 // the level carries no pitch tracking).
 //
+// `activeCode` lights the row of one pitch type — the lineup card's pitch scene
+// passes the pitch it is playing, so the list follows the animation. Optional.
+//
 // `tto` is the same module's arsenalTtoView: the same season split by how
 // many times he had already faced that batter in the game. Null for an arm
 // the nightly file carries no split for and for anyone with only one
@@ -56,7 +59,7 @@ const SIDE_LABEL = { L: 'LHB', R: 'RHB' }
 // the two filters CROSS — what he threw the third time through to lefties.
 // Null for an arm the file carries no side split for and for anyone with a
 // side under the qualifier floor, in which case that strip doesn't render.
-export function PitchArsenalMix({ arsenal, tto, sides, className = '' }) {
+export function PitchArsenalMix({ arsenal, tto, sides, className = '', activeCode = null }) {
   // `null` is the season, a number is that look. Held here, not lifted, and
   // deliberately not persisted: a scorer opening the next game's lineup wants
   // the season first, same rule the player page's card follows.
@@ -137,7 +140,7 @@ export function PitchArsenalMix({ arsenal, tto, sides, className = '' }) {
       </div>
       <ul className="arsenal__list">
         {rows.map((t) => (
-          <li key={t.code} className="arsenal__row">
+          <li key={t.code} className={`arsenal__row${t.code === activeCode ? ' is-active' : ''}`}>
             <span className="arsenal__name">{t.name}</span>
             <span className="arsenal__pct">
               {t.pct}%

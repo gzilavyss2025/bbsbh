@@ -128,6 +128,14 @@ CREATE TABLE IF NOT EXISTS postseason_pitching_totals (
 -- holds for every new column in these tables. Foul/whiff classification mirrors the live
 -- derive.js path exactly via the shared FOUL_CODES/WHIFF_CODES/pitchCallCode in
 -- src/api/playbyplay.js, so the precomputed and live tallies can't drift.
+--
+-- SCOPE (ADR-0102, as ADR-0094 did for the pitch sweep). `scope` splits the
+-- regular season ('R') from the MLB postseason ('P'). It is the LAST column
+-- with DEFAULT 'R', so an old dump line that names no scope loads as regular
+-- season, and it is SECOND in each key (after `season`). The two game-keyed
+-- tables carry it as a plain column. A reader that wants only the regular
+-- season must filter `scope = 'R'`; the postseason is exported BESIDE it
+-- (`post`), never summed into it.
 
 -- Fouls seen/hit BY each batter. `pitches_seen` counts every pitch thrown to him
 -- (including pitches during a mid-at-bat baserunning play that resumes his AB).
@@ -163,7 +171,8 @@ CREATE TABLE IF NOT EXISTS foul_batter_totals (
   max_game_opp_id    INTEGER,
   max_game_his_score INTEGER,
   max_game_opp_score INTEGER,
-  PRIMARY KEY (season, person_id)
+  scope              TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  PRIMARY KEY (season, scope, person_id)
 );
 
 -- The single most-fouled PLATE APPEARANCE a batter has had all season (as
@@ -203,7 +212,8 @@ CREATE TABLE IF NOT EXISTS foul_batter_pa_high (
   home_score         INTEGER,
   batting_team_id    INTEGER,
   opponent_id        INTEGER,
-  PRIMARY KEY (season, person_id)
+  scope              TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  PRIMARY KEY (season, scope, person_id)
 );
 
 -- Fouls surrendered BY each pitcher, plus whiffs so the app can show the
@@ -222,7 +232,8 @@ CREATE TABLE IF NOT EXISTS foul_pitcher_totals (
   pitches    INTEGER NOT NULL DEFAULT 0,
   fouls      INTEGER NOT NULL DEFAULT 0,
   whiffs     INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (season, person_id)
+  scope              TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  PRIMARY KEY (season, scope, person_id)
 );
 
 -- Fouls BY each team's batters (team-level roll-up for the club foul boards).
@@ -232,7 +243,8 @@ CREATE TABLE IF NOT EXISTS foul_team_totals (
   games            INTEGER NOT NULL DEFAULT 0,
   fouls            INTEGER NOT NULL DEFAULT 0,
   two_strike_fouls INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (season, team_id)
+  scope              TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  PRIMARY KEY (season, scope, team_id)
 );
 
 -- League-wide foul distribution by inning (innings 10+ folded into inning 10),
@@ -247,7 +259,8 @@ CREATE TABLE IF NOT EXISTS foul_league_innings (
   fouls_vs_starter    INTEGER NOT NULL DEFAULT 0,
   pitches_vs_reliever INTEGER NOT NULL DEFAULT 0,
   fouls_vs_reliever   INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (season, inning)
+  scope              TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  PRIMARY KEY (season, scope, inning)
 );
 
 -- League-wide foul rate by pitch type (details.type.code / .description).
@@ -260,7 +273,8 @@ CREATE TABLE IF NOT EXISTS foul_pitch_types (
   pitches     INTEGER NOT NULL DEFAULT 0,
   fouls       INTEGER NOT NULL DEFAULT 0,
   whiffs      INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (season, code)
+  scope              TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  PRIMARY KEY (season, scope, code)
 );
 
 -- Foul rate by pitch type, scoped to ONE team's own BATTERS (the pitch types
@@ -281,7 +295,8 @@ CREATE TABLE IF NOT EXISTS foul_team_pitch_types_batting (
   pitches     INTEGER NOT NULL DEFAULT 0,
   fouls       INTEGER NOT NULL DEFAULT 0,
   whiffs      INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (season, team_id, code)
+  scope              TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  PRIMARY KEY (season, scope, team_id, code)
 );
 
 -- Same idea as foul_team_pitch_types_batting, but for a team's own PITCHERS —
@@ -297,7 +312,8 @@ CREATE TABLE IF NOT EXISTS foul_team_pitch_types_pitching (
   pitches     INTEGER NOT NULL DEFAULT 0,
   fouls       INTEGER NOT NULL DEFAULT 0,
   whiffs      INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (season, team_id, code)
+  scope              TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  PRIMARY KEY (season, scope, team_id, code)
 );
 
 -- Idempotency guard: which gamePks have already been folded into the totals
@@ -305,7 +321,8 @@ CREATE TABLE IF NOT EXISTS foul_team_pitch_types_pitching (
 CREATE TABLE IF NOT EXISTS foul_ingested_games (
   game_pk INTEGER PRIMARY KEY,
   date    TEXT NOT NULL,
-  season  INTEGER NOT NULL
+  season  INTEGER NOT NULL,
+  scope   TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P'))
 );
 
 -- Both teams' foul totals for ONE game (the "best souvenir odds" board: which
@@ -329,7 +346,8 @@ CREATE TABLE IF NOT EXISTS foul_game_totals (
   away_fouls   INTEGER NOT NULL DEFAULT 0,
   away_score   INTEGER NOT NULL DEFAULT 0,
   total_fouls  INTEGER NOT NULL DEFAULT 0,
-  season       INTEGER NOT NULL
+  season       INTEGER NOT NULL,
+  scope        TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P'))
 );
 
 -- Per-team, per-season COMEBACK counts (gen-comeback-wins.mjs), the numerator
@@ -343,10 +361,15 @@ CREATE TABLE IF NOT EXISTS foul_game_totals (
 -- immutable, so these accumulate via incrementing upserts as each newly-Final
 -- MLB game is swept, guarded by comeback_ingested_games so a resumed or re-run
 -- sweep never double-counts. `wins` is the team's total ingested wins (context
--- for the buckets); the (team_id, season) key lets seasons coexist.
+-- for the buckets); the (team_id, season, scope) key lets seasons coexist.
+-- `scope` splits the regular season ('R') from the MLB postseason ('P'), as in
+-- pitch_arsenal_totals (ADR-0094). DEFAULT 'R' means an old dump line that names
+-- no scope loads as regular season, so no rebuild. A reader that wants only the
+-- regular season must say `scope = 'R'`.
 CREATE TABLE IF NOT EXISTS comeback_win_totals (
   team_id INTEGER NOT NULL,
   season  INTEGER NOT NULL,
+  scope   TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
   wins    INTEGER NOT NULL DEFAULT 0,
   sub10   INTEGER NOT NULL DEFAULT 0,
   sub20   INTEGER NOT NULL DEFAULT 0,
@@ -354,7 +377,7 @@ CREATE TABLE IF NOT EXISTS comeback_win_totals (
   att10   INTEGER NOT NULL DEFAULT 0,
   att20   INTEGER NOT NULL DEFAULT 0,
   att30   INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (team_id, season)
+  PRIMARY KEY (team_id, season, scope)
 );
 
 -- Idempotency guard for comeback_win_totals: which gamePks are already folded in.

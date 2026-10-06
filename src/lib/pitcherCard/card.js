@@ -52,6 +52,13 @@ export function showPostseasonRow(gameType, post) {
   return isPostseason(gameType) && (post?.games ?? 0) > 0
 }
 
+// The all-time postseason row: in a postseason game, when it covers more games
+// than this year's row (so a pitcher with earlier Octobers but none this year
+// still gets it). Same rule as the live series page.
+export function showCareerRow(gameType, career, post) {
+  return isPostseason(gameType) && (career?.games ?? 0) > (post?.games ?? 0)
+}
+
 const FOLD_UNDER = 3 // percent
 
 // One tile per pitch, most-thrown first, from pitchArsenalFor's rows. A pitch

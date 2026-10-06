@@ -8,6 +8,7 @@ import {
   pitcherRole,
   restLabel,
   seasonCells,
+  showCareerRow,
   showPostseasonRow,
   tileColumns,
 } from '../src/lib/pitcherCard/card.js'
@@ -93,6 +94,19 @@ test('postseason row: hidden with no earlier postseason game', () => {
 
 test('postseason row: shown in a postseason game after one he pitched in', () => {
   for (const t of ['F', 'D', 'L', 'W']) assert.equal(showPostseasonRow(t, LEE_POST), true, t)
+})
+
+test('all-time row: only in a postseason game, only when it adds games', () => {
+  const career = { ...LEE_POST, games: 5 }
+  assert.equal(showCareerRow('R', career, LEE_POST), false)
+  assert.equal(showCareerRow('F', null, LEE_POST), false)
+  assert.equal(showCareerRow('F', LEE_POST, LEE_POST), false)
+  assert.equal(showCareerRow('F', career, LEE_POST), true)
+})
+
+test('all-time row: shown for earlier Octobers and none this year', () => {
+  assert.equal(showCareerRow('D', { ...LEE_POST, games: 3 }, null), true)
+  assert.equal(showCareerRow('D', { ...LEE_POST, games: 3 }, { ...LEE_POST, games: 0 }), true)
 })
 
 // ---- Pitch tiles ---------------------------------------------------------------

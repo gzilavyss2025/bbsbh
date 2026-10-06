@@ -80,7 +80,7 @@ test('a season group dumps an older season once to its own frozen file', async (
   await dumpGroup(db, 'fouls', dir)
 
   assert.deepEqual(ls(dir).sort(), ['fouls-2026.sql', 'fouls.sql'])
-  assert.match(rd(join(dir, 'fouls-2026.sql'), 'utf8'), /VALUES \(158, 2026, 162, 4000, 1500\)/)
+  assert.match(rd(join(dir, 'fouls-2026.sql'), 'utf8'), /VALUES \(158, 2026, 162, 4000, 1500, .R.\)/)
   assert.doesNotMatch(rd(join(dir, 'fouls-2026.sql'), 'utf8'), /2027/)
   assert.doesNotMatch(rd(join(dir, 'fouls.sql'), 'utf8'), /2026/)
   const reopened = await openDb(dir)
@@ -103,7 +103,7 @@ test('a season group dumps an older season once to its own frozen file', async (
   } finally {
     delete process.env.REFREEZE
   }
-  assert.match(rd(join(dir, 'fouls-2026.sql'), 'utf8'), /VALUES \(158, 2026, 163, 4000, 1500\)/)
+  assert.match(rd(join(dir, 'fouls-2026.sql'), 'utf8'), /VALUES \(158, 2026, 163, 4000, 1500, .R.\)/)
 })
 
 test('a frozen season never goes back into the live dump, even when the newest season empties', async () => {

@@ -218,6 +218,13 @@ const target = arg ? new Date(`${arg}T12:00:00Z`) : new Date(Date.now() + DAY_MS
 const targetApi = iso(target)
 // "Entering the game day" cutoff for streaks/records — the day before the slate.
 const asOf = iso(new Date(target.getTime() - DAY_MS))
+
+// Every game that counts toward a season tally: the regular season plus the four
+// postseason types. Without `gameType` the gameLog sends the regular season only,
+// and `gameType=R` on the schedule drops October the same way (#1509, ADR-0088).
+// A pregame fact about an earlier game is fine under the `asOf` cut; its result
+// as a W/L/SV/HLD decision is not, and none of the reads here carry one.
+const GAME_TYPES = 'R,F,D,L,W'
 const season = target.getUTCFullYear()
 const [ty, tm, td] = targetApi.split('-')
 // One directory per slate date, one file per game inside it — the shape
@@ -525,7 +532,7 @@ async function scoringRecord(teamId, sportId) {
   const fields =
     'dates,games,gamePk,officialDate,gameDate,status,abstractGameState,teams,away,home,team,id,isWinner,score,linescore,innings,num,runs'
   const data = await getJson(
-    `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&startDate=${season}-01-01&endDate=${asOf}&gameType=R&hydrate=team,linescore&fields=${fields}`,
+    `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&startDate=${season}-01-01&endDate=${asOf}&gameType=${GAME_TYPES}&hydrate=team,linescore&fields=${fields}`,
   )
   const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
   let sfW = 0, sfL = 0, osW = 0, osL = 0
@@ -791,7 +798,7 @@ const RANK_FLOORS = {
 async function hitterEnrich(personId, sportId) {
   const mlb = sportId === MLB
   const data = await getJson(
-    `/api/v1/people/${personId}/stats?stats=${mlb ? 'gameLog,career' : 'gameLog'}&group=hitting&season=${season}${sportParam(sportId)}`,
+    `/api/v1/people/${personId}/stats?stats=${mlb ? 'gameLog,career' : 'gameLog'}&group=hitting&season=${season}&gameType=${GAME_TYPES}${sportParam(sportId)}`,
   )
   const rows = (data.stats ?? [])
     .find((b) => b.type?.displayName === 'gameLog')
@@ -985,7 +992,7 @@ async function pitcherEnrich(personId, sportId, teamId) {
     // `career` rides along for the milestone-watch check (family #9) — one
     // request, no extra fetch, same pattern as hitterEnrich's gameLog,career.
     // MLB only, like the hitter side.
-    `/api/v1/people/${personId}/stats?stats=${mlb ? 'gameLog,career' : 'gameLog'}&group=pitching&season=${season}${sportParam(sportId)}`,
+    `/api/v1/people/${personId}/stats?stats=${mlb ? 'gameLog,career' : 'gameLog'}&group=pitching&season=${season}&gameType=${GAME_TYPES}${sportParam(sportId)}`,
   )
   const rows = (data.stats ?? [])
     .find((b) => b.type?.displayName === 'gameLog')

@@ -1,7 +1,7 @@
 import { useId, useMemo, useState } from 'react'
 import { HOME } from '../../lib/ballpark/ballparkGeometry.js'
 import { HARD_HIT_MPH, hitCoordToSvg } from '../../lib/ballpark/hitProjection.js'
-import { directionCaption, directionMix, hrNote, splitBalls } from '../../api/spray.js'
+import { SCOPES, directionCaption, directionMix, hrNote, splitBalls, sprayScopeOf } from '../../api/spray.js'
 import { Card } from '../ui/frame/Card.jsx'
 import { FactGrid } from '../ui/frame/FactGrid.jsx'
 
@@ -116,7 +116,7 @@ const isHit = (b) => b.result !== 'out'
 const isXbh = (b) => b.result === 'double' || b.result === 'triple' || b.result === 'hr'
 const pct = (n, of) => (of > 0 ? `${Math.round((n / of) * 100)}%` : '—')
 
-export function SprayMap({ view }) {
+export function SprayMap({ view: regular }) {
   // An SVG id is document-global, and two spray maps can share a page once a
   // pitcher-side card exists — without a per-instance id the second card's
   // clip and blur would repaint the first one's heat.
@@ -124,8 +124,17 @@ export function SprayMap({ view }) {
   const clipId = `spray-fair-${uid}`
   const blurId = `spray-blur-${uid}`
 
+  const [wantScope, setScope] = useState('R')
   const [split, setSplit] = useState('all')
   const [hardOnly, setHardOnly] = useState(false)
+
+  // Regular season is the card; Postseason and All exist only for a batter with
+  // October balls in play (sprayView's `scoped`), so a hitter with none gets no
+  // control. The postseason is shown BESIDE the regular season, never folded
+  // into it, so the default is always Regular.
+  const scope = sprayScopeOf(regular, wantScope)
+  const view = (scope !== 'R' && regular.scoped[scope]) || regular
+  const scopes = regular.scoped ? SCOPES : []
 
   const chosen = view.splits.find((s) => s.key === split) ?? view.splits[0]
   const balls = useMemo(() => splitBalls(view.balls, chosen.key), [view.balls, chosen.key])
@@ -155,6 +164,21 @@ export function SprayMap({ view }) {
 
   return (
     <Card as="div" body="flush" className="spray">
+      {scopes.length > 0 && (
+        <div className="spray__chiprow" role="group" aria-label="Season part">
+          {scopes.map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              className={`spray__chip${key === scope ? ' spray__chip--on' : ''}`}
+              aria-pressed={key === scope}
+              onClick={() => setScope(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="spray__chiprow">
         {view.splits.map((s) => (
           <button
@@ -181,7 +205,7 @@ export function SprayMap({ view }) {
           className="spray__field"
           viewBox={VIEWBOX}
           role="img"
-          aria-label={`Spray map of ${view.name}'s hits, ${chosen.label}`}
+          aria-label={`Spray map of ${view.name}'s hits, ${scopes.length ? `${SCOPES.find(([k]) => k === scope)[1]}, ` : ''}${chosen.label}`}
         >
           <defs>
             <clipPath id={clipId}>
@@ -331,7 +355,7 @@ export function SprayMap({ view }) {
       </FactGrid>
 
       <p className="spray__foot">
-        {levels} · {chosen.bip} balls in play. Hard-hit share is of balls in play.
+        {levels}{scope === 'P' ? ' postseason' : ''} · {chosen.bip} balls in play. Hard-hit share is of balls in play.
         {note ? ` ${note}.` : ''}
       </p>
     </Card>

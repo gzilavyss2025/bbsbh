@@ -4,8 +4,12 @@ import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { openDb } from '../scripts/lib/db.js'
-import { aggregateGameFouls, exportFouls, foldGame, foulStatements, wipeTeamPitchTypes } from '../scripts/gen-fouls.mjs'
+import { aggregateGameFouls, exportFouls, exportFoulStore, foldGame, foulStatements, scopeOfGameType, wipeTeamPitchTypes } from '../scripts/gen-fouls.mjs'
 import {
+  foulsInScope,
+  compareFoulsInScope,
+  foulCardView,
+  hasPostseason,
   batterFoulLine,
   pitcherFoulLine,
   foulLeaders,
@@ -423,6 +427,8 @@ const foldInto = (db, gamePk, date, season, fouls) =>
   foldGame(db, foulStatements(db), gamePk, date, season, aggregateGameFouls(gameFeed(fouls)))
 const withoutStamp = ({ asOf: _asOf, ...rest }) => rest
 const emptyDb = () => openDb(mkdtempSync(join(tmpdir(), 'fouls-')))
+const foldScoped = (db, gamePk, date, season, fouls, scope) =>
+  foldGame(db, foulStatements(db), gamePk, date, season, aggregateGameFouls(gameFeed(fouls)), scope)
 
 test('a 2027 game leaves the 2026 foul totals alone, and 2027 holds only that game', async () => {
   const db = await emptyDb()
@@ -484,4 +490,127 @@ test('all seasons add counts, keep the higher single-game high, and rebuild a sh
   assert.equal(all.league.byPitchType[0].pitches, 12)
   assert.equal(all.league.totals.fouls, 9)
   assert.equal(all.topFoulGames.length, 3)
+})
+
+// --- the postseason beside the regular season (ADR-0102, #1511) ----------------
+
+test('a postseason game never moves the regular-season export, and sits beside it as post', async () => {
+  const db = await emptyDb()
+  foldScoped(db, 1, '2026-09-01', 2026, 3, 'R')
+  const before = withoutStamp(exportFouls(db, 2026))
+  const allBefore = withoutStamp(exportFouls(db, null))
+  assert.equal(exportFoulStore(db, 2026).post, undefined, 'no post key until a postseason game is on file')
+
+  foldScoped(db, 2, '2026-10-05', 2026, 9, 'P')
+
+  assert.deepEqual(withoutStamp(exportFouls(db, 2026)), before)
+  assert.deepEqual(withoutStamp(exportFouls(db, null)), allBefore)
+  const store = exportFoulStore(db, 2026)
+  assert.equal(store.batters[10].fouls, 3, 'the same batter keeps his regular-season row')
+  assert.equal(store.post.batters[10].fouls, 9, 'and the postseason row is his own')
+  assert.equal(store.post.pitchers[200].g, 1)
+  assert.equal(store.post.gamesIngested, 1)
+  assert.equal(store.post.coverageSince, '2026-10-05')
+  assert.deepEqual(store.topFoulGames.map((g) => g.gamePk), [1])
+  assert.deepEqual(store.post.topFoulGames.map((g) => g.gamePk), [2])
+  assert.equal(store.post.batters[10].maxGameDate, '2026-10-05')
+  assert.equal(store.post.season, undefined)
+  assert.equal(store.post.asOf, undefined)
+  assert.equal(store.league.byPitchType[0].pitches, 4, 'league rows carry no postseason pitch')
+  assert.equal(store.post.league.byPitchType[0].pitches, 10)
+  assert.equal(store.post.teamPitchTypes.batting[1][0].fouls, 9)
+  assert.equal(store.teamPitchTypes.batting[1][0].fouls, 3)
+})
+
+test('an old dump line that names no scope loads as the regular season', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'fouls-old-'))
+  const { writeFileSync } = await import('node:fs')
+  writeFileSync(
+    join(dir, 'fouls.sql'),
+    'INSERT INTO foul_ingested_games (game_pk, date, season) VALUES (7, \'2026-09-01\', 2026);\n' +
+      'INSERT INTO foul_team_totals (team_id, season, games, fouls, two_strike_fouls) VALUES (1, 2026, 4, 40, 10);\n',
+  )
+  const db = await openDb(dir)
+  assert.equal(db.prepare('SELECT scope FROM foul_ingested_games').get().scope, 'R')
+  assert.equal(exportFouls(db, 2026).teams[1].fouls, 40)
+  assert.equal(exportFouls(db, 2026, 'P').gamesIngested, 0)
+})
+
+test('the scope of a postseason game is stored on its ledger row and its game totals', async () => {
+  const db = await emptyDb()
+  foldScoped(db, 2, '2026-10-05', 2026, 9, 'P')
+  assert.deepEqual(db.prepare('SELECT game_pk, scope FROM foul_ingested_games').all().map((r) => ({ ...r })), [
+    { game_pk: 2, scope: 'P' },
+  ])
+  assert.equal(db.prepare('SELECT scope FROM foul_game_totals WHERE game_pk = 2').get().scope, 'P')
+  assert.deepEqual(wipeTeamPitchTypes(db, 2026).map((g) => g.scope), ['P'], 'the rebuild hands back each game with its scope')
+})
+
+test('a gameType maps to a scope: the postseason rounds are P, everything else R', () => {
+  for (const t of ['F', 'D', 'L', 'W']) assert.equal(scopeOfGameType(t), 'P')
+  for (const t of ['R', 'S', undefined]) assert.equal(scopeOfGameType(t), 'R')
+})
+
+test('foulsInScope lifts the postseason to the top and keeps the season labels; R is the file untouched', () => {
+  const data = {
+    season: 2026,
+    asOf: 'x',
+    gamesIngested: 100,
+    batters: { 1: { fouls: 50 } },
+    post: { gamesIngested: 3, batters: { 1: { fouls: 4 } }, coverageSince: '2026-09-29' },
+  }
+  assert.equal(foulsInScope(data, 'R'), data)
+  const p = foulsInScope(data, 'P')
+  assert.equal(p.season, 2026)
+  assert.equal(p.gamesIngested, 3)
+  assert.equal(p.batters[1].fouls, 4)
+  assert.equal(p.post, undefined)
+  assert.equal(data.batters[1].fouls, 50, 'the file itself is not touched')
+})
+
+test('without a postseason, every scope is the regular season and the toggle stays hidden', () => {
+  const data = { season: 2026, gamesIngested: 100, batters: {} }
+  assert.equal(hasPostseason(data), false)
+  assert.equal(hasPostseason({ ...data, post: { gamesIngested: 0 } }), false)
+  assert.equal(foulsInScope(data, 'P'), data)
+  assert.equal(foulsInScope(null, 'P'), null)
+})
+
+// --- the postseason beside the regular season: review fixes (stack review) -----
+
+test('a postseason-only player still gets the card, with no regular line to draw', () => {
+  // FoulCard.jsx cannot be imported by the suite, so what it decides lives here.
+  // A reliever used only in October has a `post` line and no regular one: the card
+  // must show (the toggle is the way in) and must not hand a null line to its tiles.
+  const data = { pitchers: {}, post: { gamesIngested: 3, pitchers: { 7: { pitches: 30, fouls: 5, whiffs: 2, g: 2 } } } }
+  const v = foulCardView({ data, before: null, group: 'pitching', playerId: 7, vs: null, wantPost: false })
+  assert.equal(v.show, true)
+  assert.equal(v.hasPost, true)
+  assert.equal(v.line, null, 'the regular view has nothing to draw: the card prints an empty note, not tiles')
+  const post = foulCardView({ data, before: null, group: 'pitching', playerId: 7, vs: null, wantPost: true })
+  assert.equal(post.line.fouls, 5)
+})
+
+test('a player with no line in either scope gets no card', () => {
+  const data = { batters: {}, post: { gamesIngested: 3, batters: {} } }
+  assert.equal(foulCardView({ data, before: null, group: 'hitting', playerId: 1, vs: null, wantPost: true }).show, false)
+})
+
+test('the card reads the compare season in the same scope as the main one', () => {
+  const data = { batters: { 1: { fouls: 50, g: 100 } }, post: { gamesIngested: 3, batters: { 1: { fouls: 4, g: 3 } } } }
+  const before = { batters: { 1: { fouls: 60, g: 120 } } }
+  const reg = foulCardView({ data, before, group: 'hitting', playerId: 1, vs: 2025, wantPost: false })
+  assert.equal(reg.prev.fouls, 60)
+  const post = foulCardView({ data, before, group: 'hitting', playerId: 1, vs: 2025, wantPost: true })
+  assert.equal(post.line.fouls, 4)
+  assert.equal(post.prev, null, 'a season with no postseason has no October line to compare against')
+})
+
+test('compareFoulsInScope: a compare season with no postseason compares against nothing under Postseason', () => {
+  const old = { season: 2024, gamesIngested: 100, batters: { 1: { fouls: 60 } } }
+  assert.equal(compareFoulsInScope(old, 'P'), null, 'never its regular season under another name')
+  assert.equal(compareFoulsInScope(old, 'R'), old)
+  const withPost = { ...old, post: { gamesIngested: 2, batters: { 1: { fouls: 3 } } } }
+  assert.equal(compareFoulsInScope(withPost, 'P').batters[1].fouls, 3)
+  assert.equal(compareFoulsInScope(null, 'P'), null)
 })

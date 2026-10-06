@@ -222,6 +222,33 @@ don't run these by hand.
   twelve-pitch at-bat is a length — and `test/long-at-bats.test.js` asserts that
   of the committed file by vocabulary. `--rescan` re-ingests every game;
   `--season=2026` pins the year.
+- `gen-notable.mjs` → `public/data/notable/{nohitters,cycles,tripleplays}.json` — the
+  games behind the "Notable games" shelf (`.scratch/old-games`, D4; DRAFT ADR-0101). Every
+  row has a gamePk, the date, the game type, both clubs (id, the abbreviation and name of
+  THAT season, and the final score, D5) and the kind's own fields: a no-hitter names the side
+  that threw it and its pitchers in order, with `shortened` and `lost` when true (D8); a cycle
+  names the player and his side; a triple play names the fielding side. AL and NL games only
+  (D6), regular season and postseason (D13). **No reader and no page yet** (ADR-0076): the
+  reader comes with build prompt 2b. **The nightly run refreshes only the season in play**
+  (`lib/time/season-in-play.mjs`), about 70 calls. **The full history, 1901 to now, is a hand
+  run**: `node scripts/gen-notable.mjs --from=1901 --to=2025` (the space form,
+  `--from 1901 --to 2025`, works too). `--season=Y` runs one season, `--out=DIR` writes to DIR
+  for a measuring run. The spine is one schedule call per season (game types `R,F,D,L,W`,
+  linescore and team hydrated); a game counts only when `detailedState` is `Final` or
+  `Completed Early`, once for each gamePk, and only when both clubs were in the AL or NL.
+  No-hitters: a 0-hit side in that map, plus one fielded box score each for the pitchers.
+  Triple plays: each club's fielding game log, one call for the regular season and one for each
+  postseason type the club played (the log takes one `gameType` at a time). Cycles:
+  `sports/1/players`, then batched `people` hydrates of 100 with `gameType=[R,F,D,L,W]`.
+  Each run REPLACES every row of each season it swept, in all three files (a corrected
+  upstream row must not leave a ghost row), and writes after each season.
+  `scripts/notable-seed.json` holds the hand-seeded additions (D3: the 2023-08-18 triple play
+  that only the box score text holds); a seed row for a season a run did not sweep waits, and
+  a row whose gamePk is not a played AL or NL game of its season fails the run. **No
+  `generatedAt`:** each file's `coverage` block (seasons swept, the date the data runs through,
+  leagues, game types) is its own clock. The pure half is `scripts/lib/notable/`;
+  `test/notable.test.js` reads the committed files and fails on any key off the allowlist
+  (`ALLOWED_KEYS` in `lib/notable/merge.mjs`).
 - `gen-youngest-regulars.mjs` → `public/data/youngest-regulars/{11,12,13,14}.json` —
   how old each minor league's regulars were, for the same note one level down.
   Four small calls per level: one `/league` for the three leagues, one
@@ -318,19 +345,27 @@ don't run these by hand.
   `src/api/playbyplay.js` so live (`derive.js`) and precomputed tallies can't
   drift; two-strike detection carries the PRE-pitch count forward across
   non-PA plays (the `count`-is-post-pitch off-by-one). App reads it via
-  `src/api/fouls.js` (Foul Tracker page, player-page card).
+  `src/api/fouls.js` (Foul Tracker page, player-page card). The MLB postseason is
+  swept too, kept BESIDE the regular season by a `scope` key (`R`/`P`, ADR-0102): the
+  files gain a `post` key only once a postseason game is on file, and no reader sums it
+  in. Backfill old postseason games by hand with `--since=<first postseason date>`.
 - `gen-comeback-wins.mjs` → `public/data/comeback-wins.json` — per-team,
   per-season COMEBACK counts that form a RATE: for each Final game BOTH sides'
   minimum win prob is bucketed, so whichever side fell below 10/20/30% counts an
   ATTEMPT (`att10/att20/att30`) and, if it won, a comeback WIN (`sub10/sub20/
   sub30`) — the club's claw-back rate is `sub/att`, `sub <= att`, both pairs
   nested. SQLite-backed (`comeback-wins` group, ADR-0021) APPEND-ONLY incremental
-  sweep of newly-Final MLB regular-season games like `gen-umpire-accuracy.mjs`
+  sweep of newly-Final MLB games like `gen-umpire-accuracy.mjs`
   (`--days` trailing window / backfill); `comeback_ingested_games` is the
   idempotency guard. Both minimums come from the MLB-only `/winProbability`
   endpoint (home share directly; away = `100 − home max`). A schema change (the
-  `att*` columns) needs a one-time `--rebuild` (wipe both tables, re-sweep) since
-  old rows carry no attempts. App reads it via `src/api/comebackWins.js` (Team
+  `att*` columns) needed a one-time `--rebuild` (wipe both tables, re-sweep) since
+  old rows carried no attempts. The MLB postseason (`R,F,D,L,W`) sits BESIDE the
+  regular season (ADR-0094): `comeback_win_totals` has `scope` `'R'`/`'P'` in its
+  key (DEFAULT `'R'`, so no rebuild), the export keeps `byTeamId` as regular season
+  and adds `post.byTeamId`, and the league baseline stays regular season. Postseason
+  backfill: the nightly window is 3 days, so older October games need a hand run
+  with `--days=<n>` (2026: run on 2026-10-06 with `--days=14`, 17 games, 12 clubs). App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
 - `gen-abs-challenges.mjs` → `public/data/abs/{season}/abs-challenges.json`,
   **`abs/{season}/abs-exposure.json`** and
@@ -869,6 +904,10 @@ don't run these by hand.
   backfill 51 seconds instead of an hour. A decided game that yields no tracked
   contact is counted and reported at the end for that reason — a silent zero is
   how a 30x saving turns into an empty dataset nobody notices.
+  (4) **MLB also sweeps its postseason** (`R,F,D,L,W`; Triple-A stays `R`) into a
+  `post` map beside `bat` in each bucket, never blended (ADR-0103). Old
+  postseason games are outside the nightly window: backfill by hand with
+  `--since=<date> --sports=1`; the 2026 run covered 2026-09-28 to 2026-10-06.
   Two filters worth knowing: **decided games only, never today's**
   (`abstractGameState === 'Final'` AND an officialDate strictly before today),
   which is the card's whole spoiler footing; and `detailedState === 'Cancelled'`
@@ -880,7 +919,8 @@ don't run these by hand.
   HOME club's own park. Stateless: it reads the gate off the SCHEDULE
   endpoint's `hydrate=gameInfo` (the same feed `gen-gate.mjs` sweeps, and the
   same `toRow` reducer), so a whole season is about a dozen requests and it
-  rebuilds from scratch every night. It used to fetch one boxscore per game
+  rebuilds from scratch every night. A second sweep (gameType F,D,L,W) ships a
+  separate `postseason` block, never folded into the season row (#1439). It used to fetch one boxscore per game
   (~1,900 requests) behind a SQLite ingested-games table; that sweep, its two
   tables and its committed dump are gone, and the two sources were verified to
   agree club for club before it went. `--season=`/`--seasons=` for a past year.
@@ -931,7 +971,8 @@ don't run these by hand.
   policy for the same reason: a half-played bracket on a history page is a live
   result. `--from=`/`--to=`/`--floor=` for a shorter sweep. MLB only.
 - `gen-gate.mjs` → `public/data/gate.json` — per-club attendance AND game
-  DURATION, the two facts behind `/attendance` (The Gate) and `/pace-of-play`
+  DURATION (regular season; a separate `postseason` block carries the gate only,
+  because pace of play stays regular season on purpose, #1439), the two facts behind `/attendance` (The Gate) and `/pace-of-play`
   (The Clock). Deliberately NOT an extension of `gen-attendance.mjs`, which owns the
   Ballpark card's own much smaller file: both now read the SCHEDULE endpoint's
   `hydrate=gameInfo` (`{ attendance, firstPitch, gameDurationMinutes,

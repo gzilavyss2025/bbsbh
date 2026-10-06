@@ -137,10 +137,12 @@ function starterFor(feed, side, line) {
 // because of the game you are previewing says nothing about it, and the same
 // numbers are already on the lineup pages, the player page, and the back of
 // every baseball card. Blank for a hitter with no plate appearances yet.
-function battingFor(feed, side, personId) {
+// Wild Card, Division, League Championship, World Series. Structural, not a score.
+export const isPostseason = (feed) => ['F', 'D', 'L', 'W'].includes(feed?.gameData?.game?.type)
+
+function battingFor(feed, side, personId, regular) {
   const player = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${personId}`]
   const b = player?.seasonStats?.batting
-  if (!b || !b.avg || !b.atBats) return null
   // `seasonStats` is NOT a pre-game figure — the feed updates it during the
   // game, so on a played game it already counts tonight (src/api/boxscore.js
   // says so, and built `preGameAvg` to undo it for the scorebug). Tonight's own
@@ -153,21 +155,33 @@ function battingFor(feed, side, personId) {
   const today = player?.stats?.batting ?? {}
   const entering = (season, tonight) =>
     season == null ? null : Math.max(0, season - (tonight ?? 0))
-  return {
-    avg: b.avg ?? '',
-    obp: b.obp ?? '',
-    slg: b.slg ?? '',
-    ops: b.ops ?? '',
-    homeRuns: entering(b.homeRuns, today.homeRuns),
-    rbi: entering(b.rbi, today.rbi),
-    stolenBases: entering(b.stolenBases, today.stolenBases),
-  }
+  const fromFeed =
+    !b || !b.avg || !b.atBats
+      ? null
+      : {
+          avg: b.avg ?? '',
+          obp: b.obp ?? '',
+          slg: b.slg ?? '',
+          ops: b.ops ?? '',
+          homeRuns: entering(b.homeRuns, today.homeRuns),
+          rbi: entering(b.rbi, today.rbi),
+          stolenBases: entering(b.stolenBases, today.stolenBases),
+        }
+  // In a postseason game the feed's `seasonStats` is October only (#1509), so
+  // `fromFeed` is the October line and the season line comes from
+  // `fetchHitterEntryLines`, which ends the day before (ADR-0088). Until that
+  // lands, or where it fails, the season slot stays empty: a missing line is
+  // honest, a two-game October sample labelled season is not.
+  if (!isPostseason(feed)) return { batting: fromFeed, october: null }
+  const r = regular?.[personId]
+  const season = r && r.avg && r.atBats ? r : null
+  return { batting: season, october: fromFeed }
 }
 
 // A posted batting order, trimmed to what a poster row prints. Empty array
 // when the card hasn't posted — the painter draws the "posts close to first
 // pitch" notice instead of an empty grid, the same fallback TeamInfo uses.
-function lineupFor(feed, side) {
+function lineupFor(feed, side, regular) {
   return selectLineup(feed, side).map((p) => ({
     order: p.order,
     id: p.id,
@@ -178,7 +192,7 @@ function lineupFor(feed, side) {
     last: p.last || '',
     position: p.position || '',
     jersey: p.jersey || '',
-    batting: battingFor(feed, side, p.id),
+    ...battingFor(feed, side, p.id, regular),
   }))
 }
 
@@ -295,6 +309,8 @@ export function buildPreviewModel(feed, extras = {}) {
   const broadcast = extras.broadcast ?? ''
   const umpire = extras.umpire ?? null
   const callouts = extras.callouts ?? null
+  // Regular-season entering lines by person id (api/player/hitterEntryLines.js).
+  const hitterLines = extras.hitterLines ?? null
   // "ALDS \u00b7 Game 3" for a postseason game (hooks/postseason/useGameRound.js), '' for any
   // other. A round name and a game number are pregame facts; a series record is a
   // result and must never be passed in (ADR-0087). The poster is a public image.
@@ -335,7 +351,7 @@ export function buildPreviewModel(feed, extras = {}) {
       away: starterFor(feed, 'away', starterLines.away),
       home: starterFor(feed, 'home', starterLines.home),
     },
-    lineups: { away: lineupFor(feed, 'away'), home: lineupFor(feed, 'home') },
+    lineups: { away: lineupFor(feed, 'away', hitterLines), home: lineupFor(feed, 'home', hitterLines) },
     crew: officials,
     plate: plateFor(officials, umpire),
     recordRows: RECORD_ROWS,

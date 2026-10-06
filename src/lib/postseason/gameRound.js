@@ -33,3 +33,20 @@ export function roundLine(name, seriesGameNumber) {
   if (!name) return ''
   return seriesGameNumber ? `${name} \u00b7 Game ${seriesGameNumber}` : name
 }
+
+// The same line from a SCHEDULE row hydrated with `team` (the link-preview card reads
+// that row, not the live feed). `gameType`, the home club's league and
+// `seriesGameNumber` are all pregame facts; the row's series record is never read.
+// '' for any game that is not a postseason game.
+export function scheduleRoundLine(game) {
+  const name = feedRoundName({
+    gameData: { game: { type: game?.gameType }, teams: { home: { league: game?.teams?.home?.team?.league } } },
+  })
+  return roundLine(name, game?.seriesGameNumber)
+}
+
+// The tab title: "CWS @ CLE · ALDS · Game 3 · Box score". The round sits after the
+// matchup so a tab strip still reads the clubs first. No round, no change.
+export function titleWithRound(matchup, section, round) {
+  return [matchup, round, section].filter(Boolean).join(' \u00b7 ')
+}

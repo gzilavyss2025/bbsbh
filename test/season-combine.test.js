@@ -117,6 +117,18 @@ test('fouls shard: one man, both groups, the shape batterFoulLine reads', () => 
   assert.deepEqual(out.pitchers, {})
 })
 
+test('fouls shard: the postseason is combined beside the regular season, never summed into it', () => {
+  const shards = [
+    { batters: { 7: batter({ g: 2, fouls: 3 }) }, pitchers: {}, post: { batters: { 7: batter({ g: 1, fouls: 5 }) }, pitchers: {} } },
+    { batters: { 7: batter({ g: 1, fouls: 4 }) }, pitchers: {}, post: { batters: { 7: batter({ g: 2, fouls: 6 }) }, pitchers: {} } },
+  ]
+  const out = combineFoulShards(shards, 7)
+  assert.equal(out.batters['7'].fouls, 7)
+  assert.equal(out.post.batters['7'].fouls, 11)
+  assert.equal(out.post.batters['7'].g, 3)
+  assert.equal(combineFoulShards([{ batters: { 7: batter({}) }, pitchers: {} }], 7).post, undefined)
+})
+
 test('arsenal: pitches add, velocity is pitch-weighted, max is the max', () => {
   const s2026 = {
     name: 'Arm',

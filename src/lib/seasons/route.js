@@ -35,12 +35,30 @@ function seasonSegment(base, { seasonYear, vs } = {}) {
   const compare = seasonYear !== 'all' && vs != null && vs !== seasonYear ? vs : null
   return { path, vs: compare }
 }
+// The player Analytics tab's pitch scope (#1503): `?scope=post|all`. Regular is
+// the bare address, so it is never written and a value we do not know is dropped.
+const PITCH_SCOPES = new Set(['post', 'all'])
+export const pitchScopeOf = (v) => (PITCH_SCOPES.has(v) ? v : null)
+
+// The scope the COMPARE season's Pitches card loads under: the one the main card
+// landed on, so the two never differ. On the current season the control has
+// already collapsed a man with no October pitches to Regular (`shelfScope`). On a
+// picked past season the shelf serves Regular when that season has no postseason,
+// whatever was saved, so follow what it served; null while it is still loading.
+export function vsPitchScope({ picked, shelfScope, shelfLoading = false, shelfServed }) {
+  if (picked == null) return shelfScope
+  if (shelfLoading) return null
+  return shelfServed ?? 'reg'
+}
+
 // `query` is a query the address already carries ('?d=…&s=…', a player
 // page's cutoff hints); `vs` joins it.
 export function seasonPath(base, season, query = '') {
   const { path, vs } = seasonSegment(base, season)
   const q = new URLSearchParams(query.replace(/^\?/, ''))
   if (vs != null) q.set('vs', String(vs))
+  const scope = pitchScopeOf(season?.scope)
+  if (scope) q.set('scope', scope)
   const qs = q.toString()
   return `${path}${qs ? `?${qs}` : ''}`
 }
@@ -67,6 +85,13 @@ export function parseSeasonRoute(parts, q, { asOf, sportId, idFromSlug }) {
   if ((parts.length === 2 || parts.length === 3) && head === 'umpire')
     return { name: 'umpire', id: idFromSlug(second), ...seasonParams(third, q) }
   if ((parts.length === 3 || parts.length === 4) && head === 'player' && third === 'analytics')
-    return { name: 'player-analytics', id: idFromSlug(second), asOf, sportId, ...seasonParams(fourth, q) }
+    return {
+      name: 'player-analytics',
+      id: idFromSlug(second),
+      asOf,
+      sportId,
+      ...(pitchScopeOf(q.get('scope')) && { scope: pitchScopeOf(q.get('scope')) }),
+      ...seasonParams(fourth, q),
+    }
   return null
 }

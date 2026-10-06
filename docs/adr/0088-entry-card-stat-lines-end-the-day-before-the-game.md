@@ -59,3 +59,18 @@ watched.
 - `test/pitcher-card-data.test.js` pins the URL, the combined split, the
   doubleheader rule and the postseason game types, on responses captured from
   statsapi on 2026-10-01.
+
+## Addendum (2026-10-06, #1509): hitters on the preview poster
+
+The poster's hitter line read the boxscore's `seasonStats`. In a postseason game
+that record holds the postseason only: Chase DeLauter, ALDS Gm 2 (gamePk 849834),
+read 2 G / 8 AB / .250. His regular season is 133 G / 495 AB / .287
+(`stats=season&gameType=R`). So the poster printed an October sample as a season line.
+
+In a postseason game the poster now reads the regular-season line from one
+`byDateRange` request for the whole lineup, ending the day before
+(`src/api/player/hitterEntryLines.js`). The October line, from `seasonStats` minus
+tonight, rides the model as `october`. Until the request lands the season slot is
+empty. The callouts (`gen-callouts.mjs`) count October games too: the owner chose
+that, so the nightly game logs and club schedule ask `gameType=R,F,D,L,W`, still cut
+at the day before the slate (see `docs/callouts.md`).

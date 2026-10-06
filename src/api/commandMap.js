@@ -17,6 +17,7 @@
 import { shardKey100 } from '../lib/shardKey.js'
 import { seasonFolderOf, staticJsonBy } from './staticJson.js'
 import { GRID, inHeart, inZone } from '../lib/zone/zoneGeometry.js'
+import { combineCommandEntries } from '../lib/seasons/combine.js'
 
 export const fetchCommandShard = staticJsonBy((key) => `/data/pitch-command/${key}.json`, {
   fallback: null,
@@ -26,12 +27,19 @@ export const fetchCommandShard = staticJsonBy((key) => `/data/pitch-command/${ke
 // is a year, or nothing for the season pitch-command/seasons.json names. One
 // season only: 'all' resolves to null, because no surface draws a combined
 // grid yet (#1202 does not list one).
-export async function fetchCommandFor(personId, { seasonYear } = {}) {
+//
+// `scope` is 'reg' (the default, `pit` alone, as before), 'post' (the `post`
+// bucket beside it, ADR-0094) or 'all' (the two added cell by cell, never one
+// laid over the other).
+export async function fetchCommandFor(personId, { seasonYear, scope = 'reg' } = {}) {
   if (personId == null || seasonYear === 'all') return null
   const season = await seasonFolderOf('pitch-command', seasonYear)
   if (season == null) return null
   const shard = await fetchCommandShard(`${season}/${shardKey100(personId)}`)
-  return shard?.pit?.[String(personId)] ?? null
+  const id = String(personId)
+  if (scope === 'post') return shard?.post?.[id] ?? null
+  if (scope === 'all') return combineCommandEntries([shard?.pit?.[id] ?? null, shard?.post?.[id] ?? null])
+  return shard?.pit?.[id] ?? null
 }
 
 // Below this many pitches a split says more about the sample than the pitcher,

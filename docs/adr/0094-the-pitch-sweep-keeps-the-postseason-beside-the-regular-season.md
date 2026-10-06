@@ -58,3 +58,12 @@ Three things must not change:
   `scope` column.
 - Older postseason games are outside the 3-day nightly window. Backfill them
   by hand with `--since=<date> --sports=1`.
+
+## Addendum (2026-10-06, #1503): the player page reads `post`
+
+The player Analytics tab's Pitches and Command cards take a Regular, Postseason
+or All scope (`?scope=post|all`, absent is Regular; also `localStorage`, never My
+Tally). Regular still reads `pit` only and is unchanged. Postseason reads `post`.
+All adds the two buckets (`arsenalScoped`, `combineCommandEntries`), never one
+over the other. A pitcher with no postseason pitches gets no control. "Pitches
+like" and the `all/` pools stay regular season (point 4).

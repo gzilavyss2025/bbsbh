@@ -315,6 +315,9 @@
 /* The row that stands for everybody between the two ends. It is a COUNT, not
    an ellipsis: the middle of this board is the part that says nothing, and
    saying how many are in it is more honest than three dots. */
+.rpt__between {
+  --table-pin: var(--paper-2); /* the pinned cell paints from this, not its own background */
+}
 .rpt__between th,
 .rpt__between td {
   font-family: var(--font-body);

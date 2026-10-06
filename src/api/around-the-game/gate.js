@@ -56,6 +56,15 @@ export function latestSeason(data) {
   return seasons.length ? Math.max(...seasons) : null
 }
 
+// A season's postseason gate block, or null. Separate from the season figures
+// on purpose (never mixed into a rank, average or league line), and gate only:
+// pace of play stays regular season (see gen-gate.mjs, #1439). Shape:
+// { games, through, league: { attGames, attAvg, attMedian, attTotal },
+//   clubs: { [teamId]: { venue, gate } } }.
+export function postseasonGate(data, season) {
+  return data?.seasons?.[season]?.postseason ?? null
+}
+
 // Rank a list of already-shaped rows on one numeric field, best first (or
 // last, for a field whose good end is low). Ties SHARE the best rank, the same
 // convention attendance.js and comebackWins.js already use, and a row with no

@@ -16,6 +16,8 @@ import { LinkScope } from '../lib/nav.jsx'
 import { useRouteLink } from '../lib/nav.js'
 import { humanDateWithYear } from '../lib/dates.js'
 import { ordinal } from '../lib/format.js'
+import { useGameRound } from '../hooks/postseason/useGameRound.js'
+import { titleWithRound } from '../lib/postseason/gameRound.js'
 import { seriesMarkForFeed } from '../lib/postseason/seriesMarks.js'
 import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
 import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
@@ -118,7 +120,8 @@ export function GameView({ game, section, onSection }) {
   // anyway. `feed` has to be here first, which is why this sits below the fetch
   // rather than beside `sectionToStep`.
   const step = addressedStep === 7 && feed && !filmCanExist(feed) ? 0 : addressedStep
-  useDocumentTitle(gameTitle(game, step, inning, half))
+  const round = useGameRound(feed)
+  useDocumentTitle(gameTitle(game, step, inning, half, round))
 
   // Screen Wake Lock — keeps the phone's display on during a live game so it
   // stays readable propped up next to a scorebook (see useWakeLock). Opt-in
@@ -511,6 +514,7 @@ export function GameView({ game, section, onSection }) {
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
+          round={round}
         />
         </Suspense>
       )}
@@ -636,18 +640,20 @@ function GameStatusBanner({ status }) {
 // Spoiler-safe tab title: team abbreviations plus a structural section label
 // (lineup side, half-inning, box score) — the same information the URL's
 // `section` already exposes, never anything score-revealing.
-function gameTitle(game, step, inning, half) {
+function gameTitle(game, step, inning, half, round = '') {
   const away = game.away.abbreviation || game.away.teamName || 'Away'
   const home = game.home.abbreviation || game.home.teamName || 'Home'
   const matchup = `${away} @ ${home}`
-  if (step === 0) return `${matchup} · ${away} Lineup`
-  if (step === 1) return `${matchup} · ${home} Lineup`
-  if (step === 3) return `${matchup} · Box score`
-  if (step === 4) return `${matchup} · Preview card`
-  if (step === 5) return `${matchup} · Print sheet`
-  if (step === 6) return `${matchup} · Scorecard`
-  if (step === 7) return `${matchup} · Express Lane`
-  return `${matchup} · ${half === 'bottom' ? 'Bot' : 'Top'} ${ordinal(inning)}`
+  const section =
+    step === 0 ? `${away} Lineup`
+    : step === 1 ? `${home} Lineup`
+    : step === 3 ? 'Box score'
+    : step === 4 ? 'Preview card'
+    : step === 5 ? 'Print sheet'
+    : step === 6 ? 'Scorecard'
+    : step === 7 ? 'Express Lane'
+    : `${half === 'bottom' ? 'Bot' : 'Top'} ${ordinal(inning)}`
+  return titleWithRound(matchup, section, round)
 }
 
 // The mark inside the masthead tile, sized so the EDGE_BLEED overscale

@@ -108,11 +108,22 @@ export function combineFoulPitcher(slices) {
 export function combineFoulShards(shards, personId) {
   const id = String(personId)
   const pick = (group) => (shards ?? []).map((s) => s?.[group]?.[id] ?? null)
-  const batter = combineFoulBatter(pick('batters'))
-  const pitcher = combineFoulPitcher(pick('pitchers'))
+  const one = (rows, combine) => {
+    const row = combine(rows)
+    return row ? { [id]: row } : {}
+  }
+  // The postseason rides beside, never summed in (ADR-0102, ADR-0103): a `post` shard
+  // slice per season, combined on its own, and kept only when he has a line.
+  const postOf = (group) => (shards ?? []).map((s) => s?.post?.[group]?.[id] ?? null)
+  const post = {
+    batters: one(postOf('batters'), combineFoulBatter),
+    pitchers: one(postOf('pitchers'), combineFoulPitcher),
+  }
+  const hasPost = Object.keys(post.batters).length + Object.keys(post.pitchers).length > 0
   return {
-    batters: batter ? { [id]: batter } : {},
-    pitchers: pitcher ? { [id]: pitcher } : {},
+    batters: one(pick('batters'), combineFoulBatter),
+    pitchers: one(pick('pitchers'), combineFoulPitcher),
+    ...(hasPost ? { post } : {}),
   }
 }
 
@@ -196,6 +207,37 @@ export function combineArsenalEntries(slices) {
     throws: last.throws,
     mlb: combineLevel(rows.map((r) => r.mlb)),
     aaa: combineLevel(rows.map((r) => r.aaa)),
+  }
+}
+
+// --- pitch command (src/api/commandMap.js) ----------------------------------
+// `{ throws, mlb: { code: { stand: { field: [25 counts] } } }, aaa: … }`. Every
+// field is a 25-cell count grid, so two entries (two seasons, or a regular
+// season and a postseason, ADR-0094) add cell by cell. A field one part lacks
+// adds zeros: the file leaves a field out when it is all zero.
+function combineCommandLevel(levels) {
+  const out = {}
+  for (const level of levels) {
+    for (const [code, byStand] of Object.entries(level ?? {})) {
+      out[code] ??= {}
+      for (const [stand, fields] of Object.entries(byStand)) {
+        out[code][stand] ??= {}
+        for (const [field, cells] of Object.entries(fields)) {
+          out[code][stand][field] = addCounts([out[code][stand][field], cells])
+        }
+      }
+    }
+  }
+  return out
+}
+
+export function combineCommandEntries(slices) {
+  const rows = present(slices)
+  if (!rows.length) return null
+  return {
+    throws: latest(rows).throws,
+    mlb: combineCommandLevel(rows.map((r) => r.mlb)),
+    aaa: combineCommandLevel(rows.map((r) => r.aaa)),
   }
 }
 

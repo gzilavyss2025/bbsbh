@@ -49,6 +49,11 @@
 // counts toward games/total/average and toward NO sellout — it has no
 // denominator to be measured against.
 //
+// THE POSTSEASON IS A SEPARATE BLOCK. The main sweep is gameType=R, and its
+// figures (and every rank built on them) stay regular season. A second sweep
+// (gameType F,D,L,W) ships under `postseason.byTeamId`, same row shape, never
+// folded into the season row. #1439.
+//
 // Run by hand:
 //   node scripts/gen-attendance.mjs                 # this season
 //   node scripts/gen-attendance.mjs --season=2025   # a past season
@@ -73,6 +78,9 @@ export const SELLOUT_FILL = 0.95
 // twelve month-windows cover any season with room to spare. Same sweep shape
 // as gen-gate.mjs; requesting a month with no games back is free.
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1)
+
+// Wild Card, Division, League Championship, World Series (no All-Star Game).
+const POSTSEASON_TYPES = 'F,D,L,W'
 
 const pad = (n) => String(n).padStart(2, '0')
 const lastDayOf = (season, month) => new Date(Date.UTC(season, month, 0)).getUTCDate()
@@ -147,13 +155,13 @@ export function byTeamId(rows) {
 
 // ---- the sweep ----
 
-async function fetchSeason(season) {
+async function fetchSeason(season, gameType = 'R') {
   const rows = []
   for (const month of MONTHS) {
     const startDate = `${season}-${pad(month)}-01`
     const endDate = `${season}-${pad(month)}-${pad(lastDayOf(season, month))}`
     const schedule = await getJson(
-      `/api/v1/schedule?sportId=1&gameType=R&startDate=${startDate}&endDate=${endDate}` +
+      `/api/v1/schedule?sportId=1&gameType=${gameType}&startDate=${startDate}&endDate=${endDate}` +
         `&hydrate=gameInfo,venue`,
     )
     let kept = 0
@@ -189,6 +197,11 @@ async function main() {
     file.seasons[season] = { byTeamId: byTeamId(rows) }
     games += rows.length
     console.log(`  ${rows.length} home dates folded in`)
+    const postRows = await fetchSeason(season, POSTSEASON_TYPES)
+    if (postRows.length) {
+      file.seasons[season].postseason = { byTeamId: byTeamId(postRows) }
+      console.log(`  postseason: ${postRows.length} home dates`)
+    }
   }
   await writeJsonAtomic(out, file)
   console.log(`wrote ${out} — ${games} games`)

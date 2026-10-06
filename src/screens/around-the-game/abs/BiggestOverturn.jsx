@@ -15,7 +15,7 @@ import { inches, num2 } from './format.js'
 // run figure is expectancy MOVED by one pitch, not runs that scored, so the
 // game's result cannot be read back out of it.
 
-export function BiggestOverturn({ summary, clubs }) {
+export function BiggestOverturn({ summary, clubs, seasonYear }) {
   const big = summary?.biggest ?? null
   if (!big) return null
 
@@ -52,7 +52,7 @@ export function BiggestOverturn({ summary, clubs }) {
         </PlayerLink>
         , {ROLE_IN_PROSE[big.role] ?? 'the club'}, asked for the review, and{' '}
         {big.umpireId ? (
-          <UmpireLink id={big.umpireId} name={big.umpireName}>
+          <UmpireLink id={big.umpireId} name={big.umpireName} seasonYear={seasonYear}>
             {big.umpireName}
           </UmpireLink>
         ) : (

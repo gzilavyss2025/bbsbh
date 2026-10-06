@@ -380,7 +380,11 @@ for each generator; the reader modules:
   `personId % 100` (`shardKey100`) — for the player page's one-man card, which
   used to pull 805 KB to draw four tiles and now reads ~2 KB
   (`fetchFoulsFor`). Completed-game aggregates → spoiler-free, no SealBox
-  (same footing as WAR); MLB only. Feeds the Foul Tracker page (`/fouls`,
+  (same footing as WAR); MLB only. A `post` key beside the regular season holds the
+  postseason, same shape (ADR-0102); `foulsInScope`/`hasPostseason` pick one for the
+  page's Regular season / Postseason toggle. `compareFoulsInScope` reads the compare
+  season in the same scope and gives `null` for a season with no postseason, never its
+  regular season; `foulCardView` is the pure half of `FoulCard`. Feeds the Foul Tracker page (`/fouls`,
   `FoulTrackerPage.jsx`) and the player page's `FoulCard` (current-day only —
   the precompute can't be cut to a spoiler `asOf`, so the card hides under
   one, same rule as the Milestone Watch projection). `FOUL_PRIORS` carries the
@@ -465,7 +469,11 @@ for each generator; the reader modules:
   its own — decided by a MAJORITY of the sample rather than unanimity, since one
   turned-around at-bat should not withhold the other 239. The stored
   `pitcherId` is read by nothing today; it rides so a pitcher-side spray card
-  can share these shards instead of sweeping the season twice. Surface: the
+  can share these shards instead of sweeping the season twice.
+  **The postseason is a `post` map beside `bat`** (ADR-0103): same entry shape,
+  MLB only, never blended. `sprayView` returns the regular card and adds
+  `scoped.P` and `scoped.A` (Postseason, All) only for a batter with an October
+  ball; the card floor is decided on `bat`. Surface: the
   player page's Analytics shelf, via `SprayMapSection.jsx` →
   `charts/SprayMap.jsx`. Out of the PWA precache by the inverted
   `globPatterns` default, with a `NetworkFirst` runtime rule in
@@ -561,7 +569,10 @@ for each generator; the reader modules:
   baseline `leagueRate` (`Σsub/Σatt`) and a count-based `rank`/`of`/`tied` (raw
   win count, sample-size-proof — a rate rank would let a 1-of-1 club top it).
   `comebackWinsFor` selects one raw row; `leagueComebackWinsFor` is the legacy
-  `{ teamId, stat }` count shape (still exported for reuse). Spoiler-free (a
+  `{ teamId, stat }` count shape (still exported for reuse). The postseason is a
+  separate `seasons[y].post.byTeamId`; `comebackPostFor` reads it as raw `wins`/`att`
+  counts (no rate, no baseline) and `comebackRatesFor` returns it as `post` (null
+  for a club that missed October); the card shows it under the rails. Spoiler-free (a
   Final-games aggregate, same footing as WAR) — no `SealBox`; the card renders
   only when the club has at least one comeback win.
 - `attendance.js` — the Ballpark card's attendance stats, from
@@ -580,7 +591,9 @@ for each generator; the reader modules:
   it ships the threshold it counted at, which the reader passes through as
   `selloutPct`. `attendanceFor` selects the raw row. MLB only — the generator
   is. Spoiler-free (a Final-games aggregate, same footing as WAR) — no
-  `SealBox`; the Facts rows render only when the club has one.
+  `SealBox`; the Facts rows render only when the club has one. A separate
+  `seasons[y].postseason.byTeamId` block (gameType F,D,L,W, same row shape) is
+  read by `postseasonAttendanceFor`; it never feeds the season row or a rank (#1439).
 - `around-the-game/gate.js` — the reader behind BOTH broadcast report boards that
   `gen-gate.mjs` feeds: `/attendance` (The Gate) and `/pace-of-play` (The Clock).
   The file holds each club's own totals and nothing about the other 29;
@@ -590,7 +603,10 @@ for each generator; the reader modules:
   headline column, because a raw average mostly measures how many seats a club
   built. A park not in that table yields a null fill and still ranks on every
   other column. Fill rates over 100% are printed as they are: capacity is a
-  listed figure, not a turnstile cap. `paceBoard(data, season, sortBy)` is the
+  listed figure, not a turnstile cap. `postseasonGate(data, season)` returns the
+  separate `postseason` block (gate only, home club; never mixed into the
+  season figures); pace of play stays regular season on purpose (#1439).
+  `paceBoard(data, season, sortBy)` is the
   same shape over game length, plus the three-hour/three-and-a-half-hour
   counts and the delay totals. `asClock` renders minutes the way baseball says
   them. Spoiler-free — a crowd count and a clock reading carry no result.

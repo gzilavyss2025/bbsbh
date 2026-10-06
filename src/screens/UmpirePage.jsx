@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { loadUmpire } from '../api/umpires.js'
+import { PostseasonPlateLine } from '../components/umpire/PostseasonPlateLine.jsx'
 import { UmpireTendencies } from '../components/umpire/UmpireTendencies.jsx'
 import { gamePath, umpirePath } from '../lib/route.js'
 import { ALL_MLB_TEAM_IDS, teamClubName } from '../lib/teams.js'
@@ -176,6 +177,7 @@ export function UmpirePage({ id, seasonYear, vs }) {
       )}
       {view.vs != null && <UmpireSeasonCompare now={data} then={then} year={year} vsYear={view.vs} />}
 
+      <PostseasonPlateLine post={data.accuracyPost?.season} />
       <div className="umpage__toprow">
         <div className="umpage__tendcol">
           <UmpireTendencies umpire={data} label={seasonRangeLabel(data.accuracySeasons)} />

@@ -11,6 +11,10 @@
 // Team Page's "Comeback wins" card (team rate vs. MLB average), shown when the
 // team has at least one comeback win.
 //
+// The postseason sits BESIDE the regular season (ADR-0094), under
+// `seasons[y].post.byTeamId`, same row shape. It never enters the rates, the rank
+// or the league baseline above, which stay regular season.
+//
 // Spoiler-free: a season aggregate over FINAL games carries no live-game score
 // (same footing as WAR / team-score aggregates), so no SealBox — only the live
 // per-play win prob in the innings view is sealed. Degrades to null with no file.
@@ -97,5 +101,22 @@ export function comebackRatesFor(data, teamId, season) {
       tied,
     }
   })
-  return { wins: mine.wins ?? 0, thresholds }
+  return { wins: mine.wins ?? 0, thresholds, post: comebackPostFor(data, teamId, season) }
+}
+
+// One club's postseason figures: per threshold the wins and attempts, as raw
+// counts ("N of M attempts"), never a rate against a regular-season baseline.
+// Null when the club has no postseason row (it did not play in October).
+export function comebackPostFor(data, teamId, season) {
+  const row = data?.seasons?.[season]?.post?.byTeamId?.[teamId]
+  if (!row) return null
+  return {
+    wins: row.wins ?? 0,
+    thresholds: THRESHOLDS.map(({ key, attKey, pct }) => ({
+      key,
+      pct,
+      wins: row[key] ?? 0,
+      att: row[attKey] ?? 0,
+    })),
+  }
 }

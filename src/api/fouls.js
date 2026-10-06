@@ -54,6 +54,39 @@ export async function fetchFoulsFor(personId, { seasonYear } = {}) {
 // reference the same minimums the ranking uses. Batters qualify on games
 // played, pitchers on total pitches thrown — a one-appearance cameo shouldn't
 // top a rate board (same idea as the live leader boards' playing-time floor).
+// The postseason beside the regular season (ADR-0102): a season file carries
+// `post`, the same shape again, once a postseason game is on file. This is the
+// page's data for one scope — 'R' is the file as it is, 'P' lifts `post` to the
+// top and keeps the season labels. Without a `post`, every scope is the regular
+// season (callers show the toggle only when `hasPostseason`).
+export const hasPostseason = (data) => !!data?.post?.gamesIngested
+export function foulsInScope(data, scope) {
+  if (scope !== 'P' || !hasPostseason(data)) return data
+  const { post, ...rest } = data
+  return { ...rest, ...post }
+}
+// The compare season in the SAME scope as the page. A season with no postseason
+// has no October figures, so under Postseason it compares against nothing, never
+// against its regular season under another label.
+export function compareFoulsInScope(data, scope) {
+  if (scope === 'P' && !hasPostseason(data)) return null
+  return foulsInScope(data, scope)
+}
+
+// What the foul card draws for one player: his line in the picked scope, the
+// compare season's line in that same scope, and whether the toggle shows. Pure
+// because FoulCard.jsx cannot be imported by the suite. `line` is null when he has
+// no line in the scope on screen (a man used only in October, on Regular): the
+// card still shows, since the toggle is the way in, and prints an empty note.
+export function foulCardView({ data, before, group, playerId, vs = null, wantPost = false }) {
+  const lineIn = (d) => (!d ? null : group === 'pitching' ? pitcherFoulLine(d, playerId) : batterFoulLine(d, playerId))
+  const hasPost = !!(lineIn(data?.post) || lineIn(before?.post))
+  const post = wantPost && hasPost
+  const line = lineIn(post ? data?.post : data)
+  const prev = vs == null ? null : lineIn(post ? before?.post : before)
+  return { hasPost, post, line, prev, show: !!(line || prev || hasPost) }
+}
+
 export const MIN_BATTER_GAMES = 20
 export const MIN_PITCHER_PITCHES = 200
 

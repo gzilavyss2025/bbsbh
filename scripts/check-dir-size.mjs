@@ -806,7 +806,7 @@ const BUDGETS = {
   // generator runs on import; its pure half went to scripts/lib/pitch/xwoba.mjs.
   // +1 for gen-league-averages.mjs, the hand-run league AVG/ERA table. Flat like
   // every gen-*.mjs; its pure half went to scripts/lib/stats/league-averages.mjs.
-  scripts: 123, // +1 gen-bio-history.mjs (ADR-0100; two datasets, one hand-run script, its pure half in scripts/lib/open-data/). +1 gen-family-ties.mjs (ADR-0100); its pure half is in scripts/lib/open-data/. +1 gen-franchise-history.mjs, a hand-run generator +1 gen-team-seasons.mjs (ADR-0100), a hand-run generator; its pure half is in scripts/lib/open-data/.
+  scripts: 124, // +1 gen-bio-history.mjs (ADR-0100; two datasets, one hand-run script, its pure half in scripts/lib/open-data/). +1 gen-family-ties.mjs (ADR-0100); its pure half is in scripts/lib/open-data/. +1 gen-franchise-history.mjs, a hand-run generator +1 gen-team-seasons.mjs (ADR-0100), a hand-run generator; its pure half is in scripts/lib/open-data/. +1 gen-notable.mjs (D4), a nightly generator, flat like every gen-*.mjs; its pure half is in scripts/lib/notable/.
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

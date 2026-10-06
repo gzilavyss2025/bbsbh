@@ -321,8 +321,13 @@
    instead of leaving a full-strength logo beside faded numbers. It stays well
    clear of unreadable: the row is still the page's ordinary body ink at 62%,
    and the `e` chip on it does not fade, since that chip is the reason the row
-   is dimmed at all. */
-.clubtable tr.is-eliminated td {
+   is dimmed at all.
+
+   The club cell is pinned when the board scrolls sideways, so its GROUND stays
+   opaque and only what it holds fades: fading the cell itself let the numbers
+   scrolling underneath show through it. */
+.clubtable tr.is-eliminated td:not(.team),
+.clubtable tr.is-eliminated td.team > * {
   opacity: 0.62;
 }
 .clubtable tr.is-eliminated .clinchmark {

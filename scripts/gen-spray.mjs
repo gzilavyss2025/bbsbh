@@ -41,6 +41,16 @@
 // double-counts. The ledger is scripts/data/spray-ingested.json, beside the SQL
 // dumps and owned by this script alone.
 //
+// THE POSTSEASON RIDES BESIDE THE REGULAR SEASON, NEVER BLENDED. MLB's sweep asks
+// for `R,F,D,L,W`; a postseason game folds into a second map, `post`, which sits
+// beside `bat` in the same bucket and has the same entry shape. A reader that
+// knows only `bat` never sees it, so every regular-season chart is byte-for-byte
+// what it was (ADR-0094 did the same for the pitch stores). A bucket with no
+// postseason batter carries no `post` key at all. The ledger already keys on the
+// gamePk, which is unique across game types, so a postseason game is swept once.
+// Old postseason games are outside the nightly window: backfill by hand with
+// `--since=<date> --sports=1`.
+//
 // ONE FOLDER PER SEASON (ADR-0086). A run folds games into its own season's
 // folder and nothing else, and `spray/seasons.json` names the season the card
 // serves: the latest one with data. The run's season is the year of the
@@ -56,6 +66,7 @@
 //   node scripts/gen-spray.mjs --days=7
 //   node scripts/gen-spray.mjs --since=2026-03-20 [--until=2026-08-22]
 //   node scripts/gen-spray.mjs --since=2026-03-20 --sports=11   # backfill AAA alone
+//   node scripts/gen-spray.mjs --since=2026-09-29 --sports=1    # backfill the postseason
 //   node scripts/gen-spray.mjs --season=2026 --since=2026-09-20  # name the season
 // The --since form is the one-time / full-season backfill; nightly runs use the
 // default trailing window.
@@ -68,6 +79,7 @@ import { shardKey100 } from '../src/lib/shardKey.js'
 import { round1 } from '../src/lib/math/number.js'
 import { HARD_HIT_MPH } from '../src/lib/ballpark/hitProjection.js'
 import { parseArgs, dateRange, isoDay } from './lib/args.mjs'
+import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const storeDir = join(here, '..', 'public', 'data', 'spray')
@@ -79,11 +91,13 @@ const CHECKPOINT_EVERY = 400
 const CONCURRENCY = 8
 
 // The levels swept, most-senior first — see the header for why AAA rides along
-// and AA/below don't.
+// and AA/below don't. MLB also reads its postseason (see the header); Triple-A's
+// postseason game types are unverified, so it asks for `R` alone (ADR-0094).
 const ALL_LEVELS = [
-  { sportId: 1, level: 'mlb' },
-  { sportId: 11, level: 'aaa' },
+  { sportId: 1, level: 'mlb', gameTypes: `R,${POSTSEASON_GAME_TYPES}` },
+  { sportId: 11, level: 'aaa', gameTypes: 'R' },
 ]
+const isPostseason = (gameType) => POSTSEASON_GAME_TYPES.split(',').includes(gameType)
 
 // A whole feed/live body is ~800 KB and this sweep reads eleven paths out of
 // it. `fields` is a flat allowlist of KEY NAMES (not paths), so it drags a few
@@ -243,19 +257,22 @@ export function foldGame(store, agg, date) {
 
 // --- store IO ----------------------------------------------------------------
 
-// Every committed bucket of ONE season, merged back into one map. Other
-// seasons' folders are never read or written here.
+// Every committed bucket of ONE season, merged back into two maps: `bat` (the
+// regular season) and `post` (the postseason). Other seasons' folders are never
+// read or written here.
 async function readStore(season) {
   const dir = seasonDir(season)
   const files = (await readdir(dir).catch(() => [])).filter((f) => /^\d\d\.json$/.test(f))
-  const store = {}
+  const store = { bat: {}, post: {} }
   let carried = 0
   for (const f of files) {
     const shard = await readJsonOr(join(dir, f), null)
     if (!shard || shard.season !== season) continue
-    for (const [id, entry] of Object.entries(shard.bat ?? {})) {
-      store[id] = entry
-      carried++
+    for (const part of ['bat', 'post']) {
+      for (const [id, entry] of Object.entries(shard[part] ?? {})) {
+        store[part][id] = entry
+        if (part === 'bat') carried++
+      }
     }
   }
   return { store, carried }
@@ -267,11 +284,15 @@ async function readStore(season) {
 async function writeStore(store, season) {
   const buckets = new Map()
   const asOf = new Date().toISOString()
-  for (const [id, entry] of Object.entries(store)) {
+  const bucketFor = (id) => {
     const key = shardKey100(id)
     if (!buckets.has(key)) buckets.set(key, { season, asOf, bat: {} })
-    buckets.get(key).bat[id] = entry
+    return buckets.get(key)
   }
+  for (const [id, entry] of Object.entries(store.bat)) bucketFor(id).bat[id] = entry
+  // `post` only where a batter has one, so a regular-season-only bucket keeps
+  // exactly the keys it had before the postseason was swept.
+  for (const [id, entry] of Object.entries(store.post)) (bucketFor(id).post ??= {})[id] = entry
   // Every bucket, including the empty ones: a reader that asks for bucket 37
   // and gets a 404 caches the miss for the session, so the file exists and says
   // "nobody here" instead.
@@ -299,14 +320,14 @@ async function main() {
   const ingested = new Set(ledger.season === season ? ledger.games : [])
   console.log(`carried ${carried} batters and ${ingested.size} ingested games for ${season}`)
 
-  // Regular season only, both levels. Same postponed-replay dedup as the other
-  // sweeps: a replayed game is listed under both dates, so keep only the
-  // officialDate bucket.
+  // Regular season at both levels, plus the postseason at MLB. Same
+  // postponed-replay dedup as the other sweeps: a replayed game is listed under
+  // both dates, so keep only the officialDate bucket.
   const pending = []
-  for (const { sportId, level } of LEVELS) {
+  for (const { sportId, level, gameTypes } of LEVELS) {
     const schedule = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&startDate=${startDate}&endDate=${endDate}&gameType=R` +
-        '&fields=dates,date,games,gamePk,officialDate,status,abstractGameState,detailedState',
+      `/api/v1/schedule?sportId=${sportId}&startDate=${startDate}&endDate=${endDate}&gameType=${gameTypes}` +
+        '&fields=dates,date,games,gamePk,gameType,officialDate,status,abstractGameState,detailedState',
     )
     for (const d of schedule.dates ?? []) {
       for (const g of d.games ?? []) {
@@ -322,12 +343,12 @@ async function main() {
         if (g.officialDate >= today) continue // decided games only, never today's
         if (!g.officialDate.startsWith(`${season}-`)) continue // this season's folder only
         if (ingested.has(g.gamePk)) continue
-        pending.push({ gamePk: g.gamePk, level, date: g.officialDate })
+        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, post: isPostseason(g.gameType) })
       }
     }
   }
   console.log(
-    `${startDate}..${endDate}: ${pending.length} un-ingested decided regular-season games across ${LEVELS.length} level(s)`,
+    `${startDate}..${endDate}: ${pending.length} un-ingested decided games across ${LEVELS.length} level(s)`,
   )
 
   const writeOut = async () => {
@@ -351,7 +372,7 @@ async function main() {
         // pass unremarked — a silent zero is how a 30x bandwidth saving turns
         // into an empty dataset nobody notices.
         if (agg.size === 0) empty += 1
-        foldGame(store, agg, g.date)
+        foldGame(g.post ? store.post : store.bat, agg, g.date)
         ingested.add(g.gamePk)
       } catch (err) {
         console.error(`gamePk ${g.gamePk} (${g.level}): ${err.message}`)
@@ -366,7 +387,7 @@ async function main() {
   await Promise.all(Array.from({ length: CONCURRENCY }, worker))
   // Nothing for this season yet (the new year before Opening Day): write
   // nothing, so last season's folder, the ledger and the index stay as they are.
-  if (Object.keys(store).length === 0) {
+  if (Object.keys(store.bat).length + Object.keys(store.post).length === 0) {
     console.log(`no ${season} balls in play yet — wrote nothing; seasons.json still serves the last season on file`)
     return
   }
@@ -375,10 +396,12 @@ async function main() {
   const index = await writeSeasons(storeDir, season)
 
   if (empty > 0) console.error(`${empty} decided game(s) yielded no tracked contact — check the feed shape`)
-  const balls = Object.values(store).reduce((n, e) => n + e.p.length, 0)
+  const balls = Object.values(store.bat).reduce((n, e) => n + e.p.length, 0)
+  const postBalls = Object.values(store.post).reduce((n, e) => n + e.p.length, 0)
   console.log(
-    `wrote ${written} buckets (${swept} swept) — ${Object.keys(store).length} batters, ` +
-      `${balls} plotted balls, ${ingested.size} games on file (+${done} swept this run); ` +
+    `wrote ${written} buckets (${swept} swept) — ${Object.keys(store.bat).length} batters, ` +
+      `${balls} plotted balls (+${postBalls} postseason, ${Object.keys(store.post).length} batters), ` +
+      `${ingested.size} games on file (+${done} swept this run); ` +
       `serving ${index.current} of [${index.seasons.join(', ')}]`,
   )
 }

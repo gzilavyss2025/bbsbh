@@ -25,7 +25,7 @@ import { SeasonStack } from '../season/SeasonStack.jsx'
 // Deliberately ONE self-contained block, title and all, so the whole card
 // relocates as a two-line move when the player page is split into tabs.
 export function SprayMapSection({ playerId, group, asOf, seasonYear, label, vs = null }) {
-  const skip = !!asOf || group !== 'hitting'
+  const skip = !!asOf || group !== 'hitting' || seasonYear == null
   const { data } = useAsync(
     () => (skip ? Promise.resolve(null) : fetchSprayFor(playerId, { seasonYear })),
     [skip, playerId, seasonYear],

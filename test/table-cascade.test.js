@@ -1222,7 +1222,12 @@ test('T8: the club table keeps its name cell, its tones and the board\'s column 
   assert.equal(decl(t8Rule(board, '.clubtable--full.is-expanded .st-ext'), 'display'), 'table-cell', '"More columns" brings the rest back')
   assert.equal(decl(t8Rule(board, '.clubtable--full thead th'), 'white-space'), 'normal', 'a board head may wrap, as it did on the old base')
   assert.equal(decl(t8Rule(board, '.clubtable--full td'), 'font-size'), 'var(--fs-compact)', 'a phone board keeps its compact figures')
-  assert.equal(decl(t8Rule(board, '.clubtable tr.is-eliminated td'), 'opacity'), '0.62')
+  // An eliminated row fades what its cells hold, never the pinned name cell: an opaque cell hides the numbers scrolling under it.
+  assert.equal(decl(t8Rule(board, '.clubtable tr.is-eliminated td:not(.team)'), 'opacity'), '0.62')
+  assert.equal(decl(t8Rule(board, '.clubtable tr.is-eliminated td.team > *'), 'opacity'), '0.62')
+  assert.equal(t8Rule(board, '.clubtable tr.is-eliminated td'), '', 'the pinned cell itself is never faded')
+  // The umpire board's "more between them" row tints its pinned cell through the pin, as the other tinted rows do.
+  assert.equal(decl(t8Rule('68-around-the-game.css', '.rpt__between'), '--table-pin'), 'var(--paper-2)')
   // The group row's 12px top pad and its label size never drew under the old board's own cell rules; it keeps what it showed.
   for (const p of ['padding-top', 'font-size']) assert.ok(!props(t8Rule('31-wild-card.css', '.wc-grouphead td')).includes(p), `the group row takes the board's ${p}`)
   assert.equal(decl(t8Rule('39-manager-page.css', '.psoddstable thead th'), 'font-weight'), 'var(--w-semibold)', 'the odds sheet keeps its lighter head')
