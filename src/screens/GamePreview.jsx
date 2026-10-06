@@ -11,6 +11,7 @@ import { cardsHeight, POSTER, posterLayout } from '../lib/preview/posterLayout.j
 import { ensurePosterFonts } from '../lib/preview/posterPaper.js'
 import { SavePosterButton } from '../components/preview/SavePosterButton.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { Notice } from '../components/ui/state/Notice.jsx'
 import '../styles/62-game-preview.css'
 
 // The preview poster's studio: the sheet on the left (or on top, on a phone),
@@ -166,9 +167,9 @@ export function GamePreview({ feed, starterLines, broadcast, callouts, treatment
         </fieldset>
 
         {overflows && (
-          <p className="posterstudio__warn">
+          <Notice tone="caution" role="status">
             Turn one section off — three full sections run past the bottom of the sheet.
-          </p>
+          </Notice>
         )}
 
         <SavePosterButton

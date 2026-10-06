@@ -1,0 +1,87 @@
+/* ---------------------------------------------------------------------------
+   NOTICE — the one block that tells the reader the state of the page or the
+   game (#1132). components/ui/state/Notice.jsx draws it;
+   lib/design/noticeClass.js names its classes.
+
+   Before this file, 97 notice sites drew themselves in about a dozen ways: bare
+   clay text, a dashed box, a marker wash, a navy rail. This is the one copy.
+   Later slices move those sites onto it.
+
+   WHAT IT OWNS: a thin SOLID edge all round, a pale tint inside and the copy
+   faces (decisions Q1: the wash, the same for every tone). A tone is a role and
+   sets three custom properties: --notice-edge, --notice-wash, --notice-ink.
+   The error ink is --clay-deep, never --clay: --clay on --clay-soft is 4.28:1
+   and fails AA (spec.md section 14). The sentence is the body face, because the
+   app uppercases every string (01-base.css); the label is the display face.
+   NO shadow, NO dashed edge (a namespace may keep one until the dashed-rule
+   fix decides), NO rail, NO --seal token (ADR-0083), NO club colour (ADR-0030).
+   WHAT IT DOES NOT OWN: the space around it (the parent's, #1180), any motion
+   (a pop-in stays in the caller's namespace), and when it shows (the caller's
+   test). A namespace rule loads later, so a family's margin wins on order.
+
+   HERE IN THE ORDER, right after system/empty-state.css and before 06.
+   test/notice-cascade.test.js pins the slot.
+   --------------------------------------------------------------------------- */
+.notice {
+  --notice-edge: var(--border-rule);
+  --notice-wash: transparent;
+  --notice-ink: var(--text-body);
+  --notice-label: var(--notice-ink);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  border: var(--bw-hair) solid var(--notice-edge);
+  border-radius: var(--radius-sm);
+  background: var(--notice-wash);
+  color: var(--notice-ink);
+}
+.notice--block {
+  padding: var(--space-2h) var(--space-3);
+}
+.notice--compact {
+  padding: var(--space-1h) var(--space-2h);
+}
+.notice--info {
+  --notice-edge: var(--border-hairline);
+  --notice-wash: color-mix(in srgb, var(--navy) 7%, var(--surface-card));
+}
+.notice--event {
+  --notice-wash: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
+}
+.notice--caution {
+  --notice-edge: var(--clay);
+  --notice-wash: var(--clay-soft);
+  --notice-label: var(--clay-deep);
+}
+.notice--error {
+  --notice-edge: var(--clay);
+  --notice-wash: var(--clay-soft);
+  --notice-ink: var(--clay-deep);
+}
+.notice__icon {
+  flex: none;
+}
+.notice__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.notice__label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--notice-label);
+}
+.notice__text {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-prose);
+}
+.notice__action {
+  flex: none;
+}

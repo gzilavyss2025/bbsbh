@@ -8,20 +8,21 @@ and only there.** This file does not restate it. Two copies of a rule drift, and
 the copy a reader happens to open is the one they follow. Read the ADR for what
 the six clauses say and what each one rejects; read this file for what moves.
 
-Measured on `main` at `9a578dcb7`. **157 rows**, of which **9 are held**.
+Measured on `main` at `9a578dcb7`. **156 rows**, of which **9 are held**.
 
 One row was added after the measurement, by the rename that found it: see
 `.bs__noteMore` under #1130. Twelve more, the `sheet` family under #1113, were
 added by #1155 and measured on `main` at `ffd91507a`. One more,
 `.tscoremodal__subkicker` under #1113, was found after slice H3 (#1339).
+One row, `.radarpill` under #1131, left with the Fever Radar it belonged to.
 
 | collapse issue | rows |
 | --- | --- |
 | Button and Door (#1130) | 26 |
-| Pill (#1131) | 33 |
+| Pill (#1131) | 32 |
 | SectionHead and Card (#1113) | 88 |
 | Table, EmptyState and Notice (#1132) | 10 |
-| **total** | **157** |
+| **total** | **156** |
 
 ## How to read a row
 
@@ -203,7 +204,6 @@ elements are measurably tappable, and six states are written as modifiers.
 | `.mastheadpill` | 1, 5 | `.masthead__btn` | #1131 | `components/player/CareerRegister.jsx`, `components/player/GameLog.jsx`, `components/teamstats/BullpenBoard.jsx`, `components/teamstats/StarterMatchups.jsx`, `screens/designlab/catalog.js`, `styles/10-lineup.css` | measured tappable — `cursor: pointer` and a `<button>` call site. Slice 4 of #1131 moved it onto `<Pill role="control" fill="paper">` and kept this name as the hook for its dot: the rename to the target is still open. |
 | `.prospectpill` | 1 | `.prospect__tag` | #1131 | `components/badges/ProspectPill.jsx`, `screens/designlab/catalog.js`, `screens/player/PlayerHubShell.jsx`, `styles/22-box-score-tables.css` †, `styles/23-box-score-detail.css`, `styles/31-wild-card.css`, `styles/47-trade-deadline.css`, `e2e/offseason-home.spec.js` | landed in #1131 slice 1, renamed: an outline `Pill` with no ink. It keeps no declaration of its own; the class is the hook for `.tlead__row` and `.tradecard__playerinfo` and for `e2e/offseason-home.spec.js`. Its logo element moved with it (`.prospect__logo`). |
 | `.psodds-pill` | 1, 5 | `.psodds__btn` | #1131 | `screens/designlab/catalog.js`, `screens/team/modules/SeasonSchedule.jsx`, `screens/team/modules/StandingsCard.jsx`, `styles/09-team-info.css`, `styles/39-manager-page.css` | measured tappable — `cursor: pointer`, `:focus-visible` and a `<button>` call site. Slice 5 of #1131 moved it onto `<Pill role="control" fill="ink">` and kept this name as the hook for its place in the head row and its themed-band tint: the rename to the target is still open. |
-| `.radarpill` | 1, 2, 5 | `.radar__btn` | #1131 | `components/badges/RadarPill.jsx`, `screens/designlab/catalog.js`, `screens/designlab/components.jsx`, `styles/09-team-info.css` †, `styles/10-lineup.css`, `styles/31-wild-card.css`, `styles/motion/lineup.css` † | measured tappable — `cursor: pointer` and a `<button>` call site. Also a namespace: it owns no base rule. |
 | `.reg-pill` | 1 | `.reg__tag` | #1131 | `components/player/CareerRegister.jsx`, `screens/designlab/catalog.js`, `screens/RehabPage.jsx`, `styles/05a-career-timeline.css` †, `styles/26-player-page.css` | #1129 names this one: a 3px `--radius-xs` tag wearing a capsule's name. It does not join the capsule family. |
 | `.rookiepill` | 1 | `.pill` | #1131 | `components/badges/RookiePill.jsx`, `screens/designlab/catalog.js`, `styles/12-sealbox.css`, `styles/13-play-by-play.css` †, `styles/31-wild-card.css` | landed in #1131 slice 1, absorbed: `<Pill ink="--field">`, no class of its own. Its two elements moved (`.rookie__full`, `.rookie__short`) and keep the phone swap. |
 | `.tierpill` | 1 | `.tier__tag` | #1131 | `components/badges/TierPill.jsx`, `screens/designlab/catalog.js`, `styles/09-team-info.css`, `styles/14-strike-zone.css` †, `styles/51-similar-players.css` † | landed in #1131 slice 1, renamed: an outline `Pill`; each `.tier__tag--*` tint sets the pill's custom properties rather than repainting it. |

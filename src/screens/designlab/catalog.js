@@ -373,14 +373,6 @@ export const PILLS = [
     verdict: 'Leave',
     fill: 'The shell only, no typography. It holds an icon.',
   },
-  {
-    cls: 'radarpill',
-    partial: '31-wild-card.css',
-    consumers: 1,
-    group: 'notpill',
-    verdict: 'Leave',
-    fill: 'No base rule — namespace only, like the card namespaces above.',
-  },
 ]
 
 // ---------------------------------------------------------------------------

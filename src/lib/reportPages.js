@@ -123,6 +123,10 @@ export const PAGE_GROUPS = [
       { label: 'Pace of Play', path: '/pace-of-play' },
       { label: 'Doubleheaders', path: '/doubleheaders' },
       { label: 'All Star Game', path: '/all-star-rosters' },
+      // Every club's pregame notes PDFs, links only. It was reachable only from
+      // the What's Brewing modal; it is the same "around the game" question —
+      // what a club hands the press before first pitch.
+      { label: 'Game Notes', path: '/game-notes' },
     ],
   },
   {

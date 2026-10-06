@@ -24,9 +24,10 @@ export function useHeadshotStep(identityKey, sources, info) {
   }, [identityKey])
   useEffect(() => () => clearTimeout(timer.current), [])
 
-  // Two or more photo sources means silo then milb (a MiLB/unknown club): the
-  // silo gets one try, since a prospect's silo is usually a plain 404.
-  const quickFirst = (sources?.length ?? 0) > 1
+  // A milb rung behind the silo (a MiLB/unknown club): the silo gets one try,
+  // since a prospect's silo is usually a plain 404. A MLB player's second rung
+  // is the coach photo, which is no reason to skip his silo's retry.
+  const quickFirst = Boolean(sources?.[1]?.includes('/headshot/milb/'))
   const url = headshotStepUrl(sources, step, quickFirst)
   const infoRef = useRef(info)
   useLayoutEffect(() => {
@@ -44,4 +45,14 @@ export function useHeadshotStep(identityKey, sources, info) {
   }, [step, url, quickFirst])
 
   return { url, onError }
+}
+
+// True once THIS url has finished loading. Until then the <img> carries
+// `data-pending` and CSS hides it, so a failed load (or the 2 s pause before
+// its retry) never paints the browser's broken-image glyph; the frame's tint
+// shows instead. Keyed by url, so a new source starts hidden again.
+export function useImgReady(url) {
+  const [readyUrl, setReadyUrl] = useState(null)
+  const onLoad = useCallback(() => setReadyUrl(url), [url])
+  return { pending: readyUrl !== url ? '' : undefined, onLoad }
 }

@@ -49,6 +49,10 @@ import {
   MoundVisitBar,
 } from './EventCards.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from '../scoring/StrikeZone.jsx'
+import { ReplayCell, ReplaySheet, useReplayPitches } from './pitcherCard/AtBatReplay.jsx'
+import { atBatScenePitches } from '../../lib/pitcherCard/atBat.js'
+import { Button } from '../ui/control/Button.jsx'
+import { WIDE_QUERY, useMediaQuery } from '../../hooks/useMediaQuery.js'
 import { HighlightSheet } from './HighlightSheet.jsx'
 import { CLIP_PACKAGE, CLIP_RAW, watchClipSource } from '../highlights/watchClip.js'
 import { useWatchClip } from '../highlights/useWatchClip.js'
@@ -335,6 +339,11 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     }
   }
 
+  // The last at-bat on screen with a tracked flight (what useReplayPitches
+  // needs, so a replay really exists) owns the wide rail's replay until a pick
+  // moves it (AtBatReplay.jsx's ReplayRail).
+  const lastAtBat = visibleEntries.findLastIndex((e) => e.kind === 'atbat' && atBatScenePitches(e.pitchDetails).length > 0)
+
   return (
     <div className="pbp">
       {windowed && beatKey != null && <ReliefRepeat pitcher={pitchingChangePitcher(feed, windowReliefPitcherId(visibleEntries))} teamId={pitchingTeamId} teamName={pitchingName} />}
@@ -358,6 +367,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               windowed={windowed}
               beatKey={beatKey}
               writing={writingUpTo.has(i)}
+              replayLast={i === lastAtBat}
             />
           )
         } else if (entry.eventType === 'pitching_substitution') {
@@ -536,9 +546,16 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
 // have one home (see that file's TUNING note).
 const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }
 
-function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false }) {
+function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false, replayLast = false }) {
   const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, battedBall, live } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
+  // The at-bat replay (AtBatReplay.jsx), in one place at a time: inside the
+  // zone cell on wide, in a sheet a phone opens on demand. Null at an untracked
+  // park or under reduced motion, where the zone plot and list are the account.
+  const replay = useReplayPitches(pitchDetails)
+  const wide = useMediaQuery(WIDE_QUERY)
+  const [replayOpen, setReplayOpen] = useState(false)
+  if (wide && replayOpen) setReplayOpen(false) // the sheet is a phone's; it must not reopen by itself
   // The Watch sheet's state, shared with the swing list (useWatchClip.js): a
   // raw clip's hit is kept by clipUrlCache, a MISS is not — it says only that
   // the clip had not published in the minute you asked.
@@ -666,6 +683,11 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
               <span className="pbp__hllabel">Watch</span>
             </button>
           )}
+          {replay && !wide && (
+            <Button size="control" className="pbp__replaybtn" onClick={() => setReplayOpen(true)} aria-label={`Replay the pitches to ${batter.last}`}>
+              Replay
+            </Button>
+          )}
         </div>
         <div className="pbp__side">
           <PitchLadder ladder={pitchLadder(pitches)} />
@@ -736,9 +758,18 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
           parks with no pitch tracking. */}
       {hasZone && (
         <div className="pbp__zonecell">
-          <PitchList pitchDetails={pitchDetails} />
-          <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--inline" />
+          {replay && wide ? (
+            <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} pitches={replay} id={entry.atBatIndex} last={replayLast} />
+          ) : (
+            <>
+              <PitchList pitchDetails={pitchDetails} />
+              <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--inline" />
+            </>
+          )}
         </div>
+      )}
+      {replayOpen && replay && !wide && (
+        <ReplaySheet pitchDetails={pitchDetails} pitches={replay} batter={batter} pitcher={pitcher} onClose={() => setReplayOpen(false)} />
       )}
       {zoneOpen && hasZone && (
         <StrikeZoneModal

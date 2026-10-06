@@ -333,10 +333,6 @@
         "lib/scorecard/words.js"
       ]
     },
-    "feverRadar.js": {
-      "class": "spoiler-free",
-      "why": "Static fever-radar.json — a third-party breakout/fade prospect score. No game state."
-    },
     "formerTeammates.js": {
       "class": "spoiler-free",
       "why": "Static former-teammates.json — shared (teamId, season) history between opposing rosters."

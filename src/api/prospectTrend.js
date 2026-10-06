@@ -1,8 +1,8 @@
 // Fetching + pure selectors over bbsbh's own stats-based prospect signal
 // (public/data/prospect-trend.json, gen-prospect-trend.mjs) — a
 // level-relative OPS/ERA percentile, NOT a Major League Equivalency and not
-// third-party (contrast feverRadar.js: that's an outside scouting opinion,
-// this is bbsbh's own number computed straight from statsapi splits). Meant
+// third-party (it is bbsbh's own number computed straight from statsapi
+// splits). Meant
 // to complement the weekly-refreshed rank in prospects.js, not replace it.
 // ProspectTrendPill (src/components/badges/ProspectTrendPill.jsx) is the
 // only consumer, wired onto /prospects.
@@ -63,8 +63,7 @@ export function unpackProspectTrend(raw) {
   }
 }
 
-// Session-memoized, same pattern as fetchTopProspects (prospects.js) and
-// fetchFeverRadar (feverRadar.js). Degrades to an empty snapshot on any
+// Session-memoized, same pattern as fetchTopProspects (prospects.js). Degrades to an empty snapshot on any
 // failure (404 before the first nightly run, network, malformed JSON) — no
 // caller needs its own try/catch.
 let trendPromise = null

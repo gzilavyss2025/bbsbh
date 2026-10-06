@@ -28,3 +28,13 @@ mound — `HalfInning`'s card at `isFreshPitcher` and `PlayByPlay`'s mid-half
 model (role rule, tiles, scene math) is `lib/pitcherCard/`, so `npm test` can pin it.
 `PitchScene` draws through refs from a rAF loop — never React state per frame — stops off
 screen, and stays still under reduced motion.
+
+**`AtBatReplay`** (same folder) plays the at-bat card's own pitches in that scene, each along its
+measured path (`lib/pitcherCard/atBat.js`, from the feed's `vX0..aZ` that `pitchInfo.js` now
+carries), in PitchScene's `atBat` look: the projected plate ground, the bar under the art, one pass
+then rest. A pick plays one pitch and holds it: the pitch list's dots on wide (`PitchList`'s opt-in
+`pick`; hover only with a real mouse), numbered chips in the phone sheet. ONE place at a time: at
+`WIDE_QUERY` the top of the focus reference rail, which a revealed card fills by PORTAL (`ReplayRail`:
+the rail is outside the seal, so it only lends an empty slot; the last at-bat owns it until a pick
+moves it); else a "Replay" button opens `ReplaySheet` — closed, nothing mounts. It sits inside the revealed card, so it is reveal-only like the zone plot, and none of it
+(scene, picks, button) exists at an untracked park or under reduced motion — the zone plot and list stay.

@@ -3,7 +3,7 @@ name: Update nightly data
 # Nightly precompute batch: game notes, WAR, rehab assignments, umpires,
 # umpire plate accuracy, minor-league leaders, game call-outs, former
 # teammates, career matchups, vs-team splits, milestone watch, team
-# transactions, the Fever Baseball radar and contract snapshots (each documented at the top
+# transactions, the Fever Baseball contract snapshots (each documented at the top
 # of its own scripts/gen-*.mjs) in ONE workflow with a SINGLE commit+push,
 # instead of separate crons each triggering its own Vercel deployment.
 # Consolidated 2026-07-11 after two of the eight (update-callouts and
@@ -99,7 +99,7 @@ jobs:
   update-nightly-data:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # main requires the lint-and-build status check, which the default
           # GITHUB_TOKEN can never satisfy on a bare push (no PR = no check
@@ -111,7 +111,7 @@ jobs:
           # (admin), so pushes with it bypass the required check the same
           # way the maintainer's own direct pushes already do.
           token: ${{ secrets.GH_BOT_TOKEN }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 26 # node:sqlite ships stable here (docs/adr/0021) — gen-team-score.mjs/gen-season-score.mjs need it
 
@@ -339,10 +339,6 @@ jobs:
         id: manager-history
         continue-on-error: true
         run: node scripts/gen-manager-history.mjs --current-only
-      - name: Fever Baseball radar
-        id: fever-radar
-        continue-on-error: true
-        run: node scripts/gen-fever-radar.mjs
       - name: Player contracts
         id: player-contracts
         continue-on-error: true
@@ -654,7 +650,6 @@ jobs:
           steps.team-transactions.outcome == 'failure' ||
           steps.postseason-odds.outcome == 'failure' ||
           steps.manager-history.outcome == 'failure' ||
-          steps.fever-radar.outcome == 'failure' ||
           steps.player-contracts.outcome == 'failure' ||
           steps.salaries.outcome == 'failure' ||
           steps.prospect-trend.outcome == 'failure' ||

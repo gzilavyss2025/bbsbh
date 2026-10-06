@@ -138,6 +138,7 @@ export function pitchCardInfo(feed, play) {
     const pd = e.pitchData ?? {}
     const co = pd.coordinates ?? {}
     const no = e.pitchNumber ?? i + 1
+    const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null)
     return {
       no,
       code,
@@ -146,6 +147,21 @@ export function pitchCardInfo(feed, play) {
       pz: typeof co.pZ === 'number' ? co.pZ : null,
       szTop: typeof pd.strikeZoneTop === 'number' ? pd.strikeZoneTop : null,
       szBottom: typeof pd.strikeZoneBottom === 'number' ? pd.strikeZoneBottom : null,
+      // The pitch's measured flight (the at-bat replay, lib/pitcherCard/atBat.js):
+      // velocity and acceleration at y = 50 ft in Statcast's frame, the same
+      // fields Savant's CSV calls vx0..az. Checked against gamePk 823035: all
+      // 279 pitches solve back to their own pX/pZ within 0.002 ft. `releaseY`
+      // is the release distance from the plate's back point: 60.5 ft minus the
+      // feed's `extension` (about 6.2 ft, so about 54.3 ft). An inference, and
+      // null when the park sent no extension.
+      vx0: num(co.vX0),
+      vy0: num(co.vY0),
+      vz0: num(co.vZ0),
+      ax: num(co.aX),
+      ay: num(co.aY),
+      az: num(co.aZ),
+      releaseY: num(pd.extension) == null ? null : 60.5 - pd.extension,
+      typeCode: e.details?.type?.code ?? '',
       mph: typeof pd.startSpeed === 'number' ? pd.startSpeed : null,
       type: e.details?.type?.description ?? '',
       callDesc: e.details?.call?.description ?? '',

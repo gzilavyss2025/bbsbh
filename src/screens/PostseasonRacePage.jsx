@@ -5,10 +5,14 @@ import { useMemo } from 'react'
 import { fetchLeagueStandings } from '../api/team.js'
 import { shapeWildCard } from '../api/standings.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useStandingsSeason } from '../hooks/seasons/useStandingsSeason.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useRouteLink } from '../lib/nav.js'
+import { labelDate, WILD_CARD_ERA_FROM } from '../lib/time/standingsDates.js'
+import { seasonPath } from '../lib/seasons/route.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
+import { SeasonPicker } from '../components/season/SeasonPicker.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { ClinchMark, ClinchKey } from '../components/team/ClinchMark.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
@@ -43,33 +47,6 @@ function LeagueBar({ league }) {
       }
     />
   )
-}
-
-// The baseball "today" in US Pacific — the last US zone to roll over — so
-// "entering today" reliably excludes tonight's slate. Same helper as
-// StandingsPage.jsx; standings numbers only change when a game goes final, so
-// reading live mid-slate would let today's result leak in before it's been
-// watched, the same reasoning that page's own header spells out.
-function baseballToday() {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Los_Angeles',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date())
-}
-function shiftDays(iso, n) {
-  const d = new Date(`${iso}T00:00:00Z`)
-  d.setUTCDate(d.getUTCDate() + n)
-  return d.toISOString().slice(0, 10)
-}
-function labelDate(iso) {
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
 }
 
 // Seeds a league's current 6-team field from the shaped Wild Card tree
@@ -244,12 +221,14 @@ function BracketColumn({ label, labelSide, lanes, round, format }) {
 }
 
 // Keep the connected rounds on phones, with scrolling inside the bracket.
-function LeagueBracket({ lg, side }) {
+function LeagueBracket({ lg, side, final }) {
   const wc = wcLanesFor(lg)
   const ds = dsLanesFor(lg)
   return (
     <>
-      <p className="psrace__guide">If the season ended today · Seeds 1 & 2 receive a bye</p>
+      <p className="psrace__guide">
+        {final ? 'The field' : 'If the season ended today'} · Seeds 1 & 2 receive a bye
+      </p>
       <p className="psrace__scrollhint">Scroll to follow the bracket →</p>
       <div className="psrace__scroll" role="region" aria-label={`${lg.name} bracket`} tabIndex={0}>
         <div className="psrace__miniboard">
@@ -277,13 +256,21 @@ function aliveWildCard(lg) {
   return (lg.wildcard ?? []).filter((t) => !t.wcEliminated)
 }
 
-function WildCardMiniTable({ lg }) {
-  const rows = aliveWildCard(lg)
+// A closed season has no "still alive": MLB's elimination numbers stop moving
+// when the regular season ends (api/standings.js's isEliminated says so), so the
+// last club out would read as alive. A final board prints the whole pooled order
+// instead, cutoff line and all, which is the answer it is wanted for.
+function wildCardRows(lg, final) {
+  return final ? (lg.wildcard ?? []) : aliveWildCard(lg)
+}
+
+function WildCardMiniTable({ lg, final }) {
+  const rows = wildCardRows(lg, final)
   return (
     <Table sticky label={`${lg.name} wild card race`} className="clubtable clubtable--full">
       <thead>
         <tr>
-          <th className="team">Still alive</th>
+          <th className="team">{final ? 'Wild card order' : 'Still alive'}</th>
           <th>W</th>
           <th>L</th>
           <th>Pct</th>
@@ -316,41 +303,50 @@ function WildCardMiniTable({ lg }) {
 // prints, not from the league. A league's eliminated clubs never reach either
 // surface here (the bracket shows six seeds, the table shows who is still
 // alive), so an 'e' row in the key would point at a chip nobody can see.
-function marksOnPage(leagues) {
+function marksOnPage(leagues, final) {
   const marks = new Set()
   for (const lg of leagues) {
-    for (const t of [...seedField(lg), ...aliveWildCard(lg)]) {
+    for (const t of [...seedField(lg), ...wildCardRows(lg, final)]) {
       if (t.clinch) marks.add(t.clinch)
     }
   }
   return marks
 }
 
-function LeagueBlock({ lg }) {
+function LeagueBlock({ lg, final }) {
   const side = LEAGUE_SIDE[lg.id] ?? 'al'
   return (
     <section className="psrace__league">
       <LeagueBar league={lg} />
-      <LeagueBracket lg={lg} side={side} />
-      <WildCardMiniTable lg={lg} />
+      <LeagueBracket lg={lg} side={side} final={final} />
+      <WildCardMiniTable lg={lg} final={final} />
     </section>
   )
 }
 
-// Standings remain dated through yesterday. Each league shows its fixed
-// paths from the current Wild Card field through the Championship Series.
-export function PostseasonRacePage() {
+// Standings remain dated through yesterday while the regular season runs. Once
+// it is over — through the postseason and every winter — the page shows that
+// season's final standings instead, because a dated request would come back
+// empty (useStandingsSeason). Each league shows its fixed paths from the
+// current Wild Card field through the Championship Series. An earlier season
+// opens from the picker, back to the first 12-team year.
+export function PostseasonRacePage({ seasonYear }) {
   useDocumentTitle('Postseason Race')
   const linkProps = useRouteLink()
 
-  const today = useMemo(() => baseballToday(), [])
-  const season = Number(today.slice(0, 4))
-  const yesterday = useMemo(() => shiftDays(today, -1), [today])
+  const { yesterday, ready, final, season, current, seasons } = useStandingsSeason(seasonYear, {
+    from: WILD_CARD_ERA_FROM,
+  })
+  const pickerView = { seasons, current, shown: season, vs: null }
+  const pathFor = ({ seasonYear: y }) =>
+    seasonPath('/postseason-race', { seasonYear: y === current ? null : y })
+  const standingsPath = seasonPath('/standings', { seasonYear: season === current ? null : season })
 
-  const { loading, error, data } = useAsync(
-    () => fetchLeagueStandings(season, yesterday),
-    [season, yesterday],
+  const { loading: fetching, error, data } = useAsync(
+    () => (ready ? fetchLeagueStandings(season, final ? null : yesterday) : Promise.resolve([])),
+    [ready, season, final, yesterday],
   )
+  const loading = fetching || !ready
   const leagues = useMemo(() => shapeWildCard(data ?? []), [data])
   const [al, nl] = leagues
 
@@ -359,12 +355,18 @@ export function PostseasonRacePage() {
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Postseason Race</h1>
-        <Door className="topbar__action" {...linkProps('/standings')}>
+        <Door className="topbar__action" {...linkProps(standingsPath)}>
           Standings
         </Door>
       </header>
 
-      <p className="psrace__asof">Entering today · through {labelDate(yesterday)}</p>
+      <SeasonPicker view={pickerView} pathFor={pathFor} compare={false} all={false} />
+
+      <p className="psrace__asof">
+        {final
+          ? `Final regular season · ${season}`
+          : `Entering today · through ${labelDate(yesterday)}`}
+      </p>
 
       <AsyncStatus
         loading={loading}
@@ -377,13 +379,14 @@ export function PostseasonRacePage() {
       {al && nl && (
         <>
           <div className="psrace__leagues">
-            <LeagueBlock lg={al} />
-            <LeagueBlock lg={nl} />
+            <LeagueBlock lg={al} final={final} />
+            <LeagueBlock lg={nl} final={final} />
           </div>
-          <ClinchKey marks={marksOnPage([al, nl])} />
+          <ClinchKey marks={marksOnPage([al, nl], final)} />
           <p className="psrace__tbdcaption">
-            The bracket isn’t reseeded after the Wild Card round, so each Division Series pairing
-            is already set — just waiting on a winner. Championship Series matchups are still TBD.
+            {final
+              ? 'Seeded from the final regular-season standings. This page shows the field, not series results.'
+              : 'The bracket isn’t reseeded after the Wild Card round, so each Division Series pairing is already set — just waiting on a winner. Championship Series matchups are still TBD.'}
           </p>
         </>
       )}

@@ -21,8 +21,12 @@ to reach for from anywhere. At the top level: `Loader`, `SectionMasthead`, `Copy
 - **`state/`** — `EmptyState` (#1132), the one "nothing here" block: a dashed inset, no
   ground, graphite copy; `label`, `note` and one `action` only when given; `size` block or
   compact; `className` the namespace. It owns no margin, and the caller's test decides
-  when it shows: it has no reveal prop. A loading, error or footnote line is still a `.hint`
-  until `Notice` joins it when its census lands.
+  when it shows: it has no reveal prop. `Notice` (#1132) is the one message about the page
+  or the game: `tone` info, event, caution or error (a role, never a colour; error says
+  `role="alert"` unless the caller passes one), `label`, `icon` and one `action` only when
+  given, `size` block or compact, `className` the namespace. It reads no seal token (ADR-0083) and no
+  club colour, owns no margin, and has no reveal prop. A loading line or a footnote is still
+  a `.hint`.
 - **`layout/`** — `Stack` (#1180), a column with one of four gap steps between its
   children, plus `gap="section"` for a page's top-level sections (`--space-section`). It
   owns the space BETWEEN children and nothing else. `Cluster` (#1180) is its row: a

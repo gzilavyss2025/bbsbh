@@ -41,12 +41,14 @@ export function seasonRangeLabel(seasons) {
 
 // The picker's choices: each season, newest first, then every season
 // combined. None when only one season is on file — a picker with one choice
-// is not a choice, and "all" would be that same season.
-export function seasonOptions(view) {
+// is not a choice, and "all" would be that same season. `all: false` leaves
+// the combined choice out, for a page whose figures do not add up across
+// seasons (a standings table is one year's, never a sum).
+export function seasonOptions(view, { all = true } = {}) {
   if ((view?.seasons?.length ?? 0) < 2) return []
   return [
     ...[...view.seasons].sort((a, b) => b - a).map((y) => ({ key: y, label: String(y) })),
-    { key: 'all', label: `All ${seasonRangeLabel(view.seasons)}` },
+    ...(all ? [{ key: 'all', label: `All ${seasonRangeLabel(view.seasons)}` }] : []),
   ]
 }
 

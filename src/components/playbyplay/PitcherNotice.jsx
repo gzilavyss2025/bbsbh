@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../../lib/teams.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 import { logHeadshotEvent } from '../../lib/headshot/log.js'
-import { useHeadshotStep } from '../../hooks/images/useHeadshotStep.js'
+import { useHeadshotStep, useImgReady } from '../../hooks/images/useHeadshotStep.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 
 // The "now pitching" notification card — the entering pitcher's headshot beside
@@ -97,7 +97,10 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
   // Two tries per photo source, the retry after a pause (headshot/retry.js).
   const stepInfo = { component: 'PitcherPhoto', personId, teamId, hasName: Boolean(name) }
   const { url, onError: onPhotoError } = useHeadshotStep(identityKey, sources, stepInfo)
-  const logoUrl = !url && teamId && !logoFailed ? teamLogoUrl(teamId) : null
+  // The logo is the base layer from the first paint; the photo replaces it once
+  // loaded (same rule as Headshot.jsx).
+  const underlayUrl = teamId && !logoFailed ? teamLogoUrl(teamId) : null
+  const logoUrl = !url ? underlayUrl : null
   const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?' // caps-js-exempt
   // Issue #1446's trace: note every time a real face is NOT what's drawn.
   useEffect(() => {
@@ -106,27 +109,12 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- stepInfo is rebuilt each render; these are its inputs
   }, [url, logoUrl, personId, teamId, name])
   const bg = teamTintColor(teamId)
+  const photoReady = useImgReady(url)
+  const logoReady = useImgReady(underlayUrl)
+  const photoShown = Boolean(url) && photoReady.pending === undefined
+  const showLogo = Boolean(underlayUrl) && !photoShown
 
-  if (!url) {
-    if (logoUrl) {
-      return (
-        <span
-          className="pitchernotice__shot pitchernotice__shot--logo"
-          style={bg ? { backgroundColor: bg } : undefined}
-          aria-hidden="true"
-        >
-          <img
-            key={logoUrl}
-            src={logoUrl}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            onError={() => setLogoFailed(true)}
-            aria-hidden="true"
-          />
-        </span>
-      )
-    }
+  if (!url && !underlayUrl) {
     return (
       <span className="pitchernotice__shot pitchernotice__shot--fallback" aria-hidden="true">
         {monogram}
@@ -134,17 +122,38 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
     )
   }
   return (
-    <span className="pitchernotice__shot">
-      <img
-        key={url}
-        src={url}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        onError={onPhotoError}
-        crossOrigin={HEADSHOT_CROSS_ORIGIN}
-        aria-hidden="true"
-      />
+    <span
+      className={`pitchernotice__shot${showLogo ? ' pitchernotice__shot--logo' : ''}`}
+      style={showLogo && bg ? { backgroundColor: bg } : undefined}
+      aria-hidden="true"
+    >
+      {url && (
+        <img
+          key={url}
+          src={url}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          data-pending={photoReady.pending}
+          onLoad={photoReady.onLoad}
+          onError={onPhotoError}
+          crossOrigin={HEADSHOT_CROSS_ORIGIN}
+          aria-hidden="true"
+        />
+      )}
+      {showLogo && (
+        <img
+          key={underlayUrl}
+          src={underlayUrl}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          data-pending={logoReady.pending}
+          onLoad={logoReady.onLoad}
+          onError={() => setLogoFailed(true)}
+          aria-hidden="true"
+        />
+      )}
     </span>
   )
 }

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
+import { Button } from '../ui/control/Button.jsx'
 import { EDGE, H, W, sx, sy } from '../../lib/zone/zoneGeometry.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
@@ -171,7 +172,12 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
 // same 16%-mix row-tint idiom StatBox/foul-tracker/umpire-pages already use
 // for "this one's the one to look at"). It's always the final row: the at-bat
 // ends on its last pitch by definition.
-export function PitchList({ pitchDetails }) {
+//
+// PICKING IS OPT-IN (the at-bat replay, AtBatReplay.jsx). `pick` { nos, picked,
+// onPick, onHover } turns the number dot of each pitch in `nos` into a ghost
+// .btn that plays that pitch; its hit area is the whole row (pitcher-card/card.css).
+// Without it the list is the static one the zone sheet shows.
+export function PitchList({ pitchDetails, pick }) {
   const pitches = pitchDetails ?? []
   if (pitches.length === 0) return null
   const lastNo = pitches[pitches.length - 1].no
@@ -182,7 +188,21 @@ export function PitchList({ pitchDetails }) {
           className={`pitchlist__row ${p.no === lastNo ? 'pitchlist__row--decisive' : ''}`}
           key={p.no}
         >
-          <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
+          {pick?.nos.has(p.no) ? (
+            <Button
+              skin="ghost"
+              className="pitchlist__pick"
+              pressed={pick.picked === p.no}
+              aria-label={`Play pitch ${p.no}`}
+              onClick={() => pick.onPick(p.no)}
+              onMouseEnter={pick.onHover && (() => pick.onHover(p.no))}
+              onMouseLeave={pick.onHover && (() => pick.onHover(null))}
+            >
+              <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
+            </Button>
+          ) : (
+            <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
+          )}
           <span className="pitchlist__type">{p.type || '—'}</span>
           <span className="pitchlist__meta">
             {p.mph != null ? `${p.mph} MPH, ` : ''}
@@ -256,6 +276,17 @@ function ChallengeMark({ challenge }) {
 // `.turnscene` ancestor isolates its stacking context, so an unportalled scrim
 // renders BELOW the fixed floating bar (`.pagenav`). See ModalPortal.jsx.
 export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClose }) {
+  return (
+    <ZoneSheet note="Pitch zone" batter={batter} pitcher={pitcher} onClose={onClose}>
+      <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--modal" />
+      <PitchList pitchDetails={pitchDetails} />
+    </ZoneSheet>
+  )
+}
+
+// The sheet both of an at-bat's phone sheets wear: this zone, and the replay
+// (AtBatReplay.jsx). `note` names it; `pitcher` is his last name.
+export function ZoneSheet({ note, batter, pitcher, onClose, children }) {
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
 
@@ -266,10 +297,10 @@ export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClos
         className="scrim scrim--center"
         onClick={(e) => e.target.classList.contains('scrim') && onClose()}
       >
-        <div className="szmodal" role="dialog" aria-modal="true" aria-label={`Pitch zone for ${name || 'this at-bat'}`}>
+        <div className="szmodal" role="dialog" aria-modal="true" aria-label={`${note} for ${name || 'this at-bat'}`}>
           <div className="szmodal__head">
             <div className="szmodal__ttl">
-              <span className="szmodal__note">Pitch zone</span>
+              <span className="szmodal__note">{note}</span>
               <span className="szmodal__name">{name || 'At-bat'}</span>
               {pitcher ? <span className="szmodal__vs">vs {pitcher}</span> : null}
             </div>
@@ -277,10 +308,7 @@ export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClos
               ✕
             </button>
           </div>
-          <div className="szmodal__body">
-            <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--modal" />
-            <PitchList pitchDetails={pitchDetails} />
-          </div>
+          <div className="szmodal__body">{children}</div>
         </div>
       </div>
     </ModalPortal>

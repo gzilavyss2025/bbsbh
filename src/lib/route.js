@@ -22,14 +22,14 @@
 //   '/postseason-history'               -> { name: 'postseason-history' }
 //   '/nine-keys'                        -> { name: 'nine-keys' }
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
-//   '/postseason-race'                  -> { name: 'postseason-race' }
+//   '/postseason-race[/{year}]'         -> { name: 'postseason-race', ... } (parseSeasonRoute)
 //   '/postseason-records'               -> { name: 'postseason-records', asOf, season, view, team, category, metric, sort, order }
 //   '/postseason/{seriesId}?d='         -> { name: 'postseason-series', seriesId, asOf }
 //   '/trade-deadline'                   -> { name: 'trade-deadline-season', season: <latest> }
 //   '/trade-deadline/{year}'            -> { name: 'trade-deadline-season', season: year }
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
-//   '/standings'                        -> { name: 'standings' }
+//   '/standings[/{year}]'               -> { name: 'standings', ... } (parseSeasonRoute)
 //   '/salaries' '/attendance' '/pace-of-play' '/farm-system-rankings'
 //   '/bullpen-availability' '/doubleheaders' '/abs-challenges' '/run-differential'
 //                                       -> single-segment report pages (REPORT_ROUTES, reportPages.js)
@@ -345,15 +345,12 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'nine-keys') return { name: 'nine-keys' }
   if (parts.length === 1 && parts[0] === 'postseason-leaders')
     return { name: 'postseason-leaders' }
-  if (parts.length === 1 && parts[0] === 'postseason-race')
-    return { name: 'postseason-race' }
   if (parts.length === 1 && parts[0] === 'trade-deadline')
     return { name: 'trade-deadline-season', season: LATEST_TRADE_DEADLINE_SEASON }
   if (parts.length === 1 && parts[0] === 'all-star-rosters')
     return { name: 'all-star-rosters' }
   if (parts.length === 1 && parts[0] === 'all-star-legacy')
     return { name: 'all-star-legacy' }
-  if (parts.length === 1 && parts[0] === 'standings') return { name: 'standings' }
   // Admin copy editor — the site owner tunes consent-pop-up wording here. Not
   // linked from anywhere in the app; reachable by URL and gated to a Clerk
   // admin (see AdminCopy.jsx + api/copy.js). Parsed regardless so a stray

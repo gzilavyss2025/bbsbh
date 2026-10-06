@@ -287,27 +287,37 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
               key={s.slot}
             >
               <span className="entering__slot">{s.slot}</span>
-              <span className="entering__names">
-                {s.entries.map((e, i) => (
-                  <LineupName key={i} entry={e} />
-                ))}
-                <ProspectPill {...prospectBadge(prospectsData, cur.id)} />
-                <RookiePill active={showRookiePill(rookiesData, cur.id, isMlb)} />
-                {onDeck && <span className="duepill entering__ondeck">Up next</span>}
-                {upNextLabel && (
-                  <span className="duepill">
-                    {upNextLabel === 'Due up' && <span aria-hidden="true">&larr; </span>}
-                    {upNextLabel}
-                  </span>
-                )}
-              </span>
-              <span className="entering__meta">
-                {cur.jersey ? (
-                  <span className="entering__jersey">{cur.jersey}</span>
-                ) : null}
-                {cur.position ? (
-                  <span className="entering__pos">{cur.position}</span>
-                ) : null}
+              {/* One line per occupant, so a substitute's number and position sit
+                  beside HIS name, not over the man he replaced. The pills belong
+                  to the standing occupant, so they ride the last line. */}
+              <span className="entering__entries">
+                {s.entries.map((e, i) => {
+                  const last = i === s.entries.length - 1
+                  return (
+                    <span className="entering__entry" key={i}>
+                      <span className="entering__names">
+                        <LineupName entry={e} />
+                        {last && (
+                          <>
+                            <ProspectPill {...prospectBadge(prospectsData, cur.id)} />
+                            <RookiePill active={showRookiePill(rookiesData, cur.id, isMlb)} />
+                            {onDeck && <span className="duepill entering__ondeck">Up next</span>}
+                            {upNextLabel && (
+                              <span className="duepill">
+                                {upNextLabel === 'Due up' && <span aria-hidden="true">&larr; </span>}
+                                {upNextLabel}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </span>
+                      <span className="entering__meta">
+                        {e.jersey ? <span className="entering__jersey">{e.jersey}</span> : null}
+                        {e.position ? <span className="entering__pos">{e.position}</span> : null}
+                      </span>
+                    </span>
+                  )
+                })}
               </span>
             </li>
           )
@@ -319,7 +329,7 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
 
 // One batting-order slot's name stack — struck through when replaced, tagged
 // with the inning he entered while he's the standing occupant. Jersey/position
-// are pulled up to the row's right-aligned meta column, so this renders name +
+// sit in the entry line's own right-aligned meta column, so this renders name +
 // enter-tag only. Mirrors DefenseDiamond's DefenseName styling.
 function LineupName({ entry }) {
   const entered = entry.inning != null && !entry.replaced

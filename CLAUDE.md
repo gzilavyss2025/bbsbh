@@ -65,6 +65,8 @@ the exact route you changed, and keep the server running. Put that clickable loc
 URL in your final handoff. **Add `?nointro` to any test URL**, so the first-visit
 welcome modal does not cover the slate (`e2e` specs add this through
 `e2e/fixtures.js`). See `docs/development.md` for the full workflow.
+**Small visual bug, or any cloud session:** do not hand over a dev server. Render the
+fixed view with the preinstalled Chromium and send Gary a screenshot (`SendUserFile`).
 
 ## Commands
 
@@ -175,6 +177,8 @@ fourteen, each with its ADR: `api/CLAUDE.md`.
   `ready-for-human` / `wontfix`, used as-is. See `docs/agents/triage-labels.md`.
 - **Domain docs** — single-context: one `CONTEXT.md` + `docs/adr/`. See
   `docs/agents/domain.md`.
+- **Peer sites** — when Gary asks what other baseball sites do that is cool, start from
+  `docs/peer-sites.md` and add to it.
 - **Writing style** — ASD-STE100 governs chat replies, authored docs, and commit/PR
   text here, always on. See `docs/agents/writing-style.md`.
   The house word list is enforced by `check-word-choice`: say "postseason", never "playoffs". <!-- word-choice-exempt: states the rule -->

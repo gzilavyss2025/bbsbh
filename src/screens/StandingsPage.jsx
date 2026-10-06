@@ -1,7 +1,6 @@
 import '../styles/30-standings.css'
 import { useMemo, useState } from 'react'
 import { fetchLeagueStandings } from '../api/team.js'
-import { fetchSeasonMeta } from '../api/schedule.js'
 import { fetchTeamScores, leagueSeasonGradesFor, gradeTiersByTeamId } from '../api/teamScore.js'
 import { fetchSeasonScores } from '../api/seasonScore.js'
 import {
@@ -14,15 +13,17 @@ import {
   DASH,
 } from '../api/standings.js'
 import { favoriteAccentColor } from '../lib/teams.js'
-import { offseasonPhase } from '../lib/time/seasonPhase.js'
-import { baseballToday, buildJumps, labelDate, shiftDays } from '../lib/time/standingsDates.js'
+import { buildJumps, labelDate, shiftDays, WILD_CARD_ERA_FROM } from '../lib/time/standingsDates.js'
+import { seasonPath } from '../lib/seasons/route.js'
 import { useRouteLink } from '../lib/nav.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useStandingsSeason } from '../hooks/seasons/useStandingsSeason.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
+import { SeasonPicker } from '../components/season/SeasonPicker.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { ClinchMark, ClinchKey } from '../components/team/ClinchMark.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
@@ -95,53 +96,60 @@ function LeagueBar({ league }) {
   )
 }
 
+// A stable empty table, so `shown` keeps its identity while a season loads.
+const NO_ROWS = []
+
 // Screen: league-wide standings, both leagues × three divisions, with home/away
 // splits, runs for/against, run differential, expected (Pythagorean) W-L,
 // Season Grade, division magic number/clinch, streak, last-ten, and a
 // rank-movement trend glyph riding on GB. Spoiler-safe by default — the view
 // opens "entering today" (through yesterday) and today's live standings are an
 // explicit, one-tap reveal. The historical quick-jumps scrub back to earlier
-// dates this season. (Previous seasons are a deliberate later phase; `season`
-// is already the one knob that would drive them.)
-export function StandingsPage() {
+// dates this season. A season picker reaches every earlier year back to 1998:
+// a past season is a finished record, so it opens final with no date controls.
+export function StandingsPage({ seasonYear }) {
   useDocumentTitle('Standings')
 
   const linkProps = useRouteLink()
   const { favoriteTeamId } = useFavoriteTeam()
 
-  const today = useMemo(() => baseballToday(), [])
-  const yesterday = useMemo(() => shiftDays(today, -1), [today])
-
   // IS THE SEASON OVER? — issue #1078, and the reason this page is a
   // destination the offseason home page is allowed to send a reader to.
   //
-  // Everything below was written for a season being played. From November to
-  // February it was not merely stale, it was EMPTY: statsapi's /standings only
-  // resolves a `date` that falls on a day the season played, so the default
-  // "entering today" view asked for December 14 and got zero records, and the
-  // page said "No standings available for this date" for a third of the year.
-  // Omitting the date entirely returns the season's real final standings —
-  // verified live, and the same fix gen-season-score.mjs needed for the same
-  // endpoint reading a closed season.
+  // Everything below was written for a season being played. Once the regular
+  // season ends it is not merely stale, it is EMPTY: statsapi's /standings only
+  // resolves a `date` that falls on a day the regular season played, so the
+  // default "entering today" view asked for an October or December day and got
+  // zero records, and the page said "No standings available for this date" from
+  // the day after the last game until spring. Omitting the date entirely
+  // returns the season's real final standings — verified live, and the same fix
+  // gen-season-score.mjs needed for the same endpoint reading a closed season.
   //
-  // So in the winter this page is about the season that ENDED, shows it final,
-  // and puts its date controls away: there is nothing to scrub to when the
-  // record is the record, and a row of buttons that each return an empty table
-  // would be worse than no buttons. Read off statsapi's own season row, never
-  // off the clock or off an empty response (src/lib/time/seasonPhase.js).
-  const { data: seasonRow } = useAsync(
-    () => fetchSeasonMeta(Number(today.slice(0, 4))),
-    [today],
-  )
-  const winter = useMemo(() => offseasonPhase(today, seasonRow), [today, seasonRow])
-  const final = Boolean(winter)
-  const season = winter?.seasonEnded ?? Number(today.slice(0, 4))
+  // So once the regular season is over (the postseason included, not only the
+  // winter) this page shows the season FINAL and puts its date controls away:
+  // there is nothing to scrub to when the record is the record, and a row of
+  // buttons that each return an empty table would be worse than no buttons. A
+  // season picked from the picker is final for the same reason. Read off
+  // statsapi's own season row, never off the clock or an empty response
+  // (useStandingsSeason, lib/time/standingsDates.js).
+  const { today, yesterday, ready, final, season, current, seasons, seasonRow } =
+    useStandingsSeason(seasonYear)
   const jumps = useMemo(() => (final ? [] : buildJumps(today)), [final, today])
+  // The picker's address for a year. The current season is the bare address.
+  const pickerView = { seasons, current, shown: season, vs: null }
+  const pathFor = ({ seasonYear: y }) => seasonPath('/standings', { seasonYear: y === current ? null : y })
+  // The wild-card board is drawn for the 12-team format (WILD_CARD_ERA_FROM).
+  const hasWildCard = season >= WILD_CARD_ERA_FROM
+  const racePath = seasonPath('/postseason-race', {
+    seasonYear: hasWildCard && season !== current ? season : null,
+  })
 
   // 'division' (the traditional three-divisions-per-league grid) or
   // 'wildcard' (mlb.com's pooled wild-card race board, one list per league
   // with a cutoff line after the 3rd wild-card spot).
   const [boardMode, setBoardMode] = useState('division')
+  // An older season has no wild-card board; never leave one selected for it.
+  const board = hasWildCard ? boardMode : 'division'
 
   // Phone width hides the `.st-ext` columns to avoid horizontal scroll by
   // default (see the progressive-disclosure comment on `.clubtable--full` in
@@ -164,7 +172,7 @@ export function StandingsPage() {
   const view = useMemo(() => {
     // No date at all, which is what makes the endpoint answer for a closed
     // season. It outranks every control because in the winter there are none.
-    if (final) return { date: null, mode: 'Final', detail: `${season} season` }
+    if (final) return { date: null, mode: 'Final', detail: `${season} regular season` }
     if (selKey === 'step' && stepDate) {
       return { date: stepDate, mode: 'As of', detail: labelDate(stepDate) }
     }
@@ -194,18 +202,23 @@ export function StandingsPage() {
     setSelKey(key)
   }
 
-  const { loading, error, data } = useAsync(
-    () => fetchLeagueStandings(season, view.date),
-    [season, view.date],
+  // Held until the season row is back, so October never asks for a day with no
+  // table and flashes "No standings" before the real one (useStandingsSeason).
+  const { loading: fetching, error, data } = useAsync(
+    () => (ready ? fetchLeagueStandings(season, view.date) : Promise.resolve([])),
+    [ready, season, view.date],
   )
+  const loading = fetching || !ready
 
   // useAsync nulls `data` on a deps (date) change; keep the last-good standings
   // on screen (dimmed) while the new date loads so the page doesn't collapse to
   // a spinner on every jump. State (not a ref) since it's read during render —
   // a ref must never be read outside an event handler/effect.
-  const [lastGood, setLastGood] = useState([])
-  if (data && data !== lastGood) setLastGood(data)
-  const shown = data ?? lastGood
+  // Keyed by season: a table from another year must never sit under this
+  // year's label while the picker's fetch loads.
+  const [lastGood, setLastGood] = useState({ season, rows: [] })
+  if (data && data !== lastGood.rows) setLastGood({ season, rows: data })
+  const shown = data ?? (lastGood.season === season ? lastGood.rows : NO_ROWS)
 
   // Season Grade column: a SEPARATE, independent fetch of two already-nightly
   // static files (never statsapi) — a slow/failed grade file must never block
@@ -216,7 +229,13 @@ export function StandingsPage() {
   // The nightly grade snapshots stop when the season does, so a December
   // cutoff would find none of them. Final reads the season's own last day off
   // the row the winter was established from.
-  const gradeCutoff = final ? (seasonRow?.regularSeasonEndDate ?? yesterday) : (view.date ?? yesterday)
+  // A past season's grades are the ones from its last day; the year's end is
+  // later than that day and the lookup takes the latest snapshot at or before.
+  const gradeCutoff = final
+    ? season === current
+      ? (seasonRow?.regularSeasonEndDate ?? yesterday)
+      : `${season}-12-31`
+    : (view.date ?? yesterday)
   // Grade + percentile tier come from the SAME pool of rows, so a team's pill
   // color can never disagree with its printed number.
   const { gradeByTeamId, gradeTierByTeamId } = useMemo(() => {
@@ -237,8 +256,8 @@ export function StandingsPage() {
   // finished season, and a rank that "moved" since then is a movement nobody
   // is watching for. The glyph simply does not appear.
   const compareDate = useMemo(
-    () => (final ? null : shiftDays(view.date ?? today, -7)),
-    [final, view.date, today],
+    () => (ready && !final ? shiftDays(view.date ?? today, -7) : null),
+    [ready, final, view.date, today],
   )
   const { data: compareData } = useAsync(
     () => (compareDate ? fetchLeagueStandings(season, compareDate) : Promise.resolve(null)),
@@ -246,22 +265,22 @@ export function StandingsPage() {
   )
   const prevRankByTeamId = useMemo(() => {
     const compareLeagues =
-      boardMode === 'wildcard'
+      board === 'wildcard'
         ? shapeWildCard(compareData ?? [], favoriteTeamId)
         : shapeStandings(compareData ?? [], favoriteTeamId)
-    return extractRanks(compareLeagues, boardMode)
-  }, [compareData, boardMode, favoriteTeamId])
+    return extractRanks(compareLeagues, board)
+  }, [compareData, board, favoriteTeamId])
 
   const leagues = useMemo(() => {
     const shaped =
-      boardMode === 'wildcard'
+      board === 'wildcard'
         ? shapeWildCard(shown, favoriteTeamId)
         : shapeStandings(shown, favoriteTeamId)
     attachTeamField(shaped, gradeByTeamId, 'grade')
     attachTeamField(shaped, gradeTierByTeamId, 'gradeTier')
-    attachRankTrend(shaped, boardMode, prevRankByTeamId)
+    attachRankTrend(shaped, board, prevRankByTeamId)
     return shaped
-  }, [shown, favoriteTeamId, boardMode, gradeByTeamId, gradeTierByTeamId, prevRankByTeamId])
+  }, [shown, favoriteTeamId, board, gradeByTeamId, gradeTierByTeamId, prevRankByTeamId])
 
   const clinchMarks = useMemo(() => clinchMarksInPlay(leagues), [leagues])
 
@@ -282,10 +301,12 @@ export function StandingsPage() {
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Standings</h1>
-        <Door className="topbar__action" {...linkProps('/postseason-race')}>
+        <Door className="topbar__action" {...linkProps(racePath)}>
           Postseason Race
         </Door>
       </header>
+
+      <SeasonPicker view={pickerView} pathFor={pathFor} compare={false} all={false} />
 
       <div className="standings-ctrl">
         <div className="standings-ctrl__top">
@@ -348,24 +369,26 @@ export function StandingsPage() {
           </div>
         )}
 
+        {hasWildCard && (
         <div className="standings-jumps" role="group" aria-label="Standings board">
-          <button
-            type="button"
-            aria-pressed={boardMode === 'division'}
-            className={`standings-jump ${boardMode === 'division' ? 'is-active' : ''}`}
-            onClick={() => setBoardMode('division')}
-          >
-            Division
-          </button>
-          <button
-            type="button"
-            aria-pressed={boardMode === 'wildcard'}
-            className={`standings-jump ${boardMode === 'wildcard' ? 'is-active' : ''}`}
-            onClick={() => setBoardMode('wildcard')}
-          >
-            Wild Card
-          </button>
-        </div>
+            <button
+              type="button"
+              aria-pressed={board === 'division'}
+              className={`standings-jump ${board === 'division' ? 'is-active' : ''}`}
+              onClick={() => setBoardMode('division')}
+            >
+              Division
+            </button>
+            <button
+              type="button"
+              aria-pressed={board === 'wildcard'}
+              className={`standings-jump ${board === 'wildcard' ? 'is-active' : ''}`}
+              onClick={() => setBoardMode('wildcard')}
+            >
+              Wild Card
+            </button>
+          </div>
+        )}
 
         {!isWide && (
           <div className="standings-jumps" role="group" aria-label="Standings column detail">
@@ -390,7 +413,7 @@ export function StandingsPage() {
       />
 
       <div className={refreshing ? 'standings-body is-refreshing' : 'standings-body'}>
-        {boardMode === 'wildcard'
+        {board === 'wildcard'
           ? leagues.map((lg) => (
               <section className="lgstand" key={lg.id}>
                 <div className="lgstand__bar">

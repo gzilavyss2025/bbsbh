@@ -17,6 +17,7 @@ import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
+import { Notice } from '../../components/ui/state/Notice.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { headerThemeClass, headerThemeFor, headerThemeStyle } from '../../lib/headerTheme.js'
 
@@ -201,6 +202,40 @@ function EmptyStateDemo() {
   )
 }
 
+// The notice in composition (#1132): one per tone, a label with an action, and
+// the compact size inside a Card tile. The copy is invented for the lab and says
+// what is missing or what state the page is in, never what happened.
+function NoticeDemo() {
+  return (
+    <div className="dlab__candidates">
+      <Notice tone="info" role="note">Play is paused while the grounds crew works.</Notice>
+      <Notice tone="event" role="note">The game is on a delay.</Notice>
+      <Notice tone="caution" role="note">Some pages are not ready yet.</Notice>
+      <Notice tone="error" action={<Button size="control" onClick={() => {}}>Retry</Button>}>
+        Couldn’t load games. Try again.
+      </Notice>
+      <Notice
+        tone="caution"
+        label="Unsealed"
+        role="note"
+        action={<Door onClick={() => {}}>Open the photos</Door>}
+      >
+        A photo here can show the result at a glance.
+      </Notice>
+      <Card
+        frame="ledger"
+        head={
+          <SectionHead look="label" as="span">
+            Compact, in a Card tile
+          </SectionHead>
+        }
+      >
+        <Notice tone="info" size="compact" role="note">Not posted yet.</Notice>
+      </Card>
+    </div>
+  )
+}
+
 function SectionHeadDemo() {
   return (
     <>
@@ -306,6 +341,14 @@ export function ComponentHalf() {
         >
           <EmptyStateDemo />
         </Entry>
+        <Entry
+          title="Notice"
+          path={`${UI_PATH}/state/Notice.jsx`}
+          wide
+          note="The one notice (#1132). A thin solid edge all round and a pale tint inside, the same for every tone. Four tones, each a role: info (a neutral fact), event (something changed), caution (heed this) and error (a fetch or an action failed; its ink is the dark clay, and it says role=alert by default). A label, an icon and one action render only when given. Two sizes: block and compact. Notice owns no margin, no motion and no reveal prop, and it never decides when a message shows: the caller&#39;s test does."
+        >
+          <NoticeDemo />
+        </Entry>
         <Entry title="SectionMasthead" path={`${UI_PATH}/SectionMasthead.jsx`} note="A thin wrapper over the SectionHead band, kept for its sixteen call sites. No logo passed here, so it draws its undressed state.">
           <SectionMasthead title="Milwaukee" />
         </Entry>
@@ -379,11 +422,6 @@ export function ComponentHalf() {
         <Entry title="VsLevelSlider" path={`${BADGE_PATH}/VsLevelSlider.jsx`}>
           <SliderDemo />
         </Entry>
-        <Entry
-          title="RadarPill"
-          path={`${BADGE_PATH}/RadarPill.jsx`}
-          note="Not rendered. It reads a precomputed Fever Radar entry (a board, a playerId and a movement), and inventing one would put a made-up board on the page. Its .radarpill class owns no base rule — it is a namespace, like the card namespaces."
-        />
       </Group>
 
       <Group

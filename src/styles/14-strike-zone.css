@@ -126,7 +126,7 @@
   background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
   padding-block: 1px;
 }
-.pitchlist__row--decisive > .pitchlist__num {
+.pitchlist__row--decisive .pitchlist__num {
   outline: 2px solid color-mix(in srgb, var(--marker) 70%, transparent);
   outline-offset: 1px;
 }

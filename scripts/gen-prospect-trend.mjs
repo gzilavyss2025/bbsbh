@@ -10,15 +10,14 @@
 // compare to every other qualified hitter who logged time at his level this
 // season" — see that module's header for the full reasoning.
 //
-// Same nightly SQLite snapshot + self-join pattern as gen-fever-radar.mjs:
+// Nightly SQLite snapshot + self-join pattern:
 // today's percentile is upserted into the shared player_snapshots table
 // (scripts/lib/db.js, ADR-0021) under source 'prospect-trend' (board is the
 // player's group, 'hitting' or 'pitching' — a player only ever carries one),
 // and each exported row's `movement` compares against the nearest prior
 // snapshot at least MOVEMENT_WINDOW_DAYS back — bbsbh's own recorded
-// history, nothing an external source provides. The window is wider than
-// gen-fever-radar.mjs's 6 days: a stat percentile moves slower than a
-// third-party scouting radar's daily rank.
+// history, nothing an external source provides. The window is two weeks: a
+// stat percentile moves slowly.
 //
 // Every number on a row is read at his PRIMARY level alone (snapshotRow,
 // scripts/lib/prospectPercentile.mjs), never his season summed over every
@@ -87,8 +86,7 @@ const upsertSnapshot = (db) =>
 
 // Exports today's rows, each with a `movement` computed against the nearest
 // EARLIER snapshot at least MOVEMENT_WINDOW_DAYS back — a plain self-join
-// over the table this generator itself has been filling in, same pattern as
-// gen-fever-radar.mjs's exportJson — plus the player's FULL recorded history
+// over the table this generator itself has been filling in — plus the player's FULL recorded history
 // (today's row included), oldest first, for the trend chart.
 function exportJson(db, today, levelAverageAge, asOf) {
   const rows = db

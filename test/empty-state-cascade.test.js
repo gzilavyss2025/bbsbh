@@ -44,13 +44,18 @@ const imports = () =>
 
 // ---- 1. the slot ----
 
-test('system/empty-state.css is imported right after table.css and before 06', () => {
+test('system/empty-state.css is imported right after table.css, and only notice.css sits before 06', () => {
   const list = imports()
   const table = list.indexOf('system/table.css')
   const empty = list.indexOf('system/empty-state.css')
   assert.ok(empty !== -1, 'index.css should import system/empty-state.css')
   assert.equal(empty, table + 1, 'empty-state.css sits right after table.css')
-  assert.equal(list.indexOf('06-loader-and-cards.css'), empty + 1, 'empty-state.css sits right before 06, so a namespace rule wins on order')
+  // system/notice.css (#1132, N1) sits between the empty state and 06; its slot is pinned in notice-cascade.test.js.
+  assert.deepEqual(
+    list.slice(empty + 1, list.indexOf('06-loader-and-cards.css')),
+    ['system/notice.css'],
+    'only notice.css sits between empty-state.css and 06, so a namespace rule wins on order',
+  )
 })
 
 // ---- 2. the look ----

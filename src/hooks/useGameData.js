@@ -19,8 +19,6 @@ import { selectHasStarted } from '../api/select.js'
 import { rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { fetchTopProspects } from '../api/prospects.js'
 import { fetchRookiesData } from '../api/rookies.js'
-import { fetchFeverRadar } from '../api/feverRadar.js'
-import { fetchSavantPercentiles } from '../api/savantPercentiles.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplitsForTeams } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
@@ -447,35 +445,6 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   )
   const rookiesData = rookies.data ?? null
 
-  // Fever Baseball's breakout/fade radar (see RadarPill / feverRadar.js) —
-  // an outside model's opinion, not a bbsbh callout, so it's kept off the
-  // callouts worthiness table entirely (see gen-fever-radar.mjs's header).
-  // MLB-only like rookies/vsTeamSplits: there is no MLB pitcher board and
-  // the AAA boards aren't wired to any surface yet.
-  const feverRadar = useAsync(
-    () =>
-      enrichmentReady && game.sportId === SPORT_IDS.MLB
-        ? fetchFeverRadar()
-        : Promise.resolve(null),
-    [enrichmentReady, game.sportId],
-  )
-  const feverRadarData = feverRadar.data ?? null
-
-  // Season Statcast percentile ranks (Baseball Savant) — RadarPill's meter
-  // uses savantPercentilesFor(...).ev to show a player's exit velocity
-  // against the real qualified league, rather than the raw mph number Fever
-  // itself reports. Season-aggregate and same-origin like rookies/prospects,
-  // so it's safe to fetch eagerly; not gated to MLB-only like feverRadar
-  // since gen-savant-percentiles.mjs's file is MLB-only anyway (a MiLB
-  // player's lookup just comes back null).
-  const savantPercentiles = useAsync(
-    () => (enrichmentReady ? fetchSavantPercentiles() : Promise.resolve(null)),
-    [enrichmentReady],
-  )
-  const savantPercentilesData = savantPercentiles.data ?? null
-
-
-
   // The league-wide run-expectancy (RE288) table — a static, same-origin,
   // hand-run backfill (scripts/gen-run-expectancy.mjs) with no game or score
   // information of its own, so it's safe to fetch eagerly like
@@ -491,7 +460,7 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   // Rolling pitcher workload (gen-workload.mjs) — spoiler-free completed-
   // appearance aggregates feeding the bullpen availability board (TeamInfo)
   // and the Pitchers table's laboring baseline (pitcherHealth.js). MLB-only
-  // at source, same deferred tier as rookies/feverRadar.
+  // at source, same deferred tier as rookies.
   const workload = useAsync(
     () =>
       enrichmentReady && game.sportId === SPORT_IDS.MLB
@@ -561,8 +530,6 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
     pitcherRoles,
     prospectsData,
     rookiesData,
-    feverRadarData,
-    savantPercentilesData,
     gameCallouts,
     broadcast,
     formerTeammatesData,

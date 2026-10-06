@@ -4,10 +4,9 @@ import { outsToIp } from '../../lib/math/innings.js'
 // A compact, always-visible /prospects Ledger cell for bbsbh's own
 // level-relative OPS/ERA percentile (src/api/prospectTrend.js,
 // gen-prospect-trend.mjs) — meant to sit next to the weekly-refreshed
-// Pipeline rank without reading as a second, competing rank. Unlike
-// RadarPill (a third-party opinion, tap-to-reveal inside a roster row's
-// flex-wrap), this lives in a plain table cell, so it stays a static line —
-// Ledger's rows are fixed-shape, with no open/close state to lift.
+// Pipeline rank without reading as a second, competing rank. It lives in a
+// plain table cell, so it stays a static line — Ledger's rows are
+// fixed-shape, with no open/close state to lift.
 //
 // The exact percentile, named standing band, sample confidence, and movement
 // each get one job. The former five-dot tier row duplicated the named band and

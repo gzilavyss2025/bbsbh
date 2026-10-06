@@ -512,11 +512,11 @@ test('isMlbTeamId is true for current MLB clubs, false otherwise', () => {
 // but the reason established MLB players stopped showing stale wrong-cap
 // minor-league photos: a major-leaguer (mlb: true) drops the `milb` rung).
 // --------------------------------------------------------------------------
-test('headshotSources: an MLB player gets silo only, NOT the stale milb photo', () => {
+test('headshotSources: an MLB player gets silo then coach, NOT the stale milb photo', () => {
   // George Springer (543807) — his milb variant is a years-old prospect photo
   // in the wrong cap, so it must never be a rung.
   const sources = headshotSources(543807, { mlb: true })
-  assert.deepEqual(sources, [realHeadshotUrl(543807)])
+  assert.deepEqual(sources, [realHeadshotUrl(543807), coachHeadshotUrl(543807)])
   assert.equal(
     sources.includes(milbHeadshotUrl(543807)),
     false,
@@ -524,17 +524,27 @@ test('headshotSources: an MLB player gets silo only, NOT the stale milb photo', 
   )
 })
 
-test('headshotSources: a MiLB / prospect player keeps silo -> milb', () => {
+test('milbHeadshotUrl carries the path useHeadshotStep reads to skip the silo retry', () => {
+  // useHeadshotStep decides `quickFirst` by finding this segment in the second
+  // source, so a renamed path must fail here rather than quietly bring back the
+  // silo's 2 s pause for every prospect.
+  assert.ok(milbHeadshotUrl(700000).includes('/headshot/milb/'))
+  assert.equal(headshotSources(543807, { mlb: true })[1].includes('/headshot/milb/'), false)
+})
+
+test('headshotSources: a MiLB / prospect player keeps silo -> milb -> coach', () => {
   // A genuine prospect still gets the milb rung — a real recent face when his
   // MLB silo 404s.
   assert.deepEqual(headshotSources(700000, { mlb: false }), [
     realHeadshotUrl(700000),
     milbHeadshotUrl(700000),
+    coachHeadshotUrl(700000),
   ])
   // The safe default (unspecified) also keeps milb.
   assert.deepEqual(headshotSources(700000, {}), [
     realHeadshotUrl(700000),
     milbHeadshotUrl(700000),
+    coachHeadshotUrl(700000),
   ])
 })
 
