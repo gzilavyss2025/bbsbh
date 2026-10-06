@@ -580,7 +580,9 @@ for each generator; the reader modules:
   it ships the threshold it counted at, which the reader passes through as
   `selloutPct`. `attendanceFor` selects the raw row. MLB only — the generator
   is. Spoiler-free (a Final-games aggregate, same footing as WAR) — no
-  `SealBox`; the Facts rows render only when the club has one.
+  `SealBox`; the Facts rows render only when the club has one. A separate
+  `seasons[y].postseason.byTeamId` block (gameType F,D,L,W, same row shape) is
+  read by `postseasonAttendanceFor`; it never feeds the season row or a rank (#1439).
 - `around-the-game/gate.js` — the reader behind BOTH broadcast report boards that
   `gen-gate.mjs` feeds: `/attendance` (The Gate) and `/pace-of-play` (The Clock).
   The file holds each club's own totals and nothing about the other 29;
@@ -590,7 +592,10 @@ for each generator; the reader modules:
   headline column, because a raw average mostly measures how many seats a club
   built. A park not in that table yields a null fill and still ranks on every
   other column. Fill rates over 100% are printed as they are: capacity is a
-  listed figure, not a turnstile cap. `paceBoard(data, season, sortBy)` is the
+  listed figure, not a turnstile cap. `postseasonGate(data, season)` returns the
+  separate `postseason` block (gate only, home club; never mixed into the
+  season figures); pace of play stays regular season on purpose (#1439).
+  `paceBoard(data, season, sortBy)` is the
   same shape over game length, plus the three-hour/three-and-a-half-hour
   counts and the delay totals. `asClock` renders minutes the way baseball says
   them. Spoiler-free — a crowd count and a clock reading carry no result.
