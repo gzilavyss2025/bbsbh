@@ -1499,6 +1499,14 @@ Re-run only to fold in a new season.
   affiliate data is clean) and merges a small hand-verified seed
   (`scripts/milb-history-seed.json`) for pre-2005 eras. **Edit the SEED, never the
   output.** See the generator header for the 2005-floor rationale.
+- `season-marks/fetch.mjs` → `src/lib/data/season-marks.json` + `public/logos/historical/` —
+  the mark a club wore in a past season (#1591). **Hand-run, NOT on a cron**: the art is
+  immutable. Reads `scripts/season-marks/seed.json` (**edit the SEED, never the output**),
+  asks Wikimedia Commons for each file's licence, and downloads only a file marked public
+  domain or CC0. Any other licence keeps `file: null` and a `skipped` note, so the reader
+  draws the monogram and the maintainer sees what needs a decision. The "trademarked"
+  restriction is recorded per file. Reader: `src/lib/identity/seasonMarks.js`, through
+  `TeamLogo`'s `season` prop.
 - `gen-postseason-history.mjs` → `public/data/postseason-history.json` — the
   completed bracket (who played, who won, how many games, each team's 1-6
   seed) for every MLB postseason back to 2000 (`EARLIEST_YEAR`), plus the
