@@ -333,3 +333,39 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* ---- The at-bat replay (AtBatReplay.jsx) ------------------------------------
+   The scene under an at-bat card, with a navy caption bar that names the pitch
+   in flight and how it was called. `grid-column` is for the wide layout's
+   two-column .pbp__atbat grid; the focus hero is a flex column, where it is
+   inert and the side margin matches .pbp__zonecell. Capped, because the scene
+   is a fixed-aspect picture and a full 780px row would make it 470px tall. */
+.pbp__replay {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 380px;
+  margin-top: var(--space-2);
+  gap: 0;
+}
+.innings--focus .pbp__replay {
+  margin: 0 var(--space-3);
+  width: auto;
+}
+.pbp__replay .pscene {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.pbp__replaycap {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-1h) var(--space-2);
+  border-bottom-left-radius: var(--radius-xs);
+  border-bottom-right-radius: var(--radius-xs);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}

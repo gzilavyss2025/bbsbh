@@ -49,6 +49,7 @@ import {
   MoundVisitBar,
 } from './EventCards.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from '../scoring/StrikeZone.jsx'
+import { AtBatReplay } from './pitcherCard/AtBatReplay.jsx'
 import { HighlightSheet } from './HighlightSheet.jsx'
 import { CLIP_PACKAGE, CLIP_RAW, watchClipSource } from '../highlights/watchClip.js'
 import { useWatchClip } from '../highlights/useWatchClip.js'
@@ -740,6 +741,12 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
           <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--inline" />
         </div>
       )}
+      {/* The at-bat's pitches, replayed inline along their measured paths. After
+          the zone cell so the card and the zone keep their row on the wide
+          grid, and the replay takes the full row under them. Draws nothing at
+          an untracked park or under reduced motion, where the zone plot and
+          list are the whole account (AtBatReplay.jsx). */}
+      <AtBatReplay pitchDetails={pitchDetails} pitcher={pitcher} />
       {zoneOpen && hasZone && (
         <StrikeZoneModal
           pitchDetails={pitchDetails}

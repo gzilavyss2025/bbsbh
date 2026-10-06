@@ -28,3 +28,8 @@ mound — `HalfInning`'s card at `isFreshPitcher` and `PlayByPlay`'s mid-half
 model (role rule, tiles, scene math) is `lib/pitcherCard/`, so `npm test` can pin it.
 `PitchScene` draws through refs from a rAF loop — never React state per frame — stops off
 screen, and stays still under reduced motion.
+
+**`AtBatReplay`** (same folder) plays the at-bat card's own pitches in that scene, each along its
+measured path (`lib/pitcherCard/atBat.js`, from the feed's `vX0..aZ` that `pitchInfo.js` now
+carries). It sits inside the revealed card, so it is reveal-only like the zone plot, and it draws
+nothing at an untracked park or under reduced motion — the zone plot and list stay either way.
