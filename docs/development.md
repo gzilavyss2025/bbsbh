@@ -41,6 +41,10 @@ sessions that share one machine. In the cloud, these rules change:
   maintainer's devices. Verify in the container (unit tests, lint, and the preinstalled
   Chromium) and give the exact route (and `gamePk`, if one applies) so the maintainer
   can check it locally. Keep `?nointro` on every test URL.
+- **Screenshot.** For a small visual bug, and always in the cloud, send the maintainer
+  a screenshot of the fixed view instead of a dev-server link. Use Playwright with the
+  preinstalled Chromium. If the live feed cannot show the case, mock the data. Say that
+  you mocked it. Send the file with `SendUserFile`.
 - **Branch cleanup.** Merged `claude/*` branches pile up on GitHub. Enable "Automatically
   delete head branches" in the repository settings.
 

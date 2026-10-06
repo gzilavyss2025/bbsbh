@@ -65,6 +65,8 @@ the exact route you changed, and keep the server running. Put that clickable loc
 URL in your final handoff. **Add `?nointro` to any test URL**, so the first-visit
 welcome modal does not cover the slate (`e2e` specs add this through
 `e2e/fixtures.js`). See `docs/development.md` for the full workflow.
+**Small visual bug, or any cloud session:** do not hand over a dev server. Render the
+fixed view with the preinstalled Chromium and send Gary a screenshot (`SendUserFile`).
 
 ## Commands
 
