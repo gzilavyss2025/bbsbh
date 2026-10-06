@@ -43,7 +43,9 @@ These come from the Claude API model-migration notes (Opus 4.7 and later).
   a component without a marker (ADR-0017).
 - **Team marks on a dark surface** use the `mono` variant of `TeamLogo`, not a CSS filter
   (ADR-0031).
-- **Phone first.** The target is an iPhone, about 390 px wide.
+- **Phone first, every width checked.** The main target is an iPhone, about 390 px wide.
+  A design also holds at iPad portrait (820 px), iPad landscape (1180 px) and desktop
+  (1440 px). iPad is touch, so nothing may need hover.
 - **Minor-league data degrades.** Every new field falls back to `''`, `null` or a dash.
 - **Look first.** `/design-lab` shows every token, component, card and pill. Use an
   existing block before you add a partial. The partial order in `src/index.css` is the
