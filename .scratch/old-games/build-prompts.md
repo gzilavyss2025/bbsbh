@@ -30,19 +30,20 @@ It commits 2025 only. The cross-check moved out to 1b.
 
 ## Prompt 1b. The event index: the Retrosheet cross-check
 
-**Model: Sonnet 5.5, medium** (rung 3). It follows ADR-0100's open-data pattern.
+**Model: Sonnet 5.5, medium** (rung 3). The full prompt is `prompt-1b.md`. It follows
+ADR-0100's open-data pattern.
 
 **Needs first:** prompt 1a merged.
 
-- Add a `--check-retrosheet <dir>` mode to `gen-notable.mjs`. It reads the extracted
-  `nohitters.zip` and `tripleplays.zip` from the paths given. It never downloads
-  (ADR-0100). Inspect the extracted files first; do not assume their columns.
-- Match a Retrosheet game to an API game by date and score. Accept either game of a
-  doubleheader day (`findings.md`, Step 1). This needs no team-code table.
-- Label each Retrosheet row: matched; matched but dropped by D6 (Negro league);
-  before 1901; or missed. Print the report. Never write the output or the seed. A
-  person adds a seed row.
-- Tests for the matcher and the labels.
+- A `--check-retrosheet` mode on `gen-notable.mjs`. It reads the extracted
+  `nohitters.zip` and `tripleplays.zip` (`gameinfo.csv` and `teamstats.csv`) and
+  never downloads. Cycles are out: Retrosheet has no cycle list.
+- It matches by date and score, with either game of a doubleheader day, so it needs no
+  team-code table. It gives each Retrosheet game one label (`matched`, `missed`,
+  `dropped-league`, and others) and lists `index-only` rows.
+- It writes nothing. A person adds each true miss to the seed.
+- Known cases: Larsen 1956, the 2023 seed row, and the 1920 World Series triple play.
+  The 1920 case is the first known test of the postseason triple-play route.
 
 ## Prompt 1c. The event index: the full history
 
