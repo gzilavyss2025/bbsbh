@@ -62,6 +62,7 @@ const PATHS_BEFORE_GROUPING = [
   '/trade-deadline',
   '/all-star-rosters',
   '/all-star-legacy',
+  '/teammates',
   '/profile',
   '/logbook',
   '/first-scorebook',

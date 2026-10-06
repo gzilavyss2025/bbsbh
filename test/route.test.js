@@ -203,6 +203,7 @@ test('single-segment named routes resolve to their route name', () => {
     '/postseason-leaders': 'postseason-leaders',
     '/all-star-rosters': 'all-star-rosters',
     '/all-star-legacy': 'all-star-legacy',
+    '/teammates': 'teammates',
     '/standings': 'standings',
     '/admin': 'admin',
     '/umpires': 'umpire-rankings',
