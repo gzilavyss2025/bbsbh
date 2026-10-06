@@ -178,7 +178,7 @@ export function UmpireTendencies({ umpire, label = umpire?.season }) {
           <div className="umptend__challbl">ABS challenges</div>
           <div className="umptend__chalrow">
             <Tile label="Per game" value={challenges.perGame.toFixed(1)} />
-            <Tile label="Overturned" value={`${pct1(challenges.overturnRate)}*`} />
+            <Tile label="Overturned" value={pct1(challenges.overturnRate)} sup="*" />
           </div>
           {leagueChallenges?.overturnRate != null && (
             <p className="umptend__chalfoot">
