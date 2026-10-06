@@ -571,6 +571,8 @@ export async function umpireAccuracySummary(id, { seasonYear } = {}) {
     tier: rank?.tier ?? null,
     consistency: rec.season.consistency ?? null,
     favorPerGame: rec.season.favorPerGame ?? null,
+    // His postseason plate aggregate, unranked, or null. Shown as a plain line.
+    post: acc.umpires[id]?.seasonPost?.called ? acc.umpires[id].seasonPost : null,
   }
 }
 

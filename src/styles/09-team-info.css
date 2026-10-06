@@ -617,3 +617,9 @@
    surface it opens. It left this sheet when it was redrawn as a strip of
    film: the sheet was at its file cap, and the door's vocabulary is Express
    Lane's, not the lineup page's. */
+
+/* The postseason plate line sits on its own row under the HP name. */
+.umps__post {
+  flex: 1 0 100%;
+  margin: 0;
+}
