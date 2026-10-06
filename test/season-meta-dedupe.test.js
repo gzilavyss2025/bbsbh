@@ -48,3 +48,13 @@ test('a failed read gives null and the next call tries again', () =>
       assert.equal(calls.length, 2)
     },
   ))
+
+test('two callers on one failed read both get null, then a new call reads again', () =>
+  withFetch(
+    (n) => (n === 1 ? { ok: false, status: 404, json: async () => ({}) } : row(n)),
+    async (calls) => {
+      assert.deepEqual(await Promise.all([fetchSeasonMeta(2026), fetchSeasonMeta(2026)]), [null, null])
+      assert.equal(calls.length, 1)
+      assert.deepEqual(await fetchSeasonMeta(2026), { seasonId: 'row2' })
+    },
+  ))
