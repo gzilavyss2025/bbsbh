@@ -29,6 +29,7 @@ import { GameResultFace } from '../../components/game/GameResultFace.jsx'
 import { GameCard } from '../../components/game/GameCard.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
+import { Notice } from '../../components/ui/state/Notice.jsx'
 import { seriesGameBuckets } from './selectors.js'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../../components/postseason/SeriesParts.jsx'
 import { StillToPlay } from '../../components/postseason/StillToPlay.jsx'
@@ -400,7 +401,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
                         />
                       </>
                     ) : (
-                      <p className="hint hint--error">Couldn’t load this game’s result.</p>
+                      <Notice tone="error" size="compact" className="psseries__entryerror">Couldn’t load this game’s result.</Notice>
                     )}
                   </article>
                 )
@@ -412,7 +413,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
 
       {logLoading && !stats && results.length > 0 && <p className="hint">Loading the series so far…</p>}
       {logError && !stats && results.length > 0 && (
-        <p className="hint hint--error">Couldn’t load this series’ leaders and rosters.</p>
+        <Notice tone="error" className="pslive__notice">Couldn’t load this series’ leaders and rosters.</Notice>
       )}
 
       {stats?.totals && clubs.length === 2 && <SeriesTotals totals={stats.totals} clubs={clubs} />}

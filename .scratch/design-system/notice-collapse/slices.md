@@ -613,3 +613,56 @@ for N4 to N8.
    call fails). Both are pinned by `test/notice-n3.test.js` only.
 7. **Census.** No key shifted. `.gamephotos__noticetag` prints STALE (its rule is
    deleted, as planned). The other STALE keys are not N3's.
+---
+
+## N2 as built (what the next slices need)
+
+Written by the N2 session. It records what shipped. It does not write the prompts
+for N3 to N8.
+
+1. **Nine lines moved**, all `<Notice tone="error">`: `App.jsx` (schedule, not
+   found), `FirstScorebookPage`, `PostseasonSeriesPage` and `LiveSeriesPage` (the
+   per-game line, `size="compact"`), `LiveSeriesPage` (leaders and rosters),
+   `ScoutPage`, `StampInPage` (`size="compact"`, no namespace: it sits in a list
+   row that pads itself) and `GameNotesArchivePage` (`role="status"` kept: it
+   follows an action). The sentences and the tests that decide WHEN a line shows
+   did not change. The schedule line lost its `role="status"` and is now the
+   default alert.
+2. **Namespace classes.** `appstate__notice` (`02-app-shell.css`),
+   `scorebookstory__notice` (`42-first-scorebook.css`), `pslive__notice`
+   (`postseason/series-live.css`), `scout__notice` (`scout/scout.css`),
+   `gnotes__notice` (`report/game-notes.css`). Each is one rule,
+   `margin: var(--space-3) 0`: the 12px the old `.hint` padding gave. Every one of
+   those parents is a block (`.screen`), so none had a grid or Stack to give the
+   space. That is five CSS files beyond the nine the slice listed; the slice
+   could not keep the old spacing otherwise.
+3. **The grid hook.** `.psseries__entry .psseries__entryerror { grid-column: 1 / -1 }`
+   replaces the `.hint--error` selector in `35-postseason-series.css`. The Notice
+   is a DIRECT child of `article.psseries__entry` on both series pages (a ternary
+   branch, no wrapper), so the rule still reaches it. `.hint--error` in
+   `05-masthead-nav.css` stays: five dev pages wear it (N9).
+4. **`.pslive > *` zeroes the bottom margin** in the 740px grid, at the same
+   specificity as `.pslive__notice`, so the rule sits BEFORE the media block and
+   the grid zeroes the notice's bottom margin too (the review caught the first
+   order).
+5. **Census.** A `<Notice>` with no candidate class is not a census site, so the
+   per-game lines (no rule draws them) and the plain loading `.hint` of the live
+   page left the census. Their override rows are gone:
+   `PostseasonSeriesPage#2` (the line), `LiveSeriesPage#2` and `#3` (the game
+   line and the loading hint), `StampInPage#1`. `PostseasonSeriesPage#3` is now
+   `#2` (the MVP band) and `LiveSeriesPage#4` is now `#2` (the leaders line).
+   The six rows that still match say "DONE in N2". After the run, the one STALE
+   key is `components/playbyplay/PitcherNotice.jsx#10`, as on `main`. It is not
+   N2's. A run while `npm test` or the build is running can print a long STALE
+   list, because the EmptyState hand-off fails under load: run it again alone.
+6. **Order trap.** `system/notice.css` loads right before `06`, and its root says
+   `margin: 0`. A namespace rule in a partial numbered BEFORE 06 (`02-app-shell.css`)
+   loses on order at one class, so `.screen .appstate__notice` has two. The other
+   four load later and use one class. N3 to N8: check where your partial sits.
+7. **Seen in the browser** (390px and 900px, `statsapi.mlb.com` or the data file
+   answered with 500 through `page.route`; nothing edited): seven of the nine
+   lines (both App lines, the archive, a series entry, Scout, Stamp In and the
+   CSV line). **Not seen:** the two `LiveSeriesPage` lines (the per-game line and
+   leaders and rosters). No live series was open to load. Their markup matches
+   the final series page's per-game line and the `pslive__notice` rule is pinned
+   by `test/notice-n2.test.js`.

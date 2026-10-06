@@ -13,6 +13,7 @@ import { Headshot } from '../components/player/Headshot.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { Notice } from '../components/ui/state/Notice.jsx'
 
 const DATE = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
 const FULL_DATE = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -230,7 +231,7 @@ export function FirstScorebookPage() {
     return (
       <div className="screen">
         <SiteHeader />
-        <p className="hint hint--error">Couldn’t open the scorebook archive.</p>
+        <Notice tone="error" className="scorebookstory__notice">Couldn’t open the scorebook archive.</Notice>
         <button type="button" className="btn" onClick={archive.reload}>Retry</button>
       </div>
     )
