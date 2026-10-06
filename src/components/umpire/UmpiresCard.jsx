@@ -30,12 +30,22 @@ import { UmpireLink } from './UmpireLink.jsx'
 // nothing was taken away by making the name open a sheet instead.
 //
 // `seasonYear` is the game's season (#1201), so an old game reads its own year.
-export function UmpiresCard({ officials, seasonYear }) {
+//
+// `closed` is a played game or a forfeit (selectRecordIsClosed): its crew will
+// never post, so an empty list says so in one line. Any other game keeps `null`:
+// its umpires may still post.
+export function UmpiresCard({ officials, seasonYear, closed = false }) {
   const hpId = useMemo(() => officials.find((o) => o.role === 'HP')?.id ?? null, [officials])
   const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId, { seasonYear }), [hpId, seasonYear])
   const [modalId, setModalId] = useState(null)
 
-  if (officials.length === 0) return null
+  if (officials.length === 0) {
+    return closed ? (
+      <div className="fact">
+        <dd className="fact__value">Umpires are not in the record for this game.</dd>
+      </div>
+    ) : null
+  }
   return (
     <>
       {officials.map((o) => (

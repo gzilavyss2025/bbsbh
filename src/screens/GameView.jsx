@@ -5,6 +5,9 @@ import { useWakeLock } from '../hooks/useWakeLock.js'
 import { usePreferences } from '../hooks/preferences/usePreferences.js'
 import { gameSeriesHref, sectionToStep, stepToSection } from '../lib/route.js'
 import { selectGameStatus } from '../api/select.js'
+import { selectHasNoPlayByPlay } from '../api/gamerecord/played.js'
+import { Door } from '../components/ui/control/Door.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { filmCanExist } from '../api/expresslane/eligibility.js'
 import { catchUpPlan, catchUpRevealTo } from '../hooks/useRevealProgress.js'
 import { TeamTreatmentMark } from '../components/logo/TeamTreatmentMark.jsx'
@@ -120,6 +123,10 @@ export function GameView({ game, section, onSection }) {
   // anyway. `feed` has to be here first, which is why this sits below the fetch
   // rather than beside `sectionToStep`.
   const step = addressedStep === 7 && feed && !filmCanExist(feed) ? 0 : addressedStep
+  // An old played game with no plays has no half-inning pages worth a tap
+  // (selectHasNoPlayByPlay): "Innings ›" goes to the box score, and a direct
+  // load of a half shows one line instead of InningViewer. No SealBox renders.
+  const noPlays = selectHasNoPlayByPlay(feed)
   const round = useGameRound(feed)
   useDocumentTitle(gameTitle(game, step, inning, half, round))
 
@@ -338,7 +345,7 @@ export function GameView({ game, section, onSection }) {
           scorebook pages instead of only marching forward. On the innings view
           the tabs ride down into InningViewer's nav row instead (see below), so
           they share one line with Back/Next on the wide layout. */}
-      {step !== 2 && sectionTabs}
+      {(step !== 2 || noPlays) && sectionTabs}
 
       {sketchTeam && (
         <LogoModal
@@ -412,8 +419,8 @@ export function GameView({ game, section, onSection }) {
           careerMatchupsData={careerMatchupsData}
           workloadData={workloadData}
           callouts={gameCallouts}
-          onNext={() => onSection('top1')}
-          nextLabel="Innings ›"
+          onNext={() => onSection(noPlays ? 'boxscore' : 'top1')}
+          nextLabel={noPlays ? 'Box score ›' : 'Innings ›'}
           onCatchUp={onCatchUp}
           onPrintSheet={() => onSection('sheet')}
           onPreview={() => onSection('preview')}
@@ -423,7 +430,12 @@ export function GameView({ game, section, onSection }) {
         />
         </Suspense>
       )}
-      {feed && step === 2 && (
+      {feed && step === 2 && noPlays && (
+        <EmptyState action={<Door onClick={() => onSection('boxscore')}>Box score</Door>}>
+          There is no play-by-play in the record for this game.
+        </EmptyState>
+      )}
+      {feed && step === 2 && !noPlays && (
         <Suspense fallback={<Loader />}>
         <InningViewer
           feed={feed}

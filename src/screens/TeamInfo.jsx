@@ -12,6 +12,7 @@ import {
   selectBirthdayIds,
   lastFirst,
 } from '../api/select.js'
+import { selectRecordIsClosed } from '../api/gamerecord/played.js'
 import { fetchTeam, fetchTeamRoster } from '../api/team.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
 import { BallparkModal } from '../components/ballpark/BallparkModal.jsx'
@@ -197,7 +198,7 @@ export function TeamInfo({
                 alone at the end of the grid — see the ESPN-sourced fetch in
                 GameView). The home page's grid is already even without it. */}
             {side === 'away' && <Fact label="Broadcast" value={broadcast} />}
-            <UmpiresCard officials={officials} seasonYear={gameSeason} />
+            <UmpiresCard officials={officials} seasonYear={gameSeason} closed={selectRecordIsClosed(feed)} />
           </FactGrid>
 
           {/* The preview card and the blank sheet: two plain doors on one line
@@ -429,6 +430,8 @@ function TeamSections({
   const orgTeamId = teamIdentity?.parentOrgId ?? meta.id
   const oppOrgTeamId = oppTeamIdentity?.parentOrgId ?? oppMeta.id
   const season = selectGameSeason(feed)
+  // A played game or a forfeit: its lineup and starter will never post.
+  const closed = selectRecordIsClosed(feed)
   const oppPitcher = useMemo(
     () => selectOpposingPitcher(feed, side, { includeDerivedStarter: true }),
     [feed, side],
@@ -550,7 +553,7 @@ function TeamSections({
   // than a dead-end "not posted" line — there's still something to copy onto
   // the sheet. Only fetched while actually needed (skipped once the real
   // lineup posts).
-  const needsRoster = lineup.length === 0
+  const needsRoster = lineup.length === 0 && !closed
   const { data: rawRoster } = useAsync(
     () =>
       needsRoster && meta.id && season
@@ -575,6 +578,7 @@ function TeamSections({
     <>
       <OpposingStarterCard
         pitcher={oppPitcher}
+        closed={closed}
         projected={projectedStarters}
         pitcherLine={oppPitcherLine}
         careerVsOpp={oppPitcherCareerVsOpp}
@@ -702,7 +706,9 @@ function TeamSections({
             </>
           ) : (
             <p className="roster__notice">
-              Not final{info.scheduledTime ? ` — posts close to first pitch (${info.scheduledTime})` : ' yet'}
+              {closed
+                ? 'The batting order is not in the record for this game.'
+                : `Not final${info.scheduledTime ? ` — posts close to first pitch (${info.scheduledTime})` : ' yet'}`}
             </p>
           )}
         </Card>
@@ -744,6 +750,7 @@ function TeamSections({
 // alongside it); this replaces that row rather than duplicating it.
 function OpposingStarterCard({
   pitcher,
+  closed,
   projected,
   pitcherLine,
   careerVsOpp,
@@ -860,6 +867,8 @@ function OpposingStarterCard({
             />
           )}
         </div>
+      ) : closed ? (
+        <p className="roster__notice starter__closed">The starting pitcher is not in the record for this game.</p>
       ) : projected?.length ? (
         <ProjectedStarters rows={projected} />
       ) : (

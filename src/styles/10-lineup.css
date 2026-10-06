@@ -162,6 +162,11 @@
 .starter__empty {
   margin: var(--space-2h) var(--space-3);
 }
+/* The closed-game line ("not in the record") borrows .roster__notice's face and
+   insets itself like the empty state; the second class beats its margin. */
+.starter .starter__closed {
+  margin: var(--space-2h) var(--space-3);
+}
 
 .shot.starter__shot {
   flex: none;
