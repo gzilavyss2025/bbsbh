@@ -17,7 +17,7 @@
 .asof-banner__input	control	n/a				Date field in mono face with a hairline edge (styles/27-player-position-innings.css:639-647); a form field.
 .asof-banner__label	control	n/a				'As of' label of the date field (styles/27-player-position-innings.css:635-638); part of the form state.
 .asof-banner__text	notice	HOLD				'Stats entering {date}' caption text (styles/27-player-position-innings.css:583-586); the one message in the dated state (components/seal/AsOfBanner.jsx:94). Held with the block.
-.asyncstatus__notice	notice	n/a	N4		error	N4 namespace: one margin (var(--space-3) 0) that gives back the old .hint padding, worn by AsyncStatus's two error Notices and AsyncGate()'s page error (styles/06-loader-and-cards.css). A margin on a Notice, not a notice of its own.
+.asyncstatus__notice	notice	n/a	N4		error	N4 namespace: one margin (var(--space-3) 0) that gives back the old .hint padding, worn by AsyncStatus's two error Notices and AsyncGate()'s page error (styles/08-site-shell.css). A margin on a Notice, not a notice of its own.
 .audit__banner	tool	HOLD				1px solid --border-rule box, radius-md, --surface-card ground, padding space-3 (styles/18-uniforms-and-jerseys.css:51-58); count banner on the Jersey Audit tab of /identity-lab (DEV only).
 .audit__banner--warn	tool	HOLD				Same box with border-color --accent-negative on all 4 sides (1px, no left rule), --bg-canvas ground, clay text (styles/18-uniforms-and-jerseys.css:60-64); /identity-lab audit (DEV only).
 .awardhistory__allmlbhead	other	n/a				Uppercase centred column-head label, --award-soft ground, 1px --award-line border (styles/33-awards-history.css:269); All-MLB column head on Awards history, a heading not a message.

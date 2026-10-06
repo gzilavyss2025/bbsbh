@@ -13,6 +13,15 @@
 //   node scripts/gen-run-expectancy.mjs                    # last 2 complete seasons
 //   node scripts/gen-run-expectancy.mjs --seasons=2024,2025
 //
+// ERA MODE (1960-2023, one decade at a time; never touches run-expectancy.json):
+//   node scripts/gen-run-expectancy.mjs --era-sweep --seasons=1980,1981,...
+//     one season at a time, 4 requests at once, writes
+//     .scratch/run-expectancy-eras/season-YYYY.json (a committed checkpoint of
+//     sums only, no feeds) and skips a season whose file exists
+//   node scripts/gen-run-expectancy.mjs --era-aggregate --decade=1980
+//     merges that decade's checkpoints into public/data/run-expectancy-eras/1980s.json;
+//     exits 1 and writes nothing if a season has no checkpoint
+//
 // METHODOLOGY. For every Final regular-season game, walk liveData.plays.allPlays
 // in feed order (this already includes stolen-base/caught-stealing/pickoff/
 // wild-pitch/passed-ball/balk as their own top-level plays, interleaved with
@@ -42,16 +51,24 @@
 // back at READ time (src/lib/runExpectancy.js's lookupRE) to a base/out-only
 // RE24 total — this script writes BOTH `states` (288) and `re24` (24) sums so
 // that fallback never needs a second pass over history.
+import { existsSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { stateKey, re24Key } from '../src/lib/runExpectancy.js'
+import { eraDecade } from '../src/lib/runExpectancy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
-import { writeJsonAtomic } from './lib/io.js'
+import { readJsonOr, writeJsonAtomic } from './lib/io.js'
+import {
+  accumulateGame,
+  checkpointOf,
+  decadeSeasons,
+  mergeCheckpoints,
+} from './lib/run-expectancy/eras.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'run-expectancy.json')
-const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
+const eraDir = join(here, '..', '.scratch', 'run-expectancy-eras')
+const eraOutDir = join(here, '..', 'public', 'data', 'run-expectancy-eras')
 
 // Strict on purpose: a bare `--flag` is ignored, so a mistyped value flag falls
 // back to its default. The shared parseArgs in lib/args.mjs would make it `true`.
@@ -81,98 +98,6 @@ async function seasonGamePks(season) {
   return pks
 }
 
-// Accumulate one game's plate appearances into the running state sums. Adds
-// { sum, n } into both `states` (288-bucket) and `re24` (24-bucket) Maps.
-function accumulateGame(feed, states, re24) {
-  const plays = feed?.liveData?.plays?.allPlays ?? []
-  if (!plays.length) return
-
-  // Group play indices by half-inning, in feed order (already chronological).
-  const halves = new Map() // "inning-half" -> array of play indices
-  for (let i = 0; i < plays.length; i++) {
-    const p = plays[i]
-    const key = `${p.about?.inning}-${p.about?.halfInning}`
-    if (!halves.has(key)) halves.set(key, [])
-    halves.get(key).push(i)
-  }
-
-  // Runs scored ON each play (delta of the feed's running cumulative total),
-  // then a per-half suffix sum so "remaining runs from play i forward" is O(1).
-  let prevTotal = 0
-  const runsOnPlay = new Array(plays.length)
-  for (let i = 0; i < plays.length; i++) {
-    const r = plays[i].result ?? {}
-    const total = (r.awayScore ?? 0) + (r.homeScore ?? 0)
-    runsOnPlay[i] = Math.max(0, total - prevTotal)
-    prevTotal = total
-  }
-  const suffixByIndex = new Array(plays.length)
-  for (const indices of halves.values()) {
-    let running = 0
-    for (let k = indices.length - 1; k >= 0; k--) {
-      running += runsOnPlay[indices[k]]
-      suffixByIndex[indices[k]] = running
-    }
-  }
-
-  // Walk the whole game in feed order, tracking base occupancy + outs, reset
-  // at each new half-inning.
-  let bases = [null, null, null] // runner id per base, 1B/2B/3B
-  let outs = 0
-  let curHalfKey = null
-
-  for (let i = 0; i < plays.length; i++) {
-    const p = plays[i]
-    const halfKey = `${p.about?.inning}-${p.about?.halfInning}`
-    if (halfKey !== curHalfKey) {
-      bases = [null, null, null]
-      outs = 0
-      curHalfKey = halfKey
-    }
-    if (outs >= 3) continue // shouldn't happen mid-half, but never tag a dead state
-
-    const preBaseMask = (bases[0] ? 1 : 0) | (bases[1] ? 2 : 0) | (bases[2] ? 4 : 0)
-    const preOuts = outs
-    const remainingRuns = suffixByIndex[i] ?? 0
-
-    let prevCount = { balls: 0, strikes: 0 } // resets per play, per the documented edge case above
-    for (const e of p.playEvents ?? []) {
-      if (!e.isPitch) continue
-      const balls = prevCount.balls
-      const strikes = prevCount.strikes
-      prevCount = { balls: e.count?.balls ?? balls, strikes: e.count?.strikes ?? strikes }
-      // A pre-pitch count outside 0–3 balls / 0–2 strikes is corrupted feed
-      // data (a 4th ball ends the plate appearance, so it can never be a
-      // PRE-pitch state) — rare (2 instances in a 4,860-game backfill, see
-      // consistency-favor-scope.md), but skip it entirely rather than tag a
-      // state that shouldn't exist.
-      if (balls > 3 || strikes > 2) continue
-      const k288 = stateKey(preBaseMask, preOuts, balls, strikes)
-      const cell = states.get(k288) ?? { sum: 0, n: 0 }
-      cell.sum += remainingRuns
-      cell.n += 1
-      states.set(k288, cell)
-
-      const k24 = re24Key(preBaseMask, preOuts)
-      const cell24 = re24.get(k24) ?? { sum: 0, n: 0 }
-      cell24.sum += remainingRuns
-      cell24.n += 1
-      re24.set(k24, cell24)
-    }
-
-    // Apply this play's runner movements for the NEXT play's base/out state.
-    for (const r of p.runners ?? []) {
-      const rid = r.details?.runner?.id
-      const startBase = BASE_NUM[r.movement?.start]
-      const endBase = BASE_NUM[r.movement?.end]
-      const isOut = r.movement?.isOut
-      if (startBase) bases[startBase - 1] = null
-      if (isOut) outs = Math.min(outs + 1, 3)
-      else if (endBase) bases[endBase - 1] = rid
-    }
-  }
-}
-
 // --- main ---------------------------------------------------------------------
 const args = parseArgs(process.argv.slice(2))
 const currentYear = new Date().getUTCFullYear()
@@ -180,13 +105,11 @@ const seasons = args.seasons
   ? args.seasons.split(',').map((s) => s.trim())
   : [String(currentYear - 2), String(currentYear - 1)]
 
-const states = new Map()
-const re24 = new Map()
-let gamesSwept = 0
-
-for (const season of seasons) {
+// Sweep one season's Final games into `states`/`re24`. Returns { scheduled, games }.
+async function sweepSeason(season, limit, states, re24) {
   const pks = await seasonGamePks(season)
   console.log(`${season}: ${pks.length} Final games`)
+  let games = 0
   // Accumulate each game's feed into states/re24 AS IT ARRIVES, inside the
   // worker itself, rather than collecting all of a season's feeds (each
   // several hundred KB to a few MB) in memory before processing any of
@@ -194,14 +117,74 @@ for (const season of seasons) {
   // real peak-memory problem. mapConcurrent's return value is unused
   // here; the accumulation IS the work.
   let done = 0
-  await mapConcurrent(pks, 6, async (pk) => {
+  await mapConcurrent(pks, limit, async (pk) => {
     const feed = await getJson(`/api/v1.1/game/${pk}/feed/live`)
-    accumulateGame(feed, states, re24)
-    gamesSwept++
+    if (accumulateGame(feed, states, re24)) games++ // a feed with no plays does not count
     done++
     if (done % 250 === 0) console.log(`${season}: ${done}/${pks.length} games processed`)
   })
   console.log(`${season}: swept (${states.size} states populated so far)`)
+  return { scheduled: pks.length, games }
+}
+
+if (process.argv.includes('--era-sweep')) {
+  const list = (args.seasons ?? '').split(',').map((s) => s.trim()).filter(Boolean)
+  if (!list.length || list.some((s) => !/^\d{4}$/.test(s) || !eraDecade(s))) {
+    console.error('--era-sweep needs --seasons=YYYY,YYYY,... (1960 to 2023)')
+    process.exit(1)
+  }
+  for (const season of list) {
+    const file = join(eraDir, `season-${season}.json`)
+    if (existsSync(file)) {
+      console.log(`${season}: checkpoint exists, skipped`)
+      continue
+    }
+    const started = Date.now()
+    const states = new Map()
+    const re24 = new Map()
+    const { scheduled, games } = await sweepSeason(season, 4, states, re24)
+    await writeJsonAtomic(file, checkpointOf(season, scheduled, games, states, re24))
+    const min = ((Date.now() - started) / 60000).toFixed(1)
+    console.log(`${season}: wrote ${file} — ${games}/${scheduled} games, ${min} min`)
+  }
+  process.exit(0)
+}
+
+if (process.argv.includes('--era-aggregate')) {
+  const seasonList = decadeSeasons(args.decade ?? '')
+  if (!seasonList.length) {
+    console.error('--era-aggregate needs --decade=1960|1970|1980|1990|2000|2010|2020')
+    process.exit(1)
+  }
+  const missing = seasonList.filter((s) => !existsSync(join(eraDir, `season-${s}.json`)))
+  if (missing.length) {
+    console.error(`no checkpoint for ${missing.join(', ')}; nothing written`)
+    process.exit(1)
+  }
+  const checkpoints = await Promise.all(seasonList.map((s) => readJsonOr(join(eraDir, `season-${s}.json`))))
+  if (checkpoints.some((c, i) => c.season !== seasonList[i])) {
+    console.error('a checkpoint holds the wrong season; nothing written')
+    process.exit(1)
+  }
+  for (const c of checkpoints) {
+    if (c.gamesSwept < c.scheduled) console.warn(`${c.season}: only ${c.gamesSwept}/${c.scheduled} games had play-by-play`)
+  }
+  const decade = `${seasonList[0].slice(0, 3)}0s`
+  const outFile = join(eraOutDir, `${decade}.json`)
+  const table = mergeCheckpoints(checkpoints)
+  await writeJsonAtomic(outFile, { generatedAt: new Date().toISOString(), ...table })
+  // index.json is the folder's stamp (check-data-freshness reads it) and lists the decades on disk.
+  const decades = readdirSync(eraOutDir).filter((f) => /^\d{4}s\.json$/.test(f)).map((f) => f.slice(0, -5)).sort()
+  await writeJsonAtomic(join(eraOutDir, 'index.json'), { generatedAt: new Date().toISOString(), decades })
+  console.log(`wrote ${outFile} — ${table.seasons.join(', ')}, ${table.gamesSwept} games`)
+  process.exit(0)
+}
+
+const states = new Map()
+const re24 = new Map()
+let gamesSwept = 0
+for (const season of seasons) {
+  gamesSwept += (await sweepSeason(season, 6, states, re24)).games
 }
 
 await writeJsonAtomic(out, {

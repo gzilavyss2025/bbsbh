@@ -78,20 +78,20 @@ fixes across several screens.
 
 ## Prompt 2b. The feat label inside the box-score seal; accept ADR-0101
 
-**Model: Opus 5.5, high** (rung 7). This is the step that touches the spoiler rule.
+**Model: Opus 5.5, high** (rung 7). The full prompt is `prompt-2b.md`, graded and
+rewritten with `/improve-prompt`. This step touches the spoiler rule.
 
 **Decided (2026-10-06):** D1, seal by surface.
 
-- Add the reader under `src/api/notable/`, through `staticJsonBy`. Its
-  `spoiler-manifest.json` entry is `reveal-only`, and its importer allowlist names the
-  box score's reveal module only (ADR-0101, part 4).
-- Render the feat label inside the box score's `SealBox` reveal function only. Read
-  ADR-0002, ADR-0049 and ADR-0101 before you edit.
-- Add a test that the label is not in the DOM while the box score is sealed. Add a test
-  that the label shows under the day pass (ADR-0026) and a stamp (ADR-0048) with no
-  `boxreveal` write.
-- Change ADR-0101 from DRAFT to Accepted. Write in the decision Gary took on D1. Update
-  `src/CLAUDE.md`'s UI-side list in one line.
+- The reader `src/api/notable/notable.js`, `reveal-only`, with one importer:
+  `screens/boxscore/FeatLabel.jsx`.
+- `FeatLabel.jsx` mounts inside the box score's reveal render and fetches only after the
+  reveal. `BoxScore.jsx` is at its size ceiling (1,191 of 1,200), so it gets one import
+  and one mount.
+- No seal input changes and nothing new is persisted.
+- The DOM check uses a scratch Playwright script, because the e2e hook blocks
+  `playwright test`.
+- ADR-0101 becomes Accepted, with an "As built" section.
 
 ## Prompt 3. The shelf
 
