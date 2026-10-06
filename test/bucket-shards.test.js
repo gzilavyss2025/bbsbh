@@ -149,7 +149,7 @@ test('a hitter-grid bucket stays small enough to be worth fetching alone', () =>
   }
 })
 
-// The postseason part of the spray store (ADR-0100) is MLB only, and the ledger
+// The postseason part of the spray store (ADR-0101) is MLB only, and the ledger
 // that stops a re-sweep keys on the gamePk, so a postseason game is on it once.
 test('a spray postseason entry is MLB only, and the ledger holds each game once', () => {
   for (const d of dirs('spray')) {

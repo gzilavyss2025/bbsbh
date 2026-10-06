@@ -320,7 +320,7 @@ test('sprayView decodes the balls once, for the chart to filter', () => {
 
 // ------------------------------------------------------------ the postseason ----
 //
-// `post` sits beside `bat` in a bucket, same entry shape (ADR-0100). The rules:
+// `post` sits beside `bat` in a bucket, same entry shape (ADR-0101). The rules:
 // the regular card never changes, the control exists only for a batter with
 // October balls, and All is the two added.
 

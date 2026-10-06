@@ -43,7 +43,7 @@ import { HIT_COORD_ORIGIN } from '../lib/ballpark/hitProjection.js'
 //
 // THE POSTSEASON IS A SECOND MAP BESIDE `bat`. A bucket may also carry
 // `post: { [batterId]: entry }`, the same entry shape over MLB postseason games
-// (ADR-0100). It is a new key rather than a column so a reader that knows only
+// (ADR-0101). It is a new key rather than a column so a reader that knows only
 // `bat` is unchanged, and it is never blended into `bat`: a home-run chart and a
 // hard-hit rate read as season facts, and twelve October balls folded into five
 // hundred would be invisible. The card shows Regular, Postseason or All; All is
