@@ -45,14 +45,22 @@ export function seasonPath(base, season, query = '') {
   return `${path}${qs ? `?${qs}` : ''}`
 }
 
-// The five season views (#1202), or null for any other address. lib/route.js
+// The season views (#1202), or null for any other address. lib/route.js
 // calls this before its own branches. A bare address keeps the exact shape it
 // had before #1202; a season segment or `?vs=` only adds keys.
 //
 // The player hub's Analytics tab is the one season view on the hub: its
 // season cards read the season stores. Its route keeps the hub's id, cutoff
 // and level, as lib/route.js's PLAYER_TAB_ROUTES branch builds them.
-const SEASON_PAGES = { fouls: 'fouls', umpires: 'umpire-rankings', 'abs-challenges': 'abs-challenges' }
+// `standings` and `postseason-race` take a season too ('/standings/2024') but no
+// `vs`: one year's table is not compared with another's here.
+const SEASON_PAGES = {
+  fouls: 'fouls',
+  umpires: 'umpire-rankings',
+  'abs-challenges': 'abs-challenges',
+  standings: 'standings',
+  'postseason-race': 'postseason-race',
+}
 export function parseSeasonRoute(parts, q, { asOf, sportId, idFromSlug }) {
   const [head, second, third, fourth] = parts
   if (parts.length <= 2 && SEASON_PAGES[head]) return { name: SEASON_PAGES[head], ...seasonParams(second, q) }
