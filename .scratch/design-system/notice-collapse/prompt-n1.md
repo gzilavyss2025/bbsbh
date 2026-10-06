@@ -2,9 +2,9 @@
 
 Written 2026-10-06, after the N0 plan merged (#1498, inside the stack PR #1518).
 This is the first code slice of the third #1132 family. Paste the block under
-"The prompt" into a fresh session. It asks Gary the five decisions of
-`decisions.md` with `AskUserQuestion`, one at a time, and then builds `Notice`
-to match his answers. The prompts for N2 to N8 are not here: the N1 session
+"The prompt" into a fresh session. Gary answered the five decisions of
+`decisions.md` on 2026-10-06 (all recommended), so the prompt builds `Notice`
+to match them and asks nothing. The prompts for N2 to N8 are not here: the N1 session
 writes down what it learned, and a later session writes them (`slices.md`,
 "Handoff").
 
@@ -56,11 +56,11 @@ I measured these on `origin/main` at `9d01ade71`. N0 measured `1be24feeb`.
 
 ---
 
-## N1 — ask the five decisions, build `Notice`, move the pilot
+## N1 — build `Notice`, move the pilot
 
 Model and effort: Sonnet 5.5 (`claude-sonnet-5-5`), high. It is a new component, a
 CSS file, a helper, a lab entry and tests, copied from a shape that already exists
-(EmptyState), plus one judgment: bending the build to Gary's five answers. There is
+(EmptyState), with all five answers settled. There is
 no spoiler-rule change (the pilot is on the poster studio, not a scoring surface),
 so rung 4 is enough. If the first result is shallow, raise the effort before you
 change the model.
@@ -73,9 +73,9 @@ write anything new. (Ponytail never overrides the spoiler rule, test-first or
 check-dir-size.)
 
 Task: build slice N1 of the Notice collapse for GitHub issue #1132
-(gzilavyss2025/bbsbh). First ask Gary the five design decisions with the
-AskUserQuestion tool, one question at a time. Then build the Notice component, its
-CSS, its class helper, its lab entry and its tests, to match his answers, and move
+(gzilavyss2025/bbsbh). The five design decisions are settled (Step 2).
+Build the Notice component, its
+CSS, its class helper, its lab entry and its tests, to match them, and move
 ONE pilot site onto it. This is the first code slice of the third family
 (Table and EmptyState are done). #1132 stays open: eight more Notice slices come,
 then the dashed-rule fix. The PR says "Part of #1132", never "Closes #1132".
@@ -118,7 +118,7 @@ Before you start (read and look; no edits yet)
    --dump while you read it (without it the script rewrites census.md and
    census.json).
 
-Step 1 — fix the census drift (before you ask anything)
+Step 1 — fix the census drift
 Fix overrides.tsv by READING each row's code, never by the grep alone:
 - DELETE the two STALE keys screens/scout/HeadToHead.jsx#1 and
   screens/scout/MapParts.jsx#1 (do not mark them DONE).
@@ -137,106 +137,27 @@ Fix overrides.tsv by READING each row's code, never by the grep alone:
   loader-only AsyncStatus callers (36 error callers, not 39), the moved pilot line
   (169), and the three tests that pin the import order.
 
-Step 2 — ask Gary the five decisions (AskUserQuestion, ONE question per call)
-Gary's standing rule: ask one question at a time and use AskUserQuestion. Ask in
-this order. Put the recommended option first and end its label with
-"(Recommended)". The `preview` text is a plain-text mock. Wait for each answer
-before you ask the next. If an answer is "Other", read the note and ask a
-follow-up if it is not clear; never guess. If the AskUserQuestion tool is not
-available in this session, STOP and say so: do not answer for Gary.
+Step 2 — the five decisions are settled (do not ask them again)
+Gary answered Q1 to Q5 on 2026-10-06, and decisions.md records the answers. Read the
+answers table. Every answer is the recommended one, so slices.md does not change and
+N2 to N8 stay as planned. If the table is empty or an answer differs from the list
+below, STOP and tell Gary: do not guess.
+- Q1 wash: a thin edge all round, a pale tint, the same for every tone.
+- Q2 box: build tone error; the pilot is .posterstudio__warn.
+- Q3 frame only: build the component, noticeParts() and noticeClass().
+- Q4 four tones: info, event, caution, error.
+- Q5 leave all: nothing on the hold list moves.
 
-Q1  header "Look"
-    question: "What does a Notice look like? The issue says a 3px bar on the left;
-    only the delay card has one today."
-    options:
-    - "Wash (Recommended)": "A thin edge all round and a pale tint inside, the same
-      for every tone. Matches the pitcher cards (33 sites). The delay card loses
-      its bar and its shadow."
-      preview:
-        ┌─────────────────────────────┐
-        │ ⛈ RAIN DELAY                │
-        │   Play stopped for 42 min   │
-        └─────────────────────────────┘
-        thin edge all round, pale tint
-    - "Rail": "A 3px bar on the left edge only, on a tint. Matches the delay card
-      and the lab pages. The pitcher cards lose their box, and ADR-0017 chose
-      against a rail on purpose."
-      preview:
-        ┃ ⛈ RAIN DELAY
-        ┃   Play stopped for 42 min
-        3px bar on the left, no other edge
-    - "Per tone": "A bar for info and error, a wash for event and caution. Two looks
-      inside one component."
-Q2  header "Errors"
-    question: "Does a one-line error get a box, or stay coloured text? About 42
-    screens change, the slate among them."
-    options:
-    - "A box (Recommended)": "Every error becomes a Notice with tone error: pale clay
-      fill, clay edge, dark-clay words. A smaller box inside a card. Screen readers
-      hear it at once."
-      preview:
-        ┌──────────────────────────────────────┐
-        │ Couldn't load games. Check your      │
-        │ connection and try again.  [Retry]   │
-        └──────────────────────────────────────┘
-    - "Text stays": "Errors stay clay words. Notice then serves only the 40 sites
-      that already have a box. Slices N2 and N4 are dropped."
-      preview:
-        Couldn't load games. Check your connection and try again.  [Retry]
-Q3  header "Pitcher card"
-    question: "Is the pitcher card's outer frame part of Notice? (The card is 28
-    files; its inside layout is not touched either way.)"
-    options:
-    - "Frame only (Recommended)": "The cards take their frame from a shared class.
-      Three slices on the innings viewer (N6, N7, N8). One definition of the yellow
-      wash."
-    - "Held out": "The card keeps its own frame. Only the rename (N8) happens. The
-      event tone then has one user, the postponed strip."
-Q4  header "Tones"
-    question: "Which tones? Each is a role, not a colour."
-    options:
-    - "Four (Recommended)": "info, event, caution, error. caution and error share a
-      colour family; they differ in ink and in what a screen reader says."
-    - "Three": "info, event, error. caution is merged into error: the photos notice
-      would use the error ink and announce as an alert."
-    (Gary can type other names with "Other".)
-Q5  header "Hold list"
-    question: "Leave these as they are? They are 71 sites: 7 tape banners, the
-    as-of banner, the live-edge chip, the sync strip, the Express Lane lines, the
-    pregame board tags, and the lab and admin pages."
-    options:
-    - "Leave all (Recommended)": "None of them becomes a Notice. Each reason is in
-      spec.md section 9."
-    - "Also move the as-of banner": "It needs a variant with two actions. Adds one
-      slice after N5."
-    - "Also move the tape banners": "They need a fifth, filled look, and stop looking
-      like tape. Adds one slice."
-
-Step 3 — record the answers
-- In decisions.md, fill the answers table (Q1 to Q5) with Gary's words and today's
-  date, in the style of ../empty-state-collapse/decisions.md.
-- If ANY answer differs from the recommendation, change slices.md as its "If Gary
-  answers otherwise" table says, and say which slices appear or vanish. Do not
-  start N2 to N8.
+Step 3 — nothing to record
+decisions.md already holds the answers (and the 45 to 42 fix). Do not edit its table.
 
 Step 4 — build (only what a user of N1 needs, nothing more)
-How each answer bends the build:
-- Q1 wash: the CSS in spec.md section 6. Rail: the base draws
-  `border-left: 3px solid var(--notice-edge)` and no other edge. Per tone: info and
-  error draw the rail, event and caution the wash; pin both.
-- Q2 text stays: do not build tone error. The pilot becomes .gamephotos__notice on
-  screens/GamePhotosPage.jsx and screens/team/TeamPhotosPage.jsx (2 sites, label
-  "Unsealed", tone caution; keep its dashed edge in the namespace rule in
-  styles/14-strike-zone.css so nothing changes on screen), instead of
-  .posterstudio__warn.
-- Q3 held out: do not build the frame-only helper noticeClass(); build the
-  component and noticeParts() only. Frame only: build both; noticeClass({ tone,
-  size, className }) returns the frame class string for a caller that owns its root
-  (the pitcher cards and one <button>, from N6). Its test pins it.
-- Q4 three: no tone caution (the pilot uses error). If Q2 is also "text stays",
-  there is no error tone either: STOP and ask Gary which tone the pilot takes.
-  Other names: use Gary's names in
-  the class names, the props, the lab, the tests and the docs.
+What the answers fix:
+- Wash: the CSS in spec.md section 6.
+- Tone error and tone caution both exist.
+- Build both noticeParts() and noticeClass({ tone, size, className }). noticeClass
+  returns the frame class string for a caller that owns its root (the pitcher cards
+  and one <button>, from N6). Its test pins it.
 Files (target 10; 12 here, 13 if the pilot lowers a check-raw-values.mjs budget; see
 "What changed since N0"):
 1. src/components/ui/state/Notice.jsx — `<Notice tone label icon action size
@@ -276,7 +197,7 @@ Directory budget: src/styles/system/ goes from 11 to 12, the cap. Say so in the 
 body. The next file there needs the system/state/ subfolder (spec.md section 5).
 Do NOT add a budget entry.
 
-Step 5 — the pilot (1 site; see Q2 for the alternative)
+Step 5 — the pilot (1 site)
 .posterstudio__warn on screens/GamePreview.jsx (about line 169) becomes
 `<Notice tone="caution" role="status">` with the same sentence. It appears after the
 reader toggles a section, so it is a live region. The `overflows` test stays. Read
@@ -321,17 +242,16 @@ Step 7 — review, commit, PR
   out of the census (read the STALE list; never delete it blind).
 - Commit to your assigned branch and push. Open a DRAFT PR whose body says
   "Part of #1132", mirrors .github/pull_request_template.md, lists the routes for
-  #1177's screenshot suite, says what you could not see, and states the five
-  answers. Subscribe to its activity. Do not push to main and do not merge: Gary
+  #1177's screenshot suite, says what you could not see, and lists the five
+  answers from decisions.md. Subscribe to its activity. Do not push to main and do not merge: Gary
   merges. Wait for the `lint-and-build` check (about 5 to 15 minutes). If it fails,
   follow the steward skill.
 
 Handoff
 1. Append a "N1 as built" section to slices.md: the API as built (the exact
    exports and prop names, as E1's "What E1 taught" did), the three pins you moved,
-   the namespace and margin lessons from the pilot, and the corrected slice list if
-   an answer changed it. Do NOT write the prompts for N2 to N8.
-2. Final message: Gary's five answers; the PR link; the local URL; what changed on
+   the namespace and margin lessons from the pilot. Do NOT write the prompts for N2 to N8.
+2. Final message: the PR link; the local URL; what changed on
    screen (one line per member that moved); what you did not see; and which slices
    can start next (N2, N3, N4, N5 and N6 share no file).
 

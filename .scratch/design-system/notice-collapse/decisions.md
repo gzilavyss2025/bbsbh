@@ -2,7 +2,7 @@
 
 ## The five questions
 
-Each line gives my recommendation first, then the cost. Nothing is answered yet.
+Each line gives my recommendation first, then the cost. Gary answered all five on 2026-10-06 (table below).
 The census (`census.md`) and the proposal (`spec.md`) back each one.
 
 1. **Q1. What does a notice look like?** Recommended: **a thin edge all round
@@ -10,7 +10,7 @@ The census (`census.md`) and the proposal (`spec.md`) back each one.
    the delay card has the thick left bar today, and it loses it. The issue asks
    for the bar. The census shows 1 of the 6 named things draws one.
 2. **Q2. Does a one-line error get a box, or stay text?** Recommended: **a box**,
-   with a smaller box for errors that sit inside a card. Trade-off: about 45
+   with a smaller box for errors that sit inside a card. Trade-off: about 42
    screens change at once, and the slate is one of them. The words do not change.
 3. **Q3. Is the pitcher card in or out?** Recommended: **in, but only its outer
    frame.** Its inside layout and its look stay the same. Trade-off: three
@@ -25,11 +25,11 @@ The census (`census.md`) and the proposal (`spec.md`) back each one.
 
 | # | Gary's answer |
 | --- | --- |
-| Q1 | |
-| Q2 | |
-| Q3 | |
-| Q4 | |
-| Q5 | |
+| Q1 | Wash: a thin edge all round and a pale tint, the same for every tone (2026-10-06). |
+| Q2 | A box: every error becomes a Notice with tone `error` (2026-10-06). |
+| Q3 | Frame only: the pitcher cards take their outer frame from a shared class (2026-10-06). |
+| Q4 | Four tones: info, event, caution, error (2026-10-06). |
+| Q5 | Leave all: the 71 held sites stay as they are (2026-10-06). |
 
 Some words used below:
 
@@ -85,7 +85,7 @@ the change is 3 lines of code, but the check list is long.
 
 | option | what it is | what changes |
 | --- | --- | --- |
-| **A. Box (recommended)** | every error is a notice with tone `error` | about 45 screens look different; the slate shows the box when games fail to load. Screen readers hear the error at once (`role="alert"`) where 14 of 20 lines were silent |
+| **A. Box (recommended)** | every error is a notice with tone `error` | about 42 screens look different; the slate shows the box when games fail to load. Screen readers hear the error at once (`role="alert"`) where 14 of 20 lines were silent |
 | B. Text stays | errors stay coloured words; Notice serves only the 40 places that already have a box | nothing changes on the error pages. Notice shrinks from 97 sites to about 40. Two looks for "something failed" stay |
 
 One fact makes A safer than it looks. The error words are `--clay` on the page
