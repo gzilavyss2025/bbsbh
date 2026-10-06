@@ -13,6 +13,18 @@ birthday career lines) and the standings splits (one-run / extra-inning
 records) stay MLB-only — a MiLB bundle simply lacks those keys and the notes
 never fire.
 
+## What counts as "this season"
+
+The nightly bundle counts the regular season **and October**: the hitter and pitcher
+game logs and the club schedule ask `gameType=R,F,D,L,W` (`GAME_TYPES` in
+`scripts/gen-callouts.mjs`, #1509). The owner's rule is to leave nothing out of the
+site because it is postseason. The `asOf` cut still ends the day before the slate, so
+an October note may say "his 3rd homer of the series" but never carries an earlier
+game's W/L/SV/HLD (ADR-0088, decision 4). Two reads are not widened: the API's own
+`career` stat and the standings splits (one-run and extra-inning records) are regular
+season only, so a hitter's season AVG can differ slightly from the career line it is
+compared with in October.
+
 ## The five surfaces
 
 | Surface | Module | Tense |
