@@ -26,6 +26,12 @@
 // load; a nightly job that writes a small static file keeps the live pages to
 // a single same-origin read, same as gen-vs-team-splits.mjs.
 //
+// Career totals are regular season ON PURPOSE (#1438). MLB keeps postseason
+// stats in a separate category, and statsapi's own career stat leaves them out.
+// The schedule read below asks gameType=R for the same reason. Do not add
+// postseason games to any milestone figure. While the postseason is on, the
+// pages hide the ETA at render time (milestoneProjectionPaused in
+// src/lib/time/seasonPhase.js), so this nightly file does not change.
 // Run by hand: node scripts/gen-milestones.mjs
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'

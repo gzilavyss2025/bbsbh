@@ -1,5 +1,7 @@
 import { useAsync } from '../../hooks/useAsync.js'
-import { loadMilestoneWatch, milestonesForPlayer, formatMilestoneProjection } from '../../api/milestones.js'
+import { loadMilestoneWatch, milestonesForPlayer, formatMilestoneProjection, MILESTONE_PAUSE_NOTE } from '../../api/milestones.js'
+import { useMilestonesPaused } from '../../hooks/useOffseason.js'
+import { Notice } from '../ui/state/Notice.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 
@@ -20,6 +22,7 @@ import { Card } from '../ui/frame/Card.jsx'
 // heading.
 export function MilestoneWatchCard({ playerId, asOf, milestones, groupLabel }) {
   const { data } = useAsync(() => (asOf ? Promise.resolve(null) : loadMilestoneWatch()), [asOf])
+  const paused = useMilestonesPaused()
   if (!milestones?.length) return null
   const projections = data ? milestonesForPlayer(data, playerId) : []
 
@@ -35,7 +38,7 @@ export function MilestoneWatchCard({ playerId, asOf, milestones, groupLabel }) {
     <Card as="div" body="flush" className="milestonewatch" head={head}>
       {milestones.map((m) => {
         const proj = projections.find((p) => p.stat === m.stat)
-        const eta = formatMilestoneProjection(proj?.projection)
+        const eta = paused ? null : formatMilestoneProjection(proj?.projection)
         return (
           <p key={m.stat} className="milestonewatch__row">
             <span>
@@ -45,6 +48,7 @@ export function MilestoneWatchCard({ playerId, asOf, milestones, groupLabel }) {
           </p>
         )
       })}
+      {paused && !asOf && <Notice size="compact" role="note">{MILESTONE_PAUSE_NOTE}</Notice>}
     </Card>
   )
 }

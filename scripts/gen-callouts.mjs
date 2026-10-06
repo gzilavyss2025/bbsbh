@@ -126,6 +126,11 @@
 // The raw fetches are done inline (self-contained, like the other gen-*.mjs) to
 // avoid the app's browser-oriented fetch/cache layers.
 //
+// Season scope (#1438): the streak and count reads include October (GAME_TYPES).
+// The W-L record families that read the standings splits (extra-inning, one-run)
+// stay regular season ON PURPOSE: they are ranked against regular-season league
+// figures, and a postseason game would not compare. docs/callouts.md says the same.
+//
 // Runs for TOMORROW's slate by default (the games it precomputes); pass a
 // YYYY-MM-DD as argv[2] to (re)generate a specific date by hand:
 //   node scripts/gen-callouts.mjs 2026-07-10
