@@ -170,6 +170,23 @@ don't run these by hand.
   `gen-umpire-accuracy.mjs` (nightly season favor) and, live, `src/api/umpireFavor.js`
   (the box score's reveal-only per-game favor card). Full write-up:
   `.scratch/umpire-accuracy/consistency-favor-scope.md` §2.
+- `gen-run-expectancy.mjs` **era mode** → `public/data/run-expectancy-eras/{decade}s.json`
+  — the same RE288 + RE24 table, one file per decade, for 1960 to 2023 (play-by-play
+  covers 0 of 6 sampled games for 1901-1940, 3 of 6 for 1950, 6 of 6 from 1960). It
+  never writes `run-expectancy.json`. **Hand-run, NOT on a cron.** Prompt 12b's overnight
+  session runs it, one decade at a time, on the PR branch titled "Run values by era".
+  Two steps. `--era-sweep --seasons=1980,1981,...` sweeps each season (4 requests at
+  once) and writes `.scratch/run-expectancy-eras/season-YYYY.json`, sums only, never
+  feeds, and skips a season whose file exists. Those checkpoints are COMMITTED, because
+  a cloud container is lost when its session ends. `--era-aggregate --decade=1980` merges
+  a decade's checkpoints and exits 1, writing nothing, if a season has none. Decades:
+  2020s = 2020-2023 (2020 counts as a normal season), 2010s, 2000s, 1990s, 1980s, 1970s,
+  1960s. **Pitch lists before 1990 are partial** (about 1.5 pitches per plate appearance, not 3.9;
+  sampled July 1960/70/80 and the 1985 sweep): the pre-pitch count is wrong there, so use `re24`
+  for those decades and distrust the 288 `states`. Cost: about 140,600 games, one decade about 1 hour
+  (1985: 2,103 games in 3.7 min, so about 40 min for ten seasons). Pure parts:
+  `scripts/lib/run-expectancy/eras.mjs`. Reader helper: `lookupEraRE` in
+  `src/lib/runExpectancy.js`.
 - `gen-minors-leaders.mjs` → `public/data/minors-leaders.json` — the combined
   ALL-MINORS leaderboard (every farmhand's totals SUMMED across levels). Eight
   full-level stat pulls (~4,700 players). Stores PRE-RANKED top rows per category, so

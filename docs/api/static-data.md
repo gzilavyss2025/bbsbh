@@ -29,6 +29,12 @@ driver is either an **unofficial/bulk source** (WAR) or **cost** (everything
 that would need dozens of statsapi calls per page load). See `docs/scripts/generators.md`
 for each generator; the reader modules:
 
+- `lookupEraRE(season, state, tables)` (`src/lib/runExpectancy.js`) — reads the per-decade
+  run-expectancy files in `public/data/run-expectancy-eras/` (`1960s.json` to `2020s.json`,
+  built by the hand-run era mode of `gen-run-expectancy.mjs`). Pure: the caller loads a
+  decade file and passes `{ '1980s': table }`. Gives `null` for a season outside 1960-2023
+  or a table not loaded. No screen reads it yet. The current table,
+  `run-expectancy.json`, is unchanged.
 - `staticJson.js` — not a dataset: the memoized read every reader below is built
   on. `staticJson(url, {shape, fallback})` returns a loader that fetches once per
   session and hands the SAME in-flight promise to concurrent callers;
