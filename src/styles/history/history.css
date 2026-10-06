@@ -1,0 +1,22 @@
+/* "On this day" strip and "Born near the park" line (ADR-0100). The box is a Card. */
+.onthisday { margin: 0 0 var(--space-3); }
+.onthisday__rows { display: grid; gap: var(--space-2); }
+.onthisday__row {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+}
+.onthisday__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
+.onthisday__credit {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
