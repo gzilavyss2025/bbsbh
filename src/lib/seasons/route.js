@@ -35,8 +35,9 @@ function seasonSegment(base, { seasonYear, vs } = {}) {
   const compare = seasonYear !== 'all' && vs != null && vs !== seasonYear ? vs : null
   return { path, vs: compare }
 }
-// The player Analytics tab's pitch scope (#1503): `?scope=post|all`. Regular is
-// the bare address, so it is never written and a value we do not know is dropped.
+// The pitch scope (#1503): `?scope=post|all`, on the player Analytics tab and
+// on /abs-challenges (#1514). Regular is the bare address, so it is never
+// written and a value we do not know is dropped.
 const PITCH_SCOPES = new Set(['post', 'all'])
 export const pitchScopeOf = (v) => (PITCH_SCOPES.has(v) ? v : null)
 
@@ -81,7 +82,8 @@ const SEASON_PAGES = {
 }
 export function parseSeasonRoute(parts, q, { asOf, sportId, idFromSlug }) {
   const [head, second, third, fourth] = parts
-  if (parts.length <= 2 && SEASON_PAGES[head]) return { name: SEASON_PAGES[head], ...seasonParams(second, q) }
+  const scope = pitchScopeOf(q.get('scope'))
+  if (parts.length <= 2 && SEASON_PAGES[head]) return { name: SEASON_PAGES[head], ...(scope && { scope }), ...seasonParams(second, q) }
   if ((parts.length === 2 || parts.length === 3) && head === 'umpire')
     return { name: 'umpire', id: idFromSlug(second), ...seasonParams(third, q) }
   if ((parts.length === 3 || parts.length === 4) && head === 'player' && third === 'analytics')
@@ -90,7 +92,7 @@ export function parseSeasonRoute(parts, q, { asOf, sportId, idFromSlug }) {
       id: idFromSlug(second),
       asOf,
       sportId,
-      ...(pitchScopeOf(q.get('scope')) && { scope: pitchScopeOf(q.get('scope')) }),
+      ...(scope && { scope }),
       ...seasonParams(fourth, q),
     }
   return null

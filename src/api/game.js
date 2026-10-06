@@ -6,6 +6,7 @@ import { SPORT_LABEL, MILB_LEVELS, teamAbbr } from '../lib/teams.js'
 import { applyJsonPatch } from '../lib/jsonPatch.js'
 import { num } from './person/shared.js'
 import { ipToOuts, outsToIp } from '../lib/math/innings.js'
+import { roundShort } from '../lib/postseason/gameRound.js'
 
 // `options.fields` (array or comma-string) opts a caller into a pruned
 // response — see PAST_GAME_FEED_FIELDS below for the one such caller. Omitted
@@ -437,6 +438,18 @@ async function fetchGameLogSplits(personId, season, sportId) {
     return data.stats?.[0]?.splits ?? []
   } catch {
     return []
+  }
+}
+
+// "ALDS \u2022 G1" for one MLB postseason game: one schedule read by gamePk, with the
+// home club's league for the round's name. A pregame fact, never a result. '' on
+// any failure, and the page keeps the date.
+export async function fetchRoundShort(gamePk) {
+  try {
+    const data = await getJson(`/api/v1/schedule?gamePk=${gamePk}&hydrate=team`)
+    return roundShort(data.dates?.[0]?.games?.[0])
+  } catch {
+    return ''
   }
 }
 

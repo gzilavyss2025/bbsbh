@@ -412,9 +412,10 @@ export default function App() {
   const Bare = BARE_ROUTES[route.name]
   const IdPage = ID_ROUTES[route.name]
   // `seasonYear` and `vs` are a season view's season (#1202, lib/route.js's
-  // seasonParams); undefined on every other route, and ignored there.
+  // seasonParams); `scope` is ?scope= (/abs-challenges reads it). Undefined on
+  // every other route, and ignored there.
   if (Bare) {
-    content = <Bare seasonYear={route.seasonYear} vs={route.vs} />
+    content = <Bare seasonYear={route.seasonYear} vs={route.vs} scope={route.scope} />
   } else if (IdPage) {
     content = (
       <IdPage id={route.id} asOf={route.asOf} sportId={route.sportId} seasonYear={route.seasonYear} vs={route.vs} scope={route.scope} />

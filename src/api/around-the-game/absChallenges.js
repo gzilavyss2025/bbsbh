@@ -21,7 +21,13 @@ import { seasonStaticJson } from '../staticJson.js'
 
 // A season store (ADR-0086): abs/{season}/. Takes `{ seasonYear }`: a year,
 // 'all' (abs/all/), or nothing for the season abs/seasons.json names.
-export const fetchAbsChallenges = seasonStaticJson('abs', 'abs-challenges.json')
+//
+// AND A SCOPE (#1514): 'reg' (the default), 'post' or 'all', one file each. The
+// regular season never carries a postseason game; All is its own count over
+// both. Every file carries `postGames` per level, the page's cue to offer Postseason.
+const SCOPE_FILES = { reg: 'abs-challenges.json', post: 'abs-challenges-post.json', all: 'abs-challenges-all.json' }
+const byScope = Object.fromEntries(Object.entries(SCOPE_FILES).map(([k, f]) => [k, seasonStaticJson('abs', f)]))
+export const fetchAbsChallenges = ({ scope, ...season } = {}) => (byScope[scope] ?? byScope.reg)(season)
 
 // The levels the system runs at, in the order the page offers them. MLB is
 // 2026's debut; Triple-A has run it for several seasons, which is why its

@@ -453,13 +453,16 @@ audit of statsapi is `docs/MLB_STATS_API.md`.
 | Team hub card | `src/screens/team/modules/TeamChallengeCard.jsx`, `src/styles/report/challenge-card.css` |
 | Page and its sections | `src/screens/around-the-game/AbsChallengesPage.jsx`, `src/screens/around-the-game/abs/` |
 | Chart primitives | `src/components/around-the-game/BroadcastBar.jsx`, `src/styles/report/charts.css` |
-| Tests | `test/abs-challenges.test.js`, `test/abs-exposure.test.js` |
-| Decisions | ADR-0075 (what a chance is), ADR-0076 (a dataset no surface reads) |
+| Tests | `test/abs-challenges.test.js`, `test/abs-exposure.test.js`, `test/abs-scope.test.js` |
+| Decisions | ADR-0075 (what a chance is), ADR-0076 (a dataset no surface reads), ADR-0094's addendum (the postseason beside the regular season, #1514) |
 
-Four files come out of every run of the generator, and the split is a size
+Six files come out of every run of the generator, and the split is a size
 decision every time: `abs-challenges.json` (250 KB) is what `/abs-challenges`
 fetches, `abs-exposure.json` (418 KB) is the per-player denominator list that
 one section of that page reads, and `abs-exposure-clubs-mlb.json` (93 KB) and
 `abs-exposure-clubs-aaa.json` (128 KB) are the same denominators cut by club,
 one level each, read by one club's hub tab. Folded into one file they would be
-889 KB on every visit to either page.
+889 KB on every visit to either page. The report file comes in three scopes (#1514):
+`abs-challenges.json` is the regular season alone, `abs-challenges-post.json` the
+postseason (about 36 KB in October 2026) and `abs-challenges-all.json` both; the page
+reads the regular file always and one other only when a postseason is picked.
