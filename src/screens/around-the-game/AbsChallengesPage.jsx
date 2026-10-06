@@ -219,10 +219,10 @@ export function AbsChallengesPage({ seasonYear, vs }) {
           <PlayerBoards summary={summary} clubs={clubs} />
           <LongestRuns summary={summary} clubs={clubs} />
           <HowOften exposure={exposureFor(exposure, shown)} />
-          <UmpireBoard summary={summary} />
+          <UmpireBoard summary={summary} seasonYear={view.shown} />
           <AfterAWin summary={summary} data={data} level={shown} />
           <MissBands summary={summary} />
-          <BiggestOverturn summary={summary} clubs={clubs} />
+          <BiggestOverturn summary={summary} clubs={clubs} seasonYear={view.shown} />
 
           {/* THE SOURCE LINE, not a method essay — see RunValuePage for the
               argument. What survives here is the provenance, the scope, and the

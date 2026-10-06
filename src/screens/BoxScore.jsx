@@ -266,10 +266,10 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
   // resolved an id for that role (degrades to plain text otherwise — see
   // UmpireLink). '' passes through so InfoCard's '—' fallback still shows for
   // a role the feed didn't post.
-  const umpValue = (role, name) => (name ? <UmpireLink id={officialIdByRole[role]}>{name}</UmpireLink> : '')
+  const umpValue = (role, name) => (name ? <UmpireLink id={officialIdByRole[role]} seasonYear={seasonYear}>{name}</UmpireLink> : '')
   const hpUmpireValue = u.hp ? (
     <>
-      <UmpireLink id={hpId}>{u.hp}</UmpireLink>
+      <UmpireLink id={hpId} seasonYear={seasonYear}>{u.hp}</UmpireLink>
       {hpAccuracy?.tier && (
         <button type="button" className="umps__tierbtn bs__tierbtn" onClick={() => setModalId(hpId)}>
           <TierPill tier={hpAccuracy.tier} />

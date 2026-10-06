@@ -96,8 +96,9 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs }) {
     hitting: blocks.some((b) => b.group === 'hitting'),
     pitching: pitching != null,
   })
-  // Until the index lands, the address's own season (the reader resolves it).
-  const season = { seasonYear: view?.shown ?? seasonYear, label, vs: view?.vs ?? null }
+  // `seasonYear` is undefined until the index lands. FoulCard and SprayMapSection
+  // wait for it, so a bare URL fetches each file once instead of twice.
+  const season = { seasonYear: view?.shown, label, vs: view?.vs ?? null }
   const pathFor = (o) => playerTabPath(id, 'analytics', { name: bio.fullName, d: asOf, s: sportId, ...o })
   // A pitching block's Pitches card and "Pitches like" for the picked season:
   // the loader's own block for the current season, else the store's shelf.

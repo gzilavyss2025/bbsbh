@@ -1,5 +1,5 @@
 import { Fragment, useMemo } from 'react'
-import { selectGameInfo, selectOfficials } from '../../../api/select.js'
+import { selectGameInfo, selectGameSeason, selectOfficials } from '../../../api/select.js'
 import { scorebookDate } from '../../../lib/dates.js'
 import { ManagerLink } from '../../team/ManagerLink.jsx'
 import { UmpireLink } from '../../umpire/UmpireLink.jsx'
@@ -30,6 +30,8 @@ import { Card } from '../../ui/frame/Card.jsx'
 export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }) {
   const info = useMemo(() => selectGameInfo(feed), [feed])
   const officials = useMemo(() => selectOfficials(feed), [feed])
+  // The game's season (#1201), so a past game's crew opens on that year's page.
+  const seasonYear = selectGameSeason(feed)
 
   return (
     <>
@@ -68,7 +70,7 @@ export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }
                 <li key={o.role}>
                   <span className="umps__role">{o.role}</span>
                   <span className="umps__namerow">
-                    <UmpireLink id={o.id} className="umps__name">
+                    <UmpireLink id={o.id} seasonYear={seasonYear} className="umps__name">
                       {o.name}
                     </UmpireLink>
                   </span>
