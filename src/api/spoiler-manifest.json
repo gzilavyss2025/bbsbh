@@ -337,6 +337,10 @@
       "class": "spoiler-free",
       "why": "Static former-teammates.json — shared (teamId, season) history between opposing rosters."
     },
+    "franchiseHistory.js": {
+      "class": "spoiler-free",
+      "why": "Static franchise-history shards: a club's names, leagues and ballparks by season, 1901 to the last complete season. Names and parks only, no game."
+    },
     "fouls.js": {
       "class": "spoiler-free",
       "why": "Static fouls/{season}/fouls.json season aggregates over completed games, same footing as WAR. The LIVE per-half foul counters are in derive.js instead."

@@ -871,6 +871,12 @@ for each generator; the reader modules:
   on disk and has no way to know it is three weeks old. `gen-postseason-odds.mjs`
   was off the nightly cron until 2026-08-09 for exactly that reason; if this
   card ever looks wrong, check the workflow before the math.
+- `franchiseHistory.js` — a club's names, leagues and ballparks by season, from
+  `public/data/franchise-history/{teamId}.json` (hand-run
+  `gen-franchise-history.mjs`). `franchiseFor(teamId)` returns the spans and the park lines (`parkHistory`, grouped by venue id)
+  that the Overview's `FranchiseHistory` module draws under the Ballpark card.
+  The data starts in 1901, so a park's first season is the first IN THIS DATA,
+  never its opening year. A MiLB id has no file and reads empty.
 - `managers.js` — a coach's full career, from the `personId % 100` shards in
   `public/data/manager-history/`, behind `/manager/{id}`. Every job row, not
   just the managerial ones. A club-season shared by two managers carries

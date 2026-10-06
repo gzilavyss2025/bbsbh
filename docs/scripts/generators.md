@@ -1284,6 +1284,20 @@ don't run these by hand.
 
 Re-run only to fold in a new season.
 
+- `gen-franchise-history.mjs` → `public/data/franchise-history/{teamId}.json`
+  — each of the 30 clubs' name, league and ballpark by season, 1901 to the last
+  complete season, as spans (the Brewers' file starts with the 1969 Seattle Pilots).
+  Run by hand: `node scripts/gen-franchise-history.mjs [--through 2025]`. About 125
+  calls (`/teams?sportId=1&season=Y&hydrate=venue`, one a season). Pure half:
+  `scripts/lib/franchise-history.mjs`. Reader: `src/api/franchiseHistory.js`.
+  Three rules. **A relocated club keeps its id** in this feed, but a few
+  early franchises do not: the 1901-02 Baltimore Orioles (id 298) are the Yankees'
+  first two seasons, and the Yankees' file starts in 1903. **A row with no league
+  is skipped:** the feed lists an expansion club a season or two before its first
+  game (seven rows, measured 2026-10-06). **`mates`** lists the other clubs at each
+  park in the same seasons, defunct clubs (Federal League, Negro leagues) included.
+  The files carry no `generatedAt`, so a re-run writes the same bytes.
+
 - `gen-prospect-rank-history.mjs` → `public/data/prospect-rank-history.json`
   — every year a man sat on a top-prospect list, 2005–2024 (1,823 rows, 982
   players). Input is the finished research pull in
