@@ -475,3 +475,38 @@ for N2 to N8.
    next file there needs the `system/state/` subfolder (spec section 5): move
    `empty-state.css` and `notice.css`, and edit `src/index.css` and the pins in
    `test/empty-state-cascade.test.js` and `test/notice-cascade.test.js`.
+
+---
+
+## N3 as built (what the next slices need)
+
+Written by the N3 session. It records what shipped. It does not write the prompts
+for N4 to N8.
+
+1. **Six sites moved.** Both photos pages (`tone="caution" label="Unsealed"
+   role="note"`), the game finder (`caution`, `role="status"`, `size="compact"`),
+   the erase-failed line (`error`, `role="status"`), the club-list line (`error`,
+   `role="note"`) and the All-Star Legacy line (`error`, `role="status"`). The
+   All-Star line was grey and is now an error: a deliberate change.
+2. **Namespace classes.** `.gamephotos__notice` (14-strike-zone.css) keeps the
+   margin `4px 0 space-4` and `border-style: dashed`. The dashed edge stays so
+   nothing changes on screen; the dashed-rule PR decides (spec section 11). The
+   tag and paragraph rules are deleted. `.erasesheet__error`
+   (55-my-tally-account.css) stays margin-only. `.gamefinder__notice` (08-site-shell.css) and
+   `.mytally__notice` (54-my-tally.css) are margin-top only: the parent gave no
+   gap. The All-Star line needs none (the section title's margin is enough).
+3. **Caps-exempt selectors widened** in 54-my-tally.css: `#root .erasesheet
+   .notice__text` and `#root .mytally .notice__text`, under the one existing
+   `/* caps-exempt: ... */` marker. A class on the Notice root does not reach the
+   inner `<p>`, so any later Notice inside `.mytally` or `.erasesheet` is
+   mixed-case too.
+4. **Spacing.** The old `.hint` gave `padding: 12px 2px`. See the PR for what
+   each parent gives now.
+5. **One extra file.** `test/empty-state-e6.test.js` pinned the finder's old
+   `<p className="hint">`. It now pins the Notice and still forbids an
+   EmptyState there.
+6. **Not reached:** the club-list line (needs the static club file to be
+   missing) and the erase-failed line (needs a signed-in account whose erase
+   call fails). Both are pinned by `test/notice-n3.test.js` only.
+7. **Census.** No key shifted. `.gamephotos__noticetag` prints STALE (its rule is
+   deleted, as planned). The other STALE keys are not N3's.

@@ -1,4 +1,5 @@
 import { ClubPicker } from '../../../components/account/ClubPicker.jsx'
+import { Notice } from '../../../components/ui/state/Notice.jsx'
 
 // Baseball — the preference that is about the sport rather than the device:
 // which club you follow.
@@ -42,7 +43,7 @@ export function ClubSection({ teams, club, onPickClub }) {
           // The static club file ships with the build, so this is a
           // storage/network oddity rather than a normal state — say so plainly
           // instead of rendering an empty strip that looks broken.
-          <p className="hint caps-exempt">The club list isn’t available right now.</p>
+          <Notice tone="error" role="note" className="mytally__notice">The club list isn’t available right now.</Notice>
         )}
       </div>
     </section>

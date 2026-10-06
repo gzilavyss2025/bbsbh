@@ -28,7 +28,9 @@
 #root .mytally .caps-exempt,
 #root .mergereceipt .caps-exempt,
 #root .erasesheet .caps-exempt,
-#root .syncreceipt .caps-exempt {
+#root .syncreceipt .caps-exempt,
+#root .erasesheet .notice__text,
+#root .mytally .notice__text {
   text-transform: none; /* caps-exempt: settings + privacy explanations read as sentences */
 }
 
@@ -195,6 +197,10 @@
   font-weight: var(--w-bold);
   line-height: var(--lh-tight);
   color: var(--text-body);
+}
+
+.mytally__notice {
+  margin-top: var(--space-3);
 }
 
 .mytally__fieldnote {

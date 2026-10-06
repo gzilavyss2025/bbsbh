@@ -13,6 +13,7 @@ import { Headshot } from '../components/player/Headshot.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
+import { Notice } from '../components/ui/state/Notice.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
 import { Door } from '../components/ui/control/Door.jsx'
@@ -313,7 +314,9 @@ export function AllStarLegacyPage() {
                 ))}
               </div>
             ) : (
-              <p className="hint">Couldn’t determine which All-Stars are still active right now.</p>
+              <Notice tone="error" role="status">
+                Couldn’t determine which All-Stars are still active right now.
+              </Notice>
             )}
           </section>
 
