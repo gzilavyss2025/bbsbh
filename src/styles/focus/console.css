@@ -108,8 +108,9 @@
   }
 
   /* With the strip above stood down, a staged notice (Now Pitching, a
-     defensive sub, a pinch hitter — every shape shares `.pitchernotice--pbp`)
-     can be the ONLY thing left inside `.half` before the reader has revealed
+     defensive sub, a pinch hitter — every shape shares `.pitchernotice--pbp` —
+     or the deferred "Final line" handoff card, framed by `.notice--event`
+     since #1132 N6) can be the ONLY thing left inside `.half` before the reader has revealed
      anything of it — `.half__title` is `sr-only` in focus mode, and SealBox
      (coverless) mounts no `.statgrid` until shown. `.half`'s own card chrome
      then reads as a plain white box drawn around the kraft-amber card, a card
@@ -117,7 +118,7 @@
      `:has()`/media scoping as the strip's own rule above, since this is the
      same "is the strip actually hidden" question. `:not(:has(.statgrid))`
      is what lets `.half`'s chrome back the moment real content is shown. */
-  .innings--focus .consolebar:has(.dueupconsole) ~ .innings__stage .half:has(.pitchernotice--pbp):not(:has(.statgrid)) {
+  .innings--focus .consolebar:has(.dueupconsole) ~ .innings__stage .half:has(.pitchernotice--pbp, .notice--event):not(:has(.statgrid)) {
     background: none;
     border: none;
     box-shadow: none;

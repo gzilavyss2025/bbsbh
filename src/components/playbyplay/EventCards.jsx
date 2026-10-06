@@ -3,6 +3,7 @@ import { PitcherPhoto } from './PitcherNotice.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { UsagePips } from '../charts/UsagePips.jsx'
 import { formatDelay } from '../inning/DelayCard.jsx'
+import { noticeClass } from '../../lib/design/noticeClass.js'
 
 // THE NOTIFICATION-CARD FAMILY of the half-inning feed — everything
 // PlayByPlay.jsx renders BETWEEN plate appearances, plus the two shorthand
@@ -16,8 +17,10 @@ import { formatDelay } from '../inning/DelayCard.jsx'
 // Read ADR-0017 before touching any of them. Every mid-inning "something
 // happened" moment sorts into one of three tiers — a fresh/changed actor, a
 // team/administrative event, or a baserunning/misc event with no plate
-// appearance of its own — and all three render in the SAME kraft-amber
-// `.pitchernotice.pitchernotice--pbp` card, distinguished by what is inside
+// appearance of its own — and all three render in the SAME marker-wash card
+// (the event Notice frame, `noticeClass({ tone: 'event' })` here; the actor
+// cards still draw it as `.pitchernotice--pbp` until #1132 N7, with the same
+// values), distinguished by what is inside
 // (a headshot vs. a scorer's shorthand code) rather than by a coloured accent
 // rail. That is the decision, and it is easy to undo by accident.
 
@@ -136,7 +139,7 @@ export function MoundVisitBar({ team, teamId, remaining, allowed }) {
   const label =
     used != null ? `${used} of ${allowed} mound visits used, ${remaining} left` : undefined
   return (
-    <div className="pitchernotice pitchernotice--pbp pitchernotice--event pitchernotice--mv">
+    <div className={`pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event pitchernotice--mv`}>
       <TeamLogo teamId={teamId} name={team} size={20} className="pitchernotice__teammark" />
       <span className="pitchernotice__label">Mound visit{team ? ` — ${team}` : ''}</span>
       <span className="pitchernotice__spacer" />
@@ -163,7 +166,7 @@ export function MoundVisitBar({ team, teamId, remaining, allowed }) {
 // it costs nothing and the default is what every caller passes.
 export function EjectionBar({ text, code = 'EJ' }) {
   return (
-    <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
+    <div className={`pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event`}>
       <span className="pitchernotice__code pitchernotice__code--alert">{code}</span>
       <span className="pitchernotice__eventtext">{text}</span>
     </div>
@@ -178,7 +181,7 @@ export function EjectionBar({ text, code = 'EJ' }) {
 // pitch, the catcher on a passed ball).
 export function EventCard({ code, runnerId, teamId, segments, pitchLabel = null }) {
   return (
-    <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
+    <div className={`pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event`}>
       <span className="pitchernotice__code">{code}</span>
       {runnerId != null && <PitcherPhoto personId={runnerId} teamId={teamId} />}
       <span className="pitchernotice__eventtext">
@@ -226,7 +229,7 @@ export function DelayNotice({ entry, teamId }) {
   // the sentence keeps the whole card.
   const lead = minutes != null ? `${title} (${formatDelay(minutes)})` : title
   return (
-    <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
+    <div className={`pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event`}>
       <span className="pitchernotice__code pitchernotice__code--alert">DELAY</span>
       {playerId != null && <PitcherPhoto personId={playerId} teamId={teamId} />}
       <span className="pitchernotice__eventtext">
