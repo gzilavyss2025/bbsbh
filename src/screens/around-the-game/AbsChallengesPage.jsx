@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react'
 import {
   fetchAbsChallenges,
   levelsIn,
+  MIN_UMPIRE_GAMES,
+  MIN_UMPIRE_GAMES_POST,
   summaryFor,
 } from '../../api/around-the-game/absChallenges.js'
 import {
@@ -265,7 +267,11 @@ export function AbsChallengesPage({ seasonYear, vs, scope: scopeParam }) {
           <LongestRuns summary={summary} clubs={clubs} />
           {/* The denominators are regular-season roster totals. */}
           {scope === 'reg' && <HowOften exposure={exposureFor(exposure, shown)} />}
-          <UmpireBoard summary={summary} seasonYear={view.shown} />
+          <UmpireBoard
+            summary={summary}
+            seasonYear={view.shown}
+            minGames={scope === 'post' ? MIN_UMPIRE_GAMES_POST : MIN_UMPIRE_GAMES}
+          />
           <AfterAWin summary={summary} data={data} level={shown} />
           <MissBands summary={summary} />
           <BiggestOverturn summary={summary} clubs={clubs} seasonYear={view.shown} />
