@@ -81,17 +81,27 @@ export function halvesPlayed(inning, finalInning, bottomPlayed) {
 // `currentInning` and falls back to the last entry's own number, which agree
 // on every game checked.
 //
+// WITH THE PLAYS (the sweep holds the feed), a pitch thrown in the bottom of
+// the last inning decides it instead. The feed drops `runs` from a half rain
+// stopped partway (gamePk 816400: a walk, a flyout, a hit batter), and a rain
+// advisory with no pitch is not a half played (824807). 15 of 30 shortened 2026
+// games were stored wrong under the key rule; the plays get every one right.
+//
 // Everything is null on a game that was never played: a cancelled or postponed
 // schedule row carries an empty linescore, which is exactly the class of game
 // isPlayedGame already keeps off the ledger.
-export function gameShape(linescore) {
+export function gameShape(linescore, plays) {
   const innings = linescore?.innings ?? []
-  const last = innings.length ? innings[innings.length - 1] : null
-  const finalInning = linescore?.currentInning ?? last?.num ?? null
+  const finalInning = linescore?.currentInning ?? innings.at(-1)?.num ?? null
   if (finalInning == null) return { finalInning: null, bottomPlayed: null, scheduledInnings: null }
+  // The inning the game ENDED in. A rain-shortened game's feed pads innings to
+  // nine, and the padded last entry never has `runs` (gamePk 816613).
+  const last = innings.find((i) => i.num === finalInning) ?? innings.at(-1)
   return {
     finalInning,
-    bottomPlayed: Object.hasOwn(last?.home ?? {}, 'runs') ? 1 : 0,
+    bottomPlayed: plays
+      ? Number(plays.some((p) => p.about?.inning === finalInning && p.about?.isTopInning === false && p.playEvents?.some((e) => e.isPitch)))
+      : Object.hasOwn(last?.home ?? {}, 'runs') ? 1 : 0,
     scheduledInnings: linescore?.scheduledInnings ?? null,
   }
 }

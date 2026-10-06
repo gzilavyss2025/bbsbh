@@ -305,6 +305,40 @@ test('gameShape: a seven-inning game that went to the eighth keeps both lengths'
   assert.deepEqual(shape, { finalInning: 8, bottomPlayed: 1, scheduledInnings: 7 })
 })
 
+test('gameShape: a rain-shortened game reads the inning it ended in, not the feed’s padded ninth', () => {
+  // The FEED pads a shortened game's innings out to nine, and a padded inning
+  // has no `runs` key. Reading the last entry called every one a home half
+  // never batted. gamePk 816613 ended in the fifth (Completed Early: Rain) after
+  // three home plate appearances in the bottom; its feed carries `runs: 0` there.
+  const padded = [6, 7, 8, 9].map((num) => ({ num, home: { hits: 0, errors: 0, leftOnBase: 0 } }))
+  const shape = gameShape({
+    currentInning: 5,
+    scheduledInnings: 9,
+    innings: [{ num: 5, home: { runs: 0, hits: 0, errors: 1, leftOnBase: 0 } }, ...padded],
+  })
+  assert.deepEqual(shape, { finalInning: 5, bottomPlayed: 1, scheduledInnings: 9 })
+  // gamePk 824807 stopped in the bottom of the sixth on a rain advisory with no
+  // plate appearance: the feed's sixth has no `runs`, and that is right. (Its
+  // schedule row says `runs: 0`, which is why the schedule is not the fix.)
+  const stopped = gameShape({
+    currentInning: 6,
+    scheduledInnings: 9,
+    innings: [{ num: 6, home: { hits: 0, errors: 0, leftOnBase: 0 } }, ...padded.slice(1)],
+  })
+  assert.equal(stopped.bottomPlayed, 0)
+})
+
+test('gameShape: given the plays, a home half rain stopped partway was played; one with no pitch was not', () => {
+  // The feed drops `runs` from a half that rain stops partway, so the line score
+  // cannot tell "batted, then rain" from "rain before the first pitch". The plays
+  // can. gamePk 816400 ended in the bottom of the seventh after a walk, a flyout
+  // and a hit batter; gamePk 824807 stopped on a rain advisory with no pitch.
+  const ls = (num) => ({ currentInning: num, scheduledInnings: 9, innings: [{ num, home: { hits: 0, errors: 0, leftOnBase: 0 } }] })
+  const play = (inning, isTopInning, pitches) => ({ about: { inning, isTopInning }, playEvents: pitches ? [{ isPitch: true }] : [{ isPitch: false }] })
+  assert.equal(gameShape(ls(7), [play(7, true, true), play(7, false, true)]).bottomPlayed, 1)
+  assert.equal(gameShape(ls(6), [play(6, true, true), play(6, false, false)]).bottomPlayed, 0)
+})
+
 test('gameShape: a game that was never played has no shape at all', () => {
   // gamePk 815811 (cancelled) and 816704 (postponed) both carry an empty
   // linescore. isPlayedGame already keeps them off the ledger; this is the

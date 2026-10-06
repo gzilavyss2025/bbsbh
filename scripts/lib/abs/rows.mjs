@@ -322,13 +322,14 @@ export function ingestGame(db, t, rows, shape) {
   )
 }
 
-// --recheck's write on a game already on file: its scope always, its length
-// when the schedule row carries one. Never touches the challenge rows.
+// --recheck's write on a game already on file: its scope always, and its length
+// only when none is on file. The sweep read the length off the feed's plays,
+// which the schedule row does not carry (gameShape). Never touches the
+// challenge rows.
 export function restampGame(db, gamePk, { scope, shape }) {
   db.prepare('UPDATE abs_ingested_games SET scope = ? WHERE game_pk = ?').run(scope, gamePk)
   if (shape?.finalInning == null) return false
-  db.prepare(
-    'UPDATE abs_ingested_games SET final_inning = ?, bottom_played = ?, scheduled_innings = ? WHERE game_pk = ?',
-  ).run(shape.finalInning, shape.bottomPlayed, shape.scheduledInnings, gamePk)
-  return true
+  return db.prepare(
+    'UPDATE abs_ingested_games SET final_inning = ?, bottom_played = ?, scheduled_innings = ? WHERE game_pk = ? AND final_inning IS NULL',
+  ).run(shape.finalInning, shape.bottomPlayed, shape.scheduledInnings, gamePk).changes > 0
 }

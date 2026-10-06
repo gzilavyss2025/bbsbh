@@ -54,7 +54,9 @@
 // inning, and how many innings it was scheduled for. Those are the three
 // columns the chances denominator divides by (scripts/lib/abs/chances.mjs,
 // docs/adr/0075), and they cost no extra request and no refetched feed. The
-// ordinary sweep writes them off the feed it already holds. There is
+// ordinary sweep writes them off the feed it already holds, and --recheck only
+// fills a game that has none: the feed's plays say whether the home club batted
+// in a rain-shortened last inning, and the schedule row cannot. There is
 // deliberately no --backfill-innings mode: it would be a second pass over the
 // same rows.
 //
@@ -337,10 +339,11 @@ if (args['export-only']) {
     dropGame.run(r.game_pk)
   }
 
-  // THE SECOND JOB. Every game still on file gets its length and its scope
-  // (#1514) written from the row just read. It is an UPDATE rather than a
-  // re-ingest, so a game's challenge rows are never touched, and it is
-  // idempotent — a game already right is written the same values again.
+  // THE SECOND JOB. Every game still on file gets its scope (#1514) from the
+  // row just read, and its length only if none is on file: the sweep read the
+  // length off the feed's plays, which this row does not carry (gameShape). It
+  // is an UPDATE rather than a re-ingest, so a game's challenge rows are never
+  // touched, and it is idempotent.
   const evicted = new Set(evict.map((r) => String(r.game_pk)))
   let shaped = 0
   for (const r of onFile) {
@@ -488,7 +491,7 @@ if (args['export-only']) {
       const umpName = t.umpName || boxHp?.official?.fullName || ''
       const rows = challengeRowsForGame(feed, reTable)
       // The game's length, off the feed already in hand — no extra call.
-      ingestGame(db, { ...t, umpId, umpName }, rows, gameShape(feed?.liveData?.linescore))
+      ingestGame(db, { ...t, umpId, umpName }, rows, gameShape(feed?.liveData?.linescore, feed?.liveData?.plays?.allPlays))
       ingested++
       sinceCheckpoint++
       found += rows.length

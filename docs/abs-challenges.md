@@ -371,6 +371,9 @@ four minutes.
 
 **This is the finding most easily lost, and the control must ship with it.**
 
+The section shows under Regular and All only. Under Postseason it is hidden: a
+few October games cannot carry a claim about momentum (Gary, 2026-10-06).
+
 **Counted straight it looks like nerve.** An MLB club asks **15.20 times per
 100 armed half-innings after winning a review and 11.30 after losing one** — a
 26% drop.

@@ -62,6 +62,10 @@ test('restampGame: --recheck moves a postseason game swept as R, and never touch
   // A schedule row with no linescore still sets the scope and keeps the length on file.
   restampGame(db, 9, { scope: 'P', shape: { finalInning: null } })
   assert.equal(db.prepare('SELECT final_inning FROM abs_ingested_games').get().final_inning, 9)
+  // And a length already on file is never overwritten: the sweep read it off
+  // the plays, which the schedule row does not carry.
+  restampGame(db, 9, { scope: 'P', shape: { finalInning: 6, bottomPlayed: 0, scheduledInnings: 9 } })
+  assert.equal(db.prepare('SELECT final_inning FROM abs_ingested_games').get().final_inning, 9)
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM abs_challenges').get().n, 1)
 })
 

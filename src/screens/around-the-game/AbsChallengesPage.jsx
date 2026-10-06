@@ -272,7 +272,8 @@ export function AbsChallengesPage({ seasonYear, vs, scope: scopeParam }) {
             seasonYear={view.shown}
             minGames={scope === 'post' ? MIN_UMPIRE_GAMES_POST : MIN_UMPIRE_GAMES}
           />
-          <AfterAWin summary={summary} data={data} level={shown} />
+          {/* Seventeen October games cannot carry a claim about momentum (Gary, 2026-10-06). */}
+          {scope !== 'post' && <AfterAWin summary={summary} data={data} level={shown} />}
           <MissBands summary={summary} />
           <BiggestOverturn summary={summary} clubs={clubs} seasonYear={view.shown} />
 
