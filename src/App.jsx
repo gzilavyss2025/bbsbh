@@ -417,7 +417,7 @@ export default function App() {
     content = <Bare seasonYear={route.seasonYear} vs={route.vs} />
   } else if (IdPage) {
     content = (
-      <IdPage id={route.id} asOf={route.asOf} sportId={route.sportId} seasonYear={route.seasonYear} vs={route.vs} />
+      <IdPage id={route.id} asOf={route.asOf} sportId={route.sportId} seasonYear={route.seasonYear} vs={route.vs} scope={route.scope} />
     )
   } else if (route.name === 'logos') {
     content = <LogoSheet onBack={() => go('/')} />

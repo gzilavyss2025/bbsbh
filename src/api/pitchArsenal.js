@@ -56,6 +56,30 @@ export async function fetchPitchArsenalFor(personId, { seasonYear } = {}) {
   )
 }
 
+// The player page's SCOPE (#1503): 'reg', 'post' or 'all'. The readers below
+// all read `data.pit[id]`, so a scope is a copy of `data` whose `pit` holds the
+// scope's entry for this one man: the shard's `post` bucket (ADR-0094), or the
+// two buckets added by combineArsenalEntries. Counts add and velocity is
+// weighted by pitches, never an average of two averages, and neither bucket is
+// ever written over. 'reg' hands back `data` itself, so every number on the
+// regular-season card is the one it was before the scope existed.
+export function arsenalScoped(data, personId, scope = 'reg') {
+  if (scope === 'reg' || !data) return data
+  const id = String(personId)
+  const entry =
+    scope === 'post' ? data.post?.[id] ?? null : combineArsenalEntries([data.pit?.[id] ?? null, data.post?.[id] ?? null])
+  return { ...data, pit: entry ? { [id]: entry } : {} }
+}
+
+// His postseason pitches, at either level. Zero means the scope control has
+// nothing to offer him.
+export function postPitchesOf(data, personId) {
+  const entry = data?.post?.[String(personId)]
+  let n = 0
+  for (const level of [entry?.mlb, entry?.aaa]) for (const t of level ?? []) n += t.pitches ?? 0
+  return n
+}
+
 const pool = staticJsonBy((key) => `/data/pitch-arsenal-pool/${key}.json`)
 
 // 'all' reads pitch-arsenal-pool/all/, which the nightly run folds from the

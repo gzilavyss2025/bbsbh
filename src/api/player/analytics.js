@@ -20,6 +20,8 @@ import {
 import {
   arsenalLevelOf,
   arsenalMixRows,
+  arsenalScoped,
+  postPitchesOf,
   arsenalSidesView,
   arsenalTtoView,
   fetchPitchArsenalFor,
@@ -143,6 +145,9 @@ export async function loadPlayerAnalytics(id, asOf) {
       // ~14 KB bucket (`personId % 100`) rather than the league in one file.
       // Fetched only for a pitching block, like block.command beside it.
       block.gloveTarget = group === 'pitching' ? await fetchGloveTargetFor(id, season) : null
+      // Whether the Pitches and command cards have a postseason to offer him
+      // (#1503); the scope control stands down without one.
+      block.hasPost = arsenalShard ? postPitchesOf(arsenalShard, id) > 0 : false
       block.heat = arsenalShard ? heatView(arsenalShard, id, tileSportId === 1) : null
       block.arsenalTto = arsenalShard ? arsenalTtoView(arsenalShard, id, tileSportId === 1) : null
       // The same shard's other split — what he throws to each side of the
@@ -199,25 +204,42 @@ export async function loadPlayerAnalytics(id, asOf) {
 }
 
 // ONE PICKED SEASON of the pitching shelf's season-store cards (#1202): the
-// Pitches card (mix, heat band, times-through and side splits) and "Pitches
-// like". The tab calls this for a season other than the current one, and for
-// the vs season of a compare; the current season stays on loadPlayerAnalytics
-// above, whose mix is statsapi's. `seasonYear` is a year or 'all'. Null when he
-// threw too few pitches that season: the card's own empty state. The level is
-// the one he pitched at in THAT season (arsenalLevelOf), so the pool waits on
-// the shard.
-export async function loadArsenalSeason(id, { seasonYear } = {}) {
+// Pitches card (mix, heat band, times-through and side splits), the Command
+// map and "Pitches like". The tab calls this for a season other than the
+// current one, for the vs season of a compare, and for a postseason or all-games
+// scope (#1503); the current regular season stays on loadPlayerAnalytics above,
+// whose mix is statsapi's. `seasonYear` is a year, 'all', or nothing for the
+// current season.
+//
+// `scope` is 'reg', 'post' or 'all'. A man with no postseason pitches that
+// season has no scope to pick, so it reads as 'reg' (`scope` in the result says
+// which one it served) and `hasPost` is false. The Command map is returned only
+// for a postseason or all-games scope: a regular-season Command card is the
+// current season's, from loadPlayerAnalytics. The level is the one he pitched
+// at in THAT scope (arsenalLevelOf); "Pitches like" ranks against the regular
+// season's pool whatever the scope (ADR-0094 point 4), so the pool waits on the
+// regular level.
+export async function loadArsenalSeason(id, { seasonYear, scope = 'reg' } = {}) {
   const shard = await fetchPitchArsenalFor(id, { seasonYear })
-  const isMlb = arsenalLevelOf(shard, id)
+  const hasPost = postPitchesOf(shard, id) > 0
+  const served = hasPost ? scope : 'reg'
+  const view = arsenalScoped(shard, id, served)
+  const isMlb = arsenalLevelOf(view, id)
   if (isMlb == null) return null
-  const pool = await fetchPitchArsenalPool(isMlb, { seasonYear })
-  const arsenal = arsenalMixRows(shard, id, isMlb)
-  if (!arsenal) return null
+  const regMlb = arsenalLevelOf(shard, id)
+  const [pool, command] = await Promise.all([
+    regMlb == null ? null : fetchPitchArsenalPool(regMlb, { seasonYear }),
+    served === 'reg' ? null : fetchCommandFor(id, { seasonYear, scope: served }),
+  ])
   return {
-    arsenal,
-    heat: heatView(shard, id, isMlb),
-    tto: arsenalTtoView(shard, id, isMlb),
-    sides: arsenalSidesView(shard, id, isMlb),
-    similar: similarPitchersFor(pool, id),
+    scope: served,
+    hasPost,
+    arsenal: arsenalMixRows(view, id, isMlb),
+    heat: heatView(view, id, isMlb),
+    tto: arsenalTtoView(view, id, isMlb),
+    sides: arsenalSidesView(view, id, isMlb),
+    similar: pool ? similarPitchersFor(pool, id) : [],
+    command,
+    commandMlb: isMlb,
   }
 }

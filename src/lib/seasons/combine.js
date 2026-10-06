@@ -199,6 +199,37 @@ export function combineArsenalEntries(slices) {
   }
 }
 
+// --- pitch command (src/api/commandMap.js) ----------------------------------
+// `{ throws, mlb: { code: { stand: { field: [25 counts] } } }, aaa: … }`. Every
+// field is a 25-cell count grid, so two entries (two seasons, or a regular
+// season and a postseason, ADR-0094) add cell by cell. A field one part lacks
+// adds zeros: the file leaves a field out when it is all zero.
+function combineCommandLevel(levels) {
+  const out = {}
+  for (const level of levels) {
+    for (const [code, byStand] of Object.entries(level ?? {})) {
+      out[code] ??= {}
+      for (const [stand, fields] of Object.entries(byStand)) {
+        out[code][stand] ??= {}
+        for (const [field, cells] of Object.entries(fields)) {
+          out[code][stand][field] = addCounts([out[code][stand][field], cells])
+        }
+      }
+    }
+  }
+  return out
+}
+
+export function combineCommandEntries(slices) {
+  const rows = present(slices)
+  if (!rows.length) return null
+  return {
+    throws: latest(rows).throws,
+    mlb: combineCommandLevel(rows.map((r) => r.mlb)),
+    aaa: combineCommandLevel(rows.map((r) => r.aaa)),
+  }
+}
+
 // --- umpires (src/api/umpires.js) -------------------------------------------
 // Game rows join, newest first. A game is in one season only, so nothing
 // can count twice.
