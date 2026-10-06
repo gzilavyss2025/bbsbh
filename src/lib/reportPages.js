@@ -161,6 +161,7 @@ export const PAGE_GROUPS = [
       { label: 'Postseason Leaders', path: '/postseason-leaders' },
       { label: 'Postseason Records', path: '/postseason-records' },
       { label: 'All-Star Legacy', path: '/all-star-legacy' },
+      { label: 'Six Degrees of Teammates', path: '/teammates' },
       { label: 'Milestone Watch', path: '/milestones' },
       { label: 'Trade Deadline', path: '/trade-deadline' },
     ],
@@ -300,6 +301,7 @@ export const REPORT_ROUTES = {
   attendance: 'attendance',
   'pace-of-play': 'pace',
   doubleheaders: 'doubleheaders',
+  teammates: 'teammates',
   'farm-system-rankings': 'farm-system',
   'bullpen-availability': 'bullpens',
 }

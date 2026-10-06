@@ -1,0 +1,94 @@
+/* ============================================================
+   SIX DEGREES OF TEAMMATES — /teammates (screens/teammates/TeammatesPage.jsx)
+   Imported by that screen alone. Open surface: no seal.
+   ============================================================ */
+
+.degrees__blurb {
+  margin: 0 0 var(--space-4);
+  color: var(--text-muted);
+}
+
+.degrees__pickers,
+.degrees__chain {
+  max-width: 34rem;
+}
+
+.degrees__pickers {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+/* One ledger card per player, a dashed stitch between cards with the team-season on a
+   marker chip. A vertical list: it holds at 390px and for a ten-link chain. */
+.degrees__chain {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.degrees__player {
+  padding: var(--space-2);
+}
+
+.degrees__who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+}
+
+.shot.degrees__shot {
+  flex: none;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+}
+
+.degrees__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* The stitch runs down the middle of the headshot column above and below it. */
+.degrees__link {
+  margin-left: calc(var(--shot-md-w) / 2 + var(--space-2));
+  padding: var(--space-3) 0 var(--space-3) var(--space-3);
+  border-left: 2px dashed var(--border-rule);
+}
+
+.degrees__chip {
+  padding: var(--space-1) var(--space-2);
+  background: var(--marker);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: inherit;
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+.degrees__caption {
+  display: inline-block;
+  margin: var(--space-3) 0;
+  padding: var(--space-1) var(--space-3);
+  background: var(--ink-0);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-on-ink);
+}
+
+.degrees__credit {
+  margin: 0 0 var(--space-2);
+}
+
+.degrees__label {
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
