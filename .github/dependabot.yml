@@ -1,0 +1,24 @@
+# One grouped pull request a week per ecosystem, so dependency updates do not
+# spend a Vercel deployment each (Hobby plan, docs/development.md). A pull request
+# that changes package.json deploys, so the auto-merge rule in
+# .claude/skills/steward/SKILL.md does not apply to it: merge these in a batch.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 2
+    groups:
+      actions:
+        patterns: ["*"]
