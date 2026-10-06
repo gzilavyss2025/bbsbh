@@ -47,16 +47,20 @@ ADR-0100's open-data pattern.
 
 ## Prompt 1c. The event index: the full history
 
-**Model: Haiku 4.5** (rung 1; no effort setting). Mechanical: run a generator that
-exists, and commit its output.
+**Model: Haiku 4.5** (rung 1; no effort setting). The full prompt is `prompt-1c.md`.
+Mechanical: run the generator and the cross-check, compare counts, commit data.
 
-**Needs first:** prompts 1a and 1b merged.
+**Needs first:** prompts 1a and 1b merged. (1a merged in gzilavyss2025/bbsbh#1575.)
 
-- Run `gen-notable.mjs --from 1901 --to <season in play>`. Expect about 4,000 calls
-  and about 803 MB.
-- Run the cross-check. Paste its report in the PR. Do not edit the seed file. A person
-  does that.
-- Stop on any HTTP error that repeats. Do not retry past the rule in root `CLAUDE.md`.
+- Run `gen-notable.mjs` from 1901 to 2025 in six chunks of about 20 seasons. The
+  generator writes after each season, so a stopped chunk keeps what it finished.
+- Cost, from 1a's measured runs: 29 to 77 calls a season. About 6,000 calls and about
+  900 MB in all (an estimate). The first plan said about 4,000 calls; the postseason club
+  calls account for most of the difference.
+- Check 1960 to 2025 against exact counts from `findings.md`: 196 no-hitters, 266 triple
+  plays (with the seed row), 198 cycles. Spot-check Larsen, the 1979 forfeit, the seed
+  row and the 2021 seven-inning games.
+- Run the cross-check. Paste its report. Add no seed rows.
 
 ## Prompt 2a. Old-game pages: thin eras
 
