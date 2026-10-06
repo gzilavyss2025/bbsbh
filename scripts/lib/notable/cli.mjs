@@ -1,7 +1,9 @@
 // The pure half of scripts/gen-notable.mjs, part 6: the flags.
 import { FIRST_SEASON } from './rules.mjs'
 
-const VALUE_FLAGS = ['season', 'from', 'to', 'out']
+const VALUE_FLAGS = ['season', 'from', 'to', 'out', 'nohitters', 'tripleplays', 'index', 'report']
+// The one bare flag: the hand-run Retrosheet cross-check (retro-run.mjs).
+const BARE_FLAGS = ['check-retrosheet']
 
 // lib/args.mjs reads `--flag=value`. A bare `--season 2025` would read as `true` and drop
 // the year, so the space form is joined first. Both forms work.
@@ -43,5 +45,5 @@ export function seasonsFromArgs(parsed, inPlay) {
 
 // A flag the generator does not know is a typo that would run the default season.
 export function unknownFlags(parsed) {
-  return Object.keys(parsed).filter((k) => !VALUE_FLAGS.includes(k))
+  return Object.keys(parsed).filter((k) => !VALUE_FLAGS.includes(k) && !BARE_FLAGS.includes(k))
 }
