@@ -1,14 +1,16 @@
 import { getJson } from './statsapi.js'
+import { fetchPersonStats } from './person-fetch.js'
+import { aggregateSplits } from './person/stats.js'
+import { MLB_LOG_GAME_TYPES } from './boxlines/rows.js'
 
 // The PLAYER page's "Recent form" card for hitters: how he's hit over his
 // last 7 / 15 / 30 games against his own full-season line — the hitter
 // analog of workload.js's pitcher recent-appearances precompute, but fetched
-// live per-player rather than read from a nightly file (there's no existing
-// batch precompute for lastXGames splits). Four `lastXGames` windows fan out
-// in parallel, same Promise.all idiom as fetchPitchingAdvanced /
-// fetchAllStarRosterIds in person-fetch.js. Each split degrades to null on
-// its own (a rookie with under 30 games this season just has a null last30,
-// which nulls the whole card — see hitterFormView).
+// live per-player rather than read from a nightly file. The three windows are
+// cut from one game-log fetch (regular season and October, like the Game log
+// card), and the season line is a second call that fails on its own to null.
+// A rookie with under 30 games this season just has a null last30, which nulls
+// the whole card — see hitterFormView.
 //
 // Name note: src/api/recentForm.js is an unrelated, already-shipped TEAM page
 // module (the "Last 10 Games" roster projection consumed by
@@ -17,21 +19,34 @@ import { getJson } from './statsapi.js'
 // recentForm) so the two "recent form" features never collide on one path.
 export async function fetchHitterForm(personId, season) {
   if (!personId || !season) return null
-  const urls = {
-    last7: `/api/v1/people/${personId}/stats?stats=lastXGames&limit=7&group=hitting&season=${season}`,
-    last15: `/api/v1/people/${personId}/stats?stats=lastXGames&limit=15&group=hitting&season=${season}`,
-    last30: `/api/v1/people/${personId}/stats?stats=lastXGames&limit=30&group=hitting&season=${season}`,
-    season: `/api/v1/people/${personId}/stats?stats=season&group=hitting&season=${season}`,
+  // The windows come from the game log, the same list the Game log card draws:
+  // `lastXGames` with a mixed game-type list answers one row per type plus a
+  // total that is no last-N window (probed 2026-10-06), so October could not
+  // join a window any other way. The season line stays the regular season's.
+  const [log, seasonLine] = await Promise.all([
+    fetchPersonStats(personId, { type: 'gameLog', group: 'hitting', season, gameType: MLB_LOG_GAME_TYPES }),
+    getJson(`/api/v1/people/${personId}/stats?stats=season&group=hitting&season=${season}`).then(statFor).catch(() => null),
+  ])
+  return { ...hitterFormWindows(log), season: seasonLine }
+}
+
+// The last 7 / 15 / 30 games of a game log, newest last, as one stat line each.
+// A game's order is its date, then its game number in a doubleheader. Two games
+// with the same line both count, so nothing is de-duplicated.
+export function hitterFormWindows(log) {
+  const games = (log ?? [])
+    .filter((g) => g?.stat)
+    .sort((a, b) =>
+      String(a.date).localeCompare(String(b.date)) ||
+      (a.game?.gameNumber ?? 0) - (b.game?.gameNumber ?? 0) ||
+      (a.game?.gamePk ?? 0) - (b.game?.gamePk ?? 0))
+  const window = (n) => {
+    const rows = games.slice(-n)
+    if (!rows.length) return null
+    const stat = aggregateSplits(rows, 'hitting', { dedupe: false })
+    return { ...stat, plateAppearances: rows.reduce((t, g) => t + (Number(g.stat.plateAppearances) || 0), 0) }
   }
-  const entries = Object.entries(urls)
-  const results = await Promise.all(
-    entries.map(([, path]) => getJson(path).then(statFor).catch(() => null)),
-  )
-  const out = {}
-  entries.forEach(([key], i) => {
-    out[key] = results[i]
-  })
-  return out
+  return { last7: window(7), last15: window(15), last30: window(30) }
 }
 
 function statFor(data) {

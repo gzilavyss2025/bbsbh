@@ -25,8 +25,14 @@ import {
   pitcherRole,
   SITUATIONAL_SIT_CODES,
   situationalSplitsView,
+  splitsView,
 } from '../person.js'
 import { boxscoreLinks, currentSeasonFor, playerContext, yearByYearFor } from './context.js'
+
+function postseasonSplits(id, group, season, sportId, cutoff, sitCodes) {
+  if (cutoff || sportId !== 1) return Promise.resolve([])
+  return fetchPersonStats(id, { type: 'statSplits', group, sitCodes, season, sportId: 1, gameType: 'P' })
+}
 
 export async function loadPlayerStats(id, asOf) {
   const ctx = await playerContext(id, asOf)
@@ -70,7 +76,7 @@ export async function loadPlayerStats(id, asOf) {
             gameType: currentActivitySportId === 1 ? MLB_LOG_GAME_TYPES : undefined,
           })
 
-      const [current, yby, careerSplits, lrSplits, gameLogSplits, situationalSplits] = await Promise.all([
+      const [current, yby, careerSplits, lrSplits, gameLogSplits, situationalSplits, postLr, postSituational] = await Promise.all([
         currentSeasonFor(ctx, group),
         ybyByGroup.get(group),
         // The career total is pinned to `careerSportId` (MLB for anyone who has
@@ -86,6 +92,12 @@ export async function loadPlayerStats(id, asOf) {
         currentActivitySportId === 1
           ? fetchPersonStats(id, { type: 'statSplits', group, sitCodes: SITUATIONAL_SIT_CODES, season, sportId: 1 })
           : Promise.resolve([]),
+        // The postseason scope of the same two tables, kept beside the regular
+        // ones and never blended in. gameType=P is an aggregate read, which is
+        // safe here (checked live 2026-10-06). statSplits ignores a date window,
+        // so a dated page cannot cut it and asks nothing. MLB only.
+        postseasonSplits(id, group, season, currentActivitySportId, cutoff, 'vl,vr'),
+        postseasonSplits(id, group, season, currentActivitySportId, cutoff, SITUATIONAL_SIT_CODES),
       ])
       const { seasonSplits, stat: tileStat, sportId: tileSportId, levelOnlyStat, levelOnlySplits } = current
 
@@ -142,6 +154,10 @@ export async function loadPlayerStats(id, asOf) {
         otherGroupYears,
       })
       block.situational = situationalSplitsView(situationalSplits, group)
+      block.postseason = {
+        splits: splitsView(postLr, group),
+        situational: situationalSplitsView(postSituational, group, { minRows: 1 }),
+      }
       return { group, block }
     }),
   )
