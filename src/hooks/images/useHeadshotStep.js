@@ -46,3 +46,13 @@ export function useHeadshotStep(identityKey, sources, info) {
 
   return { url, onError }
 }
+
+// True once THIS url has finished loading. Until then the <img> carries
+// `data-pending` and CSS hides it, so a failed load (or the 2 s pause before
+// its retry) never paints the browser's broken-image glyph; the frame's tint
+// shows instead. Keyed by url, so a new source starts hidden again.
+export function useImgReady(url) {
+  const [readyUrl, setReadyUrl] = useState(null)
+  const onLoad = useCallback(() => setReadyUrl(url), [url])
+  return { pending: readyUrl !== url ? '' : undefined, onLoad }
+}

@@ -2,7 +2,7 @@ import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../../lib/teams.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 import { logHeadshotEvent } from '../../lib/headshot/log.js'
-import { useHeadshotStep } from '../../hooks/images/useHeadshotStep.js'
+import { useHeadshotStep, useImgReady } from '../../hooks/images/useHeadshotStep.js'
 
 // A person's headshot, keyed by the person id we already carry. Walks a
 // fallback chain, each rung using the CDN WITHOUT its `d_people:generic`
@@ -91,6 +91,8 @@ export function Headshot({
   const logoTeamId =
     logoStage === 'primary' ? teamId : logoStage === 'fallback' ? fallbackTeamId : null
   const logoUrl = !photoUrl && logoTeamId ? teamLogoUrl(logoTeamId) : null
+  const photoReady = useImgReady(photoUrl)
+  const logoReady = useImgReady(logoUrl)
 
   // Optional: lets a caller react to "no real photo" — e.g. moving a detail
   // normally anchored to the photo (a position tag) into plain text instead
@@ -128,6 +130,8 @@ export function Headshot({
             alt=""
             loading="lazy"
             decoding="async"
+            data-pending={logoReady.pending}
+            onLoad={logoReady.onLoad}
             onError={() =>
               setLogoStage((s) => (s === 'primary' && fallbackTeamId ? 'fallback' : 'failed'))
             }
@@ -151,6 +155,8 @@ export function Headshot({
         alt=""
         loading="lazy"
         decoding="async"
+        data-pending={photoReady.pending}
+        onLoad={photoReady.onLoad}
         onError={onPhotoError}
         crossOrigin={HEADSHOT_CROSS_ORIGIN}
         aria-hidden="true"

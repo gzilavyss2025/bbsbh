@@ -129,6 +129,12 @@
      scorebook rather than popping like a web photo. */
   filter: grayscale(0.16) contrast(1.02);
 }
+.shot img[data-pending],
+.pitchernotice__shot img[data-pending] {
+  /* Not loaded yet, or failed and waiting to retry: never paint the browser's
+     broken-image glyph (useImgReady). */
+  visibility: hidden;
+}
 .shot--fallback {
   display: grid;
   place-items: center;

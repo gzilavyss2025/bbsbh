@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../../lib/teams.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 import { logHeadshotEvent } from '../../lib/headshot/log.js'
-import { useHeadshotStep } from '../../hooks/images/useHeadshotStep.js'
+import { useHeadshotStep, useImgReady } from '../../hooks/images/useHeadshotStep.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 
 // The "now pitching" notification card — the entering pitcher's headshot beside
@@ -106,6 +106,8 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- stepInfo is rebuilt each render; these are its inputs
   }, [url, logoUrl, personId, teamId, name])
   const bg = teamTintColor(teamId)
+  const photoReady = useImgReady(url)
+  const logoReady = useImgReady(logoUrl)
 
   if (!url) {
     if (logoUrl) {
@@ -121,6 +123,8 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
             alt=""
             loading="lazy"
             decoding="async"
+            data-pending={logoReady.pending}
+            onLoad={logoReady.onLoad}
             onError={() => setLogoFailed(true)}
             aria-hidden="true"
           />
@@ -141,6 +145,8 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
         alt=""
         loading="lazy"
         decoding="async"
+        data-pending={photoReady.pending}
+        onLoad={photoReady.onLoad}
         onError={onPhotoError}
         crossOrigin={HEADSHOT_CROSS_ORIGIN}
         aria-hidden="true"
