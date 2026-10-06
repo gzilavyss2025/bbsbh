@@ -174,6 +174,15 @@
   border-top-color: var(--clay);
   animation: none;
 }
+/* The spinner laid over the video, in the same grid cell, until it has a frame.
+   It takes no pointer events, so the native controls underneath still work. */
+.xl-film__video,
+.xl-film__mark--over {
+  grid-area: 1 / 1;
+}
+.xl-film__mark--over {
+  pointer-events: none;
+}
 @keyframes xl-turn {
   to {
     transform: rotate(360deg);

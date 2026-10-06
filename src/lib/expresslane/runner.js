@@ -108,6 +108,12 @@ export function createStagingRunner({
   // gate — the cursor still may not pass the picture — only when the bytes are
   // paid for.
   horizon = Infinity,
+  // THE SPEED READOUT's two inputs (speed.js). `now` is injected so a test can
+  // drive the clock, and `onSample` is told `{ bytes, ms }` after each good
+  // download. A sample carries no playId on purpose: a figure traceable to one
+  // clip would say how big the play ahead is.
+  now = () => globalThis.performance?.now?.() ?? Date.now(),
+  onSample = () => {},
 }) {
   let job = initialJob
   let pumping = false
@@ -192,6 +198,7 @@ export function createStagingRunner({
 
     controller = typeof AbortController === 'function' ? new AbortController() : null
     let result
+    const startedAt = now()
     try {
       result = await fetchClip(url, { signal: controller?.signal })
     } catch {
@@ -211,6 +218,10 @@ export function createStagingRunner({
       update(markByteFailure(job, playId))
       return job.state === 'blocked' ? 'stop' : 'retry'
     }
+
+    // The bytes are in hand, so this is a real download. It is timed before the
+    // disk write, because the write is this device's cost and not the host's.
+    if (result.blob?.size) onSample({ bytes: result.blob.size, ms: now() - startedAt })
 
     const outcome = await store.putClip(job.gamePk, playId, result.blob)
     if (outcome === 'stored') {

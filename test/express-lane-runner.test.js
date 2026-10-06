@@ -73,6 +73,8 @@ function harness({
   lookbehind,
   horizon,
   sleep = async () => {},
+  now,
+  onSample,
 } = {}) {
   const clips = fakeClips(outcomes)
   const resolveClip = resolve ?? (async (playId) => `https://clip/${playId}`)
@@ -84,6 +86,8 @@ function harness({
     sleep,
     lookbehind,
     horizon,
+    now,
+    onSample,
   })
   return { runner, clips, store, rows }
 }
@@ -358,4 +362,62 @@ test('staying ahead runs the whole half without being asked', async () => {
   await h.runner.addHalf([pitch(1), pitch(2), pitch(3)])
   await h.runner.start()
   assert.equal(h.clips.asked.length, 3, 'the default plan does not wait to be prompted')
+})
+
+// --- the speed readout ----------------------------------------------------
+//
+// The runner times each download and says so. The sample carries bytes and
+// milliseconds and NOTHING ELSE: no playId, no row, no position in the queue.
+// A figure that could be traced to one clip would let the waiting screen say
+// how big the play ahead is (ADR-0046).
+
+test('each finished download reports its size and how long it took', async () => {
+  const bigClip = new Blob([new Uint8Array(5000)])
+  let tick = 0
+  const samples = []
+  const h = harness({
+    outcomes: { 'https://clip/p1': { ok: true, status: 200, blob: bigClip } },
+    now: () => {
+      tick += 250
+      return tick
+    },
+    onSample: (sample) => samples.push(sample),
+  })
+  await h.runner.addHalf([pitch(1)])
+  await h.runner.start()
+  assert.equal(samples.length, 1)
+  assert.equal(samples[0].bytes, 5000)
+  assert.equal(samples[0].ms, 250, 'one tick between the start and the end of the download')
+})
+
+test('a sample names no clip', async () => {
+  const samples = []
+  const h = harness({ onSample: (sample) => samples.push(sample) })
+  await h.runner.addHalf([pitch(1), pitch(2)])
+  await h.runner.start()
+  assert.equal(samples.length, 2)
+  for (const sample of samples) {
+    assert.deepEqual(Object.keys(sample).sort(), ['bytes', 'ms'])
+  }
+})
+
+test('a refused or failed download reports nothing', async () => {
+  const samples = []
+  const h = harness({
+    outcomes: {
+      'https://clip/p1': { ok: false, status: 500, blob: null },
+      'https://clip/p2': { throws: true },
+    },
+    onSample: (sample) => samples.push(sample),
+  })
+  await h.runner.addHalf([pitch(1), pitch(2)])
+  await h.runner.start()
+  assert.deepEqual(samples, [], 'a failed request is not a measure of the connection speed')
+})
+
+test('a missing readout callback changes nothing', async () => {
+  const h = harness()
+  await h.runner.addHalf([pitch(1)])
+  await h.runner.start()
+  assert.equal(h.runner.getJob().staged.has('p1'), true)
 })

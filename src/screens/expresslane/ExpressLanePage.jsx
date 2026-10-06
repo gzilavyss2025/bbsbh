@@ -10,6 +10,7 @@ import { selectInningCount, selectRegulationInnings, selectTeamMeta } from '../.
 import { expressHalfOf, stepToSection } from '../../lib/route.js'
 import { DEFAULT_STAGING_PLAN } from '../../lib/expresslane/staging.js'
 import { halfIndex } from '../../api/select.js'
+import { formatMbps } from '../../lib/expresslane/speed.js'
 
 // EXPRESS LANE — CONCEPT A, THE SPLIT DECK.
 //
@@ -205,6 +206,7 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
           plan={plan}
           onPlan={setPlan}
           onStart={() => setStarted(true)}
+          speed={lane.speed}
         />
       </div>
     )
@@ -303,6 +305,13 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
                 ? 'About half an hour. Leave it open — what has arrived stays on this device.'
                 : 'It arrives as fast as MLB will send it, which is slower than it sounds.'}
             </p>
+            {/* The rate of the clips already here, and only that. No count of
+                clips, no size of the one still coming (ADR-0008, ADR-0046). */}
+            {lane.speed && (
+              <p className="xl__prerollsub" data-testid="xl-speed">
+                Your last clips came in at {formatMbps(lane.speed.mbps)}.
+              </p>
+            )}
           </div>
         )}
       </div>
