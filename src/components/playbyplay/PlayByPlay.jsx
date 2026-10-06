@@ -338,6 +338,10 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     }
   }
 
+  // The last at-bat on screen with a zone cell (where a replay can live) owns
+  // the wide rail's replay until a pick moves it (AtBatReplay.jsx's ReplayRail).
+  const lastAtBat = visibleEntries.findLastIndex((e) => e.kind === 'atbat' && hasPitchLocations(e.pitchDetails))
+
   return (
     <div className="pbp">
       {windowed && beatKey != null && <ReliefRepeat pitcher={pitchingChangePitcher(feed, windowReliefPitcherId(visibleEntries))} teamId={pitchingTeamId} teamName={pitchingName} />}
@@ -361,6 +365,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               windowed={windowed}
               beatKey={beatKey}
               writing={writingUpTo.has(i)}
+              replayLast={i === lastAtBat}
             />
           )
         } else if (entry.eventType === 'pitching_substitution') {
@@ -539,7 +544,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
 // have one home (see that file's TUNING note).
 const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }
 
-function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false }) {
+function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false, replayLast = false }) {
   const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, battedBall, live } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   // The at-bat replay (AtBatReplay.jsx), in one place at a time: inside the
@@ -749,10 +754,10 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
           Just the pitches and their plot — the batter/pitcher matchup is
           already named in the card to the left. Collapses away entirely at
           parks with no pitch tracking. */}
-      {(hasZone || (replay && wide)) && (
-        <div className={`pbp__zonecell${replay && wide ? ' pbp__zonecell--replay' : ''}`}>
+      {hasZone && (
+        <div className="pbp__zonecell">
           {replay && wide ? (
-            <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} pitches={replay} />
+            <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} pitches={replay} id={entry.atBatIndex} last={replayLast} />
           ) : (
             <>
               <PitchList pitchDetails={pitchDetails} />

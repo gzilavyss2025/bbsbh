@@ -71,7 +71,7 @@ const TABS = [
 // when something the panel actually shows changed — `stepAtBatIndex` moving
 // each tap still re-renders it, as the Lineups tab's on-deck marker needs.
 export const ReferencePanel = memo(function ReferencePanel(props) {
-  const { effInning, effHalf, revealedThrough } = props
+  const { effInning, effHalf, revealedThrough, onReplaySlot } = props
   const wide = useMediaQuery(WIDE_QUERY)
   // A half the reader hasn't reached yet has no lineup or defense to show (the
   // gate lives in defenseEntering/lineupEntering, ADR-0010 — this only decides
@@ -115,6 +115,9 @@ export const ReferencePanel = memo(function ReferencePanel(props) {
     const idFor = (s) => `refrail-${s}`
     return (
       <aside className="focusrail" aria-label="Reference">
+        {/* The at-bat replay's slot: a revealed card portals its scene here
+            (AtBatReplay.jsx's ReplayRail). Empty, it takes no room. */}
+        <div className="focusrail__replay" ref={onReplaySlot} />
         {strip(idFor)}
         <div
           className="refpanel__body"

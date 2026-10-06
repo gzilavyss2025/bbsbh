@@ -337,8 +337,8 @@
 /* ---- The at-bat replay (AtBatReplay.jsx) ------------------------------------
    PitchScene's `atBat` look: a taller frame with the plate on the ground under
    the zone (scene.js REPLAY_H), and the navy bar BELOW the drawing in two rows,
-   "N · pitch" and mph over "Pitch N of M" and the call. It rides in the zone
-   cell on wide and in a sheet on a phone. The sheet is portalled outside
+   "N · pitch" and mph over "Pitch N of M" and the call. It rides at the top of
+   the wide reference rail and in a sheet on a phone. The sheet is portalled outside
    #root, where 01-base.css's capitals do not reach, so the bar asks for its own. */
 .pscene--replay {
   aspect-ratio: auto;
@@ -398,21 +398,13 @@
   padding-inline: 0;
 }
 
-/* Wide: the zone plot and the scene side by side in the zone cell, the pitch
-   list full width under both (the scene alone takes the row where no pitch
-   could be plotted). Doubled class to beat 25-wide-layout.css's flex
-   row, which loads after this file. */
-@media (min-width: 740px) {
-  .pbp__zonecell.pbp__zonecell--replay {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--space-2) var(--space-3h);
-    align-items: start;
-  }
-  .pbp__zonecell--replay .pitchlist,
-  .pbp__zonecell--replay > .pbp__replay:first-child {
-    grid-column: 1 / -1;
-  }
+/* Wide focus: the scene's slot at the top of the reference rail
+   (ReferencePanel.jsx). Empty until a revealed card portals its scene in. */
+.focusrail__replay {
+  margin-bottom: var(--space-3);
+}
+.focusrail__replay:empty {
+  display: none;
 }
 
 /* The pitch list's picks (PitchList's opt-in `pick`): each number dot is a

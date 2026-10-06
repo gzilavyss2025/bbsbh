@@ -26,6 +26,7 @@ import { FocusControls, FocusTrail, useFocusMode } from '../components/inning/fo
 import { InningActionBar } from '../components/inning/InningActionBar.jsx'
 import { bookIsClosed } from '../components/inning/focus/beats.js'
 import { ReferencePanel } from '../components/inning/focus/ReferencePanel.jsx'
+import { ReplayRail } from '../components/playbyplay/pitcherCard/AtBatReplay.jsx'
 import { DueUpNextCard } from '../components/playbyplay/DueUpNextCard.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { ConsoleBand } from '../components/gamehud/ConsoleBand.jsx'
@@ -306,6 +307,8 @@ export function InningViewer({
   // actually prevents a second turn from starting).
   const pageTurnRef = useRef(null)
   const [turnStatus, setTurnStatus] = useState('idle')
+  // The reference rail's empty slot for the at-bat replay (ReferencePanel.jsx).
+  const [replaySlot, setReplaySlot] = useState(null)
   const turning = turnStatus !== 'idle'
   const requestForwardHalf = (idx) => pageTurnRef.current?.requestHalf(idx)
 
@@ -389,15 +392,16 @@ export function InningViewer({
 
   // Builds one InningPage instance for a given half-index — shared by the
   // active (interactive) render and, mid-turn, the inert preview render.
-  // Keyed on the half itself so navigating (or the turn committing) forces
+  // Keyed on the half itself (on its ReplayRail wrapper) so navigating (or the turn committing) forces
   // the fresh remount SealBox's re-sealing depends on (ADR-0002); presentation-
   // only-ness is left entirely to InningPage/HalfInning to enforce (ADR-0024).
   const renderInningPage = (idx, { presentationOnly }) => {
     const pageInning = Math.floor(idx / 2) + 1
     const pageHalf = idx % 2 === 0 ? 'top' : 'bottom'
+    // The at-bat replay's rail slot, for the live page only (AtBatReplay.jsx).
     return (
+      <ReplayRail key={`${pageInning}-${pageHalf}`} slot={presentationOnly ? null : replaySlot}>
       <InningPage
-        key={`${pageInning}-${pageHalf}`}
         feed={feed}
         inning={pageInning}
         half={pageHalf}
@@ -417,6 +421,7 @@ export function InningViewer({
         onLiveState={reportLiveState}
         presentationOnly={presentationOnly}
       />
+      </ReplayRail>
     )
   }
 
@@ -968,7 +973,7 @@ export function InningViewer({
             (ReferencePanel.jsx, ADR-0043). One section at a time, so the
             reader reaches the one they want without scrolling past four they
             don't. Unconditional now — every half gets it, live or historical. */}
-        <ReferencePanel {...refProps} rosters={rosters} />
+        <ReferencePanel {...refProps} rosters={rosters} onReplaySlot={setReplaySlot} />
       </div>
 
       {/* The floating bar (components/inning/InningActionBar.jsx) — the three
