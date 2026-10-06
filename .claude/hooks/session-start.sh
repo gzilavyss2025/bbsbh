@@ -138,7 +138,7 @@ if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
     echo "bbsbh: node_modules up to date, skipping install"
   else
     echo "bbsbh: installing npm dependencies…"
-    npm install --no-audit --no-fund
+    npm ci --no-audit --no-fund
     # Touch so the freshness check above short-circuits next time.
     touch node_modules
     echo "bbsbh: dependencies ready"
