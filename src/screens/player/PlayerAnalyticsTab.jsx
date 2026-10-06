@@ -24,7 +24,7 @@ import { RunValueCard } from '../../components/playerstats/RunValueCard.jsx'
 import { SprayMapSection } from '../../components/playerstats/SprayMapSection.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './PlayerHubShell.jsx'
-import { Choice } from '../../components/scout/Choice.jsx'
+import { Pill } from '../../components/ui/control/Pill.jsx'
 import { useNav } from '../../lib/nav.js'
 import { pitchScopeOf } from '../../lib/seasons/route.js'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
@@ -209,7 +209,20 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: s
           <FoulCard playerId={bio.id} group={block.group} asOf={asOf} {...season} />
 
           {block.group === 'pitching' && hasPost && (
-            <Choice label="Scope" options={SCOPES} value={scopeNow} onChange={chooseScope} />
+            <div className="cmdmap__chips" role="group" aria-label="Scope">
+              {SCOPES.map(([k, text]) => (
+                <Pill
+                  key={k}
+                  role="control"
+                  fill="paper"
+                  className="cmdmap__chip"
+                  pressed={scopeNow === k}
+                  onClick={() => chooseScope(k)}
+                >
+                  {text}
+                </Pill>
+              ))}
+            </div>
           )}
 
           <PitchesCard
