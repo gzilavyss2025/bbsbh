@@ -1182,6 +1182,11 @@ don't run these by hand.
   a record attached and the page prints the others as phantom "Shared season"
   rows. `src/api/managers.js` dedupes again on read, for shards written before
   the fix. App reads it via `src/api/managers.js`.
+  The same run also writes `public/data/manager-staff/{NN}.json` (bucketed on
+  `managerId % 100`): the reverse index, who held a coach job on each manager's
+  club-seasons, built by `scripts/lib/records/manager-staff-index.mjs` from the
+  merged table, so `--current-only` keeps old staffs. About 320 managers, 113 KB
+  in 98 files (97 buckets and `index.json`, the freshness stamp). The cron step above runs it too; the commit step stages all of `public`. App reads it via `coachedUnder` in `src/api/managers.js`.
 - `fever/gen-player-contracts.mjs` → `public/data/player-contracts/{00..99}.json` —
   Fever Baseball's current contract feed, reduced from its league-wide payload
   into player-ID shards for the profile-page Contract card. The generator

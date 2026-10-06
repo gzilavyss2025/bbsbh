@@ -896,6 +896,11 @@ for each generator; the reader modules:
   phantom shared seasons AND split continuous tenures in half. Same instinct as
   `aggregateSplits` deduping statsapi's repeated stat rows — the feed repeats
   itself, so the reader dedupes.
+  `coachedUnder(managerId)` reads the reverse index in `public/data/manager-staff/{NN}.json`
+  (same `shardKey100` bucket, keyed by manager id; each entry is
+  `[personId, seasonsTogether, laterManaged 0|1]`) and names the staff with one
+  batched `people?personIds=` request. It returns `[]` for a manager with no staff
+  on file. `CoachingTree.jsx` draws it on the manager page: open surface, no SealBox.
 - `person/contracts.js` — current salary, competitive-balance-tax payroll,
   service time, options and future club-control status from Fever Baseball's
   Cot's-to-MLBAM reconciliation. `scripts/fever/gen-player-contracts.mjs` reduces the nightly

@@ -1,5 +1,7 @@
 import { teamFullName } from '../lib/teams.js'
 import { shardKey100 } from '../lib/shardKey.js'
+import { getJson } from './statsapi.js'
+import { staticJsonBy } from './staticJson.js'
 
 // The manager detail page's data — one person's FULL coaching career (not
 // just his managerial stints — e.g. Pat Murphy was Padres bench coach years
@@ -197,4 +199,34 @@ export function currentStint(stints, season = new Date().getFullYear()) {
 export function lastManagerialStint(stints) {
   const mgr = managerialStints(stints)
   return mgr.length ? mgr[mgr.length - 1] : null
+}
+
+// The coaching tree's second row: who held a staff job under this manager,
+// from the reverse index gen-manager-history.mjs writes
+// (public/data/manager-staff/{NN}.json, same shardKey100 bucket as the history
+// shards, each entry [personId, seasonsTogether, laterManaged 0|1]). Names are
+// not in the file (the history shards carry none either), so one batched people
+// request names them. [] for a manager with no staff on file, or on any failure.
+const staffShard = staticJsonBy((key) => `/data/manager-staff/${key}.json`, {
+  shape: (d) => d.byManagerId ?? {},
+  fallback: {},
+})
+
+export async function coachedUnder(managerId) {
+  const rows = (await staffShard(shardKey100(managerId)))[managerId] ?? []
+  if (!rows.length) return []
+  let names = {}
+  try {
+    const ids = rows.map(([id]) => id).join(',')
+    const data = await getJson(`/api/v1/people?personIds=${ids}&fields=people,id,fullName`)
+    names = Object.fromEntries((data.people ?? []).map((p) => [p.id, p.fullName]))
+  } catch {
+    // A person with no name still renders, as a bare link.
+  }
+  return rows.map(([personId, seasons, later]) => ({
+    personId,
+    name: names[personId] ?? '',
+    seasons,
+    laterManaged: later === 1,
+  }))
 }
