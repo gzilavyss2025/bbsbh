@@ -412,6 +412,10 @@
       "class": "spoiler-free",
       "why": "Pure classification of a COMPLETED game's late-innings drama from its linescore, read by the nightly gen-team-score.mjs precompute. Node-side only; no app surface reads it."
     },
+    "player/leagueAverages.js": {
+      "class": "spoiler-free",
+      "why": "League AVG and ERA of one MLB season, for the career table's vs-league column. Season rates from public/data/league-averages.json, plus one live teams/stats request for the season in play. No game, no linescore, no reveal state."
+    },
     "leaders.js": {
       "class": "spoiler-free",
       "why": "Builds the leader-board pool for a scope. Season aggregates — an open surface (ADR-0034)."

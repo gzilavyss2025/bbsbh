@@ -1298,6 +1298,18 @@ Re-run only to fold in a new season.
   park in the same seasons, defunct clubs (Federal League, Negro leagues) included.
   The files carry no `generatedAt`, so a re-run writes the same bytes.
 
+- `gen-league-averages.mjs` → `public/data/league-averages.json` — the league
+  batting average and ERA of every finished MLB season, 1901 to the last complete
+  one (`lastSeason`, named by `lib/time/season-in-play.mjs`). **Hand-run, NOT on a
+  cron**: a finished season never changes, so run it once after each season ends.
+  One `teams/stats?group=hitting,pitching&sportIds=1` call a season, 125 calls,
+  4 KB. Pure half: `scripts/lib/stats/league-averages.mjs` (`sum(H)/sum(AB)`, and
+  `9*sum(ER)/sum(IP)` with IP in thirds; never a mean of team averages). Reader:
+  `src/api/player/leagueAverages.js`. **No clock:** a re-run writes the same bytes
+  (`--out <path>` writes elsewhere). **A figure the feed lacks is `null`:** the
+  feed records no earned runs, or only part of them (under 70% of runs), in every
+  season from 1901 to 1948, so ERA is `null` there and the table shows a dash.
+
 - `gen-prospect-rank-history.mjs` → `public/data/prospect-rank-history.json`
   — every year a man sat on a top-prospect list, 2005–2024 (1,823 rows, 982
   players). Input is the finished research pull in
