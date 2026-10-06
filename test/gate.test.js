@@ -9,6 +9,7 @@
 // club with no listed park quietly ranked last on fill rate.
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { toRow, dayOfWeek, aggregate, leagueFor, buildSeason, buildPostseason } from '../scripts/gen-gate.mjs'
 import {
   gateBoard,
@@ -415,4 +416,10 @@ test('the best night carries its round only when the game has one, so regular-se
     [aggregate([row])[158].gate.high.series, aggregate([row])[158].gate.high.seriesGame],
     ['NLDS', 2],
   )
+})
+
+// A round with no game number must not print "G" and the word null.
+test('the postseason crowd table prints the game number only when there is one', () => {
+  const page = readFileSync(new URL('../src/screens/around-the-game/AttendancePage.jsx', import.meta.url), 'utf8')
+  assert.match(page, /r\.bestSeriesGame != null/)
 })

@@ -42,7 +42,8 @@ export function UmpiresCard({ officials, seasonYear, closed = false }) {
   if (officials.length === 0) {
     return closed ? (
       <div className="fact">
-        <dd className="fact__value">Umpires are not in the record for this game.</dd>
+        <dt className="fact__label">Umpires</dt>
+        <dd className="fact__value">Not in the record for this game.</dd>
       </div>
     ) : null
   }
