@@ -18,7 +18,7 @@ import { SeasonStack } from '../season/SeasonStack.jsx'
 // season under it. With neither season's line, no card.
 export function FoulCard({ playerId, group, asOf, seasonYear, label, vs = null }) {
   const navigate = useNav()
-  const skip = !!asOf
+  const skip = !!asOf || seasonYear == null
   // His bucket, not the league — see fetchFoulsFor.
   const { data } = useAsync(
     () => (skip ? Promise.resolve(null) : fetchFoulsFor(playerId, { seasonYear })),
