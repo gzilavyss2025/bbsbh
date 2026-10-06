@@ -39,10 +39,20 @@ export function roundLine(name, seriesGameNumber) {
 // `seriesGameNumber` are all pregame facts; the row's series record is never read.
 // '' for any game that is not a postseason game.
 export function scheduleRoundLine(game) {
-  const name = feedRoundName({
+  return roundLine(scheduleRoundName(game), game?.seriesGameNumber)
+}
+
+// "ALDS \u2022 G1", the short form a stat tile has room for (/abs-challenges' biggest
+// postseason overturn, #1514). Same schedule row and the same pregame facts.
+export function roundShort(game) {
+  const name = scheduleRoundName(game)
+  return name && game?.seriesGameNumber ? `${name} \u2022 G${game.seriesGameNumber}` : name
+}
+
+function scheduleRoundName(game) {
+  return feedRoundName({
     gameData: { game: { type: game?.gameType }, teams: { home: { league: game?.teams?.home?.team?.league } } },
   })
-  return roundLine(name, game?.seriesGameNumber)
 }
 
 // The tab title: "CWS @ CLE · ALDS · Game 3 · Box score". The round sits after the

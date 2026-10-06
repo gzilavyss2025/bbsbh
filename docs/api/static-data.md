@@ -685,7 +685,13 @@ for each generator; the reader modules:
 - `around-the-game/absChallenges.js` — `/abs-challenges`, the season board for
   the ABS Challenge System, from `public/data/abs/{season}/abs-challenges.json`
   (the season `abs/seasons.json` names, ADR-0086)
-  (`gen-abs-challenges.mjs`). MLB and Triple-A are separate levels on the page,
+  (`gen-abs-challenges.mjs`). `fetchAbsChallenges({ seasonYear, scope })` takes
+  `scope` 'reg' (the default), 'post' or 'all', one file each
+  (`abs-challenges-post.json`, `abs-challenges-all.json`); every file carries
+  `postGames` per level, and the page offers Postseason only for a level whose
+  count is above 0 (#1514). `fetchRoundShort(gamePk)` (`src/api/game.js`) reads one schedule row for
+  the "ALDS • G1" under the biggest postseason overturn (MLB only).
+  MLB and Triple-A are separate levels on the page,
   never blended: two different leagues of hitters, catchers and umpires, and
   Triple-A has years of the rule MLB is in its first season of. The FILE ships
   each club's, umpire's and player's own totals; ranking, and the

@@ -826,6 +826,13 @@ CREATE TABLE IF NOT EXISTS abs_player_exposure (
 -- still has no `final_inning` is dropped from the chances denominator rather
 -- than counted as nought innings. `--recheck` backfills them from the
 -- schedule row it already reads, so the NULLs are transient by design.
+--
+-- `scope` is the GAME's part of the season: 'R' regular season, 'P' postseason
+-- (#1514, ADR-0094's shape). It lives on the game only: a challenge row takes
+-- its game's scope through game_pk, so the two can never disagree. It is the
+-- LAST column with DEFAULT 'R', so an old dump line loads as regular season.
+-- The sweep and `--recheck` both set it from the schedule's gameType. The export
+-- never sums 'P' into 'R'.
 CREATE TABLE IF NOT EXISTS abs_ingested_games (
   game_pk          INTEGER NOT NULL PRIMARY KEY,
   date             TEXT NOT NULL,
@@ -837,5 +844,6 @@ CREATE TABLE IF NOT EXISTS abs_ingested_games (
   challenges       INTEGER NOT NULL DEFAULT 0,
   final_inning     INTEGER,
   bottom_played    INTEGER,
-  scheduled_innings INTEGER
+  scheduled_innings INTEGER,
+  scope            TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P'))
 );

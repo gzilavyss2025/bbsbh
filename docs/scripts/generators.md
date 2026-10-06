@@ -396,10 +396,13 @@ don't run these by hand.
   backfill: the nightly window is 3 days, so older October games need a hand run
   with `--days=<n>` (2026: run on 2026-10-06 with `--days=14`, 17 games, 12 clubs). App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
-- `gen-abs-challenges.mjs` → `public/data/abs/{season}/abs-challenges.json`,
+- `gen-abs-challenges.mjs` → `public/data/abs/{season}/abs-challenges.json`
+  (regular season), `abs-challenges-post.json` and `abs-challenges-all.json` (#1514:
+  the postseason beside it, never blended; `abs_ingested_games.scope`, set by the sweep
+  and by `--recheck` from the schedule's `gameType`, ADR-0094's 2026-10-06 addendum),
   **`abs/{season}/abs-exposure.json`** and
   **`abs/{season}/abs-exposure-clubs-{mlb,aaa}.json`**, plus `abs/seasons.json` and the
-  same four files over every season in `abs/all/`. A season store (ADR-0086, #1200):
+  same files over every season in `abs/all/`. A season store (ADR-0086, #1200):
   each file is cut from its own season's rows (`buildExport`'s `season` filter), a
   file is rewritten only when its content changes, the season comes from the
   schedule game, `--exposure` reads the newest season on file (or `--season`),

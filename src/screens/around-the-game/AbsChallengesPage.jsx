@@ -11,6 +11,7 @@ import {
   exposureFor,
 } from '../../api/around-the-game/absExposure.js'
 import { loadClubs } from '../../api/around-the-game/clubs.js'
+import { fetchRoundShort } from '../../api/game.js'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { groupLabelFor } from '../../lib/reportPages.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -33,6 +34,8 @@ import { UmpireBoard } from './abs/UmpireBoard.jsx'
 import { MissBands } from './abs/MissBands.jsx'
 import { BiggestOverturn } from './abs/BiggestOverturn.jsx'
 import { absChallengesPath } from '../../lib/route.js'
+import { useNav } from '../../lib/nav.js'
+import { pitchScopeOf } from '../../lib/seasons/route.js'
 import { seasonDelta, seasonValue } from '../../lib/seasons/view.js'
 import { useSeasonView } from '../../hooks/seasons/useSeasonView.js'
 import { SeasonPicker } from '../../components/season/SeasonPicker.jsx'
@@ -85,23 +88,63 @@ import { SeasonPicker } from '../../components/season/SeasonPicker.jsx'
 
 const ABS_PATH = '/abs-challenges'
 
+// THE SCOPE (#1514): Regular, Postseason or All, the Matchup Scout's three
+// words. The address holds it (`?scope=`, absent is Regular) and so does
+// localStorage, never My Tally (ADR-0039). The file keeps the postseason beside
+// the regular season, so Regular never counts an October game.
+const SCOPE_KEY = 'bbsbh:abs:scope'
+const SCOPES = [['reg', 'Regular'], ['post', 'Postseason'], ['all', 'All']]
+const SCOPE_LINE = { reg: 'Regular season', post: 'Postseason', all: 'Regular season and postseason' }
+
+function storedScope() {
+  try {
+    return pitchScopeOf(window.localStorage.getItem(SCOPE_KEY)) ?? 'reg'
+  } catch {
+    return 'reg'
+  }
+}
+
 // A season view (#1202): `seasonYear` and `vs` come from the address. Compare
 // adds a line under each headline figure and a column to the club board; the
 // sections below it show the chosen season alone.
-export function AbsChallengesPage({ seasonYear, vs }) {
+export function AbsChallengesPage({ seasonYear, vs, scope: scopeParam }) {
   useDocumentTitle('ABS Challenges')
+  const navigate = useNav()
   const [level, setLevel] = useState('MLB')
   const view = useSeasonView('abs', { seasonYear, vs })
   const year = view?.shown
   const [mode, setMode] = useState('change')
+  const [saved, setSaved] = useState(storedScope)
+  const wanted = scopeParam ?? saved
 
-  const challenges = useAsync(() => (view ? fetchAbsChallenges({ seasonYear: year }) : Promise.resolve(null)), [view != null, year])
-  const { error, data } = challenges
-  const loading = !view || challenges.loading
-  const { data: prevData } = useAsync(
-    () => (view?.vs ? fetchAbsChallenges({ seasonYear: view.vs }) : Promise.resolve(null)),
-    [view?.vs],
+  // THE REGULAR FILE IS ALWAYS READ: it names the levels on file and how many
+  // postseason games each one has. A level with none reads as Regular and draws
+  // no scope control, so a pick can never land on an empty board.
+  const regular = useAsync(() => (view ? fetchAbsChallenges({ seasonYear: year }) : Promise.resolve(null)), [view != null, year])
+  const levels = useMemo(() => levelsIn(regular.data), [regular.data])
+  const shown = levels.some((l) => l.key === level) ? level : (levels[0]?.key ?? 'MLB')
+  const hasPost = (regular.data?.postGames?.[shown] ?? 0) > 0
+  const scope = hasPost ? wanted : 'reg'
+  const scoped = useAsync(
+    () => (view && scope !== 'reg' ? fetchAbsChallenges({ seasonYear: year, scope }) : Promise.resolve(null)),
+    [view != null, year, scope],
   )
+  const data = scope === 'reg' ? regular.data : scoped.data
+  const error = regular.error ?? scoped.error
+  const loading = !view || regular.loading || (scope !== 'reg' && scoped.loading)
+  const { data: prevData } = useAsync(
+    () => (view?.vs && regular.data ? fetchAbsChallenges({ seasonYear: view.vs, scope }) : Promise.resolve(null)),
+    [view?.vs, regular.data != null, scope],
+  )
+  const chooseScope = (k) => {
+    try {
+      window.localStorage.setItem(SCOPE_KEY, k)
+    } catch {
+      /* private window: the address still holds it */
+    }
+    setSaved(k)
+    navigate(absChallengesPath({ seasonYear, vs, scope: k }), { replace: true })
+  }
   // MLB and Triple-A both, because both run the system and both are on the
   // board. Club ids never collide across levels, so one lookup covers them.
   const { data: clubs } = useAsync(() => loadClubs([1, 11]), [])
@@ -114,11 +157,15 @@ export function AbsChallengesPage({ seasonYear, vs }) {
   // here. Nothing else waits on it — the section draws once it lands.
   const { data: exposure } = useAsync(() => (view ? fetchAbsExposure({ seasonYear: year }) : Promise.resolve(null)), [view != null, year])
 
-  const levels = useMemo(() => levelsIn(data), [data])
-  const shown = levels.some((l) => l.key === level) ? level : (levels[0]?.key ?? 'MLB')
   const summary = summaryFor(data, shown)
 
   const big = summary?.biggest ?? null
+  // Under Postseason the biggest overturn names its round and game, "ALDS \u2022 G1"
+  // (MLB only: Triple-A's rounds have no short names here, so it keeps the date).
+  const { data: round } = useAsync(
+    () => (scope === 'post' && shown === 'MLB' && big ? fetchRoundShort(big.gamePk) : Promise.resolve('')),
+    [scope, shown, big?.gamePk],
+  )
   // The same level in the compare season, or null.
   const prev = summaryFor(prevData, shown)
   const versus = (cur, before, format) =>
@@ -144,7 +191,38 @@ export function AbsChallengesPage({ seasonYear, vs }) {
         ]}
       />
 
-      <SeasonPicker view={view} pathFor={absChallengesPath} mode={mode} onMode={setMode} />
+      <SeasonPicker view={view} pathFor={(o) => absChallengesPath({ ...o, scope })} mode={mode} onMode={setMode} />
+
+      {levels.length > 1 && (
+        <div className="rpt-controls" role="group" aria-label="Choose a level">
+          {levels.map((l) => (
+            <button
+              key={l.key}
+              type="button"
+              className={`rpt-chip${l.key === shown ? ' is-on' : ''}`}
+              aria-pressed={l.key === shown}
+              onClick={() => setLevel(l.key)}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+      )}
+      {hasPost && (
+        <div className="rpt-controls" role="group" aria-label="Choose a scope">
+          {SCOPES.map(([k, text]) => (
+            <button
+              key={k}
+              type="button"
+              className={`rpt-chip${k === scope ? ' is-on' : ''}`}
+              aria-pressed={k === scope}
+              onClick={() => chooseScope(k)}
+            >
+              {text}
+            </button>
+          ))}
+        </div>
+      )}
 
       <AsyncStatus
         loading={loading}
@@ -156,22 +234,6 @@ export function AbsChallengesPage({ seasonYear, vs }) {
 
       {summary && summary.total > 0 && (
         <>
-          {levels.length > 1 && (
-            <div className="rpt-controls" role="group" aria-label="Choose a level">
-              {levels.map((l) => (
-                <button
-                  key={l.key}
-                  type="button"
-                  className={`rpt-chip${l.key === shown ? ' is-on' : ''}`}
-                  aria-pressed={l.key === shown}
-                  onClick={() => setLevel(l.key)}
-                >
-                  {l.label}
-                </button>
-              ))}
-            </div>
-          )}
-
           <SlabRow>
             <Slab
               tone="lead"
@@ -195,7 +257,7 @@ export function AbsChallengesPage({ seasonYear, vs }) {
             <Slab
               value={big ? num2(big.runs) : '—'}
               label="Biggest single overturn"
-              note={big ? `${big.playerName} · ${humanDateWithYear(big.date)}` : '—'}
+              note={big ? `${big.playerName} · ${round || humanDateWithYear(big.date)}` : '—'}
             />
           </SlabRow>
 
@@ -218,7 +280,8 @@ export function AbsChallengesPage({ seasonYear, vs }) {
           <RanOut summary={summary} clubs={clubs} />
           <PlayerBoards summary={summary} clubs={clubs} />
           <LongestRuns summary={summary} clubs={clubs} />
-          <HowOften exposure={exposureFor(exposure, shown)} />
+          {/* The denominators are regular-season roster totals. */}
+          {scope === 'reg' && <HowOften exposure={exposureFor(exposure, shown)} />}
           <UmpireBoard summary={summary} seasonYear={view.shown} />
           <AfterAWin summary={summary} data={data} level={shown} />
           <MissBands summary={summary} />
@@ -232,8 +295,8 @@ export function AbsChallengesPage({ seasonYear, vs }) {
               written up in scripts/gen-abs-challenges.mjs where the code that
               has to get them right can be read beside them. */}
           <p className="rptsource">
-            One row per ABS review, from each completed game’s own feed · Regular season and
-            postseason, no All-Star Game · Runs are run expectancy moved, not runs that scored ·
+            One row per ABS review, from each completed game’s own feed · {SCOPE_LINE[scope]},{' '}
+            {commas(summary.games)} games, no All-Star Game · Runs are run expectancy moved, not runs that scored ·
             Distance is measured from the buffered rule-book zone, per batter · An umpire’s rate
             here is off challenged pitches only, a small self-selected set, so it is not the
             Umpire Rankings figure, which scores every called pitch against the zone

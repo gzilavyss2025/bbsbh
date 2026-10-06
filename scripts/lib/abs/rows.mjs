@@ -19,6 +19,7 @@
 import { selectChallengeState } from '../../../src/api/challenges.js'
 import { missEdge } from '../../../src/api/umpireFavor.js'
 import { pitchFavor } from '../../../src/lib/runExpectancy.js'
+import { POSTSEASON_GAME_TYPES } from '../records/postseason.mjs'
 
 // --- one game's rows ----------------------------------------------------------
 
@@ -276,4 +277,58 @@ export function challengeRowsForGame(feed, table) {
 export function clearSeasonRows(db, season) {
   db.prepare('DELETE FROM abs_challenges WHERE season = ?').run(season)
   db.prepare('DELETE FROM abs_ingested_games WHERE season = ?').run(season)
+}
+
+// --- the postseason beside the regular season (#1514, ADR-0094's shape) -------
+
+// A game's scope, from its schedule row. The sweep asks for R plus these.
+export const scopeOfGameType = (gameType) => (POSTSEASON_GAME_TYPES.split(',').includes(gameType) ? 'P' : 'R')
+
+// The scope lives on the GAME. A challenge row takes it through game_pk; a game
+// row with no scope is regular season (an old row, or a test fixture). 'all' is
+// both parts, never one counted over the other.
+export function inScope(rows, games, scope) {
+  if (scope === 'all') return { rows, games }
+  const kept = games.filter((g) => (g.scope ?? 'R') === scope)
+  const pks = new Set(kept.map((g) => g.game_pk))
+  return { rows: rows.filter((r) => pks.has(r.game_pk)), games: kept }
+}
+
+// The sweep's two writes, here so a test can run them (the generator does its
+// work at import). INSERT OR REPLACE on the keys, so a second sweep of one game
+// writes the same rows again and adds nothing.
+export function ingestGame(db, t, rows, shape) {
+  const insertRow = db.prepare(
+    `INSERT OR REPLACE INTO abs_challenges
+       (game_pk, seq, season, date, level, team_id, opp_id, side, player_id, player_name,
+        role, outcome, inning, half, umpire_id, umpire_name, call_type, favor, miss_inches)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  )
+  for (const r of rows) {
+    insertRow.run(
+      t.gamePk, r.seq, t.season, t.date, t.level, r.team_id, r.opp_id,
+      r.side, r.player_id, r.player_name, r.role, r.outcome, r.inning, r.half,
+      t.umpId, t.umpName, r.call_type, r.favor, r.miss_inches,
+    )
+  }
+  db.prepare(
+    `INSERT OR REPLACE INTO abs_ingested_games
+       (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges,
+        final_inning, bottom_played, scheduled_innings, scope)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    t.gamePk, t.date, t.season, t.level, t.awayTeamId, t.homeTeamId, t.umpId, rows.length,
+    shape.finalInning, shape.bottomPlayed, shape.scheduledInnings, t.scope,
+  )
+}
+
+// --recheck's write on a game already on file: its scope always, its length
+// when the schedule row carries one. Never touches the challenge rows.
+export function restampGame(db, gamePk, { scope, shape }) {
+  db.prepare('UPDATE abs_ingested_games SET scope = ? WHERE game_pk = ?').run(scope, gamePk)
+  if (shape?.finalInning == null) return false
+  db.prepare(
+    'UPDATE abs_ingested_games SET final_inning = ?, bottom_played = ?, scheduled_innings = ? WHERE game_pk = ?',
+  ).run(shape.finalInning, shape.bottomPlayed, shape.scheduledInnings, gamePk)
+  return true
 }

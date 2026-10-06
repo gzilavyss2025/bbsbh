@@ -67,3 +67,30 @@ Tally). Regular still reads `pit` only and is unchanged. Postseason reads `post`
 All adds the two buckets (`arsenalScoped`, `combineCommandEntries`), never one
 over the other. A pitcher with no postseason pitches gets no control. "Pitches
 like" and the `all/` pools stay regular season (point 4).
+
+## Addendum (2026-10-06, #1514): ABS challenges keep the postseason beside the regular season
+
+`gen-abs-challenges.mjs` already swept `R,F,D,L,W` but kept no game type, so
+October was counted inside the regular-season figures. Owner decision: split it.
+
+- **The scope is on the game only.** `abs_ingested_games.scope` (`'R'` or `'P'`,
+  DEFAULT `'R'`, last column). A challenge row takes its game's scope through
+  `game_pk` (`inScope`), so a row and its game can never disagree, and
+  `abs_challenges` lines in the dump do not change. A game-keyed table needs no
+  scope in its key: one game has one part of the season.
+- **Both levels read their postseason.** Triple-A's postseason is `gameType` W
+  (the two league championships, checked on the 2026 schedule). Its National
+  Championship Game is type C, which the sweep does not ask for.
+- **One report file a scope.** `abs-challenges.json` stays the regular season, so
+  an old reader reads `'R'` only. `abs-challenges-post.json` and
+  `abs-challenges-all.json` sit beside it. All is a fresh count over both parts,
+  never one part added onto the other. The exposure files divide regular-season
+  challenges only, because their roster denominators are regular-season totals.
+- **The backfill set the scope by `gamePk`,** from the schedule's postseason
+  game types: 17 MLB and 6 Triple-A games, and nothing else in the dump changed.
+  Regular plus postseason equals the old totals; All equals the old file.
+  `--recheck` sets the scope too, so the nightly job keeps it right.
+- `/abs-challenges` has Regular, Postseason and All (`?scope=post|all`, also
+  `localStorage`, never My Tally), shown only for a level with a postseason game
+  on file (`postGames`, per level). Under Postseason the biggest MLB overturn
+  names its round and game ("ALDS • G1", one schedule read) in place of its date.

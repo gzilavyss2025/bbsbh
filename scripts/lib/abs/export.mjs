@@ -30,7 +30,7 @@ import { exposureByPlayer, exposureRates, hasExposure } from './exposure.mjs'
 import { ranOutBoard } from './ranout.mjs'
 import { momentumCuts } from './momentum.mjs'
 import { streakBoards } from './streaks.mjs'
-import { ROLES } from './rows.mjs'
+import { ROLES, inScope } from './rows.mjs'
 
 // The four roles a challenge can come from. A batter challenges a called
 // strike against him; a catcher or a pitcher challenges a called ball. `other`
@@ -438,17 +438,16 @@ function rolesByPlayer(rows) {
 // season's rows; `season` null is the all/ file, the same cut over every row.
 const ofSeason = (list, season) => (season == null ? (list ?? []) : (list ?? []).filter((r) => r.season === season))
 
-// The whole report file. Rows and games arrive as they come out of SQLite
-// (snake_case columns); the split by level happens here so a caller never has
-// to know which levels are on file.
+// The whole report file, for one scope: 'R' (the default, what an old reader
+// reads), 'P' or 'all'. Each is cut from its own rows (inScope), so a
+// postseason row never adds onto a regular-season figure and All is a fresh
+// count over both parts. `postGames` (per level) tells the page whether to offer Postseason.
 //
 // IT CARRIES NO DENOMINATOR A PLAYER IS DIVIDED BY. Everything that needs the
-// roster call is in the other file (buildExposureExport), because this one is
-// fetched by every visitor to /abs-challenges and that one is fetched by the
-// board that asks the question.
-export function buildExport(allRows, allGames, { season, generatedAt } = {}) {
-  const rows = ofSeason(allRows, season)
-  const games = ofSeason(allGames, season)
+// roster call is in the other file (buildExposureExport).
+export function buildExport(allRows, allGames, { season, scope = 'R', generatedAt } = {}) {
+  const seasonGames = ofSeason(allGames, season)
+  const { rows, games } = inScope(ofSeason(allRows, season), seasonGames, scope)
   const levels = {}
   const names = [...new Set([...games.map((g) => g.level), ...rows.map((r) => r.level)])].sort()
   for (const level of names) {
@@ -461,6 +460,7 @@ export function buildExport(allRows, allGames, { season, generatedAt } = {}) {
     version: 1,
     generatedAt: generatedAt ?? new Date().toISOString(),
     season: season ?? null,
+    postGames: Object.fromEntries([...Map.groupBy(seasonGames.filter((g) => g.scope === 'P'), (g) => g.level)].map(([l, g]) => [l, g.length])),
     levels,
   }
 }

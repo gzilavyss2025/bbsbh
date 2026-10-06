@@ -126,7 +126,11 @@ import {
   EXPOSURE_CLUB_LEVELS,
   exposureRowsFor,
   gameShape,
+  ingestGame,
+  inScope,
   isPlayedGame,
+  restampGame,
+  scopeOfGameType,
 } from './lib/abs/index.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -138,6 +142,9 @@ const out = 'abs-challenges.json'
 // kilobytes on every visit to /abs-challenges for data nothing on screen
 // shows. See buildExposureExport in scripts/lib/abs/export.mjs.
 const exposureOut = 'abs-exposure.json'
+// THE POSTSEASON BESIDE THE REGULAR SEASON (#1514): one report file a scope, so
+// the page downloads only the part it shows. `out` stays the regular season.
+const SCOPE_FILES = [['R', out], ['P', 'abs-challenges-post.json'], ['all', 'abs-challenges-all.json']]
 // AND THE SAME DENOMINATORS SPLIT BY CLUB, a THIRD file for the same reason
 // the second one exists: the team hub's challenge card is the only surface
 // that reads it, and abs-exposure.json is downloaded whole by every visitor to
@@ -196,26 +203,6 @@ if (args.rebuild) {
   console.log(`--rebuild: cleared the ${args.season} abs_challenges + abs_ingested_games`)
 }
 
-const insertRow = db.prepare(
-  `INSERT OR REPLACE INTO abs_challenges
-     (game_pk, seq, season, date, level, team_id, opp_id, side, player_id, player_name,
-      role, outcome, inning, half, umpire_id, umpire_name, call_type, favor, miss_inches)
-   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-)
-const markIngested = db.prepare(
-  `INSERT OR REPLACE INTO abs_ingested_games
-     (game_pk, date, season, level, away_team_id, home_team_id, umpire_id, challenges,
-      final_inning, bottom_played, scheduled_innings)
-   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-)
-// THE GAME'S SHAPE, WRITTEN WITHOUT TOUCHING THE CHALLENGE ROWS. --recheck
-// fills these on a game already on file; the sweep writes them with the rest.
-const setShape = db.prepare(
-  `UPDATE abs_ingested_games
-      SET final_inning = ?, bottom_played = ?, scheduled_innings = ?
-    WHERE game_pk = ?`,
-)
-
 // A club's exposure is REWRITTEN, never added to. The delete is scoped to the
 // one club and the one season, so a run over MLB alone cannot disturb Triple-A
 // and a failed club leaves the others standing.
@@ -245,15 +232,20 @@ async function writeOut() {
   // row. writeJsonIfChanged leaves a file alone when only its stamp would
   // move, so a completed season's folder does not change.
   const seasons = [...new Set([...games, ...exposure].map((r) => r.season))].sort((a, b) => a - b)
+  // The denominators are regular-season roster totals, so only regular-season
+  // challenges are divided by them.
+  const regRows = inScope(rows, games, 'R').rows
   const write = (dir, file, { generatedAt: _stamp, ...body }) => writeJsonIfChanged(join(dir, file), body)
   for (const season of [...seasons, null]) {
     const dir = join(storeDir, season == null ? 'all' : String(season))
     const extra = season == null ? { seasons } : {}
-    await write(dir, out, { ...buildExport(rows, games, { season }), ...extra })
-    await write(dir, exposureOut, { ...buildExposureExport(rows, exposure, { season }), ...extra })
+    for (const [scope, file] of SCOPE_FILES) {
+      await write(dir, file, { ...buildExport(rows, games, { season, scope }), ...extra })
+    }
+    await write(dir, exposureOut, { ...buildExposureExport(regRows, exposure, { season }), ...extra })
     for (const level of EXPOSURE_CLUB_LEVELS) {
       await write(dir, exposureClubsOut(level), {
-        ...buildExposureClubsExport(rows, exposure, { season, levels: [level] }),
+        ...buildExposureClubsExport(regRows, exposure, { season, levels: [level] }),
         ...extra,
       })
     }
@@ -322,7 +314,7 @@ if (args['export-only']) {
         // under both dates, and the original row still reads Postponed.
         if (d.date !== g.officialDate) continue
         seen.set(String(g.gamePk), g.status)
-        shapes.set(String(g.gamePk), gameShape(g.linescore))
+        shapes.set(String(g.gamePk), { shape: gameShape(g.linescore), scope: scopeOfGameType(g.gameType) })
       }
     }
   }
@@ -345,19 +337,17 @@ if (args['export-only']) {
     dropGame.run(r.game_pk)
   }
 
-  // THE SECOND JOB. Every game still on file gets its length written from the
-  // row just read. It is an UPDATE rather than a re-ingest, so a game's
-  // challenge rows are never touched, and it is idempotent — a game whose
-  // shape is already right is written the same values again.
+  // THE SECOND JOB. Every game still on file gets its length and its scope
+  // (#1514) written from the row just read. It is an UPDATE rather than a
+  // re-ingest, so a game's challenge rows are never touched, and it is
+  // idempotent — a game already right is written the same values again.
   const evicted = new Set(evict.map((r) => String(r.game_pk)))
   let shaped = 0
   for (const r of onFile) {
     const key = String(r.game_pk)
     if (evicted.has(key)) continue
-    const shape = shapes.get(key)
-    if (!shape || shape.finalInning == null) continue
-    setShape.run(shape.finalInning, shape.bottomPlayed, shape.scheduledInnings, r.game_pk)
-    shaped += 1
+    const read = shapes.get(key)
+    if (read && restampGame(db, r.game_pk, read)) shaped += 1
   }
 
   const { rows, games } = await writeOut()
@@ -460,6 +450,7 @@ if (args['export-only']) {
           gamePk: g.gamePk,
           date: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
           level,
+          scope: scopeOfGameType(g.gameType),
           awayTeamId: g.teams?.away?.team?.id ?? null,
           homeTeamId: g.teams?.home?.team?.id ?? null,
           umpId: hp?.official?.id ?? null,
@@ -496,19 +487,8 @@ if (args['export-only']) {
       const umpId = t.umpId ?? boxHp?.official?.id ?? null
       const umpName = t.umpName || boxHp?.official?.fullName || ''
       const rows = challengeRowsForGame(feed, reTable)
-      for (const r of rows) {
-        insertRow.run(
-          t.gamePk, r.seq, t.season, t.date, t.level, r.team_id, r.opp_id,
-          r.side, r.player_id, r.player_name, r.role, r.outcome, r.inning, r.half,
-          umpId, umpName, r.call_type, r.favor, r.miss_inches,
-        )
-      }
       // The game's length, off the feed already in hand — no extra call.
-      const shape = gameShape(feed?.liveData?.linescore)
-      markIngested.run(
-        t.gamePk, t.date, t.season, t.level, t.awayTeamId, t.homeTeamId, umpId, rows.length,
-        shape.finalInning, shape.bottomPlayed, shape.scheduledInnings,
-      )
+      ingestGame(db, { ...t, umpId, umpName }, rows, gameShape(feed?.liveData?.linescore))
       ingested++
       sinceCheckpoint++
       found += rows.length
