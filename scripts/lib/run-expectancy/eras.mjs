@@ -95,9 +95,9 @@ export function accumulateGame(feed, states, re24) {
       if (isOut) outs = Math.min(outs + 1, 3)
       else if (endBase) bases[endBase - 1] = rid
     }
-  }  return true
+  }
+  return true
 }
-
 
 // Key order follows feed arrival, so sort it: a re-run then gives the same bytes.
 const sorted = (m) => Object.fromEntries([...m].sort(([a], [b]) => (a < b ? -1 : 1)))

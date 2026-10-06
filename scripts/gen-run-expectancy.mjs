@@ -51,7 +51,7 @@
 // back at READ time (src/lib/runExpectancy.js's lookupRE) to a base/out-only
 // RE24 total — this script writes BOTH `states` (288) and `re24` (24) sums so
 // that fallback never needs a second pass over history.
-import { existsSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { eraDecade } from '../src/lib/runExpectancy.js'
@@ -129,7 +129,7 @@ async function sweepSeason(season, limit, states, re24) {
 
 if (process.argv.includes('--era-sweep')) {
   const list = (args.seasons ?? '').split(',').map((s) => s.trim()).filter(Boolean)
-  if (!list.length || list.some((s) => !eraDecade(s))) {
+  if (!list.length || list.some((s) => !/^\d{4}$/.test(s) || !eraDecade(s))) {
     console.error('--era-sweep needs --seasons=YYYY,YYYY,... (1960 to 2023)')
     process.exit(1)
   }
@@ -173,6 +173,9 @@ if (process.argv.includes('--era-aggregate')) {
   const outFile = join(eraOutDir, `${decade}.json`)
   const table = mergeCheckpoints(checkpoints)
   await writeJsonAtomic(outFile, { generatedAt: new Date().toISOString(), ...table })
+  // index.json is the folder's stamp (check-data-freshness reads it) and lists the decades on disk.
+  const decades = readdirSync(eraOutDir).filter((f) => /^\d{4}s\.json$/.test(f)).map((f) => f.slice(0, -5)).sort()
+  await writeJsonAtomic(join(eraOutDir, 'index.json'), { generatedAt: new Date().toISOString(), decades })
   console.log(`wrote ${outFile} — ${table.seasons.join(', ')}, ${table.gamesSwept} games`)
   process.exit(0)
 }

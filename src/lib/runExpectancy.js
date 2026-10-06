@@ -121,8 +121,13 @@ export function eraDecade(season) {
 
 // RE for a pre-pitch state in a past season. `tables` maps a decade label to its
 // loaded table ({ '1980s': table }); the caller loads files, so this stays pure.
-// null when the season has no era table or the caller did not load it.
+// null when the season has no era table or the caller did not load it. Before
+// 1990 the pitch lists are partial, so the per-count cells are wrong there: read
+// `re24` only (docs/scripts/generators.md).
+const COUNT_CELLS_FROM = 1990
 export function lookupEraRE(season, { baseMask, outs, balls, strikes }, tables = {}) {
   const table = tables[eraDecade(season)]
-  return table ? lookupRE(table, baseMask, outs, balls, strikes) : null
+  if (!table) return null
+  const usable = Number(season) < COUNT_CELLS_FROM ? { re24: table.re24 } : table
+  return lookupRE(usable, baseMask, outs, balls, strikes)
 }

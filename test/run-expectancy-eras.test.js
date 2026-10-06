@@ -104,12 +104,22 @@ const ERA_TABLE = {
 }
 
 test('lookupEraRE picks the decade table, else null', () => {
-  const tables = { '1980s': ERA_TABLE }
-  assert.equal(lookupEraRE(1985, { baseMask: 0, outs: 0, balls: 0, strikes: 0 }, tables), 0.5)
-  assert.equal(lookupEraRE(1985, { baseMask: 0, outs: 3, balls: 0, strikes: 0 }, tables), 0) // terminal outs
+  const tables = { '1990s': ERA_TABLE }
+  assert.equal(lookupEraRE(1995, { baseMask: 0, outs: 0, balls: 0, strikes: 0 }, tables), 0.5)
+  assert.equal(lookupEraRE(1995, { baseMask: 0, outs: 3, balls: 0, strikes: 0 }, tables), 0) // terminal outs
   assert.equal(lookupEraRE(1975, { baseMask: 0, outs: 0, balls: 0, strikes: 0 }, tables), null) // table not loaded
   assert.equal(lookupEraRE(2025, { baseMask: 0, outs: 0, balls: 0, strikes: 0 }, tables), null) // no era table
-  assert.equal(lookupEraRE(1985, { baseMask: 0, outs: 0, balls: 0, strikes: 0 }), null) // no tables at all
+  assert.equal(lookupEraRE(1995, { baseMask: 0, outs: 0, balls: 0, strikes: 0 }), null) // no tables at all
+})
+
+test('lookupEraRE ignores the per-count cells before 1990 (partial pitch lists)', () => {
+  const table = {
+    states: { '0-0-0-0': { sum: 1000, n: 100 } }, // 10: would win if read
+    re24: { '0-0': { sum: 50, n: 100 } }, // 0.5
+  }
+  const state = { baseMask: 0, outs: 0, balls: 0, strikes: 0 }
+  assert.equal(lookupEraRE(1985, state, { '1980s': table }), 0.5)
+  assert.equal(lookupEraRE(1995, state, { '1990s': table }), 10)
 })
 
 test('pitchFavor returns the same numbers as before for fixed inputs', () => {
