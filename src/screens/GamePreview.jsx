@@ -10,6 +10,7 @@ import { drawPoster } from '../lib/preview/drawPoster.js'
 import { loadPosterArt } from '../lib/preview/posterArt.js'
 import { cardsHeight, POSTER, posterLayout } from '../lib/preview/posterLayout.js'
 import { ensurePosterFonts } from '../lib/preview/posterPaper.js'
+import { BornNearPark } from '../components/history/BornNearPark.jsx'
 import { SavePosterButton } from '../components/preview/SavePosterButton.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { Notice } from '../components/ui/state/Notice.jsx'
@@ -196,6 +197,8 @@ export function GamePreview({ feed, starterLines, broadcast, callouts, treatment
             Turn one section off — three full sections run past the bottom of the sheet.
           </Notice>
         )}
+
+        <BornNearPark location={feed?.gameData?.venue?.location} />
 
         <SavePosterButton
           canvasRef={canvasRef}

@@ -129,6 +129,10 @@ const AllStarLegacyPage = lazyNamed(
   () => import('./screens/AllStarLegacyPage.jsx'),
   'AllStarLegacyPage',
 )
+const TeammatesPage = lazyNamed(
+  () => import('./screens/teammates/TeammatesPage.jsx'),
+  'TeammatesPage',
+)
 const StandingsPage = lazyNamed(() => import('./screens/StandingsPage.jsx'), 'StandingsPage')
 const SalariesPage = lazyNamed(() => import('./screens/SalariesPage.jsx'), 'SalariesPage')
 const FoulTrackerPage = lazyNamed(
@@ -313,6 +317,7 @@ const BARE_ROUTES = {
   'postseason-race': PostseasonRacePage,
   'all-star-rosters': AllStarRostersPage,
   'all-star-legacy': AllStarLegacyPage,
+  teammates: TeammatesPage,
   standings: StandingsPage,
   salaries: SalariesPage,
   fouls: FoulTrackerPage,
