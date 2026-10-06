@@ -560,6 +560,10 @@
       "class": "spoiler-free",
       "why": "The year-by-year career register. Season lines."
     },
+    "teamSeasons.js": {
+      "class": "spoiler-free",
+      "why": "Static team-seasons.json: who played for each MLB team-season, from Retrosheet (ADR-0100). History about people, with no game, score or reveal state. Open surface (ADR-0034); no SealBox."
+    },
     "person/family/family.js": {
       "class": "spoiler-free",
       "why": "Static family-ties/{NN}.json: who a player's father, brother or son is, from Retrosheet's biographical files (ADR-0100). History about people, with no game, score or reveal state. Open surface (ADR-0034); no SealBox."

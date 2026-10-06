@@ -1562,6 +1562,24 @@ Re-run only to fold in a new season.
   no MLBAM match keeps the name and a null id. No clock: a re-run writes the same
   bytes. The pure half is `scripts/lib/open-data/family-ties.mjs`. Reader:
   `src/api/person/family/family.js`.
+- `gen-team-seasons.mjs` → `public/data/team-seasons.json` — one roster per MLB
+  team-season, for "six degrees of teammates" (ADR-0100). Source: Retrosheet's
+  `allplayers.csv` (inside `basiccsvs.zip`, 741 MB: run `unzip -l`, extract only that
+  file) and `teams0.csv` (inside `biodata.zip`), joined to MLBAM ids through the Chadwick
+  register. **Hand-run, NOT on a cron**: re-run after each season ends. Nothing in it
+  downloads. Fetch each file into its own new, empty folder OUTSIDE the repo, then run
+  `node scripts/gen-team-seasons.mjs <allplayers.csv> <teams0.csv> <people-*.csv ...>`
+  (files are told apart by name; `--out <file>` writes elsewhere). Two players are
+  teammates when both have `g >= 1` for the same team code and season, so a midseason
+  trade puts a player on two rosters. Only the 60 AL, NL and Federal League codes count:
+  an All-Star side is not a team, and only 80% of Negro Leagues players carry an MLBAM id.
+  The run fails if fewer than 98% of those MLB players bridge (`--min-share` moves the
+  gate); measured 2026-10-06: 19,514 of 19,519 (99.97%). Shape: `{ credit, throughSeason,
+  players: [mlbamId], teamSeasons: [[key, label, [index into players]]] }`, where `key` is
+  `CHN-1998` and `label` is `Cubs 1998`
+  (the newest nickname for the code: Brooklyn 1897 reads "Dodgers 1897"). 816 KB, 248 KB gzipped. No clock: a re-run writes
+  the same bytes. The pure half is `scripts/lib/open-data/team-seasons.mjs`. Reader:
+  `src/api/teamSeasons.js`.
 
 ## Assets / off-app
 
