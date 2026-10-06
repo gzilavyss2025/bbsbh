@@ -10,7 +10,9 @@ import { BoxLinesList } from './BoxLinesList.jsx'
 import { Stat } from '../gamehud/StatBox.jsx'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { IconButton } from '../ui/control/IconButton.jsx'
+import { Button } from '../ui/control/Button.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
+import { Notice } from '../ui/state/Notice.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // BOX LINES — the drilldown behind a summary stat line (ADR-0069). Tap a
@@ -198,12 +200,13 @@ export function BoxLinesSheet({
           )}
 
           {failed && (
-            <>
-              <p className="hint boxlines__hint">Couldn’t pull his game lines. Try again in a moment.</p>
-              <button type="button" className="btn boxlines__retry" onClick={query.reload}>
-                Try again
-              </button>
-            </>
+            <Notice
+              tone="error"
+              className="boxlines__notice"
+              action={<Button onClick={query.reload}>Try again</Button>}
+            >
+              Couldn’t pull his game lines. Try again in a moment.
+            </Notice>
           )}
 
           {rows && rows.length === 0 && (

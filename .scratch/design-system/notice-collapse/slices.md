@@ -475,3 +475,51 @@ for N2 to N8.
    next file there needs the `system/state/` subfolder (spec section 5): move
    `empty-state.css` and `notice.css`, and edit `src/index.css` and the pins in
    `test/empty-state-cascade.test.js` and `test/notice-cascade.test.js`.
+
+---
+
+## N4 as built (what the next slices need)
+
+Written by the N4 session. It records what shipped. It does not write the prompts
+for N5 to N8.
+
+1. **The namespace class is `asyncstatus__notice`.** AsyncStatus's two error
+   Notices and AsyncGate()'s page error wear it. Its one rule,
+   `margin: var(--space-3) 0`, is in `styles/06-loader-and-cards.css`, next to the
+   loader. It must load after `system/notice.css`: `05-masthead-nav.css` (where
+   `.hint` lives) loads before it, so `.notice { margin: 0 }` would win there. 06
+   was at its 800-line file-size cap, so its entry in `scripts/check-file-size.mjs`
+   went to 810 (a sixth and seventh file). The old line was a `<p>` with the
+   browser's 1em margin plus the `.hint` padding. The box's own padding takes the
+   place of that margin, so the text sits within a few px of where it was.
+2. **Parents.** Every one of the 36 callers sits in a block parent (29 on
+   `.screen`, 2 in the team hub shell, 3 in a photos section, the slate's
+   `.slatebody__main`, one lab `Entry`). The one shared margin keeps the gap the old
+   padding gave to all of them, so no caller needed its own rule. Box Lines took
+   `.boxlines__notice` (the same margin as `.boxlines__empty`; two rules, because
+   `test/empty-state-e3.test.js` reads `.boxlines__empty` as a lone selector). The
+   slate card back needs no namespace: the Notice fills the top of the card's slot.
+3. **Roles.** Cold error and AsyncGate(): the error default (`alert`). Stale
+   error: `status`. Slate card back: `note` (static, like the old line), because
+   Reveal all turns every card at once. Box Lines: `alert`. The Retry and Try again
+   are a plain `Button` (tap size, 44px): `btn--control` is 34px with no larger
+   tap area.
+4. **The seal pin** (`test/notice-n4.test.js`, measured at `608c6062e`). Every
+   pinned file has no reveal-only import, no `<SealBox`, and no `revealedThrough`
+   read: `BoxLinesSheet.jsx`, `PastGameFlipCard.jsx`, `AsyncGate.jsx`,
+   `GameSelect.jsx`, `GameView.jsx`. All zeros would pin little, so the pin also
+   lists each file's other gated api/ imports: `boxlines/fetch.js`;
+   none; none; `postseason/text.js`; `postseason/bracket.js` and
+   `postseason/text.js`. A browser check of the lineup page, top 1st, bottom 2nd
+   and the box score (sealed, and after a tap) read the same before and after.
+5. **Three old pins flipped.** `empty-state-e2`, `-e3` and `-e9` asserted that
+   the error lines stayed `.hint`. They now assert the Notice, with the same
+   counts. The EmptyState census's overrides were re-keyed too (its
+   `BoxLinesSheet.jsx#3` is `#2` now; its five N4 error rows became comment lines).
+6. **Not reached** (a failed request does not show them): most `AsyncStatus`
+   pages read a static file whose loader turns a failure into the empty state
+   (standings, attendance, the report boards, the team hub tabs, the photos
+   pages). AsyncGate()'s "Couldn't load this {noun}" branch was not seen either:
+   a failed person fetch reads as "not found". Seen: the slate, the lineup page
+   (cold and stale), the player and team not-found pages, the slate card back,
+   the Box Lines sheet, and the lab.

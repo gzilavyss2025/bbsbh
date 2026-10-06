@@ -4,6 +4,7 @@ import { gamePath } from '../../lib/route.js'
 import { GameCard } from './GameCard.jsx'
 import { FlipCard } from '../ui/FlipCard.jsx'
 import { BoxScoreSkeleton } from './BoxScoreSkeleton.jsx'
+import { Notice } from '../ui/state/Notice.jsx'
 
 // DYNAMIC ON PURPOSE — keep it that way. GameResultFace pulls api/boxscore.js
 // and, under it, the play-by-play selectors (halfInningFeed, scorebookCode,
@@ -103,7 +104,13 @@ export function PastGameFlipCard({
           return <BoxScoreSkeleton cardMeta={cardMeta} />
         }
         if (state.error) {
-          return <p className="hint hint--error">Couldn&apos;t load this game.</p>
+          // role="note", static like the old line: Reveal all turns every card
+          // at once, and a live region per failed card would speak once per card.
+          return (
+            <Notice tone="error" role="note">
+              Couldn&apos;t load this game.
+            </Notice>
+          )
         }
         if (!state.data) return null
         // The skeleton doubles as the Suspense fallback: on the rare visit
