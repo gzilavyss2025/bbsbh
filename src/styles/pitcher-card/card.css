@@ -406,6 +406,15 @@
 .focusrail__replay:empty {
   display: none;
 }
+/* Wide, the whole half laid out: a pick's scene plays in its own card, on a
+   row of its own under the pitch list and zone plot (AtBatReplay.jsx). */
+.pbp__zonecell:has(> .pbp__replay) {
+  flex-wrap: wrap;
+}
+.pbp__zonecell > .pbp__replay {
+  flex-basis: 100%;
+  max-width: var(--refrail-w); /* the rail's size, not the card's */
+}
 
 /* The pitch list's picks (PitchList's opt-in `pick`): each number dot is a
    ghost .btn stripped to the dot, so the list keeps its height. Its hit area is

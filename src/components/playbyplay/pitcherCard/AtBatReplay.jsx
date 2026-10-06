@@ -18,7 +18,9 @@ import { atBatScenePitches, atBatZone } from '../../../lib/pitcherCard/atBat.js'
 // arrives on an at-bat card that is only built inside its half's SealBox reveal.
 //
 // ONE PLACE AT A TIME. Wide: the top of the focus reference rail (ReplayRail
-// below), with the card's zone plot and pitch list left in .pbp__zonecell.
+// below), with the card's zone plot and pitch list left in .pbp__zonecell —
+// or, with the whole half laid out (`inCard`), under them in the card the
+// reader picked, since the rail can sit a screen above it (#1539).
 // Phone: a sheet opened on demand (ReplaySheet); closed, it mounts nothing, so
 // a stacked half on a phone holds no scene per at-bat.
 
@@ -31,9 +33,9 @@ import { atBatScenePitches, atBatZone } from '../../../lib/pitcherCard/atBat.js'
 // `slot` is null on the page-turn's inert preview and before the rail mounts:
 // then no card draws a scene at all.
 const RailContext = createContext(null)
-export function ReplayRail({ slot, children }) {
+export function ReplayRail({ slot, inCard, children }) {
   const [owner, setOwner] = useState(null)
-  const value = useMemo(() => ({ slot, owner, setOwner }), [slot, owner])
+  const value = useMemo(() => ({ slot, inCard, owner, setOwner }), [slot, inCard, owner])
   return <RailContext.Provider value={value}>{children}</RailContext.Provider>
 }
 
@@ -76,7 +78,7 @@ function ReplayScene({ pitches, pitchDetails, pitcher, play, children }) {
 // picks too, only with a real mouse). The scene goes to the rail while this
 // card owns it: `id` is the at-bat, `last` says it is the last one on screen.
 export function ReplayCell({ pitchDetails, batSide, pitcher, pitches, id, last }) {
-  const { slot, owner, setOwner } = useContext(RailContext)
+  const { slot, inCard, owner, setOwner } = useContext(RailContext)
   const [play, setPlay] = useState(null)
   const mouse = useMediaQuery(HOVER_CARD_QUERY)
   const dwell = useRef(0)
@@ -109,11 +111,13 @@ export function ReplayCell({ pitchDetails, batSide, pitcher, pitches, id, last }
         }
       : undefined,
   }
+  const scene = inRail && slot && <ReplayScene pitches={pitches} pitchDetails={pitchDetails} pitcher={pitcher} play={play} />
   return (
     <>
       <PitchList pitchDetails={pitchDetails} pick={pick} />
       <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--inline" />
-      {inRail && slot && createPortal(<ReplayScene pitches={pitches} pitchDetails={pitchDetails} pitcher={pitcher} play={play} />, slot)}
+      {/* A pick plays where it was made; the unpicked last at-bat keeps the rail. */}
+      {scene && (inCard && owner === id ? scene : createPortal(scene, slot))}
     </>
   )
 }

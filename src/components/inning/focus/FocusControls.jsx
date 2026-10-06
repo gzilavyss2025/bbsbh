@@ -3,14 +3,17 @@ import { AtBatTrail } from './AtBatTrail.jsx'
 import { Button } from '../../ui/control/Button.jsx'
 import { CLOSE_SEQUENCE_MS } from './beats.js'
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
+import { focusWindowed, readsBack, stepsAhead } from './focusView.js'
 
 // The innings viewer's play-by-play mode state (InningViewer.jsx). The
 // console chrome (the anchored band, the tabbed ReferencePanel) is
 // unconditional now — every half gets it, live or historical. What this hook
-// decides is only WINDOWED vs. STACKED: while the half on screen is still
-// sealed (or just closed, see postHalf below), the play-by-play shows ONE
-// at-bat — the step the reader is on. Otherwise every card in the half shows
-// at once.
+// decides is only WINDOWED vs. STACKED: every half shows ONE at-bat — the
+// step the reader is on — until the reader taps "See the whole half", which
+// lays every card of a revealed half out at once (#1539). A half read back
+// (revealed before the reader saw it sealed) opens on its FIRST at-bat and
+// the bar's "Next at-bat ›" steps it, cursor only; a sealed or live half
+// follows the newest, as before.
 //
 // Two pieces of state, no derivations anyone else can get wrong:
 //
@@ -22,7 +25,7 @@ import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 //
 //  • `step` — which at-bat the feed is showing. null FOLLOWS the newest, so a
 //    fresh reveal shows itself without the reader chasing it; a number is the
-//    reader having paged back.
+//    reader having paged back, or a half read back starting at 0.
 //  • `steps` — how many steps are revealed, reported up from PlayByPlay. A
 //    count, never an entry: this hook is spoiler-free and must stay that way,
 //    since it is called from the component's top level where a reveal-only
@@ -32,8 +35,8 @@ import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 // (ADR-0016's `stepCap`) already permits, and paging is clamped inside it, so
 // focus mode adds no second reveal boundary — revealing stays the floating
 // bar's "Next at-bat" alone.
-export function useFocusMode(curIdx, currentSealed) {
-  const [step, setStep] = useState(null)
+export function useFocusMode(curIdx, currentSealed, halfLive) {
+  const [step, setStep] = useState(readsBack(currentSealed, halfLive) ? 0 : null)
   const [steps, setSteps] = useState(0)
   const [items, setItems] = useState([])
   // SUMMARY IS BACK, AS A QUIET LINK — NOT AS THE BAR'S SECOND BUTTON.
@@ -48,7 +51,7 @@ export function useFocusMode(curIdx, currentSealed) {
   // price for a question a scorer asks at the end of most halves.
   //
   // So the state returns with a different surface: a paper-pill link under the
-  // trail (FocusControls below), rendered only in the post-half hold, that
+  // trail (FocusControls below), rendered on any revealed windowed half, that
   // drops THIS half out of the focus layout — the ordinary revealed page, which
   // already exists, laid out exactly as paging away and back would show it.
   // One-directional per visit on purpose (the link disappears with the layout
@@ -75,7 +78,7 @@ export function useFocusMode(curIdx, currentSealed) {
   const [prevIdx, setPrevIdx] = useState(curIdx)
   if (curIdx !== prevIdx) {
     setPrevIdx(curIdx)
-    setStep(null)
+    setStep(readsBack(currentSealed, halfLive) ? 0 : null)
     setSteps(0)
     setItems([])
     setSealedSeen(currentSealed)
@@ -101,7 +104,7 @@ export function useFocusMode(curIdx, currentSealed) {
   // while `postHalf` stays true, which is what keeps ConsoleBand's gate and
   // the bar's own states reading the fact rather than the mode.
   const postHalf = sealedSeen && !currentSealed
-  const windowed = currentSealed || (postHalf && !summaryOpen)
+  const windowed = focusWindowed(currentSealed, summaryOpen)
 
   // THE SEQUENCE STARTS AT THE COMMIT AND NOWHERE ELSE. `postHalf` IS the
   // commit — the half finished under the reader's eyes — so keying the start
@@ -164,15 +167,20 @@ export function useFocusMode(curIdx, currentSealed) {
   // Back to following the newest — what revealing a fresh at-bat should do
   // even if the reader had paged back to an earlier one.
   const followLatest = useCallback(() => setStep(null), [])
-  // The post-half link's one action (see the summary note above). Setting it
-  // outside the post-half hold is harmless — `focused` only consults it there.
+  // The whole-half link's one action (see the summary note above). A sealed
+  // half ignores it — `focusWindowed` keeps a sealed half windowed.
   const openSummary = useCallback(() => setSummaryOpen(true), [])
 
   return {
     windowed,
-    postHalf,
+    // Read back from at-bat 1: no "live at-bat" to go back to (FocusTrail).
+    readBack: readsBack(sealedSeen, halfLive),
+    // "See the whole half": any revealed half still one at-bat at a time.
+    summaryLink: windowed && !currentSealed,
+    // The bar's cursor-only "Next at-bat ›" (InningActionBar.jsx).
+    stepAhead: stepsAhead({ windowed, sealedSeen, cursor, steps }),
     // The layout reads `closePhase`; the action bar reads `closing`. Two names
-    // for one fact, same split as `postHalf`/`focused` above — one is the
+    // for one fact, same split as `postHalf`/`windowed` above — one is the
     // state of the animation, the other is whether a control is held.
     closePhase,
     closing: closePhase === 'running',
@@ -191,11 +199,10 @@ export function useFocusMode(curIdx, currentSealed) {
 
 // The at-bat navigator, kept in its own component because it is one idea:
 // every step already revealed this half, as a row of chips rather than the
-// old bare ‹ Back / label / Next › pager. WINDOWED (a half still being
-// scored, or just closed and not yet paged away — `useFocusMode`'s
-// `windowed`), it's how the reader moves within the single-card window.
-// STACKED (every card already showing — a revealed half reached directly, or
-// "See the whole half"), it's a jump-to-card index instead (commit 3,
+// old bare ‹ Back / label / Next › pager. WINDOWED (every half until the
+// reader opens the whole of it — `useFocusMode`'s `windowed`), it's how the
+// reader moves within the single-card window. STACKED (every card already
+// showing, after "See the whole half"), it's a jump-to-card index instead (commit 3,
 // decision 4; see `scrollToStep` below). Either way it answers the same
 // complaint the old pager left unaddressed: with several at-bats already
 // scored, "everything but the current one is hidden/scrolled-past" is not
@@ -213,8 +220,8 @@ export function useFocusMode(curIdx, currentSealed) {
 // note on `items`). Takes the aria-disabled mid-turn guard every other
 // control on this page uses — paging resizes .turnscene, which
 // InningPageTurn answers by snapping a turn in flight.
-// Split from `FocusControls` below (which now holds only the post-half
-// summary link) because the trail moved to the TOP of the stage, above the
+// Split from `FocusControls` below (which now holds only the "See the whole
+// half" link) because the trail moved to the TOP of the stage, above the
 // hero card — amending ADR-0043's "a wrapping trail directly beneath it" — so
 // the reader watches the half's cards accumulate right next to the one
 // they're reading, rather than scrolling past the hero to see them (see
@@ -254,7 +261,7 @@ function scrollToStep(inning, half, step) {
 }
 
 export function FocusTrail({ focus, turning, inning, half }) {
-  const { windowed, cursor, steps: total, items, stepBack, stepNext, goToStep, followLatest } = focus
+  const { windowed, readBack, cursor, steps: total, items, stepBack, stepNext, goToStep, followLatest } = focus
   if (total <= 1) return null
   const stacked = !windowed
   // WINDOWED: `goToStep`/`stepBack`/`stepNext` switch the single-card window,
@@ -277,7 +284,7 @@ export function FocusTrail({ focus, turning, inning, half }) {
       // "am I on the newest step" question `step == null` was trying to ask.
       // Unused while stacked (AtBatTrail hides the button then) but still
       // correct to compute — `cursor` stays meaningful either way.
-      following={cursor === total - 1}
+      following={readBack || cursor === total - 1}
       onSelect={onSelect}
       onStepBack={onStepBack}
       onStepNext={onStepNext}
@@ -288,14 +295,14 @@ export function FocusTrail({ focus, turning, inning, half }) {
   )
 }
 
-// The post-half-only "See the whole half" link (see useFocusMode's summary
+// The "See the whole half" link on a revealed, windowed half (see useFocusMode's summary
 // note for the #685/ADR-0043 history it answers). The trail that used to sit
 // beside it here is `FocusTrail` above now, rendered above the hero card
 // instead of below it — this component keeps the name because it is still
 // where InningViewer reaches for "the controls under the card."
 export function FocusControls({ focus, turning }) {
-  const { windowed, postHalf, openSummary } = focus
-  if (!windowed || !postHalf) return null
+  const { summaryLink, openSummary } = focus
+  if (!summaryLink) return null
   return (
     <Button
       size="control"

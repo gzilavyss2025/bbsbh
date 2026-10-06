@@ -6,14 +6,16 @@
    bottom. Every half gets it, live or historical; the ADR's original claim
    (this instrument exists "while the half on screen is still sealed") is
    amended by that later change, not superseded by it — the console itself is
-   unconditional, and the ONE thing that still depends on sealed-vs-not is
-   whether the play-by-play area WINDOWS to one at-bat at a time or shows the
-   whole half STACKED (`.innings--windowed` / `.innings--stacked`, set by
-   InningViewer alongside `.innings--focus`). The reader's windowed loop is
+   unconditional, and the ONE thing that varies is whether the play-by-play
+   area WINDOWS to one at-bat at a time or shows the whole half STACKED
+   (`.innings--windowed` / `.innings--stacked`, set by InningViewer alongside
+   `.innings--focus`). Every half is windowed, a revealed one too (it opens on
+   its first at-bat and the bar steps it, #1539); stacked is only the reader's
+   own "See the whole half". The reader's windowed loop is
    tap -> read -> pencil -> glance at bases/outs -> tap, forty times a
    half-hour, so everything here is arranged to keep the at-bat and the Next
    button in the same two places for three hours; the stacked case is the
-   same shell reading back a half already scored.
+   same shell laying out a half already scored.
 
    THIS FILE holds the page SHELL: the two-column grid, the phone reading
    order, and the action bar. Its three siblings are focus/console.css (the

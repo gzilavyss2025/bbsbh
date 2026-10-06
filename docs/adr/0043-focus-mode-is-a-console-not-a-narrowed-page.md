@@ -435,3 +435,32 @@ reduce to `idx <= revealedThrough`, so there is no stacked state
 describing a step the reader hasn't themselves revealed. What changed is
 only where already-gated content renders, and how many already-revealed
 cards are on screen when it does.
+
+## Amendment (2026-10-06): a revealed half steps like a live one
+
+A half already revealed on arrival (a reload, a direct link, Scores Unlocked
+ADR-0026, Stamp In ADR-0042, a stamp ADR-0048) opened **stacked**, and the bar
+lost "Next at-bat". Issue #1539 asked for the live loop on every half.
+
+- **Windowed is the default.** `windowed = currentSealed || !summaryOpen`
+  (`focusView.js`'s `focusWindowed`). Stacked comes only from "See the whole
+  half", which shows on every revealed half that is still windowed.
+- **A half read back opens on at-bat 1.** `readsBack(sealedSeen, halfLive)`: the
+  reader never saw the half sealed, and the game is not in it now. Its `step`
+  starts at 0. A sealed half, the post-half hold, and the half in play under the
+  pass still follow the newest (`step` null). A half read back hides "Back to
+  the live at-bat", because there is no live at-bat.
+- **The bar's fourth state.** `stepsAhead`: a revealed, windowed half whose
+  cursor is not on its last at-bat shows "Next at-bat ›" in the advance's ink
+  skin. It calls `stepNext`, which moves the cursor only. It never calls a reveal
+  and never writes `revealedThrough` (ADR-0016), so it takes no kraft (ADR-0083).
+  The last at-bat gives the bar back to the next-half advance.
+- **The replay follows the pick when stacked (wide).** The rail is not sticky,
+  so a pick in a card far down the page played off screen. With the whole half
+  laid out (`ReplayRail`'s `inCard`), a pick plays the same `ReplayScene` inside
+  that card, under its pitch list and zone. One owner still: a pick in another
+  card moves it. The unpicked last at-bat keeps the rail. Phone keeps
+  `ReplaySheet`.
+
+`stacked ⇒ revealed` still holds: the only way into stacked is `summaryOpen`,
+which `focusWindowed` ignores while the half is sealed.
