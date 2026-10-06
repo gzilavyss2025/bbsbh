@@ -176,13 +176,3 @@ test('rankings and the one-line summary read the aggregates alone', async (t) =>
     ['/data/umpire-accuracy/2026/umpire-accuracy-summary.json'],
   )
 })
-
-test('the one-line summary carries the postseason aggregate, unranked, or null', async (t) => {
-  const post = { games: 2, called: 300, correct: 270 }
-  stubFetch(t)
-  SUMMARY.umpires[1].seasonPost = post
-  t.after(() => { SUMMARY.umpires[1].seasonPost = null })
-  const mod = await import('../src/api/umpires.js?case=post')
-  assert.deepEqual((await mod.umpireAccuracySummary(1)).post, post)
-  assert.equal((await mod.umpireAccuracySummary(2)).post, null)
-})

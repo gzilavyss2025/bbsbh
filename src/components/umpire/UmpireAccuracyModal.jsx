@@ -3,6 +3,7 @@ import { loadUmpire } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useNav } from '../../lib/nav.js'
 import { gamePath, umpirePath } from '../../lib/route.js'
+import { PostseasonPlateLine } from './PostseasonPlateLine.jsx'
 import { UmpireTendencies } from './UmpireTendencies.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
@@ -96,6 +97,8 @@ export function UmpireAccuracyModal({ id, seasonYear, onClose }) {
             describes it. This modal used to draw its own copy here; two on one
             surface is one too many. */}
         {data && <UmpireTendencies umpire={data} />}
+
+        <PostseasonPlateLine post={data?.accuracyPost?.season} />
 
         {hpGames.length > 0 && (
           <section className="umpmodal__games">

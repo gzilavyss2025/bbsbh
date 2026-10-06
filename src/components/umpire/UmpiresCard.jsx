@@ -3,7 +3,6 @@ import { umpireAccuracySummary } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { UmpireTierGlyph } from '../badges/UmpireTierGlyph.jsx'
 import { UmpireAccuracyModal } from './UmpireAccuracyModal.jsx'
-import { PostseasonPlateLine } from './PostseasonPlateLine.jsx'
 import { UmpireLink } from './UmpireLink.jsx'
 
 // The lineup page's crew (moved out of TeamInfo.jsx when that screen hit its
@@ -54,7 +53,6 @@ export function UmpiresCard({ officials, seasonYear }) {
                 onFullBreakdown={() => setModalId(o.id)}
               />
             )}
-            {o.role === 'HP' && <PostseasonPlateLine post={hpAccuracy?.post} className="umps__post" />}
           </dd>
         </div>
       ))}

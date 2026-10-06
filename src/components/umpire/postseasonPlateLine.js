@@ -16,6 +16,6 @@ export function postseasonPlateLine(post) {
     games,
     accuracy: pct,
     calls: post.called,
-    text: `Postseason plate work: ${games} ${games === 1 ? 'game' : 'games'}, ${pct} of ${post.called} calls correct. Not ranked.`,
+    text: `Postseason: ${games} ${games === 1 ? 'game' : 'games'}, ${pct} of ${post.called} calls correct. Not ranked.`,
   }
 }

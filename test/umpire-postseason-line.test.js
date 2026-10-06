@@ -4,7 +4,7 @@ import { postseasonPlateLine } from '../src/components/umpire/postseasonPlateLin
 
 test('states games, accuracy and call count, and says it is unranked', () => {
   const l = postseasonPlateLine({ games: 3, called: 400, correct: 368 })
-  assert.equal(l.text, 'Postseason plate work: 3 games, 92.0% of 400 calls correct. Not ranked.')
+  assert.equal(l.text, 'Postseason: 3 games, 92.0% of 400 calls correct. Not ranked.')
 })
 
 test('singular game', () => {
