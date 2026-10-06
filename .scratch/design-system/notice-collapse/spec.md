@@ -512,7 +512,7 @@ the reader sees now.
 | poster-overflow line, "pick two teams" line | clay or grey text | boxed `caution` | game preview, the game finder | 2 |
 | erase failure | clay text in the sheet | boxed | My Tally erase sheet | 1 |
 
-The largest change is the bare error line becoming a boxed callout on about 45
+The largest change is the bare error line becoming a boxed callout on about 42
 screens (48 files), one of them the slate. That is decision Q2. If Gary keeps those as text,
 the rows above turn into "none" and `Notice` has 6 sites, not 97.
 

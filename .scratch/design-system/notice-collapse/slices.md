@@ -113,6 +113,11 @@ N1 (Notice + pilot) ──┬─ N2 open-page errors ─────────
 Model and effort: Sonnet 5.5 (`claude-sonnet-5-5`), high. A new component with
 a new CSS file, a class helper and a lab entry; the pilot is one line of text.
 
+The paste-ready prompt is `prompt-n1.md` in this folder. Gary answered Q1 to Q5
+on 2026-10-06 (`decisions.md`), so it builds to those answers and asks nothing.
+It also lists what changed on `main` since this plan was measured (the Scout
+restructure, 12 files instead of 10, three import-order pins).
+
 - **Build:** `src/components/ui/state/Notice.jsx`,
   `src/styles/system/notice.css` (imported in `src/index.css` right after
   `system/empty-state.css`, line 69), `src/lib/design/noticeClass.js`,
