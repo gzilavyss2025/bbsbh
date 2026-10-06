@@ -110,6 +110,23 @@ if [ -n "$current_branch" ] && [ "$current_branch" != "HEAD" ]; then
           echo "bbsbh: primary checkout was $behind commit(s) behind origin/main — fast-forwarded, now up to date"
         else
           echo "bbsbh: '$current_branch' was $behind commit(s) behind origin/main — fast-forwarded to match"
+          # Cloud only. The environment makes the task branch with a LOCAL
+          # refs/remotes/origin/<branch> set to main's tip at session creation,
+          # but the branch is not on GitHub. After the fast-forward, every commit
+          # main got since then reads as "unpushed" to the platform Stop hook
+          # (~/.claude/stop-hook-git-check.sh counts origin/<branch>..HEAD), and
+          # it blocks every turn: "80 unpushed commit(s)" that are all on
+          # origin/main. When GitHub has no such branch, move that local-only
+          # ref to HEAD. Safe: --ff-only means HEAD has no commits of its own,
+          # and work committed later still counts as unpushed.
+          if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ] &&
+             git rev-parse -q --verify "refs/remotes/origin/$current_branch" >/dev/null; then
+            ls_rc=0
+            git ls-remote --exit-code --heads origin "$current_branch" >/dev/null 2>&1 || ls_rc=$?
+            if [ "$ls_rc" -eq 2 ]; then
+              git update-ref "refs/remotes/origin/$current_branch" HEAD
+            fi
+          fi
         fi
       elif [ "$current_branch" = "main" ]; then
         echo "bbsbh: WARNING — origin/main is $behind commit(s) ahead but the fast-forward failed;" \
