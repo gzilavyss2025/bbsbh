@@ -21,3 +21,9 @@ export function readsBack(sealedSeen, halfLive) {
 export function stepsAhead({ windowed, sealedSeen, cursor, steps }) {
   return windowed && !sealedSeen && cursor < steps - 1
 }
+
+// A step that lands a half read back on its last at-bat: the bar's advance
+// takes the button's slot, so useFocusMode holds it for STEP_HOLD_MS.
+export function holdsAdvance({ next, steps, sealedSeen }) {
+  return !sealedSeen && next === steps - 1
+}

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AtBatTrail } from './AtBatTrail.jsx'
 import { Button } from '../../ui/control/Button.jsx'
-import { CLOSE_SEQUENCE_MS } from './beats.js'
+import { CLOSE_SEQUENCE_MS, STEP_HOLD_MS } from './beats.js'
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
-import { focusWindowed, readsBack, stepsAhead } from './focusView.js'
+import { focusWindowed, holdsAdvance, readsBack, stepsAhead } from './focusView.js'
 
 // The innings viewer's play-by-play mode state (InningViewer.jsx). The
 // console chrome (the anchored band, the tabbed ReferencePanel) is
@@ -71,6 +71,9 @@ export function useFocusMode(curIdx, currentSealed, halfLive) {
   // is held; 'done' is everything after, which is the ordinary page as it
   // behaves today.
   const [closePhase, setClosePhase] = useState('idle')
+  // THE STEP HOLD (beats.js): true for STEP_HOLD_MS after a step lands a half
+  // read back on its last at-bat. It rides the bar's `closing` hold below.
+  const [stepHeld, setStepHeld] = useState(false)
 
   // Reset computed during render (not in an effect) on a half change — the
   // same pattern InningViewer's `runsInProgress` reset and Headshot.jsx use. A
@@ -84,6 +87,7 @@ export function useFocusMode(curIdx, currentSealed, halfLive) {
     setSealedSeen(currentSealed)
     setSummaryOpen(false)
     setClosePhase('idle')
+    setStepHeld(false)
   } else if (currentSealed && !sealedSeen) {
     setSealedSeen(true)
   }
@@ -147,6 +151,12 @@ export function useFocusMode(curIdx, currentSealed, halfLive) {
     }
   }, [closePhase])
 
+  useEffect(() => {
+    if (!stepHeld) return undefined
+    const t = setTimeout(() => setStepHeld(false), STEP_HOLD_MS)
+    return () => clearTimeout(t)
+  }, [stepHeld])
+
   const last = Math.max(0, steps - 1)
   // What the feed should actually show: the cursor resolved against a count
   // that can shrink under it (a live poll can rebuild a half with fewer
@@ -160,7 +170,11 @@ export function useFocusMode(curIdx, currentSealed, halfLive) {
     setItems(its || [])
   }, [])
   const stepBack = useCallback(() => setStep((s) => Math.max(0, (s == null ? last : s) - 1)), [last])
-  const stepNext = useCallback(() => setStep((s) => Math.min(last, (s == null ? last : s) + 1)), [last])
+  const stepNext = useCallback(() => {
+    const next = Math.min(last, cursor + 1)
+    setStep(next)
+    if (holdsAdvance({ next, steps, sealedSeen })) setStepHeld(true)
+  }, [last, cursor, steps, sealedSeen])
   // Jump straight to a step — what a trail chip does (AtBatTrail.jsx), rather
   // than only walking ±1.
   const goToStep = useCallback((n) => setStep(Math.min(last, Math.max(0, n))), [last])
@@ -179,11 +193,11 @@ export function useFocusMode(curIdx, currentSealed, halfLive) {
     summaryLink: windowed && !currentSealed,
     // The bar's cursor-only "Next at-bat ›" (InningActionBar.jsx).
     stepAhead: stepsAhead({ windowed, sealedSeen, cursor, steps }),
-    // The layout reads `closePhase`; the action bar reads `closing`. Two names
-    // for one fact, same split as `postHalf`/`windowed` above — one is the
+    // The layout reads `closePhase`; the action bar reads `closing`, which also
+    // covers the step hold above. Otherwise two names for one fact, same split as `postHalf`/`windowed` above — one is the
     // state of the animation, the other is whether a control is held.
     closePhase,
-    closing: closePhase === 'running',
+    closing: closePhase === 'running' || stepHeld,
     step,
     steps,
     items,

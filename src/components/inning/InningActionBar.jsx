@@ -36,7 +36,8 @@ import { ordinal } from '../../lib/format.js'
 //    screen (#1539: a reload, a direct link, the pass, Stamp In, a stamp):
 //    "Next at-bat ›" in the advance's ink skin, never the kraft one — it moves
 //    useFocusMode's cursor only, so no reveal is possible (ADR-0083). The last
-//    at-bat hands back to the advance below.
+//    at-bat hands back to the advance below, held for STEP_HOLD_MS (beats.js)
+//    through the same `closing` prop, so a fast second tap cannot turn the page.
 //  • OTHERWISE the plain advance: the next-half label once one unlocks, or the
 //    last action at the furthest revealed inning. Never "Top 10th ›", which
 //    would leak the game going to extras before the reader gets there.

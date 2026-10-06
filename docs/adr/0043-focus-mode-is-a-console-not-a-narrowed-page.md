@@ -454,7 +454,9 @@ lost "Next at-bat". Issue #1539 asked for the live loop on every half.
   cursor is not on its last at-bat shows "Next at-bat ›" in the advance's ink
   skin. It calls `stepNext`, which moves the cursor only. It never calls a reveal
   and never writes `revealedThrough` (ADR-0016), so it takes no kraft (ADR-0083).
-  The last at-bat gives the bar back to the next-half advance.
+  The last at-bat gives the bar back to the next-half advance, held for
+  `STEP_HOLD_MS` (400 ms, `beats.js`) through the bar's `closing` hold, so a
+  fast second tap cannot turn the page. No tap cuts this hold short.
 - **The replay follows the pick when stacked (wide).** The rail is not sticky,
   so a pick in a card far down the page played off screen. With the whole half
   laid out (`ReplayRail`'s `inCard`), a pick plays the same `ReplayScene` inside

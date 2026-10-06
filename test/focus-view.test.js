@@ -9,7 +9,8 @@
 // already revealed.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { focusWindowed, readsBack, stepsAhead } from '../src/components/inning/focus/focusView.js'
+import { focusWindowed, holdsAdvance, readsBack, stepsAhead } from '../src/components/inning/focus/focusView.js'
+import { CLOSE_SEQUENCE_MS, STEP_HOLD_MS } from '../src/components/inning/focus/beats.js'
 
 test('a revealed half is windowed until "See the whole half"', () => {
   assert.equal(focusWindowed(false, false), true)
@@ -39,4 +40,17 @@ test('the bar steps a half read back, windowed, until its last at-bat', () => {
   assert.equal(stepsAhead({ ...base, sealedSeen: true }), false)
   // Before PlayByPlay reports a count.
   assert.equal(stepsAhead({ ...base, steps: 0 }), false)
+})
+
+test('stepping a half read back onto its last at-bat holds the advance', () => {
+  // The bar's "Next at-bat ›" becomes the next-half advance in the same slot,
+  // so a fast second tap must not fall through to it.
+  assert.equal(holdsAdvance({ next: 4, steps: 5, sealedSeen: false }), true)
+  assert.equal(holdsAdvance({ next: 3, steps: 5, sealedSeen: false }), false)
+  // A half seen sealed keeps its live bar exactly: no new hold there.
+  assert.equal(holdsAdvance({ next: 4, steps: 5, sealedSeen: true }), false)
+})
+
+test('the hold after the last at-bat is a short literal', () => {
+  assert.ok(STEP_HOLD_MS > 0 && STEP_HOLD_MS < CLOSE_SEQUENCE_MS)
 })
