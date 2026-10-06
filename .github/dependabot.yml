@@ -13,6 +13,15 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    # ESLint 10 does not install yet: eslint-plugin-react 7.37.5 allows `eslint`
+    # up to 9, so `npm install` fails with ERESOLVE. Skip the 10.x pair (`eslint`
+    # and `@eslint/js` move together) until the plugin supports it, then delete
+    # these two entries. A later major (11) still comes through.
+    ignore:
+      - dependency-name: eslint
+        versions: ["10.x"]
+      - dependency-name: "@eslint/js"
+        versions: ["10.x"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
