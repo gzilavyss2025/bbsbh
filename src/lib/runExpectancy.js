@@ -105,3 +105,24 @@ export function pitchFavor(table, baseMask, outs, balls, strikes, actualStrike) 
   // batting team of a forced run read as "helped the batter.")
   return actualValue - correctValue
 }
+
+// --- Era tables (1960-2023), one file per decade -------------------------------
+// Built by `gen-run-expectancy.mjs --era-sweep` / `--era-aggregate`. Play-by-play
+// exists from 1960 (docs/scripts/generators.md); 2024 on is the current table.
+export const ERA_FIRST = 1960
+export const ERA_LAST = 2023
+
+// '1985' -> '1980s'. null outside the era.
+export function eraDecade(season) {
+  const y = Number(season)
+  if (!Number.isInteger(y) || y < ERA_FIRST || y > ERA_LAST) return null
+  return `${Math.floor(y / 10) * 10}s`
+}
+
+// RE for a pre-pitch state in a past season. `tables` maps a decade label to its
+// loaded table ({ '1980s': table }); the caller loads files, so this stays pure.
+// null when the season has no era table or the caller did not load it.
+export function lookupEraRE(season, { baseMask, outs, balls, strikes }, tables = {}) {
+  const table = tables[eraDecade(season)]
+  return table ? lookupRE(table, baseMask, outs, balls, strikes) : null
+}

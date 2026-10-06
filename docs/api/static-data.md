@@ -38,6 +38,12 @@ for each generator; the reader modules:
   the session, and the table marks it "to date". The pure sum lives in
   `scripts/lib/stats/league-averages.mjs`, imported by both sides so there is one copy. Open
   data: no SealBox. Feeds the career table's "vs lg" column (`CareerRegister.jsx`, MLB rows only).
+- `lookupEraRE(season, state, tables)` (`src/lib/runExpectancy.js`) — reads the per-decade
+  run-expectancy files in `public/data/run-expectancy-eras/` (`1960s.json` to `2020s.json`,
+  built by the hand-run era mode of `gen-run-expectancy.mjs`). Pure: the caller loads a
+  decade file and passes `{ '1980s': table }`. Gives `null` for a season outside 1960-2023
+  or a table not loaded. No screen reads it yet. The current table,
+  `run-expectancy.json`, is unchanged.
 - `staticJson.js` — not a dataset: the memoized read every reader below is built
   on. `staticJson(url, {shape, fallback})` returns a loader that fetches once per
   session and hands the SAME in-flight promise to concurrent callers;
