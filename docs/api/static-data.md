@@ -896,6 +896,11 @@ for each generator; the reader modules:
   phantom shared seasons AND split continuous tenures in half. Same instinct as
   `aggregateSplits` deduping statsapi's repeated stat rows — the feed repeats
   itself, so the reader dedupes.
+  `coachedUnder(managerId)` reads the reverse index in `public/data/manager-staff/{NN}.json`
+  (same `shardKey100` bucket, keyed by manager id; each entry is
+  `[personId, seasonsTogether, laterManaged 0|1]`) and names the staff with one
+  batched `people?personIds=` request. It returns `[]` for a manager with no staff
+  on file. `CoachingTree.jsx` draws it on the manager page: open surface, no SealBox.
 - `person/contracts.js` — current salary, competitive-balance-tax payroll,
   service time, options and future club-control status from Fever Baseball's
   Cot's-to-MLBAM reconciliation. `scripts/fever/gen-player-contracts.mjs` reduces the nightly
@@ -956,7 +961,32 @@ for each generator; the reader modules:
   man is to this player (his Father, his Son). A null `personId` means the relative has
   no MLBAM id: show the name, link nothing. `fetchFamilyShard(key)` returns the whole
   shard, whose `credit` lines (Retrosheet and the Chadwick register) print beside the
-  data. Spoiler-free: history about people, no game state.
+  data. `familyBand(personId)` is the player page's read: the entries ordered parents,
+  brothers, sons, rest (`orderFamily`), plus the credit lines, or `null` with no relatives.
+  `FamilyBand` draws it on the History tab. Spoiler-free: history about people, no game state.
+- `history/onThisDay.js` — who was born, and who debuted, on a calendar day in past
+  years, from `public/data/on-this-day/{MM-DD}.json` (`gen-bio-history.mjs`, hand-run,
+  ADR-0100), one file per day. `onThisDay(month, day)` (1-12, 1-31) returns
+  `{ born, debuted }`, each `[{ personId, name, year }]` (birth year, or debut year),
+  both `[]` for a day with none. The caller passes the month and day of the PAGE'S own
+  date (`src/lib/dates.js`), never a clock of its own. `fetchOnThisDayShard('MM-DD')`
+  returns the whole file, whose `credit` lines print beside the data. Spoiler-free.
+- `history/birthplaces.js` — players grouped by birth city, from
+  `public/data/birthplaces/{ab}.json` (`gen-bio-history.mjs`, ADR-0100), `ab` the first
+  two letters of the city. `bornIn(city, stateOrCountry)` returns `[{ personId, name,
+  year|null }]` or `[]`. EXACT match on lower-case city and place: the full state name
+  for a US park (`venue.location.state`, 'Wisconsin'), the country for any other
+  (`country`, 'Canada'); 'WI' finds nothing. `birthplaceKey` and `birthplaceShard` are
+  the one definition the generator also uses. `fetchBirthplaceShard(ab)` returns the
+  whole file and its `credit`. Spoiler-free.
+- `teamSeasons.js` — who played for each MLB team-season, from
+  `public/data/team-seasons.json` (`gen-team-seasons.mjs`, hand-run, ADR-0100).
+  `loadTeamSeasons()` returns `{ credit, throughSeason, players, teamSeasons }`:
+  `players` lists each MLBAM id once, and each `teamSeasons` entry is
+  `[key, label, [index into players]]` (`['CHN-1998', 'Cubs 1998', [...]]`). The
+  whole file is one fetch, memoized, and it holds no search logic. The `credit` lines
+  print beside any chain built from it. Empty on a missing file. Spoiler-free:
+  history about people, no game state.
 - `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
   `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Not a third
   party, not attributed, and not an MLE —

@@ -63,6 +63,21 @@ has the older man as id1. One label is backwards: "Great Grandson" also has the
 older man as id1, so the generator reads it as "Great Grandfather". A label the
 generator does not know fails the run.
 
+## Second dataset: on this day and birthplaces
+
+`scripts/gen-bio-history.mjs` writes `public/data/on-this-day/{MM-DD}.json` and
+`public/data/birthplaces/{ab}.json` from `biofile0.csv`. The readers are
+`src/api/history/onThisDay.js` and `birthplaces.js`, both spoiler-free.
+
+These shards key on the day and on the city, not on the MLBAM id (decision 6 is for
+per-player stores). The key must be one the reader can compute from the page: a month
+and day, or a venue city. A month's file was 415 KB, because debuts bunch in April and
+September, so each day is a file (the largest is 21 KB). The first letter of the city
+gave a 185 KB file, so the first two letters are the key (the largest is 93 KB).
+
+Only players count (a row with `debut_p`), and no deaths are read. The `HOF` column
+holds the word `HOF` on 325 rows and is empty on the rest. The generator does not use it.
+
 ## Consequences
 
 - A new open source follows this shape: a hand-run generator, a pure half in
