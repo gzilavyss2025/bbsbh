@@ -299,8 +299,10 @@ for each generator; the reader modules:
   the wrong season is worse than no card.
 - `notebook.js` — the offseason page's one NOTE, both kinds, in one reader.
   `fetchLongAtBats(season)` reads `public/data/long-at-bats/{season}.json`
-  (`gen-long-at-bats.mjs`): every plate appearance of an MLB season that took 12
-  pitches or more, plus the coverage the census rests on. Keyed on the season,
+  (`gen-long-at-bats.mjs`): every plate appearance of an MLB regular season that took 12
+  pitches or more, plus the coverage the census rests on. `post` is the postseason's census
+  beside it (its own coverage and rows, `null` until a postseason game is on file), never
+  summed into the regular season (ADR-0104). Keyed on the season,
   not one rolling path, because the offseason page names one season from November
   to February and a file that rolled over on January 1 would take the note off the
   page until April (#1122). `fetchYoungestRegulars(sportId)` reads

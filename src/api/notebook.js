@@ -25,21 +25,29 @@
 import { staticJsonBy } from './staticJson.js'
 import { gamePath } from '../lib/route.js'
 
+const longAtBatsCoverage = (c) => ({
+  games: Number(c?.games) || 0,
+  playedGames: Number(c?.playedGames) || 0,
+  plateAppearances: Number(c?.plateAppearances) || 0,
+  complete: Boolean(c?.complete),
+})
+
 // One MLB season's twelve-pitch at-bats. Keyed on the season rather than
 // written to one rolling path: the offseason page names one season from
 // November to February, and a generator that rolled over on January 1 would
 // take the note off the page until April (#1122).
+// `post` is the postseason's census, beside the regular season's and never summed
+// into it (ADR-0104). It is null until the file has a postseason game, and a
+// reader that knows only the other keys never sees it.
 export const fetchLongAtBats = staticJsonBy((season) => `/data/long-at-bats/${season}.json`, {
   shape: (d) => ({
     season: Number(d?.season) || null,
     threshold: Number(d?.threshold) || 0,
-    coverage: {
-      games: Number(d?.coverage?.games) || 0,
-      playedGames: Number(d?.coverage?.playedGames) || 0,
-      plateAppearances: Number(d?.coverage?.plateAppearances) || 0,
-      complete: Boolean(d?.coverage?.complete),
-    },
+    coverage: longAtBatsCoverage(d?.coverage),
     rows: Array.isArray(d?.rows) ? d.rows : [],
+    post: d?.post
+      ? { coverage: longAtBatsCoverage(d.post.coverage), rows: Array.isArray(d.post.rows) ? d.post.rows : [] }
+      : null,
   }),
   fallback: null,
 })

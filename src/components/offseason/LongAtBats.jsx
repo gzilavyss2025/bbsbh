@@ -18,7 +18,7 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 // end. Twelve pitches is four lines of a scorebook cell.
 //
 // A CENSUS, NOT A LEADERBOARD. The number is how many there were in the whole
-// season, out of every plate appearance played — which is only sayable because
+// regular season, out of every plate appearance played — which is only sayable because
 // pitch coverage at MLB is complete and every game was read
 // (scripts/gen-long-at-bats.mjs). When it is not complete the note says so
 // instead of quietly presenting a sample as a count; `coverage.complete` is
@@ -71,6 +71,10 @@ export function LongAtBats({ season }) {
   // is nothing.
   if (rows.length === 0 || data?.season !== season || !data?.coverage?.complete) return null
 
+  // Its own census, shown only once the file has one and every postseason game on
+  // it is read. A complete zero is still a count.
+  const post = data.post?.coverage.complete ? data.post : null
+
   const shown = rows.slice(0, visible)
   const hidden = rows.length - shown.length
   // The last press of the door is a short one — 170 rows off a 5 + 10n ladder
@@ -92,14 +96,24 @@ export function LongAtBats({ season }) {
           <p className="seasonnote__under">
             of <span className="seasonnote__against">{count(data.coverage.plateAppearances)}</span> plate
             appearances, in all{' '}
-            <span className="seasonnote__against">{count(data.coverage.games)}</span> games
+            <span className="seasonnote__against">{count(data.coverage.games)}</span> regular-season games
           </p>
+          {/* The postseason is its own count with its own denominator, beside the
+              figure and never in it (ADR-0104). Only where the file has one. */}
+          {post && (
+            <p className="seasonnote__under">
+              Postseason: <span className="seasonnote__against">{post.rows.length}</span> of{' '}
+              <span className="seasonnote__against">{count(post.coverage.plateAppearances)}</span> plate
+              appearances, in{' '}
+              <span className="seasonnote__against">{count(post.coverage.games)}</span> games
+            </p>
+          )}
         </div>
 
         <div className="seasonnote__main">
           <h4 className="seasonnote__title">The twelve-pitch at-bats</h4>
           <p className="seasonnote__note">
-            Every plate appearance of the season that took {data.threshold} pitches or more. Each
+            Every regular-season plate appearance that took {data.threshold} pitches or more. Each
             one opens its game, sealed.
           </p>
 
@@ -197,8 +211,9 @@ export function LongAtBats({ season }) {
               by default (01-base.css's ALL-CAPS INVARIANT) and a surface with
               real prose on it has to opt out. */}
           <p className="seasonnote__pool">
-            Regular season only. A batter left mid-count by an inning-ending caught stealing
-            starts a new at-bat next inning, and is counted as one.
+            The figure and the list are the regular season only; the postseason is never summed into
+            them. A batter left mid-count by an inning-ending caught stealing starts a new at-bat
+            next inning, and is counted as one.
           </p>
         </div>
       </div>
