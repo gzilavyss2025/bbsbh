@@ -1,0 +1,21 @@
+{
+  "id": 543243,
+  "fullName": "Sonny Gray",
+  "nickName": "Pickles",
+  "birthCity": "Smyrna",
+  "birthStateProvince": "TN",
+  "birthCountry": "USA",
+  "education": {
+    "highschools": [
+      {
+        "name": "Smyrna",
+        "state": "TN"
+      }
+    ],
+    "colleges": [
+      {
+        "name": "Vanderbilt"
+      }
+    ]
+  }
+}

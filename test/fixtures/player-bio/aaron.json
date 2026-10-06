@@ -1,0 +1,17 @@
+{
+  "id": 110001,
+  "fullName": "Hank Aaron",
+  "nickName": "Hammerin' Hank",
+  "birthCity": "Mobile",
+  "birthStateProvince": "AL",
+  "birthCountry": "USA",
+  "education": {
+    "highschools": [
+      {
+        "name": "Allen Institute",
+        "city": "Mobile",
+        "state": "AL"
+      }
+    ]
+  }
+}
