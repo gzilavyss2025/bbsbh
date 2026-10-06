@@ -59,6 +59,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
+import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'postseason-history.json')
@@ -161,7 +162,7 @@ async function seedsForLeague(leagueId, season, wcSeries, allSeries) {
 
 async function buildSeason(year) {
   const data = await getJson(
-    `/api/v1/schedule?sportId=1&season=${year}&gameType=F,D,L,W&hydrate=team,seriesStatus`,
+    `/api/v1/schedule?sportId=1&season=${year}&gameType=${POSTSEASON_GAME_TYPES}&hydrate=team,seriesStatus`,
   )
   const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
   // Not started, or still in progress — nothing to show for this year yet.

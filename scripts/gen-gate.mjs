@@ -69,6 +69,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
+import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -78,10 +79,6 @@ const out = join(here, '..', 'public', 'data', 'gate.json')
 // twelve month-windows cover any season with room to spare. Requesting a
 // month with no games back is free — the endpoint returns an empty dates[].
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1)
-
-// Wild Card, Division, League Championship, World Series. The All-Star Game
-// (A) is left out: a crowd at a showcase is not a home gate.
-const POSTSEASON_TYPES = 'F,D,L,W'
 
 // How many opponents' draw figures a club keeps. Three is what the page shows
 // ("who fills this park"); shipping all 29 would quadruple the file for rows
@@ -433,7 +430,8 @@ async function main() {
     }
     file.seasons[season] = buildSeason(rows)
     console.log(`  ${rows.length} games folded in`)
-    const post = buildPostseason(await fetchSeason(season, POSTSEASON_TYPES))
+    // No All-Star Game (A): a crowd at a showcase is not a home gate.
+    const post = buildPostseason(await fetchSeason(season, POSTSEASON_GAME_TYPES))
     if (post) {
       file.seasons[season].postseason = post
       console.log(`  postseason: ${post.games} games with a gate`)

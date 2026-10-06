@@ -43,7 +43,7 @@ import { bucketsOf, writeJsonIfChanged, writeSeasons, writeShards } from './lib/
 import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 import { CENTURY_CLUB_MIN, CENTURY_MPH } from '../src/api/pitchArsenal.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
-import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
+import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
 import { CELLS, COLS, aggregateGameCommand, commandStmts, markCommandIngested, parseCells } from './lib/command-grid.mjs'
 import { aggregateGameHitters, clearHitterSeason, foldHitters, hitterStmts, writeHitterGrid } from './lib/pitch/hitter-grid.mjs'
 import { readXwobaTable } from './lib/pitch/xwoba.mjs'
@@ -651,7 +651,7 @@ async function main() {
         need.hitter &&= level === 'mlb' // the hitter grid is MLB only for now (ADR-0096)
         if (!Object.values(need).some(Boolean)) continue
         // The season comes from the game, never the clock (#1200).
-        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: Number(g.season ?? g.officialDate.slice(0, 4)), scope: POSTSEASON_GAME_TYPES.split(',').includes(g.gameType) ? 'P' : 'R', need })
+        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: Number(g.season ?? g.officialDate.slice(0, 4)), scope: scopeOfGameType(g.gameType), need })
       }
     }
   }

@@ -69,6 +69,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
+import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -215,7 +216,7 @@ async function seasonNames(season) {
 // F,D,L,W returned only those types; an unknown code returned nothing).
 async function seasonPostseason(season) {
   const data = await getJson(
-    `/api/v1/schedule?sportId=1&season=${season}&gameTypes=F,D,L,W&fields=${SCHEDULE_FIELDS}`,
+    `/api/v1/schedule?sportId=1&season=${season}&gameTypes=${POSTSEASON_GAME_TYPES}&fields=${SCHEDULE_FIELDS}`,
   )
   const byPk = new Map()
   for (const game of (data.dates ?? []).flatMap((d) => d.games ?? [])) {

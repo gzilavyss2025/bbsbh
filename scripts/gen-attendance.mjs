@@ -65,6 +65,7 @@ import { writeJsonAtomic } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
 import { toRow } from './gen-gate.mjs'
 import { ballparkFor } from '../src/lib/ballpark/ballparkData.js'
+import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -78,9 +79,6 @@ export const SELLOUT_FILL = 0.95
 // twelve month-windows cover any season with room to spare. Same sweep shape
 // as gen-gate.mjs; requesting a month with no games back is free.
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1)
-
-// Wild Card, Division, League Championship, World Series (no All-Star Game).
-const POSTSEASON_TYPES = 'F,D,L,W'
 
 const pad = (n) => String(n).padStart(2, '0')
 const lastDayOf = (season, month) => new Date(Date.UTC(season, month, 0)).getUTCDate()
@@ -197,7 +195,7 @@ async function main() {
     file.seasons[season] = { byTeamId: byTeamId(rows) }
     games += rows.length
     console.log(`  ${rows.length} home dates folded in`)
-    const postRows = await fetchSeason(season, POSTSEASON_TYPES)
+    const postRows = await fetchSeason(season, POSTSEASON_GAME_TYPES)
     if (postRows.length) {
       file.seasons[season].postseason = { byTeamId: byTeamId(postRows) }
       console.log(`  postseason: ${postRows.length} home dates`)

@@ -19,7 +19,7 @@
 import { selectChallengeState } from '../../../src/api/challenges.js'
 import { missEdge } from '../../../src/api/umpireFavor.js'
 import { pitchFavor } from '../../../src/lib/runExpectancy.js'
-import { POSTSEASON_GAME_TYPES } from '../records/postseason.mjs'
+import { scopeOfGameType } from '../records/postseason.mjs'
 
 // --- one game's rows ----------------------------------------------------------
 
@@ -282,7 +282,7 @@ export function clearSeasonRows(db, season) {
 // --- the postseason beside the regular season (#1514, ADR-0094's shape) -------
 
 // A game's scope, from its schedule row. The sweep asks for R plus these.
-export const scopeOfGameType = (gameType) => (POSTSEASON_GAME_TYPES.split(',').includes(gameType) ? 'P' : 'R')
+export { scopeOfGameType }
 
 // The scope lives on the GAME. A challenge row takes it through game_pk; a game
 // row with no scope is regular season (an old row, or a test fixture). 'all' is

@@ -6,17 +6,12 @@
 
 // THE GAME TYPES THE SWEEP ASKS FOR (ADR-0104, #1542). The postseason is its own
 // list, spelled as its four rounds and never the umbrella 'P' (see
-// src/api/boxlines/rows.js). It is the list records/postseason.mjs holds too, but
-// that module imports team-records.mjs, which imports this file, so it is
-// spelled here and test/long-at-bats.test.js pins the two equal.
+// src/api/boxlines/rows.js). It comes from records/game-types.mjs, not from
+// postseason.mjs, which imports team-records.mjs, which imports this file.
+import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './records/game-types.mjs'
+export { POSTSEASON_GAME_TYPES, scopeOfGameType }
 export const REGULAR_SEASON_GAME_TYPES = 'R'
-export const POSTSEASON_GAME_TYPES = 'F,D,L,W'
 export const ALL_GAME_TYPES = `${REGULAR_SEASON_GAME_TYPES},${POSTSEASON_GAME_TYPES}`
-
-// 'P' for a postseason game, 'R' for everything else — the same two scopes as
-// ADR-0094 and ADR-0102. Read off the schedule row on every run rather than
-// stored in the scan, so there is no second copy of it to disagree.
-export const scopeOfGameType = (gameType) => (POSTSEASON_GAME_TYPES.split(',').includes(gameType) ? 'P' : 'R')
 
 // WHICH SEASON THE NOTE IS ABOUT, and it is not `new Date().getFullYear()`.
 //
