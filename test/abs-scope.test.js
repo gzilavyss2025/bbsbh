@@ -3,7 +3,7 @@
 // a challenge row takes its game's scope through game_pk.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { openDb } from '../scripts/lib/db.js'
@@ -158,4 +158,11 @@ test('the address keeps ?scope= on /abs-challenges, and Regular is the bare addr
   assert.equal(absChallengesPath({ scope: 'reg' }), '/abs-challenges')
   assert.equal(parseRoute('/abs-challenges?scope=all').scope, 'all')
   assert.equal(parseRoute('/abs-challenges?scope=bogus').scope, undefined)
+})
+
+// A bare /abs-challenges is Regular for everyone: no stored pick may change it.
+test('the ABS page reads its scope from the address alone', () => {
+  const page = readFileSync(new URL('../src/screens/around-the-game/AbsChallengesPage.jsx', import.meta.url), 'utf8')
+  assert.doesNotMatch(page, /localStorage/)
+  assert.match(page, /scopeParam \?\? 'reg'/)
 })

@@ -35,7 +35,6 @@ import { MissBands } from './abs/MissBands.jsx'
 import { BiggestOverturn } from './abs/BiggestOverturn.jsx'
 import { absChallengesPath } from '../../lib/route.js'
 import { useNav } from '../../lib/nav.js'
-import { pitchScopeOf } from '../../lib/seasons/route.js'
 import { seasonDelta, seasonValue } from '../../lib/seasons/view.js'
 import { useSeasonView } from '../../hooks/seasons/useSeasonView.js'
 import { SeasonPicker } from '../../components/season/SeasonPicker.jsx'
@@ -89,20 +88,11 @@ import { SeasonPicker } from '../../components/season/SeasonPicker.jsx'
 const ABS_PATH = '/abs-challenges'
 
 // THE SCOPE (#1514): Regular, Postseason or All, the Matchup Scout's three
-// words. The address holds it (`?scope=`, absent is Regular) and so does
-// localStorage, never My Tally (ADR-0039). The file keeps the postseason beside
-// the regular season, so Regular never counts an October game.
-const SCOPE_KEY = 'bbsbh:abs:scope'
+// words. The address alone holds it (`?scope=`, absent is Regular), so a shared
+// link reads the same for everyone. The file keeps the postseason beside the
+// regular season, so Regular never counts an October game.
 const SCOPES = [['reg', 'Regular'], ['post', 'Postseason'], ['all', 'All']]
 const SCOPE_LINE = { reg: 'Regular season', post: 'Postseason', all: 'Regular season and postseason' }
-
-function storedScope() {
-  try {
-    return pitchScopeOf(window.localStorage.getItem(SCOPE_KEY)) ?? 'reg'
-  } catch {
-    return 'reg'
-  }
-}
 
 // A season view (#1202): `seasonYear` and `vs` come from the address. Compare
 // adds a line under each headline figure and a column to the club board; the
@@ -114,8 +104,7 @@ export function AbsChallengesPage({ seasonYear, vs, scope: scopeParam }) {
   const view = useSeasonView('abs', { seasonYear, vs })
   const year = view?.shown
   const [mode, setMode] = useState('change')
-  const [saved, setSaved] = useState(storedScope)
-  const wanted = scopeParam ?? saved
+  const wanted = scopeParam ?? 'reg'
 
   // THE REGULAR FILE IS ALWAYS READ: it names the levels on file and how many
   // postseason games each one has. A level with none reads as Regular and draws
@@ -137,12 +126,6 @@ export function AbsChallengesPage({ seasonYear, vs, scope: scopeParam }) {
     [view?.vs, regular.data != null, scope],
   )
   const chooseScope = (k) => {
-    try {
-      window.localStorage.setItem(SCOPE_KEY, k)
-    } catch {
-      /* private window: the address still holds it */
-    }
-    setSaved(k)
     navigate(absChallengesPath({ seasonYear, vs, scope: k }), { replace: true })
   }
   // MLB and Triple-A both, because both run the system and both are on the
