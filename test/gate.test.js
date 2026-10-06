@@ -369,7 +369,7 @@ test('postseasonGate reads the separate block, or null', () => {
 })
 
 test('postseasonBoard ranks October clubs only, on the postseason block alone', () => {
-  const g = (avg, n) => ({ games: n, total: avg * n, avg, high: { n: avg + 10, date: '2026-10-03', oppId: 9 } })
+  const g = (avg, n) => ({ games: n, total: avg * n, avg, high: { n: avg + 10, date: '2026-10-03', oppId: 9, series: 'NLDS', seriesGame: 1 } })
   const data = {
     seasons: {
       2026: {
@@ -392,6 +392,27 @@ test('postseasonBoard ranks October clubs only, on the postseason block alone', 
   // club 3 never played in October: absent, and the regular-season figures never enter
   assert.deepEqual(b.rows.map((r) => [r.teamId, r.rank, r.avg, r.best]), [[2, 1, 43000, 43010], [1, 2, 40000, 40010]])
   assert.equal(b.rows[0].venue, 'B')
+  assert.deepEqual([b.rows[0].bestSeries, b.rows[0].bestSeriesGame], ['NLDS', 1])
   assert.equal(postseasonBoard(data, 2025), null)
   assert.equal(postseasonBoard(null, 2026), null)
+})
+
+test('toRow names the postseason round and series game, and a regular-season row carries neither', () => {
+  const post = (seriesDescription, seriesGameNumber) => toRow(game({ seriesDescription, seriesGameNumber }), '2026-06-12')
+  assert.deepEqual([post('NL Division Series', 1).series, post('NL Division Series', 1).seriesGame], ['NLDS', 1])
+  assert.equal(post('AL Wild Card Series', 2).series, 'ALWC')
+  assert.equal(post('AL Championship Series', 7).series, 'ALCS')
+  assert.equal(post('World Series', 4).series, 'WS')
+  assert.equal(toRow(game({ seriesDescription: 'Regular Season', seriesGameNumber: 3 }), '2026-06-12').series, null)
+  assert.equal(toRow(game(), '2026-06-12').series, null)
+})
+
+test('the best night carries its round only when the game has one, so regular-season blocks do not change', () => {
+  const reg = aggregate([toRow(game({ gamePk: 1 }), '2026-06-12')])
+  assert.equal('series' in reg[158].gate.high, false)
+  const row = toRow(game({ seriesDescription: 'NL Division Series', seriesGameNumber: 2 }), '2026-06-12')
+  assert.deepEqual(
+    [aggregate([row])[158].gate.high.series, aggregate([row])[158].gate.high.seriesGame],
+    ['NLDS', 2],
+  )
 })

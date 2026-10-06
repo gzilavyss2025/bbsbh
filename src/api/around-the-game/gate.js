@@ -97,6 +97,8 @@ export function postseasonBoard(data, season) {
       avg: c.gate.avg,
       total: c.gate.total,
       best: c.gate.high?.n ?? null,
+      bestSeries: c.gate.high?.series ?? null,
+      bestSeriesGame: c.gate.high?.seriesGame ?? null,
       bestDate: c.gate.high?.date ?? null,
     }))
   const withRank = ranked(rows, 'avg').sort((a, b) => b.avg - a.avg)

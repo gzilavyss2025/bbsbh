@@ -327,7 +327,9 @@ export function AttendancePage() {
                           <td>{commas(r.total)}</td>
                           <td>
                             {commas(r.best)}
-                            <span className="rpt__note">{r.bestDate ? humanDate(r.bestDate) : ''}</span>
+                            <span className="rpt__note">
+                              {r.bestSeries ? `${r.bestSeries} • G${r.bestSeriesGame}` : r.bestDate ? humanDate(r.bestDate) : ''}
+                            </span>
                           </td>
                         </tr>
                       ))}
