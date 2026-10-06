@@ -172,7 +172,8 @@ missing. This follows the MiLB pattern in root `CLAUDE.md`.
 - No umpires: the umpire card prints "Umpires are not in the record for this game."
 - No batting order: the lineup page prints the box lines and says the order is not in
   the record.
-- **No plays: the page offers no half-inning pages.** An empty half-inning page is a
+- **No plays, before 1960: the page offers no half-inning pages (D14).** From 1960 on, a
+  played game with 0 plays is almost always a forfeit, so it keeps its sealed pages. An empty half-inning page is a
   dead end, and an empty half would invite a tap that reveals nothing. The box score
   and the lineup pages stay. Scoring a game with no plays is #1525's work (Retrosheet
   plays), not this plan's.

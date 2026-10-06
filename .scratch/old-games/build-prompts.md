@@ -64,20 +64,17 @@ Mechanical: run the generator and the cross-check, compare counts, commit data.
 
 ## Prompt 2a. Old-game pages: thin eras
 
-**Model: Sonnet 5.5, medium** (rung 3). It follows the MiLB degrade pattern. It does
-not touch a seal.
+**Model: Sonnet 5.5, high** (rung 4). The full prompt is `prompt-2a.md`, graded and
+rewritten with `/improve-prompt`. It moved up from medium: a survey with judgment, then
+fixes across several screens.
 
-- First, load these on the existing route with Chromium and a screenshot each:
-  - a 1927 game, for example PHA@BOS on 07041927 (gamePk 102436);
-  - the 1956 World Series perfect game, BRO@NYY on 10081956 (gamePk 67524);
-  - the 1979 forfeit, DET@CWS on 07121979 (gamePk 177426).
-  Say what breaks. Do not fix what is not broken.
-- Add plain "not in the record" lines for no umpires and no batting order.
-- Offer no half-inning pages when the feed has 0 plays. The box score and the lineup
-  pages stay.
-- Check how an old club's logo and colours render (the 1927 Athletics). Report it; fix
-  it only if the fix is small.
-- Add a test for each fallback, written first and seen to fail.
+**Decided (2026-10-06):** D14, the "no play-by-play" notice shows only before 1960.
+
+- Survey the three test games (1927, 1956, the 1979 forfeit) and mark each card fine,
+  empty or false. Stop and report if more than 3 cards are false.
+- One "played" selector that reads `detailedState`, not `abstractGameState`.
+- Plain lines for missing umpires and batting orders; no innings pages for a pre-1960
+  played game with 0 plays; no present-day data on an old game.
 
 ## Prompt 2b. The feat label inside the box-score seal; accept ADR-0101
 
