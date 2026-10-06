@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef } from 'react'
-import { BAR_TOP, SCENE_H, SCENE_W, SLOW, pitcherStage, releasePoint, sceneFrame, stage } from '../../../lib/pitcherCard/scene.js'
+import { BAR_TOP, REPLAY_H, SCENE_H, SCENE_W, SLOW, pitcherStage, releasePoint, sceneFrame, stage } from '../../../lib/pitcherCard/scene.js'
 
 const STAGE = stage()
 const SEGMENTS = 40 // one per step of the model's path (scene.js N)
@@ -13,7 +13,7 @@ const f1 = (v) => v.toFixed(1)
 //
 // PERFORMANCE: one SVG, drawn by setting attributes through refs from a
 // requestAnimationFrame loop — no React state per frame. The loop stops while
-// the card is off screen (IntersectionObserver) and never starts under
+// the card is off screen (IntersectionObserver), its clock with it, and never starts under
 // `prefers-reduced-motion: reduce`, where the first pitch shows at full length.
 // `onActive(idx)` fires only when the pitch in flight changes.
 //
@@ -21,7 +21,14 @@ const f1 = (v) => v.toFixed(1)
 // Pitching card draws exactly as before: `view` 'pitcher' draws from the
 // centre-field camera on PitcherStage; `slow` is the slow-motion factor (1 =
 // real speed); `zone` [bottom, top] ft draws a real pitch's own zone.
-export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onActive, view = 'hitter', slow = SLOW, zone }) {
+//
+// THE AT-BAT REPLAY'S (AtBatReplay.jsx), off by default too. `atBat` is the
+// at-bat's pitch count: it plays the pitches through ONCE and rests, draws the
+// projected plate ground in a taller frame (scene.js REPLAY_H), and puts the
+// bar under the drawing with a second row, "Pitch N of M" and the call.
+// `play` { no } plays that one pitch, then holds it while the others dim; a new
+// object replays it. The effect restarts once per pick, never per frame.
+export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onActive, view = 'hitter', slow = SLOW, zone, atBat, play }) {
   const ghostRefs = useRef([])
   const segRefs = useRef([])
   const ballRef = useRef(null)
@@ -29,19 +36,29 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
   const seam2Ref = useRef(null)
   const barNameRef = useRef(null)
   const barMphRef = useRef(null)
+  const barStepRef = useRef(null)
+  const barCallRef = useRef(null)
   const sceneRef = useRef(null)
 
   useEffect(() => {
     let shownIdx = -1
+    const picked = play ? pitches.findIndex((q) => q.no === play.no) : -1
     const draw = (elapsed) => {
-      const { idx, progress } = sceneFrame(pitches, elapsed, slow)
+      const frame = picked >= 0 ? sceneFrame([pitches[picked]], elapsed, slow, true) : sceneFrame(pitches, elapsed, slow, atBat != null)
+      const { progress, done } = frame
+      const idx = picked >= 0 ? picked : frame.idx
       const p = pitches[idx]
       if (idx !== shownIdx) {
         shownIdx = idx
-        ghostRefs.current.forEach((g, j) => g?.setAttribute('visibility', j === idx ? 'hidden' : 'visible'))
+        ghostRefs.current.forEach((g, j) => {
+          g?.setAttribute('visibility', j === idx ? 'hidden' : 'visible')
+          g?.classList.toggle('is-dim', picked >= 0)
+        })
         segRefs.current.forEach((s) => s?.setAttribute('class', `stroke--${p.family}`))
         if (barNameRef.current) barNameRef.current.textContent = p.name
         if (barMphRef.current) barMphRef.current.textContent = `${p.mph} mph`
+        if (barStepRef.current) barStepRef.current.textContent = `Pitch ${p.no} of ${atBat}`
+        if (barCallRef.current) barCallRef.current.textContent = p.call || '—'
         onActive?.(idx)
       }
       const m = progress * SEGMENTS
@@ -80,17 +97,24 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
         `${f1(bx + side * r * 0.55)} ${f1(by + r * 0.75)}`
       seam1Ref.current?.setAttribute('d', seam(-1))
       seam2Ref.current?.setAttribute('d', seam(1))
+      return done
     }
 
-    draw(null)
+    // The replay starts at release; the card shows its first pitch whole
+    // until the clock runs (and for good under reduced motion).
+    draw(atBat != null ? 0 : null)
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     if (reduce) return undefined
 
-    const t0 = performance.now()
+    // On-screen time only, so a replay scrolled into view starts at its first
+    // pitch, not wherever the wall clock got to.
+    let t0 = null
+    let shown = 0
     let raf = 0
     const tick = (ts) => {
-      draw(Math.max(0, (ts - t0) / 1000))
-      raf = requestAnimationFrame(tick)
+      t0 ??= ts - shown
+      shown = ts - t0
+      raf = draw(shown / 1000) ? 0 : requestAnimationFrame(tick)
     }
     const start = () => {
       if (!raf) raf = requestAnimationFrame(tick)
@@ -98,6 +122,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
     const stop = () => {
       cancelAnimationFrame(raf)
       raf = 0
+      t0 = null
     }
     const io = new IntersectionObserver(([entry]) => (entry.isIntersecting ? start() : stop()))
     io.observe(sceneRef.current)
@@ -105,11 +130,13 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
       stop()
       io.disconnect()
     }
-  }, [pitches, onActive, slow])
+  }, [pitches, onActive, slow, atBat, play])
 
   const [rx, ry] = pitches[0]?.pts[0] ?? releasePoint(lefty, view)
   const hitterStage = useMemo(() => (zone ? stage(zone) : STAGE), [zone])
   const { front: fr, back: bk } = hitterStage
+  const replay = atBat != null
+  const H = replay ? REPLAY_H : SCENE_H
   const edges = [
     [fr.x, fr.y, bk.x, bk.y],
     [fr.x + fr.w, fr.y, bk.x + bk.w, bk.y],
@@ -126,16 +153,23 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
   return (
     <div
       ref={sceneRef}
-      className="pscene"
+      className={replay ? 'pscene pscene--replay' : 'pscene'}
       role="img"
       aria-label={`${view === 'pitcher' ? 'Centre-field' : 'Behind-the-plate'} drawing of ${name}’s pitches: ${pitches.map((p) => p.name).join(', ')}.`}
     >
-      <svg viewBox={`0 0 ${SCENE_W} ${SCENE_H}`} aria-hidden="true" focusable="false">
+      <svg viewBox={`0 0 ${SCENE_W} ${H}`} aria-hidden="true" focusable="false">
         {view === 'pitcher' ? <PitcherStage zone={zone} /> : <>
-        <rect className="pscene__sky" x="0" y="0" width={SCENE_W} height={SCENE_H} />
-        <rect className="pscene__grass" x="0" y={f1(STAGE.horizon)} width={SCENE_W} height={SCENE_H} />
+        <rect className="pscene__sky" x="0" y="0" width={SCENE_W} height={H} />
+        <rect className="pscene__grass" x="0" y={f1(STAGE.horizon)} width={SCENE_W} height={H} />
         <ellipse className="pscene__mound" cx={SCENE_W / 2} cy={f1(STAGE.mound.y)} rx={f1(STAGE.mound.rx)} ry="4" />
-        <ellipse className="pscene__dirt" cx={SCENE_W / 2} cy={f1(STAGE.dirtCy)} rx="280" ry="180" />
+        {replay ? <>
+          <polygon className="pscene__dirt" points={pts(hitterStage.dirt)} />
+          {hitterStage.boxes.map((b, i) => <polygon key={`b${i}`} className="pscene__chalk" points={pts(b)} />)}
+          <polygon className="pscene__plate" points={pts(hitterStage.plate)} />
+          {hitterStage.drops.map(([a, b], i) => (
+            <line key={`d${i}`} className="pscene__drop" x1={f1(a[0])} y1={f1(a[1])} x2={f1(b[0])} y2={f1(b[1])} />
+          ))}
+        </> : <ellipse className="pscene__dirt" cx={SCENE_W / 2} cy={f1(STAGE.dirtCy)} rx="280" ry="180" />}
         <rect className="pscene__back" x={f1(bk.x)} y={f1(bk.y)} width={f1(bk.w)} height={f1(bk.h)} />
         {edges.map(([x1, y1, x2, y2], i) => (
           <line key={`e${i}`} className="pscene__edge" x1={f1(x1)} y1={f1(y1)} x2={f1(x2)} y2={f1(y2)} />
@@ -168,9 +202,13 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
         <path ref={seam1Ref} className="pscene__seam" />
         <path ref={seam2Ref} className="pscene__seam" />
       </svg>
-      <div className="pscene__bar" style={{ top: `${(BAR_TOP / SCENE_H) * 100}%` }}>
+      <div className="pscene__bar" style={replay ? undefined : { top: `${(BAR_TOP / SCENE_H) * 100}%` }}>
         <span ref={barNameRef} className="pscene__name" />
         <span ref={barMphRef} className="pscene__mph" />
+        {replay && <>
+          <span ref={barStepRef} className="pscene__step" />
+          <span ref={barCallRef} className="pscene__call" />
+        </>}
       </div>
     </div>
   )
