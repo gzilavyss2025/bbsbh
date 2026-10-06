@@ -53,7 +53,7 @@ tests and build pass; and a draft PR holds the survey table and the screenshots.
 | --- | --- | --- | --- | --- |
 | 1901 to 1949 | PHA@BOS, game 1, 1927-07-04 | `/07041927/phabos/lineup1` | 102436 | No plays (0 in all 15 sampled games before 1941). No umpires. Box lines and the park are present. |
 | 1950 to 1959 | BRO@NYY, 1956-10-08 (World Series, Larsen) | `/10081956/bronyy/lineup1` | 67524 | Umpires: 0 to 2 in this era. Plays: some 1950s games have them. Check this one. |
-| 1960 onward | DET@CWS, game 2, 1979-07-12 (a forfeit) | `/07121979/detcws-2/lineup1` | 177426 | `detailedState` `Forfeit`, 0-0, an empty linescore. It keeps its innings pages (the decision above). |
+| 1960 onward | DET@CWS, game 2, 1979-07-12 (a forfeit) | `/07121979/detcws-2/lineup1` | 177426 | `detailedState` `Forfeit`, 0-0, an empty linescore. It keeps its innings pages (the 1960 rule in Step 2). |
 
 ## Step 1. Survey (change nothing)
 
