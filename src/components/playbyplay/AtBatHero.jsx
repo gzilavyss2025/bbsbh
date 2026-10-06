@@ -82,8 +82,12 @@ export function AtBatHero({ batter, pitcher, pinchRunners, battingTeamId, pitchi
       <div className="abhero__mid">
         <BallGlyph className="abhero__vs" />
         {scoutHref && (
-          <a className="abhero__scout" {...linkProps(scoutHref)}>
-            Scout
+          <a
+            className="abhero__scout"
+            aria-label={`Scout ${pitcher.last} vs ${batter.last}`}
+            {...linkProps(scoutHref)}
+          >
+            vs
           </a>
         )}
       </div>
