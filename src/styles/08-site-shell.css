@@ -775,3 +775,11 @@
    MOVED OUT — the About page redesign outgrew this sheet, and it is a single
    lazy route, so its rules live in `65-about-page.css`, imported by
    `screens/AboutPage.jsx`. Nothing render-blocking pays for them now. */
+
+/* ------------------------------------------------------ async status
+   The screen's status line: AsyncStatus's and AsyncGate()'s error Notice
+   (#1132, N4) takes the old .hint padding's gap. After system/notice.css,
+   so it wins on order. */
+.asyncstatus__notice {
+  margin: var(--space-3) 0;
+}

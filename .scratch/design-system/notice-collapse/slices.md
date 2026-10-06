@@ -485,11 +485,11 @@ for N5 to N8.
 
 1. **The namespace class is `asyncstatus__notice`.** AsyncStatus's two error
    Notices and AsyncGate()'s page error wear it. Its one rule,
-   `margin: var(--space-3) 0`, is in `styles/06-loader-and-cards.css`, next to the
-   loader. It must load after `system/notice.css`: `05-masthead-nav.css` (where
-   `.hint` lives) loads before it, so `.notice { margin: 0 }` would win there. 06
-   was at its 800-line file-size cap, so its entry in `scripts/check-file-size.mjs`
-   went to 810 (a sixth and seventh file). The old line was a `<p>` with the
+   `margin: var(--space-3) 0`, is in `styles/08-site-shell.css` (a sixth file). It
+   must load after `system/notice.css`: `05-masthead-nav.css` (where `.hint` lives)
+   loads before it, so `.notice { margin: 0 }` would win there. It first went into
+   06, next to the loader, but 06 is at its 800-line cap and a cap never goes up
+   (`scripts/CLAUDE.md`), so it moved to 08, the screen shell. The old line was a `<p>` with the
    browser's 1em margin plus the `.hint` padding. The box's own padding takes the
    place of that margin, so the text sits within a few px of where it was.
 2. **Parents.** Every one of the 36 callers sits in a block parent (29 on
