@@ -40,6 +40,8 @@
 // that is a judgement about how someone wants to spend their night, and the
 // measurement belongs to them.
 
+import { formatMbps } from '../../lib/expresslane/speed.js'
+
 // One card. Name, what it is, then the figures that decide it.
 function Choice({ on, onClick, name, side, figures }) {
   return (
@@ -65,7 +67,7 @@ function Choice({ on, onClick, name, side, figures }) {
   )
 }
 
-export function EntryChooser({ mode, onMode, plan, onPlan, onStart, busy = false }) {
+export function EntryChooser({ mode, onMode, plan, onPlan, onStart, busy = false, speed = null }) {
   return (
     <section className="xl-entry" aria-label="Start Express Lane">
       <header className="xl-entry__head">
@@ -132,6 +134,16 @@ export function EntryChooser({ mode, onMode, plan, onPlan, onStart, busy = false
           />
         </div>
       </fieldset>
+
+      {/* WHAT THIS DEVICE REALLY GETS. The minutes above rest on one old
+          measurement of about 2 Mbps, so the figure from the clips already
+          downloaded is set beside them. It is a rate over past clips and names
+          none of them (speed.js). It is left out until there is one. */}
+      {speed && (
+        <p className="xl-entry__hint" data-testid="xl-speed">
+          Your last clips came in at {formatMbps(speed.mbps)}. The times above assume about 2 Mbps.
+        </p>
+      )}
 
       <p className="xl-entry__consent">
         Every frame carries the broadcast scorebug. You cannot watch a pitch here without

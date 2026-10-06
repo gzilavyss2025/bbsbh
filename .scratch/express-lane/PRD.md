@@ -135,6 +135,23 @@ a probe.**
 So the throttle belongs to MLB's per-pitch clip infrastructure. It is not the
 user's connection and not our loading strategy. Nothing we write improves it.
 
+**Re-measured 2026-10-06, and it disagrees.** One cloud machine (a datacenter
+address, through a proxy) downloaded four clips one at a time, with a pause
+between them. They were 4.3 to 9.2 MB. Each took 0.65 to 2.1 seconds. That is
+about 35 to 100 Mbps, not 2.1. The same session read one clip's header: 1280×720
+H.264, 15.3 seconds, 9.2 MB, with the `moov` atom at the END of the file. So a
+clip cannot start to play while it downloads.
+
+What this does and does not show. The ceiling is not universal. It may apply
+only to home and mobile connections, or it may have changed since 2026-09-09.
+This one sample cannot tell which. The phone is the machine that matters, so
+`src/lib/expresslane/speed.js` now records the speed of every clip the device
+downloads and shows it on the entry step. Read that figure before you change the
+staging design. The owner reports that it "loads extremely slow",
+both at the opening and between plays. That fits a throttle that is
+still real on the phone.
+
+
 A full-quality clip is 4–6 MB for 7.5 seconds of video. **It takes 2–3× longer to
 fetch than to watch.** A rolling prefetch window can therefore never catch up: it
 falls further behind on every clip.

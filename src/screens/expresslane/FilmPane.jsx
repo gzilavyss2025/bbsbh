@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 // THE FILM PANE — the top band of Concept A's Split Deck.
 //
 // It shows one of four things and never a fifth: the clip, an indeterminate
@@ -24,6 +26,14 @@
 // 5. It is someone else's video, with someone else's bug on it — Marquee,
 //    Bally, whoever had the booth. The frame is theirs; the chrome around it
 //    is ours, and the two should not be confused.
+//
+// THE FRAME IS ONE CONTINUOUS BOX, and that is what this file's newest change
+// is for. A clip that is already on the device used to cost two waits: the pane
+// had nothing to draw while the bytes were read off the disk, and then the
+// video element sat black while it loaded them. Now the box is there from the
+// moment the cursor lands. While the bytes are being read it shows the spinner
+// alone, since "the film is coming" would be untrue of a clip that is here, and
+// once the <video> exists the spinner stays over it until it has a frame.
 
 function Placeholder({ children, tone = 'wait' }) {
   return (
@@ -31,6 +41,37 @@ function Placeholder({ children, tone = 'wait' }) {
       <span className="xl-film__mark" aria-hidden="true" />
       <p className="xl-film__msg">{children}</p>
     </div>
+  )
+}
+
+// The video, with the spinner held over it until it has a picture to show.
+//
+// Only where the clip autoplays. The Matchup Scout's pitch modal shows the same
+// pane with `autoPlay={false}`, and a browser that will not load a clip it has
+// not been asked to play (iOS in Low Power Mode) would leave a spinner turning
+// over a video that is simply waiting for a tap. The overlay never takes a
+// pointer event, so the native controls stay under the thumb either way.
+function FilmVideo({ url, autoPlay }) {
+  const [shown, setShown] = useState(false)
+  const show = () => setShown(true)
+  return (
+    <>
+      <video
+        className="xl-film__video"
+        src={url}
+        controls
+        playsInline
+        autoPlay={autoPlay}
+        preload="auto"
+        onLoadedData={show}
+        onCanPlay={show}
+        onPlaying={show}
+        onError={show}
+      />
+      {autoPlay && !shown && (
+        <span className="xl-film__mark xl-film__mark--over" role="status" aria-label="Loading the clip" />
+      )}
+    </>
   )
 }
 
@@ -62,15 +103,18 @@ export function FilmPane({ clipUrl, gate, blockedReason, onSkipFilm, onRetry, au
             a <video> handed a new src mid-play keeps the old frame up on some
             builds, which on this surface would be the PREVIOUS play's picture
             sitting under the new play's box. */}
-        <video
-          key={clipUrl}
-          className="xl-film__video"
-          src={clipUrl}
-          controls
-          playsInline
-          autoPlay={autoPlay}
-          preload="auto"
-        />
+        <FilmVideo key={clipUrl} url={clipUrl} autoPlay={autoPlay} />
+      </div>
+    )
+  }
+
+  // THE BYTES ARE HERE AND THE VIDEO IS NOT MOUNTED YET: the few frames between
+  // the cursor landing and the clip being read off the disk. The box is already
+  // drawn and says nothing, so the swap to the video is not a second wait.
+  if (gate?.reason === 'ready') {
+    return (
+      <div className="xl-film">
+        <span className="xl-film__mark" role="status" aria-label="Loading the clip" />
       </div>
     )
   }
