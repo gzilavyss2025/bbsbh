@@ -194,6 +194,58 @@
         "name": "Seattle Pilots",
         "commons": "File:Seattle Pilots Cap Logo.svg"
       }
+    ],
+    "120": [
+      {
+        "from": 1992,
+        "to": 2004,
+        "name": "Montreal Expos",
+        "commons": "File:Montreal Expos Cap Logo (1992 to 2004).svg"
+      }
+    ],
+    "108": [
+      {
+        "from": 1961,
+        "to": 1965,
+        "name": "Los Angeles Angels",
+        "commons": null
+      },
+      {
+        "from": 1966,
+        "to": 1970,
+        "name": "California Angels",
+        "commons": "File:California Angels logo (1966-1970).svg"
+      },
+      {
+        "from": 1971,
+        "to": 1971,
+        "name": "California Angels",
+        "commons": "File:California Angels logo (1971-1972).svg"
+      },
+      {
+        "from": 1972,
+        "to": 1972,
+        "name": "California Angels",
+        "commons": null
+      },
+      {
+        "from": 1973,
+        "to": 1988,
+        "name": "California Angels",
+        "commons": "File:California Angels logo (1972-1988).svg"
+      },
+      {
+        "from": 1989,
+        "to": 1992,
+        "name": "California Angels",
+        "commons": "File:California Angels logo (1989-1992).svg"
+      },
+      {
+        "from": 1993,
+        "to": 1996,
+        "name": "California Angels",
+        "commons": "File:California Angels logo (1993-1996).svg"
+      }
     ]
   }
 }
