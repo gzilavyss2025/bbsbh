@@ -1512,6 +1512,24 @@ Re-run only to fold in a new season.
   re-walk in `gen-pitch-arsenal.mjs`. `--gate` checks the committed `hitter-grid/`
   against Savant's pitch-arsenal-stats batter board (40+ PA: mean gap at most 0.006, at
   most 1% of rows above 0.020, none above 0.040).
+- `gen-family-ties.mjs` → `public/data/family-ties/{NN}.json` — family links between
+  players, from Retrosheet's `relatives.csv`, joined to MLBAM ids through the Chadwick
+  register (ADR-0100). **Hand-run, NOT on a cron**: re-run only after Retrosheet
+  publishes a new `biodata.zip`. Nothing in it downloads. Fetch each file into its
+  own new, empty folder OUTSIDE the repo with `scripts/lib/open-data/download.mjs`,
+  unzip `biodata.zip` there, then run
+  `node scripts/gen-family-ties.mjs <biofile0.csv> <relatives.csv> <people-*.csv ...>`
+  (files are told apart by name; `--out <dir>` writes elsewhere). One shard per
+  `shardKey100(mlbamId)`: `{ credit, players: { [mlbamId]: [{ relation, personId|null,
+  name }] } }`. Each row is stored in both directions with the inverse label
+  (Father/Son, Uncle/Nephew, Grandfather/Grandson, Great Uncle/Great Nephew,
+  Father-in-Law/Son-in-Law). Brother, Cousin, Brother-in-Law, Half Brother, Step
+  Brother and Related To are the same from both ends. The file reads "id1 is the
+  relation of id2", except "Great Grandson", which names id2 and is read as a Great
+  Grandfather row. A label the generator does not know fails the run. A relative with
+  no MLBAM match keeps the name and a null id. No clock: a re-run writes the same
+  bytes. The pure half is `scripts/lib/open-data/family-ties.mjs`. Reader:
+  `src/api/person/family/family.js`.
 
 ## Assets / off-app
 
