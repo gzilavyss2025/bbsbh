@@ -87,7 +87,8 @@ export function personNickname(person) {
 // `hydrate=education`. Names only; empty when the record lists neither.
 export function educationSummary(person) {
   const { highschools, colleges } = person?.education ?? {}
-  return [...(highschools ?? []), ...(colleges ?? [])]
+  const list = (v) => (Array.isArray(v) ? v : [])
+  return [...list(highschools), ...list(colleges)]
     .map((s) => (s?.name ?? '').trim())
     .filter(Boolean)
     .join(', ')

@@ -75,6 +75,11 @@ test('educationSummary survives null lists', () => {
   assert.equal(educationSummary({ education: { highschools: null, colleges: [{ name: 'Vanderbilt' }] } }), 'Vanderbilt')
 })
 
+test('educationSummary survives a list that is not an array', () => {
+  assert.equal(educationSummary({ education: { highschools: { items: [] }, colleges: 'x' } }), '')
+  assert.equal(educationSummary({ education: { highschools: [{ name: 'Westlake' }], colleges: {} } }), 'Westlake')
+})
+
 test('disambiguateNames keeps years on rows that share a full name', () => {
   const out = disambiguateNames(rowsOf(smiths))
   assert.deepEqual(out.map((r) => r.years), ['2019-', '2012-2024'])
