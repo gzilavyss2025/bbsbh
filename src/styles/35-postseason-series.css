@@ -365,7 +365,7 @@
   .psseries__entryhead {
     grid-column: 1 / -1;
   }
-  .psseries__entry .hint--error {
+  .psseries__entry .psseries__entryerror {
     grid-column: 1 / -1;
   }
   .psseries__potg {

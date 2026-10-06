@@ -23,6 +23,7 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
+import { Notice } from '../../components/ui/state/Notice.jsx'
 
 // Every club's Game Notes PDF the archive holds, as one plain table with a link
 // to each (#1258). It replaces the Game Notes feed idea (#911): the feed showed
@@ -124,9 +125,9 @@ export function GameNotesArchivePage({ teamId: requestedId = null }) {
         </Button>
       </div>
       {csv.error && (
-        <p className="hint hint--error" role="status">
+        <Notice tone="error" role="status" className="gnotes__notice">
           Couldn’t build the link list. Try again.
-        </p>
+        </Notice>
       )}
 
       <AsyncStatus

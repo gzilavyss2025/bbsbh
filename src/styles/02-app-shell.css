@@ -10,6 +10,14 @@
   padding: 0 var(--app-gutter) calc(var(--space-6) + env(safe-area-inset-bottom));
 }
 
+/* The load-failure and not-found lines (App.jsx GameRoute): a Notice owns no
+   margin, so this gives back the 12px the old .hint padding gave. This file
+   loads BEFORE system/notice.css (whose reset is margin: 0), so the selector is
+   two classes to win. A partial numbered 06 or later needs only the one. */
+.screen .appstate__notice {
+  margin: var(--space-3) 0;
+}
+
 /* Shared mono-figure helper (scores, jerseys, counts). */
 .stat__v,
 .datenav__label,

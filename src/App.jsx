@@ -5,6 +5,7 @@ import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
 import { isClerkEnabled } from './lib/clerkConfig.js'
 import { Loader } from './components/ui/Loader.jsx'
+import { Notice } from './components/ui/state/Notice.jsx'
 import { SyncStatusProvider } from './components/sync/SyncStatusProvider.jsx'
 import { PlayerHoverCard } from './components/player/PlayerHoverCard.jsx'
 import { HeadshotLogPanel } from './components/headshot-log/HeadshotLogPanel.jsx'
@@ -646,9 +647,9 @@ function GameRoute({ route, seed, onSection, onHome }) {
   if (resolved.error) {
     return (
       <div className="screen">
-        <p className="hint hint--error" role="status">
+        <Notice tone="error" className="appstate__notice">
           Couldn’t load the schedule. Check your connection and try again.
-        </p>
+        </Notice>
         <button className="btn" onClick={resolved.reload}>
           Retry
         </button>
@@ -661,9 +662,9 @@ function GameRoute({ route, seed, onSection, onHome }) {
   if (!resolved.data) {
     return (
       <div className="screen">
-        <p className="hint hint--error">
+        <Notice tone="error" className="appstate__notice">
           Couldn’t find that game. It may not be on the schedule for that date.
-        </p>
+        </Notice>
         <button className="btn" onClick={onHome}>
           Back to games
         </button>

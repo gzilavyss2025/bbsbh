@@ -28,6 +28,7 @@ import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { GameResultFace } from '../components/game/GameResultFace.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { Notice } from '../components/ui/state/Notice.jsx'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../components/postseason/SeriesParts.jsx'
 import { SeriesFlow } from '../components/postseason/SeriesFlow.jsx'
 import { SeriesTotals } from '../components/postseason/SeriesTotals.jsx'
@@ -300,7 +301,7 @@ export function PostseasonSeriesPage({ seriesId }) {
                       />
                     </>
                   ) : (
-                    <p className="hint hint--error">Couldn’t load this game’s result.</p>
+                    <Notice tone="error" size="compact" className="psseries__entryerror">Couldn’t load this game’s result.</Notice>
                   )}
                 </article>
               )
