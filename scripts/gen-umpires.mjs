@@ -53,9 +53,8 @@ const storeDir = join(here, '..', 'public', 'data', 'umpires')
 // Crew roles, mapped to short scorecard labels. Left/Right Field only appear in
 // six-man crews (All-Star Game + postseason); a two- or three-man MiLB crew just
 // omits the bases it doesn't staff. Any role not listed falls through to its raw
-// officialType. (`gameType=R` below means LF/RF are absent from today's sweep —
-// they'd show once postseason/exhibition games are included — but the labels are
-// here so those rows render cleanly if that coverage is added.)
+// officialType. (The sweep below asks for `gameType=R,F,D,L,W,A`, so the
+// postseason and All-Star games that carry LF/RF are included.)
 const UMP_LABELS = {
   'Home Plate': 'HP',
   'First Base': '1B',

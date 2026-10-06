@@ -115,6 +115,10 @@ Notes:
 `sportId`, `gamePk`, `gamePks`, `venueIds`, `gameTypes`, `date`, `startDate`, `endDate`,
 `opponentId`, `season`, `fields`.
 
+`gameType` and `gameTypes` are interchangeable on `schedule`: both take a comma list and
+filter the same way (checked live, season 2025, `F,D,L,W` returned only those types; an
+unknown code returned no games). Neither spelling falls back to the full schedule.
+
 `schedule_postseason_tuneIn` still returns no data — confirmed live, matching the earlier
 wiki note.
 
