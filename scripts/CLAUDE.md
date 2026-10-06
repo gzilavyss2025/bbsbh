@@ -73,6 +73,11 @@ are rules rather than reference:
   otherwise. `cachedGetJson` is a `.scratch` research cache: never in `scripts/`.
   Detail: `docs/scripts/generators.md`.
 
+- **A generator that reads an open dataset (Retrosheet, the Chadwick register) takes the
+  extracted file paths as arguments and never downloads** (ADR-0100). Downloads go through
+  `lib/open-data/download.mjs` into a new, empty folder outside the repo. Credit lines come from
+  `lib/open-data/credits.mjs`.
+
 - **A nightly generator picks its default season with `lib/time/season-in-play.mjs`**,
   not `new Date().getFullYear()` (#1465). From January 1 to Opening Day the calendar
   names a season with no games, and an unguarded generator writes an empty file over

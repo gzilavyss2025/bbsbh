@@ -1,0 +1,59 @@
+/* The franchise history under the Ballpark card (FranchiseHistory.jsx). The
+   strip scrolls inside its own box, so the page never scrolls sideways. */
+.fhist__strip {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 0 var(--space-2);
+  list-style: none;
+  overflow-x: auto;
+}
+.fhist__span {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 9rem;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+}
+.fhist__years {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-muted);
+}
+.fhist__name {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.fhist__league,
+.fhist__park {
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+.fhist__parks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.fhist__parkline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.fhist__parkname {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.fhist__parkyears,
+.fhist__parkmates {
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}

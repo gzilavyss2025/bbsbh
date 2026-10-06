@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { loadPostseasonRegister } from '../../api/player/postseasonRegister.js'
+import { lastCompleteSeason, leagueAverage, vsLeague } from '../../api/player/leagueAverages.js'
 import { spanCell } from '../../lib/ledger.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Ledger } from './Ledger.jsx'
@@ -9,6 +10,9 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 const DASH = '—'
 const NARROW_HIDE_COLS = new Set(['GS', 'K', 'BB'])
+// The "vs lg" column takes the room of one more secondary column on a phone.
+const VS_LG_HIDE_COLS = new Set(['AB', 'WHIP'])
+const VS_LG_TITLE = 'Season AVG (hitters) or ERA (pitchers) minus that season\'s league figure. An asterisk marks the season in play: league figure to date.'
 
 // The unified MLB + MiLB career table (see api/person/careerRegister.js). MLB
 // rows are inked and MiLB rows carry level pills. A same-level multi-team
@@ -22,9 +26,22 @@ export function CareerRegister({ register }) {
   const [mlbOnly, setMlbOnly] = useState(false)
   const canFilter = rows.some((r) => r.tier === 'mlb') && rows.some((r) => r.tier === 'milb')
   const keep = (r) => !(mlbOnly && canFilter) || r.tier !== 'milb'
+  // "vs lg": MLB rows only. Season stats are open data, so no SealBox.
+  const group = columns.includes('ERA') ? 'pitching' : 'hitting'
+  const rateAt = columns.indexOf(group === 'pitching' ? 'ERA' : 'AVG')
+  const mlbYears = [...new Set(rows.filter((r) => r.tier === 'mlb').map((r) => Number(r.year)))]
+  const { data: lg } = useAsync(async () => {
+    const entries = await Promise.all(mlbYears.map(async (y) => [y, await leagueAverage(y, group)]))
+    return { last: await lastCompleteSeason(), byYear: Object.fromEntries(entries) }
+  }, [mlbYears.join(), group])
   const hideNarrow = columns
-    .map((column, index) => (NARROW_HIDE_COLS.has(column) ? index + 2 : -1))
+    .map((column, index) => (NARROW_HIDE_COLS.has(column) || (mlbYears.length && VS_LG_HIDE_COLS.has(column)) ? index + 2 : -1))
     .filter((index) => index >= 0)
+  const vsLg = (row) => {
+    if (row.tier !== 'mlb' || !lg) return ''
+    const text = vsLeague(row.cells[rateAt], lg.byYear[row.year], group)
+    return Number(row.year) > lg.last && text !== DASH ? <span title="League figure to date">{text}*</span> : text
+  }
 
   const ledgerRows = rows.filter(keep).map((row) => ({
     key: row.key,
@@ -60,6 +77,7 @@ export function CareerRegister({ register }) {
             )}
           </>,
           ...row.cells,
+          ...(mlbYears.length ? [vsLg(row)] : []),
         ],
   }))
 
@@ -83,12 +101,12 @@ export function CareerRegister({ register }) {
       <Ledger
         label="Career stats"
         leftCols={2}
-        head={['Year', 'Team', ...columns]}
+        head={['Year', 'Team', ...columns, ...(mlbYears.length ? [<span key="vs-lg" title={VS_LG_TITLE}>vs lg</span>] : [])]}
         rows={ledgerRows}
         hideNarrow={hideNarrow}
         totals={totals.filter(keep).map((total) => ({
           label: total.label,
-          cells: total.cells,
+          cells: mlbYears.length ? [...total.cells, ''] : total.cells,
           className: total.tier === 'mlb' ? 'reg-mlb' : 'reg-milb',
         }))}
       />
