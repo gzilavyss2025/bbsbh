@@ -15,14 +15,18 @@ scope.
 **Model: Sonnet 5.5, medium** (rung 3). It follows two patterns that exist:
 ADR-0100's hand-run generator and the `staticJsonBy` reader.
 
-**Needs first:** D2, D3, D6, D7, D8, D13 decided.
+**Decided (2026-10-06):** D2, D3, D6, D7, D8, D13. See `decisions.md`.
 
-- Write `scripts/gen-notable.mjs` (name per D4). Use the three API routes in
+- Write `scripts/gen-notable.mjs`. Use the three API routes in
   `plan.md`, section 2. Put the pure half under `scripts/lib/`.
 - No-hitter rule: a game counts when `detailedState` is `Final` or `Completed Early`.
   `Forfeit` does not count (the 1979 DET@CWS 0-0 forfeit). Do not trust
   `abstractGameState`: postponed and cancelled rows also say `Final` there. Dedupe by
   gamePk (the schedule lists a suspended game twice).
+- Keep a row only when both clubs played in the AL or the NL that season (D6).
+  Negro league games stay out.
+- No-hitter marks (D8): "shortened" under 9 innings, "lost" when the no-hit club
+  lost, and every pitcher for a combined no-hitter.
 - Cycle rule: the batched game log with `fields=` (it cuts bytes about 10 times).
 - Merge the hand-seeded additions file (D3). Seed row 1: gamePk 716945.
 - Add a `--season Y` flag (the nightly run) and an all-seasons mode (the hand run).
@@ -32,7 +36,8 @@ ADR-0100's hand-run generator and the `staticJsonBy` reader.
 - Add the reader under `src/api/notable/` and its `spoiler-manifest.json` entry:
   `reveal-only`, importers empty for now.
 - Tests: a vocabulary test on a fixture, in the style of `test/milb-pool.test.js`. A row
-  may hold the listed keys only. It holds no score.
+  may hold the listed keys only. It holds the final score (D5) and nothing else about
+  the result.
 - Check first: the postseason team fielding log with `gameType`, and the batched
   game-log form with `gameType`. If either fails, say so and stop. Do not invent a
   route.
@@ -71,7 +76,7 @@ not touch a seal.
 
 **Model: Opus 5.5, high** (rung 7). This is the step that touches the spoiler rule.
 
-**Needs first:** D1 decided.
+**Decided (2026-10-06):** D1, seal by surface.
 
 - Render the feat label inside the box score's `SealBox` reveal function only. Read
   ADR-0002, ADR-0049 and ADR-0101 before you edit.
@@ -88,9 +93,12 @@ not touch a seal.
 **Model: Sonnet 5.5, medium** (rung 3). It is a standalone open page. It follows the
 postseason history page and ADR-0081's labelled door.
 
-**Needs first:** D4, D5, D12 decided.
+**Decided (2026-10-06):** D4 ("Notable games", `/notable`), D5 (show the score), D12
+(the box score, sealed).
 
-- Add the route and the page. Three tabs, one for each kind. Newest first.
+- Add the route `/notable` and the page "Notable games". Three tabs, one for each
+  kind. Newest first. Each row shows the final score.
+- One line says the shelf lists AL and NL games (D6).
 - The door into the shelf carries ADR-0081's label: opening it shows results.
 - Each row links to the game's `boxscore` with `gamePath`, sealed.
 - Add the page to the reader's importer allowlist.
@@ -105,13 +113,21 @@ across several files. The era floors and the "first since at least" wording need
 judgment, so it is one rung above medium. It changes no gate: the play card and the Final
 roll-up are already reveal-gated surfaces.
 
-**Needs first:** D10, D11 decided; prompt 1b merged.
+**Decided (2026-10-06):** D10 (club always; player and league only when notable), D11
+(no link; the link is gzilavyss2025/bbsbh#1570). **Needs first:** prompt 1b merged.
 
 - Read `docs/callouts.md` first. Extend the existing surfaces. Do not build a parallel
   path.
 - Triple play and cycle: on the revealed play card. No-hitter: in the box score's Final
   roll-up only. Never during the game.
-- Era floors: 1901 for no-hitters and cycles; 1960 for triple plays.
+- Three lines (D10). The club line always shows. The player line shows for cycles and
+  no-hitters, only when the event is not the player's first. The league line shows only
+  after a long league-wide gap: set the threshold with the worthiness rubric and say
+  how you set it. Do not guess one.
+- No link to the earlier game (D11).
+- Era floors, for all three lines: 1901 for no-hitters and cycles; 1960 for triple
+  plays.
 - Add the callout builder to the reader's importer allowlist.
 - Add a row to `docs/callouts.md`. Add tests for: a club with no prior event (no note), a
-  prior event older than the floor ("first since at least"), and a renamed club.
+  prior event older than the floor ("first since at least"), a renamed club, a
+  player's first cycle (no player line), and a player's second (a player line).

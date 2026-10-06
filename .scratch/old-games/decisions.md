@@ -2,16 +2,28 @@
 
 Each decision lists the recommended option first. The reasons and numbers are in
 `plan.md` and `findings.md`. A note marked **(inference)** is my reading, not a
-measured value. Gary makes every decision below. Nothing here is decided until he says so.
+measured value.
 
-## The decisions Gary must make first
+## Gary's answers (2026-10-06)
 
-These block build prompt 1 or 2.
+Gary answered all 13 in the session for prompt 15b. Each section below ends with a
+**Decided** line.
 
-- **D1. The seal** (blocks prompt 2's second half).
-- **D6. Negro league games** (blocks prompt 1: the generator must know what to keep).
-- **D8. What counts as a no-hitter** (blocks prompt 1).
-- **D4. The shelf's name and address** (blocks prompt 3 only).
+| | Decision | Answer | Same as the recommendation? |
+| --- | --- | --- | --- |
+| D1 | The seal | Seal by surface | Yes |
+| D2 | Index source | API, with a Retrosheet cross-check | Yes |
+| D3 | Box-score-only triple play | Hand-seeded additions file | Yes |
+| D4 | Shelf name and address | "Notable games", `/notable` | No recommendation was made |
+| D5 | Score in a shelf row | **Show the score** | **No** |
+| D6 | Negro league games | **Leave them out** | **No** |
+| D7 | Rows only Retrosheet holds | Leave them out | Yes |
+| D8 | What counts as a no-hitter | Every 0-hit game, with marks | Yes |
+| D9 | Current-season refresh | Nightly | Yes |
+| D10 | Whose "last time" | **Club always; player and league only when notable** | **No** |
+| D11 | Link the earlier game | No link at first | Yes |
+| D12 | Where a shelf row opens | Box score, sealed | Yes |
+| D13 | Postseason events | Include them | Yes |
 
 ## D1. What opens a sealed old game
 
@@ -30,6 +42,8 @@ The full design is DRAFT ADR-0101.
    (score a classic game) impossible without a second switch. A reader who wants to
    score the 1986 World Series by hand gets the score first. Any cutoff year is a guess.
 
+**Decided:** D1 option 1, seal by surface.
+
 ## D2. Where the event index comes from
 
 1. **Recommended: the API alone, with a Retrosheet cross-check.** Each row has a gamePk,
@@ -41,6 +55,8 @@ The full design is DRAFT ADR-0101.
 3. **The API alone, no cross-check.** Against: it keeps the known 2023-08-18 miss, and
    no check finds the next one.
 
+**Decided:** D2 option 1, the API with a Retrosheet cross-check.
+
 ## D3. The triple play that only the box score text holds
 
 1. **Recommended: a hand-seeded additions file.** The cross-check reports each
@@ -51,12 +67,17 @@ The full design is DRAFT ADR-0101.
 3. **Parse the box score `info` text for every game.** Against: one box score is about
    214 KB, and 139,366 games from 1960 cost about 24.6 GB.
 
+**Decided:** D3 option 1, a hand-seeded additions file.
+
 ## D4. The shelf's name and address (open question)
 
 I do not recommend a name. That is Gary's call. The placeholder in the plan is
 `/notable` and `public/data/notable/`. Candidate words: "Notable games", "Rare feats",
 "The record book". Two constraints: the name must not be a word the house list bans,
 and the route must not collide with a name in `src/lib/route.js`'s `parseRoute`.
+
+**Decided:** "Notable games", at `/notable`. Data folder: `public/data/notable/`.
+`/notable` does not collide with a route in `src/lib/route.js` (checked).
 
 ## D5. Does a shelf row show the final score?
 
@@ -66,6 +87,11 @@ and the route must not collide with a name in `src/lib/route.js`'s `parseRoute`.
 2. **Yes.** The shelf is an open page, and `FirstScorebookPage` and the postseason series
    page print scores. Against: the row then says more than the feat, and it gives a
    reader no reason to open the box score.
+
+**Decided:** D5 option 2, show the score. A row carries the final score, so the
+index file holds results by design. That does not change the seal: the reader stays
+`reveal-only` with an importer allowlist (ADR-0101, part 4), and the game page still
+opens sealed.
 
 ## D6. Negro league games (1920 to 1948)
 
@@ -79,6 +105,12 @@ and the route must not collide with a name in `src/lib/route.js`'s `parseRoute`.
 3. **Include them, and fix scores from Retrosheet.** Against: scores differ in 5 of 21
    sampled cases, and `findings.md` does not know which side is right.
 
+**Decided:** D6 option 2, leave them out. The shelf lists AL and NL games only.
+The generator keeps a row only when both clubs played in the AL or the NL that season.
+This drops the 9 Negro league cycles that the API alone found. The game route still
+opens these games; only the shelf leaves them out. The callout counts AL and NL events
+only, so a club's "last time" never names a Negro league game.
+
 ## D7. Rows that only Retrosheet holds
 
 1. **Recommended: leave them out.** A row must open a page. Pre-1901 games and the 28
@@ -86,6 +118,8 @@ and the route must not collide with a name in `src/lib/route.js`'s `parseRoute`.
    **inference**).
 2. **List them with no link.** Against: a shelf row that leads nowhere, and two sources
    on one list with no way to tell them apart.
+
+**Decided:** D7 option 1, leave them out.
 
 ## D8. What counts as a no-hitter
 
@@ -101,12 +135,16 @@ Retrosheet counts them too. Both sources count a team with 0 hits.
 
 How many lost no-hitters the index holds is not measured.
 
+**Decided:** D8 option 1, every 0-hit game, with the "shortened" and "lost" marks.
+
 ## D9. When the current season refreshes
 
 1. **Recommended: nightly, in the existing nightly workflow.** About 38 calls a night
    (**15b, estimate**). Finished seasons stay hand-run and frozen (ADR-0100, ADR-0080).
 2. **Hand-run after the season ends.** Against: the callout says "first since 2019" after
    a triple play earlier the same season.
+
+**Decided:** D9 option 1, nightly.
 
 ## D10. Whose "last time" the callout names
 
@@ -118,12 +156,26 @@ How many lost no-hitters the index holds is not measured.
 3. **The league's.** Against: a triple play happens about four times a season (266 in 66
    seasons), so a league span is short and says little.
 
+**Decided:** a mix that Gary chose. The club line always shows. The player line and
+the league line show only when they are notable:
+
+- **Player:** cycles and no-hitters only (a triple play is a club's play). It shows only
+  when the event is not the player's first. Example: "His second cycle; the first was
+  {date}."
+- **League:** it shows only after a long league-wide gap. Build prompt 4 sets the
+  threshold with the worthiness rubric in `docs/callouts.md`. It must not guess one.
+- The era floors apply to all three lines: 1901 for no-hitters and cycles, 1960 for
+  triple plays.
+
 ## D11. Does the callout link the earlier game?
 
 1. **Recommended: no link at first.** The note names a date and a club. Nothing more is
    needed to make it true.
 2. **Link it, sealed.** The earlier game opens on its box score, sealed (ADR-0101). This
    can come later with no change to the seal.
+
+**Decided:** D11 option 1, no link at first. The link is tracked in
+gzilavyss2025/bbsbh#1570.
 
 ## D12. Where a shelf row opens
 
@@ -132,9 +184,13 @@ How many lost no-hitters the index holds is not measured.
 2. **The first lineup page.** ADR-0081's long at-bats open there. Against: a reader who
    came for a feat wants the box score, not the lineup.
 
+**Decided:** D12 option 1, the box score, sealed.
+
 ## D13. Postseason events
 
 1. **Recommended: include them.** **(15b)** The player game log returns a postseason
    cycle with `gameType=D`. The schedule rule takes a `gameType` too. Retrosheet shows 3
    postseason events for 1960 to 2025.
 2. **Regular season only.** Against: the shelf would leave out the most famous games.
+
+**Decided:** D13 option 1, include them.

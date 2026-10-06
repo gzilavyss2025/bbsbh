@@ -1,7 +1,7 @@
 # An old game seals like a new one, and a feat is a result
 
-**Status:** DRAFT — awaiting Gary's decision on D1 in `.scratch/old-games/decisions.md`.
-Not accepted until build prompt 2b ships.
+**Status:** DRAFT — Gary chose this design (D1 in `.scratch/old-games/decisions.md`,
+2026-10-06). Not accepted until build prompt 2b ships.
 **Date:** 2026-10-06
 **Extends:** ADR-0081 (a length is not a result; a season record is a labelled door).
 **Relies on:** ADR-0002 (the `SealBox` render function), ADR-0049 (the box score you
@@ -64,7 +64,8 @@ already says that such a gate has a hole in it.
 ### 3. The shelf is a labelled door
 
 The shelf is a standalone open page outside the scoring flow, like the postseason
-history page. Its rows name the feat in the open. That is the page's job. ADR-0081
+history page. Its rows name the feat and the final score in the open. That is the
+page's job. ADR-0081
 rule 3 applies: the door into the shelf says, before it opens, that it shows results.
 The door persists, reveals and consents to nothing. Each row links into its game's box
 score, which opens sealed.
@@ -84,7 +85,10 @@ happened, which ADR-0080 rules out.
 A triple play or a cycle note renders on the revealed play card. A no-hitter note
 renders in the box score's Final roll-up, never during the game. A "last time" claim
 stays inside the years where the index has measured recall. When the last found event is
-older than that, the note says "the first since at least {year}".
+older than that, the note says "the first since at least {year}". The note always
+names the club. It adds the player and the league only when that line is notable. It
+does not link the earlier game yet (gzilavyss2025/bbsbh#1570); when it does, the link
+opens that game sealed, under this ADR.
 
 ## Alternatives considered
 

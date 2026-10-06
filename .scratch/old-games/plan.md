@@ -15,7 +15,12 @@ Not in scope, and not planned here: gzilavyss2025/bbsbh#1525 (score a classic ga
 gzilavyss2025/bbsbh#1527 (classic of the day). This plan must not block them. Section 5
 says how.
 
-Companion files: `decisions.md` (open decisions, with the recommended option first),
+**Gary answered all 13 decisions on 2026-10-06.** `decisions.md` has the table. Three
+answers differ from the recommendation: a shelf row shows the score (D5), Negro league
+games stay off the shelf (D6), and the callout always names the club and adds the
+player and the league only when notable (D10). This plan is updated to match.
+
+Companion files: `decisions.md` (the decisions, with the recommended option first),
 `build-prompts.md` (one outline for each build prompt), and the DRAFT
 `docs/adr/0101-an-old-game-seals-like-a-new-one-and-a-feat-is-a-result.md` (the seal).
 
@@ -41,10 +46,10 @@ Companion files: `decisions.md` (open decisions, with the recommended option fir
 ### What it is
 
 A hand-run generator writes `public/data/notable/{kind}.json`, one file for each kind:
-`nohitters`, `cycles`, `tripleplays`. The name `notable/` is a placeholder (D4 in
-`decisions.md`). Each row holds the gamePk, the official date, the game type, the two
+`nohitters`, `cycles`, `tripleplays`. The shelf is "Notable games" at `/notable`
+(D4). Each row holds the gamePk, the official date, the game type, the two
 clubs (team id plus the abbreviation and name **of that season**), the players, and
-the event kind. The score is not in the row (D5).
+the event kind and the final score (D5). Only AL and NL games are kept (D6).
 
 | Event | API route (method b in `findings.md`) | Rule |
 | --- | --- | --- |
@@ -99,7 +104,7 @@ The three files fit every repo, Vercel and GitHub limit that `findings.md` lists
 
 ### How the app reads it
 
-One reader, `src/api/notable/` (placeholder), through `staticJsonBy`. Its class in
+One reader, `src/api/notable/`, through `staticJsonBy`. Its class in
 `spoiler-manifest.json` is **`reveal-only`, with an importer allowlist**: the shelf
 page, the box score's reveal module, and the callout builder. This follows
 `boxscore.js`, which is reveal-only and lists `PostseasonSeriesPage.jsx`, an open
@@ -116,7 +121,7 @@ The three eras are the ones the task names. "API" means the MLB Stats API.
 
 | Feature | 1901 to 1949 | 1950 to 1959 | 1960 onward |
 | --- | --- | --- | --- |
-| 1. Shelf | API index. Retrosheet cross-check, rows that join only. | API index. Retrosheet cross-check. | API index. Retrosheet cross-check. |
+| 1. Shelf | API index, AL and NL only. Retrosheet cross-check, rows that join only. | API index. Retrosheet cross-check. | API index. Retrosheet cross-check. |
 | 2. Game page | API, from the browser (box score, lineups, park). | API, from the browser. | API, from the browser. |
 | 3. Callout | API index. A triple play claim has a floor (below). | API index. Same floor. | API index. |
 
@@ -140,14 +145,13 @@ not split it either.
 
 **1. Shelf.**
 
-- A row shows only what the index holds. A row has no score in any era.
-- **Negro league games (1920 to 1948).** The API lists them in the `sportId=1` schedule
-  **(15b: 1927-07-04 has 12 Negro league games beside 16 AL and NL games)**. The API
-  finds 9 cycles by Negro league players that Retrosheet's rows did not join. Their
-  team game logs return 404, so their triple plays are not in the index. Scores differ
-  from Retrosheet in 5 of 21 sampled cases. If Gary includes them (D6), a row carries a
-  source line ("as the MLB Stats API records it") and the triple-play tab says that
-  Negro league triple plays are not in the record.
+- A row shows what the index holds, with the final score (D5).
+- **Negro league games (1920 to 1948) are left off the shelf (D6).** The API lists them
+  in the `sportId=1` schedule **(15b: 1927-07-04 has 12 Negro league games beside 16 AL
+  and NL games)**. The generator keeps a row only when both clubs played in the AL or
+  the NL that season. This drops the 9 Negro league cycles that only the API found. The
+  game route still opens these games; only the shelf and the callout leave them out.
+  The shelf says in one line that it lists AL and NL games.
 - **Old doubleheaders.** The API numbers some old doubleheaders in a different order
   from Retrosheet. The index uses the API's own gamePk, so its row and its page agree.
   Only the Retrosheet cross-check must accept either game of that day, as
@@ -186,6 +190,10 @@ missing. This follows the MiLB pattern in root `CLAUDE.md`.
 - If the last found event is older than the floor, the callout says "the first since
   at least {floor}". If the index has no event for the club, it says nothing. It
   never invents a span.
+- **Three lines (D10).** The club line always shows. The player line shows for cycles
+  and no-hitters, and only when the event is not the player's first. The league line
+  shows only after a long league-wide gap; build prompt 4 sets that threshold with the
+  worthiness rubric in `docs/callouts.md`. The era floors apply to all three lines.
 - The club is named as it was that season. The API team id is the franchise. The
   Brewers' id may hold Seattle Pilots seasons **(inference; not checked)**.
 
@@ -239,4 +247,5 @@ smallest and it can wait for a full season of nightly data.
 - The postseason team fielding log, and the batched game-log form with `gameType`.
 - Where API coverage starts before 1901.
 - Which side is right when the API and Retrosheet disagree on a Negro league score.
+  (D6 leaves these games off the shelf, so this no longer blocks a build.)
 - How a 1927 club's logo renders.
