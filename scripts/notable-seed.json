@@ -1,0 +1,12 @@
+{
+  "nohitters": [],
+  "cycles": [],
+  "tripleplays": [
+    {
+      "gamePk": 716945,
+      "season": 2023,
+      "side": "home",
+      "note": "2023-08-18 TBA@ANA. The Angels turned it (Rengifo-Drury-Schanuel-O'Hoppe). The box score info line says \"Triple Play\" under FIELDING; the Angels' team game log says triplePlays 0, so the sweep misses it. .scratch/old-games/findings.md, Step 2."
+    }
+  ]
+}

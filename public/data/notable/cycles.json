@@ -1,0 +1,4 @@
+{"coverage":{"seasons":[2025],"through":"2025-11-01","leagues":["AL","NL"],"gameTypes":["R","F","D","L","W"]},"rows":[
+{"gamePk":777134,"officialDate":"2025-07-12","gameType":"R","gameNumber":1,"away":{"id":134,"abbr":"PIT","name":"Pittsburgh Pirates","runs":4},"home":{"id":142,"abbr":"MIN","name":"Minnesota Twins","runs":12},"player":{"id":621439,"name":"Byron Buxton"},"side":"home"},
+{"gamePk":778501,"officialDate":"2025-03-31","gameType":"R","gameNumber":1,"away":{"id":112,"abbr":"CHC","name":"Chicago Cubs","runs":18},"home":{"id":133,"abbr":"ATH","name":"Athletics","runs":3},"player":{"id":608348,"name":"Carson Kelly"},"side":"away"}
+]}

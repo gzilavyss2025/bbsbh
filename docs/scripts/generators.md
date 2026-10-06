@@ -222,6 +222,33 @@ don't run these by hand.
   twelve-pitch at-bat is a length — and `test/long-at-bats.test.js` asserts that
   of the committed file by vocabulary. `--rescan` re-ingests every game;
   `--season=2026` pins the year.
+- `gen-notable.mjs` → `public/data/notable/{nohitters,cycles,tripleplays}.json` — the
+  games behind the "Notable games" shelf (`.scratch/old-games`, D4; DRAFT ADR-0101). Every
+  row has a gamePk, the date, the game type, both clubs (id, the abbreviation and name of
+  THAT season, and the final score, D5) and the kind's own fields: a no-hitter names the side
+  that threw it and its pitchers in order, with `shortened` and `lost` when true (D8); a cycle
+  names the player and his side; a triple play names the fielding side. AL and NL games only
+  (D6), regular season and postseason (D13). **No reader and no page yet** (ADR-0076): the
+  reader comes with build prompt 2b. **The nightly run refreshes only the season in play**
+  (`lib/time/season-in-play.mjs`), about 70 calls. **The full history, 1901 to now, is a hand
+  run**: `node scripts/gen-notable.mjs --from=1901 --to=2025` (the space form,
+  `--from 1901 --to 2025`, works too). `--season=Y` runs one season, `--out=DIR` writes to DIR
+  for a measuring run. The spine is one schedule call per season (game types `R,F,D,L,W`,
+  linescore and team hydrated); a game counts only when `detailedState` is `Final` or
+  `Completed Early`, once for each gamePk, and only when both clubs were in the AL or NL.
+  No-hitters: a 0-hit side in that map, plus one fielded box score each for the pitchers.
+  Triple plays: each club's fielding game log, one call for the regular season and one for each
+  postseason type the club played (the log takes one `gameType` at a time). Cycles:
+  `sports/1/players`, then batched `people` hydrates of 100 with `gameType=[R,F,D,L,W]`.
+  Each run REPLACES every row of each season it swept, in all three files (a corrected
+  upstream row must not leave a ghost row), and writes after each season.
+  `scripts/notable-seed.json` holds the hand-seeded additions (D3: the 2023-08-18 triple play
+  that only the box score text holds); a seed row for a season a run did not sweep waits, and
+  a row whose gamePk is not a played AL or NL game of its season fails the run. **No
+  `generatedAt`:** each file's `coverage` block (seasons swept, the date the data runs through,
+  leagues, game types) is its own clock. The pure half is `scripts/lib/notable/`;
+  `test/notable.test.js` reads the committed files and fails on any key off the allowlist
+  (`ALLOWED_KEYS` in `lib/notable/merge.mjs`).
 - `gen-youngest-regulars.mjs` → `public/data/youngest-regulars/{11,12,13,14}.json` —
   how old each minor league's regulars were, for the same note one level down.
   Four small calls per level: one `/league` for the three leagues, one
