@@ -957,6 +957,21 @@ for each generator; the reader modules:
   no MLBAM id: show the name, link nothing. `fetchFamilyShard(key)` returns the whole
   shard, whose `credit` lines (Retrosheet and the Chadwick register) print beside the
   data. Spoiler-free: history about people, no game state.
+- `history/onThisDay.js` — who was born, and who debuted, on a calendar day in past
+  years, from `public/data/on-this-day/{MM-DD}.json` (`gen-bio-history.mjs`, hand-run,
+  ADR-0100), one file per day. `onThisDay(month, day)` (1-12, 1-31) returns
+  `{ born, debuted }`, each `[{ personId, name, year }]` (birth year, or debut year),
+  both `[]` for a day with none. The caller passes the month and day of the PAGE'S own
+  date (`src/lib/dates.js`), never a clock of its own. `fetchOnThisDayShard('MM-DD')`
+  returns the whole file, whose `credit` lines print beside the data. Spoiler-free.
+- `history/birthplaces.js` — players grouped by birth city, from
+  `public/data/birthplaces/{ab}.json` (`gen-bio-history.mjs`, ADR-0100), `ab` the first
+  two letters of the city. `bornIn(city, stateOrCountry)` returns `[{ personId, name,
+  year|null }]` or `[]`. EXACT match on lower-case city and place: the full state name
+  for a US park (`venue.location.state`, 'Wisconsin'), the country for any other
+  (`country`, 'Canada'); 'WI' finds nothing. `birthplaceKey` and `birthplaceShard` are
+  the one definition the generator also uses. `fetchBirthplaceShard(ab)` returns the
+  whole file and its `credit`. Spoiler-free.
 - `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
   `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Not a third
   party, not attributed, and not an MLE —
