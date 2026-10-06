@@ -16,6 +16,8 @@ game-wide rail states how many innings the game ran and so whether it went to ex
 Tier 3 — the staging queue, the film gate and the on-device byte store —
 is NOT here: it holds no baseball, only playIds and Blobs, so it lives in
 `src/lib/expresslane/` (`staging.js`, `byteStore.js`, `runner.js`, `hold.js`).
+`speed.js` is the fifth file there: the speed of clips already downloaded, shown
+on the entry step. It names no clip, so it may show on any screen of the surface.
 `hold.js` is the one to read before touching the deck: a play with film on the
 screen arrives HELD, and the hold is a CAP rather than a cover — it hands
 `expressDeck` the cursor row with `isTerminal: false`, so the box, the chip and
