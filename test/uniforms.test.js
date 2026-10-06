@@ -409,3 +409,88 @@ test('buildJerseyCombos orders Main before alternates and returns [] for an empt
     [],
   )
 })
+
+// --------------------------------------------------------------------------
+// Record-by-jersey, regular season vs postseason (#1515, Option 3). The strip's
+// `wins`/`losses` must reconcile with the standings, so they count `R` rows
+// only. October is carried apart in `postWins`/`postLosses`. Each row's OWN
+// gameType decides — never the umbrella `P` (docs/MLB_STATS_API.md).
+// --------------------------------------------------------------------------
+const HOME = '158_jersey_1_2026'
+const ALT = '158_jersey_3_2026'
+const worn = (code) => ({ [BREWERS]: { code } })
+const rec = (c) => ({ w: c.wins, l: c.losses, pw: c.postWins, pl: c.postLosses })
+
+// Home: 3 R (2-1), then F win, D loss, L win, W loss. Alt: 1 R win only.
+const MIXED_SCHEDULE = [
+  { gamePk: 1, gameType: 'R', won: true },
+  { gamePk: 2, gameType: 'R', won: true },
+  { gamePk: 3, gameType: 'R', won: false },
+  { gamePk: 4, gameType: 'R', won: true },
+  { gamePk: 5, gameType: 'F', won: true },
+  { gamePk: 6, gameType: 'D', won: false },
+  { gamePk: 7, gameType: 'L', won: true },
+  { gamePk: 8, gameType: 'W', won: false },
+]
+const MIXED_WORN = {
+  1: worn(HOME),
+  2: worn(HOME),
+  3: worn(HOME),
+  4: worn(ALT),
+  5: worn(HOME),
+  6: worn(HOME),
+  7: worn(HOME),
+  8: worn(HOME),
+}
+const combosFor = (schedule, wornByGame) =>
+  buildJerseyCombos({ catalogAssets: CATALOG, clubName: 'Brewers', schedule, wornByGame, teamId: BREWERS })
+
+test('buildJerseyCombos counts regular-season wins and losses from R rows only', () => {
+  const home = combosFor(MIXED_SCHEDULE, MIXED_WORN).find((c) => c.code === HOME)
+  assert.equal(home.wins, 2)
+  assert.equal(home.losses, 1)
+})
+
+test('buildJerseyCombos counts postseason wins and losses from F, D, L, W rows only', () => {
+  const home = combosFor(MIXED_SCHEDULE, MIXED_WORN).find((c) => c.code === HOME)
+  assert.equal(home.postWins, 2) // F and L
+  assert.equal(home.postLosses, 2) // D and W
+})
+
+test('buildJerseyCombos regular-season sum equals the club regular-season record', () => {
+  const combos = combosFor(MIXED_SCHEDULE, MIXED_WORN)
+  const standings = { wins: 3, losses: 1 } // the four R rows above
+  assert.equal(combos.reduce((n, c) => n + c.wins, 0), standings.wins)
+  assert.equal(combos.reduce((n, c) => n + c.losses, 0), standings.losses)
+})
+
+test('buildJerseyCombos gives a jersey never worn in October no postseason figure', () => {
+  const alt = combosFor(MIXED_SCHEDULE, MIXED_WORN).find((c) => c.code === ALT)
+  assert.deepEqual(rec(alt), { w: 1, l: 0, pw: 0, pl: 0 })
+})
+
+test('buildJerseyCombos skips a postseason game with no visible result', () => {
+  // fetchTeamSchedule nulls `won` for any game past the page's as-of date.
+  const schedule = [
+    { gamePk: 1, gameType: 'R', won: true },
+    { gamePk: 2, gameType: 'D', won: true },
+    { gamePk: 3, gameType: 'D', won: null }, // past the as-of date
+  ]
+  const wornByGame = { 1: worn(HOME), 2: worn(HOME), 3: worn(HOME) }
+  const home = combosFor(schedule, wornByGame).find((c) => c.code === HOME)
+  assert.deepEqual(rec(home), { w: 1, l: 0, pw: 1, pl: 0 })
+})
+
+test('buildJerseyCombos ignores the umbrella gameType P on a row', () => {
+  const home = combosFor([{ gamePk: 1, gameType: 'P', won: true }], { 1: worn(HOME) }).find((c) => c.code === HOME)
+  assert.deepEqual(rec(home), { w: 0, l: 0, pw: 0, pl: 0 })
+})
+
+test('buildJerseyCombos leaves the regular-season fields as before for an R-only schedule', () => {
+  const schedule = [
+    { gamePk: 1, gameType: 'R', won: true },
+    { gamePk: 2, gameType: 'R', won: false },
+  ]
+  const home = combosFor(schedule, { 1: worn(HOME), 2: worn(HOME) }).find((c) => c.code === HOME)
+  assert.deepEqual(rec(home), { w: 1, l: 1, pw: 0, pl: 0 })
+})

@@ -51,7 +51,8 @@ function cardTile(teamId, isMlb, treatment, side) {
 //
 // Touch drag is native (overflow-x + momentum scrolling); useDragScroll adds
 // click-and-drag panning for a mouse so the strip works the same on desktop.
-// Spoiler-free: uniform choices plus a record the standings already show.
+// Spoiler-free: uniform choices plus a record the standings already show, and
+// where a jersey was worn in October its postseason record on a second line.
 
 // A W-L record as "45–30" (en dash), or an em dash when the club hasn't been
 // seen in a posted jersey yet (no attributable game) so an unworn/newly-added
@@ -168,6 +169,11 @@ export function JerseyCombos({ combos, teamId, teamName, variant = 'record' }) {
               />
               <span className="jerseydeck__name">{c.name}</span>
               <span className="jerseydeck__rec mono">{recordLabel(c)}</span>
+              {c.postWins + c.postLosses > 0 && (
+                <span className="jerseydeck__post mono">
+                  Postseason {c.postWins}–{c.postLosses}
+                </span>
+              )}
             </Card>
           )
         })}
