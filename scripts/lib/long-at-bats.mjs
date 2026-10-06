@@ -4,6 +4,19 @@
 // A generator file RUNS on import, so anything worth a unit test has to live
 // here to be testable at all (the scripts/lib convention; test/long-at-bats.test.js).
 
+// THE GAME TYPES THE SWEEP ASKS FOR (ADR-0104, #1542). The postseason is its own
+// list, spelled as its four rounds and never the umbrella 'P' (see
+// src/api/boxlines/rows.js). It is the list records/postseason.mjs holds too, but
+// that module imports team-records.mjs, which imports this file, so it is
+// spelled here and test/long-at-bats.test.js pins the two equal.
+export const REGULAR_SEASON_GAME_TYPES = 'R'
+export const POSTSEASON_GAME_TYPES = 'F,D,L,W'
+export const ALL_GAME_TYPES = `${REGULAR_SEASON_GAME_TYPES},${POSTSEASON_GAME_TYPES}`
+
+// 'P' for a postseason game, 'R' for everything else — the same two scopes as
+// ADR-0094 and ADR-0102. Read off the schedule row on every run rather than
+// stored in the scan, so there is no second copy of it to disagree.
+export const scopeOfGameType = (gameType) => (POSTSEASON_GAME_TYPES.split(',').includes(gameType) ? 'P' : 'R')
 
 // WHICH SEASON THE NOTE IS ABOUT, and it is not `new Date().getFullYear()`.
 //
@@ -103,4 +116,116 @@ export function sortRows(rows) {
     if (a.date !== b.date) return a.date < b.date ? -1 : 1
     return (a.batter?.name ?? '') < (b.batter?.name ?? '') ? -1 : 1
   })
+}
+
+// Every PLAYED game of a schedule response, either scope, one per gamePk.
+//
+// Not "every Final row" — the #1031 trap is not only a minor-league one. MLB's
+// 2026 schedule returns a postponed September game with `abstractGameState:
+// "Final"` and `detailedState: "Postponed"`, and a census that treats it as a
+// game it failed to read can never call its own coverage complete. So the
+// linescore is hydrated and the game's own innings decide, the same reading
+// gen-milb-pool.mjs makes; only the LENGTH of that array is ever looked at, and
+// nothing from it is stored.
+//
+// A game that is not Final yet — a postseason game in play included — is simply
+// picked up on a later run.
+export function playedGamesOf(dates) {
+  const seen = new Map()
+  for (const day of dates ?? []) {
+    for (const game of day.games ?? []) {
+      if (game?.status?.abstractGameState !== 'Final') continue
+      if ((game?.linescore?.innings ?? []).length === 0) continue
+      // The schedule repeats a game across `dates` entries; the first one wins.
+      if (!seen.has(game.gamePk)) seen.set(game.gamePk, game)
+    }
+  }
+  return [...seen.values()]
+}
+
+// The games a run still has to read. A Final game's at-bats are immutable, so a
+// gamePk already in the scan is never read twice — the sweep's idempotency.
+export const gamesToRead = (games, scanGames, rescan) => games.filter((g) => rescan || !scanGames[g.gamePk])
+
+function clubOf(side) {
+  return { id: side?.team?.id ?? null, abbr: side?.team?.abbreviation ?? '' }
+}
+
+// The stored shape of one long at-bat. The batter's club comes off which half
+// he batted in, so the row can name both men's clubs without the file carrying
+// an inning — and `top` itself is dropped here, having done its one job.
+function rowFor(game, entry) {
+  const away = clubOf(game.teams?.away)
+  const home = clubOf(game.teams?.home)
+  return {
+    pk: game.gamePk,
+    date: game.officialDate,
+    ...(game.gameNumber > 1 ? { g: game.gameNumber } : {}),
+    away,
+    home,
+    batter: {
+      id: entry.batter?.id ?? null,
+      name: entry.batter?.fullName ?? '',
+      teamId: (entry.top ? away : home).id,
+    },
+    pitcher: {
+      id: entry.pitcher?.id ?? null,
+      name: entry.pitcher?.fullName ?? '',
+      teamId: (entry.top ? home : away).id,
+    },
+    pitches: entry.pitches,
+  }
+}
+
+// The census of one scope: the coverage it rests on and its rows, longest first.
+// Read from the scan, never from one run alone — a nightly run reads a handful
+// of games and the file it writes is the whole season's.
+//
+// A gamePk the schedule no longer returns as a Final game of this scope (a
+// suspended game re-filed, a rescheduled row) drops out of the census rather
+// than being counted from a stale tally.
+function censusOf(games, scanGames) {
+  const byPk = new Map(games.map((g) => [g.gamePk, g]))
+  let plateAppearances = 0
+  let withoutPitches = 0
+  let ingested = 0
+  const rows = []
+  for (const [pk, entry] of Object.entries(scanGames)) {
+    const game = byPk.get(Number(pk))
+    if (!game) continue
+    ingested += 1
+    plateAppearances += entry.pa ?? 0
+    withoutPitches += entry.noPitch ?? 0
+    for (const long of entry.long ?? []) rows.push(rowFor(game, long))
+  }
+  return {
+    coverage: {
+      games: ingested,
+      playedGames: games.length,
+      plateAppearances,
+      // The one thing that would make the count "at least N" instead of "N":
+      // an at-bat the feed carried no pitches for. The page reads this and
+      // says so rather than claiming an exactness it cannot have.
+      plateAppearancesWithoutPitches: withoutPitches,
+      complete: ingested === games.length && withoutPitches === 0,
+    },
+    rows: sortRows(rows),
+  }
+}
+
+// The season file: the regular-season census at the top, exactly as it always
+// was, and the postseason's beside it under `post` — the same shape, its own
+// denominator, never summed into the first. `post` exists only once a
+// postseason game is on file, so a regular-season-only scan builds the same
+// bytes it did before ADR-0104.
+export function buildSeasonDoc({ season, threshold, generatedAt, scanGames, games }) {
+  const inScope = (scope) => games.filter((g) => scopeOfGameType(g.gameType) === scope)
+  const post = censusOf(inScope('P'), scanGames)
+  return {
+    season,
+    generatedAt,
+    threshold,
+    ...censusOf(inScope('R'), scanGames),
+    ...(post.coverage.games > 0 ? { post } : {}),
+  }
 }

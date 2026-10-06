@@ -208,8 +208,13 @@ don't run these by hand.
   here). `--rebuild` forces the scan; `--level=13` narrows it. The roster ids that
   make the nightly re-join free live in `scripts/data/milb-pool-scan.json`.
 - `gen-long-at-bats.mjs` → `public/data/long-at-bats/{season}.json` — every plate
-  appearance of an MLB season that took **12 pitches or more**, for the offseason
-  page's notebook note (ADR-0081). A CENSUS, so every played game has to be read:
+  appearance of an MLB regular season that took **12 pitches or more**, for the offseason
+  page's notebook note (ADR-0081). The postseason is counted **beside** it under `post`
+  (the same shape, its own denominator, never summed in; ADR-0104). The schedule call asks
+  for `R,F,D,L,W` (`ALL_GAME_TYPES`), a game's scope comes from its `gameType`, and `post`
+  exists only once a postseason game is on file. The scan file is unchanged. The nightly run
+  reads the whole season's schedule, so it adds postseason games by itself; no hand run is
+  needed for the season in play. A CENSUS, so every played game has to be read:
   one `playByPlay?fields=…` call each, 28KB against 555KB untrimmed, because
   `pitchIndex`'s LENGTH is the at-bat's pitch count and the pitch events
   themselves never come down the wire. That makes it the cheapest feed sweep in
