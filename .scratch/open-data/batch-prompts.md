@@ -9,12 +9,12 @@ The goal is to run the bulk of this work on the cheapest model that can do it. G
 | Decision | Answer |
 |---|---|
 | Effort for prompts that follow a pattern | Sonnet 5.5 at **medium** for 2, 3, 4, 7, 8, 9, 12a, 13 and 14. High stays only on 5 (the foundation, the ADR and the licenses) and 10 (the risk of a weak join). If a medium run comes back shallow, re-run that prompt at high. |
-| The run-expectancy sweep (prompt 12) | Split. 12a (Sonnet medium) writes the code. 12b (Haiku 4.5) runs the sweep **one calendar decade per session**, newest first, and pushes to the same PR. |
-| Where the umpire record shows (prompt 11) | **On the umpire page only**, never on the game page. No spoiler-rule question remains, so prompt 11 is Sonnet medium, not Opus high. |
+| The run-expectancy sweep (prompt 12) | Split. 12a (Sonnet medium) writes the code. 12b (Haiku 4.5) runs the whole sweep **in one overnight session**, one calendar decade after another, newest first. It pushes to the same PR after each decade. |
+| Where the umpire record shows (prompt 11) | **On the umpire page only**, never on the game page, for the user's favorite club. No spoiler-rule question remains, so prompt 11 is Sonnet medium, not Opus high. |
 | Where the franchise module goes (prompt 9) | **Inside or directly under `BallparkCard`** on the Overview. |
 | The old-games plan (prompt 15) | Split. 15a (Sonnet medium) measures. 15b (Opus high) designs the seal and writes the plan. |
 
-Mix after the revision: 1 Opus prompt (was 2), 2 Sonnet-high prompts (was 11), 13 Sonnet-medium prompts, and up to 7 Haiku runs.
+Mix after the revision: 1 Opus prompt (was 2), 2 Sonnet-high prompts (was 11), 13 Sonnet-medium prompts, and 1 overnight Haiku run.
 
 ## Run plan
 
@@ -32,7 +32,7 @@ Mix after the revision: 1 Opus prompt (was 2), 2 Sonnet-high prompts (was 11), 1
 | 10 | Umpire history data from Retrosheet | Sonnet 5.5 | high | 5 (merged) | 6, 7, 9, 12b, 13 |
 | 11 | Umpire career chart and "record with this umpire" (umpire page only) | Sonnet 5.5 | medium | 10 (merged) | 6, 7, 8, 13, 14 |
 | 12a | Run values by era: code, checkpoint, lookup, one test season | Sonnet 5.5 | medium | none | 1, 2, 3, 5, 9, 15a |
-| 12b | Run values by era: sweep one decade (paste up to 7 times, one after another) | Haiku 4.5 | none (Haiku takes no effort setting) | 12a (draft PR open, not merged) | any prompt except another 12b |
+| 12b | Run values by era: the overnight sweep, all seven decades in one session | Haiku 4.5 | none (Haiku takes no effort setting) | 12a (draft PR open, not merged) | any prompt except another 12b |
 | 13 | Six degrees: team-season rosters from Retrosheet | Sonnet 5.5 | medium | 5 (merged) | 6, 7, 9, 10, 12b |
 | 14 | Six degrees of teammates: the page | Sonnet 5.5 | medium | 13 (merged) | 6, 7, 8, 11 |
 | 15a | Old games: measurements (join test, recall, sizes) | Sonnet 5.5 | medium | none | 1, 2, 3, 5, 9, 12a |
@@ -1139,7 +1139,7 @@ Rules
 
 ## Prompt 12a of 17 — Sonnet 5.5, effort medium
 
-**Run values by era: the code, the checkpoint and the lookup.** It reuses the existing sweep for earlier seasons. The risk is to change numbers that scoring surfaces use today, and a test pins that. This prompt runs ONE test season and opens the draft PR. It does not run the long sweep: prompt 12b (Haiku) runs that one decade at a time and pushes to this same PR.
+**Run values by era: the code, the checkpoint and the lookup.** It reuses the existing sweep for earlier seasons. The risk is to change numbers that scoring surfaces use today, and a test pins that. This prompt runs ONE test season and opens the draft PR. It does not run the long sweep: prompt 12b (Haiku) runs that overnight, one decade after another, and pushes to this same PR.
 
 ```text
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new. (Ponytail never overrides the spoiler rule, test-first or check-dir-size.)
@@ -1206,7 +1206,7 @@ Steps
    Report the difference in plain words. Commit the 1985 checkpoint. Do NOT run
    `--era-aggregate` (the 1980s are not complete yet).
 4. Docs: docs/scripts/generators.md (hand-run section: both modes, the decade list, and that
-   prompt 12b's sessions run them) and docs/api/static-data.md.
+   prompt 12b's overnight session runs them) and docs/api/static-data.md.
 
 Tests first
 Write the tests before the code. Watch them FAIL. Then build until they pass.
@@ -1250,11 +1250,13 @@ Rules
 
 ## Prompt 12b of 17 — Haiku 4.5 (no effort setting)
 
-**Run values by era: sweep one decade.** Mechanical: run two commands that prompt 12a wrote, commit the output, and tick a box. Paste this same prompt into a new session once per decade, one session after another, never two at once (they push to one branch). Seven runs finish the sweep: 2020s first, 1960s last. Each run takes about 1 hour (the 2020s about 25 minutes).
+**Run values by era: the overnight sweep.** Mechanical work: run two commands that prompt 12a wrote, commit the output, and tick boxes. Paste it once, before bed. One session runs all seven decades back to back, newest first, in about 6 to 7 hours. In a cloud session, one background command stops at 2 hours, so the session starts one background run per decade (about 45 to 70 minutes each). It commits and pushes after each decade. If the container stops during the night, paste the same prompt into a new session: it continues from the first unticked decade and skips every season that already has a checkpoint.
 
 ```text
-Task: run ONE decade of the run-expectancy era sweep and push the result to an open draft
-PR. You run commands and commit files. You do not write or change code.
+Task: run the run-expectancy era sweep for EVERY unticked decade, one decade after another,
+and push each decade's result to an open draft PR. You run commands and commit files. You
+do not write or change code. This is an unattended overnight run: nobody will answer a
+question, so follow the stop rules below and report in your final message.
 
 Find the work
 1. With the GitHub tools (the cloud has no `gh` CLI), list open PRs in
@@ -1262,30 +1264,31 @@ Find the work
    there is none, or more than one, stop and say so.
 2. Run `git fetch origin <its head branch>` and check out that branch. Run
    `git status`. If the tree is not clean, stop and say so.
-3. Read the PR body's "## Sweep status" list. Pick the FIRST unticked decade in the list
-   (the list runs newest first). If every line is ticked, stop and say "Sweep complete:
-   Gary can review the PR."
-4. Read the "Run values by era" entry in docs/scripts/generators.md for the two commands.
+3. Read the "Run values by era" entry in docs/scripts/generators.md for the two commands.
+4. Read the PR body's "## Sweep status" list. It runs newest first. If every line is
+   ticked, stop and say "Sweep complete: Gary can review the PR."
 
-Run
+The decade loop: do steps 5 to 12 for the first unticked decade, then for the next one,
+until every decade is ticked or a stop rule ends the run.
 5. The seasons of the decade: 2020s = 2020,2021,2022,2023. Every other decade = its ten
    years, for example 1980s = 1980,1981,...,1989.
-6. Start the sweep in the BACKGROUND (Bash with run_in_background):
+6. Start the sweep for THIS decade only, in the BACKGROUND (Bash with run_in_background and
+   a timeout of 7200000 ms):
    `node scripts/gen-run-expectancy.mjs --era-sweep --seasons=<the seasons>`
    Seasons that already have a file in .scratch/run-expectancy-eras/ are skipped. That is
    correct. Wait for the background task to finish. Do not poll with sleep.
 7. When it ends, list .scratch/run-expectancy-eras/ and check that every season of the
    decade has a file.
-   - If one is missing, run the sweep command once more for the missing seasons only.
-   - If it is still missing after that, commit and push the season files that exist
-     (steps 10 and 11), then stop. Report the season and the last error lines. Do not tick
-     the decade and do not run step 8.
+   - If one is missing (a failure, or the 2-hour stop), run the step 6 command once more.
+     It skips the finished seasons.
+   - If one is still missing after that, commit and push the season files that exist
+     (steps 10 and 11), then STOP the whole run. Report the season and the last error
+     lines. Do not tick the decade and do not run step 8.
 8. Run `node scripts/gen-run-expectancy.mjs --era-aggregate --decade=<first year>`
    (for example --decade=1980). It writes public/data/run-expectancy-eras/<decade>s.json.
-
-Check, commit, push
-9. Run `npm run lint; echo "exit=$?"`, then `npm test`. If either fails, stop and report
-   the failing lines. Do not edit code to fix it.
+9. Run `npm run lint; echo "exit=$?"`, then `npm test`. If either fails, commit and push
+   the files that exist (steps 10 and 11), then STOP the whole run and report the failing
+   lines. Do not edit code to fix it.
 10. Stage only the new season files and the new decade file:
     `git add .scratch/run-expectancy-eras/ public/data/run-expectancy-eras/`
     Run `git status` and check that nothing else is staged. Commit with the message
@@ -1296,17 +1299,19 @@ Check, commit, push
     `git pull --no-rebase origin <branch>` once and push again.
 12. Edit the PR body with the GitHub tools: tick that decade's line, and add after it the
     games swept, the run time and the decade file's size. Change nothing else in the body.
+    Then go back to step 5 for the next unticked decade.
 
 Rules
 - Never change files under src/, scripts/, test/, docs/ or public/data/run-expectancy.json.
 - Never re-run a season that already has a file. Never delete a season file.
+- Never run two sweeps at once. One background sweep at a time, one decade at a time.
 - Never merge the PR, mark it ready, or push to main.
-- One decade per session. Do not start the next decade.
 - If a command fails twice for the same reason, stop and report it.
 
 Handoff
-Final message: the decade you ran, games swept, run time, the decade file's size, and the
-next unticked decade (or "Sweep complete: Gary can review the PR").
+Final message: one line per decade you ran (games swept, run time, decade file size), the
+total run time, and either "Sweep complete: Gary can review the PR" or the decade where the
+run stopped and why.
 ```
 
 ## Prompt 13 of 17 — Sonnet 5.5, effort medium
