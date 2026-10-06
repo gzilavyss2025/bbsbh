@@ -37,6 +37,11 @@ async function get(url, asJson, tries = 8) {
   for (let n = 0; n < tries; n++) {
     await sleep(3000 * (n + 1))
     const res = await fetch(url, { headers: { 'User-Agent': UA } })
+    if (res.status === 429 && !asJson) {
+      // The upload host asks for a long pause (600 s seen). Retrying inside it
+      // only extends it, so stop for the whole run and say how long to wait.
+      throw new Error(`429, retry after ${res.headers.get('retry-after') ?? '?'} s`)
+    }
     if (res.status === 429) {
       await sleep(Math.min(Number(res.headers.get('retry-after')) || 0, 120) * 1000)
       continue
@@ -99,6 +104,7 @@ for (let i = 0; i < titles.length; i += 20) {
 mkdirSync(OUT_DIR, { recursive: true })
 const out = { _hint: JSON.parse(readFileSync(OUT_JSON, 'utf8'))._hint, clubs: {} }
 const skipped = []
+let blockedBy = null
 for (const [teamId, eras] of Object.entries(seed.clubs)) {
   out.clubs[teamId] = []
   for (const era of eras) {
@@ -119,13 +125,16 @@ for (const [teamId, eras] of Object.entries(seed.clubs)) {
       let have = existsSync(join(OUT_DIR, file))
       if (!dry && !have && offline) {
         entry.skipped = 'not downloaded yet; run fetch.mjs without --offline'
+      } else if (!dry && !have && blockedBy) {
+        entry.skipped = 'download refused; run fetch.mjs again'
       } else if (!dry && !have) {
         try {
           writeFileSync(join(OUT_DIR, file), await get(meta.url, false, 2))
           have = true
-        } catch {
+          await sleep(4000)
+        } catch (err) {
+          blockedBy = err.message
           entry.skipped = 'download refused; run fetch.mjs again'
-          skipped.push(`${teamId} ${era.from}-${era.to}: ${file} download refused`)
         }
       }
       entry.file = have || dry ? file : null
@@ -140,4 +149,5 @@ if (!dry) writeFileSync(OUT_JSON, `${JSON.stringify(out, null, 2)}\n`)
 const withArt = Object.values(out.clubs).flat().filter((e) => e.file).length
 const total = Object.values(out.clubs).flat().length
 console.log(`${withArt} of ${total} eras have art${dry ? ' (dry run, nothing written)' : ''}`)
+if (blockedBy) console.log(`Downloads stopped: ${blockedBy}. Run again later.`)
 if (skipped.length) console.log(`Needs a decision:\n  ${skipped.join('\n  ')}`)
