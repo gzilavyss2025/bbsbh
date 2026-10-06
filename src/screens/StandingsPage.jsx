@@ -96,6 +96,9 @@ function LeagueBar({ league }) {
   )
 }
 
+// A stable empty table, so `shown` keeps its identity while a season loads.
+const NO_ROWS = []
+
 // Screen: league-wide standings, both leagues × three divisions, with home/away
 // splits, runs for/against, run differential, expected (Pythagorean) W-L,
 // Season Grade, division magic number/clinch, streak, last-ten, and a
@@ -215,7 +218,7 @@ export function StandingsPage({ seasonYear }) {
   // year's label while the picker's fetch loads.
   const [lastGood, setLastGood] = useState({ season, rows: [] })
   if (data && data !== lastGood.rows) setLastGood({ season, rows: data })
-  const shown = data ?? (lastGood.season === season ? lastGood.rows : [])
+  const shown = data ?? (lastGood.season === season ? lastGood.rows : NO_ROWS)
 
   // Season Grade column: a SEPARATE, independent fetch of two already-nightly
   // static files (never statsapi) — a slow/failed grade file must never block
