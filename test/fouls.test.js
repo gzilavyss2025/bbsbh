@@ -490,7 +490,7 @@ test('all seasons add counts, keep the higher single-game high, and rebuild a sh
   assert.equal(all.topFoulGames.length, 3)
 })
 
-// --- the postseason beside the regular season (ADR-0101, #1511) ----------------
+// --- the postseason beside the regular season (ADR-0102, #1511) ----------------
 
 test('a postseason game never moves the regular-season export, and sits beside it as post', async () => {
   const db = await emptyDb()

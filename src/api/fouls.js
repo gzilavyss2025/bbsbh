@@ -54,7 +54,7 @@ export async function fetchFoulsFor(personId, { seasonYear } = {}) {
 // reference the same minimums the ranking uses. Batters qualify on games
 // played, pitchers on total pitches thrown — a one-appearance cameo shouldn't
 // top a rate board (same idea as the live leader boards' playing-time floor).
-// The postseason beside the regular season (ADR-0101): a season file carries
+// The postseason beside the regular season (ADR-0102): a season file carries
 // `post`, the same shape again, once a postseason game is on file. This is the
 // page's data for one scope — 'R' is the file as it is, 'P' lifts `post` to the
 // top and keeps the season labels. Without a `post`, every scope is the regular

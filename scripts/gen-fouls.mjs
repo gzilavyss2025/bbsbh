@@ -13,7 +13,7 @@
 // (scripts/lib/schema.sql's foul_* tables, docs/adr/0021) via incrementing
 // upserts, and marks it in foul_ingested_games so a resumed/re-run sweep never
 // double-counts. NEVER stores a feed on disk. MLB only (sportId 1), regular
-// season and postseason, kept apart by a `scope` key (R or P, ADR-0101).
+// season and postseason, kept apart by a `scope` key (R or P, ADR-0102).
 //
 // FOUL COUNTING mirrors the live derive.js path EXACTLY (importing the shared
 // FOUL_CODES/WHIFF_CODES/NON_PA_EVENT_TYPES/pitchCallCode from
@@ -673,7 +673,7 @@ function combine(rows, keyOf, sums, max = null) {
 // One season's export (`season`), or every season summed (`season` null, the
 // all/ file). Sums, never averages: each rate on the page is derived from
 // these counts (schema.sql, "STORE SUMS, NOT AVERAGES"). One scope: 'R' (the
-// default, so every old reader sees what it always saw) or 'P' (ADR-0101).
+// default, so every old reader sees what it always saw) or 'P' (ADR-0102).
 export function exportFouls(db, season, scope = 'R') {
   const one = season != null
   const rows = (table, where = '', order = '') =>
@@ -848,7 +848,7 @@ export function exportFouls(db, season, scope = 'R') {
   }
 }
 
-// The regular-season export with the postseason BESIDE it as `post` (ADR-0101),
+// The regular-season export with the postseason BESIDE it as `post` (ADR-0102),
 // the same shape again, never summed in. `post` exists only once a postseason
 // game is on file, so a store with none is byte-for-byte what it was.
 export function exportFoulStore(db, season) {
@@ -1024,7 +1024,7 @@ async function main() {
 
   const existing = new Set(db.prepare('SELECT game_pk FROM foul_ingested_games').all().map((r) => r.game_pk))
 
-  // MLB regular season and postseason (ADR-0101). Same postponed-replay dedup as
+  // MLB regular season and postseason (ADR-0102). Same postponed-replay dedup as
   // the other sweeps: a replayed game is listed under both dates; keep only the
   // officialDate bucket.
   const schedule = await getJson(

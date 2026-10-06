@@ -319,7 +319,7 @@ don't run these by hand.
   drift; two-strike detection carries the PRE-pitch count forward across
   non-PA plays (the `count`-is-post-pitch off-by-one). App reads it via
   `src/api/fouls.js` (Foul Tracker page, player-page card). The MLB postseason is
-  swept too, kept BESIDE the regular season by a `scope` key (`R`/`P`, ADR-0101): the
+  swept too, kept BESIDE the regular season by a `scope` key (`R`/`P`, ADR-0102): the
   files gain a `post` key only once a postseason game is on file, and no reader sums it
   in. Backfill old postseason games by hand with `--since=<first postseason date>`.
 - `gen-comeback-wins.mjs` → `public/data/comeback-wins.json` — per-team,
@@ -878,7 +878,7 @@ don't run these by hand.
   contact is counted and reported at the end for that reason — a silent zero is
   how a 30x saving turns into an empty dataset nobody notices.
   (4) **MLB also sweeps its postseason** (`R,F,D,L,W`; Triple-A stays `R`) into a
-  `post` map beside `bat` in each bucket, never blended (ADR-0101). Old
+  `post` map beside `bat` in each bucket, never blended (ADR-0103). Old
   postseason games are outside the nightly window: backfill by hand with
   `--since=<date> --sports=1`; the 2026 run covered 2026-09-28 to 2026-10-06.
   Two filters worth knowing: **decided games only, never today's**

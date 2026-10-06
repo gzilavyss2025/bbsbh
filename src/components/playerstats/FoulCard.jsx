@@ -19,7 +19,7 @@ import { PartOfSeason } from '../season/PartOfSeason.jsx'
 // it covers) are the Analytics tab's picked season; `vs` stacks a second
 // season under it. With neither season's line, no card.
 //
-// The postseason sits BESIDE the regular season (ADR-0101): his bucket's `post`
+// The postseason sits BESIDE the regular season (ADR-0102): his bucket's `post`
 // slice, the same shape. A Regular season / Postseason toggle shows once he has
 // a postseason line, in either of the seasons on screen.
 export function FoulCard({ playerId, group, asOf, seasonYear, label, vs = null }) {

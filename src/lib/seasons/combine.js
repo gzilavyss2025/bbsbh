@@ -112,7 +112,7 @@ export function combineFoulShards(shards, personId) {
     const row = combine(rows)
     return row ? { [id]: row } : {}
   }
-  // The postseason rides beside, never summed in (ADR-0101): a `post` shard
+  // The postseason rides beside, never summed in (ADR-0102, ADR-0103): a `post` shard
   // slice per season, combined on its own, and kept only when he has a line.
   const postOf = (group) => (shards ?? []).map((s) => s?.post?.[group]?.[id] ?? null)
   const post = {
