@@ -39,6 +39,17 @@ season in progress, so the client only pays for what it actually loads.
   already-fetched file, then — once that's exhausted — fetching the prior
   season's file, and so on. Nothing beyond the current season is ever
   downloaded unless the reader actually asks for more.
+- **The next season's file owns the winter (#1477, decided 2026-10-06).** A
+  season's file runs from the day after the PREVIOUS season's `seasonEndDate`
+  through its own `seasonEndDate`, so a January signing is a 2027 move and a
+  move on 2025-11-01 is a 2025 move; windows tile, none overlap or leave a gap.
+  The generator's default season turns to next year the day after this year's
+  `seasonEndDate`, so a November move has a file. The reader opens next year's
+  file first when it exists. `final` is unchanged: today past the season's own
+  `seasonEndDate`. Rules: `scripts/lib/time/transactions-window.mjs`. Where this
+  document says a season starts at `regularSeasonStartDate`, read "the day after
+  the previous `seasonEndDate`" (that date is only the fallback with no
+  previous row).
 - **No manifest needed.** Season files are just `{currentYear}.json`,
   `{currentYear - 1}.json`, … — the reader tries the previous year down from
   the current one and treats a 404 as "no more history" (a team's inaugural
