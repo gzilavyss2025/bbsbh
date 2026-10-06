@@ -1,28 +1,44 @@
 # Open data batches: the prompts
 
-Written 2026-10-06 on `origin/main` at `9d01ade7`. Each prompt stands alone. Paste one block into a fresh cloud session. Every prompt ends in one draft PR, and Gary merges. Facts marked "measured" come from the local spike of 2026-10-06; facts marked "not checked" are for the session to verify first.
+Written 2026-10-06 on `origin/main` at `9d01ade7`. Each prompt stands alone. Paste one block into a fresh cloud session. Every prompt ends in one draft PR, and Gary merges. Two prompts (12b and 15b) add to the draft PR that an earlier prompt opened, so they do not open a new PR. Facts marked "measured" come from the local spike of 2026-10-06. Facts marked "not checked" are for the session to verify first.
+
+## Revision of 2026-10-06 (cost pass)
+
+The goal is to run the bulk of this work on the cheapest model that can do it. Gary settled these five decisions:
+
+| Decision | Answer |
+|---|---|
+| Effort for prompts that follow a pattern | Sonnet 5.5 at **medium** for 2, 3, 4, 7, 8, 9, 12a, 13 and 14. High stays only on 5 (the foundation, the ADR and the licenses) and 10 (the risk of a weak join). If a medium run comes back shallow, re-run that prompt at high. |
+| The run-expectancy sweep (prompt 12) | Split. 12a (Sonnet medium) writes the code. 12b (Haiku 4.5) runs the sweep **one calendar decade per session**, newest first, and pushes to the same PR. |
+| Where the umpire record shows (prompt 11) | **On the umpire page only**, never on the game page. No spoiler-rule question remains, so prompt 11 is Sonnet medium, not Opus high. |
+| Where the franchise module goes (prompt 9) | **Inside or directly under `BallparkCard`** on the Overview. |
+| The old-games plan (prompt 15) | Split. 15a (Sonnet medium) measures. 15b (Opus high) designs the seal and writes the plan. |
+
+Mix after the revision: 1 Opus prompt (was 2), 2 Sonnet-high prompts (was 11), 13 Sonnet-medium prompts, and up to 7 Haiku runs.
 
 ## Run plan
 
 | # | What it does | Model | Effort | Depends on | Parallel with |
 |---|---|---|---|---|---|
-| 1 | Player page: nickname, hometown and school, and same-name rows in search | Sonnet 5.5 | medium | none | 2, 3, 5, 9, 12, 15 |
-| 2 | Era context: each season against that year's league average | Sonnet 5.5 | high | none | 1, 3, 5, 9, 12, 15 |
-| 3 | Manager history: reach back before 2000 | Sonnet 5.5 | high | none | 1, 2, 5, 9, 12, 15 |
-| 4 | Coaching tree on the manager page | Sonnet 5.5 | high | 3 (merged) | none |
-| 5 | Retrosheet and Chadwick plumbing, plus the family-ties data | Sonnet 5.5 | high | none | 1, 2, 3, 9, 12, 15 |
-| 6 | Family ties band on the player page | Sonnet 5.5 | medium | 5 (merged) | 7, 9, 10, 12, 13 |
-| 7 | On this day and birthplace data | Sonnet 5.5 | high | 5 (merged) | 6, 9, 10, 12, 13 |
-| 8 | On this day strip and Born near the park | Sonnet 5.5 | high | 7 (merged) | 6, 9, 10, 12, 13 |
-| 9 | Franchise timeline and ballpark biography (Stats API only) | Sonnet 5.5 | high | none | 1, 2, 3, 5, 12, 15 |
-| 10 | Umpire history data from Retrosheet | Sonnet 5.5 | high | 5 (merged) | 6, 7, 9, 12, 13 |
-| 11 | Umpire career chart and "record with this umpire" | Opus 5.5 | high | 10 (merged) | none |
-| 12 | Run values by era (data and lookup only) | Sonnet 5.5 | high | none | 1, 2, 3, 5, 9, 15 |
-| 13 | Six degrees: team-season rosters from Retrosheet | Sonnet 5.5 | high | 5 (merged) | 6, 7, 9, 10, 12 |
-| 14 | Six degrees of teammates: the page | Sonnet 5.5 | high | 13 (merged) | none |
-| 15 | Old games: a plan for the notable-performances shelf, old-game pages and "has this happened before?" | Opus 5.5 | high | none | 1, 2, 3, 5, 9, 12 |
+| 1 | Player page: nickname, hometown and school, and same-name rows in search | Sonnet 5.5 | medium | none | 2, 3, 5, 9, 12a, 15a |
+| 2 | Era context: each season against that year's league average | Sonnet 5.5 | medium | none | 1, 3, 5, 9, 12a, 15a |
+| 3 | Manager history: reach back before 2000 | Sonnet 5.5 | medium | none | 1, 2, 5, 9, 12a, 15a |
+| 4 | Coaching tree on the manager page | Sonnet 5.5 | medium | 3 (merged) | 6, 7, 8, 10, 13 |
+| 5 | Retrosheet and Chadwick plumbing, plus the family-ties data | Sonnet 5.5 | high | none | 1, 2, 3, 9, 12a, 15a |
+| 6 | Family ties band on the player page | Sonnet 5.5 | medium | 5 (merged) | 7, 9, 10, 12b, 13 |
+| 7 | On this day and birthplace data | Sonnet 5.5 | medium | 5 (merged) | 6, 9, 10, 12b, 13 |
+| 8 | On this day strip and Born near the park | Sonnet 5.5 | medium | 7 (merged) | 6, 9, 10, 12b, 13 |
+| 9 | Franchise timeline and ballpark biography (Stats API only) | Sonnet 5.5 | medium | none | 1, 2, 3, 5, 12a, 15a |
+| 10 | Umpire history data from Retrosheet | Sonnet 5.5 | high | 5 (merged) | 6, 7, 9, 12b, 13 |
+| 11 | Umpire career chart and "record with this umpire" (umpire page only) | Sonnet 5.5 | medium | 10 (merged) | 6, 7, 8, 13, 14 |
+| 12a | Run values by era: code, checkpoint, lookup, one test season | Sonnet 5.5 | medium | none | 1, 2, 3, 5, 9, 15a |
+| 12b | Run values by era: sweep one decade (paste up to 7 times, one after another) | Haiku 4.5 | none (Haiku takes no effort setting) | 12a (draft PR open, not merged) | any prompt except another 12b |
+| 13 | Six degrees: team-season rosters from Retrosheet | Sonnet 5.5 | medium | 5 (merged) | 6, 7, 9, 10, 12b |
+| 14 | Six degrees of teammates: the page | Sonnet 5.5 | medium | 13 (merged) | 6, 7, 8, 11 |
+| 15a | Old games: measurements (join test, recall, sizes) | Sonnet 5.5 | medium | none | 1, 2, 3, 5, 9, 12a |
+| 15b | Old games: the seal design, the draft ADR and the plan | Opus 5.5 | high | 15a (draft PR open, not merged) | any |
 
-## Prompt 1 of 15 — Sonnet 5.5, effort medium
+## Prompt 1 of 17 — Sonnet 5.5, effort medium
 
 **Player page: nickname, hometown and school, and same-name rows in search.** Three small changes on open surfaces, all from the MLB Stats API. No new dataset. It follows existing patterns, so the everyday rung fits.
 
@@ -128,9 +144,9 @@ Rules
   the PR.
 ```
 
-## Prompt 2 of 15 — Sonnet 5.5, effort high
+## Prompt 2 of 17 — Sonnet 5.5, effort medium
 
-**Era context: each season against that year's league average.** A hand-run generator, a reader and a table column across several files, with judgment about edge cases (weighting, the current season).
+**Era context: each season against that year's league average.** A hand-run generator, a reader and a table column across several files, with judgment about edge cases (weighting, the current season). Medium fits: the prompt settles both edge cases, and a worked generator exists to copy.
 
 ```text
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new. (Ponytail never overrides the spoiler rule, test-first or check-dir-size.)
@@ -232,9 +248,9 @@ Rules
   the PR.
 ```
 
-## Prompt 3 of 15 — Sonnet 5.5, effort high
+## Prompt 3 of 17 — Sonnet 5.5, effort medium
 
-**Manager history: reach back before 2000.** One generator change plus a long hand-run sweep. The shared-season rule needs care. No screen change beyond copy.
+**Manager history: reach back before 2000.** One generator change plus a hand-run sweep of about 3,000 calls. The generator already handles shared seasons, and the prompt gives a numeric stop rule, so medium fits. No screen change beyond copy.
 
 ```text
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new. (Ponytail never overrides the spoiler rule, test-first or check-dir-size.)
@@ -327,7 +343,7 @@ Rules
   the PR.
 ```
 
-## Prompt 4 of 15 — Sonnet 5.5, effort high
+## Prompt 4 of 17 — Sonnet 5.5, effort medium
 
 **Coaching tree on the manager page.** Builds one screen from a settled direction and adds one small index to the generator.
 
@@ -422,7 +438,7 @@ Rules
   the PR.
 ```
 
-## Prompt 5 of 15 — Sonnet 5.5, effort high
+## Prompt 5 of 17 — Sonnet 5.5, effort high
 
 **Retrosheet and Chadwick plumbing, plus the family-ties data.** The first consumer of Retrosheet and Chadwick data. It adds the shared fetch, id bridge, credits and an ADR, with the smallest dataset (family links) as its proof. No screen.
 
@@ -456,7 +472,7 @@ Context (measured 2026-10-06)
   played pro ball). Tally top prospects who never reached MLB match on key_mlbam but carry
   no Retrosheet, Baseball-Reference or FanGraphs id.
 - Licenses. Chadwick: Open Data Commons Attribution License 1.0. The repo already credits
-  it: scripts/lib/prospect-rank-history.mjs line 37 holds the CHADWICK_JOIN credit string.
+  it: scripts/lib/prospect-rank-history.mjs line 36 holds the CHADWICK_JOIN credit string.
   Retrosheet: free use, including commercial, if this statement appears prominently: "The
   information used here was obtained free of charge from and is copyrighted by Retrosheet.
   Interested parties may contact Retrosheet at 20 Sunset Rd., Newark, DE 19711."
@@ -544,7 +560,7 @@ Rules
   folder. Pass paths as arguments. Run any Python with `-I`.
 ```
 
-## Prompt 6 of 15 — Sonnet 5.5, effort medium
+## Prompt 6 of 17 — Sonnet 5.5, effort medium
 
 **Family ties band on the player page.** One band from a ready dataset and reader. It follows an existing card pattern.
 
@@ -632,9 +648,9 @@ Rules
   the PR.
 ```
 
-## Prompt 7 of 15 — Sonnet 5.5, effort high
+## Prompt 7 of 17 — Sonnet 5.5, effort medium
 
-**On this day and birthplace data.** Two small generated datasets from Retrosheet biographical data, joined to MLBAM ids. No screen; prompt 8 adds the UI.
+**On this day and birthplace data.** Two small generated datasets from Retrosheet biographical data, joined to MLBAM ids. It copies the pattern that prompt 5 sets, so medium fits. No screen; prompt 8 adds the UI.
 
 ```text
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new. (Ponytail never overrides the spoiler rule, test-first or check-dir-size.)
@@ -725,7 +741,7 @@ Rules
   folder. Pass paths as arguments. Run any Python with `-I`.
 ```
 
-## Prompt 8 of 15 — Sonnet 5.5, effort high
+## Prompt 8 of 17 — Sonnet 5.5, effort medium
 
 **On this day strip and Born near the park.** Two small UI surfaces, one beside the slate, which is near a scoring surface. It needs care, not deep reasoning.
 
@@ -820,9 +836,9 @@ Rules
   the PR.
 ```
 
-## Prompt 9 of 15 — Sonnet 5.5, effort high
+## Prompt 9 of 17 — Sonnet 5.5, effort medium
 
-**Franchise timeline and ballpark biography (Stats API only).** A small hand-run sweep plus two team-page surfaces. The one real choice is placement, because the team hub rules and a draft ADR disagree.
+**Franchise timeline and ballpark biography (Stats API only).** A small hand-run sweep plus two team-page surfaces. Gary settled the placement (inside or under `BallparkCard`), so no judgment call is left and medium fits.
 
 ```text
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new. (Ponytail never overrides the spoiler rule, test-first or check-dir-size.)
@@ -844,12 +860,13 @@ Context (measured 2026-10-06)
   Report any club whose history looks cut.
 - The ballpark card is src/screens/team/modules/ballpark/BallparkCard.jsx, mounted at
   src/screens/TeamPage.jsx line 125 (the Overview).
-- Placement rules conflict. src/screens/team/CLAUDE.md and ADR-0034 give the hub six tabs,
-  and the Overview holds PREVIEWS that link to a tab. ADR-0082 (one scroll of named bands)
-  is a DRAFT and NOT accepted: do not build for it. Recommended: put the park history inside
-  or directly under BallparkCard, and the franchise strip next to it, as one compact module.
-  If the team CLAUDE.md rule forbids a full module on the Overview, make an Overview preview
-  with a door link, put the full strip in the Numbers tab, and say why in the PR body.
+- Placement (settled by Gary, 2026-10-06): put the park history inside or directly under
+  BallparkCard, and the franchise strip next to it, as one compact module on the Overview.
+  Do not move it to another tab. Why this is allowed: src/screens/team/CLAUDE.md says the
+  Overview holds previews only, but the comment above BallparkCard in TeamPage.jsx says that
+  card "IS the full detail view" with no door to another tab. This module extends that
+  exception. Quote that comment in the PR body. ADR-0082 (one scroll of named bands) is a
+  DRAFT and NOT accepted: do not build for it.
 - Patterns: a hand-run immutable generator, like scripts/gen-manager-history.mjs; shard by
   team id, 30 small files. Use getJson and mapConcurrent.
 
@@ -908,8 +925,8 @@ Review, commit, PR
   check. If it fails, follow the steward skill.
 
 Handoff
-1. Final message: the PR link, the relocation test results, where you put the module and
-   why, and the file count and total size of the new folder.
+1. Final message: the PR link, the relocation test results, the four club ids you checked,
+   and the file count and total size of the new folder.
 
 Rules
 - Follow docs/agents/writing-style.md (ASD-STE100) and the house word list
@@ -925,7 +942,7 @@ Rules
   the PR.
 ```
 
-## Prompt 10 of 15 — Sonnet 5.5, effort high
+## Prompt 10 of 17 — Sonnet 5.5, effort high
 
 **Umpire history data from Retrosheet.** A large download reduced to small shards, with an id bridge and a team-code mapping that must be measured. No screen.
 
@@ -1027,32 +1044,34 @@ Rules
   folder. Pass paths as arguments. Run any Python with `-I`.
 ```
 
-## Prompt 11 of 15 — Opus 5.5, effort high
+## Prompt 11 of 17 — Sonnet 5.5, effort medium
 
-**Umpire career chart and "record with this umpire".** A record of results sits next to a game page. The cutoff must hold so the current game never leaks. That is spoiler-rule territory, so Opus at high.
+**Umpire career chart and "record with this umpire" (umpire page only).** Gary settled the placement: both parts go on the umpire page, which is an open surface, and nothing goes on the game page. That removes the spoiler-rule question, so this is a chart and a line that follow a settled direction. Sonnet at medium. A later game-page placement is a separate prompt, and that prompt starts at Opus high (rung 7).
 
 ```text
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new. (Ponytail never overrides the spoiler rule, test-first or check-dir-size.)
 
-Task: show the data from prompt 10 on the umpire page and on the game page.
-  (a) Umpire page: a career chart of games behind the plate by season, for seasons Tally's own
-      files do not cover.
-  (b) A "record with this umpire" line: how a club has done when this umpire worked home
-      plate, through the last complete Retrosheet season.
-Part (b) is a won-lost record. The spoiler rule decides whether and where it may show.
+Task: show the data from prompt 10 on the umpire page ONLY.
+  (a) A career chart of games behind the plate by season, for seasons Tally's own files do
+      not cover.
+  (b) A "record with this umpire" line: how the user's favorite club has done when this
+      umpire worked home plate, through the last complete Retrosheet season.
+Settled by Gary (2026-10-06): nothing goes on the game page, its umpire card
+(src/components/umpire/UmpiresCard.jsx) or the game preview. The umpire page is an open
+surface, so add no SealBox. If you think the line belongs on the game page too, say so in
+the PR body and do not build it.
 
 Context
 - Prompt 10 must be merged first: public/data/umpire-history/ and src/api/umpireHistory.js
   (`careerSeasons`, `recordWith`, and `throughSeason` in each file). If not, stop and say so.
-- Read the spoiler section of CLAUDE.md, src/CLAUDE.md, src/api/CLAUDE.md, ADR-0034 (the
-  cutoff is opt-in now), ADR-0026 and ADR-0049 BEFORE you place anything.
+- Read the spoiler section of CLAUDE.md. It explains why a season or career record on an
+  open page is not a score (ADR-0034, "The cutoff is opt-in now").
 - The history ends at a past season (`throughSeason`). It never contains today's game. The
   line must say "through {season}" and must never add live games. Settled rule: no mixing with
   the current season, ever.
-- Pages: src/screens/UmpirePage.jsx (open), and the game page's umpire card (find it under
-  src/screens/ and src/components/). The game page is a scoring surface. Decide, by reading
-  the rule and the ADRs, whether a record that cannot include this game may appear there
-  before reveal. If you are not sure, put it on the umpire page only and say so in the PR.
+- Page: src/screens/UmpirePage.jsx. The favorite club comes from
+  src/hooks/preferences/useFavoriteTeam.js (the Brewers, 158, are only the default). When
+  the favorite club has 0 games with this umpire, show no line.
 - Wireframes: a bar strip by season under the umpire's name; a bar split into wins and
   losses with a caption "Brewers with Name behind the plate, through 2025".
 
@@ -1067,14 +1086,10 @@ Before you start (read and look; no edits yet)
    reset, stash or reformat their work.
 
 Steps
-1. Write down, in the PR body, your placement decision and the rule or ADR line that supports it.
-2. Pure helper for the bar widths and the caption text, with tests, including a club with 0
+1. Pure helper for the bar widths and the caption text, with tests, including a club with 0
    games and a club with one game.
-3. Chart component for (a). Use tokens only. Check it at 390px with an umpire who has 30 years.
-4. The record line for (b), placed per step 1.
-5. Open data on the umpire page needs no SealBox. If you place anything on the game page,
-   add a test that the line is built from `recordWith` only and imports no reveal-only module
-   (see how other tests pin an import list).
+2. Chart component for (a). Use tokens only. Check it at 390px with an umpire who has 30 years.
+3. The record line for (b), under the chart on the umpire page.
 
 Tests first
 Write the tests before the code. Watch them FAIL. Then build until they pass.
@@ -1105,8 +1120,8 @@ Review, commit, PR
   check. If it fails, follow the steward skill.
 
 Handoff
-1. Final message: the PR link, the placement decision and its reason, the routes you
-   checked, what you did not see.
+1. Final message: the PR link, the umpire ids you checked (one with a 30-year career, one
+   with no record for the favorite club), and what you did not see.
 
 Rules
 - Follow docs/agents/writing-style.md (ASD-STE100) and the house word list
@@ -1122,15 +1137,17 @@ Rules
   the PR.
 ```
 
-## Prompt 12 of 15 — Sonnet 5.5, effort high
+## Prompt 12a of 17 — Sonnet 5.5, effort medium
 
-**Run values by era (data and lookup only).** Reuses the existing sweep for earlier seasons. The risk is run time and not changing numbers that scoring surfaces use today.
+**Run values by era: the code, the checkpoint and the lookup.** It reuses the existing sweep for earlier seasons. The risk is to change numbers that scoring surfaces use today, and a test pins that. This prompt runs ONE test season and opens the draft PR. It does not run the long sweep: prompt 12b (Haiku) runs that one decade at a time and pushes to this same PR.
 
 ```text
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new. (Ponytail never overrides the spoiler rule, test-first or check-dir-size.)
 
-Task: build run-expectancy tables for earlier eras, beside the existing one, from MLB Stats
-API play-by-play. Data and a pure lookup helper only. No screen in this prompt.
+Task: add an era mode to the run-expectancy generator, so that later sessions can build
+tables for 1960 to 2023 from MLB Stats API play-by-play, one decade at a time. Add a pure
+lookup helper. Run ONE test season (1985). No screen in this prompt. Do NOT run the full
+sweep: prompt 12b does that later, on this PR's branch.
 DO NOT change public/data/run-expectancy.json or src/lib/runExpectancy.js's current behavior.
 They feed the reveal-only favor card and scripts/gen-umpire-accuracy.mjs.
 
@@ -1138,17 +1155,34 @@ Context (measured 2026-10-06)
 - scripts/gen-run-expectancy.mjs is hand-run (not on the cron). Default: the last 2 complete
   seasons; `--seasons=2024,2025` picks seasons. It walks liveData.plays.allPlays for every
   Final regular-season game, tags each pitch with its pre-pitch state, and writes 288 states
-  (8 bases x 3 outs x 12 counts) plus 24 base-out totals. The current file has seasons ["2024"]
-  and gamesSwept 4,860. Read the generator header in full first.
+  (8 bases x 3 outs x 12 counts) plus 24 base-out totals. The current file has seasons
+  ["2024", "2025"] and gamesSwept 4,860. Read the generator header in full first.
 - Play-by-play coverage by era (6 sampled games per season): 0 of 6 for 1901 to 1940; 3 of 6
   for 1950; 6 of 6 for 1960, 1970, 1980, 1990, 2000 and 2010. So tables start at 1960.
-- Cost (measured): regular-season games per era from the API: 1960 to 1999 = 77,787 games;
-  1950 onward = 153,022; 1960 onward = 140,613. A game feed averages about 432 KB and 0.66 s.
-  A 1960 to 1999 sweep is about 34 GB of download and about 3.6 hours at 4 requests at once.
-  Never store feeds. Keep only per-season sums.
+- Cost (measured): 1960 onward = 140,613 regular-season games. A game feed averages about
+  432 KB and 0.66 s. At 4 requests at once, one decade takes about 1 hour. Never store feeds.
+  Keep only per-season sums.
 - Consumers of the current table: src/lib/runExpectancy.js (`lookupRE`, `pitchFavor`),
   src/api/umpireFavor.js, src/components/gamehud/StatBox.jsx,
   src/components/inning/focus/ReferencePanel.jsx, src/hooks/useGameData.js, src/screens/GameView.jsx.
+- Cloud containers are lost when a session ends. So the per-season checkpoints are COMMITTED
+  to the PR branch, and a new session resumes from them. `.scratch/run-expectancy-eras/` is
+  not in .gitignore. Keep it that way. check-dir-size scans only src, api and scripts, so 64
+  small checkpoint files there are fine.
+
+Use these exact names. Prompt 12b runs them without reading your code.
+- `node scripts/gen-run-expectancy.mjs --era-sweep --seasons=1980,1981,...` sweeps each
+  season in the list and writes .scratch/run-expectancy-eras/season-YYYY.json when that season
+  finishes. It skips a season whose file already exists. It never writes
+  public/data/run-expectancy.json. It uses scripts/lib/concurrency.mjs `mapConcurrent` with 4
+  requests at once.
+- `node scripts/gen-run-expectancy.mjs --era-aggregate --decade=1980` reads that decade's
+  checkpoints and writes public/data/run-expectancy-eras/1980s.json (the same shape as the
+  current file, plus `seasons`). It exits non-zero and writes nothing if a season of the
+  decade has no checkpoint.
+- The decades: 2020s = 2020 to 2023 (2024 and 2025 are in the current table already; 2020
+  was a short season, and it counts as a normal season here), 2010s, 2000s, 1990s, 1980s,
+  1970s, 1960s.
 
 Before you start (read and look; no edits yet)
 1. Read CLAUDE.md, every nested CLAUDE.md in the folders you will touch,
@@ -1161,21 +1195,18 @@ Before you start (read and look; no edits yet)
    reset, stash or reformat their work.
 
 Steps
-1. Read the generator and run it for ONE old season (try 1985) into a scratch path. Report
-   games, time, and the RE24 base-out value for runners on second and third with none out.
-   Compare against the 2024 table. Report the difference in plain words.
-2. Add a per-season checkpoint: write each finished season's sums to
-   .scratch/run-expectancy-eras/season-YYYY.json (small). A restart skips finished seasons.
-   Run newest to oldest, in the background, with 4 requests at once.
-3. If the full 1960 to 2023 run would take more than about 8 hours by your measurement, run
-   what finishes in this session, record the seasons done, and say what is left. Do not
-   stretch the session.
-4. Aggregate by decade into public/data/run-expectancy-eras/{decade}s.json (same shape as
-   the current file plus `seasons`). The current file stays as it is.
-5. Add `lookupEraRE(season, state)` beside the current lookup in src/lib/runExpectancy.js or a
-   new sibling. It picks the decade file. Pure, tested, fallback to null. The old functions do
-   not change. A test pins that `pitchFavor` returns the same numbers as before for fixed inputs.
-6. Docs: docs/scripts/generators.md and docs/api/static-data.md.
+1. Add the two modes above. Put the pure parts (sum one season, merge season sums into a
+   decade table) in scripts/lib/, with tests.
+2. Add `lookupEraRE(season, state)` beside the current lookup in src/lib/runExpectancy.js or
+   in a new sibling. It picks the decade file. Pure, tested, falls back to null. The old
+   functions do not change. A test pins that `pitchFavor` returns the same numbers as before
+   for fixed inputs.
+3. Run `--era-sweep --seasons=1985`. Report games, time and the checkpoint size. Compare the
+   RE24 base-out value for runners on second and third with none out against the 2024 table.
+   Report the difference in plain words. Commit the 1985 checkpoint. Do NOT run
+   `--era-aggregate` (the 1980s are not complete yet).
+4. Docs: docs/scripts/generators.md (hand-run section: both modes, the decade list, and that
+   prompt 12b's sessions run them) and docs/api/static-data.md.
 
 Tests first
 Write the tests before the code. Watch them FAIL. Then build until they pass.
@@ -1191,15 +1222,17 @@ Review, commit, PR
 - Run the ponytail-review skill on your diff and apply the cuts. Then run
   /code-review (medium) and fix what it finds.
 - Commit to your assigned branch and push. Open a DRAFT PR that mirrors
-  .github/pull_request_template.md. Put the base SHA, the files touched and how
-  you verified in the body. Write "not applicable (cloud)" for the worktree and
-  the local URL. Subscribe to the PR's activity.
-- Do not push to main. Do not merge: Gary merges. Wait for the `lint-and-build`
-  check. If it fails, follow the steward skill.
+  .github/pull_request_template.md. The title MUST start with "Run values by era" (prompt 12b
+  finds the PR by that title). Put the base SHA, the files touched and how you verified in
+  the body. Write "not applicable (cloud)" for the worktree and the local URL. Add a section
+  "## Sweep status" with one unticked line per decade, newest first:
+  `- [ ] 2020s (2020-2023)`, `- [ ] 2010s`, ... `- [ ] 1960s`. Subscribe to the PR's activity.
+- Do not push to main. Do not merge: Gary merges after every decade is ticked. Wait for the
+  `lint-and-build` check. If it fails, follow the steward skill.
 
 Handoff
-1. Final message: the PR link, seasons done and not done, the run time, the step 1
-   comparison, and the total size of the new folder.
+1. Final message: the PR link, the 1985 games, run time and checkpoint size, the step 3
+   comparison, and the estimated time per decade from your 1985 run.
 
 Rules
 - Follow docs/agents/writing-style.md (ASD-STE100) and the house word list
@@ -1215,9 +1248,70 @@ Rules
   the PR.
 ```
 
-## Prompt 13 of 15 — Sonnet 5.5, effort high
+## Prompt 12b of 17 — Haiku 4.5 (no effort setting)
 
-**Six degrees: team-season rosters from Retrosheet.** A big download reduced to a compact player-to-team-season graph. The size is the risk. No screen.
+**Run values by era: sweep one decade.** Mechanical: run two commands that prompt 12a wrote, commit the output, and tick a box. Paste this same prompt into a new session once per decade, one session after another, never two at once (they push to one branch). Seven runs finish the sweep: 2020s first, 1960s last. Each run takes about 1 hour (the 2020s about 25 minutes).
+
+```text
+Task: run ONE decade of the run-expectancy era sweep and push the result to an open draft
+PR. You run commands and commit files. You do not write or change code.
+
+Find the work
+1. With the GitHub tools (the cloud has no `gh` CLI), list open PRs in
+   gzilavyss2025/bbsbh. Find the draft PR whose title starts with "Run values by era". If
+   there is none, or more than one, stop and say so.
+2. Run `git fetch origin <its head branch>` and check out that branch. Run
+   `git status`. If the tree is not clean, stop and say so.
+3. Read the PR body's "## Sweep status" list. Pick the FIRST unticked decade in the list
+   (the list runs newest first). If every line is ticked, stop and say "Sweep complete:
+   Gary can review the PR."
+4. Read the "Run values by era" entry in docs/scripts/generators.md for the two commands.
+
+Run
+5. The seasons of the decade: 2020s = 2020,2021,2022,2023. Every other decade = its ten
+   years, for example 1980s = 1980,1981,...,1989.
+6. Start the sweep in the BACKGROUND (Bash with run_in_background):
+   `node scripts/gen-run-expectancy.mjs --era-sweep --seasons=<the seasons>`
+   Seasons that already have a file in .scratch/run-expectancy-eras/ are skipped. That is
+   correct. Wait for the background task to finish. Do not poll with sleep.
+7. When it ends, list .scratch/run-expectancy-eras/ and check that every season of the
+   decade has a file.
+   - If one is missing, run the sweep command once more for the missing seasons only.
+   - If it is still missing after that, commit and push the season files that exist
+     (steps 10 and 11), then stop. Report the season and the last error lines. Do not tick
+     the decade and do not run step 8.
+8. Run `node scripts/gen-run-expectancy.mjs --era-aggregate --decade=<first year>`
+   (for example --decade=1980). It writes public/data/run-expectancy-eras/<decade>s.json.
+
+Check, commit, push
+9. Run `npm run lint; echo "exit=$?"`, then `npm test`. If either fails, stop and report
+   the failing lines. Do not edit code to fix it.
+10. Stage only the new season files and the new decade file:
+    `git add .scratch/run-expectancy-eras/ public/data/run-expectancy-eras/`
+    Run `git status` and check that nothing else is staged. Commit with the message
+    "Run values by era: sweep the <decade>s". End the message with the attribution lines
+    the session gives you.
+11. `git push -u origin <branch>`. If it fails for a network error, retry up to 4 times,
+    waiting 2, 4, 8 and 16 seconds. If it is rejected because the branch moved, run
+    `git pull --no-rebase origin <branch>` once and push again.
+12. Edit the PR body with the GitHub tools: tick that decade's line, and add after it the
+    games swept, the run time and the decade file's size. Change nothing else in the body.
+
+Rules
+- Never change files under src/, scripts/, test/, docs/ or public/data/run-expectancy.json.
+- Never re-run a season that already has a file. Never delete a season file.
+- Never merge the PR, mark it ready, or push to main.
+- One decade per session. Do not start the next decade.
+- If a command fails twice for the same reason, stop and report it.
+
+Handoff
+Final message: the decade you ran, games swept, run time, the decade file's size, and the
+next unticked decade (or "Sweep complete: Gary can review the PR").
+```
+
+## Prompt 13 of 17 — Sonnet 5.5, effort medium
+
+**Six degrees: team-season rosters from Retrosheet.** A big download reduced to a compact player-to-team-season graph. The size is the risk, and the prompt gives numeric stop gates for it, so medium fits. No screen.
 
 ```text
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new. (Ponytail never overrides the spoiler rule, test-first or check-dir-size.)
@@ -1305,9 +1399,9 @@ Rules
   folder. Pass paths as arguments. Run any Python with `-I`.
 ```
 
-## Prompt 14 of 15 — Sonnet 5.5, effort high
+## Prompt 14 of 17 — Sonnet 5.5, effort medium
 
-**Six degrees of teammates: the page.** A new page with a search over the graph. The path search is pure and testable. The screen follows an existing page shape.
+**Six degrees of teammates: the page.** A new page with a search over the graph. The path search is pure and testable. The screen follows an existing page shape, so medium fits.
 
 ```text
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new. (Ponytail never overrides the spoiler rule, test-first or check-dir-size.)
@@ -1397,17 +1491,18 @@ Rules
   the PR.
 ```
 
-## Prompt 15 of 15 — Opus 5.5, effort high
+## Prompt 15a of 17 — Sonnet 5.5, effort medium
 
-**Old games: a plan for the notable-performances shelf, old-game pages and "has this happened before?".** Thinking work, not building. Three large features share one data path and one question about the seal. A plan first keeps the build prompts cheap. The seal design touches the spoiler rule, so Opus at high.
+**Old games: the measurements.** Doing work, not thinking work: a join test, a recall comparison and size estimates, each with a real call or file as evidence. It writes the findings and opens a docs-only draft PR. Prompt 15b (Opus) reads those findings and does the design. Splitting the work this way keeps Opus off the scripting and the waits.
 
 ```text
-Task: write a plan, not code. Three features want old games: (1) a notable-performances shelf
-(no-hitters, cycles, triple plays), (2) old-game pages (box score, lineups, umpires, park), and (3) a
-callout that names the last time a rare play happened. They share one data path and one seal
-design. Settle both, with evidence, and write the build prompts' outlines.
-Two related issues exist and are NOT in scope: gzilavyss2025/bbsbh#1525 (score a classic game) and
-#1527 (classic of the day). Link to them; do not plan them.
+Task: measure, do not design. Three later features want old games: (1) a notable-performances
+shelf (no-hitters, cycles, triple plays), (2) old-game pages (box score, lineups, umpires,
+park), and (3) a callout that names the last time a rare play happened. Measure the data
+paths they would share, and write the numbers to .scratch/old-games/findings.md. Do NOT
+design the seal, write an ADR, or recommend a plan: prompt 15b does that from your findings.
+Two related issues exist and are NOT in scope: gzilavyss2025/bbsbh#1525 (score a classic
+game) and gzilavyss2025/bbsbh#1527 (classic of the day).
 
 Context (measured 2026-10-06)
 - MLB Stats API, one game: GET /api/v1.1/game/{gamePk}/feed/live. Play-by-play present for
@@ -1428,15 +1523,13 @@ Context (measured 2026-10-06)
   plays.csv (177 columns per play, with the pitch sequence): 87 MB (1975) and 108 MB (2024)
   uncompressed per season. Master zips are 741 MB and 799 MB. Retrosheet gameinfo covers 2025
   completely (2,478 games to 2025-11-01).
-- The spoiler rule: read CLAUDE.md "The spoiler rule", ADR-0001, 0002, 0026, 0034, 0042, 0048,
-  0049. Old games are inside the scoring scope when scored or boxed. What stays sealed for a game
-  whose result a user may know is a product decision.
 - Prompts 5, 10 and 13 add Retrosheet plumbing (scripts/lib/open-data.mjs and retro-bridge.mjs).
-  If they are merged, reuse them. If not, say what you assume.
+  If they are merged, reuse them. If not, write throwaway scripts under the scratchpad (not in
+  the repo) and say so.
 
 Before you start (read and look; no edits yet)
-1. Read CLAUDE.md, every nested CLAUDE.md in the folders you will touch,
-   docs/agents/writing-style.md, and the files this prompt names.
+1. Read CLAUDE.md, docs/agents/writing-style.md, scripts/CLAUDE.md, and ADR-0038 (file and
+   directory size rules).
 2. Run `git fetch origin`. List open PRs with the GitHub tools (the cloud has no
    `gh` CLI). Work on the branch your session was given. If it has none, make
    `claude/<slug>` from current origin/main. Run
@@ -1444,25 +1537,20 @@ Before you start (read and look; no edits yet)
    Check status and diffs before you edit. Other agents may work at once: never
    reset, stash or reformat their work.
 
-Steps (each answer needs evidence from a real call or file, not memory)
+Steps (each number needs evidence from a real call or file, not memory)
 1. Join test. For about 200 Retrosheet no-hitter or cycle games across eras, find the matching
    Stats API gamePk (by date and teams). Report the match rate and the failure kinds.
 2. Event index. Compare two ways to find rare events for 1960 onward: (a) Retrosheet lists plus
    the API for display; (b) the API alone. Cover no-hitters, cycles, triple plays. Give recall,
    cost in calls and bytes, and where each fails.
-3. Era rules. Say which source serves each era (1901 to 1949, 1950 to 1959, 1960 onward) for
-   each of the three features. Say what each feature shows when data is thin.
-4. The seal. Design what stays sealed on an old-game page: the title, the teams, the score, the
-   box score, the notable-performance label (it names the result). Give one recommendation,
-   two alternatives, and the ADR it extends. Treat "a user may already know this game" as the
-   hard case.
-5. Size and layout. Sizes for each public dataset and the shard scheme, against the repo's
-   file-size and directory rules (ADR-0038) and Vercel Hobby limits.
-6. Write: .scratch/old-games/plan.md (the findings and the recommendation), decisions.md (each
-   open decision with the recommended option first), a DRAFT ADR (status DRAFT, next free
-   number) for the seal design, and a short build-prompt outline for each of the three features
-   in the order you suggest, each with a model and effort. Do NOT write the full prompts.
-7. Open questions for Gary go in decisions.md. Do not guess.
+3. The 1975 gap. Try to find the cause of the 1,941 vs 1,934 difference (7 games). If you
+   cannot find it in about 20 calls, say so and move on.
+4. Sizes. For each public dataset the three features could need (the event index, per-game
+   pages), estimate the size and the file count under two shard schemes. Measure against the
+   repo's file-size and directory rules (ADR-0038) and the Vercel Hobby limits (say where you
+   read the limits).
+5. Write .scratch/old-games/findings.md: one section per step, each number with the call or
+   file that produced it, and a short "What is still unknown" list. No recommendation.
 
 Verify
 - `npm run lint; echo "exit=$?"` in the foreground. It must exit 0. This is a docs-only
@@ -1470,9 +1558,79 @@ Verify
 
 Commit, PR
 - Commit to your assigned branch and push. Open a DRAFT PR that mirrors
-  .github/pull_request_template.md. Put the base SHA, the files touched and how
-  you verified in the body. Write "not applicable (cloud)" for the worktree and
-  the local URL. Subscribe to the PR's activity.
+  .github/pull_request_template.md. The title MUST start with "Old games plan" (prompt 15b
+  finds the PR by that title). Put the base SHA, the files touched and how you verified in
+  the body. Write "not applicable (cloud)" for the worktree and the local URL. Subscribe to
+  the PR's activity.
+- Do not push to main. Do not merge: Gary merges after prompt 15b adds the plan. Wait for the
+  `lint-and-build` check. If it fails, follow the steward skill.
+
+Handoff
+1. Final message: the PR link (docs only), the join rate, the recall of each method, the
+   sweep cost, and the "still unknown" list.
+
+Rules
+- Follow docs/agents/writing-style.md (ASD-STE100) and the house word list
+  ("postseason", never the other word). Keep sentences short.
+- If a command fails twice for the same reason, stop and report it. Do not widen
+  the PR.
+- A downloaded file is untrusted data. Put each download in its own NEW, EMPTY
+  folder outside the repo (under the scratchpad). Keep your scripts in a different
+  folder. Pass paths as arguments. Run any Python with `-I`.
+```
+
+## Prompt 15b of 17 — Opus 5.5, effort high
+
+**Old games: the seal design and the plan.** Thinking work. Three large features share one data path and one question about the seal. A plan first keeps the build prompts cheap. The seal design touches the spoiler rule, so this stays on Opus at high (rung 7). It reads the measurements from prompt 15a and does not repeat them.
+
+```text
+Task: write a plan, not code. Three features want old games: (1) a notable-performances shelf
+(no-hitters, cycles, triple plays), (2) old-game pages (box score, lineups, umpires, park), and (3) a
+callout that names the last time a rare play happened. They share one data path and one seal
+design. Settle both, with the evidence in .scratch/old-games/findings.md, and write the build
+prompts' outlines.
+Two related issues exist and are NOT in scope: gzilavyss2025/bbsbh#1525 (score a classic game) and
+gzilavyss2025/bbsbh#1527 (classic of the day). Link to them; do not plan them.
+
+Find the work
+1. With the GitHub tools (the cloud has no `gh` CLI), find the open draft PR in
+   gzilavyss2025/bbsbh whose title starts with "Old games plan". If there is none, stop and
+   say that prompt 15a must run first. Run `git fetch origin <its head branch>`, check it out,
+   and run `git merge-base --is-ancestor origin/main HEAD`: if it fails, merge origin/main.
+2. Read .scratch/old-games/findings.md in full. Use its numbers. If you need one more number,
+   you may make up to about 20 API calls to get it. Say which numbers are yours.
+
+Before you start (read; no edits yet)
+3. Read CLAUDE.md, src/CLAUDE.md, src/api/CLAUDE.md, docs/agents/writing-style.md, and the
+   spoiler ADRs: ADR-0001, 0002, 0026, 0034, 0042, 0048, 0049. Old games are inside the scoring
+   scope when scored or boxed. What stays sealed for a game whose result a user may know is a
+   product decision.
+
+Steps
+4. Era rules. Say which source serves each era (1901 to 1949, 1950 to 1959, 1960 onward) for
+   each of the three features. Say what each feature shows when data is thin.
+5. The seal. Design what stays sealed on an old-game page: the title, the teams, the score, the
+   box score, the notable-performance label (it names the result). Give one recommendation,
+   two alternatives, and the ADR it extends. Treat "a user may already know this game" as the
+   hard case.
+6. Write: .scratch/old-games/plan.md (the recommendation, built on findings.md), decisions.md
+   (each open decision with the recommended option first), a DRAFT ADR in docs/adr/ (status
+   DRAFT, next free number: check origin/main and open PRs; scripts/check-adr-numbers.mjs) for
+   the seal design, and a short build-prompt outline for each of the three features in the
+   order you suggest, each with a model and effort. Pick the cheapest rung that fits each
+   (see .claude/skills/improve-prompt/SKILL.md, step 5): mechanical sweeps go to Haiku 4.5,
+   pattern-following builds to Sonnet 5.5 medium, and any step that changes the spoiler rule
+   to Opus 5.5 high. Do NOT write the full prompts.
+7. Open questions for Gary go in decisions.md. Do not guess.
+
+Verify
+- `npm run lint; echo "exit=$?"` in the foreground. It must exit 0. This is a docs-only
+  change, so tests and the build are unaffected. Say that in the PR.
+
+Commit, PR
+- Commit to the same branch and push (`git push -u origin <branch>`). Do NOT open a new PR.
+  Update the existing PR's body with the GitHub tools: add the new files to "Files touched"
+  and a five-line summary of the recommendation. Subscribe to the PR's activity.
 - Do not push to main. Do not merge: Gary merges. Wait for the `lint-and-build`
   check. If it fails, follow the steward skill.
 
@@ -1483,12 +1641,7 @@ Handoff
 Rules
 - Follow docs/agents/writing-style.md (ASD-STE100) and the house word list
   ("postseason", never the other word). Keep sentences short.
-- Ratchet budgets (check-dir-size, check-file-size, check-raw-values): if you
-  touch one, merge origin/main and re-measure right before you push.
-- A new generator goes in docs/scripts/generators.md under its cadence, and says
-  what runs it. A new reader goes in docs/api/static-data.md. A new module in
-  src/api/ needs an entry in src/api/spoiler-manifest.json before it lints. A new
-  ADR takes the next free number (check origin/main and open PRs;
+- A new ADR takes the next free number (check origin/main and open PRs;
   scripts/check-adr-numbers.mjs).
 - If a command fails twice for the same reason, stop and report it. Do not widen
   the PR.
