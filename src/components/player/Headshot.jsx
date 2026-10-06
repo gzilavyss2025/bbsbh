@@ -16,6 +16,8 @@ import { useHeadshotStep } from '../../hooks/images/useHeadshotStep.js'
 //       prospect whose silo 404s. A CONFIRMED MLB player gets silo only — his
 //       milb variant is a years-old wrong-cap prospect photo, so a momentary
 //       silo miss degrades to the club logo below, never that stale shot.
+//     Every player then tries the coach photo last: a retired player now on a
+//     staff has one when he has no silo.
 //   • coaches/managers (`coach`): the `{code}/coach` variant only — a coaching
 //       personId has NO silo/milb (both 404).
 // Then, shared by all:
