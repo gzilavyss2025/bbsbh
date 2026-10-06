@@ -78,6 +78,21 @@ export function splitDisplayName(fullName) {
   return { first: s.slice(0, i), last: s.slice(i + 1) }
 }
 
+// The player's own nickname ("Hammerin' Hank"). Empty when the record has none.
+export function personNickname(person) {
+  return (person?.nickName ?? '').trim()
+}
+
+// "Smyrna, Vanderbilt": high schools first, then colleges, from
+// `hydrate=education`. Names only; empty when the record lists neither.
+export function educationSummary(person) {
+  const { highschools, colleges } = person?.education ?? {}
+  return [...(highschools ?? []), ...(colleges ?? [])]
+    .map((s) => (s?.name ?? '').trim())
+    .filter(Boolean)
+    .join(', ')
+}
+
 export function personBio(person) {
   if (!person) return null
   const born = [person.birthCity, person.birthStateProvince ?? person.birthCountry]
@@ -86,6 +101,8 @@ export function personBio(person) {
   return {
     id: person.id,
     fullName: person.fullName ?? '',
+    nickname: personNickname(person),
+    education: educationSummary(person),
     number: person.primaryNumber ?? '',
     posAbbr: person.primaryPosition?.abbreviation ?? '',
     posName: person.primaryPosition?.name ?? '',

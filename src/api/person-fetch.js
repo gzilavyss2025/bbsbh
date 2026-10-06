@@ -40,13 +40,15 @@ const feedLiveUrl = (gamePk, fields) =>
 // `rosterStatusView` in person.js for the classification and how it was
 // verified. Cheap: measured 1.9 KB -> 3.2 KB (Ohtani) and 3.4 KB -> 8.5 KB
 // (Cole, a long career full of rehab stints), once per player page.
+// `education` is a FIFTH field: the high school(s) and college(s), a few dozen
+// bytes per player (see `educationSummary` in person/identity.js).
 // Degrades to null (MiLB / bad id), so the page can show a graceful "couldn't
 // load".
 export async function fetchPerson(personId) {
   if (!personId) return null
   try {
     const data = await getJson(
-      `/api/v1/people/${personId}?hydrate=currentTeam,team,draft,rosterEntries`,
+      `/api/v1/people/${personId}?hydrate=currentTeam,team,draft,rosterEntries,education`,
     )
     return data.people?.[0] ?? null
   } catch {

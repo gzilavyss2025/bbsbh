@@ -1,0 +1,17 @@
+{
+  "id": 592885,
+  "fullName": "Christian Yelich",
+  "nickName": "Yeli",
+  "birthCity": "Thousand Oaks",
+  "birthStateProvince": "CA",
+  "birthCountry": "USA",
+  "education": {
+    "highschools": [
+      {
+        "name": "Westlake",
+        "city": "Westlake Village",
+        "state": "CA"
+      }
+    ]
+  }
+}
