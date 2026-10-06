@@ -10,49 +10,51 @@ starts from current `origin/main`, opens a draft PR, and runs `npm run lint` and
 `npm test`. Issues gzilavyss2025/bbsbh#1525 and gzilavyss2025/bbsbh#1527 stay out of
 scope.
 
-## Prompt 1a. The event index: generator and reader
+## Prompt 1a. The event index: generator, nightly step, tests
 
-**Model: Sonnet 5.5, medium** (rung 3). It follows two patterns that exist:
-ADR-0100's hand-run generator and the `staticJsonBy` reader.
+**Model: Sonnet 5.5, high** (rung 4). The full prompt is `prompt-1a.md`. It moved up
+from medium when the full prompt was written: it needs merge rules, a nightly step, a
+directory budget and live field checks, across several files.
 
-**Decided (2026-10-06):** D2, D3, D6, D7, D8, D13. See `decisions.md`.
+**Decided (2026-10-06):** D2, D3, D5, D6, D7, D8, D9, D13. See `decisions.md`.
 
-- Write `scripts/gen-notable.mjs`. Use the three API routes in
-  `plan.md`, section 2. Put the pure half under `scripts/lib/`.
-- No-hitter rule: a game counts when `detailedState` is `Final` or `Completed Early`.
-  `Forfeit` does not count (the 1979 DET@CWS 0-0 forfeit). Do not trust
-  `abstractGameState`: postponed and cancelled rows also say `Final` there. Dedupe by
-  gamePk (the schedule lists a suspended game twice).
-- Keep a row only when both clubs played in the AL or the NL that season (D6).
-  Negro league games stay out.
-- No-hitter marks (D8): "shortened" under 9 innings, "lost" when the no-hit club
-  lost, and every pitcher for a combined no-hitter.
-- Cycle rule: the batched game log with `fields=` (it cuts bytes about 10 times).
-- Merge the hand-seeded additions file (D3). Seed row 1: gamePk 716945.
-- Add a `--season Y` flag (the nightly run) and an all-seasons mode (the hand run).
-- Add a cross-check mode that reads Retrosheet's `nohitters.zip` and `tripleplays.zip`
-  from paths given as arguments. It reports misses. It never writes the output. It
-  follows ADR-0100's download rules.
-- Add the reader under `src/api/notable/` and its `spoiler-manifest.json` entry:
-  `reveal-only`, importers empty for now.
-- Tests: a vocabulary test on a fixture, in the style of `test/milb-pool.test.js`. A row
-  may hold the listed keys only. It holds the final score (D5) and nothing else about
-  the result.
-- Check first: the postseason team fielding log with `gameType`, and the batched
-  game-log form with `gameType`. If either fails, say so and stop. Do not invent a
-  route.
+Two changes from the first outline, found while writing the full prompt:
 
-## Prompt 1b. The event index: the full sweep
+- **No reader in 1a.** `check-dead-exports.mjs` fails on an export that nothing
+  imports. ADR-0076 lets a dataset ship before any surface reads it. The reader moves to
+  prompt 2b, its first importer.
+- **The nightly step is in 1a, not 1c.** `scripts/CLAUDE.md`: a generator is wired into
+  its cron in the same commit that adds it.
+
+It commits 2025 only. The cross-check moved out to 1b.
+
+## Prompt 1b. The event index: the Retrosheet cross-check
+
+**Model: Sonnet 5.5, medium** (rung 3). It follows ADR-0100's open-data pattern.
+
+**Needs first:** prompt 1a merged.
+
+- Add a `--check-retrosheet <dir>` mode to `gen-notable.mjs`. It reads the extracted
+  `nohitters.zip` and `tripleplays.zip` from the paths given. It never downloads
+  (ADR-0100). Inspect the extracted files first; do not assume their columns.
+- Match a Retrosheet game to an API game by date and score. Accept either game of a
+  doubleheader day (`findings.md`, Step 1). This needs no team-code table.
+- Label each Retrosheet row: matched; matched but dropped by D6 (Negro league);
+  before 1901; or missed. Print the report. Never write the output or the seed. A
+  person adds a seed row.
+- Tests for the matcher and the labels.
+
+## Prompt 1c. The event index: the full history
 
 **Model: Haiku 4.5** (rung 1; no effort setting). Mechanical: run a generator that
 exists, and commit its output.
 
-- Run prompt 1a's generator in all-seasons mode. Expect about 4,000 calls and about
-  803 MB.
+**Needs first:** prompts 1a and 1b merged.
+
+- Run `gen-notable.mjs --from 1901 --to <season in play>`. Expect about 4,000 calls
+  and about 803 MB.
 - Run the cross-check. Paste its report in the PR. Do not edit the seed file. A person
   does that.
-- Add the `EXCEPT` entry in `check-data-freshness.mjs`, and add the current-season run
-  to the nightly workflow (if D9 says nightly).
 - Stop on any HTTP error that repeats. Do not retry past the rule in root `CLAUDE.md`.
 
 ## Prompt 2a. Old-game pages: thin eras
@@ -78,10 +80,11 @@ not touch a seal.
 
 **Decided (2026-10-06):** D1, seal by surface.
 
+- Add the reader under `src/api/notable/`, through `staticJsonBy`. Its
+  `spoiler-manifest.json` entry is `reveal-only`, and its importer allowlist names the
+  box score's reveal module only (ADR-0101, part 4).
 - Render the feat label inside the box score's `SealBox` reveal function only. Read
   ADR-0002, ADR-0049 and ADR-0101 before you edit.
-- Add the box score's reveal module to the reader's importer allowlist. Add nothing
-  else to it.
 - Add a test that the label is not in the DOM while the box score is sealed. Add a test
   that the label shows under the day pass (ADR-0026) and a stamp (ADR-0048) with no
   `boxreveal` write.
@@ -114,7 +117,7 @@ judgment, so it is one rung above medium. It changes no gate: the play card and 
 roll-up are already reveal-gated surfaces.
 
 **Decided (2026-10-06):** D10 (club always; player and league only when notable), D11
-(no link; the link is gzilavyss2025/bbsbh#1570). **Needs first:** prompt 1b merged.
+(no link; the link is gzilavyss2025/bbsbh#1570). **Needs first:** prompt 1c merged.
 
 - Read `docs/callouts.md` first. Extend the existing surfaces. Do not build a parallel
   path.

@@ -231,7 +231,8 @@ link), and open by age (games before a cutoff year render open).
 
 Outlines and models are in `build-prompts.md`.
 
-1. **The event index** (generator, reader, manifest entry, the full sweep).
+1. **The event index** (1a generator and nightly step, 1b Retrosheet cross-check, 1c full
+   history). The reader comes in 2b, with its first importer.
 2. **Old-game pages** (thin-era degrade, then the feat label in the box score seal, then
    ADR-0101 goes from DRAFT to accepted).
 3. **The shelf** (the labelled-door page).
