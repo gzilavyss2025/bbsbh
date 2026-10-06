@@ -58,6 +58,7 @@ export const EXCEPT = {
   'trade-deadline/': 'hand-run; the deadline passes once a year',
   'xwoba-table/': 'hand-run a few times a season (gen-xwoba-table.mjs, ADR-0097); a table holds for a month',
   'contracts-history/': 'hand-run from committed CSVs (ADR-0066)',
+  'team-seasons.json': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the file carries no clock',
   'family-ties/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
   'on-this-day/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
   'birthplaces/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',

@@ -979,6 +979,14 @@ for each generator; the reader modules:
   (`country`, 'Canada'); 'WI' finds nothing. `birthplaceKey` and `birthplaceShard` are
   the one definition the generator also uses. `fetchBirthplaceShard(ab)` returns the
   whole file and its `credit`. Spoiler-free.
+- `teamSeasons.js` — who played for each MLB team-season, from
+  `public/data/team-seasons.json` (`gen-team-seasons.mjs`, hand-run, ADR-0100).
+  `loadTeamSeasons()` returns `{ credit, throughSeason, players, teamSeasons }`:
+  `players` lists each MLBAM id once, and each `teamSeasons` entry is
+  `[key, label, [index into players]]` (`['CHN-1998', 'Cubs 1998', [...]]`). The
+  whole file is one fetch, memoized, and it holds no search logic. The `credit` lines
+  print beside any chain built from it. Empty on a missing file. Spoiler-free:
+  history about people, no game state.
 - `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
   `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Not a third
   party, not attributed, and not an MLE —
