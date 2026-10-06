@@ -916,17 +916,6 @@ export function GameSelect({
         </Suspense>
       )}
 
-      {/* Signed-in only, and only when the cloud scorebook has entries —
-          renders null otherwise, so the slate is untouched for everyone
-          else. Signed OUT, the same slot instead pitches an account once
-          three-plus games are in progress on this device. See
-          ContinueScoring.jsx. */}
-      {ContinueScoring && (
-        <Suspense fallback={null}>
-          <ContinueScoring />
-        </Suspense>
-      )}
-
       {/* The slate's two columns, wide: the games, and the league's roster
           wire beside them. Below WIDE_QUERY this wrapper is a plain block and
           the rail is not rendered at all — the phone gets the dock at the foot
@@ -1122,6 +1111,17 @@ export function GameSelect({
           />
         )}
       </div>
+
+      {/* Signed-in only, and only when the cloud scorebook has entries —
+          renders null otherwise, so the slate is untouched for everyone
+          else. Signed OUT, the same slot instead pitches an account once
+          three-plus games are in progress on this device. See
+          ContinueScoring.jsx. */}
+      {ContinueScoring && (
+        <Suspense fallback={null}>
+          <ContinueScoring />
+        </Suspense>
+      )}
 
       <SiteFooter onShowLogos={onShowLogos} />
 
