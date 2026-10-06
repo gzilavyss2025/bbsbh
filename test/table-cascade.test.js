@@ -825,7 +825,7 @@ test('T7: no moved page reads a reveal-only module, a seal or a stamp', () => {
 // tables that became a sticky, labelled sheet, and `bare` the count of tables
 // that became a bare, unlabelled one (the doubleheaders drawer).
 const T5 = [
-  { jsx: 'screens/around-the-game/AttendancePage.jsx', boards: 3, bare: 0 },
+  { jsx: 'screens/around-the-game/AttendancePage.jsx', boards: 4, bare: 0 },
   { jsx: 'screens/around-the-game/BullpenPage.jsx', boards: 1, bare: 0 },
   { jsx: 'screens/around-the-game/DoubleheadersPage.jsx', boards: 1, bare: 1 },
   { jsx: 'screens/around-the-game/FarmSystemPage.jsx', boards: 3, bare: 0 },
@@ -860,7 +860,7 @@ test('T5: every report board renders on a sticky, labelled Table and never on a 
     }
     tables += tags.length
   }
-  assert.equal(tables, 17, 'T5 moves 17 tables')
+  assert.equal(tables, 18, 'T5 moves 18 tables')
 })
 
 test('T5: two boards on one page have two different labels', () => {
