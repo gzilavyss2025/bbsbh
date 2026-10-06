@@ -9,6 +9,7 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { SiteSearchModal } from '../../components/chrome/SiteSearch.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
+import { Card } from '../../components/ui/frame/Card.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Loader } from '../../components/ui/Loader.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
@@ -56,7 +57,9 @@ export function TeammatesPage() {
   return (
     <div className="screen">
       <SiteHeader />
-      <h1 className="degrees__title">Six degrees of teammates</h1>
+      <header className="topbar">
+        <h1 className="topbar__title">Six degrees of teammates</h1>
+      </header>
       <p className="degrees__blurb">
         Pick two players. Tally finds the shortest chain of teammates between them.
       </p>
@@ -99,15 +102,15 @@ export function TeammatesPage() {
             {chain.map((step, i) =>
               i % 2 ? (
                 <li key={i} className="degrees__link" aria-label={`teammates on the ${step}`}>
-                  {step}
+                  <b className="degrees__chip">{step}</b>
                 </li>
               ) : (
-                <li key={i} className="degrees__player">
+                <Card as="li" key={i} body="flush" className="degrees__player">
                   <PlayerLink id={step} name={names.get(step)} className="degrees__who">
                     <Headshot personId={step} name={names.get(step)} className="degrees__shot" />
                     <span className="degrees__name">{names.get(step)}</span>
                   </PlayerLink>
-                </li>
+                </Card>
               ),
             )}
           </ol>

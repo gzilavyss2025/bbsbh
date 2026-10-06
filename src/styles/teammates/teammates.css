@@ -3,18 +3,14 @@
    Imported by that screen alone. Open surface: no seal.
    ============================================================ */
 
-.degrees__title {
-  margin: var(--space-3) 0 var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-display-md);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-title);
-  color: var(--text-heading);
-}
-
 .degrees__blurb {
   margin: 0 0 var(--space-4);
   color: var(--text-muted);
+}
+
+.degrees__pickers,
+.degrees__chain {
+  max-width: 34rem;
 }
 
 .degrees__pickers {
@@ -23,50 +19,67 @@
   margin-bottom: var(--space-4);
 }
 
-/* The chain wraps in rows; nothing scrolls sideways. A player is a column of
-   headshot over name, and the dashed team-season label sits between two players. */
+/* One ledger card per player, a dashed stitch between cards with the team-season on a
+   marker chip. A vertical list: it holds at 390px and for a ten-link chain. */
 .degrees__chain {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.degrees__player {
+  padding: var(--space-2);
+}
+
 .degrees__who {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
-  max-width: var(--shot-md-w);
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
 }
 
 .shot.degrees__shot {
+  flex: none;
   width: var(--shot-md-w);
   height: var(--shot-md-h);
 }
 
 .degrees__name {
-  font-size: var(--fs-small);
-  text-align: center;
-  overflow-wrap: anywhere;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  color: var(--text-heading);
 }
 
+/* The stitch runs down the middle of the headshot column above and below it. */
 .degrees__link {
+  margin-left: calc(var(--shot-md-w) / 2 + var(--space-2));
+  padding: var(--space-3) 0 var(--space-3) var(--space-3);
+  border-left: 2px dashed var(--border-rule);
+}
+
+.degrees__chip {
   padding: var(--space-1) var(--space-2);
-  border: 1px dashed var(--text-muted);
-  border-radius: var(--radius-sm);
+  background: var(--marker);
+  font-family: var(--font-mono);
   font-size: var(--fs-small);
-  color: var(--text-muted);
+  font-weight: inherit;
+  text-transform: uppercase;
+  color: var(--text-heading);
 }
 
 .degrees__caption {
+  display: inline-block;
   margin: var(--space-3) 0;
+  padding: var(--space-1) var(--space-3);
+  background: var(--ink-0);
   font-family: var(--font-mono);
   font-size: var(--fs-small);
-  color: var(--text-muted);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-on-ink);
 }
 
 .degrees__credit {
