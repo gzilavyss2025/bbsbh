@@ -59,6 +59,7 @@ export const EXCEPT = {
   'xwoba-table/': 'hand-run a few times a season (gen-xwoba-table.mjs, ADR-0097); a table holds for a month',
   'contracts-history/': 'hand-run from committed CSVs (ADR-0066)',
   'prospect-rank-history.json': 'hand-run; the 2005-2024 rankings are frozen and the file carries no clock (#1111)',
+  'league-averages.json': 'hand-run; a finished season never changes and the file carries no clock',
   // Frozen ON PURPOSE, which is the one shape this guard cannot tell from a
   // dead generator. A level's pool is a list of games from a season that is
   // over, so it is checked once and then only re-joined against the prospect
