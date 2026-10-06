@@ -71,5 +71,6 @@ In a postseason game the poster now reads the regular-season line from one
 `byDateRange` request for the whole lineup, ending the day before
 (`src/api/player/hitterEntryLines.js`). The October line, from `seasonStats` minus
 tonight, rides the model as `october`. Until the request lands the season slot is
-empty. The callouts (`gen-callouts.mjs`) are not changed: whether an October note
-counts October games needs the owner's answer.
+empty. The callouts (`gen-callouts.mjs`) count October games too: the owner chose
+that, so the nightly game logs and club schedule ask `gameType=R,F,D,L,W`, still cut
+at the day before the slate (see `docs/callouts.md`).
