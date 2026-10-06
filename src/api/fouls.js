@@ -54,6 +54,18 @@ export async function fetchFoulsFor(personId, { seasonYear } = {}) {
 // reference the same minimums the ranking uses. Batters qualify on games
 // played, pitchers on total pitches thrown — a one-appearance cameo shouldn't
 // top a rate board (same idea as the live leader boards' playing-time floor).
+// The postseason beside the regular season (ADR-0101): a season file carries
+// `post`, the same shape again, once a postseason game is on file. This is the
+// page's data for one scope — 'R' is the file as it is, 'P' lifts `post` to the
+// top and keeps the season labels. Without a `post`, every scope is the regular
+// season (callers show the toggle only when `hasPostseason`).
+export const hasPostseason = (data) => !!data?.post?.gamesIngested
+export function foulsInScope(data, scope) {
+  if (scope !== 'P' || !hasPostseason(data)) return data
+  const { post, ...rest } = data
+  return { ...rest, ...post }
+}
+
 export const MIN_BATTER_GAMES = 20
 export const MIN_PITCHER_PITCHES = 200
 

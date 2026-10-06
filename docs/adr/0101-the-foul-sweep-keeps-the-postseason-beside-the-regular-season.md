@@ -49,8 +49,10 @@ the same problem for the pitch sweep. Three things must not change:
   this change commits the migrated dump.
 - `--backfill-team-pitch-types` wipes both scopes of a season and rebuilds each
   game under its own scope. `--backfill-games` keeps each game's scope.
-- A postseason view on `/fouls` and on the `FoulCard` is a later change. It
-  reads `post`.
+- `/fouls` has a Regular season / Postseason toggle, shown once `post` exists
+  (`PartOfSeason`, `foulsInScope` in `src/api/fouls.js`). The postseason view
+  lowers the board floors (2 games, 60 pitches), since a club plays few October
+  games. The player's `FoulCard` is a later change; it reads `post` in the bucket.
 - Older postseason games are outside the 3-day nightly window. Backfill them by
   hand with `node scripts/gen-fouls.mjs --since=<first postseason date>`.
 - Spoiler rule: a foul total over Final games says nothing about a game still

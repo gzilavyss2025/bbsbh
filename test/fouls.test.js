@@ -6,6 +6,8 @@ import { join } from 'node:path'
 import { openDb } from '../scripts/lib/db.js'
 import { aggregateGameFouls, exportFouls, exportFoulStore, foldGame, foulStatements, scopeOfGameType, wipeTeamPitchTypes } from '../scripts/gen-fouls.mjs'
 import {
+  foulsInScope,
+  hasPostseason,
   batterFoulLine,
   pitcherFoulLine,
   foulLeaders,
@@ -545,4 +547,29 @@ test('the scope of a postseason game is stored on its ledger row and its game to
 test('a gameType maps to a scope: the postseason rounds are P, everything else R', () => {
   for (const t of ['F', 'D', 'L', 'W']) assert.equal(scopeOfGameType(t), 'P')
   for (const t of ['R', 'S', undefined]) assert.equal(scopeOfGameType(t), 'R')
+})
+
+test('foulsInScope lifts the postseason to the top and keeps the season labels; R is the file untouched', () => {
+  const data = {
+    season: 2026,
+    asOf: 'x',
+    gamesIngested: 100,
+    batters: { 1: { fouls: 50 } },
+    post: { gamesIngested: 3, batters: { 1: { fouls: 4 } }, coverageSince: '2026-09-29' },
+  }
+  assert.equal(foulsInScope(data, 'R'), data)
+  const p = foulsInScope(data, 'P')
+  assert.equal(p.season, 2026)
+  assert.equal(p.gamesIngested, 3)
+  assert.equal(p.batters[1].fouls, 4)
+  assert.equal(p.post, undefined)
+  assert.equal(data.batters[1].fouls, 50, 'the file itself is not touched')
+})
+
+test('without a postseason, every scope is the regular season and the toggle stays hidden', () => {
+  const data = { season: 2026, gamesIngested: 100, batters: {} }
+  assert.equal(hasPostseason(data), false)
+  assert.equal(hasPostseason({ ...data, post: { gamesIngested: 0 } }), false)
+  assert.equal(foulsInScope(data, 'P'), data)
+  assert.equal(foulsInScope(null, 'P'), null)
 })
