@@ -1,4 +1,5 @@
 import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../../../api/game.js'
+import { fetchPitcherPostseasonCareer } from '../../../api/postseason/pitcherCareer.js'
 import { fetchPitchArsenalFor, pitchArsenalFor } from '../../../api/pitchArsenal.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import {
@@ -7,6 +8,7 @@ import {
   pitchTiles,
   pitcherRole,
   restLabel,
+  showCareerRow,
   showPostseasonRow,
 } from '../../../lib/pitcherCard/card.js'
 import { PitcherNotice } from '../PitcherNotice.jsx'
@@ -55,7 +57,10 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
         // MLB and AAA only: AA and below carry no pitch tracking.
         sportId === 1 || sportId === 11 ? fetchPitchArsenalFor(id, { seasonYear: season }) : null,
       ])
-      return { line, post, last, shard }
+      // His earlier Octobers: one extra yearByYear request, only in a postseason
+      // game, and it ends the day before this one like `post` (ADR-0088).
+      const career = isPostseason(gameType) ? await fetchPitcherPostseasonCareer(id, season, post) : null
+      return { line, post, career, last, shard }
     },
     [id, officialDate, gameNumber, season, sportId, gameType],
   )
@@ -80,6 +85,8 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
             role={role}
             line={data.line}
             post={showPostseasonRow(gameType, data.post) ? data.post : null}
+            season={season}
+            career={showCareerRow(gameType, data.career, data.post) ? data.career : null}
             debut={!data.line && !data.last}
             sportId={sportId}
           />
