@@ -58,6 +58,7 @@ export const EXCEPT = {
   'trade-deadline/': 'hand-run; the deadline passes once a year',
   'xwoba-table/': 'hand-run a few times a season (gen-xwoba-table.mjs, ADR-0097); a table holds for a month',
   'contracts-history/': 'hand-run from committed CSVs (ADR-0066)',
+  'franchise-history/': 'hand-run; a season adds one span at most, and the files carry no clock',
   'prospect-rank-history.json': 'hand-run; the 2005-2024 rankings are frozen and the file carries no clock (#1111)',
   // Frozen ON PURPOSE, which is the one shape this guard cannot tell from a
   // dead generator. A level's pool is a list of games from a season that is
