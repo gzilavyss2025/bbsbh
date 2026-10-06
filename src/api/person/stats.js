@@ -293,7 +293,10 @@ const SITUATIONAL_CODES = [
 ]
 export const SITUATIONAL_SIT_CODES = SITUATIONAL_CODES.map(([code]) => code).join(',')
 
-export function situationalSplitsView(splits, group) {
+// `minRows` is how many of the six rows the table needs before it is shown; the
+// postseason scope passes 1, because a short October is a small sample to SHOW
+// (with its count), not noise to hide.
+export function situationalSplitsView(splits, group, { minRows = 4 } = {}) {
   const byCode = {}
   for (const s of splits ?? []) {
     const code = s.split?.code
@@ -311,7 +314,7 @@ export function situationalSplitsView(splits, group) {
   )
   // A couple of stray rows (a September call-up who's barely pitched) read
   // as noise, not a table — require most of the set before rendering.
-  if (rows.length < 4) return null
+  if (rows.length < minRows) return null
   const all = byCode.r0 && byCode.ron ? overallSide([byCode.r0, byCode.ron], group) : null
   return { rows, all }
 }

@@ -55,6 +55,12 @@ one tab and "today" on the next.
   October he reached, and his career postseason line
   (`api/player/postseasonRegister.js`, statsapi `gameType=P`; it draws nothing for a
   player with no postseason, and on a dated page drops the as-of season and later).
+  The splits section has a **Regular / Postseason** switch (default Regular; the
+  two scopes are never blended). The postseason tables use `statSplits` with
+  `gameType=P`; that read ignores a date window, so a dated page asks nothing and
+  has no switch. The hitter recent-form windows are cut from the game log
+  (regular season and October together, `hitterFormWindows`), because `lastXGames`
+  with a mixed game-type list returns no true last-N window.
 - **Analytics** — what is under those numbers, for players who are not retired.
   The Prospect card below the
   majors — a level-relative OPS/ERA standing (`prospectTrend.js`) alongside how
