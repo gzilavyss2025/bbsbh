@@ -456,7 +456,11 @@ for each generator; the reader modules:
   its own — decided by a MAJORITY of the sample rather than unanimity, since one
   turned-around at-bat should not withhold the other 239. The stored
   `pitcherId` is read by nothing today; it rides so a pitcher-side spray card
-  can share these shards instead of sweeping the season twice. Surface: the
+  can share these shards instead of sweeping the season twice.
+  **The postseason is a `post` map beside `bat`** (ADR-0100): same entry shape,
+  MLB only, never blended. `sprayView` returns the regular card and adds
+  `scoped.P` and `scoped.A` (Postseason, All) only for a batter with an October
+  ball; the card floor is decided on `bat`. Surface: the
   player page's Analytics shelf, via `SprayMapSection.jsx` →
   `charts/SprayMap.jsx`. Out of the PWA precache by the inverted
   `globPatterns` default, with a `NetworkFirst` runtime rule in

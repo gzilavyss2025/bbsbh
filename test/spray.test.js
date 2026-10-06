@@ -318,6 +318,51 @@ test('sprayView decodes the balls once, for the chart to filter', () => {
   assert.equal(splitBalls(view.balls, 'L').length, 1)
 })
 
+// ------------------------------------------------------------ the postseason ----
+//
+// `post` sits beside `bat` in a bucket, same entry shape (ADR-0100). The rules:
+// the regular card never changes, the control exists only for a batter with
+// October balls, and All is the two added.
+
+const octoberOf = (n) => ({ ...entryOf({ p: Array.from({ length: n }, (_, i) => row(-30 + i)), o: { R: [n, 2, 1, 1, 3], L: [0, 0, 0, 0, 0] } }), t: 158 })
+const withPost = (id, post) => ({ ...shardOf(id, seasonOf(60)), post: post && { [id]: post } })
+function seasonOf(n) {
+  return entryOf({ p: Array.from({ length: n }, (_, i) => row(-10 + (i % 20))), o: { R: [n, 20, 8, 4, 12], L: [0, 0, 0, 0, 0] } })
+}
+
+test('the regular view is identical with or without a postseason part', () => {
+  const plain = sprayView(shardOf(7, seasonOf(60)), 7)
+  const { scoped, ...regular } = sprayView(withPost(7, octoberOf(12)), 7)
+  assert.ok(scoped)
+  assert.deepEqual(regular, plain)
+})
+
+test('a batter with no postseason ball gets no postseason scopes', () => {
+  assert.equal(sprayView(shardOf(7, seasonOf(60)), 7).scoped, undefined)
+  assert.equal(sprayView(withPost(7, null), 7).scoped, undefined)
+  assert.equal(sprayView(withPost(7, entryOf()), 7).scoped, undefined) // an entry holding no ball in play
+})
+
+test('Postseason is his October alone, with no card floor', () => {
+  const { scoped } = sprayView(withPost(7, octoberOf(12)), 7)
+  assert.equal(scoped.P.splits[0].bip, 12)
+  assert.equal(scoped.P.balls.length, 12)
+  assert.equal(scoped.P.splits[0].thin, false) // All is never thin
+  assert.equal(scoped.P.splits[1].thin, true) // 12 vs RHP is under the split floor
+})
+
+test('All is the regular season and the postseason added, never a third stored row', () => {
+  const { scoped } = sprayView(withPost(7, octoberOf(12)), 7)
+  assert.equal(scoped.A.splits[0].bip, 72)
+  assert.equal(scoped.A.balls.length, 72)
+  assert.equal(scoped.A.splits[0].hr, 4 + 1)
+})
+
+test('a postseason entry alone does not open a card the regular season did not', () => {
+  const data = { season: 2026, bat: {}, post: { 7: octoberOf(12) } }
+  assert.equal(sprayView(data, 7), null)
+})
+
 // ------------------------------------------------------------- the sweep ----
 //
 // The generator's two pure halves — one game's fold, and the merge that carries

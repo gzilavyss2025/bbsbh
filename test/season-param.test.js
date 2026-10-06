@@ -10,7 +10,7 @@ const index = { seasons: [2026, 2027], current: 2027 }
 const FILES = {
   '/data/spray/seasons.json': index,
   '/data/spray/2026/01.json': { season: 2026, bat: { 101: { n: 'Two Seasons', t: 158, b: 'R', p: [[1, 2, 90, 0, 0, 0, 0, 5]], o: { R: [3, 1, 0, 0, 1] } } } },
-  '/data/spray/2027/01.json': { season: 2027, bat: { 101: { n: 'Two Seasons', t: 158, b: 'R', p: [[3, 4, 95, 4, 1, 0, 0, 6]], o: { R: [2, 1, 1, 1, 2], L: [1, 0, 0, 0, 0] } } } },
+  '/data/spray/2027/01.json': { season: 2027, bat: { 101: { n: 'Two Seasons', t: 158, b: 'R', p: [[3, 4, 95, 4, 1, 0, 0, 6]], o: { R: [2, 1, 1, 1, 2], L: [1, 0, 0, 0, 0] } } }, post: { 101: { n: 'Two Seasons', t: 158, b: 'R', p: [[5, 6, 99, 1, 0, 0, 0, 7]], o: { R: [1, 1, 0, 0, 1] } } } },
   '/data/spray/2027/02.json': { season: 2027, bat: { 202: { n: 'Rookie', t: 121, b: 'L', p: [], o: { R: [1, 0, 0, 0, 0] } } } },
   '/data/fouls/seasons.json': index,
   '/data/fouls/2026/fouls.json': { season: 2026 },
@@ -118,6 +118,8 @@ test("one player's 'all' reads every season's shard and adds them", async () => 
   assert.equal(spray.value.season, null)
   assert.deepEqual(spray.value.bat[101].o.R, [5, 2, 1, 1, 3])
   assert.equal(spray.value.bat[101].p.length, 2)
+  assert.equal(spray.value.post[101].p.length, 1) // the postseason part rides beside, not inside
+  assert.equal(spray.value.bat[101].o.R[0], 5)
   // The combined shard is in the shape the card's own view model reads.
   assert.equal(sprayView(spray.value, 101), null) // under MIN_SPRAY_BIP, read the normal way
 

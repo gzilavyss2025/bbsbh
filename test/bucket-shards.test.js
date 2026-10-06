@@ -38,14 +38,15 @@ test('every reader computes the same bucket', () => {
   assert.equal(shardKey100(null), '00')
 })
 
-// `post` is the postseason, beside `pit` in the same bucket (ADR-0094).
-const pitAndPost = (shard) => [...Object.keys(shard.pit ?? {}), ...Object.keys(shard.post ?? {})]
+// `post` is the postseason, beside `pit` (or `bat`) in the same bucket (ADR-0094).
+const pitAndPostOf = (regular) => (shard) => [...Object.keys(shard[regular] ?? {}), ...Object.keys(shard.post ?? {})]
+const pitAndPost = pitAndPostOf('pit')
 for (const [name, pick] of [
   ['manager-history', (shard) => Object.keys(shard.byPersonId ?? {})],
   ['fouls', (shard) => [...Object.keys(shard.batters ?? {}), ...Object.keys(shard.pitchers ?? {})]],
   ['pitch-arsenal', pitAndPost],
   ['pitch-command', pitAndPost],
-  ['spray', (shard) => Object.keys(shard.bat ?? {})],
+  ['spray', pitAndPostOf('bat')],
 ]) {
   test(`every ${name} record sits in the bucket its reader will ask for`, () => {
     assert.ok(list(name).length > 50, `${name}: only ${list(name).length} buckets`)
@@ -108,8 +109,12 @@ test('a bucket stays small enough to be worth fetching alone', () => {
     // positional integers (see src/api/spray.js's header on why), so the only
     // remaining trims would be dropping the stored pitcher id — which a
     // pitcher-side card is meant to read — or losing a decimal off the
-    // coordinates. Measured largest at 122 KB; this ceiling leaves a season's
-    // remaining weeks room without letting the shape quietly double.
+    // coordinates. Measured largest at 147,161 bytes for the full regular
+    // season; the postseason part is below.
+    // Measured 2026-10-06 after the first 17 postseason games (807 balls in play
+    // across 137 batters): the largest bucket went from 147,161 to 148,190
+    // bytes, about 1 KB. The whole 2026 postseason is roughly three times that,
+    // so the largest lands near 151 KB and 160 still holds.
     ['spray', 160],
   ]) {
     const largest = Math.max(...dirs(name).flatMap((d) => list(name, d).map((f) => statSync(new URL(f, d)).size)))
@@ -142,4 +147,18 @@ test('a hitter-grid bucket stays small enough to be worth fetching alone', () =>
       for (const id of [...Object.keys(shard.bat), ...Object.keys(shard.post ?? {})]) assert.equal(shardKey100(id), f.slice(0, 2))
     }
   }
+})
+
+// The postseason part of the spray store (ADR-0100) is MLB only, and the ledger
+// that stops a re-sweep keys on the gamePk, so a postseason game is on it once.
+test('a spray postseason entry is MLB only, and the ledger holds each game once', () => {
+  for (const d of dirs('spray')) {
+    for (const f of list('spray', d)) {
+      for (const [id, entry] of Object.entries(read('spray', f, d).post ?? {})) {
+        for (const ball of entry.p) assert.equal(ball[6], 0, `spray post: ${id} has a non-MLB ball in ${f}`)
+      }
+    }
+  }
+  const { games } = JSON.parse(readFileSync(new URL('../scripts/data/spray-ingested.json', import.meta.url), 'utf8'))
+  assert.equal(new Set(games).size, games.length)
 })
