@@ -149,6 +149,7 @@
    name/handedness/jersey column, with the season line as its own row. */
 .starter__body {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2h) var(--space-3);
@@ -251,11 +252,24 @@ button.starter__careervs {
   border-top: var(--bw-hair) dashed var(--border-hairline);
 }
 
-/* The pitch-mix bar (PitchArsenalMix.jsx) — hidden below the wide breakpoint
-   (see the WIDE LAYOUT section), where the card has no spare width for it
-   next to the headshot + info column. */
-.starter__arsenal {
-  display: none;
+/* The pitch mix (StarterMix.jsx). Phone: a "Watch his pitches" door, a full row
+   under the headshot + info, that opens the scene in a sheet. Wide: the band in
+   the WIDE LAYOUT section. The body wraps so either can take a row of its own. */
+.starter__body .starter__watch {
+  flex: 0 0 100%;
+  margin: 0;
+}
+.starter__sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.starter__sheet .pcard__sec {
+  padding-top: 0;
+  border-top: 0;
+}
+.starter__sheet .btn {
+  width: 100%;
 }
 
 /* The mix's own rows, its times-through filter and the card's dark dress live
