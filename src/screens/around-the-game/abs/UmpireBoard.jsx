@@ -42,7 +42,7 @@ import { commas, num2, pct1 } from './format.js'
 // because that is the view the bar is drawn for; `showAll` swaps in every
 // qualifying man, in the same order, with the same ranks.
 
-export function UmpireBoard({ summary }) {
+export function UmpireBoard({ summary, seasonYear }) {
   const [umpSort, setUmpSort] = useState('rate')
   const [showAll, setShowAll] = useState(false)
   // The control names the table it opens, and the id is generated rather than
@@ -67,7 +67,7 @@ export function UmpireBoard({ summary }) {
             {u.tied ? 'T' : ''}
             {u.rank ?? '—'}
           </span>
-          <UmpireLink id={u.umpireId} name={u.name}>
+          <UmpireLink id={u.umpireId} name={u.name} seasonYear={seasonYear}>
             {u.name}
           </UmpireLink>
         </span>
