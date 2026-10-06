@@ -128,6 +128,7 @@ export function PlayerHubShell({ core, asOf = null, sportId = null, active, chil
                 {bio.number && <span className="player__num">#{bio.number}</span>}
               </span>
             </h1>
+            {bio.nickname && <p className="player__meta">“{bio.nickname}”</p>}
             {/* Two lines, not one run-on list. The old single line ran
                 position · hand · club · pill through mid-dots and wrapped
                 wherever it ran out of room, which stranded a separator at the
@@ -164,6 +165,7 @@ export function PlayerHubShell({ core, asOf = null, sportId = null, active, chil
                 )}
               </p>
             )}
+            {bio.education && <p className="player__meta">{bio.education}</p>}
           </div>
           {club && (
             <TeamLink id={club.id} className="player__herologo" ariaLabel={club.name}>

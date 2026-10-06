@@ -1162,8 +1162,14 @@ don't run these by hand.
   coaching career rather than his managerial stints alone (Pat Murphy was a
   Padres bench coach years before he managed the Brewers; both belong). The cron
   runs **`--current-only`**: this season, all 30 clubs, ~30 calls, MERGED into
-  the existing shards so the hand-run full backfill (2000-present, ~800 calls)
-  survives. Per-stint W-L for a club-season with more than one manager can't be
+  the existing shards so the hand-run backfill survives. The backfill covers
+  `MANAGER_HISTORY_FIRST_SEASON` (`src/api/managers.js`, 1969 since 2026-10-06) to
+  now: ~2,000 calls for a full rebuild, about 25 s. **Hand-run** (no cron runs it):
+  `node scripts/gen-manager-history.mjs` rebuilds; `--from=YYYY --to=YYYY` merges one
+  slice; `--out=DIR` writes to DIR for a measuring run. 1969 is where the unseeded
+  shared seasons stay under 150 (148 added; 1968 would make 152, 1901 about 300).
+  The API answers back to 1901, so lower the constant and run `--from` to go further.
+  Per-stint W-L for a club-season with more than one manager can't be
   split from the coaches endpoint alone (no dates, no ordering), so
   `scripts/manager-transitions-seed.json` supplies the transition date and a
   season with no seed entry is appended to
@@ -1277,6 +1283,32 @@ don't run these by hand.
 ## Hand-run generators (immutable data — NOT on a cron)
 
 Re-run only to fold in a new season.
+
+- `gen-franchise-history.mjs` → `public/data/franchise-history/{teamId}.json`
+  — each of the 30 clubs' name, league and ballpark by season, 1901 to the last
+  complete season, as spans (the Brewers' file starts with the 1969 Seattle Pilots).
+  Run by hand: `node scripts/gen-franchise-history.mjs [--through 2025]`. About 125
+  calls (`/teams?sportId=1&season=Y&hydrate=venue`, one a season). Pure half:
+  `scripts/lib/franchise-history.mjs`. Reader: `src/api/franchiseHistory.js`.
+  Three rules. **A relocated club keeps its id** in this feed, but a few
+  early franchises do not: the 1901-02 Baltimore Orioles (id 298) are the Yankees'
+  first two seasons, and the Yankees' file starts in 1903. **A row with no league
+  is skipped:** the feed lists an expansion club a season or two before its first
+  game (seven rows, measured 2026-10-06). **`mates`** lists the other clubs at each
+  park in the same seasons, defunct clubs (Federal League, Negro leagues) included.
+  The files carry no `generatedAt`, so a re-run writes the same bytes.
+
+- `gen-league-averages.mjs` → `public/data/league-averages.json` — the league
+  batting average and ERA of every finished MLB season, 1901 to the last complete
+  one (`lastSeason`, named by `lib/time/season-in-play.mjs`). **Hand-run, NOT on a
+  cron**: a finished season never changes, so run it once after each season ends.
+  One `teams/stats?group=hitting,pitching&sportIds=1` call a season, 125 calls,
+  4 KB. Pure half: `scripts/lib/stats/league-averages.mjs` (`sum(H)/sum(AB)`, and
+  `9*sum(ER)/sum(IP)` with IP in thirds; never a mean of team averages). Reader:
+  `src/api/player/leagueAverages.js`. **No clock:** a re-run writes the same bytes
+  (`--out <path>` writes elsewhere). **A figure the feed lacks is `null`:** the
+  feed records no earned runs, or only part of them (under 70% of runs), in every
+  season from 1901 to 1948, so ERA is `null` there and the table shows a dash.
 
 - `gen-prospect-rank-history.mjs` → `public/data/prospect-rank-history.json`
   — every year a man sat on a top-prospect list, 2005–2024 (1,823 rows, 982
@@ -1512,6 +1544,24 @@ Re-run only to fold in a new season.
   re-walk in `gen-pitch-arsenal.mjs`. `--gate` checks the committed `hitter-grid/`
   against Savant's pitch-arsenal-stats batter board (40+ PA: mean gap at most 0.006, at
   most 1% of rows above 0.020, none above 0.040).
+- `gen-family-ties.mjs` → `public/data/family-ties/{NN}.json` — family links between
+  players, from Retrosheet's `relatives.csv`, joined to MLBAM ids through the Chadwick
+  register (ADR-0100). **Hand-run, NOT on a cron**: re-run only after Retrosheet
+  publishes a new `biodata.zip`. Nothing in it downloads. Fetch each file into its
+  own new, empty folder OUTSIDE the repo with `scripts/lib/open-data/download.mjs`,
+  unzip `biodata.zip` there, then run
+  `node scripts/gen-family-ties.mjs <biofile0.csv> <relatives.csv> <people-*.csv ...>`
+  (files are told apart by name; `--out <dir>` writes elsewhere). One shard per
+  `shardKey100(mlbamId)`: `{ credit, players: { [mlbamId]: [{ relation, personId|null,
+  name }] } }`. Each row is stored in both directions with the inverse label
+  (Father/Son, Uncle/Nephew, Grandfather/Grandson, Great Uncle/Great Nephew,
+  Father-in-Law/Son-in-Law). Brother, Cousin, Brother-in-Law, Half Brother, Step
+  Brother and Related To are the same from both ends. The file reads "id1 is the
+  relation of id2", except "Great Grandson", which names id2 and is read as a Great
+  Grandfather row. A label the generator does not know fails the run. A relative with
+  no MLBAM match keeps the name and a null id. No clock: a re-run writes the same
+  bytes. The pure half is `scripts/lib/open-data/family-ties.mjs`. Reader:
+  `src/api/person/family/family.js`.
 
 ## Assets / off-app
 

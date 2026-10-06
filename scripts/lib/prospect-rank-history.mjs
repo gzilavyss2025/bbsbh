@@ -30,13 +30,12 @@
 //   nothing else changes. No page code names either source: the page reads
 //   labels and credits from this file.
 
+import { CHADWICK_JOIN } from './open-data/credits.mjs'
+
 // The credit each source needs, written once. `credit` is a function of the
 // seasons that actually ship, so the years it prints are always the years the
 // file holds. A source with no entry here cannot ship: an uncredited row is a
 // bug, not a default.
-const CHADWICK_JOIN =
-  'Player ids matched through the Chadwick Bureau register (Open Data Commons Attribution License 1.0).'
-
 const SOURCE_TABLE = {
   'baseball-america': {
     label: 'Baseball America',

@@ -463,7 +463,7 @@ const BUDGETS = {
   // loads on that one screen during that one window.
   // +1 for 10b-former-teammates.css — the Former Teammates Ladder (#1352).
   // Its rules would have pushed 10-lineup.css two bands past its line cap.
-  'src/styles': 118,
+  'src/styles': 119, // +1: 57a-franchise-history.css, extends 57-ballpark-card.css
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -596,7 +596,7 @@ const BUDGETS = {
   // together or not at all. Flat beside milbPool.js for every reason that entry
   // gives, and read on the same visit by the same page.
   // +1: nineKeys.js, one more static-data reader beside its siblings.
-  'src/api': 112,
+  'src/api': 113, // +1: franchiseHistory.js, a static-data reader beside its siblings
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -804,7 +804,9 @@ const BUDGETS = {
   // went to scripts/lib/records/ (a new subdirectory) so scripts/lib stays put.
   // +1 for gen-xwoba-table.mjs, the hand-run xwOBA (est.) table (ADR-0097). A
   // generator runs on import; its pure half went to scripts/lib/pitch/xwoba.mjs.
-  scripts: 118,
+  // +1 for gen-league-averages.mjs, the hand-run league AVG/ERA table. Flat like
+  // every gen-*.mjs; its pure half went to scripts/lib/stats/league-averages.mjs.
+  scripts: 121, // +1 gen-family-ties.mjs (ADR-0100); its pure half is in scripts/lib/open-data/. +1 gen-franchise-history.mjs, a hand-run generator
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -1004,7 +1006,7 @@ const BUDGETS = {
   // drops Baseball America's four seasons together with their credit lines. The
   // same testable-helper reason as its neighbours above.
   // +1 for walk.mjs, the one directory walk the check-*.mjs guards share (#1310).
-  'scripts/lib': 41,
+  'scripts/lib': 42, // +1: franchise-history.mjs, the testable half of its generator
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

@@ -29,6 +29,15 @@ driver is either an **unofficial/bulk source** (WAR) or **cost** (everything
 that would need dozens of statsapi calls per page load). See `docs/scripts/generators.md`
 for each generator; the reader modules:
 
+- `leagueAverages.js` — `leagueAverage(season, 'hitting'|'pitching')` → the season's
+  league AVG or ERA, or `null`; `lastCompleteSeason()` names the last year in the file;
+  `vsLeague(rate, league, group)` prints the signed "vs lg" cell. Reads
+  `public/data/league-averages.json` (`{ lastSeason, seasons: { [year]: { avg, era } } }`,
+  hand-run by `gen-league-averages.mjs`). The season in play is NOT in the file: the
+  reader makes one `teams/stats?group=hitting,pitching` request, keeps it in memory for
+  the session, and the table marks it "to date". The pure sum lives in
+  `scripts/lib/stats/league-averages.mjs`, imported by both sides so there is one copy. Open
+  data: no SealBox. Feeds the career table's "vs lg" column (`CareerRegister.jsx`, MLB rows only).
 - `staticJson.js` — not a dataset: the memoized read every reader below is built
   on. `staticJson(url, {shape, fallback})` returns a loader that fetches once per
   session and hands the SAME in-flight promise to concurrent callers;
@@ -871,6 +880,12 @@ for each generator; the reader modules:
   on disk and has no way to know it is three weeks old. `gen-postseason-odds.mjs`
   was off the nightly cron until 2026-08-09 for exactly that reason; if this
   card ever looks wrong, check the workflow before the math.
+- `franchiseHistory.js` — a club's names, leagues and ballparks by season, from
+  `public/data/franchise-history/{teamId}.json` (hand-run
+  `gen-franchise-history.mjs`). `franchiseFor(teamId)` returns the spans and the park lines (`parkHistory`, grouped by venue id)
+  that the Overview's `FranchiseHistory` module draws under the Ballpark card.
+  The data starts in 1901, so a park's first season is the first IN THIS DATA,
+  never its opening year. A MiLB id has no file and reads empty.
 - `managers.js` — a coach's full career, from the `personId % 100` shards in
   `public/data/manager-history/`, behind `/manager/{id}`. Every job row, not
   just the managerial ones. A club-season shared by two managers carries
@@ -934,6 +949,14 @@ for each generator; the reader modules:
   returns null for a player with no row, and says "no data" (not "dropped") for
   a season the history has not reached. See the generator entry for the file
   shape and the licence notes.
+- `person/family/family.js` — a player's family links, from
+  `public/data/family-ties/{NN}.json` (`gen-family-ties.mjs`, hand-run, ADR-0100),
+  sharded on `shardKey100(mlbamId)` and read through `staticJsonBy`. `familyOf(personId)`
+  returns `[{ relation, personId|null, name }]` or `[]`. `relation` says what the OTHER
+  man is to this player (his Father, his Son). A null `personId` means the relative has
+  no MLBAM id: show the name, link nothing. `fetchFamilyShard(key)` returns the whole
+  shard, whose `credit` lines (Retrosheet and the Chadwick register) print beside the
+  data. Spoiler-free: history about people, no game state.
 - `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
   `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Not a third
   party, not attributed, and not an MLE —
