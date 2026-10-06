@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { fetchPlayerContractHistory } from '../../api/contractsHistory.js'
 import { loadPlayerCore } from '../../api/player/core.js'
 import { loadPlayerHistory, loadPositionScope } from '../../api/player/history.js'
+import { familyBand } from '../../api/person/family/family.js'
 import { fetchProspectRankHistory } from '../../api/player/prospectRankHistory.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { AwardsLedger } from '../../components/player/AwardsLedger.jsx'
 import { CareerTimeline } from '../../components/player/CareerTimeline.jsx'
 import { ContractHistoryLedger } from '../../components/player/ContractHistoryLedger.jsx'
+import { FamilyBand } from '../../components/player/family/FamilyBand.jsx'
 import { GameLink } from '../../components/player/GameLink.jsx'
 import { LevelProgressionCard } from '../../components/player/LevelProgressionCard.jsx'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
@@ -52,6 +54,9 @@ export function PlayerHistoryTab({ id, asOf, sportId }) {
   // Keyed on the player alone — a career's money is an open, season-long record
   // with no as-of cutoff over it (ADR-0034, ADR-0052).
   const contracts = useAsync(() => fetchPlayerContractHistory(id), [id])
+  // Family links: one small shard, its own load outside the gate like the
+  // contract archive. The band renders nothing until it arrives, or without relatives.
+  const family = useAsync(() => familyBand(id), [id])
   // Start the prospect-rankings file now, beside the core load, not after it:
   // the card fetches it itself only once it mounts, behind the gate, and would
   // pop in a round trip late. The read is shared once per session, so the
@@ -140,6 +145,9 @@ export function PlayerHistoryTab({ id, asOf, sportId }) {
           currentRank={core.data.prospectRank}
         />
       )}
+
+      {/* useAsync keeps the last player's data while a new id loads: draw none then. */}
+      {!family.loading && <FamilyBand entries={family.data?.entries} credit={family.data?.credit} />}
 
       {data.timeline && <CareerTimeline entries={data.timeline.entries} />}
 
