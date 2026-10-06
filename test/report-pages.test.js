@@ -66,6 +66,7 @@ const PATHS_BEFORE_GROUPING = [
   '/logbook',
   '/first-scorebook',
   '/photos',
+  '/game-notes',
 ]
 
 test('grouping kept every report page — nothing lost, nothing invented', () => {

@@ -97,6 +97,15 @@ const APP_ROUTES = [
   { path: '/salaries', priority: '0.5', changefreq: 'weekly' },
   { path: '/postseason-race', priority: '0.6', changefreq: 'daily' },
   { path: '/fouls', priority: '0.4', changefreq: 'daily' },
+  // Footer pages that were missing here. Same class as the boards above: public,
+  // league-wide, no game's result on them. The personal pages (/profile, /logbook,
+  // /first-scorebook, /photos) stay out on purpose — they are yours, not the site's.
+  { path: '/run-value', priority: '0.5', changefreq: 'daily' },
+  { path: '/scout', priority: '0.4', changefreq: 'daily' },
+  { path: '/abs-challenges', priority: '0.5', changefreq: 'daily' },
+  { path: '/nine-keys', priority: '0.4', changefreq: 'yearly' },
+  { path: '/run-differential', priority: '0.4', changefreq: 'monthly' },
+  { path: '/postseason-records', priority: '0.4', changefreq: 'monthly' },
 ]
 
 // The six doors of the team hub (ADR-0034). MLB-only on four of them: an
