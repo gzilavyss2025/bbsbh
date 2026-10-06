@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { parseRoute } from '../src/lib/route.js'
-import { scoutPath } from '../src/lib/scout/path.js'
+import { atBatScoutPath, scoutPath } from '../src/lib/scout/path.js'
 import { canHit, canPitch, stanceFor } from '../src/lib/scout/roles.js'
 import { ROUND_TAG, resultShort } from '../src/lib/scout/format.js'
 import { MAX_TYPES, USAGE_FLOOR, boardRow, mapOf, pitcherBoard } from '../src/screens/scout/board.js'
@@ -232,4 +232,12 @@ test('the hitter side joins each pill and All to the pitcher board, and the over
   assert.equal(fastOnly.byType.SL, null)
   assert.ok(Math.abs(fastOnly.overall.covered - 0.6) < 1e-9)
   assert.ok(Math.abs(fastOnly.overall.value - 0.2) < 1e-9)
+})
+
+test('the at-bat Scout link names pitcher then hitter, with the game date', () => {
+  const pitcher = { id: 669373, first: 'Tarik', last: 'Skubal' }
+  const batter = { id: 592450, first: 'Aaron', last: 'Judge' }
+  assert.equal(atBatScoutPath({ pitcher, batter, gameDate: '2026-09-01' }), '/scout/tarik-skubal-669373/aaron-judge-592450?d=2026-09-01')
+  assert.equal(atBatScoutPath({ pitcher, batter }), '/scout/tarik-skubal-669373/aaron-judge-592450')
+  assert.equal(atBatScoutPath({ batter }), null)
 })
