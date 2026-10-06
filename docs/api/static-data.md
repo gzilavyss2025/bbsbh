@@ -380,7 +380,9 @@ for each generator; the reader modules:
   `personId % 100` (`shardKey100`) — for the player page's one-man card, which
   used to pull 805 KB to draw four tiles and now reads ~2 KB
   (`fetchFoulsFor`). Completed-game aggregates → spoiler-free, no SealBox
-  (same footing as WAR); MLB only. Feeds the Foul Tracker page (`/fouls`,
+  (same footing as WAR); MLB only. A `post` key beside the regular season holds the
+  postseason, same shape (ADR-0101); `foulsInScope`/`hasPostseason` pick one for the
+  page's Regular season / Postseason toggle. Feeds the Foul Tracker page (`/fouls`,
   `FoulTrackerPage.jsx`) and the player page's `FoulCard` (current-day only —
   the precompute can't be cut to a spoiler `asOf`, so the card hides under
   one, same rule as the Milestone Watch projection). `FOUL_PRIORS` carries the

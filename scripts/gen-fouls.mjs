@@ -13,7 +13,7 @@
 // (scripts/lib/schema.sql's foul_* tables, docs/adr/0021) via incrementing
 // upserts, and marks it in foul_ingested_games so a resumed/re-run sweep never
 // double-counts. NEVER stores a feed on disk. MLB only (sportId 1), regular
-// season only (gameType R).
+// season and postseason, kept apart by a `scope` key (R or P, ADR-0101).
 //
 // FOUL COUNTING mirrors the live derive.js path EXACTLY (importing the shared
 // FOUL_CODES/WHIFF_CODES/NON_PA_EVENT_TYPES/pitchCallCode from
@@ -58,6 +58,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
+import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // A SEASON STORE (ADR-0086): fouls/{season}/fouls.json (the league file) plus
@@ -393,15 +394,18 @@ export function aggregateGameFouls(feed) {
   }
 }
 
+// A game's scope from its gameType: the postseason rounds are 'P', all else 'R'.
+export const scopeOfGameType = (gameType) => (POSTSEASON_GAME_TYPES.split(',').includes(gameType) ? 'P' : 'R')
+
 // --- SQLite upserts ----------------------------------------------------------
 const upsertBatter = (db) =>
   db.prepare(
     `INSERT INTO foul_batter_totals
-       (person_id, season, name, team_id, games, pa, pitches_seen, fouls,
+       (person_id, season, scope, name, team_id, games, pa, pitches_seen, fouls,
         two_strike_fouls, max_game_fouls, max_game_pk, max_game_pa,
         max_game_pitches, max_game_opp_id, max_game_his_score, max_game_opp_score)
-     VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(season, person_id) DO UPDATE SET
+     VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(season, scope, person_id) DO UPDATE SET
        name = excluded.name,
        team_id = excluded.team_id,
        games = foul_batter_totals.games + 1,
@@ -432,12 +436,12 @@ const upsertBatter = (db) =>
 const upsertBatterPaHigh = (db) =>
   db.prepare(
     `INSERT INTO foul_batter_pa_high
-       (person_id, season, fouls, game_pk, pitcher_id, pitcher_name, result_event,
+       (person_id, season, scope, fouls, game_pk, pitcher_id, pitcher_name, result_event,
         result_type, result_description, pa_pitches, inning, half, outs,
         on_first, on_second, on_third, away_score, home_score,
         batting_team_id, opponent_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(season, person_id) DO UPDATE SET
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(season, scope, person_id) DO UPDATE SET
        fouls = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
                     THEN excluded.fouls ELSE foul_batter_pa_high.fouls END,
        game_pk = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
@@ -479,9 +483,9 @@ const upsertBatterPaHigh = (db) =>
 const upsertPitcher = (db) =>
   db.prepare(
     `INSERT INTO foul_pitcher_totals
-       (person_id, season, name, team_id, games, starts, pitches, fouls, whiffs)
-     VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?)
-     ON CONFLICT(season, person_id) DO UPDATE SET
+       (person_id, season, scope, name, team_id, games, starts, pitches, fouls, whiffs)
+     VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
+     ON CONFLICT(season, scope, person_id) DO UPDATE SET
        name = excluded.name,
        team_id = excluded.team_id,
        games = foul_pitcher_totals.games + 1,
@@ -493,9 +497,9 @@ const upsertPitcher = (db) =>
 
 const upsertTeam = (db) =>
   db.prepare(
-    `INSERT INTO foul_team_totals (team_id, season, games, fouls, two_strike_fouls)
-     VALUES (?, ?, 1, ?, ?)
-     ON CONFLICT(season, team_id) DO UPDATE SET
+    `INSERT INTO foul_team_totals (team_id, season, scope, games, fouls, two_strike_fouls)
+     VALUES (?, ?, ?, 1, ?, ?)
+     ON CONFLICT(season, scope, team_id) DO UPDATE SET
        games = foul_team_totals.games + 1,
        fouls = foul_team_totals.fouls + excluded.fouls,
        two_strike_fouls = foul_team_totals.two_strike_fouls + excluded.two_strike_fouls`,
@@ -504,10 +508,10 @@ const upsertTeam = (db) =>
 const upsertInning = (db) =>
   db.prepare(
     `INSERT INTO foul_league_innings
-       (inning, season, pitches, fouls, pitches_vs_starter, fouls_vs_starter,
+       (inning, season, scope, pitches, fouls, pitches_vs_starter, fouls_vs_starter,
         pitches_vs_reliever, fouls_vs_reliever)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(season, inning) DO UPDATE SET
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(season, scope, inning) DO UPDATE SET
        pitches = foul_league_innings.pitches + excluded.pitches,
        fouls = foul_league_innings.fouls + excluded.fouls,
        pitches_vs_starter = foul_league_innings.pitches_vs_starter + excluded.pitches_vs_starter,
@@ -518,9 +522,9 @@ const upsertInning = (db) =>
 
 const upsertPitchType = (db) =>
   db.prepare(
-    `INSERT INTO foul_pitch_types (code, season, description, pitches, fouls, whiffs)
-     VALUES (?, ?, ?, ?, ?, ?)
-     ON CONFLICT(season, code) DO UPDATE SET
+    `INSERT INTO foul_pitch_types (code, season, scope, description, pitches, fouls, whiffs)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(season, scope, code) DO UPDATE SET
        description = excluded.description,
        pitches = foul_pitch_types.pitches + excluded.pitches,
        fouls = foul_pitch_types.fouls + excluded.fouls,
@@ -529,9 +533,9 @@ const upsertPitchType = (db) =>
 
 const upsertTeamPitchTypeBatting = (db) =>
   db.prepare(
-    `INSERT INTO foul_team_pitch_types_batting (team_id, code, season, description, pitches, fouls, whiffs)
-     VALUES (?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(season, team_id, code) DO UPDATE SET
+    `INSERT INTO foul_team_pitch_types_batting (team_id, code, season, scope, description, pitches, fouls, whiffs)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(season, scope, team_id, code) DO UPDATE SET
        description = excluded.description,
        pitches = foul_team_pitch_types_batting.pitches + excluded.pitches,
        fouls = foul_team_pitch_types_batting.fouls + excluded.fouls,
@@ -540,9 +544,9 @@ const upsertTeamPitchTypeBatting = (db) =>
 
 const upsertTeamPitchTypePitching = (db) =>
   db.prepare(
-    `INSERT INTO foul_team_pitch_types_pitching (team_id, code, season, description, pitches, fouls, whiffs)
-     VALUES (?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(season, team_id, code) DO UPDATE SET
+    `INSERT INTO foul_team_pitch_types_pitching (team_id, code, season, scope, description, pitches, fouls, whiffs)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(season, scope, team_id, code) DO UPDATE SET
        description = excluded.description,
        pitches = foul_team_pitch_types_pitching.pitches + excluded.pitches,
        fouls = foul_team_pitch_types_pitching.fouls + excluded.fouls,
@@ -555,8 +559,8 @@ const upsertTeamPitchTypePitching = (db) =>
 const upsertGameTotals = (db) =>
   db.prepare(
     `INSERT INTO foul_game_totals
-       (game_pk, season, home_team_id, home_fouls, home_score, away_team_id, away_fouls, away_score, total_fouls)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+       (game_pk, season, scope, home_team_id, home_fouls, home_score, away_team_id, away_fouls, away_score, total_fouls)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(game_pk) DO UPDATE SET
        home_team_id = excluded.home_team_id,
        home_fouls = excluded.home_fouls,
@@ -568,7 +572,7 @@ const upsertGameTotals = (db) =>
   )
 
 const markIngested = (db) =>
-  db.prepare('INSERT OR IGNORE INTO foul_ingested_games (game_pk, date, season) VALUES (?, ?, ?)')
+  db.prepare('INSERT OR IGNORE INTO foul_ingested_games (game_pk, date, season, scope) VALUES (?, ?, ?, ?)')
 
 // Every statement a fold needs, prepared once per database.
 export const foulStatements = (db) => ({
@@ -589,24 +593,24 @@ export const foulStatements = (db) => ({
 // Node's single thread means the sync block runs to completion before any other
 // worker's transaction, so either every row AND the ingest mark commit together
 // or none do, and a resumed run never re-adds a partially-counted game.
-async function ingestGame(db, stmts, gamePk, date, season) {
+async function ingestGame(db, stmts, gamePk, date, season, scope) {
   const feed = await getJson(`/api/v1.1/game/${gamePk}/feed/live`)
-  foldGame(db, stmts, gamePk, date, season, aggregateGameFouls(feed))
+  foldGame(db, stmts, gamePk, date, season, aggregateGameFouls(feed), scope)
 }
 
 // The sync half of ingestGame: one game's aggregates into its own season's rows.
-export function foldGame(db, stmts, gamePk, date, season, agg) {
+export function foldGame(db, stmts, gamePk, date, season, agg, scope = 'R') {
   db.exec('BEGIN')
   try {
     for (const [id, b] of agg.batters) {
       stmts.batter.run(
-        id, season, b.name, b.teamId, b.pa, b.pitchesSeen, b.fouls, b.twoStrikeFouls,
+        id, season, scope, b.name, b.teamId, b.pa, b.pitchesSeen, b.fouls, b.twoStrikeFouls,
         b.gameFouls, gamePk, b.pa, b.pitchesSeen, b.opponentId, b.gameHisScore, b.gameOppScore,
       )
       if (b.bestPa) {
         const pa = b.bestPa
         stmts.batterPaHigh.run(
-          id, season, b.bestPaFouls, gamePk, pa.pitcherId, pa.pitcherName, pa.resultEvent,
+          id, season, scope, b.bestPaFouls, gamePk, pa.pitcherId, pa.pitcherName, pa.resultEvent,
           pa.resultType, pa.resultDescription, pa.paPitches, pa.inning, pa.half, pa.outs,
           pa.onFirst ? 1 : 0, pa.onSecond ? 1 : 0, pa.onThird ? 1 : 0, pa.awayScore,
           pa.homeScore, pa.battingTeamId, pa.opponentId,
@@ -614,29 +618,29 @@ export function foldGame(db, stmts, gamePk, date, season, agg) {
       }
     }
     for (const [id, p] of agg.pitchers) {
-      stmts.pitcher.run(id, season, p.name, p.teamId, p.isStarter ? 1 : 0, p.pitches, p.fouls, p.whiffs)
+      stmts.pitcher.run(id, season, scope, p.name, p.teamId, p.isStarter ? 1 : 0, p.pitches, p.fouls, p.whiffs)
     }
     for (const [id, t] of agg.teams) {
-      stmts.team.run(id, season, t.fouls, t.twoStrikeFouls)
+      stmts.team.run(id, season, scope, t.fouls, t.twoStrikeFouls)
     }
     for (const [inning, i] of agg.innings) {
-      stmts.inning.run(inning, season, i.pitches, i.fouls, i.pitchesVsStarter, i.foulsVsStarter, i.pitchesVsReliever, i.foulsVsReliever)
+      stmts.inning.run(inning, season, scope, i.pitches, i.fouls, i.pitchesVsStarter, i.foulsVsStarter, i.pitchesVsReliever, i.foulsVsReliever)
     }
     for (const [code, pt] of agg.pitchTypes) {
-      stmts.pitchType.run(code, season, pt.description, pt.pitches, pt.fouls, pt.whiffs)
+      stmts.pitchType.run(code, season, scope, pt.description, pt.pitches, pt.fouls, pt.whiffs)
     }
     for (const [teamId, byCode] of agg.battingPitchTypes) {
       for (const [code, pt] of byCode) {
-        stmts.teamPitchTypeBatting.run(teamId, code, season, pt.description, pt.pitches, pt.fouls, pt.whiffs)
+        stmts.teamPitchTypeBatting.run(teamId, code, season, scope, pt.description, pt.pitches, pt.fouls, pt.whiffs)
       }
     }
     for (const [teamId, byCode] of agg.pitchingPitchTypes) {
       for (const [code, pt] of byCode) {
-        stmts.teamPitchTypePitching.run(teamId, code, season, pt.description, pt.pitches, pt.fouls, pt.whiffs)
+        stmts.teamPitchTypePitching.run(teamId, code, season, scope, pt.description, pt.pitches, pt.fouls, pt.whiffs)
       }
     }
-    stmts.game.run(gamePk, season, agg.game.homeId, agg.game.homeFouls, agg.game.homeScore, agg.game.awayId, agg.game.awayFouls, agg.game.awayScore, agg.game.totalFouls)
-    stmts.mark.run(gamePk, date, season)
+    stmts.game.run(gamePk, season, scope, agg.game.homeId, agg.game.homeFouls, agg.game.homeScore, agg.game.awayId, agg.game.awayFouls, agg.game.awayScore, agg.game.totalFouls)
+    stmts.mark.run(gamePk, date, season, scope)
     db.exec('COMMIT')
   } catch (err) {
     db.exec('ROLLBACK')
@@ -668,15 +672,16 @@ function combine(rows, keyOf, sums, max = null) {
 
 // One season's export (`season`), or every season summed (`season` null, the
 // all/ file). Sums, never averages: each rate on the page is derived from
-// these counts (schema.sql, "STORE SUMS, NOT AVERAGES").
-export function exportFouls(db, season) {
+// these counts (schema.sql, "STORE SUMS, NOT AVERAGES"). One scope: 'R' (the
+// default, so every old reader sees what it always saw) or 'P' (ADR-0101).
+export function exportFouls(db, season, scope = 'R') {
   const one = season != null
   const rows = (table, where = '', order = '') =>
     db
       .prepare(
-        `SELECT * FROM ${table} WHERE ${one ? 'season = ?' : '1'} ${where} ORDER BY season${order ? `, ${order}` : ''}`,
+        `SELECT * FROM ${table} WHERE ${one ? 'season = ? AND' : ''} scope = ? ${where} ORDER BY season${order ? `, ${order}` : ''}`,
       )
-      .all(...(one ? [season] : []))
+      .all(...(one ? [season] : []), scope)
   const ingested = rows('foul_ingested_games')
   const coverageSince = ingested.reduce((min, r) => (min == null || r.date < min ? r.date : min), null)
 
@@ -843,21 +848,34 @@ export function exportFouls(db, season) {
   }
 }
 
+// The regular-season export with the postseason BESIDE it as `post` (ADR-0101),
+// the same shape again, never summed in. `post` exists only once a postseason
+// game is on file, so a store with none is byte-for-byte what it was.
+export function exportFoulStore(db, season) {
+  const data = exportFouls(db, season)
+  const { asOf: _asOf, season: _season, seasons: _seasons, ...post } = exportFouls(db, season, 'P')
+  return post.gamesIngested ? { ...data, post } : data
+}
+
 // The season file the Foul Tracker page reads, plus the per-player buckets the
 // player page reads — both cut from ONE export into the season's own folder
 // (fouls/{season}/, ADR-0086), so a bucket can never disagree with the file
 // beside it. Every write below goes through here, checkpoints included, so an
 // interrupted backfill leaves the two consistent. Then the index, and all/.
 async function writeFouls(db, season) {
-  const data = exportFouls(db, season)
+  const data = exportFoulStore(db, season)
   const buckets = new Map()
   for (const group of ['batters', 'pitchers']) {
-    for (const [id, row] of Object.entries(data[group] ?? {})) {
-      const key = shardKey100(id)
-      if (!buckets.has(key)) {
-        buckets.set(key, { season: data.season, asOf: data.asOf, batters: {}, pitchers: {} })
+    for (const [scope, from] of [['R', data], ['P', data.post]]) {
+      for (const [id, row] of Object.entries(from?.[group] ?? {})) {
+        const key = shardKey100(id)
+        if (!buckets.has(key)) {
+          buckets.set(key, { season: data.season, asOf: data.asOf, batters: {}, pitchers: {} })
+        }
+        const bucket = buckets.get(key)
+        const into = scope === 'R' ? bucket : (bucket.post ??= { batters: {}, pitchers: {} })
+        into[group][id] = row
       }
-      buckets.get(key)[group][id] = row
     }
   }
   await writeShards(join(storeDir, String(season)), [['fouls', data], ...buckets])
@@ -867,7 +885,7 @@ async function writeFouls(db, season) {
 // all/fouls.json: every season summed from the rows (exportFouls(db, null)).
 // League file only; the player buckets have no all/ copy (#1200).
 async function writeAll(db) {
-  const { asOf: _asOf, ...body } = exportFouls(db, null)
+  const { asOf: _asOf, ...body } = exportFoulStore(db, null)
   await writeJsonIfChanged(join(storeDir, 'all', 'fouls.json'), body)
 }
 
@@ -876,7 +894,7 @@ async function writeAll(db) {
 export function wipeTeamPitchTypes(db, season) {
   db.prepare('DELETE FROM foul_team_pitch_types_batting WHERE season = ?').run(season)
   db.prepare('DELETE FROM foul_team_pitch_types_pitching WHERE season = ?').run(season)
-  return db.prepare('SELECT game_pk, date, season FROM foul_ingested_games WHERE season = ?').all(season)
+  return db.prepare('SELECT game_pk, date, season, scope FROM foul_ingested_games WHERE season = ?').all(season)
 }
 
 // --- CLI ---------------------------------------------------------------------
@@ -911,7 +929,7 @@ async function main() {
   if (args['backfill-games']) {
     const already = new Set(db.prepare('SELECT game_pk FROM foul_game_totals').all().map((r) => r.game_pk))
     const targets = db
-      .prepare('SELECT game_pk, season FROM foul_ingested_games')
+      .prepare('SELECT game_pk, season, scope FROM foul_ingested_games')
       .all()
       .filter((r) => args.force || !already.has(r.game_pk))
     for (const r of targets) touched.add(r.season)
@@ -920,12 +938,12 @@ async function main() {
     const queue = [...targets]
     async function backfillWorker() {
       while (queue.length) {
-        const { game_pk: gamePk, season } = queue.shift() ?? {}
+        const { game_pk: gamePk, season, scope } = queue.shift() ?? {}
         if (gamePk == null) return
         try {
           const feed = await getJson(`/api/v1.1/game/${gamePk}/feed/live`)
           const agg = aggregateGameFouls(feed)
-          stmts.game.run(gamePk, season, agg.game.homeId, agg.game.homeFouls, agg.game.homeScore, agg.game.awayId, agg.game.awayFouls, agg.game.awayScore, agg.game.totalFouls)
+          stmts.game.run(gamePk, season, scope, agg.game.homeId, agg.game.homeFouls, agg.game.homeScore, agg.game.awayId, agg.game.awayFouls, agg.game.awayScore, agg.game.totalFouls)
         } catch (err) {
           console.error(`backfill gamePk ${gamePk}: ${err.message}`)
         }
@@ -974,12 +992,12 @@ async function main() {
           try {
             for (const [teamId, byCode] of agg.battingPitchTypes) {
               for (const [code, pt] of byCode) {
-                stmts.teamPitchTypeBatting.run(teamId, code, g.season, pt.description, pt.pitches, pt.fouls, pt.whiffs)
+                stmts.teamPitchTypeBatting.run(teamId, code, g.season, g.scope, pt.description, pt.pitches, pt.fouls, pt.whiffs)
               }
             }
             for (const [teamId, byCode] of agg.pitchingPitchTypes) {
               for (const [code, pt] of byCode) {
-                stmts.teamPitchTypePitching.run(teamId, code, g.season, pt.description, pt.pitches, pt.fouls, pt.whiffs)
+                stmts.teamPitchTypePitching.run(teamId, code, g.season, g.scope, pt.description, pt.pitches, pt.fouls, pt.whiffs)
               }
             }
             db.exec('COMMIT')
@@ -1006,10 +1024,11 @@ async function main() {
 
   const existing = new Set(db.prepare('SELECT game_pk FROM foul_ingested_games').all().map((r) => r.game_pk))
 
-  // MLB regular season only. Same postponed-replay dedup as the other sweeps: a
-  // replayed game is listed under both dates; keep only the officialDate bucket.
+  // MLB regular season and postseason (ADR-0101). Same postponed-replay dedup as
+  // the other sweeps: a replayed game is listed under both dates; keep only the
+  // officialDate bucket.
   const schedule = await getJson(
-    `/api/v1/schedule?sportId=1&startDate=${startDate}&endDate=${endDate}&gameType=R`,
+    `/api/v1/schedule?sportId=1&startDate=${startDate}&endDate=${endDate}&gameType=R,${POSTSEASON_GAME_TYPES}`,
   )
   const pending = []
   for (const d of schedule.dates ?? []) {
@@ -1018,10 +1037,15 @@ async function main() {
       if (d.date !== g.officialDate) continue
       if (existing.has(g.gamePk)) continue
       // The season comes from the game, never the clock (#1200).
-      pending.push({ gamePk: g.gamePk, date: g.officialDate, season: Number(g.season ?? g.officialDate.slice(0, 4)) })
+      pending.push({
+        gamePk: g.gamePk,
+        date: g.officialDate,
+        season: Number(g.season ?? g.officialDate.slice(0, 4)),
+        scope: scopeOfGameType(g.gameType),
+      })
     }
   }
-  console.log(`${startDate}..${endDate}: ${pending.length} un-ingested Final MLB regular-season games`)
+  console.log(`${startDate}..${endDate}: ${pending.length} un-ingested Final MLB games`)
 
   let done = 0
   const queue = [...pending]
@@ -1030,7 +1054,7 @@ async function main() {
       const g = queue.shift()
       if (!g) return
       try {
-        await ingestGame(db, stmts, g.gamePk, g.date, g.season)
+        await ingestGame(db, stmts, g.gamePk, g.date, g.season, g.scope)
         touched.add(g.season)
       } catch (err) {
         console.error(`gamePk ${g.gamePk}: ${err.message}`)
