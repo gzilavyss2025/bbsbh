@@ -522,3 +522,8 @@ svg.scout__swatch {
   from { transform: rotateY(-90deg); }
   to { transform: none; }
 }
+
+/* The pair-failed Notice: the 12px the old .hint padding gave. */
+.scout__notice {
+  margin: var(--space-3) 0;
+}

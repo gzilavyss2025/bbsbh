@@ -79,6 +79,12 @@ export const TALLY_CELL_COUNT = 8
 // (or until any tap cuts it short) and no longer.
 export const CLOSE_SEQUENCE_MS = (TALLY_CELL_COUNT - 1) * TALLY_STAGGER_MS
 
+// (2b) THE STEP HOLD — on a half read back (#1539), "Next at-bat ›" turns into
+// the next-half advance in the same bar slot when it lands on the last at-bat.
+// The advance is held this long, so a fast second tap cannot turn the page.
+// A plain timer: no tap cuts it short, because the stray tap is the thing held.
+export const STEP_HOLD_MS = 400
+
 // (3) THE BOOK CLOSING — whether the book is closed: the reader has revealed
 // every half that was actually played.
 //

@@ -208,8 +208,13 @@ don't run these by hand.
   here). `--rebuild` forces the scan; `--level=13` narrows it. The roster ids that
   make the nightly re-join free live in `scripts/data/milb-pool-scan.json`.
 - `gen-long-at-bats.mjs` → `public/data/long-at-bats/{season}.json` — every plate
-  appearance of an MLB season that took **12 pitches or more**, for the offseason
-  page's notebook note (ADR-0081). A CENSUS, so every played game has to be read:
+  appearance of an MLB regular season that took **12 pitches or more**, for the offseason
+  page's notebook note (ADR-0081). The postseason is counted **beside** it under `post`
+  (the same shape, its own denominator, never summed in; ADR-0104). The schedule call asks
+  for `R,F,D,L,W` (`ALL_GAME_TYPES`), a game's scope comes from its `gameType`, and `post`
+  exists only once a postseason game is on file. The scan file is unchanged. The nightly run
+  reads the whole season's schedule, so it adds postseason games by itself; no hand run is
+  needed for the season in play. A CENSUS, so every played game has to be read:
   one `playByPlay?fields=…` call each, 28KB against 555KB untrimmed, because
   `pitchIndex`'s LENGTH is the at-bat's pitch count and the pitch events
   themselves never come down the wire. That makes it the cheapest feed sweep in
@@ -396,10 +401,13 @@ don't run these by hand.
   backfill: the nightly window is 3 days, so older October games need a hand run
   with `--days=<n>` (2026: run on 2026-10-06 with `--days=14`, 17 games, 12 clubs). App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
-- `gen-abs-challenges.mjs` → `public/data/abs/{season}/abs-challenges.json`,
+- `gen-abs-challenges.mjs` → `public/data/abs/{season}/abs-challenges.json`
+  (regular season), `abs-challenges-post.json` and `abs-challenges-all.json` (#1514:
+  the postseason beside it, never blended; `abs_ingested_games.scope`, set by the sweep
+  and by `--recheck` from the schedule's `gameType`, ADR-0094's 2026-10-06 addendum),
   **`abs/{season}/abs-exposure.json`** and
   **`abs/{season}/abs-exposure-clubs-{mlb,aaa}.json`**, plus `abs/seasons.json` and the
-  same four files over every season in `abs/all/`. A season store (ADR-0086, #1200):
+  same files over every season in `abs/all/`. A season store (ADR-0086, #1200):
   each file is cut from its own season's rows (`buildExport`'s `season` filter), a
   file is rewritten only when its content changes, the season comes from the
   schedule game, `--exposure` reads the newest season on file (or `--season`),
@@ -1014,7 +1022,7 @@ don't run these by hand.
   Ships per-club aggregates only — month splits, day/night, weekend/weekday,
   top-drawing opponents, the extremes with their dates — never a per-game
   table; every rank, fill rate and league comparison is derived in
-  `src/api/around-the-game/gate.js`. `--season=`/`--seasons=` for a past year. MLB
+  `src/api/around-the-game/gate.js` (`postseasonBoard` feeds the page's Postseason section). `--season=`/`--seasons=` for a past year. MLB
   regular season, Final games only. Spoiler-free.
 - `gen-farm-system.mjs` → `public/data/farm-system.json` — the facts behind
   `/farm-system-rankings` (The Farm Report): every organisation's four full-season affiliates

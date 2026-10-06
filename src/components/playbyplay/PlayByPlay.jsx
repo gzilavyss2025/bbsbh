@@ -182,10 +182,9 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   //
   // Unconditional now (commit 3): the trail reports items for a stacked half
   // too, so AtBatTrail has something to scroll to. Safe because `stacked ⇒
-  // revealed` — the three ways a half is stacked (`!currentSealed &&
-  // !postHalf`, or `postHalf && summaryOpen`) all reduce to `idx <=
-  // revealedThrough`, so there is no stacked state describing a step the
-  // reader hasn't themselves revealed.
+  // revealed` — the one way a half is stacked (`summaryOpen` on a half not
+  // sealed, focusView.js) reduces to `idx <= revealedThrough`, so there is no
+  // stacked state describing a step the reader hasn't themselves revealed.
   useEffect(() => {
     onFocusInfo?.(revealedSteps, buildTrailItems(entries, wins, (t) => EVENT_CODES[t]))
   }, [revealedSteps, feed]) // eslint-disable-line react-hooks/exhaustive-deps

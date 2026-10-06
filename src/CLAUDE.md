@@ -152,8 +152,8 @@ must key on the `feed` object (ADR-0007).
   than the play's `visible` gate — read ADR-0016 before touching `nextStepBoundary`.
 - **The console** (ADR-0043): anchored scorebug band, wrapping trail, tabbed
   reference, `RollingLine` demoted but NEVER removed — every half, live or
-  historical. Only the play-by-play varies: **windowed** (one at-bat) vs.
-  **stacked** (the whole half); rules in `styles/focus/*`.
+  historical. Only the play-by-play varies: **windowed** (one at-bat, every half
+  by default) vs. **stacked** (only after "See the whole half"); `focusView.js`.
 - **Two opt-in departures** ride through `InningViewer` without touching its guarantees.
   `GameView` resolves `spoilersOffFor(officialDate)` — the Scores Unlocked pass is running, or
   this day was consented to (ADR-0026) — and hands it down; the reader's own **stamp** on this

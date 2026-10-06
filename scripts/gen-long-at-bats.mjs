@@ -1,6 +1,7 @@
 // Regenerates public/data/long-at-bats/{season}.json — every twelve-pitch plate
 // appearance of an MLB season, for the notebook note on the offseason home page
-// (issue #1078, step 4 of #1038).
+// (issue #1078, step 4 of #1038). The regular season is the census; the
+// postseason is counted beside it under `post`, never inside it (ADR-0104, #1542).
 //
 // WHY A SWEEP. A long at-bat is not totalled anywhere in the API. The season
 // stat line carries `numberOfPitches` and `plateAppearances`, which give a
@@ -44,7 +45,14 @@ import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { getJson } from './lib/statsapi.mjs'
 import { offseasonPhase } from '../src/lib/time/seasonPhase.js'
-import { noteSeasonFor, scanGamePlays, sortRows } from './lib/long-at-bats.mjs'
+import {
+  ALL_GAME_TYPES,
+  buildSeasonDoc,
+  gamesToRead,
+  noteSeasonFor,
+  playedGamesOf,
+  scanGamePlays,
+} from './lib/long-at-bats.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'long-at-bats')
@@ -85,33 +93,15 @@ async function seasonRow(year) {
   }
 }
 
-// Every PLAYED regular-season game of the season, in one call.
-//
-// Not "every Final row" — the #1031 trap is not only a minor-league one. MLB's
-// 2026 schedule returns a postponed September game with `abstractGameState:
-// "Final"` and `detailedState: "Postponed"`, and a census that treats it as a
-// game it failed to read can never call its own coverage complete. So the
-// linescore is hydrated and the game's own innings decide, the same reading
-// gen-milb-pool.mjs makes; only the LENGTH of that array is ever looked at, and
-// nothing from it is stored.
-//
-// A game that is not Final yet is simply picked up on a later run.
+// Every PLAYED game of the season, regular and postseason, in one call. Which
+// games count, and the postponed-game trap, are playedGamesOf's (lib).
 async function playedGames(season) {
   const data = await getJson(
-    `/api/v1/schedule?sportId=1&season=${season}&gameType=R&hydrate=team,linescore` +
-      `&fields=dates,games,gamePk,gameNumber,officialDate,status,abstractGameState,` +
+    `/api/v1/schedule?sportId=1&season=${season}&gameType=${ALL_GAME_TYPES}&hydrate=team,linescore` +
+      `&fields=dates,games,gamePk,gameNumber,gameType,officialDate,status,abstractGameState,` +
       `teams,away,home,team,id,abbreviation,linescore,innings,num`,
   )
-  const seen = new Map()
-  for (const day of data.dates ?? []) {
-    for (const game of day.games ?? []) {
-      if (game?.status?.abstractGameState !== 'Final') continue
-      if ((game?.linescore?.innings ?? []).length === 0) continue
-      // The schedule repeats a game across `dates` entries; the first one wins.
-      if (!seen.has(game.gamePk)) seen.set(game.gamePk, game)
-    }
-  }
-  return [...seen.values()]
+  return playedGamesOf(data.dates)
 }
 
 // One game's tally, or null when it cannot be read or cannot be trusted. A
@@ -129,36 +119,6 @@ async function scanGame(gamePk) {
   return scanGamePlays(plays, THRESHOLD)
 }
 
-function clubOf(side) {
-  return { id: side?.team?.id ?? null, abbr: side?.team?.abbreviation ?? '' }
-}
-
-// The stored shape of one long at-bat. The batter's club comes off which half
-// he batted in, so the row can name both men's clubs without the file carrying
-// an inning — and `top` itself is dropped here, having done its one job.
-function rowFor(game, entry) {
-  const away = clubOf(game.teams?.away)
-  const home = clubOf(game.teams?.home)
-  return {
-    pk: game.gamePk,
-    date: game.officialDate,
-    ...(game.gameNumber > 1 ? { g: game.gameNumber } : {}),
-    away,
-    home,
-    batter: {
-      id: entry.batter?.id ?? null,
-      name: entry.batter?.fullName ?? '',
-      teamId: (entry.top ? away : home).id,
-    },
-    pitcher: {
-      id: entry.pitcher?.id ?? null,
-      name: entry.pitcher?.fullName ?? '',
-      teamId: (entry.top ? home : away).id,
-    },
-    pitches: entry.pitches,
-  }
-}
-
 async function main() {
   const year = Number(today.slice(0, 4))
   const season = onlySeason ?? noteSeasonFor(offseasonPhase(today, await seasonRow(year)), year)
@@ -170,8 +130,7 @@ async function main() {
   scanFile[key] = scan
 
   const games = await playedGames(season)
-  const byPk = new Map(games.map((g) => [g.gamePk, g]))
-  const todo = games.filter((g) => rescan || !scan.games[g.gamePk])
+  const todo = gamesToRead(games, scan.games, rescan)
   console.log(`  ${games.length} played games, ${todo.length} to read`)
 
   let done = 0
@@ -196,38 +155,13 @@ async function main() {
 
   // Export from the scan, never from this run alone: a nightly run reads a
   // handful of games and the file it writes is the whole season's.
-  let plateAppearances = 0
-  let withoutPitches = 0
-  let ingested = 0
-  const rows = []
-  for (const [pk, entry] of Object.entries(scan.games)) {
-    const game = byPk.get(Number(pk))
-    // A gamePk the schedule no longer returns as a Final regular-season game
-    // (a suspended game re-filed, a rescheduled row) drops out of the census
-    // rather than being counted from a stale tally.
-    if (!game) continue
-    ingested += 1
-    plateAppearances += entry.pa ?? 0
-    withoutPitches += entry.noPitch ?? 0
-    for (const long of entry.long ?? []) rows.push(rowFor(game, long))
-  }
-
-  const doc = {
+  const doc = buildSeasonDoc({
     season,
-    generatedAt: new Date().toISOString(),
     threshold: THRESHOLD,
-    coverage: {
-      games: ingested,
-      playedGames: games.length,
-      plateAppearances,
-      // The one thing that would make the count "at least N" instead of "N":
-      // an at-bat the feed carried no pitches for. The page reads this and
-      // says so rather than claiming an exactness it cannot have.
-      plateAppearancesWithoutPitches: withoutPitches,
-      complete: ingested === games.length && withoutPitches === 0,
-    },
-    rows: sortRows(rows),
-  }
+    generatedAt: new Date().toISOString(),
+    scanGames: scan.games,
+    games,
+  })
 
   // Rewrite only when something other than the timestamp moved: in the winter
   // this generator reads a finished season every night and has nothing new to
@@ -237,11 +171,14 @@ async function main() {
   const prev = await readJsonOr(path, null)
   const strip = (d) => JSON.stringify({ ...d, generatedAt: null })
   if (!prev || strip(prev) !== strip(doc)) await writeJsonAtomic(path, doc)
-  console.log(
-    `  ${doc.rows.length} at-bats of ${THRESHOLD}+ pitches in ${plateAppearances} ` +
-      `plate appearances over ${ingested}/${games.length} games` +
-      `${withoutPitches > 0 ? ` (${withoutPitches} PA with no pitch events)` : ''}`,
-  )
+  const line = (label, { rows, coverage: c }) =>
+    console.log(
+      `  ${label}: ${rows.length} at-bats of ${THRESHOLD}+ pitches in ${c.plateAppearances} ` +
+        `plate appearances over ${c.games}/${c.playedGames} games` +
+        `${c.plateAppearancesWithoutPitches > 0 ? ` (${c.plateAppearancesWithoutPitches} PA with no pitch events)` : ''}`,
+    )
+  line('regular season', doc)
+  if (doc.post) line('postseason', doc.post)
   console.log('Done.')
 }
 

@@ -5,6 +5,7 @@ import { fetchTeamPhotoBatch } from '../../api/gamePhotos.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate, AsyncStatus } from '../../components/ui/AsyncGate.jsx'
+import { Notice } from '../../components/ui/state/Notice.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { loadTeamPhotos } from './data/loadTeamPhotos.js'
@@ -164,14 +165,11 @@ function TeamPhotosSeason({ team, season, games, onBack }) {
         </h1>
       </header>
 
-      <div className="gamephotos__notice" role="note">
-        <span className="gamephotos__noticetag">Unsealed</span>
-        <p>
-          Every professional photo MLB’s content package carries for the {season} season, newest
-          first — including tonight’s game, if one’s in progress. Personal use only — photos are
-          copyrighted (AP/Getty/USA Today Sports via MLB).
-        </p>
-      </div>
+      <Notice tone="caution" label="Unsealed" role="note" className="gamephotos__notice">
+        Every professional photo MLB’s content package carries for the {season} season, newest
+        first — including tonight’s game, if one’s in progress. Personal use only — photos are
+        copyrighted (AP/Getty/USA Today Sports via MLB).
+      </Notice>
 
       <section className="gamephotos__section gamephotos__gallery">
         <AsyncStatus

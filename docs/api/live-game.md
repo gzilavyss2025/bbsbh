@@ -224,7 +224,9 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   Team Page's record-by-jersey strip (`components/logo/JerseyCombos.jsx`),
   `fetchGameJerseys` (batched per-game worn-jersey join) + the pure
   `buildJerseyCombos` (one card per catalog jersey → its logo treatment + the
-  club's W-L in games it wore it, joined by `uniformAssetCode`; the record is
+  club's regular-season W-L in games it wore it, joined by `uniformAssetCode`, plus a
+  postseason W-L where it was worn in October — the regular-season figure sums to the
+  standings, #1515; both are
   gated by the schedule's own cutoff so it can't leak a result the standings
   don't already show). A MiLB club has no catalog at all, so its Team Page gets
   the two-card Home/Away form of that strip instead, with no record — there is

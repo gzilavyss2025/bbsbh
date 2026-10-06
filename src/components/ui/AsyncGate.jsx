@@ -2,6 +2,8 @@ import { SiteHeader } from '../chrome/SiteHeader.jsx'
 import { BackBtn } from '../chrome/BackBtn.jsx'
 import { Loader } from './Loader.jsx'
 import { EmptyState } from './state/EmptyState.jsx'
+import { Notice } from './state/Notice.jsx'
+import { Button } from './control/Button.jsx'
 
 // The cold-load loading/error/not-found screen shared by PlayerPage and
 // TeamPage: while there's no data yet, show "Loading {noun}…"; if the fetch
@@ -26,9 +28,9 @@ export function AsyncGate({ loading, error, data, screenClass, noun, onBack }) {
       <div className={`screen ${screenClass}`}>
         <SiteHeader />
         <BackBtn onClick={onBack} />
-        <p className="hint hint--error">
+        <Notice tone="error" className="asyncstatus__notice">
           {error ? `Couldn’t load this ${noun}. Try again.` : `${capitalized} not found.`}
-        </p>
+        </Notice>
       </div>
     )
   }
@@ -46,13 +48,13 @@ export function AsyncGate({ loading, error, data, screenClass, noun, onBack }) {
 // often `data && someArray.length > 0` rather than a bare `data` truthiness
 // check (a resolved-but-empty response is not the same as "still loading").
 // It also decides which of the two error treatments applies: a COLD error
-// (no data ever landed) shows a blocking hint, optionally with a Retry button
-// via `onRetry`; a STALE error (data already on screen, e.g. a live-game
-// Refresh or a Standings date-jump that failed) shows a smaller non-blocking
-// notice via `staleErrorMessage` — omit it to render nothing for that case, matching
-// screens where that combination can't happen. The empty branch is the shared
-// EmptyState (#1132): a dashed inset, no `.hint` padding, so the parent owns
-// the space around it.
+// (no data ever landed) shows an error Notice (role="alert"), with a Retry
+// Button as its action via `onRetry`; a STALE error (data already on screen,
+// e.g. a live-game Refresh or a Standings date-jump that failed) shows the same
+// Notice with role="status" via `staleErrorMessage` (#1132, N4) — omit it to
+// render nothing for that case, matching screens where that combination can't
+// happen. The empty branch is the shared EmptyState (#1132): a dashed inset, no
+// `.hint` padding, so the parent owns the space around it.
 export function AsyncStatus({
   loading,
   error,
@@ -65,23 +67,20 @@ export function AsyncStatus({
   if (loading && !hasData) return <Loader />
   if (error && !hasData) {
     return (
-      <>
-        <p className="hint hint--error" role="status">
-          {errorMessage}
-        </p>
-        {onRetry && (
-          <button type="button" className="btn" onClick={onRetry}>
-            Retry
-          </button>
-        )}
-      </>
+      <Notice
+        tone="error"
+        className="asyncstatus__notice"
+        action={onRetry && <Button onClick={onRetry}>Retry</Button>}
+      >
+        {errorMessage}
+      </Notice>
     )
   }
   if (error && hasData && staleErrorMessage) {
     return (
-      <p className="hint hint--error" role="status">
+      <Notice tone="error" role="status" className="asyncstatus__notice">
         {staleErrorMessage}
-      </p>
+      </Notice>
     )
   }
   if (!loading && !error && !hasData && emptyMessage) {

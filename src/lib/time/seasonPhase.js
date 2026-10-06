@@ -98,6 +98,18 @@ export function offseasonPhase(dateStr, row) {
   return null
 }
 
+// MILESTONE WATCH PAUSES FOR THE POSTSEASON (#1438). Career totals count the
+// regular season only, on purpose: MLB keeps postseason stats in their own
+// category, and statsapi's career stat leaves them out. So from the last day of
+// the regular season to the last day of the postseason, a "games left" ETA has
+// nothing true to say. The row states both dates; no schedule is read.
+// Fails CLOSED like offseasonPhase: a wrong-year or undated row is "not paused".
+export function milestoneProjectionPaused(dateStr, row) {
+  if (!isIso(dateStr) || !row || Number(row.seasonId) !== Number(dateStr.slice(0, 4))) return false
+  const { regularSeasonEndDate: last, postSeasonEndDate: end } = row
+  return isIso(last) && isIso(end) && dateStr >= last && dateStr <= end
+}
+
 // THE SAME READING, ONE LEVEL DOWN — issue #1077.
 //
 // A minor level is not a season; it is three leagues that each publish their

@@ -329,6 +329,12 @@ export const PAIRINGS = [
   { fg: 'field', bg: '#F8EECE', min: TEXT, note: 'lens notice: throwing hand' },
   { fg: 'clay-deep', bg: '#F8EECE', min: TEXT, note: 'lens notice: the entry flag' },
   { fg: 'text-caption', bg: '#F8EECE', min: TEXT, note: 'lens notice: arsenal and last time out' },
+  // The Notice's info tone (#1132; styles/system/notice.css, .notice--info), the
+  // default for every Notice. #EBE8DD is `color-mix(in srgb, var(--navy) 7%,
+  // var(--surface-card))` by hand: a change to that mix changes this hex. The
+  // caption ink is the club records on the extra-innings line (N5).
+  { fg: 'text-body', bg: '#EBE8DD', min: TEXT, note: 'notice info tone: label and sentence' },
+  { fg: 'text-caption', bg: '#EBE8DD', min: TEXT, note: 'notice info tone: caption ink (the extras line\'s club records)' },
   // THE MATCHUP SCOUT (#1490, styles/scout/panels.css and meetings.css). The
   // Edge ledger's tags and the lean name: clay for the hitter's side, the
   // All-Star blue for the pitcher's. The Meetings pitch calls: clay for a

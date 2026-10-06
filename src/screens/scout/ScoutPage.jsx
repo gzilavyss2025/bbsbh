@@ -14,6 +14,7 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Pill } from '../../components/ui/control/Pill.jsx'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
+import { Notice } from '../../components/ui/state/Notice.jsx'
 import { Choice } from '../../components/scout/Choice.jsx'
 import { Matchup } from '../../components/scout/Matchup.jsx'
 import { loadScout } from './loadScout.js'
@@ -182,7 +183,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
       )}
       {!hasPair && <EmptyState>Pick a pitcher and a hitter</EmptyState>}
       {hasPair && load.loading && <AsyncStatus loading hasData={false} />}
-      {hasPair && !load.loading && !data && <p className="hint hint--error">Couldn’t load this pair</p>}
+      {hasPair && !load.loading && !data && <Notice tone="error" className="scout__notice">Couldn’t load this pair</Notice>}
 
       {data && (
         <>

@@ -30,9 +30,12 @@ test('E2: the empty test stays byte for byte (a day with no games is not a resul
   assert.match(status, /if \(loading && !hasData\) return <Loader \/>/)
 })
 
-test('E2: both AsyncStatus error branches and the not-found line still render hint hint--error', () => {
-  assert.equal((status.match(/className="hint hint--error" role="status"/g) || []).length, 2)
-  assert.equal((gate.match(/className="hint hint--error"/g) || []).length, 3)
+// N4 (#1132) moved the three error lines onto Notice (decisions Q2); the
+// branch tests are pinned in test/notice-n4.test.js.
+test('E2: both AsyncStatus error branches and the not-found line render an error Notice', () => {
+  assert.equal((status.match(/<Notice\s+tone="error"/g) || []).length, 2)
+  assert.equal((gate.match(/<Notice\s+tone="error"/g) || []).length, 3)
+  assert.doesNotMatch(gate, /hint--error/)
 })
 
 test('E2: no file under src/ names emptyProse any more', () => {

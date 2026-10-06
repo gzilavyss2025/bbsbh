@@ -1,7 +1,8 @@
 import '../styles/32-milestone-watch.css'
 import { useState } from 'react'
-import { loadMilestoneWatch, formatMilestoneProjection, groupMilestoneRows } from '../api/milestones.js'
+import { loadMilestoneWatch, formatMilestoneProjection, groupMilestoneRows, MILESTONE_PAUSE_NOTE } from '../api/milestones.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useMilestonesPaused } from '../hooks/useOffseason.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { filterByTeam } from '../lib/teamFilter.js'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
@@ -12,6 +13,7 @@ import { MasonryColumns } from '../components/ui/MasonryColumns.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
+import { Notice } from '../components/ui/state/Notice.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
@@ -36,6 +38,7 @@ export function MilestoneWatchPage() {
   useDocumentTitle('Milestone Watch')
   const { loading, error, data } = useAsync(() => loadMilestoneWatch(), [])
   const [filterTeamId, setFilterTeamId] = useState(null)
+  const paused = useMilestonesPaused()
   const allRows = data?.players ?? []
   const rows = filterByTeam(allRows, filterTeamId, (r) => r.teamId)
   const groups = groupMilestoneRows(rows)
@@ -74,6 +77,7 @@ export function MilestoneWatchPage() {
 
       {rows.length > 0 && (
         <>
+          {paused && <Notice role="note">{MILESTONE_PAUSE_NOTE}</Notice>}
           <MasonryColumns
             items={groups}
             columnWidth={288}
@@ -96,7 +100,7 @@ export function MilestoneWatchPage() {
                     </TeamLink>
                   </span>
                   {g.milestones.map((m) => {
-                    const eta = formatMilestoneProjection(m.projection)
+                    const eta = paused ? null : formatMilestoneProjection(m.projection)
                     return (
                       <div className="milestonewatch-page__row" key={`${m.stat}-${m.threshold}`}>
                         <span className="milestonewatch-page__stat">{m.threshold.toLocaleString('en-US')} {m.label}</span>

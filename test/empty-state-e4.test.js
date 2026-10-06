@@ -48,7 +48,7 @@ test('E4: Stamp In renders its empty line on EmptyState, copy only', () => {
   const code = src('screens/team/StampInPage.jsx')
   assert.match(code, IMPORT)
   assert.match(code, /games\.length === 0 \? \(\s*<EmptyState>No games posted yet for this season\.<\/EmptyState>/)
-  assert.match(code, /hint hint--error">Couldn’t load this game’s result/, 'the error line stays a hint')
+  assert.match(code, /<Notice tone="error" size="compact">Couldn’t load this game’s result/, 'the error line is a compact error Notice since N2 (#1132)')
   assert.doesNotMatch(code, /EmptyState[^\n]*stamp/i)
 })
 

@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { markIntroSeenIn } from '../../lib/account/intro.js'
 import { clearTallyDataIn } from '../../lib/account/localData.js'
 import { browserStorage } from '../../lib/account/preferencesStorage.js'
+import { Notice } from '../ui/state/Notice.jsx'
 
 // "Erase my Tally data" — the confirm sheet behind the two deletion actions in
 // My Tally's Sync & data section. Deliberately TWO actions, never one:
@@ -141,10 +142,10 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
         <p className="sheet__body erasesheet__body caps-exempt">{copy.body}</p>
         <p className="erasesheet__tail caps-exempt">{copy.tail}</p>
         {state === 'failed' && (
-          <p className="hint hint--error erasesheet__error caps-exempt" role="status">
+          <Notice tone="error" role="status" className="erasesheet__error">
             Your account could not be reached, so nothing was erased. Try again in a
             moment, or clear this device on its own.
-          </p>
+          </Notice>
         )}
         <div className="erasesheet__actions">
           <button

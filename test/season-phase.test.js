@@ -17,6 +17,7 @@ import test from 'node:test'
 import {
   currentMilestone,
   daysBetween,
+  milestoneProjectionPaused,
   offseasonPhase,
   parseWinterCalendar,
 } from '../src/lib/time/seasonPhase.js'
@@ -194,4 +195,25 @@ test('the countdown counts calendar days, not elapsed hours', () => {
   assert.equal(daysBetween('2028-02-01', '2028-03-01'), 29)
   assert.equal(daysBetween('bad', '2027-02-19'), null)
   assert.equal(daysBetween('2026-12-10', null), null)
+})
+
+// MILESTONE WATCH PAUSE (#1438). Career totals count the regular season only,
+// so from the last regular-season day to the end of the postseason the ETA has
+// nothing true to say. Read off the row's own dates, never off a schedule.
+test('milestone projection pauses from the last regular-season day to the end of the postseason', () => {
+  const paused = (d, row = SEASON_2026) => milestoneProjectionPaused(d, row)
+  assert.equal(paused('2026-09-26'), false, 'the day before the regular season ends')
+  assert.equal(paused('2026-09-27'), true, 'the last day of the regular season')
+  assert.equal(paused('2026-10-15'), true, 'mid-October')
+  assert.equal(paused('2026-10-31'), true, 'the last day of the postseason')
+  assert.equal(paused('2026-11-01'), false, 'the day after the World Series')
+  assert.equal(paused('2026-01-15'), false, 'midwinter, on the new year row')
+  assert.equal(paused('2026-03-25'), false, 'Opening Day')
+})
+
+test('milestone projection pause fails closed on a wrong or unreadable row', () => {
+  assert.equal(milestoneProjectionPaused('2026-10-15', null), false)
+  assert.equal(milestoneProjectionPaused('2026-10-15', SEASON_2025), false, 'row for another year')
+  assert.equal(milestoneProjectionPaused('2026-10-15', { seasonId: '2026' }), false, 'no dates')
+  assert.equal(milestoneProjectionPaused(undefined, SEASON_2026), false)
 })

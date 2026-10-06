@@ -5,6 +5,7 @@ import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
 import { isClerkEnabled } from './lib/clerkConfig.js'
 import { Loader } from './components/ui/Loader.jsx'
+import { Notice } from './components/ui/state/Notice.jsx'
 import { SyncStatusProvider } from './components/sync/SyncStatusProvider.jsx'
 import { PlayerHoverCard } from './components/player/PlayerHoverCard.jsx'
 import { HeadshotLogPanel } from './components/headshot-log/HeadshotLogPanel.jsx'
@@ -417,9 +418,10 @@ export default function App() {
   const Bare = BARE_ROUTES[route.name]
   const IdPage = ID_ROUTES[route.name]
   // `seasonYear` and `vs` are a season view's season (#1202, lib/route.js's
-  // seasonParams); undefined on every other route, and ignored there.
+  // seasonParams); `scope` is ?scope= (/abs-challenges reads it). Undefined on
+  // every other route, and ignored there.
   if (Bare) {
-    content = <Bare seasonYear={route.seasonYear} vs={route.vs} />
+    content = <Bare seasonYear={route.seasonYear} vs={route.vs} scope={route.scope} />
   } else if (IdPage) {
     content = (
       <IdPage id={route.id} asOf={route.asOf} sportId={route.sportId} seasonYear={route.seasonYear} vs={route.vs} scope={route.scope} />
@@ -651,9 +653,9 @@ function GameRoute({ route, seed, onSection, onHome }) {
   if (resolved.error) {
     return (
       <div className="screen">
-        <p className="hint hint--error" role="status">
+        <Notice tone="error" className="appstate__notice">
           Couldn’t load the schedule. Check your connection and try again.
-        </p>
+        </Notice>
         <button className="btn" onClick={resolved.reload}>
           Retry
         </button>
@@ -666,9 +668,9 @@ function GameRoute({ route, seed, onSection, onHome }) {
   if (!resolved.data) {
     return (
       <div className="screen">
-        <p className="hint hint--error">
+        <Notice tone="error" className="appstate__notice">
           Couldn’t find that game. It may not be on the schedule for that date.
-        </p>
+        </Notice>
         <button className="btn" onClick={onHome}>
           Back to games
         </button>

@@ -101,6 +101,16 @@ export function dayOfWeek(iso) {
   return new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10))).getUTCDay()
 }
 
+// 'NL Division Series' -> 'NLDS', 'World Series' -> 'WS'; null for the regular
+// season and anything else. Read off the schedule's seriesDescription.
+const ROUNDS = [[/Wild Card/, 'WC'], [/Division/, 'DS'], [/Championship/, 'CS']]
+function seriesLabel(desc) {
+  if (desc === 'World Series') return 'WS'
+  const lg = /^(AL|NL) /.exec(desc ?? '')?.[1]
+  const round = ROUNDS.find(([re]) => re.test(desc))?.[1]
+  return lg && round ? lg + round : null
+}
+
 // One schedule game -> the flat row this generator reasons over, or null if
 // the game carries nothing worth counting. A game is usable when it is Final,
 // is filed under its own officialDate (the postponed-replay dedup every sweep
@@ -135,6 +145,10 @@ export function toRow(game, date) {
     // neutral-site/exhibition-adjacent games; those simply miss the split.
     dayNight: game.dayNight === 'day' || game.dayNight === 'night' ? game.dayNight : null,
     venue: game?.venue?.name ?? null,
+    // Postseason round and the game's number in the series ('NLDS', 1), so the
+    // page can name a best night 'NLDS • G1'. Null on a regular-season game.
+    series: seriesLabel(game.seriesDescription),
+    seriesGame: game.seriesGameNumber ?? null,
     dow: dayOfWeek(game.officialDate),
     month: Number(game.officialDate?.slice(5, 7)) || null,
     // A game CALLED EARLY is still Final and still counted — a rain-shortened
@@ -192,7 +206,10 @@ function extreme(rows, field, pick) {
   const usable = rows.filter((r) => r[field] != null)
   if (!usable.length) return null
   const best = usable.reduce((a, b) => (pick(b[field], a[field]) ? b : a))
-  return { n: best[field], date: best.date, oppId: best.oppId ?? null }
+  // The round rides along only on a postseason game, so a regular-season block
+  // keeps its old shape byte for byte.
+  const round = best.series ? { series: best.series, seriesGame: best.seriesGame } : null
+  return { n: best[field], date: best.date, oppId: best.oppId ?? null, ...round }
 }
 
 // The home-gate half: how many came, when they came, and who they came to see.

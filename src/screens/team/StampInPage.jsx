@@ -24,6 +24,7 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
+import { Notice } from '../../components/ui/state/Notice.jsx'
 import { ConsentModal } from '../../components/seal/ConsentModal.jsx'
 import { GameResultFace } from '../../components/game/GameResultFace.jsx'
 import { BoxScoreSkeleton } from '../../components/game/BoxScoreSkeleton.jsx'
@@ -261,7 +262,7 @@ function StampInRow({ game, getSignals, stamped, seasonFull, onStamp }) {
           )}
         </div>
       ) : failed ? (
-        <p className="hint hint--error">Couldn’t load this game’s result.</p>
+        <Notice tone="error" size="compact">Couldn’t load this game’s result.</Notice>
       ) : (
         <BoxScoreSkeleton />
       )}

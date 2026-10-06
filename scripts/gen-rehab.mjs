@@ -13,6 +13,9 @@
 // same-origin read. Mirrors scripts/gen-war.mjs's build-time-fetch pattern (see
 // docs/data-enrichment.md §5); rehab status changes slowly enough that a daily
 // refresh is plenty.
+// Regular season only, ON PURPOSE (#1438): the club schedule reads below ask
+// gameType=R. A rehab stint is judged against the regular-season schedule, so
+// postseason games are not read here.
 // Run by hand: node scripts/gen-rehab.mjs
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'

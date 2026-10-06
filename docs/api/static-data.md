@@ -299,8 +299,10 @@ for each generator; the reader modules:
   the wrong season is worse than no card.
 - `notebook.js` — the offseason page's one NOTE, both kinds, in one reader.
   `fetchLongAtBats(season)` reads `public/data/long-at-bats/{season}.json`
-  (`gen-long-at-bats.mjs`): every plate appearance of an MLB season that took 12
-  pitches or more, plus the coverage the census rests on. Keyed on the season,
+  (`gen-long-at-bats.mjs`): every plate appearance of an MLB regular season that took 12
+  pitches or more, plus the coverage the census rests on. `post` is the postseason's census
+  beside it (its own coverage and rows, `null` until a postseason game is on file), never
+  summed into the regular season (ADR-0104). Keyed on the season,
   not one rolling path, because the offseason page names one season from November
   to February and a file that rolled over on January 1 would take the note off the
   page until April (#1122). `fetchYoungestRegulars(sportId)` reads
@@ -606,6 +608,10 @@ for each generator; the reader modules:
   listed figure, not a turnstile cap. `postseasonGate(data, season)` returns the
   separate `postseason` block (gate only, home club; never mixed into the
   season figures); pace of play stays regular season on purpose (#1439).
+  `postseasonBoard(data, season)` shapes that block for the page: games, through date,
+  league line, and one row per October club ranked only against the other October
+  clubs. `AttendancePage` draws it as a "Postseason" section and only when it is
+  non-null. The Ballpark card (`attendance.js`) stays regular season.
   `paceBoard(data, season, sortBy)` is the
   same shape over game length, plus the three-hour/three-and-a-half-hour
   counts and the delay totals. `asClock` renders minutes the way baseball says
@@ -685,7 +691,13 @@ for each generator; the reader modules:
 - `around-the-game/absChallenges.js` — `/abs-challenges`, the season board for
   the ABS Challenge System, from `public/data/abs/{season}/abs-challenges.json`
   (the season `abs/seasons.json` names, ADR-0086)
-  (`gen-abs-challenges.mjs`). MLB and Triple-A are separate levels on the page,
+  (`gen-abs-challenges.mjs`). `fetchAbsChallenges({ seasonYear, scope })` takes
+  `scope` 'reg' (the default), 'post' or 'all', one file each
+  (`abs-challenges-post.json`, `abs-challenges-all.json`); every file carries
+  `postGames` per level, and the page offers Postseason only for a level whose
+  count is above 0 (#1514). `fetchRoundShort(gamePk)` (`src/api/game.js`) reads one schedule row for
+  the "ALDS • G1" under the biggest postseason overturn (MLB only).
+  MLB and Triple-A are separate levels on the page,
   never blended: two different leagues of hitters, catchers and umpires, and
   Triple-A has years of the rule MLB is in its first season of. The FILE ships
   each club's, umpire's and player's own totals; ranking, and the

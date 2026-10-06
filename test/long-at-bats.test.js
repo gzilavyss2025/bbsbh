@@ -15,12 +15,20 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
+  ALL_GAME_TYPES,
+  POSTSEASON_GAME_TYPES,
+  REGULAR_SEASON_GAME_TYPES,
+  buildSeasonDoc,
+  gamesToRead,
   isPlateAppearance,
   noteSeasonFor,
   pitchesIn,
+  playedGamesOf,
   scanGamePlays,
+  scopeOfGameType,
   sortRows,
 } from '../scripts/lib/long-at-bats.mjs'
+import { POSTSEASON_GAME_TYPES as SHARED_POSTSEASON } from '../scripts/lib/records/postseason.mjs'
 import { atBatGamePath, ageGap, count, defaultLeagueId, years } from '../src/api/notebook.js'
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
@@ -163,50 +171,227 @@ test('the age note opens on the reader’s own league, not on the first in the f
 // starts being the play-by-play of a game the reader may still want to score.
 // So this reads the bytes that are committed and states the allowed vocabulary
 // positively: anything a future edit adds has to be added here too.
+//
+// The postseason part (ADR-0104) is held to the same list. It is checked on a
+// built doc as well as on the committed files, because the committed files
+// carry no `post` until the nightly run has swept a postseason game.
+const BANNED =
+  /^(runs|score|scores|winner|loser|isTie|inning|innings|halfInning|outs|rbi|event|eventType|result|description|linescore|decisions|awayScore|homeScore|top|gameType|series|round)$/i
+const DOC_KEYS = ['season', 'generatedAt', 'threshold', 'coverage', 'rows', 'post']
+const COVERAGE_KEYS = ['games', 'playedGames', 'plateAppearances', 'plateAppearancesWithoutPitches', 'complete']
+const ROW_KEYS = ['pk', 'date', 'g', 'away', 'home', 'batter', 'pitcher', 'pitches']
+const CLUB_KEYS = ['id', 'abbr']
+const PERSON_KEYS = ['id', 'name', 'teamId']
+
+function assertLengthOnly(doc, label) {
+  for (const key of Object.keys(doc)) assert.ok(DOC_KEYS.includes(key), `${label} carries ${key}`)
+  const parts = [[doc, label]]
+  if (doc.post) {
+    for (const key of Object.keys(doc.post)) {
+      assert.ok(['coverage', 'rows'].includes(key), `${label}.post carries ${key}`)
+    }
+    parts.push([doc.post, `${label}.post`])
+  }
+  for (const [part, name] of parts) {
+    for (const key of Object.keys(part.coverage)) {
+      assert.ok(COVERAGE_KEYS.includes(key), `${name}.coverage carries ${key}`)
+    }
+    for (const row of part.rows) {
+      assert.ok(row.pitches >= doc.threshold, `${name} carries a ${row.pitches}-pitch at-bat`)
+      for (const key of Object.keys(row)) {
+        assert.ok(ROW_KEYS.includes(key), `${name} row carries an unexpected field: ${key}`)
+      }
+      for (const side of ['away', 'home']) {
+        for (const key of Object.keys(row[side])) {
+          assert.ok(CLUB_KEYS.includes(key), `${name} ${side} carries ${key}`)
+        }
+      }
+      for (const who of ['batter', 'pitcher']) {
+        for (const key of Object.keys(row[who])) {
+          assert.ok(PERSON_KEYS.includes(key), `${name} ${who} carries ${key}`)
+        }
+      }
+    }
+  }
+
+  // And the same question asked of every key at every depth, in case the
+  // shape above is the thing that changes.
+  const walk = (node, path) => {
+    if (Array.isArray(node)) return node.forEach((v, i) => walk(v, `${path}[${i}]`))
+    if (!node || typeof node !== 'object') return
+    for (const [key, value] of Object.entries(node)) {
+      assert.ok(!BANNED.test(key), `${label} carries a result-bearing key at ${path}.${key}`)
+      walk(value, `${path}.${key}`)
+    }
+  }
+  walk(doc, label)
+}
+
 test('no committed season carries anything that could say how an at-bat or a game went', () => {
   const dir = join(ROOT, 'public', 'data', 'long-at-bats')
   const files = readdirSync(dir).filter((f) => f.endsWith('.json'))
   assert.ok(files.length > 0, 'no seasons are committed')
-
-  const BANNED =
-    /^(runs|score|scores|winner|loser|isTie|inning|innings|halfInning|outs|rbi|event|eventType|result|description|linescore|decisions|awayScore|homeScore|top)$/i
-  const ROW_KEYS = ['pk', 'date', 'g', 'away', 'home', 'batter', 'pitcher', 'pitches']
-  const CLUB_KEYS = ['id', 'abbr']
-  const PERSON_KEYS = ['id', 'name', 'teamId']
 
   for (const file of files) {
     const doc = JSON.parse(readFileSync(join(dir, file), 'utf8'))
     assert.equal(doc.season, Number(file.replace('.json', '')))
     assert.equal(doc.threshold, 12)
     assert.ok(doc.rows.length > 0, `${file} has no at-bats`)
-
-    for (const row of doc.rows) {
-      assert.ok(row.pitches >= doc.threshold, `${file} carries a ${row.pitches}-pitch at-bat`)
-      for (const key of Object.keys(row)) {
-        assert.ok(ROW_KEYS.includes(key), `${file} row carries an unexpected field: ${key}`)
-      }
-      for (const side of ['away', 'home']) {
-        for (const key of Object.keys(row[side])) {
-          assert.ok(CLUB_KEYS.includes(key), `${file} ${side} carries ${key}`)
-        }
-      }
-      for (const who of ['batter', 'pitcher']) {
-        for (const key of Object.keys(row[who])) {
-          assert.ok(PERSON_KEYS.includes(key), `${file} ${who} carries ${key}`)
-        }
-      }
-    }
-
-    // And the same question asked of every key at every depth, in case the
-    // shape above is the thing that changes.
-    const walk = (node, path) => {
-      if (Array.isArray(node)) return node.forEach((v, i) => walk(v, `${path}[${i}]`))
-      if (!node || typeof node !== 'object') return
-      for (const [key, value] of Object.entries(node)) {
-        assert.ok(!BANNED.test(key), `${file} carries a result-bearing key at ${path}.${key}`)
-        walk(value, `${path}.${key}`)
-      }
-    }
-    walk(doc, file)
+    assertLengthOnly(doc, file)
   }
+})
+
+// THE POSTSEASON BESIDE THE REGULAR SEASON (ADR-0104, #1542).
+
+// A schedule row as playedGames asks for it.
+function game(pk, gameType, extra = {}) {
+  return {
+    gamePk: pk,
+    gameType,
+    officialDate: '2026-09-30',
+    status: { abstractGameState: 'Final' },
+    linescore: { innings: [{ num: 1 }] },
+    teams: { away: { team: { id: 10, abbreviation: 'AAA' } }, home: { team: { id: 20, abbreviation: 'HHH' } } },
+    ...extra,
+  }
+}
+
+// One scan entry as the generator stores it: a tally and its long at-bats.
+const tally = (pa, pitches = []) => ({
+  pa,
+  noPitch: 0,
+  long: pitches.map((n) => ({
+    pitches: n,
+    top: true,
+    batter: { id: 1, fullName: 'A Batter' },
+    pitcher: { id: 2, fullName: 'A Pitcher' },
+  })),
+})
+
+const build = (scanGames, games) =>
+  buildSeasonDoc({ season: 2026, threshold: 12, generatedAt: 'T', scanGames, games })
+
+test('the game-type lists are pinned: the regular season, and the four postseason rounds', () => {
+  assert.equal(REGULAR_SEASON_GAME_TYPES, 'R')
+  // Wild Card, Division, League Championship, World Series — never the umbrella
+  // 'P' (src/api/boxlines/rows.js): it selects the same games but a pitching
+  // log echoes it back as the row's own type, which hides the round.
+  assert.equal(POSTSEASON_GAME_TYPES, 'F,D,L,W')
+  assert.ok(!POSTSEASON_GAME_TYPES.split(',').includes('P'))
+  // The same list the other postseason sweeps read; this file cannot import it
+  // (a cycle through team-records.mjs), so the two are pinned equal instead.
+  assert.equal(POSTSEASON_GAME_TYPES, SHARED_POSTSEASON)
+  assert.equal(ALL_GAME_TYPES, 'R,F,D,L,W')
+})
+
+test('a game’s scope comes from its own gameType', () => {
+  for (const t of ['F', 'D', 'L', 'W']) assert.equal(scopeOfGameType(t), 'P', t)
+  for (const t of ['R', 'S', 'E', undefined]) assert.equal(scopeOfGameType(t), 'R', String(t))
+})
+
+test('a game still in play, or never played, is not counted — in either scope', () => {
+  const dates = [
+    {
+      games: [
+        game(1, 'R'),
+        game(2, 'D'),
+        game(3, 'D', { status: { abstractGameState: 'Live' } }),
+        game(4, 'W', { status: { abstractGameState: 'Preview' } }),
+        game(5, 'L', { linescore: { innings: [] } }), // Final / Postponed: no innings
+        game(6, 'F', { linescore: undefined }),
+      ],
+    },
+  ]
+  assert.deepEqual(playedGamesOf(dates).map((g) => g.gamePk), [1, 2])
+})
+
+test('a game on two schedule dates is read once, from its first entry', () => {
+  const dates = [
+    { games: [game(7, 'D', { officialDate: '2026-10-07' })] },
+    { games: [game(7, 'D', { officialDate: '2026-10-08' })] },
+  ]
+  const out = playedGamesOf(dates)
+  assert.equal(out.length, 1)
+  assert.equal(out[0].officialDate, '2026-10-07')
+  assert.deepEqual(playedGamesOf(undefined), [])
+})
+
+test('a second sweep reads nothing; --rescan reads every game', () => {
+  const games = [game(1, 'R'), game(2, 'D')]
+  assert.deepEqual(gamesToRead(games, {}, false).map((g) => g.gamePk), [1, 2])
+  const scanned = { 1: tally(30), 2: tally(30, [12]) }
+  assert.deepEqual(gamesToRead(games, scanned, false), [])
+  assert.deepEqual(gamesToRead(games, scanned, true).map((g) => g.gamePk), [1, 2])
+})
+
+test('a regular-season-only scan builds the file it always built, with no postseason key', () => {
+  const doc = build({ 1: tally(38, [13]), 2: tally(40) }, [game(1, 'R'), game(2, 'R'), game(3, 'R')])
+  assert.equal(
+    JSON.stringify(doc),
+    JSON.stringify({
+      season: 2026,
+      generatedAt: 'T',
+      threshold: 12,
+      coverage: { games: 2, playedGames: 3, plateAppearances: 78, plateAppearancesWithoutPitches: 0, complete: false },
+      rows: [
+        {
+          pk: 1,
+          date: '2026-09-30',
+          away: { id: 10, abbr: 'AAA' },
+          home: { id: 20, abbr: 'HHH' },
+          batter: { id: 1, name: 'A Batter', teamId: 10 },
+          pitcher: { id: 2, name: 'A Pitcher', teamId: 20 },
+          pitches: 13,
+        },
+      ],
+    }),
+  )
+  assert.ok(!('post' in doc))
+})
+
+test('a postseason game never adds to, or overwrites, a regular-season figure', () => {
+  const regularScan = { 1: tally(38, [13]), 2: tally(40, [12]) }
+  const regularGames = [game(1, 'R'), game(2, 'R')]
+  const regularOnly = build(regularScan, regularGames)
+
+  // Same at-bat length, same batter, a postseason game beside them.
+  const both = build({ ...regularScan, 3: tally(35, [14, 12]) }, [...regularGames, game(3, 'D')])
+
+  assert.deepEqual(
+    { ...both, post: undefined },
+    { ...regularOnly, post: undefined },
+    'the regular-season part moved when a postseason game arrived',
+  )
+  assert.equal(both.rows.length, 2)
+  assert.equal(both.coverage.plateAppearances, 78)
+  assert.equal(both.coverage.complete, true)
+  assert.equal(both.post.rows.length, 2)
+  assert.deepEqual(both.post.rows.map((r) => r.pitches), [14, 12])
+  assert.deepEqual(both.post.coverage, {
+    games: 1,
+    playedGames: 1,
+    plateAppearances: 35,
+    plateAppearancesWithoutPitches: 0,
+    complete: true,
+  })
+})
+
+test('a postseason game still being swept holds back only its own coverage', () => {
+  const doc = build({ 1: tally(38, [13]), 3: tally(35) }, [game(1, 'R'), game(3, 'D'), game(4, 'D')])
+  assert.equal(doc.coverage.complete, true) // regular season: every game read
+  assert.equal(doc.post.coverage.complete, false) // game 4 is not read yet
+  assert.equal(doc.post.coverage.playedGames, 2)
+})
+
+test('a postseason game the schedule no longer returns drops out, as a regular one does', () => {
+  const doc = build({ 1: tally(38), 3: tally(35, [12]) }, [game(1, 'R')])
+  assert.ok(!('post' in doc))
+})
+
+test('the postseason part passes the same vocabulary test as the committed files', () => {
+  assertLengthOnly(build({ 1: tally(38, [13]), 3: tally(35, [14]) }, [game(1, 'R'), game(3, 'W')]), 'built doc')
+  // And the check itself bites: a result key on a postseason row is caught.
+  const doc = build({ 3: tally(35, [14]) }, [game(3, 'W')])
+  doc.post.rows[0].result = 'strikeout'
+  assert.throws(() => assertLengthOnly(doc, 'built doc'))
 })

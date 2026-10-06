@@ -245,6 +245,13 @@
   color: var(--text-caption);
 }
 
+/* The leaders-and-rosters failure Notice: the 12px the old .hint padding gave.
+   It sits BEFORE the 740px grid block below, so that block's
+   `.pslive > * { margin-bottom: 0 }` wins at the same weight. */
+.pslive__notice {
+  margin: var(--space-3) 0;
+}
+
 /* ---- Wide layout (from 740px) --------------------------------------------- */
 /* The page turns into a two-column grid, so two pairs can sit side by side
    with no change to the DOM order a phone reads: Today beside Still to play,

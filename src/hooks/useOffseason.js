@@ -1,7 +1,13 @@
 import { useMemo } from 'react'
 import { fetchLevelSeasonDates, fetchSeasonMeta } from '../api/schedule.js'
 import { useAsync } from './useAsync.js'
-import { levelOffseasonPhase, levelOpeningDay, offseasonPhase } from '../lib/time/seasonPhase.js'
+import {
+  levelOffseasonPhase,
+  levelOpeningDay,
+  milestoneProjectionPaused,
+  offseasonPhase,
+} from '../lib/time/seasonPhase.js'
+import { baseballToday } from '../lib/time/standingsDates.js'
 import { LEVELS, SPORT_IDS } from '../lib/teams.js'
 
 // IS THE SLATE LOOKING AT A WINTER? — the offseason home page's one gate
@@ -130,4 +136,14 @@ export function useOffseason(dateStr, sportId, seasonRow) {
   // render before `winter` is, and "the season is over" is true whether or not
   // the date it counts to has landed yet. `winter` is what the page draws from.
   return { phase, winter }
+}
+
+// True while the postseason is on: Milestone Watch hides its ETAs then (#1438).
+// Decided at render time from today's date and the season row, so the nightly
+// file does not change. False until the row arrives, and false if it fails.
+export function useMilestonesPaused() {
+  const today = baseballToday()
+  const year = Number(today.slice(0, 4))
+  const { data } = useAsync(() => fetchSeasonMeta(year), [year])
+  return milestoneProjectionPaused(today, data)
 }

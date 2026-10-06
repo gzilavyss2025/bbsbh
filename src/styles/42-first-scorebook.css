@@ -19,6 +19,11 @@
   text-transform: none; /* caps-exempt: retrospective narrative and play descriptions read as natural sentences */
 }
 
+/* The archive-failed Notice: the 12px the old .hint padding gave. */
+.scorebookstory__notice {
+  margin: var(--space-3) 0;
+}
+
 .scorebookstory__cover {
   position: relative;
   overflow: hidden;

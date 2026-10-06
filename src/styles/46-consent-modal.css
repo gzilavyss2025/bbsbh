@@ -205,7 +205,7 @@
    frame here can't reach into unrelated hover/focus transitions. */
 .animlab__frame .loader__plate,
 .animlab__frame .skel__ballFrames,
-.animlab__frame .delaycard,
+.animlab__frame .delay,
 .animlab__frame .delayrain__drop,
 .animlab__frame .postponed,
 .animlab__frame .postponed__stamp,

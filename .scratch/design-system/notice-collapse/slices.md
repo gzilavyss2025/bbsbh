@@ -475,3 +475,194 @@ for N2 to N8.
    next file there needs the `system/state/` subfolder (spec section 5): move
    `empty-state.css` and `notice.css`, and edit `src/index.css` and the pins in
    `test/empty-state-cascade.test.js` and `test/notice-cascade.test.js`.
+
+## N5 as built (what the next slices need)
+
+Written by the N5 session. It records what shipped. It does not write the prompts
+for N6 to N8.
+
+1. **Two members moved; the postponed strip is held.**
+   - The delay card is `<Notice tone="info" role="note" className="delay"
+     icon={glyph} label={title}>`. The namespace `.delaycard` is now `.delay`
+     (`styles/27-player-position-innings.css`). It has no `__` part: Notice's
+     parts replaced `__icon`, `__body`, `__title` and `__detail`. `.delay` keeps
+     the margin, the `delay-pop` pop-in and its reduced-motion rule, and
+     `flex-wrap: nowrap`. `.delay .notice__icon` keeps the 38px round bubble.
+     `.delay b` keeps the mono face on the duration. The Animation Lab freeze
+     list says `.animlab__frame .delay`. The design lab row is
+     `cls: 'notice notice--info notice--block delay'`.
+   - The extra-innings line is `<Notice tone="info" size="compact" role="note"
+     className="innings__extras" icon="⚾️">`. `.innings__extras` keeps
+     `margin: 0 0 10px` and `flex-wrap: nowrap`. `.innings__extras-team` stays.
+     `.innings__extras-icon` is gone.
+   - **The postponed strip is HOLD (the fallback).** Notice puts its label ABOVE
+     the text. The strip puts the stamp in a ROW beside two stacked lines. A port
+     needs a row-layout rule on `.notice__body`, a padding override and display
+     rules on both lines. That is more than namespace rules for the stamp and the
+     motion, so N5 did not force it. `GameCardParts.jsx` and
+     `06-loader-and-cards.css` are unchanged. A later slice can move it with a
+     Notice layout option, or after the dashed-rule PR.
+2. **A Notice with an icon and no action must not wrap.** `.notice` is
+   `flex-wrap: wrap` and `.notice__body` is `flex: 1 1 auto`. A long sentence
+   then wraps the whole body under the icon. At 390px the extras line drew the
+   ball alone on one row. Both N5 namespaces set `flex-wrap: nowrap`. The fix
+   cannot go in `notice.css` as a `:not(:has(.notice__action))` rule:
+   `notice-cascade.test.js` pins every rule there as one class at one weight.
+   N6 and N7: a Notice with an icon needs the same line, or a Notice-level fix
+   that Gary approves.
+3. **The seal pin** (`test/notice-n5.test.js`, measured on `608c6062e`):
+   `DelayCard.jsx`, `ExtrasBanner.jsx`, `GameCardParts.jsx` and `GameCard.jsx`
+   have no reveal-only import, no `<SealBox` and no `revealedThrough`.
+   `InningViewer.jsx` imports `winprob.js`, has no `<SealBox` and has 15
+   `revealedThrough` reads. The three gates are pinned as source snippets.
+4. **Contrast.** `contrastPairings.js` now asserts `text-body` and
+   `text-caption` on `#EBE8DD` (the info wash, by hand). The caption pair is
+   4.72:1, a thin margin. N1's item 7 asked for this.
+5. **Seen live.** Delay card: STL@CIN 2025-05-01 (gamePk 778107, bottom 4th,
+   rain, 1 hr 36 min), MIN@CLE 2025-05-01 (778108: top 7th 16 min, top 8th
+   2 hr 5 min, none on top 6th) and WSH@CIN 2025-05-02 (778087, top 1st,
+   "Inclement Weather", 2 hr 19 min). Extras line: LAD@SF 2026-09-27 (823164,
+   top 10th; the 2025 walk-off game has no callout bundle, so its line does not
+   render, on `main` too). Page text outside the notice and the reveal mark were
+   the same before and after on 9 routes at 320, 390 and 900px. **Not seen:**
+   the "Delay in progress" copy on a live game (seen only in the Animation Lab).
+   The postponed strip did not change, so I did not load it.
+6. **Census.** The STALE keys left on `main` are not N5's: `.xl-film__msg`,
+   `.xl__prerollmsg`, three `ExpressLanePage.jsx` keys and
+   `PitcherNotice.jsx#10`. `.xl-film__mark` and `.xl-film__mark--over` are
+   UNREVIEWED. N5 added a row for `.notice__icon` (seen through
+   `.delay .notice__icon`).
+---
+
+## N4 as built (what the next slices need)
+
+Written by the N4 session. It records what shipped. It does not write the prompts
+for N5 to N8.
+
+1. **The namespace class is `asyncstatus__notice`.** AsyncStatus's two error
+   Notices and AsyncGate()'s page error wear it. Its one rule,
+   `margin: var(--space-3) 0`, is in `styles/06-loader-and-cards.css`, next to the
+   loader. It must load after `system/notice.css`: `05-masthead-nav.css` (where
+   `.hint` lives) loads before it, so `.notice { margin: 0 }` would win there. 06
+   was at its 800-line file-size cap, so its entry in `scripts/check-file-size.mjs`
+   went to 810 (a sixth and seventh file). The old line was a `<p>` with the
+   browser's 1em margin plus the `.hint` padding. The box's own padding takes the
+   place of that margin, so the text sits within a few px of where it was.
+2. **Parents.** Every one of the 36 callers sits in a block parent (29 on
+   `.screen`, 2 in the team hub shell, 3 in a photos section, the slate's
+   `.slatebody__main`, one lab `Entry`). The one shared margin keeps the gap the old
+   padding gave to all of them, so no caller needed its own rule. Box Lines took
+   `.boxlines__notice` (the same margin as `.boxlines__empty`; two rules, because
+   `test/empty-state-e3.test.js` reads `.boxlines__empty` as a lone selector). The
+   slate card back needs no namespace: the Notice fills the top of the card's slot.
+3. **Roles.** Cold error and AsyncGate(): the error default (`alert`). Stale
+   error: `status`. Slate card back: `note` (static, like the old line), because
+   Reveal all turns every card at once. Box Lines: `alert`. The Retry and Try again
+   are a plain `Button` (tap size, 44px): `btn--control` is 34px with no larger
+   tap area.
+4. **The seal pin** (`test/notice-n4.test.js`, measured at `608c6062e`). Every
+   pinned file has no reveal-only import, no `<SealBox`, and no `revealedThrough`
+   read: `BoxLinesSheet.jsx`, `PastGameFlipCard.jsx`, `AsyncGate.jsx`,
+   `GameSelect.jsx`, `GameView.jsx`. All zeros would pin little, so the pin also
+   lists each file's other gated api/ imports: `boxlines/fetch.js`;
+   none; none; `postseason/text.js`; `postseason/bracket.js` and
+   `postseason/text.js`. A browser check of the lineup page, top 1st, bottom 2nd
+   and the box score (sealed, and after a tap) read the same before and after.
+5. **Three old pins flipped.** `empty-state-e2`, `-e3` and `-e9` asserted that
+   the error lines stayed `.hint`. They now assert the Notice, with the same
+   counts. The EmptyState census's overrides were re-keyed too (its
+   `BoxLinesSheet.jsx#3` is `#2` now; its five N4 error rows became comment lines).
+6. **Not reached** (a failed request does not show them): most `AsyncStatus`
+   pages read a static file whose loader turns a failure into the empty state
+   (standings, attendance, the report boards, the team hub tabs, the photos
+   pages). AsyncGate()'s "Couldn't load this {noun}" branch was not seen either:
+   a failed person fetch reads as "not found". Seen: the slate, the lineup page
+   (cold and stale), the player and team not-found pages, the slate card back,
+   the Box Lines sheet, and the lab.
+---
+
+## N3 as built (what the next slices need)
+
+Written by the N3 session. It records what shipped. It does not write the prompts
+for N4 to N8.
+
+1. **Six sites moved.** Both photos pages (`tone="caution" label="Unsealed"
+   role="note"`), the game finder (`caution`, `role="status"`, `size="compact"`),
+   the erase-failed line (`error`, `role="status"`), the club-list line (`error`,
+   `role="note"`) and the All-Star Legacy line (`error`, `role="status"`). The
+   All-Star line was grey and is now an error: a deliberate change.
+2. **Namespace classes.** `.gamephotos__notice` (14-strike-zone.css) keeps the
+   margin `4px 0 space-4` and `border-style: dashed`. The dashed edge stays so
+   nothing changes on screen; the dashed-rule PR decides (spec section 11). The
+   tag and paragraph rules are deleted. `.erasesheet__error`
+   (55-my-tally-account.css) stays margin-only. `.gamefinder__notice` (08-site-shell.css) and
+   `.mytally__notice` (54-my-tally.css) are margin-top only: the parent gave no
+   gap. The All-Star line needs none (the section title's margin is enough).
+3. **Caps-exempt selectors widened** in 54-my-tally.css: `#root .erasesheet
+   .notice__text` and `#root .mytally .notice__text`, under the one existing
+   `/* caps-exempt: ... */` marker. A class on the Notice root does not reach the
+   inner `<p>`, so any later Notice inside `.mytally` or `.erasesheet` is
+   mixed-case too.
+4. **Spacing.** The old `.hint` gave `padding: 12px 2px`. See the PR for what
+   each parent gives now.
+5. **One extra file.** `test/empty-state-e6.test.js` pinned the finder's old
+   `<p className="hint">`. It now pins the Notice and still forbids an
+   EmptyState there.
+6. **Not reached:** the club-list line (needs the static club file to be
+   missing) and the erase-failed line (needs a signed-in account whose erase
+   call fails). Both are pinned by `test/notice-n3.test.js` only.
+7. **Census.** No key shifted. `.gamephotos__noticetag` prints STALE (its rule is
+   deleted, as planned). The other STALE keys are not N3's.
+---
+
+## N2 as built (what the next slices need)
+
+Written by the N2 session. It records what shipped. It does not write the prompts
+for N3 to N8.
+
+1. **Nine lines moved**, all `<Notice tone="error">`: `App.jsx` (schedule, not
+   found), `FirstScorebookPage`, `PostseasonSeriesPage` and `LiveSeriesPage` (the
+   per-game line, `size="compact"`), `LiveSeriesPage` (leaders and rosters),
+   `ScoutPage`, `StampInPage` (`size="compact"`, no namespace: it sits in a list
+   row that pads itself) and `GameNotesArchivePage` (`role="status"` kept: it
+   follows an action). The sentences and the tests that decide WHEN a line shows
+   did not change. The schedule line lost its `role="status"` and is now the
+   default alert.
+2. **Namespace classes.** `appstate__notice` (`02-app-shell.css`),
+   `scorebookstory__notice` (`42-first-scorebook.css`), `pslive__notice`
+   (`postseason/series-live.css`), `scout__notice` (`scout/scout.css`),
+   `gnotes__notice` (`report/game-notes.css`). Each is one rule,
+   `margin: var(--space-3) 0`: the 12px the old `.hint` padding gave. Every one of
+   those parents is a block (`.screen`), so none had a grid or Stack to give the
+   space. That is five CSS files beyond the nine the slice listed; the slice
+   could not keep the old spacing otherwise.
+3. **The grid hook.** `.psseries__entry .psseries__entryerror { grid-column: 1 / -1 }`
+   replaces the `.hint--error` selector in `35-postseason-series.css`. The Notice
+   is a DIRECT child of `article.psseries__entry` on both series pages (a ternary
+   branch, no wrapper), so the rule still reaches it. `.hint--error` in
+   `05-masthead-nav.css` stays: five dev pages wear it (N9).
+4. **`.pslive > *` zeroes the bottom margin** in the 740px grid, at the same
+   specificity as `.pslive__notice`, so the rule sits BEFORE the media block and
+   the grid zeroes the notice's bottom margin too (the review caught the first
+   order).
+5. **Census.** A `<Notice>` with no candidate class is not a census site, so the
+   per-game lines (no rule draws them) and the plain loading `.hint` of the live
+   page left the census. Their override rows are gone:
+   `PostseasonSeriesPage#2` (the line), `LiveSeriesPage#2` and `#3` (the game
+   line and the loading hint), `StampInPage#1`. `PostseasonSeriesPage#3` is now
+   `#2` (the MVP band) and `LiveSeriesPage#4` is now `#2` (the leaders line).
+   The six rows that still match say "DONE in N2". After the run, the one STALE
+   key is `components/playbyplay/PitcherNotice.jsx#10`, as on `main`. It is not
+   N2's. A run while `npm test` or the build is running can print a long STALE
+   list, because the EmptyState hand-off fails under load: run it again alone.
+6. **Order trap.** `system/notice.css` loads right before `06`, and its root says
+   `margin: 0`. A namespace rule in a partial numbered BEFORE 06 (`02-app-shell.css`)
+   loses on order at one class, so `.screen .appstate__notice` has two. The other
+   four load later and use one class. N3 to N8: check where your partial sits.
+7. **Seen in the browser** (390px and 900px, `statsapi.mlb.com` or the data file
+   answered with 500 through `page.route`; nothing edited): seven of the nine
+   lines (both App lines, the archive, a series entry, Scout, Stamp In and the
+   CSV line). **Not seen:** the two `LiveSeriesPage` lines (the per-game line and
+   leaders and rosters). No live series was open to load. Their markup matches
+   the final series page's per-game line and the `pslive__notice` rule is pinned
+   by `test/notice-n2.test.js`.

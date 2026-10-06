@@ -81,6 +81,30 @@ function ranked(rows, field, { lowIsBest = false } = {}) {
   })
 }
 
+// The postseason block as the page shows it: the games it covers, the league
+// line, and one row per club that played in October, ranked on average crowd
+// against those clubs only. Reads the postseason block alone, so no
+// regular-season figure can reach a rank or an average. Null before October.
+export function postseasonBoard(data, season) {
+  const post = postseasonGate(data, season)
+  if (!post) return null
+  const rows = Object.entries(post.clubs ?? {})
+    .filter(([, c]) => c?.gate)
+    .map(([teamId, c]) => ({
+      teamId: Number(teamId),
+      venue: c.venue,
+      games: c.gate.games,
+      avg: c.gate.avg,
+      total: c.gate.total,
+      best: c.gate.high?.n ?? null,
+      bestSeries: c.gate.high?.series ?? null,
+      bestSeriesGame: c.gate.high?.seriesGame ?? null,
+      bestDate: c.gate.high?.date ?? null,
+    }))
+  const withRank = ranked(rows, 'avg').sort((a, b) => b.avg - a.avg)
+  return { games: post.games, through: post.through, league: post.league, rows: withRank }
+}
+
 // ---- The Gate ----
 
 // Every club's home-gate row for one season, ranked. `sortBy` picks which

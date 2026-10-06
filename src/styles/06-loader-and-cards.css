@@ -1,3 +1,10 @@
+/* ------------------------------------------------------ async status
+   AsyncStatus's and AsyncGate()'s error Notice (#1132, N4): the old .hint
+   padding's gap. After system/notice.css, so it wins on order. */
+.asyncstatus__notice {
+  margin: var(--space-3) 0;
+}
+
 /* ---------------------------------------------------------------- loader
    Manual-scoreboard loading indicator (Loader.jsx) — a mini National League
    linescore (MILWAUKEE over CUBS, five columns) inside a field-green frame,

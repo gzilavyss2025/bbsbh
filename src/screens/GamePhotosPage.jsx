@@ -10,6 +10,7 @@ import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
+import { Notice } from '../components/ui/state/Notice.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 const CURRENT_YEAR = new Date().getFullYear()
@@ -99,14 +100,11 @@ export function GamePhotosPage({ initialGamePk = null } = {}) {
         <h1 className="topbar__title">Game Photos</h1>
       </header>
 
-      <div className="gamephotos__notice" role="note">
-        <span className="gamephotos__noticetag">Unsealed</span>
-        <p>
-          A photo here can show the result at a glance, so unlike the rest of
-          Tally Baseball, nothing on this page is spoiler-safe. Personal use
-          only — photos are copyrighted (AP/Getty/USA Today Sports via MLB).
-        </p>
-      </div>
+      <Notice tone="caution" label="Unsealed" role="note" className="gamephotos__notice">
+        A photo here can show the result at a glance, so unlike the rest of
+        Tally Baseball, nothing on this page is spoiler-safe. Personal use
+        only — photos are copyrighted (AP/Getty/USA Today Sports via MLB).
+      </Notice>
 
       {browsing && (
         <>

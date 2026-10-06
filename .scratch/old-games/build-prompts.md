@@ -47,33 +47,34 @@ ADR-0100's open-data pattern.
 
 ## Prompt 1c. The event index: the full history
 
-**Model: Haiku 4.5** (rung 1; no effort setting). Mechanical: run a generator that
-exists, and commit its output.
+**Model: Haiku 4.5** (rung 1; no effort setting). The full prompt is `prompt-1c.md`.
+Mechanical: run the generator and the cross-check, compare counts, commit data.
 
-**Needs first:** prompts 1a and 1b merged.
+**Needs first:** prompts 1a and 1b merged. (1a merged in gzilavyss2025/bbsbh#1575.)
 
-- Run `gen-notable.mjs --from 1901 --to <season in play>`. Expect about 4,000 calls
-  and about 803 MB.
-- Run the cross-check. Paste its report in the PR. Do not edit the seed file. A person
-  does that.
-- Stop on any HTTP error that repeats. Do not retry past the rule in root `CLAUDE.md`.
+- Run `gen-notable.mjs` from 1901 to 2025 in six chunks of about 20 seasons. The
+  generator writes after each season, so a stopped chunk keeps what it finished.
+- Cost, from 1a's measured runs: 29 to 77 calls a season. About 6,000 calls and about
+  900 MB in all (an estimate). The first plan said about 4,000 calls; the postseason club
+  calls account for most of the difference.
+- Check 1960 to 2025 against exact counts from `findings.md`: 196 no-hitters, 266 triple
+  plays (with the seed row), 198 cycles. Spot-check Larsen, the 1979 forfeit, the seed
+  row and the 2021 seven-inning games.
+- Run the cross-check. Paste its report. Add no seed rows.
 
 ## Prompt 2a. Old-game pages: thin eras
 
-**Model: Sonnet 5.5, medium** (rung 3). It follows the MiLB degrade pattern. It does
-not touch a seal.
+**Model: Sonnet 5.5, high** (rung 4). The full prompt is `prompt-2a.md`, graded and
+rewritten with `/improve-prompt`. It moved up from medium: a survey with judgment, then
+fixes across several screens.
 
-- First, load these on the existing route with Chromium and a screenshot each:
-  - a 1927 game, for example PHA@BOS on 07041927 (gamePk 102436);
-  - the 1956 World Series perfect game, BRO@NYY on 10081956 (gamePk 67524);
-  - the 1979 forfeit, DET@CWS on 07121979 (gamePk 177426).
-  Say what breaks. Do not fix what is not broken.
-- Add plain "not in the record" lines for no umpires and no batting order.
-- Offer no half-inning pages when the feed has 0 plays. The box score and the lineup
-  pages stay.
-- Check how an old club's logo and colours render (the 1927 Athletics). Report it; fix
-  it only if the fix is small.
-- Add a test for each fallback, written first and seen to fail.
+**Decided (2026-10-06):** D14, the "no play-by-play" notice shows only before 1960.
+
+- Survey the three test games (1927, 1956, the 1979 forfeit) and mark each card fine,
+  empty or false. Stop and report if more than 3 cards are false.
+- One "played" selector that reads `detailedState`, not `abstractGameState`.
+- Plain lines for missing umpires and batting orders; no innings pages for a pre-1960
+  played game with 0 plays; no present-day data on an old game.
 
 ## Prompt 2b. The feat label inside the box-score seal; accept ADR-0101
 

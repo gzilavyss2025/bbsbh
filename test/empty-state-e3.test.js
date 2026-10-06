@@ -110,10 +110,11 @@ test('E3: .roster__empty and .boxlines__empty keep only a margin, never a second
   assert.deepEqual(props(ruleBody(read('boxlines/boxlines.css'), '.boxlines__empty')), ['margin'])
 })
 
-test('E3: Box Lines\' loading and error lines keep .hint .boxlines__hint', () => {
+// N4 (#1132) moved the error line onto Notice (decisions Q2), pinned in
+// test/notice-n4.test.js; the loading line stays a hint.
+test('E3: Box Lines\' loading line keeps .hint .boxlines__hint', () => {
   const code = src('components/boxlines/BoxLinesSheet.jsx')
   has(code, '<p className="hint boxlines__hint">Pulling his game lines…</p>')
-  has(code, '<p className="hint boxlines__hint">Couldn’t pull his game lines. Try again in a moment.</p>')
-  assert.equal(code.match(/boxlines__hint/g).length, 2, 'only the loading and the error line wear it')
+  assert.equal(code.match(/boxlines__hint/g).length, 1, 'only the loading line wears it')
   assert.doesNotMatch(src('components/boxlines/GameLinesDoor.jsx'), /boxlines__hint/)
 })
