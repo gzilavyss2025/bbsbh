@@ -170,7 +170,7 @@ screens/GameSelect.jsx#1	empty	MIGRATE	E2	bare hint	AsyncStatus emptyMessage (No
 .boxlines__empty	empty	MIGRATE	E3	hint + own class	DONE in E3: the namespace of the two Box Lines empties (BoxLinesSheet.jsx, GameLinesDoor.jsx). Its rule (boxlines.css) is the status line's top margin only
 components/inning/RosterPanel.jsx#1	empty	MIGRATE	E3	bare hint	lineups and the innings rail: the lineup is not posted. A pre-game fact, no score. DONE in E3: the site renders <EmptyState size="compact" className="roster__empty">; the empty test is unchanged
 screens/TeamInfo.jsx#1	empty	MIGRATE	E3	bare hint	the lineup page starter card: not posted yet. Today `.starter > .hint` (10-lineup.css) insets it; that rule went. DONE in E3: the site renders <EmptyState size="compact" className="starter__empty">; the empty test is unchanged
-components/boxlines/BoxLinesSheet.jsx#3	empty	MIGRATE	E3	hint + own class	Box Lines carries final scores (ADR-0069); its gate is api/boxlines/rows.js. The empty test reads the gated rows: keep it where it is. DONE in E3: the site renders <EmptyState className="boxlines__empty">; the empty test is unchanged
+components/boxlines/BoxLinesSheet.jsx#2	empty	MIGRATE	E3	hint + own class	Box Lines carries final scores (ADR-0069); its gate is api/boxlines/rows.js. The empty test reads the gated rows: keep it where it is. DONE in E3: the site renders <EmptyState className="boxlines__empty">; the empty test is unchanged (Re-keyed from #3 in Notice N4: the error line above it is a Notice now, so the census no longer counts it.)
 components/boxlines/GameLinesDoor.jsx#1	empty	MIGRATE	E3	hint + own class	Box Lines door sheet: no games to list. Same gate note. DONE in E3: the site renders <EmptyState className="boxlines__empty">; the empty test is unchanged
 #
 # --- SITES — E4 team hub, E5 player page ---
@@ -244,12 +244,12 @@ screens/game-notes/GameNotesArchivePage.jsx#3	loading	n/a			AsyncStatus with no 
 # --- SITES — error (the Notice census) ---
 App.jsx#1	error	n/a			
 App.jsx#2	error	n/a			
-components/boxlines/BoxLinesSheet.jsx#2	error	n/a			
-components/game/PastGameFlipCard.jsx#1	error	n/a			
+# components/boxlines/BoxLinesSheet.jsx#2 (the Box Lines error line): DONE in Notice N4 (#1132). It renders <Notice tone="error"> now, so the census no longer sees a hint there and the row is gone.
+# components/game/PastGameFlipCard.jsx#1 (the slate card back FlipCard): DONE in Notice N4 (#1132). It renders <Notice tone="error"> now, so the census no longer sees a hint there and the row is gone.
 components/profile/EraseDataDialog.jsx#1	error	n/a			
-components/ui/AsyncGate.jsx#1	error	n/a			
-components/ui/AsyncGate.jsx#2	error	n/a			
-components/ui/AsyncGate.jsx#3	error	n/a			
+# components/ui/AsyncGate.jsx#1 (AsyncGate()'s page error): DONE in Notice N4 (#1132). It renders <Notice tone="error"> now, so the census no longer sees a hint there and the row is gone.
+# components/ui/AsyncGate.jsx#2 (AsyncStatus's cold error): DONE in Notice N4 (#1132). It renders <Notice tone="error"> now, so the census no longer sees a hint there and the row is gone.
+# components/ui/AsyncGate.jsx#3 (AsyncStatus's stale error): DONE in Notice N4 (#1132). It renders <Notice tone="error"> now, so the census no longer sees a hint there and the row is gone.
 screens/AllStarLegacyPage.jsx#3	caveat	n/a			
 screens/FirstScorebookPage.jsx#1	error	n/a			
 screens/PostseasonSeriesPage.jsx#1	error	n/a			
@@ -259,7 +259,7 @@ screens/postseason-live/LiveSeriesPage.jsx#3	error	n/a
 screens/profile/sections/ClubSection.jsx#1	error	n/a			
 screens/team/StampInPage.jsx#1	error	n/a			
 components/game/GameFinder.jsx#1	error	n/a			
-components/game/PastGameFlipCard.jsx#2	error	n/a			
+# components/game/PastGameFlipCard.jsx#2 (the slate card back error): DONE in Notice N4 (#1132). It renders <Notice tone="error"> now, so the census no longer sees a hint there and the row is gone.
 components/playbyplay/HighlightSheet.jsx#2	error	HOLD			the notice a caller passes (a clip not posted or not playable) inside the held 16:9 frame
 components/playbyplay/HighlightSheet.jsx#3	error	HOLD			inside the held 16:9 frame
 #
