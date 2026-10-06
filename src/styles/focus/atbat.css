@@ -133,6 +133,24 @@
    BallGlyph's header) but styled here rather than beside the skeleton's own
    rules — 22-box-score-tables.css is at its check-file-size ceiling, and this
    is currently the glyph's only caller. */
+.abhero__mid {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.abhero__scout {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  text-decoration: underline;
+}
+
 .abhero__vs {
   flex: 0 0 auto;
   width: 30px;

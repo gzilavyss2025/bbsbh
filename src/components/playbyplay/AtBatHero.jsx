@@ -1,6 +1,8 @@
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherPhoto } from './PitcherNotice.jsx'
 import { BallGlyph } from '../game/BoxScoreSkeleton.jsx'
+import { useRouteLink } from '../../lib/nav.js'
+import { atBatScoutPath } from '../../lib/scout/path.js'
 import { StruckLine } from '../scoring/StruckLine.jsx'
 
 // The focused plate appearance's header (ADR-0043) — focus mode only, threaded
@@ -43,7 +45,9 @@ function NameParts({ id, first, last }) {
   )
 }
 
-export function AtBatHero({ batter, pitcher, pinchRunners, battingTeamId, pitchingTeamId }) {
+export function AtBatHero({ batter, pitcher, pinchRunners, battingTeamId, pitchingTeamId, gameDate }) {
+  const linkProps = useRouteLink()
+  const scoutHref = atBatScoutPath({ pitcher, batter, gameDate })
   const replaced = pinchRunners && pinchRunners.length > 0
   return (
     <div className="abhero">
@@ -75,7 +79,14 @@ export function AtBatHero({ batter, pitcher, pinchRunners, battingTeamId, pitchi
           </StruckLine>
         ))}
       </div>
-      <BallGlyph className="abhero__vs" />
+      <div className="abhero__mid">
+        <BallGlyph className="abhero__vs" />
+        {scoutHref && (
+          <a className="abhero__scout" {...linkProps(scoutHref)}>
+            Scout
+          </a>
+        )}
+      </div>
       {pitcher && (
         <>
           <div className="abhero__arm">
