@@ -41,3 +41,46 @@ test('the line adds the game number when it is known, and nothing when there is 
   assert.equal(roundLine('World Series', 7), 'World Series · Game 7')
   assert.equal(roundLine('', 3), '')
 })
+
+// --- the three surfaces the audit named (tab title, scorecard page, link card) ---
+
+import { scheduleRoundLine, titleWithRound } from '../../src/lib/postseason/gameRound.js'
+import { gameCardText } from '../../api/_lib/cards.js'
+
+const row = (over = {}) => ({
+  gameType: 'D',
+  seriesGameNumber: 3,
+  seriesDescription: 'AL Division Series',
+  gameNumber: 1,
+  teams: {
+    away: { team: { id: 145, name: 'Chicago White Sox', abbreviation: 'CWS' }, leagueRecord: { wins: 2, losses: 1 } },
+    home: { team: { id: 114, name: 'Cleveland Guardians', abbreviation: 'CLE', league: { id: 103 } } },
+  },
+  ...over,
+})
+
+test('a schedule row names its round from game type, home league and series game number', () => {
+  assert.equal(scheduleRoundLine(row()), 'ALDS · Game 3')
+  assert.equal(scheduleRoundLine(row({ seriesGameNumber: undefined })), 'ALDS')
+  assert.equal(scheduleRoundLine(row({ gameType: 'R' })), '')
+  assert.equal(scheduleRoundLine(null), '')
+})
+
+test('the tab title names the round after the matchup, and a regular-season title is unchanged', () => {
+  assert.equal(titleWithRound('CWS @ CLE', 'Box score', 'ALDS · Game 3'), 'CWS @ CLE · ALDS · Game 3 · Box score')
+  assert.equal(titleWithRound('CWS @ CLE', 'Box score', ''), 'CWS @ CLE · Box score')
+})
+
+test('the link card names the round in title and alt, with no series record', () => {
+  const { title, alt } = gameCardText(row(), '2026-10-05')
+  assert.match(title, /ALDS · Game 3/)
+  assert.match(alt, /ALDS · Game 3/)
+  for (const text of [title, alt]) assert.doesNotMatch(text, /leads|\d-\d|2-1|series/i)
+})
+
+test('a regular-season link card is unchanged, doubleheader suffix included', () => {
+  const g = row({ gameType: 'R', seriesGameNumber: 3, gameNumber: 2 })
+  const { title, alt } = gameCardText(g, '2026-09-05')
+  assert.equal(title, 'Chicago White Sox @ Cleveland Guardians — Sep 5, 2026')
+  assert.match(alt, /^CWS @ CLE — Sep 5, 2026 · Game 2$/)
+})

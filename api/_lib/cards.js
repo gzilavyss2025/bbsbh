@@ -30,6 +30,7 @@
 // `./entity.js`, which crawl.js reads too — see that file's header on why the
 // copies exist and why they must stay in step with src/lib.
 
+import { scheduleRoundLine } from '../../src/lib/postseason/gameRound.js'
 import { playerCrawl, teamCrawl } from './crawl.js'
 import { clean, entitySegment, idFromSlug, matchupSlug, niceDate, teamAbbr, urlDateToApi } from './entity.js'
 
@@ -275,23 +276,31 @@ export async function buildRoster(params) {
   }
 }
 
+// The pure half of gameCard: the title and alt for one schedule row. Exported so a
+// test can pin them without a fetch. A postseason game adds "ALDS · Game 3" to both
+// (pregame facts, never a series record, ADR-0087); a regular-season game adds nothing.
+export function gameCardText(g, apiDate) {
+  const away = g.teams?.away?.team
+  const home = g.teams?.home?.team
+  const gm = (g.gameNumber ?? 1) > 1 ? ` · Game ${g.gameNumber}` : ''
+  const round = scheduleRoundLine(g)
+  const roundBit = round ? ` · ${round}` : ''
+  return {
+    title: `${away.name} @ ${home.name}${roundBit} — ${niceDate(apiDate)}`,
+    alt: `${teamAbbr(away)} @ ${teamAbbr(home)}${roundBit} — ${niceDate(apiDate)}${gm}`,
+  }
+}
+
 async function gameCard(date, matchup, origin) {
   const apiDate = urlDateToApi(date)
   if (!apiDate) return null
   const g = await resolveGame(apiDate, matchup)
   if (!g) return null
-  const away = g.teams?.away?.team
-  const home = g.teams?.home?.team
-  if (!away?.id || !home?.id) return null
-  const awayAbbr = teamAbbr(away)
-  const homeAbbr = teamAbbr(home)
-  const gm = (g.gameNumber ?? 1) > 1 ? ` · Game ${g.gameNumber}` : ''
-  const when = `${niceDate(apiDate)}${gm}`
+  if (!g.teams?.away?.team?.id || !g.teams?.home?.team?.id) return null
   return {
-    title: `${away.name} @ ${home.name} — ${niceDate(apiDate)}`,
+    ...gameCardText(g, apiDate),
     description: `Score this game by hand, spoiler-free: live lineups, umpires, and rosters — every run stays sealed until you tap to reveal it.`,
     image: ogUrl(origin),
-    alt: `${awayAbbr} @ ${homeAbbr} — ${when}`,
   }
 }
 
