@@ -9,7 +9,7 @@
 // club with no listed park quietly ranked last on fill rate.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { toRow, dayOfWeek, aggregate, leagueFor, buildSeason } from '../scripts/gen-gate.mjs'
+import { toRow, dayOfWeek, aggregate, leagueFor, buildSeason, buildPostseason } from '../scripts/gen-gate.mjs'
 import {
   gateBoard,
   paceBoard,
@@ -18,6 +18,7 @@ import {
   capacityFor,
   latestSeason,
   monthsIn,
+  postseasonGate,
 } from '../src/api/around-the-game/gate.js'
 
 const game = (over = {}) => ({
@@ -340,4 +341,28 @@ test('asClock reads minutes the way baseball says them', () => {
 test('monthsIn reads the axis off the data rather than assuming a season shape', () => {
   const board = gateBoard(data, 2026, 'fill')
   assert.deepEqual(monthsIn(board.rows), ['06', '07', '08'])
+})
+
+test('buildPostseason ships a home-gate block only, with no pace and no season mixing', () => {
+  const rows = [
+    toRow(game({ gamePk: 1, officialDate: '2026-10-07', gameInfo: { attendance: 40000, gameDurationMinutes: 200 } }), '2026-10-07'),
+    toRow(game({ gamePk: 2, officialDate: '2026-10-08', gameInfo: { attendance: 42000, gameDurationMinutes: 190 } }), '2026-10-08'),
+    // a clock reading with no crowd is not a postseason gate row
+    toRow(game({ gamePk: 3, officialDate: '2026-10-09', gameInfo: { gameDurationMinutes: 180 } }), '2026-10-09'),
+  ]
+  const post = buildPostseason(rows)
+  assert.equal(post.games, 2)
+  assert.equal(post.through, '2026-10-08')
+  assert.deepEqual(post.league, { attGames: 2, attAvg: 41000, attMedian: 41000, attTotal: 82000 })
+  assert.equal(post.clubs[158].gate.total, 82000)
+  assert.equal(post.clubs[158].pace, undefined)
+  assert.equal(post.clubs[112], undefined) // the visitors drew nothing at home
+  assert.equal(buildPostseason([]), null)
+})
+
+test('postseasonGate reads the separate block, or null', () => {
+  const data = { seasons: { 2026: { postseason: { games: 2 } }, 2025: {} } }
+  assert.deepEqual(postseasonGate(data, 2026), { games: 2 })
+  assert.equal(postseasonGate(data, 2025), null)
+  assert.equal(postseasonGate(null, 2026), null)
 })

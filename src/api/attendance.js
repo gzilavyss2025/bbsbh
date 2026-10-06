@@ -35,6 +35,13 @@ export function attendanceFor(data, teamId, season) {
   return data?.seasons?.[season]?.byTeamId?.[teamId] ?? null
 }
 
+// One team's POSTSEASON home totals for a season, or null. A separate block in
+// the file, same row shape as the regular-season row, never mixed into it or
+// into any rank above (#1439).
+export function postseasonAttendanceFor(data, teamId, season) {
+  return data?.seasons?.[season]?.postseason?.byTeamId?.[teamId] ?? null
+}
+
 // Percent of the listed seats that were sold across a club's measured dates,
 // one decimal, or null when no date was measurable. NEVER CLAMPED at 100:
 // capacity is a listed figure, not a turnstile cap, and standing room puts a

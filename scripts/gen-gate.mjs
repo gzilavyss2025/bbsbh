@@ -50,6 +50,16 @@
 // (see src/api/spoiler-manifest.json, where the reader is registered
 // spoiler-free).
 //
+// REGULAR SEASON FILLS THE SEASON FIGURES; THE POSTSEASON IS A SEPARATE BLOCK.
+// The main sweep asks for gameType=R only, so a postseason crowd never moves a
+// regular-season average, rank or league line. A second sweep (gameType
+// F,D,L,W) ships under `postseason` beside them: GATE ONLY, home club only.
+// PACE OF PLAY STAYS REGULAR SEASON ON PURPOSE. A postseason game runs on
+// other break lengths (longer commercial breaks, a pitching-change clock the
+// broadcast partner can stretch), so a postseason minute is not comparable
+// to a regular-season minute, and mixing the two would move the league line
+// for a reason that is not pace. #1439.
+//
 // Run by hand:
 //   node scripts/gen-gate.mjs                 # this season, whole year to date
 //   node scripts/gen-gate.mjs --season=2025   # a past season
@@ -68,6 +78,10 @@ const out = join(here, '..', 'public', 'data', 'gate.json')
 // twelve month-windows cover any season with room to spare. Requesting a
 // month with no games back is free — the endpoint returns an empty dates[].
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1)
+
+// Wild Card, Division, League Championship, World Series. The All-Star Game
+// (A) is left out: a crowd at a showcase is not a home gate.
+const POSTSEASON_TYPES = 'F,D,L,W'
 
 // How many opponents' draw figures a club keeps. Three is what the page shows
 // ("who fills this park"); shipping all 29 would quadruple the file for rows
@@ -336,15 +350,39 @@ export function buildSeason(rows) {
   }
 }
 
+// The postseason block: the gate half only (see the header for why pace is
+// not here), over rows that report a crowd. `league` carries just the
+// attendance line, counted off the games like leagueFor's.
+export function buildPostseason(rows) {
+  const gated = rows.filter((r) => r.attendance != null)
+  if (!gated.length) return null
+  const att = gated.map((r) => r.attendance)
+  const clubs = {}
+  for (const [teamId, club] of Object.entries(aggregate(gated))) {
+    if (club.gate) clubs[teamId] = { venue: club.venue, gate: club.gate }
+  }
+  return {
+    games: gated.length,
+    through: gated.reduce((a, r) => (r.date > a ? r.date : a), ''),
+    league: {
+      attGames: att.length,
+      attAvg: mean(att),
+      attMedian: median(att),
+      attTotal: att.reduce((a, b) => a + b, 0),
+    },
+    clubs,
+  }
+}
+
 // ---- the sweep ----
 
-async function fetchSeason(season) {
+async function fetchSeason(season, gameType = 'R') {
   const rows = []
   for (const month of MONTHS) {
     const startDate = `${season}-${pad(month)}-01`
     const endDate = `${season}-${pad(month)}-${pad(lastDayOf(season, month))}`
     const schedule = await getJson(
-      `/api/v1/schedule?sportId=1&gameType=R&startDate=${startDate}&endDate=${endDate}` +
+      `/api/v1/schedule?sportId=1&gameType=${gameType}&startDate=${startDate}&endDate=${endDate}` +
         `&hydrate=gameInfo,venue,linescore`,
     )
     let kept = 0
@@ -378,6 +416,11 @@ async function main() {
     }
     file.seasons[season] = buildSeason(rows)
     console.log(`  ${rows.length} games folded in`)
+    const post = buildPostseason(await fetchSeason(season, POSTSEASON_TYPES))
+    if (post) {
+      file.seasons[season].postseason = post
+      console.log(`  postseason: ${post.games} games with a gate`)
+    }
   }
   await writeJsonAtomic(out, file)
   console.log(`wrote ${out}`)

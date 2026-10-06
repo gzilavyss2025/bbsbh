@@ -880,7 +880,8 @@ don't run these by hand.
   HOME club's own park. Stateless: it reads the gate off the SCHEDULE
   endpoint's `hydrate=gameInfo` (the same feed `gen-gate.mjs` sweeps, and the
   same `toRow` reducer), so a whole season is about a dozen requests and it
-  rebuilds from scratch every night. It used to fetch one boxscore per game
+  rebuilds from scratch every night. A second sweep (gameType F,D,L,W) ships a
+  separate `postseason` block, never folded into the season row (#1439). It used to fetch one boxscore per game
   (~1,900 requests) behind a SQLite ingested-games table; that sweep, its two
   tables and its committed dump are gone, and the two sources were verified to
   agree club for club before it went. `--season=`/`--seasons=` for a past year.
@@ -931,7 +932,8 @@ don't run these by hand.
   policy for the same reason: a half-played bracket on a history page is a live
   result. `--from=`/`--to=`/`--floor=` for a shorter sweep. MLB only.
 - `gen-gate.mjs` → `public/data/gate.json` — per-club attendance AND game
-  DURATION, the two facts behind `/attendance` (The Gate) and `/pace-of-play`
+  DURATION (regular season; a separate `postseason` block carries the gate only,
+  because pace of play stays regular season on purpose, #1439), the two facts behind `/attendance` (The Gate) and `/pace-of-play`
   (The Clock). Deliberately NOT an extension of `gen-attendance.mjs`, which owns the
   Ballpark card's own much smaller file: both now read the SCHEDULE endpoint's
   `hydrate=gameInfo` (`{ attendance, firstPitch, gameDurationMinutes,

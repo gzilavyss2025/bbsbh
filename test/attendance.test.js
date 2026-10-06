@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { SELLOUT_FILL, byTeamId, capacityOf, seasonRow } from '../scripts/gen-attendance.mjs'
-import { attendanceFor, attendanceRatesFor } from '../src/api/attendance.js'
+import { attendanceFor, attendanceRatesFor, postseasonAttendanceFor } from '../src/api/attendance.js'
 
 // Fenway seats 37,755 in the static park table; Dodger Stadium 56,000.
 const FENWAY = 'Fenway Park'
@@ -196,4 +196,18 @@ test('attendanceRatesFor: null for a missing club, a missing file, or no games i
   assert.equal(attendanceRatesFor(null, 158, 2026), null)
   const empty = { seasons: { 2026: { byTeamId: { 200: { games: 0, avg: null } } } } }
   assert.equal(attendanceRatesFor(empty, 200, 2026), null)
+})
+
+test('postseasonAttendanceFor reads its own block and never the season row', () => {
+  const data = {
+    seasons: {
+      2026: {
+        byTeamId: { 158: { games: 81, total: 100 } },
+        postseason: { byTeamId: { 158: { games: 3, total: 120000 } } },
+      },
+    },
+  }
+  assert.equal(postseasonAttendanceFor(data, 158, 2026).games, 3)
+  assert.equal(attendanceFor(data, 158, 2026).games, 81)
+  assert.equal(postseasonAttendanceFor(data, 112, 2026), null)
 })
