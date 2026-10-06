@@ -461,25 +461,18 @@
 
 /* ---- Delay notice — a between-half-innings card flagging that play stopped
    for a delay (rain, etc.) during the half being viewed (see
-   components/DelayCard, api/select.js selectDelays). Spoiler-free structural
-   info: the stoppage, its cause, and how long it lasted — never a score. A cool
-   navy family (a weather interlude), set apart from the highlighter "on hold" status
-   tape and the clay out/alert red. "Pops up" on mount. ---- */
-.delaycard {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
+   components/inning/DelayCard, api/select.js selectDelays). Spoiler-free
+   structural info: the stoppage, its cause, and how long it lasted — never a
+   score. The box is a Notice, tone info (#1132, styles/system/notice.css);
+   .delay is its namespace and keeps the margin, the pop-in and the round icon
+   bubble. No wrap: a long cause on a phone wraps inside the text column and
+   never drops the text under the icon. "Pops up" on mount. ---- */
+.delay {
   margin: 4px 0 var(--space-3);
-  padding: var(--space-2h) var(--space-3h);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--navy) 7%, var(--surface-card));
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-left: 3px solid var(--navy);
-  box-shadow: var(--shadow-card);
+  flex-wrap: nowrap;
   animation: delay-pop var(--dur-med) var(--ease-out) both;
 }
-.delaycard__icon {
-  flex: 0 0 auto;
+.delay .notice__icon {
   display: grid;
   place-items: center;
   width: 38px;
@@ -487,29 +480,8 @@
   border-radius: 50%;
   background: color-mix(in srgb, var(--navy) 12%, var(--surface-inset));
 }
-.delaycard__body {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-.delaycard__title {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-label);
-  color: var(--text-heading);
-}
-.delaycard__detail {
-  font-family: var(--font-read);
-  font-size: var(--fs-small);
-  color: var(--text-caption);
-}
-.delaycard__detail b {
+.delay b {
   font-family: var(--font-mono);
-  font-weight: var(--w-bold);
-  color: var(--text-body);
 }
 
 .delayrain__cloud {
@@ -555,7 +527,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .delaycard {
+  .delay {
     animation: none;
   }
   .delayrain__drop {

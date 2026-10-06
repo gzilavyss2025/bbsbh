@@ -251,12 +251,12 @@ export const CARDS = [
     note: 'One declaration: perspective: 1400px. A 3D transform container.',
   },
   {
-    cls: 'delaycard',
+    cls: 'notice notice--info notice--block delay',
     partial: '27-player-position-innings.css',
     consumers: 1,
     group: 'notcard',
     verdict: 'Leave',
-    note: 'A notice, not a card: a 3px left rule in --navy, a tinted fill and a pop-in.',
+    note: 'A notice, not a card: the delay card is a Notice, tone info (#1132, N5). Its namespace .delay keeps the margin, the pop-in and the icon bubble.',
   },
   {
     cls: 'txcard',

@@ -475,3 +475,60 @@ for N2 to N8.
    next file there needs the `system/state/` subfolder (spec section 5): move
    `empty-state.css` and `notice.css`, and edit `src/index.css` and the pins in
    `test/empty-state-cascade.test.js` and `test/notice-cascade.test.js`.
+
+## N5 as built (what the next slices need)
+
+Written by the N5 session. It records what shipped. It does not write the prompts
+for N6 to N8.
+
+1. **Two members moved; the postponed strip is held.**
+   - The delay card is `<Notice tone="info" role="note" className="delay"
+     icon={glyph} label={title}>`. The namespace `.delaycard` is now `.delay`
+     (`styles/27-player-position-innings.css`). It has no `__` part: Notice's
+     parts replaced `__icon`, `__body`, `__title` and `__detail`. `.delay` keeps
+     the margin, the `delay-pop` pop-in and its reduced-motion rule, and
+     `flex-wrap: nowrap`. `.delay .notice__icon` keeps the 38px round bubble.
+     `.delay b` keeps the mono face on the duration. The Animation Lab freeze
+     list says `.animlab__frame .delay`. The design lab row is
+     `cls: 'notice notice--info notice--block delay'`.
+   - The extra-innings line is `<Notice tone="info" size="compact" role="note"
+     className="innings__extras" icon="⚾️">`. `.innings__extras` keeps
+     `margin: 0 0 10px` and `flex-wrap: nowrap`. `.innings__extras-team` stays.
+     `.innings__extras-icon` is gone.
+   - **The postponed strip is HOLD (the fallback).** Notice puts its label ABOVE
+     the text. The strip puts the stamp in a ROW beside two stacked lines. A port
+     needs a row-layout rule on `.notice__body`, a padding override and display
+     rules on both lines. That is more than namespace rules for the stamp and the
+     motion, so N5 did not force it. `GameCardParts.jsx` and
+     `06-loader-and-cards.css` are unchanged. A later slice can move it with a
+     Notice layout option, or after the dashed-rule PR.
+2. **A Notice with an icon and no action must not wrap.** `.notice` is
+   `flex-wrap: wrap` and `.notice__body` is `flex: 1 1 auto`. A long sentence
+   then wraps the whole body under the icon. At 390px the extras line drew the
+   ball alone on one row. Both N5 namespaces set `flex-wrap: nowrap`. The fix
+   cannot go in `notice.css` as a `:not(:has(.notice__action))` rule:
+   `notice-cascade.test.js` pins every rule there as one class at one weight.
+   N6 and N7: a Notice with an icon needs the same line, or a Notice-level fix
+   that Gary approves.
+3. **The seal pin** (`test/notice-n5.test.js`, measured on `608c6062e`):
+   `DelayCard.jsx`, `ExtrasBanner.jsx`, `GameCardParts.jsx` and `GameCard.jsx`
+   have no reveal-only import, no `<SealBox` and no `revealedThrough`.
+   `InningViewer.jsx` imports `winprob.js`, has no `<SealBox` and has 15
+   `revealedThrough` reads. The three gates are pinned as source snippets.
+4. **Contrast.** `contrastPairings.js` now asserts `text-body` and
+   `text-caption` on `#EBE8DD` (the info wash, by hand). The caption pair is
+   4.72:1, a thin margin. N1's item 7 asked for this.
+5. **Seen live.** Delay card: STL@CIN 2025-05-01 (gamePk 778107, bottom 4th,
+   rain, 1 hr 36 min), MIN@CLE 2025-05-01 (778108: top 7th 16 min, top 8th
+   2 hr 5 min, none on top 6th) and WSH@CIN 2025-05-02 (778087, top 1st,
+   "Inclement Weather", 2 hr 19 min). Extras line: LAD@SF 2026-09-27 (823164,
+   top 10th; the 2025 walk-off game has no callout bundle, so its line does not
+   render, on `main` too). Page text outside the notice and the reveal mark were
+   the same before and after on 9 routes at 320, 390 and 900px. **Not seen:**
+   the "Delay in progress" copy on a live game (seen only in the Animation Lab).
+   The postponed strip did not change, so I did not load it.
+6. **Census.** The STALE keys left on `main` are not N5's: `.xl-film__msg`,
+   `.xl__prerollmsg`, three `ExpressLanePage.jsx` keys and
+   `PitcherNotice.jsx#10`. `.xl-film__mark` and `.xl-film__mark--over` are
+   UNREVIEWED. N5 added a row for `.notice__icon` (seen through
+   `.delay .notice__icon`).
