@@ -318,7 +318,10 @@ don't run these by hand.
   `src/api/playbyplay.js` so live (`derive.js`) and precomputed tallies can't
   drift; two-strike detection carries the PRE-pitch count forward across
   non-PA plays (the `count`-is-post-pitch off-by-one). App reads it via
-  `src/api/fouls.js` (Foul Tracker page, player-page card).
+  `src/api/fouls.js` (Foul Tracker page, player-page card). The MLB postseason is
+  swept too, kept BESIDE the regular season by a `scope` key (`R`/`P`, ADR-0100): the
+  files gain a `post` key only once a postseason game is on file, and no reader sums it
+  in. Backfill old postseason games by hand with `--since=<first postseason date>`.
 - `gen-comeback-wins.mjs` → `public/data/comeback-wins.json` — per-team,
   per-season COMEBACK counts that form a RATE: for each Final game BOTH sides'
   minimum win prob is bucketed, so whichever side fell below 10/20/30% counts an

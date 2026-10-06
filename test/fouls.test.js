@@ -4,7 +4,7 @@ import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { openDb } from '../scripts/lib/db.js'
-import { aggregateGameFouls, exportFouls, foldGame, foulStatements, wipeTeamPitchTypes } from '../scripts/gen-fouls.mjs'
+import { aggregateGameFouls, exportFouls, exportFoulStore, foldGame, foulStatements, scopeOfGameType, wipeTeamPitchTypes } from '../scripts/gen-fouls.mjs'
 import {
   batterFoulLine,
   pitcherFoulLine,
@@ -423,6 +423,8 @@ const foldInto = (db, gamePk, date, season, fouls) =>
   foldGame(db, foulStatements(db), gamePk, date, season, aggregateGameFouls(gameFeed(fouls)))
 const withoutStamp = ({ asOf: _asOf, ...rest }) => rest
 const emptyDb = () => openDb(mkdtempSync(join(tmpdir(), 'fouls-')))
+const foldScoped = (db, gamePk, date, season, fouls, scope) =>
+  foldGame(db, foulStatements(db), gamePk, date, season, aggregateGameFouls(gameFeed(fouls)), scope)
 
 test('a 2027 game leaves the 2026 foul totals alone, and 2027 holds only that game', async () => {
   const db = await emptyDb()
@@ -484,4 +486,63 @@ test('all seasons add counts, keep the higher single-game high, and rebuild a sh
   assert.equal(all.league.byPitchType[0].pitches, 12)
   assert.equal(all.league.totals.fouls, 9)
   assert.equal(all.topFoulGames.length, 3)
+})
+
+// --- the postseason beside the regular season (ADR-0100, #1511) ----------------
+
+test('a postseason game never moves the regular-season export, and sits beside it as post', async () => {
+  const db = await emptyDb()
+  foldScoped(db, 1, '2026-09-01', 2026, 3, 'R')
+  const before = withoutStamp(exportFouls(db, 2026))
+  const allBefore = withoutStamp(exportFouls(db, null))
+  assert.equal(exportFoulStore(db, 2026).post, undefined, 'no post key until a postseason game is on file')
+
+  foldScoped(db, 2, '2026-10-05', 2026, 9, 'P')
+
+  assert.deepEqual(withoutStamp(exportFouls(db, 2026)), before)
+  assert.deepEqual(withoutStamp(exportFouls(db, null)), allBefore)
+  const store = exportFoulStore(db, 2026)
+  assert.equal(store.batters[10].fouls, 3, 'the same batter keeps his regular-season row')
+  assert.equal(store.post.batters[10].fouls, 9, 'and the postseason row is his own')
+  assert.equal(store.post.pitchers[200].g, 1)
+  assert.equal(store.post.gamesIngested, 1)
+  assert.equal(store.post.coverageSince, '2026-10-05')
+  assert.deepEqual(store.topFoulGames.map((g) => g.gamePk), [1])
+  assert.deepEqual(store.post.topFoulGames.map((g) => g.gamePk), [2])
+  assert.equal(store.post.batters[10].maxGameDate, '2026-10-05')
+  assert.equal(store.post.season, undefined)
+  assert.equal(store.post.asOf, undefined)
+  assert.equal(store.league.byPitchType[0].pitches, 4, 'league rows carry no postseason pitch')
+  assert.equal(store.post.league.byPitchType[0].pitches, 10)
+  assert.equal(store.post.teamPitchTypes.batting[1][0].fouls, 9)
+  assert.equal(store.teamPitchTypes.batting[1][0].fouls, 3)
+})
+
+test('an old dump line that names no scope loads as the regular season', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'fouls-old-'))
+  const { writeFileSync } = await import('node:fs')
+  writeFileSync(
+    join(dir, 'fouls.sql'),
+    'INSERT INTO foul_ingested_games (game_pk, date, season) VALUES (7, \'2026-09-01\', 2026);\n' +
+      'INSERT INTO foul_team_totals (team_id, season, games, fouls, two_strike_fouls) VALUES (1, 2026, 4, 40, 10);\n',
+  )
+  const db = await openDb(dir)
+  assert.equal(db.prepare('SELECT scope FROM foul_ingested_games').get().scope, 'R')
+  assert.equal(exportFouls(db, 2026).teams[1].fouls, 40)
+  assert.equal(exportFouls(db, 2026, 'P').gamesIngested, 0)
+})
+
+test('the scope of a postseason game is stored on its ledger row and its game totals', async () => {
+  const db = await emptyDb()
+  foldScoped(db, 2, '2026-10-05', 2026, 9, 'P')
+  assert.deepEqual(db.prepare('SELECT game_pk, scope FROM foul_ingested_games').all().map((r) => ({ ...r })), [
+    { game_pk: 2, scope: 'P' },
+  ])
+  assert.equal(db.prepare('SELECT scope FROM foul_game_totals WHERE game_pk = 2').get().scope, 'P')
+  assert.deepEqual(wipeTeamPitchTypes(db, 2026).map((g) => g.scope), ['P'], 'the rebuild hands back each game with its scope')
+})
+
+test('a gameType maps to a scope: the postseason rounds are P, everything else R', () => {
+  for (const t of ['F', 'D', 'L', 'W']) assert.equal(scopeOfGameType(t), 'P')
+  for (const t of ['R', 'S', undefined]) assert.equal(scopeOfGameType(t), 'R')
 })
