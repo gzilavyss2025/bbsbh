@@ -256,12 +256,12 @@ test('system/card.css is imported right after section-head.css and before 06', (
   const six = imports.indexOf('06-loader-and-cards.css')
   assert.ok(card !== -1, 'index.css should import system/card.css')
   assert.equal(card, head + 1, 'card.css sits right after section-head.css')
-  // system/table.css and system/empty-state.css (#1132) sit between the card and 06; their own
-  // slots are pinned in table-cascade.test.js and empty-state-cascade.test.js.
+  // system/table.css, system/empty-state.css and system/notice.css (#1132) sit between the card and 06;
+  // their own slots are pinned in table-cascade.test.js, empty-state-cascade.test.js and notice-cascade.test.js.
   assert.deepEqual(
     imports.slice(card + 1, six),
-    ['system/table.css', 'system/empty-state.css'],
-    'only table.css and empty-state.css sit between card.css and 06, so every namespace rule wins on order',
+    ['system/table.css', 'system/empty-state.css', 'system/notice.css'],
+    'only table.css, empty-state.css and notice.css sit between card.css and 06, so every namespace rule wins on order',
   )
 })
 

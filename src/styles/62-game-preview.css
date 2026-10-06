@@ -135,14 +135,6 @@
   outline-offset: 2px;
 }
 
-.posterstudio__warn {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  line-height: var(--lh-body);
-  color: var(--accent-negative);
-}
-
 /* .posterstudio__save is a Button (skin="ink", #1131 slice 6) — this file only
    places it in the grid and re-inks its two outcome states. A skin is five
    custom properties, not a repaint (system/button.css): --btn-fill/--btn-edge

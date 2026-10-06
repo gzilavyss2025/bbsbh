@@ -564,3 +564,28 @@ merge strip, the extra-innings line, the live-edge chip. **Not seen:** the
 `AsyncGate()` page error, the standings error line, the Box Lines error, the
 slate card-back error, the highlight dialog, and every `HOLD` Express Lane row
 (inferred from CSS).
+
+---
+
+## 17. Corrections after N0 (measured on `main` at `9d01ade71`)
+
+The stack PR (#1518) landed after the census. Three numbers above change.
+
+1. **Three `AsyncStatus` callers never show an error.** `screens/scout/ScoutPage.jsx`,
+   `screens/scout/meetings/MeetingsPanel.jsx` and `screens/designlab/scout/ScoutLab.jsx`
+   pass only `loading hasData={false}`. They reach the loader, not the error line.
+   Their rows are now `loading`, HOLD. The callers that can show the error line are
+   **36, not 39**, so the migrating error sites are 54 and the total is 94, not 97.
+   The N4 count of 45 becomes 42. The Scout restructure (#1490) also moved two
+   rows: `screens/scout/HeadToHead.jsx#1` is `MeetingsPanel.jsx#1`, and
+   `screens/scout/MapParts.jsx#1` is `screens/scout/zones/MapParts.jsx#1`. It added
+   `.scout__callout` (a 3px `--award-line` rule on `--surface-card`, no tint), a
+   generated sentence about the map: callout, n/a.
+2. **The pilot line moved.** `.posterstudio__warn` is at `screens/GamePreview.jsx:169`,
+   not 167. The rule is still `styles/62-game-preview.css:138`.
+3. **Three tests pin the import order around `empty-state.css`.** `notice.css` sits
+   between `empty-state.css` and `06-loader-and-cards.css`, so N1 changes the
+   expected list in `test/empty-state-cascade.test.js` (06 right after
+   `empty-state.css`), `test/card-cascade.test.js` (only `table.css` and
+   `empty-state.css` between `card.css` and 06) and `test/table-cascade.test.js`
+   (only `empty-state.css` between `table.css` and 06). The checks keep their strength.

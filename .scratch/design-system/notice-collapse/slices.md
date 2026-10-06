@@ -401,3 +401,77 @@ each one.
 - Post the status on #1132: what moved (by slice and PR), what is held and why
   (Q5), the rules deleted, the budgets before and after, and the "not seen live"
   list. Say that the dashed-rule fix is the last item.
+
+---
+
+## N1 as built (what the next slices need)
+
+Written by the N1 session. It records what shipped. It does not write the prompts
+for N2 to N8.
+
+1. **The API as built.**
+   - `src/components/ui/state/Notice.jsx` exports `Notice({ tone, label, icon,
+     action, size, className, role, children, ...rest })`. The root is
+     `div.notice.notice--{tone}.notice--{size}` plus `className`, with
+     `notice__icon` (a `span`, always `aria-hidden`), `notice__body` (holding
+     `notice__label` and `p.notice__text`) and `notice__action`. The icon, the
+     label and the action render only when given.
+   - `src/lib/design/noticeClass.js` exports `TONES` (`info`, `event`,
+     `caution`, `error`), `SIZES` (`block`, `compact`), `noticeClass({ tone,
+     size, className })` and `noticeParts({ tone, size, className, label, icon,
+     action })`. The defaults are `info` and `block`. An unknown tone or size
+     throws. `noticeClass` returns the root string for a caller that owns its
+     root (N6 and N7). `noticeParts` returns `{ root, role, label, icon, action }`.
+   - **Role.** `noticeParts` says `role: 'alert'` for the error tone and
+     `undefined` for the rest. `Notice` writes `role={role ?? parts.role}`, so any
+     role the caller passes wins, and an explicit `role={undefined}` keeps the
+     default. N2 and N4 pass `role="status"` where a line is stale or follows an
+     action.
+   - **CSS** (`src/styles/system/notice.css`, 12 rules). A tone sets
+     `--notice-edge`, `--notice-wash` and `--notice-ink`. `caution` also sets
+     `--notice-label` (clay-deep over body ink). The root is `display: flex`,
+     wrapping, centred: a long sentence pushes the action under it on a phone.
+     The text is the body face at `--fs-small`, semibold. There is no shadow, no
+     dashed edge, no rail and no `--seal`. Margin is `0` on the root and the text.
+   - **Children are phrasing content.** The sentence sits inside a `<p>`, as in
+     `EmptyState`. A site with a list or a block child needs a different shape
+     (N3 and N4 check their callers). `tone` and `size` take `undefined` for the
+     default; a `null` is a caller typo and throws.
+2. **The three pins moved.** `test/empty-state-cascade.test.js` (only
+   `notice.css` sits between `empty-state.css` and 06), `test/card-cascade.test.js`
+   (`table.css`, `empty-state.css`, `notice.css` between `card.css` and 06) and
+   `test/table-cascade.test.js` (`empty-state.css`, `notice.css` between
+   `table.css` and 06). Each is as strict as before: a `deepEqual` on the exact
+   list. The next family partial adds its name to the same three lists, and the
+   `notice-cascade` pin pins "right before 06" the way the others do.
+3. **The pilot needed no namespace.** `.posterstudio__panel` is a grid with
+   `gap: var(--space-3)`, so the `Notice` takes its space from the grid. The
+   `.posterstudio__warn` rule had only a margin reset and four declarations the
+   Notice now draws, so the rule and the class are gone. No raw value left with
+   it, so no `check-raw-values` budget moved. Lesson for N2 to N7: read the
+   parent first. A grid or `Stack` parent needs no namespace margin. A block
+   parent does (the old `.hint` gave `padding: 12px 2px` for free).
+4. **The pilot line cannot show today.** `posterLayout(...).overflows` is true
+   only when the stack is taller than 1044px. The tallest stack (all three
+   blocks, nine lineup rows) is 958px, plus four gaps of 20px, so 1038px. The
+   line never shows with the current constants. I saw it by rewriting
+   `headHeight` from 500 to 700 in the browser only (a `page.route` on
+   `posterLayout.js`; the repo is unchanged). The copy and the component are the
+   real ones. A later slice may decide whether to delete the dead line.
+5. **The census counts `<Notice` as a site.** A `<Notice` element is a candidate
+   tag (the two research diary pages define a local `Notice`; spec section 12,
+   item 6). Adding the lab demos shifted the keys of a lab file: the old
+   `screens/designlab/components.jsx#1` (the AsyncStatus demo) became `#6`.
+   Rows `#1` to `#5` are the Notice demos, job `tool`, HOLD. A later slice that
+   adds a `<Notice` above an old row in a file must re-key the rows below it:
+   read the STALE and UNREVIEWED lists together.
+6. **The seal guard reads prose.** `check-seal-scope.mjs` fails on the literal
+   `--seal` in a `CLAUDE.md` outside `src/styles/`. Say "seal token" in docs.
+7. **Not done in N1** (outside the file list): the contrast pairs of spec section
+   14 are not in `src/lib/design/contrastPairings.js`. Only `clay-deep` on
+   `clay-soft` is asserted today. The slice that first puts a `caution`, `info`
+   or `event` Notice on a scoring surface should add its pair.
+8. **Directory budget.** `src/styles/system/` is now at 12 files, the cap. The
+   next file there needs the `system/state/` subfolder (spec section 5): move
+   `empty-state.css` and `notice.css`, and edit `src/index.css` and the pins in
+   `test/empty-state-cascade.test.js` and `test/notice-cascade.test.js`.
