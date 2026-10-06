@@ -95,10 +95,12 @@ export function Headshot({
   // retrying photo is never an empty frame or a broken-image glyph. The silo
   // is a transparent cutout, so the logo is dropped (not left underneath) when
   // the photo shows.
-  const underlayUrl = logoTeamId ? teamLogoUrl(logoTeamId) : null
+  // A caller with `hideFallback` draws its own logo, so it gets no underlay.
+  const logoCandidate = logoTeamId ? teamLogoUrl(logoTeamId) : null
+  const underlayUrl = hideFallback ? null : logoCandidate
   // `logoUrl` keeps its old meaning for the callbacks and log below: the logo
   // is what's DRAWN because there is no photo.
-  const logoUrl = !photoUrl ? underlayUrl : null
+  const logoUrl = !photoUrl ? logoCandidate : null
   const photoReady = useImgReady(photoUrl)
   const logoReady = useImgReady(underlayUrl)
   const photoShown = Boolean(photoUrl) && photoReady.pending === undefined

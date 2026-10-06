@@ -211,9 +211,11 @@ export function StandingsPage({ seasonYear }) {
   // on screen (dimmed) while the new date loads so the page doesn't collapse to
   // a spinner on every jump. State (not a ref) since it's read during render —
   // a ref must never be read outside an event handler/effect.
-  const [lastGood, setLastGood] = useState([])
-  if (data && data !== lastGood) setLastGood(data)
-  const shown = data ?? lastGood
+  // Keyed by season: a table from another year must never sit under this
+  // year's label while the picker's fetch loads.
+  const [lastGood, setLastGood] = useState({ season, rows: [] })
+  if (data && data !== lastGood.rows) setLastGood({ season, rows: data })
+  const shown = data ?? (lastGood.season === season ? lastGood.rows : [])
 
   // Season Grade column: a SEPARATE, independent fetch of two already-nightly
   // static files (never statsapi) — a slow/failed grade file must never block
@@ -251,8 +253,8 @@ export function StandingsPage({ seasonYear }) {
   // finished season, and a rank that "moved" since then is a movement nobody
   // is watching for. The glyph simply does not appear.
   const compareDate = useMemo(
-    () => (final ? null : shiftDays(view.date ?? today, -7)),
-    [final, view.date, today],
+    () => (ready && !final ? shiftDays(view.date ?? today, -7) : null),
+    [ready, final, view.date, today],
   )
   const { data: compareData } = useAsync(
     () => (compareDate ? fetchLeagueStandings(season, compareDate) : Promise.resolve(null)),

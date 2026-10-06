@@ -50,6 +50,7 @@ import {
 } from './EventCards.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from '../scoring/StrikeZone.jsx'
 import { ReplayCell, ReplaySheet, useReplayPitches } from './pitcherCard/AtBatReplay.jsx'
+import { atBatScenePitches } from '../../lib/pitcherCard/atBat.js'
 import { Button } from '../ui/control/Button.jsx'
 import { WIDE_QUERY, useMediaQuery } from '../../hooks/useMediaQuery.js'
 import { HighlightSheet } from './HighlightSheet.jsx'
@@ -338,9 +339,10 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     }
   }
 
-  // The last at-bat on screen with a zone cell (where a replay can live) owns
-  // the wide rail's replay until a pick moves it (AtBatReplay.jsx's ReplayRail).
-  const lastAtBat = visibleEntries.findLastIndex((e) => e.kind === 'atbat' && hasPitchLocations(e.pitchDetails))
+  // The last at-bat on screen with a tracked flight (what useReplayPitches
+  // needs, so a replay really exists) owns the wide rail's replay until a pick
+  // moves it (AtBatReplay.jsx's ReplayRail).
+  const lastAtBat = visibleEntries.findLastIndex((e) => e.kind === 'atbat' && atBatScenePitches(e.pitchDetails).length > 0)
 
   return (
     <div className="pbp">

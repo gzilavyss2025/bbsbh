@@ -524,6 +524,14 @@ test('headshotSources: an MLB player gets silo then coach, NOT the stale milb ph
   )
 })
 
+test('milbHeadshotUrl carries the path useHeadshotStep reads to skip the silo retry', () => {
+  // useHeadshotStep decides `quickFirst` by finding this segment in the second
+  // source, so a renamed path must fail here rather than quietly bring back the
+  // silo's 2 s pause for every prospect.
+  assert.ok(milbHeadshotUrl(700000).includes('/headshot/milb/'))
+  assert.equal(headshotSources(543807, { mlb: true })[1].includes('/headshot/milb/'), false)
+})
+
 test('headshotSources: a MiLB / prospect player keeps silo -> milb -> coach', () => {
   // A genuine prospect still gets the milb rung — a real recent face when his
   // MLB silo 404s.
