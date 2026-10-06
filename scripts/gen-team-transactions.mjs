@@ -60,7 +60,7 @@ async function fetchMlbTeamIds() {
 // verified live: each affiliate row carries its own parentOrgId). Lets a
 // call-up/option row logged only against the affiliate (fromTeam/toTeam is
 // the Triple-A club, not the MLB club) still bucket to the right org.
-async function fetchAffiliateParentMap(orgIds, Math.min(season, Number(isoToday().slice(0, 4)))) {
+async function fetchAffiliateParentMap(orgIds, season) {
   const data = await getJson(`/api/v1/teams/affiliates?teamIds=${orgIds.join(',')}&season=${season}`)
   const map = new Map()
   for (const t of data.teams ?? []) {
