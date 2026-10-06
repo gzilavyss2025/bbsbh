@@ -325,12 +325,17 @@ don't run these by hand.
   ATTEMPT (`att10/att20/att30`) and, if it won, a comeback WIN (`sub10/sub20/
   sub30`) — the club's claw-back rate is `sub/att`, `sub <= att`, both pairs
   nested. SQLite-backed (`comeback-wins` group, ADR-0021) APPEND-ONLY incremental
-  sweep of newly-Final MLB regular-season games like `gen-umpire-accuracy.mjs`
+  sweep of newly-Final MLB games like `gen-umpire-accuracy.mjs`
   (`--days` trailing window / backfill); `comeback_ingested_games` is the
   idempotency guard. Both minimums come from the MLB-only `/winProbability`
   endpoint (home share directly; away = `100 − home max`). A schema change (the
-  `att*` columns) needs a one-time `--rebuild` (wipe both tables, re-sweep) since
-  old rows carry no attempts. App reads it via `src/api/comebackWins.js` (Team
+  `att*` columns) needed a one-time `--rebuild` (wipe both tables, re-sweep) since
+  old rows carried no attempts. The MLB postseason (`R,F,D,L,W`) sits BESIDE the
+  regular season (ADR-0094): `comeback_win_totals` has `scope` `'R'`/`'P'` in its
+  key (DEFAULT `'R'`, so no rebuild), the export keeps `byTeamId` as regular season
+  and adds `post.byTeamId`, and the league baseline stays regular season. Postseason
+  backfill: the nightly window is 3 days, so older October games need a hand run
+  with `--days=<n>` (2026: run on 2026-10-06 with `--days=14`, 17 games, 12 clubs). App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
 - `gen-abs-challenges.mjs` → `public/data/abs/{season}/abs-challenges.json`,
   **`abs/{season}/abs-exposure.json`** and

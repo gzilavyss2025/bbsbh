@@ -6,7 +6,10 @@
 // (or the league's) rate of clawing back from a given hole is sub/att, and both
 // pairs are NESTED (a sub-10 win also counts sub-20/sub-30; likewise att).
 // Shown on the Team Page as the "Comeback wins" card (rate vs. league baseline)
-// when non-zero — see src/api/comebackWins.js.
+// when non-zero — see src/api/comebackWins.js. The MLB POSTSEASON sits BESIDE the
+// regular season, never inside it (ADR-0094): each row carries scope 'R' or 'P',
+// the export keeps the regular season under `byTeamId` as before and adds a `post`
+// block, and the league baseline stays regular season.
 //
 // Spoiler-safe: a season aggregate over FINAL games carries no live-game score
 // (same footing as WAR / the team-score aggregates), so the Team-page card needs
@@ -14,7 +17,7 @@
 //
 // APPEND-ONLY / incremental, same shape as gen-fouls.mjs:
 // each run sweeps a small trailing window of dates, and for every newly-Final
-// MLB regular-season game not already ingested, fetches its win-probability
+// MLB game (regular season or postseason) not already ingested, fetches its win-probability
 // history, buckets BOTH sides' minimum win %, and folds attempts (both sides) +
 // wins (winner) into the running per-team totals (SQLite, docs/adr/0021). A
 // Final game's win-prob history never changes, so an already-ingested game is
@@ -27,13 +30,19 @@
 //   node scripts/gen-comeback-wins.mjs --days=200 # season-to-date backfill
 //   node scripts/gen-comeback-wins.mjs --rebuild --days=200
 //                                     # wipe both tables first, then re-ingest —
-//                                     # required after the schema gains a column
-//                                     # (att*), since old rows carry no attempts.
+//                                     # required when a schema change leaves old rows
+//                                     # without data the new column needs (the att*
+//                                     # columns did). The `scope` column does NOT:
+//                                     # it defaults to 'R'.
+//   node scripts/gen-comeback-wins.mjs --days=<n>  # postseason backfill: the nightly
+//                                     # window is 3 days, so older October games
+//                                     # need a hand run reaching back to them.
 import { dirname, join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
+import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { parseArgs } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -42,6 +51,10 @@ const DEFAULT_DAYS = 3
 // The cumulative home win % (+ its `about` for nothing here, but kept minimal).
 // Only homeTeamWinProbability is read; pruning keeps each game's payload small.
 const WP_FIELDS = 'homeTeamWinProbability'
+
+// A game's scope comes from its gameType: the postseason types are 'P', else 'R'.
+const POST_TYPES = POSTSEASON_GAME_TYPES.split(',')
+export const scopeOf = (gameType) => (POST_TYPES.includes(gameType) ? 'P' : 'R')
 
 const isoDay = (d) => d.toISOString().slice(0, 10)
 const args = parseArgs(process.argv.slice(2))
@@ -87,11 +100,18 @@ export function comebackBuckets(minWinProb) {
   }
 }
 
-function exportJson(db) {
-  const rows = db.prepare('SELECT * FROM comeback_win_totals ORDER BY season, team_id').all()
+// `byTeamId` is the regular season, exactly as before. The postseason is a new
+// key beside it, `post.byTeamId`, same row shape, so a reader that knows only
+// the old keys sees no change and a postseason row never lands on a regular one.
+export function exportJson(db) {
+  const rows = db
+    .prepare('SELECT * FROM comeback_win_totals ORDER BY season, scope DESC, team_id')
+    .all()
   const seasons = {}
   for (const r of rows) {
-    ;(seasons[r.season] ??= { byTeamId: {} }).byTeamId[r.team_id] = {
+    const season = (seasons[r.season] ??= { byTeamId: {} })
+    const bucket = r.scope === 'P' ? (season.post ??= { byTeamId: {} }) : season
+    bucket.byTeamId[r.team_id] = {
       sub10: r.sub10,
       sub20: r.sub20,
       sub30: r.sub30,
@@ -121,9 +141,9 @@ async function main() {
   // The winner both ATTEMPTED (fell into the hole) and WON from it, so its att*
   // and sub* both take the winner's buckets; `wins` is +1 per ingested game.
   const upsertWinner = db.prepare(
-    `INSERT INTO comeback_win_totals (team_id, season, wins, sub10, sub20, sub30, att10, att20, att30)
-     VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(team_id, season) DO UPDATE SET
+    `INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30)
+     VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(team_id, season, scope) DO UPDATE SET
        wins = wins + 1,
        sub10 = sub10 + excluded.sub10,
        sub20 = sub20 + excluded.sub20,
@@ -135,9 +155,9 @@ async function main() {
   // The loser only ATTEMPTED (fell into the hole, then lost) — att* only, and a
   // row may be created here before the club has any ingested win (wins stays 0).
   const upsertLoser = db.prepare(
-    `INSERT INTO comeback_win_totals (team_id, season, wins, sub10, sub20, sub30, att10, att20, att30)
-     VALUES (?, ?, 0, 0, 0, 0, ?, ?, ?)
-     ON CONFLICT(team_id, season) DO UPDATE SET
+    `INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30)
+     VALUES (?, ?, ?, 0, 0, 0, 0, ?, ?, ?)
+     ON CONFLICT(team_id, season, scope) DO UPDATE SET
        att10 = att10 + excluded.att10,
        att20 = att20 + excluded.att20,
        att30 = att30 + excluded.att30`,
@@ -159,11 +179,11 @@ async function main() {
     dates.push(isoDay(d))
   }
 
-  // Gather Final regular-season MLB games with a decided winner, newest date
+  // Gather Final MLB games (regular season and postseason) with a decided winner, newest date
   // first, skipping anything already ingested.
   const candidates = []
   for (const dateStr of dates) {
-    const slate = await getJson(`/api/v1/schedule?sportId=1&gameType=R&date=${dateStr}`)
+    const slate = await getJson(`/api/v1/schedule?sportId=1&gameType=R,${POSTSEASON_GAME_TYPES}&date=${dateStr}`)
     for (const g of (slate.dates ?? []).flatMap((d) => d.games ?? [])) {
       if (g.status?.abstractGameState !== 'Final') continue
       if (g.status?.detailedState === 'Postponed') continue
@@ -179,6 +199,7 @@ async function main() {
       candidates.push({
         gamePk: g.gamePk,
         season: Number(dateStr.slice(0, 4)),
+        scope: scopeOf(g.gameType),
         winnerId,
         loserId,
         winnerIsHome,
@@ -202,11 +223,11 @@ async function main() {
       const winnerB = comebackBuckets(m ? (c.winnerIsHome ? m.home : m.away) : null)
       const loserB = comebackBuckets(m ? (c.winnerIsHome ? m.away : m.home) : null)
       upsertWinner.run(
-        c.winnerId, c.season,
+        c.winnerId, c.season, c.scope,
         winnerB.sub10, winnerB.sub20, winnerB.sub30,
         winnerB.sub10, winnerB.sub20, winnerB.sub30,
       )
-      upsertLoser.run(c.loserId, c.season, loserB.sub10, loserB.sub20, loserB.sub30)
+      upsertLoser.run(c.loserId, c.season, c.scope, loserB.sub10, loserB.sub20, loserB.sub30)
       markIngested.run(c.gamePk, c.season)
       ingested++
       if (ingested % CHECKPOINT_EVERY === 0) {

@@ -189,6 +189,16 @@
   line-height: var(--lh-title);
   color: var(--text-muted);
 }
+.cbk__post {
+  padding: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.cbk__post > .cbk__label {
+  margin-bottom: 6px;
+}
+.cbk__post .cbk__head {
+  margin-bottom: 2px;
+}
 .cbk__frac {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
