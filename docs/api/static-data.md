@@ -881,19 +881,6 @@ for each generator; the reader modules:
   phantom shared seasons AND split continuous tenures in half. Same instinct as
   `aggregateSplits` deduping statsapi's repeated stat rows — the feed repeats
   itself, so the reader dedupes.
-- `feverRadar.js` — Fever Baseball's (feverbaseball.com) breakout/fade
-  prospect radar, from `public/data/fever-radar.json`. An OUTSIDE scouting
-  opinion, deliberately NOT a callout family (see docs/callouts.md's
-  worthiness rubric and `gen-fever-radar.mjs`'s header for why: every callout
-  is a fact bbsbh derives and can reconcile against the official record,
-  Fever's `overlay` score is a third-party model output it can't reconcile
-  the same way) — surfaced only via the attributed `RadarPill`, wired onto
-  the batting-order rows in `TeamInfo.jsx` next to `MilestonePill`/
-  `RookiePill`. MLB hitters only (there's no MLB pitcher board), so it never
-  appears on the opposing-pitcher card. Backed by the SQLite layer above
-  (`player_snapshots`); each exported row's `movement` is a self-join against
-  the nearest prior snapshot bbsbh itself recorded, not Fever's own
-  `/api/data/movers` feed.
 - `person/contracts.js` — current salary, competitive-balance-tax payroll,
   service time, options and future club-control status from Fever Baseball's
   Cot's-to-MLBAM reconciliation. `scripts/fever/gen-player-contracts.mjs` reduces the nightly
@@ -948,8 +935,8 @@ for each generator; the reader modules:
   a season the history has not reached. See the generator entry for the file
   shape and the licence notes.
 - `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
-  `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Contrast
-  `feverRadar.js` above: not a third party, not attributed, and not an MLE —
+  `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Not a third
+  party, not attributed, and not an MLE —
   purely "how does his OPS/ERA compare to every other qualified player at his
   level this season," computed straight from the same `fetchLevelSeasonStats`/
   `combineToPool` (`statsLevels.js`) the combined minors leaderboard uses. A
@@ -957,9 +944,9 @@ for each generator; the reader modules:
   floor (`MIN_PLATE_APPEARANCES`/`MIN_OUTS`,
   `scripts/lib/prospectPercentile.mjs`) yet this season, not that he's off
   the board. `ProspectTrendPill` presents it on `/prospects`; `ProspectCard`
-  uses the same signal on a minor-league player page. `movement` is the same
-  self-join-against-bbsbh's-own-history pattern as `feverRadar.js`, just a
-  wider window (stat percentiles move slower than a daily scouting rank); the
+  uses the same signal on a minor-league player page. `movement` is a
+  self-join against bbsbh's own recorded history over a two-week window (stat
+  percentiles move slowly); the
   arrow only appears past a 5-point move, since a percentile wobbles a point
   or two on one good night.
 

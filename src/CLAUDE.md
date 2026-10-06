@@ -216,7 +216,7 @@ must key on the `feed` object (ADR-0007).
 card/pill block (verdicts: `.scratch/design-system/inventory.md`).
 
 **Name a block for its job, never its shape:** the six-clause grammar is ADR-0084. The
-157 classes that break it, with the collapse issue that renames each, are the ledger in
+156 classes that break it, with the collapse issue that renames each, are the ledger in
 `docs/design-system-naming.md`.
 
 **One control, one door:** a button acts on this page and is `.btn`

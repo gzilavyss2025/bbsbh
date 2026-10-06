@@ -531,10 +531,9 @@
 
 /* Umpire accuracy glyph — the HP tier's tap target on the lineup Umpires
    card (UmpireTierGlyph.jsx). A solid home-plate silhouette on a
-   tier-colored dot, same four-ink language as the tier pills above; unlike
-   RadarPill's glyph (neutral until pressed) this one stays colored at rest
-   — the at-a-glance read is the point in this tight card. Tapping unfolds
-   .umptier__note in place, same idiom as .radarpill__note. */
+   tier-colored dot, same four-ink language as the tier pills above; it
+   stays colored at rest — the at-a-glance read is the point in this tight
+   card. Tapping unfolds .umptier__note in place. */
 .umptier__glyph {
   display: inline-flex;
   align-items: center;
@@ -573,7 +572,7 @@
 }
 .umptier__note {
   /* Basis 100% inside .umps__namerow's own flex-wrap forces this onto its
-     own line below the name/glyph, same trick as .radarpill__note. */
+     own line below the name/glyph. */
   flex: 1 0 100%;
   display: flex;
   flex-direction: column;

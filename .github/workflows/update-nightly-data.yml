@@ -3,7 +3,7 @@ name: Update nightly data
 # Nightly precompute batch: game notes, WAR, rehab assignments, umpires,
 # umpire plate accuracy, minor-league leaders, game call-outs, former
 # teammates, career matchups, vs-team splits, milestone watch, team
-# transactions, the Fever Baseball radar and contract snapshots (each documented at the top
+# transactions, the Fever Baseball contract snapshots (each documented at the top
 # of its own scripts/gen-*.mjs) in ONE workflow with a SINGLE commit+push,
 # instead of separate crons each triggering its own Vercel deployment.
 # Consolidated 2026-07-11 after two of the eight (update-callouts and
@@ -339,10 +339,6 @@ jobs:
         id: manager-history
         continue-on-error: true
         run: node scripts/gen-manager-history.mjs --current-only
-      - name: Fever Baseball radar
-        id: fever-radar
-        continue-on-error: true
-        run: node scripts/gen-fever-radar.mjs
       - name: Player contracts
         id: player-contracts
         continue-on-error: true
@@ -654,7 +650,6 @@ jobs:
           steps.team-transactions.outcome == 'failure' ||
           steps.postseason-odds.outcome == 'failure' ||
           steps.manager-history.outcome == 'failure' ||
-          steps.fever-radar.outcome == 'failure' ||
           steps.player-contracts.outcome == 'failure' ||
           steps.salaries.outcome == 'failure' ||
           steps.prospect-trend.outcome == 'failure' ||

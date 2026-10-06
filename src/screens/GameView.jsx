@@ -90,8 +90,6 @@ export function GameView({ game, section, onSection }) {
     pitcherRoles,
     prospectsData,
     rookiesData,
-    feverRadarData,
-    savantPercentilesData,
     gameCallouts,
     broadcast,
     formerTeammatesData,
@@ -377,8 +375,6 @@ export function GameView({ game, section, onSection }) {
           vsTeam={vsTeamSplitsData}
           prospectsData={prospectsData}
           rookiesData={rookiesData}
-          feverRadarData={feverRadarData}
-          savantPercentilesData={savantPercentilesData}
           formerTeammatesData={formerTeammatesData}
           careerMatchupsData={careerMatchupsData}
           workloadData={workloadData}
@@ -409,8 +405,6 @@ export function GameView({ game, section, onSection }) {
           vsTeam={vsTeamSplitsData}
           prospectsData={prospectsData}
           rookiesData={rookiesData}
-          feverRadarData={feverRadarData}
-          savantPercentilesData={savantPercentilesData}
           formerTeammatesData={formerTeammatesData}
           careerMatchupsData={careerMatchupsData}
           workloadData={workloadData}

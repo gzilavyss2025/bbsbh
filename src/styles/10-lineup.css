@@ -12,11 +12,11 @@
 .roster__row {
   display: grid;
   grid-template-columns: 24px 44px 1fr auto;
-  /* start, not center: when a namewrap child (RadarPill's note) wraps the
+  /* start, not center: when a namewrap child (an open note) wraps the
      row onto extra lines, order/jersey/pos must stay pinned level with the
      name — centering them re-centers into the row's new full height and
-     overlaps the expanded note (see the radar-glyph prototype). Identical
-     to center for a normal single-line row, so nothing else shifts. */
+     overlaps the expanded note. Identical to center for a normal
+     single-line row, so nothing else shifts. */
   align-items: start;
   gap: var(--space-2);
   padding: var(--space-2h) var(--space-3);
@@ -132,20 +132,6 @@
      this lines up under the jersey column instead of hugging the gap on a
      short one- or two-letter position. */
   text-align: right;
-}
-
-/* The one thing that actually wraps a lineup/roster row taller is an open
-   RadarPill note (Breakout/Cooling — see radarpill__note's flex: 1 0 100%
-   trick). In that expanded state, revert order/jersey/pos from the center
-   override above back to start, pinned level with the name's first line
-   rather than drifting toward the middle of the now-taller row. */
-.lineup__row:has(.radarpill__note) .lineup__order,
-.lineup__row:has(.radarpill__note) .lineup__jersey,
-.lineup__row:has(.radarpill__note) .lineup__pos,
-.roster__row:has(.radarpill__note) .roster__order,
-.roster__row:has(.radarpill__note) .roster__jersey,
-.roster__row:has(.radarpill__note) .roster__pos {
-  align-self: start;
 }
 
 /* Birthday cake beside a name on the staging sheet (see TeamInfo's
