@@ -1,0 +1,23 @@
+[
+  {
+    "id": 669257,
+    "fullName": "Will Smith",
+    "active": true,
+    "mlbDebutDate": "2019-05-28",
+    "primaryPosition": {
+      "abbreviation": "C",
+      "code": "2"
+    }
+  },
+  {
+    "id": 519293,
+    "fullName": "Will Smith",
+    "active": false,
+    "mlbDebutDate": "2012-05-23",
+    "lastPlayedDate": "2024-08-25",
+    "primaryPosition": {
+      "abbreviation": "P",
+      "code": "1"
+    }
+  }
+]

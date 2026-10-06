@@ -18,6 +18,7 @@ import { TeamHighlightsRail } from './team/modules/media/TeamHighlightsRail.jsx'
 import { TeamPhotosRail } from './team/modules/media/TeamPhotosRail.jsx'
 import { RosterProjection } from './team/modules/RosterProjection.jsx'
 import { BallparkCard } from './team/modules/ballpark/BallparkCard.jsx'
+import { FranchiseHistory } from './team/modules/ballpark/FranchiseHistory.jsx'
 
 // How many rows each preview shows. A preview is a DOOR, not a smaller
 // duplicate — every one of these ends in a link to the tab that holds the whole
@@ -90,6 +91,7 @@ export function TeamPage({ id, asOf, sportId }) {
     transactionsPage,
     milbAlumni,
     attendance,
+    franchise,
   } = data
 
   return (
@@ -123,6 +125,9 @@ export function TeamPage({ id, asOf, sportId }) {
           half and the owner's gear, minus that section. Renders nothing at
           all when the feed carries no venue name. */}
       <BallparkCard team={team} attendance={attendance} />
+      {/* Franchise history — the Ballpark card's other half: the same exception
+          (no door, the full detail), so it sits directly under it. */}
+      {franchise && <FranchiseHistory {...franchise} />}
 
       {/* Form — the season grade and form rails, in full. This is the page's
           headline, and the one preview that isn't a smaller version of

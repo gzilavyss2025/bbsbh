@@ -8,7 +8,7 @@ import { shardKey100 } from '../lib/shardKey.js'
 // shardKey100, the same join the rookie records and career WAR use) rather than
 // computed live. The page asks about ONE man and his record is ~280 bytes; the
 // league-wide file it replaced was 1.1 MB of everyone who has held an MLB staff
-// job since 2000. Same
+// job since MANAGER_HISTORY_FIRST_SEASON. Same
 // build-time-fetch pattern as umpires.js: scripts/gen-manager-history.mjs
 // sweeps every MLB team's /coaches endpoint season by season (too many calls
 // to do on a page load) and re-indexes the result by personId; this module
@@ -25,6 +25,10 @@ import { shardKey100 } from '../lib/shardKey.js'
 // Coaching data is MLB-only at the source (the /coaches endpoint), so
 // teamFullName always resolves here (unlike most of this app's MiLB-aware
 // helpers).
+
+// The first season the shards cover. gen-manager-history.mjs sweeps from here;
+// test/manager-history-range.test.js checks every shard agrees.
+export const MANAGER_HISTORY_FIRST_SEASON = 1969
 
 const shards = new Map() // bucket key -> { generatedAt, byPersonId }
 
@@ -82,7 +86,7 @@ export function dedupeStints(raw) {
 // One person's whole coaching career, chronological (oldest first, as stored),
 // each stint carrying its resolved team name and an `isManager` flag. Empty
 // stints for a person with no coaching record on file (never held any MLB
-// staff job 2000-present, or the file hasn't loaded).
+// staff job since MANAGER_HISTORY_FIRST_SEASON, or the file hasn't loaded).
 export async function loadManagerHistory(personId) {
   const { byPersonId, generatedAt } = await load(personId)
   const raw = dedupeStints(byPersonId[personId] ?? [])
