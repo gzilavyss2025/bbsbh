@@ -1,31 +1,32 @@
+import { Notice } from '../ui/state/Notice.jsx'
+
 // A between-half-innings notice that play was stopped for a delay (rain, etc.)
 // during the half being viewed. Fed by the spoiler-free selectDelays (see
 // api/select.js): it says a stoppage happened, why, and — once play resumed —
 // how long it lasted, never a score. InningViewer renders one per delay
 // attributed to the current half; there's usually none. "Pops up" on mount per
-// the design-engineering skills (a rare, worth-noticing event).
+// the design-engineering skills (a rare, worth-noticing event). The box is a
+// Notice (#1132); .delay keeps the margin, the pop-in and the icon bubble.
 export function DelayCard({ delay }) {
   const { reason, durationMinutes, resolved } = delay
   const isRain = /rain/i.test(reason)
   const title = reason ? `${reason} delay` : 'Delay'
   return (
-    <div className="delaycard" role="note">
-      <span className="delaycard__icon" aria-hidden="true">
-        {isRain ? <RainGlyph /> : <PauseGlyph />}
-      </span>
-      <div className="delaycard__body">
-        <span className="delaycard__title">{title}</span>
-        <span className="delaycard__detail">
-          {resolved ? (
-            <>
-              Play stopped for <b>{formatDelay(durationMinutes)}</b>
-            </>
-          ) : (
-            'Delay in progress'
-          )}
-        </span>
-      </div>
-    </div>
+    <Notice
+      tone="info"
+      role="note"
+      className="delay"
+      icon={isRain ? <RainGlyph /> : <PauseGlyph />}
+      label={title}
+    >
+      {resolved ? (
+        <>
+          Play stopped for <b>{formatDelay(durationMinutes)}</b>
+        </>
+      ) : (
+        'Delay in progress'
+      )}
+    </Notice>
   )
 }
 

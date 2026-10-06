@@ -28,24 +28,14 @@
   flex-direction: column;
 }
 
-/* Extra-innings team-record banner (see ExtrasBanner) — a slim, ruled
-   strip above the reading pane on any extra-inning page, reading each club's
-   season W-L in extras. Condensed uppercase like the app's other labels. */
+/* Extra-innings team-record banner (see ExtrasBanner) — a compact info Notice
+   (#1132) above the reading pane on any extra-inning page, reading each club's
+   season W-L in extras. Notice draws the box; this namespace keeps the space
+   under it and the club names. No wrap: on a phone the sentence wraps inside
+   its column, beside the ball, and never drops under it. */
 .innings__extras {
   margin: 0 0 10px;
-  padding: var(--space-1h) var(--space-2h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-inset);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  line-height: var(--lh-prose);
-  color: var(--text-body);
-}
-.innings__extras-icon {
-  margin-right: 4px;
+  flex-wrap: nowrap;
 }
 .innings__extras-team {
   white-space: nowrap;

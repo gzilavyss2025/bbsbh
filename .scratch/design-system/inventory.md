@@ -179,7 +179,7 @@ guard will keep counting them.
 | --- | --- | --- |
 | `.scorecard` | The scoring grid's custom-property block — `--sc-cell-w`, `--sc-name-w`, and nine more. No box, no border. | **never merge** — see bespoke |
 | `.flipcard` | `perspective: 1400px`. A 3D transform container. | leave |
-| `.delaycard` | A notice: `border-left: 3px solid --navy`, tinted fill, pop-in animation. | leave — it is a banner |
+| `.delay` | A notice: since #1132 N5 a `Notice` (tone info). Its namespace keeps the margin, the pop-in and the icon bubble. It was `.delaycard` (a 3px `--navy` left rule, a tinted fill). | leave — it is a notice |
 | `.txcard` | `display: grid` and a margin. A transaction row. | leave |
 | `.derbycard` | `text-decoration:none; cursor:pointer` — link behaviour applied **on top of a `.gamecard`**. | leave — it is a modifier |
 | `.gamecardstack` | The slate's stack container. Not in the 32. | leave |
