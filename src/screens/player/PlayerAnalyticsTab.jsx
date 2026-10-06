@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { loadPlayerCore } from '../../api/player/core.js'
 import { loadArsenalSeason, loadPlayerAnalytics } from '../../api/player/analytics.js'
 import { playerTabPath } from '../../lib/route.js'
@@ -23,7 +24,26 @@ import { RunValueCard } from '../../components/playerstats/RunValueCard.jsx'
 import { SprayMapSection } from '../../components/playerstats/SprayMapSection.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './PlayerHubShell.jsx'
+import { Pill } from '../../components/ui/control/Pill.jsx'
+import { useNav } from '../../lib/nav.js'
+import { pitchScopeOf } from '../../lib/seasons/route.js'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
+
+// The Pitches and Command cards' SCOPE (#1503): Regular, Postseason or All, the
+// three the Matchup Scout has. The address holds it (`?scope=`, absent is
+// Regular) and so does localStorage, so a reader who picks Postseason keeps it
+// on the next pitcher. Never My Tally (ADR-0039).
+const SCOPE_KEY = 'bbsbh:player:pitchscope'
+const SCOPES = [['reg', 'Regular'], ['post', 'Postseason'], ['all', 'All']]
+const SCOPE_NOTE = { post: 'postseason', all: 'regular season + postseason' }
+
+function storedScope() {
+  try {
+    return pitchScopeOf(window.localStorage.getItem(SCOPE_KEY)) ?? 'reg'
+  } catch {
+    return 'reg'
+  }
+}
 
 // The player hub's ANALYTICS tab — `/player/{id}/analytics`. What is under the
 // numbers on the Overview: the Prospect card below the majors, Statcast
@@ -42,7 +62,10 @@ import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 // from statsapi or Savant. The six stores are written by one nightly run, so
 // the fouls index stands for all four. Compare stacks the two seasons inside
 // each card (SeasonStack).
-export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs }) {
+export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: scopeParam }) {
+  const navigate = useNav()
+  const [saved, setSaved] = useState(storedScope)
+  const wanted = scopeParam ?? saved
   const core = useAsync(() => loadPlayerCore(id, asOf), [id, asOf])
   const analytics = useAsync(() => loadPlayerAnalytics(id, asOf), [id, asOf])
   const view = useSeasonView('fouls', { seasonYear, vs })
@@ -52,14 +75,34 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs }) {
   // The level is the one he pitched at in that season (loadArsenalSeason), not
   // the current season's tile level.
   const pitching = analytics.data?.blocks?.find((b) => b.group === 'pitching') ?? null
+  // Postseason and All come from the store's `post` bucket, so on the current
+  // season they take the shelf too. A man with no postseason pitches has no
+  // scope to pick: he reads as Regular, and the control is not drawn.
+  const shelfScope = picked == null && !pitching?.hasPost ? 'reg' : wanted
   const shelf = useAsync(
-    () => (pitching && picked != null ? loadArsenalSeason(id, { seasonYear: picked }) : Promise.resolve(null)),
-    [id, pitching != null, picked],
+    () =>
+      pitching && (picked != null || shelfScope !== 'reg')
+        ? loadArsenalSeason(id, { seasonYear: picked ?? undefined, scope: shelfScope })
+        : Promise.resolve(null),
+    [id, pitching != null, picked, shelfScope],
   )
   const vsShelf = useAsync(
-    () => (pitching && view?.vs != null ? loadArsenalSeason(id, { seasonYear: view.vs }) : Promise.resolve(null)),
-    [id, pitching != null, view?.vs],
+    () => (pitching && view?.vs != null ? loadArsenalSeason(id, { seasonYear: view.vs, scope: wanted }) : Promise.resolve(null)),
+    [id, pitching != null, view?.vs, wanted],
   )
+  const hasPost = picked == null ? pitching?.hasPost === true : shelf.data?.hasPost === true
+  const scopeNow = picked == null ? (hasPost ? wanted : 'reg') : shelf.data?.scope ?? 'reg'
+  const chooseScope = (k) => {
+    try {
+      window.localStorage.setItem(SCOPE_KEY, k)
+    } catch {
+      /* private window: the address still holds it */
+    }
+    setSaved(k)
+    navigate(playerTabPath(id, 'analytics', { name: core.data?.bio?.fullName, d: asOf, s: sportId, seasonYear, vs, scope: k }), {
+      replace: true,
+    })
+  }
   const back = () => window.history.back()
 
   const gate = AsyncGate({
@@ -99,13 +142,19 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs }) {
   // `seasonYear` is undefined until the index lands. FoulCard and SprayMapSection
   // wait for it, so a bare URL fetches each file once instead of twice.
   const season = { seasonYear: view?.shown, label, vs: view?.vs ?? null }
-  const pathFor = (o) => playerTabPath(id, 'analytics', { name: bio.fullName, d: asOf, s: sportId, ...o })
+  const pathFor = (o) => playerTabPath(id, 'analytics', { name: bio.fullName, d: asOf, s: sportId, scope: scopeNow, ...o })
   // A pitching block's Pitches card and "Pitches like" for the picked season:
   // the loader's own block for the current season, else the store's shelf.
   const arsenalOf = (block) =>
-    picked == null
+    picked == null && scopeNow === 'reg'
       ? { arsenal: block.arsenal, heat: block.heat, tto: block.arsenalTto, sides: block.arsenalSides, similar: block.similar }
       : shelf.data
+  // The Command map follows the scope; on Regular it is the current season's.
+  const commandOf = (block) =>
+    scopeNow === 'reg'
+      ? { entry: block.command, mlb: block.tileSportId === 1 }
+      : { entry: shelf.data?.command ?? null, mlb: shelf.data?.commandMlb ?? true }
+  const scopeTag = SCOPE_NOTE[scopeNow]
 
   return (
     <PlayerHubShell core={core.data} asOf={asOf} sportId={sportId} active="analytics">
@@ -160,24 +209,46 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs }) {
               Milestone Watch projection. */}
           <FoulCard playerId={bio.id} group={block.group} asOf={asOf} {...season} />
 
+          {block.group === 'pitching' && hasPost && (
+            <div className="cmdmap__chips" role="group" aria-label="Scope">
+              {SCOPES.map(([k, text]) => (
+                <Pill
+                  key={k}
+                  role="control"
+                  fill="paper"
+                  className="cmdmap__chip"
+                  pressed={scopeNow === k}
+                  onClick={() => chooseScope(k)}
+                >
+                  {text}
+                </Pill>
+              ))}
+            </div>
+          )}
+
           <PitchesCard
             mine={block.group === 'pitching' ? arsenalOf(block) : null}
             then={block.group === 'pitching' ? vsShelf.data : null}
             label={label}
             vs={season.vs}
+            scopeTag={scopeTag}
+            thin={block.group === 'pitching' && scopeNow !== 'reg' && shelf.data != null && !shelf.data.arsenal}
           />
 
           {/* Directly under the arsenal it completes: that card says WHAT he
               throws and HOW HARD, this says WHERE HE PUTS IT. Below Triple-A
               there is no pitch tracking, so there is no grid and the card
               renders nothing rather than an empty zone. */}
-          {block.command && (
+          {block.group === 'pitching' && commandOf(block).entry && (
             <>
-              <SectionHead look="rule" note="where each pitch goes">Command</SectionHead>
+              <SectionHead look="rule" note={scopeTag ? `where each pitch goes · ${scopeTag}` : 'where each pitch goes'}>
+                Command
+              </SectionHead>
               <CommandMap
-                entry={block.command}
-                level={block.tileSportId === 1 ? 'mlb' : 'aaa'}
-                throws={block.command.throws}
+                key={scopeNow}
+                entry={commandOf(block).entry}
+                level={commandOf(block).mlb ? 'mlb' : 'aaa'}
+                throws={commandOf(block).entry.throws}
               />
             </>
           )}
@@ -269,12 +340,14 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs }) {
 // The Pitches card for the picked season (`mine`, from arsenalOf), and with a
 // compare, the vs season's under it (`then`). No card when neither season has
 // a mix: the card's own empty state.
-function PitchesCard({ mine, then, label, vs }) {
+function PitchesCard({ mine, then, label, vs, scopeTag, thin }) {
+  if (thin) return <p className="hint">Too few {scopeTag} pitches on file for a mix.</p>
   if (!mine?.arsenal && !then?.arsenal) return null
+  const note = [label, scopeTag, 'share of pitches · avg velo'].filter(Boolean).join(' · ')
   const mix = (a) => a?.arsenal && <PitchMix arsenal={a.arsenal} heat={a.heat} tto={a.tto} sides={a.sides} />
   return (
     <>
-      <SectionHead look="rule" note={label ? `${label} · share of pitches · avg velo` : 'share of pitches · avg velo'}>
+      <SectionHead look="rule" note={note}>
         Pitches
       </SectionHead>
       {vs == null ? (
