@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { selectPrePitchChanges, selectHalfStartingPitcher, selectIsFreshPitcher, halfIndex } from '../../api/select.js'
 import { computePitcherLines, pitcherHandoffs, pitcherLineAt, halfClosingPitcher } from '../../api/pitchers.js'
 import { battingSlot, pitchingChangePitcher } from '../../api/playbyplay.js'
@@ -72,7 +72,7 @@ export function HalfInning({
   // NOT WHILE WINDOWED, WHICH IS WHAT DECIDES THE MOMENT THIS FIRES. A half
   // the reader unseals does NOT snap to the stacked view — `useFocusMode`
   // deliberately holds the single-at-bat window on screen afterwards
-  // (`windowed = currentSealed || (postHalf && !summaryOpen)`), and that one
+  // (`windowed = currentSealed || !summaryOpen`, focusView.js), and that one
   // card already has its own arrival beat: the denotation ink-set, a constant
   // 180ms hold and a settle (ADR-0046), which composes a `scale` onto the very
   // marks this would otherwise animate. The two are alternatives, not layers.
@@ -81,9 +81,9 @@ export function HalfInning({
   // half", the post-half link that drops out of the windowed mode (`postHalf`
   // is still true, so this flag is still armed). That is the half the reader
   // just charted, laid out to be read back, and it is the only state in which
-  // stacked cards and a reveal-in-this-session coincide: arriving at an
-  // already-revealed half renders stacked too, but `startedRevealing` was
-  // already true at mount, so useBecameTrue keeps it settled.
+  // stacked cards and a reveal-in-this-session coincide: a half revealed on
+  // arrival can be laid out the same way, but `startedRevealing` was already
+  // true at mount, so useBecameTrue keeps it settled.
   const writing = useBecameTrue(startedRevealing) && !windowed
 
   // Persistent "Now Pitching" card (in addition to Margin Notes — see
@@ -172,7 +172,12 @@ export function HalfInning({
   // Header while stacked, announcement while windowed — see the long note
   // above `nowPitching`. Both still sit behind the caller's own
   // `revealed || isNextToReveal` gate at the render site.
-  const showNowPitching = !windowed || (isFreshPitcher && !startedRevealing)
+  // A half open on arrival (#1539: windowed, read back from at-bat 1) has no
+  // unveiled-nothing moment, so the fresh arm announces on its FIRST at-bat —
+  // the between-innings change is announced nowhere else.
+  const [openOnArrival] = useState(startedRevealing)
+  const opening = !startedRevealing || (openOnArrival && focusStep === 0)
+  const showNowPitching = !windowed || (isFreshPitcher && opening)
   // The FULL card when the arm takes the mound (#1344); a carried-over arm keeps the header.
   const NowPitching = isFreshPitcher ? PitcherCard : PitcherNotice
 
@@ -290,7 +295,7 @@ export function HalfInning({
     // "2. ORTIZ", who has not batted. The scorebug's job there is to caption
     // the card under it, and who's up next is already answered — in more
     // detail, with three names — by DueUpConsole in the same row (which shows
-    // only while `currentSealed`, the windowed case). The pitch count is
+    // only while `currentSealed`). The pitch count is
     // untouched either way: it stays the tally AFTER the at-bat on screen
     // finished, which is what a scorer writes down.
     if (!windowed && live?.batter && live.batterDone && outs < 3) {

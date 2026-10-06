@@ -400,7 +400,7 @@ export function InningViewer({
     const pageHalf = idx % 2 === 0 ? 'top' : 'bottom'
     // The at-bat replay's rail slot, for the live page only (AtBatReplay.jsx).
     return (
-      <ReplayRail key={`${pageInning}-${pageHalf}`} slot={presentationOnly ? null : replaySlot}>
+      <ReplayRail key={`${pageInning}-${pageHalf}`} slot={presentationOnly ? null : replaySlot} inCard={!focus.windowed}>
       <InningPage
         feed={feed}
         inning={pageInning}
@@ -413,8 +413,8 @@ export function InningViewer({
         highlights={highlights}
         atBatCountFor={atBatCountFor}
         halfInProgress={idx === liveHalfIdx}
-        windowed={focus.windowed}
-        focusStep={focus.step}
+        windowed={presentationOnly || focus.windowed}
+        focusStep={presentationOnly ? 0 : focus.step}
         onFocusInfo={focus.reportSteps}
         onStepInfo={reportStepInfo}
         onRunsSoFar={reportRunsSoFar}
@@ -463,7 +463,7 @@ export function InningViewer({
   // The console chrome is unconditional now (every half gets the anchored
   // band + tabbed reference panel); useFocusMode only decides whether the
   // play-by-play windows to one at-bat or shows the whole half stacked.
-  const focus = useFocusMode(curIdx, currentSealed)
+  const focus = useFocusMode(curIdx, currentSealed, currentHalfLive)
 
   // THE BOOK IS CLOSED (ADR-0046): the reader has revealed every half actually
   // played. Two consequences below — the closing rule draws DOUBLE, and the
@@ -920,7 +920,7 @@ export function InningViewer({
               already revealed this half is what shows the half BUILDING — the
               point of watching it live rather than reading it after — landing
               right next to the card it describes, in the reader's normal
-              top-to-bottom scan. The post-half "See the whole half" link
+              top-to-bottom scan. The "See the whole half" link
               stays under the card, by the bar it hands off to —
               `FocusControls` below still owns that link. */}
           <FocusTrail focus={focus} turning={turning} inning={effInning} half={effHalf} />
@@ -982,8 +982,7 @@ export function InningViewer({
           header. Everything it needs is resolved here and handed down; it
           decides nothing about the reveal mark itself. */}
       <InningActionBar
-        focused={focus.windowed}
-        closing={focus.closing}
+        focus={focus}
         turning={turning}
         refresh={
           /* Dropped once the game is over — the feed is complete and a refetch

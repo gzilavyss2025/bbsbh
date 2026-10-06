@@ -28,10 +28,16 @@ import { ordinal } from '../../lib/format.js'
 // dead-space claims answer for themselves there: the -76px reach is behind
 // `:has(.innings__refresh--float)`, with a bare -20px for exactly that case.
 //
-// THREE STATES, plus a hold:
+// FOUR STATES, plus a hold:
 //
 //  • A SEALED HALF offers two reveal choices (ADR-0016) — step one at-bat, or
 //    the whole half at once.
+//  • A REVEALED HALF STILL ONE AT-BAT AT A TIME, with at-bats after the one on
+//    screen (#1539: a reload, a direct link, the pass, Stamp In, a stamp):
+//    "Next at-bat ›" in the advance's ink skin, never the kraft one — it moves
+//    useFocusMode's cursor only, so no reveal is possible (ADR-0083). The last
+//    at-bat hands back to the advance below, held for STEP_HOLD_MS (beats.js)
+//    through the same `closing` prop, so a fast second tap cannot turn the page.
 //  • OTHERWISE the plain advance: the next-half label once one unlocks, or the
 //    last action at the furthest revealed inning. Never "Top 10th ›", which
 //    would leak the game going to extras before the reader gets there.
@@ -67,8 +73,7 @@ import { ordinal } from '../../lib/format.js'
 // neither advance NOR cut the sequence short — and that is the one tap that
 // must always do something.
 export function InningActionBar({
-  focused,
-  closing,
+  focus,
   turning,
   refresh,
   atLiveEdge,
@@ -86,11 +91,21 @@ export function InningActionBar({
   bookClosed,
   onBoxScore,
 }) {
+  const { windowed, closing, stepAhead, stepNext } = focus
   const halfWord = effHalf === 'top' ? 'top' : 'bottom'
   return (
-    <div className={`pagenav pagenav--innings${focused ? ' pagenav--focus' : ''}`}>
+    <div className={`pagenav pagenav--innings${windowed ? ' pagenav--focus' : ''}`}>
       {refresh}
-      {atLiveEdge ? (
+      {stepAhead ? (
+        <button
+          className="btn btn--ink btn--next"
+          onClick={() => !turning && stepNext()}
+          aria-disabled={turning || undefined}
+          aria-label={`Next at-bat in the ${halfWord} of the ${ordinal(effInning)} inning`}
+        >
+          Next at-bat ›
+        </button>
+      ) : atLiveEdge ? (
         <div className="liveedge" role="status" aria-live="polite">
           <span className="liveedge__dot" aria-hidden="true" />
           <span className="liveedge__label">{liveEdgeLabel}</span>
