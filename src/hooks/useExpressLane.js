@@ -31,6 +31,7 @@ import {
 import { createStagingRunner } from '../lib/expresslane/runner.js'
 import { checkoutClip, getClip, persistStorage } from '../lib/expresslane/byteStore.js'
 import { holdsForFilm, playStory, unwrittenRow } from '../lib/expresslane/hold.js'
+import { addSample, loadSamples, saveSamples, summarizeSpeed } from '../lib/expresslane/speed.js'
 import { halfAt } from '../api/scorecard/alignment.js'
 
 // The rows one mode keeps, and the one switch that empties them of film.
@@ -86,6 +87,14 @@ export function useExpressLane({
   const [clip, setClip] = useState({ url: null, playId: null })
   const runnerRef = useRef(null)
   const releaseRef = useRef(null)
+  // What this device gets from the clip host, from the clips it has already
+  // downloaded (speed.js). Seeded from the last session, so the entry step has a
+  // figure before the first clip of this one lands.
+  const samplesRef = useRef(null)
+  const [speed, setSpeed] = useState(() => summarizeSpeed(loadSamples()))
+  // The bytes of the row AHEAD, read off the disk while the scorer is still on
+  // the current play. See the effect that fills it.
+  const upNextRef = useRef({ playId: null, blob: null })
 
   const { inning, half } = useMemo(() => halfAt(halfIdx), [halfIdx])
 
@@ -122,6 +131,11 @@ export function useExpressLane({
       resolveClip: (playId) => resolveClipUrl(playId),
       onChange: setJob,
       horizon,
+      onSample: (sample) => {
+        samplesRef.current = addSample(samplesRef.current ?? loadSamples(), sample)
+        saveSamples(samplesRef.current)
+        setSpeed(summarizeSpeed(samplesRef.current))
+      },
     })
     runnerRef.current = staging
     persistStorage()
@@ -267,6 +281,33 @@ export function useExpressLane({
 
   const chips = useMemo(() => reachedPlateAppearances(deck.entries), [deck.entries])
 
+  // THE ROW AHEAD IS READ OFF THE DISK BEFORE THE TAP.
+  //
+  // Reading a 6-9 MB blob out of IndexedDB takes long enough to see. Without
+  // this, the tap landed the cursor, the film pane had nothing to draw for the
+  // few frames the read took, and then the video element had its own load to
+  // do: the scorer waited twice for a clip that was already on the device.
+  //
+  // IT HOLDS THE BLOB AND NEVER AN OBJECT URL. A URL is what the screen can
+  // draw, and one made early would be a clip the scorer has not reached sitting
+  // ready to render. A Blob is bytes in a variable, the same footing the byte
+  // store already has (byteStore.js). It is one clip, replaced as the cursor
+  // moves, so the resident cost is one blob and not the 500 MB the revoke note
+  // below warns about.
+  useEffect(() => {
+    const playId = nextRow?.playId ?? null
+    if (!playId || !gamePk || gate?.reason !== 'ready') return
+    // The slot is claimed before the read starts, so the job changing under a
+    // slow read does not start a second one for the same clip.
+    if (upNextRef.current.playId === playId) return
+    upNextRef.current = { playId, blob: null }
+    getClip(gamePk, playId).then((blob) => {
+      // Fill the slot only if it is still this clip's. The cursor may have
+      // taken it, or moved on to a different row, while the read ran.
+      if (blob && upNextRef.current.playId === playId) upNextRef.current = { playId, blob }
+    })
+  }, [nextRow, gate, gamePk])
+
   // The clip for the row the cursor sits on. The previous object URL is
   // revoked as the new one is taken: a session walks past dozens of 6 MB
   // blobs, and holding them all is about 500 MB resident and a crash.
@@ -275,9 +316,21 @@ export function useExpressLane({
     const playId = cursorRow?.playId ?? null
     releaseRef.current?.()
     releaseRef.current = null
+    // The blob read ahead of the tap, if it is this row's. Taken once: the slot
+    // is emptied whether or not the read had finished, so a clip the cursor is
+    // already standing on is never held a second time, and a read still running
+    // finds the slot gone and drops its answer.
+    const readAhead = upNextRef.current
+    const mine = playId != null && readAhead.playId === playId
+    const hit = mine ? readAhead.blob : null
+    if (mine) upNextRef.current = { playId: null, blob: null }
     // A row with no film takes the same path as one with film, so nothing here
     // sets state synchronously and the effect has exactly one exit.
-    const load = playId && gamePk ? getClip(gamePk, playId) : Promise.resolve(null)
+    const load = hit
+      ? Promise.resolve(hit)
+      : playId && gamePk
+        ? getClip(gamePk, playId)
+        : Promise.resolve(null)
     load.then((blob) => {
       if (cancelled) return
       if (!blob) {
@@ -472,6 +525,10 @@ export function useExpressLane({
     job,
     status,
     preroll,
+    // What this device gets from the clip host, or null before any clip has
+    // arrived. A rate over clips ALREADY downloaded (speed.js); safe to show on
+    // any screen on this surface, the waiting ones included.
+    speed,
     // FALSE WHILE HELD, and that is a spoiler fix rather than a tidy-up. The
     // foot reads this to offer "Next half-inning", and that label on a play
     // still under its cover says the out just watched was the third one.
