@@ -196,14 +196,21 @@ export async function fetchWinterCalendar(season) {
 // offseason gate reads the same row, so an offseason day costs no extra fetch.
 // Degrades to null on failure or a missing row — every caller treats null as
 // "cannot say", never as a fact about the calendar.
-export async function fetchSeasonMeta(season) {
-  if (!season) return null
-  try {
-    const data = await getJson(`/api/v1/seasons/${season}?sportId=1`)
-    return data.seasons?.[0] ?? null
-  } catch {
-    return null
+//
+// Callers on the same tick (a player page's Milestone Watch cards, #1607) share
+// ONE read per year. It is shared only while in flight and kept after nothing,
+// so a later caller gets a fresh row and a failed read is never kept.
+const seasonMetaInFlight = new Map()
+export function fetchSeasonMeta(season) {
+  if (!season) return Promise.resolve(null)
+  if (!seasonMetaInFlight.has(season)) {
+    const read = getJson(`/api/v1/seasons/${season}?sportId=1`)
+      .then((data) => data.seasons?.[0] ?? null)
+      .catch(() => null)
+      .finally(() => seasonMetaInFlight.delete(season))
+    seasonMetaInFlight.set(season, read)
   }
+  return seasonMetaInFlight.get(season)
 }
 
 // EVERY LEAGUE AT ONE MINOR LEVEL, and the dates each one publishes for its own
