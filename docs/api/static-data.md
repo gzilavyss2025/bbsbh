@@ -934,6 +934,14 @@ for each generator; the reader modules:
   returns null for a player with no row, and says "no data" (not "dropped") for
   a season the history has not reached. See the generator entry for the file
   shape and the licence notes.
+- `person/family/family.js` — a player's family links, from
+  `public/data/family-ties/{NN}.json` (`gen-family-ties.mjs`, hand-run, ADR-0100),
+  sharded on `shardKey100(mlbamId)` and read through `staticJsonBy`. `familyOf(personId)`
+  returns `[{ relation, personId|null, name }]` or `[]`. `relation` says what the OTHER
+  man is to this player (his Father, his Son). A null `personId` means the relative has
+  no MLBAM id: show the name, link nothing. `fetchFamilyShard(key)` returns the whole
+  shard, whose `credit` lines (Retrosheet and the Chadwick register) print beside the
+  data. Spoiler-free: history about people, no game state.
 - `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
   `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Not a third
   party, not attributed, and not an MLE —

@@ -14,6 +14,11 @@ const FIGURES = [
   { v: '$0', k: 'To use it' },
 ]
 
+// Retrosheet asks for its statement word for word (ADR-0100). test/family-ties.test.js
+// pins this line against scripts/lib/open-data/credits.mjs, where the generators read it.
+const OPEN_DATA_NOTE =
+  'Family links come from Retrosheet’s biographical files, matched through the Chadwick Bureau register (Open Data Commons Attribution License 1.0). The information used here was obtained free of charge from and is copyrighted by Retrosheet. Interested parties may contact Retrosheet at 20 Sunset Rd., Newark, DE 19711.'
+
 const STORY = [
   'It starts with a paper scorebook and a game you cannot watch live. The broadcast is two hours behind, or four, or it is sitting in a recording until the kids are down. You are keeping score by hand, so you need answers all night: who came in to pitch, who moved to left field, which pinch hitter just took the third spot in the order, who is working the plate.',
   'Every tool that can answer those questions answers a different one first. Open a league app and the scoreboard is the home screen. Check a team page and the day’s result is in the header. Search a player’s name and the card that comes back carries the game state. You asked who the left fielder is, and you were told how it ends. There is no undoing that.',
@@ -221,6 +226,7 @@ export function AboutPage({ onBack }) {
           endpoints and related public baseball data sources. Tally Baseball is an
           independent project and is not affiliated with MLB, MiLB, or any club.
         </p>
+        <p>{OPEN_DATA_NOTE}</p>
       </section>
     </div>
   )
