@@ -67,6 +67,11 @@
    keeps a margin loads later and wins on order.
    test/empty-state-cascade.test.js pins the slot. */
 @import './styles/system/empty-state.css';
+/* The NOTICE — the one block that tells the reader the state of the page or the
+   game (#1132). Right after the empty state and before 06, for the same reason:
+   a namespace rule that keeps a margin loads later and wins on order.
+   test/notice-cascade.test.js pins the slot. */
+@import './styles/system/notice.css';
 @import './styles/06-loader-and-cards.css';
 @import './styles/06a-gamecard-parkart.css';
 @import './styles/06b-offday-cards.css';
