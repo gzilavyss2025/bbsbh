@@ -28,11 +28,11 @@ export function FoulCard({ playerId, group, asOf, seasonYear, label, vs = null }
   const skip = !!asOf || seasonYear == null
   // His bucket, not the league — see fetchFoulsFor.
   const { data } = useAsync(
-    () => (skip ? Promise.resolve(null) : fetchFoulsFor(playerId, { seasonYear })),
+    () => (skip ? Promise.resolve(null) : fetchFoulsFor(playerId, { seasonYear, strict: true })),
     [skip, playerId, seasonYear],
   )
   const { data: before } = useAsync(
-    () => (skip || vs == null ? Promise.resolve(null) : fetchFoulsFor(playerId, { seasonYear: vs })),
+    () => (skip || vs == null ? Promise.resolve(null) : fetchFoulsFor(playerId, { seasonYear: vs, strict: true })),
     [skip, playerId, vs],
   )
   const [wantPost, setWantPost] = useState(false)

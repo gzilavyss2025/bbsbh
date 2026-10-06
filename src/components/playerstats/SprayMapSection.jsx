@@ -27,11 +27,11 @@ import { SeasonStack } from '../season/SeasonStack.jsx'
 export function SprayMapSection({ playerId, group, asOf, seasonYear, label, vs = null }) {
   const skip = !!asOf || group !== 'hitting' || seasonYear == null
   const { data } = useAsync(
-    () => (skip ? Promise.resolve(null) : fetchSprayFor(playerId, { seasonYear })),
+    () => (skip ? Promise.resolve(null) : fetchSprayFor(playerId, { seasonYear, strict: true })),
     [skip, playerId, seasonYear],
   )
   const { data: before } = useAsync(
-    () => (skip || vs == null ? Promise.resolve(null) : fetchSprayFor(playerId, { seasonYear: vs })),
+    () => (skip || vs == null ? Promise.resolve(null) : fetchSprayFor(playerId, { seasonYear: vs, strict: true })),
     [skip, playerId, vs],
   )
   const view = skip ? null : sprayView(data, playerId)

@@ -103,16 +103,16 @@ function hpTeamRecords(games) {
 // seasons are the ASSIGNMENT store's, which goes back to 2023; pitch-call
 // accuracy starts in 2026, so an older season shows his games and no
 // Tendencies card (staticJson.js's seasonFolderOf gives a year before the
-// accuracy store's first no folder). Compare stacks the two
+// accuracy store's first, or after its last, no folder: `strict`, #1482). Compare stacks the two
 // seasons in one small table (UmpireSeasonCompare).
 export function UmpirePage({ id, seasonYear, vs }) {
   const view = useSeasonView('umpires', { seasonYear, vs })
   const year = view?.shown
-  const umpire = useAsync(() => (view ? loadUmpire(id, { seasonYear: year }) : Promise.resolve(null)), [id, view != null, year])
+  const umpire = useAsync(() => (view ? loadUmpire(id, { seasonYear: year, strict: true }) : Promise.resolve(null)), [id, view != null, year])
   const { error, data } = umpire
   const loading = !view || umpire.loading
   const { data: then } = useAsync(
-    () => (view?.vs ? loadUmpire(id, { seasonYear: view.vs }) : Promise.resolve(null)),
+    () => (view?.vs ? loadUmpire(id, { seasonYear: view.vs, strict: true }) : Promise.resolve(null)),
     [id, view?.vs],
   )
   const navigate = useNav()

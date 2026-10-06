@@ -57,7 +57,7 @@ const shard = staticJsonBy((key) => `/data/spray/${key}.json`, { fallback: null 
 // `{ seasonYear }` is a year, 'all', or nothing for the current season
 // (staticJson.js's seasonFolderOf). 'all' adds his seasons into one entry, in
 // the shard's own shape, so sprayView reads it unchanged.
-export async function fetchSprayFor(personId, { seasonYear } = {}) {
+export async function fetchSprayFor(personId, { seasonYear, strict } = {}) {
   if (personId == null) return null
   const key = shardKey100(personId)
   return readSeasonShard(
@@ -70,6 +70,7 @@ export async function fetchSprayFor(personId, { seasonYear } = {}) {
       if (!entry && !post) return null
       return { season: null, seasons, bat: entry ? { [personId]: entry } : {}, ...(post && { post: { [personId]: post } }) }
     },
+    { strict },
   )
 }
 

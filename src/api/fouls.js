@@ -40,13 +40,14 @@ const playerShard = staticJsonBy((key) => `/data/fouls/${key}.json`)
 
 // 'all' adds his seasons (lib/seasons/combine.js) into the same
 // `{ batters, pitchers }` shape, holding only him.
-export async function fetchFoulsFor(personId, { seasonYear } = {}) {
+export async function fetchFoulsFor(personId, { seasonYear, strict } = {}) {
   if (personId == null) return null
   return readSeasonShard(
     'fouls',
     seasonYear,
     (season) => playerShard(`${season}/${shardKey100(personId)}`),
     (shards, seasons) => ({ season: null, seasons, ...combineFoulShards(shards, personId) }),
+    { strict },
   )
 }
 
