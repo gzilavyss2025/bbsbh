@@ -255,6 +255,52 @@ test('a hitter line on the poster counts only what he brought into tonight', () 
   assert.equal(batting.stolenBases, 14)
 })
 
+// #1509. In a postseason game the boxscore's `seasonStats` is the POSTSEASON
+// only, with tonight on it. Measured 2026-10-06: Chase DeLauter, ALDS Gm 2
+// (gamePk 849834), `seasonStats` = 2 G / 8 AB / 2 H / .250, which is his two
+// October games, while his regular season is 133 G / 495 AB / .287.
+function octoberFeed() {
+  const feed = finishedFeed()
+  feed.gameData.game = { ...(feed.gameData.game ?? {}), type: 'D' }
+  feed.liveData.boxscore.teams.away.battingOrder = [800050]
+  feed.liveData.boxscore.teams.away.players = {
+    ID800050: {
+      person: { id: 800050, fullName: 'Chase DeLauter' },
+      battingOrder: '100',
+      allPositions: [{ abbreviation: 'RF' }],
+      seasonStats: { batting: { avg: '.250', obp: '.250', slg: '.250', ops: '.500', atBats: 8, hits: 2, homeRuns: 1, rbi: 3, stolenBases: 0 } },
+      stats: { batting: { atBats: 4, hits: 2, homeRuns: 1, rbi: 2, stolenBases: 0 } },
+    },
+  }
+  feed.gameData.players.ID800050 = { id: 800050, fullName: 'Chase DeLauter' }
+  return feed
+}
+
+test('an October hitter line is the regular season, with October kept apart', () => {
+  const regular = { 800050: { avg: '.287', obp: '.360', slg: '.460', ops: '.820', atBats: 495, homeRuns: 16, rbi: 67, stolenBases: 11 } }
+  const row = buildPreviewModel(octoberFeed(), { hitterLines: regular }).lineups.away[0]
+  assert.equal(row.batting.avg, '.287', 'the season slot must hold the regular season')
+  assert.equal(row.batting.rbi, 67)
+  assert.equal(row.october.homeRuns, 0, 'October row ends before tonight: his 1 HR tonight comes out')
+  assert.equal(row.october.rbi, 1, 'an RBI is a run driven in — tonight’s two cannot show')
+})
+
+test('an October hitter line is blank, not mislabelled, until the season read lands', () => {
+  for (const hitterLines of [undefined, null, {}]) {
+    const row = buildPreviewModel(octoberFeed(), { hitterLines }).lineups.away[0]
+    assert.equal(row.batting, null, 'October numbers must never fill the season slot')
+    assert.equal(row.october.avg, '.250')
+  }
+})
+
+test('a regular-season game still reads the feed and has no October row', () => {
+  const feed = octoberFeed()
+  feed.gameData.game.type = 'R'
+  const row = buildPreviewModel(feed).lineups.away[0]
+  assert.equal(row.batting.avg, '.250')
+  assert.equal(row.october, null)
+})
+
 test('a postseason round rides the model as given, and is blank otherwise', () => {
   assert.equal(buildPreviewModel(finishedFeed()).round, '')
   assert.equal(buildPreviewModel(finishedFeed(), { round: 'NLCS \u00b7 Game 4' }).round, 'NLCS \u00b7 Game 4')

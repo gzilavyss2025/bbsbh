@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { buildPreviewModel } from '../api/gamePreview.js'
-import { selectGameSeason, selectOfficials } from '../api/select.js'
+import { buildPreviewModel, isPostseason } from '../api/gamePreview.js'
+import { fetchHitterEntryLines } from '../api/player/hitterEntryLines.js'
+import { selectGameSeason, selectLineup, selectOfficials } from '../api/select.js'
 import { loadUmpire } from '../api/umpires.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useGameRound } from '../hooks/postseason/useGameRound.js'
@@ -74,9 +75,33 @@ export function GamePreview({ feed, starterLines, broadcast, callouts, treatment
   )
 
   const round = useGameRound(feed)
+
+  // A postseason feed's `seasonStats` is October only (#1509), so the batting
+  // order's season line is read here, ending the day before the game (ADR-0088).
+  // Regular-season games take it off the feed and skip this request.
+  const lineupIds = useMemo(
+    () =>
+      isPostseason(feed)
+        ? [...selectLineup(feed, 'away'), ...selectLineup(feed, 'home')].map((p) => p.id)
+        : [],
+    [feed],
+  )
+  const officialDate = feed?.gameData?.datetime?.officialDate
+  const hitterLines = useAsync(
+    () => fetchHitterEntryLines(lineupIds, seasonYear, officialDate),
+    [lineupIds.join(','), seasonYear, officialDate],
+  )
   const model = useMemo(
-    () => buildPreviewModel(feed, { starterLines, broadcast, callouts, umpire: umpire.data, round }),
-    [feed, starterLines, broadcast, callouts, umpire.data, round],
+    () =>
+      buildPreviewModel(feed, {
+        starterLines,
+        broadcast,
+        callouts,
+        umpire: umpire.data,
+        round,
+        hitterLines: hitterLines.data,
+      }),
+    [feed, starterLines, broadcast, callouts, umpire.data, round, hitterLines.data],
   )
 
   // Art and fonts both have to be in hand BEFORE the first paint — a canvas

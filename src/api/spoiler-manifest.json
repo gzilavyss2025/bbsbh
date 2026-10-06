@@ -741,6 +741,10 @@
       "class": "spoiler-free",
       "why": "The player hub's shell loader — bio, the four status banners, the prospect pills and the All-Star badge. Identity and roster status; no linescore, no box score, no play."
     },
+    "player/hitterEntryLines.js": {
+      "class": "spoiler-free",
+      "why": "The poster's hitter season lines, ending the day BEFORE the game (ADR-0088). One byDateRange read per lineup, regular season only, so it holds no game in progress and no earlier October game. Season aggregates on an open surface (ADR-0034)."
+    },
     "player/history.js": {
       "class": "spoiler-free",
       "why": "The player hub's History tab loader — awards, innings by position, the Firsts card, path/team history and the transaction timeline. Career-shaped facts, each honouring the page's own asOf cutoff. The Firsts card links out to box scores, which stay sealed on their own pages; it renders no score itself."
