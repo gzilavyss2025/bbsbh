@@ -245,13 +245,13 @@ don't run these by hand.
   of the committed file by vocabulary. `--rescan` re-ingests every game;
   `--season=2026` pins the year.
 - `gen-notable.mjs` → `public/data/notable/{nohitters,cycles,tripleplays}.json` — the
-  games behind the "Notable games" shelf (`.scratch/old-games`, D4; DRAFT ADR-0101). Every
+  games behind the "Notable games" shelf (`.scratch/old-games`, D4; ADR-0101). Every
   row has a gamePk, the date, the game type, both clubs (id, the abbreviation and name of
   THAT season, and the final score, D5) and the kind's own fields: a no-hitter names the side
   that threw it and its pitchers in order, with `shortened` and `lost` when true (D8); a cycle
   names the player and his side; a triple play names the fielding side. AL and NL games only
-  (D6), regular season and postseason (D13). **No reader and no page yet** (ADR-0076): the
-  reader comes with build prompt 2b. **The nightly run refreshes only the season in play**
+  (D6), regular season and postseason (D13). The reader is `src/api/notable/notable.js`
+  (`docs/api/static-data.md`), behind the box score's feat label; the shelf has no page yet. **The nightly run refreshes only the season in play**
   (`lib/time/season-in-play.mjs`), about 70 calls. **The full history, 1901 to now, is a hand
   run**: `node scripts/gen-notable.mjs --from=1901 --to=2025` (the space form,
   `--from 1901 --to 2025`, works too). `--season=Y` runs one season, `--out=DIR` writes to DIR

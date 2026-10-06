@@ -1,7 +1,7 @@
 # An old game seals like a new one, and a feat is a result
 
-**Status:** DRAFT — Gary chose this design (D1 in `.scratch/old-games/decisions.md`,
-2026-10-06). Not accepted until build prompt 2b ships.
+**Status:** Accepted (2026-10-06). Gary chose this design (D1 in
+`.scratch/old-games/decisions.md`, 2026-10-06). Accepted with the feat label that builds it.
 **Date:** 2026-10-06
 **Extends:** ADR-0081 (a length is not a result; a season record is a labelled door).
 **Relies on:** ADR-0002 (the `SealBox` render function), ADR-0049 (the box score you
@@ -45,7 +45,7 @@ and off one it sits behind a labelled door.**
 | Lineups, umpires | Open | As on every game page. |
 | Score, line score, box score | Sealed | The box score's `SealBox` (ADR-0002). A tap writes `bbsbh:boxreveal:{gamePk}` (ADR-0049). |
 | Feat label | Sealed | It renders inside the box score's reveal function, beside the box. |
-| Half-inning pages | Sealed | As today, and only where the feed has plays. |
+| Half-inning pages | Sealed | As today, and only where the feed has plays. The "no play-by-play" notice shows only for a season before 1960 (D14): from 1960 on, a played game with no plays is almost always a forfeit, so a notice before the reveal hints at the result. |
 
 The three existing openers keep their meaning with no change: the day pass (ADR-0026)
 opens any date while it runs; a stamp opens its game (ADR-0048); a remembered tap opens
@@ -89,6 +89,21 @@ older than that, the note says "the first since at least {year}". The note alway
 names the club. It adds the player and the league only when that line is notable. It
 does not link the earlier game yet (gzilavyss2025/bbsbh#1570); when it does, the link
 opens that game sealed, under this ADR.
+
+## As built
+
+- **The reader.** `src/api/notable/notable.js` reads the three `public/data/notable/` files.
+  `spoiler-manifest.json` classes it `reveal-only`, with one importer:
+  `screens/boxscore/FeatLabel.jsx`. The shelf and the callout builder join that list when
+  they ship (section 4).
+- **The label.** `FeatLabel.jsx` mounts in `BoxScoreBody`, below the Game Log stamp at the
+  top of the opened sheet. `BoxScoreBody` renders only inside the box score's `SealBox`
+  reveal render, so the label is absent from the DOM while the box score is sealed.
+  `check-stamp-surfaces.mjs` pins `BoxScore.jsx` as the one importer of `FeatLabel.jsx`.
+- **The fetch.** The component fetches the files when it mounts, so nothing about a feat is
+  fetched, held or rendered before the reveal. No seal input changed, and the label persists
+  nothing. Under the day pass, a stamp or a remembered tap it shows, because the box score
+  is open.
 
 ## Alternatives considered
 

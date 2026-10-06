@@ -13,6 +13,8 @@
 //   1. GameStamp.jsx is imported only by an allowlist.
 //   2. StampGameButton.jsx (which imports GameStamp) is imported only by
 //      BoxScore.jsx, so the chain has exactly one entry point into a game.
+//      The feat label (FeatLabel.jsx, ADR-0101) is not a stamp but rides the
+//      same pin: it names a result, so only the box score's reveal may mount it.
 //   3. A named set of spoiler-critical surfaces mentions no stamp identifier at
 //      all — a belt-and-braces check that also catches a copy-paste of the
 //      markup rather than an import.
@@ -101,6 +103,8 @@ const STAMP_ALLOWLIST = {
   // The mint affordance lives inside the box score's SealBox reveal render
   // function (ADR-0002 is what makes that safe). One importer, on purpose.
   'components/logbook/StampGameButton.jsx': ['screens/BoxScore.jsx'],
+  // Not a stamp, but the same footing: the feat label names a result (ADR-0101).
+  'screens/boxscore/FeatLabel.jsx': ['screens/BoxScore.jsx'],
 }
 
 // Surfaces that list games the user has NOT revealed. None of them may so much

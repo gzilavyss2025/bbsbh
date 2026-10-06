@@ -532,7 +532,9 @@ export default defineConfig({
               // loadTradeDeadlineIndex, was dead and has been deleted). The
               // `index` arm is kept so a future reader is covered rather than
               // silently uncached; it simply never fires right now.
-              /^\/data\/trade-deadline\/(?:index|\d{4})\.json$/.test(url.pathname),
+              /^\/data\/trade-deadline\/(?:index|\d{4})\.json$/.test(url.pathname) ||
+              // The feat index (ADR-0101): three whole files, read only after a box score's reveal.
+              /^\/data\/notable\/(?:nohitters|cycles|tripleplays)\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
             method: 'GET',
             options: { cacheName: 'bbsbh-record-shards', networkTimeoutSeconds: 3 },
