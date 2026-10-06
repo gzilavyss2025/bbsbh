@@ -58,7 +58,7 @@ import { useLensMotion } from '../../components/scoring/lens/motion/useLensMotio
 // The sheet is EDITABLE: tapping a filled box opens the notation editor and
 // the override is stored per-cell on this device (lib/scorecardNotes.js) —
 // the pencil-over-ink layer, never a change to anything derived.
-export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onReload, loading, lastUpdated }) {
+export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onReload, loading, lastUpdated, round = '' }) {
   const [side, setSide] = useState('top')
   const regulation = selectRegulationInnings(feed)
   const actualCount = selectInningCount(feed)
@@ -321,6 +321,9 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
         .join(' ')}
       onAnimationEnd={motion.onAnimationEnd}
     >
+      {/* The round and game number, for a postseason game only: pregame facts, never a
+          series record (ADR-0087). */}
+      {round && <p className="scpage__round">{round}</p>}
       <div className="scpage__bar">
         {lens !== 'lens' && (
           <div className="scpage__ctl" role="group" aria-label="Half of inning">

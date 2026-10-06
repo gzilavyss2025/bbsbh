@@ -17,6 +17,14 @@
 
 /* The live scorecard page's control bar: the Top/Bottom half toggle, with
    Refresh riding the far end. */
+.scpage__round {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
 .scpage__bar {
   display: flex;
   align-items: center;
