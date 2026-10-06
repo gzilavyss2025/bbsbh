@@ -131,6 +131,15 @@
   font-weight: var(--w-bold);
   pointer-events: none;
 }
+/* The October record, a quieter second line under the regular-season one. */
+.jerseydeck__post {
+  position: relative;
+  z-index: 1;
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
 
 .topbar__home svg,
 .topbar__home img,

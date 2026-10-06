@@ -441,6 +441,8 @@ const TREATMENT_RANK = {
   'city-connect': 5,
 }
 
+const POSTSEASON_TYPES = new Set(['F', 'D', 'L', 'W'])
+
 // Builds the Team Page's "logo + jersey + record" strip (TeamPage.jsx): one
 // entry per JERSEY in the club's uniform catalog, each carrying its logo
 // TREATMENT (classifyUniformAsset — a jersey maps to exactly one logo, though
@@ -450,7 +452,9 @@ const TREATMENT_RANK = {
 // `wornByGame` (fetchGameJerseys) — a game with no attributable jersey, or one
 // whose result isn't visible yet (`won == null`, already cutoff-gated by the
 // caller's schedule fetch), simply isn't counted, so this can't leak a result
-// the standings/schedule strip wouldn't already show. Pure/unit-testable.
+// the standings/schedule strip wouldn't already show. `wins`/`losses` count
+// regular-season (`R`) rows only, so they sum to the standings record (#1515);
+// October lands in `postWins`/`postLosses`. Pure/unit-testable.
 export function buildJerseyCombos({ catalogAssets, clubName, schedule, wornByGame, teamId, nameOverrides }) {
   const combos = (catalogAssets ?? [])
     .filter((a) => a.piece === 'J')
@@ -460,6 +464,8 @@ export function buildJerseyCombos({ catalogAssets, clubName, schedule, wornByGam
       treatment: classifyUniformAsset(a.text, clubName, a.code),
       wins: 0,
       losses: 0,
+      postWins: 0,
+      postLosses: 0,
     }))
   const byCode = new Map(combos.filter((c) => c.code).map((c) => [c.code, c]))
   for (const g of schedule ?? []) {
@@ -467,8 +473,13 @@ export function buildJerseyCombos({ catalogAssets, clubName, schedule, wornByGam
     const worn = wornByGame?.[g.gamePk]?.[teamId]
     const combo = worn?.code ? byCode.get(worn.code) : null
     if (!combo) continue
-    if (g.won) combo.wins += 1
-    else combo.losses += 1
+    // The row's OWN round, never the umbrella 'P' (docs/MLB_STATS_API.md). A
+    // row with no gameType is regular season, as fetchTeamSchedule defaults it.
+    const type = g.gameType ?? 'R'
+    const post = POSTSEASON_TYPES.has(type)
+    if (type !== 'R' && !post) continue
+    const [w, l] = post ? ['postWins', 'postLosses'] : ['wins', 'losses']
+    combo[g.won ? w : l] += 1
   }
   return combos.sort(
     (a, b) =>
