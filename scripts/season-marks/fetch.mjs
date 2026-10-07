@@ -108,7 +108,10 @@ let blockedBy = null
 for (const [teamId, eras] of Object.entries(seed.clubs)) {
   out.clubs[teamId] = []
   for (const era of eras) {
-    const entry = { from: era.from, to: era.to, name: era.name, file: null }
+    // `abbr` is what an era with no art draws (TeamLogo's serif fallback);
+    // `cite` is the source for an era Commons does not document (#1626).
+    const entry = { from: era.from, to: era.to, name: era.name, abbr: era.abbr, file: null }
+    if (era.cite) entry.cite = era.cite
     const meta = era.commons ? info.get(era.commons) : null
     if (era.commons && !meta) {
       entry.skipped = 'not found on Commons'

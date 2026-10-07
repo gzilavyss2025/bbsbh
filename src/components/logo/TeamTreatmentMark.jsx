@@ -1,6 +1,7 @@
 import { TeamLogo } from './TeamLogo.jsx'
 import { treatmentTile, isMlbTeamId } from '../../lib/teams.js'
 import { milbTreatmentTile } from '../../lib/milbColors.js'
+import { seasonTile } from '../../lib/identity/seasonMarks.js'
 
 // A club's mark on the tinted tile of whatever uniform treatment it's wearing
 // — the "square" the slate card and the in-game masthead both show. The look
@@ -34,11 +35,14 @@ export function TeamTreatmentMark({ teamId, name, treatment, side, size, block, 
   // keyed by game side, so a caller with no game context (Team Hub's club
   // page, JerseyCombos' lab preview) gets the old plain-paper tile rather
   // than an arbitrary guessed side.
-  const { logoVariant, tint, offsetX, offsetY, pinstripeColor, pinstripeBg, scale } = isMlbTeamId(teamId)
+  // A club in a season-covered era wears a neutral tile: today's tint on a
+  // 1956 game would be false (#1626, lib/identity/seasonMarks.js).
+  const tile = isMlbTeamId(teamId)
     ? { offsetX: 0, offsetY: 0, ...treatmentTile(teamId, treatment) }
     : side
       ? milbTreatmentTile(teamId, side)
       : NO_TILE
+  const { logoVariant, tint, offsetX, offsetY, pinstripeColor, pinstripeBg, scale } = seasonTile(teamId, season, tile)
   const style = {
     '--tint': tint || undefined,
     '--scale': EDGE_BLEED * scale,

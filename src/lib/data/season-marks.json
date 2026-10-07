@@ -1,19 +1,21 @@
 {
-  "_hint": "Per-season club marks (#1591). Keyed by the CURRENT franchise team id. Each era is { from, to, name, file, source, license, restriction }. Only eras whose mark differs from today's are listed. file null = covered, no art yet (TeamLogo draws the monogram). Written by scripts/season-marks/fetch.mjs from scripts/season-marks/seed.json. Files live in public/logos/historical/.",
+  "_hint": "Per-season club marks (#1591). Keyed by the CURRENT franchise team id. Each era is { from, to, name, abbr, file, cite, source, license, restriction }. Only eras whose mark differs from today's are listed. file null = covered, no art yet (TeamLogo draws abbr in a serif face, #1626). A covered era wears neutral chrome: no cited source gives period colours. Written by scripts/season-marks/fetch.mjs from scripts/season-marks/seed.json. Files live in public/logos/historical/.",
   "clubs": {
     "108": [
       {
         "from": 1961,
         "to": 1965,
         "name": "Los Angeles Angels",
+        "abbr": "LAA",
         "file": null
       },
       {
         "from": 1966,
         "to": 1970,
         "name": "California Angels",
+        "abbr": "CAL",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3ACalifornia_Angels_logo_(1966-1970).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -22,8 +24,9 @@
         "from": 1971,
         "to": 1971,
         "name": "California Angels",
+        "abbr": "CAL",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3ACalifornia_Angels_logo_(1971-1972).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -32,14 +35,16 @@
         "from": 1972,
         "to": 1972,
         "name": "California Angels",
+        "abbr": "CAL",
         "file": null
       },
       {
         "from": 1973,
         "to": 1988,
         "name": "California Angels",
+        "abbr": "CAL",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3ACalifornia_Angels_logo_(1972-1988).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -48,8 +53,9 @@
         "from": 1989,
         "to": 1992,
         "name": "California Angels",
+        "abbr": "CAL",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3ACalifornia_Angels_logo_(1989-1992).svg",
         "license": "Public domain"
       },
@@ -57,8 +63,9 @@
         "from": 1993,
         "to": 1996,
         "name": "California Angels",
+        "abbr": "CAL",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3ACalifornia_Angels_logo_(1993-1996).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -69,12 +76,14 @@
         "from": 1901,
         "to": 1909,
         "name": "Brooklyn Dodgers",
+        "abbr": "BRO",
         "file": null
       },
       {
         "from": 1910,
         "to": 1913,
         "name": "Brooklyn Dodgers",
+        "abbr": "BRO",
         "file": "119-1910-1913.png",
         "source": "https://commons.wikimedia.org/wiki/File%3ABrooklyn_Dodgers_1910-1913_logo.png",
         "license": "Public domain",
@@ -84,12 +93,14 @@
         "from": 1914,
         "to": 1933,
         "name": "Brooklyn Dodgers",
+        "abbr": "BRO",
         "file": null
       },
       {
         "from": 1934,
         "to": 1944,
         "name": "Brooklyn Dodgers",
+        "abbr": "BRO",
         "file": "119-1934-1944.svg",
         "source": "https://commons.wikimedia.org/wiki/File%3ABrooklyn_Dodgers_Cap_Logo_(1934_to_1936%2C_1938_to_1955).svg",
         "license": "Public domain",
@@ -99,6 +110,7 @@
         "from": 1945,
         "to": 1957,
         "name": "Brooklyn Dodgers",
+        "abbr": "BRO",
         "file": "119-1945-1957.png",
         "source": "https://commons.wikimedia.org/wiki/File%3ABrooklyn_Dodgers_Primary_Logo_(1945_to_1957).png",
         "license": "Public domain",
@@ -110,8 +122,9 @@
         "from": 1992,
         "to": 2004,
         "name": "Montreal Expos",
+        "abbr": "MON",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AMontreal_Expos_Cap_Logo_(1992_to_2004).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -122,6 +135,7 @@
         "from": 1901,
         "to": 1921,
         "name": "Philadelphia Athletics",
+        "abbr": "PHA",
         "file": "133-1901-1921.svg",
         "source": "https://commons.wikimedia.org/wiki/File%3APhiladelphia_Athletics_Primary_Logo_(1902_to_1921).svg",
         "license": "Public domain",
@@ -131,14 +145,16 @@
         "from": 1922,
         "to": 1927,
         "name": "Philadelphia Athletics",
+        "abbr": "PHA",
         "file": null
       },
       {
         "from": 1928,
         "to": 1949,
         "name": "Philadelphia Athletics",
+        "abbr": "PHA",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3APhiladelphia_Athletics_Jersey_Logo_(1928_to_1949).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -147,8 +163,9 @@
         "from": 1950,
         "to": 1954,
         "name": "Philadelphia Athletics",
+        "abbr": "PHA",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3APhiladelphia_Athletics_Cap_(1902_-_1954).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -157,8 +174,9 @@
         "from": 1955,
         "to": 1959,
         "name": "Kansas City Athletics",
+        "abbr": "KCA",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AKansas_City_Athletics_Cap_Logo_(1955_to_1959).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -167,14 +185,16 @@
         "from": 1960,
         "to": 1962,
         "name": "Kansas City Athletics",
+        "abbr": "KCA",
         "file": null
       },
       {
         "from": 1963,
         "to": 1967,
         "name": "Kansas City Athletics",
+        "abbr": "KCA",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AKansas_City_Athletics_logo_1963_to_1967.png",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -185,14 +205,16 @@
         "from": 1901,
         "to": 1903,
         "name": "New York Giants",
+        "abbr": "NYG",
         "file": null
       },
       {
         "from": 1904,
         "to": 1907,
         "name": "New York Giants",
+        "abbr": "NYG",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3ANew_york_giants_1904-1907.png",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -201,16 +223,18 @@
         "from": 1908,
         "to": 1948,
         "name": "New York Giants",
+        "abbr": "NYG",
         "file": null
       },
       {
         "from": 1949,
         "to": 1957,
         "name": "New York Giants",
-        "file": null,
-        "source": "https://commons.wikimedia.org/wiki/File%3ANew_york_giants_logo_cap_1949_1957.png",
-        "license": "CC BY-SA 4.0",
-        "skipped": "licence needs a maintainer decision"
+        "abbr": "NYG",
+        "file": "137-1949-1957.svg",
+        "source": "https://commons.wikimedia.org/wiki/File%3ANew_York_Giants_MLB_Cap_Logo_(1949_to_1957).svg",
+        "license": "Public domain",
+        "restriction": "trademarked"
       }
     ],
     "140": [
@@ -218,8 +242,9 @@
         "from": 1961,
         "to": 1962,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AWashington_Senators_Cap_Logo_(1961_to_1962).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -228,8 +253,9 @@
         "from": 1963,
         "to": 1967,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AWashington_Senators_Cap_Logo_(1963_to_1967).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -238,8 +264,9 @@
         "from": 1968,
         "to": 1971,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AWashington_Senators_Cap_Logo_(1968_to_1971).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -250,8 +277,9 @@
         "from": 1901,
         "to": 1904,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AWashington_Senators_Primary_Logo_(1901_to_1904).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -260,8 +288,9 @@
         "from": 1905,
         "to": 1935,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AWashington_Senators_Primary_Logo_(1905_to_1935).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -270,8 +299,9 @@
         "from": 1936,
         "to": 1937,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AWashington_Senators_Primary_Logo_(1936_to_1937).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -280,8 +310,9 @@
         "from": 1938,
         "to": 1947,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AWashington_Senators_Primary_Logo_(1938_to_1947).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -290,8 +321,9 @@
         "from": 1948,
         "to": 1952,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AWashington_Senators_Primary_Logo_(1948_to_1952).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -300,14 +332,16 @@
         "from": 1953,
         "to": 1956,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "file": null
       },
       {
         "from": 1957,
         "to": 1960,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AWashington_Senators_Primary_Logo_1957-1960.png",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -318,14 +352,16 @@
         "from": 1901,
         "to": 1945,
         "name": "Boston Braves",
+        "abbr": "BSN",
         "file": null
       },
       {
         "from": 1946,
         "to": 1952,
         "name": "Boston Braves",
+        "abbr": "BSN",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3ABoston_Braves_Cap_Logo_(1946_to_1952).svg",
         "license": "Public domain",
         "restriction": "trademarked"
@@ -334,11 +370,22 @@
         "from": 1953,
         "to": 1965,
         "name": "Milwaukee Braves",
+        "abbr": "MIL",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3AMilwaukee_Braves_Cap_Logo.svg",
         "license": "Public domain",
         "restriction": "trademarked"
+      }
+    ],
+    "145": [
+      {
+        "from": 1976,
+        "to": 1989,
+        "name": "Chicago White Sox",
+        "abbr": "CWS",
+        "file": null,
+        "cite": "https://en.wikipedia.org/wiki/Logos_and_uniforms_of_the_Chicago_White_Sox (1976: a bold \"SOX\" logo with a batter; the present Gothic logo came in September 1990)"
       }
     ],
     "158": [
@@ -346,8 +393,9 @@
         "from": 1969,
         "to": 1969,
         "name": "Seattle Pilots",
+        "abbr": "SEA",
         "file": null,
-        "skipped": "download refused; run fetch.mjs again",
+        "skipped": "not downloaded yet; run fetch.mjs without --offline",
         "source": "https://commons.wikimedia.org/wiki/File%3ASeattle_Pilots_Cap_Logo.svg",
         "license": "Public domain",
         "restriction": "trademarked"

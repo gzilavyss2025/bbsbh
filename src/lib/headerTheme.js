@@ -110,6 +110,19 @@ export function headerThemeFor(teamId, treatment) {
 // the scale, and a themed bar with no scale carries only the three colours.
 export function headerThemeStyle(theme, markScale = null) {
   if (!theme && !markScale) return undefined
+  // The neutral theme (identity/seasonMarks.js's PERIOD_THEME, #1626) sets
+  // each property to `initial`, which makes it guaranteed-invalid, so every
+  // reader's own var() fallback (the default navy chrome) applies again. Plain
+  // null would let a nested card inherit the page's club colours.
+  if (theme?.neutral) {
+    return {
+      '--bar-fill': 'initial',
+      '--bar-accent': 'initial',
+      '--bar-text': 'initial',
+      '--mark-filter': 'initial',
+      ...(markScale && { '--masthead-mark-scale': markScale }),
+    }
+  }
   return {
     ...(theme && {
       '--bar-fill': theme.bar,
@@ -210,6 +223,6 @@ export function clampMarkScale(value) {
 // The class a themed surface adds. The `--dark` variant is what re-inks the
 // mono club mark on a light bar; a caller with no theme adds nothing at all.
 export function headerThemeClass(theme) {
-  if (!theme) return ''
+  if (!theme || theme.neutral) return ''
   return theme.onBarTone === 'dark' ? 'is-themed is-themed--dark' : 'is-themed'
 }

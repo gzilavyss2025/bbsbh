@@ -48,7 +48,8 @@ export function TeamLogo({
   overrideUrl = null,
   // The season the mark is for (#1591). A club that wore a different mark that
   // year draws it from the per-season table, ahead of everything above; an
-  // era with no art on file draws the monogram, never today's mark. Absent
+  // era with no art on file draws its period abbreviation in a serif face
+  // (#1626), never today's mark. Absent
   // (every caller but the game route) or a season outside the table changes
   // nothing.
   season = null,
@@ -60,7 +61,11 @@ export function TeamLogo({
   // re-picked mark — or a freshly re-uploaded override — starts fresh
   // instead of inheriting a prior failure.
   const era = seasonMark(teamId, season)
-  const firstStage = era ? (era.url ? 'season' : 'monogram') : overrideUrl ? 'override' : 'variant'
+  // A bar asks for the `mono` variant: one ink on the band (ADR-0031). No era
+  // art has a knockout, and full-colour art on a navy bar does not read, so a
+  // bar draws the era's serif abbreviation in the bar's ink instead (#1626).
+  const eraUrl = variant === 'mono' ? null : era?.url
+  const firstStage = era ? (eraUrl ? 'season' : 'monogram') : overrideUrl ? 'override' : 'variant'
   const [stage, setStage] = useState(firstStage)
   // Reset computed during render (React's "adjust state while rendering"
   // pattern) rather than in an effect — see Headshot.jsx for the same shape.
@@ -74,11 +79,17 @@ export function TeamLogo({
   // A single-letter monogram fallback, not a re-uppercase of displayed text.
   const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?' // caps-js-exempt
   const bwClass = bw ? 'teamlogo--bw' : ''
+  // A season-covered era with no art (or art that fails to load) draws the
+  // club's period abbreviation in a serif face, never today's mark and never
+  // one letter (#1626). The face reads as period type; it claims no real mark.
+  const serif = stage === 'monogram' && era?.abbr ? era.abbr : null
+  const fallbackClass = serif ? 'teamlogo--fallback teamlogo--serif' : 'teamlogo--fallback'
+  const fallbackText = serif ?? monogram
 
   const effectiveVariant = stage === 'variant' ? variant : 'base'
   const url =
     stage === 'season'
-      ? era?.url
+      ? eraUrl
       : stage === 'override'
       ? overrideUrl
       : stage === 'monogram'
@@ -118,20 +129,20 @@ export function TeamLogo({
     if (cropBar) {
       return (
         <span
-          className={`teamlogo-crop-bar teamlogo--fallback ${bwClass} ${className}`}
+          className={`teamlogo-crop-bar ${fallbackClass} ${bwClass} ${className}`}
           aria-hidden="true"
         >
-          {monogram}
+          {fallbackText}
         </span>
       )
     }
     return (
       <span
-        className={`teamlogo teamlogo--fallback ${bwClass} ${className}`}
-        style={{ width: size, height: size }}
+        className={`teamlogo ${fallbackClass} ${bwClass} ${className}`}
+        style={{ width: size, height: size, ...(serif && { '--serif-size': `${Math.round(size * 0.4)}px` }) }}
         aria-hidden="true"
       >
-        {monogram}
+        {fallbackText}
       </span>
     )
   }

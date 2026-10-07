@@ -1511,9 +1511,11 @@ Re-run only to fold in a new season.
   immutable. Reads `scripts/season-marks/seed.json` (**edit the SEED, never the output**),
   asks Wikimedia Commons for each file's licence, and downloads only a file marked public
   domain or CC0. Any other licence keeps `file: null` and a `skipped` note, so the reader
-  draws the monogram and the maintainer sees what needs a decision. The "trademarked"
-  restriction is recorded per file. Reader: `src/lib/identity/seasonMarks.js`, through
-  `TeamLogo`'s `season` prop.
+  draws the era's serif abbreviation (`abbr`, from the Stats API for those seasons) and the
+  maintainer sees what needs a decision (#1626). An era Commons does not document carries
+  a `cite`. No era carries colours: no cited source gives period values, so a covered era
+  wears neutral chrome. The "trademarked" restriction is recorded per file. Reader:
+  `src/lib/identity/seasonMarks.js`, through `TeamLogo`'s `season` prop.
 - `gen-postseason-history.mjs` → `public/data/postseason-history.json` — the
   completed bracket (who played, who won, how many games, each team's 1-6
   seed) for every MLB postseason back to 2000 (`EARLIEST_YEAR`), plus the
