@@ -21,6 +21,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Door } from '../components/ui/control/Door.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { Stack } from '../components/ui/layout/Stack.jsx'
 
 // The league mark that rides the bar's right edge — same convention (and same
 // All-Star team ids) as StandingsPage's own LeagueBar. Not shared code: this
@@ -378,10 +379,10 @@ export function PostseasonRacePage({ seasonYear }) {
 
       {al && nl && (
         <>
-          <div className="psrace__leagues">
+          <Stack gap="loose" className="psrace__leagues">
             <LeagueBlock lg={al} final={final} />
             <LeagueBlock lg={nl} final={final} />
-          </div>
+          </Stack>
           <ClinchKey marks={marksOnPage([al, nl], final)} />
           <p className="psrace__tbdcaption">
             {final

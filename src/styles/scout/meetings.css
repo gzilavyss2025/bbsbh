@@ -131,11 +131,6 @@
 
 /* --- the list: games, then one card per plate appearance --- */
 
-.scout__game {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
 .scout__gamehead {
   display: flex;
   align-items: center;
@@ -147,9 +142,6 @@
   color: var(--text-heading);
 }
 .scout__pa {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   padding: var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);

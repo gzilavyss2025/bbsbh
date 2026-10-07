@@ -72,12 +72,6 @@
 
 /* --------------------------------------------------------------- step 2 */
 
-.introsheet__step2 {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
 .introsheet__visual {
   display: flex;
   align-items: center;
@@ -180,12 +174,6 @@
 }
 
 /* --------------------------------------------------- signed-in confirmation */
-
-.introsheet__confirm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
 
 .introsheet__confirmlede {
   margin: 0;

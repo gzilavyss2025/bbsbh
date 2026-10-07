@@ -12,6 +12,7 @@ import { AsOfBanner } from '../../../components/seal/AsOfBanner.jsx'
 import { callOf, gamesOf, inPlay, meetingFacts, mixRows, nameOf, ordinal, pitchWalk, playText, unseenNote } from './meetings.js'
 import { PitchModal } from './PitchModal.jsx'
 import { ContactFacts, Fact, fixed, xw } from './Facts.jsx'
+import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
 // THE MEETINGS TAB (#1490, was the head-to-head list of #1410): every past
 // plate appearance between the two, pitch by pitch. A facts row, the pitch
@@ -94,7 +95,7 @@ export function MeetingsPanel({ data, board, cutoff, asOf, scope, view, stance, 
         )}
 
         {games.map((g) => (
-          <div key={g.gamePk} className="scout__game">
+          <Stack gap="snug" key={g.gamePk} className="scout__game">
             <p className="scout__gamehead">
               <span>{monthDayYear(g.date)}</span>
               <Pill>{ROUND_TAG[g.round] ?? g.round}</Pill>
@@ -103,7 +104,7 @@ export function MeetingsPanel({ data, board, cutoff, asOf, scope, view, stance, 
               const list = pa.pitchList ?? []
               const last = list.at(-1)
               return (
-                <article key={pa.key} className="scout__pa">
+                <Stack gap="snug" as="article" key={pa.key} className="scout__pa">
                   <header className="scout__pahead">
                     <span className="scout__patitle">{pa.inning ? `${ordinal(pa.inning)} inning` : 'Plate appearance'}</span>
                     <span className="scout__pameta">
@@ -136,10 +137,10 @@ export function MeetingsPanel({ data, board, cutoff, asOf, scope, view, stance, 
                   ) : (
                     <p className="scout__note">No tracked pitches.</p>
                   )}
-                </article>
+                </Stack>
               )
             })}
-          </div>
+          </Stack>
         ))}
       </>
     )
