@@ -476,6 +476,52 @@ for N2 to N8.
    `empty-state.css` and `notice.css`, and edit `src/index.css` and the pins in
    `test/empty-state-cascade.test.js` and `test/notice-cascade.test.js`.
 
+## N8a as built (what the next slices need)
+
+Written by the N8a session. It records what shipped. It does not write the prompts
+for N8b or N8c.
+
+1. **The name.** Gary picked `.change` on 2026-10-07 (`decisions.md`, Q3, name
+   row). The rule: swap the prefix `pitchernotice` for `change` and keep the part
+   suffix. N8a renamed `__shot`, `__shot--logo` and `__shot--fallback`. Nothing
+   else changed; every `#root` prefix, comment marker and rule order stayed.
+2. **The files (6 source, 1 test).** `PitcherNotice.jsx` (the fallback well and the
+   template-string logo well: `` `change__shot${showLogo ? ' change__shot--logo' : ''}` ``),
+   `styles/12-sealbox.css` (the five well rules and the `:has(...)` rule near the end;
+   that rule keeps `.pitchernotice` and `__entering` for N8c), `styles/13-play-by-play.css`,
+   `styles/focus/atbat.css`, `styles/26-player-page.css`, `tokens/layout.css` (comment).
+   New: `test/notice-n8a.test.js`.
+3. **What the plan missed.** `26-player-page.css` (`.change__shot img[data-pending]`,
+   a rule shared with `.shot`) and the `:has(.pitchernotice__entering)` rule in
+   `12-sealbox.css`. No class was built at run time except the one template string.
+   After the edit, `rg "pitchernotice__sh"` finds nothing in `src`, `e2e`, `test`,
+   `scripts`, `api` and `docs`; the pin test checks `src`, `e2e` and `scripts`.
+4. **The seal pin** (`test/notice-n8a.test.js`, measured on `a75f6edae`):
+   `PitcherNotice.jsx` imports no reveal-only module, has no `<SealBox` and 0
+   `revealedThrough`. It was the only JSX file edited.
+5. **The census.** `overrides.tsv`: the three `.pitchernotice__shot*` rows say DONE in
+   N8a. The census cannot find `.change__shot*` (no notice word, rail or tint), so the
+   three keys read STALE from now on. Keep the rows as the ledger of the old name. N8b
+   and N8c will see the same for their renamed parts.
+6. **Seen** (mock anchor game 823035, `main` on :5172 from a worktree and the branch
+   on :5173, 390 and 900px, `?nointro`, images blocked so the `<img>` ends in one state):
+   `top1` sealed and open, `top2`, `top6`, `bottom6` staged and open, `top7` staged and
+   open, and a player page. Each side was captured twice before the edit and the
+   pairs matched, except the pitch-scene SVG on `top6`, `top7-staged` and `top7-open`
+   at 900px (sub-pixel jitter, main against main too). Those three were captured again
+   with reduced motion: main against main and main against the branch are identical.
+   Result: zero differences. The capture also compared border, radius, fill, filter,
+   visibility, position, transform and opacity, not only boxes.
+7. **Not seen.** The player page draws no `.change__shot` (only `.shot`), so the
+   `data-pending` rule was seen on the innings routes, where the blocked images hold
+   the well in that state. A pre-pitch staged pinch hitter, the live feed, `npm run e2e`
+   and `npm run visual` were not run. The at-bat card and the focus hero wells were
+   measured as part of `top1` (they draw `.abhero__shot` and `.pbp__batshot`).
+8. **For N8b and N8c.** `rg "pitchernotice__sh"` is now clean, so a later hit on
+   `__shot` is a new bug. N8c still has the `:has(.pitchernotice__entering)` rule to
+   rename on both sides. Capture with `BLOCKIMG=1` and run pairs one at a time:
+   four parallel Chromium runs failed here.
+
 ## N7 as built (what the next slices need)
 
 Written by the N7 session. It records what shipped. It does not write the prompts
