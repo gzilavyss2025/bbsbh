@@ -422,7 +422,7 @@
   padding: var(--space-2);
   appearance: none;
   cursor: pointer;
-  border: var(--bw-hair) dashed var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
   color: var(--accent-primary);

@@ -496,7 +496,7 @@
 .passportpage__addpage {
   min-height: var(--space-6);
   padding: 0 var(--space-2);
-  border: var(--bw-hair) dashed var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: none;
   color: var(--text-caption);
