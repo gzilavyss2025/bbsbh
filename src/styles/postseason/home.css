@@ -35,7 +35,7 @@
   justify-content: space-between;
   gap: var(--space-2);
   padding-bottom: var(--space-1h);
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 .bracketrail__title {
   margin: 0;
@@ -155,12 +155,12 @@
   padding: var(--space-2) var(--space-1);
   text-align: center;
   text-decoration: none;
-  background: var(--paper-2);
+  background: var(--surface-card);
   color: var(--ink-0);
   border-radius: var(--radius-xs);
 }
 .psboard__slot:hover {
-  background: var(--paper-3);
+  background: var(--surface-inset);
 }
 .psboard__abbr {
   font-family: var(--font-display);
@@ -193,10 +193,10 @@
    mark itself is already the gray knockout ClubMark draws for an eliminated
    club, so the X is the only new ink. */
 .psboard__slot--out {
-  background: var(--rule);
+  background: var(--border-rule);
 }
 .psboard__slot--out:hover {
-  background: var(--rule-soft);
+  background: var(--border-hairline);
 }
 .psboard__slot--out .psboard__abbr {
   color: var(--ink-2);
