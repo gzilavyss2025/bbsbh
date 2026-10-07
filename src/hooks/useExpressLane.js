@@ -114,9 +114,24 @@ export function useExpressLane({
 
   const { horizon, prerollClips, openWhen, wholeGame } = useMemo(() => stagingPlan(plan), [plan])
 
-  // The runner is built once per game and outlives a half change: the byte
-  // store, the staged set and the frontier are all per GAME, and rebuilding it
-  // on every inning would re-read the store and lose the queue.
+  // THE PLAN'S HORIZON, handed to the runner in place.
+  //
+  // It is NOT a reason to build a new runner, and it used to be. The entry step
+  // lets a reader pick a plan after the page has opened, and the page starts
+  // staging on open, so the choice always arrives with a runner already built
+  // and holding the half's rows. A rebuilt one began with an empty queue — the
+  // rows reach it only when they change, which a plan change does not do — so On
+  // demand sat on a disabled "Score the first play" and never asked for a clip.
+  // Declared BEFORE the runner effect so a first render's runner reads it.
+  const horizonRef = useRef(horizon)
+  useEffect(() => {
+    horizonRef.current = horizon
+    runnerRef.current?.setHorizon(horizon)
+  }, [horizon])
+
+  // The runner is built once per game and mode, and outlives a half change: the
+  // byte store, the staged set and the frontier are all per GAME, and
+  // rebuilding it on every inning would re-read the store and lose the queue.
   useEffect(() => {
     if (!gamePk) return undefined
     const staging = createStagingRunner({
@@ -130,7 +145,7 @@ export function useExpressLane({
       job: createJob({ gamePk, mode }),
       resolveClip: (playId) => resolveClipUrl(playId),
       onChange: setJob,
-      horizon,
+      horizon: horizonRef.current,
       onSample: (sample) => {
         samplesRef.current = addSample(samplesRef.current ?? loadSamples(), sample)
         saveSamples(samplesRef.current)
@@ -144,12 +159,12 @@ export function useExpressLane({
       staging.stop()
       runnerRef.current = null
     }
-    // The plan is in here because the horizon is baked into the runner, and
-    // changing it mid-flight would leave the queue half-walked under one rule
-    // and half under another. Rebuilding costs nothing that matters: `start`
-    // re-reads the byte store, so every clip already on the disk is picked back
-    // up rather than paid for twice.
-  }, [gamePk, mode, horizon])
+    // A new MODE rebuilds it, because the mode defines the queue. Rebuilding
+    // costs nothing that matters: `start` re-reads the byte store, so every clip
+    // already on the disk is picked back up rather than paid for twice, and the
+    // `rows` effect below hands the new runner its half again because `rows`
+    // changes with the mode.
+  }, [gamePk, mode])
 
   // THE WHOLE OF REGULATION, UP FRONT — the `all` plan, and the only place in
   // the app that fills the queue past the half the scorer is in.
