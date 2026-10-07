@@ -488,7 +488,7 @@ dashed-rule fix, which is the last item of #1132 and stays open.
 2. **Six commits, one per step.** The census, the Teammates line, the dead rule, the budgets,
    the docs, and this note. The new test is `test/notice-n9.test.js`. Each step added its
    test first and watched it fail.
-3. **The census.** `unreviewed 0` and no STALE line. 24 rows were added: the seven `*__notice`
+3. **The census.** `unreviewed 0` and no STALE line. 22 rows were added: the seven `*__notice`
    namespaces (N2 and N3, `n/a`), the `.notice__text` caps exemption, the two `<Notice` tags
    in `MilestoneWatchCard.jsx` and `MilestoneWatchPage.jsx` (adopted by #1438 after N1, the
    import is `ui/state/Notice.jsx`, nothing to move), `.degrees__link`, `.prospects__caption`
