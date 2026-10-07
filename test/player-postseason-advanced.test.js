@@ -12,6 +12,7 @@ import test, { mock } from 'node:test'
 import { advancedHittingView, advancedPitchingView } from '../src/api/person.js'
 import { fetchHittingAdvanced, fetchPitchingAdvanced } from '../src/api/person-fetch.js'
 import { loadHoverCardStats } from '../src/api/playerHoverCard.js'
+import { loadPlayerAnalytics } from '../src/api/player/analytics.js'
 
 const POST_HIT = {
   season: { gamesPlayed: 6, plateAppearances: 26, avg: '.143' },
@@ -98,6 +99,7 @@ const PERSON = {
   }],
 }
 const hoverAnswer = (post) => (url) => {
+  if (url.includes('/seasons/')) return { seasons: [{ postSeasonStartDate: '2000-10-01', offseasonStartDate: '2999-12-31' }] }
   if (url.includes('/transactions')) return { transactions: [] }
   if (url.includes('/stats?')) {
     if (url.includes('gameType=P')) {
@@ -123,3 +125,42 @@ test('the hover card has no postseason line before he has played one', async () 
   mock.restoreAll()
   assert.equal(card.postFields, null)
 })
+
+// #1651: the gameType=P request goes out only once the season row's
+// postSeasonStartDate has passed, so an April-September page pays for no empty read.
+const GATE_PERSON = {
+  id: 592450, fullName: 'Test Player', active: true, mlbDebutDate: '2015-01-01',
+  currentTeam: { id: 147 }, primaryPosition: { abbreviation: 'RF', type: 'Outfielder' },
+  batSide: { code: 'R' }, pitchHand: { code: 'R' },
+}
+
+// Records every URL; answers the season row with the given postseason start.
+async function urlsFor(postSeasonStartDate, run) {
+  const real = globalThis.fetch
+  const urls = []
+  globalThis.fetch = async (url) => {
+    urls.push(String(url))
+    const body = /\/api\/v1\/seasons\//.test(url)
+      ? { seasons: [{ postSeasonStartDate, offseasonStartDate: '2999-12-31' }] }
+      : /\/api\/v1\/people\/\d+\?|\/api\/v1\/people\?/.test(url) ? { people: [GATE_PERSON] } : {}
+    return { ok: true, status: 200, json: async () => body }
+  }
+  try {
+    await run()
+  } finally {
+    globalThis.fetch = real
+  }
+  return urls.filter((u) => u.includes('gameType=P'))
+}
+
+for (const [name, run] of [
+  ['hover card', () => loadHoverCardStats(GATE_PERSON.id)],
+  ['analytics loader', () => loadPlayerAnalytics(GATE_PERSON.id)],
+]) {
+  test(`${name}: no gameType=P request before the postseason starts`, async () => {
+    assert.equal((await urlsFor('2999-10-01', run)).length, 0)
+  })
+  test(`${name}: gameType=P request goes out once the postseason has started`, async () => {
+    assert.ok((await urlsFor('2000-10-01', run)).length > 0)
+  })
+}

@@ -43,6 +43,7 @@ import { fetchTargetCommand, targetCommandFor } from '../targetCommand.js'
 import { fetchGloveTargetFor } from '../gloveTarget.js'
 import { fetchCommandReceived, commandReceivedFor } from '../commandReceived.js'
 import { currentSeasonFor, playerContext } from './context.js'
+import { postseasonStarted } from '../postseason/started.js'
 
 export async function loadPlayerAnalytics(id, asOf) {
   const ctx = await playerContext(id, asOf)
@@ -64,6 +65,8 @@ export async function loadPlayerAnalytics(id, asOf) {
     fetchCommandReceived(),
   ])
 
+  // No gameType=P read before the season's postseason starts (#1651).
+  const postOpen = await postseasonStarted(season)
   const blocks = await Promise.all(
     groups.map(async (group) => {
       const [current, arsenalSplits, advancedBundle, postBundle] = await Promise.all([
@@ -84,7 +87,7 @@ export async function loadPlayerAnalytics(id, asOf) {
           : Promise.resolve(null),
         // The same bundle for October (#1436), the card's Postseason scope. A dated
         // page asks nothing: the API cannot cut it to the date, so it would look ahead.
-        currentActivitySportId === 1 && !cutoff
+        currentActivitySportId === 1 && !cutoff && postOpen
           ? (group === 'pitching'
             ? fetchPitchingAdvanced(id, season, { gameType: 'P' })
             : fetchHittingAdvanced(id, season, { gameType: 'P' }))

@@ -22,6 +22,7 @@ import { detectInjuredList, detectRehabAssignment } from './person/activity.js'
 import { DASH, num } from './person/shared.js'
 import { SPORT_LABEL } from '../lib/teams.js'
 import { isoToday } from '../lib/dates.js'
+import { postseasonStarted } from './postseason/started.js'
 
 // A reliever leads with SV once he clears this many saves; below it (and for
 // a starter, always) the lead stat is W-L. Its own threshold, deliberately
@@ -102,9 +103,10 @@ export function resolveHoverIdentity({ person, transactions, endDate }) {
 export async function loadHoverCardStats(personId) {
   if (!personId) return null
   const endDate = isoToday()
-  const [person, transactions] = await Promise.all([
+  const [person, transactions, postOpen] = await Promise.all([
     fetchPerson(personId),
     fetchTransactions(personId, endDate),
+    postseasonStarted(Number(endDate.slice(0, 4))),
   ])
   if (!person) return null
   const { bio, team, onRehab, teamLevelLabel, statSportId, statSeason, group } =
@@ -114,7 +116,7 @@ export async function loadHoverCardStats(personId) {
   // MLB only: a minor-league postseason code was never checked.
   const [splits, postSplits] = await Promise.all([
     fetchPersonStats(personId, { ...range, sportId: statSportId }),
-    statSportId === 1 ? fetchPersonStats(personId, { ...range, gameType: 'P' }) : [],
+    statSportId === 1 && postOpen ? fetchPersonStats(personId, { ...range, gameType: 'P' }) : [],
   ])
   const stat = aggregateSplits(splits, group)
   const postStat = aggregateSplits(postSplits, group)
