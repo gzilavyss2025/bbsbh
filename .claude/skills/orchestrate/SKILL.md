@@ -23,7 +23,8 @@ missing, ask in plain chat, one question per message.
 ## Authority
 
 **Alone:** read anything; start children on `ready-for-agent` issues (within the
-budget); start a shape session; `send_message` a child; after he approves a spec,
+budget); start a shape session; archive a session that passes the Sweep rule;
+`send_message` a child; write ledger comments once he has approved the ledger; after he approves a spec,
 comment it on the issue (end with the Claude Code footer from the session
 reminder).
 
@@ -49,7 +50,7 @@ concurrent sessions, so measure.
   Tell him once.
 - **Ask once per run:** "Is it late in your week?" If yes, start only small,
   clear issues and no Opus session.
-- **Wait, do not poll.** Subscribe to child PRs. Use `send_later` (about 50
+- **Do not poll in a loop.** Subscribe to child PRs. Use `send_later` (about 50
   minutes first, then about 4 hours). At most 6 checks per run, then report and
   stop. A `send_later` wake-up is the only way a run continues after the report.
 - Finish started work before you start new work.
@@ -84,6 +85,25 @@ asking.
 6. Read the ledger (below).
 7. Say in three lines what you will start now and why. Then start it.
 
+## Sweep (every run)
+
+Keep the maintainer's session list short, and find the sessions that wait on him.
+`list_sessions` output is long: save it and read it with a script, not by eye.
+Each record has `session_status` and `external_metadata.post_turn_summary`
+(`status_category`, `status_detail`).
+
+- **Archive alone** a session that is `IDLE`, whose `status_category` is
+  `completed`, **and** whose branch has a merged or closed PR
+  (`list_pull_requests`, `state: all`, `head: owner:branch`). Report the list.
+- **Never archive** a session that is running, `need_input`, or `review_ready`,
+  or whose PR is open, in an unmerged stack, or missing. A session with no branch
+  or no PR goes in the report instead.
+- **Bring to him** every `need_input` session, with its `status_detail` in plain
+  words. They are the decisions that wait on him, so they come first.
+- **Budget signal.** Records carry `external_metadata.rate_limit_info`. A
+  `seven_day` or `five_hour` status other than `allowed` is a limit warning.
+  (Seen on other sessions' records; check that yours shows it.)
+
 ## Lane 1: Shape (a fuzzy idea becomes a spec)
 
 For `needs-info` issues, `needs-triage` enhancements, and any issue that says
@@ -115,9 +135,10 @@ When he approves, comment the spec on the issue and ask him to confirm
 ## Lane 2: Build (a settled slice, or a bug)
 
 Start a child on a `ready-for-agent` issue or a spec slice. Title it
-`orch: #n <slug>`. Set `source_url` to this repo, `permission_mode` to
-`acceptEdits` (never `bypassPermissions`), and `tags` to `orch`, the lane, and
-the issue number. The prompt must stand alone:
+`orch: #n <slug>`. Set `source_url` to this repo, and `tags` to `orch`, the lane, and the issue
+number (the title is what you search; tags are for him). Leave `permission_mode`
+unset so the child inherits yours; never `bypassPermissions`. An unattended child
+needs Bash for npm and git. If one stalls on a permission prompt, report it. The prompt must stand alone:
 
 ```
 Issue: <link> and a 2-line summary. Parent session: <your session id>.
@@ -172,6 +193,7 @@ Keep it short, in ASD-STE100 (`docs/agents/writing-style.md`):
 > **Running:** one line per child (issue, model, status).
 > **Done:** PR links, ready to stack.
 > **Waiting:** issues that wait on an unmerged PR.
+> **Cleaned up:** sessions archived, and sessions that wait on him.
 > **Budget:** cap, count running, any warning.
 
 Then ask each decision directly with `AskUserQuestion`, one at a time. If nothing

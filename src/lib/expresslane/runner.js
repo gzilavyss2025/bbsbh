@@ -352,10 +352,6 @@ export function createStagingRunner({
       return landed
     },
 
-    // The next half the scorer has reached is now readable, so its rows join
-    // the queue. This is the ONLY way the queue grows, and it is what keeps
-    // the job from ever holding the whole game.
-    //
     // CHANGE THE PLAN WITHOUT LOSING THE QUEUE.
     //
     // The entry step lets a reader pick a plan after this runner exists — it
@@ -376,6 +372,10 @@ export function createStagingRunner({
       if (started) pump()
     },
 
+    // The next half the scorer has reached is now readable, so its rows join
+    // the queue. This is the ONLY way the queue grows, and it is what keeps
+    // the job from ever holding the whole game.
+    //
     // Rows may be added before `start`, and nothing is fetched until it is
     // called: the store has to be read first, or the pre-roll pays again for
     // clips that are already here.
