@@ -504,8 +504,8 @@ dashed-rule fix, which is the last item of #1132 and stays open.
    `alert` (the old line had none). It is an open page, no `SealBox`. Seen at 390px and 900px
    with the data file failing (see the PR).
 5. **Deleted.** The `.hint` half of `.screen--slate .hint, .screen--slate .btn` in
-   `05-masthead-nav.css`. No file the slate imports wears `.hint` (the test walks the import
-   graph of `GameSelect.jsx`). The `.btn` half stays. The E9 pin that named the grouped
+   `05-masthead-nav.css`. No file the slate imports wears `.hint` (a scratch walk over the 276 files
+   `GameSelect.jsx` imports, comments skipped, found the word nowhere). The `.btn` half stays. The E9 pin that named the grouped
    selector now names `.screen--slate .btn` alone; the pin's own comment said N9 would decide.
    `.hint__link` was already gone (E9).
 6. **Kept.** `.hint--error`: five dev-only pages still wear it (`UniformNamesPage`,
