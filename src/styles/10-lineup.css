@@ -227,7 +227,7 @@
   color: var(--field);
 }
 
-/* The starter's season line, then — same treatment, its own dashed divider —
+/* The starter's season line, then — same treatment, its own divider —
    his most recent appearance, his summed line against tonight's opponent this
    season, and (conditionally) his whole career against them, so the card
    reads as a stack of dated facts (badges, season-to-date, last time out,
@@ -242,7 +242,7 @@
   font-size: var(--fs-compact);
   color: var(--text-caption);
   padding-top: var(--space-1);
-  border-top: var(--bw-hair) dashed var(--border-hairline);
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
 /* The career line doubles as the door to its Box Lines (ADR-0069) —
@@ -251,10 +251,10 @@
    <button>, and .boxlines__door resets a button whole — padding and border
    both — from a partial that loads after this one. So the row's own dress is
    restated here at `button.` specificity: without it the career line loses
-   the dashed divider every line above it wears, and the 4px of air under it. */
+   the divider every line above it wears, and the 4px of air under it. */
 button.starter__careervs {
   padding-top: var(--space-1);
-  border-top: var(--bw-hair) dashed var(--border-hairline);
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
 /* The pitch mix (StarterMix.jsx). Phone: a "Watch his pitches" door, a full row
@@ -633,7 +633,7 @@ button.starter__careervs {
   gap: var(--space-2);
   margin: 6px 0 0;
   padding-top: var(--space-1h);
-  border-top: var(--bw-hair) dashed var(--border-hairline);
+  border-top: var(--bw-hair) solid var(--border-hairline);
   font-size: var(--fs-compact);
 }
 
