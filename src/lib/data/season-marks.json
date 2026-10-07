@@ -1,5 +1,5 @@
 {
-  "_hint": "Per-season club marks (#1591). Keyed by the CURRENT franchise team id. Each era is { from, to, name, abbr, file, cite, source, license, restriction }. Only eras whose mark differs from today's are listed. file null = covered, no art yet (TeamLogo draws abbr in a serif face, #1626). A covered era wears neutral chrome: no cited source gives period colours. Written by scripts/season-marks/fetch.mjs from scripts/season-marks/seed.json. Files live in public/logos/historical/.",
+  "_hint": "Per-season club marks (#1591). Keyed by the CURRENT franchise team id. Each era is { from, to, name, abbr, file, cite, source, license, restriction }. Only eras whose mark differs from today's are listed. file null = covered, no art yet (TeamLogo draws abbr in a serif face, #1626). A covered era wears neutral chrome: no cited source gives period colours. Written by the identity lab's Eras tab (scripts/lib/eras/dev-season-marks.mjs); do not run scripts/season-marks/fetch.mjs, it rebuilds this file from a seed. Files live in public/logos/historical/.",
   "clubs": {
     "108": [
       {

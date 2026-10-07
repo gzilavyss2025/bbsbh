@@ -9,7 +9,7 @@
 // in a serif face, because today's mark would state something false
 // (ADR-0078), and one letter says less than the club's own period code
 // (#1626). Each era with art records its source, licence and restriction, so
-// a file's status stays checkable (scripts/season-marks/fetch.mjs writes them).
+// a file's status stays checkable (the lab's Eras tab writes them).
 //
 // Colours follow the same rule. Club colours changed over time, and no cited
 // source gives an era's colours as values, so a covered era wears NEUTRAL

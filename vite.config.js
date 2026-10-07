@@ -25,6 +25,14 @@ import {
   saveCustomMark,
 } from './scripts/lib/dev-custom-marks.mjs'
 import { writeMonoLogo } from './scripts/lib/mono-logo-art.mjs'
+import {
+  DEV_ERA_ART_MAX_BODY_BYTES,
+  DEV_ERA_ART_ROUTE,
+  DEV_ERA_ROUTE,
+  deleteEra,
+  saveEra,
+  saveEraArt,
+} from './scripts/lib/eras/dev-season-marks.mjs'
 import { describeLogoCaveat } from './src/lib/logoArt.js'
 
 // Dev-only save endpoint for the curation surfaces — the Team Identity Lab
@@ -293,6 +301,57 @@ async function handleCustomMarkAssign(req, res, query) {
   }
 }
 
+// The Eras editor (scripts/lib/dev-season-marks.mjs). /era takes a small JSON
+// body, `{ action: 'save' | 'delete', teamId, era?, replaceFrom?, from? }`;
+// /era-art takes the SVG as the body with `teamId` and the era's first season
+// in the query. Neither names a path.
+async function handleEra(req, res) {
+  const body = await readBody(req, res, DEV_DATA_MAX_BODY_BYTES)
+  if (!body) return
+  try {
+    const input = JSON.parse(body.toString('utf8') || '{}')
+    const result =
+      input.action === 'delete'
+        ? await deleteEra({ teamId: input.teamId, from: input.from })
+        : await saveEra({ teamId: input.teamId, era: input.era ?? {}, replaceFrom: input.replaceFrom ?? null })
+    if (result.problem) {
+      res.statusCode = result.status ?? 400
+      res.end(result.problem)
+      return
+    }
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify(result))
+  } catch (err) {
+    res.statusCode = err instanceof SyntaxError ? 400 : 500
+    res.end(err.message)
+  }
+}
+
+async function handleEraArt(req, res, query) {
+  const params = new URLSearchParams(query)
+  const body = await readBody(req, res, DEV_ERA_ART_MAX_BODY_BYTES)
+  if (!body) return
+  try {
+    const result = await saveEraArt({
+      teamId: Number(params.get('teamId')),
+      from: Number(params.get('from')),
+      svg: body.toString('utf8'),
+    })
+    if (result.problem) {
+      res.statusCode = result.status ?? 400
+      res.end(result.problem)
+      return
+    }
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify(result))
+  } catch (err) {
+    res.statusCode = 500
+    res.end(err.message)
+  }
+}
+
 function devDataSave() {
   return {
     name: 'dev-data-save',
@@ -308,8 +367,10 @@ function devDataSave() {
         const isCustomMark = key === DEV_CUSTOM_MARK_ROUTE
         const isCustomAssign = key === DEV_CUSTOM_MARK_ASSIGN_ROUTE
         const isWpaArt = key === DEV_WPA_ART_ROUTE
+        const isEra = key === DEV_ERA_ROUTE
+        const isEraArt = key === DEV_ERA_ART_ROUTE
         const isArtRoute =
-          isLogo || isLogoCopy || isMonoLogo || isCustomMark || isCustomAssign || isWpaArt
+          isLogo || isLogoCopy || isMonoLogo || isCustomMark || isCustomAssign || isWpaArt || isEra || isEraArt
         const store = isArtRoute ? null : devDataStore(key)
         if (!isArtRoute && !store) {
           res.statusCode = 404
@@ -327,6 +388,8 @@ function devDataSave() {
         else if (isCustomMark) handleCustomMark(req, res, query)
         else if (isCustomAssign) handleCustomMarkAssign(req, res, query)
         else if (isWpaArt) handleWpaArt(req, res, query)
+        else if (isEra) handleEra(req, res)
+        else if (isEraArt) handleEraArt(req, res, query)
         else handleStoreSave(req, res, store)
       })
     },

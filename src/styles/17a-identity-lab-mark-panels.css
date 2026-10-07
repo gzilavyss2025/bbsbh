@@ -69,3 +69,82 @@
   flex: 1 1 auto;
   min-width: 0;
 }
+
+/* --------------- the Eras dimension: a club's past marks ---------------------
+   screens/identity-lab/profiles/eras.jsx and editors/EraRow.jsx (#1591). One
+   card per era: the mark on the left, the form beside it. */
+.idlab__eras {
+  padding: var(--space-3);
+}
+
+.idlab__erasum {
+  margin: 0 0 var(--space-3);
+  color: var(--text-muted);
+}
+
+.idlab__eralist {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.idlab__era {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3);
+  padding: var(--space-3);
+}
+
+.idlab__era--new {
+  grid-template-columns: 1fr;
+}
+
+.idlab__eraart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-16);
+  height: var(--space-16);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+}
+
+.idlab__eraart--over {
+  border-color: var(--accent-primary);
+}
+
+.idlab__eraart img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.idlab__eraabbr {
+  font-family: var(--font-read);
+  font-size: var(--fs-label);
+}
+
+.idlab__erafields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-2);
+}
+
+.idlab__erafields label {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--fs-cell);
+  color: var(--text-muted);
+}
+
+.idlab__erawide {
+  grid-column: 1 / -1;
+}
+
+.idlab__eraactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  grid-column: 1 / -1;
+}
