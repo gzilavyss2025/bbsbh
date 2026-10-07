@@ -89,8 +89,8 @@ export async function saveCustomMark({ teamId, name, svg }) {
   try {
     const res = await fetch(`${DEV_SAVE_BASE}/custom-mark?${query}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'image/svg+xml' },
-      body: svg,
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: bytes,
     })
     const text = await res.text()
     if (!res.ok) return { error: text || `save failed (${res.status})` }
@@ -193,9 +193,10 @@ export async function saveEraRow(body) {
   }
 }
 
-// POST one SVG as the era's mark: the markup is the body, the club and the
-// era's first season ride the query. The server names the file.
-export async function uploadEraArt({ teamId, from, svg }) {
+// POST one SVG or PNG as the era's mark: the file's bytes are the body, the
+// club and the era's first season ride the query. The server tells the two
+// apart by their content and names the file.
+export async function uploadEraArt({ teamId, from, bytes }) {
   const query = `teamId=${encodeURIComponent(teamId)}&from=${encodeURIComponent(from)}`
   try {
     const res = await fetch(`${DEV_SAVE_BASE}/era-art?${query}`, {

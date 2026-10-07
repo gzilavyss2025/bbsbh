@@ -87,7 +87,7 @@ export function EraRow({ teamId, era, bust, onArt }) {
   async function attach(file) {
     if (!file || !era) return
     const result = await run(async () =>
-      uploadEraArt({ teamId, from: era.from, svg: await file.text() }),
+      uploadEraArt({ teamId, from: era.from, bytes: new Uint8Array(await file.arrayBuffer()) }),
     )
     if (inputRef.current) inputRef.current.value = ''
     if (result) {
@@ -111,7 +111,7 @@ export function EraRow({ teamId, era, bust, onArt }) {
             setDragging(false)
             attach(e.dataTransfer?.files?.[0])
           }}
-          title="Drop an SVG here"
+          title="Drop an SVG or PNG here"
           style={HEX.test(era.bar ?? '') ? { background: era.bar } : undefined}
         >
           {era.file ? (
@@ -168,12 +168,12 @@ export function EraRow({ teamId, era, bust, onArt }) {
               ref={inputRef}
               className="colorlab__logodropinput"
               type="file"
-              accept="image/svg+xml,.svg"
-              aria-label={`Upload an SVG for ${era.name} ${era.from}-${era.to}`}
+              accept="image/svg+xml,image/png,.svg,.png"
+              aria-label={`Upload art for ${era.name} ${era.from}-${era.to}`}
               onChange={(e) => attach(e.target.files?.[0])}
             />
             <button type="button" className="colorlab__wparesetbtn" onClick={() => inputRef.current?.click()} disabled={busy}>
-              {era.file ? 'Replace SVG' : 'Add SVG'}
+              {era.file ? 'Replace art' : 'Add art'}
             </button>
             <button type="button" className="colorlab__wparesetbtn" onClick={remove} disabled={busy}>
               Delete

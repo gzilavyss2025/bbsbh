@@ -336,7 +336,7 @@ async function handleEraArt(req, res, query) {
     const result = await saveEraArt({
       teamId: Number(params.get('teamId')),
       from: Number(params.get('from')),
-      svg: body.toString('utf8'),
+      bytes: body,
     })
     if (result.problem) {
       res.statusCode = result.status ?? 400

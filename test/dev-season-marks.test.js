@@ -4,7 +4,7 @@
 // does not show, and a request cannot reach the filesystem with a name it chose.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { applyEraDelete, applyEraSave, resolveEraFile } from '../scripts/lib/eras/dev-season-marks.mjs'
+import { applyEraDelete, applyEraSave, describeEraArt, resolveEraFile } from '../scripts/lib/eras/dev-season-marks.mjs'
 
 const era = (from, to, extra = {}) => ({ from, to, name: 'Brooklyn Dodgers', abbr: 'BRO', file: null, ...extra })
 const store = () => ({ _hint: 'h', clubs: { 119: [era(1901, 1909), era(1910, 1913, { file: '119-1910-1913.png', source: 'x' })] } })
@@ -93,4 +93,14 @@ test('empty colour strings clear the fields instead of storing ""', () => {
   const saved = out.store.clubs[119].find((e) => e.from === 1914)
   assert.equal('bar' in saved, false)
   assert.equal('onBar' in saved, false)
+})
+
+// Era art may be an SVG or a PNG (the PNG for a logo that only exists as one).
+test('era art is told apart by its bytes: a PNG by its signature, an SVG by its markup', () => {
+  const png = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(32)])
+  assert.equal(describeEraArt(png).ext, 'png')
+  assert.equal(describeEraArt(Buffer.from('<svg viewBox="0 0 1 1"><path d="M0 0h1v1H0z"/></svg>')).ext, 'svg')
+  assert.match(describeEraArt(Buffer.from('GIF89a....')).problem, /not an SVG/)
+  assert.match(describeEraArt(Buffer.from('<svg><script>x()</script></svg>')).problem, /script/)
+  assert.match(describeEraArt(Buffer.alloc(2 * 1024 * 1024, 1)).problem, /too large/)
 })

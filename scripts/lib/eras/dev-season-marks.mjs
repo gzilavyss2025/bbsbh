@@ -32,9 +32,10 @@ const REPO_ROOT = path.resolve(fileURLToPath(new URL('../../..', import.meta.url
 export const DEV_ERA_ROUTE = 'era'
 export const DEV_ERA_ART_ROUTE = 'era-art'
 
-// Vector markup, like the custom marks: the cap stops a runaway body, it is not
-// a standard.
-export const DEV_ERA_ART_MAX_BODY_BYTES = 512 * 1024
+// An SVG is small markup; a PNG is a raster, so the cap is larger. It stops a
+// runaway body, it is not a standard.
+export const DEV_ERA_ART_MAX_BODY_BYTES = 1024 * 1024
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 
 const ART_DIR = 'public/logos/historical'
 const STORE_FILE = 'src/lib/data/season-marks.json'
@@ -159,20 +160,28 @@ export async function deleteEra(input) {
   return { deleted: true }
 }
 
-// Write one SVG as the era's mark. Refused when the markup is not an SVG or
-// carries anything executable (the same gate the custom marks use). A mark
-// already on the era is replaced; its old file goes if the name changes (a
-// fetched PNG becoming an SVG, say).
-export async function saveEraArt({ teamId, from, svg }) {
-  const rejection = describeMarkRejection(svg)
-  if (rejection) return { problem: rejection, status: 400 }
+// What the bytes are: a PNG (by its signature) or an SVG (the custom marks'
+// gate: real markup, nothing executable), or a `problem`.
+export function describeEraArt(bytes) {
+  if (bytes.length > DEV_ERA_ART_MAX_BODY_BYTES) return { problem: 'art is too large (1 MB at most)' }
+  if (bytes.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE)) return { ext: 'png' }
+  const rejection = describeMarkRejection(bytes.toString('utf8'))
+  return rejection ? { problem: rejection } : { ext: 'svg' }
+}
+
+// Write one SVG or PNG as the era's mark. A mark already on the era is
+// replaced; its old file goes if the name changes (a fetched PNG becoming an
+// SVG, say).
+export async function saveEraArt({ teamId, from, bytes }) {
+  const kind = describeEraArt(bytes)
+  if (kind.problem) return { problem: kind.problem, status: 400 }
   const store = await readStore()
   const era = store.clubs?.[String(teamId)]?.find((e) => e.from === from)
   if (!era) return { problem: `team ${teamId} has no era starting ${from}`, status: 404 }
 
-  const name = `${teamId}-${era.from}-${era.to}.svg`
+  const name = `${teamId}-${era.from}-${era.to}.${kind.ext}`
   await mkdir(path.resolve(REPO_ROOT, ART_DIR), { recursive: true })
-  await writeFile(resolveEraFile(name), String(svg))
+  await writeFile(resolveEraFile(name), bytes)
   if (era.file && era.file !== name) await rm(resolveEraFile(era.file), { force: true })
   era.file = name
   delete era.skipped
