@@ -134,7 +134,7 @@ export function PlayDiamond({ reached = 0, scored = false, earned = true, legNot
           <polygon
             points={`${HOME} ${FIRST} ${SECOND} ${THIRD}`}
             fill="none"
-            stroke="var(--rule)"
+            stroke="var(--border-rule)"
             strokeWidth={1.5}
             strokeLinejoin="round"
           />
@@ -173,7 +173,7 @@ export function PlayDiamond({ reached = 0, scored = false, earned = true, legNot
           y1={BASES[i][1]}
           x2={BASES[i + 1][0]}
           y2={BASES[i + 1][1]}
-          stroke={scored ? 'var(--paper-2)' : 'var(--graphite-soft)'}
+          stroke={scored ? 'var(--surface-card)' : 'var(--graphite-soft)'}
           strokeWidth={scored ? 2 : 2.5}
           strokeLinecap="round"
           strokeDasharray={GHOST_DASH}

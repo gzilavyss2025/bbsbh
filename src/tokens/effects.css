@@ -139,7 +139,7 @@
 .paper-grid {
   background-color: var(--bg-page);
   background-image:
-    linear-gradient(var(--rule-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px);
+    linear-gradient(var(--border-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-grid) 1px, transparent 1px);
   background-size: 24px 24px;
 }

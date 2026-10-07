@@ -27,8 +27,8 @@ function BaseSquare({ cx, cy, filled }) {
       width={BASE_SIZE}
       height={BASE_SIZE}
       transform={`rotate(45 ${cx} ${cy})`}
-      fill={filled ? 'var(--paper-3)' : 'transparent'}
-      stroke="var(--paper-3)"
+      fill={filled ? 'var(--surface-inset)' : 'transparent'}
+      stroke="var(--surface-inset)"
       strokeWidth="1.6"
     />
   )

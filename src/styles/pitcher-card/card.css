@@ -96,7 +96,7 @@
   overflow: hidden;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
-  background: var(--rule-grid);
+  background: var(--border-grid);
 }
 .pscene svg {
   position: absolute;
@@ -105,7 +105,7 @@
   height: 100%;
   display: block;
 }
-.pscene__sky { fill: var(--rule-grid); }
+.pscene__sky { fill: var(--border-grid); }
 .pscene__grass { fill: var(--field-outfield); }
 .pscene__mound { fill: var(--field-dirt); opacity: 0.75; }
 .pscene__dirt { fill: var(--field-dirt); opacity: 0.55; }

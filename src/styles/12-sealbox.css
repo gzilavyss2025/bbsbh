@@ -711,7 +711,7 @@
 .prepitch {
   margin-bottom: 12px;
   padding-bottom: var(--space-3);
-  border-bottom: var(--bw-hair) dashed var(--border-rule);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
 }
 
 .prepitch__list {

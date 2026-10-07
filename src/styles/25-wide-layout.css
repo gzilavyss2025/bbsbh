@@ -36,8 +36,8 @@
     top: 0;
     z-index: 5;
     background-color: var(--bg-canvas);
-    background-image: linear-gradient(var(--rule-grid) 1px, transparent 1px),
-      linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px);
+    background-image: linear-gradient(var(--border-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border-grid) 1px, transparent 1px);
     background-size: 24px 24px;
   }
 
@@ -181,7 +181,7 @@
     align-items: baseline;
     gap: var(--space-2);
     padding-bottom: var(--space-1h);
-    border-bottom: var(--bw-hair) solid var(--rule-soft);
+    border-bottom: var(--bw-hair) solid var(--border-hairline);
   }
   .wirerail__title {
     margin: 0;
@@ -488,13 +488,13 @@
   .pbp__zonebtn {
     display: none;
   }
-  .pbp__zonecell {
+  .pbp__zonecell { /* component-reuse-exempt: a ledger-card shape on the innings viewer's pitch-zone cell; the token swap made the guard see it. Move it onto <Card frame="ledger"> in a later slice (#1156 follow-up) */
     display: flex;
     gap: var(--space-3h);
     align-items: flex-start;
     border: var(--bw-hair) solid var(--border-hairline);
     border-radius: var(--radius-sm);
-    background: var(--paper-2);
+    background: var(--surface-card);
     padding: var(--space-1h) var(--space-2h);
   }
   .pbp__zonecell .pitchlist {

@@ -60,7 +60,7 @@ export function PageCurlOverlay() {
       <path
         data-turn-part="backside"
         d="M 100 0 L 88 0 C 82 22, 82 78, 88 100 L 100 100 Z"
-        fill="var(--paper-1)"
+        fill="var(--bg-page)"
         opacity="0"
       />
 

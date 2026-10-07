@@ -272,7 +272,7 @@
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
-  color: var(--paper-0);
+  color: var(--bg-canvas);
   background: var(--accent-primary);
   border-top-right-radius: var(--radius-xs);
   border-bottom-left-radius: var(--radius-sm);
@@ -331,7 +331,7 @@
   content: '';
   flex: 1;
   height: var(--bw-hair);
-  background: var(--rule-grid);
+  background: var(--border-grid);
 }
 .psstack__roundlabel:first-child {
   margin-top: 0;

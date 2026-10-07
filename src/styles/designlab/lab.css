@@ -291,7 +291,7 @@
   flex-direction: column;
   gap: 2px;
   padding-bottom: var(--space-2);
-  border-bottom: var(--bw-hair) solid var(--rule-grid);
+  border-bottom: var(--bw-hair) solid var(--border-grid);
 }
 
 .dlab__typelabel {
@@ -371,7 +371,7 @@
   gap: var(--space-3);
   flex-wrap: wrap;
   padding-bottom: var(--space-2);
-  border-bottom: var(--bw-hair) solid var(--rule-grid);
+  border-bottom: var(--bw-hair) solid var(--border-grid);
 }
 
 .dlab__pairsample {
@@ -470,7 +470,7 @@
 .dlab__matrix th,
 .dlab__matrix td {
   padding: var(--space-2);
-  border-bottom: var(--bw-hair) solid var(--rule-grid);
+  border-bottom: var(--bw-hair) solid var(--border-grid);
   text-align: left;
   vertical-align: top;
 }

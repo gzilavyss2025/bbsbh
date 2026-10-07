@@ -106,7 +106,7 @@
   --ps-page-w: 258mm;
   --ps-row: 6.5mm;
   --ps-rule: var(--border-rule);
-  --ps-faint: var(--rule-grid);
+  --ps-faint: var(--border-grid);
   box-sizing: border-box;
   width: var(--ps-page-w);
   padding: 4mm;

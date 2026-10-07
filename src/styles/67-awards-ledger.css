@@ -235,7 +235,7 @@
 }
 .awardidx__row {
   padding: var(--space-1h) 0;
-  border-bottom: var(--bw-hair) solid var(--rule-grid);
+  border-bottom: var(--bw-hair) solid var(--border-grid);
 }
 .awardidx__row:last-child {
   border-bottom: none;
@@ -298,7 +298,7 @@
 }
 .awards__expand:hover {
   background: var(--award-line);
-  color: var(--paper-2);
+  color: var(--text-on-ink);
 }
 .awards__expand:focus-visible,
 .awards__collapse:focus-visible {

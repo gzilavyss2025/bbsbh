@@ -168,8 +168,8 @@ body {
       rgba(255, 253, 246, 0.7),
       transparent 60%
     ),
-    linear-gradient(var(--rule-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px);
+    linear-gradient(var(--border-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-grid) 1px, transparent 1px);
   background-size: 100% 100%, 24px 24px, 24px 24px;
   background-attachment: fixed, scroll, scroll;
 }

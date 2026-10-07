@@ -406,7 +406,7 @@
   height: 2px;
   overflow: hidden;
   border-radius: var(--radius-pill);
-  background: var(--rule-grid);
+  background: var(--border-grid);
 }
 
 .searchoverlay__progressbar {
