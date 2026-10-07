@@ -179,7 +179,10 @@ don't run these by hand.
   once) and writes `.scratch/run-expectancy-eras/season-YYYY.json`, sums only, never
   feeds, and skips a season whose file exists. Those checkpoints are COMMITTED, because
   a cloud container is lost when its session ends. `--era-aggregate --decade=1980` merges
-  a decade's checkpoints and exits 1, writing nothing, if a season has none. Decades:
+  a decade's checkpoints and exits 1, writing nothing, if a season has none. A sweep that
+  has a failed feed fetch (after the client's retries) exits 1 and writes no checkpoint, because
+  a re-run skips a season whose file exists; a feed with no plays is counted in the checkpoint's
+  `noPlays` and is fine. Cancelled games (120 in 2001) are not scheduled games. Decades:
   2020s = 2020-2023 (2020 counts as a normal season), 2010s, 2000s, 1990s, 1980s, 1970s,
   1960s. **Pitch lists before 1990 are partial** (about 1.5 pitches per plate appearance, not 3.9;
   sampled July 1960/70/80 and the 1985 sweep): the pre-pitch count is wrong there, so use `re24`

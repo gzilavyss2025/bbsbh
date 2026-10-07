@@ -2,6 +2,7 @@
 // generator is a top-level script: importing it RUNS it). `accumulateGame` is the
 // per-game walk, moved here unchanged; the rest build and merge the per-season
 // checkpoints behind `--era-sweep` / `--era-aggregate`.
+import { mapConcurrent } from '../concurrency.mjs'
 import { stateKey, re24Key, ERA_FIRST, ERA_LAST } from '../../../src/lib/runExpectancy.js'
 
 const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
@@ -102,10 +103,56 @@ export function accumulateGame(feed, states, re24) {
 // Key order follows feed arrival, so sort it: a re-run then gives the same bytes.
 const sorted = (m) => Object.fromEntries([...m].sort(([a], [b]) => (a < b ? -1 : 1)))
 
+// Every Final, played regular-season gamePk of a schedule response. Same
+// postponed-replay dedup guard as gen-umpires.mjs / gen-umpire-accuracy.mjs: a
+// replayed game can be listed under both its original date and its officialDate;
+// keep only the listing whose bucket matches its own officialDate. A cancelled
+// game (the 120 of 2001) has abstractGameState Final but no play-by-play ever.
+export function schedulePks(schedule) {
+  const pks = []
+  for (const d of schedule?.dates ?? []) {
+    for (const g of d.games ?? []) {
+      if (g.status?.abstractGameState !== 'Final') continue
+      if (g.status?.detailedState === 'Cancelled') continue
+      if (d.date !== g.officialDate) continue
+      pks.push(g.gamePk)
+    }
+  }
+  return pks
+}
+
+// Walk each game's feed into `states`/`re24` AS IT ARRIVES, so a season's feeds
+// (several hundred KB to a few MB each) are never all in memory at once. Tells
+// three outcomes apart: `games` (a feed with plays), `noPlays` (a feed that
+// loaded with no plays, normal before 1990), and `failed` (the gamePks whose
+// fetch threw after every retry). Best-effort: a failed fetch is listed, never
+// thrown, so the nightly-style default mode stays alive; era mode refuses to
+// write a checkpoint when `failed` is not empty.
+export async function sweepGames(pks, limit, fetchFeed, states, re24, onProgress) {
+  const failed = []
+  let games = 0
+  let noPlays = 0
+  let done = 0
+  await mapConcurrent(pks, limit, async (pk) => {
+    try {
+      const feed = await fetchFeed(pk)
+      if (accumulateGame(feed, states, re24)) games++
+      else noPlays++
+    } catch {
+      failed.push(pk)
+    }
+    done++
+    onProgress?.(done)
+  })
+  return { games, noPlays, failed: failed.sort((a, b) => a - b) }
+}
+
 // One season's sums as plain JSON (the committed checkpoint file).
-// `scheduled` vs `gamesSwept` shows a season where a feed failed.
-export function checkpointOf(season, scheduled, gamesSwept, states, re24) {
-  return { season, scheduled, gamesSwept, states: sorted(states), re24: sorted(re24) }
+// `scheduled` vs `gamesSwept` shows a season with missing games; `noPlays` says
+// how many of those loaded with no plays (older checkpoints do not carry it).
+export function checkpointOf(season, scheduled, gamesSwept, states, re24, noPlays) {
+  const counts = noPlays == null ? {} : { noPlays }
+  return { season, scheduled, gamesSwept, ...counts, states: sorted(states), re24: sorted(re24) }
 }
 
 // The season strings of one decade ('1980' or '1980s'). The 2020s stop at ERA_LAST;
