@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T15:13:27.080Z",
+  "generatedAt": "2026-10-07T20:44:38.428Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -397,7 +397,7 @@
       "position": "RHP",
       "levelRaw": "ALL (2)",
       "statLine": "103.2 IP, 3.65 ERA, 144 SO",
-      "age": 21,
+      "age": 22,
       "number": "90"
     },
     {
@@ -667,7 +667,7 @@
     {
       "rank": 57,
       "playerId": 695491,
-      "name": "Joshua Báez",
+      "name": "Joshua Baez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -1772,18 +1772,6 @@
     },
     {
       "orgRank": 27,
-      "playerId": 808087,
-      "name": "Junior Sanchez",
-      "teamId": 109,
-      "team": "ari",
-      "position": "RHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "113.2 IP, 4.28 ERA, 130 SO",
-      "age": 21,
-      "topRank": null
-    },
-    {
-      "orgRank": 27,
       "playerId": 826536,
       "name": "Brian Curley",
       "teamId": 109,
@@ -1792,6 +1780,18 @@
       "levelRaw": "ALL (2)",
       "statLine": "116.0 IP, 5.28 ERA, 130 SO",
       "age": 23,
+      "topRank": null
+    },
+    {
+      "orgRank": 27,
+      "playerId": 808087,
+      "name": "Junior Sanchez",
+      "teamId": 109,
+      "team": "ari",
+      "position": "RHP",
+      "levelRaw": "ALL (2)",
+      "statLine": "113.2 IP, 4.28 ERA, 130 SO",
+      "age": 21,
       "topRank": null
     },
     {
@@ -1917,7 +1917,7 @@
     {
       "orgRank": 8,
       "playerId": 801725,
-      "name": "Luis De León",
+      "name": "Luis De Leon",
       "teamId": 110,
       "team": "bal",
       "position": "LHP",
@@ -4815,7 +4815,7 @@
       "position": "RHP",
       "levelRaw": "ALL (2)",
       "statLine": "103.2 IP, 3.65 ERA, 144 SO",
-      "age": 21,
+      "age": 22,
       "topRank": 33
     },
     {
@@ -7401,7 +7401,7 @@
     {
       "orgRank": 3,
       "playerId": 695491,
-      "name": "Joshua Báez",
+      "name": "Joshua Baez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -8487,7 +8487,7 @@
       "position": "SS",
       "levelRaw": "A",
       "statLine": ".200, 2 HR, 10 RBI",
-      "age": 21,
+      "age": 22,
       "topRank": null
     },
     {
@@ -9051,7 +9051,7 @@
       "position": "OF",
       "levelRaw": "ALL (3)",
       "statLine": ".238, 3 HR, 27 RBI",
-      "age": 21,
+      "age": 22,
       "topRank": null
     },
     {
@@ -9441,7 +9441,7 @@
     {
       "orgRank": 20,
       "playerId": 691548,
-      "name": "Rolddy Muñoz",
+      "name": "Rolddy Munoz",
       "teamId": 144,
       "team": "atl",
       "position": "RHP",
