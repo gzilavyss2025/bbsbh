@@ -88,7 +88,7 @@
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }
-/* The throwing hand in the lineup card's green, as on .pitchernotice__hand. */
+/* The throwing hand in the lineup card's green, as on .change__hand. */
 .psseries__starterhand {
   font-weight: var(--w-bold);
   color: var(--field);

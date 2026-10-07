@@ -31,7 +31,7 @@ export function PitcherSheet({ feed, arm, onClose }) {
             pitcher={pitcher}
             teamId={team.id}
             teamName={team.name}
-            className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
+            className={noticeClass({ tone: 'event', className: 'change--framed' })}
             label={fresh ? 'Now pitching' : 'Pitching'}
           />
         </div>
