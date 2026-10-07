@@ -12,6 +12,9 @@ import { ballparkFor } from '../../../src/lib/ballpark/ballparkData.js'
 import { buildFieldGeometry, HOME } from '../../../src/lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg } from '../../../src/lib/ballpark/hitProjection.js'
 import { ballFlightPath } from '../../../src/lib/ballpark/ballFlight.js'
+import { pitchCardInfo } from '../../../src/api/playbyplay/pitchInfo.js'
+import { atBatScenePitches, atBatZone } from '../../../src/lib/pitcherCard/atBat.js'
+import { stage, releasePoint } from '../../../src/lib/pitcherCard/scene.js'
 
 const [inPath, outPath, savantDir] = process.argv.slice(2)
 const D = JSON.parse(fs.readFileSync(inPath, 'utf8'))
@@ -45,6 +48,15 @@ for (const g of D.games) {
     const play = byAbi.get(s.atBatIndex)
     if (!play) continue
     s.batSide = play.matchup?.batSide?.code ?? 'R'
+    // The Now Pitching scene's at-bat replay (PR 1521), through the app's own model.
+    const { pitchDetails } = pitchCardInfo(feed, play)
+    const zone = atBatZone(pitchDetails)
+    const r1 = (v) => Math.round(v * 10) / 10
+    s.scene = {
+      stage: stage(zone),
+      release: releasePoint(play.matchup?.pitchHand?.code === 'L'),
+      pitches: atBatScenePitches(pitchDetails).map((p) => ({ no: p.no, family: p.family, name: p.name, mph: p.mph, call: p.call, T: p.T, pts: p.pts.map((q) => q.map(r1)) })),
+    }
     s.track.forEach((p, i) => { const r = sv.get(`${s.atBatIndex}:${i + 1}`); if (r) { p.bat = r.batSpeed ?? null; p.flight = r.plateTime ?? null }; const q = sw.get(`${s.atBatIndex}:${i + 1}`); if (q) p.swing = q })
     const ev = play.playEvents.findLast((e) => e.hitData?.coordinates?.coordX != null)
     if (!ev) continue

@@ -187,21 +187,75 @@ scratchpad). The canvas embeds the whole game in a script variable and draws onl
 revealed steps; the app must not do that (see §8). The bat drawing, the timing
 (560 ms a pitch) and the 30° default are mine.
 
+## 4c. Round 3: one screen, the Now Pitching scene (Gary, 2026-10-07)
+
+Gary's ask: "incorporating the design preference for the pitch flight and the view
+of the mound and grass and batters box and home plate, plus trying to fit everything
+in one screen without scrolling, try re-designing this."
+
+**The frame.** 390 × 763: an iPhone 14/15 in standalone mode, less the status bar
+and home indicator. Nothing on the page scrolls. Measured in the mock: header 43,
+band 59, stage 261, #22 card 140, runners and counts 40, trail 41, running line 80,
+bar 63, with 6px gaps. That is everything the round-1 design kept, on one screen.
+
+**The stage is the Now Pitching scene,** drawn from the app's own model
+(`atBatScenePitches`, `stage(zone)`, `releasePoint` from `lib/pitcherCard/`), so the
+mock shows the real measured flights: sky, grass, mound, plate dirt, both batter's
+boxes, the plate, the zone box on the plate, each pitch with its trail from the
+release point, then a ring with its number (X for the ball in play) where it
+crossed. The navy bar under it reads like the at-bat replay: "X · Cutter · 91.0 mph
+/ Pitch 9 of 9 · In play, no out". On contact a small field card comes up in the
+lower-left corner (over the empty left batter's box area) and the flight draws to
+where the ball landed. No bat (round 2).
+
+**Two orders.**
+
+| | Top to bottom | Files |
+|---|---|---|
+| **O1, stage first** | header, band, stage, #22 card, runners + counts, trail, running line, Next | `onescreen-o1hr.gif` (Velázquez HR, full phone), `onescreen-o1dav.gif` (Davidson, stage only), `onescreen-o1-end.jpg`, `onescreen-o1-hr.jpg`, `onescreen-o1-sealed.jpg` |
+| **O2, box first** | header, band, trail, #22 card, stage, runners + counts, running line, Next | `onescreen-o2hr.gif`, `onescreen-o2-mid.jpg`, `onescreen-o2-hr.jpg` |
+
+**Recommendation: O2.** The eye goes band → trail → the box to pencil → the
+stage that explains it, and the stage sits right above the thumb's Next button.
+O1 puts the show first but splits the trail from the band it reads with.
+
+**What else moved to fit.**
+- Notice cards (pitching change, PH, PR, AR) sit on top of the stage while it is
+  sealed, where there is nothing to cover (`onescreen-o1-sealed.jpg`).
+- The pitch count moved into the band's row; at half close the band's row holds
+  R H E LOB | P WH FO the same way.
+- The batter's block: name once, "Bats 3rd · RF · #94", today's line; the pitcher
+  folds to "vs Matthews #52 · RHP" over his day line.
+- One line under the stage: P · WH · FO, EV and distance, the top bat speed, then
+  the runner events (SB, CS, PK…) and ABS results.
+- The running line stays (ADR-0043: never removed).
+
+**Open question for Gary.** The scene plays at its own pace: ×3 slow motion plus a
+0.9 s hold per pitch, so a 9-pitch at-bat runs about 20 s. While scoring live that
+may be too slow. Options: play only the last pitch on reveal (Replay plays them
+all), or play the at-bat at ×1.5. The mock plays all of them.
+
+What was mocked (round 3): `stage/onescreen.js` and `stage/onescreen.css` over the
+canvas and the round-2 layer; `stage/enrich.mjs` adds the scene data;
+`stage/build.mjs … onescreen` builds it. The frame size, the order and the field
+card are mine.
+
 ## 5. Slices (each at most 5 files)
 
-Order follows the handoff §9. Each slice is one PR, "Part of #1389". S1 goes first
+Order follows the handoff §9. Round 3 (§4c) adds S11: the one-screen frame. Each slice is one PR, "Part of #1389". S1 goes first
 because it removes the accidental-spoil control.
 
 | # | Slice | Files (max 5) | Pattern to follow | Done test | Model |
 |---|---|---|---|---|---|
 | S1 | Bar + band trims + linescore fit: drop "Rest of half", one centered Next, "41 PITCHES", no "No outs", E column fits at 390px | `inning/focus/FocusControls.jsx`, `inning/InningActionBar.jsx`, `styles/focus/stage.css`, `gamehud/RollingLine.jsx`, `e2e/reveal-hit-area.spec.js` (+ `inning-modal-stacking.spec.js` if needed; split off if over 5) | ADR-0043 console bar; keep the specs' hit-area assertions | No "Rest of half" in DOM at 390px; RollingLine's 12 columns inside 390px (screenshot); `npm test` green | Sonnet 5.5, medium |
 | S2 | Names, ordinals, day lines (batter and pitcher, revealed steps only) | `playbyplay/AtBatHero.jsx`, new pure `api/playbyplay/dayLine.js`, its test, `spoiler-manifest.json`, `src/api/CLAUDE.md` | reveal-only module called inside `SealBox` (ADR-0001); `computeHalfInningFeed` stepCap | Unit test: day line at step k counts only steps < k; batter named once on screen | Opus 5.5, high (new reveal-only read) |
-| S3 | The stage, zone half (V1): each pitch flies in along its measured path (`PitchScene` `atBat` mode), numbers and X, ABS rings, no bat until a real swing pose is agreed; runner-event and ABS lines under it; fixed sealed height | new `inning/focus/AtBatStage.jsx`, `styles/focus/stage-anim.css`, `runnerNotes.js` (WP/BK/PB labels), test, `AtBatHero.jsx` mount | `AtBatReplay.jsx` / `PitchScene.jsx` / `lib/pitcherCard/atBat.js` (PR 1521) reused inline; ADR-0046 | Unit test: `runnerPitchLabel('wild_pitch', 2)` returns "Pitch 2" (fails today); no stage node before reveal; reduced motion shows the end state | Opus 5.5, high |
+| S3 | The stage, zone half (V1; round 3: the one-screen stage, §4c): each pitch flies in along its measured path (`PitchScene` `atBat` mode), numbers and X, ABS rings, no bat until a real swing pose is agreed; runner-event and ABS lines under it; fixed sealed height | new `inning/focus/AtBatStage.jsx`, `styles/focus/stage-anim.css`, `runnerNotes.js` (WP/BK/PB labels), test, `AtBatHero.jsx` mount | `AtBatReplay.jsx` / `PitchScene.jsx` / `lib/pitcherCard/atBat.js` (PR 1521) reused inline; ADR-0046 | Unit test: `runnerPitchLabel('wild_pitch', 2)` returns "Pitch 2" (fails today); no stage node before reveal; reduced motion shows the end state | Opus 5.5, high |
 | S4 | Runners chip + sheet: runner boxes 3rd·2nd·1st, departed for one step (kraft chip), "Bases empty" disabled | new `inning/focus/RunnersSheet.jsx`, `api/expresslane/runners.js` (reuse `expressDeck`), `styles/focus/bases.css`, `HalfInning.jsx` mount, test | Express Lane deck (`77c-express-lane-deck.css`); ADR-0072 (box at current cap, never cap+1) | Unit test: runners at step k match `runnersOnBase` at cap k; departed only at k | Opus 5.5, high |
 | S5 | Notice cards that say what to write (rule #, PR #, AR) | `PitcherNotice.jsx`, `PinchRunNotice.jsx`, `BatterNotice.jsx`, `PlacedRunnerCard.jsx`, `HalfInning.jsx` | existing Notice component (#1132 N1 to N9) | 823035 top 1st and the PH/PR moments render the "write" line | Sonnet 5.5, medium |
 | S6 | The stage, field half (V1): on contact the zone shrinks to a corner and the flight draws to the landing mark on the real park; runner dots on the bases; Replay | `AtBatStage.jsx`, `stage-anim.css`, `components/charts/BallFlight.jsx` (lift the plot), test | `lib/ballpark/ballFlight.js`, `hitProjection.js`, `ballparkData.js` (all reused as is); `api/hitchart.js` stays reveal-only | Test: HR landing mark absent before reveal; untracked park (MiLB) shows the zone only | Opus 5.5, high |
 | S9 | Bat speed from Savant `/gf`, reveal-only, shown as a number that fills in when it arrives | new `api/savant/gameFeed.js` + test, `spoiler-manifest.json`, `src/api/CLAUDE.md`, `AtBatStage.jsx` | `linescore.js` reveal-only class (ADR-0001); optional with fallback (`docs/data-enrichment.md` §3) | Test: only the revealed at-bat's rows leave the module; no `/gf` call before reveal | Opus 5.5, high |
 | S10 | Swing path for finished games (CSV): contact-swing line; a drawn bat only after Gary approves a real swing pose | `api/savant/swingPath.js` + test, `AtBatStage.jsx`, `spoiler-manifest.json` | S9's module; CSV parse at fetch, not at build | Test: a live game (CSV empty) falls back to 30° with no error | Sonnet 5.5, high |
+| S11 | One-screen frame: fixed 100dvh console, notices over the sealed stage, pitch count into the band, compact batter block | `styles/focus/stage.css`, `styles/focus/console.css`, `styles/focus/atbat.css`, `AtBatHero.jsx`, `HalfInning.jsx` | ADR-0043 console; `100dvh` with `env(safe-area-inset-*)` | Playwright screenshot at 390×763 (run by Gary): `document.scrollingElement.scrollHeight <= innerHeight` on gamePk 823169 and 823035 | Opus 5.5, high |
 | S7 | Review card (manager / crew chief) + ABS bank pips, revealed only | new `api/playbyplay/reviews.js` + test, `gamehud/ConsoleBand.jsx`, `AtBatHero.jsx`, `spoiler-manifest.json` | `challenges.js`, but NOT `gameData.absChallenges` (whole-game, leaks) | Unit test: bank at step k ignores challenges after k (824546, 823169) | Opus 5.5, high |
 | S8 | The three notation rulings (this shape session's options) | `advanceCode.js`, `halfInningFeed.js`, `eventTypes.js` or a new set, test, `docs/adr/0043` amendment | the existing `legAdvanceCode` / `runnerOutCode` tests | Test that fails first: 823166 bot 1st Cox's leg to 3rd has `slot: null`; 824951 Neto reads the chosen PKCS mark | Sonnet 5.5, high |
 
