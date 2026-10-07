@@ -8,15 +8,22 @@
    sequence numbers and X (rule 3). No bat is drawn (Gary, round 2).
    #o1 = stage first, #o2 = the #22 box first. Only v.cur (revealed) is drawn. */
 const LAYOUT = (location.hash.match(/o[12]/) || ['o1'])[0];
-const SEG = 40, SLOWF = 3, HOLDS = 0.9;
+// Gary (round 3): faster than the card's x3, and the deciding pitch first.
+// x1.5 slow motion with a 0.35 s hold; a 1.2 s rest before the at-bat repeats.
+const SEG = 40, SLOWF = 1.5, HOLDS = 0.35, LOOP_REST = 1.2;
 const f1 = (n) => n.toFixed(1);
 const ptsAttr = (a) => a.map(([x, y]) => `${f1(x)},${f1(y)}`).join(' ');
 
+// The timeline: first the deciding (last) pitch flies in over the earlier ones'
+// rings, then the whole at-bat plays in order and repeats.
 function sceneFrameJs(pitches, el) {
   const slot = Math.max(...pitches.map((p) => p.T)) * SLOWF + HOLDS;
-  if (el >= slot * pitches.length) return { idx: pitches.length - 1, progress: 1, done: true, slot };
-  const idx = Math.floor(el / slot);
-  return { idx, progress: Math.min(1, (el % slot) / (pitches[idx].T * SLOWF)), slot };
+  const n = pitches.length, last = n - 1;
+  if (el < slot) return { idx: last, progress: Math.min(1, el / (pitches[last].T * SLOWF)), slot, lead: true };
+  const period = n * slot + LOOP_REST, u = (el - slot) % period;
+  if (u >= n * slot) return { idx: last, progress: 1, slot, rest: true };
+  const idx = Math.floor(u / slot);
+  return { idx, progress: Math.min(1, (u % slot) / (pitches[idx].T * SLOWF)), slot };
 }
 
 function sceneSvg(v, a) {
@@ -94,9 +101,9 @@ function osPlay(at) {
   const fld = root.querySelector('.osfield');
   const set = (sel, t) => { const n = root.querySelector(sel); if (n) n.textContent = t; };
   const draw = (el) => {
-    const { idx, progress, done, slot } = sceneFrameJs(P, el);
+    const { idx, progress, slot, rest: done } = sceneFrameJs(P, el);
     const p = P[idx];
-    ghosts.forEach((g, j) => g.setAttribute('visibility', j < idx || (j === idx && done) ? 'visible' : 'hidden'));
+    ghosts.forEach((g, j) => g.setAttribute('visibility', j < idx || (j === idx && (done || progress >= 1)) ? 'visible' : 'hidden'));
     const lab = idx === P.length - 1 && a.flight ? 'X' : p.no;
     set('[data-bn]', `${lab} · ${p.name.replace(/^\d+ · /, '')}`); set('[data-bm]', `${p.mph} mph`); set('[data-bs]', `Pitch ${p.no} of ${P.length}`); set('[data-bc]', p.call || '');
     const m = progress * SEG, whole = Math.floor(m), pts = p.pts;
@@ -112,8 +119,8 @@ function osPlay(at) {
     ball.setAttribute('cx', f1(cur[0])); ball.setAttribute('cy', f1(cur[1])); ball.setAttribute('r', done ? 0 : (cur[2] / 2).toFixed(2));
     // On contact (the last pitch lands, in play): the field comes up in the corner
     // and the flight draws to where the ball came down.
-    if (fld) { const tc = (P.length - 1) * slot + P[P.length - 1].T * SLOWF; const k = Math.max(0, Math.min(1, (el - tc) / 1.2)); fld.style.opacity = Math.min(1, k * 3); fld.style.setProperty('--k', k); }
-    return done && (!fld || el > (P.length - 1) * slot + 3);
+    if (fld) { const tc = P[P.length - 1].T * SLOWF; const k = Math.max(0, Math.min(1, (el - tc) / 1.0)); fld.style.opacity = Math.min(1, k * 3); fld.style.setProperty('--k', k); }
+    return false;
   };
   if (at != null) { draw(at); return; }
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) { draw(1e6); return; }

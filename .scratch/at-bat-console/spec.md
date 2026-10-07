@@ -212,8 +212,8 @@ where the ball landed. No bat (round 2).
 
 | | Top to bottom | Files |
 |---|---|---|
-| **O1, stage first** | header, band, stage, #22 card, runners + counts, trail, running line, Next | `onescreen-o1hr.gif` (Velázquez HR, full phone), `onescreen-o1dav.gif` (Davidson, stage only), `onescreen-o1-end.jpg`, `onescreen-o1-hr.jpg`, `onescreen-o1-sealed.jpg` |
-| **O2, box first** | header, band, trail, #22 card, stage, runners + counts, running line, Next | `onescreen-o2hr.gif`, `onescreen-o2-mid.jpg`, `onescreen-o2-hr.jpg` |
+| **O1, stage first** | header, band, stage, #22 card, runners + counts, trail, running line, Next | `onescreen-o1hr.gif` (Velázquez HR, full phone), `onescreen-o1-end.jpg`, `onescreen-o1-hr.jpg`, `onescreen-o1-sealed.jpg` |
+| **O2, box first** | header, band, trail, #22 card, stage, runners + counts, running line, Next | `onescreen-o2hr.gif`, `onescreen-o2dav.gif` (Davidson, stage only), `onescreen-o2-mid.jpg`, `onescreen-o2-hr.jpg` |
 
 **Recommendation: O2.** The eye goes band → trail → the box to pencil → the
 stage that explains it, and the stage sits right above the thumb's Next button.
@@ -230,10 +230,14 @@ O1 puts the show first but splits the trail from the band it reads with.
   the runner events (SB, CS, PK…) and ABS results.
 - The running line stays (ADR-0043: never removed).
 
-**Open question for Gary.** The scene plays at its own pace: ×3 slow motion plus a
-0.9 s hold per pitch, so a 9-pitch at-bat runs about 20 s. While scoring live that
-may be too slow. Options: play only the last pitch on reveal (Replay plays them
-all), or play the at-bat at ×1.5. The mock plays all of them.
+**Play speed (Gary decided, 2026-10-07):** "last pitch to start, but then it
+repeats and plays them all. i want it to be faster. it's too slow now." So on
+reveal the deciding pitch flies in first, over the earlier pitches' rings. Then
+the whole at-bat plays in order and repeats, with a 1.2 s rest between loops. The
+speed is ×1.5 slow motion with a 0.35 s hold (the card uses ×3 and 0.9 s), so a
+9-pitch at-bat loops in about 10 s. Inference: the loop should stop when the stage
+leaves the screen, as PitchScene's IntersectionObserver already does, and under
+reduced motion the stage shows the end state only.
 
 What was mocked (round 3): `stage/onescreen.js` and `stage/onescreen.css` over the
 canvas and the round-2 layer; `stage/enrich.mjs` adds the scene data;
