@@ -12,10 +12,7 @@ const DOOR = /\.[\w-]*(__door|__more|__expand|-expand|__newtile|__addpage)\b/
 // scorecard/ is bespoke and out of scope. Shrink this list; never grow it.
 const PENDING = new Set(['.shelf__newtile', '.vsteam__door', '.sc-armnotice__more'])
 
-const css = (d) =>
-  readdirSync(d, { withFileTypes: true }).flatMap((e) =>
-    e.isDirectory() ? css(join(d, e.name)) : e.name.endsWith('.css') ? [join(d, e.name)] : [],
-  )
+const css = (d) => readdirSync(d, { recursive: true }).filter((f) => f.endsWith('.css')).map((f) => join(d, f))
 
 test('no door selector draws a dashed rule', () => {
   const bad = []
