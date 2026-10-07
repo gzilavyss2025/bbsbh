@@ -7,6 +7,7 @@ import {
   isActiveRookie,
   rookieRecordFor,
   rookieShardKey,
+  rookiesForGameSeason,
   showRookiePill,
 } from '../src/api/rookies.js'
 
@@ -137,4 +138,21 @@ test('fetchRookieRecord degrades to null when the shard is missing', async (t) =
 test('fetchRookiesData degrades to an empty status map when the file is missing', async (t) => {
   t.mock.method(globalThis, 'fetch', async () => ({ ok: false, status: 404, json: async () => ({}) }))
   assert.deepEqual(await fetchRookiesData(), { generatedAt: null, players: {} })
+})
+
+// --- rookiesForGameSeason: the flag means "under the limit TODAY" ------------
+
+test('rookiesForGameSeason drops the data for a game from another season', () => {
+  assert.equal(rookiesForGameSeason(DATA, '1927', 2026), null)
+  assert.equal(showRookiePill(rookiesForGameSeason(DATA, '1927', 2026), 111, true), false)
+})
+
+test('rookiesForGameSeason keeps the data for a current-season game', () => {
+  assert.equal(rookiesForGameSeason(DATA, '2026', 2026), DATA)
+  assert.equal(showRookiePill(rookiesForGameSeason(DATA, '2026', 2026), 111, true), true)
+})
+
+test('rookiesForGameSeason keeps today\'s behaviour for a feed with no season', () => {
+  assert.equal(rookiesForGameSeason(DATA, null, 2026), DATA)
+  assert.equal(rookiesForGameSeason(null, null, 2026), null)
 })
