@@ -800,6 +800,10 @@
       "class": "spoiler-free",
       "why": "The player hub's Stats tab loader — the game log, the splits and the career register. A game-log row carries this player's own line and a link to that game's (sealed) box score, never the game's score; the register is a career aggregate. Its one score-adjacent element is SplitsVsTeam's last-meeting line, gated against the page's own asOf in the component."
     },
+    "ovr/rating.js": {
+      "class": "spoiler-free",
+      "why": "Pure OVR rating: Savant season percentiles in, bucket bars and one rating out (docs/ovr-rating.md). Player pages are open surfaces (ADR-0034) and the inputs are season quality-of-contact and fielding figures, never a game's result. It fetches nothing and reads no game."
+    },
     "playerHoverCard.js": {
       "class": "spoiler-free",
       "why": "The global name-link hover card (PlayerLink, desktop only) — season stat tiles, same open-surface footing as the player page's own season tiles (person/stats.js). No per-game result."
