@@ -4,7 +4,6 @@ import { PostseasonPlateLine } from '../components/umpire/PostseasonPlateLine.js
 import { UmpireTendencies } from '../components/umpire/UmpireTendencies.jsx'
 import { gamePath, umpirePath } from '../lib/route.js'
 import { ALL_MLB_TEAM_IDS, teamClubName } from '../lib/teams.js'
-import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useNav } from '../lib/nav.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
@@ -17,7 +16,7 @@ import { Button } from '../components/ui/control/Button.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { monthDayName } from '../lib/dates.js'
 import { seasonRangeLabel } from '../lib/seasons/view.js'
-import { useSeasonView } from '../hooks/seasons/useSeasonView.js'
+import { useSeasonData } from '../hooks/seasons/useSeasonData.js'
 import { SeasonPicker } from '../components/season/SeasonPicker.jsx'
 import { UmpireSeasonCompare } from '../components/umpire/UmpireSeasonCompare.jsx'
 
@@ -106,14 +105,10 @@ function hpTeamRecords(games) {
 // accuracy store's first, or after its last, no folder: `strict`, #1482). Compare stacks the two
 // seasons in one small table (UmpireSeasonCompare).
 export function UmpirePage({ id, seasonYear, vs }) {
-  const view = useSeasonView('umpires', { seasonYear, vs })
-  const year = view?.shown
-  const umpire = useAsync(() => (view ? loadUmpire(id, { seasonYear: year, strict: true }) : Promise.resolve(null)), [id, view != null, year])
-  const { error, data } = umpire
-  const loading = !view || umpire.loading
-  const { data: then } = useAsync(
-    () => (view?.vs ? loadUmpire(id, { seasonYear: view.vs, strict: true }) : Promise.resolve(null)),
-    [id, view?.vs],
+  const { view, data, prev: then, loading, error } = useSeasonData(
+    'umpires',
+    (o) => loadUmpire(id, { ...o, strict: true }),
+    { seasonYear, vs, deps: [id] },
   )
   const navigate = useNav()
   const [hpOnly, setHpOnly] = useState(false)
@@ -175,7 +170,7 @@ export function UmpirePage({ id, seasonYear, vs }) {
           </p>
         </>
       )}
-      {view.vs != null && <UmpireSeasonCompare now={data} then={then} year={year} vsYear={view.vs} />}
+      {view.vs != null && <UmpireSeasonCompare now={data} then={then} year={view.shown} vsYear={view.vs} />}
 
       <PostseasonPlateLine post={data.accuracyPost?.season} />
       <div className="umpage__toprow">

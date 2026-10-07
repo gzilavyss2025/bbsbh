@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { loadUmpireRankings } from '../api/umpires.js'
 import { fetchTodayPlateUmpireIds } from '../api/schedule.js'
 import { toApiDate } from '../lib/dates.js'
@@ -13,7 +12,7 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Table } from '../components/ui/table/Table.jsx'
 import { umpireRankingsPath } from '../lib/route.js'
 import { SeasonPicker } from '../components/season/SeasonPicker.jsx'
-import { useSeasonView } from '../hooks/seasons/useSeasonView.js'
+import { useSeasonData } from '../hooks/seasons/useSeasonData.js'
 import { boardCompare } from '../lib/seasons/view.js'
 
 const pct1 = (x) => `${(x * 100).toFixed(1)}%`
@@ -30,19 +29,7 @@ const pct1 = (x) => `${(x * 100).toFixed(1)}%`
 // highlight is TODAY's plate, so it lights a row whatever season is shown.
 export function UmpireRankingsPage({ seasonYear, vs }) {
   useDocumentTitle('Home Plate Umpire Rankings')
-  const view = useSeasonView('umpire-accuracy', { seasonYear, vs })
-  const shown = view?.shown
-  const rankings = useAsync(
-    () => (view ? loadUmpireRankings({ seasonYear: shown }) : Promise.resolve(null)),
-    [view != null, shown],
-  )
-  const { error, data } = rankings
-  const loading = !view || rankings.loading
-  const { data: prev } = useAsync(
-    () => (view?.vs ? loadUmpireRankings({ seasonYear: view.vs }) : Promise.resolve(null)),
-    [view?.vs],
-  )
-  const [mode, setMode] = useState('change')
+  const { view, data, prev, loading, error, mode, setMode } = useSeasonData('umpire-accuracy', loadUmpireRankings, { seasonYear, vs })
   const prevById = new Map((prev?.ranked ?? []).map((u) => [u.id, u]))
   const compare = prev
     ? boardCompare({ vs: view.vs, mode, format: 'pct', value: (u) => u.accuracy, prevOf: (u) => prevById.get(u.id) })
@@ -65,7 +52,7 @@ export function UmpireRankingsPage({ seasonYear, vs }) {
       <SeasonPicker view={view} pathFor={umpireRankingsPath} mode={mode} onMode={setMode} />
 
       <p className="hint">
-        {view?.label ? `${view.label} ${shown === 'all' ? 'seasons' : 'season'} ` : 'Season '}
+        {view?.label ? `${view.label} ${view?.shown === 'all' ? 'seasons' : 'season'} ` : 'Season '}
         called-pitch accuracy for every plate umpire with at least a handful of starts behind
         the plate. Tiers are set by standard deviation from the league mean, not an even split —
         {spread != null
@@ -100,7 +87,7 @@ export function UmpireRankingsPage({ seasonYear, vs }) {
               >
                 <td className="team">
                   <span className="umprank__rank">{u.rank}</span>
-                  <UmpireLink id={u.id} seasonYear={shown}>
+                  <UmpireLink id={u.id} seasonYear={view?.shown}>
                     {u.name}
                   </UmpireLink>
                   {todayPlateIds.has(u.id) && (
