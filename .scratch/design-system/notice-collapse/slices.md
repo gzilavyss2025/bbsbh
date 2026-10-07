@@ -490,11 +490,12 @@ Written by the N8b session. It records what shipped. It does not write the N8c p
    `#root .change__eventtext :is(.plink, b)` still carry the `#root` prefix and the
    `caps-exempt:` marker. `npm run lint` (`check-caps`) passes. Computed
    `text-transform` on the event text reads `none`.
-3. **Base: N8a was not merged.** N7 is on `main` (stack PR #1649). N8a did not
-   exist when N8b started, so Gary confirmed a start from `origin/main` without
-   the "N8a as built" read. N8a edits `12-sealbox.css` and `13-play-by-play.css` too, so
-   whichever merges second may need a small conflict fix. They touch different
-   rules (`__shot*` against the eight parts).
+3. **Base: stacked on N8a (PR #1658).** N7 is on `main` (stack PR #1649). N8a was not
+   merged when N8b started. N8b began on `origin/main` (`a75f6edae`), then merged
+   the N8a branch `claude/notice-n8a-rename-s0ke9z` (a merge commit, no rebase). N8a
+   edits `12-sealbox.css` and `13-play-by-play.css` too, on different rules (`__shot*`),
+   so only the two scratch files conflicted (`overrides.tsv` and `slices.md`, both
+   sides kept). Merge #1658 first; then #1657 shows only the N8b change.
 4. **The stylesheet reads `.pitchernotice .change__code` for now.** The root
    `.pitchernotice`, `--event`, `--mv`, `--pbp` and `.pitchernotice--mv .usagepips`
    keep their names until N8c.
