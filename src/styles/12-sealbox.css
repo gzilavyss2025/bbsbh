@@ -140,7 +140,7 @@
 .abs__rows {
   display: flex;
   flex-direction: column;
-  background: var(--paper-2);
+  background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-hairline);
   border-top: none;
   border-radius: 0 0 var(--radius-sm) var(--radius-sm);
@@ -180,7 +180,7 @@
   cursor: default;
 }
 .abs__rowbtn:not(:disabled):hover {
-  background: var(--paper-1);
+  background: var(--bg-page);
 }
 .abs__rowbtn:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -242,7 +242,7 @@
    .rolling__cell) rather than the card's plain paper. */
 .abs__detail {
   padding: var(--space-1) var(--space-3) var(--space-2h);
-  background: var(--paper-1);
+  background: var(--bg-page);
 }
 .abs__detailrow {
   display: flex;
@@ -342,7 +342,7 @@
   flex-direction: column;
   gap: var(--space-1h);
   padding: var(--space-2h);
-  background: var(--paper-2);
+  background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   box-shadow: var(--inset-cell);
@@ -521,7 +521,7 @@
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-2h) var(--space-2);
-  background: var(--paper-2);
+  background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   box-shadow: var(--inset-cell);
@@ -535,11 +535,11 @@
    never had a rule in this repo — and the card census read that comment as a
    selector and filed .pin-card as dead code to delete (#1127). */
 .favormeter--standout {
-  background: color-mix(in srgb, var(--award-line) 10%, var(--paper-2));
+  background: color-mix(in srgb, var(--award-line) 10%, var(--surface-card));
   border-color: var(--award-line);
 }
 .favormeter--outlier {
-  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
   border-color: color-mix(in srgb, var(--marker) 60%, var(--border-hairline));
 }
 /* The tier badge (favorTier) — routine/standout/outlier, escalating in
@@ -771,7 +771,7 @@
   margin-top: 12px;
   display: flex;
   flex-direction: column;
-  background: var(--paper-2);
+  background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   box-shadow: var(--inset-cell);
@@ -1381,7 +1381,7 @@
    decisive-pitch row (14-strike-zone.css). Not .duepill's kraft-amber: that
    pill answers a different question (the FIELDING club's next half). */
 .entering__row--ondeck {
-  background: color-mix(in srgb, var(--marker) 18%, var(--paper-2));
+  background: color-mix(in srgb, var(--marker) 18%, var(--surface-card));
   border-radius: var(--radius-sm);
   margin-inline: -6px;
   padding: 3px var(--space-1h);
@@ -1576,7 +1576,7 @@
   gap: var(--space-1);
   text-align: center;
   padding: var(--space-2) var(--space-1);
-  background: var(--paper-2);
+  background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   box-shadow: var(--inset-cell);
