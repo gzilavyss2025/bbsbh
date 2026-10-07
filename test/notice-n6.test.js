@@ -10,7 +10,8 @@
 //   3. THE NAMESPACES. The old frame's margin moves onto .pitchernotice--event
 //      and .pitcherhandoff, with what keeps the pixels the same: no wrap, and
 //      a stretched column on the handoff cards.
-//   4. THE OLD FRAME STAYS for the actor cards until N7 moves them.
+//   4. THE OLD FRAME left the actor cards in N7 (notice-n7.test.js); the
+//      callers wear the helper, and the rule is the margin-only namespace.
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -135,12 +136,15 @@ test('N6: the handoff card keeps the 8px gap of Stack\'s "snug" step', () => {
   assert.equal(decl(ruleBody(css('12-sealbox.css'), '.pitcherhandoff'), 'gap'), undefined)
 })
 
-// ---- 4. the old frame stays ----
+// ---- 4. the old frame left the actor cards in N7 ----
 
-test('N6: the .pitchernotice--pbp frame stays for the actor cards until N7', () => {
+// N7 moved the actor cards onto the helper. The frame stays the caller's: each
+// call site passes noticeClass with .pitchernotice--pbp as the namespace, and
+// the rule keeps only the margin Notice does not draw (notice-n7.test.js).
+test('N6: the .pitchernotice--pbp rule is the margin-only namespace, and the actor-card callers wear the helper', () => {
   const frame = ruleBody(css('12-sealbox.css'), '.pitchernotice--pbp')
-  assert.equal(decl(frame, 'margin'), '4px 14px')
-  assert.equal(decl(frame, 'border'), 'var(--bw-hair) solid var(--border-rule)')
+  assert.equal(decl(frame, 'margin'), 'var(--space-1) var(--space-3h)')
+  assert.equal(decl(frame, 'border'), undefined)
   for (const rel of [
     'components/playbyplay/PitcherNotice.jsx',
     'components/playbyplay/PlayByPlay.jsx',
@@ -148,6 +152,6 @@ test('N6: the .pitchernotice--pbp frame stays for the actor cards until N7', () 
     'components/scoring/lens/LensCards.jsx',
     'components/scoring/lens/PitcherSheet.jsx',
   ]) {
-    assert.match(src(rel), /className="[^"]*pitchernotice--pbp/, `${rel} still wears the old frame`)
+    assert.match(src(rel), /\{noticeClass\(\{ tone: 'event', className: 'pitchernotice--pbp' \}\)\}/, `${rel} wears the helper`)
   }
 })

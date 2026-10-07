@@ -1,6 +1,7 @@
 import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../../../api/game.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { entryFlag, pitcherRole } from '../../../lib/pitcherCard/card.js'
+import { noticeClass } from '../../../lib/design/noticeClass.js'
 import { PitcherPhoto } from '../../playbyplay/PitcherNotice.jsx'
 
 // The cards that dock under the lens's frame (#724, ADR-0092): one at a time,
@@ -24,7 +25,7 @@ export function EnteringCard({ title, pitcherLine, defense }) {
 }
 
 // The new-pitcher notice: PitcherNotice's own parts on the same tier-1 notice
-// ground (.pitchernotice--pbp), drawn as ONE button that opens the pitcher
+// ground (the event Notice frame, as the feed's callers pass it), drawn as ONE button that opens the pitcher
 // sheet. Not PitcherNotice itself: its name is a player link, and a link
 // inside a button is two controls in one.
 export function ArmNotice({ feed, arm, onOpen }) {
@@ -34,7 +35,7 @@ export function ArmNotice({ feed, arm, onOpen }) {
   const sportId = feed?.gameData?.teams?.home?.sport?.id ?? 1
   const more = sportId === 1 || sportId === 11 ? 'Arsenal · last time out ›' : 'Last time out ›'
   return (
-    <button type="button" className="pitchernotice pitchernotice--pbp sc-armnotice" onClick={onOpen}>
+    <button type="button" className={`pitchernotice ${noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })} sc-armnotice`} onClick={onOpen}>
       <PitcherPhoto personId={pitcher.id} name={pitcher.name} teamId={team.id} />
       <span className="pitchernotice__body">
         <span className="pitchernotice__now">Now pitching{team.name ? ` for the ${team.name}` : ''}</span>

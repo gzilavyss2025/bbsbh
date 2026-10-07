@@ -902,7 +902,7 @@ test('C4: the box score defence stays unframed, and BoxScore.jsx takes no Card f
 // on specificity, so it must still name the three properties Card draws.
 test('C4: focus mode still drops the half sheet around a lone staged notice', () => {
   const css = read('focus/console.css')
-  const at = css.indexOf('.half:has(.pitchernotice--pbp, .notice--event):not(:has(.statgrid))')
+  const at = css.indexOf('.half:has(.notice--event):not(:has(.statgrid))')
   assert.ok(at > 0)
   const body = css.slice(css.indexOf('{', at) + 1, css.indexOf('}', at))
   for (const prop of ['background', 'border', 'box-shadow']) assert.equal(decl(body, prop), 'none', prop)

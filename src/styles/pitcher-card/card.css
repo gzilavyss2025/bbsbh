@@ -3,11 +3,15 @@
    tiles, and the last appearance. A SUBDIRECTORY because src/styles is a flat
    directory at its own file ratchet (scripts/check-dir-size.mjs, ADR-0038).
    Sizes follow the approved design canvas ("G series"); colours are tokens.
-   The card chrome is the caller's `.pitchernotice--pbp` (12-sealbox.css). */
+   The card chrome is the caller's: the event Notice, through the className it
+   passes (noticeClass, #1132 N7). .notice centres its items and wraps; this
+   loads later and keeps the column full width and unwrapped. */
 
 .pcard {
   display: flex;
   flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
   gap: var(--space-2h);
 }
 .pcard .pitchernotice__body {

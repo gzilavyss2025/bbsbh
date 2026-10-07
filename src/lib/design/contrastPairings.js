@@ -230,7 +230,7 @@ export const PAIRINGS = [
   { fg: 'graphite-soft', bg: 'surface-card', min: UI, note: 'former teammates ladder line' },
   { fg: 'accent-primary', bg: 'surface-card', min: UI, note: 'former teammates ladder traced line' },
   // The arsenal "other" family (#1347) draws on the Now Pitching card, whose
-  // fill is --marker 16% over --surface-card (.pitchernotice--pbp). Neither
+  // fill is --marker 16% over --surface-card (.notice--event, #1132 N7). Neither
   // reader parses color-mix(), so that composite is the literal #F8EECE,
   // worked out by hand.
   { fg: 'arsenal-other', bg: '#F8EECE', min: UI, note: 'arsenal other family on the Now Pitching card fill' },

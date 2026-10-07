@@ -530,8 +530,8 @@
    pill — routine stays the plain card treatment above (nothing to escalate),
    standout tints toward the medal-amber "honors" family, outlier toward the
    highlighter "watch flag" marker, both via the same color-mix() pattern
-   already used elsewhere in this file (e.g. .pitchernotice--pbp, which tints
-   toward --seal the same way). It used to cite ".pin-card", a class that has
+   already used elsewhere (e.g. .notice--event in system/notice.css, which
+   tints toward --marker the same way). It used to cite ".pin-card", a class that has
    never had a rule in this repo — and the card census read that comment as a
    selector and filed .pin-card as dead code to delete (#1127). */
 .favormeter--standout {
@@ -838,22 +838,21 @@
    interleaved with the at-bat cards when a change happens mid-inning
    (PlayByPlay.jsx), so a new arm/fielder/hitter reads as prominently as the
    plays around it (rather than the old plain "Pitching Change: X replaces Y"
-   note line). */
+   note line). The frame is the event Notice (#1132 N7): each CALLER passes
+   noticeClass({ tone: 'event', className: 'pitchernotice--pbp' }), because
+   PitcherNotice is also the bare header inside the full card (.pcard), which
+   takes the frame itself. This namespace keeps what Notice does not draw: the
+   margin (.half has no padding, so the card would sit flush) and no wrap
+   (.notice wraps; the cards did not). */
 .pitchernotice--pbp {
-  /* Horizontal margin, not just padding: .half has no padding of its own,
-     so without this the card's own border sits flush against the card it's
-     nested inside. */
-  margin: 4px 14px;
-  padding: var(--space-2h) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
+  margin: var(--space-1) var(--space-3h);
+  flex-wrap: nowrap;
 }
 
 /* The two pitching-handoff cards (PitcherHandoffCard.jsx) — a departing
    pitcher's line frozen at the moment he's pulled, and, once his inherited
    runners resolve, his settled line. The outer frame is the event Notice
-   (noticeClass, #1132 N6; the same values as .pitchernotice--pbp), stacked
+   (noticeClass, #1132 N6; the actor cards took the same frame in N7), stacked
    into a column by Stack (PitcherHandoffCard.jsx):
    the .pitchernotice header row
    (reused as-is, nested rather than applied to the outer element, since a

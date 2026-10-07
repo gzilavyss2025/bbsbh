@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { Button } from '../../ui/control/Button.jsx'
 import { PitcherCard } from '../../playbyplay/pitcherCard/PitcherCard.jsx'
+import { noticeClass } from '../../../lib/design/noticeClass.js'
 import { useDialogFocus } from '../../../hooks/dialog/useDialogFocus.js'
 
 // The lens's pitcher sheet (#724, ADR-0092): the full pitcher card, from the
@@ -30,7 +31,7 @@ export function PitcherSheet({ feed, arm, onClose }) {
             pitcher={pitcher}
             teamId={team.id}
             teamName={team.name}
-            className="pitchernotice--pbp"
+            className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
             label={fresh ? 'Now pitching' : 'Pitching'}
           />
         </div>
