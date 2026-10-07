@@ -2,6 +2,7 @@ import '../../styles/31d-prospect-card.css'
 import { fetchProspectRankHistory, prospectRankView } from '../../api/player/prospectRankHistory.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { Card } from '../ui/frame/Card.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // PROSPECT RANKINGS -- the years a man sat on a top-prospect list, and where
 // (issue #1111). A trajectory rather than a fact: "18, 8, 15, 16, 31, 54, then
@@ -38,7 +39,7 @@ export function ProspectRankHistoryCard({ playerId, debutYear, currentRank }) {
   return (
     <Card frame="ledger" body="flush" className="levelprog prankhist">
       <header className="levelprog__head">
-        <h3 className="levelprog__title">Prospect rankings</h3>
+        <SectionHead look="label">Prospect rankings</SectionHead>
       </header>
       <ol className="prankhist__list" aria-label="Prospect ranking by year">
         {view.entries.map((entry) => (

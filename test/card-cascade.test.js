@@ -691,6 +691,18 @@ test('C2: the two dossier cards are ledgers and keep their 3px accent rule', () 
   }
 })
 
+// H2 (Gary, 2026-10-07): a prospect or level card's name is its head, a
+// SectionHead label. The old --fs-h3 title rules are gone.
+test('H2: the prospect and level cards name themselves with a label SectionHead', () => {
+  const css = read('31d-prospect-card.css')
+  assert.doesNotMatch(css, /__title/)
+  for (const rel of ['components/player/LevelProgressionCard.jsx', 'components/player/ProspectRankHistoryCard.jsx', 'components/player/family/FamilyBand.jsx', 'components/playerstats/ProspectCard.jsx']) {
+    const code = src(rel)
+    assert.match(code, /<SectionHead look="label">/, rel)
+    assert.doesNotMatch(code, /(levelprog|prospectcard)__title/, rel)
+  }
+})
+
 // The tile was a PlayerLink <button>; it is a Card link now (as="a"), a real
 // anchor, so a middle-click opens a tab. It keeps the desktop hover card that
 // PlayerLink gave it, and it takes its path and that card from the same hook
