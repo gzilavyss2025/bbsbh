@@ -16,6 +16,7 @@ import { useDebouncedValue } from '../../../hooks/useDebouncedValue.js'
 import { playerPath } from '../../../lib/route.js'
 import { Button } from '../../ui/control/Button.jsx'
 import '../../../styles/74a-contract-lookup.css'
+import { Cluster } from '../../ui/layout/Cluster.jsx'
 
 const SEARCH_INDEX_URL = '/data/contracts-history/search-index.json'
 const RECORD_RESULT_CAP = 100
@@ -169,7 +170,7 @@ function RecordSearchPanel() {
         />
       </div>
 
-      <div className="lookupdeck__filters">
+      <Cluster gap="base" className="lookupdeck__filters">
         <div className="lookupdeck__field lookupdeck__field--compact">
           <label htmlFor={`${uid}-source`} className="lookupdeck__label">
             Source
@@ -227,7 +228,7 @@ function RecordSearchPanel() {
             ))}
           </select>
         </div>
-      </div>
+      </Cluster>
 
       {status === 'loading' && <p className="lookupdeck__status">Loading contract records…</p>}
       {status === 'error' && (

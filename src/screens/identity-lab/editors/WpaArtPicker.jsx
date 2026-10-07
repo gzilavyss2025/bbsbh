@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { clubMarkSources } from '../../../lib/markSources.js'
 import { fillWpaArt } from '../saveStores.js'
+import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 
 // Every mark this club has, as swatches, for filling its WPA slot in one click.
 //
@@ -50,7 +51,7 @@ export function WpaArtPicker({ teamId, treatment, onFilled }) {
   return (
     <div className="idlab__wpaart">
       <p className="idlab__wpaarthint">Or use a mark this club already has:</p>
-      <div className="idlab__wpaartrow">
+      <Cluster className="idlab__wpaartrow">
         {sources.map((s) => (
           <button
             key={s.key}
@@ -66,7 +67,7 @@ export function WpaArtPicker({ teamId, treatment, onFilled }) {
             <span className="idlab__wpaartlabel">{s.label}</span>
           </button>
         ))}
-      </div>
+      </Cluster>
       {message && (
         <p className={`colorlab__logodropmsg colorlab__logodropmsg--${message.kind}`}>{message.text}</p>
       )}

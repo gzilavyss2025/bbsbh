@@ -7,6 +7,7 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { BookCoverPicker } from '../../components/passport/BookCoverPicker.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
+import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 
 // Starting a new Game Log book — its own full-page surface at /logbook/new,
 // not a sheet over the shelf.
@@ -98,11 +99,11 @@ export function NewBookPage({ createBook, placing = null, onCreated, onCancel })
 
       {/* One way out, in the topbar, where every other page keeps it. A second
           Cancel down here only competed with Start for the same glance. */}
-      <div className="bookmgmt__actions newbook__actions">
+      <Cluster gap="base" className="bookmgmt__actions newbook__actions">
         <button type="button" className="btn btn--ink" onClick={start}>
           Start this book
         </button>
-      </div>
+      </Cluster>
 
       <ReportFooter />
     </div>

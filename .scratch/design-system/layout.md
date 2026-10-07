@@ -598,3 +598,57 @@ data or the dev-only identity lab, so they were not drawn. `npm run lint` and
 `.gamelist`), a gap off the steps (`.logbook__grid` 20px, `.scout__*` 6px,
 `.patternlab__grid`, `.ninekeys__keys`), scoring-adjacent surfaces
 (`.marginnotes__grid`, `.gamephotos__grid`), and the `/design-lab` grids.
+
+## Cluster slice C1
+
+First `Cluster` migration. 8 one-class wrapping-row rules on 12 JSX sites, all on
+the 4, 8 or 12px step, so nothing snaps. Base: `origin/main` at f150612ab.
+
+| rule | gap | sites | kept in the rule |
+| --- | --- | ---: | --- |
+| `.cwb__tabs` (`74-contract-workbench.css`) | snug | 1 | nothing (rule deleted) |
+| `.standings-jumps` (`30-standings.css`) | tight | 3 | nothing; `--scroll` still sets its own `flex-wrap` |
+| `.coverpick__colors` (`60-book-cover-picker.css`) | base | 1 | nothing |
+| `.bpadmin__row` (`61-ballpark-admin.css`) | snug | 1 | nothing |
+| `.lookupdeck__filters` (`74a-contract-lookup.css`) | base | 1 | nothing |
+| `.idlab__barsrow` (`17-identity-lab-workbench.css`) | base | 1 | nothing |
+| `.idlab__wpaartrow` (same file) | snug | 1 | nothing |
+| `.bookmgmt__actions` (`58-logbook-shelf.css`) | base | 3 | `align-items: center` |
+
+**Method.** `cluster-candidates.mjs` is `stack-candidates.mjs` for wrapping rows
+(one class, `display: flex`, `flex-wrap: wrap`, one gap, no other layout rule for
+the class, static JSX sites on a Cluster element). It finds 57 safe rows (it still
+lists 16px rows, which have no Cluster step). I took the 8 with the least left in
+the rule. `test/cluster-migration.test.js` was written first and failed on both
+the rules and the sites. It pins: no layout left on a migrated class, every site is
+a `<Cluster>` with the old step, and no migrated partial loads ahead of
+`system/cluster.css` in `index.css`.
+
+**Cascade.** All eight partials are lazy (a component imports them), so they load
+after `system/cluster.css`. `.standings-jumps--scroll` and `.bookmgmt__actions`
+keep one class each, so they still win on order. `.newbook__actions` (margin,
+padding, border) shares an element with `.bookmgmt__actions` and touches no layout.
+
+**Left out.** Rules in `15-team-color-lab.css`, `62-identity-admin.css`,
+`65-team-records.css`, `66-situational-records.css` and `06b-offday-cards.css`
+(Grid G1 edits them), scoring surfaces (`10-lineup.css`, `scorecard/*`,
+`.trailstrip__cells`, `.pbp__replaypicks`), rules with a 16px gap, rules with
+declarations beside the layout (a later slice), and any site with a dynamic
+`className`.
+
+**Checked.** `geom.mjs` BEFORE (`main`) and AFTER, 390 and 760px, `MOCK=1 FREEZE=1
+BLOCKIMG=1`: `/logbook/new` (the `bookmgmt__actions` site) and `/standings` (2 and 1
+`standings-jumps` sites) identical, 269 to 1,036 elements. `/identity-lab` (both
+`idlab__*` rows) has equal page heights, but the element count moves between runs
+of UNCHANGED code (1,066 to 1,076 at 390px): a nav logo `img` races its fallback
+`span`. `synth.mjs` (new `CLUSTER=1` switch) on a route that loads each sheet:
+`cwb__tabs`, `lookupdeck__filters` on `/admin/contracts`, `coverpick__colors`,
+`bookmgmt__actions` on `/logbook/new`, the `idlab__*` pair on `/identity-lab` and
+`standings-jumps` on `/standings`, all identical at both widths.
+
+**Not seen.** `.bpadmin__row`: `61-ballpark-admin.css` loads only for an admin, so
+neither a real page nor a synthetic baseline was possible. Its rule and the old one
+are the same three declarations. The real pages for `cwb__tabs` and
+`lookupdeck__filters` (Clerk-admin gated), the book management sheet, the
+`--scroll` date strip on `/standings` (not drawn by the mock) were not drawn.
+`npm run visual` and `npm run e2e` were not run.

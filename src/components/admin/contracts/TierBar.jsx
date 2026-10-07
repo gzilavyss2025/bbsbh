@@ -7,6 +7,7 @@
 // Ambiguous and unresolved-with-a-shortlist are the same question as each
 // other, so they share a tab. What is left has no shortlist at all.
 import { MODES, MODE_CHOOSE, MODE_COLD, MODE_CONFIRM, MODE_LABEL } from '../../../lib/admin/contractGroups.js'
+import { Cluster } from '../../ui/layout/Cluster.jsx'
 
 const BLURB = {
   [MODE_CONFIRM]: 'already assigned',
@@ -40,7 +41,7 @@ export function TierBar({
 }) {
   return (
     <header className="cwb__tierbar">
-      <div className="cwb__tabs" role="tablist" aria-label="Review mode">
+      <Cluster className="cwb__tabs" role="tablist" aria-label="Review mode">
         {MODES.map((m) => {
           const c = counts[m] ?? { open: 0, rows: 0, openGroups: 0 }
           return (
@@ -60,7 +61,7 @@ export function TierBar({
             </button>
           )
         })}
-      </div>
+      </Cluster>
 
       <div className="cwb__progress">
         <p className="cwb__progressline caps-exempt">
