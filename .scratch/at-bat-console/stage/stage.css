@@ -1,0 +1,72 @@
+/* Animated at-bat stage (mockup). Times come from --t per element. */
+.stage { border: 1px solid var(--rule); border-radius: var(--r-3); background: var(--paper-3); padding: 10px; display: grid; gap: 8px; }
+.stage__head { display: flex; justify-content: space-between; align-items: center; font: 700 13px/1 var(--f-display); letter-spacing: .1em; text-transform: uppercase; color: var(--graphite); }
+.replay2 { border: 1px solid var(--rule); background: var(--paper-2); border-radius: 999px; padding: 5px 12px; font: 700 12px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; color: var(--field); }
+.stage__body { position: relative; height: 252px; border-radius: var(--r-2); overflow: hidden; background: var(--paper-2); }
+.stage--sealed .stage__body { background: var(--paper-2) var(--kraft); }
+
+/* the zone */
+.stz { display: block; width: 100%; height: 100%; }
+.stz__box { fill: #FBF6E9; stroke: var(--ink-2); stroke-width: 1.5; }
+.stz__grid line { stroke: var(--rule); }
+.stz__plate { fill: #fff; stroke: var(--graphite-soft); }
+.pdot { transform-box: fill-box; transform-origin: center; animation: pin .5s cubic-bezier(.3,.7,.2,1) var(--t) both; }
+.pdot circle { fill: var(--paper-3); stroke: var(--ink-1); stroke-width: 1.8; }
+.pdot.is-strike circle { fill: var(--strike-fill); }
+.pdot.is-x circle { fill: var(--field-soft); stroke: var(--field); }
+.pdot text { font: 700 10px var(--f-mono); fill: var(--ink-0); }
+.pdot .ring-ok { fill: none; stroke: var(--field); stroke-width: 2; }
+.pdot .ring-no { fill: none; stroke: var(--clay); stroke-width: 2; }
+@keyframes pin { 0% { transform: translate(var(--dx), var(--dy)) scale(.12); opacity: 0; } 20% { opacity: 1; } 100% { transform: none; opacity: 1; } }
+.bat line { stroke: #8A5A2B; stroke-width: 7; stroke-linecap: round; }
+.bat { opacity: 0; animation: swing var(--d, .42s) cubic-bezier(.5,0,.3,1) var(--t) both; }
+.batmph { font: 700 12px var(--f-mono); fill: #8A5A2B; opacity: 0; animation: blink 1.1s ease-out var(--t) both; }
+@keyframes blink { 0% { opacity: 0; } 15% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+.sbat { font: 13px var(--f-body); color: var(--graphite); } .sbat b { color: #8A5A2B; }
+@keyframes swing { 0% { opacity: 0; transform: rotate(calc(var(--a) + var(--from))); } 15% { opacity: 1; } 70% { opacity: 1; transform: rotate(var(--a)); } 100% { opacity: 0; transform: rotate(calc(var(--a) + var(--past))); } }
+
+/* the field */
+.sfield { display: block; width: 100%; height: 100%; }
+.sf-foul { fill: var(--field-out); opacity: .55; } .sf-grass { fill: var(--field-in); } .sf-track { fill: var(--dirt); opacity: .7; }
+.sf-dirt { fill: var(--dirt); } .sf-line { stroke: #fff; stroke-width: 2.5; fill: none; } .sf-wall { stroke: var(--field); stroke-width: 4; fill: none; }
+.sf-base { fill: #fff; }
+.frun circle { fill: var(--navy); stroke: #fff; stroke-width: 3; } .frun text { font: 700 22px var(--f-display); fill: var(--navy); paint-order: stroke; stroke: #fff; stroke-width: 5px; }
+.fpath { fill: none; stroke: var(--clay); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: fly .95s ease-out var(--t) both; }
+.fpath--ground { stroke-dasharray: 1; }
+@keyframes fly { to { stroke-dashoffset: 0; } }
+.fland { fill: var(--paper-3); stroke: var(--ink-1); stroke-width: 4; transform-box: fill-box; transform-origin: center; animation: land .35s cubic-bezier(.3,1.6,.5,1) var(--t) both; }
+.fland--hit { fill: var(--field); stroke: #fff; } .fland--hr { fill: var(--clay); stroke: #fff; }
+@keyframes land { from { transform: scale(0); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* v1: zone first, then it shrinks to a corner as the field comes up */
+.s1, .s1__field, .s1__zone { position: absolute; inset: 0; }
+.s1__zone { display: grid; place-items: center; transform-origin: 8px 8px; }
+.s1__zone .stz { width: auto; height: 100%; }
+.s1__field { opacity: 0; }
+.s1--play .s1__field { animation: fadeIn .35s ease-out var(--tc) both; }
+.s1--play .s1__zone { animation: toCorner .45s ease-in-out var(--tc) both; }
+.s1:not(.s1--play) .s1__field { display: none; }
+@keyframes fadeIn { to { opacity: 1; } }
+@keyframes toCorner { to { transform: scale(.36); background: rgba(255,253,246,.9); border-radius: 8px; } }
+
+/* v2: side by side */
+.s2 { display: grid; grid-template-columns: 40% 60%; height: 100%; }
+.s2__zone, .s2__field { min-width: 0; height: 100%; }
+
+/* v3: the field, with the zone at the plate */
+.s3, .s3__field { position: absolute; inset: 0; }
+.s3__zone { position: absolute; left: 6px; bottom: 6px; width: 118px; height: 148px; background: rgba(255,253,246,.94); border: 1.5px solid var(--ink-2); border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+.s3__zone::after { content: ""; position: absolute; right: -40px; bottom: 26px; width: 40px; border-top: 1.5px dashed var(--ink-2); }
+
+/* the runners chip and the lines under the stage */
+.rchip { display: flex; align-items: center; gap: 8px; width: 100%; border: 1px solid var(--rule); background: var(--paper-2); border-radius: var(--r-2); padding: 6px 10px; font: 600 14px/1.2 var(--f-body); color: var(--ink-1); text-align: left; }
+.rchip span { flex: 1; } .rchip b { font: 700 18px var(--f-display); color: var(--graphite); }
+.rchip--mark { background: var(--paper-2) var(--kraft); border-color: var(--seal-edge); font-weight: 700; }
+.rchip[disabled] { color: var(--graphite); }
+.mini { width: 34px; height: 26px; } .mini rect { fill: none; stroke: var(--graphite); stroke-width: 1.5; } .mini rect.on { fill: var(--navy); stroke: var(--navy); }
+.sev { display: grid; gap: 4px; font: 14px/1.3 var(--f-body); color: var(--ink-1); }
+.sev .ev em { font: 700 11px var(--f-display); letter-spacing: .08em; text-transform: uppercase; background: var(--seal); color: var(--seal-ink); padding: 2px 6px; border-radius: 3px; margin-right: 6px; font-style: normal; }
+.sev b.no { color: var(--clay); } .sev b.ok { color: var(--field); }
+.sfoot { display: flex; justify-content: space-between; gap: 8px; font: 13px var(--f-body); color: var(--graphite); border-top: 1px dashed var(--rule); padding-top: 6px; }
+.sfoot b { color: var(--ink-0); }
+@media (prefers-reduced-motion: reduce) { .stage * { animation-duration: 1ms !important; animation-delay: 0ms !important; } }
