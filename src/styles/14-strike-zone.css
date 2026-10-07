@@ -617,11 +617,9 @@
    without reading as heavier than the actual controls below it. --clay is
    the app's existing alert color (outs, errors), reused here as a caution
    rather than an error. */
-/* Notice draws the box; this keeps the space and the dashed edge. The dashed-rule
-   PR decides the edge (notice-collapse spec 11). */
+/* Notice draws the box and its edge; this keeps the space. */
 .gamephotos__notice {
   margin: 4px 0 var(--space-4);
-  border-style: dashed;
 }
 
 .gamephotos__section {

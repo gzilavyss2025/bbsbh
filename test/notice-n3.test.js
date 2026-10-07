@@ -43,13 +43,13 @@ test('the two photos pages keep the sentence word for word', () => {
   assert.match(src('screens/team/TeamPhotosPage.jsx'), /Every professional photo MLB’s content package carries for the \{season\} season, newest\s+first — including tonight’s game, if one’s in progress\. Personal use only — photos are\s+copyrighted \(AP\/Getty\/USA Today Sports via MLB\)\./)
 })
 
-test('14-strike-zone.css: the tag and paragraph rules are deleted; the namespace keeps the margin and the dashed edge', () => {
+test('14-strike-zone.css: the tag and paragraph rules are deleted; the namespace keeps the margin and no edge (Notice draws it)', () => {
   const sheet = css('14-strike-zone.css')
   assert.equal(ruleBody(sheet, '.gamephotos__noticetag'), null)
   assert.equal(ruleBody(sheet, '.gamephotos__notice p'), null)
   const ns = ruleBody(sheet, '.gamephotos__notice')
   assert.equal(decl(ns, 'margin'), '4px 0 var(--space-4)')
-  assert.equal(decl(ns, 'border-style'), 'dashed', 'the dashed-rule PR decides later (spec 11)')
+  assert.equal(decl(ns, 'border-style'), undefined, 'the dashed-rule fix (#1132, Gary 2026-10-07) went solid: Notice draws the edge')
   for (const p of ['display', 'padding', 'background', 'border-radius', 'gap']) assert.equal(decl(ns, p), undefined, `Notice draws ${p}`)
 })
 
