@@ -58,3 +58,34 @@ test('the hit names the file and line of the selector', () => {
   const r = scanSheet('src/styles/x.css', `\n\n${PILL}`)
   assert.equal(r.hits.capsule[0], 'src/styles/x.css:3 .rankchip')
 })
+
+// Triage (.scratch/design-system/component-reuse-triage.md): a card-shape guard
+// must not count a form control or a button. The ledger recipe (hairline border,
+// small radius, card fill) is also the recipe of every input, select and tappable
+// tile, so those are Button/input work, not card shells.
+test('a rule whose selector is an input, select, textarea or button is a control, not a shape', () => {
+  const body = LEDGER.replace('.rows', '')
+  for (const sel of ['input.x', '.x select', '.x textarea', '.x button', '.a__input', '.a__seasonselect', '.a__stepbtn', '.a .a__btn--save', '.a__select']) {
+    assert.equal(kinds(`${sel}${body}`).found.ledger, 0, sel)
+  }
+  assert.equal(kinds(PILL.replace('.rankchip', '.pcard__infobtn span')).found.capsule, 0)
+  assert.equal(kinds(BAND.replace('.thing__head', '.bpadmin__btn--save')).found.band, 0)
+})
+
+test('a name that merely contains a control word is still counted', () => {
+  // `button` and `input` only count as a whole element or a `__` suffix.
+  assert.equal(kinds(LEDGER.replace('.rows', '.buttonbar')).found.ledger, 1)
+  assert.equal(kinds(LEDGER.replace('.rows', '.inputs__list')).found.ledger, 1)
+  assert.equal(kinds(LEDGER.replace('.rows', '.selection')).found.ledger, 1)
+})
+
+test('a tappable rule (cursor: pointer) or a resizable one is a control, not a card', () => {
+  assert.equal(kinds(LEDGER.replace('}', 'cursor: pointer; }')).found.ledger, 0)
+  assert.equal(kinds(LEDGER.replace('}', 'resize: vertical; }')).found.ledger, 0)
+  assert.equal(kinds(PILL.replace('}', 'cursor: pointer; }')).found.capsule, 0)
+})
+
+test('cursor: default, or a comment that names cursor: pointer, does not make a control', () => {
+  assert.equal(kinds(LEDGER.replace('}', 'cursor: default; }')).found.ledger, 1)
+  assert.equal(kinds(LEDGER.replace('}', '/* cursor: pointer */ }')).found.ledger, 1)
+})

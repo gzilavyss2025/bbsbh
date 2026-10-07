@@ -494,6 +494,7 @@
 }
 
 .idlab__recolorname {
+  /* component-reuse-exempt: a text input (the name field), not a card: input work (#1174) */
   flex: 1 1 auto;
   min-width: 0;
   padding: var(--space-1) var(--space-2);

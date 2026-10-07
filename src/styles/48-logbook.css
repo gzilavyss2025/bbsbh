@@ -86,6 +86,7 @@
 /* A stamp whose game facts haven't resolved (offline, or a failed batch) holds
    its place in the grid rather than dropping a keepsake off the page. */
 .logbook__pending {
+  /* component-reuse-exempt: an empty stamp slot on a Game Log surface (ADR-0035), a stamp-vocabulary circle, not a Pill */
   align-items: center;
   justify-content: center;
   aspect-ratio: 1;

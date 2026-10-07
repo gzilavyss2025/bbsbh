@@ -76,6 +76,7 @@
    where an opening is one page) the back of every leaf. Real paper, no
    content — never a second copy of a page that is also mounted elsewhere. */
 .passportbook__blank {
+  /* component-reuse-exempt: a blank passport page, the stamp book surface (ADR-0035), not a paper-sheet card */
   width: 100%;
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
@@ -448,6 +449,7 @@
    keepsake is still the user's, so it holds its exact spot on the page
    rather than leaving a gap — the same call .logbook__pending makes. */
 .passportpage__pending {
+  /* component-reuse-exempt: an empty stamp slot on a passport page (ADR-0035), a stamp-vocabulary circle, not a Pill */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -890,6 +892,7 @@
    book. Small on purpose — a tray stamp is a thing you are about to move, not
    a keepsake on display, and at page size it would out-shout the book. */
 .logbook__tray {
+  /* component-reuse-exempt: the tray that holds unplaced stamps (ADR-0035), a stamp surface with a dashed edge, not a card */
   align-items: flex-start;
   margin-bottom: var(--space-4);
   padding: var(--space-3);
