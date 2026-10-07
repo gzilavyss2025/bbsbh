@@ -8,6 +8,7 @@ import { LogoModal } from '../components/logo/LogoModal.jsx'
 import { LevelNav } from '../components/team/LevelNav.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { Grid } from '../components/ui/layout/Grid.jsx'
 
 // A browsable reference sheet of every club's logo at a level, independent of
 // any day's schedule. Tapping a tile opens the same sketch modal used
@@ -42,7 +43,7 @@ export function LogoSheet({ onBack }) {
         emptyMessage="No teams found."
       />
 
-      <ul className="logogrid">
+      <Grid as="ul" min={140} gap="base" className="logogrid">
         {teams.map((t) => (
           <li key={t.id} className="logotile">
             <button
@@ -61,7 +62,7 @@ export function LogoSheet({ onBack }) {
             <span className="logotile__name">{t.name}</span>
           </li>
         ))}
-      </ul>
+      </Grid>
 
       {sketching && (
         <LogoModal

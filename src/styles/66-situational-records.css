@@ -226,11 +226,6 @@
   line-height: var(--lh-ui);
 }
 
-.trrank__tilegrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
-  gap: var(--space-3);
-}
 .trrank__tile {
   display: flex;
   min-width: 0;

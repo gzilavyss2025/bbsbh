@@ -5,6 +5,7 @@ import { useNav } from '../../lib/nav.js'
 import { teamPath } from '../../lib/route.js'
 import { splitName } from '../../lib/teamSplits.js'
 import { teamClubNameShort, favoriteAccentColor, teamPrimaryColor, offDayTreatmentFor, treatmentTile } from '../../lib/teams.js'
+import { Grid } from '../ui/layout/Grid.jsx'
 
 // The clubs NOT playing on the slate's date, shown below the games as small
 // gameday-styled cards — same framed, overscaled logo tile the slate matchup
@@ -32,7 +33,9 @@ export function OffDaySection({ teams, favoriteTeamId, favoriteAffiliateIds, win
       aria-label={winter ? 'Every club' : 'Teams with an off day'}
     >
       <h2 className="offday__banner">{winter ? 'Every club' : 'Off Day'}</h2>
-      <ul className="offday__grid">
+      {/* 120px: wide enough that a 9-10 letter mascot (CARDINALS) fits on one line; a
+          longer one (DIAMONDBACKS) wraps, which .offday__name handles. */}
+      <Grid as="ul" min={120} gap="snug" className="offday__grid">
         {teams.map((team) => (
           <li key={team.id}>
             <OffDayCard
@@ -42,7 +45,7 @@ export function OffDaySection({ teams, favoriteTeamId, favoriteAffiliateIds, win
             />
           </li>
         ))}
-      </ul>
+      </Grid>
     </section>
   )
 }

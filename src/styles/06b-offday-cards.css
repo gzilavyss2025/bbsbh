@@ -24,17 +24,6 @@
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
 }
-.offday__grid {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  /* Wide enough that an ordinary 9-10 letter mascot (CARDINALS, ROCKHOUNDS)
-     fits on one line — a truly long one (DIAMONDBACKS) still wraps, which
-     .offday__name already handles cleanly (see overflow-wrap below). */
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: var(--space-2);
-}
 .offday__tile {
   position: relative;
   width: 100%;

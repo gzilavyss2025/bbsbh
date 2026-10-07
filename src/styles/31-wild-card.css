@@ -785,9 +785,6 @@
    name + position, then the move (MLB club -> the affiliate) and that
    affiliate's name with a level badge. */
 .rehabgrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: var(--space-3);
   margin-top: var(--space-4);
 }
 
@@ -1076,16 +1073,9 @@
   color: var(--award-ink);
 }
 
-/* The stat-line grid — the hover card's own .phcard__stats/.phcard__tile
+/* The stat-line tile — the hover card's own .phcard__stats/.phcard__tile
    recipe, reused under Horizon-scoped names rather than a third boxed-stat
-   pattern. auto-fit rather than a fixed 4 so the Milestones tile's
-   two-cell Status/Since line and the Promotion Watch tile's four-cell line
-   both size their cells evenly off the same rule. */
-.hzntile__stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
-  gap: var(--space-2);
-}
+   pattern. Its row (.hzntile__stats) is a <Grid fit> in HorizonCard.jsx. */
 .hzntile__tile {
   display: flex;
   flex-direction: column;

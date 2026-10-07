@@ -1,6 +1,7 @@
 import { CopyIconButton } from '../../../components/ui/CopyBox.jsx'
 import { HexField } from '../HexField.jsx'
 import { shiftStepKeys } from './numberSteps.js'
+import { Grid } from '../../../components/ui/layout/Grid.jsx'
 
 // The editable Size/Rotate/X/Y/H-Pad/V-Pad/Shift%/Band/Pinstripe knobs for THIS
 // treatment's WPA band — one per tile, not one per team, since a real game can
@@ -40,7 +41,7 @@ export function WpaPreview({
         )}
         <CopyIconButton text={copyText} label={`Copy ${name} ${treatmentLabel} WPA context`} />
       </div>
-      <div className="colorlab__wpapreviewfields">
+      <Grid min={90} gap="snug" className="colorlab__wpapreviewfields">
         {/* Checked (the default — `ownArt` absent/false) tiles the exact same
             mark this treatment's own logo box shows, unchanged from before
             this checkbox existed. Unchecked switches to a separately
@@ -118,7 +119,7 @@ export function WpaPreview({
             <HexField value={bandBg} placeholder="#hex (white)" onChange={(v) => onField('bandBg', v)} />
           </label>
         )}
-      </div>
+      </Grid>
       {ownArt && artUpload}
     </div>
   )

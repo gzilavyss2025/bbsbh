@@ -569,3 +569,32 @@ between runs, so capture BEFORE twice first.
 width other than 390 and 760px. Four clubs only; a club whose injured list is
 empty, or one with no bullpen card, was not singled out. I did not run `npm run
 visual` or `npm run e2e`.
+
+## Grid slice G1 (2026-10-07)
+
+First `Grid` migration: 8 of the 25 movable `auto-fit`/`auto-fill` rules, 9 JSX
+sites. Each is a one-class rule with a single static site and a gap on the 8 or
+12px step, so nothing snaps. The rule keeps only what `Grid` does not own
+(padding, margin-top, `align-content`).
+
+| rule | `min` | mode | gap |
+| --- | --- | --- | --- |
+| `.offday__grid` (ul) | 120 | fill | snug |
+| `.hzntile__stats` | 64 | fit | snug |
+| `.rehabgrid` | 150 | fill | base |
+| `.trrank__tilegrid` | 250 | fit | base |
+| `.trec__counts` | 8.5rem | fill | snug |
+| `.iddrawer__fields` (2 sites) | 150 | fit | snug |
+| `.logogrid` (ul) | 140 | fill | base |
+| `.colorlab__wpapreviewfields` | 90 | fill | snug |
+
+**Checked:** `/logos` and `/rehab` (mock API, `FREEZE=1 BLOCKIMG=1`): geometry
+identical at 390 and 760px, 178 and 421 elements. The other six hosts need live
+data or the dev-only identity lab, so they were not drawn. `npm run lint` and
+`npm test` pass. `npm run visual` was not run (Gary asks for it).
+
+**Left (17 rules):** ones with a responsive override or `@media` twin
+(`.sitefooter__actions`, `.sitemenusheet__scroll`, `.allstarlegacy__*`,
+`.gamelist`), a gap off the steps (`.logbook__grid` 20px, `.scout__*` 6px,
+`.patternlab__grid`, `.ninekeys__keys`), scoring-adjacent surfaces
+(`.marginnotes__grid`, `.gamephotos__grid`), and the `/design-lab` grids.
