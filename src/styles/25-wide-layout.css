@@ -488,7 +488,7 @@
   .pbp__zonebtn {
     display: none;
   }
-  .pbp__zonecell { /* component-reuse-exempt: zone pitch display area, not a reusable Card */
+  .pbp__zonecell { /* component-reuse-exempt: a ledger-card shape on the innings viewer's pitch-zone cell; the token swap made the guard see it. Move it onto <Card frame="ledger"> in a later slice (#1156 follow-up) */
     display: flex;
     gap: var(--space-3h);
     align-items: flex-start;
