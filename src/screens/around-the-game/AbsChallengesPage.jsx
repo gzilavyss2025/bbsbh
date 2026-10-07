@@ -38,7 +38,7 @@ import { BiggestOverturn } from './abs/BiggestOverturn.jsx'
 import { absChallengesPath } from '../../lib/route.js'
 import { useNav } from '../../lib/nav.js'
 import { seasonDelta, seasonValue } from '../../lib/seasons/view.js'
-import { useSeasonView } from '../../hooks/seasons/useSeasonView.js'
+import { useSeasonData } from '../../hooks/seasons/useSeasonData.js'
 import { SeasonPicker } from '../../components/season/SeasonPicker.jsx'
 
 // THE CHALLENGE SYSTEM — the first season anybody could argue with the plate
@@ -103,29 +103,28 @@ export function AbsChallengesPage({ seasonYear, vs, scope: scopeParam }) {
   useDocumentTitle('ABS Challenges')
   const navigate = useNav()
   const [level, setLevel] = useState('MLB')
-  const view = useSeasonView('abs', { seasonYear, vs })
+  // `compare: false`: the compare season's file is read per scope, below.
+  const { view, data: regularData, loading: regularLoading, error: regularError, mode, setMode } = useSeasonData('abs', fetchAbsChallenges, { seasonYear, vs, compare: false })
   const year = view?.shown
-  const [mode, setMode] = useState('change')
   const wanted = scopeParam ?? 'reg'
 
   // THE REGULAR FILE IS ALWAYS READ: it names the levels on file and how many
   // postseason games each one has. A level with none reads as Regular and draws
   // no scope control, so a pick can never land on an empty board.
-  const regular = useAsync(() => (view ? fetchAbsChallenges({ seasonYear: year }) : Promise.resolve(null)), [view != null, year])
-  const levels = useMemo(() => levelsIn(regular.data), [regular.data])
+  const levels = useMemo(() => levelsIn(regularData), [regularData])
   const shown = levels.some((l) => l.key === level) ? level : (levels[0]?.key ?? 'MLB')
-  const hasPost = (regular.data?.postGames?.[shown] ?? 0) > 0
+  const hasPost = (regularData?.postGames?.[shown] ?? 0) > 0
   const scope = hasPost ? wanted : 'reg'
   const scoped = useAsync(
     () => (view && scope !== 'reg' ? fetchAbsChallenges({ seasonYear: year, scope }) : Promise.resolve(null)),
     [view != null, year, scope],
   )
-  const data = scope === 'reg' ? regular.data : scoped.data
-  const error = regular.error ?? scoped.error
-  const loading = !view || regular.loading || (scope !== 'reg' && scoped.loading)
+  const data = scope === 'reg' ? regularData : scoped.data
+  const error = regularError ?? scoped.error
+  const loading = !view || regularLoading || (scope !== 'reg' && scoped.loading)
   const { data: prevData } = useAsync(
-    () => (view?.vs && regular.data ? fetchAbsChallenges({ seasonYear: view.vs, scope }) : Promise.resolve(null)),
-    [view?.vs, regular.data != null, scope],
+    () => (view?.vs && regularData ? fetchAbsChallenges({ seasonYear: view.vs, scope }) : Promise.resolve(null)),
+    [view?.vs, regularData != null, scope],
   )
   const chooseScope = (k) => {
     navigate(absChallengesPath({ seasonYear, vs, scope: k }), { replace: true })

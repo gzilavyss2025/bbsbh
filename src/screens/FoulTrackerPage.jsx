@@ -30,7 +30,7 @@ import { Pill } from '../components/ui/control/Pill.jsx'
 import { PartOfSeason } from '../components/season/PartOfSeason.jsx'
 import { Table } from '../components/ui/table/Table.jsx'
 import { SeasonPicker } from '../components/season/SeasonPicker.jsx'
-import { useSeasonView } from '../hooks/seasons/useSeasonView.js'
+import { useSeasonData } from '../hooks/seasons/useSeasonData.js'
 import { boardCompare } from '../lib/seasons/view.js'
 
 // The Foul Tracker — season-long foul-ball counting nobody else publishes:
@@ -68,17 +68,11 @@ function favRowProps(teamId, favoriteTeamId) {
 // A season view (#1202): `seasonYear` and `vs` come from the address.
 export function FoulTrackerPage({ seasonYear, vs }) {
   useDocumentTitle('Foul Tracker')
-  const view = useSeasonView('fouls', { seasonYear, vs })
-  const shown = view?.shown
-  const fouls = useAsync(() => (view ? fetchFouls({ seasonYear: shown }) : Promise.resolve(null)), [view != null, shown])
-  const { error, data: seasonData } = fouls
+  const { view, data: seasonData, prev: prevSeason, loading, error, mode, setMode } = useSeasonData('fouls', fetchFouls, { seasonYear, vs })
   const [wantPost, setWantPost] = useState(false)
   const post = wantPost && hasPostseason(seasonData)
   const data = useMemo(() => foulsInScope(seasonData, post ? 'P' : 'R'), [seasonData, post])
-  const loading = !view || fouls.loading
-  const { data: prevSeason } = useAsync(() => (view?.vs ? fetchFouls({ seasonYear: view.vs }) : Promise.resolve(null)), [view?.vs])
   const prev = useMemo(() => compareFoulsInScope(prevSeason, post ? 'P' : 'R'), [prevSeason, post])
-  const [mode, setMode] = useState('change')
   // A board's compare column: its figure, found again in the vs season.
   const cmp = (group, format, value) =>
     prev ? boardCompare({ vs: view.vs, mode, format, value, prevOf: (r) => prev[group]?.[r.id] }) : null
@@ -133,7 +127,7 @@ export function FoulTrackerPage({ seasonYear, vs }) {
       <SeasonPicker view={view} pathFor={foulsPath} mode={mode} onMode={setMode} />
 
       <p className="hint foultracker__intro">
-        {view?.label || 'This'} {shown === 'all' ? 'seasons’' : 'season’s'} {post ? 'postseason' : ''} foul balls, counted from every MLB game’s
+        {view?.label || 'This'} {view?.shown === 'all' ? 'seasons’' : 'season’s'} {post ? 'postseason' : ''} foul balls, counted from every MLB game’s
         pitch-by-pitch{data?.gamesIngested ? ` (${data.gamesIngested} games so far)` : ''}.
         Fouls hit <em>at</em> two strikes are tracked separately — they’re the ones that
         extend at-bats, and batters who reach two strikes by fouling hit .291 in those
