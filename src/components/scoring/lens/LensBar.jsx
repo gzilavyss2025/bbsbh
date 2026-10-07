@@ -42,6 +42,7 @@ export function LensBar({ bar, checkedAt, brought = false, refreshing, onSheet, 
         </Button>
         {state === 'sealed' ? (
           // The one kraft control in the bar: a tap lifts a seal (ADR-0083).
+          // Hand-drawn on purpose, not Button: the seal skin stays scoped (ADR-0105).
           <button type="button" className="sc-lensbar__unwrap" onClick={onUnwrap}>
             <span className="sc-lensbar__unwraptext">{lines.label}</span>
           </button>
