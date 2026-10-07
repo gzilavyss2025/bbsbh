@@ -286,7 +286,7 @@
   padding: var(--space-2h);
   appearance: none;
   cursor: pointer;
-  border: var(--bw-hair) dashed var(--award-line);
+  border: var(--bw-hair) solid var(--award-line);
   border-radius: var(--radius-sm);
   background: var(--award-soft);
   color: var(--award-ink);
