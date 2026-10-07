@@ -1,4 +1,4 @@
-// Cluster migration slices C1 and C2 (#1180): eleven wrapping-row rules moved onto
+// Cluster migration slices C1 to C4 (#1180): fourteen wrapping-row rules moved onto
 // <Cluster>. Each would fail silently otherwise (lint green, page drawn, only a
 // screenshot noticing):
 //
@@ -37,6 +37,8 @@ const MIGRATED = {
   srecord__doors: { file: '78-offseason.css', gap: 'base', sites: 1, keeps: ['margin-top'] },
   idlab__recolorpalette: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
   idlab__monoinkparts: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 2, keeps: ['margin'] },
+  // C4: the rule is gone whole; the row is a baseline-aligned Cluster.
+  idlab__umpire: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 1 },
 }
 const LAYOUT = /(^|;|\n)\s*(display|flex|flex-flow|flex-direction|flex-wrap|gap|row-gap|column-gap)\s*:/
 

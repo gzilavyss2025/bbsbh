@@ -775,3 +775,26 @@ between runs of UNCHANGED code (two BEFORE runs differ in element count too).
 
 **Not seen.** The `HeaderPreview` umpire row (not migrated). Interactive states of the
 recolor editor beyond first draw. `npm run visual` and `npm run e2e` were not run.
+
+## Cluster slice C4 (2026-10-07)
+
+One identity-lab rule in `17-identity-lab-workbench.css` moved onto `Cluster`: `.idlab__umpire`,
+1 JSX site (`HeaderPreview.jsx`, `UmpireCall`). Base: `origin/main` at b24dff28.
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.idlab__umpire` | snug (`--space-2`), `align="baseline"` | div | nothing, so the whole rule is gone |
+
+**Test first.** It joined `MIGRATED` in `test/cluster-migration.test.js`; the test failed on the rule
+and the site, and passes now. The rule keeps nothing, so it has no `keeps:` entry. **Cascade.** The partial
+loads after `system/cluster.css`. The gap was on-step, so nothing snapped. **Budget.** The partial is now
+1200 lines; `BUDGETS` in `scripts/check-file-size.mjs` went from 1300 to 1200 in the same commit.
+
+**Checked.** `geom.mjs` (`FREEZE=1 BLOCKIMG=1`, `?nointro`) on `/identity-lab`, 390 and 760px: the class
+draws for real (2 elements at each width). BEFORE (`HEAD`) vs AFTER, after dropping the nav logo
+`img`/`span` element (it flips between runs of unchanged code): 0 differences (1109 elements at 390px,
+1103 at 760px), same page heights. Element counts also vary a little between runs of unchanged code, so
+I compared only runs with equal counts: 2 BEFORE runs against 4 AFTER runs.
+
+**Not seen.** The Safe/Out colour states of the chip beyond the first draw. `npm run visual` and
+`npm run e2e` were not run.
