@@ -8,7 +8,7 @@
 //   2. RETIRED. The eight old part names are gone, comments too.
 //   3. THE NEW NAMES. The stylesheet draws them and EventCards.jsx wears them.
 //   4. THE CAPS EXEMPTION. The event text keeps its `#root` prefix.
-//   5. THE ROOT. .pitchernotice and its modifiers are N8c's, and stay.
+//   5. THE ROOT. .pitchernotice and its modifiers were N8c's; N8c renamed them.
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
@@ -112,12 +112,12 @@ test('N8b: the event text keeps its #root caps exemption', () => {
   assert.match(src('styles/01-base.css'), /`\.change__eventtext`/, 'the exemption list in 01-base.css names the new part')
 })
 
-// ---- 5. the root stays ----
+// ---- 5. the root (renamed by N8c) ----
 
-test('N8b: the root, its modifiers and the headshot well are not in this slice', () => {
+test('N8b: the root and its modifiers took the .change name in N8c', () => {
   const css = src('styles/12-sealbox.css')
-  assert.match(css, /^\.pitchernotice--event \{/m)
-  assert.match(css, /^\.pitchernotice--pbp \{/m)
+  assert.match(css, /^\.change--event \{/m)
+  assert.match(css, /^\.change--framed \{/m)
   const code = src('components/playbyplay/EventCards.jsx')
-  assert.match(code, /pitchernotice \$\{noticeClass\(\{ tone: 'event' \}\)\} pitchernotice--event/)
+  assert.match(code, /change \$\{noticeClass\(\{ tone: 'event' \}\)\} change--event/)
 })

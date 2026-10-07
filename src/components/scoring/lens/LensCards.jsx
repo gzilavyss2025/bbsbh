@@ -35,18 +35,18 @@ export function ArmNotice({ feed, arm, onOpen }) {
   const sportId = feed?.gameData?.teams?.home?.sport?.id ?? 1
   const more = sportId === 1 || sportId === 11 ? 'Arsenal · last time out ›' : 'Last time out ›'
   return (
-    <button type="button" className={`pitchernotice ${noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })} sc-armnotice`} onClick={onOpen}>
+    <button type="button" className={`change ${noticeClass({ tone: 'event', className: 'change--framed' })} sc-armnotice`} onClick={onOpen}>
       <PitcherPhoto personId={pitcher.id} name={pitcher.name} teamId={team.id} />
-      <span className="pitchernotice__body">
-        <span className="pitchernotice__now">Now pitching{team.name ? ` for the ${team.name}` : ''}</span>
-        <span className="pitchernotice__pitcher">
+      <span className="change__body">
+        <span className="change__now">Now pitching{team.name ? ` for the ${team.name}` : ''}</span>
+        <span className="change__pitcher">
           <span>{pitcher.name || '—'}</span>
-          <span className="pitchernotice__badges">
-            {pitcher.jersey ? <span className="pitchernotice__jersey">{pitcher.jersey}</span> : null}
-            {pitcher.hand ? <span className="pitchernotice__hand">{pitcher.hand}HP</span> : null}
+          <span className="change__badges">
+            {pitcher.jersey ? <span className="change__jersey">{pitcher.jersey}</span> : null}
+            {pitcher.hand ? <span className="change__hand">{pitcher.hand}HP</span> : null}
           </span>
         </span>
-        {flag && <span className="pitchernotice__flag">{flag}</span>}
+        {flag && <span className="change__flag">{flag}</span>}
       </span>
       <span className="sc-armnotice__more">{more}</span>
     </button>

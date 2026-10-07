@@ -120,7 +120,7 @@
    for width (see the .stars3__card--hero .stars3__stat comment above). A
    grid (not flex-wrap) so the photo gets its own fixed column and the
    copy/stat blocks share the SAME second column — see the identical
-   reasoning on .pitchernotice's own phone-only override just above the
+   reasoning on .change's own phone-only override just above the
    "Row 2" comment for why a flex-wrap + flex-basis:100% attempt here would
    instead push the name/meta block below the photo rather than beside it. */
 @media (max-width: 739.98px) {

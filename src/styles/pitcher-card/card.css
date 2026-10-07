@@ -14,12 +14,12 @@
   align-items: stretch;
   gap: var(--space-2h);
 }
-.pcard .pitchernotice__body {
+.pcard .change__body {
   flex-grow: 1;
 }
 
 /* "Pitched yesterday" / "Starter in relief", right-aligned under the name. */
-.pitchernotice__flag {
+.change__flag {
   align-self: flex-end;
   font-family: var(--font-display);
   font-size: var(--fs-label);
