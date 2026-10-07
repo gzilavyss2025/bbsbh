@@ -15,8 +15,8 @@ Give each player a card in the style of a baseball video game: one big **OVR**
 **POT** (potential) for prospects on the Top 100 list, and an arrow that shows how
 the rating moved. It is a toy for clicking around. It is not a projection and not a
 score, so it needs no seal (root `CLAUDE.md`: player pages are open surfaces,
-ADR-0034). **Open:** confirm that no ADR forbids a rating on the lineup page. The
-plan below shows it on player pages only.
+ADR-0034). The plan below shows it on player pages only. The check that no ADR
+forbids a rating on the lineup page is a comment on #1703.
 
 The card layout, tier names and colors, the compare screen, and the rating-change
 display are not part of this spec. They are in issue #1703.
@@ -118,7 +118,7 @@ There is no generator change and no outs-above-average fetch in version one.
   Savant outs above average across 563 players (part A).
 - It is a counting stat. A part-timer's near-zero value means few chances, not an
   average glove, and the file has no innings field. The playing-time floor for the
-  rank is not set yet. Build step 3 must set it.
+  rank is not set yet. Build step 5 must set it.
 - **Inference (part A):** catcher `fld` leaves out most framing value. Part A did
   not check this against a framing source.
 - Not in version one: Savant outs above average. The `oaa` column is already in the
@@ -150,8 +150,11 @@ band. On part B's one-season pool, hitter OVR has a standard deviation of 6.0 an
 the top hitter is 78.4. Pitcher OVR has a standard deviation of 7.8. A single
 metric has 12 by design. So stretch the deviation from the mean, about 2.0 for
 hitters and 1.5 for pitchers, then cap at 99. This follows what EA did for
-Madden 10: it widened attribute ranges (per Destructoid; Gary's source, and
-neither part A nor part B re-checked it). Part B says the stretch restores a
+Madden 10: it widened attribute ranges
+([Destructoid](https://destructoid.com/?p=39867); also the
+[Madden 10 developer blog](https://www.osftw.com/news/293928/madden-nfl-10-blog-player-ratings-a-new-philosophy-a-new-era)).
+A web search found both links, and only the search summary was read, not the
+pages. Treat the claim as unchecked. Part B says the stretch restores a
 standard deviation of 12 and does not change a correlation.
 
 - The mean is 60, the curve's midpoint. This is my choice. On part B's pool the
@@ -191,18 +194,39 @@ uses a three-year average of Statcast and advanced stats
 Its formula and weights are not public, so this rating is ours. Say that on the
 card. Do not use the word "official" or copy The Show's tier names.
 
-**Blend.** One hot month should not swing a rating. Start value: weight the
-current season by its share of a full season of plate appearances, and fill the
-rest with the two prior seasons.
+**Career rating (decided direction).** The rating covers a player's whole career,
+weighted for recency and adjusted with an age curve. One hot month should not swing
+a rating. It includes minor-league career history.
+
+- **Recency decay (start values).** Marcel-style weights of 5/4/3 on the last three
+  seasons, plus a smaller tail for earlier ones. The weights and the tail are
+  guesses to tune. `docs/season-score.md` already uses a Marcel-style baseline
+  (prior three seasons weighted 3/2/1, regressed with 50 games of .500 baseball),
+  so the idea has precedent here. Its weights differ from these.
+- **Age curve (Open, research).** The repo has none. The task: find a published
+  aging curve and test it on `public/data/war-history/` (WAR by season) against
+  player birth years. Every claim about the curve is an **inference** until that
+  test runs. No number for it is decided.
+- **MLB seasons.** Savant percentile boards by year (see Prior seasons). Part A
+  checked 2024 and 2025. **Inference:** older Statcast years exist. They were not
+  checked.
+- **Minor-league seasons.** They enter through the level ceilings above, at a
+  discount. Minor-league years have no Statcast (part A), so they use the
+  level-relative stats percentile. **Gap:** the per-player minor-league season
+  lines need a new fetch. Nobody has scoped it.
+- **Career Fielding.** `public/data/war-history/` holds WAR per season only, not
+  `fld`. A career Fielding bar needs a new per-season `fld` store, hand-run like
+  `gen-war-history.mjs`. The playing-time floor is still set at build time.
+  **Inference:** pooling seasons reduces the counting-stat noise.
 
 **Prior seasons (decided).** `savant-percentiles.json` holds one season only. Prior
-seasons come from Savant's `percentile-rankings?year=` board for 2024 and 2025
+MLB seasons come from Savant's `percentile-rankings?year=` board for 2024 and 2025
 (part A: 2025 has 617 hitters and 711 pitchers, 2024 has 606 and 696).
 
 - Shard by `personId % 100`, with both seasons in each shard. One shard is about
   3 KB (the average; the largest is 5.2 KB), and a player page opens one shard. One
   flat file for both seasons is 296 KB, which would double what the page parses.
-- A reader through `staticJsonBy`, then the blend.
+- A reader through `staticJsonBy`, then the career weighting.
 - `public/data/war-history/` holds WAR only, with no Statcast percentiles. It
   cannot feed the buckets.
 - **Inference:** a hand-run generator fits, like `gen-war-history.mjs`, because a
@@ -239,8 +263,7 @@ value (FV) grade, so reuse that map and convert FV to the 0-100 band.
 
 - **Decided:** POT shows only for players on the Top 100 list, from rank. Start
   values: ranks 1-5 are 90 and up, rank 100 is about 70.
-- Everyone else shows a dash. Do not invent a POT.
-- An MLB regular's POT equals his OVR, so the card shows no POT for him.
+- Everyone not on the list shows a dash, including MLB regulars. Do not invent a POT.
 
 **No scouting grades found (part A).** The Top 100 page data has 96 rows and no
 grade key. Two profile pages rendered in Chromium (rank 1, Made 815908, and rank 2,
@@ -260,6 +283,12 @@ opinion. **Decided:** keep the scrape and do not change it. The clause stays her
 a known risk. A per-player scrape of the profile pages would widen it, and the spec
 does not plan one.
 
+**Known risk: MLB copyright notice.** The notice that statsapi responses link to
+(`gdx.mlb.com/components/copyright.txt`) says: "Only individual, non-commercial,
+non-bulk use of the Materials is permitted". **Inference:** its scope reaches the
+statsapi data this app reads, not only the Top 100 page. Part A recorded it and
+changed nothing. Record only, no action.
+
 ## Rating changes over time
 
 - A nightly snapshot of each player's OVR and bars goes into a sharded file, for
@@ -274,11 +303,15 @@ does not plan one.
 1. Pure rating module with tests, test first: percentile-to-rating curve, bucket
    means, the stretch with the 99 cap, the minimum-data rule, missing-bucket
    handling.
-2. Sharded prior-season store and reader (`staticJsonBy`), then the blend.
-3. `gen-ovr.mjs` and MLB hitters and pitchers.
-4. Floor modelling task, then minor leaguers with ceilings and POT. The task tests
+2. Aging-curve research task, before the blend (see Career rating).
+3. Sharded prior-season store and reader (`staticJsonBy`), then the career
+   weighting (recency decay and the age curve).
+4. Per-season `fld` store, and the minor-league season-lines fetch. Both come
+   before `gen-ovr.mjs`.
+5. `gen-ovr.mjs` and MLB hitters and pitchers.
+6. Floor modelling task, then minor leaguers with ceilings and POT. The task tests
    whether the floor should rise with level.
-5. Rating history file and arrows (UI in #1703).
+7. Rating history file and arrows (UI in #1703).
 
 Classify each new `src/api/` module in `src/api/spoiler-manifest.json`: this
 feature is spoiler-free. Check each step in the browser against a real player
