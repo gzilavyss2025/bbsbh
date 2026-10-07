@@ -50,23 +50,23 @@ entry you touched also needs an update. A stale tier is worse than none.
 **All sessions use task branches and pull requests. Never push directly to `main`
 or trigger a Vercel deployment.** This is a Vercel Hobby project: keep
 work-in-progress off `main`, batch related changes, and cut deployment-triggering
-merges to a minimum. Non-`main` previews are disabled. Verify changes locally instead.
+merges to a minimum. Non-`main` previews are disabled. Verify in your own container or checkout instead.
 
-Multiple agents may work at once. Treat unfamiliar changes as another agent's work.
-Check status and diffs before you edit. Isolate your work by branch or worktree. Stop
-and coordinate on any file another agent may be using. Never reset, stash, overwrite, or
-reformat someone else's work. In a fresh context, fetch and list worktrees and open PRs
-before you pick a base branch: independent work starts from current `origin/main`; work
-needing an unmerged PR must name and deliberately base on that PR branch. Record that
-state in your handoff. **Cloud sessions** (`CLAUDE_CODE_REMOTE`): `docs/development.md`.
+**Cloud is the default** (`CLAUDE_CODE_REMOTE=true`; Gary works in claude.ai/code). One
+container, one branch: use the branch the session gives you, cut from current
+`origin/main`. No worktree. No `gh`: use the GitHub MCP tools. Other sessions run in
+parallel, so list the open PRs and their files before you edit, and stop on overlap.
+Leave your PR as a draft for `/stack-prs`; never merge it. Push before you stop, because
+the PR is the handoff. Verify in the container, render the route you changed in the
+preinstalled Chromium, and send Gary a screenshot (`SendUserFile`) with the exact route
+and `gamePk`. **Add `?nointro` to any test URL**, so the first-visit welcome modal does
+not cover the slate (`e2e` specs add this through `e2e/fixtures.js`). A session Gary is
+watching may ask with `AskUserQuestion`, one question at a time. A child or unattended
+session writes `[DECISION: ...]` lines instead. Detail: `docs/development.md`, "Cloud
+sessions".
 
-For a user-visible change, start the first free reserved localhost dev server, load
-the exact route you changed, and keep the server running. Put that clickable local
-URL in your final handoff. **Add `?nointro` to any test URL**, so the first-visit
-welcome modal does not cover the slate (`e2e` specs add this through
-`e2e/fixtures.js`). See `docs/development.md` for the full workflow.
-**Small visual bug, or any cloud session:** do not hand over a dev server. Render the
-fixed view with the preinstalled Chromium and send Gary a screenshot (`SendUserFile`).
+**Local sessions** (a worktree, reserved dev ports, a localhost URL in the handoff, the
+fresh-context checklist): `docs/development.md`, "Local sessions only".
 
 ## Commands
 
@@ -81,11 +81,8 @@ npm run test:coverage  # same, with a per-file coverage report
 npm run e2e        # playwright — ONLY when Gary asks (hook-enforced, see docs/testing.md)
 ```
 
-**Reserved dev ports (multi-agent safe).** `dev` uses port `5173`; `preview` uses
-`4173`. `strictPort` is on, so neither port auto-increments. If another worktree
-holds that port, use the next numbered script: `npm run dev:2` through `dev:5`
-(ports `5172`→`5169`), or `preview:2` through `preview:5` (`4172`→`4169`).
-`vite.config.js` has the rationale and the tally-nfl band split.
+Local sessions that share a machine use reserved dev ports (`dev:2` to `dev:5`);
+`docs/development.md` and `vite.config.js` explain them.
 
 `scripts/gen-*.mjs` are the data generators (WAR, rehab, umpires, callouts, and more);
 `docs/scripts/generators.md` catalogs them. The `npm test` suite does not replace the
@@ -171,7 +168,7 @@ thirteen, each with its ADR: `api/CLAUDE.md`.
 
 ## Agent skills
 
-- **Issue tracker** — issues go to **GitHub Issues** (`gh issue`). `.scratch/<slug>/`
+- **Issue tracker** — issues go to **GitHub Issues** (`gh issue` locally; the GitHub MCP tools in the cloud). `.scratch/<slug>/`
   holds working notes, not the tracker. See `docs/agents/issue-tracker.md`.
 - **Triage labels** — `needs-triage` / `needs-info` / `ready-for-agent` /
   `ready-for-human` / `wontfix`, used as-is. See `docs/agents/triage-labels.md`.

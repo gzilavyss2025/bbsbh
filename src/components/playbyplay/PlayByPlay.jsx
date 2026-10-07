@@ -389,7 +389,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
                 feed={feed} relief pitcher={pitcher}
                 teamId={pitchingTeamId}
                 teamName={pitchingName}
-                className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
+                className={noticeClass({ tone: 'event', className: 'change--framed' })}
               />
               {departureLine && (
                 <DepartureLineCard
@@ -427,7 +427,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               fielder={fielder}
               teamId={pitchingTeamId}
               teamName={pitchingName}
-              className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
+              className={noticeClass({ tone: 'event', className: 'change--framed' })}
             />
           ) : (
             <EventNote entry={entry} />
@@ -459,7 +459,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               base={entry.base}
               teamId={battingTeamId}
               teamName={battingName}
-              className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
+              className={noticeClass({ tone: 'event', className: 'change--framed' })}
             />
           ) : (
             <EventNote entry={entry} />
@@ -477,7 +477,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               batter={batter}
               teamId={battingTeamId}
               teamName={battingName}
-              className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
+              className={noticeClass({ tone: 'event', className: 'change--framed' })}
             />
           ) : (
             <EventNote entry={entry} />

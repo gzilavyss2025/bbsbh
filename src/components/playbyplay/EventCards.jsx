@@ -128,7 +128,7 @@ export function EventNote({ entry }) {
 // already says what this is). The useful bit is how many visits the club has
 // left (MLB caps them — see moundVisitsAllowed), drawn as used/open pips
 // (UsagePips) — the same shared component StatBox.jsx's ABS challenge row
-// uses, sized up here (pitchernotice--mv) since this card has no other figure
+// uses, sized up here (change--mv) since this card has no other figure
 // competing for attention. A visible "N left" tail rides alongside the pips,
 // same idiom as the ABS row's own .abs__rec readout — the dots alone don't
 // say which fill state means used vs. still available, so a viewer has to
@@ -138,14 +138,14 @@ export function MoundVisitBar({ team, teamId, remaining, allowed }) {
   const label =
     used != null ? `${used} of ${allowed} mound visits used, ${remaining} left` : undefined
   return (
-    <div className={`pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event pitchernotice--mv`}>
-      <TeamLogo teamId={teamId} name={team} size={20} className="pitchernotice__teammark" />
-      <span className="pitchernotice__label">Mound visit{team ? ` — ${team}` : ''}</span>
-      <span className="pitchernotice__spacer" />
+    <div className={`change ${noticeClass({ tone: 'event' })} change--event change--mv`}>
+      <TeamLogo teamId={teamId} name={team} size={20} className="change__teammark" />
+      <span className="change__label">Mound visit{team ? ` — ${team}` : ''}</span>
+      <span className="change__spacer" />
       {used != null && (
         <>
           <UsagePips allowed={allowed} used={used} label={label} />
-          <span className="pitchernotice__mvcount" aria-hidden="true">
+          <span className="change__mvcount" aria-hidden="true">
             {remaining} left
           </span>
         </>
@@ -165,9 +165,9 @@ export function MoundVisitBar({ team, teamId, remaining, allowed }) {
 // it costs nothing and the default is what every caller passes.
 export function EjectionBar({ text, code = 'EJ' }) {
   return (
-    <div className={`pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event`}>
-      <span className="pitchernotice__code pitchernotice__code--alert">{code}</span>
-      <span className="pitchernotice__eventtext">{text}</span>
+    <div className={`change ${noticeClass({ tone: 'event' })} change--event`}>
+      <span className="change__code change__code--alert">{code}</span>
+      <span className="change__eventtext">{text}</span>
     </div>
   )
 }
@@ -180,10 +180,10 @@ export function EjectionBar({ text, code = 'EJ' }) {
 // pitch, the catcher on a passed ball).
 export function EventCard({ code, runnerId, teamId, segments, pitchLabel = null }) {
   return (
-    <div className={`pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event`}>
-      <span className="pitchernotice__code">{code}</span>
+    <div className={`change ${noticeClass({ tone: 'event' })} change--event`}>
+      <span className="change__code">{code}</span>
       {runnerId != null && <PitcherPhoto personId={runnerId} teamId={teamId} />}
-      <span className="pitchernotice__eventtext">
+      <span className="change__eventtext">
         {segments.map((seg, i) =>
           seg.id != null ? (
             <PlayerLink key={i} id={seg.id}>
@@ -194,7 +194,7 @@ export function EventCard({ code, runnerId, teamId, segments, pitchLabel = null 
           ),
         )}
       </span>
-      {pitchLabel && <span className="pitchernotice__pitchno">{pitchLabel}</span>}
+      {pitchLabel && <span className="change__pitchno">{pitchLabel}</span>}
     </div>
   )
 }
@@ -228,10 +228,10 @@ export function DelayNotice({ entry, teamId }) {
   // the sentence keeps the whole card.
   const lead = minutes != null ? `${title} (${formatDelay(minutes)})` : title
   return (
-    <div className={`pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event`}>
-      <span className="pitchernotice__code pitchernotice__code--alert">DELAY</span>
+    <div className={`change ${noticeClass({ tone: 'event' })} change--event`}>
+      <span className="change__code change__code--alert">DELAY</span>
       {playerId != null && <PitcherPhoto personId={playerId} teamId={teamId} />}
-      <span className="pitchernotice__eventtext">
+      <span className="change__eventtext">
         <b>{lead}</b>
         {detail ? ` — ${detail}` : ''}
       </span>

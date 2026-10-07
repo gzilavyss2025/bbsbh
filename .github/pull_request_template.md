@@ -1,7 +1,7 @@
 <!--
 bbsbh PR template — mirrors the structure the repo's PRs already use.
 Fill in each section; delete a section only if it genuinely doesn't apply.
-Open as a DRAFT (agent/`claude/*` branches are required to; see CLAUDE.md).
+Open as a DRAFT (agent/`claude/*` branches are required to; see docs/development.md, "Cloud sessions").
 -->
 
 ## Summary
@@ -32,25 +32,24 @@ rule" section of CLAUDE.md + docs/adr/.
 
 <!--
 `npm test` is CI-gated (`lint-and-build` runs lint, `npm test` and build). Also verify by exercising the real flow.
-Note: this sandbox usually can't reach statsapi.mlb.com from a headless
-browser, so live-game screenshots often aren't possible — say how you
-verified instead (`e2e/fixtures/mock-api.js` for a spec pinned to the anchor
-game, the `preview` branch URL, regenerated data file, etc.). Don't
-troubleshoot an unreachable-network failure by re-running headed/`--debug` —
-it's a sandbox limitation, not something a visible browser fixes.
+Cloud sessions verify in the container with the preinstalled Chromium and send the
+maintainer a screenshot. If the live feed is out of reach, say what you mocked
+(`e2e/fixtures/mock-api.js` for a spec pinned to the anchor game, a regenerated data
+file, etc.). `.claude/skills/run/SKILL.md` has the live-data setup. Don't
+troubleshoot an unreachable-network failure by re-running headed/`--debug`.
 -->
 
 - [ ] `npm run lint` passes
 - [ ] `npm test` passes
 - [ ] `npm run build` passes
-- [ ] Exercised the affected flow in `npm run dev` against a live or recent game — <!-- gamePk / how -->
+- [ ] Exercised the affected flow in `npm run dev` against a live or recent game, and sent a screenshot — <!-- route, gamePk, what was mocked -->
 <!-- Run `npm run e2e` only when Gary asks for it. -->
 
 ## Files touched
 
 <!--
 List them — the maintainer runs concurrent `claude/*` sessions and uses this
-to spot overlap across open PRs at a glance (see CLAUDE.md "Concurrent agents").
+to spot overlap across open PRs at a glance (see docs/development.md, "Cloud sessions", "Parallel sessions").
 -->
 
 -

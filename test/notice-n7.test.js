@@ -9,9 +9,9 @@
 //   2. THE CALLERS. The frame stays the caller's: PitcherNotice is also the
 //      header INSIDE the full card (pitcherCard/PitcherCard.jsx), and a frame on
 //      its root would draw a card in the card. So each of the nine call sites
-//      passes the helper, with .pitchernotice--pbp as the namespace until N8c,
+//      passes the helper, with .change--framed as the namespace until N8c,
 //      and the four role roots keep taking it from className.
-//   3. THE NAMESPACE. .pitchernotice--pbp keeps only what Notice does not draw.
+//   3. THE NAMESPACE. .change--framed keeps only what Notice does not draw.
 //   4. THE FULL CARD. .pcard undoes .notice's centre and wrap.
 //   5. THE CONSOLE keys on the frame class every staged card now wears.
 import test from 'node:test'
@@ -81,7 +81,7 @@ test('N7: the seal pin — no reveal-only import, SealBox or revealedThrough rea
 
 // ---- 2. the callers ----
 
-const FRAME = "noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })"
+const FRAME = "noticeClass({ tone: 'event', className: 'change--framed' })"
 const HELPER = /^import \{ noticeClass \} from '(\.\.\/)+lib\/design\/noticeClass\.js'$/m
 // file -> how many of its card props take the frame from the helper
 const CALLERS = {
@@ -97,15 +97,15 @@ test('N7: the nine call sites pass the event frame from noticeClass, never the b
     const code = src(rel)
     assert.match(code, HELPER, `${rel} imports noticeClass`)
     assert.equal(count(code, `className={${FRAME}}`), n, `${rel}: ${n} call sites take the frame`)
-    assert.doesNotMatch(code, /className="pitchernotice--pbp"/, `${rel}: no call site passes the bare class`)
+    assert.doesNotMatch(code, /className="change--framed"/, `${rel}: no call site passes the bare class`)
   }
 })
 
 test('N7: ArmNotice is still one <button> and takes the frame from noticeClass', () => {
   const code = src('components/scoring/lens/LensCards.jsx')
   assert.match(code, HELPER)
-  assert.equal(count(code, `<button type="button" className={\`pitchernotice \${${FRAME}} sc-armnotice\`} onClick={onOpen}>`), 1)
-  assert.doesNotMatch(code, /className="[^"]*pitchernotice--pbp/, 'no bare frame class left')
+  assert.equal(count(code, `<button type="button" className={\`change \${${FRAME}} sc-armnotice\`} onClick={onOpen}>`), 1)
+  assert.doesNotMatch(code, /className="[^"]*change--framed/, 'no bare frame class left')
 })
 
 // The frame stays the caller's. The four role roots take it from className, and
@@ -114,7 +114,7 @@ test('N7: ArmNotice is still one <button> and takes the frame from noticeClass',
 test('N7: the role roots keep the caller\'s className, and the full card\'s header stays bare', () => {
   for (const name of ['PitcherNotice', 'BatterNotice', 'FielderNotice', 'PinchRunNotice']) {
     const code = src(`components/playbyplay/${name}.jsx`)
-    assert.ok(code.includes('<div className={`pitchernotice ${className}`}>'), `${name}'s root`)
+    assert.ok(code.includes('<div className={`change ${className}`}>'), `${name}'s root`)
     // PitcherNotice.jsx's one call is ReliefRepeat's, a caller (above).
     const live = code.replace(/^\s*\/\/.*$/gm, '') // a comment may name the helper
     assert.equal(count(live, 'noticeClass('), name === 'PitcherNotice' ? 1 : 0, `${name} does not draw the frame itself`)
@@ -131,8 +131,8 @@ test('N7: the role roots keep the caller\'s className, and the full card\'s head
 // so the card would sit flush) and no wrap: .notice wraps, the cards did not.
 // None of this goes in notice.css: notice-cascade.test.js pins every rule
 // there as one class.
-test('N7: .pitchernotice--pbp keeps only the margin and the no-wrap', () => {
-  const body = ruleBody(css('12-sealbox.css'), '.pitchernotice--pbp')
+test('N7: .change--framed keeps only the margin and the no-wrap', () => {
+  const body = ruleBody(css('12-sealbox.css'), '.change--framed')
   assert.equal(decl(body, 'margin'), 'var(--space-1) var(--space-3h)', '4px 14px, as tokens')
   assert.equal(decl(body, 'flex-wrap'), 'nowrap')
   for (const prop of ['padding', 'border', 'border-radius', 'background']) {
@@ -157,5 +157,5 @@ test('N7: .pcard stretches its sections, does not wrap and keeps its gap', () =>
 test('N7: the console finds a lone staged card by the event frame', () => {
   const sheet = css('focus/console.css')
   assert.ok(sheet.includes('.half:has(.notice--event):not(:has(.statgrid))'))
-  assert.doesNotMatch(sheet, /pitchernotice--pbp/)
+  assert.doesNotMatch(sheet, /change--framed/)
 })

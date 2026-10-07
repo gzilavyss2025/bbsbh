@@ -30,28 +30,28 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 export function PitcherNotice({ pitcher, teamId = null, teamName, className = '', label = 'Now pitching', entering = null, flag = null }) {
   if (!pitcher) return null
   return (
-    <div className={`pitchernotice ${className}`}>
+    <div className={`change ${className}`}>
       <PitcherPhoto personId={pitcher.id} name={pitcher.name} teamId={teamId} />
-      <div className="pitchernotice__body">
-        <span className="pitchernotice__now">
+      <div className="change__body">
+        <span className="change__now">
           {label}{teamName ? ` for the ${teamName}` : ''}
         </span>
-        <span className="pitchernotice__pitcher">
+        <span className="change__pitcher">
           <PlayerLink id={pitcher.id}>{pitcher.name}</PlayerLink>
           {/* Uniform number + throwing hand, right-aligned same as the
               lineup card's .lineup__jersey (see index.css) rather than
               trailing inline after the name. */}
-          <span className="pitchernotice__badges">
-            {pitcher.jersey ? <span className="pitchernotice__jersey">{pitcher.jersey}</span> : null}
-            {pitcher.hand ? <span className="pitchernotice__hand">{pitcher.hand}HP</span> : null}
+          <span className="change__badges">
+            {pitcher.jersey ? <span className="change__jersey">{pitcher.jersey}</span> : null}
+            {pitcher.hand ? <span className="change__hand">{pitcher.hand}HP</span> : null}
           </span>
         </span>
-        {flag && <span className="pitchernotice__flag">{flag}</span>}
+        {flag && <span className="change__flag">{flag}</span>}
       </div>
       {entering && (
-        <span className="pitchernotice__entering">
-          <span className="pitchernotice__enteringcount">{entering.pitches} pitches</span>
-          <span className="pitchernotice__enteringwhen">at {entering.halfLabel}</span>
+        <span className="change__entering">
+          <span className="change__enteringcount">{entering.pitches} pitches</span>
+          <span className="change__enteringwhen">at {entering.halfLabel}</span>
         </span>
       )}
     </div>
@@ -68,7 +68,7 @@ export function ReliefRepeat({ pitcher, teamId, teamName }) {
   if (!pitcher) return null
   return (
     <div className="pbp__entry">
-      <PitcherNotice pitcher={pitcher} teamId={teamId} teamName={teamName} className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })} label="Pitching" />
+      <PitcherNotice pitcher={pitcher} teamId={teamId} teamName={teamName} className={noticeClass({ tone: 'event', className: 'change--framed' })} label="Pitching" />
     </div>
   )
 }
@@ -117,14 +117,14 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
 
   if (!url && !underlayUrl) {
     return (
-      <span className="pitchernotice__shot pitchernotice__shot--fallback" aria-hidden="true">
+      <span className="change__shot change__shot--fallback" aria-hidden="true">
         {monogram}
       </span>
     )
   }
   return (
     <span
-      className={`pitchernotice__shot${showLogo ? ' pitchernotice__shot--logo' : ''}`}
+      className={`change__shot${showLogo ? ' change__shot--logo' : ''}`}
       style={showLogo && bg ? { backgroundColor: bg } : undefined}
       aria-hidden="true"
     >

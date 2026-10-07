@@ -8,8 +8,8 @@ substitution type), a team/administrative event (mound visit, ejection), or a
 baserunning/misc event with no plate appearance of its own (steal, wild pitch,
 balk, …) — and all three render in the *same* marker-wash card (the event
 Notice frame, `noticeClass({ tone: 'event' })`; an actor card's CALLER passes it, with
-`.pitchernotice--pbp` as the margin namespace, since `PitcherNotice` is also the bare
-header inside the full card), distinguished by what's inside (a
+`.change--framed` as the margin namespace, since `PitcherNotice` is also the bare
+header inside the full card; the card's root class is `.change`, ADR-0084), distinguished by what's inside (a
 headshot vs. a scorer's-shorthand code) rather than a colored accent rail.
 Read ADR-0017 before touching any of `PlayByPlay.jsx`'s notification
 components, `MoundVisitBar` (in `EventCards.jsx`), or `HalfInning.jsx`'s

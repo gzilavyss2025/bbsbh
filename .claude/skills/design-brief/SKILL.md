@@ -75,6 +75,7 @@ marked "(Recommended)". If the task already answers a question, skip it.
 
 ## Cloud sessions
 
-When `CLAUDE_CODE_REMOTE=true` nobody can answer you. Do not use `AskUserQuestion`. Write
-each open question as `[DECISION: ...]` in the prompt, your recommendation first, and make
-the plan prompt answer it before the build prompt starts.
+When `CLAUDE_CODE_REMOTE=true`, a session Gary is watching still uses `AskUserQuestion` as
+written. In a child or unattended session, write each open question as `[DECISION: ...]`
+in the prompt, your recommendation first, and make the plan prompt answer it before the
+build prompt starts.

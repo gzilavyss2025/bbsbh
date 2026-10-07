@@ -106,8 +106,8 @@ export function createStagingRunner({
   // dry, which is what `ahead` and `all` both do; `1` fetches only the row the
   // scorer is about to need, which is `demand`. It changes nothing about the
   // gate — the cursor still may not pass the picture — only when the bytes are
-  // paid for.
-  horizon = Infinity,
+  // paid for. It is only the STARTING value: `setHorizon` changes it in place.
+  horizon: startingHorizon = Infinity,
   // THE SPEED READOUT's two inputs (speed.js). `now` is injected so a test can
   // drive the clock, and `onSample` is told `{ bytes, ms }` after each good
   // download. A sample carries no playId on purpose: a figure traceable to one
@@ -116,6 +116,7 @@ export function createStagingRunner({
   onSample = () => {},
 }) {
   let job = initialJob
+  let horizon = startingHorizon
   let pumping = false
   let stopped = false
   let started = false
@@ -349,6 +350,26 @@ export function createStagingRunner({
       wakeUp()
       if (started && Number.isFinite(horizon)) pump()
       return landed
+    },
+
+    // CHANGE THE PLAN WITHOUT LOSING THE QUEUE.
+    //
+    // The entry step lets a reader pick a plan after this runner exists — it
+    // starts staging when the page opens, before the choice is made. The hook
+    // used to answer a changed plan by building a NEW runner, and the new one
+    // had an empty queue: the half's rows reach a runner only when they change,
+    // and a plan change does not change them. On demand then sat on a disabled
+    // button with no request ever sent. The horizon is one number read on each
+    // pass of the loop, so it changes in place and the queue, the staged set
+    // and the cursor all stay.
+    //
+    // Wakes the loop and pumps, because a WIDER horizon puts rows back in reach
+    // that the loop had stopped at. A narrower one needs nothing: the next pass
+    // simply reads the smaller number.
+    setHorizon(next) {
+      horizon = next
+      wakeUp()
+      if (started) pump()
     },
 
     // The next half the scorer has reached is now readable, so its rows join

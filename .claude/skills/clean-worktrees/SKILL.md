@@ -1,6 +1,6 @@
 ---
 name: clean-worktrees
-description: Interactively remove local bbsbh worktrees whose work is already merged or whose upstream branch was deleted. Use when the user says "clean worktrees" or asks to clear out stale worktrees.
+description: LOCAL ONLY, not for cloud sessions (CLAUDE_CODE_REMOTE). Interactively remove local bbsbh worktrees whose work is already merged or whose upstream branch was deleted. Use when the user says "clean worktrees" or asks to clear out stale worktrees.
 ---
 
 # /clean-worktrees

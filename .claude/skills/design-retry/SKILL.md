@@ -59,6 +59,7 @@ per call, your recommendation first and marked "(Recommended)".
 
 ## Cloud sessions
 
-When `CLAUDE_CODE_REMOTE=true` nobody can answer you, and there is no `gh` CLI. Do not use
-`AskUserQuestion`. Ask your questions inside the output as `[DECISION: ...]` lines, your
-recommendation first, and write the retry prompt so it works for the recommended answers.
+When `CLAUDE_CODE_REMOTE=true` there is no `gh` CLI. In a session Gary is watching, use
+`AskUserQuestion` as written. In a child or unattended session, ask your questions inside
+the output as `[DECISION: ...]` lines, your recommendation first, and write the retry
+prompt so it works for the recommended answers.

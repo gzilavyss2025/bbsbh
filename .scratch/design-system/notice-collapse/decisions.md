@@ -28,6 +28,7 @@ The census (`census.md`) and the proposal (`spec.md`) back each one.
 | Q1 | Wash: a thin edge all round and a pale tint, the same for every tone (2026-10-06). |
 | Q2 | A box: every error becomes a Notice with tone `error` (2026-10-06). |
 | Q3 | Frame only: the pitcher cards take their outer frame from a shared class (2026-10-06). |
+| Q3, name | The pitcher card family is named `.change` (ADR-0084: a name for the job, no shape word). N8a, N8b and N8c rename it (2026-10-07). |
 | Q4 | Four tones: info, event, caution, error (2026-10-06). |
 | Q5 | Leave all: the 71 held sites stay as they are (2026-10-06). |
 

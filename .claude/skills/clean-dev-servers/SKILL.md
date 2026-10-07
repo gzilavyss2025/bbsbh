@@ -1,5 +1,7 @@
 # /clean-dev-servers
 
+**Local sessions only.** A cloud session has no stale servers. Skip this skill there.
+
 Interactively find and kill stale local `vite` dev/preview servers left running
 from past sessions/worktrees. Companion to the informational check
 `session-start.sh` runs automatically at the start of every local session

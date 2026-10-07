@@ -1,13 +1,13 @@
 // Slice N6 of the Notice collapse (#1132): the four one-line event bars and the
 // two handoff cards of the innings feed take their frame from the Notice class
-// helper (noticeClass, tone 'event') instead of .pitchernotice--pbp. The feed is
+// helper (noticeClass, tone 'event') instead of .change--framed. The feed is
 // a scoring surface, so the slice moves a frame and never a gate. Asserted from
 // the source text, the way notice-cascade.test.js does:
 //
 //   1. THE SEAL PIN. Measured on origin/main before the first edit.
 //   2. THE ROOTS. Each of the six takes noticeClass({ tone: 'event' }), wears no
-//      .pitchernotice--pbp and keeps every other class it had.
-//   3. THE NAMESPACES. The old frame's margin moves onto .pitchernotice--event
+//      .change--framed and keeps every other class it had.
+//   3. THE NAMESPACES. The old frame's margin moves onto .change--event
 //      and .pitcherhandoff, with what keeps the pixels the same: no wrap, and
 //      a stretched column on the handoff cards.
 //   4. THE OLD FRAME left the actor cards in N7 (notice-n7.test.js); the
@@ -85,12 +85,12 @@ const HELPER = /import \{ noticeClass \} from '\.\.\/\.\.\/lib\/design\/noticeCl
 test('N6: the four event bars take the event frame from noticeClass and keep their own classes', () => {
   const code = src('components/playbyplay/EventCards.jsx')
   assert.match(code, HELPER)
-  const bar = '<div className={`pitchernotice ${noticeClass({ tone: \'event\' })} pitchernotice--event'
-  assert.ok(fn(code, 'MoundVisitBar').includes(`${bar} pitchernotice--mv\`}>`), 'the mound visit keeps pitchernotice--mv')
+  const bar = '<div className={`change ${noticeClass({ tone: \'event\' })} change--event'
+  assert.ok(fn(code, 'MoundVisitBar').includes(`${bar} change--mv\`}>`), 'the mound visit keeps change--mv')
   for (const name of ['EjectionBar', 'EventCard', 'DelayNotice']) {
     assert.ok(fn(code, name).includes(`${bar}\`}>`), `${name}'s root`)
   }
-  assert.doesNotMatch(code, /className=[^>]*pitchernotice--pbp/, 'no event bar wears the old frame')
+  assert.doesNotMatch(code, /className=[^>]*change--framed/, 'no event bar wears the old frame')
 })
 
 test('N6: the two handoff cards take the event frame on their Stack and keep their inner layout', () => {
@@ -99,10 +99,10 @@ test('N6: the two handoff cards take the event frame on their Stack and keep the
   for (const name of ['DepartureLineCard', 'FinalizedLineCard']) {
     const body = fn(code, name)
     assert.ok(body.includes(`<Stack gap="snug" className={noticeClass({ tone: 'event', className: 'pitcherhandoff' })}>`), `${name}'s root`)
-    assert.ok(body.includes('<div className="pitchernotice">'), `${name} keeps its header row`)
+    assert.ok(body.includes('<div className="change">'), `${name} keeps its header row`)
     assert.ok(body.includes('<PitcherLineTable line={line}'), `${name} keeps its table`)
   }
-  assert.doesNotMatch(code, /pitchernotice--pbp/, 'no handoff card wears the old frame')
+  assert.doesNotMatch(code, /change--framed/, 'no handoff card wears the old frame')
 })
 
 // ---- 3. the namespaces ----
@@ -116,9 +116,9 @@ test('N6: the two handoff cards take the event frame on their Stack and keep the
 // centres its items, which would shrink the full-width table; the Stack's
 // column must stretch, as it did with no align-items at all. None of this goes
 // in notice.css: notice-cascade.test.js pins every rule there as one class.
-test('N6: .pitchernotice--event and .pitcherhandoff carry the old margin and do not wrap', () => {
+test('N6: .change--event and .pitcherhandoff carry the old margin and do not wrap', () => {
   const sheet = css('12-sealbox.css')
-  const event = ruleBody(sheet, '.pitchernotice--event')
+  const event = ruleBody(sheet, '.change--event')
   assert.equal(decl(event, 'margin'), 'var(--space-1) var(--space-3h)', '4px 14px, as tokens')
   assert.equal(decl(event, 'flex-wrap'), 'nowrap')
   assert.equal(decl(event, 'gap'), 'var(--space-2)', 'the bar keeps its tighter gap')
@@ -139,10 +139,10 @@ test('N6: the handoff card keeps the 8px gap of Stack\'s "snug" step', () => {
 // ---- 4. the old frame left the actor cards in N7 ----
 
 // N7 moved the actor cards onto the helper. The frame stays the caller's: each
-// call site passes noticeClass with .pitchernotice--pbp as the namespace, and
+// call site passes noticeClass with .change--framed as the namespace, and
 // the rule keeps only the margin Notice does not draw (notice-n7.test.js).
-test('N6: the .pitchernotice--pbp rule is the margin-only namespace, and the actor-card callers wear the helper', () => {
-  const frame = ruleBody(css('12-sealbox.css'), '.pitchernotice--pbp')
+test('N6: the .change--framed rule is the margin-only namespace, and the actor-card callers wear the helper', () => {
+  const frame = ruleBody(css('12-sealbox.css'), '.change--framed')
   assert.equal(decl(frame, 'margin'), 'var(--space-1) var(--space-3h)')
   assert.equal(decl(frame, 'border'), undefined)
   for (const rel of [
@@ -152,6 +152,6 @@ test('N6: the .pitchernotice--pbp rule is the margin-only namespace, and the act
     'components/scoring/lens/LensCards.jsx',
     'components/scoring/lens/PitcherSheet.jsx',
   ]) {
-    assert.match(src(rel), /\{noticeClass\(\{ tone: 'event', className: 'pitchernotice--pbp' \}\)\}/, `${rel} wears the helper`)
+    assert.match(src(rel), /\{noticeClass\(\{ tone: 'event', className: 'change--framed' \}\)\}/, `${rel} wears the helper`)
   }
 })

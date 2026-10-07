@@ -21,7 +21,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 
 | Bucket | Holds | The test for "does it belong here?" |
 | --- | --- | --- |
-| `ui/` | `Loader`, `SectionMasthead`, `ModalPortal`, and the `control/`, `frame/`, `table/`, `layout/`, `dock/` primitives (`ui/CLAUDE.md`) | **No baseball knowledge.** No `api/` import, no feed access, no team or game concept. Safe to reach for from anywhere |
+| `ui/` | `Loader`, `SectionMasthead`, `ModalPortal`, and the `control/`, `frame/`, `table/`, `state/`, `layout/`, `dock/` primitives (`ui/CLAUDE.md`) | **No baseball knowledge.** No `api/` import, no feed access, no team or game concept. Safe to reach for from anywhere |
 | `account/` | `AccountButton`, `AccountPitch`, `FavoriteTeamModal`, `LogbookAccountGate`, `ClubPicker` | Clerk sign-in/account-menu surfaces and the signed-out Game Log pitch. **`ClubPicker.jsx` is the one club strip.** It takes `teams` as a prop and fetches nothing; `/profile` and the first-visit intro both render it, from different sources on purpose. Do not grow a second one |
 | `admin/` | `AwardOrderEditor`, `contracts/` | Editors only an admin sees |
 | `allstar/` | `AllStarGameResult`, `DerbyCard` | All-Star Game / Derby result cards (ADR-0019's plain-score exception) |

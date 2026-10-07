@@ -476,6 +476,251 @@ for N2 to N8.
    `empty-state.css` and `notice.css`, and edit `src/index.css` and the pins in
    `test/empty-state-cascade.test.js` and `test/notice-cascade.test.js`.
 
+## N9 as built (the clean-up; nothing is left to build in the collapse)
+
+Written by the N9 session. It records what shipped. It does not write the prompt for the
+dashed-rule fix, which is the last item of #1132 and stays open.
+
+0. **Links.** PR #1662 (draft). The #1132 status comment: https://github.com/gzilavyss2025/bbsbh/issues/1132#issuecomment-6040751737.
+1. **The base.** N9 sits on the N8c branch `claude/notice-n8c-rename-change-pm4g50`
+   (PR #1659, which holds N8a #1658 and N8b #1657), not on `origin/main`. Gary said to start
+   before the N8 merge (answered in the session). One stack, #1656 to #1659 plus N9, lands
+   with one deploy. If an N8 PR changes, merge it into this branch; do not rebase.
+2. **Six commits, one per step.** The census, the Teammates line, the dead rule, the budgets,
+   the docs, and this note. The new test is `test/notice-n9.test.js`. Each step added its
+   test first and watched it fail.
+3. **The census.** `unreviewed 0` and no STALE line. 22 rows were added: the seven `*__notice`
+   namespaces (N2 and N3, `n/a`), the `.notice__text` caps exemption, the two `<Notice` tags
+   in `MilestoneWatchCard.jsx` and `MilestoneWatchPage.jsx` (adopted by #1438 after N1, the
+   import is `ui/state/Notice.jsx`, nothing to move), `.degrees__link`, `.prospects__caption`
+   and `.starter__closed` (footnotes and a connector, `n/a`), and the Express Lane spinners
+   (`loading`, HOLD). The 17 STALE keys became comment rows with a reason. **Two rows were
+   wrong, not stale:** a site added above them had shifted the keys, so
+   `ExpressLanePage.jsx#1` and `#2` and `FilmPane.jsx#1` described the wrong site. They are
+   re-keyed. The two `.xl` message rows (`.xl-film__msg`, `.xl__prerollmsg`) are still HOLD and
+   still worn; the census cannot see them (no notice word in the name).
+4. **The one scope addition.** `TeammatesPage.jsx` had a bare `.hint .hint--error` line for
+   "Couldn’t load the rosters." It is an error Notice now, in the namespace `.degrees__notice`
+   (margin `var(--space-3) 0`, the same as the N2 lines). It wears the error default role,
+   `alert` (the old line had none). It is an open page, no `SealBox`. Seen at 390px and 900px
+   with the data file failing (see the PR).
+5. **Deleted.** The `.hint` half of `.screen--slate .hint, .screen--slate .btn` in
+   `05-masthead-nav.css`. No file the slate imports wears `.hint` (a scratch walk over the 276 files
+   `GameSelect.jsx` imports, comments skipped, found the word nowhere). The `.btn` half stays. The E9 pin that named the grouped
+   selector now names `.screen--slate .btn` alone; the pin's own comment said N9 would decide.
+   `.hint__link` was already gone (E9).
+6. **Kept.** `.hint--error`: five dev-only pages still wear it (`UniformNamesPage`,
+   `ScorecardLab`, `ColorLabBody`, `DugoutRail`, `profiles/milb.jsx`). The rule has a comment
+   that says so, and a test fails when the set of wearers changes. Every other rule a census
+   row lists with zero sites is worn at run time (`banner--in` and `--out`,
+   `seasonseries__cell`, `tlead__*--fav`, `xl__chip`: a constant or a template string), or is
+   a Notice part (`notice__icon`, `notice__text`).
+7. **The budgets.** `check-raw-values`: hex 26 to 24, radius 82 to 81, motion 56 to 55, shadow
+   stays 41. `check-caption-budget`: measured 120, stays 120 (no Notice rule used
+   `--fs-caption`). Each was set to the measured count, never below it. The three drops are
+   savings that were not banked yet; I did not trace each to a slice.
+8. **The docs.** `design-system-naming.md`: the `.delaycard` row targets `.delay`, the
+   `.pitchernotice` row targets `.change`, with the PR numbers. ADR-0017: the tier prose says
+   `.change` inside `.notice--event`. ADR-0084: the count is 156 (the ledger's total) and an
+   addendum records the two rows that did not fit the rule and the `.change--framed` oddity
+   (accepted). `src/components/CLAUDE.md`: the `ui/` row names `state/`. `ui/CLAUDE.md` and
+   `playbyplay/CLAUDE.md` already read true; they did not change.
+9. **Geometry** (`geom.mjs`, mock anchor game, reduced motion, images blocked, 390 and 760px, 11
+   routes: the slate, a team page, a player page, `/standings`, `/scout`, `/first-scorebook`,
+   `/game-notes`, `/photos`, `/all-star-legacy`, `/teammates`, the lineup page). Each side was
+   captured twice. Zero differences, after ignoring one thing that also differs between two runs
+   of the SAME code: a headshot that ends as an `<img>` in one run and as its fallback `<span>`
+   in the next (same rect). `lineup1@760` flips between 555 and 559 elements on the same code.
+10. **Not seen.** Everything the earlier notes list as not seen, gathered in the #1132 status
+    comment. For N9 itself: `npm run e2e` and `npm run visual` were not run. The rosters line
+    was seen only with the data file failing through `page.route`, never on a real network
+    failure.
+11. **Open questions for Gary** (both in the #1132 status comment):
+    - Six namespaces undo `flex-wrap: wrap` against `.notice`: `.delay`, `.innings__extras`
+      (N5), `.change--event`, `.pitcherhandoff` (N6), `.change--framed`, `.pcard` (N7). Fix it
+      once in Notice? The catch: `notice-cascade.test.js` pins every `notice.css` rule as one
+      class at one weight.
+    - The poster-overflow line N1 moved (`.posterstudio__warn`) never shows with the current
+      constants (the tallest stack is 1038px against a 1044px limit). Delete the dead line?
+
+## N8c as built (what the next slices need)
+
+Written by the N8c session. It records what shipped. It does not write the N9 prompt.
+
+1. **The rename and the base.** Gary picked `.change` on 2026-10-07 (ADR-0084). The
+   rule: swap the prefix `pitchernotice` for `change`, keep the suffix. The session
+   first built N8c on `origin/main` (`a75f6edae`, N7 merged) because Gary said to
+   start before N8a and N8b existed. When N8a (#1658) and N8b (#1657, stacked on N8a)
+   appeared, it merged the N8b branch (which holds N8a) into this branch with a merge
+   commit. No rebase, no force-push. The conflicts were in `EventCards.jsx` (the four
+   bar roots: N8b's part names and N8c's root names), `12-sealbox.css` (three
+   comment and rule lines), `overrides.tsv` and `slices.md`. The merged `:has` rule
+   reads `.change:has(.change__entering) .change__shot`. N8c renames the root, the
+   body and the rest of the parts: `__body`, `__badges`, `__entering`,
+   `__enteringcount`, `__enteringwhen`, `__flag`, `__forline`, `__hand`, `__jersey`,
+   `__now`, `__pitcher`, `__prtag`, `--event`, `--mv`, and `--pbp` (now `--framed`).
+2. **The files: 16 source, 3 tests, 2 notes.** JSX (10): `PitcherNotice`, `BatterNotice`,
+   `FielderNotice`, `PinchRunNotice`, `PitcherHandoffCard`, `EventCards`, `PlayByPlay`,
+   `HalfInning`, `LensCards`, `PitcherSheet`. CSS (5): `12-sealbox.css`,
+   `pitcher-card/card.css`, `scorecard/lens-cards.css`, `21a-box-score-stars.css`
+   (comment), `postseason/series-live.css` (comment). Doc (1):
+   `components/playbyplay/CLAUDE.md`. Tests: new `test/notice-n8c.test.js`; the
+   expected values in `notice-n6.test.js`, `notice-n7.test.js` and, after the merge,
+   `notice-n8a.test.js` and `notice-n8b.test.js` changed to the new names, every assertion as strict as before. Notes: `overrides.tsv`, this file.
+   `13-play-by-play.css`, `focus/atbat.css`, `26-player-page.css`, `tokens/layout.css`
+   and `01-base.css` hold only N8a and N8b names, so N8c did not edit them. The plan
+   named `console.css`: it already keys on `.notice--event` (N7) and needs no edit.
+3. **Run-time classes.** None for N8c's parts. The only template string that builds
+   a class of this family is the headshot well in `PitcherNotice.jsx`
+   (`` `change__shot${showLogo ? ' change__shot--logo' : ''}` ``, N8a).
+   `pitcherhandoff__chip--${…}` is a neighbour, not renamed. `rg "notice__"` finds
+   only `notice.css`'s own parts. `contrastPairings.js` names no class of the family.
+4. **The odd variant.** `.change--framed` is worn by three kinds of element: the
+   compact cards (which also wear `.change`), the full card `.pcard` (which does
+   NOT) and the arm button `.sc-armnotice` (which does). A modifier on an element
+   with no base is odd. N8c renamed it by prefix and nothing more. **For N9's ADR-0084
+   addendum:** decide whether `.change--framed` should become a standalone frame
+   class (it holds only the margin and `flex-wrap: nowrap`).
+5. **The seal pin** (`test/notice-n8c.test.js`, measured on `a75f6edae`, before the
+   first edit): `HalfInning.jsx` imports `boxscore.js`, `highlights.js`, `hitchart.js`
+   and `playbyplay.js`, 1 `<SealBox`, 12 `revealedThrough`. `PlayByPlay.jsx` imports
+   `playbyplay.js`, no `<SealBox`, 1 `revealedThrough`. `PitcherSheet.jsx`,
+   `PitcherNotice.jsx`, `BatterNotice.jsx`, `FielderNotice.jsx`, `PinchRunNotice.jsx`,
+   `PitcherHandoffCard.jsx`, `EventCards.jsx`, `LensCards.jsx` and `PitcherCard.jsx`:
+   none, 0, 0. It still passes after the rename.
+6. **The retired-class test.** `pitchernotice` is absent from `src`, `e2e` and
+   `scripts`, comments too, with no allow list: N8a and N8b renamed their parts
+   first. After the merge, `rg "pitchernotice" src e2e scripts api` finds nothing. The
+   old tests changed their expected values: `notice-n8a.test.js` (the `:has` rule) and
+   `notice-n8b.test.js` (the root and the modifiers), as strict as before.
+7. **The census.** `overrides.tsv`: the renamed selector rows are `#` comment lines
+   that say DONE in N8c (the census cannot find `change__*`, as in N8a and N8b). The
+   four role roots, the handoff headers, the call sites and the arm button left the
+   census, so their rows are comments too. After the merge, the two `EventCards.jsx`
+   sites that remain (`#2` the EJ code, `#3` the DELAY code) say what they are now.
+   The STALE list is the eight keys it had before N8c, plus the N8a and N8b ledger
+   rows of the old names (the census cannot find the new names).
+8. **Seen** (mock anchor game 823035, `main` on :5172 from a worktree with its own
+   `node_modules`, the branch on :5173; 390 and 900px; reduced motion, images
+   blocked, `?nointro`). The capture also read align-items, margin, padding,
+   colour, fill, border, radius and position of every element. Each side was
+   captured twice first. Zero differences on `top1`, `top2`, `top6`, `bottom6`,
+   `top7` sealed, with the mark at 9 and at 11, and open; `top8` open; the
+   scorecard lens, with the arm button and with the pitcher sheet open; `top6`
+   stepped twice (`ReliefRepeat`). Live feeds: a steal bar (778087, top 1st) and a
+   delay bar (778107, bottom 4th). The DOM check: `main`'s `innerHTML`, renamed with
+   the same map, equals the branch's in all 11 states (sealed, marked, open, the
+   lens, the two live bars), the page text and the reveal marks are equal, so the
+   sealed and the revealed state did not move. Two noise sources are masked there:
+   the headshot URL (its fallback step races when images are blocked) and React's
+   `_r_N_` ids. A first pass showed a bar button that is 0.5 to 3px wider on some runs
+   and one `top6@900` count that differed on `main` against `main`; three more runs
+   per side showed zero differences in all 45 pairs (main/main, branch/branch,
+   main/branch).
+9. **Not seen.** An ejection bar and a pre-pitch staged pinch hitter (this game has
+   none). `npm run e2e` and `npm run visual` were not run. The scorecard lens was
+   not seen on a real phone. A live-feed run of the lens was not captured.
+10. **For N9.** Left in prose: ADR-0017 (3 lines name `.pitchernotice`) and
+    `docs/design-system-naming.md` (the ledger keeps the old name). The whole family
+    now reads `.change*`; the geometry and DOM checks above were run on `main`
+    against N8c alone. After the merge of N8a and N8b the same DOM check was run
+    again (see the PR) with the full rename map.
+
+## N8b as built (what the next slices need)
+
+Written by the N8b session. It records what shipped. It does not write the N8c prompt.
+
+1. **What moved.** Eight part names changed prefix, `pitchernotice` to `change`
+   (ADR-0084; Gary picked `.change` on 2026-10-07): `__code`, `__code--alert`,
+   `__label`, `__teammark`, `__spacer`, `__mvcount`, `__eventtext`, `__pitchno`.
+   Files: `EventCards.jsx` (the spans in the four bars), `12-sealbox.css`
+   (rules and two comments), `13-play-by-play.css` (the caps exemption), `01-base.css`
+   (the exemption list comment). No rule, specificity or order changed.
+2. **The caps exemption kept its two halves.** `#root .change__eventtext,` and
+   `#root .change__eventtext :is(.plink, b)` still carry the `#root` prefix and the
+   `caps-exempt:` marker. `npm run lint` (`check-caps`) passes. Computed
+   `text-transform` on the event text reads `none`.
+3. **Base: stacked on N8a (PR #1658).** N7 is on `main` (stack PR #1649). N8a was not
+   merged when N8b started. N8b began on `origin/main` (`a75f6edae`), then merged
+   the N8a branch `claude/notice-n8a-rename-s0ke9z` (a merge commit, no rebase). N8a
+   edits `12-sealbox.css` and `13-play-by-play.css` too, on different rules (`__shot*`),
+   so only the two scratch files conflicted (`overrides.tsv` and `slices.md`, both
+   sides kept). Merge #1658 first; then #1657 shows only the N8b change.
+4. **The stylesheet reads `.pitchernotice .change__code` for now.** The root
+   `.pitchernotice`, `--event`, `--mv`, `--pbp` and `.pitchernotice--mv .usagepips`
+   keep their names until N8c.
+5. **Census.** `overrides.tsv`: the eight keys are renamed to `.change__*` and the
+   notes say "DONE in N8b". The census finds a class by a notice word in its name
+   (`notice`, `alert`, ...), so after the rename it lists seven of them under
+   STALE overrides (only `.change__code--alert` still matches, by "alert").
+   Expected, not a mistake: keep the rows as the record. N9 can drop them.
+6. **The seal pin** (`test/notice-n8b.test.js`, measured on `a75f6edae`):
+   `EventCards.jsx` no reveal-only import, no `<SealBox`, 0 `revealedThrough`.
+   `PlayByPlay.jsx` imports `playbyplay.js`, no `<SealBox`, 1 `revealedThrough`.
+   `HalfInning.jsx` imports `boxscore.js`, `highlights.js`, `hitchart.js` and
+   `playbyplay.js`, 1 `<SealBox`, 12 `revealedThrough`. The test also pins: no old
+   name in `src`, `e2e` or `scripts` (comments too); the new names in the
+   stylesheet and the markup; the `#root` exemption; the root still named
+   `.pitchernotice`.
+7. **Seen** (`geom.mjs` with reduced motion, `BLOCKIMG=1`, `FREEZE=1`, `?nointro`,
+   390 and 760px; each side captured twice first and stable): zero geometry
+   differences on the mock anchor game 823035 `top6` (mound visit) and `top7`,
+   and live on `/05022025/wshcin/top1` (gamePk 778087: DELAY bar and an SB code)
+   and `/05012025/stlcin/bottom4` (778107: DELAY bar). One exception, not from
+   the rename: a floating 44px button at the foot of live pages changes width
+   between 151.5px and 153.8px from run to run of the same code. Computed
+   `font-family`, `font-size`, `font-weight`, `letter-spacing`, `text-transform` and
+   `color` are identical before and after for the mound-visit label, the code,
+   the alert code and the event text. **Not seen:** an ejection bar (`EJ`); the
+   mound visit's `N left` tail (`__mvcount`); a steal bar's `Pitch N` tail
+   (`__pitchno`); 778108 top 8th showed no bar. Those parts are covered by the
+   source tests, not by a drawn page.
+## N8a as built (what the next slices need)
+
+Written by the N8a session. It records what shipped. It does not write the prompts
+for N8b or N8c.
+
+1. **The name.** Gary picked `.change` on 2026-10-07 (`decisions.md`, Q3, name
+   row). The rule: swap the prefix `pitchernotice` for `change` and keep the part
+   suffix. N8a renamed `__shot`, `__shot--logo` and `__shot--fallback`. Nothing
+   else changed; every `#root` prefix, comment marker and rule order stayed.
+2. **The files (6 source, 1 test).** `PitcherNotice.jsx` (the fallback well and the
+   template-string logo well: `` `change__shot${showLogo ? ' change__shot--logo' : ''}` ``),
+   `styles/12-sealbox.css` (the five well rules and the `:has(...)` rule near the end;
+   that rule keeps `.pitchernotice` and `__entering` for N8c), `styles/13-play-by-play.css`,
+   `styles/focus/atbat.css`, `styles/26-player-page.css`, `tokens/layout.css` (comment).
+   New: `test/notice-n8a.test.js`.
+3. **What the plan missed.** `26-player-page.css` (`.change__shot img[data-pending]`,
+   a rule shared with `.shot`) and the `:has(.pitchernotice__entering)` rule in
+   `12-sealbox.css`. No class was built at run time except the one template string.
+   After the edit, `rg "pitchernotice__sh"` finds nothing in `src`, `e2e`, `test`,
+   `scripts`, `api` and `docs`; the pin test checks `src`, `e2e` and `scripts`.
+4. **The seal pin** (`test/notice-n8a.test.js`, measured on `a75f6edae`):
+   `PitcherNotice.jsx` imports no reveal-only module, has no `<SealBox` and 0
+   `revealedThrough`. It was the only JSX file edited.
+5. **The census.** `overrides.tsv`: the three `.pitchernotice__shot*` rows say DONE in
+   N8a. The census cannot find `.change__shot*` (no notice word, rail or tint), so the
+   three keys read STALE from now on. Keep the rows as the ledger of the old name. N8b
+   and N8c will see the same for their renamed parts.
+6. **Seen** (mock anchor game 823035, `main` on :5172 from a worktree and the branch
+   on :5173, 390 and 900px, `?nointro`, images blocked so the `<img>` ends in one state):
+   `top1` sealed and open, `top2`, `top6`, `bottom6` staged and open, `top7` staged and
+   open, and a player page. Each side was captured twice before the edit and the
+   pairs matched, except the pitch-scene SVG on `top6`, `top7-staged` and `top7-open`
+   at 900px (sub-pixel jitter, main against main too). Those three were captured again
+   with reduced motion: main against main and main against the branch are identical.
+   Result: zero differences. The capture also compared border, radius, fill, filter,
+   visibility, position, transform and opacity, not only boxes.
+7. **Not seen.** The player page draws no `.change__shot` (only `.shot`), so the
+   `data-pending` rule was seen on the innings routes, where the blocked images hold
+   the well in that state. A pre-pitch staged pinch hitter, the live feed, `npm run e2e`
+   and `npm run visual` were not run. The at-bat card and the focus hero wells were
+   measured as part of `top1` (they draw `.abhero__shot` and `.pbp__batshot`).
+8. **For N8b and N8c.** `rg "pitchernotice__sh"` is now clean, so a later hit on
+   `__shot` is a new bug. N8c still has the `:has(.pitchernotice__entering)` rule to
+   rename on both sides. Capture with `BLOCKIMG=1` and run pairs one at a time:
+   four parallel Chromium runs failed here.
+
 ## N7 as built (what the next slices need)
 
 Written by the N7 session. It records what shipped. It does not write the prompts

@@ -138,7 +138,10 @@ compares each pair of shots, to the pixel.
 Put the list of changed pages in the PR body. A changed page that the PR did not
 mean to change is a bug.
 
-**How to run it.** You need two dev servers:
+**How to run it.** You need two dev servers. In a cloud session, a worktree for the base
+is fine here (it is the only way to hold a second checkout), and ports 5173 and 5172 are
+free because no other agent shares the container.
+
 
 1. The BASE: a dev server on current `main`, in its own worktree. For example,
    `git worktree add --detach ../bbsbh-baseline origin/main`, then `npm install`

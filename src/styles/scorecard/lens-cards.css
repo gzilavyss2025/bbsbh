@@ -76,7 +76,7 @@
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-.sc-armnotice .pitchernotice__body {
+.sc-armnotice .change__body {
   flex: 1;
 }
 .sc-armnotice__more {
