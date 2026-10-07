@@ -1,4 +1,4 @@
-// Cluster migration slice C1 (#1180): eight wrapping-row rules moved onto
+// Cluster migration slices C1 and C2 (#1180): eleven wrapping-row rules moved onto
 // <Cluster>. Each would fail silently otherwise (lint green, page drawn, only a
 // screenshot noticing):
 //
@@ -31,6 +31,10 @@ const MIGRATED = {
   idlab__barsrow: { file: '17-identity-lab-workbench.css', gap: 'base', sites: 1 },
   idlab__wpaartrow: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 1 },
   bookmgmt__actions: { file: '58-logbook-shelf.css', gap: 'base', sites: 3, keeps: ['align-items'] },
+  // C2: the offseason cards. Each keeps its own margin-top.
+  pgame__actions: { file: '78-offseason.css', gap: 'base', sites: 1, keeps: ['margin-top'] },
+  seasonnote__leagues: { file: '78-offseason.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
+  srecord__doors: { file: '78-offseason.css', gap: 'base', sites: 1, keeps: ['margin-top'] },
 }
 const LAYOUT = /(^|;|\n)\s*(display|flex|flex-flow|flex-direction|flex-wrap|gap|row-gap|column-gap)\s*:/
 

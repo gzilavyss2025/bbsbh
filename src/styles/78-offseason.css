@@ -390,9 +390,6 @@
 }
 
 .pgame__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
   margin-top: var(--space-4);
 }
 /* An anchor wearing .btn: the destination is a real address, so a reader may
@@ -565,9 +562,6 @@
    so these are toggle buttons carrying aria-pressed, which is what a reader's
    screen reader should hear. */
 .seasonnote__leagues {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
   margin-top: var(--space-3);
 }
 .seasonnote__league {
@@ -816,9 +810,6 @@
 }
 
 .srecord__doors {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
   margin-top: var(--space-3);
 }
 /* Anchors, not buttons: every destination is a real address a reader may

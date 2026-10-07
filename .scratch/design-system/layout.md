@@ -711,3 +711,34 @@ from this slice (it deletes no raw value); I did not change those budgets.
 
 **Open question.** `layout.md` is also edited by Grid G1 (#1630) and the Cluster
 branch, so the three PRs will conflict on this file. Each only appends a section.
+
+## Cluster slice C2 (2026-10-07)
+
+Three one-class wrapping-row rules in `78-offseason.css` moved onto `Cluster`: 3 rules,
+3 JSX sites in 3 files. Base: `origin/main` at 1041d9d4. The finder lists 49 safe rows
+on `main`; this partial has the most that fit the 5-file cap (the larger families
+need 6 or more files, or hold a 16px gap, or sit on a surface another PR edits).
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.pgame__actions` (`PickedGame.jsx`) | base | div | `margin-top` |
+| `.seasonnote__leagues` (`YoungestRegulars.jsx`) | snug | div (`role`, `aria-label` pass through) | `margin-top` |
+| `.srecord__doors` (`SeasonRecord.jsx`) | base | div | `margin-top` |
+
+**Test first.** The three rules joined `MIGRATED` in `test/cluster-migration.test.js`
+(with a `keeps: ['margin-top']` entry each). It failed on the rules and the sites, and
+passes now. **Cascade.** `78-offseason.css` loads after `system/cluster.css` in
+`index.css`, and the rules keep no layout, so none can win against `.cluster`.
+
+**Left in their namespace.** `.idlab__monoinkrow` (16px gap, no step), `.idlab__*` with
+sites in 6 files, `.rpt-controls` (19 sites), and everything in the C1 "Left out" list.
+
+**Checked.** `geom.mjs` (`FREEZE=1 BLOCKIMG=1`, `?nointro`, 390 and 760px) on `/12152025`:
+AFTER matches the first BEFORE, 0 differences (675 and 676 elements). The second
+BEFORE differs from the first by the known logo `img`/`span` race, 5 elements at 390px,
+so the AFTER-vs-second-BEFORE diff shows the same 5. `synth.mjs` with `CLUSTER=1` on
+the three classes: identical at both widths. Only `srecord__doors` drew for real.
+
+**Not seen.** `.pgame__actions` and `.seasonnote__leagues` did not draw (no live
+`statsapi` from the container, and `PickedGame` opens only in December); the synthetic
+check proves the CSS, not the page. `npm run visual` and `npm run e2e` were not run.
