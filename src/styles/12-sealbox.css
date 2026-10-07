@@ -881,7 +881,7 @@
 }
 /* A subheading under the pitcher's name/jersey/hand line, inside
    .pitchernotice__body (its flex-column stacks it below, not beside, the
-   name row). Text-only, no fill — same recipe as .pitchernotice__code--alert
+   name row). Text-only, no fill — same recipe as .change__code--alert
    below (color, no background). check-contrast.mjs only walks its own fixed
    pairing list, not arbitrary CSS, so this isn't guarded the way that one
    is; --clay-deep/--field-deep against this card's ~14%-seal-tinted
@@ -916,7 +916,7 @@
   flex-wrap: nowrap;
   gap: var(--space-2);
 }
-.pitchernotice__code {
+.change__code {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
   font-size: var(--fs-small);
@@ -926,20 +926,20 @@
 }
 /* An ejection's code, in the same negative accent .pbp__code--error uses for
    a reached-on-error play — this is the one alert-weight event in the family. */
-.pitchernotice__code--alert {
+.change__code--alert {
   color: var(--clay-deep);
 }
-.pitchernotice__teammark {
+.change__teammark {
   flex: none;
 }
-.pitchernotice__label {
+.change__label {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
 }
-.pitchernotice__spacer {
+.change__spacer {
   flex: 1;
 }
 /* UsagePips (shared by the mound-visit notice above and StatBox.jsx's ABS
@@ -982,7 +982,7 @@
 /* "N left" tail beside the pips — same idiom as the ABS row's own .abs__rec
    readout: the fill/outline pips alone don't say which state means used vs.
    still available, so this spells it out in words. */
-.pitchernotice__mvcount {
+.change__mvcount {
   flex: none;
   margin-left: 8px;
   font-family: var(--font-mono);
@@ -993,7 +993,7 @@
 }
 /* Which pitch a steal / caught stealing / pickoff came on ("Pitch 3"), pushed to
    the card's right edge — the same caption recipe as the "N left" tail above. */
-.pitchernotice__pitchno {
+.change__pitchno {
   flex: none;
   margin-left: auto;
   font-family: var(--font-mono);
@@ -1005,7 +1005,7 @@
 /* An ejection/event card's sentence — same natural-case prose treatment as
    .pbp__note (exempted from the ALL-CAPS INVARIANT below), since it's a full
    sentence straight from the feed, not a caps token. */
-.pitchernotice__eventtext {
+.change__eventtext {
   font-family: var(--font-read);
   font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
@@ -1126,9 +1126,9 @@
 
 /* Who the entering runner replaced and where — a second line below the name
    row, same caption weight as the pitching-change card's other trailing
-   detail (.pitchernotice__mvcount). Condensed display face like the rest of
+   detail (.change__mvcount). Condensed display face like the rest of
    this card's text, not --font-read (that's reserved for full sentences
-   straight from the feed, e.g. .pitchernotice__eventtext). */
+   straight from the feed, e.g. .change__eventtext). */
 .pitchernotice__forline {
   font-family: var(--font-display);
   font-size: var(--fs-label);
