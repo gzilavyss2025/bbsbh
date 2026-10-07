@@ -112,8 +112,8 @@
   border-radius: 2px;
   /* Holding each pole for its first stretch is load-bearing: a plain
      navy-to-rule two-stop spends the whole cool half in olive-grey and the
-     pitcher end stops reading as a pole at all. --rule rather than
-     --rule-soft at the midpoint for the same reason — the softer token
+     pitcher end stops reading as a pole at all. --border-rule rather than
+     --border-hairline at the midpoint for the same reason — the softer token
      disappears against --surface-card and the stripe looks broken in half. */
   background: linear-gradient(
     180deg,
