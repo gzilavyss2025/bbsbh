@@ -136,7 +136,7 @@
    it can layer on a row that's also this season's best/worst weekday. */
 .tstatrow--today {
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
 }
 @media (max-width: 359px) {
   .tstats__grid {

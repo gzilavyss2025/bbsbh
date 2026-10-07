@@ -276,7 +276,7 @@
    today" wash as .tstatrow--today, applied per-<td> like .foulboard tr.is-me
    (43-foul-tracker.css; border-collapse: separate keeps each cell's own border-top). */
 .umprank__row--today td {
-  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
 }
 /* Home-plate glyph beside a today-working umpire's name — a small round
    highlighter badge, same 21px dot as .umptier__glyph (the Umpires card's own
