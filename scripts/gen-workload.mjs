@@ -211,7 +211,10 @@ const cohorts = {
   losing: computeBaselines(losers, asOf),
 }
 
-const store = { season: SEASON, asOf, pitchers, baselines, cohorts }
+// generatedAt is what scripts/check-data-freshness.mjs reads. `asOf` stays: it is a
+// date-only value, so it reads as midnight UTC and a late hand dispatch looked 21h old.
+const generatedAt = new Date().toISOString()
+const store = { generatedAt, season: SEASON, asOf, pitchers, baselines, cohorts }
 await writeJsonAtomic(out, store)
 
 // --- the slate's sidecar -----------------------------------------------------
@@ -230,10 +233,10 @@ for (const teamId of teamIds) {
   const counts = clubPenCounts(store, teamId, asOf)
   if (counts) summaryCounts[teamId] = counts
 }
-await writeJsonAtomic(summaryOut, { asOf, clubs: summaryCounts })
+await writeJsonAtomic(summaryOut, { generatedAt, asOf, clubs: summaryCounts })
 
 const sizeKb = (JSON.stringify(store).length / 1024).toFixed(1)
-const summaryKb = (JSON.stringify({ asOf, clubs: summaryCounts }).length / 1024).toFixed(1)
+const summaryKb = (JSON.stringify({ generatedAt, asOf, clubs: summaryCounts }).length / 1024).toFixed(1)
 console.log(
   `wrote ${out} (${Object.keys(pitchers).length} pitchers across ${teams.length} teams, ${sizeKb}KB)`,
 )

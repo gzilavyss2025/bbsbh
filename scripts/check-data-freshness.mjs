@@ -99,26 +99,13 @@ export const EXCEPT = {
 }
 
 // Where a dataset keeps its stamp, when it is not a top-level `generatedAt`.
-// `asOf` and `generated` are READ here but must never be INTRODUCED by a new
-// generator: `asOf` already means the spoiler CUTOFF elsewhere in this codebase
-// (src/components/seal/AsOfBanner.jsx, and the `cutoff-gated` class in
-// src/api/spoiler-manifest.json), and one word cannot carry both meanings.
-// New generators write `generatedAt`.
-// Three of these are DATE-ONLY ("2026-08-28"), which JS parses as midnight UTC.
-// That makes their measured age the run's time of day, so a nightly run at
-// 08:17-14:00 leaves them 8-14h old — comfortably inside the budget — while a
-// hand dispatch after ~20:00 UTC would trip them for no real reason. The
-// alternative, reading a date-only stamp as the END of its day, would cost a
-// full 24h of sensitivity and hide a missed night on exactly these files. The
-// false positive is rare, loud, and obvious; the false negative would be
-// silent, which is the thing this whole script exists to stop. Left as-is
-// deliberately. A new generator should write a full `generatedAt` timestamp.
+// New generators write `generatedAt`, never `asOf` (that word means the spoiler
+// CUTOFF elsewhere: src/components/seal/AsOfBanner.jsx, and the `cutoff-gated`
+// class in src/api/spoiler-manifest.json) and never a date-only value, which JS
+// reads as midnight UTC and so makes a late hand dispatch look a day old.
+// workload.json, workload-summary.json and doubleheaders.json used to be listed
+// here for exactly that reason; they now write `generatedAt`.
 export const STAMP_KEY = {
-  'workload.json': 'asOf',
-  // Sidecar written by the same gen-workload.mjs run, from the same `asOf`
-  // variable as workload.json above — not a new stamp convention, the same one.
-  'workload-summary.json': 'asOf',
-  'doubleheaders.json': 'generated',
   'salaries.json': 'meta.generatedAt',
 }
 

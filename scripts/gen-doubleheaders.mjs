@@ -217,7 +217,7 @@ async function main() {
   }
 
   const payload = {
-    generated: new Date().toISOString().slice(0, 10),
+    generatedAt: new Date().toISOString(),
     firstSeason: from,
     lastSeason: to,
     incomplete: incompleteTotal,
