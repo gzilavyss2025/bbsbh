@@ -127,6 +127,7 @@
    src/components/GameResultFace.jsx). Same card chrome as .gamecard so the
    flip reads as one object turning over, not two different cards. */
 .flipback {
+  /* component-reuse-exempt: the back face of the slate card flip, part of the bespoke slate card (inventory.md item 4) */
   position: relative;
   width: 100%;
   height: 100%;

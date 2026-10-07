@@ -16,6 +16,7 @@
    action drops beneath the copy and the mount spans both rows; from the wide
    breakpoint the three sit in a single row. */
 .stampstrip {
+  /* component-reuse-exempt: the Game Log stamp surface, bespoke by ADR-0035 (stamp art is contained by where it renders) */
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);

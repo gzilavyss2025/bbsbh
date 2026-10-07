@@ -18,9 +18,8 @@
 //   band     any rule that reads --bar-fill (the club-coloured head)
 //
 // The canonical drawings live under src/styles/system/ and are skipped. The
-// `control` shape of #1114 (a tappable rule with its own height and padding) is
-// NOT counted: no declaration pair tells it from a layout box without a false
-// alarm on every row, so it waits for a test that can.
+// `control` shape of #1114 is not a fifth count, but a control is SKIPPED from the
+// four above (see isControl): a tappable rule or a form field is not a card.
 //
 // THE COUNT IS A RATCHET, not a zero. #1114 asked for a guard that is green on
 // the tree after the collapse, with an allowlist. The tree is not at zero, and
@@ -42,8 +41,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 
 // Rules outside src/styles/system/ that draw each shape. DOWNWARD ONLY.
-// Measured on origin/main at 2324e44b (band 3 less the one in system/).
-export const BUDGETS = { capsule: 10, sheet: 7, ledger: 49, band: 2 }
+// Measured on origin/main at 2324e44b (band 3 less the one in system/), then
+// triaged (.scratch/design-system/component-reuse-triage.md): controls skipped by
+// the detector, stamp/slate one-offs exempted in place.
+export const BUDGETS = { capsule: 6, sheet: 3, ledger: 17, band: 1 }
 export const KINDS = Object.keys(BUDGETS)
 
 const FIX = {
@@ -79,6 +80,18 @@ const SHAPES = {
   band: (body) => /var\(--bar-fill\b/.test(body),
 }
 
+// A CONTROL is not a card shell, whatever its border looks like. The ledger recipe
+// is also what every input, select and tappable tile wears, so the guard skips a
+// rule that is one: an input/select/textarea/button element, a class that ends
+// `btn`, `input` or `select` after `__`, a body that says `cursor: pointer`
+// (tappable), or one that says `resize:` (a textarea). Those belong to the Button
+// and input work (#1174), not to Card, Pill or SectionHead. Triage and data:
+// .scratch/design-system/component-reuse-triage.md. A name that only CONTAINS the
+// word (`.buttonbar`, `.selection`) is not a control.
+const CONTROL_SELECTOR = /(?:^|[\s>+~,])(?:input|select|textarea|button)(?![\w-])|__[\w-]*?(?:btn|input|select)(?![a-z0-9])/
+const isControl = (selector, body) =>
+  CONTROL_SELECTOR.test(selector) || /(?<![\w-])cursor\s*:\s*pointer\b/.test(body) || /(?<![\w-])resize\s*:/.test(body)
+
 // One sheet: the hits per shape as `file:line selector`, plus any exempt marker
 // that gives no reason. Canonical sheets under system/ return no hits.
 export function scanSheet(rel, raw) {
@@ -89,6 +102,7 @@ export function scanSheet(rel, raw) {
   const lineAt = (i) => css.slice(0, i).split('\n').length
   for (const m of css.matchAll(RULE_RE)) {
     const selector = m[1].trim().replace(/\s+/g, ' ')
+    if (isControl(selector, m[2])) continue
     const found = KINDS.filter((k) => SHAPES[k](m[2]))
     if (!found.length) continue
     const start = m.index + m[0].length - m[0].trimStart().length
