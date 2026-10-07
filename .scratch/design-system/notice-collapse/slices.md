@@ -535,13 +535,15 @@ dashed-rule fix, which is the last item of #1132 and stays open.
     comment. For N9 itself: `npm run e2e` and `npm run visual` were not run. The rosters line
     was seen only with the data file failing through `page.route`, never on a real network
     failure.
-11. **Open questions for Gary** (both in the #1132 status comment):
+11. **Gary's answers (2026-10-07, in the session).**
     - Six namespaces undo `flex-wrap: wrap` against `.notice`: `.delay`, `.innings__extras`
-      (N5), `.change--event`, `.pitcherhandoff` (N6), `.change--framed`, `.pcard` (N7). Fix it
-      once in Notice? The catch: `notice-cascade.test.js` pins every `notice.css` rule as one
-      class at one weight.
+      (N5), `.change--event`, `.pitcherhandoff` (N6), `.change--framed`, `.pcard` (N7).
+      **Fix it once in Notice.** It needs its own slice, because `notice-cascade.test.js`
+      pins every `notice.css` rule as one class at one weight, and that pin changes. The
+      slice is not written yet.
     - The poster-overflow line N1 moved (`.posterstudio__warn`) never shows with the current
-      constants (the tallest stack is 1038px against a 1044px limit). Delete the dead line?
+      constants (the tallest stack is 1038px against a 1044px limit). **Keep it.**
+    - `.change--framed` on `.pcard` (no `.change` base): **accepted for now.**
 
 ## N8c as built (what the next slices need)
 
