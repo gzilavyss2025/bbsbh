@@ -22,7 +22,7 @@ import assert from 'node:assert/strict'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { pillClassName, pillInkStyle } from '../src/lib/design/pillClass.js'
+import { pillClassName, pillInkStyle, pillSolidStyle } from '../src/lib/design/pillClass.js'
 import { stripComments, ruleBody } from './helpers/css.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
@@ -205,8 +205,8 @@ test('the win-probability chip takes its club colour through the pill, not a rep
   assert.match(chip, /style=\{winProbKeyPill\(/)
   const colors = readFileSync(join(SRC, 'components/charts/winprob/keyColors.js'), 'utf8')
   const keyPill = colors.slice(colors.indexOf('export function winProbKeyPill'))
-  assert.match(keyPill, /'--pill-fill': key\.fill/)
-  assert.match(keyPill, /'--pill-text': key\.text/)
+  assert.match(keyPill, /pillSolidStyle\(\{ ground: key\.fill/)
+  assert.match(keyPill, /text: key\.text/)
   assert.doesNotMatch(chip + keyPill, /background:|[^-]color:/)
 })
 
@@ -257,4 +257,20 @@ test('the foul tracker\'s result tag names its two kinds as variants, not states
   }
   const jsx = readFileSync(join(SRC, 'screens/FoulTrackerPage.jsx'), 'utf8')
   assert.match(jsx, /scorebug__result scorebug__result--\$\{positive \? 'positive' : 'negative'\}/)
+})
+
+test('a solid pill takes its ground and text as a pair, and a low-contrast pair throws (#1187)', () => {
+  assert.equal(pillClassName({ fill: 'solid' }), 'pill', 'solid is custom properties, not a class')
+  assert.deepEqual(pillSolidStyle({ ground: '#0C2340', text: '#FFFFFF' }), {
+    '--pill-fill': '#0C2340',
+    '--pill-edge': '#0C2340',
+    '--pill-text': '#FFFFFF',
+  })
+  // a token pair passes through: check-contrast's PAIRINGS holds those
+  assert.deepEqual(pillSolidStyle({ ground: 'var(--clay)', text: 'var(--text-on-ink)' })['--pill-fill'], 'var(--clay)')
+  assert.throws(() => pillSolidStyle({ ground: '#FFFFFF', text: '#EEEEEE' }), /contrast/)
+  // #FA4616 with ink text is 4.14:1 — under AA text, over the UI bar
+  assert.throws(() => pillSolidStyle({ ground: '#FA4616', text: '#1B2A3A' }), /4\.5/)
+  assert.doesNotThrow(() => pillSolidStyle({ ground: '#FA4616', text: '#1B2A3A', min: 3 }))
+  assert.throws(() => pillInkStyle({ fill: 'solid', ink: '--field' }), /carries its own ink/)
 })

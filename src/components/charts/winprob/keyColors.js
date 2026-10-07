@@ -1,4 +1,6 @@
 import { readableTextColor } from '../../../lib/contrast.js'
+import { UI } from '../../../lib/design/contrastPairings.js'
+import { pillSolidStyle } from '../../../lib/design/pillClass.js'
 
 // The chart's colour KEY — the header swatches, the readout's change pill and
 // the swing pills — takes each club's BAND colour, so a reader can match a
@@ -43,5 +45,6 @@ export function winProbKeyPair(away, home, awayChip) {
 // A figure pill's inline style in a key colour: the pill's own custom
 // properties, never a repaint (system/pill.css).
 export function winProbKeyPill(key) {
-  return { '--pill-fill': key.fill, '--pill-edge': key.fill, '--pill-text': key.text }
+  // UI bar, not AA text: six band colours measure 3.9–4.4:1 with their best text.
+  return pillSolidStyle({ ground: key.fill, text: key.text, min: UI })
 }
