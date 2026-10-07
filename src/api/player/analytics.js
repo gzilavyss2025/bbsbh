@@ -52,7 +52,7 @@ export async function loadPlayerAnalytics(id, asOf) {
 
   // Statcast percentile ranks and the league-wide pitch mix are both same-origin
   // static files, session-cached after the first read anywhere in the app.
-  const [savantData, prospectTrend, levelTenure, targetCommandData, commandReceivedData] = await Promise.all([
+  const [savantData, prospectTrend, levelTenure, targetCommandData, commandReceivedData, postOpen] = await Promise.all([
     fetchSavantPercentiles(),
     fetchProspectTrend(),
     fetchLevelTenure(),
@@ -63,10 +63,9 @@ export async function loadPlayerAnalytics(id, asOf) {
     fetchTargetCommand(),
     // The catcher-side cut of the same dataset, ~50 KB and read the same way.
     fetchCommandReceived(),
+    // No gameType=P read before the season's postseason starts (#1651).
+    postseasonStarted(season),
   ])
-
-  // No gameType=P read before the season's postseason starts (#1651).
-  const postOpen = await postseasonStarted(season)
   const blocks = await Promise.all(
     groups.map(async (group) => {
       const [current, arsenalSplits, advancedBundle, postBundle] = await Promise.all([

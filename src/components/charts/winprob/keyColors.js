@@ -46,5 +46,11 @@ export function winProbKeyPair(away, home, awayChip) {
 // properties, never a repaint (system/pill.css).
 export function winProbKeyPill(key) {
   // UI bar, not AA text: six band colours measure 3.9–4.4:1 with their best text.
-  return pillSolidStyle({ ground: key.fill, text: key.text, min: UI })
+  // A render must not throw on a data-driven pair: a chip pair that misses the bar
+  // falls back to the better of white or ink, which always clears it.
+  try {
+    return pillSolidStyle({ ground: key.fill, text: key.text, min: UI })
+  } catch {
+    return pillSolidStyle({ ground: key.fill, text: readableTextColor(key.fill, LIGHT, DARK), min: UI })
+  }
 }
