@@ -341,14 +341,16 @@ deletion, a retired line, or `.wire__kicker`, which is not a second line.
 
 ## Table, EmptyState and Notice — #1132 — 10 rows
 
-Two blocks carry `notice`; no block owns the `notice` base rule today, and
-#1132 builds one. Six states are written as modifiers, and two `__sub`
-classes were renamed for what they are, not for a head's second line (slice T2).
+Two blocks carried `notice`. `Notice` (N1, #1533) now owns the base rule, and
+the two blocks left it in slices N5 and N8: neither became `.notice--word`, and
+the two rows below say why. Their old names stay here as the record. Six states
+are written as modifiers, and two `__sub` classes were renamed for what they are,
+not for a head's second line (slice T2).
 
 | current class | clause(s) broken | target name | collapse issue | files that must move | hold + reason |
 | --- | --- | --- | --- | --- | --- |
-| `.delaycard` | 1 | `.notice--delay` | #1132 | `components/inning/DelayCard.jsx`, `screens/designlab/catalog.js`, `styles/27-player-position-innings.css`, `styles/46-consent-modal.css` | — |
-| `.pitchernotice` | 1 | `.notice--pitcher` | #1132 | `src/components/playbyplay/CLAUDE.md`, `components/playbyplay/BatterNotice.jsx`, `components/playbyplay/EventCards.jsx`, `components/playbyplay/FielderNotice.jsx`, `components/playbyplay/PinchRunNotice.jsx`, `components/playbyplay/PitcherHandoffCard.jsx`, `components/playbyplay/PitcherNotice.jsx`, `styles/01-base.css` †, `styles/12-sealbox.css`, `styles/13-play-by-play.css`, `styles/21a-box-score-stars.css` †, `styles/focus/atbat.css`, `src/tokens/layout.css` † | no block owns the `notice` base rule today; #1132 builds one. This is the largest of the six and its 18 elements move with it. |
+| `.delaycard` | 1 | `.delay` | #1132 | `components/inning/DelayCard.jsx`, `screens/designlab/catalog.js`, `styles/27-player-position-innings.css`, `styles/46-consent-modal.css` | Done in N5 (#1597). The target is the namespace `.delay`, not `.notice--delay`: `Notice` draws the icon, the label and the text, so `.delay` keeps only the margin, the pop-in and the icon bubble. See the 2026-10-07 addendum to ADR-0084. |
+| `.pitchernotice` | 1 | `.change` | #1132 | `src/components/playbyplay/CLAUDE.md`, `components/playbyplay/BatterNotice.jsx`, `components/playbyplay/EventCards.jsx`, `components/playbyplay/FielderNotice.jsx`, `components/playbyplay/PinchRunNotice.jsx`, `components/playbyplay/PitcherHandoffCard.jsx`, `components/playbyplay/PitcherNotice.jsx`, `styles/01-base.css` †, `styles/12-sealbox.css`, `styles/13-play-by-play.css`, `styles/21a-box-score-stars.css` †, `styles/focus/atbat.css`, `src/tokens/layout.css` † | Done in N8a, N8b and N8c (#1658, #1657, #1659). The target is the namespace `.change`, not `.notice--pitcher`: a variant (clause 4) cannot own the 18 parts. The frame comes from `Notice` (`.notice--event`, N6 and N7). See the 2026-10-07 addendum to ADR-0084. |
 | `.umptend__row--on` | 4 | `.umptend__row.is-on` | #1132 | `components/umpire/UmpireTendencies.jsx`, `styles/53-umpire-tendencies.css` | — |
 | `.dh__row--open` | 4 | `.dh__row.is-open` | #1132 | `screens/around-the-game/DoubleheadersPage.jsx`, `styles/68-around-the-game.css` | — |
 | `.cwb__row--done` | 4 | `.cwb__row.is-done` | #1132 | `components/admin/contracts/DecisionPane.jsx`, `styles/74-contract-workbench.css` | — |

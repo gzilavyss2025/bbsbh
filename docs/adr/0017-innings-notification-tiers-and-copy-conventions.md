@@ -22,8 +22,8 @@ changes what they're doing):
   and `select.js`'s `selectPrePitchChanges` builds the same `fielder` shape
   for a between-halves change so `HalfInning.jsx`'s `PrePitchChanges` can
   promote it to a card too, instead of a bullet in the pre-pitch list).
-  Rendered as `.pitchernotice.pitchernotice--pbp` (or `--statbox` between
-  halves): headshot, "Now V-ing for the Team", full name.
+  Rendered as `.change` inside the event Notice frame, `.notice--event`
+  (between halves too): headshot, "Now V-ing for the Team", full name.
 - **Tier 2 — team/administrative event.** No new actor, but a fact worth a
   scorer's attention: a mound visit (now captioned with the real shorthand
   "MV" plus the visiting club's own mark and a used/open pip row —
@@ -37,7 +37,7 @@ changes what they're doing):
   person the event is actually about, when the feed names one.
 
 All three tiers now render inside the **same** kraft-amber
-`.pitchernotice.pitchernotice--pbp` card — there is no separate "thin banner"
+`.change` card, framed by the event Notice (`.notice--event`) — there is no separate "thin banner"
 chrome and no colored accent-rail-on-card treatment. That rail pattern (a
 left `border-left` in the tier's accent color) was the first design tried and
 explicitly rejected: this app has no other left-rail notices, and the weight
@@ -48,11 +48,12 @@ but only as the resolution-failure fallback for tiers 1/2 (the incoming
 player isn't in `gameData.players`) — never a first-class rendering choice
 for an event type that has a home in one of the three tiers above.
 
-**2026-10-07 (#1132 N6, N7).** The shared card's frame is now the event Notice
+**2026-10-07 (#1132 N6, N7, N8c).** The shared card's frame is now the event Notice
 (`noticeClass({ tone: 'event' })`, `.notice--event`), with the same values. The
-decision above does not change. `.pitchernotice--pbp` is now only the actor
-cards' margin namespace, which each caller passes with the frame, until N8c
-renames it.
+decision above does not change. N8c renamed the card's root from `.pitchernotice` to
+`.change` (ADR-0084's 2026-10-07 addendum), and `.pitchernotice--pbp` to
+`.change--framed`. `.change--framed` is only the actor cards' margin namespace, which
+each caller passes with the frame.
 
 ## Casing: the global CSS invariant is the only source of truth
 

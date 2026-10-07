@@ -40,11 +40,11 @@ test('E9: the umpire page renders its "no games on file" line on EmptyState, tes
   assert.match(code, /!loading && !error && !data && \(seasonYear != null \|\| view\.seasons\?\.length > 1\)/)
 })
 
-// N4 (#1132) moved the slate's error line onto Notice; the .hint rules stay
-// until N9 decides what is dead.
-test('E9: the slate rules for .hint stay, and the slate\'s error line is a Notice', () => {
+// N4 (#1132) moved the slate's error line onto Notice. N9 found no .hint left on the
+// slate, so only the .btn half of the slate's caps rule stays (notice-n9.test.js).
+test('E9: the slate keeps its .btn caps rule, and the slate\'s error line is a Notice', () => {
   const nav = src('styles/05-masthead-nav.css')
-  assert.match(nav, /\.screen--slate \.hint,\s*\.screen--slate \.btn \{/)
+  assert.match(nav, /\.screen--slate \.btn \{/)
   assert.match(nav, /\.slatebody__main > \.emptystate:first-child \{/)
   assert.doesNotMatch(src('components/ui/AsyncGate.jsx'), /hint hint--error/)
   assert.match(src('components/ui/AsyncGate.jsx'), /<Notice\s+tone="error"/)

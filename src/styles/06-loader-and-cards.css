@@ -135,7 +135,7 @@
   font-size: var(--fs-ui);
 }
 
-/* Slate copy reads in scorebook all-caps (see .screen--slate .hint above);
+/* Slate copy reads in scorebook all-caps (see .screen--slate .btn above);
    the loader label follows suit there. */
 .screen--slate .loader__label {
   letter-spacing: var(--ls-caps);

@@ -610,6 +610,9 @@
   padding: var(--space-3) 2px;
 }
 
+/* Worn only by the dev-only tool pages now (UniformNamesPage, ScorecardLab and the
+   identity lab, which App.jsx loads in DEV only). Every page a reader sees uses
+   <Notice tone="error"> (#1132). Delete it with the fifth of those pages. */
 .hint--error {
   color: var(--clay);
 }
@@ -631,10 +634,10 @@
   text-transform: none; /* caps-exempt: identity lab hint paragraphs read as natural sentences */
 }
 
-/* On the slate every bit of copy reads in scorebook all-caps — the shared hint
-   and button text (loading / error / Retry) are uppercased here only,
-   leaving the same classes as-is on every other screen. */
-.screen--slate .hint,
+/* On the slate the button text (Retry and the rest) reads in scorebook all-caps,
+   uppercased here only, leaving .btn as-is on every other screen. The slate wears
+   no .hint now: its loading line is a Loader, its error an AsyncStatus Notice and
+   its empty line an EmptyState. */
 .screen--slate .btn {
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
