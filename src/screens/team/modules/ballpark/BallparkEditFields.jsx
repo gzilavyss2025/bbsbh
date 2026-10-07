@@ -2,6 +2,7 @@ import { useCallback, useId, useRef } from 'react'
 import { FIELDS } from '../../../../copy/registry.js'
 import { fieldIds } from '../../../../lib/ballpark/ballparkArt.js'
 import '../../../../styles/61-ballpark-admin.css'
+import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 
 // The owner's edit form, shown inside the Ballpark card body while the gear is
 // engaged. Deliberately Clerk-free: it only reads and writes the draft, and the
@@ -50,7 +51,7 @@ function ImagePicker({ label, accept, hint, current, onPick, onClear, disabled }
       <span className="bpadmin__label" id={id}>
         {label}
       </span>
-      <div className="bpadmin__row">
+      <Cluster className="bpadmin__row">
         <button type="button" className="bpadmin__btn" onClick={choose} disabled={disabled} aria-labelledby={id}>
           Choose file
         </button>
@@ -68,7 +69,7 @@ function ImagePicker({ label, accept, hint, current, onPick, onClear, disabled }
           tabIndex={-1}
           aria-hidden="true"
         />
-      </div>
+      </Cluster>
       <p className="bpadmin__hint">{hint}</p>
     </div>
   )

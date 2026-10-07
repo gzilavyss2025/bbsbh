@@ -44,12 +44,6 @@
   gap: var(--space-1);
 }
 
-.lookupdeck__filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-}
-
 .lookupdeck__field--compact {
   flex: 1 1 8rem;
   min-width: 8rem;

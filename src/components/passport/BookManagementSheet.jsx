@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { MAX_BOOK_SUBTITLE_LENGTH, MAX_BOOK_TITLE_LENGTH } from '../../lib/books.js'
 import { BookCoverPicker } from './BookCoverPicker.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 
 // One book's SETTINGS — rename it, re-cover it, or remove it. Reachable from
 // two places by design: the shelf, when 2+ books already exist, and the
@@ -129,7 +130,7 @@ export function BookManagementSheet({
             tray, keeping its game, its note and its score — nothing is deleted, and
             you can press each one into another book.
           </p>
-          <div className="bookmgmt__actions">
+          <Cluster gap="base" className="bookmgmt__actions">
             <button type="button" className="btn btn--ghost" onClick={handleRemove}>
               Remove book
             </button>
@@ -140,10 +141,10 @@ export function BookManagementSheet({
             >
               Keep it
             </button>
-          </div>
+          </Cluster>
         </Stack>
       ) : (
-        <div className="bookmgmt__actions">
+        <Cluster gap="base" className="bookmgmt__actions">
           <button type="button" className="btn btn--ghost" onClick={onClose}>
             Done
           </button>
@@ -155,7 +156,7 @@ export function BookManagementSheet({
           >
             Remove this book
           </button>
-        </div>
+        </Cluster>
       )}
       {!canRemove && (
         <p className="hint hint--prose">

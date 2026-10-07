@@ -106,12 +106,6 @@
   color: inherit;
 }
 
-.coverpick__colors {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-}
-
 .coverpick__color {
   flex: 1 1 0;
   min-height: var(--tap-min);

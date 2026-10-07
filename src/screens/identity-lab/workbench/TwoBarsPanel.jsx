@@ -6,6 +6,7 @@ import { MastheadMarkEditor } from '../editors/MastheadMarkEditor.jsx'
 import { LogoDropZone } from '../LogoDropZone.jsx'
 import { MarkImage } from './MarkImage.jsx'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
+import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 
 // A club has two header bars, not one per jersey — Main's, which every
 // alternate also wears, and City Connect's (a MiLB level has Home's and
@@ -22,7 +23,7 @@ export function TwoBarsPanel({ units, onHover, onSelectWearer }) {
   return (
     <Stack gap="snug" as="section" className="idlab__bars" aria-label="Header bars">
       <p className="idlab__barslead">Header bars — every jersey wears one of these.</p>
-      <div className="idlab__barsrow">
+      <Cluster gap="base" className="idlab__barsrow">
         {/* Keyed by club as well as slot: a unit now holds per-club state of its
             own (a fresh upload's cache-buster, the mark panel's pending
             preview), and re-using one instance across a club switch would carry
@@ -35,7 +36,7 @@ export function TwoBarsPanel({ units, onHover, onSelectWearer }) {
             onSelectWearer={onSelectWearer}
           />
         ))}
-      </div>
+      </Cluster>
     </Stack>
   )
 }

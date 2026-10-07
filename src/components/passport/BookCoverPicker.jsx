@@ -13,6 +13,7 @@ import { Button } from '../ui/control/Button.jsx'
 import { LEAGUE_MARK_LABELS, leagueMarkBox, leagueMarkUrl } from './leagueMarks.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 
 // How a Game Log book's cover is chosen — the one picker, used by the
 // create-a-book page and by a book's Settings sheet, so the two can never
@@ -104,7 +105,7 @@ function PresetGrid({ book, onChange }) {
 
 function ColorRow({ book, onChange }) {
   return (
-    <div className="coverpick__colors" role="group" aria-label="Board color">
+    <Cluster gap="base" className="coverpick__colors" role="group" aria-label="Board color">
       {COVER_COLORS.map((color) => {
         const active = (book?.coverColor ?? 'kraft') === color
         return (
@@ -119,7 +120,7 @@ function ColorRow({ book, onChange }) {
           </button>
         )
       })}
-    </div>
+    </Cluster>
   )
 }
 
