@@ -79,9 +79,8 @@ export async function loadPostseasonRegister(personId, group, { hasDebuted = tru
 // 2026-10-05). The caller passes the same window as the season tiles beside it, so
 // a dated page, or a game in progress, never moves it. MLB only (a player who has
 // not debuted asks nothing), and the API emits each row twice, which
-// aggregateSplits folds. Before the season's postSeasonStartDate the read can only
-// come back empty, so it is not sent (#1675); the two reads above hold past
-// Octobers and are never gated.
+// aggregateSplits folds. Not sent before the season's postseason starts (#1675);
+// the two reads above hold past Octobers and are never gated.
 export async function fetchPostseasonSeason(personId, group, { season, startDate, endDate, hasDebuted = true } = {}) {
   if (!personId || !group || !season || !hasDebuted || !(await postseasonStarted(season))) return []
   return fetchPersonStats(personId, { type: 'byDateRange', group, season, startDate, endDate, gameType: 'P' })
