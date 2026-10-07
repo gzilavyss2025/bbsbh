@@ -4,7 +4,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { getJson } from '../../api/statsapi.js'
 import { loadTeamSeasons } from '../../api/teamSeasons.js'
-import { findChain } from '../../lib/teammates/chain.js'
+import { findChain, missingFrom } from '../../lib/teammates/chain.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { SiteSearchModal } from '../../components/chrome/SiteSearch.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
@@ -24,8 +24,14 @@ async function search(a, b) {
   const data = await loadTeamSeasons()
   // staticJson answers an empty fallback on a failed load; that is an error, not "no chain".
   if (!data.teamSeasons.length) throw new Error('team-seasons.json did not load')
+  const pair = `${a.id}-${b.id}`
+  const absent = missingFrom(data, [a.id, b.id])
+  if (absent.length) {
+    const who = [a, b].filter((p) => absent.includes(p.id)).map((p) => p.name)
+    return { pair, chain: null, absent: who, throughSeason: data.throughSeason, credit: data.credit }
+  }
   const chain = findChain(data, a.id, b.id, MAX_LINKS)
-  if (!chain) return { chain: null, credit: data.credit }
+  if (!chain) return { pair, chain: null, credit: data.credit }
   const ids = chain.filter((_, i) => i % 2 === 0)
   const names = new Map([[a.id, a.name], [b.id, b.name]])
   const missing = ids.filter((id) => !names.has(id))
@@ -39,7 +45,7 @@ async function search(a, b) {
     }
     for (const id of missing) if (!names.has(id)) names.set(id, `Player ${id}`)
   }
-  return { chain, names, credit: data.credit }
+  return { pair, chain, names, credit: data.credit }
 }
 
 // "Six degrees of teammates". Two players are teammates when both played in a game for
@@ -51,7 +57,10 @@ export function TeammatesPage() {
   const [open, setOpen] = useState(null)
   const [a, b] = picks
   const result = useAsync(() => (a && b ? search(a, b) : Promise.resolve(null)), [a?.id, b?.id])
-  const { chain, names, credit } = result.data ?? {}
+  // Only the result for the CURRENT pair counts. A re-pick must not show the old
+  // chain under the new names, not even for the one render before useAsync resets.
+  const current = a && b && result.data?.pair === `${a.id}-${b.id}` ? result.data : null
+  const { chain, names, absent, throughSeason, credit } = current ?? {}
   const links = chain ? (chain.length - 1) / 2 : 0
 
   return (
@@ -89,13 +98,17 @@ export function TeammatesPage() {
         />
       )}
 
-      {a && b && result.loading && !result.data && (
+      {a && b && result.loading && !current && (
         <Loader size="inline" message="Loading every roster since 1897…" />
       )}
       {a && b && result.error && <p className="hint hint--error">Couldn’t load the rosters. Try again.</p>}
-      {a && b && result.data && !chain && (
-        <p className="hint">No chain found within {MAX_LINKS} links.</p>
+      {absent && (
+        <p className="hint">
+          {absent.join(' and ')} {absent.length > 1 ? 'are' : 'is'} not in the rosters. They
+          include only MLB games{throughSeason ? ` through ${throughSeason}` : ''}.
+        </p>
       )}
+      {current && !chain && !absent && <p className="hint">No chain found within {MAX_LINKS} links.</p>}
       {chain && (
         <section aria-label="Chain of teammates">
           <ol className="degrees__chain">
