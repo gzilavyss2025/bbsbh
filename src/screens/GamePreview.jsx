@@ -13,6 +13,7 @@ import { ensurePosterFonts } from '../lib/preview/posterPaper.js'
 import { BornNearPark } from '../components/history/BornNearPark.jsx'
 import { SavePosterButton } from '../components/preview/SavePosterButton.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { Notice } from '../components/ui/state/Notice.jsx'
 import '../styles/62-game-preview.css'
 
@@ -165,7 +166,7 @@ export function GamePreview({ feed, starterLines, broadcast, callouts, treatment
       </div>
 
       <Card as="div" body="flush" className="posterstudio__panel">
-        <h2 className="posterstudio__title">Preview card</h2>
+        <SectionHead look="label" as="h2">Preview card</SectionHead>
         <p className="posterstudio__note">
           A 1200 × 1600 image, the tallest an X timeline shows without cropping it.
         </p>

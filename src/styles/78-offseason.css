@@ -646,15 +646,9 @@
   flex: 1 1 auto;
   min-width: 0;
 }
-.seasonnote__title {
+.seasonnote__main .sectionhead,
+.srecord__body .sectionhead {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-title-md);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-tight);
-  letter-spacing: var(--ls-title);
-  text-transform: uppercase;
-  color: var(--text-heading);
 }
 #root .seasonnote__note {
   text-transform: none; /* caps-exempt: the note's own question, not a label */
@@ -788,16 +782,6 @@
 }
 .srecord__body {
   padding: var(--space-4);
-}
-.srecord__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-title-sm);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-tight);
-  letter-spacing: var(--ls-title);
-  text-transform: uppercase;
-  color: var(--text-heading);
 }
 /* #root * matches too, and this row's note is a plain prose sentence, not a
    label — shouting it back to caps would misread as one. */

@@ -3,6 +3,7 @@ import { SPORT_IDS } from '../../lib/teams.js'
 import { usePostseasonBracket } from '../../hooks/postseason/usePostseasonBracket.js'
 import { PostseasonBracket } from '../bracket/PostseasonBracket.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { recordRowIsLabelled } from '../../lib/postseason/bracketDisplay.js'
 
 // THE SEASON RECORD — the one door on the offseason page that opens onto
@@ -73,7 +74,7 @@ export function SeasonRecord({ sportId, season, dateStr }) {
       <div className="srecord__body">
         {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
             invariant is never a per-component .toUpperCase() (ADR-0017). */}
-        <h3 className="srecord__title">Season record</h3>
+        <SectionHead look="label">Season record</SectionHead>
         <p className="srecord__note">
           {inward
             ? `How the ${season} season finished, and every postseason series.`
