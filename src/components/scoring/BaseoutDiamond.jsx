@@ -25,8 +25,8 @@ export function BaseoutDiamond({ bases = [false, false, false], size = 30 }) {
       cx={pts[key][0]}
       cy={pts[key][1]}
       r={dotR}
-      fill={on ? 'var(--ink-1)' : 'var(--paper-2)'}
-      stroke={on ? 'var(--ink-1)' : 'var(--rule)'}
+      fill={on ? 'var(--ink-1)' : 'var(--surface-card)'}
+      stroke={on ? 'var(--ink-1)' : 'var(--border-rule)'}
       strokeWidth={s * 0.035}
     />
   )
@@ -35,7 +35,7 @@ export function BaseoutDiamond({ bases = [false, false, false], size = 30 }) {
       <polygon
         points={`${pts.home} ${pts.first} ${pts.second} ${pts.third}`}
         fill="none"
-        stroke="var(--rule)"
+        stroke="var(--border-rule)"
         strokeWidth={s * 0.045}
         strokeLinejoin="round"
       />
