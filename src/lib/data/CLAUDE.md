@@ -21,6 +21,7 @@ lab or the runtime overlay edits.
 | `custom-marks.json` | `customMarks.js`; written only by `scripts/lib/dev-custom-marks.mjs` |
 | `logo-url-overrides.json` | `identity/logoUrlOverrides.js` |
 | `league-logo-manifest.json` | `components/passport/leagueMarks.js`; written by `scripts/gen-league-logos.mjs` |
+| `season-marks.json` | `identity/seasonMarks.js` → `components/logo/TeamLogo.jsx` (`season` prop); written by `scripts/season-marks/fetch.mjs` from its `seed.json` |
 | `milb-ballparks.json` | `copy/registry.js`; written by `scripts/gen-milb-ballparks.mjs` |
 | `park-wash-tuning.json` | `ballpark/parkWash.js` |
 | `stamp-logo-tuning.json` | `stampLogoTuning.js` → `components/logbook/GameStamp.jsx` — read at RENDER time |
