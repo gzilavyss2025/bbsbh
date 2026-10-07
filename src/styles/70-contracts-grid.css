@@ -107,7 +107,7 @@
 .cliff__bar {
   width: 100%;
   min-height: 2px;
-  background: color-mix(in srgb, var(--marker) 35%, var(--paper-2));
+  background: color-mix(in srgb, var(--marker) 35%, var(--surface-card));
   border-top: var(--bw-heavy) solid var(--marker);
 }
 .cliff__year {
@@ -264,8 +264,8 @@
     -45deg,
     var(--bg-page) 0,
     var(--bg-page) 5px,
-    var(--rule-soft) 5px,
-    var(--rule-soft) 7px
+    var(--border-hairline) 5px,
+    var(--border-hairline) 7px
   );
 }
 .ctr__code {
@@ -362,8 +362,8 @@
     -45deg,
     var(--bg-page) 0,
     var(--bg-page) 5px,
-    var(--rule-soft) 5px,
-    var(--rule-soft) 7px
+    var(--border-hairline) 5px,
+    var(--border-hairline) 7px
   );
 }
 

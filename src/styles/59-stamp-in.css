@@ -39,7 +39,7 @@
    slate cards stacking into visual noise. */
 .stampin__row {
   padding: var(--space-3) 0;
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
 .stampin__rowhead {

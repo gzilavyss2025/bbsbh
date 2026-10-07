@@ -274,7 +274,7 @@
   overflow: hidden;
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-md);
-  background: var(--tint, var(--paper-1));
+  background: var(--tint, var(--bg-page));
   box-shadow: var(--inset-cell);
 }
 .trrank__tilemark--pinstripe {
