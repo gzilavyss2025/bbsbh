@@ -4,6 +4,7 @@ import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'
+import { Grid } from '../../../../components/ui/layout/Grid.jsx'
 
 const DASH = '—'
 
@@ -20,17 +21,19 @@ function monthDay(iso) {
 // .phcard__tile), reused under a Horizon-scoped class name rather than a
 // third boxed-stat pattern. `stats` is loadMinors.js's statLineFor output:
 // W-L/ERA/K/WHIP for a pitcher, AVG/HR/RBI/OPS for a hitter, or the
-// Milestones tile's two-cell Status/Since pair.
+// Milestones tile's two-cell Status/Since pair. auto-fit rather than a fixed 4,
+// so the two-cell line and the Promotion Watch tile's four-cell line both size
+// their cells evenly.
 function StatGrid({ stats }) {
   return (
-    <div className="hzntile__stats">
+    <Grid min={64} fit gap="snug" className="hzntile__stats">
       {stats.map((s) => (
         <div className="hzntile__tile" key={s.k}>
           <span className="hzntile__tilev">{s.v}</span>
           <span className="hzntile__tilek">{s.k}</span>
         </div>
       ))}
-    </div>
+    </Grid>
   )
 }
 

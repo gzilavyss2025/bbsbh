@@ -14,6 +14,7 @@ import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { monthDayName } from '../lib/dates.js'
+import { Grid } from '../components/ui/layout/Grid.jsx'
 
 const DASH = '—'
 
@@ -63,7 +64,7 @@ export function RehabPage() {
 
       {players.length > 0 && (
         <>
-          <div className="rehabgrid">
+          <Grid min={150} gap="base" className="rehabgrid">
             {players.map((p) => (
               <Card as="article" body="flush" className="rehabcard" key={p.playerId}>
                 <PlayerLink
@@ -120,7 +121,7 @@ export function RehabPage() {
                 )}
               </Card>
             ))}
-          </div>
+          </Grid>
           <p className="hint prospects__caption">
             {players.length} {players.length === 1 ? 'player' : 'players'} currently on a rehab assignment
             {updated && ` · updated ${updated}`}.

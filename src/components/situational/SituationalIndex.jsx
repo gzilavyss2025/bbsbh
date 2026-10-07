@@ -2,6 +2,7 @@ import { offDayTreatmentFor } from '../../lib/teams.js'
 import { TeamTreatmentMark } from '../logo/TeamTreatmentMark.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { Grid } from '../ui/layout/Grid.jsx'
 
 // The browse-first index both situational-record pages open on: every split
 // visible inside its baseball subject, each tile showing its leader before the
@@ -144,7 +145,7 @@ export function SituationalIndex({ groups, favoriteTeamId, pathFor, linkProps, p
                 <p>{GROUP_NOTES[group.title] ?? 'Every club, ranked in this split.'}</p>
               </span>
             </header>
-            <div className="trrank__tilegrid">
+            <Grid min={250} fit gap="base" className="trrank__tilegrid">
               {group.results.map((result) => (
                 <SituationTile
                   key={result.metric.id}
@@ -154,7 +155,7 @@ export function SituationalIndex({ groups, favoriteTeamId, pathFor, linkProps, p
                   linkProps={linkProps}
                 />
               ))}
-            </div>
+            </Grid>
           </section>
         ))}
       </div>

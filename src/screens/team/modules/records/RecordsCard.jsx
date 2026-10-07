@@ -7,6 +7,7 @@ import '../../../../styles/65-team-records.css'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'
+import { Grid } from '../../../../components/ui/layout/Grid.jsx'
 
 // The Numbers tab's Records card: this club's W-L in ~50 situations, grouped
 // by subject, plus the season counts that are not records (come-from-behind
@@ -69,7 +70,7 @@ function SeasonCounts({ counts, sportId, half, month }) {
     (m) => !m.id.startsWith('count-days-') || m.value > 0,
   )
   return (
-    <div className="trec__counts">
+    <Grid min="8.5rem" gap="snug" className="trec__counts">
       {items.map((m) => (
         <button
           key={m.id}
@@ -81,7 +82,7 @@ function SeasonCounts({ counts, sportId, half, month }) {
           <span className="trec__countk">{m.k}</span>
         </button>
       ))}
-    </div>
+    </Grid>
   )
 }
 

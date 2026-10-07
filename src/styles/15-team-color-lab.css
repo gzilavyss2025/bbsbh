@@ -553,9 +553,6 @@
    the whole card's width to lay out across (auto-fill instead of a fixed
    2-column grid built for a 112px sidebar). */
 .colorlab__wpapreviewfields {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: var(--space-2);
   align-content: start;
 }
 
