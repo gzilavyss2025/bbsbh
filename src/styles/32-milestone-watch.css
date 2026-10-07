@@ -61,7 +61,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--paper-0);
+  color: var(--bg-canvas);
   background: var(--accent-primary);
   border-top-right-radius: var(--radius-xs);
   border-bottom-left-radius: var(--radius-sm);
