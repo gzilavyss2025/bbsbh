@@ -19,18 +19,27 @@
 // of a session where it is unavailable was never the intent (see the "degrades to
 // an empty map so callers see a plain cache miss" note these readers carry). A
 // request that never got an answer (offline, a dropped connection) is different:
-// the caller gets the fallback, but nothing is stored, so a later call tries again.
+// the caller gets the fallback, but nothing is stored, and a later call tries again once NO_ANSWER_MS has passed.
 
 // A loader for ONE file. `shape` narrows the parsed JSON to what the reader
 // hands out; `fallback` is what a non-200, a parse failure, or an offline
 // device resolves to.
 // fetch + parse. `res.ok` false or bad JSON rejects with a plain Error (memoized);
 // fetch() itself rejecting is tagged `noAnswer` (not memoized).
+// An unanswered url is not retried for NO_ANSWER_MS, so an offline phone fires
+// one fetch per file, not one per call (#1650); a reconnect recovers after it.
+const NO_ANSWER_MS = 30_000
+const noAnswerAt = new Map() // url -> Date.now() of its last unanswered fetch
+
 async function fetchJson(url) {
+  if (Date.now() - (noAnswerAt.get(url) ?? -Infinity) < NO_ANSWER_MS) {
+    throw Object.assign(new Error(`${url} unanswered`), { noAnswer: true })
+  }
   let res
   try {
     res = await fetch(url)
   } catch (err) {
+    noAnswerAt.set(url, Date.now())
     throw Object.assign(err instanceof Error ? err : new Error(String(err)), { noAnswer: true })
   }
   if (!res.ok) throw new Error(`${url} ${res.status}`)
