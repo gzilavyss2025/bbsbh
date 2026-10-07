@@ -4,6 +4,7 @@ import { Band, Entry } from './Entry.jsx'
 import { TokenHalf } from './tokens.jsx'
 import { CardHalf, PillHalf } from './blocks.jsx'
 import { ComponentHalf } from './components.jsx'
+import { HeadPairs } from './headpairs.jsx'
 import { ButtonHalf } from './buttons.jsx'
 import { PillSystemHalf } from './pills.jsx'
 import { ClusterHalf, GridHalf, StackHalf } from './layout.jsx'
@@ -116,6 +117,7 @@ export function DesignLab() {
         lede="Grouped by what they actually are, not by where they live. The groups are the finding."
       >
         <CardHalf />
+        <HeadPairs />
       </Band>
 
       <Band
