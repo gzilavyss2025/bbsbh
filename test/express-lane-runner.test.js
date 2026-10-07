@@ -364,6 +364,55 @@ test('staying ahead runs the whole half without being asked', async () => {
   assert.equal(h.clips.asked.length, 3, 'the default plan does not wait to be prompted')
 })
 
+// --- changing the plan on a runner that already holds the queue ------------
+//
+// The entry step lets a reader pick a plan after the runner exists, because it
+// starts staging as soon as the page opens. A plan change used to REBUILD the
+// runner, and the new one had an empty queue: the rows of the half were only
+// handed over when they changed, which a plan change does not do. On demand
+// then sat on a disabled "Score the first play" with no request ever sent.
+
+test('a plan chosen after the queue was built does not lose the queue', async () => {
+  // Built under staying ahead, as the page does, then switched to on demand.
+  const h = harness({ horizon: Infinity })
+  await h.runner.addHalf([pitch(1), pitch(2), pitch(3)])
+  h.runner.setHorizon(1)
+  await h.runner.start()
+  assert.equal(h.runner.getJob().queue.length, 3, 'the rows are still queued')
+  assert.deepEqual(h.clips.asked, ['https://clip/p1'], 'and the first play is fetched at once')
+  h.runner.stop()
+})
+
+test('widening the horizon puts a waiting runner back to work', async () => {
+  const h = harness({ horizon: 1 })
+  await h.runner.addHalf([pitch(1), pitch(2), pitch(3)])
+  await h.runner.start()
+  assert.equal(h.clips.asked.length, 1, 'on demand fetches the one row')
+  h.runner.setHorizon(Infinity)
+  await settle()
+  assert.deepEqual(
+    h.clips.asked,
+    ['https://clip/p1', 'https://clip/p2', 'https://clip/p3'],
+    'staying ahead carries on from where on demand stopped',
+  )
+  h.runner.stop()
+})
+
+test('narrowing the horizon makes the next tap fetch one play, not the rest', async () => {
+  const h = harness({ horizon: Infinity })
+  await h.runner.addHalf([pitch(1)])
+  await h.runner.start()
+  assert.deepEqual(h.clips.asked, ['https://clip/p1'])
+  h.runner.setHorizon(1)
+  await h.runner.addHalf([pitch(2), pitch(3)])
+  await settle()
+  assert.equal(h.clips.asked.length, 1, 'nothing past the cursor is fetched under on demand')
+  await h.runner.moveCursor('p1')
+  await settle()
+  assert.deepEqual(h.clips.asked, ['https://clip/p1', 'https://clip/p2'], 'one play per tap')
+  h.runner.stop()
+})
+
 // --- the speed readout ----------------------------------------------------
 //
 // The runner times each download and says so. The sample carries bytes and
