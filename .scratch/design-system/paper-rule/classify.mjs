@@ -129,7 +129,12 @@ function decided(r) {
   if (r.token === '--paper-0') return (/text on a dark badge/.test(r.role) ? (sureIt('--bg-canvas'), o) : (sureIt('--bg-page'), o))
   if (r.token === '--paper-2' && /ticker/.test(r.selector)) return (sureIt('--surface-card'), o)
   if (['--paper-3', '--rule', '--rule-soft'].includes(r.token) && r.conf === 'likely') {
-    const [g, repl] = D4(r); o.group = g; o.repl = repl; o.conf = 'pending-4'; return o
+    const [g] = D4(r); o.group = g
+    const ALIAS = { '--paper-3': '--surface-inset', '--rule-soft': '--border-hairline', '--rule': '--border-rule' }
+    o.repl = g === 'text-on-ink-bright' ? '--text-on-ink-bright (new)' : g === 'text-on-ink-faint' ? '--text-on-ink-soft (new)'
+      : g === 'text-on-ink-faint?' ? '--text-on-ink-dim (new)' : ALIAS[r.token]
+    o.group = g === 'text-on-ink-faint' ? 'text-on-ink-soft' : g === 'text-on-ink-faint?' ? 'text-on-ink-dim' : g
+    o.conf = 'sure'; o.role += ' [decided 4]'; return o
   }
   return o
 }

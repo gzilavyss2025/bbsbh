@@ -1,6 +1,6 @@
 # Proposal: close the direct reads of `--paper-N` and `--rule*` (issue #1156, slice C1b of #1137)
 
-Base: `origin/main` at `b24dff28`. **Updated 2026-10-07 with Gary's answers (parts 6 to 8).** Nothing in `src/`, `public/` or any guard changed. Decision 4 is the one still open.
+Base: `origin/main` at `b24dff28`. **Updated 2026-10-07 with Gary's answers (parts 6 to 8).** Nothing in `src/`, `public/` or any guard changed. **No decision is left.**
 
 ## 0. The counts, and what changed
 
@@ -49,7 +49,7 @@ The role comes from the selector's job and the property. I did not render pages.
 The tokens `--paper-3`, `--rule-soft` and `--rule` each have exactly one alias with the same colour. That is **130 reads** (52 + 45 + 33). The issue said 121.
 
 - **75 are ready now (sure).** Border, background and fill reads. The alias name fits the job. The full list is in the appendix.
-- **55 are "likely".** The read is a **mark or text**, not a surface or border: `color`, `fill`, `stroke`, `stop-color`, or a colour inside a gradient. A swap keeps the colour. The alias name is odd (`color: var(--surface-inset)`). See decision 4.
+- **55 are "likely".** The read is a **mark or text**, not a surface or border: `color`, `fill`, `stroke`, `stop-color`, or a colour inside a gradient. A swap keeps the colour. The alias name is odd (`color: var(--surface-inset)`). Decided in part 8.
 
 | token | alias | sure | likely |
 | --- | --- | ---: | ---: |
@@ -130,39 +130,40 @@ My rule: a read that sits **on a card, or darker than its card**, is "the ground
 
 **`--album-foil` gets zero reads.** No `--paper-2` read in `src/styles/` is album foil. The three aliases cannot collide here.
 
-## 6. (e) The order of slices
+## 6. (e) The order of slices (final)
 
-Each slice has at most 5 files. A slice carries the **whole file**: every `--paper-N` and `--rule*` read in it, so a file is touched once. The guard goes **last**, because it cannot be half on (issue #1156). Model names are my advice.
+Each slice has at most 5 files. A slice carries the **whole file**: every `--paper-N` and `--rule*` read in it, so a file is touched once. The guard goes **last**, because it cannot be half on (issue #1156). Model names are my advice. "Depends on" `-` means it can start now.
 
-A file is **unblocked now** if it holds no "text" read (decision 4) and no `--rule-grid` read. A file with a `--rule-grid` read waits for slice M1, which mints `--border-grid`. A file with a "text" read waits for M2.
+Slice **M** mints four tokens in one PR because they share `colors.css`. Slices 10 to 17 and O need M, so M goes first.
 
-| # | kind | files | reads | model | can run |
+| # | kind | files | reads | model | depends on |
 | --- | --- | --- | ---: | --- | --- |
-| 1 | no new token needed | `04-site-bar.css`, `04a-wire-dock.css`, `05-masthead-nav.css`, `06-loader-and-cards.css`, `06b-offday-cards.css` | 14 | Haiku | **unblocked now** |
-| 2 | no new token needed | `12-sealbox.css`, `15-team-color-lab.css`, `16-identity-lab-shell.css`, `18-uniforms-and-jerseys.css`, `20-charts.css` | 24 | Haiku | **unblocked now** |
-| 3 | no new token needed | `21-box-score.css`, `21a-box-score-stars.css`, `21b-box-score-tally.css`, `23-box-score-detail.css`, `26a-percentile-strip.css` | 6 | Haiku | **unblocked now** |
-| 4 | no new token needed | `27-player-position-innings.css`, `28-team-hub.css`, `29-team-transactions.css`, `31-wild-card.css`, `32-milestone-watch.css` | 18 | Haiku | **unblocked now** |
-| 5 | no new token needed | `38-umpire-pages.css`, `40-game-modals.css`, `43-foul-tracker.css`, `48c-stamp-sheet.css`, `48d-stamp-detail.css` | 10 | Haiku | **unblocked now** |
-| 6 | no new token needed | `59-stamp-in.css`, `65-team-records.css`, `66-situational-records.css`, `72-club-transactions.css`, `72-player-hover-card.css` | 5 | Haiku | **unblocked now** |
-| 7 | no new token needed | `77c-express-lane-deck.css`, `postseason/home.css`, `report/challenge-card.css`, `system/section-head.css` | 10 | Haiku | **unblocked now** |
-| M1 | **mint** `--border-grid` (= `--rule-grid`) | `src/tokens/colors.css` | 0 | Sonnet | **unblocked now**; slices after it need it |
-| 8 | needs `--border-grid` | `01-base.css`, `08-site-shell.css`, `25-wide-layout.css`, `26e-contract-history.css`, `31d-prospect-card.css` | 11 | Haiku | after M1 |
-| 9 | needs `--border-grid` | `34-postseason.css`, `45-admin-copy-editor.css`, `50-logbook-landing.css`, `63-print-sheet.css`, `67-awards-ledger.css` | 8 | Haiku | after M1 |
-| 10 | needs `--border-grid` | `79-nine-keys.css`, `boxlines/gamelines.css`, `boxlines/listdoor.css`, `designlab/lab.css`, `pitcher-card/card.css` | 20 | Haiku | after M1 |
-| 11 | needs `--border-grid` | `report/charts.css`, `scorecard/box.css`, `scorecard/footer.css`, `scorecard/grid.css`, `scorecard/lens-carry.css` | 9 | Haiku | after M1 |
-| M2 | **mint** the decision 4 text tokens | `src/tokens/colors.css`, `src/lib/design/contrastPairings.js` | 0 | Sonnet | after decision 4 |
-| 12 | big file, holds "text" reads | `17-identity-lab-workbench.css` | 38 | Sonnet, high effort | after M1 and M2 and PR #1679 merges |
-| 13 | big file, holds "text" reads | `68-around-the-game.css` | 27 | Sonnet, high effort | after M1 and M2 |
-| 14 | holds "text" reads | `06a-gamecard-parkart.css`, `07-team-logo-and-buttons.css`, `13-play-by-play.css`, `14-strike-zone.css`, `22-box-score-tables.css` | 19 | Sonnet | after M1 and M2 |
-| 15 | holds "text" reads | `24-floating-nav-and-hud.css`, `26b-player-contract.css`, `39-manager-page.css`, `42-first-scorebook.css` | 30 | Sonnet | after M1 and M2 |
-| 16 | holds "text" reads | `53-umpire-tendencies.css`, `62-identity-admin.css`, `65-about-page.css`, `69-hit-chart.css` | 15 | Sonnet | after M1 and M2 |
-| 17 | holds "text" reads | `70-contracts-grid.css`, `71-salaries-league.css`, `78-offseason.css`, `focus/atbat.css` | 13 | Sonnet | after M1 and M2 |
-| O | outside consumers | `PageCurlOverlay.jsx`, `BaseoutDiamond.jsx`, `PlayDiamond.jsx`, `BaseState.jsx`, `src/tokens/effects.css` | 10 | Haiku | after M1 and M2 |
-| G | **the guard**: append one entry to `rules` in `scripts/check-typography.mjs`, its test, an ADR line, the `src/styles/CLAUDE.md` pointer. It scans `src/styles/` only. `public/learn.css` and `posterPaper.js` are not scanned, so they need no exemption entry | `scripts/check-typography.mjs`, a `test/` file, a `docs/adr/` file, `src/styles/CLAUDE.md`, `docs/scripts/tooling.md` | 0 | Sonnet | **last** |
+| 1 | no new token needed | `04-site-bar.css`, `04a-wire-dock.css`, `05-masthead-nav.css`, `06-loader-and-cards.css`, `06b-offday-cards.css` | 14 | Haiku | - |
+| 2 | no new token needed | `07-team-logo-and-buttons.css`, `12-sealbox.css`, `13-play-by-play.css`, `15-team-color-lab.css`, `16-identity-lab-shell.css` | 31 | Haiku | - |
+| 3 | no new token needed | `18-uniforms-and-jerseys.css`, `20-charts.css`, `21-box-score.css`, `21a-box-score-stars.css`, `21b-box-score-tally.css` | 5 | Haiku | - |
+| 4 | no new token needed | `22-box-score-tables.css`, `23-box-score-detail.css`, `26a-percentile-strip.css`, `26b-player-contract.css`, `27-player-position-innings.css` | 20 | Haiku | - |
+| 5 | no new token needed | `28-team-hub.css`, `29-team-transactions.css`, `31-wild-card.css`, `32-milestone-watch.css`, `38-umpire-pages.css` | 16 | Haiku | - |
+| 6 | no new token needed | `39-manager-page.css`, `40-game-modals.css`, `43-foul-tracker.css`, `48c-stamp-sheet.css`, `48d-stamp-detail.css` | 14 | Haiku | - |
+| 7 | no new token needed | `59-stamp-in.css`, `65-team-records.css`, `66-situational-records.css`, `69-hit-chart.css`, `70-contracts-grid.css` | 12 | Haiku | - |
+| 8 | no new token needed | `71-salaries-league.css`, `72-club-transactions.css`, `72-player-hover-card.css`, `77c-express-lane-deck.css`, `78-offseason.css` | 9 | Haiku | - |
+| 9 | no new token needed | `focus/atbat.css`, `postseason/home.css`, `report/challenge-card.css`, `system/section-head.css` | 11 | Haiku | - |
+| M | **mint** `--border-grid` (= `--rule-grid`), `--text-on-ink-bright`, `--text-on-ink-soft`, `--text-on-ink-dim`, and their contrast pairs | `src/tokens/colors.css`, `src/lib/design/contrastPairings.js` | 0 | Sonnet | - |
+| 10 | needs `--border-grid` | `01-base.css`, `08-site-shell.css`, `25-wide-layout.css`, `26e-contract-history.css`, `31d-prospect-card.css` | 11 | Haiku | M |
+| 11 | needs `--border-grid` | `34-postseason.css`, `45-admin-copy-editor.css`, `50-logbook-landing.css`, `63-print-sheet.css`, `67-awards-ledger.css` | 8 | Haiku | M |
+| 12 | needs `--border-grid` | `79-nine-keys.css`, `boxlines/gamelines.css`, `boxlines/listdoor.css`, `designlab/lab.css`, `pitcher-card/card.css` | 20 | Haiku | M |
+| 13 | needs `--border-grid` | `report/charts.css`, `scorecard/box.css`, `scorecard/footer.css`, `scorecard/grid.css`, `scorecard/lens-carry.css` | 9 | Haiku | M |
+| 14 | big file, holds new-token reads | `17-identity-lab-workbench.css` | 38 | Sonnet, high effort | M and PR #1679 merged |
+| 15 | big file, holds new-token reads | `68-around-the-game.css` | 27 | Sonnet, high effort | M |
+| 16 | holds new-token reads | `06a-gamecard-parkart.css`, `14-strike-zone.css`, `24-floating-nav-and-hud.css`, `42-first-scorebook.css` | 21 | Sonnet | M |
+| 17 | holds new-token reads | `53-umpire-tendencies.css`, `62-identity-admin.css`, `65-about-page.css` | 11 | Sonnet | M |
+| O | outside consumers | `PageCurlOverlay.jsx`, `BaseoutDiamond.jsx`, `PlayDiamond.jsx`, `BaseState.jsx`, `src/tokens/effects.css` | 10 | Haiku | M |
+| G | **the guard**: append one entry to `rules` in `scripts/check-typography.mjs`, its test, an ADR line, the `src/styles/CLAUDE.md` pointer. It scans `src/styles/` only | `scripts/check-typography.mjs`, a `test/` file, a `docs/adr/` file, `src/styles/CLAUDE.md`, `docs/scripts/tooling.md` | 0 | Sonnet | slices 1 to 17 and O all merged |
 
-**Unblocked now: slices 1 to 7 and M1.** That is 34 files and 87 reads. Slice 12 (`17-identity-lab-workbench.css`) must also wait for PR #1679, which edits the same file.
+**Can start now: slices 1 to 9 and M.** Slices 1 to 9 are 44 files and 132 reads. Slice 14 (`17-identity-lab-workbench.css`) also waits for PR #1679, which edits the same file.
 
-Note on confidence: 19 `--paper-2` reads stay "likely" (a card tinted by a state colour, and similar). Gary did not decide them. Slices 1 to 7 hold some of them. The slice owner swaps them to `--surface-card` (same colour) and says so in the PR.
+Note on confidence: 19 `--paper-2` reads stay "likely" (a card tinted by a state colour, and similar). Gary did not decide them. The slice owner swaps them to `--surface-card` (same colour) and says so in the PR.
+
+**Slice M must also do this:** confirm the ground of every one of the 23 text-token selectors before it adds a contrast pair (part 8 says which grounds I did and did not read).
 
 ## 7. Decided (Gary, 2026-10-07)
 
@@ -171,13 +172,13 @@ Note on confidence: 19 `--paper-2` reads stay "likely" (a card tinted by a state
 | 1 | name for the new `--rule-grid` token | **`border-grid`** (mint = slice M1) |
 | 2 | the 54 `--paper-1` reads and the 2 background `--paper-0` reads | **`page`** (`--bg-page`) |
 | 3 | the 5 "text on a dark band" reads | **`canvas`** (`--bg-canvas`; no colour moves) |
-| 4 | the 55 text and mark reads of `--paper-3`, `--rule-soft`, `--rule` | **open: Gary chose "mint text-role tokens now". See part 8.** |
+| 4 | the 55 text and mark reads of `--paper-3`, `--rule-soft`, `--rule` | **mint three text tokens now (23 reads); the other 32 use the existing aliases. See part 8.** |
 | 5 | `public/learn.css` (18 reads) | **`exempt`** |
 | 6 | `posterPaper.js` (7 names) and the guard's reach | **`exempt`**; the guard scans `src/styles/` only; slice O fixes the 10 outside reads by hand |
 | 7 | the `.contractcard__ticker` blend | **`card`** (`--surface-card` base) |
-| 8 | order | **`now`**: slices 1 to 7 and M1 may start. A slice with a "text" read waits for decision 4 |
+| 8 | order | **`now`**: slices 1 to 9 and M may start; slices 10 to 17 wait for M |
 
-## 8. Decision 4: text-role tokens
+## 8. Decision 4: text-role tokens (decided)
 
 Gary rejected both "use the alias anyway" and "mint later". I grouped the 55 reads by real job. Every group below is in `census.csv` (column `decision4_group`).
 
@@ -224,12 +225,16 @@ I computed these ratios from the hex values with the repo's own `ratio()` in `sr
 
 Every pair clears 4.5. **Not checked:** I read the dark grounds from the CSS for `.gamehud`, `.bcast`, `.scorebookstory__tally`, `.abouthero` and `.pitchlist__num`. I did not read the ground of every one of the 23 selectors (for example `.umptend__season` and the `.idlab__barmock__title` pair). Slice M2 must confirm the ground of each before it adds a pair. Slice M2 also adds the three tokens to `colors.css` and the pairs to `contrastPairings.js`.
 
-### For Gary: one word each
+### Decided (Gary, 2026-10-07)
 
-1. **4a. Name of token 1.** `bright` (recommended) / `strong`
-2. **4b. Name of token 2.** `soft` (recommended) / `pale`
-3. **4c. Token 3 (3 reads on the navy panel).** `dim` (recommended: mint it, no colour moves) / `faint` (mint it under the other name) / `join` (use token 2; the text gets lighter by 7.9 on the CIE76 scale, and contrast rises from 8.15 to 10.07)
-4. **4d. The 32 art, halo, ghost and surface reads.** `alias` (recommended: art and surface reads are not text, and the 14 surface reads fit the alias name) / `mark` (mint a `--mark-*` set for the 18 halo, art and ghost reads in a later PR)
+| | question | answer |
+| --- | --- | --- |
+| 4a | name of token 1 | **`bright`**: `--text-on-ink-bright` = `var(--paper-3)` (16 reads) |
+| 4b | name of token 2 | **`soft`**: `--text-on-ink-soft` = `var(--rule-soft)` (4 reads) |
+| 4c | token 3 | **`dim`**: mint `--text-on-ink-dim` = `var(--rule)` (3 reads) |
+| 4d | the 32 other reads | **`alias`**: `--surface-inset`, `--border-hairline` or `--border-rule`, by the value they hold |
+
+`census.csv` now shows these as the proposed replacement for all 55 rows (confidence "sure").
 
 ## Appendix A: the 75 "sure" one-to-one swaps (ready)
 
