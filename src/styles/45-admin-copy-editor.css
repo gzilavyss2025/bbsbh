@@ -526,12 +526,12 @@
 .awardord__cut > span[aria-hidden='true'] {
   flex: 1;
   height: 0;
-  border-top: var(--bw-hair) dashed var(--clay);
+  border-top: var(--bw-hair) solid var(--clay);
 }
 .awardord__note {
   margin: var(--space-2) 0 0;
   padding-top: var(--space-2);
-  border-top: var(--bw-hair) dashed var(--border-rule);
+  border-top: var(--bw-hair) solid var(--border-rule);
   font-family: var(--font-body);
   font-size: var(--fs-compact);
   line-height: var(--lh-prose);
