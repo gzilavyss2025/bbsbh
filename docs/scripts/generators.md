@@ -1265,7 +1265,7 @@ don't run these by hand.
   Padres bench coach years before he managed the Brewers; both belong). The cron
   runs **`--current-only`**: this season, all 30 clubs, ~30 calls, MERGED into
   the existing shards so the hand-run backfill survives. The backfill covers
-  `MANAGER_HISTORY_FIRST_SEASON` (`src/api/managers.js`, 1969 since 2026-10-06) to
+  `MANAGER_HISTORY_FIRST_SEASON` (`src/lib/records/managerHistory.js`, 1969 since 2026-10-06) to
   now: ~2,000 calls for a full rebuild, about 25 s. **Hand-run** (no cron runs it):
   `node scripts/gen-manager-history.mjs` rebuilds; `--from=YYYY --to=YYYY` merges one
   slice; `--out=DIR` writes to DIR for a measuring run. 1969 is where the unseeded
@@ -1410,7 +1410,7 @@ Re-run only to fold in a new season.
   one (`lastSeason`, named by `lib/time/season-in-play.mjs`). **Hand-run, NOT on a
   cron**: a finished season never changes, so run it once after each season ends.
   One `teams/stats?group=hitting,pitching&sportIds=1` call a season, 125 calls,
-  4 KB. Pure half: `scripts/lib/stats/league-averages.mjs` (`sum(H)/sum(AB)`, and
+  4 KB. Pure half: `src/lib/math/leagueAverages.js` (`sum(H)/sum(AB)`, and
   `9*sum(ER)/sum(IP)` with IP in thirds; never a mean of team averages). Reader:
   `src/api/player/leagueAverages.js`. **No clock:** a re-run writes the same bytes
   (`--out <path>` writes elsewhere). **A figure the feed lacks is `null`:** the

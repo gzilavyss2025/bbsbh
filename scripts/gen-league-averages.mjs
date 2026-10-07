@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { getJson } from './lib/statsapi.mjs'
-import { leagueAveragesOf } from './lib/stats/league-averages.mjs'
+import { leagueAveragesOf } from '../src/lib/math/leagueAverages.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const FIRST = 1901

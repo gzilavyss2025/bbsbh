@@ -97,3 +97,27 @@ test('a sharded set memoizes per key, and shares per key', async () => {
     fetchMock.mock.restore()
   }
 })
+
+test('a request that got no answer is retried; a 404 is not', async () => {
+  let down = true
+  let calls = 0
+  const fetchMock = mock.method(globalThis, 'fetch', async () => {
+    calls += 1
+    if (down) throw new TypeError('Failed to fetch')
+    return { ok: true, json: async () => ({ n: 1 }) }
+  })
+  try {
+    const load = staticJson('/data/flaky.json', { fallback: { n: 0 } })
+    const byKey = staticJsonBy((k) => `/data/flaky/${k}.json`, { fallback: { n: 0 } })
+    assert.deepEqual(await load(), { n: 0 })
+    assert.deepEqual(await byKey(1), { n: 0 })
+    down = false
+    assert.deepEqual(await load(), { n: 1 }, 'single file retried after a network failure')
+    assert.deepEqual(await byKey(1), { n: 1 }, 'shard retried after a network failure')
+    assert.equal(calls, 4)
+    await load()
+    assert.equal(calls, 4, 'a good answer is memoized')
+  } finally {
+    fetchMock.mock.restore()
+  }
+})
