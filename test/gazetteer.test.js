@@ -18,6 +18,10 @@ const locate = buildGazetteer({
     geoRow(7, 'Big Town', 'Big Town', 'Springfield,Old Name', 40.1, -88.2, 'US', 'IL', 900000),
     geoRow(8, 'London', 'London', '', 51.508, -0.126, 'GB', 'ENG', 8961989),
     geoRow(9, 'Fort Myers', 'Fort Myers', '', 26.64, -81.87, 'US', 'FL', 86000),
+    geoRow(10, 'Saint-Hyacinthe', 'Saint-Hyacinthe', '', 45.63, -72.96, 'CA', '10', 55000),
+    geoRow(11, 'Sainte-Marie', 'Sainte-Marie', '', 46.44, -71.0, 'CA', '10', 13000),
+    geoRow(12, 'Alpha', 'Alpha', 'Twin Name,Twin Name', 40.5, -89.0, 'US', 'IL', 5000),
+    geoRow(13, 'Beta', 'Beta', 'Twin Name', 38.5, -88.5, 'US', 'IL', 900),
   ].join('\n'),
   admin1: ['US.MO\tMissouri\tMissouri\t1', 'US.DC\tDistrict of Columbia\tDistrict of Columbia\t2', 'US.GA\tGeorgia\tGeorgia\t3', 'US.IL\tIllinois\tIllinois\t4', 'US.FL\tFlorida\tFlorida\t5'].join('\n'),
   countries: ['#ISO\tISO3\tISO-Numeric\tfips\tCountry', 'CA\tCAN\t124\tCA\tCanada', 'GB\tGBR\t826\tUK\tUnited Kingdom'].join('\n'),
@@ -57,4 +61,19 @@ test('a country GeoNames names differently maps through the alias; an unknown on
   assert.deepEqual(locate('London', '', 'England'), { lat: 51.51, lon: -0.13 })
   assert.equal(locate('London', '', 'Atlantis'), null)
   assert.equal(locate('', 'Missouri', 'USA'), null)
+})
+
+test('a hyphen or dot in St-, St. and Ste. spells out the same as Saint', () => {
+  assert.equal(placeName('St-Hyacinthe'), 'saint hyacinthe')
+  assert.equal(placeName('Saint-Hyacinthe'), 'saint hyacinthe')
+  assert.equal(placeName('St. Louis'), 'saint louis')
+  assert.equal(placeName('Ste. Marie'), 'sainte marie')
+  assert.equal(placeName('Ste-Marie'), 'sainte marie')
+  assert.deepEqual(locate('St-Hyacinthe', '', 'Canada'), { lat: 45.63, lon: -72.96 })
+  assert.deepEqual(locate('Ste. Marie', '', 'Canada'), { lat: 46.44, lon: -71 })
+})
+
+test('an alternate name held by two towns in one state leaves the player unplaced', () => {
+  assert.equal(locate('Twin Name', 'Illinois', 'USA'), null)
+  assert.deepEqual(locate('Old Name', 'Illinois', 'USA'), { lat: 40.1, lon: -88.2 })
 })
