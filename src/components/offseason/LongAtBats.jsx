@@ -111,7 +111,7 @@ export function LongAtBats({ season }) {
         </div>
 
         <div className="seasonnote__main">
-          <h4 className="seasonnote__title">The twelve-pitch at-bats</h4>
+          <SectionHead look="label" as="h4">The twelve-pitch at-bats</SectionHead>
           <p className="seasonnote__note">
             Every regular-season plate appearance that took {data.threshold} pitches or more. Each
             one opens its game, sealed.

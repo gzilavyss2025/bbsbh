@@ -7,6 +7,7 @@
 # LANDED in slice H1b (#1113): the innings view and box score bands wear .sectionhead--band (club) or .sectionhead--band.sectionhead--house (no club) as PAINT on their own elements; their rows that no longer draw a band left this file. .abs__title, .statbox__title, .dueup__title, .lineupcard__title, .halfdefense__title, .marginnotes__title and .pitchers__title keep a row: their size and bleed are still their own.
 # LANDED in slice H3 (#1113): the ledger renames .sitemenusheet__eyebrow, .guidelink__eyebrow, .szmodal__eyebrow, .umpmodal__eyebrow, .tscoremodal__kicker, .scorebookstory__kicker, .introsheet__eyebrow, .bcast__eyebrow, .hitchart__eyebrow, .boxlines__kicker, .awardord__hd, .lookupdeck__heading and .gamelines__heading are done (as is .awardord__hd), and .betweeninnings__eyebrow is deleted, so their rows left this file, except the three titles, which keep a row under the new name (.awardord__title, .lookupdeck__title, .gamelines__title). The .wordmarklab__eyebrow and .trrank__eyebrow rows left too: census.mjs reads a rule as a head by its old second-line name, so the renamed rules are no longer head rows. Held: .derbycard__eyebrow and the pairs on .abouthero, .logbooklanding, .researchdiary and .stampstrip (two different second lines on one head); .contractcard__eyebrow (its __note name is taken).
 # LANDED in slice H2b (#1346): .levelprog__title (LevelProgressionCard, ProspectRankHistoryCard, FamilyBand) and .prospectcard__title are SectionHead labels now (Gary, 2026-10-07), so their rows left this file.
+# LANDED in slice H2c (#1346): .gamestory__title, .posterstudio__title, .seasonnote__title and .srecord__title are SectionHead labels now (Gary, 2026-10-07), so their rows left this file. .pitchslab__title keeps its big rule (Gary).
 .topbar__title	title-keep	title	-	the app's page title in the top bar (35 files). A page title, not a section head
 .wiredock__title, .wiredock__note	label	label	H2	the wire dock's caps title + note in one rule — a label head with its note slot
 .derbycard__eyebrow	note	kicker	H3	ledger: → .gamecard__note ("All-Star Break"). Moves with .derbycard → .gamecard--derby; .gamecard stays bespoke, so a rename, not a SectionHead
@@ -29,7 +30,6 @@
 .marginnotes__title	band	band	H1	margin-notes band. Allowlisted. SEAL SCOPE
 .pitchers__title	band	band	H1	Pitchers band. Allowlisted. SEAL SCOPE (ADR-0009 gates the table, not the head)
 .boxscore__title	title-keep	title	-	the box score page title. SEAL SCOPE
-.gamestory__title	label	label	H2	game story card label
 .contractcard__eyebrow, .contractcard__salary > span, .contractcard__scorebug dt, .contractcard__ticker dt, .contractcard__factcaption, .contractcard__segyear, .contractcard__baryear, .contractcard__controlhead span	note	kicker	H3	ledger: .contractcard__eyebrow → .contract__note ("Player compensation" over <h2>Contract</h2>) — the kicker-over-title idiom the issue retires. The other seven selectors in this list are figure and caption labels that share the caps recipe; they move with the block, not onto SectionHead
 .delaycard__title	notice	plain	-	the rain-delay card title — Notice family (#1132). SEAL SCOPE
 .roster-sub__title	label	label	H2	an <h4> SUB-head inside a card body ("Position players · season WAR") — a second-level head: SectionHead needs a level, or this stays a namespace rule
@@ -44,7 +44,6 @@
 .moredir__title	title-keep	title	-	/more page title (--fs-display-md)
 .stampin__title	title-keep	title	-	Stamp In page title (ADR-0042)
 .bpadmin__title	lab	plain	-	ballpark admin gear
-.posterstudio__title	label	title	H2	poster studio panel name in --fs-h3
 .iddrawer__title	lab	plain	-	identity drawer (admin gear)
 62-identity-admin.css:.idlab__barmock	lab	band	-	the hub identity drawer's band mock (allowlisted). Must follow H1's recipe, like the lab's
 62-identity-admin.css:.idlab__barmock__title	lab	title	-	title in the drawer's band mock
@@ -59,8 +58,6 @@
 .xl-entry__title	title-keep	title	-	Express Lane entry page title
 .xl-expand__title	title-keep	title	-	Express Lane pitch expand title
 .oseason__title	label	plain	H2	offseason page section heads (5 files) — #1113 comment 1 asks the offseason rows to take the lab's style
-.seasonnote__title	label	title	H2	offseason note card name (--fs-title-md) → the card's head
-.srecord__title	label	title	H2	offseason season-record card name → the card's head
 .researchdiary__eyebrow	note	kicker	H3	ledger: → .researchdiary__note (research page)
 .researchdiary__title	lab	title	-	research diary title
 .sc-footer__title	bespoke	plain	-	the #22 scorecard footer — the scorecard is bespoke (inventory #1)
