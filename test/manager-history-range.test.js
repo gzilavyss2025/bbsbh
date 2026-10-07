@@ -4,8 +4,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readdir, readFile } from 'node:fs/promises'
-import { mergeSeasonRange, mergeCoverage } from '../scripts/lib/records/manager-history-merge.mjs'
-import { MANAGER_HISTORY_FIRST_SEASON } from '../src/api/managers.js'
+import { mergeSeasonRange, mergeCoverage, sharedCoverage, mergeNeedsResearch } from '../scripts/lib/records/manager-history-merge.mjs'
+import { MANAGER_HISTORY_FIRST_SEASON } from '../src/lib/records/managerHistory.js'
 
 const stint = (season, teamId = 158) => ({ teamId, season, job: 'Manager', jobId: 'MNGR' })
 
@@ -48,4 +48,24 @@ test('every shipped shard claims the first season, and no stint predates it', as
       for (const s of stints) assert.ok(s.season >= MANAGER_HISTORY_FIRST_SEASON, f)
     }
   }
+})
+
+test('sharedCoverage returns the one range, and throws when shards disagree', () => {
+  const a = { seasons: [1969, 2026], mode: 'backfill' }
+  assert.deepEqual(sharedCoverage([a, { ...a }, undefined]), a)
+  assert.throws(() => sharedCoverage([a, { seasons: [1990, 2026] }]), /disagree/)
+})
+
+test('mergeNeedsResearch re-measures the swept range and keeps the rest', () => {
+  const q = [
+    { teamId: 1, season: 1990 },
+    { teamId: 2, season: 2000 },
+    { teamId: 3, season: 2001 },
+    { teamId: 4, season: 2020 },
+  ]
+  const out = mergeNeedsResearch(q, [{ teamId: 3, season: 2001 }], [{ teamId: 4, season: 2020 }], 2000, 2002)
+  assert.deepEqual(out, [
+    { teamId: 1, season: 1990 },
+    { teamId: 3, season: 2001 },
+  ])
 })

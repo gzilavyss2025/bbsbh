@@ -14,14 +14,29 @@
 // await one promise. Nothing about the shape or the failure behaviour changes —
 // each reader still owns its own `shape` and its own `fallback`.
 //
-// A failure is memoized too, deliberately: the fallback is what the reader
-// wants a caller to see, and re-fetching a missing file on every render of a
-// session where it is unavailable was never the intent (see the "degrades to
-// an empty map so callers see a plain cache miss" note these readers carry).
+// An ANSWER that is a failure is memoized too, deliberately: a 404 or a body that
+// will not parse gets the fallback, and re-fetching a missing file on every render
+// of a session where it is unavailable was never the intent (see the "degrades to
+// an empty map so callers see a plain cache miss" note these readers carry). A
+// request that never got an answer (offline, a dropped connection) is different:
+// the caller gets the fallback, but nothing is stored, so a later call tries again.
 
 // A loader for ONE file. `shape` narrows the parsed JSON to what the reader
 // hands out; `fallback` is what a non-200, a parse failure, or an offline
 // device resolves to.
+// fetch + parse. `res.ok` false or bad JSON rejects with a plain Error (memoized);
+// fetch() itself rejecting is tagged `noAnswer` (not memoized).
+async function fetchJson(url) {
+  let res
+  try {
+    res = await fetch(url)
+  } catch (err) {
+    throw Object.assign(err instanceof Error ? err : new Error(String(err)), { noAnswer: true })
+  }
+  if (!res.ok) throw new Error(`${url} ${res.status}`)
+  return res.json()
+}
+
 export function staticJson(url, { shape = (d) => d, fallback = null } = {}) {
   let has = false
   let value = null
@@ -31,18 +46,19 @@ export function staticJson(url, { shape = (d) => d, fallback = null } = {}) {
     // comebackWins.js) would re-fetch a missing file forever.
     if (has) return value
     if (!inFlight) {
-      inFlight = fetch(url)
-        .then((res) => {
-          if (!res.ok) throw new Error(`${url} ${res.status}`)
-          return res.json()
-        })
+      inFlight = fetchJson(url)
         .then(shape)
-        .catch(() => fallback)
-        .then((data) => {
-          has = true
-          value = data
+        .then(
+          (data) => ({ data, keep: true }),
+          (err) => ({ data: fallback, keep: !err?.noAnswer }),
+        )
+        .then(({ data, keep }) => {
+          if (keep) {
+            has = true
+            value = data
+          }
           inFlight = null
-          return value
+          return data
         })
     }
     return inFlight
@@ -60,15 +76,14 @@ export function staticJsonBy(urlFor, { shape = (d) => d, fallback = null } = {})
     if (!inFlight.has(k)) {
       inFlight.set(
         k,
-        fetch(urlFor(key))
-          .then((res) => {
-            if (!res.ok) throw new Error(`${urlFor(key)} ${res.status}`)
-            return res.json()
-          })
+        fetchJson(urlFor(key))
           .then(shape)
-          .catch(() => fallback)
-          .then((data) => {
-            done.set(k, data)
+          .then(
+            (data) => ({ data, keep: true }),
+            (err) => ({ data: fallback, keep: !err?.noAnswer }),
+          )
+          .then(({ data, keep }) => {
+            if (keep) done.set(k, data)
             inFlight.delete(k)
             return data
           }),

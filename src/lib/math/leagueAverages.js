@@ -7,7 +7,7 @@
 // report earnedRuns 0 beside 1,158 IP, and 1911, 1914, 1915 and 1920-1948 carry
 // only part of them (1925: 4,789 ER of 18,659 R). In a real season earned runs are
 // about 88% of runs, so a total under 70% of runs reads as "not recorded".
-import { ipToOuts } from '../../../src/lib/math/innings.js'
+import { ipToOuts } from './innings.js'
 
 const sum = (splits, key) => (splits ?? []).reduce((n, s) => n + (Number(s.stat?.[key]) || 0), 0)
 const round = (n, places) => Math.round(n * 10 ** places) / 10 ** places

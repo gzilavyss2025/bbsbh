@@ -1,11 +1,11 @@
-// League averages: the pure half (scripts/lib/stats/league-averages.mjs), the reader
+// League averages: the pure half (src/lib/math/leagueAverages.js), the reader
 // (src/api/player/leagueAverages.js) and the file the generator ships.
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { leagueAveragesOf } from '../scripts/lib/stats/league-averages.mjs'
+import { leagueAveragesOf } from '../src/lib/math/leagueAverages.js'
 
 const bat = (hits, atBats) => ({ stat: { hits, atBats } })
 const arm = (earnedRuns, inningsPitched, runs = earnedRuns) => ({ stat: { earnedRuns, inningsPitched, runs } })
