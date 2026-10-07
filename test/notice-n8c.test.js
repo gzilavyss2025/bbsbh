@@ -8,9 +8,8 @@
 //
 //   1. THE SEAL PIN. Measured on origin/main at a75f6edae before the first edit.
 //   2. THE RETIRED CLASS. `pitchernotice` is absent from src, e2e and scripts,
-//      comments too, except the two families that N8a (the headshot well) and
-//      N8b (the event bar parts) still own. Each of those two slices deletes its
-//      line from RENAMED_LATER when it renames its parts.
+//      comments too. N8a (the headshot well) and N8b (the event bar parts) renamed
+//      their parts first; this branch is stacked on both.
 //   3. THE NEW NAMES exist, and no `.change` rule sits beside another one.
 //   4. THE ROOTS and THE CALLERS wear the new names.
 import test from 'node:test'
@@ -84,13 +83,6 @@ function files(dir, exts) {
   return out
 }
 
-// The parts N8a and N8b still own. Everything else the family named is gone, so
-// the strip below leaves no `pitchernotice` anywhere. Delete a line here when
-// its slice renames those parts; the empty list is the end state.
-const RENAMED_LATER = [
-  /pitchernotice__shot[\w-]*/g, // N8a: the headshot well
-  /pitchernotice__(?:code|label|teammark|spacer|mvcount|eventtext|pitchno)[\w-]*/g, // N8b: the event bar parts
-]
 const RETIRED = /pitchernotice/
 
 // Strict, comments too: a comment that names a retired class sends the next
@@ -100,8 +92,7 @@ test('N8c: .pitchernotice is gone from src, e2e and scripts, comments too', () =
   const left = []
   for (const dir of [SRC, join(ROOT, 'e2e'), join(ROOT, 'scripts')]) {
     for (const file of files(dir, ['.css', '.jsx', '.js', '.mjs', '.md', '.json'])) {
-      let text = readFileSync(file, 'utf8')
-      for (const later of RENAMED_LATER) text = text.replace(later, '')
+      const text = readFileSync(file, 'utf8')
       text.split('\n').forEach((line, i) => {
         if (RETIRED.test(line)) left.push(`${relative(ROOT, file)}:${i + 1}: ${line.trim().slice(0, 100)}`)
       })

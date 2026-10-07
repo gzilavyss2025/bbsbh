@@ -57,7 +57,7 @@
     display: block;
     align-self: start;
   }
-  .pbp__batshot .pitchernotice__shot {
+  .pbp__batshot .change__shot {
     width: var(--shot-lg-w);
     height: var(--shot-lg-h);
   }
@@ -412,8 +412,8 @@
 #root .pbp__note .plink,
 #root .pbp__notetext,
 #root .pbp__callout,
-#root .pitchernotice__eventtext,
-#root .pitchernotice__eventtext :is(.plink, b) {
+#root .change__eventtext,
+#root .change__eventtext :is(.plink, b) {
   text-transform: none; /* caps-exempt: play-by-play copy reads as sentences */
 }
 

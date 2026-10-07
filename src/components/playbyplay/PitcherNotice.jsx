@@ -117,14 +117,14 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
 
   if (!url && !underlayUrl) {
     return (
-      <span className="pitchernotice__shot pitchernotice__shot--fallback" aria-hidden="true">
+      <span className="change__shot change__shot--fallback" aria-hidden="true">
         {monogram}
       </span>
     )
   }
   return (
     <span
-      className={`pitchernotice__shot${showLogo ? ' pitchernotice__shot--logo' : ''}`}
+      className={`change__shot${showLogo ? ' change__shot--logo' : ''}`}
       style={showLogo && bg ? { backgroundColor: bg } : undefined}
       aria-hidden="true"
     >

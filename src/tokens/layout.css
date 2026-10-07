@@ -16,7 +16,7 @@
   --space-section: var(--space-4);
 
   /* Headshot size scale. Every headshot in the app (the shared <Headshot>
-     component's .shot.* variants, plus the standalone .pitchernotice__shot)
+     component's .shot.* variants, plus the standalone .change__shot)
      draws its box from one of these six rungs instead of a hand-tuned
      per-card size. All are a 3:4 portrait crop matching the base .shot, so
      swapping a rung only changes scale, never the crop. A single shared CDN
