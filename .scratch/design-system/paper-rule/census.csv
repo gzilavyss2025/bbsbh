@@ -1,0 +1,313 @@
+scope,file,line,selector,property,token,alias_it_could_use,role,proposed_replacement,confidence
+styles,src/styles/01-base.css,171,"body",background-image,--rule-grid,none,"graph-paper grid lines","(new token, see proposal)",ask
+styles,src/styles/01-base.css,172,"body",background-image,--rule-grid,none,"graph-paper grid lines","(new token, see proposal)",ask
+styles,src/styles/04-site-bar.css,370,".wire__rule",background,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/04-site-bar.css,389,".wire__row",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/04a-wire-dock.css,109,".wiredock__grabber",background,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/05-masthead-nav.css,144,".masthead__logobox",background,--paper-1,none,"logo tile ground (no club tint)","--bg-page",ask
+styles,src/styles/05-masthead-nav.css,437,".txntl-expand:hover",color,--paper-2,--text-on-ink,"text or line on a dark band","--text-on-ink",sure
+styles,src/styles/06-loader-and-cards.css,32,".loader__scoreboard",box-shadow,--paper-2,--text-on-ink,"text or line on a dark band","--text-on-ink",likely
+styles,src/styles/06-loader-and-cards.css,38,".loader__league",color,--paper-2,--text-on-ink,"text or line on a dark band","--text-on-ink",sure
+styles,src/styles/06-loader-and-cards.css,57,".loader__colhead, .loader__num, .loader__team, .loader__score, .loader__plate-window, .loader__blank",border-top,--paper-2,--text-on-ink,"text or line on a dark band","--text-on-ink",likely
+styles,src/styles/06-loader-and-cards.css,58,".loader__colhead, .loader__num, .loader__team, .loader__score, .loader__plate-window, .loader__blank",border-right,--paper-2,--text-on-ink,"text or line on a dark band","--text-on-ink",likely
+styles,src/styles/06-loader-and-cards.css,71,".loader__colhead",color,--paper-2,--text-on-ink,"text or line on a dark band","--text-on-ink",sure
+styles,src/styles/06-loader-and-cards.css,325,".gamecard__box",background,--paper-1,none,"chip, badge or small fill darker than its card","--bg-page",likely
+styles,src/styles/06-loader-and-cards.css,478,".gamecard__pinbadge",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/06-loader-and-cards.css,715,".gamecard__logobox",background,--paper-1,none,"logo tile ground (no club tint)","--bg-page",ask
+styles,src/styles/06a-gamecard-parkart.css,177,".gamecard--parkinview .gamecard__atmark-ghost",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/06a-gamecard-parkart.css,320,".gamecard__sheen::before",background,--paper-3,--surface-inset,"bright inset inside a tint or gradient","--surface-inset",likely
+styles,src/styles/06b-offday-cards.css,51,".offday__logobox",background,--paper-1,none,"logo tile ground (no club tint)","--bg-page",ask
+styles,src/styles/07-team-logo-and-buttons.css,73,".teamlogo--fallback",background,--paper-1,none,"chip, badge or small fill darker than its card","--bg-page",likely
+styles,src/styles/07-team-logo-and-buttons.css,118,".gamecard__level",background,--paper-1,none,"chip, badge or small fill darker than its card","--bg-page",likely
+styles,src/styles/07-team-logo-and-buttons.css,132,".gamecard__dh",background,--paper-1,none,"chip, badge or small fill darker than its card","--bg-page",likely
+styles,src/styles/07-team-logo-and-buttons.css,375,".pip rect",fill,--paper-1,none,"chip, badge or small fill darker than its card","--bg-page",likely
+styles,src/styles/07-team-logo-and-buttons.css,376,".pip rect",stroke,--rule,--border-rule,"faint mark or text (alias names a border)","--border-rule",likely
+styles,src/styles/07-team-logo-and-buttons.css,382,".pip__tick",stroke,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/08-site-shell.css,409,".searchoverlay__progress",background,--rule-grid,none,"meter or bar track","(new token, see proposal)",ask
+styles,src/styles/12-sealbox.css,143,".abs__rows",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/12-sealbox.css,183,".abs__rowbtn:not(:disabled):hover",background,--paper-1,none,"hover wash on a row or button","--bg-page",likely
+styles,src/styles/12-sealbox.css,245,".abs__detail",background,--paper-1,none,"open row or drawer ground","--bg-page",likely
+styles,src/styles/12-sealbox.css,345,".wcall",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/12-sealbox.css,524,".favormeter",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/12-sealbox.css,538,".favormeter--standout",background,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/12-sealbox.css,542,".favormeter--outlier",background,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/12-sealbox.css,774,".halfcast",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/12-sealbox.css,1401,".entering__row--ondeck",background,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/12-sealbox.css,1610,".stat",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/13-play-by-play.css,72,".pbp__card",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/13-play-by-play.css,335,".pbp__laddercol--ball",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/13-play-by-play.css,342,".pbp__laddercol--strike",background,--paper-3,--surface-inset,"bright inset inside a tint or gradient","--surface-inset",likely
+styles,src/styles/14-strike-zone.css,71,".strikezone__num",fill,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/14-strike-zone.css,126,".pitchlist__row--decisive > .pitchlist__type, .pitchlist__row--decisive > .pitchlist__meta, .pitchlist__row--decisive > .pitchlist__challenge, .pitchlist__row--decisive > span:empty",background,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/14-strike-zone.css,142,".pitchlist__num",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/14-strike-zone.css,175,".pitchlist__challenge",background,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/15-team-color-lab.css,64,".milbneutrals__row:hover",background,--paper-1,none,"hover wash on a row or button","--bg-page",likely
+styles,src/styles/15-team-color-lab.css,137,".colorlab__logobox",background,--paper-1,none,"logo tile ground (no club tint)","--bg-page",ask
+styles,src/styles/15-team-color-lab.css,386,".colorlab__swatchcell--active .colorlab__swatchchip",box-shadow,--paper-1,none,"gap in a selection ring","--bg-page",ask
+styles,src/styles/15-team-color-lab.css,394,".colorlab__swatchcell--wpaselected .colorlab__swatchchip",box-shadow,--paper-1,none,"gap in a selection ring","--bg-page",ask
+styles,src/styles/15-team-color-lab.css,504,".colorlab__wpapreview, .idlab__section",background,--paper-1,none,"preview well or panel ground","--bg-page",likely
+styles,src/styles/16-identity-lab-shell.css,53,".idlab__infobtn:hover",background,--paper-1,none,"hover wash on a row or button","--bg-page",likely
+styles,src/styles/16-identity-lab-shell.css,140,".idlab__railitem:hover",background,--paper-1,none,"hover wash on a row or button","--bg-page",likely
+styles,src/styles/16-identity-lab-shell.css,152,".idlab__railitem--on",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/16-identity-lab-shell.css,179,".idlab__dot",border,--paper-0,--bg-canvas,"ring gap on a dot (page ground)","--bg-canvas",likely
+styles,src/styles/16-identity-lab-shell.css,194,".idlab__dugout",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/16-identity-lab-shell.css,248,".idlab__stylecard",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/16-identity-lab-shell.css,370,".idlab__stamp",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/17-identity-lab-workbench.css,322,".idlab__recolorsource",background,--paper-1,none,"preview well or panel ground","--bg-page",likely
+styles,src/styles/17-identity-lab-workbench.css,354,".idlab__recolorpreview",border,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/17-identity-lab-workbench.css,356,".idlab__recolorpreview",background,--paper-1,none,"preview well or panel ground","--bg-page",likely
+styles,src/styles/17-identity-lab-workbench.css,401,".idlab__wpaartthumb",background-color,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/17-identity-lab-workbench.css,403,".idlab__wpaartthumb",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,404,".idlab__wpaartthumb",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,405,".idlab__wpaartthumb",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,406,".idlab__wpaartthumb",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,431,".idlab__recolorswatch",border,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/17-identity-lab-workbench.css,449,".idlab__recolorswatch--none, .idlab__monoinkswatch.idlab__recolorswatch--none",background-color,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/17-identity-lab-workbench.css,451,".idlab__recolorswatch--none, .idlab__monoinkswatch.idlab__recolorswatch--none",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,452,".idlab__recolorswatch--none, .idlab__monoinkswatch.idlab__recolorswatch--none",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,453,".idlab__recolorswatch--none, .idlab__monoinkswatch.idlab__recolorswatch--none",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,454,".idlab__recolorswatch--none, .idlab__monoinkswatch.idlab__recolorswatch--none",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,463,".idlab__recolorpreview",background-color,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/17-identity-lab-workbench.css,465,".idlab__recolorpreview",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,466,".idlab__recolorpreview",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,467,".idlab__recolorpreview",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,468,".idlab__recolorpreview",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,496,".idlab__monoinkart",border,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/17-identity-lab-workbench.css,498,".idlab__monoinkart",background,--paper-1,none,"preview well or panel ground","--bg-page",likely
+styles,src/styles/17-identity-lab-workbench.css,543,".idlab__monoinkempty",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/17-identity-lab-workbench.css,637,".idlab__monoinkswatch",border,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/17-identity-lab-workbench.css,649,".idlab__barmock--unset",border,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/17-identity-lab-workbench.css,658,".idlab__barmock__title",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/17-identity-lab-workbench.css,694,".idlab__wearerstring",background,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/17-identity-lab-workbench.css,800,".idlab__shelfthumb",background-color,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/17-identity-lab-workbench.css,802,".idlab__shelfthumb",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,803,".idlab__shelfthumb",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,804,".idlab__shelfthumb",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,805,".idlab__shelfthumb",background-image,--paper-1,none,"transparency checkerboard","(own token? see proposal)",ask
+styles,src/styles/17-identity-lab-workbench.css,836,".idlab__shelfitem--worn .idlab__shelfthumb",box-shadow,--paper-1,none,"gap in a selection ring","--bg-page",ask
+styles,src/styles/17-identity-lab-workbench.css,877,".idlab__rack::before",background,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/17-identity-lab-workbench.css,942,".idlab__chiptick--unset",border-top,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/17-identity-lab-workbench.css,954,".idlab__chiphole",background,--paper-0,--bg-canvas,"ground of a hole in a chip","--bg-canvas",likely
+styles,src/styles/17-identity-lab-workbench.css,955,".idlab__chiphole",border,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/17-identity-lab-workbench.css,1115,".idlab__stub",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/17-identity-lab-workbench.css,1162,".idlab__glove",border,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/18-uniforms-and-jerseys.css,134,".audittable__via--override",background,--paper-1,none,"chip, badge or small fill darker than its card","--bg-page",likely
+styles,src/styles/20-charts.css,144,".marginnotes__card",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/21-box-score.css,685,".bs__potgWatch--poster",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/21a-box-score-stars.css,138,".stars3__card",border-top,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/21b-box-score-tally.css,123,".bs__tallyLogobox",background,--paper-2,--surface-card,"small dot or logo tile on card paper","--surface-card",likely
+styles,src/styles/22-box-score-tables.css,394,".skel__bar, .skel__circle",background,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/22-box-score-tables.css,552,".skel__ballBody circle",stroke,--rule,--border-rule,"faint mark or text (alias names a border)","--border-rule",likely
+styles,src/styles/22-box-score-tables.css,556,".skel__ballShadeLight",stop-color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/22-box-score-tables.css,559,".skel__ballShadeDark",stop-color,--rule-soft,--border-hairline,"faint mark or text (alias names a border)","--border-hairline",likely
+styles,src/styles/23-box-score-detail.css,558,".bs__boardLogobox",background,--paper-1,none,"logo tile ground (no club tint)","--bg-page",ask
+styles,src/styles/23-box-score-detail.css,631,".bs__grid--board .bs__boardFinal",background,--paper-1,none,"chip, badge or small fill darker than its card","--bg-page",likely
+styles,src/styles/24-floating-nav-and-hud.css,142,".gamehud",color,--paper-2,--text-on-ink,"text or line on a dark band","--text-on-ink",sure
+styles,src/styles/24-floating-nav-and-hud.css,191,".gamehud__row--batter .gamehud__who",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/24-floating-nav-and-hud.css,195,".gamehud__row--pitcher .gamehud__who",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/24-floating-nav-and-hud.css,209,".gamehud__row--batter .gamehud__val",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/24-floating-nav-and-hud.css,214,".gamehud__row--pitcher .gamehud__val",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/24-floating-nav-and-hud.css,218,".gamehud__lbl",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/24-floating-nav-and-hud.css,398,".gamehud__runs",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/24-floating-nav-and-hud.css,438,".gamehud__tri--up",border-bottom,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/24-floating-nav-and-hud.css,442,".gamehud__tri--down",border-top,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/24-floating-nav-and-hud.css,454,".gamehud__innnum",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/25-wide-layout.css,39,".topbar--slate",background-image,--rule-grid,none,"graph-paper grid lines","(new token, see proposal)",ask
+styles,src/styles/25-wide-layout.css,40,".topbar--slate",background-image,--rule-grid,none,"graph-paper grid lines","(new token, see proposal)",ask
+styles,src/styles/25-wide-layout.css,184,".wirerail__head",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/25-wide-layout.css,497,".pbp__zonecell",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/26a-percentile-strip.css,161,".pctstrip__track::after",background,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/26b-player-contract.css,14,".contractcard__frame",background,--rule,--border-rule,"rule inside a gradient","--border-rule",likely
+styles,src/styles/26b-player-contract.css,15,".contractcard__frame",background,--paper-3,--surface-inset,"bright inset inside a tint or gradient","--surface-inset",likely
+styles,src/styles/26b-player-contract.css,15,".contractcard__frame",background,--paper-2,--surface-card,"card frame gradient stop","--surface-card",likely
+styles,src/styles/26b-player-contract.css,15,".contractcard__frame",background,--paper-1,none,"card frame gradient stop","--bg-page",ask
+styles,src/styles/26b-player-contract.css,26,".contractcard__frame::before",background,--paper-3,--surface-inset,"bright inset inside a tint or gradient","--surface-inset",likely
+styles,src/styles/26b-player-contract.css,139,".contractcard__ticker > div",background,--paper-3,--surface-inset,"bright inset inside a tint or gradient","--surface-inset",likely
+styles,src/styles/26b-player-contract.css,139,".contractcard__ticker > div",background,--paper-2,--surface-card,"blend of card and inset","--surface-card",ask
+styles,src/styles/26b-player-contract.css,209,".contractcard__control li::before",border,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/26b-player-contract.css,281,".contractcard__seg::before",border,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/26b-player-contract.css,425,".contractcard__tag",background,--rule,--border-rule,"rule inside a gradient","--border-rule",likely
+styles,src/styles/26e-contract-history.css,102,".cthist__row + .cthist__row",border-top,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/27-player-position-innings.css,552,".asof-banner",background,--paper-1,none,"chip, badge or small fill darker than its card","--bg-page",likely
+styles,src/styles/27-player-position-innings.css,553,".asof-banner",border,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/27-player-position-innings.css,616,".asof-banner__input",border,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/28-team-hub.css,59,".jerseydeck__card",background,--paper-1,none,"logo tile ground (no club tint)","--bg-page",ask
+styles,src/styles/28-team-hub.css,291,".team-score__row--driver",border,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/28-team-hub.css,330,".team-score__meter",background,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/28-team-hub.css,343,".team-score__row--compact",border-top,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/28-team-hub.css,344,".team-score__row--compact",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/28-team-hub.css,446,".team-score__track-base",background,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/28-team-hub.css,454,".team-score__track-mid",background,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/28-team-hub.css,710,".rankstrip__nav",border,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/28-team-hub.css,778,".team-score__detail",border-top,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/28-team-hub.css,779,".team-score__detail",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/29-team-transactions.css,134,".txday",border-right,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/29-team-transactions.css,160,".txday__count",border-top,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/29-team-transactions.css,746,".sstrip__cell",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/31-wild-card.css,139,".tstatrow--today",background,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/31d-prospect-card.css,144,".prospectcard__track::after",background,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/31d-prospect-card.css,394,".prankhist__row + .prankhist__row",border-top,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/31d-prospect-card.css,502,".famband__row + .famband__row",border-top,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/32-milestone-watch.css,64,".milestonewatch-page__pos",color,--paper-0,--bg-canvas,"text on a dark badge (paper-0 differs from --text-on-ink)","--text-on-ink would move the colour; keep a canvas name?",ask
+styles,src/styles/34-postseason.css,275,".pswscard__pos",color,--paper-0,--bg-canvas,"text on a dark badge (paper-0 differs from --text-on-ink)","--text-on-ink would move the colour; keep a canvas name?",ask
+styles,src/styles/34-postseason.css,334,".psstack__roundlabel::after",background,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/38-umpire-pages.css,279,".umprank__row--today td",background,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/39-manager-page.css,303,".bpdiagram__foul",fill,--rule-soft,--border-hairline,"faint mark or text (alias names a border)","--border-hairline",likely
+styles,src/styles/39-manager-page.css,311,".bpdiagram__track",fill,--rule,--border-rule,"faint mark or text (alias names a border)","--border-rule",likely
+styles,src/styles/39-manager-page.css,316,".bpdiagram__dirt",fill,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/39-manager-page.css,321,".bpdiagram__baseline",stroke,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/39-manager-page.css,327,".bpdiagram__line",stroke,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/40-game-modals.css,76,".tscoremodal__figs",border-top,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/40-game-modals.css,77,".tscoremodal__figs",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/42-first-scorebook.css,37,".scorebookstory__cover",background,--rule-grid,none,"graph-paper grid lines","(new token, see proposal)",ask
+styles,src/styles/42-first-scorebook.css,132,".scorebookstory__tally span",color,--rule-soft,--border-hairline,"faint mark or text (alias names a border)","--border-hairline",likely
+styles,src/styles/42-first-scorebook.css,338,".scorebookstory__momentsSection .scorebookstory__sectionhead p",color,--rule-soft,--border-hairline,"faint mark or text (alias names a border)","--border-hairline",likely
+styles,src/styles/42-first-scorebook.css,361,".scorebookstory__moment > strong",color,--rule-soft,--border-hairline,"faint mark or text (alias names a border)","--border-hairline",likely
+styles,src/styles/42-first-scorebook.css,712,".allstarlegacy__honoreepos",color,--paper-0,--bg-canvas,"text on a dark badge (paper-0 differs from --text-on-ink)","--text-on-ink would move the colour; keep a canvas name?",ask
+styles,src/styles/43-foul-tracker.css,164,".foulboard tr.foulboard__row--outlier td",background,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/43-foul-tracker.css,478,".scorebug__outdot",background,--paper-2,--surface-card,"small dot or logo tile on card paper","--surface-card",likely
+styles,src/styles/43-foul-tracker.css,479,".scorebug__outdot",border,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/45-admin-copy-editor.css,398,".awardord__row",border-top,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/48c-stamp-sheet.css,211,".postagestamp__frame",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/48c-stamp-sheet.css,302,".postagestamp__mark",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/48d-stamp-detail.css,121,".stampdetail__frame",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/48d-stamp-detail.css,163,".stampdetail__mark",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/50-logbook-landing.css,173,".logbooklanding__page",background-image,--rule-grid,none,"graph-paper grid lines","(new token, see proposal)",ask
+styles,src/styles/50-logbook-landing.css,174,".logbooklanding__page",background-image,--rule-grid,none,"graph-paper grid lines","(new token, see proposal)",ask
+styles,src/styles/53-umpire-tendencies.css,30,".umptend__season",color,--rule,--border-rule,"faint mark or text (alias names a border)","--border-rule",likely
+styles,src/styles/53-umpire-tendencies.css,122,".umptend__ramp",background,--rule,--border-rule,"rule inside a gradient","--border-rule",likely
+styles,src/styles/53-umpire-tendencies.css,156,".umptend__row + .umptend__row",box-shadow,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/53-umpire-tendencies.css,199,".umptend__watchlbl",color,--rule,--border-rule,"faint mark or text (alias names a border)","--border-rule",likely
+styles,src/styles/53-umpire-tendencies.css,211,".umptend__watchtxt--none",color,--rule,--border-rule,"faint mark or text (alias names a border)","--border-rule",likely
+styles,src/styles/59-stamp-in.css,42,".stampin__row",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/62-identity-admin.css,143,".iddrawer__tilemark",background,--paper-1,none,"logo tile ground (no club tint)","--bg-page",ask
+styles,src/styles/62-identity-admin.css,380,".iddrawer__logomark",background,--paper-1,none,"logo tile ground (no club tint)","--bg-page",ask
+styles,src/styles/62-identity-admin.css,486,".idlab__barmock__title",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/63-print-sheet.css,109,".printsheet",--ps-faint,--rule-grid,none,"print-sheet faint line","(new token, see proposal)",ask
+styles,src/styles/65-about-page.css,77,".abouthero__kicker",color,--rule-soft,--border-hairline,"faint mark or text (alias names a border)","--border-hairline",likely
+styles,src/styles/65-about-page.css,119,".abouthero__lede",color,--paper-1,none,"text on a dark band (paper-1 differs from --text-on-ink)","(ask)",ask
+styles,src/styles/65-about-page.css,235,".aboutstory__n",color,--rule-soft,--border-hairline,"faint mark or text (alias names a border)","--border-hairline",likely
+styles,src/styles/65-team-records.css,40,".trec__half.is-on",background,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/66-situational-records.css,272,".trrank__tilemark",background,--paper-1,none,"logo tile ground (no club tint)","--bg-page",ask
+styles,src/styles/67-awards-ledger.css,238,".awardidx__row",border-bottom,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/67-awards-ledger.css,301,".awards__expand:hover",color,--paper-2,--text-on-ink,"text or line on a dark band","--text-on-ink",sure
+styles,src/styles/68-around-the-game.css,65,".bcast__note",color,--paper-2,--text-on-ink,"text or line on a dark band","--text-on-ink",sure
+styles,src/styles/68-around-the-game.css,76,".bcast__strand",color,--paper-2,--text-on-ink,"text or line on a dark band","--text-on-ink",sure
+styles,src/styles/68-around-the-game.css,91,".bcast__title",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/68-around-the-game.css,100,".bcast__dek",color,--paper-2,--text-on-ink,"text or line on a dark band","--text-on-ink",sure
+styles,src/styles/68-around-the-game.css,131,".bcast__meta dt",color,--paper-2,--text-on-ink,"text or line on a dark band","--text-on-ink",sure
+styles,src/styles/68-around-the-game.css,140,".bcast__meta dd",color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/68-around-the-game.css,244,".barcell",background,--rule-grid,none,"meter or bar track","(new token, see proposal)",ask
+styles,src/styles/68-around-the-game.css,319,".rpt__between",--table-pin,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/68-around-the-game.css,326,".rpt__between th, .rpt__between td",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/68-around-the-game.css,344,".trendstrip__col",background,--rule-grid,none,"meter or bar track","(new token, see proposal)",ask
+styles,src/styles/68-around-the-game.css,369,".statusmeter",background,--rule-grid,none,"meter or bar track","(new token, see proposal)",ask
+styles,src/styles/68-around-the-game.css,496,".rpt__row--mine",--table-pin,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/68-around-the-game.css,497,".rpt__row--mine",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/68-around-the-game.css,504,".rpt__row--mine td.team, .rpt__row--mine th.team",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/68-around-the-game.css,581,".pillars",background,--rule-grid,none,"meter or bar track","(new token, see proposal)",ask
+styles,src/styles/68-around-the-game.css,665,".method",background,--paper-1,none,"chip, badge or small fill darker than its card","--bg-page",likely
+styles,src/styles/68-around-the-game.css,788,".yrange__track::before",background,--rule-grid,none,"meter or bar track","(new token, see proposal)",ask
+styles,src/styles/68-around-the-game.css,819,".yrange__input::-webkit-slider-thumb",background,--paper-1,none,"slider thumb fill","--bg-page",ask
+styles,src/styles/68-around-the-game.css,830,".yrange__input::-moz-range-thumb",background,--paper-1,none,"slider thumb fill","--bg-page",ask
+styles,src/styles/68-around-the-game.css,953,".dh__row:hover",--table-pin,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/68-around-the-game.css,957,".dh__row:hover td",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/68-around-the-game.css,961,".dh__row--open",--table-pin,--paper-1,none,"open row or drawer ground","--bg-page",likely
+styles,src/styles/68-around-the-game.css,965,".dh__row--open td",background,--paper-1,none,"open row or drawer ground","--bg-page",likely
+styles,src/styles/68-around-the-game.css,971,".dh__row.rpt__row--mine:hover, .dh__row--open.rpt__row--mine",--table-pin,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/68-around-the-game.css,976,".dh__row.rpt__row--mine:hover td, .dh__row--open.rpt__row--mine td",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/68-around-the-game.css,1024,".dh__drawerrow",--table-pin,--paper-1,none,"open row or drawer ground","--bg-page",likely
+styles,src/styles/68-around-the-game.css,1029,".dh__drawerrow > td",background,--paper-1,none,"open row or drawer ground","--bg-page",likely
+styles,src/styles/69-hit-chart.css,248,".hitchart__hit",stroke,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/69-hit-chart.css,260,".hitchart__hr",stroke,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/69-hit-chart.css,780,".bflight__hit",stroke,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/69-hit-chart.css,792,".bflight__hr",stroke,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/70-contracts-grid.css,110,".cliff__bar",background,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/70-contracts-grid.css,267,".ctr__cell--free, .ctr__cell--none",background-image,--rule-soft,--border-hairline,"rule inside a gradient","--border-hairline",likely
+styles,src/styles/70-contracts-grid.css,268,".ctr__cell--free, .ctr__cell--none",background-image,--rule-soft,--border-hairline,"rule inside a gradient","--border-hairline",likely
+styles,src/styles/70-contracts-grid.css,365,".ctr__swatch--free",background-image,--rule-soft,--border-hairline,"rule inside a gradient","--border-hairline",likely
+styles,src/styles/70-contracts-grid.css,366,".ctr__swatch--free",background-image,--rule-soft,--border-hairline,"rule inside a gradient","--border-hairline",likely
+styles,src/styles/71-salaries-league.css,87,".payboard__rank",color,--rule,--border-rule,"faint mark or text (alias names a border)","--border-rule",likely
+styles,src/styles/72-club-transactions.css,38,".txpage__rule",background,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/72-player-hover-card.css,42,".phcard__spine",background,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/77c-express-lane-deck.css,66,".xl-deck__paper",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/77c-express-lane-deck.css,67,".xl-deck__paper",border,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/78-offseason.css,40,".oseason__head",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/78-offseason.css,122,".wintercal",border-top,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/78-offseason.css,144,".wintercal__item",border-left,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/78-offseason.css,389,".pgame__dot",color,--rule,--border-rule,"faint mark or text (alias names a border)","--border-rule",likely
+styles,src/styles/79-nine-keys.css,40,".ninekeys__count",color,--paper-0,--bg-canvas,"text on a dark badge (paper-0 differs from --text-on-ink)","--text-on-ink would move the colour; keep a canvas name?",ask
+styles,src/styles/79-nine-keys.css,68,".ninekeys__keys",border-top,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/79-nine-keys.css,73,".ninekeys__key",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/79-nine-keys.css,123,".ninekeys__club",border-right,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/79-nine-keys.css,197,".ninekeys__tally",border-left,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/79-nine-keys.css,262,".ninekeys__swatch",border,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/79-nine-keys.css,291,".ninekeys__row",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/79-nine-keys.css,333,".ninekeys__rung",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/79-nine-keys.css,343,".ninekeys__rungbar",background,--rule-grid,none,"meter or bar track","(new token, see proposal)",ask
+styles,src/styles/79-nine-keys.css,370,".ninekeys__method",border-top,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/boxlines/gamelines.css,248,".gamelines__rows .gamelines__door:hover",background,--rule-grid,none,"hover or press wash","(new token, see proposal)",ask
+styles,src/styles/boxlines/gamelines.css,256,".gamelines__fam:hover",background,--rule-grid,none,"hover or press wash","(new token, see proposal)",ask
+styles,src/styles/boxlines/gamelines.css,267,".gamelines__rows .gamelines__door:active, .gamelines__fam:active",background,--rule-grid,none,"hover or press wash","(new token, see proposal)",ask
+styles,src/styles/boxlines/listdoor.css,148,".boxlines__list .boxlines-entry:hover",background,--rule-grid,none,"hover or press wash","(new token, see proposal)",ask
+styles,src/styles/boxlines/listdoor.css,158,".boxlines__list .boxlines-entry:active",background,--rule-grid,none,"hover or press wash","(new token, see proposal)",ask
+styles,src/styles/designlab/lab.css,294,".dlab__typerow",border-bottom,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/designlab/lab.css,374,".dlab__pair",border-bottom,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/designlab/lab.css,473,".dlab__matrix th, .dlab__matrix td",border-bottom,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/focus/atbat.css,225,".ballglyph circle",stroke,--rule,--border-rule,"faint mark or text (alias names a border)","--border-rule",likely
+styles,src/styles/focus/atbat.css,230,".ballglyph__shadelight",stop-color,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+styles,src/styles/focus/atbat.css,234,".ballglyph__shadedark",stop-color,--rule-soft,--border-hairline,"faint mark or text (alias names a border)","--border-hairline",likely
+styles,src/styles/pitcher-card/card.css,99,".pscene",background,--rule-grid,none,"scene fill (pitcher scene)","(new token, see proposal)",ask
+styles,src/styles/pitcher-card/card.css,108,".pscene__sky",fill,--rule-grid,none,"scene fill (pitcher scene)","(new token, see proposal)",ask
+styles,src/styles/postseason/home.css,38,".bracketrail__head",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/postseason/home.css,158,".psboard__slot",background,--paper-2,--surface-card,"card surface","--surface-card",sure
+styles,src/styles/postseason/home.css,163,".psboard__slot:hover",background,--paper-3,--surface-inset,"inset surface (brightest paper)","--surface-inset",sure
+styles,src/styles/postseason/home.css,196,".psboard__slot--out",background,--rule,--border-rule,"table or card rule","--border-rule",sure
+styles,src/styles/postseason/home.css,199,".psboard__slot--out:hover",background,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/report/challenge-card.css,86,".chal__view.is-on",background,--paper-2,--surface-card,"card tinted by a state colour","--surface-card",likely
+styles,src/styles/report/charts.css,77,".colchart__tick",border-top,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/scorecard/box.css,330,".sc-ab__type, .sc-ab__rbi",border,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/scorecard/box.css,450,".sc-ab__balls, .sc-ab__strike",border-left,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/scorecard/footer.css,104,".sc-scoreboard th, .sc-scoreboard td",border,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/scorecard/grid.css,93,".sc-sheet th, .sc-sheet td",border-right,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/scorecard/grid.css,94,".sc-sheet th, .sc-sheet td",border-bottom,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/scorecard/grid.css,270,".sc-sheet__inning-h--start, .sc-sheet__cell--start",border-left,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/scorecard/grid.css,286,".sc-sheet__totals td",border-top,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/scorecard/lens-carry.css,76,".sc-carry__box",outline,--rule-grid,none,"faint row or cell separator","(new token, see proposal)",ask
+styles,src/styles/system/section-head.css,96,".sectionhead--label",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+styles,src/styles/system/section-head.css,168,".sectionhead--club",border-bottom,--rule-soft,--border-hairline,"hairline rule","--border-hairline",sure
+outside-css,src/tokens/effects.css,142,".paper-grid",background-image,--rule-grid,none,"graph-paper grid lines","(new token, see proposal)",ask
+outside-css,src/tokens/effects.css,143,".paper-grid",background-image,--rule-grid,none,"graph-paper grid lines","(new token, see proposal)",ask
+outside-learn,public/learn.css,103,"body",background,--paper-0,none in learn.css,"ground of a hole in a chip","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,112,"body",background-image,--rule-soft,none in learn.css,"rule inside a gradient","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,113,"body",background-image,--rule-soft,none in learn.css,"rule inside a gradient","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,165,".masthead",border-bottom,--rule-soft,none in learn.css,"hairline rule","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,286,".tablewrap",border,--rule,none in learn.css,"table or card rule","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,287,".tablewrap",background,--paper-2,none in learn.css,"card surface","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,303,"th, td",border-bottom,--rule-soft,none in learn.css,"hairline rule","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,311,"thead th",background,--paper-1,none in learn.css,"chip, badge or small fill darker than its card","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,312,"thead th",border-bottom,--rule,none in learn.css,"table or card rule","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,339,".cta",background,--paper-3,none in learn.css,"inset surface (brightest paper)","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,364,".cta__go a",color,--paper-3,none in learn.css,"bright mark or text on a dark fill (alias names a surface)","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,376,".cta__go a:hover",color,--paper-3,none in learn.css,"bright mark or text on a dark fill (alias names a surface)","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,391,".related, .sources",border-top,--rule,none in learn.css,"table or card rule","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,431,".index-group__badge",color,--paper-2,none in learn.css,"text or line on a dark band","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,475,".index li",border-bottom,--rule-soft,none in learn.css,"hairline rule","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,514,".basics__list li",border-bottom,--rule-soft,none in learn.css,"hairline rule","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,560,".basics__rail a",border-bottom,--rule-soft,none in learn.css,"hairline rule","(exempt or copy alias tier — see proposal)",ask
+outside-learn,public/learn.css,587,".footer",border-top,--rule,none in learn.css,"table or card rule","(exempt or copy alias tier — see proposal)",ask
+outside-jsx,src/components/scoring/BaseoutDiamond.jsx,28,"BaseoutDiamond (off base)",fill,--paper-2,--surface-card,"card surface","--surface-card",sure
+outside-jsx,src/components/scoring/BaseoutDiamond.jsx,29,"BaseoutDiamond (off base)",stroke,--rule,--border-rule,"faint mark or text (alias names a border)","--border-rule",likely
+outside-jsx,src/components/scoring/BaseoutDiamond.jsx,38,"BaseoutDiamond",stroke,--rule,--border-rule,"faint mark or text (alias names a border)","--border-rule",likely
+outside-jsx,src/components/scoring/PlayDiamond.jsx,137,"PlayDiamond",stroke,--rule,--border-rule,"faint mark or text (alias names a border)","--border-rule",likely
+outside-jsx,src/components/scoring/PlayDiamond.jsx,176,"PlayDiamond (scored)",stroke,--paper-2,--surface-card,"card surface","--surface-card",sure
+outside-jsx,src/components/scoring/BaseState.jsx,30,"BaseState (filled)",fill,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+outside-jsx,src/components/scoring/BaseState.jsx,31,"BaseState",stroke,--paper-3,--surface-inset,"bright mark or text on a dark fill (alias names a surface)","--surface-inset",likely
+outside-jsx,src/components/page-turn/PageCurlOverlay.jsx,63,"PageCurlOverlay backside",fill,--paper-1,none,"back of a turning page","--bg-page",ask
+outside-exempt,src/lib/preview/posterPaper.js,39,"TOKEN_OF map (runtime :root read)",getPropertyValue,--paper-0,none,"runtime read of the primitive tier (alias would return the string ""var(...)"")","(keep; exempt from the rule)",sure
+outside-exempt,src/lib/preview/posterPaper.js,40,"TOKEN_OF map (runtime :root read)",getPropertyValue,--paper-1,none,"runtime read of the primitive tier (alias would return the string ""var(...)"")","(keep; exempt from the rule)",sure
+outside-exempt,src/lib/preview/posterPaper.js,41,"TOKEN_OF map (runtime :root read)",getPropertyValue,--paper-2,none,"runtime read of the primitive tier (alias would return the string ""var(...)"")","(keep; exempt from the rule)",sure
+outside-exempt,src/lib/preview/posterPaper.js,42,"TOKEN_OF map (runtime :root read)",getPropertyValue,--paper-3,none,"runtime read of the primitive tier (alias would return the string ""var(...)"")","(keep; exempt from the rule)",sure
+outside-exempt,src/lib/preview/posterPaper.js,48,"TOKEN_OF map (runtime :root read)",getPropertyValue,--rule,none,"runtime read of the primitive tier (alias would return the string ""var(...)"")","(keep; exempt from the rule)",sure
+outside-exempt,src/lib/preview/posterPaper.js,49,"TOKEN_OF map (runtime :root read)",getPropertyValue,--rule-soft,none,"runtime read of the primitive tier (alias would return the string ""var(...)"")","(keep; exempt from the rule)",sure
+outside-exempt,src/lib/preview/posterPaper.js,50,"TOKEN_OF map (runtime :root read)",getPropertyValue,--rule-grid,none,"runtime read of the primitive tier (alias would return the string ""var(...)"")","(keep; exempt from the rule)",sure

@@ -1,0 +1,2218 @@
+[
+ {
+  "file": "src/styles/01-base.css",
+  "line": 171,
+  "selector": "body",
+  "property": "background-image",
+  "token": "--rule-grid",
+  "value": "background-image: radial-gradient( 120% 60% at 50% -10%, rgba(255, 253, 246, 0.7), transparent 60% ), linear-gradient(var(--rule-grid) 1px, transparent 1px), linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px)"
+ },
+ {
+  "file": "src/styles/01-base.css",
+  "line": 172,
+  "selector": "body",
+  "property": "background-image",
+  "token": "--rule-grid",
+  "value": "background-image: radial-gradient( 120% 60% at 50% -10%, rgba(255, 253, 246, 0.7), transparent 60% ), linear-gradient(var(--rule-grid) 1px, transparent 1px), linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px)"
+ },
+ {
+  "file": "src/styles/04-site-bar.css",
+  "line": 370,
+  "selector": ".wire__rule",
+  "property": "background",
+  "token": "--rule-soft",
+  "value": "background: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/04-site-bar.css",
+  "line": 389,
+  "selector": ".wire__row",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/04a-wire-dock.css",
+  "line": 109,
+  "selector": ".wiredock__grabber",
+  "property": "background",
+  "token": "--rule-soft",
+  "value": "background: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/05-masthead-nav.css",
+  "line": 144,
+  "selector": ".masthead__logobox",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--tint, var(--paper-1))"
+ },
+ {
+  "file": "src/styles/05-masthead-nav.css",
+  "line": 437,
+  "selector": ".txntl-expand:hover",
+  "property": "color",
+  "token": "--paper-2",
+  "value": "color: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 32,
+  "selector": ".loader__scoreboard",
+  "property": "box-shadow",
+  "token": "--paper-2",
+  "value": "box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--paper-2) 28%, transparent)"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 38,
+  "selector": ".loader__league",
+  "property": "color",
+  "token": "--paper-2",
+  "value": "color: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 57,
+  "selector": ".loader__colhead, .loader__num, .loader__team, .loader__score, .loader__plate-window, .loader__blank",
+  "property": "border-top",
+  "token": "--paper-2",
+  "value": "border-top: 1px solid color-mix(in srgb, var(--paper-2) 74%, transparent)"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 58,
+  "selector": ".loader__colhead, .loader__num, .loader__team, .loader__score, .loader__plate-window, .loader__blank",
+  "property": "border-right",
+  "token": "--paper-2",
+  "value": "border-right: 1px solid color-mix(in srgb, var(--paper-2) 74%, transparent)"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 71,
+  "selector": ".loader__colhead",
+  "property": "color",
+  "token": "--paper-2",
+  "value": "color: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 325,
+  "selector": ".gamecard__box",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 478,
+  "selector": ".gamecard__pinbadge",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/06-loader-and-cards.css",
+  "line": 715,
+  "selector": ".gamecard__logobox",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--tint, var(--paper-1))"
+ },
+ {
+  "file": "src/styles/06a-gamecard-parkart.css",
+  "line": 177,
+  "selector": ".gamecard--parkinview .gamecard__atmark-ghost",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/06a-gamecard-parkart.css",
+  "line": 320,
+  "selector": ".gamecard__sheen::before",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: linear-gradient( 172deg, transparent 26%, color-mix(in srgb, var(--ink-0) 10%, transparent) 40%, color-mix(in srgb, var(--paper-3) 46%, transparent) 50%, color-mix(in srgb, var(--ink-0) 8%, transparent) 60%, transparent 74% )"
+ },
+ {
+  "file": "src/styles/06b-offday-cards.css",
+  "line": 51,
+  "selector": ".offday__logobox",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--tint, var(--paper-1))"
+ },
+ {
+  "file": "src/styles/07-team-logo-and-buttons.css",
+  "line": 73,
+  "selector": ".teamlogo--fallback",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/07-team-logo-and-buttons.css",
+  "line": 118,
+  "selector": ".gamecard__level",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/07-team-logo-and-buttons.css",
+  "line": 132,
+  "selector": ".gamecard__dh",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/07-team-logo-and-buttons.css",
+  "line": 375,
+  "selector": ".pip rect",
+  "property": "fill",
+  "token": "--paper-1",
+  "value": "fill: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/07-team-logo-and-buttons.css",
+  "line": 376,
+  "selector": ".pip rect",
+  "property": "stroke",
+  "token": "--rule",
+  "value": "stroke: var(--rule)"
+ },
+ {
+  "file": "src/styles/07-team-logo-and-buttons.css",
+  "line": 382,
+  "selector": ".pip__tick",
+  "property": "stroke",
+  "token": "--paper-3",
+  "value": "stroke: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/08-site-shell.css",
+  "line": 409,
+  "selector": ".searchoverlay__progress",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 143,
+  "selector": ".abs__rows",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 183,
+  "selector": ".abs__rowbtn:not(:disabled):hover",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 245,
+  "selector": ".abs__detail",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 345,
+  "selector": ".wcall",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 524,
+  "selector": ".favormeter",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 538,
+  "selector": ".favormeter--standout",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: color-mix(in srgb, var(--award-line) 10%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 542,
+  "selector": ".favormeter--outlier",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: color-mix(in srgb, var(--marker) 16%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 774,
+  "selector": ".halfcast",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1401,
+  "selector": ".entering__row--ondeck",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: color-mix(in srgb, var(--marker) 18%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/12-sealbox.css",
+  "line": 1610,
+  "selector": ".stat",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 72,
+  "selector": ".pbp__card",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 335,
+  "selector": ".pbp__laddercol--ball",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/13-play-by-play.css",
+  "line": 342,
+  "selector": ".pbp__laddercol--strike",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: color-mix(in srgb, var(--graphite) 22%, var(--paper-3))"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 71,
+  "selector": ".strikezone__num",
+  "property": "fill",
+  "token": "--paper-3",
+  "value": "fill: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 126,
+  "selector": ".pitchlist__row--decisive > .pitchlist__type, .pitchlist__row--decisive > .pitchlist__meta, .pitchlist__row--decisive > .pitchlist__challenge, .pitchlist__row--decisive > span:empty",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: color-mix(in srgb, var(--marker) 16%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 142,
+  "selector": ".pitchlist__num",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/14-strike-zone.css",
+  "line": 175,
+  "selector": ".pitchlist__challenge",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: color-mix(in srgb, var(--graphite-soft) 16%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/15-team-color-lab.css",
+  "line": 64,
+  "selector": ".milbneutrals__row:hover",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/15-team-color-lab.css",
+  "line": 137,
+  "selector": ".colorlab__logobox",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--tint, var(--paper-1))"
+ },
+ {
+  "file": "src/styles/15-team-color-lab.css",
+  "line": 386,
+  "selector": ".colorlab__swatchcell--active .colorlab__swatchchip",
+  "property": "box-shadow",
+  "token": "--paper-1",
+  "value": "box-shadow: 0 0 0 2px var(--paper-1), 0 0 0 4px var(--accent-positive)"
+ },
+ {
+  "file": "src/styles/15-team-color-lab.css",
+  "line": 394,
+  "selector": ".colorlab__swatchcell--wpaselected .colorlab__swatchchip",
+  "property": "box-shadow",
+  "token": "--paper-1",
+  "value": "box-shadow: 0 0 0 2px var(--paper-1), 0 0 0 4px var(--accent-primary)"
+ },
+ {
+  "file": "src/styles/15-team-color-lab.css",
+  "line": 504,
+  "selector": ".colorlab__wpapreview, .idlab__section",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/16-identity-lab-shell.css",
+  "line": 53,
+  "selector": ".idlab__infobtn:hover",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/16-identity-lab-shell.css",
+  "line": 140,
+  "selector": ".idlab__railitem:hover",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/16-identity-lab-shell.css",
+  "line": 152,
+  "selector": ".idlab__railitem--on",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/16-identity-lab-shell.css",
+  "line": 179,
+  "selector": ".idlab__dot",
+  "property": "border",
+  "token": "--paper-0",
+  "value": "border: var(--bw-hair) solid var(--paper-0)"
+ },
+ {
+  "file": "src/styles/16-identity-lab-shell.css",
+  "line": 194,
+  "selector": ".idlab__dugout",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/16-identity-lab-shell.css",
+  "line": 248,
+  "selector": ".idlab__stylecard",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/16-identity-lab-shell.css",
+  "line": 370,
+  "selector": ".idlab__stamp",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 322,
+  "selector": ".idlab__recolorsource",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 354,
+  "selector": ".idlab__recolorpreview",
+  "property": "border",
+  "token": "--rule",
+  "value": "border: var(--bw-hair) solid var(--rule)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 356,
+  "selector": ".idlab__recolorpreview",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 401,
+  "selector": ".idlab__wpaartthumb",
+  "property": "background-color",
+  "token": "--paper-3",
+  "value": "background-color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 403,
+  "selector": ".idlab__wpaartthumb",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 404,
+  "selector": ".idlab__wpaartthumb",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 405,
+  "selector": ".idlab__wpaartthumb",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 406,
+  "selector": ".idlab__wpaartthumb",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 431,
+  "selector": ".idlab__recolorswatch",
+  "property": "border",
+  "token": "--rule",
+  "value": "border: var(--bw-hair) solid var(--rule)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 449,
+  "selector": ".idlab__recolorswatch--none, .idlab__monoinkswatch.idlab__recolorswatch--none",
+  "property": "background-color",
+  "token": "--paper-3",
+  "value": "background-color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 451,
+  "selector": ".idlab__recolorswatch--none, .idlab__monoinkswatch.idlab__recolorswatch--none",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 452,
+  "selector": ".idlab__recolorswatch--none, .idlab__monoinkswatch.idlab__recolorswatch--none",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 453,
+  "selector": ".idlab__recolorswatch--none, .idlab__monoinkswatch.idlab__recolorswatch--none",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 454,
+  "selector": ".idlab__recolorswatch--none, .idlab__monoinkswatch.idlab__recolorswatch--none",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 463,
+  "selector": ".idlab__recolorpreview",
+  "property": "background-color",
+  "token": "--paper-3",
+  "value": "background-color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 465,
+  "selector": ".idlab__recolorpreview",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 466,
+  "selector": ".idlab__recolorpreview",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 467,
+  "selector": ".idlab__recolorpreview",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 468,
+  "selector": ".idlab__recolorpreview",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 496,
+  "selector": ".idlab__monoinkart",
+  "property": "border",
+  "token": "--rule",
+  "value": "border: var(--bw-hair) dashed var(--rule)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 498,
+  "selector": ".idlab__monoinkart",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 543,
+  "selector": ".idlab__monoinkempty",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 637,
+  "selector": ".idlab__monoinkswatch",
+  "property": "border",
+  "token": "--rule",
+  "value": "border: var(--bw-hair) solid var(--rule)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 649,
+  "selector": ".idlab__barmock--unset",
+  "property": "border",
+  "token": "--rule",
+  "value": "border: var(--bw-heavy) dashed var(--rule)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 658,
+  "selector": ".idlab__barmock__title",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--header-onbar, var(--paper-3))"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 694,
+  "selector": ".idlab__wearerstring",
+  "property": "background",
+  "token": "--rule",
+  "value": "background: var(--rule)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 800,
+  "selector": ".idlab__shelfthumb",
+  "property": "background-color",
+  "token": "--paper-3",
+  "value": "background-color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 802,
+  "selector": ".idlab__shelfthumb",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 803,
+  "selector": ".idlab__shelfthumb",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 804,
+  "selector": ".idlab__shelfthumb",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 805,
+  "selector": ".idlab__shelfthumb",
+  "property": "background-image",
+  "token": "--paper-1",
+  "value": "background-image: linear-gradient(45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--paper-1) 75%), linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 836,
+  "selector": ".idlab__shelfitem--worn .idlab__shelfthumb",
+  "property": "box-shadow",
+  "token": "--paper-1",
+  "value": "box-shadow: 0 0 0 2px var(--paper-1), 0 0 0 4px var(--accent-positive)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 877,
+  "selector": ".idlab__rack::before",
+  "property": "background",
+  "token": "--rule-soft",
+  "value": "background: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 942,
+  "selector": ".idlab__chiptick--unset",
+  "property": "border-top",
+  "token": "--rule",
+  "value": "border-top: 2px dashed var(--rule)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 954,
+  "selector": ".idlab__chiphole",
+  "property": "background",
+  "token": "--paper-0",
+  "value": "background: var(--paper-0)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 955,
+  "selector": ".idlab__chiphole",
+  "property": "border",
+  "token": "--rule",
+  "value": "border: var(--bw-hair) solid var(--rule)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 1115,
+  "selector": ".idlab__stub",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/17-identity-lab-workbench.css",
+  "line": 1162,
+  "selector": ".idlab__glove",
+  "property": "border",
+  "token": "--rule",
+  "value": "border: var(--bw-hair) dashed var(--rule)"
+ },
+ {
+  "file": "src/styles/18-uniforms-and-jerseys.css",
+  "line": 134,
+  "selector": ".audittable__via--override",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/20-charts.css",
+  "line": 144,
+  "selector": ".marginnotes__card",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/21-box-score.css",
+  "line": 685,
+  "selector": ".bs__potgWatch--poster",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/21a-box-score-stars.css",
+  "line": 138,
+  "selector": ".stars3__card",
+  "property": "border-top",
+  "token": "--rule-soft",
+  "value": "border-top: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/21b-box-score-tally.css",
+  "line": 123,
+  "selector": ".bs__tallyLogobox",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--tint, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 394,
+  "selector": ".skel__bar, .skel__circle",
+  "property": "background",
+  "token": "--rule-soft",
+  "value": "background: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 552,
+  "selector": ".skel__ballBody circle",
+  "property": "stroke",
+  "token": "--rule",
+  "value": "stroke: var(--rule)"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 556,
+  "selector": ".skel__ballShadeLight",
+  "property": "stop-color",
+  "token": "--paper-3",
+  "value": "stop-color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/22-box-score-tables.css",
+  "line": 559,
+  "selector": ".skel__ballShadeDark",
+  "property": "stop-color",
+  "token": "--rule-soft",
+  "value": "stop-color: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 558,
+  "selector": ".bs__boardLogobox",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--tint, var(--paper-1))"
+ },
+ {
+  "file": "src/styles/23-box-score-detail.css",
+  "line": 631,
+  "selector": ".bs__grid--board .bs__boardFinal",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/24-floating-nav-and-hud.css",
+  "line": 142,
+  "selector": ".gamehud",
+  "property": "color",
+  "token": "--paper-2",
+  "value": "color: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/24-floating-nav-and-hud.css",
+  "line": 191,
+  "selector": ".gamehud__row--batter .gamehud__who",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/24-floating-nav-and-hud.css",
+  "line": 195,
+  "selector": ".gamehud__row--pitcher .gamehud__who",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/24-floating-nav-and-hud.css",
+  "line": 209,
+  "selector": ".gamehud__row--batter .gamehud__val",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/24-floating-nav-and-hud.css",
+  "line": 214,
+  "selector": ".gamehud__row--pitcher .gamehud__val",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/24-floating-nav-and-hud.css",
+  "line": 218,
+  "selector": ".gamehud__lbl",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/24-floating-nav-and-hud.css",
+  "line": 398,
+  "selector": ".gamehud__runs",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/24-floating-nav-and-hud.css",
+  "line": 438,
+  "selector": ".gamehud__tri--up",
+  "property": "border-bottom",
+  "token": "--paper-3",
+  "value": "border-bottom: 7px solid var(--paper-3)"
+ },
+ {
+  "file": "src/styles/24-floating-nav-and-hud.css",
+  "line": 442,
+  "selector": ".gamehud__tri--down",
+  "property": "border-top",
+  "token": "--paper-3",
+  "value": "border-top: 7px solid var(--paper-3)"
+ },
+ {
+  "file": "src/styles/24-floating-nav-and-hud.css",
+  "line": 454,
+  "selector": ".gamehud__innnum",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/25-wide-layout.css",
+  "line": 39,
+  "selector": ".topbar--slate",
+  "property": "background-image",
+  "token": "--rule-grid",
+  "value": "background-image: linear-gradient(var(--rule-grid) 1px, transparent 1px), linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px)"
+ },
+ {
+  "file": "src/styles/25-wide-layout.css",
+  "line": 40,
+  "selector": ".topbar--slate",
+  "property": "background-image",
+  "token": "--rule-grid",
+  "value": "background-image: linear-gradient(var(--rule-grid) 1px, transparent 1px), linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px)"
+ },
+ {
+  "file": "src/styles/25-wide-layout.css",
+  "line": 184,
+  "selector": ".wirerail__head",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/25-wide-layout.css",
+  "line": 497,
+  "selector": ".pbp__zonecell",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/26a-percentile-strip.css",
+  "line": 161,
+  "selector": ".pctstrip__track::after",
+  "property": "background",
+  "token": "--rule-soft",
+  "value": "background: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 14,
+  "selector": ".contractcard__frame",
+  "property": "background",
+  "token": "--rule",
+  "value": "background: radial-gradient(circle at 94% -18%, color-mix(in srgb, var(--rule) 34%, transparent), transparent 42%), linear-gradient(145deg, var(--paper-3), color-mix(in srgb, var(--paper-2) 88%, var(--paper-1)) 68%)"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 15,
+  "selector": ".contractcard__frame",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: radial-gradient(circle at 94% -18%, color-mix(in srgb, var(--rule) 34%, transparent), transparent 42%), linear-gradient(145deg, var(--paper-3), color-mix(in srgb, var(--paper-2) 88%, var(--paper-1)) 68%)"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 15,
+  "selector": ".contractcard__frame",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: radial-gradient(circle at 94% -18%, color-mix(in srgb, var(--rule) 34%, transparent), transparent 42%), linear-gradient(145deg, var(--paper-3), color-mix(in srgb, var(--paper-2) 88%, var(--paper-1)) 68%)"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 15,
+  "selector": ".contractcard__frame",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: radial-gradient(circle at 94% -18%, color-mix(in srgb, var(--rule) 34%, transparent), transparent 42%), linear-gradient(145deg, var(--paper-3), color-mix(in srgb, var(--paper-2) 88%, var(--paper-1)) 68%)"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 26,
+  "selector": ".contractcard__frame::before",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: linear-gradient(110deg, color-mix(in srgb, var(--paper-3) 68%, transparent), transparent 35%)"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 139,
+  "selector": ".contractcard__ticker > div",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: color-mix(in srgb, var(--paper-3) 78%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 139,
+  "selector": ".contractcard__ticker > div",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: color-mix(in srgb, var(--paper-3) 78%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 209,
+  "selector": ".contractcard__control li::before",
+  "property": "border",
+  "token": "--paper-3",
+  "value": "border: var(--bw-hair) solid var(--paper-3)"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 281,
+  "selector": ".contractcard__seg::before",
+  "property": "border",
+  "token": "--paper-3",
+  "value": "border: var(--bw-hair) solid var(--paper-3)"
+ },
+ {
+  "file": "src/styles/26b-player-contract.css",
+  "line": 425,
+  "selector": ".contractcard__tag",
+  "property": "background",
+  "token": "--rule",
+  "value": "background: color-mix(in srgb, var(--rule) 30%, transparent)"
+ },
+ {
+  "file": "src/styles/26e-contract-history.css",
+  "line": 102,
+  "selector": ".cthist__row + .cthist__row",
+  "property": "border-top",
+  "token": "--rule-grid",
+  "value": "border-top: var(--bw-hair) dotted var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/27-player-position-innings.css",
+  "line": 552,
+  "selector": ".asof-banner",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/27-player-position-innings.css",
+  "line": 553,
+  "selector": ".asof-banner",
+  "property": "border",
+  "token": "--rule",
+  "value": "border: var(--bw-hair) dashed var(--rule)"
+ },
+ {
+  "file": "src/styles/27-player-position-innings.css",
+  "line": 616,
+  "selector": ".asof-banner__input",
+  "property": "border",
+  "token": "--rule",
+  "value": "border: var(--bw-hair) solid var(--rule)"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 59,
+  "selector": ".jerseydeck__card",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--tint, var(--paper-1))"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 291,
+  "selector": ".team-score__row--driver",
+  "property": "border",
+  "token": "--rule-soft",
+  "value": "border: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 330,
+  "selector": ".team-score__meter",
+  "property": "background",
+  "token": "--rule-soft",
+  "value": "background: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 343,
+  "selector": ".team-score__row--compact",
+  "property": "border-top",
+  "token": "--rule-soft",
+  "value": "border-top: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 344,
+  "selector": ".team-score__row--compact",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 446,
+  "selector": ".team-score__track-base",
+  "property": "background",
+  "token": "--rule-soft",
+  "value": "background: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 454,
+  "selector": ".team-score__track-mid",
+  "property": "background",
+  "token": "--rule",
+  "value": "background: var(--rule)"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 710,
+  "selector": ".rankstrip__nav",
+  "property": "border",
+  "token": "--rule-soft",
+  "value": "border: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 778,
+  "selector": ".team-score__detail",
+  "property": "border-top",
+  "token": "--rule-soft",
+  "value": "border-top: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/28-team-hub.css",
+  "line": 779,
+  "selector": ".team-score__detail",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 134,
+  "selector": ".txday",
+  "property": "border-right",
+  "token": "--rule-soft",
+  "value": "border-right: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 160,
+  "selector": ".txday__count",
+  "property": "border-top",
+  "token": "--rule-soft",
+  "value": "border-top: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/29-team-transactions.css",
+  "line": 746,
+  "selector": ".sstrip__cell",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/31-wild-card.css",
+  "line": 139,
+  "selector": ".tstatrow--today",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: color-mix(in srgb, var(--marker) 16%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/31d-prospect-card.css",
+  "line": 144,
+  "selector": ".prospectcard__track::after",
+  "property": "background",
+  "token": "--rule-soft",
+  "value": "background: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/31d-prospect-card.css",
+  "line": 394,
+  "selector": ".prankhist__row + .prankhist__row",
+  "property": "border-top",
+  "token": "--rule-grid",
+  "value": "border-top: var(--bw-hair) dotted var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/31d-prospect-card.css",
+  "line": 502,
+  "selector": ".famband__row + .famband__row",
+  "property": "border-top",
+  "token": "--rule-grid",
+  "value": "border-top: var(--bw-hair) dotted var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/32-milestone-watch.css",
+  "line": 64,
+  "selector": ".milestonewatch-page__pos",
+  "property": "color",
+  "token": "--paper-0",
+  "value": "color: var(--paper-0)"
+ },
+ {
+  "file": "src/styles/34-postseason.css",
+  "line": 275,
+  "selector": ".pswscard__pos",
+  "property": "color",
+  "token": "--paper-0",
+  "value": "color: var(--paper-0)"
+ },
+ {
+  "file": "src/styles/34-postseason.css",
+  "line": 334,
+  "selector": ".psstack__roundlabel::after",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/38-umpire-pages.css",
+  "line": 279,
+  "selector": ".umprank__row--today td",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: color-mix(in srgb, var(--marker) 16%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 303,
+  "selector": ".bpdiagram__foul",
+  "property": "fill",
+  "token": "--rule-soft",
+  "value": "fill: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 311,
+  "selector": ".bpdiagram__track",
+  "property": "fill",
+  "token": "--rule",
+  "value": "fill: var(--rule)"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 316,
+  "selector": ".bpdiagram__dirt",
+  "property": "fill",
+  "token": "--paper-2",
+  "value": "fill: color-mix(in srgb, var(--accent-negative) 22%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 321,
+  "selector": ".bpdiagram__baseline",
+  "property": "stroke",
+  "token": "--paper-2",
+  "value": "stroke: color-mix(in srgb, var(--accent-negative) 22%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/39-manager-page.css",
+  "line": 327,
+  "selector": ".bpdiagram__line",
+  "property": "stroke",
+  "token": "--paper-3",
+  "value": "stroke: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/40-game-modals.css",
+  "line": 76,
+  "selector": ".tscoremodal__figs",
+  "property": "border-top",
+  "token": "--rule-soft",
+  "value": "border-top: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/40-game-modals.css",
+  "line": 77,
+  "selector": ".tscoremodal__figs",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 37,
+  "selector": ".scorebookstory__cover",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: linear-gradient(90deg, transparent 49px, var(--accent-negative) 50px, transparent 51px), repeating-linear-gradient(0deg, transparent 0 31px, var(--rule-grid) 31px 32px), var(--surface-card)"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 132,
+  "selector": ".scorebookstory__tally span",
+  "property": "color",
+  "token": "--rule-soft",
+  "value": "color: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 338,
+  "selector": ".scorebookstory__momentsSection .scorebookstory__sectionhead p",
+  "property": "color",
+  "token": "--rule-soft",
+  "value": "color: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 361,
+  "selector": ".scorebookstory__moment > strong",
+  "property": "color",
+  "token": "--rule-soft",
+  "value": "color: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/42-first-scorebook.css",
+  "line": 712,
+  "selector": ".allstarlegacy__honoreepos",
+  "property": "color",
+  "token": "--paper-0",
+  "value": "color: var(--paper-0)"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 164,
+  "selector": ".foulboard tr.foulboard__row--outlier td",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: color-mix(in srgb, var(--marker) 16%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 478,
+  "selector": ".scorebug__outdot",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/43-foul-tracker.css",
+  "line": 479,
+  "selector": ".scorebug__outdot",
+  "property": "border",
+  "token": "--rule",
+  "value": "border: var(--bw-hair) solid var(--rule)"
+ },
+ {
+  "file": "src/styles/45-admin-copy-editor.css",
+  "line": 398,
+  "selector": ".awardord__row",
+  "property": "border-top",
+  "token": "--rule-grid",
+  "value": "border-top: var(--bw-hair) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/48c-stamp-sheet.css",
+  "line": 211,
+  "selector": ".postagestamp__frame",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/48c-stamp-sheet.css",
+  "line": 302,
+  "selector": ".postagestamp__mark",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/48d-stamp-detail.css",
+  "line": 121,
+  "selector": ".stampdetail__frame",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/48d-stamp-detail.css",
+  "line": 163,
+  "selector": ".stampdetail__mark",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/50-logbook-landing.css",
+  "line": 173,
+  "selector": ".logbooklanding__page",
+  "property": "background-image",
+  "token": "--rule-grid",
+  "value": "background-image: linear-gradient(var(--rule-grid) 1px, transparent 1px), linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px)"
+ },
+ {
+  "file": "src/styles/50-logbook-landing.css",
+  "line": 174,
+  "selector": ".logbooklanding__page",
+  "property": "background-image",
+  "token": "--rule-grid",
+  "value": "background-image: linear-gradient(var(--rule-grid) 1px, transparent 1px), linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px)"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 30,
+  "selector": ".umptend__season",
+  "property": "color",
+  "token": "--rule",
+  "value": "color: var(--rule)"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 122,
+  "selector": ".umptend__ramp",
+  "property": "background",
+  "token": "--rule",
+  "value": "background: linear-gradient( 180deg, var(--navy) 0%, var(--navy) 16%, var(--rule) 46%, var(--marker-deep) 72%, var(--marker) 92%, var(--marker) 100% )"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 156,
+  "selector": ".umptend__row + .umptend__row",
+  "property": "box-shadow",
+  "token": "--rule-grid",
+  "value": "box-shadow: inset 0 1px 0 var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 199,
+  "selector": ".umptend__watchlbl",
+  "property": "color",
+  "token": "--rule",
+  "value": "color: var(--rule)"
+ },
+ {
+  "file": "src/styles/53-umpire-tendencies.css",
+  "line": 211,
+  "selector": ".umptend__watchtxt--none",
+  "property": "color",
+  "token": "--rule",
+  "value": "color: var(--rule)"
+ },
+ {
+  "file": "src/styles/59-stamp-in.css",
+  "line": 42,
+  "selector": ".stampin__row",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 143,
+  "selector": ".iddrawer__tilemark",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--tint, var(--paper-1))"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 380,
+  "selector": ".iddrawer__logomark",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--tint, var(--paper-1))"
+ },
+ {
+  "file": "src/styles/62-identity-admin.css",
+  "line": 486,
+  "selector": ".idlab__barmock__title",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--header-onbar, var(--paper-3))"
+ },
+ {
+  "file": "src/styles/63-print-sheet.css",
+  "line": 109,
+  "selector": ".printsheet",
+  "property": "--ps-faint",
+  "token": "--rule-grid",
+  "value": "--ps-faint: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/65-about-page.css",
+  "line": 77,
+  "selector": ".abouthero__kicker",
+  "property": "color",
+  "token": "--rule-soft",
+  "value": "color: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/65-about-page.css",
+  "line": 119,
+  "selector": ".abouthero__lede",
+  "property": "color",
+  "token": "--paper-1",
+  "value": "color: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/65-about-page.css",
+  "line": 235,
+  "selector": ".aboutstory__n",
+  "property": "color",
+  "token": "--rule-soft",
+  "value": "color: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/65-team-records.css",
+  "line": 40,
+  "selector": ".trec__half.is-on",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: color-mix(in srgb, var(--marker) 16%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/66-situational-records.css",
+  "line": 272,
+  "selector": ".trrank__tilemark",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--tint, var(--paper-1))"
+ },
+ {
+  "file": "src/styles/67-awards-ledger.css",
+  "line": 238,
+  "selector": ".awardidx__row",
+  "property": "border-bottom",
+  "token": "--rule-grid",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/67-awards-ledger.css",
+  "line": 301,
+  "selector": ".awards__expand:hover",
+  "property": "color",
+  "token": "--paper-2",
+  "value": "color: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 65,
+  "selector": ".bcast__note",
+  "property": "color",
+  "token": "--paper-2",
+  "value": "color: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 76,
+  "selector": ".bcast__strand",
+  "property": "color",
+  "token": "--paper-2",
+  "value": "color: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 91,
+  "selector": ".bcast__title",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 100,
+  "selector": ".bcast__dek",
+  "property": "color",
+  "token": "--paper-2",
+  "value": "color: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 131,
+  "selector": ".bcast__meta dt",
+  "property": "color",
+  "token": "--paper-2",
+  "value": "color: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 140,
+  "selector": ".bcast__meta dd",
+  "property": "color",
+  "token": "--paper-3",
+  "value": "color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 244,
+  "selector": ".barcell",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 319,
+  "selector": ".rpt__between",
+  "property": "--table-pin",
+  "token": "--paper-2",
+  "value": "--table-pin: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 326,
+  "selector": ".rpt__between th, .rpt__between td",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 344,
+  "selector": ".trendstrip__col",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 369,
+  "selector": ".statusmeter",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 496,
+  "selector": ".rpt__row--mine",
+  "property": "--table-pin",
+  "token": "--paper-3",
+  "value": "--table-pin: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 497,
+  "selector": ".rpt__row--mine",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 504,
+  "selector": ".rpt__row--mine td.team, .rpt__row--mine th.team",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 581,
+  "selector": ".pillars",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 665,
+  "selector": ".method",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 788,
+  "selector": ".yrange__track::before",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 819,
+  "selector": ".yrange__input::-webkit-slider-thumb",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 830,
+  "selector": ".yrange__input::-moz-range-thumb",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 953,
+  "selector": ".dh__row:hover",
+  "property": "--table-pin",
+  "token": "--paper-2",
+  "value": "--table-pin: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 957,
+  "selector": ".dh__row:hover td",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 961,
+  "selector": ".dh__row--open",
+  "property": "--table-pin",
+  "token": "--paper-1",
+  "value": "--table-pin: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 965,
+  "selector": ".dh__row--open td",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 971,
+  "selector": ".dh__row.rpt__row--mine:hover, .dh__row--open.rpt__row--mine",
+  "property": "--table-pin",
+  "token": "--paper-3",
+  "value": "--table-pin: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 976,
+  "selector": ".dh__row.rpt__row--mine:hover td, .dh__row--open.rpt__row--mine td",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 1024,
+  "selector": ".dh__drawerrow",
+  "property": "--table-pin",
+  "token": "--paper-1",
+  "value": "--table-pin: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/68-around-the-game.css",
+  "line": 1029,
+  "selector": ".dh__drawerrow > td",
+  "property": "background",
+  "token": "--paper-1",
+  "value": "background: var(--paper-1)"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 248,
+  "selector": ".hitchart__hit",
+  "property": "stroke",
+  "token": "--paper-3",
+  "value": "stroke: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 260,
+  "selector": ".hitchart__hr",
+  "property": "stroke",
+  "token": "--paper-3",
+  "value": "stroke: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 780,
+  "selector": ".bflight__hit",
+  "property": "stroke",
+  "token": "--paper-3",
+  "value": "stroke: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/69-hit-chart.css",
+  "line": 792,
+  "selector": ".bflight__hr",
+  "property": "stroke",
+  "token": "--paper-3",
+  "value": "stroke: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 110,
+  "selector": ".cliff__bar",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: color-mix(in srgb, var(--marker) 35%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 267,
+  "selector": ".ctr__cell--free, .ctr__cell--none",
+  "property": "background-image",
+  "token": "--rule-soft",
+  "value": "background-image: repeating-linear-gradient( -45deg, var(--bg-page) 0, var(--bg-page) 5px, var(--rule-soft) 5px, var(--rule-soft) 7px )"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 268,
+  "selector": ".ctr__cell--free, .ctr__cell--none",
+  "property": "background-image",
+  "token": "--rule-soft",
+  "value": "background-image: repeating-linear-gradient( -45deg, var(--bg-page) 0, var(--bg-page) 5px, var(--rule-soft) 5px, var(--rule-soft) 7px )"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 365,
+  "selector": ".ctr__swatch--free",
+  "property": "background-image",
+  "token": "--rule-soft",
+  "value": "background-image: repeating-linear-gradient( -45deg, var(--bg-page) 0, var(--bg-page) 5px, var(--rule-soft) 5px, var(--rule-soft) 7px )"
+ },
+ {
+  "file": "src/styles/70-contracts-grid.css",
+  "line": 366,
+  "selector": ".ctr__swatch--free",
+  "property": "background-image",
+  "token": "--rule-soft",
+  "value": "background-image: repeating-linear-gradient( -45deg, var(--bg-page) 0, var(--bg-page) 5px, var(--rule-soft) 5px, var(--rule-soft) 7px )"
+ },
+ {
+  "file": "src/styles/71-salaries-league.css",
+  "line": 87,
+  "selector": ".payboard__rank",
+  "property": "color",
+  "token": "--rule",
+  "value": "color: var(--rule)"
+ },
+ {
+  "file": "src/styles/72-club-transactions.css",
+  "line": 38,
+  "selector": ".txpage__rule",
+  "property": "background",
+  "token": "--rule-soft",
+  "value": "background: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/72-player-hover-card.css",
+  "line": 42,
+  "selector": ".phcard__spine",
+  "property": "background",
+  "token": "--rule-soft",
+  "value": "background: var(--phcard-accent, var(--rule-soft))"
+ },
+ {
+  "file": "src/styles/77c-express-lane-deck.css",
+  "line": 66,
+  "selector": ".xl-deck__paper",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/77c-express-lane-deck.css",
+  "line": 67,
+  "selector": ".xl-deck__paper",
+  "property": "border",
+  "token": "--rule",
+  "value": "border: 1px solid var(--rule)"
+ },
+ {
+  "file": "src/styles/78-offseason.css",
+  "line": 40,
+  "selector": ".oseason__head",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/78-offseason.css",
+  "line": 122,
+  "selector": ".wintercal",
+  "property": "border-top",
+  "token": "--rule-soft",
+  "value": "border-top: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/78-offseason.css",
+  "line": 144,
+  "selector": ".wintercal__item",
+  "property": "border-left",
+  "token": "--rule",
+  "value": "border-left: var(--bw-rule) solid var(--rule)"
+ },
+ {
+  "file": "src/styles/78-offseason.css",
+  "line": 389,
+  "selector": ".pgame__dot",
+  "property": "color",
+  "token": "--rule",
+  "value": "color: var(--rule)"
+ },
+ {
+  "file": "src/styles/79-nine-keys.css",
+  "line": 40,
+  "selector": ".ninekeys__count",
+  "property": "color",
+  "token": "--paper-0",
+  "value": "color: var(--paper-0)"
+ },
+ {
+  "file": "src/styles/79-nine-keys.css",
+  "line": 68,
+  "selector": ".ninekeys__keys",
+  "property": "border-top",
+  "token": "--rule",
+  "value": "border-top: 1px solid var(--rule)"
+ },
+ {
+  "file": "src/styles/79-nine-keys.css",
+  "line": 73,
+  "selector": ".ninekeys__key",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: 1px solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/79-nine-keys.css",
+  "line": 123,
+  "selector": ".ninekeys__club",
+  "property": "border-right",
+  "token": "--rule",
+  "value": "border-right: 1px solid var(--rule)"
+ },
+ {
+  "file": "src/styles/79-nine-keys.css",
+  "line": 197,
+  "selector": ".ninekeys__tally",
+  "property": "border-left",
+  "token": "--rule",
+  "value": "border-left: 1px solid var(--rule)"
+ },
+ {
+  "file": "src/styles/79-nine-keys.css",
+  "line": 262,
+  "selector": ".ninekeys__swatch",
+  "property": "border",
+  "token": "--rule",
+  "value": "border: 1px solid var(--rule)"
+ },
+ {
+  "file": "src/styles/79-nine-keys.css",
+  "line": 291,
+  "selector": ".ninekeys__row",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: 1px solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/79-nine-keys.css",
+  "line": 333,
+  "selector": ".ninekeys__rung",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: 1px solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/79-nine-keys.css",
+  "line": 343,
+  "selector": ".ninekeys__rungbar",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/79-nine-keys.css",
+  "line": 370,
+  "selector": ".ninekeys__method",
+  "property": "border-top",
+  "token": "--rule",
+  "value": "border-top: 1px solid var(--rule)"
+ },
+ {
+  "file": "src/styles/boxlines/gamelines.css",
+  "line": 248,
+  "selector": ".gamelines__rows .gamelines__door:hover",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/boxlines/gamelines.css",
+  "line": 256,
+  "selector": ".gamelines__fam:hover",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/boxlines/gamelines.css",
+  "line": 267,
+  "selector": ".gamelines__rows .gamelines__door:active, .gamelines__fam:active",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/boxlines/listdoor.css",
+  "line": 148,
+  "selector": ".boxlines__list .boxlines-entry:hover",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/boxlines/listdoor.css",
+  "line": 158,
+  "selector": ".boxlines__list .boxlines-entry:active",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 294,
+  "selector": ".dlab__typerow",
+  "property": "border-bottom",
+  "token": "--rule-grid",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 374,
+  "selector": ".dlab__pair",
+  "property": "border-bottom",
+  "token": "--rule-grid",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/designlab/lab.css",
+  "line": 473,
+  "selector": ".dlab__matrix th, .dlab__matrix td",
+  "property": "border-bottom",
+  "token": "--rule-grid",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/focus/atbat.css",
+  "line": 225,
+  "selector": ".ballglyph circle",
+  "property": "stroke",
+  "token": "--rule",
+  "value": "stroke: var(--rule)"
+ },
+ {
+  "file": "src/styles/focus/atbat.css",
+  "line": 230,
+  "selector": ".ballglyph__shadelight",
+  "property": "stop-color",
+  "token": "--paper-3",
+  "value": "stop-color: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/focus/atbat.css",
+  "line": 234,
+  "selector": ".ballglyph__shadedark",
+  "property": "stop-color",
+  "token": "--rule-soft",
+  "value": "stop-color: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/pitcher-card/card.css",
+  "line": 99,
+  "selector": ".pscene",
+  "property": "background",
+  "token": "--rule-grid",
+  "value": "background: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/pitcher-card/card.css",
+  "line": 108,
+  "selector": ".pscene__sky",
+  "property": "fill",
+  "token": "--rule-grid",
+  "value": "fill: var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/postseason/home.css",
+  "line": 38,
+  "selector": ".bracketrail__head",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/postseason/home.css",
+  "line": 158,
+  "selector": ".psboard__slot",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: var(--paper-2)"
+ },
+ {
+  "file": "src/styles/postseason/home.css",
+  "line": 163,
+  "selector": ".psboard__slot:hover",
+  "property": "background",
+  "token": "--paper-3",
+  "value": "background: var(--paper-3)"
+ },
+ {
+  "file": "src/styles/postseason/home.css",
+  "line": 196,
+  "selector": ".psboard__slot--out",
+  "property": "background",
+  "token": "--rule",
+  "value": "background: var(--rule)"
+ },
+ {
+  "file": "src/styles/postseason/home.css",
+  "line": 199,
+  "selector": ".psboard__slot--out:hover",
+  "property": "background",
+  "token": "--rule-soft",
+  "value": "background: var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/report/challenge-card.css",
+  "line": 86,
+  "selector": ".chal__view.is-on",
+  "property": "background",
+  "token": "--paper-2",
+  "value": "background: color-mix(in srgb, var(--marker) 16%, var(--paper-2))"
+ },
+ {
+  "file": "src/styles/report/charts.css",
+  "line": 77,
+  "selector": ".colchart__tick",
+  "property": "border-top",
+  "token": "--rule-grid",
+  "value": "border-top: var(--bw-hair) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/scorecard/box.css",
+  "line": 330,
+  "selector": ".sc-ab__type, .sc-ab__rbi",
+  "property": "border",
+  "token": "--rule-grid",
+  "value": "border: var(--bw-hair) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/scorecard/box.css",
+  "line": 450,
+  "selector": ".sc-ab__balls, .sc-ab__strike",
+  "property": "border-left",
+  "token": "--rule-grid",
+  "value": "border-left: var(--bw-hair) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/scorecard/footer.css",
+  "line": 104,
+  "selector": ".sc-scoreboard th, .sc-scoreboard td",
+  "property": "border",
+  "token": "--rule-grid",
+  "value": "border: var(--bw-hair) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 93,
+  "selector": ".sc-sheet th, .sc-sheet td",
+  "property": "border-right",
+  "token": "--rule-grid",
+  "value": "border-right: var(--bw-hair) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 94,
+  "selector": ".sc-sheet th, .sc-sheet td",
+  "property": "border-bottom",
+  "token": "--rule-grid",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 270,
+  "selector": ".sc-sheet__inning-h--start, .sc-sheet__cell--start",
+  "property": "border-left",
+  "token": "--rule-grid",
+  "value": "border-left: var(--bw-rule) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/scorecard/grid.css",
+  "line": 286,
+  "selector": ".sc-sheet__totals td",
+  "property": "border-top",
+  "token": "--rule-grid",
+  "value": "border-top: var(--bw-rule) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/scorecard/lens-carry.css",
+  "line": 76,
+  "selector": ".sc-carry__box",
+  "property": "outline",
+  "token": "--rule-grid",
+  "value": "outline: var(--bw-hair) solid var(--rule-grid)"
+ },
+ {
+  "file": "src/styles/system/section-head.css",
+  "line": 96,
+  "selector": ".sectionhead--label",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: var(--bw-hair) solid var(--rule-soft)"
+ },
+ {
+  "file": "src/styles/system/section-head.css",
+  "line": 168,
+  "selector": ".sectionhead--club",
+  "property": "border-bottom",
+  "token": "--rule-soft",
+  "value": "border-bottom: var(--bw-hair) solid var(--sectionhead-rule, var(--rule-soft))"
+ }
+]
