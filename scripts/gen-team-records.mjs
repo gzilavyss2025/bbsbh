@@ -306,12 +306,12 @@ async function main() {
   if (!args['export-only']) {
     const dates = datesBetween(startDate, endDate)
     const ingested = db.prepare('SELECT game_pk, date FROM team_record_ingested_games').all()
-    // Skip every game on file except those inside the re-read window (all of
-    // them with --reingest, which re-reads the whole date range).
-    const reread = args.reingest ? null : new Set(rereadPks(ingested, isoDay(new Date())))
-    const skip = new Set(
-      ingested.map((r) => String(r.game_pk)).filter((pk) => reread && !reread.has(pk)),
-    )
+    // Skip every game on file except those inside the re-read window; with
+    // --reingest skip none, so the whole date range is read again.
+    const redo = new Set(rereadPks(ingested, isoDay(new Date())))
+    const skip = args.reingest
+      ? new Set()
+      : new Set(ingested.map((r) => String(r.game_pk)).filter((pk) => !redo.has(pk)))
     const candidates = await candidatesFor(dates, skip)
     console.log(`${candidates.length} game(s) to ingest (${startDate}..${endDate})`)
 
@@ -327,7 +327,7 @@ async function main() {
       for (let j = 0; j < chunk.length; j++) {
         const rows = results[j]
         if (!rows) {
-          console.error(`gamePk ${chunk[j].game.gamePk}: fetch failed, will retry next run`)
+          console.error(`gamePk ${chunk[j].game.gamePk}: fetch failed, any row on file stays as it is`)
           continue
         }
         storeGame(db, rows)
