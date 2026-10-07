@@ -11,6 +11,7 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Table } from '../ui/table/Table.jsx'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 
 // THE NOTEBOOK, AT A FARM LEVEL — one note about the season that just finished
 // (issue #1078, step 4 of #1038).
@@ -78,7 +79,7 @@ export function YoungestRegulars({ sportId, season }) {
       </SectionHead>
 
       {leagues.length > 1 && (
-        <div className="seasonnote__leagues" role="group" aria-label="League">
+        <Cluster className="seasonnote__leagues" role="group" aria-label="League">
           {leagues.map((l) => {
             const on = l.leagueId === league.leagueId
             return (
@@ -96,7 +97,7 @@ export function YoungestRegulars({ sportId, season }) {
               </button>
             )
           })}
-        </div>
+        </Cluster>
       )}
 
       <div className="seasonnote__body">
