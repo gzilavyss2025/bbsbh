@@ -585,7 +585,11 @@ jobs:
           # all. Neither is possible now. Verified 2026-08-28 that nothing under
           # these three roots is ignored or untracked, so this stages exactly
           # what the enumerated list did — and everything a new generator adds.
-          git add -A -- public scripts/data src/lib/data
+          # Plus the one tracked file a generator writes outside them:
+          # gen-manager-history.mjs --current-only rewrites the shared-season
+          # research queue every night. Left out, the run pushed its data and
+          # then failed the leftover check below (2026-10-07).
+          git add -A -- public scripts/data src/lib/data scripts/manager-transitions-needs-research.json
           if git diff --cached --quiet; then
             echo "No data changes to commit."
           else
