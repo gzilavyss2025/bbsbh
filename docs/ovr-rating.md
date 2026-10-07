@@ -118,7 +118,7 @@ There is no generator change and no outs-above-average fetch in version one.
   Savant outs above average across 563 players (part A).
 - It is a counting stat. A part-timer's near-zero value means few chances, not an
   average glove, and the file has no innings field. The playing-time floor for the
-  rank is not set yet. Build step 5 must set it.
+  rank is not set yet. Build step 6 must set it.
 - **Inference (part A):** catcher `fld` leaves out most framing value. Part A did
   not check this against a framing source.
 - Not in version one: Savant outs above average. The `oaa` column is already in the
@@ -300,18 +300,59 @@ changed nothing. Record only, no action.
 
 ## Build order
 
-1. Pure rating module with tests, test first: percentile-to-rating curve, bucket
+1. Calibration against posted video-game ratings (time-boxed; see below). It runs
+   first and must not block step 2.
+2. Pure rating module with tests, test first: percentile-to-rating curve, bucket
    means, the stretch with the 99 cap, the minimum-data rule, missing-bucket
    handling.
-2. Aging-curve research task, before the blend (see Career rating).
-3. Sharded prior-season store and reader (`staticJsonBy`), then the career
+3. Aging-curve research task, before the blend (see Career rating).
+4. Sharded prior-season store and reader (`staticJsonBy`), then the career
    weighting (recency decay and the age curve).
-4. Per-season `fld` store, and the minor-league season-lines fetch. Both come
+5. Per-season `fld` store, and the minor-league season-lines fetch. Both come
    before `gen-ovr.mjs`.
-5. `gen-ovr.mjs` and MLB hitters and pitchers.
-6. Floor modelling task, then minor leaguers with ceilings and POT. The task tests
+6. `gen-ovr.mjs` and MLB hitters and pitchers.
+7. Floor modelling task, then minor leaguers with ceilings and POT. The task tests
    whether the floor should rise with level.
-7. Rating history file and arrows (UI in #1703).
+8. Rating history file and arrows (UI in #1703).
+
+**Step 1: calibrate against posted ratings.** Treat posted video-game ratings as the
+answer key. Use them to calibrate only. Do not copy or reproduce their numbers.
+
+- (a) Fit posted attributes (Contact, Power, Speed, and so on) to posted OVR to
+  recover the weights. Reports say The Show's ratings are formula-driven
+  ([NBC Sports Bay Area](https://www.nbcsportsbayarea.com/mlb/mlb-the-show-20-player-ratings-where-as-roster-ended-up-on-100-scale/1280071),
+  [The Comeback](https://amp.thecomeback.com/gaming/mlb-the-show-23-player-ratings-released.html)),
+  so the fit should be close. **Inference** from those reports.
+- (b) Fit each attribute to the Statcast percentiles we already have, to set the
+  curve shape, the mean, and the spread, and to test the 2.0 / 1.5 stretch
+  factors.
+- (c) Optional: check the rank-to-future-value POT map in `docs/farm-index.md`
+  against posted scouting grades.
+- **Time box.** If no lawful data source is found, or the terms forbid use, record
+  that and go on with this spec's own start weights.
+
+What a quick web search found on 2026-10-07 (not a full survey):
+
+- No Kaggle or GitHub dataset of The Show ratings paired with stats.
+- An official public API for The Show was not confirmed. The spec names no
+  endpoint.
+- Possible third-party sources, all unchecked: the
+  [ShowZone player database](https://showzone-payload.onrender.com/players),
+  showdd.io, and the community tool
+  [theshowutil](https://pypi.python.org/project/theshowutil/). Ranking articles
+  list only a few top players.
+
+Limits:
+
+- **Known risk: fan-database terms.** The terms of use for any fan database are
+  unchecked. Read them before any scraping. This is a third known risk beside the
+  two MLB notes above. The scope of any clause is an **inference**.
+- **Inference (from reports):** the game averages about three years of data and may
+  add human judgment. A fit explains part of the spread, not all of it.
+- Only 246 of 612 hitters pass the minimum-data rule on one season, and the
+  predictors are correlated. Single-weight estimates stay unstable until prior
+  seasons exist.
+- The card must not say "official" and must not reuse The Show's tier names.
 
 Classify each new `src/api/` module in `src/api/spoiler-manifest.json`: this
 feature is spoiler-free. Check each step in the browser against a real player
