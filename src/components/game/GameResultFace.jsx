@@ -20,6 +20,7 @@ import {
   showsPerformerCard,
 } from '../../lib/resultCards.js'
 import { Pill } from '../ui/control/Pill.jsx'
+import { pillSolidStyle } from '../../lib/design/pillClass.js'
 import { Door } from '../ui/control/Door.jsx'
 
 // The flip card's back face: what a past, Final game's card turns into once
@@ -219,15 +220,19 @@ function ResultPills({ game, cardMeta }) {
   return (
     <div className="flipback__pills">
       {isGameOfTheNight && (
-        <Pill fill="ink" className="flipback__pill flipback__pill--crown">
+        <Pill
+          fill="solid"
+          className="flipback__pill"
+          style={pillSolidStyle({ ground: 'var(--award-ink)', text: 'var(--text-on-ink)' })}
+        >
           <span className="flipback__pill-star" aria-hidden="true">★</span> Game of the Night
         </Pill>
       )}
       {scenarioStyle && (
         <Pill
-          fill="ink"
-          className="flipback__pill flipback__pill--scenario"
-          style={{ '--pill-accent': scenarioStyle.accent, '--pill-text': scenarioStyle.text }}
+          fill="solid"
+          className="flipback__pill"
+          style={pillSolidStyle({ ground: scenarioStyle.accent, text: scenarioStyle.text })}
         >
           {SCENARIO_LABEL[scenario]}
         </Pill>

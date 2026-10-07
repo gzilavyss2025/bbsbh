@@ -9,7 +9,9 @@
 // throws: a silent fallback would ship an outline tag where someone asked for
 // a seal control.
 
-export const FILLS = ['outline', 'paper', 'ink', 'seal']
+import { TEXT, ratio } from './contrastPairings.js'
+
+export const FILLS = ['outline', 'paper', 'ink', 'seal', 'solid']
 export const ROLES = ['tag', 'control']
 
 // `figure` is the mono figure face (#1186): a rank, a level, a count. It is not
@@ -21,7 +23,7 @@ export function pillClassName({ fill = 'outline', role = 'tag', figure = false, 
   if (!ROLES.includes(role)) throw new Error(`Pill: unknown role "${role}" (${ROLES.join(', ')})`)
   const parts = ['pill']
   if (role !== 'tag') parts.push(`pill--${role}`)
-  if (fill !== 'outline') parts.push(`pill--${fill}`)
+  if (fill !== 'outline' && fill !== 'solid') parts.push(`pill--${fill}`)
   if (figure) parts.push('pill--figure')
   if (className) parts.push(className)
   return parts.join(' ')
@@ -53,8 +55,30 @@ export function pillInkStyle({ fill = 'outline', ink } = {}) {
   if (ink === undefined) return undefined
   if (!TOKEN.test(ink)) throw new Error(`Pill: ink must be a token name like "--field", not "${ink}"`)
   for (const [re, why] of REFUSED) if (re.test(ink)) throw new Error(`Pill: ink "${ink}" refused — ${why}`)
-  if (fill === 'ink' || fill === 'seal') {
+  if (fill === 'ink' || fill === 'seal' || fill === 'solid') {
     throw new Error(`Pill: fill="${fill}" carries its own ink; ink is for outline and paper`)
   }
   return { '--pill-ink': `var(${ink})` }
+}
+
+// THE SOLID GROUND (#1187). fill="solid" is a pill repainted in a ground the
+// caller brings, with the text that sits on it, as ONE pair. It has no class:
+// like outline, it is the base .pill reading --pill-fill, --pill-edge and
+// --pill-text, and this sets the three. A club's colour reaches a pill only
+// here or as a tint host (ADR-0030), and only on an identity label.
+//
+// The pair is checked. Two hex colours must clear `min` (WCAG AA text, 4.5, by
+// default) or this throws. A `var(--token)` cannot be resolved at runtime, so
+// a token pair passes through and scripts/check-contrast.mjs holds it through
+// its PAIRINGS. `min` is for a pair the caller cannot retune: the club key
+// colours (winprob/keyColors.js) pass the UI bar (3), because six real band
+// colours sit between 3 and 4.5 with their best text.
+const HEX = /^#[0-9a-f]{6}$/i
+
+export function pillSolidStyle({ ground, text, min = TEXT }) {
+  if (HEX.test(ground) && HEX.test(text)) {
+    const r = ratio(text, ground)
+    if (r < min) throw new Error(`Pill: solid ${text} on ${ground} is ${r.toFixed(2)}:1, under ${min}:1 contrast`)
+  }
+  return { '--pill-fill': ground, '--pill-edge': ground, '--pill-text': text }
 }
