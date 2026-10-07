@@ -222,16 +222,16 @@
 }
 
 .ballglyph circle {
-  stroke: var(--rule);
+  stroke: var(--border-rule);
   stroke-width: 3;
 }
 
 .ballglyph__shadelight {
-  stop-color: var(--paper-3);
+  stop-color: var(--surface-inset);
 }
 
 .ballglyph__shadedark {
-  stop-color: var(--rule-soft);
+  stop-color: var(--border-hairline);
 }
 
 .ballglyph__seam {
