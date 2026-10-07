@@ -27,6 +27,12 @@ sessions that share one machine. In the cloud, these rules change:
 - **Branch.** Use the branch the session gives you (`claude/<name>-<id>`). Do not
   create your own. It starts at current `origin/main`. Start a new session from
   `main` for each task. After its PR merges, do not reuse that branch.
+- **"N unpushed commit(s)" from the Stop hook.** The platform adds
+  `~/.claude/stop-hook-git-check.sh`; the repo cannot turn it off. It counts
+  `origin/<branch>..HEAD`, and the environment sets that local ref at session creation
+  without a push. `session-start.sh` moves the ref when it fast-forwards a task branch
+  that is not on GitHub, so the commits main got are not counted. If the message comes
+  back and every listed commit is on `origin/main`, `git push -u origin HEAD` stops it.
 - **No worktree.** Nobody else shares the container, so edit in the primary checkout.
   The `block-primary-checkout-edit` hook skips cloud sessions for this reason.
   Local sessions still need a worktree.
