@@ -141,7 +141,7 @@
 }
 .trrank__flip {
   flex: 0 0 auto;
-  border-style: dashed;
+  border-style: solid;
 }
 
 /* Topic rail. It acts as a compact broadcast subnav, while normal anchor
