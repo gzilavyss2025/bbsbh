@@ -76,10 +76,9 @@ const BUDGETS = {
   // really did disappear here, which is what makes tightening this safe: no
   // client ever asked for `/api/og` except the warm pass, and it stopped.
   //
-  // 14 -> 15 for `headshot-report.js`, TEMPORARY (issue #1446): the receiver
-  // for the background "?" report. It is deleted, and this goes back to 14, as
-  // soon as the cause of the "?" is found. A URL like every other file here.
-  api: 15,
+  // 14 -> 15 -> 14 for `headshot-report.js` (issue #1446): the temporary receiver
+  // for the "?" report. The cause was found, so it is deleted.
+  api: 14,
   // The 51 stylesheet partials src/index.css @imports in order. This one is a
   // deliberate exception rather than a directory awaiting subdivision: the files
   // are an ORDERED SEQUENCE, not independent modules, and the numeric prefix is
