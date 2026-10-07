@@ -141,9 +141,10 @@ export function useOffseason(dateStr, sportId, seasonRow) {
 // True while the postseason is on: Milestone Watch hides its ETAs then (#1438).
 // Decided at render time from today's date and the season row, so the nightly
 // file does not change. False until the row arrives, and false if it fails.
-export function useMilestonesPaused() {
+// `enabled` false (a card with nothing to show) makes no request.
+export function useMilestonesPaused(enabled = true) {
   const today = baseballToday()
   const year = Number(today.slice(0, 4))
-  const { data } = useAsync(() => fetchSeasonMeta(year), [year])
+  const { data } = useAsync(() => (enabled ? fetchSeasonMeta(year) : null), [year, enabled])
   return milestoneProjectionPaused(today, data)
 }
