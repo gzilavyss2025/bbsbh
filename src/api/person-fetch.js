@@ -120,12 +120,13 @@ export async function fetchPersonStats(
 // sabermetrics (FIP, ERA−). All are live full-season aggregates — same
 // spoiler footing as the vs-L/R season splits (see advancedPitchingView).
 // MLB-only at the source; degrades to null per type, and the card then
-// simply doesn't render.
-export async function fetchPitchingAdvanced(personId, season) {
+// simply doesn't render. `gameType: 'P'` reads the postseason: no sabermetrics
+// come back for it (checked live 2026-10-07), so that entry is null.
+export async function fetchPitchingAdvanced(personId, season, { gameType } = {}) {
   if (!personId || !season) return null
   try {
     const data = await getJson(
-      `/api/v1/people/${personId}/stats?stats=season,seasonAdvanced,sabermetrics&group=pitching&season=${season}`,
+      `/api/v1/people/${personId}/stats?stats=season,seasonAdvanced,sabermetrics&group=pitching&season=${season}${gameType ? `&gameType=${gameType}` : ''}`,
     )
     const statFor = (name) =>
       (data.stats ?? []).find((s) => s.type?.displayName === name)?.splits?.[0]?.stat ?? null
@@ -145,11 +146,11 @@ export async function fetchPitchingAdvanced(personId, season) {
 // outs/hits buckets), and sabermetrics (wOBA, wRC+). Same live footing as the
 // vs-L/R season splits (see advancedHittingView). MLB-only at the source;
 // degrades to null per field, and the card then simply doesn't render.
-export async function fetchHittingAdvanced(personId, season) {
+export async function fetchHittingAdvanced(personId, season, { gameType } = {}) {
   if (!personId || !season) return null
   try {
     const data = await getJson(
-      `/api/v1/people/${personId}/stats?stats=season,seasonAdvanced,sabermetrics&group=hitting&season=${season}`,
+      `/api/v1/people/${personId}/stats?stats=season,seasonAdvanced,sabermetrics&group=hitting&season=${season}${gameType ? `&gameType=${gameType}` : ''}`,
     )
     const statFor = (name) =>
       (data.stats ?? []).find((s) => s.type?.displayName === name)?.splits?.[0]?.stat ?? null

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { FactGrid } from '../ui/frame/FactGrid.jsx'
+import { Pill } from '../ui/control/Pill.jsx'
 
 // The player page's "Advanced" card, either group: the rates behind the
 // headline tiles. For a pitcher that's FIP, league-adjusted ERA−, the K/BB
@@ -16,15 +17,32 @@ import { FactGrid } from '../ui/frame/FactGrid.jsx'
 // "i" glyph next to its label rather than one fixed caveat paragraph under
 // the grid, so a reader only sees the prose for the term they're actually
 // unsure of.
-export function AdvancedStatsCard({ adv }) {
+//
+// A Regular / Postseason switch (#1436) shows once he has an October game and the
+// page is not dated: the two scopes are never blended, and Regular is the default.
+// The API has no postseason wOBA, wRC+, FIP or ERA−, so those cells read "—".
+export function AdvancedStatsCard({ adv, post = null }) {
+  const [picked, setPicked] = useState('reg')
   if (!adv?.facts?.length) return null
+  const inPost = post?.facts?.length > 0 && picked === 'post'
+  const shown = inPost ? post : adv
   return (
     <div className="advcard">
-      <SectionHead look="rule" note="full season">
+      <SectionHead look="rule" note={inPost ? 'postseason' : 'full season'}>
         Advanced
       </SectionHead>
+      {post?.facts?.length > 0 && (
+        <div className="player__splitscope" role="group" aria-label="Advanced scope">
+          <span className="player__splitscopelabel">Scope</span>
+          {[['reg', 'Regular'], ['post', 'Postseason']].map(([k, text]) => (
+            <Pill key={k} role="control" fill="paper" pressed={picked === k} onClick={() => setPicked(k)}>
+              {text}
+            </Pill>
+          ))}
+        </div>
+      )}
       <FactGrid>
-        {adv.facts.map((f) => (
+        {shown.facts.map((f) => (
           <AdvancedFact key={f.label} label={f.label} value={f.value} note={f.note} />
         ))}
       </FactGrid>

@@ -120,6 +120,20 @@
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
+/* The postseason line (#1436): a caption, then the same four tiles, only once he has
+   played an October game. It sits under the season row and never replaces it. */
+.phcard__postlabel {
+  padding: 0 var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.phcard__stats--post {
+  padding-top: var(--space-2);
+}
+
 .phcard__tile {
   display: flex;
   flex-direction: column;

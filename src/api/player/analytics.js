@@ -66,7 +66,7 @@ export async function loadPlayerAnalytics(id, asOf) {
 
   const blocks = await Promise.all(
     groups.map(async (group) => {
-      const [current, arsenalSplits, advancedBundle] = await Promise.all([
+      const [current, arsenalSplits, advancedBundle, postBundle] = await Promise.all([
         // Which LEVEL this shelf is reading. A pitcher ranks in arsenal space
         // against the level he is actually pitching at, and the heat band reads
         // the same way, so the tile level has to be resolved even though this
@@ -81,6 +81,13 @@ export async function loadPlayerAnalytics(id, asOf) {
         // return the same three-stat bundle shape.
         currentActivitySportId === 1
           ? (group === 'pitching' ? fetchPitchingAdvanced(id, season) : fetchHittingAdvanced(id, season))
+          : Promise.resolve(null),
+        // The same bundle for October (#1436), the card's Postseason scope. A dated
+        // page asks nothing: the API cannot cut it to the date, so it would look ahead.
+        currentActivitySportId === 1 && !cutoff
+          ? (group === 'pitching'
+            ? fetchPitchingAdvanced(id, season, { gameType: 'P' })
+            : fetchHittingAdvanced(id, season, { gameType: 'P' }))
           : Promise.resolve(null),
       ])
       const { seasonSplits, stat: tileStat, sportId: tileSportId, levelOnlyStat, levelOnlySplits } = current
@@ -155,6 +162,10 @@ export async function loadPlayerAnalytics(id, asOf) {
       block.arsenalSides = arsenalShard ? arsenalSidesView(arsenalShard, id, tileSportId === 1) : null
       block.advanced =
         group === 'pitching' ? advancedPitchingView(advancedBundle) : advancedHittingView(advancedBundle)
+      block.advancedPost =
+        group === 'pitching'
+          ? advancedPitchingView(postBundle, { post: true })
+          : advancedHittingView(postBundle, { post: true })
       // The batted-ball profile shares the Advanced card's seasonAdvanced
       // response — one fetch feeds both cards.
       block.battedBall = group === 'hitting' ? battedBallView(advancedBundle?.seasonAdvanced) : null
