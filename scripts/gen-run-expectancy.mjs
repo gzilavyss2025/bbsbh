@@ -56,13 +56,13 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { eraDecade } from '../src/lib/runExpectancy.js'
 import { getJson } from './lib/statsapi.mjs'
-import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import {
-  accumulateGame,
   checkpointOf,
   decadeSeasons,
   mergeCheckpoints,
+  schedulePks,
+  sweepGames,
 } from './lib/run-expectancy/eras.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -81,21 +81,8 @@ function parseArgs(argv) {
   return args
 }
 
-// Every Final regular-season gamePk for one season. Same postponed-replay
-// dedup guard as gen-umpires.mjs / gen-umpire-accuracy.mjs: a replayed game
-// can be listed under both its original date and its officialDate; keep only
-// the listing whose bucket matches its own officialDate.
 async function seasonGamePks(season) {
-  const data = await getJson(`/api/v1/schedule?sportId=1&season=${season}&gameType=R&hydrate=team`)
-  const pks = []
-  for (const d of data.dates ?? []) {
-    for (const g of d.games ?? []) {
-      if (g.status?.abstractGameState !== 'Final') continue
-      if (d.date !== g.officialDate) continue
-      pks.push(g.gamePk)
-    }
-  }
-  return pks
+  return schedulePks(await getJson(`/api/v1/schedule?sportId=1&season=${season}&gameType=R&hydrate=team`))
 }
 
 // --- main ---------------------------------------------------------------------
@@ -105,26 +92,23 @@ const seasons = args.seasons
   ? args.seasons.split(',').map((s) => s.trim())
   : [String(currentYear - 2), String(currentYear - 1)]
 
-// Sweep one season's Final games into `states`/`re24`. Returns { scheduled, games }.
+// Sweep one season's Final games into `states`/`re24`. Returns
+// { scheduled, games, noPlays, failed } (see sweepGames).
 async function sweepSeason(season, limit, states, re24) {
   const pks = await seasonGamePks(season)
   console.log(`${season}: ${pks.length} Final games`)
-  let games = 0
-  // Accumulate each game's feed into states/re24 AS IT ARRIVES, inside the
-  // worker itself, rather than collecting all of a season's feeds (each
-  // several hundred KB to a few MB) in memory before processing any of
-  // them — a full season is 2000+ games, so buffering them all first was a
-  // real peak-memory problem. mapConcurrent's return value is unused
-  // here; the accumulation IS the work.
-  let done = 0
-  await mapConcurrent(pks, limit, async (pk) => {
-    const feed = await getJson(`/api/v1.1/game/${pk}/feed/live`)
-    if (accumulateGame(feed, states, re24)) games++ // a feed with no plays does not count
-    done++
-    if (done % 250 === 0) console.log(`${season}: ${done}/${pks.length} games processed`)
-  })
+  const result = await sweepGames(
+    pks,
+    limit,
+    (pk) => getJson(`/api/v1.1/game/${pk}/feed/live`),
+    states,
+    re24,
+    (done) => {
+      if (done % 250 === 0) console.log(`${season}: ${done}/${pks.length} games processed`)
+    },
+  )
   console.log(`${season}: swept (${states.size} states populated so far)`)
-  return { scheduled: pks.length, games }
+  return { scheduled: pks.length, ...result }
 }
 
 if (process.argv.includes('--era-sweep')) {
@@ -142,10 +126,15 @@ if (process.argv.includes('--era-sweep')) {
     const started = Date.now()
     const states = new Map()
     const re24 = new Map()
-    const { scheduled, games } = await sweepSeason(season, 4, states, re24)
-    await writeJsonAtomic(file, checkpointOf(season, scheduled, games, states, re24))
+    const { scheduled, games, noPlays, failed } = await sweepSeason(season, 4, states, re24)
+    // A checkpoint is skipped on every re-run, so a hole in it would stay for good.
+    if (failed.length) {
+      console.error(`${season}: ${failed.length} feed fetches failed (${failed.join(', ')}); no checkpoint written, run it again`)
+      process.exit(1)
+    }
+    await writeJsonAtomic(file, checkpointOf(season, scheduled, games, states, re24, noPlays))
     const min = ((Date.now() - started) / 60000).toFixed(1)
-    console.log(`${season}: wrote ${file} — ${games}/${scheduled} games, ${min} min`)
+    console.log(`${season}: wrote ${file} — ${games}/${scheduled} games (${noPlays} with no play-by-play), ${min} min`)
   }
   process.exit(0)
 }
@@ -184,7 +173,9 @@ const states = new Map()
 const re24 = new Map()
 let gamesSwept = 0
 for (const season of seasons) {
-  gamesSwept += (await sweepSeason(season, 6, states, re24)).games
+  const { games, failed } = await sweepSeason(season, 6, states, re24)
+  gamesSwept += games
+  if (failed.length) console.warn(`${season}: ${failed.length} feed fetches failed and are left out of the sums`)
 }
 
 await writeJsonAtomic(out, {
