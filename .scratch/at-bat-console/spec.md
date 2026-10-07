@@ -123,6 +123,26 @@ callout covers the left side of the infield.
 `stage-sealed.jpg`: before the half's first tap the stage is an empty kraft frame of
 the same height. Nothing about the hidden at-bat shapes it.
 
+### Gary's feedback on round 2 (2026-10-07) — carry into the build
+
+- **The bat swing in the mockups is wrong. Do not copy it.** Gary: "the bat swing
+  animation looks way wrong, no one holds the bat in that position." The mock
+  pivots a straight stick around a point beside the zone. A real swing starts with
+  the hands near the back shoulder and the barrel up and behind the head. The hands
+  then come forward and down, and the barrel lags, then whips through the hitting
+  zone. Any bat drawing must start from a real grip and stance and follow that
+  path (inference: hands and barrel as two points on a keyframed path, posed from
+  the batter's side `L`/`R`). Check it with Gary on a still frame before animating.
+  Until then, leave the bat out.
+- **The pitch flight Gary likes is the Now Pitching card's scene.** Gary: "i also
+  like how the pitch arsenal looks where you see the flight of the ball." That is
+  `PitchScene.jsx` with `lib/pitcherCard/scene.js`: the behind-the-plate view where
+  each pitch draws a trail from the release point that thickens as it comes in.
+  It already plays a revealed at-bat's own measured flights in
+  `AtBatReplay.jsx` (`atBat` mode, `lib/pitcherCard/atBat.js`, PR 1521). Use it for
+  the stage's zone half, not the mockups' flat fly-in. Its pitch label stays the
+  sequence number (rule 3).
+
 ### The data (from PR #1621, `docs/peer-sites.md` "Data notes", checked again here)
 
 | What | Source | Live? |
@@ -176,12 +196,12 @@ because it removes the accidental-spoil control.
 |---|---|---|---|---|---|
 | S1 | Bar + band trims + linescore fit: drop "Rest of half", one centered Next, "41 PITCHES", no "No outs", E column fits at 390px | `inning/focus/FocusControls.jsx`, `inning/InningActionBar.jsx`, `styles/focus/stage.css`, `gamehud/RollingLine.jsx`, `e2e/reveal-hit-area.spec.js` (+ `inning-modal-stacking.spec.js` if needed; split off if over 5) | ADR-0043 console bar; keep the specs' hit-area assertions | No "Rest of half" in DOM at 390px; RollingLine's 12 columns inside 390px (screenshot); `npm test` green | Sonnet 5.5, medium |
 | S2 | Names, ordinals, day lines (batter and pitcher, revealed steps only) | `playbyplay/AtBatHero.jsx`, new pure `api/playbyplay/dayLine.js`, its test, `spoiler-manifest.json`, `src/api/CLAUDE.md` | reveal-only module called inside `SealBox` (ADR-0001); `computeHalfInningFeed` stepCap | Unit test: day line at step k counts only steps < k; batter named once on screen | Opus 5.5, high (new reveal-only read) |
-| S3 | The stage, zone half (V1): pitches fly in as numbers and X, the bat sweeps on swings, ABS rings; runner-event and ABS lines under it; fixed sealed height | new `inning/focus/AtBatStage.jsx`, `styles/focus/stage-anim.css`, `runnerNotes.js` (WP/BK/PB labels), test, `AtBatHero.jsx` mount | `scoring/StrikeZone.jsx` + `lib/zone/zoneGeometry.js`; PR 1521's replay scene (`lib/pitcherCard/scene.js`); ADR-0046 | Unit test: `runnerPitchLabel('wild_pitch', 2)` returns "Pitch 2" (fails today); no stage node before reveal; reduced motion shows the end state | Opus 5.5, high |
+| S3 | The stage, zone half (V1): each pitch flies in along its measured path (`PitchScene` `atBat` mode), numbers and X, ABS rings, no bat until a real swing pose is agreed; runner-event and ABS lines under it; fixed sealed height | new `inning/focus/AtBatStage.jsx`, `styles/focus/stage-anim.css`, `runnerNotes.js` (WP/BK/PB labels), test, `AtBatHero.jsx` mount | `AtBatReplay.jsx` / `PitchScene.jsx` / `lib/pitcherCard/atBat.js` (PR 1521) reused inline; ADR-0046 | Unit test: `runnerPitchLabel('wild_pitch', 2)` returns "Pitch 2" (fails today); no stage node before reveal; reduced motion shows the end state | Opus 5.5, high |
 | S4 | Runners chip + sheet: runner boxes 3rd·2nd·1st, departed for one step (kraft chip), "Bases empty" disabled | new `inning/focus/RunnersSheet.jsx`, `api/expresslane/runners.js` (reuse `expressDeck`), `styles/focus/bases.css`, `HalfInning.jsx` mount, test | Express Lane deck (`77c-express-lane-deck.css`); ADR-0072 (box at current cap, never cap+1) | Unit test: runners at step k match `runnersOnBase` at cap k; departed only at k | Opus 5.5, high |
 | S5 | Notice cards that say what to write (rule #, PR #, AR) | `PitcherNotice.jsx`, `PinchRunNotice.jsx`, `BatterNotice.jsx`, `PlacedRunnerCard.jsx`, `HalfInning.jsx` | existing Notice component (#1132 N1 to N9) | 823035 top 1st and the PH/PR moments render the "write" line | Sonnet 5.5, medium |
 | S6 | The stage, field half (V1): on contact the zone shrinks to a corner and the flight draws to the landing mark on the real park; runner dots on the bases; Replay | `AtBatStage.jsx`, `stage-anim.css`, `components/charts/BallFlight.jsx` (lift the plot), test | `lib/ballpark/ballFlight.js`, `hitProjection.js`, `ballparkData.js` (all reused as is); `api/hitchart.js` stays reveal-only | Test: HR landing mark absent before reveal; untracked park (MiLB) shows the zone only | Opus 5.5, high |
-| S9 | Bat speed from Savant `/gf`, reveal-only, fills in when it arrives; bat swing time from it | new `api/savant/gameFeed.js` + test, `spoiler-manifest.json`, `src/api/CLAUDE.md`, `AtBatStage.jsx` | `linescore.js` reveal-only class (ADR-0001); optional with fallback (`docs/data-enrichment.md` §3) | Test: only the revealed at-bat's rows leave the module; no `/gf` call before reveal | Opus 5.5, high |
-| S10 | Swing path for finished games (CSV): real tilt, contact-swing line | `api/savant/swingPath.js` + test, `AtBatStage.jsx`, `spoiler-manifest.json` | S9's module; CSV parse at fetch, not at build | Test: a live game (CSV empty) falls back to 30° with no error | Sonnet 5.5, high |
+| S9 | Bat speed from Savant `/gf`, reveal-only, shown as a number that fills in when it arrives | new `api/savant/gameFeed.js` + test, `spoiler-manifest.json`, `src/api/CLAUDE.md`, `AtBatStage.jsx` | `linescore.js` reveal-only class (ADR-0001); optional with fallback (`docs/data-enrichment.md` §3) | Test: only the revealed at-bat's rows leave the module; no `/gf` call before reveal | Opus 5.5, high |
+| S10 | Swing path for finished games (CSV): contact-swing line; a drawn bat only after Gary approves a real swing pose | `api/savant/swingPath.js` + test, `AtBatStage.jsx`, `spoiler-manifest.json` | S9's module; CSV parse at fetch, not at build | Test: a live game (CSV empty) falls back to 30° with no error | Sonnet 5.5, high |
 | S7 | Review card (manager / crew chief) + ABS bank pips, revealed only | new `api/playbyplay/reviews.js` + test, `gamehud/ConsoleBand.jsx`, `AtBatHero.jsx`, `spoiler-manifest.json` | `challenges.js`, but NOT `gameData.absChallenges` (whole-game, leaks) | Unit test: bank at step k ignores challenges after k (824546, 823169) | Opus 5.5, high |
 | S8 | The three notation rulings (this shape session's options) | `advanceCode.js`, `halfInningFeed.js`, `eventTypes.js` or a new set, test, `docs/adr/0043` amendment | the existing `legAdvanceCode` / `runnerOutCode` tests | Test that fails first: 823166 bot 1st Cox's leg to 3rd has `slot: null`; 824951 Neto reads the chosen PKCS mark | Sonnet 5.5, high |
 
