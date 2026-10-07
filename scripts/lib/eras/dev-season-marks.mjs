@@ -24,6 +24,7 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { contrastRatio } from '../../../src/lib/contrast.js'
 import { describeMarkRejection } from '../dev-custom-marks.mjs'
 
 const REPO_ROOT = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)))
@@ -38,6 +39,9 @@ export const DEV_ERA_ART_MAX_BODY_BYTES = 512 * 1024
 const ART_DIR = 'public/logos/historical'
 const STORE_FILE = 'src/lib/data/season-marks.json'
 const FIRST_SEASON = 1876
+const AA_TEXT = 4.5
+const HEX = /^#[0-9a-f]{6}$/i
+const COLOUR_FIELDS = ['bar', 'accent', 'onBar']
 
 // `119-1945-1957.svg`, or `.png` for the art fetch.mjs already placed.
 export function resolveEraFile(name) {
@@ -60,6 +64,23 @@ function describeEraProblem(teamId, era) {
   if (typeof era.name !== 'string' || !era.name.trim() || era.name.length > 80) return 'give the era a name (80 characters at most)'
   if (typeof era.abbr !== 'string' || !/^[A-Z]{2,4}$/.test(era.abbr)) return 'the abbreviation is 2 to 4 capital letters'
   if (era.source != null && (typeof era.source !== 'string' || era.source.length > 300)) return 'the source note is 300 characters at most'
+  return describeColourProblem(era)
+}
+
+// The era's colours, as the header triad the club stores carry. A field the
+// form left empty is ABSENT, never "" (src/lib/data/CLAUDE.md). The bar is the
+// real chrome of a real page, so onBar has to clear WCAG AA against it.
+function describeColourProblem(era) {
+  const have = Object.fromEntries(COLOUR_FIELDS.map((k) => [k, era[k] || null]))
+  for (const k of COLOUR_FIELDS) {
+    if (have[k] && !HEX.test(have[k])) return `${k} must be #RRGGBB`
+  }
+  if (!have.bar && (have.accent || have.onBar)) return 'an accent or onBar needs a bar colour'
+  if (have.bar && !have.onBar) return 'a bar colour needs an onBar (the ink on it)'
+  if (have.bar && contrastRatio(have.onBar, have.bar) < AA_TEXT) {
+    const ratio = contrastRatio(have.onBar, have.bar).toFixed(2)
+    return `onBar on bar is ${ratio}:1; WCAG AA needs ${AA_TEXT}:1`
+  }
   return null
 }
 
@@ -84,6 +105,11 @@ export function applyEraSave(store, { teamId, era, replaceFrom = null }) {
   if (kept == null) next.file = null
   if (era.source != null) next.source = era.source.trim()
   if (next.source === '') delete next.source
+  for (const k of COLOUR_FIELDS) {
+    if (era[k] === undefined) continue
+    if (era[k]) next[k] = era[k].toUpperCase()
+    else delete next[k]
+  }
   eras.push(next)
   eras.sort((a, b) => a.from - b.from)
   clubs[String(teamId)] = eras

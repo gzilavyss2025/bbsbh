@@ -1517,8 +1517,8 @@ Re-run only to fold in a new season.
   domain or CC0. Any other licence keeps `file: null` and a `skipped` note, so the reader
   draws the era's serif abbreviation (`abbr`, from the Stats API for those seasons) and the
   maintainer sees what needs a decision (#1626). An era Commons does not document carries
-  a `cite`. No era carries colours: no cited source gives period values, so a covered era
-  wears neutral chrome. The "trademarked" restriction is recorded per file. Reader:
+  a `cite`. This script sets no colours; an era carries its own
+  triad only when set in the lab, and otherwise wears neutral chrome. The "trademarked" restriction is recorded per file. Reader:
   `src/lib/identity/seasonMarks.js`, through `TeamLogo`'s `season` prop.
 - `gen-postseason-history.mjs` → `public/data/postseason-history.json` — the
   completed bracket (who played, who won, how many games, each team's 1-6

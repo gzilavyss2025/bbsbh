@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react'
 import { Card } from '../../../components/ui/frame/Card.jsx'
+import { contrastRatio, readableTextColor } from '../../../lib/contrast.js'
+import { HexField } from '../HexField.jsx'
 import { saveEraRow, uploadEraArt } from '../saveStores.js'
+import { UmpireCall } from './HeaderPreview.jsx'
 
 // One era of one club: its years, its name and period abbreviation, a source
 // note, and its mark (#1591). `era` is null for the "add an era" form, which
@@ -10,10 +13,22 @@ import { saveEraRow, uploadEraArt } from '../saveStores.js'
 // hot-reloads off the landed value, so there is no draft store here, only the
 // form's own fields. Drop an SVG onto the mark box, or pick one, and it becomes
 // the era's mark. Nothing is fetched from anywhere: you bring the file.
-const EMPTY = { from: '', to: '', name: '', abbr: '', source: '' }
+const EMPTY = { from: '', to: '', name: '', abbr: '', source: '', bar: '', accent: '', onBar: '' }
+const HEX = /^#[0-9a-f]{6}$/i
 
 function formOf(era) {
-  return era ? { from: era.from, to: era.to, name: era.name, abbr: era.abbr ?? '', source: era.source ?? '' } : EMPTY
+  return era
+    ? {
+        from: era.from,
+        to: era.to,
+        name: era.name,
+        abbr: era.abbr ?? '',
+        source: era.source ?? '',
+        bar: era.bar ?? '',
+        accent: era.accent ?? '',
+        onBar: era.onBar ?? '',
+      }
+    : EMPTY
 }
 
 export function EraRow({ teamId, era, bust, onArt }) {
@@ -24,6 +39,15 @@ export function EraRow({ teamId, era, bust, onArt }) {
   const inputRef = useRef(null)
 
   const set = (field) => (e) => setForm((was) => ({ ...was, [field]: e.target.value }))
+  // Picking a bar suggests the ink on it (whichever of white or near-black
+  // reads better) until you set one yourself.
+  const setHex = (field) => (value) =>
+    setForm((was) => {
+      const next = { ...was, [field]: value }
+      if (field === 'bar' && HEX.test(value) && !was.onBar) next.onBar = readableTextColor(value, '#FFFFFF', '#101820')
+      return next
+    })
+  const triad = HEX.test(form.bar) && HEX.test(form.onBar)
   const dirty = JSON.stringify(form) !== JSON.stringify(formOf(era))
 
   async function run(task) {
@@ -46,7 +70,7 @@ export function EraRow({ teamId, era, bust, onArt }) {
         action: 'save',
         teamId,
         replaceFrom: era?.from ?? null,
-        era: { from: Number(form.from), to: Number(form.to), name: form.name, abbr, source: form.source },
+        era: { from: Number(form.from), to: Number(form.to), name: form.name, abbr, source: form.source, bar: form.bar, accent: form.accent, onBar: form.onBar },
       }),
     )
     if (result) {
@@ -88,6 +112,7 @@ export function EraRow({ teamId, era, bust, onArt }) {
             attach(e.dataTransfer?.files?.[0])
           }}
           title="Drop an SVG here"
+          style={HEX.test(era.bar ?? '') ? { background: era.bar } : undefined}
         >
           {era.file ? (
             <img src={`/logos/historical/${era.file}?v=${bust}`} alt={`${era.name} mark, ${era.from}-${era.to}`} />
@@ -118,6 +143,21 @@ export function EraRow({ teamId, era, bust, onArt }) {
           <input type="text" value={form.source} onChange={set('source')} maxLength={300} />
         </label>
       </div>
+      <div className="colorlab__headerfields idlab__erawide">
+        <label>
+          <span>Bar</span>
+          <HexField placeholder="not set" value={form.bar} onChange={setHex('bar')} />
+        </label>
+        <label>
+          <span>Accent</span>
+          <HexField placeholder="not set" value={form.accent} onChange={setHex('accent')} />
+        </label>
+        <label>
+          <span>On bar</span>
+          <HexField placeholder="not set" value={form.onBar} onChange={setHex('onBar')} />
+        </label>
+      </div>
+      {triad && <UmpireCall contrast={contrastRatio(form.onBar, form.bar)} />}
       <div className="idlab__eraactions">
         <button type="button" className="colorlab__wparesetbtn" onClick={save} disabled={busy || !dirty}>
           {era ? 'Save era' : 'Add era'}

@@ -66,6 +66,13 @@ not overlap, because `seasonMark` takes the first match. An edit keeps the field
 does not show (the art file, a fetched licence). Markup passes the same gate as the custom
 marks: it must be an SVG and carry nothing executable.
 
+An era may also carry a header triad, `bar`, `accent` and `onBar`, set with the same hex fields
+and SAFE/OUT chip as a club's bars. A bar needs its `onBar`, and `onBar` must clear WCAG AA
+against it: the dev save refuses a pair that fails, `scripts/check-contrast.mjs` re-checks the
+table, and picking a bar suggests white or near-black for the ink. With a triad, an old game's
+club bar wears it and its tile tints with `bar`; with none, the era keeps the neutral chrome.
+Today's club colours never carry back to an old game.
+
 `scripts/season-marks/fetch.mjs` is a one-time bootstrap now. It refuses to run without
 `--rebuild-from-seed`, because it rebuilds the table from `seed.json` and would erase the
 lab's edits.

@@ -64,3 +64,33 @@ test('the art destination is rebuilt from the file name, and refuses anything el
   assert.throws(() => resolveEraFile('119-1945-1957.exe'), /not writable/)
   assert.throws(() => resolveEraFile('a/119-1945-1957.svg'), /not writable/)
 })
+
+// Era colours (#1591, PR 2): the same triad a club header carries. The bar is
+// real chrome on a real page, so onBar has to clear WCAG AA against it.
+test('an era may carry a bar, accent and onBar, normalised to upper case', () => {
+  const out = applyEraSave(store(), { teamId: 119, era: era(1914, 1933, { bar: '#005a9c', accent: '#ef3e42', onBar: '#ffffff' }) })
+  const saved = out.store.clubs[119].find((e) => e.from === 1914)
+  assert.equal(saved.bar, '#005A9C')
+  assert.equal(saved.accent, '#EF3E42')
+  assert.equal(saved.onBar, '#FFFFFF')
+})
+
+test('an onBar that fails AA against the bar is refused, with the ratio', () => {
+  const out = applyEraSave(store(), { teamId: 119, era: era(1914, 1933, { bar: '#005A9C', onBar: '#333333' }) })
+  assert.match(out.problem, /4\.5:1/)
+  assert.equal(out.status, 400)
+})
+
+test('a bar needs an onBar, and an accent or onBar needs a bar', () => {
+  assert.match(applyEraSave(store(), { teamId: 119, era: era(1914, 1933, { bar: '#005A9C' }) }).problem, /onBar/)
+  assert.match(applyEraSave(store(), { teamId: 119, era: era(1914, 1933, { onBar: '#FFFFFF' }) }).problem, /bar/)
+  assert.match(applyEraSave(store(), { teamId: 119, era: era(1914, 1933, { bar: 'blue', onBar: '#FFFFFF' }) }).problem, /#RRGGBB/)
+})
+
+test('empty colour strings clear the fields instead of storing ""', () => {
+  const had = applyEraSave(store(), { teamId: 119, era: era(1914, 1933, { bar: '#005A9C', onBar: '#FFFFFF' }) }).store
+  const out = applyEraSave(had, { teamId: 119, replaceFrom: 1914, era: era(1914, 1933, { bar: '', accent: '', onBar: '' }) })
+  const saved = out.store.clubs[119].find((e) => e.from === 1914)
+  assert.equal('bar' in saved, false)
+  assert.equal('onBar' in saved, false)
+})
