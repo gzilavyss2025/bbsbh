@@ -31,7 +31,7 @@
 .scoresum__play + .scoresum__play {
   margin-top: var(--space-2);
   padding-top: var(--space-2);
-  border-top: var(--bw-hair) dashed var(--border-rule);
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 
 /* The head of a play: club mark, ▲/▼ + inning, then WHO | WHAT. */

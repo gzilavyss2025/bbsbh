@@ -184,7 +184,7 @@ button.gamelines__door {
    ordinary rows of this same table. Dressed as structure, not as data: the
    head row's paper, a dashed rule above it, and no figures. */
 .gamelines__famrow {
-  border-top: var(--bw-hair) dashed var(--border-rule);
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 
 button.gamelines__fam {
