@@ -18,6 +18,7 @@ import { Table } from '../components/ui/table/Table.jsx'
 import { GuideLink } from '../components/chrome/GuideLink.jsx'
 import { WinProbChart } from '../components/charts/WinProbChart.jsx'
 import { HitChartCard } from './boxscore/HitChartCard.jsx'
+import { FeatLabel } from './boxscore/FeatLabel.jsx'
 import { AbsRow } from '../components/gamehud/StatBox.jsx'
 import { PerformerCard } from '../components/player/PerformerCard.jsx'
 import { CalloutNote } from '../components/playbyplay/CalloutNote.jsx'
@@ -345,6 +346,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
             guarantee, and that is a render-function boundary, not a position
             on the page. */}
         <StampGameButton game={stampFacts} />
+        <FeatLabel gamePk={feed?.gamePk} />
         <h2 className="bs__sectionTitle">Highlights</h2>
         {/* Wide: totals over the scoring summary beside decisions over the
             win-prob arc. The wrappers are transparent on a phone. */}

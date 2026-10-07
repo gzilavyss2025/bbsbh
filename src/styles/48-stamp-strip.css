@@ -248,7 +248,7 @@
 
 /* ---- the box score's phone order ---------------------------------------
    BoxScore.jsx renders ONE section in the desktop reading order. On a phone
-   the reader wants a different one (Gary's, 2026-09-29): stamp, totals,
+   the reader wants a different one (Gary's, 2026-09-29): stamp, feat label, totals,
    the scoring summary, decisions, line score, Insights, pitching tally, the game story, both clubs'
    cards (away's four, then home's four), and only then the win-prob arc, Play
    of the Game, Photos, Statcast Leaders, the video row, the hit chart, the notes and,
@@ -267,6 +267,7 @@
   }
 
   .bs .stampstrip { order: 1; }
+  .bs .bs__feats { order: 1; }
   .bs .bs__totalsCard { order: 2; }
   .bs .bs__scoring { order: 3; }
   .bs .bs__decisions { order: 4; }

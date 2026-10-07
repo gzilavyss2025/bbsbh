@@ -188,7 +188,7 @@ must key on the `feed` object (ADR-0007).
   `StampGameButton.jsx` may be imported only from their allowlists —
   `scripts/check-stamp-surfaces.mjs` fails `npm run lint` otherwise, and
   `e2e/invariants/logbook-stamp.spec.js` is its runtime half. The collection and its local-first store: `src/components/logbook/CLAUDE.md`.
-  The stamp art, its one tunable store, and its ink: `src/lib/CLAUDE.md`.
+  The stamp art, its one tunable store, and its ink: `src/lib/CLAUDE.md`. **The feat label** (`boxscore/FeatLabel.jsx`) renders only inside that same reveal and fetches after it (ADR-0101).
 - **The forward page-turn transition** (`src/components/page-turn/`) mounts an
   inert preview of the destination half — real (possibly still-sealed)
   content — underneath the active one during the animation. `SealBox`'s own
