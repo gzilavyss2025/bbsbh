@@ -339,6 +339,15 @@ test('gameShape: given the plays, a home half rain stopped partway was played; o
   assert.equal(gameShape(ls(6), [play(6, true, true), play(6, false, false)]).bottomPlayed, 0)
 })
 
+test('gameShape: a feed with no plays at all falls back to the line score, not to "home never batted"', () => {
+  // A truncated feed carries `allPlays: []`. An empty list says nothing about the
+  // bottom half, so the `runs` key still decides: a home club retired in order
+  // carries `runs: 0` and did bat.
+  const ls = { currentInning: 9, scheduledInnings: 9, innings: [{ num: 9, home: { runs: 0, hits: 0, errors: 0, leftOnBase: 0 } }] }
+  assert.equal(gameShape(ls, []).bottomPlayed, 1)
+  assert.equal(gameShape(ls, undefined).bottomPlayed, 1)
+})
+
 test('gameShape: a game that was never played has no shape at all', () => {
   // gamePk 815811 (cancelled) and 816704 (postponed) both carry an empty
   // linescore. isPlayedGame already keeps them off the ledger; this is the

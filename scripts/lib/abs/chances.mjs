@@ -81,7 +81,7 @@ export function halvesPlayed(inning, finalInning, bottomPlayed) {
 // `currentInning` and falls back to the last entry's own number, which agree
 // on every game checked.
 //
-// WITH THE PLAYS (the sweep holds the feed), a pitch thrown in the bottom of
+// WITH THE PLAYS (the sweep holds the feed; an empty list is no plays), a pitch thrown in the bottom of
 // the last inning decides it instead. The feed drops `runs` from a half rain
 // stopped partway (gamePk 816400: a walk, a flyout, a hit batter), and a rain
 // advisory with no pitch is not a half played (824807). 15 of 30 shortened 2026
@@ -99,7 +99,7 @@ export function gameShape(linescore, plays) {
   const last = innings.find((i) => i.num === finalInning) ?? innings.at(-1)
   return {
     finalInning,
-    bottomPlayed: plays
+    bottomPlayed: plays?.length
       ? Number(plays.some((p) => p.about?.inning === finalInning && p.about?.isTopInning === false && p.playEvents?.some((e) => e.isPitch)))
       : Object.hasOwn(last?.home ?? {}, 'runs') ? 1 : 0,
     scheduledInnings: linescore?.scheduledInnings ?? null,
