@@ -120,11 +120,11 @@
   border-color: var(--clay);
 }
 
-/* Dashed means TODAY — the file holds completed appearances only and he may
+/* TODAY is a darker edge on an empty cell — the file holds completed appearances only and he may
    still pitch tonight, so the cell is deliberately empty rather than a day
    off. Same treatment the starter's turn strip uses (26c-mound-card.css). */
 .daystrip__day--today {
-  border-style: dashed;
+  border-style: solid;
   border-color: var(--text-caption);
   background: var(--bg-canvas);
 }

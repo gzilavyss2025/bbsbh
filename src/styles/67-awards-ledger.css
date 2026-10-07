@@ -195,7 +195,7 @@
   color: var(--text-muted);
 }
 .awardtbl__chip--none {
-  border-style: dashed;
+  border-style: solid;
   background: transparent;
   color: var(--graphite-soft);
 }

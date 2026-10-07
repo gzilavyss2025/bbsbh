@@ -1,5 +1,5 @@
-// Dashed means ONE thing: provisional, pencilled in (#1132). A hairline between
-// two rows is not provisional, so these row dividers draw solid (Gary, 2026-10-07).
+// Dashed means ONE thing: provisional, pencilled in (#1132). Row dividers and
+// state chips are not provisional, so they draw solid (Gary, 2026-10-07).
 // Each entry is [partial, selector]. Add one per slice; no entry is ever removed.
 import test from 'node:test'
 import assert from 'node:assert/strict'
@@ -27,6 +27,10 @@ const SOLID = [
   ['postseason/series-parts.css', '.psseries__flowreadout'],
   ['scout/panels.css', '.scout__verdictrule'],
   ['scout/scout.css', '.scout__readout'],
+  ['10b-former-teammates.css', '.ladder__badge--farm'],
+  ['26c-mound-card.css', '.moundstrip__day--today'],
+  ['76-workload-marks.css', '.daystrip__day--today'],
+  ['67-awards-ledger.css', '.awardtbl__chip--none'],
 ]
 
 test('row dividers draw solid', () => {

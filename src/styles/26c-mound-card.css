@@ -147,9 +147,10 @@
   border-color: var(--accent-primary);
 }
 
-/* Dashed means TODAY, on both strips — one treatment, one meaning. */
+/* TODAY is a darker edge, on both strips — one treatment, one meaning. Dashed
+   is for pencilled-in marks only (#1132). */
 .moundstrip__day--today {
-  border-style: dashed;
+  border-style: solid;
   border-color: var(--text-caption);
 }
 
