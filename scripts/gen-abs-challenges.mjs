@@ -237,6 +237,10 @@ async function writeOut() {
   // The denominators are regular-season roster totals, so only regular-season
   // challenges are divided by them.
   const regRows = inScope(rows, games, 'R').rows
+  // A challenge row with no game on the ledger is dropped from every file
+  // (inScope), so say so: silence would hide a partial eviction or an old dump.
+  const orphans = rows.length - inScope(rows, games, 'all').rows.length
+  if (orphans > 0) console.warn(`abs-challenges: ${orphans} challenge row(s) have no game on the ledger and are left out of every file`)
   const write = (dir, file, { generatedAt: _stamp, ...body }) => writeJsonIfChanged(join(dir, file), body)
   for (const season of [...seasons, null]) {
     const dir = join(storeDir, season == null ? 'all' : String(season))
