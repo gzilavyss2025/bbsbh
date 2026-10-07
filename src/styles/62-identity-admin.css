@@ -289,7 +289,7 @@
 }
 
 .iddrawer__foot {
-  border-top: var(--bw-hair) dashed var(--border-rule);
+  border-top: var(--bw-hair) solid var(--border-rule);
   padding-top: var(--space-2);
 }
 

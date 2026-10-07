@@ -19,6 +19,10 @@ const SOLID = [
   ['45-admin-copy-editor.css', ".awardord__cut > span[aria-hidden='true']"],
   ['45-admin-copy-editor.css', '.awardord__note'],
   ['48-stamp-strip.css', '.stampstrip__details'],
+  ['62-identity-admin.css', '.iddrawer__foot'],
+  ['69-pitch-arsenal.css', '.arsenal__row'],
+  ['box-score/scoring-summary.css', '.scoresum__play + .scoresum__play'],
+  ['boxlines/gamelines.css', '.gamelines__famrow'],
 ]
 
 test('row dividers draw solid', () => {
