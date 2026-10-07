@@ -68,10 +68,13 @@ const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 // the 45 here carries a non-zero offset or a colour outside var( ). This guard
 // counts declarations, with comments blanked, var( ) contents skipped and zeros
 // ignored — see the header.
+//
+// N9 of the Notice collapse (#1132) banked the savings that were not yet banked:
+// hex 26 -> 24, radius 82 -> 81, motion 56 -> 55. Shadow stays at 41.
 export const BUDGETS = {
-  hex: 26,
-  radius: 82,
-  motion: 56,
+  hex: 24,
+  radius: 81,
+  motion: 55,
   shadow: 41,
 }
 

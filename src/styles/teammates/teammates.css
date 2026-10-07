@@ -19,6 +19,11 @@
   margin-bottom: var(--space-4);
 }
 
+/* The rosters-failed Notice: the 12px the old .hint padding gave. */
+.degrees__notice {
+  margin: var(--space-3) 0;
+}
+
 /* One ledger card per player, a dashed stitch between cards with the team-season on a
    marker chip. A vertical list: it holds at 390px and for a ten-link chain. */
 .degrees__chain {
