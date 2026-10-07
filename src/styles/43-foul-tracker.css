@@ -161,7 +161,7 @@
    (.favormeter--outlier) rather than inventing a new accent, set per-<td>
    (not the <tr> itself) — same convention as .foulboard tr.is-me below. */
 .foulboard tr.foulboard__row--outlier td {
-  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
 }
 /* The ranked-name cell: left-aligned, in the body face, with the rank, name and
    club in a row. The favorite club's row tints to its own accent
@@ -475,8 +475,8 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--paper-2);
-  border: var(--bw-hair) solid var(--rule);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
 }
 .scorebug__outdot.is-out {
   background: var(--clay);
