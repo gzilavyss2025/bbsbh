@@ -74,12 +74,9 @@
    screens/identity-lab/profiles/eras.jsx and editors/EraRow.jsx (#1591). One
    card per era: the mark on the left, the form beside it. */
 .idlab__eras {
+  display: grid;
+  gap: var(--space-3);
   padding: var(--space-3);
-}
-
-.idlab__erasum {
-  margin: 0 0 var(--space-3);
-  color: var(--text-muted);
 }
 
 .idlab__eralist {
@@ -92,7 +89,7 @@
 
 .idlab__era {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-3);
   padding: var(--space-3);
 }
@@ -127,8 +124,22 @@
 
 .idlab__erafields {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  min-width: 0;
   gap: var(--space-2);
+}
+
+.idlab__erafields input {
+  /* component-reuse-exempt: a text input, not a card: it matches .idlab__recolorname */
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-compact);
 }
 
 .idlab__erafields label {
