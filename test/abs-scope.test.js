@@ -85,6 +85,7 @@ test('buildExport: an orphan challenge row (no game record) is dropped by every 
   assert.equal(both.total, reg.total + post.total)
   assert.equal(both.success, reg.success + post.success)
   assert.equal(both.games, reg.games + post.games)
+  assert.deepEqual(inScope(rows, allGames, 'all').rows.map((r) => r.game_pk).includes(99), false)
   // An orphan's level has no game, so no scope grows an empty level for it.
   for (const scope of ['all', 'R', 'P']) assert.equal('AAA' in buildExport(rows, allGames, { season: 2026, scope }).levels, false)
 })

@@ -44,7 +44,7 @@ const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 // Measured on origin/main at 2324e44b (band 3 less the one in system/), then
 // triaged (.scratch/design-system/component-reuse-triage.md): controls skipped by
 // the detector, stamp/slate one-offs exempted in place.
-export const BUDGETS = { capsule: 6, sheet: 3, ledger: 17, band: 1 }
+export const BUDGETS = { capsule: 6, sheet: 3, ledger: 16, band: 1 }
 export const KINDS = Object.keys(BUDGETS)
 
 const FIX = {
@@ -169,7 +169,6 @@ function main() {
   const problems = bare.map(
     (at) => `${at}: a component-reuse-exempt marker with no reason. Write component-reuse-exempt: <why>.\n`,
   )
-  const warnings = []
   for (const k of KINDS) {
     const n = hits[k].length
     if (n > BUDGETS[k]) {
@@ -179,17 +178,13 @@ function main() {
           hits[k].slice(-(n - BUDGETS[k])).map((h) => `      ${h}\n`).join(''),
       )
     } else if (n < BUDGETS[k]) {
-      warnings.push(
+      problems.push(
         `${k}: down to ${n}, under its budget of ${BUDGETS[k]}. Bank it: set BUDGETS.${k} to ${n}\n` +
           '    in scripts/check-component-reuse.mjs, in this same PR.\n',
       )
     }
   }
 
-  if (warnings.length) {
-    console.warn('\n⚠ Hand-drawn shapes went DOWN — lower the budget so the ratchet holds the gain:\n')
-    for (const w of warnings) console.warn(`  ${w}`)
-  }
   if (problems.length) {
     console.error('\n✗ A shape was drawn by hand — a shared part already draws it.\n')
     console.error('  A real one-off takes a `component-reuse-exempt: <reason>` comment inside the rule.\n')

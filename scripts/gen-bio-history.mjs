@@ -58,8 +58,8 @@ const register = (await Promise.all(registerFiles.map(read))).flat()
 const bridge = buildRetroBridge(register)
 const { onThisDay, birthplaces, report } = buildBioShards({ bio, retroToMlbam: bridge.retroToMlbam, locate: buildGazetteer({ cities, admin1, countries }) })
 // writeShards sweeps every old shard, so a bad input must stop BEFORE it writes.
-if (!report.players || report.players === report.noMlbam) {
-  throw new Error(`no placed players (read ${report.players}, ${report.noMlbam} with no MLBAM id); refusing to overwrite the shards`)
+if (!report.players || report.players === report.noMlbam || !report.places) {
+  throw new Error(`no placed players (read ${report.players}, ${report.noMlbam} with no MLBAM id, ${report.places} on the map); refusing to overwrite the shards`)
 }
 const days = await writeShards(out, onThisDay)
 const places = await writeShards(outPlaces, birthplaces)

@@ -109,12 +109,12 @@ export async function loadHoverCardStats(personId) {
   if (!person) return null
   const { bio, team, onRehab, teamLevelLabel, statSportId, statSeason, group } =
     resolveHoverIdentity({ person, transactions, endDate })
-  const window = { type: 'byDateRange', group, season: statSeason, startDate: `${statSeason}-01-01`, endDate }
+  const range = { type: 'byDateRange', group, season: statSeason, startDate: `${statSeason}-01-01`, endDate }
   // October sits on its own line under the season (#1436), never blended into it.
   // MLB only: a minor-league postseason code was never checked.
   const [splits, postSplits] = await Promise.all([
-    fetchPersonStats(personId, { ...window, sportId: statSportId }),
-    statSportId === 1 ? fetchPersonStats(personId, { ...window, gameType: 'P' }) : [],
+    fetchPersonStats(personId, { ...range, sportId: statSportId }),
+    statSportId === 1 ? fetchPersonStats(personId, { ...range, gameType: 'P' }) : [],
   ])
   const stat = aggregateSplits(splits, group)
   const postStat = aggregateSplits(postSplits, group)
