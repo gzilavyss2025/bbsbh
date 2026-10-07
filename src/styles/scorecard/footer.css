@@ -101,7 +101,7 @@
 .sc-scoreboard td {
   height: 22px;
   text-align: center;
-  border: var(--bw-hair) solid var(--rule-grid);
+  border: var(--bw-hair) solid var(--border-grid);
 }
 .sc-scoreboard thead th {
   font-family: var(--font-display);

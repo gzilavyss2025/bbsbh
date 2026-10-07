@@ -90,8 +90,8 @@
 }
 .sc-sheet th,
 .sc-sheet td {
-  border-right: var(--bw-hair) solid var(--rule-grid);
-  border-bottom: var(--bw-hair) solid var(--rule-grid);
+  border-right: var(--bw-hair) solid var(--border-grid);
+  border-bottom: var(--bw-hair) solid var(--border-grid);
 }
 
 /* Inning + summary headers, pinned to the top edge as the sheet scrolls up. */
@@ -267,7 +267,7 @@
    group innings once batting-around has widened one into several columns. */
 .sc-sheet__inning-h--start,
 .sc-sheet__cell--start {
-  border-left: var(--bw-rule) solid var(--rule-grid);
+  border-left: var(--bw-rule) solid var(--border-grid);
 }
 
 /* The foot row across the grid: pitches seen, swings and misses and balls
@@ -283,7 +283,7 @@
   z-index: 2;
   height: 26px;
   background: var(--bg-page);
-  border-top: var(--bw-rule) solid var(--rule-grid);
+  border-top: var(--bw-rule) solid var(--border-grid);
   /* EVERY FIGURE ON THIS ROW SITS ON ONE LINE. The row's own cells were
      centred while the four summary cells still carried .sc-sheet__sum's
      `vertical-align: top` + `padding-top` — those are the GRID's rule, where

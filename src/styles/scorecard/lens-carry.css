@@ -73,5 +73,5 @@
   height: var(--sc-cell-h);
   zoom: calc(var(--carry-zoom, 1) * var(--lens-carry-scale));
   background: var(--surface-card);
-  outline: var(--bw-hair) solid var(--rule-grid);
+  outline: var(--bw-hair) solid var(--border-grid);
 }
