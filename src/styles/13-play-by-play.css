@@ -16,8 +16,8 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-1h) 2px;
-  border-top: var(--bw-hair) dashed var(--border-hairline);
-  border-bottom: var(--bw-hair) dashed var(--border-hairline);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
   /* Sentence-like event notes (mound visits, pitching changes) — same prose
      treatment as .pbp__desc: the high-legibility serif in natural case (the
      caps exception is the #root rule below). */
