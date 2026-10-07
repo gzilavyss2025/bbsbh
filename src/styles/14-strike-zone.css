@@ -68,7 +68,7 @@
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   font-weight: var(--w-bold);
-  fill: var(--paper-3);
+  fill: var(--text-on-ink-bright);
   text-anchor: middle;
   dominant-baseline: central;
 }
@@ -123,7 +123,7 @@
 .pitchlist__row--decisive > .pitchlist__meta,
 .pitchlist__row--decisive > .pitchlist__challenge,
 .pitchlist__row--decisive > span:empty {
-  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
   padding-block: 1px;
 }
 .pitchlist__row--decisive .pitchlist__num {
@@ -139,7 +139,7 @@
   justify-content: center;
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
-  color: var(--paper-3);
+  color: var(--text-on-ink-bright);
 }
 .pitchlist__num--called { background: var(--accent-negative); }
 .pitchlist__num--whiff { background: var(--ink-1); }
@@ -172,7 +172,7 @@
   gap: 3px;
   padding: 1px var(--space-1);
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--graphite-soft) 16%, var(--paper-2));
+  background: color-mix(in srgb, var(--graphite-soft) 16%, var(--surface-card));
   border: var(--bw-hair) solid var(--graphite-soft);
 }
 .pitchlist__challengelabel {

@@ -37,7 +37,7 @@
 .ninekeys__count {
   font-family: var(--font-mono);
   background: var(--ink-0);
-  color: var(--paper-0);
+  color: var(--bg-canvas);
   padding: var(--space-1) var(--space-3);
 }
 
@@ -65,12 +65,12 @@
   margin-top: var(--space-3);
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(212px, 1fr));
-  border-top: 1px solid var(--rule);
+  border-top: 1px solid var(--border-rule);
 }
 
 .ninekeys__key {
   padding: var(--space-2) var(--space-4) var(--space-2) 0;
-  border-bottom: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .ninekeys__key dt {
@@ -120,7 +120,7 @@
 
 .ninekeys__club {
   text-align: left;
-  border-right: 1px solid var(--rule);
+  border-right: 1px solid var(--border-rule);
   font-weight: var(--w-regular);
 }
 
@@ -194,7 +194,7 @@
 .ninekeys__tally {
   text-align: center;
   width: 72px;
-  border-left: 1px solid var(--rule);
+  border-left: 1px solid var(--border-rule);
   color: var(--ink-1);
 }
 
@@ -259,7 +259,7 @@
 .ninekeys__swatch {
   width: 12px;
   height: 12px;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border-rule);
   display: inline-block;
 }
 
@@ -288,7 +288,7 @@
   gap: var(--space-1) var(--space-4);
   align-items: baseline;
   padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .ninekeys__rowlabel {
@@ -330,7 +330,7 @@
   gap: var(--space-3);
   align-items: center;
   padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .ninekeys__runglabel {
@@ -367,7 +367,7 @@
 .ninekeys__method {
   margin-top: var(--space-5);
   padding-top: var(--space-3);
-  border-top: 1px solid var(--rule);
+  border-top: 1px solid var(--border-rule);
   font-family: var(--font-mono);
   font-size: var(--fs-small);
   color: var(--ink-2);
