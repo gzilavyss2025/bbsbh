@@ -31,6 +31,7 @@ import { BallFlight } from '../charts/BallFlight.jsx'
 import { PitchLadder } from '../scoring/PitchLadder.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
 import { PitcherPhoto, ReliefRepeat } from './PitcherNotice.jsx'
+import { Card } from '../ui/frame/Card.jsx'
 import { PitcherCard } from './pitcherCard/PitcherCard.jsx'
 import { DepartureLineCard, FinalizedLineCard } from './PitcherHandoffCard.jsx'
 import { AtBatHero } from './AtBatHero.jsx'
@@ -759,7 +760,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
           already named in the card to the left. Collapses away entirely at
           parks with no pitch tracking. */}
       {hasZone && (
-        <div className="pbp__zonecell">
+        <Card as="div" frame="ledger" body="flush" className="pbp__zonecell">
           {replay && wide ? (
             <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} pitches={replay} id={entry.atBatIndex} last={replayLast} />
           ) : (
@@ -768,7 +769,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
               <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--inline" />
             </>
           )}
-        </div>
+        </Card>
       )}
       {replayOpen && replay && !wide && (
         <ReplaySheet pitchDetails={pitchDetails} pitches={replay} batter={batter} pitcher={pitcher} onClose={() => setReplayOpen(false)} />
