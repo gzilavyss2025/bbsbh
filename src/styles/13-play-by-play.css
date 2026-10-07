@@ -69,7 +69,7 @@
   gap: var(--space-2);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
-  background: var(--paper-2);
+  background: var(--surface-card);
   padding: var(--space-1) var(--space-1h);
 }
 
@@ -332,14 +332,14 @@
 }
 
 .pbp__laddercol--ball {
-  background: var(--paper-3);
+  background: var(--surface-inset);
 }
 
 /* Shaded strike lane against the light ball lane above — pencil, not tape.
    It echoed the seal covers until ADR-0083: it was the one place in the
    innings view a reader met kraft on something no tap would lift. */
 .pbp__laddercol--strike {
-  background: color-mix(in srgb, var(--graphite) 22%, var(--paper-3));
+  background: color-mix(in srgb, var(--graphite) 22%, var(--surface-inset));
   border-left: var(--bw-hair) solid var(--border-rule);
 }
 

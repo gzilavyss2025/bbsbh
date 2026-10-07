@@ -70,7 +70,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--paper-1);
+  background: var(--bg-page);
   border: var(--bw-hair) solid var(--border-rule);
   color: var(--text-caption);
   font-family: var(--font-display);
@@ -115,7 +115,7 @@
 .gamecard__level {
   padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
-  background: var(--paper-1);
+  background: var(--bg-page);
   border: var(--bw-hair) solid var(--border-rule);
   font-family: var(--font-display);
   font-weight: var(--w-bold);
@@ -129,7 +129,7 @@
 .gamecard__dh {
   padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
-  background: var(--paper-1);
+  background: var(--bg-page);
   border: var(--bw-hair) solid var(--border-rule);
   font-family: var(--font-display);
   font-weight: var(--w-bold);
@@ -372,14 +372,14 @@
 }
 
 .pip rect {
-  fill: var(--paper-1);
-  stroke: var(--rule);
+  fill: var(--bg-page);
+  stroke: var(--border-rule);
   stroke-width: 1.5;
 }
 
 .pip__tick {
   fill: none;
-  stroke: var(--paper-3);
+  stroke: var(--surface-inset);
   stroke-width: 2.1;
   stroke-linecap: round;
   stroke-linejoin: round;
