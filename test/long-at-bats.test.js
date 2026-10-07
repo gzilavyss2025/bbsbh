@@ -278,8 +278,7 @@ test('the game-type lists are pinned: the regular season, and the four postseaso
   // log echoes it back as the row's own type, which hides the round.
   assert.equal(POSTSEASON_GAME_TYPES, 'F,D,L,W')
   assert.ok(!POSTSEASON_GAME_TYPES.split(',').includes('P'))
-  // The same list the other postseason sweeps read; this file cannot import it
-  // (a cycle through team-records.mjs), so the two are pinned equal instead.
+  // The same list the other postseason sweeps read, re-exported from one file.
   assert.equal(POSTSEASON_GAME_TYPES, SHARED_POSTSEASON)
   assert.equal(ALL_GAME_TYPES, 'R,F,D,L,W')
 })

@@ -58,7 +58,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
-import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
+import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // A SEASON STORE (ADR-0086): fouls/{season}/fouls.json (the league file) plus
@@ -395,7 +395,7 @@ export function aggregateGameFouls(feed) {
 }
 
 // A game's scope from its gameType: the postseason rounds are 'P', all else 'R'.
-export const scopeOfGameType = (gameType) => (POSTSEASON_GAME_TYPES.split(',').includes(gameType) ? 'P' : 'R')
+export { scopeOfGameType }
 
 // --- SQLite upserts ----------------------------------------------------------
 const upsertBatter = (db) =>
