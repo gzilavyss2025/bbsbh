@@ -41,7 +41,7 @@ canvas under their own title.
 | `P2-About-249.dc.html` | **ABOUT with four unlike modules**, as they ship: two cards, two bare page-level labels |
 | `P2-About-249-Carded.dc.html` | the same four, all carded — the largest item on the harmonization list, drawn to be looked at |
 | `P2-About-158.dc.html` · `P2-About-675.dc.html` | About at MLB (1,274px) and at the floor (349px) |
-| `P2-Jump.dc.html` | **the jump bar** — resting, stuck, current-section, and the floor's five that fit |
+| `P2-Jump.dc.html` | **the jump bar** — resting, stuck, current-section, and the floor's five that fit. **Stale:** draws the bar at 34px; the decision is 44px (design.md §18) |
 | `P2-Page-675.dc.html` | **THE FLOOR** — Los Mochis, five bands, whole, untuned, with the absent seam |
 | `P2-Page-158-1/2/3.dc.html` | **Milwaukee**, seven bands, across three frames |
 | `P2-Page-249-Diff.dc.html` | Wilson — the check: what else differs at six bands |
