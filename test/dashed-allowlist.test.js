@@ -75,13 +75,6 @@ const ALLOWED = {
   // A connector line that joins two things on a graph: it links, it does not
   // box anything. Dashed marks the link as a degree, not a fact (Gary, 2026-10-07).
   connector: [['teammates/teammates.css', '.degrees__link']],
-  // Owed a solid stroke, blocked on an open PR that edits the partial
-  // (#1692, #1694, #1690). Remove each entry in the PR that fixes it.
-  owedSolid: [
-    ['12-sealbox.css', '.prepitch'],
-    ['39-manager-page.css', '.mgrpage__timelinerow'],
-    ['66-situational-records.css', '.trrank__flip'],
-  ],
 }
 // scorecard/ is the sheet you score on: bespoke, out of scope (#1132).
 const BESPOKE = 'scorecard/'
