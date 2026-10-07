@@ -84,7 +84,7 @@
   font-size: var(--fs-num-lg);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-tight-score);
-  color: var(--rule);
+  color: var(--border-rule);
 }
 .payboard__row--lead .payboard__rank {
   color: var(--text-heading);
