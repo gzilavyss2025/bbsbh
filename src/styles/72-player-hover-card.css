@@ -39,7 +39,7 @@
      card identifies a CLUB, it is not a spoiler cover (ADR-0030's "a club
      may colour a card that identifies the club"). No known color (an
      unaffiliated MiLB id) just leaves the spine the card's own paper. */
-  background: var(--phcard-accent, var(--rule-soft));
+  background: var(--phcard-accent, var(--border-hairline));
 }
 
 .phcard__head {
