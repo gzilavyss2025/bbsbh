@@ -106,7 +106,7 @@
   height: 4px;
   margin: 0 auto var(--space-2);
   border-radius: var(--radius-pill);
-  background: var(--rule-soft);
+  background: var(--border-hairline);
 }
 
 /* The rail's headline and the open sheet's section head occupy the SAME box
