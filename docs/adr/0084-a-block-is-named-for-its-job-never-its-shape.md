@@ -29,12 +29,13 @@ Measured on `main` at `ba07d2c93`:
 | `__chip` elements | 23 |
 | of those, measurably tappable | **12** |
 | classes on the reject list of clause 3 | 59 |
-| classes this ADR's ledger renames or holds | **157** |
+| classes this ADR's ledger renames or holds | **156** |
 
 The last row is kept current. It was 143 at `ba07d2c93`. `.bs__noteMore` added
 one (#1130), the `sheet` family added twelve (#1155), which the first count
-missed, and `.tscoremodal__subkicker` added one (#1113, after slice H3). The
-rows above it were not measured again.
+missed, and `.tscoremodal__subkicker` added one (#1113, after slice H3). `.radarpill` left
+with the Fever Radar it belonged to (#1131), so the count is 156, the ledger's
+total. The rows above it were not measured again.
 
 ## Decision
 
@@ -213,3 +214,30 @@ and this ADR only governs the second.
   not a tidiness backlog; it is the measure of how far a system drifts in the
   absence of a written rule, which is the case for writing one down now rather
   than after four more collapse PRs each pick a taste.
+
+## Addendum, 2026-10-07 (#1132, slice N9)
+
+Two ledger rows did not fit the rule as the ledger wrote it. Both targets were
+written `.notice--word`. Neither row became that, and the ledger keeps the old
+class names as the record.
+
+- **`.pitchernotice` became `.change`, not `.notice--pitcher`.** A variant is
+  `--word` (clause 4): the kind the element is when it is made. A variant cannot own
+  18 parts (`__shot`, `__code`, `__body`, `__entering`, and the rest), because a
+  part hangs on a block, not on a modifier of another block. So the card is its own
+  block with no shape word (clause 2). Gary picked the name `.change` on 2026-10-07.
+  The frame comes from `Notice`: the callers pass `noticeClass({ tone: 'event' })`,
+  which draws `.notice--event`. Slices N8a, N8b and N8c did the rename (#1658, #1657,
+  #1659).
+- **`.delaycard` became `.delay`, not `.notice--delay`.** `Notice` draws the icon,
+  the label and the text, so the old `__icon`, `__title` and `__detail` parts went
+  away. `.delay` is a namespace for the margin, the pop-in and the icon bubble
+  (slice N5, #1597).
+- **One odd name, accepted.** `.change--framed` is the margin and `flex-wrap`
+  namespace that callers pass with the event frame. Three kinds of element wear it:
+  the compact cards (which also wear `.change`), the arm button (which also wears
+  `.change`) and the full card `.pcard` (which does NOT). A modifier on an element
+  with no base is the shape clause 4 warns about, so the name misleads a reader who
+  searches for `.change`. It stays for now: the class holds two declarations, it
+  moves no pixel, and a rename touches seven source files and the tests that pin it, for no gain on screen. Fix it, as a
+  standalone namespace name, if #1114's shape guard ever counts it.

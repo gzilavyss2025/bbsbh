@@ -101,3 +101,45 @@ test('N9: the raw-value and caption budgets are the measured counts', () => {
   assert.deepEqual(BUDGETS, { hex: 24, radius: 81, motion: 55, shadow: 41 })
   assert.match(readFileSync(join(ROOT, 'scripts/check-caption-budget.mjs'), 'utf8'), /^const BUDGET = 120$/m)
 })
+
+// ---- 4. the docs ----
+
+const ledgerRow = (cls) => doc('docs/design-system-naming.md').split('\n').find((l) => l.startsWith(`| \`${cls}\` |`)) ?? ''
+
+test('N9: the ledger rows name the real targets, and keep the old classes as the record', () => {
+  const delay = ledgerRow('.delaycard').split('|').map((c) => c.trim())
+  assert.equal(delay[1], '`.delaycard`')
+  assert.equal(delay[3], '`.delay`')
+  const change = ledgerRow('.pitchernotice').split('|').map((c) => c.trim())
+  assert.equal(change[1], '`.pitchernotice`')
+  assert.equal(change[3], '`.change`')
+})
+
+test('N9: ADR-0017 names the .change card and the event Notice frame; only its dated note names the old class', () => {
+  const adr = doc('docs/adr/0017-innings-notification-tiers-and-copy-conventions.md')
+  const at = adr.indexOf('**2026-10-07 (#1132')
+  assert.ok(at > 0, 'the dated note exists')
+  assert.doesNotMatch(adr.slice(0, at), /pitchernotice/, 'the tier prose says .change')
+  assert.match(adr, /`\.change`/)
+  assert.match(adr, /`\.notice--event`/)
+})
+
+test('N9: the ADR-0084 addendum records the two rows that did not fit the rule, and the framed oddity', () => {
+  const adr = doc('docs/adr/0084-a-block-is-named-for-its-job-never-its-shape.md')
+  const addendum = adr.slice(adr.indexOf('Addendum, 2026-10-07'))
+  assert.ok(addendum.length < adr.length, 'the addendum exists')
+  assert.match(addendum, /`\.pitchernotice`/)
+  assert.match(addendum, /`\.change`/)
+  assert.match(addendum, /`\.delaycard`/)
+  assert.match(addendum, /`\.delay`/)
+  assert.match(addendum, /`\.change--framed`/)
+  assert.match(addendum, /`\.pcard`/)
+})
+
+test('N9: the ui and playbyplay notes read true after the rename', () => {
+  assert.match(src('components/ui/CLAUDE.md'), /`Notice` \(#1132\)/)
+  const play = src('components/playbyplay/CLAUDE.md')
+  assert.match(play, /noticeClass\(\{ tone: 'event' \}\)/)
+  assert.match(play, /`\.change--framed`/)
+  assert.match(play, /root class is `\.change`/)
+})
