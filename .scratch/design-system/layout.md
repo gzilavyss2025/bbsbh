@@ -652,3 +652,62 @@ are the same three declarations. The real pages for `cwb__tabs` and
 `lookupdeck__filters` (Clerk-admin gated), the book management sheet, the
 `--scroll` date strip on `/standings` (not drawn by the mock) were not drawn.
 `npm run visual` and `npm run e2e` were not run.
+## Stack slice S14 (2026-10-07)
+
+Nine one-class `flex-direction: column` rules on one gap step moved onto
+`Stack`: 9 rules, 9 JSX sites in 5 files. The finder counts **38 safe
+candidates on `main` before S14 and 29 after**. The log above said about 44; that
+figure is stale (S8 to S13 and the other work since have used it up).
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.fhist__span` | tight | li | flex, width, padding, frame |
+| `.fhist__parks` | base | ul | margin, padding, list-style |
+| `.fhist__parkline` | tight | li | nothing (deleted) |
+| `.scout__game` | snug | div | nothing (deleted) |
+| `.scout__pa` | snug | article | padding, frame |
+| `.introsheet__step2` | loose | div | nothing (deleted) |
+| `.introsheet__confirm` | base | div | nothing (deleted) |
+| `.psrace__leagues` | loose | div | nothing (deleted) |
+| `.staffgrid` | snug | div | nothing (deleted) |
+
+**Cascade.** `system/stack.css` loads before 06, so every partial here loads after
+it. None of the nine rules keeps a `display`, `flex-direction` or `gap`, so none
+can win or lose against `.stack`. `.fhist__parks` is a `ul`: `.stack--list` sets
+`margin: 0; padding: 0; list-style: none`, and the rule keeps its own margin and
+padding and loads later, so it still wins on order.
+
+**Test first.** `test/stack.test.js` (section 6) names each rule, its gap and its
+JSX site. It failed on `main` and passes now.
+
+**Left out on purpose.** Scoring surfaces (`.starter__info`, `.teammate__mid`, `.pbp`,
+`.trailstrip`, `.refpanel__body`, `.moundcard__verdict`, `.gamehud__outs`,
+`.psseries__potgMain`). Files another open PR edits: `14-strike-zone.css`,
+`15-team-color-lab.css`, `31-wild-card.css` (Grid G1, #1630), and
+`30-standings.css` and the contract partials `74-contract-workbench.css` and
+`74a-contract-lookup.css` (Cluster C1). `.scout__pm`
+(a dialog with a key handler, so the converter refuses it), `.xl-entry` and
+`.xl-entry__head` (Express Lane, a pitch-by-pitch viewer; I did not judge them).
+
+**Checked.** Capture was `geom.mjs` with `FREEZE=1 BLOCKIMG=1`, `?nointro`, 390 and
+760px, taken twice before and once after. The two BEFORE runs match, and AFTER
+matches BEFORE: 0 differences on `/scout`, `/postseason-race`,
+`/bullpen-availability`, `/team/158` and `/team/158/minors` (240 to 1,216 elements).
+`synth.mjs` on the old and new markup is identical for all nine classes (on
+`/scout`, `/postseason-race`, `/bullpen-availability` and `/team/158`). A first BEFORE
+taken from a `git archive` copy (no `.git`) differed on every route, even `/`: the
+build info reads git. BEFORE now comes from `git checkout origin/main` of the ten
+files, in the same checkout.
+
+**Not seen.** The headless browser cannot reach live `statsapi` from the cloud
+container, so no route drew real data. The routes above show their empty or
+loading state, so the nine classes rarely drew: `.fhist__*` (the franchise history
+card needs a club with ballpark data), `.scout__game` and `.scout__pa` (past
+meetings), `.introsheet__*` (the account step, needs Clerk), `.psrace__leagues`
+(the standings are empty) and `.staffgrid` (bullpen rows). The synthetic check
+proves the CSS, not the page. I did not run `npm run visual` or `npm run e2e`.
+The raw-value lint prints "went DOWN" for hex, radius and motion. That is not
+from this slice (it deletes no raw value); I did not change those budgets.
+
+**Open question.** `layout.md` is also edited by Grid G1 (#1630) and the Cluster
+branch, so the three PRs will conflict on this file. Each only appends a section.

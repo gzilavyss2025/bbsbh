@@ -1,6 +1,7 @@
 import '../../../../styles/57a-franchise-history.css'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
+import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 
 // The club's history under the Ballpark card, one module: a strip of names,
 // leagues and parks by season, then a line for each park. Spoiler-free and open
@@ -18,17 +19,17 @@ export function FranchiseHistory({ spans, parks, through }) {
     <Card head={<SectionHead look="band" club>Franchise history</SectionHead>} className="fhist">
       <ol className="fhist__strip">
         {spans.map((s) => (
-          <li key={s.from} className="fhist__span">
+          <Stack gap="tight" as="li" key={s.from} className="fhist__span">
             <span className="fhist__years">{run(s.from, s.to, through)}</span>
             <span className="fhist__name">{s.name}</span>
             <span className="fhist__league">{s.league}</span>
             {s.venueName && <span className="fhist__park">{s.venueName}</span>}
-          </li>
+          </Stack>
         ))}
       </ol>
-      <ul className="fhist__parks">
+      <Stack as="ul" className="fhist__parks">
         {parks.map((p) => (
-          <li key={p.venueId} className="fhist__parkline">
+          <Stack gap="tight" as="li" key={p.venueId} className="fhist__parkline">
             <span className="fhist__parkname">{p.names.join(', ')}</span>
             <span className="fhist__parkyears">
               Seasons in this data: {p.runs.map(([a, b]) => run(a, b, through)).join(', ')}
@@ -39,9 +40,9 @@ export function FranchiseHistory({ spans, parks, through }) {
                 {p.mates.map((m) => `${m.name} ${run(m.from, m.to, through)}`).join(', ')}
               </span>
             )}
-          </li>
+          </Stack>
         ))}
-      </ul>
+      </Stack>
     </Card>
   )
 }

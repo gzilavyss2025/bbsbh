@@ -132,3 +132,34 @@ test('Stack and its helper import no api/ or stamp module', () => {
     }
   }
 })
+
+// ---- 6. slice S14 (#1180) ----
+// Nine one-class column rules moved onto <Stack>. Each block now gets its column
+// and its gap from stack.css, so its own rule must not draw them again, and its
+// JSX site must name the gap that rule used to write.
+const S14 = [
+  ['57a-franchise-history.css', 'screens/team/modules/ballpark/FranchiseHistory.jsx', 'fhist__span', 'tight'],
+  ['57a-franchise-history.css', 'screens/team/modules/ballpark/FranchiseHistory.jsx', 'fhist__parks', 'base'],
+  ['57a-franchise-history.css', 'screens/team/modules/ballpark/FranchiseHistory.jsx', 'fhist__parkline', 'tight'],
+  ['scout/meetings.css', 'screens/scout/meetings/MeetingsPanel.jsx', 'scout__game', 'snug'],
+  ['scout/meetings.css', 'screens/scout/meetings/MeetingsPanel.jsx', 'scout__pa', 'snug'],
+  ['56-my-tally-intro.css', 'components/account/AccountPitch.jsx', 'introsheet__step2', 'loose'],
+  ['56-my-tally-intro.css', 'components/account/AccountPitch.jsx', 'introsheet__confirm', 'base'],
+  ['70-postseason-race.css', 'screens/PostseasonRacePage.jsx', 'psrace__leagues', 'loose'],
+  ['76-workload-marks.css', 'components/workload/StaffGrid.jsx', 'staffgrid', 'snug'],
+]
+
+test('slice S14: each block is a <Stack> and its own rule no longer draws the column or gap', () => {
+  for (const [sheet, jsx, cls, gap] of S14) {
+    const css = stripComments(readFileSync(join(STYLES, sheet), 'utf8'))
+    const body = ruleBody(css, `.${cls}`) ?? ''
+    assert.doesNotMatch(body, /(^|[\s;])(display|flex-direction|gap)\s*:/, `.${cls} should leave the column and gap to Stack`)
+    const text = readFileSync(join(SRC, jsx), 'utf8')
+    assert.match(
+      text,
+      // `base` is the default gap, so a site may leave the prop off.
+      new RegExp(`<Stack\\b${gap === 'base' ? '' : `[^>]*\\bgap="${gap}"`}[^>]*\\bclassName="${cls}"`),
+      `${jsx} should render .${cls} as <Stack gap="${gap}">`,
+    )
+  }
+})
