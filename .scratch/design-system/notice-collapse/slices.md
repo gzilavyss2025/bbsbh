@@ -476,6 +476,55 @@ for N2 to N8.
    `empty-state.css` and `notice.css`, and edit `src/index.css` and the pins in
    `test/empty-state-cascade.test.js` and `test/notice-cascade.test.js`.
 
+## N8b as built (what the next slices need)
+
+Written by the N8b session. It records what shipped. It does not write the N8c prompt.
+
+1. **What moved.** Eight part names changed prefix, `pitchernotice` to `change`
+   (ADR-0084; Gary picked `.change` on 2026-10-07): `__code`, `__code--alert`,
+   `__label`, `__teammark`, `__spacer`, `__mvcount`, `__eventtext`, `__pitchno`.
+   Files: `EventCards.jsx` (the spans in the four bars), `12-sealbox.css`
+   (rules and two comments), `13-play-by-play.css` (the caps exemption), `01-base.css`
+   (the exemption list comment). No rule, specificity or order changed.
+2. **The caps exemption kept its two halves.** `#root .change__eventtext,` and
+   `#root .change__eventtext :is(.plink, b)` still carry the `#root` prefix and the
+   `caps-exempt:` marker. `npm run lint` (`check-caps`) passes. Computed
+   `text-transform` on the event text reads `none`.
+3. **Base: N8a was not merged.** N7 is on `main` (stack PR #1649). N8a did not
+   exist when N8b started, so Gary confirmed a start from `origin/main` without
+   the "N8a as built" read. N8a edits `12-sealbox.css` and `13-play-by-play.css` too, so
+   whichever merges second may need a small conflict fix. They touch different
+   rules (`__shot*` against the eight parts).
+4. **The stylesheet reads `.pitchernotice .change__code` for now.** The root
+   `.pitchernotice`, `--event`, `--mv`, `--pbp` and `.pitchernotice--mv .usagepips`
+   keep their names until N8c.
+5. **Census.** `overrides.tsv`: the eight keys are renamed to `.change__*` and the
+   notes say "DONE in N8b". The census finds a class by a notice word in its name
+   (`notice`, `alert`, ...), so after the rename it lists seven of them under
+   STALE overrides (only `.change__code--alert` still matches, by "alert").
+   Expected, not a mistake: keep the rows as the record. N9 can drop them.
+6. **The seal pin** (`test/notice-n8b.test.js`, measured on `a75f6edae`):
+   `EventCards.jsx` no reveal-only import, no `<SealBox`, 0 `revealedThrough`.
+   `PlayByPlay.jsx` imports `playbyplay.js`, no `<SealBox`, 1 `revealedThrough`.
+   `HalfInning.jsx` imports `boxscore.js`, `highlights.js`, `hitchart.js` and
+   `playbyplay.js`, 1 `<SealBox`, 12 `revealedThrough`. The test also pins: no old
+   name in `src`, `e2e` or `scripts` (comments too); the new names in the
+   stylesheet and the markup; the `#root` exemption; the root still named
+   `.pitchernotice`.
+7. **Seen** (`geom.mjs` with reduced motion, `BLOCKIMG=1`, `FREEZE=1`, `?nointro`,
+   390 and 760px; each side captured twice first and stable): zero geometry
+   differences on the mock anchor game 823035 `top6` (mound visit) and `top7`,
+   and live on `/05022025/wshcin/top1` (gamePk 778087: DELAY bar and an SB code)
+   and `/05012025/stlcin/bottom4` (778107: DELAY bar). One exception, not from
+   the rename: a floating 44px button at the foot of live pages changes width
+   between 151.5px and 153.8px from run to run of the same code. Computed
+   `font-family`, `font-size`, `font-weight`, `letter-spacing`, `text-transform` and
+   `color` are identical before and after for the mound-visit label, the code,
+   the alert code and the event text. **Not seen:** an ejection bar (`EJ`); the
+   mound visit's `N left` tail (`__mvcount`); a steal bar's `Pitch N` tail
+   (`__pitchno`); 778108 top 8th showed no bar. Those parts are covered by the
+   source tests, not by a drawn page.
+
 ## N7 as built (what the next slices need)
 
 Written by the N7 session. It records what shipped. It does not write the prompts
