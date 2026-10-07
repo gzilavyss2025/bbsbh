@@ -992,6 +992,7 @@ yet" rather than render a shape with nothing in it.
 - **The Records scope pills are ~29px**, on both rows, under the 44px minimum.
   Pre-existing; the reorganisation neither worsens nor fixes it, and the index
   lines it adds are exactly 44px.
+- **Superseded 2026-10-07 (#1154): the jump bar is 44px**, Gary's call; see §18. The text below is the case as it stood.
 - **The jump bar is 34px.** The Records review held `Open all` to 44px (F3), and
   on a one-scroll page the jump bar is the page's *only* navigation. It is a
   strong argument for 44px, and it is **not made here**, because the control is
@@ -1145,7 +1146,7 @@ pass again when both close.
 | Card head (§14·A) | **A** | A `Card` takes `head={<SectionHead look="band" club …>}`. `club` gives a plain label until a club colour arrives. A `body="flush"` card lets a table or a bleeding deck run to the edge. | Items (a) to (e) all map to `Card` + `SectionHead`. Item (d), the Transactions deck, is `body="flush"`. The reuse guard (#1114) is open: re-check when it lands. |
 | Rank cell (§14·B) | **A** | `Pill role="tag"` with `figure` (#1186) draws a rank, a level or a count in the mono face, about 20px tall. A card head's `note` is where "org rank" goes. | (a) stays a namespace tile, not a `Pill`: it is a tile of a ranked board. (d) is the head's `note`. The house rule (`1 of 30`, no `#`) is unchanged. |
 | Controls in card heads (§14·B and F) | **A** | A pill that filters, or the one action a coloured band carries, is a `Pill role="control"`, 34px. A door is a `Door`. A tag and a control never share a height. | None. The two affordances stay apart, as §14·F requires. |
-| Jump bar (§13, §14·K) | **A**, with one call named | `.teamtabs__btn` is still its own rule (`46-consent-modal.css`, `min-height: 34px`). It is not on `Button`. `Button` has two sizes: `control` 34px, "a switch inside a card", and `tap` 44px, "the bar and the page". | The drawing agrees with the control as shipped. But the system's word for a bar is `tap`. §14·K left 34 or 44 to #1107 with the cost stated (10px of sticky chrome on both hubs). That call is now the system's call too, and it is Gary's to make. No change is made here. |
+| Jump bar (§13, §14·K) | **B** (decided by Gary, 2026-10-07) | `.teamtabs__btn` is still its own rule (`46-consent-modal.css`, `min-height: 34px`). It is not on `Button`. `Button` has two sizes: `control` 34px, "a switch inside a card", and `tap` 44px, "the bar and the page". | The mockup changes to match the system: the jump bar is a `tap` control, **44px**, not 34px. §14·K's 34px is superseded. The cost, stated in §14·K, is 10px of sticky chrome on every screen of both hubs, because `HubTabBar` is shared. #1107 builds it at 44px. The §13 widths (472 / 405 / 347) were measured at 34px height; width does not depend on height, but #1107 must re-measure. `P2-Jump` was not re-rendered: it still shows 34px. |
 | Spacing 48 / 32 / 16 (§5, §13) | **A** | `--space-12`, `--space-8`, `--space-4`. `--space-section` is 16px. ADR-0085 adds `--space-1h` 6px, `--space-2h` 10px, `--space-3h` 14px. | The 10px under the head title is `--space-2h`, a landing that now has a name. The 12px is `--space-3`. The `-16px` bleed is a margin, which the guard leaves alone. |
 | Table header row (§14·C) | **A**, token names **B** | `Table` draws the head in `--font-display`, `--fs-label`, `--ls-caps`, caps, `--text-caption`, on `--bg-page`, with a `--border-hairline` rule between body rows. | §14·C says `--rule-soft`. The guard now rejects a direct `--rule*` read, so the alias is `--border-hairline`. The look is the same. `.rpt__sub` stays a per-family option. |
 | Empty state (§14·H) | **A** | `EmptyState` is a dashed inset with graphite copy: `label`, text, `note`, one `action`. It owns no ground and no margin. | The degraded Ballpark is an `EmptyState size="block"` with "not posted yet". Dashed means "pencilled in", which is what the MiLB rule says. |
@@ -1163,8 +1164,8 @@ now wrong. Two labels on them name `--rule-soft` and `--rule`; read those as
 
 **What #1107 now has to do that §17 did not say.** Add the page look and its two
 levels to `SectionHead`, and record it in the design-system ADR (outcome C). Wear
-the card head through `Card`, not through a new class. Decide 34 or 44px for the
-jump bar.
+the card head through `Card`, not through a new class. Build the jump bar at 44px
+(`tap`), as Gary decided on 2026-10-07, and re-measure its widths.
 
 *The canvas is https://claude.ai/artifact/NV6fz4ywi3d3nvX5rdRa8s — Phase 1 at the
 left, Phase 2 at the right under its own title.*

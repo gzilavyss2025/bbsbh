@@ -548,8 +548,9 @@ the row-by-row table. In short:
   `--space-12`, `--space-8` and `--space-4`, and the 10px under the title is
   `--space-2h` (ADR-0085). The table header is `Table`'s. The empty Ballpark is an
   `EmptyState`.
-- **One call is open for Gary.** The jump bar is 34px today and `Button` calls a
-  bar's control `tap`, 44px. The cost is 10px of sticky chrome on both hubs.
+- **The jump bar is 44px.** Gary decided this on 2026-10-07. It was 34px, and
+  `Button` calls a bar's control `tap`, 44px. The cost is 10px of sticky chrome on
+  both hubs, because `HubTabBar` is shared. #1107 builds it and re-measures.
 - **Still waiting:** the `Notice` rows (#1132, slices N7 to N9) and the reuse guard
   (#1114). Run the pass again when both close.
 
