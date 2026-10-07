@@ -10,7 +10,7 @@ const STYLES = join(import.meta.dirname, '..', 'src', 'styles')
 const DOOR = /\.[\w-]*(__door|__more|__expand|-expand|__newtile|__addpage)\b/
 // Doors still dashed, each owed a later slice (.scratch/design-system/dashed/census.md).
 // scorecard/ is bespoke and out of scope. Shrink this list; never grow it.
-const PENDING = new Set(['.shelf__newtile', '.vsteam__door', '.sc-armnotice__more'])
+const PENDING = new Set(['.sc-armnotice__more'])
 
 const css = (d) => readdirSync(d, { recursive: true }).filter((f) => f.endsWith('.css')).map((f) => join(d, f))
 
