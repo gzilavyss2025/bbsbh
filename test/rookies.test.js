@@ -156,3 +156,11 @@ test('rookiesForGameSeason keeps today\'s behaviour for a feed with no season', 
   assert.equal(rookiesForGameSeason(DATA, null, 2026), DATA)
   assert.equal(rookiesForGameSeason(null, null, 2026), null)
 })
+
+test('rookiesForGameSeason compares to the status file\'s own season stamp, not the calendar', () => {
+  const stamped = { ...DATA, season: 2026 }
+  // January 2027: last season's games still get the data; other seasons do not.
+  assert.equal(rookiesForGameSeason(stamped, '2026', 2027), stamped)
+  assert.equal(rookiesForGameSeason(stamped, '2027', 2027), null)
+  assert.equal(rookiesForGameSeason(stamped, '1927', 2027), null)
+})

@@ -98,7 +98,9 @@ test('a sharded set memoizes per key, and shares per key', async () => {
   }
 })
 
-test('a request that got no answer is retried; a 404 is not', async () => {
+// #1650: an unanswered request is remembered ~30 s (Date.now is the clock), so an
+// offline device fires one fetch per file, not one per call; then it may retry.
+test('a request that got no answer is remembered ~30 s, then retried', async () => {
   let down = true
   let calls = 0
   const fetchMock = mock.method(globalThis, 'fetch', async () => {
@@ -106,18 +108,25 @@ test('a request that got no answer is retried; a 404 is not', async () => {
     if (down) throw new TypeError('Failed to fetch')
     return { ok: true, json: async () => ({ n: 1 }) }
   })
+  let t = 1_000_000
+  const now = mock.method(Date, 'now', () => t)
   try {
     const load = staticJson('/data/flaky.json', { fallback: { n: 0 } })
     const byKey = staticJsonBy((k) => `/data/flaky/${k}.json`, { fallback: { n: 0 } })
-    assert.deepEqual(await load(), { n: 0 })
-    assert.deepEqual(await byKey(1), { n: 0 })
+    for (let i = 0; i < 5; i++) {
+      assert.deepEqual(await load(), { n: 0 })
+      assert.deepEqual(await byKey(1), { n: 0 })
+    }
+    assert.equal(calls, 2, `fired ${calls} fetches for two offline files`)
     down = false
-    assert.deepEqual(await load(), { n: 1 }, 'single file retried after a network failure')
-    assert.deepEqual(await byKey(1), { n: 1 }, 'shard retried after a network failure')
+    t += 31_000
+    assert.deepEqual(await load(), { n: 1 }, 'single file retried after the window')
+    assert.deepEqual(await byKey(1), { n: 1 }, 'shard retried after the window')
     assert.equal(calls, 4)
     await load()
     assert.equal(calls, 4, 'a good answer is memoized')
   } finally {
+    now.mock.restore()
     fetchMock.mock.restore()
   }
 })

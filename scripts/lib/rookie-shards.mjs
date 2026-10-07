@@ -8,7 +8,7 @@
 // a pill. This module derives two much cheaper views from it, and BOTH
 // generators call it after they write the master, so the two can never drift.
 //
-//   rookies/status.json        { generatedAt, players: { id: 1 | 0 } }
+//   rookies/status.json        { generatedAt, season, players: { id: 1 | 0 } }
 //   rookies/records/{NN}.json  { players: { id: {debutDate, rookieUntil} } }
 //
 // status.json is the whole-league answer the ROOKIE and DEBUT pills need and
@@ -38,8 +38,12 @@ export async function writeRookieShards(dataDir, master) {
   for (const [key, players] of buckets) {
     await writeJsonAtomic(join(outDir, 'records', `${key}.json`), { players })
   }
+  // Season the file describes: Jan-Feb still belong to the season that just ended.
+  const at = new Date(master.generatedAt ?? Date.now())
+  const season = at.getUTCFullYear() - (at.getUTCMonth() < 2 ? 1 : 0)
   await writeJsonAtomic(join(outDir, 'status.json'), {
     generatedAt: master.generatedAt ?? null,
+    season,
     players: status,
   })
   return { players: Object.keys(status).length, shards: buckets.size }

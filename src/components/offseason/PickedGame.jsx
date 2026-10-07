@@ -7,6 +7,7 @@ import { humanDateWithYear } from '../../lib/dates.js'
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 
 // ONE MORE GAME — the lead of the minor levels' offseason page, issue #1077.
 //
@@ -103,14 +104,14 @@ export function PickedGame({ sportId, season, dateStr }) {
           <span>Lineups posted</span>
         </p>
 
-        <div className="pgame__actions">
+        <Cluster gap="base" className="pgame__actions">
           <a className="btn btn--ink pgame__go" {...linkProps(poolGamePath(game))}>
             Score this game
           </a>
           <button type="button" className="btn pgame__another" onClick={() => setStep((n) => n + 1)}>
             Another game
           </button>
-        </div>
+        </Cluster>
       </Card>
     </section>
   )

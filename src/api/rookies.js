@@ -90,9 +90,13 @@ export function hasDebuted(data, personId) {
 // `isMlb`); the record itself (isActiveRookie) is level-agnostic.
 // The status file says "under the rookie limit TODAY", so it says nothing about
 // a game from another season. A game surface hands it through this: another
-// season gives null (no pill), a current or unknown season keeps it.
+// season gives null (no pill), the file's own season or an unknown one keeps it.
+// The file names its season (`season`, stamped by the generator), so January's
+// last-season games still match. An old file with no stamp falls back to the
+// calendar year, as before.
 export function rookiesForGameSeason(data, gameSeason, now = new Date().getFullYear()) {
-  return gameSeason != null && parseInt(gameSeason, 10) !== now ? null : data
+  const season = data?.season ?? now
+  return gameSeason != null && parseInt(gameSeason, 10) !== season ? null : data
 }
 
 export function showRookiePill(data, personId, isMlb) {

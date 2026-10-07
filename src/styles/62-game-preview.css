@@ -58,15 +58,8 @@
   padding: var(--space-4);
 }
 
-.posterstudio__title {
+.posterstudio__panel .sectionhead {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-h3);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  line-height: var(--lh-solid);
-  text-transform: uppercase;
-  color: var(--text-heading);
 }
 
 .posterstudio__note,

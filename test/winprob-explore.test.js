@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { nearestWinProbEvent, winProbReadout, winProbChangeLabel, touchIntent, followLatest, snapToMarker, focusInput, moveSnaps, wholeSwing } from '../src/components/charts/winprob/explore.js'
-import { winProbKeyColor, winProbKeyPair } from '../src/components/charts/winprob/keyColors.js'
+import { winProbKeyColor, winProbKeyPair, winProbKeyPill } from '../src/components/charts/winprob/keyColors.js'
 
 const FALLBACK = { primary: '#6B6558', secondary: '#938C7C', text: '#FBF6E9' }
 import { selectWinProbPath, selectWinProbBigPlays } from '../src/api/winprob.js'
@@ -142,4 +142,11 @@ test('when the secondary also clashes, the away key still clears the home fill',
   const onLight = winProbKeyPair({ fill: '#F0F0F0', text: '#1B2A3A' }, { fill: '#EEEEEE', text: '#1B2A3A' }, { primary: '#F1F1F1', secondary: '#F2F2F2', text: '#1B2A3A' })
   assert.equal(onLight.away.fill, '#1B2A3A')
   assert.equal(both.away.fill, '#FFFFFF')
+})
+
+test('a chip pair that misses the contrast bar does not throw in the chart: the pill falls back to readable text', () => {
+  const bad = { fill: '#808080', text: '#8A8A8A' } // a curated chip pair gone wrong
+  const style = winProbKeyPill(bad)
+  assert.equal(style['--pill-fill'], '#808080')
+  assert.match(style['--pill-text'], /^#(FFFFFF|1B2A3A)$/i)
 })

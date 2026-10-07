@@ -691,6 +691,18 @@ test('C2: the two dossier cards are ledgers and keep their 3px accent rule', () 
   }
 })
 
+// H2 (Gary, 2026-10-07): a prospect or level card's name is its head, a
+// SectionHead label. The old --fs-h3 title rules are gone.
+test('H2: the prospect and level cards name themselves with a label SectionHead', () => {
+  const css = read('31d-prospect-card.css')
+  assert.doesNotMatch(css, /__title/)
+  for (const rel of ['components/player/LevelProgressionCard.jsx', 'components/player/ProspectRankHistoryCard.jsx', 'components/player/family/FamilyBand.jsx', 'components/playerstats/ProspectCard.jsx']) {
+    const code = src(rel)
+    assert.match(code, /<SectionHead look="label">/, rel)
+    assert.doesNotMatch(code, /(levelprog|prospectcard)__title/, rel)
+  }
+})
+
 // The tile was a PlayerLink <button>; it is a Card link now (as="a"), a real
 // anchor, so a middle-click opens a tab. It keeps the desktop hover card that
 // PlayerLink gave it, and it takes its path and that card from the same hook
@@ -1330,14 +1342,14 @@ test('C5: the performer tile does not clip the focus ring of its name link', () 
 
 // GameStoryCard fetches MLB.com coverage and shows nothing without it. The
 // early return stays above the Card, so no empty frame ever says a story
-// exists, and the big "Coverage" title stays the Card's first child.
-test('C5: the coverage card keeps its large title and returns null before the Card', () => {
+// exists, and the "Coverage" label head stays the Card's first child.
+test('C5: the coverage card wears the label head and returns null before the Card', () => {
   const code = src('components/game/GameStoryCard.jsx')
   const empty = code.indexOf('if (stories.length === 0) return null')
   assert.ok(empty > 0)
   assert.ok(empty < code.indexOf('<Card'), 'the early return sits above the Card')
-  assert.match(code, /<Card body="flush" className="gamestory">\s*<div className="gamestory__head">\s*<h3 className="gamestory__title">Coverage<\/h3>/)
-  assert.equal(decl(ruleBody(read('21-box-score.css'), '.gamestory__title'), 'font-size'), 'var(--fs-ui)')
+  assert.match(code, /<Card body="flush" className="gamestory">\s*<SectionHead look="label" note="MLB.com" className="gamestory__head">\s*Coverage\s*<\/SectionHead>/)
+  assert.doesNotMatch(read('21-box-score.css'), /\.gamestory__(title|note)/)
 })
 
 // The same for every box-score block that can be empty: an empty frame would
@@ -1934,13 +1946,13 @@ test('C6c: the moved-up table sits in a flush sheet Card and its head stays outs
   assert.doesNotMatch(css, /PROVISIONAL, in the same way the \.movedup|THE \.movedup ROWS ARE PROVISIONAL/)
 })
 
-// The two names Gary keeps until he picks a look (H2, 2026-09-29).
-test('C6c: the big card names keep their rules', () => {
-  const css = read('78-offseason.css')
-  assert.equal(decl(ruleBody(css, '.seasonnote__title') ?? '', 'font-size'), 'var(--fs-title-md)')
-  assert.equal(decl(ruleBody(css, '.srecord__title') ?? '', 'font-size'), 'var(--fs-title-sm)')
-  assert.match(src('components/offseason/SeasonRecord.jsx'), /<h3 className="srecord__title">Season record<\/h3>/)
-  assert.match(src('components/offseason/LongAtBats.jsx'), /<h4 className="seasonnote__title">/)
+// Gary picked the label look (H2, 2026-10-07): the two big card names are
+// SectionHead labels, and their title rules are gone.
+test('C6c: the offseason card names are label SectionHeads', () => {
+  assert.doesNotMatch(read('78-offseason.css'), /\.(seasonnote|srecord)__title/)
+  assert.match(src('components/offseason/SeasonRecord.jsx'), /<SectionHead look="label">Season record<\/SectionHead>/)
+  assert.match(src('components/offseason/LongAtBats.jsx'), /<SectionHead look="label" as="h4">/)
+  assert.match(src('components/offseason/YoungestRegulars.jsx'), /<SectionHead look="label" as="h4">/)
 })
 
 // The ADR-0084 rename. Strict, comments too. The naming ledger (docs/) keeps
@@ -2153,11 +2165,9 @@ test('C7: the seal pin — no reveal-only import, SealBox or revealedThrough rea
   }
 })
 
-test('C7: the poster panel title keeps its own rule', () => {
-  const body = ruleBody(read('62-game-preview.css'), '.posterstudio__title') ?? ''
-  assert.equal(decl(body, 'font-size'), 'var(--fs-h3)')
-  assert.equal(decl(body, 'text-transform'), 'uppercase')
-  assert.match(src('screens/GamePreview.jsx'), /<h2 className="posterstudio__title">Preview card<\/h2>/)
+test('C7: the poster panel name is a label SectionHead', () => {
+  assert.doesNotMatch(read('62-game-preview.css'), /\.posterstudio__title/)
+  assert.match(src('screens/GamePreview.jsx'), /<SectionHead look="label" as="h2">Preview card<\/SectionHead>/)
 })
 
 // ---- slice H3: the second lines ----

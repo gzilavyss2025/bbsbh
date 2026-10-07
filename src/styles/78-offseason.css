@@ -390,9 +390,6 @@
 }
 
 .pgame__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
   margin-top: var(--space-4);
 }
 /* An anchor wearing .btn: the destination is a real address, so a reader may
@@ -565,9 +562,6 @@
    so these are toggle buttons carrying aria-pressed, which is what a reader's
    screen reader should hear. */
 .seasonnote__leagues {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
   margin-top: var(--space-3);
 }
 .seasonnote__league {
@@ -646,15 +640,9 @@
   flex: 1 1 auto;
   min-width: 0;
 }
-.seasonnote__title {
+.seasonnote__main .sectionhead,
+.srecord__body .sectionhead {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-title-md);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-tight);
-  letter-spacing: var(--ls-title);
-  text-transform: uppercase;
-  color: var(--text-heading);
 }
 #root .seasonnote__note {
   text-transform: none; /* caps-exempt: the note's own question, not a label */
@@ -789,16 +777,6 @@
 .srecord__body {
   padding: var(--space-4);
 }
-.srecord__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-title-sm);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-tight);
-  letter-spacing: var(--ls-title);
-  text-transform: uppercase;
-  color: var(--text-heading);
-}
 /* #root * matches too, and this row's note is a plain prose sentence, not a
    label — shouting it back to caps would misread as one. */
 #root .srecord__note,
@@ -816,9 +794,6 @@
 }
 
 .srecord__doors {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
   margin-top: var(--space-3);
 }
 /* Anchors, not buttons: every destination is a real address a reader may

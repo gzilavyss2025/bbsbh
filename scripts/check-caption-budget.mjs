@@ -62,7 +62,8 @@ import { resolve, join } from 'node:path'
 // its "No other tie" note took the caption the rows' name rule gave up.
 // 122 -> 121: the Records card empty line (.trec__empty) moved onto EmptyState (#1132, E4).
 // N9 of the Notice collapse (#1132) measured 120 and left it: no Notice rule used --fs-caption.
-const BUDGET = 120
+// 120 -> 119: .gamestory__note went with the Coverage label head (#1346, H2c).
+const BUDGET = 119
 
 const stylesDir = resolve('src/styles')
 const sheets = []
