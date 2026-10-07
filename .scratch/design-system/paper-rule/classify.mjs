@@ -106,14 +106,41 @@ function classify(r) {
   }
   return base
 }
+
+// --- Gary's answers (2026-10-07). Decision 4 groups are PROPOSALS until he picks names. ---
+const D4 = (r) => {
+  const { token: t, property: p, selector: s, file, line } = r
+  const f = file.replace('src/styles/', '')
+  if (t === '--paper-3' && (p === 'color' || (p === 'fill' && /strikezone__num/.test(s)) || (/^border-(top|bottom)$/.test(p) && /gamehud__tri/.test(s))))
+    return ['text-on-ink-bright', '--text-on-ink-bright (new, = --paper-3)']
+  if (t === '--rule-soft' && p === 'color' && /scorebookstory|abouthero__kicker/.test(s)) return ['text-on-ink-faint', '--text-on-ink-faint (new, = --rule-soft)']
+  if (t === '--rule' && p === 'color' && /umptend/.test(s)) return ['text-on-ink-faint?', '--text-on-ink-faint (colour moves) or keep --border-rule']
+  if (p === 'color' && /aboutstory__n|payboard__rank|pgame__dot/.test(s)) return ['ghost-alias', 'alias (decorative text on paper, no AA pair)']
+  if (t === '--paper-3' && p === 'stroke' && /pip__tick|bpdiagram__line|hitchart__h|bflight__h/.test(s)) return ['mark-halo', '--mark-halo (new, = --paper-3)']
+  if (/^(stroke|fill|stop-color)$/.test(p)) return ['art-alias', 'alias (ball and diagram art)']
+  return ['surface-alias', 'alias (surface or border inside a gradient or ring)']
+}
+function decided(r) {
+  const o = { ...r }
+  const sureIt = (repl) => { o.repl = repl; o.conf = 'sure'; o.role += ' [decided]' }
+  if (r.scope === 'outside-learn') { o.alias = 'none in learn.css'; o.repl = '(exempt, decision 5)'; o.conf = 'sure'; return o }
+  if (r.token === '--rule-grid') return (sureIt('--border-grid (new)'), o)
+  if (r.token === '--paper-1') return (/text on a dark band/.test(r.role) ? (sureIt('--bg-canvas'), o) : (sureIt('--bg-page'), o))
+  if (r.token === '--paper-0') return (/text on a dark badge/.test(r.role) ? (sureIt('--bg-canvas'), o) : (sureIt('--bg-page'), o))
+  if (r.token === '--paper-2' && /ticker/.test(r.selector)) return (sureIt('--surface-card'), o)
+  if (['--paper-3', '--rule', '--rule-soft'].includes(r.token) && r.conf === 'likely') {
+    const [g, repl] = D4(r); o.group = g; o.repl = repl; o.conf = 'pending-4'; return o
+  }
+  return o
+}
 const q = (x) => `"${String(x).replace(/"/g, '""')}"`
-const hdr = ['scope', 'file', 'line', 'selector', 'property', 'token', 'alias_it_could_use', 'role', 'proposed_replacement', 'confidence']
+const hdr = ['scope', 'file', 'line', 'selector', 'property', 'token', 'alias_it_could_use', 'role', 'proposed_replacement', 'confidence', 'decision4_group']
 const out = [hdr.join(',')]
-const done = rows.map((r) => ({ ...r, ...(() => { const c = classify(r); return { alias: c.alias, role: c.role, repl: c.repl, conf: c.conf } })() }))
+const done0 = rows.map((r) => ({ ...r, ...(() => { const c = classify(r); return { alias: c.alias, role: c.role, repl: c.repl, conf: c.conf } })() }))
+const done = done0.map(decided)
 // learn.css own definitions are excluded above (property filter). Learn reads: aliases do not exist there.
 for (const r of done) {
-  if (r.scope === 'outside-learn') { r.alias = 'none in learn.css'; r.repl = '(exempt or copy alias tier — see proposal)'; r.conf = 'ask' }
-  out.push([r.scope, r.file, r.line, q(r.selector), r.property, r.token, r.alias, q(r.role), q(r.repl), r.conf].join(','))
+    out.push([r.scope, r.file, r.line, q(r.selector), r.property, r.token, r.alias, q(r.role), q(r.repl), r.conf, r.group || ''].join(','))
 }
 writeFileSync(D + 'census.csv', out.join('\n') + '\n')
 const tally = {}
