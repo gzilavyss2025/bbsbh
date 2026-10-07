@@ -44,3 +44,53 @@ test('N9: the rosters error is an error Notice in the degrees namespace, and WHE
   // The block parent gave no gap: the namespace gives back the 12px the old .hint padding gave.
   assert.match(ruleBody(css('teammates/teammates.css'), '.degrees__notice') ?? '', /margin:\s*var\(--space-3\) 0/)
 })
+
+// ---- 2. the dead rules ----
+
+// The slate (`.screen--slate`, GameSelect.jsx) wears no `.hint`: its loading line is a
+// Loader, its error an AsyncStatus Notice, its empty line an EmptyState. Walk every
+// file the slate can import and look for the word.
+function importGraph(entry) {
+  const seen = new Set()
+  const visit = (file) => {
+    if (seen.has(file)) return
+    seen.add(file)
+    for (const m of readFileSync(file, 'utf8').matchAll(/(?:from\s+|import\s*\(\s*)['"](\.[^'"]+)['"]/g)) {
+      const base = resolve(dirname(file), m[1])
+      const hit = [base, `${base}.js`, `${base}.jsx`].find((p) => existsSync(p) && statSync(p).isFile())
+      if (hit && /\.jsx?$/.test(hit)) visit(hit)
+    }
+  }
+  visit(entry)
+  return [...seen]
+}
+
+test('N9: no file the slate imports wears .hint, so the slate rule for .hint is gone and .btn keeps its caps', () => {
+  const wearers = importGraph(join(SRC, 'screens/GameSelect.jsx'))
+    .filter((f) => readFileSync(f, 'utf8').split('\n').some((l) => /\bhint\b/.test(l) && !/^\s*(\/\/|\*|\/\*)/.test(l)))
+    .map((f) => relative(SRC, f))
+  assert.deepEqual(wearers, [])
+  const nav = css('05-masthead-nav.css')
+  assert.doesNotMatch(nav, /\.screen--slate \.hint/)
+  const body = ruleBody(nav, '.screen--slate .btn') ?? ''
+  assert.match(body, /letter-spacing:\s*var\(--ls-caps\)/)
+  assert.match(body, /text-transform:\s*uppercase/)
+})
+
+// `.hint--error` is worn by five dev-only pages (App.jsx loads them in DEV only), so the
+// rule stays. This fails the day the fifth moves, and the day a new page wears it.
+const TOOL_PAGES = [
+  'screens/ScorecardLab.jsx',
+  'screens/UniformNamesPage.jsx',
+  'screens/identity-lab/ColorLabBody.jsx',
+  'screens/identity-lab/DugoutRail.jsx',
+  'screens/identity-lab/profiles/milb.jsx',
+]
+test('N9: .hint--error keeps its rule, and only the five dev-only tool pages wear it', () => {
+  assert.match(css('05-masthead-nav.css'), /\.hint--error\s*\{\s*color:\s*var\(--clay\);\s*\}/)
+  const wearers = ['src', 'e2e', 'scripts', 'api']
+    .flatMap((d) => (existsSync(join(ROOT, d)) ? walk(join(ROOT, d)) : []))
+    .filter((f) => /\.(jsx?|mjs)$/.test(f) && /hint--error/.test(readFileSync(f, 'utf8')))
+    .map((f) => relative(SRC, f))
+  assert.deepEqual(wearers.sort(), [...TOOL_PAGES].sort())
+})
