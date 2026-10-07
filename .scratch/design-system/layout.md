@@ -602,8 +602,8 @@ JSX site. It failed on `main` and passes now.
 `.trailstrip`, `.refpanel__body`, `.moundcard__verdict`, `.gamehud__outs`,
 `.psseries__potgMain`). Files another open PR edits: `14-strike-zone.css`,
 `15-team-color-lab.css`, `31-wild-card.css` (Grid G1, #1630), and
-`30-standings.css`, `39-manager-page.css`-adjacent and the contract partials
-`74-contract-workbench.css`, `74a-contract-lookup.css` (Cluster C1). `.scout__pm`
+`30-standings.css` and the contract partials `74-contract-workbench.css` and
+`74a-contract-lookup.css` (Cluster C1). `.scout__pm`
 (a dialog with a key handler, so the converter refuses it), `.xl-entry` and
 `.xl-entry__head` (Express Lane, a pitch-by-pitch viewer; I did not judge them).
 
