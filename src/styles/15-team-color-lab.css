@@ -61,7 +61,7 @@
   }
 
   .milbneutrals__row:hover {
-    background: var(--paper-1);
+    background: var(--bg-page);
   }
 
   .milbneutrals__text {
@@ -134,7 +134,7 @@
   padding: 2px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
-  background: var(--tint, var(--paper-1));
+  background: var(--tint, var(--bg-page));
   box-shadow: var(--inset-cell);
 }
 
@@ -383,7 +383,7 @@
    the Team Identity Lab) actually used as the tile's --tint, so it's clear at a
    glance which of the three colors above is driving the box beside it. */
 .colorlab__swatchcell--active .colorlab__swatchchip {
-  box-shadow: 0 0 0 2px var(--paper-1), 0 0 0 4px var(--accent-positive);
+  box-shadow: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--accent-positive);
 }
 
 /* Marks which swatch is currently driving the WPA preview's band color
@@ -391,7 +391,7 @@
    two "this swatch is driving X" claims (tile background vs. WPA band)
    never read as the same indicator. */
 .colorlab__swatchcell--wpaselected .colorlab__swatchchip {
-  box-shadow: 0 0 0 2px var(--paper-1), 0 0 0 4px var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--accent-primary);
 }
 
 .colorlab__swatchchip--placeholder {
@@ -501,7 +501,7 @@
   padding: var(--space-2);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
-  background: var(--paper-1);
+  background: var(--bg-page);
 }
 
 .colorlab__wpapreviewhead {

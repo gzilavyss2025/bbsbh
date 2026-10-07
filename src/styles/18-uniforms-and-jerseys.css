@@ -131,7 +131,7 @@
 }
 
 .audittable__via--override {
-  background: var(--paper-1);
+  background: var(--bg-page);
   color: var(--text-caption);
   border: var(--bw-hair) solid var(--border-rule);
 }

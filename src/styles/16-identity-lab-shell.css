@@ -50,7 +50,7 @@
 }
 
 .idlab__infobtn:hover {
-  background: var(--paper-1);
+  background: var(--bg-page);
 }
 
 .idlab__infobtn:focus-visible {
@@ -137,7 +137,7 @@
 }
 
 .idlab__railitem:hover {
-  background: var(--paper-1);
+  background: var(--bg-page);
 }
 
 .idlab__railitem:focus-visible {
@@ -149,7 +149,7 @@
    notched into the workbench beside it (the ::after triangle) so the rail and
    the bench read as one continuous surface rather than two lists. */
 .idlab__railitem--on {
-  background: var(--paper-3);
+  background: var(--surface-inset);
   border-color: var(--accent-primary);
   border-width: var(--bw-heavy);
 }
@@ -176,7 +176,7 @@
   height: 6px;
   border-radius: var(--radius-pill);
   background: var(--marker);
-  border: var(--bw-hair) solid var(--paper-0);
+  border: var(--bw-hair) solid var(--bg-page);
 }
 
 /* ---- dugout rail ---- */
@@ -191,7 +191,7 @@
   gap: var(--space-4);
   min-height: 48px;
   padding: var(--space-2) var(--space-4);
-  background: var(--paper-2);
+  background: var(--surface-card);
   border-top: var(--bw-hair) solid var(--border-rule);
   box-shadow: var(--shadow-raised);
   overflow-x: auto;
@@ -245,7 +245,7 @@
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-1) var(--space-2);
-  background: var(--paper-3);
+  background: var(--surface-inset);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   animation: idlab-card-drop var(--dur-med) var(--ease-out);
@@ -367,7 +367,7 @@
   padding: var(--space-1) var(--space-4);
   border: var(--bw-heavy) solid var(--accent-primary);
   border-radius: var(--radius-sm);
-  background: var(--paper-3);
+  background: var(--surface-inset);
   box-shadow: var(--inset-cell);
   color: var(--accent-primary);
   font-family: var(--font-display);
