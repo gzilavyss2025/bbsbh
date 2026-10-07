@@ -498,13 +498,14 @@ what this pass hands it is the box to draw inside, which the token tier collapse
   app's whole idea."* `--kraft-board` is the Game Log's. Both warm browns on the
   manila ladder are spoken for.
 
-**No component.** `SectionHead` does not exist — #1113 is open and blocked by
-#1129, #1130 and #1131, all open. `SectionMasthead` (36 uses) and `SectionTitle`
-(38 uses) are still two components. The **seven** band heads this page needs are
-listed in `scope.md` §2G — this said six over a table of seven, corrected by
-#1106 — and they put exactly one new requirement on #1113: **a sub-head level**,
-which neither component has, and which comes from #928's
-two-sections-under-one-head rule rather than from the team page's taste.
+**No component was built here.** When this was written, `SectionHead` did not
+exist. It does now (#1113), with three looks: `label`, `rule` and `band`. None of
+them is the page head that `design.md` §13 draws, so the page head and its
+sub-head are a fourth look that #1107 adds. See "Trued up to the design system"
+below. The **seven** band heads this page needs are listed in `scope.md` §2G —
+this said six over a table of seven, corrected by #1106 — and the sub-head level
+they need comes from #928's two-sections-under-one-head rule rather than from
+the team page's taste.
 
 `design.md` §13 carries the drawn spec for both levels, in tokens, and it also
 reports the finding #1113 should have: **this page uses the right-aligned action
@@ -529,6 +530,28 @@ player hub, as `HubTabBar` already enforces for both callers.
 > arrives in About and the mark that says so is off the end of a control nobody
 > has touched. **The bar must scroll itself to keep the current band in view**,
 > and nothing in `HubTabBar` does that today.
+
+## Trued up to the design system
+
+**Status of this section:** partial, 2026-10-07 (#1154). #1114 and #1132 are still
+open, and #1107 has not shipped, so only documents changed. `design.md` §18 holds
+the row-by-row table. In short:
+
+- **The system takes one decision.** The page head (2px full-bleed ink rule, 21px
+  title, standfirst) and the sub-head (1px rule, 17px) become a fourth look of
+  `SectionHead`. #1107 builds it and the design-system ADR records it. No new token.
+- **Two words change in code, not in the documents.** The standfirst is the head's
+  `note` (ADR-0084 clause 3). A page section is a *section*, because the guard
+  already uses `band` for the club bar (ADR-0084 clause 6).
+- **The rest agrees.** The card head is `Card` plus `SectionHead look="band"`. A
+  rank is a `Pill role="tag"` with `figure`. Spacing 48 / 32 / 16 sits on
+  `--space-12`, `--space-8` and `--space-4`, and the 10px under the title is
+  `--space-2h` (ADR-0085). The table header is `Table`'s. The empty Ballpark is an
+  `EmptyState`.
+- **One call is open for Gary.** The jump bar is 34px today and `Button` calls a
+  bar's control `tap`, 44px. The cost is 10px of sticky chrome on both hubs.
+- **Still waiting:** the `Notice` rows (#1132, slices N7 to N9) and the reuse guard
+  (#1114). Run the pass again when both close.
 
 ## Consequences
 

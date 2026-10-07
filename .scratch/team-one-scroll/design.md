@@ -1121,5 +1121,50 @@ Applied in this PR. ADR-0082 stays **DRAFT**.
 - **One thing not to do**: no band tint, no new token, no fifth heading tier, no
   eleventh type size, and no fourth block spacing.
 
+---
+
+### 18 · Truing up to the design system — #1154, partial pass of 2026-10-07
+
+Part Two was drawn against the design system as it shipped on 2026-09-21. This
+section reads §13 and §14 again against the system as it ships on `2324e44b`.
+Each row gets one of three outcomes: **A** the mockup already agrees; **B** the
+mockup changes to match the system; **C** the system takes the mockup's decision
+and a design-system ADR must record that it did.
+
+**This is a partial pass.** #1114 (the reuse guard) and #1132 (the `Notice`
+slices N7 to N9, and the dashed-rule fix) are still open. #1107 has not shipped,
+so this pass changes documents only. The rows that wait on them say so. Run the
+pass again when both close.
+
+| Row | Outcome | What the system says now | What changes |
+| --- | --- | --- | --- |
+| Band head (§13) vs #1113 `SectionHead` | **C** | `SectionHead` has three looks: `label`, `rule`, `band` (club bar, with `bleed`). None draws a full-bleed 2px ink rule over a 21px title and a standfirst. `rule` is the `BroadcastSection` rule that §5 rejected. | The system takes the decision. A page head is a fourth look of `SectionHead`, with two levels: the band head (2px, 21px) and the sub-head (1px, 17px). #1107 adds it in code in the same PR and records it in the design-system ADR. No new token. |
+| Standfirst vs naming grammar #1129 | **B** (the word) | ADR-0084 clause 3 fixes the head parts: `__title`, `__note`, `__action`. It rejects `__lede`, `__sub`, `__eyebrow`. | "Standfirst" stays as the design word. In code it is the head's `note`. `SectionHead` draws `note` at the right today, so the page look places it under the title. |
+| "Band" vs the guard's "band" | **B** (the word) | #1114 and ADR-0084 clause 6 define a band as a rule that reads `--bar-fill`: the club bar. | The page's sections stay "bands" in these documents. In code and in the guard, a page section is a *section*, and `band` means the club bar only. §13's four levels read: page head, sub-head, card head (`SectionHead look="band"`), group label (`look="label"`). |
+| Action slot used zero times (§13) vs §14·F | **A** (clarified) | `SectionHead` takes ONE `action`: a `Door` or a `Pill role="control"`. | Zero is true for the page head. The card head uses the slot: `See all ›` is a `Door` in its `action`. §13 and §14·F do not conflict. |
+| Card head (§14·A) | **A** | A `Card` takes `head={<SectionHead look="band" club …>}`. `club` gives a plain label until a club colour arrives. A `body="flush"` card lets a table or a bleeding deck run to the edge. | Items (a) to (e) all map to `Card` + `SectionHead`. Item (d), the Transactions deck, is `body="flush"`. The reuse guard (#1114) is open: re-check when it lands. |
+| Rank cell (§14·B) | **A** | `Pill role="tag"` with `figure` (#1186) draws a rank, a level or a count in the mono face, about 20px tall. A card head's `note` is where "org rank" goes. | (a) stays a namespace tile, not a `Pill`: it is a tile of a ranked board. (d) is the head's `note`. The house rule (`1 of 30`, no `#`) is unchanged. |
+| Controls in card heads (§14·B and F) | **A** | A pill that filters, or the one action a coloured band carries, is a `Pill role="control"`, 34px. A door is a `Door`. A tag and a control never share a height. | None. The two affordances stay apart, as §14·F requires. |
+| Jump bar (§13, §14·K) | **A**, with one call named | `.teamtabs__btn` is still its own rule (`46-consent-modal.css`, `min-height: 34px`). It is not on `Button`. `Button` has two sizes: `control` 34px, "a switch inside a card", and `tap` 44px, "the bar and the page". | The drawing agrees with the control as shipped. But the system's word for a bar is `tap`. §14·K left 34 or 44 to #1107 with the cost stated (10px of sticky chrome on both hubs). That call is now the system's call too, and it is Gary's to make. No change is made here. |
+| Spacing 48 / 32 / 16 (§5, §13) | **A** | `--space-12`, `--space-8`, `--space-4`. `--space-section` is 16px. ADR-0085 adds `--space-1h` 6px, `--space-2h` 10px, `--space-3h` 14px. | The 10px under the head title is `--space-2h`, a landing that now has a name. The 12px is `--space-3`. The `-16px` bleed is a margin, which the guard leaves alone. |
+| Table header row (§14·C) | **A**, token names **B** | `Table` draws the head in `--font-display`, `--fs-label`, `--ls-caps`, caps, `--text-caption`, on `--bg-page`, with a `--border-hairline` rule between body rows. | §14·C says `--rule-soft`. The guard now rejects a direct `--rule*` read, so the alias is `--border-hairline`. The look is the same. `.rpt__sub` stays a per-family option. |
+| Empty state (§14·H) | **A** | `EmptyState` is a dashed inset with graphite copy: `label`, text, `note`, one `action`. It owns no ground and no margin. | The degraded Ballpark is an `EmptyState size="block"` with "not posted yet". Dashed means "pencilled in", which is what the MiLB rule says. |
+| "Not posted yet" and other messages | **Waits** on #1132 | `Notice` exists (tones: info, event, caution, error). Slices N7 to N9 and the dashed-rule fix are open. | Re-read this row when #1132 closes. |
+| The words (#1129) | **B**, see rows 2 and 3 | "Jump bar" is a control: its parts are `__btn`, `__tab`. | `HubTabBar` keeps `.teamtabs__btn`. |
+
+**Zero new tokens holds.** Every value in §13 and §14 reads an existing token. The
+one value that was a bare number, the 10px under the title, now has a name,
+`--space-2h`, that it did not have when it was drawn.
+
+**No canvas board changes.** Every drawn value is the same pixel value under the
+system as it ships. The boards were not re-rendered, because nothing on them is
+now wrong. Two labels on them name `--rule-soft` and `--rule`; read those as
+`--border-hairline` and `--border-rule`.
+
+**What #1107 now has to do that §17 did not say.** Add the page look and its two
+levels to `SectionHead`, and record it in the design-system ADR (outcome C). Wear
+the card head through `Card`, not through a new class. Decide 34 or 44px for the
+jump bar.
+
 *The canvas is https://claude.ai/artifact/NV6fz4ywi3d3nvX5rdRa8s — Phase 1 at the
 left, Phase 2 at the right under its own title.*
