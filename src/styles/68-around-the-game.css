@@ -62,7 +62,7 @@
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-display);
-  color: var(--paper-2);
+  color: var(--text-on-ink);
   opacity: 0.72;
 }
 
@@ -73,7 +73,7 @@
   padding: 2px var(--space-2);
   border-radius: var(--radius-xs);
   background: var(--clay);
-  color: var(--paper-2);
+  color: var(--text-on-ink);
   opacity: 1;
 }
 
@@ -88,7 +88,7 @@
   font-weight: var(--w-bold);
   line-height: var(--lh-display);
   letter-spacing: var(--ls-tight-display);
-  color: var(--paper-3);
+  color: var(--text-on-ink-bright);
 }
 
 .bcast__dek {
@@ -97,7 +97,7 @@
   font-family: var(--font-body);
   font-size: var(--fs-body);
   line-height: var(--lh-prose);
-  color: var(--paper-2);
+  color: var(--text-on-ink);
   opacity: 0.86;
 }
 
@@ -128,7 +128,7 @@
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
-  color: var(--paper-2);
+  color: var(--text-on-ink);
   opacity: 0.62;
 }
 
@@ -137,7 +137,7 @@
   font-family: var(--font-mono);
   font-size: var(--fs-compact);
   font-variant-numeric: tabular-nums;
-  color: var(--paper-3);
+  color: var(--text-on-ink-bright);
 }
 
 /* ---- section divider --------------------------------------- */
@@ -241,7 +241,7 @@
   min-width: 84px;
   padding: 3px var(--space-2);
   border-radius: var(--radius-xs);
-  background: var(--rule-grid);
+  background: var(--border-grid);
   overflow: hidden;
 }
 
@@ -316,14 +316,14 @@
    an ellipsis: the middle of this board is the part that says nothing, and
    saying how many are in it is more honest than three dots. */
 .rpt__between {
-  --table-pin: var(--paper-2); /* the pinned cell paints from this, not its own background */
+  --table-pin: var(--surface-card); /* the pinned cell paints from this, not its own background */
 }
 .rpt__between th,
 .rpt__between td {
   font-family: var(--font-body);
   font-size: var(--fs-caption);
   color: var(--text-caption);
-  background: var(--paper-2);
+  background: var(--surface-card);
 }
 
 /* ---- month trend strip ------------------------------------- */
@@ -341,7 +341,7 @@
   display: flex;
   align-items: flex-end;
   height: 100%;
-  background: var(--rule-grid);
+  background: var(--border-grid);
   border-radius: 1px;
 }
 
@@ -366,7 +366,7 @@
   height: 12px;
   border-radius: var(--radius-pill);
   overflow: hidden;
-  background: var(--rule-grid);
+  background: var(--border-grid);
 }
 
 .statusmeter__seg {
@@ -493,15 +493,15 @@
 
 /* The reader's own club, wherever it lands on the board. */
 .rpt__row--mine {
-  --table-pin: var(--paper-3);
-  background: var(--paper-3);
+  --table-pin: var(--surface-inset);
+  background: var(--surface-inset);
 }
 
 /* Solid, not translucent: a pinned cell that lets the scrolling columns show
    through is worse than no highlight at all. The clay edge marks the row. */
 .rpt__row--mine td.team,
 .rpt__row--mine th.team {
-  background: var(--paper-3);
+  background: var(--surface-inset);
   box-shadow: inset 3px 0 0 var(--clay);
 }
 
@@ -578,7 +578,7 @@
      are scaled against, which makes the bar comparable down the column. */
   width: 118px;
   height: 14px;
-  background: var(--rule-grid);
+  background: var(--border-grid);
   border-radius: 1px;
 }
 
@@ -662,7 +662,7 @@
 .method {
   margin: var(--space-8) 0 0;
   padding: var(--space-4);
-  background: var(--paper-1);
+  background: var(--bg-page);
   border: var(--bw-hair) dashed var(--border-rule);
   border-radius: var(--radius-sm);
 }
@@ -785,7 +785,7 @@
   top: 50%;
   height: 4px;
   margin-top: -2px;
-  background: var(--rule-grid);
+  background: var(--border-grid);
   border-radius: 2px;
 }
 
@@ -816,7 +816,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: var(--paper-1);
+  background: var(--bg-page);
   border: var(--bw-heavy) solid var(--navy);
   box-shadow: 0 1px 2px rgb(0 0 0 / 25%);
   pointer-events: auto;
@@ -827,7 +827,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: var(--paper-1);
+  background: var(--bg-page);
   border: var(--bw-heavy) solid var(--navy);
   pointer-events: auto;
   cursor: pointer;
@@ -950,30 +950,30 @@
 }
 
 .dh__row:hover {
-  --table-pin: var(--paper-2);
+  --table-pin: var(--surface-card);
 }
 
 .dh__row:hover td {
-  background: var(--paper-2);
+  background: var(--surface-card);
 }
 
 .dh__row--open {
-  --table-pin: var(--paper-1);
+  --table-pin: var(--bg-page);
 }
 
 .dh__row--open td {
-  background: var(--paper-1);
+  background: var(--bg-page);
 }
 
 /* The reader's own club keeps its clay edge and its own ground under both. */
 .dh__row.rpt__row--mine:hover,
 .dh__row--open.rpt__row--mine {
-  --table-pin: var(--paper-3);
+  --table-pin: var(--surface-inset);
 }
 
 .dh__row.rpt__row--mine:hover td,
 .dh__row--open.rpt__row--mine td {
-  background: var(--paper-3);
+  background: var(--surface-inset);
 }
 
 /* Marks instead of a count, in the drawer's Swept and Swept by columns. The
@@ -1021,12 +1021,12 @@
    it is deliberately narrow and indented — a second full-width table under a
    row reads as the board losing its place. */
 .dh__drawerrow {
-  --table-pin: var(--paper-1);
+  --table-pin: var(--bg-page);
 }
 
 .dh__drawerrow > td {
   padding: 0 0 var(--space-3);
-  background: var(--paper-1);
+  background: var(--bg-page);
 }
 
 .dh__drawer {
