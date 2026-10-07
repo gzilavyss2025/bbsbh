@@ -245,7 +245,7 @@ button.gamelines__fam {
 @media (hover: hover) and (pointer: fine) {
   .gamelines__rows .gamelines__door:hover {
     outline: none;
-    background: var(--rule-grid);
+    background: var(--border-grid);
   }
 
   .gamelines__rows .gamelines__door:hover .gamelines__chev {
@@ -253,7 +253,7 @@ button.gamelines__fam {
   }
 
   .gamelines__fam:hover {
-    background: var(--rule-grid);
+    background: var(--border-grid);
   }
 
   .gamelines__fam:hover .gamelines__famchev {
@@ -264,7 +264,7 @@ button.gamelines__fam {
 /* The press, which on a phone is the whole of the feedback. */
 .gamelines__rows .gamelines__door:active,
 .gamelines__fam:active {
-  background: var(--rule-grid);
+  background: var(--border-grid);
 }
 
 /* A narrow phone (the 320px class) cannot spare the gutters: the figures keep
