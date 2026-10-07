@@ -99,7 +99,7 @@
   padding: var(--space-1) 0;
 }
 .cthist__row + .cthist__row {
-  border-top: var(--bw-hair) dotted var(--rule-grid);
+  border-top: var(--bw-hair) dotted var(--border-grid);
 }
 .cthist__kind {
   font-family: var(--font-display);
