@@ -19,6 +19,7 @@ const ALLOWED = {
     ['05-masthead-nav.css', '.levelprog__step.is-unreached::before'],
     ['05-masthead-nav.css', '.levelprog__step.is-target.is-unreached'],
     ['06-loader-and-cards.css', '.postponed'],
+    ['27-player-position-innings.css', '.asof-banner'], // as-of: the figures are pencilled to a date (Gary)
     ['13-play-by-play.css', '.pbp__card--placed'],
     ['13-play-by-play.css', '.pbp__placed'],
     ['26b-player-contract.css', '.contractcard__openzone'],
@@ -70,12 +71,9 @@ const ALLOWED = {
     ['designlab/lab.css', '.dlab__entry'],
     ['scout/scout.css', '.scout__lab'],
   ],
-  // Gary has not decided these yet. Each leaves this group for another one, or
-  // goes solid.
-  undecided: [
-    ['27-player-position-innings.css', '.asof-banner'], // as-of is arguably provisional
-    ['teammates/teammates.css', '.degrees__link'], // a connector line between teammates
-  ],
+  // A connector line that joins two things on a graph: it links, it does not
+  // box anything. Dashed marks the link as a degree, not a fact (Gary, 2026-10-07).
+  connector: [['teammates/teammates.css', '.degrees__link']],
   // Owed a solid stroke, blocked on an open PR that edits the partial
   // (#1692, #1694, #1690). Remove each entry in the PR that fixes it.
   owedSolid: [
