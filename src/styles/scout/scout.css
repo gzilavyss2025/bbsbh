@@ -380,7 +380,7 @@ svg.scout__swatch {
   min-height: var(--control-min);
   margin: 0;
   padding: var(--space-1h) 0;
-  border-top: var(--bw-hair) dashed var(--border-rule);
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 .scout__readoutlabel {
   flex-basis: 100%;

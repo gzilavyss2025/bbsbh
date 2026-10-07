@@ -23,6 +23,10 @@ const SOLID = [
   ['69-pitch-arsenal.css', '.arsenal__row'],
   ['box-score/scoring-summary.css', '.scoresum__play + .scoresum__play'],
   ['boxlines/gamelines.css', '.gamelines__famrow'],
+  ['pitcher-card/card.css', '.pcard__sec'],
+  ['postseason/series-parts.css', '.psseries__flowreadout'],
+  ['scout/panels.css', '.scout__verdictrule'],
+  ['scout/scout.css', '.scout__readout'],
 ]
 
 test('row dividers draw solid', () => {

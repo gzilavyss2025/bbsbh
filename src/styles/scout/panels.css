@@ -167,7 +167,7 @@
   width: 100%;
   margin: var(--space-1) 0;
   border: 0;
-  border-top: var(--bw-hair) dashed var(--border-rule);
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 
 /* --- EDGE: the ledger, one row per pill, a dot plot on one scale --- */
