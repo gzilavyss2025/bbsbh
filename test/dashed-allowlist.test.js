@@ -63,6 +63,7 @@ const ALLOWED = {
     ['17-identity-lab-workbench.css', '.idlab__barmock--unset'],
     ['17-identity-lab-workbench.css', '.idlab__chiptick--unset'],
     ['17-identity-lab-workbench.css', '.idlab__glove'],
+    ['17a-identity-lab-mark-panels.css', '.idlab__eraart'],
     ['45-admin-copy-editor.css', '.admincopy__preview'],
     ['61-ballpark-admin.css', '.bpadmin'],
     ['61-ballpark-admin.css', '.bpadmin__focusTarget'],
