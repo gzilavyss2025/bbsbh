@@ -340,7 +340,7 @@
 
 .ninekeys__rungbar {
   height: 12px;
-  background: var(--rule-grid);
+  background: var(--border-grid);
   position: relative;
 }
 

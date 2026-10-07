@@ -145,7 +145,7 @@ button.boxlines-entry {
    only: on a phone :hover sticks after the tap. */
 @media (hover: hover) and (pointer: fine) {
   .boxlines__list .boxlines-entry:hover {
-    background: var(--rule-grid);
+    background: var(--border-grid);
   }
 
   .boxlines__list .boxlines-entry:hover .boxlines-entry__chev {
@@ -155,7 +155,7 @@ button.boxlines-entry {
 
 /* The press, which on a phone is the whole of the feedback. */
 .boxlines__list .boxlines-entry:active {
-  background: var(--rule-grid);
+  background: var(--border-grid);
 }
 
 .boxlines-entry:focus-visible {
