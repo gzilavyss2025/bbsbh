@@ -16,6 +16,7 @@ const GUARDS = [
   'check-raw-values',
   'check-word-choice',
   'check-focus-ring',
+  'check-component-reuse',
   'check-strike-links',
   'check-contrast',
   'check-claude-md',

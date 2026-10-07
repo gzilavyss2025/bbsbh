@@ -19,6 +19,7 @@
     "preview:5": "vite preview --port 4169",
     "lint": "node scripts/check-all.mjs",
     "check:feed-shape-drift": "node scripts/check-feed-shape-drift.mjs",
+    "check:component-reuse": "node scripts/check-component-reuse.mjs",
     "check:dist-dev": "node scripts/check-dist-dev-routes.mjs",
     "check:sw-learn": "node scripts/check-sw-learn-fallback.mjs",
     "compress-logos": "node scripts/compress-logos.mjs && node scripts/gen-logo-art.mjs",

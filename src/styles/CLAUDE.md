@@ -63,5 +63,8 @@ reason. The guards are catalogued in `docs/scripts/tooling.md`.
   `focus-ring-exempt` comment.
 - **`raw-value-exempt: <reason>`** (`check-raw-values.mjs`). A one-off takes
   `raw-value-exempt: <reason>`.
+- **`component-reuse-exempt: <reason>`** (`check-component-reuse.mjs`). A rule outside
+  `system/` that draws a capsule, sheet, ledger or band by hand counts against a ratchet
+  (ADR-0084); a real one-off takes the marker, with a reason, inside the rule.
 - **`strike-link-exempt`** (`check-strike-links.mjs`). A rule whose struck text can hold no
   name link opts out with a `strike-link-exempt` comment in the rule.
