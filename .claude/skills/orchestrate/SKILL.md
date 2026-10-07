@@ -74,13 +74,15 @@ asking.
 2. List open issues with labels, open PRs (drafts count), and your sessions
    (`list_sessions`, then keep titles that start `orch:`; the `tags` filter does
    not work in-session). Skip PRs labeled `wip` or `do-not-merge`.
-3. **Dedupe.** Do not start a child on issue #n if an open PR or a session titled
+3. **Cron check.** `mcp__github__actions_list` for `update-nightly-data.yml`. A failed
+   last run goes in the report.
+4. **Dedupe.** Do not start a child on issue #n if an open PR or a session titled
    `orch: #n` already covers it.
-4. Guess the files each issue touches. Two issues that share a file run one after
+5. Guess the files each issue touches. Two issues that share a file run one after
    the other. An issue that needs an unmerged PR (a chain such as N8a, N8b, N8c)
    waits until that PR merges. Say so in the digest. Stacking needs his yes.
-5. Read the ledger (below).
-6. Say in three lines what you will start now and why. Then start it.
+6. Read the ledger (below).
+7. Say in three lines what you will start now and why. Then start it.
 
 ## Lane 1: Shape (a fuzzy idea becomes a spec)
 

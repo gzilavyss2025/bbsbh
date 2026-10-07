@@ -52,7 +52,8 @@ did, and end with a short list of what needs him.
    - **Conflict in code:** resolve it if the two sides touch different logic and
      both must stay. If both sides changed the same logic and keeping one loses
      behavior, stop. Name both PRs and the file. Ask the maintainer with
-     `AskUserQuestion`, one question at a time.
+     `AskUserQuestion`, one question at a time. If nobody is watching, stop and put
+     the question in the report as `[DECISION: ...]`.
    - **A PR that will not merge cleanly and is not worth the fight:** leave it out,
      and say which one and why. Do not drop it silently.
 4. **Check the stack.** Run `npm run lint`, `npm test`, and `npm run build`.

@@ -138,11 +138,12 @@ changes.
 
 ## Cloud sessions
 
-When `CLAUDE_CODE_REMOTE=true` (see `docs/development.md`), nobody can answer you
-and there is no `gh` CLI. Change these steps:
+When `CLAUDE_CODE_REMOTE=true` (see `docs/development.md`), there is no `gh` CLI. Change
+these steps:
 
 - **Step 1.** Check issue and PR numbers with the GitHub MCP tools, not `gh`.
-- **Step 7.** Do not use `AskUserQuestion`. Put each open decision in the prompt
-  as `[DECISION: ...]`, with your recommendation first.
+- **Step 7.** In a session Gary is watching, use `AskUserQuestion` as written. In a
+  child or unattended session, put each open decision in the prompt as
+  `[DECISION: ...]`, with your recommendation first.
 - **Output.** Put the run plan, the prompts and the change list in your final
   message. Do not commit them unless the task says to.

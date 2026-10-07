@@ -1,6 +1,6 @@
 ---
 name: start-day
-description: Get the local bbsbh checkout to a known-good state at the start of a session (refresh main, clear finished dev servers/worktrees/branches, check open PRs and ready-for-human issues, nightly cron, README drift) and report what needs a decision. Use when the user says "start day" or asks for the morning status check.
+description: LOCAL ONLY, not for cloud sessions (CLAUDE_CODE_REMOTE). Get the local bbsbh checkout to a known-good state at the start of a session (refresh main, clear finished dev servers/worktrees/branches, check open PRs and ready-for-human issues, nightly cron, README drift) and report what needs a decision. Use when the user says "start day" or asks for the morning status check.
 ---
 
 # /start-day

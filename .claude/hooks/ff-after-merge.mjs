@@ -13,6 +13,9 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
+// A cloud container has no primary checkout at this path and no `gh`, so skip.
+if (process.env.CLAUDE_CODE_REMOTE === 'true') process.exit(0)
+
 const PRIMARY_DIR = process.env.BBSBH_PRIMARY_CHECKOUT || 'C:/Users/gzilavy/bbsbh'
 
 function git(args) {
