@@ -62,6 +62,7 @@ import { projectFromLiveLogs } from '../api/rotation/liveStarters.js'
 import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
 import { SPORT_LABEL, teamAbbr } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, mastheadMarkFor } from '../lib/headerTheme.js'
+import { seasonTheme, seasonMasthead } from '../lib/identity/seasonMarks.js'
 import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
@@ -138,11 +139,13 @@ export function TeamInfo({
   // string compares, and the overlay behind those tables refills them IN PLACE
   // (ADR-0050) — so a memo here would keep serving the pre-override triad until one
   // of its other deps happened to move. Same class of trap as ADR-0007.
-  const theme = headerThemeFor(meta.id, themeKeyFor(meta.id, side, treatment))
+  // An old game in a season-covered era wears the default chrome, not today's
+  // colours (#1626, lib/identity/seasonMarks.js).
+  const theme = seasonTheme(meta.id, gameSeason, headerThemeFor(meta.id, themeKeyFor(meta.id, side, treatment)))
   // The Starting pitcher card shows the OTHER club's starter, so its own
   // masthead wears THAT club's jersey colors rather than this page's — see
   // OpposingStarterCard.
-  const oppTheme = headerThemeFor(oppMeta.id, themeKeyFor(oppMeta.id, oppSide, oppTreatment))
+  const oppTheme = seasonTheme(oppMeta.id, gameSeason, headerThemeFor(oppMeta.id, themeKeyFor(oppMeta.id, oppSide, oppTreatment)))
   // A club's own override for the mark ITS mastheads draw on the BAR it wears
   // tonight (teams.js's mastheadMarkUrl) — null for a bar nobody has dressed,
   // the overwhelming default, so TeamLogo's club-wide mono mark still draws.
@@ -152,8 +155,8 @@ export function TeamInfo({
   // override tables use. Identity-only inputs, same invariant; MiLB needs no
   // special case here any more, it is simply the third bar.
   // `{ url, scale }` — the override art, and how big this bar draws its mark.
-  const ownMasthead = mastheadMarkFor(meta.id, treatment)
-  const oppMasthead = mastheadMarkFor(oppMeta.id, oppTreatment)
+  const ownMasthead = seasonMasthead(meta.id, gameSeason, mastheadMarkFor(meta.id, treatment))
+  const oppMasthead = seasonMasthead(oppMeta.id, gameSeason, mastheadMarkFor(oppMeta.id, oppTreatment))
 
   return (
     <div className={`teaminfo ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme, ownMasthead.scale)}>

@@ -42,6 +42,7 @@ import { Card } from '../components/ui/frame/Card.jsx'
 import { RefreshButton, InfoIcon } from './TeamInfo.jsx'
 import { ballparkFor } from '../lib/ballpark/ballparkData.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../lib/headerTheme.js'
+import { seasonTheme } from '../lib/identity/seasonMarks.js'
 import { useStampUnseal } from '../hooks/useStamps.js'
 import { useBoxScoreReveal } from '../hooks/useRevealProgress.js'
 import { BoxRevealSyncMount } from '../components/sync/BoxRevealSyncMount.jsx'
@@ -256,11 +257,12 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
   // string compares, and the overlay behind those tables refills them IN PLACE
   // (ADR-0050) — so a memo here would keep serving the pre-override triad until one
   // of its other deps happened to move. Same class of trap as ADR-0007.
-  const awayTheme = headerThemeFor(box.away.id, themeKeyFor(box.away.id, 'away', winProbTreatment?.away))
-  const homeTheme = headerThemeFor(box.home.id, themeKeyFor(box.home.id, 'home', winProbTreatment?.home))
-  const hpId = officialIdByRole.HP ?? null
-  // The game's season (#1201), so an old box score reads its own year.
+  // The game's season (#1201), so an old box score reads its own year. A club
+  // in a season-covered era wears the default chrome, not today's (#1626).
   const seasonYear = selectGameSeason(feed)
+  const awayTheme = seasonTheme(box.away.id, seasonYear, headerThemeFor(box.away.id, themeKeyFor(box.away.id, 'away', winProbTreatment?.away)))
+  const homeTheme = seasonTheme(box.home.id, seasonYear, headerThemeFor(box.home.id, themeKeyFor(box.home.id, 'home', winProbTreatment?.home)))
+  const hpId = officialIdByRole.HP ?? null
   const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId, { seasonYear }), [hpId, seasonYear])
   const [modalId, setModalId] = useState(null)
   // An umpire fill-in field's value, linked to their page when the crew list

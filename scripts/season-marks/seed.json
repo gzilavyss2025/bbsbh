@@ -1,35 +1,40 @@
 {
-  "_hint": "Eras whose mark differs from today's, keyed by the CURRENT franchise team id. commons is a Wikimedia Commons File: title, or null when no art is known yet. Run scripts/season-marks/fetch.mjs after an edit. An era needs only a season range and a name; the script fills in file, source, licence and restriction.",
+  "_hint": "Eras whose mark differs from today's, keyed by the CURRENT franchise team id. abbr is the club's abbreviation in the MLB Stats API for those seasons (/api/v1/teams/{id}?season=YYYY); an era with no art draws it in a serif face. commons is a Wikimedia Commons File: title, or null when no art is known yet. cite is the source that says the mark differs, for an era Commons does not document. Run scripts/season-marks/fetch.mjs after an edit. The script fills in file, source, licence and restriction. An era carries no colours: no cited source gives period colours, so a covered era wears neutral chrome (#1626).",
   "clubs": {
     "119": [
       {
         "from": 1901,
         "to": 1909,
         "name": "Brooklyn Dodgers",
+        "abbr": "BRO",
         "commons": null
       },
       {
         "from": 1910,
         "to": 1913,
         "name": "Brooklyn Dodgers",
+        "abbr": "BRO",
         "commons": "File:Brooklyn Dodgers 1910-1913 logo.png"
       },
       {
         "from": 1914,
         "to": 1933,
         "name": "Brooklyn Dodgers",
+        "abbr": "BRO",
         "commons": null
       },
       {
         "from": 1934,
         "to": 1944,
         "name": "Brooklyn Dodgers",
+        "abbr": "BRO",
         "commons": "File:Brooklyn Dodgers Cap Logo (1934 to 1936, 1938 to 1955).svg"
       },
       {
         "from": 1945,
         "to": 1957,
         "name": "Brooklyn Dodgers",
+        "abbr": "BRO",
         "commons": "File:Brooklyn Dodgers Primary Logo (1945 to 1957).png"
       }
     ],
@@ -38,25 +43,29 @@
         "from": 1901,
         "to": 1903,
         "name": "New York Giants",
+        "abbr": "NYG",
         "commons": null
       },
       {
         "from": 1904,
         "to": 1907,
         "name": "New York Giants",
+        "abbr": "NYG",
         "commons": "File:New york giants 1904-1907.png"
       },
       {
         "from": 1908,
         "to": 1948,
         "name": "New York Giants",
+        "abbr": "NYG",
         "commons": null
       },
       {
         "from": 1949,
         "to": 1957,
         "name": "New York Giants",
-        "commons": "File:New york giants logo cap 1949 1957.png"
+        "abbr": "NYG",
+        "commons": "File:New York Giants MLB Cap Logo (1949 to 1957).svg"
       }
     ],
     "133": [
@@ -64,42 +73,49 @@
         "from": 1901,
         "to": 1921,
         "name": "Philadelphia Athletics",
+        "abbr": "PHA",
         "commons": "File:Philadelphia Athletics Primary Logo (1902 to 1921).svg"
       },
       {
         "from": 1922,
         "to": 1927,
         "name": "Philadelphia Athletics",
+        "abbr": "PHA",
         "commons": null
       },
       {
         "from": 1928,
         "to": 1949,
         "name": "Philadelphia Athletics",
+        "abbr": "PHA",
         "commons": "File:Philadelphia Athletics Jersey Logo (1928 to 1949).svg"
       },
       {
         "from": 1950,
         "to": 1954,
         "name": "Philadelphia Athletics",
+        "abbr": "PHA",
         "commons": "File:Philadelphia Athletics Cap (1902 - 1954).svg"
       },
       {
         "from": 1955,
         "to": 1959,
         "name": "Kansas City Athletics",
+        "abbr": "KCA",
         "commons": "File:Kansas City Athletics Cap Logo (1955 to 1959).svg"
       },
       {
         "from": 1960,
         "to": 1962,
         "name": "Kansas City Athletics",
+        "abbr": "KCA",
         "commons": null
       },
       {
         "from": 1963,
         "to": 1967,
         "name": "Kansas City Athletics",
+        "abbr": "KCA",
         "commons": "File:Kansas City Athletics logo 1963 to 1967.png"
       }
     ],
@@ -108,18 +124,21 @@
         "from": 1901,
         "to": 1945,
         "name": "Boston Braves",
+        "abbr": "BSN",
         "commons": null
       },
       {
         "from": 1946,
         "to": 1952,
         "name": "Boston Braves",
+        "abbr": "BSN",
         "commons": "File:Boston Braves Cap Logo (1946 to 1952).svg"
       },
       {
         "from": 1953,
         "to": 1965,
         "name": "Milwaukee Braves",
+        "abbr": "MIL",
         "commons": "File:Milwaukee Braves Cap Logo.svg"
       }
     ],
@@ -128,42 +147,49 @@
         "from": 1901,
         "to": 1904,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "commons": "File:Washington Senators Primary Logo (1901 to 1904).svg"
       },
       {
         "from": 1905,
         "to": 1935,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "commons": "File:Washington Senators Primary Logo (1905 to 1935).svg"
       },
       {
         "from": 1936,
         "to": 1937,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "commons": "File:Washington Senators Primary Logo (1936 to 1937).svg"
       },
       {
         "from": 1938,
         "to": 1947,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "commons": "File:Washington Senators Primary Logo (1938 to 1947).svg"
       },
       {
         "from": 1948,
         "to": 1952,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "commons": "File:Washington Senators Primary Logo (1948 to 1952).svg"
       },
       {
         "from": 1953,
         "to": 1956,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "commons": null
       },
       {
         "from": 1957,
         "to": 1960,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "commons": "File:Washington Senators Primary Logo 1957-1960.png"
       }
     ],
@@ -172,18 +198,21 @@
         "from": 1961,
         "to": 1962,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "commons": "File:Washington Senators Cap Logo (1961 to 1962).svg"
       },
       {
         "from": 1963,
         "to": 1967,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "commons": "File:Washington Senators Cap Logo (1963 to 1967).svg"
       },
       {
         "from": 1968,
         "to": 1971,
         "name": "Washington Senators",
+        "abbr": "WAS",
         "commons": "File:Washington Senators Cap Logo (1968 to 1971).svg"
       }
     ],
@@ -192,6 +221,7 @@
         "from": 1969,
         "to": 1969,
         "name": "Seattle Pilots",
+        "abbr": "SEA",
         "commons": "File:Seattle Pilots Cap Logo.svg"
       }
     ],
@@ -200,6 +230,7 @@
         "from": 1992,
         "to": 2004,
         "name": "Montreal Expos",
+        "abbr": "MON",
         "commons": "File:Montreal Expos Cap Logo (1992 to 2004).svg"
       }
     ],
@@ -208,43 +239,60 @@
         "from": 1961,
         "to": 1965,
         "name": "Los Angeles Angels",
+        "abbr": "LAA",
         "commons": null
       },
       {
         "from": 1966,
         "to": 1970,
         "name": "California Angels",
+        "abbr": "CAL",
         "commons": "File:California Angels logo (1966-1970).svg"
       },
       {
         "from": 1971,
         "to": 1971,
         "name": "California Angels",
+        "abbr": "CAL",
         "commons": "File:California Angels logo (1971-1972).svg"
       },
       {
         "from": 1972,
         "to": 1972,
         "name": "California Angels",
+        "abbr": "CAL",
         "commons": null
       },
       {
         "from": 1973,
         "to": 1988,
         "name": "California Angels",
+        "abbr": "CAL",
         "commons": "File:California Angels logo (1972-1988).svg"
       },
       {
         "from": 1989,
         "to": 1992,
         "name": "California Angels",
+        "abbr": "CAL",
         "commons": "File:California Angels logo (1989-1992).svg"
       },
       {
         "from": 1993,
         "to": 1996,
         "name": "California Angels",
+        "abbr": "CAL",
         "commons": "File:California Angels logo (1993-1996).svg"
+      }
+    ],
+    "145": [
+      {
+        "from": 1976,
+        "to": 1989,
+        "name": "Chicago White Sox",
+        "abbr": "CWS",
+        "commons": null,
+        "cite": "https://en.wikipedia.org/wiki/Logos_and_uniforms_of_the_Chicago_White_Sox (1976: a bold \"SOX\" logo with a batter; the present Gothic logo came in September 1990)"
       }
     ]
   }
