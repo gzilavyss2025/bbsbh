@@ -167,9 +167,19 @@ async function fetchStandingsWithDivisions(season, date) {
   return out
 }
 
-async function fetchRemainingGames(season, asOf) {
+// The schedule window for games still to play after `asOf`. Null once the
+// window is empty: the API answers HTTP 400 when startDate is past endDate,
+// which failed the nightly run after the regular season ended.
+export function remainingGamesWindow(season, asOf) {
   const startDate = addDays(asOf, 1)
   const endDate = `${season}-10-05` // generous buffer past the regular-season finish
+  return startDate > endDate ? null : { startDate, endDate }
+}
+
+async function fetchRemainingGames(season, asOf) {
+  const window = remainingGamesWindow(season, asOf)
+  if (!window) return []
+  const { startDate, endDate } = window
   const data = await getJson(`/api/v1/schedule?sportId=1&gameType=R&startDate=${startDate}&endDate=${endDate}`)
   const seen = new Set()
   const games = []
