@@ -117,3 +117,5 @@ Made solid: `.txntl-expand` (05-masthead-nav), `.awards__expand` (67-awards-ledg
 - **Move to EmptyState:** the "empty" rows. Each needs a JSX move.
 - **Gary decides:** the "ask Gary" rows. The biggest group is the dashed hairline *between rows* (22): it is not provisional, not empty, not a door. Make it solid, or accept "separator" as a fourth meaning?
 - `scorecard/*` rows: bespoke, untouched (`.sc-armnotice__more` is a door; it is on the PENDING list so the guard skips it).
+
+- `.sc-armnotice__more` (scorecard) is a door too, filed "keep" only because `scorecard/*` is out of scope. `button.starter__careervs` (10-lineup) is the Box Lines door's host and is filed as a row divider; its pending call goes with the row-divider question for Gary.

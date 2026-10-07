@@ -1,6 +1,6 @@
 // Dashed means ONE thing: provisional, pencilled in (#1132). A door is not
-// provisional, so a door selector never draws a dashed rule. Empty states keep
-// their dashed inset, but they live in `EmptyState`, not under these names.
+// provisional, so a door selector never draws a dashed rule. This guards the
+// door NAMES below only; empties, row dividers and the rest are in the census.
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
@@ -16,14 +16,17 @@ const css = (d) => readdirSync(d, { recursive: true }).filter((f) => f.endsWith(
 
 test('no door selector draws a dashed rule', () => {
   const bad = []
+  const seen = new Set()
   for (const f of css(STYLES)) {
     const src = readFileSync(f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
     for (const [, sel, body] of src.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
       if (!/dashed/.test(body)) continue
       for (const s of sel.split(',').map((x) => x.trim())) {
-        if (DOOR.test(s) && !PENDING.has(s)) bad.push(`${f.slice(STYLES.length + 1)}: ${s}`)
+        if (PENDING.has(s)) seen.add(s)
+        else if (DOOR.test(s)) bad.push(`${f.slice(STYLES.length + 1)}: ${s}`)
       }
     }
   }
   assert.deepEqual(bad, [])
+  assert.deepEqual([...PENDING].filter((s) => !seen.has(s)), [], 'stale PENDING entry: remove it')
 })
