@@ -41,7 +41,6 @@ const KNOWN_UNDEFINED = new Set([
   '--team-color', // charts/winprob.css — the club's own ink, set per chart
   '--chip-accent', // 22-box-score-tables.css — per-club chips and pills
   '--card-accent',
-  '--pill-accent',
   '--start', // 26a-percentile-strip.css — the band's geometry, per player
   '--width',
   '--pct',
