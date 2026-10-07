@@ -5,7 +5,8 @@
    words, two lines at most), the situation, and the buttons.
 
    Kraft is for one control here: Unwrap lifts a seal, so it wears the tape
-   (ADR-0083, check-seal-scope). Turn is navy: the turn lifts nothing.
+   (ADR-0083, check-seal-scope). It stays a hand-drawn
+   button, not Button, on purpose (ADR-0105). Turn is navy: the turn lifts nothing.
    The app draws all text in capitals (#root *); nothing here fights that.
    ============================================================ */
 .sc-lensbar {
