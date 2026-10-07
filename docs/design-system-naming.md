@@ -341,7 +341,7 @@ deletion, a retired line, or `.wire__kicker`, which is not a second line.
 
 ### Bespoke heads — #1346
 
-Five card heads stay as they are. Each draws a head that is not the `label`, `rule`
+Six card heads stay as they are. Each draws a head that is not the `label`, `rule`
 or `band` look, and a merge into `SectionHead` would change the page. None is a row
 above, and none moves. The census lists them so a later pass does not flatten them.
 
@@ -352,6 +352,7 @@ above, and none moves. The census lists them so a later pass does not flatten th
 | `.arsenal__title` | `components/charts/PitchArsenalMix.jsx`, `styles/69-pitch-arsenal.css`. |
 | `.gamelines__title` | named `.gamelines__heading` in the issue. It landed as `__title` in #1339, so the bespoke head is this one. |
 | `.brewblurb__title` | `components/game/WhatsBrewingModal.jsx`, `styles/11-innings.css`. |
+| `.pitchslab__title` | Gary kept it large (2026-10-07). It is the heat band's own head, and its sibling `.pitchslab__head` is on `check-seal-scope`'s allowlist. `components/charts/PitchMix.jsx`, `styles/69-pitch-arsenal.css`. |
 
 ## Table, EmptyState and Notice — #1132 — 10 rows
 
