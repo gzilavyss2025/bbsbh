@@ -15,9 +15,10 @@ const FIGURES = [
 ]
 
 // Retrosheet asks for its statement word for word (ADR-0100). test/family-ties.test.js
-// pins this line against scripts/lib/open-data/credits.mjs, where the generators read it.
+// pins this line against scripts/lib/open-data/credits.mjs, where the generators read it;
+// test/on-this-day.test.js pins the GeoNames credit (ADR-0106).
 const OPEN_DATA_NOTE =
-  'Family links come from Retrosheet’s biographical files, matched through the Chadwick Bureau register (Open Data Commons Attribution License 1.0). The information used here was obtained free of charge from and is copyrighted by Retrosheet. Interested parties may contact Retrosheet at 20 Sunset Rd., Newark, DE 19711.'
+  'Family links come from Retrosheet’s biographical files, matched through the Chadwick Bureau register (Open Data Commons Attribution License 1.0). The information used here was obtained free of charge from and is copyrighted by Retrosheet. Interested parties may contact Retrosheet at 20 Sunset Rd., Newark, DE 19711. Birthplace locations from GeoNames (geonames.org), licensed under CC BY 4.0.'
 
 const STORY = [
   'It starts with a paper scorebook and a game you cannot watch live. The broadcast is two hours behind, or four, or it is sitting in a recording until the kids are down. You are keeping score by hand, so you need answers all night: who came in to pitch, who moved to left field, which pinch hitter just took the third spot in the order, who is working the plate.',

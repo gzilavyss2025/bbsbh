@@ -75,6 +75,10 @@ and day, or a venue city. A month's file was 415 KB, because debuts bunch in Apr
 September, so each day is a file (the largest is 21 KB). The first letter of the city
 gave a 185 KB file, so the first two letters are the key (the largest is 93 KB).
 
+**Superseded for birthplaces by ADR-0106 (2026-10-07).** The birthplace files now key
+on a map cell, and "near the park" is 50 miles by map distance. GeoNames places each
+birth city, under its own credit line.
+
 Only players count (a row with `debut_p`), and no deaths are read. The `HOF` column
 holds the word `HOF` on 325 rows and is empty on the rest. The generator does not use it.
 

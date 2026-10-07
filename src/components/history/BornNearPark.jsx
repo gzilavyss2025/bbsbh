@@ -1,24 +1,24 @@
-import { birthplaceKey, birthplaceShard, fetchBirthplaceShard } from '../../api/history/birthplaces.js'
+import { bornNear } from '../../api/history/birthplaces.js'
 import { useAsync } from '../../hooks/useAsync.js'
-import { parkPlace, pickPeople } from '../../lib/history/pick.js'
+import { parkPoint, pickPeople } from '../../lib/history/pick.js'
 import { PeopleList } from './PeopleList.jsx'
 import '../../styles/history/history.css'
 
-// "Born near the park" on the game preview: players born in the park's own city.
-// The city comes from the feed's venue.location, which the preview already holds.
-// Exact city and state (US) or city and country; no match renders no line at all.
+// "Born near the park" on the game preview: players born within NEAR_MILES (50) of
+// the park, by map distance (ADR-0106). The park's point comes from the feed's
+// venue.location, which the preview already holds. No point, or no one near it,
+// renders no line at all.
 // History about people (ADR-0100): nothing here reads a game, a score or a season.
 export function BornNearPark({ location }) {
-  const place = parkPlace(location)
-  const key = place && birthplaceKey(...place)
+  const point = parkPoint(location)
   const { data } = useAsync(
     async () => {
-      if (!key) return null
-      const shard = await fetchBirthplaceShard(birthplaceShard(key))
-      const people = pickPeople(shard?.places?.[key], 4)
-      return people.length ? { people, credit: shard.credit } : null
+      if (!point) return null
+      const near = await bornNear(point)
+      const people = pickPeople(near.people, 4)
+      return people.length ? { people, credit: near.credit } : null
     },
-    [key],
+    [point?.lat, point?.lon],
   )
   if (!data) return null
   return (

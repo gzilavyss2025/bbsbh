@@ -1,7 +1,7 @@
 // gen-bio-history.mjs -- Retrosheet's biofile0.csv, joined to MLBAM ids through the
 // Chadwick register, written as TWO datasets (ADR-0100):
 //   public/data/on-this-day/{MM-DD}.json     players born and debuted on each calendar day
-//   public/data/birthplaces/{ab}.json       players grouped by birth city (ab = first two letters)
+//   public/data/birthplaces/{cell}.json     players grouped by birth city's map point (ADR-0106)
 //
 // HAND-RUN, NOT ON A CRON, and it stays that way. The file is history; a re-run is
 // worth it only after Retrosheet publishes a new biodata.zip. The app never fetches
@@ -12,9 +12,13 @@
 //        node scripts/lib/open-data/download.mjs <register people-{0-9,a-f}.csv URL> <dir>
 //      Unzip biodata.zip there too. The register's files live at
 //      https://raw.githubusercontent.com/chadwickbureau/register/master/data/
-//   2. node scripts/gen-bio-history.mjs <biofile0.csv> <people-*.csv ...>
+//      GeoNames places the birth cities on the map. Three files, from
+//      https://download.geonames.org/export/dump/: cities500.zip (unzip it),
+//      admin1CodesASCII.txt and countryInfo.txt.
+//   2. node scripts/gen-bio-history.mjs <biofile0.csv> <people-*.csv ...> \
+//        <cities500.txt> <admin1CodesASCII.txt> <countryInfo.txt>
 //
-// Files are told apart by name: biofile0.csv, people-*.csv. `--out <dir>` and
+// Files are told apart by name: biofile0.csv, people-*.csv and the three GeoNames names. `--out <dir>` and
 // `--out-places <dir>` write somewhere else (the test uses them). There is no clock,
 // so a re-run with the same input rewrites the same bytes. The report it prints is
 // the one the PR quotes.
@@ -24,6 +28,7 @@ import { fileURLToPath } from 'node:url'
 import { parseCsv } from './lib/csv.mjs'
 import { writeShards } from './lib/io.js'
 import { buildBioShards } from './lib/open-data/bio-shards.mjs'
+import { buildGazetteer } from './lib/open-data/gazetteer.mjs'
 import { buildRetroBridge } from './lib/open-data/retro-bridge.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -39,13 +44,19 @@ const bioFiles = args.filter((p) => basename(p) === 'biofile0.csv')
 if (bioFiles.length !== 1) throw new Error(`pass exactly one biofile0.csv (got ${bioFiles.length})`)
 const registerFiles = args.filter((p) => /^people-[0-9a-f]\.csv$/.test(basename(p)))
 if (!registerFiles.length) throw new Error('pass the register people-*.csv files')
+const geoFile = (name) => {
+  const path = args.find((p) => basename(p) === name)
+  if (!path) throw new Error(`pass GeoNames ${name}`)
+  return readFile(path, 'utf8')
+}
+const [cities, admin1, countries] = await Promise.all(['cities500.txt', 'admin1CodesASCII.txt', 'countryInfo.txt'].map(geoFile))
 
 const read = async (path) => parseCsv(await readFile(path, 'utf8'))
 const bio = await read(bioFiles[0])
 const register = (await Promise.all(registerFiles.map(read))).flat()
 
 const bridge = buildRetroBridge(register)
-const { onThisDay, birthplaces, report } = buildBioShards({ bio, retroToMlbam: bridge.retroToMlbam })
+const { onThisDay, birthplaces, report } = buildBioShards({ bio, retroToMlbam: bridge.retroToMlbam, locate: buildGazetteer({ cities, admin1, countries }) })
 const days = await writeShards(out, onThisDay)
 const places = await writeShards(outPlaces, birthplaces)
 
@@ -54,6 +65,7 @@ console.log(`register rows: ${bridge.rows}, bridged ${bridge.matched}, no match 
 console.log(`people read: ${report.people}`)
 console.log(`players (debut date in the file): ${report.players}`)
 console.log(`no MLBAM id: ${report.noMlbam}`)
-console.log(`kept: ${report.players - report.noMlbam}; left out of debuts, no debut day: ${report.noDebutDate}; left out of birthdays, no birthdate: ${report.noBirthdate}; left out of birthplaces, no city or state: ${report.noPlace}`)
+console.log(`kept: ${report.players - report.noMlbam}; left out of debuts, no debut day: ${report.noDebutDate}; left out of birthdays, no birthdate: ${report.noBirthdate}; left out of birthplaces, no city or state: ${report.noPlace}; not on the map: ${report.unplaced}`)
+console.log(`not on the map, most players: ${report.missedMost.map(([where, n]) => `${where} (${n})`).join('; ') || 'none'}`)
 console.log(`on-this-day: ${report.born} births, ${report.debuted} debuts, ${days.written} shards (${days.swept} swept), largest ${size(onThisDay)} bytes -> ${out}`)
 console.log(`birthplaces: ${report.places} players, ${places.written} shards (${places.swept} swept), largest ${size(birthplaces)} bytes -> ${outPlaces}`)

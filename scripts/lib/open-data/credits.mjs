@@ -8,3 +8,7 @@ export const RETROSHEET_CREDIT =
 
 export const CHADWICK_JOIN =
   'Player ids matched through the Chadwick Bureau register (Open Data Commons Attribution License 1.0).'
+
+// GeoNames places the birthplaces on the map (ADR-0106). Creative Commons
+// Attribution 4.0: a credit and the licence name.
+export const GEONAMES_CREDIT = 'Birthplace locations from GeoNames (geonames.org), licensed under CC BY 4.0.'
