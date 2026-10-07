@@ -24,6 +24,14 @@ function rowsOf(data) {
   return map
 }
 
+// The ids with no team-season in the graph: a player whose first MLB game came after
+// `throughSeason`, or one who never played in MLB. findChain gives null for them too,
+// but "no chain" is the wrong answer there.
+export function missingFrom(data, ids) {
+  const rows = rowsOf(data)
+  return ids.filter((id) => !rows.has(id))
+}
+
 export function findChain(data, fromId, toId, maxLinks = 10) {
   const rows = rowsOf(data)
   if (!rows.has(fromId) || !rows.has(toId)) return null

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { findChain } from '../src/lib/teammates/chain.js'
+import { findChain, missingFrom } from '../src/lib/teammates/chain.js'
 
 // Same shape as loadTeamSeasons(): `teamSeasons` rows hold indexes into `players`.
 // Players 1-2 share Cubs 1998; 2-3 share Reds 2001; 3-4 share Mets 2005;
@@ -38,4 +38,9 @@ test('a player missing from the graph gives null', () => {
 test('a chain longer than the limit gives null', () => {
   assert.equal(findChain(data, 1, 4, 2), null)
   assert.notEqual(findChain(data, 1, 4, 3), null)
+})
+
+test('missingFrom names the ids that are not in the graph, in order', () => {
+  assert.deepEqual(missingFrom(data, [1, 777, 4, 888]), [777, 888])
+  assert.deepEqual(missingFrom(data, [1, 9]), [])
 })
