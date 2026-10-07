@@ -8,6 +8,7 @@ import { LOGO_VARIANTS, teamLogoUrl } from '../../../lib/teams.js'
 import { HexField } from '../HexField.jsx'
 import { saveCustomMark } from '../saveStores.js'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
+import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 
 // Build a club's missing jersey art out of the art it already has: pick a
 // source mark, repaint shapes one at a time, save the result under a name.
@@ -181,7 +182,7 @@ export function LogoRecolorEditor({ teamId, name, bars }) {
             </Stack>
           </div>
 
-          <div className="idlab__recolorpalette">
+          <Cluster align="center" className="idlab__recolorpalette">
             {/* Erasing a shape, not undoing it: the shapes stacked above it stay
                 put, which is how a mark's backing plate comes off so the art can
                 sit on a colored tile. Drawn as the same paper checkerboard the
@@ -214,9 +215,9 @@ export function LogoRecolorEditor({ teamId, name, bars }) {
                 paint(v)
               }}
             />
-          </div>
+          </Cluster>
 
-          <ul className="idlab__monoinkparts">
+          <Cluster as="ul" className="idlab__monoinkparts">
             {parts.map((part) => (
               <li key={part.index}>
                 <button
@@ -248,7 +249,7 @@ export function LogoRecolorEditor({ teamId, name, bars }) {
                 </button>
               </li>
             ))}
-          </ul>
+          </Cluster>
 
           <div className="idlab__recolorsave">
             <input

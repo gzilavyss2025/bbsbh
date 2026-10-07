@@ -31,6 +31,8 @@ const MIGRATED = {
   idlab__barsrow: { file: '17-identity-lab-workbench.css', gap: 'base', sites: 1 },
   idlab__wpaartrow: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 1 },
   bookmgmt__actions: { file: '58-logbook-shelf.css', gap: 'base', sites: 3, keeps: ['align-items'] },
+  idlab__recolorpalette: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
+  idlab__monoinkparts: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 2, keeps: ['margin'] },
 }
 const LAYOUT = /(^|;|\n)\s*(display|flex|flex-flow|flex-direction|flex-wrap|gap|row-gap|column-gap)\s*:/
 
