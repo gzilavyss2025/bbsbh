@@ -217,7 +217,7 @@ function watchHand(season, region) {
 // staticJson.js's seasonFolderOf; never `season`, which here is an umpire's
 // aggregate). 'all' joins his seasons' game rows; `season` is then null and
 // `seasons` lists the years, the shape the `all/` files carry.
-function load(id, seasonYear) {
+function load(id, seasonYear, strict) {
   return readSeasonShard(
     'umpires',
     seasonYear,
@@ -235,18 +235,20 @@ function load(id, seasonYear) {
         games: joinGameRows(found.map((s) => s.games)),
       }
     },
+    { strict },
   )
 }
 
 // One umpire's scored game rows, from his shard of the archive. Memoized per
 // file, and `[]` for an umpire with no pitch-tracked plate work (MiLB below AAA,
 // or a run before the generator wrote the file) — absence of rows, not an error.
-async function loadRows(id, seasonYear) {
+async function loadRows(id, seasonYear, strict) {
   const rows = await readSeasonShard(
     'umpire-accuracy',
     seasonYear,
     async (season) => (await accuracyShard(`${season}/${id}`))?.games ?? null,
     joinGameRows,
+    { strict },
   )
   return rows ?? []
 }
@@ -271,8 +273,8 @@ const loadAccuracySummary = seasonStaticJson('umpire-accuracy', 'umpire-accuracy
 // BEFORE the accuracy store's first has no accuracy at all: seasonFolderOf
 // gives that year no folder, so a 2024 page reads NO_SUMMARY and no rows, never
 // 2026's accuracy, rank and zone map beside 2024's games.
-function accuracySummary(seasonYear) {
-  return loadAccuracySummary({ seasonYear })
+function accuracySummary(seasonYear, strict) {
+  return loadAccuracySummary({ seasonYear, strict })
 }
 
 // A umpire's season aggregate for a given level. MLB is the top-level `season`
@@ -310,14 +312,14 @@ function seasonForLevel(u, level) {
 // the one aggregates file. Nothing on any umpire surface loads the league's game
 // rows: the lean's per-game ingredient is summed at build time into the
 // aggregate's favorNet/favorNetGames (see leanInputFromRows).
-async function accuracyIndex(level = 'MLB', seasonYear) {
+async function accuracyIndex(level = 'MLB', seasonYear, strict) {
   // Keyed on the folder the year resolves to, so "current" and the current
   // year spelled out share one index.
-  const folder = await seasonFolderOf('umpire-accuracy', seasonYear)
+  const folder = await seasonFolderOf('umpire-accuracy', seasonYear, { strict })
   const memoKey = `${folder}:${level}`
   const memo = indexCached.get(memoKey)
   if (memo) return memo
-  const { umpires } = await accuracySummary(seasonYear)
+  const { umpires } = await accuracySummary(seasonYear, strict)
   // A per-level view where each umpire's `season` is that level's aggregate, so
   // the ranking/baseline logic below reads `u.season` unchanged. Umpires with no
   // aggregate at this level (e.g. never worked AAA) drop out.
@@ -485,13 +487,16 @@ function accuracyFor(rec, rows, level = 'MLB') {
 // Everything here is this man's two shards plus the shared aggregates file —
 // his assignment log, his scored game rows, and the league's season aggregates.
 // No surface loads the league's game rows.
-export async function loadUmpire(id, { seasonYear } = {}) {
+//
+// `strict` is for the umpire's own season view (#1482): a year the accuracy
+// store lacks has his games and no accuracy, never the latest season's.
+export async function loadUmpire(id, { seasonYear, strict } = {}) {
   const [u, summary, rows, idxMlb, idxAaa] = await Promise.all([
-    load(id, seasonYear),
-    accuracySummary(seasonYear),
-    loadRows(id, seasonYear),
-    accuracyIndex('MLB', seasonYear),
-    accuracyIndex('AAA', seasonYear),
+    load(id, seasonYear, strict),
+    accuracySummary(seasonYear, strict),
+    loadRows(id, seasonYear, strict),
+    accuracyIndex('MLB', seasonYear, strict),
+    accuracyIndex('AAA', seasonYear, strict),
   ])
   if (!u) return null
   const rec = summary.umpires[id] ?? null

@@ -120,27 +120,32 @@ export async function seasonsOf(store) {
 // league-wide files; a reader of ONE player's shard adds the seasons up
 // instead (readSeasonShard).
 //
+// `{ strict: true }` is for a SEASON VIEW (#1482). A page that picks its year
+// from ONE store and reads others cannot assume they share a last season, so a
+// year not on file means nothing, after the last as well as before the first.
+// A game page passes nothing and keeps the spring fallback.
+//
 // The argument is `seasonYear`, never `season`: in umpires.js `u.season` is an
 // umpire's season AGGREGATE, and `season.season` must not be able to happen.
 //
 // -> a folder name (a year or 'all'), or null when there is nothing to read.
-export async function seasonFolderOf(store, seasonYear) {
+export async function seasonFolderOf(store, seasonYear, { strict = false } = {}) {
   if (seasonYear === 'all') return 'all'
   const { seasons, current } = await seasonIndexOf(store)
   if (seasonYear == null) return current
   const year = Number(seasonYear)
   if (seasons.includes(year)) return year
-  return seasons.length > 0 && year > Math.max(...seasons) ? current : null
+  return !strict && seasons.length > 0 && year > Math.max(...seasons) ? current : null
 }
 
 // One whole file of a season store, `/data/{store}/{folder}/{file}`, memoized
-// like staticJson. The loader takes `{ seasonYear }` (see seasonFolderOf).
+// like staticJson. The loader takes `{ seasonYear, strict }` (see seasonFolderOf).
 // `fallback` when the index or the file is missing; an `all/` file
 // is not on disk until the first nightly run writes it.
 export function seasonStaticJson(store, file, { shape, fallback = null } = {}) {
   const bySeason = staticJsonBy((folder) => `/data/${store}/${folder}/${file}`, { shape, fallback })
-  return async ({ seasonYear } = {}) => {
-    const folder = await seasonFolderOf(store, seasonYear)
+  return async ({ seasonYear, strict } = {}) => {
+    const folder = await seasonFolderOf(store, seasonYear, { strict })
     return folder == null ? fallback : bySeason(folder)
   }
 }
@@ -150,12 +155,13 @@ export function seasonStaticJson(store, file, { shape, fallback = null } = {}) {
 // `'all'` it reads every season on file and hands the slices, oldest first, to
 // `combine(slices, seasons)` — a pure sum from lib/seasons/combine.js. There is
 // no `all/` shard: the client adds one man's seasons, never a league's.
-export async function readSeasonShard(store, seasonYear, readOne, combine) {
+// `strict` is seasonFolderOf's.
+export async function readSeasonShard(store, seasonYear, readOne, combine, { strict } = {}) {
   if (seasonYear === 'all') {
     const seasons = await seasonsOf(store)
     if (!seasons.length) return null
     return combine(await Promise.all(seasons.map(readOne)), seasons)
   }
-  const folder = await seasonFolderOf(store, seasonYear)
+  const folder = await seasonFolderOf(store, seasonYear, { strict })
   return folder == null ? null : readOne(folder)
 }
