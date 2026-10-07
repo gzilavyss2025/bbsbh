@@ -139,13 +139,13 @@ export function MoundVisitBar({ team, teamId, remaining, allowed }) {
     used != null ? `${used} of ${allowed} mound visits used, ${remaining} left` : undefined
   return (
     <div className={`pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event pitchernotice--mv`}>
-      <TeamLogo teamId={teamId} name={team} size={20} className="pitchernotice__teammark" />
-      <span className="pitchernotice__label">Mound visit{team ? ` — ${team}` : ''}</span>
-      <span className="pitchernotice__spacer" />
+      <TeamLogo teamId={teamId} name={team} size={20} className="change__teammark" />
+      <span className="change__label">Mound visit{team ? ` — ${team}` : ''}</span>
+      <span className="change__spacer" />
       {used != null && (
         <>
           <UsagePips allowed={allowed} used={used} label={label} />
-          <span className="pitchernotice__mvcount" aria-hidden="true">
+          <span className="change__mvcount" aria-hidden="true">
             {remaining} left
           </span>
         </>
@@ -166,8 +166,8 @@ export function MoundVisitBar({ team, teamId, remaining, allowed }) {
 export function EjectionBar({ text, code = 'EJ' }) {
   return (
     <div className={`pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event`}>
-      <span className="pitchernotice__code pitchernotice__code--alert">{code}</span>
-      <span className="pitchernotice__eventtext">{text}</span>
+      <span className="change__code change__code--alert">{code}</span>
+      <span className="change__eventtext">{text}</span>
     </div>
   )
 }
@@ -181,9 +181,9 @@ export function EjectionBar({ text, code = 'EJ' }) {
 export function EventCard({ code, runnerId, teamId, segments, pitchLabel = null }) {
   return (
     <div className={`pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event`}>
-      <span className="pitchernotice__code">{code}</span>
+      <span className="change__code">{code}</span>
       {runnerId != null && <PitcherPhoto personId={runnerId} teamId={teamId} />}
-      <span className="pitchernotice__eventtext">
+      <span className="change__eventtext">
         {segments.map((seg, i) =>
           seg.id != null ? (
             <PlayerLink key={i} id={seg.id}>
@@ -194,7 +194,7 @@ export function EventCard({ code, runnerId, teamId, segments, pitchLabel = null 
           ),
         )}
       </span>
-      {pitchLabel && <span className="pitchernotice__pitchno">{pitchLabel}</span>}
+      {pitchLabel && <span className="change__pitchno">{pitchLabel}</span>}
     </div>
   )
 }
@@ -229,9 +229,9 @@ export function DelayNotice({ entry, teamId }) {
   const lead = minutes != null ? `${title} (${formatDelay(minutes)})` : title
   return (
     <div className={`pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event`}>
-      <span className="pitchernotice__code pitchernotice__code--alert">DELAY</span>
+      <span className="change__code change__code--alert">DELAY</span>
       {playerId != null && <PitcherPhoto personId={playerId} teamId={teamId} />}
-      <span className="pitchernotice__eventtext">
+      <span className="change__eventtext">
         <b>{lead}</b>
         {detail ? ` — ${detail}` : ''}
       </span>
