@@ -31,6 +31,8 @@ const SOLID = [
   ['26c-mound-card.css', '.moundstrip__day--today'],
   ['76-workload-marks.css', '.daystrip__day--today'],
   ['67-awards-ledger.css', '.awardtbl__chip--none'],
+  ['72-player-hover-card.css', '.phcard__tag--rehab'],
+  ['14-strike-zone.css', '.gamephotos__notice'],
 ]
 
 test('row dividers draw solid', () => {
