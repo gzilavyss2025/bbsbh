@@ -12,6 +12,7 @@ import { Button } from '../../components/ui/control/Button.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Loader } from '../../components/ui/Loader.jsx'
+import { Notice } from '../../components/ui/state/Notice.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 
@@ -101,7 +102,7 @@ export function TeammatesPage() {
       {a && b && result.loading && !current && (
         <Loader size="inline" message="Loading every roster since 1897…" />
       )}
-      {a && b && result.error && <p className="hint hint--error">Couldn’t load the rosters. Try again.</p>}
+      {a && b && result.error && <Notice tone="error" className="degrees__notice">Couldn’t load the rosters. Try again.</Notice>}
       {absent && (
         <p className="hint">
           {absent.join(' and ')} {absent.length > 1 ? 'are' : 'is'} not in the rosters. They
