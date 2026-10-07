@@ -141,7 +141,7 @@
   inset-inline: 0;
   top: 50%;
   height: var(--bw-hair);
-  background: var(--rule-soft);
+  background: var(--border-hairline);
   transform: translateY(-50%);
 }
 
@@ -391,7 +391,7 @@
 }
 
 .prankhist__row + .prankhist__row {
-  border-top: var(--bw-hair) dotted var(--rule-grid);
+  border-top: var(--bw-hair) dotted var(--border-grid);
 }
 
 .prankhist__year {
@@ -499,7 +499,7 @@
 }
 
 .famband__row + .famband__row {
-  border-top: var(--bw-hair) dotted var(--rule-grid);
+  border-top: var(--bw-hair) dotted var(--border-grid);
 }
 
 .famband__shot {
