@@ -339,6 +339,20 @@ deletion, a retired line, or `.wire__kicker`, which is not a second line.
 | `.stampstrip__lede` | 3 | `.stampstrip__note` | #1113 | `components/logbook/StampGameButton.jsx`, `styles/48-stamp-strip.css` | HOLD (slice H3, #1339): two different second lines on one head, each with its own rule; needs a decision on the grammar. Merging them into one `__note` would change the page, so neither row is renamed. two-step — `.stampstrip__note` is a form `<label>`, and becomes `.stampstrip__label` in the same commit. |
 | `.xl-entry__lede` | 3 | `.xl-entry__note` | #1113 | `screens/expresslane/EntryChooser.jsx`, `styles/01-base.css` †, `styles/77a-express-lane-entry.css` | landed in #1339. |
 
+### Bespoke heads — #1346
+
+Five card heads stay as they are. Each draws a head that is not the `label`, `rule`
+or `band` look, and a merge into `SectionHead` would change the page. None is a row
+above, and none moves. The census lists them so a later pass does not flatten them.
+
+| class | note |
+| --- | --- |
+| `.bcast-sec__title` | keep it: no flattening, and no larger `rule` size. |
+| `.wiredock__title` | `components/ui/dock/SheetDock.jsx`, `styles/04a-wire-dock.css`. |
+| `.arsenal__title` | `components/charts/PitchArsenalMix.jsx`, `styles/69-pitch-arsenal.css`. |
+| `.gamelines__title` | named `.gamelines__heading` in the issue. It landed as `__title` in #1339, so the bespoke head is this one. |
+| `.brewblurb__title` | `components/game/WhatsBrewingModal.jsx`, `styles/11-innings.css`. |
+
 ## Table, EmptyState and Notice — #1132 — 10 rows
 
 Two blocks carried `notice`. `Notice` (N1, #1533) now owns the base rule, and
