@@ -1,0 +1,137 @@
+/* Round 4 mock layout. Tokens only (src/tokens/*.css); every block inside is the
+   app's own class. Phone first; 740 is the app's WIDE_QUERY, 1100 and 1400 add
+   columns. No hover anywhere: every control is a tap. */
+
+.r4 { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.r4 > * { min-width: 0; }
+.r4-note { font: var(--fs-small) / var(--lh-body) var(--font-body); color: var(--text-muted); padding: var(--space-3); }
+
+/* The #22 box: the scorecard's AtBatBox, zoomed (lens carry-strip idiom). */
+.r4box { margin: 0; display: flex; flex-direction: column; gap: var(--space-1); align-items: flex-start; }
+.r4box__label {
+  font-family: var(--font-display); font-size: var(--fs-label); font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--text-muted);
+}
+.r4box__cell {
+  width: var(--sc-cell-w, 86px); height: var(--sc-cell-h, 90px); zoom: var(--r4-zoom);
+  background: var(--surface-card); border: var(--bw-hair) solid var(--border-rule);
+}
+.r4chip { align-self: flex-start; margin-top: var(--space-2); }
+.r4sheet__boxes { display: flex; flex-wrap: wrap; gap: var(--space-4); padding: var(--space-3) 0; }
+.r4-scene { margin: 0; }
+.r4-seal { border: var(--bw-rule) dashed var(--seal); background: var(--surface-inset); }
+.r4-seal__text { font: var(--fs-small) / var(--lh-body) var(--font-body); color: var(--text-muted); margin: 0; }
+
+/* ---------- D1, the box ---------- */
+.r4-a-copy { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-3); padding: var(--space-3); align-items: start; }
+.r4-a-copytext { display: flex; flex-direction: column; gap: var(--space-2); }
+.r4-a-copytext .pbp__desc { margin: 0; }
+.r4-a-pitches { padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-3); align-items: center; }
+.r4-a-pitches .pitchlist { width: 100%; }
+@media (min-width: 740px) {
+  .r4-a-scene { display: none; } /* the scene rides the rail */
+  .r4-a-pitches { flex-direction: row; align-items: flex-start; }
+}
+@media (min-width: 1100px) {
+  .r4--d1:not(.r4--sealed) {
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'notes notes' 'hero hero' 'copy pitches';
+    align-items: start; gap: var(--space-3) var(--space-4);
+  }
+  .r4-a-notes { grid-area: notes; }
+  .r4-a-hero { grid-area: hero; }
+  .r4-a-copy { grid-area: copy; grid-template-columns: auto; max-width: calc(var(--space-16) * 4); }
+  .r4-a-pitches { grid-area: pitches; flex-direction: column; align-items: stretch; }
+}
+@media (min-width: 1400px) {
+  .r4-a-pitches { flex-direction: row; }
+}
+
+/* Desktop: the console takes the room it is given (every direction). */
+@media (min-width: 1400px) {
+  /* The slate's wire-rail precedent (25-wide-layout.css): 1272px when a rail rides beside. */
+  .screen.r4screen { max-width: 1272px; }
+}
+
+/* ---------- D2, the log ---------- */
+.r4-b-log { padding: var(--space-2) var(--space-3); }
+.r4-b-head {
+  display: grid; grid-template-columns: var(--space-8) minmax(0, 1fr) var(--space-16); gap: var(--space-2);
+  font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-caps);
+  text-transform: uppercase; color: var(--text-muted); border-bottom: var(--bw-rule) solid var(--rule); padding-bottom: var(--space-1);
+}
+.r4-b-head span:last-child { text-align: right; }
+.r4-b-rows { margin: 0; padding: 0; list-style: none; }
+.r4-b-row.pitchlist__row { grid-template-columns: var(--space-8) minmax(0, 0.9fr) minmax(0, 1.3fr) var(--space-16); align-items: center; padding: var(--space-1h) 0; border-bottom: var(--bw-hair) solid var(--rule-soft); }
+.r4-b-abs { color: var(--accent-negative); font-weight: var(--w-bold); }
+.r4-b-pencil {
+  justify-self: end; text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-md); font-weight: var(--w-bold); color: var(--text-heading); display: flex; flex-direction: column; line-height: var(--lh-tight);
+}
+.r4-b-pencil small { font-family: var(--font-display); font-size: var(--fs-cell); letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--text-muted); font-weight: var(--w-semibold); }
+.r4-b-noterow { display: grid; grid-template-columns: minmax(0, 1fr) var(--space-16); gap: var(--space-2); align-items: center; padding: var(--space-2) 0; border-bottom: var(--bw-hair) solid var(--rule-soft); }
+.r4-b-noterow .change { margin: 0; }
+.r4-b-result { display: grid; grid-template-columns: calc(var(--space-16) * 2.5) minmax(0, 1fr); gap: var(--space-3); padding: var(--space-3) 0 var(--space-1); align-items: start; }
+.r4-b-result .pbp__desc { margin: 0 0 var(--space-2); }
+.r4-b-sum { display: flex; gap: var(--space-4); align-items: flex-start; flex-wrap: wrap; }
+.r4-b-blank { margin: 0; padding: 0; list-style: none; }
+.r4-b-blank li { height: var(--space-8); border-bottom: var(--bw-hair) solid var(--rule-soft); }
+@media (min-width: 740px) {
+  .r4-b-scene { display: none; } /* the scene rides the rail */
+}
+@media (min-width: 1400px) {
+  .r4--d2:not(.r4--sealed) {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'hero hero' 'log sum'; align-items: start; gap: var(--space-3) var(--space-4);
+  }
+  .r4-b-hero { grid-area: hero; }
+  .r4-b-log { grid-area: log; }
+  .r4-b-sum { grid-area: sum; flex-direction: column; }
+}
+@media (min-width: 1400px) {
+  /* The trail stands up as the half's own log, left of the at-bat's. */
+  .r4screen--d2 .innings__stage { display: grid; grid-template-columns: calc(var(--space-16) * 2.5) minmax(0, 1fr); column-gap: var(--space-4); align-items: start; }
+  .r4screen--d2 .innings__stage > * { grid-column: 2; }
+  .r4screen--d2 .innings__stage > .r4-trail { grid-column: 1; grid-row: 1 / span 4; }
+  .r4screen--d2 .trailstrip__cells { flex-direction: column; flex-wrap: nowrap; }
+}
+
+/* ---------- D3, the field ---------- */
+.r4-c-stage { display: grid; gap: var(--space-2); }
+.r4-c-park { background: var(--surface-card); border: var(--bw-hair) solid var(--border-rule); border-radius: var(--radius-md); padding: var(--space-2); }
+.r4-c-park .bflight__field { width: 100%; height: auto; display: block; }
+.r4--d3:not(.r4--inplay):not(.r4--sealed) .r4-c-park { display: none; }
+.r4-c-key { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-3); padding: var(--space-3); align-items: start; }
+.r4-c-keytext { display: flex; flex-direction: column; gap: var(--space-2); }
+.r4-c-keytext .pbp__desc { margin: 0; }
+.r4-c-pitches { padding: var(--space-3); }
+/* D3 owns the whole width: no reference rail beside the stage; the four
+   reference tabs fold to the phone's chip row at every width. */
+@media (min-width: 740px) {
+  .r4screen--d3 .innings--focus .innings__grid { grid-template-columns: minmax(0, 1fr); }
+  .r4screen--d3 .focusrail { display: none; }
+  .r4screen--d3 .r4-refbar { display: flex; }
+  .r4--d3 .r4-c-stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  .r4--d3:not(.r4--sealed) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'hero hero' 'stage stage' 'key pitches'; gap: var(--space-3) var(--space-4); align-items: start; }
+  .r4-c-hero { grid-area: hero; }
+  .r4-c-stage { grid-area: stage; }
+  .r4-c-key { grid-area: key; }
+  .r4-c-pitches { grid-area: pitches; }
+  .r4--d3:not(.r4--inplay) .r4-c-stage { grid-template-columns: minmax(0, 1fr); max-width: calc(var(--refrail-w) * 1.6); justify-self: center; width: 100%; }
+}
+.r4-refbar { display: none; }
+@media (min-width: 740px) {
+  .r4screen--d3 .r4-refbar { width: 100%; }
+  .r4screen--d3 .r4-refbar .refbar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); }
+  .r4screen--d3 .r4-refbar .refbar > * { width: 100%; }
+}
+/* The log is its own list: the pitch list's colours, not its shared column grid. */
+.r4-b-rows.pitchlist { display: block; }
+.r4-b-row.pitchlist__row { display: grid; column-gap: var(--space-2); }
+.r4-b-pencil { flex-direction: row; align-items: baseline; gap: var(--space-1); }
+.r4-c-pitches { display: flex; flex-direction: column; gap: var(--space-3); align-items: center; }
+.r4-c-pitches .pitchlist { width: 100%; }
+@media (min-width: 740px) {
+  .r4screen--d3 .r4-refbar .refbar { width: 100%; }
+  .r4--d3.r4--sealed .r4-c-stage { grid-template-columns: minmax(0, 1fr); max-width: calc(var(--refrail-w) * 1.6); margin-inline: auto; width: 100%; }
+}
