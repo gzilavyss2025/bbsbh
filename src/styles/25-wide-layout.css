@@ -488,7 +488,7 @@
   .pbp__zonebtn {
     display: none;
   }
-  .pbp__zonecell {
+  .pbp__zonecell { /* component-reuse-exempt: zone pitch display area, not a reusable Card */
     display: flex;
     gap: var(--space-3h);
     align-items: flex-start;
