@@ -1,3 +1,5 @@
+> REJECTED, see REJECTED.md. The inventory is still valid.
+
 # Round 4: three directions for the at-bat console (#1389)
 
 Shape only. No app code changed. Base: `origin/main` at `b24dff28`.

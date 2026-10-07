@@ -1,3 +1,5 @@
+> REJECTED, see REJECTED.md. The inventory is still valid.
+
 # Inventory: every block the innings page can show today (round 4, #1389)
 
 Read from source on `main` at `b24dff28`. Paths are under `src/`. "Reveal" = drawn
