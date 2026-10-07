@@ -391,7 +391,7 @@
 .skel__bar,
 .skel__circle {
   display: inline-block;
-  background: var(--rule-soft);
+  background: var(--border-hairline);
   border-radius: var(--radius-xs);
 }
 .skel__circle {
@@ -549,14 +549,14 @@
 .skel__ballBody circle {
   /* fill comes from the SkelBall-defined radialGradient (its highlight/
      shadow stops are the two rules below) — not set here. */
-  stroke: var(--rule);
+  stroke: var(--border-rule);
   stroke-width: 3;
 }
 .skel__ballShadeLight {
-  stop-color: var(--paper-3);
+  stop-color: var(--surface-inset);
 }
 .skel__ballShadeDark {
-  stop-color: var(--rule-soft);
+  stop-color: var(--border-hairline);
 }
 /* The circular "window": clips the wide frame-strip SVG down to one frame's
    worth, same idea as a classic sprite-sheet animation's viewport. Circular
