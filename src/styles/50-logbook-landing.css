@@ -170,8 +170,8 @@
   position: relative;
   overflow: hidden;
   background-color: var(--surface-inset);
-  background-image: linear-gradient(var(--rule-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px);
+  background-image: linear-gradient(var(--border-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-grid) 1px, transparent 1px);
   background-size: 18px 18px;
 }
 

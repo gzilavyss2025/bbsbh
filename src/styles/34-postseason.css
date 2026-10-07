@@ -331,7 +331,7 @@
   content: '';
   flex: 1;
   height: var(--bw-hair);
-  background: var(--rule-grid);
+  background: var(--border-grid);
 }
 .psstack__roundlabel:first-child {
   margin-top: 0;
