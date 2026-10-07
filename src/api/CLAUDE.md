@@ -87,7 +87,7 @@ reader still owns its own `shape` and `fallback`; nothing else changes.
 
 **The six #1200 season stores' readers take `{ seasonYear }`** (a year, `'all'`, or
 nothing for `current`; a year after the last reads `current`, a year before the
-first reads nothing), resolved by `seasonFolderOf` in `staticJson.js`. Never `season`: in `umpires.js` that is an
+first reads nothing; `strict` makes a year not on file read nothing, for a season view over a second store, #1482), resolved by `seasonFolderOf` in `staticJson.js`. Never `season`: in `umpires.js` that is an
 umpire's aggregate. A game page passes `selectGameSeason(feed)`. `scout/hitterGrid.js`
 is not one of the six and still takes a positional season.
 `'all'` reads a league file's `all/` copy; one player's `'all'` is a sum in
@@ -160,7 +160,7 @@ The subdirectories with their own CLAUDE.md are `around-the-game/`, `boxlines/`,
 `expresslane/`, and `transactions/`. `person/`, `playbyplay/`, and `callout-notes/` carry
 their notes in each file's own header plus a barrel file that explains the split
 (`playbyplay.js`, `callout-notes.js`, `person.js`). Read the barrel first; it states the
-directory's shared spoiler footing. `boxscore/`, `gamerecord/` (played, closed, no plays; ADR-0101), `matchup/`, `player/`, `postseason/`
+directory's shared spoiler footing. `boxscore/`, `gamerecord/` (played, closed, no plays; ADR-0101), `matchup/`, `notable/` (the feat label), `player/`, `postseason/`
 (`docs/api/postseason.md`), and `scorecard/` have only their file headers and the
 manifest.
 

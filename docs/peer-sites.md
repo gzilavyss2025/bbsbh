@@ -58,5 +58,21 @@ These notes say where the numbers behind the ideas above come from.
 - **Savant Statcast CSV** (`statcast_search/csv`) adds `attack_angle`,
   `attack_direction`, `swing_path_tilt`, and the bat/ball intercept point. It
   also carries `bat_score` and `post_bat_score`.
-- **Freshness during a live game: not measured yet.** A poll during the
-  2026-10-06 games measures it. Put the result here.
+- **Freshness during a live game: measured on 2026-10-06.** A poll every 20 s
+  ran for 90 minutes on gamePk 849819 (LAD @ ATL, postseason). It counted 65
+  swings and 25 balls in play. The lag runs from the pitch's `endTime` in the
+  MLB feed to the first poll that showed the field:
+
+  | Field | Median | p90 | Coverage |
+  |---|---|---|---|
+  | MLB feed shows the pitch | 10 s | 18 s | 65 of 65 swings |
+  | `/gf` `xba` | 51 s | 70 s | 24 of 25 balls in play |
+  | `/gf` `is_barrel` | 45 s | 55 s | 24 of 25 balls in play |
+  | `/gf` `batSpeed` | 162 s | 479 s | 63 of 65 swings |
+  | CSV (any field) | — | — | 0: the CSV returned no rows for the day during the game |
+
+  So xBA is close to live, about 40 s after the MLB feed. Bat speed often comes
+  minutes later. The swing-path fields (attack angle, tilt, intercept) exist
+  only in the CSV, so a live game cannot use them. Earlier checks found the CSV
+  complete the next morning. When it first fills (at the final out, or later)
+  is not measured. The lags carry up to 20 s of poll error.

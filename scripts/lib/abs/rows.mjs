@@ -19,7 +19,7 @@
 import { selectChallengeState } from '../../../src/api/challenges.js'
 import { missEdge } from '../../../src/api/umpireFavor.js'
 import { pitchFavor } from '../../../src/lib/runExpectancy.js'
-import { POSTSEASON_GAME_TYPES } from '../records/postseason.mjs'
+import { scopeOfGameType } from '../records/postseason.mjs'
 
 // --- one game's rows ----------------------------------------------------------
 
@@ -282,7 +282,7 @@ export function clearSeasonRows(db, season) {
 // --- the postseason beside the regular season (#1514, ADR-0094's shape) -------
 
 // A game's scope, from its schedule row. The sweep asks for R plus these.
-export const scopeOfGameType = (gameType) => (POSTSEASON_GAME_TYPES.split(',').includes(gameType) ? 'P' : 'R')
+export { scopeOfGameType }
 
 // The scope lives on the GAME. A challenge row takes it through game_pk; a game
 // row with no scope is regular season (an old row, or a test fixture). 'all' is
@@ -322,13 +322,14 @@ export function ingestGame(db, t, rows, shape) {
   )
 }
 
-// --recheck's write on a game already on file: its scope always, its length
-// when the schedule row carries one. Never touches the challenge rows.
+// --recheck's write on a game already on file: its scope always, and its length
+// only when none is on file. The sweep read the length off the feed's plays,
+// which the schedule row does not carry (gameShape). Never touches the
+// challenge rows.
 export function restampGame(db, gamePk, { scope, shape }) {
   db.prepare('UPDATE abs_ingested_games SET scope = ? WHERE game_pk = ?').run(scope, gamePk)
   if (shape?.finalInning == null) return false
-  db.prepare(
-    'UPDATE abs_ingested_games SET final_inning = ?, bottom_played = ?, scheduled_innings = ? WHERE game_pk = ?',
-  ).run(shape.finalInning, shape.bottomPlayed, shape.scheduledInnings, gamePk)
-  return true
+  return db.prepare(
+    'UPDATE abs_ingested_games SET final_inning = ?, bottom_played = ?, scheduled_innings = ? WHERE game_pk = ? AND final_inning IS NULL',
+  ).run(shape.finalInning, shape.bottomPlayed, shape.scheduledInnings, gamePk).changes > 0
 }

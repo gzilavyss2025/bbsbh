@@ -209,7 +209,8 @@ export async function loadPlayerAnalytics(id, asOf) {
 // current one, for the vs season of a compare, and for a postseason or all-games
 // scope (#1503); the current regular season stays on loadPlayerAnalytics above,
 // whose mix is statsapi's. `seasonYear` is a year, 'all', or nothing for the
-// current season.
+// current season. `strict` is seasonFolderOf's: the Analytics tab passes it, so a
+// year one store lacks reads nothing.
 //
 // `scope` is 'reg', 'post' or 'all'. A man with no postseason pitches that
 // season has no scope to pick, so it reads as 'reg' (`scope` in the result says
@@ -219,8 +220,8 @@ export async function loadPlayerAnalytics(id, asOf) {
 // at in THAT scope (arsenalLevelOf); "Pitches like" ranks against the regular
 // season's pool whatever the scope (ADR-0094 point 4), so the pool waits on the
 // regular level.
-export async function loadArsenalSeason(id, { seasonYear, scope = 'reg' } = {}) {
-  const shard = await fetchPitchArsenalFor(id, { seasonYear })
+export async function loadArsenalSeason(id, { seasonYear, scope = 'reg', strict } = {}) {
+  const shard = await fetchPitchArsenalFor(id, { seasonYear, strict })
   const hasPost = postPitchesOf(shard, id) > 0
   const served = hasPost ? scope : 'reg'
   const view = arsenalScoped(shard, id, served)
@@ -228,8 +229,8 @@ export async function loadArsenalSeason(id, { seasonYear, scope = 'reg' } = {}) 
   if (isMlb == null) return null
   const regMlb = arsenalLevelOf(shard, id)
   const [pool, command] = await Promise.all([
-    regMlb == null ? null : fetchPitchArsenalPool(regMlb, { seasonYear }),
-    served === 'reg' ? null : fetchCommandFor(id, { seasonYear, scope: served }),
+    regMlb == null ? null : fetchPitchArsenalPool(regMlb, { seasonYear, strict }),
+    served === 'reg' ? null : fetchCommandFor(id, { seasonYear, scope: served, strict }),
   ])
   return {
     scope: served,

@@ -249,6 +249,24 @@
   gap: var(--space-4);
 }
 
+/* The feat label (FeatLabel.jsx, ADR-0101): a highlighter flag, so --marker, never
+   --seal (ADR-0083). The box score's seal is what hides it. */
+.bs__feats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.bs__feats mark {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xs);
+  background: var(--marker);
+  color: var(--text-heading);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+}
+
 .bs__sectionTitle {
   margin: 0;
   padding-bottom: var(--space-2);

@@ -41,7 +41,7 @@ const arsenalShard = staticJsonBy((key) => `/data/pitch-arsenal/${key}.json`)
 
 // 'all' adds his seasons (lib/seasons/combine.js), regular season and
 // postseason apart, into the shard's own `{ pit, post }` shape.
-export async function fetchPitchArsenalFor(personId, { seasonYear } = {}) {
+export async function fetchPitchArsenalFor(personId, { seasonYear, strict } = {}) {
   if (personId == null) return null
   const id = String(personId)
   const combined = (shards, block) => {
@@ -53,6 +53,7 @@ export async function fetchPitchArsenalFor(personId, { seasonYear } = {}) {
     seasonYear,
     (season) => arsenalShard(`${season}/${shardKey100(personId)}`),
     (shards, seasons) => ({ season: null, seasons, pit: combined(shards, 'pit'), post: combined(shards, 'post') }),
+    { strict },
   )
 }
 
@@ -84,8 +85,8 @@ const pool = staticJsonBy((key) => `/data/pitch-arsenal-pool/${key}.json`)
 
 // 'all' reads pitch-arsenal-pool/all/, which the nightly run folds from the
 // velocity sums, never from the season pools' means.
-export async function fetchPitchArsenalPool(isMlb, { seasonYear } = {}) {
-  const season = await seasonFolderOf('pitch-arsenal-pool', seasonYear)
+export async function fetchPitchArsenalPool(isMlb, { seasonYear, strict } = {}) {
+  const season = await seasonFolderOf('pitch-arsenal-pool', seasonYear, { strict })
   if (season == null) return null
   return pool(`${season}/${isMlb ? 'mlb' : 'aaa'}`)
 }

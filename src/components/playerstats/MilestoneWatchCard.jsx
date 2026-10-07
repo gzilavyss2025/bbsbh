@@ -22,7 +22,8 @@ import { Card } from '../ui/frame/Card.jsx'
 // heading.
 export function MilestoneWatchCard({ playerId, asOf, milestones, groupLabel }) {
   const { data } = useAsync(() => (asOf ? Promise.resolve(null) : loadMilestoneWatch()), [asOf])
-  const paused = useMilestonesPaused()
+  // With `asOf` set the card shows no projection, so the pause flag has nothing to hide.
+  const paused = useMilestonesPaused(!asOf && !!milestones?.length)
   if (!milestones?.length) return null
   const projections = data ? milestonesForPlayer(data, playerId) : []
 

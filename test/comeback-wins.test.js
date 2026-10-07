@@ -5,8 +5,9 @@ import test from 'node:test'
 import { DatabaseSync } from 'node:sqlite'
 import { readFileSync } from 'node:fs'
 import {
-  winnerMinWinProb, bothMinWinProbs, comebackBuckets, scopeOf, exportJson,
+  winnerMinWinProb, bothMinWinProbs, comebackBuckets, exportJson,
 } from '../scripts/gen-comeback-wins.mjs'
+import { scopeOfGameType } from '../scripts/lib/records/postseason.mjs'
 import {
   comebackWinsFor, leagueComebackWinsFor, comebackRatesFor, comebackPostFor,
 } from '../src/api/comebackWins.js'
@@ -147,9 +148,9 @@ test('comebackRatesFor: null row → null; a threshold never reached → null ra
 // --------------------------------------------------------------------------
 // postseason scope — beside the regular season, never inside it (ADR-0094).
 // --------------------------------------------------------------------------
-test('scopeOf: postseason game types are P, everything else R', () => {
-  for (const t of ['F', 'D', 'L', 'W']) assert.equal(scopeOf(t), 'P')
-  for (const t of ['R', 'S', undefined]) assert.equal(scopeOf(t), 'R')
+test('scopeOfGameType: postseason game types are P, everything else R', () => {
+  for (const t of ['F', 'D', 'L', 'W']) assert.equal(scopeOfGameType(t), 'P')
+  for (const t of ['R', 'S', undefined]) assert.equal(scopeOfGameType(t), 'R')
 })
 
 function openSchemaDb() {

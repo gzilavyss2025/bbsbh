@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { teamLogoUrl } from '../../lib/teams.js'
+import { seasonMark } from '../../lib/identity/seasonMarks.js'
 
 // Decorative team logo, keyed by the team id we already carry throughout the
 // app. The label next to it always names the team in text, so the image is
@@ -45,6 +46,12 @@ export function TeamLogo({
   // 'base' — so a club whose override file goes missing quietly gets its
   // ordinary mark back instead of a broken image.
   overrideUrl = null,
+  // The season the mark is for (#1591). A club that wore a different mark that
+  // year draws it from the per-season table, ahead of everything above; an
+  // era with no art on file draws the monogram, never today's mark. Absent
+  // (every caller but the game route) or a season outside the table changes
+  // nothing.
+  season = null,
 }) {
   const cropSquare = crop === true
   const cropBar = crop === 'bar'
@@ -52,14 +59,16 @@ export function TeamLogo({
   // (teamId, variant, overrideUrl). Reset whenever any of them change so a
   // re-picked mark — or a freshly re-uploaded override — starts fresh
   // instead of inheriting a prior failure.
-  const [stage, setStage] = useState(overrideUrl ? 'override' : 'variant')
+  const era = seasonMark(teamId, season)
+  const firstStage = era ? (era.url ? 'season' : 'monogram') : overrideUrl ? 'override' : 'variant'
+  const [stage, setStage] = useState(firstStage)
   // Reset computed during render (React's "adjust state while rendering"
   // pattern) rather than in an effect — see Headshot.jsx for the same shape.
-  const identityKey = `${teamId}|${variant}|${overrideUrl ?? ''}`
+  const identityKey = `${teamId}|${variant}|${overrideUrl ?? ''}|${season ?? ''}`
   const [prevIdentityKey, setPrevIdentityKey] = useState(identityKey)
   if (identityKey !== prevIdentityKey) {
     setPrevIdentityKey(identityKey)
-    setStage(overrideUrl ? 'override' : 'variant')
+    setStage(firstStage)
   }
 
   // A single-letter monogram fallback, not a re-uppercase of displayed text.
@@ -68,7 +77,9 @@ export function TeamLogo({
 
   const effectiveVariant = stage === 'variant' ? variant : 'base'
   const url =
-    stage === 'override'
+    stage === 'season'
+      ? era?.url
+      : stage === 'override'
       ? overrideUrl
       : stage === 'monogram'
         ? null
@@ -96,6 +107,7 @@ export function TeamLogo({
     // its own shot at 'base' before giving up — a non-base variant that
     // fails drops to base; anything else is unrecoverable.
     setStage((s) => {
+      if (s === 'season') return 'monogram'
       if (s === 'override') return 'variant'
       if (s === 'variant' && variant !== 'base') return 'base'
       return 'monogram'

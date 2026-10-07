@@ -564,14 +564,14 @@ function TeamSections({
   const roster = useMemo(() => rosterFallbackGroups(rawRoster), [rawRoster])
 
   const lineupHead = (
-    <ClubHead title="Batting order" teamId={meta.id} teamName={meta.teamName} masthead={ownMasthead}>
+    <ClubHead title="Batting order" teamId={meta.id} teamName={meta.teamName} masthead={ownMasthead} season={season}>
       {/* Names the pitcher the notes below are measured against, and
           switches them off for a clean order to copy onto paper. */}
       <MatchupNotesToggle pitcherLast={starterLast} showNotes={showNotes} onToggle={setShowNotes} />
     </ClubHead>
   )
   const oppHead = (
-    <ClubHead title="Defensive alignment" teamId={oppMeta.id} teamName={oppMeta.teamName} masthead={oppMasthead} />
+    <ClubHead title="Defensive alignment" teamId={oppMeta.id} teamName={oppMeta.teamName} masthead={oppMasthead} season={season} />
   )
 
   return (
@@ -589,6 +589,7 @@ function TeamSections({
         cutoff={info.officialDate ?? null}
         teamId={oppMeta.id}
         teamName={oppMeta.teamName}
+        season={season}
         orgTeamId={oppOrgTeamId}
         theme={oppTheme}
         masthead={oppMasthead}
@@ -759,6 +760,7 @@ function OpposingStarterCard({
   cutoff,
   teamId,
   teamName,
+  season,
   orgTeamId,
   theme,
   masthead,
@@ -772,7 +774,7 @@ function OpposingStarterCard({
   bullpenToggle,
 }) {
   const head = (
-    <ClubHead title="Starting pitcher" teamId={teamId} teamName={teamName} masthead={masthead}>
+    <ClubHead title="Starting pitcher" teamId={teamId} teamName={teamName} masthead={masthead} season={season}>
       {bullpenToggle}
     </ClubHead>
   )
@@ -884,7 +886,7 @@ function OpposingStarterCard({
 // alignment, the starting pitcher): the title, the club's mono mark at the far
 // right (ADR-0031), and one control in the aside slot. It is the Card's `head`
 // (#1113, slice C3). The club colours come from the theme on the card root.
-function ClubHead({ title, teamId, teamName, masthead, children }) {
+function ClubHead({ title, teamId, teamName, masthead, season, children }) {
   return (
     <SectionMasthead
       as="h3"
@@ -897,6 +899,7 @@ function ClubHead({ title, teamId, teamName, masthead, children }) {
           variant="mono"
           crop="bar"
           overrideUrl={masthead.url}
+          season={season}
           className={`sectionhead__mark${masthead.url ? ' sectionhead__mark--custom' : ''}`}
         />
       }

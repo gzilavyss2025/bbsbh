@@ -18,6 +18,7 @@ import { Table } from '../components/ui/table/Table.jsx'
 import { GuideLink } from '../components/chrome/GuideLink.jsx'
 import { WinProbChart } from '../components/charts/WinProbChart.jsx'
 import { HitChartCard } from './boxscore/HitChartCard.jsx'
+import { FeatLabel } from './boxscore/FeatLabel.jsx'
 import { AbsRow } from '../components/gamehud/StatBox.jsx'
 import { PerformerCard } from '../components/player/PerformerCard.jsx'
 import { CalloutNote } from '../components/playbyplay/CalloutNote.jsx'
@@ -345,6 +346,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
             guarantee, and that is a render-function boundary, not a position
             on the page. */}
         <StampGameButton game={stampFacts} />
+        <FeatLabel gamePk={feed?.gamePk} />
         <h2 className="bs__sectionTitle">Highlights</h2>
         {/* Wide: totals over the scoring summary beside decisions over the
             win-prob arc. The wrappers are transparent on a phone. */}
@@ -382,6 +384,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
           innings={box.innings}
           onSection={onSection}
           treatments={winProbTreatment}
+          officialDate={feed?.gameData?.datetime?.officialDate}
         />
         <InningTally rows={inningDigest} away={box.away} home={box.home} treatments={winProbTreatment} />
         <GameStoryCard feed={feed} />
@@ -907,7 +910,7 @@ function LineTotals({ away, home }) {
 // `winProbTreatment` from BoxScoreBody) — the same shared tile the scorebug
 // HUD (Scorebug.jsx), the slate card, and the in-game masthead all wear,
 // rather than a bare mark floating with no fill of its own.
-function Scoreboard({ away, home, innings, onSection, treatments }) {
+function Scoreboard({ away, home, innings, onSection, treatments, officialDate }) {
   const rows = [
     { side: away, gameSide: 'away', cells: innings.map((i) => i.away), half: 'top' },
     { side: home, gameSide: 'home', cells: innings.map((i) => i.home), half: 'bottom' },
@@ -939,6 +942,7 @@ function Scoreboard({ away, home, innings, onSection, treatments }) {
                     treatment={treatments?.[gameSide]}
                     side={gameSide}
                     size={24}
+                    season={officialDate}
                     block="bs__boardLogobox"
                   />
                 </TeamLink>

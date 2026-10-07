@@ -31,9 +31,9 @@ export const fetchCommandShard = staticJsonBy((key) => `/data/pitch-command/${ke
 // `scope` is 'reg' (the default, `pit` alone, as before), 'post' (the `post`
 // bucket beside it, ADR-0094) or 'all' (the two added cell by cell, never one
 // laid over the other).
-export async function fetchCommandFor(personId, { seasonYear, scope = 'reg' } = {}) {
+export async function fetchCommandFor(personId, { seasonYear, scope = 'reg', strict } = {}) {
   if (personId == null || seasonYear === 'all') return null
-  const season = await seasonFolderOf('pitch-command', seasonYear)
+  const season = await seasonFolderOf('pitch-command', seasonYear, { strict })
   if (season == null) return null
   const shard = await fetchCommandShard(`${season}/${shardKey100(personId)}`)
   const id = String(personId)

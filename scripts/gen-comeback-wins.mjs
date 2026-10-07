@@ -42,7 +42,7 @@ import { writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
-import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
+import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
 import { parseArgs } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -51,10 +51,6 @@ const DEFAULT_DAYS = 3
 // The cumulative home win % (+ its `about` for nothing here, but kept minimal).
 // Only homeTeamWinProbability is read; pruning keeps each game's payload small.
 const WP_FIELDS = 'homeTeamWinProbability'
-
-// A game's scope comes from its gameType: the postseason types are 'P', else 'R'.
-const POST_TYPES = POSTSEASON_GAME_TYPES.split(',')
-export const scopeOf = (gameType) => (POST_TYPES.includes(gameType) ? 'P' : 'R')
 
 const isoDay = (d) => d.toISOString().slice(0, 10)
 const args = parseArgs(process.argv.slice(2))
@@ -199,7 +195,7 @@ async function main() {
       candidates.push({
         gamePk: g.gamePk,
         season: Number(dateStr.slice(0, 4)),
-        scope: scopeOf(g.gameType),
+        scope: scopeOfGameType(g.gameType),
         winnerId,
         loserId,
         winnerIsHome,

@@ -612,11 +612,10 @@ CREATE TABLE IF NOT EXISTS team_record_games (
   PRIMARY KEY (game_pk, team_id)
 );
 
--- Idempotency guard. An ingested gamePk is never refetched — this is what
--- keeps the nightly run at the ~65 games that actually finished rather than a
--- season-wide re-walk. statsapi does correct a Final game later (errors, hits,
--- now and then a run), and the ledger keeps the first version until a
--- re-ingest (docs/scripts/generators.md).
+-- Idempotency guard. An ingested gamePk older than the re-read window is not
+-- refetched — this keeps the nightly run off a season-wide re-walk. statsapi
+-- corrects a Final game later (errors, hits, now and then a run): the nightly
+-- run re-reads the last 3 days, --reingest any range (docs/scripts/generators.md).
 CREATE TABLE IF NOT EXISTS team_record_ingested_games (
   game_pk INTEGER NOT NULL PRIMARY KEY,
   date    TEXT NOT NULL,

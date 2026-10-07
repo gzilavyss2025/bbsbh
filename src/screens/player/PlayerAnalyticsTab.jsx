@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { loadPlayerCore } from '../../api/player/core.js'
 import { loadArsenalSeason, loadPlayerAnalytics } from '../../api/player/analytics.js'
+import { seasonFolderOf } from '../../api/staticJson.js'
 import { playerTabPath } from '../../lib/route.js'
 import { useSeasonView } from '../../hooks/seasons/useSeasonView.js'
 import { SeasonPicker } from '../../components/season/SeasonPicker.jsx'
@@ -23,6 +24,7 @@ import { FoulCard } from '../../components/playerstats/FoulCard.jsx'
 import { RunValueCard } from '../../components/playerstats/RunValueCard.jsx'
 import { SprayMapSection } from '../../components/playerstats/SprayMapSection.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
+import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { PlayerHubShell } from './PlayerHubShell.jsx'
 import { Pill } from '../../components/ui/control/Pill.jsx'
 import { useNav } from '../../lib/nav.js'
@@ -82,7 +84,7 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: s
   const shelf = useAsync(
     () =>
       pitching && (picked != null || shelfScope !== 'reg')
-        ? loadArsenalSeason(id, { seasonYear: picked ?? undefined, scope: shelfScope })
+        ? loadArsenalSeason(id, { seasonYear: picked ?? undefined, scope: shelfScope, strict: true })
         : Promise.resolve(null),
     [id, pitching != null, picked, shelfScope],
   )
@@ -91,10 +93,18 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: s
   const vsShelf = useAsync(
     () =>
       pitching && view?.vs != null && vsScope != null
-        ? loadArsenalSeason(id, { seasonYear: view.vs, scope: vsScope })
+        ? loadArsenalSeason(id, { seasonYear: view.vs, scope: vsScope, strict: true })
         : Promise.resolve(null),
     [id, pitching != null, view?.vs, vsScope],
   )
+  // The six stores are one nightly run's, but their indexes can differ by a
+  // day (#1482). A store without the picked year draws nothing: say which
+  // cards, so a missing chart is not read as a player with no data.
+  const lacking = useAsync(async () => {
+    const stores = ['spray', 'pitch-arsenal']
+    const folders = await Promise.all(stores.map((s) => seasonFolderOf(s, view?.shown, { strict: true })))
+    return stores.filter((_, i) => folders[i] == null)
+  }, [view?.shown])
   const hasPost = picked == null ? pitching?.hasPost === true : shelf.data?.hasPost === true
   const scopeNow = picked == null ? (hasPost ? wanted : 'reg') : shelf.data?.scope ?? 'reg'
   const chooseScope = (k) => {
@@ -160,11 +170,16 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: s
       ? { entry: block.command, mlb: block.tileSportId === 1 }
       : { entry: shelf.data?.command ?? null, mlb: shelf.data?.commandMlb ?? true }
   const scopeTag = SCOPE_NOTE[scopeNow]
+  const missing = [
+    lacking.data?.includes('spray') && blocks.some((b) => b.group === 'hitting') && 'Spray map',
+    lacking.data?.includes('pitch-arsenal') && picked != null && pitching && 'Pitches',
+  ].filter(Boolean)
 
   return (
     <PlayerHubShell core={core.data} asOf={asOf} sportId={sportId} active="analytics">
       <SeasonPicker view={view} pathFor={pathFor} />
       {view?.seasons?.length > 1 && cardsHint && <p className="hint">{cardsHint}</p>}
+      {missing.length > 0 && <EmptyState size="compact">{missing.join(' and ')} not on file for {label}.</EmptyState>}
       {blocks.map((block) => (
         <section key={block.group}>
           {/* The tab bar names this section now, so there is no umbrella

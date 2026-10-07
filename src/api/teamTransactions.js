@@ -616,7 +616,7 @@ async function loadSeasonFile(season, teamId) {
     .then(async () => {
       const res = await fetch(`/data/team-transactions/${season}/${teamId}.json`)
       if (!res.ok) {
-        if (res.status === 404 && season < currentYear()) return null
+        if (res.status === 404 && season !== currentYear()) return null
         throw new Error(`team transactions ${res.status}`)
       }
       return await res.json()
@@ -636,14 +636,24 @@ function currentYear() {
 }
 
 // Stateful pager: first call (cursor null) returns the most recent PAGE_DAYS
-// of a team's days from the CURRENT season's file only; each subsequent call
+// of a team's days from the NEWEST season's file (next year's, once it exists); each subsequent call
 // pages further back, crossing into the prior season's file only once the
 // newer one is exhausted. `cutoff` trims to the Team Page's `asOf` (temporal
 // hygiene, not spoiler defense — see the scope doc). Returns
 // { days, cursor, hasMore } — hasMore is false only once a season file
 // genuinely 404s (no earlier history for this team).
 export async function loadMoreTeamTransactions(teamId, cursor, cutoff) {
-  let season = cursor?.season ?? currentYear()
+  let season = cursor?.season
+  if (season == null) {
+    // The next season's file owns the winter (#1477) and exists from the day
+    // after this year's seasonEndDate, before the calendar year turns. Open it
+    // first when it is there; a 404 is cached and reads as "not started yet".
+    // Any other failure of this probe also reads as "not there": it must not
+    // break the current season's page (the dev server answers a missing file
+    // with index.html, which is not JSON).
+    season = currentYear()
+    if (await loadSeasonFile(season + 1, teamId).catch(() => null)) season += 1
+  }
   let index = cursor?.index ?? 0
   const collected = []
 

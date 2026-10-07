@@ -10,8 +10,8 @@ import { seasonDelta, seasonValue } from '../../lib/seasons/view.js'
 //
 // `now` and `then` are loadUmpire's results for the shown season and the vs
 // season. A season he did not work is a row of dashes, never zeros. A season
-// before pitch calls were scored (the assignment backfill) has games and no
-// accuracy.
+// before pitch calls were scored (the assignment backfill), or one the accuracy
+// store does not have yet, has games and no accuracy: the row says so.
 export function UmpireSeasonCompare({ now, then, year, vsYear }) {
   const rows = [
     [year, now],
@@ -41,7 +41,7 @@ export function UmpireSeasonCompare({ now, then, year, vsYear }) {
                 <th scope="row" className="team">{y}</th>
                 <td>{games ? games.length : '—'}</td>
                 <td>{games ? games.filter((g) => g.role === 'HP').length : '—'}</td>
-                <td>{seasonValue(u?.accuracy?.season?.accuracy, 'pct')}</td>
+                <td>{games && !u.accuracy ? 'no accuracy' : seasonValue(u?.accuracy?.season?.accuracy, 'pct')}</td>
                 <td>{u?.rank ? `${u.rank.rank} of ${u.rank.total}` : '—'}</td>
               </tr>
             )

@@ -28,8 +28,8 @@
 import { isPlayedFinal } from '../team-records.mjs'
 import { shipRow } from './ingest.mjs'
 
-// Wild Card Series, Division Series, League Championship Series, World Series.
-export const POSTSEASON_GAME_TYPES = 'F,D,L,W'
+// The round list and `scopeOfGameType` live in game-types.mjs (see its header).
+export { POSTSEASON_GAME_TYPES, scopeOfGameType } from './game-types.mjs'
 // The Wild Card era. Earlier postseasons have no Division Series and thinner
 // box scores; the page's depth is a decision (see the PR), not a data limit.
 export const FIRST_SEASON = 1995

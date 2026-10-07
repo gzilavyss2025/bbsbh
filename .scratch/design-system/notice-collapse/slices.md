@@ -476,6 +476,74 @@ for N2 to N8.
    `empty-state.css` and `notice.css`, and edit `src/index.css` and the pins in
    `test/empty-state-cascade.test.js` and `test/notice-cascade.test.js`.
 
+## N6 as built (what the next slices need)
+
+Written by the N6 session. It records what shipped. It does not write the prompts
+for N7 and N8.
+
+1. **The roots.** The four event bars in `EventCards.jsx` are
+   `` `pitchernotice ${noticeClass({ tone: 'event' })} pitchernotice--event` ``
+   (the mound visit adds `pitchernotice--mv`). The two handoff cards are
+   `<Stack gap="snug" className={noticeClass({ tone: 'event', className: 'pitcherhandoff' })}>`.
+   No root wears `pitchernotice--pbp` now. The inner `div.pitchernotice` header
+   row and the table did not change. This is the first production caller of
+   `noticeClass`.
+2. **The namespace rules** (`styles/12-sealbox.css`). `.pitchernotice--event` is
+   `margin: var(--space-1) var(--space-3h)` (4px 14px, as tokens, so no
+   `check-raw-values` budget moved), `flex-wrap: nowrap` and its old
+   `gap: var(--space-2)`. `.pitcherhandoff` is a new rule: the same margin,
+   `flex-wrap: nowrap` and `align-items: stretch`. The `.pitchernotice--pbp` rule
+   and its actor-card callers did not change.
+3. **The wrap and the stack.** `.notice` wraps; the bars must not, so both
+   namespaces say `nowrap` (N5's trap, item 2 there). On the handoff cards
+   `.notice` loads after `stack.css` and says `align-items: center`, which would
+   shrink the table; `stretch` keeps it full width. The computed value on those
+   two roots reads `stretch` where it read `normal` before. In flexbox `normal`
+   acts as `stretch`, and the geometry is identical. The gap stays 8px: `.notice`
+   says `var(--space-2)`, the same as Stack's "snug".
+4. **The colour.** `.notice` sets `color: var(--text-body)`. The roots inherited
+   the same `rgb(27, 42, 58)` before, so no namespace needed a colour rule.
+5. **The console trap fired.** `HalfInning.jsx` renders the "Final line" card
+   (`FinalizedLineCard`) ABOVE the seal, not from the feed. `nowPitching` reads the
+   half's first play. In a live game between halves the next half has no play
+   yet, so the Now Pitching card does not render, and `closingPitcher` compares
+   against `undefined`, so the "Final line" card can be the ONLY card in `.half`.
+   Seen: the anchor feed trimmed in the browser to the end of the 6th, mark 11,
+   `/top7` at 900px. The old selector did not match (a card in a card); the new
+   one does. `styles/focus/console.css` now says
+   `.half:has(.pitchernotice--pbp, .notice--event):not(:has(.statgrid))`, and the
+   pin in `test/card-cascade.test.js` looks for that selector. N7 can drop
+   `.pitchernotice--pbp` from the list when it deletes the rule: every actor card
+   then wears `.notice--event`.
+6. **The seal pin** (`test/notice-n6.test.js`, measured on `118f08809`):
+   `EventCards.jsx` and `PitcherHandoffCard.jsx` have no reveal-only import, no
+   `<SealBox` and no `revealedThrough`. `PlayByPlay.jsx` imports `playbyplay.js`,
+   has no `<SealBox` and 1 `revealedThrough`. `HalfInning.jsx` imports
+   `boxscore.js`, `highlights.js`, `hitchart.js` and `playbyplay.js`, has 1
+   `<SealBox` and 12 `revealedThrough`.
+7. **Census.** The census reads the literal `'event'` in the new className as a
+   class (`.event` on the four bar rows). The two Stack roots are no longer
+   census sites (their className has no candidate class), so the handoff keys
+   moved: old `#2`, `#3`, `#5` are now `#1`, `#2`, `#3`. The two DONE root rows
+   are `#` comment lines in `overrides.tsv`. The STALE keys left are not N6's
+   (`.gamephotos__noticetag`, `.xl-film__msg`, `.xl__prerollmsg`,
+   `PitcherNotice.jsx#10`, three `ExpressLanePage.jsx` keys, `StampInPage.jsx#1`).
+8. **Seen.** Geometry, element by element, the same before and after (`main` and
+   this branch served side by side, each route twice): the anchor game
+   (`/07072026/milstl-2/top6` and `/top7`, sealed with the mark at 9 and 11, and
+   open with the mark at 99 and the whole half shown) at 390 and 900px, mocked and
+   live; the in-feed DELAY bar live on 778107 (bottom 4th), 778087 (top 1st) and
+   778108 (top 8th); a steal bar (SB) live on 778087 (top 1st). **Not seen:** an
+   ejection bar.
+9. **Docs.** `components/playbyplay/CLAUDE.md`, the header comment of
+   `EventCards.jsx` and the tier-2/3 comment in `12-sealbox.css` now say the
+   event bars and handoff cards take the event Notice frame, and the actor cards
+   wear `.pitchernotice--pbp` until N7. N7 updates those three lines again.
+10. **Review items left open.** `.notice` makes each owning namespace undo
+   `flex-wrap: wrap` (N5 twice, N6 twice). A Notice-level fix needs Gary.
+   On the handoff cards, `Stack`'s `gap="snug"` does nothing now (`.notice`'s
+   gap wins, the same 8px); the test pins that the two stay equal.
+
 ## N5 as built (what the next slices need)
 
 Written by the N5 session. It records what shipped. It does not write the prompts

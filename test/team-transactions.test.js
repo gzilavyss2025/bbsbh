@@ -1031,6 +1031,51 @@ test('a club with an EMPTY shard is not the end of its history — paging crosse
   assert.equal(page.hasMore, false) // 2023 has no file at all — that is the end
 })
 
+test('with no cursor, the pager opens next year\'s file first when it exists (winter moves, #1477)', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-11-15T12:00:00Z') })
+  const winter = [{ date: '2026-11-15', stories: [] }]
+  const thisYear = syntheticDays(3, 2026, 10)
+  t.mock.method(globalThis, 'fetch', mockFetch({
+    2027: { 160: { days: winter } },
+    2026: { 160: { days: thisYear } },
+  }))
+  const page = await loadMoreTeamTransactions(160, null, null)
+  assert.deepEqual(page.days.map((d) => d.date), ['2026-11-15', ...thisYear.map((d) => d.date)])
+})
+
+test('with no cursor and no next-year file, the pager opens the current year and does not throw', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-07-15T12:00:00Z') })
+  const thisYear = syntheticDays(2, 2026, 7)
+  const spy = t.mock.method(globalThis, 'fetch', mockFetch({ 2026: { 161: { days: thisYear } } }))
+  const page = await loadMoreTeamTransactions(161, null, null)
+  assert.deepEqual(page.days.map((d) => d.date), thisYear.map((d) => d.date))
+  await loadMoreTeamTransactions(161, null, null)
+  const probes = spy.mock.calls.filter((c) => String(c.arguments[0]).includes('/2027/'))
+  assert.equal(probes.length, 1) // the 404 is cached, not refetched
+})
+
+test('a failing next-year probe does not break the current season', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-07-15T12:00:00Z') })
+  const thisYear = syntheticDays(2, 2026, 7)
+  t.mock.method(globalThis, 'fetch', async (url) => {
+    if (String(url).includes('/2027/')) return { ok: true, json: async () => { throw new SyntaxError('not json') } }
+    return { ok: true, json: async () => ({ days: thisYear }) }
+  })
+  const page = await loadMoreTeamTransactions(163, null, null)
+  assert.equal(page.days[0].date, thisYear[0].date)
+})
+
+test('the asOf cutoff still trims a next-year file opened first', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-11-15T12:00:00Z') })
+  t.mock.method(globalThis, 'fetch', mockFetch({
+    2027: { 162: { days: [{ date: '2026-11-15', stories: [] }, { date: '2026-11-01', stories: [] }] } },
+    2026: { 162: { days: [] } },
+    2025: {},
+  }))
+  const page = await loadMoreTeamTransactions(162, null, '2026-11-10')
+  assert.deepEqual(page.days.map((d) => d.date), ['2026-11-01'])
+})
+
 test('loadMoreTeamTransactions retries a transient season-file failure in the same session', async (t) => {
   let currentSeasonCalls = 0
   t.mock.method(globalThis, 'fetch', async (url) => {

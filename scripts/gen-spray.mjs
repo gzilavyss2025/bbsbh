@@ -79,7 +79,7 @@ import { shardKey100 } from '../src/lib/shardKey.js'
 import { round1 } from '../src/lib/math/number.js'
 import { HARD_HIT_MPH } from '../src/lib/ballpark/hitProjection.js'
 import { parseArgs, dateRange, isoDay } from './lib/args.mjs'
-import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
+import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const storeDir = join(here, '..', 'public', 'data', 'spray')
@@ -97,7 +97,6 @@ const ALL_LEVELS = [
   { sportId: 1, level: 'mlb', gameTypes: `R,${POSTSEASON_GAME_TYPES}` },
   { sportId: 11, level: 'aaa', gameTypes: 'R' },
 ]
-const isPostseason = (gameType) => POSTSEASON_GAME_TYPES.split(',').includes(gameType)
 
 // A whole feed/live body is ~800 KB and this sweep reads eleven paths out of
 // it. `fields` is a flat allowlist of KEY NAMES (not paths), so it drags a few
@@ -343,7 +342,7 @@ async function main() {
         if (g.officialDate >= today) continue // decided games only, never today's
         if (!g.officialDate.startsWith(`${season}-`)) continue // this season's folder only
         if (ingested.has(g.gamePk)) continue
-        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, post: isPostseason(g.gameType) })
+        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, post: scopeOfGameType(g.gameType) === 'P' })
       }
     }
   }

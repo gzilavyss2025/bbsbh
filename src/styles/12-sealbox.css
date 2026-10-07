@@ -852,12 +852,22 @@
 
 /* The two pitching-handoff cards (PitcherHandoffCard.jsx) — a departing
    pitcher's line frozen at the moment he's pulled, and, once his inherited
-   runners resolve, his settled line. Same .pitchernotice--pbp outer chrome
-   as the tier-1 cards, stacked into a column by Stack (PitcherHandoffCard.jsx):
+   runners resolve, his settled line. The outer frame is the event Notice
+   (noticeClass, #1132 N6; the same values as .pitchernotice--pbp), stacked
+   into a column by Stack (PitcherHandoffCard.jsx):
    the .pitchernotice header row
    (reused as-is, nested rather than applied to the outer element, since a
    flex row can't also hold a full-width table below it) over the Arms tab's
    own .pitchers__grid table (20-charts.css). */
+/* The namespace keeps what the old frame gave and Notice does not: the margin
+   (.half has no padding, so the card would sit flush), no wrap, and a column
+   that stretches. .notice loads after stack.css and centres its items, which
+   would shrink the table to its content. */
+.pitcherhandoff {
+  margin: var(--space-1) var(--space-3h);
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
 /* .pitchers__grid's table-layout:fixed splits its 10 columns evenly, sized
    for the Arms tab's FULL page width — nested in this narrower card on a
    phone, that same split left too little room per numeric column (confirmed
@@ -894,12 +904,17 @@
 /* Notification-card family, tier 2/3 — mound visits, ejections, and the
    baserunning/misc events with no plate appearance of their own (steal,
    caught stealing, pickoff, wild pitch, passed ball, balk) all ride the SAME
-   .pitchernotice/.pitchernotice--pbp kraft-amber card tier 1 (pitching/
-   defensive/pinch-running notices) already uses — no separate colored-rail
+   card tier 1 (pitching/defensive/pinch-running notices) already uses — the
+   same values, drawn here by the event Notice — no separate colored-rail
    strip. What used to be a bare icon is now the real scorer's shorthand for
    the event ("MV", "EJ", "SB", "WP", …), same family as the at-bat card's own
-   .pbp__code. --event just tightens the gap for this denser, iconless row. */
+   .pbp__code. --event just tightens the gap for this denser, iconless row.
+   The frame is the event Notice now (noticeClass, #1132 N6), so --event also
+   keeps the old frame's margin, and it does not wrap: .notice wraps, and the
+   mound visit (mark, label, spacer, pips, "N left") would break at 390px. */
 .pitchernotice--event {
+  margin: var(--space-1) var(--space-3h);
+  flex-wrap: nowrap;
   gap: var(--space-2);
 }
 .pitchernotice__code {
