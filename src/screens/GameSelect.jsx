@@ -33,7 +33,6 @@ import { SiteMenuButton } from '../components/chrome/SiteMenu.jsx'
 import { LogbookButton } from '../components/chrome/LogbookButton.jsx'
 import { goHome } from '../lib/home.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
-import { OnThisDay } from '../components/history/OnThisDay.jsx'
 import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/account/FavoriteTeamModal.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
@@ -916,9 +915,6 @@ export function GameSelect({
           <MergeReceiptStrip />
         </Suspense>
       )}
-
-      {/* History above the slate, never inside a score cell (ADR-0100). */}
-      <OnThisDay dateStr={dateStr} />
 
       {/* The slate's two columns, wide: the games, and the league's roster
           wire beside them. Below WIDE_QUERY this wrapper is a plain block and
