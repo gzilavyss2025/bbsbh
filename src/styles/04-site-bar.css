@@ -367,7 +367,7 @@
 .wire__rule {
   flex: 1 1 auto;
   height: 1px;
-  background: var(--rule-soft);
+  background: var(--border-hairline);
 }
 .wire__count {
   font-family: var(--font-mono);
@@ -386,7 +386,7 @@
   column-gap: var(--space-3);
   align-items: start;
   padding: var(--space-2) 0 var(--space-2) var(--space-3);
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 .wire__row::before {
   content: '';
