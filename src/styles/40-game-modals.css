@@ -73,8 +73,8 @@
   gap: 0;
   margin: 4px 0 16px;
   padding: var(--space-2) 0;
-  border-top: var(--bw-hair) solid var(--rule-soft);
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-mono);
   font-size: var(--fs-compact);
 }

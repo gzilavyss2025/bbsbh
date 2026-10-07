@@ -300,7 +300,7 @@
 }
 
 .bpdiagram__foul {
-  fill: var(--rule-soft);
+  fill: var(--border-hairline);
 }
 
 .bpdiagram__grass {
@@ -308,23 +308,23 @@
 }
 
 .bpdiagram__track {
-  fill: var(--rule);
+  fill: var(--border-rule);
   stroke: none;
 }
 
 .bpdiagram__dirt {
-  fill: color-mix(in srgb, var(--accent-negative) 22%, var(--paper-2));
+  fill: color-mix(in srgb, var(--accent-negative) 22%, var(--surface-card));
 }
 
 .bpdiagram__baseline {
   fill: none;
-  stroke: color-mix(in srgb, var(--accent-negative) 22%, var(--paper-2));
+  stroke: color-mix(in srgb, var(--accent-negative) 22%, var(--surface-card));
   stroke-linecap: round;
 }
 
 .bpdiagram__line {
   fill: none;
-  stroke: var(--paper-3);
+  stroke: var(--surface-inset);
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
 }

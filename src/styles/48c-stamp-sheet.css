@@ -208,7 +208,7 @@
   display: grid;
   aspect-ratio: 5 / 4;
   padding: 6.5%;
-  background: var(--paper-3);
+  background: var(--surface-inset);
   -webkit-mask-image: var(--perf);
   mask-image: var(--perf);
   -webkit-mask-size: 100% 100%;
@@ -299,7 +299,7 @@
   width: 22px;
   height: 22px;
   border-radius: var(--radius-pill);
-  background: var(--paper-3);
+  background: var(--surface-inset);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
 }
 
