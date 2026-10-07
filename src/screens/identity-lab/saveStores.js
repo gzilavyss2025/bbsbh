@@ -89,8 +89,8 @@ export async function saveCustomMark({ teamId, name, svg }) {
   try {
     const res = await fetch(`${DEV_SAVE_BASE}/custom-mark?${query}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/octet-stream' },
-      body: bytes,
+      headers: { 'Content-Type': 'image/svg+xml' },
+      body: svg,
     })
     const text = await res.text()
     if (!res.ok) return { error: text || `save failed (${res.status})` }
@@ -201,8 +201,8 @@ export async function uploadEraArt({ teamId, from, bytes }) {
   try {
     const res = await fetch(`${DEV_SAVE_BASE}/era-art?${query}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'image/svg+xml' },
-      body: svg,
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: bytes,
     })
     const text = await res.text()
     if (!res.ok) return { error: text || `era art failed (${res.status})` }
