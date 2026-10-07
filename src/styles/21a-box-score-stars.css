@@ -135,7 +135,7 @@
     row-gap: var(--space-1);
     align-items: start;
     border: none;
-    border-top: var(--bw-hair) solid var(--rule-soft);
+    border-top: var(--bw-hair) solid var(--border-hairline);
     border-radius: 0;
     background: none;
     overflow: visible;

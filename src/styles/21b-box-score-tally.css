@@ -120,7 +120,7 @@
   justify-content: center;
   overflow: hidden;
   border-radius: 2px;
-  background: var(--tint, var(--paper-2));
+  background: var(--tint, var(--surface-card));
 }
 .bs__tallyLogobox--pinstripe {
   background: repeating-linear-gradient(

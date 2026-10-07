@@ -682,7 +682,7 @@
   padding: 0;
   overflow: hidden;
   border-radius: var(--radius-sm);
-  background: var(--paper-2);
+  background: var(--surface-card);
 }
 .bs__potgPoster {
   display: block;

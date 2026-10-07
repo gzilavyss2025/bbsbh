@@ -1321,7 +1321,7 @@ test('C5: a three-stars tile is a list row below 740px and a ledger tile from 74
   const strip = phone.find((body) => decl(body, 'border-radius') !== undefined)
   assert.ok(strip, 'a phone rule strips the Card frame')
   assert.equal(decl(strip, 'border'), 'none')
-  assert.equal(decl(strip, 'border-top'), 'var(--bw-hair) solid var(--rule-soft)')
+  assert.equal(decl(strip, 'border-top'), 'var(--bw-hair) solid var(--border-hairline)')
   assert.equal(decl(strip, 'border-radius'), '0')
   assert.equal(decl(strip, 'background'), 'none')
   assert.equal(decl(strip, 'overflow'), 'visible', "the row's 2px side inset must not clip the name link's focus ring")
