@@ -1,5 +1,7 @@
 # Innings console redesign — handoff
 
+**Newer: `.scratch/at-bat-console/README.md` (2026-10-07) holds three later design rounds with Gary (an animated stage, then one screen with the Now Pitching scene). Read it after this file.**
+
 Status: design agreed with Gary over five rounds on 2026-10-01 and 2026-10-02.
 Nothing is built in the app yet. The build is tracked in issue #1389, which links here.
 
