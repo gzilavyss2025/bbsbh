@@ -119,9 +119,16 @@
   --text-caption:     var(--graphite);
   --text-on-ink:      var(--paper-2);
   --text-on-seal:     var(--seal-ink);
+  /* Three rungs of paper text on a dark fill (navy, ink, clay, graphite), by
+     light: bright, soft, dim. Each aliases the primitive it replaces in the
+     styles, so no colour moves (#1156). Pairs: contrastPairings.js. */
+  --text-on-ink-bright: var(--paper-3);
+  --text-on-ink-soft:   var(--rule-soft);
+  --text-on-ink-dim:    var(--rule);
 
   --border-rule:      var(--rule);
   --border-hairline:  var(--rule-soft);
+  --border-grid:      var(--rule-grid);
 
   --accent-primary:   var(--navy);
   --accent-positive:  var(--field);
