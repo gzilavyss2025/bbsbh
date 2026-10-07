@@ -45,9 +45,12 @@
         "abbr": "CAL",
         "file": null,
         "skipped": "not downloaded yet; run fetch.mjs without --offline",
-        "source": "https://commons.wikimedia.org/wiki/File%3ACalifornia_Angels_logo_(1972-1988).svg",
+        "source": "https://commons.wikimedia.org/wiki/File%3ACalifornia_Angels_logo_(1972-1988).svg · Colours: teamcolorcodes.com/los-angeles-angels-color-codes (stated for 1973-85; 1986-88 same marks)",
         "license": "Public domain",
-        "restriction": "trademarked"
+        "restriction": "trademarked",
+        "bar": "#BF0D3E",
+        "accent": "#041C2C",
+        "onBar": "#FFFFFF"
       },
       {
         "from": 1989,
@@ -125,9 +128,12 @@
         "abbr": "MON",
         "file": null,
         "skipped": "not downloaded yet; run fetch.mjs without --offline",
-        "source": "https://commons.wikimedia.org/wiki/File%3AMontreal_Expos_Cap_Logo_(1992_to_2004).svg",
+        "source": "https://commons.wikimedia.org/wiki/File%3AMontreal_Expos_Cap_Logo_(1992_to_2004).svg · Colours: teamcolorcodes.com/montreal-expos-colors (club-wide, Pantone 287 C / 185 C)",
         "license": "Public domain",
-        "restriction": "trademarked"
+        "restriction": "trademarked",
+        "bar": "#003087",
+        "accent": "#E4002B",
+        "onBar": "#FFFFFF"
       }
     ],
     "133": [
@@ -396,9 +402,12 @@
         "abbr": "SEA",
         "file": null,
         "skipped": "not downloaded yet; run fetch.mjs without --offline",
-        "source": "https://commons.wikimedia.org/wiki/File%3ASeattle_Pilots_Cap_Logo.svg",
+        "source": "https://commons.wikimedia.org/wiki/File%3ASeattle_Pilots_Cap_Logo.svg · Colours: Wikipedia, Seattle Pilots infobox (royal blue, gold)",
         "license": "Public domain",
-        "restriction": "trademarked"
+        "restriction": "trademarked",
+        "bar": "#012169",
+        "accent": "#FED141",
+        "onBar": "#FFFFFF"
       }
     ]
   }
