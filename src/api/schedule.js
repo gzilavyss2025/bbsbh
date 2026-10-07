@@ -545,7 +545,7 @@ export async function fetchHeadToHead(teamAId, teamBId, season, sportId = 1) {
 }
 
 const SEASON_SERIES_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,gameNumber,gameType,seriesGameNumber,status,abstractGameState,teams,away,home,team,id,score,isWinner,venue,name,timeZone,tz,linescore,currentInning,scheduledInnings'
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,gameType,seriesGameNumber,status,abstractGameState,startTimeTBD,teams,away,home,team,id,score,isWinner,venue,name,timeZone,tz,linescore,currentInning,scheduledInnings'
 
 // Same lookup as fetchHeadToHead, but WITH each side's score, the venue's own
 // time zone, and (for a completed game) how many innings it actually ran —
@@ -591,6 +591,7 @@ export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1, g
           innings: final ? (g.linescore?.currentInning ?? null) : null,
           scheduledInnings: g.linescore?.scheduledInnings ?? null,
           tzId: g.venue?.timeZone?.id ?? null,
+          startTimeTBD: g.status?.startTimeTBD === true,
         })
       }
     }

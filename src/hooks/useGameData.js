@@ -15,10 +15,10 @@ import { fetchJerseysData, jerseyTreatmentFor } from '../api/jerseys.js'
 import { fetchGameBroadcast } from '../api/broadcast.js'
 import { fetchTeamRoster } from '../api/team.js'
 import { generateScorebookWeather } from '../api/weather.js'
-import { selectHasStarted } from '../api/select.js'
+import { selectGameSeason, selectHasStarted } from '../api/select.js'
 import { rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { fetchTopProspects } from '../api/prospects.js'
-import { fetchRookiesData } from '../api/rookies.js'
+import { fetchRookiesData, rookiesForGameSeason } from '../api/rookies.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplitsForTeams } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
@@ -443,7 +443,12 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
     () => (enrichmentReady ? fetchRookiesData() : Promise.resolve(null)),
     [enrichmentReady],
   )
-  const rookiesData = rookies.data ?? null
+  // MLB games only: DebutPill (MiLB) reads the same data and is out of scope.
+  const rookiesRaw = rookies.data ?? null
+  const rookiesData =
+    game.sportId === SPORT_IDS.MLB
+      ? rookiesForGameSeason(rookiesRaw, selectGameSeason(activeFeed))
+      : rookiesRaw
 
   // The league-wide run-expectancy (RE288) table — a static, same-origin,
   // hand-run backfill (scripts/gen-run-expectancy.mjs) with no game or score

@@ -88,6 +88,13 @@ export function hasDebuted(data, personId) {
 // second "rookie" claim about a level he's not filling a rookie's role on.
 // isMlb is the caller's own MLB-vs-MiLB context flag (see TeamInfo.jsx's
 // `isMlb`); the record itself (isActiveRookie) is level-agnostic.
+// The status file says "under the rookie limit TODAY", so it says nothing about
+// a game from another season. A game surface hands it through this: another
+// season gives null (no pill), a current or unknown season keeps it.
+export function rookiesForGameSeason(data, gameSeason, now = new Date().getFullYear()) {
+  return gameSeason != null && parseInt(gameSeason, 10) !== now ? null : data
+}
+
 export function showRookiePill(data, personId, isMlb) {
   return !!isMlb && isActiveRookie(data, personId)
 }

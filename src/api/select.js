@@ -530,8 +530,10 @@ export function selectGameInfo(feed) {
     // unlike `firstPitch` above (boxscore.info, only populated once the game's
     // under way), this is set from the schedule the moment the game exists, so
     // it's the one time value available while the lineup still hasn't posted.
+    // Empty when the start is TBD: the feed's time is then a placeholder
+    // ("3:33 AM" on a 1927 game).
     scheduledTime:
-      gameData.datetime?.time && gameData.datetime?.ampm
+      gameData.datetime?.time && gameData.datetime?.ampm && gameData.status?.startTimeTBD !== true
         ? `${gameData.datetime.time} ${gameData.datetime.ampm}`
         : '',
   }

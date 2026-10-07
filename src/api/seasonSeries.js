@@ -66,6 +66,7 @@ export function seasonSeriesCells(games, viewingTeamId, currentGamePk, officialD
       apiDate: g.apiDate,
       gameDate: g.gameDate,
       tzId: g.tzId,
+      startTimeTBD: g.startTimeTBD === true,
       gameNumber: g.gameNumber,
       // A postseason game's round tag and its place in that series ("G2"); both
       // null for a regular-season game. A fact about the schedule, not a result.
