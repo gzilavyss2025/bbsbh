@@ -126,6 +126,19 @@ function PlayerHoverCardBody({ data }) {
           </div>
         ))}
       </div>
+      {data.postFields && (
+        <>
+          <div className="phcard__postlabel">Postseason</div>
+          <div className="phcard__stats phcard__stats--post">
+            {data.postFields.map((f) => (
+              <div className="phcard__tile" key={f.k}>
+                <span className="phcard__tilev">{f.v}</span>
+                <span className="phcard__tilek">{f.k}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </>
   )
 }

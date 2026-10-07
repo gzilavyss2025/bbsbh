@@ -48,11 +48,18 @@ export function arsenalView(splits) {
 // to null and the card doesn't render.
 // ---------------------------------------------------------------------------
 
-export function advancedPitchingView(bundle) {
+// The postseason bundle reads `season` (gameType=P) for its game count: a player with
+// no October game gets a null card, so the switch never offers an empty table.
+function postseasonPlayed(seasonStat) {
+  return Number(seasonStat?.gamesPlayed) > 0
+}
+
+export function advancedPitchingView(bundle, { post = false } = {}) {
   const seasonStat = bundle?.season
   const adv = bundle?.advanced
   const saber = bundle?.saber
   if (!adv && !saber) return null
+  if (post && !postseasonPlayed(seasonStat)) return null
   const facts = []
   // Each fact carries its own one-line explainer, shown when the card's
   // per-fact "i" glyph is tapped open (AdvancedStatsCard.jsx) — colocated
@@ -61,14 +68,17 @@ export function advancedPitchingView(bundle) {
   const push = (label, value, note) => {
     if (value != null) facts.push({ label, value, note })
   }
+  // The API has no postseason sabermetrics (#1436), so those cells read as a
+  // dash rather than leave a gap a reader takes for a missing card.
+  const saberCell = (value) => (post ? value ?? DASH : value)
   push(
     'FIP',
-    fixed2(saber?.fip),
+    saberCell(fixed2(saber?.fip)),
     'Counts what a pitcher alone controls — strikeouts, walks, and home runs allowed.',
   )
   push(
     'ERA−',
-    roundInt(saber?.eraMinus),
+    saberCell(roundInt(saber?.eraMinus)),
     'His ERA measured against the league: 100 is average, lower is better.',
   )
   push('K%', propPct(adv?.strikeoutsPerPlateAppearance), 'Share of plate appearances that ended in a strikeout.')
@@ -127,24 +137,26 @@ export function advancedPitchingView(bundle) {
 // MLB-only at the source — degrades to null and the card doesn't render.
 // ---------------------------------------------------------------------------
 
-export function advancedHittingView(bundle) {
+export function advancedHittingView(bundle, { post = false } = {}) {
   const seasonAdvanced = bundle?.seasonAdvanced
   const sabermetrics = bundle?.sabermetrics
   if (!seasonAdvanced && !sabermetrics) return null
+  if (post && !postseasonPlayed(bundle?.season)) return null
   const facts = []
   // Same per-fact note idiom as advancedPitchingView — colocated here rather
   // than string-matched by label in the component.
   const push = (label, value, note) => {
     if (value != null) facts.push({ label, value, note })
   }
+  const saberCell = (value) => (post ? value ?? DASH : value)
   push(
     'wOBA',
-    sabermetrics?.woba != null ? rate3(Number(sabermetrics.woba)) : null,
+    saberCell(sabermetrics?.woba != null ? rate3(Number(sabermetrics.woba)) : null),
     "One number for the whole plate appearance — every walk, hit and out weighted by what it's actually worth in runs.",
   )
   push(
     'wRC+',
-    roundInt(sabermetrics?.wRcPlus),
+    saberCell(roundInt(sabermetrics?.wRcPlus)),
     'His run creation measured against the league, park-adjusted: 100 is average, higher is better — the wRC+ to a hitter is what ERA− is to a pitcher.',
   )
   push(

@@ -66,7 +66,9 @@ one tab and "today" on the next.
   majors — a level-relative OPS/ERA standing (`prospectTrend.js`) alongside how
   far his current sample sits into a typical STAY at that level
   (`levelTenure.js`, `docs/level-tenure-benchmark.md`) — Statcast percentiles
-  and the advanced rates above them, his season's run value, the season's
+  and the advanced rates above them (a Regular / Postseason switch on the Advanced
+  card once he has an October game; the API has no postseason wOBA, wRC+, FIP or
+  ERA−, so those cells read "—"; a dated page has no switch), his season's run value, the season's
   fouls, the pitch mix or batted-ball mix, and the similarity neighbours.
 - **History** — how he got here. Awards, innings by position, the Firsts card,
   Path to the Majors and Team history (for a player who HAS debuted), and the
