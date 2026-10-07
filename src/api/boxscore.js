@@ -197,12 +197,24 @@ function pitchingRows(feed, side, decisions, pitcherLines) {
   const boxPlayers = team?.players ?? {}
   const order = team?.pitchers ?? []
   const lineById = new Map((pitcherLines?.[side] ?? []).map((p) => [p.id, p]))
-  const emptyLine = { ip: '0.0', pitches: 0, bf: 0, h: 0, r: 0, er: 0, bb: 0, k: 0 }
+  // No plays means no counted line: read the record's own per-pitcher stats.
+  // Pitches and ER print "—" then (never counted; ER disagrees with the totals).
+  const noPlays = !feed?.liveData?.plays?.allPlays?.length
+  const recordLine = (s) => ({
+    ip: s.inningsPitched ?? '0.0',
+    pitches: noPlays ? '—' : (s.numberOfPitches ?? 0),
+    bf: s.battersFaced ?? 0,
+    h: s.hits ?? 0,
+    r: s.runs ?? 0,
+    er: noPlays ? '—' : (s.earnedRuns ?? 0),
+    bb: s.baseOnBalls ?? 0,
+    k: s.strikeOuts ?? 0,
+  })
 
   return order.map((id) => {
     const box = boxPlayers[`ID${id}`] ?? {}
     const gd = gdPlayers[`ID${id}`] ?? box.person ?? {}
-    const s = lineById.get(id) ?? emptyLine
+    const s = lineById.get(id) ?? recordLine(box.stats?.pitching ?? {})
     let dec = ''
     if (id === decisions.winId) dec = 'W'
     else if (id === decisions.lossId) dec = 'L'
@@ -357,10 +369,9 @@ function gameTimes(feed) {
   const durRaw = info.find((r) => r.label === 'T')?.value ?? ''
 
   // Playing time (excludes stoppages): the numeric gameInfo field when present,
-  // else the leading H:MM of the T string.
-  const playMin = Number.isFinite(gi.gameDurationMinutes)
-    ? gi.gameDurationMinutes
-    : parseClockMinutes(durRaw)
+  // else the leading H:MM of the T string. A 0 is no duration (1979 forfeit).
+  const rawMin = gi.gameDurationMinutes > 0 ? gi.gameDurationMinutes : parseClockMinutes(durRaw)
+  const playMin = rawMin > 0 ? rawMin : null
 
   // Total delay. Prefer the numeric gameInfo field; else parse the
   // "(H:MM delay)" the T string carries when there was one. None -> 0.
