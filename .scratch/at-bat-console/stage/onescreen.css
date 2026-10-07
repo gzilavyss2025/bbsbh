@@ -1,0 +1,64 @@
+/* One-screen console (mockup, round 3). 390 x 763: iPhone standalone, less the
+   status bar and home indicator. No element scrolls the page. */
+.os .screen { height: 763px; overflow: hidden; display: flex; flex-direction: column; }
+.os .osbody { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 6px; padding: 6px 10px 0; }
+.os .scroll { display: contents; }
+/* trail: one row, newest at the right, older tiles slide off the left */
+.os .trail { flex-wrap: nowrap; overflow: hidden; justify-content: flex-end; flex: none; }
+.os .trail .tile { flex: none; }
+/* hero: the #22 box at 1x and the name block beside it */
+.os .hero { flex: none; padding: 8px; gap: 10px; }
+.os .hero__box { transform-origin: top left; }
+/* the stage */
+.osstage { position: relative; flex: 1 1 auto; min-height: 250px; border-radius: var(--r-2); overflow: hidden; border: 1px solid var(--rule); background: #EDE6D1; }
+.osstage.is-sealed .pscn { filter: saturate(.6); opacity: .65; }
+.pscn { position: absolute; inset: 0 0 34px 0; width: 100%; height: calc(100% - 34px); display: block; }
+.ps-sky { fill: #EDE6D1; } .ps-grass { fill: #D8E6C9; } .ps-mound { fill: #D6AA83; opacity: .75; } .ps-dirt { fill: #D6AA83; opacity: .55; }
+.ps-chalk { fill: none; stroke: #FFFDF6; stroke-width: 1.4; } .ps-plate { fill: #FFFDF6; stroke: #938C7C; stroke-width: .6; }
+.ps-drop { stroke: var(--navy); stroke-width: 1; stroke-dasharray: 1 2.5; opacity: .6; }
+.ps-back, .ps-edge { fill: none; stroke: #3C4A5A; stroke-width: 1; opacity: .35; }
+.ps-front { fill: #FFFDF6; fill-opacity: .35; stroke: var(--navy); stroke-width: 1.5; } .ps-grid { stroke: var(--navy); stroke-width: .6; opacity: .3; }
+.ps-ghost polyline { fill: none; stroke-width: 1.3; stroke-linecap: round; opacity: .45; }
+.ps-ring { fill: #FFFDF6; stroke-width: 1.4; }
+.ps-no { font: 700 9px var(--f-mono); fill: var(--ink-0); }
+.ps-trail line { stroke-linecap: round; } .ps-rel { fill: var(--ink-0); }
+.ps-ball { fill: #FFFDF6; stroke: var(--ink-0); stroke-width: 1; }
+.st-fastball { stroke: #2F6E4F; } .st-breaking { stroke: #1B2A3A; } .st-offspeed { stroke: #B4453A; } .st-other { stroke: #857E6F; }
+/* the navy bar under the drawing, two rows like the at-bat replay */
+.osbar { position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: var(--navy); color: var(--paper-2); display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: center; column-gap: 8px; padding: 0 10px; font: 700 12px/1.2 var(--f-display); letter-spacing: .06em; text-transform: uppercase; }
+.osbar span:nth-child(2), .osbar span:nth-child(4) { text-align: right; } .osbar span:nth-child(3), .osbar span:nth-child(4) { color: var(--band-dim); font-size: 11px; }
+.osbar--seal { grid-template-columns: 1fr; text-align: center; background: var(--seal) var(--kraft); color: var(--seal-ink); }
+.osreplay { position: absolute; right: 8px; top: 8px; border: 1px solid var(--rule); background: rgba(255,253,246,.9); border-radius: 999px; padding: 6px 12px; font: 700 12px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; color: var(--field); min-height: 32px; }
+.osnotice { position: absolute; left: 8px; right: 84px; top: 8px; }
+.osnotice .notices { gap: 4px; } .osnotice .notice { padding: 6px 8px; font-size: 13px; background: rgba(255,253,246,.95); }
+/* the field, in the corner, on contact */
+.osfield { position: absolute; left: 8px; top: 8px; width: 120px; height: 104px; opacity: 0; border: 1px solid var(--rule); border-radius: 8px; background: rgba(255,253,246,.92); overflow: hidden; --k: 0; }
+.osfield .sfield { width: 100%; height: 100%; }
+.osfield .fpath { animation: none; stroke-dashoffset: calc(1 - var(--k)); }
+.osfield .fland { animation: none; transform: scale(clamp(0, calc(var(--k) * 5 - 4), 1)); }
+.osfield .frun text { display: none; }
+/* runners chip + one line of counts and events */
+.osunder { flex: none; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; }
+.osunder .rchip { width: auto; padding: 4px 8px; font-size: 13px; min-height: 40px; }
+.osline { font: 13px/1.3 var(--f-body); color: var(--graphite); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.osline b { color: var(--ink-0); } .osline b.no { color: var(--clay); }
+.os .ls { flex: none; }
+
+/* compaction for one screen */
+.os .apphead { padding: 8px 12px 6px; }
+.os .band { display: flex; align-items: center; gap: 10px; padding: 7px 10px; }
+.os .band__row { flex: 1; gap: 10px; }
+.os .band__now, .os .band__tally { border-top: 0; padding-top: 0; }
+.os .band__now b { font-size: 13px; white-space: nowrap; }
+.os .band__score div { font-size: 15px; } .os .band__score .r { font-size: 17px; } .os .band__score img { width: 18px; height: 18px; }
+.os .band__tally { grid-template-columns: repeat(7, auto); gap: 4px; } .os .band__tally b { font-size: 13px; } .os .band__tally div + div { border: 0; }
+.os .trail .tile { padding-block: 4px; }
+.os .hero__box { zoom: 1; }
+.os .hero__who { gap: 4px; } .os .hero__name b { font-size: 18px; } .os .hero__name .head { width: 34px; height: 34px; }
+.oswho { border-top: 1px dashed var(--rule); padding-top: 4px; font: 600 12px/1.3 var(--f-body); color: var(--graphite); }
+.oswho b { font: 700 14px/1 var(--f-display); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-1); }
+.oswho span { font: 600 11.5px/1.3 var(--f-mono); color: var(--ink-1); }
+.os .ls th, .os .ls td { padding: 3px 0; font-size: 11px; }
+.os .bar { padding: 6px 10px 8px; } .os .bar .go { min-height: 48px; }
+.pscn { overflow: visible; }
+.osfield { top: auto; bottom: 40px; left: 6px; width: 112px; height: 96px; }
