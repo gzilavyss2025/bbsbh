@@ -14,6 +14,11 @@ const SOLID = [
   ['13-play-by-play.css', '.pbp__note'],
   ['27-player-position-innings.css', '.posinn__dh'],
   ['workload/projection.css', '.projection__note'],
+  ['32-milestone-watch.css', '.milestonewatch-page__row'],
+  ['34-postseason.css', '.pswscard__mvp'],
+  ['45-admin-copy-editor.css', ".awardord__cut > span[aria-hidden='true']"],
+  ['45-admin-copy-editor.css', '.awardord__note'],
+  ['48-stamp-strip.css', '.stampstrip__details'],
 ]
 
 test('row dividers draw solid', () => {

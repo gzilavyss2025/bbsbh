@@ -156,7 +156,7 @@
   align-items: flex-end;
   gap: var(--space-3) var(--space-4);
   padding: var(--space-3) var(--space-4) var(--space-4);
-  border-top: var(--bw-hair) dashed var(--border-rule);
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 
 .stampstrip__modes {
