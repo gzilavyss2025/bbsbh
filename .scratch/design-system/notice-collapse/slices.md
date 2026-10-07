@@ -476,6 +476,72 @@ for N2 to N8.
    `empty-state.css` and `notice.css`, and edit `src/index.css` and the pins in
    `test/empty-state-cascade.test.js` and `test/notice-cascade.test.js`.
 
+## N9 as built (the clean-up; nothing is left to build in the collapse)
+
+Written by the N9 session. It records what shipped. It does not write the prompt for the
+dashed-rule fix, which is the last item of #1132 and stays open.
+
+1. **The base.** N9 sits on the N8c branch `claude/notice-n8c-rename-change-pm4g50`
+   (PR #1659, which holds N8a #1658 and N8b #1657), not on `origin/main`. Gary said to start
+   before the N8 merge (answered in the session). One stack, #1656 to #1659 plus N9, lands
+   with one deploy. If an N8 PR changes, merge it into this branch; do not rebase.
+2. **Six commits, one per step.** The census, the Teammates line, the dead rule, the budgets,
+   the docs, and this note. The new test is `test/notice-n9.test.js`. Each step added its
+   test first and watched it fail.
+3. **The census.** `unreviewed 0` and no STALE line. 24 rows were added: the seven `*__notice`
+   namespaces (N2 and N3, `n/a`), the `.notice__text` caps exemption, the two `<Notice` tags
+   in `MilestoneWatchCard.jsx` and `MilestoneWatchPage.jsx` (adopted by #1438 after N1, the
+   import is `ui/state/Notice.jsx`, nothing to move), `.degrees__link`, `.prospects__caption`
+   and `.starter__closed` (footnotes and a connector, `n/a`), and the Express Lane spinners
+   (`loading`, HOLD). The 17 STALE keys became comment rows with a reason. **Two rows were
+   wrong, not stale:** a site added above them had shifted the keys, so
+   `ExpressLanePage.jsx#1` and `#2` and `FilmPane.jsx#1` described the wrong site. They are
+   re-keyed. The two `.xl` message rows (`.xl-film__msg`, `.xl__prerollmsg`) are still HOLD and
+   still worn; the census cannot see them (no notice word in the name).
+4. **The one scope addition.** `TeammatesPage.jsx` had a bare `.hint .hint--error` line for
+   "Couldn’t load the rosters." It is an error Notice now, in the namespace `.degrees__notice`
+   (margin `var(--space-3) 0`, the same as the N2 lines). It wears the error default role,
+   `alert` (the old line had none). It is an open page, no `SealBox`. Seen at 390px and 900px
+   with the data file failing (see the PR).
+5. **Deleted.** The `.hint` half of `.screen--slate .hint, .screen--slate .btn` in
+   `05-masthead-nav.css`. No file the slate imports wears `.hint` (the test walks the import
+   graph of `GameSelect.jsx`). The `.btn` half stays. The E9 pin that named the grouped
+   selector now names `.screen--slate .btn` alone; the pin's own comment said N9 would decide.
+   `.hint__link` was already gone (E9).
+6. **Kept.** `.hint--error`: five dev-only pages still wear it (`UniformNamesPage`,
+   `ScorecardLab`, `ColorLabBody`, `DugoutRail`, `profiles/milb.jsx`). The rule has a comment
+   that says so, and a test fails when the set of wearers changes. Every other rule a census
+   row lists with zero sites is worn at run time (`banner--in` and `--out`,
+   `seasonseries__cell`, `tlead__*--fav`, `xl__chip`: a constant or a template string), or is
+   a Notice part (`notice__icon`, `notice__text`).
+7. **The budgets.** `check-raw-values`: hex 26 to 24, radius 82 to 81, motion 56 to 55, shadow
+   stays 41. `check-caption-budget`: measured 120, stays 120 (no Notice rule used
+   `--fs-caption`). Each was set to the measured count, never below it. The three drops are
+   savings that were not banked yet; I did not trace each to a slice.
+8. **The docs.** `design-system-naming.md`: the `.delaycard` row targets `.delay`, the
+   `.pitchernotice` row targets `.change`, with the PR numbers. ADR-0017: the tier prose says
+   `.change` inside `.notice--event`. ADR-0084: the count is 156 (the ledger's total) and an
+   addendum records the two rows that did not fit the rule and the `.change--framed` oddity
+   (accepted). `src/components/CLAUDE.md`: the `ui/` row names `state/`. `ui/CLAUDE.md` and
+   `playbyplay/CLAUDE.md` already read true; they did not change.
+9. **Geometry** (`geom.mjs`, mock anchor game, reduced motion, images blocked, 390 and 760px, 11
+   routes: the slate, a team page, a player page, `/standings`, `/scout`, `/first-scorebook`,
+   `/game-notes`, `/photos`, `/all-star-legacy`, `/teammates`, the lineup page). Each side was
+   captured twice. Zero differences, after ignoring one thing that also differs between two runs
+   of the SAME code: a headshot that ends as an `<img>` in one run and as its fallback `<span>`
+   in the next (same rect). `lineup1@760` flips between 555 and 559 elements on the same code.
+10. **Not seen.** Everything the earlier notes list as not seen, gathered in the #1132 status
+    comment. For N9 itself: `npm run e2e` and `npm run visual` were not run. The rosters line
+    was seen only with the data file failing through `page.route`, never on a real network
+    failure.
+11. **Open questions for Gary** (both in the #1132 status comment):
+    - Six namespaces undo `flex-wrap: wrap` against `.notice`: `.delay`, `.innings__extras`
+      (N5), `.change--event`, `.pitcherhandoff` (N6), `.change--framed`, `.pcard` (N7). Fix it
+      once in Notice? The catch: `notice-cascade.test.js` pins every `notice.css` rule as one
+      class at one weight.
+    - The poster-overflow line N1 moved (`.posterstudio__warn`) never shows with the current
+      constants (the tallest stack is 1038px against a 1044px limit). Delete the dead line?
+
 ## N8c as built (what the next slices need)
 
 Written by the N8c session. It records what shipped. It does not write the N9 prompt.
