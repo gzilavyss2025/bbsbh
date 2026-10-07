@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Card } from '../../../components/ui/frame/Card.jsx'
 import { contrastRatio, readableTextColor } from '../../../lib/contrast.js'
+import { trimAndClear } from '../../../lib/image/imageTrim.js'
 import { HexField } from '../HexField.jsx'
 import { saveEraRow, uploadEraArt } from '../saveStores.js'
 import { UmpireCall } from './HeaderPreview.jsx'
@@ -11,10 +12,30 @@ import { UmpireCall } from './HeaderPreview.jsx'
 //
 // Save and Delete go to the server, which owns season-marks.json; the page
 // hot-reloads off the landed value, so there is no draft store here, only the
-// form's own fields. Drop an SVG onto the mark box, or pick one, and it becomes
-// the era's mark. Nothing is fetched from anywhere: you bring the file.
+// form's own fields. Drop an SVG, PNG or JPEG onto the mark box, or pick one, and it
+// becomes the era's mark; a PNG or JPEG is trimmed and its white cleared first. Nothing is fetched from anywhere: you bring the file.
 const EMPTY = { from: '', to: '', name: '', abbr: '', source: '', bar: '', accent: '', onBar: '' }
 const HEX = /^#[0-9a-f]{6}$/i
+
+// A dropped PNG or JPEG, with its white background cleared and its edges
+// trimmed (lib/imageTrim.js), as PNG bytes. An SVG is vector art and goes up
+// as it is. The canvas only supplies and takes back the pixels.
+async function artBytes(file, trim) {
+  if (!trim || !/^image\/(png|jpeg)$/.test(file.type)) return new Uint8Array(await file.arrayBuffer())
+  const bitmap = await createImageBitmap(file)
+  const canvas = document.createElement('canvas')
+  canvas.width = bitmap.width
+  canvas.height = bitmap.height
+  const ctx = canvas.getContext('2d')
+  ctx.drawImage(bitmap, 0, 0)
+  const out = trimAndClear(ctx.getImageData(0, 0, bitmap.width, bitmap.height))
+  if (!out) throw new Error('nothing left after clearing the background')
+  canvas.width = out.width
+  canvas.height = out.height
+  ctx.putImageData(new ImageData(out.data, out.width, out.height), 0, 0)
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
+  return new Uint8Array(await blob.arrayBuffer())
+}
 
 function formOf(era) {
   return era
@@ -36,6 +57,7 @@ export function EraRow({ teamId, era, bust, onArt }) {
   const [dragging, setDragging] = useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState(null)
+  const [trim, setTrim] = useState(true)
   const inputRef = useRef(null)
 
   const set = (field) => (e) => setForm((was) => ({ ...was, [field]: e.target.value }))
@@ -86,9 +108,13 @@ export function EraRow({ teamId, era, bust, onArt }) {
 
   async function attach(file) {
     if (!file || !era) return
-    const result = await run(async () =>
-      uploadEraArt({ teamId, from: era.from, bytes: new Uint8Array(await file.arrayBuffer()) }),
-    )
+    const result = await run(async () => {
+      try {
+        return await uploadEraArt({ teamId, from: era.from, bytes: await artBytes(file, trim) })
+      } catch (err) {
+        return { error: `${file.name}: ${err.message}` }
+      }
+    })
     if (inputRef.current) inputRef.current.value = ''
     if (result) {
       onArt?.()
@@ -168,10 +194,14 @@ export function EraRow({ teamId, era, bust, onArt }) {
               ref={inputRef}
               className="colorlab__logodropinput"
               type="file"
-              accept="image/svg+xml,image/png,.svg,.png"
+              accept="image/svg+xml,image/png,image/jpeg,.svg,.png,.jpg,.jpeg"
               aria-label={`Upload art for ${era.name} ${era.from}-${era.to}`}
               onChange={(e) => attach(e.target.files?.[0])}
             />
+            <label className="idlab__eratrim">
+              <input type="checkbox" checked={trim} onChange={(e) => setTrim(e.target.checked)} />
+              Trim and clear background
+            </label>
             <button type="button" className="colorlab__wparesetbtn" onClick={() => inputRef.current?.click()} disabled={busy}>
               {era.file ? 'Replace art' : 'Add art'}
             </button>
