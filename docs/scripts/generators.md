@@ -179,7 +179,10 @@ don't run these by hand.
   once) and writes `.scratch/run-expectancy-eras/season-YYYY.json`, sums only, never
   feeds, and skips a season whose file exists. Those checkpoints are COMMITTED, because
   a cloud container is lost when its session ends. `--era-aggregate --decade=1980` merges
-  a decade's checkpoints and exits 1, writing nothing, if a season has none. Decades:
+  a decade's checkpoints and exits 1, writing nothing, if a season has none. A sweep that
+  has a failed feed fetch (after the client's retries) exits 1 and writes no checkpoint, because
+  a re-run skips a season whose file exists; a feed with no plays is counted in the checkpoint's
+  `noPlays` and is fine. Cancelled games (120 in 2001) are not scheduled games. Decades:
   2020s = 2020-2023 (2020 counts as a normal season), 2010s, 2000s, 1990s, 1980s, 1970s,
   1960s. **Pitch lists before 1990 are partial** (about 1.5 pitches per plate appearance, not 3.9;
   sampled July 1960/70/80 and the 1985 sweep): the pre-pitch count is wrong there, so use `re24`
@@ -1265,7 +1268,7 @@ don't run these by hand.
   Padres bench coach years before he managed the Brewers; both belong). The cron
   runs **`--current-only`**: this season, all 30 clubs, ~30 calls, MERGED into
   the existing shards so the hand-run backfill survives. The backfill covers
-  `MANAGER_HISTORY_FIRST_SEASON` (`src/api/managers.js`, 1969 since 2026-10-06) to
+  `MANAGER_HISTORY_FIRST_SEASON` (`src/lib/records/managerHistory.js`, 1969 since 2026-10-06) to
   now: ~2,000 calls for a full rebuild, about 25 s. **Hand-run** (no cron runs it):
   `node scripts/gen-manager-history.mjs` rebuilds; `--from=YYYY --to=YYYY` merges one
   slice; `--out=DIR` writes to DIR for a measuring run. 1969 is where the unseeded
@@ -1410,7 +1413,7 @@ Re-run only to fold in a new season.
   one (`lastSeason`, named by `lib/time/season-in-play.mjs`). **Hand-run, NOT on a
   cron**: a finished season never changes, so run it once after each season ends.
   One `teams/stats?group=hitting,pitching&sportIds=1` call a season, 125 calls,
-  4 KB. Pure half: `scripts/lib/stats/league-averages.mjs` (`sum(H)/sum(AB)`, and
+  4 KB. Pure half: `src/lib/math/leagueAverages.js` (`sum(H)/sum(AB)`, and
   `9*sum(ER)/sum(IP)` with IP in thirds; never a mean of team averages). Reader:
   `src/api/player/leagueAverages.js`. **No clock:** a re-run writes the same bytes
   (`--out <path>` writes elsewhere). **A figure the feed lacks is `null`:** the
@@ -1511,9 +1514,11 @@ Re-run only to fold in a new season.
   immutable. Reads `scripts/season-marks/seed.json` (**edit the SEED, never the output**),
   asks Wikimedia Commons for each file's licence, and downloads only a file marked public
   domain or CC0. Any other licence keeps `file: null` and a `skipped` note, so the reader
-  draws the monogram and the maintainer sees what needs a decision. The "trademarked"
-  restriction is recorded per file. Reader: `src/lib/identity/seasonMarks.js`, through
-  `TeamLogo`'s `season` prop.
+  draws the era's serif abbreviation (`abbr`, from the Stats API for those seasons) and the
+  maintainer sees what needs a decision (#1626). An era Commons does not document carries
+  a `cite`. No era carries colours: no cited source gives period values, so a covered era
+  wears neutral chrome. The "trademarked" restriction is recorded per file. Reader:
+  `src/lib/identity/seasonMarks.js`, through `TeamLogo`'s `season` prop.
 - `gen-postseason-history.mjs` → `public/data/postseason-history.json` — the
   completed bracket (who played, who won, how many games, each team's 1-6
   seed) for every MLB postseason back to 2000 (`EARLIEST_YEAR`), plus the
@@ -1678,23 +1683,28 @@ Re-run only to fold in a new season.
   bytes. The pure half is `scripts/lib/open-data/family-ties.mjs`. Reader:
   `src/api/person/family/family.js`.
 - `gen-bio-history.mjs` → `public/data/on-this-day/{MM-DD}.json` and
-  `public/data/birthplaces/{ab}.json` — two datasets from Retrosheet's `biofile0.csv`,
-  joined to MLBAM ids through the Chadwick register (ADR-0100). **Hand-run, NOT on a
+  `public/data/birthplaces/{cell}.json` — two datasets from Retrosheet's `biofile0.csv`,
+  joined to MLBAM ids through the Chadwick register (ADR-0100), birth cities placed on
+  the map with GeoNames (ADR-0106). **Hand-run, NOT on a
   cron**: re-run only after Retrosheet publishes a new `biodata.zip`. Nothing in it
   downloads. Fetch and unzip as for `gen-family-ties.mjs`, then run
-  `node scripts/gen-bio-history.mjs <biofile0.csv> <people-*.csv ...>` (`--out <dir>`
+  `node scripts/gen-bio-history.mjs <biofile0.csv> <people-*.csv ...> <cities500.txt>
+  <admin1CodesASCII.txt> <countryInfo.txt>` (the three GeoNames files come from
+  `https://download.geonames.org/export/dump/`; unzip `cities500.zip`) (`--out <dir>`
   and `--out-places <dir>` write elsewhere). Only a player counts (a row with a
   `debut_p`). A player with no MLBAM id is dropped and counted. No deaths. Dates are
   `YYYYMMDD`; a date with month or day `00` is no date. On-this-day: one file per
   calendar day (366, the largest 21 KB; a month's file was 415 KB), `{ credit, born,
   debuted }`, each entry `{ personId, name, year }` (the birth year in `born`, the
   debut year in `debuted`), oldest first. A missing birthdate keeps the debut. Birthplaces:
-  `{ credit, places: { 'city|place': [{ personId, name, year|null }] } }`, one file per
-  first two letters of the city (229, the largest 93 KB, `sa`). The key is lower-case
-  city + `|` + lower-case state name for a US birth, country for any other. A missing
-  city, or a US birth with no state, is out of this one and counted. No clock: a
-  re-run writes the same bytes. The pure half is `scripts/lib/open-data/bio-shards.mjs`.
-  Readers: `src/api/history/onThisDay.js`, `src/api/history/birthplaces.js`.
+  `{ credit, places: [{ lat, lon, people: [{ personId, name, year|null }] }] }`, one file
+  per 2-degree map cell (411, the largest 56 KB, `40_-76`). GeoNames places a US birth on
+  city and state, any other on city and country (`scripts/lib/open-data/gazetteer.mjs`).
+  A missing city, a US birth with no state, or a city GeoNames cannot place is out of
+  this one and counted; the report names the ten places that missed the most players
+  (8.3% of players on the 2026-10-07 run). No clock: a
+  re-run writes the same bytes. The pure halves are `scripts/lib/open-data/bio-shards.mjs`
+  and `gazetteer.mjs`. Readers: `src/api/history/onThisDay.js`, `src/api/history/birthplaces.js`.
 
 - `gen-team-seasons.mjs` → `public/data/team-seasons.json` — one roster per MLB
   team-season, for "six degrees of teammates" (ADR-0100). Source: Retrosheet's

@@ -58,8 +58,8 @@
   color: var(--text-muted);
 }
 
-/* THE NEW-PITCHER NOTICE: the play-by-play's own notice card
-   (.pitchernotice--pbp, 12-sealbox.css), as one button. The dock owns its
+/* THE NEW-PITCHER NOTICE: the play-by-play's own notice card (the event
+   Notice frame, noticeClass, #1132 N7), as one button. The dock owns its
    place, so the card's feed margin goes; the body grows, and the way into the
    sheet sits on the right after a dashed rule. */
 .sc-armnotice {

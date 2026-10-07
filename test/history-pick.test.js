@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { pickPeople, parkPlace } from '../src/lib/history/pick.js'
+import { pickPeople, parkPoint } from '../src/lib/history/pick.js'
 
 // The "On this day" strip and the "Born near the park" line (ADR-0100) pick names
 // by one fixed rule: newest birth or debut year first, then name. No random choice.
@@ -23,19 +23,16 @@ test('pickPeople: empty or missing list gives []', () => {
   assert.deepEqual(pickPeople(undefined, 3), [])
 })
 
-test('parkPlace: a US park keys on the full state name', () => {
-  assert.deepEqual(
-    parkPlace({ city: 'San Diego', state: 'California', stateAbbrev: 'CA', country: 'USA' }),
-    ['San Diego', 'California'],
-  )
+test('parkPoint: the park\'s map point from venue.location.defaultCoordinates', () => {
+  // gamePk 823570, Citi Field: the city is 'Flushing', which a city-name match missed.
+  const citi = { city: 'Flushing', state: 'New York', country: 'USA', defaultCoordinates: { latitude: 40.75753012, longitude: -73.84559155 } }
+  assert.deepEqual(parkPoint(citi), { lat: 40.75753012, lon: -73.84559155 })
 })
 
-test('parkPlace: a park outside the US keys on the country', () => {
-  assert.deepEqual(parkPlace({ city: 'Toronto', state: 'Ontario', country: 'Canada' }), ['Toronto', 'Canada'])
-})
-
-test('parkPlace: no city, no place, or no location gives null', () => {
-  assert.equal(parkPlace({ state: 'Ohio', country: 'USA' }), null)
-  assert.equal(parkPlace({ city: 'Gary', country: 'USA' }), null)
-  assert.equal(parkPlace(undefined), null)
+test('parkPoint: no coordinates, or no location, gives null', () => {
+  // A placeholder venue (id 401, 'TBD') has a city and no defaultCoordinates.
+  assert.equal(parkPoint({ city: 'United States', country: 'USA' }), null)
+  assert.equal(parkPoint({ defaultCoordinates: { latitude: 40.7 } }), null)
+  assert.equal(parkPoint({ defaultCoordinates: { latitude: '40.7', longitude: '-73.8' } }), null)
+  assert.equal(parkPoint(undefined), null)
 })

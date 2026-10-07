@@ -18,9 +18,8 @@ import { noticeClass } from '../../lib/design/noticeClass.js'
 // happened" moment sorts into one of three tiers — a fresh/changed actor, a
 // team/administrative event, or a baserunning/misc event with no plate
 // appearance of its own — and all three render in the SAME marker-wash card
-// (the event Notice frame, `noticeClass({ tone: 'event' })` here; the actor
-// cards still draw it as `.pitchernotice--pbp` until #1132 N7, with the same
-// values), distinguished by what is inside
+// (the event Notice frame, `noticeClass({ tone: 'event' })` here; an actor
+// card's caller passes the same call, since #1132 N7), distinguished by what is inside
 // (a headshot vs. a scorer's shorthand code) rather than by a coloured accent
 // rail. That is the decision, and it is easy to undo by accident.
 

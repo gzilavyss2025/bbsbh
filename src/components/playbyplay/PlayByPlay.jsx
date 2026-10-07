@@ -51,6 +51,7 @@ import {
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from '../scoring/StrikeZone.jsx'
 import { ReplayCell, ReplaySheet, useReplayPitches } from './pitcherCard/AtBatReplay.jsx'
 import { atBatScenePitches } from '../../lib/pitcherCard/atBat.js'
+import { noticeClass } from '../../lib/design/noticeClass.js'
 import { Button } from '../ui/control/Button.jsx'
 import { WIDE_QUERY, useMediaQuery } from '../../hooks/useMediaQuery.js'
 import { HighlightSheet } from './HighlightSheet.jsx'
@@ -388,7 +389,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
                 feed={feed} relief pitcher={pitcher}
                 teamId={pitchingTeamId}
                 teamName={pitchingName}
-                className="pitchernotice--pbp"
+                className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
               />
               {departureLine && (
                 <DepartureLineCard
@@ -426,7 +427,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               fielder={fielder}
               teamId={pitchingTeamId}
               teamName={pitchingName}
-              className="pitchernotice--pbp"
+              className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
             />
           ) : (
             <EventNote entry={entry} />
@@ -458,7 +459,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               base={entry.base}
               teamId={battingTeamId}
               teamName={battingName}
-              className="pitchernotice--pbp"
+              className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
             />
           ) : (
             <EventNote entry={entry} />
@@ -476,7 +477,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               batter={batter}
               teamId={battingTeamId}
               teamName={battingName}
-              className="pitchernotice--pbp"
+              className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
             />
           ) : (
             <EventNote entry={entry} />

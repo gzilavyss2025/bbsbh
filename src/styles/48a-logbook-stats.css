@@ -258,6 +258,7 @@
 /* ---- the "Player stats & moments" disclosure: collapsed so a big book
    doesn't fire a boxscore + winProbability fetch per stamp until asked ---- */
 .logbookstats__toggle {
+  /* component-reuse-exempt: a disclosure button, not a card: Button work (#1174) */
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
   width: 100%; margin-bottom: var(--space-6); padding: var(--space-3); text-align: left;
   border: var(--bw-hair) solid var(--border-rule); border-radius: var(--radius-sm); background: var(--surface-card);

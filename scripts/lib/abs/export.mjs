@@ -449,7 +449,8 @@ export function buildExport(allRows, allGames, { season, scope = 'R', generatedA
   const seasonGames = ofSeason(allGames, season)
   const { rows, games } = inScope(ofSeason(allRows, season), seasonGames, scope)
   const levels = {}
-  const names = [...new Set([...games.map((g) => g.level), ...rows.map((r) => r.level)])].sort()
+  // inScope keeps only rows whose game is in `games`, so levels come from games.
+  const names = [...new Set(games.map((g) => g.level))].sort()
   for (const level of names) {
     levels[level] = summarizeLevel(
       rows.filter((r) => r.level === level),

@@ -7,6 +7,7 @@ import { preGameAvg, computeBatterLine } from '../../api/boxscore.js'
 import { highlightsByPlayId } from '../../api/highlights.js'
 import { selectBattedBalls } from '../../api/hitchart.js'
 import { ordinal } from '../../lib/format.js'
+import { noticeClass } from '../../lib/design/noticeClass.js'
 import { HitChart } from '../charts/HitChart.jsx'
 import { SealBox } from '../SealBox.jsx'
 import { Card } from '../ui/frame/Card.jsx'
@@ -382,7 +383,7 @@ export function HalfInning({
             pitcher={nowPitching}
             teamId={battingSide === 'away' ? homeId : awayId}
             teamName={battingSide === 'away' ? homeName : awayName}
-            className="pitchernotice--pbp"
+            className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
             label={nowPitchingLabel}
             entering={entering}
           />
@@ -570,7 +571,7 @@ function PrePitchChanges({ feed, inning, half, battingId, battingName, pitchingI
               batter={c.batter}
               teamId={battingId}
               teamName={battingName}
-              className="pitchernotice--pbp"
+              className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
             />
           )
         }
@@ -580,7 +581,7 @@ function PrePitchChanges({ feed, inning, half, battingId, battingName, pitchingI
             fielder={c.fielder}
             teamId={pitchingId}
             teamName={pitchingName}
-            className="pitchernotice--pbp"
+            className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
           />
         )
       })}

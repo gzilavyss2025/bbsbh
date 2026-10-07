@@ -78,7 +78,7 @@ test('inScope: a challenge row takes its game’s scope; a game with no scope is
 })
 
 test('buildExport: an orphan challenge row (no game record) is dropped by every scope, so All = Regular + Postseason (#1603)', () => {
-  const orphan = row({ game_pk: 99, seq: 0 })
+  const orphan = row({ game_pk: 99, seq: 0, level: 'AAA' })
   const rows = [...all, orphan]
   const of = (scope) => buildExport(rows, allGames, { season: 2026, scope }).levels.MLB
   const [both, reg, post] = [of('all'), of('R'), of('P')]
@@ -86,6 +86,8 @@ test('buildExport: an orphan challenge row (no game record) is dropped by every 
   assert.equal(both.success, reg.success + post.success)
   assert.equal(both.games, reg.games + post.games)
   assert.deepEqual(inScope(rows, allGames, 'all').rows.map((r) => r.game_pk).includes(99), false)
+  // An orphan's level has no game, so no scope grows an empty level for it.
+  for (const scope of ['all', 'R', 'P']) assert.equal('AAA' in buildExport(rows, allGames, { season: 2026, scope }).levels, false)
 })
 
 // Same club, same player, same umpire in both parts: a postseason row must not

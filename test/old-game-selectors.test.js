@@ -4,6 +4,7 @@
 // score, so they are spoiler-free (ADR-0101).
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { selectGameInfo } from '../src/api/select.js'
 import { selectIsPlayed, selectRecordIsClosed, selectHasNoPlayByPlay } from '../src/api/gamerecord/played.js'
 
 const game = ({ detailed, abstract = 'Final', season = '1927', plays = 0 }) => ({
@@ -55,4 +56,22 @@ test('no play-by-play: a 1956 game with plays is false', () => {
 test('no play-by-play: a game not started and a game with no season are false', () => {
   assert.equal(selectHasNoPlayByPlay(game({ detailed: 'Scheduled', abstract: 'Preview', season: '1927' })), false)
   assert.equal(selectHasNoPlayByPlay(game({ detailed: 'Final', season: null })), false)
+})
+
+// --- selectGameInfo.scheduledTime: a TBD start has no real time ---------------
+
+const timed = (startTimeTBD) => ({
+  gameData: {
+    datetime: { time: '3:33', ampm: 'AM' },
+    status: startTimeTBD === undefined ? {} : { startTimeTBD },
+  },
+})
+
+test('selectGameInfo: startTimeTBD true gives no scheduledTime', () => {
+  assert.equal(selectGameInfo(timed(true)).scheduledTime, '')
+})
+
+test('selectGameInfo: a real start time keeps scheduledTime, TBD false or absent', () => {
+  assert.equal(selectGameInfo(timed(false)).scheduledTime, '3:33 AM')
+  assert.equal(selectGameInfo(timed(undefined)).scheduledTime, '3:33 AM')
 })

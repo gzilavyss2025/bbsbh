@@ -569,3 +569,145 @@ between runs, so capture BEFORE twice first.
 width other than 390 and 760px. Four clubs only; a club whose injured list is
 empty, or one with no bullpen card, was not singled out. I did not run `npm run
 visual` or `npm run e2e`.
+
+## Grid slice G1 (2026-10-07)
+
+First `Grid` migration: 8 of the 25 movable `auto-fit`/`auto-fill` rules, 9 JSX
+sites. Each is a one-class rule with a single static site and a gap on the 8 or
+12px step, so nothing snaps. The rule keeps only what `Grid` does not own
+(padding, margin-top, `align-content`).
+
+| rule | `min` | mode | gap |
+| --- | --- | --- | --- |
+| `.offday__grid` (ul) | 120 | fill | snug |
+| `.hzntile__stats` | 64 | fit | snug |
+| `.rehabgrid` | 150 | fill | base |
+| `.trrank__tilegrid` | 250 | fit | base |
+| `.trec__counts` | 8.5rem | fill | snug |
+| `.iddrawer__fields` (2 sites) | 150 | fit | snug |
+| `.logogrid` (ul) | 140 | fill | base |
+| `.colorlab__wpapreviewfields` | 90 | fill | snug |
+
+**Checked:** `/logos` and `/rehab` (mock API, `FREEZE=1 BLOCKIMG=1`): geometry
+identical at 390 and 760px, 178 and 421 elements. The other six hosts need live
+data or the dev-only identity lab, so they were not drawn. `npm run lint` and
+`npm test` pass. `npm run visual` was not run (Gary asks for it).
+
+**Left (17 rules):** ones with a responsive override or `@media` twin
+(`.sitefooter__actions`, `.sitemenusheet__scroll`, `.allstarlegacy__*`,
+`.gamelist`), a gap off the steps (`.logbook__grid` 20px, `.scout__*` 6px,
+`.patternlab__grid`, `.ninekeys__keys`), scoring-adjacent surfaces
+(`.marginnotes__grid`, `.gamephotos__grid`), and the `/design-lab` grids.
+
+## Cluster slice C1
+
+First `Cluster` migration. 8 one-class wrapping-row rules on 12 JSX sites, all on
+the 4, 8 or 12px step, so nothing snaps. Base: `origin/main` at f150612ab.
+
+| rule | gap | sites | kept in the rule |
+| --- | --- | ---: | --- |
+| `.cwb__tabs` (`74-contract-workbench.css`) | snug | 1 | nothing (rule deleted) |
+| `.standings-jumps` (`30-standings.css`) | tight | 3 | nothing; `--scroll` still sets its own `flex-wrap` |
+| `.coverpick__colors` (`60-book-cover-picker.css`) | base | 1 | nothing |
+| `.bpadmin__row` (`61-ballpark-admin.css`) | snug | 1 | nothing |
+| `.lookupdeck__filters` (`74a-contract-lookup.css`) | base | 1 | nothing |
+| `.idlab__barsrow` (`17-identity-lab-workbench.css`) | base | 1 | nothing |
+| `.idlab__wpaartrow` (same file) | snug | 1 | nothing |
+| `.bookmgmt__actions` (`58-logbook-shelf.css`) | base | 3 | `align-items: center` |
+
+**Method.** `cluster-candidates.mjs` is `stack-candidates.mjs` for wrapping rows
+(one class, `display: flex`, `flex-wrap: wrap`, one gap, no other layout rule for
+the class, static JSX sites on a Cluster element). It finds 57 safe rows (it still
+lists 16px rows, which have no Cluster step). I took the 8 with the least left in
+the rule. `test/cluster-migration.test.js` was written first and failed on both
+the rules and the sites. It pins: no layout left on a migrated class, every site is
+a `<Cluster>` with the old step, and no migrated partial loads ahead of
+`system/cluster.css` in `index.css`.
+
+**Cascade.** All eight partials are lazy (a component imports them), so they load
+after `system/cluster.css`. `.standings-jumps--scroll` and `.bookmgmt__actions`
+keep one class each, so they still win on order. `.newbook__actions` (margin,
+padding, border) shares an element with `.bookmgmt__actions` and touches no layout.
+
+**Left out.** Rules in `15-team-color-lab.css`, `62-identity-admin.css`,
+`65-team-records.css`, `66-situational-records.css` and `06b-offday-cards.css`
+(Grid G1 edits them), scoring surfaces (`10-lineup.css`, `scorecard/*`,
+`.trailstrip__cells`, `.pbp__replaypicks`), rules with a 16px gap, rules with
+declarations beside the layout (a later slice), and any site with a dynamic
+`className`.
+
+**Checked.** `geom.mjs` BEFORE (`main`) and AFTER, 390 and 760px, `MOCK=1 FREEZE=1
+BLOCKIMG=1`: `/logbook/new` (the `bookmgmt__actions` site) and `/standings` (2 and 1
+`standings-jumps` sites) identical, 269 to 1,036 elements. `/identity-lab` (both
+`idlab__*` rows) has equal page heights, but the element count moves between runs
+of UNCHANGED code (1,066 to 1,076 at 390px): a nav logo `img` races its fallback
+`span`. `synth.mjs` (new `CLUSTER=1` switch) on a route that loads each sheet:
+`cwb__tabs`, `lookupdeck__filters` on `/admin/contracts`, `coverpick__colors`,
+`bookmgmt__actions` on `/logbook/new`, the `idlab__*` pair on `/identity-lab` and
+`standings-jumps` on `/standings`, all identical at both widths.
+
+**Not seen.** `.bpadmin__row`: `61-ballpark-admin.css` loads only for an admin, so
+neither a real page nor a synthetic baseline was possible. Its rule and the old one
+are the same three declarations. The real pages for `cwb__tabs` and
+`lookupdeck__filters` (Clerk-admin gated), the book management sheet, the
+`--scroll` date strip on `/standings` (not drawn by the mock) were not drawn.
+`npm run visual` and `npm run e2e` were not run.
+## Stack slice S14 (2026-10-07)
+
+Nine one-class `flex-direction: column` rules on one gap step moved onto
+`Stack`: 9 rules, 9 JSX sites in 5 files. The finder counts **38 safe
+candidates on `main` before S14 and 29 after**. The log above said about 44; that
+figure is stale (S8 to S13 and the other work since have used it up).
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.fhist__span` | tight | li | flex, width, padding, frame |
+| `.fhist__parks` | base | ul | margin, padding, list-style |
+| `.fhist__parkline` | tight | li | nothing (deleted) |
+| `.scout__game` | snug | div | nothing (deleted) |
+| `.scout__pa` | snug | article | padding, frame |
+| `.introsheet__step2` | loose | div | nothing (deleted) |
+| `.introsheet__confirm` | base | div | nothing (deleted) |
+| `.psrace__leagues` | loose | div | nothing (deleted) |
+| `.staffgrid` | snug | div | nothing (deleted) |
+
+**Cascade.** `system/stack.css` loads before 06, so every partial here loads after
+it. None of the nine rules keeps a `display`, `flex-direction` or `gap`, so none
+can win or lose against `.stack`. `.fhist__parks` is a `ul`: `.stack--list` sets
+`margin: 0; padding: 0; list-style: none`, and the rule keeps its own margin and
+padding and loads later, so it still wins on order.
+
+**Test first.** `test/stack.test.js` (section 6) names each rule, its gap and its
+JSX site. It failed on `main` and passes now.
+
+**Left out on purpose.** Scoring surfaces (`.starter__info`, `.teammate__mid`, `.pbp`,
+`.trailstrip`, `.refpanel__body`, `.moundcard__verdict`, `.gamehud__outs`,
+`.psseries__potgMain`). Files another open PR edits: `14-strike-zone.css`,
+`15-team-color-lab.css`, `31-wild-card.css` (Grid G1, #1630), and
+`30-standings.css` and the contract partials `74-contract-workbench.css` and
+`74a-contract-lookup.css` (Cluster C1). `.scout__pm`
+(a dialog with a key handler, so the converter refuses it), `.xl-entry` and
+`.xl-entry__head` (Express Lane, a pitch-by-pitch viewer; I did not judge them).
+
+**Checked.** Capture was `geom.mjs` with `FREEZE=1 BLOCKIMG=1`, `?nointro`, 390 and
+760px, taken twice before and once after. The two BEFORE runs match, and AFTER
+matches BEFORE: 0 differences on `/scout`, `/postseason-race`,
+`/bullpen-availability`, `/team/158` and `/team/158/minors` (240 to 1,216 elements).
+`synth.mjs` on the old and new markup is identical for all nine classes (on
+`/scout`, `/postseason-race`, `/bullpen-availability` and `/team/158`). A first BEFORE
+taken from a `git archive` copy (no `.git`) differed on every route, even `/`: the
+build info reads git. BEFORE now comes from `git checkout origin/main` of the ten
+files, in the same checkout.
+
+**Not seen.** The headless browser cannot reach live `statsapi` from the cloud
+container, so no route drew real data. The routes above show their empty or
+loading state, so the nine classes rarely drew: `.fhist__*` (the franchise history
+card needs a club with ballpark data), `.scout__game` and `.scout__pa` (past
+meetings), `.introsheet__*` (the account step, needs Clerk), `.psrace__leagues`
+(the standings are empty) and `.staffgrid` (bullpen rows). The synthetic check
+proves the CSS, not the page. I did not run `npm run visual` or `npm run e2e`.
+The raw-value lint prints "went DOWN" for hex, radius and motion. That is not
+from this slice (it deletes no raw value); I did not change those budgets.
+
+**Open question.** `layout.md` is also edited by Grid G1 (#1630) and the Cluster
+branch, so the three PRs will conflict on this file. Each only appends a section.

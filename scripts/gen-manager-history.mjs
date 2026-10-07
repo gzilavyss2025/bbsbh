@@ -17,7 +17,7 @@
 //
 // Two modes:
 //   node scripts/gen-manager-history.mjs                 — full backfill,
-//     seasons MANAGER_HISTORY_FIRST_SEASON (src/api/managers.js) to present,
+//     seasons MANAGER_HISTORY_FIRST_SEASON (src/lib/records/managerHistory.js) to present,
 //     all 30 teams (~2,000 calls). Hand-run once, like
 //     gen-milb-history.mjs's seed sweep. Rebuilds the WHOLE output from
 //     scratch (old seasons are immutable, so a clean rebuild is safe).
@@ -53,8 +53,8 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
-import { MANAGER_HISTORY_FIRST_SEASON } from '../src/api/managers.js'
-import { mergeSeasonRange, mergeCoverage } from './lib/records/manager-history-merge.mjs'
+import { MANAGER_HISTORY_FIRST_SEASON } from '../src/lib/records/managerHistory.js'
+import { mergeSeasonRange, mergeCoverage, sharedCoverage, mergeNeedsResearch } from './lib/records/manager-history-merge.mjs'
 import { buildStaffIndex } from './lib/records/manager-staff-index.mjs'
 import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
@@ -318,19 +318,9 @@ async function main() {
   const { byPersonId, teamSeasonManagers } = await sweepCoaches(teamIds, seasons)
   const unresolved = await attachRecords(byPersonId, teamSeasonManagers, seed)
 
-  // Merge the unresolved shared seasons into the needs-research queue,
-  // deduping by teamId+season (a re-run shouldn't pile up duplicates).
-  // Also filter out any entries that are now resolved in the seed file.
-  const seedKeys = new Set(seed.map((s) => `${s.teamId}:${s.season}`))
+  // Re-measured seasons replace their queue entries; seeded ones drop out.
   const needsResearch = await readJson(needsResearchPath, [])
-  const nrByKey = new Map(needsResearch.map((e) => [`${e.teamId}:${e.season}`, e]))
-  // Remove any entries that are now in the seed
-  for (const key of seedKeys) nrByKey.delete(key)
-  // Add unresolved entries
-  for (const u of unresolved) nrByKey.set(`${u.teamId}:${u.season}`, u)
-  const mergedNeedsResearch = [...nrByKey.values()].sort(
-    (a, b) => a.season - b.season || a.teamId - b.teamId,
-  )
+  const mergedNeedsResearch = mergeNeedsResearch(needsResearch, unresolved, seed, from, to)
   await mkdir(dirname(needsResearchPath), { recursive: true })
   await writeFile(needsResearchPath, JSON.stringify(mergedNeedsResearch, null, 2) + '\n')
 
@@ -340,14 +330,14 @@ async function main() {
   }
 
   let finalByPersonId = freshByPersonId
-  let prevCoverage
+  const coverages = []
   if (MERGE) {
     const existing = {}
     for (const f of await readdir(outDir).catch(() => [])) {
       if (!f.endsWith('.json')) continue
       const shard = await readJson(join(outDir, f), { byPersonId: {} })
       Object.assign(existing, shard.byPersonId ?? {})
-      prevCoverage ??= shard.coverage
+      coverages.push(shard.coverage)
     }
     finalByPersonId = mergeSeasonRange(existing, freshByPersonId, from, to)
   }
@@ -361,7 +351,7 @@ async function main() {
   // opens first should say where it came from and where to edit instead.
   const generatedAt = new Date().toISOString()
   const coverage = MERGE
-    ? mergeCoverage(prevCoverage, from, to)
+    ? mergeCoverage(sharedCoverage(coverages), from, to)
     : { seasons: [from, to], mode: 'backfill' }
   const buckets = new Map()
   for (const [personId, stints] of Object.entries(sortedOut)) {

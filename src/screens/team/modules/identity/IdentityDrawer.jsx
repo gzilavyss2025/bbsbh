@@ -12,6 +12,7 @@ import { IdentityStampPreview } from './IdentityStampPreview.jsx'
 import { IdentityWpaBandField } from './IdentityWpaBandField.jsx'
 import { IdentityWpaPreview } from './IdentityWpaPreview.jsx'
 import '../../../../styles/62-identity-admin.css'
+import { Grid } from '../../../../components/ui/layout/Grid.jsx'
 
 // The identity drawer, under the team hub's club header.
 //
@@ -369,13 +370,13 @@ export function IdentityDrawer({ teamId, isMilb, name, abbreviation, venueName, 
             <IdentityMonoField teamId={teamId} fields={group.fields} values={draft.values} onChange={draft.setValue} />
           ) : group.wpa ? (
             <>
-              <div className="iddrawer__fields">
+              <Grid min={150} fit gap="snug" className="iddrawer__fields">
                 {group.fields
                   .filter((field) => field.spec.kind !== 'band')
                   .map((field) => (
                     <Field key={field.id} field={field} value={draft.values[field.id]} onChange={draft.setValue} />
                   ))}
-              </div>
+              </Grid>
               <IdentityWpaBandField
                 field={group.fields.find((field) => field.spec.kind === 'band')}
                 values={draft.values}
@@ -383,7 +384,7 @@ export function IdentityDrawer({ teamId, isMilb, name, abbreviation, venueName, 
               />
             </>
           ) : (
-            <div className="iddrawer__fields">
+            <Grid min={150} fit gap="snug" className="iddrawer__fields">
               {group.fields.map((field) => (
                 <Field
                   key={field.id}
@@ -392,7 +393,7 @@ export function IdentityDrawer({ teamId, isMilb, name, abbreviation, venueName, 
                   onChange={draft.setValue}
                 />
               ))}
-            </div>
+            </Grid>
           )}
         </section>
       ))}

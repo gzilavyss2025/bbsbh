@@ -9,7 +9,11 @@ import {
   headshotStepDelay,
 } from '../src/lib/headshot/retry.js'
 import { recordHeadshotEvent, HEADSHOT_LOG_CAP } from '../src/lib/headshot/log.js'
-import { prefetchHeadshots } from '../src/lib/prefetchHeadshots.js'
+import {
+  prefetchHeadshots,
+  headshotsToWarm,
+  MAX_PREFETCH_FAILURES,
+} from '../src/lib/prefetchHeadshots.js'
 
 const SILO = 'https://img.mlbstatic.com/x/silo/current'
 const MILB = 'https://img.mlbstatic.com/x/milb/current'
@@ -85,6 +89,33 @@ test('prefetchHeadshots: every warm-up image is a CORS image', () => {
   }
   assert.equal(made.length, 2)
   for (const img of made) assert.equal(img.crossOrigin, HEADSHOT_CROSS_ORIGIN)
+})
+
+test('prefetchHeadshots: reports each id whose warm-up image fails to load', () => {
+  const made = []
+  const RealImage = globalThis.Image
+  globalThis.Image = class {
+    constructor() {
+      made.push(this)
+    }
+  }
+  const failed = []
+  try {
+    prefetchHeadshots([543807, 592450], 320, (id) => failed.push(id))
+  } finally {
+    globalThis.Image = RealImage
+  }
+  made[1].onerror()
+  assert.deepEqual(failed, [592450])
+})
+
+// A failed warm-up must not stay marked as warmed (issue #1446): the next feed
+// update tries that id again, but only a few times, so a face with no photo on
+// file (a clean 404) does not refetch for the whole game.
+test('headshotsToWarm: skips warmed ids and ids that failed too often', () => {
+  const warmed = new Set([1])
+  const failures = new Map([[2, MAX_PREFETCH_FAILURES], [3, 1]])
+  assert.deepEqual(headshotsToWarm([1, 2, 3, 4], warmed, failures), [3, 4])
 })
 
 // --------------------------------------------------------------------------

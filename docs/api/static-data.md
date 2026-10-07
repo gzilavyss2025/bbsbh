@@ -36,7 +36,7 @@ for each generator; the reader modules:
   hand-run by `gen-league-averages.mjs`). The season in play is NOT in the file: the
   reader makes one `teams/stats?group=hitting,pitching` request, keeps it in memory for
   the session, and the table marks it "to date". The pure sum lives in
-  `scripts/lib/stats/league-averages.mjs`, imported by both sides so there is one copy. Open
+  `src/lib/math/leagueAverages.js`, imported by both sides so there is one copy. Open
   data: no SealBox. Feeds the career table's "vs lg" column (`CareerRegister.jsx`, MLB rows only).
 - `lookupEraRE(season, state, tables)` (`src/lib/runExpectancy.js`) — reads the per-decade
   run-expectancy files in `public/data/run-expectancy-eras/` (`1960s.json` to `2020s.json`,
@@ -1018,14 +1018,15 @@ for each generator; the reader modules:
   both `[]` for a day with none. The caller passes the month and day of the PAGE'S own
   date (`src/lib/dates.js`), never a clock of its own. `fetchOnThisDayShard('MM-DD')`
   returns the whole file, whose `credit` lines print beside the data. Spoiler-free.
-- `history/birthplaces.js` — players grouped by birth city, from
-  `public/data/birthplaces/{ab}.json` (`gen-bio-history.mjs`, ADR-0100), `ab` the first
-  two letters of the city. `bornIn(city, stateOrCountry)` returns `[{ personId, name,
-  year|null }]` or `[]`. EXACT match on lower-case city and place: the full state name
-  for a US park (`venue.location.state`, 'Wisconsin'), the country for any other
-  (`country`, 'Canada'); 'WI' finds nothing. `birthplaceKey` and `birthplaceShard` are
-  the one definition the generator also uses. `fetchBirthplaceShard(ab)` returns the
-  whole file and its `credit`. Spoiler-free.
+- `history/birthplaces.js` — players grouped by the map point of their birth city, from
+  `public/data/birthplaces/{cell}.json` (`gen-bio-history.mjs`, ADR-0100, ADR-0106). A
+  cell is 2 degrees square, named by its south-west corner (`40_-74`).
+  `bornNear({ lat, lon }, miles = NEAR_MILES)` returns `{ people: [{ personId, name,
+  year|null }], credit }` for every birth within 50 miles (great-circle), reading the one
+  to four cells the circle touches (`cellsNear`). No point, or no one near, gives
+  `{ people: [], credit: [] }`. The caller passes `parkPoint(venue.location)`
+  (`src/lib/history/pick.js`), from the feed's `defaultCoordinates`. `birthplaceCell` is
+  the one definition the generator also uses. Spoiler-free.
 - `teamSeasons.js` — who played for each MLB team-season, from
   `public/data/team-seasons.json` (`gen-team-seasons.mjs`, hand-run, ADR-0100).
   `loadTeamSeasons()` returns `{ credit, throughSeason, players, teamSeasons }`:

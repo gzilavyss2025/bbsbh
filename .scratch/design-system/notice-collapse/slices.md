@@ -476,6 +476,62 @@ for N2 to N8.
    `empty-state.css` and `notice.css`, and edit `src/index.css` and the pins in
    `test/empty-state-cascade.test.js` and `test/notice-cascade.test.js`.
 
+## N7 as built (what the next slices need)
+
+Written by the N7 session. It records what shipped. It does not write the prompts
+for N8.
+
+1. **The plan was wrong; the frame stays the caller's.** `PitcherNotice` is also the
+   bare header inside the full card (`pitcherCard/PitcherCard.jsx`, inside
+   `div.pcard ${className}`). A frame on the four role roots would draw a card in
+   the card. The four roots (`PitcherNotice`, `BatterNotice`, `FielderNotice`,
+   `PinchRunNotice`) are not edited. Every call site passed a frame class; none
+   passed nothing.
+2. **The call sites (9 + 1).** Each passes
+   `className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}`:
+   `HalfInning.jsx` 3 (the Now Pitching card, the staged batter, the staged
+   fielder), `PlayByPlay.jsx` 4 (mid-half pitcher, fielder, pinch runner, pinch
+   hitter), `PitcherSheet.jsx` 1, `PitcherNotice.jsx` 1 (`ReliefRepeat`). `ArmNotice`
+   is `` `pitchernotice ${noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })} sc-armnotice` ``,
+   still one `<button>`. A repeated call, as N6 did; no constant.
+3. **The namespace rule.** `.pitchernotice--pbp` (`12-sealbox.css`) is now
+   `margin: var(--space-1) var(--space-3h)` and `flex-wrap: nowrap`. The padding,
+   edge, radius and wash left it. N8c renames it and drops the callers' class.
+   The batter, fielder and pinch-runner roots are never rendered bare, so N8c may
+   move the frame onto those three roots; `PitcherNotice` must keep it at the caller.
+4. **The full card.** `.pcard` (`pitcher-card/card.css`) adds `flex-wrap: nowrap`
+   and `align-items: stretch`; its gap stays `var(--space-2h)` (card.css loads after
+   `.notice`). The computed `align-items` on `.pcard` reads `stretch` where it read
+   `normal`. In a flex column `normal` acts as `stretch`; the geometry is identical
+   (N6 saw the same on the handoff cards).
+5. **The console.** `styles/focus/console.css` says
+   `.half:has(.notice--event):not(:has(.statgrid))`. The pin in
+   `test/card-cascade.test.js` looks for that selector. Seen at 900px: the rule fires
+   on the sealed `top1`, `bottom6` and `top7` (a staged card only) on `main` and on
+   this branch, and the half's chrome comes back once a stat grid shows.
+6. **The seal pin** (`test/notice-n7.test.js`, measured on `f150612ab`):
+   `HalfInning.jsx` imports `boxscore.js`, `highlights.js`, `hitchart.js` and
+   `playbyplay.js`, 1 `<SealBox`, 12 `revealedThrough`. `PlayByPlay.jsx` imports
+   `playbyplay.js`, no `<SealBox`, 1 `revealedThrough`. `ScorecardPage.jsx`: no
+   reveal-only import, no `<SealBox`, 7 `revealedThrough`. `PitcherSheet.jsx`,
+   `PitcherNotice.jsx`, `LensCards.jsx`, `PitcherCard.jsx`, `BatterNotice.jsx`,
+   `FielderNotice.jsx` and `PinchRunNotice.jsx`: none, 0, 0.
+7. **`flex-wrap: nowrap` against `.notice`: six namespaces now.** N5: `.delay`,
+   `.innings__extras`. N6: `.pitchernotice--event`, `.pitcherhandoff`. N7:
+   `.pitchernotice--pbp`, `.pcard`. A Notice-level fix needs Gary.
+8. **Seen** (mock anchor game 823035, `main` and this branch side by side, each
+   side captured twice first and stable; reduced motion so the pitch scene holds
+   still): geometry, page text and the reveal mark identical on 26 views:
+   `top1`, `top2`, `top6`, `bottom6`, `top7` sealed and open, `top8` open, at 390 and
+   900px; `top6` stepped once and twice (`ReliefRepeat`, a mid-half pinch hitter) at
+   390px; the scorecard lens at 390px with the arm button, and with the pitcher
+   sheet open. Computed colour, fill, edge, radius, padding, margin, gap and wrap
+   are the same on every card kind. **Not seen:** a pre-pitch staged pinch hitter
+   (`HalfInning`'s `BatterNotice`; this game has none). The live feed was not loaded.
+9. **Census.** No key moved. The four role-root rows and `LensCards.jsx#1` say
+   DONE in N7 with the reason; the nine call-site rows say they carry the frame.
+   The STALE keys are N6's list, unchanged.
+
 ## N6 as built (what the next slices need)
 
 Written by the N6 session. It records what shipped. It does not write the prompts

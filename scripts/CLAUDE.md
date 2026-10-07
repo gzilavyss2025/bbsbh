@@ -118,7 +118,7 @@ Guard catalog (one entry per guard): `docs/scripts/tooling.md`.
 - **A ratchet only moves down.** A budget, an allowlist or a cap is pinned at today's
   count. Growth fails, and a shrink must tighten the entry in the same commit
   (`check-dir-size`, `check-file-size`, `check-caption-budget`, `check-raw-values`,
-  `check-claude-md`). A stale allowlist entry fails too, the same ratchet rule
+  `check-component-reuse`, `check-claude-md`). A stale allowlist entry fails too, the same ratchet rule
   `check-dir-size.mjs` uses.
 - **Rebase onto `main` and re-measure before you merge a change to a budget.** A count
   taken on a branch that sits behind `main` goes stale.

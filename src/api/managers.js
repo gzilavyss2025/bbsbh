@@ -1,5 +1,6 @@
 import { teamFullName } from '../lib/teams.js'
 import { shardKey100 } from '../lib/shardKey.js'
+import { MANAGER_HISTORY_FIRST_SEASON } from '../lib/records/managerHistory.js'
 import { getJson } from './statsapi.js'
 import { staticJsonBy } from './staticJson.js'
 
@@ -28,9 +29,9 @@ import { staticJsonBy } from './staticJson.js'
 // teamFullName always resolves here (unlike most of this app's MiLB-aware
 // helpers).
 
-// The first season the shards cover. gen-manager-history.mjs sweeps from here;
-// test/manager-history-range.test.js checks every shard agrees.
-export const MANAGER_HISTORY_FIRST_SEASON = 1969
+// The first season the shards cover now lives in lib/records/managerHistory.js,
+// so the Node generator can import it without this module's fetch layer.
+export { MANAGER_HISTORY_FIRST_SEASON }
 
 const shards = new Map() // bucket key -> { generatedAt, byPersonId }
 
@@ -207,6 +208,7 @@ export function lastManagerialStint(stints) {
 // shards, each entry [personId, seasonsTogether, laterManaged 0|1]). Names are
 // not in the file (the history shards carry none either), so one batched people
 // request names them. [] for a manager with no staff on file, or on any failure.
+const NAME_BATCH = 50
 const staffShard = staticJsonBy((key) => `/data/manager-staff/${key}.json`, {
   shape: (d) => d.byManagerId ?? {},
   fallback: {},
@@ -215,14 +217,22 @@ const staffShard = staticJsonBy((key) => `/data/manager-staff/${key}.json`, {
 export async function coachedUnder(managerId) {
   const rows = (await staffShard(shardKey100(managerId)))[managerId] ?? []
   if (!rows.length) return []
-  let names = {}
-  try {
-    const ids = rows.map(([id]) => id).join(',')
-    const data = await getJson(`/api/v1/people?personIds=${ids}&fields=people,id,fullName`)
-    names = Object.fromEntries((data.people ?? []).map((p) => [p.id, p.fullName]))
-  } catch {
-    // A person with no name still renders, as a bare link.
-  }
+  const names = {}
+  // Batches of NAME_BATCH keep the URL short for a manager with a long staff. A failed
+  // batch leaves its people nameless; they still render, as a bare link.
+  const batches = []
+  for (let i = 0; i < rows.length; i += NAME_BATCH) batches.push(rows.slice(i, i + NAME_BATCH))
+  await Promise.all(
+    batches.map(async (batch) => {
+      try {
+        const ids = batch.map(([id]) => id).join(',')
+        const data = await getJson(`/api/v1/people?personIds=${ids}&fields=people,id,fullName`)
+        for (const p of data.people ?? []) names[p.id] = p.fullName
+      } catch {
+        // see above
+      }
+    }),
+  )
   return rows.map(([personId, seasons, later]) => ({
     personId,
     name: names[personId] ?? '',

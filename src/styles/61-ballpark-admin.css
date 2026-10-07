@@ -135,12 +135,6 @@
   font-size: var(--fs-field);
 }
 
-.bpadmin__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
 /* The body's buttons are the plain outline pair — the masthead's currentColor
    trick does not apply down here, where the ground is paper, not the club bar. */
 .bpadmin .bpadmin__btn {

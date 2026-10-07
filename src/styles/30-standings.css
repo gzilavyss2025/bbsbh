@@ -46,12 +46,8 @@
 }
 /* Date quick-jumps as flat scorebook index tabs — hairline-ruled, no drop
    shadow or filled chip, so they read as pencil-ruled paper tabs rather than
-   heavy Material buttons. The active tab inks solid navy. */
-.standings-jumps {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
+   heavy Material buttons. The active tab inks solid navy. The row is a
+   <Cluster gap="tight"> (#1180); the rule below overrides only its wrap. */
 /* The date quick-jumps grow a new "Month 1" tab every month of the season —
    left to wrap, that's an ever-taller control (already 3 lines by July; 7+
    month tabs by October). Horizontal scroll instead, same full-bleed

@@ -5,6 +5,8 @@ import {
   checkpointOf,
   decadeSeasons,
   mergeCheckpoints,
+  schedulePks,
+  sweepGames,
 } from '../scripts/lib/run-expectancy/eras.mjs'
 import { eraDecade, lookupEraRE, pitchFavor } from '../src/lib/runExpectancy.js'
 
@@ -136,4 +138,49 @@ test('pitchFavor returns the same numbers as before for fixed inputs', () => {
   assert.equal(pitchFavor(table, 0, 0, 0, 0, false), -0.25)
   // Called a strike on ball four, bases loaded: ball four forces in a run (1 + 1) vs 2.5 after the strike.
   assert.equal(pitchFavor(table, 7, 0, 3, 0, false), 0.5)
+})
+
+const game = (gamePk, detailedState, officialDate, abstractGameState = 'Final') => ({
+  gamePk,
+  officialDate,
+  status: { abstractGameState, detailedState },
+})
+
+test('schedulePks keeps Final games under their own date and drops cancelled ones (#1611)', () => {
+  const schedule = {
+    dates: [
+      {
+        date: '2001-09-11',
+        games: [
+          game(1, 'Final', '2001-09-11'),
+          game(2, 'Cancelled', '2001-09-11'), // abstract state is Final, but it was never played
+          game(3, 'Final', '2001-10-02'), // a replay listed under its original date
+          game(4, 'Scheduled', '2001-09-11', 'Preview'),
+        ],
+      },
+      { date: '2001-10-02', games: [game(3, 'Final', '2001-10-02')] },
+    ],
+  }
+  assert.deepEqual(schedulePks(schedule), [1, 3])
+  assert.deepEqual(schedulePks({}), [])
+})
+
+test('sweepGames counts a feed with no plays and a failed fetch apart (#1611)', async () => {
+  const feeds = { 10: FEED, 11: {}, 12: FEED }
+  const fetchFeed = async (pk) => {
+    if (pk === 13) throw new Error('503 after retries')
+    return feeds[pk]
+  }
+  const states = new Map()
+  const result = await sweepGames([10, 11, 12, 13], 2, fetchFeed, states, new Map())
+  assert.equal(result.games, 2)
+  assert.equal(result.noPlays, 1)
+  assert.deepEqual(result.failed, [13])
+  assert.equal(states.get('0-0-0-0').n, 2) // the two good feeds still add up
+})
+
+test('checkpointOf records the no-play count when it is given', () => {
+  const cp = checkpointOf('2000', 10, 8, new Map(), new Map(), 2)
+  assert.equal(cp.noPlays, 2)
+  assert.equal('noPlays' in checkpointOf('2000', 10, 8, new Map(), new Map()), false)
 })

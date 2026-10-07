@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../../lib/teams.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 import { logHeadshotEvent } from '../../lib/headshot/log.js'
+import { noticeClass } from '../../lib/design/noticeClass.js'
 import { useHeadshotStep, useImgReady } from '../../hooks/images/useHeadshotStep.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 
@@ -67,7 +68,7 @@ export function ReliefRepeat({ pitcher, teamId, teamName }) {
   if (!pitcher) return null
   return (
     <div className="pbp__entry">
-      <PitcherNotice pitcher={pitcher} teamId={teamId} teamName={teamName} className="pitchernotice--pbp" label="Pitching" />
+      <PitcherNotice pitcher={pitcher} teamId={teamId} teamName={teamName} className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })} label="Pitching" />
     </div>
   )
 }

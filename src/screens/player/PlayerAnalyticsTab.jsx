@@ -222,7 +222,7 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: s
           {/* The rates behind the headline tiles (a pitcher's FIP/ERA−/
               K%/BB%; a hitter's wOBA/wRC+/discipline) — beside Statcast's
               percentiles as its absolute-numbers sibling. */}
-          <AdvancedStatsCard adv={block.advanced} />
+          <AdvancedStatsCard adv={block.advanced} post={block.advancedPost} />
 
           {/* Season foul-ball line (gen-fouls.mjs) — a current-day-only
               card that hides under a spoiler asOf cutoff, like the

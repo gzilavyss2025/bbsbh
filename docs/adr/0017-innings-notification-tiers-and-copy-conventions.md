@@ -48,6 +48,12 @@ but only as the resolution-failure fallback for tiers 1/2 (the incoming
 player isn't in `gameData.players`) — never a first-class rendering choice
 for an event type that has a home in one of the three tiers above.
 
+**2026-10-07 (#1132 N6, N7).** The shared card's frame is now the event Notice
+(`noticeClass({ tone: 'event' })`, `.notice--event`), with the same values. The
+decision above does not change. `.pitchernotice--pbp` is now only the actor
+cards' margin namespace, which each caller passes with the frame, until N8c
+renames it.
+
 ## Casing: the global CSS invariant is the only source of truth
 
 Per-component `.toUpperCase()`/`.toLowerCase()` calls on a rendered name or

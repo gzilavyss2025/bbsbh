@@ -32,6 +32,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Door } from '../components/ui/control/Door.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
+import { Cluster } from '../components/ui/layout/Cluster.jsx'
 
 // Rank-movement glyph: '' (not '—') when there's nothing to compare, since
 // this rides inline inside the always-visible GB/WCGB cell rather than its
@@ -342,7 +343,8 @@ export function StandingsPage({ seasonYear }) {
             endpoint for a day nobody played and come back with an empty
             table (see the `final` reading above). */}
         {!final && (
-          <div
+          <Cluster
+            gap="tight"
             className="standings-jumps standings-jumps--scroll"
             role="group"
             aria-label="Standings date"
@@ -366,11 +368,11 @@ export function StandingsPage({ seasonYear }) {
                 {j.label}
               </button>
             ))}
-          </div>
+          </Cluster>
         )}
 
         {hasWildCard && (
-        <div className="standings-jumps" role="group" aria-label="Standings board">
+        <Cluster gap="tight" className="standings-jumps" role="group" aria-label="Standings board">
             <button
               type="button"
               aria-pressed={board === 'division'}
@@ -387,11 +389,11 @@ export function StandingsPage({ seasonYear }) {
             >
               Wild Card
             </button>
-          </div>
+          </Cluster>
         )}
 
         {!isWide && (
-          <div className="standings-jumps" role="group" aria-label="Standings column detail">
+          <Cluster gap="tight" className="standings-jumps" role="group" aria-label="Standings column detail">
             <button
               type="button"
               aria-pressed={expandedCols}
@@ -400,7 +402,7 @@ export function StandingsPage({ seasonYear }) {
             >
               {expandedCols ? 'Fewer columns' : 'More columns ↔'}
             </button>
-          </div>
+          </Cluster>
         )}
       </div>
 

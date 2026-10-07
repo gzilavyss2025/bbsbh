@@ -569,12 +569,7 @@
    A browsable reference sheet of every club's logo at a level, styled like
    the rest of the app rather than a standalone print sheet. */
 .logogrid {
-  list-style: none;
-  margin: 0;
   padding: 0 0 var(--space-6);
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: var(--space-3);
 }
 
 .logotile {

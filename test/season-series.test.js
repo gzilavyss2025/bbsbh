@@ -278,3 +278,14 @@ test('centeredScrollLeft: puts the card at the strip centre, wherever the strip 
   // The same card in a strip at another page position gives the same answer.
   assert.equal(centeredScrollLeft({ scrollLeft: 0, stripLeft: 229, stripWidth: 292, cellLeft: 746, cellWidth: 90 }), 416)
 })
+
+test('seasonSeriesCells: startTimeTBD rides through to the cell, absent reads false', () => {
+  const base = { apiDate: '1927-07-05', gameDate: '1927-07-05T07:33:00Z', gameNumber: 1, awayId: NYM, homeId: MIL, final: false }
+  const [tbd, real] = seasonSeriesCells(
+    [{ ...base, gamePk: 7, startTimeTBD: true }, { ...base, gamePk: 8 }],
+    MIL,
+    2,
+  )
+  assert.equal(tbd.startTimeTBD, true)
+  assert.equal(real.startTimeTBD, false)
+})

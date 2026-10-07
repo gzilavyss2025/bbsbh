@@ -3,6 +3,7 @@ import { SYNCED_ITEMS } from '../../lib/account/syncClaims.js'
 import { ClubSeal } from '../profile/ClubSeal.jsx'
 import { DeviceHandoff } from '../profile/DeviceHandoff.jsx'
 import { IntroPassportMark } from './IntroPassportMark.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // Step 2 of the first-visit intro (PRD §6.1/§6.4) — "Take your Tally with
 // you." Rendered only when isClerkEnabled; FavoriteTeamModal lazy-loads this
@@ -74,7 +75,7 @@ function ProgressMarker() {
 
 export function AccountPitch({ clubTeamId, clubName, onContinue }) {
   return (
-    <div className="introsheet__step2">
+    <Stack gap="loose" className="introsheet__step2">
       <SignedOut>
         <div className="introsheet__visual">
           <ClubSeal teamId={clubTeamId} name={clubName} size={64} />
@@ -102,7 +103,7 @@ export function AccountPitch({ clubTeamId, clubName, onContinue }) {
       <SignedIn>
         <SignedInConfirmation clubName={clubName} onContinue={onContinue} />
       </SignedIn>
-    </div>
+    </Stack>
   )
 }
 
@@ -115,7 +116,7 @@ function SignedInConfirmation({ clubName, onContinue }) {
   const { user } = useUser()
   const who = user?.primaryEmailAddress?.emailAddress || user?.username || ''
   return (
-    <div className="introsheet__confirm">
+    <Stack className="introsheet__confirm">
       {/* The club list is async, so `clubName` is empty on first paint — which
           is every time this branch renders. The two halves are written as whole
           sentences rather than one sentence with a hole in it, because the
@@ -135,6 +136,6 @@ function SignedInConfirmation({ clubName, onContinue }) {
         Continue
       </button>
       {who && <p className="introsheet__fineprint caps-exempt">Signed in as {who}.</p>}
-    </div>
+    </Stack>
   )
 }

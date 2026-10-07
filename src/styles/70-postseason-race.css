@@ -15,12 +15,6 @@
    gets the whole row to stay readable; halving the width back at a desktop
    breakpoint would just reintroduce the cramped-column truncation problem
    the split was meant to fix. */
-.psrace__leagues {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
 /* One league's own 3-column bracket. */
 .psrace__miniboard {
   display: grid;

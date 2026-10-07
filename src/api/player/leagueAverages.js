@@ -1,6 +1,6 @@
 import { staticJson } from '../staticJson.js'
 import { getJson } from '../statsapi.js'
-import { leagueAveragesOf } from '../../../scripts/lib/stats/league-averages.mjs'
+import { leagueAveragesOf } from '../../lib/math/leagueAverages.js'
 
 // League batting average and ERA for one MLB season. Season rates, not scores:
 // spoiler-free, open data, no SealBox. Seasons up to the last complete one come

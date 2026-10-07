@@ -74,7 +74,10 @@ export function revealBoxScore(cacheRef, feed, winProbability, highlights, callo
   const insights = computeGameSuperlatives(feed, derivedByInning)
   // Per-half pitches / whiffs / LOB — plain play-by-play, so it holds up at
   // MiLB parks where the Statcast card can't.
-  const inningDigest = computeInningDigest(feed, derivedByInning)
+  // No plays, no tally: the line score's innings would read as rows of false 0s.
+  const inningDigest = feed?.liveData?.plays?.allPlays?.length
+    ? computeInningDigest(feed, derivedByInning)
+    : []
   // Every leader/streak/situational-record note that fired somewhere in the
   // game (see api/callout-notes.js) — the same notes the innings view shows one
   // at a time on the play they belong to, rolled up here into the Insights card.

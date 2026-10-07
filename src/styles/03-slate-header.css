@@ -458,6 +458,7 @@
 /* OFF — the default, most-common state, so it stays ordinary chrome rather
    than banner weight. */
 .daystate__chip--live {
+  /* component-reuse-exempt: a switch (role=switch button), not a card: Button work (#1174) */
   padding: var(--space-1) var(--space-2h);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);

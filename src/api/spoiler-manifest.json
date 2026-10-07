@@ -573,7 +573,7 @@
     },
     "history/birthplaces.js": {
       "class": "spoiler-free",
-      "why": "Static birthplaces/{ab}.json: players grouped by birth city, from Retrosheet's biographical files (ADR-0100). Where a man was born says nothing about a game. Open surface (ADR-0034); no SealBox."
+      "why": "Static birthplaces/{cell}.json: players grouped by the map point of their birth city, from Retrosheet's biographical files placed with GeoNames (ADR-0100, ADR-0106). Where a man was born says nothing about a game. Open surface (ADR-0034); no SealBox."
     },
     "gamerecord/played.js": {
       "class": "spoiler-free",

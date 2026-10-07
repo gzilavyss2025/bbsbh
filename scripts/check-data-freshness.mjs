@@ -61,7 +61,7 @@ export const EXCEPT = {
   'team-seasons.json': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the file carries no clock',
   'family-ties/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
   'on-this-day/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
-  'birthplaces/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
+  'birthplaces/': 'hand-run from Retrosheet, the Chadwick register and GeoNames (ADR-0100, ADR-0106); history, and the files carry no clock',
   'franchise-history/': 'hand-run; a season adds one span at most, and the files carry no clock',
   'prospect-rank-history.json': 'hand-run; the 2005-2024 rankings are frozen and the file carries no clock (#1111)',
   'run-expectancy-eras/': 'hand-run, one decade at a time (gen-run-expectancy.mjs --era-aggregate); history',
