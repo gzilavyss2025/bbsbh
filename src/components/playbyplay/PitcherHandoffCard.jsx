@@ -8,7 +8,7 @@ import { noticeClass } from '../../lib/design/noticeClass.js'
 // api/pitchers.js for the spoiler footing both rely on): a departing
 // pitcher's line frozen at the exact moment he's pulled, and, once every
 // runner he left on base has resolved, his settled line. Both share this
-// file's markup — a `.pitchernotice`-family header (headshot + name, same
+// file's markup — a `.change`-family header (headshot + name, same
 // layout PitcherNotice uses) over a full ten-column table, the SAME markup
 // PitchersSection (the Arms tab) renders, not a compact summary row.
 //
@@ -24,15 +24,15 @@ export function DepartureLineCard({ line, teamId = null, bookOpen, inheritedCoun
   if (!line) return null
   return (
     <Stack gap="snug" className={noticeClass({ tone: 'event', className: 'pitcherhandoff' })}>
-      <div className="pitchernotice">
+      <div className="change">
         <PitcherPhoto personId={line.id} name={displayName(line)} teamId={teamId} />
-        <div className="pitchernotice__body">
-          <span className="pitchernotice__now">Departing</span>
-          <span className="pitchernotice__pitcher">
+        <div className="change__body">
+          <span className="change__now">Departing</span>
+          <span className="change__pitcher">
             <PlayerLink id={line.id}>{displayName(line)}</PlayerLink>
-            <span className="pitchernotice__badges">
-              {line.jersey ? <span className="pitchernotice__jersey">{line.jersey}</span> : null}
-              {line.hand ? <span className="pitchernotice__hand">{line.hand}HP</span> : null}
+            <span className="change__badges">
+              {line.jersey ? <span className="change__jersey">{line.jersey}</span> : null}
+              {line.hand ? <span className="change__hand">{line.hand}HP</span> : null}
             </span>
           </span>
           <span className={`pitcherhandoff__chip pitcherhandoff__chip--${bookOpen ? 'open' : 'closed'}`}>
@@ -49,15 +49,15 @@ export function FinalizedLineCard({ line, teamId = null }) {
   if (!line) return null
   return (
     <Stack gap="snug" className={noticeClass({ tone: 'event', className: 'pitcherhandoff' })}>
-      <div className="pitchernotice">
+      <div className="change">
         <PitcherPhoto personId={line.id} name={displayName(line)} teamId={teamId} />
-        <div className="pitchernotice__body">
-          <span className="pitchernotice__now">Final line for</span>
-          <span className="pitchernotice__pitcher">
+        <div className="change__body">
+          <span className="change__now">Final line for</span>
+          <span className="change__pitcher">
             <PlayerLink id={line.id}>{displayName(line)}</PlayerLink>
-            <span className="pitchernotice__badges">
-              {line.jersey ? <span className="pitchernotice__jersey">{line.jersey}</span> : null}
-              {line.hand ? <span className="pitchernotice__hand">{line.hand}HP</span> : null}
+            <span className="change__badges">
+              {line.jersey ? <span className="change__jersey">{line.jersey}</span> : null}
+              {line.hand ? <span className="change__hand">{line.hand}HP</span> : null}
             </span>
           </span>
         </div>

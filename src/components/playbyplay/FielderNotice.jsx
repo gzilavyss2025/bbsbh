@@ -2,7 +2,7 @@ import { PitcherPhoto } from './PitcherNotice.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 
 // The "now playing" notification card for a defensive change — same headshot +
-// label + name layout as PitcherNotice (shares its .pitchernotice CSS and
+// label + name layout as PitcherNotice (shares its .change CSS and
 // PitcherPhoto), just for a fielder rather than a pitcher. `fielder` is the
 // { id, name, jersey, position } shape that defensiveChangeFielder
 // (playbyplay.js, a mid-inning change) and selectPrePitchChanges (select.js,
@@ -16,14 +16,14 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 export function FielderNotice({ fielder, teamId = null, teamName, className = '' }) {
   if (!fielder) return null
   return (
-    <div className={`pitchernotice ${className}`}>
+    <div className={`change ${className}`}>
       <PitcherPhoto personId={fielder.id} name={fielder.name} teamId={teamId} />
-      <div className="pitchernotice__body">
-        <span className="pitchernotice__now">
+      <div className="change__body">
+        <span className="change__now">
           Now playing{fielder.position ? ` ${fielder.position}` : ''}
           {teamName ? ` for the ${teamName}` : ''}
         </span>
-        <span className="pitchernotice__pitcher">
+        <span className="change__pitcher">
           <PlayerLink id={fielder.id}>{fielder.name}</PlayerLink>
           {fielder.jersey ? ` ${fielder.jersey}` : ''}
         </span>

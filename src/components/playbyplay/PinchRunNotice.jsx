@@ -16,19 +16,19 @@ import { ordinal } from '../../lib/format.js'
 export function PinchRunNotice({ runner, replaced, base = null, teamId = null, teamName, className = '' }) {
   if (!runner) return null
   return (
-    <div className={`pitchernotice ${className}`}>
+    <div className={`change ${className}`}>
       <PitcherPhoto personId={runner.id} name={runner.name} teamId={teamId} />
-      <div className="pitchernotice__body">
-        <span className="pitchernotice__now">Pinch running{teamName ? ` for the ${teamName}` : ''}</span>
-        <span className="pitchernotice__pitcher">
+      <div className="change__body">
+        <span className="change__now">Pinch running{teamName ? ` for the ${teamName}` : ''}</span>
+        <span className="change__pitcher">
           <PlayerLink id={runner.id}>{runner.name}</PlayerLink>
-          <span className="pitchernotice__badges">
-            {runner.jersey ? <span className="pitchernotice__jersey">{runner.jersey}</span> : null}
-            <span className="pitchernotice__prtag">PR</span>
+          <span className="change__badges">
+            {runner.jersey ? <span className="change__jersey">{runner.jersey}</span> : null}
+            <span className="change__prtag">PR</span>
           </span>
         </span>
         {replaced && (
-          <span className="pitchernotice__forline">
+          <span className="change__forline">
             For <PlayerLink id={replaced.id}>{replaced.name}</PlayerLink>
             {base ? ` at ${ordinal(base)} base` : ''}
           </span>

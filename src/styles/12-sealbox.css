@@ -669,7 +669,7 @@
    .prehalf's margin-bottom): a headshot flush against .half's own border
    (which carries no padding of its own) reads worse than the text-only cards
    around it do, the same reasoning the kraft "now pitching" card's own
-   horizontal margin follows (see .pitchernotice--pbp). */
+   horizontal margin follows (see .change--framed). */
 .upnext {
   margin: 10px 14px 4px;
 }
@@ -826,7 +826,7 @@
 /* Shared inner layout for the "now pitching" card (see PitcherNotice), used in
    both the row-2 stat slot and the play-by-play feed; the card chrome is added
    by the context class beside it. */
-.pitchernotice {
+.change {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -839,12 +839,14 @@
    (PlayByPlay.jsx), so a new arm/fielder/hitter reads as prominently as the
    plays around it (rather than the old plain "Pitching Change: X replaces Y"
    note line). The frame is the event Notice (#1132 N7): each CALLER passes
-   noticeClass({ tone: 'event', className: 'pitchernotice--pbp' }), because
+   noticeClass({ tone: 'event', className: 'change--framed' }), because
    PitcherNotice is also the bare header inside the full card (.pcard), which
    takes the frame itself. This namespace keeps what Notice does not draw: the
    margin (.half has no padding, so the card would sit flush) and no wrap
-   (.notice wraps; the cards did not). */
-.pitchernotice--pbp {
+   (.notice wraps; the cards did not). Three kinds of element wear it: the
+   compact cards (which also wear .change), the full card .pcard (which does
+   not) and the arm button of the scorecard lens. */
+.change--framed {
   margin: var(--space-1) var(--space-3h);
   flex-wrap: nowrap;
 }
@@ -854,7 +856,7 @@
    runners resolve, his settled line. The outer frame is the event Notice
    (noticeClass, #1132 N6; the actor cards took the same frame in N7), stacked
    into a column by Stack (PitcherHandoffCard.jsx):
-   the .pitchernotice header row
+   the .change header row
    (reused as-is, nested rather than applied to the outer element, since a
    flex row can't also hold a full-width table below it) over the Arms tab's
    own .pitchers__grid table (20-charts.css). */
@@ -880,7 +882,7 @@
   min-width: 460px;
 }
 /* A subheading under the pitcher's name/jersey/hand line, inside
-   .pitchernotice__body (its flex-column stacks it below, not beside, the
+   .change__body (its flex-column stacks it below, not beside, the
    name row). Text-only, no fill — same recipe as .pitchernotice__code--alert
    below (color, no background). check-contrast.mjs only walks its own fixed
    pairing list, not arbitrary CSS, so this isn't guarded the way that one
@@ -911,7 +913,7 @@
    The frame is the event Notice now (noticeClass, #1132 N6), so --event also
    keeps the old frame's margin, and it does not wrap: .notice wraps, and the
    mound visit (mark, label, spacer, pips, "N left") would break at 390px. */
-.pitchernotice--event {
+.change--event {
   margin: var(--space-1) var(--space-3h);
   flex-wrap: nowrap;
   gap: var(--space-2);
@@ -969,14 +971,14 @@
 }
 /* Mound-visit card: the pips are the card's one figure, so they read at 2x
    size. */
-.pitchernotice--mv .usagepips {
+.change--mv .usagepips {
   gap: var(--space-2);
 }
-.pitchernotice--mv .usagepips__pip {
+.change--mv .usagepips__pip {
   width: 14px;
   height: 14px;
 }
-.pitchernotice--mv .usagepips__pip--open {
+.change--mv .usagepips__pip--open {
   border-width: 2.6px;
 }
 /* "N left" tail beside the pips — same idiom as the ABS row's own .abs__rec
@@ -1061,14 +1063,14 @@
   filter: none;
 }
 
-.pitchernotice__body {
+.change__body {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
 }
 
-.pitchernotice__now {
+.change__now {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -1077,7 +1079,7 @@
   color: var(--text-heading);
 }
 
-.pitchernotice__pitcher {
+.change__pitcher {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -1087,28 +1089,28 @@
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
-.pitchernotice__pitcher > :first-child {
+.change__pitcher > :first-child {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
 /* Uniform number + throwing hand, pinned to the row's right edge — same
    right-aligned treatment as the lineup card's .lineup__jersey/.lineup__pos. */
-.pitchernotice__badges {
+.change__badges {
   display: flex;
   align-items: baseline;
   gap: var(--space-1h);
   flex: none;
   font-size: var(--fs-compact);
 }
-.pitchernotice__jersey {
+.change__jersey {
   color: var(--clay);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
   text-align: right;
 }
-.pitchernotice__hand {
+.change__hand {
   color: var(--field);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -1116,7 +1118,7 @@
 
 /* The "PR" badge beside the entering pinch runner's jersey number — same red
    the diamond's own PR mark uses (.pbp__pr). */
-.pitchernotice__prtag {
+.change__prtag {
   color: var(--clay-deep);
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
@@ -1129,7 +1131,7 @@
    detail (.pitchernotice__mvcount). Condensed display face like the rest of
    this card's text, not --font-read (that's reserved for full sentences
    straight from the feed, e.g. .pitchernotice__eventtext). */
-.pitchernotice__forline {
+.change__forline {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
@@ -1140,7 +1142,7 @@
    `entering` prop, HalfInning.jsx only) — pinned to the card's right edge,
    a compact two-line figure beside the photo+body block rather than folded
    into either. */
-.pitchernotice__entering {
+.change__entering {
   flex: none;
   margin-left: auto;
   display: flex;
@@ -1149,7 +1151,7 @@
   gap: 2px;
   text-align: right;
 }
-.pitchernotice__enteringcount {
+.change__enteringcount {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
@@ -1157,7 +1159,7 @@
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
-.pitchernotice__enteringwhen {
+.change__enteringwhen {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
@@ -1175,26 +1177,26 @@
    break decision is its flex-basis, not its post-shrink size, so `flex: 1 1
    100%` on the body pushed it below the photo instead of keeping it beside
    it — only the explicitly margin-shifted entering block landed in the
-   right column). Scoped to :has(.pitchernotice__entering) since only this
+   right column). Scoped to :has(.change__entering) since only this
    persistent card (HalfInning.jsx) ever passes the `entering` prop — the
    mid-half change notices (PlayByPlay/StatBox) don't, and are untouched
    here. */
 @media (max-width: 739.98px) {
-  .pitchernotice:has(.pitchernotice__entering) {
+  .change:has(.change__entering) {
     display: grid;
     grid-template-columns: auto 1fr;
     column-gap: var(--space-3);
     row-gap: var(--space-1);
     align-items: start;
   }
-  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__shot {
+  .change:has(.change__entering) .pitchernotice__shot {
     grid-row: 1 / 3;
   }
-  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__body {
+  .change:has(.change__entering) .change__body {
     grid-column: 2;
     grid-row: 1;
   }
-  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__entering {
+  .change:has(.change__entering) .change__entering {
     grid-column: 2;
     grid-row: 2;
     margin-left: 0;
@@ -1291,7 +1293,7 @@
 
 /* A self-contained, clickable card — same 14px horizontal inset off .half's
    own borderless edge as the "now pitching"/"due up"/pre-half callout cards
-   above it (see .pitchernotice--pbp), rather than a bare navy header sitting
+   above it (see .change--framed), rather than a bare navy header sitting
    directly on the page with unbordered rows below (what this used to be:
    a dashed divider, no card of its own). Tapping the title (see
    LineupSection, EnteringReference.jsx) collapses .entering__teams. A Card

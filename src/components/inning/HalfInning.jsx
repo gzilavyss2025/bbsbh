@@ -383,7 +383,7 @@ export function HalfInning({
             pitcher={nowPitching}
             teamId={battingSide === 'away' ? homeId : awayId}
             teamName={battingSide === 'away' ? homeName : awayName}
-            className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
+            className={noticeClass({ tone: 'event', className: 'change--framed' })}
             label={nowPitchingLabel}
             entering={entering}
           />
@@ -571,7 +571,7 @@ function PrePitchChanges({ feed, inning, half, battingId, battingName, pitchingI
               batter={c.batter}
               teamId={battingId}
               teamName={battingName}
-              className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
+              className={noticeClass({ tone: 'event', className: 'change--framed' })}
             />
           )
         }
@@ -581,7 +581,7 @@ function PrePitchChanges({ feed, inning, half, battingId, battingName, pitchingI
             fielder={c.fielder}
             teamId={pitchingId}
             teamName={pitchingName}
-            className={noticeClass({ tone: 'event', className: 'pitchernotice--pbp' })}
+            className={noticeClass({ tone: 'event', className: 'change--framed' })}
           />
         )
       })}
