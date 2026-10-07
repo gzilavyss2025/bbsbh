@@ -140,7 +140,7 @@
   overflow: hidden;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
-  background: var(--tint, var(--paper-1));
+  background: var(--tint, var(--bg-page));
 }
 .iddrawer__tilemark--pinstripe {
   background: repeating-linear-gradient(
@@ -377,7 +377,7 @@
   overflow: hidden;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
-  background: var(--tint, var(--paper-1));
+  background: var(--tint, var(--bg-page));
 }
 .iddrawer__logomark--pinstripe {
   background: repeating-linear-gradient(
@@ -483,7 +483,7 @@
   font-size: var(--fs-title-sm);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
-  color: var(--header-onbar, var(--paper-3));
+  color: var(--header-onbar, var(--text-on-ink-bright));
 }
 .idlab__barmock__empty {
   font-family: var(--font-display);
