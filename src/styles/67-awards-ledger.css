@@ -298,7 +298,7 @@
 }
 .awards__expand:hover {
   background: var(--award-line);
-  color: var(--paper-2);
+  color: var(--text-on-ink);
 }
 .awards__expand:focus-visible,
 .awards__collapse:focus-visible {
