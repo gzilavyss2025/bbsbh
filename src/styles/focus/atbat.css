@@ -25,17 +25,17 @@
   flex: 0 0 auto;
 }
 
-.abhero__shot .pitchernotice__shot {
+.abhero__shot .change__shot {
   border-color: var(--border-rule);
   background: var(--surface-inset);
 }
 
-.abhero__shot .pitchernotice__shot img {
+.abhero__shot .change__shot img {
   filter: saturate(0.85) contrast(0.96);
 }
 
-.abhero__shot--bat .pitchernotice__shot,
-.abhero__shot--arm .pitchernotice__shot {
+.abhero__shot--bat .change__shot,
+.abhero__shot--arm .change__shot {
   width: var(--shot-sm-w);
   height: var(--shot-sm-h);
 }
