@@ -245,7 +245,7 @@
 
 .hitchart__hit {
   fill: var(--accent-primary);
-  stroke: var(--paper-3);
+  stroke: var(--surface-inset);
   stroke-width: 1.2;
 }
 
@@ -257,7 +257,7 @@
 
 .hitchart__hr {
   fill: var(--award-ink);
-  stroke: var(--paper-3);
+  stroke: var(--surface-inset);
   stroke-width: 1.2;
 }
 
@@ -777,7 +777,7 @@
 
 .bflight__hit {
   fill: var(--accent-primary);
-  stroke: var(--paper-3);
+  stroke: var(--surface-inset);
   stroke-width: 2.4;
 }
 
@@ -789,7 +789,7 @@
 
 .bflight__hr {
   fill: var(--award-ink);
-  stroke: var(--paper-3);
+  stroke: var(--surface-inset);
   stroke-width: 2.4;
 }
 

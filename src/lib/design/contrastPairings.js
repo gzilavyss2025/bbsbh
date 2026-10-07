@@ -347,4 +347,15 @@ export const PAIRINGS = [
   { fg: 'text-on-ink', bg: 'arsenal-fastball', min: TEXT, note: 'scout mix bar: fastball segment label' },
   { fg: 'text-on-ink', bg: 'arsenal-breaking', min: TEXT, note: 'scout mix bar: breaking segment label' },
   { fg: 'text-on-ink', bg: 'arsenal-offspeed', min: TEXT, note: 'scout mix bar: offspeed segment label' },
+  // THE TEXT-ON-INK RUNGS (#1156): paper text on the dark fills it sits on.
+  // The idlab bar mocks (a club-set bar) and .gamecard__atmark-ghost (a park
+  // photo) have no token ground to pair.
+  { fg: 'text-on-ink-bright', bg: 'ink-1', min: TEXT, note: 'game HUD and broadcast text on ink' },
+  { fg: 'text-on-ink-bright', bg: 'ink-0', min: TEXT, note: 'bright paper text on the darkest ink' },
+  { fg: 'text-on-ink-bright', bg: 'clay', min: TEXT, note: 'pitch list number, called strike' },
+  { fg: 'text-on-ink-bright', bg: 'graphite', min: TEXT, note: 'pitch list number, foul' },
+  { fg: 'text-on-ink-soft', bg: 'ink-0', min: TEXT, note: 'scorebook story tally and moments labels' },
+  { fg: 'text-on-ink-soft', bg: 'ink-1', min: TEXT, note: 'about hero kicker on navy' },
+  { fg: 'text-on-ink-dim', bg: 'ink-1', min: TEXT, note: 'umpire tendencies season and watch labels on navy' },
+  { fg: 'text-on-ink-dim', bg: 'ink-0', min: TEXT, note: 'dim paper text on the darkest ink' },
 ]

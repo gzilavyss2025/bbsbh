@@ -35,7 +35,7 @@
 .txpage__rule {
   flex: 1;
   height: var(--bw-hair);
-  background: var(--rule-soft);
+  background: var(--border-hairline);
 }
 .txpage__count {
   color: var(--text-muted);

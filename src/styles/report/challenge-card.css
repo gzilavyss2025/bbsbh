@@ -83,7 +83,7 @@
 }
 
 .chal__view.is-on {
-  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
   border-color: var(--accent-primary);
   color: var(--text-heading);
   font-weight: var(--w-bold);

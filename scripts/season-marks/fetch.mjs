@@ -11,7 +11,7 @@
 // recorded, never hidden: a public-domain copyright says nothing about the
 // mark itself.
 //
-// Usage: node scripts/season-marks/fetch.mjs [--dry] [--offline]
+// Usage: node scripts/season-marks/fetch.mjs --rebuild-from-seed [--dry] [--offline]
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { join, dirname, extname } from 'node:path'
@@ -24,6 +24,13 @@ const OUT_DIR = join(ROOT, 'public/logos/historical')
 const UA = 'TallyBaseball/0.1 (gary.zilavy@gmail.com)'
 const API = 'https://commons.wikimedia.org/w/api.php'
 const FREE = /^(public domain|cc0)/i
+// The lab owns season-marks.json now (/identity-lab, Eras tab). This script
+// rebuilds the table from seed.json, so a run would erase every era added or
+// edited in the lab. It stays as a one-time bootstrap and refuses without a flag.
+if (!process.argv.includes('--rebuild-from-seed')) {
+  console.error('season-marks/fetch.mjs rebuilds season-marks.json from seed.json and erases lab edits. Pass --rebuild-from-seed to run it.')
+  process.exit(1)
+}
 const dry = process.argv.includes('--dry')
 // --offline records the files already on disk and downloads nothing, so a
 // rate-limited host cannot stall the manifest. A later plain run fills the rest.

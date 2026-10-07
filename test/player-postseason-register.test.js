@@ -173,7 +173,8 @@ test('the tile read is date-cut: byDateRange with gameType=P and the page\u2019s
   const calls = []
   const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
     calls.push(String(url))
-    return { ok: true, status: 200, json: async () => ({ stats: [{ splits: [{ stat: bat }] }] }) }
+    const json = /\/seasons\//.test(url) ? { seasons: [{ postSeasonStartDate: '2000-01-01' }] } : { stats: [{ splits: [{ stat: bat }] }] }
+    return { ok: true, status: 200, json: async () => json }
   })
   try {
     const out = await fetchPostseasonSeason(669373, 'pitching', { season: 2026, startDate: '2026-01-01', endDate: '2026-10-04' })
@@ -183,9 +184,43 @@ test('the tile read is date-cut: byDateRange with gameType=P and the page\u2019s
   } finally {
     fetchMock.mock.restore()
   }
-  assert.equal(calls.length, 1)
-  assert.match(calls[0], /stats=byDateRange/)
-  assert.match(calls[0], /gameType=P/)
-  assert.match(calls[0], /startDate=2026-01-01/)
-  assert.match(calls[0], /endDate=2026-10-04/)
+  const reads = calls.filter((u) => /gameType=P/.test(u))
+  assert.equal(reads.length, 1)
+  assert.match(reads[0], /stats=byDateRange/)
+  assert.match(reads[0], /startDate=2026-01-01/)
+  assert.match(reads[0], /endDate=2026-10-04/)
+})
+
+// #1675: the this-year read waits for the season row's postSeasonStartDate.
+// A start date in 2999 is "not yet", 2000 is "started"; a missing row is "not yet".
+async function seasonReadCalls(postSeasonStartDate) {
+  const calls = []
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
+    calls.push(String(url))
+    const json = /\/seasons\//.test(url)
+      ? { seasons: postSeasonStartDate ? [{ postSeasonStartDate }] : [] }
+      : { stats: [{ splits: [{ stat: bat }] }] }
+    return { ok: true, status: 200, json: async () => json }
+  })
+  try {
+    const out = await fetchPostseasonSeason(1, 'hitting', { season: 2026, startDate: '2026-01-01', endDate: '2026-10-04' })
+    return { out, p: calls.filter((u) => /gameType=P/.test(u)) }
+  } finally {
+    fetchMock.mock.restore()
+  }
+}
+
+test('the tile read sends no gameType=P request before the postseason, one inside it', async () => {
+  const before = await seasonReadCalls('2999-01-01')
+  assert.deepEqual(before.out, [])
+  assert.equal(before.p.length, 0)
+  const inside = await seasonReadCalls('2000-01-01')
+  assert.equal(inside.out.length, 1)
+  assert.equal(inside.p.length, 1)
+})
+
+test('a missing season row sends no gameType=P request and does not throw', async () => {
+  const { out, p } = await seasonReadCalls(null)
+  assert.deepEqual(out, [])
+  assert.equal(p.length, 0)
 })

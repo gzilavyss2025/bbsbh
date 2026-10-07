@@ -63,8 +63,8 @@
    route's budget on two rules, and nothing in the token tier lists it (#1127). */
 
 .xl-deck__paper {
-  background: var(--paper-2);
-  border: 1px solid var(--rule);
+  background: var(--surface-card);
+  border: 1px solid var(--border-rule);
   border-radius: 3px;
   padding: var(--space-1);
   width: var(--xl-box-w);

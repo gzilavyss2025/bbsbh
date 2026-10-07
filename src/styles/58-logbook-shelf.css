@@ -290,7 +290,7 @@
   max-width: 320px;
   margin: 0 auto;
   aspect-ratio: var(--passport-aspect, 88 / 125);
-  border: var(--bw-rule) dashed color-mix(in srgb, var(--book-board-kraft) 42%, var(--bg-page));
+  border: var(--bw-rule) solid color-mix(in srgb, var(--book-board-kraft) 42%, var(--bg-page));
   border-radius: var(--radius-xs) var(--radius-md) var(--radius-md) var(--radius-xs);
   background: color-mix(in srgb, var(--surface-card) 72%, transparent);
   color: var(--text-caption);

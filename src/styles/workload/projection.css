@@ -56,7 +56,7 @@
 .projection__note {
   margin: 0;
   padding-top: var(--space-1);
-  border-top: var(--bw-hair) dashed var(--border-hairline);
+  border-top: var(--bw-hair) solid var(--border-hairline);
   font-size: var(--fs-ui);
   line-height: var(--lh-body);
   color: var(--text-muted);

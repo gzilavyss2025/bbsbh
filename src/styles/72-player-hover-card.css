@@ -39,7 +39,7 @@
      card identifies a CLUB, it is not a spoiler cover (ADR-0030's "a club
      may colour a card that identifies the club"). No known color (an
      unaffiliated MiLB id) just leaves the spine the card's own paper. */
-  background: var(--phcard-accent, var(--rule-soft));
+  background: var(--phcard-accent, var(--border-hairline));
 }
 
 .phcard__head {
@@ -82,7 +82,7 @@
 
 /* The club tag under the name, a paper Pill tag (#1131) on the inset paper.
    The level tag takes the paper fill's own rule edge and body ink. The rehab
-   tag is dashed in pencil, because a rehab stint is temporary. The card
+   tag only differs in its edge colour and ink. The card
    stays bespoke; the tag keeps its place under the name, its overflow rules,
    and its tighter caps tracking. It is as wide as the name column at most,
    and at the pill's --ls-label "On rehab · AAA · Iowa Cubs" ran 5px past it. */
@@ -100,7 +100,6 @@
 .phcard__tag--rehab {
   --pill-edge: var(--graphite-soft);
   --pill-ink: var(--text-caption);
-  border-style: dashed;
 }
 
 .phcard__crest {

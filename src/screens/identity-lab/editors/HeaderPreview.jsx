@@ -1,4 +1,5 @@
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
+import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 import { MARK_SCALE_LIMITS, barMarkTone } from '../../../lib/headerTheme.js'
 import { shiftStepKeys } from './numberSteps.js'
 import { HexField } from '../HexField.jsx'
@@ -147,11 +148,11 @@ export function HeaderFields({ rawColors, onField }) {
 export function UmpireCall({ contrast }) {
   const passes = contrast >= AA_TEXT
   return (
-    <div className="idlab__umpire">
+    <Cluster align="baseline" className="idlab__umpire">
       <span className={`idlab__umpirechip${passes ? '' : ' idlab__umpirechip--out'}`}>
         {passes ? 'Safe' : 'Out'} · {contrast.toFixed(2)}:1
       </span>
       <span className="idlab__umpirenote">On bar vs bar — WCAG AA needs {AA_TEXT}:1</span>
-    </div>
+    </Cluster>
   )
 }

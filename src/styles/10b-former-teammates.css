@@ -232,7 +232,7 @@
 }
 
 .ladder__badge--farm {
-  border-style: dashed;
+  border-style: solid;
 }
 
 /* The legend's sample: the badge's border alone, since either club can wear it. */

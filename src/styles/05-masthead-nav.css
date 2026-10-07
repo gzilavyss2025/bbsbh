@@ -141,7 +141,7 @@
   padding: 2px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
-  background: var(--tint, var(--paper-1));
+  background: var(--tint, var(--bg-page));
   box-shadow: var(--inset-cell);
 }
 
@@ -422,7 +422,7 @@
   padding: var(--space-2);
   appearance: none;
   cursor: pointer;
-  border: var(--bw-hair) dashed var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
   color: var(--accent-primary);
@@ -434,7 +434,7 @@
 }
 .txntl-expand:hover {
   background: var(--border-rule);
-  color: var(--paper-2);
+  color: var(--text-on-ink);
 }
 .txntl-expand:focus-visible {
   outline: 2px solid var(--focus-ring);

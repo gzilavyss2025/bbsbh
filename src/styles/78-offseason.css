@@ -37,7 +37,7 @@
   gap: var(--space-2) var(--space-3);
   margin: 0;
   padding-bottom: var(--space-1h);
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 .oseason__title {
   margin: 0;
@@ -119,7 +119,7 @@
 .wintercal {
   margin-top: var(--space-6);
   padding-top: var(--space-4);
-  border-top: var(--bw-hair) solid var(--rule-soft);
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .wintercal__list {
   display: flex;
@@ -141,7 +141,7 @@
   flex-direction: column;
   gap: 2px;
   padding-left: var(--space-3);
-  border-left: var(--bw-rule) solid var(--rule);
+  border-left: var(--bw-rule) solid var(--border-rule);
   white-space: nowrap;
 }
 .wintercal__date {
@@ -386,7 +386,7 @@
   color: var(--text-caption);
 }
 .pgame__dot {
-  color: var(--rule);
+  color: var(--border-rule);
 }
 
 .pgame__actions {

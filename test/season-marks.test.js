@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { seasonMark, seasonTile, seasonTheme, seasonMasthead, PERIOD_THEME } from '../src/lib/identity/seasonMarks.js'
+import { seasonMark, seasonTile, seasonTheme, seasonMasthead, eraTheme, PERIOD_THEME } from '../src/lib/identity/seasonMarks.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass } from '../src/lib/headerTheme.js'
 import SEASON_MARKS from '../src/lib/data/season-marks.json' with { type: 'json' }
 
@@ -99,4 +99,33 @@ test('seasonMasthead: a season-covered era drops today\'s bar art and scale', ()
   const today = { url: '/x.svg', scale: 1.2 }
   assert.deepEqual(seasonMasthead(119, 1956, today), { url: null, scale: null })
   assert.equal(seasonMasthead(119, 2026, today), today)
+})
+
+// Era colours (PR 2): an era that carries a triad dresses its bar and tile in
+// it; one that does not keeps the neutral chrome. Never today's colours.
+test('eraTheme: a coloured era is a header triad, an uncoloured one is null', () => {
+  assert.equal(eraTheme({ name: 'x' }), null)
+  assert.equal(eraTheme({ bar: '#005A9C' }), null, 'a bar with no onBar is not a theme')
+  const t = eraTheme({ bar: '#005A9C', onBar: '#FFFFFF' })
+  assert.equal(t.bar, '#005A9C')
+  assert.equal(t.accent, '#005A9C', 'accent falls back to the bar')
+  assert.equal(t.onBarTone, 'light')
+  assert.equal(eraTheme({ bar: '#FFC52F', accent: '#000000', onBar: '#101820' }).onBarTone, 'dark')
+})
+
+test('seasonMark carries the era colours, null when it has none', () => {
+  const era = seasonMark(119, 1956)
+  assert.equal(era.bar ?? null, SEASON_MARKS.clubs['119'].find((e) => e.from === 1945).bar ?? null)
+})
+
+// The guard half of the same promise check-contrast.mjs makes for the club stores.
+test('every coloured era in the table has an onBar that clears AA', async () => {
+  const { contrastRatio } = await import('../src/lib/contrast.js')
+  for (const [id, eras] of Object.entries(SEASON_MARKS.clubs)) {
+    for (const e of eras) {
+      if (!e.bar && !e.onBar) continue
+      assert.ok(e.bar && e.onBar, `${id} ${e.from}-${e.to} needs both bar and onBar`)
+      assert.ok(contrastRatio(e.onBar, e.bar) >= 4.5, `${id} ${e.from}-${e.to} onBar fails AA`)
+    }
+  }
 })

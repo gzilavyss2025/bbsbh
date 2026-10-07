@@ -93,7 +93,7 @@
 }
 .sectionhead--label {
   padding-bottom: var(--space-1);
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 .sectionhead--label .sectionhead__title,
 .sectionhead--rule .sectionhead__title {
@@ -165,7 +165,7 @@
    the card under it clips them (overflow: hidden), or it bleeds. */
 .sectionhead--club {
   background: transparent;
-  border-bottom: var(--bw-hair) solid var(--sectionhead-rule, var(--rule-soft));
+  border-bottom: var(--bw-hair) solid var(--sectionhead-rule, var(--border-hairline));
   border-radius: 0;
   color: var(--text-caption);
 }

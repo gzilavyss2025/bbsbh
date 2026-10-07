@@ -56,7 +56,7 @@
   padding: var(--space-3h) var(--space-2h) var(--space-3);
   /* The tile is a Card (sheet, flush body; #1113), which draws the edge, the
      corners and the clip. Its ground is the jersey's own tint, not paper. */
-  background: var(--tint, var(--paper-1));
+  background: var(--tint, var(--bg-page));
   color: var(--ink, var(--text-heading));
 }
 .jerseydeck__card.jerseydeck__card--pinstripe {
@@ -288,7 +288,7 @@
 .team-score__row--driver {
   min-width: 0;
   padding: var(--space-2);
-  border: var(--bw-hair) solid var(--rule-soft);
+  border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--surface-inset) 62%, var(--surface-card));
   transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease;
@@ -327,7 +327,7 @@
   height: 3px;
   overflow: hidden;
   border-radius: var(--radius-pill);
-  background: var(--rule-soft);
+  background: var(--border-hairline);
 }
 .team-score__meter > span {
   display: block;
@@ -340,8 +340,8 @@
   align-items: center;
   gap: 2px var(--space-2);
   padding: var(--space-2) var(--space-3);
-  border-top: var(--bw-hair) solid var(--rule-soft);
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
   background: color-mix(in srgb, var(--surface-inset) 42%, transparent);
 }
 .team-score__row--compact .team-score__rowtop {
@@ -443,7 +443,7 @@
   top: 21px;
   height: 2px;
   border-radius: 2px;
-  background: var(--rule-soft);
+  background: var(--border-hairline);
 }
 .team-score__track-mid {
   position: absolute;
@@ -451,7 +451,7 @@
   top: 14px;
   width: 1px;
   height: 16px;
-  background: var(--rule);
+  background: var(--border-rule);
 }
 .team-score__dot {
   position: absolute;
@@ -707,7 +707,7 @@
   width: 22px;
   height: 22px;
   padding: 0;
-  border: var(--bw-hair) solid var(--rule-soft);
+  border: var(--bw-hair) solid var(--border-hairline);
   border-radius: 50%;
   background: var(--surface-card);
   color: var(--graphite);
@@ -775,8 +775,8 @@
 .team-score__detail {
   margin: -2px 10px 0;
   padding: var(--space-2) var(--space-2h) var(--space-2);
-  border-top: var(--bw-hair) solid var(--rule-soft);
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
   background: color-mix(in srgb, var(--surface-inset) 55%, transparent);
   opacity: 1;
   transform: translateY(0);
