@@ -1203,6 +1203,8 @@ don't run these by hand.
   MLB-only roster-move story feed, ONE FILE PER ORG per season, written even with
   no moves (`days: []`) so a 404 means "no such season", never "quiet club".
   `index.json` holds the metadata: once `final`, a run skips the season unless forced.
+  The NEXT season's file owns the winter (#1477): a season runs from the day after the previous
+  `seasonEndDate`, and the default season turns to next year the day after this year's end.
 
 - `gen-highlights.mjs` also → `public/data/highlights/day/{MMDDYYYY}.json` — the
   per-slate-date **condensed-game index**, `{gamePk: {title, duration, poster,
