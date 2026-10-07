@@ -62,6 +62,10 @@ test('restampGame: --recheck moves a postseason game swept as R, and never touch
   // A schedule row with no linescore still sets the scope and keeps the length on file.
   restampGame(db, 9, { scope: 'P', shape: { finalInning: null } })
   assert.equal(db.prepare('SELECT final_inning FROM abs_ingested_games').get().final_inning, 9)
+  // And a length already on file is never overwritten: the sweep read it off
+  // the plays, which the schedule row does not carry.
+  restampGame(db, 9, { scope: 'P', shape: { finalInning: 6, bottomPlayed: 0, scheduledInnings: 9 } })
+  assert.equal(db.prepare('SELECT final_inning FROM abs_ingested_games').get().final_inning, 9)
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM abs_challenges').get().n, 1)
 })
 
@@ -165,4 +169,14 @@ test('the ABS page reads its scope from the address alone', () => {
   const page = readFileSync(new URL('../src/screens/around-the-game/AbsChallengesPage.jsx', import.meta.url), 'utf8')
   assert.doesNotMatch(page, /localStorage/)
   assert.match(page, /scopeParam \?\? 'reg'/)
+})
+
+// Gary, 2026-10-06: under Postseason the umpire board's floor is 1 game. A plate
+// umpire works a handful of October games at most, so 15 left the board empty.
+test('umpireBoard: the postseason floor is 1 game, so a man with one October plate is on it', async () => {
+  const { umpireBoard, MIN_UMPIRE_GAMES_POST } = await import('../src/api/around-the-game/absChallenges.js')
+  const summary = { byUmpire: [{ umpireId: 7, name: 'An Umpire', games: 1, n: 3, success: 2, rate: 2 / 3, perGame: 3 }] }
+  assert.equal(MIN_UMPIRE_GAMES_POST, 1)
+  assert.deepEqual(umpireBoard(summary, 'rate', MIN_UMPIRE_GAMES_POST).map((u) => u.umpireId), [7])
+  assert.deepEqual(umpireBoard(summary, 'rate').map((u) => u.umpireId), [])
 })

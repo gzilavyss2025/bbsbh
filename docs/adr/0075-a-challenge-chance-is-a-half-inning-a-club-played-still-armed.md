@@ -133,3 +133,17 @@ expected to fire on nothing.
   stricter.
 - The figures here move as the season runs. They were measured on 4,418 games —
   2,269 MLB and 2,149 Triple-A — as of 2026-09-16.
+
+## Addendum (2026-10-06): the plays decide `bottom_played`, and `--recheck` only fills
+
+The `runs`-key rule was wrong on 15 of 30 rain-shortened 2026 games. A
+shortened game's feed pads `innings` to nine (the padded last entry has no
+`runs`), and the feed drops `runs` from a half that rain stops partway. The
+schedule row can say `runs: 0` for a half where no pitch was thrown (gamePk
+824807). So:
+
+- The sweep passes the feed's plays to `gameShape`: the home club batted the
+  last inning when a pitch was thrown in its bottom half.
+- `--recheck` still sets a game's scope, but writes the length only for a game
+  with none on file. It no longer overwrites the sweep's value with the schedule's.
+- The 15 stored games were corrected from their own feeds (Gary, 2026-10-06).

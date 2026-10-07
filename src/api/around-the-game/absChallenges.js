@@ -44,6 +44,7 @@ export const LEVELS = [
 // one call. Both floors are stated on the page rather than applied silently.
 export const MIN_PLAYER_CHALLENGES = 5
 export const MIN_UMPIRE_GAMES = 15
+export const MIN_UMPIRE_GAMES_POST = 1 // an October plate is a handful of games (Gary, 2026-10-06)
 
 // Which levels the file actually carries, in LEVELS order. A level with no
 // swept games is left out rather than offered as an empty board.

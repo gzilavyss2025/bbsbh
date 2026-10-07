@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react'
 import {
   fetchAbsChallenges,
   levelsIn,
+  MIN_UMPIRE_GAMES,
+  MIN_UMPIRE_GAMES_POST,
   summaryFor,
 } from '../../api/around-the-game/absChallenges.js'
 import {
@@ -265,8 +267,13 @@ export function AbsChallengesPage({ seasonYear, vs, scope: scopeParam }) {
           <LongestRuns summary={summary} clubs={clubs} />
           {/* The denominators are regular-season roster totals. */}
           {scope === 'reg' && <HowOften exposure={exposureFor(exposure, shown)} />}
-          <UmpireBoard summary={summary} seasonYear={view.shown} />
-          <AfterAWin summary={summary} data={data} level={shown} />
+          <UmpireBoard
+            summary={summary}
+            seasonYear={view.shown}
+            minGames={scope === 'post' ? MIN_UMPIRE_GAMES_POST : MIN_UMPIRE_GAMES}
+          />
+          {/* Seventeen October games cannot carry a claim about momentum (Gary, 2026-10-06). */}
+          {scope !== 'post' && <AfterAWin summary={summary} data={data} level={shown} />}
           <MissBands summary={summary} />
           <BiggestOverturn summary={summary} clubs={clubs} seasonYear={view.shown} />
 

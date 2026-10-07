@@ -62,7 +62,9 @@ The share of those challenges that stood up runs from 38.9% to 70.2%.
 thirty points on a single call, so the board takes only umpires with **15 or
 more swept games** (`MIN_UMPIRE_GAMES`). The floor is printed on the page
 rather than applied silently — a board that drops rows without saying so is a
-board a reader cannot check.
+board a reader cannot check. Under Postseason the floor is **1 game**
+(`MIN_UMPIRE_GAMES_POST`, Gary, 2026-10-06): an October plate is a handful of
+games at most, and 15 left the board empty.
 
 **This is not the `/umpire-rankings` figure, and the page says so twice.** That
 board scores **every called pitch** against the rule-book zone. This one scores
@@ -368,6 +370,9 @@ four minutes.
 ## 7. After a win, after a loss
 
 **This is the finding most easily lost, and the control must ship with it.**
+
+The section shows under Regular and All only. Under Postseason it is hidden: a
+few October games cannot carry a claim about momentum (Gary, 2026-10-06).
 
 **Counted straight it looks like nerve.** An MLB club asks **15.20 times per
 100 armed half-innings after winning a review and 11.30 after losing one** — a

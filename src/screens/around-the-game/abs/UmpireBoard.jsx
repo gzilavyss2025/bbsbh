@@ -42,7 +42,7 @@ import { commas, num2, pct1 } from './format.js'
 // because that is the view the bar is drawn for; `showAll` swaps in every
 // qualifying man, in the same order, with the same ranks.
 
-export function UmpireBoard({ summary, seasonYear }) {
+export function UmpireBoard({ summary, seasonYear, minGames = MIN_UMPIRE_GAMES }) {
   const [umpSort, setUmpSort] = useState('rate')
   const [showAll, setShowAll] = useState(false)
   // The control names the table it opens, and the id is generated rather than
@@ -50,7 +50,7 @@ export function UmpireBoard({ summary, seasonYear }) {
   // give both the same one, and `aria-controls` would point at whichever came
   // first.
   const boardId = useId()
-  const umps = useMemo(() => (summary ? umpireBoard(summary, umpSort) : []), [summary, umpSort])
+  const umps = useMemo(() => (summary ? umpireBoard(summary, umpSort, minGames) : []), [summary, umpSort, minGames])
 
   // The league's own rate is the baseline every bar is measured from, and the
   // widest margin on it is the scale. Both come off the whole qualifying
@@ -118,7 +118,7 @@ export function UmpireBoard({ summary, seasonYear }) {
             <th className="team">
               Umpire
               <span className="rpt__note">
-                Minimum {MIN_UMPIRE_GAMES} games · challenged pitches only
+                Minimum {minGames} game{minGames === 1 ? '' : 's'} · challenged pitches only
               </span>
             </th>
             <th>Games</th>
