@@ -555,7 +555,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: var(--tint, var(--paper-1));
+  background: var(--tint, var(--bg-page));
 }
 .bs__boardLogobox--pinstripe {
   background: repeating-linear-gradient(
@@ -628,7 +628,7 @@
    inning cells beside them. */
 .bs__grid--board .bs__boardFinal {
   width: 26px;
-  background: var(--paper-1);
+  background: var(--bg-page);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   color: var(--text-heading);

@@ -11,8 +11,8 @@
   overflow: hidden;
   color: var(--text-body);
   background:
-    radial-gradient(circle at 94% -18%, color-mix(in srgb, var(--rule) 34%, transparent), transparent 42%),
-    linear-gradient(145deg, var(--paper-3), color-mix(in srgb, var(--paper-2) 88%, var(--paper-1)) 68%);
+    radial-gradient(circle at 94% -18%, color-mix(in srgb, var(--border-rule) 34%, transparent), transparent 42%),
+    linear-gradient(145deg, var(--surface-inset), color-mix(in srgb, var(--surface-card) 88%, var(--bg-page)) 68%);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-raised);
@@ -23,7 +23,7 @@
   inset: 0;
   content: '';
   pointer-events: none;
-  background: linear-gradient(110deg, color-mix(in srgb, var(--paper-3) 68%, transparent), transparent 35%);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--surface-inset) 68%, transparent), transparent 35%);
   border-radius: inherit;
 }
 .contractcard__header {
@@ -136,7 +136,7 @@
 .contractcard__ticker > div {
   min-width: 0;
   padding: var(--space-2) var(--space-4);
-  background: color-mix(in srgb, var(--paper-3) 78%, var(--paper-2));
+  background: color-mix(in srgb, var(--surface-inset) 78%, var(--surface-card));
 }
 
 /* An odd last fact spans the pair rather than leaving a filled half-cell
@@ -206,7 +206,7 @@
   height: 7px;
   content: '';
   background: var(--clay);
-  border: var(--bw-hair) solid var(--paper-3);
+  border: var(--bw-hair) solid var(--surface-inset);
   border-radius: var(--radius-pill);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--clay) 14%, transparent);
 }
@@ -278,7 +278,7 @@
   height: 7px;
   content: '';
   background: var(--seg-dot);
-  border: var(--bw-hair) solid var(--paper-3);
+  border: var(--bw-hair) solid var(--surface-inset);
   border-radius: var(--radius-pill);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--seg-dot) 14%, transparent);
 }
@@ -422,7 +422,7 @@
   margin-left: var(--space-2);
   padding: 2px var(--space-1);
   color: var(--text-caption);
-  background: color-mix(in srgb, var(--rule) 30%, transparent);
+  background: color-mix(in srgb, var(--border-rule) 30%, transparent);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   font-family: var(--font-display);

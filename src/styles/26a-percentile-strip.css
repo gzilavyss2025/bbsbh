@@ -158,7 +158,7 @@
   inset-inline: 0;
   top: 50%;
   height: var(--bw-hair);
-  background: var(--rule-soft);
+  background: var(--border-hairline);
   transform: translateY(-50%);
 }
 
