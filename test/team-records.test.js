@@ -11,6 +11,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import { DatabaseSync } from 'node:sqlite'
+import { storeGame, rereadPks } from '../scripts/lib/records/ingest.mjs'
 import {
   inningRuns,
   isPlayedFinal,
@@ -902,4 +903,35 @@ test('uniqueByGamePk keeps each gamePk once, first listing wins', () => {
   const b = { game: { gamePk: 2 }, date: '2026-05-02' }
   assert.deepEqual(uniqueByGamePk([a, dup, b]), [a, b])
   assert.deepEqual(uniqueByGamePk([]), [])
+})
+
+test('rereadPks lists ingested games dated inside the window, each once', () => {
+  const ingested = [
+    { game_pk: 1, date: '2026-10-05' }, // 2 days old, in
+    { game_pk: 2, date: '2026-10-02' }, // 4 days old, out
+    { game_pk: 3, date: '2026-10-04' }, // 3rd day, in
+    { game_pk: 1, date: '2026-10-06' }, // same gamePk twice
+  ]
+  assert.deepEqual(rereadPks(ingested, '2026-10-06', 3).sort(), ['1', '3'])
+  assert.deepEqual(rereadPks([], '2026-10-06', 3), []) // a game not on file is a normal candidate
+})
+
+test('a re-read game replaces its rows and adds no ledger mark', () => {
+  const db = new DatabaseSync(':memory:')
+  db.exec(readFileSync(new URL('../scripts/lib/schema.sql', import.meta.url), 'utf8'))
+  const row = (errors) => ({
+    game_pk: 7, team_id: 158, season: 2026, sport_id: 1, date: '2026-10-05', opp_id: 10, result: 'W',
+    payload: { errors },
+  })
+  storeGame(db, [row(1)])
+  const snap = () => [
+    db.prepare('SELECT payload_json FROM team_record_games').all(),
+    db.prepare('SELECT COUNT(*) AS n FROM team_record_ingested_games').get().n,
+  ]
+  storeGame(db, [row(2)])
+  const [rows, marks] = snap()
+  assert.deepEqual(rows.map((r) => JSON.parse(r.payload_json).errors), [2])
+  assert.equal(marks, 1)
+  storeGame(db, [row(2)]) // feed unchanged: the same state
+  assert.deepEqual(snap(), [rows, marks])
 })

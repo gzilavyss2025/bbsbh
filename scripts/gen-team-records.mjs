@@ -18,11 +18,12 @@
 //      precomputed season total could not do that without a date-keyed
 //      snapshot per club per day.
 //
-// APPEND-ONLY / incremental, same shape as gen-pitch-arsenal.mjs: each run
-// sweeps a trailing window of dates and ingests only newly-Final games not
-// already on file (team_record_ingested_games is the guard). The nightly cost
-// is the ~65 games that actually finished, never the season. The price: a
-// statsapi correction to a game already on file waits for a re-ingest.
+// INCREMENTAL, same shape as gen-pitch-arsenal.mjs: each run sweeps a trailing
+// window of dates and ingests newly-Final games not already on file
+// (team_record_ingested_games is the guard). statsapi corrects a box score after
+// Final, so a game dated inside the window is read AGAIN each run (REREAD_DAYS)
+// and its rows replaced; --reingest does the same for any range by hand (#1466).
+// Older games stay as first read, until a --reingest range reaches them.
 //
 // THREE calls per game, no more: the date's schedule (bulk, one per date per
 // level, carrying the full linescore), the box score (team home runs and both
@@ -44,6 +45,9 @@
 //   node scripts/gen-team-records.mjs                 # trailing 3 days
 //   node scripts/gen-team-records.mjs --days=200      # season-to-date backfill
 //   node scripts/gen-team-records.mjs --since=2026-04-01 --until=2026-05-01
+//   node scripts/gen-team-records.mjs --reingest --since=2026-04-01 --until=2026-05-01
+//                                                     # re-read games already on
+//                                                     # file, to pick up corrections
 //   node scripts/gen-team-records.mjs --sports=1      # restrict the sweep
 //   node scripts/gen-team-records.mjs --export-only   # rebuild the JSON from
 //                                                     # rows already on disk,
@@ -57,7 +61,7 @@ import { readFile } from 'node:fs/promises'
 import { writeShards } from './lib/io.js'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
-import { parseArgs, dateRange } from './lib/args.mjs'
+import { parseArgs, dateRange, isoDay } from './lib/args.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import {
   isPlayedGame,
@@ -68,14 +72,15 @@ import {
   isGetawayDay,
   dailyDivisionRanks,
 } from './lib/team-records.mjs'
-import { pitchHandsFor, pitcherRolesFor, rowsForGame, shipRow } from './lib/records/ingest.mjs'
+import { pitchHandsFor, pitcherRolesFor, rowsForGame, shipRow, storeGame,
+  REREAD_DAYS, rereadPks } from './lib/records/ingest.mjs'
 import { homeVenueByTeam, siteOf } from './lib/schedule-shape.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'team-records')
 const teamsFile = join(here, '..', 'public', 'data', 'teams.json')
 
-const DEFAULT_DAYS = 3
+const DEFAULT_DAYS = REREAD_DAYS
 // MLB + the four full-season MiLB levels + Rookie (sportId 16, complex leagues
 // like the ACL/FCL/DSL). Nothing here depends on `probablePitcher` or assumes a
 // 9-inning game — `starterLine` reads the boxscore's actual `pitchers[0]`, and
@@ -105,10 +110,10 @@ function datesBetween(startDate, endDate) {
 // ---------------------------------------------------------------------------
 
 // Final regular-season games in the window, at every swept level, that aren't
-// already on file. A Postponed or Cancelled row reads "Final" too, keeps its
+// already on file (`skip`). A Postponed or Cancelled row reads "Final" too, keeps its
 // original date in the feed and carries no linescore, so isPlayedGame drops
 // it rather than ingesting it as a 0-0 tie.
-async function candidatesFor(dates, existing) {
+async function candidatesFor(dates, skip) {
   const out = []
   for (const sportId of sports) {
     for (const date of dates) {
@@ -123,7 +128,7 @@ async function candidatesFor(dates, existing) {
       }
       for (const g of (slate.dates ?? []).flatMap((d) => d.games ?? [])) {
         if (!isPlayedGame(g)) continue
-        if (existing.has(String(g.gamePk))) continue
+        if (skip.has(String(g.gamePk))) continue
         const away = g.teams?.away?.team
         const home = g.teams?.home?.team
         if (!away?.id || !home?.id) continue
@@ -300,25 +305,20 @@ async function main() {
 
   if (!args['export-only']) {
     const dates = datesBetween(startDate, endDate)
-    const existing = new Set(
-      db.prepare('SELECT game_pk FROM team_record_ingested_games').all().map((r) => String(r.game_pk)),
+    const ingested = db.prepare('SELECT game_pk, date FROM team_record_ingested_games').all()
+    // Skip every game on file except those inside the re-read window (all of
+    // them with --reingest, which re-reads the whole date range).
+    const reread = args.reingest ? null : new Set(rereadPks(ingested, isoDay(new Date())))
+    const skip = new Set(
+      ingested.map((r) => String(r.game_pk)).filter((pk) => reread && !reread.has(pk)),
     )
-    const candidates = await candidatesFor(dates, existing)
+    const candidates = await candidatesFor(dates, skip)
     console.log(`${candidates.length} game(s) to ingest (${startDate}..${endDate})`)
 
     const hands = {}
     for (const sportId of sports) Object.assign(hands, await pitchHandsFor(sportId, roleSeason))
 
-    const insertRow = db.prepare(
-      `INSERT OR REPLACE INTO team_record_games (
-         game_pk, team_id, season, sport_id, date, opp_id, result, payload_json
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    const markIngested = db.prepare(
-      'INSERT OR IGNORE INTO team_record_ingested_games (game_pk, date, season) VALUES (?, ?, ?)',
-    )
-
-    let ingested = 0
+    let done = 0
     // Chunked so a checkpoint can land mid-backfill: the pool runs the
     // fetches, the writes happen on this thread in order.
     for (let i = 0; i < candidates.length; i += CHECKPOINT_EVERY) {
@@ -330,22 +330,16 @@ async function main() {
           console.error(`gamePk ${chunk[j].game.gamePk}: fetch failed, will retry next run`)
           continue
         }
-        for (const r of rows) {
-          insertRow.run(
-            r.game_pk, r.team_id, r.season, r.sport_id, r.date, r.opp_id, r.result,
-            JSON.stringify(r.payload),
-          )
-        }
-        markIngested.run(rows[0].game_pk, rows[0].date, rows[0].season)
-        ingested++
+        storeGame(db, rows)
+        done++
       }
       if (candidates.length > CHECKPOINT_EVERY) {
         await dumpGroup(db, 'team-records')
-        console.log(`checkpoint: ${ingested}/${candidates.length} ingested`)
+        console.log(`checkpoint: ${done}/${candidates.length} ingested`)
       }
     }
-    console.log(`${ingested} game(s) ingested`)
-    if (ingested > 0) await dumpGroup(db, 'team-records')
+    console.log(`${done} game(s) ingested`)
+    if (done > 0) await dumpGroup(db, 'team-records')
   }
 
   // The role refresh rides with a sweep, never with `--export-only` — that
