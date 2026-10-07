@@ -172,3 +172,42 @@ export function mergeTeamDraftIntoStore(store, draft, apply, { name } = {}) {
   }
   return next
 }
+
+// The Eras editor's two routes (scripts/lib/dev-season-marks.mjs). The lab owns
+// the per-season table, so the server writes season-marks.json itself and Vite
+// hot-reloads it. `action: 'save'` adds an era, or edits the one starting at
+// `replaceFrom`; `action: 'delete'` drops one. Resolve `{ era }` / `{ deleted }`
+// on success or `{ error }` with the server's reason.
+export async function saveEraRow(body) {
+  try {
+    const res = await fetch(`${DEV_SAVE_BASE}/era`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    const text = await res.text()
+    if (!res.ok) return { error: text || `era save failed (${res.status})` }
+    return JSON.parse(text)
+  } catch {
+    return { error: 'could not reach the era endpoint — is `npm run dev` running?' }
+  }
+}
+
+// POST one SVG or PNG as the era's mark: the file's bytes are the body, the
+// club and the era's first season ride the query. The server tells the two
+// apart by their content and names the file.
+export async function uploadEraArt({ teamId, from, bytes }) {
+  const query = `teamId=${encodeURIComponent(teamId)}&from=${encodeURIComponent(from)}`
+  try {
+    const res = await fetch(`${DEV_SAVE_BASE}/era-art?${query}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: bytes,
+    })
+    const text = await res.text()
+    if (!res.ok) return { error: text || `era art failed (${res.status})` }
+    return JSON.parse(text)
+  } catch {
+    return { error: 'could not reach the era art endpoint — is `npm run dev` running?' }
+  }
+}

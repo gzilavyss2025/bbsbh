@@ -1510,14 +1510,15 @@ Re-run only to fold in a new season.
   (`scripts/milb-history-seed.json`) for pre-2005 eras. **Edit the SEED, never the
   output.** See the generator header for the 2005-floor rationale.
 - `season-marks/fetch.mjs` → `src/lib/data/season-marks.json` + `public/logos/historical/` —
-  the mark a club wore in a past season (#1591). **Hand-run, NOT on a cron**: the art is
-  immutable. Reads `scripts/season-marks/seed.json` (**edit the SEED, never the output**),
-  asks Wikimedia Commons for each file's licence, and downloads only a file marked public
+  the mark a club wore in a past season (#1591). **The lab owns that table now** (the
+  Eras tab, `docs/identity-lab.md`): this script is a one-time bootstrap, and it refuses
+  to run without `--rebuild-from-seed`, because it would erase every era the lab added.
+  **Hand-run, NOT on a cron**: the art is immutable. Reads `scripts/season-marks/seed.json`, asks Wikimedia Commons for each file's licence, and downloads only a file marked public
   domain or CC0. Any other licence keeps `file: null` and a `skipped` note, so the reader
   draws the era's serif abbreviation (`abbr`, from the Stats API for those seasons) and the
   maintainer sees what needs a decision (#1626). An era Commons does not document carries
-  a `cite`. No era carries colours: no cited source gives period values, so a covered era
-  wears neutral chrome. The "trademarked" restriction is recorded per file. Reader:
+  a `cite`. This script sets no colours; an era carries its own
+  triad only when set in the lab, and otherwise wears neutral chrome. The "trademarked" restriction is recorded per file. Reader:
   `src/lib/identity/seasonMarks.js`, through `TeamLogo`'s `season` prop.
 - `gen-postseason-history.mjs` → `public/data/postseason-history.json` — the
   completed bracket (who played, who won, how many games, each team's 1-6

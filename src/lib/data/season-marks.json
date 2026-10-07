@@ -1,5 +1,5 @@
 {
-  "_hint": "Per-season club marks (#1591). Keyed by the CURRENT franchise team id. Each era is { from, to, name, abbr, file, cite, source, license, restriction }. Only eras whose mark differs from today's are listed. file null = covered, no art yet (TeamLogo draws abbr in a serif face, #1626). A covered era wears neutral chrome: no cited source gives period colours. Written by scripts/season-marks/fetch.mjs from scripts/season-marks/seed.json. Files live in public/logos/historical/.",
+  "_hint": "Per-season club marks (#1591). Keyed by the CURRENT franchise team id. Each era is { from, to, name, abbr, file, cite, source, license, restriction, bar, accent, onBar }. Only eras whose mark differs from today's are listed. file null = covered, no art yet (TeamLogo draws abbr in a serif face, #1626). A covered era wears neutral chrome unless it carries its own header triad (bar, accent, onBar; onBar must clear WCAG AA on bar). Written by the identity lab's Eras tab (scripts/lib/eras/dev-season-marks.mjs); do not run scripts/season-marks/fetch.mjs, it rebuilds this file from a seed. Files live in public/logos/historical/.",
   "clubs": {
     "108": [
       {
@@ -45,9 +45,12 @@
         "abbr": "CAL",
         "file": null,
         "skipped": "not downloaded yet; run fetch.mjs without --offline",
-        "source": "https://commons.wikimedia.org/wiki/File%3ACalifornia_Angels_logo_(1972-1988).svg",
+        "source": "https://commons.wikimedia.org/wiki/File%3ACalifornia_Angels_logo_(1972-1988).svg · Colours: teamcolorcodes.com/los-angeles-angels-color-codes (stated for 1973-85; 1986-88 same marks)",
         "license": "Public domain",
-        "restriction": "trademarked"
+        "restriction": "trademarked",
+        "bar": "#BF0D3E",
+        "accent": "#041C2C",
+        "onBar": "#FFFFFF"
       },
       {
         "from": 1989,
@@ -125,9 +128,12 @@
         "abbr": "MON",
         "file": null,
         "skipped": "not downloaded yet; run fetch.mjs without --offline",
-        "source": "https://commons.wikimedia.org/wiki/File%3AMontreal_Expos_Cap_Logo_(1992_to_2004).svg",
+        "source": "https://commons.wikimedia.org/wiki/File%3AMontreal_Expos_Cap_Logo_(1992_to_2004).svg · Colours: teamcolorcodes.com/montreal-expos-colors (club-wide, Pantone 287 C / 185 C)",
         "license": "Public domain",
-        "restriction": "trademarked"
+        "restriction": "trademarked",
+        "bar": "#003087",
+        "accent": "#E4002B",
+        "onBar": "#FFFFFF"
       }
     ],
     "133": [
@@ -396,9 +402,12 @@
         "abbr": "SEA",
         "file": null,
         "skipped": "not downloaded yet; run fetch.mjs without --offline",
-        "source": "https://commons.wikimedia.org/wiki/File%3ASeattle_Pilots_Cap_Logo.svg",
+        "source": "https://commons.wikimedia.org/wiki/File%3ASeattle_Pilots_Cap_Logo.svg · Colours: Wikipedia, Seattle Pilots infobox (royal blue, gold)",
         "license": "Public domain",
-        "restriction": "trademarked"
+        "restriction": "trademarked",
+        "bar": "#012169",
+        "accent": "#FED141",
+        "onBar": "#FFFFFF"
       }
     ]
   }

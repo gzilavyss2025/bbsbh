@@ -27,6 +27,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import MLB_TREATMENT_TUNING from '../src/lib/data/mlb-treatment-tuning.json' with { type: 'json' }
 import MILB_TREATMENT_TUNING from '../src/lib/data/milb-treatment-tuning.json' with { type: 'json' }
+import SEASON_MARKS from '../src/lib/data/season-marks.json' with { type: 'json' }
 
 // ---- Load every custom property defined under src/tokens/ ----
 const tokensDir = resolve('src/tokens')
@@ -77,6 +78,8 @@ for (const p of PAIRINGS) {
 }
 
 // ---- Every per-club header triad in the hand-tuned stores ----
+// Plus every era's own triad in season-marks.json (the lab's Eras tab): an old
+// game's bar wears it, so the same `onBar` on `bar` rule holds.
 // A club's bar is whatever hex someone landed for it, so the check reads the
 // STORES rather than a token table. Only `onBar` vs `bar` is asserted: those
 // two are the text-on-background pair. `accent` is the bar's 3px kraft-tape
@@ -89,6 +92,17 @@ for (const p of PAIRINGS) {
 // re-inks it to match `onBar` rather than constraining which bars may exist
 // (see .metricbar--themed-dark in index.css / ADR-0030).
 const headerFailures = []
+for (const [teamId, eras] of Object.entries(SEASON_MARKS.clubs)) {
+  for (const era of eras) {
+    if (!era.bar && !era.onBar) continue
+    if (!era.bar || !era.onBar) {
+      headerFailures.push(`era ${teamId} ${era.name} ${era.from}-${era.to}: needs both bar and onBar`)
+      continue
+    }
+    const r = ratio(era.onBar, era.bar)
+    if (r < TEXT) headerFailures.push(`era ${teamId} ${era.name} ${era.from}-${era.to} — ${r.toFixed(2)}:1 (onBar ${era.onBar} on bar ${era.bar})`)
+  }
+}
 const headerRows = []
 let headerCount = 0
 for (const [label, store] of [['MLB', MLB_TREATMENT_TUNING], ['MiLB', MILB_TREATMENT_TUNING]]) {
@@ -246,7 +260,7 @@ if (allFailures.length) {
   }
   if (headerFailures.length) {
     console.error(
-      'A club header triad lives in src/lib/data/{mlb,milb}-treatment-tuning.json — pick a readable\n' +
+      'A club header triad lives in src/lib/data/{mlb,milb}-treatment-tuning.json (an era\'s, in season-marks.json) — pick a readable\n' +
         '`onBar` (or a darker `bar`) in the Team Identity Lab, which shows this same ratio live.',
     )
   }
