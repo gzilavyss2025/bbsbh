@@ -286,10 +286,11 @@ export { scopeOfGameType }
 
 // The scope lives on the GAME. A challenge row takes it through game_pk; a game
 // row with no scope is regular season (an old row, or a test fixture). 'all' is
-// both parts, never one counted over the other.
+// both parts, never one counted over the other. EVERY scope drops a challenge
+// row whose game is not on the ledger (a partial eviction, an old dump), so All
+// always equals Regular plus Postseason (#1603).
 export function inScope(rows, games, scope) {
-  if (scope === 'all') return { rows, games }
-  const kept = games.filter((g) => (g.scope ?? 'R') === scope)
+  const kept = scope === 'all' ? games : games.filter((g) => (g.scope ?? 'R') === scope)
   const pks = new Set(kept.map((g) => g.game_pk))
   return { rows: rows.filter((r) => pks.has(r.game_pk)), games: kept }
 }
