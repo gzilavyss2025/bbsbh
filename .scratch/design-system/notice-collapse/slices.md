@@ -481,6 +481,7 @@ for N2 to N8.
 Written by the N9 session. It records what shipped. It does not write the prompt for the
 dashed-rule fix, which is the last item of #1132 and stays open.
 
+0. **Links.** PR #1662 (draft). The #1132 status comment: https://github.com/gzilavyss2025/bbsbh/issues/1132#issuecomment-6040751737.
 1. **The base.** N9 sits on the N8c branch `claude/notice-n8c-rename-change-pm4g50`
    (PR #1659, which holds N8a #1658 and N8b #1657), not on `origin/main`. Gary said to start
    before the N8 merge (answered in the session). One stack, #1656 to #1659 plus N9, lands
