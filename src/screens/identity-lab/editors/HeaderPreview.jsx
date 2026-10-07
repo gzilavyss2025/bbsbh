@@ -1,7 +1,7 @@
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
+import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 import { MARK_SCALE_LIMITS, barMarkTone } from '../../../lib/headerTheme.js'
 import { shiftStepKeys } from './numberSteps.js'
-import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 import { HexField } from '../HexField.jsx'
 
 // The header chrome a lineup page wears when this club is in this jersey —
