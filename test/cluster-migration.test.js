@@ -35,6 +35,8 @@ const MIGRATED = {
   pgame__actions: { file: '78-offseason.css', gap: 'base', sites: 1, keeps: ['margin-top'] },
   seasonnote__leagues: { file: '78-offseason.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
   srecord__doors: { file: '78-offseason.css', gap: 'base', sites: 1, keeps: ['margin-top'] },
+  idlab__recolorpalette: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
+  idlab__monoinkparts: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 2, keeps: ['margin'] },
 }
 const LAYOUT = /(^|;|\n)\s*(display|flex|flex-flow|flex-direction|flex-wrap|gap|row-gap|column-gap)\s*:/
 

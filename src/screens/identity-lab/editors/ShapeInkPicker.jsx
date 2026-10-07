@@ -14,6 +14,8 @@
 // classifier's call — never routing back through a third "unpinned" stop. Each
 // caller owns its own way back to automatic, in bulk.
 
+import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
+
 const VERDICT_LABEL = {
   auto: 'Automatic',
   ink: 'Ink — part of the mark',
@@ -43,7 +45,7 @@ export function ShapeInkPicker({ picker, parts, pins, onToggle, children }) {
         {children}
       </div>
 
-      <ul className="idlab__monoinkparts">
+      <Cluster as="ul" className="idlab__monoinkparts">
         {parts.map((part) => {
           const verdict = pins[part.index] ?? 'auto'
           const effective = verdict === 'auto' ? part.auto : verdict
@@ -66,7 +68,7 @@ export function ShapeInkPicker({ picker, parts, pins, onToggle, children }) {
             </li>
           )
         })}
-      </ul>
+      </Cluster>
     </>
   )
 }

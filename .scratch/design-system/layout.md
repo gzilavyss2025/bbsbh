@@ -742,3 +742,36 @@ the three classes: identical at both widths. Only `srecord__doors` drew for real
 **Not seen.** `.pgame__actions` and `.seasonnote__leagues` did not draw (no live
 `statsapi` from the container, and `PickedGame` opens only in December); the synthetic
 check proves the CSS, not the page. `npm run visual` and `npm run e2e` were not run.
+
+## Cluster slice C3 (2026-10-07)
+
+Two identity-lab rules in `17-identity-lab-workbench.css` moved onto `Cluster`: 2 rules,
+3 JSX sites in 2 files. Base: `origin/main` at 1041d9d4. Picked because it had the most
+safe rows left that fit the 5-file cap without a 16px gap, a `<p>` host or an open PR's file.
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.idlab__recolorpalette` (`LogoRecolorEditor.jsx`) | snug, `align="center"` | div | `margin-top` |
+| `.idlab__monoinkparts` (`LogoRecolorEditor.jsx`, `ShapeInkPicker.jsx`) | snug, `as="ul"` | ul | `margin` (`.cluster--list` resets the rest) |
+
+**Test first.** Both joined `MIGRATED` in `test/cluster-migration.test.js`; it failed on the
+rules and the sites, and passes now. **Cascade.** The partial loads after `system/cluster.css`.
+No gap was off-step, so nothing snapped.
+
+**Left in their namespace.**
+- `.idlab__umpire` (`HeaderPreview.jsx`): a safe row, but removing its 7 lines takes the
+  partial to 1200 lines, which trips the `check-file-size` ratchet. Tightening that budget is a
+  6th file. Next slice: migrate it and tighten `BUDGETS` to 1200 in the same commit.
+- `.idlab__monoinksource` (tight, 2 sites in 2 more files), `.idlab__monoinkrow` (16px, no step).
+- `.cwb__candline` and `.cwb__rowactions`: they sit on `<p>`, and `Cluster` has no `p`. Changing
+  the element is a design choice; I did not make it.
+- `.cwb__progress`, `.cwb__qsub`, `.cwb__chips`: admin-gated, and 3 files, so they did not fit
+  beside the idlab rows.
+
+**Checked.** `geom.mjs` (`FREEZE=1 BLOCKIMG=1`, `?nointro`) on `/identity-lab`, 390 and 760px:
+both classes draw for real (1 and 2 elements). BEFORE (`HEAD`) vs AFTER: 1103 elements each,
+0 differences, same page heights, after dropping the nav logo `img`/`span` element, which flips
+between runs of UNCHANGED code (two BEFORE runs differ in element count too).
+
+**Not seen.** The `HeaderPreview` umpire row (not migrated). Interactive states of the
+recolor editor beyond first draw. `npm run visual` and `npm run e2e` were not run.
