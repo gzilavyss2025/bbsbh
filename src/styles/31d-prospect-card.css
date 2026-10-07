@@ -22,6 +22,13 @@
   border-bottom: var(--bw-hair) solid var(--border-rule);
 }
 
+.levelprog__head .sectionhead,
+.prospectcard__head .sectionhead {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 .levelprog__status,
 .levelprog__current span {
   display: block;
@@ -31,13 +38,6 @@
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-caption);
-}
-
-.levelprog__title {
-  font-family: var(--font-display);
-  font-size: var(--fs-h3);
-  line-height: var(--lh-title);
-  color: var(--text-body);
 }
 
 .levelprog__current {
@@ -84,13 +84,6 @@
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-caption);
-}
-
-.prospectcard__title {
-  font-family: var(--font-display);
-  font-size: var(--fs-h3);
-  line-height: var(--lh-title);
-  color: var(--text-body);
 }
 
 .prospectcard__body {

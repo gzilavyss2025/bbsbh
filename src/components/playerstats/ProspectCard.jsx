@@ -6,6 +6,7 @@ import { outsToIp } from '../../lib/math/innings.js'
 import { confidenceLabel, movementState } from '../../api/prospectTrend.js'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
 
 const CHART_H = 140
@@ -80,7 +81,7 @@ export function ProspectCard({ view, level, badge, group, preview = false }) {
     return (
       <Card frame="ledger" body="flush" className="prospectcard prospectcard--preview">
         <header className="prospectcard__head">
-          <h3 className="prospectcard__title">Prospect performance</h3>
+          <SectionHead look="label">Prospect performance</SectionHead>
           {hasBadge && <ProspectPill {...badge} />}
         </header>
         <p className="prospectcard__teaser">{standingLine(view, level)}</p>
@@ -91,7 +92,7 @@ export function ProspectCard({ view, level, badge, group, preview = false }) {
   return (
     <Card frame="ledger" body="flush" className="prospectcard">
       <header className="prospectcard__head">
-        <h3 className="prospectcard__title">Prospect performance</h3>
+        <SectionHead look="label">Prospect performance</SectionHead>
         {hasBadge && <ProspectPill {...badge} />}
       </header>
 

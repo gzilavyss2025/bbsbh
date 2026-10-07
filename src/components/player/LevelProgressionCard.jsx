@@ -1,5 +1,6 @@
 import '../../styles/31d-prospect-card.css'
 import { Card } from '../ui/frame/Card.jsx'
+import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // A factual level-by-level dossier: reached levels retain their year and
 // workload, the live assignment is explicit, and unreached levels remain the
@@ -18,7 +19,7 @@ export function LevelProgressionCard({ levels, debutYear }) {
   return (
     <Card frame="ledger" body="flush" className="levelprog">
       <header className="levelprog__head">
-        <h3 className="levelprog__title">Path to the Majors</h3>
+        <SectionHead look="label">Path to the Majors</SectionHead>
         {current && (
           <p className="levelprog__current">
             <span>Current level</span>

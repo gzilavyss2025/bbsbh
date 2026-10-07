@@ -1,5 +1,6 @@
 import '../../../styles/31d-prospect-card.css'
 import { Card } from '../../ui/frame/Card.jsx'
+import { SectionHead } from '../../ui/frame/SectionHead.jsx'
 import { Pill } from '../../ui/control/Pill.jsx'
 import { Headshot } from '../Headshot.jsx'
 import { PlayerLink } from '../PlayerLink.jsx'
@@ -17,7 +18,7 @@ export function FamilyBand({ entries, credit = [] }) {
   return (
     <Card frame="ledger" body="flush" className="levelprog prankhist">
       <header className="levelprog__head">
-        <h3 className="levelprog__title">Family in baseball</h3>
+        <SectionHead look="label">Family in baseball</SectionHead>
       </header>
       <ul className="prankhist__list" aria-label="Relatives who also played or managed">
         {entries.map((e, i) => (
