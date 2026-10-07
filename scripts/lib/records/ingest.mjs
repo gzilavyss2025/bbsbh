@@ -247,3 +247,34 @@ export function shipRow(r, getaway, roles) {
   put('ga', getaway ? 1 : 0)
   return row
 }
+
+// Writes one game's rows. A re-read row replaces the old one (game and club are
+// the key); the ledger mark is INSERT OR IGNORE, so a re-read adds no mark.
+export function storeGame(db, rows) {
+  const insert = db.prepare(
+    `INSERT OR REPLACE INTO team_record_games (
+       game_pk, team_id, season, sport_id, date, opp_id, result, payload_json
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+  )
+  for (const r of rows) {
+    insert.run(r.game_pk, r.team_id, r.season, r.sport_id, r.date, r.opp_id, r.result, JSON.stringify(r.payload))
+  }
+  db.prepare('INSERT OR IGNORE INTO team_record_ingested_games (game_pk, date, season) VALUES (?, ?, ?)').run(
+    rows[0].game_pk, rows[0].date, rows[0].season,
+  )
+}
+
+// How many days after a game's date the nightly sweep reads it again. statsapi
+// corrects a box score after Final (errors, hits, now and then a run), and the
+// ledger is otherwise append-only (#1466). Also the sweep's default window.
+export const REREAD_DAYS = 3
+
+// The ingested gamePks the sweep must read again: those dated inside the last
+// `days` days (today counts as day 1). `ingested` is rows of `{ game_pk, date }`.
+// A game not on file is not listed here; it is an ordinary candidate.
+export function rereadPks(ingested, today, days = REREAD_DAYS) {
+  const start = new Date(`${today}T00:00:00Z`)
+  start.setUTCDate(start.getUTCDate() - (days - 1))
+  const cutoff = start.toISOString().slice(0, 10)
+  return [...new Set(ingested.filter((r) => r.date >= cutoff).map((r) => String(r.game_pk)))]
+}

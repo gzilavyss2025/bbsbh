@@ -604,16 +604,21 @@ don't run these by hand.
   MiLB doubleheader is scheduled for seven innings and its eighth is extra
   baseball. Together they cost about 1.2 KB on a club's ~135-game season file,
   roughly 4.5%. SQLite-backed (`team-records` group,
-  ADR-0021), APPEND-ONLY over newly-Final games; `team_record_ingested_games` is
-  the idempotency guard, so the nightly cost is the ~65 games that finished,
-  never the season. `--export-only` does not change a fact that the row stores
-  at ingest (the batted-around count) or a statsapi correction to a game on
-  file. To apply one, re-ingest the season: delete its
-  `team_record_ingested_games` rows, dump the group, and sweep its dates again
-  (`--since`/`--until`). Then make sure that every `team_record_games` row has
-  a mark. A game that the sweep skips (a failed fetch, a changed status) keeps
-  its old row with no mark, and the nightly window never looks at it again.
-  #1296 re-ingested 2026 this way. The `team_record_games` table is **seven columns plus a `payload_json`**, not
+  ADR-0021), INCREMENTAL: `team_record_ingested_games` is
+  the idempotency guard, so a game dated before the window is read once.
+  **How corrections reach the ledger (#1466).** statsapi corrects a box score
+  after Final (errors, hits, a run now and then). Each run reads again every
+  game dated in the last `REREAD_DAYS` (3, in `scripts/lib/records/ingest.mjs`)
+  days, and the new rows replace the old ones (`INSERT OR REPLACE`; the mark is
+  `INSERT OR IGNORE`, so it does not change). A correction after day 3 needs a
+  hand run: `node scripts/gen-team-records.mjs --reingest --since=2026-04-01
+  --until=2026-05-01` re-reads every game in the range, on file or not
+  (`--reingest` alone uses the 3-day window). Only games that the schedule still
+  lists as played are read, and a failed fetch keeps the old row. Cost: the
+  schedule calls do not change; the box score and play-by-play calls grow from
+  the games that finished to the games of 3 days. `--export-only` does not change
+  a fact that the row stores at ingest (the batted-around count) or a
+  correction; those need a re-read. #1296 re-ingested 2026 by hand before this. The `team_record_games` table is **seven columns plus a `payload_json`**, not
   thirty-one, and the schema comment says why: `dumpGroup` repeats every column
   NAME on every row, so a six-level season would otherwise have committed
   megabytes of column names.
