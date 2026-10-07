@@ -8,6 +8,7 @@
   "git": {
     "deploymentEnabled": {
       "main": true,
+      "claude/nice-planck-c31mxn": true,
       "**": false
     }
   },
