@@ -41,12 +41,14 @@ lowest effort that can do that job well. Do these steps in order.
    and what it hands to the next. Mark prompts that can run in parallel.
 5. **Pick model and effort for each prompt.** Pick the cheapest rung that fits
    the hardest step in that prompt. The ladder runs from cheapest to strongest.
-   Haiku 4.5 has no effort setting: it errors if you send one, so never state an
-   effort for it. The other three models take low, medium, high, xhigh and max.
+   Haiku 5.5 takes an effort setting, like Sonnet 5.5, Opus 5.5 and Fable 5.1, so
+   always state one for it. Haiku 4.5 is the exception: it has no effort setting
+   and errors if you send one, so never state an effort for 4.5. Choose Haiku 5.5
+   over 4.5 unless the author names 4.5.
 
    | Rung | Model + effort | Work in the prompt |
    |---|---|---|
-   | 1 | Haiku 4.5 | Mechanical: rename, move, format, bump a version, run a generator script, look up a fact, list PRs or worktrees |
+   | 1 | Haiku 5.5, low (Haiku 4.5 has no effort) | Mechanical: rename, move, format, bump a version, run a generator script, look up a fact, list PRs or worktrees |
    | 2 | Sonnet 5.5, low | Quick edit, docs, a data refresh, a copy or typography tweak |
    | 3 | Sonnet 5.5, medium | **The everyday rung.** Add a test for known behavior, fix with a known cause, a slice that follows an existing pattern, agentic coding with a clear spec |
    | 4 | Sonnet 5.5, high | A feature across several files with some judgment; a test-first bug fix where the cause takes digging |
@@ -57,7 +59,13 @@ lowest effort that can do that job well. Do these steps in order.
    | 9 | Opus 5.5, max | Only after xhigh failed, or when one wrong answer is very costly |
    | 10 | Fable 5.1, medium or high | Only when Opus 5.5 at xhigh is not enough: the hardest reasoning or long autonomous work |
 
-   API price per million tokens (input / output): Haiku 4.5 $1 / $5, Sonnet 5.5
+   Haiku 5.5 is one rung with a range: low for mechanical work. For a narrow,
+   fully specified code change (named files, a test to write first), medium or
+   high on Haiku 5.5 can come before a jump to Sonnet 5.5. Move to Sonnet 5.5
+   when Haiku 5.5 at high gives a shallow result.
+
+   API price per million tokens (input / output): Haiku 4.5 $1 / $5, Haiku 5.5
+   $0.10 / $0.50 (prompts up to 100K tokens; $0.50 / $2.50 above that), Sonnet 5.5
    $2 / $10, Opus 5.5 $4 / $20, Fable 5.1 $10 / $50. Fable 5.1 costs 2.5 times
    as much as Opus 5.5, so pick it only when a rung above cannot do the job.
 
@@ -72,8 +80,8 @@ lowest effort that can do that job well. Do these steps in order.
    - Sonnet 5.5 at xhigh costs half as much per token as Opus 5.5 at xhigh. No
      measured data says how Sonnet 5.5 at xhigh compares with Opus 5.5 at medium
      or high. Treat rungs 5 to 7 as a judgment call and test on a real task.
-   - Always state the effort. Opus 5.5 defaults to medium, Sonnet 5.5 and
-     Fable 5.1 default to high, so an unstated effort picks different rungs.
+   - Always state the effort. Opus 5.5 and Haiku 5.5 default to medium, Sonnet 5.5
+     and Fable 5.1 default to high, so an unstated effort picks different rungs.
    - A spoiler-rule change never goes below rung 7.
    - Design work: more effort does not make a design better or more varied. Pick
      the rung by kind of work, then spend on checking, not on thinking.
@@ -91,7 +99,7 @@ lowest effort that can do that job well. Do these steps in order.
      Split the decision from the build: one prompt picks the direction, a cheaper
      prompt builds it. Name the palette and type, or point at the tokens in
      `src/styles/`, so the model does not fall back to its default house style.
-   - In a multi-agent run, match each phase: Haiku for survey and grep passes,
+   - In a multi-agent run, match each phase: Haiku 5.5 (low) for survey and grep passes,
      Sonnet 5.5 medium for checks that need judgment, Sonnet 5.5 high or Opus 5.5
      high for synthesis and docs that must read well.
 

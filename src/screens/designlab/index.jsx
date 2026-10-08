@@ -10,6 +10,7 @@ import { PillSystemHalf } from './pills.jsx'
 import { ClusterHalf, GridHalf, StackHalf } from './layout.jsx'
 import { CARDS, PILLS, PROTOTYPES } from './catalog.js'
 import { ScoutLab } from './scout/ScoutLab.jsx'
+import { NestedBoxes } from './nested/NestedBoxes.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import '../../styles/designlab/lab.css'
 
@@ -136,6 +137,7 @@ export function DesignLab() {
         {PROTOTYPES.map((p) => (
           <Entry key={p.id} title={p.title} path={p.path} verdict={p.verdict} tone="hold" note={p.note} wide>
             {p.id === 'scout' && <ScoutLab />}
+            {p.id === 'nested-boxes' && <NestedBoxes />}
           </Entry>
         ))}
       </Band>

@@ -117,8 +117,25 @@ There is no generator change and no outs-above-average fetch in version one.
   out the positional adjustment, which is a separate field. It correlates 0.93 with
   Savant outs above average across 563 players (part A).
 - It is a counting stat. A part-timer's near-zero value means few chances, not an
-  average glove, and the file has no innings field. The playing-time floor for the
-  rank is not set yet. Build step 6 must set it.
+  average glove, and the file has no innings field.
+- **Playing-time floor (decided at build, step 6, #1720): 200 plate appearances in a
+  season** (`FLD_MIN_PA` in `scripts/lib/ovr/build.mjs`). Plate appearances stand in
+  for innings (r = 0.91 in 2026). Of 0, 100, 200 and 300 plate appearances, 200 had
+  the best repeatability between 2025 and 2026 (Pearson 0.43, Spearman 0.38, 361 of
+  751 hitters kept). 300 only tied it on Pearson. There is no ground truth for glove
+  quality, so this measures repeatability only (**inference**: a repeatable number is
+  a better glove number). The rank is made per season among the hitters over the floor.
+  A tie takes the middle of its run, because many hitters sit on 0.0. The seasons are
+  then blended with the career weights, with no age shift. The pooled floor of about 600
+  plate appearances from the same research is not used, because the rank is per season.
+  A hitter under the floor in every season gets no Fielding bar, and its weight goes to
+  the other buckets. In the committed run that is 1 of 444 rated hitters.
+- **Current-season plate appearances.** `war.json` has no plate-appearance field. The
+  generator sums `paEnd` over the hitter's `mlb` entry in the nightly
+  `hitter-grid/{season}/` shards. A check on 2026 against the stats API (534 hitters with
+  50 or more plate appearances): the median ratio was 0.99, and 4 hitters changed side of
+  the 200 line. 89 of the 751 hitters in `war.json` are not in the grid, and none of them
+  has 200 plate appearances.
 - **Inference (part A):** catcher `fld` leaves out most framing value. Part A did
   not check this against a framing source.
 - Not in version one: Savant outs above average. The `oaa` column is already in the
@@ -179,6 +196,43 @@ The thresholds for "tracks" (Spearman 0.5 or more) and "relabelled" (0.9 or more
 are part B's judgment, so they are an **inference**. These numbers used the old
 weights, with Discipline and no Fielding. They do not test the new weights.
 
+**Re-run with the final method (step 6, #1720, data).** Weights 22/33/17/28 and
+30/45/25, stretch 2.0 and 1.5, Fielding with the 200-plate-appearance floor, and the
+career blend. Target: 2026 `war.json` (WAR, wRC+) and 2026 innings. The script is
+`.scratch/ovr/calibrate-final.mjs`. "2026 only" is the same code with the prior seasons
+removed, on part B's pool. "Final" is what `gen-ovr.mjs` writes, for rated players with a
+2026 row. Pitchers use 50 or more innings.
+
+| OVR vs | Pool | n | Pearson r | Spearman |
+| --- | --- | --- | --- | --- |
+| Hitters: WAR | part B (old weights) | 246 | 0.51 | 0.51 |
+| Hitters: WAR | 2026 only | 246 | 0.71 | 0.69 |
+| Hitters: WAR | final | 368 | 0.54 | 0.51 |
+| Hitters: wRC+ | part B (old weights) | 246 | 0.61 | 0.60 |
+| Hitters: wRC+ | 2026 only | 246 | 0.50 | 0.49 |
+| Hitters: wRC+ | final | 368 | 0.33 | 0.41 |
+| Pitchers: WAR per 200 IP | part B (old weights) | 325 | 0.77 | 0.71 |
+| Pitchers: WAR per 200 IP | 2026 only | 325 | 0.77 | 0.72 |
+| Pitchers: WAR per 200 IP | final | 326 | 0.67 | 0.62 |
+
+- Fielding raised the hitter WAR correlation (0.51 to 0.71 on one season) and lowered the
+  wRC+ one (0.61 to 0.50). That is expected: WAR holds defense and wRC+ does not.
+- The blend lowers every row. **Inference:** the target is one season and the rating is a
+  career, so the two should part. A rise for the blend would have been the surprise.
+- Spread, final run (`node scripts/gen-ovr.mjs`): 444 hitters, mean 58.0, SD 9.9, highest
+  99.0 (Bobby Witt Jr.), lowest 24.7 (Yasmani Grandal, last season 2024). 686 pitchers,
+  mean 58.9, SD 10.5, highest 94.0 (Felix Bautista, last season 2025), lowest 28.3 (Jake
+  Woodford). The blend squeezes the band again: the SD on one season is 11.9 (hitters) and
+  12.3 (pitchers). Nobody sits on the floor of 20, and one hitter sits on the cap of 99.
+- Review notes of the rating module, checked on real data: no value was a string (0
+  converted). 46 blended percentiles reached 0, 100 or past them (20 are a raw 0 or 100;
+  the age shift pushes the rest past), and the clamp in `percentileToRating` stops each
+  before `inverseNormalCdf`. No hitter has only Contact and Power (every one has Speed),
+  so the sparse-hitter spread cannot be measured on this data. The one hitter without a
+  Fielding bar rates 41.9.
+- Limits, unchanged: the weights come from one season, so no out-of-sample test exists.
+  The AAA anchor of 58 is weakly supported.
+
 - The weights come from one season, so no out-of-sample test exists until prior
   seasons are built.
 - Hitter misses come from defense, which Fielding now addresses, and from results
@@ -226,8 +280,13 @@ not swing a rating. It includes minor-league career history.
   swing length exist from 2023 only.
 - **Minor-league seasons.** They enter through the level ceilings above, at a
   discount. Minor-league years have no Statcast (part A), so they use the
-  level-relative stats percentile. **Gap:** the per-player minor-league season
-  lines need a new fetch. Nobody has scoped it.
+  level-relative stats percentile (`public/data/milb-seasons/` for 2021-2025,
+  `prospect-trend.json` for the current season). A row weighs recency x level weight
+  x playing time (`LEVEL_WEIGHT` in `src/api/milbSeasons.js`; 400 PA or 150 IP is
+  full). **Decided (2026-10-08, #1803):** only a player with fewer than 3 MLB seasons
+  has minor-league rows in his rating. With all rows, 26% of established hitters moved
+  by more than 2 points. **Guess:** the two kinds of season are averaged on the OVR
+  scale, one MLB rating standing for all its seasons.
 - **Career Fielding.** The per-season `fld` lives in `public/data/war-history/`
   (with `pa`), from 2023 on, hand-run through `gen-war-history.mjs`. The playing-time floor is still set at build time.
   **Inference:** pooling seasons reduces the counting-stat noise.
@@ -341,11 +400,43 @@ changed nothing. Record only, no action.
 
 ## Rating changes over time
 
-- A nightly snapshot of each player's OVR and bars goes into a sharded file, for
-  example `public/data/ovr-history/`, written by a new `scripts/gen-ovr.mjs`.
-  The reader goes through `staticJson.js` (`src/api/CLAUDE.md`).
-- `prospect-trend.json` already keeps weekly history for prospects. Reuse its
-  weeks for the first version.
+Built in step 8 (#1722). This is the data half. The card does not show it yet (#1703).
+
+- **The file.** `gen-ovr.mjs` also writes `public/data/ovr-history/{NN}.json`, on
+  `personId % 100`, in the same `bat` / `pit` split as `ovr/`. A player holds a list of
+  rows `[date, ovr, bars | null, 1?]`, oldest first. The date is the day the nightly
+  inputs were made (`generatedAt` of `savant-percentiles.json`). A rated date already on
+  disk is never rewritten, so a rerun on the same files writes the same bytes.
+- **What is kept** (`scripts/lib/ovr/history.mjs`): every day of the last 60 days
+  (`RECENT_DAYS`), then one row per week for the rest of the current season. Older
+  seasons are dropped.
+- **Seeded rows.** A prospect has no rating before step 7 (#1721), so the generator
+  seeds each prospect's series from `prospect-trend.json`, thinned by the rule above. A
+  seeded row ends in `1` and holds the prospect-trend **percentile**, not an OVR. It is
+  kept only before the player's first real row. A week with no percentile (no line) has
+  no row. Rows made by the old method, which summed every level (`atLevel` false, all
+  rows before 2026-10-01), are seeded too, by Gary's call, so the series shows a step at
+  2026-10-01 for a player who changed level. The weekly rows from 2026-03-29 to
+  2026-08-09 have no gap.
+- **Readers.** `fetchOvrHistory(personId, group)` in `src/api/ovr/ovrData.js` gives
+  `[{ date, ovr, bars, seeded }]`. `changeSince(snapshots, days = 7)` in
+  `src/api/ovr/history.js` gives `{ delta, from, to }`, or `null` until a snapshot at
+  least seven days older than the newest exists. It is measured from the newest
+  snapshot, not a clock. It is also `null` when one end is seeded and the other is not,
+  because a percentile and a rating are not one scale. `seasonSeries(snapshots, season)`
+  gives one year in date order, with `seeded` on each row.
+- **A major leaguer** has one real row on the first run, so its change is `null` until
+  the history is seven days old.
+- **Size.** The 8 KB shard line does not hold here, by Gary's call. About 11 rated players
+  a shard at 60 daily rows with bars (about 55 bytes a row) come to about 106 KB at the most
+  (**estimate** from the real row size, not yet measured at full length), so the generator
+  throws past 128 KB (`MAX_HISTORY_SHARD_BYTES`). A player page opens one shard. Sharding on
+  `personId % 1000` was measured and does not fix it: 317 of 672 shards would still pass
+  8 KB, because player ids cluster on their last digits. Today the largest shard is 23 KB
+  (the seeded prospects).
+- **Cadence.** `gen-ovr.mjs` is hand-run today. The history only grows when it runs, so
+  a nightly step is needed for a real series. That step is not in the workflow yet:
+  Gary approves it first, because each nightly data commit that reaches `main` can deploy.
 - How the card shows the change (the arrow and the season sparkline) is in #1703.
 
 ## Build order
