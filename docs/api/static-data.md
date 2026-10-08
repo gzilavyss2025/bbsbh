@@ -394,6 +394,22 @@ for each generator; the reader modules:
   sections, same as `minorsLeaders.js` does for the all-minors board; the
   franchise/repeat-MVP boards are plain rank lists (team-keyed, not the
   player-keyed pool `TeamLeaders` expects).
+- `callouts.js`'s `seriesBlockFor(bundle)` — the series primer's block, from the
+  `series` key of an LCS or World Series game's `callouts/{MMDDYYYY}/{gamePk}.json`
+  (`gen-callouts.mjs`, nightly). Returns `null` for every other game. The shape is
+  `{ gamePks, games, stats }`. `games` holds one finished game each, in the shape at
+  the top of `src/lib/postseason/primer/ribbonNodes.js` (runs, park, 26 win-chance
+  points). `stats` is `{ batting, pitching, totals }`, the same as
+  `loadSeriesStats` returns without `rosters`, so `SeriesTotals` and the leaders
+  ledger read it with no change. Both sides fold through one function,
+  `foldSeriesStats` (`src/api/postseasonSeries.js`). The builder is
+  `src/lib/postseason/primer/seriesBlock.js`. A game counts only when the bracket
+  counts it (`deriveBracket`, cut at the slate date): Final with a winner before
+  that date, on its resume date for a suspended game. The slate game, a later game
+  and an "if necessary" game are never in the block. Game 1 gets an empty block. A
+  failed read gets no block, and the primer reads statsapi live. The block is about
+  4 to 6 KB; with it, the whole 2025 World Series Game 7 shard is 29 KB. Spoiler-free on the ADR-0087 footing: the
+  cutoff is a date. `test/postseason/series-block.test.js` pins the cutoff.
 
 - `fouls.js` — season foul-ball lines + leaders, from `public/data/fouls/{season}/fouls.json`
   (`gen-fouls.mjs`; the season `fouls/seasons.json` names, ADR-0086) for the
