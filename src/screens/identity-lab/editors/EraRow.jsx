@@ -18,10 +18,11 @@ const EMPTY = { from: '', to: '', name: '', abbr: '', source: '', bar: '', accen
 const HEX = /^#[0-9a-f]{6}$/i
 
 // A dropped PNG, with its white background cleared and its edges
-// trimmed (lib/imageTrim.js), as PNG bytes. An SVG is vector art and goes up
+// trimmed (lib/imageTrim.js), as PNG bytes. The picker offers no JPEG (#1747),
+// but one dragged in with trim on still goes through here and up as PNG. An SVG is vector art and goes up
 // as it is. The canvas only supplies and takes back the pixels.
 async function artBytes(file, trim) {
-  if (!trim || file.type !== 'image/png') return new Uint8Array(await file.arrayBuffer())
+  if (!trim || !/^image\/(png|jpeg)$/.test(file.type)) return new Uint8Array(await file.arrayBuffer())
   const bitmap = await createImageBitmap(file)
   const canvas = document.createElement('canvas')
   canvas.width = bitmap.width
