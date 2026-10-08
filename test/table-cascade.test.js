@@ -889,7 +889,7 @@ test('T5: the report boards keep the club cell, its pin tint and the heavy head 
   const css = read(T5_CSS)
   // The pinned cell is opaque in the board's own canvas ground, and a favorite row pins its own tint.
   assert.equal(decl(t5Rule(css, '.rpt'), '--table-pin'), 'var(--bg-page)')
-  assert.equal(decl(t5Rule(css, '.rpt__row--mine'), '--table-pin'), 'var(--paper-3)')
+  assert.equal(decl(t5Rule(css, '.rpt__row--mine'), '--table-pin'), 'var(--surface-inset)')
   // The sticky club cell keeps display: table-cell and the flex stays on the child.
   assert.equal(decl(t5Rule(css, '.rpt td.team, .rpt tbody th.team'), 'display'), 'table-cell')
   assert.equal(decl(t5Rule(css, '.rpt__club'), 'display'), 'flex')
@@ -920,10 +920,10 @@ test('T5: the doubleheaders drawer keeps its indent and width, and its row tints
   // The drawer sits inside a `.rpt` board, whose heavy head rule would reach it; the first body row's rule is the one line.
   assert.equal(decl(t5Rule(css, '.dh__drawer thead th'), 'border'), '0')
   // The drawer row's cell is the first cell of its row, so the sticky rule pins it: it must keep its ground.
-  assert.equal(decl(t5Rule(css, '.dh__drawerrow'), '--table-pin'), 'var(--paper-1)')
+  assert.equal(decl(t5Rule(css, '.dh__drawerrow'), '--table-pin'), 'var(--bg-page)')
   // Rows that tint themselves tint the pinned cell by the custom property, not a rule the pin out-weighs.
-  assert.equal(decl(t5Rule(css, '.dh__row:hover'), '--table-pin'), 'var(--paper-2)')
-  assert.equal(decl(t5Rule(css, '.dh__row--open'), '--table-pin'), 'var(--paper-1)')
+  assert.equal(decl(t5Rule(css, '.dh__row:hover'), '--table-pin'), 'var(--surface-card)')
+  assert.equal(decl(t5Rule(css, '.dh__row--open'), '--table-pin'), 'var(--bg-page)')
 })
 
 test('T5: the e2e club-cell pin finds the new wrap, not the old scroller', () => {
@@ -1015,7 +1015,7 @@ test('T6a: the umpire board keeps its middle row rule', () => {
   assert.ok(between, `${T6A_CSS}: a .rpt__between row rule`)
   // Its own padding never drew (the cell rules out-weighed it); a live one would grow the row 4px.
   assert.ok(!props(between).some((p) => p.startsWith('padding')), 'a padding here would grow the row')
-  assert.equal(decl(between, 'background'), 'var(--paper-2)')
+  assert.equal(decl(between, 'background'), 'var(--surface-card)')
 })
 
 test('T6a: the ABS pages stay outside the seal', () => {
@@ -1227,7 +1227,7 @@ test('T8: the club table keeps its name cell, its tones and the board\'s column 
   assert.equal(decl(t8Rule(board, '.clubtable tr.is-eliminated td.team > *'), 'opacity'), '0.62')
   assert.equal(t8Rule(board, '.clubtable tr.is-eliminated td'), '', 'the pinned cell itself is never faded')
   // The umpire board's "more between them" row tints its pinned cell through the pin, as the other tinted rows do.
-  assert.equal(decl(t8Rule('68-around-the-game.css', '.rpt__between'), '--table-pin'), 'var(--paper-2)')
+  assert.equal(decl(t8Rule('68-around-the-game.css', '.rpt__between'), '--table-pin'), 'var(--surface-card)')
   // The group row's 12px top pad and its label size never drew under the old board's own cell rules; it keeps what it showed.
   for (const p of ['padding-top', 'font-size']) assert.ok(!props(t8Rule('31-wild-card.css', '.wc-grouphead td')).includes(p), `the group row takes the board's ${p}`)
   assert.equal(decl(t8Rule('39-manager-page.css', '.psoddstable thead th'), 'font-weight'), 'var(--w-semibold)', 'the odds sheet keeps its lighter head')
