@@ -238,7 +238,7 @@ for (const { rel, name, css } of sheets) {
     // `head` is everything before the colon. It defaults to the bare property
     // name — unanchored, which is the behaviour the four type rules were
     // written against — and a rule that needs to be precise supplies its own.
-    const declarations = new RegExp(`(${rule.head ?? rule.property})\\s*:\\s*([^;]+);`, 'g')
+    const declarations = new RegExp(`(${rule.head ?? rule.property})\\s*:\\s*([^;}]+)(?:;|(?=}))`, 'g')
     for (const match of scan.matchAll(declarations)) {
       const value = match[2].trim()
       const verdict = rule.allowed(value, { name, rel })

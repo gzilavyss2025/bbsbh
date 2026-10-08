@@ -31,7 +31,7 @@ const TOKENS = ['--paper-0', '--paper-1', '--paper-2', '--paper-3', '--paper-9',
 test('a read of each primitive fails and names the token', () => {
   for (const t of TOKENS) {
     const err = run(`.a { border-color: var(${t}); }\n`)
-    assert.match(err, new RegExp(`x\\.css:1: .*${t}\\b`), t)
+    assert.match(err, new RegExp(`x\\.css:1: .*reads ${t}(?![\\w-])`), t)
   }
 })
 
@@ -39,6 +39,10 @@ test('a read in any property, a list or a fallback fails', () => {
   assert.match(run('.a { box-shadow: 0 0 0 1px var(--rule), 0 1px var(--paper-0); }\n'), /--rule\b/)
   assert.match(run('.a { background: linear-gradient(var(--paper-1), var(--rule-grid)); }\n'), /--paper-1/)
   assert.match(run('.a { --edge: var(--rule-soft, #ccc); }\n'), /--rule-soft/)
+})
+
+test('a read in the last declaration, with no semicolon, fails', () => {
+  assert.match(run('.a { border-color: var(--rule) }\n'), /--rule\b/)
 })
 
 test('an alias, a lookalike name and a comment do not fail', () => {
