@@ -160,7 +160,8 @@ screenshot with SendUserFile (Chromium, ?nointro, say what is mocked).
 Handoff: open a DRAFT PR to main. Body: base SHA, files, how you verified, and
 one line per issue. Write "Closes #n" when this PR meets the issue's "Done means".
 Write "Part of #n" only when the issue has more slices after this one. Subscribe
-to the PR and drive it to green.
+to the PR and drive it to green. When the work is done and CI is green, remove the
+`wip` label (docs/development.md, "Draft PRs").
 Never merge. Never push to main.
 Stop if: the issue is unclear, a design choice is open, the change needs more
 than 5 files, a test would need to be weakened, or CI fails twice for a reason
@@ -187,7 +188,8 @@ handed it to you (its step 9). One prompt is a plan too. Work on the plan only.
 
    ```
    Parent session: <your session id>. Open a DRAFT PR to main (a workflow marks it
-   ready), subscribe to it, and drive it to green. Never merge. Never push to main.
+   ready and adds `wip`), subscribe to it, and drive it to green. When the work is done and
+   CI is green, remove the `wip` label. Never merge. Never push to main.
    To stop for a reason you cannot fix, send_message your parent AND end with a final
    line "NEEDS PARENT: <what you need>".
    ```
@@ -240,7 +242,8 @@ regular basis. Vercel allows 100 deployments a day, so a stack is cheap.
 - Stack at a check-in when one or more child PRs are green, finished, and not
   waiting on a pick from him. At most one stack per check-in.
 - Skip a PR labeled `wip` or `do-not-merge`, a PR another session still pushes
-  to, and a PR that waits on his choice.
+  to, and a PR that waits on his choice. A green child PR whose session is idle and completed
+  but still has `wip`: remove `wip` yourself, then stack it.
 - Pass the PR numbers to `/stack-prs`. With no list it stacks every open PR,
   other sessions' drafts included.
 - Build each stack on a new branch (`claude/stack-<date>-r<n>`). Never reuse a

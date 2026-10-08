@@ -31,8 +31,10 @@ did, and end with a short list of what needs him.
    (`mcp__github__list_pull_requests`, or `gh pr list --state open`). Drafts count:
    cloud sessions open every PR as a draft.
    - If the user named PR numbers, use only those.
-   - Skip a PR labeled `wip` or `do-not-merge`. Skip a PR that targets a branch
-     other than `main` unless its base PR is also in the set.
+   - Skip a PR labeled `wip` or `do-not-merge`, and say which ones. Every agent PR
+     carries `wip` until its session removes it, so a PR without it was called done.
+   - Skip a PR that targets a branch other than `main` unless its base PR is also in
+     the set.
    - Skip the stack PR from an earlier run of this skill. Say so.
    - If nothing is left, report that and stop.
    - **Note the linked issues.** Read each PR body and its commit messages. Record

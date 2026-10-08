@@ -1,21 +1,30 @@
 name: Mark PR ready
 
 # Agent sessions must open every PR as a draft. This marks it ready as soon as it
-# opens, so the maintainer never does it by hand. A PR the maintainer converts back
-# to draft later stays a draft: this runs on `opened` only.
+# opens, so the maintainer never does it by hand, and adds the `wip` label, which
+# `/stack-prs` skips. The session removes `wip` when its work is done and CI is green.
+# A PR the maintainer converts back to draft later stays a draft: this runs on
+# `opened` only. A PR that opens ready (Dependabot, a hand-made PR) gets no `wip`.
 on:
   pull_request:
     types: [opened]
 
 permissions:
   pull-requests: write
+  issues: write
 
 jobs:
   ready:
     if: github.event.pull_request.draft == true
     runs-on: ubuntu-latest
     steps:
-      - name: Mark ready for review
+      - name: Mark ready for review and label wip
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr ready ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh label create wip --color FBCA04 --force --repo "$REPO" \
+            --description "Work in progress: /stack-prs skips this PR"
+          gh pr edit "$PR" --add-label wip --repo "$REPO"
+          gh pr ready "$PR" --repo "$REPO"

@@ -57,7 +57,8 @@ is a Vercel Hobby project (about 100 deployments a day): keep work-in-progress o
 container, one branch: use the branch the session gives you, cut from current
 `origin/main`. No worktree. No `gh`: use the GitHub MCP tools. Other sessions run in
 parallel, so list the open PRs and their files before you edit, and stop on overlap.
-Open your PR as a draft (`mark-ready.yml` flips it to ready); never merge it. `/stack-prs` lands it. Push before you stop, because
+Open your PR as a draft (`mark-ready.yml` flips it to ready and adds `wip`); remove `wip` when
+the work is done and CI is green; never merge it. `/stack-prs` lands it. Push before you stop, because
 the PR is the handoff. Verify in the container, render the route you changed in the
 preinstalled Chromium, and send Gary a screenshot (`SendUserFile`) with the exact route
 and `gamePk`. **Add `?nointro` to any test URL**, so the first-visit welcome modal does

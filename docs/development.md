@@ -46,7 +46,10 @@ sessions that share one machine. In the cloud, these rules change:
   watches, cannot get an answer. It writes each open decision as `[DECISION: ...]`
   in its PR description or final message, and stops at that point.
 - **Draft PRs.** Open every PR as a draft. `.github/workflows/mark-ready.yml` marks it
-  ready when it opens, so the maintainer never marks a PR ready.
+  ready and adds the `wip` label when it opens. Remove `wip` when the work is done and CI
+  is green: read the PR's labels (`pull_request_read`), then call `issue_write` with
+  `method: update` and every label except `wip`. `/stack-prs` skips a PR that still has
+  `wip`, so the maintainer never marks a PR ready or done.
 - **Parallel sessions.** Several sessions run at once. Before you edit, list the open
   PRs and the files each changes (`list_pull_requests`, `pull_request_read`). Stop on
   overlap, or wait for that PR. Keep the change to the one task you were given, and
