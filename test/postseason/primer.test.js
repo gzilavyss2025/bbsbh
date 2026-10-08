@@ -38,11 +38,23 @@ test('a series with two games on the slate (doubleheader, resumed game) keeps th
   assert.deepEqual(primerSeriesFor(b, '2025-10-17', [ALCS_G5, ALCS_G5, NLCS_G4]), [])
 })
 
-test('a Division Series day, an empty slate and a day past the cutoff prime nothing', () => {
-  const ds = bracket2025('2025-10-08')
-  const dsPks = ds.series.filter((s) => s.playsOnCutoff).map((s) => s.cutoffGame.gamePk)
-  assert.ok(dsPks.length > 0)
-  assert.deepEqual(primerSeriesFor(ds, '2025-10-08', dsPks), [])
+test('a Wild Card day and a Division Series day prime every series on the slate', () => {
+  for (const [date, round] of [['2025-09-30', 'wildcard'], ['2025-10-08', 'division']]) {
+    const b = bracket2025(date)
+    const pks = b.series.filter((s) => s.playsOnCutoff).map((s) => s.cutoffGame.gamePk)
+    const list = primerSeriesFor(b, date, pks)
+    assert.equal(list.length, 4)
+    assert.ok(list.every((s) => s.round === round))
+  }
+})
+
+test('a day with two rounds on the slate keeps the usual page', () => {
+  const b = bracket2025('2025-10-17')
+  seriesWith(b, 'NL', 'lcs', 'LAD').round = 'division'
+  assert.deepEqual(primerSeriesFor(b, '2025-10-17', [ALCS_G5, NLCS_G4]), [])
+})
+
+test('an empty slate, a day past the cutoff and no bracket prime nothing', () => {
   assert.deepEqual(primerSeriesFor(bracket2025('2025-10-17'), '2025-10-17', []), [])
   assert.deepEqual(primerSeriesFor(bracket2025('2025-10-17'), '2025-10-18', [ALCS_G5, NLCS_G4]), [])
   assert.deepEqual(primerSeriesFor(null, '2025-10-17', [ALCS_G5]), [])
@@ -73,6 +85,11 @@ test('the default tab: the favourite club, else the earlier first pitch, else th
   assert.equal(pick({ firstPitchByPk: { [ALCS_G5]: 'x', [NLCS_G4]: 'x' } }), 'NL')
   assert.equal(defaultPrimerSeries([list[0]], {}), list[0])
   assert.equal(defaultPrimerSeries([], {}), null)
+  // Four series: the earliest first pitch wins, and a tie goes to an NL series.
+  const four = primerSeriesFor(bracket2025('2025-10-08'), '2025-10-08', bracket2025('2025-10-08').series.filter((x) => x.playsOnCutoff).map((x) => x.cutoffGame.gamePk))
+  const at = (hours) => Object.fromEntries(four.map((x, i) => [x.cutoffGame.gamePk, `2025-10-08T${hours[i]}:00:00Z`]))
+  assert.equal(defaultPrimerSeries(four, { firstPitchByPk: at([20, 19, 22, 21]) }), four[1])
+  assert.equal(defaultPrimerSeries(four, { firstPitchByPk: at([19, 19, 19, 19]) }).league, 'NL')
 })
 
 test('the status head and the elimination chip', () => {

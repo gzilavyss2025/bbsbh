@@ -58,10 +58,13 @@ function Main({ primer: { list, series, game, setPick, data, bracket, cutoff, sl
         <div role="group" aria-label="Series" className="seriesprimer__tabs">
           {list.map((s) => {
             const mark = seriesMark({ ...s, season: bracket.season })
+            // Two series of one round and league (the Division Series, the Wild Card) share a name: the clubs tell them apart.
+            const twin = list.some((o) => o !== s && o.round === s.round && o.league === s.league)
             return (
               <Pill key={s.id} role="control" pressed={s === series} onClick={() => setPick(s.id)}>
                 {/* The round's art on its navy plate; a season with no art keeps the words. */}
                 {mark ? <SeriesMark mark={mark} height={18} plate /> : roundTitle(s)}
+                {twin && ` ${s.slots.map((slot) => slot.club.abbreviation).join('–')}`}
               </Pill>
             )
           })}
@@ -111,7 +114,7 @@ function Rail({ primer: { series, data, bracket, cutoff } }) {
   const { stats } = data
   return (
     <aside className="bracketrail" aria-label="The series so far">
-      <BracketNow bracket={bracket} cutoff={cutoff} />
+      <BracketNow bracket={bracket} cutoff={cutoff} round={series.round} />
       {stats?.totals && <SeriesTotals totals={stats.totals} clubs={series.slots.map((slot) => slot.club)} />}
       {stats && <SeriesLeadersLedger batting={stats.batting} pitching={stats.pitching} games={data.games.length} />}
     </aside>

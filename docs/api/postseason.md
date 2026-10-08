@@ -196,10 +196,10 @@ Example: 2025 NLDS, heading into 2025-10-09.
 
 Pure (ADR-0087, 2026-10-08 addendum). The home page draws it: see "The home page primer" below.
 
-- `primerSeriesFor(bracket, slateDate, slateGamePks)`: the LCS and World Series
-  playing on the cutoff, or `[]` unless each slate game maps to one of them and
-  each has exactly one slate game. `defaultPrimerSeries(list, opts)` picks the
-  first tab.
+- `primerSeriesFor(bracket, slateDate, slateGamePks)`: the series playing on the
+  cutoff, or `[]` unless they are all in one round and each slate game maps to one
+  of them, with exactly one slate game each. `defaultPrimerSeries(list, opts)` picks
+  the first tab: the favourite club, else the earliest first pitch, else an NL series.
 - `seriesStatus(series)`: `{ head, chip }`. The head is `bestOfLine` before
   Game 1, else `recordLine`. The chip is "MIL facing elimination", or `null`.
 - `ribbonNodes(series, { scoresByPk })`: one node per game, `played`, `today`,
@@ -213,6 +213,9 @@ Pure (ADR-0087, 2026-10-08 addendum). The home page draws it: see "The home page
   Series boxes (club rows with wins and `eliminated`, a `decided` flag, a foot line),
   and one connector per LCS, inked once that series is decided. A World Series slot
   with no club keeps `club: null`. `null` when an LCS or the World Series is missing.
+  `roundFeed(bracket, round)` is the same for a Wild Card or Division Series day:
+  `{ from, to, links }`, the round's series (AL first) and the boxes they feed, one
+  link per series. A blank slot names the series it waits on (`feeder`).
   `BracketNow.jsx` and `SeriesLeadersLedger.jsx` draw it.
 
 ## The primer's data
@@ -262,13 +265,14 @@ On some postseason days the home page shows a series primer. It replaces the
 survivors board and the bracket rail. It shows from `BRACKET_RAIL_QUERY` (1000 px)
 up. Below that width the page does not change.
 
-- **When it shows.** `primerSeriesFor` returns one or two series: every game on the
-  MLB slate is in an LCS or the World Series, and each series has one game that day.
-  A Division Series game, a doubleheader, a resumed game or a game that the bracket
-  does not know gives `[]`. The page then keeps its usual layout.
+- **When it shows.** `primerSeriesFor` returns one to four series: every game on the
+  MLB slate is in one round (the Wild Card, the Division Series, the LCS or the World
+  Series), and each series has one game that day. A day with two rounds on the slate,
+  a doubleheader, a resumed game or a game that the bracket does not know gives `[]`.
+  The page then keeps its usual layout.
 - **One hook, two slots.** `usePrimer` (`src/hooks/postseason/`) runs once in
   `GameSelect`. It picks the series (`defaultPrimerSeries`: the favourite club, else
-  the earlier first pitch, else the NL series), holds the open tab, and calls
+  the earliest first pitch, else an NL series), holds the open tab, and calls
   `useSeriesPrimerData` for the open series. `SeriesPrimer`
   (`src/components/postseason/`) draws the two slots from that answer:
   `part="main"` under the game list, `part="rail"` in the right column. With no
@@ -276,7 +280,9 @@ up. Below that width the page does not change.
 - **Main column, in order.** The game card (unchanged), `SeriesStarters`, Today's
   edges (`SeriesEdges`), `SeriesRibbon`, `SeasonSeriesStrip`. On a two-series day a
   switch of two `Pill` controls (`aria-pressed`) sits above them. Each pill wears the round's art (`SeriesMark`, on its navy plate), or the words when the season has no art.
-- **Right column.** `BracketNow`, `SeriesTotals`, `SeriesLeadersLedger`.
+- **Right column.** `BracketNow` (for the day's round), `SeriesTotals`, `SeriesLeadersLedger`.
+  Two series of one round and league (two Division Series) have the same name, so
+  their pills add the clubs ("ALDS NYY–TB").
 - **Starters.** They show only when the slate date is today. The schedule names the
   starter who really pitched once the day is past.
 - **Spoiler footing.** The cutoff is a date. A finished game before the cutoff shows
