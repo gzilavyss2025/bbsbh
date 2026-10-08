@@ -1,0 +1,102 @@
+/* REPORT LOOK prototype (#1776). Imported by designlab/report/ReportLook.jsx,
+   never by index.css. It leaves with that entry when Gary decides. */
+.rl { display: flex; flex-direction: column; gap: var(--space-8); width: 100%; }
+.rl__name { margin: 0; font-family: var(--font-display); font-size: var(--fs-h3); font-weight: var(--w-bold); color: var(--text-heading); }
+.rl__why { margin: var(--space-1) 0 0; font-size: var(--fs-small); color: var(--text-body); }
+.rl__spec { margin: var(--space-2) 0 var(--space-3); display: grid; gap: var(--space-1); font-size: var(--fs-small); }
+.rl__spec div { display: grid; grid-template-columns: 9rem 1fr; gap: var(--space-2); }
+.rl__spec dt { font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
+.rl__spec dd { margin: 0; color: var(--text-body); }
+.rl__pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 520px)); gap: var(--space-4); align-items: start; }
+
+/* The real Who-challenges card draws its children flush to the card edge, in
+   the app too. The candidates inset them so the comparison is about the look
+   and not the missing gutter. The "today" row does not, because it is today. */
+.rl__look:not(.rl--today) .chal > :not(.sechead):not(.chal__board) {
+  margin-inline: var(--space-4);
+}
+.rl__look:not(.rl--today) .chal__board { margin-inline: var(--space-2); }
+
+/* ---- A and C share the flat grade, flat tiles and underlined tabs ------- */
+.rl--flat .team-score__grade,
+.rl--margin .team-score__grade {
+  margin-inline: var(--space-3);
+  padding-inline: 0;
+  border: 0;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.rl--flat .team-score__row--driver,
+.rl--flat .team-score__row--driver.is-active,
+.rl--margin .team-score__row--driver,
+.rl--margin .team-score__row--driver.is-active {
+  padding: var(--space-2) 0 0;
+  border: 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+  border-radius: 0;
+  background: none;
+}
+.rl--flat .chal__view,
+.rl--margin .chal__view,
+.rl--flat .chal__view.is-on,
+.rl--margin .chal__view.is-on {
+  border: 0;
+  border-bottom: var(--bw-heavy) solid transparent;
+  border-radius: 0;
+  background: none;
+}
+.rl--flat .chal__view.is-on { border-bottom-color: var(--navy); }
+.rl--margin .chal__view.is-on { border-bottom-color: var(--marker); }
+
+/* ---- B. Printed form ---------------------------------------------------- */
+.rl--form .team-score__grade {
+  margin-inline: 0;
+  padding: var(--space-3);
+  border: 0;
+  border-bottom: var(--bw-rule) solid var(--navy);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.rl--form .team-score__grade-result {
+  padding-left: var(--space-3);
+  border-left: var(--bw-hair) solid var(--border-rule);
+}
+.rl--form .team-score__row--driver,
+.rl--form .team-score__row--driver.is-active {
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  border-radius: 0;
+  background: none;
+}
+.rl--form .team-score__row--compact { padding: 0 var(--space-3) var(--space-2); }
+.rl--form .scatter__plot {
+  border-left: var(--bw-rule) solid var(--navy);
+  background-image:
+    linear-gradient(var(--border-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.rl--form .chal__view { border-radius: 0; background: none; }
+.rl--form .chal__view.is-on { background: var(--navy); color: var(--surface-card); }
+
+/* ---- C only: the numeral in the margin, graphite ink, marker emphasis --- */
+.rl--margin .team-score__grade { border-top: var(--bw-rule) solid var(--navy); }
+.rl--margin .team-score__grade-button { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+.rl--margin .team-score__grade-result { order: -1; align-items: flex-start; }
+.rl--margin .team-score__grade-score { font-size: var(--fs-hero-sm); }
+.rl--margin .scatter__line { stroke: var(--graphite); }
+.rl--margin .scatter__dot { background: var(--graphite); }
+.rl--margin .scatter__dot--mark { background: var(--marker); }
+
+/* The app shouts everything (01-base.css all-caps invariant), so only wrap long token names. */
+.rl__spec dd { overflow-wrap: anywhere; }
+@media (max-width: 560px) { .rl__spec div { grid-template-columns: 1fr; gap: 0; } }
+
+/* The rank strip's edge fades are tinted for the inset tile. With the tile
+   gone they must fade to the sheet. The :is() form outranks the compact rule. */
+:is(.rl--flat, .rl--form, .rl--margin) .rankstrip .rankstrip__fade--l { background: linear-gradient(to right, var(--surface-card), transparent); }
+:is(.rl--flat, .rl--form, .rl--margin) .rankstrip .rankstrip__fade--r { background: linear-gradient(to left, var(--surface-card), transparent); }
