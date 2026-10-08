@@ -2,6 +2,7 @@
 // `currentTeam` just have nowhere else to point? See ../person.js's header
 // for the module's overall spoiler footing.
 
+import { birthplace } from '../../lib/person/birthplace.js'
 import { isMlbTeamId, teamFullName } from '../../lib/teams.js'
 import { DASH, num } from './shared.js'
 
@@ -96,9 +97,6 @@ export function educationSummary(person) {
 
 export function personBio(person) {
   if (!person) return null
-  const born = [person.birthCity, person.birthStateProvince ?? person.birthCountry]
-    .filter(Boolean)
-    .join(', ')
   return {
     id: person.id,
     fullName: person.fullName ?? '',
@@ -117,7 +115,7 @@ export function personBio(person) {
         : person.height || DASH,
     age: person.currentAge ?? DASH,
     birthDate: person.birthDate ?? null,
-    born: born || DASH,
+    born: birthplace(person) || DASH,
     debut: person.mlbDebutDate ?? '',
     draft: draftInfo(person),
     // `parentOrgId`/`parentOrgName` ride along on `currentTeam` for a MiLB

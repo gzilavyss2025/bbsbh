@@ -30,6 +30,7 @@
 // `./entity.js`, which crawl.js reads too — see that file's header on why the
 // copies exist and why they must stay in step with src/lib.
 
+import { birthplace } from '../../src/lib/person/birthplace.js'
 import { scheduleRoundLine } from '../../src/lib/postseason/gameRound.js'
 import { playerCrawl, teamCrawl } from './crawl.js'
 import { clean, entitySegment, idFromSlug, matchupSlug, niceDate, teamAbbr, urlDateToApi } from './entity.js'
@@ -175,7 +176,7 @@ async function playerCard(idSegment, origin) {
     // What canonicalUrl re-spells the address with. Built from the name statsapi
     // just returned, never from the segment the request arrived on.
     segment: entitySegment(id, name),
-    crawl: playerCrawl(p, { id, name, pos, team }),
+    crawl: playerCrawl(p, { id, name, pos, team, born: clean(birthplace(p)) }),
   }
 }
 
