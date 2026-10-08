@@ -99,7 +99,6 @@ did, and end with a short list of what needs him.
      it, fix it, and push. Do not re-run to hope.
    - No merge conflict with `main`. If `main` moved, merge it into the stack
      branch and re-run step 4.
-   - No open red-circle review finding and no failing Claude Approvals row.
    - The review in step 6 found nothing left open.
    - The user did not ask for a dry run.
 

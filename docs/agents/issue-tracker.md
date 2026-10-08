@@ -16,7 +16,9 @@ in GitHub, where it can be found without knowing which directory to look in.
 - `gh issue list`, `gh issue view <n>`, `gh issue create`, `gh issue close <n>`
 - Triage state is a GitHub **label** (see `triage-labels.md` for the role strings)
 - Discussion is a GitHub comment, not an appended `## Comments` section
-- A PR closes its issue with `Closes #<n>` in the PR body
+- A PR closes its issue with `Closes #<n>` in the PR body when it meets the issue's "Done
+  means". A slice of a larger issue says `Part of #<n>` instead. `/stack-prs` copies the
+  `Closes` lines into the stack PR.
 - Long-form context that would swamp an issue body stays in `.scratch/` and is
   LINKED from the issue, rather than pasted into it
 

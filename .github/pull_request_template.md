@@ -8,6 +8,16 @@ Open as a DRAFT (agent/`claude/*` branches are required to; see docs/development
 
 <!-- What this change does and why, in a few sentences. Link any related PR/issue. -->
 
+## Issue
+
+<!--
+One line per issue. `Closes #n` when this PR meets the issue's "Done means". `Part of #n`
+when more slices follow. `/stack-prs` copies the `Closes` lines into the stack PR, so
+GitHub closes the issue when the stack merges.
+-->
+
+- 
+
 ## Changes
 
 <!-- The notable changes, as a short list. Skip if the Summary already covers it. -->

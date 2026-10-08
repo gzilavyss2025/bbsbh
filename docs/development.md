@@ -60,7 +60,8 @@ sessions that share one machine. In the cloud, these rules change:
   file. Regenerate it with its `scripts/gen-*.mjs` only when your PR changes that
   generator.
 - **Handoff is the PR.** Push before you stop, because the container is discarded.
-  Put the base SHA, the files touched, and how you verified in the PR description.
+  Put the base SHA, the files touched, how you verified, and the issue line (`Closes #n`
+  or `Part of #n`) in the PR description.
   Write "not applicable (cloud)" for the worktree and the local URL.
 - **Verification.** A localhost URL in the container is not reachable from the
   maintainer's devices. Verify in the container (unit tests, lint, and the preinstalled
