@@ -138,7 +138,7 @@ export function PlayerHubShell({ core, asOf = null, sportId = null, active, chil
                 attributes — and the wrap can no longer split a dot from what
                 it separates, because line one is the only line with dots. */}
             <p className="player__meta">
-              {heroPos && <span className="player__pos">{heroPos}</span>}
+              {heroPos}
               {hand && <> <span className="sep">·</span> <span className="player__hand">{hand}</span></>}
             </p>
             {(club || status || core.prospectRank || core.orgProspectRank) && (

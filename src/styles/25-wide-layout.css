@@ -574,10 +574,6 @@
     font-size: var(--fs-hero-sm);
     margin-left: 8px;
   }
-  .player__meta {
-    margin-top: 10px;
-    font-size: var(--fs-num-md);
-  }
   .player__herologo > .teamlogo {
     width: 96px !important;
     height: 96px !important;
