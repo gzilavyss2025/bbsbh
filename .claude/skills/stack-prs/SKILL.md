@@ -103,9 +103,9 @@ did, and end with a short list of what needs him.
    - The user did not ask for a dry run.
 
    If a gate cannot pass, stop. Say which gate, why, and what you need.
-8. **Merge.** Mark the stack PR ready for review yourself; the maintainer never has
-   to. Cloud session: `mcp__github__update_pull_request` with `draft: false`. Local
-   session: `gh pr ready`. Source PRs stay drafts; step 9 closes them. Merge it with a **merge
+8. **Merge.** The `mark-ready` workflow marks each new PR ready. If the stack PR is
+   still a draft, mark it yourself (cloud: `mcp__github__update_pull_request` with
+   `draft: false`; local: `gh pr ready`). Merge it with a **merge
    commit**, so GitHub marks each source PR as merged. Use
    `mcp__github__merge_pull_request`. If the repo allows only squash, use that,
    and then do the cleanup below by hand. Never push to `main` directly.

@@ -1,0 +1,21 @@
+name: Mark PR ready
+
+# Agent sessions must open every PR as a draft. This marks it ready as soon as it
+# opens, so the maintainer never does it by hand. A PR the maintainer converts back
+# to draft later stays a draft: this runs on `opened` only.
+on:
+  pull_request:
+    types: [opened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  ready:
+    if: github.event.pull_request.draft == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark ready for review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr ready ${{ github.event.pull_request.number }} --repo ${{ github.repository }}

@@ -2,6 +2,7 @@
 bbsbh PR template — mirrors the structure the repo's PRs already use.
 Fill in each section; delete a section only if it genuinely doesn't apply.
 Open as a DRAFT (agent/`claude/*` branches are required to; see docs/development.md, "Cloud sessions").
+`mark-ready.yml` marks it ready when it opens.
 -->
 
 ## Summary

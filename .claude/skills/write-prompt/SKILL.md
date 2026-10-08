@@ -30,18 +30,17 @@ written, and go to step 1.
    paths (CI flake, missing data, tool errors), how long to wait, what to verify
    and against which baseline, and the handoff. Flag any step that an agent could
    read two ways.
-4. **Decide the split.** Split the prompt when one or more of these is true:
+4. **Decide the split.** Default to one prompt. A split runs more sessions and costs more
+   usage; Anthropic reports that multi-agent runs use about 15 times the tokens of a
+   chat. Split only when one of these is true:
    - It asks for more than one deliverable that could ship or be reviewed alone
      (two PRs, two features, a fix plus an unrelated cleanup).
-   - It mixes thinking work (research, design, a decision) with doing work
-     (implement, migrate, write docs) that follows from it.
-   - Its parts need different models: a hard part next to mechanical parts.
    - A `[DECISION: ...]` or a user review sits in the middle, and the rest
      depends on the answer.
-   - It is too big for one session: more than about 5 distinct steps, or more
-     than about 10 files to change.
+   - It is too big for one session: more than about 10 files to change.
 
-   When none is true, keep one prompt. When you split, each prompt must stand
+   When none is true, keep one prompt, even if it has several steps or mixes research
+   with doing. When you split, say why in one line. Each prompt must stand
    alone: a fresh agent with no memory of the others can run it. Each prompt
    states what it needs from an earlier prompt (a branch, a file, a merged PR)
    and what it hands to the next. Mark prompts that can run in parallel.
@@ -156,7 +155,7 @@ written, and go to step 1.
 9. **Offer the hand-off (only when step 4 split the prompt into waves).** Start no
    session from this skill; `orchestrate` owns that. End with the run plan and:
    "Run `/orchestrate` to start these." Say which prompts are wave 1. A later wave starts
-   only after the wave before it has green draft PRs.
+   only after the wave before it has green PRs.
 
 Do not run the prompt yourself. This skill writes, grades and rewrites it.
 

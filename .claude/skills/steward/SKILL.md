@@ -39,7 +39,7 @@ If a spec needs a change, edit it and say in the PR that it has not run.
   resolve the thread.
 - Larger asks (multi-file refactor, API or schema change, open-ended design
   feedback): reply with a proposal. Do not push.
-- A red-circle finding from `Claude Code Review` is never optional.
+- A red-circle finding from the `code-review` skill is never optional.
 - Optional findings (yellow or purple circle): reply in one line, resolve the
   thread, and carry plainly correct nits into the next push that already changes
   those files.
