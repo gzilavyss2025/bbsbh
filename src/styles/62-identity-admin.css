@@ -358,14 +358,6 @@
 
 /* ---- the Logo art group ---- */
 
-/* The tile at judging size beside its controls; stacks on a narrow phone. */
-.iddrawer__logo {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  align-items: flex-start;
-}
-
 /* Same custom-property contract as the strip's thumb, at judging size. */
 .iddrawer__logomark {
   flex: 0 0 auto;

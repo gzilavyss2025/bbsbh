@@ -1,4 +1,5 @@
 import { monthDayYear } from '../../../lib/dates.js'
+import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 
 // The dates this club actually wore this jersey, as ticket-stub links into that
 // game's photo gallery (`/photos/{gamePk}` — GamePhotosPage, deep-linked), each
@@ -28,7 +29,7 @@ export function WearDates({ dates, hrefFor, name, label }) {
       ) : dates.length === 0 ? (
         <p className="colorlab__weardates-hint">No posted wear this season.</p>
       ) : (
-        <div className="colorlab__weardates-list">
+        <Cluster gap="tight" className="colorlab__weardates-list">
           {dates.map((d) => (
             <a
               key={d.gamePk}
@@ -41,7 +42,7 @@ export function WearDates({ dates, hrefFor, name, label }) {
               {monthDayYear(d.apiDate)}
             </a>
           ))}
-        </div>
+        </Cluster>
       )}
     </div>
   )

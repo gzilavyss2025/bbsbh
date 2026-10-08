@@ -39,6 +39,7 @@ import { TierBar } from '../../components/admin/contracts/TierBar.jsx'
 import { ReviewQueue } from '../../components/admin/contracts/ReviewQueue.jsx'
 import { DecisionPane } from '../../components/admin/contracts/DecisionPane.jsx'
 import { LookupDeck } from '../../components/admin/contracts/LookupDeck.jsx'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 import '../../styles/research/diary.css'
 // After diary.css, not before: .cwb__main and .researchdiary__main carry the
 // same specificity, so source order is what lets the workbench widen the
@@ -251,7 +252,7 @@ function Workbench() {
   if (pending.error) return <Notice>Could not load pending.json — {pending.error.message}</Notice>
 
   return (
-    <div className="cwb">
+    <Stack gap="loose" className="cwb">
       <p className="cwb__narrow caps-exempt">
         This page is built for a desktop screen. It still works here, but the queue and the decision
         pane are stacked and the shortcuts need a keyboard.
@@ -285,7 +286,7 @@ function Workbench() {
       <div className="cwb__deck" ref={deckRef}>
         <LookupDeck selectedRow={targetRow} onUseAsMatch={useAsMatch} disabled={saving} />
       </div>
-    </div>
+    </Stack>
   )
 }
 

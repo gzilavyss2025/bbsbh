@@ -8,6 +8,7 @@ import {
   LOGO_MAX_BYTES,
   LOGO_SIZE,
 } from '../../../../lib/logoArt.js'
+import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 
 // The drawer's Logo art group for one (club, treatment): the tile as it renders
 // right now, the Art URL box behind it, and the upload that fills that box.
@@ -100,7 +101,7 @@ export function IdentityLogoField({ teamId, name, isMilb, treatment, field, valu
   }
 
   return (
-    <div className="iddrawer__logo">
+    <Cluster gap="base" align="start" className="iddrawer__logo">
       {/* The SAME component and resolver every real surface renders — the strip
           above shows it at thumb size, this one at judging size. It repaints
           from the draft's preview layer, so an upload or a pasted URL shows
@@ -159,6 +160,6 @@ export function IdentityLogoField({ teamId, name, isMilb, treatment, field, valu
           </p>
         )}
       </div>
-    </div>
+    </Cluster>
   )
 }
