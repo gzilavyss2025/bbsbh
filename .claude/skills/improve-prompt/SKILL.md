@@ -64,8 +64,8 @@ lowest effort that can do that job well. Do these steps in order.
    high on Haiku 5.5 can come before a jump to Sonnet 5.5. Move to Sonnet 5.5
    when Haiku 5.5 at high gives a shallow result.
 
-   API price per million tokens (input / output): Haiku 4.5 $1 / $5 (Haiku 5.5
-   price not checked here; look it up before you quote it), Sonnet 5.5
+   API price per million tokens (input / output): Haiku 4.5 $1 / $5, Haiku 5.5
+   $0.10 / $0.50 (prompts up to 100K tokens; $0.50 / $2.50 above that), Sonnet 5.5
    $2 / $10, Opus 5.5 $4 / $20, Fable 5.1 $10 / $50. Fable 5.1 costs 2.5 times
    as much as Opus 5.5, so pick it only when a rung above cannot do the job.
 
