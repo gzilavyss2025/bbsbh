@@ -11,6 +11,7 @@ import { ClusterHalf, GridHalf, StackHalf } from './layout.jsx'
 import { CARDS, PILLS, PROTOTYPES } from './catalog.js'
 import { ScoutLab } from './scout/ScoutLab.jsx'
 import { NestedBoxes } from './nested/NestedBoxes.jsx'
+import { ReportLook } from './report/ReportLook.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import '../../styles/designlab/lab.css'
 
@@ -138,6 +139,7 @@ export function DesignLab() {
           <Entry key={p.id} title={p.title} path={p.path} verdict={p.verdict} tone="hold" note={p.note} wide>
             {p.id === 'scout' && <ScoutLab />}
             {p.id === 'nested-boxes' && <NestedBoxes />}
+            {p.id === 'report-look' && <ReportLook />}
           </Entry>
         ))}
       </Band>

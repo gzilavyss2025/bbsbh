@@ -394,6 +394,13 @@ export const PROTOTYPES = [
     verdict: 'Prototype',
     note: 'Four real cases, each before and after: a panel, a nested sheet, a well and a table. Invented data. Nothing ships; Gary picks which to flatten.',
   },
+  {
+    id: 'report-look',
+    title: 'Report cards (#1776)',
+    path: 'src/screens/designlab/report/',
+    verdict: 'Prototype',
+    note: 'The Season Report and “Who challenges” as they are on frame="sheet", then three candidate looks on the same two real components. Invented data. No new Card frame; Gary picks, or stays on sheet.',
+  },
 ]
 
 export const GROUP_TITLES = {
