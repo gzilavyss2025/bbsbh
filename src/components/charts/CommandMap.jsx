@@ -5,6 +5,7 @@ import { MIN_COMMAND_PITCHES, commandHandCounts, commandTypes, commandView } fro
 import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
 import { Pill } from '../ui/control/Pill.jsx'
 import { FactGrid } from '../ui/frame/FactGrid.jsx'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 
 // THE COMMAND MAP — where a pitcher puts each pitch, over a season.
 //
@@ -75,12 +76,12 @@ export function CommandMap({ entry, level = 'mlb', throws = null }) {
 
   return (
     <div className="cmdmap">
-      <div className="cmdmap__chips" role="group" aria-label="Batter hand">
+      <Cluster className="cmdmap__chips" role="group" aria-label="Batter hand">
         <Chip on={stand === null} onSelect={() => setStand(null)} label="All" n={hands.L + hands.R} />
         <Chip on={stand === 'R'} onSelect={() => setStand('R')} label="vs RHH" n={hands.R} />
         <Chip on={stand === 'L'} onSelect={() => setStand('L')} label="vs LHH" n={hands.L} />
-      </div>
-      <div className="cmdmap__chips cmdmap__chips--types" role="group" aria-label="Pitch type">
+      </Cluster>
+      <Cluster className="cmdmap__chips cmdmap__chips--types" role="group" aria-label="Pitch type">
         <Chip on={code === null} onSelect={() => setCode(null)} label="All" />
         {types.map((t) => (
           <Chip
@@ -97,7 +98,7 @@ export function CommandMap({ entry, level = 'mlb', throws = null }) {
             family={pitchFamily(t.code)}
           />
         ))}
-      </div>
+      </Cluster>
 
       <svg
         className="cmdmap__plot"

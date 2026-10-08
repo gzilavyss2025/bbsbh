@@ -146,9 +146,6 @@
 }
 
 .daystrip-key {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
   list-style: none;
   margin: 0;
   padding: 0;

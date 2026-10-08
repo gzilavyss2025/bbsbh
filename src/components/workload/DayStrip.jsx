@@ -18,6 +18,8 @@
 // between them with no pixel arithmetic, at any cell width, on any strip
 // length. Rail runs come from restRunsFor; the caller passes them in so the
 // staff grid computes them once a row instead of once a render.
+import { Cluster } from '../ui/layout/Cluster.jsx'
+
 export function DayStrip({ cells, runs = [], label, size = 'md' }) {
   if (!cells || cells.length === 0) return null
   const cols = `repeat(${cells.length}, minmax(0, 1fr))`
@@ -65,7 +67,7 @@ function stripLabel(cells, runs) {
 // needs this once — never once a strip.
 export function DayStripKey() {
   return (
-    <ul className="daystrip-key">
+    <Cluster gap="base" as="ul" className="daystrip-key">
       <li>
         <span className="daystrip-key__swatch daystrip-key__swatch--light" aria-hidden="true" />
         <span>Light</span>
@@ -82,6 +84,6 @@ export function DayStripKey() {
         <span className="daystrip-key__rail" aria-hidden="true" />
         <span>Days in a row</span>
       </li>
-    </ul>
+    </Cluster>
   )
 }

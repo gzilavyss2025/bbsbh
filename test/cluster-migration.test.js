@@ -1,4 +1,4 @@
-// Cluster migration slices C1 to C9 (#1180): twenty-nine wrapping-row rules moved onto
+// Cluster migration slices C1 to C10 (#1180): thirty-three wrapping-row rules moved onto
 // <Cluster>. Each would fail silently otherwise (lint green, page drawn, only a
 // screenshot noticing):
 //
@@ -60,6 +60,11 @@ const MIGRATED = {
   colorlab__swatchrow: { file: '15-team-color-lab.css', gap: 'base', sites: 1 },
   'colorlab__weardates-list': { file: '15-team-color-lab.css', gap: 'tight', sites: 1 },
   iddrawer__logo: { file: '62-identity-admin.css', gap: 'base', sites: 1, align: 'start' },
+  // C10: four rows. Three keep their own margin; the day-strip key is a <ul> that keeps its reset.
+  cmdmap__chips: { file: '26d-command-map.css', gap: 'snug', sites: 4, keeps: ['margin-block-end'] },
+  seriesedges__pen: { file: 'postseason/primer-main.css', gap: 'snug', sites: 1, align: 'center', keeps: ['margin-bottom'] },
+  idlab__monoinksource: { file: '17-identity-lab-workbench.css', gap: 'tight', sites: 2, align: 'center', keeps: ['margin'] },
+  'daystrip-key': { file: '76-workload-marks.css', gap: 'base', sites: 1, keeps: ['list-style', 'margin', 'padding'] },
 }
 
 defineMigrationTests('cluster', CLUSTER, MIGRATED)

@@ -11,6 +11,7 @@ import {
 import { attributionFor } from '../../api/targetCommand.js'
 import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
 import { Pill } from '../ui/control/Pill.jsx'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 
 // THE GLOVE TARGET — where a pitcher's misses actually land, relative to the
 // glove he was throwing at.
@@ -72,7 +73,7 @@ export function GloveTarget({ entry, data }) {
 
   return (
     <div className="glovetarget">
-      <div className="cmdmap__chips cmdmap__chips--types" role="group" aria-label="Pitch type">
+      <Cluster className="cmdmap__chips cmdmap__chips--types" role="group" aria-label="Pitch type">
         {types.map((t) => (
           <Pill
             key={t.code}
@@ -93,7 +94,7 @@ export function GloveTarget({ entry, data }) {
             {t.code === 'ALL' ? 'All' : pitchLabel(t.code)}
           </Pill>
         ))}
-      </div>
+      </Cluster>
 
       <svg
         className="glovetarget__plot"
