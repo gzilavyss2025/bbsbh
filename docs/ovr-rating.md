@@ -319,10 +319,12 @@ changed nothing. Record only, no action.
 answer key. Use them to calibrate only. Do not copy or reproduce their numbers.
 
 - (a) Fit posted attributes (Contact, Power, Speed, and so on) to posted OVR to
-  recover the weights. Reports say The Show's ratings are formula-driven
-  ([NBC Sports Bay Area](https://www.nbcsportsbayarea.com/mlb/mlb-the-show-20-player-ratings-where-as-roster-ended-up-on-100-scale/1280071),
-  [The Comeback](https://amp.thecomeback.com/gaming/mlb-the-show-23-player-ratings-released.html)),
-  so the fit should be close. **Inference** from those reports.
+  recover the weights. One report says The Show's ratings are formula-driven
+  ([The Comeback](https://thecomeback.com/gaming/mlb-the-show-23-player-ratings-released.html):
+  "They depend on the numbers so there is no human element involved."), so the fit
+  could be close. **Inference** from that one report, and unproven. The report gives
+  no weights. The NBC Sports Bay Area article on The Show 20 states no formula, so it
+  is not a source for this claim.
 - (b) Fit each attribute to the Statcast percentiles we already have, to set the
   curve shape, the mean, and the spread, and to test the 2.0 / 1.5 stretch
   factors.
