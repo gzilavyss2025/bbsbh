@@ -306,6 +306,12 @@
   .pslive > .psseries__totalssection ~ :not(.psseries__keyssection) {
     order: 3;
   }
+  /* The ABS card sits in the right column under Nine Keys, outside the stretched
+     pair above it. Four classes beat the order-3 rule just above. */
+  .pslive > .psseries__totalssection ~ .psseries__keyssection ~ .psseries__abssection {
+    grid-column: 2;
+    order: 2;
+  }
   /* A pair stretches to one height, so it reads as one row. */
   .pslive > .psseries__today:has(~ .psseries__upcoming),
   .pslive > .psseries__today ~ .psseries__upcoming,

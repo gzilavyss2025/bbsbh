@@ -1,5 +1,6 @@
 import '../../styles/35-postseason-series.css'
 import '../../styles/postseason/series-parts.css'
+import '../../styles/postseason/series-abs.css'
 import '../../styles/postseason/series-live.css'
 import { useMemo } from 'react'
 import { usePostseasonBracket } from '../../hooks/postseason/usePostseasonBracket.js'
@@ -37,6 +38,7 @@ import { SeriesStarters } from '../../components/postseason/SeriesStarters.jsx'
 import { SeriesFlow } from '../../components/postseason/SeriesFlow.jsx'
 import { SeriesTotals } from '../../components/postseason/SeriesTotals.jsx'
 import { SeriesNineKeys } from '../../components/postseason/SeriesNineKeys.jsx'
+import { SeriesAbsReport } from '../../components/postseason/SeriesAbsReport.jsx'
 import { SeasonSeriesStrip } from '../../components/teamstats/SeasonSeriesStrip.jsx'
 import { FormerTeammates } from '../../components/team/FormerTeammates.jsx'
 import { seriesMark } from '../../lib/postseason/seriesMarks.js'
@@ -452,6 +454,12 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             title="Regular season"
           />
           <SeriesNineKeys data={nineKeys} clubs={clubs} season={bracket.season} />
+          <SeriesAbsReport
+            season={bracket.season}
+            clubIds={clubs.map((c) => c.id)}
+            gamePks={games.map((g) => g.gamePk)}
+            cutoff={cutoff}
+          />
           <FormerTeammates
             pairs={teammatePairs}
             startingIds={startingIds}

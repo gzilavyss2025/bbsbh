@@ -707,6 +707,13 @@ for each generator; the reader modules:
   And the `MIN_ABS_RUNS` floor applies to the main board only — a bat a run from
   average overall can still lead the league with the glove, which is what the
   four single-skill boards are for.
+- `around-the-game/absSeries.js` — the ABS card on a postseason series page (#1769), from
+  `public/data/abs/{season}/abs-challenges-post-games.json` (`gen-abs-challenges.mjs`, one entry per
+  postseason game, roles added per player). `fetchAbsSeriesGames(seasonYear)` is strict, so an old
+  series reads no file. `seriesAbsRows(file, { gamePks, clubIds, cutoff })` cuts it to the series' own
+  games, drops a game dated on or after the cutoff, and sorts by win %, then challenges, then name.
+  No minimum-sample floor, by design. `fmtWinPct` prints `.750`. Spoiler-free: a ball-strike
+  record, counted only for games Final before the cutoff (ADR-0034, ADR-0087).
 - `around-the-game/absChallenges.js` — `/abs-challenges`, the season board for
   the ABS Challenge System, from `public/data/abs/{season}/abs-challenges.json`
   (the season `abs/seasons.json` names, ADR-0086)

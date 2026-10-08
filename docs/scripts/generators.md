@@ -425,7 +425,9 @@ don't run these by hand.
   (regular season), `abs-challenges-post.json` and `abs-challenges-all.json` (#1514:
   the postseason beside it, never blended; `abs_ingested_games.scope`, set by the sweep
   and by `--recheck` from the schedule's `gameType`, ADR-0094's 2026-10-06 addendum),
-  **`abs/{season}/abs-exposure.json`** and
+  **`abs/{season}/abs-challenges-post-games.json`** (#1769: one entry per postseason game,
+  each player's challenges added over roles, for the series page's ABS card; one season only,
+  no `all/` copy; `buildPostGamesExport`, `scripts/lib/abs/postgames.mjs`), **`abs/{season}/abs-exposure.json`** and
   **`abs/{season}/abs-exposure-clubs-{mlb,aaa}.json`**, plus `abs/seasons.json` and the
   same files over every season in `abs/all/`. A season store (ADR-0086, #1200):
   each file is cut from its own season's rows (`buildExport`'s `season` filter), a

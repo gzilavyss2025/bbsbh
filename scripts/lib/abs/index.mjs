@@ -1,4 +1,4 @@
-// The pure half of gen-abs-challenges.mjs, in eight parts: turn ONE Final
+// The pure half of gen-abs-challenges.mjs, in nine parts: turn ONE Final
 // game's feed into challenge rows (rows.mjs), replay a club's challenge bank
 // inning by inning (bank.mjs), count the half-innings a club played still
 // holding one (chances.mjs), find the nights a club emptied that bank earliest
@@ -6,7 +6,8 @@
 // hold the rulebook still and ask what a win or a loss changed (momentum.mjs),
 // turn one club's roster into how much baseball each man saw
 // (exposure.mjs), and turn the accumulated rows plus the swept-games ledger
-// into public/data/abs/{season}/abs-challenges.json (export.mjs).
+// into public/data/abs/{season}/abs-challenges.json (export.mjs), plus the
+// postseason one game at a time (postgames.mjs).
 //
 // THE SEAM BETWEEN THEM IS THE DISCIPLINE THE WHOLE JOB RESTS ON. The database
 // stores FACTS — one row per challenge, one row per game — and every split the
@@ -79,3 +80,4 @@ export {
   buildExposureClubsExport,
   EXPOSURE_CLUB_LEVELS,
 } from './export.mjs'
+export { buildPostGamesExport } from './postgames.mjs'

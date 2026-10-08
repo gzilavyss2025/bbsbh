@@ -1,5 +1,6 @@
 import '../styles/35-postseason-series.css'
 import '../styles/postseason/series-parts.css'
+import '../styles/postseason/series-abs.css'
 import { useMemo } from 'react'
 import { loadPostseasonHistory } from '../api/postseasonHistory.js'
 import {
@@ -33,6 +34,7 @@ import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../component
 import { SeriesFlow } from '../components/postseason/SeriesFlow.jsx'
 import { SeriesTotals } from '../components/postseason/SeriesTotals.jsx'
 import { SeriesNineKeys } from '../components/postseason/SeriesNineKeys.jsx'
+import { SeriesAbsReport } from '../components/postseason/SeriesAbsReport.jsx'
 import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
 import { historyFlowBuckets } from '../lib/postseason/seriesFlow.js'
 import { addDays, monthDayName, toApiDate } from '../lib/dates.js'
@@ -355,6 +357,7 @@ export function PostseasonSeriesPage({ seriesId }) {
         title="Regular season"
       />
       <SeriesNineKeys data={nineKeys} clubs={clubs} season={year} />
+      <SeriesAbsReport season={year} clubIds={clubs.map((c) => c.id)} gamePks={games.map((g) => g.gamePk)} />
 
       <div className="psseries__rosters">
         <RosterCard teamId={winner.teamId} roster={stats.rosters[winner.teamId]} />
