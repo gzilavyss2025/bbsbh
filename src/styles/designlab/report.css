@@ -91,3 +91,12 @@
 .rl--margin .scatter__line { stroke: var(--graphite); }
 .rl--margin .scatter__dot { background: var(--graphite); }
 .rl--margin .scatter__dot--mark { background: var(--marker); }
+
+/* The app shouts everything (01-base.css all-caps invariant), so only wrap long token names. */
+.rl__spec dd { overflow-wrap: anywhere; }
+@media (max-width: 560px) { .rl__spec div { grid-template-columns: 1fr; gap: 0; } }
+
+/* The rank strip's edge fades are tinted for the inset tile. With the tile
+   gone they must fade to the sheet. The :is() form outranks the compact rule. */
+:is(.rl--flat, .rl--form, .rl--margin) .rankstrip .rankstrip__fade--l { background: linear-gradient(to right, var(--surface-card), transparent); }
+:is(.rl--flat, .rl--form, .rl--margin) .rankstrip .rankstrip__fade--r { background: linear-gradient(to left, var(--surface-card), transparent); }
