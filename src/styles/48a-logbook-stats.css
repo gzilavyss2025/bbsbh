@@ -273,9 +273,6 @@
    toggle) rather than the shared .levelnav (slate, logo sheet) — this page's
    own retrospective chrome, and .levelnav's five-only shape has no "All". */
 .logbookstats__levels {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
   margin-bottom: var(--space-4);
 }
 

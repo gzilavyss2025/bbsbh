@@ -18,6 +18,7 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
+import { Cluster } from '../components/ui/layout/Cluster.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { dateLabel, SectionHead } from './logbook/statsShared.jsx'
@@ -98,7 +99,7 @@ const LEVEL_ALL = 'all'
 // levels can't drift from every other level switch in the app.
 function LevelFilterBar({ value, onChange }) {
   return (
-    <div className="logbookstats__levels" aria-label="Filter by level">
+    <Cluster className="logbookstats__levels" aria-label="Filter by level">
       <Pill role="control" figure pressed={value === LEVEL_ALL} onClick={() => onChange(LEVEL_ALL)}>
         All
       </Pill>
@@ -113,7 +114,7 @@ function LevelFilterBar({ value, onChange }) {
           {lvl.label}
         </Pill>
       ))}
-    </div>
+    </Cluster>
   )
 }
 

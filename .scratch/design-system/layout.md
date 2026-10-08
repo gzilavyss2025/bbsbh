@@ -798,3 +798,31 @@ I compared only runs with equal counts: 2 BEFORE runs against 4 AFTER runs.
 
 **Not seen.** The Safe/Out colour states of the chip beyond the first draw. `npm run visual` and
 `npm run e2e` were not run.
+
+## Cluster slice C5 (2026-10-08)
+
+Two Game Log chip rows moved onto `Cluster`: 2 rules, 2 JSX sites in 2 files. Base: `origin/main` at
+ab98c96. No open PR touched these files. The finder lists 44 safe rows; the larger families need more than
+the 5-file cap, hold a 16px gap, or sit on a surface another issue owns.
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.logbook__seasons` (`StampCollection.jsx`) | snug, `as="nav"` | nav (`aria-label` passes through) | `margin-bottom` |
+| `.logbookstats__levels` (`LogbookStatsPage.jsx`) | snug | div (`aria-label` passes through) | `margin-bottom` |
+
+**Test first.** Both joined `MIGRATED` in `test/cluster-migration.test.js` with `keeps: ['margin-bottom']`; it
+failed on the rules and the sites, and passes now. **Cascade.** Both partials are lazy, so they load after
+`system/cluster.css`. The descendant rules (`.logbook__seasons small`, `.logbookstats__levels .pill`) stay.
+
+**Checked.** `geom.mjs` (`MOCK=1 FREEZE=1 BLOCKIMG=1`, `?nointro`, 390 and 760px) on `/logbook/stats` and
+`/logbook`: BEFORE (stash) vs AFTER identical, 234 and 236 elements, same page heights. `synth.mjs` with
+`CLUSTER=1`: `logbook__seasons` on `/logbook` and `logbookstats__levels` on `/logbook/stats` identical at both
+widths. Each class only has its sheet on the route named; the other route shows a block in OLD, which is not a
+regression.
+
+**Not seen.** With the mock there are no stamps, so neither row drew for real (the season nav needs two or
+more seasons; the level bar needs stamps). The synthetic check proves the CSS, not the page. `npm run visual`
+and `npm run e2e` were not run.
+
+**Left.** `.stampsheet__levels` (`StampSheet.jsx`, 6th file), `.idlab__mastheadmode` (2 more files),
+`.team-hub__namerow` (2 sites in 2 files), `.idlab__eraactions` (`EraRow.jsx`, #1747).

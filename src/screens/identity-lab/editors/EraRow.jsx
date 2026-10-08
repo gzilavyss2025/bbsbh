@@ -12,13 +12,14 @@ import { UmpireCall } from './HeaderPreview.jsx'
 //
 // Save and Delete go to the server, which owns season-marks.json; the page
 // hot-reloads off the landed value, so there is no draft store here, only the
-// form's own fields. Drop an SVG, PNG or JPEG onto the mark box, or pick one, and it
-// becomes the era's mark; a PNG or JPEG is trimmed and its white cleared first. Nothing is fetched from anywhere: you bring the file.
+// form's own fields. Drop an SVG or PNG onto the mark box, or pick one, and it
+// becomes the era's mark; a PNG is trimmed and its white cleared first. Nothing is fetched from anywhere: you bring the file.
 const EMPTY = { from: '', to: '', name: '', abbr: '', source: '', bar: '', accent: '', onBar: '' }
 const HEX = /^#[0-9a-f]{6}$/i
 
-// A dropped PNG or JPEG, with its white background cleared and its edges
-// trimmed (lib/imageTrim.js), as PNG bytes. An SVG is vector art and goes up
+// A dropped PNG, with its white background cleared and its edges
+// trimmed (lib/imageTrim.js), as PNG bytes. The picker offers no JPEG (#1747),
+// but one dragged in with trim on still goes through here and up as PNG. An SVG is vector art and goes up
 // as it is. The canvas only supplies and takes back the pixels.
 async function artBytes(file, trim) {
   if (!trim || !/^image\/(png|jpeg)$/.test(file.type)) return new Uint8Array(await file.arrayBuffer())
@@ -194,7 +195,7 @@ export function EraRow({ teamId, era, bust, onArt }) {
               ref={inputRef}
               className="colorlab__logodropinput"
               type="file"
-              accept="image/svg+xml,image/png,image/jpeg,.svg,.png,.jpg,.jpeg"
+              accept="image/svg+xml,image/png,.svg,.png"
               aria-label={`Upload art for ${era.name} ${era.from}-${era.to}`}
               onChange={(e) => attach(e.target.files?.[0])}
             />
