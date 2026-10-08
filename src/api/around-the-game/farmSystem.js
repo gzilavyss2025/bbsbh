@@ -73,7 +73,7 @@ export const LEVEL_WEIGHTS = { 11: 0.4, 12: 0.3, 13: 0.18, 14: 0.12 }
 // The age at which a ranked prospect is neither young nor old for the list.
 // The Top 100's own centre of mass sits close to 21; a name younger than that
 // scores above the midpoint of the youth pillar and an older one below.
-const AGE_PIVOT = 21
+export const AGE_PIVOT = 21
 // One year of age moves the youth pillar by this much on its own 0–100 scale.
 // Twelve points a year puts the realistic 18-to-25 range across most of the
 // scale without letting a single 25-year-old bottom out a whole system.

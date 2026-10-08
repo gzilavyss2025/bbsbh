@@ -573,9 +573,9 @@ export default defineConfig({
             // it: an LRU cap sized for a page-snapshot cache would evict a
             // visited page's data on the next player tap.
             urlPattern: ({ url }) =>
-              // Career WAR, Savant history, minor-league seasons, coaching history, coaching staffs and contracts, all bucketed
+              // Career WAR, Savant history, OVR ratings and their history, minor-league seasons, coaching history, coaching staffs and contracts, all bucketed
               // on personId % 100 like the rookie records.
-              /^\/data\/(?:war-history|savant-history|milb-seasons|manager-history|manager-staff|player-contracts)\/\d{2}\.json$/.test(
+              /^\/data\/(?:war-history|savant-history|ovr|ovr-history|milb-seasons|manager-history|manager-staff|player-contracts)\/\d{2}\.json$/.test(
                 url.pathname,
               ) ||
               // A season store (ADR-0086): its seasons.json and one season's
