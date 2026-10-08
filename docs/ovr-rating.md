@@ -195,21 +195,35 @@ Its formula and weights are not public, so this rating is ours. Say that on the
 card. Do not use the word "official" or copy The Show's tier names.
 
 **Career rating (decided direction).** The rating covers a player's whole career,
-weighted for recency and adjusted with an age curve. One hot month should not swing
-a rating. It includes minor-league career history.
+weighted for recency and adjusted with an age term (see below). One hot month should
+not swing a rating. It includes minor-league career history.
 
 - **Recency decay (start values).** Marcel-style weights of 5/4/3 on the last three
   seasons, plus a smaller tail for earlier ones. The weights and the tail are
   guesses to tune. `docs/season-score.md` already uses a Marcel-style baseline
   (prior three seasons weighted 3/2/1, regressed with 50 games of .500 baseball),
   so the idea has precedent here. Its weights differ from these.
-- **Age curve (Open, research).** The repo has none. The task: find a published
-  aging curve and test it on `public/data/war-history/` (WAR by season) against
-  player birth years. Every claim about the curve is an **inference** until that
-  test runs. No number for it is decided.
-- **MLB seasons.** Savant percentile boards by year (see Prior seasons). Part A
-  checked 2024 and 2025. **Inference:** older Statcast years exist. They were not
-  checked.
+- **Age term (decided form).** The fit is in `.scratch/ovr/age-shift/`
+  (`findings-age-shift.md`, with the tables and scripts). It uses Savant percentile
+  boards for 2015-2025 and birth dates from the stats API. Version one:
+  - In the career blend, move older seasons to the player's current age with the
+    smooth, centred age-shift table **for sprint speed and fastball velocity
+    only**. Start values, in percentile points per year: fastball velocity +5.5 at
+    age 21, +0.7 at 27, -1.7 at 31, -4.6 at 39; sprint speed +2.1, +0.2, -0.8, -2.1.
+  - The other metrics get no blend shift. The gain is inside the noise. Bat speed,
+    squared-up rate and swing length have 3 seasons and get no table.
+  - Use an age term in POT for players 25 and under. How the POT term is computed
+    is not decided.
+  - Checked in the fit: a percentile is a rank inside each year's pool, so the shift
+    is relative to peers and not absolute change. With 5/4/3 recency weights the
+    shift barely changes the order of players (rank correlation 0.998 or higher). In
+    a holdout test only fastball velocity improved (error 13.07 to 12.38).
+  - **Inference:** the table is partly corrected for players who leave the board
+    and for regression to the mean. It cannot confirm a peak age (the zero crossing
+    is the sample mean age). Refit the start values when more seasons exist.
+- **MLB seasons.** Savant percentile boards by year (see Prior seasons). The boards
+  exist for 2015-2025 (checked in the age-shift fit). Bat speed, squared-up rate and
+  swing length exist from 2023 only.
 - **Minor-league seasons.** They enter through the level ceilings above, at a
   discount. Minor-league years have no Statcast (part A), so they use the
   level-relative stats percentile. **Gap:** the per-player minor-league season
@@ -305,9 +319,11 @@ changed nothing. Record only, no action.
 2. Pure rating module with tests, test first: percentile-to-rating curve, bucket
    means, the stretch with the 99 cap, the minimum-data rule, missing-bucket
    handling.
-3. Aging-curve research task, before the blend (see Career rating).
+3. Age-shift fit from Savant 2015-2025 (done; the form is decided, see Career
+   rating).
 4. Sharded prior-season store and reader (`staticJsonBy`), then the career
-   weighting (recency decay and the age curve).
+   weighting (recency decay, and the age shift for sprint speed and fastball
+   velocity).
 5. Per-season `fld` store, and the minor-league season-lines fetch. Both come
    before `gen-ovr.mjs`.
 6. `gen-ovr.mjs` and MLB hitters and pitchers.
