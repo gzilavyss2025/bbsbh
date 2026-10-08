@@ -4,7 +4,7 @@
 // (`/people?hydrate=stats(type=[yearByYear],sportId=N)`, pulled 2026-10-08).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { SEASONS, parseRate, totalSplits, rowsFor, populationKeyOf } from '../scripts/lib/milb/seasons.mjs'
+import { SEASONS, parseRate, totalSplits, rowsFor, populationKeyOf, uniqueIds } from '../scripts/lib/milb/seasons.mjs'
 import {
   FULL_WEIGHT_OUTS,
   FULL_WEIGHT_PA,
@@ -121,4 +121,8 @@ test('the reader unpacks its shard, and gives [] for a player the shard lacks or
   } finally {
     globalThis.fetch = real
   }
+})
+
+test('a player in both id lists (war.json keys are strings, top-prospects ids are numbers) is listed once', () => {
+  assert.deepEqual(uniqueIds(['805805', '1'], [805805, 2]), ['805805', '1', '2'])
 })

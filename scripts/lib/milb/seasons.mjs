@@ -10,6 +10,9 @@ export const SEASONS = [2021, 2022, 2023, 2024, 2025] // no 2020; the current se
 
 export const populationKeyOf = (sportId, season, group) => `${season}:${populationKey(sportId, group)}`
 
+// war.json keys are strings and top-prospects ids are numbers: a Set on the raw values keeps both.
+export const uniqueIds = (...lists) => [...new Set(lists.flat().map(String))]
+
 // "-.--", ".---", absent and "" are all null (the MiLB rule). Rates print with a leading dot.
 export function parseRate(v) {
   const n = Number(v)

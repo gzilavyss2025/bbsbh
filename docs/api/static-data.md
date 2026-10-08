@@ -298,6 +298,11 @@ for each generator; the reader modules:
   caller owns (the viewed date + the level), so a re-render cannot deal a new one,
   and "another game" walks the same fixed deck; it skips any game this device has
   a reveal mark for, and says `started` when every game in the pool has one.
+  `reasonLine` turns the stored counts into the card's one sentence, ordered so a
+  NAME off the prospect board outranks a count. The file's `season` is carried
+  through the reader for the same reason the leaders board's is: a level's winter
+  opens hours before the night's generator run, and a card offering a game from
+  the wrong season is worse than no card.
 - `milbSeasons.js` — a player's minor-league season lines, 2021-2025, AAA to A
   (`public/data/milb-seasons/{NN}.json`, bucketed on `personId % 100`, hand-run by
   `gen-milb-seasons.mjs`). `fetchMilbSeasons(personId)` gives rows
@@ -308,11 +313,6 @@ for each generator; the reader modules:
   Degrades to `[]`. Also exports the career blend's start values for step 5:
   `LEVEL_WEIGHT` (AAA 0.6, AA 0.5, A+ 0.35, A 0.25, Rk 0.1), `FULL_WEIGHT_PA` (400) and
   `FULL_WEIGHT_OUTS` (450, 150 IP). Spoiler-free: season totals only.
-  `reasonLine` turns the stored counts into the card's one sentence, ordered so a
-  NAME off the prospect board outranks a count. The file's `season` is carried
-  through the reader for the same reason the leaders board's is: a level's winter
-  opens hours before the night's generator run, and a card offering a game from
-  the wrong season is worse than no card.
 - `notebook.js` — the offseason page's one NOTE, both kinds, in one reader.
   `fetchLongAtBats(season)` reads `public/data/long-at-bats/{season}.json`
   (`gen-long-at-bats.mjs`): every plate appearance of an MLB regular season that took 12

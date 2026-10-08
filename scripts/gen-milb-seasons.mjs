@@ -25,7 +25,7 @@ import { milbShardKey, packRow } from '../src/api/milbSeasons.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeShards } from './lib/io.js'
 import { qualifiedMetrics } from './lib/prospectPercentile.mjs'
-import { SEASONS, SPORT_IDS, populationKeyOf, rowsFor } from './lib/milb/seasons.mjs'
+import { SEASONS, SPORT_IDS, populationKeyOf, rowsFor, uniqueIds } from './lib/milb/seasons.mjs'
 import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -39,9 +39,7 @@ const FIELDS = 'people,id,stats,group,displayName,splits,season,stat,plateAppear
 
 const readJson = async (name) => JSON.parse(await readFile(join(data, name), 'utf8'))
 const [war, top] = await Promise.all([readJson('war.json'), readJson('top-prospects.json')])
-const ids = [
-  ...new Set([...Object.keys(war.bat), ...Object.keys(war.pit), ...top.players.map((p) => p.playerId)]),
-]
+const ids = uniqueIds(Object.keys(war.bat), Object.keys(war.pit), top.players.map((p) => p.playerId))
 console.log(`${ids.length} players`)
 
 // Pass 1: one pool per level, season and group. An empty pool is a failed call
