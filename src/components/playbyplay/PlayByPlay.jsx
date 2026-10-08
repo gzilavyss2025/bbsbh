@@ -338,7 +338,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   const lastAtBat = visibleEntries.findLastIndex((e) => e.kind === 'atbat' && atBatScenePitches(e.pitchDetails).length > 0)
 
   // Windowed: the previous at-bat's trailing notes, repeated first (windowLeadIn).
-  const leadIn = beatKey != null ? windowLeadIn(entries, wins, beatKey) : []
+  const leadIn = windowLeadIn(entries, wins, beatKey)
 
   return (
     <div className="pbp">
@@ -512,7 +512,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
             : `${entry.kind === 'placed' ? entry.runnerId : entry.batterId}-${i}`
         const entryEl = (
           <div
-            className={repeat ? 'pbp__entry pbp__entry--repeat' : 'pbp__entry'}
+            className="pbp__entry"
             id={step != null ? `pbp-${inning}-${half}-step-${step}` : undefined}
             key={entryKey}
           >

@@ -19,7 +19,7 @@
 // of a big inning. `stepTotals` below is the one place that arithmetic lives
 // now, precisely so the slice cannot be forgotten at a call site again.
 
-import { HIT_EVENT_TYPES } from './eventTypes.js'
+import { HIT_EVENT_TYPES, STOPPAGE_EVENTS } from './eventTypes.js'
 
 // At-bat-mode stepping (ADR-0016): the entries index marking the end of the
 // NEXT step from `fromCount` — everything up to and including the next
@@ -188,15 +188,21 @@ export function focusWindows(entries, cap) {
 // says so. Read off the window bounds, so it uses the same split as the
 // windows: a `midAtBat` note, and everything after it, is already in window i.
 // Nothing for window 0 (the half's opening notes lead it, and the half-opening
-// change is the persistent "Now pitching" card's).
+// change is the persistent "Now pitching" card's), nor for a stacked half (no
+// window picked, `i` null). Only the managers' notices: a standalone play
+// between batters (a pickoff or a balk with no pitch) is a scored play, and
+// drawing it twice invites logging the out twice.
 //
 // Spoiler footing: window i exists only when its own at-bat is under the cap,
-// so window i-1 is wholly under it; every note returned was on screen a tap ago.
+// so window i-1 is wholly under it, and every note returned is under the cap.
+// That is all it promises: usually the note was drawn a tap ago, but not when
+// it reached the feed after that tap, or when "Rest of half" skipped the window.
 export function windowLeadIn(entries, wins, i) {
   if (!(i > 0)) return []
   const prev = entries.slice(wins[i - 1].start, wins[i - 1].end)
-  return prev.slice(prev.findLastIndex((e) => e.kind === 'atbat') + 1)
+  return prev.slice(prev.findLastIndex((e) => e.kind === 'atbat') + 1).filter((e) => LEAD_IN_EVENTS.has(e.eventType))
 }
+const LEAD_IN_EVENTS = new Set([...STOPPAGE_EVENTS, 'pinch_hitting', 'pinch_running', 'game_advisory'])
 
 // The half's runs and hits SO FAR — over the first `cap` entries only, which
 // is the entire point of this function existing (read the module header). The

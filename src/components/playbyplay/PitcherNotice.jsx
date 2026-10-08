@@ -59,18 +59,12 @@ export function PitcherNotice({ pitcher, teamId = null, teamName, className = ''
 }
 
 // A reliever's card repeated at the head of the window holding his first batter
-// (focus mode). The change itself trails the at-bat BEFORE it, so without this
-// the page with his first result never names him. Windowed only — a stacked half
-// already reads change-then-batter, and the same card twice running is noise.
-// "Pitching", not "Now pitching": he was announced a tap ago, the wording the
-// persistent header drops to for an arm already in.
+// (focus mode, PlayByPlay's lead-in, which owns the wrapper). The change itself
+// trails the at-bat BEFORE it, so without this the page with his first result
+// never names him. "Pitching", not "Now pitching": he is already in, the wording
+// the persistent header drops to for an arm already in.
 export function ReliefRepeat({ pitcher, teamId, teamName }) {
-  if (!pitcher) return null
-  return (
-    <div className="pbp__entry">
-      <PitcherNotice pitcher={pitcher} teamId={teamId} teamName={teamName} className={noticeClass({ tone: 'event', className: 'change--framed' })} label="Pitching" />
-    </div>
-  )
+  return <PitcherNotice pitcher={pitcher} teamId={teamId} teamName={teamName} className={noticeClass({ tone: 'event', className: 'change--framed' })} label="Pitching" />
 }
 
 // The entering pitcher's headshot. Walks the same ordered fallback chain as

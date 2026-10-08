@@ -174,12 +174,57 @@ test('a pitching change with no arm on record still repeats, for the plain note 
   assert.equal(pitchingChangePitcher(feed, repeat.playerId), null, 'no card to draw, so PlayByPlay falls back to EventNote')
 })
 
-test('a window under the reveal cap repeats only what the cap already revealed', () => {
+test('a window repeats only notes under the reveal cap, at every cap', () => {
   const entries = computeHalfInningFeed(judgeFeed([MOUND_VISIT]), 3, 'top', 'away')
-  // Cap at Ashby + the trailing notes: no second window, so nothing repeats.
-  const wins = focusWindows(entries, entries.length - 1)
-  assert.equal(wins.length, 1)
-  assert.deepEqual(windowLeadIn(entries, wins, 0), [])
+  assert.deepEqual(kinds(entries.filter((e) => e.kind === 'event')), ['mound_visit', 'pinch_hitting'])
+  for (let cap = 0; cap <= entries.length; cap++) {
+    const wins = focusWindows(entries, cap)
+    const leads = wins.map((_, i) => windowLeadIn(entries, wins, i))
+    for (const e of leads.flat()) assert.ok(entries.indexOf(e) < cap, `cap ${cap}: a repeat past the cap`)
+    // Judge's window, the only one with a lead-in, exists only once his at-bat is revealed.
+    assert.deepEqual(kinds(leads.at(-1) ?? []), cap === entries.length ? ['mound_visit', 'pinch_hitting'] : [])
+  }
+})
+
+test('a stacked half (no window picked) repeats nothing', () => {
+  const entries = computeHalfInningFeed(buildFeed(), 3, 'top', 'away')
+  assert.deepEqual(windowLeadIn(entries, focusWindows(entries, entries.length), null), [])
+})
+
+// Only the managers' notices repeat (ADR-0016): a standalone play between
+// batters (a pickoff, a caught stealing or a balk with no pitch, pushed with
+// midAtBat false) is a scored play, and drawing it twice invites logging the
+// out twice.
+test('a standalone play between batters is not repeated; the managers’ notices are', () => {
+  const ev = (eventType) => ({ kind: 'event', eventType, midAtBat: false })
+  const entries = [
+    { kind: 'atbat' },
+    ev('pickoff_caught_stealing_2b'), ev('mound_visit'), ev('balk'), ev('pitching_substitution'),
+    ev('pinch_hitting'), ev('pinch_running'), ev('defensive_substitution'), ev('defensive_switch'),
+    ev('ejection'), ev('game_advisory'),
+    { kind: 'atbat' },
+  ]
+  const wins = focusWindows(entries, entries.length)
+  assert.deepEqual(kinds(windowLeadIn(entries, wins, 1)), [
+    'mound_visit', 'pitching_substitution', 'pinch_hitting', 'pinch_running',
+    'defensive_substitution', 'defensive_switch', 'ejection', 'game_advisory',
+  ])
+})
+
+// The render half, read off the source the way button-placement.test.js does
+// (the suite runs no JSX): a repeat never carries the departing arm's line, a
+// repeated change is the short card, and the repeat wrapper is the only one.
+test('PlayByPlay draws a repeat as the short card, with no handoff line and one wrapper', () => {
+  const src = (rel) => readFileSync(new URL(`../src/components/playbyplay/${rel}`, import.meta.url), 'utf8')
+  const pbp = src('PlayByPlay.jsx')
+  assert.match(pbp, /const finals =\s+repeat \|\| entry\.atBatIndex == null/)
+  const shortAt = pbp.indexOf("} else if (repeat && entry.eventType === 'pitching_substitution') {")
+  const fullAt = pbp.indexOf("} else if (entry.eventType === 'pitching_substitution') {")
+  assert.ok(shortAt > 0 && shortAt < fullAt, 'the repeat branch comes before the full card')
+  assert.match(pbp.slice(shortAt, fullAt), /<ReliefRepeat\b/)
+  assert.doesNotMatch(pbp.slice(shortAt, fullAt), /PitcherCard|DepartureLineCard/)
+  const relief = src('PitcherNotice.jsx').split('export function ReliefRepeat')[1].split('\nexport ')[0]
+  assert.doesNotMatch(relief, /pbp__entry/, 'PlayByPlay owns the wrapper; no nested .pbp__entry')
 })
 
 // The spoiler invariant, on the captured game it is pinned to (see
