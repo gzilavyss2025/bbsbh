@@ -1,5 +1,6 @@
 import { pitchFamily, pitchLabel } from '../../../api/pitchArsenal.js'
 import { totalsOf } from '../../../api/scout/headToHead.js'
+import { ordinal as withSuffix } from '../../../lib/format.js'
 
 // THE MEETINGS TAB, PURE (#1490): every past meeting pitch by pitch, from the
 // head-to-head's `pitchList` (api/scout/headToHead.js). test/scout-meetings
@@ -31,12 +32,7 @@ export const callOf = (call) => {
   return { word, tone }
 }
 
-export const ordinal = (n) => {
-  if (n == null) return ''
-  const t = n % 100
-  const s = t >= 11 && t <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th')
-  return `${n}${s}`
-}
+export const ordinal = (n) => (n == null ? '' : withSuffix(n))
 
 // A pitch's full name: the board's pill name, else pitchLabel's.
 export const nameOf = (code, board) => board?.types.find((t) => t.code === code)?.name ?? (code ? pitchLabel(code) : 'Pitch')

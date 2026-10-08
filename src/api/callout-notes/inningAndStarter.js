@@ -6,7 +6,8 @@
 import { pitchCallCode, FOUL_CODES } from '../playbyplay.js'
 import { personNameParts, dayWordFor, halfIndex } from '../select.js'
 import { availabilityFor } from '../workload.js'
-import { otherSide, ordinal, isNum, clampScore, skewBonus, magnitudeOf, SCORE_BASE } from './shared.js'
+import { otherSide, isNum, clampScore, skewBonus, magnitudeOf, SCORE_BASE } from './shared.js'
+import { ordinal } from '../../lib/format.js'
 
 // --- run differential by inning --------------------------------------------------
 // "The Brewers have outscored opponents 38-14 in the 7th this season" — from

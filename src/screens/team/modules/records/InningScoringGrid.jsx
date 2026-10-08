@@ -1,4 +1,5 @@
-import { ordinal, shortDate } from '../../../../api/teamRecords.js'
+import { shortDate } from '../../../../api/teamRecords.js'
+import { ordinal } from '../../../../lib/format.js'
 import { situationalRecordsPath } from '../../../../lib/route.js'
 import { useNav } from '../../../../lib/nav.js'
 

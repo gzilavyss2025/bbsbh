@@ -1,4 +1,4 @@
-import { ordinal } from '../../lib/ballpark/ballparkData.js'
+import { ordinal } from '../../lib/format.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 
 // The two small building blocks of a park's "details" — a labeled built/roof/

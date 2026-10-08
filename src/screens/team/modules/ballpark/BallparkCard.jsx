@@ -1,5 +1,6 @@
 import { Suspense, lazy, useCallback, useState } from 'react'
-import { ordinal, rankedDimensions } from '../../../../lib/ballpark/ballparkData.js'
+import { rankedDimensions } from '../../../../lib/ballpark/ballparkData.js'
+import { ordinal } from '../../../../lib/format.js'
 import {
   fieldIds,
   resolveParkName,

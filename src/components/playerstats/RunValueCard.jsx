@@ -9,6 +9,7 @@ import {
 } from '../../api/around-the-game/runValue.js'
 import { RunValueSplit, splitScale } from '../around-the-game/RunValueParts.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { ordinal } from '../../lib/format.js'
 
 // The player page's RUN VALUE card — his season split into the four things a
 // player can do to move a run, on the one scale that lets them be added.
@@ -82,8 +83,3 @@ function leadWith(view) {
   return `Most of it is ${best.inProse}: ${best.about}`
 }
 
-function ordinal(n) {
-  const rest = n % 100
-  if (rest >= 11 && rest <= 13) return `${n}th`
-  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`
-}

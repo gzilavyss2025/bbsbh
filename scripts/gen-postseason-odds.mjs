@@ -20,7 +20,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs } from './lib/args.mjs'
-import { round1 } from '../src/lib/math/number.js'
+import { clamp, round1 } from '../src/lib/math/number.js'
 import { latestAtOrBefore } from '../src/lib/math/snapshot.js'
 import { writeJsonAtomic } from './lib/io.js'
 
@@ -31,7 +31,6 @@ const MLB_LEAGUES = [103, 104]
 const HOME_WIN_PROBABILITY = 0.54
 const DEFAULT_SIMS = 5000
 
-const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
 // Two decimals for the probability fields: at DEFAULT_SIMS the true
 // granularity is finer than 0.1%, and near the 0%/100% extremes that extra
 // digit is what lets the UI show "99.95%" instead of overstating certainty

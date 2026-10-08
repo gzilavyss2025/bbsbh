@@ -41,6 +41,7 @@ import { CENTURY_CLUB_MIN, CENTURY_MPH, pitchFamily } from './pitchArsenal.js'
 // without the merge quietly favouring whichever surface capped its bonus higher.
 import { magnitudeOf, corroborationBonus } from './callout-notes.js'
 import { ipToOuts } from '../lib/math/innings.js'
+import { ordinal } from '../lib/format.js'
 
 // Worthiness bases for this family, same 0–100 scale and clamp/skew idiom as
 // callout-notes.js's SCORE_BASE (kept local rather than imported — this
@@ -385,10 +386,4 @@ export function buildMarginNotes(feed, revealedThrough, bundle, teamNames, extra
     }
   }
   return ordered.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-}
-
-function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd']
-  const v = n % 100
-  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }

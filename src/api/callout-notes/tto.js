@@ -7,7 +7,8 @@
 
 import { NON_PA_EVENT_TYPES } from '../playbyplay.js'
 import { personNameParts, selectPrePitchChanges } from '../select.js'
-import { otherSide, ordinal, isNum, clampScore, magnitudeOf, SCORE_BASE } from './shared.js'
+import { otherSide, isNum, clampScore, magnitudeOf, SCORE_BASE } from './shared.js'
+import { ordinal } from '../../lib/format.js'
 
 // --- times-through-the-order --------------------------------------------------
 // "Batters see Imanaga a 3rd time this inning — they're hitting .444 off him

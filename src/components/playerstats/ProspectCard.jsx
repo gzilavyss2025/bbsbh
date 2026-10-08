@@ -8,6 +8,7 @@ import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
+import { ordinal } from '../../lib/format.js'
 
 const CHART_H = 140
 const PLOT_TOP = 26
@@ -21,12 +22,6 @@ function sampleSizeLabel(metric, sampleSize) {
 
 function comparisonGroup(metricOrGroup) {
   return metricOrGroup === 'ERA' || metricOrGroup === 'pitching' ? 'pitchers' : 'hitters'
-}
-
-function ordinal(value) {
-  const mod100 = value % 100
-  const suffix = mod100 >= 11 && mod100 <= 13 ? 'th' : value % 10 === 1 ? 'st' : value % 10 === 2 ? 'nd' : value % 10 === 3 ? 'rd' : 'th'
-  return `${value}${suffix}`
 }
 
 function shortDate(apiDate) {

@@ -4,6 +4,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { ballparkFor } from '../../lib/ballpark/ballparkData.js'
 import { VIEWBOX, PLOT_SKY_CROP, PLOT_VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
+import { ordinal } from '../../lib/format.js'
 
 // The Hit chart: every ball put in play, plotted where it was fielded on the
 // park's own field drawing. Purely presentational — it fetches nothing, derives
@@ -49,12 +50,6 @@ const isHard = (ball, cut) => ball?.exitVelo != null && ball.exitVelo >= cut
 // number, so the readout simply drops it.
 const carried = (ball) =>
   ball != null && ball.trajectory !== 'ground_ball' && ball.distance != null
-
-function ordinal(n) {
-  const teens = n % 100
-  if (teens >= 11 && teens <= 13) return `${n}th`
-  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`
-}
 
 const velo = (ball) => (ball?.exitVelo == null ? -1 : ball.exitVelo)
 const veloText = (ball) => (ball?.exitVelo == null ? DASH : ball.exitVelo.toFixed(1))

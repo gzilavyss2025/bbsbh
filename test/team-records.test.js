@@ -48,9 +48,9 @@ import {
   daysAtPlace,
   lastOccurrence,
   monthsPlayed,
-  ordinal,
   shortDate,
 } from '../src/api/teamRecords.js'
+import { ordinal } from '../src/lib/format.js'
 
 // A linescore's innings array, from `[away, home]` pairs. `null` home means
 // that side did not bat.
