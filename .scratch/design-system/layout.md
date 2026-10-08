@@ -826,3 +826,31 @@ and `npm run e2e` were not run.
 
 **Left.** `.stampsheet__levels` (`StampSheet.jsx`, 6th file), `.idlab__mastheadmode` (2 more files),
 `.team-hub__namerow` (2 sites in 2 files), `.idlab__eraactions` (`EraRow.jsx`, #1747).
+
+## Grid slice G2 (2026-10-08)
+
+Second `Grid` migration: 2 rules, 2 JSX sites. Only two of the 17 rules G1 left
+pass the filter (one class, no responsive twin, gap on the 8 or 12px step, not
+scoring-adjacent), so the slice is small. Nothing snaps.
+
+| rule | `min` | mode | gap |
+| --- | --- | --- | --- |
+| `.idlab__erafields` (keeps `min-width: 0`) | 7rem | fit | snug |
+| `.gamesgrid__grid` (rule deleted, class dropped) | 100 | fill | snug |
+
+**Test:** `test/grid-migration.test.js` pins both (rule holds no layout, site is a
+`<Grid>` with the old `min`, mode and gap). It failed first, then passed.
+
+**Checked:** `/team/158/games` (mock API, `FREEZE=1 BLOCKIMG=1`, 390 and 760px):
+5,315 and 5,313 elements, geometry identical. The only differences are three
+team-logo `<img>`/`<span>` fallbacks that also differ between two runs of the same
+code (the logo race `BLOCKIMG` is meant to hide); their rects match.
+`.idlab__erafields` is in the dev-only identity lab and was not drawn.
+`npm run lint`, `npm test` and `npm run build` pass. `npm run visual` was not run.
+
+**Left (15 rules):** a two-value or off-step gap (`.cwb__sheet`, `.navdir`,
+`.scout__facts`, `.scout__pitches`, `.logbook__grid`, `.patternlab__grid`), no gap
+(`.ninekeys__keys`), a responsive override or `@media` twin (`.allstarlegacy__*`,
+`.gamelist`, `.sitefooter__actions`, `.stamppane__grid`), a non-`minmax(px, 1fr)`
+column (`.photorail--strip`), scoring-adjacent (`.marginnotes__grid`,
+`.gamephotos__grid`), and the `/design-lab` grids.
