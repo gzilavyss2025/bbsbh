@@ -400,11 +400,43 @@ changed nothing. Record only, no action.
 
 ## Rating changes over time
 
-- A nightly snapshot of each player's OVR and bars goes into a sharded file, for
-  example `public/data/ovr-history/`, written by a new `scripts/gen-ovr.mjs`.
-  The reader goes through `staticJson.js` (`src/api/CLAUDE.md`).
-- `prospect-trend.json` already keeps weekly history for prospects. Reuse its
-  weeks for the first version.
+Built in step 8 (#1722). This is the data half. The card does not show it yet (#1703).
+
+- **The file.** `gen-ovr.mjs` also writes `public/data/ovr-history/{NN}.json`, on
+  `personId % 100`, in the same `bat` / `pit` split as `ovr/`. A player holds a list of
+  rows `[date, ovr, bars | null, 1?]`, oldest first. The date is the day the nightly
+  inputs were made (`generatedAt` of `savant-percentiles.json`). A rated date already on
+  disk is never rewritten, so a rerun on the same files writes the same bytes.
+- **What is kept** (`scripts/lib/ovr/history.mjs`): every day of the last 60 days
+  (`RECENT_DAYS`), then one row per week for the rest of the current season. Older
+  seasons are dropped.
+- **Seeded rows.** A prospect has no rating before step 7 (#1721), so the generator
+  seeds each prospect's series from `prospect-trend.json`, thinned by the rule above. A
+  seeded row ends in `1` and holds the prospect-trend **percentile**, not an OVR. It is
+  kept only before the player's first real row. A week with no percentile (no line) has
+  no row. Rows made by the old method, which summed every level (`atLevel` false, all
+  rows before 2026-10-01), are seeded too, by Gary's call, so the series shows a step at
+  2026-10-01 for a player who changed level. The weekly rows from 2026-03-29 to
+  2026-08-09 have no gap.
+- **Readers.** `fetchOvrHistory(personId, group)` in `src/api/ovr/ovrData.js` gives
+  `[{ date, ovr, bars, seeded }]`. `changeSince(snapshots, days = 7)` in
+  `src/api/ovr/history.js` gives `{ delta, from, to }`, or `null` until a snapshot at
+  least seven days older than the newest exists. It is measured from the newest
+  snapshot, not a clock. It is also `null` when one end is seeded and the other is not,
+  because a percentile and a rating are not one scale. `seasonSeries(snapshots, season)`
+  gives one year in date order, with `seeded` on each row.
+- **A major leaguer** has one real row on the first run, so its change is `null` until
+  the history is seven days old.
+- **Size.** The 8 KB shard line does not hold here, by Gary's call. About 11 rated players
+  a shard at 60 daily rows with bars (about 55 bytes a row) come to about 106 KB at the most
+  (**estimate** from the real row size, not yet measured at full length), so the generator
+  throws past 128 KB (`MAX_HISTORY_SHARD_BYTES`). A player page opens one shard. Sharding on
+  `personId % 1000` was measured and does not fix it: 317 of 672 shards would still pass
+  8 KB, because player ids cluster on their last digits. Today the largest shard is 23 KB
+  (the seeded prospects).
+- **Cadence.** `gen-ovr.mjs` is hand-run today. The history only grows when it runs, so
+  a nightly step is needed for a real series. That step is not in the workflow yet:
+  Gary approves it first, because each nightly data commit that reaches `main` can deploy.
 - How the card shows the change (the arrow and the season sparkline) is in #1703.
 
 ## Build order

@@ -541,6 +541,15 @@ for each generator; the reader modules:
   (ADR-0034). No SealBox. No UI reads it yet (#1703). The pure steps before it are
   `ovr/rating.js`, `ovr/career.js`, `ovr/minor.js` (a minor leaguer's rating and the
   minor-league half of the blend) and `ovr/pot.js`; the prior-season input is `ovr/savantHistory.js`.
+- `ovr/ovrData.js` `fetchOvrHistory(personId, 'hitting' | 'pitching')` and `ovr/history.js`
+  — a player's rating history, from `public/data/ovr-history/{NN}.json` (`gen-ovr.mjs`,
+  same `personId % 100` shard key as `ovr/`). `fetchOvrHistory` gives
+  `[{ date, ovr, bars, seeded }]`, oldest first, or `[]`. `seeded` is true for a
+  prospect-trend percentile, which is not a rating. `changeSince(snapshots, days = 7)`
+  gives `{ delta, from, to }` or `null` (fewer than two rows, no row `days` or more older
+  than the newest, or a seeded end against a real one). `seasonSeries(snapshots, year)`
+  gives one year in date order. Pure and spoiler-free, no SealBox (ADR-0034). No UI reads
+  it yet (#1703).
 - `savantPercentiles.js` — season Statcast percentile ranks, from
   `public/data/savant-percentiles.json` (`gen-savant-percentiles.mjs`, nightly).
   MLB only; completed-game season aggregates, so spoiler-free with no `SealBox`

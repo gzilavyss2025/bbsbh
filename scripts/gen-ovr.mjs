@@ -9,15 +9,21 @@
 // prior-season stores are rebuilt each autumn. Sharded on `personId % 100`, both
 // player types in one shard, so a player page opens ONE file (src/api/ovr/ovrData.js).
 // Run by hand: node scripts/gen-ovr.mjs
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeShards } from './lib/io.js'
 import { FLD_MIN_PA, buildRatings, loadInputs } from './lib/ovr/build.mjs'
+import { mergeHistory, seedRows } from './lib/ovr/history.mjs'
+import { unpackProspectTrend } from '../src/api/prospectTrend.js'
 import { CONSTANTS } from '../src/api/ovr/rating.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 
 const dataDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data')
 const MAX_SHARD_BYTES = 8 * 1024 // the sizing rule's stop-and-ask line (src/api/CLAUDE.md)
+// The history store is the one exception, by Gary's call: 11 rated players a shard at 60 daily rows
+// with bars come to about 106 KB at the most, so the line is 128 KB. A page opens one shard.
+const MAX_HISTORY_SHARD_BYTES = 128 * 1024
 
 const inputs = loadInputs(dataDir)
 const out = buildRatings(inputs)
@@ -40,6 +46,35 @@ for (const group of ['bat', 'pit']) {
 const biggest = Math.max(...[...shards.values()].map((s) => JSON.stringify(s).length))
 if (biggest > MAX_SHARD_BYTES) throw new Error(`a shard is ${biggest} bytes, over ${MAX_SHARD_BYTES}: stop and ask`)
 const { written } = await writeShards(join(dataDir, 'ovr'), [...shards])
+
+// The history file (#1722): public/data/ovr-history/{NN}.json, same shard key and the same
+// bat / pit split. A row per player per date, kept by mergeHistory. The date is the day the
+// nightly inputs were made, so a rerun on the same files writes the same bytes. Prospects get
+// weekly rows seeded from prospect-trend.json (flagged, they are percentiles, not ratings).
+const readJson = (path) => (existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : null)
+const today = readJson(join(dataDir, 'savant-percentiles.json')).generatedAt.slice(0, 10)
+const seeds = { bat: {}, pit: {} }
+for (const p of unpackProspectTrend(readJson(join(dataDir, 'prospect-trend.json')) ?? { players: [] }).players) {
+  seeds[p.group === 'pitching' ? 'pit' : 'bat'][p.playerId] = seedRows(p.history)
+}
+const history = new Map() // shard key -> { bat: { id: rows }, pit }
+const histShard = (key) => history.get(key) ?? history.set(key, { bat: {}, pit: {} }).get(key)
+for (let n = 0; n < 100; n++) {
+  const key = String(n).padStart(2, '0')
+  const old = readJson(join(dataDir, 'ovr-history', `${key}.json`)) ?? { bat: {}, pit: {} }
+  for (const group of ['bat', 'pit']) {
+    const ids = new Set([...Object.keys(old[group]), ...Object.keys(shards.get(key)?.[group] ?? {})])
+    for (const id of Object.keys(seeds[group])) if (shardKey100(id) === key) ids.add(id)
+    for (const id of ids) {
+      const now = shards.get(key)?.[group][id]
+      const rows = mergeHistory({ prior: old[group][id], seed: seeds[group][id], real: now && [now.ovr, now.bars], today })
+      if (rows.length) histShard(key)[group][id] = rows
+    }
+  }
+}
+const histBiggest = Math.max(...[...history.values()].map((s) => JSON.stringify(s).length))
+if (histBiggest > MAX_HISTORY_SHARD_BYTES) throw new Error(`a history shard is ${histBiggest} bytes, over ${MAX_HISTORY_SHARD_BYTES}: stop and ask`)
+const { written: histWritten } = await writeShards(join(dataDir, 'ovr-history'), [...history])
 
 // The report: what the review notes on the rating module (issue #1720) asked this step to look at.
 const stat = (xs) => {
@@ -71,4 +106,5 @@ const bySignature = {}
 for (const e of Object.values(out.bat).filter((e) => e.bars)) (bySignature[Object.keys(e.bars).sort().join('+')] ??= []).push(e.ovr)
 for (const [sig, xs] of Object.entries(bySignature)) console.log(`  hitters with ${sig}: ${stat(xs)}`)
 console.log(`strings converted to numbers: ${out.strings}; blended percentiles at 0 or 100 or past them (clamped before inverseNormalCdf): ${out.clamped}`)
+console.log(`history ${today}: ${histWritten} shards to ${join(dataDir, 'ovr-history')}, largest ${histBiggest} bytes`)
 console.log(`wrote ${written} shards to ${join(dataDir, 'ovr')} (floor ${FLD_MIN_PA} PA, largest ${biggest} bytes)`)

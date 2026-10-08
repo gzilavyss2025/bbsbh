@@ -68,6 +68,7 @@ export const EXCEPT = {
   'run-expectancy-eras/': 'hand-run, one decade at a time (gen-run-expectancy.mjs --era-aggregate); history',
   'league-averages.json': 'hand-run; a finished season never changes and the file carries no clock',
   'ovr/': 'hand-run (gen-ovr.mjs, #1720) after the prior-season stores are rebuilt each autumn; the shards carry no clock, so a rerun on the same files writes the same bytes',
+  'ovr-history/': 'hand-run with gen-ovr.mjs (#1722); a row is dated by the nightly inputs it was built from, and a rerun on the same files writes the same bytes',
   'milb-seasons/': 'hand-run once a year (gen-milb-seasons.mjs, #1719); a finished minor-league season never changes',
   // Frozen ON PURPOSE, which is the one shape this guard cannot tell from a
   // dead generator. A level's pool is a list of games from a season that is
