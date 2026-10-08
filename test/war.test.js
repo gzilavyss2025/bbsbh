@@ -2,7 +2,7 @@
 // wrappers plus the pure year-union helper the player page reads.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { fetchWarData, fetchWarHistory, warByYearFor, warByTeamFor, warShardKey } from '../src/api/war.js'
+import { fetchWarData, fetchWarHistory, fldByYearFor, paByYearFor, warByYearFor, warByTeamFor, warShardKey } from '../src/api/war.js'
 
 // --------------------------------------------------------------------------
 // warByYearFor — pure, no fetch involved
@@ -32,6 +32,27 @@ test('warByYearFor skips a season/current entry the player has no value in', () 
 test('warByYearFor degrades to {} for missing/null history or current', () => {
   assert.deepEqual(warByYearFor(1, 'hitting', null, null), {})
   assert.deepEqual(warByYearFor(1, 'hitting', undefined, undefined), {})
+})
+
+// --------------------------------------------------------------------------
+// fldByYearFor / paByYearFor — pure, read the same shard as warByYearFor
+// --------------------------------------------------------------------------
+test('fldByYearFor and paByYearFor read one player\'s season maps; a pitcher\'s 0 is a value', () => {
+  const history = {
+    bat: {},
+    pit: {},
+    fld: { 660271: { 2023: 4.5, 2024: -1.2 }, 543037: { 2024: 0 } },
+    pa: { 660271: { 2023: 600, 2024: 580 } },
+  }
+  assert.deepEqual(fldByYearFor(660271, history), { 2023: 4.5, 2024: -1.2 })
+  assert.deepEqual(paByYearFor(660271, history), { 2023: 600, 2024: 580 })
+  assert.deepEqual(fldByYearFor(543037, history), { 2024: 0 })
+})
+
+test('fldByYearFor and paByYearFor return {} for an unknown player or an old shard', () => {
+  assert.deepEqual(fldByYearFor(1, { fld: {}, pa: {} }), {})
+  assert.deepEqual(paByYearFor(1, { bat: {}, pit: {} }), {})
+  assert.deepEqual(fldByYearFor(1, null), {})
 })
 
 // --------------------------------------------------------------------------
@@ -77,7 +98,7 @@ test('fetchWarData reads the static file and caches it across calls', async (t) 
 // --------------------------------------------------------------------------
 test('fetchWarHistory degrades to empty bat/pit maps on a non-ok response', async (t) => {
   t.mock.method(globalThis, 'fetch', async () => ({ ok: false, status: 404 }))
-  assert.deepEqual(await fetchWarHistory(11), { bat: {}, pit: {} })
+  assert.deepEqual(await fetchWarHistory(11), { bat: {}, pit: {}, fld: {}, pa: {} })
 })
 
 test('fetchWarHistory asks for the player his bucket, and caches per bucket', async (t) => {

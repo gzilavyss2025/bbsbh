@@ -1465,6 +1465,12 @@ Re-run only to fold in a new season.
   800 expected for 24 teams; the 1994 strike = 657.6 against 657 for 28 teams at
   114 games; 2020 = 373.3 against 370 for 60 games). A player page fetches one
   shard, which the deeper window grows from about 4 KB to about 18 KB.
+  Since the OVR work (#1718) each shard also holds `fld` (season fielding runs, from
+  `stats=sabermetrics` `stat.fielding`) and `pa` (plate appearances, from
+  `stats=season` `plateAppearances`), both `{ [personId]: { [season]: n } }`, hitting
+  group only, for seasons from `FLD_START_SEASON` (2023). Older seasons were not
+  checked. Adds about 0.8 KB per shard (1.5 KB at most). A pitcher has no `fld` row
+  unless he batted. `src/api/war.js` reads them with `fldByYearFor` / `paByYearFor`.
 - `gen-awards-history.mjs` → `public/data/awards-history.json` — who won each major
   MLB award (MVP, Cy Young, Rookie of the Year, Silver Slugger, Gold Glove, Platinum
   Glove, Reliever of the Year, Comeback Player, Hank Aaron, Roberto Clemente, All-MLB

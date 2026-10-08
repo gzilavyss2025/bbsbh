@@ -34,6 +34,7 @@
 // Before this window went back, a pre-2010 row on a veteran's register showed a
 // dash in the WAR column; now the register is filled for every MLB season a
 // player ever had.
+// Also keeps `fld` and `pa` per season from FLD_START_SEASON (see docs/scripts/generators.md).
 // Run by hand: node scripts/gen-war-history.mjs
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -45,6 +46,9 @@ const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'war-history')
 
 const START_SEASON = 1901
+// fld (fielding runs) and pa (plate appearances) were checked for 2019-2025 only;
+// do not widen this below the checked range without re-checking the source.
+const FLD_START_SEASON = 2023
 // Only COMPLETED seasons belong here; the live season is war.json's job. Before
 // a season ends its WAR is still moving, so stop at the year before the current.
 const LAST_SEASON = new Date().getFullYear() - 1
@@ -55,41 +59,66 @@ async function fetchLeaderboard(group, season) {
       `&season=${season}&sportId=1&limit=3000&playerPool=ALL`,
   )
   const map = {}
+  const fld = {}
   for (const split of json.stats?.[0]?.splits ?? []) {
     const id = split.player?.id
     const war = Number(split.stat?.war)
     if (id && Number.isFinite(war)) map[id] = Math.round(war * 10) / 10
+    const f = Number(split.stat?.fielding)
+    if (id && split.stat?.fielding != null && Number.isFinite(f)) fld[id] = Math.round(f * 10) / 10
+  }
+  return { war: map, fld }
+}
+
+async function fetchPlateAppearances(season) {
+  const json = await getJson(
+    `/api/v1/stats?stats=season&group=hitting&season=${season}&sportId=1&limit=3000&playerPool=ALL`,
+  )
+  const map = {}
+  for (const split of json.stats?.[0]?.splits ?? []) {
+    const id = split.player?.id
+    const pa = Number(split.stat?.plateAppearances)
+    if (id && Number.isFinite(pa)) map[id] = pa
   }
   return map
 }
 
 const bat = {}
 const pit = {}
+const fld = {}
+const pa = {}
 const seasons = []
 for (let season = START_SEASON; season <= LAST_SEASON; season++) {
-  const [b, p] = await Promise.all([
+  const [b, p, paMap] = await Promise.all([
     fetchLeaderboard('hitting', season),
     fetchLeaderboard('pitching', season),
+    season >= FLD_START_SEASON ? fetchPlateAppearances(season) : null,
   ])
-  bat[season] = b
-  pit[season] = p
+  bat[season] = b.war
+  pit[season] = p.war
+  if (paMap) {
+    fld[season] = b.fld
+    pa[season] = paMap
+  }
   seasons.push(season)
-  console.log(`${season}: ${Object.keys(b).length} batters, ${Object.keys(p).length} pitchers`)
+  console.log(`${season}: ${Object.keys(b.war).length} batters, ${Object.keys(p.war).length} pitchers`)
 }
 
 // Pivot from season-keyed to PLAYER-keyed, then bucket on `personId % 100` —
 // the reader wants one career, not one season of the league. warShardKey is
 // imported from the reader (src/api/war.js), never re-implemented, so the two
 // cannot disagree about which bucket a player is in.
-const buckets = new Map() // shard key -> { bat, pit }
+const buckets = new Map() // shard key -> { bat, pit, fld, pa }
 for (const [group, bySeason] of [
   ['bat', bat],
   ['pit', pit],
+  ['fld', fld],
+  ['pa', pa],
 ]) {
   for (const [season, byId] of Object.entries(bySeason)) {
     for (const [id, war] of Object.entries(byId)) {
       const key = warShardKey(id)
-      if (!buckets.has(key)) buckets.set(key, { bat: {}, pit: {} })
+      if (!buckets.has(key)) buckets.set(key, { bat: {}, pit: {}, fld: {}, pa: {} })
       const player = buckets.get(key)[group]
       ;(player[id] ??= {})[season] = war
     }
