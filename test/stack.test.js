@@ -21,7 +21,7 @@ import { dirname, join } from 'node:path'
 import { walk, toPosix } from '../scripts/lib/walk.mjs'
 import { GAPS, STACK_TAGS, stackClassName } from '../src/lib/design/stackClass.js'
 import { stripComments, ruleBody } from './helpers/css.js'
-import { checkMigration } from './helpers/layoutMigration.js'
+import { defineMigrationTests } from './helpers/layoutMigration.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const STYLES = join(SRC, 'styles')
@@ -130,30 +130,31 @@ test('Stack and its helper import no api/ or stamp module', () => {
 // Rules moved onto <Stack> keep their own padding, margin or frame, and nothing that
 // draws the column or the gap, in any stylesheet. Every JSX site of the class is a
 // <Stack> with the gap the old rule wrote (base is the default). The checks are in
-// test/helpers/layoutMigration.js. A rule deleted whole has no `file`.
+// test/helpers/layoutMigration.js. A rule deleted whole keeps the `file` that held it.
 const STACK = {
   component: 'Stack',
   sheet: 'system/stack.css',
   props: ['gap'],
   defaults: { gap: 'base' },
   closed: false,
+  allowDefault: true, // gap="base" is the default, and a site may spell it out
 }
 
 // S14: nine one-class column rules.
 const S14 = {
-  fhist__span: { file: '57a-franchise-history.css', gap: 'tight', keeps: ['flex'] },
-  fhist__parks: { file: '57a-franchise-history.css', gap: 'base' },
-  fhist__parkline: { file: '57a-franchise-history.css', gap: 'tight' },
-  scout__game: { file: 'scout/meetings.css', gap: 'snug' },
-  scout__pa: { file: 'scout/meetings.css', gap: 'snug' },
-  introsheet__step2: { file: '56-my-tally-intro.css', gap: 'loose' },
-  introsheet__confirm: { file: '56-my-tally-intro.css', gap: 'base' },
-  psrace__leagues: { file: '70-postseason-race.css', gap: 'loose' },
-  staffgrid: { file: '76-workload-marks.css', gap: 'snug' },
+  fhist__span: { jsx: 'screens/team/modules/ballpark/FranchiseHistory.jsx', file: '57a-franchise-history.css', gap: 'tight', keeps: ['flex'] },
+  fhist__parks: { jsx: 'screens/team/modules/ballpark/FranchiseHistory.jsx', file: '57a-franchise-history.css', gap: 'base' },
+  fhist__parkline: { jsx: 'screens/team/modules/ballpark/FranchiseHistory.jsx', file: '57a-franchise-history.css', gap: 'tight' },
+  scout__game: { jsx: 'screens/scout/meetings/MeetingsPanel.jsx', file: 'scout/meetings.css', gap: 'snug' },
+  scout__pa: { jsx: 'screens/scout/meetings/MeetingsPanel.jsx', file: 'scout/meetings.css', gap: 'snug' },
+  introsheet__step2: { jsx: 'components/account/AccountPitch.jsx', file: '56-my-tally-intro.css', gap: 'loose' },
+  introsheet__confirm: { jsx: 'components/account/AccountPitch.jsx', file: '56-my-tally-intro.css', gap: 'base' },
+  psrace__leagues: { jsx: 'screens/PostseasonRacePage.jsx', file: '70-postseason-race.css', gap: 'loose' },
+  staffgrid: { jsx: 'components/workload/StaffGrid.jsx', file: '76-workload-marks.css', gap: 'snug' },
 }
 
 const S15 = {
-  trrank__detail: { gap: 'loose', sites: 2 },
+  trrank__detail: { file: 'situational-records/66a-detail.css', gap: 'loose', sites: 2 },
   'standings-ctrl': { file: '30-standings.css', gap: 'snug' },
   coachtree__node: { file: '39-manager-page.css', gap: 'tight' },
 }
@@ -161,13 +162,9 @@ const S15 = {
 // S16: `.colorlab__logodrop` keeps its align-items, flex and max-width.
 // `.lookupdeck__field` has five sites, and four also carry `--compact`.
 const S16 = {
-  colorlab__row: { gap: 'snug' },
+  colorlab__row: { file: '15-team-color-lab.css', gap: 'snug' },
   colorlab__logodrop: { file: '15-team-color-lab.css', gap: 'snug', keeps: ['align-items', 'flex', 'max-width'] },
   lookupdeck__field: { file: '74a-contract-lookup.css', gap: 'tight', sites: 5 },
 }
 
-for (const [slice, rows] of Object.entries({ S14, S15, S16 })) {
-  test(`slice ${slice}: each block is a <Stack> and its own rule no longer draws the column or gap`, () => {
-    checkMigration(STACK, rows)
-  })
-}
+for (const [slice, rows] of Object.entries({ S14, S15, S16 })) defineMigrationTests(`stack ${slice}`, STACK, rows)

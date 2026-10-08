@@ -10,8 +10,7 @@
 //   3. THE CASCADE. No migrated partial is imported by index.css ahead of
 //      system/cluster.css, so it could not lose to it. A migrated partial is
 //      lazy (a component imports it) or sits after the cluster in index.css.
-import test from 'node:test'
-import { checkMigration } from './helpers/layoutMigration.js'
+import { defineMigrationTests } from './helpers/layoutMigration.js'
 
 const CLUSTER = {
   component: 'Cluster',
@@ -56,6 +55,4 @@ const MIGRATED = {
   'team-hub__namerow': { file: '28a-team-hub-hero.css', gap: 'snug', sites: 2, align: 'baseline' },
 }
 
-test('every migrated Cluster class is a <Cluster> with the old gap and align, and its rule is gone', () => {
-  checkMigration(CLUSTER, MIGRATED)
-})
+defineMigrationTests('cluster', CLUSTER, MIGRATED)

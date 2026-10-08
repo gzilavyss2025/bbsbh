@@ -2,8 +2,7 @@
 // The shared checker (test/helpers/layoutMigration.js) pins the stylesheet, the
 // <Grid> sites (min, fit, gap) and the cascade. A rule deleted whole has no class
 // left, so `dropped` finds its site by `min`.
-import test from 'node:test'
-import { checkMigration } from './helpers/layoutMigration.js'
+import { defineMigrationTests } from './helpers/layoutMigration.js'
 
 const GRID = {
   component: 'Grid',
@@ -14,10 +13,8 @@ const GRID = {
 }
 
 const MIGRATED = {
-  idlab__erafields: { file: '17a-identity-lab-mark-panels.css', min: '7rem', fit: true, keeps: ['min-width'] },
-  gamesgrid__grid: { file: '', dropped: true, jsx: 'screens/team/modules/TeamGames.jsx', min: '{100}' },
+  idlab__erafields: { file: '17a-identity-lab-mark-panels.css', jsx: 'screens/identity-lab/editors/EraRow.jsx', min: '7rem', fit: true, keeps: ['min-width'] },
+  gamesgrid__grid: { dropped: true, jsx: 'screens/team/modules/TeamGames.jsx', min: '{100}' },
 }
 
-test('every migrated grid is a <Grid> with the old min, mode and gap, and its rule is gone', () => {
-  checkMigration(GRID, MIGRATED)
-})
+defineMigrationTests('grid', GRID, MIGRATED)
