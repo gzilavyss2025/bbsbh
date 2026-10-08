@@ -220,18 +220,31 @@ a rating. It includes minor-league career history.
   **Inference:** pooling seasons reduces the counting-stat noise.
 
 **Prior seasons (decided).** `savant-percentiles.json` holds one season only. Prior
-MLB seasons come from Savant's `percentile-rankings?year=` board for 2024 and 2025
-(part A: 2025 has 617 hitters and 711 pitchers, 2024 has 606 and 696).
+MLB seasons come from Savant's `percentile-rankings?year=` board for 2023, 2024 and
+2025. They match the 5/4/3 weights on the last three seasons. Do not store older
+seasons until tuning shows the tail needs them.
 
-- Shard by `personId % 100`, with both seasons in each shard. One shard is about
-  3 KB (the average; the largest is 5.2 KB), and a player page opens one shard. One
-  flat file for both seasons is 296 KB, which would double what the page parses.
-- A reader through `staticJsonBy`, then the career weighting.
+- Coverage (checked 2026-10-07): the board exists for every year from 2015 to 2025.
+  Hitter rows: 614 (2023), 606 (2024), 617 (2025). Pitcher rows: 707, 696, 712.
+  Sprint speed and fastball velocity exist in every year. Bat speed, squared-up rate
+  and swing length exist from 2023 only (216, 214 and 226 hitter rows). The other
+  metrics exist for qualified players only, about 250 of 600+ hitters and about 350
+  of 700 pitchers, so blank cells are normal. The blend drops a blank cell and
+  renormalizes the weights for that metric.
+- Shard by `personId % 100`, with all three seasons and both player types in each
+  shard, and null keys left out. One shard is about 2.5 KB on average (the largest is
+  5.0 KB); a player page opens one shard. One flat file would be about 300 KB, which
+  would double what the page parses. With null keys kept, two seasons were 3.0 KB.
+- A reader through `staticJsonBy` (`src/api/ovr/savantHistory.js`), then the career
+  weighting (`src/api/ovr/career.js`).
 - `public/data/war-history/` holds WAR only, with no Statcast percentiles. It
   cannot feed the buckets.
-- **Inference:** a hand-run generator fits, like `gen-war-history.mjs`, because a
-  finished season's percentiles do not change. Part A did not check whether Savant
-  revises past-year ranks.
+- A hand-run generator fits (`scripts/gen-savant-history.mjs`), like
+  `gen-war-history.mjs`. Revisions (checked once): two fetches minutes apart gave
+  identical files for 2023, 2024 and 2025. The 2026 board did move while the season
+  was open: 89 of 1,842 hitter values and 4 of 2,736 pitcher values changed between
+  two snapshots. **Not checked:** whether Savant revises a finished season later.
+  Regenerate by hand after each season closes.
 - This is on the critical path. It is the coverage fix for the minimum-data rule.
 
 ## OVR for a minor leaguer
