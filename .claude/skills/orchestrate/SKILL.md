@@ -26,11 +26,11 @@ missing, ask in plain chat, one question per message.
 budget); start a shape session; archive a session that passes the Sweep rule;
 `send_message` a child; write ledger comments once he has approved the ledger; after he approves a spec,
 comment it on the issue (end with the Claude Code footer from the session
-reminder).
+reminder); run `/stack-prs` (see "Stacking").
 
 **Ask first** with `AskUserQuestion`, **one question at a time**, recommendation
-first: any label change (`docs/agents/triage-labels.md`); any merge (only
-`/stack-prs` merges, and only when he invokes it); creating, editing, or closing
+first: any label change (`docs/agents/triage-labels.md`); any merge outside
+`/stack-prs`; creating, editing, or closing
 an issue; closing a PR; raising the cap; a design choice, a spoiler-rule
 question, or an ADR; stacking a child on an unmerged PR.
 
@@ -197,8 +197,19 @@ Keep it short, in ASD-STE100 (`docs/agents/writing-style.md`):
 > **Budget:** cap, count running, any warning.
 
 Then ask each decision directly with `AskUserQuestion`, one at a time. If nothing
-needs him, say exactly that. When three or more draft PRs are ready, suggest
-`/stack-prs`. He decides.
+needs him, say exactly that.
+
+## Stacking
+
+He gave standing permission (2026-10-08): you run `/stack-prs` on your own, on a
+regular basis. Vercel allows 100 deployments a day, so a stack is cheap.
+
+- Stack at a check-in when one or more child PRs are green, finished, and not
+  waiting on a pick from him. At most one stack per check-in.
+- Skip a PR labeled `wip` or `do-not-merge`, a PR another session still pushes
+  to, and a PR that waits on his choice.
+- After the merge, start the work that waited on it. Say in the report what the
+  stack carried.
 
 ## First run
 
