@@ -53,14 +53,12 @@ function WorstCallBody() {
   )
 }
 
-function FavorBody({ tier }) {
+function FavorBody() {
   return (
     <>
-      {tier && (
-        <Pill className="favormeter__tierpill favormeter__tierpill--standout">
-          Standout<span className="favormeter__tierpill-count"> · {FAVOR.calls} missed calls</span>
-        </Pill>
-      )}
+      <Pill className="favormeter__tierpill favormeter__tierpill--standout">
+        Standout<span className="favormeter__tierpill-count"> · {FAVOR.calls} missed calls</span>
+      </Pill>
       <div className="favormeter__track-row">
         <span className="wcall__edgeword">AWY</span>
         <div className="favormeter__track" role="img" aria-label={`Missed calls added ${FAVOR.net} runs for ${FAVOR.club}`}>
@@ -87,7 +85,7 @@ function PanelBefore() {
         <span className="umpfavor__title">Sample behind the plate</span>
         <div className="umpfavor__row">
           <div className="wcall"><WorstCallBody /></div>
-          <div className="favormeter favormeter--standout"><FavorBody tier /></div>
+          <div className="favormeter favormeter--standout"><FavorBody /></div>
         </div>
       </div>
     </Card>
@@ -100,7 +98,7 @@ function PanelAfter() {
       <span className="umpfavor__title nested__ruled">Sample behind the plate</span>
       <div className="nested__duo">
         <div className="nested__cell"><WorstCallBody /></div>
-        <div className="nested__cell nested__cell--meter"><FavorBody tier /></div>
+        <div className="nested__cell nested__cell--meter"><FavorBody /></div>
       </div>
     </Card>
   )
@@ -117,20 +115,11 @@ const ROSTER = [
 const rosterHead = <SectionHead look="band" club>Current Roster</SectionHead>
 const rosterList = <RosterList season={2026} rows={ROSTER} />
 
-function RosterBefore() {
+function RosterCard({ flat }) {
   return (
     <Card head={rosterHead}>
       <h4 className="roster-sub__title">Position players · season WAR</h4>
-      {rosterList}
-    </Card>
-  )
-}
-
-function RosterAfter() {
-  return (
-    <Card head={rosterHead}>
-      <h4 className="roster-sub__title">Position players · season WAR</h4>
-      <div className="nested__roster">{rosterList}</div>
+      {flat ? <div className="nested__roster">{rosterList}</div> : rosterList}
     </Card>
   )
 }
@@ -236,8 +225,8 @@ const CASES = [
     kind: 'Nested sheet',
     title: 'Roster list, inside the roster card',
     where: '.thub-roster · team/modules/RosterList.jsx',
-    before: <RosterBefore />,
-    after: <RosterAfter />,
+    before: <RosterCard />,
+    after: <RosterCard flat />,
     lost: 'The list stops being a thing you can point at. Rows keep their hairlines and the card edge is the only frame. The same list draws on the All-Star and series pages, which need their own look before the box goes. Team-hub files wait for #1179 and #1180.',
   },
   {
