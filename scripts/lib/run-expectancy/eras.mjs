@@ -1,15 +1,26 @@
 // Pure parts of scripts/gen-run-expectancy.mjs, so tests can import them (a
 // generator is a top-level script: importing it RUNS it). `accumulateGame` is the
-// per-game walk, moved here unchanged; the rest build and merge the per-season
+// per-game walk, moved here; the rest build and merge the per-season
 // checkpoints behind `--era-sweep` / `--era-aggregate`.
 import { mapConcurrent } from '../concurrency.mjs'
 import { stateKey, re24Key, ERA_FIRST, ERA_LAST } from '../../../src/lib/runExpectancy.js'
 
 const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
 
+// One re24 observation: `runs` remaining from a base/out state.
+function addRe24(re24, baseMask, outs, runs) {
+  const k24 = re24Key(baseMask, outs)
+  const cell24 = re24.get(k24) ?? { sum: 0, n: 0 }
+  cell24.sum += runs
+  cell24.n += 1
+  re24.set(k24, cell24)
+}
+
 // Accumulate one game's plate appearances into the running state sums. Adds
 // { sum, n } into both `states` (288-bucket) and `re24` (24-bucket) Maps.
-export function accumulateGame(feed, states, re24) {
+// `re24` counts once per pitch, which the default table needs. With `perPlay`
+// it counts once per play instead (era tables, #1611). `states` stays per pitch.
+export function accumulateGame(feed, states, re24, { perPlay = false } = {}) {
   const plays = feed?.liveData?.plays?.allPlays ?? []
   if (!plays.length) return false
 
@@ -78,13 +89,10 @@ export function accumulateGame(feed, states, re24) {
       cell.sum += remainingRuns
       cell.n += 1
       states.set(k288, cell)
-
-      const k24 = re24Key(preBaseMask, preOuts)
-      const cell24 = re24.get(k24) ?? { sum: 0, n: 0 }
-      cell24.sum += remainingRuns
-      cell24.n += 1
-      re24.set(k24, cell24)
+      if (!perPlay) addRe24(re24, preBaseMask, preOuts, remainingRuns)
     }
+    // Once per play, after the pitch loop, so a play with no pitch events counts too.
+    if (perPlay) addRe24(re24, preBaseMask, preOuts, remainingRuns)
 
     // Apply this play's runner movements for the NEXT play's base/out state.
     for (const r of p.runners ?? []) {
@@ -127,8 +135,8 @@ export function schedulePks(schedule) {
 // loaded with no plays, normal before 1990), and `failed` (the gamePks whose
 // fetch threw after every retry). Best-effort: a failed fetch is listed, never
 // thrown, so the nightly-style default mode stays alive; era mode refuses to
-// write a checkpoint when `failed` is not empty.
-export async function sweepGames(pks, limit, fetchFeed, states, re24, onProgress) {
+// write a checkpoint when `failed` is not empty. `options` goes to accumulateGame.
+export async function sweepGames(pks, limit, fetchFeed, states, re24, onProgress, options) {
   const failed = []
   let games = 0
   let noPlays = 0
@@ -136,7 +144,7 @@ export async function sweepGames(pks, limit, fetchFeed, states, re24, onProgress
   await mapConcurrent(pks, limit, async (pk) => {
     try {
       const feed = await fetchFeed(pk)
-      if (accumulateGame(feed, states, re24)) games++
+      if (accumulateGame(feed, states, re24, options)) games++
       else noPlays++
     } catch {
       failed.push(pk)

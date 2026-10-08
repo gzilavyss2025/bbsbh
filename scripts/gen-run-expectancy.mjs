@@ -93,8 +93,9 @@ const seasons = args.seasons
   : [String(currentYear - 2), String(currentYear - 1)]
 
 // Sweep one season's Final games into `states`/`re24`. Returns
-// { scheduled, games, noPlays, failed } (see sweepGames).
-async function sweepSeason(season, limit, states, re24) {
+// { scheduled, games, noPlays, failed } (see sweepGames). `options` is the
+// accumulateGame flag: only the era sweep passes { perPlay: true }.
+async function sweepSeason(season, limit, states, re24, options) {
   const pks = await seasonGamePks(season)
   console.log(`${season}: ${pks.length} Final games`)
   const result = await sweepGames(
@@ -106,6 +107,7 @@ async function sweepSeason(season, limit, states, re24) {
     (done) => {
       if (done % 250 === 0) console.log(`${season}: ${done}/${pks.length} games processed`)
     },
+    options,
   )
   console.log(`${season}: swept (${states.size} states populated so far)`)
   return { scheduled: pks.length, ...result }
@@ -126,7 +128,7 @@ if (process.argv.includes('--era-sweep')) {
     const started = Date.now()
     const states = new Map()
     const re24 = new Map()
-    const { scheduled, games, noPlays, failed } = await sweepSeason(season, 4, states, re24)
+    const { scheduled, games, noPlays, failed } = await sweepSeason(season, 4, states, re24, { perPlay: true })
     // A checkpoint is skipped on every re-run, so a hole in it would stay for good.
     if (failed.length) {
       console.error(`${season}: ${failed.length} feed fetches failed (${failed.join(', ')}); no checkpoint written, run it again`)
