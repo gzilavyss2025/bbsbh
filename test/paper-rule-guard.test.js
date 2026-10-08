@@ -45,13 +45,35 @@ test('a read in the last declaration, with no semicolon, fails', () => {
   assert.match(run('.a { border-color: var(--rule) }\n'), /--rule\b/)
 })
 
-test('an alias, a lookalike name and a comment do not fail', () => {
+test('an alias, a lookalike name and a comment do not fail, and the guard did run', () => {
+  // Line 4 is a real read: it proves the guard scanned this file, so a pass on the
+  // lines above is not a pass by crash or by an empty scan.
   const err = run(
-    '/* border: var(--rule); */\n.a { border-color: var(--border-grid); color: var(--rule-strong); }\n',
+    '/* border: var(--rule); */\n' +
+      '.a { border-color: var(--border-grid); color: var(--rule-strong); }\n' +
+      '.b { border-color: var(--border-rule); background: var(--bg-page); outline-color: var(--rule-hairline); border-top-color: var(--paper-card); }\n' +
+      '.c { border-color: var(--rule); }\n',
   )
-  assert.doesNotMatch(err, /--rule|--paper/)
+  assert.match(err, /x\.css:4: .*reads --rule\b/)
+  assert.doesNotMatch(err, /x\.css:[123]:/)
 })
 
 test('a definition is not a read', () => {
-  assert.doesNotMatch(run('.a { --paper-2: #fff; }\n'), /--paper/)
+  assert.doesNotMatch(run('.a { --paper-2: #fff; }\n.b { --edge: var(--rule); }\n'), /x\.css:1:/)
+})
+
+test('a primitive in the fallback position, with spaces, or with !important fails', () => {
+  assert.match(run('.a { color: var(--bg-page, var(--paper-1)); }\n'), /--paper-1/)
+  assert.match(run('.a { color: var(  --rule  ); }\n'), /--rule\b/)
+  assert.match(run('.a { color: var(--paper-2) !important; }\n'), /--paper-2/)
+})
+
+test('a selector colon or an at-rule wrapper does not garble the report', () => {
+  const err = run('@media (min-width: 1px) {\n  .e:hover {\n    border-color: var(--rule);\n  }\n}\n')
+  assert.match(err, /x\.css:3: border-color: var\(--rule\)/)
+})
+
+test('a semicolon inside a data URI does not hide a later read', () => {
+  const err = run('.a { background: url("data:image/svg+xml;utf8,<svg/>") center, var(--rule); }\n')
+  assert.match(err, /x\.css:1: .*reads --rule\b/)
 })

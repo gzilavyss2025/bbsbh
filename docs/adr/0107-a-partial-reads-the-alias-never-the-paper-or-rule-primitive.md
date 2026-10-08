@@ -14,7 +14,10 @@ reading a primitive again.
 
 1. **`check-typography.mjs` fails on any such read in `src/styles/`**, in any property.
    It splits each value on `var(` and reads the token name, so `--paper-0` counts. The
-   message names the token it found.
+   message names the token it found. It reads a last declaration with no `;`, blanks
+   `url(...)` bodies first (a data URI carries `;`), and anchors the property name to a
+   declaration start, so a selector colon is not read as one. The other rules in the
+   file keep their original value pattern.
 2. **No allowlist.** The guard passes on the tree with zero entries.
 3. **Scope is `src/styles/` only (Gary, 2026-10-07).** `src/tokens/` defines the
    primitives. `public/learn.css` loads outside the bundle. `posterPaper.js` reads the

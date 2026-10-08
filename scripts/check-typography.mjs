@@ -48,6 +48,12 @@ if (!sheets.length || totalRules === 0) {
 const stripComments = (css) =>
   css.replace(/\/\*[\s\S]*?\*\//g, (block) => block.replace(/[^\n]/g, ' '))
 
+// A url(...) body is not a declaration either. A data URI carries `;` (and `var(`
+// in a string), which would end a value early and hide a later read in the same
+// declaration (#1156). Blank it the same way: same length, same newlines.
+const stripUrls = (css) =>
+  css.replace(/url\((?:"[^"]*"|'[^']*'|[^)]*)\)/g, (u) => u.replace(/[^\n]/g, ' '))
+
 // ---------------------------------------------------------------------------
 // THE SPACING RESIDUE (ADR-0085)
 //
@@ -220,7 +226,9 @@ const rules = [
     // `--paper-N: ...;` as a property name is a definition, not a read, and is
     // not flagged (no partial defines one; src/tokens/ does, and is not scanned).
     property: 'colour primitive',
-    head: '[\\w-]+',
+    // Anchored to a declaration start (after `;` or `{`), so a selector colon or an
+    // at-rule condition is never read as a property name.
+    head: '(?<=[;{]\\s*)[\\w-]+',
     allowed: (value) => {
       const hits = value
         .split('var(')
@@ -233,12 +241,16 @@ const rules = [
 ]
 
 for (const { rel, name, css } of sheets) {
-  const scan = stripComments(css)
+  const scan = stripUrls(stripComments(css))
   for (const rule of rules) {
     // `head` is everything before the colon. It defaults to the bare property
     // name — unanchored, which is the behaviour the four type rules were
     // written against — and a rule that needs to be precise supplies its own.
-    const declarations = new RegExp(`(${rule.head ?? rule.property})\\s*:\\s*([^;}]+)(?:;|(?=}))`, 'g')
+    // A rule with its own `head` also reads a last declaration that has no `;`
+    // before the `}`. The type rules keep the original pattern, so this change does
+    // not move their counts (the nudge ceiling is at 349 of 350).
+    const tail = rule.head ? '([^;}]+)(?:;|(?=}))' : '([^;]+);'
+    const declarations = new RegExp(`(${rule.head ?? rule.property})\\s*:\\s*${tail}`, 'g')
     for (const match of scan.matchAll(declarations)) {
       const value = match[2].trim()
       const verdict = rule.allowed(value, { name, rel })
