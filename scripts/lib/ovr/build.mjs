@@ -105,7 +105,9 @@ export function buildRatings({ bat, pit, fld, pa, birthYear, season, minors = {}
       const rows = minorRows(id)
       const now = rows.find((r) => r.season === season)
       if (out[id] || !now) continue
-      out[id] = { ovr: careerOvr(null, rows), seasons: [...new Set(rows.map((r) => r.season))].sort((a, b) => b - a), level: now.sport }
+      const ovr = careerOvr(null, rows)
+      if (ovr == null) continue // a level with no ceiling (not 11-14 or 16) rates nothing
+      out[id] = { ovr, seasons: [...new Set(rows.map((r) => r.season))].sort((a, b) => b - a), level: now.sport }
     }
     for (const [id, t] of Object.entries(top)) if (out[id]) out[id].pot = potRating(out[id].ovr, t.rank, t.age)
     return out

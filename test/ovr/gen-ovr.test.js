@@ -119,6 +119,11 @@ test('a player with minor-league rows but none this season gets no entry', () =>
   assert.equal(withMinors({ minors: { 7: [row({ season: 2025 })] } }).bat[7], undefined)
 })
 
+test('a current-season row at a level with no ceiling gets no entry', () => {
+  const out = withMinors({ minors: { 7: [row({ sport: 15 })] } })
+  assert.equal(out.bat[7], undefined)
+})
+
 test('minor-league seasons pull an MLB rating toward them and leave the bars alone', () => {
   const base = withMinors({}).bat[1]
   const out = withMinors({ minors: { 1: [row({ season: 2025, pct: 0 })] } }).bat[1]
