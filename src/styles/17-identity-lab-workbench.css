@@ -556,10 +556,6 @@
 /* Which CDN mark feeds the conversion (SOURCE_OPTIONS) — a segmented toggle,
    not a select, since there are only four stops to compare by eye. */
 .idlab__monoinksource {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1);
   margin: var(--space-2) 0;
 }
 

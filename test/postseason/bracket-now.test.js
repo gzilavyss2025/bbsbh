@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { bracket2025 } from './fixtures.js'
-import { bracketNow } from '../../src/lib/postseason/primer/bracketNow.js'
+import { bracketNow, roundFeed } from '../../src/lib/postseason/primer/bracketNow.js'
 
 const abbrs = (box) => box.rows.map((r) => r.club?.abbreviation ?? null)
 
@@ -71,4 +71,27 @@ test('a bracket missing an LCS or the World Series draws nothing', () => {
   const b = bracket2025('2025-10-17')
   assert.equal(bracketNow({ ...b, worldSeries: null }), null)
   assert.equal(bracketNow({ ...b, leagues: { ...b.leagues, NL: { ...b.leagues.NL, lcs: null } } }), null)
+})
+
+test('a Wild Card day: four series, AL first, each feeding its Division Series box', () => {
+  const { from, to, links } = roundFeed(bracket2025('2025-09-30'), 'wildcard')
+  assert.deepEqual(from.map((b) => b.league), ['AL', 'AL', 'NL', 'NL'])
+  assert.equal(to.length, 4)
+  assert.deepEqual(links.map((l) => l.to).sort(), [0, 1, 2, 3])
+  assert.ok(from.every((b) => b.foot === 'Today \u00b7 Game 1'))
+  // A Division Series box has the bye club, and a blank slot that names the series it waits on.
+  const blank = to[0].rows.find((r) => !r.club)
+  assert.equal(blank.feeder, 'AL Wild Card')
+})
+
+test('a Division Series day: four series feed two LCS boxes, two to a box', () => {
+  const { from, to, links } = roundFeed(bracket2025('2025-10-08'), 'division')
+  assert.equal(from.length, 4)
+  assert.deepEqual(to.map((b) => b.name), ['ALCS', 'NLCS'])
+  assert.deepEqual(links.map((l) => l.to), [0, 0, 1, 1])
+})
+
+test('no round to draw gives null', () => {
+  assert.equal(roundFeed(null, 'division'), null)
+  assert.equal(roundFeed({ leagues: {}, series: [] }, 'wildcard'), null)
 })

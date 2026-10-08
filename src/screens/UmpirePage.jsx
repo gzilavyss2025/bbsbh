@@ -19,6 +19,7 @@ import { seasonRangeLabel } from '../lib/seasons/view.js'
 import { useSeasonData } from '../hooks/seasons/useSeasonData.js'
 import { SeasonPicker } from '../components/season/SeasonPicker.jsx'
 import { UmpireSeasonCompare } from '../components/umpire/UmpireSeasonCompare.jsx'
+import { Cluster } from '../components/ui/layout/Cluster.jsx'
 
 const TOP_VENUES_LIMIT = 5
 const HP_RECORDS_LIMIT = 10
@@ -181,7 +182,7 @@ export function UmpirePage({ id, seasonYear, vs }) {
           {teams.length > 0 && (
             <Card body="flush" className="umpage__card">
               <h2 className="umpage__cardtitle">Most worked teams</h2>
-              <ul className="umpage__teamgrid">
+              <Cluster gap="base" as="ul" className="umpage__teamgrid">
                 {teams.map((t) => (
                   <li
                     key={t.id}
@@ -193,7 +194,7 @@ export function UmpirePage({ id, seasonYear, vs }) {
                     </TeamLink>
                   </li>
                 ))}
-              </ul>
+              </Cluster>
             </Card>
           )}
 

@@ -68,6 +68,7 @@ test('the series pages never seal and never read Scores Unlocked', () => {
   const files = [
     ...dir('components/postseason'),
     ...dir('components/postseason/edges'),
+    ...dir('hooks/postseason'),
     ...dir('screens/postseason-live'),
     ...dir('styles/postseason'),
     new URL('../../src/screens/PostseasonSeriesPage.jsx', import.meta.url),

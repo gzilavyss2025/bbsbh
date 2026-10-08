@@ -145,15 +145,6 @@
   background: var(--clay-deep);
 }
 
-.daystrip-key {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
 .daystrip-key li {
   display: inline-flex;
   align-items: center;

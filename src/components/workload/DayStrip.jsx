@@ -1,3 +1,5 @@
+import { Cluster } from '../ui/layout/Cluster.jsx'
+
 // THE DAY STRIP, AND THE REST RAIL UNDER IT.
 //
 // One cell a calendar day, shaded by what the pitcher threw (api/workload.js's
@@ -65,7 +67,7 @@ function stripLabel(cells, runs) {
 // needs this once — never once a strip.
 export function DayStripKey() {
   return (
-    <ul className="daystrip-key">
+    <Cluster gap="base" as="ul" className="daystrip-key">
       <li>
         <span className="daystrip-key__swatch daystrip-key__swatch--light" aria-hidden="true" />
         <span>Light</span>
@@ -82,6 +84,6 @@ export function DayStripKey() {
         <span className="daystrip-key__rail" aria-hidden="true" />
         <span>Days in a row</span>
       </li>
-    </ul>
+    </Cluster>
   )
 }

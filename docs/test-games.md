@@ -212,6 +212,28 @@ W. Iglesias enters mid top 8; Painter (bottom 8) is "Starter in relief";
 Fuentes enters mid top 9 with a folded "Other <1%" tile. The issue holds the
 full expected-value table.
 
+## Series primer: reference days
+
+The home page shows a series primer on these days (ADR-0087, 2026-10-08
+addendum), and on any other day when every slate game is in one round. Open each with `?nointro`, at 1440 and 1180 px. At 820 and 390 px the
+page stays as it is. Past dates have no nightly block, so the live read runs. The
+starters and the matchup edges do not show on a past date.
+
+- **A middle game**: `/10162024`, NLCS Game 3, gamePk `775305`. Series tied 1–1.
+- **Little history**: `/10132024`, NLCS Game 1, gamePk `775307`.
+- **A club facing elimination**: `/10202024`, NLCS Game 6, gamePk `775302`. The ribbon
+  head shows "NYM facing elimination".
+- **Two series (the switch)**: `/10142024`, NLCS Game 2 (gamePk `775306`) and ALCS
+  Game 1 (gamePk `775314`). The NL series opens first.
+- **Winner take all**: `/11012025`, World Series Game 7, gamePk `813024`.
+- **World Series Game 1**: `/10242025`, gamePk `813027`.
+- **A Wild Card day (four tabs)**: `/09302025`, four Game 1s. The small bracket shows
+  the four series feeding the Division Series boxes.
+- **A Division Series day (four tabs)**: `/10082025`. The four series feed the two LCS
+  boxes. Two series in one league share a name, so the pills add the clubs.
+- **No primer**: a day with two rounds on the slate, and a regular-season day. A
+  Division Series day with one game per series now shows the primer.
+
 ## Categories not included (couldn't verify)
 
 Batting out of order and an overturned replay challenge were searched but

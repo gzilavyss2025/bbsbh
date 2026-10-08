@@ -1,4 +1,4 @@
-// Cluster migration slices C1 to C9 (#1180): twenty-nine wrapping-row rules moved onto
+// Cluster migration slices C1 to C11 (#1180): thirty-seven wrapping-row rules moved onto
 // <Cluster>. Each would fail silently otherwise (lint green, page drawn, only a
 // screenshot noticing):
 //
@@ -60,6 +60,17 @@ const MIGRATED = {
   colorlab__swatchrow: { file: '15-team-color-lab.css', gap: 'base', sites: 1 },
   'colorlab__weardates-list': { file: '15-team-color-lab.css', gap: 'tight', sites: 1 },
   iddrawer__logo: { file: '62-identity-admin.css', gap: 'base', sites: 1, align: 'start' },
+  // C10: four rows. Three keep their own margin; the day-strip key <ul> is deleted whole (.cluster--list is its reset).
+  cmdmap__chips: { file: '26d-command-map.css', gap: 'snug', sites: 4, keeps: ['margin-block-end'] },
+  seriesedges__pen: { file: 'postseason/primer-main.css', gap: 'snug', sites: 1, align: 'center', keeps: ['margin-bottom'] },
+  idlab__monoinksource: { file: '17-identity-lab-workbench.css', gap: 'tight', sites: 2, align: 'center', keeps: ['margin'] },
+  'daystrip-key': { gap: 'base', sites: 1 },
+  // C11: the umpire team list is a ul, so Cluster's list modifier owns its reset and the rule is gone whole.
+  // The other three keep justify-content (the part does not own justification).
+  umpage__teamgrid: { file: '38-umpire-pages.css', gap: 'base', sites: 1 },
+  allstargame__main: { file: '37-all-star-rosters.css', gap: 'base', sites: 1, align: 'center', keeps: ['justify-content: space-between'] },
+  simlike__meta: { file: '51-similar-players.css', gap: 'tight', sites: 1, align: 'baseline', keeps: ['justify-content: center', 'min-width', 'font-size', 'line-height'] },
+  arsenal__head: { file: '69-pitch-arsenal.css', gap: 'snug', sites: 1, align: 'center', keeps: ['justify-content: space-between', 'margin-bottom'] },
 }
 
 defineMigrationTests('cluster', CLUSTER, MIGRATED)

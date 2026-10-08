@@ -153,11 +153,7 @@
   padding: var(--space-2) var(--space-3);
 }
 .allstargame__main {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
-  flex-wrap: wrap;
 }
 .allstargame__scorecol {
   display: flex;

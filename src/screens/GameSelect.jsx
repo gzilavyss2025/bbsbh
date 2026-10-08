@@ -22,9 +22,9 @@ import { GameCard } from '../components/game/GameCard.jsx'
 import { DerbyCard } from '../components/allstar/DerbyCard.jsx'
 import { PastGameFlipCard } from '../components/game/PastGameFlipCard.jsx'
 import { PostseasonBracket } from '../components/bracket/PostseasonBracket.jsx'
-import { BracketRail } from '../components/bracket/BracketRail.jsx'
+import { SeriesPrimer } from '../components/postseason/SeriesPrimer.jsx'
+import { usePrimer } from '../hooks/postseason/usePrimer.js'
 import { BracketDock } from '../components/bracket/BracketDock.jsx'
-import { SurvivorsBoard } from '../components/bracket/SurvivorsBoard.jsx'
 import { LevelNav } from '../components/team/LevelNav.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { TallyLockup } from '../components/chrome/TallyBrand.jsx'
@@ -358,6 +358,15 @@ export function GameSelect({
     () => sortGames(stackedSuspended.games, favoriteTeamId, favoriteAffiliateIds),
     [stackedSuspended, favoriteTeamId, favoriteAffiliateIds],
   )
+  // The series primer (ADR-0087): off unless the rail is up.
+  const primer = usePrimer({
+    enabled: bracketInRail,
+    postseason: postseasonBracket,
+    slateDate: dateStr,
+    isToday,
+    games: data,
+    favoriteTeamId,
+  })
 
   // A same-day alternate/City Connect posting doesn't reach jerseysData
   // (public/data/jerseys.json) until tomorrow night's cron — one batched live
@@ -1053,16 +1062,8 @@ export function GameSelect({
             {/* Any idle club, the whole-league All-Star case included. In the
                 winter that is every club — and wide, it moves to the rail
                 (WinterRail.jsx, #1078). */}
-            {/* In the postseason window the survivors' board takes this
-                slot instead: all twelve clubs, out ones included, with what
-                each does next (SurvivorsBoard.jsx). */}
-            {october && (
-              <SurvivorsBoard
-                bracket={postseasonBracket.bracket}
-                slateDate={dateStr}
-                favoriteTeamId={favoriteTeamId}
-              />
-            )}
+            {/* October: the survivors' board, or the series primer on a primer day. */}
+            {october && <SeriesPrimer part="main" primer={primer} />}
             {offDayTeams.length > 0 && !(wide && winter) && !october && (
               <OffDaySection
                 teams={offDayTeams}
@@ -1092,14 +1093,8 @@ export function GameSelect({
           />
         )}
 
-        {/* October's copy of that column: the bracket (BracketRail.jsx). */}
-        {bracketInRail && (
-          <BracketRail
-            bracket={postseasonBracket.bracket}
-            cutoff={postseasonBracket.cutoff}
-            slateDate={dateStr}
-          />
-        )}
+        {/* October's copy of that column: the bracket, or the primer's. */}
+        {bracketInRail && <SeriesPrimer part="rail" primer={primer} />}
 
         {/* The slot the wire left; `railed` reserves it (WinterRail.jsx). */}
         {wide && winter && (

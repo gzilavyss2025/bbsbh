@@ -190,14 +190,10 @@ don't run these by hand.
   (1985: 2,103 games in 3.7 min, so about 40 min for ten seasons). Pure parts:
   `scripts/lib/run-expectancy/eras.mjs`. Reader helper: `lookupEraRE` in
   `src/lib/runExpectancy.js`.
-  **Era `re24` is per play** (#1611). Before that change it was per pitch. The 1960s,
-  1970s and 1980s checkpoints still hold per-pitch sums. Re-sweep those seasons by hand
-  (about 2 hours) before any screen reads them. Remove their `season-YYYY.json` files first,
-  because a sweep skips a season whose file exists. Then re-aggregate the three decades.
-  1990-2023 need no re-sweep. `lookupEraRE` reads the per-count cells from 1990 on, and uses
-  `re24` only as the thin-cell fallback. Until the 1960s to 1980s are re-swept, era `re24`
-  mixes per-pitch and per-play weighting across decades. The 1990-2023 checkpoints are per
-  pitch too, so that mix stays after the re-sweep, unless those decades are also re-swept.
+  **Era `re24` is per play** (#1611) for 1960-1989, which were re-swept after that change.
+  1990-2023 are still per pitch, so the mix across decades stays unless those are also
+  re-swept. `lookupEraRE` reads the per-count cells from 1990 on, and uses `re24` only as
+  the thin-cell fallback. No screen reads the era tables yet.
 - `gen-minors-leaders.mjs` → `public/data/minors-leaders.json` — the combined
   ALL-MINORS leaderboard (every farmhand's totals SUMMED across levels). Eight
   full-level stat pulls (~4,700 players). Stores PRE-RANKED top rows per category, so
@@ -1539,7 +1535,8 @@ Re-run only to fold in a new season.
   `prospect-trend.json`; a seeded row ends in `1` and holds a percentile, not a rating.
   The row date is `generatedAt` of `savant-percentiles.json`, so a rerun on the same files
   changes nothing. It throws past 128 KB a shard (not 8 KB: see `docs/ovr-rating.md`, "Rating
-  changes over time"). Not on a cron yet.
+  changes over time"). Runs nightly in `update-nightly-data.yml`, after WAR, Savant
+  percentiles and the prospect trend, and only when all three succeeded (#1685).
 - `gen-milb-seasons.mjs` → `public/data/milb-seasons/{NN}.json` (player-keyed, bucketed
   on `personId % 100` via the reader's `milbShardKey`) — each player's minor-league season
   lines for 2021-2025 at AAA, AA, A+ and A, for the career rating (`docs/ovr-rating.md`,

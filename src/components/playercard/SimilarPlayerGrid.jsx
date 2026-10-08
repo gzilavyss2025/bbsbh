@@ -5,6 +5,7 @@ import { Card } from '../ui/frame/Card.jsx'
 import { splitDisplayName } from '../../api/person.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { teamClubNameShort } from '../../lib/teams.js'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 
 // The shared presentation for both neighbour cards — "Pitches like"
 // (SimilarPitchers) and "Hits like" (SimilarHitters). The two are the same
@@ -117,10 +118,10 @@ export function SimilarPlayerGrid({ rows, measure, excludes }) {
                       guessed "P" — and the line disappears entirely when
                       neither resolves. */}
                   {(p.pos || club) && (
-                    <span className="simlike__meta">
+                    <Cluster gap="tight" as="span" align="baseline" className="simlike__meta">
                       {p.pos && <span className="simlike__pos">{p.pos}</span>}
                       {club && <span className="simlike__club">{club}</span>}
-                    </span>
+                    </Cluster>
                   )}
                 </span>
                 <span className="simlike__match">

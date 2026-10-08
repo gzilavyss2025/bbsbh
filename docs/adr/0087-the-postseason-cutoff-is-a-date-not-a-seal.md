@@ -177,8 +177,10 @@ Unlocked read, and nothing from today's game or a later one.
 ## Addendum (2026-10-08): the series primer
 
 Gary locked the series primer on 2026-10-08. It is a new home page (`/`) layout
-for a postseason day. It shows only when every game on the MLB slate is in the
-NLCS, the ALCS or the World Series, with one game for each series. It shows from
+for a postseason day. It shows only when every game on the MLB slate is in one
+round (the Wild Card, the Division Series, the LCS or the World Series), with one
+game for each series. Gary widened it from the LCS and the World Series to every
+round on 2026-10-08. A day with two rounds on the slate keeps the usual page. It shows from
 `BRACKET_RAIL_QUERY` (1000px) up. On any other day, and below 1000px, the page
 does not change. The pure rules are in `src/lib/postseason/primer/`, and
 `test/postseason/primer.test.js` pins them.
@@ -188,10 +190,12 @@ does not change. The pure rules are in `src/lib/postseason/primer/`, and
   the winner in ink. The win-chance lines and the leaders read the same games. A
   game on the cutoff date or later never shows a score, a winner or a run
   (`ribbonNodes.js`). The primer does not read Scores Unlocked. The 2026-09-30
-  departure does not apply here: the primer reads the bracket without
-  `{ live: true }`, so with the pass on it still shows nothing from today's
-  game. If a live bracket that counts today's game gets to `primerSeriesFor`,
-  it returns no series and the page keeps its usual layout.
+  departure does not apply here: the primer never shows today's game. The slate
+  gives the primer the same bracket it draws, and with the pass on that bracket
+  is the live one. Once today's game is Final, the live bracket counts it. Then
+  `primerSeriesFor` returns no series and the page keeps its usual layout. Gary
+  kept this rule on 2026-10-08: the page never shows a state that includes
+  today's result.
 - **(b) The primer keys on the series, not on the game.** A day with two series
   gets a two-tab switch. The first tab is the favourite club's series, else the
   series with the earlier first pitch, else the NL series (`primerSeries.js`).
@@ -199,7 +203,9 @@ does not change. The pure rules are in `src/lib/postseason/primer/`, and
   the usual page.
 - **(c) On a primer day, the primer's own parts replace the rail and the
   survivors' board.** `BracketRail` and `SurvivorsBoard` do not render. A small
-  bracket (the two LCS and the World Series) is in the right column. "Still to
+  bracket is in the right column: the round being played feeds the next round (on
+  an LCS day, the two LCS and the World Series; on a Wild Card or Division Series
+  day, the series of that round, AL first, and the boxes they feed). "Still to
   play" and the travel and off-day words do not render, because the ribbon
   shows the date and the park of each game ahead. The game card, the site
   chrome, the club strip, the date stepper and the Reveal All bar do not change.
