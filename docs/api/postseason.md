@@ -214,21 +214,24 @@ shard first and from statsapi for what the shard does not have (ADR-0087,
 date can come in. The bracket decides which games these are.
 
 - `useSeriesPrimerData(series, cutoff)` (`src/hooks/postseason/`) returns
-  `{ games, stats, source, loading }`. `source` is `"shard"`, `"live"` or
+  `{ games, stats, source, loading, error }`. `error` is the live read's. `source` is `"shard"`, `"live"` or
   `"mixed"`. `series` is a bracket series read without `{ live: true }`.
 - It reads the callouts bundle of **today's** game with `fetchCallouts`. The
-  bundle can hold a `series` block: `{ id, gamePks, games, stats? }`. A game is
+  bundle can hold a `series` block: `{ id, gamePks, games, stats? }`. `gamePks` is
+  required, because `stats` carry no game ids. A game is
   the slice 1 shape in `ribbonNodes.js`. `seriesBlockFor(bundle, seriesId)` gives
   the block, or `null` when the id does not match.
 - The rules are in `primerGames.js` (`src/lib/postseason/primer/`):
   - The block names the same games as the bracket: use it (`"shard"`).
-  - The block lacks a counted game: use the games it has, and read the rest live
+  - The block lacks a counted game, or has no `stats`, or its `gamePks` are not
+    exactly the counted games: use the games it has, and read the rest live
     (`"mixed"`). The live stats cover every counted game, so a missing game means
     live stats as well.
   - The block names a game that the bracket does not count: drop the whole block
     and read live (`"live"`). This keeps a stale or early file from bringing in
     today's result.
-  - No block: read live. A block without `stats` also reads the stats live.
+  - No block, or a block of the wrong shape: read live. `source` names what was
+    used, so a block that gives no game is `"live"`.
 - The live read is `useSeriesLog(games)`. It is the same read that
   `LiveSeriesPage` makes: box scores (`loadSeriesStats`), game cards and
   win-chance signals. `loadSeriesStats` has one new output field,

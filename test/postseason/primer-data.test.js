@@ -95,6 +95,29 @@ test('shard lacks a counted game: mixed, the live game fills it', () => {
   assert.equal(out.stats, liveLog.stats)
 })
 
+test('stats are trusted only when gamePks is exactly the counted set', () => {
+  // gamePks lacks 11 although games carries it: the stats might cover a game we cannot name
+  const loose = block([10, 11], { gamePks: [10] })
+  assert.equal(planShard(loose, counted).needLive, true)
+  assert.equal(primerData(loose, counted, liveLog).stats, liveLog.stats)
+  // no gamePks at all: the stats cannot be tied to a game list, so the block is not used
+  const nameless = block([10, 11], { gamePks: undefined })
+  assert.equal(planShard(nameless, counted).usable, false)
+  assert.equal(primerData(nameless, counted, liveLog).source, 'live')
+})
+
+test('a malformed block falls back to the live read and never throws', () => {
+  for (const bad of [{ id: 's', gamePks: { 0: 10 }, games: [] }, { id: 's', gamePks: [10], games: [null] }, { id: 's', gamePks: [10], games: 'x' }, 7]) {
+    assert.equal(planShard(bad, counted).usable, false)
+    assert.equal(primerData(bad, counted, liveLog).source, 'live')
+  }
+})
+
+test('source names what was used: a block with no counted game to give is live', () => {
+  assert.equal(primerData(block([]), [], null).source, 'live')
+  assert.equal(primerData(block([]), counted, liveLog).source, 'live')
+})
+
 test('shard has a game the bracket does not count: the whole shard is dropped', () => {
   const b = block([10, 11, 12]) // 12 is today's game, or one after
   assert.equal(planShard(b, counted).usable, false)

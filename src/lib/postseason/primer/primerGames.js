@@ -8,7 +8,9 @@
 // The shard block lives on the callouts bundle of TODAY'S game
 // (public/data/callouts/{MMDDYYYY}/{gamePk}.json, api/callouts.js) as `series`:
 //   { id, gamePks: number[], games: Game[], stats?: loadSeriesStats's output }
-// `stats` is optional. Without it the live read supplies the stats.
+// `gamePks` is required: the stats carry no game ids, so it is the only proof of
+// which games they sum. `stats` is optional. Without it the live read supplies
+// the stats.
 //
 // SPOILER FOOTING. Every game here is one the bracket counts (Final before the
 // cutoff date). A block that names any other game is dropped whole, so a stale
@@ -23,19 +25,23 @@ export function seriesBlockFor(bundle, seriesId) {
 }
 
 // -> { usable, byPk, needLive }
-//   usable    the block names no game the bracket does not count
+//   usable    the block has the shape above and names no game the bracket does
+//             not count. A block of any other shape is not used.
 //   byPk      the block's games, by gamePk (empty when not usable)
 //   needLive  a live read is needed: no usable block, a counted game the block
-//             lacks, or no stats in the block. The live stats cover every
-//             counted game, so a missing game means live stats too.
+//             lacks, or stats that are not tied to exactly the counted games.
+//             The block's `stats` carry no game ids, so `gamePks` is the only
+//             proof of what they cover. The live stats cover every counted
+//             game, so a missing game means live stats too.
 export function planShard(block, counted) {
   const pks = new Set(counted.map((g) => g.gamePk))
-  const shardGames = block?.games ?? []
-  const named = [...(block?.gamePks ?? []), ...shardGames.map((g) => g.gamePk)]
-  const usable = Boolean(block) && named.every((pk) => pks.has(pk))
-  const byPk = usable ? Object.fromEntries(shardGames.map((g) => [g.gamePk, g])) : {}
+  const shaped =
+    Array.isArray(block?.gamePks) && Array.isArray(block.games) && block.games.every((g) => g?.gamePk != null)
+  const usable = shaped && [...block.gamePks, ...block.games.map((g) => g.gamePk)].every((pk) => pks.has(pk))
+  const byPk = usable ? Object.fromEntries(block.games.map((g) => [g.gamePk, g])) : {}
+  const exact = usable && new Set(block.gamePks).size === pks.size
   const complete = counted.every((g) => byPk[g.gamePk])
-  return { usable, byPk, needLive: counted.length > 0 && !(usable && complete && block.stats) }
+  return { usable, byPk, needLive: counted.length > 0 && !(exact && complete && block.stats) }
 }
 
 // At most WP_POINTS home win-chance points, evenly spaced across the plays.
@@ -72,11 +78,11 @@ function liveGames(counted, log) {
 // while the live read is still on its way; the games it would give are then
 // missing, and the caller shows its loading state.
 export function primerData(block, counted, log) {
-  const { usable, byPk, needLive } = planShard(block, counted)
+  const { byPk, needLive } = planShard(block, counted)
   const live = needLive ? liveGames(counted, log) : {}
   return {
     games: counted.map((g) => byPk[g.gamePk] ?? live[g.gamePk]).filter(Boolean),
     stats: needLive ? (log?.stats ?? null) : (block?.stats ?? null),
-    source: !usable ? 'live' : needLive ? 'mixed' : 'shard',
+    source: Object.keys(byPk).length === 0 ? 'live' : needLive ? 'mixed' : 'shard',
   }
 }
