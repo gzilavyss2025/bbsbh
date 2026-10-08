@@ -228,9 +228,8 @@ not swing a rating. It includes minor-league career history.
   discount. Minor-league years have no Statcast (part A), so they use the
   level-relative stats percentile. **Gap:** the per-player minor-league season
   lines need a new fetch. Nobody has scoped it.
-- **Career Fielding.** `public/data/war-history/` holds WAR per season only, not
-  `fld`. A career Fielding bar needs a new per-season `fld` store, hand-run like
-  `gen-war-history.mjs`. The playing-time floor is still set at build time.
+- **Career Fielding.** The per-season `fld` lives in `public/data/war-history/`
+  (with `pa`), from 2023 on, hand-run through `gen-war-history.mjs`. The playing-time floor is still set at build time.
   **Inference:** pooling seasons reduces the counting-stat noise.
 
 **Prior seasons (decided).** `savant-percentiles.json` holds one season only. Prior

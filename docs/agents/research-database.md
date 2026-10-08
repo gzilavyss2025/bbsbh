@@ -267,6 +267,8 @@ These ship in the app. A spike reads them as a source of record. Their row count
 | `public_war` | `public/data/war.json` | 1 report (`bat`, `pit`, `wrc`, `fld`, `batByTeam`, `pitByTeam`) | The raw WAR file with the by-team split. |
 | `public_war_history__bat` | `public/data/war-history/*.json` | One batter, history (`key` = MLB id; `value` maps year to WAR) | What was each hitter's WAR by year? Read with `map_entries(value)`. |
 | `public_war_history__pit` | `public/data/war-history/*.json` | One pitcher, history (`value` maps year to WAR) | What was each pitcher's WAR by year? |
+| `public_war_history__fld` | `public/data/war-history/*.json` | One hitter, history, 2023 on (`value` maps year to fielding runs) | What were a hitter's fielding runs by year? |
+| `public_war_history__pa` | `public/data/war-history/*.json` | One hitter, history, 2023 on (`value` maps year to plate appearances) | How many plate appearances did a hitter have by year? |
 | `public_war_history` | `public/data/war-history/*.json` | 100 rows, one per shard | The raw shards behind the two history views. |
 | `public_rookies__players` | `public/data/rookies.json` | One player (`key` = MLB id), 21,509 rows | When did a man debut, and when does his rookie status end? |
 | `public_rookies` | `public/data/rookies.json` | 1 report (`players` map) | The raw rookie-status file. |

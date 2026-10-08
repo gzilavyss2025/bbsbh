@@ -35,7 +35,9 @@ export function warByTeamFor(personId, group, current) {
 }
 
 // Season WAR for COMPLETED seasons — the multi-year companion to war.json above,
-// keyed by PLAYER: { bat: { [personId]: {season: war} }, pit }.
+// keyed by PLAYER: { bat: { [personId]: {season: war} }, pit, fld, pa }. `fld`
+// (season fielding runs) and `pa` (plate appearances) are hitting-group maps in
+// the same shape, from FLD_START_SEASON on (scripts/gen-war-history.mjs).
 // Hand-generated (scripts/gen-war-history.mjs), not on the nightly cron, since a
 // finished season's WAR never changes. Degrades to empty like the current-season
 // file.
@@ -45,7 +47,8 @@ export function warByTeamFor(personId, group, current) {
 // worth, at most a couple of dozen numbers, out of 416 KB of league-seasons.
 export const warShardKey = shardKey100
 
-const historyShards = new Map() // shard key -> { bat, pit }
+const historyShards = new Map() // shard key -> { bat, pit, fld, pa }
+const EMPTY_SHARD = { bat: {}, pit: {}, fld: {}, pa: {} }
 
 export async function fetchWarHistory(personId) {
   const key = warShardKey(personId)
@@ -53,8 +56,8 @@ export async function fetchWarHistory(personId) {
     historyShards.set(
       key,
       fetch(`/data/war-history/${key}.json`)
-        .then((r) => (r.ok ? r.json() : { bat: {}, pit: {} }))
-        .catch(() => ({ bat: {}, pit: {} })),
+        .then((r) => (r.ok ? r.json() : EMPTY_SHARD))
+        .catch(() => EMPTY_SHARD),
     )
   }
   return historyShards.get(key)
@@ -74,3 +77,10 @@ export function warByYearFor(personId, group, current, history) {
   }
   return out
 }
+
+// A player's fielding runs and plate appearances by season, from his history
+// shard — `{ [season]: number }`, or {} for an unknown player or one who never
+// batted. A 0 is a value, not an error. Completed seasons from 2023 only; no
+// live-season union.
+export const fldByYearFor = (personId, history) => history?.fld?.[personId] ?? {}
+export const paByYearFor = (personId, history) => history?.pa?.[personId] ?? {}

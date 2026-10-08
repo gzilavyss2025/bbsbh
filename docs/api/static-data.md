@@ -74,7 +74,9 @@ for each generator; the reader modules:
   `fetchWarHistory(personId)` + `warByYearFor(personId, group, current, history)`
   union the two into a player's `{season: war}` map (live season from war.json wins its own
   year), which `loadPlayer.js` threads into the player page. MLB-only at source,
-  so MiLB rows fall back to a dash.
+  so MiLB rows fall back to a dash. The same shard also carries `fld` (fielding runs) and
+  `pa` (plate appearances) maps for 2023 on, read with `fldByYearFor(personId, history)` /
+  `paByYearFor(personId, history)` (pure, `{}` for an unknown player). No UI reads them yet.
 - `team.js`'s `fetchMilbAlumni(teamId)` — one farm club's big-league alumni, from
   `public/data/milb-alumni/{teamId}.json` (`scripts/gen-milb-alumni.mjs`, nightly).
   Not its own module: this reader sits beside `fetchAffiliates`, which already
