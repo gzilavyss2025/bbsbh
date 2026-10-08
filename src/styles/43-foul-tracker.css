@@ -320,24 +320,24 @@
    PlayerPage's .player__meta line. */
 .foulboard__herometa {
   margin: 2px 0 0;
-  font-size: var(--fs-small);
-  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 /* Compound to beat .plink's `font: inherit`/`color: inherit` reset. */
 .foulboard__herometa .foulboard__heroteamname {
-  font-size: var(--fs-small);
+  font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
   color: var(--navy);
 }
 /* Same treatment as PlayerPage's .player__pos — a batched people lookup
    (fetchPositions) fills this in for just the four featured leaders, so it's
    absent (and this renders nothing) until that request resolves. */
 .foulboard__heropos {
-  font-family: var(--font-display);
   font-weight: var(--w-bold);
-  color: var(--text-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
 }
 /* Sized up and vertically centered against the (now two-line-tall) name
    column, rather than pinned to the card's top edge. */

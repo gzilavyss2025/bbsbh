@@ -335,10 +335,14 @@
    own tile ink came out. */
 .team-hub__manager {
   margin: 4px 0 0;
-  font-size: var(--fs-small);
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-label);
   color: color-mix(in srgb, var(--ink, var(--text-muted)) 75%, transparent);
 }
 .team-hub__manager .plink {
+  letter-spacing: var(--ls-label);
   color: var(--ink, var(--text-heading));
   font-weight: var(--w-semibold);
 }

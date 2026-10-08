@@ -585,7 +585,10 @@
   color: var(--text-body);
 }
 .coachtree__meta {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
   font-size: var(--fs-compact);
+  letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
 .coachtree__more {
