@@ -215,7 +215,7 @@ configured` on a deploy with no store and `401` on one where the store is live.
 
 A model that is too weak or too strong for design work costs quality or usage. Two
 small scripts show this without interrupting anyone. The ladder they use is step 5 of
-`.claude/skills/improve-prompt`.
+`.claude/skills/write-prompt`.
 
 - **The hook** (`.claude/hooks/design-work-flag.mjs`, `PostToolUse` on `Edit|Write`)
   writes a flag file under `~/.claude/rung-flags/` when an edit lands in a design file:

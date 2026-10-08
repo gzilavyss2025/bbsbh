@@ -1,14 +1,31 @@
 ---
-name: improve-prompt
-description: Grade a prompt A+ to F, check its claims against the repo, and rewrite it to an A+, split into smaller prompts when it is too big, with a model and effort level for each. Use when the user says "improve prompt", "grade this prompt", "split this prompt", asks which model or effort to use for a prompt, or pastes a prompt and asks to make it better.
+name: write-prompt
+description: Write a prompt from a thin idea, or edit and polish one that already exists. Interviews the user one question at a time when the idea is thin, checks every claim against the repo, grades the result A+ to F, splits it when it is too big, and picks a model and effort level for each part. Use when the user says "write a prompt", "write me a prompt for", "improve prompt", "grade this prompt", "split this prompt", asks which model or effort to use, or pastes a prompt and asks to make it better.
 ---
 
-# Improve prompt
+# Write prompt
 
-The user gives you a prompt (pasted, or as a file path). Grade it from A+ to F,
-then make it an A+. An A+ prompt does one job, on the cheapest model and the
-lowest effort that can do that job well. Do these steps in order.
+The user gives you one of two things: a thin idea (a sentence or two), or a prompt that
+already exists (pasted, or as a file path). Turn either into an A+ prompt. An A+ prompt
+does one job, on the cheapest model and the lowest effort that can do that job well.
+Do these steps in order. Step 0 is for a thin idea. Skip it for a prompt that is already
+written, and go to step 1.
 
+0. **Interview (thin idea only).** A prompt can only hold the intent you give it. The
+   model cannot see what the user left unsaid, so get it out before you write.
+   - Read first. Open the files, docs, ADRs and open PRs the idea touches. Ask the user
+     only what the repo cannot answer.
+   - Ask with `AskUserQuestion`, one question per call. Put your recommended answer first
+     and mark it "(Recommended)". Give each option its trade-off.
+   - Cover, in this order, and stop as soon as the prompt can stand alone: the goal and
+     who it is for; what "done" looks like (a test, a screenshot, a route and gamePk);
+     what to leave alone; what to do when a design choice is open (decide, or stop and
+     ask); how big it may get.
+   - Do not ask what the repo already answers. Do not ask more than six questions. When
+     the user says "you pick", pick, and write the pick into the prompt as a settled fact.
+   - Then write a first draft that follows steps 1 to 8. Keep the user's words where you
+     can. Explain why behind each rule, because a reason generalizes and a bare "never"
+     does not.
 1. **Check the facts.** Check every claim against the repo and `origin/main`
    (run `git fetch` first): paths, file lists, counts, commit hashes, ports,
    scripts, skills and issue numbers. Read every doc the prompt cites. Mark each
@@ -110,7 +127,12 @@ lowest effort that can do that job well. Do these steps in order.
    are only polish. A prompt that should split but does not, or that runs
    simple work on an expensive model, loses points.
 7. **Rewrite it.** Keep the author's structure, voice and house style (in
-   bbsbh: ASD-STE100 and the house word list). Do not add scope the author did
+   bbsbh: ASD-STE100 and the house word list). For a prompt that runs unattended on
+   Sonnet 5.5 at low or medium effort, add this line: "Keep working until everything
+   asked for is done. Stop to ask only when you cannot go on without the user, or
+   before a risky step. When the work is done and checked, stop and report; do not add
+   features, tests, files or docs that were not asked for." Anthropic measured that
+   such a model otherwise stops to check in early (Sonnet 5.5 prompting guide). Do not add scope the author did
    not ask for; a split divides the same scope, it does not grow it. Do not
    make up facts. Where a fix needs a decision from the user, ask it with
    AskUserQuestion before you write the final prompts: one question per
@@ -140,7 +162,7 @@ lowest effort that can do that job well. Do these steps in order.
 8. **List the changes.** After the prompts, list each change and its reason,
    including why you split (or did not) and why you picked each model.
 
-Do not run the prompt. This skill only grades and rewrites it. If the prompt is
+Do not run the prompt. This skill only writes, grades and rewrites it. If the prompt is
 already an A+, say so and show the evidence from steps 1 to 5. Do not invent
 changes.
 
@@ -149,6 +171,9 @@ changes.
 When `CLAUDE_CODE_REMOTE=true` (see `docs/development.md`), there is no `gh` CLI. Change
 these steps:
 
+- **Step 0.** In a session Gary is watching, interview with `AskUserQuestion` as written. In a
+  child or unattended session, do not interview: write each open question as
+  `[DECISION: ...]`, with your recommendation first.
 - **Step 1.** Check issue and PR numbers with the GitHub MCP tools, not `gh`.
 - **Step 7.** In a session Gary is watching, use `AskUserQuestion` as written. In a
   child or unattended session, put each open decision in the prompt as

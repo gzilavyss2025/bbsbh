@@ -55,11 +55,11 @@ marked "(Recommended)". If the task already answers a question, skip it.
      to `main`.
    - Stop and ask when: a rule conflicts with the design, or the page needs data the app
      does not fetch.
-6. **Pick model and effort.** Use the ladder in step 5 of the `improve-prompt` skill. Use
+6. **Pick model and effort.** Use the ladder in step 5 of the `write-prompt` skill. Use
    its design rungs: explore directions on Sonnet 5.5 medium, build from a settled
    direction on Sonnet 5.5 high, a design decision or a spoiler-adjacent page on Opus 5.5
    high. Give one line of reason for each.
-7. **Grade the prompts.** Always run the `improve-prompt` skill on the prompts you wrote, before
+7. **Grade the prompts.** Always run the `write-prompt` skill on the prompts you wrote, before
    you show them. It checks each repo claim (routes, paths, line numbers, class names, who uses
    a component), grades the set, and rewrites it. Show Gary the graded result: the grade, the
    fixes, and the final prompts. Do not show the ungraded draft as the answer. When a prompt

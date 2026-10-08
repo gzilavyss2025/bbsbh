@@ -58,7 +58,7 @@ concurrent sessions, so measure.
 ## Models
 
 `create_session` takes `model` and no effort setting. Pick by model, and keep
-the prompt tight. This table is a short form of `improve-prompt` step 5.
+the prompt tight. This table is a short form of `write-prompt` step 5.
 
 | Work | `model` |
 |---|---|
