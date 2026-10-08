@@ -57,7 +57,7 @@ export function eraTheme(era) {
 export function seasonTile(teamId, season, tile) {
   const era = seasonMark(teamId, season)
   if (!era) return tile
-  return { ...tile, tint: era.bar, ink: era.bar ? era.onBar : undefined, pinstripeColor: null, pinstripeBg: null, scale: 1, offsetX: 0, offsetY: 0 }
+  return { ...tile, tint: era.bar, ink: era.onBar, pinstripeColor: null, pinstripeBg: null, scale: 1, offsetX: 0, offsetY: 0 }
 }
 
 // The bar theme of a club in a season-covered era: the app's default chrome,

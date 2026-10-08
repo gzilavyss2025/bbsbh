@@ -145,5 +145,5 @@ test('seasonTile: the ink on every no-art coloured era tile clears AA against it
     }
   }
   assert.ok(n >= 3, 'the CAL, MON and SEA eras are covered')
-  assert.equal(seasonTile(119, 1905, { tint: '#FFFFFF' }).ink, undefined)
+  assert.ok(!seasonTile(119, 1905, { tint: '#FFFFFF' }).ink)
 })
