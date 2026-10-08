@@ -5,6 +5,7 @@ import { TeamLink } from '../team/TeamLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 import { Table } from '../ui/table/Table.jsx'
 import { MetricFigure } from './SituationalIndex.jsx'
 
@@ -75,7 +76,7 @@ export function SituationalBoard({ result, group, pathFor, favoriteTeamId, clubA
       : 'Lowest first'
 
   return (
-    <main className="trrank__detail">
+    <Stack as="main" gap="loose" className="trrank__detail">
       <a
         className="trrank__back"
         {...linkProps(pathFor({
@@ -208,6 +209,6 @@ export function SituationalBoard({ result, group, pathFor, favoriteTeamId, clubA
           </tbody>
         </Table>
       </div>
-    </main>
+    </Stack>
   )
 }

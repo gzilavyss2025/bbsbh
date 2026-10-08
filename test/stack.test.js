@@ -163,3 +163,29 @@ test('slice S14: each block is a <Stack> and its own rule no longer draws the co
     )
   }
 })
+
+// ---- 7. slice S15 (#1180) ----
+// Three one-class column rules moved onto <Stack>, four JSX sites in four files.
+// `.trrank__detail` is drawn by two pages, so it names both. Each rule keeps its
+// own padding, margin or frame, and nothing that draws the column or the gap.
+const S15 = [
+  ['situational-records/66a-detail.css', 'components/situational/SituationalBoard.jsx', 'trrank__detail', 'loose'],
+  ['situational-records/66a-detail.css', 'screens/postseason-records/PostseasonRecordsPage.jsx', 'trrank__detail', 'loose'],
+  ['30-standings.css', 'screens/StandingsPage.jsx', 'standings-ctrl', 'snug'],
+  ['39-manager-page.css', 'components/team/CoachingTree.jsx', 'coachtree__node', 'tight'],
+]
+
+test('slice S15: each block is a <Stack> and its own rule no longer draws the column or gap', () => {
+  for (const [sheet, jsx, cls, gap] of S15) {
+    const css = stripComments(readFileSync(join(STYLES, sheet), 'utf8'))
+    for (const m of css.matchAll(new RegExp(`(^|\\})\\s*\\.${cls}\\s*\\{([^}]*)\\}`, 'g'))) {
+      assert.doesNotMatch(m[2], /(^|[\s;])(display|flex-direction|gap)\s*:/, `.${cls} should leave the column and gap to Stack`)
+    }
+    const text = readFileSync(join(SRC, jsx), 'utf8')
+    assert.match(
+      text,
+      new RegExp(`<Stack\\b[^>]*\\bgap="${gap}"[^>]*\\bclassName="${cls}"`),
+      `${jsx} should render .${cls} as <Stack gap="${gap}">`,
+    )
+  }
+})

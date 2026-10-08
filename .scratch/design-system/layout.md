@@ -883,3 +883,33 @@ code (the logo race `BLOCKIMG` is meant to hide); their rects match.
 `.gamelist`, `.sitefooter__actions`, `.stamppane__grid`), a non-`minmax(px, 1fr)`
 column (`.photorail--strip`), scoring-adjacent (`.marginnotes__grid`,
 `.gamephotos__grid`), and the `/design-lab` grids.
+
+## Stack slice S15 (2026-10-08)
+
+Three one-class `flex-direction: column` rules moved onto `Stack`: 3 rules, 4 JSX sites in 4 files.
+Base: `origin/main` at 528c1b1. The finder counted 29 safe candidates after S14.
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.trrank__detail` (`SituationalBoard.jsx`, `PostseasonRecordsPage.jsx`) | loose | main | nothing (deleted) |
+| `.standings-ctrl` (`StandingsPage.jsx`) | snug | div | `margin-bottom` |
+| `.coachtree__node` (`CoachingTree.jsx`) | tight | li | padding, size (the shared border rule stays) |
+
+**Cascade.** None of the three rules keeps a `display`, `flex-direction` or `gap`, so none can win or
+lose against `.stack`.
+
+**Test first.** `test/stack.test.js` (section 7) names each rule, its gap and its JSX site. It failed on
+`main` and passes now.
+
+**Left on purpose.** Scoring surfaces and Express Lane, as listed in the brief. `.scout__sheet` (a dialog),
+`.printsheet-screen__intro` (keeps `align-items`), and `.projection__list`, `.stampstrip__note` and
+`.pcard__sec` (not judged). Files #1754 edits: `StampSheet.jsx`, `ConsentModal.jsx`, `StaffGrid.jsx`,
+`DeviceSection.jsx`.
+
+**Checked.** `geom.mjs` (`MOCK=1 FREEZE=1 BLOCKIMG=1`, `?nointro`, 390 and 760px), BEFORE (stash) vs AFTER:
+0 differences on `/standings`, `/situational-records`, `/situational-records?metric=trr_1`,
+`/postseason-records`, `/postseason-records?view=team` and `/manager/craig-counsell-453356`.
+`.standings-ctrl` and `.trrank__detail` drew for real, 1 element each at both widths.
+
+**Not seen.** `.coachtree__node` and the `PostseasonRecordsPage` site of `.trrank__detail` did not draw under
+the mock. `npm run visual` and `npm run e2e` were not run.

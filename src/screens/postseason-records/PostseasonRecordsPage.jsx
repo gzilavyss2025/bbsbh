@@ -25,6 +25,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { SituationalIndex, GROUP_KEYS } from '../../components/situational/SituationalIndex.jsx'
 import { SituationalBoard } from '../../components/situational/SituationalBoard.jsx'
@@ -286,7 +287,7 @@ export function PostseasonRecordsPage({
       />
 
       {!loading && !error && byTeam && teamGroups && (
-        <main className="trrank__detail">
+        <Stack as="main" gap="loose" className="trrank__detail">
           <section className="trrank__detailhead">
             <span className="trrank__detailgroup">{scopeLabel}</span>
             <h2>{team.name}</h2>
@@ -302,7 +303,7 @@ export function PostseasonRecordsPage({
             renderRecord={(row) => gamesDoor(teamId, row.id, row.k, row)}
             ranked={!allTeams}
           />
-        </main>
+        </Stack>
       )}
 
       {!loading && !error && !byTeam && index.groups.length > 0 && !result && (

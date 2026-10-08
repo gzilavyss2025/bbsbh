@@ -1,11 +1,6 @@
 /* Focused Situational Records leaderboard. The browse-first index rules live
    in 66-situational-records.css; this companion stays lazy with the screen. */
 
-.trrank__detail {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
 .trrank__back {
   display: inline-flex;
   align-self: flex-start;
