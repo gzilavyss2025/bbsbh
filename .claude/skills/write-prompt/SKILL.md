@@ -152,10 +152,12 @@ written, and go to step 1.
 8. **List the changes.** After the prompts, list each change and its reason,
    including why you split (or did not) and why you picked each model.
 
-9. **Offer the hand-off (only when step 4 split the prompt into waves).** Start no
-   session from this skill; `orchestrate` owns that. End with the run plan and:
-   "Run `/orchestrate` to start these." Say which prompts are wave 1. A later wave starts
-   only after the wave before it has green PRs.
+9. **Offer to start it (only in a session Gary is watching).** After the plan, ask once with
+   `AskUserQuestion`: "Start this in cloud sessions now?" (recommended: yes). If yes,
+   invoke the `orchestrate` skill and give it the run plan; its Lane 3 starts the
+   sessions, one wave at a time, and owns the cap, the budget and the `orch:` titles.
+   Start no session from this skill. If no, or in a child or unattended session, return
+   the plan and stop.
 
 Do not run the prompt yourself. This skill writes, grades and rewrites it.
 

@@ -1,6 +1,6 @@
 ---
 name: orchestrate
-description: Run bbsbh's cloud work queue from one session. Reads open issues and PRs, shapes fuzzy ideas into specs the maintainer can answer by looking, starts child cloud sessions on ready issues, watches them, and brings the decisions to the maintainer one at a time. Use when the user says "orchestrate", "work the queue", "run the backlog", or "what should the cloud sessions do".
+description: Run bbsbh's cloud work queue from one session. Reads open issues and PRs, shapes fuzzy ideas into specs the maintainer can answer by looking, starts child cloud sessions on ready issues or on a run plan from write-prompt, watches them, and brings the decisions to the maintainer one at a time. Use when the user says "orchestrate", "work the queue", "run the backlog", "what should the cloud sessions do", or hands you a run plan to start.
 ---
 
 # /orchestrate
@@ -22,8 +22,8 @@ missing, ask in plain chat, one question per message.
 
 ## Authority
 
-**Alone:** read anything; start children on `ready-for-agent` issues (within the
-budget); start a shape session; archive a session that passes the Sweep rule;
+**Alone:** read anything; start children on `ready-for-agent` issues or on the prompts of a run plan
+he handed you (within the budget); start a shape session; archive a session that passes the Sweep rule;
 `send_message` a child; write ledger comments once he has approved the ledger; after he approves a spec,
 comment it on the issue (end with the Claude Code footer from the session
 reminder); run `/stack-prs` (see "Stacking").
@@ -71,6 +71,9 @@ asking.
 
 ## Start of a run
 
+**With a run plan** (Lane 3), do steps 1, 2, 4 and 5 for the plan's prompts only, then go
+to Lane 3. Start no issue work unless he asks.
+
 1. `git fetch origin --prune`. Note the `origin/main` SHA.
 2. List open issues with labels, open PRs (drafts count), and your sessions
    (`list_sessions`, then keep titles that start `orch:`; the `tags` filter does
@@ -78,7 +81,7 @@ asking.
 3. **Cron check.** `mcp__github__actions_list` for `update-nightly-data.yml`. A failed
    last run goes in the report.
 4. **Dedupe.** Do not start a child on issue #n if an open PR or a session titled
-   `orch: #n` already covers it.
+   `orch: #n` already covers it. Do the same for a plan prompt and `orch: <slug> <n>`.
 5. Guess the files each issue touches. Two issues that share a file run one after
    the other. An issue that needs an unmerged PR (a chain such as N8a, N8b, N8c)
    waits until that PR merges. Say so in the digest. Stacking needs his yes.
@@ -168,6 +171,34 @@ you cannot fix. To stop, send_message your parent AND end with a final line
 Subscribe to the child's PR when it opens. Sonnet by default. Opus when the cause
 of a bug is unknown or the spoiler rule changes (that also goes to him first).
 
+## Lane 3: Run a plan (prompts from `write-prompt`)
+
+Input: a run plan, which is the table and the prompts that `write-prompt` writes (its step
+7). It comes in the invocation, or it is already in this session because `write-prompt`
+handed it to you (its step 9). One prompt is a plan too. Work on the plan only.
+
+1. **Read the table.** Wave 1 is every row with nothing in "depends on". A later wave is
+   every row that depends on rows in the wave before it.
+2. **Start wave 1 inside the cap of 3.** Title each `orch: <slug> <n>` (the plan's slug,
+   and the prompt number). `tags`: `orch`, `plan`, `wave-N`. `model` from its row.
+   `create_session` has no effort setting, so put "Run at <effort>." first in the prompt.
+3. **Use the prompt as written.** Append this footer and change nothing else. If the
+   prompt names an issue, the issue rule in Lane 2 applies to its PR body.
+
+   ```
+   Parent session: <your session id>. Open a DRAFT PR to main (a workflow marks it
+   ready), subscribe to it, and drive it to green. Never merge. Never push to main.
+   To stop for a reason you cannot fix, send_message your parent AND end with a final
+   line "NEEDS PARENT: <what you need>".
+   ```
+4. **Start wave N+1 when every PR in wave N is green.** Subscribe to each PR and use the
+   `send_later` checks from Budget. If a prompt needs the earlier wave's code, ask him
+   once for the whole plan: build on that branch (set `source_revision`), or wait for
+   `/stack-prs` to merge it.
+5. **Stop the plan on a failure.** A `NEEDS PARENT` line, or a PR that stays red after
+   two tries, stops the later waves. Start nothing new. Tell him which prompt and why.
+6. Two prompts that share a file run one after the other, even in one wave.
+
 ## Reports and watching
 
 - A child reports with `send_message` to you and a final `NEEDS PARENT:` line.
@@ -192,7 +223,7 @@ you start a child, and add the session id after.
 
 Keep it short, in ASD-STE100 (`docs/agents/writing-style.md`):
 
-> **Running:** one line per child (issue, model, status).
+> **Running:** one line per child (issue or prompt, model, status).
 > **Done:** PR links, ready to stack.
 > **Waiting:** issues that wait on an unmerged PR.
 > **Cleaned up:** sessions archived, and sessions that wait on him.
