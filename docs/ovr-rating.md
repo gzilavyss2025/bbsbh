@@ -408,14 +408,11 @@ Built in step 8 (#1722). This is the data half. The card does not show it yet (#
 - **Seeded rows.** A prospect has no rating before step 7 (#1721), so the generator
   seeds each prospect's series from `prospect-trend.json`, thinned by the rule above. A
   seeded row ends in `1` and holds the prospect-trend **percentile**, not an OVR. It is
-  kept only before the player's first real row. Only rows with `atLevel` true are
-  seeded, the same rule `movementSince` and the trend chart use. **This leaves a short
-  seed.** All 9,420 weekly-era rows (2026-03-29 to 2026-08-09, none missing) and every
-  row before 2026-10-01 were made by the old method that summed every level, so they are
-  skipped. On the first run a prospect has 8 rows, 2026-10-01 to 2026-10-08. The season
-  series grows from there. Seeding the old rows too is one line (`seedRows` in
-  `scripts/lib/ovr/history.mjs`) but draws a step at 2026-10-01 for players who moved
-  level. Open decision in the PR for #1722.
+  kept only before the player's first real row. A week with no percentile (no line) has
+  no row. Rows made by the old method, which summed every level (`atLevel` false, all
+  rows before 2026-10-01), are seeded too, by Gary's call, so the series shows a step at
+  2026-10-01 for a player who changed level. The weekly rows from 2026-03-29 to
+  2026-08-09 have no gap.
 - **Readers.** `fetchOvrHistory(personId, group)` in `src/api/ovr/ovrData.js` gives
   `[{ date, ovr, bars, seeded }]`. `changeSince(snapshots, days = 7)` in
   `src/api/ovr/history.js` gives `{ delta, from, to }`, or `null` until a snapshot at
@@ -425,9 +422,13 @@ Built in step 8 (#1722). This is the data half. The card does not show it yet (#
   gives one year in date order, with `seeded` on each row.
 - **A major leaguer** has one real row on the first run, so its change is `null` until
   the history is seven days old.
-- **Size.** The committed shards hold at most 3.9 KB. The generator throws past 8 KB. A
-  full history will not fit: about 11 rated players a shard at 60 daily rows plus about
-  30 weekly rows is far over 8 KB. A decision is open (see the PR for #1722).
+- **Size.** The 8 KB shard line does not hold here, by Gary's call. About 11 rated players
+  a shard at 60 daily rows with bars (about 55 bytes a row) come to about 106 KB at the most
+  (**estimate** from the real row size, not yet measured at full length), so the generator
+  throws past 128 KB (`MAX_HISTORY_SHARD_BYTES`). A player page opens one shard. Sharding on
+  `personId % 1000` was measured and does not fix it: 317 of 672 shards would still pass
+  8 KB, because player ids cluster on their last digits. Today the largest shard is 23 KB
+  (the seeded prospects).
 - **Cadence.** `gen-ovr.mjs` is hand-run today. The history only grows when it runs, so
   a nightly step is needed for a real series. That step is not in the workflow yet:
   Gary approves it first, because each nightly data commit that reaches `main` can deploy.

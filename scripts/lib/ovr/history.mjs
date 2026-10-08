@@ -39,8 +39,9 @@ export function mergeHistory({ prior = [], seed = [], real, today }) {
   return retain(rows, today)
 }
 
-// A prospect-trend history (unpacked rows of the form { date, percentile, atLevel })
-// as seeded rows. A row with no percentile is a week with no line. A row that did
-// not read one level (atLevel false) summed every level, so it is another method.
+// A prospect-trend history (unpacked rows of the form { date, percentile }) as seeded
+// rows. A row with no percentile is a week with no line. Rows before 2026-10-01 summed
+// every level (`atLevel` false); they are seeded anyway, by Gary's call, so a series
+// shows a step at that date for a player who changed level.
 export const seedRows = (history) =>
-  history.filter((h) => h.percentile != null && h.atLevel).map((h) => [h.date, h.percentile, null, 1])
+  history.filter((h) => h.percentile != null).map((h) => [h.date, h.percentile, null, 1])

@@ -21,6 +21,9 @@ import { shardKey100 } from '../src/lib/shardKey.js'
 
 const dataDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data')
 const MAX_SHARD_BYTES = 8 * 1024 // the sizing rule's stop-and-ask line (src/api/CLAUDE.md)
+// The history store is the one exception, by Gary's call: 11 rated players a shard at 60 daily rows
+// with bars come to about 106 KB at the most, so the line is 128 KB. A page opens one shard.
+const MAX_HISTORY_SHARD_BYTES = 128 * 1024
 
 const out = buildRatings(loadInputs(dataDir))
 
@@ -66,7 +69,7 @@ for (let n = 0; n < 100; n++) {
   }
 }
 const histBiggest = Math.max(...[...history.values()].map((s) => JSON.stringify(s).length))
-if (histBiggest > MAX_SHARD_BYTES) throw new Error(`a history shard is ${histBiggest} bytes, over ${MAX_SHARD_BYTES}: stop and ask`)
+if (histBiggest > MAX_HISTORY_SHARD_BYTES) throw new Error(`a history shard is ${histBiggest} bytes, over ${MAX_HISTORY_SHARD_BYTES}: stop and ask`)
 const { written: histWritten } = await writeShards(join(dataDir, 'ovr-history'), [...history])
 
 // The report: what the review notes on the rating module (issue #1720) asked this step to look at.

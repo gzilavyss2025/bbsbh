@@ -44,11 +44,11 @@ test('a player with no real row today keeps a trimmed history; with nothing to k
   assert.deepEqual(mergeHistory({ prior: [['2024-10-01', 60, {}]], today: '2026-10-08' }), [])
 })
 
-test('seedRows turns a prospect-trend history into flagged rows, skipping rows that are not usable', () => {
+test('seedRows turns a prospect-trend history into flagged rows, skipping weeks with no percentile', () => {
   const h = [
-    { date: '2026-04-05', percentile: 55, atLevel: true },
+    { date: '2026-04-05', percentile: 55, atLevel: false }, // the old method: still seeded, by Gary's call
     { date: '2026-04-12', percentile: null, atLevel: true }, // no line that week
-    { date: '2026-04-19', percentile: 60, atLevel: false }, // summed over levels: another method
+    { date: '2026-10-02', percentile: 60, atLevel: true },
   ]
-  assert.deepEqual(seedRows(h), [['2026-04-05', 55, null, 1]])
+  assert.deepEqual(seedRows(h), [['2026-04-05', 55, null, 1], ['2026-10-02', 60, null, 1]])
 })

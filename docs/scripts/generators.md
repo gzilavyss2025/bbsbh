@@ -1520,8 +1520,8 @@ Re-run only to fold in a new season.
   days, one a week for the rest of the season). Prospects are seeded from
   `prospect-trend.json`; a seeded row ends in `1` and holds a percentile, not a rating.
   The row date is `generatedAt` of `savant-percentiles.json`, so a rerun on the same files
-  changes nothing. It throws past 8 KB a shard. Today the largest is 3.9 KB; see
-  `docs/ovr-rating.md` for the size limit. Not on a cron yet.
+  changes nothing. It throws past 128 KB a shard (not 8 KB: see `docs/ovr-rating.md`, "Rating
+  changes over time"). Not on a cron yet.
 - `gen-milb-seasons.mjs` → `public/data/milb-seasons/{NN}.json` (player-keyed, bucketed
   on `personId % 100` via the reader's `milbShardKey`) — each player's minor-league season
   lines for 2021-2025 at AAA, AA, A+ and A, for the career rating (`docs/ovr-rating.md`,
