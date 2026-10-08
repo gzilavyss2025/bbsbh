@@ -5,6 +5,8 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { FLD_MIN_PA, buildRatings, percentileAmong } from '../../scripts/lib/ovr/build.mjs'
 import { blendCareer } from '../../src/api/ovr/career.js'
+import { careerOvr, minorRating } from '../../src/api/ovr/minor.js'
+import { potRating } from '../../src/api/ovr/pot.js'
 import { percentileToRating, rateHitter } from '../../src/api/ovr/rating.js'
 
 const near = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol, `${a} not within ${tol} of ${b}`)
@@ -101,4 +103,54 @@ test('a missing birth year skips the age shift and still rates', () => {
   const s = { 2026: full, 2024: { ...full, sprintSpeed: 90 } }
   const out = buildRatings(inputs({ bat: { 1: s } }))
   near(out.bat[1].bars.speed, percentileToRating(blendCareer(s).sprintSpeed))
+})
+
+// OVR step 7 (#1721): minor leaguers, minor-league seasons in the blend, and POT.
+const row = (over = {}) => ({ season: 2026, sport: 12, group: 'hitting', n: 300, pct: 80, ...over })
+const withMinors = (over) => buildRatings(inputs({ season: 2026, ...over }))
+
+test('a minor leaguer with a current-season row gets OVR and level, no bars', () => {
+  const out = withMinors({ minors: { 7: [row()], 8: [row({ group: 'pitching', sport: 14, pct: 100, n: 450 })] } })
+  assert.deepEqual(out.bat[7], { ovr: minorRating(80, 12), seasons: [2026], level: 12 })
+  assert.deepEqual(out.pit[8], { ovr: 39, seasons: [2026], level: 14 })
+})
+
+test('a player with minor-league rows but none this season gets no entry', () => {
+  assert.equal(withMinors({ minors: { 7: [row({ season: 2025 })] } }).bat[7], undefined)
+})
+
+test('minor-league seasons pull an MLB rating toward them and leave the bars alone', () => {
+  const base = withMinors({}).bat[1]
+  const out = withMinors({ minors: { 1: [row({ season: 2025, pct: 0 })] } }).bat[1]
+  assert.deepEqual(out.bars, base.bars)
+  assert.ok(out.ovr < base.ovr)
+  near(out.ovr, careerOvr({ ovr: base.ovr, years: base.seasons }, [row({ season: 2025, pct: 0 })]))
+  assert.equal(out.level, undefined) // an MLB entry has no level
+})
+
+test('a player with no minor-league row rates exactly as before', () => {
+  assert.deepEqual(withMinors({ minors: { 9: [row()] } }).bat[1], buildRatings(inputs()).bat[1])
+})
+
+test('POT goes only to Top 100 players that have a rating', () => {
+  const out = withMinors({
+    minors: { 7: [row()], 8: [row({ pct: 100 })] },
+    top: { 7: { rank: 1, age: 19 }, 3: { rank: 2, age: 19 } },
+  })
+  near(out.bat[7].pot, potRating(out.bat[7].ovr, 1, 19))
+  assert.equal(out.bat[8].pot, undefined) // a minor leaguer off the list
+  assert.equal(out.bat[1].pot, undefined) // an MLB regular off the list
+  assert.equal(out.bat[3], undefined) // on the list, no rating, no card
+})
+
+test('a Top 100 major leaguer gets POT on his MLB entry', () => {
+  const out = withMinors({ top: { 1: { rank: 5, age: 22 } } })
+  assert.ok(out.bat[1].pot >= out.bat[1].ovr)
+})
+
+test('a hitter with 3 MLB seasons keeps his MLB rating whatever his minor-league rows say', () => {
+  const three = { bat: { 1: { 2026: full, 2025: full, 2024: full } } }
+  const base = buildRatings(inputs(three)).bat[1]
+  const out = buildRatings(inputs({ ...three, season: 2026, minors: { 1: [row({ season: 2025, pct: 0 })] } })).bat[1]
+  assert.deepEqual(out, base)
 })

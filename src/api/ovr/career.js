@@ -23,6 +23,9 @@ const SHIFT = {
   fbVelo: [6.4, 5.47, 4.57, 3.72, 2.91, 2.13, 1.4, 0.7, 0.04, -0.57, -1.15, -1.69, -2.19, -2.65, -3.07, -3.45, -3.79, -4.1, -4.36, -4.58, -4.77],
 }
 
+// Weight of the i-th newest season (0 = newest).
+export const recency = (i) => CONSTANTS.W[i] ?? CONSTANTS.TAIL
+
 // Points to add to a `metric` percentile from `year` so it reads at the age the
 // player has in `now`: the table summed over each year of age from then to now.
 // An age outside 20..40 takes the nearest end. No birth year, no shift.
@@ -45,7 +48,7 @@ export function blendCareer(seasons, birthYear) {
   const sum = {}
   const wsum = {}
   years.forEach((year, i) => {
-    const w = CONSTANTS.W[i] ?? CONSTANTS.TAIL
+    const w = recency(i)
     for (const [metric, pct] of Object.entries(seasons[year])) {
       if (pct == null) continue
       sum[metric] = (sum[metric] ?? 0) + w * (pct + shiftBetween(metric, year, years[0], birthYear))

@@ -820,6 +820,14 @@
       "class": "spoiler-free",
       "why": "Static ovr/NN.json shards: each MLB hitter's and pitcher's OVR rating and bars, built from season Statcast percentiles and fielding runs (docs/ovr-rating.md). A toy rating on open surfaces (ADR-0034), not a projection and not a score; it holds no game result. No SealBox."
     },
+    "ovr/minor.js": {
+      "class": "spoiler-free",
+      "why": "Pure OVR for a minor leaguer and the minor-league half of the career blend: a level-relative OPS or ERA percentile under a level ceiling (docs/ovr-rating.md). Season totals on open surfaces (ADR-0034), never a game's result. It fetches nothing and reads no game."
+    },
+    "ovr/pot.js": {
+      "class": "spoiler-free",
+      "why": "Pure POT for a Top 100 player: the list rank and age in, one number out (docs/ovr-rating.md). A toy on open surfaces (ADR-0034), not a projection and not a score. It fetches nothing and reads no game."
+    },
     "ovr/rating.js": {
       "class": "spoiler-free",
       "why": "Pure OVR rating: Savant season percentiles in, bucket bars and one rating out (docs/ovr-rating.md). Player pages are open surfaces (ADR-0034) and the inputs are season quality-of-contact and fielding figures, never a game's result. It fetches nothing and reads no game."

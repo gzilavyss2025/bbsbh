@@ -11,7 +11,8 @@ const loadShard = staticJsonBy((key) => `/data/ovr/${key}.json`)
 // group ('hitting' | 'pitching'). `ovr` and each bar are whole numbers 20-99;
 // `seasons` is every season that fed the rating, newest first. null when the player
 // failed the minimum-data rule (a hitter needs Contact and Power, a pitcher all three
-// buckets), so a null is "no rating", never a low one.
+// buckets), so a null is "no rating", never a low one. A minor leaguer's entry has `level`
+// (a sportId) and no `bars`; a rated Top 100 player's has `pot`, any other has none (a dash).
 export async function fetchOvr(personId, group) {
   const shard = await loadShard(shardKey100(personId))
   return shard?.[group === 'pitching' ? 'pit' : 'bat']?.[personId] ?? null

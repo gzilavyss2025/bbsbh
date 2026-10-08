@@ -530,14 +530,17 @@ for each generator; the reader modules:
   `vite.config.js` beside the vs-team-splits and rookies ones.
 - `ovr/ovrData.js` — a player's OVR rating, from `public/data/ovr/{NN}.json`
   (`gen-ovr.mjs`, hand-run; bucketed on `personId % 100`, both player types in one shard,
-  1.9 KB at most). `fetchOvr(personId, 'hitting' | 'pitching')` gives
-  `{ ovr, bars, seasons }` or `null`. `ovr` and each bar are whole numbers from 20 to 99;
+  2.5 KB at most). `fetchOvr(personId, 'hitting' | 'pitching')` gives
+  `{ ovr, bars, seasons }` or `null`. A minor leaguer's entry has `level` (a sportId) and no
+  `bars`; a rated Top 100 player's entry has `pot`, and any other entry has none (a dash).
+  `ovr`, `pot` and each bar are whole numbers from 20 to 99;
   `seasons` lists every season that fed the rating, newest first. A `null` means the player
   failed the minimum-data rule, so it is "no rating" and never a low one. Read through
   `staticJsonBy`. Degrades to `null` before the shard exists. Spoiler-free: a season
   rating built from quality-of-contact percentiles and fielding runs, on open surfaces
   (ADR-0034). No SealBox. No UI reads it yet (#1703). The pure steps before it are
-  `ovr/rating.js` and `ovr/career.js`; the prior-season input is `ovr/savantHistory.js`.
+  `ovr/rating.js`, `ovr/career.js`, `ovr/minor.js` (a minor leaguer's rating and the
+  minor-league half of the blend) and `ovr/pot.js`; the prior-season input is `ovr/savantHistory.js`.
 - `savantPercentiles.js` — season Statcast percentile ranks, from
   `public/data/savant-percentiles.json` (`gen-savant-percentiles.mjs`, nightly).
   MLB only; completed-game season aggregates, so spoiler-free with no `SealBox`

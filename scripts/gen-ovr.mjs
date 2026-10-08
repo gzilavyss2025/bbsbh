@@ -19,17 +19,21 @@ import { shardKey100 } from '../src/lib/shardKey.js'
 const dataDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data')
 const MAX_SHARD_BYTES = 8 * 1024 // the sizing rule's stop-and-ask line (src/api/CLAUDE.md)
 
-const out = buildRatings(loadInputs(dataDir))
+const inputs = loadInputs(dataDir)
+const out = buildRatings(inputs)
+const mlbOnly = buildRatings({ ...inputs, minors: {}, top: {} }) // for the report: who the minor-league seasons move
 
-const shards = new Map() // shard key -> { bat: { id: { ovr, bars, seasons } }, pit }
+const shards = new Map() // shard key -> { bat: { id: { ovr, bars?, seasons, level?, pot? } }, pit }
 for (const group of ['bat', 'pit']) {
   for (const [id, e] of Object.entries(out[group])) {
     const key = shardKey100(id)
     if (!shards.has(key)) shards.set(key, { bat: {}, pit: {} })
     shards.get(key)[group][id] = {
       ovr: Math.round(e.ovr),
-      bars: Object.fromEntries(Object.entries(e.bars).map(([b, v]) => [b, Math.round(v)])),
+      ...(e.bars && { bars: Object.fromEntries(Object.entries(e.bars).map(([b, v]) => [b, Math.round(v)])) }),
       seasons: e.seasons,
+      ...(e.level && { level: e.level }),
+      ...(e.pot != null && { pot: Math.round(e.pot) }),
     }
   }
 }
@@ -42,7 +46,8 @@ const stat = (xs) => {
   const m = xs.reduce((s, v) => s + v, 0) / xs.length
   return `n ${xs.length}, mean ${m.toFixed(1)}, SD ${Math.sqrt(xs.reduce((s, v) => s + (v - m) ** 2, 0) / xs.length).toFixed(1)}, min ${Math.min(...xs).toFixed(1)}, max ${Math.max(...xs).toFixed(1)}`
 }
-for (const [label, group] of [['hitters', out.bat], ['pitchers', out.pit]]) {
+for (const [label, all] of [['hitters', out.bat], ['pitchers', out.pit]]) {
+  const group = Object.fromEntries(Object.entries(all).filter(([, e]) => e.bars)) // MLB entries
   const rows = Object.entries(group)
   const ovrs = rows.map(([, e]) => e.ovr)
   const at = (v) => rows.filter(([, e]) => e.ovr === v)
@@ -51,9 +56,19 @@ for (const [label, group] of [['hitters', out.bat], ['pitchers', out.pit]]) {
   const worst = rows.reduce((a, b) => (b[1].ovr < a[1].ovr ? b : a))
   console.log(`  highest ${best[0]} ${best[1].ovr.toFixed(1)}, lowest ${worst[0]} ${worst[1].ovr.toFixed(1)}`)
 }
+// Minor leaguers, POT, and how far the minor-league seasons moved the MLB ratings.
+for (const [label, all, base] of [['hitters', out.bat, mlbOnly.bat], ['pitchers', out.pit, mlbOnly.pit]]) {
+  const minor = Object.values(all).filter((e) => e.level)
+  const pots = Object.values(all).filter((e) => e.pot != null)
+  const moves = Object.entries(base).map(([id, b]) => Math.abs(all[id].ovr - b.ovr))
+  const over = (d) => moves.filter((m) => m > d).length
+  console.log(`${label}: ${minor.length} minor leaguers (${stat(minor.map((e) => e.ovr))}); ${pots.length} with POT; minor-league seasons moved ${over(1)} of ${moves.length} MLB ratings by over 1, ${over(2)} by over 2, largest ${Math.max(...moves).toFixed(1)}`)
+}
+const unrated = Object.keys(inputs.top).filter((id) => !out.bat[id]?.pot && !out.pit[id]?.pot)
+console.log(`Top 100 players with no rating (so no POT): ${unrated.length} of ${Object.keys(inputs.top).length}`)
 // Spread by which bars a hitter has: a sparse hitter (Contact and Power only) gets the full stretch.
 const bySignature = {}
-for (const e of Object.values(out.bat)) (bySignature[Object.keys(e.bars).sort().join('+')] ??= []).push(e.ovr)
+for (const e of Object.values(out.bat).filter((e) => e.bars)) (bySignature[Object.keys(e.bars).sort().join('+')] ??= []).push(e.ovr)
 for (const [sig, xs] of Object.entries(bySignature)) console.log(`  hitters with ${sig}: ${stat(xs)}`)
 console.log(`strings converted to numbers: ${out.strings}; blended percentiles at 0 or 100 or past them (clamped before inverseNormalCdf): ${out.clamped}`)
 console.log(`wrote ${written} shards to ${join(dataDir, 'ovr')} (floor ${FLD_MIN_PA} PA, largest ${biggest} bytes)`)

@@ -5,6 +5,9 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { blendCareer } from '../../../src/api/ovr/career.js'
+import { unpackRow } from '../../../src/api/milbSeasons.js'
+import { ESTABLISHED_SEASONS, careerOvr } from '../../../src/api/ovr/minor.js'
+import { potRating } from '../../../src/api/ovr/pot.js'
 import { CONSTANTS, rateHitter, ratePitcher } from '../../../src/api/ovr/rating.js'
 
 // Plate appearances a hitter needs IN A SEASON to be ranked for Fielding. Gary left
@@ -37,8 +40,12 @@ export function percentileAmong(values) {
 
 // bat / pit: { [id]: { [season]: { [metric]: percentile | null } } }
 // fld, pa:   { [id]: { [season]: number } }       birthYear: { [id]: year }
-// -> { bat: { [id]: { ovr, bars, seasons } }, pit, strings, clamped }
-export function buildRatings({ bat, pit, fld, pa, birthYear }) {
+// minors:    { [id]: [{ season, sport, group, n, pct }] }  minor-league rows, current season included
+// top:       { [id]: { rank, age } }                  the Top 100 list (POT)
+// -> { bat: { [id]: { ovr, bars, seasons, pot? } | { ovr, seasons, level, pot? } }, pit, strings, clamped }
+// A minor leaguer (no MLB rating, a row this season) has `level` and no bars. `pot` is
+// only for a rated player on the list.
+export function buildRatings({ bat, pit, fld, pa, birthYear, season, minors = {}, top = {} }) {
   const tally = { strings: 0, clamped: 0 }
   // A number, or null. A numeric string is converted and counted: rate() skips
   // anything that is not a finite number without a word, so a "72" would vanish.
@@ -75,7 +82,8 @@ export function buildRatings({ bat, pit, fld, pa, birthYear }) {
     for (const [id, p] of Object.entries(percentileAmong(pool))) (fldSeasons[id] ??= {})[year] = { fld: p }
   }
 
-  const rateGroup = (group, rate, withFielding) => {
+  const rateGroup = (group, rate, withFielding, rowGroup) => {
+    const minorRows = (id) => (minors[id] ?? []).filter((r) => r.group === rowGroup && r.pct != null)
     const out = {}
     for (const [id, raw] of Object.entries(group)) {
       const seasons = cleanSeasons(raw)
@@ -87,11 +95,22 @@ export function buildRatings({ bat, pit, fld, pa, birthYear }) {
       const rated = rate(pcts)
       if (!rated) continue // the minimum-data rule
       const years = new Set([...Object.keys(seasons), ...Object.keys(fseasons)])
-      out[id] = { ovr: rated.ovr, bars: rated.bars, seasons: [...years].map(Number).sort((a, b) => b - a) }
+      const mlbYears = [...years].map(Number).sort((a, b) => b - a)
+      const rows = mlbYears.length >= ESTABLISHED_SEASONS ? [] : minorRows(id)
+      const all = [...new Set([...mlbYears, ...rows.map((r) => r.season)])].sort((a, b) => b - a)
+      out[id] = { ovr: careerOvr({ ovr: rated.ovr, years: mlbYears }, rows), bars: rated.bars, seasons: all }
     }
+    // A minor leaguer: no MLB rating, but a minor-league row this season.
+    for (const id of Object.keys(minors)) {
+      const rows = minorRows(id)
+      const now = rows.find((r) => r.season === season)
+      if (out[id] || !now) continue
+      out[id] = { ovr: careerOvr(null, rows), seasons: [...new Set(rows.map((r) => r.season))].sort((a, b) => b - a), level: now.sport }
+    }
+    for (const [id, t] of Object.entries(top)) if (out[id]) out[id].pot = potRating(out[id].ovr, t.rank, t.age)
     return out
   }
-  return { bat: rateGroup(bat, rateHitter, true), pit: rateGroup(pit, ratePitcher, false), ...tally }
+  return { bat: rateGroup(bat, rateHitter, true, 'hitting'), pit: rateGroup(pit, ratePitcher, false, 'pitching'), ...tally }
 }
 
 // Reads the committed files and shapes them for buildRatings. The current season is
@@ -131,5 +150,19 @@ export function loadInputs(dataDir) {
   // Birth years: the on-this-day files list every player with a Retrosheet birth date.
   const birthYear = {}
   for (const f of readdirSync(join(dataDir, 'on-this-day'))) for (const e of read(`on-this-day/${f}`).born ?? []) birthYear[e.personId] = e.year
-  return { bat, pit, fld, pa, birthYear, season }
+  // Minor-league rows: the finished seasons from milb-seasons/ (packed), and this season
+  // from prospect-trend.json (a primary-level percentile; sampleSize is PA or outs).
+  const minors = {}
+  for (const s of shards('milb-seasons')) {
+    for (const [id, rows] of Object.entries(s.players)) minors[id] = rows.map(unpackRow)
+  }
+  const trend = read('prospect-trend.json')
+  if (!trend.dataThrough.startsWith(season)) throw new Error(`prospect-trend.json runs through ${trend.dataThrough}, savant-percentiles is ${season}`)
+  for (const p of trend.players) {
+    if (p.percentile == null) continue
+    ;(minors[p.playerId] ??= []).push({ season, sport: p.sportId, group: p.group, n: p.sampleSize, pct: p.percentile })
+  }
+  const top = {}
+  for (const p of read('top-prospects.json').players) top[p.playerId] = { rank: p.rank, age: p.age }
+  return { bat, pit, fld, pa, birthYear, season, minors, top }
 }
