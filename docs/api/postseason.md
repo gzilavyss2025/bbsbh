@@ -205,6 +205,9 @@ Pure, and no UI yet (ADR-0087, 2026-10-08 addendum).
 - `ribbonNodes(series, { scoresByPk })`: one node per game, `played`, `today`,
   `ahead` or `ifNecessary`. Its header holds the shared shape of one finished game.
 - `leaderRows(entries)`: three or fewer show, high to low; more show the leader.
+- `matchupEdges(sides)`: the Matchup edges card's rows, from `starterMatchupsFor` sides. The
+  thresholds are named constants Gary tunes. The rows hold no total bases, so the line has no OPS.
+- `wpSpark(wp, { flip })`: the ribbon's win-chance line, as SVG point strings.
 
 ## Series marks (`src/lib/postseason/seriesMarks.js`)
 
@@ -312,7 +315,7 @@ grid (`styles/postseason/series-live.css`).
 `bracket-fetch`, `bracket-hook`, `live-series-selectors` (the live series
 page's pure game-bucket sort, slice 6), `series-roster` (the declared roster's
 date and its 26-player check), `upcoming-games`, `day-shape`, `series-flow`,
-`series-totals`, `keys-verdict`, `primer` (the series primer's rules). `bracket-hook` also scans the series pages'
+`series-totals`, `keys-verdict`, `primer` and `primer-edges` (the series primer's rules). `bracket-hook` also scans the series pages'
 parts for a seal or a Scores Unlocked read. The route is in `test/route.test.js`,
 and the slate model's `seriesStatus`/`leagueRecord` guard in
 `test/slate-scores.test.js`.

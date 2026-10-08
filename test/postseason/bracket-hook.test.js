@@ -58,9 +58,12 @@ test('a bracket built for another cutoff is never handed back', () => {
 // seal, no kraft token, no read of Scores Unlocked.
 test('the series pages never seal and never read Scores Unlocked', () => {
   const dir = (rel) =>
-    readdirSync(new URL(`../../src/${rel}/`, import.meta.url)).map((f) => new URL(`../../src/${rel}/${f}`, import.meta.url))
+    readdirSync(new URL(`../../src/${rel}/`, import.meta.url), { withFileTypes: true })
+      .filter((e) => e.isFile())
+      .map((e) => new URL(`../../src/${rel}/${e.name}`, import.meta.url))
   const files = [
     ...dir('components/postseason'),
+    ...dir('components/postseason/edges'),
     ...dir('screens/postseason-live'),
     ...dir('styles/postseason'),
     new URL('../../src/screens/PostseasonSeriesPage.jsx', import.meta.url),
