@@ -3,7 +3,7 @@
 // Node, not jq: jq is not installed on this Windows machine, which is why the old
 // bash script (statusline-command.sh) never showed the model.
 //
-// The ladder is in memory/model-effort-ladder.md and .claude/skills/improve-prompt:
+// The ladder is in memory/model-effort-ladder.md and .claude/skills/write-prompt:
 //   1 Haiku 5.5 (any effort) or Haiku 4.5 | 2-5 Sonnet 5.5 low/medium/high/xhigh(+max) | 6-9 Opus 5.5
 //   medium(+low)/high/xhigh/max | 10 Fable 5.1
 //

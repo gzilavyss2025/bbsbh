@@ -1,14 +1,22 @@
 ---
-name: improve-prompt
-description: Grade a prompt A+ to F, check its claims against the repo, and rewrite it to an A+, split into smaller prompts when it is too big, with a model and effort level for each. Use when the user says "improve prompt", "grade this prompt", "split this prompt", asks which model or effort to use for a prompt, or pastes a prompt and asks to make it better.
+name: write-prompt
+description: Write a prompt from a thin idea, or edit and polish one that already exists. Interviews the user one question at a time when the idea is thin, checks every claim against the repo, grades the result A+ to F, splits it when it is too big, and picks a model and effort level for each part. Use when the user says "write a prompt", "write me a prompt for", "improve prompt", "grade this prompt", "split this prompt", asks which model or effort to use, or pastes a prompt and asks to make it better.
 ---
 
-# Improve prompt
+# Write prompt
 
-The user gives you a prompt (pasted, or as a file path). Grade it from A+ to F,
-then make it an A+. An A+ prompt does one job, on the cheapest model and the
-lowest effort that can do that job well. Do these steps in order.
+The user gives you one of two things: a thin idea (a sentence or two), or a prompt that
+already exists (pasted, or as a file path). Turn either into an A+ prompt. An A+ prompt
+does one job, on the cheapest model and the lowest effort that can do that job well.
+Do these steps in order. Step 0 is for a thin idea. Skip it for a prompt that is already
+written, and go to step 1.
 
+0. **Interview (thin idea only).** Read the files, docs and ADRs the idea touches. Then
+   ask what the repo cannot answer, one `AskUserQuestion` per call, recommendation
+   first, until the prompt can stand alone: what "done" looks like, what to leave
+   alone, and whether to decide or stop and ask on an open design choice. Ask at most
+   six questions in all, counting step 7. On "you pick", pick, and write the pick in
+   as a settled fact. Then do steps 1 to 8.
 1. **Check the facts.** Check every claim against the repo and `origin/main`
    (run `git fetch` first): paths, file lists, counts, commit hashes, ports,
    scripts, skills and issue numbers. Read every doc the prompt cites. Mark each
@@ -20,22 +28,19 @@ lowest effort that can do that job well. Do these steps in order.
 3. **Look for gaps.** Check each item: goal and scope, what "done" means,
    test-first, docs and ADR updates, merge or deploy authority, stop and failure
    paths (CI flake, missing data, tool errors), how long to wait, what to verify
-   and against which baseline, the handoff, and (for a code-changing prompt in
-   a repo that has the ponytail skill) whether it says to use ponytail and to
-   finish with `ponytail-review` and `/code-review`. Flag any step that an
-   agent could read two ways.
-4. **Decide the split.** Split the prompt when one or more of these is true:
+   and against which baseline, and the handoff. Flag any step that an agent could
+   read two ways.
+4. **Decide the split.** Default to one prompt. A split runs more sessions and costs more
+   usage; Anthropic reports that multi-agent runs use about 15 times the tokens of a
+   chat. Split only when one of these is true:
    - It asks for more than one deliverable that could ship or be reviewed alone
      (two PRs, two features, a fix plus an unrelated cleanup).
-   - It mixes thinking work (research, design, a decision) with doing work
-     (implement, migrate, write docs) that follows from it.
-   - Its parts need different models: a hard part next to mechanical parts.
    - A `[DECISION: ...]` or a user review sits in the middle, and the rest
      depends on the answer.
-   - It is too big for one session: more than about 5 distinct steps, or more
-     than about 10 files to change.
+   - It is too big for one session: more than about 10 files to change.
 
-   When none is true, keep one prompt. When you split, each prompt must stand
+   When none is true, keep one prompt, even if it has several steps or mixes research
+   with doing. When you split, say why in one line. Each prompt must stand
    alone: a fresh agent with no memory of the others can run it. Each prompt
    states what it needs from an earlier prompt (a branch, a file, a merged PR)
    and what it hands to the next. Mark prompts that can run in parallel.
@@ -64,7 +69,8 @@ lowest effort that can do that job well. Do these steps in order.
    high on Haiku 5.5 can come before a jump to Sonnet 5.5. Move to Sonnet 5.5
    when Haiku 5.5 at high gives a shallow result.
 
-   API price per million tokens (input / output): Haiku 4.5 $1 / $5, Haiku 5.5
+   API price per million tokens (input / output), as of 2026-10-08 (prices change;
+   check them before you rely on them): Haiku 4.5 $1 / $5, Haiku 5.5
    $0.10 / $0.50 (prompts up to 100K tokens; $0.50 / $2.50 above that), Sonnet 5.5
    $2 / $10, Opus 5.5 $4 / $20, Fable 5.1 $10 / $50. Fable 5.1 costs 2.5 times
    as much as Opus 5.5, so pick it only when a rung above cannot do the job.
@@ -110,7 +116,13 @@ lowest effort that can do that job well. Do these steps in order.
    are only polish. A prompt that should split but does not, or that runs
    simple work on an expensive model, loses points.
 7. **Rewrite it.** Keep the author's structure, voice and house style (in
-   bbsbh: ASD-STE100 and the house word list). Do not add scope the author did
+   bbsbh: ASD-STE100 and the house word list). For a prompt that runs unattended on
+   Sonnet 5.5 at low or medium effort, add this line: "Keep working until everything
+   asked for is done. Stop to ask only when you cannot go on without the user, or
+   before a risky step. When the work is done and checked, stop and report; do not add
+   features, tests, files or docs that were not asked for. Tests, docs and checks that
+   this prompt or CLAUDE.md names count as asked for." Anthropic measured that
+   such a model otherwise stops to check in early (Sonnet 5.5 prompting guide). Do not add scope the author did
    not ask for; a split divides the same scope, it does not grow it. Do not
    make up facts. Where a fix needs a decision from the user, ask it with
    AskUserQuestion before you write the final prompts: one question per
@@ -140,7 +152,16 @@ lowest effort that can do that job well. Do these steps in order.
 8. **List the changes.** After the prompts, list each change and its reason,
    including why you split (or did not) and why you picked each model.
 
-Do not run the prompt. This skill only grades and rewrites it. If the prompt is
+9. **Offer to start it (only in a session Gary is watching).** After the plan, ask once with
+   `AskUserQuestion`: "Start this in cloud sessions now?" (recommended: yes). If yes,
+   invoke the `orchestrate` skill and give it the run plan; its Lane 3 starts the
+   sessions, one wave at a time, and owns the cap, the budget and the `orch:` titles.
+   Start no session from this skill. If no, or in a child or unattended session, return
+   the plan and stop.
+
+Do not run the prompt yourself. This skill writes, grades and rewrites it.
+
+If the prompt is
 already an A+, say so and show the evidence from steps 1 to 5. Do not invent
 changes.
 
@@ -150,8 +171,8 @@ When `CLAUDE_CODE_REMOTE=true` (see `docs/development.md`), there is no `gh` CLI
 these steps:
 
 - **Step 1.** Check issue and PR numbers with the GitHub MCP tools, not `gh`.
-- **Step 7.** In a session Gary is watching, use `AskUserQuestion` as written. In a
-  child or unattended session, put each open decision in the prompt as
+- **Steps 0 and 7.** In a session Gary is watching, use `AskUserQuestion` as written. In a
+  child or unattended session, do not ask: put each open question in the prompt as
   `[DECISION: ...]`, with your recommendation first.
 - **Output.** Put the run plan, the prompts and the change list in your final
   message. Do not commit them unless the task says to.

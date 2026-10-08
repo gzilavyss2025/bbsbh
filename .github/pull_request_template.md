@@ -2,11 +2,23 @@
 bbsbh PR template — mirrors the structure the repo's PRs already use.
 Fill in each section; delete a section only if it genuinely doesn't apply.
 Open as a DRAFT (agent/`claude/*` branches are required to; see docs/development.md, "Cloud sessions").
+`mark-ready.yml` marks it ready and adds `wip` when it opens. Remove `wip` when the work is done
+and CI is green.
 -->
 
 ## Summary
 
 <!-- What this change does and why, in a few sentences. Link any related PR/issue. -->
+
+## Issue
+
+<!--
+One line per issue. `Closes #n` when this PR meets the issue's "Done means". `Part of #n`
+when more slices follow. `/stack-prs` copies the `Closes` lines into the stack PR, so
+GitHub closes the issue when the stack merges.
+-->
+
+- 
 
 ## Changes
 

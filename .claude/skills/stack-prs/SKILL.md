@@ -31,8 +31,10 @@ did, and end with a short list of what needs him.
    (`mcp__github__list_pull_requests`, or `gh pr list --state open`). Drafts count:
    cloud sessions open every PR as a draft.
    - If the user named PR numbers, use only those.
-   - Skip a PR labeled `wip` or `do-not-merge`. Skip a PR that targets a branch
-     other than `main` unless its base PR is also in the set.
+   - Skip a PR labeled `wip` or `do-not-merge`, and say which ones. Every agent PR
+     carries `wip` until its session removes it, so a PR without it was called done.
+   - Skip a PR that targets a branch other than `main` unless its base PR is also in
+     the set.
    - Skip the stack PR from an earlier run of this skill. Say so.
    - If nothing is left, report that and stop.
    - **Note the linked issues.** Read each PR body and its commit messages. Record
@@ -99,12 +101,13 @@ did, and end with a short list of what needs him.
      it, fix it, and push. Do not re-run to hope.
    - No merge conflict with `main`. If `main` moved, merge it into the stack
      branch and re-run step 4.
-   - No open red-circle review finding and no failing Claude Approvals row.
    - The review in step 6 found nothing left open.
    - The user did not ask for a dry run.
 
    If a gate cannot pass, stop. Say which gate, why, and what you need.
-8. **Merge.** Mark the stack PR ready for review. Merge it with a **merge
+8. **Merge.** The `mark-ready` workflow marks each new PR ready. If the stack PR is
+   still a draft, mark it yourself (cloud: `mcp__github__update_pull_request` with
+   `draft: false`; local: `gh pr ready`). Merge it with a **merge
    commit**, so GitHub marks each source PR as merged. Use
    `mcp__github__merge_pull_request`. If the repo allows only squash, use that,
    and then do the cleanup below by hand. Never push to `main` directly.
@@ -117,7 +120,13 @@ did, and end with a short list of what needs him.
       first, then:
       - **Closing keyword:** confirm GitHub closed it. If it is still open, close
         it with a reason of completed.
-      - **Plain reference:** leave it open. Do not change its labels. The triage
+      - **Plain reference:** the issue needs a section titled "Done means". With
+        none, leave it open and list it under **Needs you**; do not infer one. Check
+        each line against the source PR's diff and checks, not its text. If all are
+        met and no slice remains, close it with a reason of completed. Name the
+        evidence in the comment and add "Reopen this if it is wrong." If any line is
+        unmet or unclear, leave it open and list it under **Needs you**. A "Part of"
+        issue with later slices stays open. Do not change its labels; the triage
         labels in `docs/agents/triage-labels.md` are the maintainer's call.
       - **Comment on every one,** once, with the stack PR link, the source PR it
         came from, and a plain status: "Landed in <stack PR link> (from <source

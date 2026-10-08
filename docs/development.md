@@ -45,21 +45,26 @@ sessions that share one machine. In the cloud, these rules change:
   question at a time, recommendation first. A child session, or any session nobody
   watches, cannot get an answer. It writes each open decision as `[DECISION: ...]`
   in its PR description or final message, and stops at that point.
-- **Draft PRs.** Open every PR as a draft. The maintainer marks it ready.
+- **Draft PRs.** Open every PR as a draft. `.github/workflows/mark-ready.yml` marks it
+  ready and adds the `wip` label when it opens. Remove `wip` when the work is done and CI
+  is green: read the PR's labels (`pull_request_read`), then call `issue_write` with
+  `method: update` and every label except `wip`. `/stack-prs` skips a PR that still has
+  `wip`, so the maintainer never marks a PR ready or done.
 - **Parallel sessions.** Several sessions run at once. Before you edit, list the open
   PRs and the files each changes (`list_pull_requests`, `pull_request_read`). Stop on
   overlap, or wait for that PR. Keep the change to the one task you were given, and
   list the files you touched in the PR. A task that needs an unmerged PR names that PR
   and bases on its branch on purpose; otherwise it waits.
 - **Deploy budget.** Merging to `main` deploys. Parallel sessions never merge. They
-  leave draft PRs open, and `/stack-prs` lands them together: the maintainer runs it,
+  leave their PRs open, and `/stack-prs` lands them together: the maintainer runs it,
   or the orchestrator runs it under his standing permission (`.claude/skills/orchestrate/`).
 - **Nightly data.** The data cron pushes to `main` (`public/data/*.json`). A branch open
   across a nightly run can conflict there. Take `origin/main`'s version of a generated
   file. Regenerate it with its `scripts/gen-*.mjs` only when your PR changes that
   generator.
 - **Handoff is the PR.** Push before you stop, because the container is discarded.
-  Put the base SHA, the files touched, and how you verified in the PR description.
+  Put the base SHA, the files touched, how you verified, and the issue line (`Closes #n`
+  or `Part of #n`) in the PR description.
   Write "not applicable (cloud)" for the worktree and the local URL.
 - **Verification.** A localhost URL in the container is not reachable from the
   maintainer's devices. Verify in the container (unit tests, lint, and the preinstalled
@@ -215,7 +220,7 @@ configured` on a deploy with no store and `401` on one where the store is live.
 
 A model that is too weak or too strong for design work costs quality or usage. Two
 small scripts show this without interrupting anyone. The ladder they use is step 5 of
-`.claude/skills/improve-prompt`.
+`.claude/skills/write-prompt`.
 
 - **The hook** (`.claude/hooks/design-work-flag.mjs`, `PostToolUse` on `Edit|Write`)
   writes a flag file under `~/.claude/rung-flags/` when an edit lands in a design file:

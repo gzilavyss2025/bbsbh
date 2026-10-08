@@ -5,7 +5,7 @@
 // ~/.claude/rung-flags/. The user-level status line (~/.claude/statusline-command.mjs)
 // reads it. While the flag is fresh (30 minutes), the status line turns the model
 // segment amber if the model and effort sit below rung 3 or at rung 9 and above of the
-// ladder in .claude/skills/improve-prompt. A hook cannot see the model, but the status
+// ladder in .claude/skills/write-prompt. A hook cannot see the model, but the status
 // line can see both model and effort, so the hook only says "design work is happening".
 //
 // Advisory only: it never blocks, prints nothing, and swallows every error.

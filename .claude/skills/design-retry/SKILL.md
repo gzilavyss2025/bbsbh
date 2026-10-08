@@ -39,7 +39,7 @@ per call, your recommendation first and marked "(Recommended)".
    | Fell back to its default look | Cream and serif type that fights the navy and mono scorebook | Names the tokens and a screen to copy |
    | Too big for one pass | Many files, many partials, mixed old and new | Splits into slices of about 5 files |
    | Nothing checked the result | No route, no screenshot, no link in the handoff | Adds the dev-server route and what to look at |
-   | Rung too low | Shallow result on a hard visual problem, or Haiku or low effort | Moves up one rung (`improve-prompt`, step 5) |
+   | Rung too low | Shallow result on a hard visual problem, or Haiku or low effort | Moves up one rung (`write-prompt`, step 5) |
    | Rung too high, no gain | Opus at max, still generic | Moves down, and spends on direction and checking instead |
    | Scope crept | Other pages changed | Adds a "do not touch" list |
 
@@ -51,11 +51,11 @@ per call, your recommendation first and marked "(Recommended)".
      goal and route, what stays, the direction, tokens and screens to copy, only the rules
      that apply, how to check, what done means, when to stop and ask. Name the exact thing
      that went wrong the first time so the agent does not repeat it.
-   - **Model and effort.** From the ladder in `improve-prompt` step 5, one line of reason.
+   - **Model and effort.** From the ladder in `write-prompt` step 5, one line of reason.
      Change the rung only when the cause table says so.
 5. **Offer, never do.** If the cause was a repo rule that no doc states, offer to add one
    line to the nearest nested `CLAUDE.md` or to the memory, through a task branch and a PR.
-   If Gary wants the prompt graded, offer `improve-prompt`.
+   If Gary wants the prompt graded, offer `write-prompt`.
 
 ## Cloud sessions
 
