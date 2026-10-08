@@ -225,7 +225,7 @@
   margin-left: 5px;
 }
 /* "Small attribute line under a name": the .phcard__meta / .t-label recipe.
-   .player__pos and .player__hand inherit it: "SP · THROWS L" is one line. */
+   Position and hand inherit it: "SP · THROWS L" is one line. */
 .player__meta {
   margin: 6px 0 0;
   font-family: var(--font-display);
@@ -235,9 +235,6 @@
   color: var(--text-caption);
   line-height: var(--lh-prose);
   text-transform: uppercase;
-}
-.player__pos {
-  font-weight: var(--w-bold);
 }
 .player__meta .sep {
   color: var(--graphite-soft);

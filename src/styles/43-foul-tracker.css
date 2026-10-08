@@ -333,12 +333,6 @@
   letter-spacing: var(--ls-label);
   color: var(--navy);
 }
-/* Same treatment as PlayerPage's .player__pos — a batched people lookup
-   (fetchPositions) fills this in for just the four featured leaders, so it's
-   absent (and this renders nothing) until that request resolves. */
-.foulboard__heropos {
-  font-weight: var(--w-bold);
-}
 /* Sized up and vertically centered against the (now two-line-tall) name
    column, rather than pinned to the card's top edge. */
 .foulboard__heroteam {
