@@ -17,6 +17,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 
 const PLAY_ID_FIELDS = 'liveData,plays,allPlays,about,atBatIndex,playEvents,isPitch,playId'
@@ -70,7 +71,7 @@ export function SeriesPlayOfTheGame({ potg, gamePk, awayAbbr, homeAbbr }) {
         />
         <div className="psseries__potgMain">
           {potg.batterName && (
-            <div className="psseries__potgWho">
+            <Cluster align="baseline" className="psseries__potgWho">
               <PlayerLink id={potg.batterId} className="psseries__potgName">
                 {potg.batterName}
               </PlayerLink>
@@ -79,7 +80,7 @@ export function SeriesPlayOfTheGame({ potg, gamePk, awayAbbr, homeAbbr }) {
                   {[potg.batterTeamAbbr, potg.batterPos].filter(Boolean).join(' · ')}
                 </span>
               )}
-            </div>
+            </Cluster>
           )}
           <p className="psseries__potgDesc">
             {potg.inning != null && (

@@ -952,4 +952,33 @@ elements; 30 `.colorlab__row` drew). `synth.mjs` old vs new: 0 differences for `
 **Not seen.** `/identity-lab` draws `.colorlab__logodrop` three times, but two BEFORE runs of that route
 differ in element count (1077, 1071, 1065), so it gives no geometry diff. `LookupDeck` is behind the Clerk
 admin gate, so it never drew for real; the synthetic check does not build the `--compact` combination.
+
+## Cluster slice C7 (2026-10-08)
+
+Four wrapping rows in five files moved onto `Cluster`: 4 rules, 5 JSX sites. Base: `origin/main` at 24f9ec3.
+The one open PR (#1756) edits play-by-play files only. The finder lists 38 safe rows.
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.pshistory__seasonhead` (`PostseasonHistoryPage.jsx`) | base, `align="center"` | div | nothing, so the rule is gone |
+| `.psseries__potgWho` (`SeriesParts.jsx`) | snug, `align="baseline"` | div | nothing, so the rule is gone |
+| `.erasesheet__actions` (`EraseDataDialog.jsx`) | snug | div | `margin-top` |
+| `.team-hub__namerow` (`TeamHubShell.jsx`, `TeamLeadersPage.jsx`) | snug, `align="baseline"` | div | nothing, so the rule is gone |
+
+**Test first.** All four joined `MIGRATED` in `test/cluster-migration.test.js`; it failed on the rules and the
+sites, and passes now. **Cascade.** `28a`, `33` and `55` load after `system/cluster.css` in `index.css`; `35` is
+lazy. No gap was off-step, so nothing snapped. No site sits inside a SealBox reveal.
+
+**Left.** `.allstargame__main` (keeps `justify-content`), `.umpage__teamgrid` and `.coachtree__row` (lists with
+3 or 4 kept declarations), `.trrank__chips` (Grid G1 file), `.cmdmap__chips`, `.rpt-controls` (19 sites),
+`.animlab__frozen` (16 sites, a lab), `.cwb__*` (admin).
+
+**Checked.** `geom.mjs` (`MOCK=1 FREEZE=1 BLOCKIMG=1`, `?nointro`, 390 and 760px), BEFORE (stash) vs AFTER:
+`/postseason-history` (1 and 6 `pshistory__seasonhead`), `/team/158` and `/team/158/leaders` (1 `team-hub__namerow`
+each) and `/profile` identical, same page heights. The first `/team/158` AFTER had 4 fewer elements than BEFORE
+with equal heights (the known logo race); two more AFTER runs matched BEFORE exactly. `synth.mjs` (`CLUSTER=1`):
+`erasesheet__actions` identical at both widths.
+
+**Not seen.** `.psseries__potgWho` (the series page needs a live series; `synth.mjs` has no `align` switch, so
+the baseline row was not checked synthetically) and `.erasesheet__actions` for real (the dialog opens from a tap).
 `npm run visual` and `npm run e2e` were not run.

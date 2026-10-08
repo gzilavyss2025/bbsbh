@@ -301,12 +301,6 @@
   gap: var(--space-1);
   min-width: 0;
 }
-.psseries__potgWho {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
 .psseries__potgName {
   font-family: var(--font-body);
   font-size: var(--fs-ui);
