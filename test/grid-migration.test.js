@@ -34,7 +34,7 @@ function walk(dir, ext) {
 test('a migrated class holds no layout of its own, in any stylesheet', () => {
   for (const [cls, { keeps = [] }] of Object.entries(MIGRATED)) {
     for (const f of walk(join(SRC, 'styles'), ['.css'])) {
-      if (f.endsWith('grid.css')) continue
+      if (f.replaceAll('\\', '/').endsWith('system/grid.css')) continue
       const body = ruleBody(stripComments(readFileSync(f, 'utf8')), `.${cls}`)
       if (body === null) continue
       assert.ok(!LAYOUT.test(body), `${relative(SRC, f)} still lays out .${cls}`)
