@@ -174,7 +174,7 @@
   opacity: 0.38;
 }
 .gamecard--parkinview .gamecard__atmark-ghost {
-  color: var(--paper-3);
+  color: var(--text-on-ink-bright);
   opacity: 0.7;
 }
 
@@ -317,7 +317,7 @@
     172deg,
     transparent 26%,
     color-mix(in srgb, var(--ink-0) 10%, transparent) 40%,
-    color-mix(in srgb, var(--paper-3) 46%, transparent) 50%,
+    color-mix(in srgb, var(--surface-inset) 46%, transparent) 50%,
     color-mix(in srgb, var(--ink-0) 8%, transparent) 60%,
     transparent 74%
   );

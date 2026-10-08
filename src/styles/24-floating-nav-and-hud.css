@@ -139,7 +139,7 @@
   box-shadow: var(--shadow-raised);
   overflow: hidden;
   font-family: var(--font-body);
-  color: var(--paper-2);
+  color: var(--text-on-ink);
 }
 
 /* Scorebug.jsx's batter/pitcher wrapper — invisible to layout, so the card
@@ -188,11 +188,11 @@
 }
 
 .gamehud__row--batter .gamehud__who {
-  color: var(--paper-3);
+  color: var(--text-on-ink-bright);
 }
 
 .gamehud__row--pitcher .gamehud__who {
-  color: var(--paper-3);
+  color: var(--text-on-ink-bright);
   font-size: var(--fs-compact);
   font-weight: var(--w-regular);
 }
@@ -206,16 +206,16 @@
 }
 
 .gamehud__row--batter .gamehud__val {
-  color: var(--paper-3);
+  color: var(--text-on-ink-bright);
   font-weight: var(--w-semibold);
 }
 
 .gamehud__row--pitcher .gamehud__val {
-  color: var(--paper-3);
+  color: var(--text-on-ink-bright);
 }
 
 .gamehud__lbl {
-  color: var(--paper-3);
+  color: var(--text-on-ink-bright);
   margin-right: 2px;
 }
 
@@ -395,7 +395,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--paper-3);
+  background: var(--surface-inset);
   color: var(--ink-0);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -435,11 +435,11 @@
 }
 
 .gamehud__tri--up {
-  border-bottom: 7px solid var(--paper-3);
+  border-bottom: 7px solid var(--text-on-ink-bright);
 }
 
 .gamehud__tri--down {
-  border-top: 7px solid var(--paper-3);
+  border-top: 7px solid var(--text-on-ink-bright);
 }
 
 .gamehud__tri--dim {
@@ -451,7 +451,7 @@
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
   font-size: var(--fs-title-md);
-  color: var(--paper-3);
+  color: var(--text-on-ink-bright);
   line-height: var(--lh-solid);
 }
 

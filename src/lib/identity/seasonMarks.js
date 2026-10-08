@@ -50,13 +50,14 @@ export function eraTheme(era) {
   return { bar: era.bar, accent: era.accent ?? era.bar, onBar: era.onBar, onBarTone: barMarkTone(era.onBar) }
 }
 
-// A club tile (lib/teams.js's treatmentTile shape) for the season. A covered
+// A club tile (lib/teams.js's treatmentTile shape) for the season. `ink` is the
+// era's onBar, the abbreviation's colour on a tinted tile (#1724). A covered
 // era drops today's tint, pinstripe and per-club tuning: the tuning was set by
 // eye for TODAY's art, and the colours are today's, not the era's.
 export function seasonTile(teamId, season, tile) {
   const era = seasonMark(teamId, season)
   if (!era) return tile
-  return { ...tile, tint: era.bar, pinstripeColor: null, pinstripeBg: null, scale: 1, offsetX: 0, offsetY: 0 }
+  return { ...tile, tint: era.bar, ink: era.onBar, pinstripeColor: null, pinstripeBg: null, scale: 1, offsetX: 0, offsetY: 0 }
 }
 
 // The bar theme of a club in a season-covered era: the app's default chrome,

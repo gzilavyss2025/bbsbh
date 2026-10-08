@@ -74,7 +74,7 @@
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
-  color: var(--rule-soft);
+  color: var(--text-on-ink-soft);
 }
 
 /* The headline is one sentence set at two scales — the qualifying clause as a
@@ -116,7 +116,7 @@
   max-width: 46ch;
   font-size: var(--fs-body);
   line-height: var(--lh-prose);
-  color: var(--paper-1);
+  color: var(--bg-canvas);
 }
 
 /* ---------------------------------------------------------------- figures */
@@ -232,7 +232,7 @@
   font-weight: var(--w-bold);
   line-height: var(--lh-solid);
   letter-spacing: var(--ls-tight-score);
-  color: var(--rule-soft);
+  color: var(--border-hairline);
   pointer-events: none;
 }
 

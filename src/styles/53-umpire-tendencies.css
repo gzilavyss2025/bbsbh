@@ -27,7 +27,7 @@
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   letter-spacing: var(--ls-wide);
-  color: var(--rule);
+  color: var(--text-on-ink-dim);
   font-variant-numeric: tabular-nums;
 }
 
@@ -112,14 +112,14 @@
   border-radius: 2px;
   /* Holding each pole for its first stretch is load-bearing: a plain
      navy-to-rule two-stop spends the whole cool half in olive-grey and the
-     pitcher end stops reading as a pole at all. --rule rather than
-     --rule-soft at the midpoint for the same reason — the softer token
+     pitcher end stops reading as a pole at all. --border-rule rather than
+     --border-hairline at the midpoint for the same reason — the softer token
      disappears against --surface-card and the stripe looks broken in half. */
   background: linear-gradient(
     180deg,
     var(--navy) 0%,
     var(--navy) 16%,
-    var(--rule) 46%,
+    var(--border-rule) 46%,
     var(--marker-deep) 72%,
     var(--marker) 92%,
     var(--marker) 100%
@@ -153,7 +153,7 @@
   border-radius: 3px;
 }
 .umptend__row + .umptend__row {
-  box-shadow: inset 0 1px 0 var(--rule-grid);
+  box-shadow: inset 0 1px 0 var(--border-grid);
 }
 .umptend__rowl {
   font-family: var(--font-display);
@@ -196,7 +196,7 @@
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
-  color: var(--rule);
+  color: var(--text-on-ink-dim);
 }
 .umptend__watchtxt {
   font-family: var(--font-display);
@@ -208,7 +208,7 @@
   margin-top: 3px;
 }
 .umptend__watchtxt--none {
-  color: var(--rule);
+  color: var(--text-on-ink-dim);
 }
 /* A paper plate behind the grid, or the navy panel swallows every
    low-opacity navy cell in the map. */
