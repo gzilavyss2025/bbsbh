@@ -13,6 +13,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
 import { buildRoster } from '../api/_lib/cards.js'
+import { birthplace } from '../src/lib/person/birthplace.js'
 import { CRAWL_STYLE, playerCrawl, renderCrawlBody, seasonTable, teamCrawl } from '../api/_lib/crawl.js'
 import { withCrawlBody } from '../api/preview.js'
 import { buildSitemap } from '../scripts/gen-sitemap.mjs'
@@ -59,7 +60,7 @@ const CLUB = {
 }
 
 const playerBody = () =>
-  renderCrawlBody(playerCrawl(HITTER, { id: 545361, name: 'Mike Trout', pos: 'CF', team: 'Los Angeles Angels' }))
+  renderCrawlBody(playerCrawl(HITTER, { id: 545361, name: 'Mike Trout', pos: 'CF', team: 'Los Angeles Angels', born: birthplace(HITTER) }))
 
 const clubBody = (tab = '') =>
   renderCrawlBody(teamCrawl(CLUB, { id: 158, name: 'Milwaukee Brewers', level: 'MLB', league: 'National League', tab }))
@@ -77,6 +78,18 @@ test('a player body carries the words, with no JavaScript required', () => {
   // existed the only markup this site offered one was a sitemap.
   assert.ok(out.includes('href="/team/los-angeles-angels-108"'), 'it links to the club, slugged')
   assert.ok(out.includes('href="/learn"'), 'it links into the guides')
+})
+
+test('the Born fact reads City, ST for the US and adds the country abroad', () => {
+  const born = (p) => {
+    const facts = playerCrawl(p, { id: 1, name: 'X', pos: '', team: '', born: birthplace(p) }).facts
+    return facts.find((f) => f.label === 'Born').value
+  }
+  assert.equal(born(HITTER), 'Aug 7, 1991 · Vineland, NJ')
+  assert.equal(
+    born({ birthDate: '1999-03-03', birthCity: 'Montreal', birthStateProvince: 'QC', birthCountry: 'Canada' }),
+    'Mar 3, 1999 · Montreal, QC, Canada',
+  )
 })
 
 test('a club body carries its identity and its own five other doors', () => {
@@ -106,7 +119,7 @@ test('a missing field renders as nothing, not as a blank row', () => {
 
 test('a player with no season on file renders without a stat table', () => {
   const out = renderCrawlBody(
-    playerCrawl({ ...HITTER, stats: [] }, { id: 545361, name: 'Mike Trout', pos: 'CF', team: 'Los Angeles Angels' }),
+    playerCrawl({ ...HITTER, stats: [] }, { id: 545361, name: 'Mike Trout', pos: 'CF', team: 'Los Angeles Angels', born: '' }),
   )
   assert.ok(out.includes('<h1>Mike Trout</h1>'))
   assert.doesNotMatch(out, /<table>/, 'no empty table')

@@ -128,12 +128,9 @@ export function seasonTable(person) {
 // A player's readable body: who he is, the club he is on, and the season line.
 // Position spelled out rather than abbreviated — 'Center Fielder' is a term an
 // answer engine can match a question against; 'CF' is not.
-export function playerCrawl(p, { id, name, pos, team }) {
+export function playerCrawl(p, { id, name, pos, team, born }) {
   const posName = clean(p.primaryPosition?.name || '')
   const positionLabel = posName && posName !== 'Unknown' ? posName : pos
-  const born = [clean(p.birthCity), clean(p.birthStateProvince), clean(p.birthCountry)]
-    .filter(Boolean)
-    .join(', ')
   const clubSegment = p.currentTeam?.id ? entitySegment(p.currentTeam.id, team) : ''
   return {
     h1: name,

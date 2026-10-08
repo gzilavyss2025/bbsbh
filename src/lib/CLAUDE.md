@@ -4,7 +4,7 @@ Pure data and pure functions, no React. This file covers the **club identity
 layer**: which colours a club owns, which mark a tile wears, and how a
 hand-tuned adjustment gets from someone's eye into the app. Other modules document
 themselves at their tops; `math/` holds the shared pure helpers, `scorecard/` the scorecard
-lens's (#724). Share a pure helper. Keep a copy only when it carries a comment that says
+lens's (#724), `person/` the birthplace rule that the player page and the crawler body share (#1777). Share a pure helper. Keep a copy only when it carries a comment that says
 why (owner decision 2026-09-30, #1306). Screens: `src/CLAUDE.md`; data: `src/api/CLAUDE.md`.
 
 ## The two vocabularies
