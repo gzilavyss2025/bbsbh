@@ -31,7 +31,7 @@ export function MatchupEdges({ edges }) {
               <PlayerLink id={e.id} className="seriesedges__name">
                 {e.name}
               </PlayerLink>{' '}
-              vs {e.vs.split(' ').at(-1)}
+              vs {e.vs}
               <span className="seriesedges__line">{e.line}</span>
             </span>
           </li>

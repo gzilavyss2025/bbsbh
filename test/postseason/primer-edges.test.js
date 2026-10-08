@@ -59,8 +59,15 @@ test('wpSpark: one point per value, home chance up, flipped for the away club', 
 
 test('wpSpark: the fill polygons clip at the middle line', () => {
   const s = wpSpark([50, 100, 0], { flip: false, w: 100, h: 20 })
-  assert.equal(s.up, '0.0,10.0 50.0,0.0 100.0,10.0 100.0,10.0 0.0,10.0')
-  assert.equal(s.down, '0.0,10.0 50.0,10.0 100.0,20.0 100.0,10.0 0.0,10.0')
+  assert.equal(s.up, '0.0,10.0 50.0,0.0 75.0,10.0 100.0,10.0 100.0,10.0 0.0,10.0')
+  assert.equal(s.down, '0.0,10.0 50.0,10.0 75.0,10.0 100.0,20.0 100.0,10.0 0.0,10.0')
+})
+
+test('wpSpark: a lead change adds a point where the line crosses the middle', () => {
+  const s = wpSpark([75, 25], { flip: false, w: 100, h: 20 })
+  assert.equal(s.up, '0.0,5.0 50.0,10.0 100.0,10.0 100.0,10.0 0.0,10.0')
+  assert.equal(s.down, '0.0,10.0 50.0,10.0 100.0,15.0 100.0,10.0 0.0,10.0')
+  assert.equal(s.line, '0.0,5.0 100.0,15.0')
 })
 
 test('wpSpark: fewer than two points draw nothing', () => {

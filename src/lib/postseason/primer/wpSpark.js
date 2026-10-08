@@ -10,7 +10,14 @@ export function wpSpark(wp, { flip = false, w = 100, h = 26 } = {}) {
   if (!Array.isArray(wp) || wp.length < 2 || !wp.every(Number.isFinite)) return null
   const mid = h / 2
   const pts = wp.map((p, i) => ({ x: (i / (wp.length - 1)) * w, y: (1 - (flip ? 100 - p : p) / 100) * h }))
-  const trace = (clamp) => pts.map(({ x, y }) => pt(x, clamp(y))).join(' ')
-  const closed = (clamp) => `${trace(clamp)} ${pt(w, mid)} ${pt(0, mid)}`
-  return { line: trace((y) => y), up: closed((y) => Math.min(y, mid)), down: closed((y) => Math.max(y, mid)) }
+  // A fill follows the line exactly, so where the line crosses the middle a
+  // point goes in at the crossing: the share above it ends, the share below begins.
+  const withCrossings = pts.flatMap((p, i) => {
+    const q = pts[i + 1]
+    if (!q || (p.y - mid) * (q.y - mid) >= 0) return [p]
+    return [p, { x: p.x + ((mid - p.y) / (q.y - p.y)) * (q.x - p.x), y: mid }]
+  })
+  const trace = (list, clamp) => list.map(({ x, y }) => pt(x, clamp(y))).join(' ')
+  const closed = (clamp) => `${trace(withCrossings, clamp)} ${pt(w, mid)} ${pt(0, mid)}`
+  return { line: trace(pts, (y) => y), up: closed((y) => Math.min(y, mid)), down: closed((y) => Math.max(y, mid)) }
 }

@@ -142,7 +142,7 @@
   display: block;
 }
 /* The five lean bands, pitcher pole first; the umpire's own band is inked and a
-   caret sits at his true position inside it. */
+   caret marks the middle of that band. */
 .seriesedges__lean {
   position: relative;
   display: grid;
