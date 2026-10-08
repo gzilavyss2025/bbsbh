@@ -258,12 +258,18 @@ the app's own number and not a major-league equivalent.
 Rating = `20 + (ceiling - 20) * percentile / 100`, using the level ceiling above.
 With the fixed floor of 20, a 97th-percentile A+ hitter is about 44.
 
-**Level floor.** The floor stays fixed at 20 for now. The spec's formula floors every
-level at 20, but part B's data (hitters by OPS, pitchers by ERA, ranked inside the
-level-season) show a bottom-half AAA player reaches the majors 14.9% of the time and
-a bottom-half A player 10.2%. **Inference:** if OVR is to mean the same thing at
-every level, the floor should rise with the level. Part B did not model it. A
-modelling task comes before the minor-league build step (see Build order).
+**Level floor (decided).** One floor of 20 at every level. The formula floors every
+level at 20, although part B's data (hitters by OPS, pitchers by ERA, ranked inside
+the level-season) show a bottom-half AAA player reaches the majors 14.9% of the time
+and a bottom-half A player 10.2%. A modelling task tested a floor that rises with
+level (2009-2019 level-seasons, a logistic fit of reach against in-level percentile).
+Fitted floors ran about 23 to 30. The 95% intervals were 3 to 6 points wide and
+overlapped, except that Rk was lower. The level-dependent floor aligned the levels
+better only at 10% reach (spread 3.2 points, against 6.8 for a floor of 20). It did
+not align them better at 20% or 30% reach. **Inference:** reach rate measures
+future arrival, not current ability, so the data cannot say the floor must rise.
+Gary decided to keep the single floor. The fit is a comment on issue #1721. It was
+not saved as a file.
 
 **Bars (decided).** A minor leaguer's card shows OVR and POT only, with no
 attribute bars. Rough bars from slash-line parts: not in version one.
@@ -327,8 +333,8 @@ changed nothing. Record only, no action.
 5. Per-season `fld` store, and the minor-league season-lines fetch. Both come
    before `gen-ovr.mjs`.
 6. `gen-ovr.mjs` and MLB hitters and pitchers.
-7. Floor modelling task, then minor leaguers with ceilings and POT. The task tests
-   whether the floor should rise with level.
+7. Minor leaguers with ceilings and POT. The floor modelling task is done: the
+   floor stays at 20 (see OVR for a minor leaguer).
 8. Rating history file and arrows (UI in #1703).
 
 **Step 1: calibrate against posted ratings.** Treat posted video-game ratings as the
