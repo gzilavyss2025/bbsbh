@@ -128,10 +128,10 @@ export function seasonTable(person) {
 // A player's readable body: who he is, the club he is on, and the season line.
 // Position spelled out rather than abbreviated — 'Center Fielder' is a term an
 // answer engine can match a question against; 'CF' is not.
-export function playerCrawl(p, { id, name, pos, team, born }) {
+export function playerCrawl(p, { id, name, pos, team, born, status = null }) {
   const posName = clean(p.primaryPosition?.name || '')
   const positionLabel = posName && posName !== 'Unknown' ? posName : pos
-  const clubSegment = p.currentTeam?.id ? entitySegment(p.currentTeam.id, team) : ''
+  const clubSegment = team && p.currentTeam?.id ? entitySegment(p.currentTeam.id, team) : ''
   return {
     h1: name,
     lead: [positionLabel, team].filter(Boolean).join(' · '),
@@ -142,7 +142,7 @@ export function playerCrawl(p, { id, name, pos, team, born }) {
       { label: 'Number', value: p.primaryNumber ? `#${clean(p.primaryNumber)}` : '' },
       { label: 'Bats / Throws', value: bothSides(p) },
       { label: 'Height / Weight', value: [clean(p.height), p.weight ? `${p.weight} lb` : ''].filter(Boolean).join(' / ') },
-      { label: 'Age', value: p.currentAge ? String(p.currentAge) : '' },
+      ...ageFact(p, status),
       { label: 'Born', value: [niceDate(p.birthDate), born].filter(Boolean).join(' · ') },
       { label: 'MLB debut', value: niceDate(p.mlbDebutDate) },
       // The id in the body as well as in the address, for a reader checking
@@ -164,6 +164,15 @@ export function playerCrawl(p, { id, name, pos, team, born }) {
   }
 }
 
+// The page labels a retired player's age "Age at retirement" and shows his age when
+// his last stint ended; `currentAge` is frozen at death for the deceased. No such
+// age on file means no fact, never a wrong one. `status` is rosterStatusView's result,
+// computed in cards.js, so this file stays pure.
+function ageFact(p, status) {
+  if (status?.state !== 'retired') return [{ label: 'Age', value: p.currentAge ? String(p.currentAge) : '' }]
+  return [{ label: 'Age at retirement', value: status.retiredAge == null ? '' : String(status.retiredAge) }]
+}
+
 function bothSides(p) {
   const bats = clean(p.batSide?.description || '')
   const throws = clean(p.pitchHand?.description || '')
@@ -183,6 +192,10 @@ const TEAM_DOORS = [
   { tab: 'leaders', suffix: '/leaders', text: 'Team leaders' },
 ]
 
+// The feed's `locationName` is "United States" for a club it has no city for (Kia
+// Tigers, Colombia): a placeholder, wrong for a Korean club. The page shows no location.
+const knownLocation = (t) => (t.locationName === 'United States' ? '' : clean(t.locationName || ''))
+
 // A club's readable body: identity, where it plays, and its own six doors.
 //
 // NO RECORD, and that is a decision rather than an omission. A club's W-L is
@@ -190,7 +203,7 @@ const TEAM_DOORS = [
 // (standings.js, teamScore.js, teamRecords.js, seasonSeries.js) — a number that
 // takes an `asOf` for a reason. Nothing here has a reader to ask, so it does not
 // print one. The identity below never moves during a game.
-export function teamCrawl(t, { id, name, level, league, tab }) {
+export function teamCrawl(t, { id, name, level, league, tab, ballpark = clean(t.venue?.name || '') }) {
   const segment = entitySegment(id, name)
   const division = clean(t.division?.name || '')
   return {
@@ -201,8 +214,8 @@ export function teamCrawl(t, { id, name, level, league, tab }) {
       { label: 'League', value: league },
       { label: 'Division', value: division },
       { label: 'Level', value: level },
-      { label: 'Ballpark', value: clean(t.venue?.name || '') },
-      { label: 'Location', value: clean(t.locationName || '') },
+      { label: 'Ballpark', value: ballpark },
+      { label: 'Location', value: knownLocation(t) },
       { label: 'First season', value: t.firstYearOfPlay ? String(t.firstYearOfPlay) : '' },
       { label: 'Club id', value: String(id) },
     ],

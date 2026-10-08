@@ -1,0 +1,19 @@
+{
+  "id": 119,
+  "name": "Los Angeles Dodgers",
+  "locationName": "Los Angeles",
+  "firstYearOfPlay": "1884",
+  "venue": {
+    "id": 22,
+    "name": "UNIQLO Field at Dodger Stadium"
+  },
+  "league": {
+    "name": "National League"
+  },
+  "division": {
+    "name": "National League West"
+  },
+  "sport": {
+    "id": 1
+  }
+}

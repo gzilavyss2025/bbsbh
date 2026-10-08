@@ -1,0 +1,17 @@
+{
+  "id": 1190,
+  "name": "Kia Tigers",
+  "locationName": "United States",
+  "firstYearOfPlay": "2001",
+  "venue": {
+    "id": 401,
+    "name": "Generic"
+  },
+  "league": {
+    "name": "Korean Baseball Organization"
+  },
+  "division": {},
+  "sport": {
+    "id": 32
+  }
+}
