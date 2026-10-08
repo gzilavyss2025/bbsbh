@@ -3,6 +3,7 @@ import { useAsync } from '../../../../hooks/useAsync.js'
 import { monoLogoFingerprint, monoLogoParts, monoLogoPickerSvg, monoLogoSvg } from '../../../../lib/logoMono.js'
 import { sanitizeSvgMarkup } from '../../../../lib/svgSanitize.js'
 import { LOGO_VARIANTS, logoCdnUrl } from '../../../../lib/logoCdn.js'
+import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 import { ShapeInkPicker, flipVerdict } from '../../../identity-lab/editors/ShapeInkPicker.jsx'
 // The shape picker's own markup carries the identity-lab's `idlab__monoink*`
 // classes (ShapeInkPicker.jsx is deliberately shared rather than
@@ -11,7 +12,6 @@ import { ShapeInkPicker, flipVerdict } from '../../../identity-lab/editors/Shape
 // imports; this drawer needs the same rules and pulls them in directly,
 // since 62-identity-admin.css is a separate lazy chunk.
 import '../../../../styles/17-identity-lab-workbench.css'
-import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 
 // The drawer's Knockout mark group: which shapes of this club's mark are ink
 // vs. the paper it's drawn against, reusing /identity-lab's own picker so a

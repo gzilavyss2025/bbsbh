@@ -1040,7 +1040,7 @@ switch). `npm run visual` and `npm run e2e` were not run.
 
 ## Cluster slice C10 (2026-10-08)
 
-Four wrapping rows in seven files moved onto `Cluster`: 4 rules, 9 JSX sites. No open PR or layout.md used "C10"
+Four wrapping rows in seven files moved onto `Cluster`: 4 rules, 8 JSX sites. No open PR or layout.md used "C10"
 (open PRs #1798, #1799, #1800, #1802 touch no stylesheet these rows live in; #1799 edits `home.css` only). The
 finder listed 30 safe rows. No gap was off the three steps, so nothing was snapped.
 
@@ -1069,11 +1069,11 @@ the element count differs (1104 vs 1111) with equal page height 5634, the same n
 **Not seen.** `.cmdmap__chips` (`/design-lab` does not load `26d`, and the real routes need live statsapi),
 `.seriesedges__pen` (the home primer is not wired until #1799 merges), and the `align="center"` of the identity-lab
 row at 390px (the geom count noise; `synth.mjs` has no `align` switch). `npm run visual` and `npm run e2e` were not run.
+
 ## Cluster slice C11 (2026-10-08)
 
-Named C11 as the prompt said; C10's branch (`claude/hopeful-bardeen-7d14p6`) was not on origin when I edited, so I
-could not check its `MIGRATED` rows. If the names clash, `/stack-prs` resolves it. Four wrapping rows moved onto
-`Cluster`: 4 rules, 4 JSX sites in 8 files. Expect an additive conflict in `MIGRATED` and in this file.
+Written beside C10 and stacked with it (C10's rows were not on origin when I edited; no row clashed, only
+`MIGRATED` and this file merged). Four wrapping rows moved onto `Cluster`: 4 rules, 4 JSX sites in 8 files.
 
 | rule | gap | align | element | rule keeps |
 | --- | --- | --- | --- | --- |
