@@ -188,10 +188,12 @@ does not change. The pure rules are in `src/lib/postseason/primer/`, and
   the winner in ink. The win-chance lines and the leaders read the same games. A
   game on the cutoff date or later never shows a score, a winner or a run
   (`ribbonNodes.js`). The primer does not read Scores Unlocked. The 2026-09-30
-  departure does not apply here: the primer reads the bracket without
-  `{ live: true }`, so with the pass on it still shows nothing from today's
-  game. If a live bracket that counts today's game gets to `primerSeriesFor`,
-  it returns no series and the page keeps its usual layout.
+  departure does not apply here: the primer never shows today's game. The slate
+  gives the primer the same bracket it draws, and with the pass on that bracket
+  is the live one. Once today's game is Final, the live bracket counts it. Then
+  `primerSeriesFor` returns no series and the page keeps its usual layout. Gary
+  kept this rule on 2026-10-08: the page never shows a state that includes
+  today's result.
 - **(b) The primer keys on the series, not on the game.** A day with two series
   gets a two-tab switch. The first tab is the favourite club's series, else the
   series with the earlier first pitch, else the NL series (`primerSeries.js`).
