@@ -130,8 +130,9 @@ export async function fetchCallouts(urlDate, gamePks) {
 //       callout-notes/shared.js), and it is absent unless the manual scan
 //       (scripts/scan-game-notes-insights.mjs) found a live entry for a club in
 //       this game.
-//     series?:{ gamePks, games, stats:{ batting, pitching, totals } } — LCS and
-//       World Series games only; read it with seriesBlockFor.
+//     series?:{ id, gamePks, games, stats:{ batting, pitching, totals } } — LCS and
+//       World Series games only; read it with seriesBlockFor (the primer takes it
+//       through primerGames.js's, which also checks the series id).
 //
 // Fields newer than a given date's committed file simply aren't there (the
 // nightly cron regenerates future dates only) — every consumer null-guards, so

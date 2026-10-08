@@ -409,7 +409,8 @@ for each generator; the reader modules:
 - `callouts.js`'s `seriesBlockFor(bundle)` — the series primer's block, from the
   `series` key of an LCS or World Series game's `callouts/{MMDDYYYY}/{gamePk}.json`
   (`gen-callouts.mjs`, nightly). Returns `null` for every other game. The shape is
-  `{ gamePks, games, stats }`. `games` holds one finished game each, in the shape at
+  `{ id, gamePks, games, stats }` (`id` is the bracket series' id; the primer's own reader,
+  `primerGames.js`'s `seriesBlockFor(bundle, seriesId)`, takes the block only for that series). `games` holds one finished game each, in the shape at
   the top of `src/lib/postseason/primer/ribbonNodes.js` (runs, park, 26 win-chance
   points). `stats` is `{ batting, pitching, totals }`, the same as
   `loadSeriesStats` returns without `rosters`, so `SeriesTotals` and the leaders

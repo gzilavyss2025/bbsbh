@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs'
 
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { firstNonNull, buildCard, TEAM_TABS } from '../api/_lib/cards.js'
+import { firstNonNull, buildCard, TEAM_TABS, todayEt } from '../api/_lib/cards.js'
 // The slug helpers moved to api/_lib/entity.js when the crawlable body gave them
 // a second caller (ADR-0059). Still the edge-side copies this asserts against
 // the app's own — the file changed, the claim did not.
@@ -317,4 +317,10 @@ test('the edge copies of slugify/idFromSlug match the app’s', () => {
 // The edge copy of the 30-club set (rosterStatusView needs it, #1779) names the same ids as the app's.
 test('the edge isMlbTeamId agrees with the app’s for every id a club can have', () => {
   for (let id = 0; id <= 6000; id++) assert.equal(edgeIsMlbTeamId(id), isMlbTeamId(id), `team ${id}`)
+})
+
+test('todayEt is the Eastern date, so 9 pm ET is still today and not UTC tomorrow', () => {
+  assert.equal(todayEt(new Date('2026-10-09T01:00:00Z')), '2026-10-08')
+  assert.equal(todayEt(new Date('2026-10-08T14:00:00Z')), '2026-10-08')
+  assert.equal(todayEt(new Date('2026-10-09T05:00:00Z')), '2026-10-09')
 })

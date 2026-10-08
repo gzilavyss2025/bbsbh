@@ -140,7 +140,7 @@ test('no shard: live source, the live log builds each game in the slice 1 shape'
     venueId: 32,
     venueName: 'Live Park',
     runs: { away: 4, home: 6 },
-    wp: [55, 70, 90],
+    wp: [50, 55, 70, 90], // opens even, like the shard's line (wpLine)
   })
 })
 
@@ -156,7 +156,7 @@ test('wp is cut to 26 points and ignores entries with no home chance', () => {
   const log = { ...liveLog, gameSignals: { 10: { winProb: long } } }
   const [g] = primerData(null, [counted[0]], log).games
   assert.equal(g.wp.length, 26)
-  assert.equal(g.wp[0], 0)
+  assert.equal(g.wp[0], 50)
   assert.equal(g.wp.at(-1), 79)
 })
 

@@ -40,7 +40,8 @@ function playedNode(series, game, score) {
     gamePk: game.gamePk,
     date: game.date,
     winnerId: game.winnerId,
-    record: recordLine({ ...series, slots, gamesPlayed: sofar.length }),
+    // `decided` is the series' end state: only its last game reads as the result.
+    record: recordLine({ ...series, slots, gamesPlayed: sofar.length, decided: series.decided && sofar.length === series.games.length }),
     runs: score ? series.slots.map((slot) => (slot.club.id === score.awayId ? score.runs.away : score.runs.home)) : null,
     score: score ?? null,
   }

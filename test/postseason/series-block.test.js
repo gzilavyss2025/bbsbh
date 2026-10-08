@@ -12,6 +12,7 @@ import { bracket2025, results, skeleton } from './fixtures.js'
 import { deriveBracket } from '../../src/api/postseason/bracket.js'
 import { foldSeriesStats } from '../../src/api/postseasonSeries.js'
 import { seriesBlockFor } from '../../src/api/callouts.js'
+import { seriesBlockFor as primerBlockFor } from '../../src/lib/postseason/primer/primerGames.js'
 import { seriesBlock } from '../../src/lib/postseason/primer/seriesBlock.js'
 
 const WS_2025 = [813027, 813026, 813032, 813023, 813022, 813025, 813024]
@@ -119,4 +120,13 @@ test('seriesBlockFor reads the block, or null for any other bundle', () => {
   assert.equal(seriesBlockFor({ gamePk: 813024, series: block }), block)
   assert.equal(seriesBlockFor({ gamePk: 1 }), null)
   assert.equal(seriesBlockFor(null), null)
+})
+
+test('the block names its series, so the primer takes the shard instead of always reading live', () => {
+  const bracket = bracket2025('2025-11-01')
+  const block = seriesBlock(bracket, 813024, dataFor(WS_2025))
+  assert.equal(block.id, bracket.worldSeries.id)
+  assert.ok(block.id)
+  assert.equal(primerBlockFor({ gamePk: 813024, series: block }, block.id), block)
+  assert.equal(primerBlockFor({ gamePk: 813024, series: block }, 'some-other-series'), null)
 })

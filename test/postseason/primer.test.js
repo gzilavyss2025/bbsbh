@@ -148,3 +148,12 @@ test('leader rows: three or fewer all show high to low, more show the leader onl
   assert.deepEqual(leaderRows([e('a', 1), e('b', 3), e('c', 2)]).map((r) => r.name), ['b', 'c', 'a'])
   assert.deepEqual(leaderRows([e('a', 5), e('b', 4), e('c', 3), e('d', 2)]).map((r) => r.name), ['a'])
 })
+
+test('the ribbon of a decided series reads the result on the clincher only', () => {
+  const ws = { ...bracket2025('2025-11-02').worldSeries }
+  assert.equal(ws.decided, true)
+  const records = ribbonNodes(ws, {}).filter((n) => n.kind === 'played').map((n) => n.record)
+  assert.equal(records.length, ws.games.length)
+  assert.ok(records.slice(0, -1).every((r) => !r.includes(' won ')), records.join(' | '))
+  assert.match(records.at(-1), /^[A-Z]+ won 4–3$/)
+})

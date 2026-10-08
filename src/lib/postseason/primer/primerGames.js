@@ -17,10 +17,11 @@
 // or early file cannot bring today's result in. The caller gives `counted`;
 // nothing else decides which games show.
 
-const WP_POINTS = 26
+import { seriesBlockFor as blockOf } from '../../../api/callouts.js'
+import { wpLine } from './wpSpark.js'
 
 export function seriesBlockFor(bundle, seriesId) {
-  const block = bundle?.series
+  const block = blockOf(bundle)
   return block?.id === seriesId ? block : null
 }
 
@@ -44,13 +45,6 @@ export function planShard(block, counted) {
   return { usable, byPk, needLive: counted.length > 0 && !(exact && complete && block.stats) }
 }
 
-// At most WP_POINTS home win-chance points, evenly spaced across the plays.
-function wpPoints(winProb) {
-  const ys = (winProb ?? []).filter((e) => typeof e?.homeTeamWinProbability === 'number').map((e) => e.homeTeamWinProbability)
-  if (ys.length <= WP_POINTS) return ys
-  return Array.from({ length: WP_POINTS }, (_, i) => ys[Math.round((i * (ys.length - 1)) / (WP_POINTS - 1))])
-}
-
 // The live read's games, by gamePk. `log` is useSeriesLog's data. A game with
 // no box score (its read failed) has no runs to show, so it is left out.
 function liveGames(counted, log) {
@@ -68,7 +62,7 @@ function liveGames(counted, log) {
       venueId: venue?.id ?? null,
       venueName: venue?.name ?? '',
       runs: box.runs,
-      wp: wpPoints(log.gameSignals?.[g.gamePk]?.winProb),
+      wp: wpLine(log.gameSignals?.[g.gamePk]?.winProb, box.homeId),
     }
   }
   return out

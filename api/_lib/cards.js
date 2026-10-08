@@ -80,6 +80,12 @@ function findMatchup(games, want) {
   )
 }
 
+// Today's date in Eastern time, the clock statsapi's roster dates run on. UTC would roll
+// over at 8 pm ET and read a stint that ends today as already over.
+export function todayEt(now = new Date()) {
+  return now.toLocaleDateString('en-CA', { timeZone: 'America/New_York' })
+}
+
 // Resolves to the first non-null value among `promises` as it lands, or
 // `null` once every one of them has settled — a rejection counts the same as
 // a null fulfillment ("this one found nothing"), so a caller never needs to
@@ -172,7 +178,7 @@ async function playerCard(idSegment, origin) {
   const pos = posAbbr && posAbbr !== 'Unknown' ? posAbbr : ''
   // A retired or unsigned player's currentTeam is a stale pointer, and the page
   // shows no club for him, so neither does the card or the body (rosterStatusView).
-  const status = rosterStatusView(p, new Date().toISOString().slice(0, 10), { isMlbTeamId })
+  const status = rosterStatusView(p, todayEt(), { isMlbTeamId })
   const team = status ? '' : clean(p.currentTeam?.name || '')
   const sub = [team, pos].filter(Boolean).join(' · ')
   return {

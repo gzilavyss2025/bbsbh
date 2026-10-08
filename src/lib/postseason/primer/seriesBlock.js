@@ -14,9 +14,7 @@
 // game has no box score: no block is better than a block that is short a game.
 import { foldSeriesStats } from '../../../api/postseasonSeries.js'
 import { seriesForGame } from '../../../api/postseason/bracket.js'
-import { gamePoints } from '../seriesFlow.js'
-
-const WP_POINTS = 26
+import { wpLine } from './wpSpark.js'
 
 export function seriesBlock(bracket, gamePk, dataByPk) {
   const series = seriesForGame(bracket, gamePk)?.series
@@ -29,6 +27,8 @@ export function seriesBlock(bracket, gamePk, dataByPk) {
     reads.map((r) => r.feed),
   )
   return {
+    // primerGames.seriesBlockFor takes a block only for the series it was asked about.
+    id: series.id,
     gamePks: counted.map((g) => g.gamePk),
     games: counted.map((g, i) => finishedGame(g, reads[i])),
     stats: { batting, pitching, totals },
@@ -39,7 +39,6 @@ export function seriesBlock(bracket, gamePk, dataByPk) {
 function finishedGame(game, { box, feed, winProb }) {
   const [away, home] = [box.teams?.away, box.teams?.home]
   const homeId = home?.team?.id ?? null
-  const ys = gamePoints(winProb, homeId, homeId).points.map((p) => Math.round(p.y))
   return {
     gamePk: game.gamePk,
     n: game.gameNumber,
@@ -49,9 +48,6 @@ function finishedGame(game, { box, feed, winProb }) {
     venueId: feed?.gameData?.venue?.id ?? null,
     venueName: feed?.gameData?.venue?.name ?? '',
     runs: { away: away?.teamStats?.batting?.runs ?? null, home: home?.teamStats?.batting?.runs ?? null },
-    wp:
-      ys.length <= WP_POINTS
-        ? ys
-        : Array.from({ length: WP_POINTS }, (_, i) => ys[Math.round((i * (ys.length - 1)) / (WP_POINTS - 1))]),
+    wp: wpLine(winProb, homeId),
   }
 }

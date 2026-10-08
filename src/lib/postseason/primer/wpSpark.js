@@ -4,6 +4,20 @@
 // Returns SVG point strings in a w x h box (high chance = top), the share above
 // the middle line and the share below it as two fills (closed along the middle).
 // Null when there is no line to draw (the degrade convention).
+import { gamePoints } from '../seriesFlow.js'
+
+const WP_POINTS = 26
+
+// The `wp` a finished game carries: the home club's win chance, even at the start
+// and then after each play, rounded, at most WP_POINTS evenly spaced. The nightly
+// shard (seriesBlock.js) and the live read (primerGames.js) both build it here, so
+// the same game draws the same line whichever one supplied it.
+export function wpLine(winProb, homeId) {
+  const ys = gamePoints(winProb, homeId, homeId).points.map((p) => Math.round(p.y))
+  if (ys.length <= WP_POINTS) return ys
+  return Array.from({ length: WP_POINTS }, (_, i) => ys[Math.round((i * (ys.length - 1)) / (WP_POINTS - 1))])
+}
+
 const pt = (x, y) => `${x.toFixed(1)},${y.toFixed(1)}`
 
 export function wpSpark(wp, { flip = false, w = 100, h = 26 } = {}) {
