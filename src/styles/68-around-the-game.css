@@ -67,7 +67,7 @@
 }
 
 /* The strand name sits in a clay chip — the one place the accent
-   colour carries text, which is why the pairing (--paper-2 on
+   colour carries text, which is why the pairing (--text-on-ink on
    --clay, 4.6:1) is an entry in check-contrast.mjs. */
 .bcast__strand {
   padding: 2px var(--space-2);
