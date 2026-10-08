@@ -33,6 +33,7 @@ import { Door } from '../components/ui/control/Door.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
 import { Cluster } from '../components/ui/layout/Cluster.jsx'
+import { Stack } from '../components/ui/layout/Stack.jsx'
 
 // Rank-movement glyph: '' (not '—') when there's nothing to compare, since
 // this rides inline inside the always-visible GB/WCGB cell rather than its
@@ -309,7 +310,7 @@ export function StandingsPage({ seasonYear }) {
 
       <SeasonPicker view={pickerView} pathFor={pathFor} compare={false} all={false} />
 
-      <div className="standings-ctrl">
+      <Stack gap="snug" className="standings-ctrl">
         <div className="standings-ctrl__top">
           <div className="standings-ctrl__asof">
             <span className="standings-ctrl__mode">{view.mode}</span>
@@ -404,7 +405,7 @@ export function StandingsPage({ seasonYear }) {
             </button>
           </Cluster>
         )}
-      </div>
+      </Stack>
 
       <AsyncStatus
         loading={loading}

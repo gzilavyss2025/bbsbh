@@ -10,9 +10,6 @@
 /* Date controls: the "entering today / as of …" readout, the historical
    quick-jumps, and the kraft-amber opt-in to reveal today's live standings. */
 .standings-ctrl {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   margin-bottom: 16px;
 }
 /* Readout + the kraft reveal chip share one row: the "as of" context reads left,
