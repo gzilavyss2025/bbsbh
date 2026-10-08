@@ -194,7 +194,7 @@ Example: 2025 NLDS, heading into 2025-10-09.
 
 ## The series primer's rules (`src/lib/postseason/primer/`)
 
-Pure, and no UI yet (ADR-0087, 2026-10-08 addendum).
+Pure (ADR-0087, 2026-10-08 addendum). The home page draws it: see "The home page primer" below.
 
 - `primerSeriesFor(bracket, slateDate, slateGamePks)`: the LCS and World Series
   playing on the cutoff, or `[]` unless each slate game maps to one of them and
@@ -213,7 +213,7 @@ Pure, and no UI yet (ADR-0087, 2026-10-08 addendum).
   Series boxes (club rows with wins and `eliminated`, a `decided` flag, a foot line),
   and one connector per LCS, inked once that series is decided. A World Series slot
   with no club keeps `club: null`. `null` when an LCS or the World Series is missing.
-  `BracketNow.jsx` and `SeriesLeadersLedger.jsx` draw it, with no wiring yet.
+  `BracketNow.jsx` and `SeriesLeadersLedger.jsx` draw it.
 
 ## The primer's data
 
@@ -255,6 +255,38 @@ date can come in. The bracket decides which games these are.
   one schedule call with `hydrate=officials` and a narrow `fields` list that has
   no result field. It returns `{}` on any failure. A game with no posted umpire
   has no entry. Assignments post about two hours before first pitch.
+
+## The home page primer
+
+On some postseason days the home page shows a series primer. It replaces the
+survivors board and the bracket rail. It shows from `BRACKET_RAIL_QUERY` (1000 px)
+up. Below that width the page does not change.
+
+- **When it shows.** `primerSeriesFor` returns one or two series: every game on the
+  MLB slate is in an LCS or the World Series, and each series has one game that day.
+  A Division Series game, a doubleheader, a resumed game or a game that the bracket
+  does not know gives `[]`. The page then keeps its usual layout.
+- **One hook, two slots.** `usePrimer` (`src/hooks/postseason/`) runs once in
+  `GameSelect`. It picks the series (`defaultPrimerSeries`: the favourite club, else
+  the earlier first pitch, else the NL series), holds the open tab, and calls
+  `useSeriesPrimerData` for the open series. `SeriesPrimer`
+  (`src/components/postseason/`) draws the two slots from that answer:
+  `part="main"` under the game list, `part="rail"` in the right column. With no
+  series, the same two slots draw `SurvivorsBoard` and `BracketRail`.
+- **Main column, in order.** The game card (unchanged), `SeriesStarters`, Today's
+  edges (`SeriesEdges`), `SeriesRibbon`, `SeasonSeriesStrip`. On a two-series day a
+  switch of two `Pill` controls (`aria-pressed`) sits above them.
+- **Right column.** `BracketNow`, `SeriesTotals`, `SeriesLeadersLedger`.
+- **Starters.** They show only when the slate date is today. The schedule names the
+  starter who really pitched once the day is past.
+- **Spoiler footing.** The cutoff is a date. A finished game before the cutoff shows
+  plainly. Nothing from the day's own game, or a later game, is read. There is no
+  `SealBox`, no `--seal` token and no Scores Unlocked read. A live bracket that counts
+  today's game gives no primer (`primerSeriesFor`).
+- **Past dates.** They have no nightly block, so the live read runs. The career
+  matchups file covers only the current slate, so the matchup edges do not show.
+- **The words.** "facing elimination", "Winner take all", "if necessary". `FullBracket`
+  uses "facing elimination" too.
 
 ## Series marks (`src/lib/postseason/seriesMarks.js`)
 
@@ -362,7 +394,7 @@ grid (`styles/postseason/series-live.css`).
 `bracket-fetch`, `bracket-hook`, `live-series-selectors` (the live series
 page's pure game-bucket sort, slice 6), `series-roster` (the declared roster's
 date and its 26-player check), `upcoming-games`, `day-shape`, `series-flow`,
-`series-totals`, `keys-verdict`, `primer` and `primer-edges` (the series primer's rules). `bracket-hook` also scans the series pages'
+`series-totals`, `keys-verdict`, `primer` and `primer-edges` (the series primer's rules), `use-primer` (its hook). `bracket-hook` also scans the series pages'
 parts for a seal or a Scores Unlocked read. The route is in `test/route.test.js`,
 and the slate model's `seriesStatus`/`leagueRecord` guard in
 `test/slate-scores.test.js`.

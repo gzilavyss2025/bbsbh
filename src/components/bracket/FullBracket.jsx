@@ -104,7 +104,7 @@ function BoxNote({ series, x, y, w }) {
     return (
       <div className="pbkt-note" style={style}>
         <span className="pbkt-today">Today · Game {series.cutoffGame.gameNumber}</span>
-        {isElimination(series) && <span className="pbkt-when"> · one from out</span>}
+        {isElimination(series) && <span className="pbkt-when"> · facing elimination</span>}
       </div>
     )
   }
@@ -289,7 +289,7 @@ function wsNoteText(series) {
   if (series.decided) return null
   if (isDecidingGame(series)) return 'Winner take all'
   if (series.playsOnCutoff) {
-    return `Today · Game ${series.cutoffGame.gameNumber}${isElimination(series) ? ' · one from out' : ''}`
+    return `Today · Game ${series.cutoffGame.gameNumber}${isElimination(series) ? ' · facing elimination' : ''}`
   }
   return null
 }
