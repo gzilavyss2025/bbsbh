@@ -229,7 +229,6 @@ const rules = [
         .filter((t) => /^--(?:paper-\d+|rule(?:-soft|-grid)?)$/.test(t))
       return hits.length ? `reads ${hits.join(', ')}; read the alias in src/tokens/colors.css (e.g. --bg-page, --border-grid)` : true
     },
-    guidance: '',
   },
 ]
 
