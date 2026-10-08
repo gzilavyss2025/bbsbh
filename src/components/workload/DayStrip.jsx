@@ -1,3 +1,5 @@
+import { Cluster } from '../ui/layout/Cluster.jsx'
+
 // THE DAY STRIP, AND THE REST RAIL UNDER IT.
 //
 // One cell a calendar day, shaded by what the pitcher threw (api/workload.js's
@@ -18,8 +20,6 @@
 // between them with no pixel arithmetic, at any cell width, on any strip
 // length. Rail runs come from restRunsFor; the caller passes them in so the
 // staff grid computes them once a row instead of once a render.
-import { Cluster } from '../ui/layout/Cluster.jsx'
-
 export function DayStrip({ cells, runs = [], label, size = 'md' }) {
   if (!cells || cells.length === 0) return null
   const cols = `repeat(${cells.length}, minmax(0, 1fr))`
