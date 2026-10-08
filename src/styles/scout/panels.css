@@ -339,12 +339,6 @@
 
 /* --- the filter sheet --- */
 
-.scout__sheet {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
 /* --- natural case for the Scout's sentences --- */
 
 /* The Edge verdict, the Zones callout, the Meetings play text and notes are

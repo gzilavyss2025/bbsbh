@@ -99,7 +99,7 @@ const BUDGETS = {
   'src/styles/10-lineup.css': 700, // 800 -> 700 at 654: the Former Teammates card's crossroads rules went, and its Ladder lives in 10b-former-teammates.css (#1352)
   'src/styles/12-sealbox.css': 1700, // 1639 — unified focus/stacked layout: dropped the unfocused page's .prehalf, .half__entering/.halfentering, .innings__reference/.innings__ref-*, .innings__rosters, and .innings__row2 rules
   'src/styles/14-strike-zone.css': 900, // 898 — the sheet's ✕ left for IconButton (system/button.css, #1209); both pitch-colour keys left earlier
-  'src/styles/15-team-color-lab.css': 700, // 691
+  'src/styles/15-team-color-lab.css': 680, // 674
   'src/styles/17-identity-lab-workbench.css': 1200, // 1300 -> 1200 at 1200: .idlab__umpire moved onto Cluster (#1180, slice C4). 1229 — stamp-ink rules
   'src/styles/21-box-score.css': 900, // 800 -> 869: the Coverage card's lead-story treatment (.gamestory__lead*) — a full-bleed photo, team badge, headline and blurb for the first enriched story, same .gamestory namespace the compact-row rules already live in here. 771 — the Three Stars card split out to 21a-box-score-stars.css,
   //                                    the by-inning tally to 21b-box-score-tally.css
