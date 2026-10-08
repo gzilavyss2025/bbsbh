@@ -1,4 +1,5 @@
 import { Card } from '../ui/frame/Card.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 import { ManagerLink } from './ManagerLink.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 
@@ -35,7 +36,7 @@ function Row({ staff }) {
       {staff.map((p) => {
         const Link = p.laterManaged ? ManagerLink : PlayerLink
         return (
-          <li key={p.personId} className="coachtree__node">
+          <Stack as="li" gap="tight" key={p.personId} className="coachtree__node">
             <Link id={p.personId} name={p.name || undefined} className="coachtree__name">
               {p.name || 'Coach'}
             </Link>
@@ -43,7 +44,7 @@ function Row({ staff }) {
               {p.seasons} {p.seasons === 1 ? 'season' : 'seasons'}
               {p.laterManaged && <b> → manager</b>}
             </span>
-          </li>
+          </Stack>
         )
       })}
     </ul>

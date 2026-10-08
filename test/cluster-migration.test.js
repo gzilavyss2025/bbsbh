@@ -42,6 +42,11 @@ const MIGRATED = {
   // C5: the Game Log chip rows. Each keeps its own margin-bottom.
   logbook__seasons: { file: '48-logbook.css', gap: 'snug', sites: 1, keeps: ['margin-bottom'] },
   logbookstats__levels: { file: '48a-logbook-stats.css', gap: 'snug', sites: 1, keeps: ['margin-bottom'] },
+  // C6: four rows, one file each. Each keeps its own margin-top, if it had one.
+  stampsheet__levels: { file: '48c-stamp-sheet.css', gap: 'snug', sites: 1 },
+  mytally__choices: { file: '54-my-tally.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
+  consent__actions: { file: '46-consent-modal.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
+  staffgrid__summary: { file: '76-workload-marks.css', gap: 'snug', sites: 1 },
 }
 const LAYOUT = /(^|;|\n)\s*(display|flex|flex-flow|flex-direction|flex-wrap|gap|row-gap|column-gap)\s*:/
 

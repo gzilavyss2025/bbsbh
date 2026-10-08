@@ -826,3 +826,90 @@ and `npm run e2e` were not run.
 
 **Left.** `.stampsheet__levels` (`StampSheet.jsx`, 6th file), `.idlab__mastheadmode` (2 more files),
 `.team-hub__namerow` (2 sites in 2 files), `.idlab__eraactions` (`EraRow.jsx`, #1747).
+
+## Cluster slice C6 (2026-10-08)
+
+Four wrapping rows, one per file, moved onto `Cluster`: 4 rules, 4 JSX sites in 4 files. Base:
+`origin/main` at 1574055. The one open PR (#1751) edits a skill file only. The finder lists 42 safe rows.
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.stampsheet__levels` (`StampSheet.jsx`) | snug | div (`role`, `aria-label` already there; pass through) | nothing, so the rule is gone (`.pill` descendant stays) |
+| `.mytally__choices` (`DeviceSection.jsx`) | snug | div (`role`, `aria-label` pass through) | `margin-top` |
+| `.consent__actions` (`ConsentModal.jsx`) | snug | div | `margin-top` |
+| `.staffgrid__summary` (`StaffGrid.jsx`) | snug, `align="center"` | div | nothing, so the rule is gone |
+
+**Test first.** All four joined `MIGRATED` in `test/cluster-migration.test.js`; it failed on the rules and the
+sites, and passes now. **Cascade.** `46`, `54` and `76` load after `system/cluster.css` in `index.css`, and
+`48c` is lazy. No gap was off-step, so nothing snapped.
+
+**Left.** `.txntl__head` (`05-masthead-nav.css` loads ahead of `cluster.css`, so the order guard would fail),
+`.cmdmap__chips` (4 sites in 3 files, plus a `--types` modifier), `.animlab__frozen` (16 sites, a lab),
+`.team-hub__namerow` (2 files), the `.cwb__*` rows (admin), `15-team-color-lab.css` (Grid G1).
+
+**Checked.** `geom.mjs` (`MOCK=1 FREEZE=1 BLOCKIMG=1`, `?nointro`, 390 and 760px), BEFORE (stash) vs AFTER:
+`/profile`, `/bullpen-availability`, `/logbook/stats`, `/milestones` all identical (393, 1116, 234 and 3810
+elements, same page heights). `.mytally__choices` (`/profile`) and `.staffgrid__summary`
+(`/bullpen-availability`) drew for real, 1 element each at both widths.
+
+**Not seen.** `.stampsheet__levels` and `.consent__actions` did not draw under the mock (no stamps; the consent
+modal opens from a tap on a sealed score). The CSS change is the same four declarations for each.
+`npm run visual` and `npm run e2e` were not run.
+
+## Grid slice G2 (2026-10-08)
+
+Second `Grid` migration: 2 rules, 2 JSX sites. Only two of the 17 rules G1 left
+pass the filter (one class, no responsive twin, gap on the 8 or 12px step, not
+scoring-adjacent), so the slice is small. Nothing snaps.
+
+| rule | `min` | mode | gap |
+| --- | --- | --- | --- |
+| `.idlab__erafields` (keeps `min-width: 0`) | 7rem | fit | snug |
+| `.gamesgrid__grid` (rule deleted, class dropped) | 100 | fill | snug |
+
+**Test:** `test/grid-migration.test.js` pins both (rule holds no layout, site is a
+`<Grid>` with the old `min`, mode and gap). It failed first, then passed.
+
+**Checked:** `/team/158/games` (mock API, `FREEZE=1 BLOCKIMG=1`, 390 and 760px):
+5,315 and 5,313 elements, geometry identical. The only differences are three
+team-logo `<img>`/`<span>` fallbacks that also differ between two runs of the same
+code (the logo race `BLOCKIMG` is meant to hide); their rects match.
+`.idlab__erafields` is in the dev-only identity lab and was not drawn.
+`npm run lint`, `npm test` and `npm run build` pass. `npm run visual` was not run.
+
+**Left (15 rules):** a two-value or off-step gap (`.cwb__sheet`, `.navdir`,
+`.scout__facts`, `.scout__pitches`, `.logbook__grid`, `.patternlab__grid`), no gap
+(`.ninekeys__keys`), a responsive override or `@media` twin (`.allstarlegacy__*`,
+`.gamelist`, `.sitefooter__actions`, `.stamppane__grid`), a non-`minmax(px, 1fr)`
+column (`.photorail--strip`), scoring-adjacent (`.marginnotes__grid`,
+`.gamephotos__grid`), and the `/design-lab` grids.
+
+## Stack slice S15 (2026-10-08)
+
+Three one-class `flex-direction: column` rules moved onto `Stack`: 3 rules, 4 JSX sites in 4 files.
+Base: `origin/main` at 528c1b1. The finder counted 29 safe candidates after S14.
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.trrank__detail` (`SituationalBoard.jsx`, `PostseasonRecordsPage.jsx`) | loose | main | nothing (deleted) |
+| `.standings-ctrl` (`StandingsPage.jsx`) | snug | div | `margin-bottom` |
+| `.coachtree__node` (`CoachingTree.jsx`) | tight | li | padding, size (the shared border rule stays) |
+
+**Cascade.** None of the three rules keeps a `display`, `flex-direction` or `gap`, so none can win or
+lose against `.stack`.
+
+**Test first.** `test/stack.test.js` (section 7) names each rule, its gap and its JSX site. It failed on
+`main` and passes now.
+
+**Left on purpose.** Scoring surfaces and Express Lane, as listed in the brief. `.scout__sheet` (a dialog),
+`.printsheet-screen__intro` (keeps `align-items`), and `.projection__list`, `.stampstrip__note` and
+`.pcard__sec` (not judged). Files #1754 edits: `StampSheet.jsx`, `ConsentModal.jsx`, `StaffGrid.jsx`,
+`DeviceSection.jsx`.
+
+**Checked.** `geom.mjs` (`MOCK=1 FREEZE=1 BLOCKIMG=1`, `?nointro`, 390 and 760px), BEFORE (stash) vs AFTER:
+0 differences on `/standings`, `/situational-records`, `/situational-records?metric=trr_1`,
+`/postseason-records`, `/postseason-records?view=team` and `/manager/craig-counsell-453356`.
+`.standings-ctrl` and `.trrank__detail` drew for real, 1 element each at both widths.
+
+**Not seen.** `.coachtree__node` and the `PostseasonRecordsPage` site of `.trrank__detail` did not draw under
+the mock. `npm run visual` and `npm run e2e` were not run.

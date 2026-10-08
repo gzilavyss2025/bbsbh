@@ -10,6 +10,7 @@ import { useCopy } from '../../copy/copyContext.js'
 import { LEVELS } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
 import { StampDetailModal } from './StampDetailModal.jsx'
 
@@ -91,7 +92,7 @@ export function StampSheet({ stamps = [], factsByPk = {}, counts = false }) {
 
   return (
     <div className="stampsheet">
-      <div className="stampsheet__levels" role="group" aria-label="Level">
+      <Cluster className="stampsheet__levels" role="group" aria-label="Level">
         {LEVELS.map((lvl) => (
           <Pill
             key={lvl.sportId}
@@ -103,7 +104,7 @@ export function StampSheet({ stamps = [], factsByPk = {}, counts = false }) {
             {lvl.label}
           </Pill>
         ))}
-      </div>
+      </Cluster>
 
       {empty && staticTeams.loading ? (
         <p className="stampsheet__loading">Loading this level’s clubs.</p>

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Card } from '../../../components/ui/frame/Card.jsx'
+import { Grid } from '../../../components/ui/layout/Grid.jsx'
 import { contrastRatio, readableTextColor } from '../../../lib/contrast.js'
 import { trimAndClear } from '../../../lib/image/imageTrim.js'
 import { HexField } from '../HexField.jsx'
@@ -148,7 +149,7 @@ export function EraRow({ teamId, era, bust, onArt }) {
           )}
         </div>
       )}
-      <div className="idlab__erafields">
+      <Grid min="7rem" fit className="idlab__erafields">
         <label>
           First season
           <input type="number" inputMode="numeric" value={form.from} onChange={set('from')} />
@@ -169,7 +170,7 @@ export function EraRow({ teamId, era, bust, onArt }) {
           Source and licence
           <input type="text" value={form.source} onChange={set('source')} maxLength={300} />
         </label>
-      </div>
+      </Grid>
       <div className="colorlab__headerfields idlab__erawide">
         <label>
           <span>Bar</span>
