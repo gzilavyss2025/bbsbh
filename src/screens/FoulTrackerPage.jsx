@@ -377,7 +377,7 @@ function FoulFeatured({ player, favoriteTeamId, positions }) {
             <span className="foulboard__heroname-last">{last}</span>
           </PlayerLink>
           <p className="foulboard__herometa">
-            {position && <span className="foulboard__heropos">{position}</span>}
+            {position}
             {position && ' · '}
             <TeamLink id={player.teamId} className="foulboard__heroteamname">
               {teamFullName(player.teamId)}
@@ -731,7 +731,7 @@ function GameHighRow({ b, favoriteTeamId, gameLinks, positions }) {
           <span className="foulboard__heroname-last">{last}</span>
         </PlayerLink>
         <p className="foulboard__herometa">
-          {position && <span className="foulboard__heropos">{position}</span>}
+          {position}
           {position && ' · '}
           <TeamLink id={b.teamId} className="foulboard__heroteamname">
             {teamAbbr({ id: b.teamId })}
