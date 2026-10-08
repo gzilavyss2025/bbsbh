@@ -3,7 +3,7 @@
 // screenshot noticing):
 //
 //   1. THE RULE IS GONE. A migrated class keeps no display, flex, wrap or gap
-//      of its own. If one came back, it would load after system/cluster.css and
+//      of its own, in any rule that ends in it. If one came back, it would load after system/cluster.css and
 //      win on order, so the gap step would stop meaning what Cluster says.
 //   2. THE SITES. Every JSX site that names the class is a <Cluster> with the
 //      step the old rule had (snug is the default and is left out).
@@ -11,17 +11,19 @@
 //      system/cluster.css, so it could not lose to it. A migrated partial is
 //      lazy (a component imports it) or sits after the cluster in index.css.
 import test from 'node:test'
-import assert from 'node:assert/strict'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { dirname, join, relative } from 'node:path'
-import { toPosix } from '../scripts/lib/walk.mjs'
-import { stripComments, ruleBody } from './helpers/css.js'
+import { checkMigration } from './helpers/layoutMigration.js'
 
-const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
+const CLUSTER = {
+  component: 'Cluster',
+  sheet: 'system/cluster.css',
+  props: ['gap', 'align'],
+  defaults: { gap: 'snug' },
+  closed: true,
+}
 
-// class -> its stylesheet, the step the old rule used, the JSX sites, and the
-// declarations the rule may still hold (the part does not own them).
+// class -> its stylesheet, the gap step and align the old rule used, the JSX sites,
+// and the declarations the rule keeps (the part does not own them). A site with no
+// align stretches, the flexbox default.
 const MIGRATED = {
   cwb__tabs: { file: '74-contract-workbench.css', gap: 'snug', sites: 1 },
   'standings-jumps': { file: '30-standings.css', gap: 'tight', sites: 3 },
@@ -30,15 +32,15 @@ const MIGRATED = {
   lookupdeck__filters: { file: '74a-contract-lookup.css', gap: 'base', sites: 1 },
   idlab__barsrow: { file: '17-identity-lab-workbench.css', gap: 'base', sites: 1 },
   idlab__wpaartrow: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 1 },
-  bookmgmt__actions: { file: '58-logbook-shelf.css', gap: 'base', sites: 3, keeps: ['align-items'] },
+  bookmgmt__actions: { file: '58-logbook-shelf.css', gap: 'base', sites: 3, keeps: ['align-items: center'] },
   // C2: the offseason cards. Each keeps its own margin-top.
   pgame__actions: { file: '78-offseason.css', gap: 'base', sites: 1, keeps: ['margin-top'] },
   seasonnote__leagues: { file: '78-offseason.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
   srecord__doors: { file: '78-offseason.css', gap: 'base', sites: 1, keeps: ['margin-top'] },
-  idlab__recolorpalette: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
+  idlab__recolorpalette: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 1, align: 'center', keeps: ['margin-top'] },
   idlab__monoinkparts: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 2, keeps: ['margin'] },
   // C4: the rule is gone whole; the row is a baseline-aligned Cluster.
-  idlab__umpire: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 1 },
+  idlab__umpire: { file: '17-identity-lab-workbench.css', gap: 'snug', sites: 1, align: 'baseline' },
   // C5: the Game Log chip rows. Each keeps its own margin-bottom.
   logbook__seasons: { file: '48-logbook.css', gap: 'snug', sites: 1, keeps: ['margin-bottom'] },
   logbookstats__levels: { file: '48a-logbook-stats.css', gap: 'snug', sites: 1, keeps: ['margin-bottom'] },
@@ -46,69 +48,14 @@ const MIGRATED = {
   stampsheet__levels: { file: '48c-stamp-sheet.css', gap: 'snug', sites: 1 },
   mytally__choices: { file: '54-my-tally.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
   consent__actions: { file: '46-consent-modal.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
-  staffgrid__summary: { file: '76-workload-marks.css', gap: 'snug', sites: 1 },
+  staffgrid__summary: { file: '76-workload-marks.css', gap: 'snug', sites: 1, align: 'center' },
   // C7: four rows, five JSX sites in five files. The erase sheet keeps its own margin-top.
-  pshistory__seasonhead: { file: '33-awards-history.css', gap: 'base', sites: 1 },
-  psseries__potgWho: { file: '35-postseason-series.css', gap: 'snug', sites: 1 },
+  pshistory__seasonhead: { file: '33-awards-history.css', gap: 'base', sites: 1, align: 'center' },
+  psseries__potgWho: { file: '35-postseason-series.css', gap: 'snug', sites: 1, align: 'baseline' },
   erasesheet__actions: { file: '55-my-tally-account.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
-  'team-hub__namerow': { file: '28a-team-hub-hero.css', gap: 'snug', sites: 2 },
-}
-const LAYOUT = /(^|;|\n)\s*(display|flex|flex-flow|flex-direction|flex-wrap|gap|row-gap|column-gap)\s*:/
-
-function walk(dir, ext) {
-  return readdirSync(dir).flatMap((f) => {
-    const abs = join(dir, f)
-    if (statSync(abs).isDirectory()) return walk(abs, ext)
-    return ext.some((e) => f.endsWith(e)) ? [abs] : []
-  })
+  'team-hub__namerow': { file: '28a-team-hub-hero.css', gap: 'snug', sites: 2, align: 'baseline' },
 }
 
-test('a migrated class holds no layout of its own, in any stylesheet', () => {
-  for (const [cls, { file, keeps = [] }] of Object.entries(MIGRATED)) {
-    for (const f of walk(join(SRC, 'styles'), ['.css'])) {
-      if (toPosix(f).endsWith('system/cluster.css')) continue
-      const body = ruleBody(stripComments(readFileSync(f, 'utf8')), `.${cls}`)
-      if (body === null) continue
-      assert.ok(!LAYOUT.test(body), `${relative(SRC, f)} still lays out .${cls}`)
-      for (const m of body.matchAll(/(^|;|\n)\s*([a-z-]+)\s*:/g)) {
-        assert.ok(keeps.includes(m[2]), `.${cls} in ${file} keeps "${m[2]}", which is not on its keep list`)
-      }
-    }
-  }
-})
-
-test('the declaration a migrated rule keeps is still there', () => {
-  const css = stripComments(readFileSync(join(SRC, 'styles', '58-logbook-shelf.css'), 'utf8'))
-  assert.match(ruleBody(css, '.bookmgmt__actions'), /align-items:\s*center/)
-})
-
-test('every JSX site of a migrated class is a <Cluster> with the old gap step', () => {
-  const files = walk(SRC, ['.jsx', '.js']).map((f) => ({ f, text: readFileSync(f, 'utf8') }))
-  for (const [cls, { gap, sites }] of Object.entries(MIGRATED)) {
-    let n = 0
-    const re = new RegExp(`className="(?:[\\w-]+ )*${cls}(?: [\\w-]+)*"`, 'g')
-    for (const { f, text } of files) {
-      for (const m of text.matchAll(re)) {
-        const tag = [...text.slice(0, m.index).matchAll(/<([A-Za-z][\w.]*)(?=[\s>])/g)].pop()
-        assert.equal(tag[1], 'Cluster', `${relative(SRC, f)}: .${cls} should sit on a Cluster, not <${tag[1]}>`)
-        const open = text.slice(tag.index, text.indexOf('>', m.index))
-        if (gap === 'snug') assert.ok(!/\sgap=/.test(open), `${cls}: snug is the default`)
-        else assert.match(open, new RegExp(`\\sgap="${gap}"`), `${relative(SRC, f)}: .${cls} should be gap="${gap}"`)
-        n += 1
-      }
-    }
-    assert.equal(n, sites, `.${cls} should have ${sites} Cluster site(s)`)
-  }
-})
-
-test('no migrated partial is imported by index.css ahead of system/cluster.css', () => {
-  const imports = [...readFileSync(join(SRC, 'index.css'), 'utf8').matchAll(/@import '\.\/styles\/([^']+)';/g)].map(
-    (m) => m[1],
-  )
-  const cluster = imports.indexOf('system/cluster.css')
-  assert.ok(cluster !== -1)
-  for (const { file } of Object.values(MIGRATED)) {
-    const at = imports.indexOf(file)
-    assert.ok(at === -1 || at > cluster, `${file} loads ahead of system/cluster.css`)
-  }
+test('every migrated Cluster class is a <Cluster> with the old gap and align, and its rule is gone', () => {
+  checkMigration(CLUSTER, MIGRATED)
 })
