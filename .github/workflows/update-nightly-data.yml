@@ -374,6 +374,17 @@ jobs:
         if: steps.top-prospects.outcome == 'success'
         continue-on-error: true
         run: node scripts/gen-prospect-trend.mjs
+      # After WAR, Savant percentiles and the prospect trend: gen-ovr.mjs reads
+      # the war.json, savant-percentiles.json and prospect-trend.json those steps
+      # just wrote (plus committed shard stores). Gated on all three so a failed
+      # producer cannot publish yesterday's numbers under today's date. It adds
+      # public/data/ovr/ and ovr-history/ to the nightly commit below: no extra
+      # commit, so no extra deploy.
+      - name: OVR ratings and history
+        id: ovr
+        if: steps.war.outcome == 'success' && steps.savant-percentiles.outcome == 'success' && steps.prospect-trend.outcome == 'success'
+        continue-on-error: true
+        run: node scripts/gen-ovr.mjs
       - name: Comeback wins
         id: comeback-wins
         continue-on-error: true
@@ -655,6 +666,7 @@ jobs:
           steps.workload.outcome == 'failure' ||
           steps.vs-team-splits.outcome == 'failure' ||
           steps.savant-percentiles.outcome == 'failure' ||
+          steps.ovr.outcome == 'failure' ||
           steps.savant-matchup.outcome == 'failure' ||
           steps.run-value.outcome == 'failure' ||
           steps.milestones.outcome == 'failure' ||
