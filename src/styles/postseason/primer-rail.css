@@ -1,0 +1,93 @@
+/* The series primer's right column (ADR-0087, 2026-10-08 addendum): the small
+   bracket (components/bracket/BracketNow.jsx) and the leaders ledger
+   (components/postseason/SeriesLeadersLedger.jsx). Component-imported, not in
+   src/index.css: it loads only where the primer draws. The rail is 358px wide
+   and the card's body padding leaves 324px, which BracketNow's geometry is
+   built on. Connectors reuse 80-postseason-bracket.css's .pbkt-ink and .pbkt-pencil;
+   the ledger reuses the core sheet's .tledg* rules. */
+
+/* ---------- the small bracket ---------- */
+.pbnow__tree {
+  position: relative;
+  max-width: 100%;
+}
+.pbnow__box {
+  position: absolute;
+  box-sizing: border-box;
+  display: grid;
+  align-content: start;
+  gap: 0;
+  overflow: hidden;
+  padding: var(--space-1) var(--space-2);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--accent-primary);
+  border-radius: var(--radius-xs);
+}
+/* A box that plays today wears the clay ring, as the artifact's ribbon does. */
+.pbnow__box--today {
+  box-shadow: inset 0 0 0 var(--bw-heavy) var(--accent-negative);
+}
+.pbnow__name,
+.pbnow__foot {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-compact);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+.pbnow__box--today .pbnow__foot {
+  color: var(--text-heading);
+}
+.pbnow__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  min-height: 22px;
+}
+.pbnow__row .pbkt-pips {
+  margin-left: auto;
+}
+.pbnow__abbr {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+}
+/* strike-link-exempt: a plain club abbreviation, never a TeamLink/PlayerLink */
+.pbnow__row--out .pbnow__abbr {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.pbnow__note {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+  text-align: center;
+}
+
+/* The full-bracket sheet. .sheet docks to the bottom edge with square lower
+   corners; centered, it floats, so all four corners round and a tall bracket
+   scrolls inside it. */
+.pbnow-sheet {
+  max-height: 92vh;
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+}
+.pbnow-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.pbnow-sheet__head .sheet__title {
+  margin: 0;
+}
+
+/* ---------- the leaders ledger ---------- */
+/* The club tile before a leader's name. */
+.pbrail__club {
+  flex: none;
+  align-self: center;
+}

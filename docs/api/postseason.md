@@ -205,6 +205,11 @@ Pure, and no UI yet (ADR-0087, 2026-10-08 addendum).
 - `ribbonNodes(series, { scoresByPk })`: one node per game, `played`, `today`,
   `ahead` or `ifNecessary`. Its header holds the shared shape of one finished game.
 - `leaderRows(entries)`: three or fewer show, high to low; more show the leader.
+- `bracketNow(bracket)`: the small bracket's `{ boxes, links }`: ALCS, NLCS and World
+  Series boxes (club rows with wins and `eliminated`, a `decided` flag, a foot line),
+  and one connector per LCS, inked once that series is decided. A World Series slot
+  with no club keeps `club: null`. `null` when an LCS or the World Series is missing.
+  `BracketNow.jsx` and `SeriesLeadersLedger.jsx` draw it, with no wiring yet.
 
 ## Series marks (`src/lib/postseason/seriesMarks.js`)
 

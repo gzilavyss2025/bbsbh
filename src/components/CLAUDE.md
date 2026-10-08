@@ -29,7 +29,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `badges/` | `ProspectPill`, `RookiePill`, `InjuredMark`, `TierPill`, `UmpireTierGlyph` | An inline mark that adorns a name in a dense row, and **renders nothing when inactive** — so a caller can splice it in unconditionally |
 | `ballpark/` | `BallparkDiagram`, `BallparkModal` | Park diagram + its modal |
 | `boxlines/` | `BoxLinesDoor`, `BoxLinesSheet`, `BoxLineRow`, `BoxLinesList` | The reusable drilldown behind a summary stat line (ADR-0069). **"Box Lines" is internal and never renders.** Rules: `boxlines/CLAUDE.md` |
-| `bracket/` | `PostseasonBracket`, `FullBracket`, `BracketRail`, `BracketDock`, `SurvivorsBoard` | October's bracket on the home slate. Nothing here fetches a score outside `src/api/postseason/bracket.js`'s cutoff-gated reads (ADR-0087) |
+| `bracket/` | `PostseasonBracket`, `FullBracket`, `BracketRail`, `BracketDock`, `BracketNow`, `SurvivorsBoard` | October's bracket on the home slate. Nothing here fetches a score outside `src/api/postseason/bracket.js`'s cutoff-gated reads (ADR-0087) |
 | `charts/` | `WinProbChart`, `PitchMix`, `HitChart`, `BallFlight`, `SprayMap` | Draws a quantity. Every value arrives **already reveal-gated by its caller** — nothing here decides what may be shown |
 | `chrome/` | `SiteHeader`, `SiteFooter`, `SiteMenu`, `SiteSearch`, `BackBtn` | Global site frame — header/footer/menu/search, not any one screen. Rules: `chrome/CLAUDE.md` |
 | `game/` | `GameCard`, `GameFinder`, `PastGameFlipCard`, `ContinueScoring`, `BoxScoreSkeleton` | The slate/game-selection layer — a game before you're inside its innings |
@@ -43,7 +43,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `player/` | `Headshot`, `PlayerLink`, `PlayerHoverCard`, `Ledger`, `CareerTimeline` | Player-identity primitives and career-level cards |
 | `playerstats/` | `RecentFormCard`, `SplitsVsTeam`, `GameLinesCard`, `SprayMapSection` | Player statistical cards (as distinct from `charts/`'s plotted quantities). `SprayMapSection` is the odd one: a self-fetching MOUNT for a `charts/` card, so the player page carries one line and the whole block — title, fetch and every reason to render nothing — moves together. **`GameLinesCard` is a REGISTRY, not a card to copy.** Rules: `src/api/boxlines/CLAUDE.md` |
 | `playbyplay/` | `PlayByPlay`, `BatterNotice`, `PitcherNotice`, `FielderNotice`, `pitcherCard/` | The at-bat feed's notification-card family (ADR-0017). `PitchScene` never uses React state per frame. Rules: `playbyplay/CLAUDE.md` |
-| `postseason/` | `SeriesParts`, `SeriesMark`, `SeriesFlow`, `SeriesTotals` | The parts both series pages draw the same way: the finished page and the live page. Draw-only; each page keeps its own spoiler footing (ADR-0087's 2026-10-01 addendum) |
+| `postseason/` | `SeriesParts`, `SeriesMark`, `SeriesFlow`, `SeriesTotals`, `SeriesLeadersLedger` | The parts both series pages draw the same way: the finished page and the live page. Draw-only; each page keeps its own spoiler footing (ADR-0087's 2026-10-01 addendum) |
 | `preview/` | `SavePosterButton` | Saves the finished poster out of the canvas (`docs/preview-poster.md`) |
 | `profile/` | `ClubSeal`, `ProfileAccount`, `SyncReceipt`, `MergeReceipt`, `EraseDataDialog` | My Tally's parts. They render no game data (`src/screens/profile/CLAUDE.md`) |
 | `salaries/` | `SalaryBoard`, `ClubPayrolls`, `ContractGrid`, `Money` | The money pages (ADR-0052): open surfaces, no seal |

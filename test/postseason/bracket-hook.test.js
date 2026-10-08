@@ -31,6 +31,10 @@ test('the bracket code never reads Scores Unlocked and never touches storage', (
     ...readdirSync(new URL('../../src/lib/postseason/primer/', import.meta.url)).map(
       (f) => new URL(`../../src/lib/postseason/primer/${f}`, import.meta.url),
     ),
+
+    // The primer's right column (the small bracket and the leaders ledger).
+    new URL('../../src/components/bracket/BracketNow.jsx', import.meta.url),
+    new URL('../../src/components/postseason/SeriesLeadersLedger.jsx', import.meta.url),
   ]
   for (const url of files) {
     const src = readFileSync(fileURLToPath(url), 'utf8')
