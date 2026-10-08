@@ -104,6 +104,20 @@ Two corrections, both from scoring along in focus mode, where the page is one at
   stacked (change then batter is already adjacent), nor for a change between pitches (it leads
   its own window), nor for the half-opening change (the persistent "Now pitching" card's).
   Nothing new is revealed: the change was on screen a tap ago.
+- *Every trailing notice repeats, marked (2026-10-08, #1756 and its follow-up).* A pinch
+  hitter, a defensive change, a pinch runner, a mound visit, an ejection or a delay trails the
+  previous at-bat the same way, so the next batter's page opened with no word of it either.
+  `windowLeadIn(entries, wins, i)` now returns every note that trailed the previous at-bat
+  inside window i-1, in feed order, pitching change included, and a windowed `PlayByPlay` draws
+  them first. It replaces the `reliefPitcherId` stamp and `windowReliefPitcherId`. Read off the
+  window bounds, it splits where the windows split: a `midAtBat` note, and every note after
+  it, is already in window i, so it is not repeated (a second walk in `computeHalfInningFeed`
+  had reset at that note, which repeated the notes after it and dropped the ones before). Each
+  repeat carries an "Earlier" tag, because a scorer can log a second mound visit from an
+  unmarked copy. The pitching change repeats as the short "Pitching" card (the plain note if
+  the arm does not resolve), not the full card and departing line again. Spoiler footing is
+  unchanged: window i exists only when its at-bat is under the cap, so window i-1 is wholly
+  under it. Stacked halves and window 0 repeat nothing.
 
 The steal, caught-stealing and pickoff cards also say which pitch of the at-bat they came on
 ("Pitch 3"; a pickoff, a throw between pitches, says "After pitch 3"). The count is the pitches

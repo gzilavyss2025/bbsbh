@@ -17,10 +17,10 @@ components, `MoundVisitBar` (in `EventCards.jsx`), or `HalfInning.jsx`'s
 color pairing, and the button/label conventions (chevron vs. destination-named
 link, "Reveal" always visible, accessible name contains the visible word).
 
-**Lead-in repeat.** A notice trails the PREVIOUS at-bat's window (ADR-0016), so
-`computeHalfInningFeed` stamps every non-`midAtBat` one on the batter it precedes as
-`leadIn` and a windowed `PlayByPlay` renders them first (`windowLeadIn`) — the next
-at-bat's view, live included, opens with them. A pitching change is `ReliefRepeat`'s.
+**Lead-in repeat.** A notice trails the PREVIOUS at-bat's window (ADR-0016), so a
+windowed `PlayByPlay` draws it again at the head of the next window (`windowLeadIn`,
+read off the window bounds), in feed order, each in a `.pbp__entry--repeat` with an
+"Earlier" tag. A pitching change repeats as `ReliefRepeat` ("Pitching"), else `EventNote`.
 
 ## The files
 

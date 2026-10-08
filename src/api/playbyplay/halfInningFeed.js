@@ -845,41 +845,5 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
   // Bank every batter's final (or only) trip.
   for (const batterId of originIndex.keys()) finalizeTrip(batterId)
 
-  // Who came in since the last plate appearance, stamped on the first batter he
-  // faces so focus mode can repeat his card on that batter's page (see
-  // entriesView.js's windowReliefPitcherId). Only a change made BETWEEN plate
-  // appearances counts: a change between pitches already leads its own at-bat's
-  // window, and the half's opening change never reaches `entries` at all.
-  let relievedBy = null
-  for (const e of entries) {
-    if (e.kind === 'event' && e.eventType === 'pitching_substitution') {
-      relievedBy = e.midAtBat ? null : (e.playerId ?? null)
-    } else if (e.kind === 'atbat') {
-      if (relievedBy != null) e.reliefPitcherId = relievedBy
-      relievedBy = null
-    }
-  }
-
-  // Every other notice between two plate appearances, stamped on the batter it
-  // precedes as `leadIn` so focus mode can repeat it at the head of HIS window
-  // (a pinch hitter, a defensive change, a mound visit, an ejection). The feed
-  // nests these ahead of his play, but windowing files them under the PREVIOUS
-  // at-bat (focusWindows), so the page for the next batter — the live "next
-  // at-bat" view — would otherwise open with no word of them. A pitching change
-  // is left out: windowReliefPitcherId repeats it. A `midAtBat` note already
-  // leads its own window, and a half's opening notes lead its first window.
-  let run = []
-  let seenAtBat = false
-  for (const e of entries) {
-    if (e.kind === 'event') {
-      if (e.midAtBat) run = []
-      else if (e.eventType !== 'pitching_substitution') run.push(e)
-    } else if (e.kind === 'atbat') {
-      if (seenAtBat && run.length > 0) e.leadIn = run
-      seenAtBat = true
-      run = []
-    }
-  }
-
   return entries
 }

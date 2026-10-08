@@ -15,7 +15,8 @@
 // own first pitch.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { computeHalfInningFeed, pinchHittingBatter, focusWindows, windowLeadIn } from '../src/api/playbyplay.js'
+import { readFileSync } from 'node:fs'
+import { computeHalfInningFeed, pinchHittingBatter, pitchingChangePitcher, focusWindows, windowLeadIn } from '../src/api/playbyplay.js'
 
 function person(id, last, first, num) {
   return { id, fullName: `${first} ${last}`, lastName: last, firstName: first, useName: first, primaryNumber: String(num) }
@@ -108,20 +109,28 @@ test('pinchHittingBatter resolves the notice card fields the same way the other 
 })
 
 // The notice trails the PREVIOUS at-bat's window (ADR-0016), so the next
-// batter's own window — the live "next at-bat" view — repeated nothing. Every
-// notice between two plate appearances is stamped on the batter it precedes.
+// batter's own window — the live "next at-bat" view — repeated nothing. The
+// lead-in is read off the window bounds: whatever trailed the previous at-bat
+// inside the previous window.
 const kinds = (list) => list.map((e) => e.eventType)
-
-test('the batter a notice precedes carries it as leadIn, and his window repeats it', () => {
-  const entries = computeHalfInningFeed(buildFeed(), 3, 'top', 'away')
-  const byName = Object.fromEntries(entries.filter((e) => e.kind === 'atbat').map((e) => [e.batter.last, e]))
-  assert.deepEqual(kinds(byName.Judge.leadIn), ['pinch_hitting'])
-  assert.equal(byName.Ashby.leadIn, undefined, 'the half\u2019s first batter has nothing before him to repeat')
+const leadIns = (entries) => {
   const wins = focusWindows(entries, entries.length)
-  assert.deepEqual(
-    wins.map((w) => kinds(windowLeadIn(entries.slice(w.start, w.end)))),
-    [[], ['pinch_hitting']],
-  )
+  return wins.map((_, i) => kinds(windowLeadIn(entries, wins, i)))
+}
+function judgeFeed(head) {
+  const feed = buildFeed()
+  const judge = structuredClone(PINCH_HIT_PLAY)
+  feed.liveData.plays.allPlays[1] = judge
+  judge.playEvents = [...head, ...judge.playEvents]
+  return feed
+}
+const PITCHING_CHANGE = { details: { eventType: 'pitching_substitution', description: 'Pitching Change' }, position: { abbreviation: 'P' }, player: { id: 77 } }
+const MOUND_VISIT = { details: { eventType: 'mound_visit', description: 'Mound visit.' } }
+const STEAL = { details: { eventType: 'stolen_base_2b', description: 'Aaron Ashby steals (1) 2nd base.' }, player: { id: LEADOFF } }
+
+test('the next batter’s window repeats the notice that trailed the previous one', () => {
+  const entries = computeHalfInningFeed(buildFeed(), 3, 'top', 'away')
+  assert.deepEqual(leadIns(entries), [[], ['pinch_hitting']], 'the half’s first batter has nothing before him to repeat')
 })
 
 test('a notice between pitches leads its own window, so it is not repeated', () => {
@@ -129,20 +138,75 @@ test('a notice between pitches leads its own window, so it is not repeated', () 
   const judge = structuredClone(PINCH_HIT_PLAY)
   feed.liveData.plays.allPlays[1] = judge
   judge.playEvents = [judge.playEvents[1], judge.playEvents[0], ...judge.playEvents.slice(2)]
-  const entries = computeHalfInningFeed(feed, 3, 'top', 'away')
-  assert.equal(entries.find((e) => e.kind === 'atbat' && e.batter.last === 'Judge').leadIn, undefined)
+  assert.deepEqual(leadIns(computeHalfInningFeed(feed, 3, 'top', 'away')), [[], []])
 })
 
-test('a mound visit and a pitching change: the visit repeats, the change is windowReliefPitcherId\u2019s', () => {
-  const feed = buildFeed()
-  const judge = structuredClone(PINCH_HIT_PLAY)
-  feed.liveData.plays.allPlays[1] = judge
-  judge.playEvents = [
-    { details: { eventType: 'pitching_substitution', description: 'Pitching Change' }, position: { abbreviation: 'P' }, player: { id: 77 } },
-    { details: { eventType: 'mound_visit', description: 'Mound visit.' } },
-    ...judge.playEvents,
-  ]
+test('a mound visit and a pitching change both repeat, in feed order', () => {
+  const entries = computeHalfInningFeed(judgeFeed([MOUND_VISIT, PITCHING_CHANGE]), 3, 'top', 'away')
+  assert.deepEqual(leadIns(entries), [[], ['mound_visit', 'pitching_substitution', 'pinch_hitting']])
+})
+
+test('the lead-in stops at the first between-pitches note, the same boundary focusWindows uses', () => {
+  // [Ashby, pinch hit, steal (midAtBat), mound visit, Judge]: the steal opens
+  // Judge's window, so the visit after it is already there; only the pinch-hit
+  // notice before it trailed Ashby's window.
+  const feed = judgeFeed([])
+  const ev = feed.liveData.plays.allPlays[1].playEvents
+  ev.splice(1, 0, STEAL, MOUND_VISIT)
   const entries = computeHalfInningFeed(feed, 3, 'top', 'away')
-  const j = entries.find((e) => e.kind === 'atbat' && e.batter.last === 'Judge')
-  assert.deepEqual(kinds(j.leadIn), ['mound_visit', 'pinch_hitting'])
+  assert.deepEqual(kinds(entries.filter((e) => e.kind === 'event')), ['pinch_hitting', 'stolen_base_2b', 'mound_visit'])
+  assert.deepEqual(leadIns(entries), [[], ['pinch_hitting']])
+})
+
+test('a pitching change after a between-pitches note is in the window already, so it is not repeated', () => {
+  const entries = computeHalfInningFeed(judgeFeed([STEAL, PITCHING_CHANGE]), 3, 'top', 'away')
+  assert.deepEqual(leadIns(entries), [[], []])
+  // The lead-in is the one source of a repeat: no card carries a second one.
+  for (const e of entries) assert.equal(e.reliefPitcherId, undefined)
+})
+
+test('a pitching change with no arm on record still repeats, for the plain note to show', () => {
+  const feed = judgeFeed([{ ...PITCHING_CHANGE, player: undefined }])
+  const entries = computeHalfInningFeed(feed, 3, 'top', 'away')
+  const wins = focusWindows(entries, entries.length)
+  const repeat = windowLeadIn(entries, wins, 1).find((e) => e.eventType === 'pitching_substitution')
+  assert.ok(repeat, 'the change is in the lead-in')
+  assert.equal(pitchingChangePitcher(feed, repeat.playerId), null, 'no card to draw, so PlayByPlay falls back to EventNote')
+})
+
+test('a window under the reveal cap repeats only what the cap already revealed', () => {
+  const entries = computeHalfInningFeed(judgeFeed([MOUND_VISIT]), 3, 'top', 'away')
+  // Cap at Ashby + the trailing notes: no second window, so nothing repeats.
+  const wins = focusWindows(entries, entries.length - 1)
+  assert.equal(wins.length, 1)
+  assert.deepEqual(windowLeadIn(entries, wins, 0), [])
+})
+
+// The spoiler invariant, on the captured game it is pinned to (see
+// invariant-real-game.test.js). At every cap of every half, every note a window
+// repeats sits under the cap, before that window, after the previous at-bat,
+// and never between pitches — so a repeat shows only what a tap already showed.
+test('on the captured game, a lead-in never repeats past the cap or into its own window', () => {
+  const feed = JSON.parse(readFileSync(new URL('./fixtures/game-823035.trimmed.json', import.meta.url), 'utf8'))
+  let repeated = 0
+  for (let inning = 1; inning <= feed.liveData.linescore.innings.length; inning++) {
+    for (const half of ['top', 'bottom']) {
+      const all = computeHalfInningFeed(feed, inning, half, half === 'top' ? 'away' : 'home')
+      for (let cap = 0; cap <= all.length; cap++) {
+        const entries = computeHalfInningFeed(feed, inning, half, half === 'top' ? 'away' : 'home', cap)
+        const wins = focusWindows(entries, cap)
+        for (let i = 0; i < wins.length; i++) {
+          for (const e of windowLeadIn(entries, wins, i)) {
+            const at = entries.indexOf(e)
+            assert.ok(at < cap && at < wins[i].start, `${half} ${inning} cap ${cap}: a repeat past the cap or inside its window`)
+            assert.equal(e.kind, 'event')
+            assert.ok(!e.midAtBat, 'a between-pitches note leads its own window, never repeats')
+            assert.ok(entries.slice(at, wins[i].start).every((x) => x.kind !== 'atbat'), 'a repeat from before the previous at-bat')
+            if (cap === all.length) repeated += 1
+          }
+        }
+      }
+    }
+  }
+  assert.ok(repeated > 5, `expected the game to repeat some notes, saw ${repeated}`)
 })
