@@ -190,6 +190,14 @@ don't run these by hand.
   (1985: 2,103 games in 3.7 min, so about 40 min for ten seasons). Pure parts:
   `scripts/lib/run-expectancy/eras.mjs`. Reader helper: `lookupEraRE` in
   `src/lib/runExpectancy.js`.
+  **Era `re24` is per play** (#1611). Before that change it was per pitch. The 1960s,
+  1970s and 1980s checkpoints still hold per-pitch sums. Re-sweep those seasons by hand
+  (about 2 hours) before any screen reads them. Remove their `season-YYYY.json` files first,
+  because a sweep skips a season whose file exists. Then re-aggregate the three decades.
+  1990-2023 need no re-sweep. `lookupEraRE` reads the per-count cells from 1990 on, and uses
+  `re24` only as the thin-cell fallback. Until the 1960s to 1980s are re-swept, era `re24`
+  mixes per-pitch and per-play weighting across decades. The 1990-2023 checkpoints are per
+  pitch too, so that mix stays after the re-sweep, unless those decades are also re-swept.
 - `gen-minors-leaders.mjs` → `public/data/minors-leaders.json` — the combined
   ALL-MINORS leaderboard (every farmhand's totals SUMMED across levels). Eight
   full-level stat pulls (~4,700 players). Stores PRE-RANKED top rows per category, so
