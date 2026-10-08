@@ -80,6 +80,10 @@
       "class": "spoiler-free",
       "why": "Static abs-challenges.json — the season board for the ABS Challenge System, over Final MLB and Triple-A games. A challenge is a ball-strike judgment, not a run: it says a pitch was on the other side of the line, never who scored. Same footing as umpires.js's accuracy aggregates. The LIVE per-game challenge state, which can flip a called third strike, is challenges.js and stays reveal-only. No SealBox."
     },
+    "around-the-game/absSeries.js": {
+      "class": "spoiler-free",
+      "why": "Static abs-challenges-post-games.json — one entry per postseason game with each player's challenges added over roles. The series page's ABS card cuts it to one series and to games Final before the page's cutoff date. A challenge record is a ball-strike judgment, not a score; same footing as Nine Keys and Standings (ADR-0034, ADR-0087). No SealBox."
+    },
     "around-the-game/absExposure.js": {
       "class": "spoiler-free",
       "why": "Static abs-exposure.json — one row per player per level: plate appearances, pitches seen, innings caught, and how many reviews he called for. The DENOMINATOR half of the ABS report, shipped beside absChallenges.js rather than inside it because it is 418 KB of roster sweep behind one section. Season totals over completed games; no run, no margin and no game's result can be read back out of a plate-appearance count. No SealBox."
