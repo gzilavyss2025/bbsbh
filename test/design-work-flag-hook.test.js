@@ -47,6 +47,11 @@ import { rungFor, designFlag, render } from '../.claude/statusline-rung.mjs'
 test('model id and effort map to the ladder rung', () => {
   const rung = (id, effort) => rungFor(id, '', effort).rung
   assert.equal(rung('claude-haiku-4-5'), 1)
+  // Haiku 5.5 takes an effort setting but stays on rung 1 at every level.
+  assert.deepEqual(
+    [undefined, 'low', 'medium', 'high', 'xhigh', 'max'].map((e) => rung('claude-haiku-5-5', e)),
+    [1, 1, 1, 1, 1, 1],
+  )
   assert.deepEqual(
     ['low', 'medium', 'high', 'xhigh', 'max'].map((e) => rung('claude-sonnet-5-5', e)),
     [2, 3, 4, 5, 5],

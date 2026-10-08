@@ -62,7 +62,7 @@ the prompt tight. This table is a short form of `improve-prompt` step 5.
 
 | Work | `model` |
 |---|---|
-| Survey, list, rename, run a generator | `claude-haiku-4-5-20251001` |
+| Survey, list, rename, run a generator | `claude-haiku-5-5` |
 | Everyday build, a test, a known-cause bug | `claude-sonnet-5-5` |
 | Shape session, unknown-cause bug, any spoiler-rule change | `claude-opus-5-5` |
 

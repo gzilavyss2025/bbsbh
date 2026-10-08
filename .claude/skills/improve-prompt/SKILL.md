@@ -80,8 +80,8 @@ lowest effort that can do that job well. Do these steps in order.
    - Sonnet 5.5 at xhigh costs half as much per token as Opus 5.5 at xhigh. No
      measured data says how Sonnet 5.5 at xhigh compares with Opus 5.5 at medium
      or high. Treat rungs 5 to 7 as a judgment call and test on a real task.
-   - Always state the effort. Opus 5.5 defaults to medium, Sonnet 5.5 and
-     Fable 5.1 default to high, so an unstated effort picks different rungs.
+   - Always state the effort. Opus 5.5 and Haiku 5.5 default to medium, Sonnet 5.5
+     and Fable 5.1 default to high, so an unstated effort picks different rungs.
    - A spoiler-rule change never goes below rung 7.
    - Design work: more effort does not make a design better or more varied. Pick
      the rung by kind of work, then spend on checking, not on thinking.
