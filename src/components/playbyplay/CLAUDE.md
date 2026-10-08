@@ -17,6 +17,11 @@ components, `MoundVisitBar` (in `EventCards.jsx`), or `HalfInning.jsx`'s
 color pairing, and the button/label conventions (chevron vs. destination-named
 link, "Reveal" always visible, accessible name contains the visible word).
 
+**Lead-in repeat.** A notice trails the PREVIOUS at-bat's window (ADR-0016), so
+`computeHalfInningFeed` stamps every non-`midAtBat` one on the batter it precedes as
+`leadIn` and a windowed `PlayByPlay` renders them first (`windowLeadIn`) — the next
+at-bat's view, live included, opens with them. A pitching change is `ReliefRepeat`'s.
+
 ## The files
 
 `DelayNotice` (a function in `EventCards.jsx`) cards a stoppage only when it came to

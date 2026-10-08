@@ -190,6 +190,14 @@ export function windowReliefPitcherId(windowEntries) {
   return windowEntries.find((e) => e.kind === 'atbat')?.reliefPitcherId ?? null
 }
 
+// The notices to repeat at the head of a window that opens on a plate
+// appearance — `leadIn`, stamped by computeHalfInningFeed. Same gap and same
+// spoiler footing as windowReliefPitcherId: they trailed the previous at-bat's
+// window, so they were on screen a tap ago.
+export function windowLeadIn(windowEntries) {
+  return windowEntries.find((e) => e.kind === 'atbat')?.leadIn ?? []
+}
+
 // The half's runs and hits SO FAR — over the first `cap` entries only, which
 // is the entire point of this function existing (read the module header). The
 // caller reports these up so RollingLine's own cell and its R/H totals column
