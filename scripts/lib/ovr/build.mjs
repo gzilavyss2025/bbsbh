@@ -156,7 +156,9 @@ export function loadInputs(dataDir) {
   for (const s of shards('milb-seasons')) {
     for (const [id, rows] of Object.entries(s.players)) minors[id] = rows.map(unpackRow)
   }
-  for (const p of read('prospect-trend.json').players) {
+  const trend = read('prospect-trend.json')
+  if (!trend.dataThrough.startsWith(season)) throw new Error(`prospect-trend.json runs through ${trend.dataThrough}, savant-percentiles is ${season}`)
+  for (const p of trend.players) {
     if (p.percentile == null) continue
     ;(minors[p.playerId] ??= []).push({ season, sport: p.sportId, group: p.group, n: p.sampleSize, pct: p.percentile })
   }

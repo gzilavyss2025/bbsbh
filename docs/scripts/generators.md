@@ -1512,7 +1512,7 @@ Re-run only to fold in a new season.
   blended with `src/api/ovr/career.js`, then `rateHitter` or `ratePitcher`. A string cell
   is converted to a number and counted. It prints the spread, the count on the floor of
   20 and the cap of 99, and the count of percentiles the clamp caught. About 1,130
-  players, 100 shards, 1.9 KB at most; it throws past 8 KB. A page opens one shard
+  players, 100 shards, 2.5 KB at most; it throws past 8 KB. A page opens one shard
   (`src/api/ovr/ovrData.js`). Part B's calibration is re-run by
   `.scratch/ovr/calibrate-final.mjs`.
   Since #1721 it also reads `milb-seasons/` (2021-2025), `prospect-trend.json` (this
