@@ -45,7 +45,8 @@ sessions that share one machine. In the cloud, these rules change:
   question at a time, recommendation first. A child session, or any session nobody
   watches, cannot get an answer. It writes each open decision as `[DECISION: ...]`
   in its PR description or final message, and stops at that point.
-- **Draft PRs.** Open every PR as a draft. The maintainer marks it ready.
+- **Draft PRs.** Open every PR as a draft and leave it one. `/stack-prs` marks the stack
+  PR ready and merges it, so the maintainer never marks a PR ready.
 - **Parallel sessions.** Several sessions run at once. Before you edit, list the open
   PRs and the files each changes (`list_pull_requests`, `pull_request_read`). Stop on
   overlap, or wait for that PR. Keep the change to the one task you were given, and
