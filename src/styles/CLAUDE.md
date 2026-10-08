@@ -27,7 +27,8 @@ first split rather than silently disabling them.
 ## Type, focus rings, and contrast
 
 Type size, weight, leading, and tracking must use the semantic roles in
-`tokens/typography.css`; `scripts/check-typography.mjs` rejects ad hoc values. Small
+`tokens/typography.css`; `scripts/check-typography.mjs` rejects ad hoc values. A partial never reads `--paper-N`, `--rule`,
+`--rule-soft` or `--rule-grid`: use the alias (ADR-0107). Small
 text is split BY JOB: `--fs-label` 12px display labels, `--fs-cell` 11px mono figures,
 `--fs-small` 13px running copy; `--fs-caption` is short body-face text only, and
 `scripts/check-caption-budget.mjs` only ever lets its count shrink.

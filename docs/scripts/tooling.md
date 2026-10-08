@@ -33,7 +33,8 @@ list says what each guard checks.
   with the CSS invariant, and can drift from it on real Unicode names). See ADR-0017.
 - `check-typography.mjs` — rejects ad hoc size, weight, line-height, and tracking
   declarations in `src/styles/*.css`; add or reuse the semantic roles in
-  `src/tokens/typography.css` instead.
+  `src/tokens/typography.css` instead. Also rejects a read of `--paper-N`, `--rule`,
+  `--rule-soft` or `--rule-grid` in any partial (ADR-0107).
 - `check-focus-ring.mjs` — every `:focus-visible` rule that draws a ring must use
   `var(--focus-ring)` (outline) or `var(--ring)` (box-shadow), never a hand-rolled
   color. See ADR-0023.

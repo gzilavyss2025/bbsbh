@@ -213,6 +213,23 @@ const rules = [
     allowed: spacingAllowed,
     guidance: 'use a --space-* token',
   },
+  {
+    // #1156, ADR-0107. A partial reads an alias (--bg-page, --border-grid, ...),
+    // never the primitive under it. Token names END IN DIGITS, so a [a-z-] class
+    // would count zero --paper-N reads: the head is read off each `var(` instead.
+    // `--paper-N: ...;` as a property name is a definition, not a read, and is
+    // not flagged (no partial defines one; src/tokens/ does, and is not scanned).
+    property: 'colour primitive',
+    head: '[\\w-]+',
+    allowed: (value) => {
+      const hits = value
+        .split('var(')
+        .slice(1)
+        .map((rest) => rest.match(/^\s*(--[\w-]+)/)?.[1])
+        .filter((t) => /^--(?:paper-\d+|rule(?:-soft|-grid)?)$/.test(t))
+      return hits.length ? `reads ${hits.join(', ')}; read the alias in src/tokens/colors.css (e.g. --bg-page, --border-grid)` : true
+    },
+  },
 ]
 
 for (const { rel, name, css } of sheets) {
@@ -221,7 +238,7 @@ for (const { rel, name, css } of sheets) {
     // `head` is everything before the colon. It defaults to the bare property
     // name — unanchored, which is the behaviour the four type rules were
     // written against — and a rule that needs to be precise supplies its own.
-    const declarations = new RegExp(`(${rule.head ?? rule.property})\\s*:\\s*([^;]+);`, 'g')
+    const declarations = new RegExp(`(${rule.head ?? rule.property})\\s*:\\s*([^;}]+)(?:;|(?=}))`, 'g')
     for (const match of scan.matchAll(declarations)) {
       const value = match[2].trim()
       const verdict = rule.allowed(value, { name, rel })
