@@ -212,8 +212,8 @@ not swing a rating. It includes minor-league career history.
     age 21, +0.7 at 27, -1.7 at 31, -4.6 at 39; sprint speed +2.1, +0.2, -0.8, -2.1.
   - The other metrics get no blend shift. The gain is inside the noise. Bat speed,
     squared-up rate and swing length have 3 seasons and get no table.
-  - Use an age term in POT for players 25 and under. How the POT term is computed
-    is not decided.
+  - Use an age term in POT. Its form is in the POT section (a small runway credit
+    for players under 21).
   - Checked in the fit: a percentile is a rank inside each year's pool, so the shift
     is relative to peers and not absolute change. With 5/4/3 recency weights the
     shift barely changes the order of players (rank correlation 0.998 or higher). In
@@ -278,12 +278,30 @@ attribute bars. Rough bars from slash-line parts: not in version one.
 
 The only potential signal on file is MLB Pipeline's Top 100 rank in
 `public/data/top-prospects.json` (96 players at last read). It holds a rank and
-no scouting grades. `docs/farm-index.md` already maps rank to a 20-80 future
-value (FV) grade, so reuse that map and convert FV to the 0-100 band.
+no scouting grades. `docs/farm-index.md` does not map rank to a 20-80 future value
+(FV) grade, as an earlier version of this spec said. It scores a rank with
+`value(rank) = 100 * e^(-k * (rank - 1))`, `k = ln(100 / 8) / 99` (`rankValue()` in
+`src/api/around-the-game/farmSystem.js`): rank 1 scores 100 and rank 100 scores 8. It
+cites FV only as dollar values, to justify the shape of the decay.
 
-- **Decided:** POT shows only for players on the Top 100 list, from rank. Start
-  values: ranks 1-5 are 90 and up, rank 100 is about 70.
+- **Decided:** POT shows only for players on the Top 100 list, from rank.
 - Everyone not on the list shows a dash, including MLB regulars. Do not invent a POT.
+
+**POT formula (decided at Gary's request on 2026-10-08; every constant is a start
+value).**
+- Base: `POT_base = 70 + 25 * (rankValue(rank) - 8) / 92`. Rank 1 gives 95, rank 5
+  about 92, rank 100 gives 70. This keeps the earlier start values (ranks 1-5 are 90
+  and up, rank 100 is about 70) and reuses the one rank curve the repo already has.
+- Age term: a runway credit only. `age_credit = clamp(1.5 * (21 - age), 0, 4)`
+  POT points. A player aged 21 or older gets 0, and there is no debit for older
+  players. The pivot of 21 is the pivot of the farm index's youth pillar
+  (`AGE_PIVOT` in `farmSystem.js`).
+- `POT = min(99, max(OVR, POT_base + age_credit))`.
+- **Inference:** Pipeline's rank already reflects age to some degree (not checked),
+  so the credit is small and positive only, to avoid counting age twice. The age-shift
+  fit (`.scratch/ovr/age-shift/`) shows the youngest bands rising fastest relative to
+  peers, which supports the direction. The size of 1.5 points per year and the cap of
+  4 are guesses and are not derived from the fit.
 
 **No scouting grades found (part A).** The Top 100 page data has 96 rows and no
 grade key. Two profile pages rendered in Chromium (rank 1, Made 815908, and rank 2,
@@ -350,8 +368,8 @@ answer key. Use them to calibrate only. Do not copy or reproduce their numbers.
 - (b) Fit each attribute to the Statcast percentiles we already have, to set the
   curve shape, the mean, and the spread, and to test the 2.0 / 1.5 stretch
   factors.
-- (c) Optional: check the rank-to-future-value POT map in `docs/farm-index.md`
-  against posted scouting grades.
+- (c) Optional: check the rank-to-POT map (see the POT section) against posted
+  scouting grades.
 - **Time box.** If no lawful data source is found, or the terms forbid use, record
   that and go on with this spec's own start weights.
 
