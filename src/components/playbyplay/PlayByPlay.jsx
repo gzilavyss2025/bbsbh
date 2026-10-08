@@ -344,7 +344,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     <div className="pbp">
       {[...leadIn, ...visibleEntries].map((entry, k) => {
         const i = k - leadIn.length // into visibleEntries
-        const repeat = i < 0 // a lead-in notice, tagged "Earlier"; a change is the short card
+        const repeat = i < 0 // a lead-in notice, tagged; a change is the short card
         let node
         if (entry.kind === 'placed') {
           // The extra-innings automatic runner. A card, not a notification —
@@ -516,7 +516,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
             id={step != null ? `pbp-${inning}-${half}-step-${step}` : undefined}
             key={entryKey}
           >
-            {repeat && <span className="pbp__repeat-tag">Earlier</span>}
+            {repeat && <span className="pbp__repeat-tag">Before this at-bat</span>}
             {node}
           </div>
         )

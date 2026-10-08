@@ -10,8 +10,8 @@
   flex-direction: column;
   gap: var(--space-2);
 }
-/* "Earlier": the tag over a notice repeated at the head of the next at-bat's
-   window (PlayByPlay, windowLeadIn) — it was on the page a tap ago. */
+/* "Before this at-bat": the tag over a notice repeated at the head of the next
+   at-bat's window (PlayByPlay, windowLeadIn) — when it happened, not "seen". */
 .pbp__repeat-tag {
   display: block;
   margin-bottom: var(--space-1);

@@ -114,13 +114,13 @@ Two corrections, both from scoring along in focus mode, where the page is one at
   window bounds, it splits where the windows split: a `midAtBat` note, and every note after
   it, is already in window i, so it is not repeated (a second walk in `computeHalfInningFeed`
   had reset at that note, which repeated the notes after it and dropped the ones before). Each
-  repeat carries an "Earlier" tag, because a scorer can log a second mound visit from an
-  unmarked copy. The pitching change repeats as the short "Pitching" card (the plain note if
+  repeat carries a "Before this at-bat" tag, because a scorer can log a second mound visit
+  from an unmarked copy. The tag says when the note happened, not that the reader saw it. The pitching change repeats as the short "Pitching" card (the plain note if
   the arm does not resolve), not the full card and departing line again. Spoiler footing is
   unchanged: window i exists only when its at-bat is under the cap, so window i-1 is wholly
-  under it, and every repeat is under the cap. That is the whole promise. A repeat was usually
-  drawn a tap ago, but not always: a note that reached the feed after that tap, or a window
-  that "Rest of half" skipped, was never drawn. Stacked halves and window 0 repeat nothing.
+  under it, and every repeat is under the cap. That is the whole promise: a note that reached the
+  feed after the tap, or a window that "Rest of half" skipped, was never drawn, which is why
+  the tag is not "Earlier" (Gary's choice, 2026-10-08). Stacked halves and window 0 repeat nothing.
 
 The steal, caught-stealing and pickoff cards also say which pitch of the at-bat they came on
 ("Pitch 3"; a pickoff, a throw between pitches, says "After pitch 3"). The count is the pitches

@@ -113,7 +113,7 @@ export function stepCommitReady(entries, cap, halfInProgress) {
 // not the other way around (gamePk 823584 bottom 1st: Robert Gasser relieved
 // Dustin May after the first out, and a reader had no way to know it until
 // they'd already revealed Gasser's own first batter faced). It is ALSO repeated
-// at the head of the next window, marked "Earlier" (windowLeadIn): one window
+// at the head of the next window, tagged "Before this at-bat" (windowLeadIn): one window
 // is one page, and the page for the batter it precedes — the live "next at-bat"
 // view — otherwise opens with no word of who came in or what changed. The
 // repeat is drawn, never written into window i+1, so the rule below holds: each
@@ -195,8 +195,9 @@ export function focusWindows(entries, cap) {
 //
 // Spoiler footing: window i exists only when its own at-bat is under the cap,
 // so window i-1 is wholly under it, and every note returned is under the cap.
-// That is all it promises: usually the note was drawn a tap ago, but not when
-// it reached the feed after that tap, or when "Rest of half" skipped the window.
+// That is all it promises, not that the reader saw the note: one that reached
+// the feed after the tap, or a window "Rest of half" skipped, was never drawn.
+// So the tag says when it happened ("Before this at-bat"), never "seen".
 export function windowLeadIn(entries, wins, i) {
   if (!(i > 0)) return []
   const prev = entries.slice(wins[i - 1].start, wins[i - 1].end)

@@ -218,6 +218,8 @@ test('PlayByPlay draws a repeat as the short card, with no handoff line and one 
   const src = (rel) => readFileSync(new URL(`../src/components/playbyplay/${rel}`, import.meta.url), 'utf8')
   const pbp = src('PlayByPlay.jsx')
   assert.match(pbp, /const finals =\s+repeat \|\| entry\.atBatIndex == null/)
+  // When it happened, never "Earlier": a repeat may be a note the reader never saw.
+  assert.match(pbp, /\{repeat && <span className="pbp__repeat-tag">Before this at-bat<\/span>\}/)
   const shortAt = pbp.indexOf("} else if (repeat && entry.eventType === 'pitching_substitution') {")
   const fullAt = pbp.indexOf("} else if (entry.eventType === 'pitching_substitution') {")
   assert.ok(shortAt > 0 && shortAt < fullAt, 'the repeat branch comes before the full card')
