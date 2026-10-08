@@ -42,9 +42,10 @@ export function TeamTreatmentMark({ teamId, name, treatment, side, size, block, 
     : side
       ? milbTreatmentTile(teamId, side)
       : NO_TILE
-  const { logoVariant, tint, offsetX, offsetY, pinstripeColor, pinstripeBg, scale } = seasonTile(teamId, season, tile)
+  const { logoVariant, tint, ink, offsetX, offsetY, pinstripeColor, pinstripeBg, scale } = seasonTile(teamId, season, tile)
   const style = {
     '--tint': tint || undefined,
+    '--tile-ink': ink || undefined,
     '--scale': EDGE_BLEED * scale,
     '--offset-x': offsetX ? `${offsetX}%` : undefined,
     '--offset-y': offsetY ? `${offsetY}%` : undefined,

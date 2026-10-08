@@ -129,3 +129,21 @@ test('every coloured era in the table has an onBar that clears AA', async () => 
     }
   }
 })
+
+// #1724: the serif abbreviation on a tinted era tile wears the era's onBar, so
+// it clears AA against the tint. An untinted tile keeps no ink (CSS falls back).
+test('seasonTile: the ink on every no-art coloured era tile clears AA against its tint', async () => {
+  const { contrastRatio } = await import('../src/lib/contrast.js')
+  let n = 0
+  for (const [id, eras] of Object.entries(SEASON_MARKS.clubs)) {
+    for (const e of eras) {
+      if (e.file || !e.bar) continue
+      n++
+      const t = seasonTile(Number(id), e.from, { tint: '#FFFFFF' })
+      assert.equal(t.tint, e.bar)
+      assert.ok(contrastRatio(t.ink, t.tint) >= 4.5, `${id} ${e.from}-${e.to} tile ink fails AA`)
+    }
+  }
+  assert.ok(n >= 3, 'the CAL, MON and SEA eras are covered')
+  assert.equal(seasonTile(119, 1905, { tint: '#FFFFFF' }).ink, undefined)
+})
