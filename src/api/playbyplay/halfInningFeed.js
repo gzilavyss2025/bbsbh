@@ -860,5 +860,26 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     }
   }
 
+  // Every other notice between two plate appearances, stamped on the batter it
+  // precedes as `leadIn` so focus mode can repeat it at the head of HIS window
+  // (a pinch hitter, a defensive change, a mound visit, an ejection). The feed
+  // nests these ahead of his play, but windowing files them under the PREVIOUS
+  // at-bat (focusWindows), so the page for the next batter — the live "next
+  // at-bat" view — would otherwise open with no word of them. A pitching change
+  // is left out: windowReliefPitcherId repeats it. A `midAtBat` note already
+  // leads its own window, and a half's opening notes lead its first window.
+  let run = []
+  let seenAtBat = false
+  for (const e of entries) {
+    if (e.kind === 'event') {
+      if (e.midAtBat) run = []
+      else if (e.eventType !== 'pitching_substitution') run.push(e)
+    } else if (e.kind === 'atbat') {
+      if (seenAtBat && run.length > 0) e.leadIn = run
+      seenAtBat = true
+      run = []
+    }
+  }
+
   return entries
 }

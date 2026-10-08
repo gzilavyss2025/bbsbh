@@ -16,6 +16,7 @@ import {
   stepCommitReady,
   focusWindows,
   windowReliefPitcherId,
+  windowLeadIn,
   stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,
@@ -133,16 +134,12 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // each is load-bearing (api/playbyplay/entriesView.js, ADR-0016/0055).
   const exhausted = stepping && stepCommitReady(entries, effectiveCap, halfInProgress)
 
-  // Focus mode: one window per revealed AT-BAT (focusWindows), the notices
-  // staging it at its head, every window clamped to the cap. NOT one window
-  // per reveal tap — see focusWindows' own header for the defect the
-  // tap-shaped windows caused (a notice reaching the feed after the tap that
-  // revealed the previous at-bat disqualified the last window and moved the
-  // reader BACK an at-bat; 14 of 89 taps on a replayed real game).
+  // Focus mode: one window per revealed AT-BAT (focusWindows), every window
+  // clamped to the cap. NOT one window per reveal tap — focusWindows' header
+  // has the defect tap-shaped windows caused (the reader moved BACK an at-bat).
   //
-  // Built for a STACKED half too (commit 3): its trail needs the same
-  // boundaries to build its scroll targets, not just a windowed half's single
-  // card. Cheap either way — a pure walk over `entries`, not a fetch.
+  // Built for a STACKED half too: its trail needs the same boundaries for its
+  // scroll targets. A pure walk over `entries`, not a fetch.
   //
   // The cap is `effectiveCap ?? entries.length`, which is what carries the
   // windows PAST the commit. The last at-bat of a half commits it, dropping
@@ -345,10 +342,13 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // moves it (AtBatReplay.jsx's ReplayRail).
   const lastAtBat = visibleEntries.findLastIndex((e) => e.kind === 'atbat' && atBatScenePitches(e.pitchDetails).length > 0)
 
+  const leadIn = windowed && beatKey != null ? windowLeadIn(visibleEntries) : []
+
   return (
     <div className="pbp">
       {windowed && beatKey != null && <ReliefRepeat pitcher={pitchingChangePitcher(feed, windowReliefPitcherId(visibleEntries))} teamId={pitchingTeamId} teamName={pitchingName} />}
-      {visibleEntries.map((entry, i) => {
+      {(leadIn.length ? [...leadIn, ...visibleEntries] : visibleEntries).map((entry, k) => {
+        const i = k - leadIn.length // into visibleEntries; < 0 is a repeated lead-in notice
         let node
         if (entry.kind === 'placed') {
           // The extra-innings automatic runner. A card, not a notification —
@@ -525,7 +525,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
         // resolving — see handoffsResolvingAt for which handoffs qualify here
         // vs. HalfInning.jsx's leading-notice placement.
         const finals =
-          entry.atBatIndex == null
+          i < 0 || entry.atBatIndex == null
             ? []
             : handoffsResolvingAt(handoffs, entry.atBatIndex, renderedFinal, lastHalfOfGame)
                 .map((h) => {
