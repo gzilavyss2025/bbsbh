@@ -1501,7 +1501,9 @@ Re-run only to fold in a new season.
   MLB hitter and pitcher who passes the minimum-data rule (a hitter needs Contact and
   Power, a pitcher all three buckets; `docs/ovr-rating.md`; #1720). **Hand-run, not a
   cron**: `node scripts/gen-ovr.mjs`. Rerun it after the nightly files move on and after
-  the prior-season stores are rebuilt each autumn. **It makes no network call.** It reads
+  the prior-season stores are rebuilt each autumn (when the season rolls over, rebuild
+  `war-history/` and `savant-history/` first: until then the new season has no prior
+  plate appearances). **It makes no network call.** It reads
   `savant-percentiles.json` and `war.json` (current season), `savant-history/` and
   `war-history/` (2023-2025), `hitter-grid/{season}/` (the current season's plate
   appearances, because `war.json` has none) and `on-this-day/` (birth years for the age
