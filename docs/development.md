@@ -15,7 +15,8 @@ workflow:
 4. Open a pull request and let the maintainer decide when to merge it.
 
 Never push directly to `main`, invoke `vercel deploy`, or enable an ad hoc preview
-without explicit maintainer authorization. Merging to `main` is the production
+without explicit maintainer authorization. The maintainer gave the orchestrator standing
+authorization to merge through `/stack-prs`. Merging to `main` is the production
 deployment trigger and is intentionally controlled by the maintainer.
 
 ## Cloud sessions (claude.ai/code)
@@ -51,7 +52,8 @@ sessions that share one machine. In the cloud, these rules change:
   list the files you touched in the PR. A task that needs an unmerged PR names that PR
   and bases on its branch on purpose; otherwise it waits.
 - **Deploy budget.** Merging to `main` deploys. Parallel sessions never merge. They
-  leave draft PRs open, and the maintainer lands them together with `/stack-prs`.
+  leave draft PRs open, and `/stack-prs` lands them together: the maintainer runs it,
+  or the orchestrator runs it under his standing permission (`.claude/skills/orchestrate/`).
 - **Nightly data.** The data cron pushes to `main` (`public/data/*.json`). A branch open
   across a nightly run can conflict there. Take `origin/main`'s version of a generated
   file. Regenerate it with its `scripts/gen-*.mjs` only when your PR changes that
