@@ -213,6 +213,24 @@ const rules = [
     allowed: spacingAllowed,
     guidance: 'use a --space-* token',
   },
+  {
+    // #1156, ADR-0107. A partial reads an alias (--bg-page, --border-grid, ...),
+    // never the primitive under it. Token names END IN DIGITS, so a [a-z-] class
+    // would count zero --paper-N reads: the head is read off each `var(` instead.
+    // `--paper-N: ...;` as a property name is a definition, not a read, and is
+    // not flagged (no partial defines one; src/tokens/ does, and is not scanned).
+    property: 'colour primitive',
+    head: '[\\w-]+',
+    allowed: (value) => {
+      const hits = value
+        .split('var(')
+        .slice(1)
+        .map((rest) => rest.match(/^\s*(--[\w-]+)/)?.[1])
+        .filter((t) => /^--(?:paper-\d+|rule(?:-soft|-grid)?)$/.test(t))
+      return hits.length ? `reads ${hits.join(', ')}; read the alias in src/tokens/colors.css (e.g. --bg-page, --border-grid)` : true
+    },
+    guidance: '',
+  },
 ]
 
 for (const { rel, name, css } of sheets) {
