@@ -913,3 +913,43 @@ lose against `.stack`.
 
 **Not seen.** `.coachtree__node` and the `PostseasonRecordsPage` site of `.trrank__detail` did not draw under
 the mock. `npm run visual` and `npm run e2e` were not run.
+
+## Stack slice S16 (2026-10-08)
+
+Three one-class `flex-direction: column` rules moved onto `Stack`: 3 rules, 7 JSX sites in 5 files, and a
+stricter slice test. Base: `origin/main` at 24f9ec3. The finder counted 26 safe candidates.
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.colorlab__row` (`UniformNamesPage.jsx`) | snug | section (with `id`) | nothing (deleted) |
+| `.colorlab__logodrop` (`LogoDropZone.jsx`) | snug | div | `flex`, `align-items`, `max-width` |
+| `.lookupdeck__field` (`LookupDeck.jsx`, 5 sites, 4 with `--compact`) | tight | div | nothing (deleted) |
+
+**Cascade.** None of the three rules keeps a `display`, `flex-direction` or `gap`, so none can win or lose
+against `.stack`. `.lookupdeck__field--compact` sets only `flex` and `min-width`.
+
+**Test first.** `test/stack.test.js` section 7 now covers S15 and S16 the way `cluster-migration.test.js`
+does: it reads rules after `{` and `,` (inside `@media` or a grouped selector), counts every JSX site of
+the class and asserts each is a `<Stack>` with the old step, and reads the opening tag, so prop order does
+not matter. It still passed on S15 (checked before S16 went in) and S16 failed on `main`. The tuples lost
+their sheet and file columns: the scan covers every stylesheet and source file.
+
+**Outer `<main>` stack (brief rule 3).** None picked. No chosen rule sits on a page's outer `<main>`.
+`.trrank__detail` (S15) did and is `loose`; `--space-section` is `var(--space-4)`, the same 16px step.
+
+**Left on purpose.** Scoring surfaces and Express Lane, as listed in the brief. `.cwb` (loose, a `div`, fits
+a later slice), `.szmodal__body` (a modal), `.logotile` (`14-strike-zone.css`, six kept lines, not judged),
+`.patternlab__card`, `.horizoncard__list` (`31-wild-card.css`, Grid G1), `.dlab__tables`,
+`.consolebar__tallygroup` (also written inside `@media`), `.pcard__sec` (6 sites in 4 files; over the
+5-file cap), `.projection__list`, `.stampstrip__note`, `.printsheet-screen__intro` (keeps `align-items`),
+`.scout__pm`, `.scout__sheet`. Open PR #1756 edits no file of this slice.
+
+**Checked.** `geom.mjs` (`MOCK=1 FREEZE=1 BLOCKIMG=1`, `?nointro`, 390 and 760px), BEFORE from
+`git checkout origin/main` of the five files in the same checkout: `/uniform-names` 0 differences (798
+elements; 30 `.colorlab__row` drew). `synth.mjs` old vs new: 0 differences for `colorlab__logodrop` (on
+`/uniform-names`) and `lookupdeck__field` (on `/admin/contracts`).
+
+**Not seen.** `/identity-lab` draws `.colorlab__logodrop` three times, but two BEFORE runs of that route
+differ in element count (1077, 1071, 1065), so it gives no geometry diff. `LookupDeck` is behind the Clerk
+admin gate, so it never drew for real; the synthetic check does not build the `--compact` combination.
+`npm run visual` and `npm run e2e` were not run.

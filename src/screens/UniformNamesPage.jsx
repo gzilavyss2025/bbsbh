@@ -1,6 +1,7 @@
 import '../styles/15-team-color-lab.css'
 import { useEffect, useMemo, useState } from 'react'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { Stack } from '../components/ui/layout/Stack.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { teamAnchorId } from './identity-lab/teamAnchorId.js'
@@ -176,7 +177,7 @@ function TeamUniforms({ teamId, assets, savedOverrides, edits, onChange }) {
   if (!jerseys.length) return null
 
   return (
-    <section className="colorlab__row" id={teamAnchorId(teamId, ANCHOR_SCOPE)}>
+    <Stack as="section" gap="snug" className="colorlab__row" id={teamAnchorId(teamId, ANCHOR_SCOPE)}>
       <h2 className="colorlab__teamname">{teamFullName(teamId)}</h2>
       {jerseys.map((asset) => {
         const defaultName = uniformDisplayName(asset.text, clubName, asset.code, savedOverrides)
@@ -196,6 +197,6 @@ function TeamUniforms({ teamId, assets, savedOverrides, edits, onChange }) {
           </div>
         )
       })}
-    </section>
+    </Stack>
   )
 }
