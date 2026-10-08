@@ -12,6 +12,8 @@ import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { PlayerTabBar } from './PlayerTabBar.jsx'
 import { monthDayName } from '../../lib/dates.js'
 import { Pill } from '../../components/ui/control/Pill.jsx'
+import { OvrTile } from '../../components/ovr/OvrTile.jsx'
+import { useOvr } from '../../components/ovr/useOvr.js'
 
 const TAB_TITLE = {
   overview: null,
@@ -65,6 +67,10 @@ export function PlayerHubShell({ core, asOf = null, sportId = null, active, chil
   // .player__name-last--long. Eleven units is where the base size starts
   // ellipsizing at phone width.
   const nameUnits = lastName.length + (bio.number ? String(bio.number).length + 1 : 0)
+  // The OVR card (#1703): null for a player with no rating, which draws no tile and
+  // leaves the hero as it was.
+  const ovr = useOvr(bio)
+  const ovrSub = [heroPos, club?.name, bio.number && `#${bio.number}`].filter(Boolean).join(' · ')
 
   return (
     <LinkScope asOf={asOf} sportId={core.sportId ?? sportId ?? null}>
@@ -107,16 +113,20 @@ export function PlayerHubShell({ core, asOf = null, sportId = null, active, chil
         <BackBtn onClick={back} />
 
         <header className="player__hero">
-          {/* No club, no club-colored wash behind the face — and `isMlb` is
-              passed explicitly because it normally derives from the teamId
-              that just went null, and a debuted player must keep skipping the
-              stale `milb` prospect-photo rung (see Headshot). */}
-          <Headshot
-            personId={bio.id}
-            name={bio.fullName}
-            teamId={club?.parentOrgId ?? club?.id}
-            isMlb={isMlbTeamId(club?.id) || Boolean(status && bio.debut)}
-          />
+          {/* The OVR tile rides the headshot's corner (styles/ovr/card.css). */}
+          <div className="player__portrait">
+            {/* No club, no club-colored wash behind the face — and `isMlb` is
+                passed explicitly because it normally derives from the teamId
+                that just went null, and a debuted player must keep skipping the
+                stale `milb` prospect-photo rung (see Headshot). */}
+            <Headshot
+              personId={bio.id}
+              name={bio.fullName}
+              teamId={club?.parentOrgId ?? club?.id}
+              isMlb={isMlbTeamId(club?.id) || Boolean(status && bio.debut)}
+            />
+            {ovr && <OvrTile ratings={ovr} personId={bio.id} name={bio.fullName} sub={ovrSub} />}
+          </div>
           <div className="player__ident">
             <h1 className="player__name">
               {firstName && <span className="player__name-first">{firstName}</span>}

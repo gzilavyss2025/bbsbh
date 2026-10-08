@@ -85,6 +85,23 @@
   --album-foil:       var(--paper-2);
   --album-foil-soft:  #A9A292;
 
+  /* ---- OVR tiers (the player page's rating card, src/lib/ovr/tiers.js) ---- six
+     colours bright enough to glow on the album board, which is the card's panel.
+     Each is asserted twice in check-contrast.mjs: as text on the board (the "OVR"
+     label) and under --text-heading (a bar's number chip, the tier ribbon). Bench
+     started at #7F8A99, which fell short of the text minimum on the board, and was
+     lightened until the pair passed. The
+     up and down arrows borrow the two hues that already read as good and bad. */
+  --ovr-bench:   #8A95A4;
+  --ovr-starter: #6FBF93;
+  --ovr-regular: #5B9BE0;
+  --ovr-allstar: #E07A6D;
+  --ovr-mvp:     #E9C33F;
+  --ovr-legend:  #F3EEDF;
+  --ovr-frame:   var(--marker);   /* the Legend tile's gold frame */
+  --ovr-up:      var(--ovr-starter);
+  --ovr-down:    var(--ovr-allstar);
+
   /* ---- Highlight / marker ---- */
   --marker:   #E9C33F;   /* highlighter yellow — "watch" flag */
   /* The hatch stripe of --hold-texture (tokens/effects.css), which is the

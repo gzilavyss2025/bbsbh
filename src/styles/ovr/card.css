@@ -1,0 +1,436 @@
+/* ============================================================
+   THE OVR CARD (#1703): the tile in the player hero and the menu it opens.
+   Imported by OvrTile.jsx, the one lazy screen's partial (src/styles/CLAUDE.md).
+   The look is "Game": the Game Log's album board as the one dark panel, two
+   corners cut, a glow and a bottom edge in the tier colour, numbers slanted.
+   The tier colours are tokens (--ovr-*, colors.css), picked by the element's
+   --tier. Its motion is motion/ovr.css and nothing else. This sheet loads after
+   index.css, so a motion rule outranks it on specificity (docs/motion.md).
+
+   Barlow Condensed ships one weight (700), so the slant is a transform and not
+   an italic face.
+   ============================================================ */
+
+/* ---- where the tile sits in the hero ---- */
+
+/* The portrait is a box the size of the headshot, and the tile rides its
+   bottom-right corner at every width, as a rating badge sits on a video-game
+   player card. The hero grid is untouched: the tile takes no column, so it cannot
+   squeeze the name. */
+.player__portrait {
+  position: relative;
+}
+.player__portrait .ovrtile {
+  position: absolute;
+  right: calc(-1 * var(--space-1h));
+  bottom: calc(-1 * var(--space-1h));
+}
+
+/* ---- the closed tile ---- */
+
+.ovrtile,
+.ovrmenu {
+  --ovr-slant: -14deg;
+}
+
+.ovrtile {
+  --ovr-num: var(--fs-title-lg);
+  --ovr-cut: var(--space-2);
+  --ovr-pad: var(--space-2h);
+
+  appearance: none;
+  display: block;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--album-foil);
+  font: inherit;
+  cursor: pointer;
+}
+.ovrtile:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+
+/* The face is what is cut, so the focus ring on the button is not. */
+.ovrtile__face {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  padding: var(--space-1) var(--ovr-pad);
+  background: linear-gradient(160deg, var(--album-board), color-mix(in srgb, var(--album-board) 40%, var(--ink-0)));
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--ovr-cut)) 0,
+    100% var(--ovr-cut),
+    100% 100%,
+    var(--ovr-cut) 100%,
+    0 calc(100% - var(--ovr-cut))
+  );
+}
+/* The soft glow behind the number, and the tier-colour edge under it. */
+.ovrtile__face::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 35%, color-mix(in srgb, var(--tier) 28%, transparent), transparent 70%);
+  pointer-events: none;
+}
+.ovrtile__face::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: var(--space-1);
+  background: var(--tier);
+}
+.ovrtile--legend .ovrtile__face {
+  box-shadow: inset 0 0 0 var(--bw-heavy) var(--ovr-frame);
+}
+.ovrtile__num {
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--ovr-num);
+  line-height: var(--lh-score);
+  font-variant-numeric: tabular-nums;
+  color: var(--album-foil);
+  text-shadow: 0 0 var(--space-4) color-mix(in srgb, var(--tier) 50%, transparent);
+  transform: skewX(var(--ovr-slant));
+}
+.ovrtile__label,
+.ovrmenu__label {
+  position: relative;
+  padding-left: var(--ls-display);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-display);
+  color: var(--tier);
+}
+/* The ring that leaves the tile on a tap (motion/ovr.css draws it moving). */
+.ovrtile__ring {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: var(--space-8);
+  height: var(--space-8);
+  translate: -50% -50%;
+  border: var(--bw-heavy) solid var(--tier);
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+}
+
+/* ---- the open menu ---- */
+
+.ovrscrim {
+  align-items: flex-end;
+}
+@media (min-width: 740px) {
+  .ovrscrim {
+    align-items: center;
+  }
+}
+
+/* The dialog is the cut, glowing panel; the content scrolls inside it. */
+.ovrmenu {
+  --ovr-cut: var(--space-5);
+  --ovr-ink: var(--album-foil);
+  --ovr-mute: var(--album-foil-soft);
+  --ovr-line: var(--album-board-line);
+  --ovr-dim: color-mix(in srgb, var(--album-board-line) 70%, var(--ovr-mute) 30%);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--app-width);
+  max-height: calc(100vh - var(--space-8));
+  max-height: calc(100dvh - var(--space-8));
+  color: var(--ovr-ink);
+  background: linear-gradient(170deg, var(--album-board), color-mix(in srgb, var(--album-board) 55%, var(--ink-0)));
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--ovr-cut)) 0,
+    100% var(--ovr-cut),
+    100% 100%,
+    var(--ovr-cut) 100%,
+    0 calc(100% - var(--ovr-cut))
+  );
+}
+.ovrmenu::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 18% 18%, color-mix(in srgb, var(--tier) 22%, transparent), transparent 70%);
+  pointer-events: none;
+}
+.ovrmenu__panel {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ovrmenu__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-2);
+}
+.ovrmenu__who {
+  flex: 1;
+  min-width: 0;
+}
+.ovrmenu__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-h1);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--ovr-ink);
+  overflow-wrap: anywhere;
+}
+.ovrmenu__sub {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ovr-mute);
+}
+.ovrmenu .ovrmenu__close {
+  --btn-ink: var(--ovr-ink);
+  --btn-fill-hover: var(--ovr-line);
+}
+.ovrmenu__groups {
+  display: flex;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-2);
+}
+
+.ovrmenu__hero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  border-bottom: var(--bw-hair) solid var(--ovr-line);
+}
+.ovrmenu__ovr,
+.ovrmenu__pot {
+  display: grid;
+  justify-items: center;
+  flex: none;
+}
+.ovrmenu__pot {
+  margin-left: auto;
+  --tier: var(--ovr-mute);
+}
+.ovrmenu__num,
+.ovrmenu__potnum {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-display);
+  font-variant-numeric: tabular-nums;
+  transform: skewX(var(--ovr-slant));
+}
+.ovrmenu__num {
+  min-width: 2ch;
+  font-size: var(--fs-hero-2xl);
+  text-shadow: 0 0 var(--space-5) color-mix(in srgb, var(--tier) 55%, transparent);
+}
+.ovrmenu__potnum {
+  font-size: var(--fs-display-lg);
+}
+.ovrmenu__tier {
+  display: grid;
+  gap: var(--space-1h);
+  min-width: 0;
+}
+/* The tier ribbon: a pennant in the tier colour, dark ink on it. */
+.ovrmenu__ribbon {
+  display: inline-block;
+  justify-self: start;
+  padding: var(--space-1) var(--space-4) var(--space-1) var(--space-3);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  background: var(--tier);
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--space-2)) 50%, 100% 100%, 0 100%);
+  transform: skewX(var(--ovr-slant));
+}
+.ovrmenu__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+  color: var(--ovr-mute);
+}
+.ovrmenu__change {
+  font-variant-numeric: tabular-nums;
+}
+.ovrmenu__change--up {
+  color: var(--ovr-up);
+}
+.ovrmenu__change--down {
+  color: var(--ovr-down);
+}
+.ovrmenu__spark {
+  display: block;
+  width: 5.25rem;
+  height: 1.375rem;
+}
+
+/* A section label with a rule running out of it. */
+.ovrmenu__sec {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2h);
+  margin: 0;
+  padding: var(--space-2h) var(--space-4) var(--space-1);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-display);
+  text-transform: uppercase;
+  color: var(--ovr-mute);
+}
+.ovrmenu__sec::after {
+  content: '';
+  flex: 1;
+  height: var(--bw-hair);
+  background: linear-gradient(90deg, var(--ovr-line), transparent);
+}
+.ovrmenu__foot {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4) calc(var(--space-3h) + env(safe-area-inset-bottom));
+  border-top: var(--bw-hair) solid var(--ovr-line);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--ovr-mute);
+}
+
+/* ---- the attribute rows ---- */
+
+.ovrbars {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-1) var(--space-4) var(--space-3);
+  list-style: none;
+}
+.ovrbars__row {
+  display: grid;
+  grid-template-columns: 5rem 1fr 3rem;
+  align-items: center;
+  gap: var(--space-2h);
+}
+.ovrbars__name {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-body);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+/* Twenty segments of a twentieth each, a gap between them; the fill is the
+   same pattern in the tier colour, cut at the lit segment. */
+.ovrbars__track {
+  position: relative;
+  height: var(--space-3);
+  background: repeating-linear-gradient(90deg, var(--ovr-dim) 0 calc(5% - 2px), transparent calc(5% - 2px) 5%);
+  transform: skewX(var(--ovr-slant));
+}
+.ovrbars__fill {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, var(--tier) 0 calc(5% - 2px), transparent calc(5% - 2px) 5%);
+  clip-path: inset(0 calc(100% - var(--fill, 0%)) 0 0);
+}
+.ovrbars__chip {
+  justify-self: center;
+  min-width: 2.5rem;
+  padding: var(--space-1) 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-num-lg);
+  line-height: var(--lh-solid);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+  background: var(--tier);
+  transform: skewX(var(--ovr-slant));
+}
+
+/* ---- the path-to-the-majors meter ---- */
+
+.ovrpath {
+  display: grid;
+  gap: var(--space-1h);
+  padding: var(--space-1) var(--space-4) var(--space-3);
+}
+.ovrpath__track {
+  position: relative;
+  height: var(--space-3h);
+  background: var(--ovr-dim);
+  transform: skewX(var(--ovr-slant));
+}
+.ovrpath__now {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--tier);
+}
+.ovrpath__cap {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-left: var(--bw-heavy) solid var(--ovr-mute);
+}
+.ovrpath__pot {
+  position: absolute;
+  inset: calc(-1 * var(--space-1)) auto calc(-1 * var(--space-1)) 0;
+  width: var(--space-1);
+  margin-left: calc(-0.5 * var(--space-1));
+  background: var(--ovr-ink);
+}
+.ovrpath__labels {
+  position: relative;
+  height: var(--space-4);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+  color: var(--ovr-mute);
+}
+.ovrpath__labels > span {
+  position: absolute;
+  white-space: nowrap;
+}
+.ovrpath__lab--mid {
+  translate: -50% 0;
+}
+.ovrpath__lab--end {
+  translate: -100% 0;
+}

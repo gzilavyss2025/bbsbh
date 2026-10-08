@@ -100,6 +100,10 @@
   --dur-turn-in:     200ms;
   --dur-lens-sheet:  260ms;
 
+  /* The OVR card's tap (motion/ovr.css): one beat between rows, so the names, the
+     bars and the chips each step down the list 80 ms apart. */
+  --dur-ovr-step:    80ms;
+
   /* Sealed cover — kraft tape look, reused via background */
   --seal-texture: repeating-linear-gradient(
       -45deg,
