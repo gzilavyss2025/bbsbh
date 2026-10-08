@@ -32,6 +32,7 @@ Type size, weight, leading, and tracking must use the semantic roles in
 text is split BY JOB: `--fs-label` 12px display labels, `--fs-cell` 11px mono figures,
 `--fs-small` 13px running copy; `--fs-caption` is short body-face text only, and
 `scripts/check-caption-budget.mjs` only ever lets its count shrink.
+A small attribute line under a name (position, hand, club, school) is the `.t-label` recipe, as in `.phcard__meta`: display face, semibold, `--fs-compact`, `--ls-label`, `--text-caption`.
 
 Focus rings use `var(--focus-ring)`/`var(--ring)`, on a band `--focus-ring-band` +
 `--ring-band` (`check-focus-ring.mjs`). Text-on-background pairings hold WCAG AA
