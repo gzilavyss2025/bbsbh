@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-08T06:33:36.386Z",
+  "generatedAt": "2026-10-08T15:38:28.069Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -667,7 +667,7 @@
     {
       "rank": 57,
       "playerId": 695491,
-      "name": "Joshua Baez",
+      "name": "Joshua Báez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -1917,7 +1917,7 @@
     {
       "orgRank": 8,
       "playerId": 801725,
-      "name": "Luis De Leon",
+      "name": "Luis De León",
       "teamId": 110,
       "team": "bal",
       "position": "LHP",
@@ -6063,7 +6063,7 @@
       "position": "3B",
       "levelRaw": "ALL (2)",
       "statLine": ".276, 13 HR, 59 RBI",
-      "age": 21,
+      "age": 22,
       "topRank": null
     },
     {
@@ -7401,7 +7401,7 @@
     {
       "orgRank": 3,
       "playerId": 695491,
-      "name": "Joshua Baez",
+      "name": "Joshua Báez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -10149,7 +10149,7 @@
     {
       "orgRank": 2,
       "playerId": 695684,
-      "name": "Elmer Rodriguez",
+      "name": "Elmer Rodríguez",
       "teamId": 147,
       "team": "nyy",
       "position": "RHP",
@@ -10575,7 +10575,7 @@
       "position": "C",
       "levelRaw": "ALL (2)",
       "statLine": ".245, 15 HR, 69 RBI",
-      "age": 23,
+      "age": 24,
       "topRank": null
     },
     {
