@@ -159,7 +159,9 @@ function ogUrl(origin) {
 // pitcher with pitching. It costs about a kilobyte of response and no round
 // trip. `rosterEntries` rides the same call (#1779), verified 2026-10-08 against
 // people 114794 / 110001 / 605141: it is how the page knows a retired or unsigned
-// player's `currentTeam` is a stale pointer, and the body has to know it too.
+// player's `currentTeam` is a stale pointer, and the body has to know it too. It
+// adds about 0.4 KB for a one-stint player and about 4 KB for a veteran (measured on
+// 114794, 120274, 545361, 605141): still one request, and the 4 s budget is unchanged.
 async function playerCard(idSegment, origin) {
   const id = idFromSlug(idSegment)
   const data = await getJson(`/api/v1/people/${id}?hydrate=currentTeam,stats(type=season),rosterEntries`)

@@ -131,6 +131,7 @@ export function seasonTable(person) {
 export function playerCrawl(p, { id, name, pos, team, born, status = null }) {
   const posName = clean(p.primaryPosition?.name || '')
   const positionLabel = posName && posName !== 'Unknown' ? posName : pos
+  const retired = status?.state === 'retired'
   const clubSegment = team && p.currentTeam?.id ? entitySegment(p.currentTeam.id, team) : ''
   return {
     h1: name,
@@ -142,7 +143,9 @@ export function playerCrawl(p, { id, name, pos, team, born, status = null }) {
       { label: 'Number', value: p.primaryNumber ? `#${clean(p.primaryNumber)}` : '' },
       { label: 'Bats / Throws', value: bothSides(p) },
       { label: 'Height / Weight', value: [clean(p.height), p.weight ? `${p.weight} lb` : ''].filter(Boolean).join(' / ') },
-      ...ageFact(p, status),
+      // The page labels a retired player's age "Age at retirement", from the last stint
+      // (`currentAge` is frozen at death). No such age on file means no fact, never a wrong one.
+      { label: retired ? 'Age at retirement' : 'Age', value: String((retired ? status.retiredAge : p.currentAge) || '') },
       { label: 'Born', value: [niceDate(p.birthDate), born].filter(Boolean).join(' · ') },
       { label: 'MLB debut', value: niceDate(p.mlbDebutDate) },
       // The id in the body as well as in the address, for a reader checking
@@ -162,15 +165,6 @@ export function playerCrawl(p, { id, name, pos, team, born, status = null }) {
         }
       : null,
   }
-}
-
-// The page labels a retired player's age "Age at retirement" and shows his age when
-// his last stint ended; `currentAge` is frozen at death for the deceased. No such
-// age on file means no fact, never a wrong one. `status` is rosterStatusView's result,
-// computed in cards.js, so this file stays pure.
-function ageFact(p, status) {
-  if (status?.state !== 'retired') return [{ label: 'Age', value: p.currentAge ? String(p.currentAge) : '' }]
-  return [{ label: 'Age at retirement', value: status.retiredAge == null ? '' : String(status.retiredAge) }]
 }
 
 function bothSides(p) {

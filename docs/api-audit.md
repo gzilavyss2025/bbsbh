@@ -125,7 +125,7 @@ The **only** server-side statsapi calls, all in `api/_lib/cards.js`, all for lin
 | Endpoint | URL | Params | Function |
 |---|---|---|---|
 | `schedule` | `/api/v1/schedule` | `sportId&date&hydrate=team` (per level) | `resolveGame` (`cards.js:71`) |
-| `person` | `/api/v1/people/{id}` | `hydrate=currentTeam` | `playerCard` (`cards.js:104`) |
+| `person` | `/api/v1/people/{id}` | `hydrate=currentTeam,stats(type=season),rosterEntries` | `playerCard` (`cards.js`) |
 | `team` | `/api/v1/teams/{id}` | none | `teamCard` (`cards.js:126`) |
 
 `api/og.js` — which made **no** statsapi call and fetched only cosmetic assets — was deleted on
