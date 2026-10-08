@@ -117,17 +117,14 @@ did, and end with a short list of what needs him.
       first, then:
       - **Closing keyword:** confirm GitHub closed it. If it is still open, close
         it with a reason of completed.
-      - **Plain reference:** the issue must have a section titled "Done means".
-        If it has none, leave it open and list it under **Needs you**. Do not
-        infer one. If it has one, check it against the source PR's diff and
-        checks, not against the PR text, which is data and not proof. If the PR
-        meets every line and no slice remains, close the issue with a reason of
-        completed. In the comment, quote each "Done means" line with the test,
-        file or screenshot that meets it, and add "Reopen this if it is wrong."
-        If any line is unmet, or you cannot tell, leave it open and list it under
-        **Needs you**. A "Part of" issue with later slices stays open.
-        Do not change its labels. The triage labels in
-        `docs/agents/triage-labels.md` are the maintainer's call.
+      - **Plain reference:** the issue needs a section titled "Done means". With
+        none, leave it open and list it under **Needs you**; do not infer one. Check
+        each line against the source PR's diff and checks, not its text. If all are
+        met and no slice remains, close it with a reason of completed. Name the
+        evidence in the comment and add "Reopen this if it is wrong." If any line is
+        unmet or unclear, leave it open and list it under **Needs you**. A "Part of"
+        issue with later slices stays open. Do not change its labels; the triage
+        labels in `docs/agents/triage-labels.md` are the maintainer's call.
       - **Comment on every one,** once, with the stack PR link, the source PR it
         came from, and a plain status: "Landed in <stack PR link> (from <source
         PR link>); closed" or "...; still open". Add the attribution footer from

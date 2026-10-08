@@ -24,8 +24,7 @@ missing, ask in plain chat, one question per message.
 
 **Alone:** read anything; start children on `ready-for-agent` issues (within the
 budget); start a shape session; archive a session that passes the Sweep rule;
-`send_message` a child; edit a child's draft PR body to fix its closing keyword
-(see "Lane 2"); write ledger comments once he has approved the ledger; after he approves a spec,
+`send_message` a child; write ledger comments once he has approved the ledger; after he approves a spec,
 comment it on the issue (end with the Claude Code footer from the session
 reminder); run `/stack-prs` (see "Stacking").
 
@@ -166,12 +165,8 @@ you cannot fix. To stop, send_message your parent AND end with a final line
 "NEEDS PARENT: <what you need>".
 ```
 
-Subscribe to the child's PR when it opens. Read its body once: if the issue's
-"Done means" is met and the line says "Part of #n" or has no keyword, edit the
-body to "Closes #n". A slice of a multi-slice issue keeps "Part of #n".
-
-Sonnet by default. Opus when the cause of a bug is unknown or the spoiler rule
-changes (that also goes to him first).
+Subscribe to the child's PR when it opens. Sonnet by default. Opus when the cause
+of a bug is unknown or the spoiler rule changes (that also goes to him first).
 
 ## Reports and watching
 

@@ -11,21 +11,12 @@ does one job, on the cheapest model and the lowest effort that can do that job w
 Do these steps in order. Step 0 is for a thin idea. Skip it for a prompt that is already
 written, and go to step 1.
 
-0. **Interview (thin idea only).** A prompt can only hold the intent you give it. The
-   model cannot see what the user left unsaid, so get it out before you write.
-   - Read first. Open the files, docs, ADRs and open PRs the idea touches. Ask the user
-     only what the repo cannot answer.
-   - Ask with `AskUserQuestion`, one question per call. Put your recommended answer first
-     and mark it "(Recommended)". Give each option its trade-off.
-   - Cover, in this order, and stop as soon as the prompt can stand alone: the goal and
-     who it is for; what "done" looks like (a test, a screenshot, a route and gamePk);
-     what to leave alone; what to do when a design choice is open (decide, or stop and
-     ask); how big it may get.
-   - Do not ask what the repo already answers. Ask at most six questions in all, counting step 7. When
-     the user says "you pick", pick, and write the pick into the prompt as a settled fact.
-   - Then write a first draft that follows steps 1 to 8. Keep the user's words where you
-     can. Explain why behind each rule, because a reason generalizes and a bare "never"
-     does not.
+0. **Interview (thin idea only).** Read the files, docs and ADRs the idea touches. Then
+   ask what the repo cannot answer, one `AskUserQuestion` per call, recommendation
+   first, until the prompt can stand alone: what "done" looks like, what to leave
+   alone, and whether to decide or stop and ask on an open design choice. Ask at most
+   six questions in all, counting step 7. On "you pick", pick, and write the pick in
+   as a settled fact. Then do steps 1 to 8.
 1. **Check the facts.** Check every claim against the repo and `origin/main`
    (run `git fetch` first): paths, file lists, counts, commit hashes, ports,
    scripts, skills and issue numbers. Read every doc the prompt cites. Mark each
@@ -37,10 +28,8 @@ written, and go to step 1.
 3. **Look for gaps.** Check each item: goal and scope, what "done" means,
    test-first, docs and ADR updates, merge or deploy authority, stop and failure
    paths (CI flake, missing data, tool errors), how long to wait, what to verify
-   and against which baseline, the handoff, and (for a code-changing prompt in
-   a repo that has the ponytail skill) whether it says to use ponytail and to
-   finish with `ponytail-review` and `/code-review`. Flag any step that an
-   agent could read two ways.
+   and against which baseline, and the handoff. Flag any step that an agent could
+   read two ways.
 4. **Decide the split.** Split the prompt when one or more of these is true:
    - It asks for more than one deliverable that could ship or be reviewed alone
      (two PRs, two features, a fix plus an unrelated cleanup).
@@ -164,17 +153,14 @@ written, and go to step 1.
 8. **List the changes.** After the prompts, list each change and its reason,
    including why you split (or did not) and why you picked each model.
 
-9. **Offer the hand-off (only when step 4 split the prompt into waves).** Do not start
-   sessions from this skill. Starting and watching sessions belongs to `orchestrate`,
-   which owns the cap of 3, the budget, the `orch:` titles that its sweep and duplicate
-   check read, and the ledger. End the reply with the run plan and one line: "Run
-   `/orchestrate` to start these." Say which prompts are wave 1 and which wait on
-   an earlier wave. `orchestrate` starts a later wave only when the wave before it has
-   green draft PRs.
+9. **Offer the hand-off (only when step 4 split the prompt into waves).** Start no
+   session from this skill; `orchestrate` owns that. End with the run plan and:
+   "Run `/orchestrate` to start these." Say which prompts are wave 1. A later wave starts
+   only after the wave before it has green draft PRs.
 
 Do not run the prompt yourself. This skill writes, grades and rewrites it.
 
-Test scenarios for step 0 are in `evals.md`. Run them before you change step 0. If the prompt is
+If the prompt is
 already an A+, say so and show the evidence from steps 1 to 5. Do not invent
 changes.
 
@@ -183,12 +169,9 @@ changes.
 When `CLAUDE_CODE_REMOTE=true` (see `docs/development.md`), there is no `gh` CLI. Change
 these steps:
 
-- **Step 0.** In a session Gary is watching, interview with `AskUserQuestion` as written. In a
-  child or unattended session, do not interview: write each open question as
-  `[DECISION: ...]`, with your recommendation first.
 - **Step 1.** Check issue and PR numbers with the GitHub MCP tools, not `gh`.
-- **Step 7.** In a session Gary is watching, use `AskUserQuestion` as written. In a
-  child or unattended session, put each open decision in the prompt as
+- **Steps 0 and 7.** In a session Gary is watching, use `AskUserQuestion` as written. In a
+  child or unattended session, do not ask: put each open question in the prompt as
   `[DECISION: ...]`, with your recommendation first.
 - **Output.** Put the run plan, the prompts and the change list in your final
   message. Do not commit them unless the task says to.
