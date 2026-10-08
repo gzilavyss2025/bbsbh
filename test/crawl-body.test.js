@@ -12,7 +12,9 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
-import { buildRoster } from '../api/_lib/cards.js'
+import { buildCard, buildRoster } from '../api/_lib/cards.js'
+import { personBio, rosterStatusView } from '../src/api/person/identity.js'
+import { birthplace } from '../src/lib/person/birthplace.js'
 import { CRAWL_STYLE, playerCrawl, renderCrawlBody, seasonTable, teamCrawl } from '../api/_lib/crawl.js'
 import { withCrawlBody } from '../api/preview.js'
 import { buildSitemap } from '../scripts/gen-sitemap.mjs'
@@ -59,7 +61,7 @@ const CLUB = {
 }
 
 const playerBody = () =>
-  renderCrawlBody(playerCrawl(HITTER, { id: 545361, name: 'Mike Trout', pos: 'CF', team: 'Los Angeles Angels' }))
+  renderCrawlBody(playerCrawl(HITTER, { id: 545361, name: 'Mike Trout', pos: 'CF', team: 'Los Angeles Angels', born: birthplace(HITTER) }))
 
 const clubBody = (tab = '') =>
   renderCrawlBody(teamCrawl(CLUB, { id: 158, name: 'Milwaukee Brewers', level: 'MLB', league: 'National League', tab }))
@@ -77,6 +79,18 @@ test('a player body carries the words, with no JavaScript required', () => {
   // existed the only markup this site offered one was a sitemap.
   assert.ok(out.includes('href="/team/los-angeles-angels-108"'), 'it links to the club, slugged')
   assert.ok(out.includes('href="/learn"'), 'it links into the guides')
+})
+
+test('the Born fact reads City, ST for the US and adds the country abroad', () => {
+  const born = (p) => {
+    const facts = playerCrawl(p, { id: 1, name: 'X', pos: '', team: '', born: birthplace(p) }).facts
+    return facts.find((f) => f.label === 'Born').value
+  }
+  assert.equal(born(HITTER), 'Aug 7, 1991 · Vineland, NJ')
+  assert.equal(
+    born({ birthDate: '1999-03-03', birthCity: 'Montreal', birthStateProvince: 'QC', birthCountry: 'Canada' }),
+    'Mar 3, 1999 · Montreal, QC, Canada',
+  )
 })
 
 test('a club body carries its identity and its own five other doors', () => {
@@ -106,7 +120,7 @@ test('a missing field renders as nothing, not as a blank row', () => {
 
 test('a player with no season on file renders without a stat table', () => {
   const out = renderCrawlBody(
-    playerCrawl({ ...HITTER, stats: [] }, { id: 545361, name: 'Mike Trout', pos: 'CF', team: 'Los Angeles Angels' }),
+    playerCrawl({ ...HITTER, stats: [] }, { id: 545361, name: 'Mike Trout', pos: 'CF', team: 'Los Angeles Angels', born: '' }),
   )
   assert.ok(out.includes('<h1>Mike Trout</h1>'))
   assert.doesNotMatch(out, /<table>/, 'no empty table')
@@ -278,4 +292,105 @@ test('a missing club file degrades to a shorter sitemap, never a failed build', 
   const xml = buildSitemap([], [])
   assert.match(xml, /^<\?xml version="1\.0" encoding="UTF-8"\?>/)
   assert.ok(xml.includes('<loc>https://tallybb.com/</loc>'), 'the app routes still ship')
+})
+
+// ---------------------------------------------- the page and the body agree (#1779)
+
+// Both read ONE raw statsapi record. The body goes through cards.js (the step that
+// does the I/O and the computing, fetch stubbed, clock fixed); the page's facts come
+// from personBio() and rosterStatusView(), as PlayerPage.jsx reads them.
+const TODAY = '2026-10-08'
+const fixture = (name) => JSON.parse(read(`test/fixtures/player-bio/${name}.json`))
+// renderFacts drops an empty value, so an empty fact counts as absent here too.
+const fact = (crawl, label) => crawl.facts.find((f) => f.label === label)?.value || undefined
+
+async function cardFor(t, route, id, record) {
+  if (route === 'player') t.mock.timers.enable({ apis: ['Date'], now: new Date(`${TODAY}T12:00:00Z`) })
+  const fetched = []
+  t.mock.method(globalThis, 'fetch', async (url) => {
+    fetched.push(String(url))
+    return new Response(JSON.stringify(route === 'player' ? { people: [record] } : { teams: [record] }), { status: 200 })
+  })
+  const card = await buildCard(new URLSearchParams({ route, id: String(id) }), 'https://example.test')
+  return { card, crawl: card.crawl, fetched }
+}
+
+test('the player request is still one call, and it now asks for rosterEntries', async (t) => {
+  const { fetched } = await cardFor(t, 'player', 665489, fixture('canada'))
+  assert.equal(fetched.length, 1)
+  assert.match(fetched[0], /hydrate=currentTeam,stats\(type=season\),rosterEntries/)
+})
+
+test('a retired player: no stale club anywhere, and the age is labelled at retirement', async (t) => {
+  // Ed Gill, 114794: currentTeam still reads Washington Senators, 30 years after his last stint.
+  const { card, crawl } = await cardFor(t, 'player', 114794, fixture('gill'))
+  assert.equal(fact(crawl, 'Club'), undefined)
+  assert.equal(crawl.lead, 'Pitcher')
+  assert.equal(crawl.links, null)
+  assert.doesNotMatch(`${card.description} ${card.alt}`, /Senators/)
+  assert.equal(fact(crawl, 'Age'), undefined)
+  assert.equal(fact(crawl, 'Age at retirement'), '24')
+})
+
+test('a deceased player: currentAge is frozen at death, so the body says age at retirement', async (t) => {
+  // Hank Aaron, 110001: currentAge 86, last stint ended 1976-12-31, born 1934-02-05.
+  const { crawl } = await cardFor(t, 'player', 110001, fixture('aaron-deceased'))
+  assert.equal(fact(crawl, 'Club'), undefined)
+  assert.equal(fact(crawl, 'Age'), undefined)
+  assert.equal(fact(crawl, 'Age at retirement'), '42')
+})
+
+test('a rostered player keeps his club and the plain Age', async (t) => {
+  const { crawl } = await cardFor(t, 'player', 665489, fixture('canada'))
+  assert.equal(fact(crawl, 'Club'), 'Toronto Blue Jays')
+  assert.equal(fact(crawl, 'Age'), '27')
+  assert.equal(fact(crawl, 'Age at retirement'), undefined)
+})
+
+test('a retired player with no age at retirement on file prints no age fact', () => {
+  const out = playerCrawl(HITTER, { id: 1, name: 'X', pos: '', team: '', born: '', status: { state: 'retired', retiredAge: null } })
+  assert.equal(fact(out, 'Age'), undefined)
+  assert.equal(fact(out, 'Age at retirement'), undefined)
+})
+
+for (const name of ['canada', 'rodriguez', 'gill', 'aaron-deceased']) {
+  test(`parity: the body and the page agree on Born, Club and Age for ${name}`, async (t) => {
+    const raw = fixture(name)
+    const { crawl } = await cardFor(t, 'player', raw.id, raw)
+    const bio = personBio(raw)
+    const status = rosterStatusView(raw, TODAY)
+    assert.equal(fact(crawl, 'Born').split(' · ').at(-1), bio.born)
+    assert.equal(fact(crawl, 'Club'), status ? undefined : bio.team.name)
+    const retired = status?.state === 'retired'
+    const age = retired ? status.retiredAge : bio.age
+    assert.equal(fact(crawl, retired ? 'Age at retirement' : 'Age'), age == null ? undefined : String(age))
+    assert.equal(fact(crawl, retired ? 'Age' : 'Age at retirement'), undefined)
+  })
+}
+
+test('Manuel Rodríguez: the "-1" state is gone from the body', async (t) => {
+  const { crawl } = await cardFor(t, 'player', 655889, fixture('rodriguez'))
+  assert.equal(fact(crawl, 'Born'), 'Aug 6, 1996 · Merida, Mexico')
+})
+
+test('a club whose locationName is the "United States" placeholder prints no Location', async (t) => {
+  const { crawl } = await cardFor(t, 'team', 1190, fixture('club-kia'))
+  assert.equal(fact(crawl, 'Location'), undefined)
+})
+
+test('a real locationName is kept', async (t) => {
+  const { crawl } = await cardFor(t, 'team', 119, fixture('club-dodgers'))
+  assert.equal(fact(crawl, 'Location'), 'Los Angeles')
+})
+
+// BallparkCard.jsx shows ballparkFor(venue.name).name, and the feed's own name only for
+// a park not on file. Dodgers: the feed says "UNIQLO Field at Dodger Stadium".
+test('Ballpark reads as the club page does: the park name, not the sponsor name', async (t) => {
+  const { crawl } = await cardFor(t, 'team', 119, fixture('club-dodgers'))
+  assert.equal(fact(crawl, 'Ballpark'), 'Dodger Stadium')
+})
+
+test('a park not on file keeps the feed name', async (t) => {
+  const { crawl } = await cardFor(t, 'team', 1190, fixture('club-kia'))
+  assert.equal(fact(crawl, 'Ballpark'), 'Generic')
 })

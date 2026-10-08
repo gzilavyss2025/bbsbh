@@ -17,7 +17,7 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
-import { parseCsv, medianRates } from './lib/savant.mjs'
+import { METRICS, fetchPercentiles, parseCsv, medianRates } from './lib/savant.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -25,35 +25,6 @@ const out = join(here, '..', 'public', 'data', 'savant-percentiles.json')
 // The season in play, not the calendar year (#1465): on January 1 the calendar
 // names a season with no games, and this file would be written empty.
 const season = await fetchSeasonInPlay()
-
-// Savant's own player-page percentile widget columns, trimmed to the 5–7
-// most scorebook-relevant per role. Mapped to short output keys (war.json's
-// convention) to keep the committed file small across ~1,100 rows.
-const METRICS = {
-  bat: {
-    xwoba: 'xwoba',
-    exit_velocity: 'ev',
-    hard_hit_percent: 'hardHit',
-    brl_percent: 'brl',
-    chase_percent: 'chase',
-    sprint_speed: 'sprintSpeed',
-    // Bat-tracking percentiles the percentile-rankings board already reports
-    // — free, since fetchPercentiles('batter') is fetched nightly regardless
-    // (issue #937). No pitcher analog, so METRICS.pit stays untouched.
-    bat_speed: 'batSpeed',
-    squared_up_rate: 'squaredUp',
-    swing_length: 'swingLength',
-  },
-  pit: {
-    xera: 'xera',
-    k_percent: 'k',
-    bb_percent: 'bb',
-    whiff_percent: 'whiff',
-    chase_percent: 'chase',
-    fb_velocity: 'fbVelo',
-    hard_hit_percent: 'hardHit',
-  },
-}
 
 // The RAW rate behind each percentile above, for the percentile strip's own
 // column (src/components/charts/PercentileStrip.jsx) — ".422" and "21.7%"
@@ -88,46 +59,6 @@ const RAW_METRICS = {
     fastball_avg_speed: 'fbVelo',
     hard_hit_percent: 'hardHit',
   },
-}
-
-async function fetchPercentiles(type) {
-  const url =
-    `https://baseballsavant.mlb.com/leaderboard/percentile-rankings` +
-    `?type=${type}&year=${season}&csv=true`
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`Savant percentile-rankings ${type}: HTTP ${res.status}`)
-  const text = await res.text()
-  const rows = parseCsv(text.replace(/^﻿/, ''))
-  if (!rows.length) throw new Error(`Savant percentile-rankings ${type}: empty response`)
-
-  const [header, ...data] = rows
-  const colIndex = {}
-  header.forEach((name, i) => { colIndex[name] = i })
-
-  const wanted = METRICS[type === 'batter' ? 'bat' : 'pit']
-  for (const col of ['player_id', ...Object.keys(wanted)]) {
-    if (!(col in colIndex)) {
-      throw new Error(
-        `Savant percentile-rankings CSV: expected column '${col}' not found — layout may have changed`,
-      )
-    }
-  }
-
-  const map = {}
-  for (const r of data) {
-    const id = r[colIndex.player_id]
-    if (!id) continue
-    const entry = {}
-    let hasAny = false
-    for (const [srcCol, outKey] of Object.entries(wanted)) {
-      const raw = r[colIndex[srcCol]]
-      const n = raw === '' || raw == null ? null : Number(raw)
-      entry[outKey] = Number.isFinite(n) ? n : null
-      if (entry[outKey] != null) hasAny = true
-    }
-    if (hasAny) map[id] = entry
-  }
-  return map
 }
 
 // The raw-rate companion to fetchPercentiles, off the `custom` board. Values
@@ -246,8 +177,8 @@ async function fetchBatTracking() {
 }
 
 const [bat, pit, rawBat, rawPit, batTracking] = await Promise.all([
-  fetchPercentiles('batter'),
-  fetchPercentiles('pitcher'),
+  fetchPercentiles('batter', season),
+  fetchPercentiles('pitcher', season),
   fetchRawRates('batter'),
   fetchRawRates('pitcher'),
   fetchBatTracking(),

@@ -6,9 +6,12 @@ description: Combine every open bbsbh PR into one stacked PR, review it, fix wha
 # /stack-prs
 
 Land all open PRs as one change. One merge to `main` means one Vercel deployment.
-The Hobby plan allows few deployments, so this is the point of the skill.
+The Hobby plan allows about 100 deployments a day; one batch per stack keeps `main`
+tidy and each deploy reviewed.
 
-**Invoking this skill is the maintainer's explicit yes to merge to `main`.** It is
+**Invoking this skill is the maintainer's explicit yes to merge to `main`.** The
+orchestrator may also invoke it under the maintainer's standing permission
+(`.claude/skills/orchestrate/`, "Stacking"); it then passes explicit PR numbers. It is
 the only merge the maintainer pre-approves. The gates in step 7 still apply. If
 one gate fails, stop and report. Never merge around a gate.
 

@@ -28,6 +28,13 @@ test('the bracket code never reads Scores Unlocked and never touches storage', (
       (f) => new URL(`../../src/api/postseason/${f}`, import.meta.url),
     ),
     new URL('../../src/hooks/postseason/usePostseasonBracket.js', import.meta.url),
+    ...readdirSync(new URL('../../src/lib/postseason/primer/', import.meta.url)).map(
+      (f) => new URL(`../../src/lib/postseason/primer/${f}`, import.meta.url),
+    ),
+
+    // The primer's right column (the small bracket and the leaders ledger).
+    new URL('../../src/components/bracket/BracketNow.jsx', import.meta.url),
+    new URL('../../src/components/postseason/SeriesLeadersLedger.jsx', import.meta.url),
   ]
   for (const url of files) {
     const src = readFileSync(fileURLToPath(url), 'utf8')
@@ -55,9 +62,12 @@ test('a bracket built for another cutoff is never handed back', () => {
 // seal, no kraft token, no read of Scores Unlocked.
 test('the series pages never seal and never read Scores Unlocked', () => {
   const dir = (rel) =>
-    readdirSync(new URL(`../../src/${rel}/`, import.meta.url)).map((f) => new URL(`../../src/${rel}/${f}`, import.meta.url))
+    readdirSync(new URL(`../../src/${rel}/`, import.meta.url), { withFileTypes: true })
+      .filter((e) => e.isFile())
+      .map((e) => new URL(`../../src/${rel}/${e.name}`, import.meta.url))
   const files = [
     ...dir('components/postseason'),
+    ...dir('components/postseason/edges'),
     ...dir('screens/postseason-live'),
     ...dir('styles/postseason'),
     new URL('../../src/screens/PostseasonSeriesPage.jsx', import.meta.url),

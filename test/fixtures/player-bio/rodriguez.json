@@ -1,0 +1,196 @@
+{
+  "id": 655889,
+  "fullName": "Manuel Rodríguez",
+  "active": true,
+  "currentAge": 30,
+  "birthDate": "1996-08-06",
+  "primaryNumber": "39",
+  "height": "5' 11\"",
+  "weight": 205,
+  "birthCity": "Merida",
+  "birthStateProvince": "-1",
+  "birthCountry": "Mexico",
+  "mlbDebutDate": "2021-07-30",
+  "primaryPosition": {
+    "abbreviation": "P",
+    "name": "Pitcher"
+  },
+  "batSide": {
+    "description": "Right"
+  },
+  "pitchHand": {
+    "description": "Right"
+  },
+  "currentTeam": {
+    "id": 139,
+    "name": "Tampa Bay Rays"
+  },
+  "rosterEntries": [
+    {
+      "startDate": "2023-11-06",
+      "status": {
+        "code": "40M"
+      },
+      "team": {
+        "id": 139,
+        "name": "Tampa Bay Rays"
+      }
+    },
+    {
+      "startDate": "2026-09-13",
+      "endDate": "2026-09-24",
+      "status": {
+        "code": "RA"
+      },
+      "team": {
+        "id": 234,
+        "name": "Durham Bulls",
+        "parentOrgId": 139
+      }
+    },
+    {
+      "startDate": "2026-07-26",
+      "endDate": "2026-07-27",
+      "status": {
+        "code": "RA"
+      },
+      "team": {
+        "id": 233,
+        "name": "Charleston RiverDogs",
+        "parentOrgId": 139
+      }
+    },
+    {
+      "startDate": "2026-07-23",
+      "endDate": "2026-07-25",
+      "status": {
+        "code": "RA"
+      },
+      "team": {
+        "id": 2003,
+        "name": "FCL Rays",
+        "parentOrgId": 139
+      }
+    },
+    {
+      "startDate": "2023-01-24",
+      "endDate": "2023-07-31",
+      "status": {
+        "code": "A"
+      },
+      "team": {
+        "id": 451,
+        "name": "Iowa Cubs",
+        "parentOrgId": 112
+      }
+    },
+    {
+      "startDate": "2019-11-20",
+      "endDate": "2023-07-30",
+      "status": {
+        "code": "TR"
+      },
+      "team": {
+        "id": 112,
+        "name": "Chicago Cubs"
+      }
+    },
+    {
+      "startDate": "2022-08-09",
+      "endDate": "2022-08-16",
+      "status": {
+        "code": "RA"
+      },
+      "team": {
+        "id": 407,
+        "name": "ACL Cubs",
+        "parentOrgId": 112
+      }
+    },
+    {
+      "startDate": "2021-04-30",
+      "endDate": "2021-06-27",
+      "status": {
+        "code": "ASG"
+      },
+      "team": {
+        "id": 553,
+        "name": "Tennessee Smokies",
+        "parentOrgId": 112
+      }
+    },
+    {
+      "startDate": "2021-03-31",
+      "endDate": "2021-04-30",
+      "status": {
+        "code": "ASG"
+      },
+      "team": {
+        "id": 3264,
+        "name": "Cubs Alternate Training Site",
+        "parentOrgId": 112
+      }
+    },
+    {
+      "startDate": "2019-04-03",
+      "endDate": "2019-11-20",
+      "status": {
+        "code": "ASG"
+      },
+      "team": {
+        "id": 521,
+        "name": "Myrtle Beach Pelicans",
+        "parentOrgId": 112
+      }
+    },
+    {
+      "startDate": "2017-08-20",
+      "endDate": "2019-04-03",
+      "status": {
+        "code": "ASG"
+      },
+      "team": {
+        "id": 550,
+        "name": "South Bend Cubs",
+        "parentOrgId": 112
+      }
+    },
+    {
+      "startDate": "2017-10-04",
+      "endDate": "2018-02-01",
+      "status": {
+        "code": "RES"
+      },
+      "team": {
+        "id": 675,
+        "name": "Caneros de los Mochis",
+        "parentOrgId": 112
+      }
+    },
+    {
+      "startDate": "2017-06-12",
+      "endDate": "2017-08-20",
+      "status": {
+        "code": "ASG"
+      },
+      "team": {
+        "id": 461,
+        "name": "Eugene Emeralds",
+        "parentOrgId": 112
+      }
+    },
+    {
+      "startDate": "2014-05-20",
+      "endDate": "2017-06-11",
+      "status": {
+        "code": "RES"
+      },
+      "team": {
+        "id": 496,
+        "name": "Leones de Yucatan",
+        "parentOrgId": 11
+      }
+    }
+  ],
+  "stats": []
+}

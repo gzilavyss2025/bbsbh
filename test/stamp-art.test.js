@@ -461,14 +461,14 @@ test('the band covers everything it has to knock out', () => {
 // club's `leagueId` (the live feed has no series game number, so none is printed: a stamp
 // must read the same whichever producer resolved it). Both are pregame facts.
 test('each round is named from the game type and the home club\u2019s league', () => {
-  assert.equal(stampSeriesText({ gameType: 'F', leagueId: 103 }), 'AL WC')
-  assert.equal(stampSeriesText({ gameType: 'F', leagueId: 104 }), 'NL WC')
+  assert.equal(stampSeriesText({ gameType: 'F', leagueId: 103 }), 'ALWC')
+  assert.equal(stampSeriesText({ gameType: 'F', leagueId: 104 }), 'NLWC')
   assert.equal(stampSeriesText({ gameType: 'D', leagueId: 103 }), 'ALDS')
   assert.equal(stampSeriesText({ gameType: 'D', leagueId: 104 }), 'NLDS')
   assert.equal(stampSeriesText({ gameType: 'L', leagueId: 103 }), 'ALCS')
   assert.equal(stampSeriesText({ gameType: 'L', leagueId: 104 }), 'NLCS')
-  assert.equal(stampSeriesText({ gameType: 'W', leagueId: 103 }), 'World Series')
-  assert.equal(stampSeriesText({ gameType: 'W' }), 'World Series')
+  assert.equal(stampSeriesText({ gameType: 'W', leagueId: 103 }), 'WS')
+  assert.equal(stampSeriesText({ gameType: 'W' }), 'WS')
 })
 
 test('a regular-season game, or a blob written before the league was stored, names no round', () => {
@@ -482,7 +482,7 @@ test('a regular-season game, or a blob written before the league was stored, nam
 test('the bottom arc is the round and a short date for October, and the long date for any other game', () => {
   const oct = { gameType: 'D', leagueId: 103, date: '2026-10-03' }
   assert.equal(stampBottomText(oct), 'ALDS \u00b7 Oct 3, 2026')
-  assert.equal(stampBottomText({ ...oct, gameType: 'W' }), 'World Series \u00b7 Oct 3, 2026')
+  assert.equal(stampBottomText({ ...oct, gameType: 'W' }), 'WS \u00b7 Oct 3, 2026')
   assert.equal(stampBottomText({ gameType: 'R', date: '2026-08-02' }), 'Sunday, August 2, 2026')
   assert.equal(stampBottomText({ gameType: 'D' }), '') // no league and no date: nothing to print
   // an explicit series line (the prop GameStamp always had) still wins over the derived one

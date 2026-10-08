@@ -62,10 +62,12 @@ export const EXCEPT = {
   'family-ties/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
   'on-this-day/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
   'birthplaces/': 'hand-run from Retrosheet, the Chadwick register and GeoNames (ADR-0100, ADR-0106); history, and the files carry no clock',
+  'savant-history/': 'hand-run once a year (gen-savant-history.mjs, #1717); finished seasons, and the shards carry no clock',
   'franchise-history/': 'hand-run; a season adds one span at most, and the files carry no clock',
   'prospect-rank-history.json': 'hand-run; the 2005-2024 rankings are frozen and the file carries no clock (#1111)',
   'run-expectancy-eras/': 'hand-run, one decade at a time (gen-run-expectancy.mjs --era-aggregate); history',
   'league-averages.json': 'hand-run; a finished season never changes and the file carries no clock',
+  'milb-seasons/': 'hand-run once a year (gen-milb-seasons.mjs, #1719); a finished minor-league season never changes',
   // Frozen ON PURPOSE, which is the one shape this guard cannot tell from a
   // dead generator. A level's pool is a list of games from a season that is
   // over, so it is checked once and then only re-joined against the prospect

@@ -85,7 +85,7 @@ async function fetchGameBoxscore(gamePk) {
 // pitch's call code, about 20 KB a game against the multi-MB full feed (the
 // same trick as person-fetch.js's scans). No result, run or score field is
 // named, so none arrives.
-const WHIFF_FEED_FIELDS =
+export const WHIFF_FEED_FIELDS =
   'gameData,teams,away,home,id,liveData,plays,allPlays,about,halfInning,playEvents,isPitch,details,call,code'
 
 async function fetchGameWhiffFeed(gamePk) {
@@ -187,6 +187,22 @@ function buildRosters(rosterByTeam) {
   return out
 }
 
+// Each game's runs, off the box scores loadSeriesStats already fetched (the
+// primer's ribbon prints them). `boxscores` lines up with `games`; a game whose
+// read failed, or whose box has no run count, leaves no entry.
+// { [gamePk]: { awayId, homeId, runs: { away, home } } }
+export function foldRunsByGame(games, boxscores) {
+  const out = {}
+  games.forEach((g, i) => {
+    const { away, home } = boxscores[i]?.teams ?? {}
+    const awayRuns = away?.teamStats?.batting?.runs
+    const homeRuns = home?.teamStats?.batting?.runs
+    if (awayRuns == null || homeRuns == null) return
+    out[g.gamePk] = { awayId: away.team?.id ?? null, homeId: home.team?.id ?? null, runs: { away: awayRuns, home: homeRuns } }
+  })
+  return out
+}
+
 // Sums every player's batting/pitching lines across just this series' games
 // (a handful of `/boxscore` fetches), then shapes the totals into
 // TeamLeaders' `precomputed` category-map contract ({ id, name, teamId,
@@ -205,7 +221,17 @@ export async function loadSeriesStats(games) {
     Promise.all((games ?? []).map((g) => fetchGameBoxscore(g.gamePk))),
     Promise.all((games ?? []).map((g) => fetchGameWhiffFeed(g.gamePk))),
   ])
+  return {
+    ...foldSeriesStats(boxscores, whiffFeeds),
+    // Needs `games` to line the box scores up, which the shared fold has no
+    // need of, so it stays out of foldSeriesStats.
+    runsByGame: foldRunsByGame(games ?? [], boxscores),
+  }
+}
 
+// The pure half of loadSeriesStats, shared with the nightly callouts shard's
+// "series" block (lib/postseason/primer/seriesBlock.js).
+export function foldSeriesStats(boxscores, whiffFeeds) {
   const batting = new Map()
   const pitching = new Map()
   const rosterByTeam = new Map()

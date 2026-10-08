@@ -94,7 +94,8 @@
 // worse than one that is missing. It rides the nightly job for that reason
 // (.github/workflows/update-nightly-data.yml).
 //
-// TWO FILES COME OUT OF THIS JOB (four, with the per-club cut a level).
+// TWO FILES COME OUT OF THIS JOB (five, with the per-club cut a level and the
+// postseason's per-game file).
 // abs-challenges.json is the report page's; abs-exposure.json is the
 // per-player denominator list, kept separate because the report page reads
 // none of it.
@@ -123,6 +124,7 @@ import {
   buildExport,
   buildExposureExport,
   buildExposureClubsExport,
+  buildPostGamesExport,
   challengeRowsForGame,
   clearSeasonRows,
   EXPOSURE_CLUB_LEVELS,
@@ -144,6 +146,10 @@ const out = 'abs-challenges.json'
 // kilobytes on every visit to /abs-challenges for data nothing on screen
 // shows. See buildExposureExport in scripts/lib/abs/export.mjs.
 const exposureOut = 'abs-exposure.json'
+// THE POSTSEASON ONE GAME AT A TIME (#1769), a FOURTH file: the series page's
+// ABS card cuts it to one series, which the folded post file cannot give. One
+// season's games only, so no all/ copy. See scripts/lib/abs/postgames.mjs.
+const postGamesOut = 'abs-challenges-post-games.json'
 // THE POSTSEASON BESIDE THE REGULAR SEASON (#1514): one report file a scope, so
 // the page downloads only the part it shows. `out` stays the regular season.
 const SCOPE_FILES = [['R', out], ['P', 'abs-challenges-post.json'], ['all', 'abs-challenges-all.json']]
@@ -248,6 +254,7 @@ async function writeOut() {
     for (const [scope, file] of SCOPE_FILES) {
       await write(dir, file, { ...buildExport(rows, games, { season, scope }), ...extra })
     }
+    if (season != null) await write(dir, postGamesOut, buildPostGamesExport(rows, games, { season }))
     await write(dir, exposureOut, { ...buildExposureExport(regRows, exposure, { season }), ...extra })
     for (const level of EXPOSURE_CLUB_LEVELS) {
       await write(dir, exposureClubsOut(level), {

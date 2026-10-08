@@ -1,4 +1,4 @@
-// Cluster migration slices C1 to C7 (#1180): twenty-four wrapping-row rules moved onto
+// Cluster migration slices C1 to C9 (#1180): twenty-nine wrapping-row rules moved onto
 // <Cluster>. Each would fail silently otherwise (lint green, page drawn, only a
 // screenshot noticing):
 //
@@ -53,6 +53,13 @@ const MIGRATED = {
   psseries__potgWho: { file: '35-postseason-series.css', gap: 'snug', sites: 1, align: 'baseline' },
   erasesheet__actions: { file: '55-my-tally-account.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
   'team-hub__namerow': { file: '28a-team-hub-hero.css', gap: 'snug', sites: 2, align: 'baseline' },
+  // C8: the rule is gone whole; .trrank__chips keeps only its sibling margin rule.
+  trrank__chips: { gap: 'tight', sites: 5 },
+  pbp__replaypicks: { gap: 'tight', sites: 1 },
+  // C9: three rows, each deleted whole. The identity drawer logo row aligns to the start.
+  colorlab__swatchrow: { file: '15-team-color-lab.css', gap: 'base', sites: 1 },
+  'colorlab__weardates-list': { file: '15-team-color-lab.css', gap: 'tight', sites: 1 },
+  iddrawer__logo: { file: '62-identity-admin.css', gap: 'base', sites: 1, align: 'start' },
 }
 
 defineMigrationTests('cluster', CLUSTER, MIGRATED)

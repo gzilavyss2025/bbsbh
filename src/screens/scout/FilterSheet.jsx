@@ -3,6 +3,7 @@ import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { METRICS } from '../../lib/scout/metrics.js'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Choice } from '../../components/scout/Choice.jsx'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 // THE SCOUT'S FILTER SHEET (#1490): Hand, Scope and Metric in one bottom sheet,
 // opened from the chip under the matchup. They used to sit in two rows, above
@@ -28,7 +29,7 @@ export function FilterSheet({ onClose, showHitter, hand, onHand, switchHitter, s
   useDialogFocus(closeRef, onClose)
   return (
     <div className="scrim" onClick={(e) => e.target.classList.contains('scrim') && onClose()}>
-      <div className="sheet scout__sheet" role="dialog" aria-modal="true" aria-label="Filters">
+      <Stack gap="loose" className="sheet scout__sheet" role="dialog" aria-modal="true" aria-label="Filters">
         <h2 className="sheet__title">Filters</h2>
         <div className="scout__controls">
           {showHitter && (
@@ -42,7 +43,7 @@ export function FilterSheet({ onClose, showHitter, hand, onHand, switchHitter, s
         <div className="sheet__actions">
           <Button ref={closeRef} skin="ink" onClick={onClose}>Done</Button>
         </div>
-      </div>
+      </Stack>
     </div>
   )
 }

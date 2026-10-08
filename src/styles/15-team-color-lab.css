@@ -291,12 +291,6 @@
   outline-offset: 2px;
 }
 
-.colorlab__swatchrow {
-  display: flex;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-}
-
 .colorlab__posinlinefields {
   display: flex;
   gap: var(--space-1h);
@@ -653,12 +647,6 @@
 .colorlab__headerfields input:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
-}
-
-.colorlab__weardates-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
 }
 
 .colorlab__weardates-hint {

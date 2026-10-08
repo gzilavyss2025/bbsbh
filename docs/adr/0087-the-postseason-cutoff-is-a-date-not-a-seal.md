@@ -173,3 +173,40 @@ Unlocked read, and nothing from today's game or a later one.
 - The finished series page draws the parts that need only counted games: the
   strip, the park line, the totals, the leader doors, the head-to-head strip
   and Nine Keys (for the current season only).
+
+## Addendum (2026-10-08): the series primer
+
+Gary locked the series primer on 2026-10-08. It is a new home page (`/`) layout
+for a postseason day. It shows only when every game on the MLB slate is in the
+NLCS, the ALCS or the World Series, with one game for each series. It shows from
+`BRACKET_RAIL_QUERY` (1000px) up. On any other day, and below 1000px, the page
+does not change. The pure rules are in `src/lib/postseason/primer/`, and
+`test/postseason/primer.test.js` pins them.
+
+- **(a) Finished games show their scores plainly.** This is Gary's decision. The
+  ribbon shows the runs of each game that went Final before the cutoff date, and
+  the winner in ink. The win-chance lines and the leaders read the same games. A
+  game on the cutoff date or later never shows a score, a winner or a run
+  (`ribbonNodes.js`). The primer does not read Scores Unlocked. The 2026-09-30
+  departure does not apply here: the primer reads the bracket without
+  `{ live: true }`, so with the pass on it still shows nothing from today's
+  game. If a live bracket that counts today's game gets to `primerSeriesFor`,
+  it returns no series and the page keeps its usual layout.
+- **(b) The primer keys on the series, not on the game.** A day with two series
+  gets a two-tab switch. The first tab is the favourite club's series, else the
+  series with the earlier first pitch, else the NL series (`primerSeries.js`).
+  A series with two games on the slate (a doubleheader, a resumed game) keeps
+  the usual page.
+- **(c) On a primer day, the primer's own parts replace the rail and the
+  survivors' board.** `BracketRail` and `SurvivorsBoard` do not render. A small
+  bracket (the two LCS and the World Series) is in the right column. "Still to
+  play" and the travel and off-day words do not render, because the ribbon
+  shows the date and the park of each game ahead. The game card, the site
+  chrome, the club strip, the date stepper and the Reveal All bar do not change.
+- **(d) The data comes from the nightly shard first.** The primer reads the
+  finished games from the nightly static file first. It reads statsapi live only
+  for a game that the file does not have.
+
+Decisions 1 to 4 do not change. The cutoff is a date (1). Yesterday's results
+are not protected (2). Nothing here uses a `SealBox` or a `--seal*` token (3).
+Nothing here reads `useScoresUnlocked()` or `spoilersOffFor()` (4).

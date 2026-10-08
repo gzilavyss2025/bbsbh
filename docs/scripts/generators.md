@@ -385,6 +385,18 @@ don't run these by hand.
   `scripts/data/callouts-archive/{MMDDYYYY}/` (committed, never shipped), so the
   bundle behind every night's Margin Notes is kept. See `docs/callouts.md` + ADR-0014;
   extend this pipeline, don't build a parallel path.
+  An LCS or World Series game's file also gets a `series` block for the series
+  primer (`seriesBlock.js`, reader `seriesBlockFor` in `docs/api/static-data.md`).
+  It goes into TODAY's files (the run's `asOf` date, written the night before), not
+  tomorrow's: the run starts before tonight's games, so tomorrow's block would be
+  short a game. The step reads the bracket's skeleton and results
+  (`src/api/postseason/fetch.js`) and cuts them at today with `deriveBracket`. Then
+  it reads three things for each counted game: the box score, the feed pruned to
+  the whiff and venue fields, and `winProbability` pruned to about 4 KB. A failed
+  box score read drops only that series' block. To check a past slate by hand, run
+  the generator for that date and then for the day after (`2025-11-01`, then
+  `2025-11-02`). Then delete the new `callouts/` folders and any folder a run moved
+  into `scripts/data/callouts-archive/`, and never commit either one.
 - `gen-fouls.mjs` → `fouls/{season}/fouls.json` (league, for `/fouls`) +
   `fouls/{season}/{NN}.json` (`personId % 100`, for the player card) + `fouls/seasons.json`
   + `fouls/all/fouls.json` (every season, summed from rows). A season store (ADR-0086,
@@ -425,7 +437,9 @@ don't run these by hand.
   (regular season), `abs-challenges-post.json` and `abs-challenges-all.json` (#1514:
   the postseason beside it, never blended; `abs_ingested_games.scope`, set by the sweep
   and by `--recheck` from the schedule's `gameType`, ADR-0094's 2026-10-06 addendum),
-  **`abs/{season}/abs-exposure.json`** and
+  **`abs/{season}/abs-challenges-post-games.json`** (#1769: one entry per postseason game,
+  each player's challenges added over roles, for the series page's ABS card; one season only,
+  no `all/` copy; `buildPostGamesExport`, `scripts/lib/abs/postgames.mjs`), **`abs/{season}/abs-exposure.json`** and
   **`abs/{season}/abs-exposure-clubs-{mlb,aaa}.json`**, plus `abs/seasons.json` and the
   same files over every season in `abs/all/`. A season store (ADR-0086, #1200):
   each file is cut from its own season's rows (`buildExport`'s `season` filter), a
@@ -1465,6 +1479,39 @@ Re-run only to fold in a new season.
   800 expected for 24 teams; the 1994 strike = 657.6 against 657 for 28 teams at
   114 games; 2020 = 373.3 against 370 for 60 games). A player page fetches one
   shard, which the deeper window grows from about 4 KB to about 18 KB.
+  Since the OVR work (#1718) each shard also holds `fld` (season fielding runs, from
+  `stats=sabermetrics` `stat.fielding`) and `pa` (plate appearances, from
+  `stats=season` `plateAppearances`), both `{ [personId]: { [season]: n } }`, hitting
+  group only, for seasons from `FLD_START_SEASON` (2023). Older seasons were not
+  checked. Adds about 0.8 KB per shard (1.5 KB at most). A pitcher has no `fld` row
+  unless he batted. `src/api/war.js` reads them with `fldByYearFor` / `paByYearFor`.
+- `gen-savant-history.mjs` → `public/data/savant-history/{NN}.json` (player-keyed,
+  bucketed on `personId % 100` via `shardKey100`) — Savant `percentile-rankings`
+  percentiles for the last three COMPLETED seasons (**2023-2025**), hitters and
+  pitchers in one shard, null cells left out. The prior-season input of the OVR career
+  blend (#1717, `docs/ovr-rating.md`). Same board and `METRICS` map as the nightly
+  `gen-savant-percentiles.mjs` (both import them from `lib/savant.mjs`). Run by hand
+  once a year after the season ends and move `FIRST_SEASON`/`LAST_SEASON` with it:
+  `node scripts/gen-savant-history.mjs`. About 2.5 KB a shard on average, 5 KB at most;
+  it throws past 6 KB. A page opens one shard (`src/api/ovr/savantHistory.js`). A finished
+  season's ranks did not change between two fetches minutes apart (checked once); a
+  later revision is unchecked.
+- `gen-milb-seasons.mjs` → `public/data/milb-seasons/{NN}.json` (player-keyed, bucketed
+  on `personId % 100` via the reader's `milbShardKey`) — each player's minor-league season
+  lines for 2021-2025 at AAA, AA, A+ and A, for the career rating (`docs/ovr-rating.md`,
+  "Career rating"; #1719). **Hand-run, not a cron**: a finished minor-league season never
+  changes, so run it once a year and bump `SEASONS` in `scripts/lib/milb/seasons.mjs`.
+  Two passes. The first pulls each level-season's full pool (`fetchLevelSeasonStats`, 40
+  calls) for the OPS or ERA population. The second batches the players
+  (`/people?personIds=…&hydrate=stats(type=[yearByYear],sportId=N)`, 300 ids a call; the URL
+  cap is about 7,000 characters, so 1,200 ids fail). Players: everyone with a career in
+  `war.json`, plus the Top 100 in `top-prospects.json` (about 1,470 with a line). Rank math
+  and floor (40 PA, 30 outs) are `prospectPercentile.mjs`'s, so a 2026 percentile matches
+  `prospect-trend.json` for all 660 players checked. Parse rules: take the total row of a
+  two-club season (the split with no `team`), skip a season such as "2018.2" and 2020, read
+  ".---" or an absent rate as null. Rk (16) is not built: it needs a league filter for the
+  Arizona and Gulf Coast leagues. About 12 s, 220 KB, the largest shard 4 KB. This is bulk
+  use of statsapi (the terms allow "non-bulk" use), so keep it to the yearly run.
 - `gen-awards-history.mjs` → `public/data/awards-history.json` — who won each major
   MLB award (MVP, Cy Young, Rookie of the Year, Silver Slugger, Gold Glove, Platinum
   Glove, Reliever of the Year, Comeback Player, Hank Aaron, Roberto Clemente, All-MLB

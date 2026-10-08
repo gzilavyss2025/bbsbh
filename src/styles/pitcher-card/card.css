@@ -392,11 +392,6 @@
 }
 /* Phone: one numbered chip per pitch under the scene. Square, so eight fit
    across the sheet's 304px and more wrap. */
-.pbp__replaypicks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
 .pbp__replaypicks .btn {
   min-width: var(--control-min);
   padding-inline: 0;

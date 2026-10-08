@@ -74,7 +74,9 @@ for each generator; the reader modules:
   `fetchWarHistory(personId)` + `warByYearFor(personId, group, current, history)`
   union the two into a player's `{season: war}` map (live season from war.json wins its own
   year), which `loadPlayer.js` threads into the player page. MLB-only at source,
-  so MiLB rows fall back to a dash.
+  so MiLB rows fall back to a dash. The same shard also carries `fld` (fielding runs) and
+  `pa` (plate appearances) maps for 2023 on, read with `fldByYearFor(personId, history)` /
+  `paByYearFor(personId, history)` (pure, `{}` for an unknown player). No UI reads them yet.
 - `team.js`'s `fetchMilbAlumni(teamId)` — one farm club's big-league alumni, from
   `public/data/milb-alumni/{teamId}.json` (`scripts/gen-milb-alumni.mjs`, nightly).
   Not its own module: this reader sits beside `fetchAffiliates`, which already
@@ -303,6 +305,16 @@ for each generator; the reader modules:
   through the reader for the same reason the leaders board's is: a level's winter
   opens hours before the night's generator run, and a card offering a game from
   the wrong season is worse than no card.
+- `milbSeasons.js` — a player's minor-league season lines, 2021-2025, AAA to A
+  (`public/data/milb-seasons/{NN}.json`, bucketed on `personId % 100`, hand-run by
+  `gen-milb-seasons.mjs`). `fetchMilbSeasons(personId)` gives rows
+  `{ season, sport, group, n, v, pct }`: the season total at one level, `n` plate
+  appearances or outs, `v` OPS or ERA (null on a dash), `pct` the percentile in that
+  level-season (null under 40 PA or 30 outs). The shard stores rows as arrays
+  (`packRow`/`unpackRow`). The current season is not in it: read `prospect-trend.json`.
+  Degrades to `[]`. Also exports the career blend's start values for step 5:
+  `LEVEL_WEIGHT` (AAA 0.6, AA 0.5, A+ 0.35, A 0.25, Rk 0.1), `FULL_WEIGHT_PA` (400) and
+  `FULL_WEIGHT_OUTS` (450, 150 IP). Spoiler-free: season totals only.
 - `notebook.js` — the offseason page's one NOTE, both kinds, in one reader.
   `fetchLongAtBats(season)` reads `public/data/long-at-bats/{season}.json`
   (`gen-long-at-bats.mjs`): every plate appearance of an MLB regular season that took 12
@@ -394,6 +406,23 @@ for each generator; the reader modules:
   sections, same as `minorsLeaders.js` does for the all-minors board; the
   franchise/repeat-MVP boards are plain rank lists (team-keyed, not the
   player-keyed pool `TeamLeaders` expects).
+- `callouts.js`'s `seriesBlockFor(bundle)` — the series primer's block, from the
+  `series` key of an LCS or World Series game's `callouts/{MMDDYYYY}/{gamePk}.json`
+  (`gen-callouts.mjs`, nightly). Returns `null` for every other game. The shape is
+  `{ id, gamePks, games, stats }` (`id` is the bracket series' id; the primer's own reader,
+  `primerGames.js`'s `seriesBlockFor(bundle, seriesId)`, takes the block only for that series). `games` holds one finished game each, in the shape at
+  the top of `src/lib/postseason/primer/ribbonNodes.js` (runs, park, 26 win-chance
+  points). `stats` is `{ batting, pitching, totals }`, the same as
+  `loadSeriesStats` returns without `rosters`, so `SeriesTotals` and the leaders
+  ledger read it with no change. Both sides fold through one function,
+  `foldSeriesStats` (`src/api/postseasonSeries.js`). The builder is
+  `src/lib/postseason/primer/seriesBlock.js`. A game counts only when the bracket
+  counts it (`deriveBracket`, cut at the slate date): Final with a winner before
+  that date, on its resume date for a suspended game. The slate game, a later game
+  and an "if necessary" game are never in the block. Game 1 gets an empty block. A
+  failed read gets no block, and the primer reads statsapi live. The block is about
+  4 to 6 KB; with it, the whole 2025 World Series Game 7 shard is 29 KB. Spoiler-free on the ADR-0087 footing: the
+  cutoff is a date. `test/postseason/series-block.test.js` pins the cutoff.
 
 - `fouls.js` — season foul-ball lines + leaders, from `public/data/fouls/{season}/fouls.json`
   (`gen-fouls.mjs`; the season `fouls/seasons.json` names, ADR-0086) for the
@@ -707,6 +736,13 @@ for each generator; the reader modules:
   And the `MIN_ABS_RUNS` floor applies to the main board only — a bat a run from
   average overall can still lead the league with the glove, which is what the
   four single-skill boards are for.
+- `around-the-game/absSeries.js` — the ABS card on a postseason series page (#1769), from
+  `public/data/abs/{season}/abs-challenges-post-games.json` (`gen-abs-challenges.mjs`, one entry per
+  postseason game, roles added per player). `fetchAbsSeriesGames(seasonYear)` is strict, so an old
+  series reads no file. `seriesAbsRows(file, { gamePks, clubIds, cutoff })` cuts it to the series' own
+  games, drops a game dated on or after the cutoff, and sorts by win %, then challenges, then name.
+  No minimum-sample floor, by design. `fmtWinPct` prints `.750`. Spoiler-free: a ball-strike
+  record, counted only for games Final before the cutoff (ADR-0034, ADR-0087).
 - `around-the-game/absChallenges.js` — `/abs-challenges`, the season board for
   the ABS Challenge System, from `public/data/abs/{season}/abs-challenges.json`
   (the season `abs/seasons.json` names, ADR-0086)

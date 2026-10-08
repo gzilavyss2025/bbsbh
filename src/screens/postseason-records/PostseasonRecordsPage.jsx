@@ -31,6 +31,7 @@ import { SituationalIndex, GROUP_KEYS } from '../../components/situational/Situa
 import { SituationalBoard } from '../../components/situational/SituationalBoard.jsx'
 import { TeamRecordsList } from '../../components/situational/TeamRecordsList.jsx'
 import { GameLinesDoor } from '../../components/boxlines/GameLinesDoor.jsx'
+import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 
 // The regular-season Situational Records page (SituationalRecordsPage.jsx),
 // over the MLB postseason: one split with every postseason club ranked, or one
@@ -231,7 +232,7 @@ export function PostseasonRecordsPage({
           </label>
         )}
         {season === ALL_SEASONS && (
-          <div className="trrank__chips" role="group" aria-label="Minimum games in a split">
+          <Cluster gap="tight" className="trrank__chips" role="group" aria-label="Minimum games in a split">
             {MIN_GAMES.map((n) => (
               <button
                 key={n}
@@ -243,9 +244,9 @@ export function PostseasonRecordsPage({
                 {n === 0 ? 'Any games' : `${n}+ games`}
               </button>
             ))}
-          </div>
+          </Cluster>
         )}
-        <div className="trrank__chips" role="group" aria-label="View">
+        <Cluster gap="tight" className="trrank__chips" role="group" aria-label="View">
           {[
             { key: null, label: 'By situation' },
             { key: 'teams', label: 'By team' },
@@ -260,7 +261,7 @@ export function PostseasonRecordsPage({
               {item.label}
             </button>
           ))}
-        </div>
+        </Cluster>
         {byTeam && clubs.length > 0 && (
           <label className="trrank__pick">
             <span>Club</span>

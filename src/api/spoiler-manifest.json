@@ -80,6 +80,10 @@
       "class": "spoiler-free",
       "why": "Static abs-challenges.json — the season board for the ABS Challenge System, over Final MLB and Triple-A games. A challenge is a ball-strike judgment, not a run: it says a pitch was on the other side of the line, never who scored. Same footing as umpires.js's accuracy aggregates. The LIVE per-game challenge state, which can flip a called third strike, is challenges.js and stays reveal-only. No SealBox."
     },
+    "around-the-game/absSeries.js": {
+      "class": "spoiler-free",
+      "why": "Static abs-challenges-post-games.json — one entry per postseason game with each player's challenges added over roles. The series page's ABS card cuts it to one series and to games Final before the page's cutoff date. A challenge record is a ball-strike judgment, not a score; same footing as Nine Keys and Standings (ADR-0034, ADR-0087). No SealBox."
+    },
     "around-the-game/absExposure.js": {
       "class": "spoiler-free",
       "why": "Static abs-exposure.json — one row per player per level: plate appearances, pitches seen, innings caught, and how many reviews he called for. The DENOMINATOR half of the ABS report, shipped beside absChallenges.js rather than inside it because it is 418 KB of roster sweep behind one section. Season totals over completed games; no run, no margin and no game's result can be read back out of a plate-appearance count. No SealBox."
@@ -248,7 +252,7 @@
     },
     "callouts.js": {
       "class": "spoiler-free",
-      "why": "Static per-date callouts file. Every value is a season aggregate; safety comes from WHERE each note renders, never from this data."
+      "why": "Static per-date callouts file. Every value is a season aggregate; safety comes from WHERE each note renders, never from this data. An LCS or World Series game's file also has a series block (seriesBlockFor): the runs, win-chance line and stats of the series games that went Final BEFORE the slate date. Heading into a date, never the slate game or a later one; same footing as the bracket (ADR-0087). No SealBox."
     },
     "careerMatchups.js": {
       "class": "spoiler-free",
@@ -510,6 +514,10 @@
     "milestones.js": {
       "class": "cutoff-gated",
       "why": "Career counting-stat totals carry no individual game's score, so the page needs no seal — but the precompute cannot be retrofit to an old game's cutoff, so the player-page card shows its projection only on a bare current-day view."
+    },
+    "milbSeasons.js": {
+      "class": "spoiler-free",
+      "why": "Static milb-seasons shards: a player's finished minor-league season totals (2021-2025) and their level percentile. Season aggregates, never a game."
     },
     "milbPool.js": {
       "class": "spoiler-free",
@@ -800,6 +808,14 @@
       "class": "spoiler-free",
       "why": "The player hub's Stats tab loader — the game log, the splits and the career register. A game-log row carries this player's own line and a link to that game's (sealed) box score, never the game's score; the register is a career aggregate. Its one score-adjacent element is SplitsVsTeam's last-meeting line, gated against the page's own asOf in the component."
     },
+    "ovr/career.js": {
+      "class": "spoiler-free",
+      "why": "Pure OVR career blend: per-season Savant percentiles in, one percentile per metric out, with a recency weight and an age shift for sprint speed and fastball velocity (docs/ovr-rating.md). Season quality-of-contact figures on an open surface (ADR-0034), never a game's result. It fetches nothing and reads no game."
+    },
+    "ovr/savantHistory.js": {
+      "class": "spoiler-free",
+      "why": "Static savant-history/NN.json shards — Statcast percentile ranks for the completed seasons 2023-2025, the prior-season input of the OVR career blend. Same footing as savantPercentiles.js and war.js: a finished season's quality-of-contact ranks, never a game's result. No SealBox."
+    },
     "ovr/rating.js": {
       "class": "spoiler-free",
       "why": "Pure OVR rating: Savant season percentiles in, bucket bars and one rating out (docs/ovr-rating.md). Player pages are open surfaces (ADR-0034) and the inputs are season quality-of-contact and fielding figures, never a game's result. It fetches nothing and reads no game."
@@ -823,6 +839,10 @@
     "postseason/upcoming.js": {
       "class": "spoiler-free",
       "why": "The live series page's read of the games still to play: each one's park and announced probable pitchers, and those pitchers' throwing hand. A probable pitcher and a park are not results. The caller hands it only DATED upcoming gamePks (never today's game, never an if-necessary game, which has no gamePk), and the field list asks for no state, score, winner, linescore, seriesStatus or leagueRecord, so even a wrong pk brings back no result. test/postseason/upcoming-games.test.js pins that list."
+    },
+    "postseason/plateUmpire.js": {
+      "class": "spoiler-free",
+      "why": "The series primer's home plate umpire read: one schedule call with hydrate=officials for a date, shaped to { [gamePk]: { id, name } }. An assignment names who is behind the plate, not how a game went. The field list asks for ids and names only (no state, score, teams or linescore), and test/postseason/plate-umpire.test.js pins it. No SealBox."
     },
     "postseason/pitcherCareer.js": {
       "class": "spoiler-free",
@@ -854,7 +874,7 @@
     },
     "postseasonSeries.js": {
       "class": "spoiler-free",
-      "why": "One series' game log, aggregated live from boxscores. `loadSeriesStats(games)` needs only each game's `gamePk`, so it also runs directly on the bracket module's `Series.games` (screens/postseason-live/LiveSeriesPage.jsx, #1230 slice 6), not only on postseason-history.json's completed series. Safe either way: postseason-history.json ships only completed postseasons, and bracket.js's `settle()` filters `Series.games` to games already Final BEFORE the cutoff (docs/api/postseason.md) — so no caller can hand this module a still-live or upcoming game, whichever source it reads from. It also reads each counted game's pitch calls (a `fields=`-pruned feed: club ids, half-innings and call codes, no result or score field) to count whiffs for the series totals."
+      "why": "One series' game log, aggregated live from boxscores. `loadSeriesStats(games)` needs only each game's `gamePk`, so it also runs directly on the bracket module's `Series.games` (screens/postseason-live/LiveSeriesPage.jsx, #1230 slice 6), not only on postseason-history.json's completed series. Safe either way: postseason-history.json ships only completed postseasons, and bracket.js's `settle()` filters `Series.games` to games already Final BEFORE the cutoff (docs/api/postseason.md) — so no caller can hand this module a still-live or upcoming game, whichever source it reads from. It also reads each counted game's pitch calls (a `fields=`-pruned feed: club ids, half-innings and call codes, no result or score field) to count whiffs for the series totals. It also folds each counted game's final runs out of those box scores (`runsByGame`) for the series primer's ribbon; the footing is the same, counted games only (ADR-0087)."
     },
     "prehalf-callouts.js": {
       "class": "caller-gated",

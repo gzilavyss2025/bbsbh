@@ -1,0 +1,88 @@
+/* ABS challenges card on the postseason series pages (SeriesAbsReport.jsx). A
+   partial because series-parts.css is at the file-size cap. */
+.psseries__abssection {
+  margin: 0 0 var(--space-3);
+}
+.psseries__abs {
+  padding: var(--space-2) var(--space-3) var(--space-2);
+}
+.psseries__abstable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.psseries__abstable thead th {
+  padding: var(--space-1) 0 var(--space-1h);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  text-align: center;
+  text-transform: uppercase;
+}
+.psseries__abstable thead th:nth-child(2) {
+  text-align: left;
+}
+.psseries__abstable thead th:nth-child(3),
+.psseries__abstable thead th:nth-child(4) {
+  width: 56px;
+}
+.psseries__absrank {
+  width: 22px;
+  text-align: left;
+}
+.psseries__absrow > * {
+  height: 32px;
+  padding: 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  vertical-align: middle;
+}
+.psseries__absrow:first-child > * {
+  border-top: none;
+}
+td.psseries__absrank {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+/* The logo follows the name. The name truncates first, so the mark stays. */
+.psseries__absname {
+  overflow: hidden;
+  height: 32px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+  text-align: left;
+  text-transform: uppercase;
+}
+.psseries__absnamein {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  max-width: 100%;
+}
+.psseries__abslink {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.psseries__abslogo {
+  flex: none;
+}
+.psseries__absnum {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-num);
+  color: var(--text-body);
+  text-align: center;
+}
+.psseries__abspct {
+  color: var(--text-heading);
+}

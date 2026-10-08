@@ -192,6 +192,70 @@ Example: 2025 NLDS, heading into 2025-10-09.
   `null` for a season with no art on file. A card that draws the mark prints
   `gameLine` ("Game 2") beside it, not `seriesLine`.
 
+## The series primer's rules (`src/lib/postseason/primer/`)
+
+Pure, and no UI yet (ADR-0087, 2026-10-08 addendum).
+
+- `primerSeriesFor(bracket, slateDate, slateGamePks)`: the LCS and World Series
+  playing on the cutoff, or `[]` unless each slate game maps to one of them and
+  each has exactly one slate game. `defaultPrimerSeries(list, opts)` picks the
+  first tab.
+- `seriesStatus(series)`: `{ head, chip }`. The head is `bestOfLine` before
+  Game 1, else `recordLine`. The chip is "MIL facing elimination", or `null`.
+- `ribbonNodes(series, { scoresByPk })`: one node per game, `played`, `today`,
+  `ahead` or `ifNecessary`. Its header holds the shared shape of one finished game.
+- `leaderRows(entries)`: three or fewer show, high to low; more show the leader.
+- `matchupEdges(sides)`: the Matchup edges card's rows, from `starterMatchupsFor` sides. The
+  thresholds are named constants Gary tunes. The rows hold no total bases, so the line has no OPS.
+- `wpSpark(wp, { flip })`: the ribbon's win-chance line, as SVG point strings. `wpLine(winProb, homeId)`
+  (same file) builds the `wp` a game carries, for the nightly block and the live read alike.
+- `bracketNow(bracket)`: the small bracket's `{ boxes, links }`: ALCS, NLCS and World
+  Series boxes (club rows with wins and `eliminated`, a `decided` flag, a foot line),
+  and one connector per LCS, inked once that series is decided. A World Series slot
+  with no club keeps `club: null`. `null` when an LCS or the World Series is missing.
+  `BracketNow.jsx` and `SeriesLeadersLedger.jsx` draw it, with no wiring yet.
+
+## The primer's data
+
+The primer needs the finished games of one series. It gets them from the nightly
+shard first and from statsapi for what the shard does not have (ADR-0087,
+2026-10-08 addendum, decision d). Only games that went Final before the cutoff
+date can come in. The bracket decides which games these are.
+
+- `useSeriesPrimerData(series, cutoff)` (`src/hooks/postseason/`) returns
+  `{ games, stats, source, loading, error }`. `error` is the live read's. `source` is `"shard"`, `"live"` or
+  `"mixed"`. `series` is a bracket series read without `{ live: true }`.
+- It reads the callouts bundle of **today's** game with `fetchCallouts`. The
+  bundle can hold a `series` block: `{ id, gamePks, games, stats? }`. `gamePks` is
+  required, because `stats` carry no game ids. A game is
+  the slice 1 shape in `ribbonNodes.js`. `seriesBlockFor(bundle, seriesId)` gives
+  the block, or `null` when the id does not match.
+- The rules are in `primerGames.js` (`src/lib/postseason/primer/`):
+  - The block names the same games as the bracket: use it (`"shard"`).
+  - The block lacks a counted game, or has no `stats`, or its `gamePks` are not
+    exactly the counted games: use the games it has, and read the rest live
+    (`"mixed"`). The live stats cover every counted game, so a missing game means
+    live stats as well.
+  - The block names a game that the bracket does not count: drop the whole block
+    and read live (`"live"`). This keeps a stale or early file from bringing in
+    today's result.
+  - No block, or a block of the wrong shape: read live. `source` names what was
+    used, so a block that gives no game is `"live"`.
+- The live read is `useSeriesLog(games)`. It is the same read that
+  `LiveSeriesPage` makes: box scores (`loadSeriesStats`), game cards and
+  win-chance signals. `loadSeriesStats` has one new output field,
+  `runsByGame`: `{ [gamePk]: { awayId, homeId, runs: { away, home } } }`. It is
+  folded from the box scores that the function already fetches. A game with no
+  box score has no entry, and the live path then leaves that game out.
+- `wp` is cut to at most 26 home win-chance points.
+- `recordAfterGame(series, index)` (`primer/recordAfter.js`) gives the record
+  line after one game. The game log and the ribbon share it.
+- `fetchPlateUmpires(dateStr)` (`src/api/postseason/plateUmpire.js`) returns
+  `{ [gamePk]: { id, name } }` for the home plate umpires of one date. It makes
+  one schedule call with `hydrate=officials` and a narrow `fields` list that has
+  no result field. It returns `{}` on any failure. A game with no posted umpire
+  has no entry. Assignments post about two hours before first pitch.
+
 ## Series marks (`src/lib/postseason/seriesMarks.js`)
 
 MLB's round art, per season, in `public/postseason-marks/{season}/`: 2026 is
@@ -298,7 +362,7 @@ grid (`styles/postseason/series-live.css`).
 `bracket-fetch`, `bracket-hook`, `live-series-selectors` (the live series
 page's pure game-bucket sort, slice 6), `series-roster` (the declared roster's
 date and its 26-player check), `upcoming-games`, `day-shape`, `series-flow`,
-`series-totals`, `keys-verdict`. `bracket-hook` also scans the series pages'
+`series-totals`, `keys-verdict`, `primer` and `primer-edges` (the series primer's rules). `bracket-hook` also scans the series pages'
 parts for a seal or a Scores Unlocked read. The route is in `test/route.test.js`,
 and the slate model's `seriesStatus`/`leagueRecord` guard in
 `test/slate-scores.test.js`.

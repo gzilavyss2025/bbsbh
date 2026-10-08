@@ -1,0 +1,137 @@
+{
+  "id": 665489,
+  "fullName": "Vladimir Guerrero Jr.",
+  "active": true,
+  "currentAge": 27,
+  "birthDate": "1999-03-16",
+  "primaryNumber": "27",
+  "height": "6' 0\"",
+  "weight": 245,
+  "birthCity": "Montreal",
+  "birthStateProvince": "QC",
+  "birthCountry": "Canada",
+  "mlbDebutDate": "2019-04-26",
+  "primaryPosition": {
+    "abbreviation": "1B",
+    "name": "First Base"
+  },
+  "batSide": {
+    "description": "Right"
+  },
+  "pitchHand": {
+    "description": "Right"
+  },
+  "currentTeam": {
+    "id": 141,
+    "name": "Toronto Blue Jays"
+  },
+  "rosterEntries": [
+    {
+      "startDate": "2019-04-26",
+      "status": {
+        "code": "A"
+      },
+      "team": {
+        "id": 141,
+        "name": "Toronto Blue Jays"
+      }
+    },
+    {
+      "startDate": "2026-08-20",
+      "endDate": "2026-08-21",
+      "status": {
+        "code": "RA"
+      },
+      "team": {
+        "id": 424,
+        "name": "Dunedin Blue Jays",
+        "parentOrgId": 141
+      }
+    },
+    {
+      "startDate": "2020-12-08",
+      "endDate": "2021-01-31",
+      "status": {
+        "code": "A"
+      },
+      "team": {
+        "id": 671,
+        "name": "Leones del Escogido",
+        "parentOrgId": 141
+      }
+    },
+    {
+      "startDate": "2019-04-11",
+      "endDate": "2019-04-26",
+      "status": {
+        "code": "ASG"
+      },
+      "team": {
+        "id": 422,
+        "name": "Buffalo Bisons",
+        "parentOrgId": 141
+      }
+    },
+    {
+      "startDate": "2018-08-30",
+      "endDate": "2018-11-13",
+      "status": {
+        "code": "A"
+      },
+      "team": {
+        "id": 542,
+        "name": "Surprise Saguaros",
+        "parentOrgId": 141
+      }
+    },
+    {
+      "startDate": "2018-07-19",
+      "endDate": "2018-07-31",
+      "status": {
+        "code": "ASG"
+      },
+      "team": {
+        "id": 463,
+        "name": "New Hampshire Fisher Cats",
+        "parentOrgId": 141
+      }
+    },
+    {
+      "startDate": "2018-07-13",
+      "endDate": "2018-07-16",
+      "status": {
+        "code": "RA"
+      },
+      "team": {
+        "id": 1390,
+        "name": "GCL Blue Jays",
+        "parentOrgId": 141
+      }
+    },
+    {
+      "startDate": "2017-04-03",
+      "endDate": "2017-07-10",
+      "status": {
+        "code": "ASG"
+      },
+      "team": {
+        "id": 499,
+        "name": "Lansing Lugnuts",
+        "parentOrgId": 141
+      }
+    },
+    {
+      "startDate": "2016-06-23",
+      "endDate": "2017-04-03",
+      "status": {
+        "code": "ASG"
+      },
+      "team": {
+        "id": 517,
+        "name": "Bluefield Blue Jays",
+        "parentOrgId": 141
+      }
+    }
+  ],
+  "stats": []
+}

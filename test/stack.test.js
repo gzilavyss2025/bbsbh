@@ -126,7 +126,7 @@ test('Stack and its helper import no api/ or stamp module', () => {
   }
 })
 
-// ---- 6. slices S14 to S16 (#1180) ----
+// ---- 6. slices S14 to S17 (#1180) ----
 // Rules moved onto <Stack> keep their own padding, margin or frame, and nothing that
 // draws the column or the gap, in any stylesheet. Every JSX site of the class is a
 // <Stack> with the gap the old rule wrote (base is the default). The checks are in
@@ -168,4 +168,10 @@ const S16 = {
   lookupdeck__field: { file: '74a-contract-lookup.css', gap: 'tight', sites: 5 },
 }
 
-for (const [slice, rows] of Object.entries({ S14, S15, S16 })) defineMigrationTests(`stack ${slice}`, STACK, rows)
+// S17: both rules are deleted whole. `.scout__sheet` rides on `.sheet`, which keeps the frame.
+const S17 = {
+  cwb: { file: '74-contract-workbench.css', gap: 'loose' },
+  scout__sheet: { file: 'scout/panels.css', gap: 'loose' },
+}
+
+for (const [slice, rows] of Object.entries({ S14, S15, S16, S17 })) defineMigrationTests(`stack ${slice}`, STACK, rows)

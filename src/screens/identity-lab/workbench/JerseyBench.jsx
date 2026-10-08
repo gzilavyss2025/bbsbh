@@ -8,6 +8,7 @@ import { liftStyle, useStyleCard } from '../styleClipboard.js'
 import { ColorSwatch } from './ColorSwatch.jsx'
 import { WearDates } from './WearDates.jsx'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
+import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 
 // One jersey on the bench: every knob that tunes it down the left, and the
 // three surfaces those knobs actually paint pinned down the right. The pinning
@@ -136,11 +137,11 @@ export function JerseyBench({
                 </button>
               )}
             </div>
-            <div className="colorlab__swatchrow">
+            <Cluster gap="base" className="colorlab__swatchrow">
               {swatches.map((swatch, i) => (
                 <ColorSwatch key={i} {...swatch} />
               ))}
-            </div>
+            </Cluster>
           </div>
 
           <LogoPositionControls {...position} />
