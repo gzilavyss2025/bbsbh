@@ -595,7 +595,7 @@ const BUDGETS = {
   // together or not at all. Flat beside milbPool.js for every reason that entry
   // gives, and read on the same visit by the same page.
   // +1: nineKeys.js, one more static-data reader beside its siblings.
-  'src/api': 114, // +1: teamSeasons.js, a static-data reader beside its siblings
+  'src/api': 115, // +1: milbSeasons.js (#1719), a static-data reader beside milbHistory.js and milbPool.js. +1: teamSeasons.js, a static-data reader beside its siblings
   // src/api/person, 13: awards.js, the player page's Awards section, split OUT
   // of transactions.js when the honors half it carried outgrew that file's
   // 600-line budget. It belongs beside its siblings — same "nothing here
@@ -805,7 +805,7 @@ const BUDGETS = {
   // generator runs on import; its pure half went to scripts/lib/pitch/xwoba.mjs.
   // +1 for gen-league-averages.mjs, the hand-run league AVG/ERA table. Flat like
   // every gen-*.mjs; its pure half went to src/lib/math/leagueAverages.js.
-  scripts: 125, // +1 check-component-reuse.mjs (#1114), a flat lint guard like check-focus-ring.mjs; its unit cases are in test/. +1 gen-bio-history.mjs (ADR-0100; two datasets, one hand-run script, its pure half in scripts/lib/open-data/). +1 gen-family-ties.mjs (ADR-0100); its pure half is in scripts/lib/open-data/. +1 gen-franchise-history.mjs, a hand-run generator +1 gen-team-seasons.mjs (ADR-0100), a hand-run generator; its pure half is in scripts/lib/open-data/. +1 gen-notable.mjs (D4), a nightly generator, flat like every gen-*.mjs; its pure half is in scripts/lib/notable/.
+  scripts: 126, // +1 gen-milb-seasons.mjs (#1719), a hand-run generator, flat like every gen-*.mjs; its pure half is in scripts/lib/milb/. +1 check-component-reuse.mjs (#1114), a flat lint guard like check-focus-ring.mjs; its unit cases are in test/. +1 gen-bio-history.mjs (ADR-0100; two datasets, one hand-run script, its pure half in scripts/lib/open-data/). +1 gen-family-ties.mjs (ADR-0100); its pure half is in scripts/lib/open-data/. +1 gen-franchise-history.mjs, a hand-run generator +1 gen-team-seasons.mjs (ADR-0100), a hand-run generator; its pure half is in scripts/lib/open-data/. +1 gen-notable.mjs (D4), a nightly generator, flat like every gen-*.mjs; its pure half is in scripts/lib/notable/.
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

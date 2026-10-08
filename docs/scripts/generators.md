@@ -1465,6 +1465,22 @@ Re-run only to fold in a new season.
   800 expected for 24 teams; the 1994 strike = 657.6 against 657 for 28 teams at
   114 games; 2020 = 373.3 against 370 for 60 games). A player page fetches one
   shard, which the deeper window grows from about 4 KB to about 18 KB.
+- `gen-milb-seasons.mjs` → `public/data/milb-seasons/{NN}.json` (player-keyed, bucketed
+  on `personId % 100` via the reader's `milbShardKey`) — each player's minor-league season
+  lines for 2021-2025 at AAA, AA, A+ and A, for the career rating (`docs/ovr-rating.md`,
+  "Career rating"; #1719). **Hand-run, not a cron**: a finished minor-league season never
+  changes, so run it once a year and bump `SEASONS` in `scripts/lib/milb/seasons.mjs`.
+  Two passes. The first pulls each level-season's full pool (`fetchLevelSeasonStats`, 40
+  calls) for the OPS or ERA population. The second batches the players
+  (`/people?personIds=…&hydrate=stats(type=[yearByYear],sportId=N)`, 300 ids a call; the URL
+  cap is about 7,000 characters, so 1,200 ids fail). Players: everyone with a career in
+  `war.json`, plus the Top 100 in `top-prospects.json` (about 1,470 with a line). Rank math
+  and floor (40 PA, 30 outs) are `prospectPercentile.mjs`'s, so a 2026 percentile matches
+  `prospect-trend.json` for all 660 players checked. Parse rules: take the total row of a
+  two-club season (the split with no `team`), skip a season such as "2018.2" and 2020, read
+  ".---" or an absent rate as null. Rk (16) is not built: it needs a league filter for the
+  Arizona and Gulf Coast leagues. About 12 s, 220 KB, the largest shard 4 KB. This is bulk
+  use of statsapi (the terms allow "non-bulk" use), so keep it to the yearly run.
 - `gen-awards-history.mjs` → `public/data/awards-history.json` — who won each major
   MLB award (MVP, Cy Young, Rookie of the Year, Silver Slugger, Gold Glove, Platinum
   Glove, Reliever of the Year, Comeback Player, Hank Aaron, Roberto Clemente, All-MLB
