@@ -275,7 +275,7 @@ up. Below that width the page does not change.
   series, the same two slots draw `SurvivorsBoard` and `BracketRail`.
 - **Main column, in order.** The game card (unchanged), `SeriesStarters`, Today's
   edges (`SeriesEdges`), `SeriesRibbon`, `SeasonSeriesStrip`. On a two-series day a
-  switch of two `Pill` controls (`aria-pressed`) sits above them.
+  switch of two `Pill` controls (`aria-pressed`) sits above them. Each pill wears the round's art (`SeriesMark`, on its navy plate), or the words when the season has no art.
 - **Right column.** `BracketNow`, `SeriesTotals`, `SeriesLeadersLedger`.
 - **Starters.** They show only when the slate date is today. The schedule names the
   starter who really pitched once the day is past.

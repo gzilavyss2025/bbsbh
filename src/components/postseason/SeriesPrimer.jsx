@@ -6,12 +6,14 @@ import { fetchUpcomingSeriesGames } from '../../api/postseason/upcoming.js'
 import { roundTitle } from '../../api/postseason/text.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { ribbonNodes } from '../../lib/postseason/primer/ribbonNodes.js'
+import { seriesMark } from '../../lib/postseason/seriesMarks.js'
 import { BracketNow } from '../bracket/BracketNow.jsx'
 import { BracketRail } from '../bracket/BracketRail.jsx'
 import { SurvivorsBoard } from '../bracket/SurvivorsBoard.jsx'
 import { SeasonSeriesStrip } from '../teamstats/SeasonSeriesStrip.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
 import { SeriesEdges } from './edges/SeriesEdges.jsx'
+import { SeriesMark } from './SeriesMark.jsx'
 import { SeriesLeadersLedger } from './SeriesLeadersLedger.jsx'
 import { SeriesRibbon } from './SeriesRibbon.jsx'
 import { SeriesStarters } from './SeriesStarters.jsx'
@@ -49,11 +51,15 @@ function Main({ primer: { list, series, game, setPick, data, bracket, cutoff, sl
     <>
       {list.length > 1 && (
         <div role="group" aria-label="Series" className="seriesprimer__tabs">
-          {list.map((s) => (
-            <Pill key={s.id} role="control" pressed={s === series} onClick={() => setPick(s.id)}>
-              {roundTitle(s)}
-            </Pill>
-          ))}
+          {list.map((s) => {
+            const mark = seriesMark({ ...s, season: bracket.season })
+            return (
+              <Pill key={s.id} role="control" pressed={s === series} onClick={() => setPick(s.id)}>
+                {/* The round's art on its navy plate; a season with no art keeps the words. */}
+                {mark ? <SeriesMark mark={mark} height={18} plate /> : roundTitle(s)}
+              </Pill>
+            )
+          })}
         </div>
       )}
       {/* The schedule names the starter who really pitched once the day is past, so the starters wait for today. */}
