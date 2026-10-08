@@ -154,8 +154,10 @@ Use the ponytail skill at level full. Finish with ponytail-review. (Opus slices:
 also /code-review.)
 Verify: npm run lint, npm test, npm run build. For a visible change, send a
 screenshot with SendUserFile (Chromium, ?nointro, say what is mocked).
-Handoff: open a DRAFT PR to main. Body: base SHA, files, how you verified,
-"Closes #n" or "Part of #n". Subscribe to the PR and drive it to green.
+Handoff: open a DRAFT PR to main. Body: base SHA, files, how you verified, and
+one line per issue. Write "Closes #n" when this PR meets the issue's "Done means".
+Write "Part of #n" only when the issue has more slices after this one. Subscribe
+to the PR and drive it to green.
 Never merge. Never push to main.
 Stop if: the issue is unclear, a design choice is open, the change needs more
 than 5 files, a test would need to be weakened, or CI fails twice for a reason
@@ -163,7 +165,9 @@ you cannot fix. To stop, send_message your parent AND end with a final line
 "NEEDS PARENT: <what you need>".
 ```
 
-Subscribe to the child's PR when it opens. Sonnet by default. Opus when the cause
+Subscribe to the child's PR when it opens. Read its body once: if the issue's
+"Done means" is met and the line says "Part of #n" or has no keyword, edit the
+body to "Closes #n". A slice of a multi-slice issue keeps "Part of #n". Sonnet by default. Opus when the cause
 of a bug is unknown or the spoiler rule changes (that also goes to him first).
 
 ## Reports and watching

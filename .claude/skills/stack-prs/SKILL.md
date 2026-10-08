@@ -117,8 +117,13 @@ did, and end with a short list of what needs him.
       first, then:
       - **Closing keyword:** confirm GitHub closed it. If it is still open, close
         it with a reason of completed.
-      - **Plain reference:** leave it open. Do not change its labels. The triage
-        labels in `docs/agents/triage-labels.md` are the maintainer's call.
+      - **Plain reference:** read the issue's "Done means" (or its acceptance
+        list) and the source PR. If the PR clearly meets all of it and no slice
+        remains, close the issue with a reason of completed and say why in the
+        comment. If any part is unmet, or you cannot tell, leave it open and list
+        it under **Needs you**. A "Part of" issue with later slices stays open.
+        Do not change its labels. The triage labels in
+        `docs/agents/triage-labels.md` are the maintainer's call.
       - **Comment on every one,** once, with the stack PR link, the source PR it
         came from, and a plain status: "Landed in <stack PR link> (from <source
         PR link>); closed" or "...; still open". Add the attribution footer from
