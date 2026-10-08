@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef } from 'react'
 import { useCopy } from '../../copy/copyContext.js'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 
 // The spoiler-consent modal — the one place the app's single opt-in departure
 // from the spoiler rule is agreed to (ADR-0026). All wording comes from the
@@ -82,7 +83,7 @@ export function ConsentModal({ group, time, onConfirm, onDismiss, resolveText })
         {changes && <p className="sheet__body consent__changes">{changes}</p>}
         {humor && <p className="consent__humor">{humor}</p>}
         <p className="consent__reset">{text('resetNote')}</p>
-        <div className="consent__actions">
+        <Cluster className="consent__actions">
           <button
             ref={dismissRef}
             type="button"
@@ -98,7 +99,7 @@ export function ConsentModal({ group, time, onConfirm, onDismiss, resolveText })
           >
             {text('confirm')}
           </button>
-        </div>
+        </Cluster>
       </div>
     </div>
   )

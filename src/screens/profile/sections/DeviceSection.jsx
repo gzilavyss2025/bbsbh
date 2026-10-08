@@ -1,4 +1,5 @@
 import { MOTION_MODES } from '../../../lib/account/preferences.js'
+import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 
 // Scorebook experience — how this app behaves while you are scoring.
 //
@@ -52,7 +53,7 @@ export function DeviceSection({
 
       <div className="mytally__field">
         <p className="mytally__fieldlabel">Motion</p>
-        <div className="mytally__choices" role="group" aria-label="Motion">
+        <Cluster className="mytally__choices" role="group" aria-label="Motion">
           {MOTION_MODES.map((mode) => (
             <button
               key={mode}
@@ -64,7 +65,7 @@ export function DeviceSection({
               {MOTION_COPY[mode].label}
             </button>
           ))}
-        </div>
+        </Cluster>
         <p className="mytally__fieldnote caps-exempt">{MOTION_COPY[motion]?.note ?? ''}</p>
       </div>
 
