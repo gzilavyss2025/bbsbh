@@ -317,13 +317,13 @@ export function stampDateText(date) {
 
 const RING_DATE_SHORT = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
-// A postseason game's round, as the bottom arc prints it: "AL WC", "ALDS", "ALCS",
-// "World Series". Built from the two facts every producer of the blob carries, the game
+// A postseason game's round, as the bottom arc prints it: "ALWC", "ALDS", "ALCS",
+// "WS". Built from the two facts every producer of the blob carries, the game
 // type and the home club's league id, so a stamp reads the same whichever resolved it.
 // A blob written before `leagueId` was stored (the server's cache is immutable) names no
 // round for a league round, and the stamp keeps its date. Both facts are pregame: no
 // series record, and no game number, which the live feed does not carry.
-const STAMP_ROUND = { F: (lg) => `${lg} WC`, D: (lg) => `${lg}DS`, L: (lg) => `${lg}CS`, W: () => 'World Series' }
+const STAMP_ROUND = { F: (lg) => `${lg}WC`, D: (lg) => `${lg}DS`, L: (lg) => `${lg}CS`, W: () => 'WS' }
 
 export function stampSeriesText(game) {
   const name = STAMP_ROUND[game?.gameType]
