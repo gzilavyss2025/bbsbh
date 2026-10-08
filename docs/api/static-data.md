@@ -531,7 +531,9 @@ for each generator; the reader modules:
 - `ovr/ovrData.js` — a player's OVR rating, from `public/data/ovr/{NN}.json`
   (`gen-ovr.mjs`, hand-run; bucketed on `personId % 100`, both player types in one shard,
   1.9 KB at most). `fetchOvr(personId, 'hitting' | 'pitching')` gives
-  `{ ovr, bars, seasons }` or `null`. `ovr` and each bar are whole numbers from 20 to 99;
+  `{ ovr, bars, seasons }` or `null`. A minor leaguer's entry has `level` (a sportId) and no
+  `bars`; a rated Top 100 player's entry has `pot`, and any other entry has none (a dash).
+  `ovr`, `pot` and each bar are whole numbers from 20 to 99;
   `seasons` lists every season that fed the rating, newest first. A `null` means the player
   failed the minimum-data rule, so it is "no rating" and never a low one. Read through
   `staticJsonBy`. Degrades to `null` before the shard exists. Spoiler-free: a season

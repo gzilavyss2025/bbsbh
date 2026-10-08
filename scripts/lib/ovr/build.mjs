@@ -6,7 +6,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { blendCareer } from '../../../src/api/ovr/career.js'
 import { unpackRow } from '../../../src/api/milbSeasons.js'
-import { careerOvr } from '../../../src/api/ovr/minor.js'
+import { ESTABLISHED_SEASONS, careerOvr } from '../../../src/api/ovr/minor.js'
 import { potRating } from '../../../src/api/ovr/pot.js'
 import { CONSTANTS, rateHitter, ratePitcher } from '../../../src/api/ovr/rating.js'
 
@@ -96,7 +96,7 @@ export function buildRatings({ bat, pit, fld, pa, birthYear, season, minors = {}
       if (!rated) continue // the minimum-data rule
       const years = new Set([...Object.keys(seasons), ...Object.keys(fseasons)])
       const mlbYears = [...years].map(Number).sort((a, b) => b - a)
-      const rows = minorRows(id)
+      const rows = mlbYears.length >= ESTABLISHED_SEASONS ? [] : minorRows(id)
       const all = [...new Set([...mlbYears, ...rows.map((r) => r.season)])].sort((a, b) => b - a)
       out[id] = { ovr: careerOvr({ ovr: rated.ovr, years: mlbYears }, rows), bars: rated.bars, seasons: all }
     }

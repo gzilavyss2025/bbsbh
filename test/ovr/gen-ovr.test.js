@@ -147,3 +147,10 @@ test('a Top 100 major leaguer gets POT on his MLB entry', () => {
   const out = withMinors({ top: { 1: { rank: 5, age: 22 } } })
   assert.ok(out.bat[1].pot >= out.bat[1].ovr)
 })
+
+test('a hitter with 3 MLB seasons keeps his MLB rating whatever his minor-league rows say', () => {
+  const three = { bat: { 1: { 2026: full, 2025: full, 2024: full } } }
+  const base = buildRatings(inputs(three)).bat[1]
+  const out = buildRatings(inputs({ ...three, season: 2026, minors: { 1: [row({ season: 2025, pct: 0 })] } })).bat[1]
+  assert.deepEqual(out, base)
+})

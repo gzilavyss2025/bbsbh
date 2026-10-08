@@ -280,8 +280,13 @@ not swing a rating. It includes minor-league career history.
   swing length exist from 2023 only.
 - **Minor-league seasons.** They enter through the level ceilings above, at a
   discount. Minor-league years have no Statcast (part A), so they use the
-  level-relative stats percentile. **Gap:** the per-player minor-league season
-  lines need a new fetch. Nobody has scoped it.
+  level-relative stats percentile (`public/data/milb-seasons/` for 2021-2025,
+  `prospect-trend.json` for the current season). A row weighs recency x level weight
+  x playing time (`LEVEL_WEIGHT` in `src/api/milbSeasons.js`; 400 PA or 150 IP is
+  full). **Decided (2026-10-08, #1803):** only a player with fewer than 3 MLB seasons
+  has minor-league rows in his rating. With all rows, 26% of established hitters moved
+  by more than 2 points. **Guess:** the two kinds of season are averaged on the OVR
+  scale, one MLB rating standing for all its seasons.
 - **Career Fielding.** The per-season `fld` lives in `public/data/war-history/`
   (with `pa`), from 2023 on, hand-run through `gen-war-history.mjs`. The playing-time floor is still set at build time.
   **Inference:** pooling seasons reduces the counting-stat noise.

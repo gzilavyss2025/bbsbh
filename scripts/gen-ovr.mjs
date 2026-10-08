@@ -13,6 +13,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeShards } from './lib/io.js'
 import { FLD_MIN_PA, buildRatings, loadInputs } from './lib/ovr/build.mjs'
+import { ESTABLISHED_SEASONS } from '../src/api/ovr/minor.js'
 import { CONSTANTS } from '../src/api/ovr/rating.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 
@@ -60,9 +61,9 @@ for (const [label, all] of [['hitters', out.bat], ['pitchers', out.pit]]) {
 for (const [label, all, base] of [['hitters', out.bat, mlbOnly.bat], ['pitchers', out.pit, mlbOnly.pit]]) {
   const minor = Object.values(all).filter((e) => e.level)
   const pots = Object.values(all).filter((e) => e.pot != null)
-  const moves = Object.entries(base).map(([id, b]) => Math.abs(all[id].ovr - b.ovr))
-  const over = (d) => moves.filter((m) => m > d).length
-  console.log(`${label}: ${minor.length} minor leaguers (${stat(minor.map((e) => e.ovr))}); ${pots.length} with POT (${minor.filter((e) => e.pot != null).length} minor, ${pots.length - minor.filter((e) => e.pot != null).length} MLB); of ${moves.length} MLB ratings, ${over(0.5)} moved over 0.5, ${over(1)} over 1, ${over(2)} over 2 (${((100 * over(2)) / moves.length).toFixed(1)}%), largest ${Math.max(...moves).toFixed(1)}`)
+  const moves = Object.entries(base).map(([id, b]) => [b.seasons.length >= ESTABLISHED_SEASONS, Math.abs(all[id].ovr - b.ovr)])
+  const line = (name, xs) => `${xs.length} ${name}: ${xs.filter((m) => m > 1).length} moved over 1, ${xs.filter((m) => m > 2).length} over 2, largest ${Math.max(0, ...xs).toFixed(1)}`
+  console.log(`${label}: ${minor.length} minor leaguers (${stat(minor.map((e) => e.ovr))}); ${pots.length} with POT; minor-league seasons move MLB ratings: ${line('established', moves.filter(([e]) => e).map(([, m]) => m))}; ${line('under ' + ESTABLISHED_SEASONS + ' MLB seasons', moves.filter(([e]) => !e).map(([, m]) => m))}`)
 }
 const unrated = Object.keys(inputs.top).filter((id) => !out.bat[id]?.pot && !out.pit[id]?.pot)
 console.log(`Top 100 players with no rating (so no POT): ${unrated.length} of ${Object.keys(inputs.top).length}`)

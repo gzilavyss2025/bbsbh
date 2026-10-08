@@ -9,6 +9,11 @@ import { FULL_WEIGHT_OUTS, FULL_WEIGHT_PA, LEVEL_WEIGHT } from '../milbSeasons.j
 // Spec, "One band for every level" (decided). Floor 20 at every level (decided).
 export const CEILING = { 11: 58, 12: 55, 13: 45, 14: 39, 16: 30 }
 
+// A player with this many MLB seasons is established: his minor-league rows do not enter
+// his rating. Decided by Gary (2026-10-08, #1803): with all rows, 26% of established
+// hitters moved by more than 2 points. The rows cover thin MLB history, nothing more.
+export const ESTABLISHED_SEASONS = 3
+
 export function minorRating(percentile, level) {
   const ceiling = CEILING[level]
   if (ceiling == null) return null

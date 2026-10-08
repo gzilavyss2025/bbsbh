@@ -1515,6 +1515,16 @@ Re-run only to fold in a new season.
   players, 100 shards, 1.9 KB at most; it throws past 8 KB. A page opens one shard
   (`src/api/ovr/ovrData.js`). Part B's calibration is re-run by
   `.scratch/ovr/calibrate-final.mjs`.
+  Since #1721 it also reads `milb-seasons/` (2021-2025), `prospect-trend.json` (this
+  season's level percentile) and `top-prospects.json` (rank and age). A **minor leaguer**
+  (a minor-league row this season, no MLB rating) gets an entry with `ovr`, `seasons` and
+  `level` (the sportId) and no `bars`: `src/api/ovr/minor.js`, rating
+  `20 + (ceiling - 20) * percentile / 100`. A player with fewer than 3 MLB seasons
+  (`ESTABLISHED_SEASONS`) also has his minor-league rows blended into his OVR (recency x
+  level weight x playing time, from `milbSeasons.js`); an established player is not
+  touched. A rated Top 100 player gets `pot` (`src/api/ovr/pot.js`); everyone else has no
+  `pot`. The run prints how far the minor-league seasons move MLB ratings, and how many
+  Top 100 players have no rating.
 - `gen-milb-seasons.mjs` → `public/data/milb-seasons/{NN}.json` (player-keyed, bucketed
   on `personId % 100` via the reader's `milbShardKey`) — each player's minor-league season
   lines for 2021-2025 at AAA, AA, A+ and A, for the career rating (`docs/ovr-rating.md`,
