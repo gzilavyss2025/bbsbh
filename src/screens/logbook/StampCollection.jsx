@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { GameStamp } from '../../components/logbook/GameStamp.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
+import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 // Every stamp you hold, season by season — the grid that has always sat below
@@ -58,7 +59,7 @@ export function StampCollection({
       {open && (
         <div className="stampcard__body" id={bodyId}>
           {seasons.length > 1 && (
-            <nav className="logbook__seasons" aria-label="Game Log seasons">
+            <Cluster as="nav" className="logbook__seasons" aria-label="Game Log seasons">
               {seasons.map((year) => (
                 <Button
                   size="control"
@@ -71,7 +72,7 @@ export function StampCollection({
                   <small>{counts[year]}</small>
                 </Button>
               ))}
-            </nav>
+            </Cluster>
           )}
 
           <p className="stampcard__through">
