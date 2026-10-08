@@ -208,6 +208,11 @@ Pure, and no UI yet (ADR-0087, 2026-10-08 addendum).
 - `matchupEdges(sides)`: the Matchup edges card's rows, from `starterMatchupsFor` sides. The
   thresholds are named constants Gary tunes. The rows hold no total bases, so the line has no OPS.
 - `wpSpark(wp, { flip })`: the ribbon's win-chance line, as SVG point strings.
+- `bracketNow(bracket)`: the small bracket's `{ boxes, links }`: ALCS, NLCS and World
+  Series boxes (club rows with wins and `eliminated`, a `decided` flag, a foot line),
+  and one connector per LCS, inked once that series is decided. A World Series slot
+  with no club keeps `club: null`. `null` when an LCS or the World Series is missing.
+  `BracketNow.jsx` and `SeriesLeadersLedger.jsx` draw it, with no wiring yet.
 
 ## Series marks (`src/lib/postseason/seriesMarks.js`)
 
