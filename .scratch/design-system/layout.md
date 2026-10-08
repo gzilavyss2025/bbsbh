@@ -1049,7 +1049,7 @@ finder listed 30 safe rows. No gap was off the three steps, so nothing was snapp
 | `.cmdmap__chips` (`CommandMap`, `GloveTarget`, `PlayerAnalyticsTab`; 4 sites) | snug | stretch | div | `margin-block-end` |
 | `.seriesedges__pen` (`PenEdge.jsx`) | snug | `center` | div | `margin-bottom` |
 | `.idlab__monoinksource` (`MonoInkEditor`, `IdentityMonoField`; 2 sites) | tight | `center` | div | `margin` |
-| `.daystrip-key` (`DayStrip.jsx`) | base | stretch | `ul` | `list-style`, `margin`, `padding` |
+| `.daystrip-key` (`DayStrip.jsx`) | base | stretch | `ul` | nothing, so the rule is gone (`.cluster--list` is the reset) |
 
 **Test first.** All four joined `MIGRATED` in `test/cluster-migration.test.js`; it failed on the rules and the
 sites, then passed. **Cascade.** `26d`, `primer-main` and `17` are lazy (components import them); `76` loads after
