@@ -5,10 +5,11 @@
 //   1. RULES. No rule in ANY stylesheet that ends in the class (inside @media,
 //      nested with `&`, in a grouped selector or `:is()`, compound or descendant)
 //      draws display, flex, wrap, gap or grid. Only the part's own sheet is
-//      skipped. Only the class's OWN exact rule, in its own `file`, may hold a
-//      layout property, and only if it is on `keeps`. A closed part (Cluster,
-//      Grid) allows nothing else in an exact rule; an open one (Stack) allows
-//      padding, margin and frame too.
+//      skipped. A layout property is allowed only in the class's OWN exact rule,
+//      in its own `file`, only if it is on `keeps`, and only if the part lists it
+//      as `keepable` (Stack: `flex`; Cluster and Grid: none). A closed part
+//      (Cluster, Grid) allows nothing else in an exact rule; an open one (Stack)
+//      allows padding, margin and frame too.
 //   2. KEEPS. `file` is a real sheet, each `keeps` entry stays in the class's
 //      rule there (`'align-items: center'` pins a value), and a row with no
 //      `file` has no rule left anywhere.
@@ -229,7 +230,7 @@ function sitesOf(cls) {
 
 // ---- the checks ----
 
-// part: { component, sheet, props, defaults, closed, allowDefault }
+// part: { component, sheet, props, defaults, closed, allowDefault, keepable }
 // rows: { [class]: { file, sites = 1, keeps = [], jsx, gap, align, min, fit, dropped } }
 //   `file`: the sheet that held (or holds) the rule. Leave it off only when no rule
 //   of the class exists anywhere.
@@ -237,10 +238,14 @@ function sitesOf(cls) {
 //   `min` in `jsx` instead of by class.
 export function defineMigrationTests(label, part, rows) {
   test(`${label}: no rule that ends in a migrated class draws layout`, () => checkRules(part, rows))
-  test(`${label}: each row's sheet exists and keeps what it should`, () => checkKeeps(rows))
+  test(`${label}: each row's sheet exists and keeps what it should`, () => checkKeeps(part, rows))
   test(`${label}: each class has the right <${part.component}> sites`, () => checkSites(part, rows))
   test(`${label}: no migrated partial loads ahead of ${part.sheet}`, () => checkCascade(part, rows))
 }
+
+// A layout property a row may keep in its own rule. Cluster and Grid own all layout, so
+// none. Stack's `flex` sizes the block as an item of its parent, which main allowed.
+const keepable = (part, prop) => (part.keepable ?? []).includes(prop)
 
 function checkRules(part, rows) {
   for (const [cls, { file, keeps = [] }] of Object.entries(rows)) {
@@ -252,7 +257,7 @@ function checkRules(part, rows) {
           const exact = sel === `.${cls}`
           for (const [prop] of decls) {
             const kept = keepNames.includes(prop)
-            if (LAYOUT.test(prop)) assert.ok(exact && name === file && kept, `${name}: "${sel}" still draws ${prop} on .${cls}`)
+            if (LAYOUT.test(prop)) assert.ok(exact && name === file && kept && keepable(part, prop), `${name}: "${sel}" still draws ${prop} on .${cls}`)
             else assert.ok(!exact || !part.closed || kept, `${name}: .${cls} keeps "${prop}", which is not on its keep list`)
           }
         }
@@ -261,7 +266,7 @@ function checkRules(part, rows) {
   }
 }
 
-function checkKeeps(rows) {
+function checkKeeps(part, rows) {
   const { sheets } = loadTree()
   for (const [cls, { file, keeps = [] }] of Object.entries(rows)) {
     const exact = (sheet) => sheet.rules.filter((r) => r.selectors.includes(`.${cls}`))
@@ -269,6 +274,10 @@ function checkKeeps(rows) {
       assert.deepEqual(keeps, [], `.${cls} has keeps but no file`)
       for (const sheet of sheets) assert.equal(exact(sheet).length, 0, `${sheet.name} still has a .${cls} rule, so the row needs its file`)
       continue
+    }
+    for (const keep of keeps) {
+      const prop = keep.split(/:\s*/)[0]
+      assert.ok(!LAYOUT.test(prop) || keepable(part, prop), `.${cls} cannot keep ${prop}: the part draws layout`)
     }
     const own = sheets.find((s) => s.name === file)
     assert.ok(own, `${file} is not a stylesheet under src/styles`)

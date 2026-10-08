@@ -137,6 +137,7 @@ const STACK = {
   props: ['gap'],
   defaults: { gap: 'base' },
   closed: false,
+  keepable: ['flex'], // item sizing in the parent's flex row; the Stack draws the rest
   allowDefault: true, // gap="base" is the default, and a site may spell it out
 }
 
