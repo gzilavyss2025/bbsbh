@@ -99,8 +99,9 @@ Two corrections, both from scoring along in focus mode, where the page is one at
   counts of at-bats, so the stability rule above is unchanged.
 - *The change card stays where it is, and is repeated.* A pitching change made between plate
   appearances still trails the at-bat before it — that is what tells the scorer who comes in.
-  Windowed, the page holding his first batter opens with the same card ("Pitching for…",
-  `windowReliefPitcherId`), because that page otherwise never names him. Not repeated while
+  Windowed, the page holding his first batter opens with the same card (a "Pitching" card, from
+  `windowLeadIn`; it replaced `windowReliefPitcherId`, see below), because that page otherwise
+  never names him. Not repeated while
   stacked (change then batter is already adjacent), nor for a change between pitches (it leads
   its own window), nor for the half-opening change (the persistent "Now pitching" card's).
   Nothing new is revealed: the change is under the cap.
