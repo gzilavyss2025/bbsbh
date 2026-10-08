@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { recordAfterGame } from '../../src/lib/postseason/primer/recordAfter.js'
-import { foldRunsByGame } from '../../src/api/postseasonSeries.js'
+import { foldRunsByGame, loadSeriesStats } from '../../src/api/postseasonSeries.js'
 import { planShard, primerData, seriesBlockFor } from '../../src/lib/postseason/primer/primerGames.js'
 
 // ---- recordAfterGame ------------------------------------------------------
@@ -172,4 +172,21 @@ test('seriesBlockFor reads the block off a game bundle and nothing else', () => 
   assert.equal(seriesBlockFor({ series: b }, 'other'), null)
   assert.equal(seriesBlockFor(null, 's'), null)
   assert.equal(seriesBlockFor({}, 's'), null)
+})
+
+// The stack of the series-block slice (a pure foldSeriesStats) and this slice
+// (runsByGame) once left loadSeriesStats reading a `games` the fold did not have.
+test('loadSeriesStats hands the live read its runs by game', async (t) => {
+  const box = (awayRuns, homeRuns) => ({
+    teams: {
+      away: { team: { id: 119 }, teamStats: { batting: { runs: awayRuns } }, players: {}, batters: [], pitchers: [] },
+      home: { team: { id: 158 }, teamStats: { batting: { runs: homeRuns } }, players: {}, batters: [], pitchers: [] },
+    },
+  })
+  t.mock.method(globalThis, 'fetch', async (url) => ({
+    ok: true,
+    json: async () => (String(url).includes('/boxscore') ? box(4, 6) : {}),
+  }))
+  const stats = await loadSeriesStats([{ gamePk: 10 }])
+  assert.deepEqual(stats.runsByGame[10], { awayId: 119, homeId: 158, runs: { away: 4, home: 6 } })
 })

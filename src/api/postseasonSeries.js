@@ -221,7 +221,12 @@ export async function loadSeriesStats(games) {
     Promise.all((games ?? []).map((g) => fetchGameBoxscore(g.gamePk))),
     Promise.all((games ?? []).map((g) => fetchGameWhiffFeed(g.gamePk))),
   ])
-  return foldSeriesStats(boxscores, whiffFeeds)
+  return {
+    ...foldSeriesStats(boxscores, whiffFeeds),
+    // Needs `games` to line the box scores up, which the shared fold has no
+    // need of, so it stays out of foldSeriesStats.
+    runsByGame: foldRunsByGame(games ?? [], boxscores),
+  }
 }
 
 // The pure half of loadSeriesStats, shared with the nightly callouts shard's
@@ -312,6 +317,5 @@ export function foldSeriesStats(boxscores, whiffFeeds) {
     // Team sums from the same box scores (seriesTotals.js), plus the whiff
     // counts off each counted game's pitch calls.
     totals: foldTeamTotals(boxscores, foldWhiffs(whiffFeeds)),
-    runsByGame: foldRunsByGame(games ?? [], boxscores),
   }
 }
