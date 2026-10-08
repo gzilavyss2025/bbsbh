@@ -214,6 +214,47 @@ Pure, and no UI yet (ADR-0087, 2026-10-08 addendum).
   with no club keeps `club: null`. `null` when an LCS or the World Series is missing.
   `BracketNow.jsx` and `SeriesLeadersLedger.jsx` draw it, with no wiring yet.
 
+## The primer's data
+
+The primer needs the finished games of one series. It gets them from the nightly
+shard first and from statsapi for what the shard does not have (ADR-0087,
+2026-10-08 addendum, decision d). Only games that went Final before the cutoff
+date can come in. The bracket decides which games these are.
+
+- `useSeriesPrimerData(series, cutoff)` (`src/hooks/postseason/`) returns
+  `{ games, stats, source, loading, error }`. `error` is the live read's. `source` is `"shard"`, `"live"` or
+  `"mixed"`. `series` is a bracket series read without `{ live: true }`.
+- It reads the callouts bundle of **today's** game with `fetchCallouts`. The
+  bundle can hold a `series` block: `{ id, gamePks, games, stats? }`. `gamePks` is
+  required, because `stats` carry no game ids. A game is
+  the slice 1 shape in `ribbonNodes.js`. `seriesBlockFor(bundle, seriesId)` gives
+  the block, or `null` when the id does not match.
+- The rules are in `primerGames.js` (`src/lib/postseason/primer/`):
+  - The block names the same games as the bracket: use it (`"shard"`).
+  - The block lacks a counted game, or has no `stats`, or its `gamePks` are not
+    exactly the counted games: use the games it has, and read the rest live
+    (`"mixed"`). The live stats cover every counted game, so a missing game means
+    live stats as well.
+  - The block names a game that the bracket does not count: drop the whole block
+    and read live (`"live"`). This keeps a stale or early file from bringing in
+    today's result.
+  - No block, or a block of the wrong shape: read live. `source` names what was
+    used, so a block that gives no game is `"live"`.
+- The live read is `useSeriesLog(games)`. It is the same read that
+  `LiveSeriesPage` makes: box scores (`loadSeriesStats`), game cards and
+  win-chance signals. `loadSeriesStats` has one new output field,
+  `runsByGame`: `{ [gamePk]: { awayId, homeId, runs: { away, home } } }`. It is
+  folded from the box scores that the function already fetches. A game with no
+  box score has no entry, and the live path then leaves that game out.
+- `wp` is cut to at most 26 home win-chance points.
+- `recordAfterGame(series, index)` (`primer/recordAfter.js`) gives the record
+  line after one game. The game log and the ribbon share it.
+- `fetchPlateUmpires(dateStr)` (`src/api/postseason/plateUmpire.js`) returns
+  `{ [gamePk]: { id, name } }` for the home plate umpires of one date. It makes
+  one schedule call with `hydrate=officials` and a narrow `fields` list that has
+  no result field. It returns `{}` on any failure. A game with no posted umpire
+  has no entry. Assignments post about two hours before first pitch.
+
 ## Series marks (`src/lib/postseason/seriesMarks.js`)
 
 MLB's round art, per season, in `public/postseason-marks/{season}/`: 2026 is

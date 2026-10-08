@@ -9,14 +9,15 @@ import { fetchUpcomingSeriesGames } from '../../api/postseason/upcoming.js'
 import { loadNineKeys } from '../../api/nineKeys.js'
 import { formerTeammatePairs, loadFormerTeammates } from '../../api/formerTeammates.js'
 import { fetchSeriesRoster, rosterReadDate } from '../../api/postseason/roster.js'
-import { loadSeriesStats, BATTING_CATEGORIES, SERIES_PITCHING_CATEGORIES } from '../../api/postseasonSeries.js'
-import { fetchGameCardsByPk, fetchSchedule } from '../../api/schedule.js'
+import { BATTING_CATEGORIES, SERIES_PITCHING_CATEGORIES } from '../../api/postseasonSeries.js'
+import { fetchSchedule } from '../../api/schedule.js'
 import { computePlayOfTheGame } from '../../api/boxscore.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
-import { usePastGameSignals } from '../../hooks/usePastGameSignals.js'
+import { EMPTY_LOG, useSeriesLog } from '../../hooks/postseason/useSeriesLog.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { dayShape } from '../../lib/postseason/dayShape.js'
+import { recordAfterGame } from '../../lib/postseason/primer/recordAfter.js'
 import { gamePath } from '../../lib/route.js'
 import { useNav } from '../../lib/nav.js'
 import { monthDayName, toApiDate } from '../../lib/dates.js'
@@ -44,51 +45,6 @@ import { FormerTeammates } from '../../components/team/FormerTeammates.jsx'
 import { seriesMark } from '../../lib/postseason/seriesMarks.js'
 import { SeriesMark } from '../../components/postseason/SeriesMark.jsx'
 
-
-// The record AS OF one logged game, in the same three wordings recordLine
-// (text.js) uses for the series' current state — mirrored here rather than
-// reused because a Series' `games` carry a winnerId, not two scores, so the
-// tally itself is simpler than PostseasonSeriesPage.jsx's seriesStatusAfterGame.
-function recordAfterGame(series, index) {
-  const [a, b] = series.slots
-  let aWins = 0
-  let bWins = 0
-  for (let i = 0; i <= index; i++) {
-    const winnerId = series.games[i].winnerId
-    if (winnerId === a.club?.id) aWins += 1
-    else if (winnerId === b.club?.id) bWins += 1
-  }
-  const hi = Math.max(aWins, bWins)
-  const lo = Math.min(aWins, bWins)
-  const isClincher = series.decided && index === series.games.length - 1
-  if (isClincher) return `${series.winner.abbreviation} won ${hi}–${lo}`
-  if (aWins === bWins) return `Series tied ${hi}–${lo}`
-  const leader = aWins > bWins ? a.club : b.club
-  return `${leader?.abbreviation ?? ''} leads ${hi}–${lo}`
-}
-
-// Sweeps only the ALREADY-COUNTED games (before the cutoff) for their box
-// scores, cards and win-probability signals — the same footing as
-// PostseasonSeriesPage.jsx's loadSeries, minus the postseason-history.json
-// read this page skips: `games` comes straight off the bracket Series. Never
-// called with the cutoff game or an upcoming one — loadSeriesStats fetches a
-// `/boxscore` per game, which for a still-live game would resolve its score.
-async function loadGameLog(games, getSignals) {
-  const [stats, cardsByPk, signalsEntries] = await Promise.all([
-    loadSeriesStats(games),
-    fetchGameCardsByPk(games.map((g) => g.gamePk)),
-    Promise.all(
-      games.map((g) =>
-        getSignals(g.gamePk)
-          .then((signals) => [g.gamePk, signals])
-          .catch(() => [g.gamePk, null]),
-      ),
-    ),
-  ])
-  return { stats, cardsByPk, gameSignals: Object.fromEntries(signalsEntries) }
-}
-
-const EMPTY_LOG = { stats: null, cardsByPk: {}, gameSignals: {} }
 
 // Live Postseason Series: a series still in progress, or a 2026 series that
 // finished but has nowhere else to go yet — postseason-history.json only
@@ -137,13 +93,8 @@ export function LiveSeriesPage({ seriesId, asOf }) {
     [todayPk, cutoffInput],
   )
 
-  const getSignals = usePastGameSignals()
   const games = series?.games ?? []
-  const gamePks = games.map((g) => g.gamePk).join(',')
-  const { loading: logLoading, error: logError, data: log } = useAsync(
-    () => (games.length ? loadGameLog(games, getSignals) : Promise.resolve(EMPTY_LOG)),
-    [gamePks],
-  )
+  const { loading: logLoading, error: logError, data: log } = useSeriesLog(games)
 
   // The three game buckets, sorted once: counted results, today's game, the
   // games still ahead (today excluded). Null-safe before the series loads.

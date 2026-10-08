@@ -828,6 +828,10 @@
       "class": "spoiler-free",
       "why": "The live series page's read of the games still to play: each one's park and announced probable pitchers, and those pitchers' throwing hand. A probable pitcher and a park are not results. The caller hands it only DATED upcoming gamePks (never today's game, never an if-necessary game, which has no gamePk), and the field list asks for no state, score, winner, linescore, seriesStatus or leagueRecord, so even a wrong pk brings back no result. test/postseason/upcoming-games.test.js pins that list."
     },
+    "postseason/plateUmpire.js": {
+      "class": "spoiler-free",
+      "why": "The series primer's home plate umpire read: one schedule call with hydrate=officials for a date, shaped to { [gamePk]: { id, name } }. An assignment names who is behind the plate, not how a game went. The field list asks for ids and names only (no state, score, teams or linescore), and test/postseason/plate-umpire.test.js pins it. No SealBox."
+    },
     "postseason/pitcherCareer.js": {
       "class": "spoiler-free",
       "why": "A starter's all-time postseason line for the live series page: finished prior seasons (yearByYear) plus the cutoff-gated line it is handed. Never stats=career, which counts a game in progress. ADR-0088."
@@ -858,7 +862,7 @@
     },
     "postseasonSeries.js": {
       "class": "spoiler-free",
-      "why": "One series' game log, aggregated live from boxscores. `loadSeriesStats(games)` needs only each game's `gamePk`, so it also runs directly on the bracket module's `Series.games` (screens/postseason-live/LiveSeriesPage.jsx, #1230 slice 6), not only on postseason-history.json's completed series. Safe either way: postseason-history.json ships only completed postseasons, and bracket.js's `settle()` filters `Series.games` to games already Final BEFORE the cutoff (docs/api/postseason.md) — so no caller can hand this module a still-live or upcoming game, whichever source it reads from. It also reads each counted game's pitch calls (a `fields=`-pruned feed: club ids, half-innings and call codes, no result or score field) to count whiffs for the series totals."
+      "why": "One series' game log, aggregated live from boxscores. `loadSeriesStats(games)` needs only each game's `gamePk`, so it also runs directly on the bracket module's `Series.games` (screens/postseason-live/LiveSeriesPage.jsx, #1230 slice 6), not only on postseason-history.json's completed series. Safe either way: postseason-history.json ships only completed postseasons, and bracket.js's `settle()` filters `Series.games` to games already Final BEFORE the cutoff (docs/api/postseason.md) — so no caller can hand this module a still-live or upcoming game, whichever source it reads from. It also reads each counted game's pitch calls (a `fields=`-pruned feed: club ids, half-innings and call codes, no result or score field) to count whiffs for the series totals. It also folds each counted game's final runs out of those box scores (`runsByGame`) for the series primer's ribbon; the footing is the same, counted games only (ADR-0087)."
     },
     "prehalf-callouts.js": {
       "class": "caller-gated",
