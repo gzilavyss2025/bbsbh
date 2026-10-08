@@ -1515,6 +1515,13 @@ Re-run only to fold in a new season.
   players, 100 shards, 1.9 KB at most; it throws past 8 KB. A page opens one shard
   (`src/api/ovr/ovrData.js`). Part B's calibration is re-run by
   `.scratch/ovr/calibrate-final.mjs`.
+  It also writes `public/data/ovr-history/{NN}.json` (#1722): per player, the dated rows
+  `[date, ovr, bars | null, 1?]` kept by `scripts/lib/ovr/history.mjs` (every day for 60
+  days, one a week for the rest of the season). Prospects are seeded from
+  `prospect-trend.json`; a seeded row ends in `1` and holds a percentile, not a rating.
+  The row date is `generatedAt` of `savant-percentiles.json`, so a rerun on the same files
+  changes nothing. It throws past 8 KB a shard. Today the largest is 3.9 KB; see
+  `docs/ovr-rating.md` for the size limit. Not on a cron yet.
 - `gen-milb-seasons.mjs` → `public/data/milb-seasons/{NN}.json` (player-keyed, bucketed
   on `personId % 100` via the reader's `milbShardKey`) — each player's minor-league season
   lines for 2021-2025 at AAA, AA, A+ and A, for the career rating (`docs/ovr-rating.md`,
