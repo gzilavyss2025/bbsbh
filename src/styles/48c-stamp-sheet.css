@@ -35,12 +35,6 @@
    list, and "every club across all five levels" is not a list anyone
    collects against. Sits on the PAGE, not on the board: it acts on the
    panes below rather than belonging to any one of them. */
-.stampsheet__levels {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
 /* Figure Pill controls (#1131 slice 4), the twin of .logbookstats__levels:
    the same reading size, --fs-small. */
 .stampsheet__levels .pill {

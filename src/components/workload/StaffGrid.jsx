@@ -3,6 +3,7 @@ import { bullpenStatusCounts } from '../../api/workload.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { DayStrip, DayStripKey } from './DayStrip.jsx'
 import { PenDots } from './PenDots.jsx'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 
 // THE STAFF GRID — one club's whole bullpen over a week, on one board.
@@ -41,14 +42,14 @@ export function StaffGrid({ rows, showDots = true, showKey = true }) {
   return (
     <Stack gap="snug" className="staffgrid">
       {showDots && (
-        <div className="staffgrid__summary">
+        <Cluster className="staffgrid__summary" align="center">
           <PenDots counts={counts} />
           <span className="staffgrid__tally">
             {counts.fresh} available
             {counts.limited > 0 && ` · ${counts.limited} limited`}
             {counts.down > 0 && ` · ${counts.down} down`}
           </span>
-        </div>
+        </Cluster>
       )}
 
       <div className="staffgrid__head">

@@ -826,3 +826,32 @@ and `npm run e2e` were not run.
 
 **Left.** `.stampsheet__levels` (`StampSheet.jsx`, 6th file), `.idlab__mastheadmode` (2 more files),
 `.team-hub__namerow` (2 sites in 2 files), `.idlab__eraactions` (`EraRow.jsx`, #1747).
+
+## Cluster slice C6 (2026-10-08)
+
+Four wrapping rows, one per file, moved onto `Cluster`: 4 rules, 4 JSX sites in 4 files. Base:
+`origin/main` at 1574055. The one open PR (#1751) edits a skill file only. The finder lists 42 safe rows.
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.stampsheet__levels` (`StampSheet.jsx`) | snug | div (`role`, `aria-label` already there; pass through) | nothing, so the rule is gone (`.pill` descendant stays) |
+| `.mytally__choices` (`DeviceSection.jsx`) | snug | div (`role`, `aria-label` pass through) | `margin-top` |
+| `.consent__actions` (`ConsentModal.jsx`) | snug | div | `margin-top` |
+| `.staffgrid__summary` (`StaffGrid.jsx`) | snug, `align="center"` | div | nothing, so the rule is gone |
+
+**Test first.** All four joined `MIGRATED` in `test/cluster-migration.test.js`; it failed on the rules and the
+sites, and passes now. **Cascade.** `46`, `54` and `76` load after `system/cluster.css` in `index.css`, and
+`48c` is lazy. No gap was off-step, so nothing snapped.
+
+**Left.** `.txntl__head` (`05-masthead-nav.css` loads ahead of `cluster.css`, so the order guard would fail),
+`.cmdmap__chips` (4 sites in 3 files, plus a `--types` modifier), `.animlab__frozen` (16 sites, a lab),
+`.team-hub__namerow` (2 files), the `.cwb__*` rows (admin), `15-team-color-lab.css` (Grid G1).
+
+**Checked.** `geom.mjs` (`MOCK=1 FREEZE=1 BLOCKIMG=1`, `?nointro`, 390 and 760px), BEFORE (stash) vs AFTER:
+`/profile`, `/bullpen-availability`, `/logbook/stats`, `/milestones` all identical (393, 1116, 234 and 3810
+elements, same page heights). `.mytally__choices` (`/profile`) and `.staffgrid__summary`
+(`/bullpen-availability`) drew for real, 1 element each at both widths.
+
+**Not seen.** `.stampsheet__levels` and `.consent__actions` did not draw under the mock (no stamps; the consent
+modal opens from a tap on a sealed score). The CSS change is the same four declarations for each.
+`npm run visual` and `npm run e2e` were not run.
