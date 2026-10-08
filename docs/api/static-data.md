@@ -305,6 +305,16 @@ for each generator; the reader modules:
   through the reader for the same reason the leaders board's is: a level's winter
   opens hours before the night's generator run, and a card offering a game from
   the wrong season is worse than no card.
+- `milbSeasons.js` — a player's minor-league season lines, 2021-2025, AAA to A
+  (`public/data/milb-seasons/{NN}.json`, bucketed on `personId % 100`, hand-run by
+  `gen-milb-seasons.mjs`). `fetchMilbSeasons(personId)` gives rows
+  `{ season, sport, group, n, v, pct }`: the season total at one level, `n` plate
+  appearances or outs, `v` OPS or ERA (null on a dash), `pct` the percentile in that
+  level-season (null under 40 PA or 30 outs). The shard stores rows as arrays
+  (`packRow`/`unpackRow`). The current season is not in it: read `prospect-trend.json`.
+  Degrades to `[]`. Also exports the career blend's start values for step 5:
+  `LEVEL_WEIGHT` (AAA 0.6, AA 0.5, A+ 0.35, A 0.25, Rk 0.1), `FULL_WEIGHT_PA` (400) and
+  `FULL_WEIGHT_OUTS` (450, 150 IP). Spoiler-free: season totals only.
 - `notebook.js` — the offseason page's one NOTE, both kinds, in one reader.
   `fetchLongAtBats(season)` reads `public/data/long-at-bats/{season}.json`
   (`gen-long-at-bats.mjs`): every plate appearance of an MLB regular season that took 12

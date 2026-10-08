@@ -67,6 +67,7 @@ export const EXCEPT = {
   'prospect-rank-history.json': 'hand-run; the 2005-2024 rankings are frozen and the file carries no clock (#1111)',
   'run-expectancy-eras/': 'hand-run, one decade at a time (gen-run-expectancy.mjs --era-aggregate); history',
   'league-averages.json': 'hand-run; a finished season never changes and the file carries no clock',
+  'milb-seasons/': 'hand-run once a year (gen-milb-seasons.mjs, #1719); a finished minor-league season never changes',
   // Frozen ON PURPOSE, which is the one shape this guard cannot tell from a
   // dead generator. A level's pool is a list of games from a season that is
   // over, so it is checked once and then only re-joined against the prospect
