@@ -982,3 +982,29 @@ with equal heights (the known logo race); two more AFTER runs matched BEFORE exa
 **Not seen.** `.psseries__potgWho` (the series page needs a live series; `synth.mjs` has no `align` switch, so
 the baseline row was not checked synthetically) and `.erasesheet__actions` for real (the dialog opens from a tap).
 `npm run visual` and `npm run e2e` were not run.
+
+## Cluster slice C8 (2026-10-08)
+
+Two wrapping rows moved onto `Cluster`: 2 rules, 6 JSX sites in 4 files. Base: `origin/main` at 72284f8.
+Open PRs touching these files: none (#1783 edits other rules in `26`, `43`, `29`, `39`).
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.trrank__chips` (`SituationalBoard.jsx`, `SituationalRecordsPage.jsx` x2, `PostseasonRecordsPage.jsx` x2) | tight | div (`role`, `aria-label` pass through) | the `+ .trrank__chips` sibling `margin-top` rule |
+| `.pbp__replaypicks` (`AtBatReplay.jsx`) | tight | div | the `.btn` descendant rule |
+
+**Test first.** Both joined `MIGRATED` in `test/cluster-migration.test.js` with no `file` (no own rule is left);
+it failed on `main` (3 of 4 tests) and passes now. **Cascade.** `card.css` loads after `system/cluster.css`;
+`66` is lazy. No gap was off-step, so nothing snapped. No site sits inside a SealBox reveal.
+
+**Left.** `.trailstrip__cells` (`AtBatTrail.jsx`: a site with `onKeyDown`, on the innings-viewer trail, a scoring
+surface, so by hand later). The rest of the finder's list keeps three or more declarations, or is a lab or admin
+row (`.dlab__*`, `.idlab__*`, `.cwb__*`, `.animlab__frozen`, `.rpt-controls` with 19 sites).
+
+**Checked.** `geom.mjs` (`MOCK=1 FREEZE=1 BLOCKIMG=1`, `?nointro`, 390 and 760px), BEFORE (stash) vs AFTER:
+`/situational-records`, `/situational-records?metric=trr_1`, `/postseason-records` and
+`/postseason-records?view=team` all identical (1922, 608, 1376 and 1376 elements, same page heights).
+
+**Not seen.** The geometry dump keeps no class names, so I did not confirm that any `.trrank__chips` row
+drew under the mock. `.pbp__replaypicks` (a phone replay sheet behind a tap) was not loaded.
+`npm run visual` and `npm run e2e` were not run.

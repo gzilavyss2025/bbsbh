@@ -17,6 +17,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { SituationalIndex, GROUP_KEYS } from '../components/situational/SituationalIndex.jsx'
 import { SituationalBoard } from '../components/situational/SituationalBoard.jsx'
+import { Cluster } from '../components/ui/layout/Cluster.jsx'
 
 // One situational record, every club at one level, in rank order. The bare
 // route is a browse-first index: every split stays visible inside its
@@ -140,7 +141,7 @@ export function SituationalRecordsPage({
           onChange={(nextSport) => navigate(pathFor({ sport: nextSport }))}
         />
         {showHalves && (
-          <div className="trrank__chips" role="group" aria-label="Season half">
+          <Cluster gap="tight" className="trrank__chips" role="group" aria-label="Season half">
             {HALVES.map((item) => (
               <button
                 key={item.key}
@@ -152,10 +153,10 @@ export function SituationalRecordsPage({
                 {item.label}
               </button>
             ))}
-          </div>
+          </Cluster>
         )}
         {months.length > 1 && (
-          <div className="trrank__chips" role="group" aria-label="Month">
+          <Cluster gap="tight" className="trrank__chips" role="group" aria-label="Month">
             <button
               type="button"
               className={`trrank__chip${month == null ? ' is-on' : ''}`}
@@ -175,7 +176,7 @@ export function SituationalRecordsPage({
                 {item.label}
               </button>
             ))}
-          </div>
+          </Cluster>
         )}
       </section>
 
