@@ -1485,6 +1485,17 @@ Re-run only to fold in a new season.
   group only, for seasons from `FLD_START_SEASON` (2023). Older seasons were not
   checked. Adds about 0.8 KB per shard (1.5 KB at most). A pitcher has no `fld` row
   unless he batted. `src/api/war.js` reads them with `fldByYearFor` / `paByYearFor`.
+- `gen-savant-history.mjs` → `public/data/savant-history/{NN}.json` (player-keyed,
+  bucketed on `personId % 100` via `shardKey100`) — Savant `percentile-rankings`
+  percentiles for the last three COMPLETED seasons (**2023-2025**), hitters and
+  pitchers in one shard, null cells left out. The prior-season input of the OVR career
+  blend (#1717, `docs/ovr-rating.md`). Same board and `METRICS` map as the nightly
+  `gen-savant-percentiles.mjs` (both import them from `lib/savant.mjs`). Run by hand
+  once a year after the season ends and move `FIRST_SEASON`/`LAST_SEASON` with it:
+  `node scripts/gen-savant-history.mjs`. About 2.5 KB a shard on average, 5 KB at most;
+  it throws past 6 KB. A page opens one shard (`src/api/ovr/savantHistory.js`). A finished
+  season's ranks did not change between two fetches minutes apart (checked once); a
+  later revision is unchecked.
 - `gen-awards-history.mjs` → `public/data/awards-history.json` — who won each major
   MLB award (MVP, Cy Young, Rookie of the Year, Silver Slugger, Gold Glove, Platinum
   Glove, Reliever of the Year, Comeback Player, Hank Aaron, Roberto Clemente, All-MLB
