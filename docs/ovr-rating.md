@@ -195,21 +195,35 @@ Its formula and weights are not public, so this rating is ours. Say that on the
 card. Do not use the word "official" or copy The Show's tier names.
 
 **Career rating (decided direction).** The rating covers a player's whole career,
-weighted for recency and adjusted with an age curve. One hot month should not swing
-a rating. It includes minor-league career history.
+weighted for recency and adjusted with an age term (see below). One hot month should
+not swing a rating. It includes minor-league career history.
 
 - **Recency decay (start values).** Marcel-style weights of 5/4/3 on the last three
   seasons, plus a smaller tail for earlier ones. The weights and the tail are
   guesses to tune. `docs/season-score.md` already uses a Marcel-style baseline
   (prior three seasons weighted 3/2/1, regressed with 50 games of .500 baseball),
   so the idea has precedent here. Its weights differ from these.
-- **Age curve (Open, research).** The repo has none. The task: find a published
-  aging curve and test it on `public/data/war-history/` (WAR by season) against
-  player birth years. Every claim about the curve is an **inference** until that
-  test runs. No number for it is decided.
-- **MLB seasons.** Savant percentile boards by year (see Prior seasons). Part A
-  checked 2024 and 2025. **Inference:** older Statcast years exist. They were not
-  checked.
+- **Age term (decided form).** The fit is in `.scratch/ovr/age-shift/`
+  (`findings-age-shift.md`, with the tables and scripts). It uses Savant percentile
+  boards for 2015-2025 and birth dates from the stats API. Version one:
+  - In the career blend, move older seasons to the player's current age with the
+    smooth, centred age-shift table **for sprint speed and fastball velocity
+    only**. Start values, in percentile points per year: fastball velocity +5.5 at
+    age 21, +0.7 at 27, -1.7 at 31, -4.6 at 39; sprint speed +2.1, +0.2, -0.8, -2.1.
+  - The other metrics get no blend shift. The gain is inside the noise. Bat speed,
+    squared-up rate and swing length have 3 seasons and get no table.
+  - Use an age term in POT. Its form is in the POT section (a small runway credit
+    for players under 21).
+  - Checked in the fit: a percentile is a rank inside each year's pool, so the shift
+    is relative to peers and not absolute change. With 5/4/3 recency weights the
+    shift barely changes the order of players (rank correlation 0.998 or higher). In
+    a holdout test only fastball velocity improved (error 13.07 to 12.38).
+  - **Inference:** the table is partly corrected for players who leave the board
+    and for regression to the mean. It cannot confirm a peak age (the zero crossing
+    is the sample mean age). Refit the start values when more seasons exist.
+- **MLB seasons.** Savant percentile boards by year (see Prior seasons). The boards
+  exist for 2015-2025 (checked in the age-shift fit). Bat speed, squared-up rate and
+  swing length exist from 2023 only.
 - **Minor-league seasons.** They enter through the level ceilings above, at a
   discount. Minor-league years have no Statcast (part A), so they use the
   level-relative stats percentile. **Gap:** the per-player minor-league season
@@ -244,12 +258,18 @@ the app's own number and not a major-league equivalent.
 Rating = `20 + (ceiling - 20) * percentile / 100`, using the level ceiling above.
 With the fixed floor of 20, a 97th-percentile A+ hitter is about 44.
 
-**Level floor.** The floor stays fixed at 20 for now. The spec's formula floors every
-level at 20, but part B's data (hitters by OPS, pitchers by ERA, ranked inside the
-level-season) show a bottom-half AAA player reaches the majors 14.9% of the time and
-a bottom-half A player 10.2%. **Inference:** if OVR is to mean the same thing at
-every level, the floor should rise with the level. Part B did not model it. A
-modelling task comes before the minor-league build step (see Build order).
+**Level floor (decided).** One floor of 20 at every level. The formula floors every
+level at 20, although part B's data (hitters by OPS, pitchers by ERA, ranked inside
+the level-season) show a bottom-half AAA player reaches the majors 14.9% of the time
+and a bottom-half A player 10.2%. A modelling task tested a floor that rises with
+level (2009-2019 level-seasons, a logistic fit of reach against in-level percentile).
+Fitted floors ran about 23 to 30. The 95% intervals were 3 to 6 points wide and
+overlapped, except that Rk was lower. The level-dependent floor aligned the levels
+better only at 10% reach (spread 3.2 points, against 6.8 for a floor of 20). It did
+not align them better at 20% or 30% reach. **Inference:** reach rate measures
+future arrival, not current ability, so the data cannot say the floor must rise.
+Gary decided to keep the single floor. The fit is a comment on issue #1721. It was
+not saved as a file.
 
 **Bars (decided).** A minor leaguer's card shows OVR and POT only, with no
 attribute bars. Rough bars from slash-line parts: not in version one.
@@ -258,12 +278,30 @@ attribute bars. Rough bars from slash-line parts: not in version one.
 
 The only potential signal on file is MLB Pipeline's Top 100 rank in
 `public/data/top-prospects.json` (96 players at last read). It holds a rank and
-no scouting grades. `docs/farm-index.md` already maps rank to a 20-80 future
-value (FV) grade, so reuse that map and convert FV to the 0-100 band.
+no scouting grades. `docs/farm-index.md` does not map rank to a 20-80 future value
+(FV) grade, as an earlier version of this spec said. It scores a rank with
+`value(rank) = 100 * e^(-k * (rank - 1))`, `k = ln(100 / 8) / 99` (`rankValue()` in
+`src/api/around-the-game/farmSystem.js`): rank 1 scores 100 and rank 100 scores 8. It
+cites FV only as dollar values, to justify the shape of the decay.
 
-- **Decided:** POT shows only for players on the Top 100 list, from rank. Start
-  values: ranks 1-5 are 90 and up, rank 100 is about 70.
+- **Decided:** POT shows only for players on the Top 100 list, from rank.
 - Everyone not on the list shows a dash, including MLB regulars. Do not invent a POT.
+
+**POT formula (decided at Gary's request on 2026-10-08; every constant is a start
+value).**
+- Base: `POT_base = 70 + 25 * (rankValue(rank) - 8) / 92`. Rank 1 gives 95, rank 5
+  about 92, rank 100 gives 70. This keeps the earlier start values (ranks 1-5 are 90
+  and up, rank 100 is about 70) and reuses the one rank curve the repo already has.
+- Age term: a runway credit only. `age_credit = clamp(1.5 * (21 - age), 0, 4)`
+  POT points. A player aged 21 or older gets 0, and there is no debit for older
+  players. The pivot of 21 is the pivot of the farm index's youth pillar
+  (`AGE_PIVOT` in `farmSystem.js`).
+- `POT = min(99, max(OVR, POT_base + age_credit))`.
+- **Inference:** Pipeline's rank already reflects age to some degree (not checked),
+  so the credit is small and positive only, to avoid counting age twice. The age-shift
+  fit (`.scratch/ovr/age-shift/`) shows the youngest bands rising fastest relative to
+  peers, which supports the direction. The size of 1.5 points per year and the cap of
+  4 are guesses and are not derived from the fit.
 
 **No scouting grades found (part A).** The Top 100 page data has 96 rows and no
 grade key. Two profile pages rendered in Chromium (rank 1, Made 815908, and rank 2,
@@ -305,14 +343,16 @@ changed nothing. Record only, no action.
 2. Pure rating module with tests, test first: percentile-to-rating curve, bucket
    means, the stretch with the 99 cap, the minimum-data rule, missing-bucket
    handling.
-3. Aging-curve research task, before the blend (see Career rating).
+3. Age-shift fit from Savant 2015-2025 (done; the form is decided, see Career
+   rating).
 4. Sharded prior-season store and reader (`staticJsonBy`), then the career
-   weighting (recency decay and the age curve).
+   weighting (recency decay, and the age shift for sprint speed and fastball
+   velocity).
 5. Per-season `fld` store, and the minor-league season-lines fetch. Both come
    before `gen-ovr.mjs`.
 6. `gen-ovr.mjs` and MLB hitters and pitchers.
-7. Floor modelling task, then minor leaguers with ceilings and POT. The task tests
-   whether the floor should rise with level.
+7. Minor leaguers with ceilings and POT. The floor modelling task is done: the
+   floor stays at 20 (see OVR for a minor leaguer).
 8. Rating history file and arrows (UI in #1703).
 
 **Step 1: calibrate against posted ratings.** Treat posted video-game ratings as the
@@ -328,8 +368,8 @@ answer key. Use them to calibrate only. Do not copy or reproduce their numbers.
 - (b) Fit each attribute to the Statcast percentiles we already have, to set the
   curve shape, the mean, and the spread, and to test the 2.0 / 1.5 stretch
   factors.
-- (c) Optional: check the rank-to-future-value POT map in `docs/farm-index.md`
-  against posted scouting grades.
+- (c) Optional: check the rank-to-POT map (see the POT section) against posted
+  scouting grades.
 - **Time box.** If no lawful data source is found, or the terms forbid use, record
   that and go on with this spec's own start weights.
 
