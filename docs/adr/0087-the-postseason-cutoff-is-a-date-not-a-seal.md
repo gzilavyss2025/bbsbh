@@ -177,8 +177,10 @@ Unlocked read, and nothing from today's game or a later one.
 ## Addendum (2026-10-08): the series primer
 
 Gary locked the series primer on 2026-10-08. It is a new home page (`/`) layout
-for a postseason day. It shows only when every game on the MLB slate is in the
-NLCS, the ALCS or the World Series, with one game for each series. It shows from
+for a postseason day. It shows only when every game on the MLB slate is in one
+round (the Wild Card, the Division Series, the LCS or the World Series), with one
+game for each series. Gary widened it from the LCS and the World Series to every
+round on 2026-10-08. A day with two rounds on the slate keeps the usual page. It shows from
 `BRACKET_RAIL_QUERY` (1000px) up. On any other day, and below 1000px, the page
 does not change. The pure rules are in `src/lib/postseason/primer/`, and
 `test/postseason/primer.test.js` pins them.
@@ -201,7 +203,9 @@ does not change. The pure rules are in `src/lib/postseason/primer/`, and
   the usual page.
 - **(c) On a primer day, the primer's own parts replace the rail and the
   survivors' board.** `BracketRail` and `SurvivorsBoard` do not render. A small
-  bracket (the two LCS and the World Series) is in the right column. "Still to
+  bracket is in the right column: the round being played feeds the next round (on
+  an LCS day, the two LCS and the World Series; on a Wild Card or Division Series
+  day, the series of that round, AL first, and the boxes they feed). "Still to
   play" and the travel and off-day words do not render, because the ribbon
   shows the date and the park of each game ahead. The game card, the site
   chrome, the club strip, the date stepper and the Reveal All bar do not change.

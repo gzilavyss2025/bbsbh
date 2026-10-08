@@ -215,7 +215,7 @@ full expected-value table.
 ## Series primer: reference days
 
 The home page shows a series primer on these days (ADR-0087, 2026-10-08
-addendum). Open each with `?nointro`, at 1440 and 1180 px. At 820 and 390 px the
+addendum), and on any other day when every slate game is in one round. Open each with `?nointro`, at 1440 and 1180 px. At 820 and 390 px the
 page stays as it is. Past dates have no nightly block, so the live read runs. The
 starters and the matchup edges do not show on a past date.
 
@@ -227,8 +227,12 @@ starters and the matchup edges do not show on a past date.
   Game 1 (gamePk `775314`). The NL series opens first.
 - **Winner take all**: `/11012025`, World Series Game 7, gamePk `813024`.
 - **World Series Game 1**: `/10242025`, gamePk `813027`.
-- **No primer**: `/10122024`, ALDS Game 5, gamePk `775326`. A Division Series game
-  keeps today's layout, as does a regular-season day.
+- **A Wild Card day (four tabs)**: `/09302025`, four Game 1s. The small bracket shows
+  the four series feeding the Division Series boxes.
+- **A Division Series day (four tabs)**: `/10082025`. The four series feed the two LCS
+  boxes. Two series in one league share a name, so the pills add the clubs.
+- **No primer**: a day with two rounds on the slate, and a regular-season day. A
+  Division Series day with one game per series now shows the primer.
 
 ## Categories not included (couldn't verify)
 
