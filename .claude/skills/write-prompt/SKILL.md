@@ -162,7 +162,40 @@ written, and go to step 1.
 8. **List the changes.** After the prompts, list each change and its reason,
    including why you split (or did not) and why you picked each model.
 
-Do not run the prompt. This skill only writes, grades and rewrites it. If the prompt is
+9. **Hand off a chain (only when step 4 split the prompt into waves).** A wave is a set
+   of prompts that can run at the same time. Wave 1 has no dependencies. Wave 2 needs
+   wave 1, and so on. In a session Gary is watching, ask once with `AskUserQuestion`:
+   "Start these sessions for you?" (recommended: yes). Never start a session before he
+   answers. In a child or unattended session, skip this step and return the prompts.
+   If he says yes:
+   1. **Check the cap.** `orchestrate` allows 3 children at once, and a session that
+      waits counts. If the chain has more, ask whether to raise the cap or run the
+      later waves after the first finish. Stop on any limit warning.
+   2. **Start the last wave first.** A session cannot message a session that does not
+      exist yet, and wave 1 must know every later session id. Start the last wave, then
+      each earlier wave. Use `create_session` with `source_url` set to this repo, the
+      `model` from the plan, a title `wp: <slug> wave N`, and tags `wp` and
+      `wave-N`. It takes no effort setting, so write the effort into the prompt's first
+      line ("Run at <effort>") and tell Gary to set it if the session shows another.
+      Set `permission_mode` the way `orchestrate` does: leave it unset.
+   3. **Wait text for waves 2 and up.** Put this at the top of the prompt, with the
+      real ids: "You are wave N of M. Do nothing, and read no files, until session
+      `<previous wave id>` sends you a message that starts with `START`. Then do the
+      task below. If the message starts with `ABORT`, stop and reply `STOPPED`."
+   4. **Hand-off text for every wave but the last.** Put this at the end of the prompt,
+      with the real ids: "When your work is done and checked, `send_message` each of
+      these sessions: `<id>` (wave N+1), with `START` and one line naming the branch or
+      PR it needs. If you cannot finish, send `ABORT <reason>` to them, then to your
+      parent `<this session id>`, and end with `NEEDS PARENT: <what you need>`."
+      A wave with more than one session sends `START` only after every session in its
+      wave is done, so the lowest-numbered one sends it and the others message it
+      `DONE`.
+   5. **Report.** Give Gary a table: wave, session id, title, model, what it waits on.
+      Tell him that waves 2 and up are idle until the wave before them messages them,
+      and that he can `send_message` `START` to any of them by hand.
+   A session that is told to wait is idle, so it costs almost nothing until it starts.
+
+Do not run the prompt yourself. This skill writes, grades and rewrites it, and step 9 may start sessions that run it. If the prompt is
 already an A+, say so and show the evidence from steps 1 to 5. Do not invent
 changes.
 
