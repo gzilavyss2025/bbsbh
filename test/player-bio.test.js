@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
-import { educationSummary, personBio, personNickname } from '../src/api/person/identity.js'
+import { educationSummary, personBio, personNickname, rosterStatusView } from '../src/api/person/identity.js'
 import { birthplace } from '../src/lib/person/birthplace.js'
 import { disambiguateNames, yearsPlayed } from '../src/api/search.js'
 
@@ -125,4 +125,13 @@ test('personBio born: foreign, junk state, missing city, US fixture', () => {
   assert.equal(born({ birthCity: 'Merida', birthStateProvince: '-1', birthCountry: 'Mexico' }), 'Merida, Mexico')
   assert.equal(born({ birthStateProvince: 'TX', birthCountry: 'USA' }), '—')
   assert.equal(personBio(yelich).born, 'Thousand Oaks, CA')
+})
+
+// rosterStatusView lives in lib/person/rosterStatus.js (shared with the crawler body);
+// identity.js binds the app's team table to it. Real records: test/fixtures/player-bio/.
+test('rosterStatusView through identity.js: retired players carry their age at retirement', () => {
+  const at = (name) => rosterStatusView(load(name), '2026-10-08')
+  assert.deepEqual([at('gill').state, at('gill').retiredAge], ['retired', 24])
+  assert.deepEqual([at('aaron-deceased').state, at('aaron-deceased').retiredAge], ['retired', 42])
+  assert.equal(at('canada'), null) // rostered: nothing to say
 })

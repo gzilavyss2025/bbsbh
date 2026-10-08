@@ -13,7 +13,7 @@
 // page for the crawlers that run no JavaScript (ADR-0059). That body is built
 // from the payload the card already needed, so the request count per route is
 // unchanged; the player call carries one wider `hydrate` clause and nothing
-// else moved.
+// else moved (`rosterEntries` joined it for #1779).
 //
 // `buildRoster` is the single exception, and it is deliberately not part of
 // `buildCard`: a club's active roster is what makes /team/{id}/roster worth
@@ -30,10 +30,12 @@
 // `./entity.js`, which crawl.js reads too — see that file's header on why the
 // copies exist and why they must stay in step with src/lib.
 
+import { ballparkFor } from '../../src/lib/ballpark/ballparkData.js'
 import { birthplace } from '../../src/lib/person/birthplace.js'
+import { rosterStatusView } from '../../src/lib/person/rosterStatus.js'
 import { scheduleRoundLine } from '../../src/lib/postseason/gameRound.js'
 import { playerCrawl, teamCrawl } from './crawl.js'
-import { clean, entitySegment, idFromSlug, matchupSlug, niceDate, teamAbbr, urlDateToApi } from './entity.js'
+import { clean, entitySegment, idFromSlug, isMlbTeamId, matchupSlug, niceDate, teamAbbr, urlDateToApi } from './entity.js'
 
 const MLB = 'https://statsapi.mlb.com'
 // Every statsapi call here runs on an UNAUTHENTICATED path where a novel query
@@ -155,16 +157,23 @@ function ogUrl(origin) {
 // defaults the season to the current one (no `season=` needed) and picks the
 // group from the player's position, so a hitter comes back with hitting and a
 // pitcher with pitching. It costs about a kilobyte of response and no round
-// trip.
+// trip. `rosterEntries` rides the same call (#1779), verified 2026-10-08 against
+// people 114794 / 110001 / 605141: it is how the page knows a retired or unsigned
+// player's `currentTeam` is a stale pointer, and the body has to know it too. It
+// adds about 0.4 KB for a one-stint player and about 4 KB for a veteran (measured on
+// 114794, 120274, 545361, 605141): still one request, and the 4 s budget is unchanged.
 async function playerCard(idSegment, origin) {
   const id = idFromSlug(idSegment)
-  const data = await getJson(`/api/v1/people/${id}?hydrate=currentTeam,stats(type=season)`)
+  const data = await getJson(`/api/v1/people/${id}?hydrate=currentTeam,stats(type=season),rosterEntries`)
   const p = data.people?.[0]
   if (!p) return null
   const name = clean(p.fullName || p.firstLastName || p.lastFirstName || `Player ${id}`)
   const posAbbr = p.primaryPosition?.abbreviation
   const pos = posAbbr && posAbbr !== 'Unknown' ? posAbbr : ''
-  const team = clean(p.currentTeam?.name || '')
+  // A retired or unsigned player's currentTeam is a stale pointer, and the page
+  // shows no club for him, so neither does the card or the body (rosterStatusView).
+  const status = rosterStatusView(p, new Date().toISOString().slice(0, 10), { isMlbTeamId })
+  const team = status ? '' : clean(p.currentTeam?.name || '')
   const sub = [team, pos].filter(Boolean).join(' · ')
   return {
     title: `${name} — Tally Baseball`,
@@ -176,7 +185,7 @@ async function playerCard(idSegment, origin) {
     // What canonicalUrl re-spells the address with. Built from the name statsapi
     // just returned, never from the segment the request arrived on.
     segment: entitySegment(id, name),
-    crawl: playerCrawl(p, { id, name, pos, team, born: clean(birthplace(p)) }),
+    crawl: playerCrawl(p, { id, name, pos, team, born: clean(birthplace(p)), status }),
   }
 }
 
@@ -233,7 +242,9 @@ async function teamCard(idSegment, origin, { tab } = {}) {
     image: ogUrl(origin),
     alt: `${name}${sub ? ` — ${sub}` : ''}`,
     segment: entitySegment(id, name),
-    crawl: teamCrawl(t, { id, name, level, league, tab }),
+    // The park as the club page names it: the alias-resolved name (BallparkCard.jsx),
+    // the feed's own only for a park not on file.
+    crawl: teamCrawl(t, { id, name, level, league, tab, ballpark: clean(ballparkFor(t.venue?.name)?.name || t.venue?.name || '') }),
   }
 }
 

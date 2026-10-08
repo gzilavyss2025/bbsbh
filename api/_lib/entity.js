@@ -40,6 +40,14 @@ export function teamAbbr(team) {
   )
 }
 
+// The 30 current MLB clubs, copied from src/lib/teams.js MLB_TEAM_NAMES for
+// rosterStatusView (the crawler's retired-player rule). test/cards.test.js asserts it.
+const MLB_TEAM_IDS = new Set([
+  108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
+  133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 158,
+])
+export const isMlbTeamId = (id) => MLB_TEAM_IDS.has(id)
+
 export function matchupSlug(awayAbbr, homeAbbr, gameNumber = 1) {
   const base = `${(awayAbbr || '').toLowerCase()}${(homeAbbr || '').toLowerCase()}`
   return gameNumber > 1 ? `${base}-${gameNumber}` : base

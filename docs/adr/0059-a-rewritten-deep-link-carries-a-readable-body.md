@@ -175,3 +175,38 @@ carry a parent org and a second call for one is not worth it on a page whose
 Minors tab already says it. And a player-page listing, if it is ever wanted, needs
 its own generator and a cut somebody defended — not a data file borrowed for a
 second job.
+
+## Addendum (2026-10-08): one rule for the page and the body (#1779)
+
+The body and the React page built the same facts with different code, and a live
+sweep found them in disagreement. Each fact now has one rule that both sides read.
+A reader sees the body first and the page about a second later, so a difference
+shows as a flash of changed text.
+
+- **Born.** One helper, `src/lib/person/birthplace.js` (#1777).
+- **A retired or unsigned player's club.** `currentTeam` never empties, so it is
+  a stale pointer for such a player. The player request now carries
+  `rosterEntries` on the same call (about 0.4 KB for a one-stint player and about
+  4 KB for a veteran; still one request). `src/lib/person/rosterStatus.js` holds
+  the rule. When it reports a status, the card and the body say no club: no Club
+  fact, no club in the lead, no club links, and no club in the card description.
+- **The age.** A retired player gets "Age at retirement", counted to the end of
+  the last stint, as the page does. The feed freezes `currentAge` at death. With
+  no age on file, the body omits the fact.
+- **A club's location.** The feed sends "United States" as `locationName` for a
+  club it has no city for (Kia Tigers, Colombia). The body omits that value. The
+  page shows no location.
+- **A club's ballpark.** The body uses the park name that the club page shows
+  (`ballparkFor`), for example "Dodger Stadium" where the feed says "UNIQLO Field
+  at Dodger Stadium". It keeps the feed name for a park that is not on file.
+
+`crawl.js` still has one import and stays pure. `cards.js` does the I/O and the
+computing and passes plain values in. The roster-status rule takes its two team
+lookups as arguments, because the edge runtime cannot take `src/lib/teams.js`.
+`entity.js` holds an edge copy of the 30 MLB club ids, and `test/cards.test.js`
+checks it against the app's. `test/crawl-body.test.js` feeds one raw record to
+both builders and asserts that Born, Club and the age agree.
+
+The crawler keeps its full-word style ("Shortstop", "Right / Right"). Hiding the
+body from browsers is still rejected, as above.
+

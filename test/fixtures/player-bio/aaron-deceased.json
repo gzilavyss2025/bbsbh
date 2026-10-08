@@ -1,0 +1,54 @@
+{
+  "id": 110001,
+  "fullName": "Hank Aaron",
+  "active": false,
+  "currentAge": 86,
+  "birthDate": "1934-02-05",
+  "deathDate": "2021-01-22",
+  "primaryNumber": "44",
+  "height": "6' 0\"",
+  "weight": 180,
+  "birthCity": "Mobile",
+  "birthStateProvince": "AL",
+  "birthCountry": "USA",
+  "mlbDebutDate": "1954-04-13",
+  "primaryPosition": {
+    "abbreviation": "RF",
+    "name": "Outfielder"
+  },
+  "batSide": {
+    "description": "Right"
+  },
+  "pitchHand": {
+    "description": "Right"
+  },
+  "currentTeam": {
+    "id": 158,
+    "name": "Milwaukee Brewers"
+  },
+  "rosterEntries": [
+    {
+      "startDate": "1975-01-01",
+      "endDate": "1976-12-31",
+      "status": {
+        "code": "A"
+      },
+      "team": {
+        "id": 158,
+        "name": "Milwaukee Brewers"
+      }
+    },
+    {
+      "startDate": "1954-01-01",
+      "endDate": "1974-12-31",
+      "status": {
+        "code": "A"
+      },
+      "team": {
+        "id": 144,
+        "name": "Atlanta Braves"
+      }
+    }
+  ],
+  "stats": []
+}

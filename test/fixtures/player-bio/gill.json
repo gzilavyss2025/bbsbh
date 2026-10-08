@@ -1,0 +1,42 @@
+{
+  "id": 114794,
+  "fullName": "Ed Gill",
+  "active": false,
+  "currentAge": 100,
+  "birthDate": "1895-08-07",
+  "deathDate": "1995-10-10",
+  "height": "5' 10\"",
+  "weight": 165,
+  "birthCity": "Somerville",
+  "birthStateProvince": "MA",
+  "birthCountry": "USA",
+  "mlbDebutDate": "1919-07-05",
+  "primaryPosition": {
+    "abbreviation": "P",
+    "name": "Pitcher"
+  },
+  "batSide": {
+    "description": "Left"
+  },
+  "pitchHand": {
+    "description": "Right"
+  },
+  "currentTeam": {
+    "id": 142,
+    "name": "Washington Senators"
+  },
+  "rosterEntries": [
+    {
+      "startDate": "1919-01-01",
+      "endDate": "1919-12-31",
+      "status": {
+        "code": "A"
+      },
+      "team": {
+        "id": 142,
+        "name": "Washington Senators"
+      }
+    }
+  ],
+  "stats": []
+}
