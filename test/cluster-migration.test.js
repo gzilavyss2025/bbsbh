@@ -47,7 +47,7 @@ const MIGRATED = {
   mytally__choices: { file: '54-my-tally.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
   consent__actions: { file: '46-consent-modal.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
   staffgrid__summary: { file: '76-workload-marks.css', gap: 'snug', sites: 1 },
-  // C7: five rows in five files. The erase sheet keeps its own margin-top.
+  // C7: four rows, five JSX sites in five files. The erase sheet keeps its own margin-top.
   pshistory__seasonhead: { file: '33-awards-history.css', gap: 'base', sites: 1 },
   psseries__potgWho: { file: '35-postseason-series.css', gap: 'snug', sites: 1 },
   erasesheet__actions: { file: '55-my-tally-account.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },

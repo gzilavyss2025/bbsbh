@@ -167,7 +167,7 @@
   font-weight: var(--w-bold);
   color: var(--text-muted);
 }
-/* Team name + its level pill (AAA/AA/… — MiLB pages only) on one baseline. */
+/* The team name row is a <Cluster align="baseline"> (TeamHubShell.jsx, TeamLeadersPage.jsx). */
 /* An opaque token background reads fine on any one club's tint, but not on
    every club's — instead the pill's own fill/border are mixed FROM `--ink`
    at low strength, so it stays legible whether the row's ink came out light
