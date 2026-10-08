@@ -248,7 +248,7 @@
     },
     "callouts.js": {
       "class": "spoiler-free",
-      "why": "Static per-date callouts file. Every value is a season aggregate; safety comes from WHERE each note renders, never from this data."
+      "why": "Static per-date callouts file. Every value is a season aggregate; safety comes from WHERE each note renders, never from this data. An LCS or World Series game's file also has a series block (seriesBlockFor): the runs, win-chance line and stats of the series games that went Final BEFORE the slate date. Heading into a date, never the slate game or a later one; same footing as the bracket (ADR-0087). No SealBox."
     },
     "careerMatchups.js": {
       "class": "spoiler-free",

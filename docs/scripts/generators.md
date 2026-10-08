@@ -385,6 +385,18 @@ don't run these by hand.
   `scripts/data/callouts-archive/{MMDDYYYY}/` (committed, never shipped), so the
   bundle behind every night's Margin Notes is kept. See `docs/callouts.md` + ADR-0014;
   extend this pipeline, don't build a parallel path.
+  An LCS or World Series game's file also gets a `series` block for the series
+  primer (`seriesBlock.js`, reader `seriesBlockFor` in `docs/api/static-data.md`).
+  It goes into TODAY's files (the run's `asOf` date, written the night before), not
+  tomorrow's: the run starts before tonight's games, so tomorrow's block would be
+  short a game. The step reads the bracket's skeleton and results
+  (`src/api/postseason/fetch.js`) and cuts them at today with `deriveBracket`. Then
+  it reads three things for each counted game: the box score, the feed pruned to
+  the whiff and venue fields, and `winProbability` pruned to about 4 KB. A failed
+  box score read drops only that series' block. To check a past slate by hand, run
+  the generator for that date and then for the day after (`2025-11-01`, then
+  `2025-11-02`). Then delete the new `callouts/` folders and any folder a run moved
+  into `scripts/data/callouts-archive/`, and never commit either one.
 - `gen-fouls.mjs` → `fouls/{season}/fouls.json` (league, for `/fouls`) +
   `fouls/{season}/{NN}.json` (`personId % 100`, for the player card) + `fouls/seasons.json`
   + `fouls/all/fouls.json` (every season, summed from rows). A season store (ADR-0086,

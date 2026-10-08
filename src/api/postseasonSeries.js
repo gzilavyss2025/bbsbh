@@ -85,7 +85,7 @@ async function fetchGameBoxscore(gamePk) {
 // pitch's call code, about 20 KB a game against the multi-MB full feed (the
 // same trick as person-fetch.js's scans). No result, run or score field is
 // named, so none arrives.
-const WHIFF_FEED_FIELDS =
+export const WHIFF_FEED_FIELDS =
   'gameData,teams,away,home,id,liveData,plays,allPlays,about,halfInning,playEvents,isPitch,details,call,code'
 
 async function fetchGameWhiffFeed(gamePk) {
@@ -205,7 +205,12 @@ export async function loadSeriesStats(games) {
     Promise.all((games ?? []).map((g) => fetchGameBoxscore(g.gamePk))),
     Promise.all((games ?? []).map((g) => fetchGameWhiffFeed(g.gamePk))),
   ])
+  return foldSeriesStats(boxscores, whiffFeeds)
+}
 
+// The pure half of loadSeriesStats, shared with the nightly callouts shard's
+// "series" block (lib/postseason/primer/seriesBlock.js).
+export function foldSeriesStats(boxscores, whiffFeeds) {
   const batting = new Map()
   const pitching = new Map()
   const rosterByTeam = new Map()

@@ -139,7 +139,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getJson as statsapiJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
-import { writeShards } from './lib/io.js'
+import { writeJsonAtomic, writeShards } from './lib/io.js'
 import { loadCenturyClub } from './lib/century-club.mjs'
 import { loadArsenalSide } from './lib/arsenal-side.mjs'
 import {
@@ -169,6 +169,10 @@ import { MILESTONE_DEFS, nearestMilestone } from '../src/api/person.js'
 import { mlbOps, eraOf, rate3, num } from '../src/api/person/shared.js'
 import { tallyStarterRecord, starterCgShutoutCount } from './lib/pitcher-starts.mjs'
 import { corroboratedFor, loadCorroborationFile } from './lib/game-notes-corroboration.mjs'
+import { deriveBracket, seriesForGame } from '../src/api/postseason/bracket.js'
+import { resultRowsFrom, resultsUrl, skeletonRowsFrom, skeletonUrl } from '../src/api/postseason/fetch.js'
+import { WHIFF_FEED_FIELDS } from '../src/api/postseasonSeries.js'
+import { seriesBlock } from '../src/lib/postseason/primer/seriesBlock.js'
 
 // The browser client this file used to import capped every call at 15 s; keep
 // that cap on the shared client, whose own default is none.
@@ -1212,6 +1216,42 @@ async function ttoSplits(personId, sportId) {
 }
 
 // ---------------------------------------------------------------------------
+
+// The series primer's "series" block (src/lib/postseason/primer/seriesBlock.js)
+// goes into TODAY's shards (`asOf`, written last night): this run starts before
+// tonight's games, so tomorrow's block would be short one. It runs before
+// tomorrow's slate is read, which exits early on an empty day. The bracket's
+// reads and cutoff rule are the app's own, cut at today. Only the box score is
+// required; a failed one drops the block, and the primer reads statsapi live.
+try {
+  const slateGames = (await getJson(`/api/v1/schedule?sportId=1&date=${asOf}&gameType=L,W`)).dates?.flatMap((d) => d.games ?? []) ?? []
+  if (slateGames.length) {
+    const asOfSeason = asOf.slice(0, 4)
+    const [skel, res] = await Promise.all([getJson(skeletonUrl(asOfSeason)), getJson(resultsUrl(asOfSeason, asOf))])
+    const bracket = deriveBracket(skeletonRowsFrom(skel), resultRowsFrom(res), asOf)
+    const pks = slateGames.map((g) => g.gamePk)
+    const counted = new Set(pks.flatMap((pk) => seriesForGame(bracket, pk)?.series.games.map((x) => x.gamePk) ?? []))
+    const dataByPk = {}
+    await mapConcurrent([...counted], 4, async (pk) => {
+      const [box, feed, winProb] = await Promise.all([
+        getJson(`/api/v1/game/${pk}/boxscore`),
+        getJson(`/api/v1.1/game/${pk}/feed/live?fields=${WHIFF_FEED_FIELDS},venue,name`).catch(() => null),
+        getJson(`/api/v1/game/${pk}/winProbability?fields=homeTeamWinProbability,about,inning`).catch(() => null),
+      ])
+      dataByPk[pk] = { box, feed, winProb }
+    })
+    const [ay, am, ad] = asOf.split('-')
+    for (const pk of pks) {
+      const block = seriesBlock(bracket, pk, dataByPk)
+      const path = join(outDir, `${am}${ad}${ay}`, `${pk}.json`)
+      const bundle = block && JSON.parse(await readFile(path, 'utf8').catch(() => 'null'))
+      if (bundle) await writeJsonAtomic(path, { ...bundle, series: block })
+      console.log(`series block for ${asOf} ${pk}: ${bundle ? `${block.gamePks.length} games` : 'none'}`)
+    }
+  }
+} catch (e) {
+  console.error(`series blocks skipped for ${asOf}: ${e.message}`)
+}
 
 const slate = await getJson(
   `/api/v1/schedule?sportId=${SWEPT_SPORT_IDS.join(',')}&date=${targetApi}&hydrate=team,probablePitcher`,

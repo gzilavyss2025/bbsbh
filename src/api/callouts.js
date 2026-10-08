@@ -130,12 +130,21 @@ export async function fetchCallouts(urlDate, gamePks) {
 //       callout-notes/shared.js), and it is absent unless the manual scan
 //       (scripts/scan-game-notes-insights.mjs) found a live entry for a club in
 //       this game.
+//     series?:{ gamePks, games, stats:{ batting, pitching, totals } } — LCS and
+//       World Series games only; read it with seriesBlockFor.
 //
 // Fields newer than a given date's committed file simply aren't there (the
 // nightly cron regenerates future dates only) — every consumer null-guards, so
 // a stale bundle just means fewer notes, never a crash.
 export function calloutsForGame(data, gamePk) {
   return data?.games?.[gamePk] ?? null
+}
+
+// The series primer's block, or null: only an LCS or World Series game's
+// bundle has one (lib/postseason/primer/seriesBlock.js has the shape). Heading
+// into the slate date, so it holds only games that went Final before it.
+export function seriesBlockFor(bundle) {
+  return bundle?.series ?? null
 }
 
 // The lineup-staging pill text for one player, or null when he's not within
