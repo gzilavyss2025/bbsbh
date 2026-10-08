@@ -38,8 +38,8 @@
   color: var(--text-caption);
 }
 
-/* Logo-per-team grid: wraps to the next row once a line of logos fills the
-   card width, rather than a fixed column count — reads well from a phone's
+/* Logo-per-team list (a Cluster): wraps to the next row once a line of logos fills
+   the card width, rather than a fixed column count — reads well from a phone's
    narrow width up through the wide desktop layout. */
 .umpage__teamitem {
   flex: 0 0 auto;
