@@ -460,14 +460,10 @@
    qualifying look — see arsenalTtoView — so on a card with no split the row is
    the label alone and reads exactly as it did before. */
 .arsenal__head {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
   /* Three items on a phone-width row once the side strip joins the title and
-     the look strip. Neither strip shrinks (flex: none below), so wrapping is
-     what keeps the card from running off its own edge. */
-  flex-wrap: wrap;
-  gap: var(--space-2);
+     the look strip. Neither strip shrinks (flex: none below), so Cluster's
+     wrap is what keeps the card from running off its own edge. */
   margin-bottom: 6px;
 }
 

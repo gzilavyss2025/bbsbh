@@ -64,8 +64,8 @@ const MIGRATED = {
   // The other three keep justify-content (the part does not own justification).
   umpage__teamgrid: { file: '38-umpire-pages.css', gap: 'base', sites: 1 },
   allstargame__main: { file: '37-all-star-rosters.css', gap: 'base', sites: 1, align: 'center', keeps: ['justify-content: space-between'] },
-  simlike__meta: { file: '51-similar-players.css', gap: 'tight', sites: 1, align: 'baseline', keeps: ['justify-content: center'] },
-  arsenal__head: { file: '69-pitch-arsenal.css', gap: 'snug', sites: 1, align: 'center', keeps: ['justify-content: space-between'] },
+  simlike__meta: { file: '51-similar-players.css', gap: 'tight', sites: 1, align: 'baseline', keeps: ['justify-content: center', 'min-width', 'font-size', 'line-height'] },
+  arsenal__head: { file: '69-pitch-arsenal.css', gap: 'snug', sites: 1, align: 'center', keeps: ['justify-content: space-between', 'margin-bottom'] },
 }
 
 defineMigrationTests('cluster', CLUSTER, MIGRATED)

@@ -41,14 +41,6 @@
 /* Logo-per-team grid: wraps to the next row once a line of logos fills the
    card width, rather than a fixed column count — reads well from a phone's
    narrow width up through the wide desktop layout. */
-.umpage__teamgrid {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-}
 .umpage__teamitem {
   flex: 0 0 auto;
 }

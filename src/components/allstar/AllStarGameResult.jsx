@@ -7,6 +7,7 @@ import { BallparkModal } from '../ballpark/BallparkModal.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { leagueLogoUrl } from '../../lib/teams.js'
 import { ballparkFor } from '../../lib/ballpark/ballparkData.js'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 
 // The All-Star Rosters page's one game-result card. Layout: the date sits
 // left-aligned on its own line, the score (AL/NL marks + runs) on the line
@@ -40,7 +41,7 @@ export function AllStarGameResult({ score, mvp, venue, dateLabel, onBoxScore }) 
 
   return (
     <Card as="div" body="flush" className="allstargame">
-      <div className="allstargame__main">
+      <Cluster gap="base" align="center" className="allstargame__main">
         <div className="allstargame__scorecol">
           {dateLabel && <span className="allstargame__date">{dateLabel}</span>}
           <div className="allstargame__scorerow">
@@ -121,7 +122,7 @@ export function AllStarGameResult({ score, mvp, venue, dateLabel, onBoxScore }) 
             )}
           </div>
         )}
-      </div>
+      </Cluster>
       {ballparkOpen && (
         <BallparkModal venue={venue.name} onClose={() => setBallparkOpen(false)} />
       )}
