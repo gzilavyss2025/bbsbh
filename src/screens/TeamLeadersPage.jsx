@@ -12,6 +12,7 @@ import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { TeamLeaders } from '../components/teamstats/TeamLeaders.jsx'
 import { Pill } from '../components/ui/control/Pill.jsx'
+import { Cluster } from '../components/ui/layout/Cluster.jsx'
 import { isoToday } from '../lib/dates.js'
 
 const DASH = '—'
@@ -58,12 +59,12 @@ export function TeamLeadersPage({ id, asOf, sportId }) {
             <TeamLogo teamId={team.id} name={team.name} size={64} />
           </div>
           <div>
-            <div className="team-hub__namerow">
+            <Cluster align="baseline" className="team-hub__namerow">
               <h1>{team.name}</h1>
               {isMilb && (
                 <Pill className="team-hub__level">{SPORT_LABEL[team.sport?.id] ?? DASH}</Pill>
               )}
-            </div>
+            </Cluster>
             <p className="team-hub__rec">
               <span className="team-hub__div">Team leaders</span>
             </p>

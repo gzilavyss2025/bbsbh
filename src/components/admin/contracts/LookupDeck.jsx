@@ -17,6 +17,7 @@ import { playerPath } from '../../../lib/route.js'
 import { Button } from '../../ui/control/Button.jsx'
 import '../../../styles/74a-contract-lookup.css'
 import { Cluster } from '../../ui/layout/Cluster.jsx'
+import { Stack } from '../../ui/layout/Stack.jsx'
 
 const SEARCH_INDEX_URL = '/data/contracts-history/search-index.json'
 const RECORD_RESULT_CAP = 100
@@ -155,7 +156,7 @@ function RecordSearchPanel() {
         Search contract records
       </h3>
 
-      <div className="lookupdeck__field">
+      <Stack gap="tight" className="lookupdeck__field">
         <label htmlFor={`${uid}-query`} className="lookupdeck__label">
           Name
         </label>
@@ -168,10 +169,10 @@ function RecordSearchPanel() {
           placeholder="Name as the source printed it"
           autoComplete="off"
         />
-      </div>
+      </Stack>
 
       <Cluster gap="base" className="lookupdeck__filters">
-        <div className="lookupdeck__field lookupdeck__field--compact">
+        <Stack gap="tight" className="lookupdeck__field lookupdeck__field--compact">
           <label htmlFor={`${uid}-source`} className="lookupdeck__label">
             Source
           </label>
@@ -189,8 +190,8 @@ function RecordSearchPanel() {
               </option>
             ))}
           </select>
-        </div>
-        <div className="lookupdeck__field lookupdeck__field--compact">
+        </Stack>
+        <Stack gap="tight" className="lookupdeck__field lookupdeck__field--compact">
           <label htmlFor={`${uid}-team`} className="lookupdeck__label">
             Team
           </label>
@@ -208,8 +209,8 @@ function RecordSearchPanel() {
               </option>
             ))}
           </select>
-        </div>
-        <div className="lookupdeck__field lookupdeck__field--compact">
+        </Stack>
+        <Stack gap="tight" className="lookupdeck__field lookupdeck__field--compact">
           <label htmlFor={`${uid}-season`} className="lookupdeck__label">
             Season
           </label>
@@ -227,7 +228,7 @@ function RecordSearchPanel() {
               </option>
             ))}
           </select>
-        </div>
+        </Stack>
       </Cluster>
 
       {status === 'loading' && <p className="lookupdeck__status">Loading contract records…</p>}
@@ -309,7 +310,7 @@ function PlayerSearchPanel({ selectedRow, onUseAsMatch, disabled }) {
         Search MLB players
       </h3>
 
-      <div className="lookupdeck__field">
+      <Stack gap="tight" className="lookupdeck__field">
         <label htmlFor={`${uid}-query`} className="lookupdeck__label">
           Player name
         </label>
@@ -322,7 +323,7 @@ function PlayerSearchPanel({ selectedRow, onUseAsMatch, disabled }) {
           placeholder="Current or retired player"
           autoComplete="off"
         />
-      </div>
+      </Stack>
 
       {searching && <p className="lookupdeck__status">Searching…</p>}
       {noResults && <p className="lookupdeck__status">No players match “{trimmed}”.</p>}

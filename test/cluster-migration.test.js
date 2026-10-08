@@ -1,4 +1,4 @@
-// Cluster migration slices C1 to C5 (#1180): sixteen wrapping-row rules moved onto
+// Cluster migration slices C1 to C7 (#1180): twenty-four wrapping-row rules moved onto
 // <Cluster>. Each would fail silently otherwise (lint green, page drawn, only a
 // screenshot noticing):
 //
@@ -47,6 +47,11 @@ const MIGRATED = {
   mytally__choices: { file: '54-my-tally.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
   consent__actions: { file: '46-consent-modal.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
   staffgrid__summary: { file: '76-workload-marks.css', gap: 'snug', sites: 1 },
+  // C7: four rows, five JSX sites in five files. The erase sheet keeps its own margin-top.
+  pshistory__seasonhead: { file: '33-awards-history.css', gap: 'base', sites: 1 },
+  psseries__potgWho: { file: '35-postseason-series.css', gap: 'snug', sites: 1 },
+  erasesheet__actions: { file: '55-my-tally-account.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
+  'team-hub__namerow': { file: '28a-team-hub-hero.css', gap: 'snug', sites: 2 },
 }
 const LAYOUT = /(^|;|\n)\s*(display|flex|flex-flow|flex-direction|flex-wrap|gap|row-gap|column-gap)\s*:/
 

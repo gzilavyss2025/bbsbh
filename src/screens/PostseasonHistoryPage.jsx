@@ -16,6 +16,7 @@ import { Card } from '../components/ui/frame/Card.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { teamClubNameShort, teamFullName } from '../lib/teams.js'
 import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
+import { Cluster } from '../components/ui/layout/Cluster.jsx'
 import { Stack } from '../components/ui/layout/Stack.jsx'
 import { seriesMark } from '../lib/postseason/seriesMarks.js'
 
@@ -343,7 +344,7 @@ function BracketStack({ season, onOpenSeries }) {
 function SeasonBracket({ season, onOpenSeries, wide }) {
   return (
     <Stack as="section" className="pshistory__season">
-      <div className="pshistory__seasonhead">
+      <Cluster gap="base" align="center" className="pshistory__seasonhead">
         <span className="pshistory__year">{season.year}</span>
         <TeamLink id={season.championTeamId} className="pshistory__champion">
           <TeamLogo
@@ -362,7 +363,7 @@ function SeasonBracket({ season, onOpenSeries, wide }) {
             World Series Champion
           </span>
         </TeamLink>
-      </div>
+      </Cluster>
 
       {wide ? (
         <BracketGrid season={season} onOpenSeries={onOpenSeries} />

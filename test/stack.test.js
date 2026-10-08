@@ -17,7 +17,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { dirname, join } from 'node:path'
+import { dirname, join, relative } from 'node:path'
 import { toPosix } from '../scripts/lib/walk.mjs'
 import { GAPS, STACK_TAGS, stackClassName } from '../src/lib/design/stackClass.js'
 import { stripComments, ruleBody } from './helpers/css.js'
@@ -164,28 +164,75 @@ test('slice S14: each block is a <Stack> and its own rule no longer draws the co
   }
 })
 
-// ---- 7. slice S15 (#1180) ----
-// Three one-class column rules moved onto <Stack>, four JSX sites in four files.
-// `.trrank__detail` is drawn by two pages, so it names both. Each rule keeps its
-// own padding, margin or frame, and nothing that draws the column or the gap.
+// ---- 7. slices S15 and S16 (#1180) ----
+// Each rule moved onto <Stack> keeps its own padding, margin or frame, and nothing
+// that draws the column or the gap. The scan follows test/cluster-migration.test.js:
+// it reads rules after `{` and `,` too (inside @media, in a grouped selector), counts
+// every JSX site of the class, and reads the opening tag, so prop order does not matter.
+const LAYOUT = /(^|[\s;])(display|flex-direction|flex-flow|gap|row-gap)\s*:/
+
+function walkSrc(dir, ext = /\.jsx?$/) {
+  return readdirSync(dir).flatMap((f) => {
+    const abs = join(dir, f)
+    if (statSync(abs).isDirectory()) return walkSrc(abs, ext)
+    return ext.test(f) ? [abs] : []
+  })
+}
+
+// Every rule body whose selector list holds `.cls` as one whole selector.
+function bodiesOf(css, cls) {
+  const out = []
+  for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    if (m[1].split(',').some((s) => s.trim() === `.${cls}`)) out.push(m[2])
+  }
+  return out
+}
+
+// [class, gap, JSX site count]. Rules and sites are found by class name, in every
+// stylesheet and source file. A rule deleted whole has no body to check.
+function checkSlice(slice) {
+  const files = walkSrc(SRC).map((f) => ({ f, text: readFileSync(f, 'utf8') }))
+  const sheets = walkSrc(STYLES, /\.css$/).map((f) => stripComments(readFileSync(f, 'utf8')))
+  for (const [cls, gap, sites] of slice) {
+    for (const css of sheets) {
+      for (const body of bodiesOf(css, cls)) assert.doesNotMatch(body, LAYOUT, `.${cls} should leave the column and gap to Stack`)
+    }
+    let n = 0
+    const re = new RegExp(`className="(?:[\\w-]+ )*${cls}(?: [\\w-]+)*"`, 'g')
+    for (const { f, text } of files) {
+      for (const m of text.matchAll(re)) {
+        const tag = [...text.slice(0, m.index).matchAll(/<([A-Za-z][\w.]*)(?=[\s>])/g)].pop()
+        const where = relative(SRC, f)
+        assert.equal(tag[1], 'Stack', `${where}: .${cls} should sit on a Stack, not <${tag[1]}>`)
+        const open = text.slice(tag.index, text.indexOf('>', m.index))
+        // `base` is the default gap, so a site may leave the prop off.
+        if (gap === 'base') assert.doesNotMatch(open, /\sgap="(?!base")/, `${where}: .${cls} should be gap="base"`)
+        else assert.match(open, new RegExp(`\\sgap="${gap}"`), `${where}: .${cls} should be gap="${gap}"`)
+        n += 1
+      }
+    }
+    assert.equal(n, sites, `.${cls} should have ${sites} Stack site(s)`)
+  }
+}
+
 const S15 = [
-  ['situational-records/66a-detail.css', 'components/situational/SituationalBoard.jsx', 'trrank__detail', 'loose'],
-  ['situational-records/66a-detail.css', 'screens/postseason-records/PostseasonRecordsPage.jsx', 'trrank__detail', 'loose'],
-  ['30-standings.css', 'screens/StandingsPage.jsx', 'standings-ctrl', 'snug'],
-  ['39-manager-page.css', 'components/team/CoachingTree.jsx', 'coachtree__node', 'tight'],
+  ['trrank__detail', 'loose', 2],
+  ['standings-ctrl', 'snug', 1],
+  ['coachtree__node', 'tight', 1],
 ]
 
 test('slice S15: each block is a <Stack> and its own rule no longer draws the column or gap', () => {
-  for (const [sheet, jsx, cls, gap] of S15) {
-    const css = stripComments(readFileSync(join(STYLES, sheet), 'utf8'))
-    for (const m of css.matchAll(new RegExp(`(^|\\})\\s*\\.${cls}\\s*\\{([^}]*)\\}`, 'g'))) {
-      assert.doesNotMatch(m[2], /(^|[\s;])(display|flex-direction|gap)\s*:/, `.${cls} should leave the column and gap to Stack`)
-    }
-    const text = readFileSync(join(SRC, jsx), 'utf8')
-    assert.match(
-      text,
-      new RegExp(`<Stack\\b[^>]*\\bgap="${gap}"[^>]*\\bclassName="${cls}"`),
-      `${jsx} should render .${cls} as <Stack gap="${gap}">`,
-    )
-  }
+  checkSlice(S15)
+})
+
+// S16: three rules, seven sites. `.colorlab__logodrop` keeps its align-items, flex and
+// max-width. `.lookupdeck__field` has five sites, and four also carry `--compact`.
+const S16 = [
+  ['colorlab__row', 'snug', 1],
+  ['colorlab__logodrop', 'snug', 1],
+  ['lookupdeck__field', 'tight', 5],
+]
+
+test('slice S16: each block is a <Stack> and its own rule no longer draws the column or gap', () => {
+  checkSlice(S16)
 })

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { describeLogoRejection, LOGO_MAX_BYTES, LOGO_SIZE } from '../../lib/logoArt.js'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { assignCustomMark, copyLogo, uploadLogo } from './saveStores.js'
 
 // Drag a PNG onto a tile and it becomes that club's art. Wraps the tile's own
@@ -126,7 +127,7 @@ export function LogoDropZone({
   const hint = `Drop a ${LOGO_SIZE}x${LOGO_SIZE} PNG under ${LOGO_MAX_BYTES / 1024} KB here, or use Replace art`
 
   return (
-    <div className="colorlab__logodrop">
+    <Stack gap="snug" className="colorlab__logodrop">
       <div
         className={`colorlab__logodropzone${dragging ? ' colorlab__logodropzone--over' : ''}`}
         onDragOver={(e) => {
@@ -224,6 +225,6 @@ export function LogoDropZone({
       {message && (
         <p className={`colorlab__logodropmsg colorlab__logodropmsg--${message.kind}`}>{message.text}</p>
       )}
-    </div>
+    </Stack>
   )
 }

@@ -25,6 +25,7 @@ import { TeamTabBar } from './TeamTabBar.jsx'
 import { parentOrgIdOf } from './data/shared.js'
 import { useIdentityDraft } from './modules/identity/useIdentityDraft.js'
 import { Pill } from '../../components/ui/control/Pill.jsx'
+import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 
 // Both halves of the identity editor are lazy, for two different reasons — the
 // same split BallparkCard makes.
@@ -215,12 +216,12 @@ export function TeamHubShell({
             <TeamLogo teamId={team.id} name={team.name} variant={headerTile.logoVariant} size={104} />
           </div>
           <div>
-            <div className="team-hub__namerow">
+            <Cluster align="baseline" className="team-hub__namerow">
               <h1>{team.name}</h1>
               {isMilb && (
                 <Pill className="team-hub__level">{SPORT_LABEL[team.sport?.id] ?? DASH}</Pill>
               )}
-            </div>
+            </Cluster>
             {record && (
               <p className="team-hub__rec">
                 <span className="mono">{record.wins}–{record.losses}</span>
