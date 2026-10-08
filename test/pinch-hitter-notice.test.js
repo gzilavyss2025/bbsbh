@@ -15,7 +15,7 @@
 // own first pitch.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { computeHalfInningFeed, pinchHittingBatter } from '../src/api/playbyplay.js'
+import { computeHalfInningFeed, pinchHittingBatter, focusWindows, windowLeadIn } from '../src/api/playbyplay.js'
 
 function person(id, last, first, num) {
   return { id, fullName: `${first} ${last}`, lastName: last, firstName: first, useName: first, primaryNumber: String(num) }
@@ -105,4 +105,44 @@ test('pinchHittingBatter resolves the notice card fields the same way the other 
   const batter = pinchHittingBatter(feed, PINCH_HITTER)
   assert.deepEqual(batter, { id: PINCH_HITTER, name: 'Judge, Jim', jersey: '24' })
   assert.equal(pinchHittingBatter(feed, null), null)
+})
+
+// The notice trails the PREVIOUS at-bat's window (ADR-0016), so the next
+// batter's own window — the live "next at-bat" view — repeated nothing. Every
+// notice between two plate appearances is stamped on the batter it precedes.
+const kinds = (list) => list.map((e) => e.eventType)
+
+test('the batter a notice precedes carries it as leadIn, and his window repeats it', () => {
+  const entries = computeHalfInningFeed(buildFeed(), 3, 'top', 'away')
+  const byName = Object.fromEntries(entries.filter((e) => e.kind === 'atbat').map((e) => [e.batter.last, e]))
+  assert.deepEqual(kinds(byName.Judge.leadIn), ['pinch_hitting'])
+  assert.equal(byName.Ashby.leadIn, undefined, 'the half\u2019s first batter has nothing before him to repeat')
+  const wins = focusWindows(entries, entries.length)
+  assert.deepEqual(
+    wins.map((w) => kinds(windowLeadIn(entries.slice(w.start, w.end)))),
+    [[], ['pinch_hitting']],
+  )
+})
+
+test('a notice between pitches leads its own window, so it is not repeated', () => {
+  const feed = buildFeed()
+  const judge = structuredClone(PINCH_HIT_PLAY)
+  feed.liveData.plays.allPlays[1] = judge
+  judge.playEvents = [judge.playEvents[1], judge.playEvents[0], ...judge.playEvents.slice(2)]
+  const entries = computeHalfInningFeed(feed, 3, 'top', 'away')
+  assert.equal(entries.find((e) => e.kind === 'atbat' && e.batter.last === 'Judge').leadIn, undefined)
+})
+
+test('a mound visit and a pitching change: the visit repeats, the change is windowReliefPitcherId\u2019s', () => {
+  const feed = buildFeed()
+  const judge = structuredClone(PINCH_HIT_PLAY)
+  feed.liveData.plays.allPlays[1] = judge
+  judge.playEvents = [
+    { details: { eventType: 'pitching_substitution', description: 'Pitching Change' }, position: { abbreviation: 'P' }, player: { id: 77 } },
+    { details: { eventType: 'mound_visit', description: 'Mound visit.' } },
+    ...judge.playEvents,
+  ]
+  const entries = computeHalfInningFeed(feed, 3, 'top', 'away')
+  const j = entries.find((e) => e.kind === 'atbat' && e.batter.last === 'Judge')
+  assert.deepEqual(kinds(j.leadIn), ['mound_visit', 'pinch_hitting'])
 })
