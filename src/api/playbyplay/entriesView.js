@@ -19,7 +19,7 @@
 // of a big inning. `stepTotals` below is the one place that arithmetic lives
 // now, precisely so the slice cannot be forgotten at a call site again.
 
-import { HIT_EVENT_TYPES } from './eventTypes.js'
+import { HIT_EVENT_TYPES, STOPPAGE_EVENTS } from './eventTypes.js'
 
 // At-bat-mode stepping (ADR-0016): the entries index marking the end of the
 // NEXT step from `fromCount` — everything up to and including the next
@@ -112,7 +112,12 @@ export function stepCommitReady(entries, cap, halfInProgress) {
 // scorer finishes the batter, pencils the change, THEN sees who's next up —
 // not the other way around (gamePk 823584 bottom 1st: Robert Gasser relieved
 // Dustin May after the first out, and a reader had no way to know it until
-// they'd already revealed Gasser's own first batter faced). The one exception
+// they'd already revealed Gasser's own first batter faced). It is ALSO repeated
+// at the head of the next window, tagged "Before this at-bat" (windowLeadIn): one window
+// is one page, and the page for the batter it precedes — the live "next at-bat"
+// view — otherwise opens with no word of who came in or what changed. The
+// repeat is drawn, never written into window i+1, so the rule below holds: each
+// card belongs to exactly one window. The one exception
 // is content before the half's FIRST at-bat (an extras placement, a pre-pitch
 // note the persistent header didn't already cover) — nothing precedes it to
 // trail, so it leads the half's opening window instead, same as always.
@@ -175,20 +180,30 @@ export function focusWindows(entries, cap) {
   return wins
 }
 
-// Who relieved, for a window that opens on the first batter he faces — or null.
-// Focus mode shows ONE at-bat at a time, and the card announcing a pitching
-// change trails the at-bat BEFORE it (above), so the page holding the new
-// pitcher's first result has no mention of him at all. The window repeats his
-// card at its head. `reliefPitcherId` is stamped by computeHalfInningFeed on
-// that first batter's card and only for a change made between plate
-// appearances — one between pitches already leads this window itself, and the
-// half's opening change is the persistent "Now pitching" card's.
+// The notices to repeat at the head of window i (focus mode shows ONE at-bat
+// at a time): every note that trailed the previous at-bat inside the previous
+// window — a pitching change, a pinch hitter, a defensive change, a mound
+// visit, an ejection — in feed order. They announce what the managers did
+// before this batter came up, and the page holding his result otherwise never
+// says so. Read off the window bounds, so it uses the same split as the
+// windows: a `midAtBat` note, and everything after it, is already in window i.
+// Nothing for window 0 (the half's opening notes lead it, and the half-opening
+// change is the persistent "Now pitching" card's), nor for a stacked half (no
+// window picked, `i` null). Only the managers' notices: a standalone play
+// between batters (a pickoff or a balk with no pitch) is a scored play, and
+// drawing it twice invites logging the out twice.
 //
-// Spoiler footing: a window exists only under the cap, and the change this
-// repeats trailed the PREVIOUS at-bat's window, so it was on screen a tap ago.
-export function windowReliefPitcherId(windowEntries) {
-  return windowEntries.find((e) => e.kind === 'atbat')?.reliefPitcherId ?? null
+// Spoiler footing: window i exists only when its own at-bat is under the cap,
+// so window i-1 is wholly under it, and every note returned is under the cap.
+// That is all it promises, not that the reader saw the note: one that reached
+// the feed after the tap, or a window "Rest of half" skipped, was never drawn.
+// So the tag says when it happened ("Before this at-bat"), never "seen".
+export function windowLeadIn(entries, wins, i) {
+  if (!(i > 0)) return []
+  const prev = entries.slice(wins[i - 1].start, wins[i - 1].end)
+  return prev.slice(prev.findLastIndex((e) => e.kind === 'atbat') + 1).filter((e) => LEAD_IN_EVENTS.has(e.eventType))
 }
+const LEAD_IN_EVENTS = new Set([...STOPPAGE_EVENTS, 'pinch_hitting', 'pinch_running', 'game_advisory'])
 
 // The half's runs and hits SO FAR — over the first `cap` entries only, which
 // is the entire point of this function existing (read the module header). The

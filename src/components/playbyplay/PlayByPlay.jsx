@@ -15,7 +15,7 @@ import {
   nextStepBoundary,
   stepCommitReady,
   focusWindows,
-  windowReliefPitcherId,
+  windowLeadIn,
   stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,
@@ -133,16 +133,12 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // each is load-bearing (api/playbyplay/entriesView.js, ADR-0016/0055).
   const exhausted = stepping && stepCommitReady(entries, effectiveCap, halfInProgress)
 
-  // Focus mode: one window per revealed AT-BAT (focusWindows), the notices
-  // staging it at its head, every window clamped to the cap. NOT one window
-  // per reveal tap — see focusWindows' own header for the defect the
-  // tap-shaped windows caused (a notice reaching the feed after the tap that
-  // revealed the previous at-bat disqualified the last window and moved the
-  // reader BACK an at-bat; 14 of 89 taps on a replayed real game).
+  // Focus mode: one window per revealed AT-BAT (focusWindows), every window
+  // clamped to the cap. NOT one window per reveal tap — focusWindows' header
+  // has the defect tap-shaped windows caused (the reader moved BACK an at-bat).
   //
-  // Built for a STACKED half too (commit 3): its trail needs the same
-  // boundaries to build its scroll targets, not just a windowed half's single
-  // card. Cheap either way — a pure walk over `entries`, not a fetch.
+  // Built for a STACKED half too: its trail needs the same boundaries for its
+  // scroll targets. A pure walk over `entries`, not a fetch.
   //
   // The cap is `effectiveCap ?? entries.length`, which is what carries the
   // windows PAST the commit. The last at-bat of a half commits it, dropping
@@ -232,14 +228,10 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     onLiveState?.(deriveLiveState(entries, effectiveCap ?? entries.length))
   }, [feed, inning, half, battingSide, effectiveCap]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // (This file used to report the currently-revealed pitcher back up to
-  // HalfInning, which overrode its persistent "Now Pitching" header. That put
-  // a mid-half reliever's card in two places at once and, on a half revealed
-  // all at once, hoisted the LAST arm of the inning above at-bat cards the
-  // starter had pitched. The header now names the half's starting pitcher and
-  // only that; a mid-half change belongs here, in chronological place, where
-  // the `pitching_substitution` branch below already renders it as the same
-  // card. See HalfInning.jsx's nowPitching.)
+  // (This file no longer reports the revealed pitcher up to HalfInning: that put
+  // a reliever's card in two places at once. The header names the half's starting
+  // pitcher only; a mid-half change renders here, in place, in the
+  // `pitching_substitution` branch below. See HalfInning.jsx's nowPitching.)
 
   // Pitching-handoff cards — a departing pitcher's line frozen at the exact
   // moment he's pulled (DepartureLineCard), and, once every runner he left on
@@ -345,10 +337,14 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // moves it (AtBatReplay.jsx's ReplayRail).
   const lastAtBat = visibleEntries.findLastIndex((e) => e.kind === 'atbat' && atBatScenePitches(e.pitchDetails).length > 0)
 
+  // Windowed: the previous at-bat's trailing notes, repeated first (windowLeadIn).
+  const leadIn = windowLeadIn(entries, wins, beatKey)
+
   return (
     <div className="pbp">
-      {windowed && beatKey != null && <ReliefRepeat pitcher={pitchingChangePitcher(feed, windowReliefPitcherId(visibleEntries))} teamId={pitchingTeamId} teamName={pitchingName} />}
-      {visibleEntries.map((entry, i) => {
+      {[...leadIn, ...visibleEntries].map((entry, k) => {
+        const i = k - leadIn.length // into visibleEntries
+        const repeat = i < 0 // a lead-in notice, tagged; a change is the short card
         let node
         if (entry.kind === 'placed') {
           // The extra-innings automatic runner. A card, not a notification —
@@ -372,6 +368,9 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               replayLast={i === lastAtBat}
             />
           )
+        } else if (repeat && entry.eventType === 'pitching_substitution') {
+          const pitcher = pitchingChangePitcher(feed, entry.playerId)
+          node = pitcher ? <ReliefRepeat pitcher={pitcher} teamId={pitchingTeamId} teamName={pitchingName} /> : <EventNote entry={entry} />
         } else if (entry.eventType === 'pitching_substitution') {
           // A mid-inning pitching change renders as the same "now pitching" card
           // the stat slot shows for a between-halves change (see PitcherNotice),
@@ -517,6 +516,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
             id={step != null ? `pbp-${inning}-${half}-step-${step}` : undefined}
             key={entryKey}
           >
+            {repeat && <span className="pbp__repeat-tag">Before this at-bat</span>}
             {node}
           </div>
         )
@@ -525,7 +525,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
         // resolving — see handoffsResolvingAt for which handoffs qualify here
         // vs. HalfInning.jsx's leading-notice placement.
         const finals =
-          entry.atBatIndex == null
+          repeat || entry.atBatIndex == null
             ? []
             : handoffsResolvingAt(handoffs, entry.atBatIndex, renderedFinal, lastHalfOfGame)
                 .map((h) => {

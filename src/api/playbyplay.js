@@ -86,7 +86,7 @@ export {
   nextStepBoundary,
   stepCommitReady,
   focusWindows,
-  windowReliefPitcherId,
+  windowLeadIn,
   stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,

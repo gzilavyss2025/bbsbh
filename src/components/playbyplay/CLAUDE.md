@@ -17,6 +17,13 @@ components, `MoundVisitBar` (in `EventCards.jsx`), or `HalfInning.jsx`'s
 color pairing, and the button/label conventions (chevron vs. destination-named
 link, "Reveal" always visible, accessible name contains the visible word).
 
+**Lead-in repeat.** A managers' notice trails the PREVIOUS at-bat's window (ADR-0016),
+so a windowed `PlayByPlay` draws it again at the head of the next window (`windowLeadIn`,
+read off the window bounds), in feed order, with a "Before this at-bat" tag (when it happened, not a claim the reader saw it). Each repeat is the same
+notice component as the original (`MoundVisitBar`, `BatterNotice`, …), except a pitching
+change: `ReliefRepeat` ("Pitching"), or `EventNote` when the arm does not resolve. A
+standalone play (pickoff, balk) is never repeated.
+
 ## The files
 
 `DelayNotice` (a function in `EventCards.jsx`) cards a stoppage only when it came to

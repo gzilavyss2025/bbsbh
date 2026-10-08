@@ -845,20 +845,5 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
   // Bank every batter's final (or only) trip.
   for (const batterId of originIndex.keys()) finalizeTrip(batterId)
 
-  // Who came in since the last plate appearance, stamped on the first batter he
-  // faces so focus mode can repeat his card on that batter's page (see
-  // entriesView.js's windowReliefPitcherId). Only a change made BETWEEN plate
-  // appearances counts: a change between pitches already leads its own at-bat's
-  // window, and the half's opening change never reaches `entries` at all.
-  let relievedBy = null
-  for (const e of entries) {
-    if (e.kind === 'event' && e.eventType === 'pitching_substitution') {
-      relievedBy = e.midAtBat ? null : (e.playerId ?? null)
-    } else if (e.kind === 'atbat') {
-      if (relievedBy != null) e.reliefPitcherId = relievedBy
-      relievedBy = null
-    }
-  }
-
   return entries
 }
