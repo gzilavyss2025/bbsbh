@@ -322,6 +322,17 @@
   .pslive > .psseries__totalssection:has(~ .psseries__keyssection ~ .psseries__abssection) {
     grid-row: span 2;
   }
+  /* Both tables take the height their card was stretched to: the rows share the
+     slack, and the tally and the door stay at the foot. */
+  .pslive > .psseries__totalssection:has(~ .psseries__keyssection ~ .psseries__abssection) ~ .psseries__keyssection .psseries__keys,
+  .pslive > .psseries__totalssection ~ .psseries__keyssection ~ .psseries__abssection .psseries__abs {
+    display: flex;
+    flex-direction: column;
+  }
+  .pslive > .psseries__totalssection:has(~ .psseries__keyssection ~ .psseries__abssection) ~ .psseries__keyssection .psseries__keystable,
+  .pslive > .psseries__totalssection ~ .psseries__keyssection ~ .psseries__abssection .psseries__abstable {
+    flex: 1 1 auto;
+  }
   /* A pair stretches to one height, so it reads as one row. */
   .pslive > .psseries__today:has(~ .psseries__upcoming),
   .pslive > .psseries__today ~ .psseries__upcoming,

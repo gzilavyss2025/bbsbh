@@ -49,10 +49,7 @@ td.psseries__absrank {
 }
 /* The logo follows the name. The name truncates first, so the mark stays. */
 .psseries__absname {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1h);
-  min-width: 0;
+  overflow: hidden;
   height: 32px;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -61,6 +58,12 @@ td.psseries__absrank {
   color: var(--text-heading);
   text-align: left;
   text-transform: uppercase;
+}
+.psseries__absnamein {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  max-width: 100%;
 }
 .psseries__abslink {
   min-width: 0;

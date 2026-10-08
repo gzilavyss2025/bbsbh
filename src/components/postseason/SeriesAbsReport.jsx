@@ -60,10 +60,12 @@ export function SeriesAbsReport({ season, clubIds, gamePks, cutoff = null }) {
               <tr key={r.playerId} className="psseries__absrow">
                 <td className="psseries__absrank">{i + 1}</td>
                 <th scope="row" className="psseries__absname">
-                  <PlayerLink id={r.playerId} name={r.name} className="psseries__abslink">
-                    {r.name}
-                  </PlayerLink>
-                  <TeamLogo teamId={r.teamId} size={16} className="psseries__abslogo" name={teamClubNameShort(r.teamId)} />
+                  <span className="psseries__absnamein">
+                    <PlayerLink id={r.playerId} name={r.name} className="psseries__abslink">
+                      {r.name}
+                    </PlayerLink>
+                    <TeamLogo teamId={r.teamId} size={16} className="psseries__abslogo" name={teamClubNameShort(r.teamId)} />
+                  </span>
                 </th>
                 <td className="psseries__absnum">
                   {r.wins}-{r.losses}
