@@ -100,11 +100,6 @@
   margin-bottom: var(--space-2);
 }
 
-.trrank__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
 .trrank__chips + .trrank__chips {
   margin-top: var(--space-2);
 }

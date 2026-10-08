@@ -6,6 +6,7 @@ import { PitchList, StrikeZone, ZoneSheet } from '../../scoring/StrikeZone.jsx'
 import { HOVER_CARD_QUERY, useMediaQuery } from '../../../hooks/useMediaQuery.js'
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 import { atBatScenePitches, atBatZone } from '../../../lib/pitcherCard/atBat.js'
+import { Cluster } from '../../ui/layout/Cluster.jsx'
 
 // WHAT THE AT-BAT LOOKED LIKE: every pitch of one plate appearance, thrown in
 // order from behind the plate, each along its own measured path. The Now
@@ -128,7 +129,7 @@ export function ReplaySheet({ pitchDetails, pitches, batter, pitcher, onClose })
   return (
     <ZoneSheet note="Replay" batter={batter} pitcher={pitcher?.last} onClose={onClose}>
       <ReplayScene pitches={pitches} pitchDetails={pitchDetails} pitcher={pitcher} play={play}>
-        <div className="pbp__replaypicks">
+        <Cluster gap="tight" className="pbp__replaypicks">
           {pitches.map((p) => (
             <Button
               key={p.no}
@@ -140,7 +141,7 @@ export function ReplaySheet({ pitchDetails, pitches, batter, pitcher, onClose })
               {p.no}
             </Button>
           ))}
-        </div>
+        </Cluster>
       </ReplayScene>
     </ZoneSheet>
   )

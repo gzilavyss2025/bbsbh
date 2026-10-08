@@ -8,6 +8,7 @@ import { Card } from '../ui/frame/Card.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 import { Table } from '../ui/table/Table.jsx'
 import { MetricFigure } from './SituationalIndex.jsx'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 
 // The focused board for ONE split, every club ranked: the podium, the sort
 // controls, the "more in this group" links and the table. Shared by the
@@ -105,7 +106,7 @@ export function SituationalBoard({ result, group, pathFor, favoriteTeamId, clubA
 
       <section className="trrank__boardcontrols" aria-label="Leaderboard controls">
         <span className="trrank__controltitle">Rank the board</span>
-        <div className="trrank__chips">
+        <Cluster gap="tight" className="trrank__chips">
           {!isCount && SORTS.map((item) => (
             <button
               key={item.key}
@@ -124,7 +125,7 @@ export function SituationalBoard({ result, group, pathFor, favoriteTeamId, clubA
           >
             {flipLabel} {dir === 'desc' ? '↓' : '↑'}
           </button>
-        </div>
+        </Cluster>
       </section>
 
       {group && group.metrics.length > 1 && (
