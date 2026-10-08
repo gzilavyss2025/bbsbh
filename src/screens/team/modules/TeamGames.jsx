@@ -7,6 +7,7 @@ import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
 import { DOW_LABELS, MONTH_LABELS } from './TeamStatsCard.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
+import { Grid } from '../../../components/ui/layout/Grid.jsx'
 import { Card } from '../../../components/ui/frame/Card.jsx'
 import { jumpScrollLeft } from '../../../hooks/scroll/useScrollRail.js'
 
@@ -236,11 +237,11 @@ export function AllGames({ games }) {
 
   return (
     <section className="gamesgrid" aria-label="Games played">
-      <div className="gamesgrid__grid">
+      <Grid min={100}>
         {visible.map((g) => (
           <GameStubCard key={g.gamePk} game={g} />
         ))}
-      </div>
+      </Grid>
       {remaining > 0 && (
         <Door layout="block" onClick={() => setVisibleCount((c) => c + GRID_PAGE)}>
           Show {Math.min(GRID_PAGE, remaining)} more &middot; {remaining} left
