@@ -46,8 +46,8 @@ const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'war-history')
 
 const START_SEASON = 1901
-// fld (fielding runs) and pa (plate appearances) were checked for 2019-2025 only;
-// do not widen this below the checked range without re-checking the source.
+// First season stored for fld (fielding runs) and pa (plate appearances). The
+// source was checked for 2019-2025 only; check it before going below 2019.
 const FLD_START_SEASON = 2023
 // Only COMPLETED seasons belong here; the live season is war.json's job. Before
 // a season ends its WAR is still moving, so stop at the year before the current.

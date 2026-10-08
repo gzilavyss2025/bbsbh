@@ -79,7 +79,8 @@ export function warByYearFor(personId, group, current, history) {
 }
 
 // A player's fielding runs and plate appearances by season, from his history
-// shard — `{ [season]: number }`, or {} for an unknown player. A pitcher's fld
-// is 0, a value, not an error. Completed seasons only; no live-season union.
+// shard — `{ [season]: number }`, or {} for an unknown player or one who never
+// batted. A 0 is a value, not an error. Completed seasons from 2023 only; no
+// live-season union.
 export const fldByYearFor = (personId, history) => history?.fld?.[personId] ?? {}
 export const paByYearFor = (personId, history) => history?.pa?.[personId] ?? {}
