@@ -816,6 +816,10 @@
       "class": "spoiler-free",
       "why": "Static savant-history/NN.json shards — Statcast percentile ranks for the completed seasons 2023-2025, the prior-season input of the OVR career blend. Same footing as savantPercentiles.js and war.js: a finished season's quality-of-contact ranks, never a game's result. No SealBox."
     },
+    "ovr/ovrData.js": {
+      "class": "spoiler-free",
+      "why": "Static ovr/NN.json shards: each MLB hitter's and pitcher's OVR rating and bars, built from season Statcast percentiles and fielding runs (docs/ovr-rating.md). A toy rating on open surfaces (ADR-0034), not a projection and not a score; it holds no game result. No SealBox."
+    },
     "ovr/rating.js": {
       "class": "spoiler-free",
       "why": "Pure OVR rating: Savant season percentiles in, bucket bars and one rating out (docs/ovr-rating.md). Player pages are open surfaces (ADR-0034) and the inputs are season quality-of-contact and fielding figures, never a game's result. It fetches nothing and reads no game."

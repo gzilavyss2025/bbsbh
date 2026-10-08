@@ -117,8 +117,25 @@ There is no generator change and no outs-above-average fetch in version one.
   out the positional adjustment, which is a separate field. It correlates 0.93 with
   Savant outs above average across 563 players (part A).
 - It is a counting stat. A part-timer's near-zero value means few chances, not an
-  average glove, and the file has no innings field. The playing-time floor for the
-  rank is not set yet. Build step 6 must set it.
+  average glove, and the file has no innings field.
+- **Playing-time floor (decided at build, step 6, #1720): 200 plate appearances in a
+  season** (`FLD_MIN_PA` in `scripts/lib/ovr/build.mjs`). Plate appearances stand in
+  for innings (r = 0.91 in 2026). Of 0, 100, 200 and 300 plate appearances, 200 had
+  the best repeatability between 2025 and 2026 (Pearson 0.43, Spearman 0.38, 361 of
+  751 hitters kept). 300 only tied it on Pearson. There is no ground truth for glove
+  quality, so this measures repeatability only (**inference**: a repeatable number is
+  a better glove number). The rank is made per season among the hitters over the floor.
+  A tie takes the middle of its run, because many hitters sit on 0.0. The seasons are
+  then blended with the career weights, with no age shift. The pooled floor of about 600
+  plate appearances from the same research is not used, because the rank is per season.
+  A hitter under the floor in every season gets no Fielding bar, and its weight goes to
+  the other buckets. In the committed run that is 1 of 444 rated hitters.
+- **Current-season plate appearances.** `war.json` has no plate-appearance field. The
+  generator sums `paEnd` over the hitter's `mlb` entry in the nightly
+  `hitter-grid/{season}/` shards. A check on 2026 against the stats API (534 hitters with
+  50 or more plate appearances): the median ratio was 0.99, and 4 hitters changed side of
+  the 200 line. 89 of the 751 hitters in `war.json` are not in the grid, and none of them
+  has 200 plate appearances.
 - **Inference (part A):** catcher `fld` leaves out most framing value. Part A did
   not check this against a framing source.
 - Not in version one: Savant outs above average. The `oaa` column is already in the
@@ -178,6 +195,43 @@ not WAR relabelled:
 The thresholds for "tracks" (Spearman 0.5 or more) and "relabelled" (0.9 or more)
 are part B's judgment, so they are an **inference**. These numbers used the old
 weights, with Discipline and no Fielding. They do not test the new weights.
+
+**Re-run with the final method (step 6, #1720, data).** Weights 22/33/17/28 and
+30/45/25, stretch 2.0 and 1.5, Fielding with the 200-plate-appearance floor, and the
+career blend. Target: 2026 `war.json` (WAR, wRC+) and 2026 innings. The script is
+`.scratch/ovr/calibrate-final.mjs`. "2026 only" is the same code with the prior seasons
+removed, on part B's pool. "Final" is what `gen-ovr.mjs` writes, for rated players with a
+2026 row. Pitchers use 50 or more innings.
+
+| OVR vs | Pool | n | Pearson r | Spearman |
+| --- | --- | --- | --- | --- |
+| Hitters: WAR | part B (old weights) | 246 | 0.51 | 0.51 |
+| Hitters: WAR | 2026 only | 246 | 0.71 | 0.69 |
+| Hitters: WAR | final | 368 | 0.54 | 0.51 |
+| Hitters: wRC+ | part B (old weights) | 246 | 0.61 | 0.60 |
+| Hitters: wRC+ | 2026 only | 246 | 0.50 | 0.49 |
+| Hitters: wRC+ | final | 368 | 0.33 | 0.41 |
+| Pitchers: WAR per 200 IP | part B (old weights) | 325 | 0.77 | 0.71 |
+| Pitchers: WAR per 200 IP | 2026 only | 325 | 0.77 | 0.72 |
+| Pitchers: WAR per 200 IP | final | 326 | 0.67 | 0.62 |
+
+- Fielding raised the hitter WAR correlation (0.51 to 0.71 on one season) and lowered the
+  wRC+ one (0.61 to 0.50). That is expected: WAR holds defense and wRC+ does not.
+- The blend lowers every row. **Inference:** the target is one season and the rating is a
+  career, so the two should part. A rise for the blend would have been the surprise.
+- Spread, final run (`node scripts/gen-ovr.mjs`): 444 hitters, mean 58.0, SD 9.9, highest
+  99.0 (Bobby Witt Jr.), lowest 24.7 (Yasmani Grandal, last season 2024). 686 pitchers,
+  mean 58.9, SD 10.5, highest 94.0 (Felix Bautista, last season 2025), lowest 28.3 (Jake
+  Woodford). The blend squeezes the band again: the SD on one season is 11.9 (hitters) and
+  12.3 (pitchers). Nobody sits on the floor of 20, and one hitter sits on the cap of 99.
+- Review notes of the rating module, checked on real data: no value was a string (0
+  converted). 46 blended percentiles reached 0, 100 or past them (20 are a raw 0 or 100;
+  the age shift pushes the rest past), and the clamp in `percentileToRating` stops each
+  before `inverseNormalCdf`. No hitter has only Contact and Power (every one has Speed),
+  so the sparse-hitter spread cannot be measured on this data. The one hitter without a
+  Fielding bar rates 41.9.
+- Limits, unchanged: the weights come from one season, so no out-of-sample test exists.
+  The AAA anchor of 58 is weakly supported.
 
 - The weights come from one season, so no out-of-sample test exists until prior
   seasons are built.

@@ -1504,6 +1504,25 @@ Re-run only to fold in a new season.
   it throws past 6 KB. A page opens one shard (`src/api/ovr/savantHistory.js`). A finished
   season's ranks did not change between two fetches minutes apart (checked once); a
   later revision is unchecked.
+- `gen-ovr.mjs` → `public/data/ovr/{NN}.json` (player-keyed, bucketed on `personId % 100`
+  via `shardKey100`) — an OVR rating, the bars that exist and the seasons used, for every
+  MLB hitter and pitcher who passes the minimum-data rule (a hitter needs Contact and
+  Power, a pitcher all three buckets; `docs/ovr-rating.md`; #1720). **Hand-run, not a
+  cron**: `node scripts/gen-ovr.mjs`. Rerun it after the nightly files move on and after
+  the prior-season stores are rebuilt each autumn (when the season rolls over, rebuild
+  `war-history/` and `savant-history/` first: until then the new season has no prior
+  plate appearances). **It makes no network call.** It reads
+  `savant-percentiles.json` and `war.json` (current season), `savant-history/` and
+  `war-history/` (2023-2025), `hitter-grid/{season}/` (the current season's plate
+  appearances, because `war.json` has none) and `on-this-day/` (birth years for the age
+  shift). The math is in `scripts/lib/ovr/build.mjs`: Fielding is `fld` ranked per season
+  among hitters with 200 or more plate appearances (`FLD_MIN_PA`), then the seasons are
+  blended with `src/api/ovr/career.js`, then `rateHitter` or `ratePitcher`. A string cell
+  is converted to a number and counted. It prints the spread, the count on the floor of
+  20 and the cap of 99, and the count of percentiles the clamp caught. About 1,130
+  players, 100 shards, 1.9 KB at most; it throws past 8 KB. A page opens one shard
+  (`src/api/ovr/ovrData.js`). Part B's calibration is re-run by
+  `.scratch/ovr/calibrate-final.mjs`.
 - `gen-milb-seasons.mjs` → `public/data/milb-seasons/{NN}.json` (player-keyed, bucketed
   on `personId % 100` via the reader's `milbShardKey`) — each player's minor-league season
   lines for 2021-2025 at AAA, AA, A+ and A, for the career rating (`docs/ovr-rating.md`,
