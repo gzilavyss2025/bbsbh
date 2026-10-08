@@ -17,31 +17,38 @@
 }
 .rl__look:not(.rl--today) .chal__board { margin-inline: var(--space-2); }
 
-/* ---- A. Sheet, inner box removed ---------------------------------------- */
-.rl--flat .team-score__grade {
+/* ---- A and C share the flat grade, flat tiles and underlined tabs ------- */
+.rl--flat .team-score__grade,
+.rl--margin .team-score__grade {
   margin-inline: var(--space-3);
   padding-inline: 0;
   border: 0;
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
   border-radius: 0;
   background: none;
   box-shadow: none;
 }
 .rl--flat .team-score__row--driver,
-.rl--flat .team-score__row--driver.is-active {
+.rl--flat .team-score__row--driver.is-active,
+.rl--margin .team-score__row--driver,
+.rl--margin .team-score__row--driver.is-active {
   padding: var(--space-2) 0 0;
   border: 0;
-  border-top: var(--bw-hair) solid var(--border-hairline);
+  border-top: var(--bw-hair) solid var(--border-rule);
   border-radius: 0;
   background: none;
 }
-.rl--flat .chal__view {
+.rl--flat .chal__view,
+.rl--margin .chal__view,
+.rl--flat .chal__view.is-on,
+.rl--margin .chal__view.is-on {
   border: 0;
   border-bottom: var(--bw-heavy) solid transparent;
   border-radius: 0;
   background: none;
 }
-.rl--flat .chal__view.is-on { background: none; border-bottom-color: var(--navy); }
+.rl--flat .chal__view.is-on { border-bottom-color: var(--navy); }
+.rl--margin .chal__view.is-on { border-bottom-color: var(--marker); }
 
 /* ---- B. Printed form ---------------------------------------------------- */
 .rl--form .team-score__grade {
@@ -74,37 +81,13 @@
   background-size: 24px 24px;
 }
 .rl--form .chal__view { border-radius: 0; background: none; }
-.rl--form .chal__view.is-on { background: var(--navy); color: var(--paper-card, var(--surface-card)); }
+.rl--form .chal__view.is-on { background: var(--navy); color: var(--surface-card); }
 
-/* ---- C. Margin numeral -------------------------------------------------- */
-.rl--margin .team-score__grade {
-  margin-inline: var(--space-3);
-  padding-inline: 0;
-  border: 0;
-  border-top: var(--bw-rule) solid var(--navy);
-  border-bottom: var(--bw-hair) solid var(--border-rule);
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-}
+/* ---- C only: the numeral in the margin, graphite ink, marker emphasis --- */
+.rl--margin .team-score__grade { border-top: var(--bw-rule) solid var(--navy); }
 .rl--margin .team-score__grade-button { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
 .rl--margin .team-score__grade-result { order: -1; align-items: flex-start; }
 .rl--margin .team-score__grade-score { font-size: var(--fs-hero-sm); }
-.rl--margin .team-score__row--driver,
-.rl--margin .team-score__row--driver.is-active {
-  padding: var(--space-2) 0 0;
-  border: 0;
-  border-top: var(--bw-hair) solid var(--border-rule);
-  border-radius: 0;
-  background: none;
-}
 .rl--margin .scatter__line { stroke: var(--graphite); }
 .rl--margin .scatter__dot { background: var(--graphite); }
 .rl--margin .scatter__dot--mark { background: var(--marker); }
-.rl--margin .chal__view {
-  border: 0;
-  border-bottom: var(--bw-heavy) solid transparent;
-  border-radius: 0;
-  background: none;
-}
-.rl--margin .chal__view.is-on { background: none; border-bottom-color: var(--marker); }

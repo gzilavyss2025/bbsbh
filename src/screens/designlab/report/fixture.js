@@ -6,13 +6,12 @@ const IDS = [108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 12
 
 // A fixed spread, 1.8 to 8.9, so the rail has a cluster and a tail.
 const spread = (i, k) => Math.round((1.8 + ((i * k) % 30) * 0.2386) * 10) / 10
-const pool = (k) => IDS.map((teamId, i) => ({ teamId, score: spread(i, k) }))
-pool.own = (rows, score) => rows.map((r) => (r.teamId === TEAM_ID ? { ...r, score } : r))
+const pool = (k, own) => IDS.map((teamId, i) => ({ teamId, score: teamId === TEAM_ID ? own : spread(i, k) }))
 
-export const LEAGUE_QUALITY = pool.own(pool(7), 6.9)
-export const LEAGUE_SURPRISE = pool.own(pool(11), 7.6)
-export const LEAGUE_FORM = pool.own(pool(13), 3.4)
-export const LEAGUE_GRADE = pool.own(pool(17), 7.8)
+export const LEAGUE_QUALITY = pool(7, 6.9)
+export const LEAGUE_SURPRISE = pool(11, 7.6)
+export const LEAGUE_FORM = pool(13, 3.4)
+export const LEAGUE_GRADE = pool(17, 7.8)
 
 export const SNAPSHOT = {
   season: {

@@ -48,23 +48,6 @@ const LOOKS = [
   },
 ]
 
-function Specimens() {
-  return (
-    <div className="rl__pair">
-      <TeamScoreCard
-        snapshot={SNAPSHOT}
-        surprise={SURPRISE}
-        teamId={TEAM_ID}
-        leagueGradeScores={LEAGUE_GRADE}
-        leagueSeasonScores={LEAGUE_QUALITY}
-        leagueSurpriseScores={LEAGUE_SURPRISE}
-        leagueFormScores={LEAGUE_FORM}
-      />
-      <TeamChallengeCard data={CHALLENGES} teamId={TEAM_ID} clubName="Sample club" />
-    </div>
-  )
-}
-
 export function ReportLook() {
   return (
     <div className="rl">
@@ -78,7 +61,18 @@ export function ReportLook() {
             <div><dt>Score out of 10</dt><dd>{l.score}</dd></div>
             <div><dt>Trend chart</dt><dd>{l.chart}</dd></div>
           </dl>
-          <Specimens />
+          <div className="rl__pair">
+            <TeamScoreCard
+              snapshot={SNAPSHOT}
+              surprise={SURPRISE}
+              teamId={TEAM_ID}
+              leagueGradeScores={LEAGUE_GRADE}
+              leagueSeasonScores={LEAGUE_QUALITY}
+              leagueSurpriseScores={LEAGUE_SURPRISE}
+              leagueFormScores={LEAGUE_FORM}
+            />
+            <TeamChallengeCard data={CHALLENGES} teamId={TEAM_ID} clubName="Sample club" />
+          </div>
         </section>
       ))}
     </div>
