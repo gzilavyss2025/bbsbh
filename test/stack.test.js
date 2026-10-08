@@ -15,24 +15,17 @@
 //      api/ module and no stamp module.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { dirname, join, relative } from 'node:path'
-import { toPosix } from '../scripts/lib/walk.mjs'
+import { dirname, join } from 'node:path'
+import { walk, toPosix } from '../scripts/lib/walk.mjs'
 import { GAPS, STACK_TAGS, stackClassName } from '../src/lib/design/stackClass.js'
 import { stripComments, ruleBody } from './helpers/css.js'
+import { defineMigrationTests } from './helpers/layoutMigration.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const STYLES = join(SRC, 'styles')
 const stackCss = () => stripComments(readFileSync(join(STYLES, 'system/stack.css'), 'utf8'))
-
-function cssFiles(dir) {
-  return readdirSync(dir).flatMap((f) => {
-    const abs = join(dir, f)
-    if (statSync(abs).isDirectory()) return cssFiles(abs)
-    return f.endsWith('.css') ? [abs] : []
-  })
-}
 
 // ---- 1. the slot ----
 
@@ -56,7 +49,7 @@ test('.stack is a column with one gap, and no other stylesheet draws it', () => 
   assert.match(base, /display:\s*flex/)
   assert.match(base, /flex-direction:\s*column/)
   assert.match(base, /gap:\s*var\(--stack-gap\)/)
-  for (const f of cssFiles(STYLES)) {
+  for (const f of walk(STYLES, { exts: ['.css'] })) {
     if (toPosix(f).endsWith('system/stack.css')) continue
     const css = stripComments(readFileSync(f, 'utf8'))
     assert.equal(ruleBody(css, '.stack'), null, `${f} should not redraw .stack`)
@@ -133,106 +126,45 @@ test('Stack and its helper import no api/ or stamp module', () => {
   }
 })
 
-// ---- 6. slice S14 (#1180) ----
-// Nine one-class column rules moved onto <Stack>. Each block now gets its column
-// and its gap from stack.css, so its own rule must not draw them again, and its
-// JSX site must name the gap that rule used to write.
-const S14 = [
-  ['57a-franchise-history.css', 'screens/team/modules/ballpark/FranchiseHistory.jsx', 'fhist__span', 'tight'],
-  ['57a-franchise-history.css', 'screens/team/modules/ballpark/FranchiseHistory.jsx', 'fhist__parks', 'base'],
-  ['57a-franchise-history.css', 'screens/team/modules/ballpark/FranchiseHistory.jsx', 'fhist__parkline', 'tight'],
-  ['scout/meetings.css', 'screens/scout/meetings/MeetingsPanel.jsx', 'scout__game', 'snug'],
-  ['scout/meetings.css', 'screens/scout/meetings/MeetingsPanel.jsx', 'scout__pa', 'snug'],
-  ['56-my-tally-intro.css', 'components/account/AccountPitch.jsx', 'introsheet__step2', 'loose'],
-  ['56-my-tally-intro.css', 'components/account/AccountPitch.jsx', 'introsheet__confirm', 'base'],
-  ['70-postseason-race.css', 'screens/PostseasonRacePage.jsx', 'psrace__leagues', 'loose'],
-  ['76-workload-marks.css', 'components/workload/StaffGrid.jsx', 'staffgrid', 'snug'],
-]
-
-test('slice S14: each block is a <Stack> and its own rule no longer draws the column or gap', () => {
-  for (const [sheet, jsx, cls, gap] of S14) {
-    const css = stripComments(readFileSync(join(STYLES, sheet), 'utf8'))
-    const body = ruleBody(css, `.${cls}`) ?? ''
-    assert.doesNotMatch(body, /(^|[\s;])(display|flex-direction|gap)\s*:/, `.${cls} should leave the column and gap to Stack`)
-    const text = readFileSync(join(SRC, jsx), 'utf8')
-    assert.match(
-      text,
-      // `base` is the default gap, so a site may leave the prop off.
-      new RegExp(`<Stack\\b${gap === 'base' ? '' : `[^>]*\\bgap="${gap}"`}[^>]*\\bclassName="${cls}"`),
-      `${jsx} should render .${cls} as <Stack gap="${gap}">`,
-    )
-  }
-})
-
-// ---- 7. slices S15 and S16 (#1180) ----
-// Each rule moved onto <Stack> keeps its own padding, margin or frame, and nothing
-// that draws the column or the gap. The scan follows test/cluster-migration.test.js:
-// it reads rules after `{` and `,` too (inside @media, in a grouped selector), counts
-// every JSX site of the class, and reads the opening tag, so prop order does not matter.
-const LAYOUT = /(^|[\s;])(display|flex-direction|flex-flow|gap|row-gap)\s*:/
-
-function walkSrc(dir, ext = /\.jsx?$/) {
-  return readdirSync(dir).flatMap((f) => {
-    const abs = join(dir, f)
-    if (statSync(abs).isDirectory()) return walkSrc(abs, ext)
-    return ext.test(f) ? [abs] : []
-  })
+// ---- 6. slices S14 to S16 (#1180) ----
+// Rules moved onto <Stack> keep their own padding, margin or frame, and nothing that
+// draws the column or the gap, in any stylesheet. Every JSX site of the class is a
+// <Stack> with the gap the old rule wrote (base is the default). The checks are in
+// test/helpers/layoutMigration.js. A rule deleted whole keeps the `file` that held it.
+const STACK = {
+  component: 'Stack',
+  sheet: 'system/stack.css',
+  props: ['gap'],
+  defaults: { gap: 'base' },
+  closed: false,
+  allowDefault: true, // gap="base" is the default, and a site may spell it out
 }
 
-// Every rule body whose selector list holds `.cls` as one whole selector.
-function bodiesOf(css, cls) {
-  const out = []
-  for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    if (m[1].split(',').some((s) => s.trim() === `.${cls}`)) out.push(m[2])
-  }
-  return out
+// S14: nine one-class column rules.
+const S14 = {
+  fhist__span: { jsx: 'screens/team/modules/ballpark/FranchiseHistory.jsx', file: '57a-franchise-history.css', gap: 'tight', keeps: ['flex'] },
+  fhist__parks: { jsx: 'screens/team/modules/ballpark/FranchiseHistory.jsx', file: '57a-franchise-history.css', gap: 'base' },
+  fhist__parkline: { jsx: 'screens/team/modules/ballpark/FranchiseHistory.jsx', file: '57a-franchise-history.css', gap: 'tight' },
+  scout__game: { jsx: 'screens/scout/meetings/MeetingsPanel.jsx', file: 'scout/meetings.css', gap: 'snug' },
+  scout__pa: { jsx: 'screens/scout/meetings/MeetingsPanel.jsx', file: 'scout/meetings.css', gap: 'snug' },
+  introsheet__step2: { jsx: 'components/account/AccountPitch.jsx', file: '56-my-tally-intro.css', gap: 'loose' },
+  introsheet__confirm: { jsx: 'components/account/AccountPitch.jsx', file: '56-my-tally-intro.css', gap: 'base' },
+  psrace__leagues: { jsx: 'screens/PostseasonRacePage.jsx', file: '70-postseason-race.css', gap: 'loose' },
+  staffgrid: { jsx: 'components/workload/StaffGrid.jsx', file: '76-workload-marks.css', gap: 'snug' },
 }
 
-// [class, gap, JSX site count]. Rules and sites are found by class name, in every
-// stylesheet and source file. A rule deleted whole has no body to check.
-function checkSlice(slice) {
-  const files = walkSrc(SRC).map((f) => ({ f, text: readFileSync(f, 'utf8') }))
-  const sheets = walkSrc(STYLES, /\.css$/).map((f) => stripComments(readFileSync(f, 'utf8')))
-  for (const [cls, gap, sites] of slice) {
-    for (const css of sheets) {
-      for (const body of bodiesOf(css, cls)) assert.doesNotMatch(body, LAYOUT, `.${cls} should leave the column and gap to Stack`)
-    }
-    let n = 0
-    const re = new RegExp(`className="(?:[\\w-]+ )*${cls}(?: [\\w-]+)*"`, 'g')
-    for (const { f, text } of files) {
-      for (const m of text.matchAll(re)) {
-        const tag = [...text.slice(0, m.index).matchAll(/<([A-Za-z][\w.]*)(?=[\s>])/g)].pop()
-        const where = relative(SRC, f)
-        assert.equal(tag[1], 'Stack', `${where}: .${cls} should sit on a Stack, not <${tag[1]}>`)
-        const open = text.slice(tag.index, text.indexOf('>', m.index))
-        // `base` is the default gap, so a site may leave the prop off.
-        if (gap === 'base') assert.doesNotMatch(open, /\sgap="(?!base")/, `${where}: .${cls} should be gap="base"`)
-        else assert.match(open, new RegExp(`\\sgap="${gap}"`), `${where}: .${cls} should be gap="${gap}"`)
-        n += 1
-      }
-    }
-    assert.equal(n, sites, `.${cls} should have ${sites} Stack site(s)`)
-  }
+const S15 = {
+  trrank__detail: { file: 'situational-records/66a-detail.css', gap: 'loose', sites: 2 },
+  'standings-ctrl': { file: '30-standings.css', gap: 'snug' },
+  coachtree__node: { file: '39-manager-page.css', gap: 'tight' },
 }
 
-const S15 = [
-  ['trrank__detail', 'loose', 2],
-  ['standings-ctrl', 'snug', 1],
-  ['coachtree__node', 'tight', 1],
-]
+// S16: `.colorlab__logodrop` keeps its align-items, flex and max-width.
+// `.lookupdeck__field` has five sites, and four also carry `--compact`.
+const S16 = {
+  colorlab__row: { file: '15-team-color-lab.css', gap: 'snug' },
+  colorlab__logodrop: { file: '15-team-color-lab.css', gap: 'snug', keeps: ['align-items', 'flex', 'max-width'] },
+  lookupdeck__field: { file: '74a-contract-lookup.css', gap: 'tight', sites: 5 },
+}
 
-test('slice S15: each block is a <Stack> and its own rule no longer draws the column or gap', () => {
-  checkSlice(S15)
-})
-
-// S16: three rules, seven sites. `.colorlab__logodrop` keeps its align-items, flex and
-// max-width. `.lookupdeck__field` has five sites, and four also carry `--compact`.
-const S16 = [
-  ['colorlab__row', 'snug', 1],
-  ['colorlab__logodrop', 'snug', 1],
-  ['lookupdeck__field', 'tight', 5],
-]
-
-test('slice S16: each block is a <Stack> and its own rule no longer draws the column or gap', () => {
-  checkSlice(S16)
-})
+for (const [slice, rows] of Object.entries({ S14, S15, S16 })) defineMigrationTests(`stack ${slice}`, STACK, rows)
