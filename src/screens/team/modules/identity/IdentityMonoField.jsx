@@ -3,6 +3,7 @@ import { useAsync } from '../../../../hooks/useAsync.js'
 import { monoLogoFingerprint, monoLogoParts, monoLogoPickerSvg, monoLogoSvg } from '../../../../lib/logoMono.js'
 import { sanitizeSvgMarkup } from '../../../../lib/svgSanitize.js'
 import { LOGO_VARIANTS, logoCdnUrl } from '../../../../lib/logoCdn.js'
+import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 import { ShapeInkPicker, flipVerdict } from '../../../identity-lab/editors/ShapeInkPicker.jsx'
 // The shape picker's own markup carries the identity-lab's `idlab__monoink*`
 // classes (ShapeInkPicker.jsx is deliberately shared rather than
@@ -119,7 +120,7 @@ export function IdentityMonoField({ teamId, fields, values, onChange }) {
         nightly team-data refresh runs, not the instant you save here.
       </p>
 
-      <div className="idlab__monoinksource" role="group" aria-label="Source art">
+      <Cluster gap="tight" align="center" className="idlab__monoinksource" role="group" aria-label="Source art">
         <span className="idlab__monoinksourcelabel">Source</span>
         {SOURCE_OPTIONS.map((opt) => (
           <button
@@ -132,7 +133,7 @@ export function IdentityMonoField({ teamId, fields, values, onChange }) {
             {opt.label}
           </button>
         ))}
-      </div>
+      </Cluster>
 
       {art.loading && <p className="idlab__monoinkhint">Loading the club mark…</p>}
       {art.error && <p className="idlab__monoinkhint">{art.error.message}</p>}

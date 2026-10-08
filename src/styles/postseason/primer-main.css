@@ -173,10 +173,6 @@
   gap: var(--space-2);
 }
 .seriesedges__pen {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
   margin-bottom: var(--space-2);
 }
 .seriesedges__club {

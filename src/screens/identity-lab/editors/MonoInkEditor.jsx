@@ -11,6 +11,7 @@ import { sanitizeSvgMarkup } from '../../../lib/svgSanitize.js'
 import { LOGO_VARIANTS, teamLogoUrl } from '../../../lib/teams.js'
 import { regenerateMonoLogo, saveStores } from '../saveStores.js'
 import { ShapeInkPicker, flipVerdict } from './ShapeInkPicker.jsx'
+import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 
 // Pick, by eye, which SHAPES of a club's logo are the mark and which are the
 // paper it's drawn against — the hand correction to logoMono.js's automatic
@@ -54,7 +55,7 @@ const DEFAULT_CHROME_BAR = '#12233F'
 // means waiting out a loading flash between every pair of clicks.
 function SourcePicker({ sourceVariant, onChange }) {
   return (
-    <div className="idlab__monoinksource" role="group" aria-label="Source art">
+    <Cluster gap="tight" align="center" className="idlab__monoinksource" role="group" aria-label="Source art">
       <span className="idlab__monoinksourcelabel">Source</span>
       {SOURCE_OPTIONS.map((opt) => (
         <button
@@ -67,7 +68,7 @@ function SourcePicker({ sourceVariant, onChange }) {
           {opt.label}
         </button>
       ))}
-    </div>
+    </Cluster>
   )
 }
 

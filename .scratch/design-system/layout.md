@@ -1038,6 +1038,66 @@ heights, so it gives no geometry diff.
 **Not seen.** `.iddrawer__logo` (the team identity drawer is behind the admin gate; `synth.mjs` has no `align`
 switch). `npm run visual` and `npm run e2e` were not run.
 
+## Cluster slice C10 (2026-10-08)
+
+Four wrapping rows in seven files moved onto `Cluster`: 4 rules, 8 JSX sites. No open PR or layout.md used "C10"
+(open PRs #1798, #1799, #1800, #1802 touch no stylesheet these rows live in; #1799 edits `home.css` only). The
+finder listed 30 safe rows. No gap was off the three steps, so nothing was snapped.
+
+| rule | gap | align | element | rule keeps |
+| --- | --- | --- | --- | --- |
+| `.cmdmap__chips` (`CommandMap`, `GloveTarget`, `PlayerAnalyticsTab`; 4 sites) | snug | stretch | div | `margin-block-end` |
+| `.seriesedges__pen` (`PenEdge.jsx`) | snug | `center` | div | `margin-bottom` |
+| `.idlab__monoinksource` (`MonoInkEditor`, `IdentityMonoField`; 2 sites) | tight | `center` | div | `margin` |
+| `.daystrip-key` (`DayStrip.jsx`) | base | stretch | `ul` | nothing, so the rule is gone (`.cluster--list` is the reset) |
+
+**Test first.** All four joined `MIGRATED` in `test/cluster-migration.test.js`; it failed on the rules and the
+sites, then passed. **Cascade.** `26d`, `primer-main` and `17` are lazy (components import them); `76` loads after
+`system/cluster.css` in `index.css`. **Budget.** `17-identity-lab-workbench.css` is 1196 lines now; its budget went
+from 1200 to 1196.
+
+**Left.** `.txntl__head` (loads before the cluster), `.starter__body`, `.abhero__meta` (scoring surfaces), `.dlab__*`,
+`.cwb__*`, `.animlab__frozen`, `.rpt-controls` (as in C7/C9). Also `.spray__key` (the spray chart sits near a
+reveal-only module; skipped to be safe), `.allstargame__main` (space-between), `.arsenal__head` and `.simlike__meta`
+(keep `justify-content`), `.admincopy__savebar`, `.asof-banner`, `.scout__scenebar` (keep many declarations).
+
+**Checked.** `synth.mjs` (`CLUSTER=1`, `/design-lab`) old vs new: `daystrip-key` identical at 390 and 760px.
+`geom.mjs` on `/identity-lab` (`FREEZE=1 BLOCKIMG=1`): identical at 760px (1105 elements, height 4552); at 390px
+the element count differs (1104 vs 1111) with equal page height 5634, the same noise C9 recorded. `npm run lint` and
+`npm test` pass.
+
+**Not seen.** `.cmdmap__chips` (`/design-lab` does not load `26d`, and the real routes need live statsapi),
+`.seriesedges__pen` (the home primer is not wired until #1799 merges), and the `align="center"` of the identity-lab
+row at 390px (the geom count noise; `synth.mjs` has no `align` switch). `npm run visual` and `npm run e2e` were not run.
+
+## Cluster slice C11 (2026-10-08)
+
+Written beside C10 and stacked with it (C10's rows were not on origin when I edited; no row clashed, only
+`MIGRATED` and this file merged). Four wrapping rows moved onto `Cluster`: 4 rules, 4 JSX sites in 8 files.
+
+| rule | gap | align | element | rule keeps |
+| --- | --- | --- | --- | --- |
+| `.umpage__teamgrid` (`UmpirePage.jsx`) | base | stretch | ul | nothing: `as="ul"` adds `.cluster--list`, which owns list-style, margin and padding, so the rule is gone |
+| `.allstargame__main` (`AllStarGameResult.jsx`) | base | center | div | `justify-content: space-between` |
+| `.simlike__meta` (`SimilarPlayerGrid.jsx`) | tight | baseline | span | `justify-content`, `min-width`, `font-size`, `line-height` |
+| `.arsenal__head` (`PitchArsenalMix.jsx`) | snug | center | div | `justify-content: space-between`, `margin-bottom`, the wrap comment (reworded: Cluster does the wrap) |
+
+**Test first.** Rows added to `MIGRATED`; the test failed on rules and sites before the move. The brief said the
+`ul` rule keeps list-style, margin and padding. It does not need to: the list modifier does the same job, so I
+deleted the rule whole. **Cascade.** `37` and `51` are lazy; `69` and `38` load after `system/cluster.css`.
+**Budget.** None of the four partials has a budget entry (all well under the 700-line cap), so nothing to lower.
+
+**Left.** Nothing from my four. Not taken: `.txntl__head`, `.starter__body`, `.abhero__meta`, `.animlab__frozen`,
+`.rpt-controls`, `.dlab__*`, `.cwb__*`, any row on a `<p>` (as told).
+
+**Checked.** `geom.mjs` (`PROXY=1 BLOCKIMG=1 FREEZE=1`, live statsapi), BEFORE vs AFTER, 390 and 760px, diff 0 on
+`/umpire/x-427013` (885 elements, 1 `umpage__teamgrid`), `/all-star-rosters` (4840 elements, 10 `allstargame__main`)
+and `/player/tarik-skubal-669373/analytics` (689 elements, 3 `simlike__meta`).
+
+**Not seen.** `.arsenal__head`: it renders only in the starter's pitch mix on the lineup page (`TeamInfo.jsx`,
+a scoring surface needing a live game with arsenal data). No geometry diff for it; its rule change is
+declaration-for-declaration the same as the Cluster modifiers. `npm run visual` and `npm run e2e` were not run.
+
 ## Stack slice S17 (2026-10-08)
 
 Two one-class `flex-direction: column` rules moved onto `Stack`: 2 rules, 2 JSX sites in 4 files. The slice

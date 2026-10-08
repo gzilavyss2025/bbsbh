@@ -179,11 +179,7 @@
    the one thing in this cell that can't take an overlay. Here it reads as what
    it is: the first half of a caption, inked to stand off the club beside it. */
 .simlike__meta {
-  display: flex;
-  align-items: baseline;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: var(--space-1);
   min-width: 0;
   font-size: var(--fs-caption);
   line-height: var(--lh-snug);

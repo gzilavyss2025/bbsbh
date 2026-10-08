@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { MIN_LOOK_SHIFT } from '../../api/pitchArsenal.js'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 
 // Direction of a pitch's usage between one look and the look before it. The
 // SHAPE carries the direction and the colour only agrees with it — the same
@@ -109,7 +110,7 @@ export function PitchArsenalMix({ arsenal, tto, sides, className = '', activeCod
 
   return (
     <div className={`arsenal ${className}`.trim()}>
-      <div className="arsenal__head">
+      <Cluster align="center" className="arsenal__head">
         <h4 className="arsenal__title">Pitch mix</h4>
         {sides && (
           <div className="arsenal__tabs arsenal__tabs--side" role="group" aria-label="Side the batter hits from">
@@ -137,7 +138,7 @@ export function PitchArsenalMix({ arsenal, tto, sides, className = '', activeCod
             ))}
           </div>
         )}
-      </div>
+      </Cluster>
       <ul className="arsenal__list">
         {rows.map((t) => (
           <li key={t.code} className={`arsenal__row${t.code === activeCode ? ' is-active' : ''}`}>
