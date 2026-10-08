@@ -306,11 +306,21 @@
   .pslive > .psseries__totalssection ~ :not(.psseries__keyssection) {
     order: 3;
   }
-  /* The ABS card sits in the right column under Nine Keys, outside the stretched
-     pair above it. Four classes beat the order-3 rule just above. */
+  /* The ABS card sits in the right column under Nine Keys. Series totals spans
+     both rows, so Nine Keys and the ABS card share its height and neither
+     trails empty paper. Four classes beat the order-3 rule just above. */
   .pslive > .psseries__totalssection ~ .psseries__keyssection ~ .psseries__abssection {
     grid-column: 2;
     order: 2;
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+  }
+  .pslive > .psseries__totalssection ~ .psseries__keyssection ~ .psseries__abssection > .card {
+    flex: 1 1 auto;
+  }
+  .pslive > .psseries__totalssection:has(~ .psseries__keyssection ~ .psseries__abssection) {
+    grid-row: span 2;
   }
   /* A pair stretches to one height, so it reads as one row. */
   .pslive > .psseries__today:has(~ .psseries__upcoming),
