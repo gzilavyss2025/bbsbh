@@ -40,15 +40,15 @@ test('a higher level weighs more in one season', () => {
 })
 
 test('playing time: 200 PA weighs half of 400, and more than 400 is capped', () => {
-  const mlb = { ovr: 80, years: [2026] }
+  const mlb = { ovr: 80, years: [2025] }
   const w = (n) => careerOvr(mlb, [row({ n, pct: 0 })])
   const full = LEVEL_WEIGHT[11] * W[0]
-  near(w(400), (W[0] * 80 + full * 20) / (W[0] + full))
-  near(w(200), (W[0] * 80 + (full / 2) * 20) / (W[0] + full / 2))
+  near(w(400), (W[1] * 80 + full * 20) / (W[1] + full))
+  near(w(200), (W[1] * 80 + (full / 2) * 20) / (W[1] + full / 2))
   near(w(4000), w(400))
   // a pitcher's full weight is 450 outs, not 400
   const p = careerOvr(mlb, [row({ group: 'pitching', n: 225, pct: 0 })])
-  near(p, (W[0] * 80 + (full / 2) * 20) / (W[0] + full / 2))
+  near(p, (W[1] * 80 + (full / 2) * 20) / (W[1] + full / 2))
 })
 
 test('recency: the newest season weighs most, the same way as the MLB blend', () => {
@@ -63,6 +63,15 @@ test('an MLB rating is weighted by its seasons and pulled toward the minor-leagu
   const m = W[2] * LEVEL_WEIGHT[12]
   near(out, ((W[0] + W[1]) * 70 + m * 55) / (W[0] + W[1] + m))
   assert.ok(out < 70)
+})
+
+test('a season with an MLB rating takes no minor-league row: the season counts once', () => {
+  const mlb = { ovr: 70, years: [2026, 2025] }
+  assert.equal(careerOvr(mlb, [row({ season: 2026, pct: 0 })]), 70)
+  // a row from a season with no MLB rating still enters
+  const out = careerOvr(mlb, [row({ season: 2026, pct: 0 }), row({ season: 2024, pct: 0 })])
+  const m = W[2] * LEVEL_WEIGHT[11]
+  near(out, ((W[0] + W[1]) * 70 + m * 20) / (W[0] + W[1] + m))
 })
 
 test('with no minor-league row an MLB rating comes back unchanged', () => {

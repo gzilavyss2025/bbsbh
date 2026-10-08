@@ -23,11 +23,13 @@ export function minorRating(percentile, level) {
 // rows: [{ season, sport, group, n, pct }] (n is PA or outs); mlb: { ovr, years } | null,
 // the MLB rating and the seasons it rests on. Each minor-league row weighs
 // recency x level x playing time; each MLB season weighs its recency, so one MLB rating
-// stands for all of them. A row under the playing-time floor (pct null) is dropped.
+// stands for all of them. A row under the playing-time floor (pct null) is dropped, and
+// so is a row from a season the MLB rating already covers, so a season counts once.
 // GUESS: the spec is silent on mixing the two, so ratings are averaged on the OVR
 // scale and recency is the rank among every season the player has, as in career.js.
 export function careerOvr(mlb, rows) {
-  const rated = rows.filter((r) => r.pct != null && CEILING[r.sport] != null)
+  const covered = new Set(mlb?.years)
+  const rated = rows.filter((r) => r.pct != null && CEILING[r.sport] != null && !covered.has(r.season))
   if (!rated.length) return mlb?.ovr ?? null
   const years = [...new Set([...(mlb?.years ?? []), ...rated.map((r) => r.season)])].sort((a, b) => b - a)
   const rec = (y) => recency(years.indexOf(y))
