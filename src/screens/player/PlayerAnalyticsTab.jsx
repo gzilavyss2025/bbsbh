@@ -30,6 +30,7 @@ import { Pill } from '../../components/ui/control/Pill.jsx'
 import { useNav } from '../../lib/nav.js'
 import { pitchScopeOf, vsPitchScope } from '../../lib/seasons/route.js'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
+import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 
 // The Pitches and Command cards' SCOPE (#1503): Regular, Postseason or All, the
 // three the Matchup Scout has. The address holds it (`?scope=`, absent is
@@ -230,7 +231,7 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: s
           <FoulCard playerId={bio.id} group={block.group} asOf={asOf} {...season} />
 
           {block.group === 'pitching' && hasPost && (
-            <div className="cmdmap__chips" role="group" aria-label="Scope">
+            <Cluster className="cmdmap__chips" role="group" aria-label="Scope">
               {SCOPES.map(([k, text]) => (
                 <Pill
                   key={k}
@@ -243,7 +244,7 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: s
                   {text}
                 </Pill>
               ))}
-            </div>
+            </Cluster>
           )}
 
           <PitchesCard

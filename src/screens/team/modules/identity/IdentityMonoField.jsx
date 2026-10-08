@@ -11,6 +11,7 @@ import { ShapeInkPicker, flipVerdict } from '../../../identity-lab/editors/Shape
 // imports; this drawer needs the same rules and pulls them in directly,
 // since 62-identity-admin.css is a separate lazy chunk.
 import '../../../../styles/17-identity-lab-workbench.css'
+import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 
 // The drawer's Knockout mark group: which shapes of this club's mark are ink
 // vs. the paper it's drawn against, reusing /identity-lab's own picker so a
@@ -119,7 +120,7 @@ export function IdentityMonoField({ teamId, fields, values, onChange }) {
         nightly team-data refresh runs, not the instant you save here.
       </p>
 
-      <div className="idlab__monoinksource" role="group" aria-label="Source art">
+      <Cluster gap="tight" align="center" className="idlab__monoinksource" role="group" aria-label="Source art">
         <span className="idlab__monoinksourcelabel">Source</span>
         {SOURCE_OPTIONS.map((opt) => (
           <button
@@ -132,7 +133,7 @@ export function IdentityMonoField({ teamId, fields, values, onChange }) {
             {opt.label}
           </button>
         ))}
-      </div>
+      </Cluster>
 
       {art.loading && <p className="idlab__monoinkhint">Loading the club mark…</p>}
       {art.error && <p className="idlab__monoinkhint">{art.error.message}</p>}
