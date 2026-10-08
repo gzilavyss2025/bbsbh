@@ -40,11 +40,13 @@ const TO_Y = WS_Y + BOX_H / 2
 const wins = (n) => `${n} ${n === 1 ? 'win' : 'wins'}`
 
 function Box({ box, x, y, feeders }) {
-  const sides = box.rows.map((r) => (r.club ? `${r.club.name} ${wins(r.wins)}` : 'to come')).join(', ')
+  const sides = box.rows
+    .map((r, i) => (r.club ? `${r.club.name} ${wins(r.wins)}` : feeders ? `winner of ${feeders[i]} to come` : 'to come'))
+    .join(', ')
   return (
     <div
       role="group"
-      aria-label={`${box.name}. ${sides}. ${box.foot}`}
+      aria-label={`${box.name}. ${sides}.${box.foot ? ` ${box.foot}.` : ''}`}
       className={`pbnow__box${box.today ? ' pbnow__box--today' : ''}`}
       style={{ left: x, top: y, width: BOX_W, height: BOX_H }}
     >
