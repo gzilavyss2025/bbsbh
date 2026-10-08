@@ -82,9 +82,9 @@
 }
 
 /* An old game's club in a season-covered era with no art (#1626): the period
-   abbreviation in the serif face, in neutral ink, printed straight on the tile
-   like a wordmark (no paper chip: the tile is already the frame). The era's
-   own colours have no cited source, so the mark claims none. TeamLogo sets
+   abbreviation in the serif face, printed straight on the tile like a wordmark
+   (no paper chip: the tile is already the frame). On a tinted tile it wears the
+   era's own onBar ink (--tile-ink, #1724), else neutral ink. TeamLogo sets
    --serif-size from the box. */
 .teamlogo--serif {
   background: none;
@@ -92,7 +92,7 @@
   font-family: var(--font-read);
   font-weight: var(--w-bold);
   font-size: var(--serif-size, 0.62em);
-  color: var(--text-body);
+  color: var(--tile-ink, var(--text-body));
 }
 
 /* On a section bar the abbreviation is the bar's own text colour, the same ink
