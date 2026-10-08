@@ -28,6 +28,9 @@ test('the bracket code never reads Scores Unlocked and never touches storage', (
       (f) => new URL(`../../src/api/postseason/${f}`, import.meta.url),
     ),
     new URL('../../src/hooks/postseason/usePostseasonBracket.js', import.meta.url),
+    ...readdirSync(new URL('../../src/lib/postseason/primer/', import.meta.url)).map(
+      (f) => new URL(`../../src/lib/postseason/primer/${f}`, import.meta.url),
+    ),
   ]
   for (const url of files) {
     const src = readFileSync(fileURLToPath(url), 'utf8')
