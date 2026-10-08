@@ -296,7 +296,7 @@ function SeasonSeriesCell({ cell, onSelect, cellRef, otherPark }) {
 // mix two time zones, so this deliberately never falls back to the viewer's
 // device time zone the way GameCard's slate-card clock does; missing tzId
 // just reads TBD rather than silently showing the wrong city's clock.
-function GameTime({ gameDate, tzId, tbd }) {
+export function GameTime({ gameDate, tzId, tbd }) {
   if (tbd || !gameDate || !tzId) return <span className="seasonseries__time">TBD</span>
   let local
   try {

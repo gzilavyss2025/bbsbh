@@ -1,0 +1,226 @@
+/* ------------------------------------------ series primer: the main column
+   (SeriesRibbon.jsx, edges/*.jsx). Imported by those components, not by
+   index.css: a lazy partial. The same scorebook vocabulary as series-live.css:
+   label heads on a hairline, cards of paper, mono tabular figures, condensed
+   caps for structure. No kraft token: none of these parts is a seal
+   (ADR-0083, ADR-0087 d.3). Nothing here is a control, so nothing needs hover
+   or a focus ring. */
+
+/* ---- The series ribbon ------------------------------------------------- */
+.seriesribbon {
+  margin: 0 0 var(--space-3);
+}
+.seriesribbon__chip {
+  margin-inline-start: var(--space-2h);
+  vertical-align: middle;
+}
+.seriesribbon__games {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.seriesribbon__game {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+}
+/* Today is ringed in clay, inside the edge. */
+.seriesribbon__game--today {
+  box-shadow: inset 0 0 0 var(--bw-heavy) var(--clay);
+}
+/* A game still to come is pencilled in: dashed, no fill. */
+.seriesribbon__game--ahead,
+.seriesribbon__game--ifNecessary {
+  border-style: dashed;
+  background: transparent;
+}
+.seriesribbon__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-1h);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.seriesribbon__no {
+  color: var(--text-heading);
+}
+.seriesribbon__note {
+  margin: 0;
+  font-size: var(--fs-cell);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+}
+.seriesribbon__scores {
+  display: grid;
+  gap: var(--space-1);
+}
+.seriesribbon__score {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-1h);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-inset);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+/* The winner is inked: navy fill, paper text. The words "(won)" back it up for
+   a screen reader, so the emphasis is not colour alone. */
+.seriesribbon__score.is-won {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+.seriesribbon__runs {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-body);
+  letter-spacing: var(--ls-num);
+}
+.seriesribbon__wp {
+  width: 100%;
+  height: 26px;
+}
+.seriesribbon__wpup {
+  fill: var(--winprob-home);
+}
+.seriesribbon__wpdown {
+  fill: var(--winprob-away);
+}
+.seriesribbon__wpline {
+  fill: none;
+  stroke: var(--text-body);
+  stroke-width: var(--bw-rule);
+  vector-effect: non-scaling-stroke;
+}
+
+/* ---- Today's edges ------------------------------------------------------ */
+.seriesedges {
+  margin: 0 0 var(--space-3);
+}
+.seriesedges__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--space-3);
+  align-items: start;
+}
+.seriesedges__who {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-title);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.seriesedges__label,
+.seriesedges__poles {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.seriesedges__label {
+  display: block;
+}
+/* The five lean bands, pitcher pole first; the umpire's own band is inked and a
+   caret sits at his true position inside it. */
+.seriesedges__lean {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-1);
+  padding-top: var(--space-2h);
+}
+.seriesedges__lean i {
+  height: 8px;
+  border-radius: var(--radius-xs);
+  background: var(--border-rule);
+}
+.seriesedges__lean i.is-on {
+  background: var(--text-body);
+}
+.seriesedges__lean b {
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-inline: 5px solid transparent;
+  border-top: 7px solid var(--clay);
+  transform: translateX(-50%);
+}
+.seriesedges__poles {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.seriesedges__pen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.seriesedges__club {
+  min-width: 36px;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.seriesedges__counts {
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.seriesedges__rows {
+  display: grid;
+  gap: var(--space-1h);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.seriesedges__row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2);
+  align-items: start;
+  padding-bottom: var(--space-1h);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-small);
+}
+.seriesedges__row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.seriesedges__name {
+  color: var(--text-heading);
+}
+.seriesedges__line {
+  display: block;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-cell);
+  color: var(--text-muted);
+}
