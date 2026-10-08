@@ -187,6 +187,22 @@ function buildRosters(rosterByTeam) {
   return out
 }
 
+// Each game's runs, off the box scores loadSeriesStats already fetched (the
+// primer's ribbon prints them). `boxscores` lines up with `games`; a game whose
+// read failed, or whose box has no run count, leaves no entry.
+// { [gamePk]: { awayId, homeId, runs: { away, home } } }
+export function foldRunsByGame(games, boxscores) {
+  const out = {}
+  games.forEach((g, i) => {
+    const { away, home } = boxscores[i]?.teams ?? {}
+    const awayRuns = away?.teamStats?.batting?.runs
+    const homeRuns = home?.teamStats?.batting?.runs
+    if (awayRuns == null || homeRuns == null) return
+    out[g.gamePk] = { awayId: away.team?.id ?? null, homeId: home.team?.id ?? null, runs: { away: awayRuns, home: homeRuns } }
+  })
+  return out
+}
+
 // Sums every player's batting/pitching lines across just this series' games
 // (a handful of `/boxscore` fetches), then shapes the totals into
 // TeamLeaders' `precomputed` category-map contract ({ id, name, teamId,
@@ -291,5 +307,6 @@ export async function loadSeriesStats(games) {
     // Team sums from the same box scores (seriesTotals.js), plus the whiff
     // counts off each counted game's pitch calls.
     totals: foldTeamTotals(boxscores, foldWhiffs(whiffFeeds)),
+    runsByGame: foldRunsByGame(games ?? [], boxscores),
   }
 }

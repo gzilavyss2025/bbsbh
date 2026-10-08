@@ -1,0 +1,82 @@
+// How the primer gets its finished games: the nightly shard block first, the
+// live read for whatever the block does not have (ADR-0087, 2026-10-08
+// addendum, decision d). Pure; useSeriesPrimerData does the reads.
+//
+// One finished game, the slice 1 shape (ribbonNodes.js):
+//   { gamePk, n, date, awayId, homeId, venueId, venueName, runs: { away, home }, wp }
+//
+// The shard block lives on the callouts bundle of TODAY'S game
+// (public/data/callouts/{MMDDYYYY}/{gamePk}.json, api/callouts.js) as `series`:
+//   { id, gamePks: number[], games: Game[], stats?: loadSeriesStats's output }
+// `stats` is optional. Without it the live read supplies the stats.
+//
+// SPOILER FOOTING. Every game here is one the bracket counts (Final before the
+// cutoff date). A block that names any other game is dropped whole, so a stale
+// or early file cannot bring today's result in. The caller gives `counted`;
+// nothing else decides which games show.
+
+const WP_POINTS = 26
+
+export function seriesBlockFor(bundle, seriesId) {
+  const block = bundle?.series
+  return block?.id === seriesId ? block : null
+}
+
+// -> { usable, byPk, needLive }
+//   usable    the block names no game the bracket does not count
+//   byPk      the block's games, by gamePk (empty when not usable)
+//   needLive  a live read is needed: no usable block, a counted game the block
+//             lacks, or no stats in the block. The live stats cover every
+//             counted game, so a missing game means live stats too.
+export function planShard(block, counted) {
+  const pks = new Set(counted.map((g) => g.gamePk))
+  const shardGames = block?.games ?? []
+  const named = [...(block?.gamePks ?? []), ...shardGames.map((g) => g.gamePk)]
+  const usable = Boolean(block) && named.every((pk) => pks.has(pk))
+  const byPk = usable ? Object.fromEntries(shardGames.map((g) => [g.gamePk, g])) : {}
+  const complete = counted.every((g) => byPk[g.gamePk])
+  return { usable, byPk, needLive: counted.length > 0 && !(usable && complete && block.stats) }
+}
+
+// At most WP_POINTS home win-chance points, evenly spaced across the plays.
+function wpPoints(winProb) {
+  const ys = (winProb ?? []).filter((e) => typeof e?.homeTeamWinProbability === 'number').map((e) => e.homeTeamWinProbability)
+  if (ys.length <= WP_POINTS) return ys
+  return Array.from({ length: WP_POINTS }, (_, i) => ys[Math.round((i * (ys.length - 1)) / (WP_POINTS - 1))])
+}
+
+// The live read's games, by gamePk. `log` is useSeriesLog's data. A game with
+// no box score (its read failed) has no runs to show, so it is left out.
+function liveGames(counted, log) {
+  const out = {}
+  for (const g of counted) {
+    const box = log?.stats?.runsByGame?.[g.gamePk]
+    if (!box) continue
+    const venue = log.cardsByPk?.[g.gamePk]?.venue
+    out[g.gamePk] = {
+      gamePk: g.gamePk,
+      n: g.gameNumber,
+      date: g.date,
+      awayId: box.awayId,
+      homeId: box.homeId,
+      venueId: venue?.id ?? null,
+      venueName: venue?.name ?? '',
+      runs: box.runs,
+      wp: wpPoints(log.gameSignals?.[g.gamePk]?.winProb),
+    }
+  }
+  return out
+}
+
+// -> { games, stats, source: 'shard' | 'live' | 'mixed' }. `log` may be null
+// while the live read is still on its way; the games it would give are then
+// missing, and the caller shows its loading state.
+export function primerData(block, counted, log) {
+  const { usable, byPk, needLive } = planShard(block, counted)
+  const live = needLive ? liveGames(counted, log) : {}
+  return {
+    games: counted.map((g) => byPk[g.gamePk] ?? live[g.gamePk]).filter(Boolean),
+    stats: needLive ? (log?.stats ?? null) : (block?.stats ?? null),
+    source: !usable ? 'live' : needLive ? 'mixed' : 'shard',
+  }
+}
