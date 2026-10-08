@@ -167,35 +167,39 @@ written, and go to step 1.
    wave 1, and so on. In a session Gary is watching, ask once with `AskUserQuestion`:
    "Start these sessions for you?" (recommended: yes). Never start a session before he
    answers. In a child or unattended session, skip this step and return the prompts.
-   If he says yes:
-   1. **Check the cap.** `orchestrate` allows 3 children at once, and a session that
-      waits counts. If the chain has more, ask whether to raise the cap or run the
-      later waves after the first finish. Stop on any limit warning.
-   2. **Start the last wave first.** A session cannot message a session that does not
-      exist yet, and wave 1 must know every later session id. Start the last wave, then
-      each earlier wave. Use `create_session` with `source_url` set to this repo, the
-      `model` from the plan, a title `wp: <slug> wave N`, and tags `wp` and
-      `wave-N`. It takes no effort setting, so write the effort into the prompt's first
-      line ("Run at <effort>") and tell Gary to set it if the session shows another.
-      Set `permission_mode` the way `orchestrate` does: leave it unset.
-   3. **Wait text for waves 2 and up.** Put this at the top of the prompt, with the
-      real ids: "You are wave N of M. Do nothing, and read no files, until session
-      `<previous wave id>` sends you a message that starts with `START`. Then do the
-      task below. If the message starts with `ABORT`, stop and reply `STOPPED`."
-   4. **Hand-off text for every wave but the last.** Put this at the end of the prompt,
-      with the real ids: "When your work is done and checked, `send_message` each of
-      these sessions: `<id>` (wave N+1), with `START` and one line naming the branch or
-      PR it needs. If you cannot finish, send `ABORT <reason>` to them, then to your
-      parent `<this session id>`, and end with `NEEDS PARENT: <what you need>`."
-      A wave with more than one session sends `START` only after every session in its
-      wave is done, so the lowest-numbered one sends it and the others message it
-      `DONE`.
-   5. **Report.** Give Gary a table: wave, session id, title, model, what it waits on.
-      Tell him that waves 2 and up are idle until the wave before them messages them,
-      and that he can `send_message` `START` to any of them by hand.
-   A session that is told to wait is idle, so it costs almost nothing until it starts.
+   If he says yes, **you drive the waves. The children never wait and never message each
+   other.** A session that waits for a `START` can stall without any error, because
+   `send_message` does not always wake an idle session (`orchestrate`, "Reports and
+   watching").
+   1. **Check the cap.** `orchestrate` allows 3 children at once. If wave 1 is larger,
+      start 3 and the rest as they finish. Stop on any limit warning.
+   2. **Start wave 1 only.** Use `create_session` with `source_url` set to this repo, the
+      `model` from the plan, a title `wp: <slug> wave N`, and tags `wp` and `wave-N`.
+      It takes no effort setting, so write the effort into the first line of the prompt
+      ("Run at <effort>") and tell Gary to set it if the session shows another. Leave
+      `permission_mode` unset. End each prompt with the `orchestrate` child handoff: open
+      a draft PR, subscribe to it, and finish with a final line `NEEDS PARENT: <what you
+      need>` when stopped.
+   3. **Subscribe to each child's PR** (`subscribe_pr_activity`). Do not poll in a loop.
+      Add a `send_later` check (about 50 minutes first, then about 4 hours, at most 6
+      checks).
+   4. **Start wave N+1 when every session in wave N has a green draft PR.** Do not wait
+      for a merge when the later wave only needs to read the earlier one. When it must
+      build on the earlier code, ask Gary once for the whole chain
+      ("Build wave 2 on wave 1's branch?"). If yes, set `source_revision` to that
+      branch. If no, wait for `/stack-prs` to merge it. Say in the later prompt which
+      branch or PR it builds on and what it hands on.
+   5. **Stop the chain on a failure.** If a session sends `NEEDS PARENT`, or its PR stays
+      red after it tried twice, start nothing new. Tell Gary which wave stopped and why.
+   6. **Report.** Give Gary a table: wave, session id, title, model, status, and what the
+      next wave waits on. The tags `wp` and `wave-N` let a new session find the chain
+      with `list_sessions` if this session ends.
+   Starting a session costs usage from his shared pool. That is why you start the next
+   wave only when the last one is green.
 
-Do not run the prompt yourself. This skill writes, grades and rewrites it, and step 9 may start sessions that run it. If the prompt is
+Do not run the prompt yourself. This skill writes, grades and rewrites it, and step 9 may start sessions that run it.
+
+Test scenarios for step 0 are in `evals.md`. Run them before you change step 0. If the prompt is
 already an A+, say so and show the evidence from steps 1 to 5. Do not invent
 changes.
 
