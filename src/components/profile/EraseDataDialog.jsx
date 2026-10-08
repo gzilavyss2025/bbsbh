@@ -3,6 +3,7 @@ import { markIntroSeenIn } from '../../lib/account/intro.js'
 import { clearTallyDataIn } from '../../lib/account/localData.js'
 import { browserStorage } from '../../lib/account/preferencesStorage.js'
 import { Notice } from '../ui/state/Notice.jsx'
+import { Cluster } from '../ui/layout/Cluster.jsx'
 
 // "Erase my Tally data" — the confirm sheet behind the two deletion actions in
 // My Tally's Sync & data section. Deliberately TWO actions, never one:
@@ -147,7 +148,7 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
             moment, or clear this device on its own.
           </Notice>
         )}
-        <div className="erasesheet__actions">
+        <Cluster className="erasesheet__actions">
           <button
             ref={cancelRef}
             type="button"
@@ -182,7 +183,7 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
               {state === 'working' ? copy.working : copy.confirm}
             </button>
           )}
-        </div>
+        </Cluster>
       </div>
     </div>
   )
