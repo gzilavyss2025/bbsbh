@@ -12,6 +12,7 @@ import { BracketRail } from '../bracket/BracketRail.jsx'
 import { SurvivorsBoard } from '../bracket/SurvivorsBoard.jsx'
 import { SeasonSeriesStrip } from '../teamstats/SeasonSeriesStrip.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
+import { Notice } from '../ui/state/Notice.jsx'
 import { SeriesEdges } from './edges/SeriesEdges.jsx'
 import { SeriesMark } from './SeriesMark.jsx'
 import { SeriesLeadersLedger } from './SeriesLeadersLedger.jsx'
@@ -25,7 +26,11 @@ import { SeriesTotals } from './SeriesTotals.jsx'
 // none they draw what they always did, the survivors' board and the bracket rail.
 //
 // SPOILER FOOTING. The cutoff is a date. Every part reads games that went Final
-// before it, or files that exist before first pitch; none reads today's game. No
+// before it, or files that exist before first pitch. Today's gamePk goes to
+// exactly two reads, and each is safe by its field list: fetchUpcomingSeriesGames
+// (park and probables, pinned by test/postseason/upcoming-games.test.js) and
+// fetchPlateUmpires (the umpire, pinned by plate-umpire.test.js). Change either
+// list only with its test. No
 // SealBox, no Scores Unlocked.
 export function SeriesPrimer({ part, primer }) {
   const { series, bracket, cutoff, slateDate, favoriteTeamId } = primer
@@ -85,6 +90,7 @@ function Main({ primer: { list, series, game, setPick, data, bracket, cutoff, sl
       ) : (
         <SeriesRibbon series={series} nodes={ribbonNodes(series, { scoresByPk: byPk })} games={{ ...parks, ...byPk }} clubs={clubs} />
       )}
+      {data.error && <Notice tone="error">The series results did not load.</Notice>}
       <SeasonSeriesStrip
         viewingTeamId={clubs[1].id}
         opponentId={clubs[0].id}

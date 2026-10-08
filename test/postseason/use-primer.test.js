@@ -16,7 +16,7 @@ function read(args) {
   const bracket = bracket2025(DATE)
   const Probe = () => {
     const p = usePrimer({ postseason: { bracket, cutoff: DATE }, slateDate: DATE, isToday: true, favoriteTeamId: 0, ...args })
-    return createElement('i', null, JSON.stringify({ id: p.series?.id ?? null, tabs: p.list?.length ?? 0, game: p.game?.gamePk ?? null }))
+    return createElement('i', null, JSON.stringify({ id: p.series?.id ?? null, tabs: p.list?.length ?? 0, game: p.game?.gamePk ?? null, base: [p.bracket, p.cutoff, p.slateDate, p.favoriteTeamId].map(String) }))
   }
   return JSON.parse(renderToStaticMarkup(createElement(Probe)).replace(/<[^>]+>/g, '').replaceAll('&quot;', '"'))
 }
@@ -30,4 +30,14 @@ test('two LCS games on the slate: both tabs, the earlier first pitch opens first
 test('below the rail width, or with no slate yet, nothing is primed', () => {
   assert.equal(read({ enabled: false, games: slate }).id, null)
   assert.equal(read({ enabled: true, games: null }).id, null)
+})
+
+test('the favourite club\u2019s series opens first, even when the other plays earlier', () => {
+  assert.equal(read({ enabled: true, games: slate, favoriteTeamId: 119 }).game, NLCS_G4)
+})
+
+test('with no primer, the survivors board and the bracket rail still get what they read', () => {
+  const r = read({ enabled: false, games: slate, favoriteTeamId: 119 })
+  assert.deepEqual(r.base.slice(1), [DATE, DATE, '119'])
+  assert.notEqual(r.base[0], 'undefined')
 })
