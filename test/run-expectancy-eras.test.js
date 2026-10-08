@@ -50,6 +50,61 @@ test('accumulateGame tags each pitch with its pre-pitch state and the half-innin
   assert.deepEqual(re24.get('1-0'), { sum: 2, n: 1 })
 })
 
+// Two plate appearances from bases empty, 0 out: a 3-pitch homer, then a 1-pitch
+// homer. Per pitch, the 0-out empty state counts 4 pitches. Per play, it counts 2.
+const TWO_PLAYS = {
+  liveData: {
+    plays: {
+      allPlays: [
+        {
+          about: { inning: 1, halfInning: 'top' },
+          result: { awayScore: 1, homeScore: 0 },
+          playEvents: [pitch(0, 0), pitch(0, 1), pitch(1, 1)],
+          runners: [{ details: { runner: { id: 7 } }, movement: { start: null, end: 'score', isOut: false } }],
+        },
+        {
+          about: { inning: 1, halfInning: 'top' },
+          result: { awayScore: 2, homeScore: 0 },
+          playEvents: [pitch(0, 0)],
+          runners: [{ details: { runner: { id: 8 } }, movement: { start: null, end: 'score', isOut: false } }],
+        },
+      ],
+    },
+  },
+}
+
+test('accumulateGame tags re24 per pitch by default, and per play with perPlay (#1611)', () => {
+  const pitchStates = new Map()
+  const pitchWise = new Map()
+  accumulateGame(TWO_PLAYS, pitchStates, pitchWise)
+  assert.deepEqual(pitchWise.get('0-0'), { sum: 7, n: 4 }) // 3 pitches x 2 runs, then 1 x 1 run
+
+  const playStates = new Map()
+  const playWise = new Map()
+  accumulateGame(TWO_PLAYS, playStates, playWise, { perPlay: true })
+  assert.deepEqual(playWise.get('0-0'), { sum: 3, n: 2 }) // one entry per play: 2 runs, then 1 run
+  // The 288-bucket states stay per pitch in both modes.
+  const pitches = (m) => [...m.values()].reduce((a, c) => a + c.n, 0)
+  assert.equal(pitches(playStates), 4)
+  assert.equal(pitches(pitchStates), 4)
+})
+
+test('accumulateGame with perPlay counts a play that has no pitch events (#1611)', () => {
+  const feed = {
+    liveData: {
+      plays: {
+        allPlays: [{ about: { inning: 1, halfInning: 'top' }, result: { awayScore: 0, homeScore: 0 }, playEvents: [], runners: [] }],
+      },
+    },
+  }
+  const re24 = new Map()
+  accumulateGame(feed, new Map(), re24, { perPlay: true })
+  assert.deepEqual(re24.get('0-0'), { sum: 0, n: 1 })
+  const byPitch = new Map()
+  accumulateGame(feed, new Map(), byPitch)
+  assert.equal(byPitch.size, 0)
+})
+
 test('accumulateGame ignores a feed with no plays', () => {
   const states = new Map()
   assert.equal(accumulateGame({}, states, new Map()), false)
@@ -183,4 +238,10 @@ test('checkpointOf records the no-play count when it is given', () => {
   const cp = checkpointOf('2000', 10, 8, new Map(), new Map(), 2)
   assert.equal(cp.noPlays, 2)
   assert.equal('noPlays' in checkpointOf('2000', 10, 8, new Map(), new Map()), false)
+})
+
+test('sweepGames passes the perPlay option down to accumulateGame (#1611)', async () => {
+  const re24 = new Map()
+  await sweepGames([10], 1, async () => TWO_PLAYS, new Map(), re24, undefined, { perPlay: true })
+  assert.deepEqual(re24.get('0-0'), { sum: 3, n: 2 })
 })

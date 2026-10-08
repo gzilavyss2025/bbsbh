@@ -4,7 +4,7 @@
 // bash script (statusline-command.sh) never showed the model.
 //
 // The ladder is in memory/model-effort-ladder.md and .claude/skills/improve-prompt:
-//   1 Haiku 4.5 | 2-5 Sonnet 5.5 low/medium/high/xhigh(+max) | 6-9 Opus 5.5
+//   1 Haiku 5.5 (any effort) or Haiku 4.5 | 2-5 Sonnet 5.5 low/medium/high/xhigh(+max) | 6-9 Opus 5.5
 //   medium(+low)/high/xhigh/max | 10 Fable 5.1
 //
 // Quiet flag: the repo hook design-work-flag.mjs writes a file when design files are
@@ -36,7 +36,7 @@ export function rungFor(modelId, displayName, effort) {
   if (!m) return { label, rung: null }
   const [, family, major, minor] = m
   const v = `${major}.${minor}`
-  if (family === 'haiku' && v === '4.5') return { label, rung: 1 }
+  if (family === 'haiku' && (v === '5.5' || v === '4.5')) return { label, rung: 1 }
   if (family === 'sonnet' && v === '5.5') return { label, rung: SONNET_55[effort] ?? null }
   if (family === 'opus' && v === '5.5') return { label, rung: OPUS_55[effort] ?? null }
   if (family === 'fable' && v === '5.1') return { label, rung: 10 }

@@ -190,6 +190,14 @@ don't run these by hand.
   (1985: 2,103 games in 3.7 min, so about 40 min for ten seasons). Pure parts:
   `scripts/lib/run-expectancy/eras.mjs`. Reader helper: `lookupEraRE` in
   `src/lib/runExpectancy.js`.
+  **Era `re24` is per play** (#1611). Before that change it was per pitch. The 1960s,
+  1970s and 1980s checkpoints still hold per-pitch sums. Re-sweep those seasons by hand
+  (about 2 hours) before any screen reads them. Remove their `season-YYYY.json` files first,
+  because a sweep skips a season whose file exists. Then re-aggregate the three decades.
+  1990-2023 need no re-sweep. `lookupEraRE` reads the per-count cells from 1990 on, and uses
+  `re24` only as the thin-cell fallback. Until the 1960s to 1980s are re-swept, era `re24`
+  mixes per-pitch and per-play weighting across decades. The 1990-2023 checkpoints are per
+  pitch too, so that mix stays after the re-sweep, unless those decades are also re-swept.
 - `gen-minors-leaders.mjs` → `public/data/minors-leaders.json` — the combined
   ALL-MINORS leaderboard (every farmhand's totals SUMMED across levels). Eight
   full-level stat pulls (~4,700 players). Stores PRE-RANKED top rows per category, so
@@ -1496,6 +1504,42 @@ Re-run only to fold in a new season.
   it throws past 6 KB. A page opens one shard (`src/api/ovr/savantHistory.js`). A finished
   season's ranks did not change between two fetches minutes apart (checked once); a
   later revision is unchecked.
+- `gen-ovr.mjs` → `public/data/ovr/{NN}.json` (player-keyed, bucketed on `personId % 100`
+  via `shardKey100`) — an OVR rating, the bars that exist and the seasons used, for every
+  MLB hitter and pitcher who passes the minimum-data rule (a hitter needs Contact and
+  Power, a pitcher all three buckets; `docs/ovr-rating.md`; #1720). **Hand-run, not a
+  cron**: `node scripts/gen-ovr.mjs`. Rerun it after the nightly files move on and after
+  the prior-season stores are rebuilt each autumn (when the season rolls over, rebuild
+  `war-history/` and `savant-history/` first: until then the new season has no prior
+  plate appearances). **It makes no network call.** It reads
+  `savant-percentiles.json` and `war.json` (current season), `savant-history/` and
+  `war-history/` (2023-2025), `hitter-grid/{season}/` (the current season's plate
+  appearances, because `war.json` has none) and `on-this-day/` (birth years for the age
+  shift). The math is in `scripts/lib/ovr/build.mjs`: Fielding is `fld` ranked per season
+  among hitters with 200 or more plate appearances (`FLD_MIN_PA`), then the seasons are
+  blended with `src/api/ovr/career.js`, then `rateHitter` or `ratePitcher`. A string cell
+  is converted to a number and counted. It prints the spread, the count on the floor of
+  20 and the cap of 99, and the count of percentiles the clamp caught. About 1,130
+  players, 100 shards, 2.5 KB at most; it throws past 8 KB. A page opens one shard
+  (`src/api/ovr/ovrData.js`). Part B's calibration is re-run by
+  `.scratch/ovr/calibrate-final.mjs`.
+  Since #1721 it also reads `milb-seasons/` (2021-2025), `prospect-trend.json` (this
+  season's level percentile) and `top-prospects.json` (rank and age). A **minor leaguer**
+  (a minor-league row this season, no MLB rating) gets an entry with `ovr`, `seasons` and
+  `level` (the sportId) and no `bars`: `src/api/ovr/minor.js`, rating
+  `20 + (ceiling - 20) * percentile / 100`. A player with fewer than 3 MLB seasons
+  (`ESTABLISHED_SEASONS`) also has his minor-league rows blended into his OVR (recency x
+  level weight x playing time, from `milbSeasons.js`); an established player is not
+  touched. A rated Top 100 player gets `pot` (`src/api/ovr/pot.js`); everyone else has no
+  `pot`. The run prints how far the minor-league seasons move MLB ratings, and how many
+  Top 100 players have no rating.
+  It also writes `public/data/ovr-history/{NN}.json` (#1722): per player, the dated rows
+  `[date, ovr, bars | null, 1?]` kept by `scripts/lib/ovr/history.mjs` (every day for 60
+  days, one a week for the rest of the season). Prospects are seeded from
+  `prospect-trend.json`; a seeded row ends in `1` and holds a percentile, not a rating.
+  The row date is `generatedAt` of `savant-percentiles.json`, so a rerun on the same files
+  changes nothing. It throws past 128 KB a shard (not 8 KB: see `docs/ovr-rating.md`, "Rating
+  changes over time"). Not on a cron yet.
 - `gen-milb-seasons.mjs` → `public/data/milb-seasons/{NN}.json` (player-keyed, bucketed
   on `personId % 100` via the reader's `milbShardKey`) — each player's minor-league season
   lines for 2021-2025 at AAA, AA, A+ and A, for the career rating (`docs/ovr-rating.md`,

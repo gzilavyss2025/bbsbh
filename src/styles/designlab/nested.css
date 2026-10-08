@@ -1,0 +1,130 @@
+/* ============================================================
+   BOXES INSIDE CARDS prototype (#1775). Imported by
+   screens/designlab/nested/NestedBoxes.jsx, never by index.css. It leaves
+   with that entry when Gary decides which boxes to flatten.
+
+   The BEFORE side of each pair is the shipped class or component. This file
+   draws only the AFTER side (.nested__duo, .nested__roster, .nested__stats)
+   and the frame around each pair. Where a rule here removes a box, it is the
+   rule the real change would write.
+   ============================================================ */
+.nested {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  width: 100%;
+}
+.nested__case {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.nested__casehead {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.nested__where {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+/* The pair stacks at every width. The real boxes read the viewport (740px),
+   not their parent, so a half-width BEFORE would squeeze into a layout the
+   app never draws. Stacked, each side gets the measure the app gives it. */
+.nested__pair {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.nested__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
+  min-width: 0;
+}
+.nested__tag {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.nested__lost {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+.nested__lost strong {
+  color: var(--text-heading);
+}
+
+/* Case 1: the two boxes become two columns split by a pencil rule. */
+.nested__ruled {
+  padding-bottom: var(--space-1h);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.nested__duo {
+  display: flex;
+  flex-direction: column;
+}
+.nested__cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
+  padding: var(--space-3) 0;
+}
+.nested__cell--meter {
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+.nested__cell + .nested__cell {
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+@media (min-width: 740px) {
+  .nested__duo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .nested__cell + .nested__cell {
+    border-top: 0;
+    border-left: var(--bw-hair) solid var(--border-hairline);
+    padding-left: var(--space-3);
+  }
+  .nested__cell:first-child {
+    padding-right: var(--space-3);
+  }
+}
+
+/* Case 2: RosterList stays the real component. Its box is the only thing off. */
+.nested__roster .thub-roster {
+  border: 0;
+  border-block: var(--bw-hair) solid var(--border-rule);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.nested__roster .thub-row {
+  padding-inline: 0;
+}
+
+/* Case 3: the grey wells become figures under a pencil rule each. */
+.nested__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+  gap: var(--space-2) var(--space-3);
+}
+.nested__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-rule);
+  text-align: center;
+}

@@ -1,0 +1,30 @@
+import { shardKey100 } from '../../lib/shardKey.js'
+import { staticJsonBy } from '../staticJson.js'
+
+// A player's OVR rating, one shard per `personId % 100`
+// (public/data/ovr/NN.json, hand-run by scripts/gen-ovr.mjs; docs/ovr-rating.md).
+// A shard holds both player types; a player page opens one. Degrades to null
+// before the shard exists or on any failure: a player with no card, not a broken page.
+const loadShard = staticJsonBy((key) => `/data/ovr/${key}.json`)
+const loadHistory = staticJsonBy((key) => `/data/ovr-history/${key}.json`)
+
+// -> { ovr, bars: { [bucket]: n }, seasons: [year, ...] } | null, for one player and
+// group ('hitting' | 'pitching'). `ovr` and each bar are whole numbers 20-99;
+// `seasons` is every season that fed the rating, newest first. null when the player
+// failed the minimum-data rule (a hitter needs Contact and Power, a pitcher all three
+// buckets), so a null is "no rating", never a low one. A minor leaguer's entry has `level`
+// (a sportId) and no `bars`; a rated Top 100 player's has `pot`, any other has none (a dash).
+export async function fetchOvr(personId, group) {
+  const shard = await loadShard(shardKey100(personId))
+  return shard?.[group === 'pitching' ? 'pit' : 'bat']?.[personId] ?? null
+}
+
+// A player's rating history, oldest first: [{ date, ovr, bars, seeded }], [] when there is
+// none. Rows are packed on disk as [date, ovr, bars | null, 1?]
+// (public/data/ovr-history/NN.json, scripts/gen-ovr.mjs; changeSince and seasonSeries in
+// ./history.js read them). `seeded` is true for a prospect-trend percentile, which is not a rating.
+export async function fetchOvrHistory(personId, group) {
+  const shard = await loadHistory(shardKey100(personId))
+  const rows = shard?.[group === 'pitching' ? 'pit' : 'bat']?.[personId]
+  return (Array.isArray(rows) ? rows : []).map(([date, ovr, bars, seeded]) => ({ date, ovr, bars, seeded: seeded === 1 }))
+}
