@@ -21,7 +21,7 @@ written, and go to step 1.
      who it is for; what "done" looks like (a test, a screenshot, a route and gamePk);
      what to leave alone; what to do when a design choice is open (decide, or stop and
      ask); how big it may get.
-   - Do not ask what the repo already answers. Do not ask more than six questions. When
+   - Do not ask what the repo already answers. Ask at most six questions in all, counting step 7. When
      the user says "you pick", pick, and write the pick into the prompt as a settled fact.
    - Then write a first draft that follows steps 1 to 8. Keep the user's words where you
      can. Explain why behind each rule, because a reason generalizes and a bare "never"
@@ -81,7 +81,8 @@ written, and go to step 1.
    high on Haiku 5.5 can come before a jump to Sonnet 5.5. Move to Sonnet 5.5
    when Haiku 5.5 at high gives a shallow result.
 
-   API price per million tokens (input / output): Haiku 4.5 $1 / $5, Haiku 5.5
+   API price per million tokens (input / output), as of 2026-10-08 (prices change;
+   check them before you rely on them): Haiku 4.5 $1 / $5, Haiku 5.5
    $0.10 / $0.50 (prompts up to 100K tokens; $0.50 / $2.50 above that), Sonnet 5.5
    $2 / $10, Opus 5.5 $4 / $20, Fable 5.1 $10 / $50. Fable 5.1 costs 2.5 times
    as much as Opus 5.5, so pick it only when a rung above cannot do the job.
@@ -131,7 +132,8 @@ written, and go to step 1.
    Sonnet 5.5 at low or medium effort, add this line: "Keep working until everything
    asked for is done. Stop to ask only when you cannot go on without the user, or
    before a risky step. When the work is done and checked, stop and report; do not add
-   features, tests, files or docs that were not asked for." Anthropic measured that
+   features, tests, files or docs that were not asked for. Tests, docs and checks that
+   this prompt or CLAUDE.md names count as asked for." Anthropic measured that
    such a model otherwise stops to check in early (Sonnet 5.5 prompting guide). Do not add scope the author did
    not ask for; a split divides the same scope, it does not grow it. Do not
    make up facts. Where a fix needs a decision from the user, ask it with
@@ -162,42 +164,15 @@ written, and go to step 1.
 8. **List the changes.** After the prompts, list each change and its reason,
    including why you split (or did not) and why you picked each model.
 
-9. **Hand off a chain (only when step 4 split the prompt into waves).** A wave is a set
-   of prompts that can run at the same time. Wave 1 has no dependencies. Wave 2 needs
-   wave 1, and so on. In a session Gary is watching, ask once with `AskUserQuestion`:
-   "Start these sessions for you?" (recommended: yes). Never start a session before he
-   answers. In a child or unattended session, skip this step and return the prompts.
-   If he says yes, **you drive the waves. The children never wait and never message each
-   other.** A session that waits for a `START` can stall without any error, because
-   `send_message` does not always wake an idle session (`orchestrate`, "Reports and
-   watching").
-   1. **Check the cap.** `orchestrate` allows 3 children at once. If wave 1 is larger,
-      start 3 and the rest as they finish. Stop on any limit warning.
-   2. **Start wave 1 only.** Use `create_session` with `source_url` set to this repo, the
-      `model` from the plan, a title `wp: <slug> wave N`, and tags `wp` and `wave-N`.
-      It takes no effort setting, so write the effort into the first line of the prompt
-      ("Run at <effort>") and tell Gary to set it if the session shows another. Leave
-      `permission_mode` unset. End each prompt with the `orchestrate` child handoff: open
-      a draft PR, subscribe to it, and finish with a final line `NEEDS PARENT: <what you
-      need>` when stopped.
-   3. **Subscribe to each child's PR** (`subscribe_pr_activity`). Do not poll in a loop.
-      Add a `send_later` check (about 50 minutes first, then about 4 hours, at most 6
-      checks).
-   4. **Start wave N+1 when every session in wave N has a green draft PR.** Do not wait
-      for a merge when the later wave only needs to read the earlier one. When it must
-      build on the earlier code, ask Gary once for the whole chain
-      ("Build wave 2 on wave 1's branch?"). If yes, set `source_revision` to that
-      branch. If no, wait for `/stack-prs` to merge it. Say in the later prompt which
-      branch or PR it builds on and what it hands on.
-   5. **Stop the chain on a failure.** If a session sends `NEEDS PARENT`, or its PR stays
-      red after it tried twice, start nothing new. Tell Gary which wave stopped and why.
-   6. **Report.** Give Gary a table: wave, session id, title, model, status, and what the
-      next wave waits on. The tags `wp` and `wave-N` let a new session find the chain
-      with `list_sessions` if this session ends.
-   Starting a session costs usage from his shared pool. That is why you start the next
-   wave only when the last one is green.
+9. **Offer the hand-off (only when step 4 split the prompt into waves).** Do not start
+   sessions from this skill. Starting and watching sessions belongs to `orchestrate`,
+   which owns the cap of 3, the budget, the `orch:` titles that its sweep and duplicate
+   check read, and the ledger. End the reply with the run plan and one line: "Run
+   `/orchestrate` to start these." Say which prompts are wave 1 and which wait on
+   an earlier wave. `orchestrate` starts a later wave only when the wave before it has
+   green draft PRs.
 
-Do not run the prompt yourself. This skill writes, grades and rewrites it, and step 9 may start sessions that run it.
+Do not run the prompt yourself. This skill writes, grades and rewrites it.
 
 Test scenarios for step 0 are in `evals.md`. Run them before you change step 0. If the prompt is
 already an A+, say so and show the evidence from steps 1 to 5. Do not invent
