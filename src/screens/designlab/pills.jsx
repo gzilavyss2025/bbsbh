@@ -28,6 +28,7 @@ const TAG_INKS = {
   ],
   ink: [{ label: '1st of 30' }],
   seal: [{ label: 'Due up' }],
+  solid: [{ label: 'Solid' }],
 }
 
 // THE STATES ARE THE REAL ATTRIBUTES, as on the button's matrix: selected is
