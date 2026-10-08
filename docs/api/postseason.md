@@ -192,6 +192,20 @@ Example: 2025 NLDS, heading into 2025-10-09.
   `null` for a season with no art on file. A card that draws the mark prints
   `gameLine` ("Game 2") beside it, not `seriesLine`.
 
+## The series primer's rules (`src/lib/postseason/primer/`)
+
+Pure, and no UI yet (ADR-0087, 2026-10-08 addendum).
+
+- `primerSeriesFor(bracket, slateDate, slateGamePks)`: the LCS and World Series
+  playing on the cutoff, or `[]` unless each slate game maps to one of them and
+  each has exactly one slate game. `defaultPrimerSeries(list, opts)` picks the
+  first tab.
+- `seriesStatus(series)`: `{ head, chip }`. The head is `bestOfLine` before
+  Game 1, else `recordLine`. The chip is "MIL facing elimination", or `null`.
+- `ribbonNodes(series, { scoresByPk })`: one node per game, `played`, `today`,
+  `ahead` or `ifNecessary`. Its header holds the shared shape of one finished game.
+- `leaderRows(entries)`: three or fewer show, high to low; more show the leader.
+
 ## Series marks (`src/lib/postseason/seriesMarks.js`)
 
 MLB's round art, per season, in `public/postseason-marks/{season}/`: 2026 is
@@ -298,7 +312,7 @@ grid (`styles/postseason/series-live.css`).
 `bracket-fetch`, `bracket-hook`, `live-series-selectors` (the live series
 page's pure game-bucket sort, slice 6), `series-roster` (the declared roster's
 date and its 26-player check), `upcoming-games`, `day-shape`, `series-flow`,
-`series-totals`, `keys-verdict`. `bracket-hook` also scans the series pages'
+`series-totals`, `keys-verdict`, `primer` (the series primer's rules). `bracket-hook` also scans the series pages'
 parts for a seal or a Scores Unlocked read. The route is in `test/route.test.js`,
 and the slate model's `seriesStatus`/`leagueRecord` guard in
 `test/slate-scores.test.js`.
