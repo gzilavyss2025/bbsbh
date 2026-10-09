@@ -401,6 +401,7 @@
   position: absolute;
   inset: 0 auto 0 0;
   background: var(--tier);
+  clip-path: inset(0); /* a resting shape for the ovr-fill wipe to animate to; none cannot interpolate */
 }
 .ovrpath__cap {
   position: absolute;
