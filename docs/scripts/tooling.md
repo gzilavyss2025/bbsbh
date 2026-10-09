@@ -44,6 +44,13 @@ list says what each guard checks.
   shape as `check-caption-budget.mjs`; a drop only warns until you lower the budget.
   Each count is taken two ways (regex and a character
   scanner) and must agree.
+- `layout/check-media-widths.mjs` — an `@media` width must be on the grandfather
+  list in the guard (`WIDTHS`), which `src/tokens/layout.css` mirrors as a table:
+  740px is the one wide step, the rest are widths already in use (#1179). It moves
+  no layout; it stops a new width. A real new one goes on the list with its reason,
+  or takes `breakpoint-exempt: <reason>` in a comment on the `@media` line or the
+  line above. It lives in `scripts/layout/` so `scripts/` stays inside its
+  `check-dir-size` budget.
 - `check-strike-links.mjs` — every rule that draws a `line-through` must name
   `.plink` in its selector list, because a player name is a `<button
   class="plink">` and neither inherits an ancestor's decoration nor keeps its

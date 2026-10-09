@@ -38,6 +38,7 @@ const GUARDS = [
   'check-line-endings',
   'check-comment-citations',
   'check-fixture-freshness',
+  'layout/check-media-widths',
 ]
 
 const COMMANDS = [

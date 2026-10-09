@@ -139,6 +139,26 @@
   --lens-carry-scale: 0.9;
 }
 
+/* SCREEN WIDTHS (#1179). Custom properties do not work inside @media, so the
+   set is this table, and scripts/layout/check-media-widths.mjs fails an @media
+   width that is not on it. A new width goes here and in that guard's WIDTHS in
+   the same PR, with its reason, or takes a `breakpoint-exempt: <reason>` comment.
+
+   THE ONE WIDE STEP: 740px. "A wide phone or a tablet" (--console-hud-h's cut,
+   the focus grid, the slate's two-column page). It is used 93 times:
+     min-width: 740px      the wide layout
+     max-width: 739.98px   its narrow side (739px, twice, is the same cut)
+
+   Every other width in use when the guard landed is a grandfather. It is a list
+   of what exists, not a set to copy; it moves no layout, and it only stops the
+   next width from being 735px.
+
+     under a phone      350px  359px  360px  370px
+     phone              420px  430px  480px  520px
+     large phone        560px  600px  620px  640px
+     small tablet       700px  720px  739px  739.98px  760px  860px  30rem
+     tablet, laptop     899px  900px  959.98px  1024px  1040px  1200px  1279px */
+
 /* --console-hud-h's desktop half — see the mobile value above for why this is
    two numbers, not one, and for the rule that both are measured. Same 740px cut
    as 24-floating-nav-and-hud.css's own `.gamehud--console` media block and
