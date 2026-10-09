@@ -1,5 +1,5 @@
-import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { useMemo } from 'react'
+import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { PAIRINGS, ratio } from '../../lib/design/contrastPairings.js'
 import { Entry, Group } from './Entry.jsx'
 
