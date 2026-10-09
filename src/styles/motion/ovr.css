@@ -1,0 +1,123 @@
+/* ------------------------------------------------------- motion / ovr */
+/* THE OVR CARD'S TAP (player page, src/components/ovr/). The one motion this card
+   has: no resting animation. Everything below hangs off a class that only a tap
+   adds. `.ovrtile__face--press` and the ring exist only for a tap that did not
+   ask for less motion, and `.ovrmenu--play` is on the menu only when it opened
+   from such a tap (OvrTile reads motionIsReduced at the tap). The menu mounts on
+   the tap, so a page load or a return plays nothing (docs/motion.md, "The
+   one-shot gate"). A delay is not a duration, so the blanket reduced-motion rules
+   cannot do this; the JS leaves the classes off instead, and runs no count-up.
+
+   THE ORDER, about 1.4 s in all, every time a multiple of a token:
+     press + ring     tile       2 x --dur-fast, 1.5 x --dur-slow
+     sheet slides up  menu       after --dur-fast, --dur-slow
+     colour flash     menu       after 2 x --dur-fast, 2 x --dur-med
+     number counts    JS         after 2 x --dur-fast, 2 x --dur-slow (OvrMenu.jsx)
+     names slide up   each row   after 2 x --dur-fast, then one step per row
+     bars fill        each row   after --dur-slow, then one step per row
+     chips pop        each row   as its bar ends
+     ribbon lands     last, after the last row's step: a short stamp-press
+
+   Slant is in `transform: skewX`, so every move here uses the individual
+   `translate`, `scale` and `rotate` properties, which compose with it and do not
+   un-slant a number for the length of its animation. */
+
+@keyframes ovr-press {
+  35% {
+    scale: 0.93;
+  }
+}
+@keyframes ovr-ring {
+  from {
+    scale: 0.6;
+    opacity: 0.9;
+  }
+  to {
+    scale: 5.5;
+    opacity: 0;
+  }
+}
+@keyframes ovr-slide {
+  from {
+    translate: 0 100%;
+  }
+}
+@keyframes ovr-flash {
+  from {
+    opacity: 0.7;
+  }
+}
+@keyframes ovr-rise {
+  from {
+    translate: 0 var(--space-2);
+    opacity: 0;
+  }
+}
+@keyframes ovr-fill {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+@keyframes ovr-pop {
+  from {
+    scale: 0.4;
+    opacity: 0;
+  }
+  60% {
+    scale: 1.18;
+    opacity: 1;
+  }
+}
+@keyframes ovr-thunk {
+  from {
+    scale: 1.9;
+    rotate: -10deg;
+    opacity: 0;
+  }
+  55% {
+    scale: 0.94;
+    rotate: -2deg;
+    opacity: 1;
+  }
+}
+
+/* The tap: the tile presses in and a ring leaves it. */
+.ovrtile .ovrtile__face--press {
+  animation: ovr-press calc(var(--dur-fast) * 2) var(--ease-out);
+}
+.ovrtile .ovrtile__ring {
+  opacity: 0;
+  animation: ovr-ring calc(var(--dur-slow) * 1.5) var(--ease-out) forwards;
+}
+
+/* The menu: slides up, then a one-time flash in the tier colour crosses the panel. */
+.ovrscrim .ovrmenu--play {
+  animation: ovr-slide var(--dur-slow) var(--ease-out) var(--dur-fast) backwards;
+}
+.ovrscrim .ovrmenu--play::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--tier);
+  opacity: 0;
+  pointer-events: none;
+  animation: ovr-flash calc(var(--dur-med) * 2) ease-out calc(var(--dur-fast) * 2) backwards;
+}
+
+/* The rows, in order: the name slides up, the bar fills, the chip pops as the bar ends. */
+.ovrmenu--play .ovrbars__name {
+  animation: ovr-rise var(--dur-med) var(--ease-out) calc(var(--dur-fast) * 2 + var(--i, 0) * var(--dur-ovr-step)) backwards;
+}
+.ovrmenu--play .ovrbars__fill,
+.ovrmenu--play .ovrpath__now {
+  animation: ovr-fill calc(var(--dur-slow) * 1.5) var(--ease-out) calc(var(--dur-slow) + var(--i, 0) * var(--dur-ovr-step)) backwards;
+}
+.ovrmenu--play .ovrbars__chip,
+.ovrmenu--play .ovrmenu__potnum {
+  animation: ovr-pop var(--dur-med) var(--ease-out) calc(var(--dur-slow) * 2.5 + var(--i, 0) * var(--dur-ovr-step)) backwards;
+}
+
+/* The tier ribbon lands last, a short stamp-press. */
+.ovrmenu--play .ovrmenu__ribbon {
+  animation: ovr-thunk var(--dur-med) var(--ease-out) calc(var(--dur-slow) * 2.5 + var(--ovr-rows, 1) * var(--dur-ovr-step)) backwards;
+}

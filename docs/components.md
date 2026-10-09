@@ -14,6 +14,10 @@ Reference moved out of `src/components/CLAUDE.md`. That file keeps each bucket's
 
 Pure logic is in `lib/postseason/` (`dayShape`, `seriesFlow`, `seriesTotals`, `keysVerdict`); CSS in `styles/postseason/series-parts.css` (shared) and `series-live.css` (live page). `SeriesMark` is MLB's round art (`lib/postseason/seriesMarks.js`), white-on-navy, so it goes on a navy band or its own `plate`; it renders nothing for a season with no art, and the slate card, bracket and game masthead draw it too
 
+## `ovr/`
+
+The OVR card (`docs/ovr-rating.md`, "The card"). `OvrTile` is the closed tile (a button: `aria-expanded`, `aria-controls`); it owns the open state and mounts `OvrMenu` on a tap, which is the gate for the card's motion. `OvrMenu` is a dialog built like `BallparkModal` (`.scrim` through `ModalPortal`, `useDialogFocus`), with a Pill switch for a two-way player. `OvrBars` draws the attribute rows and `OvrPath` the minor leaguer's meter. `useOvr` reads the ratings for the hero (`null` means no tile and no gap). Everything the card shows comes from `lib/ovr/card.js`'s `ovrView`; tiers are one constant in `lib/ovr/tiers.js`. CSS: `styles/ovr/card.css`, motion `styles/motion/ovr.css`
+
 ## `gamehud/`
 
 `ConsoleBand` is focus mode's whole top row (ADR-0043) — the placed scorebug plus exactly one companion: `DueUpConsole` while the half is being scored, or once it is over, `BetweenInnings` — one card that opens on `HalfTally`'s grid and cycles on tap through up to 5 score-free facts (`api/between-innings.js`) before returning to the grid

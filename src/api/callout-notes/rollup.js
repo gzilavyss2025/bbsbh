@@ -13,7 +13,8 @@ import {
   runnerLastName,
 } from '../playbyplay.js'
 import { personNameParts, dayWord } from '../select.js'
-import { ordinal, isNum, clampScore, skewBonus, magnitudeOf, corroborationBonus, SCORE_BASE, foldedRecordText, gameResult } from './shared.js'
+import { isNum, clampScore, skewBonus, magnitudeOf, corroborationBonus, SCORE_BASE, foldedRecordText, gameResult } from './shared.js'
+import { ordinal } from '../../lib/format.js'
 import { computeCalloutProgress } from './progress.js'
 import { buildCallouts } from './liveAtBat.js'
 import { VS_TEAM_ROLLUP_MAX } from './vsTeamNote.js'

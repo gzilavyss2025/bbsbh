@@ -3,13 +3,12 @@
 
 import { num, DASH } from './shared.js'
 import { pitcherRole } from './identity.js'
+import { ordinal as withSuffix } from '../../lib/format.js'
 
+// A rank as "3rd"; a dash when there is no rank to print.
 export function ordinal(n) {
   const v = num(n)
-  if (!v) return DASH
-  const s = ['th', 'st', 'nd', 'rd']
-  const m = v % 100
-  return `${v}${s[(m - 20) % 10] ?? s[m] ?? s[0]}`
+  return v ? withSuffix(v) : DASH
 }
 
 // This team's rank (1 = best) among all clubs for one stat. Lower-is-better for

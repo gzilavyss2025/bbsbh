@@ -439,6 +439,30 @@ Built in step 8 (#1722). This is the data half. The card does not show it yet (#
   Gary approves it first, because each nightly data commit that reaches `main` can deploy.
 - How the card shows the change (the arrow and the season sparkline) is in #1703.
 
+## The card
+
+Built in step 9 (#1703), the player page only. Spoiler-free: no SealBox, no seal token
+(ADR-0034). **The card never says "official" and is "Tally's own rating".**
+
+- **Closed.** A tile on the headshot's bottom-right corner, at every width: the number and
+  "OVR" under it, on the album board, two corners cut, with a glow and a bottom edge in the
+  tier colour. A Legend tile has a gold frame. A player with no rating has no tile and no gap.
+  A two-way player's tile shows the hitting rating.
+- **Open.** A dialog sheet: full width at the foot of a phone, a 440 px panel centred on a
+  wide screen. A major leaguer has Power, Contact, Speed and Fielding (a pitcher Stuff, Results
+  and Control) as 20-segment bars with a chip in the tier colour of that value, and a missing
+  bar draws no row. A minor leaguer has OVR, POT (a dash off the Top 100) and a "path to the
+  majors" meter marking OVR, POT and the level cap, and no bars. The 7-day change and the season
+  sparkline show only from real ratings: a seeded percentile is not a rating, and a null change
+  draws no arrow and no zero. A two-way player gets a Hitting / Pitching switch.
+- **Footer.** "Based on 2023-2026", from the seasons in the shard (`seasonsLine`).
+- **Tiers** (`src/lib/ovr/tiers.js`, one constant, placeholders to tune): Bench 20-44, Starter
+  45-59, Regular 60-69, All-Star 70-79, MVP 80-89, Legend 90-99. The tier colours are the
+  `--ovr-*` tokens, each held to AA on the album board in `check-contrast`.
+- **Motion** is the tap only: `docs/motion.md`, "The OVR card".
+- Not built: the compare view, a lineup-page tile, and the animation of the 7-day change
+  (#1801).
+
 ## Build order
 
 1. Calibration against posted video-game ratings (time-boxed; see below). It runs

@@ -24,7 +24,8 @@ import {
   dowWhen,
 } from './checkpoints.js'
 import { selectRegulationInnings } from '../select.js'
-import { ordinal, isNum, clampScore, skewBonus, magnitudeOf, SCORE_BASE, otherSide, foldedRecordText, parseRecord } from './shared.js'
+import { isNum, clampScore, skewBonus, magnitudeOf, SCORE_BASE, otherSide, foldedRecordText, parseRecord } from './shared.js'
+import { ordinal } from '../../lib/format.js'
 // The league-rank clause, appended ONLY to the entering-tense wording below.
 // A folded sentence ("moved to 59-2") states tonight's record, which the rank
 // was not computed against — so every `result?.final` branch stays bare.

@@ -78,6 +78,14 @@ export const PAIRINGS = [
   { fg: 'album-foil', bg: 'album-board', min: TEXT, note: 'stamp sheet pane title on the album board' },
   { fg: 'album-foil-soft', bg: 'album-board', min: TEXT, note: 'stamp caption on the album board' },
   { fg: 'marker', bg: 'album-board', min: UI, note: 'completed-set ring on the album board' },
+  // The OVR card (src/components/ovr/) is drawn on the same board. A tier colour is
+  // text on it (the "OVR" label, an arrow) and a fill under dark text (a bar's number
+  // chip, the tier ribbon). The frame is the Legend tile's non-text ring.
+  ...['bench', 'starter', 'regular', 'allstar', 'mvp', 'legend'].flatMap((t) => [
+    { fg: `ovr-${t}`, bg: 'album-board', min: TEXT, note: `${t} tier colour as text on the album board` },
+    { fg: 'text-heading', bg: `ovr-${t}`, min: TEXT, note: `ink on a ${t} number chip` },
+  ]),
+  { fg: 'ovr-frame', bg: 'album-board', min: UI, note: 'Legend tile frame on the album board' },
   // Core semantic text roles on their intended surfaces.
   { fg: 'text-body', bg: 'bg-canvas', min: TEXT, note: 'body text on app canvas' },
   { fg: 'text-heading', bg: 'surface-card', min: TEXT, note: 'heading on raised card' },

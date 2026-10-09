@@ -15,6 +15,7 @@
 
 import { txnDate } from './rehab-policy.js'
 import { rate3 } from './person/shared.js'
+import { ordinal } from '../lib/format.js'
 
 // ---------------------------------------------------------------------------
 // Season windows — trade deadline dates carry no API field (verified against
@@ -516,19 +517,7 @@ export function dedupeStatSplits(splits) {
 
 function ordinalRound(n) {
   const num = Number(n)
-  if (!Number.isFinite(num) || num <= 0) return String(n ?? '')
-  const mod100 = num % 100
-  if (mod100 >= 11 && mod100 <= 13) return `${num}th`
-  switch (num % 10) {
-    case 1:
-      return `${num}st`
-    case 2:
-      return `${num}nd`
-    case 3:
-      return `${num}rd`
-    default:
-      return `${num}th`
-  }
+  return Number.isFinite(num) && num > 0 ? ordinal(num) : String(n ?? '')
 }
 
 // The amateur draft has only ever covered the US, Canada, and Puerto Rico —
