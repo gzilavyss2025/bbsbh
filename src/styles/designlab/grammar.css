@@ -58,6 +58,7 @@
 .gx__ref { position: absolute; left: var(--ref); top: calc(-1 * var(--space-1) / 2); bottom: calc(-1 * var(--space-1) / 2); width: var(--bw-hair); background: var(--text-caption); }
 
 .gx__mixbar { display: flex; height: var(--gx-h); background: var(--border-hairline); }
+.gx__key { width: var(--space-2); height: var(--space-2); background-color: var(--accent-primary); }
 .gx__seg { flex: 0 0 var(--w); box-sizing: border-box; border-right: var(--gx-gap) solid var(--surface-card); background-clip: padding-box; background-color: var(--accent-primary); }
 .gx__seg--1 { background-color: var(--ink-2); }
 .gx__seg--2 { background-color: var(--graphite-soft); }
@@ -66,7 +67,6 @@
 .gx__legend { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin: var(--space-2) 0 0; padding: 0; list-style: none; font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); color: var(--text-caption); }
 .gx__legend li { display: flex; align-items: center; gap: var(--space-1); }
 .gx__legend b { font-size: var(--fs-cell); color: var(--text-body); }
-.gx__key { width: var(--space-2); height: var(--space-2); background-color: var(--accent-primary); }
 
 .gx__form { display: flex; justify-content: space-between; align-items: center; gap: var(--space-1); height: var(--gx-formh); }
 /* layout-exempt: two stacked blocks in a pane */
@@ -109,11 +109,10 @@
 .gx--attr .gx__pip { width: var(--space-4); height: var(--space-6); }
 .gx--attr .gx__pip.is-w { background: var(--accent-positive); }
 .gx--attr .gx__pip.is-l { background: var(--accent-negative); }
-.gx--attr .gx__seg { background-color: var(--ovr-regular); }
+.gx--attr :is(.gx__seg, .gx__key) { background-color: var(--ovr-regular); }
 .gx--attr .gx__seg--1 { background-color: var(--ovr-allstar); }
 .gx--attr .gx__seg--2 { background-color: var(--ovr-starter); }
 .gx--attr .gx__seg--3 { background-color: var(--ovr-bench); }
-.gx--attr .gx__key { background-color: var(--ovr-regular); }
 
 /* =============== C · PENCIL RULE — a dot on a ruled line =============== */
 .gx--rule { --gx-h: var(--space-3); --gx-gap: var(--space-1); --gx-formh: var(--space-4); }
@@ -123,8 +122,7 @@
 .gx--rule .gx__fill { top: 50%; bottom: auto; height: var(--bw-heavy); background: var(--ink-1); transform: translateY(-50%); }
 .gx--rule .gx__fill::after { content: ''; position: absolute; right: 0; top: 50%; width: var(--space-2); height: var(--space-2); border-radius: var(--radius-pill); background: var(--ink-1); transform: translate(50%, -50%); }
 .gx--rule .gx__ref { top: 50%; bottom: auto; width: var(--space-2); height: var(--space-2); box-sizing: border-box; border: var(--bw-rule) solid var(--text-caption); border-radius: var(--radius-pill); background: var(--surface-card); background-clip: padding-box; transform: translate(-50%, -50%); z-index: 1; }
-.gx--rule .gx__plabel { display: flex; align-items: baseline; gap: var(--space-1); }
-.gx--rule .gx__plabel::after { content: ''; flex: 1 1 auto; min-width: var(--space-2); border-bottom: var(--bw-hair) dotted var(--border-rule); }
+.gx--rule .gx__plabel { border-bottom: var(--bw-hair) dotted var(--border-rule); }
 /* layout-exempt: tile seats the figure beside label and rank */
 .gx--rule .gx__tile { border-top: var(--bw-heavy) solid var(--ink-1); padding-inline: 0; display: grid; grid-template-columns: auto 1fr; column-gap: var(--space-2); align-items: baseline; }
 .gx--rule .gx__tilevalue { grid-row: 1 / span 2; font-family: var(--font-display); font-size: var(--fs-hero-sm); }

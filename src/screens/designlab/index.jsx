@@ -142,7 +142,7 @@ export function DesignLab() {
             {p.id === 'scout' && <ScoutLab />}
             {p.id === 'nested-boxes' && <NestedBoxes />}
             {p.id === 'report-look' && <ReportLook />}
-            {p.id.startsWith('grammar-') && <Grammar dir={p.id.slice(8)} />}
+            {p.dir && <Grammar dir={p.dir} />}
           </Entry>
         ))}
       </Band>

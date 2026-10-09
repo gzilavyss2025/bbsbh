@@ -189,9 +189,9 @@ const SPEC_ROWS = [
 
 // layout-exempt: a fixed-width specimen frame (390 or 1180 px) is the point of
 // the entry, so it cannot use a width-driven layout part.
-function Frame({ size, children }) {
+function Frame({ size, label, children }) {
   return (
-    <div className="gx__scroll" tabIndex={0} role="region" aria-label={`${size} frame`}>
+    <div className="gx__scroll" tabIndex={0} role="region" aria-label={`${label}, ${size}`}>
       <div className={`gx__frame gx__frame--${size}`}>{children}</div>
     </div>
   )
@@ -209,13 +209,13 @@ export function Grammar({ dir }) {
           ))}
         </dl>
         <p className="gx__cap">Player: Season and Craft. Phone, 390 px.</p>
-        <Frame size="phone"><PlayerSlice dir={dir} /></Frame>
+        <Frame size="phone" label={`${d.name} player`}><PlayerSlice dir={dir} /></Frame>
         <p className="gx__cap">Player: Season and Craft. Wide, 1180 px.</p>
-        <Frame size="wide"><PlayerSlice dir={dir} /></Frame>
+        <Frame size="wide" label={`${d.name} player`}><PlayerSlice dir={dir} /></Frame>
         <p className="gx__cap">Team: Numbers. Phone, 390 px.</p>
-        <Frame size="phone"><TeamSlice dir={dir} /></Frame>
+        <Frame size="phone" label={`${d.name} team`}><TeamSlice dir={dir} /></Frame>
         <p className="gx__cap">Team: Numbers. Wide, 1180 px.</p>
-        <Frame size="wide"><TeamSlice dir={dir} /></Frame>
+        <Frame size="wide" label={`${d.name} team`}><TeamSlice dir={dir} /></Frame>
       </Stack>
     </div>
   )
