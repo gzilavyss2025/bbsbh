@@ -135,8 +135,12 @@ did, and end with a short list of what needs him.
       - **An issue that is already closed:** comment only if the status changed.
         Skip it otherwise.
       - **An issue you cannot read or edit:** do not guess. Put it in the report.
-   3. **Delete the branches.** Delete the source branches and the stack branch on
-      the remote.
+   3. **Delete the branches.** A cloud session cannot do this: `git push --delete`
+      gets a 403 from the proxy, and the GitHub MCP tools have no delete-branch call.
+      Do not retry. The daily `prune-branches` workflow deletes them (rules in
+      `scripts/repo/prune-branches.mjs`). To delete now, start it from the Actions tab
+      with `apply` on, or run that script with `--apply` on a local machine. List the
+      source branches in the report so Gary can see what is waiting.
    4. **Reset local state.** Fetch and fast-forward local `main`. Remove the stack
       worktree if you made one.
 

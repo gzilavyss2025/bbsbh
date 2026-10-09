@@ -1,0 +1,34 @@
+name: Prune branches
+
+# Cloud sessions cannot delete a remote branch, so branches pile up. This deletes the
+# ones that carry no live work (rules: scripts/repo/prune-branches.mjs). The scheduled run
+# deletes. A manual run is a dry run unless you tick `apply`.
+on:
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: 'Delete the branches (leave off for a dry run)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prune branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLY: ${{ github.event_name == 'schedule' || inputs.apply }}
+        run: |
+          if [ "$APPLY" = "true" ]; then
+            node scripts/repo/prune-branches.mjs --apply --repo "$GITHUB_REPOSITORY"
+          else
+            node scripts/repo/prune-branches.mjs --repo "$GITHUB_REPOSITORY"
+          fi
