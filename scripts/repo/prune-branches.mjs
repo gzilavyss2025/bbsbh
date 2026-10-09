@@ -57,7 +57,11 @@ for (const { name, protected: isProtected } of branches) {
     continue
   }
 
-  const ahead = Number(api(`repos/${repo}/compare/${base}...${name}`, '--jq', '.ahead_by'))
+  // Compare answers 404 for a branch with no common ancestor. That is not merged: go on to the PR check.
+  let ahead = Infinity
+  try {
+    ahead = Number(api(`repos/${repo}/compare/${base}...${name}`, '--jq', '.ahead_by'))
+  } catch {}
   if (ahead === 0) {
     drop.push([name, 'merged: no commit missing from ' + base])
     continue
@@ -72,7 +76,7 @@ for (const { name, protected: isProtected } of branches) {
     .filter(Boolean)
   if (states.includes('open')) keep.push([name, 'open PR'])
   else if (states.length) drop.push([name, `${states.length} PR, all closed`])
-  else keep.push([name, `${ahead} unique commits and no PR`])
+  else keep.push([name, ahead === Infinity ? 'unrelated history and no PR' : `${ahead} unique commits and no PR`])
 }
 
 console.log(`${repo}: ${drop.length} to delete, ${keep.length} to keep (default branch: ${base})`)
