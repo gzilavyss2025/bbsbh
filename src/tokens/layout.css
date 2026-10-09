@@ -179,13 +179,15 @@
    the same PR, with its reason, or takes a `breakpoint-exempt: <reason>` comment.
 
    THE ONE WIDE STEP: 740px. "A wide phone or a tablet" (--console-hud-h's cut,
-   the focus grid, the slate's two-column page). It is used 93 times:
+   the focus grid, the slate's two-column page). It is by far the most used width:
      min-width: 740px      the wide layout
      max-width: 739.98px   its narrow side (739px, twice, is the same cut)
 
-   Every other width in use when the guard landed is a grandfather. It is a list
-   of what exists, not a set to copy; it moves no layout, and it only stops the
-   next width from being 735px.
+   Every other CSS @media width in use when the guard landed is a grandfather. It
+   is a list of what exists, not a set to copy; it moves no layout, and it only
+   stops the next width from being 735px. The guard reads CSS only: a width in a
+   JS media query (useMediaQuery.js 1000px, PassportBook.jsx 900px,
+   scorecard/geometry.js 480px) is not on the list and is not checked.
 
      under a phone      350px  359px  360px  370px
      phone              420px  430px  480px  520px
