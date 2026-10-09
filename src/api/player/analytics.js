@@ -171,6 +171,7 @@ export async function loadPlayerAnalytics(id, asOf) {
       // The batted-ball profile shares the Advanced card's seasonAdvanced
       // response — one fetch feeds both cards.
       block.battedBall = group === 'hitting' ? battedBallView(advancedBundle?.seasonAdvanced) : null
+      block.battedBallPost = group === 'hitting' ? battedBallView(postBundle?.seasonAdvanced) : null
       return block
     }),
   )

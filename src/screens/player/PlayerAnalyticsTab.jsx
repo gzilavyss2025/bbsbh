@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { loadPlayerCore } from '../../api/player/core.js'
 import { loadArsenalSeason, loadPlayerAnalytics } from '../../api/player/analytics.js'
+import { battedBallFor } from '../../api/person.js'
 import { seasonFolderOf } from '../../api/staticJson.js'
 import { playerTabPath } from '../../lib/route.js'
 import { useSeasonView } from '../../hooks/seasons/useSeasonView.js'
@@ -68,6 +69,7 @@ function storedScope() {
 export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: scopeParam }) {
   const navigate = useNav()
   const [saved, setSaved] = useState(storedScope)
+  const [advPost, setAdvPost] = useState({}) // per block group: the Advanced card is on Postseason
   const wanted = scopeParam ?? saved
   const core = useAsync(() => loadPlayerCore(id, asOf), [id, asOf])
   const analytics = useAsync(() => loadPlayerAnalytics(id, asOf), [id, asOf])
@@ -181,7 +183,10 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: s
       <SeasonPicker view={view} pathFor={pathFor} />
       {view?.seasons?.length > 1 && cardsHint && <p className="hint">{cardsHint}</p>}
       {missing.length > 0 && <EmptyState size="compact">{missing.join(' and ')} not on file for {label}.</EmptyState>}
-      {blocks.map((block) => (
+      {blocks.map((block) => {
+        const inPost = advPost[block.group] === 'post' && block.advancedPost?.facts?.length > 0
+        const batted = battedBallFor(block, inPost)
+        return (
         <section key={block.group}>
           {/* The tab bar names this section now, so there is no umbrella
               "Analytics" heading here: it would print the tab's own name once
@@ -223,7 +228,7 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: s
           {/* The rates behind the headline tiles (a pitcher's FIP/ERA−/
               K%/BB%; a hitter's wOBA/wRC+/discipline) — beside Statcast's
               percentiles as its absolute-numbers sibling. */}
-          <AdvancedStatsCard adv={block.advanced} post={block.advancedPost} />
+          <AdvancedStatsCard adv={block.advanced} post={block.advancedPost} picked={inPost ? 'post' : 'reg'} onPick={(k) => setAdvPost((was) => ({ ...was, [block.group]: k }))} />
 
           {/* Season foul-ball line (gen-fouls.mjs) — a current-day-only
               card that hides under a spoiler asOf cutoff, like the
@@ -299,10 +304,10 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: s
               he connects, in the same bar-over-rows dress (BattedBallMix
               reuses the pitchmix classes on purpose). Shares the Advanced
               card's fetch; null below the balls-in-play floor. */}
-          {block.battedBall && (
+          {(batted || (inPost && block.battedBall)) && (
             <>
-              <SectionHead look="rule" note="share of contact · average when hit">Batted balls</SectionHead>
-              <BattedBallMix battedBall={block.battedBall} />
+              <SectionHead look="rule" note={`share of contact · average when hit${inPost ? ' · postseason' : ''}`}>Batted balls</SectionHead>
+              {batted ? <BattedBallMix battedBall={batted} /> : <p className="hint">Too few postseason balls in play for a mix.</p>}
             </>
           )}
 
@@ -334,7 +339,8 @@ export function PlayerAnalyticsTab({ id, asOf, sportId, seasonYear, vs, scope: s
             )
           )}
         </section>
-      ))}
+        )
+      })}
 
       {/* CATCHING — its own section, outside the blocks loop on purpose.
           A catcher's stat blocks are hitting (and, for a two-way arm,

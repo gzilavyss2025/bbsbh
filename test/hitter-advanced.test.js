@@ -10,7 +10,7 @@
 // ballsInPlay (145 + 83 + 83 + 30 = 341).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { advancedHittingView, battedBallView, hittingRanksView } from '../src/api/person.js'
+import { advancedHittingView, battedBallFor, battedBallView, hittingRanksView } from '../src/api/person.js'
 
 // ---------------------------------------------------------------------------
 // advancedHittingView
@@ -163,4 +163,17 @@ test('hittingRanksView returns null with no qualifying rank or no split', () => 
     hittingRanksView([{ league: { name: 'National League' }, stat: { homeRuns: '38', rbi: '45' } }]),
     null,
   )
+})
+
+// ---------------------------------------------------------------------------
+// battedBallFor — the Advanced card's Regular/Postseason scope (#1829)
+// ---------------------------------------------------------------------------
+
+test('battedBallFor never serves the regular-season mix under the Postseason scope', () => {
+  const regular = battedBallView(SEASON_ADVANCED)
+  const block = { battedBall: regular, battedBallPost: null }
+  assert.equal(battedBallFor(block, false), regular)
+  assert.equal(battedBallFor(block, true), null)
+  const post = battedBallView({ ...SEASON_ADVANCED, ballsInPlay: 60, groundOuts: 30, groundHits: 0, lineOuts: 10, lineHits: 5, flyOuts: 10, flyHits: 5, popOuts: 0, popHits: 0 })
+  assert.equal(battedBallFor({ ...block, battedBallPost: post }, true), post)
 })

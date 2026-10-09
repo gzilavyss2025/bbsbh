@@ -222,3 +222,7 @@ export function battedBallView(seasonAdvanced) {
   })
   return { rows, ballsInPlay: bip }
 }
+
+// The block's mix for the Advanced card's scope. Postseason reads its own mix,
+// never the regular-season one: null (below the sample floor) means "note", not "fall back".
+export const battedBallFor = (block, inPost) => (inPost ? block.battedBallPost : block.battedBall)
