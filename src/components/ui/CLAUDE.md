@@ -34,3 +34,5 @@ to reach for from anywhere. At the top level: `Loader`, `SectionMasthead`, `Copy
   is the third: as many columns of at least `min` as fit, no breakpoint, filling by default
   or collapsing with `fit`. It is NOT the grid for a layout you author (label and value,
   named areas, a fixed count) — those keep their own namespace rule.
+  New layout uses these parts. Old rules move only when a PR already edits them
+  (`layout/check-layout-ratchet` freezes the count; `layout-exempt: <reason>` opts out).
