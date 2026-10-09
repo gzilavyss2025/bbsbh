@@ -14,11 +14,6 @@
   gap: var(--space-8);
   width: 100%;
 }
-.nested__case {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
 .nested__casehead {
   margin: 0;
   font-family: var(--font-display);
@@ -31,14 +26,6 @@
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   color: var(--text-caption);
-}
-/* The pair stacks at every width. The real boxes read the viewport (740px),
-   not their parent, so a half-width BEFORE would squeeze into a layout the
-   app never draws. Stacked, each side gets the measure the app gives it. */
-.nested__pair {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
 }
 .nested__side {
   display: flex;

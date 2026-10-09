@@ -3,6 +3,7 @@ import { Card } from '../../../components/ui/frame/Card.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 import { Table } from '../../../components/ui/table/Table.jsx'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
+import { Stack } from '../../../components/ui/layout/Stack.jsx'
 import { Grid } from '../../../components/ui/layout/Grid.jsx'
 import { RosterList } from '../../team/modules/RosterList.jsx'
 
@@ -251,10 +252,11 @@ export function NestedBoxes() {
   return (
     <div className="nested">
       {CASES.map((c, i) => (
-        <section className="nested__case" key={c.kind}>
+        <Stack as="section" gap="snug" className="nested__case" key={c.kind}>
           <h4 className="nested__casehead">{i + 1} · {c.kind}: {c.title}</h4>
           <p className="nested__where">{c.where}</p>
-          <div className="nested__pair">
+          {/* The pair stacks at every width. The real boxes read the viewport (740px), not their parent, so a half-width BEFORE would squeeze into a layout the app never draws. */}
+          <Stack gap="loose" className="nested__pair">
             <div className="nested__side">
               <span className="nested__tag">Before · today</span>
               {c.before}
@@ -263,9 +265,9 @@ export function NestedBoxes() {
               <span className="nested__tag">After · flattened</span>
               {c.after}
             </div>
-          </div>
+          </Stack>
           <p className="nested__lost"><strong>Flattening loses:</strong> {c.lost}</p>
-        </section>
+        </Stack>
       ))}
     </div>
   )
