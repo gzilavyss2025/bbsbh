@@ -268,6 +268,11 @@ Consequences to keep in mind when touching CI:
   break every data cron again. The bypass for admins is load-bearing here.
 - The trade-off is that admin (including your own) direct pushes skip the gate —
   which is why rule #2 above (always PR your own work) matters.
+- **A scheduled run skips when another run is in flight or succeeded in the last 18
+  hours** (the `gate` job in `update-nightly-data.yml`, 2026-10-09). A Claude routine
+  dispatches the workflow about an hour after the last game goes Final, so the 08:17 UTC
+  cron usually finds the work done and does not commit or deploy a second time. A hand
+  dispatch never skips.
 - If you ever rotate or remove `GH_BOT_TOKEN`, the crons stop being able to push
   to `main`. Keep it valid and admin-scoped.
 - Nothing in CI regenerates the README any more. `regenerate-readme.yml` was
