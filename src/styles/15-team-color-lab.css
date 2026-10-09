@@ -40,7 +40,7 @@
     overflow-y: auto;
     background: var(--surface-card);
     border-left: var(--bw-hair) solid var(--border-rule);
-    z-index: 5;
+    z-index: calc(var(--z-raised) + 1);
   }
 
   .milbneutrals__title {

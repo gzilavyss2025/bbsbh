@@ -44,6 +44,12 @@ list says what each guard checks.
   shape as `check-caption-budget.mjs`; a drop only warns until you lower the budget.
   Each count is taken two ways (regex and a character
   scanner) and must agree.
+- `layout/check-z-index.mjs` — a `z-index` above 3 must read a layer token
+  (`--z-raised`, `--z-sticky`, `--z-overlay`, `--z-modal`, `--z-toast`, defined with
+  their surface table in `src/tokens/layout.css`), in CSS and in an inline `zIndex`
+  (#1179). A local -1 to 3 stays raw. A real one-off takes `z-index-exempt: <reason>`
+  in a comment on the line or the line above. It lives in `scripts/layout/` so
+  `scripts/` stays inside its `check-dir-size` budget.
 - `check-strike-links.mjs` — every rule that draws a `line-through` must name
   `.plink` in its selector list, because a player name is a `<button
   class="plink">` and neither inherits an ancestor's decoration nor keeps its

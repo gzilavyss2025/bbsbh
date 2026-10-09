@@ -762,7 +762,7 @@
   bottom: 0;
   right: 6px;
   width: 30px;
-  z-index: 15;
+  z-index: calc(var(--z-sticky) - 5);
   pointer-events: none;
 }
 .allstarlegacy__rankrail-track {

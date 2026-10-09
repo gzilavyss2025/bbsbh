@@ -279,7 +279,7 @@
 .xl-expand {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: calc(var(--z-overlay) + 20);
   display: grid;
   place-items: end stretch;
   background: rgb(0 0 0 / 0.55);

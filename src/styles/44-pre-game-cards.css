@@ -385,7 +385,7 @@
   position: absolute;
   top: calc(100% + 9px);
   right: 0;
-  z-index: 30;
+  z-index: calc(var(--z-overlay) - 10);
   width: 240px;
   max-width: 72vw;
   padding: var(--space-2h) var(--space-3);
