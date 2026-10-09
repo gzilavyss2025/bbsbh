@@ -96,7 +96,46 @@ permissions:
   contents: write
 
 jobs:
+  # The nightly Claude routine dispatches this workflow about an hour after the
+  # last game goes Final (2026-10-09), usually BEFORE this cron fires. A second
+  # full run would rewrite every generatedAt stamp, commit, and deploy again,
+  # so a SCHEDULED run skips when another run is in flight or succeeded in the
+  # last 18 hours. A hand dispatch never skips: the maintainer dispatches after
+  # a merge to pick up a new generator, and that must always run. 18 hours sits
+  # under check-data-freshness.mjs's 20-hour budget. If the API call fails, the
+  # gate lets the run go ahead: a duplicate beats a dropped night.
+  gate:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          RUN_ID: ${{ github.run_id }}
+          REPO: ${{ github.repository }}
+        run: |
+          skip=false
+          if [ "$EVENT" = "schedule" ]; then
+            cutoff="$(date -u -d '18 hours ago' +%Y-%m-%dT%H:%M:%SZ)"
+            recent="$(gh api "repos/$REPO/actions/workflows/update-nightly-data.yml/runs?per_page=10" \
+              | jq --arg id "$RUN_ID" --arg cutoff "$cutoff" \
+                '[.workflow_runs[] | select((.id | tostring) != $id)
+                  | select(.status != "completed" or (.conclusion == "success" and .updated_at > $cutoff))]
+                 | length')" || recent=0
+            if [ "${recent:-0}" -gt 0 ]; then
+              echo "Another run is in flight or succeeded in the last 18 hours — skipping this scheduled run."
+              skip=true
+            fi
+          fi
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
+
   update-nightly-data:
+    needs: gate
+    if: ${{ !cancelled() && needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
