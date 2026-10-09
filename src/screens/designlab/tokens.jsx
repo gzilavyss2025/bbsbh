@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { PAIRINGS, ratio } from '../../lib/design/contrastPairings.js'
 import { Entry, Group } from './Entry.jsx'
 
@@ -139,11 +140,11 @@ function TypeSpecimen({ token }) {
 
 function MeasureBar({ token }) {
   return (
-    <div className="dlab__measure">
+    <Cluster align="center" className="dlab__measure">
       <span className="dlab__swatchname">--{token.name}</span>
       <span className="dlab__bar" style={{ width: token.resolved }} aria-hidden="true" />
       <span className="dlab__swatchval">{token.resolved}</span>
-    </div>
+    </Cluster>
   )
 }
 
@@ -344,7 +345,7 @@ export function TokenHalf() {
         </div>
         <div className="dlab__rows">
           {borders.map((t) => (
-            <div className="dlab__measure" key={t.name}>
+            <Cluster align="center" className="dlab__measure" key={t.name}>
               <span className="dlab__swatchname">--{t.name}</span>
               <span
                 className="dlab__rule"
@@ -352,7 +353,7 @@ export function TokenHalf() {
                 aria-hidden="true"
               />
               <span className="dlab__swatchval">{t.resolved}</span>
-            </div>
+            </Cluster>
           ))}
         </div>
       </Group>
@@ -383,10 +384,10 @@ export function TokenHalf() {
             isLength(t.resolved) ? (
               <MeasureBar key={t.name} token={t} />
             ) : (
-              <div className="dlab__measure" key={t.name}>
+              <Cluster align="center" className="dlab__measure" key={t.name}>
                 <span className="dlab__swatchname">--{t.name}</span>
                 <span className="dlab__swatchval">{t.resolved}</span>
-              </div>
+              </Cluster>
             ),
           )}
         </div>
@@ -400,10 +401,10 @@ export function TokenHalf() {
         </div>
         <div className="dlab__rows">
           {motion.map((t) => (
-            <div className="dlab__measure" key={t.name}>
+            <Cluster align="center" className="dlab__measure" key={t.name}>
               <span className="dlab__swatchname">--{t.name}</span>
               <span className="dlab__swatchval">{t.resolved}</span>
-            </div>
+            </Cluster>
           ))}
         </div>
       </Group>
@@ -419,10 +420,10 @@ export function TokenHalf() {
               isColor(t.resolved) ? (
                 <Swatch key={t.name} token={t} />
               ) : (
-                <div className="dlab__measure" key={t.name}>
+                <Cluster align="center" className="dlab__measure" key={t.name}>
                   <span className="dlab__swatchname">--{t.name}</span>
                   <span className="dlab__swatchval">{t.resolved}</span>
-                </div>
+                </Cluster>
               ),
             )}
           </div>

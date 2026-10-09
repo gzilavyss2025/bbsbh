@@ -1,3 +1,4 @@
+import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { Pill } from '../../components/ui/control/Pill.jsx'
 
 // ONE ENTRY ON THE DESIGN LAB: a heading, the specimen itself, and a caption
@@ -14,10 +15,10 @@ import { Pill } from '../../components/ui/control/Pill.jsx'
 export function Entry({ title, path, consumers, verdict, tone = '', note, wide = false, contained = false, children }) {
   return (
     <section className={`dlab__entry${wide ? ' dlab__entry--wide' : ''}`}>
-      <div className="dlab__entryhead">
+      <Cluster align="baseline" className="dlab__entryhead">
         <h3 className="dlab__entrytitle">{title}</h3>
         {verdict && <Pill className={`dlab__verdict${tone ? ` dlab__verdict--${tone}` : ''}`}>{verdict}</Pill>}
-      </div>
+      </Cluster>
       {/* The specimen sits on the app canvas, not on a lab surface, so a card
           that sets --surface-card reads against the ground it really lands on.
           `contained` is for a specimen the app positions FIXED (.phcard is a
