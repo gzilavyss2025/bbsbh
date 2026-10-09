@@ -40,6 +40,7 @@ const GUARDS = [
   'check-fixture-freshness',
   'layout/check-z-index',
   'layout/check-media-widths',
+  'layout/check-layout-ratchet',
 ]
 
 const COMMANDS = [
