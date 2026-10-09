@@ -34,7 +34,7 @@
 .wiredock {
   position: fixed;
   inset: 0 0 0 0;
-  z-index: 40;
+  z-index: var(--z-overlay);
   /* The frame is a pass-through: only the sheet and (at full) the scrim take
      taps, so at the rail the whole slate stays live behind it. This is what
      separates a dock from a modal. */

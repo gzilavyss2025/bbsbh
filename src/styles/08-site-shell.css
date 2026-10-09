@@ -51,7 +51,7 @@
 
 .searchbox__results {
   position: absolute;
-  z-index: 5;
+  z-index: calc(var(--z-raised) + 1);
   top: calc(100% + 4px);
   left: 0;
   right: 0;
@@ -284,7 +284,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: var(--z-modal);
   /* The fallback for a browser with no visualViewport (desktop, mostly, where
      there's no keyboard to work around). Where there IS one, useVisualViewport
      overrides height + transform inline with the real visible rectangle — the

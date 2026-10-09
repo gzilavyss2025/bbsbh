@@ -640,7 +640,7 @@
 
 .bflight--hover {
   position: fixed;
-  z-index: 100;
+  z-index: var(--z-modal);
   /* THE CARD TAKES NO POINTER. It is read-only — a drawing and three numbers —
      so a reader travelling down the feed's diamonds passes straight through it
      onto the next one, which re-anchors the card, instead of having to steer

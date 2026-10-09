@@ -478,7 +478,7 @@
 .scrim {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: var(--z-modal);
   background: rgba(22, 34, 47, 0.44);
   display: flex;
   align-items: flex-end;

@@ -114,7 +114,7 @@
    over the cell's edge, so the rail plus two columns still fit the pane. */
 .sc-lens__frame {
   position: absolute;
-  z-index: 4;
+  z-index: var(--z-raised);
   box-sizing: border-box;
   border: var(--lens-frame-bw) solid var(--navy);
   border-radius: var(--radius-xs);
@@ -126,7 +126,7 @@
 .sc-lens__ruler {
   position: absolute;
   left: 0;
-  z-index: 4;
+  z-index: var(--z-raised);
   height: var(--lens-frame-bw);
   margin-top: calc(-1 * var(--lens-frame-bw));
   background: var(--navy);
@@ -169,7 +169,7 @@
   position: fixed;
   bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
   left: 50%;
-  z-index: 10;
+  z-index: calc(var(--z-sticky) - 10);
   transform: translateX(-50%);
 }
 .sc-lensback .btn {

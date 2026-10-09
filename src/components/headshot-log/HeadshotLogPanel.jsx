@@ -26,7 +26,7 @@ export function HeadshotLogPanel() {
     return `${new Date(at).toLocaleTimeString()} ${JSON.stringify(rest)}`
   })
   return (
-    <div style={{ position: 'fixed', left: 8, bottom: 8, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 4, maxWidth: 'calc(100vw - 16px)' }}>
+    <div style={{ position: 'fixed', left: 8, bottom: 8, zIndex: 'var(--z-toast)', display: 'flex', flexDirection: 'column', gap: 4, maxWidth: 'calc(100vw - 16px)' }}>
       <button type="button" className="btn" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         Headshot log ({log.length})
       </button>

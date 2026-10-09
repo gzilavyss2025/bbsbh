@@ -397,7 +397,7 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  z-index: 4;
+  z-index: var(--z-raised);
   /* Hide this badge's own back face too: on a flipped past-game card (see
      FlipCard) the front face is rotated away, but iOS Safari would still paint
      an absolutely-positioned, z-indexed child through it — mirrored. The face's
@@ -437,7 +437,7 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  z-index: 4;
+  z-index: var(--z-raised);
   backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
   -webkit-backface-visibility: hidden;
   display: inline-flex;
@@ -465,7 +465,7 @@
   position: absolute;
   top: 8px;
   left: 8px;
-  z-index: 4;
+  z-index: var(--z-raised);
   backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
   -webkit-backface-visibility: hidden;
   display: inline-flex;

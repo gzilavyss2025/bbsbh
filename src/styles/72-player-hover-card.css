@@ -14,7 +14,7 @@
 
 .phcard {
   position: fixed;
-  z-index: 100;
+  z-index: var(--z-modal);
   width: 300px;
   background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-hairline);

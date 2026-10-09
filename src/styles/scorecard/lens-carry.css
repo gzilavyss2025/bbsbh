@@ -14,7 +14,7 @@
   position: absolute;
   right: var(--space-4);
   left: var(--space-4);
-  z-index: 4;
+  z-index: var(--z-raised);
   margin-top: var(--space-2);
   overflow: hidden;
   pointer-events: none;
