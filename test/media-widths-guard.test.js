@@ -13,6 +13,8 @@ test('a width off the list fails; min, max, range and rem forms are read', () =>
   assert.deepEqual(w('@media (min-width: 735px) { .a { color: red } }'), ['1:735px'])
   assert.deepEqual(w('@media (max-width: 777px) and (min-width: 740px) { }'), ['1:777px'])
   assert.deepEqual(w('@media (width >= 731px) { }'), ['1:731px'])
+  assert.deepEqual(w('@media (700px <= width <= 800px) { }'), ['1:800px'])
+  assert.deepEqual(w('@media (min-height: 500px) { }'), [])
   assert.deepEqual(w('@media (max-width: 31rem) { }'), ['1:31rem'])
 })
 
@@ -33,6 +35,9 @@ test('a comment that quotes a query does not fail', () => {
 })
 
 test('layout.css documents every width the guard lists', () => {
-  const doc = readFileSync(new URL('../src/tokens/layout.css', import.meta.url), 'utf8')
-  for (const width of WIDTHS) assert.ok(doc.includes(width), `${width} missing from src/tokens/layout.css`)
+  const css = readFileSync(new URL('../src/tokens/layout.css', import.meta.url), 'utf8')
+  const table = css.slice(css.indexOf('SCREEN WIDTHS'))
+  for (const width of WIDTHS) {
+    assert.match(table, new RegExp(`(?<![\\d.])${width.replace('.', '\\.')}(?![\\d.])`), width)
+  }
 })

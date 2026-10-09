@@ -9,8 +9,8 @@
 //
 // The list lives here and is mirrored as a table in src/tokens/layout.css (custom
 // properties do not work inside @media, so the table is a comment). The unit test
-// fails when the two differ. Only width queries count; heights and features
-// (prefers-reduced-motion, hover) are not widths.
+// fails when a listed width is missing from the table. Only width queries count; heights, features
+// (prefers-reduced-motion, hover) and `@container` are not covered.
 //
 // Scans src/ CSS. Run by `npm run lint`.
 
@@ -27,8 +27,10 @@ export const WIDTHS = [
 
 const EXEMPT = /breakpoint-exempt\s*:\s*\S/
 const PRELUDE = /@media([^{]*)\{/g
-const FEATURE = /(?:min-|max-)?width\s*:\s*([\d.]+(?:px|rem|em))/g
-const RANGE = /width\s*[<>]=?\s*([\d.]+(?:px|rem|em))|([\d.]+(?:px|rem|em))\s*[<>]=?\s*width/g
+// Every `(...)` group that names `width` — min-width, max-width or range syntax,
+// either side of the operator — and every length inside it.
+const WIDTH_GROUP = /\(([^()]*width[^()]*)\)/g
+const LENGTH = /[\d.]+(?:px|rem|em)/g
 
 export function findUnlistedWidths(css) {
   const rawLines = css.split('\n')
@@ -37,10 +39,8 @@ export function findUnlistedWidths(css) {
   for (const q of masked.matchAll(PRELUDE)) {
     const line = masked.slice(0, q.index).split('\n').length
     if (EXEMPT.test(rawLines[line - 1]) || EXEMPT.test(rawLines[line - 2] ?? '')) continue
-    for (const m of q[1].matchAll(FEATURE)) if (!WIDTHS.includes(m[1])) found.push({ line, width: m[1] })
-    for (const m of q[1].matchAll(RANGE)) {
-      const width = m[1] ?? m[2]
-      if (!WIDTHS.includes(width)) found.push({ line, width })
+    for (const g of q[1].matchAll(WIDTH_GROUP)) {
+      for (const [width] of g[1].matchAll(LENGTH)) if (!WIDTHS.includes(width)) found.push({ line, width })
     }
   }
   return found
