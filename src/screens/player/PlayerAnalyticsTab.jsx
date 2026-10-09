@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { loadPlayerCore } from '../../api/player/core.js'
 import { loadArsenalSeason, loadPlayerAnalytics } from '../../api/player/analytics.js'
-import { battedBallFor } from '../../api/person.js'
+import { battedBallFor } from '../../api/person/advanced.js'
 import { seasonFolderOf } from '../../api/staticJson.js'
 import { playerTabPath } from '../../lib/route.js'
 import { useSeasonView } from '../../hooks/seasons/useSeasonView.js'

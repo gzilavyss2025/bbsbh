@@ -10,7 +10,8 @@
 // ballsInPlay (145 + 83 + 83 + 30 = 341).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { advancedHittingView, battedBallFor, battedBallView, hittingRanksView } from '../src/api/person.js'
+import { advancedHittingView, battedBallView, hittingRanksView } from '../src/api/person.js'
+import { battedBallFor } from '../src/api/person/advanced.js'
 
 // ---------------------------------------------------------------------------
 // advancedHittingView
