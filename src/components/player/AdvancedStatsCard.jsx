@@ -21,8 +21,8 @@ import { Pill } from '../ui/control/Pill.jsx'
 // A Regular / Postseason switch (#1436) shows once he has an October game and the
 // page is not dated: the two scopes are never blended, and Regular is the default.
 // The API has no postseason wOBA, wRC+, FIP or ERA−, so those cells read "—".
-export function AdvancedStatsCard({ adv, post = null }) {
-  const [picked, setPicked] = useState('reg')
+// `picked`/`onPick` are the parent's, so the Batted balls block can follow the same switch.
+export function AdvancedStatsCard({ adv, post = null, picked, onPick }) {
   if (!adv?.facts?.length) return null
   const inPost = post?.facts?.length > 0 && picked === 'post'
   const shown = inPost ? post : adv
@@ -35,7 +35,7 @@ export function AdvancedStatsCard({ adv, post = null }) {
         <div className="player__splitscope" role="group" aria-label="Advanced scope">
           <span className="player__splitscopelabel">Scope</span>
           {[['reg', 'Regular'], ['post', 'Postseason']].map(([k, text]) => (
-            <Pill key={k} role="control" fill="paper" pressed={picked === k} onClick={() => setPicked(k)}>
+            <Pill key={k} role="control" fill="paper" pressed={picked === k} onClick={() => onPick(k)}>
               {text}
             </Pill>
           ))}
