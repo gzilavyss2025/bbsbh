@@ -38,6 +38,7 @@ const GUARDS = [
   'check-line-endings',
   'check-comment-citations',
   'check-fixture-freshness',
+  'layout/check-z-index',
 ]
 
 const COMMANDS = [

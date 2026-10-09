@@ -36,7 +36,7 @@
   /* Above the fixed page chrome (.pagenav, 20) on the way out, below the
      dialog layer (.scrim, 100) — a half flying past should never cross a
      sheet that is already open. */
-  z-index: 90;
+  z-index: calc(var(--z-modal) - 10);
   pointer-events: none;
 }
 

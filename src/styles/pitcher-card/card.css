@@ -241,7 +241,7 @@
 .pcard__tip {
   display: none;
   position: absolute;
-  z-index: 5;
+  z-index: calc(var(--z-raised) + 1);
   top: 26px;
   left: -4px;
   width: 240px;

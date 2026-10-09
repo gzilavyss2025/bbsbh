@@ -8,7 +8,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 20;
+  z-index: var(--z-sticky);
   display: flex;
   justify-content: center;
   padding: var(--space-3h) var(--app-gutter) calc(var(--space-3h) + env(safe-area-inset-bottom));

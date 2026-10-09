@@ -137,6 +137,40 @@
   /* The carry strip's boxes are the sheet's own box at this share of the
      sheet's zoom (#724, L6). */
   --lens-carry-scale: 0.9;
+
+  /* THE LAYER SCALE (#1179). Five tiers, lowest to highest. A z-index above 3
+     reads one of these, never a bare number (scripts/layout/check-z-index.mjs);
+     a local lift of -1 to 3 inside one component may stay raw. A second surface
+     in the same tier writes its offset: `calc(var(--z-overlay) + 20)`.
+
+     Every surface kept the number it had before the tokens, so no pair of
+     surfaces changed order. To put a new surface on the scale, find the tier
+     whose job it does and read the table before choosing an offset.
+
+       tier       value  surfaces
+       raised      4     gamecard live/delay/pin badges; the scorecard lens
+                         frame, ruler and carry strip
+                   5     raised + 1: the lens's docked card; a pitcher-card
+                         tip; the slate topbar and its search results; the
+                         lab pages' sticky rails
+                   6     raised + 2: the identity lab's dugout
+       sticky     10     sticky - 10: the lens's bottom bar and back button
+                  15     sticky - 5: the All-Star legacy rank rail
+                  20     the floating nav bars (.pagenav, standings day nav,
+                         postseason year nav)
+       overlay    30     overlay - 10: the info pop tip
+                  40     the wire dock
+                  60     overlay + 20: the Express Lane expand
+       modal      90     modal - 10: the seal tear (flies over page chrome,
+                         never over an open dialog)
+                 100     .scrim dialogs and sheets, the site search overlay,
+                         the player hover card, the box-light hover card
+       toast    1000     the dev-only headshot log panel; above everything */
+  --z-raised: 4;
+  --z-sticky: 20;
+  --z-overlay: 40;
+  --z-modal: 100;
+  --z-toast: 1000;
 }
 
 /* --console-hud-h's desktop half — see the mobile value above for why this is

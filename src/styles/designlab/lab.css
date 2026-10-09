@@ -31,7 +31,7 @@
 .dlab__jump {
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: calc(var(--z-raised) + 1);
   padding: var(--space-3) var(--app-gutter);
   background: var(--bg-canvas);
   border-bottom: var(--bw-hair) solid var(--border-rule);
