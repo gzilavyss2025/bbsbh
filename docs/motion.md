@@ -82,6 +82,7 @@ is one.
 | `strike.css` | #981 | The drawn cross-out, all four sites |
 | `playbyplay.css` | #982 | The four-beat write-on |
 | `innings.css` | #978, #983 | The live-edge dot's breath and the frontier seal's |
+| `ovr.css` | #1703 | The OVR card's tap, on the player page: the tile's press and ring, the menu's slide and flash, and the rows' name, bar, chip and ribbon. See "The OVR card" below |
 | `scorecard-lens.css` | #724 (L7) | The phone lens (ADR-0092): the tear, the runner-move fade, the page turn, the two-cycle seal breath, the docked card's fade and the pitcher sheet's slide. The glide is beside it in JS |
 
 ### The scorecard lens (#724, L7)
@@ -107,6 +108,27 @@ narrower. The turn runs on its own tap. The docked card's fade is the one on
 Reduced motion: no tear, no glide, no turn (the JS reads `motionIsReduced`);
 the cards and the sheet arrive at once under the blanket rules; the runner tint
 opts out of the blanket and stays, still, until the next tap.
+
+### The OVR card (#1703)
+
+One tap, about 1.4 seconds, no resting animation. Every time is a multiple of a token
+(`--dur-fast`, `--dur-med`, `--dur-slow`) except the 80 ms step between rows
+(`--dur-ovr-step`, the one new token). The order is in the header of `ovr.css`.
+
+| Motion | Spec | Gate |
+| --- | --- | --- |
+| Press and ring | The tile's face scales to .93 and back in 2 x `--dur-fast`; a ring leaves it, 1.5 x `--dur-slow`, `--ease-out` | `OvrTile` renders the press class and the ring only for a tap that did not ask for less motion |
+| Sheet | Slides up from its own height in `--dur-slow`, after `--dur-fast` | The menu mounts on the tap |
+| Flash | One flash in the tier colour across the panel, 2 x `--dur-med` | `.ovrmenu--play` |
+| Count-up | The big number runs from 20 to its value on the lens glide's `easeOut`, 2 x `--dur-slow`, in JS | `.ovrmenu--play`; the JS runs no count when the class is off |
+| Rows | Name rises, bar fills left to right, chip pops as its bar ends; each row 80 ms after the one above | `.ovrmenu--play` |
+| Ribbon | A short stamp-press, after the last row's step | `.ovrmenu--play` |
+
+The class is added only when `motionIsReduced()` is false **at the tap**. A delay is not a
+duration, so the blanket rules cannot stand in for that check: with reduced motion the
+sheet opens with the number and the bars already drawn. Switching a two-way player to his
+other rating drops the class, so a switch does not replay the sequence. The slant is a
+`transform`, so every move uses `translate`, `scale` and `rotate`, which compose with it.
 
 ## Two idle loops, one beat
 
