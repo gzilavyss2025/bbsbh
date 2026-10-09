@@ -39,6 +39,7 @@ const GUARDS = [
   'check-comment-citations',
   'check-fixture-freshness',
   'layout/check-z-index',
+  'layout/check-media-widths',
 ]
 
 const COMMANDS = [
