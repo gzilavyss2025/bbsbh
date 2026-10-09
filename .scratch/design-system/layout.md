@@ -1147,3 +1147,27 @@ which has no step), `.animlab__frozen`, `.rpt-controls`, scoring surfaces, `.txn
 
 **Not seen.** The sticky behaviour of `.dlab__jump` at scroll (the edit does not touch `position`).
 `npm run visual` and `npm run e2e` were not run.
+
+## Stack slice S18 (2026-10-09)
+
+Two one-class `flex-direction: column` rules moved onto `Stack`: 2 rules, 2 JSX sites in 1 file. Base:
+`origin/main` at c43e104. Re-measured: 356 column rules (312 in scope), 328 grids; the finder lists 23 safe rows
+(the S17 list). The family is the design lab's boxes-inside-cards page (`designlab/nested.css`), which no earlier
+slice touched. Open PRs #1815, #1816 and #1820 (their stack) touch none of the files.
+
+| rule | gap | element | rule keeps |
+| --- | --- | --- | --- |
+| `.nested__case` (`NestedBoxes.jsx`) | snug | section | nothing (deleted) |
+| `.nested__pair` (`NestedBoxes.jsx`) | loose | div | nothing (deleted) |
+
+**Cascade.** Neither rule kept a `display`, `flex-direction` or `gap`. The class stays on the Stack as its namespace.
+
+**Test first.** `S18` in `test/stack.test.js`; it failed on both checks, then passed.
+
+**Left.** `.nested__side` (6px, off the steps, keeps `min-width`), `.nested` (32px, the one bespoke step). The other
+finder rows are the ones S16 and S17 left, scoring surfaces or Express Lane.
+
+**Checked.** `geom.mjs` (`MOCK=1 FREEZE=1 BLOCKIMG=1`, `?nointro`, 390 and 760px) on `/design-lab`, BEFORE twice
+then AFTER: identical, 5,539 elements, heights 68,556 and 47,411; 4 `nested__case` and 4 `nested__pair` drew.
+
+**Not seen.** `npm run visual` and `npm run e2e` were not run.
