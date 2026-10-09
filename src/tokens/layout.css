@@ -9,10 +9,10 @@
    ============================================================ */
 
 :root {
-  /* The gap between a page's top-level sections (#1180). A page's outer Stack
-     reads it (gap="section"), so one edit moves every page. It is the 16px
-     step today: pages already separate sections by about that much, and a
-     larger section gap would change every page at once. */
+  /* The gap between a page's top-level sections (#1180), read by a page's
+     outer Stack (gap="section"). It is the 16px step, the team hub's gap.
+     It is not one gap for every page: pages space their sections on purpose
+     (0 to 58px), and "one section gap" is no longer a goal (ADR-0108). */
   --space-section: var(--space-4);
 
   /* Headshot size scale. Every headshot in the app (the shared <Headshot>

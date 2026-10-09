@@ -1,5 +1,11 @@
 # Layout census: Stack, Cluster and Grid (#1180)
 
+> **Frozen 2026-10-09. See ADR-0108** (`docs/adr/0108-the-layout-migration-is-frozen-new-layout-uses-the-parts.md`).
+> The migration of old rules stopped. New layout uses the parts. An old rule moves only when a
+> PR already edits it. `scripts/layout/check-layout-ratchet.mjs` is the ratchet. This file is
+> history: do not add slices or log entries. Decision 5 (snap) is reversed, and the "one
+> section gap" goal of decision 2 is dropped.
+
 First step of #1180. This file counts what the layout rules do. It proposes the
 gap steps. It builds nothing. Gary signs off on the proposals before any code
 lands, as #1128 did for spacing.
@@ -182,7 +188,7 @@ Follow the #1113 pattern. This is a proposal, not a decision.
 - `src/styles/system/stack.css` for the rules, one file per part (`cluster.css`, `grid.css` follow). It loads ahead of `section-head.css`: `test/card-cascade.test.js` pins the head, the card and 06 as adjacent imports.
 - `--space-section` goes in `src/tokens/layout.css`, not `spacing.css`: it is an alias, and `spacing.css` holds the primitive steps only.
 - Specimens on `/design-lab`, one per part (#1131 did this for Pill).
-- One part per PR. Cascade order is the contract (#1113): a rule moved into
+- *(Historical: dropped with the freeze, ADR-0108.)* One part per PR. Cascade order is the contract (#1113): a rule moved into
   `system/` changes which rule wins at equal specificity. A wrong slice must
   revert alone.
 
@@ -192,12 +198,12 @@ Follow the #1113 pattern. This is a proposal, not a decision.
    24px step and no half-steps.
 2. **`--space-section` is 16px.** It is an alias of the 16px step, read by a
    page's outer `Stack`. Pages look the same; a later change to the section gap
-   is still one edit.
+   is still one edit. *(2026-10-09: the token stays; "one section gap" is no longer a goal, ADR-0108.)*
 3. **Cluster gets a `rowGap` prop.** `gap` is the column gap. The 39 two-value
    rows migrate with no visible change.
 4. **Grid covers `auto-fit` only.** The 28 rules that already use it. The other
    259 stay authored by hand.
-5. **The 37 odd-gap stacks snap to the nearest step, ties round up.**
+5. **Reversed 2026-10-09 (ADR-0108): no snapping; off-step gaps stay hand-written.** ~~The 37 odd-gap stacks snap to the nearest step, ties round up.~~
 
    | from | to | rules |
    | ---: | ---: | ---: |
@@ -219,7 +225,7 @@ Follow the #1113 pattern. This is a proposal, not a decision.
 
 Build one part per PR, in this order: `Stack`, `Cluster`, `Grid`. Each PR adds
 the component, its rules in `src/styles/system/<part>.css`, a `/design-lab`
-specimen and a test. **`Stack`, `Cluster` and `Grid` are built** (this branch). `Cluster` also takes `align` (`start`, `center`, `baseline`), which was not in the sign-off: the census of 147 wrapping rows found 69 with no alignment, 41 `center`, 31 `baseline` and 5 `flex-start`, so a Cluster without it could not host half of them. Migrating the existing rules follows in sliced PRs.
+specimen and a test. **`Stack`, `Cluster` and `Grid` are built** (this branch). `Cluster` also takes `align` (`start`, `center`, `baseline`), which was not in the sign-off: the census of 147 wrapping rows found 69 with no alignment, 41 `center`, 31 `baseline` and 5 `flex-start`, so a Cluster without it could not host half of them. Migrating the existing rules followed in sliced PRs until the freeze (ADR-0108).
 
 `Grid` takes `min` (a length, default `9rem`), `gap` (the Stack's four steps)
 and `fit`. Two facts from the 28 grids shaped it: 17 use `auto-fill` and 11 use

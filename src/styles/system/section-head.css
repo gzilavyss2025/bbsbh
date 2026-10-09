@@ -11,7 +11,7 @@
 
    WHAT IT OWNS: the look (ground, underline, ink, type), the padding, and the
    row that puts the title left and the note, action and mark right.
-   WHAT IT DOES NOT OWN: the space above and below it (the parent's, #1180),
+   WHAT IT DOES NOT OWN: the space above and below it (the parent's),
    and the card it sits on (#1113's Card).
 
    HERE IN THE ORDER, before 06-loader-and-cards.css. Every per-site partial
@@ -83,7 +83,7 @@
 
 /* THE LABEL. A section's name on the page: graphite caps, one step down from
    a band's title, on a hairline. It carries its own space above and below
-   until the parent owns that (#1180); the 18px is .section__title's, kept so
+   (an old rule moves only when a PR edits it, ADR-0108); the 18px is .section__title's, kept so
    no page moves. */
 .sectionhead--label,
 .sectionhead--rule {

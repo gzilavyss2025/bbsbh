@@ -70,10 +70,16 @@ reason. The guards are catalogued in `docs/scripts/tooling.md`.
   (ADR-0084); a real one-off takes the marker, with a reason, inside the rule.
 - **`strike-link-exempt`** (`check-strike-links.mjs`). A rule whose struck text can hold no
   name link opts out with a `strike-link-exempt` comment in the rule.
+- **`layout-exempt: <reason>`** (`layout/check-layout-ratchet.mjs`). New layout uses `Stack`,
+  `Cluster` or `Grid`. A hand-written column, wrap or grid rule takes this marker on the line
+  before it, or the ratchet fails (ADR-0108).
+- **`z-index-exempt: <reason>`** and **`breakpoint-exempt: <reason>`**: see "Layers and screen
+  widths" below.
 
 ## Layers and screen widths
 
 A `z-index` above 3 reads a layer token (`--z-raised`, `--z-sticky`, `--z-overlay`, `--z-modal`, `--z-toast`) or a
 `calc()` offset from one; `scripts/layout/check-z-index.mjs` rejects a raw number (`z-index-exempt: <reason>` for a
-one-off). An `@media` width must be on the list in `tokens/layout.css`; 740px is the one wide step, and
-`scripts/layout/check-media-widths.mjs` stops new widths (`breakpoint-exempt: <reason>`).
+one-off). An `@media` width must be on the guard's `WIDTHS` list (mirrored in `tokens/layout.css`); 740px is the
+one wide step, and `scripts/layout/check-media-widths.mjs` stops new widths (`breakpoint-exempt: <reason>`)
+(ADR-0108).
