@@ -401,6 +401,34 @@ export const PROTOTYPES = [
     verdict: 'Prototype',
     note: 'The Season Report and “Who challenges” as they are on frame="sheet", then three candidate looks on the same two real components. Invented data. No new Card frame; Gary picks, or stays on sheet.',
   },
+  {
+    id: 'grammar-box',
+    title: 'Shared grammar, A · Box Score',
+    path: 'src/screens/designlab/grammar/',
+    verdict: 'Prototype',
+    note: 'One of four directions for a single visual grammar on the player and team pages. Same invented rows in all four: a player Season and Craft slice and a team Numbers slice, each at 390 and 1180 px. Nothing ships; Gary picks one.',
+  },
+  {
+    id: 'grammar-attr',
+    title: 'Shared grammar, B · Attribute Screen',
+    path: 'src/screens/designlab/grammar/',
+    verdict: 'Prototype',
+    note: 'One of four directions for a single visual grammar on the player and team pages. Same invented rows in all four: a player Season and Craft slice and a team Numbers slice, each at 390 and 1180 px. Nothing ships; Gary picks one.',
+  },
+  {
+    id: 'grammar-rule',
+    title: 'Shared grammar, C · Pencil Rule',
+    path: 'src/screens/designlab/grammar/',
+    verdict: 'Prototype',
+    note: 'One of four directions for a single visual grammar on the player and team pages. Same invented rows in all four: a player Season and Craft slice and a team Numbers slice, each at 390 and 1180 px. Nothing ships; Gary picks one.',
+  },
+  {
+    id: 'grammar-vs',
+    title: 'Shared grammar, D · Versus League',
+    path: 'src/screens/designlab/grammar/',
+    verdict: 'Prototype',
+    note: 'One of four directions for a single visual grammar on the player and team pages. Same invented rows in all four: a player Season and Craft slice and a team Numbers slice, each at 390 and 1180 px. Nothing ships; Gary picks one.',
+  },
 ]
 
 export const GROUP_TITLES = {
