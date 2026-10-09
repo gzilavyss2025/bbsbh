@@ -99,8 +99,8 @@ Three projects — `mobile` (iPhone 13), `ipad` (iPad gen 7), `desktop`
 default engine (only Chromium's binary is cached here). Running with no
 `--project` flag runs every spec against all three, which is the default for
 `npm run e2e`; scope to one project when the check doesn't care about
-layout/breakpoint (`min-width: 740px` in `index.css` is the one responsive
-rule in the app — mobile is below it, ipad/desktop are above it).
+layout/breakpoint (740px is the one wide step, ADR-0108; its rules are in
+`styles/25-wide-layout.css` — mobile is below it, ipad/desktop are above it).
 
 Use `page.screenshot()` sparingly — prefer assertions (`expect(locator)...`)
 over eyeballing screenshots; they're cheaper and don't need a human/model to

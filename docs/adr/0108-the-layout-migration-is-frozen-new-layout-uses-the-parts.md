@@ -46,8 +46,9 @@ Moving the old rules onto the parts stopped paying back:
 
 ## Known limits
 
-- The guards read CSS only. JavaScript media queries are not checked. For example,
-  `src/hooks/useMediaQuery.js` uses `(min-width: 1000px)`.
+- The width guard reads CSS only. JavaScript media queries are not checked. For example,
+  `src/hooks/useMediaQuery.js` uses `(min-width: 1000px)`. (The z-index guard also reads an
+  inline `zIndex` in JS and JSX.)
 - The z-index guard reads bare integers only. A `calc()` value is not read, so it passes at any
   size. Source: the pattern in `check-z-index.mjs`. (Inferred from the pattern; not tested.)
 

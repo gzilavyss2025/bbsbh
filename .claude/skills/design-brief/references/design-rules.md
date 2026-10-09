@@ -32,6 +32,10 @@ These come from the Claude API model-migration notes (Opus 4.7 and later).
   (`check-raw-values`, `check-typography`). `src/styles/CLAUDE.md`.
 - **One control, one door.** A button that acts on this page is `.btn`. A door that opens
   more is `.door`. Never draw a third. `src/CLAUDE.md` "Design system".
+- **Layout uses the parts.** New layout is `Stack`, `Cluster` or `Grid`
+  (`src/components/ui/layout/`), or a hand-written rule with `layout-exempt: <reason>`. A
+  `z-index` above 3 reads a `--z-*` token. No new `@media` width: 740px is the wide step.
+  Old rules stay as they are unless the PR already edits them (ADR-0108).
 - **Name a block for its job, not its shape.** ADR-0084 and `docs/design-system-naming.md`.
 - **A paper scorebook.** Manila paper, navy ink, pencil graphite, kraft-tape amber for
   seals. Numbers are mono and tabular. Structural labels are condensed capitals.
