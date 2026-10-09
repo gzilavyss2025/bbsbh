@@ -1,4 +1,4 @@
-// Cluster migration slices C1 to C11 (#1180): thirty-seven wrapping-row rules moved onto
+// Cluster migration slices C1 to C12 (#1180): forty wrapping-row rules moved onto
 // <Cluster>. Each would fail silently otherwise (lint green, page drawn, only a
 // screenshot noticing):
 //
@@ -71,6 +71,10 @@ const MIGRATED = {
   allstargame__main: { file: '37-all-star-rosters.css', gap: 'base', sites: 1, align: 'center', keeps: ['justify-content: space-between'] },
   simlike__meta: { file: '51-similar-players.css', gap: 'tight', sites: 1, align: 'baseline', keeps: ['justify-content: center', 'min-width', 'font-size', 'line-height'] },
   arsenal__head: { file: '69-pitch-arsenal.css', gap: 'snug', sites: 1, align: 'center', keeps: ['justify-content: space-between', 'margin-bottom'] },
+  // C12: the Design Lab chrome. The jump bar and the entry head keep their own frame and justification.
+  dlab__jump: { file: 'designlab/lab.css', gap: 'snug', sites: 1, keeps: ['position', 'top', 'z-index', 'padding', 'background', 'border-bottom'] },
+  dlab__entryhead: { file: 'designlab/lab.css', gap: 'snug', sites: 1, align: 'baseline', keeps: ['justify-content: space-between'] },
+  dlab__measure: { file: 'designlab/lab.css', gap: 'snug', sites: 5, align: 'center' },
 }
 
 defineMigrationTests('cluster', CLUSTER, MIGRATED)

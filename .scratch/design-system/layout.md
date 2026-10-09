@@ -1123,3 +1123,27 @@ ones S16 left, or keep more than `flex`.
 `/scout`) at 390 and 760px. The synthetic host carries only the one class, so it does not include `.sheet`.
 
 **Not seen.** `.cwb` for real (Clerk admin gate) and the Scout filter sheet (opens from a tap).
+
+## Cluster slice C12 (2026-10-09)
+
+Three wrapping rows on the Design Lab chrome moved onto `Cluster`: 3 rules, 7 JSX sites in 3 files. Base: `origin/main` at 5a59a43.
+Open PRs #1815 and #1816 touch none of these files. The finder lists 22 safe rows; the rest of the Design Lab
+(`/design-lab`) rows were the best fit for one family, one stylesheet (`designlab/lab.css`).
+
+| rule | gap | align | element | rule keeps |
+| --- | --- | --- | --- | --- |
+| `.dlab__jump` (`index.jsx`) | snug | stretch | nav | `position`, `top`, `z-index`, padding, background, border |
+| `.dlab__entryhead` (`Entry.jsx`) | snug | baseline | div | `justify-content: space-between` |
+| `.dlab__measure` (`tokens.jsx`, 5 sites) | snug | center | div | nothing, so the rule is gone |
+
+**Test first.** Three rows added to `MIGRATED`; the test failed on rules and sites, then passed. **Cascade.** `lab.css`
+is lazy (`/design-lab` imports it), so it loads after `system/cluster.css`. No gap was off-step, so nothing snapped.
+
+**Left.** `.dlab__*` rules that keep more than the layout, `.cwb__*` (admin), `.idlab__*` (the monoinkrow gap is 16px,
+which has no step), `.animlab__frozen`, `.rpt-controls`, scoring surfaces, `.txntl__head` (loads before the cluster).
+
+**Checked.** `geom.mjs` (`MOCK=1 FREEZE=1 BLOCKIMG=1`, `?nointro`), BEFORE twice (stash) vs AFTER, 390 and 760px:
+`/design-lab` identical, 5,539 elements, heights 68,556 and 47,411. The two BEFORE runs match.
+
+**Not seen.** The sticky behaviour of `.dlab__jump` at scroll (the edit does not touch `position`).
+`npm run visual` and `npm run e2e` were not run.

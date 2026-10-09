@@ -32,9 +32,6 @@
   position: sticky;
   top: 0;
   z-index: 5;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
   padding: var(--space-3) var(--app-gutter);
   background: var(--bg-canvas);
   border-bottom: var(--bw-hair) solid var(--border-rule);
@@ -127,11 +124,7 @@
 }
 
 .dlab__entryhead {
-  display: flex;
-  align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-2);
-  flex-wrap: wrap;
 }
 
 .dlab__entrytitle {
@@ -325,13 +318,6 @@
   font-family: var(--font-body);
   font-size: var(--fs-body);
   max-width: 48ch;
-}
-
-.dlab__measure {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-wrap: wrap;
 }
 
 .dlab__bar {
