@@ -1,3 +1,4 @@
+import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { Band, Entry } from './Entry.jsx'
@@ -62,7 +63,7 @@ export function DesignLab() {
         nowhere else in the app.
       </p>
 
-      <nav className="dlab__jump" aria-label="Design lab sections">
+      <Cluster as="nav" className="dlab__jump" aria-label="Design lab sections">
         {/* In-page #anchors: a Button with an href, not a Door (they do not
             leave the page) and not a Pill (they filter nothing). The team
             hub's jump bar is a ruled box for the same reason (#1131). */}
@@ -71,7 +72,7 @@ export function DesignLab() {
         <Button size="control" className="dlab__jumplink" href="#cards">Cards</Button>
         <Button size="control" className="dlab__jumplink" href="#pills">Pills</Button>
         <Button size="control" className="dlab__jumplink" href="#prototypes">Prototypes</Button>
-      </nav>
+      </Cluster>
 
       <section className="dlab__verdictbox">
         <h2 className="dlab__bandtitle">What the catalog shows</h2>
