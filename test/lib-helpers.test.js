@@ -5,6 +5,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { ordinal } from '../src/lib/format.js'
+import { ordinal as rankText } from '../src/api/person/teamPage.js'
+import { ordinal as meetingOrdinal } from '../src/screens/scout/meetings/meetings.js'
 import { nameFromChildren } from '../src/lib/nav.js'
 import { toApiDate, addDays, monthDay, humanDate, scorebookDate } from '../src/lib/dates.js'
 import { tierForZ, meanAndSd, TIER_LABELS } from '../src/lib/statTiers.js'
@@ -37,6 +39,16 @@ test('ordinal suffixes the ones digit except the 11–13 teens', () => {
   assert.equal(ordinal(111), '111th')
   assert.equal(ordinal(112), '112th')
   assert.equal(ordinal(113), '113th')
+})
+
+// The two wrappers that keep their own empty-value rule on top of the shared suffix.
+test('ordinal wrappers keep their empty-value rules', () => {
+  assert.equal(rankText(22), '22nd')
+  assert.equal(rankText('3'), '3rd')
+  assert.equal(rankText(null), '—')
+  assert.equal(rankText(0), '—')
+  assert.equal(meetingOrdinal(11), '11th')
+  assert.equal(meetingOrdinal(null), '')
 })
 
 // --------------------------------------------------------------------------

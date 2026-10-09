@@ -149,18 +149,6 @@ function rankDescending(value, values) {
   return higher + 1
 }
 
-// English ordinal for a positive integer: 1 → "1st", 22 → "22nd".
-export function ordinal(n) {
-  const mod100 = n % 100
-  if (mod100 >= 11 && mod100 <= 13) return `${n}th`
-  switch (n % 10) {
-    case 1: return `${n}st`
-    case 2: return `${n}nd`
-    case 3: return `${n}rd`
-    default: return `${n}th`
-  }
-}
-
 // Rank every dimension of a park against the whole league (the 30 MLB parks in
 // BALLPARKS). Returns the park record plus a `rows` array — one entry per
 // DIMENSIONS descriptor — carrying the park's value and its league rank

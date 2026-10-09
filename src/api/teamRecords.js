@@ -24,6 +24,7 @@
 // tonight even before the cutoff is applied. Degrades to null with no file.
 
 import { staticJsonBy } from './staticJson.js'
+import { ordinal } from '../lib/format.js'
 
 // staticJsonBy memoizes on String(key), so the key has to be a string — a
 // `{season, teamId}` object would collapse every club onto "[object Object]"
@@ -189,14 +190,6 @@ export const RECORD_GROUPS = [
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-// 1st, 2nd, 3rd, 4th — the inning names the by-inning rows print. Only 1-9 are
-// ever asked for here, so the teen exception every general implementation
-// needs cannot be reached; it is written anyway because the next caller might.
-export function ordinal(n) {
-  const rest = n % 100
-  if (rest >= 11 && rest <= 13) return `${n}th`
-  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`
-}
 
 // ---------------------------------------------------------------------------
 // Tally

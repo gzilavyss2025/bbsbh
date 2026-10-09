@@ -12,11 +12,9 @@
 // dependency for anything downstream. MLB only (sportId 1): the vast
 // majority of shared links, and where the bug this warms against was found.
 //
-// Self-contained (own small copies of the date/slug helpers, including the
-// entity slug of ADR-0057 — warm the address a crawler will actually request,
-// which is the slugged one the canonical names, not the bare id it used to be),
-// same convention as gen-rehab.mjs mirroring person.js's transaction-scan logic
-// for anything that lives under src/.
+// The date and slug helpers (including the entity slug of ADR-0057 — warm the
+// address a crawler will actually request, which is the slugged one the
+// canonical names, not the bare id it used to be) come from src/lib/route.js.
 //
 // Rather than reconstructing the image URL by hand (which would duplicate —
 // and could drift from — api/_lib/cards.js's own card-building logic), each
@@ -32,6 +30,7 @@
 
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
+import { apiDateToUrl, entitySegment, matchupSlug } from '../src/lib/route.js'
 
 const APP_ORIGIN = 'https://bbsbh.vercel.app'
 const REQUEST_TIMEOUT_MS = 8000
@@ -59,41 +58,11 @@ function todayEasternDateStr() {
   return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
 }
 
-function apiDateToUrl(apiDate) {
-  const [y, m, d] = (apiDate || '').split('-')
-  return `${m}${d}${y}`
-}
-
 function teamAbbr(team) {
   return (
     team?.abbreviation ||
     (team?.teamName || team?.name || '').replace(/[^a-z]/gi, '').slice(0, 3).toUpperCase()
   )
-}
-
-// route.js / api/_lib/cards.js twins. A page about a person or a club is
-// addressed '{slug}-{id}', and that is the URL the crawler follows, so it is the
-// URL worth warming — the bare form resolves too, but it is a different edge
-// cache key and nobody is going to request it.
-function slugify(name) {
-  return String(name ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 48)
-    .replace(/-+$/, '')
-}
-
-function entitySegment(id, name) {
-  const slug = slugify(name)
-  return slug ? `${slug}-${id}` : String(id)
-}
-
-function matchupSlug(awayAbbr, homeAbbr, gameNumber = 1) {
-  const base = `${(awayAbbr || '').toLowerCase()}${(homeAbbr || '').toLowerCase()}`
-  return gameNumber > 1 ? `${base}-${gameNumber}` : base
 }
 
 // Fetches a pretty preview page (warming its own cache entry as a side

@@ -21,7 +21,7 @@
 // the record it decorates, so it rides inside whichever `revealedThrough`
 // gate its family already carries and changes no tense (ADR-0014).
 
-import { ordinal } from './shared.js'
+import { ordinal } from '../../lib/format.js'
 
 // How wide the field must be before a rank is worth printing at all. A "2nd of
 // 5" is arithmetic, not a standing.

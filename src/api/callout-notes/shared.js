@@ -1,9 +1,11 @@
 // Pure, cross-cutting helpers/constants shared across the callout-notes/
-// modules — worthiness scoring, W-L record parsing/folding, ordinal wording,
+// modules — worthiness scoring, W-L record parsing/folding,
 // and the small event-type sets both the live at-bat builder (liveAtBat.js)
 // and the in-game progress walk (progress.js) trigger on. No fetching, no
 // feed-walking of its own. See ../callout-notes.js's header for the overall
 // two-tenses rule (ADR-0014) this whole directory implements.
+
+import { ordinal } from '../../lib/format.js'
 
 // Marquee hit leader category keys, shared with gen-callouts.mjs (imported there).
 export const HIT_CATEGORY_KEYS = ['hr', 'triples', 'doubles', 'bb_b', 'sb', 'hbp']
@@ -136,15 +138,6 @@ export function gameResult(feed) {
     final: isFinal && decided,
     winnerSide: isFinal && decided ? (a > h ? 'away' : 'home') : null,
   }
-}
-
-// Ordinal wording ("6th", "9th", "3rd"...) — shared by the checkpoint notes
-// (inning number), the folded-record phrasing ("the 2nd loss"), and the
-// times-through-the-order card above (trip number).
-export function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd']
-  const v = n % 100
-  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }
 
 // --- magnitude bonuses --------------------------------------------------------

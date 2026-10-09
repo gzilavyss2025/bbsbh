@@ -7,6 +7,8 @@
 // It mirrors with the page's View, the way the maps do (ADR-0093): first base
 // on the left in the Pitcher's view, on the right in the Hitter's. The side
 // words say inside and away for the batter's stance in that plate appearance.
+import { clamp } from '../../../lib/math/number.js'
+
 const W = 120
 const H = 140
 const FT = 34 // px per foot
@@ -20,7 +22,6 @@ export function PitchZone({ pitch, view, stance, family }) {
   const top = pitch.szTop ?? 3.5
   const bot = pitch.szBot ?? 1.6
   const x0 = Math.min(X(-HALF), X(HALF))
-  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
   const cx = clamp(X(pitch.px ?? 0), 6, W - 6)
   const cy = clamp(Z(pitch.pz ?? 2.5), 6, H - 20)
   // Third-base side is -x: on the viewer's left in the Hitter's view.

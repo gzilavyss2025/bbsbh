@@ -1,5 +1,6 @@
 import { confidenceLabel, confidenceState, levelTier, movementState, tierLabel } from '../../api/prospectTrend.js'
 import { outsToIp } from '../../lib/math/innings.js'
+import { ordinal } from '../../lib/format.js'
 
 // A compact, always-visible /prospects Ledger cell for bbsbh's own
 // level-relative OPS/ERA percentile (src/api/prospectTrend.js,
@@ -31,20 +32,6 @@ function DirectionTriangle({ up }) {
 // stays off until the move is big enough to be about the player. Five points is
 // roughly one rung on the band scale above.
 const METRIC = { hitting: 'OPS', pitching: 'ERA' }
-function ordinal(value) {
-  const mod100 = value % 100
-  const suffix = mod100 >= 11 && mod100 <= 13
-    ? 'th'
-    : value % 10 === 1
-      ? 'st'
-      : value % 10 === 2
-        ? 'nd'
-        : value % 10 === 3
-          ? 'rd'
-          : 'th'
-  return `${value}${suffix}`
-}
-
 function shortDate(apiDate) {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(apiDate ?? '')
   if (!match) return ''

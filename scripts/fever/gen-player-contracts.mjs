@@ -11,7 +11,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { shardKey100 } from '../../src/lib/shardKey.js'
 import { computePayRanks, largestSplit } from '../lib/contract-pay-rank.mjs'
-import { mapConcurrent } from '../lib/concurrency.mjs'
+import { chunk, mapConcurrent } from '../lib/concurrency.mjs'
 import { writeShards } from '../lib/io.js'
 import { getJson } from '../lib/statsapi.mjs'
 import { normalizeContractsPayload } from './normalize-contracts.mjs'
@@ -31,12 +31,6 @@ const FEED_URL = 'https://www.feverbaseball.com/api/data/contracts'
 const CHUNK_SIZE = 100
 const CONCURRENCY = 4
 const STATS_HYDRATE = 'stats(group=[pitching],type=[season,career],season=SEASON)'
-
-function chunk(items, size) {
-  const out = []
-  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size))
-  return out
-}
 
 function statLine(person, typeName) {
   const group = (person.stats ?? []).find((entry) => entry.type?.displayName === typeName)

@@ -11,6 +11,7 @@ import { expressHalfOf, stepToSection } from '../../lib/route.js'
 import { DEFAULT_STAGING_PLAN } from '../../lib/expresslane/staging.js'
 import { halfIndex } from '../../api/select.js'
 import { formatMbps } from '../../lib/expresslane/speed.js'
+import { ordinal } from '../../lib/format.js'
 
 // EXPRESS LANE — CONCEPT A, THE SPLIT DECK.
 //
@@ -47,9 +48,7 @@ import { formatMbps } from '../../lib/expresslane/speed.js'
 // the rules; the hook holds the cursor; this page draws the two states.
 
 function halfLabel(inning, half) {
-  const ordinal =
-    inning === 1 ? '1st' : inning === 2 ? '2nd' : inning === 3 ? '3rd' : `${inning}th`
-  return `${half === 'bottom' ? 'Bottom' : 'Top'} ${ordinal}`
+  return `${half === 'bottom' ? 'Bottom' : 'Top'} ${ordinal(inning)}`
 }
 
 // THE DEV-ONLY FILM SWITCH — `?nofilm`, and it is dev-only in the build rather

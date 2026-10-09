@@ -7,7 +7,8 @@
 // box-score roll-up's result-aware "Held" counterparts live in heldNotes.js.
 
 import { dayWord } from '../select.js'
-import { ordinal, isNum, clampScore, skewBonus, SCORE_BASE, parseRecord } from './shared.js'
+import { isNum, clampScore, skewBonus, SCORE_BASE, parseRecord } from './shared.js'
+import { ordinal } from '../../lib/format.js'
 // The league-rank clause each record note below appends when the club's mark
 // sits near either end of its level. Purely additive: no rank, today's
 // sentence (see rank.js).
