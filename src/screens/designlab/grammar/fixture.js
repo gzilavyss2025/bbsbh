@@ -65,6 +65,7 @@ export const SPLIT = [
 export const DIRECTIONS = [
   {
     id: 'box',
+    tableHead: 'Graphite capitals on a hairline, right-aligned except the first cell. Same as today’s standings.',
     name: 'Box Score',
     why: 'The quietest. A printed box score has no colour, so the figures do the talking and the bar is only a rule that has length.',
     track: '4px high, square ends, hairline track, fill from the left edge.',
@@ -79,6 +80,7 @@ export const DIRECTIONS = [
   },
   {
     id: 'attr',
+    tableHead: 'Ink fill row, paper capitals. The table reads as a stat sheet.',
     name: 'Attribute Screen',
     why: 'Taken from the OVR tile and a sports game’s attribute screen: a ten-notch gauge, a big number on an ink plate, and a tier colour you can read at a glance.',
     track: '12px high, square ends, ten notches on the track (stronger at 25, 50 and 75).',
@@ -93,6 +95,7 @@ export const DIRECTIONS = [
   },
   {
     id: 'rule',
+    tableHead: 'Graphite capitals over a 2px ink rule (the scorebook’s heavy line). Row rules are dotted.',
     name: 'Pencil Rule',
     why: 'A scorebook is ruled paper with marks on it. The track is the rule, the value is a dot on the rule, and nothing is boxed.',
     track: '2px rule, no radius. The value is an 8px round dot on the rule (--radius-pill is the only round end).',
@@ -107,6 +110,7 @@ export const DIRECTIONS = [
   },
   {
     id: 'vs',
+    tableHead: 'Graphite capitals on a hairline. The own-club row carries a navy edge.',
     name: 'Versus League',
     why: 'Every bar starts at the league average and runs left (worse) or right (better). The reader sees “better or worse than the field” before reading a figure.',
     track: '8px high, 2px radius (--radius-xs on the outer ends), a heavy centre line at league average.',

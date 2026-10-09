@@ -199,14 +199,13 @@ function Frame({ size, children }) {
 
 export function Grammar({ dir }) {
   const d = DIRECTIONS.find((x) => x.id === dir)
-  const spec = { ...d, tableHead: d.tableHead ?? TABLE_HEAD[dir] }
   return (
     <div className={`gx gx--${dir}`}>
       <Stack gap="loose">
         <h3 className="gx__name">{d.name}</h3>
         <dl className="gx__spec">
           {SPEC_ROWS.map(([k, key]) => (
-            <div key={key}><dt>{k}</dt><dd className="gx__dd">{spec[key]}</dd></div>
+            <div key={key}><dt>{k}</dt><dd className="gx__dd">{d[key]}</dd></div>
           ))}
         </dl>
         <p className="gx__cap">Player: Season and Craft. Phone, 390 px.</p>
@@ -220,11 +219,4 @@ export function Grammar({ dir }) {
       </Stack>
     </div>
   )
-}
-
-const TABLE_HEAD = {
-  box: 'Graphite capitals on a hairline, right-aligned except the first cell. Same as today’s standings.',
-  attr: 'Ink fill row, paper capitals. The table reads as a stat sheet.',
-  rule: 'Graphite capitals over a 2px ink rule (the scorebook’s heavy line). Row rules are dotted.',
-  vs: 'Graphite capitals on a hairline. The own-club row carries a navy edge.',
 }
