@@ -164,6 +164,8 @@ thirteen, each with its ADR: `api/CLAUDE.md`.
   gamePk. Confirm a new field against a real response; do not guess.
 - **Styling is a token-based design system** (a paper scorebook). Use semantic CSS
   variables, not raw hex. Rules: `src/CLAUDE.md` and `src/styles/CLAUDE.md`.
+- **Pitch types have one shape and one colour everywhere.** Read `pitchMark(code)` in
+  `src/lib/pitch/pitchTypes.js`; never pick a pitch colour in a screen (`docs/pitch-types.md`).
 - **Flat directories don't stay flat.** Subdivide a directory before roughly its
   10th file; `check-dir-size` fails past 12 (`MAX_FILES`) and `check-file-size` caps
   file length (ADR-0038).
