@@ -1,3 +1,4 @@
+import { DIRECTIONS } from './grammar/fixture.js'
 // THE BLOCK TABLE behind /design-lab's second half — every card block and pill
 // block in src/styles/, with the partial that owns it, the modules that consume
 // it, and the verdict proposed for issue #1113.
@@ -401,6 +402,14 @@ export const PROTOTYPES = [
     verdict: 'Prototype',
     note: 'The Season Report and “Who challenges” as they are on frame="sheet", then three candidate looks on the same two real components. Invented data. No new Card frame; Gary picks, or stays on sheet.',
   },
+  ...DIRECTIONS.map((d, i) => ({
+    id: `grammar-${d.id}`,
+    dir: d.id,
+    title: `Shared grammar, ${String.fromCharCode(65 + i)} · ${d.name}`,
+    path: 'src/screens/designlab/grammar/',
+    verdict: 'Prototype',
+    note: 'One of four directions for a single visual grammar on the player and team pages. Same invented rows in all four: a player Season and Craft slice and a team Numbers slice, each at 390 and 1180 px. Nothing ships; Gary picks one.',
+  })),
 ]
 
 export const GROUP_TITLES = {

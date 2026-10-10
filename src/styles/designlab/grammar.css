@@ -1,0 +1,161 @@
+/* ============================================================
+   SHARED GRAMMAR prototype. Imported by
+   screens/designlab/grammar/Grammar.jsx, never by index.css. It leaves with
+   that entry when Gary picks a direction.
+
+   One markup, four directions. The base rules below hold what all four share
+   (the frame, the grid, the type face of a figure). Each .gx--{id} block then
+   sets what that direction decides: the bar, the tile, the head, the rank.
+   Tokens only. No new token.
+   ============================================================ */
+.gx { width: 100%; --v: 0%; --ref: 50%; --lo: 0%; --w: 0%; /* defaults; each bar and segment sets its own inline */ }
+.gx__name { margin: 0; font-family: var(--font-display); font-size: var(--fs-h3); font-weight: var(--w-bold); color: var(--text-heading); }
+/* layout-exempt: spec list, one fixed label column */
+.gx__spec { margin: 0; display: grid; gap: var(--space-1); }
+/* layout-exempt: a label/value spec list, two fixed columns, like report.css .rl__spec */
+.gx__spec div { display: grid; grid-template-columns: 9rem 1fr; gap: var(--space-2); }
+.gx__spec dt { font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); color: var(--text-caption); }
+.gx__spec dd { margin: 0; }
+#root .gx__dd { text-transform: none; /* caps-exempt: spec prose, natural case */ font-size: var(--fs-small); color: var(--text-body); }
+.gx__cap { margin: 0; font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); color: var(--text-caption); }
+
+/* ---- the specimen frame: fixed width, scrolls when the lab is narrower ---- */
+.gx__scroll { overflow-x: auto; border: var(--bw-hair) solid var(--border-hairline); }
+.gx__frame { padding: var(--space-3); background: var(--bg-page); }
+.gx__frame--phone { width: 390px; }
+.gx__frame--wide { width: 1180px; }
+
+/* ---- shared figure type ---- */
+.gx__tilevalue, .gx__pval, .gx__pnum, .gx__rank, .gx__delta, .gx__legend b { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.gx__tilelabel, .gx__plabel { font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); }
+.gx__card { overflow: hidden; }
+.gx__delta, .gx__pdelta, .gx__diverge { display: none; }
+
+/* ---- grids: the frame, not a media query, picks the columns ---- */
+/* layout-exempt: tile board and two-pane body; columns follow the specimen frame width */
+.gx__tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-3); padding: var(--space-3); }
+.gx__frame--wide .gx__tiles { grid-template-columns: repeat(4, 1fr); }
+/* layout-exempt: two panes, one column on the phone frame */
+.gx__cols { display: grid; grid-template-columns: 1fr; gap: var(--space-4); padding: var(--space-3); }
+.gx__frame--wide .gx__cols { grid-template-columns: 1fr 1fr; }
+/* layout-exempt: pane stack inside a fixed specimen frame */
+.gx__pane { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.gx__pane--form { padding: 0 var(--space-3) var(--space-3); }
+
+/* layout-exempt: tile stack, label over figure over rank */
+.gx__tile { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-2); min-width: 0; }
+.gx__tilevalue { font-size: var(--fs-num-lg); color: var(--text-heading); }
+.gx__tilelabel { color: var(--text-caption); }
+.gx__rank { font-size: var(--fs-cell); color: var(--text-caption); }
+
+/* The bar. Rows align because the label and number columns are fixed. */
+/* layout-exempt: four fixed columns so bars line up row to row */
+.gx__prow { display: grid; grid-template-columns: 8.5rem 1fr 3.5rem 2.25rem; gap: var(--space-2); align-items: center; }
+.gx__plabel { color: var(--text-caption); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gx__pval, .gx__pnum { font-size: var(--fs-cell); text-align: right; color: var(--text-body); }
+.gx__bar { position: relative; display: block; min-width: 0; height: var(--gx-h); background: var(--border-hairline); }
+.gx__fill { position: absolute; top: 0; bottom: 0; left: 0; width: var(--v); background: var(--accent-primary); }
+.gx__ref { position: absolute; left: var(--ref); top: calc(-1 * var(--space-1) / 2); bottom: calc(-1 * var(--space-1) / 2); width: var(--bw-hair); background: var(--text-caption); }
+
+.gx__mixbar { display: flex; height: var(--gx-h); background: var(--border-hairline); }
+.gx__key { width: var(--space-2); height: var(--space-2); background-color: var(--accent-primary); }
+.gx__seg { flex: 0 0 var(--w); box-sizing: border-box; border-right: var(--gx-gap) solid var(--surface-card); background-clip: padding-box; background-color: var(--accent-primary); }
+.gx__seg--1 { background-color: var(--ink-2); }
+.gx__seg--2 { background-color: var(--graphite-soft); }
+.gx__seg--3 { background-color: var(--border-rule); }
+/* layout-exempt: legend wraps inside a fixed frame */
+.gx__legend { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin: var(--space-2) 0 0; padding: 0; list-style: none; font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); color: var(--text-caption); }
+.gx__legend li { display: flex; align-items: center; gap: var(--space-1); }
+.gx__legend b { font-size: var(--fs-cell); color: var(--text-body); }
+
+.gx__form { display: flex; justify-content: space-between; align-items: center; gap: var(--space-1); height: var(--gx-formh); }
+/* layout-exempt: two stacked blocks in a pane */
+.gx__split { display: flex; flex-direction: column; gap: var(--space-3); }
+.gx__tbl th, .gx__tbl td { font-size: var(--fs-cell); }
+.gx__tbl tbody th { text-align: left; font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); color: var(--text-body); }
+.gx__tbl thead th:first-child { text-align: left; }
+.gx__tbl tr.is-own { background: var(--surface-inset); }
+
+/* =============== A · BOX SCORE — the quietest =============== */
+.gx--box { --gx-h: 4px; --gx-gap: var(--bw-hair); --gx-formh: 12px; }
+.gx--box .gx__tile { border-top: var(--bw-hair) solid var(--border-rule); padding-inline: 0; }
+.gx--box .gx__bar--mini { display: none; }
+.gx--box .gx__pip { width: var(--space-2); height: var(--space-2); box-sizing: border-box; border: var(--bw-hair) solid var(--accent-primary); }
+.gx--box .gx__pip.is-w { background: var(--accent-primary); }
+
+/* =============== B · ATTRIBUTE SCREEN — notched gauge, plates =============== */
+.gx--attr { --gx-h: 12px; --gx-gap: var(--bw-heavy); --gx-formh: 24px; }
+.gx--attr .gx__bar { background-color: var(--surface-inset); border: var(--bw-hair) solid var(--border-rule); box-sizing: border-box; }
+.gx--attr .gx__bar::after,
+.gx--attr .gx__mixbar::after { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(to right, transparent 0 calc(10% - var(--bw-hair)), var(--surface-card) calc(10% - var(--bw-hair)) 10%); }
+.gx--attr .gx__mixbar { position: relative; }
+.gx--attr .gx__bar--t0 .gx__fill { background: var(--ovr-bench); }
+.gx--attr .gx__bar--t1 .gx__fill { background: var(--ovr-starter); }
+.gx--attr .gx__bar--t2 .gx__fill { background: var(--ovr-regular); }
+.gx--attr .gx__bar--t3 .gx__fill { background: var(--ovr-allstar); }
+.gx--attr .gx__bar--t4 .gx__fill { background: var(--ovr-mvp); }
+.gx--attr .gx__ref { width: var(--bw-heavy); background: var(--ink-0); top: calc(-1 * var(--bw-heavy)); bottom: calc(-1 * var(--bw-heavy)); z-index: 1; }
+/* plate | label over bar | stat */
+/* layout-exempt: the row re-seats the number on a plate, left of the gauge */
+.gx--attr .gx__prow { grid-template-columns: 2.5rem 1fr 3.5rem; grid-template-areas: "n l v" "n b v"; row-gap: var(--space-1); }
+.gx--attr .gx__prow > .gx__plabel { grid-area: l; color: var(--text-heading); }
+.gx--attr .gx__prow > .gx__bar { grid-area: b; }
+.gx--attr .gx__prow > .gx__pval { grid-area: v; }
+.gx--attr .gx__prow > .gx__pnum { grid-area: n; align-self: stretch; display: flex; align-items: center; justify-content: center; background: var(--ink-1); color: var(--text-on-ink); font-family: var(--font-display); font-size: var(--fs-h3); }
+.gx--attr .gx__tile { border: var(--bw-heavy) solid var(--ink-1); background: var(--surface-inset); }
+.gx--attr .gx__tilevalue { font-family: var(--font-display); font-size: var(--fs-hero-sm); }
+.gx--attr .gx__rank { align-self: flex-start; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--marker); color: var(--ink-0); }
+.gx--attr .gx__tbl thead th { background: var(--ink-1); color: var(--text-on-ink); }
+.gx--attr .gx__pip { width: var(--space-4); height: var(--space-6); }
+.gx--attr .gx__pip.is-w { background: var(--accent-positive); }
+.gx--attr .gx__pip.is-l { background: var(--accent-negative); }
+.gx--attr :is(.gx__seg, .gx__key) { background-color: var(--ovr-regular); }
+.gx--attr .gx__seg--1 { background-color: var(--ovr-allstar); }
+.gx--attr .gx__seg--2 { background-color: var(--ovr-starter); }
+.gx--attr .gx__seg--3 { background-color: var(--ovr-bench); }
+
+/* =============== C · PENCIL RULE — a dot on a ruled line =============== */
+.gx--rule { --gx-h: var(--space-3); --gx-gap: var(--space-1); --gx-formh: var(--space-4); }
+.gx--rule .gx__bar { background: none; }
+.gx--rule .gx__bar::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: var(--bw-heavy); background: var(--border-hairline); transform: translateY(-50%); }
+.gx--rule .gx__bar::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(var(--border-rule), var(--border-rule)), linear-gradient(var(--border-rule), var(--border-rule)), linear-gradient(var(--border-rule), var(--border-rule)); background-size: var(--bw-hair) 50%, var(--bw-hair) 50%, var(--bw-hair) 50%; background-position: 25% 50%, 50% 50%, 75% 50%; background-repeat: no-repeat; }
+.gx--rule .gx__fill { top: 50%; bottom: auto; height: var(--bw-heavy); background: var(--ink-1); transform: translateY(-50%); }
+.gx--rule .gx__fill::after { content: ''; position: absolute; right: 0; top: 50%; width: var(--space-2); height: var(--space-2); border-radius: var(--radius-pill); background: var(--ink-1); transform: translate(50%, -50%); }
+.gx--rule .gx__ref { top: 50%; bottom: auto; width: var(--space-2); height: var(--space-2); box-sizing: border-box; border: var(--bw-rule) solid var(--text-caption); border-radius: var(--radius-pill); background: var(--surface-card); background-clip: padding-box; transform: translate(-50%, -50%); z-index: 1; }
+.gx--rule .gx__plabel { border-bottom: var(--bw-hair) dotted var(--border-rule); }
+/* layout-exempt: tile seats the figure beside label and rank */
+.gx--rule .gx__tile { border-top: var(--bw-heavy) solid var(--ink-1); padding-inline: 0; display: grid; grid-template-columns: auto 1fr; column-gap: var(--space-2); align-items: baseline; }
+.gx--rule .gx__tilevalue { grid-row: 1 / span 2; font-family: var(--font-display); font-size: var(--fs-hero-sm); }
+.gx--rule .gx__bar--mini { display: none; }
+.gx--rule .gx__tbl thead th { background: none; border-bottom: var(--bw-heavy) solid var(--ink-1); }
+.gx--rule .gx__tbl tbody :is(th, td) { border-top-style: dotted; border-top-color: var(--border-rule); }
+.gx--rule .gx__form { background: linear-gradient(to bottom, transparent calc(50% - var(--bw-hair)), var(--border-rule) calc(50% - var(--bw-hair)) calc(50% + var(--bw-hair)), transparent calc(50% + var(--bw-hair))); }
+.gx--rule .gx__pip { width: var(--space-3); height: var(--space-3); box-sizing: border-box; border-radius: var(--radius-pill); border: var(--bw-rule) solid var(--ink-1); background: var(--surface-card); }
+.gx--rule .gx__pip.is-w { background: var(--ink-1); }
+.gx--rule .gx__seg { height: var(--bw-heavy); align-self: center; background-color: var(--ink-1); }
+.gx--rule .gx__seg--1 { background-color: var(--ink-2); }
+.gx--rule .gx__mixbar { background: none; }
+
+/* =============== D · VERSUS LEAGUE — bars grow from the league average =============== */
+.gx--vs { --gx-h: var(--space-2); --gx-gap: var(--bw-hair); --gx-formh: var(--space-8); }
+.gx--vs .gx__fill { left: var(--lo); width: var(--w); border-radius: var(--radius-xs); }
+.gx--vs .gx__bar.is-up .gx__fill { background: var(--accent-positive); }
+.gx--vs .gx__bar.is-down .gx__fill { background: var(--accent-negative); }
+.gx--vs .gx__ref { width: var(--bw-heavy); top: calc(-1 * var(--space-1)); bottom: calc(-1 * var(--space-1)); background: var(--ink-1); transform: translateX(-50%); z-index: 1; }
+.gx--vs .gx__prow > .gx__pnum { display: none; }
+.gx--vs .gx__pdelta { display: block; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: var(--fs-cell); text-align: right; color: var(--text-heading); }
+.gx--vs .gx__delta { display: block; font-size: var(--fs-cell); color: var(--text-heading); }
+.gx--vs .gx__tile { padding-inline: 0; border-top: var(--bw-hair) solid var(--border-rule); }
+.gx--vs .gx__mixbar--split { display: none; }
+/* layout-exempt: rows stacked in a pane */
+.gx--vs .gx__diverge { display: flex; flex-direction: column; gap: var(--space-3); }
+.gx--vs .gx__tbl tr.is-own th { box-shadow: inset var(--space-1) 0 0 var(--accent-primary); }
+.gx--vs .gx__pip { width: var(--space-2); height: var(--space-3); }
+.gx--vs .gx__pip.is-w { background: var(--accent-positive); transform: translateY(-50%); }
+.gx--vs .gx__pip.is-l { background: var(--accent-negative); transform: translateY(50%); }
+.gx--vs .gx__form { background: linear-gradient(to bottom, transparent calc(50% - var(--bw-hair)), var(--ink-1) calc(50% - var(--bw-hair)) calc(50% + var(--bw-hair)), transparent calc(50% + var(--bw-hair))); }
+
+/* ---- label and rule heads sit inside the card, not on its edge ---- */
+.gx__card > .sectionhead--label,
+.gx__card > .sectionhead--rule { margin: 0; padding: var(--space-3) var(--space-3) var(--space-1); }
+.gx__card > .sectionhead--label { margin-inline: var(--space-3); padding-inline: 0; }
