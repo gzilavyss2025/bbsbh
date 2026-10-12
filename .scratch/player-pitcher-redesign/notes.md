@@ -11,10 +11,10 @@ Source design: the "Gasser Arsenal" artifact, https://claude.ai/artifact/RTUCgAp
 2. **Floating filter bar, desktop only.** It sticks to the bottom of the window.
    - Scope chips: All season, Regular season, Postseason. Show Postseason only for a
      pitcher whose team has postseason starts.
-   - A two-handle slider over his starts, in date order (not calendar days).
-   - An opponent picker. It lists each team with its start count.
+   - A two-handle slider over his games, in date order (not calendar days).
+   - An opponent picker. It lists each team with its game count.
    - It filters the header numbers, every chart, and the pitch table.
-   - The Game Log does not hide starts. It dims the starts that are filtered out.
+   - The Game Log does not hide games. It dims the games that are filtered out.
    - On a phone it is not floating. It moves to the top of the page.
 3. **Game Log** replaces "Start by start".
 4. **Start modal.** Tap a Game Log bar to open it.
@@ -29,8 +29,11 @@ It marks where earlier seasons go.
 - Load a season on demand when the user scrolls to the dashed slot. Do not fetch all
   seasons at page load.
 - Season list: `GET /api/v1/people/{id}/stats?stats=yearByYear&group=pitching`.
-- One season of starts: `GET /api/v1/people/{id}/stats?stats=gameLog&group=pitching&season=YYYY&gameType=R,F,D,L,W`.
-  Use `gamesStarted` to drop relief outings. Check how the page treats relievers.
+- One season of games: `GET /api/v1/people/{id}/stats?stats=gameLog&group=pitching&season=YYYY&gameType=R,F,D,L,W`.
+  Keep every game, start or relief. Do not filter on `gamesStarted`. The Game Log does not
+  mark a start or a relief outing; that detail comes later, when a game opens (not built yet).
+  Gary decided this on 2026-10-12: Robert Gasser's 2026-08-26 relief outing (5.1 IP at NYM)
+  is a normal row. Label counts as games, not starts.
 - Pitch tracking starts around 2015 (from memory, not checked in the API). Check which seasons return `pitchData`. Older seasons show no pitch mix. Show a bar with only
   the date, opponent and result. Do not crash and do not invent data.
 - MiLB seasons have partial tracking. Degrade the same way (see CLAUDE.md, "MiLB data
@@ -76,7 +79,7 @@ Match rate in 2026: 76 of 208 plays had an MLB highlight. The rest use the Savan
   `/game/{gamePk}`.
 - The prototype modal closes with the Close button or a click on the dim area. The app
   must also close on Escape and trap focus.
-- The prototype loads one JSON file (about 335 KB for 22 starts). The app should follow
+- The prototype loads one JSON file (about 335 KB for 22 games). The app should follow
   the build-time-fetch pattern in `src/api/CLAUDE.md`, or fetch per season on demand.
 - The pitch table dropped Spin, Rise, Run and CSW. Rise and run still show in the
   Movement chart. Ask Gary if CSW should come back as a tooltip.
