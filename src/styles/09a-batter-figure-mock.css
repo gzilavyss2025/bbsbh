@@ -1,0 +1,38 @@
+/* THROWAWAY mockup for issue #1852. Never merge. */
+.bfig {
+  position: relative;
+  display: block;
+  flex: none;
+  width: var(--bfig-w, 48px);
+  aspect-ratio: 496 / 1050;
+}
+.bfig__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.bfig--a { --bfig-w: 44px; }
+.bfig--b { --bfig-w: 180px; }
+.bfig--c { --bfig-w: 52px; }
+.bfig--d { --bfig-w: 56px; }
+
+.fact__figrow { justify-content: space-between; }
+.fact--fig .fact__figrow { flex-wrap: nowrap; }
+.fact--wide.fact--fig .fact__figrow { justify-content: flex-start; }
+
+.bfig-sheet { padding-top: var(--space-6); }
+.bfig-sheet__cap {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* (c) head: the figure stands on the bar's accent rule */
+.teaminfo__head--fig { align-items: flex-end; }
+.teaminfo__head--fig .bfig--c { align-self: flex-end; margin: calc(var(--space-2h) * -1) 0 calc(var(--space-2h) * -1) var(--space-2); }
+.teaminfo__head--fig .teaminfo__headright { align-self: center; }

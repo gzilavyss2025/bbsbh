@@ -65,6 +65,7 @@ import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, masthe
 import { seasonTheme, seasonMasthead } from '../lib/identity/seasonMarks.js'
 import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { mockDirection, UniformFactA, UniformFactB, UniformFactD, HeadFigure } from '../components/mock/BatterFigureMock.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
@@ -160,7 +161,7 @@ export function TeamInfo({
 
   return (
     <div className={`teaminfo ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme, ownMasthead.scale)}>
-      <div className="teaminfo__head">
+      <div className={`teaminfo__head${mockDirection() === 'c' ? ' teaminfo__head--fig' : ''}`}>
         <h2 className="teaminfo__name">
           <TeamLink id={meta.id} className="teaminfo__namelink">
             {meta.name || 'Team'}
@@ -170,6 +171,7 @@ export function TeamInfo({
           <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
           <GameNotesButton feed={feed} side={side} />
         </div>
+        {mockDirection() === 'c' && <HeadFigure side={side} />}
       </div>
 
       {/* The page-top zone: the fill-in facts, the crew, the preview door,
@@ -195,12 +197,12 @@ export function TeamInfo({
                 Navy Blue") — spoiler-free, but the assignment isn't posted until
                 around first pitch, so pregame this reads "—" until a Refresh picks
                 it up. Never posted for MiLB. */}
-            <Fact label="Uniform" value={uniform} />
-            {/* Broadcast rides on the away page only, filling the cell that
-                otherwise sits empty next to Uniform (an odd fact count leaves it
-                alone at the end of the grid — see the ESPN-sourced fetch in
-                GameView). The home page's grid is already even without it. */}
-            {side === 'away' && <Fact label="Broadcast" value={broadcast} />}
+            {mockDirection() === 'd' && side === 'away' && <Fact label="Broadcast" value={broadcast} />}
+            {mockDirection() === 'a' ? <UniformFactA side={side} uniform={uniform} />
+              : mockDirection() === 'b' ? <UniformFactB side={side} uniform={uniform} />
+              : mockDirection() === 'd' ? <UniformFactD side={side} uniform={uniform} />
+              : <Fact label="Uniform" value={uniform} />}
+            {mockDirection() !== 'd' && side === 'away' && <Fact label="Broadcast" value={broadcast} />}
             <UmpiresCard officials={officials} seasonYear={gameSeason} closed={selectRecordIsClosed(feed)} />
           </FactGrid>
 
