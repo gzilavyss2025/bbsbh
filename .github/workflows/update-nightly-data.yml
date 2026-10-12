@@ -619,7 +619,11 @@ jobs:
         id: compress-logos
         continue-on-error: true
         run: |
-          npm install --no-save --no-audit --no-fund sharp
+          # --prefix scripts: install sharp alone under scripts/node_modules
+          # (gitignored; the .mjs files resolve it from there). A bare
+          # `npm install sharp` also installs the whole package.json tree and
+          # prints its glob/install-scripts warnings (issue #1847).
+          npm install --no-save --no-audit --no-fund --prefix scripts sharp@^0.35.5
           node scripts/compress-logos.mjs
           node scripts/gen-logo-art.mjs
 
