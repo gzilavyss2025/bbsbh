@@ -1082,24 +1082,25 @@ function Fact({ label, value, aside }) {
   )
 }
 
-// The kraft "i" info glyph itself, drawn as an SVG dot-over-bar rather than a
-// literal "i" character — the global ALL-CAPS invariant forces all rendered
-// text uppercase (see index.css / check-caps.mjs), which would flatten a
-// literal letter into a capital I, so a vector shape is the same move
-// UmpireTierGlyph's home-plate icon already makes. Exported so the box
-// score's own Attendance field (BoxScore.jsx) can reuse the same glyph.
-export function InfoIcon() {
+// A small crowd — three heads and shoulders — drawn as an SVG, filled like the
+// Umpires card's home plate (UmpireTierGlyph), so the Attendance dot and the HP
+// ump dot match. Exported so the box score's own Attendance field
+// (BoxScore.jsx) draws the same glyph.
+export function CrowdIcon() {
   return (
-    <svg viewBox="0 0 20 20" width="10" height="10" aria-hidden="true">
-      <circle cx="10" cy="5.5" r="1.8" fill="currentColor" />
-      <rect x="8.2" y="9" width="3.6" height="8" rx="1.2" fill="currentColor" />
+    <svg viewBox="0 0 20 20" width="12" height="12" aria-hidden="true" fill="currentColor">
+      <circle cx="10" cy="6.5" r="2.6" />
+      <path d="M5 16c0-3 2.2-5 5-5s5 2 5 5Z" />
+      <circle cx="3.8" cy="8.8" r="1.8" />
+      <circle cx="16.2" cy="8.8" r="1.8" />
+      <path d="M1 15c0-2 1.3-3.5 3-3.5.6 0 1.1.1 1.5.4-.8.9-1.2 1.9-1.3 3.1ZM19 15c0-2-1.3-3.5-3-3.5-.6 0-1.1.1-1.5.4.8.9 1.2 1.9 1.3 3.1Z" />
     </svg>
   )
 }
 
 // The Attendance fact. When the park's capacity is on file (the 30 MLB
 // parks — see ballparkData.js) and tonight's attendance parses to a number, a
-// kraft "i" glyph sits next to the figure and unfolds a small note with the
+// crowd glyph sits next to the figure and unfolds a small note with the
 // percent full + the park's capacity — same tap-glyph-unfolds-in-place idiom
 // as the Umpires card's tier glyph (UmpireTierGlyph), just without a further
 // "full breakdown" modal since there's nothing more to show. MiLB parks and
@@ -1125,7 +1126,7 @@ function AttendanceFact({ venue, attendance }) {
           aria-expanded={open}
           aria-label="How full is the stadium"
         >
-          <InfoIcon />
+          <CrowdIcon />
         </button>
       </dd>
       {open && (

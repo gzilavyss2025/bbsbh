@@ -318,8 +318,9 @@
    small tap hint. Tapping it open switches to an ink fill, same look the tier
    glyph uses for its own open state. Both were kraft until ADR-0083. */
 .attendance__value {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-1h);
 }
 .attendance__glyph {
@@ -327,13 +328,13 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: 18px;
-  height: 18px;
+  width: 21px;
+  height: 21px;
   padding: 0;
   border-radius: 999px;
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--accent-link);
+  border: 0;
+  background: var(--text-muted);
+  color: var(--text-on-ink);
   cursor: pointer;
 }
 .attendance__glyph:hover {
@@ -341,8 +342,6 @@
 }
 .attendance__glyph--open {
   background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
 }
 .attendance__glyph:focus-visible {
   outline: 2px solid var(--focus-ring);

@@ -30,10 +30,10 @@ export function UniformFigure({ urls, label, size, onError }) {
   )
 }
 
-// A shirt outline, so the control reads as "the uniform" without drawing it.
+// A solid shirt, the way the ump's home plate is solid, so the control reads as "the uniform" without drawing it.
 function ShirtIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
       <path d="M8 3 3 6l2 4 2-1v12h10V9l2 1 2-4-5-3c-1 2-7 2-8 0Z" />
     </svg>
   )
@@ -47,7 +47,7 @@ export function UniformFigureButton({ urls, label }) {
   const [open, setOpen] = useState(false)
   return (
     <>
-      <IconButton mark="md" skin="outline" label={`Show uniform: ${label}`} onClick={() => setOpen(true)}>
+      <IconButton mark="sm" className="fact__shirt" label={`Show uniform: ${label}`} onClick={() => setOpen(true)}>
         <ShirtIcon />
       </IconButton>
       {open && (

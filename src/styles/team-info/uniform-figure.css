@@ -10,8 +10,13 @@
   gap: var(--space-2);
 }
 
-.fact__figure > button {
-  flex: none;
+/* Same 21px solid dot as the HP ump's .umptier__glyph in the next cell. The
+   IconButton keeps its 44px tap area around the smaller mark. */
+.fact__figure > .fact__shirt {
+  --icon-mark: 21px;
+  --btn-fill: var(--text-muted);
+  --btn-edge: var(--text-muted);
+  --btn-ink: var(--text-on-ink);
 }
 
 .ufig {
