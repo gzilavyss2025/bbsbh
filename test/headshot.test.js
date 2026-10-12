@@ -7,6 +7,9 @@ import {
   HEADSHOT_CROSS_ORIGIN,
   headshotStepUrl,
   headshotStepDelay,
+  rememberSiloMiss,
+  dropKnownMisses,
+  resetSiloMisses,
 } from '../src/lib/headshot/retry.js'
 import { recordHeadshotEvent, HEADSHOT_LOG_CAP } from '../src/lib/headshot/log.js'
 import {
@@ -139,4 +142,33 @@ test('recordHeadshotEvent: keeps only the newest HEADSHOT_LOG_CAP events', () =>
 test('recordHeadshotEvent: tolerates a missing or broken previous log', () => {
   assert.equal(recordHeadshotEvent(null, { kind: 'x' }, 1).length, 1)
   assert.equal(recordHeadshotEvent('nonsense', { kind: 'x' }, 1).length, 1)
+})
+
+// --------------------------------------------------------------------------
+// A silo that already 404'd this session is not asked for again. The CDN's 404
+// is `no-cache`, so every <Headshot>/<PitcherPhoto> of the same prospect on one
+// page used to pay for its own miss before reaching the milb face.
+// --------------------------------------------------------------------------
+test('rememberSiloMiss / dropKnownMisses: a remembered silo is skipped, milb leads', () => {
+  const S = 'https://img.mlbstatic.com/p/1/headshot/silo/current'
+  const M = 'https://img.mlbstatic.com/p/1/headshot/milb/current'
+  const COACH = 'https://img.mlbstatic.com/p/1/headshot/67/coach/current'
+  resetSiloMisses()
+  assert.deepEqual(dropKnownMisses([S, M, COACH]), [S, M, COACH])
+  rememberSiloMiss(S)
+  assert.deepEqual(dropKnownMisses([S, M, COACH]), [M, COACH])
+  // an MLB chain (coach behind the silo) always keeps its silo
+  assert.deepEqual(dropKnownMisses([S, COACH]), [S, COACH])
+  resetSiloMisses()
+})
+
+test('dropKnownMisses: only a silo is forgotten, and never the last source', () => {
+  resetSiloMisses()
+  const M = 'https://img.mlbstatic.com/p/2/headshot/milb/current'
+  const S = 'https://img.mlbstatic.com/p/2/headshot/silo/current'
+  rememberSiloMiss(M) // not a silo url: ignored
+  assert.deepEqual(dropKnownMisses([S, M]), [S, M])
+  rememberSiloMiss(S)
+  assert.deepEqual(dropKnownMisses([S]), [S]) // never leaves an empty list
+  resetSiloMisses()
 })
