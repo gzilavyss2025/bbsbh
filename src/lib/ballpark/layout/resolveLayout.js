@@ -7,9 +7,8 @@
 // its own reveal gate.
 
 import { BALLPARKS } from '../ballparkData.js'
-import { WALLS } from '../ballparkFields.js'
-import { auditFence } from './fenceAudit.js'
 import { CONFIGURATIONS, SEED } from './configurations.js'
+import { fenceFor, measuredFor } from './fences.js'
 
 // Same key rule as ballparkData.js and ballparks.js.
 function normalizeVenue(name) {
@@ -41,45 +40,35 @@ function dayOf(gameDate) {
 
 const covers = (c, day) => (c.from == null || c.from <= day) && (c.to == null || day <= c.to)
 
-// The fence layer's quality. 'audited' = a traced outline whose CF passes the
-// audit; 'estimated' = a traced outline that misses it (drawn, but not to be
-// read as a measurement); 'dimensions-only' = no outline, the five posted
-// distances only; 'missing' = not even those.
-function fenceLayer(c, dist) {
-  if (c.fence === 'seed') {
-    const points = WALLS[c.seedKey]
-    const audit = auditFence(points, dist?.cf)
-    const quality = audit?.pass ? 'audited' : 'estimated'
-    return { points, quality, audit, cfMarkerAngle: audit?.pass ? audit.cfMarkerAngle : 0 }
-  }
-  const five = dist && ['lf', 'lc', 'cf', 'rc', 'rf'].every((k) => Number.isFinite(dist[k]))
-  return { points: null, quality: five ? 'dimensions-only' : 'missing', audit: null, cfMarkerAngle: 0 }
-}
-
 function build(c) {
   const rec = c.park ? BALLPARKS[c.park] : null
   const dist = rec ? rec.dist : c.dist
   const wall = rec ? rec.wall : c.wall
-  const fence = fenceLayer(c, dist)
+  const measured = measuredFor(c)
+  const fence = fenceFor(c, dist)
   return {
     venueId: c.venueId,
     configurationId: c.id,
     name: rec?.name ?? c.names?.[0] ?? null,
     validFrom: c.from,
     validTo: c.to,
-    measurements: { dist, wall },
+    // `dist` is the posted signs (what the labels say); `measured` is Savant's
+    // survey of the current wall, five distances and five heights. They differ
+    // on purpose: Fenway posts 420 at the triangle, Savant measures 388 at
+    // straightaway. `wall` is Savant's line/CF/line heights when measured.
+    measurements: { dist, wall, measured },
     geometry: { fence: fence.points, cfMarkerAngle: fence.cfMarkerAngle },
-    quality: { fence: fence.quality, wall: wall ? 'posted' : 'missing' },
+    quality: { fence: fence.quality, wall: measured ? 'measured' : wall ? 'posted' : 'missing' },
     audit: fence.audit,
     provenance: {
-      fence: c.fence === 'seed' ? { ...SEED, key: c.seedKey } : null,
+      fence: fence.source?.kind === 'seed' ? { kind: 'seed', ...SEED, key: c.seedKey } : fence.source,
       sources: c.sources ?? [],
       note: c.note ?? null,
     },
   }
 }
 
-// One layout per configuration, built once (the audit is a few hundred ray casts).
+// One layout per configuration, built once (an audit is a few hundred ray casts).
 const LAYOUTS = new Map(CONFIGURATIONS.map((c) => [c.id, build(c)]))
 
 // The configuration a venue had on a date. `venueId` wins over `venueName` when

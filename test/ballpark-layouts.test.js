@@ -9,9 +9,9 @@
 //      whether a caller has a venue id or only a (possibly old) name. A
 //      renovated park resolves by date. A club that moved does not take its
 //      old park's wall with it.
-//   2. A traced outline that does not describe the current park is not drawn
-//      for it. Globe Life Field drew the old Arlington wall for six seasons
-//      because nothing checked.
+//   2. An outline that does not describe the current park is not drawn for
+//      it. Globe Life Field drew the old Arlington wall for six seasons because
+//      nothing checked; Comerica's Gameday SVG still shows its pre-2023 wall.
 //   3. The CF label sits where the CF sign stands, not at the fence's deepest
 //      vertex (Houston's old trace put a "409" on a 433-ft wall).
 import assert from 'node:assert/strict'
@@ -22,6 +22,7 @@ import { auditFence, fenceDistanceAt, CF_TOLERANCE_FT } from '../src/lib/ballpar
 import { BALLPARKS, ballparkFor } from '../src/lib/ballpark/ballparkData.js'
 import { WALLS } from '../src/lib/ballpark/ballparkFields.js'
 import { buildFieldGeometry, HOME } from '../src/lib/ballpark/ballparkGeometry.js'
+import { FIELDS } from '../src/lib/ballpark/layout/fences.js'
 
 const layout = (q) => resolveBallparkLayout(q)?.configurationId ?? null
 
@@ -57,8 +58,8 @@ test('a relocated club does not take its old park with it', () => {
   assert.equal(layout({ venueId: 13, gameDate: '2021-08-01' }), null)
   const glf = resolveBallparkLayout({ venueId: 5325, gameDate: '2024-08-01' })
   assert.equal(glf.configurationId, 'globelifefield')
-  assert.equal(glf.geometry.fence, null)
-  assert.equal(glf.quality.fence, 'dimensions-only')
+  assert.equal(glf.provenance.fence.kind, 'gameday', 'its own outline, not the Arlington trace')
+  assert.notDeepEqual(glf.geometry.fence, WALLS.globelifeparkinarlington)
   assert.equal(layout({ venueId: 5325, gameDate: '2019-08-01' }), null, 'not open yet')
   // Athletics: Sutter Health Park is its own venue with no trace.
   const sutter = resolveBallparkLayout({ venueId: 2529, gameDate: '2025-05-01' })
@@ -101,24 +102,51 @@ test('every seed reference exists and every trace is used once at most', () => {
   assert.match(SEED.license, /MIT/)
 })
 
-test('a current record that draws a trace passes the audit or is marked estimated', () => {
+test('every drawn outline passed its audit', () => {
   for (const l of allBallparkLayouts()) {
     if (!l.geometry.fence) continue
-    assert.ok(l.audit, `${l.configurationId} was audited`)
-    assert.equal(l.quality.fence, l.audit.pass ? 'audited' : 'estimated', l.configurationId)
+    assert.equal(l.quality.fence, 'audited', l.configurationId)
+    assert.ok(l.audit.pass, l.configurationId)
   }
-  // The two traces that miss today. If one starts to pass (or a new one starts
-  // to fail), update the coverage report in docs/ballpark-layouts.md.
-  const estimated = allBallparkLayouts().filter((l) => l.quality.fence === 'estimated')
-  assert.deepEqual(estimated.map((l) => l.configurationId).sort(), ['oraclepark', 'yankeestadium'])
 })
 
-test('the rebuilt parks no longer draw the old wall', () => {
-  for (const key of ['globelifefield', 'daikinpark', 'comericapark', 'rogerscentre', 'orioleparkatcamdenyards', 'loandepotpark', 'sutterhealthpark']) {
-    assert.equal(BALLPARKS[key].arc, undefined, key)
+test('a current park draws its Gameday outline or none, never a 2018 trace', () => {
+  const traces = new Set(Object.values(WALLS))
+  for (const c of CONFIGURATIONS.filter((cfg) => cfg.park && cfg.to == null)) {
+    const rec = BALLPARKS[c.park]
+    assert.ok(!traces.has(rec.arc), `${c.id} draws a 2018 trace`)
+    if (rec.arc) assert.deepEqual(rec.arc, FIELDS.venues[c.venueId].fence, c.id)
   }
-  assert.ok(ballparkFor('Fenway Park').arc, 'an audited park keeps its trace')
+  // The four whose SVG fails the audit against Savant 2026 (or has none). If
+  // one starts to pass after a re-import, update docs/ballpark-layouts.md.
+  const without = CONFIGURATIONS.filter((c) => c.park && c.to == null && !BALLPARKS[c.park].arc).map((c) => c.park)
+  assert.deepEqual(without.sort(), ['comericapark', 'kauffmanstadium', 'rogerscentre', 'sutterhealthpark'])
   assert.equal(ballparkFor('Comerica Park').dist.cf, 412)
+})
+
+test('wall heights are Savant\'s measured ones where it measures the park', () => {
+  assert.deepEqual(ballparkFor('Fenway Park').wall, { lf: 37, cf: 17, rf: 4 })
+  // The issue's Sutter Health example: 8 / 8 / 13, not the old flat 8s.
+  assert.deepEqual(ballparkFor('Sutter Health Park').wall, { lf: 8, cf: 8, rf: 13 })
+  const l = resolveBallparkLayout({ venueId: 2529, gameDate: '2026-05-01' })
+  assert.equal(l.quality.wall, 'measured')
+  // An older configuration never borrows today's measurements.
+  const old = resolveBallparkLayout({ venueId: 2394, gameDate: '2022-05-01' })
+  assert.equal(old.measurements.measured, null)
+})
+
+test('the imported store is complete for every current MLB park', () => {
+  for (const c of CONFIGURATIONS.filter((cfg) => cfg.park && cfg.to == null)) {
+    const v = FIELDS.venues[c.venueId]
+    assert.ok(v?.measured, `venue ${c.venueId} has a Savant row`)
+    if (v.fence) {
+      assert.ok(v.audit.pass, `venue ${c.venueId} stores only a passing outline`)
+      assert.ok(v.fence.length >= 4)
+      // Pole to pole, left to right: the first point is in left field.
+      assert.ok(v.fence[0][0] < 0 && v.fence.at(-1)[0] > 0)
+    }
+  }
+  assert.match(FIELDS.generatedAt, /^\d{4}-\d{2}-\d{2}$/)
 })
 
 test('the audit reads the CF sign at straightaway or at the deepest point', () => {

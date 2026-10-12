@@ -9,8 +9,10 @@
 //   - Outfield distances (lf/lc/cf/rc/rf, feet) come straight from the MLB Stats
 //     API venue endpoint (/api/v1/venues/{id}?hydrate=fieldInfo) — the same host
 //     the whole app already uses — snapshotted here so the modal needs no fetch.
-//   - Wall heights (lf/cf/rf, feet) are NOT in statsapi; they're public
-//     measurements (the 37' Green Monster, PNC's 21' Clemente Wall, etc.).
+//   - Wall heights (lf/cf/rf, feet) are NOT in statsapi. The literals below are
+//     public figures (the 37' Green Monster, PNC's 21' Clemente Wall, etc.);
+//     at load, Baseball Savant's measured heights replace them for every park
+//     it measures (./layout/fields.json, #1859).
 //   - built / roof / capacity round out the facts strip. Capacity matches the
 //     venue endpoint's fieldInfo for 29 of the 30 parks; Rogers Centre is the
 //     one deliberate exception, and its own comment says why.
@@ -49,9 +51,8 @@
 // the bearing table. To add/refresh a park: re-pull fieldInfo from statsapi for
 // the distances and drop the verified wall heights in alongside.
 
-import { WALLS } from './ballparkFields.js'
 import { CONFIGURATIONS } from './layout/configurations.js'
-import { auditFence } from './layout/fenceAudit.js'
+import { fenceFor, measuredFor } from './layout/fences.js'
 
 // Normalize a venue name to a stable lookup key (mirrors ballparks.js).
 // "Oriole Park at Camden Yards" → "orioleparkatcamdenyards".
@@ -111,19 +112,24 @@ export const BALLPARKS = {
   sutterhealthpark: { name: 'Sutter Health Park', dist: { lf: 330, lc: 380, cf: 403, rc: 380, rf: 325 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2000, roof: 'Open', capacity: 14014 },
 }
 
-// Attach the CURRENT configuration's traced outline (feet, home-origin) so the
-// diagram can draw the true fence shape. The registry decides which parks may
-// use their seed trace: a park rebuilt after the trace was taken has no outline
-// here and draws the five posted distances (./layout/configurations.js).
+// Attach the CURRENT configuration's audited outline (feet, home-origin) so the
+// diagram can draw the true fence shape, and Savant's measured wall heights.
+// The registry decides which outline may stand for today's park
+// (./layout/fences.js); a park with none draws its five posted distances.
 // `cfMarkerAngle` is where the CF sign stands: 0 (straightaway) unless the
 // audit found the posted CF at the deepest point instead (Fenway's triangle).
-// Aliases share the same record object, so they inherit both automatically.
+// The `wall` literals above are the fallback for a park Savant does not
+// measure. Aliases share the record object, so they inherit all of it.
 for (const c of CONFIGURATIONS) {
-  const rec = c.park && c.to == null && c.fence === 'seed' ? BALLPARKS[c.park] : null
+  const rec = c.park && c.to == null ? BALLPARKS[c.park] : null
   if (!rec) continue
-  rec.arc = WALLS[c.seedKey]
-  const audit = auditFence(rec.arc, rec.dist.cf)
-  rec.cfMarkerAngle = audit?.pass ? audit.cfMarkerAngle : 0
+  const fence = fenceFor(c, rec.dist)
+  if (fence.points) {
+    rec.arc = fence.points
+    rec.cfMarkerAngle = fence.cfMarkerAngle
+  }
+  const h = measuredFor(c)?.height
+  if (h) rec.wall = { lf: Math.round(h.lf), cf: Math.round(h.cf), rf: Math.round(h.rf) }
 }
 
 // Aliases for parks whose feed name can appear under a former/sponsor variant, so

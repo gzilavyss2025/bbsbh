@@ -1412,6 +1412,16 @@ don't run these by hand.
 
 Re-run only to fold in a new season.
 
+- `ballpark/import-field-layouts.mjs` → `src/lib/ballpark/layout/fields.json` — each
+  MLB park's measured distances, wall heights, deepest point and fair area (Baseball
+  Savant's Dimensions table), plus its current fence outline, extracted from MLB's
+  Gameday field SVG. An outline is stored only when it passes an audit against the
+  same season's Savant row. Run by hand once a season, or after a club announces a
+  wall change: `npm run gen:field-layouts [-- --year 2027]`. The default season is
+  `lib/time/season-in-play.mjs`. About 33 requests. Pure half:
+  `scripts/lib/ballpark/field-svg.mjs`. Readers: `src/lib/ballpark/layout/fences.js`
+  and, through it, `ballparkData.js` and `resolveLayout.js`. Coverage report:
+  `docs/ballpark-layouts.md` (#1859).
 - `gen-franchise-history.mjs` → `public/data/franchise-history/{teamId}.json`
   — each of the 30 clubs' name, league and ballpark by season, 1901 to the last
   complete season, as spans (the Brewers' file starts with the 1969 Seattle Pilots).

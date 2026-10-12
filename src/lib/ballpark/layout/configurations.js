@@ -8,20 +8,25 @@
 // a new record. A club that moves gets the new venue's records, never the old
 // park's shape because it is the same team.
 //
-// WHERE THE OUTLINES COME FROM. Every `fence: 'seed'` outline is WALLS[seedKey]
-// in ../ballparkFields.js, digitized from GeomMLBStadiums (pinned in SEED below).
-// That dataset is one traced shape per TEAM, captured in 2018, with the Orioles
-// retraced in 2023. It carries no dates, so a trace can show a wall the club
-// later rebuilt. The rule here: a seed outline describes the CURRENT park only
-// when no documented change came after it, and when it passes the CF audit in
-// ./fenceAudit.js. Where a documented change came after, the current record has
-// `fence: null` (the renderer draws the five posted distances) and the seed
-// moves to the dated record of the configuration it shows.
+// WHERE THE OUTLINES COME FROM. Two sources, by `fence`:
+//   - 'gameday': the CURRENT record of every park. The outline is extracted from
+//     MLB's Gameday field SVG and stored in ./fields.json only when it passes an
+//     audit against the same season's Baseball Savant measurements (CF, the
+//     deepest point, both poles, both gaps, the fair area). A park whose SVG
+//     fails, or has none, draws its five posted distances instead.
+//     scripts/ballpark/import-field-layouts.mjs writes that file.
+//   - 'seed': an OLDER configuration, drawn from WALLS[seedKey] in
+//     ../ballparkFields.js (GeomMLBStadiums, pinned in SEED below). That dataset
+//     is one traced shape per team from 2018 (the Orioles retraced in 2023), so
+//     each trace stands for the configuration it shows, on that configuration's
+//     dates. It is audited against the posted CF (./fenceAudit.js).
 //
-// HOW SURE EACH OLD RECORD IS. The `from`/`to` dates come from the cited sources.
-// WHICH old configuration a seed shows is an inference from its depth, and each
-// such record says so in `note`. Measurements an old record does not know stay
-// null; nothing here is filled in to make a record look complete.
+// WHERE THE DATES COME FROM. Savant's Dimensions table flags a season whose
+// configuration changed (`is_diff_configuration`, 2016 on), and its measured
+// distances show what moved. Every dated record below agrees with those flags;
+// the news sources say why. Which older wall a 2018 trace shows is an inference
+// from its depth, and each such record says so in `note`. Measurements an old
+// record does not know stay null; nothing is filled in to look complete.
 //
 // Every dated record covers whole seasons: `from` is Jan 1, `to` is Dec 31.
 // `null` means open-ended (since the park opened, or still current).
@@ -40,19 +45,32 @@ export const SEED = {
 }
 
 const STATSAPI_VENUE = 'https://statsapi.mlb.com/api/v1/venues/{id}?hydrate=fieldInfo'
+const SAVANT_DIMENSIONS = 'https://baseballsavant.mlb.com/leaderboard/statcast-park-factors?type=dimensions'
 
 // One current record per park, venue id from the Stats API teams endpoint
 // (2024–2026 seasons). `park` is the ../ballparkData.js key for its posted
-// distances, wall heights and facts.
+// distances and facts.
 const current = (venueId, park, extra = {}) => ({
   id: park,
   venueId,
   park,
   from: null,
   to: null,
+  fence: 'gameday',
+  sources: [STATSAPI_VENUE.replace('{id}', venueId), SAVANT_DIMENSIONS],
+  ...extra,
+})
+
+// An older configuration drawn from a 2018 trace.
+const prior = (venueId, id, seedKey, extra) => ({
+  id,
+  venueId,
+  park: null,
+  from: null,
+  to: null,
   fence: 'seed',
-  seedKey: park,
-  sources: [STATSAPI_VENUE.replace('{id}', venueId)],
+  seedKey,
+  wall: null,
   ...extra,
 })
 
@@ -61,75 +79,70 @@ export const CONFIGURATIONS = [
   current(2, 'orioleparkatcamdenyards', {
     id: 'orioleparkatcamdenyards-2025',
     from: '2025-01-01',
-    fence: null,
     sources: [
+      SAVANT_DIMENSIONS,
       'https://www.mlb.com/news/effect-of-camden-yards-new-dimensions-for-2025',
-      'https://www.cbssports.com/mlb/news/orioles-to-alter-camden-yards-left-field-dimensions-for-second-time-in-three-years/',
     ],
-    note: 'The left-field wall moved in by 9 to 20 ft for 2025. The seed shows the 2022 wall.',
+    note: 'The left-field wall moved in by 9 to 20 ft for 2025 (Savant flags 2025).',
   }),
-  {
-    id: 'orioleparkatcamdenyards-2022',
-    venueId: 2,
-    park: null,
+  prior(2, 'orioleparkatcamdenyards-2022', 'orioleparkatcamdenyards', {
     from: '2022-01-01',
     to: '2024-12-31',
-    fence: 'seed',
-    seedKey: 'orioleparkatcamdenyards',
     dist: { lf: 333, lc: null, cf: 410, rc: null, rf: 318 },
-    wall: null,
-    sources: ['https://www.mlb.com/orioles/news/orioles-camden-yards-left-field-wall-modifications'],
+    sources: [SAVANT_DIMENSIONS, 'https://www.mlb.com/orioles/news/orioles-camden-yards-left-field-wall-modifications'],
     note:
       'Inferred: the 2023 Orioles retrace reaches 396 ft at -22.5°, which fits the 2022 ' +
-      'wall (deepest point 398 ft), not the 2025 one. Gap distances and wall heights unknown.',
-  },
+      'wall (deepest point 398 ft). Savant flags 2022 and 2025. Gaps and heights unknown.',
+  }),
   current(3, 'fenwaypark'),
   current(4, 'ratefield'),
   current(5, 'progressivefield'),
-  current(7, 'kauffmanstadium'),
+  current(7, 'kauffmanstadium', {
+    id: 'kauffmanstadium-2026',
+    from: '2026-01-01',
+    sources: [STATSAPI_VENUE.replace('{id}', 7), SAVANT_DIMENSIONS],
+    note:
+      'Savant flags 2026: its measured lines are 324 ft and the fair area is 3% smaller. ' +
+      'The Gameday SVG still shows the earlier wall, so this record draws posted distances. ' +
+      'Open item: the Stats API still posts 347 / 344 ft lines.',
+  }),
+  prior(7, 'kauffmanstadium-1973', 'kauffmanstadium', {
+    to: '2025-12-31',
+    dist: { lf: null, lc: null, cf: 410, rc: null, rf: null },
+    sources: [SAVANT_DIMENSIONS],
+    note:
+      'The 2018 trace. Savant shows no configuration change from 2016 through 2025 and ' +
+      'measures CF 410 for those seasons. Other distances and heights unknown here.',
+  }),
   current(12, 'tropicanafield'),
-  {
-    id: 'globelifeparkinarlington',
-    venueId: 13,
-    park: null,
+  prior(13, 'globelifeparkinarlington', 'globelifeparkinarlington', {
     names: ['Globe Life Park in Arlington', 'Choctaw Stadium'],
-    from: null,
     to: '2019-12-31',
-    fence: 'seed',
-    seedKey: 'globelifeparkinarlington',
     dist: { lf: 332, lc: 390, cf: 400, rc: 407, rf: 325 },
-    wall: null,
     sources: [STATSAPI_VENUE.replace('{id}', 13)],
     note:
-      'The Rangers seed is the 2018 trace, so it shows this park, not Globe Life Field ' +
-      '(opened 2020). Distances are the venue endpoint for venue 13. Wall heights unknown.',
-  },
+      'The Rangers 2018 trace shows this park, not Globe Life Field (opened 2020). ' +
+      'Distances are the venue endpoint for venue 13. Wall heights unknown.',
+  }),
   current(14, 'rogerscentre', {
     id: 'rogerscentre-2023',
     from: '2023-01-01',
-    fence: null,
     sources: [
       STATSAPI_VENUE.replace('{id}', 14),
+      SAVANT_DIMENSIONS,
       'https://globalnews.ca/news/10465943/rogers-centre-renovations-changed-how-it-plays/',
     ],
     note:
-      'The 2023 renovation moved left-center to 368 ft and right-center to 359 ft and ' +
-      'raised most of the wall. The seed shows the earlier wall. Wall heights here are ' +
-      'still the old 8 ft placeholders: open item.',
+      'The 2023 renovation moved left-center to 368 ft and right-center to 359 ft (Savant ' +
+      'flags 2023). The Gameday SVG fails the audit at right-center and on area, so this ' +
+      'record draws posted distances.',
   }),
-  {
-    id: 'rogerscentre-1989',
-    venueId: 14,
-    park: null,
-    from: null,
+  prior(14, 'rogerscentre-1989', 'rogerscentre', {
     to: '2022-12-31',
-    fence: 'seed',
-    seedKey: 'rogerscentre',
     dist: { lf: 328, lc: 375, cf: 404, rc: 375, rf: 328 },
-    wall: null,
-    sources: ['https://globalnews.ca/news/10465943/rogers-centre-renovations-changed-how-it-plays/'],
+    sources: [SAVANT_DIMENSIONS],
     note: 'The 2018 trace. Wall heights before 2023 unknown here.',
-  },
+  }),
   current(15, 'chasefield'),
   current(17, 'wrigleyfield'),
   current(19, 'coorsfield'),
@@ -140,62 +153,43 @@ export const CONFIGURATIONS = [
   current(2392, 'daikinpark', {
     id: 'daikinpark-2017',
     from: '2017-01-01',
-    fence: null,
     sources: [
-      STATSAPI_VENUE.replace('{id}', 2392),
+      SAVANT_DIMENSIONS,
       'https://www.mlb.com/news/astros-removing-tal-s-hill-at-minute-maid-park-c205642648',
     ],
-    note: "Tal's Hill came out before 2017 and center field moved in from 436 to 409 ft.",
+    note: "Tal's Hill came out before 2017 and center field moved in from 436 to 409 ft (Savant flags 2017).",
   }),
-  {
-    id: 'daikinpark-2000',
-    venueId: 2392,
-    park: null,
+  prior(2392, 'daikinpark-2000', 'daikinpark', {
     names: ['Minute Maid Park', 'Enron Field', 'Astros Field'],
-    from: null,
     to: '2016-12-31',
-    fence: 'seed',
-    seedKey: 'daikinpark',
     dist: { lf: 315, lc: 362, cf: 436, rc: 373, rf: 326 },
-    wall: null,
-    sources: ['https://www.mlb.com/news/astros-removing-tal-s-hill-at-minute-maid-park-c205642648'],
+    sources: [SAVANT_DIMENSIONS],
     note:
-      "Inferred: the seed reaches 433 ft at straightaway, which fits Tal's Hill (436), not " +
-      'the 409 posted since 2017. Only CF is sourced for this era; the other distances are ' +
+      "Inferred: the trace reaches 433 ft at straightaway, which fits Tal's Hill (Savant " +
+      'measures 434 for 2016). Only CF is sourced for this era; the other distances are ' +
       'the current ones and are an assumption.',
-  },
+  }),
   current(2394, 'comericapark', {
     id: 'comericapark-2023',
     from: '2023-01-01',
-    fence: null,
     sources: [
+      SAVANT_DIMENSIONS,
       'https://ballparkdigest.com/2023/01/11/tigers-announce-new-comerica-park-outfield-dimensions/',
     ],
     note:
-      'Center field moved in from 422 (measured) to 412 ft for 2023, and the LF corner was ' +
-      're-measured as 342 ft. The Stats API venue endpoint still lists 345 and 420.',
+      'Center field moved in from 422 (measured) to 412 ft for 2023 (Savant flags 2023), and ' +
+      'the LF corner was re-measured as 342 ft. The Gameday SVG still shows the 422-ft wall, ' +
+      'so this record draws posted distances. The Stats API still posts 345 and 420.',
   }),
-  {
-    id: 'comericapark-2000',
-    venueId: 2394,
-    park: null,
-    from: null,
+  prior(2394, 'comericapark-2000', 'comericapark', {
     to: '2022-12-31',
-    fence: 'seed',
-    seedKey: 'comericapark',
     dist: { lf: 345, lc: 370, cf: 420, rc: 365, rf: 330 },
-    wall: null,
-    sources: [
-      'https://ballparkdigest.com/2023/01/11/tigers-announce-new-comerica-park-outfield-dimensions/',
-    ],
+    sources: ['https://ballparkdigest.com/2023/01/11/tigers-announce-new-comerica-park-outfield-dimensions/'],
     note: 'The 2018 trace. Posted CF was 420; the wall measured 422.',
-  },
+  }),
   current(2395, 'oraclepark'),
   current(2529, 'sutterhealthpark', {
-    fence: null,
-    note:
-      'No traced outline. LF, CF and RF are posted. The gaps are the venue endpoint ' +
-      'figures (380 ft) and wall heights are estimates.',
+    note: 'No usable Gameday SVG (it is a sheet of many Triple-A parks), so this record draws posted distances.',
   }),
   current(2602, 'greatamericanballpark'),
   current(2680, 'petcopark'),
@@ -206,37 +200,38 @@ export const CONFIGURATIONS = [
   current(3312, 'targetfield'),
   current(3313, 'yankeestadium'),
   current(4169, 'loandepotpark', {
-    id: 'loandepotpark-2016',
-    from: '2016-01-01',
-    fence: null,
-    sources: [
-      STATSAPI_VENUE.replace('{id}', 4169),
-      'https://www.mlb.com/marlins/news/marlins-think-ballpark-new-dimensions-will-help',
-    ],
+    id: 'loandepotpark-2020',
+    from: '2020-01-01',
+    sources: [SAVANT_DIMENSIONS, 'https://www.mlb.com/marlins/news/marlins-think-ballpark-new-dimensions-will-help'],
     note:
-      'The fences moved in for 2016 and again for 2020. Open item: 2020 reports give CF ' +
-      '400 ft, while the venue endpoint still lists 407 (the 2016 figure).',
+      'The fences moved in again for 2020 (Savant flags 2020; it measures CF 396). Open ' +
+      'item: the Stats API still posts CF 407, the 2016 figure.',
   }),
   {
-    id: 'loandepotpark-2012',
+    id: 'loandepotpark-2016',
     venueId: 4169,
     park: null,
     names: ['Marlins Park'],
-    from: null,
-    to: '2015-12-31',
-    fence: 'seed',
-    seedKey: 'loandepotpark',
-    dist: { lf: null, lc: null, cf: 418, rc: null, rf: null },
+    from: '2016-01-01',
+    to: '2019-12-31',
+    fence: null,
+    dist: { lf: 344, lc: 386, cf: 407, rc: 392, rf: 335 },
     wall: null,
+    sources: [SAVANT_DIMENSIONS, 'https://mlb.com/news/marlins-park-renovation-should-benefit-hitters-c162859126'],
+    note: 'Savant flags 2016 and 2020. No outline for this configuration; posted distances only.',
+  },
+  prior(4169, 'loandepotpark-2012', 'loandepotpark', {
+    names: ['Marlins Park'],
+    to: '2015-12-31',
+    dist: { lf: null, lc: null, cf: 418, rc: null, rf: null },
     sources: ['https://mlb.com/news/marlins-park-renovation-should-benefit-hitters-c162859126'],
     note:
-      'Inferred: the seed reaches 420 ft at straightaway, which fits the 2012 wall (418), ' +
+      'Inferred: the trace reaches 420 ft at straightaway, which fits the 2012 wall (418), ' +
       'not the later ones.',
-  },
+  }),
   current(4705, 'truistpark'),
   current(5325, 'globelifefield', {
     from: '2020-01-01',
-    fence: null,
-    note: 'Opened 2020. No traced outline yet; the Rangers seed shows the old park.',
+    note: 'Opened 2020.',
   }),
 ]
