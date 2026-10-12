@@ -97,6 +97,9 @@ the shipped default for all 30 parks got here.
    `venueKey(park.name)` from `ballparkArt.js` — the park's **canonical** name,
    not the raw feed venue string. Aliases (Minute Maid/Daikin, Guaranteed
    Rate/Rate) share one record, so they share one photo.
+   For a park already in `src/lib/data/park-keys.json`, use its pinned `key`
+   there instead (`parkKey(name)`). After a sponsor rename the key stays the
+   OLD name's, so the photo keeps the old file name.
 4. Add or update the `CREDITS` entry in the same commit: `artist`, `license`,
    and the `source` file-page URL.
 5. Run `npm run gen:ballpark-thumbs` to (re)write the mobile-sized companion

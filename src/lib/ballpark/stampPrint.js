@@ -1,5 +1,6 @@
 import { ballparkFor } from './ballparkData.js'
-import { fieldIds, resolvePhoto, venueKey } from './ballparkArt.js'
+import { fieldIds, resolvePhoto } from './ballparkArt.js'
+import { parkKey } from './parkKeys.js'
 
 // What prints on one Game Log stamp-sheet slot, and what names it — shared by
 // the grid itself (components/logbook/StampSheet.jsx's PostageStamp) and the
@@ -34,8 +35,9 @@ export function resolveStampArt(slot, park, t, { full = false } = {}) {
 // original — the modal enlarges this print, so a thumbnail built for a
 // ~110px grid slot would show as soft/blocky at that size.
 function resolvePhotoArt(name, t, full) {
-  const ids = fieldIds(venueKey(name))
-  const photo = resolvePhoto(name, { photo: t(ids.photo), focus: t(ids.focus) })
+  const key = parkKey(name)
+  const ids = fieldIds(key)
+  const photo = resolvePhoto(key, { photo: t(ids.photo), focus: t(ids.focus) })
   if (!photo) return null
   return { src: full ? photo.src : photo.thumbSrc, focus: photo.focus }
 }

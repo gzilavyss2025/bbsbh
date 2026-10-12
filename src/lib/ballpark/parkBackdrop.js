@@ -44,7 +44,8 @@
 // (verified 2026-08-11 against the 2026-08-10 MLB slate).
 
 import { ballparkFor } from './ballparkData.js'
-import { fieldIds, resolvePhoto, venueKey } from './ballparkArt.js'
+import { fieldIds, resolvePhoto } from './ballparkArt.js'
+import { parkKey } from './parkKeys.js'
 
 // A src safe to interpolate into a CSS `url("…")`. Everything reaching here is
 // already validated — a bundled path is built from a venueKey (a-z0-9 only) and
@@ -57,15 +58,22 @@ const SAFE_CSS_URL = /^(\/[a-z0-9/._-]+|https:\/\/[^\s"'<>()\\]+)$/i
 // `t` is the copy reader (useCopy().t) rather than an import, so this module
 // stays pure and React-free — same reason the rest of src/lib/ takes its inputs
 // as arguments. Returns null whenever there is nothing to show.
-export function parkBackdrop(venueName, t) {
+//
+// `venueId` is optional. With it, a park renamed since the last generator run
+// still finds its photo; without it, every name the venue has ever worn still
+// does (./parkKeys.js).
+export function parkBackdrop(venueName, t, venueId = null) {
   if (!venueName) return null
   // The park's CANONICAL name when we hold a record for it, so the three alias
   // keys (Minute Maid/Daikin, Guaranteed Rate/Rate, the Dodger Stadium pair)
   // resolve to the one shared photo — and the raw feed string otherwise, which
   // is what keeps an uncatalogued park addressable at all.
   const name = ballparkFor(venueName)?.name || venueName
-  const ids = fieldIds(venueKey(name))
-  const photo = resolvePhoto(name, { photo: t(ids.photo), focus: t(ids.focus) })
+  // The photo and its admin fields are filed under the venue's PINNED key,
+  // which a sponsor rename does not move.
+  const key = parkKey(venueName, venueId)
+  const ids = fieldIds(key)
+  const photo = resolvePhoto(key, { photo: t(ids.photo), focus: t(ids.focus) })
   if (!photo || !SAFE_CSS_URL.test(photo.src)) return null
   // thumbSrc is a second, independently-built path (scripts/gen-ballpark-
   // thumbs.mjs) for a bundled park, so it earns the same scrutiny rather than

@@ -36,7 +36,9 @@
 // "Oriole Park at Camden Yards" -> "orioleparkatcamdenyards". Exported because
 // the copy registry derives one admin-editable note id per park from it, and
 // those ids are Redis field names — if this and the CREDITS keys ever drifted,
-// a saved note would silently detach from its park.
+// a saved note would silently detach from its park. A caller files a park
+// under ./parkKeys.js's parkKey(), not under this directly: that key is pinned
+// to the venue id, so a sponsor rename cannot move it.
 export function venueKey(name) {
   return (name ?? '')
     .normalize('NFD')
