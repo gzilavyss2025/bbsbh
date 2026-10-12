@@ -37,7 +37,7 @@ export function AllStarGameResult({ score, mvp, venue, venueId, gameDate, dateLa
   const [ballparkOpen, setBallparkOpen] = useState(false)
   if (!score) return null
   const winner = score.al === score.nl ? null : score.al > score.nl ? 'al' : 'nl'
-  const hasBallpark = venue && ballparkFor(venue.name)
+  const hasBallpark = venue && ballparkFor(venue.name, venueId)
 
   return (
     <Card as="div" body="flush" className="allstargame">

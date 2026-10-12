@@ -8,7 +8,10 @@
 // matrix(.98 0 0 -.98 250 420) group), and the audit's pass/fail edges.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { fenceFromSvg, auditOutline, pathPoints, SCALE_FT_PER_UNIT } from '../scripts/lib/ballpark/field-svg.mjs'
+import {
+  fenceFromSvg, auditOutline, pathPoints, SCALE_FT_PER_UNIT,
+  legacyFenceFromSvg, auditPosted, LEGACY_SCALE_FT_PER_UNIT,
+} from '../scripts/lib/ballpark/field-svg.mjs'
 import { fenceDistanceAt } from '../src/lib/ballpark/layout/fenceAudit.js'
 
 // Home at (125, 200). Foul lines 100 units long at ±45°. The wall: the LF pole,
@@ -76,4 +79,41 @@ test('the audit passes a matching outline and fails a moved wall', () => {
   assert.equal(r.errors.cf, 10)
   // The area alone catches a wall moved along one stretch.
   assert.equal(auditOutline(out.points, out.areaSqFt, { ...measured, areaSqFt: measured.areaSqFt * 0.96 }).pass, false)
+})
+
+// The older minor-league art: no ids. A fill="none" three-point polyline is the
+// foul-line template (its lowest point is home), the field is drawn in track and
+// grass colours, and the grey shapes are the compass glyph, which never counts.
+const legacy = (extra = '') =>
+  `<svg viewBox="0 0 250 250">` +
+  `<polygon fill="#A68D4B" points="${125 - P},${200 - P} 125,90 ${125 + P},${200 - P} 125,200"/>` +
+  `<polygon fill="#989898" points="5,5 60,5 60,60"/>` +
+  extra +
+  `<polyline fill="none" points="15,90 125,200 235,90"/></svg>`
+
+test('the legacy art is read from its template and its field colours', () => {
+  const out = legacyFenceFromSvg(legacy())
+  const ft = 100 * LEGACY_SCALE_FT_PER_UNIT
+  assert.ok(Math.abs(Math.hypot(...out.points[0]) - ft) < 1, 'LF pole')
+  assert.ok(Math.abs(fenceDistanceAt(out.points, 0) - 110 * LEGACY_SCALE_FT_PER_UNIT) < 1, 'straightaway CF')
+  assert.ok(out.points[0][0] < 0, 'left field is negative x')
+})
+
+test('the compass glyph never becomes the wall', () => {
+  // A grey shape far out in center field changes nothing; a field-coloured one would.
+  const glyph = legacyFenceFromSvg(legacy('<polygon fill="#DCDCDC" points="115,20 135,20 125,10"/>'))
+  assert.ok(Math.abs(fenceDistanceAt(glyph.points, 0) - 110 * LEGACY_SCALE_FT_PER_UNIT) < 1)
+})
+
+test('legacy art with no template returns null', () => {
+  assert.equal(legacyFenceFromSvg('<svg><polygon fill="#1B833C" points="0,0 10,0 10,10"/></svg>'), null)
+})
+
+test('the posted-sign audit passes within 10 ft and fails past it', () => {
+  const out = legacyFenceFromSvg(legacy())
+  const ft = Math.round(100 * LEGACY_SCALE_FT_PER_UNIT)
+  const cf = Math.round(110 * LEGACY_SCALE_FT_PER_UNIT)
+  assert.equal(auditPosted(out.points, { lf: ft, cf, rf: ft }).pass, true)
+  assert.equal(auditPosted(out.points, { lf: ft, cf: cf + 15, rf: ft }).pass, false)
+  assert.equal(auditPosted(out.points, { lf: null, cf, rf: ft }).pass, false, 'a missing sign is not a pass')
 })

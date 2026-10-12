@@ -1418,10 +1418,14 @@ Re-run only to fold in a new season.
   Gameday field SVG. An outline is stored only when it passes an audit against the
   same season's Savant row. Run by hand once a season, or after a club announces a
   wall change: `npm run gen:field-layouts [-- --year 2027]`. The default season is
-  `lib/time/season-in-play.mjs`. About 33 requests. Pure half:
+  `lib/time/season-in-play.mjs`. Pure half:
   `scripts/lib/ballpark/field-svg.mjs`. Readers: `src/lib/ballpark/layout/fences.js`
-  and, through it, `ballparkData.js` and `resolveLayout.js`. Coverage report:
-  `docs/ballpark-layouts.md` (#1859).
+  and, through it, `ballparkData.js` and `resolveLayout.js`. A second pass covers
+  the home park of every MiLB club in `public/data/teams.json`: posted distances
+  from the Stats API venue endpoint (through `lib/statsapi.mjs`), and an outline
+  from the older Gameday art, stored only when it fits the posted LF, CF and RF
+  within 10 ft. About 160 requests in all. Coverage report and the method for
+  adding a park: `docs/ballpark-layouts.md` (#1859).
 - `gen-franchise-history.mjs` → `public/data/franchise-history/{teamId}.json`
   — each of the 30 clubs' name, league and ballpark by season, 1901 to the last
   complete season, as spans (the Brewers' file starts with the 1969 Seattle Pilots).

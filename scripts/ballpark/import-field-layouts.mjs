@@ -20,13 +20,29 @@
 // bug this registry exists to stop. The audit numbers are stored either way, so
 // the coverage report (docs/ballpark-layouts.md) can show why.
 //
+// MINOR-LEAGUE PARKS (#1859, slice 3) get a second, weaker pass. No Savant row
+// exists for them, so the targets are the posted signs from the Stats API
+// venue endpoint, and most of their Gameday SVGs are the older unnamed-layer
+// art (legacyFenceFromSvg). An outline is stored only when LF, CF and RF each
+// agree with the posted sign within 10 ft, and the registry labels it an
+// estimate. A park with no passing outline keeps its five posted distances, so
+// the app can still draw the straight five-point wall. The venue list is the
+// MiLB clubs' home parks in public/data/teams.json (gen-teams.mjs).
+//
 // The output stores numbers derived from MLB's drawings and tables, never the
 // drawings themselves.
 
 import { writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
-import { fenceFromSvg, auditOutline, SCALE_FT_PER_UNIT, TOLERANCE } from '../lib/ballpark/field-svg.mjs'
+import { readFileSync } from 'node:fs'
+import {
+  fenceFromSvg, auditOutline, legacyFenceFromSvg, auditPosted,
+  SCALE_FT_PER_UNIT, LEGACY_SCALE_FT_PER_UNIT, TOLERANCE, POSTED_TOLERANCE_FT,
+} from '../lib/ballpark/field-svg.mjs'
+import { getJson, statsapiUrl } from '../lib/statsapi.mjs'
+import { ballparkFor } from '../../src/lib/ballpark/ballparkData.js'
+import { CONFIGURATIONS } from '../../src/lib/ballpark/layout/configurations.js'
 import { fetchSeasonInPlay } from '../lib/time/season-in-play.mjs'
 
 const OUT = fileURLToPath(new URL('../../src/lib/ballpark/layout/fields.json', import.meta.url))
@@ -95,6 +111,95 @@ for (const r of rows) {
 fitted.sort((a, b) => a - b)
 console.log(`median per-park pole scale ${fitted[fitted.length >> 1]?.toFixed(3)} ft/unit (stored outlines use ${SCALE_FT_PER_UNIT})`)
 
+// ── Park names, this season and next ────────────────────────────────────────
+// Sponsors rename parks, mostly over the winter, and the Stats API lists the
+// new name under next season's clubs as soon as it is known. Every drawing
+// resolves by venue id, so a rename never loses the wall. But a caller with
+// only a name (and the facts table's aliases) needs the new name, so this
+// logs every MLB park name that does not resolve, and every MLB venue with no
+// layout record (a new park). Add the alias in ballparkData.js, or the record
+// in layout/configurations.js, before Opening Day.
+const namesBySeason = {}
+for (const season of [year, year + 1]) {
+  const data = await getJson(`/api/v1/teams?sportIds=1,11,12,13,14&season=${season}&hydrate=venue`)
+  namesBySeason[season] = data?.teams ?? []
+  for (const t of namesBySeason[season].filter((x) => x.sport?.id === 1 && x.venue)) {
+    if (!ballparkFor(t.venue.name)) console.warn(`RENAME? ${season} ${t.abbreviation} venue ${t.venue.id} "${t.venue.name}" has no alias in ballparkData.js`)
+    if (!CONFIGURATIONS.some((c) => c.venueId === t.venue.id)) console.warn(`NEW PARK? ${season} ${t.abbreviation} venue ${t.venue.id} "${t.venue.name}" has no layout record`)
+  }
+}
+// Every name a minor-league venue carries in either season, so the
+// resolver's name fallback knows a rename the day it ships.
+const milbNames = new Map()
+for (const season of [year, year + 1]) {
+  for (const t of namesBySeason[season].filter((x) => x.sport?.id !== 1 && x.venue?.name)) {
+    const list = milbNames.get(t.venue.id) ?? []
+    if (!list.includes(t.venue.name)) list.push(t.venue.name)
+    milbNames.set(t.venue.id, list)
+  }
+}
+
+// ── Minor-league parks ──────────────────────────────────────────────────────
+const TEAMS = fileURLToPath(new URL('../../public/data/teams.json', import.meta.url))
+const MILB_SPORTS = ['11', '12', '13', '14']
+const milbVenues = new Map()
+for (const sportId of MILB_SPORTS) {
+  for (const t of JSON.parse(readFileSync(TEAMS, 'utf8')).bySportId[sportId] ?? []) {
+    if (t.venueId && !milbVenues.has(t.venueId)) milbVenues.set(t.venueId, Number(sportId))
+  }
+}
+const ids = [...milbVenues.keys()]
+const fieldInfo = new Map()
+for (let i = 0; i < ids.length; i += 50) {
+  const data = await getJson(`/api/v1/venues?venueIds=${ids.slice(i, i + 50).join(',')}&hydrate=fieldInfo`)
+  for (const v of data?.venues ?? []) fieldInfo.set(v.id, v)
+}
+const milb = {}
+const legacyFitted = []
+for (const [id, sportId] of milbVenues) {
+  if (venues[id]) continue // an MLB-measured park (Sutter Health) keeps its Savant row
+  const v = fieldInfo.get(id)
+  const fi = v?.fieldInfo ?? {}
+  const posted = { lf: fi.leftLine ?? null, lc: fi.leftCenter ?? null, cf: fi.center ?? null, rc: fi.rightCenter ?? null, rf: fi.rightLine ?? null }
+  let fence = null
+  let audit = null
+  let style = null
+  try {
+    const svg = await text(GAMEDAY(id))
+    const named = fenceFromSvg(svg)
+    const out = named ?? legacyFenceFromSvg(svg)
+    style = out ? (named ? 'named' : 'legacy') : null
+    if (out) {
+      audit = auditPosted(out.points, posted)
+      if (audit.pass) fence = out.points
+      if (!named && posted.cf) {
+        // The scale that would put this drawing's CF on its posted sign, for
+        // the log's check on LEGACY_SCALE_FT_PER_UNIT.
+        const cfFt = posted.cf - audit.errors.cf
+        if (cfFt > 0) legacyFitted.push((LEGACY_SCALE_FT_PER_UNIT * posted.cf) / cfFt)
+      }
+    }
+  } catch {
+    // No Gameday SVG for this park (a 403): posted distances only.
+  }
+  const five = Object.values(posted).every(Number.isFinite)
+  if (!fence && !five) continue // nothing to draw: the app keeps "not on file"
+  const names = [...new Set([v?.name, ...(milbNames.get(id) ?? [])].filter(Boolean))]
+  if (names.length > 1) console.log(`  renamed: ${names.join(' -> ')}`)
+  milb[id] = {
+    name: v?.name ?? null,
+    ...(names.length > 1 ? { names } : {}),
+    sportId,
+    posted,
+    fence,
+    ...(fence ? { style } : {}),
+    audit: audit && { ...audit.errors, pass: audit.pass },
+  }
+  console.log(String(id).padEnd(5), String(v?.name ?? '').slice(0, 28).padEnd(28), fence ? `estimated (${style})` : 'posted distances only', audit ? JSON.stringify(audit.errors) : '')
+}
+legacyFitted.sort((a, b) => a - b)
+console.log(`MiLB: ${Object.keys(milb).length} of ${milbVenues.size} venues drawable, ${Object.values(milb).filter((m) => m.fence).length} with an outline; median legacy CF scale ${legacyFitted[legacyFitted.length >> 1]?.toFixed(3)} (stored outlines use ${LEGACY_SCALE_FT_PER_UNIT})`)
+
 const out = {
   season: year,
   generatedAt: new Date().toISOString().slice(0, 10),
@@ -102,6 +207,12 @@ const out = {
   scaleFtPerUnit: SCALE_FT_PER_UNIT,
   tolerance: TOLERANCE,
   venues,
+  milb: {
+    sources: { posted: statsapiUrl('/api/v1/venues?venueIds={venueId}&hydrate=fieldInfo'), fence: GAMEDAY('{venueId}') },
+    legacyScaleFtPerUnit: LEGACY_SCALE_FT_PER_UNIT,
+    toleranceFt: POSTED_TOLERANCE_FT,
+    venues: milb,
+  },
 }
 writeFileSync(OUT, JSON.stringify(out, null, 0).replace(/("\d+":\{)/g, '\n$1') + '\n')
 console.log(`wrote ${OUT}`)

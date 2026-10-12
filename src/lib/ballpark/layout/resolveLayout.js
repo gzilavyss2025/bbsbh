@@ -8,7 +8,12 @@
 
 import { BALLPARKS } from '../ballparkData.js'
 import { CONFIGURATIONS, SEED } from './configurations.js'
-import { fenceFor, measuredFor } from './fences.js'
+import { fenceFor, measuredFor, MILB_CONFIGURATIONS } from './fences.js'
+
+// Every configuration: the curated registry first, then the imported
+// minor-league parks it does not already cover.
+const curated = new Set(CONFIGURATIONS.map((c) => c.venueId))
+const ALL = [...CONFIGURATIONS, ...MILB_CONFIGURATIONS.filter((c) => !curated.has(c.venueId))]
 
 // Same key rule as ballparkData.js and ballparks.js.
 function normalizeVenue(name) {
@@ -22,7 +27,7 @@ function normalizeVenue(name) {
 // The venue id behind a feed name: through a current park record (which carries
 // every sponsor alias), else through an old record's own `names`.
 const VENUE_BY_NAME = new Map()
-for (const c of CONFIGURATIONS) {
+for (const c of ALL) {
   for (const n of c.names ?? []) VENUE_BY_NAME.set(normalizeVenue(n), c.venueId)
 }
 for (const [key, rec] of Object.entries(BALLPARKS)) {
@@ -45,8 +50,9 @@ const covers = (c, day) => (c.from == null || c.from <= day) && (c.to == null ||
 // Gameday outline needs none.
 function accuracyNote(quality, kind) {
   if (quality === 'dimensions-only') return 'Wall drawn straight between the posted distances'
-  if (quality === 'estimated') return 'Wall shape is approximate'
+  if (quality === 'estimated' && kind !== 'milb') return 'Wall shape is approximate'
   if (kind === 'seed') return 'Wall traced from a 2018 drawing'
+  if (kind === 'milb') return "Wall from MLB's drawing of this park, checked against its posted distances"
   return null
 }
 
@@ -86,7 +92,7 @@ function build(c) {
 }
 
 // One layout per configuration, built once (an audit is a few hundred ray casts).
-const LAYOUTS = new Map(CONFIGURATIONS.map((c) => [c.id, build(c)]))
+const LAYOUTS = new Map(ALL.map((c) => [c.id, build(c)]))
 
 // The configuration a venue had on a date. `venueId` wins over `venueName` when
 // both are given (a neutral site or a renamed park still has its own id).
@@ -96,7 +102,7 @@ export function resolveBallparkLayout({ venueId, venueName, gameDate } = {}) {
   const id = venueId != null && venueId !== '' ? Number(venueId) : VENUE_BY_NAME.get(normalizeVenue(venueName))
   if (id == null) return null
   const day = dayOf(gameDate)
-  const c = CONFIGURATIONS.find((cfg) => cfg.venueId === id && covers(cfg, day))
+  const c = ALL.find((cfg) => cfg.venueId === id && covers(cfg, day))
   return c ? LAYOUTS.get(c.id) : null
 }
 

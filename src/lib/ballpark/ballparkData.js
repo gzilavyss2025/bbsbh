@@ -145,9 +145,20 @@ export const DIMENSIONS = [
   { key: 'rf', group: 'wall', label: 'RF wall' },
 ]
 
-// The park record for a venue name, or null if we don't have it (an MiLB park,
-// a newly renamed venue) — callers render "not on file".
-export function ballparkFor(venueName) {
+// The current park record for each venue id, from the layout registry. A
+// sponsor rename changes the name and never the id, so a caller that has the
+// id finds the park the day the new name ships, before anyone adds an alias.
+const BY_VENUE_ID = new Map()
+for (const c of CONFIGURATIONS) {
+  if (c.park && c.to == null) BY_VENUE_ID.set(c.venueId, BALLPARKS[c.park])
+}
+
+// The park record for a venue, or null if we don't have it (an MiLB park, a
+// venue on no list) — callers render "not on file". The id wins when given;
+// the name (and its aliases above) is the fallback for a caller without one.
+export function ballparkFor(venueName, venueId = null) {
+  const byId = venueId != null ? BY_VENUE_ID.get(Number(venueId)) : null
+  if (byId) return byId
   const key = normalizeVenue(venueName)
   return key in BALLPARKS ? BALLPARKS[key] : null
 }
@@ -167,8 +178,8 @@ function rankDescending(value, values) {
 // (rank 1 = biggest, total = number of parks that have that dimension). Pure and
 // spoiler-free: park geometry carries no score, so this runs at render with no
 // gating. Returns null when the venue isn't on file.
-export function rankedDimensions(venueName) {
-  const park = ballparkFor(venueName)
+export function rankedDimensions(venueName, venueId = null) {
+  const park = ballparkFor(venueName, venueId)
   if (!park) return null
   // Dedupe by object identity so alias keys (same record under a former/sponsor
   // name) don't count a park twice in the league pool.

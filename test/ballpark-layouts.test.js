@@ -71,8 +71,10 @@ test('a relocated club does not take its old park with it', () => {
 test('a venue with no record resolves to null, so callers say "not on file"', () => {
   // The Rays' 2025 season at George M. Steinbrenner Field (venue 2523).
   assert.equal(resolveBallparkLayout({ venueId: 2523, gameDate: '2025-05-01' }), null)
-  // A MiLB park, by name.
-  assert.equal(resolveBallparkLayout({ venueName: 'Louisville Slugger Field' }), null)
+  // A park no source covers, by name.
+  assert.equal(resolveBallparkLayout({ venueName: 'Nowhere Field' }), null)
+  // Louisville Slugger Field was "not on file" before slice 3; it draws now.
+  assert.equal(layout({ venueName: 'Louisville Slugger Field' }), 'milb-2724')
   assert.equal(resolveBallparkLayout({}), null)
   // A venue id wins over a name: a neutral site is its own venue.
   assert.equal(resolveBallparkLayout({ venueId: 2523, venueName: 'Tropicana Field' }), null)
@@ -106,8 +108,10 @@ test('every seed reference exists and every trace is used once at most', () => {
 test('every drawn outline passed its audit', () => {
   for (const l of allBallparkLayouts()) {
     if (!l.geometry.fence) continue
-    assert.equal(l.quality.fence, 'audited', l.configurationId)
     assert.ok(l.audit.pass, l.configurationId)
+    // A minor-league outline is checked only against posted signs: an estimate.
+    const kind = l.provenance.fence?.kind
+    assert.equal(l.quality.fence, kind === 'milb' ? 'estimated' : 'audited', l.configurationId)
   }
 })
 
@@ -255,4 +259,69 @@ test('every configuration builds a drawing, and prints only values it knows', ()
   assert.deepEqual(old.labels.map((x) => x.t), [345, 420, 330])
   const kc = buildFieldGeometry(diagramInput(resolveBallparkLayout({ venueId: 7, gameDate: '2024-06-15' })))
   assert.deepEqual(kc.labels.map((x) => x.t), [410], 'only the CF distance is known for the old Kauffman wall')
+})
+
+// ── Minor-league parks (slice 3) ───────────────────────────────────────────
+
+test('a minor-league park with a checked outline draws it, labelled an estimate', () => {
+  // Principal Park (Iowa Cubs, venue 2844): posted 335 / 400 / 335.
+  const l = resolveBallparkLayout({ venueId: 2844, gameDate: '2026-06-01' })
+  assert.equal(l.configurationId, 'milb-2844')
+  assert.equal(l.quality.fence, 'estimated')
+  assert.equal(l.provenance.fence.kind, 'milb')
+  assert.match(l.accuracyNote, /posted distances/)
+  assert.equal(l.measurements.wall, null, 'no wall heights are known')
+  // By name too: the feed's venue name resolves the same record.
+  assert.equal(layout({ venueName: 'Principal Park', gameDate: '2026-06-01' }), 'milb-2844')
+})
+
+test('a minor-league park with no usable outline draws its five posted distances', () => {
+  // Fifth Third Field (Toledo, venue 2767): the SVG parses to no wall.
+  const l = resolveBallparkLayout({ venueId: 2767, gameDate: '2026-06-01' })
+  assert.equal(l.quality.fence, 'dimensions-only')
+  assert.equal(l.geometry.fence, null)
+  assert.match(l.accuracyNote, /straight between the posted distances/)
+})
+
+test('a minor-league park resolves only from the imported season on', () => {
+  // No dated history exists for minor-league walls: an older game gets nothing.
+  assert.equal(layout({ venueId: 2844, gameDate: `${FIELDS.season - 1}-06-01` }), null)
+})
+
+test('a minor-league venue with nothing to draw stays "not on file"', () => {
+  // Roger Dean Chevrolet Stadium (venue 2520) hosts two clubs; it resolves by
+  // venue, so both clubs get the same answer: no outline, no five posted signs.
+  assert.equal(resolveBallparkLayout({ venueId: 2520, gameDate: '2026-06-01' }), null)
+  assert.equal(resolveBallparkLayout({ venueName: 'Roger Dean Chevrolet Stadium', gameDate: '2026-06-01' }), null)
+})
+
+test('every stored minor-league outline fits its posted signs and is a valid fence', () => {
+  const venues = Object.entries(FIELDS.milb.venues)
+  assert.ok(venues.length > 50, 'the import covers the minor-league parks')
+  for (const [id, v] of venues) {
+    if (!v.fence) {
+      assert.ok(Object.values(v.posted).every(Number.isFinite), `${id}: kept only for its five posted distances`)
+      continue
+    }
+    assert.ok(v.audit.pass, id)
+    for (const k of ['lf', 'cf', 'rf']) assert.ok(Math.abs(v.audit[k]) <= FIELDS.milb.toleranceFt, `${id} ${k}`)
+    assert.deepEqual(fenceProblems(clipToFoulLines(v.fence)), [], id)
+  }
+  // An MLB-measured park is never shadowed by the minor-league pass.
+  assert.equal(FIELDS.milb.venues[2529], undefined, 'Sutter Health keeps its Savant row')
+})
+
+test('a sponsor rename never loses the park: the venue id wins over the name', () => {
+  // A name nobody has added an alias for yet, with American Family Field's id.
+  const park = ballparkFor('Some New Sponsor Field', 32)
+  assert.equal(park?.name, 'American Family Field')
+  assert.equal(ballparkFor('Some New Sponsor Field'), null, 'by name alone it is not on file')
+  assert.equal(
+    resolveBallparkLayout({ venueId: 32, venueName: 'Some New Sponsor Field', gameDate: '2026-07-01' }).configurationId,
+    'americanfamilyfield',
+  )
+  // A minor-league rename the importer saw for next season: both names resolve.
+  // Lehigh Valley's Coca-Cola Park (venue 3230) is Jefferson Park in the 2027 data.
+  assert.equal(layout({ venueName: 'Coca-Cola Park', gameDate: '2026-07-01' }), 'milb-3230')
+  assert.equal(layout({ venueName: 'Jefferson Park', gameDate: '2026-07-01' }), 'milb-3230')
 })

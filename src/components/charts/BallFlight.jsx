@@ -71,7 +71,7 @@ function FlightPlot({ ball, park }) {
       className="bflight__field"
       layout={park}
       viewBox={PLOT_VIEWBOX}
-      label={`Flight of the ball at ${park.name}`}
+      label={`Flight of the ball at ${ball.venue || park.name}`}
     >
       <defs>
         <linearGradient id={heatId} x1="0" y1="1" x2="1" y2="0">

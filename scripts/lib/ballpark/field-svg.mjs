@@ -16,7 +16,7 @@
 // are all free, and all five are checks (auditOutline below). Fitting the scale
 // per park over the 2026 rows gives a median of 2.400 ft/unit.
 
-import { fenceDistanceAt } from '../../../src/lib/ballpark/layout/fenceAudit.js'
+import { fenceDistanceAt, auditFence } from '../../../src/lib/ballpark/layout/fenceAudit.js'
 
 export const SCALE_FT_PER_UNIT = 2.4
 
@@ -239,12 +239,19 @@ export function fenceFromSvg(svg, { poles = null, tolFt = 1, scaleFtPerUnit = SC
     return [x * c - y * s, x * s + y * c]
   }
   const polys = field.map((sp) => sp.map(toFeet))
-  const span = ((angR - angL) * 180) / Math.PI / 2
-  // The wall is sampled from 0.5° inside each foul line, every 0.25°. Right at
-  // the line the art is unreliable both ways: the `Outfield` shape can tuck in
-  // before it (a bullpen gate, a corner cut; Wrigley), and a drawn foul line
-  // can run past the wall (Yankee Stadium). So each pole sits ON the foul line
-  // at the distance of the nearest inside sample.
+  const out = sampleWall(polys, ((angR - angL) * 180) / Math.PI / 2, tolFt)
+  return out && { ...out, fittedScale }
+}
+
+// The wall of a field drawn as closed shapes in feet, sampled every 0.25°
+// between foul lines `spanDeg` either side of center, simplified to `tolFt`.
+// Sampling starts 0.5° inside each line: right at the line the art is
+// unreliable both ways. A shape can tuck in before it (a bullpen gate, a
+// corner cut; Wrigley), and a drawn foul line can run past the wall (Yankee
+// Stadium). So each pole sits ON the foul line at the distance of the nearest
+// inside sample.
+function sampleWall(polys, spanDeg, tolFt) {
+  const span = spanDeg
   const inner = span - 0.5
   const steps = Math.round((2 * inner) / 0.25)
   const polar = []
@@ -260,11 +267,9 @@ export function fenceFromSvg(svg, { poles = null, tolFt = 1, scaleFtPerUnit = SC
     const rad = (deg * Math.PI) / 180
     return [r * Math.sin(rad), r * Math.cos(rad)]
   })
-  if (sampled.length < 2) return null
   return {
     points: simplify(sampled, tolFt).map(([a, b]) => [r1(a), r1(b)]),
     foulAngleDeg: r1(span * 2),
-    fittedScale,
     // Fair area: home → fence → home, shoelace (home is the origin, so its
     // two edges add nothing).
     areaSqFt: Math.round(Math.abs(sampled.reduce((acc, p, k) => {
@@ -306,5 +311,85 @@ export function auditOutline(points, areaSqFt, measured) {
     within(e.lf, TOLERANCE.poleFt) && within(e.rf, TOLERANCE.poleFt) &&
     within(e.lc, TOLERANCE.gapFt) && within(e.rc, TOLERANCE.gapFt) &&
     within(e.areaPct, TOLERANCE.areaPct)
+  return { errors: e, pass }
+}
+
+// ── Minor-league parks: the LEGACY Gameday art ─────────────────────────────
+//
+// Most MiLB field SVGs predate the named-layer style above: hand-drawn
+// Illustrator shapes with no ids. What they share with every other Gameday
+// field is a stamped infield and a three-point foul-line template (a
+// fill="none" polyline whose lowest point is the apex of home plate). The
+// outfield is drawn per park, in track and grass colours; the grey shapes are
+// the compass glyph.
+//
+// The legacy art is drawn at its own scale. Fitted to the posted LF, CF and RF
+// signs of the 68 parks it parses (2026-10-12), the median is 2.333 ft/unit,
+// against 2.40 for the named-layer MLB art. One scale for every legacy park, for
+// the same reason as above: a per-park fit would hide a wrong drawing.
+//
+// What this art is NOT: a survey. The audit below checks it only against the
+// posted signs (no Savant row exists for a minor-league park), so a passing
+// outline is an estimate, and the registry labels it so.
+export const LEGACY_SCALE_FT_PER_UNIT = 2.333
+const GREY = /^#(e4e4e4|dcdcdc|989898|727272|d0d0d0|ffffff|fff|58745e)$/i
+
+function legacyShapes(svg) {
+  const out = []
+  for (const m of svg.matchAll(/<(path|polygon|polyline)\b([^>]*)>/g)) {
+    const [tag, kind, attrs] = [m[0], m[1], m[2]]
+    const fill = (attrs.match(/\bfill="([^"]*)"/)?.[1] ?? '').trim()
+    const apply = transformAt(svg, m.index, tag)
+    let subs = []
+    const d = attrs.match(/\bd="([^"]*)"/)
+    if (d) subs = pathPoints(d[1])
+    const pp = attrs.match(/\bpoints="([^"]*)"/)
+    if (pp) {
+      const n = pp[1].match(NUM).map(Number)
+      const q = []
+      for (let k = 0; k + 1 < n.length; k += 2) q.push([n[k], n[k + 1]])
+      subs = [kind === 'polygon' ? [...q, q[0]] : q]
+    }
+    out.push({ kind, fill, subs: subs.map((sp) => sp.map(apply)) })
+  }
+  return out
+}
+
+// The fence of a legacy MiLB field SVG, in feet, LF pole to RF pole, or null
+// when the art has no foul-line template or no field shapes.
+export function legacyFenceFromSvg(svg, { tolFt = 1, scaleFtPerUnit = LEGACY_SCALE_FT_PER_UNIT } = {}) {
+  const shapes = legacyShapes(svg)
+  const tmpl = shapes.find((s) => s.kind === 'polyline' && s.fill === 'none' && s.subs[0]?.length === 3)
+  if (!tmpl) return null
+  const q = tmpl.subs[0]
+  const home = q.reduce((a, b) => (b[1] > a[1] ? b : a))
+  const [L, R] = q.filter((p) => p !== home).sort((a, b) => a[0] - b[0])
+  const angL = Math.atan2(L[0] - home[0], home[1] - L[1])
+  const angR = Math.atan2(R[0] - home[0], home[1] - R[1])
+  const rot = (angL + angR) / 2
+  const toFeet = ([px, py]) => {
+    const x = (px - home[0]) * scaleFtPerUnit
+    const y = (home[1] - py) * scaleFtPerUnit
+    return [x * Math.cos(-rot) - y * Math.sin(-rot), x * Math.sin(-rot) + y * Math.cos(-rot)]
+  }
+  const polys = shapes
+    .filter((s) => s.fill && s.fill !== 'none' && !GREY.test(s.fill))
+    .flatMap((s) => s.subs.map((sp) => sp.map(toFeet)))
+  if (!polys.length) return null
+  return sampleWall(polys, ((angR - angL) * 180) / Math.PI / 2, tolFt)
+}
+
+// Audit against the posted signs only: LF line, CF (straightaway or deepest,
+// as auditFence reads it) and RF line, each within 10 ft.
+export const POSTED_TOLERANCE_FT = 10
+export function auditPosted(points, posted) {
+  const cf = auditFence(points, posted?.cf)
+  const err = (a, b) => (Number.isFinite(a) && Number.isFinite(b) ? r1(a - b) : null)
+  const e = {
+    lf: err(Math.hypot(...points[0]), posted?.lf),
+    cf: cf ? cf.cfErrorFt : null,
+    rf: err(Math.hypot(...points[points.length - 1]), posted?.rf),
+  }
+  const pass = Object.values(e).every((v) => v != null && Math.abs(v) <= POSTED_TOLERANCE_FT)
   return { errors: e, pass }
 }

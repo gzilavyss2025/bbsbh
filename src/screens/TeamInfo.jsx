@@ -19,6 +19,7 @@ import { BallparkModal } from '../components/ballpark/BallparkModal.jsx'
 import { BoxLinesDoor } from '../components/boxlines/BoxLinesDoor.jsx'
 import { ExpressLaneDoor } from '../components/game/ExpressLaneDoor.jsx'
 import { ballparkFor } from '../lib/ballpark/ballparkData.js'
+import { resolveBallparkLayout } from '../lib/ballpark/layout/resolveLayout.js'
 import { POS_ORDER } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill, hasDebuted } from '../api/rookies.js'
@@ -1129,13 +1130,16 @@ function AttendanceFact({ venue, attendance }) {
   )
 }
 
-// The Ballpark fact. When we have the park on file (the 30 MLB parks — see
-// ballparkData.js), the venue name becomes a button that opens the to-scale
-// field diagram + league-ranked dimensions. MiLB parks and any venue not on file
-// degrade to the plain read-only Fact, per the app's graceful-degradation rule.
+// The Ballpark fact. When we have the park on file (the MLB parks — see
+// ballparkData.js — or a minor-league park the layout registry can draw), the
+// venue name becomes a button that opens the to-scale field diagram, plus
+// league-ranked dimensions for an MLB park. Any venue not on file degrades to
+// the plain read-only Fact, per the app's graceful-degradation rule.
 function BallparkFact({ venue, venueId, gameDate }) {
   const [open, setOpen] = useState(false)
-  if (!ballparkFor(venue)) return <Fact label="Ballpark" value={venue} />
+  if (!ballparkFor(venue, venueId) && !resolveBallparkLayout({ venueId, venueName: venue, gameDate })) {
+    return <Fact label="Ballpark" value={venue} />
+  }
   return (
     <div className="fact">
       <dt className="fact__label">Ballpark</dt>

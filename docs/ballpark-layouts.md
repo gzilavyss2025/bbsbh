@@ -2,7 +2,7 @@
 
 This report lists each playing-field configuration the app knows, where its
 fence outline comes from, who draws it, and what is still missing. Issue #1859,
-slices 1 and 2.
+slices 1 to 3.
 
 Code: `src/lib/ballpark/layout/`. The registry is `configurations.js`. The
 choice of outline is `fences.js`. The resolver is `resolveLayout.js`
@@ -121,12 +121,96 @@ a 2018 trace shows is an inference from its depth; each record's `note` says so.
 - **New outlines needed:** Comerica Park, Rogers Centre, Kauffman Stadium (all
   three SVGs show an earlier wall), and Sutter Health Park. A re-import picks
   up a corrected SVG on its own.
-- **MiLB.** Gameday SVGs exist for MiLB parks (Toledo, Lehigh Valley and Iowa
-  checked), but in an older style with no named layers. Extracting them is
-  slice 3. An MiLB venue resolves to `null`, and the caller shows "not on file".
+- **MiLB parks without a drawing (43 of 119).** These have no Gameday SVG (a
+  403) or an SVG with no foul-line template, and fewer than five posted
+  distances. They stay "not on file". A hand trace is the way to add one (see
+  "Adding a park" below).
+- **MiLB date history.** A minor-league record covers the imported season
+  onward. A game from an earlier season at the same park resolves to nothing.
 - **Gap bearings of the five-point fallback.** A park with no outline draws
   its posted gap signs at ±22.5°. No source gives the bearing of a posted gap
   sign, so the accuracy note says the wall is drawn straight between them.
+
+## Minor-league parks (slice 3)
+
+The importer also reads the home park of every MiLB club in
+`public/data/teams.json` (119 venues, sportIds 11–14). For each:
+
+1. **Posted distances** from the Stats API venue endpoint (`fieldInfo`).
+   Savant does not measure minor-league parks.
+2. **The outline**, from the park's Gameday SVG. Most are an older style with
+   no named layers (`legacyFenceFromSvg`): home plate is the lowest point of
+   the three-point foul-line template, and the wall is the outer edge of every
+   track- or grass-coloured shape (the grey compass glyph never counts).
+3. **One scale for the older art: 2.333 ft per unit.** It is the median fit of
+   the drawn LF, CF and RF to the posted signs over the 68 parks that parse.
+   The named-layer MLB art is 2.40.
+4. **The audit**: LF line, CF (at straightaway or the deepest point) and RF
+   line, each within 10 ft of its posted sign. Only a passing outline is
+   stored.
+
+| Level | Drawable | With an outline |
+| --- | --- | --- |
+| Triple-A | 24 of 30 | 13 |
+| Double-A | 24 of 30 | 12 |
+| High-A | 16 of 30 | 12 |
+| Single-A | 12 of 29 | 6 |
+| **All** | **76 of 119** | **43** |
+
+A minor-league outline is `estimated`, never `audited`: the art is stylized
+(Principal Park is a flat-topped box) and the only check is three posted
+signs. Its drawing says "Wall from MLB's drawing of this park, checked against
+its posted distances". A park with no passing outline but five posted signs
+draws the straight five-point wall with its own note. Minor-league walls have
+no known heights, so no height is printed.
+
+On the screens, a drawable minor-league park gets the drawing on the team
+hub's Ballpark card and in the lineup page's Ballpark sheet, without league
+ranks. The hit charts and the ball-flight card draw it for a game that sends
+hit coordinates.
+
+## Park names and renames
+
+Sponsors rename parks, mostly over the winter. Everything here resolves by
+Stats API venue id first, and a rename never changes the id:
+
+- `resolveBallparkLayout` and `ballparkFor` / `rankedDimensions` take the
+  venue id, so a renamed park keeps its wall, its facts and its ranks the day
+  the new name ships. The name (with the aliases in `ballparkData.js`) is only
+  the fallback for a caller with no id.
+- A game's drawing is labelled with the name the park had that day (the
+  feed's own name), not today's sponsor name.
+- The importer reads every club's park name for the imported season and the
+  next one. It logs an MLB name that no alias resolves (`RENAME?`) and an MLB
+  venue with no layout record (`NEW PARK?`), and it stores both names of a
+  renamed minor-league park. On 2026-10-12 it found no MLB rename, and one
+  minor-league rename: Lehigh Valley's Coca-Cola Park (venue 3230) is Jefferson
+  Park in the 2027 data.
+
+Re-run the import once next season's names are posted (the offseason), and
+again before Opening Day.
+
+## Adding a park
+
+1. **A park the importer already reads** (an MLB park, or the home park of an
+   MiLB club in `teams.json`): run `npm run gen:field-layouts`. A corrected
+   Gameday SVG or a new posted sign is picked up on its own. Review the
+   `fields.json` diff and the import log; a park whose outline fails its
+   audit is logged with its errors.
+2. **A wall change with dates** (a renovation): add a dated record to
+   `src/lib/ballpark/layout/configurations.js` and close the old one with
+   `to`. Cite the change (a club announcement, or Savant's configuration
+   flag). Never fill a value a source does not give; leave it `null`.
+3. **A park with no usable drawing** (a neutral site, or an MiLB park the
+   importer cannot draw): trace the wall by hand, in feet from home plate
+   (+x toward right field, +y toward center field, LF pole to RF pole), from
+   a licensed diagram or an aerial photo checked for scale (home plate, both
+   poles, the visible fence corners). Add it to `WALLS` in
+   `src/lib/ballpark/ballparkFields.js` and point a `fence: 'seed'` record at
+   it. Its CF must pass the audit in `fenceAudit.js`, and
+   `test/ballpark-layouts.test.js` checks it for foul ground and crossings.
+   Record the source and the method in the record's `sources` and `note`.
+4. Update the tables in this report.
 
 ## Who draws what (slice 2)
 

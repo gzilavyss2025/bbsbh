@@ -41,17 +41,18 @@ import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 // null for MiLB or a club with no home games ingested yet; the Facts rows
 // simply don't render.
 //
-// MEASUREMENTS ARE MLB-ONLY; THE PHOTO/NAME HALF IS NOT. `ballparkData.js`'s
-// BALLPARKS table is a hand-verified diagram nobody has built for a MiLB
-// park, so `rankedDimensions` finds nothing for one and the diagram/dimensions
-// half of the card (`ballparkcard__layout`) simply does not render — the same
-// graceful-degrade convention `ballparkFor` documents. The hero (photo + name)
-// and the owner's gear are NOT gated on that lookup: they key off the venue's
+// LEAGUE RANKS ARE MLB-ONLY; THE DRAWING AND THE PHOTO/NAME HALF ARE NOT.
+// `ballparkData.js`'s BALLPARKS table (facts, league ranks) covers the MLB
+// parks only, so `rankedDimensions` finds nothing for a minor-league park. The
+// drawing comes from the layout registry instead (`resolveBallparkLayout`),
+// which also covers the minor-league parks it could draw from their posted
+// distances (#1859); a park it cannot draw resolves to null and the
+// `ballparkcard__layout` half simply does not render. The hero (photo + name)
+// and the owner's gear are NOT gated on either lookup: they key off the venue's
 // own name either way (its canonical, alias-resolved name for an MLB park,
 // the raw feed name for anything else — MiLB has no alias table to resolve
 // through), so every park on file in `milb-ballparks.json`
-// (`scripts/gen-milb-ballparks.mjs`) gets the same photo/name/logo editor with
-// no diagram beside it.
+// (`scripts/gen-milb-ballparks.mjs`) gets the same photo/name/logo editor.
 //
 // EDITING IN PLACE. The site owner gets a gear in the masthead that turns the
 // card into a form for its own copy fields — the park's name, its art, the
@@ -197,7 +198,7 @@ function AttendanceFacts({ attendance }) {
 export function BallparkCard({ team, attendance }) {
   const { t } = useCopy()
   const venueName = team.venue?.name
-  const park = venueName ? rankedDimensions(venueName) : null
+  const park = venueName ? rankedDimensions(venueName, team.venue?.id) : null
   // The team's home park today: no date, so the current configuration (#1859).
   const layout = venueName ? resolveBallparkLayout({ venueId: team.venue?.id, venueName }) : null
 
@@ -313,28 +314,33 @@ export function BallparkCard({ team, attendance }) {
         </Suspense>
       )}
 
-      {/* The diagram/dimensions half — MLB only. A MiLB park has no
-          BALLPARKS record (no hand-verified distances, no digitized wall
-          polygon), so there is nothing here to draw or rank; the card ends
-          at the hero + gear above rather than showing a broken diagram. */}
-      {park && (
+      {/* The diagram/dimensions half. An MLB park draws its wall and ranks its
+          dimensions against the league. A minor-league park the layout
+          registry can draw (#1859) gets the drawing alone: its posted
+          distances label it, and there is no league to rank it in. A park
+          with neither ends at the hero + gear above. */}
+      {(park || layout) && (
         <div className="ballparkcard__layout">
           {layout && <BallparkDiagram className="ballparkcard__diagram" layout={layout} />}
           <div className="ballparkcard__details">
-            <dl className="bpsheet__facts">
-              <Facts label="Opened" value={park.built} />
-              <Facts label="Roof" value={park.roof} />
-              <Facts label="Capacity" value={park.capacity?.toLocaleString()} />
-            </dl>
+            {park && (
+              <dl className="bpsheet__facts">
+                <Facts label="Opened" value={park.built} />
+                <Facts label="Roof" value={park.roof} />
+                <Facts label="Capacity" value={park.capacity?.toLocaleString()} />
+              </dl>
+            )}
             {attendance && <AttendanceFacts attendance={attendance} />}
             {note && <p className="ballparkcard__note">{note}</p>}
-            <Stack gap="loose" className="bpsheet__ranks">
-              <RankGroup
-                title="Outfield distances"
-                rows={park.rows.filter((r) => r.group === 'dist')}
-              />
-              <RankGroup title="Wall heights" rows={park.rows.filter((r) => r.group === 'wall')} />
-            </Stack>
+            {park && (
+              <Stack gap="loose" className="bpsheet__ranks">
+                <RankGroup
+                  title="Outfield distances"
+                  rows={park.rows.filter((r) => r.group === 'dist')}
+                />
+                <RankGroup title="Wall heights" rows={park.rows.filter((r) => r.group === 'wall')} />
+              </Stack>
+            )}
           </div>
         </div>
       )}

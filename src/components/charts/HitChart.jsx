@@ -126,7 +126,7 @@ export function HitChart({
   const tagLines = Array.isArray(tag) ? tag : tag ? [tag] : []
   const fieldLabel = isHalf
     ? "Chart of this half inning's balls in play"
-    : `Chart of the balls in play at ${park.name}`
+    : `Chart of the balls in play at ${venue || park.name}`
 
   const chip = (on, tone) =>
     `hitchart__chip${on ? ` hitchart__chip--${tone}` : ''}`
