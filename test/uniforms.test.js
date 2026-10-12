@@ -20,6 +20,7 @@ import {
   uniformNamesSaveBody,
   uniformNameOverridesLoaded,
   buildJerseyCombos,
+  batterFigureUrls,
 } from '../src/api/uniforms.js'
 
 // --------------------------------------------------------------------------
@@ -493,4 +494,44 @@ test('buildJerseyCombos leaves the regular-season fields as before for an R-only
   ]
   const home = combosFor(schedule, { 1: worn(HOME), 2: worn(HOME) }).find((c) => c.code === HOME)
   assert.deepEqual(rec(home), { w: 1, l: 1, pw: 0, pl: 0 })
+
+// batterFigureUrls — Gameday batter-figure art for a posted side (#1852).
+// --------------------------------------------------------------------------
+const FIG = 'https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.3.0/images/batters'
+const SIDE = [
+  { text: 'Brewers City Connect 2.0 Jersey', piece: 'J', code: '158_jersey_5_2026' },
+  { text: 'Brewers City Connect 2.0 Pants', piece: 'P', code: '158_pants_5_2026' },
+  { text: 'Brewers City Connect 2.0 Cap', piece: 'C', code: '158_hat_5_2026' },
+]
+
+test('batterFigureUrls builds jersey and pants URLs, year from the code, right-handed by default', () => {
+  assert.deepEqual(batterFigureUrls(SIDE), {
+    jersey: `${FIG}/2026/right/158_jersey_5_2026.png`,
+    pants: `${FIG}/2026/right/158_pants_5_2026.png`,
+  })
+})
+
+test('batterFigureUrls honours the left-handed stance and reads a 2025 code', () => {
+  const side = [
+    { piece: 'J', code: '138_jersey_2_2025' },
+    { piece: 'P', code: '138_pants_2_2025' },
+  ]
+  assert.equal(batterFigureUrls(side, 'left').jersey, `${FIG}/2025/left/138_jersey_2_2025.png`)
+})
+
+test('batterFigureUrls returns null for a missing jersey or pants', () => {
+  assert.equal(batterFigureUrls(SIDE.filter((a) => a.piece !== 'J')), null)
+  assert.equal(batterFigureUrls(SIDE.filter((a) => a.piece !== 'P')), null)
+})
+
+test('batterFigureUrls returns null for a null or empty side', () => {
+  assert.equal(batterFigureUrls(null), null)
+  assert.equal(batterFigureUrls([]), null)
+})
+
+test('batterFigureUrls returns null for a null or malformed code', () => {
+  const bad = (code) => [{ piece: 'J', code }, { piece: 'P', code: '158_pants_5_2026' }]
+  assert.equal(batterFigureUrls(bad(null)), null)
+  assert.equal(batterFigureUrls(bad('158_jersey_5')), null)
+  assert.equal(batterFigureUrls(bad('nonsense')), null)
 })

@@ -60,6 +60,25 @@ render on the staging screens (TeamInfo / GameView masthead). The only wrinkle i
 still be empty when the user stages a game pregame, so render it
 behind the usual "not posted yet" fallback and let Refresh pick it up.
 
+### Batter figure images
+
+Gameday renders a batter figure per uniform asset (found in longbored's
+`fetch_uniform_assets.py` gist; checked 2026-10-12, issue #1852):
+
+`https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.3.0/images/batters/{year}/{right|left}/{code}.png`
+
+- `{code}` is the `uniformAssetCode` from `/uniforms/game` (`158_jersey_5_2026`);
+  `{year}` is its last segment. Both hands return 200. One fixed stance per hand.
+- PNG, 496x1050, transparent, 38-60 KB. Jersey and pants are SEPARATE images on
+  the same canvas: stack the pants under the jersey at equal size.
+- No hat art: cap codes are not on this path. The figure wears a generic helmet.
+- **Unofficial.** The path carries a version (`1.3.0`); MLB could move it without
+  notice, so a consumer hides the figure on `onError`.
+- **2025 codes are not checked yet.** Only 2026 images were fetched.
+- Spoiler-free static art; `batterFigureUrls` (`src/api/uniforms.js`) builds the
+  URLs and returns null unless both pieces are posted. Cached `CacheFirst` in
+  `vite.config.js`.
+
 ## 2. Alternate logos (Barrelman, City Connect marks) — NOT on any MLB CDN
 
 Re-verified today, extending the sweep recorded in `src/lib/teams.js`:
