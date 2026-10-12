@@ -22,7 +22,7 @@ export function SeasonLines({ role, line, post, career, season, debut, sportId }
           <div className="pcard__postrule">
             <span className="pcard__lbl pcard__lbl--ink">{season} postseason</span>
           </div>
-          <StatGrid cells={seasonCells(role, post, { postseason: true })} />
+          <StatGrid cells={seasonCells(role, post)} />
         </>
       )}
       {career && (
@@ -30,7 +30,7 @@ export function SeasonLines({ role, line, post, career, season, debut, sportId }
           <div className="pcard__postrule">
             <span className="pcard__lbl pcard__lbl--ink">All-time postseason</span>
           </div>
-          <StatGrid cells={seasonCells(role, career, { postseason: true })} />
+          <StatGrid cells={seasonCells(role, career)} />
         </>
       )}
     </div>

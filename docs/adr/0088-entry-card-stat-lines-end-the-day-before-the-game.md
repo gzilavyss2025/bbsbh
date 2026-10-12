@@ -41,10 +41,11 @@ keeps a game with `date < officialDate`, or the same date with a lower
 `gameNumber` (a doubleheader). The gameLog call asks for
 `gameType=R,F,D,L,W`.
 
-**4. No decision from an earlier game.** In a series, a W, L, SV or HLD tells
-the reader how an earlier game ended. The postseason row shows "–" in the
-decision column. The last appearance shows no decision. The fetcher does not
-return one.
+**4. Decisions: postseason rows show them; the last appearance does not.** In a
+series, a W, L, SV or HLD tells the reader how an earlier game ended. Gary chose
+to accept this in the postseason rows, so they show the real decision column
+(a dash there hid a W-L that must exist). The last appearance still shows no
+decision, and the fetcher does not return one.
 
 **5. Yesterday is not protected.** WC Gm 1 is in the WC Gm 2 card's postseason
 row. This follows ADR-0087's rule: a cutoff is a date, not what the reader

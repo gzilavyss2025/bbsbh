@@ -20,8 +20,8 @@ import { Card } from '../ui/frame/Card.jsx'
 //
 // SPOILER FOOTING (ADR-0088, ADR-0087). Every line ends the DAY BEFORE the
 // cutoff (fetchPitcherSeasonLine), the last appearance is strictly before it
-// (fetchPitcherLastGame), and the postseason row shows a dash for the decision:
-// a W or L there would say how an earlier game of this series ended. This is
+// (fetchPitcherLastGame). The postseason rows show W-L, so they can say how an
+// earlier game of this series ended (ADR-0088, point 4). This is
 // deliberately NOT the lineup page's PitcherCard: that card reads the game's own
 // feed, and this page never fetches today's feed. A side with no announced
 // probable shows the "Likely starters" guess (ADR-0089) and never a headshot or
@@ -95,7 +95,7 @@ function Starter({ clubId, arm, season, cutoff, restOn, gameNumber }) {
               <div className="pcard__postrule">
                 <span className="pcard__lbl pcard__lbl--ink">{season} postseason</span>
               </div>
-              <StatGrid cells={seasonCells(role, data.post, { postseason: true })} />
+              <StatGrid cells={seasonCells(role, data.post)} />
             </>
           )}
           {hasCareer && (
@@ -103,7 +103,7 @@ function Starter({ clubId, arm, season, cutoff, restOn, gameNumber }) {
               <div className="pcard__postrule">
                 <span className="pcard__lbl pcard__lbl--ink">All-time postseason</span>
               </div>
-              <StatGrid cells={seasonCells(role, data.career, { postseason: true })} />
+              <StatGrid cells={seasonCells(role, data.career)} />
             </>
           )}
         </div>

@@ -29,8 +29,7 @@ import { SeasonLines } from './SeasonLines.jsx'
 // both stat lines END THE DAY BEFORE this game (fetchPitcherSeasonLine,
 // ADR-0088), the last appearance is strictly before it (doubleheader-safe,
 // fetchPitcherLastGame), the pitch mix is a completed-game season total, and
-// no decision from an earlier game in the series is shown (the postseason
-// row's decision column is a dash; the last appearance has none).
+// the last appearance shows no decision (the postseason rows do show W-L).
 //
 // `relief`: he enters as a reliever (any arm after the first half his club
 // pitched). Drives "Starter in relief" and "Pitched yesterday".
