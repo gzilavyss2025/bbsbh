@@ -30,8 +30,12 @@ const VENUE_BY_NAME = new Map()
 for (const c of ALL) {
   for (const n of c.names ?? []) VENUE_BY_NAME.set(normalizeVenue(n), c.venueId)
 }
+const CONFIG_BY_RECORD = new Map()
+for (const cfg of CONFIGURATIONS) {
+  if (cfg.park && !CONFIG_BY_RECORD.has(BALLPARKS[cfg.park])) CONFIG_BY_RECORD.set(BALLPARKS[cfg.park], cfg)
+}
 for (const [key, rec] of Object.entries(BALLPARKS)) {
-  const c = CONFIGURATIONS.find((cfg) => cfg.park && BALLPARKS[cfg.park] === rec)
+  const c = CONFIG_BY_RECORD.get(rec)
   if (c) VENUE_BY_NAME.set(key, c.venueId)
 }
 
@@ -101,8 +105,13 @@ function build(c) {
   }
 }
 
-// One layout per configuration, built once (an audit is a few hundred ray casts).
-const LAYOUTS = new Map(ALL.map((c) => [c.id, build(c)]))
+// One layout per configuration, built on first use and kept (an audit is a few
+// hundred ray casts, so an importer that never draws a park pays nothing).
+const LAYOUTS = new Map()
+function layoutOf(c) {
+  if (!LAYOUTS.has(c.id)) LAYOUTS.set(c.id, build(c))
+  return LAYOUTS.get(c.id)
+}
 
 // The configuration a venue had on a date. `venueId` wins over `venueName` when
 // both are given (a neutral site or a renamed park still has its own id).
@@ -113,10 +122,10 @@ export function resolveBallparkLayout({ venueId, venueName, gameDate } = {}) {
   if (id == null) return null
   const day = dayOf(gameDate)
   const c = ALL.find((cfg) => cfg.venueId === id && covers(cfg, day))
-  return c ? LAYOUTS.get(c.id) : null
+  return c ? layoutOf(c) : null
 }
 
 // Every configuration's layout, for the coverage report and the tests.
 export function allBallparkLayouts() {
-  return [...LAYOUTS.values()]
+  return ALL.map(layoutOf)
 }

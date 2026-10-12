@@ -40,7 +40,7 @@ function highest(rows, key) {
 // The park runs (`g`) join in the same order as the balls. A slice whose runs
 // do not cover all its balls (a season stored before the runs existed) gets
 // one run of unknown park for the rest, so the joined runs still line up.
-function coveringRuns(slice) {
+export function coveringRuns(slice) {
   const runs = slice.g ?? []
   const covered = runs.reduce((n, r) => n + r[0], 0)
   const rest = (slice.p?.length ?? 0) - covered

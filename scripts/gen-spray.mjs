@@ -79,6 +79,7 @@ import { readdir } from 'node:fs/promises'
 import { getJson } from './lib/statsapi.mjs'
 import { readJsonOr, writeJsonAtomic, writeSeasons, writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
+import { coveringRuns } from '../src/lib/seasons/combine.js'
 import { round1 } from '../src/lib/math/number.js'
 import { HARD_HIT_MPH } from '../src/lib/ballpark/hitProjection.js'
 import { parseArgs, dateRange, isoDay } from './lib/args.mjs'
@@ -273,11 +274,9 @@ export function foldGame(store, agg, date, venueId = null) {
     }
     if (delta.bats) entry.b = delta.bats
     if (delta.rows.length) {
-      const runs = (entry.g ??= [])
       // Rows carried from before the runs existed get one run of unknown park,
       // so `g` always covers `p` exactly (a rebuild makes this a no-op).
-      const covered = runs.reduce((n, r) => n + r[0], 0)
-      if (covered < entry.p.length) runs.push([entry.p.length - covered, null])
+      const runs = (entry.g = coveringRuns(entry))
       const last = runs[runs.length - 1]
       if (last && last[1] === venueId) last[0] += delta.rows.length
       else runs.push([delta.rows.length, venueId])

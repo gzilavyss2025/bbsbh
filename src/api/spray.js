@@ -1,6 +1,6 @@
 import { readSeasonShard, staticJsonBy } from './staticJson.js'
 import { shardKey100 } from '../lib/shardKey.js'
-import { combineSprayEntries } from '../lib/seasons/combine.js'
+import { combineSprayEntries, coveringRuns } from '../lib/seasons/combine.js'
 import { HIT_COORD_ORIGIN, HARD_HIT_MPH } from '../lib/ballpark/hitProjection.js'
 import { resolveBallparkLayout } from '../lib/ballpark/layout/resolveLayout.js'
 
@@ -124,11 +124,7 @@ function entryFor(data, personId, part = 'bat') {
 // (a pre-run entry gets one unknown run). Null in, null out.
 export function withSeasonRuns(entry, season) {
   if (!entry) return null
-  const runs = entry.g ?? []
-  const covered = runs.reduce((n, r) => n + r[0], 0)
-  const rest = (entry.p?.length ?? 0) - covered
-  const all = rest > 0 ? [...runs, [rest, null]] : runs
-  return { ...entry, g: all.map(([n, v, s]) => [n, v, s ?? season]) }
+  return { ...entry, g: coveringRuns(entry).map(([n, v, s]) => [n, v, s ?? season]) }
 }
 
 // The compact rows as objects. Called once per view; every filter downstream
