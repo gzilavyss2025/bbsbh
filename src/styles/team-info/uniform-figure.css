@@ -1,6 +1,6 @@
-/* The Uniform fact's batter figure (#1852): the text stays plain ink, the
-   thumbnail sits beside it. Two images stack in a box of fixed size, so the
-   cell does not jump when they load. */
+/* The Uniform fact's shirt button and the sheet it opens (#1852): the text stays
+   plain ink, the button sits beside it. In the sheet, two images stack in a box
+   of fixed size, so it does not jump when they load. */
 
 /* layout-exempt: text shrinks beside a fixed-width thumbnail; a wrapping Cluster would drop the thumbnail under the text */
 .fact__figure {
@@ -10,17 +10,13 @@
   gap: var(--space-2);
 }
 
-.fact__tap {
+.fact__figure > button {
   flex: none;
-  padding: 0;
-  min-width: var(--tap-min);
-  justify-content: center;
 }
 
 .ufig {
   position: relative;
   display: block;
-  flex: none;
 }
 
 .ufig__img {
@@ -32,10 +28,5 @@
 }
 
 .ufig__text {
-  font-size: var(--fs-ui);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-num);
-  color: var(--text-body);
   text-align: center;
 }

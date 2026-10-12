@@ -64,6 +64,7 @@ import { SPORT_LABEL, teamAbbr } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, mastheadMarkFor } from '../lib/headerTheme.js'
 import { seasonTheme, seasonMasthead } from '../lib/identity/seasonMarks.js'
 import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
+import { batterFigureUrls } from '../api/uniforms.js'
 import { UniformFigureButton } from '../components/logo/UniformFigure.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
@@ -135,6 +136,7 @@ export function TeamInfo({
     [hpId, gameSeason],
   )
   const info = useMemo(() => selectGameInfo(feed), [feed])
+  const figureUrls = batterFigureUrls(uniformFigure) // null until both pieces are posted
   // Null for a club with no curated triad, which leaves every bar below on the
   // app's default navy chrome — coverage is partial by design (ADR-0030).
   // Resolved on every render rather than memoized. It is a table lookup and two
@@ -200,7 +202,7 @@ export function TeamInfo({
             <Fact
               label="Uniform"
               value={uniform}
-              aside={<UniformFigureButton assets={uniformFigure} label={uniform} />}
+              aside={figureUrls && <UniformFigureButton urls={figureUrls} label={uniform} />}
             />
             {/* Broadcast rides on the away page only, filling the cell that
                 otherwise sits empty next to Uniform (an odd fact count leaves it

@@ -1,15 +1,14 @@
 import { useRef, useState } from 'react'
-import { batterFigureUrls } from '../../api/uniforms.js'
-import { Button } from '../ui/control/Button.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // Gameday's batter figure for tonight's uniform (#1852): the pants image under
-// the jersey image, same canvas, in a box of fixed width and height so the page
-// does not shift while they load. Spoiler-free static art
+// the jersey image, same canvas, in a box of fixed width and height so nothing
+// shifts while they load. Spoiler-free static art
 // (docs/uniforms-and-logos.md, "Batter figure images"). `crossOrigin` lets the
-// service worker's CacheFirst rule store the response.
+// service worker's CacheFirst rule store the response. `urls` is
+// `batterFigureUrls`' result, which the caller has already checked for null.
 const ASPECT = 1050 / 496 // the art's tall canvas
 
 export function UniformFigure({ urls, label, size, onError }) {
@@ -31,27 +30,29 @@ export function UniformFigure({ urls, label, size, onError }) {
   )
 }
 
-// The Uniform fact's thumbnail: a ghost Button that opens the full-size figure
-// in a sheet (the LogoModal pattern). Renders nothing when the side has no
-// complete figure (pregame, MiLB, half posted), and hides itself, sheet
-// included, when either image fails to load — no broken-image icon.
-export function UniformFigureButton({ assets, label }) {
-  const urls = batterFigureUrls(assets)
+// A shirt outline, so the control reads as "the uniform" without drawing it.
+function ShirtIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+      <path d="M8 3 3 6l2 4 2-1v12h10V9l2 1 2-4-5-3c-1 2-7 2-8 0Z" />
+    </svg>
+  )
+}
+
+// The Uniform fact's shirt button: it opens the full-size figure in a sheet
+// (the LogoModal pattern). The sheet is the only place the images load, so a
+// failed image hides the figure there and leaves the uniform text: no broken
+// icon. The sheet remounts on each open, so a failure never sticks.
+export function UniformFigureButton({ urls, label }) {
   const [open, setOpen] = useState(false)
-  const [failed, setFailed] = useState(false)
-  if (!urls || failed) return null
-  const fail = () => setFailed(true)
   return (
     <>
-      <Button skin="ghost" className="fact__tap" aria-label="Show uniform" onClick={() => setOpen(true)}>
-        <UniformFigure urls={urls} label="" size={44} onError={fail} />
-      </Button>
+      <IconButton mark="md" skin="outline" label={`Show uniform: ${label}`} onClick={() => setOpen(true)}>
+        <ShirtIcon />
+      </IconButton>
       {open && (
         <ModalPortal>
-          <UniformSheet onClose={() => setOpen(false)}>
-            <UniformFigure urls={urls} label={label} size={180} onError={fail} />
-            <p className="ufig__text">{label}</p>
-          </UniformSheet>
+          <UniformSheet urls={urls} label={label} onClose={() => setOpen(false)} />
         </ModalPortal>
       )}
     </>
@@ -59,8 +60,9 @@ export function UniformFigureButton({ assets, label }) {
 }
 
 // Own component so `useDialogFocus` runs only while the sheet is mounted.
-function UniformSheet({ onClose, children }) {
+function UniformSheet({ urls, label, onClose }) {
   const closeRef = useRef(null)
+  const [failed, setFailed] = useState(false)
   useDialogFocus(closeRef, onClose)
   return (
     <div
@@ -71,7 +73,8 @@ function UniformSheet({ onClose, children }) {
         <IconButton ref={closeRef} mark="md" className="logomodal__close" onClick={onClose} label="Close">
           ✕
         </IconButton>
-        {children}
+        {!failed && <UniformFigure urls={urls} label={label} size={180} onError={() => setFailed(true)} />}
+        <p className="fact__value ufig__text">{label}</p>
       </div>
     </div>
   )
