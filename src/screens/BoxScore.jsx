@@ -39,7 +39,7 @@ import { UmpireLink } from '../components/umpire/UmpireLink.jsx'
 import { ManagerLink } from '../components/team/ManagerLink.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
-import { RefreshButton, InfoIcon } from './TeamInfo.jsx'
+import { RefreshButton, CrowdIcon } from './TeamInfo.jsx'
 import { ballparkFor } from '../lib/ballpark/ballparkData.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../lib/headerTheme.js'
 import { seasonTheme } from '../lib/identity/seasonMarks.js'
@@ -605,7 +605,7 @@ function InsightNoteCard({ group }) {
 
 // The Attendance fill-in's "i" glyph + % full note — the same tap-glyph-
 // unfolds-in-place idiom as the lineup page's own AttendanceFact
-// (TeamInfo.jsx), reusing its .attendance__* styling and InfoIcon glyph.
+// (TeamInfo.jsx), reusing its .attendance__* styling and CrowdIcon glyph.
 // Only reached (see homeFields above) when the feed posted a figure, so no
 // separate "not posted yet" branch is needed here; degrades to the plain
 // attendance figure when the park isn't one of the 30 MLB parks on file
@@ -629,7 +629,7 @@ function AttendanceValue({ venue, attendance }) {
           aria-expanded={open}
           aria-label="How full is the stadium"
         >
-          <InfoIcon />
+          <CrowdIcon />
         </button>
       </span>
       {open && (
