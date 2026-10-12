@@ -23,6 +23,7 @@ lab or the runtime overlay edits.
 | `league-logo-manifest.json` | `components/passport/leagueMarks.js`; written by `scripts/gen-league-logos.mjs` |
 | `season-marks.json` | `identity/seasonMarks.js` → `components/logo/TeamLogo.jsx` (`season` prop); written by the lab's Eras tab (`scripts/lib/eras/dev-season-marks.mjs`); `scripts/season-marks/fetch.mjs` is a one-time bootstrap |
 | `milb-ballparks.json` | `copy/registry.js`; written by `scripts/gen-milb-ballparks.mjs` |
+| `park-keys.json` | `ballpark/parkKeys.js` — each venue id's PINNED store key, append-only so a sponsor rename keeps the park's photo and copy; written by `scripts/gen-milb-ballparks.mjs` (a hand-added name or venue is kept) |
 | `park-wash-tuning.json` | `ballpark/parkWash.js` |
 | `stamp-logo-tuning.json` | `stampLogoTuning.js` → `components/logbook/GameStamp.jsx` — read at RENDER time |
 | `stamp-ink.json` | `stampInkTuning.js` → `stampInk.js` → `components/logbook/GameStamp.jsx` — also read at RENDER time, so a retune restyles every minted stamp |

@@ -1,7 +1,8 @@
 // Ballpark art upload — the eighth narrow, opt-in backend exception, and the
 // FIRST one that accepts bytes.
 //
-//   POST /api/ballpark-photo?key={venueKey}&kind=photo|wordmark
+//   POST /api/ballpark-photo?key={parkKey}&kind=photo|wordmark
+//   (the park's PINNED key, src/lib/ballpark/parkKeys.js — a rename keeps it)
 //     body:    raw image bytes, content-type image/jpeg or image/png
 //     returns: { url }                                        (admin only)
 //

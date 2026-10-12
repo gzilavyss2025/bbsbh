@@ -27,27 +27,18 @@
 // because clamping would erase exactly the clubs the stat is finding.
 
 import { staticJson } from '../staticJson.js'
-import { BALLPARKS } from '../../lib/ballpark/ballparkData.js'
+import { parkRecord } from '../../lib/ballpark/parkKeys.js'
 
 export const fetchGate = staticJson('/data/gate.json')
-
-// Normalized venue key, mirroring lib/ballpark/ballparkData.js's own — kept as
-// a local copy for the same reason that module keeps one: it is four lines,
-// and exporting it would widen that module's surface for one caller.
-function venueKey(name) {
-  return (name ?? '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '')
-}
 
 // The listed capacity of a club's home park, or null when the park is not in
 // the static table (the Athletics' temporary Triple-A home is the standing
 // gap). A null capacity means no fill rate — the row still ranks on every
-// other column rather than dropping off the board.
-export function capacityFor(venue) {
-  return BALLPARKS[venueKey(venue)]?.capacity ?? null
+// other column rather than dropping off the board. Found through any name the
+// venue has worn (parkRecord), so a sponsor rename does not drop a club's fill
+// rate the season it lands.
+export function capacityFor(venue, venueId = null) {
+  return parkRecord(venue, venueId)?.capacity ?? null
 }
 
 // The season a bare page load should open on: the newest one on file.

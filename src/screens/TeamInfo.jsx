@@ -19,6 +19,7 @@ import { BallparkModal } from '../components/ballpark/BallparkModal.jsx'
 import { BoxLinesDoor } from '../components/boxlines/BoxLinesDoor.jsx'
 import { ExpressLaneDoor } from '../components/game/ExpressLaneDoor.jsx'
 import { ballparkFor } from '../lib/ballpark/ballparkData.js'
+import { resolveBallparkLayout } from '../lib/ballpark/layout/resolveLayout.js'
 import { POS_ORDER } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill, hasDebuted } from '../api/rookies.js'
@@ -306,7 +307,7 @@ function GameFacts({ info, scorebookWeather, scorebookWeatherLoading }) {
   return (
     <>
       <Fact label="Date" value={scorebookDate(info.officialDate)} />
-      <BallparkFact venue={info.venue} />
+      <BallparkFact venue={info.venue} venueId={info.venueId} gameDate={info.officialDate} />
       {/* Scheduled start (posted the moment the game exists) until the box
           score's own "First pitch" info line posts once the game's under
           way — the actual time then overwrites the estimate in place, same
@@ -1139,13 +1140,16 @@ function AttendanceFact({ venue, attendance }) {
   )
 }
 
-// The Ballpark fact. When we have the park on file (the 30 MLB parks — see
-// ballparkData.js), the venue name becomes a button that opens the to-scale
-// field diagram + league-ranked dimensions. MiLB parks and any venue not on file
-// degrade to the plain read-only Fact, per the app's graceful-degradation rule.
-function BallparkFact({ venue }) {
+// The Ballpark fact. When we have the park on file (the MLB parks — see
+// ballparkData.js — or a minor-league park the layout registry can draw), the
+// venue name becomes a button that opens the to-scale field diagram, plus
+// league-ranked dimensions for an MLB park. Any venue not on file degrades to
+// the plain read-only Fact, per the app's graceful-degradation rule.
+function BallparkFact({ venue, venueId, gameDate }) {
   const [open, setOpen] = useState(false)
-  if (!ballparkFor(venue)) return <Fact label="Ballpark" value={venue} />
+  if (!ballparkFor(venue, venueId) && !resolveBallparkLayout({ venueId, venueName: venue, gameDate })) {
+    return <Fact label="Ballpark" value={venue} />
+  }
   return (
     <div className="fact">
       <dt className="fact__label">Ballpark</dt>
@@ -1154,7 +1158,9 @@ function BallparkFact({ venue }) {
           {venue}
         </button>
       </dd>
-      {open && <BallparkModal venue={venue} onClose={() => setOpen(false)} />}
+      {open && (
+        <BallparkModal venue={venue} venueId={venueId} gameDate={gameDate} onClose={() => setOpen(false)} />
+      )}
     </div>
   )
 }

@@ -118,7 +118,7 @@ export function GameCard({
   // lib/ballpark/parkBackdrop.js). Reading the copy store here is a context
   // read, not a fetch.
   const { t } = useCopy()
-  const park = parkBackdrop(game.venue?.name, t)
+  const park = parkBackdrop(game.venue?.name, t, game.venue?.id)
   // The photo is fetched the moment the card first appears on screen (see the
   // effect below), not on mount — a slate is fifteen cards and even the small
   // companion image isn't free, so loading them all up front would cost bytes

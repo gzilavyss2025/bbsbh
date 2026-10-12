@@ -988,6 +988,15 @@ don't run these by hand.
   `post` map beside `bat` in each bucket, never blended (ADR-0103). Old
   postseason games are outside the nightly window: backfill by hand with
   `--since=<date> --sports=1`; the 2026 run covered 2026-09-28 to 2026-10-06.
+  (5) **Each entry records its parks** (schema version 2, `v` in every bucket;
+  #1859): `g: [[count, venueId], …]`, the park of each consecutive run of rows,
+  from `gameData.venue.id` (`venue` is in the `fields=` allowlist). Runs, not a
+  ninth column: about 20 runs a batter, +3% on disk (a column would pass the
+  160 KB bucket ceiling in `test/bucket-shards.test.js`). A season stored under
+  an older version rebuilds itself on the next run: the whole season again,
+  from January 1, into an empty store and ledger. Checkpoints keep version 1, so
+  a rebuild cut short starts over. Measured on 2026-10-12: 4,679 games in 67
+  seconds, largest bucket 152.9 KB. `--rebuild` forces one.
   Two filters worth knowing: **decided games only, never today's**
   (`abstractGameState === 'Final'` AND an officialDate strictly before today),
   which is the card's whole spoiler footing; and `detailedState === 'Cancelled'`
@@ -1396,8 +1405,11 @@ don't run these by hand.
   own weekly crons until 2026-08-28 — but running them on a cadence made the
   nightly steps that READ their output impossible to gate on them, so as of
   2026-08-29 they simply run every night (11 requests between them). App reads it via `src/api/team.js`.
-- `gen-milb-ballparks.mjs` → `src/lib/data/milb-ballparks.json` — every current
-  MiLB team's venue name, deduped by `venueKey` (one venue can host two clubs,
+- `gen-milb-ballparks.mjs` → `src/lib/data/park-keys.json` and
+  `src/lib/data/milb-ballparks.json`. The first pins one store key per MLB and
+  MiLB venue id, append-only: a rename keeps the key and adds the new name, and
+  the run logs it (`src/lib/ballpark/parkKeys.js` has the why). The second is every current
+  MiLB team's venue name, deduped by that pinned key (one venue can host two clubs,
   e.g. Roger Dean Chevrolet Stadium). Read straight from the `teams.json` this
   same workflow just wrote rather than a second statsapi fetch. This is the
   MiLB counterpart to `src/lib/ballpark/ballparkData.js`'s hand-authored MLB
@@ -1412,6 +1424,23 @@ don't run these by hand.
 
 Re-run only to fold in a new season.
 
+- `ballpark/import-field-layouts.mjs` → `src/lib/ballpark/layout/fields.json` — each
+  MLB park's measured distances, wall heights, deepest point and fair area (Baseball
+  Savant's Dimensions table), plus its current fence outline, extracted from MLB's
+  Gameday field SVG. An outline is stored only when it passes an audit against the
+  same season's Savant row. Run by hand once a season, or after a club announces a
+  wall change: `npm run gen:field-layouts [-- --year 2027]`. The default season is
+  `lib/time/season-in-play.mjs`. Pure half:
+  `scripts/lib/ballpark/field-svg.mjs`. Readers: `src/lib/ballpark/layout/fences.js`
+  and, through it, `ballparkData.js` and `resolveLayout.js`. A second pass covers
+  the home park of every MiLB club in `public/data/teams.json`: posted distances
+  from the Stats API venue endpoint (through `lib/statsapi.mjs`), and an outline
+  from the older Gameday art, stored only when it fits the posted LF, CF and RF
+  within 10 ft. For an MLB park with an audited outline it also stores the
+  playing surface (foul ground and backstop) and the warning track's inner
+  edge from the same SVG, each only when plausible (`checkLayers`). About 160
+  requests in all. Coverage report and the method for
+  adding a park: `docs/ballpark-layouts.md` (#1859).
 - `gen-franchise-history.mjs` → `public/data/franchise-history/{teamId}.json`
   — each of the 30 clubs' name, league and ballpark by season, 1901 to the last
   complete season, as spans (the Brewers' file starts with the 1969 Seattle Pilots).

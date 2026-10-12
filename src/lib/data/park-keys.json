@@ -1,0 +1,897 @@
+{
+  "1": {
+    "key": "angelstadium",
+    "names": [
+      "Angel Stadium"
+    ]
+  },
+  "2": {
+    "key": "orioleparkatcamdenyards",
+    "names": [
+      "Oriole Park at Camden Yards"
+    ]
+  },
+  "3": {
+    "key": "fenwaypark",
+    "names": [
+      "Fenway Park"
+    ]
+  },
+  "4": {
+    "key": "ratefield",
+    "names": [
+      "Rate Field"
+    ]
+  },
+  "5": {
+    "key": "progressivefield",
+    "names": [
+      "Progressive Field"
+    ]
+  },
+  "7": {
+    "key": "kauffmanstadium",
+    "names": [
+      "Kauffman Stadium"
+    ]
+  },
+  "12": {
+    "key": "tropicanafield",
+    "names": [
+      "Tropicana Field"
+    ]
+  },
+  "14": {
+    "key": "rogerscentre",
+    "names": [
+      "Rogers Centre"
+    ]
+  },
+  "15": {
+    "key": "chasefield",
+    "names": [
+      "Chase Field"
+    ]
+  },
+  "17": {
+    "key": "wrigleyfield",
+    "names": [
+      "Wrigley Field"
+    ]
+  },
+  "19": {
+    "key": "coorsfield",
+    "names": [
+      "Coors Field"
+    ]
+  },
+  "22": {
+    "key": "dodgerstadium",
+    "names": [
+      "UNIQLO Field at Dodger Stadium"
+    ]
+  },
+  "31": {
+    "key": "pncpark",
+    "names": [
+      "PNC Park"
+    ]
+  },
+  "32": {
+    "key": "americanfamilyfield",
+    "names": [
+      "American Family Field"
+    ]
+  },
+  "680": {
+    "key": "tmobilepark",
+    "names": [
+      "T-Mobile Park"
+    ]
+  },
+  "2392": {
+    "key": "daikinpark",
+    "names": [
+      "Daikin Park"
+    ]
+  },
+  "2394": {
+    "key": "comericapark",
+    "names": [
+      "Comerica Park"
+    ]
+  },
+  "2395": {
+    "key": "oraclepark",
+    "names": [
+      "Oracle Park"
+    ]
+  },
+  "2511": {
+    "key": "publixfieldatjokermarchantstadium",
+    "names": [
+      "Publix Field at Joker Marchant Stadium"
+    ]
+  },
+  "2512": {
+    "key": "upmcpark",
+    "names": [
+      "UPMC Park"
+    ]
+  },
+  "2516": {
+    "key": "thediamond",
+    "names": [
+      "The Diamond"
+    ]
+  },
+  "2520": {
+    "key": "rogerdeanchevroletstadium",
+    "names": [
+      "Roger Dean Chevrolet Stadium"
+    ]
+  },
+  "2523": {
+    "key": "georgemsteinbrennerfield",
+    "names": [
+      "George M. Steinbrenner Field"
+    ]
+  },
+  "2526": {
+    "key": "lecompark",
+    "names": [
+      "LECOM Park"
+    ]
+  },
+  "2528": {
+    "key": "delldiamond",
+    "names": [
+      "Dell Diamond"
+    ]
+  },
+  "2529": {
+    "key": "sutterhealthpark",
+    "names": [
+      "Sutter Health Park"
+    ]
+  },
+  "2536": {
+    "key": "tdballpark",
+    "names": [
+      "TD Ballpark"
+    ]
+  },
+  "2540": {
+    "key": "josephprileyjrballpark",
+    "names": [
+      "Joseph P. Riley, Jr. Ballpark"
+    ]
+  },
+  "2541": {
+    "key": "durhambullsathleticpark",
+    "names": [
+      "Durham Bulls Athletic Park"
+    ]
+  },
+  "2542": {
+    "key": "autozonepark",
+    "names": [
+      "AutoZone Park"
+    ]
+  },
+  "2602": {
+    "key": "greatamericanballpark",
+    "names": [
+      "Great American Ball Park"
+    ]
+  },
+  "2640": {
+    "key": "chukchansipark",
+    "names": [
+      "Chukchansi Park"
+    ]
+  },
+  "2680": {
+    "key": "petcopark",
+    "names": [
+      "Petco Park"
+    ]
+  },
+  "2681": {
+    "key": "citizensbankpark",
+    "names": [
+      "Citizens Bank Park"
+    ]
+  },
+  "2683": {
+    "key": "isotopespark",
+    "names": [
+      "Isotopes Park"
+    ]
+  },
+  "2700": {
+    "key": "baycareballpark",
+    "names": [
+      "BayCare Ballpark"
+    ]
+  },
+  "2722": {
+    "key": "route66stadium",
+    "names": [
+      "Route 66 Stadium"
+    ]
+  },
+  "2723": {
+    "key": "firstnationalbankfield",
+    "names": [
+      "First National Bank Field"
+    ]
+  },
+  "2724": {
+    "key": "louisvillesluggerfield",
+    "names": [
+      "Louisville Slugger Field"
+    ]
+  },
+  "2728": {
+    "key": "sanmanuelstadium",
+    "names": [
+      "San Manuel Stadium"
+    ]
+  },
+  "2729": {
+    "key": "arthurwperduestadium",
+    "names": [
+      "Arthur W. Perdue Stadium"
+    ]
+  },
+  "2730": {
+    "key": "avistastadium",
+    "names": [
+      "Avista Stadium"
+    ]
+  },
+  "2731": {
+    "key": "bannerislandballpark",
+    "names": [
+      "Banner Island Ballpark"
+    ]
+  },
+  "2733": {
+    "key": "peoplesnaturalgasfield",
+    "names": [
+      "Peoples Natural Gas Field"
+    ]
+  },
+  "2735": {
+    "key": "journeybankballpark",
+    "names": [
+      "Journey Bank Ballpark"
+    ]
+  },
+  "2740": {
+    "key": "717creditunionpark",
+    "names": [
+      "7 17 Credit Union Park"
+    ]
+  },
+  "2745": {
+    "key": "cheneystadium",
+    "names": [
+      "Cheney Stadium"
+    ]
+  },
+  "2747": {
+    "key": "pelicansballpark",
+    "names": [
+      "Pelicans Ballpark"
+    ]
+  },
+  "2749": {
+    "key": "fnbfield",
+    "names": [
+      "FNB Field"
+    ]
+  },
+  "2755": {
+    "key": "ridersfield",
+    "names": [
+      "Riders Field"
+    ]
+  },
+  "2756": {
+    "key": "sahlenfield",
+    "names": [
+      "Sahlen Field"
+    ]
+  },
+  "2757": {
+    "key": "heritagefinancialpark",
+    "names": [
+      "Heritage Financial Park"
+    ]
+  },
+  "2759": {
+    "key": "classicautogrouppark",
+    "names": [
+      "Classic Auto Group Park"
+    ]
+  },
+  "2762": {
+    "key": "everettmemorialstadium",
+    "names": [
+      "Everett Memorial Stadium"
+    ]
+  },
+  "2764": {
+    "key": "atriumhealthballpark",
+    "names": [
+      "Atrium Health Ballpark"
+    ]
+  },
+  "2765": {
+    "key": "lmcuballpark",
+    "names": [
+      "LMCU Ballpark"
+    ]
+  },
+  "2766": {
+    "key": "dayairballpark",
+    "names": [
+      "Day Air Ballpark"
+    ]
+  },
+  "2767": {
+    "key": "fifththirdfield",
+    "names": [
+      "Fifth Third Field"
+    ]
+  },
+  "2768": {
+    "key": "momentumbankballpark",
+    "names": [
+      "Momentum Bank Ballpark"
+    ]
+  },
+  "2769": {
+    "key": "firstenergystadium",
+    "names": [
+      "FirstEnergy Stadium"
+    ]
+  },
+  "2771": {
+    "key": "neurosciencegroupfield",
+    "names": [
+      "Neuroscience Group Field"
+    ]
+  },
+  "2773": {
+    "key": "eslballpark",
+    "names": [
+      "ESL Ballpark"
+    ]
+  },
+  "2776": {
+    "key": "synovuspark",
+    "names": [
+      "Synovus Park"
+    ]
+  },
+  "2779": {
+    "key": "deltadentalpark",
+    "names": [
+      "Delta Dental Park"
+    ]
+  },
+  "2781": {
+    "key": "harborpark",
+    "names": [
+      "Harbor Park"
+    ]
+  },
+  "2782": {
+    "key": "nymeofield",
+    "names": [
+      "Nymeo Field"
+    ]
+  },
+  "2787": {
+    "key": "jackierobinsonballpark",
+    "names": [
+      "Jackie Robinson Ballpark"
+    ]
+  },
+  "2790": {
+    "key": "modernwoodmenpark",
+    "names": [
+      "Modern Woodmen Park"
+    ]
+  },
+  "2793": {
+    "key": "frawleystadium",
+    "names": [
+      "Frawley Stadium"
+    ]
+  },
+  "2795": {
+    "key": "maimonidespark",
+    "names": [
+      "Maimonides Park"
+    ]
+  },
+  "2796": {
+    "key": "lpfransstadium",
+    "names": [
+      "L.P. Frans Stadium"
+    ]
+  },
+  "2797": {
+    "key": "pncfield",
+    "names": [
+      "PNC Field"
+    ]
+  },
+  "2803": {
+    "key": "citystadium",
+    "names": [
+      "City Stadium"
+    ]
+  },
+  "2807": {
+    "key": "hometrustpark",
+    "names": [
+      "HomeTrust Park"
+    ]
+  },
+  "2814": {
+    "key": "dabospark",
+    "names": [
+      "DABOS Park"
+    ]
+  },
+  "2815": {
+    "key": "exciteballpark",
+    "names": [
+      "Excite Ballpark"
+    ]
+  },
+  "2817": {
+    "key": "rogersfieldatnatbaileystadium",
+    "names": [
+      "Rogers Field at Nat Bailey Stadium"
+    ]
+  },
+  "2818": {
+    "key": "nelsonwolffstadium",
+    "names": [
+      "Nelson Wolff Stadium"
+    ]
+  },
+  "2820": {
+    "key": "mirabitostadium",
+    "names": [
+      "Mirabito Stadium"
+    ]
+  },
+  "2821": {
+    "key": "dozerpark",
+    "names": [
+      "Dozer Park"
+    ]
+  },
+  "2822": {
+    "key": "jacksonfield",
+    "names": [
+      "Jackson Field"
+    ]
+  },
+  "2823": {
+    "key": "nbtbankstadium",
+    "names": [
+      "NBT Bank Stadium"
+    ]
+  },
+  "2826": {
+    "key": "gesastadium",
+    "names": [
+      "Gesa Stadium"
+    ]
+  },
+  "2832": {
+    "key": "princegeorgesstadium",
+    "names": [
+      "Prince George's Stadium"
+    ]
+  },
+  "2835": {
+    "key": "valleystrongballpark",
+    "names": [
+      "Valley Strong Ballpark"
+    ]
+  },
+  "2840": {
+    "key": "carilionclinicfield",
+    "names": [
+      "Carilion Clinic Field"
+    ]
+  },
+  "2843": {
+    "key": "chickasawbricktownballpark",
+    "names": [
+      "Chickasaw Bricktown Ballpark"
+    ]
+  },
+  "2844": {
+    "key": "principalpark",
+    "names": [
+      "Principal Park"
+    ]
+  },
+  "2850": {
+    "key": "fourwindsfield",
+    "names": [
+      "Four Winds Field"
+    ]
+  },
+  "2851": {
+    "key": "adventhealthstadium",
+    "names": [
+      "AdventHealth Stadium"
+    ]
+  },
+  "2852": {
+    "key": "vystarballpark",
+    "names": [
+      "Vystar Ballpark"
+    ]
+  },
+  "2854": {
+    "key": "morongofield",
+    "names": [
+      "Morongo Field"
+    ]
+  },
+  "2856": {
+    "key": "cloverpark",
+    "names": [
+      "Clover Park"
+    ]
+  },
+  "2857": {
+    "key": "veteransmemorialstadium",
+    "names": [
+      "Veterans Memorial Stadium"
+    ]
+  },
+  "2858": {
+    "key": "victoryfield",
+    "names": [
+      "Victory Field"
+    ]
+  },
+  "2861": {
+    "key": "whataburgerfield",
+    "names": [
+      "Whataburger Field"
+    ]
+  },
+  "2862": {
+    "key": "leehealthsportscomplex",
+    "names": [
+      "Lee Health Sports Complex"
+    ]
+  },
+  "2866": {
+    "key": "shoretownballpark",
+    "names": [
+      "ShoreTown Ballpark"
+    ]
+  },
+  "2868": {
+    "key": "deltadentalstadium",
+    "names": [
+      "Delta Dental Stadium"
+    ]
+  },
+  "2889": {
+    "key": "buschstadium",
+    "names": [
+      "Busch Stadium"
+    ]
+  },
+  "3189": {
+    "key": "dowdiamond",
+    "names": [
+      "Dow Diamond"
+    ]
+  },
+  "3230": {
+    "key": "cocacolapark",
+    "names": [
+      "Coca-Cola Park",
+      "Jefferson Park"
+    ]
+  },
+  "3289": {
+    "key": "citifield",
+    "names": [
+      "Citi Field"
+    ]
+  },
+  "3309": {
+    "key": "nationalspark",
+    "names": [
+      "Nationals Park"
+    ]
+  },
+  "3312": {
+    "key": "targetfield",
+    "names": [
+      "Target Field"
+    ]
+  },
+  "3313": {
+    "key": "yankeestadium",
+    "names": [
+      "Yankee Stadium"
+    ]
+  },
+  "3329": {
+    "key": "arvestballpark",
+    "names": [
+      "Arvest Ballpark"
+    ]
+  },
+  "3389": {
+    "key": "dickeystephenspark",
+    "names": [
+      "Dickey-Stephens Park"
+    ]
+  },
+  "3429": {
+    "key": "fluorfieldatthewestend",
+    "names": [
+      "Fluor Field at the West End"
+    ]
+  },
+  "3569": {
+    "key": "bowlinggreenballpark",
+    "names": [
+      "Bowling Green Ballpark"
+    ]
+  },
+  "3789": {
+    "key": "greaternevadafield",
+    "names": [
+      "Greater Nevada Field"
+    ]
+  },
+  "3790": {
+    "key": "parkviewfield",
+    "names": [
+      "Parkview Field"
+    ]
+  },
+  "3810": {
+    "key": "gwinnettfield",
+    "names": [
+      "Gwinnett Field"
+    ]
+  },
+  "3970": {
+    "key": "huntingtonpark",
+    "names": [
+      "Huntington Park"
+    ]
+  },
+  "4089": {
+    "key": "truiststadium",
+    "names": [
+      "Truist Stadium"
+    ]
+  },
+  "4109": {
+    "key": "pkpark",
+    "names": [
+      "PK Park"
+    ]
+  },
+  "4149": {
+    "key": "oneokfield",
+    "names": [
+      "ONEOK Field"
+    ]
+  },
+  "4169": {
+    "key": "loandepotpark",
+    "names": [
+      "loanDepot park"
+    ]
+  },
+  "4271": {
+    "key": "wernerpark",
+    "names": [
+      "Werner Park"
+    ]
+  },
+  "4329": {
+    "key": "bluewahoosstadium",
+    "names": [
+      "Blue Wahoos Stadium"
+    ]
+  },
+  "4529": {
+    "key": "regionsfield",
+    "names": [
+      "Regions Field"
+    ]
+  },
+  "4669": {
+    "key": "southwestuniversitypark",
+    "names": [
+      "Southwest University Park"
+    ]
+  },
+  "4670": {
+    "key": "truistfield",
+    "names": [
+      "Truist Field"
+    ]
+  },
+  "4705": {
+    "key": "truistpark",
+    "names": [
+      "Truist Park"
+    ]
+  },
+  "4715": {
+    "key": "firsthorizonpark",
+    "names": [
+      "First Horizon Park"
+    ]
+  },
+  "4960": {
+    "key": "keeslerfederalpark",
+    "names": [
+      "Keesler Federal Park"
+    ]
+  },
+  "4980": {
+    "key": "segrapark",
+    "names": [
+      "Segra Park"
+    ]
+  },
+  "4985": {
+    "key": "dunkinpark",
+    "names": [
+      "Dunkin' Park"
+    ]
+  },
+  "5325": {
+    "key": "globelifefield",
+    "names": [
+      "Globe Life Field"
+    ]
+  },
+  "5345": {
+    "key": "srppark",
+    "names": [
+      "SRP Park"
+    ]
+  },
+  "5355": {
+    "key": "lasvegasballpark",
+    "names": [
+      "Las Vegas Ballpark"
+    ]
+  },
+  "5400": {
+    "key": "segrastadium",
+    "names": [
+      "SEGRA Stadium"
+    ]
+  },
+  "5410": {
+    "key": "polarpark",
+    "names": [
+      "Polar Park"
+    ]
+  },
+  "5415": {
+    "key": "hodgetown",
+    "names": [
+      "Hodgetown"
+    ]
+  },
+  "5418": {
+    "key": "tdbankballpark",
+    "names": [
+      "TD Bank Ballpark"
+    ]
+  },
+  "5421": {
+    "key": "constellationfield",
+    "names": [
+      "Constellation Field"
+    ]
+  },
+  "5450": {
+    "key": "equitybankpark",
+    "names": [
+      "Equity Bank Park"
+    ]
+  },
+  "5455": {
+    "key": "toyotafield",
+    "names": [
+      "Toyota Field"
+    ]
+  },
+  "5472": {
+    "key": "chsfield",
+    "names": [
+      "CHS Field"
+    ]
+  },
+  "5520": {
+    "key": "virginiacreditunionstadium",
+    "names": [
+      "Virginia Credit Union Stadium"
+    ]
+  },
+  "5525": {
+    "key": "abcsupplystadium",
+    "names": [
+      "ABC Supply Stadium"
+    ]
+  },
+  "6134": {
+    "key": "fifththirdpark",
+    "names": [
+      "Fifth Third Park"
+    ]
+  },
+  "6135": {
+    "key": "theballparkatamericafirstsquare",
+    "names": [
+      "The Ballpark at America First Square"
+    ]
+  },
+  "6136": {
+    "key": "covenanthealthpark",
+    "names": [
+      "Covenant Health Park"
+    ]
+  },
+  "7253": {
+    "key": "ontfield",
+    "names": [
+      "ONT Field"
+    ]
+  },
+  "7254": {
+    "key": "wilsonballpark",
+    "names": [
+      "Wilson Ballpark"
+    ]
+  },
+  "7255": {
+    "key": "erlangerpark",
+    "names": [
+      "Erlanger Park"
+    ]
+  },
+  "7256": {
+    "key": "hopsballpark",
+    "names": [
+      "Hops Ballpark"
+    ]
+  },
+  "7257": {
+    "key": "carmaxpark",
+    "names": [
+      "CarMax Park"
+    ]
+  }
+}

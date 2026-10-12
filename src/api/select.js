@@ -494,6 +494,18 @@ export function selectGameSeason(feed) {
   return feed?.gameData?.game?.season ?? null
 }
 
+// The park a drawing of this game needs: the name, the id and the date, which
+// together pick the wall the game was played at (lib/ballpark/layout/
+// resolveLayout.js, #1859). Spread onto a HitChart. Identity, never a result.
+export function selectVenueRef(feed) {
+  const gameData = feed?.gameData ?? {}
+  return {
+    venue: gameData.venue?.name ?? '',
+    venueId: gameData.venue?.id ?? null,
+    gameDate: gameData.datetime?.officialDate ?? null,
+  }
+}
+
 // Venue / weather / attendance / first pitch. MLB populates these; MiLB may
 // not, so every field is optional.
 export function selectGameInfo(feed) {
@@ -519,6 +531,7 @@ export function selectGameInfo(feed) {
 
   return {
     venue,
+    venueId: gameData.venue?.id ?? null, // with the date, picks the wall (#1859)
     weather: [base, windMeaningful ? wind : ''].filter(Boolean).join(' · '),
     attendance: infoByLabel['Att'] ?? '',
     firstPitch: infoByLabel['First pitch'] ?? '',

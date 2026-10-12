@@ -32,7 +32,7 @@ import { landingFields } from './landing/fields.js'
 import { awardFields } from './awardFields.js'
 import { offseasonFields } from './offseasonFields.js'
 import { BALLPARKS } from '../lib/ballpark/ballparkData.js'
-import { venueKey } from '../lib/ballpark/ballparkArt.js'
+import { parkKey } from '../lib/ballpark/parkKeys.js'
 import MILB_BALLPARKS from '../lib/data/milb-ballparks.json' with { type: 'json' }
 
 // Groups order the admin panel and let it render section headers. Keep ids
@@ -96,6 +96,11 @@ export const TOKENS = Object.freeze(['time', 'inning'])
 // keys (Minute Maid/Daikin, Guaranteed Rate/Rate, the Dodger Stadium pair)
 // collapse to one field, which is what an editor expects: one park, one note.
 //
+// THE KEY IS PINNED, NOT RE-DERIVED. parkKey() answers the key the venue was
+// first filed under (lib/data/park-keys.json, pinned to its Stats API
+// venue id), so if BALLPARKS ever takes a park's new sponsor name, these ids
+// stay where the saved copy is. test/park-keys.test.js holds the line.
+//
 // Every default is EMPTY on purpose. The card renders no paragraph at all until
 // the owner writes one, so nothing ships in a voice they did not choose — and
 // `sanitizeOverrides` already treats '' as "no override", so clearing a box in
@@ -127,7 +132,7 @@ function parkFields() {
     .map((park) => park.name)
     .sort((a, b) => a.localeCompare(b))
     .flatMap((name) => {
-      const key = venueKey(name)
+      const key = parkKey(name)
       const base = { group: 'ballparks', subgroup: name }
       return [
         {
@@ -200,7 +205,9 @@ function parkFields() {
 // section for one at all; a note field with nothing beside it would be a
 // paragraph floating under a bare stadium name. FIVE fields per park, not six.
 //
-// SAME KEY SCHEME AS parkFields(): venueKey(name), not a team id. That is what
+// SAME KEY SCHEME AS parkFields(): the venue's PINNED key, which is venueKey()
+// of the first name the venue was seen under and never moves after (a rename
+// keeps the key; the heading below shows the current name). Not a team id. That is what
 // lets a MiLB park's fields "just work" everywhere a key is already derived
 // from the live venue name with no BALLPARKS hit — parkBackdrop.js's MiLB
 // fallback (see its header) starts rendering a slate-card backdrop for a park
@@ -219,7 +226,10 @@ function parkFields() {
 // sportId 11 too. A key BALLPARKS already claims skips here — one set of six
 // fields for it, the MLB one with its diagram, not a colliding second set of
 // five with no diagram.
-const MLB_PARK_KEYS = new Set(Object.keys(BALLPARKS))
+const MLB_PARK_KEYS = new Set([
+  ...Object.keys(BALLPARKS),
+  ...Object.values(BALLPARKS).map((park) => parkKey(park.name)),
+])
 
 function milbParkFields() {
   return Object.entries(MILB_BALLPARKS)

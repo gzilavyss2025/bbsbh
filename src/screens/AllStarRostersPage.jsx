@@ -172,6 +172,11 @@ function RosterYear({ year, roster, score, mvp, venue, card, navigate, effective
               score={score}
               mvp={mvp}
               venue={venue}
+              venueId={card?.venue?.id}
+              // The game card's date, else mid-July of the year: the All-Star
+              // Game is always played then, and a season is all the park
+              // resolver needs to pick the wall (#1859).
+              gameDate={card?.officialDate ?? `${year}-07-15`}
               dateLabel={card ? humanDate(card.officialDate) : null}
               onBoxScore={
                 card

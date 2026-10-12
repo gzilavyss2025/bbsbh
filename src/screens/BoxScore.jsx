@@ -7,7 +7,7 @@ import { InningTally } from './boxscore/InningTally.jsx'
 import { ScoringSummary } from './boxscore/ScoringSummary.jsx'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
-import { selectGameSeason, selectOfficials, selectIsFinal } from '../api/select.js'
+import { selectGameSeason, selectOfficials, selectIsFinal, selectVenueRef } from '../api/select.js'
 import { stepToSection } from '../lib/route.js'
 import { ordinal } from '../lib/format.js'
 import { umpireAccuracySummary } from '../api/umpires.js'
@@ -428,7 +428,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
             is. Rendered here, inside the seal, is what makes it safe: see
             GameVideoRow.jsx. */}
         <GameVideoRow items={highlights} />
-        <HitChartCard battedBalls={battedBalls} box={box} venue={get('Venue').replace(/\.\s*$/, '')} />
+        <HitChartCard battedBalls={battedBalls} box={box} {...selectVenueRef(feed)} />
         <GameInfo rows={box.footNotes} />
         <ThreeStars stars={stars} />
       </section>

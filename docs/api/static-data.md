@@ -494,7 +494,11 @@ for each generator; the reader modules:
   `MIN_SIMILARITY_PITCHES` to enter the pool, `MIN_MATCH` below which a pairing
   is dropped — so an unusual arsenal returns a SHORT list or none rather than
   filler. See `.scratch/player-profile-card/scope.md` §4.
-- `spray.js` — one batter's season balls in play and where they landed, from
+- `spray.js` — one batter's season balls in play and where they landed (and,
+  from schema version 2, at which park: `g` runs, decoded onto each ball as
+  `venueId` and `season`; `sprayParks` groups a view's balls by the ballpark
+  configuration they were hit at, and `parkSubview` narrows a view to one park
+  with every count recomputed from its balls, #1859), from
   `public/data/spray/{season}/{NN}.json` (`gen-spray.mjs`, nightly, buckets on
   `personId % 100`; the season `spray/seasons.json` names, ADR-0086). Completed-game season aggregates over games that were
   already DECIDED when the sweep touched them, so spoiler-free with no
