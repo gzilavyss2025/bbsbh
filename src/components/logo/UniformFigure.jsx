@@ -9,9 +9,8 @@ import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 // (docs/uniforms-and-logos.md, "Batter figure images"). `crossOrigin` lets the
 // service worker's CacheFirst rule store the response. `urls` is
 // `batterFigureUrls`' result, which the caller has already checked for null.
-const ASPECT = 1050 / 496 // the art's tall canvas
-
-export function UniformFigure({ urls, label, size, onError }) {
+// The box size lives in uniform-figure.css (.ufig).
+function UniformFigure({ urls, label, onError }) {
   const img = (src, alt) => (
     <img
       className="ufig__img"
@@ -23,7 +22,7 @@ export function UniformFigure({ urls, label, size, onError }) {
     />
   )
   return (
-    <span className="ufig" style={{ width: size, height: Math.round(size * ASPECT) }}>
+    <span className="ufig">
       {img(urls.pants, '')}
       {img(urls.jersey, label)}
     </span>
@@ -73,7 +72,7 @@ function UniformSheet({ urls, label, onClose }) {
         <IconButton ref={closeRef} mark="md" className="logomodal__close" onClick={onClose} label="Close">
           ✕
         </IconButton>
-        {!failed && <UniformFigure urls={urls} label={label} size={180} onError={() => setFailed(true)} />}
+        {!failed && <UniformFigure urls={urls} label={label} onError={() => setFailed(true)} />}
         <p className="fact__value ufig__text">{label}</p>
       </div>
     </div>

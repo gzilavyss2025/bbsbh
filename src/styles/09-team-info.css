@@ -311,16 +311,12 @@
   font-weight: var(--w-regular);
 }
 
-/* Attendance's "i" glyph + the unfold note it opens — same tap-glyph idiom
-   as the Umpires card's .umptier__glyph, but deliberately quiet at rest
-   (just background info, not a tier read worth a loud fill): the card's own
-   surface + rule color, with only the icon tinted in the action green as a
-   small tap hint. Tapping it open switches to an ink fill, same look the tier
-   glyph uses for its own open state. Both were kraft until ADR-0083. */
+/* Attendance's crowd glyph + the unfold note it opens — same tap-glyph idiom
+   and the same solid 21px dot as the Umpires card's .umptier__glyph (#1852).
+   Tapping it open switches to the primary fill. Both were kraft until ADR-0083. */
 .attendance__value {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-1h);
 }
 .attendance__glyph {

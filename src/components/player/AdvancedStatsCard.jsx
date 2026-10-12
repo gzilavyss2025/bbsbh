@@ -81,10 +81,8 @@ function AdvancedFact({ label, value, note }) {
 
 // The kraft "i" info glyph, drawn as an SVG dot-over-bar rather than a
 // literal "i" character — the app's global ALL-CAPS invariant (index.css)
-// would flatten a literal letter into a capital I. Same shape as
-// TeamInfo.jsx's InfoIcon (Attendance fact / Umpire tier glyph); kept as its
-// own copy here rather than imported, since components/ shouldn't reach into
-// screens/ for a five-line glyph.
+// would flatten a literal letter into a capital I. The lineup page's
+// Attendance fact used the same shape until #1852 gave it a crowd glyph.
 function InfoIcon() {
   return (
     <svg viewBox="0 0 20 20" width="10" height="10" aria-hidden="true">
