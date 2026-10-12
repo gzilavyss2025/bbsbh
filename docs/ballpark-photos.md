@@ -38,6 +38,10 @@ art, no hotlinking, no runtime dependency on a third-party host. That matches
 how `ballparkData.js` already treats park facts: static reference data baked
 into the repo.
 
+MLB's Gameday has a day and a night render of every MLB park, keyed by venue
+id (`docs/gameday-assets.md`). They are MLB-owned art on MLB's host, so this
+rule keeps them off these surfaces.
+
 CC BY and CC BY-SA **require visible attribution**. There is no caption under the
 photo any more: `BallparkCard` wraps a bundled photo in a link to its Commons
 file page, where the author and licence live, and carries `creditLine()` in the

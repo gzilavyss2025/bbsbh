@@ -63,7 +63,9 @@ behind the usual "not posted yet" fallback and let Refresh pick it up.
 ### Batter figure images
 
 Gameday renders a batter figure per uniform asset (found in longbored's
-`fetch_uniform_assets.py` gist; checked 2026-10-12, issue #1852):
+`fetch_uniform_assets.py` gist; checked 2026-10-12, issue #1852). Gameday's
+other asset paths (stadium renders, field outlines, action photos) are in
+`docs/gameday-assets.md`.
 
 `https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.3.0/images/batters/{year}/{right|left}/{code}.png`
 
