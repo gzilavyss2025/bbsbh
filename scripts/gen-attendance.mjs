@@ -64,7 +64,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
 import { toRow } from './gen-gate.mjs'
-import { ballparkFor } from '../src/lib/ballpark/ballparkData.js'
+import { parkRecord } from '../src/lib/ballpark/parkKeys.js'
 import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
@@ -88,9 +88,10 @@ const lastDayOf = (season, month) => new Date(Date.UTC(season, month, 0)).getUTC
 // The listed capacity of the park a game was played in, or null when that park
 // is not in the static table. Keyed off the venue the game actually used, not
 // the home club's usual address, so a neutral-site game is never measured
-// against a park it was not played in.
+// against a park it was not played in. Found through any name the venue has
+// worn (parkRecord), so a renamed park keeps its capacity.
 export function capacityOf(venue) {
-  return ballparkFor(venue)?.capacity ?? null
+  return parkRecord(venue)?.capacity ?? null
 }
 
 // One club's home dates -> the season row attendance.json ships for it, or

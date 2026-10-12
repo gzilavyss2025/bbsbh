@@ -662,6 +662,25 @@ export default defineConfig({
             },
           },
           {
+            // Gameday batter-figure art (uniforms.js batterFigureUrls) — static
+            // PNGs keyed by uniform asset code, ~50 KB each, spoiler-free
+            // (ADR-0004 covers statsapi.mlb.com only). CacheFirst stores only 200s, so
+            // the <img> must set crossOrigin="anonymous" (the CDN sends
+            // access-control-allow-origin: *), as Headshot.jsx does.
+            // Scoped to the figure path, not the whole host, like the headshot rule.
+            urlPattern: ({ url }) =>
+              url.hostname === 'prod-gameday.mlbstatic.com' && url.pathname.includes('/images/batters/'),
+            handler: 'CacheFirst',
+            method: 'GET',
+            options: {
+              cacheName: 'bbsbh-gameday-figures',
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+            },
+          },
+          {
             // Player headshots (teams.js's realHeadshotUrl / HEADSHOT_BASE) —
             // decorative art keyed by personId, not game data. CacheFirst so
             // the same face recurring across every AtBatCard in the at-bat

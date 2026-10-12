@@ -1405,8 +1405,11 @@ don't run these by hand.
   own weekly crons until 2026-08-28 — but running them on a cadence made the
   nightly steps that READ their output impossible to gate on them, so as of
   2026-08-29 they simply run every night (11 requests between them). App reads it via `src/api/team.js`.
-- `gen-milb-ballparks.mjs` → `src/lib/data/milb-ballparks.json` — every current
-  MiLB team's venue name, deduped by `venueKey` (one venue can host two clubs,
+- `gen-milb-ballparks.mjs` → `src/lib/data/park-keys.json` and
+  `src/lib/data/milb-ballparks.json`. The first pins one store key per MLB and
+  MiLB venue id, append-only: a rename keeps the key and adds the new name, and
+  the run logs it (`src/lib/ballpark/parkKeys.js` has the why). The second is every current
+  MiLB team's venue name, deduped by that pinned key (one venue can host two clubs,
   e.g. Roger Dean Chevrolet Stadium). Read straight from the `teams.json` this
   same workflow just wrote rather than a second statsapi fetch. This is the
   MiLB counterpart to `src/lib/ballpark/ballparkData.js`'s hand-authored MLB

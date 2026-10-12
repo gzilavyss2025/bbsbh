@@ -96,6 +96,7 @@ export function TeamInfo({
   side,
   manager,
   uniform,
+  uniformFigure: _uniformFigure, // batter-figure assets; UI lands later (#1852)
   treatment,
   oppTreatment,
   broadcast,

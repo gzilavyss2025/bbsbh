@@ -1,12 +1,12 @@
 import { Suspense, lazy, useCallback, useState } from 'react'
 import { rankedDimensions } from '../../../../lib/ballpark/ballparkData.js'
 import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
+import { parkKey } from '../../../../lib/ballpark/parkKeys.js'
 import { ordinal } from '../../../../lib/format.js'
 import {
   fieldIds,
   resolveParkName,
   resolvePhoto,
-  venueKey,
   withoutBrokenArt,
 } from '../../../../lib/ballpark/ballparkArt.js'
 import { isClerkEnabled } from '../../../../lib/clerkConfig.js'
@@ -205,14 +205,14 @@ export function BallparkCard({ team, attendance }) {
   // The park's CANONICAL name, never the raw feed string, when we have one —
   // so a renamed MLB venue resolves through its alias to the one shared
   // record. A MiLB park has no alias table to resolve through, so the raw
-  // feed name IS canonical for it; that is also exactly what parkBackdrop.js
-  // already assumes for the same fallback (see its header). Either way `name`
-  // is what keys the copy fields (`milb-ballparks.json`'s entries are keyed
-  // the identical way) and what a bare-text card falls back to.
+  // feed name IS canonical for it. `name` is what a bare-text card prints.
+  // The copy fields and the bundled photo are keyed by the venue's PINNED key
+  // instead (lib/ballpark/parkKeys.js), found by venue id first, so a
+  // sponsor rename keeps every photo and note an admin saved for the park.
   const name = park ? park.name : venueName
   // Computed before the early return below so the hooks under it always run —
   // a park with no venue name at all still has to call them, in the same order.
-  const key = name ? venueKey(name) : ''
+  const key = name ? parkKey(venueName, team.venue?.id) : ''
   // No useMemo on either of these. React Compiler memoizes them, and a manual
   // useMemo keyed on `key` made it bail out of optimizing this component
   // entirely ("existing memoization could not be preserved") — which is a worse
@@ -257,7 +257,7 @@ export function BallparkCard({ team, attendance }) {
   // safe for the same reason a controlled input is: the value came from this
   // browser's own file picker as an object URL, and the moment it is SAVED it
   // goes through the registry's choke point like everything else.
-  const photo = resolvePhoto(name, {
+  const photo = resolvePhoto(key, {
     photo: shown.photo,
     credit: shown.credit,
     focus: shown.focus,

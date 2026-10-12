@@ -88,6 +88,7 @@ export function GameView({ game, section, onSection }) {
     feed,
     officialDate,
     uniformBrief,
+    uniformFigure,
     managers,
     weather,
     starterLines,
@@ -375,6 +376,7 @@ export function GameView({ game, section, onSection }) {
           side="away"
           manager={managers.data?.away}
           uniform={uniformBrief.away}
+          uniformFigure={uniformFigure.away ?? null}
           treatment={jerseyTreatments.away}
           oppTreatment={jerseyTreatments.home}
           broadcast={broadcast.data}
@@ -406,6 +408,7 @@ export function GameView({ game, section, onSection }) {
           side="home"
           manager={managers.data?.home}
           uniform={uniformBrief.home}
+          uniformFigure={uniformFigure.home ?? null}
           treatment={jerseyTreatments.home}
           oppTreatment={jerseyTreatments.away}
           broadcast={broadcast.data}
