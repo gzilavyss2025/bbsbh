@@ -98,6 +98,8 @@
 @import './styles/08-site-shell.css';
 @import './styles/08a-site-menu.css';
 @import './styles/09-team-info.css';
+/* The Uniform fact's shirt button and batter-figure sheet (#1852); a subfolder, since 09 is at its line cap and src/styles at its file cap. */
+@import './styles/team-info/uniform-figure.css';
 @import './styles/10-lineup.css';
 @import './styles/10b-former-teammates.css';
 @import './styles/workload/projection.css';

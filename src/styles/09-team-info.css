@@ -311,12 +311,9 @@
   font-weight: var(--w-regular);
 }
 
-/* Attendance's "i" glyph + the unfold note it opens — same tap-glyph idiom
-   as the Umpires card's .umptier__glyph, but deliberately quiet at rest
-   (just background info, not a tier read worth a loud fill): the card's own
-   surface + rule color, with only the icon tinted in the action green as a
-   small tap hint. Tapping it open switches to an ink fill, same look the tier
-   glyph uses for its own open state. Both were kraft until ADR-0083. */
+/* Attendance's crowd glyph + the unfold note it opens — same tap-glyph idiom
+   and the same solid 21px dot as the Umpires card's .umptier__glyph (#1852).
+   Tapping it open switches to the primary fill. Both were kraft until ADR-0083. */
 .attendance__value {
   display: inline-flex;
   align-items: center;
@@ -327,13 +324,13 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: 18px;
-  height: 18px;
+  width: 21px;
+  height: 21px;
   padding: 0;
   border-radius: 999px;
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--accent-link);
+  border: 0;
+  background: var(--text-muted);
+  color: var(--text-on-ink);
   cursor: pointer;
 }
 .attendance__glyph:hover {
@@ -341,8 +338,6 @@
 }
 .attendance__glyph--open {
   background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
 }
 .attendance__glyph:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -477,6 +472,11 @@
   align-items: center;
   gap: var(--space-1);
   flex-wrap: wrap;
+}
+/* The HP accuracy dot sits at the cell's right edge, like the Attendance and
+   Uniform buttons. */
+.umps__namerow .umptier__glyph {
+  margin-left: auto;
 }
 /* Wraps the HP tier pill as a tap target for the accuracy modal — reset to
    bare, no underline-on-hover (would run oddly under the pill's own border/
