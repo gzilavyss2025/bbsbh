@@ -104,6 +104,22 @@ export function liveTreatmentFor(gameJerseys, gamePk, teamId, clubName) {
   return classifyUniformAsset(jersey.text, clubName, jersey.code)
 }
 
+// Gameday's rendered batter figure for a posted side: jersey and pants are
+// separate images on one canvas (stack pants under jersey). Null unless BOTH
+// pieces have a well-formed code — a torso without legs looks broken. Spoiler-
+// free static art (docs/uniforms-and-logos.md, "Batter figure images").
+const FIGURE_BASE = 'https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.3.0/images/batters'
+export function batterFigureUrls(assets, hand = 'right') {
+  const url = (piece) => {
+    const code = assets?.find((a) => a.piece === piece)?.code
+    const year = /^\d+_[a-z]+_\d+_(\d{4})$/.exec(code ?? '')?.[1]
+    return year ? `${FIGURE_BASE}/${year}/${hand}/${code}.png` : null
+  }
+  const jersey = url('J')
+  const pants = url('P')
+  return jersey && pants ? { jersey, pants } : null
+}
+
 // A tight, at-a-glance uniform summary — "Away Alternate Navy Blue",
 // "Home White", "Road Grey" — synthesized from the full asset list the way
 // weather.js boils a forecast down to a scorebook line. The JERSEY is the
