@@ -537,3 +537,8 @@ test('batterFigureUrls returns null for a null or malformed code', () => {
   assert.equal(batterFigureUrls(bad('158_jersey_5')), null)
   assert.equal(batterFigureUrls(bad('nonsense')), null)
 })
+
+test('batterFigureUrls draws any hand but "left" as the right-handed stance (the CDN has only those two folders)', () => {
+  assert.equal(batterFigureUrls(SIDE, 'R').jersey, `${FIG}/2026/right/158_jersey_5_2026.png`)
+  assert.equal(batterFigureUrls(SIDE, 'S').pants, `${FIG}/2026/right/158_pants_5_2026.png`)
+})

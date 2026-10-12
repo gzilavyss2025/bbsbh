@@ -667,7 +667,9 @@ export default defineConfig({
             // (ADR-0004 covers statsapi.mlb.com only). CacheFirst stores only 200s, so
             // the <img> must set crossOrigin="anonymous" (the CDN sends
             // access-control-allow-origin: *), as Headshot.jsx does.
-            urlPattern: ({ url }) => url.hostname === 'prod-gameday.mlbstatic.com',
+            // Scoped to the figure path, not the whole host, like the headshot rule.
+            urlPattern: ({ url }) =>
+              url.hostname === 'prod-gameday.mlbstatic.com' && url.pathname.includes('/images/batters/'),
             handler: 'CacheFirst',
             method: 'GET',
             options: {

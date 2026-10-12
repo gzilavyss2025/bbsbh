@@ -110,10 +110,11 @@ export function liveTreatmentFor(gameJerseys, gamePk, teamId, clubName) {
 // free static art (docs/uniforms-and-logos.md, "Batter figure images").
 const FIGURE_BASE = 'https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.3.0/images/batters'
 export function batterFigureUrls(assets, hand = 'right') {
+  const stance = hand === 'left' ? 'left' : 'right' // the CDN's only two folders
   const url = (piece) => {
     const code = assets?.find((a) => a.piece === piece)?.code
     const year = /^\d+_[a-z]+_\d+_(\d{4})$/.exec(code ?? '')?.[1]
-    return year ? `${FIGURE_BASE}/${year}/${hand}/${code}.png` : null
+    return year ? `${FIGURE_BASE}/${year}/${stance}/${code}.png` : null
   }
   const jersey = url('J')
   const pants = url('P')
