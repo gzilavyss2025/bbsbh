@@ -64,6 +64,7 @@ import { SPORT_LABEL, teamAbbr } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, mastheadMarkFor } from '../lib/headerTheme.js'
 import { seasonTheme, seasonMasthead } from '../lib/identity/seasonMarks.js'
 import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
+import { UniformFigureButton } from '../components/logo/UniformFigure.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 
@@ -95,7 +96,7 @@ export function TeamInfo({
   side,
   manager,
   uniform,
-  uniformFigure: _uniformFigure, // batter-figure assets; UI lands later (#1852)
+  uniformFigure,
   treatment,
   oppTreatment,
   broadcast,
@@ -196,7 +197,11 @@ export function TeamInfo({
                 Navy Blue") — spoiler-free, but the assignment isn't posted until
                 around first pitch, so pregame this reads "—" until a Refresh picks
                 it up. Never posted for MiLB. */}
-            <Fact label="Uniform" value={uniform} />
+            <Fact
+              label="Uniform"
+              value={uniform}
+              aside={<UniformFigureButton assets={uniformFigure} label={uniform} />}
+            />
             {/* Broadcast rides on the away page only, filling the cell that
                 otherwise sits empty next to Uniform (an odd fact count leaves it
                 alone at the end of the grid — see the ESPN-sourced fetch in
@@ -1065,11 +1070,12 @@ export function RefreshButton({ onReload, loading, lastUpdated, className = '' }
   )
 }
 
-function Fact({ label, value }) {
+function Fact({ label, value, aside }) {
+  const text = value || <span className="fact__na">—</span>
   return (
     <div className="fact">
       <dt className="fact__label">{label}</dt>
-      <dd className="fact__value">{value || <span className="fact__na">—</span>}</dd>
+      <dd className="fact__value">{aside ? <div className="fact__figure"><span>{text}</span>{aside}</div> : text}</dd>
     </div>
   )
 }
