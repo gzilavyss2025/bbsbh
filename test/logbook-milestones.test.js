@@ -188,8 +188,8 @@ test('rosterFor: shapes a minor level off the snapshot, alphabetical by label', 
 })
 
 test('rosterFor: MLB prefers the short club name the app already uses', () => {
-  const roster = rosterFor({ bySportId: { '1': [{ id: 158, teamName: 'Nope', venueName: 'American Family Field' }] } }, 1)
-  assert.deepEqual(roster, [{ id: 158, label: 'Brewers', venueName: 'American Family Field' }])
+  const roster = rosterFor({ bySportId: { '1': [{ id: 158, teamName: 'Nope', venueName: 'American Family Field', venueId: 32 }] } }, 1)
+  assert.deepEqual(roster, [{ id: 158, label: 'Brewers', venueName: 'American Family Field', venueId: 32 }])
 })
 
 test('rosterFor: no snapshot falls back to the 30 MLB clubs for sportId 1', () => {

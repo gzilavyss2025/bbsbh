@@ -90,8 +90,8 @@ const lastDayOf = (season, month) => new Date(Date.UTC(season, month, 0)).getUTC
 // the home club's usual address, so a neutral-site game is never measured
 // against a park it was not played in. Found through any name the venue has
 // worn (parkRecord), so a renamed park keeps its capacity.
-export function capacityOf(venue) {
-  return parkRecord(venue)?.capacity ?? null
+export function capacityOf(venue, venueId = null) {
+  return parkRecord(venue, venueId)?.capacity ?? null
 }
 
 // One club's home dates -> the season row attendance.json ships for it, or
@@ -114,7 +114,7 @@ export function seasonRow(rows) {
     total += r.attendance
     if (high == null || r.attendance > high) high = r.attendance
     if (low == null || r.attendance < low) low = r.attendance
-    const capacity = capacityOf(r.venue)
+    const capacity = capacityOf(r.venue, r.venueId)
     if (!capacity) continue
     capGames += 1
     seats += capacity

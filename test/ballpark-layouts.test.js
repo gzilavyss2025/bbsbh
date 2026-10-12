@@ -371,3 +371,9 @@ test('every stored foul ground and track passes its plausibility check', () => {
   }
   assert.ok(surfaces >= 20, 'most current MLB parks have their own foul ground')
 })
+
+test('a game date that was asked for and is missing resolves no layout; no date at all means today', () => {
+  assert.equal(resolveBallparkLayout({ venueId: 32, gameDate: null }), null)
+  assert.equal(resolveBallparkLayout({ venueId: 32, gameDate: '' }), null)
+  assert.ok(resolveBallparkLayout({ venueId: 32 }))
+})
