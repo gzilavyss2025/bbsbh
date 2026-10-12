@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { headshotStepDelay, headshotStepUrl } from '../../lib/headshot/retry.js'
+import {
+  dropKnownMisses,
+  headshotStepDelay,
+  headshotStepUrl,
+  rememberSiloMiss,
+} from '../../lib/headshot/retry.js'
 import { logHeadshotEvent } from '../../lib/headshot/log.js'
 
 // The shared "which try are we on" state for a headshot <img> (Headshot.jsx and
@@ -10,14 +15,18 @@ import { logHeadshotEvent } from '../../lib/headshot/log.js'
 // per-component state was; a pending retry for the OLD identity is dropped.
 // Returns the URL to try now (null when every source is spent) and the
 // <img>'s `onError`. `info` rides along into the failure log (issue #1446).
-export function useHeadshotStep(identityKey, sources, info) {
+export function useHeadshotStep(identityKey, allSources, info) {
   const [step, setStep] = useState(0)
+  // Pinned per identity: a silo miss recorded mid-walk must not shift the rungs
+  // under a step already counted against the full list.
+  const [sources, setSources] = useState(() => dropKnownMisses(allSources))
   const [prevKey, setPrevKey] = useState(identityKey)
   const keyRef = useRef(identityKey)
   const timer = useRef(null)
   if (identityKey !== prevKey) {
     setPrevKey(identityKey)
     setStep(0)
+    setSources(dropKnownMisses(allSources))
   }
   useEffect(() => {
     keyRef.current = identityKey
@@ -35,6 +44,9 @@ export function useHeadshotStep(identityKey, sources, info) {
   })
   const onError = useCallback(() => {
     logHeadshotEvent({ kind: 'load-error', step, url, ...infoRef.current })
+    // A clean first-try miss on a silo with a milb photo behind it. Not while
+    // offline, where the miss says nothing about the photo.
+    if (quickFirst && step === 0 && globalThis.navigator?.onLine !== false) rememberSiloMiss(url)
     const key = keyRef.current
     const advance = () => {
       if (keyRef.current === key) setStep((s) => (s === step ? s + 1 : s))

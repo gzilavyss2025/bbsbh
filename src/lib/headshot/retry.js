@@ -39,3 +39,27 @@ export function headshotStepDelay(step, quickFirst = false) {
   if (quickFirst && step === 0) return 0
   return logicalStep(step, quickFirst) % 2 === 0 ? RETRY_PAUSE_MS : 0
 }
+
+// Silo photos that already 404'd this session, for players with a milb photo
+// behind the silo. The CDN sends the 404 `no-cache`, so without this every
+// card showing the same prospect (at-bat hero, notices, due-up lists…) pays
+// for its own miss. Session memory only: a reload asks again.
+const siloMisses = new Set()
+
+const isSilo = (url) => typeof url === 'string' && url.includes('/silo/current')
+
+export function rememberSiloMiss(url) {
+  if (isSilo(url)) siloMisses.add(url)
+}
+
+export function resetSiloMisses() {
+  siloMisses.clear()
+}
+
+// The sources to walk: a remembered silo is dropped so the milb photo leads.
+// Only a silo with a milb rung behind it goes (a MLB player's silo is the
+// one that can miss for a moment, so it is always asked for).
+export function dropKnownMisses(sources) {
+  if (!sources?.[1]?.includes('/headshot/milb/')) return sources
+  return siloMisses.has(sources[0]) ? sources.slice(1) : sources
+}
