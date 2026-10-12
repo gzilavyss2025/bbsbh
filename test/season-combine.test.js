@@ -30,13 +30,22 @@ test('spray: the balls join, the per-hand counts add, the name is the latest', (
       [1, 2, 99, 4, 0, 0, 0, 7],
       [3, 4, 88, 0, 1, 0, 0, 8],
     ],
+    // Both slices were stored before the park runs, so each joins as one run
+    // of unknown park, lined up with its balls.
+    g: [[1, null], [1, null]],
     o: { R: [30, 9, 3, 1, 13], L: [5, 2, 0, 0, 1] },
   })
 })
 
+test('spray: the park runs join in ball order, and a pre-run season is unknown', () => {
+  const s2025 = { n: 'A', t: 1, b: 'R', p: [[1, 1, 1, 0, 0, 0, 0, 1], [2, 2, 2, 0, 0, 0, 0, 2]], o: {} }
+  const s2026 = { n: 'A', t: 1, b: 'R', p: [[3, 3, 3, 0, 0, 0, 0, 3]], g: [[1, 2394, 2026]], o: {} }
+  assert.deepEqual(combineSprayEntries([s2025, s2026]).g, [[2, null], [1, 2394, 2026]])
+})
+
 test('spray: a 2027 rookie (no 2026 row) is his 2027 season alone', () => {
   const s2027 = { n: 'Rookie', t: 158, b: 'L', p: [], o: { R: [4, 1, 0, 0, 1], L: [1, 0, 0, 0, 0] } }
-  assert.deepEqual(combineSprayEntries([null, s2027]), { ...s2027, p: [] })
+  assert.deepEqual(combineSprayEntries([null, s2027]), { ...s2027, p: [], g: [] })
 })
 
 const batter = (over) => ({

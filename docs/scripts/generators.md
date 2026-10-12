@@ -988,6 +988,15 @@ don't run these by hand.
   `post` map beside `bat` in each bucket, never blended (ADR-0103). Old
   postseason games are outside the nightly window: backfill by hand with
   `--since=<date> --sports=1`; the 2026 run covered 2026-09-28 to 2026-10-06.
+  (5) **Each entry records its parks** (schema version 2, `v` in every bucket;
+  #1859): `g: [[count, venueId], …]`, the park of each consecutive run of rows,
+  from `gameData.venue.id` (`venue` is in the `fields=` allowlist). Runs, not a
+  ninth column: about 20 runs a batter, +3% on disk (a column would pass the
+  160 KB bucket ceiling in `test/bucket-shards.test.js`). A season stored under
+  an older version rebuilds itself on the next run: the whole season again,
+  from January 1, into an empty store and ledger. Checkpoints keep version 1, so
+  a rebuild cut short starts over. Measured on 2026-10-12: 4,679 games in 67
+  seconds, largest bucket 152.9 KB. `--rebuild` forces one.
   Two filters worth knowing: **decided games only, never today's**
   (`abstractGameState === 'Final'` AND an officialDate strictly before today),
   which is the card's whole spoiler footing; and `detailedState === 'Cancelled'`

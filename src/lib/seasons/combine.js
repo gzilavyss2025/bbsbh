@@ -35,8 +35,18 @@ function highest(rows, key) {
 }
 
 // --- spray (src/api/spray.js) ----------------------------------------------
-// `{ n, t, b, p, o: { R, L } }`. The balls join; the per-hand counts add. A
+// `{ n, t, b, p, g, o: { R, L } }`. The balls join; the per-hand counts add. A
 // hand no season has stays absent, as in the file (splitTotals reads zeros).
+// The park runs (`g`) join in the same order as the balls. A slice whose runs
+// do not cover all its balls (a season stored before the runs existed) gets
+// one run of unknown park for the rest, so the joined runs still line up.
+function coveringRuns(slice) {
+  const runs = slice.g ?? []
+  const covered = runs.reduce((n, r) => n + r[0], 0)
+  const rest = (slice.p?.length ?? 0) - covered
+  return rest > 0 ? [...runs, [rest, null]] : runs
+}
+
 export function combineSprayEntries(slices) {
   const rows = present(slices)
   if (!rows.length) return null
@@ -46,6 +56,7 @@ export function combineSprayEntries(slices) {
     t: last.t,
     b: last.b,
     p: rows.flatMap((r) => r.p ?? []),
+    g: rows.flatMap(coveringRuns),
     o: Object.fromEntries(
       ['R', 'L']
         .filter((hand) => rows.some((r) => r.o?.[hand]))

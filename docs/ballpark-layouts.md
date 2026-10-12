@@ -2,7 +2,7 @@
 
 This report lists each playing-field configuration the app knows, where its
 fence outline comes from, who draws it, and what is still missing. Issue #1859,
-slices 1 to 3.
+slices 1 to 4.
 
 Code: `src/lib/ballpark/layout/`. The registry is `configurations.js`. The
 choice of outline is `fences.js`. The resolver is `resolveLayout.js`
@@ -189,6 +189,29 @@ Stats API venue id first, and a rename never changes the id:
 
 Re-run the import once next season's names are posted (the offseason), and
 again before Opening Day.
+
+## Season spray maps (slice 4)
+
+A season is many parks, so the player page's spray map keeps its generic field
+for "All parks". Its park picker draws one park's real wall and only the balls
+hit there.
+
+- **The store keeps each ball's park** as runs beside the rows
+  (`g: [[count, venueId], …]`, schema version 2, `scripts/gen-spray.mjs`). The
+  season is the folder's. Venue and season pick the wall because every
+  configuration covers whole seasons; `test/spray-parks.test.js` holds the
+  registry to that.
+- **Grouped by wall, not by venue.** An All-seasons view across a renovation
+  lists each wall on its own, with its seasons in the label.
+- **Counts come from the balls hit there.** The stored season totals have no
+  park, so a park view counts the balls with a landing point at that park
+  (the chips, the facts and the foot), and its foot says so.
+- **Coverage.** A ball with no park on record (stored before version 2), or at
+  a park with no layout, stays in the All-parks field and in no park's count.
+  The All-parks foot says how many.
+- **Migration.** The committed 2026 store is version 1. The first nightly run
+  after this merges rebuilds 2026 with parks (about a minute). Until then the
+  picker does not show.
 
 ## Adding a park
 

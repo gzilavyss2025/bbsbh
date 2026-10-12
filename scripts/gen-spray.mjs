@@ -68,6 +68,9 @@
 //   node scripts/gen-spray.mjs --since=2026-03-20 --sports=11   # backfill AAA alone
 //   node scripts/gen-spray.mjs --since=2026-09-29 --sports=1    # backfill the postseason
 //   node scripts/gen-spray.mjs --season=2026 --since=2026-09-20  # name the season
+//   node scripts/gen-spray.mjs --season=2026 --rebuild   # sweep the season again from scratch
+// A season stored under an older schema version rebuilds itself on the next
+// run (see SCHEMA_VERSION), so the nightly cron performs that migration.
 // The --since form is the one-time / full-season backfill; nightly runs use the
 // default trailing window.
 import { dirname, join } from 'node:path'
@@ -109,8 +112,20 @@ const FEED_FIELDS = [
   'fullName', 'batSide', 'code', 'liveData', 'plays', 'allPlays', 'about',
   'halfInning', 'result', 'eventType', 'matchup', 'batter', 'pitcher',
   'pitchHand', 'playEvents', 'hitData', 'coordinates', 'coordX', 'coordY',
-  'launchSpeed',
+  'launchSpeed', 'venue',
 ].join(',')
+// `venue` (with `id`, already above) keeps gameData.venue.id: the park each
+// ball was hit in, for the park view (#1859). Measured on gamePk 823427: the
+// body grows by the venue's id alone.
+
+// THE STORE'S SCHEMA VERSION, written into every bucket as `v`. Version 2 adds
+// the park runs (`g`, see foldGame). A season whose buckets are older is
+// REBUILT once, from January 1 with an empty store and an empty ledger, because
+// its rows cannot be given a park after the fact: the rows of one batter are
+// in fold order, not game order, and nothing in a row names its game. The
+// version is written only when that sweep finishes, so a rebuild cut short
+// starts over on the next run rather than leaving half a season unattributed.
+export const SCHEMA_VERSION = 2
 
 // --- the stored row's coded columns -----------------------------------------
 //
@@ -237,7 +252,18 @@ export function aggregateGameSpray(feed, level) {
 // a backfill runs in whatever order the schedule hands it over, so "his current
 // club" has to be the club from the LATEST game on file rather than the club
 // from whichever fetch happened to land last.
-export function foldGame(store, agg, date) {
+//
+// THE PARK RUNS (`g`, schema version 2). `venueId` is the Stats API venue id
+// of the game. Each entry keeps `g: [[count, venueId], …]`: the next `count`
+// rows of `p` were hit at `venueId`. A run per GAME would do; consecutive games
+// at one park (a home stand) merge into one run, so a season costs about
+// twenty-five runs a batter, not a column on every one of his ~450 rows (a
+// column would push the largest bucket past bucket-shards.test.js's 160 KB
+// ceiling). The season is the folder's, and every ballpark configuration
+// covers whole seasons (lib/ballpark/layout/configurations.js), so venue and
+// season are all a reader needs to pick the wall. A null venue is a game the
+// feed named no park for.
+export function foldGame(store, agg, date, venueId = null) {
   for (const [batterId, delta] of agg) {
     const entry = store[batterId] ?? (store[batterId] = { n: '', t: null, b: null, d: null, p: [], o: {} })
     if (entry.d == null || date >= entry.d) {
@@ -246,6 +272,16 @@ export function foldGame(store, agg, date) {
       if (delta.teamId != null) entry.t = delta.teamId
     }
     if (delta.bats) entry.b = delta.bats
+    if (delta.rows.length) {
+      const runs = (entry.g ??= [])
+      // Rows carried from before the runs existed get one run of unknown park,
+      // so `g` always covers `p` exactly (a rebuild makes this a no-op).
+      const covered = runs.reduce((n, r) => n + r[0], 0)
+      if (covered < entry.p.length) runs.push([entry.p.length - covered, null])
+      const last = runs[runs.length - 1]
+      if (last && last[1] === venueId) last[0] += delta.rows.length
+      else runs.push([delta.rows.length, venueId])
+    }
     for (const row of delta.rows) entry.p.push(row)
     for (const [hand, totals] of Object.entries(delta.totals)) {
       const carried = entry.o[hand] ?? (entry.o[hand] = [0, 0, 0, 0, 0])
@@ -264,9 +300,11 @@ async function readStore(season) {
   const files = (await readdir(dir).catch(() => [])).filter((f) => /^\d\d\.json$/.test(f))
   const store = { bat: {}, post: {} }
   let carried = 0
+  let version = SCHEMA_VERSION
   for (const f of files) {
     const shard = await readJsonOr(join(dir, f), null)
     if (!shard || shard.season !== season) continue
+    version = Math.min(version, shard.v ?? 1)
     for (const part of ['bat', 'post']) {
       for (const [id, entry] of Object.entries(shard[part] ?? {})) {
         store[part][id] = entry
@@ -274,18 +312,18 @@ async function readStore(season) {
       }
     }
   }
-  return { store, carried }
+  return { store, carried, version }
 }
 
 // One file per `personId % 100` bucket (shardKey100, imported from the app so
 // the generator and the reader agree on where a batter went). A whole-league
 // file would be ~7 MB for a page that prints one man's card.
-async function writeStore(store, season) {
+async function writeStore(store, season, v = SCHEMA_VERSION) {
   const buckets = new Map()
   const asOf = new Date().toISOString()
   const bucketFor = (id) => {
     const key = shardKey100(id)
-    if (!buckets.has(key)) buckets.set(key, { season, asOf, bat: {} })
+    if (!buckets.has(key)) buckets.set(key, { season, v, asOf, bat: {} })
     return buckets.get(key)
   }
   for (const [id, entry] of Object.entries(store.bat)) bucketFor(id).bat[id] = entry
@@ -297,7 +335,7 @@ async function writeStore(store, season) {
   // "nobody here" instead.
   for (let i = 0; i < 100; i++) {
     const key = String(i).padStart(2, '0')
-    if (!buckets.has(key)) buckets.set(key, { season, asOf, bat: {} })
+    if (!buckets.has(key)) buckets.set(key, { season, v, asOf, bat: {} })
   }
   return writeShards(seasonDir(season), [...buckets].sort((a, b) => (a[0] < b[0] ? -1 : 1)))
 }
@@ -306,7 +344,7 @@ async function writeStore(store, season) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
-  const { startDate, endDate } = dateRange(args, DEFAULT_DAYS)
+  let { startDate, endDate } = dateRange(args, DEFAULT_DAYS)
   const today = isoDay(new Date())
   const sportsFilter = args.sports
     ? new Set(String(args.sports).split(',').map((s) => Number(s.trim())))
@@ -314,10 +352,23 @@ async function main() {
   const LEVELS = sportsFilter ? ALL_LEVELS.filter((l) => sportsFilter.has(l.sportId)) : ALL_LEVELS
 
   const season = Number(args.season) || Number(endDate.slice(0, 4))
-  const { store, carried } = await readStore(season)
+  const read = await readStore(season)
   const ledger = await readJsonOr(ledgerPath, { season, games: [] })
-  const ingested = new Set(ledger.season === season ? ledger.games : [])
-  console.log(`carried ${carried} batters and ${ingested.size} ingested games for ${season}`)
+  let ingested = new Set(ledger.season === season ? ledger.games : [])
+  // An older schema (see SCHEMA_VERSION), or --rebuild: sweep the whole season
+  // again into an empty store. Checkpoints keep the OLD version number, so only
+  // a finished sweep marks the season current.
+  const rebuild = Boolean(args.rebuild) || (read.carried > 0 && read.version < SCHEMA_VERSION)
+  const store = rebuild ? { bat: {}, post: {} } : read.store
+  // Version 1 means "rows without parks": a rebuild cut short reads as one
+  // and starts over, whatever version the store had before.
+  const writeVersion = rebuild ? 1 : SCHEMA_VERSION
+  if (rebuild) {
+    ingested = new Set()
+    startDate = `${season}-01-01`
+    console.log(`rebuilding ${season} from ${startDate} (store schema v${read.version} → v${SCHEMA_VERSION})`)
+  }
+  console.log(`carried ${rebuild ? 0 : read.carried} batters and ${ingested.size} ingested games for ${season}`)
 
   // Regular season at both levels, plus the postseason at MLB. Same
   // postponed-replay dedup as the other sweeps: a replayed game is listed under
@@ -351,7 +402,7 @@ async function main() {
   )
 
   const writeOut = async () => {
-    await writeStore(store, season)
+    await writeStore(store, season, writeVersion)
     await writeJsonAtomic(ledgerPath, { season, games: [...ingested].sort((a, b) => a - b) })
   }
 
@@ -371,7 +422,7 @@ async function main() {
         // pass unremarked — a silent zero is how a 30x bandwidth saving turns
         // into an empty dataset nobody notices.
         if (agg.size === 0) empty += 1
-        foldGame(g.post ? store.post : store.bat, agg, g.date)
+        foldGame(g.post ? store.post : store.bat, agg, g.date, feed?.gameData?.venue?.id ?? null)
         ingested.add(g.gamePk)
       } catch (err) {
         console.error(`gamePk ${g.gamePk} (${g.level}): ${err.message}`)
@@ -390,7 +441,7 @@ async function main() {
     console.log(`no ${season} balls in play yet — wrote nothing; seasons.json still serves the last season on file`)
     return
   }
-  const { written, swept } = await writeStore(store, season)
+  const { written, swept } = await writeStore(store, season, SCHEMA_VERSION)
   await writeJsonAtomic(ledgerPath, { season, games: [...ingested].sort((a, b) => a - b) })
   const index = await writeSeasons(storeDir, season)
 
