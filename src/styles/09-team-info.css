@@ -477,6 +477,11 @@
   gap: var(--space-1);
   flex-wrap: wrap;
 }
+/* The HP accuracy dot sits at the cell's right edge, like the Attendance and
+   Uniform buttons. */
+.umps__namerow .umptier__glyph {
+  margin-left: auto;
+}
 /* Wraps the HP tier pill as a tap target for the accuracy modal — reset to
    bare, no underline-on-hover (would run oddly under the pill's own border/
    fill), just the focus ring for keyboard access. */
