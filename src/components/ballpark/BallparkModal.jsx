@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { BallparkDiagram } from './BallparkDiagram.jsx'
 import { Facts, RankGroup } from './BallparkFacts.jsx'
 import { rankedDimensions } from '../../lib/ballpark/ballparkData.js'
+import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { Stack } from '../ui/layout/Stack.jsx'
 
@@ -10,12 +11,17 @@ import { Stack } from '../ui/layout/Stack.jsx'
 // heights, each ranked against the 30 MLB parks ("Center field 420′ — 1st of 29").
 // Opened by tapping the venue name on the lineup page's game facts.
 //
+// The DRAWING is the wall on the game's date (`venueId` + `gameDate` through
+// resolveBallparkLayout, #1859); the facts and ranks are today's park. When the
+// two differ (a 2022 game at Comerica), the foot says which is which.
+//
 // Spoiler-safe: everything here is static park geometry (src/lib/ballpark/ballparkData.js),
 // no score, so it sits outside any seal like the rest of the lineup page. Same
 // dialog contract as WhatsBrewingModal — dismiss via backdrop, close button, or
 // Escape; focus moves into the sheet on open and back to the trigger on close.
-export function BallparkModal({ venue, onClose }) {
+export function BallparkModal({ venue, venueId, gameDate, onClose }) {
   const data = rankedDimensions(venue)
+  const layout = resolveBallparkLayout({ venueId, venueName: venue, gameDate })
 
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
@@ -37,7 +43,7 @@ export function BallparkModal({ venue, onClose }) {
           </button>
         </div>
 
-        <BallparkDiagram dist={data.dist} wall={data.wall} arc={data.arc} cfAngle={data.cfMarkerAngle} />
+        {layout && <BallparkDiagram layout={layout} />}
 
         <dl className="bpsheet__facts">
           <Facts label="Opened" value={data.built} />
@@ -51,8 +57,9 @@ export function BallparkModal({ venue, onClose }) {
         </Stack>
 
         <p className="bpsheet__foot">
+          {layout?.validTo && `The drawing shows the wall used through ${layout.validTo.slice(0, 4)}; the ranks are for today's park. `}
           Distances from the MLB Stats API, ranked among the MLB parks · wall shapes
-          from GeomMLBStadiums
+          and heights checked against Baseball Savant
         </p>
       </div>
     </div>

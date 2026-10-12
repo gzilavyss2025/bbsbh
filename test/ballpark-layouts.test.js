@@ -21,7 +21,8 @@ import { CONFIGURATIONS, SEED } from '../src/lib/ballpark/layout/configurations.
 import { auditFence, fenceDistanceAt, CF_TOLERANCE_FT } from '../src/lib/ballpark/layout/fenceAudit.js'
 import { BALLPARKS, ballparkFor } from '../src/lib/ballpark/ballparkData.js'
 import { WALLS } from '../src/lib/ballpark/ballparkFields.js'
-import { buildFieldGeometry, HOME } from '../src/lib/ballpark/ballparkGeometry.js'
+import { buildFieldGeometry, diagramInput, HOME } from '../src/lib/ballpark/ballparkGeometry.js'
+import { clipToFoulLines, fenceProblems, heightAt } from '../src/lib/ballpark/layout/fenceShape.js'
 import { FIELDS } from '../src/lib/ballpark/layout/fences.js'
 
 const layout = (q) => resolveBallparkLayout(q)?.configurationId ?? null
@@ -112,14 +113,16 @@ test('every drawn outline passed its audit', () => {
 
 test('a current park draws its Gameday outline or none, never a 2018 trace', () => {
   const traces = new Set(Object.values(WALLS))
-  for (const c of CONFIGURATIONS.filter((cfg) => cfg.park && cfg.to == null)) {
-    const rec = BALLPARKS[c.park]
-    assert.ok(!traces.has(rec.arc), `${c.id} draws a 2018 trace`)
-    if (rec.arc) assert.deepEqual(rec.arc, FIELDS.venues[c.venueId].fence, c.id)
+  const current = CONFIGURATIONS.filter((cfg) => cfg.park && cfg.to == null)
+  const fenceOf = (c) => resolveBallparkLayout({ venueId: c.venueId }).geometry.fence
+  for (const c of current) {
+    const fence = fenceOf(c)
+    assert.ok(!traces.has(fence), `${c.id} draws a 2018 trace`)
+    if (fence) assert.deepEqual(fence, FIELDS.venues[c.venueId].fence, c.id)
   }
   // The four whose SVG fails the audit against Savant 2026 (or has none). If
   // one starts to pass after a re-import, update docs/ballpark-layouts.md.
-  const without = CONFIGURATIONS.filter((c) => c.park && c.to == null && !BALLPARKS[c.park].arc).map((c) => c.park)
+  const without = current.filter((c) => !fenceOf(c)).map((c) => c.park)
   assert.deepEqual(without.sort(), ['comericapark', 'kauffmanstadium', 'rogerscentre', 'sutterhealthpark'])
   assert.equal(ballparkFor('Comerica Park').dist.cf, 412)
 })
@@ -169,18 +172,87 @@ test('the CF label sits at the CF sign, not the deepest vertex', () => {
   const wall = { lf: 8, cf: 8, rf: 8 }
   // Deepest vertex is 30 ft right of center; straightaway is 400.
   const arc = [[-233, 233], [-50, 395], [0, 400], [30, 440], [80, 400], [233, 233]]
-  const g = buildFieldGeometry(dist, wall, arc)
+  const g = buildFieldGeometry({ dist, wall, fence: arc })
   const cfLabel = g.labels[1]
   assert.equal(cfLabel.t, 400)
   assert.ok(Math.abs(cfLabel.x - HOME.x) < 0.01, 'straightaway: no sideways offset')
   // With the sign at the deepest point, the label moves there.
-  const atDeep = buildFieldGeometry(dist, wall, arc, (Math.atan2(30, 440) * 180) / Math.PI)
+  const atDeep = buildFieldGeometry({ dist, wall, fence: arc, cfAngle: (Math.atan2(30, 440) * 180) / Math.PI })
   assert.ok(atDeep.labels[1].x > HOME.x + 20)
 })
 
 test("Fenway's 420 label sits at the triangle, right of straightaway", () => {
-  const fenway = ballparkFor('Fenway Park')
-  assert.ok(fenway.cfMarkerAngle > 5, 'the triangle is right of center')
-  const g = buildFieldGeometry(fenway.dist, fenway.wall, fenway.arc, fenway.cfMarkerAngle)
+  const fenway = resolveBallparkLayout({ venueName: 'Fenway Park', gameDate: '2026-07-01' })
+  assert.ok(fenway.geometry.cfMarkerAngle > 5, 'the triangle is right of center')
+  const g = buildFieldGeometry(diagramInput(fenway))
   assert.ok(g.labels[1].x > HOME.x)
+})
+
+test('every outline clips to the foul lines as a valid fence', () => {
+  for (const l of allBallparkLayouts()) {
+    if (!l.geometry.fence) continue
+    const c = clipToFoulLines(l.geometry.fence)
+    assert.deepEqual(fenceProblems(c), [], l.configurationId)
+    const bearing = (p) => (Math.atan2(p[0], p[1]) * 180) / Math.PI
+    assert.ok(Math.abs(bearing(c[0]) + 45) < 0.01 && Math.abs(bearing(c.at(-1)) - 45) < 0.01, l.configurationId)
+  }
+})
+
+test('clipping cuts a trace that runs into foul ground at the line', () => {
+  // Runs past both lines (a bullpen wall), then back.
+  const fence = [[-260, 200], [-240, 240], [0, 400], [240, 240], [260, 200]]
+  const c = clipToFoulLines(fence)
+  assert.ok(Math.abs(c[0][0] + c[0][1]) < 0.01, 'starts on the LF line (x = -y)')
+  assert.ok(Math.abs(c.at(-1)[0] - c.at(-1)[1]) < 0.01, 'ends on the RF line (x = y)')
+  assert.deepEqual(c.slice(1, -1), [[0, 400]])
+  // An end that stops short of the line is carried onto it, same distance.
+  const short = clipToFoulLines([[-200, 260], [0, 400], [200, 260]])
+  assert.ok(Math.abs(Math.hypot(...short[0]) - Math.hypot(200, 260)) < 0.01)
+})
+
+test('fenceProblems names a crossing, foul ground, and a backwards outline', () => {
+  assert.match(fenceProblems([[-240, 240], [100, 380], [-100, 380], [240, 240]]).join(), /cross/)
+  assert.match(fenceProblems([[-300, 100], [0, 400], [240, 240]]).join(), /foul territory/)
+  assert.match(fenceProblems([[240, 240], [0, 400], [-240, 240]]).join(), /left field to right field/)
+})
+
+test("wall height follows Savant's five measured heights when present", () => {
+  const five = { lf: 37, lc: 17, cf: 17, rc: 5, rf: 4 }
+  assert.equal(heightAt(-45, five), 37)
+  assert.equal(heightAt(-18, five), 17)
+  assert.equal(heightAt(18, five), 5)
+  assert.equal(heightAt(-31.5, five), 27)
+  // Three heights only: line → CF → line.
+  assert.equal(heightAt(-22.5, { lf: 8, cf: 16, rf: 8 }), 12)
+  // The Fenway layout weights its stroke with the five.
+  const fenway = resolveBallparkLayout({ venueName: 'Fenway Park', gameDate: '2026-07-01' })
+  assert.ok(Number.isFinite(diagramInput(fenway).heights.lc))
+})
+
+test('a drawing that is not a checked outline says so', () => {
+  const note = (q) => resolveBallparkLayout(q).accuracyNote
+  assert.equal(note({ venueId: 3, gameDate: '2026-07-01' }), null, 'a checked Gameday outline needs no note')
+  assert.match(note({ venueId: 2394, gameDate: '2026-07-01' }), /posted distances/)
+  assert.match(note({ venueId: 2394, gameDate: '2022-07-01' }), /2018 drawing/)
+  // An older record with no name of its own takes the park's current name.
+  assert.equal(resolveBallparkLayout({ venueId: 2394, gameDate: '2022-07-01' }).name, 'Comerica Park')
+})
+
+test('every configuration builds a drawing, and prints only values it knows', () => {
+  // A dated older wall knows its outline but not its heights (wall: null), and
+  // may know only some distances: the 2022 Comerica sheet crashed on exactly
+  // that. Unknown values are left off the drawing, never printed as "null′".
+  for (const l of allBallparkLayouts()) {
+    if (l.quality.fence === 'missing') continue
+    const g = buildFieldGeometry(diagramInput(l))
+    for (const t of [...g.labels.map((x) => x.t), ...g.wallTags.map((x) => x.h)]) {
+      assert.ok(Number.isFinite(t), `${l.configurationId}: printed ${t}`)
+    }
+    for (const s of g.fenceSegs) assert.ok(Number.isFinite(s.h), `${l.configurationId}: stroke weight`)
+  }
+  const old = buildFieldGeometry(diagramInput(resolveBallparkLayout({ venueId: 2394, gameDate: '2022-06-15' })))
+  assert.equal(old.wallTags.length, 0, 'no heights on file for the old wall')
+  assert.deepEqual(old.labels.map((x) => x.t), [345, 420, 330])
+  const kc = buildFieldGeometry(diagramInput(resolveBallparkLayout({ venueId: 7, gameDate: '2024-06-15' })))
+  assert.deepEqual(kc.labels.map((x) => x.t), [410], 'only the CF distance is known for the old Kauffman wall')
 })

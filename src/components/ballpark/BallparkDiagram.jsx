@@ -1,4 +1,4 @@
-import { buildFieldGeometry, wallStroke, VIEWBOX, HOME } from '../../lib/ballpark/ballparkGeometry.js'
+import { buildFieldGeometry, diagramInput, wallStroke, VIEWBOX, HOME } from '../../lib/ballpark/ballparkGeometry.js'
 
 // The scorebook's ballpark drawing: an ink-on-manila sketch of the full field —
 // infield diamond, outfield grass, the warning track hugging the fence, and the
@@ -15,17 +15,17 @@ const f = (n) => Math.round(n * 100) / 100
 // the top so the field fills its card, and it is not "a ballpark diagram" to a
 // screen reader — it is a spray chart. Both default to what every other caller
 // already gets, so nothing else moves.
+// `layout` is one resolved configuration (lib/ballpark/layout/resolveLayout.js):
+// every card that draws a park passes the same object for the same game, so
+// the same date draws the same wall everywhere (#1859).
 export function BallparkDiagram({
-  dist,
-  wall,
-  arc,
-  cfAngle = 0,
+  layout,
   className = '',
   viewBox = `0 0 ${VIEWBOX.w} ${VIEWBOX.h}`,
   label = 'Ballpark field dimensions diagram',
   children = null,
 }) {
-  const g = buildFieldGeometry(dist, wall, arc, cfAngle)
+  const g = buildFieldGeometry(diagramInput(layout))
   return (
     <svg
       className={`bpdiagram ${className}`}
@@ -101,6 +101,13 @@ export function BallparkDiagram({
           {w.h}′
         </text>
       ))}
+      {/* How sure the wall is, when it is not a checked outline. Bottom-left is
+          empty paper in every park, and no caller crops it. */}
+      {layout.accuracyNote && (
+        <text className="bpdiagram__note" x="12" y={VIEWBOX.h - 12}>
+          {layout.accuracyNote}
+        </text>
+      )}
       {/* An overlay drawn LAST, so a caller's own marks sit on top of the park
           rather than under the fence. Plain children, not a render function:
           a render function in this codebase means a spoiler gate (SealBox),

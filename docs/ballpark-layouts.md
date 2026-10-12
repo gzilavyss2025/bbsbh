@@ -1,7 +1,8 @@
 # Ballpark layouts: coverage report
 
 This report lists each playing-field configuration the app knows, where its
-fence outline comes from, and what is still missing. Issue #1859, slice 1.
+fence outline comes from, who draws it, and what is still missing. Issue #1859,
+slices 1 and 2.
 
 Code: `src/lib/ballpark/layout/`. The registry is `configurations.js`. The
 choice of outline is `fences.js`. The resolver is `resolveLayout.js`
@@ -123,8 +124,30 @@ a 2018 trace shows is an inference from its depth; each record's `note` says so.
 - **MiLB.** Gameday SVGs exist for MiLB parks (Toledo, Lehigh Valley and Iowa
   checked), but in an older style with no named layers. Extracting them is
   slice 3. An MiLB venue resolves to `null`, and the caller shows "not on file".
-- **Callers still resolve by name, for the current configuration.** Passing the
-  venue id and game date from the live feed into the hit chart, the ball-flight
-  card and the box score is slice 2.
-- **Wall heights** are three values per park, interpolated between them. Savant
-  gives five; per-segment heights are slice 2.
+- **Gap bearings of the five-point fallback.** A park with no outline draws
+  its posted gap signs at ±22.5°. No source gives the bearing of a posted gap
+  sign, so the accuracy note says the wall is drawn straight between them.
+
+## Who draws what (slice 2)
+
+Every drawing goes through `resolveBallparkLayout` with the venue id and the
+date, so the same game draws the same wall on every card:
+
+| Surface | Venue id from | Date from |
+| --- | --- | --- |
+| Innings hit chart (`HalfInning.jsx`) | `feed.gameData.venue.id` | `feed.gameData.datetime.officialDate` |
+| Box score hit chart (`BoxScore.jsx` → `HitChartCard`) | `feed.gameData.venue.id` | `feed.gameData.datetime.officialDate` |
+| Ball-flight card (`halfInningFeed.js` puts both on the batted ball) | `feed.gameData.venue.id` | `feed.gameData.datetime.officialDate` |
+| Lineup page Ballpark sheet (`TeamInfo.jsx` → `BallparkModal`) | `selectGameInfo(feed).venueId` | `selectGameInfo(feed).officialDate` |
+| All-Star page Ballpark sheet | the game card's `venue.id` | the game card's date, else mid-July of the year |
+| Team hub Ballpark card | `team.venue.id` | none: today's wall |
+
+The Ballpark sheet's facts and league ranks stay today's park. When the
+drawing is an older wall, the sheet's foot says so.
+
+The renderer cuts each outline at the foul lines with segment intersections
+(`layout/fenceShape.js`), and the tests check every stored outline for point
+order, foul ground and crossings. The stroke weight follows Savant's five
+measured heights where the park has them. Only measured or posted heights are
+printed. A wall that is not a checked outline carries a one-line accuracy note
+in the drawing's corner.

@@ -40,6 +40,22 @@ function dayOf(gameDate) {
 
 const covers = (c, day) => (c.from == null || c.from <= day) && (c.to == null || day <= c.to)
 
+// The short note a diagram prints when its wall is not a checked outline, so a
+// straight five-point sketch never passes for the real fence. A checked
+// Gameday outline needs none.
+function accuracyNote(quality, kind) {
+  if (quality === 'dimensions-only') return 'Wall drawn straight between the posted distances'
+  if (quality === 'estimated') return 'Wall shape is approximate'
+  if (kind === 'seed') return 'Wall traced from a 2018 drawing'
+  return null
+}
+
+// The venue's current park name, for an older record with no name of its own.
+function currentName(venueId) {
+  const cur = CONFIGURATIONS.find((cfg) => cfg.venueId === venueId && cfg.park)
+  return cur ? BALLPARKS[cur.park].name : null
+}
+
 function build(c) {
   const rec = c.park ? BALLPARKS[c.park] : null
   const dist = rec ? rec.dist : c.dist
@@ -49,7 +65,7 @@ function build(c) {
   return {
     venueId: c.venueId,
     configurationId: c.id,
-    name: rec?.name ?? c.names?.[0] ?? null,
+    name: rec?.name ?? c.names?.[0] ?? currentName(c.venueId),
     validFrom: c.from,
     validTo: c.to,
     // `dist` is the posted signs (what the labels say); `measured` is Savant's
@@ -60,6 +76,7 @@ function build(c) {
     geometry: { fence: fence.points, cfMarkerAngle: fence.cfMarkerAngle },
     quality: { fence: fence.quality, wall: measured ? 'measured' : wall ? 'posted' : 'missing' },
     audit: fence.audit,
+    accuracyNote: accuracyNote(fence.quality, fence.source?.kind),
     provenance: {
       fence: fence.source?.kind === 'seed' ? { kind: 'seed', ...SEED, key: c.seedKey } : fence.source,
       sources: c.sources ?? [],

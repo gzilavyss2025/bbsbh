@@ -298,7 +298,7 @@ function GameFacts({ info, scorebookWeather, scorebookWeatherLoading }) {
   return (
     <>
       <Fact label="Date" value={scorebookDate(info.officialDate)} />
-      <BallparkFact venue={info.venue} />
+      <BallparkFact venue={info.venue} venueId={info.venueId} gameDate={info.officialDate} />
       {/* Scheduled start (posted the moment the game exists) until the box
           score's own "First pitch" info line posts once the game's under
           way — the actual time then overwrites the estimate in place, same
@@ -1133,7 +1133,7 @@ function AttendanceFact({ venue, attendance }) {
 // ballparkData.js), the venue name becomes a button that opens the to-scale
 // field diagram + league-ranked dimensions. MiLB parks and any venue not on file
 // degrade to the plain read-only Fact, per the app's graceful-degradation rule.
-function BallparkFact({ venue }) {
+function BallparkFact({ venue, venueId, gameDate }) {
   const [open, setOpen] = useState(false)
   if (!ballparkFor(venue)) return <Fact label="Ballpark" value={venue} />
   return (
@@ -1144,7 +1144,9 @@ function BallparkFact({ venue }) {
           {venue}
         </button>
       </dd>
-      {open && <BallparkModal venue={venue} onClose={() => setOpen(false)} />}
+      {open && (
+        <BallparkModal venue={venue} venueId={venueId} gameDate={gameDate} onClose={() => setOpen(false)} />
+      )}
     </div>
   )
 }

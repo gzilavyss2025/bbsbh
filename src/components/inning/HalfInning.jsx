@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { selectPrePitchChanges, selectHalfStartingPitcher, selectIsFreshPitcher, halfIndex } from '../../api/select.js'
+import { selectPrePitchChanges, selectHalfStartingPitcher, selectIsFreshPitcher, selectVenueRef, halfIndex } from '../../api/select.js'
 import { computePitcherLines, pitcherHandoffs, pitcherLineAt, halfClosingPitcher } from '../../api/pitchers.js'
 import { battingSlot, pitchingChangePitcher } from '../../api/playbyplay.js'
 import { selectDueUpNow } from '../../api/dueup.js'
@@ -532,7 +532,7 @@ function HalfHitChart({ feed, inning, half, label, teamId }) {
   return (
     <HitChart
       balls={balls}
-      venue={feed?.gameData?.venue?.name ?? ''}
+      {...selectVenueRef(feed)}
       variant="half"
       note={`${label} ${ordinal(inning)}`}
     />

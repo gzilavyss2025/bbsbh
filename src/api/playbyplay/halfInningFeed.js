@@ -67,6 +67,10 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
   // ball below. Identity, not a result — it is on the masthead of every page
   // this feed renders under.
   const venueName = feed?.gameData?.venue?.name ?? ''
+  // The id and the date pick the park's configuration on THIS date (#1859): a
+  // renovated wall is not the wall this ball was hit at.
+  const venueId = feed?.gameData?.venue?.id ?? null
+  const gameDate = feed?.gameData?.datetime?.officialDate ?? null
 
   // Each batting-side player's own fielding position as of entering THIS
   // half (see resolveBatter's doc) — a player on this side can only gain a
@@ -530,7 +534,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // over the field; `venue` rides along because the drawing is a
         // PARTICULAR park's, and the card that reads this is handed the ball
         // and nothing else.
-        battedBall: battedBall && { ...battedBall, venue: venueName },
+        battedBall: battedBall && { ...battedBall, venue: venueName, venueId, gameDate },
         // Prose for any baserunning event (a steal, a caught stealing, a wild
         // pitch…) that occurred during this plate appearance.
         baserunningNotes,

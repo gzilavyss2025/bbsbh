@@ -2,7 +2,7 @@ import { useId, useMemo, useState } from 'react'
 import { BallparkDiagram } from '../ballpark/BallparkDiagram.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Card } from '../ui/frame/Card.jsx'
-import { ballparkFor } from '../../lib/ballpark/ballparkData.js'
+import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 import { VIEWBOX, PLOT_SKY_CROP, PLOT_VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
 import { ordinal } from '../../lib/format.js'
 
@@ -78,6 +78,8 @@ function InningMark({ inning, half }) {
 export function HitChart({
   balls,
   venue,
+  venueId,
+  gameDate,
   clubs = [],
   note,
   tag,
@@ -108,7 +110,7 @@ export function HitChart({
   // The park record is static geometry, not game state. A MiLB venue has none —
   // and without the field the dots' coordinates mean nothing — so the card
   // stands down entirely rather than drawing marks on empty paper.
-  const park = ballparkFor(venue)
+  const park = resolveBallparkLayout({ venueId, venueName: venue, gameDate })
   if (!balls?.length || !park) return null
 
   // The half shows what happened; the game shows hits until you ask for outs.
@@ -205,10 +207,7 @@ export function HitChart({
         <div className="hitchart__plot">
           <BallparkDiagram
             className="hitchart__field"
-            dist={park.dist}
-            wall={park.wall}
-            arc={park.arc}
-            cfAngle={park.cfMarkerAngle}
+            layout={park}
             viewBox={PLOT_VIEWBOX}
             label={fieldLabel}
           >

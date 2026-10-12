@@ -1,25 +1,34 @@
 // Geometry for the ballpark field drawing (see components/BallparkDiagram.jsx).
-// Turns a park's outfield wall into the SVG path strings + label points the
-// diagram renders — infield diamond, outfield grass, warning track, foul ground,
-// and the fence.
+// Turns one resolved park layout (layout/resolveLayout.js) into the SVG path
+// strings + label points the diagram renders — infield diamond, outfield grass,
+// warning track, foul ground, and the fence.
 //
-// The fence comes from one of two sources, both drawn as STRAIGHT segments (real
-// outfield walls are straight runs meeting at distinct corners — never a smooth
-// arc):
-//   • the digitized wall polygon in ballparkFields.js when we have it (passed in
-//     as `arc`, an LF-pole→RF-pole point list in feet) — true shape, real corners;
-//   • otherwise a five-point outline through the posted LF/LC/CF/RC/RF distances —
-//     angular, just coarser (the fallback for the A's park and any MiLB venue).
+// The fence is drawn as STRAIGHT segments (real outfield walls are straight
+// runs meeting at distinct corners — never a smooth arc), from one of two
+// inputs:
+//   • the layout's audited outline (an LF-pole→RF-pole point list in feet),
+//     cut at the two foul lines with segment intersections (layout/fenceShape.js);
+//   • otherwise a five-point outline through the posted LF/LC/CF/RC/RF distances,
+//     with the gaps at ±22.5° — a drawing choice, since a posted gap sign has no
+//     published bearing. The layout's accuracy note says so.
 //
 // The CF distance label sits where the CF sign stands: straightaway center, or
 // the angle the layout audit found the posted number at (`cfAngle`, Fenway's
 // triangle). It used to sit at the fence's deepest vertex, which is a different
 // point in most parks (#1859).
 //
+// Wall height sets each fence segment's stroke weight. It comes from Savant's
+// five measured heights when the layout has them, else the three posted ones
+// (layout/fenceShape.js's heightAt). Only the measured or posted values are
+// ever printed; between them the weight is a drawing choice.
+//
 // Pure and self-contained (no React, no data import). Home plate anchors the
 // drawing; feet map 1:1 to SVG units, +x toward right field, +y toward center
 // field (SVG y grows down, so center field subtracts from home's y). Fixed
-// 620×560 viewBox and fixed scale, so a deep park visibly fills more of the frame.
+// 620×560 viewBox and fixed scale, so a deep park visibly fills more of the
+// frame. The deepest outline on file (433 ft, the old Tal's Hill wall) tops out
+// at y≈72 and the widest pole (355 ft) at x≈59, both inside the frame and
+// below the plot window's sky crop, so no park needs its own scale.
 
 export const VIEWBOX = { w: 620, h: 560 }
 export const HOME = { x: 310, y: 505 }
@@ -44,45 +53,27 @@ const HOME_DIRT_FT = 13 // dirt circle around home plate
 const BASELINE_DIRT_FT = 6 // width of the dirt running-lane strip along each baseline
 
 import { fenceDistanceAt } from './layout/fenceAudit.js'
+import { clipToFoulLines, heightAt } from './layout/fenceShape.js'
 
 const f = (n) => Math.round(n * 100) / 100
 
 // Feet (home-origin, y toward center) → SVG point.
 const toSvg = (xFt, yFt) => ({ x: HOME.x + xFt, y: HOME.y - yFt })
 
-// Wall height interpolated across the outfield by angle from center (−45°=LF,
-// 0°=CF, +45°=RF), so the fence thickness eases between the three posted heights.
-function heightAt(a, wall) {
-  const c = Math.max(-45, Math.min(45, a))
-  return c <= 0
-    ? wall.lf + (wall.cf - wall.lf) * ((c + 45) / 45)
-    : wall.cf + (wall.rf - wall.cf) * (c / 45)
-}
-
-// The ordered wall as SVG points carrying each point's angle + local wall height.
-// From the digitized arc when present, else the five posted distances.
-function wallPoints(dist, wall, arc) {
-  if (arc && arc.length > 1) {
-    // The digitized polygon (GeomMLBStadiums' outfield_outer) runs past both foul
-    // poles into foul territory — bullpen/camera-well wall beyond the true fair
-    // line. Keep only the interior fair-territory points (within ±45° of dead
-    // center) and cap each end at the actual posted pole distance, so the fence
-    // still ends exactly at the foul line the labels report instead of bulging
-    // past it.
-    const interior = arc
-      .map(([xf, yf]) => ({ xf, yf, a: (Math.atan2(xf, yf) * 180) / Math.PI }))
-      .filter((p) => p.a >= -45 && p.a <= 45)
-    const pole = (adeg, r) => {
-      const rad = (adeg * Math.PI) / 180
-      return { xf: r * Math.sin(rad), yf: r * Math.cos(rad), a: adeg }
-    }
-    const withPoles = [pole(-45, dist.lf), ...interior, pole(45, dist.rf)]
-    return withPoles.map((p) => ({ ...toSvg(p.xf, p.yf), a: p.a, h: heightAt(p.a, wall) }))
+// The ordered wall as SVG points carrying each point's bearing + local wall
+// height. From the clipped outline when present, else the five posted distances.
+function wallPoints(dist, heights, fence) {
+  const clipped = clipToFoulLines(fence)
+  if (clipped) {
+    return clipped.map(([xf, yf]) => {
+      const a = (Math.atan2(xf, yf) * 180) / Math.PI
+      return { ...toSvg(xf, yf), a, h: heightAt(a, heights) }
+    })
   }
   return ['lf', 'lc', 'cf', 'rc', 'rf'].map((k) => {
     const a = ANGLE[k]
     const rad = (a * Math.PI) / 180
-    return { ...toSvg(dist[k] * Math.sin(rad), dist[k] * Math.cos(rad)), a, h: heightAt(a, wall) }
+    return { ...toSvg(dist[k] * Math.sin(rad), dist[k] * Math.cos(rad)), a, h: heightAt(a, heights) }
   })
 }
 
@@ -161,8 +152,28 @@ function fencePointAt(pts, deg) {
   return toSvg(ft * Math.sin(rad), ft * Math.cos(rad))
 }
 
-export function buildFieldGeometry(dist, wall, arc, cfAngle = 0) {
-  const pts = wallPoints(dist, wall, arc)
+// The input the drawing needs from a resolved layout (resolveLayout.js):
+// posted distances (the labels), the three printed wall heights, the heights
+// that weight the stroke (Savant's five when measured), the outline, and
+// where the CF sign stands.
+export function diagramInput(layout) {
+  const { dist, wall, measured } = layout.measurements
+  return {
+    dist,
+    wall,
+    heights: measured?.height ?? wall ?? null,
+    fence: layout.geometry.fence,
+    cfAngle: layout.geometry.cfMarkerAngle,
+  }
+}
+
+// The stroke weight for a wall whose heights are unknown (an older
+// configuration): an ordinary 8 ft. It is a drawing weight only; no label
+// prints it, and the wall tags are left off.
+const UNKNOWN_HEIGHTS = { lf: 8, cf: 8, rf: 8 }
+
+export function buildFieldGeometry({ dist, wall, heights = wall, fence = null, cfAngle = 0 }) {
+  const pts = wallPoints(dist, heights ?? UNKNOWN_HEIGHTS, fence)
   const lf = pts[0]
   const rf = pts[pts.length - 1]
   const cf = fencePointAt(pts, cfAngle)
@@ -228,8 +239,10 @@ export function buildFieldGeometry(dist, wall, arc, cfAngle = 0) {
     baselineDirtL, baselineDirtR,
     bases: [b1, b2, b3], mound,
     moundDirtR: MOUND_DIRT_FT, homeDirtR: HOME_DIRT_FT, baselineDirtW: BASELINE_DIRT_FT,
-    labels: [labelAt(lf, dist.lf), labelAt(cf, dist.cf), labelAt(rf, dist.rf)],
-    wallTags: [tagAt(lf, wall.lf), tagAt(cf, wall.cf), tagAt(rf, wall.rf)],
+    // Only values on file are printed: an older wall may know its CF and not
+    // its lines, and its heights not at all.
+    labels: [labelAt(lf, dist.lf), labelAt(cf, dist.cf), labelAt(rf, dist.rf)].filter((l) => Number.isFinite(l.t)),
+    wallTags: wall ? [tagAt(lf, wall.lf), tagAt(cf, wall.cf), tagAt(rf, wall.rf)].filter((w) => Number.isFinite(w.h)) : [],
   }
 }
 

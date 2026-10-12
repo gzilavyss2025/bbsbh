@@ -52,7 +52,7 @@
 // the distances and drop the verified wall heights in alongside.
 
 import { CONFIGURATIONS } from './layout/configurations.js'
-import { fenceFor, measuredFor } from './layout/fences.js'
+import { measuredFor } from './layout/fences.js'
 
 // Normalize a venue name to a stable lookup key (mirrors ballparks.js).
 // "Oriole Park at Camden Yards" → "orioleparkatcamdenyards".
@@ -112,23 +112,14 @@ export const BALLPARKS = {
   sutterhealthpark: { name: 'Sutter Health Park', dist: { lf: 330, lc: 380, cf: 403, rc: 380, rf: 325 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2000, roof: 'Open', capacity: 14014 },
 }
 
-// Attach the CURRENT configuration's audited outline (feet, home-origin) so the
-// diagram can draw the true fence shape, and Savant's measured wall heights.
-// The registry decides which outline may stand for today's park
-// (./layout/fences.js); a park with none draws its five posted distances.
-// `cfMarkerAngle` is where the CF sign stands: 0 (straightaway) unless the
-// audit found the posted CF at the deepest point instead (Fenway's triangle).
-// The `wall` literals above are the fallback for a park Savant does not
-// measure. Aliases share the record object, so they inherit all of it.
+// Savant's measured wall heights replace the literals above for every park it
+// measures (./layout/fields.json), so the league ranks compare measurements.
+// The fence outline is NOT attached here: a diagram draws the configuration
+// its date resolves to (./layout/resolveLayout.js), which is not always the
+// current one. Aliases share the record object, so they inherit the heights.
 for (const c of CONFIGURATIONS) {
   const rec = c.park && c.to == null ? BALLPARKS[c.park] : null
-  if (!rec) continue
-  const fence = fenceFor(c, rec.dist)
-  if (fence.points) {
-    rec.arc = fence.points
-    rec.cfMarkerAngle = fence.cfMarkerAngle
-  }
-  const h = measuredFor(c)?.height
+  const h = rec && measuredFor(c)?.height
   if (h) rec.wall = { lf: Math.round(h.lf), cf: Math.round(h.cf), rf: Math.round(h.rf) }
 }
 

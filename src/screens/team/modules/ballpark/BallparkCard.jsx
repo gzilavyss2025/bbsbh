@@ -1,5 +1,6 @@
 import { Suspense, lazy, useCallback, useState } from 'react'
 import { rankedDimensions } from '../../../../lib/ballpark/ballparkData.js'
+import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
 import { ordinal } from '../../../../lib/format.js'
 import {
   fieldIds,
@@ -197,6 +198,8 @@ export function BallparkCard({ team, attendance }) {
   const { t } = useCopy()
   const venueName = team.venue?.name
   const park = venueName ? rankedDimensions(venueName) : null
+  // The team's home park today: no date, so the current configuration (#1859).
+  const layout = venueName ? resolveBallparkLayout({ venueId: team.venue?.id, venueName }) : null
 
   // The park's CANONICAL name, never the raw feed string, when we have one —
   // so a renamed MLB venue resolves through its alias to the one shared
@@ -316,13 +319,7 @@ export function BallparkCard({ team, attendance }) {
           at the hero + gear above rather than showing a broken diagram. */}
       {park && (
         <div className="ballparkcard__layout">
-          <BallparkDiagram
-            className="ballparkcard__diagram"
-            dist={park.dist}
-            wall={park.wall}
-            arc={park.arc}
-            cfAngle={park.cfMarkerAngle}
-          />
+          {layout && <BallparkDiagram className="ballparkcard__diagram" layout={layout} />}
           <div className="ballparkcard__details">
             <dl className="bpsheet__facts">
               <Facts label="Opened" value={park.built} />
