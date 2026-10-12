@@ -239,8 +239,78 @@ export function fenceFromSvg(svg, { poles = null, tolFt = 1, scaleFtPerUnit = SC
     return [x * c - y * s, x * s + y * c]
   }
   const polys = field.map((sp) => sp.map(toFeet))
-  const out = sampleWall(polys, ((angR - angL) * 180) / Math.PI / 2, tolFt)
-  return out && { ...out, fittedScale }
+  const span = ((angR - angL) * 180) / Math.PI / 2
+  const out = sampleWall(polys, span, tolFt)
+  if (!out) return null
+  // The two softer layers (#1859, slice 5). Neither is a measurement: the art
+  // is checked only for plausibility (checkLayers), and the app draws them as
+  // estimates. Rounded to whole feet, because they ship with the app.
+  // - `surface`: the playing surface, fair and foul, out to the wall and the
+  //   stands — the `Outfield` layer's largest shape. It carries the foul ground
+  //   and the backstop the stylized drawing used to invent.
+  // - `trackInner`: the warning track's inner edge, the `grass` layer's outer
+  //   edge sampled across fair territory.
+  const surface = polys.reduce((a, b) => (polygonArea(b) > polygonArea(a) ? b : a))
+  const grass = layer(svg, 'grass')?.map((sp) => sp.map(toFeet)) ?? []
+  const inner = []
+  for (let deg = -(span - 0.5); deg <= span - 0.5 + 1e-9; deg += 0.5) {
+    const r = outermost(grass, deg)
+    if (r != null) inner.push([r * Math.sin((deg * Math.PI) / 180), r * Math.cos((deg * Math.PI) / 180)])
+  }
+  const whole = (pts) => pts.map(([x, y]) => [Math.round(x), Math.round(y)])
+  return {
+    ...out,
+    fittedScale,
+    surface: whole(simplifyClosed(surface, 2)),
+    trackInner: inner.length > 1 ? whole(simplify(inner, 2)) : null,
+  }
+}
+
+function polygonArea(p) {
+  return Math.abs(p.reduce((acc, q, i) => {
+    const r = p[(i + 1) % p.length]
+    return acc + q[0] * r[1] - r[0] * q[1]
+  }, 0)) / 2
+}
+
+// Douglas-Peucker on a closed ring: split at the point farthest from the first.
+function simplifyClosed(ring, tol) {
+  const pts = ring.length > 1 && ring[0][0] === ring.at(-1)[0] && ring[0][1] === ring.at(-1)[1] ? ring.slice(0, -1) : ring
+  if (pts.length < 4) return pts
+  let far = 1
+  for (let k = 1; k < pts.length; k++) if (hypot(pts[0], pts[k]) > hypot(pts[0], pts[far])) far = k
+  return [...simplify(pts.slice(0, far + 1), tol).slice(0, -1), ...simplify([...pts.slice(far), pts[0]], tol).slice(0, -1)]
+}
+
+// Plausibility checks for the two softer layers against the audited fence.
+// A layer that fails is not stored, and the app keeps its stylized drawing.
+//   track: 8 to 40 ft wide at every 5° across fair territory (to ±40°);
+//   surface: holds the fence (within 5 ft, inside the poles: the surface is
+//   simplified to 2 ft and rounded to whole feet, which can shave a sharp
+//   corner such as Fenway's triangle), its backstop is 35 to 90 ft
+//   behind the plate, and it is larger than fair territory.
+export const LAYER_LIMITS = { trackFt: [8, 40], backstopFt: [35, 90], fenceSlackFt: 5 }
+export function checkLayers(fence, fairAreaSqFt, { surface, trackInner }) {
+  const out = { track: false, surface: false }
+  if (trackInner) {
+    const widths = []
+    for (let d = -40; d <= 40; d += 5) widths.push(fenceDistanceAt(fence, d) - (fenceDistanceAt(trackInner, d) ?? Infinity))
+    out.track = widths.every((w) => w >= LAYER_LIMITS.trackFt[0] && w <= LAYER_LIMITS.trackFt[1])
+  }
+  if (surface?.length > 2) {
+    const ring = [...surface, surface[0]]
+    const back = outermost([ring], 180)
+    // Interior bearings only: each pole is carried onto its foul line by
+    // construction (sampleWall), right where the surface shape tucks in.
+    const holdsFence = fence.every(([x, y]) => {
+      const deg = (Math.atan2(x, y) * 180) / Math.PI
+      return Math.abs(deg) > 44 || (outermost([ring], deg) ?? 0) >= Math.hypot(x, y) - LAYER_LIMITS.fenceSlackFt
+    })
+    out.surface = holdsFence && back != null &&
+      back >= LAYER_LIMITS.backstopFt[0] && back <= LAYER_LIMITS.backstopFt[1] &&
+      polygonArea(surface) > fairAreaSqFt
+  }
+  return out
 }
 
 // The wall of a field drawn as closed shapes in feet, sampled every 0.25°

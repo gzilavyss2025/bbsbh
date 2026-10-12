@@ -2,7 +2,7 @@
 
 This report lists each playing-field configuration the app knows, where its
 fence outline comes from, who draws it, and what is still missing. Issue #1859,
-slices 1 to 4.
+slices 1 to 5.
 
 Code: `src/lib/ballpark/layout/`. The registry is `configurations.js`. The
 choice of outline is `fences.js`. The resolver is `resolveLayout.js`
@@ -168,6 +168,27 @@ On the screens, a drawable minor-league park gets the drawing on the team
 hub's Ballpark card and in the lineup page's Ballpark sheet, without league
 ranks. The hit charts and the ball-flight card draw it for a game that sends
 hit coordinates.
+
+## Foul ground, warning track and infield (slice 5)
+
+Each layer has its own quality (`layout.quality.foul`, `.track`, `.infield`):
+a checked fence does not make its foul ground checked.
+
+| Layer | Source | Check | Coverage |
+| --- | --- | --- | --- |
+| Foul ground (`geometry.surface`) | The Gameday SVG's `Outfield` layer: the playing surface, fair and foul, out to the wall and the stands | Holds the fence (within 5 ft); backstop 35–90 ft; larger than fair territory | 26 current MLB parks |
+| Warning track (`geometry.trackInner`) | The Gameday SVG's `grass` layer: its outer edge is the track's inner edge | 8–40 ft wide at every 5° across fair territory | 25 (not Fenway: 46–52 ft at the triangle and the RF bend) |
+| Infield | None | — | The regulation drawing everywhere (90-ft bases, the 95-ft arc). Gameday's infield is one stamp in every SVG, so it measures nothing. |
+
+Both Gameday layers are estimates of a drawing, not measurements, and the
+drawing shows no note for them (the owner's call, 2026-10-12). Two published
+anchors back the foul ground's size: SABR (via
+[WBUR](https://www.wbur.org/news/2015/06/09/fenway-park-safety-tonya-carpenter))
+puts Fenway under 20,000 sq ft of foul territory and the Oakland Coliseum over
+35,000; the drawings give 16,825 and 38,032. Two things look off: the drawn
+backstops (41–57 ft) sit short of the 60 ft or more most parks have, and the
+drawn tracks (17–24 ft) look wide. A park with no stored layer, an older wall
+or a minor-league park draws the stylized foul ground and track.
 
 ## Park names and renames
 

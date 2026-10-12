@@ -10,7 +10,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   fenceFromSvg, auditOutline, pathPoints, SCALE_FT_PER_UNIT,
-  legacyFenceFromSvg, auditPosted, LEGACY_SCALE_FT_PER_UNIT,
+  legacyFenceFromSvg, auditPosted, LEGACY_SCALE_FT_PER_UNIT, checkLayers,
 } from '../scripts/lib/ballpark/field-svg.mjs'
 import { fenceDistanceAt } from '../src/lib/ballpark/layout/fenceAudit.js'
 
@@ -116,4 +116,24 @@ test('the posted-sign audit passes within 10 ft and fails past it', () => {
   assert.equal(auditPosted(out.points, { lf: ft, cf, rf: ft }).pass, true)
   assert.equal(auditPosted(out.points, { lf: ft, cf: cf + 15, rf: ft }).pass, false)
   assert.equal(auditPosted(out.points, { lf: null, cf, rf: ft }).pass, false, 'a missing sign is not a pass')
+})
+
+// The softer layers (slice 5): a playing surface and a track edge are stored
+// only when plausible against the audited fence.
+test('checkLayers keeps a plausible surface and track, and drops a bad one', () => {
+  const fence = [[-240, 240], [-100, 380], [0, 400], [100, 380], [240, 240]]
+  const fair = 100000
+  // A surface 30 ft beyond the wall all round, with a 55-ft backstop.
+  const surface = [[-300, 240], [-110, 420], [110, 420], [300, 240], [60, -55], [-60, -55]]
+  const track = [[-226, 226], [-94, 362], [0, 384], [94, 362], [226, 226]]
+  assert.deepEqual(checkLayers(fence, fair, { surface, trackInner: track }), { track: true, surface: true })
+  // A backstop 20 ft behind the plate is not a ballpark.
+  const tight = surface.map(([x, y]) => (y < 0 ? [x, -20] : [x, y]))
+  assert.equal(checkLayers(fence, fair, { surface: tight, trackInner: track }).surface, false)
+  // A surface that cuts inside the wall at center.
+  const short = surface.map(([x, y]) => (y > 400 ? [x, 380] : [x, y]))
+  assert.equal(checkLayers(fence, fair, { surface: short, trackInner: track }).surface, false)
+  // A track 60 ft wide somewhere.
+  const wide = track.map(([x, y], i) => (i === 2 ? [0, 340] : [x, y]))
+  assert.equal(checkLayers(fence, fair, { surface, trackInner: wide }).track, false)
 })

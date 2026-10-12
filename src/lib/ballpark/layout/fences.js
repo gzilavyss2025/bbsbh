@@ -37,6 +37,19 @@ export const MILB_CONFIGURATIONS = Object.entries(FIELDS.milb?.venues ?? {}).map
   sources: [FIELDS.milb.sources.posted.replace('{venueId}', id)],
 }))
 
+// The two softer layers of a CURRENT configuration (#1859, slice 5), from the
+// same Gameday drawing as its outline: the playing surface (fair and foul, out
+// to the stands) and the warning track's inner edge. Each was stored only when
+// plausible (scripts/lib/ballpark/field-svg.mjs's checkLayers). They are
+// estimates of a drawing, not measurements, and no note says so on screen: the
+// owner's call (2026-10-12), since nobody reads foul ground as a measurement.
+// An older configuration, a minor-league park or a park whose layer failed
+// gets null, and the renderer draws its stylized layer.
+export function softLayersFor(config) {
+  const v = config.fence === 'gameday' && config.to == null ? FIELDS.venues[config.venueId] : null
+  return { surface: v?.surface ?? null, trackInner: v?.trackInner ?? null }
+}
+
 // Savant's measured row for a venue, for the season fields.json was imported
 // for. Only a CURRENT configuration may use it; an older one predates it.
 export function measuredFor(config) {

@@ -8,7 +8,7 @@
 
 import { BALLPARKS } from '../ballparkData.js'
 import { CONFIGURATIONS, SEED } from './configurations.js'
-import { fenceFor, measuredFor, MILB_CONFIGURATIONS } from './fences.js'
+import { fenceFor, measuredFor, softLayersFor, MILB_CONFIGURATIONS } from './fences.js'
 
 // Every configuration: the curated registry first, then the imported
 // minor-league parks it does not already cover.
@@ -68,6 +68,7 @@ function build(c) {
   const wall = rec ? rec.wall : c.wall
   const measured = measuredFor(c)
   const fence = fenceFor(c, dist)
+  const soft = softLayersFor(c)
   return {
     venueId: c.venueId,
     configurationId: c.id,
@@ -79,8 +80,17 @@ function build(c) {
     // on purpose: Fenway posts 420 at the triangle, Savant measures 388 at
     // straightaway. `wall` is Savant's line/CF/line heights when measured.
     measurements: { dist, wall, measured },
-    geometry: { fence: fence.points, cfMarkerAngle: fence.cfMarkerAngle },
-    quality: { fence: fence.quality, wall: measured ? 'measured' : wall ? 'posted' : 'missing' },
+    geometry: { fence: fence.points, cfMarkerAngle: fence.cfMarkerAngle, ...soft },
+    // One quality per layer: a checked fence does not make its foul ground
+    // checked. The infield is the regulation drawing in every park (no source
+    // measures one; Gameday's is the same stamp in every SVG).
+    quality: {
+      fence: fence.quality,
+      wall: measured ? 'measured' : wall ? 'posted' : 'missing',
+      foul: soft.surface ? 'estimated' : 'stylized',
+      track: soft.trackInner ? 'estimated' : 'stylized',
+      infield: 'regulation',
+    },
     audit: fence.audit,
     accuracyNote: accuracyNote(fence.quality, fence.source?.kind),
     provenance: {

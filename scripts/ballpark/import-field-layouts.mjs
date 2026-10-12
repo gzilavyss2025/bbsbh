@@ -37,7 +37,7 @@ import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 import { readFileSync } from 'node:fs'
 import {
-  fenceFromSvg, auditOutline, legacyFenceFromSvg, auditPosted,
+  fenceFromSvg, auditOutline, legacyFenceFromSvg, auditPosted, checkLayers,
   SCALE_FT_PER_UNIT, LEGACY_SCALE_FT_PER_UNIT, TOLERANCE, POSTED_TOLERANCE_FT,
 } from '../lib/ballpark/field-svg.mjs'
 import { getJson, statsapiUrl } from '../lib/statsapi.mjs'
@@ -85,13 +85,21 @@ for (const r of rows) {
   let fence = null
   let audit = null
   let note = null
+  let layers = {}
   try {
     const out = fenceFromSvg(await text(GAMEDAY(r.venue_id)), { poles: measured.dist })
     if (!out) note = 'Gameday SVG has no Outfield/foul-line layers'
     else {
       if (out.fittedScale) fitted.push(out.fittedScale)
       audit = auditOutline(out.points, out.areaSqFt, measured)
-      if (audit.pass) fence = out.points
+      if (audit.pass) {
+        fence = out.points
+        // The softer layers ride only on an audited fence, and only when
+        // plausible (slice 5): the playing surface and the track's inner edge.
+        const ok = checkLayers(out.points, measured.areaSqFt, out)
+        layers = { ...(ok.surface ? { surface: out.surface } : {}), ...(ok.track ? { trackInner: out.trackInner } : {}) }
+        if (!ok.surface || !ok.track) console.log(`  ${r.venue_id}: stylized ${[!ok.surface && 'foul ground', !ok.track && 'track'].filter(Boolean).join(' and ')} (failed the plausibility check)`)
+      }
     }
   } catch (err) {
     note = `Gameday SVG not fetched: ${err.message}`
@@ -101,6 +109,7 @@ for (const r of rows) {
     configChanged: Boolean(r.is_diff_configuration),
     measured,
     fence,
+    ...layers,
     audit: audit && { ...audit.errors, pass: audit.pass },
     ...(note ? { note } : {}),
   }

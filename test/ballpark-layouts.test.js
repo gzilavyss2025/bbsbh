@@ -24,6 +24,7 @@ import { WALLS } from '../src/lib/ballpark/ballparkFields.js'
 import { buildFieldGeometry, diagramInput, HOME } from '../src/lib/ballpark/ballparkGeometry.js'
 import { clipToFoulLines, fenceProblems, heightAt } from '../src/lib/ballpark/layout/fenceShape.js'
 import { FIELDS } from '../src/lib/ballpark/layout/fences.js'
+import { checkLayers } from '../scripts/lib/ballpark/field-svg.mjs'
 
 const layout = (q) => resolveBallparkLayout(q)?.configurationId ?? null
 
@@ -324,4 +325,49 @@ test('a sponsor rename never loses the park: the venue id wins over the name', (
   // Lehigh Valley's Coca-Cola Park (venue 3230) is Jefferson Park in the 2027 data.
   assert.equal(layout({ venueName: 'Coca-Cola Park', gameDate: '2026-07-01' }), 'milb-3230')
   assert.equal(layout({ venueName: 'Jefferson Park', gameDate: '2026-07-01' }), 'milb-3230')
+})
+
+// ── Foul ground, track, infield (slice 5) ──────────────────────────────────
+
+test('each layer has its own quality: a checked fence does not check its foul ground', () => {
+  const brewers = resolveBallparkLayout({ venueId: 32, gameDate: '2026-07-01' })
+  assert.deepEqual(
+    { fence: brewers.quality.fence, foul: brewers.quality.foul, track: brewers.quality.track, infield: brewers.quality.infield },
+    { fence: 'audited', foul: 'estimated', track: 'estimated', infield: 'regulation' },
+  )
+  // Fenway's drawn track is 46 to 52 ft wide at the triangle and the RF bend: not stored.
+  const fenway = resolveBallparkLayout({ venueId: 3, gameDate: '2026-07-01' })
+  assert.equal(fenway.quality.foul, 'estimated')
+  assert.equal(fenway.quality.track, 'stylized')
+  // An older wall and a minor-league park keep the stylized layers.
+  for (const q of [{ venueId: 2394, gameDate: '2022-07-01' }, { venueId: 2844, gameDate: '2026-07-01' }]) {
+    const l = resolveBallparkLayout(q)
+    assert.equal(l.quality.foul, 'stylized')
+    assert.equal(l.quality.track, 'stylized')
+  }
+  // Estimates of a drawing carry no on-screen note (the owner's call).
+  assert.equal(brewers.accuracyNote, null)
+})
+
+test("the drawing uses the park's own foul ground and track when it has them", () => {
+  const brewers = resolveBallparkLayout({ venueId: 32, gameDate: '2026-07-01' })
+  const own = buildFieldGeometry(diagramInput(brewers))
+  const stylized = buildFieldGeometry({ ...diagramInput(brewers), surface: null, trackInner: null })
+  assert.notEqual(own.foul, stylized.foul)
+  assert.notEqual(own.track, stylized.track)
+  // The surface path is the stored ring, behind the plate included.
+  const ys = [...own.foul.matchAll(/-?\d+(?:\.\d+)? (-?\d+(?:\.\d+)?)/g)].map((m) => Number(m[1]))
+  assert.ok(Math.max(...ys) > HOME.y + 35, 'the backstop sits behind home plate')
+})
+
+test('every stored foul ground and track passes its plausibility check', () => {
+  let surfaces = 0
+  for (const [id, v] of Object.entries(FIELDS.venues)) {
+    if (!v.surface && !v.trackInner) continue
+    assert.ok(v.fence, `${id}: soft layers ride only on an audited fence`)
+    const ok = checkLayers(v.fence, v.measured.areaSqFt, v)
+    if (v.surface) { assert.ok(ok.surface, `${id} surface`); surfaces++ }
+    if (v.trackInner) assert.ok(ok.track, `${id} track`)
+  }
+  assert.ok(surfaces >= 20, 'most current MLB parks have their own foul ground')
 })

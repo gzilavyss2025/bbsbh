@@ -164,6 +164,8 @@ export function diagramInput(layout) {
     heights: measured?.height ?? wall ?? null,
     fence: layout.geometry.fence,
     cfAngle: layout.geometry.cfMarkerAngle,
+    surface: layout.geometry.surface ?? null,
+    trackInner: layout.geometry.trackInner ?? null,
   }
 }
 
@@ -172,7 +174,9 @@ export function diagramInput(layout) {
 // prints it, and the wall tags are left off.
 const UNKNOWN_HEIGHTS = { lf: 8, cf: 8, rf: 8 }
 
-export function buildFieldGeometry({ dist, wall, heights = wall, fence = null, cfAngle = 0 }) {
+export function buildFieldGeometry({
+  dist, wall, heights = wall, fence = null, cfAngle = 0, surface = null, trackInner = null,
+}) {
   const pts = wallPoints(dist, heights ?? UNKNOWN_HEIGHTS, fence)
   const lf = pts[0]
   const rf = pts[pts.length - 1]
@@ -181,12 +185,15 @@ export function buildFieldGeometry({ dist, wall, heights = wall, fence = null, c
   // Fair territory: home → LF pole → straight fence run → RF pole → home.
   const fair = `M ${f(HOME.x)} ${f(HOME.y)} L ${line(pts)} L ${f(HOME.x)} ${f(HOME.y)} Z`
 
-  // Warning track: a band of constant width running the whole fence, pole to
-  // pole — inset from the wall by the same TRACK_FT everywhere, same as a real
-  // park's track (not a stroke straddling the fence line, which used to leave
-  // half its width sitting in foul ground beyond the wall).
-  const trackInner = pts.map((p) => offsetFromHome(p, -TRACK_FT))
-  const track = `M ${line(pts)} L ${line([...trackInner].reverse())} Z`
+  // Warning track: the band between the wall and the track's inner edge. The
+  // park's own edge when the layout has one (Gameday's grass line, slice 5),
+  // else a band of constant width, inset from the wall by TRACK_FT everywhere
+  // (not a stroke straddling the fence line, which used to leave half its
+  // width sitting in foul ground beyond the wall).
+  const inner = trackInner?.length > 1
+    ? trackInner.map(([x, y]) => toSvg(x, y))
+    : pts.map((p) => offsetFromHome(p, -TRACK_FT))
+  const track = `M ${line(pts)} L ${line([...inner].reverse())} Z`
 
   // The fence again, split per segment so each can take a stroke width scaled to
   // the local wall height — a fat run for Fenway's Monster, a hairline elsewhere.
@@ -198,15 +205,18 @@ export function buildFieldGeometry({ dist, wall, heights = wall, fence = null, c
     })
   }
 
-  // Foul ground: the fence run pushed outward + a backstop curve behind home, as a
-  // stylized park footprint sitting behind the grass (not park-accurate foul area).
+  // Foul ground: the park's own playing surface when the layout has one
+  // (Gameday's drawing, fair and foul out to the stands and the backstop,
+  // slice 5), drawn behind the grass. Else the fence run pushed outward + a
+  // backstop curve behind home, as a stylized footprint.
   const foulPts = pts.map((p) => offsetFromHome(p, FOUL_FT))
   const backLeft = { x: HOME.x - 66, y: HOME.y + 30 }
   const backRight = { x: HOME.x + 66, y: HOME.y + 30 }
-  const foul =
-    `M ${f(backLeft.x)} ${f(backLeft.y)} L ${line(foulPts)} ` +
-    `L ${f(backRight.x)} ${f(backRight.y)} ` +
-    `Q ${f(HOME.x)} ${f(HOME.y + 58)} ${f(backLeft.x)} ${f(backLeft.y)} Z`
+  const foul = surface?.length > 2
+    ? `M ${line(surface.map(([x, y]) => toSvg(x, y)))} Z`
+    : `M ${f(backLeft.x)} ${f(backLeft.y)} L ${line(foulPts)} ` +
+      `L ${f(backRight.x)} ${f(backRight.y)} ` +
+      `Q ${f(HOME.x)} ${f(HOME.y + 58)} ${f(backLeft.x)} ${f(backLeft.y)} Z`
 
   // Foul lines, home to each pole.
   const foulLineL = `M ${f(HOME.x)} ${f(HOME.y)} L ${f(lf.x)} ${f(lf.y)}`

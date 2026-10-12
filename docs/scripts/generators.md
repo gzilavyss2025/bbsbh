@@ -1433,7 +1433,10 @@ Re-run only to fold in a new season.
   the home park of every MiLB club in `public/data/teams.json`: posted distances
   from the Stats API venue endpoint (through `lib/statsapi.mjs`), and an outline
   from the older Gameday art, stored only when it fits the posted LF, CF and RF
-  within 10 ft. About 160 requests in all. Coverage report and the method for
+  within 10 ft. For an MLB park with an audited outline it also stores the
+  playing surface (foul ground and backstop) and the warning track's inner
+  edge from the same SVG, each only when plausible (`checkLayers`). About 160
+  requests in all. Coverage report and the method for
   adding a park: `docs/ballpark-layouts.md` (#1859).
 - `gen-franchise-history.mjs` → `public/data/franchise-history/{teamId}.json`
   — each of the 30 clubs' name, league and ballpark by season, 1901 to the last
