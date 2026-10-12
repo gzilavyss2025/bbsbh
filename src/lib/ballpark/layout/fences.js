@@ -12,7 +12,7 @@
 //   'dimensions-only' no outline, five posted distances;
 //   'missing'         not even those.
 
-import FIELDS from './fields.json' with { type: 'json' }
+import FIELDS from './fields.js'
 import { WALLS } from '../ballparkFields.js'
 import { auditFence } from './fenceAudit.js'
 
@@ -50,7 +50,7 @@ export function softLayersFor(config) {
   return { surface: v?.surface ?? null, trackInner: v?.trackInner ?? null }
 }
 
-// Savant's measured row for a venue, for the season fields.json was imported
+// Savant's measured row for a venue, for the season fields.js was imported
 // for. Only a CURRENT configuration may use it; an older one predates it.
 export function measuredFor(config) {
   return config.to == null ? FIELDS.venues[config.venueId]?.measured ?? null : null

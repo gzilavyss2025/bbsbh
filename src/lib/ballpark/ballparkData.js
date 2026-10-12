@@ -12,7 +12,7 @@
 //   - Wall heights (lf/cf/rf, feet) are NOT in statsapi. The literals below are
 //     public figures (the 37' Green Monster, PNC's 21' Clemente Wall, etc.);
 //     at load, Baseball Savant's measured heights replace them for every park
-//     it measures (./layout/fields.json, #1859).
+//     it measures (./layout/fields.js, #1859).
 //   - built / roof / capacity round out the facts strip. Capacity matches the
 //     venue endpoint's fieldInfo for 29 of the 30 parks; Rogers Centre is the
 //     one deliberate exception, and its own comment says why.
@@ -113,7 +113,7 @@ export const BALLPARKS = {
 }
 
 // Savant's measured wall heights replace the literals above for every park it
-// measures (./layout/fields.json), so the league ranks compare measurements.
+// measures (./layout/fields.js), so the league ranks compare measurements.
 // The fence outline is NOT attached here: a diagram draws the configuration
 // its date resolves to (./layout/resolveLayout.js), which is not always the
 // current one. Aliases share the record object, so they inherit the heights.
