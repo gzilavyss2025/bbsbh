@@ -69,17 +69,12 @@ test('closer and setup columns', () => {
   assert.deepEqual(setup.map((c) => c.value), ['71', '31', '3.09', '67.0', '77', '17', '0.97'])
 })
 
-// Lee won Gm 1. A decision in the postseason row says how an earlier game of
-// the same series ended, so the column shows a dash, and no W anywhere.
-test('the postseason row shows a dash in the decision column, whatever the role', () => {
-  for (const role of ['starter', 'closer', 'setup']) {
-    const cells = seasonCells(role, LEE_POST, { postseason: true })
-    assert.equal(cells[1].value, '–', role)
-    assert.equal(cells.length, 7)
-  }
+// ADR-0088, point 4: the postseason rows carry the real decision column.
+test('the postseason row shows the real decision column', () => {
+  assert.equal(seasonCells('starter', LEE_POST)[1].value, `${LEE_POST.wins}-${LEE_POST.losses}`)
   assert.deepEqual(
-    seasonCells('setup', LEE_POST, { postseason: true }).map((c) => c.value),
-    ['1', '–', '0.00', '1.0', '1', '0', '0.00'],
+    seasonCells('setup', LEE_POST).map((c) => c.value),
+    ['1', String(LEE_POST.holds), '0.00', '1.0', '1', '0', '0.00'],
   )
 })
 

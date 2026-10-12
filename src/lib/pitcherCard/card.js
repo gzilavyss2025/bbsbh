@@ -21,10 +21,9 @@ export function pitcherRole(line) {
 const FIRST = { starter: 'GS', closer: 'G', setup: 'G' }
 const DECISION = { starter: 'W-L', closer: 'SV', setup: 'HLD' }
 
-// Seven cells, { label, value }. In the postseason row the decision column is
-// a dash: a W, SV or HLD there says how an earlier game of the same series
-// ended.
-export function seasonCells(role, line, { postseason = false } = {}) {
+// Seven cells, { label, value }. The postseason rows show the real decision
+// column too: Gary chose that over a dash (ADR-0088, point 4).
+export function seasonCells(role, line) {
   const decision = {
     starter: `${line.wins}-${line.losses}`,
     closer: String(line.saves),
@@ -32,7 +31,7 @@ export function seasonCells(role, line, { postseason = false } = {}) {
   }[role]
   return [
     { label: FIRST[role], value: String(role === 'starter' ? line.gamesStarted : line.games) },
-    { label: DECISION[role], value: postseason ? '–' : decision },
+    { label: DECISION[role], value: decision },
     { label: 'ERA', value: line.era || '–' },
     { label: 'IP', value: line.inningsPitched || '–' },
     { label: 'K', value: String(line.strikeOuts) },
