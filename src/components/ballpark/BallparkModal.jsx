@@ -37,7 +37,7 @@ export function BallparkModal({ venue, onClose }) {
           </button>
         </div>
 
-        <BallparkDiagram dist={data.dist} wall={data.wall} arc={data.arc} />
+        <BallparkDiagram dist={data.dist} wall={data.wall} arc={data.arc} cfAngle={data.cfMarkerAngle} />
 
         <dl className="bpsheet__facts">
           <Facts label="Opened" value={data.built} />

@@ -72,6 +72,7 @@ function FlightPlot({ ball, park }) {
       dist={park.dist}
       wall={park.wall}
       arc={park.arc}
+      cfAngle={park.cfMarkerAngle}
       viewBox={PLOT_VIEWBOX}
       label={`Flight of the ball at ${park.name}`}
     >

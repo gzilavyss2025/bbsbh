@@ -19,12 +19,13 @@ export function BallparkDiagram({
   dist,
   wall,
   arc,
+  cfAngle = 0,
   className = '',
   viewBox = `0 0 ${VIEWBOX.w} ${VIEWBOX.h}`,
   label = 'Ballpark field dimensions diagram',
   children = null,
 }) {
-  const g = buildFieldGeometry(dist, wall, arc)
+  const g = buildFieldGeometry(dist, wall, arc, cfAngle)
   return (
     <svg
       className={`bpdiagram ${className}`}

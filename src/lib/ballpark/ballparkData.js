@@ -32,10 +32,16 @@
 //   - Camden Yards, Busch, Target Field and Kauffman sit well under theirs on a
 //     ceiling that swings thousands year to year. That is demand, not capacity.
 //
-// Covers the 30 current MLB parks (the Athletics' temporary Sutter Health Park is
-// the one gap — small Triple-A footprint, distances not yet snapshotted; it
-// degrades gracefully to "not on file" via ballparkFor() returning null, per the
-// app's MiLB-degradation convention). MiLB venues are intentionally absent.
+// Covers the 29 current MLB parks plus Sutter Health Park, the Athletics' Triple-A
+// interim home (LF/CF/RF posted, gaps from the venue endpoint, wall heights
+// estimated). Other MiLB venues are intentionally absent and degrade to "not on
+// file" via ballparkFor() returning null, per the app's MiLB-degradation
+// convention.
+//
+// This table is the CURRENT configuration of each park. Which wall a park had
+// on an earlier date, and which fence outline may stand for it, is the layout
+// registry's job: ./layout/configurations.js, resolved by
+// ./layout/resolveLayout.js (#1859).
 //
 // Keyed by the SAME normalized venue name as ./ballparks.js (lowercase, accents
 // and non-alphanumerics stripped), which the live game feed always provides — so
@@ -44,6 +50,8 @@
 // the distances and drop the verified wall heights in alongside.
 
 import { WALLS } from './ballparkFields.js'
+import { CONFIGURATIONS } from './layout/configurations.js'
+import { auditFence } from './layout/fenceAudit.js'
 
 // Normalize a venue name to a stable lookup key (mirrors ballparks.js).
 // "Oriole Park at Camden Yards" → "orioleparkatcamdenyards".
@@ -64,7 +72,7 @@ export const BALLPARKS = {
   chasefield: { name: 'Chase Field', dist: { lf: 328, lc: 412, cf: 407, rc: 414, rf: 335 }, wall: { lf: 8, cf: 25, rf: 8 }, built: 1998, roof: 'Retractable', capacity: 48359 },
   citifield: { name: 'Citi Field', dist: { lf: 335, lc: 370, cf: 408, rc: 380, rf: 330 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2009, roof: 'Open', capacity: 42136 },
   citizensbankpark: { name: 'Citizens Bank Park', dist: { lf: 329, lc: 381, cf: 401, rc: 398, rf: 330 }, wall: { lf: 6, cf: 6, rf: 13 }, built: 2004, roof: 'Open', capacity: 42901 },
-  comericapark: { name: 'Comerica Park', dist: { lf: 345, lc: 370, cf: 420, rc: 365, rf: 330 }, wall: { lf: 7, cf: 9, rf: 9 }, built: 2000, roof: 'Open', capacity: 41083 },
+  comericapark: { name: 'Comerica Park', dist: { lf: 342, lc: 370, cf: 412, rc: 365, rf: 330 }, wall: { lf: 7, cf: 7, rf: 9 }, built: 2000, roof: 'Open', capacity: 41083 },
   coorsfield: { name: 'Coors Field', dist: { lf: 347, lc: 420, cf: 415, rc: 424, rf: 350 }, wall: { lf: 8, cf: 8, rf: 17 }, built: 1995, roof: 'Open', capacity: 50144 },
   daikinpark: { name: 'Daikin Park', dist: { lf: 315, lc: 362, cf: 409, rc: 373, rf: 326 }, wall: { lf: 21, cf: 9, rf: 7 }, built: 2000, roof: 'Retractable', capacity: 41000 },
   fenwaypark: { name: 'Fenway Park', dist: { lf: 310, lc: 390, cf: 420, rc: 380, rf: 302 }, wall: { lf: 37, cf: 17, rf: 5 }, built: 1912, roof: 'Open', capacity: 37755 },
@@ -88,7 +96,7 @@ export const BALLPARKS = {
   // published for the current configuration. Every other park in this table
   // matches statsapi; this one row does not, on purpose, so a refresh of the
   // distances must not quietly restore it.
-  rogerscentre: { name: 'Rogers Centre', dist: { lf: 328, lc: 375, cf: 404, rc: 375, rf: 328 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1989, roof: 'Retractable', capacity: 41500 },
+  rogerscentre: { name: 'Rogers Centre', dist: { lf: 328, lc: 368, cf: 404, rc: 359, rf: 328 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1989, roof: 'Retractable', capacity: 41500 },
   targetfield: { name: 'Target Field', dist: { lf: 339, lc: 377, cf: 404, rc: 367, rf: 328 }, wall: { lf: 8, cf: 8, rf: 23 }, built: 2010, roof: 'Open', capacity: 38544 },
   tmobilepark: { name: 'T-Mobile Park', dist: { lf: 331, lc: 390, cf: 405, rc: 387, rf: 327 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1999, roof: 'Retractable', capacity: 47929 },
   tropicanafield: { name: 'Tropicana Field', dist: { lf: 315, lc: 410, cf: 404, rc: 404, rf: 322 }, wall: { lf: 9, cf: 9, rf: 9 }, built: 1990, roof: 'Dome', capacity: 25025 },
@@ -96,19 +104,26 @@ export const BALLPARKS = {
   uniqlofieldatdodgerstadium: { name: 'Dodger Stadium', dist: { lf: 330, lc: 385, cf: 395, rc: 385, rf: 330 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1962, roof: 'Open', capacity: 56000 },
   wrigleyfield: { name: 'Wrigley Field', dist: { lf: 355, lc: 368, cf: 400, rc: 368, rf: 353 }, wall: { lf: 11, cf: 11, rf: 11 }, built: 1914, roof: 'Open', capacity: 41363 },
   yankeestadium: { name: 'Yankee Stadium', dist: { lf: 318, lc: 399, cf: 408, rc: 385, rf: 314 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2009, roof: 'Open', capacity: 47309 },
-  // The Athletics' interim home (a Triple-A park). Only the three line/center
-  // distances are posted; the gaps (lc/rc) and wall heights are estimated, so its
-  // gap ranks are approximate. No digitized wall polygon exists, so the diagram
-  // uses the straight five-point fallback.
-  sutterhealthpark: { name: 'Sutter Health Park', dist: { lf: 330, lc: 372, cf: 403, rc: 372, rf: 325 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2000, roof: 'Open', capacity: 14014 },
+  // The Athletics' interim home (a Triple-A park). The lines and center are
+  // posted; the gaps (lc/rc) are the venue endpoint's 380, and the wall heights
+  // are estimated, so its gap and wall ranks are approximate. No traced outline
+  // exists, so the diagram uses the straight five-point fallback.
+  sutterhealthpark: { name: 'Sutter Health Park', dist: { lf: 330, lc: 380, cf: 403, rc: 380, rf: 325 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2000, roof: 'Open', capacity: 14014 },
 }
 
-// Attach each park's digitized outfield-wall polygon (feet, home-origin) so the
-// diagram can draw the true fence shape. Aliases share the same record object, so
-// they inherit the arc automatically. Parks with no polygon keep arc undefined and
-// fall back to the five-point straight outline (see ballparkGeometry.js).
-for (const [key, arc] of Object.entries(WALLS)) {
-  if (BALLPARKS[key]) BALLPARKS[key].arc = arc
+// Attach the CURRENT configuration's traced outline (feet, home-origin) so the
+// diagram can draw the true fence shape. The registry decides which parks may
+// use their seed trace: a park rebuilt after the trace was taken has no outline
+// here and draws the five posted distances (./layout/configurations.js).
+// `cfMarkerAngle` is where the CF sign stands: 0 (straightaway) unless the
+// audit found the posted CF at the deepest point instead (Fenway's triangle).
+// Aliases share the same record object, so they inherit both automatically.
+for (const c of CONFIGURATIONS) {
+  const rec = c.park && c.to == null && c.fence === 'seed' ? BALLPARKS[c.park] : null
+  if (!rec) continue
+  rec.arc = WALLS[c.seedKey]
+  const audit = auditFence(rec.arc, rec.dist.cf)
+  rec.cfMarkerAngle = audit?.pass ? audit.cfMarkerAngle : 0
 }
 
 // Aliases for parks whose feed name can appear under a former/sponsor variant, so
@@ -133,8 +148,8 @@ export const DIMENSIONS = [
   { key: 'rf', group: 'wall', label: 'RF wall' },
 ]
 
-// The park record for a venue name, or null if we don't have it (MiLB park, the
-// A's temporary home, a newly renamed venue) — callers render "not on file".
+// The park record for a venue name, or null if we don't have it (an MiLB park,
+// a newly renamed venue) — callers render "not on file".
 export function ballparkFor(venueName) {
   const key = normalizeVenue(venueName)
   return key in BALLPARKS ? BALLPARKS[key] : null

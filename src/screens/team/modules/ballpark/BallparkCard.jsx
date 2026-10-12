@@ -321,6 +321,7 @@ export function BallparkCard({ team, attendance }) {
             dist={park.dist}
             wall={park.wall}
             arc={park.arc}
+            cfAngle={park.cfMarkerAngle}
           />
           <div className="ballparkcard__details">
             <dl className="bpsheet__facts">

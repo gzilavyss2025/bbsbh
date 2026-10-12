@@ -208,6 +208,7 @@ export function HitChart({
             dist={park.dist}
             wall={park.wall}
             arc={park.arc}
+            cfAngle={park.cfMarkerAngle}
             viewBox={PLOT_VIEWBOX}
             label={fieldLabel}
           >

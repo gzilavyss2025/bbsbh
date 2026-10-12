@@ -11,6 +11,11 @@
 //   • otherwise a five-point outline through the posted LF/LC/CF/RC/RF distances —
 //     angular, just coarser (the fallback for the A's park and any MiLB venue).
 //
+// The CF distance label sits where the CF sign stands: straightaway center, or
+// the angle the layout audit found the posted number at (`cfAngle`, Fenway's
+// triangle). It used to sit at the fence's deepest vertex, which is a different
+// point in most parks (#1859).
+//
 // Pure and self-contained (no React, no data import). Home plate anchors the
 // drawing; feet map 1:1 to SVG units, +x toward right field, +y toward center
 // field (SVG y grows down, so center field subtracts from home's y). Fixed
@@ -37,6 +42,8 @@ const SKIN_RADIUS_FT = 95 // real groundskeeping spec: skin infield is a 95' arc
 const MOUND_DIRT_FT = 9 // dirt circle around the pitching rubber
 const HOME_DIRT_FT = 13 // dirt circle around home plate
 const BASELINE_DIRT_FT = 6 // width of the dirt running-lane strip along each baseline
+
+import { fenceDistanceAt } from './layout/fenceAudit.js'
 
 const f = (n) => Math.round(n * 100) / 100
 
@@ -145,11 +152,20 @@ function skinFanPath(moundFt, rFt) {
   return `M ${f(HOME.x)} ${f(HOME.y)} L ${line(arcPts)} Z`
 }
 
-export function buildFieldGeometry(dist, wall, arc) {
+// Where the fence crosses the ray from home at `deg`, as an SVG point; the
+// deepest point when the ray misses (it cannot for a fence pinned at both poles).
+function fencePointAt(pts, deg) {
+  const ft = fenceDistanceAt(pts.map((p) => [p.x - HOME.x, HOME.y - p.y]), deg)
+  if (ft == null) return pts.reduce((a, b) => (b.y < a.y ? b : a))
+  const rad = (deg * Math.PI) / 180
+  return toSvg(ft * Math.sin(rad), ft * Math.cos(rad))
+}
+
+export function buildFieldGeometry(dist, wall, arc, cfAngle = 0) {
   const pts = wallPoints(dist, wall, arc)
   const lf = pts[0]
   const rf = pts[pts.length - 1]
-  const cf = pts.reduce((a, b) => (b.y < a.y ? b : a)) // topmost = deepest center
+  const cf = fencePointAt(pts, cfAngle)
 
   // Fair territory: home → LF pole → straight fence run → RF pole → home.
   const fair = `M ${f(HOME.x)} ${f(HOME.y)} L ${line(pts)} L ${f(HOME.x)} ${f(HOME.y)} Z`
