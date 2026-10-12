@@ -1,11 +1,12 @@
 import { Suspense, lazy, useCallback, useState } from 'react'
 import { rankedDimensions } from '../../../../lib/ballpark/ballparkData.js'
+import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
+import { parkKey } from '../../../../lib/ballpark/parkKeys.js'
 import { ordinal } from '../../../../lib/format.js'
 import {
   fieldIds,
   resolveParkName,
   resolvePhoto,
-  venueKey,
   withoutBrokenArt,
 } from '../../../../lib/ballpark/ballparkArt.js'
 import { isClerkEnabled } from '../../../../lib/clerkConfig.js'
@@ -40,17 +41,18 @@ import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 // null for MiLB or a club with no home games ingested yet; the Facts rows
 // simply don't render.
 //
-// MEASUREMENTS ARE MLB-ONLY; THE PHOTO/NAME HALF IS NOT. `ballparkData.js`'s
-// BALLPARKS table is a hand-verified diagram nobody has built for a MiLB
-// park, so `rankedDimensions` finds nothing for one and the diagram/dimensions
-// half of the card (`ballparkcard__layout`) simply does not render — the same
-// graceful-degrade convention `ballparkFor` documents. The hero (photo + name)
-// and the owner's gear are NOT gated on that lookup: they key off the venue's
+// LEAGUE RANKS ARE MLB-ONLY; THE DRAWING AND THE PHOTO/NAME HALF ARE NOT.
+// `ballparkData.js`'s BALLPARKS table (facts, league ranks) covers the MLB
+// parks only, so `rankedDimensions` finds nothing for a minor-league park. The
+// drawing comes from the layout registry instead (`resolveBallparkLayout`),
+// which also covers the minor-league parks it could draw from their posted
+// distances (#1859); a park it cannot draw resolves to null and the
+// `ballparkcard__layout` half simply does not render. The hero (photo + name)
+// and the owner's gear are NOT gated on either lookup: they key off the venue's
 // own name either way (its canonical, alias-resolved name for an MLB park,
 // the raw feed name for anything else — MiLB has no alias table to resolve
 // through), so every park on file in `milb-ballparks.json`
-// (`scripts/gen-milb-ballparks.mjs`) gets the same photo/name/logo editor with
-// no diagram beside it.
+// (`scripts/gen-milb-ballparks.mjs`) gets the same photo/name/logo editor.
 //
 // EDITING IN PLACE. The site owner gets a gear in the masthead that turns the
 // card into a form for its own copy fields — the park's name, its art, the
@@ -196,19 +198,21 @@ function AttendanceFacts({ attendance }) {
 export function BallparkCard({ team, attendance }) {
   const { t } = useCopy()
   const venueName = team.venue?.name
-  const park = venueName ? rankedDimensions(venueName) : null
+  const park = venueName ? rankedDimensions(venueName, team.venue?.id) : null
+  // The team's home park today: no date, so the current configuration (#1859).
+  const layout = venueName ? resolveBallparkLayout({ venueId: team.venue?.id, venueName }) : null
 
   // The park's CANONICAL name, never the raw feed string, when we have one —
   // so a renamed MLB venue resolves through its alias to the one shared
   // record. A MiLB park has no alias table to resolve through, so the raw
-  // feed name IS canonical for it; that is also exactly what parkBackdrop.js
-  // already assumes for the same fallback (see its header). Either way `name`
-  // is what keys the copy fields (`milb-ballparks.json`'s entries are keyed
-  // the identical way) and what a bare-text card falls back to.
+  // feed name IS canonical for it. `name` is what a bare-text card prints.
+  // The copy fields and the bundled photo are keyed by the venue's PINNED key
+  // instead (lib/ballpark/parkKeys.js), found by venue id first, so a
+  // sponsor rename keeps every photo and note an admin saved for the park.
   const name = park ? park.name : venueName
   // Computed before the early return below so the hooks under it always run —
   // a park with no venue name at all still has to call them, in the same order.
-  const key = name ? venueKey(name) : ''
+  const key = name ? parkKey(venueName, team.venue?.id) : ''
   // No useMemo on either of these. React Compiler memoizes them, and a manual
   // useMemo keyed on `key` made it bail out of optimizing this component
   // entirely ("existing memoization could not be preserved") — which is a worse
@@ -253,7 +257,7 @@ export function BallparkCard({ team, attendance }) {
   // safe for the same reason a controlled input is: the value came from this
   // browser's own file picker as an object URL, and the moment it is SAVED it
   // goes through the registry's choke point like everything else.
-  const photo = resolvePhoto(name, {
+  const photo = resolvePhoto(key, {
     photo: shown.photo,
     credit: shown.credit,
     focus: shown.focus,
@@ -310,33 +314,33 @@ export function BallparkCard({ team, attendance }) {
         </Suspense>
       )}
 
-      {/* The diagram/dimensions half — MLB only. A MiLB park has no
-          BALLPARKS record (no hand-verified distances, no digitized wall
-          polygon), so there is nothing here to draw or rank; the card ends
-          at the hero + gear above rather than showing a broken diagram. */}
-      {park && (
+      {/* The diagram/dimensions half. An MLB park draws its wall and ranks its
+          dimensions against the league. A minor-league park the layout
+          registry can draw (#1859) gets the drawing alone: its posted
+          distances label it, and there is no league to rank it in. A park
+          with neither ends at the hero + gear above. */}
+      {(park || layout) && (
         <div className="ballparkcard__layout">
-          <BallparkDiagram
-            className="ballparkcard__diagram"
-            dist={park.dist}
-            wall={park.wall}
-            arc={park.arc}
-          />
+          {layout && <BallparkDiagram className="ballparkcard__diagram" layout={layout} />}
           <div className="ballparkcard__details">
-            <dl className="bpsheet__facts">
-              <Facts label="Opened" value={park.built} />
-              <Facts label="Roof" value={park.roof} />
-              <Facts label="Capacity" value={park.capacity?.toLocaleString()} />
-            </dl>
+            {park && (
+              <dl className="bpsheet__facts">
+                <Facts label="Opened" value={park.built} />
+                <Facts label="Roof" value={park.roof} />
+                <Facts label="Capacity" value={park.capacity?.toLocaleString()} />
+              </dl>
+            )}
             {attendance && <AttendanceFacts attendance={attendance} />}
             {note && <p className="ballparkcard__note">{note}</p>}
-            <Stack gap="loose" className="bpsheet__ranks">
-              <RankGroup
-                title="Outfield distances"
-                rows={park.rows.filter((r) => r.group === 'dist')}
-              />
-              <RankGroup title="Wall heights" rows={park.rows.filter((r) => r.group === 'wall')} />
-            </Stack>
+            {park && (
+              <Stack gap="loose" className="bpsheet__ranks">
+                <RankGroup
+                  title="Outfield distances"
+                  rows={park.rows.filter((r) => r.group === 'dist')}
+                />
+                <RankGroup title="Wall heights" rows={park.rows.filter((r) => r.group === 'wall')} />
+              </Stack>
+            )}
           </div>
         </div>
       )}

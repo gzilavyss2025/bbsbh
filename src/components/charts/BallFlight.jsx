@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { BallparkDiagram } from '../ballpark/BallparkDiagram.jsx'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { Card } from '../ui/frame/Card.jsx'
-import { ballparkFor } from '../../lib/ballpark/ballparkData.js'
+import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 import { PLOT_VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
 import { ballFlightPath } from '../../lib/ballpark/ballFlight.js'
 import { hoverCardPosition } from '../../lib/playerHoverPosition.js'
@@ -69,11 +69,9 @@ function FlightPlot({ ball, park }) {
   return (
     <BallparkDiagram
       className="bflight__field"
-      dist={park.dist}
-      wall={park.wall}
-      arc={park.arc}
+      layout={park}
       viewBox={PLOT_VIEWBOX}
-      label={`Flight of the ball at ${park.name}`}
+      label={`Flight of the ball at ${ball.venue || park.name}`}
     >
       <defs>
         <linearGradient id={heatId} x1="0" y1="1" x2="1" y2="0">
@@ -251,7 +249,7 @@ export function BallFlight({ ball, batter, code = '' }) {
 
   // Static park geometry. A MiLB venue has none, and without the field the
   // ball's coordinates mean nothing, so the whole handle stands down.
-  const park = ballparkFor(ball?.venue)
+  const park = resolveBallparkLayout({ venueId: ball?.venueId, venueName: ball?.venue, gameDate: ball?.gameDate })
   if (!ball || !park) return null
 
   const name = batter?.last || batter?.fullName || ''

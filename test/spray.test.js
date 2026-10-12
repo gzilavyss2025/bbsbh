@@ -192,6 +192,9 @@ test('decodeSprayBalls names every stored column', () => {
     side: 'L',
     level: 'aaa',
     pitcherId: 543037,
+    // An entry with no park runs (stored before schema v2): park unknown.
+    venueId: null,
+    season: null,
   })
 })
 

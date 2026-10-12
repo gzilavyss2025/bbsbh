@@ -12,7 +12,7 @@ import { HitChart } from '../../components/charts/HitChart.jsx'
 // the DOM that the line score above it has not already shown (ADR-0051).
 // Renders nothing at a park that sends no tracking, or a venue the ballpark
 // drawing does not carry — HitChart decides that.
-export function HitChartCard({ battedBalls, box, venue }) {
+export function HitChartCard({ battedBalls, box, venue, venueId, gameDate }) {
   const clubs = [
     { teamId: box.away.id, name: box.away.teamName, count: battedBalls.filter((b) => !b.isHome).length },
     { teamId: box.home.id, name: box.home.teamName, count: battedBalls.filter((b) => b.isHome).length },
@@ -21,6 +21,8 @@ export function HitChartCard({ battedBalls, box, venue }) {
     <HitChart
       balls={battedBalls}
       venue={venue}
+      venueId={venueId}
+      gameDate={gameDate}
       clubs={clubs}
       tag={[`${box.away.abbreviation} @ ${box.home.abbreviation}`]}
     />

@@ -1,7 +1,9 @@
 import { useId, useMemo, useState } from 'react'
-import { HOME } from '../../lib/ballpark/ballparkGeometry.js'
+import { HOME, buildFieldGeometry, diagramInput } from '../../lib/ballpark/ballparkGeometry.js'
 import { HARD_HIT_MPH, hitCoordToSvg } from '../../lib/ballpark/hitProjection.js'
-import { SCOPES, directionCaption, directionMix, hrNote, splitBalls, sprayScopeOf } from '../../api/spray.js'
+import {
+  SCOPES, directionCaption, directionMix, hrNote, parkSubview, splitBalls, sprayParks, sprayScopeOf,
+} from '../../api/spray.js'
 import { Card } from '../ui/frame/Card.jsx'
 import { FactGrid } from '../ui/frame/FactGrid.jsx'
 
@@ -116,6 +118,19 @@ const isHit = (b) => b.result !== 'out'
 const isXbh = (b) => b.result === 'double' || b.result === 'triple' || b.result === 'hr'
 const pct = (n, of) => (of > 0 ? `${Math.round((n / of) * 100)}%` : '—')
 
+// The All-parks foot's coverage note: what the park picker leaves out. Balls
+// stored before parks were kept have none on record; balls at a park the app
+// cannot draw have one but no wall. Both stay in the field above; neither is
+// in any park's count.
+function parkCoverage({ groups, unknown, offFile, total }) {
+  // No picker (no ball with a park on record yet): nothing to qualify.
+  if (!groups.length || !total || (!unknown && !offFile)) return ''
+  const parts = []
+  if (unknown) parts.push(`${unknown} with no park on record`)
+  if (offFile) parts.push(`${offFile} at a park not on file`)
+  return ` Park view: ${parts.join(', ')}, of ${total} plotted balls.`
+}
+
 export function SprayMap({ view: regular }) {
   // An SVG id is document-global, and two spray maps can share a page once a
   // pitcher-side card exists — without a per-instance id the second card's
@@ -127,14 +142,24 @@ export function SprayMap({ view: regular }) {
   const [wantScope, setScope] = useState('R')
   const [split, setSplit] = useState('all')
   const [hardOnly, setHardOnly] = useState(false)
+  const [parkKey, setParkKey] = useState('')
 
   // Regular season is the card; Postseason and All exist only for a batter with
   // October balls in play (sprayView's `scoped`), so a hitter with none gets no
   // control. The postseason is shown BESIDE the regular season, never folded
   // into it, so the default is always Regular.
   const scope = sprayScopeOf(regular, wantScope)
-  const view = (scope !== 'R' && regular.scoped[scope]) || regular
+  const scoped = (scope !== 'R' && regular.scoped[scope]) || regular
   const scopes = regular.scoped ? SCOPES : []
+
+  // ONE PARK AT A TIME (#1859). A season is many parks, so "All parks" keeps
+  // the generic field. A chosen park draws that configuration's real wall and
+  // only the balls hit there, every count recomputed from them (parkSubview).
+  // A pick that the new scope or season does not have falls back to All parks.
+  const parks = useMemo(() => sprayParks(scoped.balls), [scoped.balls])
+  const park = parks.groups.find((g) => g.key === parkKey) ?? null
+  const view = useMemo(() => (park ? parkSubview(scoped, park) : scoped), [scoped, park])
+  const ground = useMemo(() => (park ? buildFieldGeometry(diagramInput(park.layout)) : null), [park])
 
   const chosen = view.splits.find((s) => s.key === split) ?? view.splits[0]
   const balls = useMemo(() => splitBalls(view.balls, chosen.key), [view.balls, chosen.key])
@@ -179,6 +204,23 @@ export function SprayMap({ view: regular }) {
           ))}
         </div>
       )}
+      {parks.groups.length > 0 && (
+        <div className="spray__chiprow">
+          <select
+            className="spray__park"
+            aria-label="Park"
+            value={park ? park.key : ''}
+            onChange={(e) => setParkKey(e.target.value)}
+          >
+            <option value="">All parks</option>
+            {parks.groups.map((g) => (
+              <option key={g.key} value={g.key}>
+                {g.label} · {g.n}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="spray__chiprow">
         {view.splits.map((s) => (
           <button
@@ -205,11 +247,11 @@ export function SprayMap({ view: regular }) {
           className="spray__field"
           viewBox={VIEWBOX}
           role="img"
-          aria-label={`Spray map of ${view.name}'s hits, ${scopes.length ? `${SCOPES.find(([k]) => k === scope)[1]}, ` : ''}${chosen.label}`}
+          aria-label={`Spray map of ${view.name}'s hits, ${scopes.length ? `${SCOPES.find(([k]) => k === scope)[1]}, ` : ''}${chosen.label}${park ? `, at ${park.label}` : ''}`}
         >
           <defs>
             <clipPath id={clipId}>
-              <path d={FAIR_CLIP} />
+              <path d={ground ? ground.fair : FAIR_CLIP} />
             </clipPath>
             <filter id={blurId} x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur stdDeviation={BLUR} />
@@ -233,9 +275,24 @@ export function SprayMap({ view: regular }) {
           </g>
 
           <g className="spray__art" aria-hidden="true">
-            <path className="spray__fence" d={FENCE_PATH} />
-            <path className="spray__foul" d={LEFT_LINE} />
-            <path className="spray__foul" d={RIGHT_LINE} />
+            {ground ? (
+              <>
+                <path className="spray__fence" d={ground.fenceSegs.map((seg) => seg.d).join(' ')} />
+                <path className="spray__foul" d={ground.foulLineL} />
+                <path className="spray__foul" d={ground.foulLineR} />
+                {ground.labels.map((l) => (
+                  <text key={l.t} className="spray__dist" x={f1(l.x)} y={f1(l.y)}>
+                    {l.t}′
+                  </text>
+                ))}
+              </>
+            ) : (
+              <>
+                <path className="spray__fence" d={FENCE_PATH} />
+                <path className="spray__foul" d={LEFT_LINE} />
+                <path className="spray__foul" d={RIGHT_LINE} />
+              </>
+            )}
             <path className="spray__diamond" d={DIAMOND} />
             <circle className="spray__mound" cx={f1(MOUND.x)} cy={f1(MOUND.y)} r="5" />
           </g>
@@ -355,8 +412,18 @@ export function SprayMap({ view: regular }) {
       </FactGrid>
 
       <p className="spray__foot">
-        {levels}{scope === 'P' ? ' postseason' : ''} · {chosen.bip} balls in play. Hard-hit share is of balls in play.
-        {note ? ` ${note}.` : ''}
+        {park ? (
+          <>
+            {park.label} · {chosen.bip} balls in play with a landing point, counted here alone. Hard-hit share is of
+            those.{park.layout.accuracyNote ? ` ${park.layout.accuracyNote}.` : ''}
+          </>
+        ) : (
+          <>
+            {levels}{scope === 'P' ? ' postseason' : ''} · {chosen.bip} balls in play. Hard-hit share is of balls in play.
+            {note ? ` ${note}.` : ''}
+            {parkCoverage(parks)}
+          </>
+        )}
       </p>
     </Card>
   )

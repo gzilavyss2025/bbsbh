@@ -1,7 +1,8 @@
 import { readSeasonShard, staticJsonBy } from './staticJson.js'
 import { shardKey100 } from '../lib/shardKey.js'
 import { combineSprayEntries } from '../lib/seasons/combine.js'
-import { HIT_COORD_ORIGIN } from '../lib/ballpark/hitProjection.js'
+import { HIT_COORD_ORIGIN, HARD_HIT_MPH } from '../lib/ballpark/hitProjection.js'
+import { resolveBallparkLayout } from '../lib/ballpark/layout/resolveLayout.js'
 
 // The season spray map's reader — where one batter's balls in play landed, and
 // how that changes against a right-handed or a left-handed pitcher.
@@ -26,7 +27,15 @@ import { HIT_COORD_ORIGIN } from '../lib/ballpark/hitProjection.js'
 //   { season, asOf, bat: { [batterId]: {
 //       n: name, t: teamId, b: 'R' | 'L' | 'S',
 //       p: [ [coordX, coordY, launchSpeed, result, hand, side, level, pitcherId], … ],
+//       g: [ [count, venueId], … ],
 //       o: { R: [bip, hits, xbh, hr, hard], L: [ … ] } } } }
+//
+// `g` (schema version 2, the bucket's `v`) names the PARK of each row without a
+// column on every row: the next `count` rows of `p` were hit at Stats API venue
+// `venueId` (null: the feed named none). Consecutive games at one park merge
+// into one run. An entry written before version 2 has no `g`; its balls read as
+// "park unknown", never as a guessed park. Venue and season pick the wall, since
+// every ballpark configuration covers whole seasons (#1859).
 //
 // `p` is one row per ball in play the park gave a landing point, in RAW Gameday
 // coordinates — the projection to SVG happens at render time, so the stored
@@ -65,8 +74,11 @@ export async function fetchSprayFor(personId, { seasonYear, strict } = {}) {
     seasonYear,
     (season) => shard(`${season}/${key}`),
     (shards, seasons) => {
-      const entry = combineSprayEntries(shards.map((d) => entryFor(d, personId)))
-      const post = combineSprayEntries(shards.map((d) => entryFor(d, personId, 'post')))
+      // Each season's runs carry their season into the joined entry, so a ball
+      // from 2022 at Comerica resolves the 2022 wall, not today's.
+      const tagged = (part) => shards.map((d) => withSeasonRuns(entryFor(d, personId, part), d?.season))
+      const entry = combineSprayEntries(tagged('bat'))
+      const post = combineSprayEntries(tagged('post'))
       if (!entry && !post) return null
       return { season: null, seasons, bat: entry ? { [personId]: entry } : {}, ...(post && { post: { [personId]: post } }) }
     },
@@ -108,10 +120,25 @@ function entryFor(data, personId, part = 'bat') {
   return data?.[part]?.[personId] ?? data?.[part]?.[String(personId)] ?? null
 }
 
+// An entry's park runs, each stamped with `season` and covering every ball
+// (a pre-run entry gets one unknown run). Null in, null out.
+export function withSeasonRuns(entry, season) {
+  if (!entry) return null
+  const runs = entry.g ?? []
+  const covered = runs.reduce((n, r) => n + r[0], 0)
+  const rest = (entry.p?.length ?? 0) - covered
+  const all = rest > 0 ? [...runs, [rest, null]] : runs
+  return { ...entry, g: all.map(([n, v, s]) => [n, v, s ?? season]) }
+}
+
 // The compact rows as objects. Called once per view; every filter downstream
-// works on the decoded list.
-export function decodeSprayBalls(entry) {
-  return (entry?.p ?? []).map(([x, y, ev, r, h, s, l, pid]) => ({
+// works on the decoded list. `season` is the folder's season, for runs that do
+// not carry their own (a single-season file); a ball outside every run has no
+// park (`venueId: null`).
+export function decodeSprayBalls(entry, season = null) {
+  const park = []
+  for (const [n, v, s] of entry?.g ?? []) for (let i = 0; i < n; i++) park.push([v ?? null, s ?? season])
+  return (entry?.p ?? []).map(([x, y, ev, r, h, s, l, pid], i) => ({
     x,
     y,
     exitVelo: ev ?? null,
@@ -120,6 +147,8 @@ export function decodeSprayBalls(entry) {
     side: HANDS[s] ?? 'R',
     level: LEVELS[l] ?? 'mlb',
     pitcherId: pid ?? null,
+    venueId: park[i]?.[0] ?? null,
+    season: park[i]?.[1] ?? season,
   }))
 }
 
@@ -247,14 +276,14 @@ export const sprayScopeOf = (view, want) => (want !== 'R' && view?.scoped?.[want
 
 // One scope's card body over an entry, or null for an entry with no balls in
 // play at all. The card floor is NOT applied here — see sprayView.
-function viewOf(entry, personId, bip) {
+function viewOf(entry, personId, bip, season = null) {
   const splits = SPLITS.map(([key, label]) => {
     const totals = splitTotals(entry, key)
     return { key, label, ...totals, thin: key !== 'all' && totals.bip < MIN_SPLIT_BIP }
   })
   if (splits[0].bip < bip) return null
 
-  const balls = decodeSprayBalls(entry)
+  const balls = decodeSprayBalls(entry, season)
   // Majors first, always, so a call-up's card reads MLB + AAA rather than in
   // whatever order his season happened to run. Taken from the plotted balls
   // because the totals carry no level of their own — safe in practice, since
@@ -286,14 +315,86 @@ function viewOf(entry, personId, bip) {
 // and a floor would hide the very balls the reader came to see; a thin sample
 // shows as grayed split chips, with its own counts, as a thin split always has.
 export function sprayView(data, personId) {
+  const season = data?.season ?? null
   const entry = entryFor(data, personId)
   if (!entry) return null
-  const view = viewOf(entry, personId, MIN_SPRAY_BIP)
+  const view = viewOf(entry, personId, MIN_SPRAY_BIP, season)
   if (!view) return null
 
   const post = entryFor(data, personId, 'post')
-  const postView = post && viewOf(post, personId, 1)
+  const postView = post && viewOf(post, personId, 1, season)
   if (!postView) return view
-  const all = viewOf(combineSprayEntries([entry, post]), personId, 1)
+  const all = viewOf(combineSprayEntries([entry, post]), personId, 1, season)
   return { ...view, scoped: { P: postView, A: all } }
+}
+
+// --- one park at a time (#1859) ----------------------------------------------
+//
+// A season is many parks, so the card's default field is a generic one. The
+// park view draws ONE configuration's real wall and only the balls hit there.
+// A ball is grouped by the wall it was hit at, not by the venue: the 2022 and
+// 2023 Comerica walls are two groups, never one drawing with both seasons' balls.
+
+// The configuration a ball was hit at, resolved once per venue and season. The
+// date is mid-season: every configuration covers whole seasons.
+function layoutKey(cache, venueId, season) {
+  const k = `${venueId}:${season}`
+  if (!cache.has(k)) {
+    cache.set(k, venueId != null && season != null
+      ? resolveBallparkLayout({ venueId, gameDate: `${season}-07-01` })
+      : null)
+  }
+  return cache.get(k)
+}
+
+// The parks a view's balls were hit at, most balls first, plus the two counts
+// the card's coverage note needs: balls with no park on record (`unknown`, a
+// season stored before parks were kept) and balls at a park the app cannot
+// draw (`offFile`, a minor-league park with no layout).
+export function sprayParks(balls) {
+  const cache = new Map()
+  const groups = new Map()
+  let unknown = 0
+  let offFile = 0
+  for (const b of balls ?? []) {
+    if (b.venueId == null) { unknown++; continue }
+    const layout = layoutKey(cache, b.venueId, b.season)
+    if (!layout) { offFile++; continue }
+    const g = groups.get(layout.configurationId) ??
+      { key: layout.configurationId, venueId: b.venueId, name: layout.name, layout, n: 0, seasons: new Set() }
+    g.n += 1
+    if (b.season != null) g.seasons.add(b.season)
+    groups.set(layout.configurationId, g)
+  }
+  // Two walls of one park in one view (an All-seasons view across a
+  // renovation) carry their seasons in the label, so the picker can tell them apart.
+  const list = [...groups.values()].map((g) => ({ ...g, seasons: [...g.seasons].sort() }))
+  const perVenue = new Map()
+  for (const g of list) perVenue.set(g.venueId, (perVenue.get(g.venueId) ?? 0) + 1)
+  for (const g of list) {
+    const span = g.seasons.length ? `${g.seasons[0]}${g.seasons.length > 1 ? `–${g.seasons.at(-1)}` : ''}` : ''
+    g.label = perVenue.get(g.venueId) > 1 && span ? `${g.name} (${span})` : g.name
+  }
+  list.sort((a, b) => b.n - a.n || a.label.localeCompare(b.label))
+  return { groups: list, unknown, offFile, total: (balls ?? []).length }
+}
+
+// A view narrowed to one park group. Every count is RECOMPUTED from the balls
+// hit there, because the stored denominators (`o`) are season totals with no
+// park: the chips, the facts and the foot all describe this park alone. They
+// count balls with a landing point (the rows), which is what a park can know.
+export function parkSubview(view, group) {
+  const balls = view.balls.filter((b) => b.venueId === group.venueId && group.seasons.includes(b.season))
+  const count = (bs) => ({
+    bip: bs.length,
+    hits: bs.filter((b) => b.result !== 'out').length,
+    xbh: bs.filter((b) => b.result === 'double' || b.result === 'triple' || b.result === 'hr').length,
+    hr: bs.filter((b) => b.result === 'hr').length,
+    hard: bs.filter((b) => b.exitVelo != null && b.exitVelo >= HARD_HIT_MPH).length,
+  })
+  const splits = SPLITS.map(([key, label]) => {
+    const totals = count(key === 'all' ? balls : balls.filter((b) => b.hand === key))
+    return { key, label, ...totals, thin: key !== 'all' && totals.bip < MIN_SPLIT_BIP }
+  })
+  return { ...view, balls, splits, park: group }
 }

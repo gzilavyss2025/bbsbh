@@ -24,6 +24,7 @@
     "check:sw-learn": "node scripts/check-sw-learn-fallback.mjs",
     "compress-logos": "node scripts/compress-logos.mjs && node scripts/gen-logo-art.mjs",
     "gen:ballpark-thumbs": "node scripts/gen-ballpark-thumbs.mjs",
+    "gen:field-layouts": "node scripts/ballpark/import-field-layouts.mjs",
     "lint:fix": "eslint . --fix",
     "prepare": "git config core.hooksPath .githooks || true",
     "test": "node --test --test-reporter=dot \"test/**/*.test.js\"",
