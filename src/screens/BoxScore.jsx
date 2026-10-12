@@ -603,7 +603,7 @@ function InsightNoteCard({ group }) {
   )
 }
 
-// The Attendance fill-in's "i" glyph + % full note — the same tap-glyph-
+// The Attendance fill-in's crowd glyph + % full note — the same tap-glyph-
 // unfolds-in-place idiom as the lineup page's own AttendanceFact
 // (TeamInfo.jsx), reusing its .attendance__* styling and CrowdIcon glyph.
 // Only reached (see homeFields above) when the feed posted a figure, so no

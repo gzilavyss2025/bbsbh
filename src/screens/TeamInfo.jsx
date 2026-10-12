@@ -203,7 +203,7 @@ export function TeamInfo({
             <Fact
               label="Uniform"
               value={uniform}
-              aside={figureUrls && <UniformFigureButton urls={figureUrls} label={uniform} />}
+              aside={figureUrls && uniform && <UniformFigureButton urls={figureUrls} label={uniform} />}
             />
             {/* Broadcast rides on the away page only, filling the cell that
                 otherwise sits empty next to Uniform (an odd fact count leaves it
