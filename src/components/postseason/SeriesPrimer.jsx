@@ -61,9 +61,9 @@ function Main({ primer: { list, series, game, setPick, data, bracket, cutoff, sl
             // Two series of one round and league (the Division Series, the Wild Card) share a name: the clubs tell them apart.
             const twin = list.some((o) => o !== s && o.round === s.round && o.league === s.league)
             return (
-              <Pill key={s.id} role="control" pressed={s === series} onClick={() => setPick(s.id)}>
-                {/* The round's art on its navy plate; a season with no art keeps the words. */}
-                {mark ? <SeriesMark mark={mark} height={18} plate /> : roundTitle(s)}
+              <Pill key={s.id} role="control" fill="ink" pressed={s === series} onClick={() => setPick(s.id)}>
+                {/* The ink pill is the navy the art needs, so the mark sits straight on it, no plate; a season with no art keeps the words. */}
+                {mark ? <SeriesMark mark={mark} height={18} /> : roundTitle(s)}
                 {twin && ` ${s.slots.map((slot) => slot.club.abbreviation).join('–')}`}
               </Pill>
             )
