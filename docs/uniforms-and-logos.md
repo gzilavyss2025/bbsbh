@@ -76,8 +76,10 @@ Gameday renders a batter figure per uniform asset (found in longbored's
   notice, so a consumer hides the figure on `onError`.
 - **2025 codes are not checked yet.** Only 2026 images were fetched.
 - Spoiler-free static art; `batterFigureUrls` (`src/api/uniforms.js`) builds the
-  URLs and returns null unless both pieces are posted. Cached `CacheFirst` in
-  `vite.config.js`.
+  URLs and returns null unless both pieces are posted with a well-formed code
+  (`{club}_{piece}_{n}_{year}`). Cached `CacheFirst` in `vite.config.js`; the CDN
+  sends `access-control-allow-origin: *`, so the `<img>` needs
+  `crossOrigin="anonymous"` or the response is opaque and never cached.
 
 ## 2. Alternate logos (Barrelman, City Connect marks) — NOT on any MLB CDN
 

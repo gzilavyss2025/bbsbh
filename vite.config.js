@@ -664,7 +664,9 @@ export default defineConfig({
           {
             // Gameday batter-figure art (uniforms.js batterFigureUrls) — static
             // PNGs keyed by uniform asset code, ~50 KB each, spoiler-free
-            // (ADR-0004 covers statsapi.mlb.com only). CacheFirst.
+            // (ADR-0004 covers statsapi.mlb.com only). CacheFirst stores only 200s, so
+            // the <img> must set crossOrigin="anonymous" (the CDN sends
+            // access-control-allow-origin: *), as Headshot.jsx does.
             urlPattern: ({ url }) => url.hostname === 'prod-gameday.mlbstatic.com',
             handler: 'CacheFirst',
             method: 'GET',
