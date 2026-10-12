@@ -12,7 +12,7 @@
 //   'dimensions-only' no outline, five posted distances;
 //   'missing'         not even those.
 
-import FIELDS from './fields.json' with { type: 'json' }
+import FIELDS from './fields.js'
 import { WALLS } from '../ballparkFields.js'
 import { auditFence } from './fenceAudit.js'
 

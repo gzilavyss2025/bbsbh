@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Import every MLB park's measured dimensions and current fence outline into
-// src/lib/ballpark/layout/fields.json (#1859). HAND-RUN, once a season or after
+// src/lib/ballpark/layout/fields.js (#1859). HAND-RUN, once a season or after
 // a club announces a wall change: `npm run gen:field-layouts` (optionally
 // `-- --year 2027`). Its output is reviewed in the PR diff like any data change.
 //
@@ -45,7 +45,7 @@ import { ballparkFor } from '../../src/lib/ballpark/ballparkData.js'
 import { CONFIGURATIONS } from '../../src/lib/ballpark/layout/configurations.js'
 import { fetchSeasonInPlay } from '../lib/time/season-in-play.mjs'
 
-const OUT = fileURLToPath(new URL('../../src/lib/ballpark/layout/fields.json', import.meta.url))
+const OUT = fileURLToPath(new URL('../../src/lib/ballpark/layout/fields.js', import.meta.url))
 const SAVANT = (y) => `https://baseballsavant.mlb.com/leaderboard/statcast-park-factors?type=dimensions&year=${y}`
 const GAMEDAY = (id) => `https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.2.0/images/fields/${id}.svg`
 
@@ -223,5 +223,5 @@ const out = {
     venues: milb,
   },
 }
-writeFileSync(OUT, JSON.stringify(out, null, 0).replace(/("\d+":\{)/g, '\n$1') + '\n')
+writeFileSync(OUT, 'export default ' + JSON.stringify(out, null, 0).replace(/("\d+":\{)/g, '\n$1') + '\n')
 console.log(`wrote ${OUT}`)
