@@ -359,6 +359,8 @@ async function main() {
   // again into an empty store. Checkpoints keep the OLD version number, so only
   // a finished sweep marks the season current.
   const rebuild = Boolean(args.rebuild) || (read.carried > 0 && read.version < SCHEMA_VERSION)
+  // A filtered sweep would empty the other levels and still stamp the season current.
+  if (rebuild && sportsFilter) throw new Error('A rebuild sweeps every level: drop --sports')
   const store = rebuild ? { bat: {}, post: {} } : read.store
   // Version 1 means "rows without parks": a rebuild cut short reads as one
   // and starts over, whatever version the store had before.
