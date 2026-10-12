@@ -190,6 +190,24 @@ backstops (41–57 ft) sit short of the 60 ft or more most parks have, and the
 drawn tracks (17–24 ft) look wide. A park with no stored layer, an older wall
 or a minor-league park draws the stylized foul ground and track.
 
+## Overlay alignment
+
+The marks and the park use separate calibrations, on purpose: hit coordinates
+go through `hitCoordToSvg` (2.51 ft per unit, fitted to the feed's own
+distances), and the outlines are 2.40 ft per unit (fitted to Savant's walls).
+`test/overlay-alignment.test.js` checks that they agree:
+
+- a ball d feet out at a bearing plots on the drawing's own d-foot point, and a
+  ball at the pole on the end of the drawn foul line;
+- on 24 real June 2026 games at eight parks
+  (`test/fixtures/overlay-alignment-2026.json`, built by
+  `.scratch/overlay-alignment/build.mjs`), every home run lands beyond the
+  wall its park draws (measured: 12 to 104 ft beyond), and no more than 2% of
+  caught balls land more than 10 ft past it (measured: 3 of 292, the farthest
+  21 ft). Drawing the walls 4% too large, as the 2018 traces did, fails it;
+- an HTML label laid over the cropped plot window (`plotPercent`) lands where
+  the SVG puts its mark.
+
 ## Park names and renames
 
 Sponsors rename parks, mostly over the winter. Everything here resolves by

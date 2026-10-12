@@ -42,6 +42,14 @@ export const HOME = { x: 310, y: 505 }
 // the crop to 0 to go back to the full frame.
 export const PLOT_SKY_CROP = 50
 export const PLOT_VIEWBOX = `0 ${PLOT_SKY_CROP} ${VIEWBOX.w} ${VIEWBOX.h - PLOT_SKY_CROP}`
+
+// Where an SVG point sits as a percentage of the plot window: the position for
+// an HTML label laid over a plot card (the hit chart's dot numbers). The one
+// spelling of that mapping, so HTML and SVG marks cannot slide apart
+// (test/overlay-alignment.test.js).
+export function plotPercent({ x, y }) {
+  return { left: (x / VIEWBOX.w) * 100, top: ((y - PLOT_SKY_CROP) / (VIEWBOX.h - PLOT_SKY_CROP)) * 100 }
+}
 const ANGLE = { lf: -45, lc: -22.5, cf: 0, rc: 22.5, rf: 45 }
 const TRACK_FT = 14 // warning-track width, feet
 const FOUL_FT = 26 // stylized foul-ground margin beyond the wall/lines

@@ -3,7 +3,7 @@ import { BallparkDiagram } from '../ballpark/BallparkDiagram.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
-import { VIEWBOX, PLOT_SKY_CROP, PLOT_VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
+import { VIEWBOX, PLOT_VIEWBOX, plotPercent } from '../../lib/ballpark/ballparkGeometry.js'
 import { ordinal } from '../../lib/format.js'
 
 // The Hit chart: every ball put in play, plotted where it was fielded on the
@@ -19,10 +19,10 @@ import { ordinal } from '../../lib/format.js'
 //   'half' — one half inning: no club to choose, dots numbered against a list
 //            of that half's batters underneath.
 
-// The crop and the box it leaves are ballparkGeometry.js's now — the flight
-// card the play-by-play diamond opens plots onto the same window, and a second
-// spelling of the number would slide one card's marks against the other's.
-const PLOT_H = VIEWBOX.h - PLOT_SKY_CROP
+// The crop, the box it leaves and the percentage mapping for HTML laid over
+// it are ballparkGeometry.js's (PLOT_VIEWBOX, plotPercent) — the flight card
+// the play-by-play diamond opens plots onto the same window, and a second
+// spelling of the numbers would slide one card's marks against the other's.
 
 // The half's dot numbers ride beside their dot rather than on it — to its
 // right normally, and to its LEFT once the dot is far enough over that the
@@ -294,13 +294,14 @@ export function HitChart({
             plotted.map((ball, i) => {
               const flip = ball.x > RIGHT_EDGE
               const x = flip ? ball.x - NUMBER_OFFSET_X : ball.x + NUMBER_OFFSET_X
+              const at = plotPercent({ x, y: ball.y })
               return (
                 <span
                   key={ball.id}
                   className={`hitchart__dotnum${flip ? ' hitchart__dotnum--flip' : ''}`}
                   style={{
-                    left: `${((x / VIEWBOX.w) * 100).toFixed(2)}%`,
-                    top: `${(((ball.y - PLOT_SKY_CROP) / PLOT_H) * 100).toFixed(2)}%`,
+                    left: `${at.left.toFixed(2)}%`,
+                    top: `${at.top.toFixed(2)}%`,
                   }}
                 >
                   {i + 1}
