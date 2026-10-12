@@ -14,7 +14,7 @@
 // Only the traces that stand for an OLDER configuration are kept, keyed by the
 // park each trace SHOWS (the Rangers trace predates Globe Life Field, so it sits
 // under Globe Life Park in Arlington). Every current park now draws its audited
-// Gameday outline (./layout/fields.json) instead. Which trace stands for which
+// Gameday outline (./layout/fields.js) instead. Which trace stands for which
 // configuration on which dates is decided in ./layout/configurations.js.
 
 export const WALLS = {

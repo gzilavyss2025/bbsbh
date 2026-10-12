@@ -7,7 +7,7 @@ slices 1 to 5.
 Code: `src/lib/ballpark/layout/`. The registry is `configurations.js`. The
 choice of outline is `fences.js`. The resolver is `resolveLayout.js`
 (`resolveBallparkLayout({ venueId, venueName, gameDate })`). The imported store
-is `fields.json`, written by `npm run gen:field-layouts`
+is `fields.js`, written by `npm run gen:field-layouts`
 (`scripts/ballpark/import-field-layouts.mjs`). Tests:
 `test/ballpark-layouts.test.js` and `test/field-svg.test.js`. Audit date:
 2026-10-12, Savant season 2026.
@@ -257,7 +257,7 @@ hit there.
 1. **A park the importer already reads** (an MLB park, or the home park of an
    MiLB club in `teams.json`): run `npm run gen:field-layouts`. A corrected
    Gameday SVG or a new posted sign is picked up on its own. Review the
-   `fields.json` diff and the import log; a park whose outline fails its
+   `fields.js` diff and the import log; a park whose outline fails its
    audit is logged with its errors.
 2. **A wall change with dates** (a renovation): add a dated record to
    `src/lib/ballpark/layout/configurations.js` and close the old one with

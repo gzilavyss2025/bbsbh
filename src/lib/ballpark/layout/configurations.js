@@ -10,7 +10,7 @@
 //
 // WHERE THE OUTLINES COME FROM. Two sources, by `fence`:
 //   - 'gameday': the CURRENT record of every park. The outline is extracted from
-//     MLB's Gameday field SVG and stored in ./fields.json only when it passes an
+//     MLB's Gameday field SVG and stored in ./fields.js only when it passes an
 //     audit against the same season's Baseball Savant measurements (CF, the
 //     deepest point, both poles, both gaps, the fair area). A park whose SVG
 //     fails, or has none, draws its five posted distances instead.

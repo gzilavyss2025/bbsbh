@@ -1424,7 +1424,7 @@ don't run these by hand.
 
 Re-run only to fold in a new season.
 
-- `ballpark/import-field-layouts.mjs` → `src/lib/ballpark/layout/fields.json` — each
+- `ballpark/import-field-layouts.mjs` → `src/lib/ballpark/layout/fields.js` — each
   MLB park's measured distances, wall heights, deepest point and fair area (Baseball
   Savant's Dimensions table), plus its current fence outline, extracted from MLB's
   Gameday field SVG. An outline is stored only when it passes an audit against the
