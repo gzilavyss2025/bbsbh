@@ -122,7 +122,7 @@ export function gateBoard(data, season, sortBy = 'fill') {
     .filter(([, c]) => c?.gate)
     .map(([teamId, c]) => {
       const g = c.gate
-      const capacity = capacityFor(c.venue)
+      const capacity = capacityFor(c.venue, c.venueId)
       return {
         teamId: Number(teamId),
         venue: c.venue,

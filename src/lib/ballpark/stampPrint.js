@@ -20,8 +20,8 @@ export function resolveStampArt(slot, park, t, { full = false } = {}) {
   // illustration as every other reader of park art — see parkBackdrop.js's
   // header for why this fallback (raw feed name for an uncatalogued park) is
   // the right one.
-  const name = park && slot.venueName ? ballparkFor(slot.venueName)?.name || slot.venueName : ''
-  const art = name ? resolvePhotoArt(name, t, full) : null
+  const name = park && slot.venueName ? ballparkFor(slot.venueName, slot.venueId)?.name || slot.venueName : ''
+  const art = name ? resolvePhotoArt(name, slot.venueId, t, full) : null
   const caption = park ? slot.venueName || slot.label : slot.label
   return { name, art, caption }
 }
@@ -34,8 +34,8 @@ export function resolveStampArt(slot, park, t, { full = false } = {}) {
 // thumbnail in) UNLESS `full` is asked for, which always takes the 1000px
 // original — the modal enlarges this print, so a thumbnail built for a
 // ~110px grid slot would show as soft/blocky at that size.
-function resolvePhotoArt(name, t, full) {
-  const key = parkKey(name)
+function resolvePhotoArt(name, venueId, t, full) {
+  const key = parkKey(name, venueId)
   const ids = fieldIds(key)
   const photo = resolvePhoto(key, { photo: t(ids.photo), focus: t(ids.focus) })
   if (!photo) return null

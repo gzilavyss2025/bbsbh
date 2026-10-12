@@ -102,6 +102,7 @@ export function rosterFor(staticTeams, sportId = 1) {
       // `teamName` ("Mud Hens"), falling back to the full name.
       label: teamClubNameShort(team.id) ?? team.teamName ?? team.name ?? '',
       venueName: team.venueName ?? '',
+      venueId: team.venueId ?? null,
     }))
     .sort((a, b) => a.label.localeCompare(b.label))
   if (roster.length) return roster

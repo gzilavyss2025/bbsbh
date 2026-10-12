@@ -142,6 +142,7 @@ export function toRow(game, date) {
     // neutral-site/exhibition-adjacent games; those simply miss the split.
     dayNight: game.dayNight === 'day' || game.dayNight === 'night' ? game.dayNight : null,
     venue: game?.venue?.name ?? null,
+    venueId: game?.venue?.id ?? null, // finds a renamed park by id
     // Postseason round and the game's number in the series ('NLDS', 1), so the
     // page can name a best night 'NLDS • G1'. Null on a regular-season game.
     series: seriesLabel(game.seriesDescription),
@@ -307,6 +308,7 @@ export function aggregate(rows) {
     const playedRows = all.get(teamId) ?? []
     clubs[teamId] = {
       venue: hostRows.find((r) => r.venue)?.venue ?? null,
+      venueId: hostRows.find((r) => r.venue)?.venueId ?? null,
       gate: gateFor(hostRows),
       pace: paceFor(playedRows),
     }
@@ -373,7 +375,7 @@ export function buildPostseason(rows) {
   const att = gated.map((r) => r.attendance)
   const clubs = {}
   for (const [teamId, club] of Object.entries(aggregate(gated))) {
-    if (club.gate) clubs[teamId] = { venue: club.venue, gate: club.gate }
+    if (club.gate) clubs[teamId] = { venue: club.venue, venueId: club.venueId, gate: club.gate }
   }
   return {
     games: gated.length,

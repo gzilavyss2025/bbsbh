@@ -39,9 +39,13 @@ for (const [key, rec] of Object.entries(BALLPARKS)) {
   if (c) VENUE_BY_NAME.set(key, c.venueId)
 }
 
-// 'YYYY-MM-DD' (or any ISO string starting with one), else today, local time.
+// 'YYYY-MM-DD' (or any ISO string starting with one). No date given at all
+// (undefined) means "the park as it is now": today, local time. A date that was
+// asked for and is missing or malformed (null, '') is unknown: null, so the
+// caller draws no wall rather than today's for a game from another year.
 function dayOf(gameDate) {
   if (typeof gameDate === 'string' && /^\d{4}-\d{2}-\d{2}/.test(gameDate)) return gameDate.slice(0, 10)
+  if (gameDate !== undefined) return null
   const d = new Date()
   const p = (n) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
@@ -121,6 +125,7 @@ export function resolveBallparkLayout({ venueId, venueName, gameDate } = {}) {
   const id = venueId != null && venueId !== '' ? Number(venueId) : VENUE_BY_NAME.get(normalizeVenue(venueName))
   if (id == null) return null
   const day = dayOf(gameDate)
+  if (day == null) return null
   const c = ALL.find((cfg) => cfg.venueId === id && covers(cfg, day))
   return c ? layoutOf(c) : null
 }
