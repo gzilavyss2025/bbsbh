@@ -38,7 +38,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `highlights/` | `HighlightClipCard` | Purely presentational video-clip cards — no fetching, no game-shape knowledge; the caller precomputes the caption and owns the `HighlightSheet` it opens |
 | `inning/` | `HalfInning`, `PitchersSection`, `RosterPanel`, `MarginNotes`, and `focus/` | The innings-viewer shell around the at-bat feed — one layout for every half (ADR-0043's unify amendment), built by `focus/` |
 | `logbook/` | `GameStamp`, `StampGameButton`, `StampInButton`, `StampSheet` | The Logbook stamp (ADR-0035) and its shelves. `check-stamp-surfaces.mjs` names these by path. Rules: `logbook/CLAUDE.md` |
-| `logo/` | `TeamLogo`, `LogoModal`, `TeamTreatmentMark`, `JerseyCombos` | Club-mark rendering and its sketch/print modal |
+| `logo/` | `TeamLogo`, `LogoModal`, `TeamTreatmentMark`, `JerseyCombos`, `UniformFigure` | Club-mark rendering and its sketch/print modal. `UniformFigure` is Gameday's batter figure for tonight's uniform: a shirt-icon button and the sheet that shows the figure (#1852) |
 | `offseason/` | `LevelOffseason`, `SeasonRecord`, `MovedUp`, `WinterRail` | The empty-slate page state (ADR-0074, ADR-0079, ADR-0080, ADR-0081). Rules: `offseason/CLAUDE.md` |
 | `ovr/` | `OvrTile`, `OvrMenu`, `OvrBars`, `OvrPath`, `useOvr` | The player page's OVR card (#1703): the tile on the headshot's corner and the menu sheet it opens. Open surface, no SealBox (ADR-0034). Logic is pure, in `lib/ovr/`; the card is draw-only and reads the ratings through `api/ovr/` |
 | `player/` | `Headshot`, `PlayerLink`, `PlayerHoverCard`, `Ledger`, `CareerTimeline` | Player-identity primitives and career-level cards |
