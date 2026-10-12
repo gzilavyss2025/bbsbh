@@ -205,11 +205,8 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
     }
   }, [feedState.data, game.away.teamName, game.home.teamName])
 
-  // Raw per-side assets (null until posted) for the Gameday batter figure.
-  const uniformFigure = {
-    away: feedState.data?.uniforms?.away ?? null,
-    home: feedState.data?.uniforms?.home ?? null,
-  }
+  // Raw per-side assets (null/absent until posted) for the Gameday batter figure.
+  const uniformFigure = feedState.data?.uniforms ?? {}
 
   // Managers need a separate endpoint per team. The coaches endpoint needs
   // nothing from the feed — the game prop already carries both team ids and
