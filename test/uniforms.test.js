@@ -494,7 +494,9 @@ test('buildJerseyCombos leaves the regular-season fields as before for an R-only
   ]
   const home = combosFor(schedule, { 1: worn(HOME), 2: worn(HOME) }).find((c) => c.code === HOME)
   assert.deepEqual(rec(home), { w: 1, l: 1, pw: 0, pl: 0 })
+})
 
+// --------------------------------------------------------------------------
 // batterFigureUrls — Gameday batter-figure art for a posted side (#1852).
 // --------------------------------------------------------------------------
 const FIG = 'https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.3.0/images/batters'
