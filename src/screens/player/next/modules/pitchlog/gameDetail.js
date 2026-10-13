@@ -6,14 +6,17 @@ import { HIT_EVENT_TYPES, WHIFF_CODES, pitchCallCode } from '../../../../../api/
 // feed, and the clips from its content items. Fetched only when the view opens.
 // The score and the decision are NOT read here: they come from the log row (resultOf), so the
 // ADR-0110 guard on that row covers this view too. Plays are open on this page (ADR-0110).
+// THE GUARD ALSO HOLDS THE CLIPS: a headline says "in win" or "records the save", and a video
+// carries the broadcast scorebug. A held row (row.result null: a game today, or a suspended game
+// that resumes today) gets no clip of any kind, and its content is never fetched.
 
 // Every path below verified live on gamePk 823787 (2026-10-13). `fields=` is name-based: a
 // name missing here arrives undefined.
 const FIELDS =
-  'gameData,teams,away,home,id,teamName,abbreviation,liveData,plays,allPlays,about,inning,isScoringPlay,matchup,pitcher,batter,fullName,result,eventType,event,description,rbi,playEvents,isPitch,playId,details,call,code,type,pitchData,startSpeed'
+  'liveData,plays,allPlays,about,inning,isScoringPlay,matchup,pitcher,batter,id,fullName,result,eventType,event,description,rbi,playEvents,isPitch,playId,details,call,code,type,pitchData,startSpeed'
 
-export async function loadStart(gamePk) {
-  const [feed, items] = await Promise.all([fetchGameFeed(gamePk, { fields: FIELDS }).catch(() => null), fetchHighlights(gamePk)])
+export async function loadStart({ gamePk, result }) {
+  const [feed, items] = await Promise.all([fetchGameFeed(gamePk, { fields: FIELDS }).catch(() => null), result ? fetchHighlights(gamePk) : []])
   return { feed, items }
 }
 
@@ -39,18 +42,17 @@ export function clipFor(play, items, day) {
   return null
 }
 
-const line = (play, items, day, event) => ({
+const line = (play, items, day, result, event) => ({
   key: lastPitch(play)?.playId ?? null,
   inning: play.about?.inning ?? null,
   batter: play.matchup?.batter?.fullName ?? '',
   event,
   text: play.result?.description ?? '',
-  clip: clipFor(play, items, day),
+  clip: result ? clipFor(play, items, day) : null,
 })
 
-// `{ feed, items }` (loadStart) for pitcher `id` and his log row -> the parts. `club` is his
-// club's name ("Brewers") for the result strip, or null with no feed.
-export function startDetail({ feed, items }, id, { day, home }) {
+// `{ feed, items }` (loadStart) for pitcher `id` and his log row -> the parts.
+export function startDetail({ feed, items }, id, { day, result }) {
   const plays = (feed?.liveData?.plays?.allPlays ?? []).filter((p) => p.matchup?.pitcher?.id === id)
   const by = new Map()
   for (const e of plays.flatMap((p) => p.playEvents ?? [])) {
@@ -70,15 +72,15 @@ export function startDetail({ feed, items }, id, { day, home }) {
     .sort((a, b) => b.n - a.n)
     .map((t) => ({ code: t.code, n: t.n, pct: Math.round((100 * t.n) / total), mph: t.mphN ? (t.mphSum / t.mphN).toFixed(1) : null, whiffs: t.whiffs }))
 
-  const strikeouts = plays.filter((p) => p.result?.eventType?.startsWith('strikeout')).map((p) => line(p, items, day))
+  const strikeouts = plays.filter((p) => p.result?.eventType?.startsWith('strikeout')).map((p) => line(p, items, day, result))
   const bigPlays = plays
     .filter((p) => HIT_EVENT_TYPES.has(p.result?.eventType) || p.about?.isScoringPlay || p.result?.rbi > 0)
-    .map((p) => line(p, items, day, p.result?.rbi > 0 ? `${p.result.event}, ${p.result.rbi} RBI` : p.result?.event ?? ''))
+    .map((p) => line(p, items, day, result, p.result?.rbi > 0 ? `${p.result.event}, ${p.result.rbi} RBI` : p.result?.event ?? ''))
 
   // Clips about his outing: his id on the clip, not joined to one of his plays, and published
   // within two days of the game (a game's content can list clips of other games).
   const joined = new Set(plays.map((p) => lastPitch(p)?.playId).filter(Boolean))
-  const clips = (items ?? [])
+  const clips = (result ? items ?? [] : [])
     .filter(
       (i) =>
         isEligibleForPositiveFilter(classifyHighlight(i)) &&
@@ -89,19 +91,18 @@ export function startDetail({ feed, items }, id, { day, home }) {
     .map((i) => ({ key: i.guid ?? i.id ?? i.headline, title: i.headline ?? '', ...watch(i) }))
     .filter((c) => c.href)
 
-  const club = feed?.gameData?.teams?.[home ? 'home' : 'away']?.teamName ?? null
-  return { pitches, strikeouts, bigPlays, clips, club }
+  return { pitches, strikeouts, bigPlays, clips }
 }
 
 const DEC = { W: (n) => `${n} gets the win.`, L: (n) => `${n} takes the loss.`, SV: (n) => `${n} gets the save.`, ND: (n) => `No decision for ${n}.` }
 
 // The result strip, from the log row (the guarded score and decision): null for a game with no
-// final score on file. `club` is his club's name ("Brewers"), `last` his last name.
-export function resultOf(row, club, last) {
+// final score on file. `last` is his last name.
+export function resultOf(row, last) {
   if (!row.result) return null
   return {
-    label: `${club} ${{ W: 'win', L: 'lose', T: 'tie' }[row.result]}`,
-    score: `${club} ${row.runs}, ${row.oppAbbr} ${row.oppRuns}`,
+    label: `${row.clubAbbr} ${{ W: 'win', L: 'lose', T: 'tie' }[row.result]}`,
+    score: `${row.clubAbbr} ${row.runs}, ${row.oppAbbr} ${row.oppRuns}`,
     dec: DEC[row.dec]?.(last) ?? null,
   }
 }

@@ -16,7 +16,8 @@ import { loadStart, resultOf, startDetail } from './gameDetail.js'
 // The game detail view (#1851): one row of the Game Log, opened. A native modal <dialog>:
 // showModal() makes the page behind it inert (the focus trap) and Escape fires `cancel`.
 // The caller hands focus back to the row. The feed and the clips load only when it opens.
-// Score and decision come from the row (ADR-0110), so a game in progress today shows neither.
+// Score and decision come from the row (ADR-0110), so a game in progress today shows neither,
+// and no clip (gameDetail.js).
 
 function Plays({ title, plays }) {
   if (!plays.length) return null
@@ -51,7 +52,7 @@ export function StartDetail({ row, pitcherId, last, onEarlier, onLater, onClose 
   const titleId = useId()
   const link = useRouteLink()
   const { asOf, sportId } = useLinkScope()
-  const { data, loading } = useAsync(() => loadStart(row.gamePk), [row.gamePk])
+  const { data, loading } = useAsync(() => loadStart(row), [row.gamePk])
   useEffect(() => {
     ref.current?.showModal()
   }, [])
@@ -61,7 +62,8 @@ export function StartDetail({ row, pitcherId, last, onEarlier, onLater, onClose 
   }
 
   const d = data && startDetail(data, pitcherId, row)
-  const res = resultOf(row, d?.club ?? row.clubAbbr, last)
+  const playClips = d && [...d.strikeouts, ...d.bigPlays].some((p) => p.clip)
+  const res = resultOf(row, last)
   const [away, home] = row.home ? [row.oppAbbr, row.clubAbbr] : [row.clubAbbr, row.oppAbbr]
   const head = [`Game ${row.n} of ${row.of}`, row.series || 'Regular season', row.relief && 'Relief', `${row.home ? 'vs' : 'at'} ${row.opp}`, humanDateWithYear(row.day)]
 
@@ -92,7 +94,7 @@ export function StartDetail({ row, pitcherId, last, onEarlier, onLater, onClose 
             {res.dec && <p>{res.dec}</p>}
           </div>
         ) : (
-          <p className="hint">No final score on file. A game played today shows none until the next day.</p>
+          <p className="hint">No final score on file. A game played today shows no score and no clips until the next day.</p>
         )}
 
         <FactGrid look="strip" as="div">
@@ -144,30 +146,34 @@ export function StartDetail({ row, pitcherId, last, onEarlier, onLater, onClose 
               <p className="hint">No pitch tracking for this game.</p>
             )}
 
-            <Stack gap="tight" as="section">
-              <h3 className="pitchlog__h">Game clips</h3>
-              {d.clips.length > 0 ? (
-                <ul className="pitchlog__plays">
-                  {d.clips.map((c) => (
-                    <li key={c.key}>
-                      <Cluster gap="tight" align="center">
-                        <span>{c.title}</span>
-                        <Door href={c.href} target="_blank" rel="noreferrer" className="pitchlog__clip">
-                          {c.label}
-                        </Door>
-                      </Cluster>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="hint">MLB posted no clips about his outing. The plays below link to single-pitch clips.</p>
-              )}
-            </Stack>
+            {row.result && (
+              <Stack gap="tight" as="section">
+                <h3 className="pitchlog__h">Game clips</h3>
+                {d.clips.length > 0 ? (
+                  <ul className="pitchlog__plays">
+                    {d.clips.map((c) => (
+                      <li key={c.key}>
+                        <Cluster gap="tight" align="center">
+                          <span>{c.title}</span>
+                          <Door href={c.href} target="_blank" rel="noreferrer" className="pitchlog__clip">
+                            {c.label}
+                          </Door>
+                        </Cluster>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="hint">MLB posted no clips about his outing.{playClips && ' The plays below link to single-pitch clips.'}</p>
+                )}
+              </Stack>
+            )}
             <Plays title="Strikeouts" plays={d.strikeouts} />
             <Plays title="Big plays against him" plays={d.bigPlays} />
-            <p className="hint">
-              Clips come from MLB&apos;s highlight reel for the game. If MLB cut no highlight for a play, the button opens the single-pitch clip from Baseball Savant.
-            </p>
+            {playClips && (
+              <p className="hint">
+                Clips come from MLB&apos;s highlight reel for the game. If MLB cut no highlight for a play, the button opens the single-pitch clip from Baseball Savant.
+              </p>
+            )}
           </>
         )}
 

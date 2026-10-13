@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import test, { mock } from 'node:test'
 import { fetchFinalScores } from '../src/api/boxlines/fetch.js'
 import { earlierSeason, keyOf, linesOf, loadPitchlog, pitchlogView, scopeRows, totalsOf } from '../src/screens/player/next/modules/pitchlog/pitchlogView.js'
-import { resultOf, startDetail } from '../src/screens/player/next/modules/pitchlog/gameDetail.js'
+import { loadStart, resultOf, startDetail } from '../src/screens/player/next/modules/pitchlog/gameDetail.js'
 
 // The pitcher Game Log's rows (#1851): every game of the gameLog split, newest first, with the
 // score and decision from fetchFinalScores (which holds today back) and the per-game pitch mix.
@@ -201,12 +201,12 @@ test('the clip: MLB highlight joined on the last pitch playId, else the Savant p
 
 test('a play with no tracked pitch and no highlight has no clip button (a 2008 game)', () => {
   const play = { matchup: { pitcher: { id: 1 }, batter: { fullName: 'A B' } }, about: { inning: 1 }, result: { eventType: 'strikeout', description: 'x' }, playEvents: [{ isPitch: true, playId: 'p1', pitchData: {} }] }
-  const d = startDetail({ feed: { liveData: { plays: { allPlays: [play] } } }, items: [] }, 1, { day: '2008-05-25', home: true })
+  const d = startDetail({ feed: { liveData: { plays: { allPlays: [play] } } }, items: [] }, 1, { day: '2008-05-25', result: 'W' })
   assert.equal(d.strikeouts[0].clip, null)
   // Savant has no clip before 2016, even for a pitch PITCHf/x tracked.
   play.playEvents[0].pitchData.startSpeed = 92
-  assert.equal(startDetail({ feed: { liveData: { plays: { allPlays: [play] } } }, items: [] }, 1, { day: '2014-05-25', home: true }).strikeouts[0].clip, null)
-  assert.equal(startDetail({ feed: { liveData: { plays: { allPlays: [play] } } }, items: [] }, 1, { day: '2016-05-25', home: true }).strikeouts[0].clip.label, 'Pitch clip')
+  assert.equal(startDetail({ feed: { liveData: { plays: { allPlays: [play] } } }, items: [] }, 1, { day: '2014-05-25', result: 'W' }).strikeouts[0].clip, null)
+  assert.equal(startDetail({ feed: { liveData: { plays: { allPlays: [play] } } }, items: [] }, 1, { day: '2016-05-25', result: 'W' }).strikeouts[0].clip.label, 'Pitch clip')
   assert.deepEqual(d.pitches, [])
 })
 
@@ -219,16 +219,44 @@ test('game clips: his own clips not joined to a play, from this game only; none 
 
 test('no feed: no parts, no crash', () => {
   const d = startDetail({ feed: null, items: [] }, 688107, ROW)
-  assert.deepEqual([d.pitches, d.strikeouts, d.bigPlays, d.clips, d.club], [[], [], [], [], null])
+  assert.deepEqual([d.pitches, d.strikeouts, d.bigPlays, d.clips], [[], [], [], []])
+})
+
+// THE GUARD (ADR-0110) reaches the clips: a clip headline says "in win" or "records the save",
+// and the video carries the broadcast scorebug. A held row (no final score on file) gets no clip
+// list and no clip button, and its clips are never fetched.
+test('a held game: no clip list, no Watch or Pitch clip button, the plays stay', () => {
+  const held = { ...ROW, result: null, runs: null, oppRuns: null, dec: null }
+  const d = startDetail(FIX, 688107, held)
+  assert.deepEqual(d.clips, [])
+  assert.equal(d.strikeouts.length, 4)
+  assert.deepEqual([...d.strikeouts, ...d.bigPlays].map((p) => p.clip), Array(8).fill(null))
+})
+
+test('a held game fetches the feed only, never the clips', async () => {
+  const asked = []
+  const m = mock.method(globalThis, 'fetch', async (url) => {
+    asked.push(String(url))
+    return { ok: true, status: 200, json: async () => ({}) }
+  })
+  try {
+    await loadStart({ gamePk: 823787, result: null })
+    assert.equal(asked.some((u) => u.includes('/content')), false)
+    assert.equal(asked.some((u) => u.includes('/feed/live')), true)
+    await loadStart({ gamePk: 823787, result: 'L' })
+    assert.equal(asked.some((u) => u.includes('/content')), true)
+  } finally {
+    m.mock.restore()
+  }
 })
 
 test('the result strip comes from the log row; a held game has none', () => {
-  assert.deepEqual(resultOf(ROW, 'Brewers', 'Gasser'), { label: 'Brewers lose', score: 'Brewers 3, LAD 11', dec: 'Gasser takes the loss.' })
-  assert.equal(D.club, 'Brewers')
+  // One name form, from the row, so the strip never changes in place when the feed lands.
+  assert.deepEqual(resultOf(ROW, 'Gasser'), { label: 'MIL lose', score: 'MIL 3, LAD 11', dec: 'Gasser takes the loss.' })
   const held = pitchlogView([app('2026-10-13', 2, { w: 1 })]).rows[0]
-  assert.equal(resultOf(held, 'Brewers', 'Gasser'), null)
-  const relief = pitchlogView([app('2026-05-06', 2, { gs: 0 })], { scores: new Map([[2, { runs: 4, oppRuns: 3 }]]) }).rows[0]
-  assert.deepEqual(resultOf(relief, 'Cubs', 'Smith'), { label: 'Cubs win', score: 'Cubs 4, CHC 3', dec: null })
+  assert.equal(resultOf(held, 'Gasser'), null)
+  const relief = pitchlogView([{ ...app('2026-05-06', 2, { gs: 0 }), team: { id: 114 } }], { scores: new Map([[2, { runs: 4, oppRuns: 3 }]]) }).rows[0]
+  assert.deepEqual(resultOf(relief, 'Smith'), { label: 'CLE win', score: 'CLE 4, CHC 3', dec: null })
 })
 
 test('earlier seasons: one season back each time, never before his debut year', () => {
