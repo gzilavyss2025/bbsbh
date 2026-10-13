@@ -258,6 +258,12 @@ function readLoose(loose, toLine, base, group) {
   return lines.map((l) => (l.list ? l : read[i++]))
 }
 
+// One door's ERA (a pitcher) or OPS (a bat) by its registry key, or a dash when the door is not on the card.
+export function doorFigure(view, key, group) {
+  const line = view?.sections.flatMap((s) => s.items).find((l) => l.key === key)
+  return (group === 'pitching' ? line?.era : line?.ops) ?? '—'
+}
+
 // "7/5" for the season prop's year, "7/5/24" for an earlier one, so a stale meeting reads as old.
 export function meetingDate(iso, season) {
   const [y, m, d] = (iso || '').split('-')

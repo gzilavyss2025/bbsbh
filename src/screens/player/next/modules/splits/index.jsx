@@ -8,7 +8,7 @@ import { Flag, Head, Row } from './LineRows.jsx'
 import { GameLines } from './GameLines.jsx'
 import { VsTeam } from './VsTeam.jsx'
 import { loadCareer, loadGameLines, loadSplits, loadVsTeam } from './splitsData.js'
-import { gameLinesView, handTable, scopeText, seasonChoices, sitTable } from './splitsView.js'
+import { doorFigure, gameLinesView, handTable, scopeText, seasonChoices, sitTable } from './splitsView.js'
 import '../../../../../styles/player-next/both/splits.css'
 import './parts.css'
 
@@ -83,7 +83,7 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
     ['h', 'By handedness', hand && `${hand.rows[0].label} ${hand.rows[0].ops} · ${hand.rows[1].label} ${hand.rows[1].ops}`, 'OPS against'],
     ['s', 'Situational', sit && `Empty ${sitOps('r0')} · RISP ${sitOps('risp')}`, 'OPS against'],
     vs.data && ['v', 'Splits vs team', 'Every club, career', 'Career ERA'],
-    glView && ['g', 'Game lines', `Home ${glView.sections[0]?.items[0]?.era ?? '—'} · Road ${glView.sections[0]?.items[1]?.era ?? '—'}`, 'Career ERA'],
+    glView && ['g', 'Game lines', `Home ${doorFigure(glView, 'home', group)} · Road ${doorFigure(glView, 'road', group)}`, 'Career ERA'],
     ['all', 'All four', 'Scroll through everything', 'Every section open'],
   ].filter(Boolean)
   const empties = <p className="splitsmod__none">{`No ${scope === 'P' ? 'postseason ' : ''}splits for ${shown === 'career' ? 'his career' : shown}.`}</p>
