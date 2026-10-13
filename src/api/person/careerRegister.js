@@ -121,7 +121,16 @@ function byTeamStints(splits) {
 // all year" from a gap the app cannot explain (unsigned, holdout, retired).
 // A year with a row in a two-way player's OTHER group is a season he played,
 // so it is never "missed": it reads "Did not pitch" / "Did not bat". 2020 had no
-// minor-league season, so a 2020 gap before the debut says that instead.
+// minor-league season, so a 2020 gap before the debut says that instead. Any other
+// gap before the debut reads "No MLB or MiLB stats": the feed has no overseas rows,
+// so a KBO year (Merrill Kelly 2015-2018) looks the same as a year off.
+function gapNote(yr, preDebut, injured, group, otherGroup) {
+  if (yr === 2020 && preDebut) return 'No minor-league season'
+  if (injured) return 'Injured — missed season'
+  if (otherGroup) return group === 'pitching' ? 'Did not pitch' : 'Did not bat'
+  if (preDebut) return 'No MLB or MiLB stats'
+  return group === 'pitching' ? 'Did not pitch' : 'Did not play'
+}
 function missingSeasonRows(presentYears, debutYear, currentSeason, transactions, group, retiredYear, otherGroupYears) {
   const rows = []
   const endSeason = retiredYear ? Math.min(currentSeason, retiredYear) : currentSeason
@@ -139,7 +148,7 @@ function missingSeasonRows(presentYears, debutYear, currentSeason, transactions,
       pill: '',
       teamIds: [],
       gap: true,
-      note: yr === 2020 && !(debutYear && debutYear <= 2020) ? 'No minor-league season' : injured ? 'Injured — missed season' : group === 'pitching' ? 'Did not pitch' : otherGroupYears?.has(yr) ? 'Did not bat' : 'Did not play',
+      note: gapNote(yr, !debutYear || yr < debutYear, injured, group, otherGroupYears?.has(yr)),
     })
   }
   return rows
@@ -346,10 +355,14 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     })
   }
   if (milbVisible.length > 1) {
+    const rowSum = aggregateSplits(milbVisible.map((s) => ({ stat: s.stat })), group)
+    // A level whose career call failed answers nothing, so a career sum SHORT of the
+    // rows on screen is a partial one: keep the row sum then.
+    const career = Number(milbCareer?.gamesPlayed) >= Number(rowSum?.gamesPlayed ?? 0) ? milbCareer : null
     totals.push({
       label: 'MiLB',
       tier: 'milb',
-      cells: withWar(yearByYearCells(milbCareer ?? aggregateSplits(milbVisible.map((s) => ({ stat: s.stat })), group) ?? {}, group, showSaves), DASH),
+      cells: withWar(yearByYearCells(career ?? rowSum ?? {}, group, showSaves), DASH),
     })
   }
 
