@@ -394,9 +394,9 @@
    --font-body at --fs-body/--w-semibold (.tlead__name-last, .playerline__name,
    .lineup__name), and this row is no exception; it read a size small before,
    at --fs-ui, which is the role for UI chrome rather than for content.
-   (Only one weight of Source Sans is registered, so --w-semibold renders at
-   400 today — it is declared because that is the role, and because a second
-   weight would otherwise reach every name in the app but this one.)
+   (Source Sans ships four weights, so --w-semibold draws a real 600 — it is
+   declared because that is the role, and because a second weight would
+   otherwise reach every name in the app but this one.)
    The tracking is the part that was genuinely missing: this row sits between a
    tracked condensed label and a mono figure, and an all-caps run with no
    tracking between those two reads soft.

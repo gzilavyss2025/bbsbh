@@ -56,6 +56,12 @@ test('no season games empties the log and foul-ball slots only: Similar players 
   assert.deepEqual(two.filter((i) => g2[i.key]).map((i) => i.module), ['pitchlog'])
 })
 
+test('postseason games keep the log: a call-up with only October games still has one', () => {
+  const inst = slotInstances(['hitting'])
+  const october = [{ group: 'hitting', seasonGames: 0, postseason: { games: 3, tiles: [] } }]
+  assert.deepEqual(seedEmpty(inst, october), {})
+})
+
 test('a pitcher with no stat block yet still gets the pitcher bar, with no counts', () => {
   const list = jumpSections({ isPitcher: true }, [])
   assert.ok(keys(list).includes('pitches'))
@@ -180,4 +186,33 @@ test('a rank mark belongs to the tile its label names, W-L included', () => {
   assert.deepEqual(rankFor(marks, 'ERA'), { rank: 1, of: 20 })
   assert.equal(rankFor(marks, 'IP'), undefined)
   assert.equal(rankFor(undefined, 'ERA'), undefined)
+})
+
+// ---- the top cards (heroData.js): when each one hides ----
+import { hasExtras, headerExtras } from '../src/screens/player/next/heroData.js'
+
+const bio = { id: 1 }
+const hitRating = { ovr: 70, bars: { power: 70, contact: 65, speed: 50, fielding: 60 } }
+
+test('header extras hide with nothing to show, and show for any one of the five', () => {
+  assert.equal(headerExtras({ bio }, null), null)
+  assert.equal(headerExtras({ bio: { ...bio, nickname: 'Shohei' } }, null).nickname, 'Shohei')
+  assert.equal(headerExtras({ bio, prospectRank: 4 }, null).rank, 4)
+  assert.equal(headerExtras({ bio, orgProspectRank: 9 }, null).orgRank, 9)
+  assert.equal(headerExtras({ bio: { ...bio, education: 'Rice' } }, null).education, 'Rice')
+  const x = headerExtras({ bio }, { hitting: hitRating })
+  assert.equal(x.bars[0].group, 'hitting')
+  assert.ok(x.bars[0].rows.length > 0)
+})
+
+test('a minor leaguer (an OVR with no bars) adds no OVR bars', () => {
+  assert.equal(headerExtras({ bio }, { hitting: { ovr: 55, level: 12 } }), null)
+})
+
+test('overview extras: a block counts for ranks, a postseason row or other levels, not for empty lists', () => {
+  assert.equal(hasExtras({ ranks: [], otherLevels: [] }), false)
+  assert.equal(hasExtras({}), false)
+  assert.equal(hasExtras({ ranks: [{ league: 'NL' }] }), true)
+  assert.equal(hasExtras({ postseason: { games: 3, tiles: [] } }), true)
+  assert.equal(hasExtras({ otherLevels: [{ sportId: 11 }] }), true)
 })

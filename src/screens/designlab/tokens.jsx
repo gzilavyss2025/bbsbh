@@ -270,11 +270,11 @@ export function TokenHalf() {
           ))}
         </div>
         <p className="dlab__warn">
-          Barlow Condensed and JetBrains Mono ship ONE weight each — 700. Every rule that asks
-          either family for {weights.map((w) => `--${w.name}`).join(', ')} renders at 700, so
-          font-weight is a no-op on the display and mono faces. It is a deliberate trade, not an
-          oversight (src/tokens/fonts.css), and it has cost time twice. Emphasise with colour or
-          size instead. Source Sans 3 and Lora do ship real second weights.
+          Barlow Condensed ships one weight, 700, and JetBrains Mono ships one, 500. Every rule that
+          asks either family for {weights.map((w) => `--${w.name}`).join(', ')} draws that one
+          weight, so font-weight is a no-op on the display and mono faces. It follows the canvas
+          (ADR-0109, src/tokens/fonts.css). Emphasise with colour or size instead. Source Sans 3 and
+          Lora ship real second weights; the card count tag has its own 600 face.
         </p>
         <div className="dlab__rows">
           {weights.map((t) => (
