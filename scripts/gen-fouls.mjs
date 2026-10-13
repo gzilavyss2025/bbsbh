@@ -60,7 +60,7 @@ import { writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
-import { batterCovered, pitcherCovered, countStatements, endPa, exportByCount, exportGameFouls, foldBatterTotals, foldPitcherTotals, gameShards, medianBestPa, newCells, tallyPitches } from './lib/fouls/byCount.mjs'
+import { countStatements, endPa, exportByCount, exportGameFouls, foldBatterTotals, foldPitcherTotals, gameShards, medianBestPa, newCells, tallyPitches } from './lib/fouls/byCount.mjs'
 import { rebuildCommand } from './lib/fouls/rebuild.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -697,7 +697,7 @@ export function exportFouls(db, season, scope = 'R') {
       cols: ['max_game_fouls', 'max_game_pk', 'max_game_pa', 'max_game_pitches', 'max_game_opp_id', 'max_game_his_score', 'max_game_opp_score'],
     },
   )
-  const { byPerson: countsOf, league: byCount } = exportByCount(db, 'foul_batter_counts', season, scope, batterRows, batterCovered)
+  const { byPerson: countsOf, league: byCount } = exportByCount(db, 'foul_batter_counts', season, scope, batterRows, (c, r) => c.reach[0] === r.pa)
   for (const r of batterRows) {
     const pa = paHighByPerson.get(r.person_id)
     batters[r.person_id] = {
@@ -745,7 +745,7 @@ export function exportFouls(db, season, scope = 'R') {
 
   const pitchers = {}
   const pitcherRows = combine(rows('foul_pitcher_totals', '', 'person_id'), (r) => r.person_id, ['games', 'starts', 'pitches', 'fouls', 'whiffs'])
-  const pitcherCounts = exportByCount(db, 'foul_pitcher_counts', season, scope, pitcherRows, pitcherCovered).byPerson
+  const pitcherCounts = exportByCount(db, 'foul_pitcher_counts', season, scope, pitcherRows, (c, r) => c.fouls.reduce((n, x) => n + x, 0) === r.fouls).byPerson
   for (const r of pitcherRows) {
     pitchers[r.person_id] = {
       name: r.name,

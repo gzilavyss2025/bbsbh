@@ -121,16 +121,13 @@ export function foldPitcherTotals(stmts, season, scope, id, p) {
 }
 
 // --- exports -----------------------------------------------------------------
-const sum = (a) => a.reduce((n, x) => n + x, 0)
-// A batter's cells cover every PA he has when the 0-0 count (every PA starts there) is all of them.
-// A pitcher's cover every pitch he threw when the fouls in the cells are all of his.
-export const batterCovered = (cells, r) => cells.reach[0] === r.pa
-export const pitcherCovered = (cells, r) => sum(cells.fouls) === r.fouls
-
 // personId -> its 12-cell arrays, for one season (or all, `season` null) and scope; and the
-// league's, summed over them. Only a player whose cells are `covered` by his season row is kept:
-// a store part-read since the cells were added shows none until the full re-read, never a few
-// nights' games as a season. `league` is null with none; only the batters' is read (#1993).
+// league's, summed over them. A player is kept only when `covered(cells, seasonRow)` says his cells
+// hold all of his season. A store part-read since the cells were added then shows none until the
+// full re-read, never a few nights' games as a season. `league` is null with none; only the
+// batters' is read (#1993). The two tests (gen-fouls.mjs): a batter's 0-0 `reach` equals his PA
+// (every PA starts there); a pitcher's cell fouls equal his `fouls`. The pitcher test cannot tell
+// a part-read from a whole season when he has 0 fouls, so the re-read lands in the same stack.
 export function exportByCount(db, table, season, scope, totalRows, covered) {
   const one = season != null
   const rows = db
