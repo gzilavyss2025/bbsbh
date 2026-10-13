@@ -110,7 +110,7 @@
 /* layout-exempt: a name column and n figure columns, set by --fcols */
 .fstretch__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(var(--fcols, 4), var(--fstretch-col, 3rem));
+  grid-template-columns: minmax(0, 1fr) repeat(var(--fcols, 4), 3rem);
   column-gap: var(--space-1h);
   align-items: center;
 }
@@ -172,9 +172,6 @@
   font-family: var(--font-mono);
   font-size: var(--fs-small);
   font-variant-numeric: tabular-nums;
-}
-.fstretch__fig:nth-child(3) {
-  font-weight: var(--w-bold);
 }
 .fstretch__bar {
   display: flex;

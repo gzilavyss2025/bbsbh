@@ -42,7 +42,7 @@ export function FormChart({ points, season, better, step, best, worst, cursor, o
     const left = (100 * x(i)) / W
     if (m !== months.at(-1)?.m && (!months.length || left - months.at(-1).left >= 7)) months.push({ m, left, t: monthDayName(p.date).split(' ')[0] })
   })
-  const good = better === 'up' ? 'up' : 'down'
+  const up = better === 'up'
   const cur = points[cursor]
   return (
     <div className="fchart">
@@ -54,8 +54,8 @@ export function FormChart({ points, season, better, step, best, worst, cursor, o
                 <clipPath id={`${id}up`}><rect x="0" y="0" width={W} height={ref} /></clipPath>
                 <clipPath id={`${id}dn`}><rect x="0" y={ref} width={W} height={H} /></clipPath>
               </defs>
-              <path d={area} clipPath={`url(#${id}up)`} className={`fchart__fill fchart__fill--${good === 'up' ? 'good' : 'bad'}`} />
-              <path d={area} clipPath={`url(#${id}dn)`} className={`fchart__fill fchart__fill--${good === 'up' ? 'bad' : 'good'}`} />
+              <path d={area} clipPath={`url(#${id}up)`} className={`fchart__fill fchart__fill--${up ? 'good' : 'bad'}`} />
+              <path d={area} clipPath={`url(#${id}dn)`} className={`fchart__fill fchart__fill--${up ? 'bad' : 'good'}`} />
             </>
           )}
           <path d={grid.map((v) => `M0,${y(v).toFixed(1)}H${W}`).join('')} className="fchart__grid" />
