@@ -10,7 +10,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { resolveCurrentSeasonStat } from '../src/api/player/context.js'
-import { careerRegisterView, careerTimelineView } from '../src/api/person.js'
+import { careerRegisterView, careerTimelineView, milbCareerStat } from '../src/api/person.js'
 import { SPORT_IDS } from '../src/lib/teams.js'
 
 // A pitching stint's raw stat line, shaped like a statsapi split's `.stat`.
@@ -490,4 +490,32 @@ test('careerRegisterView: a retired career stops at retirement instead of fillin
 
   assert.ok(register.rows.some((row) => row.year === '2011' && row.gap), 'an in-career gap remains visible')
   assert.ok(!register.rows.some((row) => Number(row.year) > 2012), 'post-retirement filler rows are pruned')
+})
+
+// Gap rows run from the FIRST pro season, not the MLB debut (#1909). 2020 had no
+// minor-league season, so a pre-debut 2020 with no row reads that, not "Did not play".
+test('careerRegisterView: gap rows start at the first pro season; 2020 reads "No minor-league season"', () => {
+  const hit = (gamesPlayed) => ({ gamesPlayed, atBats: 100, avg: '.250', homeRuns: 1, rbi: 10 })
+  const split = (season, sportId, teamId) => ({ season: String(season), sport: { id: sportId }, team: { id: teamId }, stat: hit(30) })
+  const register = careerRegisterView({
+    mlbSplits: [split(2023, SPORT_IDS.MLB, 158)],
+    milbSplits: [split(2018, SPORT_IDS.ROK, 406), split(2021, SPORT_IDS.AAA, 556)],
+    group: 'hitting', debutYear: 2023, currentSeason: 2024,
+  })
+  const gaps = register.rows.filter((r) => r.gap).map((r) => [r.year, r.note])
+  assert.deepEqual(gaps, [['2022', 'Did not play'], ['2020', 'No minor-league season'], ['2019', 'Did not play']])
+})
+
+// The MiLB career line sums the per-level career calls (#1909). A level with two clubs
+// answers ONE team-less numTeams row; summed beside another level's club row it was dropped.
+test('milbCareerStat: sums every level, keeping a two-club level\'s team-less row', () => {
+  const stat = (gamesPlayed, atBats, hits) => ({ gamesPlayed, atBats, hits })
+  const career = [
+    { sport: { id: SPORT_IDS.ROK }, numTeams: 2, stat: stat(42, 159, 45) },
+    { sport: { id: SPORT_IDS.AAA }, team: { id: 556 }, stat: stat(190, 732, 190) },
+  ]
+  const line = milbCareerStat(career, 'hitting')
+  assert.equal(line.gamesPlayed, 232)
+  assert.equal(line.atBats, 891)
+  assert.equal(line.avg, '.264')
 })
