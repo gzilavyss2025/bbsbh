@@ -82,13 +82,14 @@ export function posterPalette(root = typeof document === 'undefined' ? null : do
 }
 
 // The four type roles from tokens/typography.css, as canvas font stacks. The
-// families are bundled woff2 (tokens/fonts.css) at ONE weight each, so a canvas
-// `font` string asking for a weight the face doesn't have gets synthesised —
-// hence every role below states the weight its file actually ships.
+// families are bundled woff2 (tokens/fonts.css), drawn in the browser (not on a
+// server), so a canvas `font` string asking for a weight the face doesn't have
+// gets synthesised — hence every role below states the weight its file ships
+// (mono ships 500; the face is declared for every weight, so 500 is what draws).
 export const FONT = {
   display: (px) => `700 ${px}px "Barlow Condensed", "Arial Narrow", sans-serif`,
   body: (px) => `400 ${px}px "Source Sans 3", system-ui, sans-serif`,
-  mono: (px) => `700 ${px}px "JetBrains Mono", ui-monospace, monospace`,
+  mono: (px) => `500 ${px}px "JetBrains Mono", ui-monospace, monospace`,
   read: (px) => `400 ${px}px "Lora", Georgia, serif`,
   // Not one of the four roles — the slate card's '@' watermark face, borrowed
   // here for the same mark at poster scale (tokens/fonts.css: "one weight,
