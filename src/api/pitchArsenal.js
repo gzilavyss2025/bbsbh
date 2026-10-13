@@ -88,12 +88,32 @@ export function postPitchesOf(data, personId) {
 // surface (the player page), never from a scoring surface for a game being watched. Null for a game with no row: the
 // files fill with the re-walk, and a missing file, season or game all read the same.
 const startsShard = staticJsonBy((key) => `/data/pitch-arsenal-starts/${key}.json`)
-export async function fetchPitchMixFor(personId, gamePk, { seasonYear } = {}) {
+async function startsKey(personId, gamePk, seasonYear) {
   if (personId == null || gamePk == null) return null
   const season = await seasonFolderOf('pitch-arsenal-starts', seasonYear, { strict: true })
-  if (season == null || season === 'all') return null
-  const shard = await startsShard(`${season}/${shardKey100(personId)}`)
-  return shard?.pit?.[personId]?.[gamePk] ?? null
+  return season == null || season === 'all' ? null : `${season}/${shardKey100(personId)}`
+}
+export async function fetchPitchMixFor(personId, gamePk, { seasonYear } = {}) {
+  const key = await startsKey(personId, gamePk, seasonYear)
+  if (!key) return null
+  return (await startsShard(key))?.pit?.[personId]?.[gamePk] ?? null
+}
+
+// ONE START'S MEAN MPH (#1933): his mean start speed for one pitch code in one game, or, with no
+// code, for his primary fastball: the most-used of FF, SI and FC that game that has a speed. It lives in a sibling
+// file, `{NN}.mph.json`, in tenths of a mph (a mix shard beside it is at its size ceiling). Only the
+// primary fastball also reads the mix, to rank the three. Null when the game, the code or the speed
+// is not on file, never 0.
+export async function fetchPitchMphFor(personId, gamePk, code, { seasonYear } = {}) {
+  const key = await startsKey(personId, gamePk, seasonYear)
+  if (!key) return null
+  const [mix, file] = await Promise.all([code ? null : startsShard(key), startsShard(`${key}.mph`)])
+  const counts = mix?.pit?.[personId]?.[gamePk]
+  const speeds = file?.mph?.[personId]?.[gamePk]
+  // Only a fastball with a speed can be primary. Equal counts keep the list order: FF, SI, FC.
+  const pick = code ?? ['FF', 'SI', 'FC'].filter((c) => counts?.[c] && speeds?.[c] != null).sort((a, b) => counts[b] - counts[a])[0]
+  const tenths = speeds?.[pick]
+  return tenths == null ? null : tenths / 10
 }
 
 const pool = staticJsonBy((key) => `/data/pitch-arsenal-pool/${key}.json`)
