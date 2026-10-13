@@ -13,6 +13,9 @@ import { AsOfBanner } from '../../../components/seal/AsOfBanner.jsx'
 import { PlayerNextHero } from './PlayerNextHero.jsx'
 import { PlayerNextTiles } from './PlayerNextTiles.jsx'
 import { Slot } from './Slot.jsx'
+import { HeaderExtras } from './top/HeaderExtras.jsx'
+import { OverviewExtras } from './top/OverviewExtras.jsx'
+import { StatusBanners } from './top/StatusBanners.jsx'
 import { jumpSections, rolesOf, seedEmpty, shownSections, slotInstances } from './sections.js'
 import '../../../styles/player-next/page.css'
 
@@ -52,7 +55,9 @@ function PlayerNextBody({ id, asOf, sportId }) {
         <BackBtn onClick={back} />
         <Stack gap="section" className="pnext__page">
           <Stack gap="section" id="overview">
+            <StatusBanners core={core.data} />
             <PlayerNextHero core={core.data} />
+            <HeaderExtras core={core.data} />
             {rows.map((b) => (
               <PlayerNextTiles
                 key={b.group}
@@ -62,6 +67,7 @@ function PlayerNextBody({ id, asOf, sportId }) {
                 label={blocks.length > 1 ? b.title : undefined}
               />
             ))}
+            <OverviewExtras blocks={blocks} />
           </Stack>
           <HubTabBar variant="anchor" tabs={sections} ariaLabel="Page sections" />
           {sections

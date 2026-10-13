@@ -88,13 +88,15 @@ export async function fetchPostseasonSeason(personId, group, { season, startDate
 
 // The tile row: the season tiles' own four (WAR is a regular-season figure and
 // drops out), then OPS for a bat or WHIP for an arm. Null until he has played a
-// postseason game, so the row does not exist before October.
-export function postseasonTilesView(splits, group, role = null) {
+// postseason game, so the row does not exist before October. `season` is the
+// year the tiles cover (the page's cutoff season), so the title never says
+// the real year over a past October.
+export function postseasonTilesView(splits, group, role = null, season = null) {
   const stat = aggregateSplits(splits ?? [], group)
   if (!stat || !(Number(stat.gamesPlayed) > 0)) return null
   const tiles =
     group === 'pitching'
       ? [...pitcherTiles(stat, role).slice(0, 4), { k: 'WHIP', v: stat.whip ?? DASH }]
       : [...hitterTiles(stat).slice(0, 4), { k: 'OPS', v: stat.ops ?? DASH }]
-  return { games: Number(stat.gamesPlayed), tiles }
+  return { title: `${season} Postseason`, games: Number(stat.gamesPlayed), tiles }
 }
