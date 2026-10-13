@@ -10,6 +10,7 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { AsOfBanner } from '../../components/seal/AsOfBanner.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { PlayerTabBar } from './PlayerTabBar.jsx'
+import { statusBannersView } from './statusBanners.js'
 import { monthDayName } from '../../lib/dates.js'
 import { Pill } from '../../components/ui/control/Pill.jsx'
 import { OvrTile } from '../../components/ovr/OvrTile.jsx'
@@ -70,44 +71,36 @@ export function PlayerHubShell({ core, asOf = null, sportId = null, active, chil
   // The OVR card (#1703): null for a player with no rating, which draws no tile and
   // leaves the hero as it was.
   const ovr = useOvr(bio)
+  // Text and rules in statusBanners.js (the new page draws the same view).
+  const banner = Object.fromEntries(statusBannersView(core).map((b) => [b.key, b.text]))
   const ovrSub = [heroPos, club?.name, bio.number && `#${bio.number}`].filter(Boolean).join(' · ')
 
   return (
     <LinkScope asOf={asOf} sportId={core.sportId ?? sportId ?? null}>
       <div className={`screen player ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
         <SiteHeader />
-        {core.isAllStar && (
+        {banner.allstar && (
           <div className="allstar-banner" role="note">
             <span className="allstar-banner__star" aria-hidden="true">★</span>
-            <span className="allstar-banner__text">{core.currentYear} All-Star</span>
+            <span className="allstar-banner__text">{banner.allstar}</span>
             <span className="allstar-banner__star" aria-hidden="true">★</span>
           </div>
         )}
-        {/* startingToday: he's announced as TODAY's probable starter for the
-            club that has him on rehab/the IL — MLB posts that days before it
-            files the activation transaction the banners are otherwise keyed
-            on, so showing "Rehab Assignment"/"Injured List" the day he's
-            about to take the mound would be stale on its face. See
-            api/player/core.js. */}
-        {core.onRehab && !core.startingToday && (
+        {banner.rehab && (
           <div className="rehab-banner" role="note">
             <span className="rehab-banner__mark" aria-hidden="true">✚</span>
-            <span className="rehab-banner__text">
-              Rehab Assignment{core.rehab?.name ? ` · ${core.rehab.name}` : ''}
-            </span>
+            <span className="rehab-banner__text">{banner.rehab}</span>
           </div>
         )}
-        {core.onIL && !core.startingToday && (
+        {banner.il && (
           <div className="il-banner" role="note">
             <span className="il-banner__mark" aria-hidden="true">✚</span>
-            <span className="il-banner__text">
-              Injured List{core.il?.days ? ` · ${core.il.days}-Day` : ''}
-            </span>
+            <span className="il-banner__text">{banner.il}</span>
           </div>
         )}
-        {core.lastPlayedYear && (
+        {banner.lastplayed && (
           <div className="lastplayed-banner" role="note">
-            <span className="lastplayed-banner__text">Last played in {core.lastPlayedYear}</span>
+            <span className="lastplayed-banner__text">{banner.lastplayed}</span>
           </div>
         )}
         <BackBtn onClick={back} />

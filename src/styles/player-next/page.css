@@ -4,8 +4,7 @@
    StatTiles, so this file holds only the places they sit in. The page root is
    .playernext, never .player: .player .factgrid would override the strip. */
 
-.playernext .mono,
-.playernext .stattile__caption {
+.playernext .mono {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
@@ -142,6 +141,37 @@
 /* A section slot: a stamped Card whose name tab hangs above it. */
 .pnext__slot {
   margin-top: var(--space-3h);
+}
+
+/* THE TOP CARDS: status banners, header extras, overview extras. */
+.pnext__banner {
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+/* A small attribute line (the .t-label recipe in src/styles/CLAUDE.md). */
+.pnext__attr {
+  margin: 0;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+/* OvrBars is drawn for the OVR menu: here it sits on paper, with no padding of its own. */
+.pnext__ovr {
+  --ovr-slant: -14deg;
+  --ovr-dim: var(--border-hairline);
+}
+.pnext__ovr .ovrbars {
+  padding: 0;
+}
+.pnext__top .leaguerank {
+  margin: 0;
 }
 
 /* The position pill takes the tint of the lead tile (the boards' green). */
