@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { fetchTeamHighlights, flattenPositiveClips } from '../../api/gamehighlights.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useScrollRail } from '../../hooks/scroll/useScrollRail.js'
@@ -46,7 +46,9 @@ function clipCaption(clip) {
 // Empty renders nothing (no section, no spinner-that-never-resolves) — a
 // bench player's genuinely sparse rail is expected per the PRD's
 // "Drawbacks", not a bug.
-export function PlayerHighlightsRail({ playerId, teamId, limit }) {
+// `onEmpty` (optional) is called once the load has settled with no clip, a failed load included;
+// the new player page uses it to hide its card. The live page passes none.
+export function PlayerHighlightsRail({ playerId, teamId, limit, onEmpty }) {
   const [openClip, setOpenClip] = useState(null)
   const [expanded, setExpanded] = useState(!limit)
 
@@ -67,7 +69,11 @@ export function PlayerHighlightsRail({ playerId, teamId, limit }) {
     flagUserScroll: true,
   })
 
-  if (!loading && allClips.length === 0) return null
+  const empty = !loading && allClips.length === 0
+  useEffect(() => {
+    if (empty) onEmpty?.()
+  }, [empty, onEmpty])
+  if (empty) return null
 
   return (
     <section>
