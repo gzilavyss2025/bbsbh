@@ -18,11 +18,17 @@ export function withTeams(register, abbrevs) {
   return { ...register, rows: register.rows.map((r) => ({ ...r, team: team(r) })) }
 }
 
-export function scopesOf(register, post) {
+// The All-Star mark goes on the MLB season-lead row of each selected year (as the live register does).
+export function withStars(register, years) {
+  return { ...register, rows: register.rows.map((r) => ({ ...r, allStar: r.tier === 'mlb' && r.seasonLead && years.has(Number(r.year)) })) }
+}
+
+// `mayPost`: the player has debuted, so a postseason may exist. It is read when its scope is chosen.
+export function scopesOf(register, mayPost) {
   const rows = register?.rows ?? []
   const mlb = rows.some((r) => r.tier === 'mlb')
   const milb = rows.some((r) => r.tier === 'milb')
-  const has = { mlb, milb, all: mlb && milb, post: Boolean(post?.rows?.length) }
+  const has = { mlb, milb, all: mlb && milb, post: Boolean(mayPost) }
   return SCOPES.filter((s) => has[s.id])
 }
 
@@ -40,6 +46,7 @@ function rowOf(r) {
     team: r.team || '',
     pill: r.pill || '',
     gap: Boolean(r.gap),
+    allStar: Boolean(r.allStar),
     note: r.note,
     subtotal: Boolean(r.subtotal),
     // The season WAR sits on one row per MLB year: its single club row or its subtotal.

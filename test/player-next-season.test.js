@@ -3,7 +3,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { careerRegisterView } from '../src/api/person/careerRegister.js'
-import { compareView, scopesOf, tableFor, tilesFor, withTeams } from '../src/screens/player/next/modules/season/seasonView.js'
+import { compareView, scopesOf, tableFor, tilesFor, withStars, withTeams } from '../src/screens/player/next/modules/season/seasonView.js'
 
 const bat = (g, ab, h, hr = 0, rbi = 0) => ({
   gamesPlayed: g, atBats: ab, hits: h, homeRuns: hr, rbi, totalBases: h + hr * 3, strikeOuts: 20, baseOnBalls: 5,
@@ -41,16 +41,21 @@ function register(over = {}) {
 const labels = (rows) => rows.map((r) => `${r.year} ${r.gap ? r.note : r.team}`)
 const names = (list) => list.map((s) => s.id)
 
-test('the switch offers a scope only when it has rows: All needs both levels, Postseason needs a year', () => {
+test('the switch offers a scope only when it has rows: All needs both levels, Postseason needs a debut', () => {
   const reg = register()
-  const post = { columns: [], rows: [{ key: 'p' }], totals: [] }
-  assert.deepEqual(names(scopesOf(reg, null)), ['mlb', 'milb', 'all'])
-  assert.deepEqual(names(scopesOf(reg, post)), ['mlb', 'milb', 'all', 'post'])
-  const mlbOnly = register({ milbSplits: [] })
-  assert.deepEqual(names(scopesOf(mlbOnly, null)), ['mlb'])
+  assert.deepEqual(names(scopesOf(reg, false)), ['mlb', 'milb', 'all'])
+  assert.deepEqual(names(scopesOf(reg, true)), ['mlb', 'milb', 'all', 'post'])
+  assert.deepEqual(names(scopesOf(register({ milbSplits: [] }), false)), ['mlb'])
   const prospect = register({ mlbSplits: [], debutYear: null, currentStat: null, currentSplits: [], currentSportId: 11 })
-  assert.deepEqual(names(scopesOf(prospect, null)), ['milb'])
-  assert.deepEqual(scopesOf(null, null), [])
+  assert.deepEqual(names(scopesOf(prospect, false)), ['milb'])
+  assert.deepEqual(scopesOf(null, false), [])
+})
+
+test('the All-Star star marks the MLB season-lead row of a selected year, and never a minor-league row', () => {
+  const reg = withStars(withTeams(register(), {}), new Set([2024, 2023, 2022]))
+  const starred = tableFor(reg, null, 'all').rows.filter((r) => r.allStar).map((r) => `${r.year} ${r.tier} ${r.subtotal ? 'TM' : ''}`.trim())
+  assert.deepEqual(starred, ['2024 mlb', '2023 mlb TM'])
+  assert.ok(tableFor(reg, null, 'milb').rows.every((r) => !r.allStar))
 })
 
 test('MLB scope: a traded season keeps its club rows and the 2 TM subtotal; the MLB footer, no minors', () => {

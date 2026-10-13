@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Ledger } from '../../../../../components/player/Ledger.jsx'
 import { StatTile } from '../../../../../components/ui/frame/StatTile.jsx'
 import { ModalPortal } from '../../../../../components/ui/ModalPortal.jsx'
@@ -25,11 +25,31 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
   const [pick, setPick] = useState(null)
   const [allCols, setAllCols] = useState(false)
   const [open, setOpen] = useState(null)
+  // Read when the scope that needs them is first chosen. `undefined` is "not read yet".
+  const [milbCareer, setMilbCareer] = useState()
+  const [postseason, setPostseason] = useState()
 
-  const scopes = data ? scopesOf(data.register, data.post) : []
+  const register = useMemo(() => data?.build(milbCareer ?? []), [data, milbCareer])
+  const scopes = register ? scopesOf(register, data.hasDebuted) : []
   const scope = scopes.find((s) => s.id === pick)?.id ?? scopes[0]?.id
+  const needMilb = Boolean(data?.hasMilb) && (scope === 'milb' || scope === 'all')
+  const needPost = scope === 'post'
+  useEffect(() => {
+    if (!needMilb || milbCareer !== undefined) return
+    let live = true
+    data.loadMilbCareer().catch(() => []).then((splits) => live && setMilbCareer(splits))
+    return () => { live = false }
+  }, [needMilb, milbCareer, data])
+  useEffect(() => {
+    if (!needPost || postseason !== undefined) return
+    let live = true
+    data.loadPostseason().catch(() => ({ post: null, line: null })).then((got) => live && setPostseason(got))
+    return () => { live = false }
+  }, [needPost, postseason, data])
+
   const empty = Boolean(error) || (!loading && !scope)
-  const view = scope && tilesFor({ scope, group: role, role: data.armRole, lines: data.lines, war: data.war, season })
+  const post = postseason?.post ?? null
+  const view = scope && tilesFor({ scope, group: role, role: data.armRole, lines: { ...data.lines, post: postseason?.line ?? null }, war: data.war, season })
 
   useEffect(() => {
     if (empty) onEmpty()
@@ -41,38 +61,7 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
   // A card that has not loaded yet reserves its height; Slot reads a bare first render as "no data".
   if (!scope) return <div className="seasonmod seasonmod--wait" aria-busy={!empty} />
 
-  const table = tableFor(data.register, data.post, scope)
-  const warAt = table.columns.indexOf('WAR')
-  const hideNarrow = allCols ? [] : table.columns.flatMap((c, i) => (NARROW.has(c) ? [i + 2] : []))
-  const rows = table.rows.map((r) => ({
-    key: r.key,
-    className: r.className,
-    cells: r.gap
-      ? [<>{r.year}</>, spanCell(<span className="reg-gap__note">{r.note}</span>)]
-      : [
-          <>{r.year}</>,
-          <>
-            {r.team || DASH}
-            {r.pill && <span className="reg-pill">{r.pill}</span>}
-          </>,
-          ...r.cells.map((c, i) =>
-            i === warAt && r.compare ? (
-              <button
-                key="war"
-                type="button"
-                className="seasonmod__war"
-                aria-haspopup="dialog"
-                aria-label={`WAR ${c}, ${r.year}. Compare with the league`}
-                onClick={() => setOpen(r)}
-              >
-                {c}
-              </button>
-            ) : (
-              c
-            ),
-          ),
-        ],
-  }))
+  const table = scope !== 'post' || post ? tableFor(register, post, scope) : null
 
   return (
     <Stack gap="loose" className="seasonmod">
@@ -87,7 +76,9 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
         <span className="seasonmod__caption">{CAPTION[scope]}</span>
       </Cluster>
 
-      {view.tiles.length ? (
+      {scope === 'post' && postseason === undefined ? (
+        <p className="hint">Loading the postseason…</p>
+      ) : view.tiles.length ? (
         <div className="seasonmod__tiles" role="list">
           {view.tiles.map((t) => (
             <StatTile key={t.k} label={t.k} value={t.v} tone={t.tone} className="seasonmod__tile" />
@@ -97,26 +88,71 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
         <EmptyState size="compact">{view.empty}</EmptyState>
       )}
 
-      <Ledger
-        label={`${role === 'pitching' ? 'Pitching' : 'Batting'} by year, ${scopes.find((s) => s.id === scope).label}`}
-        leftCols={2}
-        head={['Year', 'Team', ...table.columns]}
-        rows={rows}
-        hideNarrow={hideNarrow}
-        totals={table.totals}
-      />
-
-      <Cluster gap="tight" align="center" className="seasonmod__foot">
-        {table.columns.some((c) => NARROW.has(c)) && (
-          <button type="button" className="seasonmod__link" aria-pressed={allCols} onClick={() => setAllCols(!allCols)}>
-            {allCols ? 'Fewer columns' : 'All columns'}
-          </button>
-        )}
-        {scope !== 'post' && scope !== 'milb' && <span>Tap a season’s WAR to compare it with the league.</span>}
-      </Cluster>
+      {table && (
+        <YearTable
+          table={table}
+          label={`${role === 'pitching' ? 'Pitching' : 'Batting'} by year, ${scopes.find((s) => s.id === scope).label}`}
+          allCols={allCols}
+          onAllCols={() => setAllCols(!allCols)}
+          note={scope !== 'post' && scope !== 'milb'}
+          onCompare={setOpen}
+        />
+      )}
 
       {open && <Compare row={open} columns={table.columns} group={role} onClose={() => setOpen(null)} />}
     </Stack>
+  )
+}
+
+// The register's rows as a ledger, the "All columns" switch and the WAR hint.
+function YearTable({ table, label, allCols, onAllCols, note, onCompare }) {
+  const warAt = table.columns.indexOf('WAR')
+  const hideNarrow = allCols ? [] : table.columns.flatMap((c, i) => (NARROW.has(c) ? [i + 2] : []))
+  const rows = table.rows.map((r) => ({
+    key: r.key,
+    className: r.className,
+    allStar: r.allStar,
+    cells: r.gap
+      ? [<>{r.year}</>, spanCell(<span className="reg-gap__note">{r.note}</span>)]
+      : [
+          <>
+            {r.year}
+            {r.allStar && <span className="ledger__allstar" title="All Star">★</span>}
+          </>,
+          <>
+            {r.team || DASH}
+            {r.pill && <span className="reg-pill">{r.pill}</span>}
+          </>,
+          ...r.cells.map((c, i) =>
+            i === warAt && r.compare ? (
+              <button
+                key="war"
+                type="button"
+                className="seasonmod__war"
+                aria-haspopup="dialog"
+                aria-label={`WAR ${c}, ${r.year}. Compare with the league`}
+                onClick={() => onCompare(r)}
+              >
+                {c}
+              </button>
+            ) : (
+              c
+            ),
+          ),
+        ],
+  }))
+  return (
+    <>
+      <Ledger label={label} leftCols={2} head={['Year', 'Team', ...table.columns]} rows={rows} hideNarrow={hideNarrow} totals={table.totals} />
+      <Cluster gap="tight" align="center" className="seasonmod__foot">
+        {table.columns.some((c) => NARROW.has(c)) && (
+          <button type="button" className="seasonmod__link" aria-pressed={allCols} onClick={onAllCols}>
+            {allCols ? 'Fewer columns' : 'All columns'}
+          </button>
+        )}
+        {note && <span>Tap a season’s WAR to compare it with the league.</span>}
+      </Cluster>
+    </>
   )
 }
 
