@@ -379,6 +379,8 @@ CREATE TABLE IF NOT EXISTS foul_batter_counts (
 -- appearances he finished (the pitcher of record, as in foul_pitcher_totals; a PA handed off
 -- mid-count belongs to the reliever, so 0-0 `reach` can differ a little from MLB's batters
 -- faced), credited to every count they reached. A PA a caught stealing or pickoff cuts off keeps its fouls and has no `reach`.
+-- `pitches` are all the pitches he threw from the count: every game adds them, so their sum
+-- against foul_pitcher_totals.pitches tells a whole season from a part-read one.
 -- Rebuilt from scratch by gen-fouls.mjs --rebuild-counts.
 CREATE TABLE IF NOT EXISTS foul_pitcher_counts (
   person_id INTEGER NOT NULL,
@@ -392,6 +394,7 @@ CREATE TABLE IF NOT EXISTS foul_pitcher_counts (
   walk      INTEGER NOT NULL DEFAULT 0,
   so        INTEGER NOT NULL DEFAULT 0,
   out       INTEGER NOT NULL DEFAULT 0,
+  pitches   INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (season, scope, person_id, count_idx)
 );
 

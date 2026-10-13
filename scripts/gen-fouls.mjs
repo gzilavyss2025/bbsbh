@@ -60,7 +60,7 @@ import { writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
-import { countStatements, endPa, exportByCount, exportGameFouls, foldBatterTotals, foldPitcherTotals, gameShards, medianBestPa, newCells, tallyPitches } from './lib/fouls/byCount.mjs'
+import { BATTER_KEYS, PITCHER_KEYS, countStatements, endPa, exportByCount, exportGameFouls, foldBatterTotals, foldPitcherTotals, gameShards, medianBestPa, newCells, newPitcherCells, tallyPitches } from './lib/fouls/byCount.mjs'
 import { rebuildCommand } from './lib/fouls/rebuild.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -131,7 +131,7 @@ export function aggregateGameFouls(feed) {
   const getPitcher = (id, name, teamId) => {
     let p = pitchers.get(id)
     if (!p) {
-      p = { name, teamId, pitches: 0, fouls: 0, whiffs: 0, isStarter: false, cells: newCells() }
+      p = { name, teamId, pitches: 0, fouls: 0, whiffs: 0, isStarter: false, cells: newPitcherCells() }
       pitchers.set(id, p)
     } else {
       if (name) p.name = name
@@ -274,7 +274,7 @@ export function aggregateGameFouls(feed) {
         }
       : carryPaContext
 
-    if (b) tallyPitches(b, isNewPa, play, p) // fouls by count and per game (scripts/lib/fouls)
+    tallyPitches(b ?? { cells: newCells() }, isNewPa, play, p) // no batter id: a throwaway, so the pitcher's cells still match his totals // fouls by count and per game (scripts/lib/fouls)
     let preStrikes = isNewPa ? 0 : carryStrikes
     let paFouls = isNewPa ? 0 : carryPaFouls
     let paPitches = (isNewPa ? 0 : carryPaPitches) + pitchEvents.length
@@ -697,7 +697,7 @@ export function exportFouls(db, season, scope = 'R') {
       cols: ['max_game_fouls', 'max_game_pk', 'max_game_pa', 'max_game_pitches', 'max_game_opp_id', 'max_game_his_score', 'max_game_opp_score'],
     },
   )
-  const { byPerson: countsOf, league: byCount } = exportByCount(db, 'foul_batter_counts', season, scope, batterRows, (c, r) => c.reach[0] === r.pa)
+  const { byPerson: countsOf, league: byCount } = exportByCount(db, 'foul_batter_counts', BATTER_KEYS, season, scope, batterRows, (c, r) => c.reach[0] === r.pa)
   for (const r of batterRows) {
     const pa = paHighByPerson.get(r.person_id)
     batters[r.person_id] = {
@@ -745,7 +745,7 @@ export function exportFouls(db, season, scope = 'R') {
 
   const pitchers = {}
   const pitcherRows = combine(rows('foul_pitcher_totals', '', 'person_id'), (r) => r.person_id, ['games', 'starts', 'pitches', 'fouls', 'whiffs'])
-  const pitcherCounts = exportByCount(db, 'foul_pitcher_counts', season, scope, pitcherRows, (c, r) => c.fouls.reduce((n, x) => n + x, 0) === r.fouls).byPerson
+  const pitcherCounts = exportByCount(db, 'foul_pitcher_counts', PITCHER_KEYS, season, scope, pitcherRows, (c, r) => c.pitches.reduce((n, x) => n + x, 0) === r.pitches).byPerson
   for (const r of pitcherRows) {
     pitchers[r.person_id] = {
       name: r.name,
