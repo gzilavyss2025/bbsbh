@@ -7,6 +7,7 @@ import { meetsWorkload, CUP_OF_COFFEE_FLOOR, REHAB_CAP } from '../../rehab-polic
 import { ipToOuts } from '../../../lib/math/innings.js'
 import { DASH, num } from '../shared.js'
 import { levelSeasonStat, CAREER_ORDER } from '../careerRegister.js'
+import { withoutMultiTeamAggregate } from '../stats.js'
 
 // ---------------------------------------------------------------------------
 // Level progression — for a pre-debut MiLB player, one row per level from
@@ -16,9 +17,14 @@ import { levelSeasonStat, CAREER_ORDER } from '../careerRegister.js'
 // player who debuted at A, say, is never going back to Rookie ball) built
 // from the same multi-level yearByYear splits already fetched for the nested
 // ledger above — no extra request.
+// Each level also carries its games and the clubs he played them for (first
+// played first), counted from the club rows so a two-club season's team-less
+// roll-up never doubles them. `mlbSplits` (optional) feeds `mlbGames`.
 // ---------------------------------------------------------------------------
 
-export function levelProgressionView(splits, group, currentSportId) {
+const gamesOf = (rows) => rows.reduce((t, s) => t + num(s.stat?.gamesPlayed), 0)
+
+export function levelProgressionView(splits, group, currentSportId, mlbSplits) {
   const byLevel = new Map()
   for (const s of splits ?? []) {
     const sid = s.sport?.id
@@ -28,6 +34,14 @@ export function levelProgressionView(splits, group, currentSportId) {
   }
   const levels = MILB_LEVELS.map(({ sportId, label }) => {
     const rows = byLevel.get(sportId) ?? []
+    const clubRows = withoutMultiTeamAggregate(rows)
+    const clubs = new Map()
+    for (const s of clubRows) {
+      if (!s.team?.id) continue
+      const club = clubs.get(s.team.id) ?? { id: s.team.id, name: s.team.name ?? '', games: 0 }
+      club.games += num(s.stat?.gamesPlayed)
+      clubs.set(s.team.id, club)
+    }
     const stat = levelSeasonStat(rows, group)
     const years = rows.map((s) => Number(s.season)).filter(Boolean)
     return {
@@ -36,6 +50,8 @@ export function levelProgressionView(splits, group, currentSportId) {
       reached: rows.length > 0,
       firstYear: years.length ? Math.min(...years) : null,
       lastYear: years.length ? Math.max(...years) : null,
+      games: gamesOf(clubRows),
+      teams: [...clubs.values()],
       stat:
         group === 'pitching'
           ? `${stat?.inningsPitched ?? DASH} IP`
@@ -45,7 +61,11 @@ export function levelProgressionView(splits, group, currentSportId) {
   })
   const startIndex = levels.findIndex((l) => l.reached)
   if (startIndex === -1) return null
-  return { levels: levels.slice(startIndex) }
+  return {
+    levels: levels.slice(startIndex),
+    minorsGames: levels.reduce((t, l) => t + l.games, 0),
+    mlbGames: gamesOf(withoutMultiTeamAggregate(mlbSplits)),
+  }
 }
 
 // Rehab-assignment noise. Once a player has reached the majors, any later
