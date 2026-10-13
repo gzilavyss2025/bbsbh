@@ -3,6 +3,7 @@
 **Status:** DRAFT — awaiting sign-off on #1105. Not accepted until #1107 ships.
 **Date:** 2026-09-21
 **Supersedes:** ADR-0034, *The team page is five tabs, not one scroll*.
+**Amended by:** ADR-0109, *The canvas is the site-wide look* (counts on the jump bar; the cards use the shared parts).
 
 > ADR-0034 is not wrong, and it is not deleted. It holds the record of why the
 > old one-scroll page failed, and those three failures are still the test any

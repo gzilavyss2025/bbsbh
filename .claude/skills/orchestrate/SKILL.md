@@ -77,14 +77,22 @@ to Lane 3. Start no issue work unless he asks.
 1. `git fetch origin --prune`. Note the `origin/main` SHA.
 2. List open issues with labels, open PRs (drafts count), and your sessions
    (`list_sessions`, then keep titles that start `orch:`; the `tags` filter does
-   not work in-session). Skip PRs labeled `wip` or `do-not-merge`.
+   not work in-session). Skip PRs labeled `wip` or `do-not-merge`, except a PR that
+   a plan row continues (Lane 3).
 3. **Cron check.** `mcp__github__actions_list` for `update-nightly-data.yml`. A failed
    last run goes in the report.
 4. **Dedupe.** Do not start a child on issue #n if an open PR or a session titled
    `orch: #n` already covers it. Do the same for a plan prompt and `orch: <slug> <n>`.
+   A plan row that continues an open PR is the exception: dedupe it on the session
+   title only.
 5. Guess the files each issue touches. Two issues that share a file run one after
    the other. An issue that needs an unmerged PR (a chain such as N8a, N8b, N8c)
    waits until that PR merges. Say so in the digest. Stacking needs his yes.
+   **Blocked by.** A `Blocked by: #a, #b` line in an issue body is the blocker record.
+   Start nothing while an issue on that line is open, even if it is `ready-for-agent`.
+   The cloud cannot set GitHub's native "blocked by" links (the MCP tools have no call
+   for them). When you file or change blockers, write the body line, then give him one
+   checklist of the native links to add by hand.
 6. Read the ledger (below).
 7. Say in three lines what you will start now and why. Then start it.
 
@@ -179,7 +187,8 @@ Input: a run plan, which is the table and the prompts that `write-prompt` writes
 handed it to you (its step 9). One prompt is a plan too. Work on the plan only.
 
 1. **Read the table.** Wave 1 is every row with nothing in "depends on". A later wave is
-   every row that depends on rows in the wave before it.
+   every row that depends on rows in the wave before it. "Depends on" names rows
+   ("row 2 merged"), not issue or PR numbers.
 2. **Start wave 1 inside the cap of 3.** Title each `orch: <slug> <n>` (the plan's slug,
    and the prompt number). `tags`: `orch`, `plan`, `wave-N`. `model` from its row.
    `create_session` has no effort setting, so put "Run at <effort>." first in the prompt.
@@ -194,9 +203,26 @@ handed it to you (its step 9). One prompt is a plan too. Work on the plan only.
    line "NEEDS PARENT: <what you need>".
    ```
 4. **Start wave N+1 when every PR in wave N is green.** Subscribe to each PR and use the
-   `send_later` checks from Budget. If a prompt needs the earlier wave's code, ask him
+   `send_later` checks from Budget. A row whose "depends on" says **merged** waits
+   until that PR is on `main`: stack it (see "Stacking"), then start the row. If a
+   prompt needs the earlier wave's code and the plan does not say which, ask him
    once for the whole plan: build on that branch (set `source_revision`), or wait for
    `/stack-prs` to merge it.
+   **A row that continues an open PR** (the plan names the PR) works on that PR's
+   head branch: set `source_url` to this repo, and `source_revision` and
+   `outcome_branch` to the branch. Use this footer in place of the one in step 3:
+
+   ```
+   Parent session: <your session id>. Push to the existing PR #<n>. Do not open a new
+   PR. Bring in main with a merge, never a rebase or force-push. Subscribe to the PR
+   and drive it to green. When the work is done and CI is green, remove the `wip`
+   label. Never merge. Never push to main. If the push is refused, open a new DRAFT
+   PR that links #<n>, and say so to your parent.
+   To stop for a reason you cannot fix, send_message your parent AND end with a final
+   line "NEEDS PARENT: <what you need>".
+   ```
+
+   Ask him before you close the old PR.
 5. **Stop the plan on a failure.** A `NEEDS PARENT` line, or a PR that stays red after
    two tries, stops the later waves. Start nothing new. Tell him which prompt and why.
 6. Two prompts that share a file run one after the other, even in one wave.
