@@ -99,3 +99,21 @@ test('a button hides only when every slot in its section is empty', () => {
   assert.deepEqual(keys(shownSections(sections, inst, gone)), ['overview', 'history'])
   assert.equal(history.length, 2)
 })
+
+// ---- "not built yet" is not "no data" ----
+import { readFileSync } from 'node:fs'
+
+test('with every slot a stub, all nine batter buttons show', () => {
+  const sections = jumpSections({ isPitcher: false }, [hit])
+  const shown = shownSections(sections, slotInstances(['hitting']), {})
+  assert.equal(shown.length, 9)
+  assert.deepEqual(keys(shown), keys(sections))
+})
+
+test('a stub module renders its placeholder line: it never returns null or calls onEmpty', () => {
+  for (const slot of SLOTS) {
+    const src = readFileSync(new URL(`../src/screens/player/next/modules/${slot.module}/index.jsx`, import.meta.url), 'utf8')
+    assert.ok(!/return null/.test(src), `${slot.module} returns null`)
+    assert.ok(!/onEmpty\(/.test(src), `${slot.module} calls onEmpty`)
+  }
+})

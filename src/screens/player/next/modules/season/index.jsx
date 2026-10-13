@@ -1,5 +1,6 @@
-// The season module's slot (the contract is in ../../CLAUDE.md). A stub until its issue
-// builds it: it renders nothing, so the slot hides.
+// The season module's slot (the contract is in ../../CLAUDE.md). A stub until its issue builds
+// it: it says so in one line. It reports nothing as empty and renders something, because
+// "not built yet" is not "no data" and the slot must stay.
 export default function SeasonModule() {
-  return null
+  return <p className="hint">Season loads here.</p>
 }

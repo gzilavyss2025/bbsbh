@@ -15,8 +15,10 @@
   the shared `tbd` module which section it fills.
 - **Data:** the module owns its data hook. `Slot` mounts it only once the slot is near
   (`hooks/scroll/useNearView.js`), so nothing loads before then.
-- **No data:** call `onEmpty()`, or render nothing on the first render. `Slot` then hides
-  the card, and the jump-bar button hides when ALL slots of its section are empty.
+- **Two states.** *Not built yet:* the stub renders its one placeholder line, never `null`
+  and never `onEmpty()`, so the card and its button stay. *No data:* a real module that has
+  loaded and found nothing calls `onEmpty()`, or renders nothing on its first render; `Slot`
+  hides the card, and the button hides when ALL slots of its section are empty.
 - **Count tag:** call `onCount(n)` (or a string); `Slot` draws it on the card's edge.
 - **CSS:** the module's own file, in its folder or `src/styles/player-next/<module>.css`,
   imported from its `index.jsx` (`src/styles` is at its file budget).
