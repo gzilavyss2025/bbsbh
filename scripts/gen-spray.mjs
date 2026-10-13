@@ -185,7 +185,8 @@ const RESULT_OF = {
 // [launchAngle, totalDistance, xBA in thousandths]. They go to a sibling store, not into
 // the row: one shard holds one page's data, and these columns plus a gamePk run per game
 // would push the busiest spray bucket from 153 KB to about 250 KB, past the 160 KB
-// ceiling. `xba` is the season's xBA lattice (readXwobaTable(season, 'xba-table')), or
+// ceiling. Its own sibling file is about 60 KB there (measured on a synthetic file built from
+// 1,633 real rows; see the ceiling in test/bucket-shards.test.js). `xba` is the season's xBA lattice (readXwobaTable(season, 'xba-table')), or
 // null: the ball's xBA is then null.
 //
 // TOTALS AND ROWS ARE COUNTED SEPARATELY, on purpose. A ball in play with no
@@ -289,10 +290,12 @@ export function aggregateGameSpray(feed, level, xba = null) {
 //
 // THE CONTACT STORE (`contacts`, optional: the same part's map in the contact store).
 // An entry is { n, c, g }: `n` is the number of spray rows `p` held when it was
-// written, `c` the contact rows of the LAST `c.length` of them (rows folded before
-// this store existed have none, and always come first), and `g` is [[count, gamePk], …]
-// over `c`. A reader that finds `n` different from `p.length` reads no contact at all,
-// never a shifted column. #1912.
+// written; `c` is the contact rows of the LAST `c.length / 3` of them, FLAT
+// ([launchAngle, distance, xBA, launchAngle, …], three numbers a row); and `g` is
+// FLAT pairs, [count, gamePk, count, gamePk, …], over those rows. Flat saves the
+// brackets: on the busiest bucket 60 KB against 73 KB nested. Rows folded before this
+// store existed have no contact and always come first. A reader that finds `n`
+// different from `p.length` reads no contact at all, never a shifted column. #1912.
 export function foldGame(store, agg, date, venueId = null, contacts = null, gamePk = null) {
   for (const [batterId, delta] of agg) {
     const entry = store[batterId] ?? (store[batterId] = { n: '', t: null, b: null, d: null, p: [], o: {} })
@@ -313,8 +316,8 @@ export function foldGame(store, agg, date, venueId = null, contacts = null, game
     if (contacts && delta.rows.length) {
       let c = contacts[batterId]
       if (c?.n !== entry.p.length) c = contacts[batterId] = { n: entry.p.length, c: [], g: [] }
-      c.c.push(...delta.contact)
-      c.g.push([delta.contact.length, gamePk])
+      c.c.push(...delta.contact.flat())
+      c.g.push(delta.contact.length, gamePk)
       c.n += delta.rows.length
     }
     for (const row of delta.rows) entry.p.push(row)

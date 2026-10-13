@@ -527,10 +527,11 @@ for each generator; the reader modules:
   can share these shards instead of sweeping the season twice.
   **The contact store** (#1912) is `NN.contact.json` beside each shard, read only by
   `fetchSprayFor(id, { contact: true })` (the spray map never fetches it): per batter
-  `{ n, c, g }`, where `c` is `[launchAngle, totalDistance, xBA in thousandths]` for the LAST
-  `c.length` of his `p` rows and `g` is `[[count, gamePk], …]` over `c`. A row swept before the
+  `{ n, c, g }`, where `c` is FLAT triples, `[launchAngle, totalDistance, xBA in thousandths, …]`,
+  for the LAST `c.length / 3` of his `p` rows, and `g` is FLAT pairs `[count, gamePk, …]` over them
+  (flat saves the brackets: 60 KB against 73 KB nested on the busiest bucket). A row swept before the
   store has no contact and comes first; `n` is the `p` length it was written against, and
-  `withContact` aligns it as `k` only when `n` equals `p.length` and `g` covers `c`, so a
+  `withContact` aligns it as `k` only when `n` equals `p.length` and `g` covers the rows, so a
   mismatch reads as no contact columns, never shifted ones. `decodeSprayBalls` gives each ball
   `launchAngle`, `distance`, `xba` (0-1), `gamePk` and `barrel` (`isBarrel`, derived from exit
   velocity and angle; a fit of Savant's zone, not Savant's own count), all null when unknown.
