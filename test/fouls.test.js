@@ -848,3 +848,77 @@ test('rebuildCommand refuses a bare flag or a non-year', async () => {
   const deps = { aggregate: aggregateGameFouls, getFeed: async () => countGame(), touched: new Set(), writeOut: async () => {} }
   for (const bad of [true, undefined, 'x', '1']) await assert.rejects(rebuildCommand(db, foulStatements(db), bad, deps), /needs a season/)
 })
+
+test('fouls in a PA that a caught stealing ends still reach the count cells, so the cells sum to his fouls', async () => {
+  // PA 1 ends in play at 0-0. PA 2 is cut off in the 2nd inning: C (0-0), F (0-1), F (0-2), then the runner is
+  // caught stealing for the third out. He never finishes it, so no plate appearance ends to credit `reach`.
+  // The 0-1 and 0-2 fouls are real; the cells dropped them (2026: 18 batters were short by 1 or 2).
+  const feed = feedWith([
+    play({ batter: 10, pitcher: 200, eventType: 'field_out', events: [pitchAt('X', 0, 0)] }),
+    play({
+      batter: 10, pitcher: 200, inning: 2, eventType: 'caught_stealing_2b', outs: 3,
+      events: [pitchAt('C', 0, 1), pitchAt('F', 0, 2), pitchAt('F', 0, 2)],
+    }),
+  ])
+  const agg = aggregateGameFouls(feed)
+  const b = agg.batters.get(10)
+  assert.equal(b.fouls, 2)
+  const db = await emptyDb()
+  foldGame(db, foulStatements(db), 1, '2026-09-01', 2026, agg)
+  const out = exportFouls(db, 2026).batters[10]
+  const sum = (a) => a.reduce((n, x) => n + x, 0)
+  assert.equal(out.fouls, 2)
+  assert.equal(sum(out.byCount.fouls), 2, 'cells agree with the total')
+  assert.equal(out.byCount.fouls[at(0, 1)], 1)
+  assert.equal(out.byCount.fouls[at(0, 2)], 1)
+  assert.equal(out.byCount.reach[at(0, 0)], 1, 'the cut-off PA is not a plate appearance')
+})
+
+test('rebuildCounts also rebuilds the season TOTALS, so a total folded under an old rule agrees with the cells', async () => {
+  // Game 1 was folded before FOUL_CODES took 'O' (a bunt foul tip): the stored total holds 1 foul.
+  // The feed now has F then O, so the re-read must give 2 in the total AND in the cells.
+  const feed = () =>
+    feedWith([play({ batter: 10, pitcher: 200, eventType: 'strikeout', events: [pitchAt('C', 0, 1), pitchAt('F', 0, 2), pitchAt('O', 0, 2), pitchAt('S', 0, 3)] })])
+  const db = await emptyDb()
+  foldGame(db, foulStatements(db), 1, '2026-09-01', 2026, aggregateGameFouls(countGame()))
+  foldGame(db, foulStatements(db), 3, '2027-03-25', 2027, aggregateGameFouls(countGame()))
+  assert.equal(exportFouls(db, 2026).batters[10].fouls, 1, 'the stale total')
+  const teamRows = () => JSON.stringify(db.prepare('SELECT * FROM foul_team_totals ORDER BY season').all())
+  const teamBefore = teamRows()
+  const { failed } = await rebuildCounts(db, foulStatements(db), { season: 2026, aggregate: aggregateGameFouls, getFeed: async () => feed() })
+  assert.deepEqual(failed, [])
+  const b = exportFouls(db, 2026).batters[10]
+  const sum = (a) => a.reduce((n, x) => n + x, 0)
+  assert.equal(b.fouls, 2)
+  assert.equal(b.g, 1, 'one game, not folded on top of the stale row')
+  assert.equal(sum(b.byCount.fouls), b.fouls, 'total and cells come from the same feed')
+  assert.equal(db.prepare('SELECT fouls FROM foul_pitcher_totals WHERE season = 2026 AND person_id = 200').get().fouls, 2)
+  assert.equal(teamRows(), teamBefore, 'other tables are not touched')
+  assert.equal(exportFouls(db, 2027).batters[10].fouls, 1, 'another season is not touched')
+})
+
+test('a failed re-read puts the stale season totals back: batter, best PA and pitcher rows', async () => {
+  const db = await emptyDb()
+  foldCounts(db, 1, '2026-09-01', 2026)
+  foldCounts(db, 2, '2026-09-02', 2026)
+  // Stale values the re-read would change: a successful game 1 would refold them to 1, 1 and 1.
+  db.exec(`UPDATE foul_batter_totals SET fouls = 99 WHERE season = 2026;
+           UPDATE foul_pitcher_totals SET fouls = 98 WHERE season = 2026;
+           UPDATE foul_batter_pa_high SET fouls = 97 WHERE season = 2026`)
+  const read = () => ({
+    batter: db.prepare('SELECT fouls FROM foul_batter_totals WHERE season = 2026 AND person_id = 10').get().fouls,
+    pitcher: db.prepare('SELECT fouls FROM foul_pitcher_totals WHERE season = 2026 AND person_id = 200').get().fouls,
+    high: db.prepare('SELECT fouls FROM foul_batter_pa_high WHERE season = 2026 AND person_id = 10').get().fouls,
+  })
+  assert.deepEqual(read(), { batter: 99, pitcher: 98, high: 97 })
+  const { failed } = await rebuildCounts(db, foulStatements(db), {
+    season: 2026,
+    aggregate: aggregateGameFouls,
+    getFeed: async (pk) => {
+      if (pk === 2) throw new Error('boom')
+      return countGame()
+    },
+  })
+  assert.deepEqual(failed.map((g) => g.game_pk), [2])
+  assert.deepEqual(read(), { batter: 99, pitcher: 98, high: 97 })
+})
