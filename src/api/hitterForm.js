@@ -61,27 +61,18 @@ const inOrder = (log) =>
 export function rollingSeries(log, w) {
   const games = inOrder(log).filter((g) => Number(g.stat.plateAppearances) > 0)
   if (games.length < w) return null
-  const stretches = games.slice(w - 1).map((last, i) => {
-    const rows = games.slice(i, i + w)
-    return {
-      point: {
-        date: last.date,
-        gamePk: last.game?.gamePk,
-        opp: teamAbbr(last.opponent),
-        isHome: Boolean(last.isHome),
-        ops: Number.parseFloat(aggregateSplits(rows, 'hitting', { dedupe: false }).ops),
-      },
-      span: { startDate: rows[0].date, endDate: last.date },
-    }
-  })
-  const pick = (better) =>
-    stretches.reduce((m, s) => (better(s.point.ops, m.point.ops) ? s : m))
-  const named = ({ point, span }) => ({ ...span, ops: point.ops })
-  return {
-    points: stretches.map((s) => s.point),
-    best: named(pick((a, b) => a > b)),
-    worst: named(pick((a, b) => a < b)),
+  const points = games.slice(w - 1).map((last, i) => ({
+    date: last.date,
+    gamePk: last.game?.gamePk,
+    opp: teamAbbr(last.opponent),
+    isHome: Boolean(last.isHome),
+    ops: Number.parseFloat(aggregateSplits(games.slice(i, i + w), 'hitting', { dedupe: false }).ops),
+  }))
+  const stretch = (better) => {
+    const i = points.reduce((m, p, j) => (better(p.ops, points[m].ops) ? j : m), 0)
+    return { startDate: games[i].date, endDate: points[i].date, ops: points[i].ops }
   }
+  return { points, best: stretch((a, b) => a > b), worst: stretch((a, b) => a < b) }
 }
 
 function statFor(data) {
