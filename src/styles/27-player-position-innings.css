@@ -272,6 +272,15 @@
   vertical-align: middle;
 }
 
+/* The game log's final score (W 7-4), his club's runs first. */
+.gamelog__score {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 /* ---- 2026 All-Star banner — blue tape across the top of the card ---- */
 .allstar-banner {
   display: flex;

@@ -1,0 +1,349 @@
+/* ==== ON THE MOUND (the new player page, #1893) ====
+   Copied from the board MoundCard: the days-since track, then the recent outings on a calendar.
+   Tokens only. Nothing dashed: today is a solid line, the average a solid clay one. */
+
+/* layout-exempt: one column of the card's blocks */
+.mound {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+/* The reserve is for the load only: a card with little to draw (a reliever off a few days) stays short. */
+.mound--loading {
+  min-height: 440px;
+}
+
+/* layout-exempt: tabs and the role word, a wrapping row */
+.mound__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+}
+.mound__tabs {
+  display: flex;
+  gap: var(--space-2);
+}
+.mound__role {
+  margin-inline-start: auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* layout-exempt: a heading and its key, a wrapping row */
+.mound__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* layout-exempt: the key swatches, a wrapping row */
+.mound__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-none);
+}
+.mound__key span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+}
+
+/* --- the days-since track --- */
+/* layout-exempt: the last-outing chip and the Day chip, a wrapping row */
+.mound__trk {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-bottom: calc(var(--space-12) + var(--space-2));
+}
+/* layout-exempt: logo, date and tag, a wrapping row */
+.mound__chip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2h) var(--space-1) var(--space-1);
+  background: var(--surface-card);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped-soft);
+  font-size: var(--fs-small);
+}
+.mound__tag {
+  padding: var(--space-1) var(--space-1h);
+  background: var(--award-soft);
+  border: 1px solid var(--award-line);
+  color: var(--award-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.mound__day {
+  padding: var(--space-1) var(--space-2h);
+  background: var(--award-soft);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped-soft);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+  white-space: nowrap;
+}
+.mound__now {
+  position: absolute;
+  top: 0;
+  width: 0;
+}
+.mound__now .mound__day {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.mound__rail {
+  position: relative;
+  flex: 0 0 100%;
+  height: 34px;
+  margin-top: var(--space-5);
+  overflow: hidden;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-inset);
+}
+.mound__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--navy);
+}
+.mound__zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(135deg, var(--surface-inset) 0 5px, var(--award-line) 5px 7px);
+}
+.mound__ticks {
+  position: absolute;
+  inset: auto 0 0;
+  height: 40px;
+}
+/* layout-exempt: weekday over date, a two-line stack */
+.mound__tick {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  color: var(--text-caption);
+}
+.mound__tick em {
+  font-style: normal;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+.mound__tick--on {
+  color: var(--text-heading);
+}
+.mound__tick--first {
+  transform: none;
+  align-items: flex-start;
+}
+.mound__tick--end {
+  transform: translateX(-100%);
+  align-items: flex-end;
+}
+.mound__trk--lead .mound__day {
+  right: auto;
+  left: 0;
+}
+.mound__short {
+  display: none;
+}
+
+/* --- the calendar --- */
+.mound__plot {
+  position: relative;
+  height: 178px;
+  margin-top: var(--space-6);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+}
+.mound__bar {
+  position: absolute;
+  bottom: 0;
+  min-width: 12px;
+  transform: translateX(-50%);
+  background: var(--navy);
+}
+.mound__bar--relief {
+  background: repeating-linear-gradient(135deg, var(--navy) 0 4px, var(--border-grid) 4px 6px);
+}
+.mound__bar--post {
+  border-top: var(--space-1) solid var(--clay);
+}
+.mound__bar--last {
+  background: var(--award-line);
+  box-shadow: inset 0 0 0 var(--bw-heavy) var(--border-stamped);
+}
+.mound__pv {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding-bottom: var(--space-1);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.mound__avg {
+  position: absolute;
+  inset-inline: 0;
+  border-top: var(--bw-heavy) solid var(--clay);
+  pointer-events: none;
+}
+.mound__today {
+  position: absolute;
+  right: 0;
+  top: calc(var(--space-6) * -1);
+  bottom: 0;
+  padding-inline-end: var(--space-1h);
+  border-right: var(--bw-heavy) solid var(--border-stamped);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.mound__month {
+  position: absolute;
+  top: calc(var(--space-6) * -1);
+  padding-inline-start: var(--space-1h);
+  border-left: 1px solid var(--border-hairline);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.mound__swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--border-stamped);
+  background: var(--navy);
+}
+.mound__swatch--relief {
+  background: repeating-linear-gradient(135deg, var(--navy) 0 3px, var(--border-grid) 3px 5px);
+}
+.mound__swatch--post {
+  border-top: var(--space-1) solid var(--clay);
+}
+.mound__swatch--last {
+  background: var(--award-line);
+}
+.mound__swatch--avg {
+  height: 0;
+  width: 18px;
+  border: 0;
+  border-top: var(--bw-heavy) solid var(--clay);
+  background: none;
+}
+
+/* Under the plot: the date, the opponent's mark, then a bracket over the days between outings. */
+.mound__axis {
+  position: relative;
+  height: 106px;
+  margin-top: var(--space-1);
+}
+.mound__date {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  white-space: nowrap;
+}
+.mound__date--lo {
+  top: 15px;
+}
+.mound__logo {
+  position: absolute;
+  top: 32px;
+  display: flex;
+  transform: translateX(-50%);
+}
+.mound__gap {
+  position: absolute;
+  top: 64px;
+  height: 10px;
+  border: var(--bw-heavy) solid var(--text-caption);
+  border-top: 0;
+}
+.mound__gap b {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+.mound__gap--odd {
+  border-color: var(--clay);
+}
+.mound__gap--odd b {
+  color: var(--clay-deep);
+}
+.mound__gap--now {
+  border-color: var(--border-stamped);
+  background: var(--award-soft);
+}
+.mound__gap--now b {
+  color: var(--text-heading);
+}
+
+/* Narrow, or a Day chip near the left edge: it drops under the last-outing chip. */
+.mound__trk--lead .mound__now {
+  top: var(--space-12);
+}
+.mound__trk--lead .mound__rail {
+  margin-top: calc(var(--space-12) + var(--space-5));
+}
+/* Narrow: ticks thin to every other day, gaps to bare numbers. */
+@container (max-width: 560px) {
+  .mound__now {
+    top: var(--space-12);
+  }
+  .mound__rail {
+    margin-top: calc(var(--space-12) + var(--space-5));
+  }
+  .mound__tick--skip,
+  .mound__date--dense {
+    display: none;
+  }
+  .mound__long {
+    display: none;
+  }
+  .mound__short {
+    display: inline;
+  }
+}

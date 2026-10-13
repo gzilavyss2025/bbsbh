@@ -46,7 +46,7 @@ export function hitterFormWindows(log) {
 }
 
 // Game-log rows with a stat line, oldest first.
-const inOrder = (log) =>
+export const inOrder = (log) =>
   (log ?? [])
     .filter((g) => g?.stat)
     .sort((a, b) =>

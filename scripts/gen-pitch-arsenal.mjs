@@ -30,6 +30,7 @@
 //   node scripts/gen-pitch-arsenal.mjs --since=2026-03-20 --sports=11   # backfill AAA alone
 //   node scripts/gen-pitch-arsenal.mjs --export-only [--season=2026]    # re-export, no sweep
 //   node scripts/gen-pitch-arsenal.mjs --clear-hitters=2026 --since=2026-03-20   # hitter re-walk
+//   node scripts/gen-pitch-arsenal.mjs --clear-arsenal=2026 --since=2026-03-20   # arsenal re-walk (#1908; #1915's per-game mix hooks in here)
 // The --since form is the one-time / full-season backfill; nightly runs use the
 // default trailing window. Checkpoints (dump + JSON export) every 100 games so a
 // long backfill resumes cleanly. --export-only rebuilds the JSON view from the
@@ -47,6 +48,11 @@ import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason
 import { CELLS, COLS, aggregateGameCommand, commandStmts, markCommandIngested, parseCells } from './lib/command-grid.mjs'
 import { aggregateGameHitters, clearHitterSeason, foldHitters, hitterStmts, writeHitterGrid } from './lib/pitch/hitter-grid.mjs'
 import { readXwobaTable } from './lib/pitch/xwoba.mjs'
+import { PHYS_JOIN, PHYS_SELECT, addPhys, clearArsenalSeason, emptyPhys, foldPhysRow, physMeans, physStmt, rewalkFailures } from './lib/pitch/arsenal-physics.mjs'
+import { fetchPitcherHands } from './lib/pitch/pitcher-hands.mjs'
+import { centuryRankMap } from './lib/pitch/century-rank.mjs'
+
+export { centuryRankMap } // moved to lib/pitch/ to hold this file's size budget; tests import it from here
 
 const here = dirname(fileURLToPath(import.meta.url))
 // TWO OUTPUTS, one per reader — see writeArsenal below and src/api/pitchArsenal.js.
@@ -113,7 +119,7 @@ export function aggregateGamePitchTypes(feed) {
     let t = p.types.get(key)
     if (!t) {
       t = {
-        description: desc || '', pitches: 0, velocitySum: 0, velocityN: 0, centuryPitches: 0, maxVelo: null,
+        description: desc || '', pitches: 0, velocitySum: 0, velocityN: 0, centuryPitches: 0, maxVelo: null, phys: emptyPhys(),
         tto: [
           { pitches: 0, velocitySum: 0, velocityN: 0 },
           { pitches: 0, velocitySum: 0, velocityN: 0 },
@@ -169,6 +175,7 @@ export function aggregateGamePitchTypes(feed) {
       if (!code) continue
       const t = getType(p, code, stand, e.details?.type?.description)
       t.pitches += 1
+      addPhys(t.phys, e.pitchData)
       const bucket = ttoIndex == null ? null : t.tto[ttoIndex]
       if (bucket) bucket.pitches += 1
       const speed = e.pitchData?.startSpeed
@@ -229,6 +236,7 @@ export function arsenalStatements(db) {
   const c = commandStmts(db)
   return {
     pitchType: upsertPitchType(db),
+    phys: physStmt(db),
     mark: markIngested(db),
     markCommand: markCommandIngested(db),
     commandRead: c.read,
@@ -266,6 +274,7 @@ export function foldGame(db, stmts, { gamePk, level, date, season, scope = 'R', 
           t.tto[1].pitches, t.tto[1].velocitySum, t.tto[1].velocityN,
           t.tto[2].pitches, t.tto[2].velocitySum, t.tto[2].velocityN,
         )
+        stmts.phys.run(season, scope, id, level, code, stand, ...t.phys)
       }
     }
     for (const [id, byKey] of command) {
@@ -287,60 +296,6 @@ export function foldGame(db, stmts, { gamePk, level, date, season, scope = 'R', 
     db.exec('ROLLBACK')
     throw err
   }
-}
-
-// --- handedness --------------------------------------------------------------
-//
-// Which way each pitcher throws, for the player page's "Pitches like" card
-// (src/lib/pitcherSimilarity.js), where it's a hard filter — a lefty and a
-// righty with the same repertoire are not a useful answer to "who pitches like
-// this guy".
-//
-// Resolved at EXPORT time from one bulk call per level rather than stored per
-// game in pitch_arsenal_totals, which is why this needs no schema change and no
-// backfill: every pitcher already on file gains a hand on the very next run,
-// including every row swept before this existed. A per-game column would only
-// have filled in as each pitcher next happened to appear.
-//
-// ~50 KB per level and never fatal — a failed lookup means the card filters
-// more conservatively for a run (an unknown hand is skipped, never guessed),
-// not that the sweep fails.
-async function fetchPitcherHands(sportIds, season) {
-  const hands = {}
-  for (const sportId of sportIds) {
-    try {
-      const data = await getJson(
-        `/api/v1/sports/${sportId}/players?season=${season}&fields=people,id,pitchHand,code`,
-      )
-      for (const p of data?.people ?? []) {
-        const code = p?.pitchHand?.code
-        if (p?.id != null && (code === 'L' || code === 'R')) hands[p.id] = code
-      }
-    } catch (err) {
-      console.error(`pitcher hands (sportId ${sportId}): ${err.message}`)
-    }
-  }
-  return hands
-}
-
-// Competition ranking (1, 2, 2, 4) over one level's century-club counts —
-// ties share a place and the next man skips, the way a leaderboard reads.
-// `counts` is [id, count] pairs ALREADY filtered to the cohort being ranked;
-// `of` is that cohort's size, so the rank a card renders and the denominator
-// beside it always describe the same population. Pure, exported for tests.
-export function centuryRankMap(counts) {
-  const sorted = [...counts].sort((a, b) => b[1] - a[1])
-  const of = sorted.length
-  const ranks = new Map()
-  let lastCount = null
-  let lastRank = 0
-  sorted.forEach(([id, count], i) => {
-    const rank = count === lastCount ? lastRank : i + 1
-    lastCount = count
-    lastRank = rank
-    ranks.set(id, { rank, of })
-  })
-  return ranks
 }
 
 // --- JSON export from the accumulated table ----------------------------------
@@ -365,7 +320,7 @@ function ttoPairs(buckets) {
 
 const emptyBucket = () => ({
   pitches: 0, vSum: 0, vN: 0, century: 0, maxVelo: null,
-  tto: [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+  tto: [[0, 0, 0], [0, 0, 0], [0, 0, 0]], phys: emptyPhys(),
 })
 
 const foldRow = (acc, r) => {
@@ -373,6 +328,7 @@ const foldRow = (acc, r) => {
   acc.vSum += r.velocity_sum
   acc.vN += r.velocity_n
   acc.century += r.century_pitches
+  foldPhysRow(acc.phys, r)
   if (r.max_velo != null && (acc.maxVelo == null || r.max_velo > acc.maxVelo)) acc.maxVelo = r.max_velo
   for (let i = 0; i < 3; i += 1) {
     acc.tto[i][0] += r[`tto${i + 1}_pitches`]
@@ -398,7 +354,7 @@ export function exportPitchArsenal(db, hands = {}, season = null, scope = 'R') {
   // `vs` keeps L and R on their own for the side filter.
   const types = new Map()
   for (const r of db
-    .prepare(`SELECT * FROM pitch_arsenal_totals WHERE scope = ? ${one ? 'AND season = ?' : ''} ORDER BY season, person_id, level, code, stand`)
+    .prepare(`SELECT t.*${PHYS_SELECT} FROM pitch_arsenal_totals t ${PHYS_JOIN} WHERE t.scope = ? ${one ? 'AND t.season = ?' : ''} ORDER BY t.season, t.person_id, t.level, t.code, t.stand`)
     .all(scope, ...params)) {
     const entry = pit[r.person_id] ?? (pit[r.person_id] = { name: r.name, teamId: r.team_id, mlb: [], aaa: [] })
     entry.name = r.name
@@ -429,6 +385,7 @@ export function exportPitchArsenal(db, hands = {}, season = null, scope = 'R') {
       avgVelo: avgVeloOf(acc.all.vSum, acc.all.vN),
       century: acc.all.century,
       maxVelo: acc.all.maxVelo,
+      ...physMeans(acc.all.phys),
     }
     // The times-through split, only when the rows actually carry one. Rows
     // ingested before the sweep started counting it hold nine zeroes, and an
@@ -594,6 +551,9 @@ async function main() {
     clearHitterSeason(db, Number(args['clear-hitters']))
   }
 
+  // Re-walk after a new arsenal column (#1908): the season's arsenal half, the levels in the run.
+  if (args['clear-arsenal']) clearArsenalSeason(db, Number(args['clear-arsenal']), LEVELS.map((l) => l.level), args)
+
   // Throwing hands for the season being written, never the clock year (#1200).
   const handsBySeason = new Map()
   const handsFor = (season) => {
@@ -658,6 +618,7 @@ async function main() {
   console.log(`${startDate}..${endDate}: ${pending.length} un-ingested Final games across ${LEVELS.length} level(s)`)
 
   let done = 0
+  const failed = []
   const queue = [...pending]
   async function worker() {
     while (queue.length) {
@@ -668,6 +629,7 @@ async function main() {
         touched.add(g.season)
       } catch (err) {
         console.error(`gamePk ${g.gamePk} (${g.level}): ${err.message}`)
+        failed.push(g)
       }
       done += 1
       if (done % CHECKPOINT_EVERY === 0) {
@@ -684,6 +646,10 @@ async function main() {
     console.log(`wrote pitch-arsenal/${season}/ — ${total} games on file (+${done} swept this run)`)
   }
   if (!touched.size) console.log('no new game — wrote nothing')
+  if (args['clear-arsenal'] && failed.length) {
+    console.error(rewalkFailures(failed))
+    process.exitCode = 1
+  }
   db.close()
 }
 

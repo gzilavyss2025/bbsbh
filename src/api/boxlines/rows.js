@@ -178,8 +178,12 @@ export function surfaceOf(turfType) {
   return t.includes('grass') ? 'grass' : 'turf'
 }
 
-export function seriesAbbr(gameType) {
-  return { F: 'WC', D: 'DS', L: 'LCS', W: 'WS' }[gameType] ?? ''
+// `league` ('AL' or 'NL', optional) names whose round it is — NLDS, ALCS, NLWC.
+// The World Series is both leagues', so it stays WS.
+export function seriesAbbr(gameType, league = '') {
+  const round = { F: 'WC', D: 'DS', L: 'LCS', W: 'WS' }[gameType] ?? ''
+  if (!league || !round || round === 'WS') return round
+  return round === 'LCS' ? `${league}CS` : `${league}${round}`
 }
 
 // The splits a row may be built from: the right game types, dated, joinable by

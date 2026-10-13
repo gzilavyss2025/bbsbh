@@ -8,6 +8,11 @@ import {
   fetchPlayerAwards,
   fetchTransactions,
 } from '../../../../../api/person-fetch.js'
+import { aggregateSplits } from '../../../../../api/person/stats.js'
+import { mlbCareerThroughCutoff, milestoneWatchView } from '../../../../../api/person/milestones.js'
+import { fetchTargetCommand, targetCommandFor, targetCommandRows } from '../../../../../api/targetCommand.js'
+import { fetchCommandReceived, commandReceivedFor } from '../../../../../api/commandReceived.js'
+import { fetchFoulsFor, foulCardView } from '../../../../../api/fouls.js'
 import { advancedHittingView, advancedPitchingView } from '../../../../../api/person/advanced.js'
 import { buildCareerTimeline } from '../../../../../api/careerTimeline.js'
 import { postseasonStarted } from '../../../../../api/postseason/started.js'
@@ -78,4 +83,40 @@ export async function photoGamesFor(bio, season) {
     .filter((s) => s.game?.gamePk && s.date && s.date !== today)
     .map((s) => ({ gamePk: s.game.gamePk, apiDate: s.date }))
     .sort((a, b) => (a.apiDate < b.apiDate ? -1 : a.apiDate > b.apiDate ? 1 : 0))
+}
+
+// The pitcher's two OpenCommand cards: each file holds one season, so a page on another gets none.
+export async function targetCommandCardFor(id, season) {
+  const data = await fetchTargetCommand()
+  const entry = targetCommandFor(data, id, season)
+  return targetCommandRows(entry, data) ? { entry, data } : null
+}
+
+export async function commandReceivedCardFor(id, season) {
+  const data = await fetchCommandReceived()
+  return commandReceivedFor(data, id, season) ? data : null
+}
+
+// The Foul balls card's own read, to learn whether it has a line. Current-day only, like the card.
+export async function foulsFor(bio, role, season, asOf) {
+  if (asOf) return null
+  const data = await fetchFoulsFor(bio.id, { seasonYear: season, strict: true })
+  return foulCardView({ data, group: role, playerId: bio.id }).show ? data : null
+}
+
+// Milestone watch's progress rows: his prior MLB seasons plus this season to the cutoff, the
+// same sum the live hub's block makes (activity.js buildBlock, mlbCareerThroughCutoff).
+export async function milestonesFor(bio, role, season, asOf) {
+  if (!inMajors(bio) || !bio.debut) return []
+  const [mlbSplits, seasonSplits] = await Promise.all([
+    fetchPersonStats(bio.id, { type: 'yearByYear', group: role, sportId: 1 }),
+    fetchPersonStats(bio.id, {
+      type: 'byDateRange', group: role, season, startDate: `${season}-01-01`, endDate: endDateOf(asOf), sportId: 1,
+    }),
+  ])
+  const stat = mlbCareerThroughCutoff(
+    { mlbSplits, tileStat: aggregateSplits(seasonSplits, role), tileSportId: 1, currentSeason: season },
+    role,
+  )
+  return milestoneWatchView(stat, role)
 }

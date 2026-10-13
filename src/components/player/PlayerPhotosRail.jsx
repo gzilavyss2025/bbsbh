@@ -33,7 +33,9 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 // PLACE (no second route — this card has nowhere else to link to) by lifting
 // the cap, which resumes the normal unlimited walk-back exactly as if no
 // `limit` had been passed.
-export function PlayerPhotosRail({ personId, games, limit }) {
+// `onEmpty` (optional) is called once the walk-back has run out with no photo; the new player
+// page uses it to hide its card. The live page passes none.
+export function PlayerPhotosRail({ personId, games, limit, onEmpty }) {
   const sentinelRef = useRef(null)
   const [expanded, setExpanded] = useState(!limit)
   const pendingGrowRef = useRef(null)
@@ -130,7 +132,11 @@ export function PlayerPhotosRail({ personId, games, limit }) {
     return () => io.disconnect()
   }, [exhausted, loading, growPhotos, expanded, trackRef, userScrolledBackRef])
 
-  if (exhausted && photos.length === 0 && !loading) return null
+  const empty = exhausted && photos.length === 0 && !loading
+  useEffect(() => {
+    if (empty) onEmpty?.()
+  }, [empty, onEmpty])
+  if (empty) return null
   // Newest photos sit at the end of the array (see growPhotos' prepend and
   // the scroll-anchors-right convention above) — a capped preview keeps the
   // newest `limit`, same as the game log's "last N" reads newest first.

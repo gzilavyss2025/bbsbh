@@ -200,6 +200,7 @@ export async function loadPlayerOverview(id, asOf) {
       dropRehabStints(primaryResult.milbYbySplits, debutYear),
       primaryResult.group,
       liveSportId,
+      primaryResult.mlbYbySplits,
     )
     timeline = await buildCareerTimeline(
       [...primaryResult.mlbYbySplits, ...primaryResult.milbYbySplits],
