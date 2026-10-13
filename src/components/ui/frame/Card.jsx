@@ -12,7 +12,7 @@ import { cardAccentStyle, cardBodyClassName, cardClassName, cardHead, isInteract
 //           the player page's card (#1882). Only it takes the four below.
 //   label   stamped only: the name on the ink tab across the top-left edge.
 //           It is the card's heading, and names the card for a screen reader.
-//   labelAs the tab's heading element: 'h2' (the default) to 'h4'.
+//   labelAs the tab's heading element: 'h2' (the default), 'h3' or 'h4'.
 //   count   stamped only: the tag across the top-right edge ("6 firsts").
 //   tone    stamped only: 'plain' (the default), 'tint' or 'ink'.
 //   stampIn stamped only: the card drops into its shadow as it appears
@@ -58,7 +58,6 @@ export function Card({
   cardHead(Tag, head)
   if (named && head != null && head !== false) throw new Error('Card: a name tab and a head are two titles; pass one')
   if (count != null && frame !== 'stamped') throw new Error('Card: a count tag is for frame="stamped"')
-  if (!['h2', 'h3', 'h4'].includes(Label)) throw new Error(`Card: labelAs="${Label}" (h2, h3, h4)`)
   const bodyClass = cardBodyClassName(body)
   const accentStyle = cardAccentStyle(accent)
   const BodyTag = isInteractive(Tag) ? 'span' : 'div'
