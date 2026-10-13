@@ -26,6 +26,11 @@
    No club colour reaches the card (ADR-0030). A club colours the band head
    that names it, through the head's own theme hook, never the card's frame.
    --------------------------------------------------------------------------- */
+/* The three frame values do not inherit: a sheet or ledger card nested in a
+   stamped one keeps its own edge, ground and clip. */
+@property --card-edge { syntax: '*'; inherits: false; }
+@property --card-ground { syntax: '*'; inherits: false; }
+@property --card-overflow { syntax: '*'; inherits: false; }
 .card {
   border: var(--card-edge, var(--bw-hair) solid var(--border-rule));
   border-radius: var(--card-radius);

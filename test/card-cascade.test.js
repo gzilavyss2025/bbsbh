@@ -342,6 +342,19 @@ test('the stamped frame: square, a heavy ink edge, the hard offset shadow, and t
   assert.equal(decl(ink, 'color'), 'var(--text-on-ink)')
 })
 
+test('the frame values do not inherit, so a card nested in a stamped one keeps its own frame (#1882)', () => {
+  const css = read('system/card.css')
+  for (const prop of ['--card-edge', '--card-ground', '--card-overflow']) {
+    assert.match(css, new RegExp(`@property ${prop} \\{[^}]*inherits: false;`), `${prop} must not inherit`)
+  }
+})
+
+test('the stat tile number is the heading ink, and paper on the ink tile (#1882)', () => {
+  const css = read('system/stamped/stamped.css')
+  assert.equal(decl(ruleBody(css, '.stattile__value'), 'color'), 'var(--text-heading)')
+  assert.equal(decl(ruleBody(css, '.card--ink .stattile__value'), 'color'), 'var(--text-on-ink)')
+})
+
 test('the stamp-in is off under prefers-reduced-motion (#1882)', () => {
   const css = read('motion/stamp-in.css')
   assert.match(css, /\.card--stamp-in\s*\{[^}]*animation:[^;]*card-stamp-in/)

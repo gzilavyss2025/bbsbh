@@ -66,6 +66,7 @@
 }
 .stattile__value {
   margin: var(--space-1) 0 0;
+  color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-score-lg);
   font-weight: var(--w-bold);
@@ -85,6 +86,9 @@
 .card--ink .stattile__label,
 .card--ink .stattile__caption {
   color: var(--text-on-ink-dim);
+}
+.card--ink .stattile__value {
+  color: var(--text-on-ink);
 }
 
 /* THE FACT STRIP. The gap-rule grid of .factgrid__grid, on the hairline: the
