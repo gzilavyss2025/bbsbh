@@ -103,14 +103,17 @@ export function shownSections(sections, instances, empty) {
   })
 }
 
-// Slots the loaded data already shows empty: with no season games the game log and the
-// foul-ball slots have nothing, while the section keeps its other slots (Similar players).
-// Each log module reads its own role's block. Same shape as `empty`: key -> true.
-const LOG_ROLE = { batlog: 'hitting', fouls: 'hitting', pitchlog: 'pitching' }
+// Slots the loaded data already shows empty: with no games the game log and the foul-ball
+// slots have nothing, while the section keeps its other slots (Similar players). The log
+// lists postseason games too, so a call-up with only October games keeps his log. Each log
+// module reads its own role's block. Same shape as `empty`: key -> true.
+const LOG_MODULES = new Set(['batlog', 'fouls', 'pitchlog'])
 export function seedEmpty(instances, blocks) {
   const out = {}
   for (const i of instances) {
-    if (LOG_ROLE[i.module] && !blocks.find((b) => b.group === LOG_ROLE[i.module])?.seasonGames) out[i.key] = true
+    if (!LOG_MODULES.has(i.module)) continue
+    const b = blocks.find((x) => x.group === i.role)
+    if (!b?.seasonGames && !b?.postseason?.games) out[i.key] = true
   }
   return out
 }

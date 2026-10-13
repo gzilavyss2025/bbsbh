@@ -93,7 +93,7 @@ the sheet.
   of this design inked it there, pointing at a walk total as though it were the
   headline figure; `DOOR_EMPHASIS` is pinned to the rate columns by test.
 - **Emphasis is colour, never weight.** JetBrains Mono ships one registered
-  weight in this app (`tokens/fonts.css`), so every figure renders at 700
+  weight in this app, 500 (`tokens/fonts.css`), so every figure renders at 500
   whatever a rule asks for and a "bold" cell beside a regular one is two cells
   that look the same. Graphite for context, slate for the rate beside the
   answer, near-black for the answer.

@@ -1,4 +1,4 @@
-# Run plan: player-redesign DATA issues (checked against origin/main f4b0d6604, 2026-10-13)
+# Run plan: player-redesign DATA issues (v2: checked again against origin/main 5f65b939a, 2026-10-13)
 
 Gary's decisions (2026-10-13), written into the prompts as facts:
 - #1910: a pitcher's "All batters" row is vs L + vs R (today's code).
@@ -6,7 +6,9 @@ Gary's decisions (2026-10-13), written into the prompts as facts:
 - #1912: each ball shows real xBA from a second lattice beside `public/data/xwoba-table/` (ADR-0097), with its own accuracy check.
 - #1881: now `ready-for-agent`. The league "most in one at-bat" figure is the median of regular hitters (300+ PA); 2026 = 6. It lands together with #1914(b), the per-game fouls; new code goes in `scripts/lib/fouls/`.
 - Backfills: a code PR that adds per-game generator columns adds the generator change, a backfill flag and tests, and checks them on a few games only. A SEPARATE Haiku 5.5 (low) row runs the full 2026 re-read after that code PR is merged. It opens a data-only PR right before `/stack-prs`, because the nightly job rewrites the same dumps.
-- Not in this plan: the module issues #1926 to #1930.
+- #1930 (pitcher Form trend, Gary's comment of 2026-10-13): rolling ERA; starters by starts (3/5/10, default 5), relievers by innings (10/15/20 IP, default 15), role from `pitcherRole`; K% and BB% in the stretches table; postseason in; no bottom marks. Its DATA slice is row 20 here. Its module slice is in `module-run-plan.md` (M12).
+- #1933: per-game fastball velocity comes from a generator field, not from page requests. It is row 21 (code) and row 22 (Haiku backfill). Its card part is `module-run-plan.md` M22.
+- The module issues (#1885-#1896, #1851, #1926-#1930) are in `module-run-plan.md`.
 
 I applied the backfill rule to two more code rows than Gary named: #1911 (the hitter-grid counters, the same sweep and the same `pitch-arsenal.sql` dump) and #1912(b) (the spray columns; `gen-spray.mjs` runs nightly and rewrites the same shards). Each gets its own Haiku row (18, 19). Drop them if Gary wants those re-reads done another way.
 
@@ -22,7 +24,7 @@ I applied the backfill rule to two more code rows than Gary named: #1911 (the hi
 | 6 | #1910 part b: vs-team OBP, SLG, K%, BB% | Sonnet 5.5 | medium | none | 1-5, 7 |
 | 7 | #1912 part a: the xBA lattice and its check | Sonnet 5.5 | high | none | 1-6 |
 | 8 | #1914(a) + #1915 part a: game-log sort, league prefix, score | Opus 5.5 | high | row 4 merged | 9, 10, 11 |
-| 9 | #1917 Path to the Majors: games and clubs per level | Sonnet 5.5 | medium | row 4 merged; PR #1924 merged | 8, 10, 11, 12, 13 |
+| 9 | #1917 Path to the Majors: games and clubs per level | Sonnet 5.5 | medium | row 4 merged | 8, 10, 11, 12, 13, 20 |
 | 10 | #1908 part b code: movement, spin, flight; arsenal re-walk flag | Sonnet 5.5 | high | none (kept out of wave 1: per-game columns) | 8, 9, 11, 12, 13 |
 | 11 | #1912 part b code: spray columns, per-ball xBA, game runs; checked on a few games | Sonnet 5.5 | high | row 7 merged | 8, 9, 10, 12, 13 |
 | 12 | #1881 + #1914(b) code: fouls by count + per-game fouls; backfill flag | Sonnet 5.5 | xhigh | row 8 merged | 9, 10, 11, 13 |
@@ -33,10 +35,13 @@ I applied the backfill rule to two more code rows than Gary named: #1911 (the hi
 | 17 | Backfill: pitch arsenal 2026 re-walk (#1908, #1915) | Haiku 5.5 | low | rows 10 and 15 merged; right before /stack-prs | 16, 19 |
 | 18 | Backfill: hitter-grid 2026 re-walk + gate (#1911) | Haiku 5.5 | low | rows 14 and 17 merged; right before /stack-prs | 16, 19 |
 | 19 | Backfill: spray 2026 rebuild (#1912) | Haiku 5.5 | low | row 11 merged; right before /stack-prs | 16, 17, 18 |
+| 20 | #1930 data: `pitcherRollingSeries` (pure, no new request) | Sonnet 5.5 | medium | row 2 merged | 8-13 |
+| 21 | #1933 code: per-game velocity per pitch type in the per-start table | Sonnet 5.5 | high | rows 14 and 15 merged | 16, 19, 20 |
+| 22 | Backfill: velocity 2026 re-walk (#1933) | Haiku 5.5 | low | row 21 merged; right before /stack-prs | 16, 19 |
 
-Waves: wave 1 = rows 1-7 (no per-game generator columns). Wave 2 = rows 8, 9, 10, 11 (row 9 also waits for PR #1924). Wave 3 = rows 12, 13, 15. Wave 4 = row 14 and the backfill rows whose code is merged. Each backfill row runs right before the `/stack-prs` that follows its code PR's merge, and outside 07:30-10:00 UTC (the nightly job starts at 08:17 UTC).
+Waves: wave 1 = rows 1-7 (no per-game generator columns). Wave 2 = rows 8, 9, 10, 11, 20 (PR #1924 is merged; row 9 no longer waits for it). Wave 3 = rows 12, 13, 15. Wave 4 = row 14 and the backfill rows whose code is merged. Wave 5 = row 21, then row 22. If row 21 merges BEFORE row 17 runs, run row 17 after it: one arsenal re-walk then fills #1908, #1915 and #1933, and row 22 has nothing left to do (it checks and stops). Each backfill row runs right before the `/stack-prs` that follows its code PR's merge, and outside 07:30-10:00 UTC (the nightly job starts at 08:17 UTC).
 
-PR bodies: a row that finishes an issue says "Closes #n". A code row whose issue still waits for a backfill says "Part of #n", and its backfill row says "Closes #n" (rows 16-19). Rows 5 and 7 say "Part of" too; rows 17 and 19 close #1908 and #1912.
+PR bodies: a row that finishes an issue says "Closes #n". Row 20 says "Part of #1930" (the module closes it). Row 21 and row 22 say "Part of #1933" (the card part, module M22, closes it). A code row whose issue still waits for a backfill says "Part of #n", and its backfill row says "Closes #n" (rows 16-19). Rows 5 and 7 say "Part of" too; rows 17 and 19 close #1908 and #1912.
 
 Model picks, one line each:
 - 1. One field and one pure helper, named files, a test first: Haiku 5.5 medium can do it.
@@ -46,7 +51,9 @@ Model picks, one line each:
 - 8. It adds a final score to `gameLogView`, which is cutoff-gated and also renders in game-context visits. A spoiler-adjacent change never goes below rung 7.
 - 10, 11, 14, 15. Schema columns, a sweep change next to a file budget, and a re-walk flag: rung 4.
 - 12. Two issues in one generator at 1084/1100 lines, a 12-count state machine (balls are not carried today), a per-game table and a wipe-and-rebuild flag: rung 5. The research suggested Opus 5.5 high; Sonnet 5.5 xhigh costs half as much per token, so try it first.
-- 16-19. Run one command, check numbers, commit data: Gary's pick, Haiku 5.5 low (rung 1).
+- 16-19, 22. Run one command, check numbers, commit data: Gary's pick, Haiku 5.5 low (rung 1).
+- 20. A pure helper in the shape of row 2, with fixtures and a test first: rung 3 (Gary's pick in #1930).
+- 21. Two more columns in a table row 15 adds, inside a file at 695/700 lines: rung 4, like rows 10, 14 and 15.
 
 Fact fixes to the research and the issues (all checked on origin/main f4b0d6604; main moved from 3c542261f):
 - #1910: `FIELDS`, `doorCells` and `DOOR_COLUMNS` are in `src/api/boxlines/careerSplits.js` (:49, :146, :162), not in `cardFacets.js`. `overallSide` is `src/api/person/stats.js:223`. `SITUATIONAL_SIT_CODES` is `person/stats.js:305`.
@@ -57,7 +64,14 @@ Fact fixes to the research and the issues (all checked on origin/main f4b0d6604;
 - #1881: `gen-fouls.mjs` carries `preStrikes` but not balls. Its flags today: `--backfill-games` (fills `foul_game_totals` only) and `--backfill-team-pitch-types` (wipes and rebuilds; the pattern to copy). Reader: `src/api/fouls.js` (257 lines, spoiler-free).
 - #1911: the hitter grid is swept by `gen-pitch-arsenal.mjs` (695/700) through `scripts/lib/pitch/hitter-grid.mjs` (184 lines). Its counters list is `FIELDS` in `src/api/scout/hitterGrid.js:48`. The re-walk exists: `--clear-hitters=2026 --since=2026-03-20`.
 - #1912: `gen-spray.mjs` keeps no SQLite; its shards are the accumulator, and it has `--rebuild`. The xwOBA day cache is the full Savant detail CSV, so `estimated_ba_using_speedangle` is in the same files.
-- Budgets: `src/api/person/` 13/13 files (`contract/`, `family/` are subfolders). `scripts/lib/` 43/42, so new helpers go in `scripts/lib/pitch/` (2 files) or a new `scripts/lib/fouls/`. `gen-fouls.mjs` 1084/1100, `gen-pitch-arsenal.mjs` 695/700. `src/api/player/` 11/12, `src/styles` 119/119 (no row touches them).
+- Budgets: `src/api/person/` 13/13 files (`contract/`, `family/` are subfolders). `scripts/lib/` 43/42, so new helpers go in `scripts/lib/pitch/` (2 files) or a new `scripts/lib/fouls/`. `gen-fouls.mjs` 1084/1100, `gen-pitch-arsenal.mjs` 695/700. `src/api/player/` 11/12 (row 20 makes it 12/12), `src/styles` 119/119 (no row touches it).
+
+Refresh of 2026-10-13 (origin/main 5f65b939a; main moved from f4b0d6604 by the #1924/#1931 stack):
+- PR #1924 is merged. It added `block.rankSplits` to `src/api/player/overview.js` (+2 lines). `levelProgressionView` is now called at overview.js:199 (was "~:197"); history.js:175 is unchanged. The new page (`src/screens/player/next/PlayerNextPage.jsx`) reads `loadPlayerOverview`, so rows 8 and 9 must keep the overview's game-log preview free of a score.
+- `src/api/` is at its budget: 115/115 files (`check-dir-size.mjs:598`). #1930's comment names `src/api/pitcherForm.js`; that path fails the guard. Row 20 uses `src/api/player/pitcherForm.js`.
+- #1930's comment says the pitcher card needs "no extra request" because `loadPlayerOverview` already fetches the game log. A module gets only `{ bio, role, asOf, season, section, ... }` and `getJson` has no cache, so the module makes one game-log call. Row 20 stays pure; the cost lands on module M12.
+- Open PRs: only #1934 (font weights: `src/tokens/fonts.css`, `src/tokens/typography.css`, `src/styles/09-team-info.css`, `src/screens/designlab/tokens.jsx`). No data row edits those files.
+- Every other fact above was spot-checked again and still holds: file sizes (`gen-fouls.mjs` 1084, `gen-pitch-arsenal.mjs` 695, `pitchArsenal.js` 433, `hitterForm.js` 201, `fouls.js` 257, `hitter-grid.mjs` 184, `gen-spray.mjs` 464), `gameLogView` :76-79, `moundRateFor` :370/:379, `careerRegister.js` 600 lines with the level section from :399, `loadPlayerStats` :37, `fetchTeamAbbrevs` call at stats.js:191.
 
 ## File overlap
 
@@ -67,10 +81,12 @@ Fact fixes to the research and the issues (all checked on origin/main f4b0d6604;
 | `src/api/person/careerRegister.js` (600/600) | 4, 9 | 4 moves the level/timeline half to `src/api/person/career/progression.js`; 9 edits that file after 4 merges |
 | `src/api/person/gameLog.js` | 8, 12 | 12 after 8 |
 | `src/api/person/stats.js`, `person/activity.js` | 4 (maybe), 8, 13 | in order 4, 8, 13 |
-| `src/api/player/overview.js` | 9, open PR #1924 | 9 waits for #1924. Row 8 must not edit it |
+| `src/api/player/overview.js` | 9 | #1924 is merged. Row 8 must not edit it (the new page reads it) |
 | `src/api/player/history.js` | 1 (:334), 9 (:175) | different waves |
 | `scripts/gen-fouls.mjs` (1084/1100), `scripts/data/fouls.sql` | 12, 16, nightly | one code row for both issues; 16 after 12 |
-| `scripts/gen-pitch-arsenal.mjs` (695/700), `scripts/lib/schema.sql`, `scripts/data/pitch-arsenal.sql` | 10, 15, 14, 17, 18, nightly | 10, then 15, then 14; 17 after 10 and 15; 18 after 14 and 17 |
+| `scripts/gen-pitch-arsenal.mjs` (695/700), `scripts/lib/schema.sql`, `scripts/data/pitch-arsenal.sql` | 10, 15, 14, 21, 17, 18, 22, nightly | 10, then 15, then 14, then 21; 17 after 10 and 15; 18 after 14 and 17; 22 after 21 (or none, if 17 runs after 21) |
+| `src/api/player/` (11/12) | 20 | only row 20 adds a file |
+| `src/api/hitterForm.js` | 2, 20 (reads its order only) | 20 after 2 |
 | `scripts/lib/pitch/xwoba.mjs`, `scripts/gen-xwoba-table.mjs` | 7, 11 (reads) | 11 after 7 |
 | `public/data/spray/`, `scripts/data/spray-ingested.json` | 11 (few games, not committed), 19, nightly | 19 after 11 |
 | `src/api/spoiler-manifest.json` | 4, 8 (maybe), 11 (maybe) | different entries; not an overlap |
@@ -78,7 +94,7 @@ Fact fixes to the research and the issues (all checked on origin/main f4b0d6604;
 
 ---
 
-## Prompt 1 of 19 — Haiku 5.5, effort medium
+## Prompt 1 of 22 — Haiku 5.5, effort medium
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -106,7 +122,7 @@ Keep working until everything asked for is done. Stop to ask only when you canno
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 2 of 19 — Sonnet 5.5, effort medium
+## Prompt 2 of 22 — Sonnet 5.5, effort medium
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -141,7 +157,7 @@ Keep working until everything asked for is done. Stop to ask only when you canno
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 3 of 19 — Sonnet 5.5, effort medium
+## Prompt 3 of 22 — Sonnet 5.5, effort medium
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -174,7 +190,7 @@ Keep working until everything asked for is done. Stop to ask only when you canno
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 4 of 19 — Sonnet 5.5, effort high
+## Prompt 4 of 22 — Sonnet 5.5, effort high
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -204,7 +220,7 @@ Handoff: open a draft PR. Body in ASD-STE100 style, with "Closes #1909". Remove 
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 5 of 19 — Sonnet 5.5, effort medium
+## Prompt 5 of 22 — Sonnet 5.5, effort medium
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -234,7 +250,7 @@ Keep working until everything asked for is done. Stop to ask only when you canno
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 6 of 19 — Sonnet 5.5, effort medium
+## Prompt 6 of 22 — Sonnet 5.5, effort medium
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -263,7 +279,7 @@ Keep working until everything asked for is done. Stop to ask only when you canno
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 7 of 19 — Sonnet 5.5, effort high
+## Prompt 7 of 22 — Sonnet 5.5, effort high
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -291,7 +307,7 @@ Handoff: open a draft PR. Body in ASD-STE100 style, with "Part of #1912". No scr
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 8 of 19 — Opus 5.5, effort high
+## Prompt 8 of 22 — Opus 5.5, effort high
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -304,7 +320,7 @@ Facts (checked on origin/main):
 - gameLogView (src/api/person/gameLog.js:76) filters rows to s.date < cutoff (:78), then sorts by date only (:79). Doubleheaders swap (Turang 2026: 04-04, 07-07, 07-11).
 - seriesAbbr (src/api/boxlines/rows.js:181) gives WC, DS, LCS, WS. rows.js:317 also calls it.
 - boxlines/fetch.js already asks the schedule BY GAMEPK for final scores (fetchSchedule, not exported), and its header says why that beats one call per season.
-- The game log's loader is loadPlayerStats (src/api/player/stats.js:37), through buildBlock (src/api/person/activity.js:431). Do not edit src/api/player/overview.js (open PR #1924); the overview preview stays without a score.
+- The game log's loader is loadPlayerStats (src/api/player/stats.js:37), through buildBlock (src/api/person/activity.js:431). Do not edit src/api/player/overview.js: the overview preview, and the new page (src/screens/player/next/) that reads it, stay without a score.
 
 The spoiler rule here: person/gameLog.js is cutoff-gated. The player page is an open surface (ADR-0034), but a game-context visit passes a cutoff. A score must follow that same cutoff: ask the schedule only for gamePks of rows that pass the cutoff, and join after the filter. A same-day game 1 is out, as in rows.js.
 
@@ -322,18 +338,18 @@ Handoff: open a draft PR. Body in ASD-STE100 style, with "Part of #1914" and "Pa
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 9 of 19 — Sonnet 5.5, effort medium
+## Prompt 9 of 22 — Sonnet 5.5, effort medium
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
 
-Repo: /home/user/bbsbh (Tally Baseball). Read CLAUDE.md and src/api/CLAUDE.md. Use the branch the session gives you, cut from current origin/main. Needs on main: the #1909 PR (it moved the level views to src/api/person/career/progression.js) and PR #1924 (it edits src/api/player/overview.js). If either is not merged, stop and report. List the open PRs and their files with the GitHub MCP tools (owner gzilavyss2025, repo bbsbh). If an open PR edits a file below, stop and report.
+Repo: /home/user/bbsbh (Tally Baseball). Read CLAUDE.md and src/api/CLAUDE.md. Use the branch the session gives you, cut from current origin/main. Needs on main: the #1909 PR (it moved the level views to src/api/person/career/progression.js). If it is not merged, stop and report. (PR #1924, which edited src/api/player/overview.js, is merged.) List the open PRs and their files with the GitHub MCP tools (owner gzilavyss2025, repo bbsbh). If an open PR edits a file below, stop and report.
 
 Task: issue #1917 (Path to the Majors). Each level needs games and clubs.
 
 Facts (check the line numbers again after the #1909 move):
 - levelProgressionView gives AB or IP per level. dropRehabStints trims rehab seasons. careerTimelineView has the teams per stint. All three are now in src/api/person/career/progression.js.
-- Callers: src/api/player/history.js (~:175, after the debut) and src/api/player/overview.js (~:197, before the debut). Both pass the MiLB year-by-year splits only.
+- Callers: src/api/player/history.js (~:175, after the debut) and src/api/player/overview.js (~:199, before the debut). Both pass the MiLB year-by-year splits only.
 
 Steps (test first: add the tests in test/career-register.test.js or a new test file, see them fail, then write the code):
 1. Per level, add games (the sum of gamesPlayed) and teams: [{ id, name, games }], in the order he played for them.
@@ -351,7 +367,7 @@ Last step: run the ponytail-review skill on the diff, apply the cuts it lists, t
 ```
 
 
-## Prompt 10 of 19 — Sonnet 5.5, effort high
+## Prompt 10 of 22 — Sonnet 5.5, effort high
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -380,7 +396,7 @@ Handoff: open a draft PR. Body in ASD-STE100 style, with "Part of #1908", the fl
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 11 of 19 — Sonnet 5.5, effort high
+## Prompt 11 of 22 — Sonnet 5.5, effort high
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -409,7 +425,7 @@ Handoff: open a draft PR. Body in ASD-STE100 style, with "Part of #1912", the si
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 12 of 19 — Sonnet 5.5, effort xhigh
+## Prompt 12 of 22 — Sonnet 5.5, effort xhigh
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -442,7 +458,7 @@ Handoff: open a draft PR. Body in ASD-STE100 style, with "Part of #1881", "Part 
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 13 of 19 — Sonnet 5.5, effort high
+## Prompt 13 of 22 — Sonnet 5.5, effort high
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -473,7 +489,7 @@ Last step: run the ponytail-review skill on the diff, apply the cuts it lists, t
 ```
 
 
-## Prompt 14 of 19 — Sonnet 5.5, effort high
+## Prompt 14 of 22 — Sonnet 5.5, effort high
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -502,7 +518,7 @@ Handoff: open a draft PR. Body in ASD-STE100 style, with "Part of #1911" and the
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 15 of 19 — Sonnet 5.5, effort high
+## Prompt 15 of 22 — Sonnet 5.5, effort high
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
@@ -529,7 +545,7 @@ Handoff: open a draft PR. Body in ASD-STE100 style, with "Part of #1915" and the
 Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
 ```
 
-## Prompt 16 of 19 — Haiku 5.5, effort low
+## Prompt 16 of 22 — Haiku 5.5, effort low
 
 ```
 Repo: /home/user/bbsbh (Tally Baseball). Read CLAUDE.md and scripts/CLAUDE.md. Use the branch the session gives you, cut from current origin/main.
@@ -554,7 +570,7 @@ Handoff: open a draft PR. Body in ASD-STE100 style: the command, the run time, t
 Keep working until everything asked for is done. Stop to ask only when you cannot go on without the user, or before a risky step. When the work is done and checked, stop and report; do not add features, tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked for.
 ```
 
-## Prompt 17 of 19 — Haiku 5.5, effort low
+## Prompt 17 of 22 — Haiku 5.5, effort low
 
 ```
 Repo: /home/user/bbsbh (Tally Baseball). Read CLAUDE.md and scripts/CLAUDE.md. Use the branch the session gives you, cut from current origin/main.
@@ -579,7 +595,7 @@ Handoff: open a draft PR. Body in ASD-STE100 style: the command, the run time, t
 Keep working until everything asked for is done. Stop to ask only when you cannot go on without the user, or before a risky step. When the work is done and checked, stop and report; do not add features, tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked for.
 ```
 
-## Prompt 18 of 19 — Haiku 5.5, effort low
+## Prompt 18 of 22 — Haiku 5.5, effort low
 
 ```
 Repo: /home/user/bbsbh (Tally Baseball). Read CLAUDE.md and scripts/CLAUDE.md. Use the branch the session gives you, cut from current origin/main.
@@ -605,7 +621,7 @@ Handoff: open a draft PR. Body in ASD-STE100 style: the commands, the run time, 
 Keep working until everything asked for is done. Stop to ask only when you cannot go on without the user, or before a risky step. When the work is done and checked, stop and report; do not add features, tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked for.
 ```
 
-## Prompt 19 of 19 — Haiku 5.5, effort low
+## Prompt 19 of 22 — Haiku 5.5, effort low
 
 ```
 Repo: /home/user/bbsbh (Tally Baseball). Read CLAUDE.md and scripts/CLAUDE.md. Use the branch the session gives you, cut from current origin/main.
@@ -626,6 +642,92 @@ Steps:
 Stop if: the run fails twice, a check is wrong, or a shard is more than 2.5 times its old size. Report it. Do not fix code.
 
 Handoff: open a draft PR. Body in ASD-STE100 style: the command, the run time, the checks, and "Closes #1912". Remove `wip` when CI is green. Never merge.
+
+Keep working until everything asked for is done. Stop to ask only when you cannot go on without the user, or before a risky step. When the work is done and checked, stop and report; do not add features, tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked for.
+```
+
+## Prompt 20 of 22 — Sonnet 5.5, effort medium
+
+```
+Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
+
+Repo: /home/user/bbsbh (Tally Baseball). Read CLAUDE.md, then src/api/CLAUDE.md. Use the branch the session gives you, cut from current origin/main. Needs on main: the #1913 PR (rollingSeries in src/api/hitterForm.js). If it is not merged, stop and report. List the open PRs and their files with the GitHub MCP tools (owner gzilavyss2025, repo bbsbh). If an open PR edits a file below, stop and report.
+
+Task: issue #1930, the DATA slice: a pure rolling series for the pitcher Form trend. The card is a later prompt. Read #1930 and its comment. Gary decided (2026-10-13):
+- Headline: rolling ERA. K% and BB% also go in the "How the stretches ended" table, and K% is a chart toggle.
+- Starter window: 3 / 5 / 10 starts, default 5. Reliever window: by innings, 10 / 15 / 20 IP, default 15. The role comes from pitcherRole (src/api/person/identity.js:40).
+- Postseason included (gameType MLB_LOG_GAME_TYPES, src/api/boxlines/rows.js:152). The game line uses the split's `summary`.
+
+Facts (origin/main):
+- src/api/ is at its budget (115/115, scripts/check-dir-size.mjs:598). The #1930 comment says src/api/pitcherForm.js; use src/api/player/pitcherForm.js instead (11/12). Add a src/api/spoiler-manifest.json entry, the same class as hitterForm.js.
+- Reuse aggregateSplits (src/api/person/stats.js:50) and ipToOuts (src/lib/math/innings.js:7). Order games like hitterFormWindows (hitterForm.js:36): date, then game.gameNumber, then gamePk.
+- Match the point shape of rollingSeries (#1913), so the two cards share one chart.
+
+Steps (test first: add test/pitcher-form.test.js with Gasser and Ashby fixtures; see it fail, then write the code):
+1. pitcherRollingSeries(log, { by: 'apps' | 'outs', w }): one point per appearance once the window is full. For 'outs', the window is the trailing appearances until it holds at least w outs. Each point: { date, gamePk, opp, isHome, summary, era, kPct, bbPct, ip }.
+2. The best and the worst stretch (by ERA), and the season line.
+3. Check live (statsapi.mlb.com, 2026 gameLog, group pitching): Robert Gasser 688107, 5-start ERA best 1.35 (Sep 7-Oct 7), worst 5.32 (Jul 12-Aug 8), season 3.87. Aaron Ashby 676879, 15-IP ERA 0.55 to 6.00, no 0.00 window. Put the numbers in the PR.
+
+Done means: the tests failed first and pass; the live numbers match; npm run lint, npm test and npm run build pass.
+Stop if: a live number does not match after the order rule; report the number and the stretch.
+
+Handoff: open a draft PR. Body in ASD-STE100 style, with "Part of #1930" (the module closes it). No screen changes, so send no screenshot; say so in the PR. Remove `wip` when CI is green. Never merge.
+
+Keep working until everything asked for is done. Stop to ask only when you cannot go on without the user, or before a risky step. When the work is done and checked, stop and report; do not add features, tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked for.
+
+Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
+```
+
+## Prompt 21 of 22 — Sonnet 5.5, effort high
+
+```
+Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
+
+Repo: /home/user/bbsbh (Tally Baseball). Read CLAUDE.md, scripts/CLAUDE.md, src/api/CLAUDE.md and docs/adr/0021-sqlite-data-layer.md. Use the branch the session gives you, cut from current origin/main. Needs on main: the #1915 part b code PR (the per-start mix table) and the #1911 code PR (both change the same sweep and schema). If either is not merged, stop and report. List the open PRs and their files with the GitHub MCP tools (owner gzilavyss2025, repo bbsbh). If an open PR edits a file below, stop and report.
+
+Task: issue #1933, the CODE only: a per-game mean velocity per pitch type, for the pitcher Form trend's velocity view. Gary decided (2026-10-13): a generator field, not extra requests on the page. As for #1908 and #1915, this PR checks a few games only; a separate session runs the full 2026 re-walk later. Do not run it here. The card part is a later prompt.
+
+Facts (check them on main first):
+- The #1915 PR added a per-start table (pitcher, gamePk, code, n), filled by the arsenal sweep and wiped by the #1908 re-walk flag, and a per-start shard set with a reader in src/api/pitchArsenal.js. Its PR body names them.
+- The feed field is pitchData.startSpeed (check it on a live MLB and a live AAA feed).
+- Budgets: gen-pitch-arsenal.mjs is at or near 700 lines (check-file-size.mjs:239). Put new code in scripts/lib/pitch/. Do not raise a budget. src/api/ is 115/115: add no file there.
+
+Steps (test first: add the tests in test/pitch-arsenal.test.js, see them fail, then write the code):
+1. Add a speed sum and a speed count to the per-start table (columns with defaults, so the committed scripts/data/pitch-arsenal.sql still loads). A pitch with no speed adds to neither.
+2. Export the mean mph per code (one decimal) in the same per-start shard. Keep it compact; estimate the full-season shard size.
+3. A reader: one pitcher's per-game mean mph for one code, and for his primary fastball (the most-used of FF, SI, FC), or null.
+4. Check on 3-5 games in a scratch copy, including Gasser 688107's start of 2026-05-23 vs LAD: FF 92.3, SI 91.5, FC 87.8 (issue #1851). Do not commit scripts/data/*.sql or the shards.
+
+Done means: the tests failed first; the committed dump loads; the files hold their budgets; npm run lint, npm test and npm run build pass.
+Stop if: the estimated per-start shard grows by more than half; report the sizes.
+
+Handoff: open a draft PR. Body in ASD-STE100 style, with "Part of #1933", the size estimate and the exact re-walk command for the backfill session. No screen changes, so send no screenshot; say so in the PR. Remove `wip` when CI is green. Never merge.
+
+Last step: run the ponytail-review skill on the diff, apply the cuts it lists, then run /code-review. Run the checks again and push.
+```
+
+## Prompt 22 of 22 — Haiku 5.5, effort low
+
+```
+Repo: /home/user/bbsbh (Tally Baseball). Read CLAUDE.md and scripts/CLAUDE.md. Use the branch the session gives you, cut from current origin/main.
+
+Task: a DATA-ONLY backfill: the 2026 arsenal re-walk that fills the per-game velocity of issue #1933. Do not edit any code, test or doc.
+
+Before you start:
+- The #1933 code PR ("Part of #1933") must be merged on main. Its body names the command. If it is not merged, stop and report.
+- If the pitch-arsenal backfill ("Closes #1908", "Closes #1915") was merged AFTER the #1933 code PR, the velocity is already on file. Check Gasser 688107's 2026-05-23 start: if it has FF 92.3, stop and report "already filled".
+- Run this right before /stack-prs, and not between 07:30 and 10:00 UTC: the nightly job (08:17 UTC) rewrites scripts/data/pitch-arsenal.sql. If the time is in that window, stop and report.
+- List the open PRs and their files with the GitHub MCP tools (owner gzilavyss2025, repo bbsbh). If an open PR edits scripts/data/pitch-arsenal.sql or the public/data/ pitch-arsenal folders, stop and report.
+
+Steps:
+1. Run the re-walk command from the #1933 code PR body for 2026 (--since=2026-03-20). If it stops, run it again to resume.
+2. Check Gasser 688107, 2026-05-23 vs LAD: FF 92.3, SI 91.5, FC 87.8. Check one Aaron Ashby 676879 relief outing has a fastball mph. Put the numbers in the PR.
+3. Run npm run lint, npm test and npm run build.
+4. Commit only scripts/data/pitch-arsenal.sql and the public/data/ folders the generator wrote.
+
+Stop if: the run fails twice, or a check is wrong. Report the error or the number. Do not fix code.
+
+Handoff: open a draft PR. Body in ASD-STE100 style: the command, the run time, the checks, and "Part of #1933" (the card closes it). Remove `wip` when CI is green. Never merge.
 
 Keep working until everything asked for is done. Stop to ask only when you cannot go on without the user, or before a risky step. When the work is done and checked, stop and report; do not add features, tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked for.
 ```

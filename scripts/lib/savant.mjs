@@ -169,6 +169,8 @@ export function medianRates(pctMap, rawMap, keys, floor) {
   return out
 }
 
+const PITCH_USAGE_MIN = 15 // percent of a pitcher's OWN pitches — "a pitch he throws 4% of the time isn't what this at-bat is about"
+const PITCH_THROWN_MIN = 150 // pitches thrown, gates a pitcher's own pitch rows
 const BATTER_PA_MIN = 40 // plate appearances vs one pitch type, gates a hitter's rows (the payload-size floor, docs/scratch spec)
 // Regression weight, in PITCHES SEEN — whiff is already ~94% stable, so it
 // barely needs regressing toward the pitch type's own league mean. K=200
@@ -203,6 +205,32 @@ export function batterArsenalMap(rows, leagueBat) {
       ba: ba == null ? null : Math.round(ba * 1000) / 1000,
       estWoba: estWoba == null ? null : Math.round(estWoba * 1000) / 1000,
       pa,
+    }
+  }
+  return map
+}
+
+// Gate the PITCH, not just the players: a pitcher's own row for a pitch type
+// only counts once it's a real part of his repertoire. `xwoba` is Savant's
+// est_woba against that pitch, null when blank (the row still ships).
+export function pitcherArsenalMap(rows, leaguePit) {
+  const map = {}
+  for (const r of rows) {
+    const id = r.player_id
+    const type = r.pitch_type
+    if (!id || !type) continue
+    const usage = num(r.pitch_usage)
+    const pitches = num(r.pitches)
+    const whiff = num(r.whiff_percent)
+    if (usage == null || pitches == null || whiff == null) continue
+    if (usage < PITCH_USAGE_MIN || pitches < PITCH_THROWN_MIN) continue
+    const lg = leaguePit[type]?.m
+    const xwoba = num(r.est_woba)
+    if (!map[id]) map[id] = {}
+    map[id][type] = {
+      usage: round1(usage),
+      whiff: round1(regress(whiff, pitches, lg)),
+      xwoba: xwoba == null ? null : Math.round(xwoba * 1000) / 1000,
     }
   }
   return map
