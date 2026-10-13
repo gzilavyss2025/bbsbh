@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
-  ballDetail, contactBalls, contactView, markKey, mixRows, pickBalls, typeOf,
+  ballDetail, contactBalls, contactView, firstView, markKey, mixRows, pickBalls, typeOf,
 } from '../src/screens/player/next/modules/contact/contactView.js'
 
 // The batter Contact view (#1888): the spray field's ball marks, the batted-ball mix and the
@@ -33,6 +33,12 @@ test('contactView: null under the card floor, counts above it', () => {
   assert.equal(contactView(MANY(39)), null)
   const v = contactView([...MANY(38), ball({ result: 'hr' }), ball({ result: 'single' })])
   assert.deepEqual(v.counts, { hr: 1, hit: 2, all: 40 })
+})
+
+test('firstView: home runs, else hits, else all balls', () => {
+  assert.equal(firstView({ hr: 2, hit: 9, all: 40 }), 'hr')
+  assert.equal(firstView({ hr: 0, hit: 9, all: 40 }), 'hit')
+  assert.equal(firstView({ hr: 0, hit: 0, all: 40 }), 'all')
 })
 
 test('pickBalls: view and batted-ball type narrow the field', () => {
@@ -79,6 +85,8 @@ test('ballDetail: the tapped ball, xBA from the store, dashes for a missing fiel
   assert.deepEqual(d.stats, [['Exit velo', '108.4 mph'], ['Launch angle', '22°'], ['xBA', '.907'], ['Barrel', 'Yes']])
   const e = ballDetail(ball({ exitVelo: null, launchAngle: null, distance: null, xba: null, barrel: null }))
   assert.equal(e.big, '—')
+  assert.equal(e.unit, '')
+  assert.equal(d.unit, 'ft')
   assert.deepEqual(e.stats.map((s) => s[1]), ['—', '—', '—', '—'])
   assert.equal(e.when, '')
 })

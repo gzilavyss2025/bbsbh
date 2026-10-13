@@ -43,6 +43,9 @@ export function contactView(balls) {
   }
 }
 
+// The view a card opens on: the first of home runs, hits, all balls that has a ball to show.
+export const firstView = (c) => VIEWS.find(([k]) => c[k])[0]
+
 export function pickBalls(balls, view, type) {
   return balls.filter(
     (b) => (view === 'all' || (view === 'hr' ? b.result === 'hr' : b.result !== 'out')) && (!type || typeOf(b.launchAngle) === type),
@@ -82,7 +85,7 @@ export function ballDetail(b) {
     eyebrow: RESULT_NAMES[b.result] ?? '',
     when: monthDayName(b.date),
     big: f(b.distance, String),
-    unit: 'ft',
+    unit: b.distance == null ? '' : 'ft',
     stats: [
       ['Exit velo', f(b.exitVelo, (v) => `${v.toFixed(1)} mph`)],
       ['Launch angle', f(b.launchAngle, (v) => `${v}°`)],
