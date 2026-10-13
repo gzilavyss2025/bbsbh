@@ -295,8 +295,6 @@ export function foldGame(db, stmts, { gamePk, level, date, season, scope = 'R', 
   }
 }
 
-// Throwing hands: ./lib/pitch/pitcher-hands.mjs (fetched at export time, no schema).
-
 // Competition ranking (1, 2, 2, 4) over one level's century-club counts —
 // ties share a place and the next man skips, the way a leaderboard reads.
 // `counts` is [id, count] pairs ALREADY filtered to the cohort being ranked;

@@ -39,7 +39,7 @@ export const emptyPhys = () => new Array(PHYS_COLS.length).fill(0)
 export function addPhys(acc, pitchData) {
   PHYS_FIELDS.forEach((f, i) => {
     const v = SOURCE[f][1](pitchData ?? {})
-    if (typeof v !== 'number' || !Number.isFinite(v)) return
+    if (!Number.isFinite(v)) return
     acc[2 * i] += v
     acc[2 * i + 1] += 1
   })
