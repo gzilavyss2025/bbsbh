@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import '../../../../../styles/player-next/batter/form.css'
+import '../../../../../styles/player-next/pitcher/pform.css'
 import { fetchPersonStats } from '../../../../../api/person-fetch.js'
 import { MLB_LOG_GAME_TYPES } from '../../../../../api/boxlines/rows.js'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
@@ -54,7 +55,7 @@ export default function PformModule({ bio, asOf, season, onEmpty, onCount }) {
   }, [running, cursor])
 
   if (empty) return null
-  if (!view) return <div className="fform fform--wait" aria-busy="true"><p className="hint">Loading the form trend…</p></div>
+  if (!view) return <div className="fform pform--wait" aria-busy="true"><p className="hint">Loading the form trend…</p></div>
 
   const scrub = (i) => {
     setPlaying(false)
