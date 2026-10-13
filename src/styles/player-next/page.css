@@ -128,6 +128,11 @@
   }
 }
 
+/* A section is one jump-bar target. Its first card's name tab hangs above the card, so the
+   section leaves room for it and a tap lands with the tab in view. */
+.pnext__section {
+  padding-top: var(--space-3h);
+}
 /* A section slot: a stamped Card whose name tab hangs above it. */
 .pnext__slot {
   margin-top: var(--space-3h);

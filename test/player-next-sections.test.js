@@ -39,3 +39,63 @@ test('a pitcher with no stat block yet still gets the pitcher bar, with no count
   assert.ok(keys(list).includes('pitches'))
   assert.ok(list.every((s) => s.count === undefined))
 })
+
+// ---- module wiring (#1884): every slot pre-wired, which buttons show ----
+import { SLOTS, rolesOf, shownSections, slotInstances } from '../src/screens/player/next/sections.js'
+
+const BOTH = ['hitting', 'pitching']
+
+test('the slots are the 13 module folders, with Career = path + tbd and History = firsts + tbd', () => {
+  assert.deepEqual(
+    [...new Set(SLOTS.map((s) => s.module))].sort(),
+    ['arsenal', 'batlog', 'contact', 'firsts', 'form', 'fouls', 'mound', 'path', 'pitchlog', 'plate', 'season', 'splits', 'tbd'],
+  )
+  assert.deepEqual(SLOTS.filter((s) => s.section === 'career').map((s) => s.module), ['path', 'tbd'])
+  assert.deepEqual(SLOTS.filter((s) => s.section === 'history').map((s) => s.module), ['firsts', 'tbd'])
+  assert.equal(new Set(SLOTS.map((s) => s.id)).size, SLOTS.length)
+})
+
+test('foul balls sit at the end of the Game log section', () => {
+  assert.equal(SLOTS.filter((s) => s.section === 'game-log').at(-1).module, 'fouls')
+})
+
+test('every slot sits in a section its roles have a button for', () => {
+  const batter = keys(jumpSections({}, [hit]))
+  const pitcher = keys(jumpSections({ isPitcher: true }, [pit]))
+  for (const s of SLOTS) {
+    if (s.roles.includes('hitting')) assert.ok(batter.includes(s.section), s.id)
+    if (s.roles.includes('pitching')) assert.ok(pitcher.includes(s.section), s.id)
+  }
+})
+
+test('rolesOf reads the blocks, then the bio', () => {
+  assert.deepEqual(rolesOf({}, [hit]), ['hitting'])
+  assert.deepEqual(rolesOf({}, [hit, pit]), BOTH)
+  assert.deepEqual(rolesOf({ isPitcher: true }, []), ['pitching'])
+})
+
+test('a slot for both roles gets one instance per role the player has; a one-role slot only its own', () => {
+  const season = slotInstances(['hitting', 'pitching']).filter((i) => i.id === 'season')
+  assert.deepEqual(season.map((i) => i.role), BOTH)
+  assert.notEqual(season[0].key, season[1].key)
+  assert.notEqual(season[0].label, season[1].label)
+  const pitcher = slotInstances(['pitching'])
+  assert.ok(pitcher.every((i) => i.role === 'pitching'))
+  assert.ok(!pitcher.some((i) => i.id === 'plate'))
+  assert.equal(pitcher.find((i) => i.id === 'season').label, 'Season')
+})
+
+test('a button hides only when every slot in its section is empty', () => {
+  const sections = [{ key: 'overview' }, { key: 'career' }, { key: 'history' }]
+  const inst = slotInstances(['hitting'])
+  const career = inst.filter((i) => i.section === 'career')
+  const history = inst.filter((i) => i.section === 'history')
+  // Nothing reported yet: every button stays. The Overview has no slot, so it always stays.
+  assert.deepEqual(keys(shownSections(sections, inst, {})), ['overview', 'career', 'history'])
+  // One of two empty: the section stays.
+  assert.deepEqual(keys(shownSections(sections, inst, { [career[0].key]: true })), ['overview', 'career', 'history'])
+  // Both empty: it goes.
+  const gone = Object.fromEntries(career.map((i) => [i.key, true]))
+  assert.deepEqual(keys(shownSections(sections, inst, gone)), ['overview', 'history'])
+  assert.equal(history.length, 2)
+})
