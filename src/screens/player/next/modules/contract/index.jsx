@@ -49,8 +49,8 @@ function Pay({ board }) {
         <span className="cnext__salary">{board.salary}</span>
       ) : (
         <>
-          <span className="cnext__soft">Club sets the pay</span>
-          <span className="cnext__note">No figure published yet</span>
+          <span className="cnext__soft">{board.noFigure[0]}</span>
+          {board.noFigure[1] && <span className="cnext__note">{board.noFigure[1]}</span>}
         </>
       )}
     </div>

@@ -98,6 +98,33 @@ test('a retired player with salary rows and no current record gets the history a
   assert.equal(b.past.total, '$50M')
 })
 
+// Shard records, 2026-10-12: 669200 has no figure, no out-years and no salary row; 695600 is
+// an arbitration-year record whose salary the sheet has not published.
+const MCCOY = { season: 2027, club: 'San Diego Padres', salaryUsd: null, terms: null, regime: 'unknown', outYears: [], payRank: null }
+const JENSEN = {
+  season: 2027, club: 'Kansas City Royals', salaryUsd: null, terms: null, regime: 'unknown',
+  outYears: [
+    { year: 2029, cash: 'A1', cbt: null },
+    { year: 2030, cash: 'A2', cbt: null },
+    { year: 2031, cash: 'A3', cbt: null },
+  ],
+  payRank: null,
+}
+
+test('a record with nothing to draw returns null, so the card hides', () => {
+  assert.equal(contractBoard(MCCOY, [salary(2026, null), salary(2025, null)]), null)
+})
+
+test('the line under a missing salary follows the regime: only a pre-arbitration club "sets the pay"', () => {
+  assert.deepEqual(contractBoard(GASSER, []).noFigure, ['Club sets the pay', 'No figure published yet'])
+  const jensen = contractBoard(JENSEN, [salary(2026, 781150)])
+  assert.equal(jensen.pill, 'Arbitration')
+  assert.deepEqual(jensen.noFigure, ['No figure published yet'])
+  assert.equal(contractBoard(TURANG, []).noFigure, null)
+  // His own year is not a signed deal: the sheet has no regime for it.
+  assert.deepEqual(jensen.strip.cols.slice(0, 2).map((c) => [c.kind, c.status]), [['other', ''], ['arb', 'Arb 1']])
+})
+
 test('nothing to show returns null', () => {
   assert.equal(contractBoard(null, []), null)
   assert.equal(contractBoard(null, [salary(2023, null)]), null)

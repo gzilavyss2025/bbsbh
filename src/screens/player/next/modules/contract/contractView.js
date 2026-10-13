@@ -23,7 +23,8 @@ const LEFT_OUT = 2020
 const tick = (year) => `’${String(year).slice(-2)}`
 
 function column(seg, record) {
-  const kind = KIND[seg.kind] ?? 'other'
+  // contractView reads a record with no regime as a guaranteed year; that is not a signed deal.
+  const kind = seg.current && record.regime === 'unknown' ? 'other' : KIND[seg.kind] ?? 'other'
   const merged = seg.endYear !== seg.startYear
   const cash = record.outYears?.find((y) => y.year === seg.startYear)?.cash
   const arbN = /^A(\d+)/i.exec(record.terms ?? '')?.[1]
@@ -110,15 +111,18 @@ export function contractBoard(record, rows = []) {
   if (!record) {
     return hist && {
       pill: `${hist.seasons} ${hist.seasons === 1 ? 'season' : 'seasons'}`,
-      salary: null, rank: null, tiles: [], strip: null, past: hist,
+      salary: null, noFigure: null, rank: null, tiles: [], strip: null, past: hist,
     }
   }
   const view = contractView(record)
   const signed = view.regime === 'signed' || view.regime === 'plain'
-  return {
+  const salary = shortMoney(record.salaryUsd)
+  const board = {
     pill: PILL[view.regime] ?? PLAIN_PILL[record.regime] ?? 'Contract',
     season: record.season,
-    salary: shortMoney(record.salaryUsd),
+    salary,
+    // What stands in for a missing salary: only a pre-arbitration club sets the pay.
+    noFigure: salary ? null : view.regime === 'preArb' ? ['Club sets the pay', 'No figure published yet'] : ['No figure published yet'],
     rank: rank(view.payRank),
     tiles: signed
       ? [['Guaranteed', shortMoney(record.contractTotalUsd)], ['AAV', shortMoney(record.aavUsd)]].filter((t) => t[1])
@@ -126,4 +130,6 @@ export function contractBoard(record, rows = []) {
     strip: strip(view, record),
     past: hist,
   }
+  // A record with nothing to draw (no figure, no strip, no history) hides the card.
+  return board.salary || board.rank || board.tiles.length || board.strip || board.past ? board : null
 }
