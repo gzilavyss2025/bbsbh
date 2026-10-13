@@ -1,0 +1,136 @@
+/* Innings by position (#1928): rings on FieldBackdrop. The box holds its 4:3 shape while the
+   data loads, so the card keeps its height. */
+.pnext-inn__scope {
+  width: 100%;
+  max-width: 340px;
+  margin-inline: auto;
+}
+.pnext-inn__scope > * {
+  flex: 1 1 0;
+}
+.pnext-inn__park {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  container-type: inline-size;
+  --ring: max(40px, 15cqw);
+}
+.pnext-inn__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.pnext-inn__loading,
+.pnext-inn__none {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+.pnext-inn__ring,
+.pnext-inn__idle {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+.pnext-inn__ring {
+  width: var(--ring);
+  aspect-ratio: 1;
+}
+.pnext-inn__ring svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.pnext-inn__track {
+  fill: none;
+  stroke: var(--bg-page);
+  stroke-width: 10;
+}
+.pnext-inn__arc {
+  fill: none;
+  stroke: var(--field);
+  stroke-width: 10;
+}
+.pnext-inn__rim {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 2;
+}
+.pnext-inn__hub {
+  fill: var(--bg-page);
+  stroke: var(--text-heading);
+  stroke-width: 2;
+}
+.pnext-inn__ring--top .pnext-inn__hub {
+  fill: var(--text-heading);
+}
+.pnext-inn__code {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+}
+.pnext-inn__ring--top .pnext-inn__code {
+  color: var(--text-on-ink);
+}
+.pnext-inn__tag,
+.pnext-inn__badge {
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--text-heading);
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-ui);
+  padding: 0 var(--space-1);
+  white-space: nowrap;
+}
+.pnext-inn__tag {
+  position: absolute;
+}
+.pnext-inn__tag--a { bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 3px; }
+.pnext-inn__tag--b { top: 100%; left: 50%; transform: translateX(-50%); margin-top: 3px; }
+.pnext-inn__tag--l { right: 100%; top: 50%; transform: translateY(-50%); margin-right: 3px; }
+.pnext-inn__tag--r { left: 100%; top: 50%; transform: translateY(-50%); margin-left: 3px; }
+.pnext-inn__idle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--ring) * 0.46);
+  aspect-ratio: 1;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-pill); /* component-reuse-exempt: a round position dot, not a capsule */
+  background: var(--bg-page);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+.pnext-inn__badge {
+  position: absolute;
+  bottom: 1%;
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+.pnext-inn__badge b {
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.pnext-inn__badge--l { left: 1%; }
+.pnext-inn__badge--r { right: 1%; }

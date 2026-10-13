@@ -141,8 +141,11 @@ test('with every slot a stub, all nine batter buttons show', () => {
   assert.deepEqual(keys(shown), keys(sections))
 })
 
+// A built module has data to find empty, so it may call onEmpty(); list it here when its issue lands.
+const BUILT = new Set(['innings'])
+
 test('a stub module renders its placeholder line: it never returns null or calls onEmpty', () => {
-  for (const slot of SLOTS) {
+  for (const slot of SLOTS.filter((s) => !BUILT.has(s.module))) {
     const src = readFileSync(new URL(`../src/screens/player/next/modules/${slot.module}/index.jsx`, import.meta.url), 'utf8')
     assert.ok(!/return null/.test(src), `${slot.module} returns null`)
     assert.ok(!/onEmpty\(/.test(src), `${slot.module} calls onEmpty`)
