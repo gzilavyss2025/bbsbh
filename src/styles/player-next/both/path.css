@@ -1,0 +1,118 @@
+/* ==== NEW PLAYER PAGE: the Path to the Majors card (#1894), copied from the PathToMajors board ==== */
+
+/* Holds the card's height while the levels load. */
+.pathmod--wait {
+  min-height: calc(var(--space-16) * 3);
+}
+/* layout-exempt: a plain stack of the headline and the row */
+.pathmod {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3h);
+}
+.pathmod__head {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+/* layout-exempt: the minor-league tiles share the row with the one fixed majors tile */
+.pathmod__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.pathmod__minors {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.pathmod__majors {
+  flex: 0 0 var(--space-16);
+}
+.pathmod__cap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  height: var(--space-4);
+  margin: 0 0 var(--space-1h);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.pathmod__rule {
+  flex: 1;
+  border-top: var(--bw-heavy) solid var(--text-caption);
+}
+.pathmod__tiles {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: logo, level, games and years stack in a narrow column */
+.pathmod__tile {
+  display: flex;
+  flex: 1 1 var(--space-10);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: var(--space-10);
+  margin-left: calc(var(--bw-heavy) * -1);
+  padding-bottom: var(--space-1h);
+}
+.pathmod__tile.is-now {
+  background: var(--surface-stamped-tint);
+}
+.pathmod__bar {
+  align-self: stretch;
+  height: var(--space-8);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--accent-tint);
+}
+.is-now > .pathmod__bar,
+.pathmod__bar--mlb {
+  background: var(--marker);
+}
+.pathmod__logo {
+  display: block;
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+.pathmod__lvl {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+.pathmod__g {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+.pathmod__yr {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-solid);
+  white-space: nowrap;
+}
+.pathmod__here {
+  padding: var(--space-1) var(--space-1h);
+  background: var(--surface-stamped-ink);
+  color: var(--marker);
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
