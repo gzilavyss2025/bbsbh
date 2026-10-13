@@ -79,6 +79,18 @@
 .batlog__seen small {
   margin-inline-start: var(--space-1);
 }
+/* The table's column head says Seen, so the unit shows in the card look only; the game cell stays on one line. */
+@container (min-width: 720px) {
+  .batlog__seen small {
+    display: none;
+  }
+  .logtable__grid td.batlog__game {
+    white-space: nowrap;
+  }
+  .logtable__grid td.batlog__game > * {
+    flex-wrap: nowrap;
+  }
+}
 .batlog__barcell {
   flex: 1 1 0;
   min-width: 0;

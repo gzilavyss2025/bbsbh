@@ -79,7 +79,7 @@ const CELLS = {
 
 const TABLE_COLUMNS = COLUMNS.map((c) => ({
   ...c,
-  className: WIDE.has(c.key) ? 'batlog__wide' : c.key === 'bar' ? 'batlog__barcell' : c.key === 'seen' ? 'batlog__seen' : undefined,
+  className: WIDE.has(c.key) ? 'batlog__wide' : c.key === 'game' ? 'batlog__game' : c.key === 'bar' ? 'batlog__barcell' : c.key === 'seen' ? 'batlog__seen' : undefined,
   cell:
     CELLS[c.key] ??
     ((r) => <span className={`mono${HI[c.key]?.(r[c.key]) ? ' batlog__hi' : LO[c.key]?.(r[c.key]) ? ' batlog__lo' : ''}`}>{r[c.key]}</span>),
