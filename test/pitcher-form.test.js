@@ -15,7 +15,7 @@ const row = ([date, gamePk, ip, er, k, bb, bf, gs, gameNumber, gameType]) => ({
   game: { gamePk, gameNumber },
   stat: {
     summary: [`${ip} IP`, er && `${er} ER`, k && `${k} K`, bb && `${bb} BB`].filter(Boolean).join(', '),
-    inningsPitched: ip, earnedRuns: er, strikeOuts: k, baseOnBalls: bb, battersFaced: bf,
+    inningsPitched: ip, era: '1.29', earnedRuns: er, strikeOuts: k, baseOnBalls: bb, battersFaced: bf,
     gamesPlayed: 1, gamesStarted: gs,
   },
 })
@@ -182,4 +182,18 @@ test('an October-only log has a series and no season line', () => {
   const post = gasser.filter((g) => g.gameType !== 'R')
   const s = pitcherRollingSeries([...post, ...post.map((g) => ({ ...g, game: { ...g.game, gamePk: g.game.gamePk + 1 } }))], { by: 'apps', w: 2 })
   assert.equal(s.season, null)
+})
+
+test('a one-game window reports that game\'s ERA, not the cumulative season ERA on the split', () => {
+  const [p] = pitcherRollingSeries([row(['2026-04-01', 1, '6.0', 3, 6, 2, 25, 1, 1, 'R'])], { by: 'apps', w: 1 }).points
+  assert.equal(p.era, 4.5)
+  assert.equal(p.kPct, 24)
+})
+
+test('an appearance with an out and no batter faced (a pickoff, 0.1 IP) still counts', () => {
+  const log = [row(['2026-04-01', 1, '2.2', 1, 2, 0, 9, 0, 1, 'R']), row(['2026-04-02', 2, '0.1', 0, 0, 0, 0, 0, 1, 'R'])]
+  const s = pitcherRollingSeries(log, { by: 'apps', w: 2 })
+  assert.equal(s.points[0].ip, '3.0')
+  assert.equal(s.points[0].era, 3)
+  assert.equal(s.season.ip, '3.0')
 })

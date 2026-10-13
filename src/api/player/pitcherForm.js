@@ -1,6 +1,6 @@
-import { aggregateSplits } from '../person/stats.js'
+import { eraOf } from '../person/shared.js'
 import { inOrder } from '../hitterForm.js'
-import { ipToOuts } from '../../lib/math/innings.js'
+import { ipToOuts, outsToIp } from '../../lib/math/innings.js'
 import { teamAbbr } from '../../lib/teams.js'
 
 // The pitcher's Form trend (#1930): the rolling ERA, K% and BB% of his game log, one
@@ -12,20 +12,24 @@ import { teamAbbr } from '../../lib/teams.js'
 // when the log never fills one window. The stretches include October; `season` is the
 // regular season only, the line the card compares them to.
 const BF = (g) => Number(g.stat.battersFaced) || 0
+const sum = (games, key) => games.reduce((t, g) => t + (Number(g.stat[key]) || 0), 0)
 
+// Summed from the rows, never read off aggregateSplits: a one-game window comes back
+// as the raw split, whose `era` is the season-to-date figure at that game.
 function line(games) {
-  const agg = aggregateSplits(games, 'pitching', { dedupe: false })
+  const outs = games.reduce((t, g) => t + ipToOuts(g.stat.inningsPitched), 0)
   const bf = games.reduce((t, g) => t + BF(g), 0)
   return {
-    era: Number.parseFloat(agg.era),
-    kPct: bf ? (100 * agg.strikeOuts) / bf : null,
-    bbPct: bf ? (100 * agg.baseOnBalls) / bf : null,
-    ip: agg.inningsPitched,
+    era: Number(eraOf(sum(games, 'earnedRuns'), outs)?.toFixed(2)),
+    kPct: bf ? (100 * sum(games, 'strikeOuts')) / bf : null,
+    bbPct: bf ? (100 * sum(games, 'baseOnBalls')) / bf : null,
+    ip: outsToIp(outs),
   }
 }
 
 export function pitcherRollingSeries(log, { by, w }) {
-  const games = inOrder(log).filter((g) => BF(g) > 0)
+  // An appearance counts if he faced a batter or recorded an out (a pickoff ends 0.1 IP with no batter).
+  const games = inOrder(log).filter((g) => BF(g) > 0 || ipToOuts(g.stat.inningsPitched) > 0)
   const outs = games.map((g) => ipToOuts(g.stat.inningsPitched))
   const spans = []
   let from = 0
