@@ -77,6 +77,7 @@
   color: var(--text-caption);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
 }
 /* THE RANK MARK. Mono, on a highlighter stroke: rank emphasis takes --marker (ADR-0083).
    --text-heading on --marker is 10.5:1; on the ink fill the stroke goes and the text
@@ -88,6 +89,7 @@
   color: var(--text-heading);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
   font-weight: var(--w-bold);
 }
 .card--ink .rankmark {

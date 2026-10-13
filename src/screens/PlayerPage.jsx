@@ -25,9 +25,8 @@ import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './player/PlayerHubShell.jsx'
 import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCard.jsx'
 import { gameLogDoorLabel } from './player/overviewPreview.js'
-import { DASH, Fact, StatGrid, debutLabel, draftLabel, roleWord } from './player/parts.jsx'
+import { DASH, Fact, RankChips, StatGrid, debutLabel, draftLabel, roleWord } from './player/parts.jsx'
 import { isoToday, monthDayName } from '../lib/dates.js'
-import { Pill } from '../components/ui/control/Pill.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
 
@@ -207,16 +206,7 @@ export function PlayerPage({ id, asOf, sportId }) {
                 to the raw 1.63. Top-10 ranks only (see pitchingRanksView);
                 current-day only, so the strip vanishes under a spoiler asOf
                 (the loader skips the fetch). */}
-            {block.ranks?.map((r) => (
-              <p className="leaguerank" key={r.league}>
-                {r.items.map((it) => (
-                  <Pill fill="paper" ink="--text-muted" className="leaguerank__tag" key={it.label}>
-                    <strong className="leaguerank__ord">{it.text}</strong>
-                    {` ${r.league} · ${it.label}${r.club ? ` · with ${r.club}` : ''}`}
-                  </Pill>
-                ))}
-              </p>
-            ))}
+            <RankChips ranks={block.ranks} />
 
             {/* This October to date, over the same window as the tiles above
                 (api/player/postseasonRegister.js). The row does not exist until
