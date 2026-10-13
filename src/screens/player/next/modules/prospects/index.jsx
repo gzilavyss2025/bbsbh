@@ -9,7 +9,7 @@ import '../../../../../styles/player-next/both/prospects.css'
 // Prospect rankings (#1927): a bar per list year, the change from the last list, a dark Debuted
 // row. The list is per player, so a two-way player gets one card: the hitting instance draws it
 // and the pitching one hides. No ranking on file hides the card. Open surface: no seal.
-export default function ProspectsModule({ bio, role, onEmpty, onCount }) {
+export default function ProspectsModule({ bio, role, season, onEmpty, onCount }) {
   const skip = role === 'pitching' && bio.twoWay
   const { data } = useAsync(() => (skip ? null : Promise.all([fetchProspectRankHistory(), fetchTopProspects()])), [skip])
   const view = data && prospectsView({
@@ -17,7 +17,7 @@ export default function ProspectsModule({ bio, role, onEmpty, onCount }) {
     snapshot: data[1],
     playerId: bio.id,
     debutYear: bio.debut ? Number(bio.debut.slice(0, 4)) : null,
-    currentSeason: new Date().getFullYear(),
+    currentSeason: season,
   })
   const settled = skip || data
   useEffect(() => {
