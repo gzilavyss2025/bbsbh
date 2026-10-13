@@ -89,3 +89,15 @@ batter board:
   halves the board-level error in the spike (0.0035 to 0.0019). It needs one
   more Savant request (the sprint-speed board). It is not in this decision.
 - Triple-A has no table. The hitter grid is MLB only (ADR-0096).
+
+## Addendum (2026-10-13): an xBA lattice beside it (#1912)
+
+`gen-xwoba-table.mjs` also writes `public/data/xba-table/{season}.json`, in the same shape. It
+fits Savant's `estimated_ba_using_speedangle` with the same `fitTable` on the same day files, so
+one run builds both tables. The xBA table is checked before it is written: a lattice lookup per
+ball against Savant's own estimate, over the season's balls in play (`XBA_GATE` in
+`scripts/lib/pitch/xwoba.mjs`: mean gap at most 0.008, at most 2% of balls above 0.05, none above
+0.5). A failure writes no xBA table. **Measured on 2026-10-13** (195 days through 2026-10-11):
+123,275 balls, mean gap 0.0070, 1.7% above 0.05, largest 0.445. A per-ball gap is wider than the
+gate above, which is per hitter. Spot checks: 108.4 mph at 22 degrees reads .907 (Savant .911);
+106.3 mph at 2 degrees reads .522 (Savant .520). Nothing reads the table yet (#1912, part b).

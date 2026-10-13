@@ -14,7 +14,7 @@ to reach for from anywhere. At the top level: `Loader`, `SectionMasthead`, `Copy
   `frame` sheet, ledger or stamped (the player redesign, #1882: `label` name tab, `count`
   tag, `tone` plain, tint or ink, `stampIn`), `head` a SectionHead, `body` padded or flush,
   `className` the block's namespace. It owns no margin. `StatTile` is a stamped Card with
-  a label, a number, a caption and an optional `RankMark` ("2 of 68", #1856); `FactGrid look="strip"` is the fact strip.
+  a label, a number, a caption and an optional `RankMark` ("2 of 68" for a rate stat, "6th" for a counting stat, #1856); `FactGrid look="strip"` is the fact strip.
 - **`table/`** — `Table`, the one grid of figures with column names (#1132): `frame` sheet
   or bare, `density` row, tight or keep (keep pads no cell: the namespace sets its own),
   `sticky` first column, `label` makes the scroll region a Tab stop, `className` the
