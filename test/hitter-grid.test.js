@@ -13,7 +13,7 @@ import { aggregateGameCommand } from '../scripts/lib/command-grid.mjs'
 import { aggregateGameHitters, clearHitterSeason, exportHitterGrid, hitterGamesMissing } from '../scripts/lib/pitch/hitter-grid.mjs'
 import { fitTable, xwobaOf } from '../scripts/lib/pitch/xwoba.mjs'
 import { commandCell, normalizePitch } from '../src/lib/zone/zoneGeometry.js'
-import { fetchHitterGridFor, fetchHitterLeague, flatRates, hitterCounters } from '../src/api/scout/hitterGrid.js'
+import { fetchHitterGridFor, fetchHitterLeague, flatRates, hitterCounters, joinPlate } from '../src/api/scout/hitterGrid.js'
 
 const TOP = 3.4
 const BOT = 1.6
@@ -209,8 +209,10 @@ test('the export drops all-zero counters, and keeps the xwOBA numerator out unti
   const db = await emptyDb()
   const stmts = arsenalStatements(db)
   foldGame(db, stmts, { gamePk: 1, level: 'mlb', date: '2026-06-01', season: 2026 }, ...game([play([pitch(MID, 'B')], 'walk')]))
-  assert.deepEqual(Object.keys(exportHitterGrid(db, 2026, 'R').bat[9].mlb.FF.R.R), ['pitches', 'paEnd', 'wobaFixed', 'speedSum'])
+  assert.deepEqual(Object.keys(exportHitterGrid(db, 2026, 'R').bat[9].mlb.FF.R.R), ['pitches', 'paEnd', 'wobaFixed'])
   assert.equal(db.prepare('SELECT xwoba_bip FROM pitch_hitter_cells').get().xwoba_bip, null)
+  // The plate counters ride in a sibling export, so the base shards keep their shape and size.
+  assert.deepEqual(Object.keys(exportHitterGrid(db, 2026, 'R').plate.bat[9].mlb.FF.R.R), ['speedSum'])
 })
 
 test('a game swept with no table leaves its rows\' xwOBA unknown, and the export says so', async () => {
@@ -251,17 +253,17 @@ test('a game swept with no table leaves its rows\' xwOBA unknown, and the export
   assert.equal(hitterGamesMissing(db, 2026), 0)
 })
 
-test('rows swept before the plate counters stay unknown, and the export leaves them out', async () => {
+test('rows swept before the plate counters stay unknown: the export has no plate part', async () => {
   const db = await emptyDb()
   const stmts = arsenalStatements(db)
   foldGame(db, stmts, { gamePk: 1, level: 'mlb', date: '2026-06-01', season: 2026 }, ...game([atBat(MID)]))
-  assert.equal(exportHitterGrid(db, 2026, 'R').plate, true)
+  assert.deepEqual(Object.keys(exportHitterGrid(db, 2026, 'R').plate.bat[9].mlb.FF.R.R), ['speedSum'])
   // A row from the committed dump: it has no plate row, and a game folded in adds none.
   db.prepare('DELETE FROM pitch_hitter_plate').run()
   foldGame(db, stmts, { gamePk: 2, level: 'mlb', date: '2026-06-02', season: 2026 }, ...game([atBat(MID)]))
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM pitch_hitter_plate').get().n, 0)
   const out = exportHitterGrid(db, 2026, 'R')
-  assert.equal(out.plate, false)
+  assert.equal(out.plate, null)
   assert.deepEqual(Object.keys(out.bat[9].mlb.FF.R.R), ['pitches', 'swings', 'whiffs', 'paEnd'])
 })
 
@@ -332,15 +334,39 @@ test('with the season\'s xwOBA on file, wobaSum is wobaFixed plus the estimate, 
   assert.equal(hitterCounters({ ...covered, xwoba: undefined }, { code: 'FF' }).wobaSum, null)
 })
 
-test('a shard with no plate counters gives null for them, not 0; a new one gives arrays', () => {
+test('without the plate file the plate counters are null, not 0; joined, they are arrays', () => {
   const old = hitterCounters(grid, { code: 'FF' })
   assert.deepEqual([old.calledStrikes, old.inPlay, old.speedSum], [null, null, null])
-  const fresh = { mlb: { FF: { R: { L: { pitches: z(0, 4), calledStrikes: z(0, 1), speedSum: z(0, 380) } } } } }
-  const c = hitterCounters({ season: 2026, reg: fresh, post: null, plate: true }, { code: 'FF' })
-  assert.equal(c.calledStrikes[0], 1)
-  assert.equal(c.speedSum[0], 380)
-  assert.equal(sum(c.inPlay), 0)
-  assert.equal(hitterCounters({ season: 2026, reg: fresh, post: null }, { code: 'FF' }).speedSum, null)
+  const plate = { season: 2026, reg: { mlb: { FF: { R: { L: { calledStrikes: z(0, 1), speedSum: z(0, 380) } } } } }, post: null }
+  const joined = joinPlate(grid, plate)
+  assert.equal(joined.plate, true)
+  const c = hitterCounters(joined, { code: 'FF', hand: 'R', scope: 'R' })
+  assert.deepEqual([c.calledStrikes[0], c.speedSum[0], sum(c.inPlay)], [1, 380, 0])
+  assert.equal(c.pitches[0], 10)
+  // The base grid is not touched; no plate file gives the grid back as it was.
+  assert.equal(grid.reg.mlb.FF.R.L.speedSum, undefined)
+  assert.equal(joinPlate(grid, null), grid)
+})
+
+test('the plate file is read only when asked for, and a missing one gives null counters', async (t) => {
+  const fetched = []
+  const files = {
+    '/data/hitter-grid/seasons.json': { seasons: [2026], current: 2026 },
+    '/data/hitter-grid/2026/80.json': { season: 2026, bat: { 660280: entry(5) }, post: {} },
+    '/data/hitter-grid/2026/80.plate.json': { season: 2026, bat: { 660280: { mlb: { FF: { R: { L: { speedSum: z(0, 475) } } } } } }, post: {} },
+    '/data/hitter-grid/2026/81.json': { season: 2026, bat: { 660281: entry(5) }, post: {} },
+  }
+  t.mock.method(globalThis, 'fetch', async (url) => {
+    fetched.push(url)
+    return files[url] ? { ok: true, status: 200, json: async () => files[url] } : { ok: false, status: 404, json: async () => null }
+  })
+  assert.equal(fetched.length, 0)
+  assert.equal((await fetchHitterGridFor(660280, 2026)).plate, undefined)
+  assert.ok(!fetched.some((u) => u.includes('.plate')))
+  const withPlate = await fetchHitterGridFor(660280, 2026, { plate: true })
+  assert.equal(hitterCounters(withPlate, { code: 'FF', hand: 'R', scope: 'R' }).speedSum[0], 475)
+  const missing = await fetchHitterGridFor(660281, 2026, { plate: true })
+  assert.equal(hitterCounters(missing, { code: 'FF' }).speedSum, null)
 })
 
 test('flatRates is the whole-type rate per metric, wherever the pitch was thrown', () => {

@@ -150,35 +150,39 @@ const rowsOf = (db, season, scope) =>
   db.prepare(`SELECT c.*, ${PLATE_COLS.map((x) => `p.${x}`).join(', ')} FROM ${JOIN} WHERE c.season = ? AND c.scope = ? ORDER BY person_id, level, code, p_throws, stand`).all(season, scope)
 
 // One row into an entry { [level]: { [code]: { [pitcherHand]: { [stand]: counters } } } },
-// adding onto what is there. An all-zero counter is left out, and so is
-// xwobaBip unless every row of the season has it (`xwoba`), and so are the
-// plate counters unless every row has them (`plate`).
-function addRow(entry, r, { xwoba, plate }) {
+// adding onto what is there. `fields` are the counters the entry takes: an
+// all-zero counter is left out.
+function addRow(entry, r, fields) {
   const into = ((((entry[r.level] ??= {})[r.code] ??= {})[r.p_throws] ??= {})[r.stand] ??= {})
-  FIELDS.forEach((f, i) => {
-    if (f === 'xwobaBip' ? !xwoba : PLATE_FIELDS.includes(f) && !plate) return
-    const arr = parseCells(r[COLS[i]])
+  for (const f of fields) {
+    const arr = parseCells(r[COLS[FIELDS.indexOf(f)]])
     if (arr.some((v) => v > 0)) into[f] = arr.map((v, j) => round(v + (into[f]?.[j] ?? 0)))
-  })
+  }
 }
 
 // One season and scope: `bat`, { [hitterId]: entry }, and `league`, every
 // hitter's rows summed into ONE entry of the same shape, so the colour scale
 // reads it with the same reader as a hitter. `xwoba`: every hitter row of the
-// season, both scopes, has its estimate. One NULL row and the season has none.
-// `plate`: every hitter row has its plate row.
+// season, both scopes, has its estimate. One NULL row and the season has none,
+// and the base entries leave xwobaBip out.
+// `plate`: { bat } with the plate counters alone (#1911, they are the sibling
+// NN.plate.json file, not part of the base shards), or null unless every
+// hitter row of the season has its plate row.
 export function exportHitterGrid(db, season, scope = 'R') {
   const { n, noXwoba, noPlate } = db.prepare(
     `SELECT COUNT(*) AS n, COUNT(*) - COUNT(xwoba_bip) AS noXwoba, COUNT(*) - COUNT(p.called_strikes) AS noPlate FROM ${JOIN} WHERE c.season = ?`,
   ).get(season)
-  const flags = { xwoba: n > 0 && noXwoba === 0, plate: n > 0 && noPlate === 0 }
+  const xwoba = n > 0 && noXwoba === 0
+  const base = CELL_FIELDS.filter((f) => xwoba || f !== 'xwobaBip')
   const bat = {}
   const league = {}
+  const plate = n > 0 && noPlate === 0 ? { bat: {} } : null
   for (const r of rowsOf(db, season, scope)) {
-    addRow((bat[r.person_id] ??= {}), r, flags)
-    addRow(league, r, flags)
+    addRow((bat[r.person_id] ??= {}), r, base)
+    addRow(league, r, base)
+    if (plate) addRow((plate.bat[r.person_id] ??= {}), r, PLATE_FIELDS)
   }
-  return { bat, league, ...flags }
+  return { bat, league, xwoba, plate }
 }
 
 // Forget a season's hitter half, so the next sweep re-walks it: after a new
@@ -201,9 +205,16 @@ export async function writeHitterGrid(db, season) {
   if (missing) return console.log(`hitter-grid/${season}/ not written: ${missing} MLB games still owe the hitter half`)
   const [reg, post] = ['R', 'P'].map((scope) => exportHitterGrid(db, season, scope))
   if (!Object.keys(reg.bat).length) return
-  const head = { season, ...(reg.xwoba && { xwoba: true }), ...(reg.plate && { plate: true }) }
+  const head = { season, ...(reg.xwoba && { xwoba: true }) }
   if (!reg.xwoba) console.log(`hitter-grid/${season}/ written with no xwOBA: a row has no estimate (no table, or swept before it)`)
-  if (!reg.plate) console.log(`hitter-grid/${season}/ written with no plate counters: a row was swept before them`)
-  await writeShards(join(outDir, String(season)), [...bucketsOf(head, reg.bat, post.bat, 'bat'), ['league', { ...head, bat: reg.league, post: post.league }]])
+  if (!reg.plate) console.log(`hitter-grid/${season}/ written with no plate counters: a row was swept before them, so no NN.plate.json`)
+  // The plate counters ride in NN.plate.json beside each bucket, in the same writeShards call
+  // (it sweeps every file it did not write). With a row swept before them, no plate file is written.
+  const plateFiles = reg.plate ? bucketsOf({ season }, reg.plate.bat, post.plate.bat, 'bat').map(([k, body]) => [`${k}.plate`, body]) : []
+  await writeShards(join(outDir, String(season)), [
+    ...bucketsOf(head, reg.bat, post.bat, 'bat'),
+    ['league', { ...head, bat: reg.league, post: post.league }],
+    ...plateFiles,
+  ])
   await writeSeasons(outDir, season)
 }

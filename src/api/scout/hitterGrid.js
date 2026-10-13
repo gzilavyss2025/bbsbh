@@ -17,25 +17,49 @@
 // tracked ones, ADR-0097), calledStrikes, inPlay and speedSum (the start speed
 // of every pitch that has one; #1911). Sums only. An all-zero counter is absent.
 // `xwoba: true` on a file says the season's xwobaBip is complete; without it
-// the file has no xwobaBip. `plate: true` says the same of calledStrikes,
-// inPlay and speedSum: a file without it was written before them.
+// the file has no xwobaBip.
+// THE PLATE FILE (#1911): calledStrikes, inPlay and speedSum are NOT in those
+// shards. They sit in hitter-grid/{season}/NN.plate.json, the same bucket and
+// the same { bat, post } shape, each counter at the same code/hand/stand path.
+// It is written only when every row of the season has them, and read only
+// when a caller asks (`plate: true`): a missing file means "not on file".
 import { shardKey100 } from '../../lib/shardKey.js'
 import { GRID } from '../../lib/zone/zoneGeometry.js'
 import { currentSeasonOf, staticJsonBy } from '../staticJson.js'
 
 const fetchFile = staticJsonBy((key) => `/data/hitter-grid/${key}.json`, { fallback: null })
+const fetchPlateFile = staticJsonBy((key) => `/data/hitter-grid/${key}.plate.json`, { fallback: null })
 const asGrid = (season, reg, post, file) =>
-  reg || post ? { season, reg: reg ?? null, post: post ?? null, ...(file?.xwoba && { xwoba: true }), ...(file?.plate && { plate: true }) } : null
+  reg || post ? { season, reg: reg ?? null, post: post ?? null, ...(file?.xwoba && { xwoba: true }) } : null
+
+// One part (reg or post) with the plate counters put onto the same code/hand/stand path.
+function joinPart(base, extra) {
+  if (!base || !extra) return base
+  const out = structuredClone(base)
+  for (const [c, byHand] of Object.entries(extra.mlb ?? {})) {
+    for (const [h, byStand] of Object.entries(byHand)) {
+      for (const [s, counters] of Object.entries(byStand)) Object.assign(out.mlb?.[c]?.[h]?.[s] ?? {}, counters)
+    }
+  }
+  return out
+}
+
+// The grid with its plate counters, flagged `plate: true`; the grid as it was with no plate file.
+export const joinPlate = (grid, plate) =>
+  plate ? { ...grid, reg: joinPart(grid.reg, plate.reg), post: joinPart(grid.post, plate.post), plate: true } : grid
 
 // One season, never pooled with another (the 2026 zone is not the 2025 zone).
 // Pass the pitch-command season so both maps read the same one.
+// `plate: true` also reads the plate file and joins it (the grid then carries `plate: true`).
 // -> null | { season, reg: entry | null, post: entry | null, xwoba?: true, plate?: true }
-export async function fetchHitterGridFor(personId, season) {
+export async function fetchHitterGridFor(personId, season, { plate = false } = {}) {
   if (personId == null) return null
   season ??= await currentSeasonOf('hitter-grid')
   if (season == null) return null
-  const shard = await fetchFile(`${season}/${shardKey100(personId)}`)
-  return asGrid(season, shard?.bat?.[personId], shard?.post?.[personId], shard)
+  const key = `${season}/${shardKey100(personId)}`
+  const [shard, extra] = await Promise.all([fetchFile(key), plate ? fetchPlateFile(key) : null])
+  const grid = asGrid(season, shard?.bat?.[personId], shard?.post?.[personId], shard)
+  return grid && joinPlate(grid, extra && asGrid(season, extra.bat?.[personId], extra.post?.[personId]))
 }
 
 // Every hitter summed, the same shape as one hitter's grid.
@@ -58,7 +82,7 @@ export const FIELDS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaFixed', 'bip
 // `wobaSum` is wobaFixed + xwobaBip, cell by cell, when the season's xwOBA is
 // on file (`grid.xwoba`), and null when not: wobaFixed alone would read as a
 // low xwOBA (ADR-0096, ADR-0097). calledStrikes, inPlay and speedSum are null
-// when the season's file has no `plate` flag: unknown, not 0.
+// when the grid was not joined with its plate file (`plate: true`): unknown, not 0.
 // Null when nothing matches.
 export function hitterCounters(grid, { code = null, hand = null, stand = null, scope = null } = {}) {
   const out = Object.fromEntries(FIELDS.map((f) => [f, new Array(GRID * GRID).fill(0)]))

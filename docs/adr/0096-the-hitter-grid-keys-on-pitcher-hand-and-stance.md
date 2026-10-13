@@ -47,10 +47,14 @@ that joins on the pitch (#1411, the Part C spike). The owner has not picked one.
      and the shared sets and the pitcher grids keep it as a swing only.
    - `called_strikes`, `in_play` and `speed_sum` (start speed) came with #1911,
      in `pitch_hitter_plate`: a table of its own, so the dump of
-     `pitch_hitter_cells` keeps its bytes. A cells row with no plate row was
-     swept before them; the file says `plate: true` only when no row lacks one,
-     and the reader gives `null`, not 0, without it. The in-zone count needs no
-     counter: it is the middle nine cells at read time.
+     `pitch_hitter_cells` keeps its bytes. They are NOT in the base shards:
+     the export writes them to `hitter-grid/{season}/NN.plate.json`, the same
+     bucket, so the base shards keep their size under the 120 KB ceiling. The
+     plate file is written only when every cells row has a plate row (a row
+     swept before them has none), and the reader fetches it only when asked
+     (`fetchHitterGridFor(id, season, { plate: true })`); no file gives `null`,
+     not 0. The in-zone count needs no counter: it is the middle nine cells
+     at read time.
    - `pa_end` counts the pitches that an xwOBA mean counts. A PA ends on the
      last event of a play whose eventType is on the plate-appearance allow
      list (`isPlateAppearance` in `scripts/lib/long-at-bats.mjs`). A PA that
