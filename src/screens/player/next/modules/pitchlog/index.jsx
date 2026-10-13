@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import '../../../../../styles/player-next/pitcher/pitchlog.css'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
@@ -129,12 +129,12 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
   useEffect(() => {
     onCount(view ? starts(view.rows.length) : undefined)
   }, [view, onCount])
-  const rows = useMemo(() => (view ? scopeRows(view.rows, scope) : []), [view, scope])
 
   if (empty) return null
   if (!view) return <div className="pitchlog pitchlog--wait" aria-busy="true"><p className="hint">Loading the game log…</p></div>
 
   const all = view.rows
+  const rows = scopeRows(all, scope)
   const post = scopeRows(all, 'post').length
   const t = totalsOf(rows)
   const shown = more ? rows : rows.slice(0, SHOWN)
@@ -142,10 +142,10 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
   const groups = scope === 'all' && post > 0
   const lines = shown.flatMap((r, i) =>
     groups && (i === 0 || r.post !== shown[i - 1].post)
-      ? [{ key: `div-${r.post}`, divider: r.post ? 'Postseason' : 'Regular season', note: starts(r.post ? post : all.length - post) }, { ...r, key: r.gamePk }]
+      ? [{ key: `div-${r.gamePk}`, divider: r.post ? 'Postseason' : 'Regular season', note: starts(r.post ? post : all.length - post) }, { ...r, key: r.gamePk }]
       : [{ ...r, key: r.gamePk }],
   )
-  const codes = keyOf(rows)
+  const codes = keyOf(shown)
   const counts = { all: all.length, reg: all.length - post, post }
 
   return (

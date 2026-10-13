@@ -28,7 +28,7 @@
   padding: var(--space-2);
   border-bottom: var(--bw-hair) solid var(--border-hairline);
   vertical-align: middle;
-  font-size: var(--fs-cell);
+  font-size: var(--fs-small);
 }
 .logtable__grid .logtable__cell {
   text-align: right;

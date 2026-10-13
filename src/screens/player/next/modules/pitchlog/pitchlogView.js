@@ -91,7 +91,7 @@ export function totalsOf(rows) {
 // One season's starts with their scores and mixes, or null (no start, or the log did not load).
 export async function loadPitchlog(personId, season, asOf) {
   const log = await fetchPersonStats(personId, { type: 'gameLog', group: 'pitching', season, gameType: MLB_LOG_GAME_TYPES })
-  const starts = log.filter(isStart)
+  const starts = log.filter((s) => isStart(s) && (!asOf || s.date < asOf))
   if (!starts.length) return null
   const pks = starts.map((s) => s.game?.gamePk)
   const [scores, mixes] = await Promise.all([
