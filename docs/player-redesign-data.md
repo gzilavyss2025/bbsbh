@@ -147,7 +147,7 @@ Module issue: #1888.
 | Launch angle (colour mode, groups, average) | none | missing | Add `launchAngle` as a column in `scripts/gen-spray.mjs` |
 | Distance | none | missing | Add `totalDistance` in the same change |
 | Barrel flag | none | missing | Derive from exit velocity and launch angle once stored |
-| xBA per ball | none | missing | Not stored anywhere. Drop it, or show xwOBA (est.) from the `xwoba-table` |
+| xBA per ball | `xba-table/{season}.json` | lookup on exit velocity and launch angle | A lattice like the `xwoba-table`; nothing reads it yet (#1912, part b) |
 | Date, gamePk, opponent (timeline) | spray `g` merges games into park runs | missing | Write `g` as `[count, venueId, gamePk]` runs |
 | Pitch type and speed, play text | none | missing | Optional columns; leave out the play text |
 
