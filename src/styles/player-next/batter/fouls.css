@@ -1,0 +1,267 @@
+/* ==== NEW PLAYER PAGE: the Foul balls card (#1891, board FoulBalls) ====
+   The frame, its name tab and its count tag are the slot's Card (Slot.jsx); this file holds the
+   inside. It lays out by the card's own width, not the screen's. */
+
+.fouls {
+  container-type: inline-size;
+}
+/* Holds about the loaded card while the data loads: the grid, the panel and the baseline. */
+.fouls__wait {
+  min-height: 50rem;
+}
+/* layout-exempt: a named-area grid, one column on a phone and the panel beside the grid when wide */
+.fouls__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+.fouls__panel {
+  padding: var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--bg-canvas);
+}
+@container (min-width: 45rem) {
+  .fouls__body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    grid-template-areas: "pick panel" "base panel";
+    column-gap: var(--space-6);
+    align-items: start;
+  }
+  .fouls__pick {
+    grid-area: pick;
+  }
+  .fouls__panel {
+    grid-area: panel;
+  }
+  .fouls__base {
+    grid-area: base;
+  }
+}
+
+.fouls__cap,
+.fouls__colhead {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+.fouls__colhead {
+  text-align: center;
+}
+.fouls__rowhead {
+  display: flex;
+  align-items: center;
+  text-align: left;
+}
+
+/* ---- the 4 x 3 count grid ---- */
+/* layout-exempt: a row head and three count cells, the shape of a count table */
+.fouls__grid {
+  display: grid;
+  grid-template-columns: var(--space-12) repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+/* layout-exempt: centres the count name over its visit share */
+.fouls__cell {
+  appearance: none;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: var(--tap-min);
+  margin: calc(var(--bw-hair) * -1);
+  padding: var(--space-2) 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  cursor: pointer;
+}
+/* The shade is the fouls per visit, against this batter's own busiest count. */
+.fouls__cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--surface-stamped-ink);
+  opacity: calc(0.06 + var(--heat, 0) * 0.3);
+}
+.fouls__cell[aria-pressed="true"] {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+}
+.fouls__cell[aria-pressed="true"]::before {
+  opacity: 0;
+}
+.fouls__cell:focus-visible {
+  z-index: 1;
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+.fouls__name {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+.fouls__reach {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-solid);
+}
+
+/* ---- the picked count ---- */
+.fouls__big {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-display-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+.fouls__flag {
+  padding: var(--space-1) var(--space-2);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+/* layout-exempt: three equal figures side by side */
+.fouls__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.fouls__stat--end {
+  align-items: flex-end;
+  text-align: right;
+}
+.fouls__num {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+}
+.fouls__sub,
+.fouls__lg {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.fouls__lg b {
+  color: var(--accent-negative);
+}
+.fouls__lg .fouls__ink {
+  color: var(--text-heading);
+}
+.fouls__between {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+.fouls__stat--end .fouls__num {
+  color: var(--accent-negative);
+}
+
+/* ---- the rail: his figure filled, the league's as a tick ---- */
+.fouls__rail {
+  position: relative;
+  height: var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.fouls__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--surface-stamped-ink);
+}
+.fouls__tick {
+  position: absolute;
+  top: calc(var(--space-1h) * -1);
+  bottom: calc(var(--space-1h) * -1);
+  width: var(--bw-rule);
+  margin-left: calc(var(--bw-hair) * -1);
+  background: var(--accent-negative);
+}
+
+/* ---- how those at-bats ended ---- */
+.fouls__bar {
+  display: flex;
+  height: var(--space-8);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.fouls__seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+}
+.fouls__bar .fouls__seg + .fouls__seg {
+  border-left: var(--bw-heavy) solid var(--border-stamped);
+}
+.fouls__seg--hit {
+  background: var(--accent-positive);
+  color: var(--text-on-ink);
+}
+.fouls__seg--walk {
+  background: var(--field-mint);
+  color: var(--text-heading);
+}
+.fouls__seg--out {
+  background: var(--clay-soft);
+  color: var(--text-heading);
+}
+.fouls__seg--so {
+  background: var(--accent-negative);
+  color: var(--text-on-ink);
+}
+/* layout-exempt: legend rows in two columns */
+.fouls__legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1h) var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-ui);
+}
+.fouls__legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.fouls__legend b {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+.fouls__legend b span {
+  color: var(--text-caption);
+  font-weight: var(--w-medium);
+}
+.fouls__key {
+  flex: none;
+  width: var(--space-3h);
+  height: var(--space-3h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+
+/* ---- the season baseline ---- */
+.fouls__metric {
+  padding: var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
