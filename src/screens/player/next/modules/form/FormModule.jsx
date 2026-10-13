@@ -57,7 +57,7 @@ export default function FormModule({ bio, asOf, season, onEmpty, onCount }) {
   return (
     <div className="fform">
       <div className="fform__top">
-        <div className="fform__read" aria-live="polite">
+        <div className="fform__read" aria-live={running ? 'off' : 'polite'}>
           <span className="fform__big">{text.big}</span>
           <span className="fform__lines">
             <span className="fform__line1">{text.line1}</span>
