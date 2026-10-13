@@ -79,11 +79,13 @@
 // Class: cutoff-gated (spoiler-manifest.json). Degrades to `null` on any
 // failure so the sheet shows its retry state rather than an empty ledger.
 import { getJson } from '../statsapi.js'
+import { baseballToday } from '../../lib/time/standingsDates.js'
 import { facetPlan } from './facets.js'
 import {
   boxLineRows,
   logRequestPlan,
   matchingSplits,
+  MLB_LOG_GAME_TYPES,
   REGULAR_SEASON,
   scorelessGamePks,
 } from './rows.js'
@@ -368,4 +370,33 @@ export async function fetchBoxLines({ personId, group, cutoff = null, facet = nu
     ? await lineupSlotsFor(key, personId, [...new Set(join.splits.map((s) => s.game.gamePk))])
     : null
   return boxLineRows({ ...join, group, cutoff, gameTypes: types, keep, lineupSlots })
+}
+
+// THE PLAYER PAGE'S GAME LOG SCORES (#1914): a Map gamePk -> its gated box
+// line (`won`, `runs`, `oppRuns` are what the log reads) for the game-log
+// splits handed in. The same schedule call as the join above, and the same
+// gate, under the EARLIER of `cutoff` and the baseball today: a split on or
+// after it is dropped BEFORE the call, so its gamePk is never asked about, and
+// boxLineRows re-applies it and the Final check on what comes back. An empty
+// map on any failure: the log then shows no score, as before.
+//
+// TODAY IS HELD even with no cutoff (Gary, 2026-10-13). A link out of a game
+// carries no `?d=` (ADR-0034's "The cutoff is opt-in now"), so a reader who
+// taps a player while scoring tonight's game, or one from earlier today off a
+// recording, or game 1 before he scores game 2, would read its final score at
+// the top of the log. The row stays, with no score and no decision.
+// `baseballToday` is US Pacific, the last zone to roll over, as in
+// scout/playIds.js's `mayRead`.
+export async function fetchFinalScores(splits, group, cutoff = null, today = baseballToday()) {
+  const until = cutoff && cutoff < today ? cutoff : today
+  const gameTypes = MLB_LOG_GAME_TYPES.split(',')
+  const gated = matchingSplits(splits, { gameTypes }).filter((s) => s.date < until)
+  if (!gated.length) return new Map()
+  try {
+    const schedule = await fetchSchedule([...new Set(gated.map((s) => s.game.gamePk))])
+    const rows = boxLineRows({ splits: gated, schedule, group, cutoff: until, gameTypes })
+    return new Map(rows.map((r) => [r.gamePk, r]))
+  } catch {
+    return new Map()
+  }
 }

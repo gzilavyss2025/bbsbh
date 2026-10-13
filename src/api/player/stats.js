@@ -18,10 +18,13 @@ import {
 } from '../person-fetch.js'
 import { resolveCareerOrgs } from '../careerTimeline.js'
 import { MLB_LOG_GAME_TYPES } from '../boxlines/rows.js'
+import { fetchFinalScores } from '../boxlines/fetch.js'
 import { fetchWarData, fetchWarHistory, warByYearFor, warByTeamFor } from '../war.js'
 import { fetchVsTeamSplitsForPlayer, vsTeamSplitsFor } from '../vsTeamSplits.js'
 import {
   buildBlock,
+  gameLogLimit,
+  loggedSplits,
   otherLevelSeasonBlocks,
   pitcherRole,
   SITUATIONAL_SIT_CODES,
@@ -126,9 +129,13 @@ export async function loadPlayerStats(id, asOf) {
       const otherGroupYears = otherYby.length
         ? new Set(otherYby.flatMap((y) => [...y.mlbYbySplits, ...y.milbYbySplits]).map((s) => Number(s.season)))
         : null
-      const [milbCareerSplits, orgOf] = await Promise.all([
+      // The final score of each row the log will show (both levels' logs, one
+      // schedule call), asked for only over the rows the cutoff let through.
+      const shown = (splits) => loggedSplits(splits, cutoff, gameLogLimit(group))
+      const [milbCareerSplits, orgOf, gameLogScores] = await Promise.all([
         yby.milbYbySplits.length ? fetchMilbCareer(id, group) : [],
         resolveCareerOrgs([...yby.mlbYbySplits, ...yby.milbYbySplits]),
+        fetchFinalScores([...shown(gameLogSplits), ...shown(altGameLogSplits)], group, cutoff),
       ])
 
       const block = buildBlock({
@@ -139,6 +146,7 @@ export async function loadPlayerStats(id, asOf) {
         lrSplits,
         gameLogSplits,
         altGameLogSplits,
+        gameLogScores,
         arsenalSplits: [],
         mlbYbySplits: yby.mlbYbySplits,
         milbYbySplits: yby.milbYbySplits,

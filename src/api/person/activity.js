@@ -15,7 +15,7 @@ import {
 import { monthDayName } from '../../lib/dates.js'
 import { pitcherRole } from './identity.js'
 import { aggregateSplits, milbCareerStat, hitterTiles, pitcherTiles, splitsView } from './stats.js'
-import { gameLogView } from './gameLog.js'
+import { gameLogLimit, gameLogView } from './gameLog.js'
 import { milestoneWatchView, mlbCareerThroughCutoff } from './milestones.js'
 import { arsenalView } from './advanced.js'
 import { careerRegisterView, levelSeasonStat, LEVEL_ORDER_DESC } from './careerRegister.js'
@@ -428,7 +428,7 @@ export function otherLevelSeasonBlocks({ mlbSplits, milbSplits, group, currentSe
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
 
-export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, altGameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, milbCareerSplits, cutoff, currentSeason, currentSportId, debutYear, retiredYear = null, tileStat, levelOnlyStat, levelOnlySplits, logTagLevel = false, warByYear = {}, warByTeam = {}, transactions = [], orgOf = null, otherGroupYears = null }) {
+export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, altGameLogSplits, gameLogScores = null, arsenalSplits, mlbYbySplits, milbYbySplits, milbCareerSplits, cutoff, currentSeason, currentSportId, debutYear, retiredYear = null, tileStat, levelOnlyStat, levelOnlySplits, logTagLevel = false, warByYear = {}, warByTeam = {}, transactions = [], orgOf = null, otherGroupYears = null }) {
   // The date-cut current-season stat at the player's CURRENT level. It leads
   // the "Current season" tiles, so it can't move mid-game. `tileStat` (see
   // loadPlayer) resolves to the live level for an active MLB/single-level
@@ -455,7 +455,7 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
   const otherLevels = otherLevelSeasonBlocks({
     mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, currentSeason, currentSportId,
   })
-  const logLimit = group === 'pitching' ? 6 : 8
+  const logLimit = gameLogLimit(group)
   return {
     group,
     role,
@@ -471,7 +471,7 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     otherLevels,
     arsenal: group === 'pitching' ? arsenalView(arsenalSplits) : null,
     splits: splitsView(lrSplits, group),
-    gameLog: gameLogView(gameLogSplits, group, cutoff, logLimit, { tagLevel: logTagLevel }),
+    gameLog: gameLogView(gameLogSplits, group, cutoff, logLimit, { tagLevel: logTagLevel, scores: gameLogScores }),
     // The Game log's level toggle — offered only when `otherLevels` (above)
     // already found a second level worth a promoted tile THIS season, so the
     // toggle never appears without the tile giving it context. Reuses that
@@ -483,7 +483,7 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     // for everyone else, including a rehab combined log (already both levels,
     // per-row tagged) so the two ways of seeing a split level never compete.
     gameLogAlt: otherLevels?.length
-      ? gameLogView(altGameLogSplits, group, cutoff, logLimit)
+      ? gameLogView(altGameLogSplits, group, cutoff, logLimit, { scores: gameLogScores })
       : null,
     gameLogAltLevel: otherLevels?.length ? otherLevels[0].level : null,
     // The unified MLB + MiLB career table. `career` (the API's MLB career line
