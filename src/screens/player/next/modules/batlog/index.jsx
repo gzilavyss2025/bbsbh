@@ -24,8 +24,8 @@ const games = (n) => `${n} ${n === 1 ? 'game' : 'games'}`
 // Bold-equivalent marks: 3+ hits, a homer, 3+ RBI (green); 3+ strikeouts (clay).
 const HI = { h: (v) => v >= 3, hr: (v) => v >= 1, rbi: (v) => v >= 3 }
 const LO = { k: (v) => v >= 3 }
-// Hidden in the card look (the board drops them there); the table shows all.
-const WIDE = new Set(['d2', 'd3', 'sb', 'avg'])
+// A column's class: 2B, 3B, SB and AVG are hidden in the card look (the board drops them there).
+const CLASS = { d2: 'batlog__wide', d3: 'batlog__wide', sb: 'batlog__wide', avg: 'batlog__wide', game: 'batlog__game', seen: 'batlog__seen', bar: 'batlog__barcell' }
 const SEGS = [
   ['whiffs', 'Whiffs'],
   ['fouls', 'Fouls'],
@@ -63,7 +63,7 @@ const CELLS = {
   ),
   bar: (r) =>
     r.other == null ? (
-      <span className="hint">No pitch counts on file</span>
+      <span className="hint">No whiff or foul counts on file</span>
     ) : (
       <span className="batlog__bar" role="img" aria-label={SEGS.map(([k, name]) => `${name} ${r[k]}`).join(', ')}>
         {SEGS.map(([k]) =>
@@ -79,7 +79,7 @@ const CELLS = {
 
 const TABLE_COLUMNS = COLUMNS.map((c) => ({
   ...c,
-  className: WIDE.has(c.key) ? 'batlog__wide' : c.key === 'game' ? 'batlog__game' : c.key === 'bar' ? 'batlog__barcell' : c.key === 'seen' ? 'batlog__seen' : undefined,
+  className: CLASS[c.key],
   cell:
     CELLS[c.key] ??
     ((r) => <span className={`mono${HI[c.key]?.(r[c.key]) ? ' batlog__hi' : LO[c.key]?.(r[c.key]) ? ' batlog__lo' : ''}`}>{r[c.key]}</span>),
@@ -120,7 +120,7 @@ export default function BatlogModule({ bio, asOf, season, onEmpty, onCount }) {
         {post > 0 && (
           <Cluster gap="tight" role="group" aria-label="Show games">
             {SCOPES.map(([id, label]) => (
-              <Button key={id} size="control" pressed={id === scope} onClick={() => setScope(id)}>
+              <Button key={id} size="control" pressed={id === scope} onClick={() => (setScope(id), setMore(false))}>
                 {label} <span className="mono">{counts[id]}</span>
               </Button>
             ))}
