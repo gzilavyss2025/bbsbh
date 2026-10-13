@@ -37,10 +37,11 @@ export function rankMarks(rankSplits, group, pools) {
   const [s] = list
   const pool = pools.get(s.league?.id)
   if (!pool) return marks
-  for (const { key, label, tile = label, rate, chipOnly } of RANK_STATS[group]) {
+  for (const { key, label, tile = label, rate, chipOnly } of RANK_STATS[group] ?? []) {
     const rank = !chipOnly && topRank(s.stat, key)
     const of = pool[rate ? 'qualified' : 'all'][group]
-    if (rank && of) marks.push({ key, label: tile, rank, of, text: `${rank} of ${of}` })
+    // A rank past its pool (early in a season) is not "N of M": none.
+    if (rank && of && rank <= of) marks.push({ key, label: tile, rank, of, text: `${rank} of ${of}` })
   }
   return marks
 }
@@ -72,7 +73,9 @@ function poolsFor(season, leagueId) {
 // player with no rankings (MiLB, or a spoiler cutoff, where the caller passes none).
 // `playerId` stays in the call shape the page uses; the pool no longer needs it.
 export async function fetchRankMarks(playerId, group, rankSplits, season) {
-  const leagueIds = [...new Set(rankedSplits(rankSplits).map((s) => s.league?.id).filter(Boolean))]
+  // A traded player gets no mark (rankMarks), so he costs no pool request either.
+  const list = rankedSplits(rankSplits)
+  const leagueIds = list.length === 1 && list[0].league?.id ? [list[0].league.id] : []
   const pools = new Map()
   await Promise.all(
     leagueIds.map(async (id) => {

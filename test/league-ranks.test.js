@@ -144,3 +144,20 @@ test('a traded hitter keeps the SO tile caption: the summed season carries plate
   const so = hitterTiles(season, null).find((t) => t.k === 'SO')
   assert.equal(so.caption, '680 PA')
 })
+
+test('a rank larger than its pool shows nothing: early in a season "8 of 6" is not a rank', () => {
+  const early = new Map([[NL, sizes(6, 6, 412, 473)]])
+  assert.deepEqual(rankMarks([split({ era: '8', strikeOuts: 2 })], 'pitching', early).map((m) => m.text), ['2 of 473'])
+})
+
+test('an unknown group gives no marks, not an error', () => {
+  assert.deepEqual(rankMarks([split({ avg: '1' })], 'fielding', POOLS), [])
+})
+
+test('a player traded across leagues costs no pool request', async (t) => {
+  let calls = 0
+  t.mock.method(globalThis, 'fetch', async (url) => (calls++, poolsReply(url, { q: 68, a: 412 })))
+  const two = [split({ avg: '1' }), split({ avg: '2' }, { id: 103, name: 'American League' })]
+  assert.deepEqual(await fetchRankMarks(3, 'hitting', two, 2033), [])
+  assert.equal(calls, 0)
+})

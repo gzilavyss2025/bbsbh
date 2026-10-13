@@ -46,7 +46,7 @@ Module issue: #1884.
 | W–L caption "20 GS" | season `gamesStarted` | reshape | Add the caption to `pitcherTiles` |
 | AVG "Lg" figure | `leagueAverage()` (`src/api/player/leagueAverages.js`) | reshape | Call it in the tile build in `src/api/player/overview.js` |
 | ERA "Lg 4.02" | not a repo figure | reshape | Use `leagueAverage(season, 'pitching')` (4.17). See Mismatches |
-| Rank "N of M" (AVG, HR, RBI, IP, ERA, K) | `fetchPersonStats` `type: 'rankings'`, then `hittingRanksView` / `pitchingRanksView` (`src/api/person/stats.js`) give N | reshape | M (the pool size) is missing. #1856 owns this |
+| Rank "N of M" (AVG, HR, RBI, IP, ERA, K) | `fetchPersonStats` `type: 'rankings'`, then `hittingRanksView` / `pitchingRanksView` (`src/api/person/stats.js`) give N | have | M is the pool N comes from (#1856, Gary 2026-10-13): rate stats the qualified players of his league, counting stats all players (`/api/v1/stats … playerPool=qualified or all, leagueId=L`, `totalSplits`; `src/api/player/leagueRanks.js`) |
 
 ### Jump bar counts
 
