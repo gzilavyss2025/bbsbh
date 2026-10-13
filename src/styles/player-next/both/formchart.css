@@ -110,7 +110,7 @@
 /* layout-exempt: a name column and n figure columns, set by --fcols */
 .fstretch__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(var(--fcols), var(--fstretch-col, 3rem));
+  grid-template-columns: minmax(0, 1fr) repeat(var(--fcols, 4), var(--fstretch-col, 3rem));
   column-gap: var(--space-1h);
   align-items: center;
 }
