@@ -739,13 +739,18 @@ test('the file keeps the precision Savant publishes: tenths of a foot and inch, 
   assert.deepEqual(exportPitchArsenal(db, {}, 2026).pit[100].mlb[0].phys, [-1.9, 5.8, -8.5, 14.7, 6.4, 0.41, 2288])
 })
 
-test('the committed dump still loads, and its rows have no physics until the re-walk', async () => {
+test('the committed dump loads, and after the 2026 re-walk its rows carry physics', async () => {
   const db = await openDb()
   const count = (t) => db.prepare(`SELECT COUNT(*) AS n FROM ${t}`).get().n
   assert.ok(count('pitch_arsenal_totals') > 0, 'the dump has rows')
-  assert.equal(count('pitch_arsenal_physics'), 0)
+  assert.ok(count('pitch_arsenal_physics') > 0, 'the re-walk filled the physics table')
   const out = exportPitchArsenal(db, {}, 2026)
-  assert.equal(Object.values(out.pit).some((e) => e.mlb.some((t) => t.phys)), false, 'unknown, never zero')
+  const typed = Object.values(out.pit).flatMap((e) => e.mlb.filter((t) => t.phys))
+  assert.ok(typed.length > 0, 'some tracked type carries phys')
+  assert.ok(typed.every((t) => t.phys.some((v) => v !== 0)), 'unknown, never zero: no phys is all zeros')
+  const ff = out.pit[688107].mlb.find((t) => t.code === 'FF')
+  assert.equal(ff.phys.length, 7, 'Gasser FF: seven physics means')
+  assert.ok(ff.phys.every((v) => v !== null), 'Gasser FF: none null')
 })
 
 test('clearArsenalSeason wipes one season of the arsenal half at the levels named, and nothing else', async () => {

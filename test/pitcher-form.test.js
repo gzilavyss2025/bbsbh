@@ -156,6 +156,17 @@ test('a point carries the chart fields; the summary is the game line of the wind
   assert.equal(first.ip, '13.1') // 4.0 + 4.1 + 5.0
 })
 
+test("the game line prints a count of one: the feed's own summary leaves the number out", () => {
+  // Gasser 2026-09-25, as the feed writes it: "6.0 IP, ER, 9 K, BB" with 1 ER and 1 BB. A zero reads "0 ER".
+  const feed = row(['2026-09-25', 9, '6.0', 1, 9, 1, 24, 1, 1, 'R'])
+  feed.stat.summary = '6.0 IP, ER, 9 K, BB'
+  const zero = row(['2026-09-30', 10, '7.0', 0, 8, 0, 25, 1, 1, 'R'])
+  zero.stat.summary = '7.0 IP, 0 ER, 8 K, 0 BB'
+  const [a, b] = pitcherRollingSeries([feed, zero], { by: 'apps', w: 1 }).points
+  assert.equal(a.summary, '6.0 IP, 1 ER, 9 K, 1 BB')
+  assert.equal(b.summary, '7.0 IP, 0 ER, 8 K, 0 BB')
+})
+
 test('K% and BB% are shares of batters faced over the window', () => {
   const [p] = pitcherRollingSeries([row(['2026-04-01', 1, '6.0', 2, 6, 2, 25, 1, 1, 'R']), row(['2026-04-07', 2, '5.0', 1, 4, 1, 20, 1, 1, 'R'])], { by: 'apps', w: 2 }).points
   assert.equal(p.kPct, (10 / 45) * 100)
