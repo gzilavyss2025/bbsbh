@@ -12,7 +12,9 @@
 // doubleheader game 1 is on the cutoff day and is out) and only games the
 // schedule reports Final AND scored (a live or suspended game has no row, and
 // the gate asks for the score rather than for the word Final, because a
-// postponed game calls itself Final too). The component holds no date logic; it
+// postponed game calls itself Final too) and whose schedule record did not
+// RESUME on or after the cutoff (a suspended game keeps its first day, so its
+// date alone would let a final through: gamePk 777861, #1967). The component holds no date logic; it
 // renders what it is handed. A FACET's `keep` predicate (facets.js) is applied
 // AFTER both checks, never before, so narrowing is all a facet can do — the
 // rows it never sees do not exist. `logRequestPlan` is the other half of the
@@ -45,6 +47,7 @@
 import { gamePath } from '../../lib/route.js'
 import { hitterLine, pitcherLine } from '../person/gameLog.js'
 import { ipToOuts } from '../../lib/math/innings.js'
+import { baseballToday } from '../../lib/time/standingsDates.js'
 
 const n = (v) => Number(v) || 0
 
@@ -201,9 +204,10 @@ export function matchingSplits(splits, { opponentId = null, gameTypes = REGULAR_
   )
 }
 
-// THE GATE's first two checks, shared by its two readers. A split reaches here
+// THE GATE's first three checks, shared by its two readers. A split reaches here
 // only if it is dated strictly before the cutoff — a same-day doubleheader game
-// 1 shares the date and is out — and matches a schedule record the endpoint
+// 1 shares the date and is out — and its game did not resume on or after the
+// cutoff (a suspended game's date is its first day), and matches a schedule record the endpoint
 // reports Final. The SCORE check is deliberately not here: it is the one
 // question the two readers answer differently. `boxLineRows` needs a score to
 // build a row; `scorelessGamePks` wants exactly the games that have none.
@@ -213,6 +217,10 @@ function* gatedPairs({ splits, schedule, cutoff, gameTypes }) {
     if (cutoff && !(s.date < cutoff)) continue
     const g = byPk.get(s.game.gamePk)
     if (!g || g.status?.abstractGameState !== 'Final') continue
+    // A SUSPENDED game keeps its first day on the split and officialDate; only
+    // `resumeDate` names the day it ended (gamePk 777861: suspended 2025-05-19,
+    // finished 05-21). Read as a Pacific day, on or after the cutoff = out.
+    if (cutoff && g.resumeDate && !(baseballToday(new Date(g.resumeDate)) < cutoff)) continue
     yield [s, g]
   }
 }
@@ -287,8 +295,8 @@ export function boxLineRows({
   recoveredScores = null,
 }) {
   const rows = []
-  // THE GATE, first two checks in `gatedPairs`: strictly before the cutoff — a
-  // same-day game shares the date — and only a game the schedule says is over.
+  // THE GATE, first three checks in `gatedPairs`: strictly before the cutoff — a
+  // same-day game shares the date — not resumed on or after it, and only a game the schedule says is over.
   for (const [s, g] of gatedPairs({ splits, schedule, cutoff, gameTypes })) {
     const teamId = s.team?.id ?? null
     const awayIsHis = g.teams?.away?.team?.id === teamId
