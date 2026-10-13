@@ -141,9 +141,14 @@ test('with every slot a stub, all nine batter buttons show', () => {
   assert.deepEqual(keys(shown), keys(sections))
 })
 
+// Modules whose issue has shipped: real modules, which may return null and call onEmpty. Add a
+// module here in the PR that builds it; every other module must still be a stub.
+const BUILT = new Set(['similar'])
+
 test('a stub module renders its placeholder line: it never returns null or calls onEmpty', () => {
   for (const slot of SLOTS) {
     const src = readFileSync(new URL(`../src/screens/player/next/modules/${slot.module}/index.jsx`, import.meta.url), 'utf8')
+    if (BUILT.has(slot.module)) continue
     assert.ok(!/return null/.test(src), `${slot.module} returns null`)
     assert.ok(!/onEmpty\(/.test(src), `${slot.module} calls onEmpty`)
   }
