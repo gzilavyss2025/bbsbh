@@ -29,6 +29,7 @@ export {
 
 export {
   aggregateSplits,
+  milbCareerStat,
   hitterTiles,
   pitcherTiles,
   splitsView,
