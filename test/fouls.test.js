@@ -744,9 +744,9 @@ test('the committed dump still loads and exports: no cells, no game rows, until 
   const db = await openDb()
   const out = exportFouls(db, 2026)
   assert.ok(Object.keys(out.batters).length > 100)
-  assert.equal(Object.values(out.batters).some((b) => 'byCount' in b), false)
-  assert.deepEqual(out.league.byCount, null)
-  assert.deepEqual(exportGameFouls(db, 2026), {})
+  assert.equal(Object.values(out.batters).every((b) => 'byCount' in b), true)
+  assert.equal(Array.isArray(out.league.byCount.fouls), true)
+  assert.ok(Object.keys(exportGameFouls(db, 2026)).length > 100)
 })
 
 test('rebuildCounts wipes ONE season of both tables and refills it from the ingested games', async () => {
