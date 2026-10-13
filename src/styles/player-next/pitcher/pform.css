@@ -1,0 +1,7 @@
+/* ==== THE PITCHER FORM TREND (#1930) ====
+   The card reuses the batter card's classes (batter/form.css). This file holds what the pitcher card alone needs. */
+
+/* The load reserves about the loaded card's height (reading card, chart, four stretch rows), so the page below does not jump. */
+.fform.pform--wait {
+  min-height: calc(var(--space-16) * 20);
+}
