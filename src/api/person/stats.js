@@ -92,6 +92,7 @@ export function aggregateSplits(splits, group, { dedupe = true } = {}) {
   const obp = obpDen ? (h + bb + hbp) / obpDen : 0
   const slg = ab ? tb / ab : 0
   return {
+    plateAppearances: sum('plateAppearances'),
     atBats: ab,
     hits: h,
     doubles: sum('doubles'),

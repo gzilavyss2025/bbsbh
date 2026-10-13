@@ -110,3 +110,12 @@ test('fetchRankMarks asks once per league for both groups, and not at all with n
   assert.deepEqual(await fetchRankMarks(3, 'hitting', [], 2031), [])
   assert.equal(urls.length, 1)
 })
+
+test('a traded hitter keeps the SO tile caption: the summed season carries plate appearances (#1907)', async () => {
+  const { aggregateSplits, hitterTiles } = await import('../src/api/person/stats.js')
+  const stint = (pa, so) => ({ team: { id: pa }, stat: { plateAppearances: pa, atBats: pa - 10, hits: 30, strikeOuts: so, baseOnBalls: 10 } })
+  const season = aggregateSplits([stint(300, 70), stint(380, 101)], 'hitting')
+  assert.equal(season.plateAppearances, 680)
+  const so = hitterTiles(season, null).find((t) => t.k === 'SO')
+  assert.equal(so.caption, '680 PA')
+})
