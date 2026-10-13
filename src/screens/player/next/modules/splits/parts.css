@@ -1,0 +1,191 @@
+/* ==== THE SPLITS CARD, vs-team and Game lines parts (#1886) ====
+   The club strip, the club's header, the last meeting, and the Game lines sections with their
+   folds. The rest of the card is src/styles/player-next/both/splits.css (it is at the file cap). */
+
+/* ---- the club strip, the club's header, the last meeting ---- */
+/* layout-exempt: a horizontal scroller of fixed-width club buttons */
+.splitsmod__strip {
+  position: relative;
+  display: flex;
+  gap: var(--space-1);
+  overflow-x: auto;
+  margin: 0 calc(var(--space-1h) * -1);
+  padding: var(--space-3h) var(--space-1h) var(--space-2);
+  scroll-snap-type: x proximity;
+}
+.splitsmod__club {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  width: calc(var(--space-1) * 14);
+  min-height: calc(var(--space-1) * 22);
+  padding: var(--space-2) var(--bw-heavy) var(--space-1);
+  border: var(--bw-heavy) solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-body);
+  cursor: pointer;
+  scroll-snap-align: center;
+}
+.splitsmod__club img {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+.splitsmod__club[aria-pressed='true'] {
+  border-color: var(--border-stamped);
+  background: var(--surface-inset);
+}
+.splitsmod__club[aria-pressed='true'] img {
+  opacity: 1;
+  filter: none;
+}
+.splitsmod__club.is-none img {
+  opacity: 0.3;
+}
+.splitsmod__abbr {
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+}
+.splitsmod__chipfig {
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.splitsmod__chipfig.is-thin {
+  color: var(--text-caption);
+  text-decoration: underline dotted;
+}
+.splitsmod__next {
+  position: absolute;
+  top: calc(var(--space-2) * -1);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--bw-heavy) var(--space-1);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+}
+.splitsmod__clubhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-2h);
+  margin: var(--space-1) 0 var(--space-2);
+}
+.splitsmod__clubname {
+  color: var(--text-heading);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+}
+.splitsmod__nexttag {
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.splitsmod__last {
+  margin-top: var(--space-3);
+  padding: var(--space-2h) var(--space-3);
+  border: var(--bw-heavy) solid var(--border-hairline);
+  background: var(--surface-inset);
+}
+.splitsmod__lastlabel {
+  margin: 0;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.splitsmod__lastline {
+  margin: var(--space-1) 0 0;
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  line-height: var(--lh-loose);
+}
+.splitsmod__sep {
+  padding: 0 var(--space-1h);
+  color: var(--text-caption);
+}
+
+/* ---- the Game lines sections and their folds ---- */
+.splitsmod__sec {
+  margin-top: var(--space-3h);
+}
+.splitsmod__fold {
+  display: grid;
+  grid-template-columns: var(--space-5) minmax(0, 1fr);
+  column-gap: var(--space-2);
+  align-items: center;
+  width: 100%;
+  min-height: var(--space-12);
+  padding: var(--space-2) var(--space-1h);
+  border: 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  border-radius: 0;
+  background: var(--surface-inset);
+  color: var(--text-heading);
+  text-align: left;
+  cursor: pointer;
+}
+.splitsmod__foldchev {
+  display: flex;
+  justify-content: center;
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+}
+.splitsmod__fold[aria-expanded='true'] .splitsmod__foldchev {
+  transform: rotate(90deg);
+}
+.splitsmod__foldtext {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.splitsmod__foldname {
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-solid);
+}
+.splitsmod__foldprev {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.splitsmod__pv {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.splitsmod__pv svg {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+.splitsmod__more {
+  width: 100%;
+  margin-top: var(--space-3);
+}

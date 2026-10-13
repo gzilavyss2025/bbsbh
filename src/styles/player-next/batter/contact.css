@@ -1,0 +1,122 @@
+/* ==== THE BATTER CONTACT MODULE (#1888) ====
+   ContactModule.jsx: view and color chips, the spray field with the tapped-ball panel beside
+   it, then the batted-ball mix (BattedBallMix, 27-player-position-innings.css). The field art
+   reuses the spray map's .spray__fence, .spray__foul and .spray__diamond. It reserves its
+   height while the balls load. */
+
+.fcontact {
+  min-height: calc(var(--space-16) * 8);
+}
+/* layout-exempt: two chip rows wrap on a phone */
+.fcontact__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2h) var(--space-5);
+  margin-bottom: var(--space-3h);
+}
+/* layout-exempt: chips wrap */
+.fcontact__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+/* layout-exempt: field beside its panel, one column on a phone */
+.fcontact__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+@media (min-width: 720px) {
+  .fcontact__grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+}
+/* layout-exempt: field above its legend */
+.fcontact__plot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.fcontact__field {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.fcontact__dot {
+  stroke: var(--surface-inset);
+  stroke-width: 1.5;
+  cursor: pointer;
+  fill: var(--text-caption);
+}
+.fcontact__dot--sel {
+  stroke: var(--text-heading);
+  stroke-width: 3;
+}
+.fcontact__dot--single { fill: var(--accent-primary); }
+.fcontact__dot--double,
+.fcontact__dot--triple { fill: var(--accent-positive); }
+.fcontact__dot--hr { fill: var(--award-ink); }
+.fcontact__dot--ground { fill: var(--batted-ground); }
+.fcontact__dot--line { fill: var(--batted-line); }
+.fcontact__dot--fly { fill: var(--batted-fly); }
+.fcontact__dot--pop { fill: var(--batted-pop); }
+/* layout-exempt: the panel stacks its lines */
+.fcontact__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: calc(var(--space-16) * 4);
+  padding: var(--space-3h) var(--space-4);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--field-wash);
+}
+.fcontact__eyebrow {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  text-transform: uppercase;
+}
+.fcontact__when {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+.fcontact__big {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-2xl);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+.fcontact__big small {
+  margin-left: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: var(--w-regular);
+}
+/* layout-exempt: two fixed columns */
+.fcontact__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2h) var(--space-3);
+  margin: 0;
+}
+.fcontact__stats dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+}
+.fcontact__stats dt {
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+}
+.fcontact__note {
+  margin: var(--space-3h) 0 0;
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+}
+.fcontact__facts {
+  margin-top: var(--space-3);
+}
