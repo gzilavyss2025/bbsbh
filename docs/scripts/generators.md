@@ -830,7 +830,10 @@ don't run these by hand.
   had the field; #1908). A game ingested before the columns holds none, so the arsenal
   half is re-walked with `--clear-arsenal=<season> --since=<its first day>`: it wipes that
   season's arsenal totals and ledger at the levels in the run (the command and hitter
-  halves stay) and refuses a `--since` after the first game on file. `pitch_arsenal_totals` is
+  halves stay), refuses `--until` and a `--since` after the first game on file at those
+  levels, and exits non-zero naming any game whose feed failed (run again without the flag).
+  A mean over under 5 pitches is not exported, and the precision is Savant's, to hold the
+  largest bucket under its ceiling. `pitch_arsenal_totals` is
   keyed `(season, scope, person_id, level, code, stand)` — one row per side the BATTER stood
   on, `'L'`/`'R'`, or `'?'` when the feed named none. The side is in the KEY,
   unlike the times-through split's nine columns, because the two cross: a look
