@@ -371,8 +371,8 @@ export async function fetchBoxLines({ personId, group, cutoff = null, facet = nu
   return boxLineRows({ ...join, group, cutoff, gameTypes: types, keep, lineupSlots })
 }
 
-// THE PLAYER PAGE'S GAME LOG SCORES (#1914): a Map gamePk -> { won, runs,
-// oppRuns } for the game-log splits handed in. The same schedule call as the
+// THE PLAYER PAGE'S GAME LOG SCORES (#1914): a Map gamePk -> its gated box
+// line (`won`, `runs`, `oppRuns` are what the log reads) for the game-log splits handed in. The same schedule call as the
 // join above, and the same gate: a split on or after `cutoff` is dropped BEFORE
 // the call, so its gamePk is never asked about, and boxLineRows re-applies the
 // cutoff and the Final check on what comes back. An empty map on any failure:
@@ -384,7 +384,7 @@ export async function fetchFinalScores(splits, group, cutoff = null) {
   try {
     const schedule = await fetchSchedule([...new Set(gated.map((s) => s.game.gamePk))])
     const rows = boxLineRows({ splits: gated, schedule, group, cutoff, gameTypes })
-    return new Map(rows.map((r) => [r.gamePk, { won: r.won, runs: r.runs, oppRuns: r.oppRuns }]))
+    return new Map(rows.map((r) => [r.gamePk, r]))
   } catch {
     return new Map()
   }

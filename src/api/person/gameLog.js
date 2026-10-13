@@ -76,8 +76,10 @@ export function pitcherLine(st) {
 // rather than a grid of columns.
 //
 // `scores` (optional) is boxlines/fetch.js's fetchFinalScores map, gamePk ->
-// { won, runs, oppRuns }, asked for over `loggedSplits` alone, so it can hold
-// no game the cutoff turned away. Without it a row carries no score.
+// a row carrying { runs, oppRuns }, asked for over `loggedSplits` alone, so it
+// can hold no game the cutoff turned away. Without it a row carries no score.
+// A hitter's `result` is his club's (W, L, T); a pitcher's is his own decision
+// (W, L, SV, or null), read off the gameLog stat, which carries it per game.
 export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false, scores = null } = {}) {
   const rows = loggedSplits(splits, cutoff, limit)
     .map((s) => {
@@ -96,7 +98,7 @@ export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false
         // A postseason game wears its round (WC/DS/LCS/WS); '' for the regular
         // season, so most rows carry no pill at all.
         series: seriesAbbr(s.gameType, LEAGUE_BY_ID[s.league?.id]),
-        result: score ? (score.won ? 'W' : 'L') : null,
+        result: score ? (group === 'pitching' ? decision(st) : teamResult(score)) : null,
         runs: score?.runs ?? null,
         oppRuns: score?.oppRuns ?? null,
         line: group === 'pitching' ? pitcherLine(st) : hitterLine(st),
@@ -109,6 +111,9 @@ export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false
   if (!rows.length) return null
   return { rows }
 }
+
+const teamResult = ({ runs, oppRuns }) => (runs > oppRuns ? 'W' : runs < oppRuns ? 'L' : 'T')
+const decision = (st) => (num(st.wins) ? 'W' : num(st.losses) ? 'L' : num(st.saves) ? 'SV' : null)
 
 // How many rows the Stats tab's log shows: a pitcher's outings are fewer and longer.
 export const gameLogLimit = (group) => (group === 'pitching' ? 6 : 8)

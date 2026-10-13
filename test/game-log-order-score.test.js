@@ -59,6 +59,21 @@ test('gameLogView: a row joins its final score on gamePk; no scores, no score', 
   assert.equal(gameLogView([row('2026-05-23', 1)], 'hitting', null, 8).rows[0].result, null)
 })
 
+test('gameLogView: a tied final reads T, not L', () => {
+  const scores = new Map([[1, { won: false, runs: 1, oppRuns: 1 }]])
+  assert.equal(gameLogView([row('2016-09-29', 1)], 'hitting', null, 8, { scores }).rows[0].result, 'T')
+})
+
+test("gameLogView: a pitcher's row wears his own decision, and a no-decision wears none", () => {
+  const scores = new Map([[1, { won: true, runs: 7, oppRuns: 4 }], [2, { won: true, runs: 3, oppRuns: 2 }], [3, { won: false, runs: 2, oppRuns: 5 }]])
+  const arm = (date, pk, stat) => row(date, pk, 1, { stat: { gamesStarted: 1, inningsPitched: '5.0', ...stat } })
+  const rows = gameLogView(
+    [arm('2026-09-03', 1, {}), arm('2026-09-02', 2, { saves: 1 }), arm('2026-09-01', 3, { losses: 1 })],
+    'pitching', null, 6, { scores },
+  ).rows
+  assert.deepEqual(rows.map((r) => [r.result, r.runs, r.oppRuns]), [[null, 7, 4], ['SV', 3, 2], ['L', 2, 5]])
+})
+
 // The schedule, stubbed: every gamePk asked for comes back Final, MIL home 6-2.
 function stubSchedule() {
   const asked = []
