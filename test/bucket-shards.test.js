@@ -162,3 +162,20 @@ test('a spray postseason entry is MLB only, and the ledger holds each game once'
   const { games } = JSON.parse(readFileSync(new URL('../scripts/data/spray-ingested.json', import.meta.url), 'utf8'))
   assert.equal(new Set(games).size, games.length)
 })
+
+// The spray contact store (#1912): `NN.contact.json` beside each spray bucket, the same
+// `personId % 100` join. Not on file until the full spray rebuild, so with none the
+// test checks nothing. Estimated largest 66 KB (launch angle, distance and xBA per
+// ball, a gamePk run per game, on the real 2026 batters); 90 leaves room for the
+// postseason. Re-measure with the rebuild and set the ceiling from the measured file.
+test('a spray contact bucket sits where its reader will ask for it and stays small', () => {
+  for (const d of dirs('spray')) {
+    for (const f of readdirSync(d).filter((f) => /^\d\d\.contact\.json$/.test(f))) {
+      assert.ok(statSync(new URL(f, d)).size < 90 * 1024, `spray contact: ${f} is ${Math.round(statSync(new URL(f, d)).size / 1024)} KB`)
+      const shard = read('spray', f, d)
+      for (const id of [...Object.keys(shard.bat ?? {}), ...Object.keys(shard.post ?? {})]) {
+        assert.equal(shardKey100(id), f.slice(0, 2), `spray contact: ${id} is in ${f}`)
+      }
+    }
+  }
+})

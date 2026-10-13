@@ -59,20 +59,39 @@ import { resolveBallparkLayout } from '../lib/ballpark/layout/resolveLayout.js'
 // the two entries added, never a third stored row. A bucket with no postseason
 // batter has no `post` key at all.
 //
+// THE CONTACT STORE (#1912) is a sibling file, `NN.contact.json`, because five more
+// columns and a gamePk run per game would take the busiest bucket past its size
+// ceiling. A batter's entry there is `{ n, c, g }`: `n` is how many spray rows `p`
+// held when it was written, `c` the [launchAngle, totalDistance, xBA in thousandths]
+// of the LAST `c.length` of them (rows swept before the store existed have none and
+// come first), `g` is [[count, gamePk], …] over `c`. `withContact` aligns it onto the
+// entry as `k` (one [launchAngle, distance, xBA, gamePk] or null per row) ONLY when `n`
+// equals `p.length` and `g` covers `c`; otherwise the entry reads as having no contact
+// columns, never as shifted ones. The barrel flag is not stored: isBarrel derives it.
+//
 // The stored `pitcherId` is for nobody on this card. It rides so a pitcher-side
 // spray card can read these same shards rather than sweeping the season twice.
 const shard = staticJsonBy((key) => `/data/spray/${key}.json`, { fallback: null })
+// The contact store (#1912), `NN.contact.json` beside each shard: launch angle,
+// distance, xBA and the gamePk of each run, for the Contact card alone. The spray map
+// never asks for it.
+const contactShard = staticJsonBy((key) => `/data/spray/${key}.contact.json`, { fallback: null })
 
 // `{ seasonYear }` is a year, 'all', or nothing for the current season
 // (staticJson.js's seasonFolderOf). 'all' adds his seasons into one entry, in
-// the shard's own shape, so sprayView reads it unchanged.
-export async function fetchSprayFor(personId, { seasonYear, strict } = {}) {
+// the shard's own shape, so sprayView reads it unchanged. `{ contact: true }` also
+// reads the contact store and aligns it (the Contact card; the spray map leaves it off).
+export async function fetchSprayFor(personId, { seasonYear, strict, contact = false } = {}) {
   if (personId == null) return null
   const key = shardKey100(personId)
+  const readOne = async (season) => {
+    const [d, c] = await Promise.all([shard(`${season}/${key}`), contact ? contactShard(`${season}/${key}`) : null])
+    return c && d ? attachContact(d, c, personId) : d
+  }
   return readSeasonShard(
     'spray',
     seasonYear,
-    (season) => shard(`${season}/${key}`),
+    readOne,
     (shards, seasons) => {
       // Each season's runs carry their season into the joined entry, so a ball
       // from 2022 at Comerica resolves the 2022 wall, not today's.
@@ -84,6 +103,37 @@ export async function fetchSprayFor(personId, { seasonYear, strict } = {}) {
     },
     { strict },
   )
+}
+
+// One entry with its contact rows aligned as `k`, or the entry as it was when the
+// two do not line up (see the header).
+export function withContact(entry, ce) {
+  const n = entry?.p?.length ?? 0
+  const covered = (ce?.g ?? []).reduce((t, [count]) => t + count, 0)
+  if (!ce || ce.n !== n || covered !== ce.c?.length || ce.c.length > n) return entry
+  const games = (ce.g ?? []).flatMap(([count, pk]) => new Array(count).fill(pk))
+  return { ...entry, k: [...new Array(n - ce.c.length).fill(null), ...ce.c.map((r, i) => [...r, games[i]])] }
+}
+
+// A season shard with `personId`'s contact rows aligned onto his entries.
+function attachContact(d, c, personId) {
+  const swap = (part) => {
+    const entry = entryFor(d, personId, part)
+    const joined = withContact(entry, entryFor(c, personId, part))
+    return joined === entry ? d[part] : { ...d[part], [personId]: joined }
+  }
+  return { ...d, ...(d.bat && { bat: swap('bat') }), ...(d.post && { post: swap('post') }) }
+}
+
+// Savant's barrel zone, from exit velocity and launch angle. MLB's glossary
+// (mlb.com/glossary/statcast/barrel) gives the anchors: at least 98 mph, 26-30 degrees
+// at 98 mph, widening with speed to 8-50 degrees at 116 mph. The line pair below is the
+// community fit of that zone (baseballr's code_barrel), an APPROXIMATION: it reproduces
+// both anchors, but fits of it can sit a barrel or two off Savant's own count.
+// Null when either input is missing.
+export function isBarrel(ev, la) {
+  if (ev == null || la == null) return null
+  return ev >= 98 && la >= 8 && la <= 50 && 1.5 * ev - la >= 117 && ev + la >= 124
 }
 
 // The card floor: how many balls in play a season needs before a spray map is
@@ -134,18 +184,27 @@ export function withSeasonRuns(entry, season) {
 export function decodeSprayBalls(entry, season = null) {
   const park = []
   for (const [n, v, s] of entry?.g ?? []) for (let i = 0; i < n; i++) park.push([v ?? null, s ?? season])
-  return (entry?.p ?? []).map(([x, y, ev, r, h, s, l, pid], i) => ({
-    x,
-    y,
-    exitVelo: ev ?? null,
-    result: RESULTS[r] ?? 'out',
-    hand: HANDS[h] ?? 'R',
-    side: HANDS[s] ?? 'R',
-    level: LEVELS[l] ?? 'mlb',
-    pitcherId: pid ?? null,
-    venueId: park[i]?.[0] ?? null,
-    season: park[i]?.[1] ?? season,
-  }))
+  return (entry?.p ?? []).map(([x, y, ev, r, h, s, l, pid], i) => {
+    const [la, dist, xba, gamePk] = entry.k?.[i] ?? []
+    return {
+      x,
+      y,
+      exitVelo: ev ?? null,
+      result: RESULTS[r] ?? 'out',
+      hand: HANDS[h] ?? 'R',
+      side: HANDS[s] ?? 'R',
+      level: LEVELS[l] ?? 'mlb',
+      pitcherId: pid ?? null,
+      venueId: park[i]?.[0] ?? null,
+      season: park[i]?.[1] ?? season,
+      // The contact columns (#1912): null on a ball with none, never 0.
+      launchAngle: la ?? null,
+      distance: dist ?? null,
+      xba: xba == null ? null : xba / 1000,
+      gamePk: gamePk ?? null,
+      barrel: isBarrel(ev, la),
+    }
+  })
 }
 
 // Where a ball went, as an angle off dead centre in degrees: negative toward
