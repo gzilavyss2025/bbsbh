@@ -374,6 +374,30 @@ CREATE TABLE IF NOT EXISTS foul_batter_counts (
   PRIMARY KEY (season, scope, person_id, count_idx)
 );
 
+-- Fouls BY COUNT for PITCHERS (#1993): the same cells from the pitcher's side. `fouls` and
+-- `swings` are the pitches HE threw from the count; `reach` and the four endings are the plate
+-- appearances he finished (the pitcher of record, as in foul_pitcher_totals; a PA handed off
+-- mid-count belongs to the reliever, so 0-0 `reach` can differ a little from MLB's batters
+-- faced), credited to every count they reached. A PA a caught stealing or pickoff cuts off keeps its fouls and has no `reach`.
+-- `pitches` are all the pitches he threw from the count: every game adds them, so their sum
+-- against foul_pitcher_totals.pitches tells a whole season from a part-read one.
+-- Rebuilt from scratch by gen-fouls.mjs --rebuild-counts.
+CREATE TABLE IF NOT EXISTS foul_pitcher_counts (
+  person_id INTEGER NOT NULL,
+  season    INTEGER NOT NULL,
+  scope     TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  count_idx INTEGER NOT NULL,
+  reach     INTEGER NOT NULL DEFAULT 0,
+  fouls     INTEGER NOT NULL DEFAULT 0,
+  swings    INTEGER NOT NULL DEFAULT 0,
+  hit       INTEGER NOT NULL DEFAULT 0,
+  walk      INTEGER NOT NULL DEFAULT 0,
+  so        INTEGER NOT NULL DEFAULT 0,
+  out       INTEGER NOT NULL DEFAULT 0,
+  pitches   INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (season, scope, person_id, count_idx)
+);
+
 -- A batter's pitches seen, fouls and whiffs in ONE game (#1914), for the
 -- player's game log. Written once per game, so a plain overwrite on conflict.
 CREATE TABLE IF NOT EXISTS foul_batter_games (

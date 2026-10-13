@@ -69,6 +69,7 @@ export const GROUPS = {
       'foul_team_pitch_types_pitching',
       'foul_batter_counts',
       'foul_batter_games',
+      'foul_pitcher_counts',
     ],
   },
   // Both comeback tables are written by the one nightly gen-comeback-wins.mjs —
