@@ -617,7 +617,7 @@
     },
     "person/gameLog.js": {
       "class": "cutoff-gated",
-      "why": "A player's per-game log DOES carry per-game lines, but for an open surface; the player page's own asOf cutoff is what keeps a dated view honest."
+      "why": "A player's per-game log DOES carry per-game lines, but for an open surface; the player page's own asOf cutoff is what keeps a dated view honest. `loggedSplits` is that cut, and the Stats tab asks for final scores over its rows alone, so `scores` can hold no game the cutoff turned away."
     },
     "person/identity.js": {
       "class": "spoiler-free",
@@ -813,8 +813,8 @@
       "why": "The player page's Prospect rankings card: the years a man sat on a top-prospect list, from a frozen 2005-2024 file. A scout's ranking of a player, not a fact about a game, so it opens live (ADR-0034). It names no source and no year itself; labels, credits and coverage all come from the file."
     },
     "player/stats.js": {
-      "class": "spoiler-free",
-      "why": "The player hub's Stats tab loader — the game log, the splits and the career register. A game-log row carries this player's own line and a link to that game's (sealed) box score, never the game's score; the register is a career aggregate. Its one score-adjacent element is SplitsVsTeam's last-meeting line, gated against the page's own asOf in the component."
+      "class": "cutoff-gated",
+      "why": "The player hub's Stats tab loader — the game log, the splits and the career register. A game-log row carries this player's own line, a link to that game's (sealed) box score, and the game's final score (#1914): boxlines/fetch.js's fetchFinalScores asks the schedule only for the gamePks of rows dated before the page's cutoff, so a same-day game 1 and anything later is never asked about; the register is a career aggregate. Its one score-adjacent element is SplitsVsTeam's last-meeting line, gated against the page's own asOf in the component."
     },
     "ovr/career.js": {
       "class": "spoiler-free",

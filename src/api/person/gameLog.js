@@ -6,6 +6,7 @@ import { SPORT_LABEL } from '../../lib/teams.js'
 import { monthDay } from '../../lib/dates.js'
 import { ipToOuts } from '../../lib/math/innings.js'
 import { seriesAbbr } from '../boxlines/rows.js'
+import { LEAGUE_BY_ID } from '../../lib/postseason/seriesMarks.js'
 import { DASH, NBSP, num } from './shared.js'
 
 // ---------------------------------------------------------------------------
@@ -73,14 +74,16 @@ export function pitcherLine(st) {
 // it. `cutoff` null (context-free cold link) shows the most recent games. Each
 // row carries a single broadcast-style stat `line` (see hitterLine/pitcherLine)
 // rather than a grid of columns.
-export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false } = {}) {
-  const rows = (splits ?? [])
-    .filter((s) => s.date && (!cutoff || s.date < cutoff))
-    .sort((a, b) => (a.date < b.date ? 1 : -1))
-    .slice(0, limit)
+//
+// `scores` (optional) is boxlines/fetch.js's fetchFinalScores map, gamePk ->
+// { won, runs, oppRuns }, asked for over `loggedSplits` alone, so it can hold
+// no game the cutoff turned away. Without it a row carries no score.
+export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false, scores = null } = {}) {
+  const rows = loggedSplits(splits, cutoff, limit)
     .map((s) => {
       const st = s.stat ?? {}
       const md = monthDay(s.date)
+      const score = scores?.get(s.game?.gamePk)
       return {
         date: md,
         home: s.isHome,
@@ -92,7 +95,10 @@ export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false
         level: tagLevel ? SPORT_LABEL[s.sport?.id] ?? '' : '',
         // A postseason game wears its round (WC/DS/LCS/WS); '' for the regular
         // season, so most rows carry no pill at all.
-        series: seriesAbbr(s.gameType),
+        series: seriesAbbr(s.gameType, LEAGUE_BY_ID[s.league?.id]),
+        result: score ? (score.won ? 'W' : 'L') : null,
+        runs: score?.runs ?? null,
+        oppRuns: score?.oppRuns ?? null,
         line: group === 'pitching' ? pitcherLine(st) : hitterLine(st),
         // Quality start (6+ IP, ≤3 ER, as a starter) — a small pill beside the
         // opponent so a run of strong starts reads at a glance.
@@ -102,6 +108,23 @@ export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false
     })
   if (!rows.length) return null
   return { rows }
+}
+
+// How many rows the Stats tab's log shows: a pitcher's outings are fewer and longer.
+export const gameLogLimit = (group) => (group === 'pitching' ? 6 : 8)
+
+// The splits gameLogView shows: before `cutoff`, newest first, `limit` of them.
+// A doubleheader's game 2 sits above game 1 (gameNumber), then the gamePk.
+export function loggedSplits(splits, cutoff, limit) {
+  return (splits ?? [])
+    .filter((s) => s.date && (!cutoff || s.date < cutoff))
+    .sort(
+      (a, b) =>
+        b.date.localeCompare(a.date) ||
+        num(b.game?.gameNumber) - num(a.game?.gameNumber) ||
+        num(b.game?.gamePk) - num(a.game?.gamePk),
+    )
+    .slice(0, limit)
 }
 
 // ---------------------------------------------------------------------------

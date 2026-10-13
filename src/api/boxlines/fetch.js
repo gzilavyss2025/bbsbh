@@ -84,6 +84,7 @@ import {
   boxLineRows,
   logRequestPlan,
   matchingSplits,
+  MLB_LOG_GAME_TYPES,
   REGULAR_SEASON,
   scorelessGamePks,
 } from './rows.js'
@@ -368,4 +369,23 @@ export async function fetchBoxLines({ personId, group, cutoff = null, facet = nu
     ? await lineupSlotsFor(key, personId, [...new Set(join.splits.map((s) => s.game.gamePk))])
     : null
   return boxLineRows({ ...join, group, cutoff, gameTypes: types, keep, lineupSlots })
+}
+
+// THE PLAYER PAGE'S GAME LOG SCORES (#1914): a Map gamePk -> { won, runs,
+// oppRuns } for the game-log splits handed in. The same schedule call as the
+// join above, and the same gate: a split on or after `cutoff` is dropped BEFORE
+// the call, so its gamePk is never asked about, and boxLineRows re-applies the
+// cutoff and the Final check on what comes back. An empty map on any failure:
+// the log then shows no score, as before.
+export async function fetchFinalScores(splits, group, cutoff = null) {
+  const gameTypes = MLB_LOG_GAME_TYPES.split(',')
+  const gated = matchingSplits(splits, { gameTypes }).filter((s) => !cutoff || s.date < cutoff)
+  if (!gated.length) return new Map()
+  try {
+    const schedule = await fetchSchedule([...new Set(gated.map((s) => s.game.gamePk))])
+    const rows = boxLineRows({ splits: gated, schedule, group, cutoff, gameTypes })
+    return new Map(rows.map((r) => [r.gamePk, { won: r.won, runs: r.runs, oppRuns: r.oppRuns }]))
+  } catch {
+    return new Map()
+  }
 }

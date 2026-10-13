@@ -1,0 +1,100 @@
+// The Stats tab's game log (#1914, #1915): doubleheader order, the league on a
+// postseason round, and the final score joined on gamePk behind the cutoff.
+import assert from 'node:assert/strict'
+import test, { mock } from 'node:test'
+import { gameLogView } from '../src/api/person/gameLog.js'
+import { seriesAbbr } from '../src/api/boxlines/rows.js'
+import { fetchFinalScores } from '../src/api/boxlines/fetch.js'
+
+const row = (date, gamePk, gameNumber = 1, extra = {}) => ({
+  date,
+  gameType: 'R',
+  isHome: true,
+  team: { id: 158 },
+  league: { id: 104 },
+  opponent: { id: 112, teamName: 'Cubs' },
+  game: { gamePk, gameNumber },
+  stat: { hits: 1, atBats: 4 },
+  ...extra,
+})
+
+test('gameLogView: a doubleheader reads game 2 above game 1, whatever the gamePks say', () => {
+  // Turang 2026-07-11: game 1 is 823357, game 2 is 823356 (the lower gamePk).
+  const splits = [row('2026-07-10', 1), row('2026-07-11', 823357, 1), row('2026-07-11', 823356, 2)]
+  for (const input of [splits, [...splits].reverse()]) {
+    assert.deepEqual(gameLogView(input, 'hitting', null, 8).rows.map((r) => r.gamePk), [823356, 823357, 1])
+  }
+})
+
+test('gameLogView: one date, one game number, the higher gamePk first', () => {
+  for (const input of [[row('2026-07-11', 5), row('2026-07-11', 9)], [row('2026-07-11', 9), row('2026-07-11', 5)]]) {
+    assert.deepEqual(gameLogView(input, 'hitting', null, 8).rows.map((r) => r.gamePk), [9, 5])
+  }
+})
+
+test('seriesAbbr: a league puts AL or NL before the round; the World Series stays WS', () => {
+  assert.equal(seriesAbbr('F', 'AL'), 'ALWC')
+  assert.equal(seriesAbbr('D', 'NL'), 'NLDS')
+  assert.equal(seriesAbbr('L', 'NL'), 'NLCS')
+  assert.equal(seriesAbbr('W', 'AL'), 'WS')
+  assert.equal(seriesAbbr('R', 'NL'), '')
+  assert.equal(seriesAbbr('D'), 'DS')
+})
+
+test('gameLogView: a postseason row names its league from the split', () => {
+  const view = gameLogView(
+    [row('2026-10-05', 1, 1, { gameType: 'D' }), row('2026-10-12', 2, 1, { gameType: 'L', league: { id: 103 } })],
+    'hitting',
+    null,
+    8,
+  )
+  assert.deepEqual(view.rows.map((r) => r.series), ['ALCS', 'NLDS'])
+})
+
+test('gameLogView: a row joins its final score on gamePk; no scores, no score', () => {
+  const scores = new Map([[1, { won: true, runs: 5, oppRuns: 3 }]])
+  const [scored, bare] = gameLogView([row('2026-05-23', 1), row('2026-05-22', 2)], 'hitting', null, 8, { scores }).rows
+  assert.deepEqual([scored.result, scored.runs, scored.oppRuns], ['W', 5, 3])
+  assert.deepEqual([bare.result, bare.runs, bare.oppRuns], [null, null, null])
+  assert.equal(gameLogView([row('2026-05-23', 1)], 'hitting', null, 8).rows[0].result, null)
+})
+
+// The schedule, stubbed: every gamePk asked for comes back Final, MIL home 6-2.
+function stubSchedule() {
+  const asked = []
+  const m = mock.method(globalThis, 'fetch', async (url) => {
+    const pks = (String(url).match(/gamePks=([\d,]+)/)?.[1] ?? '').split(',').map(Number)
+    asked.push(...pks)
+    const games = pks.map((gamePk) => ({
+      gamePk,
+      status: { abstractGameState: 'Final' },
+      teams: { away: { score: 2, team: { id: 112 } }, home: { score: 6, team: { id: 158 } } },
+    }))
+    return { ok: true, status: 200, json: async () => ({ dates: [{ games }] }) }
+  })
+  return { asked, restore: () => m.mock.restore() }
+}
+
+test('fetchFinalScores: no score is asked for at or after the cutoff, a same-day game 1 included', async () => {
+  const api = stubSchedule()
+  try {
+    const splits = [row('2026-05-22', 101), row('2026-05-23', 102, 1), row('2026-05-23', 103, 2), row('2026-05-24', 104)]
+    const scores = await fetchFinalScores(splits, 'hitting', '2026-05-23')
+    assert.deepEqual(api.asked, [101])
+    assert.deepEqual([...scores.keys()], [101])
+    assert.deepEqual([scores.get(101).won, scores.get(101).runs, scores.get(101).oppRuns], [true, 6, 2])
+  } finally {
+    api.restore()
+  }
+})
+
+test('fetchFinalScores: nothing before the cutoff asks nothing', async () => {
+  const api = stubSchedule()
+  try {
+    const scores = await fetchFinalScores([row('2026-05-23', 102)], 'pitching', '2026-05-23')
+    assert.deepEqual(api.asked, [])
+    assert.equal(scores.size, 0)
+  } finally {
+    api.restore()
+  }
+})
