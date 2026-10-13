@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { fetchFielding, fetchPersonStats, fetchStarterReliever } from '../../../../../api/person-fetch.js'
+import {
+  fetchFielding, fetchMilbFieldingSeason, fetchMilbStarterRelieverSeason, fetchMilbYearByYear, fetchPersonStats, fetchStarterReliever,
+} from '../../../../../api/person-fetch.js'
 import { fieldingView, pitchingStints, starterRelieverView } from '../../../../../api/person.js'
 import { loadPositionScope } from '../../../../../api/player/history.js'
 import { fetchTeam } from '../../../../../api/team.js'
@@ -10,7 +12,7 @@ import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { Loader } from '../../../../../components/ui/Loader.jsx'
 import { resolveBallparkLayout } from '../../../../../lib/ballpark/layout/resolveLayout.js'
-import { batterView, PARK_VIEWBOX, pitcherView, scopeOptions, spotAt, TAG_SIDE } from './inningsView.js'
+import { batterView, inMinors, PARK_VIEWBOX, pitcherView, scopeOptions, spotAt, TAG_SIDE } from './inningsView.js'
 import '../../../../../styles/player-next/both/innings.css'
 
 const POSITION_NAME = {
@@ -18,19 +20,26 @@ const POSITION_NAME = {
   LF: 'Left field', CF: 'Center field', RF: 'Right field', P: 'Pitcher',
 }
 
-// One scope's view, or null for none. The season scope is a single MLB call; the career scope
-// goes through loadPositionScope, the live History tab's own loader. These aggregates carry no
-// date cut (person-fetch.js header), so neither fetcher takes `asOf`; `season` is the viewed one.
+// One scope's view, or null for none. Season is the one season's call (every MiLB level for a
+// player in the minors); a career scope goes through loadPositionScope, the live History tab's own
+// loader. These aggregates carry no date cut (person-fetch.js header), so no fetcher takes `asOf`;
+// `season` is the viewed one.
 async function loadScope(bio, role, scope, season) {
   const id = bio.id
-  if (role === 'pitching') {
-    if (scope === 'season') return pitcherView(starterRelieverView(await fetchStarterReliever(id, { season, sportId: 1 })))
-    const pitchStints = pitchingStints(await fetchPersonStats(id, { type: 'yearByYear', group: 'pitching', sportId: 1 }))
-    const res = await loadPositionScope(id, 'mlb', { showFielding: false, showPitching: true, pitchStints })
-    return pitcherView(res.pitching)
+  const pitching = role === 'pitching'
+  if (scope === 'season') {
+    if (pitching) {
+      const splits = inMinors(bio) ? await fetchMilbStarterRelieverSeason(id, season) : await fetchStarterReliever(id, { season, sportId: 1 })
+      return pitcherView(starterRelieverView(splits))
+    }
+    const splits = inMinors(bio) ? await fetchMilbFieldingSeason(id, season) : await fetchFielding(id, { season, sportId: 1 })
+    return batterView(fieldingView(splits))
   }
-  if (scope === 'season') return batterView(fieldingView(await fetchFielding(id, { season, sportId: 1 })))
-  return batterView((await loadPositionScope(id, 'mlb', { showFielding: true, showPitching: false })).fielding)
+  const pitchStints = pitching
+    ? pitchingStints(scope === 'mlb' ? await fetchPersonStats(id, { type: 'yearByYear', group: 'pitching', sportId: 1 }) : await fetchMilbYearByYear(id, 'pitching'))
+    : []
+  const res = await loadPositionScope(id, scope, { showFielding: !pitching, showPitching: pitching, pitchStints })
+  return pitching ? pitcherView(res.pitching) : batterView(res.fielding)
 }
 
 // The park of the club he is on, as it stands on `asOf` (today when none). Null when the club
@@ -103,25 +112,28 @@ export default function InningsModule({ bio, role, asOf, season, onEmpty, onCoun
     return () => { live = false }
   }, [bio.team?.id, asOf]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Season first; a player with no season line (retired, off the roster) lands on his career.
+  // The first scope with data: Season, else his career. An error hides the card like no data.
   useEffect(() => {
     let live = true
     ;(async () => {
-      const found = { season: await loadScope(bio, role, 'season', season) }
-      if (!found.season && scopes.length > 1) found.mlb = await loadScope(bio, role, 'mlb', season)
+      const found = {}
+      for (const { key } of scopes) {
+        found[key] = await loadScope(bio, role, key, season)
+        if (found[key]) break
+      }
       if (!live) return
-      const key = found.season ? 'season' : 'mlb'
-      if (!found[key]) return onEmpty()
+      const key = scopes.find((s) => found[s.key])?.key
+      if (!key) return onEmpty()
       if (!picked.current) setScope(key)
       setViews((cur) => ({ ...found, ...cur }))
-    })()
+    })().catch(() => live && onEmpty())
     return () => { live = false }
   }, [bio.id, role, season]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const view = views[scope]
   useEffect(() => {
     const n = view?.rings?.length ?? 0
-    onCount(n ? `${n} ${n === 1 ? 'position' : 'positions'}` : '')
+    onCount(n ? `${n} ${n === 1 ? 'position' : 'positions'}` : undefined)
   }, [view]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const pick = (key) => {
@@ -133,7 +145,7 @@ export default function InningsModule({ bio, role, asOf, season, onEmpty, onCoun
       .then((v) => setViews((cur) => ({ ...cur, [key]: v })))
   }
 
-  const scopeWord = scope === 'season' ? `${season} season` : 'MLB career'
+  const scopeWord = scopes.find((s) => s.key === scope).label.replace('Season', `${season} season`)
   return (
     <Stack gap="snug">
       {scopes.length > 1 && (

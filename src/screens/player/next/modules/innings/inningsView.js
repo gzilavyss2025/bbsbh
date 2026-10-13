@@ -35,9 +35,15 @@ export const FIELD_ORDER = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF']
 // Where a ring's innings tag sits so it clears its neighbours (above, below, left, right).
 export const TAG_SIDE = { C: 'b', '1B': 'r', '2B': 'a', '3B': 'l', SS: 'a', LF: 'b', CF: 'b', RF: 'b' }
 
-const SCOPES = [{ key: 'season', label: 'Season' }, { key: 'mlb', label: 'MLB career' }]
-// A prospect with no MLB debut has no career scope.
-export const scopeOptions = (bio) => (bio.debut ? SCOPES : SCOPES.slice(0, 1))
+// A club with a parent org is a minor-league club (identity.js), the live History tab's own test.
+export const inMinors = (bio) => Boolean(bio.team?.parentOrgId)
+// Season always; MLB career after a debut; MiLB career for a player now in the minors (so a
+// pre-debut prospect has a card). The keys are loadPositionScope's own.
+export const scopeOptions = (bio) => [
+  { key: 'season', label: 'Season' },
+  ...(bio.debut ? [{ key: 'mlb', label: 'MLB career' }] : []),
+  ...(inMinors(bio) ? [{ key: 'milb', label: 'MiLB career' }] : []),
+]
 
 // A ring's arc as a percent of the circle; a sliver still shows, and none stays none.
 export const ringSize = (share) => (share > 0 ? Math.min(100, Math.max(3, share * 100)) : 0)

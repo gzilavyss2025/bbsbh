@@ -42,9 +42,12 @@ test('the pitcher ring is the starter share, summed in outs (104.0 + 5.1 is 109.
   assert.equal(pitcherView(null), null)
 })
 
-test('a player with no MLB debut has no career scope', () => {
-  assert.deepEqual(scopeOptions({ debut: '2023-04-01' }).map((s) => s.key), ['season', 'mlb'])
-  assert.deepEqual(scopeOptions({}).map((s) => s.key), ['season'])
+test('scopes: Season always; MLB career after a debut; MiLB career for a player on a minor-league club', () => {
+  const keys = (bio) => scopeOptions(bio).map((s) => s.key)
+  assert.deepEqual(keys({ debut: '2023-04-01', team: { id: 158 } }), ['season', 'mlb'])
+  assert.deepEqual(keys({ debut: '', team: { id: 1, parentOrgId: 158 } }), ['season', 'milb'])
+  assert.deepEqual(keys({ debut: '2024-04-01', team: { id: 1, parentOrgId: 158 } }), ['season', 'mlb', 'milb'])
+  assert.deepEqual(keys({}), ['season'])
 })
 
 test('a ring stands at its position in the park\'s own feet, cropped like the board; no park uses the shared field\'s spots', () => {
