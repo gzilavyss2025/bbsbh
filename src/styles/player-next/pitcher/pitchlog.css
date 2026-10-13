@@ -1,0 +1,125 @@
+/* ==== THE PITCHER GAME LOG (the new player page, #1851) ====
+   From the board "GameLog": the filter, the totals strip, the starts (LogTable,
+   both/logtable.css) and the pitch key. Tokens only. A pitch's colour is pitchMark's
+   (lib/pitch/pitchTypes.js), set on the element, never picked here. */
+
+/* The reserve is for the load only: about the loaded card, five starts and the key. */
+.pitchlog--wait {
+  min-height: 560px;
+}
+.pitchlog__top {
+  justify-content: space-between;
+}
+.pitchlog__scope,
+.pitchlog__n,
+.pitchlog__at,
+.pitchlog__pc small {
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+.pitchlog__date {
+  font-weight: var(--w-bold);
+  white-space: nowrap;
+}
+.pitchlog__tag {
+  padding: var(--space-1) var(--space-1h);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+}
+
+/* The result: the club's score, then his decision in a box. A letter says each, so the
+   colour is never the only mark. */
+.pitchlog__score {
+  white-space: nowrap;
+}
+.pitchlog__score--W {
+  color: var(--accent-positive);
+}
+.pitchlog__score--L {
+  color: var(--accent-negative);
+}
+.pitchlog__dec {
+  min-width: 2.25em;
+  padding: var(--space-1) var(--space-1h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-solid);
+  text-align: center;
+}
+.pitchlog__dec--W {
+  background: var(--accent-positive);
+  color: var(--text-on-ink);
+}
+.pitchlog__dec--L {
+  background: var(--accent-negative);
+  color: var(--text-on-ink);
+}
+
+/* K of 7 or more, ER of 4 or more: colour and an underline (the mono face ships one weight,
+   so emphasis is never weight, ADR-0109). */
+.pitchlog__hi {
+  text-decoration: underline var(--bw-heavy);
+  text-underline-offset: var(--space-1);
+}
+.pitchlog__hi--k {
+  color: var(--accent-positive);
+}
+.pitchlog__hi--er {
+  color: var(--accent-negative);
+}
+
+.pitchlog__pc {
+  white-space: nowrap;
+}
+.pitchlog__pc small {
+  display: block;
+}
+.pitchlog__mixcell {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-inline-start: var(--space-3);
+}
+.logtable__grid td.pitchlog__mixcell {
+  width: 30%;
+}
+.pitchlog__mix {
+  display: flex;
+  height: var(--space-6);
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+.pitchlog__seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--fs-cell);
+  color: var(--text-body);
+}
+.pitchlog__seg + .pitchlog__seg {
+  border-inline-start: var(--bw-hair) solid var(--border-stamped);
+}
+
+.pitchlog__key {
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+}
+.pitchlog__key li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+}
+.pitchlog__mark {
+  width: var(--space-4);
+  height: var(--space-4);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.pitchlog__mark path:not([stroke]) {
+  stroke: var(--border-stamped);
+}

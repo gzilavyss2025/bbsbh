@@ -159,6 +159,13 @@ user-visible string says Game Log. The code name is `logbook`: the route
 (`/logbook`), modules, CSS classes, and storage keys.
 _Avoid_: Logbook in any user-visible string
 
+**Pitcher Game Log**:
+A different thing with the same name: on a pitcher's player page, his starts of a
+season, one row per start, with the score, his decision, his line and the pitch mix
+(#1851, ADR-0110). The stamp Game Log is the games that YOU stamped; the pitcher Game
+Log is the games that HE started. The code name is `pitchlog`.
+_Avoid_: Start by start
+
 **Box Lines**:
 The drilldown behind a summary stat line: tap the line and see the game-by-game rows that
 add up to it. An internal name for prompts and code; it never renders. The page says

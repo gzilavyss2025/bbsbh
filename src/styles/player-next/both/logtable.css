@@ -1,0 +1,127 @@
+/* ==== THE GAME LOG TABLE (#1851; LogTable.jsx, shared with the batter log #1890) ====
+   From the board "GameLog": a table when the card is 720 px wide or more, one card per row
+   below that (the board's own step; the page's card body is 892 px wide at most, so a 960 px
+   step would never show the table). The switch reads the CARD's width, never the window's.
+   Tokens only. Each column's place in the card look is its `card` kind:
+   head (top left), end (top right), cell (the stat row, label above), foot (bottom line). */
+
+.logtable {
+  container-type: inline-size;
+}
+.logtable__grid {
+  width: 100%;
+  border-collapse: collapse;
+}
+.logtable__grid th {
+  padding: 0 var(--space-2) var(--space-1h);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+  color: var(--text-caption);
+}
+.logtable__grid td {
+  padding: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  vertical-align: middle;
+  font-size: var(--fs-cell);
+}
+.logtable__grid .logtable__cell {
+  text-align: right;
+}
+.logtable__lab {
+  display: none;
+}
+.logtable__div th {
+  padding-top: var(--space-4);
+}
+.logtable__div .mono {
+  margin-inline-start: var(--space-2);
+  letter-spacing: var(--ls-none);
+}
+
+/* The card look: each row wraps into four lines (head and end; the stat cells; the foot).
+   The two empty pseudo-items, a full line each, are the line breaks. */
+@container (max-width: 719.98px) {
+  .logtable__grid,
+  .logtable__grid tbody {
+    display: block;
+  }
+  .logtable__grid thead {
+    display: none;
+  }
+  /* layout-exempt: one start's card, its cells wrapping onto set lines */
+  .logtable__grid tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: var(--space-3) 0;
+    border-bottom: var(--bw-hair) solid var(--border-hairline);
+  }
+  .logtable__grid tbody tr::before,
+  .logtable__grid tbody tr::after {
+    content: '';
+    flex-basis: 100%;
+  }
+  .logtable__grid tbody tr::before {
+    order: 2;
+  }
+  .logtable__grid tbody tr::after {
+    order: 4;
+  }
+  .logtable__grid td {
+    display: block;
+    padding: 0;
+    border: 0;
+  }
+  .logtable__grid .logtable__head {
+    order: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .logtable__grid .logtable__end {
+    order: 1;
+  }
+  /* layout-exempt: a stat cell, its label over its figure */
+  .logtable__grid .logtable__cell {
+    order: 3;
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    margin-top: var(--space-2);
+    padding: var(--space-1) 0;
+    border: var(--bw-hair) solid var(--border-stamped);
+    text-align: center;
+  }
+  .logtable__grid .logtable__cell + .logtable__cell {
+    border-inline-start-color: var(--border-hairline);
+    margin-inline-start: calc(-1 * var(--bw-hair));
+  }
+  .logtable__grid .logtable__foot {
+    order: 5;
+    margin-top: var(--space-2);
+  }
+  .logtable__lab {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--text-caption);
+  }
+  .logtable__grid tbody tr.logtable__div {
+    display: block;
+    padding: 0;
+    border: 0;
+  }
+  .logtable__div th {
+    display: block;
+  }
+}
