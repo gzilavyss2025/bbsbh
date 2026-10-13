@@ -75,19 +75,21 @@ export const xwobaOf = (table, ev, la) => table.rows[ci(ev)][cj(la)] / 1000
 export const tablePath = (season, dir = 'xwoba-table') =>
   join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'public', 'data', dir, `${season}.json`)
 
-// The season's table, or null when none is on file. Read once per season.
+// The season's table (`dir`: 'xwoba-table' or 'xba-table'), or null when none is on
+// file. Read once per season and dir.
 const tables = new Map()
-export function readXwobaTable(season) {
-  if (!tables.has(season)) {
+export function readXwobaTable(season, dir = 'xwoba-table') {
+  const key = `${dir}/${season}`
+  if (!tables.has(key)) {
     let table = null
     try {
-      table = JSON.parse(readFileSync(tablePath(season), 'utf8'))
+      table = JSON.parse(readFileSync(tablePath(season, dir), 'utf8'))
     } catch (err) {
       if (err.code !== 'ENOENT') throw err
     }
-    tables.set(season, table)
+    tables.set(key, table)
   }
-  return tables.get(season)
+  return tables.get(key)
 }
 
 // --- the gate ---------------------------------------------------------------------

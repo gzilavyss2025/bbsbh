@@ -57,6 +57,8 @@ export function combineSprayEntries(slices) {
     b: last.b,
     p: rows.flatMap((r) => r.p ?? []),
     g: rows.flatMap(coveringRuns),
+    // The aligned contact rows (spray.js's withContact), one per ball; a slice with none gets nulls.
+    ...(rows.some((r) => r.k) && { k: rows.flatMap((r) => r.k ?? new Array(r.p?.length ?? 0).fill(null)) }),
     o: Object.fromEntries(
       ['R', 'L']
         .filter((hand) => rows.some((r) => r.o?.[hand]))
