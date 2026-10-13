@@ -500,7 +500,8 @@ for each generator; the reader modules:
   configuration they were hit at, and `parkSubview` narrows a view to one park
   with every count recomputed from its balls, #1859), from
   `public/data/spray/{season}/{NN}.json` (`gen-spray.mjs`, nightly, buckets on
-  `personId % 100`; the season `spray/seasons.json` names, ADR-0086). Completed-game season aggregates over games that were
+  `personId % 100`; the season `spray/seasons.json` names, ADR-0086; a sibling
+  `NN.contact.json` holds the Contact card's columns, #1912, below). Completed-game season aggregates over games that were
   already DECIDED when the sweep touched them, so spoiler-free with no
   `SealBox` — same footing as `war.js`/`pitchArsenal.js` (ADR-0034). Worth
   stating out loud because the same COORDINATES are reveal-only in
@@ -524,6 +525,17 @@ for each generator; the reader modules:
   turned-around at-bat should not withhold the other 239. The stored
   `pitcherId` is read by nothing today; it rides so a pitcher-side spray card
   can share these shards instead of sweeping the season twice.
+  **The contact store** (#1912) is `NN.contact.json` beside each shard, read only by
+  `fetchSprayFor(id, { contact: true })` (the spray map never fetches it): per batter
+  `{ n, c, g }`, where `c` is FLAT triples, `[launchAngle, totalDistance, xBA in thousandths, …]`,
+  for the LAST `c.length / 3` of his `p` rows, and `g` is FLAT pairs `[count, gamePk, …]` over them
+  (flat saves the brackets: 60 KB against 73 KB nested on the busiest bucket). A row swept before the
+  store has no contact and comes first; `n` is the `p` length it was written against, and
+  `withContact` aligns it as `k` only when `n` equals `p.length` and `g` covers the rows, so a
+  mismatch reads as no contact columns, never shifted ones. `decodeSprayBalls` gives each ball
+  `launchAngle`, `distance`, `xba` (0-1), `gamePk` and `barrel` (`isBarrel`, derived from exit
+  velocity and angle; a fit of Savant's zone, not Savant's own count), all null when unknown.
+  xBA comes from `public/data/xba-table/{season}.json` (`readXwobaTable(season, 'xba-table')`).
   **The postseason is a `post` map beside `bat`** (ADR-0103): same entry shape,
   MLB only, never blended. `sprayView` returns the regular card and adds
   `scoped.P` and `scoped.A` (Postseason, All) only for a batter with an October

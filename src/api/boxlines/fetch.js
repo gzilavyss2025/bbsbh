@@ -391,17 +391,15 @@ export async function fetchBoxLines({ personId, group, cutoff = null, facet = nu
 // A SUSPENDED GAME ENDS ON A LATER DAY than its split says. gamePk 777861 was
 // suspended 2025-05-19 and finished 2025-05-21; its split and officialDate stay
 // 05-19, and only the schedule record's `resumeDate` (on the first `dates`
-// entry, the one fetchSchedule keeps) names 05-21. So a record whose resumeDate,
-// as a Pacific day, is on or after the gate keeps no score either.
+// entry, the one fetchSchedule keeps) names 05-21. boxLineRows' gate drops a
+// record whose resumeDate, as a Pacific day, is on or after `until`.
 export async function fetchFinalScores(splits, group, cutoff = null, today = baseballToday()) {
   const until = cutoff && cutoff < today ? cutoff : today
   const gameTypes = MLB_LOG_GAME_TYPES.split(',')
   const gated = matchingSplits(splits, { gameTypes }).filter((s) => s.date < until)
   if (!gated.length) return new Map()
   try {
-    const schedule = (await fetchSchedule([...new Set(gated.map((s) => s.game.gamePk))])).filter(
-      (g) => !g.resumeDate || baseballToday(new Date(g.resumeDate)) < until,
-    )
+    const schedule = await fetchSchedule([...new Set(gated.map((s) => s.game.gamePk))])
     const rows = boxLineRows({ splits: gated, schedule, group, cutoff: until, gameTypes })
     return new Map(rows.map((r) => [r.gamePk, r]))
   } catch {

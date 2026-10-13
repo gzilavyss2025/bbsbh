@@ -18,6 +18,7 @@ import {
   logRequestPlan,
   matchingSplits,
   POSTSEASON,
+  scorelessGamePks,
   seriesAbbr,
   surfaceOf,
 } from '../src/api/boxlines/rows.js'
@@ -787,4 +788,20 @@ test('a NEUTRAL-SITE game lands under the park it was played at', () => {
   assert.deepEqual(home.map((r) => r.gamePk), [1])
   assert.deepEqual(neutral.map((r) => r.gamePk), [2])
   assert.equal(neutral[0].venueName, 'London Stadium')
+})
+
+// A SUSPENDED GAME keeps its first day on the split and officialDate; only the
+// schedule record's `resumeDate` names the day it ended. Shaped like gamePk
+// 777861: suspended 2025-05-19, finished 2025-05-21 (resumeDate 17:10Z).
+test('a suspended game that resumes on or after the cutoff day produces no row', () => {
+  const args = (cutoff) => ({
+    splits: [split('2025-05-19', 777861)],
+    schedule: [sched(777861, '2025-05-19', { resumeDate: '2025-05-21T17:10:00Z' })],
+    group: 'pitching',
+    cutoff,
+  })
+  assert.deepEqual(boxLineRows(args('2025-05-21')), [])
+  assert.deepEqual(scorelessGamePks(args('2025-05-21')), [])
+  assert.equal(boxLineRows(args('2025-05-22')).length, 1)
+  assert.equal(boxLineRows(args(null)).length, 1)
 })
