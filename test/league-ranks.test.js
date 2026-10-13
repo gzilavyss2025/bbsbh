@@ -36,16 +36,20 @@ test('a rate stat ranks among the qualified, a counting stat among all players o
   ])
 })
 
-test('every mark label is a tile key of its group', () => {
-  const stat = { avg: '1', homeRuns: 1, rbi: 1, obp: '1', ops: '1', stolenBases: 1, hits: 1, strikeOuts: 1 }
-  const keys = (tiles) => tiles.map((t) => t.k)
-  const hit = keys(hitterTiles({}, 1))
-  assert.ok(rankMarks([split(stat)], 'hitting', POOLS).every((m) => hit.includes(m.label)))
-  const arm = { ...stat, era: '1', whip: '1', wins: 1, saves: 1, inningsPitched: 1 }
-  const lead = (role) => keys(pitcherTiles({}, role, 1))
-  const marks = rankMarks([split(arm)], 'pitching', POOLS)
-  assert.ok(marks.every((m) => lead('CL').includes(m.label) || lead('SP').includes(m.label)))
-  assert.deepEqual(marks.map((m) => m.label), ['ERA', 'K', 'W–L', 'SV', 'IP'])
+test('a stat with a hero tile carries the tile key; a stat without one carries its own name', () => {
+  const stat = { avg: '1', homeRuns: 1, rbi: 1, obp: '1', slg: '1', ops: '1', stolenBases: 1, hits: 1, strikeOuts: 1 }
+  const hit = rankMarks([split(stat)], 'hitting', POOLS)
+  assert.deepEqual(hit.map((m) => m.label), ['HR', 'RBI', 'AVG', 'OBP', 'SLG', 'OPS', 'SB'])
+  const tiles = hitterTiles({}, 1).map((t) => t.k)
+  assert.ok(['HR', 'RBI', 'AVG'].every((k) => tiles.includes(k)))
+  // OBP, SLG, OPS and WHIP are rates (qualified pool); SB is a count (all players).
+  assert.deepEqual(hit.map((m) => m.of), [412, 412, 68, 68, 68, 68, 412])
+  const arm = rankMarks([split({ era: '1', whip: '1', wins: 1, saves: 1, inningsPitched: 1, strikeOuts: 1, avg: '1' })], 'pitching', POOLS)
+  assert.deepEqual(arm.map((m) => [m.label, m.of]), [
+    ['ERA', 20], ['WHIP', 20], ['K', 473], ['W–L', 473], ['SV', 473], ['IP', 473],
+  ])
+  const lead = [...pitcherTiles({}, 'CL', 1), ...pitcherTiles({}, 'SP', 1)].map((t) => t.k)
+  assert.ok(['ERA', 'K', 'W–L', 'SV', 'IP'].every((k) => lead.includes(k)))
 })
 
 test('rank 11 and beyond shows nothing', () => {

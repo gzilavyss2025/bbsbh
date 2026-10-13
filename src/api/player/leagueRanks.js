@@ -7,7 +7,7 @@ import { RANK_STATS, rankedSplits, topRank } from '../person/stats.js'
 //   N  the player's own rank, from stats=rankings (fetchPersonStats type 'rankings',
 //      one split per league; the feed lists ranks up to about 25).
 //   M  the pool that rank is taken from (Gary's decision, #1856, 2026-10-13). A rate stat
-//      (AVG, ERA) ranks the qualified players of his league; a counting stat (HR, RBI, K,
+//      (AVG, OBP, SLG, OPS, ERA, WHIP) ranks the qualified players of his league; a counting stat (HR, RBI, SB, K,
 //      W, SV, IP) ranks every player of it. rankings carries no pool size, so the size is
 //      `totalSplits` of /stats with playerPool=qualified, and with playerPool=all: TWO
 //      requests per season and league, limit=1, shared by both groups. Checked live
@@ -15,8 +15,9 @@ import { RANK_STATS, rankedSplits, topRank } from '../person/stats.js'
 //      pitching 473. A player with no rate rank in the feed (Gasser 688107, not qualified)
 //      simply has no AVG/ERA mark.
 //
-// The stats and their tile keys are person/stats.js's RANK_STATS. Top 10 only. WAR has no
-// rankings key, so it has no mark.
+// The stats and their tile keys are person/stats.js's RANK_STATS. Gary's list keeps OBP,
+// SLG, OPS, SB and WHIP: no hero tile shows them, a later module does. Top 10 only. WAR
+// has no rankings key, so it has no mark.
 
 // { hitting, pitching } sizes of the pool in one response; 0 for a group it lacks.
 export function poolsOf(data) {
@@ -26,7 +27,7 @@ export function poolsOf(data) {
 
 // The marks for one group. `pools` maps a leagueId to { qualified, all } sizes. A split
 // with no league, a league with no pool, or an empty pool adds nothing. Each mark's
-// `label` is the tile key it ranks.
+// `label` is the hero tile it ranks, or the stat's own name when it has none.
 export function rankMarks(rankSplits, group, pools) {
   const marks = []
   // A traded player has one split per league, each ranking one club's games while the
@@ -36,8 +37,8 @@ export function rankMarks(rankSplits, group, pools) {
   const [s] = list
   const pool = pools.get(s.league?.id)
   if (!pool) return marks
-  for (const { key, tile, rate } of RANK_STATS[group]) {
-    const rank = tile && topRank(s.stat, key)
+  for (const { key, label, tile = label, rate, chipOnly } of RANK_STATS[group]) {
+    const rank = !chipOnly && topRank(s.stat, key)
     const of = pool[rate ? 'qualified' : 'all'][group]
     if (rank && of) marks.push({ key, label: tile, rank, of, text: `${rank} of ${of}` })
   }

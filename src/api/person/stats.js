@@ -339,27 +339,30 @@ export function situationalSplitsView(splits, group, { minRows = 4 } = {}) {
 // same rule as FoulCard/Recent workload).
 // ---------------------------------------------------------------------------
 
-// One list per group serves both readers: the chips below (every entry, `label`) and the
-// league "N of M" mark of api/player/leagueRanks.js (entries with a `tile`, the StatTile
-// key the mark rides on). `rate` stats are ranked among the qualified only; the rest
-// among every player of the league.
+// One list per group serves both readers: the chips below (`label`; not the `marksOnly`
+// entries) and the league "N of M" mark of api/player/leagueRanks.js (every entry; a
+// mark carries `tile`, the StatTile key it rides on, else its own label). `rate` stats
+// are ranked among the qualified only; the rest among every player of the league.
+// `chipOnly` is a chip with no mark (Opp. AVG is not the batter's AVG; H is no hero stat).
 export const RANK_STATS = {
   pitching: [
     { key: 'era', label: 'ERA', tile: 'ERA', rate: true },
-    { key: 'whip', label: 'WHIP' },
+    { key: 'whip', label: 'WHIP', rate: true },
     { key: 'strikeOuts', label: 'K', tile: 'K' },
     { key: 'wins', label: 'Wins', tile: 'W–L' },
     { key: 'saves', label: 'Saves', tile: 'SV' },
-    { key: 'avg', label: 'Opp. AVG' },
+    { key: 'avg', label: 'Opp. AVG', chipOnly: true },
     { key: 'inningsPitched', label: 'IP', tile: 'IP' },
   ],
   hitting: [
     { key: 'homeRuns', label: 'HR', tile: 'HR' },
     { key: 'rbi', label: 'RBI', tile: 'RBI' },
     { key: 'avg', label: 'AVG', tile: 'AVG', rate: true },
-    { key: 'ops', label: 'OPS' },
+    { key: 'obp', label: 'OBP', rate: true, marksOnly: true },
+    { key: 'slg', label: 'SLG', rate: true, marksOnly: true },
+    { key: 'ops', label: 'OPS', rate: true },
     { key: 'stolenBases', label: 'SB' },
-    { key: 'hits', label: 'H' },
+    { key: 'hits', label: 'H', chipOnly: true },
   ],
 }
 export const RANK_FLOOR = 10
@@ -386,8 +389,8 @@ function ranksView(splits, stats) {
   const groups = []
   for (const s of list) {
     const items = []
-    for (const { key, label } of stats) {
-      const rank = topRank(s.stat, key)
+    for (const { key, label, marksOnly } of stats) {
+      const rank = !marksOnly && topRank(s.stat, key)
       if (rank) items.push({ label, rank, text: ordinal(rank) })
     }
     if (!items.length) continue
