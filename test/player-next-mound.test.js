@@ -125,3 +125,28 @@ test('two apps on one day (a doubleheader) still draw bars with width', () => {
   const c = calendarFor([{ d: '2026-10-01', p: 20 }, { d: '2026-10-01', p: 15 }], '2026-10-13', 30)
   assert.ok(c.bars.every((b) => b.w > 0))
 })
+
+// Wandy Peralta: a reliever (5 openers all year), one opener in his last twelve apps, nothing in the last 14 days.
+const peralta = {
+  role: 'RP',
+  season: { g: 65, gs: 5, pitches: 1224, outs: 232, gsPitches: 62, gsOuts: 15 },
+  apps: [
+    { d: '2026-09-25', p: 25, o: 109, h: true, t: 'R' },
+    { d: '2026-09-22', p: 24, o: 119, h: false, t: 'R' },
+    { d: '2026-08-15', p: 13, o: 147, h: true, t: 'R', gs: 1 },
+  ],
+}
+
+test('a reliever with one opener keeps the Bullpen tab and opens on it, though no app is in the last 14 days', () => {
+  const v = moundView(peralta, '2026-10-13')
+  assert.deepEqual(v.tabs, ['starter', 'bullpen'])
+  assert.equal(v.tab, 'bullpen')
+  assert.equal(v.views.bullpen.last.md, '9/25')
+  assert.equal(v.views.bullpen.track.since, 18)
+  assert.equal(v.views.bullpen.chart.bars.length, 0)
+})
+
+test('a starter with no app in the last 14 days has no Bullpen tab', () => {
+  const v = moundView({ ...gasser, apps: [{ d: '2026-07-03', p: 110, gs: 1 }] }, '2026-10-13')
+  assert.deepEqual(v.tabs, ['starter'])
+})

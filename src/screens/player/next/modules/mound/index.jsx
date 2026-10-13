@@ -15,7 +15,7 @@ const at = (o) => (o.opp ? `${o.home ? 'vs' : 'at'} ${teamAbbr({ id: o.opp })}` 
 // Open surface (ADR-0034): workload.json holds completed appearances only. It is regular season for the
 // averages; the apps also hold postseason outings, which count for rest, wear a round tag, and stay out of the average.
 export default function MoundModule({ bio, asOf, season, onEmpty }) {
-  const { data, error } = useAsync(fetchWorkload, [])
+  const { data, loading } = useAsync(fetchWorkload, [])
   const [picked, setPicked] = useState(null)
   const view = useMemo(() => {
     if (!data || (season && data.season && Number(data.season) !== Number(season))) return null
@@ -23,11 +23,12 @@ export default function MoundModule({ bio, asOf, season, onEmpty }) {
     // The season totals are end-of-file: under a cutoff they would average a different stretch than the bars, so no average line.
     return moundView(asOf && p ? { ...p, season: null } : p, asOf || data.asOf)
   }, [data, bio.id, asOf, season])
-  const empty = !!error || (!!data && !view)
+  // A missing file resolves to null (staticJson's fallback), it does not reject: a settled load with no view is empty.
+  const empty = !loading && !view
   useEffect(() => {
     if (empty) onEmpty()
   }, [empty, onEmpty])
-  if (!data && !error) return <div className="mound mound--loading" aria-busy="true" />
+  if (loading) return <div className="mound mound--loading" aria-busy="true" />
   if (empty) return null
   const tab = view.tabs.includes(picked) ? picked : view.tab
   const v = view.views[tab]
