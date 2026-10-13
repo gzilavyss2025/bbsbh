@@ -152,10 +152,119 @@ export async function transactionRowsFor(bio, txns, rookieInfo, endDate) {
   })
 }
 
+// The dated firsts of one role (`group`), pinned to their games. `ybySplits` is his MLB year-by-year and
+// `debutSplits` his debut-season game log, both for that group. The live History tab calls it for his
+// primary role, and `loadFirsts` calls it for each role of the new page's Firsts module.
+export async function firstsFor(ctx, group, ybySplits, debutSplits) {
+  const { bio, cutoff, currentYear, debutYear } = ctx
+  // Career milestones pinned to their exact games. A milestone can land any
+  // season, not just the debut one (a late-September cameo debut —
+  // Bethancourt's lone 2013 game, only a strikeout — gets his first hit/HR/run
+  // seasons later), so the per-season year-by-year splits pick out the earliest
+  // SEASON each milestone occurred (firstMilestoneSeasons), and only those
+  // seasons' game logs are fetched to find the exact game — the debut season's
+  // is reused from `debutSplits`. Hitters get five plate milestones plus the
+  // first game STARTED, which needs each candidate game's own boxscore (see
+  // findFirstStart) since no gameLog field distinguishes a start from a sub
+  // appearance. Pitchers get the pitching counterpart — every field but the
+  // strikeout victim is a direct gameLog stat.
+  let firsts = null
+  if (bio.debut) {
+    const pitching = group === 'pitching'
+    const defs = pitching ? PITCHER_FIRSTS_DEFS : FIRSTS_DEFS
+    const throughYear = cutoff ? Number(cutoff.slice(0, 4)) : currentYear
+    const seasonSet = new Set(firstMilestoneSeasons(ybySplits, defs, throughYear))
+    if (debutYear && (!throughYear || debutYear <= throughYear)) seasonSet.add(debutYear)
+    const seasons = [...seasonSet].sort((a, b) => a - b)
+    const logs = await Promise.all(
+      seasons.map((yr) =>
+        yr === debutYear
+          ? Promise.resolve(debutSplits)
+          : fetchPersonStats(bio.id, { type: 'gameLog', group, season: yr, sportId: 1 }),
+      ),
+    )
+    const careerSplits = logs.flat()
+    if (pitching) {
+      const { events } = firstsFromGameLog(careerSplits, cutoff, PITCHER_FIRSTS_DEFS)
+      if (events.so) {
+        events.so.batter = await findFirstStrikeoutBatter(bio.id, events.so.gamePk)
+      }
+      firsts = events
+    } else {
+      const { events, rowsAscending } = firstsFromGameLog(careerSplits, cutoff)
+      const startSplit = await findFirstStart(bio.id, rowsAscending)
+      events.start = startSplit
+        ? {
+            label: 'First Start',
+            date: startSplit.date,
+            gamePk: startSplit.game.gamePk,
+            isHome: startSplit.isHome,
+          }
+        : null
+      // The opposing pitcher a batter got each plate milestone off of — read
+      // from that milestone game's play-by-play, so the card can name (and link
+      // to) who he did it against.
+      await Promise.all(
+        ['hit', 'xbh', 'hr', 'so'].map(async (key) => {
+          const f = events[key]
+          if (!f?.gamePk) return
+          f.pitcher = await findFirstPitcherFaced(bio.id, f.gamePk, MILESTONE_EVENTS[key])
+        }),
+      )
+      firsts = events
+    }
+  }
+
+  // The MLB Debut milestone — a synthetic "first" pinned to the debut game.
+  // When the debut game was ALSO his first start (a position player or pitcher
+  // who started his debut), fold the two into one "MLB Debut & First Start" row
+  // and drop the separate First Start entry; otherwise they stand as distinct
+  // milestones. isHome comes from the debut-game split so the opponent resolves
+  // like every other first.
+  const debutGamePk = (debutSplits ?? []).find((s) => s.date === bio.debut)?.game?.gamePk ?? null
+  if (firsts && bio.debut) {
+    const debutSplit = (debutSplits ?? []).find((s) => s.date === bio.debut)
+    const sameAsStart = firsts.start && firsts.start.date === bio.debut
+    firsts.debut = {
+      label: sameAsStart ? 'MLB Debut & First Start' : 'MLB Debut',
+      date: bio.debut,
+      gamePk: debutGamePk,
+      isHome: debutSplit?.isHome ?? null,
+    }
+    if (sameAsStart) firsts.start = null
+  }
+
+  if (firsts) {
+    const links = await boxscoreLinks(Object.values(firsts).map((f) => f?.gamePk))
+    for (const key of Object.keys(firsts)) {
+      const f = firsts[key]
+      if (!f) continue
+      const g = links.byPk[f.gamePk]
+      firsts[key] = {
+        ...f,
+        path: links.path(f.gamePk),
+        ...firstOpponent(f, g),
+      }
+    }
+  }
+  return firsts
+}
+
+// Only what the firsts need: his MLB year-by-year and debut-season game log for `group`, then `firstsFor`.
+export async function loadFirsts(id, asOf, group) {
+  const ctx = await playerContext(id, asOf)
+  if (!ctx?.bio.debut) return null
+  const [ybySplits, debutSplits] = await Promise.all([
+    fetchPersonStats(id, { type: 'yearByYear', group, sportId: 1 }),
+    ctx.debutYear ? fetchPersonStats(id, { type: 'gameLog', group, season: ctx.debutYear, sportId: 1 }) : [],
+  ])
+  return { bio: ctx.bio, firsts: await firstsFor(ctx, group, ybySplits, debutSplits) }
+}
+
 export async function loadPlayerHistory(id, asOf) {
   const ctx = await playerContext(id, asOf)
   if (!ctx) return null
-  const { bio, txns, groups, primaryGroup, season, endDate, cutoff, currentYear, debutYear, liveSportId, currentActivitySportId } = ctx
+  const { bio, txns, groups, primaryGroup, season, endDate, debutYear, liveSportId, currentActivitySportId } = ctx
 
   const [awards, rookieInfo, yby, debutSplits] = await Promise.all([
     // The ledger ranks EVERY award the feed carries, and a prospect's case —
@@ -255,100 +364,14 @@ export async function loadPlayerHistory(id, asOf) {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // Firsts
-  // -------------------------------------------------------------------------
-  // Career milestones pinned to their exact games. A milestone can land any
-  // season, not just the debut one (a late-September cameo debut —
-  // Bethancourt's lone 2013 game, only a strikeout — gets his first hit/HR/run
-  // seasons later), so the per-season year-by-year splits pick out the earliest
-  // SEASON each milestone occurred (firstMilestoneSeasons), and only those
-  // seasons' game logs are fetched to find the exact game — the debut season's
-  // is reused from `debutSplits`. Hitters get five plate milestones plus the
-  // first game STARTED, which needs each candidate game's own boxscore (see
-  // findFirstStart) since no gameLog field distinguishes a start from a sub
-  // appearance. Pitchers get the pitching counterpart — every field but the
-  // strikeout victim is a direct gameLog stat.
-  let firsts = null
-  if (bio.debut) {
-    const firstsGroup = bio.isPitcher ? 'pitching' : 'hitting'
-    const defs = bio.isPitcher ? PITCHER_FIRSTS_DEFS : FIRSTS_DEFS
-    const throughYear = cutoff ? Number(cutoff.slice(0, 4)) : currentYear
-    const firstsYby = yby.find((r) => r.group === firstsGroup)?.mlbYbySplits ?? []
-    const seasonSet = new Set(firstMilestoneSeasons(firstsYby, defs, throughYear))
-    if (debutYear && (!throughYear || debutYear <= throughYear)) seasonSet.add(debutYear)
-    const seasons = [...seasonSet].sort((a, b) => a - b)
-    const logs = await Promise.all(
-      seasons.map((yr) =>
-        yr === debutYear
-          ? Promise.resolve(debutSplits)
-          : fetchPersonStats(id, { type: 'gameLog', group: firstsGroup, season: yr, sportId: 1 }),
-      ),
-    )
-    const careerSplits = logs.flat()
-    if (bio.isPitcher) {
-      const { events } = firstsFromGameLog(careerSplits, cutoff, PITCHER_FIRSTS_DEFS)
-      if (events.so) {
-        events.so.batter = await findFirstStrikeoutBatter(bio.id, events.so.gamePk)
-      }
-      firsts = events
-    } else {
-      const { events, rowsAscending } = firstsFromGameLog(careerSplits, cutoff)
-      const startSplit = await findFirstStart(bio.id, rowsAscending)
-      events.start = startSplit
-        ? {
-            label: 'First Start',
-            date: startSplit.date,
-            gamePk: startSplit.game.gamePk,
-            isHome: startSplit.isHome,
-          }
-        : null
-      // The opposing pitcher a batter got each plate milestone off of — read
-      // from that milestone game's play-by-play, so the card can name (and link
-      // to) who he did it against.
-      await Promise.all(
-        ['hit', 'xbh', 'hr', 'so'].map(async (key) => {
-          const f = events[key]
-          if (!f?.gamePk) return
-          f.pitcher = await findFirstPitcherFaced(bio.id, f.gamePk, MILESTONE_EVENTS[key])
-        }),
-      )
-      firsts = events
-    }
-  }
-
-  // The MLB Debut milestone — a synthetic "first" pinned to the debut game.
-  // When the debut game was ALSO his first start (a position player or pitcher
-  // who started his debut), fold the two into one "MLB Debut & First Start" row
-  // and drop the separate First Start entry; otherwise they stand as distinct
-  // milestones. isHome comes from the debut-game split so the opponent resolves
-  // like every other first.
-  const debutGamePk = (debutSplits ?? []).find((s) => s.date === bio.debut)?.game?.gamePk ?? null
-  if (firsts && bio.debut) {
-    const debutSplit = (debutSplits ?? []).find((s) => s.date === bio.debut)
-    const sameAsStart = firsts.start && firsts.start.date === bio.debut
-    firsts.debut = {
-      label: sameAsStart ? 'MLB Debut & First Start' : 'MLB Debut',
-      date: bio.debut,
-      gamePk: debutGamePk,
-      isHome: debutSplit?.isHome ?? null,
-    }
-    if (sameAsStart) firsts.start = null
-  }
-
-  if (firsts) {
-    const links = await boxscoreLinks(Object.values(firsts).map((f) => f?.gamePk))
-    for (const key of Object.keys(firsts)) {
-      const f = firsts[key]
-      if (!f) continue
-      const g = links.byPk[f.gamePk]
-      firsts[key] = {
-        ...f,
-        path: links.path(f.gamePk),
-        ...firstOpponent(f, g),
-      }
-    }
-  }
+  // Firsts: the dated milestones of his primary role (see firstsFor).
+  const firstsGroup = bio.isPitcher ? 'pitching' : 'hitting'
+  const firsts = await firstsFor(
+    ctx,
+    firstsGroup,
+    yby.find((r) => r.group === firstsGroup)?.mlbYbySplits ?? [],
+    debutSplits,
+  )
 
   return {
     bio,
