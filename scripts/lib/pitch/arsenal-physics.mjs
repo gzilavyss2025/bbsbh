@@ -73,7 +73,7 @@ export function clearArsenalSeason(db, season, levels, { since, until }) {
   if (until) throw new Error('--clear-arsenal refuses --until: the wipe takes the whole season, the re-walk must reach its end')
   const first = db.prepare(`SELECT MIN(date) AS d FROM pitch_arsenal_ingested_games WHERE season = ? AND level IN (${levels.map(() => '?').join(', ')})`).get(season, ...levels).d
   if (first && first < since) throw new Error(`--since=${since} is after the first game on file (${first}): the re-walk would lose games`)
-  for (const t of ['pitch_arsenal_totals', 'pitch_arsenal_physics', 'pitch_arsenal_starts', 'pitch_arsenal_ingested_games']) {
+  for (const t of ['pitch_arsenal_totals', 'pitch_arsenal_physics', 'pitch_arsenal_starts', 'pitch_arsenal_start_speed', 'pitch_arsenal_ingested_games']) {
     for (const level of levels) db.prepare(`DELETE FROM ${t} WHERE season = ? AND level = ?`).run(season, level)
   }
 }

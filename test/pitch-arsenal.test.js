@@ -18,8 +18,8 @@ import {
   poolsOf,
 } from '../scripts/gen-pitch-arsenal.mjs'
 import { MIN_PHYS_N, clearArsenalSeason, rewalkFailures } from '../scripts/lib/pitch/arsenal-physics.mjs'
-import { startsBuckets } from '../scripts/lib/pitch/arsenal-starts.mjs'
-import { PHYS_FIELDS, fetchPitchMixFor, physOf, pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, arsenalSidesView, MIN_ARSENAL_PITCHES, MIN_LOOK_SHIFT, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
+import { mphBuckets, startsBuckets } from '../scripts/lib/pitch/arsenal-starts.mjs'
+import { PHYS_FIELDS, fetchPitchMixFor, fetchPitchMphFor, physOf, pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, arsenalSidesView, MIN_ARSENAL_PITCHES, MIN_LOOK_SHIFT, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
 
 // --- helpers to build a tiny synthetic feed ----------------------------------
 const pitch = (typeCode, description, startSpeed) => ({
@@ -830,6 +830,60 @@ test('clearArsenalSeason wipes the starts at the levels named, so one re-walk fi
 test('the committed dump still loads with the starts table in place', async () => {
   const db = await openDb()
   assert.ok(db.prepare('SELECT COUNT(*) AS n FROM pitch_arsenal_starts').get().n >= 0)
+  assert.ok(db.prepare('SELECT COUNT(*) AS n FROM pitch_arsenal_start_speed').get().n >= 0)
+})
+
+test('a start keeps a speed sum and count for each code, and a pitch with no speed adds to neither', async () => {
+  const { db, fold } = await physFolder()
+  fold(11, [tracked('FF', { startSpeed: 95 }), tracked('FF', { startSpeed: 96 }), tracked('FF'), tracked('SL'), tracked('SL', { startSpeed: 85.5 })])
+  const rows = db.prepare('SELECT code, speed_sum, speed_n FROM pitch_arsenal_start_speed ORDER BY code').all()
+  assert.deepEqual(rows.map((r) => [r.code, r.speed_sum, r.speed_n]), [['FF', 191, 2], ['SL', 85.5, 1]])
+})
+
+test('the mph shards carry the mean in tenths, beside the mix and not in it', async () => {
+  const { db, fold } = await physFolder()
+  fold(11, [tracked('FF', { startSpeed: 95 }), tracked('FF', { startSpeed: 96 }), tracked('FF', { startSpeed: 96 }), tracked('CH')])
+  assert.deepEqual(Object.fromEntries(mphBuckets(db, 2026)), { '00': { season: 2026, mph: { 100: { 11: { FF: 957 } } } } })
+  assert.deepEqual(Object.fromEntries(startsBuckets(db, 2026)), { '00': { season: 2026, pit: { 100: { 11: { CH: 1, FF: 3 } } } } }, 'the mix shard is unchanged')
+  assert.deepEqual(mphBuckets(db, 2027), [])
+})
+
+test('clearArsenalSeason wipes the start speeds too', async () => {
+  const { db, fold } = await physFolder()
+  fold(1, [tracked('FF', { startSpeed: 95 })])
+  clearArsenalSeason(db, 2026, ['mlb'], { since: '2026-04-01' })
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM pitch_arsenal_start_speed').get().n, 0)
+})
+
+test('fetchPitchMphFor reads one code, or the primary fastball, and null for anything missing', async (t) => {
+  const files = {
+    '/data/pitch-arsenal-starts/seasons.json': { seasons: [2026], current: 2026 },
+    '/data/pitch-arsenal-starts/2026/09.json': { season: 2026, pit: { 509: { 11: { FF: 50, SI: 10, SL: 20 }, 12: { SI: 40, FC: 5 }, 13: { SL: 30 } } } },
+    '/data/pitch-arsenal-starts/2026/09.mph.json': { season: 2026, mph: { 509: { 11: { FF: 951, SL: 850 }, 12: { SI: 932 } } } },
+  }
+  t.mock.method(globalThis, 'fetch', async (url) => ({ ok: url in files, status: url in files ? 200 : 404, json: async () => files[url] }))
+  const opts = { seasonYear: 2026 }
+  assert.equal(await fetchPitchMphFor(509, 11, 'SL', opts), 85)
+  assert.equal(await fetchPitchMphFor(509, 11, 'SI', opts), null, 'thrown, but no speed on file')
+  assert.equal(await fetchPitchMphFor(509, 11, undefined, opts), 95.1, 'primary fastball: FF most used')
+  assert.equal(await fetchPitchMphFor(509, 12, undefined, opts), 93.2, 'primary fastball: SI most used')
+  assert.equal(await fetchPitchMphFor(509, 13, undefined, opts), null, 'no fastball thrown')
+  assert.equal(await fetchPitchMphFor(509, 99, 'FF', opts), null, 'a game he did not pitch')
+  assert.equal(await fetchPitchMphFor(508, 11, 'FF', opts), null, 'a missing mph file')
+  assert.equal(await fetchPitchMphFor(null, 11, 'FF', opts), null)
+})
+
+test('the primary fastball is the most-used of FF, SI, FC that has a speed, and a tie goes FF, SI, FC', async (t) => {
+  const files = {
+    '/data/pitch-arsenal-starts/seasons.json': { seasons: [2026], current: 2026 },
+    '/data/pitch-arsenal-starts/2026/10.json': { season: 2026, pit: { 510: { 1: { FF: 50, SI: 10 }, 2: { SI: 40, FF: 40, FC: 40 }, 3: { FC: 40, SI: 40 } } } },
+    '/data/pitch-arsenal-starts/2026/10.mph.json': { season: 2026, mph: { 510: { 1: { SI: 932 }, 2: { SI: 930, FF: 950, FC: 880 }, 3: { FC: 880, SI: 931 } } } },
+  }
+  t.mock.method(globalThis, 'fetch', async (url) => ({ ok: url in files, status: url in files ? 200 : 404, json: async () => files[url] }))
+  const opts = { seasonYear: 2026 }
+  assert.equal(await fetchPitchMphFor(510, 1, undefined, opts), 93.2, 'FF is most used but has no speed: SI')
+  assert.equal(await fetchPitchMphFor(510, 2, undefined, opts), 95, 'a three-way tie: FF')
+  assert.equal(await fetchPitchMphFor(510, 3, undefined, opts), 93.1, 'a tie of SI and FC: SI')
 })
 
 test('fetchPitchMixFor reads one pitcher\'s mix for one game, and null for anything missing', async (t) => {
