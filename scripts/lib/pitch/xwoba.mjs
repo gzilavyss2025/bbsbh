@@ -16,6 +16,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { flatRates, hitterCounters } from '../../../src/api/scout/hitterGrid.js'
 import { clamp } from '../../../src/lib/math/number.js'
+import { num } from '../savant.mjs'
 
 const EV_MAX = 125
 const LA_MIN = -90
@@ -27,9 +28,18 @@ const K = 3
 const ci = (ev) => clamp(Math.round(ev), 0, EV_MAX)
 const cj = (la) => clamp(Math.round(la), LA_MIN, LA_MAX) - LA_MIN
 
+// Savant detail CSV rows -> [[exitVelocity, launchAngle, estimate], ...], the estimate
+// read from `col` (estimated_woba_ or estimated_ba_using_speedangle), balls in play only.
+export const ballsOf = (rows, col) =>
+  rows.flatMap((r) => {
+    const ball = [num(r.launch_speed), num(r.launch_angle), num(r[col])]
+    return r.description === 'hit_into_play' && ball.every((v) => v != null) ? [ball] : []
+  })
+
 // [[exitVelocity, launchAngle, estimate], ...] -> { rows }: NE x NL thousandths.
+// Any estimate column fits: xwOBA (est.) and xBA (est.) share the lattice.
 export function fitTable(balls) {
-  if (balls.length < K) throw new Error(`an xwOBA table needs ${K} balls, got ${balls.length}`)
+  if (balls.length < K) throw new Error(`a lookup table needs ${K} balls, got ${balls.length}`)
   // Integral images of the count and the sum, (NE + 1) x (NL + 1).
   const grid = () => Array.from({ length: NE + 1 }, () => new Float64Array(NL + 1))
   const C = grid()
@@ -62,8 +72,8 @@ export function fitTable(balls) {
 
 export const xwobaOf = (table, ev, la) => table.rows[ci(ev)][cj(la)] / 1000
 
-export const tablePath = (season) =>
-  join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'public', 'data', 'xwoba-table', `${season}.json`)
+export const tablePath = (season, dir = 'xwoba-table') =>
+  join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'public', 'data', dir, `${season}.json`)
 
 // The season's table, or null when none is on file. Read once per season.
 const tables = new Map()
@@ -102,12 +112,20 @@ export function gateRows(board, shard) {
   return { gaps, missing }
 }
 
-export function gateVerdict(gaps) {
+export function gateVerdict(gaps, gate = GATE) {
   const abs = gaps.map(Math.abs)
   const n = abs.length
   const mean = n ? abs.reduce((x, y) => x + y, 0) / n : null
-  const over = abs.filter((g) => g > GATE.over).length
+  const over = abs.filter((g) => g > gate.over).length
   const max = n ? Math.max(...abs) : null
-  const pass = n > 0 && mean <= GATE.mean && over <= GATE.share * n && max <= GATE.max
+  const pass = n > 0 && mean <= gate.mean && over <= gate.share * n && max <= gate.max
   return { pass, n, mean, over, max }
 }
+
+// --- the xBA check (#1912) --------------------------------------------------------
+// The xBA lattice against Savant's own estimate on the season's balls in play it was
+// fitted on: each gap is lattice minus Savant. Measured 2026-10-13 on 123,275 balls: mean
+// 0.0070, 1.7% above 0.05, max 0.445. The thresholds sit just above that. A per-ball gap is
+// wider than the xwOBA gate's per-hitter gap: xBA is steep where line drives meet grounders.
+export const XBA_GATE = { mean: 0.008, over: 0.05, share: 0.02, max: 0.5 }
+export const xbaGaps = (table, balls) => balls.map(([ev, la, y]) => xwobaOf(table, ev, la) - y)
