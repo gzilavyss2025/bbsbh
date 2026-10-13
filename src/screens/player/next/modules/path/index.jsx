@@ -7,8 +7,6 @@ import { loadPath } from './pathData.js'
 import { pathView } from './pathView.js'
 import '../../../../../styles/player-next/both/path.css'
 
-const here = <span className="pathmod__here">Here now</span>
-
 function Tile({ label, games, years, logoId, now, mlb, aria }) {
   return (
     <li className={`pathmod__tile${now ? ' is-now' : ''}`} aria-label={aria}>
@@ -17,7 +15,7 @@ function Tile({ label, games, years, logoId, now, mlb, aria }) {
       <span className="pathmod__lvl">{label}</span>
       <span className="pathmod__g">{games}</span>
       <span className="pathmod__yr">{years}</span>
-      {now && here}
+      {now && <span className="pathmod__here">Here now</span>}
     </li>
   )
 }
