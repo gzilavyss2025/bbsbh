@@ -51,6 +51,22 @@ export async function fetchFoulsFor(personId, { seasonYear, strict } = {}) {
   )
 }
 
+// One batter's pitches seen, fouls and whiffs in each game of a season, `{ gamePk: [pitches, fouls,
+// whiffs] }`, from his `NN.games.json` beside the bucket (#1914): a busy bucket's per-game rows
+// alone would outweigh it. For the game log's rows (person/gameLog.js withGameFouls). 'all' merges
+// his seasons; a gamePk is in one. Null when the file or he is not on file.
+const gamesShard = staticJsonBy((key) => `/data/fouls/${key}.games.json`, { fallback: null })
+export async function fetchBatterGameFouls(personId, { seasonYear, strict } = {}) {
+  if (personId == null) return null
+  return readSeasonShard(
+    'fouls',
+    seasonYear,
+    async (season) => (await gamesShard(`${season}/${shardKey100(personId)}`))?.games?.[personId] ?? null,
+    (slices) => Object.assign({}, ...slices),
+    { strict },
+  )
+}
+
 // Qualifier floors for the leaderboards, exported so a caller (or a test) can
 // reference the same minimums the ranking uses. Batters qualify on games
 // played, pitchers on total pitches thrown — a one-appearance cameo shouldn't
@@ -104,6 +120,24 @@ export const FOUL_PRIORS = {
 
 const round = (n, d = 2) => (Number.isFinite(n) ? Number(n.toFixed(d)) : n)
 
+// The 12 counts in the order the generator files them: cell = balls * 3 + strikes (#1881).
+const COUNTS = ['0-0', '0-1', '0-2', '1-0', '1-1', '1-2', '2-0', '2-1', '2-2', '3-0', '3-1', '3-2']
+
+// A batter's `byCount` (or the league's) as 12 cells: the plate appearances that reached the count,
+// his fouls and swings from it, fouls per swing (null with no swing), and how those plate
+// appearances ended (a walk includes a hit by pitch). Null when the file has none yet.
+export function foulCountCells(byCount) {
+  if (!byCount) return null
+  return COUNTS.map((count, i) => ({
+    count,
+    reach: byCount.reach[i],
+    fouls: byCount.fouls[i],
+    swings: byCount.swings[i],
+    foulsPerSwing: byCount.swings[i] ? round(byCount.fouls[i] / byCount.swings[i], 3) : null,
+    ends: { hit: byCount.hit[i], walk: byCount.walk[i], so: byCount.so[i], out: byCount.out[i] },
+  }))
+}
+
 // One batter's foul view model with derived rates, or null when he isn't in the
 // file (a non-MLB player, or one who never fouled a pitch off in a swept game).
 export function batterFoulLine(data, personId) {
@@ -128,6 +162,7 @@ export function batterFoulLine(data, personId) {
     maxGameOppScore: b.maxGameOppScore ?? null,
     maxGameDate: b.maxGameDate ?? null,
     bestPa: b.bestPa ?? null,
+    byCount: b.byCount ?? null,
     foulsPerGame: g ? round(b.fouls / g) : null,
     foulsPerPA: pa ? round(b.fouls / pa, 3) : null,
     twoStrikeFoulsPerGame: g ? round(b.twoStrikeFouls / g) : null,
@@ -230,6 +265,8 @@ export function leagueFoulRates(data) {
     totals,
     byInning,
     byPitchType,
+    byCount: foulCountCells(league.byCount),
+    medianBestPaFouls: league.medianBestPaFouls ?? null, // the middle hitter of 300+ PA, for "most in one at-bat"
   }
 }
 

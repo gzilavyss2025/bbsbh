@@ -33,6 +33,7 @@
 //   node scripts/gen-fouls.mjs --since=2026-03-20 [--until=2026-07-19]
 //   node scripts/gen-fouls.mjs --backfill-games      # see below
 //   node scripts/gen-fouls.mjs --backfill-team-pitch-types  # see below
+//   node scripts/gen-fouls.mjs --rebuild-counts=2026  # by-count cells + per-game rows, scripts/lib/fouls/rebuild.mjs
 // The --since form is the one-time / full-season backfill; nightly runs use the
 // default trailing window. Checkpoints (dump + JSON export) every 100 games so a
 // long backfill resumes cleanly. --backfill-games is a SEPARATE one-time backfill
@@ -59,6 +60,8 @@ import { writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
+import { countStatements, endPa, exportByCount, exportGameFouls, foldBatterCounts, gameShards, medianBestPa, newCells, tallyPitches } from './lib/fouls/byCount.mjs'
+import { rebuildCommand } from './lib/fouls/rebuild.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // A SEASON STORE (ADR-0086): fouls/{season}/fouls.json (the league file) plus
@@ -115,7 +118,7 @@ export function aggregateGameFouls(feed) {
     let b = batters.get(id)
     if (!b) {
       b = {
-        name, teamId, pa: 0, pitchesSeen: 0, fouls: 0, twoStrikeFouls: 0, gameFouls: 0,
+        name, teamId, pa: 0, pitchesSeen: 0, fouls: 0, whiffs: 0, twoStrikeFouls: 0, gameFouls: 0, cells: newCells(),
         opponentId: null, bestPaFouls: 0, bestPa: null, gameHisScore: null, gameOppScore: null,
       }
       batters.set(id, b)
@@ -271,6 +274,7 @@ export function aggregateGameFouls(feed) {
         }
       : carryPaContext
 
+    if (b) tallyPitches(b, isNewPa, play) // fouls by count and per game (scripts/lib/fouls)
     let preStrikes = isNewPa ? 0 : carryStrikes
     let paFouls = isNewPa ? 0 : carryPaFouls
     let paPitches = (isNewPa ? 0 : carryPaPitches) + pitchEvents.length
@@ -313,6 +317,7 @@ export function aggregateGameFouls(feed) {
       }
 
       if (isWhiff && p) p.whiffs += 1
+      if (isWhiff && b) b.whiffs += 1
 
       if (isFoul) {
         if (b) {
@@ -351,6 +356,7 @@ export function aggregateGameFouls(feed) {
       carryPaFouls = 0
       carryPaPitches = 0
       carryPaContext = null
+      if (b) endPa(b, play.result?.eventType)
       if (b && paFouls > b.bestPaFouls) {
         b.bestPaFouls = paFouls
         b.bestPa = {
@@ -586,6 +592,7 @@ export const foulStatements = (db) => ({
   teamPitchTypePitching: upsertTeamPitchTypePitching(db),
   game: upsertGameTotals(db),
   mark: markIngested(db),
+  ...countStatements(db),
 })
 
 // Fetch the feed (the only await), then fold the whole game in as one atomic
@@ -607,6 +614,7 @@ export function foldGame(db, stmts, gamePk, date, season, agg, scope = 'R') {
         id, season, scope, b.name, b.teamId, b.pa, b.pitchesSeen, b.fouls, b.twoStrikeFouls,
         b.gameFouls, gamePk, b.pa, b.pitchesSeen, b.opponentId, b.gameHisScore, b.gameOppScore,
       )
+      foldBatterCounts(stmts, gamePk, season, scope, id, b)
       if (b.bestPa) {
         const pa = b.bestPa
         stmts.batterPaHigh.run(
@@ -696,6 +704,7 @@ export function exportFouls(db, season, scope = 'R') {
     ]),
   )
 
+  const { byPerson: countsOf, league: byCount } = exportByCount(db, season, scope)
   const batters = {}
   const batterRows = combine(
     rows('foul_batter_totals', '', 'person_id'),
@@ -716,6 +725,7 @@ export function exportFouls(db, season, scope = 'R') {
       pitchesSeen: r.pitches_seen,
       fouls: r.fouls,
       twoStrikeFouls: r.two_strike_fouls,
+      ...(countsOf[r.person_id] && { byCount: countsOf[r.person_id] }),
       maxGameFouls: r.max_game_fouls,
       maxGamePk: r.max_game_pk,
       maxGamePa: r.max_game_pa,
@@ -842,7 +852,7 @@ export function exportFouls(db, season, scope = 'R') {
     batters,
     pitchers,
     teams,
-    league: { byInning, byPitchType, totals },
+    league: { byInning, byPitchType, totals, byCount, medianBestPaFouls: medianBestPa(batterRows, paHighByPerson) },
     topFoulGames,
     teamPitchTypes,
   }
@@ -878,7 +888,7 @@ async function writeFouls(db, season) {
       }
     }
   }
-  await writeShards(join(storeDir, String(season)), [['fouls', data], ...buckets])
+  await writeShards(join(storeDir, String(season)), [['fouls', data], ...buckets, ...gameShards(exportGameFouls(db, season), season, data.asOf)])
   await writeSeasons(storeDir, season)
 }
 
@@ -959,6 +969,11 @@ async function main() {
     console.log(`backfilled ${done} games' foul_game_totals`)
     db.close()
     return
+  }
+
+  if (args['rebuild-counts']) {
+    await rebuildCommand(db, stmts, args['rebuild-counts'], { aggregate: aggregateGameFouls, getFeed: (pk) => getJson(`/api/v1.1/game/${pk}/feed/live`), touched, writeOut })
+    return db.close()
   }
 
   // One-time (re)build of the per-team pitch-type tables — added after most

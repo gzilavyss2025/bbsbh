@@ -347,7 +347,7 @@
     },
     "fouls.js": {
       "class": "spoiler-free",
-      "why": "Static fouls/{season}/fouls.json season aggregates over completed games, same footing as WAR. The LIVE per-half foul counters are in derive.js instead."
+      "why": "Static fouls/{season}/fouls.json season aggregates over completed games, same footing as WAR. The LIVE per-half foul counters are in derive.js instead. The by-count cells and a batter's per-game [pitches, fouls, whiffs] (`fetchBatterGameFouls`) are the same sweep: counts of pitches in games already Final."
     },
     "game.js": {
       "class": "spoiler-free",
@@ -617,7 +617,7 @@
     },
     "person/gameLog.js": {
       "class": "cutoff-gated",
-      "why": "A player's per-game log DOES carry per-game lines, but for an open surface; the player page's own asOf cutoff is what keeps a dated view honest. `loggedSplits` is that cut, and the Stats tab asks for final scores over its rows alone, so `scores` can hold no game the cutoff turned away."
+      "why": "A player's per-game log DOES carry per-game lines, but for an open surface; the player page's own asOf cutoff is what keeps a dated view honest. `loggedSplits` is that cut, and the Stats tab asks for final scores over its rows alone, so `scores` can hold no game the cutoff turned away. `withGameFouls` joins a game's pitches, fouls and whiffs onto the rows that cut let through: a foul count is no score."
     },
     "person/identity.js": {
       "class": "spoiler-free",

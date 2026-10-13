@@ -5,7 +5,12 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { openDb } from '../scripts/lib/db.js'
 import { aggregateGameFouls, exportFouls, exportFoulStore, foldGame, foulStatements, scopeOfGameType, wipeTeamPitchTypes } from '../scripts/gen-fouls.mjs'
+import { exportGameFouls } from '../scripts/lib/fouls/byCount.mjs'
+import { rebuildCounts } from '../scripts/lib/fouls/rebuild.mjs'
+import { withGameFouls } from '../src/api/person/gameLog.js'
 import {
+  fetchBatterGameFouls,
+  foulCountCells,
   foulsInScope,
   compareFoulsInScope,
   foulCardView,
@@ -613,4 +618,212 @@ test('compareFoulsInScope: a compare season with no postseason compares against 
   const withPost = { ...old, post: { gamesIngested: 2, batters: { 1: { fouls: 3 } } } }
   assert.equal(compareFoulsInScope(withPost, 'P').batters[1].fouls, 3)
   assert.equal(compareFoulsInScope(null, 'P'), null)
+})
+
+// --- fouls by count (#1881) and per game (#1914) -------------------------------
+// A pitch with its post-pitch BALL count too: the 12 cells are keyed on the count BEFORE it.
+const pitchAt = (code, balls, strikes) => ({ ...pitch(code, strikes), count: { balls, strikes } })
+const cellsOf = (agg, id) => agg.batters.get(id).cells
+const at = (balls, strikes) => balls * 3 + strikes
+
+test('foul and swing cells sit on the PRE-pitch count; a PA reaches each count it was in', () => {
+  // B (0-0 -> 1-0), C (1-0 -> 1-1), F (1-1 -> 1-2), F (1-2 -> 1-2), S (1-2 -> 1-3, strike three).
+  const agg = aggregateGameFouls(
+    feedWith([
+      play({ batter: 10, pitcher: 200, events: [pitchAt('B', 1, 0), pitchAt('C', 1, 1), pitchAt('F', 1, 2), pitchAt('F', 1, 2), pitchAt('S', 1, 3)] }),
+    ]),
+  )
+  const c = cellsOf(agg, 10)
+  assert.equal(c.fouls[at(1, 1)], 1)
+  assert.equal(c.fouls[at(1, 2)], 1)
+  assert.equal(c.fouls.reduce((n, x) => n + x, 0), 2)
+  // Swings are whiff + foul + in play: the 1-2 count saw a foul and the swinging strike three.
+  assert.equal(c.swings[at(1, 2)], 2)
+  assert.equal(c.swings[at(1, 1)], 1)
+  assert.equal(c.swings[at(0, 0)], 0, 'a ball is no swing')
+  assert.deepEqual([at(0, 0), at(1, 0), at(1, 1), at(1, 2)].map((i) => c.reach[i]), [1, 1, 1, 1])
+  assert.equal(c.reach.reduce((n, x) => n + x, 0), 4)
+})
+
+test('the PA end is credited to every count the PA reached: hit, walk, strikeout, out', () => {
+  const agg = aggregateGameFouls(
+    feedWith([
+      play({ batter: 10, pitcher: 200, eventType: 'single', events: [pitchAt('C', 0, 1), pitchAt('X', 0, 1)] }),
+      play({ batter: 11, pitcher: 200, eventType: 'walk', events: [pitchAt('B', 1, 0), pitchAt('B', 2, 0), pitchAt('B', 3, 0), pitchAt('B', 4, 0)] }),
+      play({ batter: 12, pitcher: 200, eventType: 'strikeout', events: [pitchAt('S', 0, 1), pitchAt('S', 0, 2), pitchAt('S', 0, 3)] }),
+      play({ batter: 13, pitcher: 200, eventType: 'field_out', events: [pitchAt('X', 0, 0)] }),
+      play({ batter: 14, pitcher: 200, eventType: 'hit_by_pitch', events: [pitchAt('H', 1, 0)] }),
+    ]),
+  )
+  const one = (id, key) => cellsOf(agg, id)[key].reduce((n, x) => n + x, 0)
+  assert.deepEqual([cellsOf(agg, 10).hit[at(0, 0)], cellsOf(agg, 10).hit[at(0, 1)]], [1, 1])
+  assert.equal(one(10, 'hit'), 2, 'the single reached 0-0 and 0-1')
+  assert.equal(one(11, 'walk'), 4, 'the walk reached 0-0, 1-0, 2-0, 3-0')
+  assert.equal(cellsOf(agg, 11).walk[at(3, 0)], 1)
+  assert.equal(one(12, 'so'), 3)
+  assert.equal(one(13, 'out'), 1)
+  assert.equal(one(14, 'walk'), 1, 'a hit by pitch is on base, with the walks')
+  assert.equal(one(11, 'reach'), one(11, 'hit') + one(11, 'walk') + one(11, 'so') + one(11, 'out'))
+})
+
+test('the ball count carries across a non-PA play into the resumed at-bat', () => {
+  const agg = aggregateGameFouls(
+    feedWith([
+      play({ batter: 11, pitcher: 200, eventType: 'stolen_base_2b', events: [pitchAt('B', 1, 0), pitchAt('C', 1, 1)] }),
+      play({ batter: 11, pitcher: 200, eventType: 'walk', events: [pitchAt('F', 1, 2)] }),
+    ]),
+  )
+  const c = cellsOf(agg, 11)
+  assert.equal(c.fouls[at(1, 1)], 1, 'the foul is thrown from 1-1, carried over the stolen base')
+  assert.equal(c.reach[at(0, 0)], 1, 'one PA, so one 0-0')
+  assert.equal(c.reach.reduce((n, x) => n + x, 0), 3)
+})
+
+test('a pitch-clock violation (an event with a count and no pitch) moves the pre-pitch count', () => {
+  // Feed shape from gamePk 823035: a "VP" event reads 1-0, then the first pitch is a strike at 1-1.
+  const violation = { isPitch: false, details: { event: 'Pitch Clock Violation' }, count: { balls: 1, strikes: 0 } }
+  const agg = aggregateGameFouls(
+    feedWith([play({ batter: 10, pitcher: 200, events: [violation, pitchAt('F', 1, 1)] })]),
+  )
+  const c = cellsOf(agg, 10)
+  assert.equal(c.fouls[at(1, 0)], 1)
+  assert.equal(c.fouls[at(0, 0)], 0)
+  assert.deepEqual([c.reach[at(0, 0)], c.reach[at(1, 0)]], [1, 1], 'it began in 0-0, so 0-0 is reached with no pitch from it')
+})
+
+test('per game: the batter row carries pitches, fouls and whiffs', () => {
+  const agg = aggregateGameFouls(
+    feedWith([play({ batter: 10, pitcher: 200, events: [pitchAt('C', 0, 1), pitchAt('F', 0, 2), pitchAt('S', 0, 3)] })]),
+  )
+  const b = agg.batters.get(10)
+  assert.deepEqual([b.pitchesSeen, b.fouls, b.whiffs], [3, 1, 1])
+})
+
+// One game, batter 10 sees: C (0-0), F (0-1), S (0-2): fouls and swings on 0-1 and 0-2, whiff at 0-2.
+const countGame = () =>
+  feedWith([play({ batter: 10, pitcher: 200, eventType: 'strikeout', events: [pitchAt('C', 0, 1), pitchAt('F', 0, 2), pitchAt('S', 0, 3)] })])
+const foldCounts = (db, gamePk, date, season, scope = 'R') =>
+  foldGame(db, foulStatements(db), gamePk, date, season, aggregateGameFouls(countGame()), scope)
+
+test('exportFouls: a batter row and the league carry the by-count cells, summed over games', async () => {
+  const db = await emptyDb()
+  foldCounts(db, 1, '2026-09-01', 2026)
+  foldCounts(db, 2, '2026-09-02', 2026)
+  const out = exportFouls(db, 2026)
+  const bc = out.batters[10].byCount
+  assert.equal(bc.reach[at(0, 0)], 2)
+  assert.equal(bc.fouls[at(0, 1)], 2)
+  assert.equal(bc.swings[at(0, 2)], 2)
+  assert.equal(bc.so[at(0, 2)], 2)
+  assert.deepEqual(out.league.byCount, bc, 'one batter, so the league is his cells')
+})
+
+test('the league median of the best at-bat counts hitters with 300+ PA only', async () => {
+  const db = await emptyDb()
+  const total = db.prepare("INSERT INTO foul_batter_totals (person_id, season, scope, name, pa) VALUES (?, 2026, 'R', 'x', ?)")
+  const high = db.prepare("INSERT INTO foul_batter_pa_high (person_id, season, scope, fouls, game_pk) VALUES (?, 2026, 'R', ?, 1)")
+  for (const [id, pa, fouls] of [[1, 300, 4], [2, 650, 9], [3, 420, 6], [4, 299, 20], [5, 100, 12]]) {
+    total.run(id, pa)
+    high.run(id, fouls)
+  }
+  assert.equal(exportFouls(db, 2026).league.medianBestPaFouls, 6)
+  assert.equal(exportFouls(await emptyDb(), 2026).league.medianBestPaFouls, null, 'nobody qualifies')
+})
+
+test('exportGameFouls: [pitches, fouls, whiffs] per batter and gamePk, both scopes, rewritten not added', async () => {
+  const db = await emptyDb()
+  foldCounts(db, 1, '2026-09-01', 2026)
+  foldCounts(db, 7, '2026-10-05', 2026, 'P')
+  assert.deepEqual(exportGameFouls(db, 2026), { 10: { 1: [3, 1, 1], 7: [3, 1, 1] } })
+  foldGame(db, foulStatements(db), 1, '2026-09-01', 2026, aggregateGameFouls(countGame()))
+  assert.deepEqual(exportGameFouls(db, 2026)[10][1], [3, 1, 1], 'the same game folded again overwrites its row')
+  assert.deepEqual(exportGameFouls(db, 2027), {})
+})
+
+test('the committed dump still loads and exports: no cells, no game rows, until the re-read', async () => {
+  const db = await openDb()
+  const out = exportFouls(db, 2026)
+  assert.ok(Object.keys(out.batters).length > 100)
+  assert.equal(Object.values(out.batters).some((b) => 'byCount' in b), false)
+  assert.deepEqual(out.league.byCount, null)
+  assert.deepEqual(exportGameFouls(db, 2026), {})
+})
+
+test('rebuildCounts wipes ONE season of both tables and refills it from the ingested games', async () => {
+  const db = await emptyDb()
+  foldCounts(db, 1, '2026-09-01', 2026)
+  foldCounts(db, 7, '2026-10-05', 2026, 'P')
+  foldCounts(db, 3, '2027-03-25', 2027)
+  const before = withoutStamp(exportFouls(db, 2026))
+  const beforeGames = exportGameFouls(db, 2026)
+  db.exec("UPDATE foul_batter_counts SET reach = 99 WHERE season = 2026; UPDATE foul_batter_games SET fouls = 99 WHERE season = 2026") // stale rows
+  const asked = []
+  const { done, failed } = await rebuildCounts(db, foulStatements(db), {
+    season: 2026,
+    aggregate: aggregateGameFouls,
+    getFeed: async (pk) => (asked.push(pk), countGame()),
+  })
+  assert.deepEqual([done, failed], [2, []])
+  assert.deepEqual(asked.sort(), [1, 7], 'both scopes of 2026, and not the 2027 game')
+  assert.deepEqual(withoutStamp(exportFouls(db, 2026)), before)
+  assert.deepEqual(exportGameFouls(db, 2026), beforeGames)
+  assert.equal(exportFouls(db, 2027).batters[10].byCount.reach[0], 1, '2027 is untouched')
+})
+
+test('rebuildCounts names a game whose feed failed, and the wipe is not undone for it', async () => {
+  const db = await emptyDb()
+  foldCounts(db, 1, '2026-09-01', 2026)
+  foldCounts(db, 2, '2026-09-02', 2026)
+  const { done, failed } = await rebuildCounts(db, foulStatements(db), {
+    season: 2026,
+    aggregate: aggregateGameFouls,
+    getFeed: async (pk) => {
+      if (pk === 2) throw new Error('boom')
+      return countGame()
+    },
+  })
+  assert.equal(done, 2)
+  assert.deepEqual(failed.map((g) => g.game_pk), [2])
+  assert.equal(exportFouls(db, 2026).batters[10].byCount.reach[0], 1, 'only game 1 is back')
+})
+
+test('foulCountCells reads fouls per swing and how the PAs ended, and is null-safe', () => {
+  const zero = () => new Array(12).fill(0)
+  const byCount = { reach: zero(), fouls: zero(), swings: zero(), hit: zero(), walk: zero(), so: zero(), out: zero() }
+  byCount.reach[at(0, 2)] = 10
+  byCount.fouls[at(0, 2)] = 3
+  byCount.swings[at(0, 2)] = 6
+  byCount.so[at(0, 2)] = 4
+  byCount.out[at(0, 2)] = 6
+  const cells = foulCountCells(byCount)
+  assert.equal(cells.length, 12)
+  assert.equal(cells[at(0, 2)].count, '0-2')
+  assert.equal(cells[at(0, 2)].foulsPerSwing, 0.5)
+  assert.deepEqual(cells[at(0, 2)].ends, { hit: 0, walk: 0, so: 4, out: 6 })
+  assert.equal(cells[at(3, 2)].count, '3-2')
+  assert.equal(cells[at(0, 0)].foulsPerSwing, null, 'no swings, no rate')
+  assert.equal(foulCountCells(null), null)
+  assert.equal(batterFoulLine({ batters: { 5: { g: 1, byCount } } }, 5).byCount, byCount)
+  assert.equal(batterFoulLine({ batters: { 5: { g: 1 } } }, 5).byCount, null)
+})
+
+test('withGameFouls adds a game\'s pitches, fouls and whiffs to its log row; no entry reads null', () => {
+  const view = { rows: [{ gamePk: 1 }, { gamePk: 2 }] }
+  const joined = withGameFouls(view, { 1: [90, 7, 5] })
+  assert.deepEqual(joined.rows.map((r) => [r.pitchesSeen, r.fouls, r.whiffs]), [[90, 7, 5], [null, null, null]])
+  assert.equal(joined.rows[0].gamePk, 1)
+  assert.deepEqual(withGameFouls(view, null).rows[0].fouls, null)
+  assert.equal(withGameFouls(null, {}), null)
+})
+
+test('fetchBatterGameFouls reads his games shard from the season store; a missing shard or id reads null', async (t) => {
+  const files = {
+    '/data/fouls/seasons.json': { seasons: [2026], current: 2026 },
+    '/data/fouls/2026/71.games.json': { season: 2026, games: { 660271: { 824386: [20, 3, 1] } } },
+  }
+  t.mock.method(globalThis, 'fetch', async (url) => ({ ok: url in files, status: url in files ? 200 : 404, json: async () => files[url] }))
+  assert.deepEqual(await fetchBatterGameFouls(660271), { 824386: [20, 3, 1] })
+  assert.equal(await fetchBatterGameFouls(660272), null, 'no shard in his bucket')
+  assert.equal(await fetchBatterGameFouls(171), null, 'a shard that does not hold him')
+  assert.equal(await fetchBatterGameFouls(null), null)
 })
