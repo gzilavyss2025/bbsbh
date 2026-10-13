@@ -8,7 +8,7 @@ import { GRID, inZone } from '../../../../../lib/zone/zoneGeometry.js'
 // The five ways a pitch ended, hitter's side first. A foul tip is a whiff (Gary, 2026-10-13).
 export const OUTCOMES = ['In play', 'Ball', 'Foul', 'Called', 'Whiff']
 export const MIN_CELL = 10 // a cell under this many pitches prints nothing
-export const MIN_TYPE = 10 // a pitch type under this many is left out of the mix
+const MIN_TYPE = 10 // a pitch type under this many is left out of the mix
 
 const sum = (a) => a.reduce((x, y) => x + y, 0)
 const rate = (n, d) => (d > 0 ? n / d : null)
@@ -44,7 +44,7 @@ export function plateView(grid, { hand = null, code = null } = {}) {
   })
   // Rank the cells that print by the hitter's share into five bands (0 = the pitcher's, 4 = the hitter's).
   const ranked = cells.filter((x) => x.hit != null).sort((a, b) => a.hit - b.hit)
-  cells.forEach((x) => { x.band = x.hit == null ? null : Math.min(4, Math.floor((ranked.indexOf(x) / ranked.length) * 5)) })
+  cells.forEach((x) => { x.band = x.hit == null ? null : Math.min(4, Math.floor((ranked.findIndex((y) => y.hit === x.hit) / ranked.length) * 5)) })
   return {
     n,
     swings,

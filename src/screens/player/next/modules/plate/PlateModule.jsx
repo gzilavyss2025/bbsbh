@@ -37,10 +37,11 @@ const tableRow = (key, name, sub, at, v) => ({
 })
 
 export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
-  const { data: grid, loading, error } = useAsync(() => fetchHitterGridFor(bio.id, season, { plate: true }), [bio.id, season])
-  const [hand, setHand] = useState(null)
+  const { data: grid, loading, error } = useAsync(() => (asOf ? null : fetchHitterGridFor(bio.id, season, { plate: true })), [bio.id, season, asOf])
+  const [pickHand, setHand] = useState(null)
   const [pick, setPick] = useState(null)
   const [cell, setCell] = useState(-1)
+  const hand = pitchesVs(grid, pickHand) ? pickHand : null // a hand this hitter never faced falls back to both
   const all = useMemo(() => plateView(grid), [grid])
   const rows = useMemo(() => pitchRows(grid, hand), [grid, hand])
   const code = rows.some((r) => r.code === pick) ? pick : null
@@ -99,7 +100,7 @@ export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
                   className="fplate__cell"
                   data-band={c.band ?? 'none'}
                   aria-pressed={cell === c.i}
-                  aria-label={`${ROWS[Math.floor(c.i / GRID)]}, ${COLS[GRID - 1 - (c.i % GRID)]}: ${c.hit == null ? `${c.n < MIN_CELL ? `fewer than ${MIN_CELL} pitches` : 'not on file'}` : `${pct(c.hit)} percent hitter outcomes on ${c.n} pitches`}`}
+                  aria-label={`${ROWS[Math.floor(c.i / GRID)]}, ${COLS[GRID - 1 - (c.i % GRID)]}: ${c.hit == null ? (c.n < MIN_CELL ? `fewer than ${MIN_CELL} pitches` : 'not on file') : `${pct(c.hit)} percent hitter outcomes on ${c.n} pitches`}`}
                   onClick={() => setCell(cell === c.i ? -1 : c.i)}
                 >
                   {c.hit != null && <>{pct(c.hit)}<small>%</small></>}

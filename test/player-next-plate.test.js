@@ -60,6 +60,7 @@ test('a cell under the floor prints nothing; the rest rank into five bands', () 
   assert.equal(v.cells[0].n, 9)
   // The outer cells are all balls and fouls (the hitter's outcomes); the zone cells are not.
   assert.ok(v.cells[12].band < v.cells[2].band)
+  assert.equal(v.cells[12].band, v.cells[13].band) // equal shares, one band
   assert.ok(v.cells.every((c) => c.band == null || (c.band >= 0 && c.band <= 4)))
 })
 
