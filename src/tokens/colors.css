@@ -43,6 +43,10 @@
   --field:    #2F6E4F;   /* outfield green — positive / on-base */
   --field-deep:#255740;
   --field-soft:#E3EDE2;
+  /* A light outfield green that carries ink text (#1883). It fills the count
+     badge on the current jump-bar button and the position pill on the player
+     page. Read it through --accent-tint, never by this name. */
+  --field-mint:#86BE98;
   /* The tint of a stamped stat tile (#1882, the player page's hero row). A
      greener, deeper wash than --field-soft, so a tinted tile reads as a second
      fill beside the plain card paper. */
@@ -183,6 +187,12 @@
      worst on the darkest of them at 5.28:1 (--accent-link on --bg-canvas),
      asserted in check-contrast.mjs. */
   --accent-link:      var(--field);
+
+  /* A soft green fill under ink text (#1883): the count badge on the current
+     jump-bar button (HubTabBar's anchor variant) and the player page's
+     position pill. 8.4:1 (--text-heading on --accent-tint), asserted in
+     check-contrast.mjs. It is the app's own colour, never a club's (ADR-0030). */
+  --accent-tint:      var(--field-mint);
 
   --seal-cover:       var(--seal);
   --seal-cover-ink:   var(--seal-ink);

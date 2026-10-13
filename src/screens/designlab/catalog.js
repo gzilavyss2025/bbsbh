@@ -402,6 +402,13 @@ export const PROTOTYPES = [
     note: 'The Season Report and “Who challenges” as they are on frame="sheet", then three candidate looks on the same two real components. Invented data. No new Card frame; Gary picks, or stays on sheet.',
   },
   {
+    id: 'jump-bar',
+    title: 'Jump bar (#1883)',
+    path: 'src/screens/designlab/jumpbar/',
+    verdict: 'Prototype',
+    note: 'HubTabBar variant="anchor" over invented sections. Scroll the box: the ink button follows. Tap a button: the box scrolls to it. A row that scrolls sideways under 740px; a wrapped box at 740px and up.',
+  },
+  {
     id: 'stamped-parts',
     title: 'Player redesign: shared parts (#1882)',
     path: 'src/screens/designlab/stamped/',
