@@ -8,26 +8,27 @@ import { Card } from '../../../components/ui/frame/Card.jsx'
 import { FactGrid } from '../../../components/ui/frame/FactGrid.jsx'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { DASH, Fact, debutLabel, draftLabel } from '../parts.jsx'
+import { ageFact } from './heroData.js'
 
 // The Age fact, as a button that flips to the birthday (D2-phone). The flip is
 // the motion, so a reader who asked for less motion gets plain text.
-function AgeFact({ age, birthDate }) {
+function AgeFact({ fact, birthDate }) {
   const [flipped, setFlipped] = useState(false)
   const [still] = useState(motionIsReduced)
-  if (still || !birthDate) return <Fact label="Age" value={age} mono />
+  if (still || !fact.flip) return <Fact label={fact.label} value={fact.value} mono />
   return (
     <div className="fact fact--flip">
       <button
         type="button"
         className={`pnext__agebtn${flipped ? ' is-flipped' : ''}`}
         aria-pressed={flipped}
-        aria-label={`Age ${age}. Tap to flip to his birthday.`}
+        aria-label={`Age ${fact.value}. Tap to flip to his birthday.`}
         onClick={() => setFlipped((f) => !f)}
       >
         <span className="pnext__ageflip">
           <span className="pnext__ageface">
             <span className="fact__label">Age</span>
-            <span className="fact__value mono">{age}</span>
+            <span className="fact__value mono">{fact.value}</span>
           </span>
           <span className="pnext__ageface pnext__ageface--back" aria-hidden="true">
             <span className="fact__label">Birthday</span>
@@ -69,7 +70,7 @@ export function PlayerNextHero({ core }) {
       </div>
       <FactGrid look="strip" as="div">
         <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} mono />
-        <AgeFact age={bio.age} birthDate={bio.birthDate} />
+        <AgeFact fact={ageFact(bio, status)} birthDate={bio.birthDate} />
         <Fact label="Ht / Wt" value={bio.heightWeight} mono />
         <Fact label="Born" value={bio.born} />
         <Fact label="MLB debut" value={bio.debut ? debutLabel(bio.debut) : DASH} mono />

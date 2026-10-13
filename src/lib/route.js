@@ -39,7 +39,7 @@
 //   '/admin/contenders'                 -> { name: 'admin-contenders' }  (Contender Diary, Clerk-admin gated)
 //   '/admin/contracts'                  -> { name: 'admin-contracts' }  (contract-identity review queue, Clerk-admin gated)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
-//   '/player/{name-id}'                 -> { name: 'player', id, asOf, sportId }
+//   '/player/{name-id}'                 -> { name: 'player', id, asOf, sportId }  (?look=new: name 'player-next', #1884)
 //   '/player/{name-id}/{stats|analytics|history}'
 //                                       -> { name: 'player-{tab}', id, asOf, sportId }
 //                                          (the player hub's tabs — an unknown third

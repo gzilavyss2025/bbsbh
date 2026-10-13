@@ -13,7 +13,7 @@ import { AsOfBanner } from '../../../components/seal/AsOfBanner.jsx'
 import { PlayerNextHero } from './PlayerNextHero.jsx'
 import { PlayerNextTiles } from './PlayerNextTiles.jsx'
 import { Slot } from './Slot.jsx'
-import { jumpSections, rolesOf, shownSections, slotInstances } from './sections.js'
+import { jumpSections, rolesOf, seedEmpty, shownSections, slotInstances } from './sections.js'
 import '../../../styles/player-next/page.css'
 
 // The new player page (#1884, docs/player-redesign.md), at /player/{id}?look=new
@@ -21,7 +21,7 @@ import '../../../styles/player-next/page.css'
 // slot per section for the module issues to fill. An open surface (ADR-0034):
 // nothing here is sealed or gated. Both loaders mount together, as PlayerPage
 // does, because they share playerContext only while in flight.
-export function PlayerNextPage({ id, asOf, sportId }) {
+function PlayerNextBody({ id, asOf, sportId }) {
   const core = useAsync(() => loadPlayerCore(id, asOf), [id, asOf])
   const overview = useAsync(() => loadPlayerOverview(id, asOf), [id, asOf])
   useDocumentTitle(core.data?.bio.fullName || null)
@@ -40,7 +40,9 @@ export function PlayerNextPage({ id, asOf, sportId }) {
 
   const { blocks } = overview.data
   const instances = slotInstances(rolesOf(core.data.bio, blocks))
-  const sections = shownSections(jumpSections(core.data.bio, blocks), instances, empty)
+  // What the loaded data shows empty, then what the modules have reported.
+  const gone = { ...seedEmpty(instances, blocks), ...empty }
+  const sections = shownSections(jumpSections(core.data.bio, blocks), instances, gone)
   const markEmpty = (key) => setEmpty((e) => (e[key] ? e : { ...e, [key]: true }))
   const rows = blocks.filter((b) => b.tiles.length)
   return (
@@ -67,7 +69,7 @@ export function PlayerNextPage({ id, asOf, sportId }) {
             .map((s) => (
               <Stack key={s.key} as="section" gap="section" id={s.key} className="pnext__section">
                 {instances
-                  .filter((i) => i.section === s.key && !empty[i.key])
+                  .filter((i) => i.section === s.key && !gone[i.key])
                   .map((i) => (
                     <Slot key={i.key} inst={i} bio={core.data.bio} asOf={asOf} season={core.data.season} onEmpty={markEmpty} />
                   ))}
@@ -78,4 +80,10 @@ export function PlayerNextPage({ id, asOf, sportId }) {
       </div>
     </LinkScope>
   )
+}
+
+// Keyed on the player and the cutoff, so a slot's reported-empty state never carries over
+// to the next player (App.jsx renders this with no key of its own).
+export function PlayerNextPage(props) {
+  return <PlayerNextBody key={`${props.id}:${props.asOf ?? ''}`} {...props} />
 }

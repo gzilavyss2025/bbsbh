@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { useNearView } from '../../../hooks/scroll/useNearView.js'
 import { Card } from '../../../components/ui/frame/Card.jsx'
+import { SlotBoundary } from './SlotBoundary.jsx'
 
 // Runs once the module has mounted: a module that rendered nothing has no data.
 // It sits beside the module inside its Suspense boundary, so it commits with it.
@@ -24,22 +25,24 @@ export function Slot({ inst, bio, asOf, season, onEmpty }) {
   return (
     <Card frame="stamped" label={inst.label} count={count} ref={ref} className="pnext__slot">
       {near ? (
-        <Suspense fallback={<p className="hint">Loading {inst.label}…</p>}>
-          <div ref={bodyRef}>
-            <Module
-              bio={bio}
-              role={inst.role}
-              asOf={asOf}
-              season={season}
-              section={inst.section}
-              onEmpty={report}
-              onCount={setCount}
-            />
-          </div>
-          <Probe bodyRef={bodyRef} onEmpty={report} />
-        </Suspense>
+        <SlotBoundary onFail={report}>
+          <Suspense fallback={<p className="hint">Loading {inst.label}…</p>}>
+            <div ref={bodyRef}>
+              <Module
+                bio={bio}
+                role={inst.role}
+                asOf={asOf}
+                season={season}
+                section={inst.section}
+                onEmpty={report}
+                onCount={setCount}
+              />
+            </div>
+            <Probe bodyRef={bodyRef} onEmpty={report} />
+          </Suspense>
+        </SlotBoundary>
       ) : (
-        <p className="hint">{' '}</p>
+        <p className="hint">{'\u00a0'}</p>
       )}
     </Card>
   )

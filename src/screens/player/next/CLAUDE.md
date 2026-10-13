@@ -29,6 +29,10 @@ the `SLOTS` order in `sections.js`. No section has its own button beyond the jum
   loaded and found nothing calls `onEmpty()`, or renders nothing on its first render; `Slot`
   hides the card, and the button hides when ALL slots of its section are empty.
 - **Count tag:** call `onCount(n)` (or a string); `Slot` draws it on the card's edge.
+- **Height:** a placeholder reserves none, so with the 600px margin most slots count as near on
+  first paint. A real module reserves its own height (or `Slot` gets a min-height then).
+- **Failure:** a module that throws, or whose chunk fails to load, hides its card like `onEmpty()`
+  (`SlotBoundary`); it never takes down the page.
 - **CSS:** the module's own file, in its folder or `src/styles/player-next/<module>.css`,
   imported from its `index.jsx` (`src/styles` is at its file budget).
 - **Open surface (ADR-0034):** no seal, no gate. Keep `?d=` and `?s=` on every link (the
