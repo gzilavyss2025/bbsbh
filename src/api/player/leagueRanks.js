@@ -27,8 +27,8 @@ export function poolsOf(data) {
 
 // The marks for one group. `pools` maps a leagueId to the { hitting, pitching } sizes of
 // its qualified pool. A split with no league, a league with no pool, or an empty pool
-// adds nothing. Each mark's
-// `label` is the hero tile it ranks, or the stat's own name when it has none.
+// adds nothing. Each mark's `label` is the hero tile it ranks, or the stat's own name
+// when it has none.
 export function rankMarks(rankSplits, group, pools) {
   const marks = []
   // A traded player has one split per league, each ranking one club's games while the
