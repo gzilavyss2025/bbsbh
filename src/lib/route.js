@@ -39,7 +39,7 @@
 //   '/admin/contenders'                 -> { name: 'admin-contenders' }  (Contender Diary, Clerk-admin gated)
 //   '/admin/contracts'                  -> { name: 'admin-contracts' }  (contract-identity review queue, Clerk-admin gated)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
-//   '/player/{name-id}'                 -> { name: 'player', id, asOf, sportId }
+//   '/player/{name-id}'                 -> { name: 'player', id, asOf, sportId }  (?look=new: name 'player-next', #1884)
 //   '/player/{name-id}/{stats|analytics|history}'
 //                                       -> { name: 'player-{tab}', id, asOf, sportId }
 //                                          (the player hub's tabs — an unknown third
@@ -541,7 +541,7 @@ export function parseRoute(url) {
   const scout = parseScoutRoute(parts, q, { asOf, idFromSlug })
   if (scout) return scout
   if (parts.length === 2 && parts[0] === 'player')
-    return { name: 'player', id: idFromSlug(parts[1]), asOf, sportId }
+    return { name: q.get('look') === 'new' ? 'player-next' : 'player', id: idFromSlug(parts[1]), asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')
     return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId }
   // A series id (e.g. '2025-division-112-158') already matches

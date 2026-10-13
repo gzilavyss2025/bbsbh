@@ -25,7 +25,7 @@ import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { PlayerHubShell } from './player/PlayerHubShell.jsx'
 import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCard.jsx'
 import { gameLogDoorLabel } from './player/overviewPreview.js'
-import { DASH, Fact, StatGrid, debutLabel, roleWord } from './player/parts.jsx'
+import { DASH, Fact, StatGrid, debutLabel, draftLabel, roleWord } from './player/parts.jsx'
 import { isoToday, monthDayName } from '../lib/dates.js'
 import { Pill } from '../components/ui/control/Pill.jsx'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
@@ -60,15 +60,6 @@ function PreviewDoor({ label, onClick }) {
       <Door onClick={onClick}>{label}</Door>
     </div>
   )
-}
-
-function draftLabel(draft, signedYear) {
-  if (draft && draft.year) {
-    if (!draft.round) return String(draft.year)
-    return `${draft.year} · Rd ${draft.round}${draft.overall ? ` #${draft.overall}` : ''}`
-  }
-  if (signedYear) return `Signed ${signedYear}`
-  return DASH
 }
 
 export function PlayerPage({ id, asOf, sportId }) {

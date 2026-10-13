@@ -92,6 +92,7 @@ const ContractIdentityReviewPage = lazyNamed(
 const GameView = lazyNamed(() => import('./screens/GameView.jsx'), 'GameView')
 const LogoSheet = lazyNamed(() => import('./screens/LogoSheet.jsx'), 'LogoSheet')
 const PlayerPage = lazyNamed(() => import('./screens/PlayerPage.jsx'), 'PlayerPage')
+const PlayerNextPage = lazyNamed(() => import('./screens/player/next/PlayerNextPage.jsx'), 'PlayerNextPage')
 const MorePage = lazyNamed(() => import('./screens/MorePage.jsx'), 'MorePage')
 const ProspectsPage = lazyNamed(() => import('./screens/ProspectsPage.jsx'), 'ProspectsPage')
 const RehabPage = lazyNamed(() => import('./screens/RehabPage.jsx'), 'RehabPage')
@@ -346,6 +347,7 @@ const BARE_ROUTES = {
 // and the league.
 const ID_ROUTES = {
   player: PlayerPage,
+  'player-next': PlayerNextPage,
   'player-stats': PlayerStatsTab,
   'player-analytics': PlayerAnalyticsTab,
   'player-history': PlayerHistoryTab,

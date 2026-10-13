@@ -1,0 +1,169 @@
+/* ==== THE NEW PLAYER PAGE (/player/{id}?look=new, #1884) ====
+   Hero, stat tiles and section slots, copied from the boards B-phone, B-wide and
+   D2-phone (docs/player-redesign.md). The frames are Cards and the tiles are
+   StatTiles, so this file holds only the places they sit in. The page root is
+   .playernext, never .player: .player .factgrid would override the strip. */
+
+.playernext .mono,
+.playernext .stattile__caption {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.pnext__page {
+  padding-top: var(--space-4);
+}
+
+/* THE HERO: photo left of the identity. */
+/* layout-exempt: photo beside the identity, two fixed parts */
+.pnext__id {
+  display: flex;
+  gap: var(--space-3h);
+  align-items: center;
+  padding: var(--space-3h);
+}
+.shot.pnext__shot {
+  width: 96px;
+  height: 112px;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--bg-canvas);
+}
+.pnext__who {
+  min-width: 0;
+}
+.pnext__role {
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.pnext__name {
+  margin: var(--space-1) 0 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-display-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+/* layout-exempt: club logo, name and pill on one wrapping line */
+.pnext__club {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  font-weight: var(--w-semibold);
+}
+
+/* THE AGE FLIP. The button is the fact cell; its two faces share a grid cell and
+   turn about the horizontal axis. Only the motion changes on a reduced-motion
+   page, and there AgeFact draws no button at all. */
+.factgrid--strip .fact--flip {
+  padding: 0;
+}
+.pnext__agebtn {
+  display: block;
+  width: 100%;
+  min-height: var(--tap-min);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  perspective: 500px;
+}
+.pnext__agebtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+/* layout-exempt: two faces stacked in one grid cell */
+.pnext__ageflip {
+  display: grid;
+  align-content: start;
+  transform-style: preserve-3d;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+/* layout-exempt: a label over a value */
+.pnext__ageface {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  backface-visibility: hidden;
+}
+.pnext__ageface--back {
+  transform: rotateX(180deg);
+}
+.is-flipped .pnext__ageflip {
+  transform: rotateX(180deg);
+}
+
+/* THE TILES. Phone: the ink tile spans the row, then two by two. Wide: five in
+   one row. */
+.pnext__rowlabel {
+  margin: 0 0 var(--space-3);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+/* layout-exempt: a fixed two-up grid whose lead tile spans it; Grid fits columns by width */
+.pnext__tilerow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.pnext__tilerow > :first-child {
+  grid-column: 1 / -1;
+}
+@media (min-width: 740px) {
+  /* layout-exempt: five tiles in one row at the wide step */
+  .pnext__tilerow {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .pnext__tilerow > :first-child {
+    grid-column: auto;
+  }
+}
+
+/* A section is one jump-bar target. Its first card's name tab hangs above the card, so the
+   section leaves room for it and a tap lands with the tab in view. */
+.pnext__section {
+  padding-top: var(--space-3h);
+}
+/* A section slot: a stamped Card whose name tab hangs above it. */
+.pnext__slot {
+  margin-top: var(--space-3h);
+}
+
+/* The position pill takes the tint of the lead tile (the boards' green). */
+.pnext__club .pill {
+  border-color: var(--border-stamped);
+  background: var(--accent-tint);
+  color: var(--text-heading);
+}
+
+@media (min-width: 740px) {
+  .pnext__id {
+    gap: var(--space-5);
+    padding: var(--space-4);
+  }
+  .shot.pnext__shot {
+    width: 112px;
+    height: 132px;
+  }
+  .pnext__name {
+    font-size: var(--fs-hero-xl);
+  }
+  .pnext__agebtn {
+    padding: var(--space-2h) var(--space-3h);
+  }
+}
