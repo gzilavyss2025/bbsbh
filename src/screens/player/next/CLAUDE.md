@@ -5,6 +5,15 @@
 `sections.js`. `Slot.jsx` is the stamped Card around one module. **A module never edits
 `sections.js`, `Slot.jsx` or the page.**
 
+## The slots
+
+One `modules/<module>/` folder per module: `season` #1885, `splits` #1886, `plate` #1887,
+`contact` #1888, `form` #1889 (batter), `pform` #1930 (pitcher Form trend), `batlog` #1890,
+`pitchlog` #1851, `fouls` #1891, `similar` #1926 (ends Game log), `arsenal` #1892, `mound`
+#1893, `path` #1894, `prospects` #1927, `firsts` #1895, `innings` #1928, `contract` #1929,
+`tbd` #1896 (one folder, three slots: Season, Career and History). Order inside a section is
+the `SLOTS` order in `sections.js`. No section has its own button beyond the jump bar's nine.
+
 ## The module contract
 
 `modules/<module>/index.jsx` default-exports a component; every slot is pre-wired in

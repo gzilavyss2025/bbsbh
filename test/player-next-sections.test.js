@@ -45,18 +45,27 @@ import { SLOTS, rolesOf, shownSections, slotInstances } from '../src/screens/pla
 
 const BOTH = ['hitting', 'pitching']
 
-test('the slots are the 13 module folders, with Career = path + tbd and History = firsts + tbd', () => {
+test('the slots are the 18 module folders, with each section holding its modules in order', () => {
   assert.deepEqual(
     [...new Set(SLOTS.map((s) => s.module))].sort(),
-    ['arsenal', 'batlog', 'contact', 'firsts', 'form', 'fouls', 'mound', 'path', 'pitchlog', 'plate', 'season', 'splits', 'tbd'],
+    ['arsenal', 'batlog', 'contact', 'contract', 'firsts', 'form', 'fouls', 'innings', 'mound', 'path', 'pform', 'pitchlog', 'plate', 'prospects', 'season', 'similar', 'splits', 'tbd'],
   )
-  assert.deepEqual(SLOTS.filter((s) => s.section === 'career').map((s) => s.module), ['path', 'tbd'])
-  assert.deepEqual(SLOTS.filter((s) => s.section === 'history').map((s) => s.module), ['firsts', 'tbd'])
+  const at = (section) => SLOTS.filter((s) => s.section === section).map((s) => s.module)
+  assert.deepEqual(at('season'), ['season', 'tbd'])
+  assert.deepEqual(at('career'), ['path', 'prospects', 'tbd'])
+  assert.deepEqual(at('history'), ['firsts', 'innings', 'contract', 'tbd'])
+  assert.deepEqual(at('form-trend'), ['form', 'pform'])
   assert.equal(new Set(SLOTS.map((s) => s.id)).size, SLOTS.length)
 })
 
-test('foul balls sit at the end of the Game log section', () => {
-  assert.equal(SLOTS.filter((s) => s.section === 'game-log').at(-1).module, 'fouls')
+test('the Game log section ends with foul balls, then similar players', () => {
+  assert.deepEqual(SLOTS.filter((s) => s.section === 'game-log').map((s) => s.module), ['batlog', 'pitchlog', 'fouls', 'similar'])
+})
+
+test('the batter Form trend and the pitcher Form trend are two modules', () => {
+  const form = (r) => slotInstances([r]).filter((i) => i.section === 'form-trend').map((i) => i.module)
+  assert.deepEqual(form('hitting'), ['form'])
+  assert.deepEqual(form('pitching'), ['pform'])
 })
 
 test('every slot sits in a section its roles have a button for', () => {
@@ -92,12 +101,12 @@ test('a button hides only when every slot in its section is empty', () => {
   const history = inst.filter((i) => i.section === 'history')
   // Nothing reported yet: every button stays. The Overview has no slot, so it always stays.
   assert.deepEqual(keys(shownSections(sections, inst, {})), ['overview', 'career', 'history'])
-  // One of two empty: the section stays.
+  // One of several empty: the section stays.
   assert.deepEqual(keys(shownSections(sections, inst, { [career[0].key]: true })), ['overview', 'career', 'history'])
   // Both empty: it goes.
   const gone = Object.fromEntries(career.map((i) => [i.key, true]))
   assert.deepEqual(keys(shownSections(sections, inst, gone)), ['overview', 'history'])
-  assert.equal(history.length, 2)
+  assert.equal(history.length, 4)
 })
 
 // ---- "not built yet" is not "no data" ----
