@@ -26,6 +26,9 @@ beside it.
   `label` stops being visible: it becomes the sheet's headline and the button's
   accessible name. The house `See all ›` is said once, under the card title. Adding a
   facet needs nothing here: the columns are the group's, not the door's.
+- **`doorCells(entry, stat, group, { wide: true })`** adds OBP, SLG, K% and BB% after the five
+  (`DOOR_COLUMNS_WIDE`); the live card draws five and does not ask. `splitsLoad.js` is the
+  Splits card's season (1 request) and career (1, or 2 with the postseason) loader (#1910).
 - **The suite pins two rules.** The cells and `careerSplitLine` must quote the same five
   figures in the same order (the door is the only place the card and the sheet meet).
   `DOOR_EMPHASIS` must ink a RATE: a pitcher's fifth column is `BB`, a hitter's is OPS,

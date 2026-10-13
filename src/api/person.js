@@ -33,6 +33,7 @@ export {
   hitterTiles,
   pitcherTiles,
   splitsView,
+  splitReads,
   SITUATIONAL_SIT_CODES,
   situationalSplitsView,
   pitchingRanksView,
