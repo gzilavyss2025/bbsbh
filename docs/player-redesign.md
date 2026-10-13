@@ -26,6 +26,8 @@ design system. It does not replace it.
 
 ## 2. Decisions (Gary, 2026-10-13)
 
+Recorded in [ADR-0109](adr/0109-the-canvas-is-the-site-wide-look.md).
+
 1. **The canvas is the site-wide look.** It answers the open "pick a direction" item in
    #1198, section 1. The four directions in PR #1841 close. The shared parts go into the
    design system (`src/components/ui/`, `src/styles/system/`), not into the player page.
