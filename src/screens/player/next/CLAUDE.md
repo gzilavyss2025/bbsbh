@@ -14,6 +14,14 @@ One `modules/<module>/` folder per module: `season` #1885, `splits` #1886, `plat
 `tbd` #1896 (one folder, three slots: Season, Career and History). Order inside a section is
 the `SLOTS` order in `sections.js`. No section has its own button beyond the jump bar's nine.
 
+## The top cards
+
+`top/` holds three page-level cards that are NOT slots: `StatusBanners` and `HeaderExtras` (nickname,
+prospect pills, school, OVR bars) wrap the hero, `OverviewExtras` (rank chips, postseason, other
+levels) sits under the tiles (#1884, TbdWire "top"). Each is a plain stamped Card with the live
+page's content and hides when it has none. The banner text is `../statusBanners.js`, shared with the
+live hub.
+
 ## The module contract
 
 `modules/<module>/index.jsx` default-exports a component; every slot is pre-wired in
@@ -29,10 +37,12 @@ the `SLOTS` order in `sections.js`. No section has its own button beyond the jum
   loaded and found nothing calls `onEmpty()`, or renders nothing on its first render; `Slot`
   hides the card, and the button hides when ALL slots of its section are empty. A module that is built leaves the stub list: add it to `BUILT` in `test/player-next-sections.test.js`.
 - **Count tag:** call `onCount(n)` (or a string); `Slot` draws it on the card's edge.
-- **Height:** a placeholder reserves none, so with the 600px margin most slots count as near on
-  first paint. A real module reserves its own height (or `Slot` gets a min-height then).
+- **Height:** a slot before it is near holds one non-breaking-space line, so it reserves one line; with
+  the 600px margin most slots count as near on first paint. A real module reserves its own height (or `Slot` gets a min-height then).
 - **Failure:** a module that throws, or whose chunk fails to load, hides its card like `onEmpty()`
-  (`SlotBoundary`); it never takes down the page.
+  (`SlotBoundary`, which logs the error with the slot key); it never takes down the page. The page
+  also hides the log slots from its own data: with no season or postseason games, `seedEmpty` hides
+  `batlog`, `pitchlog` and `fouls` before they mount.
 - **CSS:** the module's own file, in its folder or `src/styles/player-next/<module>.css`,
   imported from its `index.jsx` (`src/styles` is at its file budget).
 - **Open surface (ADR-0034):** no seal, no gate. Keep `?d=` and `?s=` on every link (the

@@ -33,7 +33,7 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
-import { fetchCustomBoard, fetchArsenalBoard, batterArsenalMap, regress, meanSd, meanSdGrouped, num, round1 } from './lib/savant.mjs'
+import { fetchCustomBoard, fetchArsenalBoard, batterArsenalMap, pitcherArsenalMap, regress, meanSd, meanSdGrouped, num, round1 } from './lib/savant.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'savant-matchup.json')
@@ -153,8 +153,6 @@ if (!Object.keys(bat).length || !Object.keys(pit).length) {
 // model; whiff is ~84%, because its denominator is PITCHES SEEN (median 149),
 // not PA. `ba` is carried on the batter row for display color only, never
 // scored and never compared to a baseline.
-const PITCH_USAGE_MIN = 15 // percent of a pitcher's OWN pitches — "a pitch he throws 4% of the time isn't what this at-bat is about"
-const PITCH_THROWN_MIN = 150 // pitches thrown, gates a pitcher's own pitch rows
 const [pitArsenalRows, batArsenalRows] = [
   await fetchArsenalBoard('pitcher', { season }),
   await fetchArsenalBoard('batter', { season }),
@@ -168,27 +166,7 @@ const arsenalLeague = {
   bat: meanSdGrouped(batArsenalRows, 'pitch_type', 'whiff_percent'),
 }
 
-// Gate the PITCH, not just the players: a pitcher's own row for a pitch type
-// only counts once it's a real part of his repertoire.
-function pitcherArsenalMap(rows) {
-  const map = {}
-  for (const r of rows) {
-    const id = r.player_id
-    const type = r.pitch_type
-    if (!id || !type) continue
-    const usage = num(r.pitch_usage)
-    const pitches = num(r.pitches)
-    const whiff = num(r.whiff_percent)
-    if (usage == null || pitches == null || whiff == null) continue
-    if (usage < PITCH_USAGE_MIN || pitches < PITCH_THROWN_MIN) continue
-    const lg = arsenalLeague.pit[type]?.m
-    if (!map[id]) map[id] = {}
-    map[id][type] = { usage: round1(usage), whiff: round1(regress(whiff, pitches, lg)) }
-  }
-  return map
-}
-
-const arsenal = { pit: pitcherArsenalMap(pitArsenalRows), bat: batterArsenalMap(batArsenalRows, arsenalLeague.bat) }
+const arsenal = { pit: pitcherArsenalMap(pitArsenalRows, arsenalLeague.pit), bat: batterArsenalMap(batArsenalRows, arsenalLeague.bat) }
 
 let arsenalThin = 0
 for (const [group, rows] of [['pit', pitArsenalRows], ['bat', batArsenalRows]]) {
@@ -199,10 +177,13 @@ for (const [group, rows] of [['pit', pitArsenalRows], ['bat', batArsenalRows]]) 
   }
 }
 
-// est_woba rides the batter row for the Scout page. A renamed column comes back
-// blank, not as an error (scripts/lib/savant.mjs header): warn, keep the file.
-if (batArsenalRows.filter((r) => num(r.est_woba) != null).length < batArsenalRows.length / 2) {
-  console.error('WARNING: arsenal.bat.estWoba is mostly blank — the est_woba column may have been renamed')
+// est_woba rides both rows (the batter's for the Scout page, the pitcher's per pitch type).
+// A renamed column comes back blank, not as an error (scripts/lib/savant.mjs header): warn,
+// keep the file.
+for (const [group, rows, key] of [['bat', batArsenalRows, 'estWoba'], ['pit', pitArsenalRows, 'xwoba']]) {
+  if (rows.filter((r) => num(r.est_woba) != null).length < rows.length / 2) {
+    console.error(`WARNING: arsenal.${group}.${key} is mostly blank — the est_woba column may have been renamed`)
+  }
 }
 
 if (!Object.keys(arsenal.pit).length || !Object.keys(arsenal.bat).length) {

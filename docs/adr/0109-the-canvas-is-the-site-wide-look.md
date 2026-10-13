@@ -72,6 +72,16 @@ The parts obey the rules that are already in place:
 - **ADR-0108 (layout).** New layout uses `Stack`, `Cluster` or `Grid`.
 - **ADR-0030 (club colours).** The jump bar stays the app's own colours.
 
+**Type weights (#1932, Gary, 2026-10-13).** The canvas draws each house face at one
+weight, so the site ships one weight per face:
+
+- Barlow Condensed ships 700 only. A rule that asks for another weight draws 700.
+- JetBrains Mono ships its 500 file only, declared for every weight. Emphasis in a
+  figure is colour, never weight (ADR-0073).
+- The card count tag is the one Barlow 600. It has its own family name, "Barlow
+  Condensed Tag" (`--font-display-tag`), so no other rule can reach that face.
+- Source Sans 3 keeps 400, 500, 600 and 700. The fact strip value is 500.
+
 ## Older ADRs
 
 Each ADR named in #1879 was checked against this decision.

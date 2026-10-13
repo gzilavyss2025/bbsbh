@@ -10,6 +10,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { aggregateGameCommand } from '../scripts/lib/command-grid.mjs'
 import { WHIFF_CODES, FOUL_CODES } from '../src/api/playbyplay/pitchInfo.js'
+import { commandPitchMarks } from '../src/api/commandMap.js'
 import { commandCell, normalizePitch } from '../src/lib/zone/zoneGeometry.js'
 
 const TOP = 3.4
@@ -103,4 +104,27 @@ test('a play with no pitcher, or an unknown batter side, contributes nothing', (
   const noPitcher = { matchup: { batSide: { code: 'R' } }, playEvents: [pitch(0, 2.5, 'C')] }
   const noSide = { matchup: { pitcher: { id: 1 } }, playEvents: [pitch(0, 2.5, 'C')] }
   assert.equal(aggregateGameCommand(feed([noPitcher, noSide])).size, 0)
+})
+
+// ---- commandPitchMarks: one row per pitch type, for the per-pitch numbers (#1908) ----
+const grid = (pairs) => {
+  const a = new Array(25).fill(0)
+  for (const [i, n] of pairs) a[i] = n
+  return a
+}
+
+test('each pitch type gets its pitches, whiff % and the pitch-weighted centroid of its cells', () => {
+  const entry = {
+    mlb: {
+      // 3 pitches at cell 0 (col 0,row 0), 1 at cell 24 (col 4,row 4): centroid col 1, row 1.
+      FF: { R: { cells: grid([[0, 3], [24, 1]]), whiffs: grid([[0, 1]]), swings: grid([[0, 2]]) } },
+      SL: { L: { cells: grid([[12, 2]]), whiffs: grid([]), swings: grid([[12, 1]]) } },
+    },
+  }
+  assert.deepEqual(commandPitchMarks(entry), [
+    { code: 'FF', pitches: 4, whiffPct: 50, mark: { col: 1, row: 1 } },
+    { code: 'SL', pitches: 2, whiffPct: 0, mark: { col: 2, row: 2 } },
+  ])
+  assert.deepEqual(commandPitchMarks(entry, { stand: 'L' }).map((r) => r.code), ['SL'])
+  assert.deepEqual(commandPitchMarks(null), [])
 })

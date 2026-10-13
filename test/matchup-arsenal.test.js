@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { buildArsenalNote } from '../src/api/matchup/arsenal.js'
-import { arsenalRatesFor, arsenalFor, arsenalLeagueFor, arsenalZScore } from '../src/api/matchup/savant.js'
+import { arsenalRatesFor, arsenalXwobaFor, arsenalFor, arsenalLeagueFor, arsenalZScore } from '../src/api/matchup/savant.js'
 import { SHORT_MAX } from '../src/api/matchup/voice.js'
-import { batterArsenalMap } from '../scripts/lib/savant.mjs'
+import { batterArsenalMap, pitcherArsenalMap } from '../scripts/lib/savant.mjs'
 
 // Representative per-pitch-type league baselines — not a live probe (this
 // family's real numbers are re-probed at generation time per the issue's own
@@ -65,6 +65,25 @@ test('the reader returns estWoba, and tolerates a file written before the field 
   assert.equal(arsenalRatesFor(now, 1, 'FF', 'batting').estWoba, 0.424)
   assert.doesNotThrow(() => arsenalRatesFor(old, 1, 'FF', 'batting'))
   assert.equal(arsenalRatesFor(old, 1, 'FF', 'batting').estWoba, undefined)
+})
+
+const pitRow = (over = {}) => boardRow({ pitch_usage: '30', pitches: '400', ...over })
+
+test('pitcherArsenalMap carries est_woba as xwoba, 3 places, null when blank, under the same pitch gate', () => {
+  const map = pitcherArsenalMap([pitRow(), pitRow({ pitch_type: 'SL', est_woba: '' }), pitRow({ pitch_type: 'CU', pitch_usage: '5' })], {})
+  assert.equal(map[592450].FF.xwoba, 0.424)
+  assert.equal(map[592450].SL.xwoba, null)
+  assert.equal(map[592450].SL.usage, 30) // the rest of the row still ships
+  assert.equal(map[592450].CU, undefined) // below the usage gate
+})
+
+test('the xwoba reader is null on a miss and on a file written before the field existed', () => {
+  const now = { arsenal: { pit: { 2: { FF: { usage: 30, whiff: 22, xwoba: 0.31 } } } } }
+  const old = { arsenal: { pit: { 2: { FF: { usage: 30, whiff: 22 } } } } }
+  assert.equal(arsenalXwobaFor(now, 2, 'FF'), 0.31)
+  assert.equal(arsenalXwobaFor(old, 2, 'FF'), null)
+  assert.equal(arsenalXwobaFor(now, 2, 'SL'), null)
+  assert.equal(arsenalXwobaFor(null, 2, 'FF'), null)
 })
 
 // --- the readers -------------------------------------------------------------

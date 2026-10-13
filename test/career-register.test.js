@@ -10,7 +10,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { resolveCurrentSeasonStat } from '../src/api/player/context.js'
-import { careerRegisterView, careerTimelineView } from '../src/api/person.js'
+import { careerRegisterView, careerTimelineView, milbCareerStat } from '../src/api/person.js'
 import { SPORT_IDS } from '../src/lib/teams.js'
 
 // A pitching stint's raw stat line, shaped like a statsapi split's `.stat`.
@@ -341,6 +341,25 @@ test('careerRegisterView: a career footer appears only when its side has more th
   assert.equal(milb.cells[4], '31.1')
 })
 
+// A failed level answers an empty list (fetchPersonStats swallows the error), so the
+// career-call sum can come back SHORT of the rows on screen. The footer then keeps
+// the visible-row sum rather than print a total below its own rows.
+test('the MiLB footer ignores a career-call sum that is short of the visible rows', () => {
+  const view = (milbCareer) => careerRegisterView({
+    mlbSplits: [{ season: 2026, sport: { id: 1 }, team: { id: 158 }, stat: MLB_STAT }],
+    milbSplits: [
+      { season: 2022, sport: { id: SPORT_IDS.AAA }, team: { id: 5015 }, stat: REHAB_STAT },
+      { season: 2021, sport: { id: SPORT_IDS.AA }, team: { id: 5016 }, stat: AA_STAT },
+    ],
+    group: 'pitching', role: null, debutYear: 2023, currentStat: null, currentSeason: 2026,
+    currentSportId: 1, careerStat: null, milbCareer, warByYear: {}, transactions: [],
+  }).totals.find((t) => t.label === 'MiLB').cells[0]
+  // The AA level failed: the career sum holds only the AAA 2 G.
+  assert.equal(view(milbCareerStat([{ stat: REHAB_STAT }], 'pitching')), 21)
+  // A full career sum (more than the rows: a two-club level the rows drop) still wins.
+  assert.equal(view(milbCareerStat([{ stat: REHAB_STAT }, { stat: AA_STAT }, { stat: { ...AA_STAT, gamesPlayed: 3 } }], 'pitching')), 24)
+})
+
 // Regression coverage for a real bug: a season with no qualifying stint
 // ANYWHERE (Casey Mize's 2023 Tommy John year) used to surface as
 // "2020–22, 2024–26" — a caption implying he'd left the org and come back,
@@ -490,4 +509,39 @@ test('careerRegisterView: a retired career stops at retirement instead of fillin
 
   assert.ok(register.rows.some((row) => row.year === '2011' && row.gap), 'an in-career gap remains visible')
   assert.ok(!register.rows.some((row) => Number(row.year) > 2012), 'post-retirement filler rows are pruned')
+})
+
+// Gap rows run from the FIRST pro season, not the MLB debut (#1909). 2020 had no
+// minor-league season, so a pre-debut 2020 with no row reads that, not "Did not play".
+// Any other pre-debut gap reads "No MLB or MiLB stats" (Gary, 2026-10-13): the feed has
+// no overseas rows, so a KBO year (Merrill Kelly 2015-2018) looks like a year off.
+test('careerRegisterView: gap rows start at the first pro season; a pre-debut gap reads neutral', () => {
+  const hit = (gamesPlayed) => ({ gamesPlayed, atBats: 100, avg: '.250', homeRuns: 1, rbi: 10 })
+  const split = (season, sportId, teamId) => ({ season: String(season), sport: { id: sportId }, team: { id: teamId }, stat: hit(30) })
+  const register = careerRegisterView({
+    mlbSplits: [split(2023, SPORT_IDS.MLB, 158)],
+    milbSplits: [split(2018, SPORT_IDS.ROK, 406), split(2021, SPORT_IDS.AAA, 556)],
+    group: 'hitting', debutYear: 2023, currentSeason: 2025,
+  })
+  const gaps = register.rows.filter((r) => r.gap).map((r) => [r.year, r.note])
+  assert.deepEqual(gaps, [
+    ['2024', 'Did not play'],
+    ['2022', 'No MLB or MiLB stats'],
+    ['2020', 'No minor-league season'],
+    ['2019', 'No MLB or MiLB stats'],
+  ])
+})
+
+// The MiLB career line sums the per-level career calls (#1909). A level with two clubs
+// answers ONE team-less numTeams row; summed beside another level's club row it was dropped.
+test('milbCareerStat: sums every level, keeping a two-club level\'s team-less row', () => {
+  const stat = (gamesPlayed, atBats, hits) => ({ gamesPlayed, atBats, hits })
+  const career = [
+    { sport: { id: SPORT_IDS.ROK }, numTeams: 2, stat: stat(42, 159, 45) },
+    { sport: { id: SPORT_IDS.AAA }, team: { id: 556 }, stat: stat(190, 732, 190) },
+  ]
+  const line = milbCareerStat(career, 'hitting')
+  assert.equal(line.gamesPlayed, 232)
+  assert.equal(line.atBats, 891)
+  assert.equal(line.avg, '.264')
 })

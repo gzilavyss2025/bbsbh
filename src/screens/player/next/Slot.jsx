@@ -25,7 +25,7 @@ export function Slot({ inst, bio, asOf, season, onEmpty }) {
   return (
     <Card frame="stamped" label={inst.label} count={count} ref={ref} className="pnext__slot">
       {near ? (
-        <SlotBoundary onFail={report}>
+        <SlotBoundary slotKey={inst.key} onFail={report}>
           <Suspense fallback={<p className="hint">Loading {inst.label}…</p>}>
             <div ref={bodyRef}>
               <Module

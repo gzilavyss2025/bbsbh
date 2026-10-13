@@ -16,10 +16,15 @@
   --font-body:    "Source Sans 3", system-ui, sans-serif;
   --font-mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
   --font-read:    "Lora", Georgia, "Times New Roman", serif;
+  --font-display-tag: "Barlow Condensed Tag", "Barlow Condensed", "Arial Narrow", sans-serif;  /* the card count tag only, its 600 face */
 
-  /* Weights — three deliberate levels; 500 previously blurred the boundary
-     between ordinary copy and emphasized UI. */
+  /* Weights. 500 was removed once because it blurred ordinary copy and
+     emphasized UI. It is back (ADR-0109, #1932) for one role: the weight of
+     .fact__value, the fact values on the player, team, umpire and lineup
+     cards. The canvas draws "Born" at 500. Source Sans 3 is the only family
+     with a real 500 face; Barlow and mono ship one weight each. */
   --w-regular: 400;
+  --w-medium: 500;
   --w-semibold: 600;
   --w-bold:    700;
   --w-black:   900;   /* the slate card's '@' watermark + the masthead '@' — see index.css */

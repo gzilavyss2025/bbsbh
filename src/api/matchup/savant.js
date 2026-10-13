@@ -75,6 +75,11 @@ export function arsenalRatesFor(data, personId, pitchType, role) {
   return arsenalFor(data, personId, role)?.[pitchType] ?? null
 }
 
+// A pitcher's xwOBA against one pitch type, or null: a miss, or a file written
+// before the field existed.
+export const arsenalXwobaFor = (data, personId, pitchType) =>
+  arsenalRatesFor(data, personId, pitchType, 'pitching')?.xwoba ?? null
+
 // The league whiff mean/spread for ONE pitch type, one board per role — the
 // same "each role scored against its own board" rule leagueFor uses above,
 // with a pitch-type key added.

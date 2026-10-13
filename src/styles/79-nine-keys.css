@@ -305,7 +305,7 @@
   color: var(--ink-0);
 }
 
-/* The row at the limit. JetBrains Mono ships at 700 only, so a weight change
+/* The row at the limit. JetBrains Mono ships at 500 only, so a weight change
    is a no-op; the stress is size and the darkest ink. Not --surface-inset,
    which already means "failed" in the grids above. */
 .ninekeys__row--em .ninekeys__rowlabel {
