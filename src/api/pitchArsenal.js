@@ -100,7 +100,7 @@ export async function fetchPitchMixFor(personId, gamePk, { seasonYear } = {}) {
 }
 
 // ONE START'S MEAN MPH (#1933): his mean start speed for one pitch code in one game, or, with no
-// code, for his primary fastball: the most-used of FF, SI and FC that game. It lives in a sibling
+// code, for his primary fastball: the most-used of FF, SI and FC that game that has a speed. It lives in a sibling
 // file, `{NN}.mph.json`, in tenths of a mph (a mix shard beside it is at its size ceiling). Only the
 // primary fastball also reads the mix, to rank the three. Null when the game, the code or the speed
 // is not on file, never 0.
@@ -109,8 +109,10 @@ export async function fetchPitchMphFor(personId, gamePk, code, { seasonYear } = 
   if (!key) return null
   const [mix, file] = await Promise.all([code ? null : startsShard(key), startsShard(`${key}.mph`)])
   const counts = mix?.pit?.[personId]?.[gamePk]
-  const pick = code ?? ['FF', 'SI', 'FC'].filter((c) => counts?.[c]).sort((a, b) => counts[b] - counts[a])[0]
-  const tenths = file?.mph?.[personId]?.[gamePk]?.[pick]
+  const speeds = file?.mph?.[personId]?.[gamePk]
+  // Only a fastball with a speed can be primary. Equal counts keep the list order: FF, SI, FC.
+  const pick = code ?? ['FF', 'SI', 'FC'].filter((c) => counts?.[c] && speeds?.[c] != null).sort((a, b) => counts[b] - counts[a])[0]
+  const tenths = speeds?.[pick]
   return tenths == null ? null : tenths / 10
 }
 
