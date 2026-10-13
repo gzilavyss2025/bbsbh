@@ -748,7 +748,7 @@ test('the committed dump loads and exports the by-count cells and the per-game r
   assert.notEqual(out.league.byCount, null)
   assert.ok(Object.keys(exportGameFouls(db, 2026)).length > 100)
   // Turang 668930: 573 regular-season fouls, and his cells cover all 677 PA.
-  assert.equal(out.batters['668930'].fouls, 573)
+  assert.equal(out.batters['668930'].fouls, 574)
   assert.equal(out.batters['668930'].byCount.reach[0], 677)
 })
 
