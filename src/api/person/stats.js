@@ -2,6 +2,7 @@
 // chips. See ../person.js's header for the module's overall spoiler footing.
 
 import { ipToOuts, outsToIp } from '../../lib/math/innings.js'
+import { rateText } from '../../lib/math/leagueAverages.js'
 import { DASH, num, rate3, mlbOps, eraOf, whipOf } from './shared.js'
 import { ordinal } from './teamPage.js'
 import { teamAbbr } from '../../lib/teams.js'
@@ -123,7 +124,7 @@ function tile(k, v, tone, caption) {
 export function withLeagueFigure(tiles, group, league) {
   const k = group === 'pitching' ? 'ERA' : 'AVG'
   if (league == null) return tiles
-  const lg = group === 'pitching' ? league.toFixed(2) : league.toFixed(3).slice(1)
+  const lg = rateText(league, group)
   return tiles.map((t) => (t.k === k ? { ...t, lg } : t))
 }
 
@@ -330,7 +331,7 @@ export function situationalSplitsView(splits, group, { minRows = 4 } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// League ranks (pitching) — stats=rankings returns the player's rank within
+// League ranks — stats=rankings returns the player's rank within
 // his own league for each standard stat. Curated to the headline stats and
 // gated to top-10 ranks: "1st in NL ERA" is a fact worth a chip; "38th in
 // wins" is not. Live full-season ranks with no as-of history, so the strip
@@ -338,17 +339,41 @@ export function situationalSplitsView(splits, group, { minRows = 4 } = {}) {
 // same rule as FoulCard/Recent workload).
 // ---------------------------------------------------------------------------
 
-const RANK_STATS = [
-  ['era', 'ERA'],
-  ['whip', 'WHIP'],
-  ['strikeOuts', 'K'],
-  ['wins', 'Wins'],
-  ['saves', 'Saves'],
-  ['avg', 'Opp. AVG'],
-  ['inningsPitched', 'IP'],
-]
+// One list per group serves both readers: the chips below (every entry, `label`) and the
+// league "N of M" mark of api/player/leagueRanks.js (entries with a `tile`, the StatTile
+// key the mark rides on). `rate` stats are ranked among the qualified only; the rest
+// among every player of the league.
+export const RANK_STATS = {
+  pitching: [
+    { key: 'era', label: 'ERA', tile: 'ERA', rate: true },
+    { key: 'whip', label: 'WHIP' },
+    { key: 'strikeOuts', label: 'K', tile: 'K' },
+    { key: 'wins', label: 'Wins', tile: 'W–L' },
+    { key: 'saves', label: 'Saves', tile: 'SV' },
+    { key: 'avg', label: 'Opp. AVG' },
+    { key: 'inningsPitched', label: 'IP', tile: 'IP' },
+  ],
+  hitting: [
+    { key: 'homeRuns', label: 'HR', tile: 'HR' },
+    { key: 'rbi', label: 'RBI', tile: 'RBI' },
+    { key: 'avg', label: 'AVG', tile: 'AVG', rate: true },
+    { key: 'ops', label: 'OPS' },
+    { key: 'stolenBases', label: 'SB' },
+    { key: 'hits', label: 'H' },
+  ],
+}
 export const RANK_FLOOR = 10
 const RANK_MAX_CHIPS = 4
+
+// The splits that carry a ranking. A traded player has one per league, so a count of
+// these is a count of leagues (also read by leagueRanks.js).
+export const rankedSplits = (splits) => (splits ?? []).filter((s) => s?.stat)
+
+// A top-10 rank from a rankings stat, or null.
+export function topRank(stat, key) {
+  const rank = Number(stat[key])
+  return Number.isFinite(rank) && rank >= 1 && rank <= RANK_FLOOR ? rank : null
+}
 
 // One chip group per league split. A player traded across leagues gets one
 // split per league, each ranking only the games for that league's club, and the
@@ -357,15 +382,13 @@ const RANK_MAX_CHIPS = 4
 // would overclaim); a one-split player's `club` is null. Returns null when no
 // split holds a top-10 rank.
 function ranksView(splits, stats) {
-  const list = (splits ?? []).filter((s) => s?.stat)
+  const list = rankedSplits(splits)
   const groups = []
   for (const s of list) {
     const items = []
-    for (const [key, label] of stats) {
-      const rank = Number(s.stat[key])
-      if (Number.isFinite(rank) && rank >= 1 && rank <= RANK_FLOOR) {
-        items.push({ label, rank, text: ordinal(rank) })
-      }
+    for (const { key, label } of stats) {
+      const rank = topRank(s.stat, key)
+      if (rank) items.push({ label, rank, text: ordinal(rank) })
     }
     if (!items.length) continue
     items.sort((a, b) => a.rank - b.rank)
@@ -381,22 +404,11 @@ function ranksView(splits, stats) {
 }
 
 export function pitchingRanksView(splits) {
-  return ranksView(splits, RANK_STATS)
+  return ranksView(splits, RANK_STATS.pitching)
 }
 
-// Hitting counterpart to pitchingRanksView — same top-10-only gate and chip
-// cap, curated to the headline hitting stats instead. Shares RANK_FLOOR /
-// RANK_MAX_CHIPS with the pitching version rather than a hitting-specific
-// pair, since the "worth a chip" bar doesn't change by group.
-const HITTING_RANK_STATS = [
-  ['homeRuns', 'HR'],
-  ['rbi', 'RBI'],
-  ['avg', 'AVG'],
-  ['ops', 'OPS'],
-  ['stolenBases', 'SB'],
-  ['hits', 'H'],
-]
-
+// Hitting counterpart to pitchingRanksView — same top-10-only gate and chip cap, since
+// the "worth a chip" bar doesn't change by group.
 export function hittingRanksView(rankSplits) {
-  return ranksView(rankSplits, HITTING_RANK_STATS)
+  return ranksView(rankSplits, RANK_STATS.hitting)
 }

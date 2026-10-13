@@ -5,69 +5,78 @@ import test from 'node:test'
 import { fetchRankMarks, poolsOf, rankMarks } from '../src/api/player/leagueRanks.js'
 import { hitterTiles, pitcherTiles, withLeagueFigure } from '../src/api/person/stats.js'
 
-// The shape of /api/v1/stats?playerPool=qualified&leagueId=104&fields=... (checked live
-// 2026-10-13: hitting totalSplits 68, pitching 20; Turang 668930 is in the hitting pool).
-const pool = (ids) => ({ ids: new Set(ids) })
+// The shape of /api/v1/stats?leagueId=104&limit=1&fields=...totalSplits (checked live
+// 2026-10-13, NL: qualified hitting 68, pitching 20; all hitting 412, pitching 473).
 const NL = 104
-const POOLS = new Map([[NL, pool([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])]])
+const sizes = (qh, qp, ah, ap) => ({ qualified: { hitting: qh, pitching: qp }, all: { hitting: ah, pitching: ap } })
+const POOLS = new Map([[NL, sizes(68, 20, 412, 473)]])
 const split = (stat, league = { id: NL, name: 'National League' }) => ({ league, stat })
 
-test('poolsOf reads each group of one response: the qualified ids and their count', () => {
+test('poolsOf reads totalSplits of each group', () => {
   const data = {
     stats: [
-      { group: { displayName: 'hitting' }, totalSplits: 2, splits: [{ player: { id: 7 } }, { player: { id: 9 } }] },
-      { group: { displayName: 'pitching' }, totalSplits: 1, splits: [{ player: { id: 3 } }] },
+      { group: { displayName: 'hitting' }, totalSplits: 68 },
+      { group: { displayName: 'pitching' }, totalSplits: 20 },
     ],
   }
-  const p = poolsOf(data)
-  assert.equal(p.hitting.ids.size, 2)
-  assert.ok(p.hitting.ids.has(9))
-  assert.equal(p.pitching.ids.size, 1)
-  assert.deepEqual(poolsOf(null), { hitting: pool([]), pitching: pool([]) })
+  assert.deepEqual(poolsOf(data), { hitting: 68, pitching: 20 })
+  assert.deepEqual(poolsOf(null), { hitting: 0, pitching: 0 })
 })
 
-test('a qualified hitter in the top 10 gets "N of M", in the order of the stat list', () => {
-  const marks = rankMarks([split({ homeRuns: 2, avg: '5', rbi: 10 })], 'hitting', POOLS, 3)
-  assert.deepEqual(marks.map((m) => [m.key, m.rank, m.of, m.text]), [
-    ['avg', 5, 12, '5 of 12'],
-    ['homeRuns', 2, 12, '2 of 12'],
-    ['rbi', 10, 12, '10 of 12'],
+test('a rate stat ranks among the qualified, a counting stat among all players of the league', () => {
+  const marks = rankMarks([split({ homeRuns: 2, avg: '5', rbi: 10 })], 'hitting', POOLS)
+  assert.deepEqual(marks.map((m) => [m.label, m.rank, m.of, m.text]), [
+    ['HR', 2, 412, '2 of 412'],
+    ['RBI', 10, 412, '10 of 412'],
+    ['AVG', 5, 68, '5 of 68'],
+  ])
+  const arm = rankMarks([split({ era: '1', strikeOuts: 3, wins: 2, saves: 4, inningsPitched: 5 })], 'pitching', POOLS)
+  assert.deepEqual(arm.map((m) => [m.label, m.text]), [
+    ['ERA', '1 of 20'], ['K', '3 of 473'], ['W–L', '2 of 473'], ['SV', '4 of 473'], ['IP', '5 of 473'],
   ])
 })
 
+test('every mark label is a tile key of its group', () => {
+  const stat = { avg: '1', homeRuns: 1, rbi: 1, obp: '1', ops: '1', stolenBases: 1, hits: 1, strikeOuts: 1 }
+  const keys = (tiles) => tiles.map((t) => t.k)
+  const hit = keys(hitterTiles({}, 1))
+  assert.ok(rankMarks([split(stat)], 'hitting', POOLS).every((m) => hit.includes(m.label)))
+  const arm = { ...stat, era: '1', whip: '1', wins: 1, saves: 1, inningsPitched: 1 }
+  const lead = (role) => keys(pitcherTiles({}, role, 1))
+  const marks = rankMarks([split(arm)], 'pitching', POOLS)
+  assert.ok(marks.every((m) => lead('CL').includes(m.label) || lead('SP').includes(m.label)))
+  assert.deepEqual(marks.map((m) => m.label), ['ERA', 'K', 'W–L', 'SV', 'IP'])
+})
+
 test('rank 11 and beyond shows nothing', () => {
-  assert.deepEqual(rankMarks([split({ avg: '11', homeRuns: 25 })], 'hitting', POOLS, 3), [])
+  assert.deepEqual(rankMarks([split({ avg: '11', homeRuns: 25 })], 'hitting', POOLS), [])
 })
 
 test('ties keep both marks at the same rank', () => {
-  const marks = rankMarks([split({ avg: '2', obp: '2' })], 'hitting', POOLS, 3)
-  assert.deepEqual(marks.map((m) => m.text), ['2 of 12', '2 of 12'])
+  const marks = rankMarks([split({ homeRuns: 2, rbi: 2 })], 'hitting', POOLS)
+  assert.deepEqual(marks.map((m) => m.text), ['2 of 412', '2 of 412'])
 })
 
-test('a player outside the qualified pool gets no rank, even at rank 1 (a closer)', () => {
-  assert.deepEqual(rankMarks([split({ saves: 1 })], 'pitching', new Map([[NL, pool([1, 2])]]), 99), [])
-})
-
-test('a missing league, a league with no pool, or no splits gives no rank', () => {
-  assert.deepEqual(rankMarks([split({ avg: '1' }, null)], 'hitting', POOLS, 3), [])
-  assert.deepEqual(rankMarks([split({ avg: '1' }, { id: 103 })], 'hitting', POOLS, 3), [])
-  assert.deepEqual(rankMarks([], 'hitting', POOLS, 3), [])
-  assert.deepEqual(rankMarks(undefined, 'hitting', POOLS, 3), [])
+test('a missing league, a league with no pool, an empty pool or no splits gives no rank', () => {
+  assert.deepEqual(rankMarks([split({ avg: '1' }, null)], 'hitting', POOLS), [])
+  assert.deepEqual(rankMarks([split({ avg: '1' }, { id: 103 })], 'hitting', POOLS), [])
+  assert.deepEqual(rankMarks([split({ avg: '1', homeRuns: 1 })], 'hitting', new Map([[NL, sizes(0, 0, 0, 0)]])), [])
+  assert.deepEqual(rankMarks([], 'hitting', POOLS), [])
+  assert.deepEqual(rankMarks(undefined, 'hitting', POOLS), [])
 })
 
 test('a player traded across leagues gets no rank: each league ranks one club, the tiles total both', () => {
   const two = [split({ avg: '1' }), split({ avg: '2' }, { id: 103, name: 'American League' })]
-  const pools = new Map([[NL, pool([3])], [103, pool([3])]])
-  assert.deepEqual(rankMarks(two, 'hitting', pools, 3), [])
+  assert.deepEqual(rankMarks(two, 'hitting', new Map([[NL, sizes(68, 20, 412, 473)], [103, sizes(60, 20, 400, 450)]])), [])
+})
+
+test('a split with no stat does not count as a league: a traded player still reads his one ranked split', () => {
+  const two = [split({ homeRuns: 3 }), { league: { id: 103 } }]
+  assert.deepEqual(rankMarks(two, 'hitting', POOLS).map((m) => m.text), ['3 of 412'])
 })
 
 test('a stat outside the list, or one that is not a number, is skipped', () => {
-  assert.deepEqual(rankMarks([split({ hits: 1, avg: 'x' })], 'hitting', POOLS, 3), [])
-})
-
-test('pitching reads the pitching list', () => {
-  const marks = rankMarks([split({ era: '1', strikeOuts: 3, avg: '4' })], 'pitching', POOLS, 3)
-  assert.deepEqual(marks.map((m) => m.key), ['era', 'strikeOuts'])
+  assert.deepEqual(rankMarks([split({ hits: 1, avg: 'x' })], 'hitting', POOLS), [])
 })
 
 test('hitter tiles carry the SO caption "680 PA"', () => {
@@ -92,23 +101,35 @@ test('withLeagueFigure sets "lg" on AVG (.xxx) and ERA (x.xx) and leaves the res
   assert.equal(withLeagueFigure(hitterTiles({ avg: '.280' }, 1), 'hitting', null).some((t) => t.lg), false)
 })
 
-test('fetchRankMarks asks once per league for both groups, and not at all with no rankings', async (t) => {
+const poolsReply = (url, size) => {
+  const n = String(url).includes('playerPool=qualified') ? size.q : size.a
+  return Response.json({ stats: [{ group: { displayName: 'hitting' }, totalSplits: n }, { group: { displayName: 'pitching' }, totalSplits: n }] })
+}
+
+test('fetchRankMarks asks twice per league (qualified, all) for both groups, and not at all with no rankings', async (t) => {
   const urls = []
-  t.mock.method(globalThis, 'fetch', async (url) => {
-    urls.push(String(url))
-    return Response.json({
-      stats: [{ group: { displayName: 'hitting' }, splits: [{ player: { id: 3 } }] }],
-    })
-  })
+  t.mock.method(globalThis, 'fetch', async (url) => (urls.push(String(url)), poolsReply(url, { q: 68, a: 412 })))
   const splits = [split({ avg: '4', homeRuns: 1 })]
   const marks = await fetchRankMarks(3, 'hitting', splits, 2031)
-  assert.deepEqual(marks.map((m) => m.text), ['4 of 1', '1 of 1'])
-  // The pitching group rides the same request, and the second call hits the cache.
+  assert.deepEqual(marks.map((m) => m.text), ['1 of 412', '4 of 68'])
+  // The pitching group rides the same two requests, and the second call hits the cache.
   assert.deepEqual(await fetchRankMarks(3, 'pitching', splits, 2031), [])
-  assert.equal(urls.length, 1)
-  assert.match(urls[0], /playerPool=qualified.*leagueId=104/)
+  assert.equal(urls.length, 2)
+  assert.ok(urls.some((u) => /playerPool=qualified.*leagueId=104/.test(u)))
+  assert.ok(urls.some((u) => /playerPool=all.*leagueId=104/.test(u)))
   assert.deepEqual(await fetchRankMarks(3, 'hitting', [], 2031), [])
-  assert.equal(urls.length, 1)
+  assert.equal(urls.length, 2)
+})
+
+test('an empty pool response is not kept: the next ask tries again', async (t) => {
+  let size = { q: 0, a: 0 }
+  let calls = 0
+  t.mock.method(globalThis, 'fetch', async (url) => (calls++, poolsReply(url, size)))
+  const splits = [split({ homeRuns: 1 })]
+  assert.deepEqual(await fetchRankMarks(3, 'hitting', splits, 2032), [])
+  size = { q: 68, a: 412 }
+  assert.deepEqual((await fetchRankMarks(3, 'hitting', splits, 2032)).map((m) => m.text), ['1 of 412'])
+  assert.equal(calls, 4)
 })
 
 test('a traded hitter keeps the SO tile caption: the summed season carries plate appearances (#1907)', async () => {

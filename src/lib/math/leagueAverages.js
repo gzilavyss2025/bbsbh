@@ -22,3 +22,6 @@ export function leagueAveragesOf({ hitting, pitching } = {}) {
     era: outs && earned && recorded ? round((27 * earned) / outs, 2) : null,
   }
 }
+
+// A league rate as printed: AVG ".248", ERA "4.17".
+export const rateText = (n, group) => (group === 'pitching' ? n.toFixed(2) : n.toFixed(3).slice(1))

@@ -1,6 +1,6 @@
 import { staticJson } from '../staticJson.js'
 import { getJson } from '../statsapi.js'
-import { leagueAveragesOf } from '../../lib/math/leagueAverages.js'
+import { leagueAveragesOf, rateText } from '../../lib/math/leagueAverages.js'
 
 // League batting average and ERA for one MLB season. Season rates, not scores:
 // spoiler-free, open data, no SealBox. Seasons up to the last complete one come
@@ -50,6 +50,6 @@ export function vsLeague(rate, league, group) {
   if (!Number.isFinite(own) || league == null) return '—'
   const pitching = group === 'pitching'
   const gap = Number((own - league).toFixed(pitching ? 2 : 3))
-  const text = pitching ? Math.abs(gap).toFixed(2) : Math.abs(gap).toFixed(3).slice(1)
+  const text = rateText(Math.abs(gap), group)
   return `${gap > 0 ? '+' : gap < 0 ? '-' : ''}${text}`
 }
