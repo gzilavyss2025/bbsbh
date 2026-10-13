@@ -825,7 +825,7 @@ don't run these by hand.
   the export then writes no `xwobaBip` for that season. After a new table, re-walk the
   hitter half: `--clear-hitters=<season> --since=<its first day>`. Each pitch type also
   sums release point, movement, extension, flight time and spin (a sum and a count per
-  field, `scripts/lib/pitch/arsenal-physics.mjs`) and exports the means as `phys`, seven
+  field, `scripts/lib/pitch/arsenal-physics.mjs`, table `pitch_arsenal_physics`) and exports the means as `phys`, seven
   numbers in `PHYS_FIELDS` order (`src/api/pitchArsenal.js`, `physOf`; null when no pitch
   had the field; #1908). A game ingested before the columns holds none, so the arsenal
   half is re-walked with `--clear-arsenal=<season> --since=<its first day>`: it wipes that

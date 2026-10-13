@@ -19,10 +19,19 @@ const snake = (f) => f.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`)
 // Sums and counts interleaved, so a row's columns and an accumulator line up.
 export const PHYS_COLS = PHYS_FIELDS.flatMap((f) => [`${snake(f)}_sum`, `${snake(f)}_n`])
 
-// SQL pieces for the totals upsert: more columns, more `?`, more additions.
-export const PHYS_INSERT = PHYS_COLS.map((c) => `, ${c}`).join('')
-export const PHYS_VALUES = ', ?'.repeat(PHYS_COLS.length)
-export const PHYS_UPDATE = PHYS_COLS.map((c) => `,\n       ${c} = pitch_arsenal_totals.${c} + excluded.${c}`).join('')
+const KEY = 'season, scope, person_id, level, code, stand'
+
+// The upsert into pitch_arsenal_physics: run(season, scope, personId, level, code, stand, ...acc).
+export const physStmt = (db) => db.prepare(
+  `INSERT INTO pitch_arsenal_physics (${KEY}, ${PHYS_COLS.join(', ')})
+   VALUES (?, ?, ?, ?, ?, ?${', ?'.repeat(PHYS_COLS.length)})
+   ON CONFLICT(${KEY}) DO UPDATE SET
+     ${PHYS_COLS.map((c) => `${c} = pitch_arsenal_physics.${c} + excluded.${c}`).join(',\n     ')}`,
+)
+
+// For the totals export: SELECT columns and the join that adds a row's physics (0 when none).
+export const PHYS_SELECT = PHYS_COLS.map((c) => `, COALESCE(p.${c}, 0) AS ${c}`).join('')
+export const PHYS_JOIN = `LEFT JOIN pitch_arsenal_physics p ON ${KEY.split(', ').map((k) => `p.${k} = t.${k}`).join(' AND ')}`
 
 export const emptyPhys = () => new Array(PHYS_COLS.length).fill(0)
 
@@ -56,7 +65,7 @@ export function physMeans(acc) {
 export function clearArsenalSeason(db, season, levels, since) {
   const first = db.prepare('SELECT MIN(date) AS d FROM pitch_arsenal_ingested_games WHERE season = ?').get(season).d
   if (first && first < since) throw new Error(`--since=${since} is after the first game on file (${first}): the re-walk would lose games`)
-  for (const t of ['pitch_arsenal_totals', 'pitch_arsenal_ingested_games']) {
+  for (const t of ['pitch_arsenal_totals', 'pitch_arsenal_physics', 'pitch_arsenal_ingested_games']) {
     for (const level of levels) db.prepare(`DELETE FROM ${t} WHERE season = ? AND level = ?`).run(season, level)
   }
 }

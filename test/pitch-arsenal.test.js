@@ -729,11 +729,13 @@ test('a type with no tracking carries no phys, and a part-tracked one carries nu
   assert.equal(physOf(undefined).x0, null)
 })
 
-test('the committed dump still loads, with every physics sum at its default of zero', async () => {
+test('the committed dump still loads, and its rows have no physics until the re-walk', async () => {
   const db = await openDb()
-  const { n, seen } = db.prepare('SELECT COUNT(*) AS n, SUM(spin_rate_n + x0_n + plate_time_n) AS seen FROM pitch_arsenal_totals').get()
-  assert.ok(n > 0, 'the dump has rows')
-  assert.equal(seen, 0)
+  const count = (t) => db.prepare(`SELECT COUNT(*) AS n FROM ${t}`).get().n
+  assert.ok(count('pitch_arsenal_totals') > 0, 'the dump has rows')
+  assert.equal(count('pitch_arsenal_physics'), 0)
+  const out = exportPitchArsenal(db, {}, 2026)
+  assert.equal(Object.values(out.pit).some((e) => e.mlb.some((t) => t.phys)), false, 'unknown, never zero')
 })
 
 test('clearArsenalSeason wipes one season of the arsenal half at the levels named, and nothing else', async () => {
@@ -745,6 +747,7 @@ test('clearArsenalSeason wipes one season of the arsenal half at the levels name
   const count = (sql) => db.prepare(sql).get().n
   assert.equal(count("SELECT COUNT(*) AS n FROM pitch_arsenal_totals WHERE season = 2026 AND level = 'mlb'"), 0)
   assert.equal(count("SELECT COUNT(*) AS n FROM pitch_arsenal_ingested_games WHERE season = 2026 AND level = 'mlb'"), 0)
+  assert.equal(count("SELECT COUNT(*) AS n FROM pitch_arsenal_physics WHERE season = 2026 AND level = 'mlb'"), 0)
   assert.equal(count("SELECT COUNT(*) AS n FROM pitch_arsenal_totals WHERE season = 2026 AND level = 'aaa'"), 1, 'a level not in the run stays')
   assert.equal(count('SELECT COUNT(*) AS n FROM pitch_arsenal_totals WHERE season = 2027'), 1)
   assert.equal(count('SELECT COUNT(*) AS n FROM pitch_command_ingested_games WHERE season = 2026'), 2, 'the command half keeps its ledger')

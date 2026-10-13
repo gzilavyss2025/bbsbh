@@ -48,7 +48,7 @@ import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason
 import { CELLS, COLS, aggregateGameCommand, commandStmts, markCommandIngested, parseCells } from './lib/command-grid.mjs'
 import { aggregateGameHitters, clearHitterSeason, foldHitters, hitterStmts, writeHitterGrid } from './lib/pitch/hitter-grid.mjs'
 import { readXwobaTable } from './lib/pitch/xwoba.mjs'
-import { PHYS_INSERT, PHYS_UPDATE, PHYS_VALUES, addPhys, clearArsenalSeason, emptyPhys, foldPhysRow, physMeans } from './lib/pitch/arsenal-physics.mjs'
+import { PHYS_JOIN, PHYS_SELECT, addPhys, clearArsenalSeason, emptyPhys, foldPhysRow, physMeans, physStmt } from './lib/pitch/arsenal-physics.mjs'
 import { fetchPitcherHands } from './lib/pitch/pitcher-hands.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -199,8 +199,8 @@ const upsertPitchType = (db) =>
        (person_id, level, code, stand, season, scope, name, team_id, description, pitches, velocity_sum, velocity_n, century_pitches, max_velo,
         tto1_pitches, tto1_velocity_sum, tto1_velocity_n,
         tto2_pitches, tto2_velocity_sum, tto2_velocity_n,
-        tto3_pitches, tto3_velocity_sum, tto3_velocity_n${PHYS_INSERT})
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?${PHYS_VALUES})
+        tto3_pitches, tto3_velocity_sum, tto3_velocity_n)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(season, scope, person_id, level, code, stand) DO UPDATE SET
        name = excluded.name,
        team_id = excluded.team_id,
@@ -222,7 +222,7 @@ const upsertPitchType = (db) =>
        tto2_velocity_n = pitch_arsenal_totals.tto2_velocity_n + excluded.tto2_velocity_n,
        tto3_pitches = pitch_arsenal_totals.tto3_pitches + excluded.tto3_pitches,
        tto3_velocity_sum = pitch_arsenal_totals.tto3_velocity_sum + excluded.tto3_velocity_sum,
-       tto3_velocity_n = pitch_arsenal_totals.tto3_velocity_n + excluded.tto3_velocity_n${PHYS_UPDATE}`,
+       tto3_velocity_n = pitch_arsenal_totals.tto3_velocity_n + excluded.tto3_velocity_n`,
   )
 
 const markIngested = (db) =>
@@ -233,6 +233,7 @@ export function arsenalStatements(db) {
   const c = commandStmts(db)
   return {
     pitchType: upsertPitchType(db),
+    phys: physStmt(db),
     mark: markIngested(db),
     markCommand: markCommandIngested(db),
     commandRead: c.read,
@@ -268,8 +269,9 @@ export function foldGame(db, stmts, { gamePk, level, date, season, scope = 'R', 
           t.pitches, t.velocitySum, t.velocityN, t.centuryPitches, t.maxVelo,
           t.tto[0].pitches, t.tto[0].velocitySum, t.tto[0].velocityN,
           t.tto[1].pitches, t.tto[1].velocitySum, t.tto[1].velocityN,
-          t.tto[2].pitches, t.tto[2].velocitySum, t.tto[2].velocityN, ...t.phys,
+          t.tto[2].pitches, t.tto[2].velocitySum, t.tto[2].velocityN,
         )
+        stmts.phys.run(season, scope, id, level, code, stand, ...t.phys)
       }
     }
     for (const [id, byKey] of command) {
@@ -371,7 +373,7 @@ export function exportPitchArsenal(db, hands = {}, season = null, scope = 'R') {
   // `vs` keeps L and R on their own for the side filter.
   const types = new Map()
   for (const r of db
-    .prepare(`SELECT * FROM pitch_arsenal_totals WHERE scope = ? ${one ? 'AND season = ?' : ''} ORDER BY season, person_id, level, code, stand`)
+    .prepare(`SELECT t.*${PHYS_SELECT} FROM pitch_arsenal_totals t ${PHYS_JOIN} WHERE t.scope = ? ${one ? 'AND t.season = ?' : ''} ORDER BY t.season, t.person_id, t.level, t.code, t.stand`)
     .all(scope, ...params)) {
     const entry = pit[r.person_id] ?? (pit[r.person_id] = { name: r.name, teamId: r.team_id, mlb: [], aaa: [] })
     entry.name = r.name

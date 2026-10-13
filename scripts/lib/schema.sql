@@ -469,10 +469,17 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
   tto3_velocity_sum REAL    NOT NULL DEFAULT 0,
   tto3_velocity_n   INTEGER NOT NULL DEFAULT 0,
   scope             TEXT    NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
-  -- Physics (#1908 part b): a sum and a count per field, so a mean never needs a
-  -- stored average. The count is separate because a pitch can lack a field.
-  -- DEFAULT 0 keeps a dump line from before them loadable; rows swept earlier
-  -- read as unknown until --clear-arsenal re-walks the season.
+  PRIMARY KEY (season, scope, person_id, level, code, stand)
+);
+
+-- Per-pitch-type physics (#1908 part b): a sum and a count per field, so a mean never
+-- needs a stored average; the count is separate because a pitch can lack a field. Same
+-- key as pitch_arsenal_totals, in its own table so the committed totals dump is not
+-- rewritten with fourteen new columns on every row. A row swept before this has no row
+-- here, which reads as unknown until --clear-arsenal re-walks the season.
+CREATE TABLE IF NOT EXISTS pitch_arsenal_physics (
+  season INTEGER NOT NULL, scope TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  person_id INTEGER NOT NULL, level TEXT NOT NULL, code TEXT NOT NULL, stand TEXT NOT NULL,
   x0_sum REAL NOT NULL DEFAULT 0, x0_n INTEGER NOT NULL DEFAULT 0,
   z0_sum REAL NOT NULL DEFAULT 0, z0_n INTEGER NOT NULL DEFAULT 0,
   pfx_x_sum REAL NOT NULL DEFAULT 0, pfx_x_n INTEGER NOT NULL DEFAULT 0,
