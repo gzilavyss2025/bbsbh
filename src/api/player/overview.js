@@ -126,7 +126,7 @@ export async function loadPlayerOverview(id, asOf) {
         // pure shaper's signature.
         // Live to-date figure: not under a spoiler cutoff, which shows an earlier span.
         if (tileSportId === 1 && !cutoff) block.tiles = withLeagueFigure(block.tiles, group, leagueFigure)
-        block.postseason = postseasonTilesView(postseasonSplits, group, block.role)
+        block.postseason = postseasonTilesView(postseasonSplits, group, block.role, season)
         block.ranks = group === 'pitching' ? pitchingRanksView(rankSplits) : hittingRanksView(rankSplits)
         // The raw rankings splits, for the new page's rank marks (fetchRankMarks).
         block.rankSplits = rankSplits

@@ -44,6 +44,14 @@ import {
 import { teamFullName } from '../../lib/teams.js'
 import { boxscoreLinks, playerContext, yearByYearFor } from './context.js'
 
+// The opponent of one first (f: the first, g: its boxscore link, or undefined). He
+// is the away club when he was at home. `oppId` is the logo's key; the rest label it.
+export function firstOpponent(f, g) {
+  if (!g) return { oppId: null, oppAbbr: '', oppName: null }
+  const oppId = f.isHome ? g.awayId : g.homeId
+  return { oppId, oppAbbr: f.isHome ? g.awayAbbr : g.homeAbbr, oppName: teamFullName(oppId) }
+}
+
 // Fetch the position-innings data for one CAREER scope ('mlb' | 'milb') — the
 // 'season' scope is already eager in this tab's `positionInnings.initial`.
 // Lazy: the card calls this only when the user toggles into a career scope.
@@ -331,8 +339,7 @@ export async function loadPlayerHistory(id, asOf) {
       firsts[key] = {
         ...f,
         path: links.path(f.gamePk),
-        oppAbbr: g ? (f.isHome ? g.awayAbbr : g.homeAbbr) : '',
-        oppName: g ? teamFullName(f.isHome ? g.awayId : g.homeId) : null,
+        ...firstOpponent(f, g),
       }
     }
   }

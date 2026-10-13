@@ -163,6 +163,11 @@ test('a pitcher\u2019s tiles are W\u2013L, IP, ERA, K and WHIP; a closer leads w
   assert.deepEqual([cl.tiles[0].k, cl.tiles[0].v], ['SV', '2'])
 })
 
+test('the row is titled with the season it covers, not the real year (a ?d= past cutoff)', () => {
+  assert.equal(postseasonTilesView([{ stat: bat }], 'hitting', null, 2024).title, '2024 Postseason')
+  assert.equal(postseasonTilesView([{ stat: arm }], 'pitching', 'SP', '2025').title, '2025 Postseason')
+})
+
 test('no postseason game yet means no tiles', () => {
   assert.equal(postseasonTilesView([], 'hitting'), null)
   assert.equal(postseasonTilesView(null, 'hitting'), null)

@@ -278,7 +278,7 @@
 .fact__value {
   margin: 3px 0 0;
   font-size: var(--fs-ui);
-  font-weight: var(--w-semibold);
+  font-weight: var(--w-medium);
   color: var(--text-body);
   text-transform: uppercase;
   letter-spacing: var(--ls-num);

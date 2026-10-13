@@ -171,13 +171,16 @@ test('mergeCareerSplits prints 1.145', () => {
 })
 
 test('the two generators take OPS from the shared rule, not their own sum', () => {
-  for (const path of ['../scripts/gen-vs-team-splits.mjs', '../scripts/gen-callouts.mjs']) {
-    const src = rawSource(path)
-    assert.match(src, /import \{[^}]*\bmlbOps\b[^}]*\} from '\.\.\/src\/api\/person\/shared\.js'/, path)
-    assert.match(src, /\bmlbOps\(/, path)
-  }
+  const src = rawSource('../scripts/gen-callouts.mjs')
+  assert.match(src, /import \{[^}]*\bmlbOps\b[^}]*\} from '\.\.\/src\/api\/person\/shared\.js'/)
+  assert.match(src, /\bmlbOps\(/)
+  // The vs-team hitter line moved to scripts/lib/vs-team/hitter.mjs, one folder deeper.
+  const hit = rawSource('../scripts/lib/vs-team/hitter.mjs')
+  assert.match(hit, /import \{[^}]*\bmlbOps\b[^}]*\} from '\.\.\/\.\.\/\.\.\/src\/api\/person\/shared\.js'/)
+  assert.match(hit, /\bmlbOps\(/)
+  assert.match(rawSource('../scripts/gen-vs-team-splits.mjs'), /\bhitterCar\(/)
   // The old full-precision sums are gone.
-  assert.doesNotMatch(rawSource('../scripts/gen-vs-team-splits.mjs'), /\(obp \+ slg\)/)
+  assert.doesNotMatch(rawSource('../scripts/lib/vs-team/hitter.mjs'), /\(obp \+ slg\)/)
   assert.doesNotMatch(rawSource('../scripts/gen-callouts.mjs'), /obpDen \+ t\.tb \/ t\.ab/)
 })
 
