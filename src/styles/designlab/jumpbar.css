@@ -1,0 +1,29 @@
+/* ============================================================
+   JUMP BAR prototype frame (#1883). Imported by
+   screens/designlab/jumpbar/JumpBarLab.jsx, never by index.css.
+
+   The bar itself is the shipped .jumpbar (styles/system/jumpbar/jumpbar.css). This
+   file draws only the frame the invented sections scroll in, so the
+   scroll-spy can be seen with the bar in view above them.
+   ============================================================ */
+.jumplab {
+  width: 100%;
+}
+.jumplab__view {
+  max-height: 480px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--bg-canvas);
+}
+.jumplab__view:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.jumplab__lines {
+  margin: 0;
+  padding-left: var(--space-4);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
