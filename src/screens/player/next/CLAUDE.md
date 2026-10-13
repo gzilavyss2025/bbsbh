@@ -46,5 +46,7 @@ live hub.
   `batlog`, `pitchlog` and `fouls` before they mount.
 - **CSS:** the module's own file, in its folder or `src/styles/player-next/<module>.css`,
   imported from its `index.jsx` (`src/styles` is at its file budget).
+- **Shared parts:** a part two modules use sits in `parts/`, not in one module's folder:
+  `LogTable.jsx`, the game log table (pitchlog #1851, batlog #1890).
 - **Open surface (ADR-0034):** no seal, no gate. Keep `?d=` and `?s=` on every link (the
   page wraps everything in `LinkScope`) and ADR-0057 addresses (use the path builders).
