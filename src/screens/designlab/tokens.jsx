@@ -270,11 +270,11 @@ export function TokenHalf() {
           ))}
         </div>
         <p className="dlab__warn">
-          Barlow Condensed ships 600 and 700; JetBrains Mono ships 500 and 700. A rule that
-          asks either family for a weight it lacks draws the nearest face, so
-          {' '}{weights.map((w) => `--${w.name}`).join(', ')} do not each look different there. The
-          faces follow the canvas (ADR-0109, src/tokens/fonts.css). Source Sans 3 and Lora
-          ship real second weights.
+          Barlow Condensed ships one weight, 700, and JetBrains Mono ships one, 500. Every rule that
+          asks either family for {weights.map((w) => `--${w.name}`).join(', ')} draws that one
+          weight, so font-weight is a no-op on the display and mono faces. It follows the canvas
+          (ADR-0109, src/tokens/fonts.css). Emphasise with colour or size instead. Source Sans 3 and
+          Lora ship real second weights; the card count tag has its own 600 face.
         </p>
         <div className="dlab__rows">
           {weights.map((t) => (
@@ -287,7 +287,7 @@ export function TokenHalf() {
                 className="dlab__typesample"
                 style={{ fontFamily: 'var(--font-display)', fontWeight: t.resolved }}
               >
-                Display face at {t.resolved}
+                Display face at {t.resolved} — identical to every other
               </span>
             </div>
           ))}

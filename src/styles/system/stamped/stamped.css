@@ -43,7 +43,7 @@
   background: var(--bg-canvas);
   border: var(--bw-heavy) solid var(--border-stamped);
   color: var(--text-heading);
-  font-family: var(--font-display);
+  font-family: var(--font-display-tag);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
   line-height: var(--lh-solid);
