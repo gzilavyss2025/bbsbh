@@ -8,7 +8,7 @@ import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { pitchMark } from '../../../../../lib/pitch/pitchTypes.js'
 import { DASH, Fact } from '../../../parts.jsx'
-import { LogTable } from './LogTable.jsx'
+import { LogTable } from '../../parts/LogTable.jsx'
 import { keyOf, loadPitchlog, scopeRows, totalsOf } from './pitchlogView.js'
 
 // The pitcher Game Log (#1851, board "GameLog"): his games this season, starts and relief outings,
@@ -96,7 +96,7 @@ const COLUMNS = [
     cell: (r) => (
       <span className="mono">
         {r.pitches ?? DASH}
-        {r.strikes != null && <small> {r.strikes} strikes</small>}
+        {r.pitches != null && r.strikes != null && <small> {r.strikes} strikes</small>}
       </span>
     ),
   },
@@ -172,7 +172,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
         <Fact label="K" value={t.k} mono />
         <Fact label="BB" value={t.bb} mono />
       </FactGrid>
-      <LogTable columns={COLUMNS} rows={lines} />
+      <LogTable columns={COLUMNS} rows={lines} caption={`Game log, ${season}`} />
       {rows.length > SHOWN && (
         <Button size="control" onClick={() => setMore(!more)} aria-expanded={more}>
           {more ? 'Show fewer' : `Show all ${games(rows.length)}`}
@@ -191,7 +191,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
       <p className="hint pitchlog__note">
         Bar: the share of each pitch type in the tracked pitches of the game, in the order of the key. Green underlined K: 7 or more. Clay
         underlined ER: 4 or more. Dec is his decision: W win, L loss, SV save, ND no decision in a start.
-        {all.some((r) => !r.result) && ' A dash in Result: no final score on file. A game played today shows none until the next day.'}
+        {all.some((r) => !r.result) && ' A dash in Result: no final score on file. A game played today shows none until the next day, and so does a suspended game that resumes today (its row keeps the earlier date).'}
       </p>
     </Stack>
   )

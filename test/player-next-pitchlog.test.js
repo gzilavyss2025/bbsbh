@@ -125,6 +125,14 @@ test('the filter and the totals row: games, W-L (the decisions shown), ERA, IP, 
   assert.equal(totalsOf([]).era, '—')
 })
 
+test('the totals W–L leave out a held row, though its split already says W', () => {
+  // A start in progress today: fetchFinalScores gives it no score, so it shows no decision and adds none.
+  const scores = new Map([[1, { runs: 5, oppRuns: 2 }]])
+  const { rows } = pitchlogView([app('2026-10-12', 1, { w: 1 }), app('2026-10-13', 2, { w: 1 })], { scores })
+  const t = totalsOf(rows)
+  assert.deepEqual([t.games, t.w, t.l], [2, 1, 0])
+})
+
 test('the loader: a log with no game, or a failed fetch, ends as no view', async () => {
   const m = mock.method(globalThis, 'fetch', async () => ({ ok: true, status: 200, json: async () => ({ stats: [{ splits: [] }] }) }))
   try {

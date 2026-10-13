@@ -1,5 +1,5 @@
-import '../../../../../styles/player-next/both/logtable.css'
-import { Table } from '../../../../../components/ui/table/Table.jsx'
+import '../../../../styles/player-next/both/logtable.css'
+import { Table } from '../../../../components/ui/table/Table.jsx'
 
 // THE GAME LOG TABLE (#1851), shared with the batter log (#1890), which passes its own columns.
 // One markup, two looks, switched on the CARD's width (logtable.css): a table at 720 px or
@@ -11,10 +11,12 @@ import { Table } from '../../../../../components/ui/table/Table.jsx'
 //            one the cell is row[key].
 //   rows     data rows, each with a `key`; a row with a `divider` is a group's heading,
 //            with its `note` (a count) beside it.
-export function LogTable({ columns, rows }) {
+//   caption  the table's name for a screen reader ("Game log, 2026"); it does not show.
+export function LogTable({ columns, rows, caption }) {
   return (
     <div className="logtable">
       <Table frame="bare" density="keep" className="logtable__grid">
+        {caption && <caption className="sr-only">{caption}</caption>}
         <thead>
           <tr>
             {columns.map((c) => (
@@ -28,7 +30,7 @@ export function LogTable({ columns, rows }) {
           {rows.map((r) =>
             r.divider ? (
               <tr key={r.key} className="logtable__div">
-                <th colSpan={columns.length} scope="colgroup">
+                <th colSpan={columns.length} scope="rowgroup">
                   {r.divider} <span className="mono">{r.note}</span>
                 </th>
               </tr>
