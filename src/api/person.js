@@ -69,10 +69,13 @@ export {
   levelSeasonStat,
   careerRegisterView,
   positionPlayerPastNote,
+} from './person/careerRegister.js'
+
+export {
   levelProgressionView,
   dropRehabStints,
   careerTimelineView,
-} from './person/careerRegister.js'
+} from './person/career/progression.js'
 
 export {
   tradeKey,
