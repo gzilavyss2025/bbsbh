@@ -1,4 +1,4 @@
-/* PROSPECT RANKINGS (#1927): the board's rows in the stamped card. A bar is the place on its list. */
+/* PROSPECT RANKINGS (#1927): the board's rows in the stamped card. */
 
 .prospects--wait {
   min-height: 7rem; /* two rows, so the card does not jump when the lists arrive */
@@ -39,27 +39,13 @@
   font-weight: var(--w-bold);
 }
 
-.prospects__what {
+.prospects__label {
   flex: 1 1 0;
   min-width: 0;
-}
-
-.prospects__label {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
-}
-
-.prospects__bar {
-  display: block;
-  height: var(--space-2);
-  border: var(--bw-hair) solid currentColor;
-  background: var(--surface-stamped-tint);
-}
-
-.prospects__row--today .prospects__bar {
-  background: var(--marker);
 }
 
 .prospects__delta {
@@ -75,7 +61,7 @@
 }
 
 .prospects__rank {
-  flex: 0 0 2.75rem;
+  flex: 0 0 3.5rem;
   font-family: var(--font-display);
   font-size: var(--fs-display-md);
   font-weight: var(--w-bold);
