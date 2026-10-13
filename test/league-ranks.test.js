@@ -69,10 +69,10 @@ test('ties keep both marks at the same rank', () => {
   assert.deepEqual(marks.map((m) => m.text), ['2nd', '2nd'])
 })
 
-test('a missing league, a league with no pool, an empty pool or no splits gives no rank', () => {
+test('a missing league, a league with no pool, an empty pool or no splits gives no rate rank', () => {
   assert.deepEqual(rankMarks([split({ avg: '1' }, null)], 'hitting', POOLS), [])
   assert.deepEqual(rankMarks([split({ avg: '1' }, { id: 103 })], 'hitting', POOLS), [])
-  assert.deepEqual(rankMarks([split({ avg: '1', homeRuns: 1 })], 'hitting', new Map([[NL, sizes(0, 0)]])), [])
+  assert.deepEqual(rankMarks([split({ avg: '1' })], 'hitting', new Map([[NL, sizes(0, 0)]])), [])
   assert.deepEqual(rankMarks([], 'hitting', POOLS), [])
   assert.deepEqual(rankMarks(undefined, 'hitting', POOLS), [])
 })
@@ -85,6 +85,15 @@ test('a player traded across leagues gets no rank: each league ranks one club, t
 test('a split with no stat does not count as a league: a traded player still reads his one ranked split', () => {
   const two = [split({ homeRuns: 3 }), { league: { id: 103 } }]
   assert.deepEqual(rankMarks(two, 'hitting', POOLS).map((m) => m.text), ['3rd'])
+})
+
+test('a counting mark does not depend on the pool: no pool, an empty pool or a failed request keeps it, drops the rate mark', async (t) => {
+  const stat = split({ avg: '1', homeRuns: 1 })
+  for (const pools of [new Map(), new Map([[103, sizes(60, 20)]]), new Map([[NL, sizes(0, 0)]])]) {
+    assert.deepEqual(rankMarks([stat], 'hitting', pools).map((m) => m.text), ['1st'])
+  }
+  t.mock.method(globalThis, 'fetch', async () => { throw new Error('down') })
+  assert.deepEqual((await fetchRankMarks(3, 'hitting', [stat], 2034)).map((m) => m.text), ['1st'])
 })
 
 test('a stat outside the list, or one that is not a number, is skipped', () => {
@@ -136,10 +145,10 @@ test('an empty pool response is not kept: the next ask tries again', async (t) =
   let size = { q: 0 }
   let calls = 0
   t.mock.method(globalThis, 'fetch', async (url) => (calls++, poolsReply(url, size)))
-  const splits = [split({ homeRuns: 1 })]
+  const splits = [split({ avg: '1' })]
   assert.deepEqual(await fetchRankMarks(3, 'hitting', splits, 2032), [])
   size = { q: 68 }
-  assert.deepEqual((await fetchRankMarks(3, 'hitting', splits, 2032)).map((m) => m.text), ['1st'])
+  assert.deepEqual((await fetchRankMarks(3, 'hitting', splits, 2032)).map((m) => m.text), ['1 of 68'])
   assert.equal(calls, 2)
 })
 

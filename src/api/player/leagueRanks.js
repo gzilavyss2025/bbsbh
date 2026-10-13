@@ -26,9 +26,9 @@ export function poolsOf(data) {
 }
 
 // The marks for one group. `pools` maps a leagueId to the { hitting, pitching } sizes of
-// its qualified pool. A split with no league, a league with no pool, or an empty pool
-// adds nothing. Each mark's `label` is the hero tile it ranks, or the stat's own name
-// when it has none.
+// its qualified pool. A rate stat needs that pool: with no league, no pool or an empty
+// pool it adds nothing. A counting stat needs none. Each mark's `label` is the hero tile
+// it ranks, or the stat's own name when it has none.
 export function rankMarks(rankSplits, group, pools) {
   const marks = []
   // A traded player has one split per league, each ranking one club's games while the
@@ -37,13 +37,13 @@ export function rankMarks(rankSplits, group, pools) {
   if (list.length !== 1) return marks
   const [s] = list
   const pool = pools.get(s.league?.id)
-  if (!pool) return marks
   for (const { key, label, tile = label, rate, chipOnly } of RANK_STATS[group] ?? []) {
     const rank = !chipOnly && topRank(s.stat, key)
-    if (!rank || !pool[group]) continue
+    if (!rank) continue
     // A rate rank past its pool (early in a season) is not "N of M": none.
+    const of = pool?.[group]
     if (!rate) marks.push({ key, label: tile, rank, text: ordinal(rank) })
-    else if (rank <= pool[group]) marks.push({ key, label: tile, rank, of: pool[group], text: `${rank} of ${pool[group]}` })
+    else if (of && rank <= of) marks.push({ key, label: tile, rank, of, text: `${rank} of ${of}` })
   }
   return marks
 }
