@@ -461,7 +461,9 @@ for each generator; the reader modules:
   **The per-start mix** (#1915) is a third shard set, `public/data/pitch-arsenal-starts/{season}/{NN}.json`
   (`personId % 100`, a season store): `{ season, pit: { pitcherId: { gamePk: { code: n } } } }`, the
   pitches of each code he threw in each game, both batter sides summed, relievers too. Its own set because
-  the buckets above are at their size ceiling; per-game velocity (#1933) adds to this table later.
+  the buckets above are at their size ceiling. **The per-start mean mph** (#1933) is a sibling, `{NN}.mph.json`:
+  `{ season, mph: { pitcherId: { gamePk: { code: tenths } } } }`, a code with no speed left out (own file: the
+  mix shards are at their ceiling). `fetchPitchMphFor(personId, gamePk, code?, { seasonYear })` returns mph or null.
   `fetchPitchMixFor(personId, gamePk, { seasonYear })` returns one `{ code: n }` or null. A missing
   shard, season or game all read null: the files fill with the 2026 re-walk (`--clear-arsenal`).
   The `pitch-command` buckets (`commandMap.js`) have the same `post` key, and so do the

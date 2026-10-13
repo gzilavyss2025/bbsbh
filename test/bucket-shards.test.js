@@ -198,6 +198,21 @@ test('a pitch-arsenal-starts bucket sits where its reader will ask for it and st
   }
 })
 
+// The per-start mean mph (#1933, pitch-arsenal-starts/{season}/NN.mph.json): a sibling of each mix
+// bucket, because those sit at their own ceiling. Measured in a scratch 2026 re-walk (not committed): the
+// largest is 33.2 KB; 50 KB is that plus 30%, rounded up to 10 KB. Until the backfill lands the test checks nothing.
+test('a per-start mph file sits in its pitcher\'s bucket and stays small', () => {
+  if (!existsSync(new URL('../public/data/pitch-arsenal-starts/seasons.json', import.meta.url))) return
+  for (const season of indexOf('pitch-arsenal-starts').seasons) {
+    const d = folder('pitch-arsenal-starts', season)
+    for (const f of readdirSync(d).filter((n) => /^\d\d\.mph\.json$/.test(n))) {
+      const size = statSync(new URL(f, d)).size
+      assert.ok(size < 50 * 1024, `pitch-arsenal-starts: ${f} is ${Math.round(size / 1024)} KB`)
+      for (const id of Object.keys(read('pitch-arsenal-starts', f, d).mph)) assert.equal(shardKey100(id), f.slice(0, 2), `pitch-arsenal-starts: ${id} is in ${f}`)
+    }
+  }
+})
+
 // The per-game fouls (#1914, fouls/{season}/NN.games.json): a sibling of each fouls bucket,
 // written by the 2026 re-read (`gen-fouls.mjs --rebuild-counts=2026`). Until those files exist
 // the test checks nothing. Estimate, not a measurement: PR #1972 puts the busiest bucket's
