@@ -17,9 +17,11 @@
   --font-mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
   --font-read:    "Lora", Georgia, "Times New Roman", serif;
 
-  /* Weights — three deliberate levels; 500 previously blurred the boundary
-     between ordinary copy and emphasized UI. */
+  /* Weights — the canvas weights (ADR-0109, #1932). 500 was removed once
+     because it blurred ordinary copy and emphasized UI; it is back only because
+     the canvas draws mono figures and the "Born" value at 500. Use it for those. */
   --w-regular: 400;
+  --w-medium: 500;
   --w-semibold: 600;
   --w-bold:    700;
   --w-black:   900;   /* the slate card's '@' watermark + the masthead '@' — see index.css */

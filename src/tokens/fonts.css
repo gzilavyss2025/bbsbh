@@ -4,14 +4,16 @@
    same metrics and hierarchy when it is offline. These are SUBSTITUTES:
    no original brand font files were provided with the project.
 
-   Barlow Condensed and JetBrains Mono ship ONE static weight each, chosen
-   after a side-by-side type-system audit (see the "Type Ledger" review):
-   every rule that asks either family for --w-regular/--w-semibold renders
-   at that family's single registered weight (700), a deliberate trade for
-   a simpler voice, not an oversight — neither role ever needs a SECOND
-   weight to emphasize a run against its own kind sitting right beside it.
+   The faces follow the design canvas (ADR-0109, #1932): Barlow Condensed ships
+   600 (the card count tag) and 700 (names, labels, buttons, pills); JetBrains
+   Mono ships 500 (figures) and 700; Source Sans 3 ships 400, 500, 600 and 700.
+   The Barlow 700 file is registered twice, for 700 and for 400-500, so a rule
+   that asks Barlow for 400 or 500 (or no weight) still draws the 700 label
+   voice the canvas uses, and only an exact 600 draws the 600 face. With one
+   700 rule, 400 would fall through to 600. A mono rule that asks for 400 draws
+   500; 600 and 700 draw 700.
 
-   Source Sans 3 and Lora ship TWO: their regular weight for running prose,
+   Lora ships TWO, and Source Sans 3 more: the regular weight for running prose,
    plus the weight several components ask for to bold a name or a number
    inline inside that same prose (a wire-dock/transactions player name, a
    box score's Play of the Game score) — a bold run beside regular text of
@@ -19,6 +21,22 @@
    browser/OS decides to fake or clamp it, which is inconsistent by
    definition. Registering the real face is what makes --w-bold/--w-semibold
    trustworthy there; skip it only for a role nothing else sits beside. */
+
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("@fontsource/barlow-condensed/files/barlow-condensed-latin-600-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("@fontsource/barlow-condensed/files/barlow-condensed-latin-700-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+}
 
 @font-face {
   font-family: "Barlow Condensed";
@@ -38,6 +56,14 @@
 
 @font-face {
   font-family: "Source Sans 3";
+  src: url("@fontsource/source-sans-3/files/source-sans-3-latin-500-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Source Sans 3";
   src: url("@fontsource/source-sans-3/files/source-sans-3-latin-600-normal.woff2") format("woff2");
   font-style: normal;
   font-weight: 600;
@@ -49,6 +75,14 @@
   src: url("@fontsource/source-sans-3/files/source-sans-3-latin-700-normal.woff2") format("woff2");
   font-style: normal;
   font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
   font-display: swap;
 }
 
