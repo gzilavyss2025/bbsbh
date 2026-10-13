@@ -3,13 +3,13 @@
 // file, so the totals and the cells come from the same feeds and the same rules.
 import { foldBatterTotals, foldPitcherTotals } from './byCount.mjs'
 
-// One season's rows in every table the re-read refills: the by-count cells and per-game rows, and
+// One season's rows in every table the re-read refills: the by-count cells (batters', pitchers') and per-game rows, and
 // the batter and pitcher season rows the cells are checked against (#1881). All of them ACCUMULATE
 // across games, so filling gaps would double-count: wipe first, like --backfill-team-pitch-types.
 // Other tables (teams, innings, pitch types, game totals) are not touched.
-const TABLES = ['foul_batter_counts', 'foul_batter_games', 'foul_batter_totals', 'foul_batter_pa_high', 'foul_pitcher_totals']
+const TABLES = ['foul_batter_counts', 'foul_batter_games', 'foul_pitcher_counts', 'foul_batter_totals', 'foul_batter_pa_high', 'foul_pitcher_totals']
 // Totals only are put back when a feed fails: the cells and games are flagged by the exit code.
-const TOTAL_TABLES = TABLES.slice(2)
+const TOTAL_TABLES = TABLES.slice(3)
 const CHUNK = 100 // games fetched at a time, then folded in order, so a tie for a season high goes to the earliest game
 
 // The wipe and the walk take the same rows (every ingested game of the season, both scopes),

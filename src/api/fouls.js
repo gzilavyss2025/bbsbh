@@ -123,7 +123,7 @@ const round = (n, d = 2) => (Number.isFinite(n) ? Number(n.toFixed(d)) : n)
 // The 12 counts in the order the generator files them: cell = balls * 3 + strikes (#1881).
 const COUNTS = ['0-0', '0-1', '0-2', '1-0', '1-1', '1-2', '2-0', '2-1', '2-2', '3-0', '3-1', '3-2']
 
-// A batter's `byCount` (or the league's) as 12 cells: the plate appearances that reached the count,
+// A batter's or pitcher's `byCount` (or the league's) as 12 cells: the plate appearances that reached the count,
 // his fouls and swings from it, fouls per swing (null with no swing), and how those plate
 // appearances ended (a walk includes a hit by pitch). Null when the file has none yet.
 export function foulCountCells(byCount) {
@@ -186,6 +186,7 @@ export function pitcherFoulLine(data, personId) {
     fouls: p.fouls || 0,
     whiffs,
     isStarter: !!p.isStarter,
+    byCount: p.byCount ?? null,
     foulPct: pitches ? round(p.fouls / pitches, 3) : null,
     foulsToWhiffs: whiffs ? round(p.fouls / whiffs) : null,
     foulsPerGame: g ? round(p.fouls / g) : null,

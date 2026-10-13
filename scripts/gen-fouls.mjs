@@ -60,7 +60,7 @@ import { writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
-import { countStatements, endPa, exportByCount, exportGameFouls, foldBatterTotals, foldPitcherTotals, gameShards, medianBestPa, newCells, tallyPitches } from './lib/fouls/byCount.mjs'
+import { batterCovered, pitcherCovered, countStatements, endPa, exportByCount, exportGameFouls, foldBatterTotals, foldPitcherTotals, gameShards, medianBestPa, newCells, tallyPitches } from './lib/fouls/byCount.mjs'
 import { rebuildCommand } from './lib/fouls/rebuild.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -83,7 +83,7 @@ const MAX_INNING_BUCKET = 10 // innings 10+ fold into inning 10
 //   { batters:  Map personId -> { name, teamId, pa, pitchesSeen, fouls,
 //                                 twoStrikeFouls, gameFouls, opponentId,
 //                                 bestPaFouls, bestPa },
-//     pitchers: Map personId -> { name, teamId, pitches, fouls, whiffs, isStarter },
+//     pitchers: Map personId -> { name, teamId, pitches, fouls, whiffs, isStarter, cells },
 //     teams:    Map teamId   -> { fouls, twoStrikeFouls },
 //     innings:  Map inning   -> { pitches, fouls, pitchesVsStarter, foulsVsStarter,
 //                                 pitchesVsReliever, foulsVsReliever },
@@ -131,7 +131,7 @@ export function aggregateGameFouls(feed) {
   const getPitcher = (id, name, teamId) => {
     let p = pitchers.get(id)
     if (!p) {
-      p = { name, teamId, pitches: 0, fouls: 0, whiffs: 0, isStarter: false }
+      p = { name, teamId, pitches: 0, fouls: 0, whiffs: 0, isStarter: false, cells: newCells() }
       pitchers.set(id, p)
     } else {
       if (name) p.name = name
@@ -274,7 +274,7 @@ export function aggregateGameFouls(feed) {
         }
       : carryPaContext
 
-    if (b) tallyPitches(b, isNewPa, play) // fouls by count and per game (scripts/lib/fouls)
+    if (b) tallyPitches(b, isNewPa, play, p) // fouls by count and per game (scripts/lib/fouls)
     let preStrikes = isNewPa ? 0 : carryStrikes
     let paFouls = isNewPa ? 0 : carryPaFouls
     let paPitches = (isNewPa ? 0 : carryPaPitches) + pitchEvents.length
@@ -356,7 +356,7 @@ export function aggregateGameFouls(feed) {
       carryPaFouls = 0
       carryPaPitches = 0
       carryPaContext = null
-      if (b) endPa(b, play.result?.eventType)
+      if (b) endPa(b, play.result?.eventType, p)
       if (b && paFouls > b.bestPaFouls) {
         b.bestPaFouls = paFouls
         b.bestPa = {
@@ -697,7 +697,7 @@ export function exportFouls(db, season, scope = 'R') {
       cols: ['max_game_fouls', 'max_game_pk', 'max_game_pa', 'max_game_pitches', 'max_game_opp_id', 'max_game_his_score', 'max_game_opp_score'],
     },
   )
-  const { byPerson: countsOf, league: byCount } = exportByCount(db, season, scope, batterRows)
+  const { byPerson: countsOf, league: byCount } = exportByCount(db, 'foul_batter_counts', season, scope, batterRows, batterCovered)
   for (const r of batterRows) {
     const pa = paHighByPerson.get(r.person_id)
     batters[r.person_id] = {
@@ -744,7 +744,9 @@ export function exportFouls(db, season, scope = 'R') {
   }
 
   const pitchers = {}
-  for (const r of combine(rows('foul_pitcher_totals', '', 'person_id'), (r) => r.person_id, ['games', 'starts', 'pitches', 'fouls', 'whiffs'])) {
+  const pitcherRows = combine(rows('foul_pitcher_totals', '', 'person_id'), (r) => r.person_id, ['games', 'starts', 'pitches', 'fouls', 'whiffs'])
+  const pitcherCounts = exportByCount(db, 'foul_pitcher_counts', season, scope, pitcherRows, pitcherCovered).byPerson
+  for (const r of pitcherRows) {
     pitchers[r.person_id] = {
       name: r.name,
       teamId: r.team_id,
@@ -754,6 +756,7 @@ export function exportFouls(db, season, scope = 'R') {
       whiffs: r.whiffs,
       gs: r.starts, // so a client sum of seasons rebuilds isStarter exactly (#1201)
       isStarter: r.starts * 2 > r.games, // majority of appearances were starts
+      ...(pitcherCounts[r.person_id] && { byCount: pitcherCounts[r.person_id] }),
     }
   }
 

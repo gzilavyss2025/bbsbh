@@ -423,10 +423,14 @@ don't run these by hand.
   `byCount` (12 cells, `balls * 3 + strikes`: PAs in the count, fouls and swings thrown from
   it, and how those PAs ended, credited to every count they were in) and the league block gains
   `byCount` and `medianBestPaFouls` (the middle best at-bat of hitters with 300+ PA). Per-game
+  PITCHER cells (#1993): each pitcher row gains the same `byCount` from his side (the pitches he
+  threw from each count; the PAs he finished, as the pitcher of record, as foul_pitcher_totals
+  has them), in table `foul_pitcher_counts`; a row shows it only when the cells' fouls add up to
+  his season `fouls`. Per-game
   `[pitches, fouls, whiffs]` go to `fouls/{season}/{NN}.games.json`, a second shard set
   because a busy bucket's per-game rows alone outweigh the bucket. Both ride new tables
   (`foul_batter_counts`, `foul_batter_games`): the nightly sweep fills them for new games, and
-  `--rebuild-counts=<season>` wipes both for the season, plus that season's batter and pitcher
+  `--rebuild-counts=<season>` wipes both (and the pitcher cells) for the season, plus that season's batter and pitcher
   totals, and re-reads every ingested game of it, both scopes (the same rows it wipes), so the
   totals and the cells come from the same feeds. If a feed fails, the totals go back as they were. It exits non-zero and names any game whose feed
   failed; run it again, and commit only after a clean run. Until it has run, a batter row

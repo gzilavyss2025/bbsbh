@@ -443,6 +443,7 @@ for each generator; the reader modules:
   bucket instead (reveal-only, surfaced in `StatBox` + the box-score digest).
   `batterFoulLine` carries `byCount` and `foulCountCells` reads it (and the league's, from
   `leagueFoulRates`) as 12 cells with fouls per swing and how the PAs ended (#1881);
+  `pitcherFoulLine` carries the pitcher's `byCount` the same way (#1993), `null` when absent;
   `fetchBatterGameFouls` reads a batter's `{NN}.games.json`, `{ gamePk: [pitches, fouls,
   whiffs] }`, for `person/gameLog.js`'s `withGameFouls` (#1914).
 - `pitchArsenal.js` — each pitcher's season pitch-type mix (share of pitches +
