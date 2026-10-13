@@ -11,7 +11,7 @@ export function StatusBanners({ core }) {
   const list = statusBannersView(core)
   if (!list.length) return null
   return (
-    <Card frame="stamped" label="Status banners" className="pnext__slot pnext__top">
+    <Card frame="stamped" label="Status banners" className="pnext__slot">
       <Stack gap="tight">
         {list.map((b) => (
           <p key={b.key} role="note" className="pnext__banner">

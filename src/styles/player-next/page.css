@@ -170,9 +170,6 @@
 .pnext__ovr .ovrbars {
   padding: 0;
 }
-.pnext__top .leaguerank {
-  margin: 0;
-}
 
 /* The position pill takes the tint of the lead tile (the boards' green). */
 .pnext__club .pill {

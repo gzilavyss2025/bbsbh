@@ -17,7 +17,7 @@ export function HeaderExtras({ core }) {
   if (!x) return null
   const club = core.rosterStatus ? null : core.bio.team
   return (
-    <Card frame="stamped" label="Header extras" className="pnext__slot pnext__top">
+    <Card frame="stamped" label="Header extras" className="pnext__slot">
       <Stack gap="snug">
         {x.nickname && <p className="pnext__attr">“{x.nickname}”</p>}
         {(x.rank || x.orgRank) && (

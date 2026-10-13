@@ -24,7 +24,7 @@ export function OverviewExtras({ blocks, year }) {
   const mine = blocks.filter(hasExtras)
   if (!mine.length) return null
   return (
-    <Card frame="stamped" label="Overview extras" className="pnext__slot pnext__top">
+    <Card frame="stamped" label="Overview extras" className="pnext__slot">
       <Stack gap="base">
         {mine.map((b) => (
           <Stack key={b.group} gap="snug">
