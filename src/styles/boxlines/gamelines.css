@@ -144,8 +144,8 @@ button.gamelines__door {
 }
 
 /* THE FIGURES. Three steps of ink, and no step of WEIGHT: JetBrains Mono ships
-   one registered weight here (tokens/fonts.css), so every figure renders at
-   700 whatever a rule asks for, and a bold cell beside a regular one would be
+   one registered weight here, 500 (tokens/fonts.css), so every figure renders at
+   500 whatever a rule asks for, and a bold cell beside a regular one would be
    two cells that look the same. Colour is the only lever, and it is enough —
    graphite for context, slate for the rate beside the answer, near-black for
    the answer itself. */
