@@ -44,7 +44,7 @@ function fillOf(kind, value, metric) {
 }
 const tickOf = (base, metric) => (base == null ? null : fixed((base / AXIS[metric]) * 100, 2))
 const kindOf = (value, base, thin, pitching) =>
-  value == null ? 'none' : thin ? 'thin' : (pitching ? value <= base : value >= base) ? 'pos' : 'neg'
+  value == null ? 'none' : thin ? 'thin' : base == null ? 'base' : (pitching ? value <= base : value >= base) ? 'pos' : 'neg'
 
 // ---- hand and situational rows (a splitSide of api/person/stats.js) ----
 
@@ -189,7 +189,7 @@ export function vsTeamLine(car, label, group) {
       ? { gamesPlayed: car.g, inningsPitched: car.ip, era: car.era, strikeOuts: car.k, baseOnBalls: car.bb }
       : { gamesPlayed: car.g, plateAppearances: car.pa, avg: car.avg, obp: car.obp, slg: car.slg, ops: car.ops, homeRuns: car.hr, strikeOuts: car.so, baseOnBalls: car.bb }
   const line = figLine('vs', label, stat, group)
-  return group === 'pitching' || car.so != null ? line : { ...line, k: DASH }
+  return line && (group === 'pitching' || car.so != null) ? line : line && { ...line, k: DASH }
 }
 
 // One club of the strip: its career figure under the logo.

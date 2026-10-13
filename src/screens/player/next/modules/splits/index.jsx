@@ -68,8 +68,9 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
   }, [empty, onEmpty])
   const pa = tables?.hand?.base.count
   useEffect(() => {
+    if (!tables) return
     onCount(pa ? `${pa} ${pitching ? 'BF' : 'PA'}` : undefined)
-  }, [pa, pitching, onCount])
+  }, [pa, pitching, tables, onCount])
 
   if (empty) return null
   if (!ready && !splits.error) return <div className="splitsmod splitsmod--wait" aria-busy="true" />
@@ -77,9 +78,10 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
   const show = (id) => !pitching || focus === id || focus === 'all'
   const hand = tables?.hand
   const sit = tables?.sit
+  const sitOps = (code) => sit?.groups.flatMap((g) => g.rows).find((r) => r.key === code)?.ops ?? '—'
   const menu = [
     ['h', 'By handedness', hand && `${hand.rows[0].label} ${hand.rows[0].ops} · ${hand.rows[1].label} ${hand.rows[1].ops}`, 'OPS against'],
-    ['s', 'Situational', sit && `Empty ${sit.groups[0]?.rows[0]?.ops ?? '—'} · RISP ${sit.groups[0]?.rows[2]?.ops ?? '—'}`, 'OPS against'],
+    ['s', 'Situational', sit && `Empty ${sitOps('r0')} · RISP ${sitOps('risp')}`, 'OPS against'],
     vs.data && ['v', 'Splits vs team', 'Every club, career', 'Career ERA'],
     glView && ['g', 'Game lines', `Home ${glView.sections[0]?.items[0]?.era ?? '—'} · Road ${glView.sections[0]?.items[1]?.era ?? '—'}`, 'Career ERA'],
     ['all', 'All four', 'Scroll through everything', 'Every section open'],
@@ -99,7 +101,7 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
           <span className="splitsmod__lbl">Scope</span>
           <div className="splitsmod__segs">
             {SCOPES.map(([id, label]) => (
-              <Button key={id} size="control" skin="outline" pressed={scope === id} disabled={id !== 'R' && !postOk} onClick={() => setWanted(id)}>
+              <Button key={id} size="control" skin="outline" pressed={scope === id} disabled={id !== 'R' && !postOk} onClick={() => { setPicked(shown); setWanted(id) }}>
                 {label}
               </Button>
             ))}

@@ -5,6 +5,7 @@
 /* ---- the club strip, the club's header, the last meeting ---- */
 /* layout-exempt: a horizontal scroller of fixed-width club buttons */
 .splitsmod__strip {
+  position: relative;
   display: flex;
   gap: var(--space-1);
   overflow-x: auto;

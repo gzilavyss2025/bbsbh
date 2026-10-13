@@ -52,7 +52,7 @@ function Bar({ line, metric }) {
         {line.tick != null && <span className="splitsmod__tick" style={{ left: `${line.tick}%` }} />}
       </span>
       <span className="splitsmod__fig">{figure}</span>
-      <span className={`splitsmod__delta${line.delta === 'base' || line.thin ? '' : line.fill?.kind === 'pos' ? ' is-pos' : ' is-neg'}`}>{line.delta}</span>
+      <span className={`splitsmod__delta${line.thin ? '' : line.fill?.kind === 'pos' ? ' is-pos' : line.fill?.kind === 'neg' ? ' is-neg' : ''}`}>{line.delta}</span>
       <span className={line.thin ? 'splitsmod__thin' : undefined}>{line.thin ? 'thin' : ''}</span>
     </span>
   )

@@ -30,7 +30,8 @@ export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
     const line = career && figLine('career', 'Career', career, group)
     return line ? asBase(line) : null
   }, [career, group])
-  const line = entry?.car ? readFigs(baseLine, [vsTeamLine(entry.car, `vs ${team.abbr}`, group)], group)[0] : null
+  const raw = entry?.car && vsTeamLine(entry.car, `vs ${team.abbr}`, group)
+  const line = raw ? readFigs(baseLine, [raw], group)[0] : null
   // The last meeting is a game result: a dated page holds back one on or after its day.
   const last = entry?.last && (!asOf || entry.last.date < asOf) ? entry.last : null
   const clubName = team ? [teamLocationName(team.id), teamClubName(team.id)].filter(Boolean).join(' ') || team.name : ''
