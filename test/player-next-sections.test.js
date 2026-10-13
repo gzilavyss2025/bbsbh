@@ -154,8 +154,11 @@ test('with every slot a stub, all nine batter buttons show', () => {
   assert.deepEqual(keys(shown), keys(sections))
 })
 
-// Modules an issue has built: they hide themselves when they have no data (tbd #1896).
-const BUILT = new Set(['tbd'])
+// Modules an issue has built: real modules, which may return null and call onEmpty when
+// they have no data. Add a module here in the PR that builds it; every other module must
+// still be a stub.
+const BUILT = new Set(['tbd', 'similar'])
+
 test('a stub module renders its placeholder line: it never returns null or calls onEmpty', () => {
   for (const slot of SLOTS) {
     const src = readFileSync(new URL(`../src/screens/player/next/modules/${slot.module}/index.jsx`, import.meta.url), 'utf8')
