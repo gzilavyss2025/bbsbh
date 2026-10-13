@@ -41,7 +41,7 @@ export function JumpBarLab() {
   return (
     <Stack gap="snug" className="jumplab">
       <HubTabBar variant="anchor" tabs={tabs} ariaLabel="Page sections" scrollRoot={viewRef} />
-      <div ref={viewRef} className="jumplab__view" tabIndex={0} aria-label="Invented page sections">
+      <div ref={viewRef} className="jumplab__view" tabIndex={0} role="region" aria-label="Invented page sections">
         <Stack gap="loose">
           {SHOWN.map((s) => (
             <Card key={s.key} id={idFor(s.key)} head={<SectionHead look="rule">{s.label}</SectionHead>}>

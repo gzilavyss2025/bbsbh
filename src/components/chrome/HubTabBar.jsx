@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNav } from '../../lib/nav.js'
 import { Cluster } from '../ui/layout/Cluster.jsx'
 import { countLabel, currentSection, scrollLeftToShow } from '../../lib/jumpbar/spy.js'
+import { motionIsReduced } from '../../hooks/preferences/motionIsReduced.js'
 
 // The tab bar under a hub's pinned identity header. ONE control, two callers —
 // the team hub (screens/team/TeamTabBar.jsx) and the player hub
@@ -62,9 +63,6 @@ const HOLD_MS = 250
 // The tap's hold on the mark, read and renewed by the scroll-spy. A helper
 // outside the component: the React compiler lint rejects Date.now() inline.
 const holdFor = () => ({ until: Date.now() + HOLD_MS })
-
-const reducedMotion = () =>
-  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
 // THE JUMP BAR. Square buttons with a count badge; the current one is ink.
 // Under 740px it is one row that scrolls sideways; at 740px and up it wraps in
@@ -153,7 +151,7 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '' }) {
       itemWidth: btn.offsetWidth,
       pad: 16,
     })
-    if (left !== nav.scrollLeft) nav.scrollTo({ left, behavior: reducedMotion() ? 'auto' : 'smooth' })
+    if (left !== nav.scrollLeft) nav.scrollTo({ left, behavior: motionIsReduced() ? 'auto' : 'smooth' })
   }, [current])
 
   const jump = (key) => {
@@ -161,7 +159,7 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '' }) {
     if (!el) return
     setCurrent(key)
     holdRef.current = holdFor()
-    const behavior = reducedMotion() ? 'auto' : 'smooth'
+    const behavior = motionIsReduced() ? 'auto' : 'smooth'
     const root = scrollRoot?.current
     if (root) {
       const top = root.scrollTop + el.getBoundingClientRect().top - root.getBoundingClientRect().top - offset

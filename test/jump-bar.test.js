@@ -55,3 +55,10 @@ test('a count reads with thousands separators; no count is null', () => {
   assert.equal(countLabel(''), null)
   assert.equal(countLabel(Number.NaN), null)
 })
+
+test('the jump bar reads both halves of the motion contract, not only the OS setting (#1883)', async () => {
+  const { readFileSync } = await import('node:fs')
+  const src = readFileSync(new URL('../src/components/chrome/HubTabBar.jsx', import.meta.url), 'utf8')
+  assert.match(src, /import \{ motionIsReduced \} from '\.\.\/\.\.\/hooks\/preferences\/motionIsReduced\.js'/)
+  assert.doesNotMatch(src, /prefers-reduced-motion/, 'the in-app Motion preference must count too')
+})
