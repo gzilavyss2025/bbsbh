@@ -284,3 +284,29 @@ test('a pitching gap in a year the other group has rows is "Did not pitch", neve
   const alone = careerRegisterView(args)
   assert.equal(alone.rows.find((r) => r.gap).note, 'Injured — missed season')
 })
+
+// --- A transfer between lists: the banner reads the DESTINATION list ---------
+//
+// Woodruff 2026, pulled live on 2026-10-13. A transfer row names both lists
+// ("from the 15-day injured list to the 60-day injured list"); the banner read
+// the first day count and showed "15-Day" for a man on the 60-day list.
+const BREWERS = { id: 158, name: 'Milwaukee Brewers' }
+const WOODRUFF_2026_TRANSFER = [
+  {
+    id: 925251, typeCode: 'SC', date: '2026-07-05', effectiveDate: '2026-07-05',
+    person: { id: 605540, fullName: 'Brandon Woodruff' }, toTeam: BREWERS,
+    description: 'Milwaukee Brewers placed RHP Brandon Woodruff on the 15-day injured list. Right shoulder inflammation.',
+  },
+  {
+    id: 927069, typeCode: 'SC', date: '2026-07-12', effectiveDate: '2026-07-12',
+    person: { id: 605540, fullName: 'Brandon Woodruff' }, toTeam: BREWERS,
+    description: 'Milwaukee Brewers transferred RHP Brandon Woodruff from the 15-day injured list to the 60-day injured list. Right shoulder inflammation.',
+  },
+]
+
+test('a 15-day to 60-day transfer reads as the 60-day list', () => {
+  assert.deepEqual(
+    detectInjuredList(WOODRUFF_2026_TRANSFER, '2026-10-13'),
+    { days: '60', label: '60-Day', team: BREWERS },
+  )
+})
