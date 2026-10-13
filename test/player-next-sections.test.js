@@ -83,11 +83,18 @@ test('the slots are the 18 module folders, with each section holding its modules
   assert.deepEqual(at('career'), ['path', 'prospects', 'tbd'])
   assert.deepEqual(at('history'), ['firsts', 'innings', 'contract', 'tbd'])
   assert.deepEqual(at('form-trend'), ['form', 'pform'])
+  assert.deepEqual(at('on-the-mound'), ['mound', 'tbd'])
   assert.equal(new Set(SLOTS.map((s) => s.id)).size, SLOTS.length)
 })
 
-test('the Game log section ends with foul balls, then similar players', () => {
-  assert.deepEqual(SLOTS.filter((s) => s.section === 'game-log').map((s) => s.module), ['batlog', 'pitchlog', 'fouls', 'similar'])
+test('the Game log section ends with foul balls, similar players, then the tbd slot', () => {
+  assert.deepEqual(SLOTS.filter((s) => s.section === 'game-log').map((s) => s.module), ['batlog', 'pitchlog', 'fouls', 'similar', 'tbd'])
+})
+
+test('the tbd slots for the pitcher boards: On the mound for a pitcher only, Game log for both', () => {
+  const tbd = (r) => slotInstances(r).filter((i) => i.module === 'tbd').map((i) => i.id)
+  assert.deepEqual(tbd(['hitting']), ['tbd-season', 'tbd-gamelog', 'tbd-career', 'tbd-history'])
+  assert.deepEqual(tbd(['pitching']), ['tbd-season', 'tbd-gamelog', 'tbd-mound', 'tbd-career', 'tbd-history'])
 })
 
 test('the batter Form trend and the pitcher Form trend are two modules', () => {
@@ -147,12 +154,13 @@ test('with every slot a stub, all nine batter buttons show', () => {
   assert.deepEqual(keys(shown), keys(sections))
 })
 
-// Modules that have been built: a real module may report no data (onEmpty) or render nothing.
-const BUILT = new Set(['season'])
+// Modules an issue has built: real modules, which may return null and call onEmpty when
+// they have no data. Add a module here in the PR that builds it; every other module must
+// still be a stub.
+const BUILT = new Set(['season', 'tbd', 'similar', 'prospects', 'innings', 'contract'])
 
 test('a stub module renders its placeholder line: it never returns null or calls onEmpty', () => {
-  for (const slot of SLOTS) {
-    if (BUILT.has(slot.module)) continue
+  for (const slot of SLOTS.filter((s) => !BUILT.has(s.module))) {
     const src = readFileSync(new URL(`../src/screens/player/next/modules/${slot.module}/index.jsx`, import.meta.url), 'utf8')
     assert.ok(!/return null/.test(src), `${slot.module} returns null`)
     assert.ok(!/onEmpty\(/.test(src), `${slot.module} calls onEmpty`)
