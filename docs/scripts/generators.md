@@ -426,8 +426,9 @@ don't run these by hand.
   `[pitches, fouls, whiffs]` go to `fouls/{season}/{NN}.games.json`, a second shard set
   because a busy bucket's per-game rows alone outweigh the bucket. Both ride new tables
   (`foul_batter_counts`, `foul_batter_games`): the nightly sweep fills them for new games, and
-  `--rebuild-counts=<season>` wipes both for the season and re-reads every ingested game of
-  it, both scopes (the same rows it wipes). It exits non-zero and names any game whose feed
+  `--rebuild-counts=<season>` wipes both for the season, plus that season's batter and pitcher
+  totals, and re-reads every ingested game of it, both scopes (the same rows it wipes), so the
+  totals and the cells come from the same feeds. If a feed fails, the totals go back as they were. It exits non-zero and names any game whose feed
   failed; run it again, and commit only after a clean run. Until it has run, a batter row
   has no `byCount` and the reader gives `null`.
 - `gen-comeback-wins.mjs` → `public/data/comeback-wins.json` — per-team,

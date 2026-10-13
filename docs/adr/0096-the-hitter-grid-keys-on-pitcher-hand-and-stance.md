@@ -42,8 +42,19 @@ that joins on the pitch (#1411, the Part C spike). The owner has not picked one.
 3. **The counters.** Each is a 25-value CSV over the 5x5 command grid, a sum:
    `pitches`, `swings`, `whiffs`, `pa_end` and `woba_fixed`.
    - Swings and whiffs use the shared code sets (`WHIFF_CODES`, `FOUL_CODES` in
-     `src/api/playbyplay/`), the same as the pitcher grid. A foul tip is a
-     swing, not a whiff.
+     `src/api/playbyplay/`). A foul tip (`T`) is a swing and, since #1911
+     (Gary, 2026-10-13), a whiff, as on Savant: this grid adds the code itself,
+     and the shared sets and the pitcher grids keep it as a swing only.
+   - `called_strikes`, `in_play` and `speed_sum` (start speed) came with #1911,
+     in `pitch_hitter_plate`: a table of its own, so the dump of
+     `pitch_hitter_cells` keeps its bytes. They are NOT in the base shards:
+     the export writes them to `hitter-grid/{season}/NN.plate.json`, the same
+     bucket, so the base shards keep their size under the 120 KB ceiling. The
+     plate file is written only when every cells row has a plate row (a row
+     swept before them has none), and the reader fetches it only when asked
+     (`fetchHitterGridFor(id, season, { plate: true })`); no file gives `null`,
+     not 0. The in-zone count needs no counter: it is the middle nine cells
+     at read time.
    - `pa_end` counts the pitches that an xwOBA mean counts. A PA ends on the
      last event of a play whose eventType is on the plate-appearance allow
      list (`isPlateAppearance` in `scripts/lib/long-at-bats.mjs`). A PA that
