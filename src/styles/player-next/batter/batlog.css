@@ -1,0 +1,131 @@
+/* ==== THE BATTER GAME LOG (the new player page, #1890) ====
+   From the board "BatterGameLog": the filter, the totals strip, the games (LogTable,
+   both/logtable.css) and the pitch key. Reads as one part with the pitcher log (pitcher/pitchlog.css).
+   Tokens only. */
+
+/* The reserve is for the load only: about the loaded card, eight games and the key. */
+.batlog--wait {
+  min-height: 560px;
+}
+.batlog__top {
+  justify-content: space-between;
+}
+.batlog__scope,
+.batlog__n,
+.batlog__at,
+.batlog__seen small {
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+.batlog__date {
+  font-weight: var(--w-bold);
+  white-space: nowrap;
+}
+.batlog__tag {
+  padding: var(--space-1) var(--space-1h);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+}
+
+/* The result: the club's score, then where he played in a box. A letter says W or L, so the
+   colour is never the only mark. */
+.batlog__score {
+  white-space: nowrap;
+}
+.batlog__score--W {
+  color: var(--accent-positive);
+}
+.batlog__score--L {
+  color: var(--accent-negative);
+}
+.batlog__pos {
+  min-width: 2.25em;
+  padding: var(--space-1) var(--space-1h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-solid);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Colour and an underline (the mono face ships one weight, so emphasis is never weight, ADR-0109). */
+.batlog__hi,
+.batlog__lo {
+  text-decoration: underline var(--bw-heavy);
+  text-underline-offset: var(--space-1);
+}
+.batlog__hi {
+  color: var(--accent-positive);
+}
+.batlog__lo {
+  color: var(--accent-negative);
+}
+
+/* The card look drops 2B, 3B, SB and AVG (the board's step); the table keeps them. */
+@container (max-width: 719.98px) {
+  .logtable__grid td.batlog__wide {
+    display: none;
+  }
+}
+
+.batlog__seen {
+  white-space: nowrap;
+}
+.batlog__seen small {
+  margin-inline-start: var(--space-1);
+}
+.batlog__barcell {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-inline-start: var(--space-3);
+}
+.logtable__grid td.batlog__barcell {
+  width: 30%;
+}
+.batlog__bar {
+  display: flex;
+  height: var(--space-6);
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+.batlog__seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--space-4);
+  overflow: hidden;
+  font-size: var(--fs-cell);
+}
+.batlog__seg + .batlog__seg {
+  border-inline-start: var(--bw-hair) solid var(--border-stamped);
+}
+.batlog__seg--whiffs {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+}
+.batlog__seg--fouls {
+  background: var(--accent-tint);
+  color: var(--text-body);
+}
+.batlog__seg--other {
+  background: var(--surface-inset);
+  color: var(--text-body);
+}
+
+.batlog__key {
+  font-size: var(--fs-small);
+}
+.batlog__key li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+}
+.batlog__sw {
+  width: var(--space-4);
+  height: var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
