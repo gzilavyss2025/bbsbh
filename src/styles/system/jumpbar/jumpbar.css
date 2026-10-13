@@ -54,7 +54,7 @@
   cursor: pointer;
   transition: transform var(--dur-fast) var(--ease-standard);
 }
-/* The press: the item moves 2px down and right, into its shadow. */
+/* The press: the item moves 2px down and right. */
 .jumpbar__item:active {
   transform: translate(var(--bw-heavy), var(--bw-heavy));
 }

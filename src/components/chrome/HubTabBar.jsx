@@ -59,7 +59,8 @@ const SLACK = 24
 // How long the tap's own scroll may pause before the scroll-spy takes over.
 const HOLD_MS = 250
 
-// The tap's hold on the mark, read and renewed by the scroll-spy.
+// The tap's hold on the mark, read and renewed by the scroll-spy. A helper
+// outside the component: the React compiler lint rejects Date.now() inline.
 const holdFor = () => ({ until: Date.now() + HOLD_MS })
 
 const reducedMotion = () =>
@@ -67,7 +68,7 @@ const reducedMotion = () =>
 
 // THE JUMP BAR. Square buttons with a count badge; the current one is ink.
 // Under 740px it is one row that scrolls sideways; at 740px and up it wraps in
-// a bordered box (styles/46-consent-modal.css, `.jumpbar`).
+// a bordered box (styles/system/jumpbar/jumpbar.css).
 //
 //   tabs        [{ key, label, count }] in page order. `key` is the id of the
 //               section element. `count` is a number, a string, or absent (the

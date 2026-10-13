@@ -2,7 +2,7 @@
    JUMP BAR prototype frame (#1883). Imported by
    screens/designlab/jumpbar/JumpBarLab.jsx, never by index.css.
 
-   The bar itself is the shipped .jumpbar (styles/46-consent-modal.css). This
+   The bar itself is the shipped .jumpbar (styles/system/jumpbar/jumpbar.css). This
    file draws only the frame the invented sections scroll in, so the
    scroll-spy can be seen with the bar in view above them.
    ============================================================ */
