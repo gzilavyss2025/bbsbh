@@ -5,9 +5,14 @@
 // player gets them once, on his primary role (the one PlayerHistoryTab's primaryGroup names).
 export function tbdCards(section, role, bio) {
   const first = role === (bio.isPitcher ? 'pitching' : 'hitting')
-  if (section === 'season') return first ? ['percentile', 'advanced', 'runvalue'] : ['percentile', 'advanced']
+  if (section === 'season') {
+    // Command received is a catcher's card; the live Analytics tab shows it by data, so a hitter's
+    // list holds it and the card hides itself for a man who never caught.
+    const keys = role === 'hitting' ? ['percentile', 'advanced', 'cmdreceived'] : ['percentile', 'advanced']
+    return first ? [...keys, 'runvalue'] : keys
+  }
   if (section === 'history' && first) return ['awards', 'timeline', 'transactions', 'media']
-  if (section === 'on-the-mound' && role === 'pitching') return ['targetcommand', 'cmdreceived']
+  if (section === 'on-the-mound' && role === 'pitching') return ['targetcommand']
   if (section === 'game-log') return role === 'pitching' ? ['fouls', 'milestones'] : ['milestones']
   return []
 }
