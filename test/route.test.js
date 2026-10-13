@@ -28,6 +28,7 @@ import {
   LEAGUE_SLUG,
   matchupSlug,
   gamePath,
+  linkQuery,
   playerPath,
   playerTabPath,
   teamPath,
@@ -251,6 +252,18 @@ test('player and team routes carry the id plus the optional cutoff hints', () =>
     asOf: '2026-07-05',
     sportId: null,
   })
+})
+
+test('?look=new opens the unlisted player page; any other look is the live page', () => {
+  assert.deepEqual(parseRoute('/player/12345?look=new&d=2026-07-05&s=1'), {
+    name: 'player-next',
+    id: '12345',
+    asOf: '2026-07-05',
+    sportId: 1,
+  })
+  assert.equal(parseRoute('/player/12345?look=x').name, 'player')
+  // linkQuery carries only d and s, so `look` never leaks onto a link out.
+  assert.equal(linkQuery({ d: '2026-07-05', s: 1 }), '?d=2026-07-05&s=1')
 })
 
 test('umpire and manager routes carry no cutoff query (never score-revealing)', () => {

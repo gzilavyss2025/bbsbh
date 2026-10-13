@@ -3,7 +3,7 @@
 // badge's text.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { countLabel, currentSection, scrollLeftToShow } from '../src/lib/jumpbar/spy.js'
+import { countLabel, currentSection, holdStep, scrollLeftToShow } from '../src/lib/jumpbar/spy.js'
 
 const S = [
   { key: 'overview', top: -900 },
@@ -61,4 +61,17 @@ test('the jump bar reads both halves of the motion contract, not only the OS set
   const src = readFileSync(new URL('../src/components/chrome/HubTabBar.jsx', import.meta.url), 'utf8')
   assert.match(src, /import \{ motionIsReduced \} from '\.\.\/\.\.\/hooks\/preferences\/motionIsReduced\.js'/)
   assert.doesNotMatch(src, /prefers-reduced-motion/, 'the in-app Motion preference must count too')
+})
+
+test('a tap hold that is running keeps the mark and asks the spy to come back when it ends', () => {
+  const step = holdStep({ until: 1000 }, 900, 250)
+  assert.equal(step.measure, false)
+  assert.deepEqual(step.hold, { until: 1150 })
+  // A timer set for retryIn lands just after the renewed hold ends, so one measure follows the last scroll.
+  assert.ok(step.retryIn > 250)
+})
+
+test('no hold, or an ended hold, measures at once and clears the hold', () => {
+  assert.deepEqual(holdStep(null, 900, 250), { measure: true, hold: null, retryIn: 0 })
+  assert.deepEqual(holdStep({ until: 1000 }, 1001, 250), { measure: true, hold: null, retryIn: 0 })
 })

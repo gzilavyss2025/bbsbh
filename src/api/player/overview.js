@@ -128,6 +128,8 @@ export async function loadPlayerOverview(id, asOf) {
         if (tileSportId === 1 && !cutoff) block.tiles = withLeagueFigure(block.tiles, group, leagueFigure)
         block.postseason = postseasonTilesView(postseasonSplits, group, block.role)
         block.ranks = group === 'pitching' ? pitchingRanksView(rankSplits) : hittingRanksView(rankSplits)
+        // The raw rankings splits, for the new page's rank marks (fetchRankMarks).
+        block.rankSplits = rankSplits
         block.gameLogPreview = gameLogView(gameLogSplits, group, cutoff, PREVIEW_GAME_LOG_LIMIT)
         // The door's own count — the season's real game total, never the 3
         // rows the preview shows (see overviewPreview.js's gameLogDoorLabel).
