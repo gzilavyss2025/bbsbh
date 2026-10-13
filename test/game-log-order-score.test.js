@@ -113,3 +113,27 @@ test('fetchFinalScores: nothing before the cutoff asks nothing', async () => {
     api.restore()
   }
 })
+
+test("fetchFinalScores: with no cutoff, today's games hold back their score and are never asked for", async () => {
+  const api = stubSchedule()
+  try {
+    const splits = [row('2026-10-12', 201), row('2026-10-13', 202, 1), row('2026-10-13', 203, 2)]
+    const scores = await fetchFinalScores(splits, 'hitting', null, '2026-10-13')
+    assert.deepEqual(api.asked, [201])
+    assert.deepEqual([...scores.keys()], [201])
+    const view = gameLogView(splits, 'hitting', null, 8, { scores }).rows
+    assert.deepEqual(view.map((r) => [r.gamePk, r.result, r.runs]), [[203, null, null], [202, null, null], [201, 'W', 6]])
+  } finally {
+    api.restore()
+  }
+})
+
+test('fetchFinalScores: an earlier ?d= cutoff still rules over today', async () => {
+  const api = stubSchedule()
+  try {
+    await fetchFinalScores([row('2026-05-22', 101), row('2026-06-01', 105)], 'hitting', '2026-05-23', '2026-10-13')
+    assert.deepEqual(api.asked, [101])
+  } finally {
+    api.restore()
+  }
+})
