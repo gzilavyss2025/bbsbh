@@ -20,7 +20,7 @@ const snapshot = {
 }
 const empty = { players: [], orgProspects: [] }
 
-test('one list, then the debut: the depth comes from the file, not from 100', () => {
+test('one list, then the debut: the rank reads "#N", with no "of X"', () => {
   const v = prospectsView({ history, snapshot: empty, playerId: 668930, debutYear: 2023, currentSeason: 2026 })
   assert.equal(v.badge, '1 list')
   // The coverage note keeps a missing year from reading as a fall from the list.
@@ -28,10 +28,10 @@ test('one list, then the debut: the depth comes from the file, not from 100', ()
   assert.match(v.note, /A year with no line means he was not on that year's list\./)
   assert.match(v.note, /There is no data for 2024–2025\./)
   assert.deepEqual(
-    v.rows.map((r) => [r.tone, r.year, r.label, r.rank, r.bar, r.delta]),
+    v.rows.map((r) => [r.tone, r.year, r.label, r.rank, r.delta]),
     [
-      ['rank', 2021, 'MLB Pipeline · of 99', 95, 5, ''],
-      ['debut', 2023, 'Debuted', '', null, ''],
+      ['rank', 2021, 'MLB Pipeline', '#95', ''],
+      ['debut', 2023, 'Debuted', '', ''],
     ],
   )
 })
@@ -47,31 +47,30 @@ test('six lists: each row carries the change from the last list, and the debut f
   assert.equal(v.rows[5].year, 2022)
 })
 
-test('a rank of 1 fills the bar; a list of the same rank reads as an equals sign', () => {
+test('a list of the same rank reads as an equals sign', () => {
   const same = { ...history, players: { 1: [[2022, 7, MP], [2023, 7, MP]] } }
   const v = prospectsView({ history: same, snapshot: empty, playerId: 1 })
   assert.equal(v.rows[1].delta, '=')
-  const top = prospectsView({ history: { ...history, players: { 2: [[2022, 1, MP]] } }, snapshot: empty, playerId: 2 })
-  assert.equal(top.rows[0].bar, 100)
 })
 
-test("today's list only: the rank on both lists, a note, no debut row and no org bar", () => {
+test("today's list only: the rank on both lists, a note and no debut row", () => {
   const v = prospectsView({ history, snapshot, playerId: 815908 })
   assert.equal(v.badge, 'Prospect')
   assert.deepEqual(
-    v.rows.map((r) => [r.tone, r.year, r.label, r.rank, r.bar]),
+    v.rows.map((r) => [r.tone, r.year, r.label, r.rank]),
     [
-      ['today', 'Today', 'Current list · MLB Pipeline', 1, 100],
-      ['today', 'Today', 'Brewers org list', 1, null],
+      ['today', 'Today', 'Current list · MLB Pipeline', '#1'],
+      ['today', 'Today', 'Brewers org list', '#1'],
     ],
   )
   assert.match(v.note, /No earlier lists/)
 })
 
-test('on his org list only: one row, and no note about bars that are not there', () => {
+test('on his org list only: one row, and no note', () => {
   const org = { players: [], orgProspects: [{ playerId: 5, orgRank: 12, teamId: 158 }] }
   const v = prospectsView({ history, snapshot: org, playerId: 5 })
   assert.equal(v.rows.length, 1)
+  assert.equal(v.rows[0].rank, '#12')
   assert.equal(v.note, '')
 })
 
