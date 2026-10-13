@@ -800,6 +800,10 @@
       "class": "spoiler-free",
       "why": "The player hub's History tab loader — awards, innings by position, the Firsts card, path/team history and the transaction timeline. Career-shaped facts, each honouring the page's own asOf cutoff. The Firsts card links out to box scores, which stay sealed on their own pages; it renders no score itself."
     },
+    "player/pitcherForm.js": {
+      "class": "cutoff-gated",
+      "why": "The pitcher Form trend's rolling ERA, K% and BB% over his own game log (#1930) — the pitcher twin of hitterForm.js. Pure; current-day only, so the card skips under a spoiler `asOf`."
+    },
     "player/overview.js": {
       "class": "spoiler-free",
       "why": "The player hub's Overview tab loader — the fact grid, the contract card, the season tiles with their rank chips and promoted other-level rows, Milestone Watch, and four preview doors into the other tabs (a trimmed game log, a Statcast/prospect teaser, an awards-chip strip). Season aggregates and a cutoff-filtered game log, over completed games."
