@@ -31,7 +31,7 @@ const data = {
         { d: '2026-07-26', p: 83, gs: 1 }, { d: '2026-07-20', p: 65, gs: 1 },
         { d: '2026-07-07', p: 103, gs: 1 }, { d: '2026-07-02', p: 82, gs: 1 },
       ],
-      season: { g: 24, gs: 24, pitches: 2179, outs: 435, bf: 550, strikes: 1484 },
+      season: { g: 24, gs: 24, pitches: 2179, outs: 435, gsPitches: 2179, gsOuts: 435, bf: 550, strikes: 1484 },
     },
     // A multi-inning reliever: one heavy outing, one light, one three-pitch cameo.
     reliever: {
@@ -130,6 +130,21 @@ test('moundRateFor: outs per outing separates a one-inning arm from a long man',
   const st = moundRateFor(data, 'starter')
   assert.equal(st.ipPerStart, '6.0')     // 435 outs / 24 starts = 18.1 outs
   assert.equal(st.pitchesPerStart, 91)   // 2179 / 24, rounded
+})
+
+test('moundRateFor: per-start rates count starts only, not the relief outings of a swingman', () => {
+  // 2 starts (90 + 80 pitches, 18 + 15 outs) and 2 relief outings (20 + 10 pitches, 3 + 3 outs).
+  const swing = { pitchers: { x: { role: 'SP', apps: [], season: { g: 4, gs: 2, pitches: 200, outs: 39, gsPitches: 170, gsOuts: 33 } } } }
+  const r = moundRateFor(swing, 'x')
+  assert.equal(r.pitchesPerStart, 85)    // 170 / 2, not 200 / 2
+  assert.equal(r.ipPerStart, '5.2')      // 33 outs / 2 = 16.5, rounds to 17 outs
+})
+
+test('moundRateFor: a store from before the starts-only sums gives no per-start rate', () => {
+  const old = { pitchers: { x: { role: 'SP', apps: [], season: { g: 4, gs: 2, pitches: 200, outs: 39 } } } }
+  const r = moundRateFor(old, 'x')
+  assert.equal(r.pitchesPerStart, null)
+  assert.equal(r.ipPerStart, null)
 })
 
 test('moundRateFor: no season games means no rates rather than a divide by zero', () => {
