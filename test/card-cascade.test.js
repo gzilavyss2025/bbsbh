@@ -286,11 +286,19 @@ test('card.css draws the frame in exactly one rule, .card', () => {
     ['.card'],
   )
   const card = ruleBody(read('system/card.css'), '.card')
-  assert.equal(decl(card, 'border'), 'var(--bw-hair) solid var(--border-rule)')
-  assert.equal(decl(card, 'background'), 'var(--surface-card)')
+  // The edge, the ground and the clip default to the sheet's and ledger's own
+  // values; only a frame class may change them, through the custom property
+  // (#1882, the stamped frame).
+  assert.equal(decl(card, 'border'), 'var(--card-edge, var(--bw-hair) solid var(--border-rule))')
+  assert.equal(decl(card, 'background'), 'var(--card-ground, var(--surface-card))')
   assert.equal(decl(card, 'border-radius'), 'var(--card-radius)')
   assert.equal(decl(card, 'box-shadow'), 'var(--card-shadow)')
-  assert.equal(decl(card, 'overflow'), 'hidden', 'the card clips a band head to its corners')
+  assert.equal(decl(card, 'overflow'), 'var(--card-overflow, hidden)', 'the card clips a band head to its corners')
+  for (const frame of ['.card--sheet', '.card--ledger']) {
+    for (const prop of ['--card-edge', '--card-ground', '--card-overflow']) {
+      assert.equal(decl(ruleBody(read('system/card.css'), frame), prop), undefined, `${frame} keeps the default ${prop}`)
+    }
+  }
   for (const prop of ['margin', 'margin-top', 'margin-bottom', 'display', 'gap', 'padding']) {
     assert.equal(decl(card, prop), undefined, `.card sets no ${prop}: spacing and layout are the parent's and the namespace's`)
   }
@@ -317,6 +325,27 @@ test('the sheet is the md radius with the card shadow; the ledger is the sm radi
   assert.equal(decl(sheet, '--card-shadow'), 'var(--shadow-card)')
   assert.equal(decl(ledger, '--card-radius'), 'var(--radius-sm)')
   assert.equal(decl(ledger, '--card-shadow'), 'none')
+})
+
+test('the stamped frame: square, a heavy ink edge, the hard offset shadow, and the tab not clipped (#1882)', () => {
+  const css = read('system/card.css')
+  const stamped = ruleBody(css, '.card--stamped')
+  assert.equal(decl(stamped, '--card-radius'), '0')
+  assert.equal(decl(stamped, '--card-shadow'), 'var(--shadow-stamped)')
+  assert.equal(decl(stamped, '--card-edge'), 'var(--bw-heavy) solid var(--border-stamped)')
+  assert.equal(decl(stamped, '--card-overflow'), 'visible', 'the name tab and the count tag sit across the top edge')
+  assert.equal(decl(stamped, 'position'), 'relative', 'the tab and the tag are placed from the card')
+  assert.equal(decl(ruleBody(css, '.card--tint'), '--card-ground'), 'var(--surface-stamped-tint)')
+  const ink = ruleBody(css, '.card--ink')
+  assert.equal(decl(ink, '--card-ground'), 'var(--surface-stamped-ink)')
+  assert.equal(decl(ink, '--card-shadow'), 'var(--shadow-stamped-soft)', 'an ink shadow would not show under an ink tile')
+  assert.equal(decl(ink, 'color'), 'var(--text-on-ink)')
+})
+
+test('the stamp-in is off under prefers-reduced-motion (#1882)', () => {
+  const css = read('motion/stamp-in.css')
+  assert.match(css, /\.card--stamp-in\s*\{[^}]*animation:[^;]*card-stamp-in/)
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{\s*\.card--stamp-in \{\s*animation: none;/)
 })
 
 test('the padded body is the old team hub body', () => {
@@ -358,6 +387,21 @@ test('an unknown frame, body or element, or an accent on a still card, is refuse
   assert.throws(() => cardClassName({ as: 'div', accent: '--offday-accent' }), /interactive/)
   assert.throws(() => cardAccentStyle('#ff0000'), /custom property/)
   assert.throws(() => cardClassName({ as: 'span' }), /as="span"/)
+})
+
+test('the stamped frame takes a tone, a name tab and the stamp-in; no other frame does (#1882)', () => {
+  assert.equal(cardClassName({ frame: 'stamped' }), 'card card--stamped')
+  assert.equal(cardClassName({ frame: 'stamped', tone: 'plain' }), 'card card--stamped')
+  assert.equal(cardClassName({ frame: 'stamped', tone: 'tint' }), 'card card--stamped card--tint')
+  assert.equal(
+    cardClassName({ frame: 'stamped', tone: 'ink', named: true, stampIn: true, className: 'stattile' }),
+    'card card--stamped card--ink card--named card--stamp-in stattile',
+  )
+  assert.throws(() => cardClassName({ frame: 'stamped', tone: 'green' }), /unknown tone/)
+  assert.throws(() => cardClassName({ tone: 'tint' }), /frame="stamped"/)
+  assert.throws(() => cardClassName({ frame: 'ledger', named: true }), /frame="stamped"/)
+  assert.throws(() => cardClassName({ stampIn: true }), /frame="stamped"/)
+  assert.throws(() => cardClassName({ frame: 'stamped', as: 'a', named: true }), /no name tab/)
 })
 
 test('a link or button card takes no head: it holds phrasing content only', () => {

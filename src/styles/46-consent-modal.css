@@ -256,6 +256,11 @@
    (480ms), and the out is stamped last (560ms). Keep these in step with
    styles/motion/playbyplay.css — a frame is only worth reading if the two
    agree. */
+/* The stamp-in (#1882) staggers a row with its own --stamp-delay. */
+.animlab__frame .card--stamp-in {
+  animation-play-state: paused;
+  animation-delay: calc(var(--stamp-delay, 0s) + var(--animlab-delay, 0s));
+}
 .animlab__frame .lineup__row {
   animation-play-state: paused;
   animation-delay: calc(var(--row-i, 0) * 30ms + var(--animlab-delay, 0s));

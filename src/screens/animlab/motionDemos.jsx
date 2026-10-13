@@ -6,6 +6,7 @@ import { glideTo } from '../../components/scoring/lens/useLens.js'
 import { PitchLadder } from '../../components/scoring/PitchLadder.jsx'
 import { PlayDiamond } from '../../components/scoring/PlayDiamond.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
+import { StatTile } from '../../components/ui/frame/StatTile.jsx'
 
 // ---------------------------------------------------------------------------
 // THE MOTION STUDY'S DEMOS (issues #976-#983), for /animation-lab.
@@ -339,4 +340,10 @@ export function LensTurnDemo({ beat }) {
       <LensCells rows={[<AtBatBox key="box" atbat={DEMO_DOUBLE} />]} />
     </div>
   )
+}
+
+// The stamp-in (#1882): the real StatTile on its real stamped Card, an
+// invented figure.
+export function StampInDemo() {
+  return <StatTile label="HR" value="18" caption="Invented" tone="tint" stampIn />
 }

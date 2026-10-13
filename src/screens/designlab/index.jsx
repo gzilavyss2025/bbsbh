@@ -13,6 +13,7 @@ import { CARDS, PILLS, PROTOTYPES } from './catalog.js'
 import { ScoutLab } from './scout/ScoutLab.jsx'
 import { NestedBoxes } from './nested/NestedBoxes.jsx'
 import { ReportLook } from './report/ReportLook.jsx'
+import { StampedParts } from './stamped/StampedParts.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import '../../styles/designlab/lab.css'
 
@@ -141,6 +142,7 @@ export function DesignLab() {
             {p.id === 'scout' && <ScoutLab />}
             {p.id === 'nested-boxes' && <NestedBoxes />}
             {p.id === 'report-look' && <ReportLook />}
+            {p.id === 'stamped-parts' && <StampedParts />}
           </Entry>
         ))}
       </Band>

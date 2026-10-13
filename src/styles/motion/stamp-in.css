@@ -1,0 +1,32 @@
+/* ---------------------------------------------------------------------------
+   THE STAMP-IN (#1882; docs/player-redesign.md, section 3). A stamped card
+   appears pressed flat into the place of its own shadow (--stamped-offset
+   down and to the right, no shadow, no ink), then comes up to rest as the
+   shadow prints under it. The keyframe is the canvas's stamp-a.
+   This is not the Stamp In page (ADR-0042).
+
+   Card.jsx adds .card--stamp-in only when the caller asks (stampIn). A card
+   that already shows on a return visit must not play it again: the page that
+   uses it gates it (docs/motion.md, "The one-shot gate"). A caller staggers a
+   row of cards with --stamp-delay.
+
+   The resting look is system/card.css. This file holds only the motion.
+   --------------------------------------------------------------------------- */
+
+@keyframes card-stamp-in {
+  from {
+    opacity: 0;
+    transform: translate(var(--stamped-offset), var(--stamped-offset));
+    box-shadow: none;
+  }
+}
+
+.card--stamp-in {
+  animation: card-stamp-in var(--dur-stamp-in) var(--ease-stamp-in) var(--stamp-delay, 0s) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card--stamp-in {
+    animation: none;
+  }
+}

@@ -1,0 +1,86 @@
+/* ============================================================
+   THE STAMPED PARTS entry (#1882). Imported by
+   screens/designlab/stamped/StampedParts.jsx, never by index.css.
+
+   The parts themselves are system/card.css and system/stamped/stamped.css.
+   This file holds only the invented content inside them: the hero's name
+   block and the rows of the "Firsts" card. The player page draws its own
+   when it ships, and this file leaves with the entry.
+   ============================================================ */
+.stamplab {
+  width: 100%;
+}
+/* A name tab hangs --space-3h above its card, so the card leaves room. */
+.stamplab__named {
+  margin-top: var(--space-4);
+}
+
+.stamplab__who {
+  padding: var(--space-3h);
+}
+.stamplab__kicker {
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.stamplab__name {
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-display-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+.stamplab__club {
+  margin: 0;
+  color: var(--text-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+}
+
+.stamplab__rows {
+  margin: 0;
+  padding: var(--space-3h) 0 0;
+  list-style: none;
+}
+.stamplab__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  padding: var(--space-3) var(--space-3h);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.stamplab__row:last-child {
+  border-bottom: 0;
+}
+.stamplab__rowlabel {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+.stamplab__rowdate {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+}
+.stamplab__copy {
+  margin: 0;
+  color: var(--text-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+@media (min-width: 740px) {
+  .stamplab__name {
+    font-size: var(--fs-hero-xl);
+  }
+}

@@ -3,10 +3,12 @@
 // components/ui/frame/Card.jsx and its tests. Pure, so node --test can pin it,
 // the way sectionHeadClass.js pins the head.
 //
-// FRAMES. Two, and the radius decides (#1113 Q1):
+// FRAMES. Three (#1113 Q1, #1882):
 //   sheet   the md radius with the card shadow: the team hub's card, and most
 //           cards in the app.
 //   ledger  the sm radius with no shadow: the tight card of a ledger or grid.
+//   stamped square corners, a 2px ink edge and a hard ink offset shadow: the
+//           player page's card and stat tile (docs/player-redesign.md, §3).
 // An unknown frame is a caller's typo, and it throws. "plain" and "report" are
 // not frames: a plain card is a sheet (its missing shadow was below the eye on
 // manila), and report cards take the sheet for now (#1113 Q6).
@@ -18,17 +20,35 @@
 // gets the hover tint and the focus ring. Only such a card takes an accent:
 // the custom property whose colour the hover tint mixes in. A still card with
 // an accent would carry a colour nothing draws, so that throws too.
-export const FRAMES = ['sheet', 'ledger']
+//
+// THE STAMPED FRAME'S OPTIONS, which no other frame takes (each throws there):
+//   tone     the fill: plain (the card paper, the default), tint or ink (the
+//            lead stat tile).
+//   named    the card wears a name tab on its top edge, so its body clears it.
+//   stampIn  the card drops into its shadow as it appears (motion/stamp-in.css).
+export const FRAMES = ['sheet', 'ledger', 'stamped']
+export const TONES = ['plain', 'tint', 'ink']
 export const BODIES = ['padded', 'flush']
 export const CARD_TAGS = ['section', 'div', 'article', 'li', 'aside', 'a', 'button']
 const INTERACTIVE = ['a', 'button']
 
-export function cardClassName({ frame = 'sheet', as = 'section', accent, className = '' } = {}) {
+export function cardClassName({
+  frame = 'sheet', as = 'section', accent, tone, named = false, stampIn = false, className = '',
+} = {}) {
   if (!FRAMES.includes(frame)) throw new Error(`Card: unknown frame "${frame}" (${FRAMES.join(', ')})`)
   cardTag(as)
   const interactive = INTERACTIVE.includes(as)
   if (accent && !interactive) throw new Error('Card: accent is for an interactive card (as="a" or "button")')
+  const stamped = frame === 'stamped'
+  if (!stamped && (tone != null || named || stampIn)) {
+    throw new Error('Card: tone, a name tab and the stamp-in are for frame="stamped"')
+  }
+  if (tone != null && !TONES.includes(tone)) throw new Error(`Card: unknown tone "${tone}" (${TONES.join(', ')})`)
+  if (named && interactive) throw new Error('Card: a link or button card takes no name tab (its content is phrasing only)')
   const parts = ['card', `card--${frame}`]
+  if (tone && tone !== 'plain') parts.push(`card--${tone}`)
+  if (named) parts.push('card--named')
+  if (stampIn) parts.push('card--stamp-in')
   if (interactive) parts.push('card--interactive')
   if (className) parts.push(className)
   return parts.join(' ')
