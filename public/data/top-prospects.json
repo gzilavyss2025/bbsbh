@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T19:26:24.369Z",
+  "generatedAt": "2026-10-13T06:55:41.931Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -1180,6 +1180,18 @@
       "levelRaw": "ROK",
       "statLine": "6.2 IP, 2.70 ERA, 9 SO",
       "age": 23,
+      "topRank": null
+    },
+    {
+      "orgRank": 26,
+      "playerId": 806992,
+      "name": "Enrique Jimenez",
+      "teamId": 11,
+      "team": "",
+      "position": "C",
+      "levelRaw": "ALL (3)",
+      "statLine": ".241, 6 HR, 17 RBI",
+      "age": 20,
       "topRank": null
     },
     {
@@ -8908,18 +8920,6 @@
       "levelRaw": "ROK",
       "statLine": "1.2 IP, 10.80 ERA, 1 SO",
       "age": 18,
-      "topRank": null
-    },
-    {
-      "orgRank": 26,
-      "playerId": 806992,
-      "name": "Enrique Jimenez",
-      "teamId": 142,
-      "team": "min",
-      "position": "C",
-      "levelRaw": "ALL (3)",
-      "statLine": ".241, 6 HR, 17 RBI",
-      "age": 20,
       "topRank": null
     },
     {
