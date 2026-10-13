@@ -20,7 +20,7 @@ function TileRow({ title, note, tiles }) {
 // The third top card (TbdWire "Overview extras"), under the tiles: league-rank chips, this
 // October's row and an up-and-down player's other levels. They ride the overview blocks the
 // tiles read. Hides when no block has any.
-export function OverviewExtras({ blocks, year }) {
+export function OverviewExtras({ blocks }) {
   const mine = blocks.filter(hasExtras)
   if (!mine.length) return null
   return (
@@ -30,7 +30,7 @@ export function OverviewExtras({ blocks, year }) {
           <Stack key={b.group} gap="snug">
             {blocks.length > 1 && <h3 className="pnext__rowlabel">{b.title}</h3>}
             <RankChips ranks={b.ranks} />
-            {b.postseason && <TileRow title={`${year} Postseason`} note={`${b.postseason.games} G`} tiles={b.postseason.tiles} />}
+            {b.postseason && <TileRow title={b.postseason.title} note={`${b.postseason.games} G`} tiles={b.postseason.tiles} />}
             {b.otherLevels?.map((lvl) => (
               <TileRow
                 key={lvl.sportId}

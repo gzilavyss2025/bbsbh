@@ -214,7 +214,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             {block.postseason && (
               <div className="player__otherlevel">
                 <SectionHead look="rule" note={`${block.postseason.games} G`}>
-                  {`${data.currentYear} Postseason`}
+                  {block.postseason.title}
                 </SectionHead>
                 <StatGrid tiles={block.postseason.tiles} />
               </div>

@@ -67,7 +67,7 @@ function PlayerNextBody({ id, asOf, sportId }) {
                 label={blocks.length > 1 ? b.title : undefined}
               />
             ))}
-            <OverviewExtras blocks={blocks} year={core.data.currentYear} />
+            <OverviewExtras blocks={blocks} />
           </Stack>
           <HubTabBar variant="anchor" tabs={sections} ariaLabel="Page sections" />
           {sections
