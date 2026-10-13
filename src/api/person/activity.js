@@ -98,7 +98,8 @@ function isIlEndingTxn(t) {
 
 // The player's CURRENT injured-list stint, or null. Takes the most recent IL
 // placement and treats it as active unless a later transaction closes it. The day
-// count ('7'|'10'|'15'|'60') is parsed from the placement description; a placement
+// count ('7'|'10'|'15'|'60') is parsed from the placement description (for a
+// transfer, the list he moved TO — transferDestinationDays below); a placement
 // with no day count (a plain / full-season "injured list") yields days:null and a
 // generic label. Score-safe: transactions are already capped at the spoiler
 // cutoff by the caller, so this reflects IL status AS OF the game being viewed.
@@ -117,7 +118,7 @@ export function detectInjuredList(transactions, asOf) {
   if (asOf && start.slice(0, 4) < asOf.slice(0, 4)) return null
   const ends = (transactions ?? []).some((t) => txnDate(t) > start && isIlEndingTxn(t))
   if (ends) return null
-  const days = injuredListDays(latest)
+  const days = transferDestinationDays(latest)
   return {
     days,
     label: days ? `${days}-Day` : 'Injured List',
