@@ -131,6 +131,9 @@ export const PAIRINGS = [
   { fg: 'text-on-ink', bg: 'field', min: TEXT, note: 'Dominant Performance pill text' },
   { fg: 'text-on-ink', bg: 'clay', min: TEXT, note: 'Blowout pill text' },
   { fg: 'text-heading', bg: 'marker', min: TEXT, note: 'Close Game pill text' },
+  // The jump bar's current count badge and the player page's position pill
+  // (#1883): heading ink on the soft green tint.
+  { fg: 'text-heading', bg: 'accent-tint', min: TEXT, note: 'jump-bar current count badge, position pill' },
   // --hold-texture (tokens/effects.css) weaves those same two stripes into the
   // "on hold" status tape — a rehab assignment, a postponed or delayed game, a
   // season record taped to the page. Its base stripe is --marker, asserted on
