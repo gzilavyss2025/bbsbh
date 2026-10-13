@@ -11,16 +11,17 @@ import { DASH, Fact } from '../../../parts.jsx'
 import { LogTable } from './LogTable.jsx'
 import { keyOf, loadPitchlog, scopeRows, totalsOf } from './pitchlogView.js'
 
-// The pitcher Game Log (#1851, board "GameLog"): his starts this season, newest first, a totals
-// row that follows the filter, and each start's pitch mix. Open surface (ADR-0034, ADR-0110):
-// the score and decision show, except for a start on today's date (pitchlogView.js holds it).
+// The pitcher Game Log (#1851, board "GameLog"): his games this season, starts and relief outings,
+// newest first, a totals row that follows the filter, and each game's pitch mix. Open surface
+// (ADR-0034, ADR-0110): the score and decision show, except for a game on today's date
+// (pitchlogView.js holds it).
 const SHOWN = 5
 const SCOPES = [
   ['all', 'All'],
   ['reg', 'Regular season'],
   ['post', 'Postseason'],
 ]
-const starts = (n) => `${n} ${n === 1 ? 'start' : 'starts'}`
+const games = (n) => `${n} ${n === 1 ? 'game' : 'games'}`
 const HI = { k: (v) => v >= 7, er: (v) => v >= 4 }
 // The family shape of each pitch (pitchTypes.js), on a 22-unit box.
 const SHAPE = {
@@ -60,6 +61,7 @@ const COLUMNS = [
         <TeamLogo teamId={r.oppId} name={r.opp} size={30} />
         <span className="sr-only">{r.opp}</span>
         {r.series && <span className="pitchlog__tag">{r.series}</span>}
+        {r.relief && <span className="pitchlog__tag pitchlog__tag--relief">Relief</span>}
       </Cluster>
     ),
   },
@@ -73,7 +75,7 @@ const COLUMNS = [
           <span className={`mono pitchlog__score pitchlog__score--${r.result}`}>
             {r.result} {r.runs}–{r.oppRuns}
           </span>
-          <span className={`mono pitchlog__dec pitchlog__dec--${r.dec}`}>{r.dec}</span>
+          {r.dec ? <span className={`mono pitchlog__dec pitchlog__dec--${r.dec}`}>{r.dec}</span> : <span className="mono">{DASH}</span>}
         </Cluster>
       ) : (
         <span className="mono">{DASH}</span>
@@ -122,12 +124,12 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
   const { data: view, loading, error } = useAsync(() => loadPitchlog(bio.id, season, asOf), [bio.id, season, asOf])
   const [scope, setScope] = useState('all')
   const [more, setMore] = useState(false)
-  const empty = Boolean(error) || (!loading && !view) // a null load (no start, no log) ends the loader
+  const empty = Boolean(error) || (!loading && !view) // a null load (no game, no log) ends the loader
   useEffect(() => {
     if (empty) onEmpty()
   }, [empty, onEmpty])
   useEffect(() => {
-    onCount(view ? starts(view.rows.length) : undefined)
+    onCount(view ? games(view.rows.length) : undefined)
   }, [view, onCount])
 
   if (empty) return null
@@ -142,7 +144,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
   const groups = scope === 'all' && post > 0
   const lines = shown.flatMap((r, i) =>
     groups && (i === 0 || r.post !== shown[i - 1].post)
-      ? [{ key: `div-${r.gamePk}`, divider: r.post ? 'Postseason' : 'Regular season', note: starts(r.post ? post : all.length - post) }, { ...r, key: r.gamePk }]
+      ? [{ key: `div-${r.gamePk}`, divider: r.post ? 'Postseason' : 'Regular season', note: games(r.post ? post : all.length - post) }, { ...r, key: r.gamePk }]
       : [{ ...r, key: r.gamePk }],
   )
   const codes = keyOf(shown)
@@ -152,7 +154,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
     <Stack className="pitchlog">
       <Cluster align="center" className="pitchlog__top">
         {post > 0 && (
-          <Cluster gap="tight" role="group" aria-label="Show starts">
+          <Cluster gap="tight" role="group" aria-label="Show games">
             {SCOPES.map(([id, label]) => (
               <Button key={id} size="control" pressed={id === scope} onClick={() => setScope(id)}>
                 {label} <span className="mono">{counts[id]}</span>
@@ -163,7 +165,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
         <span className="mono pitchlog__scope">{season} · newest first</span>
       </Cluster>
       <FactGrid look="strip" as="div" className="pitchlog__totals">
-        <Fact label="Starts" value={t.starts} mono />
+        <Fact label="Games" value={t.games} mono />
         <Fact label="W–L" value={`${t.w}–${t.l}`} mono />
         <Fact label="ERA" value={t.era} mono />
         <Fact label="IP" value={t.ip} mono />
@@ -173,7 +175,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
       <LogTable columns={COLUMNS} rows={lines} />
       {rows.length > SHOWN && (
         <Button size="control" onClick={() => setMore(!more)} aria-expanded={more}>
-          {more ? 'Show fewer' : `Show all ${starts(rows.length)}`}
+          {more ? 'Show fewer' : `Show all ${games(rows.length)}`}
         </Button>
       )}
       {codes.length > 0 && (
@@ -187,9 +189,9 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
         </Cluster>
       )}
       <p className="hint pitchlog__note">
-        Bar: the share of each pitch type in the tracked pitches of the start, in the order of the key. Green underlined K: 7 or more. Clay
-        underlined ER: 4 or more. Dec is his decision: W win, L loss, ND no decision.
-        {all.some((r) => !r.result) && ' A dash in Result: no final score on file. A start played today shows none until the next day.'}
+        Bar: the share of each pitch type in the tracked pitches of the game, in the order of the key. Green underlined K: 7 or more. Clay
+        underlined ER: 4 or more. Dec is his decision: W win, L loss, SV save, ND no decision in a start.
+        {all.some((r) => !r.result) && ' A dash in Result: no final score on file. A game played today shows none until the next day.'}
       </p>
     </Stack>
   )

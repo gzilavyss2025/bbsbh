@@ -3,8 +3,8 @@ import test, { mock } from 'node:test'
 import { fetchFinalScores } from '../src/api/boxlines/fetch.js'
 import { keyOf, loadPitchlog, pitchlogView, scopeRows, totalsOf } from '../src/screens/player/next/modules/pitchlog/pitchlogView.js'
 
-// The pitcher Game Log's rows (#1851): his starts from the gameLog split, newest first, with the
-// score and decision from fetchFinalScores (which holds today back) and the per-start pitch mix.
+// The pitcher Game Log's rows (#1851): every game of the gameLog split, newest first, with the
+// score and decision from fetchFinalScores (which holds today back) and the per-game pitch mix.
 
 const app = (date, pk, { gs = 1, type = 'R', w = 0, l = 0, ip = '6.0', er = 1, k = 5, bb = 1, opp = 112, ...rest } = {}) => ({
   date,
@@ -34,15 +34,22 @@ const GASSER = {
   },
 }
 
-test('a row is one start: relief outings stay out, newest first, numbered from his first start', () => {
+// Gary, 2026-10-13: every game is a row. Gasser's 2026-08-26 bulk relief outing at NYM is row 16 of 22.
+test('every game is a row: a relief outing is tagged, newest first, numbered from his first game', () => {
   const rows = pitchlogView([app('2026-05-01', 1), app('2026-05-06', 2, { gs: 0 }), app('2026-05-11', 3)]).rows
-  assert.deepEqual(rows.map((r) => [r.gamePk, r.n]), [[3, 2], [1, 1]])
+  assert.deepEqual(rows.map((r) => [r.gamePk, r.n, r.relief]), [[3, 3, false], [2, 2, true], [1, 1, false]])
 })
 
-test('no start (a reliever, or no game yet) is no view', () => {
-  assert.equal(pitchlogView([app('2026-05-06', 2, { gs: 0 })]), null)
+test('a reliever gets rows; no game is no view', () => {
+  assert.deepEqual(pitchlogView([app('2026-05-06', 2, { gs: 0 }), app('2026-05-07', 4, { gs: 0 })]).rows.map((r) => r.relief), [true, true])
   assert.equal(pitchlogView([]), null)
   assert.equal(pitchlogView(null), null)
+})
+
+test('a relief outing with no decision shows none: ND is a start word; a save is SV', () => {
+  const scores = new Map([[1, { runs: 5, oppRuns: 2 }], [2, { runs: 4, oppRuns: 3 }], [3, { runs: 1, oppRuns: 2 }]])
+  const rows = pitchlogView([app('2026-05-01', 1, { gs: 0 }), app('2026-05-06', 2, { gs: 0, saves: 1 }), app('2026-05-11', 3)], { scores }).rows
+  assert.deepEqual(rows.map((r) => [r.result, r.dec]), [['L', 'ND'], ['W', 'SV'], ['W', null]])
 })
 
 test('Gasser 5/23 vs LAD: L 3-11, his loss, 4.1 IP, 4 ER, 4 K, 89 pitches, 53 strikes, cutter 29', () => {
@@ -73,8 +80,8 @@ test('a start with no row in the per-start store has no mix bar', () => {
   assert.equal(pitchlogView([app('2026-05-01', 1)]).rows[0].mix, null)
 })
 
-// The one guard (ADR-0110): a start still in progress today shows no final score and no decision.
-test('a start in progress today: no score and no decision, though the split already says W', async () => {
+// The one guard (ADR-0110): a game still in progress today, start or relief, shows no final score and no decision.
+test('a game in progress today: no score and no decision, though the split already says W or SV', async () => {
   const asked = []
   const m = mock.method(globalThis, 'fetch', async (url) => {
     const pks = (String(url).match(/gamePks=([\d,]+)/)?.[1] ?? '').split(',').map(Number)
@@ -87,10 +94,11 @@ test('a start in progress today: no score and no decision, though the split alre
     return { ok: true, status: 200, json: async () => ({ dates: [{ games }] }) }
   })
   try {
-    const starts = [app('2026-10-08', 1, { w: 1 }), app('2026-10-13', 2, { w: 1 })]
-    const scores = await fetchFinalScores(starts, 'pitching', null, '2026-10-13')
+    const games = [app('2026-10-08', 1, { w: 1 }), app('2026-10-13', 2, { w: 1 }), app('2026-10-13', 3, { gs: 0, saves: 1 })]
+    const scores = await fetchFinalScores(games, 'pitching', null, '2026-10-13')
     assert.deepEqual(asked, [1])
-    const [today, before] = pitchlogView(starts, { scores }).rows
+    const [relief, today, before] = pitchlogView(games, { scores }).rows
+    assert.deepEqual([relief.relief, relief.result, relief.runs, relief.dec], [true, null, null, null])
     assert.deepEqual([today.result, today.runs, today.oppRuns, today.dec], [null, null, null, null])
     assert.deepEqual([before.result, before.runs, before.oppRuns, before.dec], ['W', 6, 2, 'W'])
   } finally {
@@ -98,12 +106,12 @@ test('a start in progress today: no score and no decision, though the split alre
   }
 })
 
-test('a cutoff keeps the starts before that day only', () => {
+test('a cutoff keeps the games before that day only', () => {
   const rows = pitchlogView([app('2026-05-01', 1), app('2026-05-11', 3)], { cutoff: '2026-05-11' }).rows
   assert.deepEqual(rows.map((r) => r.gamePk), [1])
 })
 
-test('the filter and the totals row: starts, W-L (the decisions shown), ERA, IP, K, BB', () => {
+test('the filter and the totals row: games, W-L (the decisions shown), ERA, IP, K, BB', () => {
   const { rows } = pitchlogView([
     app('2026-05-01', 1, { w: 1, ip: '6.0', er: 2, k: 7, bb: 1 }),
     app('2026-05-06', 2, { l: 1, ip: '4.1', er: 4, k: 4, bb: 4 }),
@@ -113,12 +121,12 @@ test('the filter and the totals row: starts, W-L (the decisions shown), ERA, IP,
   assert.deepEqual(scopeRows(rows, 'reg').map((r) => r.gamePk), [2, 1])
   assert.equal(scopeRows(rows, 'all').length, 3)
   assert.equal(rows[0].series, 'NLDS')
-  assert.deepEqual(totalsOf(rows), { starts: 3, w: 1, l: 1, era: '4.40', ip: '14.1', k: 14, bb: 6 })
+  assert.deepEqual(totalsOf(rows), { games: 3, w: 1, l: 1, era: '4.40', ip: '14.1', k: 14, bb: 6 })
   assert.equal(totalsOf([]).era, '—')
 })
 
-test('the loader: a log with no start, or a failed fetch, ends as no view', async () => {
-  const m = mock.method(globalThis, 'fetch', async () => ({ ok: true, status: 200, json: async () => ({ stats: [{ splits: [app('2026-05-06', 2, { gs: 0 })] }] }) }))
+test('the loader: a log with no game, or a failed fetch, ends as no view', async () => {
+  const m = mock.method(globalThis, 'fetch', async () => ({ ok: true, status: 200, json: async () => ({ stats: [{ splits: [] }] }) }))
   try {
     assert.equal(await loadPitchlog(1, 2026, null), null)
     m.mock.mockImplementation(async () => {

@@ -21,6 +21,7 @@
   font-weight: var(--w-bold);
   white-space: nowrap;
 }
+/* A series tag (NLDS) is ink; a relief tag is an ink outline, so the two read apart. */
 .pitchlog__tag {
   padding: var(--space-1) var(--space-1h);
   background: var(--surface-stamped-ink);
@@ -30,6 +31,12 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   line-height: var(--lh-solid);
+}
+.pitchlog__tag--relief {
+  padding: calc(var(--space-1) - var(--bw-hair)) calc(var(--space-1h) - var(--bw-hair));
+  border: var(--bw-hair) solid var(--border-stamped);
+  background: none;
+  color: var(--text-body);
 }
 
 /* The result: the club's score, then his decision in a box. A letter says each, so the

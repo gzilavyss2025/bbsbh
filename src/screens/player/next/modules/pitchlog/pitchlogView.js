@@ -7,18 +7,19 @@ import { DASH, eraOf, num } from '../../../../../api/person/shared.js'
 import { ipToOuts, outsToIp } from '../../../../../lib/math/innings.js'
 import { PITCH_TYPES } from '../../../../../lib/pitch/pitchTypes.js'
 
-// The pitcher Game Log's rows (#1851, ADR-0110): one row per start of the season, newest first.
+// The pitcher Game Log's rows (#1851, ADR-0110): one row per game of the season, start or relief
+// (Gary, 2026-10-13), newest first.
 // gameLogView (api/person/gameLog.js) gives the order, the date, the series tag, the score and the
 // decision; this file adds the stat line, the opponent's id for the logo and the pitch mix.
 // THE GUARD: fetchFinalScores holds back every game on today's baseball date, and gameLogView
-// gives no decision to a row with no score, so a start in progress shows neither.
+// gives no decision to a row with no score, so a game in progress shows neither.
 
 const isStart = (s) => num(s.stat?.gamesStarted) > 0
 // A pitch the table does not know goes last.
 const ORDER = PITCH_TYPES.map((t) => t.code)
 const rank = (code) => (ORDER.includes(code) ? ORDER.indexOf(code) : ORDER.length)
 
-// `{ code: n }` (one start in the per-start store) -> [{ code, n, pct }] in the fixed order, or null.
+// `{ code: n }` (one game in the per-start store, which holds relief outings too) -> [{ code, n, pct }] in the fixed order, or null.
 function mixOf(byCode) {
   const all = Object.entries(byCode ?? {}).filter(([, n]) => n > 0)
   const total = all.reduce((t, [, n]) => t + n, 0)
@@ -26,17 +27,17 @@ function mixOf(byCode) {
   return all.sort(([a], [b]) => rank(a) - rank(b)).map(([code, n]) => ({ code, n, pct: Math.round((100 * n) / total) }))
 }
 
-// gameLog splits (season, any game type) -> { rows } or null with no start. `cutoff` keeps the
+// gameLog splits (season, any game type) -> { rows } or null with no game. `cutoff` keeps the
 // days before it (the page's asOf); `scores` is fetchFinalScores' map; `mixes` maps gamePk to the
-// per-start store's `{ code: n }`.
+// per-game store's `{ code: n }`.
 export function pitchlogView(splits, { cutoff = null, scores = null, mixes = null } = {}) {
-  const starts = (splits ?? []).filter(isStart)
-  const view = gameLogView(starts, 'pitching', cutoff, Infinity, { scores })
+  const view = gameLogView(splits, 'pitching', cutoff, Infinity, { scores })
   if (!view) return null
-  const ordered = loggedSplits(starts, cutoff, Infinity)
+  const ordered = loggedSplits(splits, cutoff, Infinity)
   const rows = view.rows.map((r, i) => {
     const s = ordered[i]
     const st = s.stat
+    const relief = !isStart(s)
     return {
       gamePk: r.gamePk,
       n: ordered.length - i,
@@ -46,11 +47,13 @@ export function pitchlogView(splits, { cutoff = null, scores = null, mixes = nul
       opp: s.opponent?.name || r.opp,
       series: r.series,
       post: s.gameType !== 'R',
+      relief,
       result: r.runs == null ? null : r.runs > r.oppRuns ? 'W' : r.runs < r.oppRuns ? 'L' : 'T',
       runs: r.runs,
       oppRuns: r.oppRuns,
-      // gameLogView's decision is null with no score; with one, no W or L is a no-decision.
-      dec: r.runs == null ? null : r.result ?? 'ND',
+      // gameLogView's decision is null with no score; with one, a start with no W or L is a
+      // no-decision. ND is a start word: a relief outing with none shows none.
+      dec: r.runs == null ? null : r.result ?? (relief ? null : 'ND'),
       ip: st.inningsPitched ?? DASH,
       h: num(st.hits),
       r: num(st.runs),
@@ -78,7 +81,7 @@ export function totalsOf(rows) {
   const outs = rows.reduce((t, r) => t + ipToOuts(r.ip), 0)
   const era = eraOf(sum('er'), outs)
   return {
-    starts: rows.length,
+    games: rows.length,
     w: rows.filter((r) => r.dec === 'W').length,
     l: rows.filter((r) => r.dec === 'L').length,
     era: era == null ? DASH : era.toFixed(2),
@@ -88,15 +91,15 @@ export function totalsOf(rows) {
   }
 }
 
-// One season's starts with their scores and mixes, or null (no start, or the log did not load).
+// One season's games with their scores and mixes, or null (no game, or the log did not load).
 export async function loadPitchlog(personId, season, asOf) {
   const log = await fetchPersonStats(personId, { type: 'gameLog', group: 'pitching', season, gameType: MLB_LOG_GAME_TYPES })
-  const starts = log.filter((s) => isStart(s) && (!asOf || s.date < asOf))
-  if (!starts.length) return null
-  const pks = starts.map((s) => s.game?.gamePk)
+  const games = log.filter((s) => !asOf || s.date < asOf)
+  if (!games.length) return null
+  const pks = games.map((s) => s.game?.gamePk)
   const [scores, mixes] = await Promise.all([
-    fetchFinalScores(starts, 'pitching', asOf),
+    fetchFinalScores(games, 'pitching', asOf),
     Promise.all(pks.map((pk) => fetchPitchMixFor(personId, pk, { seasonYear: season }).catch(() => null))),
   ])
-  return pitchlogView(starts, { cutoff: asOf, scores, mixes: new Map(pks.map((pk, i) => [pk, mixes[i]])) })
+  return pitchlogView(games, { cutoff: asOf, scores, mixes: new Map(pks.map((pk, i) => [pk, mixes[i]])) })
 }
