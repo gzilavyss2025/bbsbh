@@ -69,11 +69,13 @@ export const countStatements = (db) => ({
   ),
 })
 
-// One batter's game into both tables. Only the cells he reached get a row.
+// One batter's game into both tables. Only the cells with a count get a row. `reach` alone is
+// not the test: a PA that a caught stealing or a pickoff ends never ends as a PA, so its pitches
+// are in `fouls`/`swings` with no `reach`, and dropping that row lost them from the cell sums.
 export function foldBatterCounts(stmts, gamePk, season, scope, id, b) {
   stmts.batterGame.run(gamePk, id, season, scope, b.pitchesSeen, b.fouls, b.whiffs)
   for (let at = 0; at < CELLS; at++) {
-    if (b.cells.reach[at]) stmts.cells.run(id, season, scope, at, ...KEYS.map((k) => b.cells[k][at]))
+    if (KEYS.some((k) => b.cells[k][at])) stmts.cells.run(id, season, scope, at, ...KEYS.map((k) => b.cells[k][at]))
   }
 }
 

@@ -845,3 +845,28 @@ test('rebuildCommand refuses a bare flag or a non-year', async () => {
   const deps = { aggregate: aggregateGameFouls, getFeed: async () => countGame(), touched: new Set(), writeOut: async () => {} }
   for (const bad of [true, undefined, 'x', '1']) await assert.rejects(rebuildCommand(db, foulStatements(db), bad, deps), /needs a season/)
 })
+
+test('fouls in a PA that a caught stealing ends still reach the count cells, so the cells sum to his fouls', async () => {
+  // PA 1 ends in play at 0-0. PA 2 is cut off in the 2nd inning: C (0-0), F (0-1), F (0-2), then the runner is
+  // caught stealing for the third out. He never finishes it, so no plate appearance ends to credit `reach`.
+  // The 0-1 and 0-2 fouls are real; the cells dropped them (2026: 18 batters were short by 1 or 2).
+  const feed = feedWith([
+    play({ batter: 10, pitcher: 200, eventType: 'field_out', events: [pitchAt('X', 0, 0)] }),
+    play({
+      batter: 10, pitcher: 200, inning: 2, eventType: 'caught_stealing_2b', outs: 3,
+      events: [pitchAt('C', 0, 1), pitchAt('F', 0, 2), pitchAt('F', 0, 2)],
+    }),
+  ])
+  const agg = aggregateGameFouls(feed)
+  const b = agg.batters.get(10)
+  assert.equal(b.fouls, 2)
+  const db = await emptyDb()
+  foldGame(db, foulStatements(db), 1, '2026-09-01', 2026, agg)
+  const out = exportFouls(db, 2026).batters[10]
+  const sum = (a) => a.reduce((n, x) => n + x, 0)
+  assert.equal(out.fouls, 2)
+  assert.equal(sum(out.byCount.fouls), 2, 'cells agree with the total')
+  assert.equal(out.byCount.fouls[at(0, 1)], 1)
+  assert.equal(out.byCount.fouls[at(0, 2)], 1)
+  assert.equal(out.byCount.reach[at(0, 0)], 1, 'the cut-off PA is not a plate appearance')
+})
