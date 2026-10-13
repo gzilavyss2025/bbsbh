@@ -11,7 +11,7 @@ import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg } from '../../../../../lib/ballpark/hitProjection.js'
-import { COLORS, VIEWS, ballDetail, contactBalls, contactView, markKey, mixRows, pickBalls } from './contactView.js'
+import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, mixRows, pickBalls } from './contactView.js'
 
 // The batter Contact module (#1888): where each ball went, tapped for its exit velocity, launch
 // angle and xBA, and how his contact ends by ball type. An open surface (ADR-0034): one season of
@@ -43,7 +43,7 @@ const load = (id, season) =>
 
 export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const { data, error } = useAsync(() => load(bio.id, season), [bio.id, season])
-  const [view, setView] = useState('hr')
+  const [pickedView, setView] = useState(null) // null opens on the first view with balls
   const [color, setColor] = useState('result')
   const [type, setType] = useState(null)
   const [sel, setSel] = useState(null)
@@ -54,6 +54,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
     const balls = sprayView(data[0], bio.id)?.balls
     return balls && contactView(contactBalls(balls, dates, asOf))
   }, [data, bio.id, asOf])
+  const view = pickedView ?? (card ? firstView(card.counts) : 'hr')
   const mix = useMemo(() => card && mixRows(card.balls), [card])
   const shown = useMemo(() => (card ? pickBalls(card.balls, view, type) : []), [card, view, type])
   const marks = useMemo(() => shown.map((b) => ({ b, p: hitCoordToSvg(b.x, b.y) })).filter((m) => m.p), [shown])
