@@ -13,6 +13,14 @@ const PITCHES_SHOWN = 5
 export const initials = (name) =>
   name.replace(/\./g, '').split(' ').filter((p) => p && !/^(Jr|Sr)$/.test(p)).map((p) => p[0]).slice(0, 2).join('')
 
+// The arsenal pools to try for a pitcher, in order (true is MLB). The page's level is
+// currentActivitySportId (read from the link scope): a free agent has no club and a rehabber is
+// pinned to MLB, so both read MLB. A debuted player at a minor-league club may still have MLB games
+// this season, which the live card ranks him on (context.js resolveCurrentSeasonStat), so MLB
+// comes first and being in that pool stands in for those games. A prospect is in the minor pool only.
+export const poolLevels = (sportId, debuted) =>
+  sportId == null || sportId === 1 ? [true] : debuted ? [true, false] : [false]
+
 // RHP / LHP, or a bare P when the pool has no hand for him.
 export const pitcherPos = (throws) => (throws === 'R' ? 'RHP' : throws === 'L' ? 'LHP' : 'P')
 

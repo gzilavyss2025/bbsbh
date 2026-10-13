@@ -1,7 +1,7 @@
 // The Similar players module's pure view (src/screens/player/next/modules/similar/similarView.js, #1926).
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { hitterModel, pitcherModel, pitcherPos, initials } from '../src/screens/player/next/modules/similar/similarView.js'
+import { hitterModel, pitcherModel, pitcherPos, initials, poolLevels } from '../src/screens/player/next/modules/similar/similarView.js'
 
 // Brice Turang's five dots, from savant-percentiles.json.
 const bat = {
@@ -85,4 +85,15 @@ test('the position line: hand for a pitcher, bare P when the hand is unknown; in
   assert.equal(pitcherPos('L'), 'LHP')
   assert.equal(pitcherPos(null), 'P')
   assert.equal(initials('Jazz Chisholm Jr.'), 'JC')
+})
+
+// Which pools to try, in order (api/player/context.js resolveCurrentSeasonStat is the live rule). A free
+// agent has no club and a rehabber is pinned to MLB: both are sportId 1. A player who has debuted and is
+// at a minor-league club may still have MLB games this season, so MLB comes first and he is ranked there
+// when he is in that pool. A player who never debuted can only be in the minor-league pool.
+test('pool order: MLB alone at MLB or with no level; MLB then AAA for a debuted minor leaguer; AAA alone for a prospect', () => {
+  assert.deepEqual(poolLevels(1, true), [true])
+  assert.deepEqual(poolLevels(null, false), [true])
+  assert.deepEqual(poolLevels(12, true), [true, false])
+  assert.deepEqual(poolLevels(11, false), [false])
 })
