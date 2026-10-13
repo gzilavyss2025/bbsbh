@@ -219,7 +219,7 @@ foul generator is the right place.
 
 ## Pitch arsenal (`ArsenalReveal`)
 
-Module issue: #1892.
+Module issue: #1892. Data issue: #1908.
 
 | Field | Source today | Status | Fix |
 | --- | --- | --- | --- |
@@ -304,18 +304,19 @@ Most board figures match. These do not:
 
 ## Summary of gaps
 
-Each gap has one data issue, a sub-issue of #1878 that blocks its module issue.
+Each gap has one data issue, a sub-issue of #1878 that blocks its module issue. Gap 1 also
+needs #1856 (the rank pool) and gap 10 uses the older #1881.
 
-1. **Hero tiles** (#1884): league figure and captions on the tiles; rank pool M (#1856).
-2. **Pitch movement** (#1884, #1892): spin, flight time, movement, release point and extension per pitch type in `gen-pitch-arsenal.mjs`; per-pitch whiff %, zone mark and xwOBA.
-3. **Season statistics** (#1885): "2 TM" subtotal, MiLB career line, gap rows before the debut, season-correct abbreviations.
-4. **Splits** (#1886): season picker, Career and All scopes, vs-team OBP / SLG / K%, more door columns, deltas and reads.
-5. **Plate approach** (#1887): called strikes, balls in play and speed in the hitter grid; whiff rule.
-6. **Contact** (#1888): spray store with launch angle, distance and per-game runs.
-7. **Form trend** (#1889): rolling series helper; 0-PA and doubleheader rule.
-8. **Batter game log** (#1890): per-game fouls and whiffs; score and series name; doubleheader order.
-9. **Pitcher game log** (#1851): per-start pitch mix.
-10. **Foul balls** (#1891): by-count counters in `gen-fouls.mjs` (#1881).
-11. **On the mound** (#1893): opponent on workload apps; pitches-per-start bug.
-12. **Path to the Majors** (#1894): games and clubs per level.
-13. **Firsts** (#1895): opponent id.
+1. **Hero tiles** (#1907, blocks #1884): league figure and captions on the tiles; the rank pool M stays with #1856.
+2. **Pitch movement** (#1908, blocks #1892): spin, flight time, movement, release point and extension per pitch type in `gen-pitch-arsenal.mjs`; per-pitch whiff %, zone mark and xwOBA. Pitch flight belongs to the Pitch arsenal module, not the hero (Gary, 2026-10-13).
+3. **Season statistics** (#1909, blocks #1885): "2 TM" subtotal, MiLB career line, gap rows before the debut, season-correct abbreviations.
+4. **Splits** (#1910, blocks #1886): season picker, Career and All scopes, vs-team OBP / SLG / K%, more door columns, deltas and reads.
+5. **Plate approach** (#1911, blocks #1887): called strikes, balls in play and speed in the hitter grid; whiff rule.
+6. **Contact** (#1912, blocks #1888): spray store with launch angle, distance and per-game runs.
+7. **Form trend** (#1913, blocks #1889): rolling series helper; 0-PA and doubleheader rule.
+8. **Batter game log** (#1914, blocks #1890): per-game fouls and whiffs; score and series name; doubleheader order.
+9. **Pitcher game log** (#1915, blocks #1851): per-start pitch mix; score.
+10. **Foul balls** (#1881, blocks #1891): by-count counters in `gen-fouls.mjs`.
+11. **On the mound** (#1916, blocks #1893): opponent on workload apps; pitches-per-start bug.
+12. **Path to the Majors** (#1917, blocks #1894): games and clubs per level.
+13. **Firsts** (#1918, blocks #1895): opponent id.
