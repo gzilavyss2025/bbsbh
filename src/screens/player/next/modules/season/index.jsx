@@ -49,7 +49,7 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
 
   const empty = Boolean(error) || (!loading && !scope)
   const post = postseason?.post ?? null
-  const view = scope && tilesFor({ scope, group: role, role: data.armRole, lines: { ...data.lines, post: postseason?.line ?? null }, war: data.war, season })
+  const view = scope && tilesFor({ scope, group: role, role: data.armRole, lines: { ...data.lines, post: postseason?.line ?? null }, war: data.war, season, retired: data.retired })
 
   useEffect(() => {
     if (empty) onEmpty()
@@ -79,7 +79,7 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
       {scope === 'post' && postseason === undefined ? (
         <p className="hint">Loading the postseason…</p>
       ) : view.tiles.length ? (
-        <div className="seasonmod__tiles" role="list">
+        <div className="seasonmod__tiles">
           {view.tiles.map((t) => (
             <StatTile key={t.k} label={t.k} value={t.v} tone={t.tone} className="seasonmod__tile" />
           ))}
@@ -190,7 +190,7 @@ function Compare({ row, columns, group, onClose }) {
             <span>{row.year} vs league</span>
             <button ref={close} type="button" className="seasonmod__x" aria-label="Close" onClick={onClose}>×</button>
           </div>
-          {view ? (
+          {view && !view.empty ? (
             <>
               <p className="seasonmod__popline"><span>{view.mineLabel}</span><b>{view.mine}</b></p>
               <p className="seasonmod__popline"><span>{view.lgLabel}</span><b>{view.lg}</b></p>
@@ -201,7 +201,7 @@ function Compare({ row, columns, group, onClose }) {
               <p className="seasonmod__popnote">{view.note}</p>
             </>
           ) : (
-            <p className="seasonmod__popnote">{loading ? 'Loading the league figure…' : `No league figure for ${row.year}.`}</p>
+            <p className="seasonmod__popnote">{view?.empty ?? (loading ? 'Loading the league figure…' : `No league figure for ${row.year}.`)}</p>
           )}
         </div>
       </div>

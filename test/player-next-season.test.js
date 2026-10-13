@@ -3,7 +3,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { careerRegisterView } from '../src/api/person/careerRegister.js'
-import { compareView, scopesOf, tableFor, tilesFor, withStars, withTeams } from '../src/screens/player/next/modules/season/seasonView.js'
+import { compareView, linesOf, scopesOf, starYears, tableFor, tilesFor, withStars, withTeams } from '../src/screens/player/next/modules/season/seasonView.js'
 
 const bat = (g, ab, h, hr = 0, rbi = 0) => ({
   gamesPlayed: g, atBats: ab, hits: h, homeRuns: hr, rbi, totalBases: h + hr * 3, strikeOuts: 20, baseOnBalls: 5,
@@ -143,7 +143,37 @@ test('a scope with no line this season has no tiles and says so with the page se
   assert.deepEqual(minors.tiles, [])
   assert.equal(minors.empty, 'No 2024 minor-league line yet.')
   assert.equal(tilesFor({ scope: 'post', group: 'hitting', role: null, lines, war: null, season: 2024 }).empty, 'No 2024 postseason yet.')
-  assert.equal(tilesFor({ scope: 'mlb', group: 'hitting', role: null, lines: {}, war: null, season: 2024 }).empty, 'No 2024 line in this scope yet.')
+})
+
+test('"yet" is dropped when no line can follow: a retired player, or one with no stint this season at all', () => {
+  const at = (scope, over) => tilesFor({ scope, group: 'hitting', role: null, lines: { mlb: bat(100, 300, 90), milb: null, post: null }, war: null, season: 2026, ...over })
+  assert.equal(at('milb', { retired: true }).empty, 'No 2026 minor-league line.')
+  assert.equal(at('post', { retired: true }).empty, 'No 2026 postseason.')
+  assert.equal(at('mlb', { lines: {}, retired: true }).empty, 'No 2026 line in this scope.')
+  assert.equal(at('mlb', { lines: {} }).empty, 'No 2026 line in this scope.')
+  assert.equal(at('mlb', { lines: { mlb: bat(0, 0, 0, 0, 0), milb: null } }).empty, 'No 2026 line in this scope.')
+})
+
+test('the level rule: an MLB tile level takes the MLB line and the minor-league rows; any other level takes its window as the minors', () => {
+  const mlb = bat(100, 300, 90)
+  const window = bat(20, 70, 21)
+  const rows = bat(10, 30, 9)
+  assert.deepEqual(linesOf({ tileSportId: 1, levelOnlyStat: mlb, tileStat: window, milbThisSeason: rows }), { mlb, milb: rows })
+  // An MLB tile level with no level-only line falls back to the tile line (a rehab stint).
+  assert.equal(linesOf({ tileSportId: 1, levelOnlyStat: null, tileStat: window, milbThisSeason: rows }).mlb, window)
+  assert.deepEqual(linesOf({ tileSportId: 11, levelOnlyStat: window, tileStat: window, milbThisSeason: rows }), { mlb: null, milb: window })
+})
+
+test('All-Star years: only the All-Star awards, and none dated after the cutoff', () => {
+  const awards = [
+    { id: 'ALAS', season: '2023', date: '2023-07-11' },
+    { id: 'NLAS', season: '2024', date: '2024-07-16' },
+    { id: 'ALMVP', season: '2022', date: '2022-11-10' },
+    { id: 'NLAS', season: '2025', date: '2025-07-15' },
+  ]
+  assert.deepEqual([...starYears(awards, null)].sort(), [2023, 2024, 2025])
+  assert.deepEqual([...starYears(awards, '2024-07-15')], [2023])
+  assert.deepEqual([...starYears([], null)], [])
 })
 
 test('pitcher tiles: W–L leads, a closer leads with SV; ERA is the ink tile', () => {
@@ -169,7 +199,7 @@ test('WAR vs league: a hitter above the league average is better; the note says 
   const now = compareView({ row: reg.rows.find((r) => r.year === '2026'), columns: reg.columns, group: 'hitting', league: 0.33, last: 2025 })
   assert.equal(now.diff, '−.030 worse')
   assert.match(now.note, /League figure to date/)
-  assert.equal(compareView({ row, columns: reg.columns, group: 'hitting', league: null, last: 2025 }), null)
+  assert.equal(compareView({ row, columns: reg.columns, group: 'hitting', league: null, last: 2025 }).empty, 'No league figure for 2024.')
 })
 
 test('WAR vs league: no sign on a zero gap, and no "to date" note when the last complete season is unknown', () => {
@@ -178,6 +208,12 @@ test('WAR vs league: no sign on a zero gap, and no "to date" note when the last 
   const view = compareView({ row, columns: reg.columns, group: 'hitting', league: 0.26, last: null })
   assert.equal(view.diff, '.000 even')
   assert.doesNotMatch(view.note, /to date/)
+})
+
+test('WAR vs league: a season with no ERA of its own says that, not that the league has no figure', () => {
+  const columns = ['G', 'GS', 'W–L', 'ERA', 'IP', 'K', 'BB', 'WHIP', 'WAR']
+  const row = { year: '2025', cells: ['3', '0', '0–0', '-.--', '0.0', '0', '2', '-.--', '0.0'] }
+  assert.equal(compareView({ row, columns, group: 'pitching', league: 4.1, last: 2025 }).empty, 'No ERA to compare for 2025.')
 })
 
 test('WAR vs league for a pitcher: a lower ERA is better', () => {

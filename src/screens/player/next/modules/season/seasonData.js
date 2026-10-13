@@ -10,7 +10,7 @@ import { fetchWarData, fetchWarHistory, warByTeamFor, warByYearFor } from '../..
 import { aggregateSplits, careerRegisterView, milbCareerStat, pitcherRole } from '../../../../../api/person.js'
 import { currentSeasonFor, playerContext, yearByYearFor } from '../../../../../api/player/context.js'
 import { fetchPostseasonSeason, loadPostseasonRegister } from '../../../../../api/player/postseasonRegister.js'
-import { withStars, withTeams } from './seasonView.js'
+import { linesOf, starYears, withStars, withTeams } from './seasonView.js'
 
 // Null when the player has no season row anywhere (the module then hides its card).
 export async function loadSeason({ bio, role: group, asOf }) {
@@ -63,11 +63,7 @@ export async function loadSeason({ bio, role: group, asOf }) {
   if (!first) return null
 
   const abbrevs = await fetchTeamAbbrevs(first.rows.flatMap((r) => r.teamIds))
-  const stars = new Set(
-    awards.filter((a) => ['ALAS', 'NLAS'].includes(a.id) && (!endDate || a.date <= endDate)).map((a) => Number(a.season)),
-  )
-  // The tiles' lines follow the live loader's level rule: MLB when the tile level is MLB (an
-  // up-and-down big leaguer on a rehab stint included), else the minor-league window.
+  const stars = starYears(awards, endDate)
   const milbThisSeason = aggregateSplits(yby.milbYbySplits.filter((s) => Number(s.season) === season), group)
   return {
     // The register, with the minor-league career splits once they are read.
@@ -75,10 +71,8 @@ export async function loadSeason({ bio, role: group, asOf }) {
       withStars(withTeams(shape(milbCareerStat(milbCareerSplits, group)), abbrevs), stars),
     hasMilb: yby.milbYbySplits.length > 0,
     hasDebuted,
-    lines: {
-      mlb: tileSportId === 1 ? levelOnlyStat ?? tileStat : null,
-      milb: tileSportId === 1 ? milbThisSeason : tileStat,
-    },
+    lines: linesOf({ tileSportId, levelOnlyStat, tileStat, milbThisSeason }),
+    retired: rosterStatus?.state === 'retired',
     war: warByYear[season] ?? null,
     armRole,
     // Read on the tap of the scope that needs them.

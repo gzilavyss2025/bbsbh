@@ -75,22 +75,26 @@ export function tableFor(register, post, scope) {
   }
 }
 
+// The line a scope reads when it has no current-season figure. "yet" says one may still come, so it
+// stays only for a player who is active and has a stint this season.
 const EMPTY = {
-  milb: (season) => `No ${season} minor-league line yet.`,
-  post: (season) => `No ${season} postseason yet.`,
+  milb: (season, yet) => `No ${season} minor-league line${yet}.`,
+  post: (season, yet) => `No ${season} postseason${yet}.`,
 }
+const played = (stat) => Number(stat?.gamesPlayed) > 0
 
 // The five tiles for a scope, from that scope's current-season line. `lines` holds the raw stat
 // lines ({ mlb, milb, post }); All is the MLB and minor-league lines summed. WAR is an MLB figure.
 // ERA is the ink tile for an arm and AVG for a bat (the board).
-export function tilesFor({ scope, group, role, lines, war, season }) {
+export function tilesFor({ scope, group, role, lines, war, season, retired = false }) {
   const pitching = group === 'pitching'
   const stat =
     scope === 'all'
       ? aggregateSplits([lines.mlb, lines.milb].filter(Boolean).map((s) => ({ stat: s })), group, { dedupe: false })
       : lines[scope]
-  if (!stat || !(Number(stat.gamesPlayed) > 0)) {
-    return { tiles: [], badge: '', empty: (EMPTY[scope] ?? ((y) => `No ${y} line in this scope yet.`))(season) }
+  if (!played(stat)) {
+    const yet = retired || !(played(lines.mlb) || played(lines.milb)) ? '' : ' yet'
+    return { tiles: [], badge: '', empty: (EMPTY[scope] ?? ((y, t) => `No ${y} line in this scope${t}.`))(season, yet) }
   }
   const mlbWar = scope === 'mlb' || scope === 'all' ? war : null
   const made = pitching ? pitcherTiles(stat, role, mlbWar) : hitterTiles(stat, mlbWar)
@@ -109,18 +113,20 @@ export function tilesFor({ scope, group, role, lines, war, season }) {
 }
 
 // The popover behind a season's WAR: that year's AVG (bat) or ERA (arm) against the league's.
-// Null when the row or the league has no figure. `last` is the last complete season: a later
-// year's league figure is to date.
+// `empty` says which figure is missing: the season's own rate, or the league's. `last` is the last
+// complete season: a later year's league figure is to date.
 export function compareView({ row, columns, group, league, last }) {
   const pitching = group === 'pitching'
   const key = pitching ? 'ERA' : 'AVG'
   const mine = row.cells[columns.indexOf(key)]
   const own = parseFloat(mine)
-  if (!Number.isFinite(own) || league == null) return null
+  const title = `${row.year} vs league`
+  if (!Number.isFinite(own)) return { title, empty: `No ${key} to compare for ${row.year}.` }
+  if (league == null) return { title, empty: `No league figure for ${row.year}.` }
   const diff = Number((own - league).toFixed(pitching ? 2 : 3))
   const good = pitching ? diff < 0 : diff > 0
   return {
-    title: `${row.year} vs league`,
+    title,
     mineLabel: `Player ${key}`,
     mine,
     lgLabel: `League ${key}`,
@@ -133,4 +139,20 @@ export function compareView({ row, columns, group, league, last }) {
       pitching && 'Lower ERA is better.',
     ].filter(Boolean).join(' '),
   }
+}
+
+// The All-Star years among a player's awards, none dated after the page's cutoff day.
+export function starYears(awards, endDate) {
+  return new Set(
+    awards.filter((a) => ['ALAS', 'NLAS'].includes(a.id) && (!endDate || a.date <= endDate)).map((a) => Number(a.season)),
+  )
+}
+
+// The current-season lines the tiles read, by the live loader's level rule: an MLB tile level (an
+// up-and-down big leaguer on a rehab stint included) gives the MLB line and the minor-league rows
+// for the season; any other level gives its window, which already spans the minors.
+export function linesOf({ tileSportId, levelOnlyStat, tileStat, milbThisSeason }) {
+  return tileSportId === 1
+    ? { mlb: levelOnlyStat ?? tileStat, milb: milbThisSeason }
+    : { mlb: null, milb: tileStat }
 }
