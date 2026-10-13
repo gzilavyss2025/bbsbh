@@ -178,3 +178,17 @@ test('a pitch-arsenal-starts bucket sits where its reader will ask for it and st
     }
   }
 })
+
+// The per-game fouls (#1914, fouls/{season}/NN.games.json): a sibling of each fouls bucket,
+// written by the 2026 re-read (`gen-fouls.mjs --rebuild-counts=2026`). Until those files exist
+// the test checks nothing. Estimate, not a measurement: PR #1972 puts the busiest bucket's
+// per-game rows near 24 KB; 40 KB leaves the postseason room. Re-measure after the re-read and
+// set the ceiling from the largest file.
+test('a per-game fouls file stays small enough to be worth fetching alone', () => {
+  for (const d of dirs('fouls')) {
+    for (const f of readdirSync(d).filter((n) => /^\d\d\.games\.json$/.test(n))) {
+      const size = statSync(new URL(f, d)).size
+      assert.ok(size < 40 * 1024, `fouls: ${f} is ${Math.round(size / 1024)} KB`)
+    }
+  }
+})
