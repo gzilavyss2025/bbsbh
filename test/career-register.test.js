@@ -10,7 +10,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { resolveCurrentSeasonStat } from '../src/api/player/context.js'
-import { careerRegisterView, careerTimelineView, milbCareerStat } from '../src/api/person.js'
+import { careerRegisterView, careerTimelineView, levelProgressionView, milbCareerStat } from '../src/api/person.js'
 import { SPORT_IDS } from '../src/lib/teams.js'
 
 // A pitching stint's raw stat line, shaped like a statsapi split's `.stat`.
@@ -544,4 +544,44 @@ test('milbCareerStat: sums every level, keeping a two-club level\'s team-less ro
   assert.equal(line.gamesPlayed, 232)
   assert.equal(line.atBats, 891)
   assert.equal(line.avg, '.264')
+})
+
+// Path to the Majors: games and clubs per level (#1917).
+const hit = (season, sportId, id, name, gamesPlayed, extra = {}) => ({
+  season: String(season), sport: { id: sportId }, team: id ? { id, name } : undefined,
+  stat: { gamesPlayed, atBats: gamesPlayed * 3 }, ...extra,
+})
+
+test('levelProgressionView: a two-club level lists each club once with its games, and the team-less roll-up is not counted', () => {
+  // Turang 2018 Rookie: AZL Brewers 13 + Helena 29, plus the numTeams roll-up row.
+  const splits = [
+    hit(2018, SPORT_IDS.ROK, 1, 'AZL Brewers', 13),
+    hit(2018, SPORT_IDS.ROK, 2, 'Helena Brewers', 29),
+    hit(2018, SPORT_IDS.ROK, null, '', 42, { numTeams: 2 }),
+  ]
+  const view = levelProgressionView(splits, 'hitting', null, [hit(2021, SPORT_IDS.MLB, 3, 'Brewers', 10)])
+  const rookie = view.levels.find((l) => l.sportId === SPORT_IDS.ROK)
+  assert.equal(rookie.games, 42)
+  assert.deepEqual(rookie.teams, [
+    { id: 1, name: 'AZL Brewers', games: 13 },
+    { id: 2, name: 'Helena Brewers', games: 29 },
+  ])
+})
+
+test('levelProgressionView: a club seen in two seasons sums its games and keeps first-played order; totals cover the minors and MLB', () => {
+  const splits = [
+    hit(2019, SPORT_IDS.AA, 5, 'Biloxi', 100),
+    hit(2019, SPORT_IDS.AAA, 6, 'Colorado Springs', 20),
+    hit(2021, SPORT_IDS.AA, 5, 'Biloxi', 50),
+  ]
+  const view = levelProgressionView(splits, 'hitting', null, [hit(2022, SPORT_IDS.MLB, 3, 'Brewers', 7)])
+  assert.equal(view.levels.find((l) => l.sportId === SPORT_IDS.AA).games, 150)
+  assert.deepEqual(view.levels.find((l) => l.sportId === SPORT_IDS.AA).teams, [{ id: 5, name: 'Biloxi', games: 150 }])
+  assert.equal(view.minorsGames, 170)
+  assert.equal(view.mlbGames, 7)
+})
+
+test('levelProgressionView: with no MLB splits passed the MLB total is 0', () => {
+  const view = levelProgressionView([hit(2019, SPORT_IDS.AA, 5, 'Biloxi', 10)], 'hitting', null)
+  assert.equal(view.mlbGames, 0)
 })

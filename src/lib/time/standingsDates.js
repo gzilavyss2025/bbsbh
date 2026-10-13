@@ -22,13 +22,14 @@ const FIRST_SEASON_MONTH = 4
 // "entering today" reliably excludes tonight's whole slate (even a late
 // West-coast game the user may still be scoring) rather than the viewer's own
 // local/UTC midnight folding one back in. en-CA formats as YYYY-MM-DD.
-export function baseballToday() {
+// `now` reads any other instant as a baseball day (a suspended game's resumeDate).
+export function baseballToday(now = new Date()) {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/Los_Angeles',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  }).format(new Date())
+  }).format(now)
 }
 
 // String date math on YYYY-MM-DD (UTC-anchored so it never drifts a day).

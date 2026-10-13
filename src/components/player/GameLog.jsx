@@ -61,6 +61,12 @@ export function GameLog({ gameLog, gameLogAlt, altLevel, note, limit }) {
                   {r.series && <span className="gamelog__level" title="Postseason">{r.series}</span>}
                   {r.qs && <span className="gamelog__qs" title="Quality start">QS</span>}
                 </span>
+                {/* The final score, his club's runs first, after the result (a
+                    pitcher's own decision); gameLogView joins it only for a game
+                    before the page's cutoff. */}
+                {r.runs != null && (
+                  <span className="gamelog__score">{[r.result, `${r.runs}-${r.oppRuns}`].filter(Boolean).join(' ')}</span>
+                )}
               </div>
               <div className="gamelog__line">{r.line}</div>
             </li>
