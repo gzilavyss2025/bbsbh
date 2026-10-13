@@ -11,6 +11,7 @@
 
 import {
   fetchAllStarRosterIds,
+  fetchMilbCareer,
   fetchMilbGameLog,
   fetchPersonStats,
   fetchTeamAbbrevs,
@@ -125,7 +126,10 @@ export async function loadPlayerStats(id, asOf) {
       const otherGroupYears = otherYby.length
         ? new Set(otherYby.flatMap((y) => [...y.mlbYbySplits, ...y.milbYbySplits]).map((s) => Number(s.season)))
         : null
-      const orgOf = await resolveCareerOrgs([...yby.mlbYbySplits, ...yby.milbYbySplits])
+      const [milbCareerSplits, orgOf] = await Promise.all([
+        yby.milbYbySplits.length ? fetchMilbCareer(id, group) : [],
+        resolveCareerOrgs([...yby.mlbYbySplits, ...yby.milbYbySplits]),
+      ])
 
       const block = buildBlock({
         group,
@@ -138,6 +142,7 @@ export async function loadPlayerStats(id, asOf) {
         arsenalSplits: [],
         mlbYbySplits: yby.mlbYbySplits,
         milbYbySplits: yby.milbYbySplits,
+        milbCareerSplits,
         cutoff,
         currentSeason: season,
         currentSportId: tileSportId,

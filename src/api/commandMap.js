@@ -137,6 +137,23 @@ export function commandTypes(entry, { level = 'mlb', stand = null } = {}) {
   return rows.sort((a, b) => b.pitches - a.pitches)
 }
 
+// One row per pitch type for the per-pitch numbers (#1908): pitches, whiff % and
+// the zone mark, the pitch-weighted centroid of its cells. `mark` is in the
+// grid's own stored frame ({ col, row }, row 0 on top, un-mirrored; see
+// zoneGeometry.js), so a card maps it through viewCol like any other cell.
+export function commandPitchMarks(entry, { level = 'mlb', stand = null } = {}) {
+  return commandTypes(entry, { level, stand }).map(({ code }) => {
+    const { cells, pitches, whiffPct } = commandView(entry, { level, code, stand })
+    let col = 0
+    let row = 0
+    cells.forEach((n, i) => {
+      col += n * (i % GRID)
+      row += n * Math.floor(i / GRID)
+    })
+    return { code, pitches, whiffPct, mark: { col: col / pitches, row: row / pitches } }
+  })
+}
+
 // How many pitches he threw to each hand, for the split chips' own counts.
 export function commandHandCounts(entry, level = 'mlb') {
   const out = { L: 0, R: 0 }
