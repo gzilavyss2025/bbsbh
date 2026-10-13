@@ -894,12 +894,21 @@ test('rebuildCounts also rebuilds the season TOTALS, so a total folded under an 
   assert.equal(exportFouls(db, 2027).batters[10].fouls, 1, 'another season is not touched')
 })
 
-test('a failed re-read leaves the season totals as they were', async () => {
+test('a failed re-read puts the stale season totals back: batter, best PA and pitcher rows', async () => {
   const db = await emptyDb()
   foldCounts(db, 1, '2026-09-01', 2026)
   foldCounts(db, 2, '2026-09-02', 2026)
-  const before = exportFouls(db, 2026).batters[10].fouls
-  await rebuildCounts(db, foulStatements(db), {
+  // Stale values the re-read would change: a successful game 1 would refold them to 1, 1 and 1.
+  db.exec(`UPDATE foul_batter_totals SET fouls = 99 WHERE season = 2026;
+           UPDATE foul_pitcher_totals SET fouls = 98 WHERE season = 2026;
+           UPDATE foul_batter_pa_high SET fouls = 97 WHERE season = 2026`)
+  const read = () => ({
+    batter: db.prepare('SELECT fouls FROM foul_batter_totals WHERE season = 2026 AND person_id = 10').get().fouls,
+    pitcher: db.prepare('SELECT fouls FROM foul_pitcher_totals WHERE season = 2026 AND person_id = 200').get().fouls,
+    high: db.prepare('SELECT fouls FROM foul_batter_pa_high WHERE season = 2026 AND person_id = 10').get().fouls,
+  })
+  assert.deepEqual(read(), { batter: 99, pitcher: 98, high: 97 })
+  const { failed } = await rebuildCounts(db, foulStatements(db), {
     season: 2026,
     aggregate: aggregateGameFouls,
     getFeed: async (pk) => {
@@ -907,5 +916,6 @@ test('a failed re-read leaves the season totals as they were', async () => {
       return countGame()
     },
   })
-  assert.equal(exportFouls(db, 2026).batters[10].fouls, before)
+  assert.deepEqual(failed.map((g) => g.game_pk), [2])
+  assert.deepEqual(read(), { batter: 99, pitcher: 98, high: 97 })
 })
