@@ -19,6 +19,7 @@ import {
   LensTurnDemo,
   LineupDemo,
   RiffleDemo,
+  StampInDemo,
   StrikeDemo,
   WriteOnDemo,
 } from './animlab/motionDemos.jsx'
@@ -462,6 +463,27 @@ export function AnimationLab() {
             </div>
           </div>
         ))}
+      </Entry>
+
+      <Entry
+        title="Stamped card — the stamp-in"
+        note={
+          <>
+            The player page&rsquo;s stamped card and stat tile (#1882, styles/motion/stamp-in.css). It
+            appears flat in the place of its own shadow, then comes up 4px as the shadow prints, in
+            360ms. Off under reduced motion.
+          </>
+        }
+        live={<StampInDemo />}
+      >
+        <span className="animlab__stagelabel">The stamp-in, 0 → 360ms</span>
+        <div className="animlab__frozen">
+          {[0, 60, 120, 240, 360].map((ms) => (
+            <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
+              <StampInDemo />
+            </Frame>
+          ))}
+        </div>
       </Entry>
     </div>
   )

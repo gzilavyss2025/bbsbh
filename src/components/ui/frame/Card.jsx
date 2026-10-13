@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { cardAccentStyle, cardBodyClassName, cardClassName, cardHead, isInteractive } from '../../../lib/design/cardClass.js'
 
 // THE CARD — the one box of paper a section sits on (#1113). Drawn once, in
@@ -7,6 +8,15 @@ import { cardAccentStyle, cardBodyClassName, cardClassName, cardHead, isInteract
 //
 //   frame   'sheet' (the default): the md radius with the card shadow.
 //           'ledger': the sm radius with no shadow (#1113 Q1).
+//           'stamped': square, a 2px ink edge and a hard ink offset shadow,
+//           the player page's card (#1882). Only it takes the four below.
+//   label   stamped only: the name on the ink tab across the top-left edge.
+//           It is the card's heading, and names the card for a screen reader.
+//   labelAs the tab's heading element: 'h2' (the default), 'h3' or 'h4'.
+//   count   stamped only: the tag across the top-right edge ("6 firsts").
+//   tone    stamped only: 'plain' (the default), 'tint' or 'ink'.
+//   stampIn stamped only: the card drops into its shadow as it appears
+//           (motion/stamp-in.css). The caller decides when that is right.
 //   head    a SectionHead, or nothing. It renders first, so the card clips
 //           its band to the card's corners. A link or button card takes none.
 //           Its padded body is a <span>, since a link or a button holds
@@ -33,12 +43,21 @@ export function Card({
   as: Tag = 'section',
   className = '',
   accent,
+  label,
+  labelAs: Label = 'h2',
+  count,
+  tone,
+  stampIn = false,
   style,
   children,
   ...rest
 }) {
-  const cls = cardClassName({ frame, as: Tag, accent, className })
+  const labelId = useId()
+  const named = label != null && label !== false
+  const cls = cardClassName({ frame, as: Tag, accent, tone, named, stampIn, className })
   cardHead(Tag, head)
+  if (named && head != null && head !== false) throw new Error('Card: a name tab and a head are two titles; pass one')
+  if (count != null && frame !== 'stamped') throw new Error('Card: a count tag is for frame="stamped"')
   const bodyClass = cardBodyClassName(body)
   const accentStyle = cardAccentStyle(accent)
   const BodyTag = isInteractive(Tag) ? 'span' : 'div'
@@ -46,9 +65,12 @@ export function Card({
     <Tag
       className={cls}
       style={accentStyle ? { ...accentStyle, ...style } : style}
+      {...(named ? { 'aria-labelledby': labelId } : null)}
       {...rest}
       {...(Tag === 'button' ? { type: rest.type ?? 'button' } : null)}
     >
+      {named && <Label id={labelId} className="card__name">{label}</Label>}
+      {count != null && <span className="card__count">{count}</span>}
       {head}
       {bodyClass ? <BodyTag className={bodyClass}>{children}</BodyTag> : children}
     </Tag>

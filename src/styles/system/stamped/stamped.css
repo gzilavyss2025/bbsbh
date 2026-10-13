@@ -1,0 +1,124 @@
+/* ---------------------------------------------------------------------------
+   THE STAMPED PARTS (#1882; docs/player-redesign.md, section 3). The player
+   page's shared parts, copied from the design canvas's finished boards.
+
+   The frame itself is a Card: system/card.css draws .card--stamped (the 2px
+   ink edge and the hard offset shadow), and its tones. This file holds what
+   sits on that frame:
+
+     .card__name   the ink name tab on the top-left edge. It is the card's
+                   heading (Card.jsx renders it as an <h2> by default).
+     .card__count  the count tag on the top-right edge. It is a label, never a
+                   control (ADR-0084, clause 5).
+     .stattile     a stat tile's inside: one label, one big number, one
+                   caption (StatTile.jsx, a stamped Card).
+     .factgrid--strip  the fact strip under the hero: three columns on a
+                   phone, six from the wide step (FactGrid look="strip").
+
+   The space AROUND each part is the parent's: a name tab hangs
+   --space-3h above its card, so the parent leaves room for it.
+   --------------------------------------------------------------------------- */
+
+.card__name {
+  position: absolute;
+  top: calc(-1 * var(--space-3h));
+  left: var(--space-3);
+  margin: 0;
+  padding: var(--space-1) var(--space-2h);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+
+.card__count {
+  position: absolute;
+  top: calc(-1 * var(--space-3));
+  right: var(--space-3);
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-canvas);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+/* THE STAT TILE. The fill is the Card's tone; this is only the inside. */
+.stattile {
+  padding: var(--space-3);
+}
+.stattile__label {
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.stattile__value {
+  margin: var(--space-1) 0 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-score-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+}
+.stattile__caption {
+  margin: var(--space-1) 0 0;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+/* On the tint, the caption takes the soft ink (graphite is 4.52:1 there, too
+   near the floor). On ink, the label and the caption take the dim paper. */
+.card--tint .stattile__caption {
+  color: var(--text-muted);
+}
+.card--ink .stattile__label,
+.card--ink .stattile__caption {
+  color: var(--text-on-ink-dim);
+}
+.card--ink .stattile__value {
+  color: var(--text-on-ink);
+}
+
+/* THE FACT STRIP. The gap-rule grid of .factgrid__grid, on the hairline: the
+   strip's ground shows through the 1px gaps as the rules between facts. An
+   ink rule on top joins it to the hero above it. It sits flush inside a
+   stamped card, so it owns no frame and no margin. A fixed count of columns,
+   so it is its own rule and not a Grid (ADR-0108). */
+.factgrid.factgrid--strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--bw-hair);
+  margin: 0;
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--border-hairline);
+}
+.factgrid--strip .fact {
+  padding: var(--space-2) var(--space-3);
+}
+
+@media (min-width: 740px) {
+  .stattile {
+    padding: var(--space-3h);
+  }
+  .stattile__value {
+    font-size: var(--fs-hero-xl);
+  }
+  .factgrid.factgrid--strip {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .factgrid--strip .fact {
+    padding: var(--space-2h) var(--space-3h);
+  }
+}

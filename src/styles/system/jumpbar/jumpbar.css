@@ -1,0 +1,87 @@
+/* ==== THE JUMP BAR (HubTabBar variant="anchor", #1883) ==== */
+/* The same control as .teamtabs on a one-scroll page: each item scrolls to a
+   section, and the section in view marks its item current. From the canvas
+   boards B-phone and B-wide (docs/player-redesign.md, section 3). Square
+   items, 44px tall, each with a count badge. The current item is ink, and its
+   badge is --accent-tint. The app's own colours on every page (ADR-0030).
+
+   Under 740px: one row with a rule above and below, scrolling sideways. The
+   row is a Cluster (it wraps); here it does not, so the bar scrolls instead.
+   At 740px and up: the Cluster wraps inside a bordered box. */
+.jumpbar {
+  position: relative; /* the items' offsetParent, for the bar's own scroll */
+  border-block: var(--bw-heavy) solid var(--text-heading);
+  background: var(--surface-card);
+  padding: var(--space-2h) var(--space-4);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.jumpbar::-webkit-scrollbar {
+  display: none;
+}
+@media (max-width: 739.98px) {
+  .jumpbar__row {
+    flex-wrap: nowrap;
+    min-width: min-content;
+  }
+}
+@media (min-width: 740px) {
+  .jumpbar {
+    overflow: visible;
+    border: var(--bw-heavy) solid var(--text-heading);
+    padding: var(--space-2h) var(--space-3h);
+    box-shadow: var(--shadow-stamped);
+  }
+}
+.jumpbar__item {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  white-space: nowrap;
+  border: var(--bw-heavy) solid var(--text-heading);
+  border-radius: 0;
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+/* The press: the item moves 2px down and right, into its shadow. */
+.jumpbar__item:active {
+  transform: translate(var(--bw-heavy), var(--bw-heavy));
+}
+.jumpbar__item:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.jumpbar__item.is-current {
+  background: var(--text-heading);
+  color: var(--text-on-ink);
+}
+.jumpbar__count {
+  padding: 0 var(--space-1);
+  border: var(--bw-heavy) solid var(--text-heading);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+}
+.jumpbar__item.is-current .jumpbar__count {
+  border-color: var(--text-on-ink);
+  background: var(--accent-tint);
+}
+@media (prefers-reduced-motion: reduce) {
+  .jumpbar__item {
+    transition: none;
+  }
+}

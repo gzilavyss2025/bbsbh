@@ -369,4 +369,16 @@ export const PAIRINGS = [
   { fg: 'text-on-ink-soft', bg: 'ink-1', min: TEXT, note: 'about hero kicker on navy' },
   { fg: 'text-on-ink-dim', bg: 'ink-1', min: TEXT, note: 'umpire tendencies season and watch labels on navy' },
   { fg: 'text-on-ink-dim', bg: 'ink-0', min: TEXT, note: 'dim paper text on the darkest ink' },
+  // THE STAMPED PARTS (#1882, system/stamped/stamped.css): the name tab, the
+  // count tag, and the stat tile's three fills. The edge and the two shadows
+  // are UI marks on the page they sit on.
+  { fg: 'text-on-ink', bg: 'surface-stamped-ink', min: TEXT, note: 'stamped card name tab; ink stat tile number' },
+  { fg: 'text-on-ink-dim', bg: 'surface-stamped-ink', min: TEXT, note: 'ink stat tile label and caption' },
+  { fg: 'text-heading', bg: 'surface-stamped-tint', min: TEXT, note: 'tint stat tile label and number' },
+  { fg: 'text-muted', bg: 'surface-stamped-tint', min: TEXT, note: 'tint stat tile caption' },
+  { fg: 'text-heading', bg: 'surface-card', min: TEXT, note: 'plain stat tile label and number' },
+  { fg: 'text-caption', bg: 'surface-card', min: TEXT, note: 'plain stat tile caption' },
+  { fg: 'text-heading', bg: 'bg-canvas', min: TEXT, note: 'stamped card count tag' },
+  { fg: 'border-stamped', bg: 'bg-canvas', min: UI, note: 'stamped edge and shadow on the page' },
+  { fg: 'border-stamped-soft', bg: 'bg-canvas', min: UI, note: 'soft stamped shadow under the ink tile' },
 ]

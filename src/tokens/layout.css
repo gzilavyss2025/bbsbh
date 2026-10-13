@@ -33,6 +33,8 @@
   --app-width:   440px;      /* iPhone-class second screen */
   --app-gutter:  16px;
   --tap-min:     44px;       /* min hit target */
+  /* How far a stamped card's shadow sits off it (#1882, --shadow-stamped). */
+  --stamped-offset: var(--space-1);
   /* The OTHER button height (#1130). A control that switches something inside
      a card — a scope toggle, a filter, a zoom step, Refresh — is 34px; a
      control that stands on the page or in the bar is --tap-min. Two heights,

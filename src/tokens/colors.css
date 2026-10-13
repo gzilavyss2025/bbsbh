@@ -47,6 +47,10 @@
      badge on the current jump-bar button and the position pill on the player
      page. Read it through --accent-tint, never by this name. */
   --field-mint:#86BE98;
+  /* The tint of a stamped stat tile (#1882, the player page's hero row). A
+     greener, deeper wash than --field-soft, so a tinted tile reads as a second
+     fill beside the plain card paper. */
+  --field-wash:#DDE7CF;
   /* Field illustration: shared by defense alignments and position innings. */
   --field-outfield:#D8E6C9;
   --field-infield: #A6C393;
@@ -150,6 +154,17 @@
   --border-rule:      var(--rule);
   --border-hairline:  var(--rule-soft);
   --border-grid:      var(--rule-grid);
+
+  /* THE STAMPED FAMILY (#1882; docs/player-redesign.md, section 3): the card,
+     the stat tile and the fact strip of the player page. A 2px ink edge with a
+     hard ink offset shadow (--shadow-stamped, effects.css). The soft edge is
+     the shadow under an ink tile, where an ink shadow would not show. The
+     hairline between facts is --border-hairline: the canvas hairline is the
+     same #DED6C0. The pairs are in src/lib/design/contrastPairings.js. */
+  --border-stamped:       var(--ink-0);
+  --border-stamped-soft:  var(--graphite);
+  --surface-stamped-ink:  var(--ink-0);
+  --surface-stamped-tint: var(--field-wash);
 
   --accent-primary:   var(--navy);
   --accent-positive:  var(--field);
