@@ -350,6 +350,43 @@ CREATE TABLE IF NOT EXISTS foul_game_totals (
   scope        TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P'))
 );
 
+-- Fouls BY COUNT (#1881): one row per batter and pre-pitch count, count_idx =
+-- balls * 3 + strikes (0 = 0-0 ... 11 = 3-2). `reach` is the plate appearances
+-- that were in the count (every one starts in 0-0; a pitch-clock ball moves it
+-- on with no pitch); `hit`/`walk`/`so`/`out` split those same
+-- plate appearances by how they ended, credited to EVERY count they reached
+-- (walk includes a hit by pitch; out is every other ending). `fouls` and
+-- `swings` (whiff + foul + in play) are the pitches thrown from the count.
+-- Counts only, so a season sum is a sum of rows. A row exists only where the
+-- batter reached the count. Rebuilt from scratch by gen-fouls.mjs --rebuild-counts.
+CREATE TABLE IF NOT EXISTS foul_batter_counts (
+  person_id INTEGER NOT NULL,
+  season    INTEGER NOT NULL,
+  scope     TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  count_idx INTEGER NOT NULL,
+  reach     INTEGER NOT NULL DEFAULT 0,
+  fouls     INTEGER NOT NULL DEFAULT 0,
+  swings    INTEGER NOT NULL DEFAULT 0,
+  hit       INTEGER NOT NULL DEFAULT 0,
+  walk      INTEGER NOT NULL DEFAULT 0,
+  so        INTEGER NOT NULL DEFAULT 0,
+  out       INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (season, scope, person_id, count_idx)
+);
+
+-- A batter's pitches seen, fouls and whiffs in ONE game (#1914), for the
+-- player's game log. Written once per game, so a plain overwrite on conflict.
+CREATE TABLE IF NOT EXISTS foul_batter_games (
+  game_pk   INTEGER NOT NULL,
+  person_id INTEGER NOT NULL,
+  season    INTEGER NOT NULL,
+  scope     TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  pitches   INTEGER NOT NULL DEFAULT 0,
+  fouls     INTEGER NOT NULL DEFAULT 0,
+  whiffs    INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (game_pk, person_id)
+);
+
 -- Per-team, per-season COMEBACK counts (gen-comeback-wins.mjs), the numerator
 -- AND denominator of a comeback RATE. For every Final game BOTH sides' minimum
 -- win probability is bucketed: whichever side fell below 10 / 20 / 30% at some
