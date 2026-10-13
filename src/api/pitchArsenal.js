@@ -98,8 +98,9 @@ export const MIN_ARSENAL_PITCHES = 15
 
 // The per-type physics means the generator writes as `phys`, in this order:
 // release point (ft), movement (inches), extension (ft), flight time (s), spin
-// (rpm). Each is the mean over the pitches that carried the field. `phys` is
-// absent on a type with none, so physOf gives null for each: unknown, never 0.
+// (rpm). Each is the mean over the pitches that carried the field, and null under
+// 5 of them. `phys` is absent on a type with none, so physOf gives null for each:
+// unknown, never 0.
 export const PHYS_FIELDS = ['x0', 'z0', 'pfxX', 'pfxZ', 'extension', 'plateTime', 'spinRate']
 export const physOf = (type) => Object.fromEntries(PHYS_FIELDS.map((f, i) => [f, type?.phys?.[i] ?? null]))
 

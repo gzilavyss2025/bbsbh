@@ -48,8 +48,11 @@ import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason
 import { CELLS, COLS, aggregateGameCommand, commandStmts, markCommandIngested, parseCells } from './lib/command-grid.mjs'
 import { aggregateGameHitters, clearHitterSeason, foldHitters, hitterStmts, writeHitterGrid } from './lib/pitch/hitter-grid.mjs'
 import { readXwobaTable } from './lib/pitch/xwoba.mjs'
-import { PHYS_JOIN, PHYS_SELECT, addPhys, clearArsenalSeason, emptyPhys, foldPhysRow, physMeans, physStmt } from './lib/pitch/arsenal-physics.mjs'
+import { PHYS_JOIN, PHYS_SELECT, addPhys, clearArsenalSeason, emptyPhys, foldPhysRow, physMeans, physStmt, rewalkFailures } from './lib/pitch/arsenal-physics.mjs'
 import { fetchPitcherHands } from './lib/pitch/pitcher-hands.mjs'
+import { centuryRankMap } from './lib/pitch/century-rank.mjs'
+
+export { centuryRankMap } // moved to lib/pitch/ to hold this file's size budget; tests import it from here
 
 const here = dirname(fileURLToPath(import.meta.url))
 // TWO OUTPUTS, one per reader — see writeArsenal below and src/api/pitchArsenal.js.
@@ -293,26 +296,6 @@ export function foldGame(db, stmts, { gamePk, level, date, season, scope = 'R', 
     db.exec('ROLLBACK')
     throw err
   }
-}
-
-// Competition ranking (1, 2, 2, 4) over one level's century-club counts —
-// ties share a place and the next man skips, the way a leaderboard reads.
-// `counts` is [id, count] pairs ALREADY filtered to the cohort being ranked;
-// `of` is that cohort's size, so the rank a card renders and the denominator
-// beside it always describe the same population. Pure, exported for tests.
-export function centuryRankMap(counts) {
-  const sorted = [...counts].sort((a, b) => b[1] - a[1])
-  const of = sorted.length
-  const ranks = new Map()
-  let lastCount = null
-  let lastRank = 0
-  sorted.forEach(([id, count], i) => {
-    const rank = count === lastCount ? lastRank : i + 1
-    lastCount = count
-    lastRank = rank
-    ranks.set(id, { rank, of })
-  })
-  return ranks
 }
 
 // --- JSON export from the accumulated table ----------------------------------
@@ -568,10 +551,8 @@ async function main() {
     clearHitterSeason(db, Number(args['clear-hitters']))
   }
 
-  if (args['clear-arsenal']) { // re-walk after a new arsenal column (#1908): the season's arsenal half, the levels in the run
-    if (!args.since) throw new Error('--clear-arsenal needs --since=<first day>')
-    clearArsenalSeason(db, Number(args['clear-arsenal']), LEVELS.map((l) => l.level), args.since)
-  }
+  // Re-walk after a new arsenal column (#1908): the season's arsenal half, the levels in the run.
+  if (args['clear-arsenal']) clearArsenalSeason(db, Number(args['clear-arsenal']), LEVELS.map((l) => l.level), args)
 
   // Throwing hands for the season being written, never the clock year (#1200).
   const handsBySeason = new Map()
@@ -637,6 +618,7 @@ async function main() {
   console.log(`${startDate}..${endDate}: ${pending.length} un-ingested Final games across ${LEVELS.length} level(s)`)
 
   let done = 0
+  const failed = []
   const queue = [...pending]
   async function worker() {
     while (queue.length) {
@@ -647,6 +629,7 @@ async function main() {
         touched.add(g.season)
       } catch (err) {
         console.error(`gamePk ${g.gamePk} (${g.level}): ${err.message}`)
+        failed.push(g)
       }
       done += 1
       if (done % CHECKPOINT_EVERY === 0) {
@@ -663,6 +646,10 @@ async function main() {
     console.log(`wrote pitch-arsenal/${season}/ — ${total} games on file (+${done} swept this run)`)
   }
   if (!touched.size) console.log('no new game — wrote nothing')
+  if (args['clear-arsenal'] && failed.length) {
+    console.error(rewalkFailures(failed))
+    process.exitCode = 1
+  }
   db.close()
 }
 
