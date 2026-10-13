@@ -299,6 +299,7 @@ export async function loadPlayerHistory(id, asOf) {
       dropRehabStints(primaryResult.milbYbySplits, debutYear),
       primaryResult.group,
       liveSportId,
+      primaryResult.mlbYbySplits,
     )
     // Fed the player's FULL year-by-year — every MiLB level plus MLB, NOT the
     // rehab-trimmed splits — because a genuine post-debut option-down season is

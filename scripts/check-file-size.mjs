@@ -236,7 +236,7 @@ const BUDGETS = {
   // pitch a card reads (emptyBucket/foldRow/ttoPairs). Splitting the file would
   // put the counting rules and the shape they are exported in on either side of
   // a module boundary, which is the one pair that has to be read together.
-  'scripts/gen-pitch-arsenal.mjs': 700, // 652
+  'scripts/gen-pitch-arsenal.mjs': 661, // 661
   'src/api/teamTransactions.js': 700, // 619 — the prose half moved to transactions/cutline.js, the vocabulary before it
   'src/screens/InningViewer.jsx': 1100, // 1003 — wired in useHeadshotPrefetch (one hook call + its doc comment) so at-bat stepping warms both rosters' headshot CDN URLs up front; the hook's own logic lives in src/hooks/useHeadshotPrefetch.js, not here
   'src/api/boxscore.js': 800, // 762 — the info block moved to boxscore/gameNotes.js

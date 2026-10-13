@@ -41,6 +41,8 @@ export {
 
 export {
   gameLogView,
+  gameLogLimit,
+  loggedSplits,
   FIRSTS_DEFS,
   PITCHER_FIRSTS_DEFS,
   firstsFromGameLog,

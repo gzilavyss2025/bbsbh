@@ -146,7 +146,7 @@
     },
     "boxlines/fetch.js": {
       "class": "cutoff-gated",
-      "why": "The Box Lines sheet's fetch half for every facet: yearByYear for the seasons, one trimmed game log per season (never past the cutoff's day-before, via rows.js's plan), one schedule call per chunk of the gamePks those splits named, and one linescore call for each of the handful of those records that came back with no score (#1031 — a game MLB left stuck at Postponed after it was played). Asking the schedule by gamePk is what keeps it safe without a date bound — the only gamePks that exist came from already-gated splits — and the recovery list is narrower still: rows.js's own `scorelessGamePks` runs the SAME gate, so a game at or after the cutoff, or one the schedule does not call Final, is never asked about. A miss or a failure leaves the row dropped exactly as before. Every row it returns went through boxLineRows, so it inherits rows.js's footing whole — it computes nothing rows.js does not."
+      "why": "The Box Lines sheet's fetch half for every facet: yearByYear for the seasons, one trimmed game log per season (never past the cutoff's day-before, via rows.js's plan), one schedule call per chunk of the gamePks those splits named, and one linescore call for each of the handful of those records that came back with no score (#1031 — a game MLB left stuck at Postponed after it was played). Asking the schedule by gamePk is what keeps it safe without a date bound — the only gamePks that exist came from already-gated splits — and the recovery list is narrower still: rows.js's own `scorelessGamePks` runs the SAME gate, so a game at or after the cutoff, or one the schedule does not call Final, is never asked about. A miss or a failure leaves the row dropped exactly as before. Every row it returns went through boxLineRows, so it inherits rows.js's footing whole — it computes nothing rows.js does not. `fetchFinalScores` is its second reader, the player Stats tab's game log (#1914): the same schedule call and boxLineRows gate over the log rows it is handed, with any split on or after the earlier of the cutoff and the baseball today dropped before the call. Today is held because a link out of a game no longer stamps `?d=` (ADR-0034). A suspended game keeps its first day on the split, so a record whose `resumeDate` (as a Pacific day) is on or after that date keeps no score either."
     },
     "boxlines/fold.js": {
       "class": "spoiler-free",
@@ -617,7 +617,7 @@
     },
     "person/gameLog.js": {
       "class": "cutoff-gated",
-      "why": "A player's per-game log DOES carry per-game lines, but for an open surface; the player page's own asOf cutoff is what keeps a dated view honest."
+      "why": "A player's per-game log DOES carry per-game lines, but for an open surface; the player page's own asOf cutoff is what keeps a dated view honest. `loggedSplits` is that cut, and the Stats tab asks for final scores over its rows alone, so `scores` can hold no game the cutoff turned away."
     },
     "person/identity.js": {
       "class": "spoiler-free",
@@ -800,6 +800,10 @@
       "class": "spoiler-free",
       "why": "The player hub's History tab loader — awards, innings by position, the Firsts card, path/team history and the transaction timeline. Career-shaped facts, each honouring the page's own asOf cutoff. The Firsts card links out to box scores, which stay sealed on their own pages; it renders no score itself."
     },
+    "player/pitcherForm.js": {
+      "class": "cutoff-gated",
+      "why": "The pitcher Form trend's rolling ERA, K% and BB% over his own game log (#1930) — the pitcher twin of hitterForm.js. Pure; current-day only, so the card skips under a spoiler `asOf`."
+    },
     "player/overview.js": {
       "class": "spoiler-free",
       "why": "The player hub's Overview tab loader — the fact grid, the contract card, the season tiles with their rank chips and promoted other-level rows, Milestone Watch, and four preview doors into the other tabs (a trimmed game log, a Statcast/prospect teaser, an awards-chip strip). Season aggregates and a cutoff-filtered game log, over completed games."
@@ -813,8 +817,8 @@
       "why": "The player page's Prospect rankings card: the years a man sat on a top-prospect list, from a frozen 2005-2024 file. A scout's ranking of a player, not a fact about a game, so it opens live (ADR-0034). It names no source and no year itself; labels, credits and coverage all come from the file."
     },
     "player/stats.js": {
-      "class": "spoiler-free",
-      "why": "The player hub's Stats tab loader — the game log, the splits and the career register. A game-log row carries this player's own line and a link to that game's (sealed) box score, never the game's score; the register is a career aggregate. Its one score-adjacent element is SplitsVsTeam's last-meeting line, gated against the page's own asOf in the component."
+      "class": "cutoff-gated",
+      "why": "The player hub's Stats tab loader — the game log, the splits and the career register. A game-log row carries this player's own line, a link to that game's (sealed) box score, and the game's final score (#1914): boxlines/fetch.js's fetchFinalScores asks the schedule only for the gamePks of rows dated before the EARLIER of the page's cutoff and the baseball today (US Pacific), so a same-day game 1, any game played today, and anything later is never asked about. Today is held even with no `?d=`, because a link out of a game stamps none (ADR-0034); the register is a career aggregate. Its one score-adjacent element is SplitsVsTeam's last-meeting line, gated against the page's own asOf in the component."
     },
     "ovr/career.js": {
       "class": "spoiler-free",
