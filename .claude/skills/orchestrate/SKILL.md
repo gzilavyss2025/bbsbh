@@ -85,6 +85,11 @@ to Lane 3. Start no issue work unless he asks.
 5. Guess the files each issue touches. Two issues that share a file run one after
    the other. An issue that needs an unmerged PR (a chain such as N8a, N8b, N8c)
    waits until that PR merges. Say so in the digest. Stacking needs his yes.
+   **Blocked by.** A `Blocked by: #a, #b` line in an issue body is the blocker record.
+   Start nothing while an issue on that line is open, even if it is `ready-for-agent`.
+   The cloud cannot set GitHub's native "blocked by" links (the MCP tools have no call
+   for them). When you file or change blockers, write the body line, then give him one
+   checklist of the native links to add by hand.
 6. Read the ledger (below).
 7. Say in three lines what you will start now and why. Then start it.
 
@@ -194,9 +199,17 @@ handed it to you (its step 9). One prompt is a plan too. Work on the plan only.
    line "NEEDS PARENT: <what you need>".
    ```
 4. **Start wave N+1 when every PR in wave N is green.** Subscribe to each PR and use the
-   `send_later` checks from Budget. If a prompt needs the earlier wave's code, ask him
+   `send_later` checks from Budget. A row whose "depends on" says **merged** waits
+   until that PR is on `main`: stack it (see "Stacking"), then start the row. If a
+   prompt needs the earlier wave's code and the plan does not say which, ask him
    once for the whole plan: build on that branch (set `source_revision`), or wait for
    `/stack-prs` to merge it.
+   **A row that continues an open PR** (the plan names the PR) works on that PR's
+   head branch: set `source_revision` and `outcome_branch` to it. In the footer,
+   replace "Open a DRAFT PR to main" with "Push to the existing PR #n. Do not open a
+   new PR. Bring in main with a merge, never a rebase or force-push." Dedupe on the
+   PR number. If the push is refused, the child opens a new draft PR that links the
+   old one, and you ask him before you close the old one.
 5. **Stop the plan on a failure.** A `NEEDS PARENT` line, or a PR that stays red after
    two tries, stops the later waves. Start nothing new. Tell him which prompt and why.
 6. Two prompts that share a file run one after the other, even in one wave.

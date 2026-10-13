@@ -130,8 +130,8 @@ step 4.
    local task branches, 38 of them with a deleted upstream. Sweep them:
 
    ```bash
-   git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads |
-     awk '$2 == "[gone]" { print $1 }'
+   git for-each-ref refs/heads \
+     --format='%(if:equals=[gone])%(upstream:track)%(then)%(refname:short)%(end)' | grep .
    ```
 
    Delete each one with `git branch -D` (`-d` refuses a squash-merged branch,
