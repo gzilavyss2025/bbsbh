@@ -1,0 +1,140 @@
+/* THE SEASON STATISTICS MODULE (#1885; the SeasonStats boards). The scope switch, the five tiles,
+   the register table (styled by 26-player-page.css's .ledger rules) and the WAR-vs-league dialog. */
+/* Holds the card's height while the register loads, so the page does not jump. */
+.seasonmod--wait {
+  min-height: calc(var(--space-16) * 5);
+}
+
+.seasonmod__bar,
+.seasonmod__foot {
+  justify-content: space-between;
+}
+.seasonmod__caption {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+}
+
+/* layout-exempt: five tiles in one row at every width, as the board draws them */
+.seasonmod__tiles {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.seasonmod__tile.stattile {
+  padding: var(--space-2) var(--space-1);
+  text-align: center;
+}
+.seasonmod__tile .stattile__value {
+  font-size: var(--fs-hero-sm);
+}
+@media (min-width: 740px) {
+  .seasonmod__tile.stattile {
+    padding: var(--space-3h) var(--space-2);
+  }
+  .seasonmod__tile .stattile__value {
+    font-size: var(--fs-hero-xl);
+  }
+}
+
+/* The WAR figure is a button: dotted rule under it, the tint on hover and while its dialog is open. */
+.seasonmod__war {
+  min-height: var(--space-10);
+  padding: 0 var(--space-1);
+  border: 0;
+  border-bottom: var(--bw-heavy) dotted var(--border-stamped);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.seasonmod__war:hover,
+.seasonmod__war:focus-visible {
+  background: var(--surface-stamped-tint);
+}
+
+.seasonmod__foot {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
+}
+.seasonmod__link {
+  min-height: var(--space-10);
+  padding: 0 var(--space-1);
+  border: 0;
+  background: none;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+  cursor: pointer;
+}
+
+/* The dialog, over a .scrim--center. */
+.seasonmod__pop {
+  width: min(16.5rem, 100%);
+  padding-bottom: var(--space-3);
+  background: var(--surface-card);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped);
+}
+.seasonmod__pophead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: var(--space-3);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.seasonmod__x {
+  width: var(--space-12);
+  min-height: var(--space-10);
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  cursor: pointer;
+}
+.seasonmod__popline {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-3) 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+.seasonmod__popline span {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.seasonmod__good {
+  color: var(--accent-positive);
+}
+.seasonmod__bad {
+  color: var(--accent-negative);
+}
+.seasonmod__popnote {
+  margin: 0;
+  padding: var(--space-2) var(--space-3) 0;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
+}
