@@ -1782,6 +1782,9 @@ Re-run only to fold in a new season.
   re-walk in `gen-pitch-arsenal.mjs`. `--gate` checks the committed `hitter-grid/`
   against Savant's pitch-arsenal-stats batter board (40+ PA: mean gap at most 0.006, at
   most 1% of rows above 0.020, none above 0.040).
+  The same run also writes `public/data/xba-table/{season}.json` from
+  `estimated_ba_using_speedangle`, after a per-ball check against Savant (`XBA_GATE`: mean
+  gap at most 0.008, at most 2% above 0.05, none above 0.5); a failed check writes no xBA table.
 - `gen-family-ties.mjs` → `public/data/family-ties/{NN}.json` — family links between
   players, from Retrosheet's `relatives.csv`, joined to MLBAM ids through the Chadwick
   register (ADR-0100). **Hand-run, NOT on a cron**: re-run only after Retrosheet

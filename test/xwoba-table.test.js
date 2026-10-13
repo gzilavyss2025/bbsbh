@@ -2,7 +2,7 @@
 // velocity and launch angle, and the gate that holds it to Savant's board.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { fitTable, gateRows, gateVerdict, xwobaOf } from '../scripts/lib/pitch/xwoba.mjs'
+import { XBA_GATE, ballsOf, fitTable, gateRows, gateVerdict, tablePath, xbaGaps, xwobaOf } from '../scripts/lib/pitch/xwoba.mjs'
 
 const three = (ev, la, ...ys) => ys.map((y) => [ev, la, y])
 
@@ -75,4 +75,30 @@ test('the gate: mean gap at most 0.006, at most 1% of rows above 0.020, no row a
   assert.equal(gateVerdict([0.041, ...ok.slice(1)]).pass, false)
   // A gate over nothing is no pass.
   assert.equal(gateVerdict([]).pass, false)
+})
+
+// --- the xBA lattice (#1912): the same fit on Savant's estimated_ba_using_speedangle ---
+const csv = (description, launch_speed, launch_angle, woba, ba) =>
+  ({ description, launch_speed, launch_angle, estimated_woba_using_speedangle: woba, estimated_ba_using_speedangle: ba })
+
+test('ballsOf reads one estimate column off the balls in play that have all three values', () => {
+  const rows = [csv('hit_into_play', '108.4', '22', '1.9', '0.911'), csv('hit_into_play', '106.3', '2', '', '0.52'),
+    csv('foul', '90', '10', '0.2', '0.2'), csv('hit_into_play', '', '5', '0.1', '0.1')]
+  assert.deepEqual(ballsOf(rows, 'estimated_ba_using_speedangle'), [[108.4, 22, 0.911], [106.3, 2, 0.52]])
+  assert.deepEqual(ballsOf(rows, 'estimated_woba_using_speedangle'), [[108.4, 22, 1.9]])
+})
+
+test('each table has its own folder', () => {
+  assert.match(tablePath(2026), /xwoba-table[\\/]2026\.json$/)
+  assert.match(tablePath(2026, 'xba-table'), /xba-table[\\/]2026\.json$/)
+})
+
+test('the xBA check: a lookup per ball, minus Savant, against its own thresholds', () => {
+  const balls = [...three(108, 22, 0.905, 0.91, 0.915), ...three(106, 2, 0.515, 0.52, 0.525)]
+  const t = fitTable(balls)
+  const gaps = xbaGaps(t, balls)
+  assert.equal(gaps.length, 6)
+  assert.ok(Math.abs(gaps[0] - (0.91 - 0.905)) < 1e-9)
+  assert.equal(gateVerdict(gaps, XBA_GATE).pass, true)
+  assert.equal(gateVerdict(gaps.map(() => 0.5), XBA_GATE).pass, false)
 })

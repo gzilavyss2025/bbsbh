@@ -344,9 +344,9 @@ export function situationalSplitsView(splits, group, { minRows = 4 } = {}) {
 // ---------------------------------------------------------------------------
 
 // One list per group serves both readers: the chips below (`label`; not the `marksOnly`
-// entries) and the league "N of M" mark of api/player/leagueRanks.js (every entry; a
-// mark carries `tile`, the StatTile key it rides on, else its own label). `rate` stats
-// are ranked among the qualified only; the rest among every player of the league.
+// entries) and the league rank mark of api/player/leagueRanks.js (every entry; a mark
+// carries `tile`, the StatTile key it rides on, else its own label). A `rate` stat reads
+// "N of M", M the qualified players of his league; the rest read the place only, "6th".
 // `chipOnly` is a chip with no mark (Opp. AVG is not the batter's AVG; H is no hero stat).
 export const RANK_STATS = {
   pitching: [
