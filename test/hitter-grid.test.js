@@ -60,10 +60,26 @@ test('each located pitch counts once, for the hitter, by pitcher hand and by the
   assert.equal(out.size, 3)
 })
 
-test('a foul tip is a swing and not a whiff, the same rule the pitcher grid uses', () => {
+// Savant's rule, Gary's call of 2026-10-13 (#1911): a foul tip is a whiff. The shared
+// WHIFF_CODES leave it out, and the pitcher grids keep that, so this grid adds it itself.
+test('a foul tip is a swing and a whiff in the hitter grid', () => {
   const r = cellOf(aggregateGameHitters(feed([play([pitch(MID, 'T')], 'strikeout')])))
   assert.equal(r.swings[at(MID)], 1)
-  assert.equal(r.whiffs[at(MID)], 0)
+  assert.equal(r.whiffs[at(MID)], 1)
+})
+
+test('called strikes, balls in play and the start speed sum per cell; a pitch with no speed adds none', () => {
+  const noSpeed = pitch(MID, 'C')
+  delete noSpeed.pitchData.startSpeed
+  const r = cellOf(aggregateGameHitters(feed([
+    play([pitch(MID, 'C'), pitch(MID, 'K'), pitch(MID, 'B'), noSpeed, pitch(UP, 'S'), pitch(UP, 'D', TRACKED)], 'field_out'),
+  ])))
+  assert.equal(r.calledStrikes[at(MID)], 3)
+  assert.equal(sum(r.calledStrikes), 3)
+  assert.equal(r.inPlay[at(UP)], 1)
+  assert.equal(sum(r.inPlay), 1)
+  assert.equal(r.speedSum[at(MID)], 285)
+  assert.equal(r.speedSum[at(UP)], 190)
 })
 
 test('the PA-ending pitch is the last event of a plate appearance, and it carries the fixed wOBA weights', () => {
@@ -193,7 +209,7 @@ test('the export drops all-zero counters, and keeps the xwOBA numerator out unti
   const db = await emptyDb()
   const stmts = arsenalStatements(db)
   foldGame(db, stmts, { gamePk: 1, level: 'mlb', date: '2026-06-01', season: 2026 }, ...game([play([pitch(MID, 'B')], 'walk')]))
-  assert.deepEqual(Object.keys(exportHitterGrid(db, 2026, 'R').bat[9].mlb.FF.R.R), ['pitches', 'paEnd', 'wobaFixed'])
+  assert.deepEqual(Object.keys(exportHitterGrid(db, 2026, 'R').bat[9].mlb.FF.R.R), ['pitches', 'paEnd', 'wobaFixed', 'speedSum'])
   assert.equal(db.prepare('SELECT xwoba_bip FROM pitch_hitter_cells').get().xwoba_bip, null)
 })
 
@@ -233,6 +249,20 @@ test('a game swept with no table leaves its rows\' xwOBA unknown, and the export
   assert.equal(out.bat[9].mlb.FF.R.R.xwobaBip[at(MID)], 1.536)
   assert.equal(out.bat[9].mlb.FF.R.R.paEnd[at(MID)], 6)
   assert.equal(hitterGamesMissing(db, 2026), 0)
+})
+
+test('rows swept before the plate counters stay unknown, and the export leaves them out', async () => {
+  const db = await emptyDb()
+  const stmts = arsenalStatements(db)
+  foldGame(db, stmts, { gamePk: 1, level: 'mlb', date: '2026-06-01', season: 2026 }, ...game([atBat(MID)]))
+  assert.equal(exportHitterGrid(db, 2026, 'R').plate, true)
+  // A row from the committed dump: it has no plate row, and a game folded in adds none.
+  db.prepare('DELETE FROM pitch_hitter_plate').run()
+  foldGame(db, stmts, { gamePk: 2, level: 'mlb', date: '2026-06-02', season: 2026 }, ...game([atBat(MID)]))
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM pitch_hitter_plate').get().n, 0)
+  const out = exportHitterGrid(db, 2026, 'R')
+  assert.equal(out.plate, false)
+  assert.deepEqual(Object.keys(out.bat[9].mlb.FF.R.R), ['pitches', 'swings', 'whiffs', 'paEnd'])
 })
 
 test('the league is every hitter summed, in the same shape as one hitter', async () => {
@@ -300,6 +330,17 @@ test('with the season\'s xwOBA on file, wobaSum is wobaFixed plus the estimate, 
   assert.equal(hitterCounters(covered, { code: 'FF', scope: 'P' }).wobaSum[0], 0.7)
   // No flag, no sum, even when the file holds estimates.
   assert.equal(hitterCounters({ ...covered, xwoba: undefined }, { code: 'FF' }).wobaSum, null)
+})
+
+test('a shard with no plate counters gives null for them, not 0; a new one gives arrays', () => {
+  const old = hitterCounters(grid, { code: 'FF' })
+  assert.deepEqual([old.calledStrikes, old.inPlay, old.speedSum], [null, null, null])
+  const fresh = { mlb: { FF: { R: { L: { pitches: z(0, 4), calledStrikes: z(0, 1), speedSum: z(0, 380) } } } } }
+  const c = hitterCounters({ season: 2026, reg: fresh, post: null, plate: true }, { code: 'FF' })
+  assert.equal(c.calledStrikes[0], 1)
+  assert.equal(c.speedSum[0], 380)
+  assert.equal(sum(c.inPlay), 0)
+  assert.equal(hitterCounters({ season: 2026, reg: fresh, post: null }, { code: 'FF' }).speedSum, null)
 })
 
 test('flatRates is the whole-type rate per metric, wherever the pitch was thrown', () => {

@@ -87,7 +87,7 @@ export const GROUPS = {
     bySeason: true,
     tables: [
       'pitch_arsenal_totals', 'pitch_arsenal_physics', 'pitch_arsenal_starts', 'pitch_arsenal_ingested_games', 'pitch_command_cells', 'pitch_command_ingested_games',
-      'pitch_hitter_cells', 'pitch_hitter_ingested_games',
+      'pitch_hitter_cells', 'pitch_hitter_plate', 'pitch_hitter_ingested_games',
     ],
   },
   // All three tables are written by the one nightly gen-team-records.mjs — its

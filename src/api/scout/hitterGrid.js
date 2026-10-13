@@ -13,21 +13,23 @@
 // MLB only for now; a Triple-A phase would add `aaa` beside it.
 // Counters are 25-value arrays over the 5x5 command grid (feed frame, the
 // commandCell order): pitches, swings, whiffs, paEnd, wobaFixed, bipUntracked
-// (balls in play with no launch data) and xwobaBip (the xwOBA (est.) of the
-// tracked ones, ADR-0097). Sums only. An all-zero counter is absent.
+// (balls in play with no launch data), xwobaBip (the xwOBA (est.) of the
+// tracked ones, ADR-0097), calledStrikes, inPlay and speedSum (the start speed
+// of every pitch that has one; #1911). Sums only. An all-zero counter is absent.
 // `xwoba: true` on a file says the season's xwobaBip is complete; without it
-// the file has no xwobaBip.
+// the file has no xwobaBip. `plate: true` says the same of calledStrikes,
+// inPlay and speedSum: a file without it was written before them.
 import { shardKey100 } from '../../lib/shardKey.js'
 import { GRID } from '../../lib/zone/zoneGeometry.js'
 import { currentSeasonOf, staticJsonBy } from '../staticJson.js'
 
 const fetchFile = staticJsonBy((key) => `/data/hitter-grid/${key}.json`, { fallback: null })
 const asGrid = (season, reg, post, file) =>
-  reg || post ? { season, reg: reg ?? null, post: post ?? null, ...(file?.xwoba && { xwoba: true }) } : null
+  reg || post ? { season, reg: reg ?? null, post: post ?? null, ...(file?.xwoba && { xwoba: true }), ...(file?.plate && { plate: true }) } : null
 
 // One season, never pooled with another (the 2026 zone is not the 2025 zone).
 // Pass the pitch-command season so both maps read the same one.
-// -> null | { season, reg: entry | null, post: entry | null, xwoba?: true }
+// -> null | { season, reg: entry | null, post: entry | null, xwoba?: true, plate?: true }
 export async function fetchHitterGridFor(personId, season) {
   if (personId == null) return null
   season ??= await currentSeasonOf('hitter-grid')
@@ -45,7 +47,8 @@ export async function fetchHitterLeague(season) {
 }
 
 // The counters, in file order. The generator imports this list.
-export const FIELDS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaFixed', 'bipUntracked', 'xwobaBip']
+export const PLATE_FIELDS = ['calledStrikes', 'inPlay', 'speedSum']
+export const FIELDS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaFixed', 'bipUntracked', 'xwobaBip', ...PLATE_FIELDS]
 
 // The counters for one view, summed. `scope` 'R' (regular season), 'P'
 // (postseason) or null (both); `hand` the pitcher's hand or null (both);
@@ -54,7 +57,8 @@ export const FIELDS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaFixed', 'bip
 // has two, and the league's colour scale should be read for his one.
 // `wobaSum` is wobaFixed + xwobaBip, cell by cell, when the season's xwOBA is
 // on file (`grid.xwoba`), and null when not: wobaFixed alone would read as a
-// low xwOBA (ADR-0096, ADR-0097).
+// low xwOBA (ADR-0096, ADR-0097). calledStrikes, inPlay and speedSum are null
+// when the season's file has no `plate` flag: unknown, not 0.
 // Null when nothing matches.
 export function hitterCounters(grid, { code = null, hand = null, stand = null, scope = null } = {}) {
   const out = Object.fromEntries(FIELDS.map((f) => [f, new Array(GRID * GRID).fill(0)]))
@@ -75,6 +79,7 @@ export function hitterCounters(grid, { code = null, hand = null, stand = null, s
   }
   if (!stands.size) return null
   const { xwobaBip, ...counters } = out
+  if (!grid.plate) for (const f of PLATE_FIELDS) counters[f] = null
   const wobaSum = grid.xwoba ? out.wobaFixed.map((v, i) => v + xwobaBip[i]) : null
   return { ...counters, wobaSum, stands: [...stands].sort() }
 }

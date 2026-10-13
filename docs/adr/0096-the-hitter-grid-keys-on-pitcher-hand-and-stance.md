@@ -42,8 +42,15 @@ that joins on the pitch (#1411, the Part C spike). The owner has not picked one.
 3. **The counters.** Each is a 25-value CSV over the 5x5 command grid, a sum:
    `pitches`, `swings`, `whiffs`, `pa_end` and `woba_fixed`.
    - Swings and whiffs use the shared code sets (`WHIFF_CODES`, `FOUL_CODES` in
-     `src/api/playbyplay/`), the same as the pitcher grid. A foul tip is a
-     swing, not a whiff.
+     `src/api/playbyplay/`). A foul tip (`T`) is a swing and, since #1911
+     (Gary, 2026-10-13), a whiff, as on Savant: this grid adds the code itself,
+     and the shared sets and the pitcher grids keep it as a swing only.
+   - `called_strikes`, `in_play` and `speed_sum` (start speed) came with #1911,
+     in `pitch_hitter_plate`: a table of its own, so the dump of
+     `pitch_hitter_cells` keeps its bytes. A cells row with no plate row was
+     swept before them; the file says `plate: true` only when no row lacks one,
+     and the reader gives `null`, not 0, without it. The in-zone count needs no
+     counter: it is the middle nine cells at read time.
    - `pa_end` counts the pitches that an xwOBA mean counts. A PA ends on the
      last event of a play whose eventType is on the plate-appearance allow
      list (`isPlateAppearance` in `scripts/lib/long-at-bats.mjs`). A PA that
