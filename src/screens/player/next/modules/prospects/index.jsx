@@ -17,6 +17,7 @@ export default function ProspectsModule({ bio, role, onEmpty, onCount }) {
     snapshot: data[1],
     playerId: bio.id,
     debutYear: bio.debut ? Number(bio.debut.slice(0, 4)) : null,
+    currentSeason: new Date().getFullYear(),
   })
   const settled = skip || data
   useEffect(() => {

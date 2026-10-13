@@ -21,8 +21,12 @@ const snapshot = {
 const empty = { players: [], orgProspects: [] }
 
 test('one list, then the debut: the depth comes from the file, not from 100', () => {
-  const v = prospectsView({ history, snapshot: empty, playerId: 668930, debutYear: 2023 })
+  const v = prospectsView({ history, snapshot: empty, playerId: 668930, debutYear: 2023, currentSeason: 2026 })
   assert.equal(v.badge, '1 list')
+  // The coverage note keeps a missing year from reading as a fall from the list.
+  assert.match(v.note, /Lists cover 2018–2023\./)
+  assert.match(v.note, /A year with no line means he was not on that year's list\./)
+  assert.match(v.note, /There is no data for 2024–2025\./)
   assert.deepEqual(
     v.rows.map((r) => [r.tone, r.year, r.label, r.rank, r.bar, r.delta]),
     [
@@ -73,9 +77,10 @@ test('on his org list only: one row, and no note about bars that are not there',
 
 test('a past list plus today: the past rows, then today, and the credit lines', () => {
   const both = { ...snapshot, players: [{ playerId: 668930, rank: 40 }] }
-  const v = prospectsView({ history, snapshot: both, playerId: 668930, debutYear: 2023 })
+  const v = prospectsView({ history, snapshot: both, playerId: 668930, debutYear: 2023, currentSeason: 2024 })
   assert.deepEqual(v.rows.map((r) => r.tone), ['rank', 'debut', 'today'])
-  assert.equal(v.note, '')
+  assert.match(v.note, /Lists cover 2018–2023 and today's list\./)
+  assert.doesNotMatch(v.note, /no data for/)
   assert.deepEqual(v.credits, ['MLB Pipeline top prospects, 2009–2024.'])
 })
 
