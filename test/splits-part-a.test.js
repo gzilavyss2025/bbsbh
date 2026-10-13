@@ -92,6 +92,12 @@ test('pctOf rounds half up and says null for an empty denominator', () => {
   assert.equal(pctOf(3, 0), null)
 })
 
+test('splitsView rounds K% half up where the float product falls just under the tie', () => {
+  // 29 of 200 batters faced is 14.5%; (29 / 200) * 100 is 14.499999999999998.
+  const view = splitsView([{ split: { code: 'vl' }, stat: { battersFaced: 200, strikeOuts: 29, baseOnBalls: 9 } }], 'pitching')
+  assert.deepEqual([view.left.soPct, view.left.bbPct], ['15%', '5%'])
+})
+
 test('doors: a wide cell row adds OBP, SLG, K% and BB% after the five the card draws today', () => {
   const stat = { gamesPlayed: 80, plateAppearances: 8, avg: '.250', homeRuns: 2, ops: '.700', obp: '.300', slg: '.400', strikeOuts: 1, baseOnBalls: 1 }
   assert.deepEqual(doorCells(null, stat, 'hitting'), ['80', '8', '.250', '2', '.700'])
