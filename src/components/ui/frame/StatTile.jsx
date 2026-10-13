@@ -1,3 +1,4 @@
+import { ordinal } from '../../../lib/format.js'
 import { Card } from './Card.jsx'
 
 // THE STAT TILE — one label, one big number, one caption, on a stamped Card
@@ -8,7 +9,7 @@ import { Card } from './Card.jsx'
 //   label    the stat's name ("HR", "AVG · 2026").
 //   value    the number, as the caller formats it.
 //   caption  one short line under the number ("680 PA"), or nothing.
-//   rank     { rank, of } for a league rank under the caption, or nothing (RankMark).
+//   rank     { rank, of? } for a league rank under the caption, or nothing (RankMark).
 //   tone     'plain' (the default), 'tint', or 'ink' for the lead tile.
 //   stampIn  the tile drops into its shadow as it appears. Stagger a row with
 //            --stamp-delay in `style`.
@@ -35,9 +36,9 @@ export function StatTile({ label, value, caption, rank, tone = 'plain', stampIn 
   )
 }
 
-// THE RANK MARK — "2 of 68" on its own line, no "#" (#1856). It draws only the text it is
+// THE RANK MARK — "2 of 68" (a rate stat) or "6th" (a counting stat, no `of`) on its own line, no "#" (#1856). It draws only the text it is
 // given, so a player with no rank passes none and leaves no gap. Styled once, in
 // system/stamped/stamped.css; the tile is its first host.
 function RankMark({ rank, of }) {
-  return <p className="rankmark">{rank} of {of}</p>
+  return <p className="rankmark">{of ? `${rank} of ${of}` : ordinal(rank)}</p>
 }

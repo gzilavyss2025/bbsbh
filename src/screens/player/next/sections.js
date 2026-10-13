@@ -45,11 +45,13 @@ export const SLOTS = [
   { id: 'pform', module: 'pform', section: 'form-trend', label: 'Form trend', roles: P, load: () => import('./modules/pform/index.jsx') },
   { id: 'batlog', module: 'batlog', section: 'game-log', label: 'Game log', roles: H, load: () => import('./modules/batlog/index.jsx') },
   { id: 'pitchlog', module: 'pitchlog', section: 'game-log', label: 'Game log', roles: P, load: () => import('./modules/pitchlog/index.jsx') },
-  // Foul balls has no button on the boards: it sits in the Game log section, and similar players ends it.
+  // Foul balls has no button on the boards: it sits in the Game log section, and similar players ends it (the tbd slot after it is the "more" board).
   { id: 'fouls', module: 'fouls', section: 'game-log', label: 'Foul balls', roles: H, load: () => import('./modules/fouls/index.jsx') },
   { id: 'similar', module: 'similar', section: 'game-log', label: 'Similar players', roles: HP, load: () => import('./modules/similar/index.jsx') },
+  { id: 'tbd-gamelog', module: 'tbd', section: 'game-log', label: 'More game log', roles: HP, load: () => import('./modules/tbd/index.jsx') },
   { id: 'arsenal', module: 'arsenal', section: 'pitches', label: 'Pitch arsenal', roles: P, load: () => import('./modules/arsenal/index.jsx') },
   { id: 'mound', module: 'mound', section: 'on-the-mound', label: 'On the mound', roles: P, load: () => import('./modules/mound/index.jsx') },
+  { id: 'tbd-mound', module: 'tbd', section: 'on-the-mound', label: 'More on the mound', roles: P, load: () => import('./modules/tbd/index.jsx') },
   { id: 'path', module: 'path', section: 'career', label: 'Path to the Majors', roles: HP, load: () => import('./modules/path/index.jsx') },
   { id: 'prospects', module: 'prospects', section: 'career', label: 'Prospect rankings', roles: HP, load: () => import('./modules/prospects/index.jsx') },
   { id: 'tbd-career', module: 'tbd', section: 'career', label: 'More career', roles: HP, load: () => import('./modules/tbd/index.jsx') },

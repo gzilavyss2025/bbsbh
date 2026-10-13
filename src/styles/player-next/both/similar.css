@@ -1,0 +1,294 @@
+/* ==== SIMILAR PLAYERS on the new player page (#1926, board SimilarPlayers) ====
+   "Hits like" / "Pitches like": three rows, each opening a dot plot against this
+   player. The frame, its name tab and its count tag are the slot's Card
+   (src/screens/player/next/Slot.jsx), so this file holds only the inside. */
+
+.simp {
+  --simp-ini-w: 3.25rem;
+  --simp-ini-h: 3.8rem;
+  --simp-dot-w: 1.6rem;
+  --simp-dot-h: 1.85rem;
+  --simp-metric-w: 5.25rem;
+  --simp-value-w: 4.6rem;
+}
+/* The height of the three rows, held while the data loads. */
+.simp--wait {
+  min-height: 19rem;
+}
+
+.simp__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.simp__rows li + li .simp__row {
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* ---- the row: initials, name and club, match, and the match meter ---- */
+/* layout-exempt: a named-area grid, the meter wraps under the row on a phone */
+.simp__row {
+  display: grid;
+  grid-template-columns: var(--simp-ini-w) minmax(0, 1fr) auto;
+  grid-template-areas: "ini who match" "meter meter meter";
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-3) var(--space-1);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.simp__row:hover {
+  background: var(--bg-canvas);
+}
+/* layout-exempt: centres two letters in the box */
+.simp__ini {
+  grid-area: ini;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--simp-ini-w);
+  height: var(--simp-ini-h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--bg-canvas);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+/* layout-exempt: name over the club line */
+.simp__who {
+  grid-area: who;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.simp__name {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-text);
+}
+.simp__name .plink {
+  font: inherit;
+  letter-spacing: var(--ls-text);
+  text-align: left;
+}
+/* layout-exempt: pill then club on one wrapping line */
+.simp__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+}
+.simp__meta .pill {
+  border-color: var(--border-stamped);
+  background: var(--accent-tint);
+  color: var(--text-heading);
+}
+/* layout-exempt: the figure over its unit, right-aligned */
+.simp__match {
+  grid-area: match;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: var(--lh-solid);
+}
+.simp__matchval {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-num-xl);
+  font-weight: var(--w-bold);
+}
+.simp__matchval small {
+  margin-left: var(--space-1);
+  color: var(--text-caption);
+  font-size: var(--fs-title-sm);
+}
+.simp__matchunit {
+  margin-top: var(--space-1);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.simp__meter {
+  grid-area: meter;
+  position: relative;
+  height: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--bg-canvas);
+}
+.simp__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--surface-stamped-ink);
+}
+
+/* ---- one neighbour against this player ---- */
+/* layout-exempt: a column of back, head, switch, plot and key */
+.simp__focus {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.simp__focus > .btn:first-child {
+  align-self: flex-start;
+}
+/* layout-exempt: initials, who, match; the row's grid without the meter */
+.simp__head {
+  display: grid;
+  grid-template-columns: var(--simp-ini-w) minmax(0, 1fr) auto;
+  grid-template-areas: "ini who match";
+  gap: var(--space-3);
+  align-items: center;
+}
+/* layout-exempt: two joined buttons */
+.simp__switch {
+  display: flex;
+}
+.simp__switch .btn {
+  flex: 1;
+}
+.simp__box {
+  padding: 0 var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+/* layout-exempt: the plot's three fixed columns, metric | rail | values */
+.simp__fhead,
+.simp__fl {
+  display: grid;
+  grid-template-columns: var(--simp-metric-w) minmax(0, 1fr) var(--simp-value-w);
+  gap: var(--space-2);
+  align-items: center;
+}
+.simp__fhead {
+  min-height: var(--space-8);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+.simp__right {
+  text-align: right;
+}
+.simp__fl {
+  min-height: var(--space-16);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.simp__fm {
+  color: var(--text-heading);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+}
+.simp__ft {
+  position: relative;
+  height: var(--space-12);
+}
+.simp__rail {
+  position: absolute;
+  inset: 50% 0 auto;
+  border-top: var(--bw-heavy) solid var(--border-rule);
+}
+.simp__grid {
+  position: absolute;
+  inset: var(--space-2) auto var(--space-2) 0;
+  border-left: var(--bw-hair) solid var(--border-rule);
+}
+/* This player's dot rides the upper track and the neighbour's the lower, so two close
+   values never cover each other. */
+/* layout-exempt: centres the initials in the dot */
+.simp__av {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--simp-dot-w);
+  height: var(--simp-dot-h);
+  margin-left: calc(var(--simp-dot-w) / -2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--bg-canvas);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+}
+.simp__av--me {
+  top: var(--space-1);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  box-shadow: 0 0 0 var(--bw-heavy) var(--surface-card);
+}
+.simp__av--them {
+  top: var(--space-5);
+}
+/* layout-exempt: this player's figure over the neighbour's */
+.simp__fv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+}
+.simp__fv b {
+  color: var(--text-heading);
+}
+.simp__fax {
+  position: relative;
+  height: var(--space-5);
+  margin: 0 calc(var(--simp-value-w) + var(--space-2)) 0 calc(var(--simp-metric-w) + var(--space-2));
+  color: var(--text-caption);
+  font-size: var(--fs-cell);
+}
+.simp__fax span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+.simp__key {
+  margin: 0;
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+}
+.simp__key b {
+  color: var(--text-heading);
+}
+
+@media (min-width: 740px) {
+  .simp {
+    --simp-ini-w: 3.75rem;
+    --simp-ini-h: 4.4rem;
+  }
+  .simp--wait {
+    min-height: 15rem;
+  }
+  .simp__row {
+    grid-template-columns: var(--simp-ini-w) minmax(0, 1fr) 12rem auto;
+    grid-template-areas: "ini who meter match";
+    padding: var(--space-4) var(--space-2);
+  }
+  .simp__name {
+    font-size: var(--fs-display-md);
+  }
+  .simp__switch .btn {
+    flex: none;
+    min-width: 7.5rem;
+  }
+}
