@@ -2,6 +2,7 @@ import { getJson } from './statsapi.js'
 import { fetchPersonStats } from './person-fetch.js'
 import { aggregateSplits } from './person/stats.js'
 import { MLB_LOG_GAME_TYPES } from './boxlines/rows.js'
+import { teamAbbr } from '../lib/teams.js'
 
 // The PLAYER page's "Recent form" card for hitters: how he's hit over his
 // last 7 / 15 / 30 games against his own full-season line — the hitter
@@ -34,12 +35,7 @@ export async function fetchHitterForm(personId, season) {
 // A game's order is its date, then its game number in a doubleheader. Two games
 // with the same line both count, so nothing is de-duplicated.
 export function hitterFormWindows(log) {
-  const games = (log ?? [])
-    .filter((g) => g?.stat)
-    .sort((a, b) =>
-      String(a.date).localeCompare(String(b.date)) ||
-      (a.game?.gameNumber ?? 0) - (b.game?.gameNumber ?? 0) ||
-      (a.game?.gamePk ?? 0) - (b.game?.gamePk ?? 0))
+  const games = inOrder(log)
   const window = (n) => {
     const rows = games.slice(-n)
     if (!rows.length) return null
@@ -47,6 +43,45 @@ export function hitterFormWindows(log) {
     return { ...stat, plateAppearances: rows.reduce((t, g) => t + (Number(g.stat.plateAppearances) || 0), 0) }
   }
   return { last7: window(7), last15: window(15), last30: window(30) }
+}
+
+// Game-log rows with a stat line, oldest first.
+const inOrder = (log) =>
+  (log ?? [])
+    .filter((g) => g?.stat)
+    .sort((a, b) =>
+      String(a.date).localeCompare(String(b.date)) ||
+      (a.game?.gameNumber ?? 0) - (b.game?.gameNumber ?? 0) ||
+      (a.game?.gamePk ?? 0) - (b.game?.gamePk ?? 0))
+
+// The form trend: the OPS of every w-game stretch, one point per game from game w
+// on, plus the best and worst stretch (the first one on a tie). Only games with a
+// plate appearance count, so a pinch-running or late-defense game does not stretch
+// a window. Null when he has fewer than w such games.
+export function rollingSeries(log, w) {
+  const games = inOrder(log).filter((g) => Number(g.stat.plateAppearances) > 0)
+  if (games.length < w) return null
+  const stretches = games.slice(w - 1).map((last, i) => {
+    const rows = games.slice(i, i + w)
+    return {
+      point: {
+        date: last.date,
+        gamePk: last.game?.gamePk,
+        opp: teamAbbr(last.opponent),
+        isHome: Boolean(last.isHome),
+        ops: Number.parseFloat(aggregateSplits(rows, 'hitting', { dedupe: false }).ops),
+      },
+      span: { startDate: rows[0].date, endDate: last.date },
+    }
+  })
+  const pick = (better) =>
+    stretches.reduce((m, s) => (better(s.point.ops, m.point.ops) ? s : m))
+  const named = ({ point, span }) => ({ ...span, ops: point.ops })
+  return {
+    points: stretches.map((s) => s.point),
+    best: named(pick((a, b) => a > b)),
+    worst: named(pick((a, b) => a < b)),
+  }
 }
 
 function statFor(data) {
