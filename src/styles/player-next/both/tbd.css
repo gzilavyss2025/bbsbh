@@ -1,0 +1,5 @@
+/* The tbd module's cards (#1896): a card still loading holds its height, so the
+   cards below it do not jump. A card with no data leaves no gap. */
+.tbd__part--wait {
+  min-height: calc(var(--space-16) * 2);
+}
