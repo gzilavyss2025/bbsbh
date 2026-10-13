@@ -81,6 +81,21 @@ export function postPitchesOf(data, personId) {
   return n
 }
 
+// ONE START'S PITCH MIX (#1915): `{ code: n }` for one pitcher in one game, from
+// public/data/pitch-arsenal-starts/{season}/{NN}.json (his %100 bucket, a season store). Its
+// own shard set: the buckets above are at their size ceiling. A completed-game aggregate like
+// the rest of this file, so it is spoiler-free (ADR-0034), but it is per GAME: call it from an open
+// surface (the player page), never from a scoring surface for a game being watched. Null for a game with no row: the
+// files fill with the re-walk, and a missing file, season or game all read the same.
+const startsShard = staticJsonBy((key) => `/data/pitch-arsenal-starts/${key}.json`)
+export async function fetchPitchMixFor(personId, gamePk, { seasonYear } = {}) {
+  if (personId == null || gamePk == null) return null
+  const season = await seasonFolderOf('pitch-arsenal-starts', seasonYear, { strict: true })
+  if (season == null || season === 'all') return null
+  const shard = await startsShard(`${season}/${shardKey100(personId)}`)
+  return shard?.pit?.[personId]?.[gamePk] ?? null
+}
+
 const pool = staticJsonBy((key) => `/data/pitch-arsenal-pool/${key}.json`)
 
 // 'all' reads pitch-arsenal-pool/all/, which the nightly run folds from the

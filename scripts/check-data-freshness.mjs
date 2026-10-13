@@ -129,7 +129,9 @@ const DEFAULT_KEYS = ['generatedAt']
 // Raised 22 -> 23 for hitter-grid/ (ADR-0096), a sharded season store like
 // pitch-command/ beside it: 101 shards a season, rewritten only when a game
 // lands. Its files arrive with the first 2026 re-walk.
-export const UNSTAMPED_BUDGET = 23
+// Raised 23 -> 24 for pitch-arsenal-starts/ (#1915), the same kind of store: 100 shards a season,
+// rewritten only when a game lands. Its files arrive with the first sweep after this change.
+export const UNSTAMPED_BUDGET = 24
 
 const dig = (obj, dotted) => dotted.split('.').reduce((o, k) => (o == null ? o : o[k]), obj)
 

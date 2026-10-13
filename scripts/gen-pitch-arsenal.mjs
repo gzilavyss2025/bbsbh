@@ -30,7 +30,7 @@
 //   node scripts/gen-pitch-arsenal.mjs --since=2026-03-20 --sports=11   # backfill AAA alone
 //   node scripts/gen-pitch-arsenal.mjs --export-only [--season=2026]    # re-export, no sweep
 //   node scripts/gen-pitch-arsenal.mjs --clear-hitters=2026 --since=2026-03-20   # hitter re-walk
-//   node scripts/gen-pitch-arsenal.mjs --clear-arsenal=2026 --since=2026-03-20   # arsenal re-walk (#1908; #1915's per-game mix hooks in here)
+//   node scripts/gen-pitch-arsenal.mjs --clear-arsenal=2026 --since=2026-03-20   # arsenal re-walk (#1908; also refills the per-start mix, #1915)
 // The --since form is the one-time / full-season backfill; nightly runs use the
 // default trailing window. Checkpoints (dump + JSON export) every 100 games so a
 // long backfill resumes cleanly. --export-only rebuilds the JSON view from the
@@ -49,6 +49,7 @@ import { CELLS, COLS, aggregateGameCommand, commandStmts, markCommandIngested, p
 import { aggregateGameHitters, clearHitterSeason, foldHitters, hitterStmts, writeHitterGrid } from './lib/pitch/hitter-grid.mjs'
 import { readXwobaTable } from './lib/pitch/xwoba.mjs'
 import { PHYS_JOIN, PHYS_SELECT, addPhys, clearArsenalSeason, emptyPhys, foldPhysRow, physMeans, physStmt, rewalkFailures } from './lib/pitch/arsenal-physics.mjs'
+import { foldStarts, writeStarts } from './lib/pitch/arsenal-starts.mjs'
 import { fetchPitcherHands } from './lib/pitch/pitcher-hands.mjs'
 import { centuryRankMap } from './lib/pitch/century-rank.mjs'
 
@@ -245,12 +246,9 @@ export function arsenalStatements(db) {
   }
 }
 
-// Fetch the feed (the only await), then fold the whole game in as one atomic
-// synchronous transaction — same pattern as gen-fouls.mjs's ingestGame.
-// `need` says which halves of the sweep this game still owes. Both totals
-// tables ADD, so re-walking a game for the command or hitter grid must NOT fold its pitch
-// types in a second time — that would silently double a season of arsenal
-// counts, and nothing downstream would look wrong until a share exceeded 100%.
+// Fetch the feed (the only await), then fold the whole game in as one atomic synchronous
+// transaction (as gen-fouls.mjs's ingestGame). `need` says which halves this game still owes:
+// the totals tables ADD, so a re-walk for the command or hitter grid must not fold the pitch types in twice.
 async function ingestGame(db, stmts, game) {
   const need = game.need ?? { arsenal: true, command: true, hitter: true }
   const feed = await getJson(`/api/v1.1/game/${game.gamePk}/feed/live`)
@@ -277,6 +275,7 @@ export function foldGame(db, stmts, { gamePk, level, date, season, scope = 'R', 
         stmts.phys.run(season, scope, id, level, code, stand, ...t.phys)
       }
     }
+    foldStarts(db, { gamePk, level, season }, pitchers)
     for (const [id, byKey] of command) {
       for (const [key, b] of byKey) {
         const [code, stand] = key.split(':')
@@ -517,6 +516,7 @@ async function writeArsenal(db, hands, season) {
   await writeShards(join(outDir, String(season)), buckets)
   await writeShards(join(outPools, String(season)), Object.entries(poolsOf(data)))
   for (const store of [outDir, outPools]) await writeSeasons(store, season)
+  await writeStarts(db, season)
 }
 
 // all/{mlb,aaa}.json over every season, with every season's hands (newest wins), #1200.

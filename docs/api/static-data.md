@@ -454,6 +454,12 @@ for each generator; the reader modules:
   became 12 KB for the mix bar and 149/194 KB for the pool. Each bucket also has
   `post`, the MLB postseason in the same shape as `pit`. The readers here read `pit`
   only, so they show the regular season only (ADR-0094); the pool has no postseason.
+  **The per-start mix** (#1915) is a third shard set, `public/data/pitch-arsenal-starts/{season}/{NN}.json`
+  (`personId % 100`, a season store): `{ season, pit: { pitcherId: { gamePk: { code: n } } } }`, the
+  pitches of each code he threw in each game, both batter sides summed, relievers too. Its own set because
+  the buckets above are at their size ceiling; per-game velocity (#1933) adds to this table later.
+  `fetchPitchMixFor(personId, gamePk, { seasonYear })` returns one `{ code: n }` or null. A missing
+  shard, season or game all read null: the files fill with the 2026 re-walk (`--clear-arsenal`).
   The `pitch-command` buckets (`commandMap.js`) have the same `post` key, and so do the
   `hitter-grid` buckets (`scout/hitterGrid.js`, ADR-0096) beside `bat`. A hitter-grid file
   with `xwoba: true` holds `xwobaBip`, and `hitterCounters` then gives `wobaSum`

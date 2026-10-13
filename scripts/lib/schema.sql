@@ -490,6 +490,17 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_physics (
   PRIMARY KEY (season, scope, person_id, level, code, stand)
 );
 
+-- The per-start pitch mix (#1915): one row per (pitcher, game, code), the count over both
+-- batter sides. Its own table and shard set, because the season buckets are at their size
+-- ceiling. The name says starts, not mix: per-game velocity (#1933) adds columns here. A game
+-- swept before this has no row, which reads as unknown until --clear-arsenal re-walks the season.
+CREATE TABLE IF NOT EXISTS pitch_arsenal_starts (
+  season INTEGER NOT NULL, level TEXT NOT NULL,
+  person_id INTEGER NOT NULL, game_pk INTEGER NOT NULL, code TEXT NOT NULL,
+  n INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (person_id, game_pk, code)
+);
+
 -- Idempotency guard, one row per (gamePk, level) — a gamePk only ever belongs
 -- to one level, but level rides along so a coverage report can split by it
 -- without a join back to a schedule call.
