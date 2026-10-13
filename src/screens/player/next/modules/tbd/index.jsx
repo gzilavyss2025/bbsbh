@@ -4,7 +4,7 @@ import { CARDS } from './Cards.jsx'
 import { tbdCards } from './tbdView.js'
 import '../../../../../styles/player-next/both/tbd.css'
 
-// The tbd module's slots (the contract is in ../../CLAUDE.md, #1896): Season, Career and
+// The tbd module's slots (the contract is in ../../CLAUDE.md, #1896): Season, On the mound, Game log, Career and
 // History each draw today's cards for their section, unchanged. Each card loads its own data
 // and hides alone; when all of a slot's cards have, the slot reports empty. Career has no
 // card left (Prospect rankings is #1927), so it renders nothing on its first render.

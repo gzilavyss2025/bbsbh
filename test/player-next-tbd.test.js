@@ -28,3 +28,16 @@ test('History: awards, team history, transactions, media, once per player', () =
   assert.deepEqual(tbdCards('history', 'hitting', both), all)
   assert.deepEqual(tbdCards('history', 'pitching', both), [])
 })
+
+test('On the mound: Target command and Command received, for a pitching role only', () => {
+  assert.deepEqual(tbdCards('on-the-mound', 'pitching', arm), ['targetcommand', 'cmdreceived'])
+  assert.deepEqual(tbdCards('on-the-mound', 'pitching', both), ['targetcommand', 'cmdreceived'])
+  assert.deepEqual(tbdCards('on-the-mound', 'hitting', bat), [])
+})
+
+test('Game log: Foul balls for a pitcher, then Milestone watch last, for either role', () => {
+  assert.deepEqual(tbdCards('game-log', 'pitching', arm), ['fouls', 'milestones'])
+  assert.deepEqual(tbdCards('game-log', 'hitting', bat), ['milestones'])
+  assert.deepEqual(tbdCards('game-log', 'hitting', both), ['milestones'])
+  assert.deepEqual(tbdCards('game-log', 'pitching', both), ['fouls', 'milestones'])
+})
