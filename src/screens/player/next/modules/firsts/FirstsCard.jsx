@@ -10,15 +10,17 @@ import '../../../../../styles/player-next/both/firsts.css'
 // builds them for his primary role only (bio.isPitcher), so the other role of a two-way
 // player has none and its card hides.
 export function FirstsCard({ bio, role, asOf, onEmpty, onCount }) {
-  const { data, error } = useAsync(() => loadPlayerHistory(bio.id, asOf), [bio.id, asOf])
-  const view = data && (role === 'pitching') === Boolean(bio.isPitcher) ? firstsView({ firsts: data.firsts, role }) : null
-  const done = Boolean(data) || Boolean(error)
+  const { data, loading: busy } = useAsync(() => loadPlayerHistory(bio.id, asOf), [bio.id, asOf])
+  // useAsync keeps the last player's data for one render after the id changes.
+  const mine = data?.bio?.id === bio.id
+  const loading = busy || Boolean(data && !mine)
+  const view = mine && (role === 'pitching') === Boolean(bio.isPitcher) ? firstsView({ firsts: data.firsts, role }) : null
   useEffect(() => {
-    if (done && !view) onEmpty()
+    if (!loading && !view) onEmpty()
     onCount(view?.count)
-  }, [done, view, onEmpty, onCount])
+  }, [loading, view, onEmpty, onCount])
 
-  if (!view) return done ? null : <div className="firsts firsts--wait" aria-busy="true" />
+  if (!view) return loading ? <div className="firsts firsts--wait" aria-busy="true" /> : null
   return (
     <div className="firsts">
       {view.rows.map((r) => (

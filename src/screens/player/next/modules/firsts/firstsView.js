@@ -24,7 +24,7 @@ export function firstsView({ firsts, role }) {
         date,
         path: f.path,
         oppId: f.oppId,
-        where: `${f.isHome ? 'vs' : 'at'} ${f.oppAbbr}`,
+        where: f.oppAbbr ? `${f.isHome ? 'vs' : 'at'} ${f.oppAbbr}` : '',
       }
     })
   if (!rows.length) return null
