@@ -25,6 +25,9 @@ const ALLOWED = {
     ['26b-player-contract.css', '.contractcard__openzone'],
     ['26d-command-map.css', '.cmdmap__chip--thin'],
     ['26e-contract-history.css', '.cthist__fuzzy'],
+    ['player-next/both/contract.css', '.cnext__st--fa'], // free agency: not reached yet, the club may still sign him
+    ['player-next/both/contract.css', '.cnext__bar--left'], // 2020: the contracted salary, not what the 60-game season paid
+    ['player-next/both/contract.css', '.cnext__bar--gap'], // a season with a row and no figure
     ['34-postseason.css', '.seed--bye'],
     ['73-spray-map.css', '.spray__chip--thin'],
     ['77-express-lane.css', '.xl__chip--placed'],

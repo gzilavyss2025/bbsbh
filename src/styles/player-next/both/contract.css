@@ -1,0 +1,279 @@
+/* THE CONTRACT CARD (#1929): inside a Slot's stamped Card, so this draws only the body.
+   Board: Contract and CareerEarnings, canvas V3RGaxTfYFsTqmB1ucTDEK. */
+/* layout-exempt: the card body is one column of parts */
+.contractcard.cnext {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+}
+.cnext--wait {
+  min-height: 26rem;
+}
+.cnext__label {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+.cnext__note {
+  margin: 0;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+/* layout-exempt: a label over a figure */
+.cnext__pay {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.cnext__salary {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-hero-lg);
+  line-height: var(--lh-solid);
+}
+.cnext__soft {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+}
+
+/* The pay rank: a bar from lowest to highest paid, a needle where he sits, a tag above. */
+.cnext__ranktop {
+  position: relative;
+  height: var(--space-5);
+}
+.cnext__tag {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  padding: var(--space-1) var(--space-2);
+  background: var(--marker);
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  white-space: nowrap;
+}
+.cnext__track {
+  height: var(--space-4);
+  margin-top: var(--space-1);
+  background: var(--surface-card);
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+.cnext__fill {
+  height: 100%;
+  background: var(--field-infield);
+  border-right: var(--space-1) solid var(--border-stamped);
+}
+.cnext__ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-1);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+
+/* layout-exempt: two tiles side by side at any width */
+.cnext__tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+/* The colour strip: one column per run of years, the year on top, the status below. */
+/* layout-exempt: a label, the strip and its legend, stacked */
+.cnext__ahead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.cnext__strip {
+  display: flex;
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+/* layout-exempt: a year cell over its status cell */
+.cnext__col {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+  border-left: var(--bw-hair) solid var(--border-stamped);
+}
+.cnext__col:first-child {
+  border-left: 0;
+}
+.cnext__yr {
+  padding: var(--space-2) 0;
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  text-align: center;
+}
+.cnext__yr--now {
+  background: var(--marker);
+}
+/* layout-exempt: a status line over its money, centred in the cell */
+.cnext__st {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: var(--space-16);
+  padding: 0 var(--space-1);
+  border-top: var(--bw-hair) solid var(--border-stamped);
+  color: var(--text-heading);
+  text-align: center;
+}
+.cnext__stlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-wide);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+}
+.cnext__stmoney {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+}
+.cnext__st--preArb {
+  background: var(--field-infield);
+}
+.cnext__st--arb {
+  background: color-mix(in srgb, var(--marker) 40%, var(--surface-card));
+}
+.cnext__st--deal {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+}
+.cnext__st--option {
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ink-0) 16%, transparent) 0 2px,
+    transparent 2px 7px
+  ) var(--surface-card);
+}
+.cnext__st--fa {
+  background: var(--surface-inset);
+  border-left: var(--bw-heavy) dashed var(--border-stamped);
+}
+.cnext__st--other {
+  background: var(--surface-card);
+}
+/* layout-exempt: swatches that wrap under a narrow card */
+.cnext__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.cnext__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.cnext__swatch {
+  display: inline-block;
+  width: var(--space-3);
+  height: var(--space-3);
+  border: var(--bw-rule) solid var(--border-stamped);
+}
+
+/* Salary history: a native details, closed until asked. */
+/* layout-exempt: the summary and its panel, stacked */
+.cnext__hist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.cnext__hist > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--space-12);
+  padding: 0 var(--space-3);
+  background: var(--surface-card);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  cursor: pointer;
+}
+.cnext__hist > summary:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+.cnext__hist[open] > summary {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+}
+.cnext__histname {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+.cnext__histsub {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.cnext__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-1);
+  height: 100px;
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+}
+.cnext__bar {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 3px;
+  background: var(--field-infield);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-bottom: 0;
+}
+.cnext__bar--left {
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ink-0) 16%, transparent) 0 2px,
+    transparent 2px 7px
+  ) var(--surface-card);
+  border-style: dashed;
+}
+.cnext__bar--gap {
+  height: var(--space-4);
+  background: transparent;
+  border-style: dashed;
+}
+.cnext__barlabels {
+  display: flex;
+  gap: var(--space-1);
+}
+/* layout-exempt: a figure over a year tick */
+.cnext__barlabels span {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  white-space: nowrap;
+}
+.cnext__barlabels strong {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}

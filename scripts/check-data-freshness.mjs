@@ -57,6 +57,7 @@ export const EXCEPT = {
   'game-notes-corroboration.json': 'hand-run audit sample, not a nightly product',
   'trade-deadline/': 'hand-run; the deadline passes once a year',
   'xwoba-table/': 'hand-run a few times a season (gen-xwoba-table.mjs, ADR-0097); a table holds for a month',
+  'xba-table/': 'built with the xwoba-table by the same run (gen-xwoba-table.mjs, ADR-0097); a table holds for a month',
   'contracts-history/': 'hand-run from committed CSVs (ADR-0066)',
   'team-seasons.json': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the file carries no clock',
   'family-ties/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
