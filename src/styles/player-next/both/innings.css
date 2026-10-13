@@ -2,7 +2,7 @@
    data loads, so the card keeps its height. */
 .pnext-inn__scope {
   width: 100%;
-  max-width: 340px;
+  max-width: 460px;
   margin-inline: auto;
 }
 .pnext-inn__scope > * {
@@ -10,11 +10,16 @@
 }
 .pnext-inn__park {
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 560 / 490;
   width: 100%;
-  max-width: 340px;
+  max-width: 460px;
   margin: 0 auto;
   container-type: inline-size;
+  --ring: max(40px, 11cqw);
+}
+.pnext-inn__park--field {
+  aspect-ratio: 4 / 3;
+  max-width: 340px;
   --ring: max(40px, 15cqw);
 }
 .pnext-inn__art {

@@ -1,7 +1,7 @@
 // The innings card's pure view (src/screens/player/next/modules/innings/inningsView.js).
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { batterView, pitcherView, ringSize, scopeOptions } from '../src/screens/player/next/modules/innings/inningsView.js'
+import { batterView, pitcherView, ringSize, scopeOptions, spotAt } from '../src/screens/player/next/modules/innings/inningsView.js'
 
 // Brice Turang, 2026 season, MLB Stats API (the board's sample).
 const turang = { positions: [{ pos: '2B', innings: '1311.2' }, { pos: 'SS', innings: '12.0' }], dh: null }
@@ -45,4 +45,11 @@ test('the pitcher ring is the starter share, summed in outs (104.0 + 5.1 is 109.
 test('a player with no MLB debut has no career scope', () => {
   assert.deepEqual(scopeOptions({ debut: '2023-04-01' }).map((s) => s.key), ['season', 'mlb'])
   assert.deepEqual(scopeOptions({}).map((s) => s.key), ['season'])
+})
+
+test('a ring stands at its position in the park\'s own feet, cropped like the board; no park uses the shared field\'s spots', () => {
+  const park = { name: 'Any Park' }
+  assert.deepEqual(spotAt('CF', park), { x: 50, y: ((235 - 74) / 490) * 100 })
+  assert.deepEqual(spotAt('C', park), { x: 50, y: ((527 - 74) / 490) * 100 })
+  assert.deepEqual(spotAt('CF', null), { x: 50, y: 12 })
 })
