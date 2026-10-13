@@ -49,15 +49,15 @@ export async function rebuildCounts(db, stmts, { season, aggregate, getFeed, che
 // The CLI half: `season` is the flag's value. Sets a non-zero exit code when any game failed.
 export async function rebuildCommand(db, stmts, season, { aggregate, getFeed, touched, writeOut }) {
   const year = Number(season)
-  if (!year) throw new Error('--rebuild-counts needs a season: --rebuild-counts=2026')
+  if (!(year > 1900)) throw new Error('--rebuild-counts needs a season: --rebuild-counts=2026')
   touched.add(year)
   const { done, failed } = await rebuildCounts(db, stmts, { season: year, aggregate, getFeed, checkpoint: writeOut })
   await writeOut()
-  console.log(`rebuilt ${year} foul_batter_counts/games from ${done} games`)
+  console.log(`rebuilt ${year} foul_batter_counts/games from ${done - failed.length} games`)
   if (!failed.length) return
   console.error(
     `${failed.length} game(s) failed and are missing from the rebuild: ${failed.map((g) => g.game_pk).join(', ')}. ` +
-      'Run the same command again to fetch them, and do not commit before it ends clean.',
+      'Run the same command again (it re-reads the whole season), and do not commit before it ends clean.',
   )
   process.exitCode = 1
 }

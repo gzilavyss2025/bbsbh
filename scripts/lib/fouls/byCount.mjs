@@ -79,23 +79,27 @@ export function foldBatterCounts(stmts, gamePk, season, scope, id, b) {
 
 // --- exports -----------------------------------------------------------------
 // personId -> its 12-cell arrays, for one season (or all, `season` null) and scope; and the
-// league's, summed over everyone. `league` is null when no row is on file, which is every
-// store until the full re-read.
-export function exportByCount(db, season, scope) {
+// league's, summed over them. Only a batter whose cells cover every PA he has (`reach[0]`, the
+// 0-0 count, is all of them) is kept: a store part-read since the cells were added shows none
+// until the full re-read, never a few nights' games as a season. `league` is null with none.
+export function exportByCount(db, season, scope, batterRows) {
   const one = season != null
   const rows = db
     .prepare(`SELECT * FROM foul_batter_counts WHERE ${one ? 'season = ? AND' : ''} scope = ?`)
     .all(...(one ? [season] : []), scope)
+  const all = {}
+  for (const r of rows) {
+    const cells = (all[r.person_id] ??= newCells())
+    for (const k of KEYS) cells[k][r.count_idx] += r[k]
+  }
   const byPerson = {}
   const league = newCells()
-  for (const r of rows) {
-    const cells = (byPerson[r.person_id] ??= newCells())
-    for (const k of KEYS) {
-      cells[k][r.count_idx] += r[k]
-      league[k][r.count_idx] += r[k]
-    }
+  for (const { person_id: id, pa } of batterRows) {
+    if (all[id]?.reach[0] !== pa) continue
+    byPerson[id] = all[id]
+    for (const k of KEYS) all[id][k].forEach((n, i) => (league[k][i] += n))
   }
-  return { byPerson, league: rows.length ? league : null }
+  return { byPerson, league: Object.keys(byPerson).length ? league : null }
 }
 
 // The middle of the best-plate-appearance foul counts of the hitters with 300+ PA, or null
@@ -120,12 +124,13 @@ export function exportGameFouls(db, season) {
 
 // The per-game rows as shard entries for writeShards: `NN.games.json` beside each bucket's
 // `NN.json`, because a busy bucket's per-game rows alone (about 1,300 of them) outweigh the
-// bucket itself. `{ games: { personId: { gamePk: [pitches, fouls, whiffs] } } }`.
-export function gameShards(byPerson, season, asOf) {
+// bucket itself. No `asOf`: a bucket with no new game then stays byte for byte as it was.
+// `{ games: { personId: { gamePk: [pitches, fouls, whiffs] } } }`.
+export function gameShards(byPerson, season) {
   const buckets = new Map()
   for (const [id, byGame] of Object.entries(byPerson)) {
     const key = `${shardKey100(id)}.games`
-    if (!buckets.has(key)) buckets.set(key, { season, asOf, games: {} })
+    if (!buckets.has(key)) buckets.set(key, { season, games: {} })
     buckets.get(key).games[id] = byGame
   }
   return [...buckets]

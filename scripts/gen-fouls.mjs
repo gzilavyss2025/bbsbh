@@ -704,7 +704,6 @@ export function exportFouls(db, season, scope = 'R') {
     ]),
   )
 
-  const { byPerson: countsOf, league: byCount } = exportByCount(db, season, scope)
   const batters = {}
   const batterRows = combine(
     rows('foul_batter_totals', '', 'person_id'),
@@ -715,6 +714,7 @@ export function exportFouls(db, season, scope = 'R') {
       cols: ['max_game_fouls', 'max_game_pk', 'max_game_pa', 'max_game_pitches', 'max_game_opp_id', 'max_game_his_score', 'max_game_opp_score'],
     },
   )
+  const { byPerson: countsOf, league: byCount } = exportByCount(db, season, scope, batterRows)
   for (const r of batterRows) {
     const pa = paHighByPerson.get(r.person_id)
     batters[r.person_id] = {
@@ -888,7 +888,7 @@ async function writeFouls(db, season) {
       }
     }
   }
-  await writeShards(join(storeDir, String(season)), [['fouls', data], ...buckets, ...gameShards(exportGameFouls(db, season), season, data.asOf)])
+  await writeShards(join(storeDir, String(season)), [['fouls', data], ...buckets, ...gameShards(exportGameFouls(db, season), season)])
   await writeSeasons(storeDir, season)
 }
 

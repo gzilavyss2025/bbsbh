@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { openDb } from '../scripts/lib/db.js'
 import { aggregateGameFouls, exportFouls, exportFoulStore, foldGame, foulStatements, scopeOfGameType, wipeTeamPitchTypes } from '../scripts/gen-fouls.mjs'
 import { exportGameFouls } from '../scripts/lib/fouls/byCount.mjs'
-import { rebuildCounts } from '../scripts/lib/fouls/rebuild.mjs'
+import { rebuildCommand, rebuildCounts } from '../scripts/lib/fouls/rebuild.mjs'
 import { withGameFouls } from '../src/api/person/gameLog.js'
 import {
   fetchBatterGameFouls,
@@ -784,7 +784,8 @@ test('rebuildCounts names a game whose feed failed, and the wipe is not undone f
   })
   assert.equal(done, 2)
   assert.deepEqual(failed.map((g) => g.game_pk), [2])
-  assert.equal(exportFouls(db, 2026).batters[10].byCount.reach[0], 1, 'only game 1 is back')
+  assert.deepEqual(Object.keys(exportGameFouls(db, 2026)[10]), ['1'], 'only game 1 is back')
+  assert.equal('byCount' in exportFouls(db, 2026).batters[10], false, 'and the cells no longer cover his PA, so none show')
 })
 
 test('foulCountCells reads fouls per swing and how the PAs ended, and is null-safe', () => {
@@ -826,4 +827,21 @@ test('fetchBatterGameFouls reads his games shard from the season store; a missin
   assert.equal(await fetchBatterGameFouls(660272), null, 'no shard in his bucket')
   assert.equal(await fetchBatterGameFouls(171), null, 'a shard that does not hold him')
   assert.equal(await fetchBatterGameFouls(null), null)
+})
+
+test('byCount is exported only where the cells cover every PA, so a part-read season shows none', async () => {
+  const db = await emptyDb()
+  foldCounts(db, 1, '2026-09-01', 2026)
+  assert.ok(exportFouls(db, 2026).batters[10].byCount)
+  // Older games the cells never read: his PA total is ahead of the cells' 0-0 count.
+  db.exec('UPDATE foul_batter_totals SET pa = pa + 5')
+  const out = exportFouls(db, 2026)
+  assert.equal('byCount' in out.batters[10], false)
+  assert.equal(out.league.byCount, null, 'nobody complete, no league cells')
+})
+
+test('rebuildCommand refuses a bare flag or a non-year', async () => {
+  const db = await emptyDb()
+  const deps = { aggregate: aggregateGameFouls, getFeed: async () => countGame(), touched: new Set(), writeOut: async () => {} }
+  for (const bad of [true, undefined, 'x', '1']) await assert.rejects(rebuildCommand(db, foulStatements(db), bad, deps), /needs a season/)
 })
