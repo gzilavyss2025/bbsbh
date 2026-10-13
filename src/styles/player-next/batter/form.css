@@ -1,0 +1,87 @@
+/* ==== THE BATTER FORM TREND MODULE (#1889) ====
+   FormModule.jsx: the reading card, the window chips, then the chart and the table
+   (both/formchart.css). It reserves its height while the game log loads. */
+
+.fform {
+  min-height: calc(var(--space-16) * 6);
+}
+/* layout-exempt: reading card and controls wrap on a phone */
+.fform__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3h) var(--space-6);
+  margin-bottom: var(--space-4);
+}
+/* layout-exempt: the big figure and its two lines wrap */
+.fform__read {
+  display: flex;
+  flex: 1 1 20rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+  align-content: center;
+  gap: var(--space-1) var(--space-4);
+  min-height: calc(var(--space-16) + var(--space-8));
+  padding: var(--space-3h) var(--space-4);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--field-wash);
+}
+.fform__big {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-2xl);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+/* layout-exempt: two lines under each other */
+.fform__lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.fform__line1 {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.fform__line2 {
+  color: var(--text-muted);
+}
+/* layout-exempt: chips and Play wrap */
+.fform__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.fform__windows {
+  display: flex;
+  gap: var(--space-2);
+}
+/* layout-exempt: legend items wrap */
+.fform__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  list-style: none;
+}
+.fform__legend b {
+  font-family: var(--font-mono);
+  color: var(--text-heading);
+}
+.fform__note {
+  margin: var(--space-3) 0 0;
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+}
+.fform > .section-head {
+  margin-top: var(--space-6);
+}
