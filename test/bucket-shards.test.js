@@ -149,6 +149,25 @@ test('a hitter-grid bucket stays small enough to be worth fetching alone', () =>
   }
 })
 
+// The hitter-grid plate file (#1911): `NN.plate.json` beside each base bucket, the same
+// `personId % 100` join, holding calledStrikes, inPlay and speedSum so the base buckets keep
+// their size. Measured 2026-10-13 on a scratch copy after the full 2026 re-walk (2,458
+// games): largest plate file 79,916 bytes (57), against a largest base bucket of 116,331
+// (57). 78 KB plus 30% is 101 KB, rounded up to 110. Until the first re-walk lands the
+// test checks nothing.
+test('a hitter-grid plate file sits where its reader will ask for it and stays small', () => {
+  if (!existsSync(new URL('../public/data/hitter-grid/seasons.json', import.meta.url))) return
+  for (const d of dirs('hitter-grid')) {
+    for (const f of readdirSync(d).filter((f) => /^\d\d\.plate\.json$/.test(f))) {
+      assert.ok(statSync(new URL(f, d)).size < 110 * 1024, `hitter-grid plate: ${f} is ${Math.round(statSync(new URL(f, d)).size / 1024)} KB`)
+      const shard = read('hitter-grid', f, d)
+      for (const id of [...Object.keys(shard.bat ?? {}), ...Object.keys(shard.post ?? {})]) {
+        assert.equal(shardKey100(id), f.slice(0, 2), `hitter-grid plate: ${id} is in ${f}`)
+      }
+    }
+  }
+})
+
 // The postseason part of the spray store (ADR-0103) is MLB only, and the ledger
 // that stops a re-sweep keys on the gamePk, so a postseason game is on it once.
 test('a spray postseason entry is MLB only, and the ledger holds each game once', () => {

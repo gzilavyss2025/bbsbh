@@ -1,0 +1,462 @@
+/* ==== NEW PLAYER PAGE: THE SPLITS CARD (#1886, boards Splits and PitcherSplits) ====
+   index.jsx imports this file. The bar and legend sit over four parts. Two row grids share the
+   cells: --slash (PA or BF, AVG/OBP/SLG, the OPS bar, HR, K%, BB%) and --era (G, IP, the ERA bar,
+   K, BB). On a phone the bar drops to a second line under its row; from 800px of card it joins
+   the row. .is-dr adds the door's chevron column. */
+
+/* Holds the card's height while the first splits load, so the page does not jump. */
+.splitsmod--wait {
+  min-height: calc(var(--space-16) * 5);
+}
+.splitsmod {
+  container-type: inline-size;
+  container-name: splitsmod;
+}
+
+/* ---- the season and scope bar ---- */
+/* layout-exempt: the bar wraps its three controls and the PA total rides the right edge */
+.splitsmod__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2h) var(--space-4);
+}
+/* layout-exempt: a caption stacked over its control */
+.splitsmod__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.splitsmod__lbl {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.splitsmod__select {
+  min-height: var(--space-12);
+  min-width: calc(var(--space-16) * 2);
+  padding: 0 var(--space-2h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font-family: var(--font-body);
+  font-size: var(--fs-field);
+  font-weight: var(--w-semibold);
+}
+.splitsmod__segs {
+  display: inline-flex;
+}
+.splitsmod__sum {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--space-12);
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+}
+.splitsmod__pa {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-field);
+}
+
+/* ---- the legend ---- */
+/* layout-exempt: a wrapping key of swatches and flags */
+.splitsmod__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1h) var(--space-3h);
+  margin: 0;
+  padding: var(--space-2h) 0 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  color: var(--text-muted);
+  font-size: var(--fs-label);
+  line-height: var(--lh-loose);
+  list-style: none;
+}
+.splitsmod__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+}
+.splitsmod__legend svg {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+.splitsmod__lgh {
+  color: var(--text-heading);
+  font-weight: var(--w-semibold);
+}
+.splitsmod__sw {
+  display: inline-block;
+  flex: none;
+  width: var(--space-5);
+  height: var(--space-2h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+.splitsmod__sw.is-pos {
+  background: var(--field);
+}
+.splitsmod__sw.is-neg,
+.splitsmod__fill.is-neg {
+  background: repeating-linear-gradient(135deg, var(--clay) 0, var(--clay) var(--space-1), var(--clay-deep) var(--space-1), var(--clay-deep) calc(var(--space-1) + var(--bw-heavy)));
+}
+.splitsmod__sw.is-thin,
+.splitsmod__fill.is-thin {
+  background: repeating-linear-gradient(90deg, var(--text-muted) 0, var(--text-muted) var(--bw-heavy), transparent var(--bw-heavy), transparent calc(var(--space-1) + var(--bw-hair)));
+}
+.splitsmod__sw.is-line {
+  width: 0;
+  height: var(--space-3h);
+  border-width: 0 0 0 var(--bw-heavy);
+}
+.splitsmod__flag {
+  flex: none;
+  display: block;
+  color: var(--text-heading);
+}
+.splitsmod__flag.is-weak {
+  color: var(--clay-deep);
+}
+
+/* ---- the pitcher's menu of the four parts ---- */
+/* layout-exempt: the menu cards share a wrapping row; picked, they shrink to a rail */
+.splitsmod__menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2h);
+}
+/* layout-exempt: a menu card stacks its title over its preview */
+.splitsmod__mc {
+  flex: 1 1 calc(var(--space-16) * 3);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: var(--space-12);
+  padding: var(--space-3) var(--space-3h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--surface-card);
+  color: var(--text-heading);
+  text-align: left;
+  cursor: pointer;
+}
+.splitsmod__mc[aria-pressed='true'] {
+  background: var(--text-body);
+  color: var(--text-on-ink);
+}
+.splitsmod__mt {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+}
+.splitsmod__mp {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+}
+.splitsmod__mh {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--text-caption);
+  font-size: var(--fs-cell);
+}
+.splitsmod__mc[aria-pressed='true'] .splitsmod__mp,
+.splitsmod__mc[aria-pressed='true'] .splitsmod__mh {
+  color: var(--text-on-ink);
+}
+.splitsmod__menu.is-rail .splitsmod__mc {
+  flex: 0 0 calc(var(--space-16) * 2);
+  padding: var(--space-1h) var(--space-3h);
+  justify-content: center;
+}
+.splitsmod__menu.is-rail .splitsmod__mt {
+  font-size: var(--fs-body);
+}
+.splitsmod__menu.is-rail .splitsmod__mx {
+  display: none;
+}
+
+/* ---- the four parts ---- */
+/* layout-exempt: the first two parts pair up from 460px of card; the career parts take the row */
+.splitsmod__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, calc(var(--space-16) * 7)), 1fr));
+  gap: var(--space-8) var(--space-6);
+  min-height: calc(var(--space-16) * 3);
+}
+.splitsmod__part {
+  min-width: 0;
+}
+.splitsmod__part--wide {
+  grid-column: 1 / -1;
+}
+.splitsmod__none,
+.splitsmod__part .hint {
+  margin: var(--space-2) 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  line-height: var(--lh-loose);
+}
+
+/* ---- the rows ---- */
+/* layout-exempt: every row kind is a fixed set of figure tracks beside one flexible name track */
+.splitsmod__grid {
+  display: grid;
+  column-gap: var(--space-1h);
+  align-items: start;
+}
+.splitsmod__grid--slash {
+  --cols: minmax(0, 1fr) calc(var(--space-1) * 7) calc(var(--space-1) * 9) calc(var(--space-1) * 5.5) calc(var(--space-1) * 7) calc(var(--space-1) * 7);
+  grid-template-columns: var(--cols);
+}
+.splitsmod__grid--era {
+  --cols: minmax(0, 1fr) calc(var(--space-1) * 6) calc(var(--space-1) * 10) calc(var(--space-1) * 6.5) calc(var(--space-1) * 6.5);
+  grid-template-columns: var(--cols);
+}
+.splitsmod__grid.is-dr {
+  grid-template-columns: var(--cols) calc(var(--space-1) * 7.5);
+}
+.splitsmod__head {
+  padding: var(--space-2) 0 var(--space-1h);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  align-items: end;
+}
+.splitsmod__head > span:not(:first-child) {
+  text-align: right;
+}
+.splitsmod__headtitle {
+  margin: 0;
+  color: var(--text-heading);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+}
+.splitsmod__wide {
+  display: none;
+}
+.splitsmod__row,
+.splitsmod__door {
+  padding: var(--space-2h) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.splitsmod__row.is-base {
+  background: var(--surface-inset);
+  box-shadow: calc(var(--space-2) * -1) 0 0 var(--surface-inset), var(--space-2) 0 0 var(--surface-inset);
+}
+.splitsmod__fam {
+  margin: 0;
+  padding: var(--space-2h) 0 var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+/* layout-exempt: the row name stacks over its screen-reader read */
+.splitsmod__label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+/* layout-exempt: the name wraps its best and weak flags beside it */
+.splitsmod__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-1h);
+  color: var(--text-heading);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-solid);
+}
+.splitsmod__row.is-base .splitsmod__name {
+  font-weight: var(--w-bold);
+}
+.splitsmod__name .is-nested {
+  padding-left: var(--space-3h);
+}
+.splitsmod__name .is-nested::before {
+  content: '\2514';
+  margin: 0 var(--space-1) 0 calc(var(--space-3h) * -1);
+  color: var(--text-caption);
+}
+.splitsmod__cell {
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
+  text-align: right;
+}
+
+/* ---- the OPS or ERA bar: a fill under a tick at the baseline, then figure, delta, thin tag ---- */
+/* layout-exempt: the bar takes the leftover width and the three figures keep fixed tracks */
+.splitsmod__ops {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) calc(var(--space-1) * 11.5) calc(var(--space-1) * 12) calc(var(--space-1) * 9);
+  column-gap: var(--space-1h);
+  align-items: center;
+  grid-column: 1 / 7;
+  grid-row: 2;
+  margin-top: var(--space-2);
+}
+.splitsmod__grid--era .splitsmod__ops {
+  grid-column: 1 / 6;
+}
+.splitsmod__track {
+  position: relative;
+  display: block;
+  height: var(--space-3h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--border-hairline);
+}
+.splitsmod__track.is-none {
+  border-color: var(--border-hairline);
+  background: transparent;
+}
+.splitsmod__fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+}
+.splitsmod__fill.is-base {
+  background: var(--text-body);
+}
+.splitsmod__fill.is-pos {
+  background: var(--field);
+}
+.splitsmod__tick {
+  position: absolute;
+  z-index: 1;
+  top: calc(var(--space-1h) * -1);
+  bottom: calc(var(--space-1h) * -1);
+  width: 0;
+  border-left: var(--bw-heavy) solid var(--border-stamped);
+}
+.splitsmod__fig {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-align: right;
+}
+.splitsmod__delta {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  text-align: right;
+}
+.splitsmod__delta.is-pos {
+  color: var(--accent-positive);
+}
+.splitsmod__delta.is-neg {
+  color: var(--clay);
+}
+.splitsmod__thin {
+  padding: 0 var(--space-1);
+  border: var(--bw-hair) dotted var(--text-muted);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
+  text-align: center;
+}
+
+/* ---- a door row: the row, as a button ---- */
+.splitsmod__door {
+  display: block;
+  min-height: var(--space-12);
+  padding: var(--space-2h) 0;
+  border-radius: 0;
+}
+.splitsmod__door .splitsmod__grid {
+  width: 100%;
+}
+.splitsmod__door.is-sub {
+  width: calc(100% - var(--space-1h));
+  margin-left: var(--space-1h);
+  padding-left: var(--space-2h);
+  border-left: var(--bw-heavy) solid var(--border-stamped);
+}
+.splitsmod__chev {
+  grid-column: 7;
+  grid-row: 1 / 3;
+  align-self: center;
+  justify-self: end;
+  display: flex;
+  color: var(--text-heading);
+}
+.splitsmod__grid--era .splitsmod__chev {
+  grid-column: 6;
+}
+.splitsmod__grid.is-list .splitsmod__label {
+  grid-column: 1 / 7;
+}
+.splitsmod__grid--era.is-list .splitsmod__label {
+  grid-column: 1 / 6;
+}
+.splitsmod__grid.is-list .splitsmod__chev {
+  grid-row: 1;
+}
+
+/* ---- from 800px of card: the bar joins the row and the long headings show ---- */
+@container splitsmod (min-width: 800px) {
+  .splitsmod__wide {
+    display: inline;
+  }
+  .splitsmod__head > .splitsmod__wide {
+    display: block;
+  }
+  .splitsmod__grid {
+    column-gap: var(--space-3);
+    align-items: center;
+  }
+  .splitsmod__grid--slash {
+    --cols: minmax(var(--space-16), 0.8fr) calc(var(--space-1) * 11) calc(var(--space-1) * 30) minmax(calc(var(--space-16) * 3.75), 1.6fr) calc(var(--space-1) * 9) calc(var(--space-1) * 11) calc(var(--space-1) * 11);
+  }
+  .splitsmod__grid--era {
+    --cols: minmax(var(--space-16), 0.8fr) calc(var(--space-1) * 9) calc(var(--space-1) * 13) minmax(calc(var(--space-16) * 3.75), 1.6fr) calc(var(--space-1) * 10) calc(var(--space-1) * 10);
+  }
+  .splitsmod__ops,
+  .splitsmod__grid--era .splitsmod__ops {
+    grid-column: auto;
+    grid-row: auto;
+    margin-top: 0;
+    grid-template-columns: minmax(0, 1fr) calc(var(--space-1) * 12) calc(var(--space-1) * 13) calc(var(--space-1) * 9.5);
+  }
+  .splitsmod__chev,
+  .splitsmod__grid--era .splitsmod__chev,
+  .splitsmod__grid.is-list .splitsmod__chev {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .splitsmod__grid.is-list .splitsmod__label {
+    grid-column: 1 / 8;
+  }
+  .splitsmod__grid--era.is-list .splitsmod__label {
+    grid-column: 1 / 7;
+  }
+  .splitsmod__cell {
+    font-size: var(--fs-small);
+  }
+}

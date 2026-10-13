@@ -11,7 +11,7 @@ import { FOUL_CODES, WHIFF_CODES } from '../../src/api/playbyplay/pitchInfo.js'
 // command sweep needs both, and a second copy of MLB's own code table is
 // exactly the drift that file's header warns about — so they are named here
 // once, beside the two it does export, and pinned by test/command-aggregate.test.js.
-const CALLED_STRIKE_COMMAND_CODES = new Set(['C', 'K', 'A', 'AB', 'AC'])
+export const CALLED_STRIKE_COMMAND_CODES = new Set(['C', 'K', 'A', 'AB', 'AC'])
 export const INPLAY_COMMAND_CODES = new Set(['D', 'X', 'E', 'J', 'Y', 'Z'])
 
 // ---------------------------------------------------------------------------
