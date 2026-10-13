@@ -8,9 +8,9 @@ import { teamClubName } from '../../../../../lib/teams.js'
 // name). Today's org list has no depth in the store, so it draws no bar.
 const bar = (rank, of) => Math.round(((of + 1 - rank) / of) * 100)
 
-export function prospectsView({ history, snapshot, playerId, debutYear }) {
+export function prospectsView({ history, snapshot, playerId, debutYear, currentSeason }) {
   const { rank, orgRank, orgTeamId } = prospectBadge(snapshot, playerId)
-  const base = prospectRankView({ history, playerId, debutYear, currentRank: rank })
+  const base = prospectRankView({ history, playerId, debutYear, currentRank: rank, currentSeason })
   const entries = base?.entries ?? (rank ? [{ kind: 'today', rank }] : [])
 
   let prev = null
@@ -41,7 +41,7 @@ export function prospectsView({ history, snapshot, playerId, debutYear }) {
   return {
     rows,
     badge: lists ? `${lists} ${lists === 1 ? 'list' : 'lists'}` : 'Prospect',
-    note: base || !rank ? '' : 'No earlier lists on file. Bars show place on a 100-deep list: longer is higher.',
+    note: base ? base.note : !rank ? '' : 'No earlier lists on file. Bars show place on a 100-deep list: longer is higher.',
     credits: base?.credits ?? [],
   }
 }
