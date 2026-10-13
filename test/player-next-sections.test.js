@@ -144,6 +144,7 @@ test('with every slot a stub, all nine batter buttons show', () => {
 test('a stub module renders its placeholder line: it never returns null or calls onEmpty', () => {
   for (const slot of SLOTS) {
     const src = readFileSync(new URL(`../src/screens/player/next/modules/${slot.module}/index.jsx`, import.meta.url), 'utf8')
+    if (!/loads here\./.test(src)) continue // a built module (its issue landed) follows the contract's no-data path
     assert.ok(!/return null/.test(src), `${slot.module} returns null`)
     assert.ok(!/onEmpty\(/.test(src), `${slot.module} calls onEmpty`)
   }
