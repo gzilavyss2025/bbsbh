@@ -24,6 +24,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { HIT_COORD_ORIGIN } from '../src/lib/ballpark/hitProjection.js'
 import { aggregateGameSpray, foldGame } from '../scripts/gen-spray.mjs'
+import { readXwobaTable } from '../scripts/lib/pitch/xwoba.mjs'
 import {
   MIN_SPRAY_BIP,
   MIN_SPLIT_BIP,
@@ -33,11 +34,13 @@ import {
   directionMix,
   directionOf,
   hrNote,
+  isBarrel,
   splitBalls,
   splitTotals,
   sprayAngle,
   sprayScopeOf,
   sprayView,
+  withSeasonRuns,
 } from '../src/api/spray.js'
 
 // A coordinate `deg` degrees off dead centre, `units` out from the origin —
@@ -195,6 +198,14 @@ test('decodeSprayBalls names every stored column', () => {
     // An entry with no park runs (stored before schema v2): park unknown.
     venueId: null,
     season: null,
+    gamePk: null,
+    // An 8-column row (stored before the contact columns): unknown, never 0.
+    launchAngle: null,
+    distance: null,
+    xba: null,
+    pitchType: null,
+    pitchSpeed: null,
+    barrel: null,
   })
 })
 
@@ -409,8 +420,8 @@ test('aggregateGameSpray records one row per tracked ball in play', () => {
   const agg = aggregateGameSpray(gameFeed([gamePlay({}), gamePlay({ eventType: 'home_run' })]), 'mlb')
   const one = agg.get(660271)
   assert.equal(one.rows.length, 2)
-  assert.deepEqual(one.rows[0].slice(2), [96.2, 1, 0, 0, 0, 500001])
-  assert.deepEqual(one.rows[1].slice(3), [4, 0, 0, 0, 500001])
+  assert.deepEqual(one.rows[0].slice(2, 8), [96.2, 1, 0, 0, 0, 500001])
+  assert.deepEqual(one.rows[1].slice(3, 8), [4, 0, 0, 0, 500001])
 })
 
 test('aggregateGameSpray counts hits, extra bases, home runs and hard contact', () => {
@@ -531,4 +542,94 @@ test('a picked scope the card cannot serve falls back to Regular, so the footer 
   assert.equal(sprayScopeOf(withPost, 'P'), 'P')
   assert.equal(sprayScopeOf(withPost, 'A'), 'A')
   assert.equal(sprayScopeOf(withPost, 'R'), 'R')
+})
+
+// ------------------------------------------------- contact columns (#1912) ----
+//
+// Five columns follow pitcherId: launchAngle, totalDistance, xBA (thousandths,
+// from the season's xBA lattice), pitch type and pitch speed. `g` runs carry the
+// gamePk. Shards written before this hold 8-column rows and [count, venue] runs,
+// and a nightly run before the rebuild folds new rows into them, so a reader meets
+// all of it in one entry.
+
+// An xBA lattice (scripts/lib/pitch/xwoba.mjs's shape) that reads .312 at 96 mph, 25 degrees.
+const xbaTable = () => {
+  const rows = Array.from({ length: 126 }, () => new Array(181).fill(100))
+  rows[96][25 + 90] = 312
+  return { rows }
+}
+const contactEvent = (extra = {}) => ({
+  details: { code: 'X', type: { code: 'SI' } },
+  pitchData: { startSpeed: 93.4 },
+  hitData: { launchSpeed: 96.2, launchAngle: 25, totalDistance: 301, coordinates: { coordX: 100, coordY: 120 } },
+  ...extra,
+})
+
+test('aggregateGameSpray stores launch angle, distance, xBA, pitch type and pitch speed', () => {
+  const agg = aggregateGameSpray(gameFeed([gamePlay({ events: [contactEvent()] })]), 'mlb', xbaTable())
+  assert.deepEqual(agg.get(660271).rows[0].slice(8), [25, 301, 312, 'SI', 93.4])
+})
+
+test('aggregateGameSpray stores a null xBA with no table, or with no exit velocity or angle', () => {
+  const noTable = aggregateGameSpray(gameFeed([gamePlay({ events: [contactEvent()] })]), 'mlb')
+  assert.equal(noTable.get(660271).rows[0][10], null)
+  const noAngle = contactEvent()
+  delete noAngle.hitData.launchAngle
+  const row = aggregateGameSpray(gameFeed([gamePlay({ events: [noAngle] })]), 'mlb', xbaTable()).get(660271).rows[0]
+  assert.deepEqual(row.slice(8, 11), [null, 301, null])
+})
+
+test('aggregateGameSpray stores nulls for a ball with no pitch data', () => {
+  const bare = { hitData: contactEvent().hitData }
+  const row = aggregateGameSpray(gameFeed([gamePlay({ events: [bare] })]), 'mlb').get(660271).rows[0]
+  assert.deepEqual(row.slice(11), [null, null])
+})
+
+test('the xBA lattice for 2026 is on file and reads as a table', () => {
+  const table = readXwobaTable(2026, 'xba-table')
+  assert.equal(table.rows.length, 126)
+  assert.equal(readXwobaTable(2026, 'xba-table-none'), null)
+})
+
+test('foldGame writes [count, venueId, gamePk] runs: one per game, even at one park', () => {
+  const store = {}
+  const two = aggregateGameSpray(gameFeed([gamePlay({}), gamePlay({})]), 'mlb')
+  foldGame(store, two, '2026-04-01', 17, 801)
+  foldGame(store, aggregateGameSpray(gameFeed([gamePlay({})]), 'mlb'), '2026-04-02', 17, 802)
+  assert.deepEqual(store[660271].g, [[2, 17, 801], [1, 17, 802]])
+})
+
+test('foldGame onto a shard written before the runs and the contact columns', () => {
+  const old = entryOf({ p: [row(-30), row(10)], g: [[2, 17]], d: '2026-04-01' })
+  const store = { 660271: old }
+  foldGame(store, aggregateGameSpray(gameFeed([gamePlay({ events: [contactEvent()] })]), 'mlb', xbaTable()), '2026-04-02', 17, 802)
+  assert.deepEqual(store[660271].g, [[2, 17], [1, 17, 802]])
+  const [a, , c] = decodeSprayBalls(store[660271], 2026)
+  assert.equal(a.xba, null)
+  assert.equal(a.gamePk, null)
+  assert.deepEqual([c.xba, c.pitchType, c.gamePk, c.venueId], [0.312, 'SI', 802, 17])
+})
+
+test('decodeSprayBalls reads a new row: contact columns, gamePk and the barrel flag', () => {
+  const entry = entryOf({ p: [[100, 80, 100, 4, 0, 0, 0, 9, 28, 410, 760, 'FF', 95.5]], g: [[1, 17, 801]] })
+  const [ball] = decodeSprayBalls(entry, 2026)
+  assert.deepEqual(
+    [ball.launchAngle, ball.distance, ball.xba, ball.pitchType, ball.pitchSpeed, ball.barrel, ball.gamePk],
+    [28, 410, 0.76, 'FF', 95.5, true, 801],
+  )
+})
+
+test('a run keeps its gamePk when an all-seasons view stamps the season on it', () => {
+  const stamped = withSeasonRuns(entryOf({ p: [row(0), row(5)], g: [[1, 17, 801], [1, 17]] }), 2025)
+  const balls = decodeSprayBalls(stamped)
+  assert.deepEqual(balls.map((b) => [b.gamePk, b.season]), [[801, 2025], [null, 2025]])
+})
+
+test('isBarrel follows the Savant zone: 98 mph needs 26-30 degrees, 116 mph 8-50', () => {
+  const yes = [[98, 26], [98, 30], [99, 25], [99, 31], [100, 24], [116, 8], [116, 50], [120, 8]]
+  const no = [[98, 25], [98, 31], [97.9, 28], [99, 24], [100, 23], [116, 7], [116, 51], [80, 28]]
+  for (const [ev, la] of yes) assert.equal(isBarrel(ev, la), true, `${ev} mph ${la}°`)
+  for (const [ev, la] of no) assert.equal(isBarrel(ev, la), false, `${ev} mph ${la}°`)
+  assert.equal(isBarrel(null, 28), null)
+  assert.equal(isBarrel(100, null), null)
 })

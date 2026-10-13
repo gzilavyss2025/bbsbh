@@ -26,16 +26,26 @@ import { resolveBallparkLayout } from '../lib/ballpark/layout/resolveLayout.js'
 //
 //   { season, asOf, bat: { [batterId]: {
 //       n: name, t: teamId, b: 'R' | 'L' | 'S',
-//       p: [ [coordX, coordY, launchSpeed, result, hand, side, level, pitcherId], … ],
-//       g: [ [count, venueId], … ],
+//       p: [ [coordX, coordY, launchSpeed, result, hand, side, level, pitcherId,
+//             launchAngle, totalDistance, xBA, pitchType, pitchSpeed], … ],
+//       g: [ [count, venueId, gamePk], … ],
 //       o: { R: [bip, hits, xbh, hr, hard], L: [ … ] } } } }
 //
 // `g` (schema version 2, the bucket's `v`) names the PARK of each row without a
 // column on every row: the next `count` rows of `p` were hit at Stats API venue
-// `venueId` (null: the feed named none). Consecutive games at one park merge
-// into one run. An entry written before version 2 has no `g`; its balls read as
-// "park unknown", never as a guessed park. Venue and season pick the wall, since
-// every ballpark configuration covers whole seasons (#1859).
+// `venueId` (null: the feed named none), in game `gamePk` (one run per game,
+// #1912). An entry written before version 2 has no `g`; its balls read as
+// "park unknown", never as a guessed park. A run written before the gamePk is
+// [count, venueId] and reads as an unknown game. Venue and season pick the wall,
+// since every ballpark configuration covers whole seasons (#1859).
+//
+// THE CONTACT COLUMNS (#1912), the last five of a row: launch angle (degrees),
+// total distance (feet), the ball's xBA in thousandths (the season's xBA lattice,
+// public/data/xba-table/, read with exit velocity and launch angle), the pitch's
+// type code and its speed. Each is null when the feed or the table had none. A row
+// stored before them is 8 long, and a shard between the code change and the full
+// rebuild holds both lengths, so every column past pitcherId reads as unknown when
+// absent. The barrel flag is not stored: isBarrel derives it at read time.
 //
 // `p` is one row per ball in play the park gave a landing point, in RAW Gameday
 // coordinates — the projection to SVG happens at render time, so the stored
@@ -124,7 +134,17 @@ function entryFor(data, personId, part = 'bat') {
 // (a pre-run entry gets one unknown run). Null in, null out.
 export function withSeasonRuns(entry, season) {
   if (!entry) return null
-  return { ...entry, g: coveringRuns(entry).map(([n, v, s]) => [n, v, s ?? season]) }
+  return { ...entry, g: coveringRuns(entry).map(([n, v, pk, s]) => [n, v, pk ?? null, s ?? season]) }
+}
+
+// Savant's barrel zone, from exit velocity and launch angle: at least 98 mph, and
+// at 98 mph a 26-30 degree angle that widens a little each mph (25-31 at 99) to
+// 8-50 degrees at 116 mph. Written as the line pair the Statcast barrel code uses
+// (as I recall it from the baseballr package, not checked against a Savant page);
+// its ends match Savant's published 98 and 116 mph ends. Null when either is missing.
+export function isBarrel(ev, la) {
+  if (ev == null || la == null) return null
+  return ev >= 98 && la >= 8 && la <= 50 && 1.5 * ev - la >= 117 && ev + la >= 124
 }
 
 // The compact rows as objects. Called once per view; every filter downstream
@@ -133,8 +153,8 @@ export function withSeasonRuns(entry, season) {
 // park (`venueId: null`).
 export function decodeSprayBalls(entry, season = null) {
   const park = []
-  for (const [n, v, s] of entry?.g ?? []) for (let i = 0; i < n; i++) park.push([v ?? null, s ?? season])
-  return (entry?.p ?? []).map(([x, y, ev, r, h, s, l, pid], i) => ({
+  for (const [n, v, pk, s] of entry?.g ?? []) for (let i = 0; i < n; i++) park.push([v ?? null, s ?? season, pk ?? null])
+  return (entry?.p ?? []).map(([x, y, ev, r, h, s, l, pid, la, dist, xba, pt, ps], i) => ({
     x,
     y,
     exitVelo: ev ?? null,
@@ -145,6 +165,13 @@ export function decodeSprayBalls(entry, season = null) {
     pitcherId: pid ?? null,
     venueId: park[i]?.[0] ?? null,
     season: park[i]?.[1] ?? season,
+    gamePk: park[i]?.[2] ?? null,
+    launchAngle: la ?? null,
+    distance: dist ?? null,
+    xba: xba == null ? null : xba / 1000,
+    pitchType: pt ?? null,
+    pitchSpeed: ps ?? null,
+    barrel: isBarrel(ev, la),
   }))
 }
 

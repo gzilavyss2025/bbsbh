@@ -496,7 +496,7 @@ for each generator; the reader modules:
   filler. See `.scratch/player-profile-card/scope.md` §4.
 - `spray.js` — one batter's season balls in play and where they landed (and,
   from schema version 2, at which park: `g` runs, decoded onto each ball as
-  `venueId` and `season`; `sprayParks` groups a view's balls by the ballpark
+  `venueId`, `season` and `gamePk`; `sprayParks` groups a view's balls by the ballpark
   configuration they were hit at, and `parkSubview` narrows a view to one park
   with every count recomputed from its balls, #1859), from
   `public/data/spray/{season}/{NN}.json` (`gen-spray.mjs`, nightly, buckets on
@@ -510,8 +510,12 @@ for each generator; the reader modules:
   reveal-only module.
   **Two numbers per split, not one.** `p` holds one fixed-length row per ball
   the park gave a landing point ( `[coordX, coordY, launchSpeed, result, hand,
-  side, level, pitcherId]` — positional because a season is ~190,000 rows and
-  eight spelled-out keys apiece quadruples the committed bytes); `o` holds the
+  side, level, pitcherId, launchAngle, totalDistance, xBA, pitchType,
+  pitchSpeed]` — positional because a season is ~190,000 rows and
+  thirteen spelled-out keys apiece would multiply the committed bytes; the last five are the
+  contact columns, #1912: xBA is thousandths from the season's xBA lattice, `isBarrel`
+  derives the barrel flag at read time, and a row or `g` run stored before them
+  reads as unknown, so one shard may hold both shapes); `o` holds the
   per-pitcher-hand TOTALS, swept independently. They differ by about one ball in
   two thousand, and home runs are among them — so `hrNote` prints "16 of 17 HR
   had tracked landing points" rather than letting the card under-report a man's

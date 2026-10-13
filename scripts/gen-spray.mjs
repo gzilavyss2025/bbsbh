@@ -69,6 +69,11 @@
 //   node scripts/gen-spray.mjs --since=2026-09-29 --sports=1    # backfill the postseason
 //   node scripts/gen-spray.mjs --season=2026 --since=2026-09-20  # name the season
 //   node scripts/gen-spray.mjs --season=2026 --rebuild   # sweep the season again from scratch
+// THE CONTACT COLUMNS (#1912) changed the row without a version bump, on purpose: a
+// bump would make the nightly cron rebuild the season. Rows and `g` runs written
+// before it stay as they are, and a nightly run folds new-shape rows onto them in the
+// same shard (the reader takes both). The full rebuild is a separate run:
+//   node scripts/gen-spray.mjs --season=2026 --rebuild
 // A season stored under an older schema version rebuilds itself on the next
 // run (see SCHEMA_VERSION), so the nightly cron performs that migration.
 // The --since form is the one-time / full-season backfill; nightly runs use the
@@ -80,6 +85,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { readJsonOr, writeJsonAtomic, writeSeasons, writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { coveringRuns } from '../src/lib/seasons/combine.js'
+import { readXwobaTable, xwobaOf } from './lib/pitch/xwoba.mjs'
 import { round1 } from '../src/lib/math/number.js'
 import { HARD_HIT_MPH } from '../src/lib/ballpark/hitProjection.js'
 import { parseArgs, dateRange, isoDay } from './lib/args.mjs'
@@ -113,11 +119,15 @@ const FEED_FIELDS = [
   'fullName', 'batSide', 'code', 'liveData', 'plays', 'allPlays', 'about',
   'halfInning', 'result', 'eventType', 'matchup', 'batter', 'pitcher',
   'pitchHand', 'playEvents', 'hitData', 'coordinates', 'coordX', 'coordY',
-  'launchSpeed', 'venue',
+  'launchSpeed', 'venue', 'launchAngle', 'totalDistance', 'pitchData', 'startSpeed',
+  'details', 'type',
 ].join(',')
 // `venue` (with `id`, already above) keeps gameData.venue.id: the park each
 // ball was hit in, for the park view (#1859). Measured on gamePk 823427: the
-// body grows by the venue's id alone.
+// body grows by the venue's id alone. `launchAngle`, `totalDistance`, `pitchData`,
+// `startSpeed`, `details` and `type` carry the contact columns (#1912): the pitch
+// type is `details.type.code` on the event that holds the hitData ('SI' on gamePk
+// 823427; `details.code` is the play's own 'X'), the speed is `pitchData.startSpeed`.
 
 // THE STORE'S SCHEMA VERSION, written into every bucket as `v`. Version 2 adds
 // the park runs (`g`, see foldGame). A season whose buckets are older is
@@ -131,7 +141,11 @@ export const SCHEMA_VERSION = 2
 // --- the stored row's coded columns -----------------------------------------
 //
 // One row per tracked ball in play:
-//   [coordX, coordY, launchSpeed, result, hand, side, level, pitcherId]
+//   [coordX, coordY, launchSpeed, result, hand, side, level, pitcherId,
+//    launchAngle, totalDistance, xBA (thousandths), pitchType, pitchSpeed]
+// The last five (#1912) are absent from a row stored before them, and a nightly run
+// before the full rebuild folds new rows onto old ones in the same shard, so a
+// reader takes either length (decodeSprayBalls).
 // Positional and integer-coded, because a season is ~190,000 of them and
 // spelling out eight keys apiece multiplies the committed bytes by four for
 // nothing a reader gains. src/api/spray.js's decodeSprayBalls names them back.
@@ -151,10 +165,10 @@ const LEVEL_CODE = { mlb: 0, aaa: 1 }
 // api/hitchart.js's selectPlayBattedBall follows. A park that tracks a foul
 // ball records it exactly the way it records the ball that ended the at-bat,
 // and it is the terminal one the play's result describes.
-function lastHitData(play) {
+function lastBattedEvent(play) {
   const events = play?.playEvents ?? []
   for (let i = events.length - 1; i >= 0; i--) {
-    if (events[i]?.hitData) return events[i].hitData
+    if (events[i]?.hitData) return events[i]
   }
   return null
 }
@@ -171,7 +185,8 @@ const RESULT_OF = {
 // Walks one game's live feed and returns each batter's deltas. No network, no
 // disk — a pure function of the feed, so a synthetic fixture can drive the exact
 // counting rules. Shape: Map batterId -> { name, teamId, bats, rows, totals },
-// where `totals` is { R | L: [bip, hits, xbh, hr, hard] }.
+// where `totals` is { R | L: [bip, hits, xbh, hr, hard] }. `xba` is the season's
+// xBA lattice (readXwobaTable(season, 'xba-table')), or null: the ball's xBA is then null.
 //
 // TOTALS AND ROWS ARE COUNTED SEPARATELY, on purpose. A ball in play with no
 // landing point still counts in the totals and contributes no row — rare (about
@@ -179,7 +194,7 @@ const RESULT_OF = {
 // the totals for its numbers and the rows for its marks, then says so when the
 // two disagree. Deriving the totals from the rows instead would under-report a
 // man's home runs forever, with nothing on screen to show it.
-export function aggregateGameSpray(feed, level) {
+export function aggregateGameSpray(feed, level, xba = null) {
   const plays = feed?.liveData?.plays?.allPlays ?? []
   const awayId = feed?.gameData?.teams?.away?.id ?? null
   const homeId = feed?.gameData?.teams?.home?.id ?? null
@@ -190,8 +205,9 @@ export function aggregateGameSpray(feed, level) {
   for (const play of plays) {
     const half = play?.about?.halfInning
     if (half !== 'top' && half !== 'bottom') continue
-    const hitData = lastHitData(play)
-    if (!hitData) continue
+    const event = lastBattedEvent(play)
+    if (!event) continue
+    const hitData = event.hitData
 
     const batterId = play?.matchup?.batter?.id
     if (batterId == null) continue
@@ -219,6 +235,7 @@ export function aggregateGameSpray(feed, level) {
     const side = play?.matchup?.batSide?.code === 'L' ? 'L' : 'R'
     const result = RESULT_OF[play?.result?.eventType] ?? 'out'
     const exitVelo = hitData.launchSpeed ?? null
+    const launchAngle = hitData.launchAngle ?? null
 
     const totals = entry.totals[hand] ?? (entry.totals[hand] = [0, 0, 0, 0, 0])
     totals[0] += 1
@@ -239,6 +256,11 @@ export function aggregateGameSpray(feed, level) {
       HAND_CODE[side],
       levelCode,
       play?.matchup?.pitcher?.id ?? null,
+      launchAngle == null ? null : round1(launchAngle),
+      hitData.totalDistance == null ? null : round1(hitData.totalDistance),
+      xba && exitVelo != null && launchAngle != null ? Math.round(1000 * xwobaOf(xba, exitVelo, launchAngle)) : null,
+      event.details?.type?.code ?? null,
+      event.pitchData?.startSpeed == null ? null : round1(event.pitchData.startSpeed),
     ])
   }
   return batters
@@ -255,16 +277,15 @@ export function aggregateGameSpray(feed, level) {
 // from whichever fetch happened to land last.
 //
 // THE PARK RUNS (`g`, schema version 2). `venueId` is the Stats API venue id
-// of the game. Each entry keeps `g: [[count, venueId], …]`: the next `count`
-// rows of `p` were hit at `venueId`. A run per GAME would do; consecutive games
-// at one park (a home stand) merge into one run, so a season costs about
-// twenty-five runs a batter, not a column on every one of his ~450 rows (a
-// column would push the largest bucket past bucket-shards.test.js's 160 KB
-// ceiling). The season is the folder's, and every ballpark configuration
+// of the game. Each entry keeps `g: [[count, venueId, gamePk], …]`: the next `count`
+// rows of `p` were hit at `venueId`, in game `gamePk` (#1912). One run per GAME,
+// not a column on every one of his ~450 rows (a column would push the largest
+// bucket past bucket-shards.test.js's 160 KB ceiling). A run stored before the
+// gamePk is [count, venueId]; it stays as it is. The season is the folder's, and every ballpark configuration
 // covers whole seasons (lib/ballpark/layout/configurations.js), so venue and
 // season are all a reader needs to pick the wall. A null venue is a game the
 // feed named no park for.
-export function foldGame(store, agg, date, venueId = null) {
+export function foldGame(store, agg, date, venueId = null, gamePk = null) {
   for (const [batterId, delta] of agg) {
     const entry = store[batterId] ?? (store[batterId] = { n: '', t: null, b: null, d: null, p: [], o: {} })
     if (entry.d == null || date >= entry.d) {
@@ -278,8 +299,8 @@ export function foldGame(store, agg, date, venueId = null) {
       // so `g` always covers `p` exactly (a rebuild makes this a no-op).
       const runs = (entry.g = coveringRuns(entry))
       const last = runs[runs.length - 1]
-      if (last && last[1] === venueId) last[0] += delta.rows.length
-      else runs.push([delta.rows.length, venueId])
+      if (last && last[1] === venueId && last[2] === gamePk) last[0] += delta.rows.length
+      else runs.push([delta.rows.length, venueId, gamePk])
     }
     for (const row of delta.rows) entry.p.push(row)
     for (const [hand, totals] of Object.entries(delta.totals)) {
@@ -416,14 +437,14 @@ async function main() {
       if (!g) return
       try {
         const feed = await getJson(`/api/v1.1/game/${g.gamePk}/feed/live?fields=${FEED_FIELDS}`)
-        const agg = aggregateGameSpray(feed, g.level)
+        const agg = aggregateGameSpray(feed, g.level, readXwobaTable(season, 'xba-table'))
         // A decided game with no tracked contact at all is either a very short
         // weather-shortened game or a `fields` allowlist that has stopped
         // matching the feed. Neither should fail the run, and neither should
         // pass unremarked — a silent zero is how a 30x bandwidth saving turns
         // into an empty dataset nobody notices.
         if (agg.size === 0) empty += 1
-        foldGame(g.post ? store.post : store.bat, agg, g.date, feed?.gameData?.venue?.id ?? null)
+        foldGame(g.post ? store.post : store.bat, agg, g.date, feed?.gameData?.venue?.id ?? null, g.gamePk)
         ingested.add(g.gamePk)
       } catch (err) {
         console.error(`gamePk ${g.gamePk} (${g.level}): ${err.message}`)
