@@ -7,11 +7,13 @@ import { INPLAY_COMMAND_CODES } from '../command-grid.mjs'
 import { shardKey100 } from '../../../src/lib/shardKey.js'
 
 const CELLS = 12 // balls 0-3 x strikes 0-2; the cell is balls * 3 + strikes
-const KEYS = ['reach', 'fouls', 'swings', 'hit', 'walk', 'so', 'out']
+export const BATTER_KEYS = ['reach', 'fouls', 'swings', 'hit', 'walk', 'so', 'out']
 const WALKS = new Set(['walk', 'intent_walk', 'hit_by_pitch'])
 const STRIKEOUTS = new Set(['strikeout', 'strikeout_double_play'])
 
-export const newCells = () => Object.fromEntries(KEYS.map((k) => [k, new Array(CELLS).fill(0)]))
+export const PITCHER_KEYS = [...BATTER_KEYS, 'pitches'] // + the pitches thrown from the count: what every game adds (#1993)
+export const newCells = (keys = BATTER_KEYS) => Object.fromEntries(keys.map((k) => [k, new Array(CELLS).fill(0)]))
+export const newPitcherCells = () => newCells(PITCHER_KEYS)
 // The batter's plate appearance in progress (`b.cur`): its count, and the cells it has been in
 // (it starts in 0-0). A non-PA play (a steal) leaves it for the same batter's resumed at-bat.
 const newPa = () => ({ balls: 0, strikes: 0, reached: new Set([0]) })
@@ -21,18 +23,24 @@ const endOf = (eventType) =>
 
 // Walks one play's events for batter `b`; `fresh` starts a new plate appearance. The count
 // BEFORE a pitch is the count of the event before it, pitch or not: a pitch-clock violation
-// adds a ball with no pitch (gamePk 823035).
-export function tallyPitches(b, fresh, play) {
+// adds a ball with no pitch (gamePk 823035). The pitcher `p` of the play gets the same
+// tallies (#1993): the pitches he threw, so his cells sum to his own `fouls`.
+export function tallyPitches(b, fresh, play, p) {
   if (fresh) b.cur = newPa()
-  const { cells, cur: pa } = b
+  const sides = p ? [b.cells, p.cells] : [b.cells]
+  const pa = b.cur
   for (const e of play.playEvents ?? []) {
     if (e.isPitch) {
       const at = pa.balls * 3 + pa.strikes
       pa.reached.add(at)
       const call = pitchCallCode(e)
       const foul = !!call && FOUL_CODES.has(call)
-      if (foul) cells.fouls[at] += 1
-      if (foul || WHIFF_CODES.has(call) || INPLAY_COMMAND_CODES.has(call)) cells.swings[at] += 1
+      const swing = foul || WHIFF_CODES.has(call) || INPLAY_COMMAND_CODES.has(call)
+      for (const c of sides) {
+        if (foul) c.fouls[at] += 1
+        if (swing) c.swings[at] += 1
+        if (c.pitches) c.pitches[at] += 1 // the pitcher's cells only
+      }
     }
     if (e.count) {
       pa.balls = e.count.balls ?? pa.balls
@@ -44,23 +52,29 @@ export function tallyPitches(b, fresh, play) {
   }
 }
 
-// The PA is over: it counts once in every cell it reached, under how it ended.
-export function endPa({ cells, cur }, eventType) {
+// The PA is over: it counts once in every cell it reached, under how it ended, for the batter
+// and for the pitcher `p` who finished it. A PA cut off by a caught stealing never gets here.
+export function endPa({ cells, cur }, eventType, p) {
   const how = endOf(eventType)
-  for (const at of cur.reached) {
-    cells.reach[at] += 1
-    cells[how][at] += 1
+  for (const c of p ? [cells, p.cells] : [cells]) {
+    for (const at of cur.reached) {
+      c.reach[at] += 1
+      c[how][at] += 1
+    }
   }
 }
 
 // --- SQLite ------------------------------------------------------------------
-export const countStatements = (db) => ({
-  cells: db.prepare(
-    `INSERT INTO foul_batter_counts (person_id, season, scope, count_idx, ${KEYS.join(', ')})
-     VALUES (?, ?, ?, ?, ${KEYS.map(() => '?').join(', ')})
+const cellsStatement = (db, table, keys) =>
+  db.prepare(
+    `INSERT INTO ${table} (person_id, season, scope, count_idx, ${keys.join(', ')})
+     VALUES (?, ?, ?, ?, ${keys.map(() => '?').join(', ')})
      ON CONFLICT(season, scope, person_id, count_idx) DO UPDATE SET
-       ${KEYS.map((k) => `${k} = foul_batter_counts.${k} + excluded.${k}`).join(', ')}`,
-  ),
+       ${keys.map((k) => `${k} = ${table}.${k} + excluded.${k}`).join(', ')}`,
+  )
+export const countStatements = (db) => ({
+  cells: cellsStatement(db, 'foul_batter_counts', BATTER_KEYS),
+  pitcherCells: cellsStatement(db, 'foul_pitcher_counts', PITCHER_KEYS),
   batterGame: db.prepare(
     `INSERT INTO foul_batter_games (game_pk, person_id, season, scope, pitches, fouls, whiffs)
      VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -69,14 +83,20 @@ export const countStatements = (db) => ({
   ),
 })
 
-// One batter's game into both tables. Only the cells with a count get a row. `reach` alone is
-// not the test: a PA that a caught stealing or a pickoff ends never ends as a PA, so its pitches
+// One player's game of cells into `stmt`'s table. Only the cells with a count get a row. `reach` alone
+// is not the test: a PA that a caught stealing or a pickoff ends never ends as a PA, so its pitches
 // are in `fouls`/`swings` with no `reach`, and dropping that row lost them from the cell sums.
+function foldCells(stmt, season, scope, id, cells) {
+  const keys = Object.keys(cells)
+  for (let at = 0; at < CELLS; at++) {
+    if (keys.some((k) => cells[k][at])) stmt.run(id, season, scope, at, ...keys.map((k) => cells[k][at]))
+  }
+}
+
+// One batter's game into both tables.
 export function foldBatterCounts(stmts, gamePk, season, scope, id, b) {
   stmts.batterGame.run(gamePk, id, season, scope, b.pitchesSeen, b.fouls, b.whiffs)
-  for (let at = 0; at < CELLS; at++) {
-    if (KEYS.some((k) => b.cells[k][at])) stmts.cells.run(id, season, scope, at, ...KEYS.map((k) => b.cells[k][at]))
-  }
+  foldCells(stmts.cells, season, scope, id, b.cells)
 }
 
 // One batter's game into his season row, his best-PA row and his by-count rows; one pitcher's game
@@ -101,29 +121,34 @@ export function foldBatterTotals(stmts, gamePk, season, scope, id, b) {
 
 export function foldPitcherTotals(stmts, season, scope, id, p) {
   stmts.pitcher.run(id, season, scope, p.name, p.teamId, p.isStarter ? 1 : 0, p.pitches, p.fouls, p.whiffs)
+  foldCells(stmts.pitcherCells, season, scope, id, p.cells)
 }
 
 // --- exports -----------------------------------------------------------------
 // personId -> its 12-cell arrays, for one season (or all, `season` null) and scope; and the
-// league's, summed over them. Only a batter whose cells cover every PA he has (`reach[0]`, the
-// 0-0 count, is all of them) is kept: a store part-read since the cells were added shows none
-// until the full re-read, never a few nights' games as a season. `league` is null with none.
-export function exportByCount(db, season, scope, batterRows) {
+// league's, summed over them. A player is kept only when `covered(cells, seasonRow)` says his cells
+// hold all of his season. A store part-read since the cells were added then shows none until the
+// full re-read, never a few nights' games as a season. `league` is null with none; only the
+// batters' is read (#1993). The two tests (gen-fouls.mjs): a batter's 0-0 `reach` equals his PA
+// (every PA starts there); a pitcher's cell `pitches` equal his season `pitches` (every game adds
+// pitches, which a count of fouls does not: a game with no foul would hide a part-read store).
+export function exportByCount(db, table, keys, season, scope, totalRows, covered) {
   const one = season != null
   const rows = db
-    .prepare(`SELECT * FROM foul_batter_counts WHERE ${one ? 'season = ? AND' : ''} scope = ?`)
+    .prepare(`SELECT * FROM ${table} WHERE ${one ? 'season = ? AND' : ''} scope = ?`)
     .all(...(one ? [season] : []), scope)
   const all = {}
   for (const r of rows) {
-    const cells = (all[r.person_id] ??= newCells())
-    for (const k of KEYS) cells[k][r.count_idx] += r[k]
+    const cells = (all[r.person_id] ??= newCells(keys))
+    for (const k of keys) cells[k][r.count_idx] += r[k]
   }
   const byPerson = {}
-  const league = newCells()
-  for (const { person_id: id, pa } of batterRows) {
-    if (all[id]?.reach[0] !== pa) continue
+  const league = newCells(keys)
+  for (const r of totalRows) {
+    const id = r.person_id
+    if (!all[id] || !covered(all[id], r)) continue
     byPerson[id] = all[id]
-    for (const k of KEYS) all[id][k].forEach((n, i) => (league[k][i] += n))
+    for (const k of keys) all[id][k].forEach((n, i) => (league[k][i] += n))
   }
   return { byPerson, league: Object.keys(byPerson).length ? league : null }
 }
