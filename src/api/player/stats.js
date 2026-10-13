@@ -126,8 +126,10 @@ export async function loadPlayerStats(id, asOf) {
       const otherGroupYears = otherYby.length
         ? new Set(otherYby.flatMap((y) => [...y.mlbYbySplits, ...y.milbYbySplits]).map((s) => Number(s.season)))
         : null
-      const milbCareerSplits = yby.milbYbySplits.length ? await fetchMilbCareer(id, group) : []
-      const orgOf = await resolveCareerOrgs([...yby.mlbYbySplits, ...yby.milbYbySplits])
+      const [milbCareerSplits, orgOf] = await Promise.all([
+        yby.milbYbySplits.length ? fetchMilbCareer(id, group) : [],
+        resolveCareerOrgs([...yby.mlbYbySplits, ...yby.milbYbySplits]),
+      ])
 
       const block = buildBlock({
         group,

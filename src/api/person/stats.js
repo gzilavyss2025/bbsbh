@@ -48,7 +48,7 @@ function statSig(s) {
 // The MiLB career line: sums the per-level `career` rows (fetchMilbCareer), one per level.
 // Each is stripped to its stat first: a level with two clubs answers ONE team-less numTeams
 // row, which aggregateSplits would drop beside another level's club row.
-export const milbCareerStat = (splits, group) => aggregateSplits((splits ?? []).map((s) => ({ stat: s.stat })), group)
+export const milbCareerStat = (splits, group) => aggregateSplits((splits ?? []).map((s) => ({ stat: s.stat })), group, { dedupe: false })
 // `dedupe: false` skips the repeat-line guard, for rows that are different seasons
 // and never the API's duplicate (a postseason year-by-year footer).
 export function aggregateSplits(splits, group, { dedupe = true } = {}) {
