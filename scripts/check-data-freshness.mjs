@@ -101,6 +101,8 @@ export const EXCEPT = {
   // frozen, and a file is rewritten only when its content changes, so an
   // unchanged stamp is the healthy state here, as with milb-pool/ above.
   'abs/': 'season store (ADR-0086): a completed season is frozen; files move only with their content',
+  // A stamp would be old on every night with no new game and turn the nightly job red.
+  'pitch-arsenal-starts/': 'season store (ADR-0086, #1915): written only when a game lands, so a quiet night leaves it unchanged by design',
 }
 
 // Where a dataset keeps its stamp, when it is not a top-level `generatedAt`.

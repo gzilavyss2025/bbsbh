@@ -18,7 +18,8 @@ import {
   poolsOf,
 } from '../scripts/gen-pitch-arsenal.mjs'
 import { MIN_PHYS_N, clearArsenalSeason, rewalkFailures } from '../scripts/lib/pitch/arsenal-physics.mjs'
-import { PHYS_FIELDS, physOf, pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, arsenalSidesView, MIN_ARSENAL_PITCHES, MIN_LOOK_SHIFT, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
+import { startsBuckets } from '../scripts/lib/pitch/arsenal-starts.mjs'
+import { PHYS_FIELDS, fetchPitchMixFor, physOf, pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, arsenalSidesView, MIN_ARSENAL_PITCHES, MIN_LOOK_SHIFT, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
 
 // --- helpers to build a tiny synthetic feed ----------------------------------
 const pitch = (typeCode, description, startSpeed) => ({
@@ -788,4 +789,53 @@ test('rewalkFailures names every game that failed and how to fetch it, or says n
   assert.match(msg, /11/)
   assert.match(msg, /22/)
   assert.match(msg, /WITHOUT --clear-arsenal/)
+})
+
+// --- the per-start pitch mix (#1915) ------------------------------------------
+// One row for each (pitcher, game, code): the count of that code over every batter side.
+
+test('a game folds one row for each pitcher and code, with both batter sides summed', async () => {
+  const { db, fold } = await physFolder()
+  fold(11, [tracked('FF'), tracked('FF'), tracked('SL')])
+  fold(12, [tracked('FF')], { date: '2026-04-02' })
+  const rows = db.prepare('SELECT person_id, game_pk, code, n FROM pitch_arsenal_starts ORDER BY game_pk, code').all()
+  assert.deepEqual(rows.map((r) => [r.person_id, r.game_pk, r.code, r.n]), [[100, 11, 'FF', 2], [100, 11, 'SL', 1], [100, 12, 'FF', 1]])
+})
+
+test('the starts shards key each pitcher by gamePk and code, in the pitcher\'s %100 bucket', async () => {
+  const { db, fold } = await physFolder()
+  fold(11, [tracked('FF'), tracked('FF'), tracked('SL')])
+  fold(12, [tracked('CH')], { date: '2026-04-02' })
+  assert.deepEqual(Object.fromEntries(startsBuckets(db, 2026)), { '00': { season: 2026, pit: { 100: { 11: { FF: 2, SL: 1 }, 12: { CH: 1 } } } } })
+  assert.deepEqual(startsBuckets(db, 2027), [], 'a season with no row writes no shard')
+})
+
+test('clearArsenalSeason wipes the starts at the levels named, so one re-walk fills both tables', async () => {
+  const { db, fold } = await physFolder()
+  fold(1, [tracked('FF')])
+  fold(2, [tracked('FF')], { level: 'aaa' })
+  fold(3, [tracked('FF')], { season: 2027, date: '2027-04-01' })
+  clearArsenalSeason(db, 2026, ['mlb'], { since: '2026-04-01' })
+  const left = db.prepare('SELECT game_pk FROM pitch_arsenal_starts ORDER BY game_pk').all().map((r) => r.game_pk)
+  assert.deepEqual(left, [2, 3])
+  assert.throws(() => clearArsenalSeason(db, 2026, ['aaa'], { since: '2026-04-05', until: '2026-06-30' }), /--until/)
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM pitch_arsenal_starts').get().n, 2, 'a refused window deletes nothing')
+})
+
+test('the committed dump still loads with the starts table in place', async () => {
+  const db = await openDb()
+  assert.ok(db.prepare('SELECT COUNT(*) AS n FROM pitch_arsenal_starts').get().n >= 0)
+})
+
+test('fetchPitchMixFor reads one pitcher\'s mix for one game, and null for anything missing', async (t) => {
+  const files = {
+    '/data/pitch-arsenal-starts/seasons.json': { seasons: [2026], current: 2026 },
+    '/data/pitch-arsenal-starts/2026/07.json': { season: 2026, pit: { 507: { 11: { FF: 50, SL: 20 } } } },
+  }
+  t.mock.method(globalThis, 'fetch', async (url) => ({ ok: url in files, status: url in files ? 200 : 404, json: async () => files[url] }))
+  assert.deepEqual(await fetchPitchMixFor(507, 11, { seasonYear: 2026 }), { FF: 50, SL: 20 })
+  assert.equal(await fetchPitchMixFor(507, 99, { seasonYear: 2026 }), null, 'a game he did not pitch')
+  assert.equal(await fetchPitchMixFor(508, 11, { seasonYear: 2026 }), null, 'a missing shard file')
+  assert.equal(await fetchPitchMixFor(507, 11, { seasonYear: 2025 }), null, 'a season not on file')
+  assert.equal(await fetchPitchMixFor(null, 11), null)
 })

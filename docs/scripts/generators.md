@@ -792,6 +792,8 @@ don't run these by hand.
   accumulated history instead of always falling back to the base logo.
 - `gen-pitch-arsenal.mjs` → `pitch-arsenal/{season}/{NN}.json` (per-pitcher buckets) +
   `pitch-arsenal-pool/{season}/{mlb,aaa}.json` (slim similarity pool, `docs/api/static-data.md`)
+  + `pitch-arsenal-starts/{season}/{NN}.json` (each pitcher's pitch mix per game, from the
+  `pitch_arsenal_starts` table; `--clear-arsenal` re-walks it with the arsenal half, #1915)
   + `pitch-command/{season}/{NN}.json` (the command grid), a `seasons.json` in each of the
   three folders, and `pitch-arsenal-pool/all/{mlb,aaa}.json` (every season, summed from
   rows). A season store (ADR-0086, #1200): `season` leads both totals tables' keys, the

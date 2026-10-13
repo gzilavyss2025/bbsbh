@@ -649,7 +649,7 @@
     },
     "pitchArsenal.js": {
       "class": "spoiler-free",
-      "why": "Static pitch-arsenal.json — completed-game season aggregates, same footing as fouls.js. No SealBox."
+      "why": "Static pitch-arsenal.json — completed-game season aggregates, same footing as fouls.js. No SealBox. fetchPitchMixFor (#1915) reads one pitcher's pitch count by code for ONE finished game: open surfaces only (the player page), never a scoring surface for a game being watched, where a starter's pitch count shows how early he left."
     },
     "pitcher-callouts.js": {
       "class": "reveal-gated",

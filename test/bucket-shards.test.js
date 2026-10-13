@@ -162,3 +162,19 @@ test('a spray postseason entry is MLB only, and the ledger holds each game once'
   const { games } = JSON.parse(readFileSync(new URL('../scripts/data/spray-ingested.json', import.meta.url), 'utf8'))
   assert.equal(new Set(games).size, games.length)
 })
+
+// The per-start pitch mix (#1915, pitch-arsenal-starts/): one season store beside the arsenal
+// buckets, `personId % 100`, written with the first sweep or re-walk after this landed. Until
+// its files exist the test checks nothing. Estimate, not a measurement: 43,500 pitcher-games
+// at 39 bytes on the 4,708 games on file is 1.7 MB, 17 KB a bucket, and 60 KB covers a bucket
+// 3.5 times the mean. Re-measure after the 2026 re-walk and set the ceiling from the largest file.
+test('a pitch-arsenal-starts bucket sits where its reader will ask for it and stays small', () => {
+  if (!existsSync(new URL('../public/data/pitch-arsenal-starts/seasons.json', import.meta.url))) return
+  for (const season of indexOf('pitch-arsenal-starts').seasons) {
+    const d = folder('pitch-arsenal-starts', season)
+    for (const f of list('pitch-arsenal-starts', d)) {
+      assert.ok(statSync(new URL(f, d)).size < 60 * 1024, `pitch-arsenal-starts: ${f} is ${Math.round(statSync(new URL(f, d)).size / 1024)} KB`)
+      for (const id of Object.keys(read('pitch-arsenal-starts', f, d).pit)) assert.equal(shardKey100(id), f.slice(0, 2), `pitch-arsenal-starts: ${id} is in ${f}`)
+    }
+  }
+})
