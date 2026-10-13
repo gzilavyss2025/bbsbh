@@ -31,6 +31,14 @@ const TILES = [
   { label: 'WAR', value: '4.1', caption: 'Invented' },
 ]
 
+// The league rank on a tile (#1856), three cases: a hitter, a pitcher, and a player with
+// no rank. The marks are invented; the real ones come from api/player/leagueRanks.js.
+const RANK_TILES = [
+  { label: 'Hitter · AVG', value: '.311', caption: '147 H', rank: { rank: 2, of: 68 } },
+  { label: 'Pitcher · ERA', value: '1.94', caption: '30 GS', rank: { rank: 1, of: 20 } },
+  { label: 'No rank · ERA', value: '3.80', caption: '12 GS' },
+]
+
 const FIRSTS = [
   ['MLB debut', '4/11/22'],
   ['First hit', '4/12/22'],
@@ -74,6 +82,12 @@ export function StampedParts() {
             stampIn
             style={{ '--stamp-delay': `${60 + i * 40}ms` }}
           />
+        ))}
+      </Grid>
+
+      <Grid min="9rem" gap="loose">
+        {RANK_TILES.map((t) => (
+          <StatTile key={t.label} {...t} />
         ))}
       </Grid>
 

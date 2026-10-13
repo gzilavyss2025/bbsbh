@@ -33,6 +33,8 @@ import {
   positionPlayerPastNote,
 } from '../person.js'
 import { boxscoreLinks, currentSeasonFor, playerContext, yearByYearFor } from './context.js'
+import { leagueAverage } from './leagueAverages.js'
+import { withLeagueFigure } from '../person/stats.js'
 import { fetchPostseasonSeason, postseasonTilesView } from './postseasonRegister.js'
 
 // The game-log preview's row count — see docs/player-hub.md.
@@ -120,6 +122,8 @@ export async function loadPlayerOverview(id, asOf) {
         // Same attach-after-buildBlock pattern the old loader used: the rank
         // strip and the two previews ride the block rather than widening a
         // pure shaper's signature.
+        // Live to-date figure: not under a spoiler cutoff, which shows an earlier span.
+        if (tileSportId === 1 && !cutoff) block.tiles = withLeagueFigure(block.tiles, group, await leagueAverage(season, group))
         block.postseason = postseasonTilesView(postseasonSplits, group, block.role)
         block.ranks = group === 'pitching' ? pitchingRanksView(rankSplits) : hittingRanksView(rankSplits)
         block.gameLogPreview = gameLogView(gameLogSplits, group, cutoff, PREVIEW_GAME_LOG_LIMIT)
