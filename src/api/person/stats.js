@@ -397,6 +397,8 @@ export const RANK_STATS = {
     { key: 'slg', label: 'SLG', rate: true, marksOnly: true },
     { key: 'ops', label: 'OPS', rate: true },
     { key: 'stolenBases', label: 'SB' },
+    { key: 'runs', label: 'R' },
+    { key: 'doubles', label: '2B' },
     { key: 'hits', label: 'H', chipOnly: true },
   ],
 }
