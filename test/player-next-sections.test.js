@@ -157,10 +157,10 @@ test('with every slot a stub, all nine batter buttons show', () => {
 // Modules an issue has built: real modules, which may return null and call onEmpty when
 // they have no data. Add a module here in the PR that builds it; every other module must
 // still be a stub.
-const BUILT = new Set(['tbd', 'similar', 'prospects'])
+const BUILT = new Set(['tbd', 'similar', 'prospects', 'innings'])
 
 test('a stub module renders its placeholder line: it never returns null or calls onEmpty', () => {
-  for (const slot of SLOTS) {
+  for (const slot of SLOTS.filter((s) => !BUILT.has(s.module))) {
     const src = readFileSync(new URL(`../src/screens/player/next/modules/${slot.module}/index.jsx`, import.meta.url), 'utf8')
     if (BUILT.has(slot.module)) continue
     assert.ok(!/return null/.test(src), `${slot.module} returns null`)
