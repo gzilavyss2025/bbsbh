@@ -538,6 +538,17 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_starts (
   PRIMARY KEY (person_id, game_pk, code)
 );
 
+-- The per-start speed sums (#1933), in a table of their own: new columns on pitch_arsenal_starts
+-- would rewrite every line of its committed dump. `speed_sum` and `speed_n` count only the
+-- pitches that carried a start speed. A start with no row here was swept before this table:
+-- its mph is unknown until the season's re-walk.
+CREATE TABLE IF NOT EXISTS pitch_arsenal_start_speed (
+  season INTEGER NOT NULL, level TEXT NOT NULL,
+  person_id INTEGER NOT NULL, game_pk INTEGER NOT NULL, code TEXT NOT NULL,
+  speed_sum REAL NOT NULL DEFAULT 0, speed_n INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (person_id, game_pk, code)
+);
+
 -- Idempotency guard, one row per (gamePk, level) — a gamePk only ever belongs
 -- to one level, but level rides along so a coverage report can split by it
 -- without a join back to a schedule call.

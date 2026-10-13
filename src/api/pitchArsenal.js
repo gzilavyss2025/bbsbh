@@ -88,12 +88,24 @@ export function postPitchesOf(data, personId) {
 // surface (the player page), never from a scoring surface for a game being watched. Null for a game with no row: the
 // files fill with the re-walk, and a missing file, season or game all read the same.
 const startsShard = staticJsonBy((key) => `/data/pitch-arsenal-starts/${key}.json`)
-export async function fetchPitchMixFor(personId, gamePk, { seasonYear } = {}) {
+async function startsEntry(personId, gamePk, seasonYear) {
   if (personId == null || gamePk == null) return null
   const season = await seasonFolderOf('pitch-arsenal-starts', seasonYear, { strict: true })
   if (season == null || season === 'all') return null
-  const shard = await startsShard(`${season}/${shardKey100(personId)}`)
-  return shard?.pit?.[personId]?.[gamePk] ?? null
+  return startsShard(`${season}/${shardKey100(personId)}`)
+}
+export async function fetchPitchMixFor(personId, gamePk, { seasonYear } = {}) {
+  return (await startsEntry(personId, gamePk, seasonYear))?.pit?.[personId]?.[gamePk] ?? null
+}
+
+// ONE START'S MEAN MPH (#1933): his mean start speed for one pitch code in one game, or, with no
+// code, for his primary fastball: the most-used of FF, SI and FC that game. Null when the game, the
+// code or the speed is not on file, never 0.
+export async function fetchPitchMphFor(personId, gamePk, code, { seasonYear } = {}) {
+  const shard = await startsEntry(personId, gamePk, seasonYear)
+  const mix = shard?.pit?.[personId]?.[gamePk]
+  const pick = code ?? ['FF', 'SI', 'FC'].filter((c) => mix?.[c]).sort((a, b) => mix[b] - mix[a])[0]
+  return shard?.mph?.[personId]?.[gamePk]?.[pick] ?? null
 }
 
 const pool = staticJsonBy((key) => `/data/pitch-arsenal-pool/${key}.json`)
