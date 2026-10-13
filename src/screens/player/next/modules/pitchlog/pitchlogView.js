@@ -89,11 +89,12 @@ export const games = (n) => `${n} ${n === 1 ? 'game' : 'games'}`
 export function linesOf(blocks, scope, limit = Infinity) {
   let left = limit
   return blocks.flatMap(({ season, rows: all }) => {
-    const rows = scopeRows(all, scope).slice(0, left)
+    const scoped = scopeRows(all, scope)
+    const rows = scoped.slice(0, left)
     left -= rows.length
     const post = scopeRows(all, 'post').length
     const split = scope === 'all' && post > 0
-    const head = blocks.length > 1 ? [{ key: `season-${season}`, divider: String(season), note: all.length ? games(rows.length) : 'no games on file' }] : []
+    const head = blocks.length > 1 ? [{ key: `season-${season}`, divider: String(season), note: all.length ? games(scoped.length) : 'no games on file' }] : []
     return head.concat(
       rows.flatMap((r, i) =>
         split && (i === 0 || r.post !== rows[i - 1].post)

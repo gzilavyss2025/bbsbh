@@ -29,23 +29,23 @@ const isWhiff = (call) => call === 'T' || WHIFF_CODES.has(call)
 const lastPitch = (play) => play.playEvents?.findLast((e) => e.isPitch) ?? null
 
 // The clip for one play: MLB's highlight, joined on the last pitch's playId (highlights.js),
-// else the Baseball Savant single-pitch clip of that pitch. A pitch with no tracking (before
-// Statcast) has no Savant clip, so no button.
-export function clipFor(play, items) {
+// else the Baseball Savant single-pitch clip of that pitch. Savant has none before 2016
+// (expresslane/clipIndex.js) or for an untracked pitch, so no button then.
+export function clipFor(play, items, day) {
   const last = lastPitch(play)
   const clip = watch(highlightForPlay(items, last?.playId))
   if (clip) return clip
-  if (last?.playId && last.pitchData?.startSpeed != null) return { label: 'Pitch clip', href: `https://baseballsavant.mlb.com/sporty-videos?playId=${last.playId}` }
+  if (day >= '2016' && last?.playId && last.pitchData?.startSpeed != null) return { label: 'Pitch clip', href: `https://baseballsavant.mlb.com/sporty-videos?playId=${last.playId}` }
   return null
 }
 
-const line = (play, items, event) => ({
-  key: lastPitch(play)?.playId ?? `${play.about?.inning}-${play.matchup?.batter?.id}`,
+const line = (play, items, day, event) => ({
+  key: lastPitch(play)?.playId ?? null,
   inning: play.about?.inning ?? null,
   batter: play.matchup?.batter?.fullName ?? '',
   event,
   text: play.result?.description ?? '',
-  clip: clipFor(play, items),
+  clip: clipFor(play, items, day),
 })
 
 // `{ feed, items }` (loadStart) for pitcher `id` and his log row -> the parts. `club` is his
@@ -70,10 +70,10 @@ export function startDetail({ feed, items }, id, { day, home }) {
     .sort((a, b) => b.n - a.n)
     .map((t) => ({ code: t.code, n: t.n, pct: Math.round((100 * t.n) / total), mph: t.mphN ? (t.mphSum / t.mphN).toFixed(1) : null, whiffs: t.whiffs }))
 
-  const strikeouts = plays.filter((p) => p.result?.eventType?.startsWith('strikeout')).map((p) => line(p, items))
+  const strikeouts = plays.filter((p) => p.result?.eventType?.startsWith('strikeout')).map((p) => line(p, items, day))
   const bigPlays = plays
     .filter((p) => HIT_EVENT_TYPES.has(p.result?.eventType) || p.about?.isScoringPlay || p.result?.rbi > 0)
-    .map((p) => line(p, items, p.result?.rbi > 0 ? `${p.result.event}, ${p.result.rbi} RBI` : p.result?.event ?? ''))
+    .map((p) => line(p, items, day, p.result?.rbi > 0 ? `${p.result.event}, ${p.result.rbi} RBI` : p.result?.event ?? ''))
 
   // Clips about his outing: his id on the clip, not joined to one of his plays, and published
   // within two days of the game (a game's content can list clips of other games).

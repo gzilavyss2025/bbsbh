@@ -26,8 +26,8 @@ function Plays({ title, plays }) {
         {title} <span className="mono">({plays.length})</span>
       </h3>
       <ul className="pitchlog__plays">
-        {plays.map((p) => (
-          <li key={p.key}>
+        {plays.map((p, i) => (
+          <li key={p.key ?? i}>
             <Cluster gap="tight" align="center">
               <span className="mono pitchlog__inn">Inn {p.inning ?? DASH}</span>
               <b>{p.batter}</b>
@@ -110,6 +110,8 @@ export function StartDetail({ row, pitcherId, last, onEarlier, onLater, onClose 
           <p className="hint pitchlog__wait" aria-busy="true">
             Loading the game…
           </p>
+        ) : !data.feed ? (
+          <p className="hint">The play by play did not load. Close and open the game to try again.</p>
         ) : (
           <>
             {d.pitches.length > 0 ? (

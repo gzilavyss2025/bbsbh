@@ -203,6 +203,10 @@ test('a play with no tracked pitch and no highlight has no clip button (a 2008 g
   const play = { matchup: { pitcher: { id: 1 }, batter: { fullName: 'A B' } }, about: { inning: 1 }, result: { eventType: 'strikeout', description: 'x' }, playEvents: [{ isPitch: true, playId: 'p1', pitchData: {} }] }
   const d = startDetail({ feed: { liveData: { plays: { allPlays: [play] } } }, items: [] }, 1, { day: '2008-05-25', home: true })
   assert.equal(d.strikeouts[0].clip, null)
+  // Savant has no clip before 2016, even for a pitch PITCHf/x tracked.
+  play.playEvents[0].pitchData.startSpeed = 92
+  assert.equal(startDetail({ feed: { liveData: { plays: { allPlays: [play] } } }, items: [] }, 1, { day: '2014-05-25', home: true }).strikeouts[0].clip, null)
+  assert.equal(startDetail({ feed: { liveData: { plays: { allPlays: [play] } } }, items: [] }, 1, { day: '2016-05-25', home: true }).strikeouts[0].clip.label, 'Pitch clip')
   assert.deepEqual(d.pitches, [])
 })
 
@@ -241,6 +245,13 @@ test('the season blocks: one season has no season heading; more add a labelled d
   assert.deepEqual(linesOf([{ season: 2026, rows: now }], 'all', 1).map((l) => l.gamePk), [2])
   const lines = linesOf([{ season: 2026, rows: now }, { season: 2025, rows: then }, { season: 2024, rows: [] }], 'all')
   assert.deepEqual(lines.map((l) => (l.divider ? `${l.divider} (${l.note})` : l.gamePk)), ['2026 (2 games)', 2, 1, '2025 (1 game)', 3, '2024 (no games on file)'])
+})
+
+test('a season divider counts the season\'s games, not the rows a collapsed view shows', () => {
+  const now = pitchlogView([app('2026-05-01', 1), app('2026-05-06', 2)]).rows
+  const then = pitchlogView([app('2025-06-01', 3)]).rows
+  const lines = linesOf([{ season: 2026, rows: now }, { season: 2025, rows: then }], 'all', 1)
+  assert.deepEqual(lines.map((l) => (l.divider ? `${l.divider} (${l.note})` : l.gamePk)), ['2026 (2 games)', 2, '2025 (1 game)'])
 })
 
 test('an earlier season loads with no pitch mix (the per-game store holds 2026 only) and ends as null with no game', async () => {

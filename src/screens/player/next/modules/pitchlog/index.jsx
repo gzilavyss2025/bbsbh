@@ -166,7 +166,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
         setBusy(false)
       })
   }
-  const at = shown.findIndex((r) => r.gamePk === open)
+  const at = rows.findIndex((r) => r.gamePk === open)
   const close = () => {
     setOpen(null)
     document.querySelector(`.pitchlog__open[data-pk="${open}"]`)?.focus()
@@ -229,11 +229,18 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
       {at >= 0 && (
         <StartDetail
           key={open}
-          row={shown[at]}
+          row={rows[at]}
           pitcherId={bio.id}
           last={splitDisplayName(bio.fullName).last}
-          onEarlier={at < shown.length - 1 ? () => setOpen(shown[at + 1].gamePk) : null}
-          onLater={at > 0 ? () => setOpen(shown[at - 1].gamePk) : null}
+          onEarlier={
+            at < rows.length - 1
+              ? () => {
+                  setMore(true) // the row it opens may sit past the collapsed list
+                  setOpen(rows[at + 1].gamePk)
+                }
+              : null
+          }
+          onLater={at > 0 ? () => setOpen(rows[at - 1].gamePk) : null}
           onClose={close}
         />
       )}
