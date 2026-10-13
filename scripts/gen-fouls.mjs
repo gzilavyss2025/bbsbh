@@ -33,7 +33,7 @@
 //   node scripts/gen-fouls.mjs --since=2026-03-20 [--until=2026-07-19]
 //   node scripts/gen-fouls.mjs --backfill-games      # see below
 //   node scripts/gen-fouls.mjs --backfill-team-pitch-types  # see below
-//   node scripts/gen-fouls.mjs --rebuild-counts=2026  # by-count cells + per-game rows, scripts/lib/fouls/rebuild.mjs
+//   node scripts/gen-fouls.mjs --rebuild-counts=2026  # totals + by-count cells + per-game rows, scripts/lib/fouls/rebuild.mjs
 // The --since form is the one-time / full-season backfill; nightly runs use the
 // default trailing window. Checkpoints (dump + JSON export) every 100 games so a
 // long backfill resumes cleanly. --backfill-games is a SEPARATE one-time backfill
@@ -60,7 +60,7 @@ import { writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
-import { countStatements, endPa, exportByCount, exportGameFouls, foldBatterCounts, gameShards, medianBestPa, newCells, tallyPitches } from './lib/fouls/byCount.mjs'
+import { countStatements, endPa, exportByCount, exportGameFouls, foldBatterTotals, foldPitcherTotals, gameShards, medianBestPa, newCells, tallyPitches } from './lib/fouls/byCount.mjs'
 import { rebuildCommand } from './lib/fouls/rebuild.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -609,25 +609,8 @@ async function ingestGame(db, stmts, gamePk, date, season, scope) {
 export function foldGame(db, stmts, gamePk, date, season, agg, scope = 'R') {
   db.exec('BEGIN')
   try {
-    for (const [id, b] of agg.batters) {
-      stmts.batter.run(
-        id, season, scope, b.name, b.teamId, b.pa, b.pitchesSeen, b.fouls, b.twoStrikeFouls,
-        b.gameFouls, gamePk, b.pa, b.pitchesSeen, b.opponentId, b.gameHisScore, b.gameOppScore,
-      )
-      foldBatterCounts(stmts, gamePk, season, scope, id, b)
-      if (b.bestPa) {
-        const pa = b.bestPa
-        stmts.batterPaHigh.run(
-          id, season, scope, b.bestPaFouls, gamePk, pa.pitcherId, pa.pitcherName, pa.resultEvent,
-          pa.resultType, pa.resultDescription, pa.paPitches, pa.inning, pa.half, pa.outs,
-          pa.onFirst ? 1 : 0, pa.onSecond ? 1 : 0, pa.onThird ? 1 : 0, pa.awayScore,
-          pa.homeScore, pa.battingTeamId, pa.opponentId,
-        )
-      }
-    }
-    for (const [id, p] of agg.pitchers) {
-      stmts.pitcher.run(id, season, scope, p.name, p.teamId, p.isStarter ? 1 : 0, p.pitches, p.fouls, p.whiffs)
-    }
+    for (const [id, b] of agg.batters) foldBatterTotals(stmts, gamePk, season, scope, id, b)
+    for (const [id, p] of agg.pitchers) foldPitcherTotals(stmts, season, scope, id, p)
     for (const [id, t] of agg.teams) {
       stmts.team.run(id, season, scope, t.fouls, t.twoStrikeFouls)
     }

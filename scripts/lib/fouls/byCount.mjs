@@ -79,6 +79,30 @@ export function foldBatterCounts(stmts, gamePk, season, scope, id, b) {
   }
 }
 
+// One batter's game into his season row, his best-PA row and his by-count rows; one pitcher's game
+// into his season row. foldGame calls these for every ingested game, and so does --rebuild-counts,
+// so the totals and the cells can never come from different rules.
+export function foldBatterTotals(stmts, gamePk, season, scope, id, b) {
+  stmts.batter.run(
+    id, season, scope, b.name, b.teamId, b.pa, b.pitchesSeen, b.fouls, b.twoStrikeFouls,
+    b.gameFouls, gamePk, b.pa, b.pitchesSeen, b.opponentId, b.gameHisScore, b.gameOppScore,
+  )
+  foldBatterCounts(stmts, gamePk, season, scope, id, b)
+  if (b.bestPa) {
+    const pa = b.bestPa
+    stmts.batterPaHigh.run(
+      id, season, scope, b.bestPaFouls, gamePk, pa.pitcherId, pa.pitcherName, pa.resultEvent,
+      pa.resultType, pa.resultDescription, pa.paPitches, pa.inning, pa.half, pa.outs,
+      pa.onFirst ? 1 : 0, pa.onSecond ? 1 : 0, pa.onThird ? 1 : 0, pa.awayScore,
+      pa.homeScore, pa.battingTeamId, pa.opponentId,
+    )
+  }
+}
+
+export function foldPitcherTotals(stmts, season, scope, id, p) {
+  stmts.pitcher.run(id, season, scope, p.name, p.teamId, p.isStarter ? 1 : 0, p.pitches, p.fouls, p.whiffs)
+}
+
 // --- exports -----------------------------------------------------------------
 // personId -> its 12-cell arrays, for one season (or all, `season` null) and scope; and the
 // league's, summed over them. Only a batter whose cells cover every PA he has (`reach[0]`, the
