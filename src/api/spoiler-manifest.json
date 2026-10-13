@@ -422,7 +422,7 @@
     },
     "player/leagueRanks.js": {
       "class": "spoiler-free",
-      "why": "League rank \"N of M\" for the player page (#1856): the rank from stats=rankings and the qualified-pool size from one stats request per season and league. Season ranks, no game, no linescore, no reveal state."
+      "why": "League rank \"N of M\" for the player page (#1856): the rank from stats=rankings and the pool size (qualified for a rate stat, all players for a counting stat) from two stats requests per season and league. Season ranks, no game, no linescore, no reveal state."
     },
     "leaders.js": {
       "class": "spoiler-free",
