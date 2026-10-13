@@ -42,7 +42,7 @@
 import { getJson } from '../statsapi.js'
 import { mlbOps, eraOf, rate3 } from '../person/shared.js'
 import { outsToIp } from '../../lib/math/innings.js'
-import { num } from '../../lib/math/number.js'
+import { num, pctOf } from '../../lib/math/number.js'
 
 // Every field either group's line reads, in one list — statsapi ignores the
 // names that do not apply to the group asked for.
@@ -54,7 +54,10 @@ const FIELDS =
   // rates cannot be averaged — .444 over 16 games and .208 over 26 is not
   // .326 of anything. `mergeCareerSplits` adds the counting stats these name
   // and divides once, which is what a combined rate IS.
-  'atBats,hits,hitByPitch,sacFlies,totalBases,earnedRuns,outs'
+  'atBats,hits,hitByPitch,sacFlies,totalBases,earnedRuns,outs,' +
+  // What the Splits card's rows and the wide doors read: the true slash, the extra-base and
+  // RBI counts, and a pitcher's batters faced (his plate-appearance count).
+  'obp,slg,doubles,triples,rbi,battersFaced'
 
 // The career line one door prints, in the vocabulary the Splits vs team door
 // beside it already uses (api/vsTeamSplits.js's `vsTeamDoorLabel`), so two
@@ -68,6 +71,11 @@ export function careerSplitLine(stat, group) {
     ? `${stat.gamesPlayed} G, ${stat.inningsPitched} IP, ${stat.era} ERA, ${stat.strikeOuts} K, ${stat.baseOnBalls} BB`
     : `${stat.gamesPlayed} G, ${stat.plateAppearances} PA, ${stat.avg}, ${stat.homeRuns} HR, ${stat.ops} OPS`
 }
+
+const COUNTS = [
+  'gamesPlayed', 'plateAppearances', 'battersFaced', 'atBats', 'hits', 'doubles', 'triples', 'homeRuns',
+  'rbi', 'strikeOuts', 'baseOnBalls', 'hitByPitch', 'sacFlies', 'totalBases',
+]
 
 // ONE CAREER OUT OF TWO, for the doors that span the postseason. MLB keeps the
 // regular season and October apart — `careerStatSplits` answers for one
@@ -86,20 +94,6 @@ export function careerSplitLine(stat, group) {
 export function mergeCareerSplits(a, b, group) {
   if (!a || !b) return a ?? b ?? null
   const sum = (k) => num(a[k]) + num(b[k])
-  if (group === 'pitching') {
-    // `outs` is MLB's own exact count, so the innings never go through
-    // "153.0" and back. Printed the way statsapi prints them: whole innings,
-    // then the leftover third.
-    const outs = sum('outs')
-    const earned = sum('earnedRuns')
-    return {
-      gamesPlayed: sum('gamesPlayed'),
-      inningsPitched: outsToIp(outs),
-      era: eraOf(earned, outs)?.toFixed(2) ?? '-.--',
-      strikeOuts: sum('strikeOuts'),
-      baseOnBalls: sum('baseOnBalls'),
-    }
-  }
   const atBats = sum('atBats')
   const hits = sum('hits')
   const walks = sum('baseOnBalls')
@@ -108,12 +102,23 @@ export function mergeCareerSplits(a, b, group) {
   const reached = atBats + walks + hbp + flies
   const obp = reached ? (hits + walks + hbp) / reached : 0
   const slugging = atBats ? sum('totalBases') / atBats : 0
-  return {
-    gamesPlayed: sum('gamesPlayed'),
-    plateAppearances: sum('plateAppearances'),
+  // A pitcher's line is his opponents', so the same sums give the slash against him.
+  const merged = {
+    ...Object.fromEntries(COUNTS.map((k) => [k, sum(k)])),
     avg: rate3(atBats ? hits / atBats : 0),
-    homeRuns: sum('homeRuns'),
+    obp: rate3(obp),
+    slg: rate3(slugging),
     ops: rate3(mlbOps(obp, slugging)),
+  }
+  if (group !== 'pitching') return merged
+  // `outs` is MLB's own exact count, so the innings never go through
+  // "153.0" and back. Printed the way statsapi prints them: whole innings,
+  // then the leftover third.
+  const outs = sum('outs')
+  return {
+    ...merged,
+    inningsPitched: outsToIp(outs),
+    era: eraOf(sum('earnedRuns'), outs)?.toFixed(2) ?? '-.--',
   }
 }
 
@@ -143,15 +148,27 @@ export function doorLine(entry, stat, group) {
 // GAMES off a fielding career and it carries no rate stat, so their last four
 // cells are empty rather than zero. The card draws a quiet mark there; a zero
 // would be a lie and a dash reads as data MLB failed to send.
-export function doorCells(entry, stat, group) {
+//
+// `{ wide: true }` appends four more after the five (OBP, SLG, K%, BB%), named by
+// DOOR_COLUMNS_WIDE; the card draws five and does not ask. A pitcher's K% and BB% divide by
+// batters faced, a hitter's by plate appearances.
+export function doorCells(entry, stat, group, { wide = false } = {}) {
   if (!stat) return null
   const text = (v) => (v == null ? null : String(v))
-  if (entry?.lineKind === 'games') return [text(stat.gamesPlayed), null, null, null, null]
-  return (
-    group === 'pitching'
+  if (entry?.lineKind === 'games') return [text(stat.gamesPlayed), ...Array(wide ? 8 : 4).fill(null)]
+  const pitching = group === 'pitching'
+  const five = (
+    pitching
       ? [stat.gamesPlayed, stat.inningsPitched, stat.era, stat.strikeOuts, stat.baseOnBalls]
       : [stat.gamesPlayed, stat.plateAppearances, stat.avg, stat.homeRuns, stat.ops]
   ).map(text)
+  if (!wide) return five
+  const pa = pitching ? stat.battersFaced : stat.plateAppearances
+  const pct = (n) => {
+    const p = pctOf(num(n), num(pa))
+    return p == null ? null : `${p}%`
+  }
+  return [...five, text(stat.obp), text(stat.slg), pct(stat.strikeOuts), pct(stat.baseOnBalls)]
 }
 
 // What those five cells are CALLED, in the order `doorCells` returns them and
@@ -162,6 +179,10 @@ export function doorCells(entry, stat, group) {
 export const DOOR_COLUMNS = {
   hitting: ['G', 'PA', 'AVG', 'HR', 'OPS'],
   pitching: ['G', 'IP', 'ERA', 'K', 'BB'],
+}
+export const DOOR_COLUMNS_WIDE = {
+  hitting: [...DOOR_COLUMNS.hitting, 'OBP', 'SLG', 'K%', 'BB%'],
+  pitching: [...DOOR_COLUMNS.pitching, 'OBP', 'SLG', 'K%', 'BB%'],
 }
 
 // WHICH CELL CARRIES THE QUESTION. A split is asked to answer "how well", and
