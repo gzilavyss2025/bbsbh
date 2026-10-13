@@ -5,6 +5,12 @@
 // arm side, the feed's own sign for x0 and pfxX), h is height, z is feet from the back tip of the plate
 // toward the mound. All lengths are feet, flight time is seconds, movement is inches.
 //
+// The feed's pfxX and pfxZ are PITCHf/x values: the break over the LAST 40 ft only. This flight runs from the
+// release, and a break grows as the square of the time, so the movement over the whole flight is the stored
+// value times (distance flown / 40)^2, taking the time over a stretch as its length (distance, not drag).
+// Checked on four live four-seamers (gamePk 823035): pfxZ 7.9 / 8.5 / 7.4 / 9.4 scale to 13.5 / 14.5 / 12.6 / 16.0 in,
+// against Statcast's breakVerticalInduced 13.6 / 14.5 / 12.6 / 16.0. Upgrade: store the induced break in the arsenal store.
+//
 // ponytail: this is an average path, not a tracked one. The feed's x0/z0 sit at 50 ft and drag slows the
 // ball, so the real path is a little curved in z and the speed falls by about 8%. Here z falls evenly with
 // time and the vertical and side bend is the feed's pfx at the plate. Upgrade only if a per-pitch store holds vx0/ax.
@@ -33,9 +39,12 @@ export function markFeet(cell) {
 // nowhere known is not drawn. `phys` is physOf(type); `landing` is { x, h } in feet (markFeet).
 export function flightPath(phys, landing) {
   if (!phys || !landing || INPUTS.some((k) => phys[k] == null)) return null
-  const { x0, z0, pfxX, pfxZ, extension, plateTime: T } = phys
+  const { x0, z0, extension, plateTime: T } = phys
   const end = landing
   const zRel = RUBBER_Z - extension
+  const full = ((zRel - PLATE_Z) / 40) ** 2
+  const pfxX = phys.pfxX * full // inches over the whole flight
+  const pfxZ = phys.pfxZ * full
   const sag = 0.5 * G * T * T // feet gravity alone drops it over the flight
   // The gravity-only path ends where the movement did not take it; the real path adds the movement on top, as a square of time.
   const freeX = end.x - pfxX / 12
@@ -71,11 +80,11 @@ export function towardOf(side, throws) {
 // "Falls a little less than gravity alone; moves 5 in toward his arm side."
 export function verdictOf({ lift, side }, throws) {
   const rise =
-    lift >= 12 ? 'Rides high'
-    : lift >= 5 ? 'Falls a little less than gravity alone'
-    : lift > -5 ? 'Falls about as fast as gravity alone'
+    lift >= 18 ? 'Rides high'
+    : lift >= 8 ? 'Falls a little less than gravity alone'
+    : lift > -8 ? 'Falls about as fast as gravity alone'
     : 'Drops more than gravity alone'
-  return `${rise}; ${Math.abs(side) < 3 ? 'barely moves sideways' : `moves ${Math.round(Math.abs(side))} in toward ${towardOf(side, throws)}`}.`
+  return `${rise}; ${Math.abs(side) < 5 ? 'barely moves sideways' : `moves ${Math.round(Math.abs(side))} in toward ${towardOf(side, throws)}`}.`
 }
 
 // How far apart the paths are, in inches, at release, 23.8 ft out and at the plate (largest pair), and the
@@ -100,6 +109,14 @@ export function tunnelView(items) {
   }
   pairs.sort((a, b) => a.out - b.out)
   return { ...widest, closest: pairs[0], widest: pairs.at(-1) }
+}
+
+// The drop curve as a 64 x 28 sparkline path, an inch a pixel about the line at 14, shrunk to fit a big arch.
+export function sparkD(path) {
+  const v = dropCurve(path).map((d) => d * 12)
+  const peak = Math.max(...v.map(Math.abs))
+  const k = peak > 12 ? 12 / peak : 1
+  return v.map((d, i) => `${i ? 'L' : 'M'}${(2 + (60 * i) / (v.length - 1)).toFixed(1)} ${(14 - d * k).toFixed(1)}`).join('')
 }
 
 // Height of the path above a straight line from release to landing, sampled n+1 times: the drop sparkline.

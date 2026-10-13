@@ -8,6 +8,9 @@ import { PitchGlyph } from './PitchGlyph.jsx'
 const SPEEDS = [[1, '1×', 'real speed'], [1 / 3, '⅓×', 'one-third speed'], [1 / 4, '¼×', 'one-quarter speed']]
 const inches = (v, d = 1) => `${Math.abs(v).toFixed(d)} in`
 const MID = (ZONE.y0 + ZONE.y1) / 2
+// A missing figure is a dash with no unit.
+const mph = (v) => (v == null ? '—' : `${v.toFixed(1)} mph`)
+const rpm = (v) => (v == null ? '—' : `${v.toLocaleString('en-US')} rpm`)
 
 // The flight clock: seconds into the flight, played by the animation frame. `end` is the flight's length,
 // `speed` the fraction of real time. A reader who asked for less motion gets the landed frame and a scrubber.
@@ -65,7 +68,7 @@ export function FlightCard({ rows, season, throws }) {
     else restart()
   }
   const label = seq
-    ? `${p.code} · ${p.velo?.toFixed(1) ?? '—'} mph · ${p.path.T.toFixed(2)} s`
+    ? `${p.code} · ${mph(p.velo)} · ${p.path.T.toFixed(2)} s`
     : shown.length ? `${shown.map((r) => r.code).join(' · ')} · together` : 'No pitch selected'
   const left = rows.length - flyers.length
   return (
@@ -84,7 +87,7 @@ export function FlightCard({ rows, season, throws }) {
             key={r.code}
             size="control"
             pressed={seq ? n === i : on.has(r.code)}
-            aria-label={`${r.mark.name}, ${r.velo?.toFixed(1) ?? 'no'} mph`}
+            aria-label={r.velo == null ? r.mark.name : `${r.mark.name}, ${mph(r.velo)}`}
             onClick={() => {
               if (seq) setI(n)
               else setOn((cur) => new Set(cur.has(r.code) ? [...cur].filter((c) => c !== r.code) : [...cur, r.code]))
@@ -160,7 +163,7 @@ function Sequence({ p, throws }) {
       <p className="flight__ask">{p.mark.name}</p>
       <p className="flight__note">{verdictOf(path, throws)} Thrown {p.pct}% of the time.</p>
       <div className="flight__facts">
-        <Fact name="Speed and spin" value={`${p.velo?.toFixed(1) ?? '—'} mph`} note={`${p.spin?.toLocaleString('en-US') ?? '—'} rpm · ${path.T.toFixed(2)} s to the plate`} />
+        <Fact name="Speed and spin" value={mph(p.velo)} note={`${rpm(p.spin)} · ${path.T.toFixed(2)} s to the plate`} />
         <Fact
           name="Rise vs. gravity-only"
           value={`${path.lift >= 0 ? '+' : '−'}${inches(path.lift)}`}
@@ -169,7 +172,7 @@ function Sequence({ p, throws }) {
         <Fact
           name="Side break"
           value={inches(path.side)}
-          note={Math.abs(path.side) < 1 ? 'Almost no side break.' : `Toward ${towardOf(path.side, throws)}.`}
+          note={Math.abs(path.side) < 2 ? 'Almost no side break.' : `Toward ${towardOf(path.side, throws)}.`}
         />
         <Fact
           name="Average landing"

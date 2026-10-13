@@ -9,6 +9,7 @@ import {
   makeCamera,
   markFeet,
   project,
+  sparkD,
   tunnelView,
   verdictOf,
 } from '../src/screens/player/next/modules/arsenal/flightView.js'
@@ -43,7 +44,11 @@ test('markFeet maps a grid cell to feet in the feed frame: the middle cell is th
   assert.equal(markFeet(null), null)
 })
 
-test('flightPath starts at release, ends on the landing mark, and bends by the movement', () => {
+// The feed's pfxX and pfxZ are PITCHf/x values: the break over the last 40 ft only. A flight from this release
+// is (52.18 / 40)^2 = 1.7019 times that, since the break grows as the square of the time. Hand-computed.
+const K = ((60.5 - 6.9 - 1.417) / 40) ** 2
+
+test('flightPath starts at release, ends on the landing mark, and bends by the full-flight movement', () => {
   const p = flightPath({ x0: 2.5, z0: 5.1, pfxX: 5.2, pfxZ: 8.1, extension: 6.9, plateTime: 0.41 }, { x: 0.1, h: 2.5 })
   assert.equal(p.T, 0.41)
   close(p.at(0)[0], 2.5)
@@ -53,15 +58,24 @@ test('flightPath starts at release, ends on the landing mark, and bends by the m
   close(end[0], 0.1)
   close(end[1], 2.5)
   close(end[2], 1.417)
-  // The gravity-only path lands where the movement did not take it: lift and side are the feed's inches.
+  // The gravity-only path ends where the movement did not take it: lift and side are the movement over the whole flight.
   const g = p.grav(p.T)
-  close((end[1] - g[1]) * 12, 8.1)
-  close((end[0] - g[0]) * 12, 5.2)
-  close(p.lift, 8.1)
-  close(p.side, 5.2)
+  close((end[1] - g[1]) * 12, 8.1 * K)
+  close((end[0] - g[0]) * 12, 5.2 * K)
+  close(p.lift, 8.1 * K)
+  close(p.side, 5.2 * K)
+  close(p.lift, 13.79, 0.01)
   close(p.fall, 0.5 * 32.174 * 0.41 * 0.41 * 12)
   // Time past the end holds the landing point.
   assert.deepEqual(p.at(9), end)
+})
+
+test('flightPath lift matches Statcast induced break on the four-seamers of gamePk 823035 (within 1 in)', () => {
+  // pfxZ over the last 40 ft, against breakVerticalInduced over the flight.
+  const base = { x0: -1.5, z0: 6, pfxX: 0, extension: 6.9, plateTime: 0.394 }
+  for (const [pfxZ, ivb] of [[7.9, 13.6], [8.5, 14.5], [7.4, 12.6], [9.4, 16.0]]) {
+    close(flightPath({ ...base, pfxZ }, { x: 0, h: 2.5 }).lift, ivb, 1)
+  }
 })
 
 test('flightPath flies toward the plate at every step', () => {
@@ -81,15 +95,15 @@ test('flightPath is null when a flight input or the landing mark is missing', ()
   assert.equal(flightPath(full, null), null)
 })
 
-test('verdictOf reads the lift and the side break, by the pitcher\'s arm', () => {
-  assert.equal(verdictOf({ lift: 15, side: 1 }, 'L'), 'Rides high; barely moves sideways.')
-  assert.equal(verdictOf({ lift: 8, side: 5 }, 'L'), 'Falls a little less than gravity alone; moves 5 in toward his arm side.')
-  assert.equal(verdictOf({ lift: 8, side: 5 }, 'R'), 'Falls a little less than gravity alone; moves 5 in toward his glove side.')
-  assert.equal(verdictOf({ lift: 1, side: -8 }, 'L'), 'Falls about as fast as gravity alone; moves 8 in toward his glove side.')
-  assert.equal(verdictOf({ lift: -9, side: 1 }, 'R'), 'Drops more than gravity alone; barely moves sideways.')
+test('verdictOf reads the full-flight lift and side break, by the pitcher\'s arm', () => {
+  assert.equal(verdictOf({ lift: 20, side: 1 }, 'L'), 'Rides high; barely moves sideways.')
+  assert.equal(verdictOf({ lift: 14, side: 8 }, 'L'), 'Falls a little less than gravity alone; moves 8 in toward his arm side.')
+  assert.equal(verdictOf({ lift: 14, side: 8 }, 'R'), 'Falls a little less than gravity alone; moves 8 in toward his glove side.')
+  assert.equal(verdictOf({ lift: 2, side: -13 }, 'L'), 'Falls about as fast as gravity alone; moves 13 in toward his glove side.')
+  assert.equal(verdictOf({ lift: -15, side: 1 }, 'R'), 'Drops more than gravity alone; barely moves sideways.')
   // No hand on file: the side is named by the base, not the arm.
-  assert.match(verdictOf({ lift: 1, side: 6 }, ''), /toward the first-base side/)
-  assert.match(verdictOf({ lift: 1, side: -6 }, ''), /toward the third-base side/)
+  assert.match(verdictOf({ lift: 1, side: 10 }, ''), /toward the first-base side/)
+  assert.match(verdictOf({ lift: 1, side: -10 }, ''), /toward the third-base side/)
 })
 
 test('tunnelView measures how far apart the paths are at release, 23.8 ft out and at the plate', () => {
@@ -110,6 +124,16 @@ test('tunnelView measures how far apart the paths are at release, 23.8 ft out an
   // The 23.8 ft gate sits between release and the plate, in distance from the plate.
   close(a.at(a.tD)[2], ZD)
   assert.equal(tunnelView([{ code: 'FF', path: a }]), null)
+})
+
+test('sparkD keeps the drop curve inside the 28 px sparkline, even for a big arch', () => {
+  const ys = (path) => [...sparkD(path).matchAll(/[ML][\d.]+ ([\d.-]+)/g)].map((m) => Number(m[1]))
+  const big = flightPath({ x0: 0, z0: 6, pfxX: 0, pfxZ: -30, extension: 6, plateTime: 0.55 }, { x: 0, h: 1.2 })
+  for (const y of ys(big)) assert.ok(y >= 0 && y <= 28, `y ${y} is inside the box`)
+  // A small arch is drawn at one pixel an inch, centred on the line at 14.
+  const small = flightPath({ x0: 0, z0: 6, pfxX: 0, pfxZ: 8, extension: 6.9, plateTime: 0.4 }, { x: 0, h: 2.4 })
+  const mid = ys(small)[8]
+  assert.ok(mid > 0 && mid < 28)
 })
 
 test('the catcher camera sees the plate in the middle and nothing behind it', () => {

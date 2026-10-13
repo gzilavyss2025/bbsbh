@@ -1,15 +1,12 @@
 import { useState } from 'react'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
-import { ZONE, dropCurve } from './flightView.js'
+import { ZONE, sparkD } from './flightView.js'
 import { FlightScene } from './FlightScene.jsx'
 import { GlyphPath, PitchGlyph } from './PitchGlyph.jsx'
 
 const MID = (ZONE.y0 + ZONE.y1) / 2
 const dash = (v, f) => (v == null ? '—' : f(v))
 const xwobaText = (v) => v.toFixed(3).replace(/^0/, '')
-
-// The drop under a straight line from release to landing, as a 64 x 28 sparkline (1 px an inch).
-const sparkD = (path) => dropCurve(path).map((v, i, a) => `${i ? 'L' : 'M'}${2 + (60 * i) / (a.length - 1)} ${(14 - v * 12).toFixed(1)}`).join('')
 
 // The Pitch arsenal card (#1892, board ArsenalReveal.dc.html): the mix bar, the side view of every pitch
 // leaving one release point, where each lands (catcher's view), and a menu that opens one pitch.
