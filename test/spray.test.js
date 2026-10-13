@@ -25,6 +25,7 @@ import assert from 'node:assert/strict'
 import { HIT_COORD_ORIGIN } from '../src/lib/ballpark/hitProjection.js'
 import { aggregateGameSpray, foldGame } from '../scripts/gen-spray.mjs'
 import { readXwobaTable } from '../scripts/lib/pitch/xwoba.mjs'
+import { combineSprayEntries } from '../src/lib/seasons/combine.js'
 import {
   MIN_SPRAY_BIP,
   MIN_SPLIT_BIP,
@@ -33,6 +34,7 @@ import {
   directionCaption,
   directionMix,
   directionOf,
+  fetchSprayFor,
   hrNote,
   isBarrel,
   splitBalls,
@@ -40,7 +42,7 @@ import {
   sprayAngle,
   sprayScopeOf,
   sprayView,
-  withSeasonRuns,
+  withContact,
 } from '../src/api/spray.js'
 
 // A coordinate `deg` degrees off dead centre, `units` out from the origin —
@@ -198,13 +200,11 @@ test('decodeSprayBalls names every stored column', () => {
     // An entry with no park runs (stored before schema v2): park unknown.
     venueId: null,
     season: null,
-    gamePk: null,
-    // An 8-column row (stored before the contact columns): unknown, never 0.
+    // No contact store for this entry (#1912): unknown, never 0.
     launchAngle: null,
     distance: null,
     xba: null,
-    pitchType: null,
-    pitchSpeed: null,
+    gamePk: null,
     barrel: null,
   })
 })
@@ -420,8 +420,8 @@ test('aggregateGameSpray records one row per tracked ball in play', () => {
   const agg = aggregateGameSpray(gameFeed([gamePlay({}), gamePlay({ eventType: 'home_run' })]), 'mlb')
   const one = agg.get(660271)
   assert.equal(one.rows.length, 2)
-  assert.deepEqual(one.rows[0].slice(2, 8), [96.2, 1, 0, 0, 0, 500001])
-  assert.deepEqual(one.rows[1].slice(3, 8), [4, 0, 0, 0, 500001])
+  assert.deepEqual(one.rows[0].slice(2), [96.2, 1, 0, 0, 0, 500001])
+  assert.deepEqual(one.rows[1].slice(3), [4, 0, 0, 0, 500001])
 })
 
 test('aggregateGameSpray counts hits, extra bases, home runs and hard contact', () => {
@@ -544,13 +544,11 @@ test('a picked scope the card cannot serve falls back to Regular, so the footer 
   assert.equal(sprayScopeOf(withPost, 'R'), 'R')
 })
 
-// ------------------------------------------------- contact columns (#1912) ----
+// ------------------------------------------------- contact store (#1912) ----
 //
-// Five columns follow pitcherId: launchAngle, totalDistance, xBA (thousandths,
-// from the season's xBA lattice), pitch type and pitch speed. `g` runs carry the
-// gamePk. Shards written before this hold 8-column rows and [count, venue] runs,
-// and a nightly run before the rebuild folds new rows into them, so a reader meets
-// all of it in one entry.
+// Launch angle, distance and xBA live in a sibling store, `{ n, c, g }` per batter,
+// aligned to the spray rows. A reader that finds the two out of step must read NO
+// contact columns, never shifted ones.
 
 // An xBA lattice (scripts/lib/pitch/xwoba.mjs's shape) that reads .312 at 96 mph, 25 degrees.
 const xbaTable = () => {
@@ -558,71 +556,86 @@ const xbaTable = () => {
   rows[96][25 + 90] = 312
   return { rows }
 }
-const contactEvent = (extra = {}) => ({
-  details: { code: 'X', type: { code: 'SI' } },
-  pitchData: { startSpeed: 93.4 },
+const contactEvent = () => ({
   hitData: { launchSpeed: 96.2, launchAngle: 25, totalDistance: 301, coordinates: { coordX: 100, coordY: 120 } },
-  ...extra,
+})
+const contactGame = (table = xbaTable()) => aggregateGameSpray(gameFeed([gamePlay({ events: [contactEvent()] })]), 'mlb', table)
+
+test('aggregateGameSpray keeps the 8-column row and writes the contact row beside it', () => {
+  const one = contactGame().get(660271)
+  assert.equal(one.rows[0].length, 8)
+  assert.deepEqual(one.contact, [[25, 301, 312]])
 })
 
-test('aggregateGameSpray stores launch angle, distance, xBA, pitch type and pitch speed', () => {
-  const agg = aggregateGameSpray(gameFeed([gamePlay({ events: [contactEvent()] })]), 'mlb', xbaTable())
-  assert.deepEqual(agg.get(660271).rows[0].slice(8), [25, 301, 312, 'SI', 93.4])
-})
-
-test('aggregateGameSpray stores a null xBA with no table, or with no exit velocity or angle', () => {
-  const noTable = aggregateGameSpray(gameFeed([gamePlay({ events: [contactEvent()] })]), 'mlb')
-  assert.equal(noTable.get(660271).rows[0][10], null)
+test('the contact row has a null xBA with no table, or with no angle or exit velocity', () => {
+  assert.deepEqual(contactGame(null).get(660271).contact, [[25, 301, null]])
   const noAngle = contactEvent()
   delete noAngle.hitData.launchAngle
-  const row = aggregateGameSpray(gameFeed([gamePlay({ events: [noAngle] })]), 'mlb', xbaTable()).get(660271).rows[0]
-  assert.deepEqual(row.slice(8, 11), [null, 301, null])
+  const row = aggregateGameSpray(gameFeed([gamePlay({ events: [noAngle] })]), 'mlb', xbaTable()).get(660271).contact
+  assert.deepEqual(row, [[null, 301, null]])
 })
 
-test('aggregateGameSpray stores nulls for a ball with no pitch data', () => {
-  const bare = { hitData: contactEvent().hitData }
-  const row = aggregateGameSpray(gameFeed([gamePlay({ events: [bare] })]), 'mlb').get(660271).rows[0]
-  assert.deepEqual(row.slice(11), [null, null])
+test('the xBA lattice for 2026 is on file and reads as a table; a season without one reads null', () => {
+  assert.equal(readXwobaTable(2026, 'xba-table').rows.length, 126)
+  assert.equal(readXwobaTable(1999, 'xba-table'), null)
 })
 
-test('the xBA lattice for 2026 is on file and reads as a table', () => {
-  const table = readXwobaTable(2026, 'xba-table')
-  assert.equal(table.rows.length, 126)
-  assert.equal(readXwobaTable(2026, 'xba-table-none'), null)
-})
-
-test('foldGame writes [count, venueId, gamePk] runs: one per game, even at one park', () => {
+test('foldGame fills the contact store: runs by game, n the spray rows held', () => {
   const store = {}
-  const two = aggregateGameSpray(gameFeed([gamePlay({}), gamePlay({})]), 'mlb')
-  foldGame(store, two, '2026-04-01', 17, 801)
-  foldGame(store, aggregateGameSpray(gameFeed([gamePlay({})]), 'mlb'), '2026-04-02', 17, 802)
-  assert.deepEqual(store[660271].g, [[2, 17, 801], [1, 17, 802]])
+  const contacts = {}
+  const two = aggregateGameSpray(gameFeed([gamePlay({ events: [contactEvent()] }), gamePlay({ events: [contactEvent()] })]), 'mlb', xbaTable())
+  foldGame(store, two, '2026-04-01', 17, contacts, 801)
+  foldGame(store, contactGame(), '2026-04-02', 17, contacts, 802)
+  assert.deepEqual(contacts[660271].g, [[2, 801], [1, 802]])
+  assert.equal(contacts[660271].c.length, 3)
+  assert.equal(contacts[660271].n, store[660271].p.length)
+  assert.deepEqual(store[660271].g, [[3, 17]], 'the spray store keeps merging a home stand into one run')
 })
 
-test('foldGame onto a shard written before the runs and the contact columns', () => {
-  const old = entryOf({ p: [row(-30), row(10)], g: [[2, 17]], d: '2026-04-01' })
-  const store = { 660271: old }
-  foldGame(store, aggregateGameSpray(gameFeed([gamePlay({ events: [contactEvent()] })]), 'mlb', xbaTable()), '2026-04-02', 17, 802)
-  assert.deepEqual(store[660271].g, [[2, 17], [1, 17, 802]])
-  const [a, , c] = decodeSprayBalls(store[660271], 2026)
-  assert.equal(a.xba, null)
-  assert.equal(a.gamePk, null)
-  assert.deepEqual([c.xba, c.pitchType, c.gamePk, c.venueId], [0.312, 'SI', 802, 17])
+test('foldGame onto rows swept before the store: their contact is null, the new rows line up', () => {
+  const store = { 660271: entryOf({ p: [row(-30), row(10)], g: [[2, 17]], d: '2026-04-01' }) }
+  const contacts = {}
+  foldGame(store, contactGame(), '2026-04-02', 17, contacts, 802)
+  assert.deepEqual([contacts[660271].n, contacts[660271].c.length], [3, 1])
+  const [a, b, c] = decodeSprayBalls(withContact(store[660271], contacts[660271]), 2026)
+  assert.deepEqual([a.launchAngle, a.xba, a.gamePk, b.distance], [null, null, null, null])
+  assert.deepEqual([c.launchAngle, c.distance, c.xba, c.gamePk], [25, 301, 0.312, 802])
 })
 
-test('decodeSprayBalls reads a new row: contact columns, gamePk and the barrel flag', () => {
-  const entry = entryOf({ p: [[100, 80, 100, 4, 0, 0, 0, 9, 28, 410, 760, 'FF', 95.5]], g: [[1, 17, 801]] })
+test('foldGame drops a contact entry that is out of step with the spray rows instead of shifting it', () => {
+  const store = { 660271: entryOf({ p: [row(-30), row(10), row(20), row(30)], d: '2026-04-01' }) }
+  const stale = { n: 3, c: [[1, 2, 3]], g: [[1, 800]] } // written when p held 3 rows, but p holds 4
+  const contacts = { 660271: stale }
+  foldGame(store, contactGame(), '2026-04-02', 17, contacts, 802)
+  assert.deepEqual([contacts[660271].n, contacts[660271].c.length, contacts[660271].g], [5, 1, [[1, 802]]])
+})
+
+test('withContact reads no contact when n differs from the rows, or the runs do not cover the contact rows', () => {
+  const entry = entryOf({ p: [row(0), row(5), row(10)] })
+  const good = { n: 3, c: [[20, 300, 400], [21, 310, 410]], g: [[2, 801]] }
+  assert.deepEqual(withContact(entry, good).k, [null, [20, 300, 400, 801], [21, 310, 410, 801]])
+  for (const bad of [{ ...good, n: 2 }, { ...good, n: 4 }, { ...good, g: [[1, 801]] }, { ...good, g: [[3, 801]] }, { n: 3, c: [[1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4]], g: [[4, 9]] }, null]) {
+    assert.equal(withContact(entry, bad), entry)
+  }
+  const balls = decodeSprayBalls(withContact(entry, { ...good, n: 2 }), 2026)
+  assert.deepEqual(balls.map((b) => b.launchAngle), [null, null, null])
+})
+
+test('an all-seasons join keeps the contact rows in step with the balls', () => {
+  const a = withContact(entryOf({ p: [row(0), row(5)] }), { n: 2, c: [[20, 300, 400], [21, 310, 410]], g: [[2, 801]] })
+  const b = entryOf({ p: [row(10)] }) // a season with no contact store
+  const joined = combineSprayEntries([a, b])
+  assert.deepEqual(decodeSprayBalls(joined).map((x) => x.launchAngle), [20, 21, null])
+  assert.equal(combineSprayEntries([b, b]).k, undefined)
+})
+
+test('decodeSprayBalls reads a ball with contact: angle, distance, xBA, gamePk and the barrel flag', () => {
+  const entry = withContact(entryOf({ p: [[100, 80, 100, 4, 0, 0, 0, 9]] }), { n: 1, c: [[28, 410, 760]], g: [[1, 801]] })
   const [ball] = decodeSprayBalls(entry, 2026)
   assert.deepEqual(
-    [ball.launchAngle, ball.distance, ball.xba, ball.pitchType, ball.pitchSpeed, ball.barrel, ball.gamePk],
-    [28, 410, 0.76, 'FF', 95.5, true, 801],
+    [ball.launchAngle, ball.distance, ball.xba, ball.gamePk, ball.barrel],
+    [28, 410, 0.76, 801, true],
   )
-})
-
-test('a run keeps its gamePk when an all-seasons view stamps the season on it', () => {
-  const stamped = withSeasonRuns(entryOf({ p: [row(0), row(5)], g: [[1, 17, 801], [1, 17]] }), 2025)
-  const balls = decodeSprayBalls(stamped)
-  assert.deepEqual(balls.map((b) => [b.gamePk, b.season]), [[801, 2025], [null, 2025]])
 })
 
 test('isBarrel follows the Savant zone: 98 mph needs 26-30 degrees, 116 mph 8-50', () => {
@@ -632,4 +645,23 @@ test('isBarrel follows the Savant zone: 98 mph needs 26-30 degrees, 116 mph 8-50
   for (const [ev, la] of no) assert.equal(isBarrel(ev, la), false, `${ev} mph ${la}°`)
   assert.equal(isBarrel(null, 28), null)
   assert.equal(isBarrel(100, null), null)
+})
+
+test('fetchSprayFor asks for the contact file only when told to, and a missing one reads as no contact', async (t) => {
+  const asked = []
+  const spray = { season: 2026, bat: { 660271: entryOf({ p: [row(0), row(5)] }) } }
+  const contact = { season: 2026, bat: { 660271: { n: 2, c: [[22, 330, 410]], g: [[1, 801]] } } }
+  t.mock.method(globalThis, 'fetch', async (url) => {
+    asked.push(url)
+    const body = { '/data/spray/seasons.json': { seasons: [2026], current: 2026 }, '/data/spray/2026/71.json': spray, '/data/spray/2026/71.contact.json': contact, '/data/spray/2026/72.json': { season: 2026, bat: { 660272: entryOf({ p: [row(0)] }) } } }[url]
+    return { ok: body != null, status: body ? 200 : 404, json: async () => body }
+  })
+  const plain = await fetchSprayFor(660271)
+  assert.equal(asked.some((u) => u.includes('contact')), false, 'the spray map never reads the contact file')
+  assert.equal(decodeSprayBalls(plain.bat[660271])[1].launchAngle, null)
+  const full = await fetchSprayFor(660271, { contact: true })
+  assert.deepEqual(decodeSprayBalls(full.bat[660271]).map((b) => [b.launchAngle, b.xba, b.gamePk]), [[null, null, null], [22, 0.41, 801]])
+  // No contact file for this bucket (a 404): the spray map's data, with no contact columns.
+  const bare = await fetchSprayFor(660272, { contact: true })
+  assert.deepEqual(decodeSprayBalls(bare.bat[660272]).map((b) => b.launchAngle), [null])
 })

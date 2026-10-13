@@ -29,23 +29,22 @@ const feed = (plays) => ({
   gameData: { teams: { away: { id: 158 }, home: { id: 116 } }, players: {} },
   liveData: { plays: { allPlays: plays } },
 })
-const fold = (store, plays, date, venueId, gamePk = null) =>
-  foldGame(store, aggregateGameSpray(feed(plays), 'mlb'), date, venueId, gamePk)
+const fold = (store, plays, date, venueId) => foldGame(store, aggregateGameSpray(feed(plays), 'mlb'), date, venueId)
 
-test('foldGame keeps one run per game, covering the rows exactly', () => {
+test('foldGame keeps one run per park stretch, covering the rows exactly', () => {
   const store = {}
-  fold(store, [play(100), play(110)], '2026-04-01', 2394, 801)
-  fold(store, [play(120)], '2026-04-02', 2394, 802) // same park, next game: a new run
-  fold(store, [play(130)], '2026-04-03', 32, 803) // a new park: a new run
-  fold(store, [], '2026-04-04', 3, 804) // no ball in play: no run
-  assert.deepEqual(store[7].g, [[2, 2394, 801], [1, 2394, 802], [1, 32, 803]])
+  fold(store, [play(100), play(110)], '2026-04-01', 2394)
+  fold(store, [play(120)], '2026-04-02', 2394) // same park: the run grows
+  fold(store, [play(130)], '2026-04-03', 32) // a new park: a new run
+  fold(store, [], '2026-04-04', 3) // no ball in play: no run
+  assert.deepEqual(store[7].g, [[3, 2394], [1, 32]])
   assert.equal(store[7].p.length, 4)
 })
 
 test('rows carried from before the runs get one run of unknown park', () => {
   const store = { 7: { n: 'A', t: 158, b: 'R', d: '2026-03-30', p: [[1, 1, 1, 0, 0, 0, 0, 1]], o: {} } }
   fold(store, [play(100)], '2026-04-01', 2394)
-  assert.deepEqual(store[7].g, [[1, null], [1, 2394, null]])
+  assert.deepEqual(store[7].g, [[1, null], [1, 2394]])
 })
 
 test('the decoder gives each ball its park and season, in row order', () => {

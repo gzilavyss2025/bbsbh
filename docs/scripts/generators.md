@@ -951,7 +951,9 @@ don't run these by hand.
   and lives in the data layer for that reason: the figure is mostly each
   PITCHER's own command, and a ranked list under a catcher's name reads as a
   catcher's skill unless something says otherwise.
-- `gen-spray.mjs` → `public/data/spray/{season}/{NN}.json` + `spray/seasons.json`
+- `gen-spray.mjs` → `public/data/spray/{season}/{NN}.json` + `{NN}.contact.json` + `spray/seasons.json`
+  (the contact file, #1912: launch angle, distance, xBA and gamePk runs per batter, aligned to the
+  spray rows; rows swept before it have none until `--season=<year> --rebuild`)
   (per-batter buckets on `personId % 100`; a season store, ADR-0086: a run folds
   only its own season's games into its own folder, and writes nothing until the
   new season has a ball in play) — the batter-side sibling of `gen-pitch-arsenal.mjs`: every

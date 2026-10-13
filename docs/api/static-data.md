@@ -496,11 +496,12 @@ for each generator; the reader modules:
   filler. See `.scratch/player-profile-card/scope.md` §4.
 - `spray.js` — one batter's season balls in play and where they landed (and,
   from schema version 2, at which park: `g` runs, decoded onto each ball as
-  `venueId`, `season` and `gamePk`; `sprayParks` groups a view's balls by the ballpark
+  `venueId` and `season`; `sprayParks` groups a view's balls by the ballpark
   configuration they were hit at, and `parkSubview` narrows a view to one park
   with every count recomputed from its balls, #1859), from
   `public/data/spray/{season}/{NN}.json` (`gen-spray.mjs`, nightly, buckets on
-  `personId % 100`; the season `spray/seasons.json` names, ADR-0086). Completed-game season aggregates over games that were
+  `personId % 100`; the season `spray/seasons.json` names, ADR-0086; a sibling
+  `NN.contact.json` holds the Contact card's columns, #1912, below). Completed-game season aggregates over games that were
   already DECIDED when the sweep touched them, so spoiler-free with no
   `SealBox` — same footing as `war.js`/`pitchArsenal.js` (ADR-0034). Worth
   stating out loud because the same COORDINATES are reveal-only in
@@ -510,12 +511,8 @@ for each generator; the reader modules:
   reveal-only module.
   **Two numbers per split, not one.** `p` holds one fixed-length row per ball
   the park gave a landing point ( `[coordX, coordY, launchSpeed, result, hand,
-  side, level, pitcherId, launchAngle, totalDistance, xBA, pitchType,
-  pitchSpeed]` — positional because a season is ~190,000 rows and
-  thirteen spelled-out keys apiece would multiply the committed bytes; the last five are the
-  contact columns, #1912: xBA is thousandths from the season's xBA lattice, `isBarrel`
-  derives the barrel flag at read time, and a row or `g` run stored before them
-  reads as unknown, so one shard may hold both shapes); `o` holds the
+  side, level, pitcherId]` — positional because a season is ~190,000 rows and
+  eight spelled-out keys apiece quadruples the committed bytes); `o` holds the
   per-pitcher-hand TOTALS, swept independently. They differ by about one ball in
   two thousand, and home runs are among them — so `hrNote` prints "16 of 17 HR
   had tracked landing points" rather than letting the card under-report a man's
@@ -528,6 +525,16 @@ for each generator; the reader modules:
   turned-around at-bat should not withhold the other 239. The stored
   `pitcherId` is read by nothing today; it rides so a pitcher-side spray card
   can share these shards instead of sweeping the season twice.
+  **The contact store** (#1912) is `NN.contact.json` beside each shard, read only by
+  `fetchSprayFor(id, { contact: true })` (the spray map never fetches it): per batter
+  `{ n, c, g }`, where `c` is `[launchAngle, totalDistance, xBA in thousandths]` for the LAST
+  `c.length` of his `p` rows and `g` is `[[count, gamePk], …]` over `c`. A row swept before the
+  store has no contact and comes first; `n` is the `p` length it was written against, and
+  `withContact` aligns it as `k` only when `n` equals `p.length` and `g` covers `c`, so a
+  mismatch reads as no contact columns, never shifted ones. `decodeSprayBalls` gives each ball
+  `launchAngle`, `distance`, `xba` (0-1), `gamePk` and `barrel` (`isBarrel`, derived from exit
+  velocity and angle; a fit of Savant's zone, not Savant's own count), all null when unknown.
+  xBA comes from `public/data/xba-table/{season}.json` (`readXwobaTable(season, 'xba-table')`).
   **The postseason is a `post` map beside `bat`** (ADR-0103): same entry shape,
   MLB only, never blended. `sprayView` returns the regular card and adds
   `scoped.P` and `scoped.A` (Postseason, All) only for a batter with an October
