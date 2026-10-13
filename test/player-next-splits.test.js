@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
   clubChip,
+  doorFigure,
   figLine,
   gameLinesView,
   handTable,
@@ -175,4 +176,18 @@ test('game lines: figure doors in their section, a month run of three folds, lis
   assert.deepEqual([fold.count, fold.best, fold.weak], [3, 'Mar .900', 'Apr .700'])
   assert.equal(gameLinesView({ rows, labels: new Map() }, door(1, 1, '.2', '.2', '.2', '.5', 0, 0, 0), 'hitting'), null)
   assert.equal(gameLinesView({ rows, labels }, null, 'hitting'), null)
+})
+
+test('doorFigure finds a door by its key, and shows a dash when the door has no games', () => {
+  const p = (g, ip, era) => ({ gamesPlayed: g, inningsPitched: ip, era, strikeOuts: 1, baseOnBalls: 1 })
+  const rows = [
+    { key: 'home', section: 'where', label: 'Home' },
+    { key: 'road', section: 'where', label: 'Road' },
+  ]
+  const base = p(28, '143.0', '3.66')
+  const both = gameLinesView({ rows, labels: new Map([['home', p(16, '80.1', '2.80')], ['road', p(12, '62.2', '4.60')]]) }, base, 'pitching')
+  assert.deepEqual([doorFigure(both, 'home', 'pitching'), doorFigure(both, 'road', 'pitching')], ['2.80', '4.60'])
+  // No home games: the road door must not slide into the home slot.
+  const noHome = gameLinesView({ rows, labels: new Map([['road', p(12, '62.2', '4.60')]]) }, base, 'pitching')
+  assert.deepEqual([doorFigure(noHome, 'home', 'pitching'), doorFigure(noHome, 'road', 'pitching')], ['—', '4.60'])
 })
