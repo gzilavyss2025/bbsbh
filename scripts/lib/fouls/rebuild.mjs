@@ -15,21 +15,37 @@ const CHUNK = 100 // games fetched at a time, then folded in order, so a tie for
 // The wipe and the walk take the same rows (every ingested game of the season, both scopes),
 // so no game is wiped and then left out. Oldest first, as the nightly folds were.
 export function wipeCounts(db, season) {
-  for (const t of TABLES) db.prepare(`DELETE FROM ${t} WHERE season = ?`).run(season)
+  inTransaction(db, () => {
+    for (const t of TABLES) db.prepare(`DELETE FROM ${t} WHERE season = ?`).run(season)
+  })
   return db
     .prepare('SELECT game_pk, date, season, scope FROM foul_ingested_games WHERE season = ? ORDER BY date, game_pk')
     .all(season)
 }
 
+// One transaction, so a crash leaves a season whole or untouched, never part wiped or part restored.
+function inTransaction(db, fn) {
+  db.exec('BEGIN')
+  try {
+    fn()
+    db.exec('COMMIT')
+  } catch (err) {
+    db.exec('ROLLBACK')
+    throw err
+  }
+}
+
 const saveRows = (db, season) => TOTAL_TABLES.map((t) => [t, db.prepare(`SELECT * FROM ${t} WHERE season = ?`).all(season)])
 function restoreRows(db, season, saved) {
-  for (const [t, rows] of saved) {
-    db.prepare(`DELETE FROM ${t} WHERE season = ?`).run(season)
-    for (const r of rows) {
-      const cols = Object.keys(r)
-      db.prepare(`INSERT INTO ${t} (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`).run(...Object.values(r))
+  inTransaction(db, () => {
+    for (const [t, rows] of saved) {
+      db.prepare(`DELETE FROM ${t} WHERE season = ?`).run(season)
+      for (const r of rows) {
+        const cols = Object.keys(r)
+        db.prepare(`INSERT INTO ${t} (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`).run(...Object.values(r))
+      }
     }
-  }
+  })
 }
 
 // -> { done, failed }. `failed` are the ledger rows whose feed did not come back: they
@@ -93,6 +109,7 @@ export async function rebuildCommand(db, stmts, season, { aggregate, getFeed, to
   if (!failed.length) return
   console.error(
     `${failed.length} game(s) failed and are missing from the rebuild: ${failed.map((g) => g.game_pk).join(', ')}. ` +
+      'The season totals were put back to their old values, so those games\' batters have totals that include them and cells that do not, until a rerun. ' +
       'Run the same command again (it re-reads the whole season), and do not commit before it ends clean.',
   )
   process.exitCode = 1
