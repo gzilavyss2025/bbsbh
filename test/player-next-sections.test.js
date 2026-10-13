@@ -147,8 +147,12 @@ test('with every slot a stub, all nine batter buttons show', () => {
   assert.deepEqual(keys(shown), keys(sections))
 })
 
+// Modules that have been built: a real module may report no data (onEmpty) or render nothing.
+const BUILT = new Set(['season'])
+
 test('a stub module renders its placeholder line: it never returns null or calls onEmpty', () => {
   for (const slot of SLOTS) {
+    if (BUILT.has(slot.module)) continue
     const src = readFileSync(new URL(`../src/screens/player/next/modules/${slot.module}/index.jsx`, import.meta.url), 'utf8')
     assert.ok(!/return null/.test(src), `${slot.module} returns null`)
     assert.ok(!/onEmpty\(/.test(src), `${slot.module} calls onEmpty`)
