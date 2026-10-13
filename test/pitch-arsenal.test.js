@@ -17,7 +17,8 @@ import {
   foldGame,
   poolsOf,
 } from '../scripts/gen-pitch-arsenal.mjs'
-import { pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, arsenalSidesView, MIN_ARSENAL_PITCHES, MIN_LOOK_SHIFT, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
+import { clearArsenalSeason } from '../scripts/lib/pitch/arsenal-physics.mjs'
+import { PHYS_FIELDS, physOf, pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, arsenalSidesView, MIN_ARSENAL_PITCHES, MIN_LOOK_SHIFT, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
 
 // --- helpers to build a tiny synthetic feed ----------------------------------
 const pitch = (typeCode, description, startSpeed) => ({
@@ -677,4 +678,84 @@ test('a bucket carries the postseason beside `pit`, never inside it', () => {
   assert.deepEqual(buckets['01'], { season: 2026, pit: {}, post: { 201: post[201] } })
   assert.equal(pitchArsenalFor(buckets['01'], 201, true), null)
   assert.deepEqual(Object.fromEntries(bucketsOf({ season: 2026 }, regular, {})), { '00': { season: 2026, pit: regular } })
+})
+
+// --- per-type physics means (#1908 part b) ------------------------------------
+// Release point, movement, extension, flight time and spin: a sum and a count per
+// field, so a pitch missing one field adds to that field's count and no other.
+
+const tracked = (code, pitchData) => ({ isPitch: true, details: { type: { code, description: code } }, pitchData })
+const flight = (o = {}) => ({
+  coordinates: { x0: -2, z0: 6, pfxX: -8, pfxZ: 14 }, breaks: { spinRate: 2300 }, extension: 6.4, plateTime: 0.4, ...o,
+})
+const physFolder = async () => {
+  const db = await emptyDb()
+  const stmts = arsenalStatements(db)
+  return {
+    db,
+    fold: (gamePk, pitches, { date = '2026-04-01', level = 'mlb', season = 2026 } = {}) =>
+      foldGame(
+        db, stmts, { gamePk, level, date, season },
+        aggregateGamePitchTypes(feedWith([play({ pitcher: 100, batter: 7, events: pitches })])), new Map(),
+      ),
+  }
+}
+
+test('PHYS_FIELDS names the seven means in the order the file carries them', () => {
+  assert.deepEqual(PHYS_FIELDS, ['x0', 'z0', 'pfxX', 'pfxZ', 'extension', 'plateTime', 'spinRate'])
+})
+
+test('a type\'s physics means span games, and a pitch missing a field leaves that field\'s count alone', async () => {
+  const { db, fold } = await physFolder()
+  fold(1, [
+    tracked('FF', flight()),
+    tracked('FF', flight({ coordinates: { x0: -4, z0: 6.2, pfxX: -10, pfxZ: 16 }, breaks: { spinRate: 2400 }, extension: 6.6, plateTime: 0.42 })),
+  ])
+  fold(2, [tracked('FF', flight({ coordinates: { x0: -3, z0: 6.3, pfxX: -9, pfxZ: 14 }, breaks: undefined }))])
+  const [ff] = exportPitchArsenal(db, {}, 2026).pit[100].mlb
+  // Spin stays the mean of the two pitches that had it; the third had none.
+  assert.deepEqual(ff.phys, [-3, 6.17, -9, 14.7, 6.47, 0.407, 2350])
+  assert.deepEqual(physOf(ff), Object.fromEntries(PHYS_FIELDS.map((f, i) => [f, ff.phys[i]])))
+})
+
+test('a type with no tracking carries no phys, and a part-tracked one carries null for the rest', async () => {
+  const { db, fold } = await physFolder()
+  fold(1, [tracked('SL', { startSpeed: 85 }), tracked('CU', { extension: 6 }), tracked('CH', undefined)])
+  const byCode = Object.fromEntries(exportPitchArsenal(db, {}, 2026).pit[100].mlb.map((t) => [t.code, t]))
+  assert.equal(byCode.SL.phys, undefined)
+  assert.equal(byCode.CH.phys, undefined)
+  assert.deepEqual(byCode.CU.phys, [null, null, null, null, 6, null, null])
+  assert.equal(physOf(byCode.SL).spinRate, null, 'a missing mean reads null, never 0')
+  assert.equal(physOf(undefined).x0, null)
+})
+
+test('the committed dump still loads, and its rows have no physics until the re-walk', async () => {
+  const db = await openDb()
+  const count = (t) => db.prepare(`SELECT COUNT(*) AS n FROM ${t}`).get().n
+  assert.ok(count('pitch_arsenal_totals') > 0, 'the dump has rows')
+  assert.equal(count('pitch_arsenal_physics'), 0)
+  const out = exportPitchArsenal(db, {}, 2026)
+  assert.equal(Object.values(out.pit).some((e) => e.mlb.some((t) => t.phys)), false, 'unknown, never zero')
+})
+
+test('clearArsenalSeason wipes one season of the arsenal half at the levels named, and nothing else', async () => {
+  const { db, fold } = await physFolder()
+  fold(1, [tracked('FF', flight())])
+  fold(2, [tracked('FF', flight())], { level: 'aaa' })
+  fold(3, [tracked('FF', flight())], { season: 2027, date: '2027-04-01' })
+  clearArsenalSeason(db, 2026, ['mlb'], '2026-04-01')
+  const count = (sql) => db.prepare(sql).get().n
+  assert.equal(count("SELECT COUNT(*) AS n FROM pitch_arsenal_totals WHERE season = 2026 AND level = 'mlb'"), 0)
+  assert.equal(count("SELECT COUNT(*) AS n FROM pitch_arsenal_ingested_games WHERE season = 2026 AND level = 'mlb'"), 0)
+  assert.equal(count("SELECT COUNT(*) AS n FROM pitch_arsenal_physics WHERE season = 2026 AND level = 'mlb'"), 0)
+  assert.equal(count("SELECT COUNT(*) AS n FROM pitch_arsenal_totals WHERE season = 2026 AND level = 'aaa'"), 1, 'a level not in the run stays')
+  assert.equal(count('SELECT COUNT(*) AS n FROM pitch_arsenal_totals WHERE season = 2027'), 1)
+  assert.equal(count('SELECT COUNT(*) AS n FROM pitch_command_ingested_games WHERE season = 2026'), 2, 'the command half keeps its ledger')
+})
+
+test('clearArsenalSeason refuses a --since later than the first game on file, and deletes nothing', async () => {
+  const { db, fold } = await physFolder()
+  fold(1, [tracked('FF', flight())])
+  assert.throws(() => clearArsenalSeason(db, 2026, ['mlb'], '2026-04-02'), /--since/)
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM pitch_arsenal_totals').get().n, 1)
 })

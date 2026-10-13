@@ -823,7 +823,14 @@ don't run these by hand.
   from `public/data/xwoba-table/{season}.json` (hand-run `gen-xwoba-table.mjs`,
   below; ADR-0097). A game swept with no table leaves the row's `xwoba_bip` NULL, and
   the export then writes no `xwobaBip` for that season. After a new table, re-walk the
-  hitter half: `--clear-hitters=<season> --since=<its first day>`. `pitch_arsenal_totals` is
+  hitter half: `--clear-hitters=<season> --since=<its first day>`. Each pitch type also
+  sums release point, movement, extension, flight time and spin (a sum and a count per
+  field, `scripts/lib/pitch/arsenal-physics.mjs`, table `pitch_arsenal_physics`) and exports the means as `phys`, seven
+  numbers in `PHYS_FIELDS` order (`src/api/pitchArsenal.js`, `physOf`; null when no pitch
+  had the field; #1908). A game ingested before the columns holds none, so the arsenal
+  half is re-walked with `--clear-arsenal=<season> --since=<its first day>`: it wipes that
+  season's arsenal totals and ledger at the levels in the run (the command and hitter
+  halves stay) and refuses a `--since` after the first game on file. `pitch_arsenal_totals` is
   keyed `(season, scope, person_id, level, code, stand)` — one row per side the BATTER stood
   on, `'L'`/`'R'`, or `'?'` when the feed named none. The side is in the KEY,
   unlike the times-through split's nine columns, because the two cross: a look
