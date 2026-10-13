@@ -1,8 +1,9 @@
 import { transactionTimelineView } from '../../src/api/person/transactions.js'
 import { SPORT_LABEL } from '../../src/lib/teams.js'
 import fs from 'node:fs'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 const rook = JSON.parse(fs.readFileSync('public/data/rookies.json','utf8')).players
-const J = (u) => fetch('https://statsapi.mlb.com'+u).then(r=>r.json())
+const J = getJson
 const PEOPLE = [
   { id: 'gasser', pid: 688107, label: 'Robert Gasser · pitcher' },
   { id: 'turang', pid: 668930, label: 'Brice Turang · infielder' },

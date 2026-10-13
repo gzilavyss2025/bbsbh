@@ -18,7 +18,7 @@ Gary did not like option A. Start a different design. Four earlier options
   Run it from the repo root: `node .scratch/tx-player/run3.mjs`.
 - `final.json` is its output (2026-10-13). Each row has date, code, label, tone,
   club, text, tag (level change) and il (injured-list days).
-- `run.mjs`, `run2.mjs` are earlier probes. `rows.json` is the output of `run2.mjs`.
+
 
 ## Facts a new design must respect
 - The shipped feed has roster moves only. Awards (All-Star too) are a separate
