@@ -28,10 +28,32 @@ test('a two-way player gets the batter sections, then the pitcher-only ones', ()
   assert.equal(new Set(list).size, list.length)
 })
 
-test('the game log shows its season game total, and hides when no block has games', () => {
+test('the game log button shows the season game total, and stays with no games (the slots decide)', () => {
   assert.equal(jumpSections({}, [hit]).find((s) => s.key === 'game-log').count, 151)
-  assert.ok(!keys(jumpSections({}, [{ group: 'hitting', seasonGames: 0 }])).includes('game-log'))
-  assert.ok(keys(jumpSections({}, [{ group: 'hitting', seasonGames: 0 }, pit])).includes('game-log'))
+  const none = jumpSections({}, [{ group: 'hitting', seasonGames: 0 }])
+  assert.ok(keys(none).includes('game-log'))
+  assert.equal(none.find((s) => s.key === 'game-log').count, undefined)
+})
+
+test('a two-way player counts the larger of his two game totals, not the sum', () => {
+  const log = (blocks) => jumpSections({ twoWay: true }, blocks).find((s) => s.key === 'game-log').count
+  assert.equal(log([{ group: 'hitting', seasonGames: 135 }, { group: 'pitching', seasonGames: 14 }]), 135)
+  assert.equal(log([{ group: 'hitting', seasonGames: 0 }, { group: 'pitching', seasonGames: 14 }]), 14)
+})
+
+test('no season games empties the log and foul-ball slots only: Similar players keeps the section', () => {
+  const inst = slotInstances(['hitting'])
+  const gone = seedEmpty(inst, [{ group: 'hitting', seasonGames: 0 }])
+  assert.deepEqual(
+    inst.filter((i) => gone[i.key]).map((i) => i.module),
+    ['batlog', 'fouls'],
+  )
+  assert.ok(keys(shownSections(jumpSections({}, [{ group: 'hitting', seasonGames: 0 }]), inst, gone)).includes('game-log'))
+  // With games, nothing is seeded. A two-way player's pitching side is judged by its own block.
+  assert.deepEqual(seedEmpty(inst, [hit]), {})
+  const two = slotInstances(BOTH)
+  const g2 = seedEmpty(two, [hit, { group: 'pitching', seasonGames: 0 }])
+  assert.deepEqual(two.filter((i) => g2[i.key]).map((i) => i.module), ['pitchlog'])
 })
 
 test('a pitcher with no stat block yet still gets the pitcher bar, with no counts', () => {
@@ -41,7 +63,7 @@ test('a pitcher with no stat block yet still gets the pitcher bar, with no count
 })
 
 // ---- module wiring (#1884): every slot pre-wired, which buttons show ----
-import { SLOTS, rolesOf, shownSections, slotInstances } from '../src/screens/player/next/sections.js'
+import { SLOTS, rolesOf, seedEmpty, shownSections, slotInstances } from '../src/screens/player/next/sections.js'
 
 const BOTH = ['hitting', 'pitching']
 
@@ -125,4 +147,32 @@ test('a stub module renders its placeholder line: it never returns null or calls
     assert.ok(!/return null/.test(src), `${slot.module} returns null`)
     assert.ok(!/onEmpty\(/.test(src), `${slot.module} calls onEmpty`)
   }
+})
+
+// ---- the hero's age fact and the tiles' rank marks (heroData.js) ----
+import { ageFact, rankFor } from '../src/screens/player/next/heroData.js'
+
+test('the Age fact: a birthday flip for a living player, "Age at retirement" and no flip for a retired one', () => {
+  assert.deepEqual(ageFact({ age: 26, birthDate: '1999-05-31' }, null), { label: 'Age', value: 26, flip: true })
+  assert.deepEqual(ageFact({ age: 26 }, null), { label: 'Age', value: 26, flip: false })
+  assert.deepEqual(ageFact({ age: 41, birthDate: '1985-01-01' }, { state: 'retired', retiredAge: 38 }), {
+    label: 'Age at retirement',
+    value: 38,
+    flip: false,
+  })
+  assert.equal(ageFact({ age: 41 }, { state: 'retired' }).value, '—')
+  // A free agent who has not retired still shows his age.
+  assert.equal(ageFact({ age: 33, birthDate: '1993-01-01' }, { state: 'free-agent' }).label, 'Age')
+})
+
+test('a rank mark belongs to the tile its label names, W-L included', () => {
+  const marks = [
+    { key: 'wins', label: 'W–L', rank: 3, of: 473 },
+    { key: 'era', label: 'ERA', rank: 1, of: 20 },
+    { key: 'whip', label: 'WHIP', rank: 2, of: 20 },
+  ]
+  assert.deepEqual(rankFor(marks, 'W–L'), { rank: 3, of: 473 })
+  assert.deepEqual(rankFor(marks, 'ERA'), { rank: 1, of: 20 })
+  assert.equal(rankFor(marks, 'IP'), undefined)
+  assert.equal(rankFor(undefined, 'ERA'), undefined)
 })

@@ -68,20 +68,15 @@ export function rolesOf(bio, blocks) {
   return batter && pitcher ? ['hitting', 'pitching'] : pitcher ? ['pitching'] : ['hitting']
 }
 
-// The jump-bar buttons, in order. A section hides here only when the loaded data
-// shows it is empty: no games this season hides the game log. A count shows only
-// when the loaded data gives one. `blocks` are api/player/overview.js's stat blocks.
+// The jump-bar buttons, in order. A count shows only when the loaded data gives one: the
+// Game log's is the season's game total (the larger of a two-way player's two, since the
+// games overlap). A button hides by its slots (shownSections), never here.
+// `blocks` are api/player/overview.js's stat blocks.
 export function jumpSections(bio, blocks) {
   const roles = rolesOf(bio, blocks)
   const list = roles.length > 1 ? [...BATTER, ...PITCHER_ONLY] : roles[0] === 'pitching' ? PITCHER : BATTER
-  const noGames = blocks.every((b) => !b.seasonGames)
-  return list
-    .filter(([key]) => !(key === 'game-log' && noGames))
-    .map(([key, label]) => ({
-      key,
-      label,
-      count: key === 'game-log' ? blocks[0]?.seasonGames || undefined : undefined,
-    }))
+  const games = Math.max(0, ...blocks.map((b) => b.seasonGames || 0))
+  return list.map(([key, label]) => ({ key, label, count: key === 'game-log' && games ? games : undefined }))
 }
 
 // The slots for a player: one per slot per role it serves that he has. A both-role
@@ -106,4 +101,16 @@ export function shownSections(sections, instances, empty) {
     const mine = instances.filter((i) => i.section === s.key)
     return !mine.length || mine.some((i) => !empty[i.key])
   })
+}
+
+// Slots the loaded data already shows empty: with no season games the game log and the
+// foul-ball slots have nothing, while the section keeps its other slots (Similar players).
+// Each log module reads its own role's block. Same shape as `empty`: key -> true.
+const LOG_ROLE = { batlog: 'hitting', fouls: 'hitting', pitchlog: 'pitching' }
+export function seedEmpty(instances, blocks) {
+  const out = {}
+  for (const i of instances) {
+    if (LOG_ROLE[i.module] && !blocks.find((b) => b.group === LOG_ROLE[i.module])?.seasonGames) out[i.key] = true
+  }
+  return out
 }
