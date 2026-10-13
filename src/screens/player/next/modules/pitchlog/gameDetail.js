@@ -18,6 +18,11 @@ export async function loadStart(gamePk) {
 }
 
 const DAY = 864e5
+// An MLB clip's button, or null with no playable source.
+function watch(item) {
+  const { mp4, hls } = highlightPlaybacks(item)
+  return item && (mp4 || hls) ? { label: `Watch ${formatClipDuration(item.duration)}`.trim(), href: mp4 ?? hls } : null
+}
 // A whiff as Savant counts it, foul tips ('T') in, as scripts/lib/pitch/hitter-grid.mjs does: the
 // approved design's numbers (cutter 5 on 5/23) are Savant's. The scoring surfaces count a tip as a foul.
 const isWhiff = (call) => call === 'T' || WHIFF_CODES.has(call)
@@ -28,9 +33,8 @@ const lastPitch = (play) => play.playEvents?.findLast((e) => e.isPitch) ?? null
 // Statcast) has no Savant clip, so no button.
 export function clipFor(play, items) {
   const last = lastPitch(play)
-  const item = highlightForPlay(items, last?.playId)
-  const { mp4, hls } = highlightPlaybacks(item)
-  if (item && (mp4 || hls)) return { label: `Watch ${formatClipDuration(item.duration)}`.trim(), href: mp4 ?? hls }
+  const clip = watch(highlightForPlay(items, last?.playId))
+  if (clip) return clip
   if (last?.playId && last.pitchData?.startSpeed != null) return { label: 'Pitch clip', href: `https://baseballsavant.mlb.com/sporty-videos?playId=${last.playId}` }
   return null
 }
@@ -82,10 +86,8 @@ export function startDetail({ feed, items }, id, { day, home }) {
         !joined.has(i.guid) &&
         Math.abs(Date.parse(i.date) - Date.parse(day)) < 2 * DAY,
     )
-    .flatMap((i) => {
-      const { mp4, hls } = highlightPlaybacks(i)
-      return mp4 || hls ? [{ key: i.guid ?? i.id ?? i.headline, title: i.headline ?? '', label: `Watch ${formatClipDuration(i.duration)}`.trim(), href: mp4 ?? hls }] : []
-    })
+    .map((i) => ({ key: i.guid ?? i.id ?? i.headline, title: i.headline ?? '', ...watch(i) }))
+    .filter((c) => c.href)
 
   const club = feed?.gameData?.teams?.[home ? 'home' : 'away']?.teamName ?? null
   return { pitches, strikeouts, bigPlays, clips, club }

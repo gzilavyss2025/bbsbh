@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import test, { mock } from 'node:test'
 import { fetchFinalScores } from '../src/api/boxlines/fetch.js'
 import { earlierSeason, keyOf, linesOf, loadPitchlog, pitchlogView, scopeRows, totalsOf } from '../src/screens/player/next/modules/pitchlog/pitchlogView.js'
-import { resultOf, startDetail } from '../src/screens/player/next/modules/pitchlog/startDetail.js'
+import { resultOf, startDetail } from '../src/screens/player/next/modules/pitchlog/gameDetail.js'
 
 // The pitcher Game Log's rows (#1851): every game of the gameLog split, newest first, with the
 // score and decision from fetchFinalScores (which holds today back) and the per-game pitch mix.

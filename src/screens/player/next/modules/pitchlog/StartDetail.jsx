@@ -11,7 +11,7 @@ import { useLinkScope, useRouteLink } from '../../../../../lib/nav.js'
 import { pitchMark } from '../../../../../lib/pitch/pitchTypes.js'
 import { gamePath, linkQuery } from '../../../../../lib/route.js'
 import { DASH, Fact } from '../../../parts.jsx'
-import { loadStart, resultOf, startDetail } from './startDetail.js'
+import { loadStart, resultOf, startDetail } from './gameDetail.js'
 
 // The game detail view (#1851): one row of the Game Log, opened. A native modal <dialog>:
 // showModal() makes the page behind it inert (the focus trap) and Escape fires `cancel`.
@@ -51,7 +51,7 @@ export function StartDetail({ row, pitcherId, last, onEarlier, onLater, onClose 
   const titleId = useId()
   const link = useRouteLink()
   const { asOf, sportId } = useLinkScope()
-  const { data, loading } = useAsync(() => loadStart(row.gamePk).catch(() => ({ feed: null, items: [] })), [row.gamePk])
+  const { data, loading } = useAsync(() => loadStart(row.gamePk), [row.gamePk])
   useEffect(() => {
     ref.current?.showModal()
   }, [])

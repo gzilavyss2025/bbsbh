@@ -131,7 +131,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
   const [scope, setScope] = useState('all')
   const [more, setMore] = useState(false)
   const [earlier, setEarlier] = useState([]) // [{ season, rows }], newest first
-  const [busy, setBusy] = useState(null) // the season in flight
+  const [busy, setBusy] = useState(false)
   const [open, setOpen] = useState(null) // the gamePk in the detail view
   const empty = Boolean(error) || (!loading && !view) // a null load (no game, no log) ends the loader
   const blocks = view ? [{ season, rows: view.rows }, ...earlier] : []
@@ -155,14 +155,15 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
   const counts = { all: all.length, reg: all.length - post, post }
   const next = earlierSeason(blocks.map((b) => b.season), bio.debut)
   const oldest = blocks.at(-1).season
+  const span = oldest === season ? season : `${oldest}–${season}`
   const loadEarlier = () => {
-    setBusy(next)
+    setBusy(true)
     setMore(true)
     loadPitchlog(bio.id, next, asOf)
       .catch(() => null)
       .then((v) => {
         setEarlier((e) => [...e, { season: next, rows: v?.rows ?? [] }])
-        setBusy(null)
+        setBusy(false)
       })
   }
   const at = shown.findIndex((r) => r.gamePk === open)
@@ -172,12 +173,15 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
   }
 
   return (
-    <Stack className="pitchlog" onClick={(e) => e.target.closest?.('.pitchlog__open') && setOpen(Number(e.target.closest('.pitchlog__open').dataset.pk))}>
+    <Stack className="pitchlog" onClick={(e) => {
+        const pk = e.target.closest?.('.pitchlog__open')?.dataset.pk
+        if (pk) setOpen(Number(pk))
+      }}>
       <Cluster align="center" className="pitchlog__top">
         <Cluster gap="tight" align="center">
           {next != null && (
-            <Button size="control" onClick={loadEarlier} busy={busy != null}>
-              {busy ? `Loading ${busy}…` : 'Load earlier season'}
+            <Button size="control" onClick={loadEarlier} busy={busy}>
+              {busy ? `Loading ${next}…` : 'Load earlier season'}
             </Button>
           )}
           {post > 0 && (
@@ -190,7 +194,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
             </Cluster>
           )}
         </Cluster>
-        <span className="mono pitchlog__scope">{oldest === season ? season : `${oldest}–${season}`} · newest first</span>
+        <span className="mono pitchlog__scope">{span} · newest first</span>
       </Cluster>
       <FactGrid look="strip" as="div" className="pitchlog__totals">
         <Fact label="Games" value={t.games} mono />
@@ -200,7 +204,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
         <Fact label="K" value={t.k} mono />
         <Fact label="BB" value={t.bb} mono />
       </FactGrid>
-      <LogTable columns={COLUMNS} rows={lines} caption={`Game log, ${oldest === season ? season : `${oldest} to ${season}`}`} />
+      <LogTable columns={COLUMNS} rows={lines} caption={`Game log, ${span}`} />
       {rows.length > SHOWN && (
         <Button size="control" onClick={() => setMore(!more)} aria-expanded={more}>
           {more ? 'Show fewer' : `Show all ${games(rows.length)}`}
