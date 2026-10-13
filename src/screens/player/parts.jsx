@@ -15,6 +15,16 @@ export function debutLabel(iso) {
   return y ? `${MONTHS[Number(m) - 1]} ${Number(d)}, ${y}` : ''
 }
 
+// "2018 · Rd 1 #21", or the signing year for an undrafted player.
+export function draftLabel(draft, signedYear) {
+  if (draft && draft.year) {
+    if (!draft.round) return String(draft.year)
+    return `${draft.year} · Rd ${draft.round}${draft.overall ? ` #${draft.overall}` : ''}`
+  }
+  if (signedYear) return `Signed ${signedYear}`
+  return DASH
+}
+
 export function roleWord(role) {
   return role === 'SP' ? 'starter' : role === 'CL' ? 'closer' : 'reliever'
 }
