@@ -348,6 +348,21 @@ test('without the plate file the plate counters are null, not 0; joined, they ar
   assert.equal(joinPlate(grid, null), grid)
 })
 
+test('a base path the plate file lacks reads null for the plate counters, never 0', () => {
+  // grid.reg has FF/R/L, FF/L/R, FF/L/L and SL/R/L; the plate file covers only FF/R/L.
+  const plate = { season: 2026, reg: { mlb: { FF: { R: { L: { speedSum: z(0, 380) } } } } }, post: null }
+  const joined = joinPlate(grid, plate)
+  const covered = hitterCounters(joined, { code: 'FF', hand: 'R', scope: 'R' })
+  assert.equal(covered.speedSum[0], 380)
+  for (const view of [{ code: 'FF', scope: 'R' }, { code: 'SL', scope: 'R' }, { scope: 'P' }]) {
+    const c = hitterCounters(joined, view)
+    assert.deepEqual([c.calledStrikes, c.inPlay, c.speedSum], [null, null, null], JSON.stringify(view))
+    assert.ok(c.pitches, 'the base counters are still there')
+  }
+  // The base grid is not marked.
+  assert.equal(JSON.stringify(grid).includes('noPlate'), false)
+})
+
 test('the plate file is read only when asked for, and a missing one gives null counters', async (t) => {
   const fetched = []
   const files = {

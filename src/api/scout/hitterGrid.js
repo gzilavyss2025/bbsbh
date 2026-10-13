@@ -33,12 +33,17 @@ const asGrid = (season, reg, post, file) =>
   reg || post ? { season, reg: reg ?? null, post: post ?? null, ...(file?.xwoba && { xwoba: true }) } : null
 
 // One part (reg or post) with the plate counters put onto the same code/hand/stand path.
+// A base path the plate file lacks is marked `noPlate`: hitterCounters reads it as unknown.
 function joinPart(base, extra) {
-  if (!base || !extra) return base
+  if (!base) return base
   const out = structuredClone(base)
-  for (const [c, byHand] of Object.entries(extra.mlb ?? {})) {
+  for (const [c, byHand] of Object.entries(out.mlb ?? {})) {
     for (const [h, byStand] of Object.entries(byHand)) {
-      for (const [s, counters] of Object.entries(byStand)) Object.assign(out.mlb?.[c]?.[h]?.[s] ?? {}, counters)
+      for (const [s, counters] of Object.entries(byStand)) {
+        const plate = extra?.mlb?.[c]?.[h]?.[s]
+        if (plate) Object.assign(counters, plate)
+        else counters.noPlate = true
+      }
     }
   }
   return out
@@ -82,11 +87,13 @@ export const FIELDS = ['pitches', 'swings', 'whiffs', 'paEnd', 'wobaFixed', 'bip
 // `wobaSum` is wobaFixed + xwobaBip, cell by cell, when the season's xwOBA is
 // on file (`grid.xwoba`), and null when not: wobaFixed alone would read as a
 // low xwOBA (ADR-0096, ADR-0097). calledStrikes, inPlay and speedSum are null
-// when the grid was not joined with its plate file (`plate: true`): unknown, not 0.
+// when the grid was not joined with its plate file (`plate: true`), or when a path in
+// the view has none in that file: unknown, not 0.
 // Null when nothing matches.
 export function hitterCounters(grid, { code = null, hand = null, stand = null, scope = null } = {}) {
   const out = Object.fromEntries(FIELDS.map((f) => [f, new Array(GRID * GRID).fill(0)]))
   const stands = new Set()
+  let plateGap = false
   const parts = scope === 'R' ? [grid?.reg] : scope === 'P' ? [grid?.post] : [grid?.reg, grid?.post]
   for (const part of parts) {
     for (const [c, byHand] of Object.entries(part?.mlb ?? {})) {
@@ -96,6 +103,7 @@ export function hitterCounters(grid, { code = null, hand = null, stand = null, s
         for (const [s, counters] of Object.entries(byStand)) {
           if (stand && s !== stand) continue
           stands.add(s)
+          if (counters.noPlate) plateGap = true
           for (const f of FIELDS) counters[f]?.forEach((v, i) => { out[f][i] += v })
         }
       }
@@ -103,7 +111,7 @@ export function hitterCounters(grid, { code = null, hand = null, stand = null, s
   }
   if (!stands.size) return null
   const { xwobaBip, ...counters } = out
-  if (!grid.plate) for (const f of PLATE_FIELDS) counters[f] = null
+  if (!grid.plate || plateGap) for (const f of PLATE_FIELDS) counters[f] = null
   const wobaSum = grid.xwoba ? out.wobaFixed.map((v, i) => v + xwobaBip[i]) : null
   return { ...counters, wobaSum, stands: [...stands].sort() }
 }
