@@ -740,13 +740,16 @@ test('exportGameFouls: [pitches, fouls, whiffs] per batter and gamePk, both scop
   assert.deepEqual(exportGameFouls(db, 2027), {})
 })
 
-test('the committed dump still loads and exports: no cells, no game rows, until the re-read', async () => {
+test('the committed dump loads and exports the by-count cells and the per-game rows (after the 2026 re-read)', async () => {
   const db = await openDb()
   const out = exportFouls(db, 2026)
   assert.ok(Object.keys(out.batters).length > 100)
-  assert.equal(Object.values(out.batters).some((b) => 'byCount' in b), false)
-  assert.deepEqual(out.league.byCount, null)
-  assert.deepEqual(exportGameFouls(db, 2026), {})
+  assert.equal(Object.values(out.batters).some((b) => 'byCount' in b), true)
+  assert.notEqual(out.league.byCount, null)
+  assert.ok(Object.keys(exportGameFouls(db, 2026)).length > 100)
+  // Turang 668930: 573 regular-season fouls, and his cells cover all 677 PA.
+  assert.equal(out.batters['668930'].fouls, 573)
+  assert.equal(out.batters['668930'].byCount.reach[0], 677)
 })
 
 test('rebuildCounts wipes ONE season of both tables and refills it from the ingested games', async () => {

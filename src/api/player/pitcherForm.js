@@ -27,6 +27,10 @@ function line(games) {
   }
 }
 
+// "6.0 IP, 1 ER, 9 K, 1 BB". Built from the counts: the feed's own `summary` writes a count of one
+// with no number ("6.0 IP, ER, 9 K, BB"), which reads like a typo.
+const gameLine = (st) => `${st.inningsPitched} IP, ${Number(st.earnedRuns) || 0} ER, ${Number(st.strikeOuts) || 0} K, ${Number(st.baseOnBalls) || 0} BB`
+
 export function pitcherRollingSeries(log, { by, w }) {
   // An appearance counts if he faced a batter or recorded an out (a pickoff ends 0.1 IP with no batter).
   const games = inOrder(log).filter((g) => BF(g) > 0 || ipToOuts(g.stat.inningsPitched) > 0)
@@ -54,7 +58,7 @@ export function pitcherRollingSeries(log, { by, w }) {
       gamePk: last.game?.gamePk,
       opp: teamAbbr(last.opponent),
       isHome: Boolean(last.isHome),
-      summary: last.stat.summary,
+      summary: gameLine(last.stat),
       ...line(games.slice(a, b + 1)),
     }
   })
