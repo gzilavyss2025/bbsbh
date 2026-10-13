@@ -425,8 +425,9 @@ don't run these by hand.
   `byCount` and `medianBestPaFouls` (the middle best at-bat of hitters with 300+ PA). Per-game
   PITCHER cells (#1993): each pitcher row gains the same `byCount` from his side (the pitches he
   threw from each count; the PAs he finished, as the pitcher of record, as foul_pitcher_totals
-  has them), in table `foul_pitcher_counts`; a row shows it only when the cells' fouls add up to
-  his season `fouls`. Per-game
+  has them), in table `foul_pitcher_counts`; a row shows it only when the cells' `pitches` (an extra cell
+  array, only here) add up to his season `pitches`, which every game adds. A failed feed puts the
+  pitcher cells back with the totals. Per-game
   `[pitches, fouls, whiffs]` go to `fouls/{season}/{NN}.games.json`, a second shard set
   because a busy bucket's per-game rows alone outweigh the bucket. Both ride new tables
   (`foul_batter_counts`, `foul_batter_games`): the nightly sweep fills them for new games, and

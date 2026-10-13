@@ -931,7 +931,9 @@ const sumOf = (a) => a.reduce((n, x) => n + x, 0)
 test('pitcher cells: the pitches he threw by count, and the PAs he ended, by how they ended', () => {
   const agg = aggregateGameFouls(countGame())
   const c = agg.pitchers.get(200).cells
-  assert.deepEqual(c, agg.batters.get(10).cells, 'one batter and one pitcher, so the same cells')
+  const { pitches, ...rest } = c
+  assert.deepEqual(rest, agg.batters.get(10).cells, 'one batter and one pitcher, so the same cells')
+  assert.equal(pitches[at(0, 0)], 1)
   assert.equal(c.fouls[at(0, 1)], 1)
   assert.equal(c.so[at(0, 2)], 1)
   assert.equal(c.reach[at(0, 0)], 1, 'one PA finished')
@@ -967,15 +969,15 @@ test('exportFouls: a pitcher row carries his cells per scope, summed over games'
   assert.equal(exportFouls(db, 2027).pitchers[200], undefined)
 })
 
-test('a pitcher shows cells only where they cover his fouls, so a part-read season shows none', async () => {
+test('a pitcher shows cells only where they cover his pitches, so a part-read season shows none', async () => {
   const db = await emptyDb()
   foldCounts(db, 1, '2026-09-01', 2026)
   assert.ok(exportFouls(db, 2026).pitchers[200].byCount)
-  db.exec('UPDATE foul_pitcher_totals SET fouls = fouls + 5') // games the cells never read
+  db.exec('UPDATE foul_pitcher_totals SET pitches = pitches + 5') // games the cells never read
   assert.equal('byCount' in exportFouls(db, 2026).pitchers[200], false)
 })
 
-test('rebuildCounts refills the pitcher cells; a failed feed leaves them part-read, so none show', async () => {
+test('rebuildCounts refills the pitcher cells; a failed feed puts them back with the totals', async () => {
   const db = await emptyDb()
   foldCounts(db, 1, '2026-09-01', 2026)
   foldCounts(db, 2, '2026-09-02', 2026)
@@ -991,8 +993,59 @@ test('rebuildCounts refills the pitcher cells; a failed feed leaves them part-re
     })
   await run(null)
   assert.equal(exportFouls(db, 2026).pitchers[200].byCount.reach[at(0, 0)], 2)
+  db.exec('UPDATE foul_pitcher_counts SET reach = 98 WHERE season = 2026 AND count_idx = 0')
   await run(2)
-  assert.equal('byCount' in exportFouls(db, 2026).pitchers[200], false)
+  assert.equal(db.prepare('SELECT reach FROM foul_pitcher_counts WHERE season = 2026 AND count_idx = 0').get().reach, 98, 'cells and totals both back as they were')
+})
+
+test('a 0-foul game cannot hide a part-read store: coverage is the pitch count, not the fouls', async () => {
+  // Game 9: pitcher 200 allows one groundout and no foul. The cells for it are then lost (the store
+  // before the cells were added); the next fold adds game 1's cells only, so they hold 3 of 4 pitches.
+  const db = await emptyDb()
+  const groundout = feedWith([play({ batter: 10, pitcher: 200, eventType: 'field_out', events: [pitchAt('X', 0, 0)] })])
+  foldGame(db, foulStatements(db), 9, '2026-08-30', 2026, aggregateGameFouls(groundout))
+  db.exec('DELETE FROM foul_pitcher_counts')
+  foldCounts(db, 1, '2026-09-01', 2026)
+  const row = exportFouls(db, 2026).pitchers[200]
+  assert.equal(row.pitches, 4)
+  assert.equal('byCount' in row, false, 'the cells hold 3 of his 4 pitches, so none show')
+})
+
+test('pitcher cells: the pitches in the cells add up to his pitches', () => {
+  const agg = aggregateGameFouls(countGame())
+  assert.equal(sumOf(agg.pitchers.get(200).cells.pitches), agg.pitchers.get(200).pitches)
+})
+
+test('a play with no batter id still lands in the pitcher cells, as it does in his totals', () => {
+  const agg = aggregateGameFouls(feedWith([play({ batter: undefined, pitcher: 200, events: [pitchAt('F', 0, 1), pitchAt('S', 0, 2)] })]))
+  const p = agg.pitchers.get(200)
+  assert.deepEqual([p.pitches, p.fouls], [2, 1])
+  assert.equal(sumOf(p.cells.pitches), 2)
+  assert.equal(sumOf(p.cells.fouls), 1)
+})
+
+test('a pitching change mid-PA: the play belongs to its matchup pitcher, in the cells as in the totals', () => {
+  const change = { isPitch: false, details: { eventType: 'pitching_substitution' }, count: { balls: 0, strikes: 1 } }
+  const agg = aggregateGameFouls(
+    feedWith([play({ batter: 10, pitcher: 201, eventType: 'strikeout', events: [pitchAt('F', 0, 1), change, pitchAt('F', 0, 2), pitchAt('S', 0, 3)] })]),
+  )
+  assert.equal(agg.pitchers.has(200), false)
+  const p = agg.pitchers.get(201)
+  assert.deepEqual([p.pitches, p.fouls, sumOf(p.cells.pitches), sumOf(p.cells.fouls)], [3, 2, 3, 2])
+  assert.equal(p.cells.reach[at(0, 0)], 1)
+})
+
+test('a PA that resumes after a caught stealing under a new pitcher: pitches stay with the pitcher of each play', () => {
+  const agg = aggregateGameFouls(
+    feedWith([
+      play({ batter: 10, pitcher: 200, eventType: 'caught_stealing_2b', events: [pitchAt('F', 0, 1)] }),
+      play({ batter: 10, pitcher: 201, eventType: 'strikeout', events: [pitchAt('F', 0, 2), pitchAt('S', 0, 3)] }),
+    ]),
+  )
+  const [a, b] = [agg.pitchers.get(200), agg.pitchers.get(201)]
+  assert.deepEqual([a.pitches, sumOf(a.cells.pitches), sumOf(a.cells.fouls), sumOf(a.cells.reach)], [1, 1, 1, 0])
+  assert.deepEqual([b.pitches, sumOf(b.cells.pitches), sumOf(b.cells.fouls)], [2, 2, 1])
+  assert.equal(b.cells.reach[at(0, 0)], 1, 'he finished the PA')
 })
 
 test('pitcherFoulLine and the league cells: byCount rides the line, null when the file has none', () => {

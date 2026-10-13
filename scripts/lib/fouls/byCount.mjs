@@ -7,11 +7,13 @@ import { INPLAY_COMMAND_CODES } from '../command-grid.mjs'
 import { shardKey100 } from '../../../src/lib/shardKey.js'
 
 const CELLS = 12 // balls 0-3 x strikes 0-2; the cell is balls * 3 + strikes
-const KEYS = ['reach', 'fouls', 'swings', 'hit', 'walk', 'so', 'out']
+export const BATTER_KEYS = ['reach', 'fouls', 'swings', 'hit', 'walk', 'so', 'out']
 const WALKS = new Set(['walk', 'intent_walk', 'hit_by_pitch'])
 const STRIKEOUTS = new Set(['strikeout', 'strikeout_double_play'])
 
-export const newCells = () => Object.fromEntries(KEYS.map((k) => [k, new Array(CELLS).fill(0)]))
+export const PITCHER_KEYS = [...BATTER_KEYS, 'pitches'] // + the pitches thrown from the count: what every game adds (#1993)
+export const newCells = (keys = BATTER_KEYS) => Object.fromEntries(keys.map((k) => [k, new Array(CELLS).fill(0)]))
+export const newPitcherCells = () => newCells(PITCHER_KEYS)
 // The batter's plate appearance in progress (`b.cur`): its count, and the cells it has been in
 // (it starts in 0-0). A non-PA play (a steal) leaves it for the same batter's resumed at-bat.
 const newPa = () => ({ balls: 0, strikes: 0, reached: new Set([0]) })
@@ -37,6 +39,7 @@ export function tallyPitches(b, fresh, play, p) {
       for (const c of sides) {
         if (foul) c.fouls[at] += 1
         if (swing) c.swings[at] += 1
+        if (c.pitches) c.pitches[at] += 1 // the pitcher's cells only
       }
     }
     if (e.count) {
@@ -62,16 +65,16 @@ export function endPa({ cells, cur }, eventType, p) {
 }
 
 // --- SQLite ------------------------------------------------------------------
-const cellsStatement = (db, table) =>
+const cellsStatement = (db, table, keys) =>
   db.prepare(
-    `INSERT INTO ${table} (person_id, season, scope, count_idx, ${KEYS.join(', ')})
-     VALUES (?, ?, ?, ?, ${KEYS.map(() => '?').join(', ')})
+    `INSERT INTO ${table} (person_id, season, scope, count_idx, ${keys.join(', ')})
+     VALUES (?, ?, ?, ?, ${keys.map(() => '?').join(', ')})
      ON CONFLICT(season, scope, person_id, count_idx) DO UPDATE SET
-       ${KEYS.map((k) => `${k} = ${table}.${k} + excluded.${k}`).join(', ')}`,
+       ${keys.map((k) => `${k} = ${table}.${k} + excluded.${k}`).join(', ')}`,
   )
 export const countStatements = (db) => ({
-  cells: cellsStatement(db, 'foul_batter_counts'),
-  pitcherCells: cellsStatement(db, 'foul_pitcher_counts'),
+  cells: cellsStatement(db, 'foul_batter_counts', BATTER_KEYS),
+  pitcherCells: cellsStatement(db, 'foul_pitcher_counts', PITCHER_KEYS),
   batterGame: db.prepare(
     `INSERT INTO foul_batter_games (game_pk, person_id, season, scope, pitches, fouls, whiffs)
      VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -84,8 +87,9 @@ export const countStatements = (db) => ({
 // is not the test: a PA that a caught stealing or a pickoff ends never ends as a PA, so its pitches
 // are in `fouls`/`swings` with no `reach`, and dropping that row lost them from the cell sums.
 function foldCells(stmt, season, scope, id, cells) {
+  const keys = Object.keys(cells)
   for (let at = 0; at < CELLS; at++) {
-    if (KEYS.some((k) => cells[k][at])) stmt.run(id, season, scope, at, ...KEYS.map((k) => cells[k][at]))
+    if (keys.some((k) => cells[k][at])) stmt.run(id, season, scope, at, ...keys.map((k) => cells[k][at]))
   }
 }
 
@@ -126,25 +130,25 @@ export function foldPitcherTotals(stmts, season, scope, id, p) {
 // hold all of his season. A store part-read since the cells were added then shows none until the
 // full re-read, never a few nights' games as a season. `league` is null with none; only the
 // batters' is read (#1993). The two tests (gen-fouls.mjs): a batter's 0-0 `reach` equals his PA
-// (every PA starts there); a pitcher's cell fouls equal his `fouls`. The pitcher test cannot tell
-// a part-read from a whole season when he has 0 fouls, so the re-read lands in the same stack.
-export function exportByCount(db, table, season, scope, totalRows, covered) {
+// (every PA starts there); a pitcher's cell `pitches` equal his season `pitches` (every game adds
+// pitches, which a count of fouls does not: a game with no foul would hide a part-read store).
+export function exportByCount(db, table, keys, season, scope, totalRows, covered) {
   const one = season != null
   const rows = db
     .prepare(`SELECT * FROM ${table} WHERE ${one ? 'season = ? AND' : ''} scope = ?`)
     .all(...(one ? [season] : []), scope)
   const all = {}
   for (const r of rows) {
-    const cells = (all[r.person_id] ??= newCells())
-    for (const k of KEYS) cells[k][r.count_idx] += r[k]
+    const cells = (all[r.person_id] ??= newCells(keys))
+    for (const k of keys) cells[k][r.count_idx] += r[k]
   }
   const byPerson = {}
-  const league = newCells()
+  const league = newCells(keys)
   for (const r of totalRows) {
     const id = r.person_id
     if (!all[id] || !covered(all[id], r)) continue
     byPerson[id] = all[id]
-    for (const k of KEYS) all[id][k].forEach((n, i) => (league[k][i] += n))
+    for (const k of keys) all[id][k].forEach((n, i) => (league[k][i] += n))
   }
   return { byPerson, league: Object.keys(byPerson).length ? league : null }
 }
