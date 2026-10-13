@@ -1,0 +1,244 @@
+/* ==== THE FORM TREND CHART AND STRETCH TABLE (#1889, shared with the pitcher's #1930) ====
+   FormChart.jsx and StretchTable.jsx import this file. The board is FormTrend.dc.html
+   (docs/player-redesign.md). The fill grows from the season line: .fchart__fill--good on the
+   better side, --bad on the other. The scrubber is a native range input laid over the plot. */
+
+.fchart__plot {
+  position: relative;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.fchart__plot:focus-within {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--space-1);
+}
+.fchart__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.fchart__grid {
+  fill: none;
+  stroke: var(--border-hairline);
+  stroke-width: 1;
+}
+.fchart__season {
+  fill: none;
+  stroke: var(--text-caption);
+  stroke-width: 1.4;
+  stroke-dasharray: 5 4;
+}
+.fchart__fill--good {
+  fill: var(--field-mint);
+  fill-opacity: 0.55;
+}
+.fchart__fill--bad {
+  fill: var(--award-line);
+  fill-opacity: 0.5;
+}
+.fchart__line {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 2.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.fchart__rug {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 2.6;
+}
+.fchart__cursor {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 1.4;
+}
+.fchart__dot {
+  stroke: var(--text-heading);
+  stroke-width: 2;
+}
+.fchart__dot--best {
+  fill: var(--field-mint);
+}
+.fchart__dot--worst {
+  fill: var(--award-line);
+}
+.fchart__dot--cursor {
+  fill: var(--surface-card);
+  stroke-width: 2.4;
+}
+.fchart__scale {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.fchart__tick {
+  position: absolute;
+  left: var(--space-1h);
+  transform: translateY(-115%);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.fchart__scrub {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+.fchart__months {
+  position: relative;
+  height: var(--space-5);
+  margin-top: var(--space-1h);
+}
+.fchart__month {
+  position: absolute;
+  top: 0;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+/* THE STRETCH TABLE: a head, then one row per stretch, then the key to the bars. */
+/* layout-exempt: a name column and n figure columns, set by --fcols */
+.fstretch__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(var(--fcols, 4), 3rem);
+  column-gap: var(--space-1h);
+  align-items: center;
+}
+.fstretch__head {
+  padding: 0 var(--space-2) var(--space-1h);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.fstretch__head > :not(:first-child),
+.fstretch__fig {
+  text-align: right;
+}
+.fstretch__row {
+  display: block;
+  width: 100%;
+  padding: var(--space-3) var(--space-2);
+  border: 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.fstretch__row--pick {
+  cursor: pointer;
+}
+.fstretch__row--pick[aria-pressed='true'] {
+  background: var(--accent-tint);
+  box-shadow: inset var(--space-1) 0 0 var(--border-stamped);
+}
+.fstretch__row--pick:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: calc(var(--space-1) * -1);
+}
+/* layout-exempt: title over its dates */
+.fstretch__name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.fstretch__title {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+}
+.fstretch__sub {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.fstretch__fig {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+}
+.fstretch__bar {
+  display: flex;
+  height: var(--space-8);
+  margin-top: var(--space-2h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.fstretch__seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.fstretch__seg:not(:first-child) {
+  border-left: var(--bw-heavy) solid var(--border-stamped);
+}
+.fstretch__seg[data-i='0'] {
+  background: var(--field);
+  color: var(--text-on-ink);
+}
+.fstretch__seg[data-i='1'] {
+  background: var(--field-mint);
+}
+.fstretch__seg[data-i='2'] {
+  background: var(--field-outfield);
+}
+.fstretch__seg[data-i='3'] {
+  background: var(--field-dirt);
+}
+.fstretch__seg[data-i='4'] {
+  background: var(--clay);
+  background-image: repeating-linear-gradient(45deg, color-mix(in srgb, var(--ink-0) 40%, transparent) 0 1px, transparent 1px 5px);
+  color: var(--text-on-ink);
+}
+.fstretch__ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-1h);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+}
+.fstretch__end--good {
+  color: var(--accent-positive);
+}
+.fstretch__end--bad {
+  color: var(--clay-deep);
+}
+.fstretch__key {
+  margin-top: var(--space-4);
+}
+.fstretch__keyhead {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.fstretch__key .fstretch__seg {
+  flex: 1 1 0;
+}

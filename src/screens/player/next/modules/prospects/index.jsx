@@ -1,12 +1,11 @@
 import { useEffect } from 'react'
 import { fetchTopProspects } from '../../../../../api/prospects.js'
 import { fetchProspectRankHistory } from '../../../../../api/player/prospectRankHistory.js'
-import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { prospectsView } from './prospectsView.js'
 import '../../../../../styles/player-next/both/prospects.css'
 
-// Prospect rankings (#1927): a bar per list year, the change from the last list, a dark Debuted
+// Prospect rankings (#1927): a rank per list year, the change from the last list, a dark Debuted
 // row. The list is per player, so a two-way player gets one card: the hitting instance draws it
 // and the pitching one hides. No ranking on file hides the card. Open surface: no seal.
 export default function ProspectsModule({ bio, role, season, onEmpty, onCount }) {
@@ -34,10 +33,7 @@ export default function ProspectsModule({ bio, role, season, onEmpty, onCount })
         {view.rows.map((r, i) => (
           <li key={i} className={`prospects__row prospects__row--${r.tone}`}>
             <span className="prospects__year">{r.year}</span>
-            <Stack gap="snug" className="prospects__what">
-              <span className="prospects__label">{r.label}</span>
-              {r.bar != null && <span className="prospects__bar" style={{ width: `${r.bar}%` }} />}
-            </Stack>
+            <span className="prospects__label">{r.label}</span>
             <span className="prospects__delta">{r.delta}</span>
             <span className="prospects__rank">{r.rank}</span>
           </li>

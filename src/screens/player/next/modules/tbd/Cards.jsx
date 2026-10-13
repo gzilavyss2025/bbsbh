@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { StatcastPercentiles } from '../../../../../components/charts/StatcastPercentiles.jsx'
 import { AdvancedStatsCard } from '../../../../../components/player/AdvancedStatsCard.jsx'
 import { AwardsLedger } from '../../../../../components/player/AwardsLedger.jsx'
 import { CareerTimeline } from '../../../../../components/player/CareerTimeline.jsx'
 import { PlayerHighlightsRail } from '../../../../../components/player/PlayerHighlightsRail.jsx'
 import { PlayerPhotosRail } from '../../../../../components/player/PlayerPhotosRail.jsx'
+import { TargetCommand } from '../../../../../components/charts/TargetCommand.jsx'
+import { CommandReceivedCard } from '../../../../../components/playerstats/CommandReceivedCard.jsx'
+import { FoulCard } from '../../../../../components/playerstats/FoulCard.jsx'
+import { MilestoneWatchCard } from '../../../../../components/playerstats/MilestoneWatchCard.jsx'
 import { RunValueCard } from '../../../../../components/playerstats/RunValueCard.jsx'
 import { TransactionTimeline } from '../../../../../components/transactions/TransactionTimeline.jsx'
 import { fetchRunValue, playerRunValue } from '../../../../../api/around-the-game/runValue.js'
@@ -13,8 +17,12 @@ import { Part } from './Part.jsx'
 import {
   advancedFor,
   awardsFor,
+  commandReceivedCardFor,
+  foulsFor,
+  milestonesFor,
   inMajors,
   percentilesFor,
+  targetCommandCardFor,
   photoGamesFor,
   timelineFor,
   transactionsFor,
@@ -34,24 +42,34 @@ function Advanced({ p }) {
   )
 }
 
-// His this-season MLB games for the Photos walk-back; the rail hides itself on none.
-function Photos({ bio, season }) {
-  const { data } = useAsync(() => photoGamesFor(bio, season), [bio.id, season])
-  return data?.length ? <PlayerPhotosRail personId={bio.id} games={data} limit={6} /> : null
+// His this-season MLB games for the Photos walk-back. With none (or a failed read) the rail is
+// never drawn, so it reports empty itself; otherwise the rail does.
+function Photos({ bio, season, onEmpty }) {
+  const { data, loading } = useAsync(() => photoGamesFor(bio, season), [bio.id, season])
+  const none = !loading && !data?.length
+  useEffect(() => {
+    if (none) onEmpty()
+  }, [none, onEmpty])
+  return data?.length ? <PlayerPhotosRail personId={bio.id} games={data} limit={6} onEmpty={onEmpty} /> : null
 }
 
-// Photos and highlights: only for a player in the majors, on the live view. The rails decide
-// for themselves whether they have anything, so this card never reports empty.
-// ponytail: a bench player with neither leaves the card blank; the rails would need an onEmpty.
+// Photos and highlights: only for a player in the majors, on the live view. Each rail reports
+// when it has nothing; the card hides once both have.
 function Media({ p }) {
   const { bio, asOf, season, hide } = p
   const shown = !asOf && bio.debut && inMajors(bio)
+  const [none, setNone] = useState({})
+  const noPhotos = useCallback(() => setNone((n) => (n.photos ? n : { ...n, photos: true })), [])
+  const noClips = useCallback(() => setNone((n) => (n.clips ? n : { ...n, clips: true })), [])
+  useEffect(() => {
+    if (none.photos && none.clips) hide('media')
+  }, [none, hide])
   return (
     <Part id="media" hide={hide} load={async () => shown} deps={[shown]}>
       {() => (
         <>
-          <Photos bio={bio} season={season} />
-          <PlayerHighlightsRail playerId={bio.id} teamId={bio.team?.id} limit={6} />
+          <Photos bio={bio} season={season} onEmpty={noPhotos} />
+          <PlayerHighlightsRail playerId={bio.id} teamId={bio.team?.id} limit={6} onEmpty={noClips} />
         </>
       )}
     </Part>
@@ -103,4 +121,42 @@ export const CARDS = {
     </Part>
   ),
   media: Media,
+  targetcommand: ({ p }) => (
+    <Part id="targetcommand" hide={p.hide} load={() => targetCommandCardFor(p.bio.id, p.season)} deps={[p.bio.id, p.season]}>
+      {(d) => <TargetCommand entry={d.entry} data={d.data} />}
+    </Part>
+  ),
+  cmdreceived: ({ p }) => (
+    <Part id="cmdreceived" hide={p.hide} load={() => commandReceivedCardFor(p.bio.id, p.season)} deps={[p.bio.id, p.season]}>
+      {(data) => <CommandReceivedCard data={data} personId={p.bio.id} season={p.season} />}
+    </Part>
+  ),
+  fouls: ({ p }) => (
+    <Part
+      id="fouls"
+      hide={p.hide}
+      load={() => foulsFor(p.bio, p.role, p.season, p.asOf)}
+      deps={[p.bio.id, p.role, p.season, p.asOf]}
+    >
+      {() => <FoulCard playerId={p.bio.id} group={p.role} asOf={p.asOf} seasonYear={p.season} label={String(p.season)} />}
+    </Part>
+  ),
+  milestones: ({ p }) => (
+    <Part
+      id="milestones"
+      hide={p.hide}
+      load={() => milestonesFor(p.bio, p.role, p.season, p.asOf)}
+      deps={[p.bio.id, p.role, p.season, p.asOf]}
+      has={(m) => m?.length}
+    >
+      {(m) => (
+        <MilestoneWatchCard
+          playerId={p.bio.id}
+          asOf={p.asOf}
+          milestones={m}
+          groupLabel={p.bio.twoWay ? (p.role === 'pitching' ? 'Pitching' : 'Batting') : null}
+        />
+      )}
+    </Part>
+  ),
 }

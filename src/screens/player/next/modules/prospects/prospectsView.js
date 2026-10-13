@@ -4,9 +4,7 @@ import { teamClubName } from '../../../../../lib/teams.js'
 
 // The Prospect rankings board's rows (#1927). Pure. The list history, the debut row's place and the
 // credit lines are prospectRankView's; the snapshot adds today's two ranks. Null with no ranking on file.
-// A bar is the place on its list: the file's depth for a past list, 100 for today's Top 100 (the list's
-// name). Today's org list has no depth in the store, so it draws no bar.
-const bar = (rank, of) => Math.round(((of + 1 - rank) / of) * 100)
+// A rank reads "#14", never "of X" and never a bar (Gary, #1927).
 
 export function prospectsView({ history, snapshot, playerId, debutYear, currentSeason }) {
   const { rank, orgRank, orgTeamId } = prospectBadge(snapshot, playerId)
@@ -15,25 +13,23 @@ export function prospectsView({ history, snapshot, playerId, debutYear, currentS
 
   let prev = null
   const rows = entries.map((e) => {
-    if (e.kind === 'debut') return { tone: 'debut', year: e.season, label: 'Debuted', rank: '', bar: null, delta: '' }
+    if (e.kind === 'debut') return { tone: 'debut', year: e.season, label: 'Debuted', rank: '', delta: '' }
     if (e.kind === 'today') {
-      return { tone: 'today', year: 'Today', label: 'Current list · MLB Pipeline', rank: e.rank, bar: bar(e.rank, 100), delta: '' }
+      return { tone: 'today', year: 'Today', label: 'Current list · MLB Pipeline', rank: `#${e.rank}`, delta: '' }
     }
     const diff = prev == null ? null : prev - e.rank
     prev = e.rank
-    const label = [e.sourceLabel, e.of && `of ${e.of}`].filter(Boolean).join(' · ')
     return {
       tone: 'rank',
       year: e.season,
-      label,
-      rank: e.rank,
-      bar: e.of ? bar(e.rank, e.of) : null,
+      label: e.sourceLabel,
+      rank: `#${e.rank}`,
       delta: diff == null ? '' : diff === 0 ? '=' : `${diff > 0 ? '+' : '−'}${Math.abs(diff)}`,
     }
   })
   if (orgRank) {
     const club = teamClubName(orgTeamId)
-    rows.push({ tone: 'today', year: 'Today', label: club ? `${club} org list` : 'Org list', rank: orgRank, bar: null, delta: '' })
+    rows.push({ tone: 'today', year: 'Today', label: club ? `${club} org list` : 'Org list', rank: `#${orgRank}`, delta: '' })
   }
   if (!rows.length) return null
 
@@ -41,7 +37,7 @@ export function prospectsView({ history, snapshot, playerId, debutYear, currentS
   return {
     rows,
     badge: lists ? `${lists} ${lists === 1 ? 'list' : 'lists'}` : 'Prospect',
-    note: base ? base.note : !rank ? '' : 'No earlier lists on file. Bars show place on a 100-deep list: longer is higher.',
+    note: base ? base.note : !rank ? '' : 'No earlier lists on file.',
     credits: base?.credits ?? [],
   }
 }
