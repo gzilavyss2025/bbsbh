@@ -113,6 +113,21 @@ export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false
   return { rows }
 }
 
+// The log's rows with a game's pitches seen, fouls and whiffs joined on gamePk: `byGame` is
+// fouls.js's fetchBatterGameFouls map, `{ gamePk: [pitches, fouls, whiffs] }` (#1914). A row with no
+// entry reads null. Foul counts hold no score, so the join needs no cutoff of its own: it adds
+// to the rows gameLogView let through and to nothing else.
+export function withGameFouls(view, byGame) {
+  if (!view) return view
+  return {
+    ...view,
+    rows: view.rows.map((r) => {
+      const [pitchesSeen = null, fouls = null, whiffs = null] = byGame?.[r.gamePk] ?? []
+      return { ...r, pitchesSeen, fouls, whiffs }
+    }),
+  }
+}
+
 const teamResult = ({ runs, oppRuns }) => (runs > oppRuns ? 'W' : runs < oppRuns ? 'L' : 'T')
 const decision = (st) => (num(st.wins) ? 'W' : num(st.losses) ? 'L' : num(st.saves) ? 'SV' : null)
 

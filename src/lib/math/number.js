@@ -17,3 +17,9 @@ export function clamp(n, lo, hi) {
 export function round1(n) {
   return Math.round(n * 10) / 10
 }
+
+// `n` of `of` as a whole percent, half up, or null with nothing to divide by. The product
+// comes first: (29 / 200) * 100 is 14.499999999999998 and would round down.
+export function pctOf(n, of) {
+  return of > 0 ? Math.round((100 * n) / of) : null
+}

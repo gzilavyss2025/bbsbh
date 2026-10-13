@@ -121,3 +121,10 @@ test('the shipped data stays inside the unstamped budget', () => {
       '  A new dataset should write generatedAt, not raise the budget.',
   )
 })
+
+test('the per-start pitch mix store is excepted by name, so it never counts as unstamped', () => {
+  const r = run([{ name: 'pitch-arsenal-starts/', stamp: null }])
+  assert.deepEqual(r.unstamped, [])
+  assert.equal(r.excepted.length, 1)
+  assert.equal(UNSTAMPED_BUDGET, 23, 'the budget did not move')
+})

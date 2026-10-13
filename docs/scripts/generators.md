@@ -419,6 +419,17 @@ don't run these by hand.
   swept too, kept BESIDE the regular season by a `scope` key (`R`/`P`, ADR-0102): the
   files gain a `post` key only once a postseason game is on file, and no reader sums it
   in. Backfill old postseason games by hand with `--since=<first postseason date>`.
+  FOULS BY COUNT (#1881) and PER GAME (#1914), from `scripts/lib/fouls/`: each batter row gains
+  `byCount` (12 cells, `balls * 3 + strikes`: PAs in the count, fouls and swings thrown from
+  it, and how those PAs ended, credited to every count they were in) and the league block gains
+  `byCount` and `medianBestPaFouls` (the middle best at-bat of hitters with 300+ PA). Per-game
+  `[pitches, fouls, whiffs]` go to `fouls/{season}/{NN}.games.json`, a second shard set
+  because a busy bucket's per-game rows alone outweigh the bucket. Both ride new tables
+  (`foul_batter_counts`, `foul_batter_games`): the nightly sweep fills them for new games, and
+  `--rebuild-counts=<season>` wipes both for the season and re-reads every ingested game of
+  it, both scopes (the same rows it wipes). It exits non-zero and names any game whose feed
+  failed; run it again, and commit only after a clean run. Until it has run, a batter row
+  has no `byCount` and the reader gives `null`.
 - `gen-comeback-wins.mjs` → `public/data/comeback-wins.json` — per-team,
   per-season COMEBACK counts that form a RATE: for each Final game BOTH sides'
   minimum win prob is bucketed, so whichever side fell below 10/20/30% counts an
@@ -792,6 +803,8 @@ don't run these by hand.
   accumulated history instead of always falling back to the base logo.
 - `gen-pitch-arsenal.mjs` → `pitch-arsenal/{season}/{NN}.json` (per-pitcher buckets) +
   `pitch-arsenal-pool/{season}/{mlb,aaa}.json` (slim similarity pool, `docs/api/static-data.md`)
+  + `pitch-arsenal-starts/{season}/{NN}.json` (each pitcher's pitch mix per game, from the
+  `pitch_arsenal_starts` table; `--clear-arsenal` re-walks it with the arsenal half, #1915)
   + `pitch-command/{season}/{NN}.json` (the command grid), a `seasons.json` in each of the
   three folders, and `pitch-arsenal-pool/all/{mlb,aaa}.json` (every season, summed from
   rows). A season store (ADR-0086, #1200): `season` leads both totals tables' keys, the

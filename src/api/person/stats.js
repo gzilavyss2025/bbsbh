@@ -6,6 +6,7 @@ import { rateText } from '../../lib/math/leagueAverages.js'
 import { DASH, num, rate3, mlbOps, eraOf, whipOf } from './shared.js'
 import { ordinal } from './teamPage.js'
 import { teamAbbr } from '../../lib/teams.js'
+import { pctOf } from '../../lib/math/number.js'
 
 // ---------------------------------------------------------------------------
 // Stat aggregation
@@ -192,7 +193,7 @@ function splitSide(stat, group) {
     return { count: DASH, slash: DASH, ops: DASH, hr: DASH, rbi: DASH, xbh: DASH, soPct: DASH, bbPct: DASH, opsNum: null }
   }
   const pa = group === 'pitching' ? num(stat.battersFaced) : num(stat.plateAppearances)
-  const pct = (x) => (pa ? `${Math.round((num(x) / pa) * 100)}%` : DASH)
+  const pct = (x) => (pa ? `${pctOf(num(x), pa)}%` : DASH)
   const slash = [stat.avg, stat.obp, stat.slg].map((v) => v ?? DASH).join('/')
   const opsNum = Number.parseFloat(stat.ops)
   return {
@@ -268,6 +269,36 @@ export function splitsView(lrSplits, group) {
   const r = byCode.vr
   if (!l && !r) return null
   return { left: splitSide(l, group), right: splitSide(r, group), all: overallSide([l, r], group) }
+}
+
+// A split row read against the baseline row it sits under (`all`, splitsView's or
+// situationalSplitsView's). `rows` are [{ label, side }] as those views build them. Each
+// answer is { delta, flag, thin, read }: the OPS gap to the baseline, signed with a true minus
+// ('' with no baseline); 'best' or 'weak' for the end of the sound rows; a thin flag under
+// SPLIT_SAMPLE_PA; and a one-line read. Best is the highest OPS for a bat and the lowest for
+// an arm, whose line is what hitters did against him. A thin row is never flagged, and sound
+// rows with one row or one OPS between them have nothing to rank.
+const SPLIT_SAMPLE_PA = 100
+
+export function splitReads(rows, all, group) {
+  const base = all?.opsNum ?? null
+  // A row with no line at all (opsNum null) is missing, not small.
+  const thin = rows.map(({ side }) => side.opsNum != null && num(side.count) < SPLIT_SAMPLE_PA)
+  const sound = rows.flatMap(({ side }, i) => (thin[i] || side.opsNum == null ? [] : [side.opsNum]))
+  const hi = Math.max(...sound)
+  const lo = Math.min(...sound)
+  const [best, weak] = group === 'pitching' ? [lo, hi] : [hi, lo]
+  return rows.map(({ label, side }, i) => {
+    const gap = base == null || side.opsNum == null ? null : rate3(Math.abs(side.opsNum - base))
+    const delta = gap == null ? '' : gap === '.000' ? gap : `${side.opsNum > base ? '+' : '−'}${gap}`
+    const ranked = sound.length > 1 && hi !== lo && !thin[i] && side.opsNum != null
+    return {
+      delta,
+      flag: ranked ? (side.opsNum === best ? 'best' : side.opsNum === weak ? 'weak' : null) : null,
+      thin: thin[i],
+      read: `${label}: ${side.ops} OPS${delta ? `, ${delta} against ${all.ops} overall` : ''}${thin[i] ? ` · under ${SPLIT_SAMPLE_PA} PA` : ''}`,
+    }
+  })
 }
 
 // ---------------------------------------------------------------------------

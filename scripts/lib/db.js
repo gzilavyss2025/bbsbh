@@ -51,7 +51,7 @@ export const GROUPS = {
   'postseason-player-stats': {
     tables: ['postseason_ingested_games', 'postseason_batting_totals', 'postseason_pitching_totals'],
   },
-  // All six foul tables are written by the SAME single generator (gen-fouls.mjs)
+  // All the foul tables are written by the SAME single generator (gen-fouls.mjs)
   // on the nightly cron — no cross-cron collision to isolate, so one group
   // covers them all, same as postseason-player-stats above.
   fouls: {
@@ -67,6 +67,8 @@ export const GROUPS = {
       'foul_game_totals',
       'foul_team_pitch_types_batting',
       'foul_team_pitch_types_pitching',
+      'foul_batter_counts',
+      'foul_batter_games',
     ],
   },
   // Both comeback tables are written by the one nightly gen-comeback-wins.mjs —
@@ -84,7 +86,7 @@ export const GROUPS = {
   'pitch-arsenal': {
     bySeason: true,
     tables: [
-      'pitch_arsenal_totals', 'pitch_arsenal_physics', 'pitch_arsenal_ingested_games', 'pitch_command_cells', 'pitch_command_ingested_games',
+      'pitch_arsenal_totals', 'pitch_arsenal_physics', 'pitch_arsenal_starts', 'pitch_arsenal_ingested_games', 'pitch_command_cells', 'pitch_command_ingested_games',
       'pitch_hitter_cells', 'pitch_hitter_ingested_games',
     ],
   },
