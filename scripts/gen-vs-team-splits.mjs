@@ -40,7 +40,8 @@ import { fileURLToPath } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
-import { mlbOps, eraOf, rate3 } from '../src/api/person/shared.js'
+import { eraOf } from '../src/api/person/shared.js'
+import { hitterCar } from './lib/vs-team/hitter.mjs'
 import { num } from '../src/lib/math/number.js'
 import { ipToOuts, outsToIp } from '../src/lib/math/innings.js'
 
@@ -92,13 +93,6 @@ function pitcherLine(st) {
 }
 
 // --- rate stats from summed components ---------------------------------------
-const avgOf = (h, ab) => (ab > 0 ? rate3(h / ab) : '.000')
-function opsOf(b) {
-  const obDen = b.ab + b.bb + b.hbp + b.sf
-  const obp = obDen > 0 ? (b.h + b.bb + b.hbp) / obDen : 0
-  const slg = b.ab > 0 ? b.tb / b.ab : 0
-  return rate3(mlbOps(obp, slg)) // MLB's own rounding, not the full-precision sum (#1275)
-}
 // '-.--' is statsapi's own mark for no ERA; 0.00 would say he was perfect (#1276).
 const eraText = (er, outs) => eraOf(er, outs)?.toFixed(2) ?? '-.--'
 
@@ -214,7 +208,7 @@ async function buildPlayerVs(personId, group, teamAbbr) {
       if (!b) {
         b = { last: null, sums: isPitcher
           ? { g: 0, outs: 0, er: 0, k: 0, bb: 0 }
-          : { g: 0, pa: 0, ab: 0, h: 0, d: 0, t: 0, hr: 0, rbi: 0, bb: 0, hbp: 0, sf: 0, tb: 0 } }
+          : { g: 0, pa: 0, ab: 0, h: 0, d: 0, t: 0, hr: 0, rbi: 0, bb: 0, hbp: 0, sf: 0, so: 0, tb: 0 } }
         buckets.set(oppId, b)
       }
       if (isPitcher) {
@@ -235,6 +229,7 @@ async function buildPlayerVs(personId, group, teamAbbr) {
         b.sums.bb += num(st.baseOnBalls)
         b.sums.hbp += num(st.hitByPitch)
         b.sums.sf += num(st.sacFlies)
+        b.sums.so += num(st.strikeOuts)
         b.sums.tb += num(st.totalBases)
       }
       // Track the latest meeting for the last-game line.
@@ -256,7 +251,7 @@ async function buildPlayerVs(personId, group, teamAbbr) {
     // src/api/callout-notes.js) — the player-page card doesn't read them.
     const car = isPitcher
       ? { g: s.g, ip: outsToIp(s.outs), era: eraText(s.er, s.outs), k: s.k, bb: s.bb }
-      : { g: s.g, pa: s.pa, ab: s.ab, h: s.h, avg: avgOf(s.h, s.ab), hr: s.hr, xbh: s.d + s.t + s.hr, rbi: s.rbi, bb: s.bb, ops: opsOf(s) }
+      : hitterCar(s)
     vs[oppId] = { car, last: b.last }
   }
   return vs

@@ -33,7 +33,7 @@ export const fetchWorkload = staticJson('/data/workload.json')
 // this; it lives here because a generator is a top-level script and cannot be
 // unit-tested (test/workload.test.js).
 export function foldGameLog(splits) {
-  const season = { g: 0, gs: 0, pitches: 0, outs: 0, bf: 0, strikes: 0 }
+  const season = { g: 0, gs: 0, pitches: 0, outs: 0, gsPitches: 0, gsOuts: 0, bf: 0, strikes: 0 }
   const allApps = []
   for (const s of splits ?? []) {
     if (!s?.date) continue
@@ -44,10 +44,16 @@ export function foldGameLog(splits) {
       season.gs += gs
       season.pitches += num(st.numberOfPitches)
       season.outs += ipToOuts(st.inningsPitched)
+      // Starts only: the per-start rates (moundRateFor) must not count a swingman's relief outings.
+      if (gs) {
+        season.gsPitches += num(st.numberOfPitches)
+        season.gsOuts += ipToOuts(st.inningsPitched)
+      }
       season.bf += num(st.battersFaced)
       season.strikes += num(st.strikes)
     }
-    const app = { d: s.date, p: num(st.numberOfPitches) }
+    // o opponent id, h home, t game type, g gamePk — short keys, the store holds ~12 apps a pitcher.
+    const app = { d: s.date, p: num(st.numberOfPitches), o: s.opponent?.id, h: s.isHome, t: s.gameType, g: s.game?.gamePk }
     if (gs) app.gs = 1
     allApps.push(app)
   }
@@ -375,8 +381,9 @@ export function moundRateFor(data, personId) {
   return {
     outsPerOuting,
     multiInning: outsPerOuting > 3,
-    ipPerStart: s.gs > 0 ? outsToIp(Math.round(s.outs / s.gs)) : null,
-    pitchesPerStart: s.gs > 0 ? Math.round(s.pitches / s.gs) : null,
+    // gsOuts/gsPitches are starts only; a store older than them has none, so no rate.
+    ipPerStart: s.gs > 0 && s.gsOuts != null ? outsToIp(Math.round(s.gsOuts / s.gs)) : null,
+    pitchesPerStart: s.gs > 0 && s.gsPitches != null ? Math.round(s.gsPitches / s.gs) : null,
   }
 }
 

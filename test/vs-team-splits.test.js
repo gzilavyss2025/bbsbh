@@ -6,8 +6,10 @@ import {
   fetchVsTeamSplitsForPlayer,
   fetchVsTeamSplitsForTeams,
   vsTeamDoorLabel,
+  vsTeamRates,
   vsTeamSplitsFor,
 } from '../src/api/vsTeamSplits.js'
+import { hitterCar } from '../scripts/lib/vs-team/hitter.mjs'
 
 const TEAMS = [
   { id: 158, abbr: 'MIL', name: 'Brewers' },
@@ -164,4 +166,25 @@ test('the club shards merge back into the whole-file shape, and are fetched once
   const one = await fetchVsTeamSplitsForPlayer(1)
   assert.equal(urls.length, calls)
   assert.equal(one.players[1].teamId, 158)
+})
+
+// --------------------------------------------------------------------------
+// #1910 part b: the hitter line carries obp, slg and so; the reader turns them
+// into BB% and K%.
+// --------------------------------------------------------------------------
+const SUMS = { g: 10, pa: 44, ab: 36, h: 12, d: 3, t: 0, hr: 2, rbi: 6, bb: 6, hbp: 1, sf: 1, so: 11, tb: 21 }
+
+test('hitterCar writes obp, slg (MLB rounding) and so beside the old keys', () => {
+  const car = hitterCar(SUMS)
+  assert.equal(car.obp, '.432') // (12 + 6 + 1) / (36 + 6 + 1 + 1)
+  assert.equal(car.slg, '.583') // 21 / 36
+  assert.equal(car.ops, '1.015') // each half rounded, then added
+  assert.equal(car.so, 11)
+  assert.equal(car.xbh, 5)
+})
+
+test('vsTeamRates divides by plate appearances; a shard with no so gives null', () => {
+  assert.deepEqual(vsTeamRates({ pa: 40, bb: 4, so: 10 }), { bbPct: 0.1, kPct: 0.25 })
+  assert.deepEqual(vsTeamRates({ pa: 40, bb: 4 }), { bbPct: 0.1, kPct: null })
+  assert.deepEqual(vsTeamRates({ pa: 0, bb: 0, so: 0 }), { bbPct: null, kPct: null })
 })

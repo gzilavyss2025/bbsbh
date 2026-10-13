@@ -105,6 +105,12 @@ export function vsTeamDoorLabel(car, group, oppAbbr) {
   return `Career vs ${oppAbbr}: ${stat}`
 }
 
+// BB% and K% of plate appearances, off a hitter's career line. A shard written
+// before the generator kept `so` has no strikeouts, so K% is null (the UI shows
+// "—"), never 0%.
+const pctOf = (n, pa) => (Number.isFinite(n) && pa > 0 ? n / pa : null)
+export const vsTeamRates = (car) => ({ bbPct: pctOf(car?.bb, car?.pa), kPct: pctOf(car?.so, car?.pa) })
+
 export function vsTeamSplitsFor(data, personId) {
   const player = data?.players?.[personId]
   if (!player || !player.vs) return null

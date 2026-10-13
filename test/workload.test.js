@@ -189,6 +189,20 @@ test('foldGameLog: October outings reach apps but not the regular-season totals'
   assert.equal(season.pitches, 20)
 })
 
+test('foldGameLog: starter-only sums skip relief outings; each app keeps opponent, side, type and game', () => {
+  const g = (o, h, pk) => ({ opponent: { id: o }, isHome: h, game: { gamePk: pk } })
+  const { season, allApps } = foldGameLog([
+    { ...split('2026-09-01', 'R', 90, { gamesStarted: 1, inningsPitched: '6.0' }), ...g(135, true, 1) },
+    { ...split('2026-09-06', 'R', 20, { inningsPitched: '1.0' }), ...g(112, false, 2) },
+    { ...split('2026-10-07', 'D', 56, { gamesStarted: 1, inningsPitched: '4.0' }), ...g(135, false, 3) },
+  ])
+  assert.equal(season.pitches, 110)
+  assert.equal(season.gsPitches, 90)
+  assert.equal(season.gsOuts, 18)
+  assert.deepEqual(allApps[2], { d: '2026-10-07', p: 56, gs: 1, o: 135, h: false, t: 'D', g: 3 })
+  assert.equal(allApps[0].h, true)
+})
+
 test('foldGameLog: undated splits are dropped and an empty log is safe', () => {
   assert.equal(foldGameLog([{ gameType: 'R', stat: {} }]).allApps.length, 0)
   assert.equal(foldGameLog(undefined).season.g, 0)

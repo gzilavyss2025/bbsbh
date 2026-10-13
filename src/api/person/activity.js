@@ -14,7 +14,7 @@ import {
 } from '../rehab-policy.js'
 import { monthDayName } from '../../lib/dates.js'
 import { pitcherRole } from './identity.js'
-import { aggregateSplits, hitterTiles, pitcherTiles, splitsView } from './stats.js'
+import { aggregateSplits, milbCareerStat, hitterTiles, pitcherTiles, splitsView } from './stats.js'
 import { gameLogView } from './gameLog.js'
 import { milestoneWatchView, mlbCareerThroughCutoff } from './milestones.js'
 import { arsenalView } from './advanced.js'
@@ -428,7 +428,7 @@ export function otherLevelSeasonBlocks({ mlbSplits, milbSplits, group, currentSe
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
 
-export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, altGameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, retiredYear = null, tileStat, levelOnlyStat, levelOnlySplits, logTagLevel = false, warByYear = {}, warByTeam = {}, transactions = [], orgOf = null, otherGroupYears = null }) {
+export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, altGameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, milbCareerSplits, cutoff, currentSeason, currentSportId, debutYear, retiredYear = null, tileStat, levelOnlyStat, levelOnlySplits, logTagLevel = false, warByYear = {}, warByTeam = {}, transactions = [], orgOf = null, otherGroupYears = null }) {
   // The date-cut current-season stat at the player's CURRENT level. It leads
   // the "Current season" tiles, so it can't move mid-game. `tileStat` (see
   // loadPlayer) resolves to the live level for an active MLB/single-level
@@ -494,7 +494,7 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     register: careerRegisterView({
       mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, role, debutYear,
       currentStat: levelOnlyStat ?? tile, currentSplits: levelOnlySplits,
-      currentSeason, currentSportId, retiredYear, careerStat: career, warByYear, warByTeam,
+      currentSeason, currentSportId, retiredYear, careerStat: career, milbCareer: milbCareerStat(milbCareerSplits, group), warByYear, warByTeam,
       transactions, orgOf, otherGroupYears,
     }),
     milestones: milestoneWatchView(milestoneStat, group),
