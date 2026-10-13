@@ -401,6 +401,13 @@ export const PROTOTYPES = [
     verdict: 'Prototype',
     note: 'The Season Report and “Who challenges” as they are on frame="sheet", then three candidate looks on the same two real components. Invented data. No new Card frame; Gary picks, or stays on sheet.',
   },
+  {
+    id: 'stamped-parts',
+    title: 'Player redesign: shared parts (#1882)',
+    path: 'src/screens/designlab/stamped/',
+    verdict: 'Prototype',
+    note: 'Spec: docs/player-redesign.md, section 3. The real parts on invented data: Card frame="stamped" with its name tab and count tag, StatTile in its ink, tint and plain fills, FactGrid look="strip", and the stamp-in. Check at 390 and 1180 px.',
+  },
 ]
 
 export const GROUP_TITLES = {

@@ -11,8 +11,10 @@ to reach for from anywhere. At the top level: `Loader`, `SectionMasthead`, `Copy
   leaves, a pill is a capsule.
 - **`frame/`** — `SectionHead`, the one head a section or card wears (#1113;
   `SectionMasthead` is its thin band wrapper), and `Card`, the one box a section sits on:
-  `frame` sheet or ledger, `head` a SectionHead, `body` padded or flush, `className` the
-  block's namespace. It owns no margin.
+  `frame` sheet, ledger or stamped (the player redesign, #1882: `label` name tab, `count`
+  tag, `tone` plain, tint or ink, `stampIn`), `head` a SectionHead, `body` padded or flush,
+  `className` the block's namespace. It owns no margin. `StatTile` is a stamped Card with
+  a label, a number and a caption; `FactGrid look="strip"` is the fact strip.
 - **`table/`** — `Table`, the one grid of figures with column names (#1132): `frame` sheet
   or bare, `density` row, tight or keep (keep pads no cell: the namespace sets its own),
   `sticky` first column, `label` makes the scroll region a Tab stop, `className` the

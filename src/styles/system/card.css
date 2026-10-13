@@ -15,8 +15,10 @@
    block wears (the namespace's too). A namespace rule loads later, so it wins
    on order at equal specificity.
 
-   TWO FRAMES, and the radius decides (#1113 Q1). The frame rule below is the
-   only rule that draws; a frame class sets only the two values that differ.
+   THREE FRAMES (#1113 Q1, #1882). The frame rule below is the only rule that
+   draws; a frame class sets only the custom properties that differ. The edge,
+   the ground and the clip fall back to the sheet's values, so only the
+   stamped frame sets them.
 
    HERE IN THE ORDER, right after system/section-head.css and before
    06-loader-and-cards.css. test/card-cascade.test.js pins the slot.
@@ -24,12 +26,17 @@
    No club colour reaches the card (ADR-0030). A club colours the band head
    that names it, through the head's own theme hook, never the card's frame.
    --------------------------------------------------------------------------- */
+/* The three frame values do not inherit: a sheet or ledger card nested in a
+   stamped one keeps its own edge, ground and clip. */
+@property --card-edge { syntax: '*'; inherits: false; }
+@property --card-ground { syntax: '*'; inherits: false; }
+@property --card-overflow { syntax: '*'; inherits: false; }
 .card {
-  border: var(--bw-hair) solid var(--border-rule);
+  border: var(--card-edge, var(--bw-hair) solid var(--border-rule));
   border-radius: var(--card-radius);
-  background: var(--surface-card);
+  background: var(--card-ground, var(--surface-card));
   box-shadow: var(--card-shadow);
-  overflow: hidden;
+  overflow: var(--card-overflow, hidden);
 }
 .card--sheet {
   --card-radius: var(--radius-md);
@@ -40,12 +47,40 @@
   --card-shadow: none;
 }
 
+/* THE STAMPED FRAME (#1882; docs/player-redesign.md, section 3): the player
+   page's card and stat tile. Square, a 2px ink edge and a hard ink offset
+   shadow. It does not clip, because its name tab and count tag sit across the
+   top edge (system/stamped/stamped.css draws them). It takes no band head, so
+   there are no corners to clip to.
+
+   TONES fill a stat tile: tint, or ink for the lead tile. An ink shadow does
+   not show under an ink tile, so the ink tone takes the soft shadow. */
+.card--stamped {
+  --card-radius: 0;
+  --card-shadow: var(--shadow-stamped);
+  --card-edge: var(--bw-heavy) solid var(--border-stamped);
+  --card-overflow: visible;
+  position: relative;
+}
+.card--tint {
+  --card-ground: var(--surface-stamped-tint);
+}
+.card--ink {
+  --card-ground: var(--surface-stamped-ink);
+  --card-shadow: var(--shadow-stamped-soft);
+  color: var(--text-on-ink);
+}
+
 /* The padded body: the old team hub body, so the rows line up under a head
    that uses the default --space-4 inset. It is a <span> inside a link or a
    button card (phrasing content only), so it says display: block itself. */
 .card__body {
   display: block;
   padding: var(--space-3) var(--space-4) var(--space-4);
+}
+/* A card with a name tab: the body clears the tab that hangs into it. */
+.card--named > .card__body {
+  padding-top: var(--space-6);
 }
 
 /* THE INTERACTIVE CARD: the whole card is the tap target (as="a" or

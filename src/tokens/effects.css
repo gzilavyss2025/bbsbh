@@ -26,6 +26,12 @@
      multi-layer or spread syntax, so it can't consume --shadow-* directly. */
   --shadow-drop-raised: 0 3px 5px rgba(22,34,47,0.22);
 
+  /* The stamped card's hard offset shadow (#1882): no blur, the edge ink
+     printed --stamped-offset down and right, so the card reads as a block
+     stamped onto the page. The soft form sits under an ink tile. */
+  --shadow-stamped:      var(--stamped-offset) var(--stamped-offset) 0 var(--border-stamped);
+  --shadow-stamped-soft: var(--stamped-offset) var(--stamped-offset) 0 var(--border-stamped-soft);
+
   /* Focus ring */
   --ring: 0 0 0 3px rgba(47,110,79,0.35);
 
@@ -52,6 +58,14 @@
   --dur-fast:   120ms;
   --dur-med:    220ms;
   --dur-slow:   360ms;
+
+  /* The stamp-in (#1882, motion/stamp-in.css): a stamped card drops
+     --stamped-offset into its own shadow as it appears. The canvas drew it at
+     380ms on cubic-bezier(.2,.9,.3,1). That is under the eye's floor from
+     --dur-slow and --ease-out, so the motion reads those two. It is not the
+     Stamp In page (ADR-0042). */
+  --dur-stamp-in:  var(--dur-slow);
+  --ease-stamp-in: var(--ease-out);
 
   /* Sub-200ms press feedback (review-animations STANDARDS.md's "button press
      feedback" spec) for controls a touch heavier than the plain --dur-fast tap. */
