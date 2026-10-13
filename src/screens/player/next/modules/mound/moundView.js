@@ -104,7 +104,7 @@ export function moundView(p, today) {
       chart: { head: `Last ${shown.length} outings`, avg, avgLabel: avg && `Averages ${avg} pitches per start`, avgPct: avg && pct(avg, maxP), ...calendarFor(shown, today, maxP, { usual, hatch: true }) },
     }
   }
-  if (recent.length || !starts.length) {
+  if (p.role !== 'SP' || recent.length || !starts.length) {
     const avg = s?.g > 0 ? Math.round(s.pitches / s.g) || null : null
     const shown = recent.slice().reverse()
     const maxP = Math.max(30, ceil10(Math.max(...shown.map((a) => a.p), avg ?? 0)))
