@@ -541,7 +541,7 @@ export function parseRoute(url) {
   const scout = parseScoutRoute(parts, q, { asOf, idFromSlug })
   if (scout) return scout
   if (parts.length === 2 && parts[0] === 'player')
-    return { name: 'player', id: idFromSlug(parts[1]), asOf, sportId }
+    return { name: q.get('look') === 'new' ? 'player-next' : 'player', id: idFromSlug(parts[1]), asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')
     return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId }
   // A series id (e.g. '2025-division-112-158') already matches

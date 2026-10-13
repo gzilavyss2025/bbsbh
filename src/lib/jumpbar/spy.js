@@ -42,3 +42,13 @@ export function countLabel(count) {
   if (typeof count === 'number') return Number.isFinite(count) ? count.toLocaleString('en-US') : null
   return String(count)
 }
+
+// What a measure does with the tap's hold (`hold` is { until } or null). A live
+// hold keeps the mark and renews itself, because the tap's own smooth scroll
+// keeps firing frames. `retryIn` is when the spy must measure again: just after
+// the renewed hold ends. Without that, nothing re-measures once the scroll stops
+// and the mark can stay on the tapped button while the page sits elsewhere.
+export function holdStep(hold, now, holdMs) {
+  if (hold && now <= hold.until) return { measure: false, hold: { until: now + holdMs }, retryIn: holdMs + 1 }
+  return { measure: true, hold: null, retryIn: 0 }
+}

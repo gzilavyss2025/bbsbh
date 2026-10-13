@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNav } from '../../lib/nav.js'
 import { Cluster } from '../ui/layout/Cluster.jsx'
-import { countLabel, currentSection, scrollLeftToShow } from '../../lib/jumpbar/spy.js'
+import { countLabel, currentSection, holdStep, scrollLeftToShow } from '../../lib/jumpbar/spy.js'
 import { motionIsReduced } from '../../hooks/preferences/motionIsReduced.js'
 
 // The tab bar under a hub's pinned identity header. ONE control, two callers —
@@ -95,6 +95,8 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '' }) {
   const navRef = useRef(null)
   const btnRefs = useRef(new Map())
   const holdRef = useRef(null)
+  const spyRef = useRef(null)
+  const [barWidth, setBarWidth] = useState(0)
   const keys = tabs.map((t) => t.key).join('|')
 
   // The scroll-spy. Measured on a frame, at most once a frame.
@@ -103,16 +105,16 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '' }) {
     const target = root ?? window
     const list = keys ? keys.split('|') : []
     let frame = 0
+    let retry = 0
     const measure = () => {
       frame = 0
-      const hold = holdRef.current
-      if (hold) {
-        const now = Date.now()
-        if (now <= hold.until) {
-          hold.until = now + HOLD_MS
-          return
-        }
-        holdRef.current = null
+      const step = holdStep(holdRef.current, Date.now(), HOLD_MS)
+      holdRef.current = step.hold
+      if (!step.measure) {
+        // Come back once the hold ends: the last scroll frame is the last event.
+        clearTimeout(retry)
+        retry = setTimeout(onScroll, step.retryIn)
+        return
       }
       const rootTop = root ? root.getBoundingClientRect().top : 0
       const sections = []
@@ -130,14 +132,25 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '' }) {
       if (!frame) frame = requestAnimationFrame(measure)
     }
     measure()
+    spyRef.current = onScroll
     target.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onScroll)
     return () => {
       if (frame) cancelAnimationFrame(frame)
+      clearTimeout(retry)
       target.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
     }
   }, [keys, scrollRoot, offset])
+
+  // The bar's own width, so rule 1 runs again when a resize or a rotation makes it overflow.
+  useEffect(() => {
+    const nav = navRef.current
+    if (!nav || typeof ResizeObserver === 'undefined') return undefined
+    const ro = new ResizeObserver(() => setBarWidth(nav.clientWidth))
+    ro.observe(nav)
+    return () => ro.disconnect()
+  }, [])
 
   // Rule 1: keep the current button in view inside a bar that scrolls sideways.
   useEffect(() => {
@@ -152,13 +165,15 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '' }) {
       pad: 16,
     })
     if (left !== nav.scrollLeft) nav.scrollTo({ left, behavior: motionIsReduced() ? 'auto' : 'smooth' })
-  }, [current])
+  }, [current, barWidth])
 
   const jump = (key) => {
     const el = document.getElementById(key)
     if (!el) return
     setCurrent(key)
     holdRef.current = holdFor()
+    // A tap that scrolls nowhere fires no scroll event: ask the spy to measure once the hold ends.
+    spyRef.current?.()
     const behavior = motionIsReduced() ? 'auto' : 'smooth'
     const root = scrollRoot?.current
     if (root) {
