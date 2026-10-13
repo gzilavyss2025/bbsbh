@@ -68,32 +68,9 @@ export async function loadPositionScope(id, scope, { showFielding, showPitching,
   }
 }
 
-export async function loadPlayerHistory(id, asOf) {
-  const ctx = await playerContext(id, asOf)
-  if (!ctx) return null
-  const { bio, txns, groups, primaryGroup, season, endDate, cutoff, currentYear, debutYear, liveSportId, currentActivitySportId } = ctx
-
-  const [awards, rookieInfo, yby, debutSplits] = await Promise.all([
-    // The ledger ranks EVERY award the feed carries, and a prospect's case —
-    // league MVP, Futures Game, the Baseball America teams — is the whole
-    // section for him, which is why this is not conditional on bio.debut.
-    fetchPlayerAwards(id),
-    fetchRookieRecord(id),
-    Promise.all(groups.map(async (group) => ({ group, ...(await yearByYearFor(ctx, group)) }))),
-    // The MLB debut is always sportId 1; its game log anchors both the debut
-    // "first" and findFirstStart's earliest rows.
-    bio.debut && debutYear
-      ? fetchPersonStats(id, {
-          type: 'gameLog', group: bio.isPitcher ? 'pitching' : 'hitting',
-          season: debutYear, sportId: 1,
-        })
-      : Promise.resolve([]),
-  ])
-  const primaryResult = yby.find((r) => r.group === primaryGroup) ?? yby[0]
-
-  // -------------------------------------------------------------------------
-  // Awards
-  // -------------------------------------------------------------------------
+// The Awards ledger, with the MLB column's affiliate rows resolved. Shared with the new
+// player page's tbd module (screens/player/next/modules/tbd).
+export async function awardLedgerFor(awards, endDate) {
   const awardLedger = awardsView(awards, endDate)
   // The MLB column's affiliate rows: awardsView leaves orgId null for anything
   // that isn't already an MLB club (it can't fetch — see that module's header),
@@ -108,10 +85,12 @@ export async function loadPlayerHistory(id, asOf) {
     )
     for (const r of milbAwardRows) r.orgId = orgOf(r.teamId, r.year)
   }
+  return awardLedger
+}
 
-  // -------------------------------------------------------------------------
-  // Transactions
-  // -------------------------------------------------------------------------
+// The curated transaction rows. `txns` is the player's raw feed; the rest is the enrichment the
+// ledger names (levels, trade cohorts, draft, rookie limit). Shared with the tbd module.
+export async function transactionRowsFor(bio, txns, rookieInfo, endDate) {
   // Everything the raw player-scoped feed can't give on its own: each affiliate
   // club's level (for CALLED UP / SENT DOWN + the level tags, and for naming an
   // Injured List rehab stop by level rather than affiliate name), the other
@@ -155,7 +134,7 @@ export async function loadPlayerHistory(id, asOf) {
     for (const p of others) if (!list.some((x) => x.id === p.id)) list.push(p)
     tradeOthers.set(key, list)
   }
-  const transactions = transactionTimelineView(txns, {
+  return transactionTimelineView(txns, {
     selfId: bio.id,
     levelByTeamId,
     tradeOthers,
@@ -163,6 +142,33 @@ export async function loadPlayerHistory(id, asOf) {
     rookieUntil: rookieInfo?.rookieUntil ?? null,
     endDate,
   })
+}
+
+export async function loadPlayerHistory(id, asOf) {
+  const ctx = await playerContext(id, asOf)
+  if (!ctx) return null
+  const { bio, txns, groups, primaryGroup, season, endDate, cutoff, currentYear, debutYear, liveSportId, currentActivitySportId } = ctx
+
+  const [awards, rookieInfo, yby, debutSplits] = await Promise.all([
+    // The ledger ranks EVERY award the feed carries, and a prospect's case —
+    // league MVP, Futures Game, the Baseball America teams — is the whole
+    // section for him, which is why this is not conditional on bio.debut.
+    fetchPlayerAwards(id),
+    fetchRookieRecord(id),
+    Promise.all(groups.map(async (group) => ({ group, ...(await yearByYearFor(ctx, group)) }))),
+    // The MLB debut is always sportId 1; its game log anchors both the debut
+    // "first" and findFirstStart's earliest rows.
+    bio.debut && debutYear
+      ? fetchPersonStats(id, {
+          type: 'gameLog', group: bio.isPitcher ? 'pitching' : 'hitting',
+          season: debutYear, sportId: 1,
+        })
+      : Promise.resolve([]),
+  ])
+  const primaryResult = yby.find((r) => r.group === primaryGroup) ?? yby[0]
+
+  const awardLedger = await awardLedgerFor(awards, endDate)
+  const transactions = await transactionRowsFor(bio, txns, rookieInfo, endDate)
 
   // -------------------------------------------------------------------------
   // Path to the Majors + Team history (post-debut only — see overview.js)
