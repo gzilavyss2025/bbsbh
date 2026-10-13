@@ -101,6 +101,8 @@ export const EXCEPT = {
   // frozen, and a file is rewritten only when its content changes, so an
   // unchanged stamp is the healthy state here, as with milb-pool/ above.
   'abs/': 'season store (ADR-0086): a completed season is frozen; files move only with their content',
+  // A stamp would be old on every night with no new game and turn the nightly job red.
+  'pitch-arsenal-starts/': 'season store (ADR-0086, #1915): written only when a game lands, so a quiet night leaves it unchanged by design',
 }
 
 // Where a dataset keeps its stamp, when it is not a top-level `generatedAt`.
@@ -129,9 +131,7 @@ const DEFAULT_KEYS = ['generatedAt']
 // Raised 22 -> 23 for hitter-grid/ (ADR-0096), a sharded season store like
 // pitch-command/ beside it: 101 shards a season, rewritten only when a game
 // lands. Its files arrive with the first 2026 re-walk.
-// Raised 23 -> 24 for pitch-arsenal-starts/ (#1915), the same kind of store: 100 shards a season,
-// rewritten only when a game lands. Its files arrive with the first sweep after this change.
-export const UNSTAMPED_BUDGET = 24
+export const UNSTAMPED_BUDGET = 23
 
 const dig = (obj, dotted) => dotted.split('.').reduce((o, k) => (o == null ? o : o[k]), obj)
 
