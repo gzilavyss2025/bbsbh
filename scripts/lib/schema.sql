@@ -529,7 +529,7 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_physics (
 
 -- The per-start pitch mix (#1915): one row per (pitcher, game, code), the count over both
 -- batter sides. Its own table and shard set, because the season buckets are at their size
--- ceiling. The name says starts, not mix: per-game velocity (#1933) adds columns here. A game
+-- ceiling. Its start speeds are in pitch_arsenal_start_speed below. A game
 -- swept before this has no row, which reads as unknown until --clear-arsenal re-walks the season.
 CREATE TABLE IF NOT EXISTS pitch_arsenal_starts (
   season INTEGER NOT NULL, level TEXT NOT NULL,

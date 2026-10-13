@@ -2,8 +2,10 @@
 // he threw. Folded in the arsenal sweep, so one --clear-arsenal re-walk fills it too. Its
 // own shard set because the pitch-arsenal buckets are at their ceiling: public/data/
 // pitch-arsenal-starts/{season}/{NN}.json, `{ season, pit: { pitcherId: { gamePk: { code: n } } } }`,
-// in the pitcher's %100 bucket. `mph` (#1933) rides beside `pit` in the same shape, the mean start
-// speed to one decimal, left out for a code with no speed. A gamePk is one game, so the postseason needs no map of its own.
+// in the pitcher's %100 bucket. A gamePk is one game, so the postseason needs no map of its own.
+// The mean start speed (#1933) goes beside each shard in {NN}.mph.json, `{ season, mph: { pitcherId:
+// { gamePk: { code: tenths } } } }`, because the mix shards are at their size ceiling. A code with
+// no speed has no entry.
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { bucketsOf, writeSeasons, writeShards } from '../io.js'
@@ -30,19 +32,21 @@ export function startsBuckets(db, season) {
   for (const r of db.prepare('SELECT * FROM pitch_arsenal_starts WHERE season = ? ORDER BY person_id, game_pk, code').all(season)) {
     ;((pit[r.person_id] ??= {})[r.game_pk] ??= {})[r.code] = r.n
   }
+  return bucketsOf({ season }, pit, {})
+}
+
+export function mphBuckets(db, season) {
   const mph = {}
-  for (const r of db.prepare('SELECT * FROM pitch_arsenal_start_speed WHERE season = ? AND speed_n > 0 ORDER BY person_id, game_pk, code').all(season)) {
-    ;((mph[r.person_id] ??= {})[r.game_pk] ??= {})[r.code] = Math.round((r.speed_sum / r.speed_n) * 10) / 10
+  for (const r of db.prepare('SELECT * FROM pitch_arsenal_start_speed WHERE season = ? ORDER BY person_id, game_pk, code').all(season)) {
+    ;((mph[r.person_id] ??= {})[r.game_pk] ??= {})[r.code] = Math.round((r.speed_sum / r.speed_n) * 10)
   }
-  const buckets = bucketsOf({ season }, pit, {})
-  for (const [, b] of buckets) for (const id of Object.keys(b.pit)) if (mph[id]) (b.mph ??= {})[id] = mph[id]
-  return buckets
+  return bucketsOf({ season }, mph, {}, 'mph')
 }
 
 // Writes nothing while the season has no row, so the files wait for the first sweep or re-walk.
 export async function writeStarts(db, season) {
   const buckets = startsBuckets(db, season)
   if (!buckets.length) return
-  await writeShards(join(outDir, String(season)), buckets)
+  await writeShards(join(outDir, String(season)), [...buckets, ...mphBuckets(db, season).map(([k, b]) => [`${k}.mph`, b])])
   await writeSeasons(outDir, season)
 }
