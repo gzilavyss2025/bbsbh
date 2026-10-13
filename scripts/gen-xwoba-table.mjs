@@ -33,8 +33,8 @@ import { setTimeout as sleep } from 'node:timers/promises'
 import { isoDay, parseArgs } from './lib/args.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
-import { csvObjects, fetchArsenalBoard, num, withRetry } from './lib/savant.mjs'
-import { fitTable, gateRows, gateVerdict, tablePath } from './lib/pitch/xwoba.mjs'
+import { csvObjects, fetchArsenalBoard, withRetry } from './lib/savant.mjs'
+import { XBA_GATE, ballsOf, fitTable, gateRows, gateVerdict, tablePath, xbaGaps } from './lib/pitch/xwoba.mjs'
 import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 
 const args = parseArgs(process.argv.slice(2))
@@ -56,7 +56,7 @@ async function build() {
       d.games.every((g) => g.status?.abstractGameState === 'Final') && d.games.some((g) => g.status?.codedGameState === 'F'))
     .map((d) => d.date)
   await mkdir(cacheDir, { recursive: true })
-  const balls = []
+  const rows = []
   let streak = 0
   for (const day of days) {
     const file = join(cacheDir, `${day}.csv.gz`)
@@ -81,15 +81,24 @@ async function build() {
       }
       await sleep(1000)
     } else streak = 0
-    for (const r of csvObjects(gunzipSync(await readFile(file)).toString('utf8'))) {
-      const ball = [num(r.launch_speed), num(r.launch_angle), num(r.estimated_woba_using_speedangle)]
-      if (r.description === 'hit_into_play' && ball.every((v) => v != null)) balls.push(ball)
-    }
+    rows.push(...csvObjects(gunzipSync(await readFile(file)).toString('utf8')))
   }
   const missing = days.filter((d) => !existsSync(join(cacheDir, `${d}.csv.gz`)))
   if (missing.length) throw new Error(`${missing.length} days not pulled (${missing.join(', ')}); run again to resume`)
-  await writeJsonAtomic(tablePath(season), { season, through: days.at(-1), balls: balls.length, ...fitTable(balls) })
+  const stamp = { season, through: days.at(-1) }
+  const balls = ballsOf(rows, 'estimated_woba_using_speedangle')
+  await writeJsonAtomic(tablePath(season), { ...stamp, balls: balls.length, ...fitTable(balls) })
   console.log(`wrote xwoba-table/${season}.json: ${balls.length} balls in play, ${days.length} days through ${days.at(-1)}`)
+  // The xBA lattice, held to Savant's own xBA on the same balls before it is written.
+  const xba = ballsOf(rows, 'estimated_ba_using_speedangle')
+  const table = fitTable(xba)
+  const v = gateVerdict(xbaGaps(table, xba), XBA_GATE)
+  const f = (x) => x?.toFixed(4)
+  console.log(`xBA check ${season}: ${v.n} balls, mean gap ${f(v.mean)}, ${v.over} above ${XBA_GATE.over} (${f(v.over / v.n)}), ` +
+    `max ${f(v.max)} -> ${v.pass ? 'PASS' : 'FAIL'}`)
+  if (!v.pass) return void (process.exitCode = 1)
+  await writeJsonAtomic(tablePath(season, 'xba-table'), { ...stamp, balls: xba.length, ...table })
+  console.log(`wrote xba-table/${season}.json: ${xba.length} balls in play`)
 }
 
 async function gate() {
