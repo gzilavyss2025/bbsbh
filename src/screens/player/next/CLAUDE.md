@@ -36,7 +36,7 @@ live hub.
 - **Two states.** *Not built yet:* the stub renders its one placeholder line, never `null`
   and never `onEmpty()`, so the card and its button stay. *No data:* a real module that has
   loaded and found nothing calls `onEmpty()`, or renders nothing on its first render; `Slot`
-  hides the card, and the button hides when ALL slots of its section are empty.
+  hides the card, and the button hides when ALL slots of its section are empty. A module that is built leaves the stub list: add it to `BUILT` in `test/player-next-sections.test.js`.
 - **Count tag:** call `onCount(n)` (or a string); `Slot` draws it on the card's edge.
 - **Height:** a slot before it is near holds one non-breaking-space line, so it reserves one line; with
   the 600px margin most slots count as near on first paint. A real module reserves its own height (or `Slot` gets a min-height then).
