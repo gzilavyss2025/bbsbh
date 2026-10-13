@@ -297,10 +297,8 @@ export function foldGame(store, agg, date, venueId = null, gamePk = null) {
     if (delta.rows.length) {
       // Rows carried from before the runs existed get one run of unknown park,
       // so `g` always covers `p` exactly (a rebuild makes this a no-op).
-      const runs = (entry.g = coveringRuns(entry))
-      const last = runs[runs.length - 1]
-      if (last && last[1] === venueId && last[2] === gamePk) last[0] += delta.rows.length
-      else runs.push([delta.rows.length, venueId, gamePk])
+      entry.g = coveringRuns(entry)
+      entry.g.push([delta.rows.length, venueId, gamePk])
     }
     for (const row of delta.rows) entry.p.push(row)
     for (const [hand, totals] of Object.entries(delta.totals)) {
@@ -390,6 +388,8 @@ async function main() {
     startDate = `${season}-01-01`
     console.log(`rebuilding ${season} from ${startDate} (store schema v${read.version} → v${SCHEMA_VERSION})`)
   }
+  // No xBA lattice: every ball swept now stores a null xBA, and the ledger keeps it that way.
+  if (!readXwobaTable(season, 'xba-table')) console.warn(`no public/data/xba-table/${season}.json: xBA is stored null for this run`)
   console.log(`carried ${rebuild ? 0 : read.carried} batters and ${ingested.size} ingested games for ${season}`)
 
   // Regular season at both levels, plus the postseason at MLB. Same

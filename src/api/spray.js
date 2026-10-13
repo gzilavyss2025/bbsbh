@@ -137,11 +137,12 @@ export function withSeasonRuns(entry, season) {
   return { ...entry, g: coveringRuns(entry).map(([n, v, pk, s]) => [n, v, pk ?? null, s ?? season]) }
 }
 
-// Savant's barrel zone, from exit velocity and launch angle: at least 98 mph, and
-// at 98 mph a 26-30 degree angle that widens a little each mph (25-31 at 99) to
-// 8-50 degrees at 116 mph. Written as the line pair the Statcast barrel code uses
-// (as I recall it from the baseballr package, not checked against a Savant page);
-// its ends match Savant's published 98 and 116 mph ends. Null when either is missing.
+// Savant's barrel zone, from exit velocity and launch angle. MLB's glossary
+// (mlb.com/glossary/statcast/barrel) gives the anchors: at least 98 mph, 26-30 degrees
+// at 98 mph, widening with speed to 8-50 degrees at 116 mph. The line pair below is the
+// community fit of that zone (baseballr's code_barrel), an APPROXIMATION: it reproduces
+// both anchors, but fits of it can sit a barrel or two off Savant's own count.
+// Null when either input is missing.
 export function isBarrel(ev, la) {
   if (ev == null || la == null) return null
   return ev >= 98 && la >= 8 && la <= 50 && 1.5 * ev - la >= 117 && ev + la >= 124
