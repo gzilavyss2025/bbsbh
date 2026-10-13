@@ -113,8 +113,17 @@ export function aggregateSplits(splits, group, { dedupe = true } = {}) {
 // Season tiles — the finalized card set
 // ---------------------------------------------------------------------------
 
-function tile(k, v, tone) {
-  return { k, v: v === undefined || v === null || v === '' ? DASH : String(v), tone }
+function tile(k, v, tone, caption) {
+  return { k, v: v === undefined || v === null || v === '' ? DASH : String(v), tone, caption: caption || undefined }
+}
+
+// The league figure under AVG (".248") and ERA ("4.17"): leagueAverage()'s number, or
+// no figure when the league has none.
+export function withLeagueFigure(tiles, group, league) {
+  const k = group === 'pitching' ? 'ERA' : 'AVG'
+  if (league == null) return tiles
+  const lg = group === 'pitching' ? league.toFixed(2) : league.toFixed(3).slice(1)
+  return tiles.map((t) => (t.k === k ? { ...t, lg } : t))
 }
 
 // WAR (season, MLB calc — see src/api/war.js) for the tile — MLB-only, so it's null on a MiLB tile
@@ -131,7 +140,7 @@ export function hitterTiles(stat, war) {
     tile('AVG', stat.avg),
     tile('HR', stat.homeRuns, 'run'),
     tile('RBI', stat.rbi),
-    tile('SO', stat.strikeOuts),
+    tile('SO', stat.strikeOuts, undefined, stat.plateAppearances && `${stat.plateAppearances} PA`),
     warTile(war),
   ]
 }
@@ -144,7 +153,7 @@ export function pitcherTiles(stat, role, war) {
   const lead =
     role === 'CL'
       ? tile('SV', stat.saves)
-      : tile('W–L', `${num(stat.wins)}–${num(stat.losses)}`)
+      : tile('W–L', `${num(stat.wins)}–${num(stat.losses)}`, undefined, num(stat.gamesStarted) > 0 && `${stat.gamesStarted} GS`)
   return [
     lead,
     tile('IP', stat.inningsPitched),
@@ -337,7 +346,7 @@ const RANK_STATS = [
   ['avg', 'Opp. AVG'],
   ['inningsPitched', 'IP'],
 ]
-const RANK_FLOOR = 10
+export const RANK_FLOOR = 10
 const RANK_MAX_CHIPS = 4
 
 // One chip group per league split. A player traded across leagues gets one

@@ -78,6 +78,22 @@
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
 }
+/* THE RANK MARK. Mono, on a highlighter stroke: rank emphasis takes --marker (ADR-0083).
+   --text-heading on --marker is 10.5:1; on the ink fill the stroke goes and the text
+   takes the paper ink. */
+.rankmark {
+  display: inline-block;
+  margin: var(--space-1) 0 0;
+  background: linear-gradient(transparent 55%, var(--rank-stroke, var(--marker)) 55%);
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+}
+.card--ink .rankmark {
+  --rank-stroke: transparent;
+  color: var(--text-on-ink);
+}
 /* On the tint, the caption takes the soft ink (graphite is 4.52:1 there, too
    near the floor). On ink, the label and the caption take the dim paper. */
 .card--tint .stattile__caption {
