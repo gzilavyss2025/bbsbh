@@ -1,0 +1,376 @@
+/* ==== THE PITCH ARSENAL MODULE (#1892) ====
+   modules/arsenal/: the Arsenal card (mix bar, side view, menu) and the Pitch flight card, side by side
+   at the wide step. Boards: ArsenalReveal.dc.html and PitchFlight.dc.html (docs/player-redesign.md).
+   Pitch colours are never set here: each mark's colour arrives as --pitch from pitchMark(code). */
+
+/* Holds the module's height while the three files load, so the page does not jump. */
+.arsenal--wait {
+  min-height: calc(var(--space-16) * 26);
+}
+@media (min-width: 740px) {
+  .arsenal--wait {
+    min-height: calc(var(--space-16) * 18);
+  }
+}
+/* layout-exempt: one column on a phone, two at the wide step */
+.arsenal {
+  display: grid;
+  gap: var(--space-6);
+}
+@media (min-width: 740px) {
+  /* layout-exempt: the two cards sit side by side at the wide step, as the boards draw them */
+  .arsenal {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+/* layout-exempt: each card is a column of blocks */
+.arsenal__card,
+.flight {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* The mark, in a scene or as an icon: the family is the shape, --pitch the colour, a ring is hollow. */
+.arsenal__glyph {
+  fill: var(--pitch, var(--text-caption));
+  stroke: var(--text-heading);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.arsenal__glyph--ring {
+  fill: none;
+  stroke: var(--pitch, var(--text-caption));
+  stroke-width: 3;
+}
+.arsenal__icon {
+  flex: none;
+}
+
+/* The mix bar: one segment a pitch, as wide as its share. */
+.arsenal__mix {
+  display: flex;
+  height: var(--space-10);
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+/* layout-exempt: code over share, centred in the segment */
+.arsenal__seg {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  border-right: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--pitch, var(--text-caption));
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  line-height: var(--lh-solid);
+}
+.arsenal__seg:last-child {
+  border-right: 0;
+}
+.arsenal__seg--ring {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 var(--space-1) var(--pitch, var(--text-caption));
+}
+.arsenal__seg span {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+}
+
+/* The scene: the park from one camera, every path drawn on it. */
+.arsenal__side,
+.flight__stage {
+  position: relative;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  line-height: var(--lh-zero);
+}
+.arsenal__scene {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.arsenal__ground {
+  fill: none;
+  stroke: var(--border-grid);
+  stroke-width: 1;
+}
+.arsenal__ground--mound {
+  stroke: var(--text-caption);
+}
+.arsenal__rubber {
+  fill: var(--text-heading);
+}
+.arsenal__plate {
+  fill: var(--text-caption);
+}
+.arsenal__zone {
+  fill: var(--surface-inset);
+  stroke: var(--text-heading);
+  stroke-width: 1.6;
+}
+.arsenal__halo {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 4.6;
+  stroke-linejoin: round;
+}
+.arsenal__trail {
+  fill: none;
+  stroke: var(--pitch, var(--text-caption));
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+}
+.arsenal__gravity {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 1.3;
+  stroke-dasharray: 5 4;
+  opacity: 0.55;
+}
+.arsenal__ball {
+  fill: var(--surface-card);
+  stroke: var(--pitch, var(--text-caption));
+  stroke-width: 2.4;
+}
+/* The paths draw in from the release point when the card opens or Replay is pressed. */
+.arsenal__side .arsenal__halo,
+.arsenal__side .arsenal__trail {
+  stroke-dasharray: 1;
+  animation: arsenal-draw var(--dur-highlight) var(--ease-out) backwards;
+}
+@keyframes arsenal-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arsenal__side .arsenal__halo,
+  .arsenal__side .arsenal__trail {
+    animation: none;
+  }
+}
+
+/* Where each type lands, from the catcher's seat, in the scene's corner. */
+.arsenal__inset {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  width: 24%;
+  min-width: calc(var(--space-16) * 1.25);
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.arsenal__inset text {
+  fill: var(--text-caption);
+  font-family: var(--font-mono);
+}
+.arsenal__zonebox {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 1.4;
+}
+
+/* layout-exempt: controls wrap on a phone */
+.arsenal__bar,
+.flight__bar,
+.flight__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The menu: a card a pitch. Opening one folds the rest into a rail. */
+/* layout-exempt: the pitch cards wrap */
+.arsenal__menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+/* layout-exempt: name, figures and sparkline stack in one card */
+.arsenal__pick.btn {
+  display: flex;
+  flex: 1 1 9rem;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
+  height: auto;
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+}
+.arsenal__name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: inherit;
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+}
+.arsenal__figs {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.arsenal__spark {
+  width: 100%;
+  height: var(--space-6);
+  overflow: visible;
+}
+.arsenal__sparkline {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.arsenal__sparkbase {
+  fill: none;
+  stroke: var(--text-caption);
+  stroke-dasharray: 2 2;
+  vector-effect: non-scaling-stroke;
+}
+.arsenal__menu--rail .arsenal__pick.btn {
+  flex: 0 0 auto;
+}
+.arsenal__menu--rail .arsenal__figs,
+.arsenal__menu--rail .arsenal__spark {
+  display: none;
+}
+
+/* One pitch opened. */
+.arsenal__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+/* layout-exempt: two figures to a row, as the board draws them */
+.arsenal__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+/* layout-exempt: figure over its label */
+.arsenal__stats span {
+  display: flex;
+  flex-direction: column;
+}
+.arsenal__stats b {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+}
+.arsenal__stats i,
+.arsenal__drop i {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-style: normal;
+  letter-spacing: var(--ls-label);
+}
+.arsenal__drop {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.arsenal__drop svg {
+  display: block;
+  width: 100%;
+  height: calc(var(--space-12) + var(--space-2));
+  overflow: visible;
+}
+
+/* ---- the Pitch flight card ---- */
+.flight__label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+}
+.flight__label b {
+  white-space: nowrap;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+}
+.flight__label em {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-style: normal;
+  text-align: right;
+}
+.flight__range {
+  flex: 1 1 9rem;
+  min-width: 0;
+  height: var(--space-10);
+  margin: 0;
+  accent-color: var(--text-heading);
+}
+.flight__clock {
+  min-width: 5ch;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  text-align: right;
+}
+.flight__ask {
+  margin: 0 0 var(--space-2);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+.flight__note {
+  margin: 0 0 var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+}
+/* layout-exempt: the facts fill the card's width */
+.flight__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0 var(--space-5);
+}
+.flight__fact {
+  min-width: 0;
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-grid);
+}
+.flight__fact b {
+  display: block;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+}
+.flight__fact em {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-style: normal;
+  font-weight: var(--w-bold);
+}
+.flight__fact small {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+}

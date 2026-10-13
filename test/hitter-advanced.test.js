@@ -132,6 +132,19 @@ test('hittingRanksView keeps top-10 ranks only, sorted, capped at four chips', (
   assert.ok(!items.some((i) => i.label === 'SB' || i.label === 'H'))
 })
 
+test('hittingRanksView: a hitter 3rd in runs and 2nd in doubles gets R and 2B chips (#1992)', () => {
+  const [g] = hittingRanksView([{ league: { name: 'National League' }, stat: { runs: '3', doubles: '2' } }])
+  assert.deepEqual(g.items.map((i) => [i.label, i.text]), [['2B', '2nd'], ['R', '3rd']])
+})
+
+test('hittingRanksView: top 10 in more than four stats keeps the best four places, ties by list order (#1992)', () => {
+  const [g] = hittingRanksView([
+    { league: { name: 'National League' }, stat: { homeRuns: '5', rbi: '5', avg: '5', ops: '5', stolenBases: '5', runs: '5', doubles: '1' } },
+  ])
+  // 2B 1st wins; the 5th-place ties fill the rest in list order: HR, RBI, AVG. OPS, SB and R drop.
+  assert.deepEqual(g.items.map((i) => i.label), ['2B', 'HR', 'RBI', 'AVG'])
+})
+
 // Eugenio Suárez 2025 (553993), checked live 2026-10-02: stats=rankings holds
 // one split per league, AL (SEA, empty stat) first, NL (ARI) second. Reading
 // splits[0] dropped his 5th-in-NL home runs.

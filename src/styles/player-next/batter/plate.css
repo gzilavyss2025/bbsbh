@@ -1,0 +1,178 @@
+/* ==== THE BATTER PLATE APPROACH MODULE (#1887) ====
+   PlateModule.jsx: hand chips, then the 5 x 5 map beside the pitch mix (both use the Form
+   trend's .fstretch table). It reserves about its loaded height (.fplate--wait). */
+
+.fplate--wait {
+  min-height: calc(var(--space-16) * 38);
+}
+@media (min-width: 760px) {
+  .fplate--wait {
+    min-height: calc(var(--space-16) * 28);
+  }
+}
+/* layout-exempt: chips wrap */
+.fplate__hands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+/* layout-exempt: one column on a phone, the map beside the mix on a wide screen */
+.fplate__cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+@media (min-width: 760px) {
+  .fplate__cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+/* The map: 25 buttons in a gap-rule grid, and the rulebook zone ruled over the middle nine. */
+/* layout-exempt: a fixed 5 x 5 count */
+.fplate__map {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--bw-heavy);
+  margin-top: var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--border-stamped);
+}
+.fplate__cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  cursor: pointer;
+}
+.fplate__cell small {
+  font-size: 0.6em;
+}
+.fplate__cell[aria-pressed='true'] {
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+.fplate__cell:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+.fplate__box {
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  width: 60%;
+  height: 60%;
+  border: 3px solid var(--border-stamped);
+  pointer-events: none;
+}
+
+/* Five bands, the pitcher's (0) to the hitter's (4); the same ramp as the stretch bars. */
+.fplate__cell[data-band='none'] {
+  background: var(--surface-card);
+  background-image: repeating-linear-gradient(135deg, color-mix(in srgb, var(--ink-0) 12%, transparent) 0 5px, transparent 5px 10px);
+}
+.fplate__cell[data-band='0'],
+.fplate__swatch[data-band='0'] {
+  background: var(--clay);
+  color: var(--text-on-ink);
+}
+.fplate__cell[data-band='1'],
+.fplate__swatch[data-band='1'] {
+  background: var(--field-dirt);
+}
+.fplate__cell[data-band='2'],
+.fplate__swatch[data-band='2'] {
+  background: var(--field-outfield);
+}
+.fplate__cell[data-band='3'],
+.fplate__swatch[data-band='3'] {
+  background: var(--field-mint);
+}
+.fplate__cell[data-band='4'],
+.fplate__swatch[data-band='4'] {
+  background: var(--field);
+  color: var(--text-on-ink);
+}
+
+/* layout-exempt: two side labels, one at each end */
+.fplate__sides {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+/* layout-exempt: the key is a row of five swatches between two end labels */
+.fplate__ramp {
+  display: flex;
+  align-items: stretch;
+  margin-top: var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+.fplate__swatch {
+  flex: 1 1 0;
+  height: var(--space-4);
+}
+.fplate__endcap {
+  padding: 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.fplate__endcap--bad {
+  color: var(--clay-deep);
+}
+.fplate__endcap--good {
+  color: var(--accent-positive);
+}
+
+/* layout-exempt: two lines under each other */
+.fplate__read {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: calc(var(--space-16) + var(--space-4));
+  margin-top: var(--space-4);
+  padding: var(--space-3h) var(--space-4);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--field-wash);
+}
+.fplate__readtitle {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+}
+.fplate__readtext {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.fplate__facts {
+  margin-top: var(--space-4);
+}
+.fplate__note {
+  margin: var(--space-3) 0 0;
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+}
