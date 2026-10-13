@@ -11,7 +11,8 @@ One `modules/<module>/` folder per module: `season` #1885, `splits` #1886, `plat
 `contact` #1888, `form` #1889 (batter), `pform` #1930 (pitcher Form trend), `batlog` #1890,
 `pitchlog` #1851, `fouls` #1891, `similar` #1926 (ends Game log), `arsenal` #1892, `mound`
 #1893, `path` #1894, `prospects` #1927, `firsts` #1895, `innings` #1928, `contract` #1929,
-`tbd` #1896 (one folder, three slots: Season, Career and History). Order inside a section is
+`tbd` #1896 (one folder, five slots: Season, On the mound (pitchers), Game log, Career and History; no
+Overview slot, the top cards cover it). Order inside a section is
 the `SLOTS` order in `sections.js`. No section has its own button beyond the jump bar's nine.
 
 ## The top cards

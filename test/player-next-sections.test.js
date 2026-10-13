@@ -83,11 +83,18 @@ test('the slots are the 18 module folders, with each section holding its modules
   assert.deepEqual(at('career'), ['path', 'prospects', 'tbd'])
   assert.deepEqual(at('history'), ['firsts', 'innings', 'contract', 'tbd'])
   assert.deepEqual(at('form-trend'), ['form', 'pform'])
+  assert.deepEqual(at('on-the-mound'), ['mound', 'tbd'])
   assert.equal(new Set(SLOTS.map((s) => s.id)).size, SLOTS.length)
 })
 
-test('the Game log section ends with foul balls, then similar players', () => {
-  assert.deepEqual(SLOTS.filter((s) => s.section === 'game-log').map((s) => s.module), ['batlog', 'pitchlog', 'fouls', 'similar'])
+test('the Game log section ends with foul balls, similar players, then the tbd slot', () => {
+  assert.deepEqual(SLOTS.filter((s) => s.section === 'game-log').map((s) => s.module), ['batlog', 'pitchlog', 'fouls', 'similar', 'tbd'])
+})
+
+test('the tbd slots for the pitcher boards: On the mound for a pitcher only, Game log for both', () => {
+  const tbd = (r) => slotInstances(r).filter((i) => i.module === 'tbd').map((i) => i.id)
+  assert.deepEqual(tbd(['hitting']), ['tbd-season', 'tbd-gamelog', 'tbd-career', 'tbd-history'])
+  assert.deepEqual(tbd(['pitching']), ['tbd-season', 'tbd-gamelog', 'tbd-mound', 'tbd-career', 'tbd-history'])
 })
 
 test('the batter Form trend and the pitcher Form trend are two modules', () => {
