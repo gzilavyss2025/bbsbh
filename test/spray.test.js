@@ -586,8 +586,8 @@ test('foldGame fills the contact store: runs by game, n the spray rows held', ()
   const two = aggregateGameSpray(gameFeed([gamePlay({ events: [contactEvent()] }), gamePlay({ events: [contactEvent()] })]), 'mlb', xbaTable())
   foldGame(store, two, '2026-04-01', 17, contacts, 801)
   foldGame(store, contactGame(), '2026-04-02', 17, contacts, 802)
-  assert.deepEqual(contacts[660271].g, [[2, 801], [1, 802]])
-  assert.equal(contacts[660271].c.length, 3)
+  assert.deepEqual(contacts[660271].g, [2, 801, 1, 802])
+  assert.equal(contacts[660271].c.length, 9, 'three balls, three numbers each')
   assert.equal(contacts[660271].n, store[660271].p.length)
   assert.deepEqual(store[660271].g, [[3, 17]], 'the spray store keeps merging a home stand into one run')
 })
@@ -596,7 +596,7 @@ test('foldGame onto rows swept before the store: their contact is null, the new 
   const store = { 660271: entryOf({ p: [row(-30), row(10)], g: [[2, 17]], d: '2026-04-01' }) }
   const contacts = {}
   foldGame(store, contactGame(), '2026-04-02', 17, contacts, 802)
-  assert.deepEqual([contacts[660271].n, contacts[660271].c.length], [3, 1])
+  assert.deepEqual([contacts[660271].n, contacts[660271].c.length], [3, 3])
   const [a, b, c] = decodeSprayBalls(withContact(store[660271], contacts[660271]), 2026)
   assert.deepEqual([a.launchAngle, a.xba, a.gamePk, b.distance], [null, null, null, null])
   assert.deepEqual([c.launchAngle, c.distance, c.xba, c.gamePk], [25, 301, 0.312, 802])
@@ -604,17 +604,17 @@ test('foldGame onto rows swept before the store: their contact is null, the new 
 
 test('foldGame drops a contact entry that is out of step with the spray rows instead of shifting it', () => {
   const store = { 660271: entryOf({ p: [row(-30), row(10), row(20), row(30)], d: '2026-04-01' }) }
-  const stale = { n: 3, c: [[1, 2, 3]], g: [[1, 800]] } // written when p held 3 rows, but p holds 4
+  const stale = { n: 3, c: [1, 2, 3], g: [1, 800] } // written when p held 3 rows, but p holds 4
   const contacts = { 660271: stale }
   foldGame(store, contactGame(), '2026-04-02', 17, contacts, 802)
-  assert.deepEqual([contacts[660271].n, contacts[660271].c.length, contacts[660271].g], [5, 1, [[1, 802]]])
+  assert.deepEqual([contacts[660271].n, contacts[660271].c.length, contacts[660271].g], [5, 3, [1, 802]])
 })
 
 test('withContact reads no contact when n differs from the rows, or the runs do not cover the contact rows', () => {
   const entry = entryOf({ p: [row(0), row(5), row(10)] })
-  const good = { n: 3, c: [[20, 300, 400], [21, 310, 410]], g: [[2, 801]] }
+  const good = { n: 3, c: [20, 300, 400, 21, 310, 410], g: [2, 801] }
   assert.deepEqual(withContact(entry, good).k, [null, [20, 300, 400, 801], [21, 310, 410, 801]])
-  for (const bad of [{ ...good, n: 2 }, { ...good, n: 4 }, { ...good, g: [[1, 801]] }, { ...good, g: [[3, 801]] }, { n: 3, c: [[1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4]], g: [[4, 9]] }, null]) {
+  for (const bad of [{ ...good, n: 2 }, { ...good, n: 4 }, { ...good, g: [1, 801] }, { ...good, g: [3, 801] }, { ...good, g: [2, 801, 0] }, { ...good, c: [20, 300, 400, 21, 310] }, { n: 3, c: [1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4], g: [4, 9] }, null]) {
     assert.equal(withContact(entry, bad), entry)
   }
   const balls = decodeSprayBalls(withContact(entry, { ...good, n: 2 }), 2026)
@@ -622,7 +622,7 @@ test('withContact reads no contact when n differs from the rows, or the runs do 
 })
 
 test('an all-seasons join keeps the contact rows in step with the balls', () => {
-  const a = withContact(entryOf({ p: [row(0), row(5)] }), { n: 2, c: [[20, 300, 400], [21, 310, 410]], g: [[2, 801]] })
+  const a = withContact(entryOf({ p: [row(0), row(5)] }), { n: 2, c: [20, 300, 400, 21, 310, 410], g: [2, 801] })
   const b = entryOf({ p: [row(10)] }) // a season with no contact store
   const joined = combineSprayEntries([a, b])
   assert.deepEqual(decodeSprayBalls(joined).map((x) => x.launchAngle), [20, 21, null])
@@ -630,7 +630,7 @@ test('an all-seasons join keeps the contact rows in step with the balls', () => 
 })
 
 test('decodeSprayBalls reads a ball with contact: angle, distance, xBA, gamePk and the barrel flag', () => {
-  const entry = withContact(entryOf({ p: [[100, 80, 100, 4, 0, 0, 0, 9]] }), { n: 1, c: [[28, 410, 760]], g: [[1, 801]] })
+  const entry = withContact(entryOf({ p: [[100, 80, 100, 4, 0, 0, 0, 9]] }), { n: 1, c: [28, 410, 760], g: [1, 801] })
   const [ball] = decodeSprayBalls(entry, 2026)
   assert.deepEqual(
     [ball.launchAngle, ball.distance, ball.xba, ball.gamePk, ball.barrel],
@@ -650,7 +650,7 @@ test('isBarrel follows the Savant zone: 98 mph needs 26-30 degrees, 116 mph 8-50
 test('fetchSprayFor asks for the contact file only when told to, and a missing one reads as no contact', async (t) => {
   const asked = []
   const spray = { season: 2026, bat: { 660271: entryOf({ p: [row(0), row(5)] }) } }
-  const contact = { season: 2026, bat: { 660271: { n: 2, c: [[22, 330, 410]], g: [[1, 801]] } } }
+  const contact = { season: 2026, bat: { 660271: { n: 2, c: [22, 330, 410], g: [1, 801] } } }
   t.mock.method(globalThis, 'fetch', async (url) => {
     asked.push(url)
     const body = { '/data/spray/seasons.json': { seasons: [2026], current: 2026 }, '/data/spray/2026/71.json': spray, '/data/spray/2026/71.contact.json': contact, '/data/spray/2026/72.json': { season: 2026, bat: { 660272: entryOf({ p: [row(0)] }) } } }[url]
