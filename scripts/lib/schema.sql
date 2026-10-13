@@ -625,6 +625,26 @@ CREATE TABLE IF NOT EXISTS pitch_hitter_cells (
   PRIMARY KEY (season, scope, person_id, level, code, p_throws, stand)
 );
 
+-- The plate counters of the hitter grid (#1911) in a table of their own, with the
+-- same key: a row of columns added to pitch_hitter_cells would rewrite every line
+-- of its committed dump. A cells row with no row here was swept before them: their
+-- sums are unknown, not 0, and stay so until the season's re-walk.
+-- `called_strikes` and `in_play` count; `speed_sum` sums the start speed of every
+-- pitch that has one.
+CREATE TABLE IF NOT EXISTS pitch_hitter_plate (
+  person_id  INTEGER NOT NULL,
+  level      TEXT NOT NULL,
+  code       TEXT NOT NULL,
+  p_throws   TEXT NOT NULL,
+  stand      TEXT NOT NULL,
+  season     INTEGER NOT NULL,
+  scope      TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P')),
+  called_strikes TEXT NOT NULL,
+  in_play    TEXT NOT NULL,
+  speed_sum  TEXT NOT NULL,
+  PRIMARY KEY (season, scope, person_id, level, code, p_throws, stand)
+);
+
 -- Its own ledger, for the reason pitch_command_ingested_games gives: every
 -- game of the season was already in both other ledgers.
 CREATE TABLE IF NOT EXISTS pitch_hitter_ingested_games (
