@@ -4,6 +4,12 @@
    StatTiles, so this file holds only the places they sit in. The page root is
    .playernext, never .player: .player .factgrid would override the strip. */
 
+.playernext .mono,
+.playernext .stattile__caption {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
 .pnext__page {
   padding-top: var(--space-4);
 }
