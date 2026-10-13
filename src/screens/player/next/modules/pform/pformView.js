@@ -27,12 +27,16 @@ const n = (g, k) => Number(g.stat[k]) || 0
 const sum = (games, k) => games.reduce((t, g) => t + n(g, k), 0)
 const outsOf = (games) => games.reduce((t, g) => t + ipToOuts(g.stat.inningsPitched), 0)
 const pct = (x, of) => (of ? `${Math.round((100 * x) / of)}%` : '—')
-const dp = (d, k) => `${d < 0 ? '−' : '+'}${Math.abs(d).toFixed(k)}`
+// A signed gap printed to k places; a gap that prints as zero carries no sign.
+const dp = (d, k) => {
+  const r = Number(d.toFixed(k))
+  return r ? `${r < 0 ? '−' : '+'}${Math.abs(r).toFixed(k)}` : (0).toFixed(k)
+}
 
 // The chart's two readings. `better` is which way the green fill runs.
 export const METRICS = {
-  era: { label: 'ERA', better: 'down', step: 1, format: (v) => v.toFixed(2) },
-  kPct: { label: 'K%', better: 'up', step: 5, format: (v) => `${+v.toFixed(1)}%` },
+  era: { label: 'ERA', digits: 2, better: 'down', step: 1, format: (v) => v.toFixed(2) },
+  kPct: { label: 'K%', digits: 1, better: 'up', step: 5, format: (v) => `${+v.toFixed(1)}%` },
 }
 
 // 'SP' or 'RP' (a closer reads as a reliever) from the log's totals before `asOf`, or null with
@@ -99,16 +103,18 @@ export function chartOf(view, metric) {
 // The card under the chart's title at point i: the big figure, the game, the gap to the season.
 export function cursorText(view, i, metric) {
   const { points, ends, starter } = view
-  const { format } = METRICS[metric]
+  const { format, digits } = METRICS[metric]
   const p = points[i]
   const season = view.season?.[metric]
-  const gap = metric === 'era' ? (d) => dp(d, 2) : (d) => `${dp(d, 1)} pts`
+  // The gap is between the two printed figures, so 3.4551 against a season of 3.46 reads no gap.
+  const rounded = (v) => Number(v.toFixed(digits))
+  const gap = (d) => (metric === 'era' ? dp(d, digits) : `${dp(d, digits)} pts`)
   return {
     big: format(p[metric]),
     line1: [i === points.length - 1 && 'Latest', `${starter ? 'Start' : 'Game'} ${ends[i] + 1}`, monthDayName(p.date), `${p.isHome ? 'vs' : '@'} ${p.opp}`, p.summary]
       .filter(Boolean)
       .join(' · '),
-    line2: season == null ? '' : `${gap(p[metric] - season)} against his season ${METRICS[metric].label} of ${format(season)}`,
+    line2: season == null ? '' : `${gap(rounded(p[metric]) - rounded(season))} against his season ${METRICS[metric].label} of ${format(season)}`,
   }
 }
 
@@ -122,7 +128,7 @@ function row(key, name, sub, games, at = null) {
   const so = sum(games, 'strikeOuts')
   const outs = outsOf(games)
   const counts = [xbh, hits - xbh, walks, Math.max(0, bf - hits - walks - so), so]
-  const out = Math.round((100 * (counts[3] + so)) / bf)
+  const out = Math.round((100 * (counts[3] + so)) / bf) // NaN with no batters faced; good and bad then print a dash
   return {
     key,
     name,
@@ -133,8 +139,8 @@ function row(key, name, sub, games, at = null) {
     k: pct(so, bf),
     bb: pct(sum(games, 'baseOnBalls'), bf), // walks alone, as the series' bbPct counts them
     segs: counts.map((c) => ({ n: c, label: c / bf >= 0.08 ? String(Math.round((100 * c) / bf)) : '' })),
-    good: `${100 - out}% on base`,
-    bad: `${out}% outs`,
+    good: bf ? `${100 - out}% on base` : '—',
+    bad: bf ? `${out}% outs` : '—',
   }
 }
 

@@ -125,3 +125,25 @@ test('a reliever row counts the outings in its innings window', () => {
   assert.equal(stretchRows(one, 0, 'era')[0].sub, '1 game · May 1 to May 1')
   assert.equal(stretchRows(one, 0, 'era')[0].bb, '7%')
 })
+
+test('the gap to the season is taken between the two printed figures, and a zero gap carries no sign', () => {
+  const at = (era, seasonEra) => cursorText(
+    { starter: true, ends: [0], points: [{ era, kPct: 20, date: '2026-04-01', isHome: true, opp: 'CHC', summary: 'x' }], season: { era: seasonEra, kPct: 20.04 } },
+    0,
+    'era',
+  ).line2
+  // 3.4551 prints 3.46 and the season 3.46: no gap, and never "−0.00" or "+0.00".
+  assert.equal(at(3.4551, 3.46), '0.00 against his season ERA of 3.46')
+  assert.equal(at(3.46, 3.4551), '0.00 against his season ERA of 3.46')
+  // Prints 3.45 against 3.46: one hundredth under.
+  assert.equal(at(3.4549, 3.4551), '−0.01 against his season ERA of 3.46')
+  const k = cursorText({ starter: true, ends: [0], points: [{ era: 3, kPct: 20.04, date: '2026-04-01', isHome: true, opp: 'CHC', summary: 'x' }], season: { era: 3, kPct: 19.96 } }, 0, 'kPct')
+  assert.equal(k.line2, '0.0 pts against his season K% of 20%')
+})
+
+test('a stretch that faced no batters prints dashes, not NaN', () => {
+  const pen = [1, 2, 3].map((i) => app(`2026-05-0${i}`, 50 + i, { ip: '1.0', bf: 0, gs: 0 }))
+  const [cursor] = stretchRows(pformView(pen, 'RP', 3), 0, 'era')
+  assert.deepEqual([cursor.k, cursor.bb, cursor.good, cursor.bad], ['—', '—', '—', '—'])
+  assert.deepEqual(cursor.segs.map((s) => [s.n, s.label]), [[0, ''], [0, ''], [0, ''], [0, ''], [0, '']])
+})
