@@ -56,7 +56,8 @@ async function build() {
       d.games.every((g) => g.status?.abstractGameState === 'Final') && d.games.some((g) => g.status?.codedGameState === 'F'))
     .map((d) => d.date)
   await mkdir(cacheDir, { recursive: true })
-  const rows = []
+  const balls = []
+  const xba = []
   let streak = 0
   for (const day of days) {
     const file = join(cacheDir, `${day}.csv.gz`)
@@ -81,22 +82,25 @@ async function build() {
       }
       await sleep(1000)
     } else streak = 0
-    rows.push(...csvObjects(gunzipSync(await readFile(file)).toString('utf8')))
+    const csv = csvObjects(gunzipSync(await readFile(file)).toString('utf8'))
+    balls.push(...ballsOf(csv, 'estimated_woba_using_speedangle'))
+    xba.push(...ballsOf(csv, 'estimated_ba_using_speedangle'))
   }
   const missing = days.filter((d) => !existsSync(join(cacheDir, `${d}.csv.gz`)))
   if (missing.length) throw new Error(`${missing.length} days not pulled (${missing.join(', ')}); run again to resume`)
   const stamp = { season, through: days.at(-1) }
-  const balls = ballsOf(rows, 'estimated_woba_using_speedangle')
   await writeJsonAtomic(tablePath(season), { ...stamp, balls: balls.length, ...fitTable(balls) })
   console.log(`wrote xwoba-table/${season}.json: ${balls.length} balls in play, ${days.length} days through ${days.at(-1)}`)
   // The xBA lattice, held to Savant's own xBA on the same balls before it is written.
-  const xba = ballsOf(rows, 'estimated_ba_using_speedangle')
   const table = fitTable(xba)
   const v = gateVerdict(xbaGaps(table, xba), XBA_GATE)
   const f = (x) => x?.toFixed(4)
   console.log(`xBA check ${season}: ${v.n} balls, mean gap ${f(v.mean)}, ${v.over} above ${XBA_GATE.over} (${f(v.over / v.n)}), ` +
     `max ${f(v.max)} -> ${v.pass ? 'PASS' : 'FAIL'}`)
-  if (!v.pass) return void (process.exitCode = 1)
+  if (!v.pass) {
+    process.exitCode = 1
+    return
+  }
   await writeJsonAtomic(tablePath(season, 'xba-table'), { ...stamp, balls: xba.length, ...table })
   console.log(`wrote xba-table/${season}.json: ${xba.length} balls in play`)
 }
