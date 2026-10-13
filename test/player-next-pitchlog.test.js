@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import test, { mock } from 'node:test'
 import { fetchFinalScores } from '../src/api/boxlines/fetch.js'
-import { keyOf, loadPitchlog, pitchlogView, scopeRows, totalsOf } from '../src/screens/player/next/modules/pitchlog/pitchlogView.js'
+import { earlierSeason, keyOf, linesOf, loadPitchlog, pitchlogView, scopeRows, totalsOf } from '../src/screens/player/next/modules/pitchlog/pitchlogView.js'
+import { resultOf, startDetail } from '../src/screens/player/next/modules/pitchlog/startDetail.js'
 
 // The pitcher Game Log's rows (#1851): every game of the gameLog split, newest first, with the
 // score and decision from fetchFinalScores (which holds today back) and the per-game pitch mix.
@@ -26,6 +28,7 @@ const GASSER = {
   gameType: 'R',
   isHome: true,
   league: { id: 104 },
+  team: { id: 158, name: 'Milwaukee Brewers' },
   opponent: { id: 119, name: 'Los Angeles Dodgers' },
   game: { gamePk: 823787, gameNumber: 1 },
   stat: {
@@ -141,6 +144,118 @@ test('the loader: a log with no game, or a failed fetch, ends as no view', async
       throw new Error('offline')
     })
     assert.equal(await loadPitchlog(1, 2026, null), null)
+  } finally {
+    m.mock.restore()
+  }
+})
+
+// ---- The game detail view (#1851 slice 3) and earlier seasons (slice 4). ----
+// The fixture is the live feed of gamePk 823787 (Gasser vs LAD, 2026-05-23), read with the
+// detail view's own `fields=` list and cut to his plays, and the game's content items cut
+// to the fields the view reads.
+const FIX = JSON.parse(readFileSync(new URL('./fixtures/game-823787-gasser.trimmed.json', import.meta.url)))
+const ROW = pitchlogView([GASSER], { scores: new Map([[823787, { runs: 3, oppRuns: 11 }]]) }).rows[0]
+const D = startDetail(FIX, 688107, ROW)
+
+test('the detail row keeps what the view needs: the ISO day, the game count, both abbreviations, the game number', () => {
+  assert.deepEqual([ROW.day, ROW.of, ROW.clubAbbr, ROW.oppAbbr, ROW.gameNumber], ['2026-05-23', 1, 'MIL', 'LAD', 1])
+})
+
+test('pitches in this game: used, share, avg mph and whiffs (foul tips in, as Savant) per pitch, most used first', () => {
+  assert.deepEqual(D.pitches.map((p) => [p.code, p.n, p.pct, p.mph, p.whiffs]), [
+    ['FC', 29, 33, '87.8', 5],
+    ['SI', 18, 20, '91.5', 1],
+    ['ST', 18, 20, '79.8', 3],
+    ['FF', 16, 18, '92.3', 1],
+    ['CH', 8, 9, '86.9', 0],
+  ])
+})
+
+test('his strikeouts: inning, batter, play text, in order', () => {
+  assert.deepEqual(D.strikeouts.map((p) => [p.inning, p.batter, p.text]), [
+    [1, 'Shohei Ohtani', 'Shohei Ohtani called out on strikes.'],
+    [2, 'Teoscar Hernández', 'Teoscar Hernández strikes out swinging.'],
+    [4, 'Shohei Ohtani', 'Shohei Ohtani strikes out swinging.'],
+    [5, 'Mookie Betts', 'Mookie Betts called out on strikes.'],
+  ])
+})
+
+test('big plays against him: every hit, run-scoring play or RBI, with the RBI built from the count', () => {
+  assert.deepEqual(D.bigPlays.map((p) => [p.inning, p.batter, p.event]), [
+    [2, 'Kyle Tucker', 'Triple'],
+    [4, 'Freddie Freeman', 'Double'],
+    [4, 'Andy Pages', 'Double, 1 RBI'],
+    [4, 'Teoscar Hernández', 'Home Run, 3 RBI'],
+  ])
+})
+
+test('the clip: MLB highlight joined on the last pitch playId, else the Savant pitch clip', () => {
+  const labels = (list) => list.map((p) => p.clip?.label ?? null)
+  // The 0:14 clip is of the first Ohtani strikeout only; the fourth-inning one has its own pitch clip.
+  assert.deepEqual(labels(D.strikeouts), ['Watch 0:14', 'Pitch clip', 'Pitch clip', 'Pitch clip'])
+  // The home run joins its own clip (0:29), not the six-RBI reel that also names Hernández.
+  assert.deepEqual(labels(D.bigPlays), ['Pitch clip', 'Pitch clip', 'Watch 0:30', 'Watch 0:29'])
+  assert.match(D.bigPlays[3].clip.href, /\.mp4$/)
+  assert.equal(D.bigPlays[0].clip.href, 'https://baseballsavant.mlb.com/sporty-videos?playId=171b6eeb-d84f-328a-8e48-30cba54fe02b')
+})
+
+test('a play with no tracked pitch and no highlight has no clip button (a 2008 game)', () => {
+  const play = { matchup: { pitcher: { id: 1 }, batter: { fullName: 'A B' } }, about: { inning: 1 }, result: { eventType: 'strikeout', description: 'x' }, playEvents: [{ isPitch: true, playId: 'p1', pitchData: {} }] }
+  const d = startDetail({ feed: { liveData: { plays: { allPlays: [play] } } }, items: [] }, 1, { day: '2008-05-25', home: true })
+  assert.equal(d.strikeouts[0].clip, null)
+  assert.deepEqual(d.pitches, [])
+})
+
+test('game clips: his own clips not joined to a play, from this game only; none for Gasser 5/23', () => {
+  assert.deepEqual(D.clips, [])
+  const mine = (date, guid) => ({ guid, headline: 'Gasser works out of a jam', date, duration: '00:00:20', keywordsAll: [{ type: 'player_id', value: '688107' }, { type: 'taxonomy', value: 'highlight' }], playbacks: [{ name: 'mp4Avc', url: 'https://x/a.mp4' }] })
+  const d = startDetail({ ...FIX, items: [...FIX.items, mine('2026-05-24T01:00:00Z', 'g1'), mine('2026-09-25T01:00:00Z', 'g2')] }, 688107, ROW)
+  assert.deepEqual(d.clips.map((c) => [c.title, c.label]), [['Gasser works out of a jam', 'Watch 0:20']])
+})
+
+test('no feed: no parts, no crash', () => {
+  const d = startDetail({ feed: null, items: [] }, 688107, ROW)
+  assert.deepEqual([d.pitches, d.strikeouts, d.bigPlays, d.clips, d.club], [[], [], [], [], null])
+})
+
+test('the result strip comes from the log row; a held game has none', () => {
+  assert.deepEqual(resultOf(ROW, 'Brewers', 'Gasser'), { label: 'Brewers lose', score: 'Brewers 3, LAD 11', dec: 'Gasser takes the loss.' })
+  assert.equal(D.club, 'Brewers')
+  const held = pitchlogView([app('2026-10-13', 2, { w: 1 })]).rows[0]
+  assert.equal(resultOf(held, 'Brewers', 'Gasser'), null)
+  const relief = pitchlogView([app('2026-05-06', 2, { gs: 0 })], { scores: new Map([[2, { runs: 4, oppRuns: 3 }]]) }).rows[0]
+  assert.deepEqual(resultOf(relief, 'Cubs', 'Smith'), { label: 'Cubs win', score: 'Cubs 4, CHC 3', dec: null })
+})
+
+test('earlier seasons: one season back each time, never before his debut year', () => {
+  assert.equal(earlierSeason([2026], '2024-05-10'), 2025)
+  assert.equal(earlierSeason([2026, 2025], '2024-05-10'), 2024)
+  assert.equal(earlierSeason([2026, 2025, 2024], '2024-05-10'), null)
+  assert.equal(earlierSeason([2026], ''), null)
+})
+
+test('the season blocks: one season has no season heading; more add a labelled divider each, and a season with no game says so', () => {
+  const now = pitchlogView([app('2026-05-01', 1), app('2026-05-06', 2)]).rows
+  const then = pitchlogView([app('2025-06-01', 3)]).rows
+  assert.deepEqual(linesOf([{ season: 2026, rows: now }], 'all').map((l) => l.divider ?? l.gamePk), [2, 1])
+  assert.deepEqual(linesOf([{ season: 2026, rows: now }], 'all', 1).map((l) => l.gamePk), [2])
+  const lines = linesOf([{ season: 2026, rows: now }, { season: 2025, rows: then }, { season: 2024, rows: [] }], 'all')
+  assert.deepEqual(lines.map((l) => (l.divider ? `${l.divider} (${l.note})` : l.gamePk)), ['2026 (2 games)', 2, 1, '2025 (1 game)', 3, '2024 (no games on file)'])
+})
+
+test('an earlier season loads with no pitch mix (the per-game store holds 2026 only) and ends as null with no game', async () => {
+  const m = mock.method(globalThis, 'fetch', async (url) => {
+    const u = String(url)
+    if (u.includes('/stats?') && u.includes('season=2025')) return { ok: true, status: 200, json: async () => ({ stats: [{ splits: [app('2025-06-01', 3)] }] }) }
+    if (u.includes('/stats?')) return { ok: true, status: 200, json: async () => ({ stats: [{ splits: [] }] }) }
+    if (u.includes('seasons.json')) return { ok: true, status: 200, json: async () => ({ seasons: [2026], current: 2026 }) }
+    if (u.includes('schedule')) return { ok: true, status: 200, json: async () => ({ dates: [] }) }
+    return { ok: false, status: 404, json: async () => null }
+  })
+  try {
+    const v = await loadPitchlog(1, 2025, null)
+    assert.deepEqual(v.rows.map((r) => [r.gamePk, r.mix, r.ip]), [[3, null, '6.0']])
+    assert.equal(await loadPitchlog(1, 2024, null), null)
   } finally {
     m.mock.restore()
   }
