@@ -9,7 +9,7 @@ import { hasExtras } from '../heroData.js'
 function TileRow({ title, note, tiles }) {
   return (
     <Stack gap="snug">
-      <SectionHead look="rule" as="h4" note={note}>{title}</SectionHead>
+      <SectionHead look="rule" as="span" note={note}>{title}</SectionHead>
       <Grid min="6rem">
         {tiles.map((t) => <StatTile key={t.k} label={t.k} value={t.v} />)}
       </Grid>
