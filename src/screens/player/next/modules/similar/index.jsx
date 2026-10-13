@@ -6,8 +6,9 @@ import { PlayerLink } from '../../../../../components/player/PlayerLink.jsx'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { Pill } from '../../../../../components/ui/control/Pill.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
-import { isMlbTeamId, teamClubNameShort } from '../../../../../lib/teams.js'
-import { hitterModel, initials, pitcherModel } from './similarView.js'
+import { useLinkScope } from '../../../../../lib/nav.js'
+import { teamClubNameShort } from '../../../../../lib/teams.js'
+import { hitterModel, initials, pitcherModel, poolLevels } from './similarView.js'
 import '../../../../../styles/player-next/both/similar.css'
 
 // Similar players (#1926, board SimilarPlayers): "Hits like" for a batter, "Pitches like"
@@ -34,17 +35,22 @@ async function loadHitters(id, signal) {
   return rows.length ? hitterModel(data, id, rows) : null
 }
 
-async function loadPitchers(id, isMlb) {
-  const pool = await fetchPitchArsenalPool(isMlb)
-  const similar = similarPitchersFor(pool, id)
-  return similar.length ? pitcherModel(pool, id, similar) : null
+// The first pool he is in decides his peers; a pool he is not in says nothing about the next.
+async function loadPitchers(id, levels) {
+  for (const isMlb of levels) {
+    const pool = await fetchPitchArsenalPool(isMlb)
+    if (!pool?.pit?.[id]) continue
+    const similar = similarPitchersFor(pool, id)
+    return similar.length ? pitcherModel(pool, id, similar) : null
+  }
+  return null
 }
 
 export default function SimilarModule({ bio, role, onEmpty, onCount }) {
-  const isMlb = isMlbTeamId(bio.team?.id)
+  const levels = poolLevels(useLinkScope().sportId, Boolean(bio.debut))
   const { data, loading } = useAsync(
-    (signal) => (role === 'pitching' ? loadPitchers(bio.id, isMlb) : loadHitters(bio.id, signal)),
-    [bio.id, role, isMlb],
+    (signal) => (role === 'pitching' ? loadPitchers(bio.id, levels) : loadHitters(bio.id, signal)),
+    [bio.id, role, levels.join()],
   )
   const [pick, setPick] = useState(-1)
   // The row to give focus back to when the plot closes: the swap unmounts the focused button.
