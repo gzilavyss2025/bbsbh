@@ -120,7 +120,7 @@ const LOG_FIELDS = {
     'plateAppearances,hitByPitch,sacFlies',
 }
 const SCHEDULE_FIELDS =
-  'fields=dates,games,gamePk,officialDate,gameNumber,dayNight,status,abstractGameState,' +
+  'fields=dates,games,gamePk,officialDate,resumeDate,gameNumber,dayNight,status,abstractGameState,' +
   'teams,away,home,score,team,id,abbreviation,venue,name,fieldInfo,turfType'
 // `venue(fieldInfo)` is what puts the park's SURFACE on the row, and it is
 // season-correct — Chase Field comes back Grass through 2018 and Artificial
@@ -387,13 +387,21 @@ export async function fetchBoxLines({ personId, group, cutoff = null, facet = nu
 // the top of the log. The row stays, with no score and no decision.
 // `baseballToday` is US Pacific, the last zone to roll over, as in
 // scout/playIds.js's `mayRead`.
+//
+// A SUSPENDED GAME ENDS ON A LATER DAY than its split says. gamePk 777861 was
+// suspended 2025-05-19 and finished 2025-05-21; its split and officialDate stay
+// 05-19, and only the schedule record's `resumeDate` (on the first `dates`
+// entry, the one fetchSchedule keeps) names 05-21. So a record whose resumeDate,
+// as a Pacific day, is on or after the gate keeps no score either.
 export async function fetchFinalScores(splits, group, cutoff = null, today = baseballToday()) {
   const until = cutoff && cutoff < today ? cutoff : today
   const gameTypes = MLB_LOG_GAME_TYPES.split(',')
   const gated = matchingSplits(splits, { gameTypes }).filter((s) => s.date < until)
   if (!gated.length) return new Map()
   try {
-    const schedule = await fetchSchedule([...new Set(gated.map((s) => s.game.gamePk))])
+    const schedule = (await fetchSchedule([...new Set(gated.map((s) => s.game.gamePk))])).filter(
+      (g) => !g.resumeDate || baseballToday(new Date(g.resumeDate)) < until,
+    )
     const rows = boxLineRows({ splits: gated, schedule, group, cutoff: until, gameTypes })
     return new Map(rows.map((r) => [r.gamePk, r]))
   } catch {

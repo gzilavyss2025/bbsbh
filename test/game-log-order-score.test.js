@@ -75,7 +75,7 @@ test("gameLogView: a pitcher's row wears his own decision, and a no-decision wea
 })
 
 // The schedule, stubbed: every gamePk asked for comes back Final, MIL home 6-2.
-function stubSchedule() {
+function stubSchedule(extra = {}) {
   const asked = []
   const m = mock.method(globalThis, 'fetch', async (url) => {
     const pks = (String(url).match(/gamePks=([\d,]+)/)?.[1] ?? '').split(',').map(Number)
@@ -84,6 +84,7 @@ function stubSchedule() {
       gamePk,
       status: { abstractGameState: 'Final' },
       teams: { away: { score: 2, team: { id: 112 } }, home: { score: 6, team: { id: 158 } } },
+      ...extra[gamePk],
     }))
     return { ok: true, status: 200, json: async () => ({ dates: [{ games }] }) }
   })
@@ -123,6 +124,21 @@ test("fetchFinalScores: with no cutoff, today's games hold back their score and 
     assert.deepEqual([...scores.keys()], [201])
     const view = gameLogView(splits, 'hitting', null, 8, { scores }).rows
     assert.deepEqual(view.map((r) => [r.gamePk, r.result, r.runs]), [[203, null, null], [202, null, null], [201, 'W', 6]])
+  } finally {
+    api.restore()
+  }
+})
+
+test('fetchFinalScores: a suspended game that ends today holds its score, though its split keeps the first day', async () => {
+  // Shaped like gamePk 777861: suspended 2025-05-19, finished 2025-05-21. The
+  // split and officialDate keep 05-19; only the schedule's resumeDate says 05-21.
+  const api = stubSchedule({
+    301: { officialDate: '2026-10-11', resumeDate: '2026-10-13T17:10:00Z' },
+    302: { officialDate: '2026-10-10', resumeDate: '2026-10-12T17:10:00Z' },
+  })
+  try {
+    const scores = await fetchFinalScores([row('2026-10-11', 301), row('2026-10-10', 302)], 'hitting', null, '2026-10-13')
+    assert.deepEqual([...scores.keys()], [302])
   } finally {
     api.restore()
   }
