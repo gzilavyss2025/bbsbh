@@ -55,6 +55,54 @@
   stroke: var(--text-heading);
   stroke-width: 3;
 }
+/* The ball flight (#2073; ContactFlight.jsx). The tapped dot hides while its ball flies.
+   The marks are SVG strokes at the canvas widths times 2.5 (the canvas field unit). Their
+   opacity and size are per frame, from contactFlight.js. */
+.fcontact__dot--hide {
+  opacity: 0;
+}
+.fcontact__fx {
+  pointer-events: none;
+}
+.fcontact__fx-pulse,
+.fcontact__fx-ring,
+.fcontact__fx-sel {
+  fill: none;
+  stroke: var(--text-heading);
+}
+.fcontact__fx-pulse { stroke-width: 2.5; }
+.fcontact__fx-ring { stroke-width: 3; }
+.fcontact__fx-sel { stroke-width: 4.5; }
+.fcontact__fx-ring2 {
+  fill: none;
+  stroke: var(--award-ink);
+  stroke-width: 5;
+}
+.fcontact__fx-track {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 2;
+  stroke-dasharray: 5 6;
+}
+.fcontact__fx-trace {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 3.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.fcontact__fx-shadow { fill: var(--text-heading); }
+.fcontact__fx-drop {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+.fcontact__fx-ball {
+  fill: var(--surface-card);
+  stroke: var(--text-heading);
+  stroke-width: 2.75;
+}
 .fcontact__dot--single { fill: var(--accent-primary); }
 .fcontact__dot--double,
 .fcontact__dot--triple { fill: var(--accent-positive); }
@@ -135,6 +183,22 @@
 .fcontact__stats dt {
   color: var(--text-caption);
   font-size: var(--fs-small);
+}
+/* After the landing, the last two stats rise in, 60ms apart (--fcontact-i is 0 or 1).
+   In flight they wait unseen. */
+.fcontact__rise {
+  animation: fcontact-rise var(--dur-stamp-in) var(--ease-stamp) backwards;
+  animation-delay: calc(var(--fcontact-i, 0) * var(--dur-fast) / 2);
+}
+.fcontact__detail--fly .fcontact__rise {
+  animation: none;
+  opacity: 0;
+}
+@keyframes fcontact-rise {
+  from { opacity: 0; transform: translateY(var(--space-1h)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fcontact__rise { animation: none; }
 }
 .fcontact__note {
   margin: var(--space-3h) 0 0;
