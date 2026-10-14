@@ -22,6 +22,12 @@
   --paper-2:  #FBF6E9;   /* raised card / cell fill */
   --paper-3:  #FFFDF6;   /* brightest inset (revealed value) */
   --paper-cream: #F1E7CC; /* cream knockout on ink: the player-page draft hex (#1984) */
+  /* Two papers a step and two steps darker than the canvas (#2073): a table
+     row under the pointer, and a picked row. Numbered, so the ADR-0107 guard
+     in check-typography.mjs (`--paper-\d+`) stops a partial that reads them
+     by name. Read --surface-row-hover and --surface-row-selected. */
+  --paper-4:  #F3EBD2;   /* row under the pointer */
+  --paper-5:  #EFE6C8;   /* picked row */
 
   /* Pushed darker in #1128 from #16222F, which sat 4.2 (CIE76) / 2.78
      (CIEDE2000) from --ink-1 — under or at the 1.0 just-noticeable threshold
@@ -138,6 +144,14 @@
   --bg-page:          var(--bg-canvas);
   --surface-card:     var(--paper-2);
   --surface-inset:    var(--paper-3);
+  /* A table row under the pointer, and a picked row (#2073): the game logs,
+     Firsts and Similar Players. The row is shaded, not lifted, so both are
+     darker than the card. The text pairs are in
+     src/lib/design/contrastPairings.js. A loss on a picked row reads
+     --clay-deep: --accent-negative there is
+     4.37:1 (--accent-negative on --surface-row-selected), under AA. */
+  --surface-row-hover:    var(--paper-4);
+  --surface-row-selected: var(--paper-5);
 
   --text-heading:     var(--ink-0);
   --text-body:        var(--ink-1);
