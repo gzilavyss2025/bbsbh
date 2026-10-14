@@ -22,9 +22,10 @@ export function leagueAveragesOf({ hitting, pitching } = {}) {
   const pa = sum(hitting, 'plateAppearances')
   const [so, bb, tb, hr] = ['strikeOuts', 'baseOnBalls', 'totalBases', 'homeRuns'].map((k) => sum(hitting, k))
   const hits = sum(hitting, 'hits')
-  const counted = (hitting ?? []).filter((s) => s.stat?.numberOfPitches >= 2 * s.stat?.plateAppearances)
-  // Opponent OPS from the pitching splits: OBP + SLG over the same plate appearances.
-  const [pAb, pH, pBb, pHbp, pSf, pTb] = ['atBats', 'hits', 'baseOnBalls', 'hitByPitch', 'sacFlies', 'totalBases'].map((k) => sum(pitching, k))
+  const counted = (hitting ?? []).filter((s) => s.stat?.numberOfPitches >= 3 * s.stat?.plateAppearances)
+  // Opponent OPS from the pitching splits of the clubs that carry total bases (1913, 1959, 1972 have a few stray ones).
+  const whole = (pitching ?? []).filter((s) => s.stat?.totalBases >= s.stat?.hits)
+  const [pAb, pH, pBb, pHbp, pSf, pTb] = ['atBats', 'hits', 'baseOnBalls', 'hitByPitch', 'sacFlies', 'totalBases'].map((k) => sum(whole, k))
   const obpDen = pAb + pBb + pHbp + pSf
   return {
     avg: atBats ? round(hits / atBats, 3) : null,
@@ -35,8 +36,8 @@ export function leagueAveragesOf({ hitting, pitching } = {}) {
     bbk: ratio(bb, so, 2),
     iso: ratio(tb - hits, atBats, 3), // total bases missing makes tb - hits negative: null
     babip: so > 0 ? ratio(hits - hr, atBats - so - hr + sum(hitting, 'sacFlies'), 3) : null,
-    // Pitch counts reached part of the clubs for a few seasons, and 1950 has a stray 1: divide by the PA
-    // of the clubs whose count is real (a PA never takes under 2 pitches on average; the league runs 3.4-3.9).
+    // Pitch counts reached part of the clubs for a few seasons, and 1950 has a stray 1, 1975-79 count
+    // about 1.5 a PA: divide by the PA of the clubs whose count is real (a club never averages under 3 a PA).
     ppa: ratio(sum(counted, 'numberOfPitches'), sum(counted, 'plateAppearances'), 2),
     ops: pTb > 0 && obpDen > 0 && pAb > 0 ? round((pH + pBb + pHbp) / obpDen + pTb / pAb, 3) : null,
   }

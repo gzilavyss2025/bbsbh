@@ -1,4 +1,4 @@
-// gen-league-averages.mjs -- the league batting average and ERA of every
+// gen-league-averages.mjs -- the league AVG, ERA and Advanced-card rates of every
 // finished MLB season, 1901 on: public/data/league-averages.json.
 //
 // HAND-RUN, NOT ON A CRON. A finished season never changes. Run it once after

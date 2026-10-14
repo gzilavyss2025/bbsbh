@@ -85,6 +85,16 @@ test('pitch counts on part of the clubs: P/PA divides by the PA of those clubs o
   assert.equal(r.ppa, 3.75)
 })
 
+test('opponent OPS skips clubs whose total bases are missing or stray (a 1959 club has 12 TB on 1,384 H)', () => {
+  const stray = club({ atBats: 5000, hits: 1300, baseOnBalls: 400, hitByPitch: 30, sacFlies: 30, totalBases: 12 })
+  assert.equal(leagueAveragesOf({ pitching: [...pit, stray, club({ atBats: 5000, hits: 1300 })] }).ops, leagueAveragesOf({ pitching: pit }).ops)
+})
+
+test('a club counting under 3 pitches a PA is left out of P/PA (1975-79 count about 1.5)', () => {
+  assert.equal(leagueAveragesOf({ hitting: [club({ plateAppearances: 400, numberOfPitches: 1500 }), club({ plateAppearances: 600, numberOfPitches: 900 })] }).ppa, 3.75)
+  assert.equal(leagueAveragesOf({ hitting: [club({ plateAppearances: 600, numberOfPitches: 900 })] }).ppa, null)
+})
+
 test('K-BB% goes negative when walks outnumber strikeouts', () => {
   const r = leagueAveragesOf({ hitting: [club({ plateAppearances: 1000, strikeOuts: 90, baseOnBalls: 100 })] })
   assert.equal(r.kbb, -0.01)
@@ -141,6 +151,13 @@ test('the shipped file has no clock, starts in 1901 and stays small', () => {
   assert.ok(file.seasons['1901'])
   assert.ok(file.seasons[file.lastSeason])
   assert.ok(text.length < 20_000)
+  // Every rate that is set is a real league figure (a partial feed once shipped OPS .32 and P/PA 2.2).
+  const range = { k: [0.03, 0.3], bb: [0.05, 0.15], bbk: [0.2, 2], iso: [0.05, 0.25], babip: [0.24, 0.34], ppa: [3, 4.5], ops: [0.55, 0.95] }
+  for (const [year, row] of Object.entries(file.seasons)) {
+    for (const [key, [lo, hi]] of Object.entries(range)) {
+      assert.ok(row[key] === null || (row[key] >= lo && row[key] <= hi), `${year} ${key} ${row[key]}`)
+    }
+  }
 })
 
 // --- the table cell -------------------------------------------------------
