@@ -10,7 +10,7 @@ amendment comment and the two CLAUDE.md lines.
 - Depends on: **none**. (spec.md says "01 merged". Segmented reads no token that
   slice 01 adds, so it does not need to wait. The press it shows comes from
   `.btn:active`, which slice 02 changes for every Button at once.)
-- Parallel with: 01, 02, 05, 06, 07, 08, 10, 13, 20a-c.
+- Parallel with: 01, 02, 05, 06, 07, 08, 10, 13.
 - Blocks: 03b, 04a, 04b, 04c, 04d.
 
 ## Goal
@@ -100,7 +100,7 @@ Token map (spec.md): ink `#0F1822` → `--text-heading` / `--border-stamped`; pa
 spec.md fixes `--text-on-ink`. Follow spec.md (`--text-on-ink`). Do not re-open it.
 
 **Focus.** Do not copy the canvas 3px ink ring. `.btn:focus-visible` already draws
-the house ring (`button.css` l.257-260). Copy only the canvas `position: relative;
+the house ring (`button.css` l.264-267). Copy only the canvas `position: relative;
 z-index: 1` on focus, so the next joined button does not paint over the ring.
 
 **Press.** Segmented adds no press rule. It inherits `.btn:active` (today 1px +
@@ -129,10 +129,10 @@ writes `aria-pressed` only when `pressed !== undefined`.
 .btn { --btn-fill: var(--surface-card); --btn-edge: var(--border-rule); --btn-ink: var(--text-body);
        --btn-fill-hover: var(--surface-inset); --btn-edge-hover: var(--text-caption);
        min-height: var(--tap-min); padding: var(--space-2) var(--space-4);
-       border: var(--bw-rule) solid var(--btn-edge); border-radius: var(--radius-sm); ... }   /* l.123-151 */
+       border: var(--bw-rule) solid var(--btn-edge); border-radius: var(--radius-sm); ... }   /* l.111-140 */
 .btn[aria-pressed='true'], .btn[aria-current='page'] {
-  background: var(--accent-primary); border-color: var(--accent-primary); color: var(--text-on-ink); }  /* l.241-246 */
-.btn[aria-pressed='true']::before, .btn[aria-current='page']::before { content: '✓'; ... }           /* l.247-253 */
+  background: var(--accent-primary); border-color: var(--accent-primary); color: var(--text-on-ink); }  /* l.250-255 */
+.btn[aria-pressed='true']::before, .btn[aria-current='page']::before { content: '✓'; ... }           /* l.256-262 */
 ```
 
 `src/index.css` l.100-102:
@@ -336,7 +336,7 @@ Notes for the guards:
   `src/styles/system/`. No marker needed.
 - `layout/check-z-index.mjs`: `z-index: 1` is a local lift (3 or less is allowed).
 - Reduced motion: this sheet adds no transition or animation. `.btn` already turns
-  its own transition off under `prefers-reduced-motion` (`button.css` l.283-297), so
+  its own transition off under `prefers-reduced-motion` (`button.css` l.286-297), so
   no `@media (prefers-reduced-motion)` block is needed here. Say so in the PR.
 - No `/animation-lab` entry: Segmented adds no animation. (spec.md's shared-files
   table lists 03 against `motionDemos.jsx`; that line does not apply.)

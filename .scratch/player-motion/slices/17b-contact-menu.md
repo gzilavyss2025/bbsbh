@@ -124,11 +124,19 @@ zero rows included.
 
 | Live group | Lines | After this slice |
 |---|---|---|
-| "Which balls" (Home runs / Hits / All balls) | l.80-86 | Not this slice. An in-card toggle: slice 04 (`Segmented`), or `Pill` as today. |
-| "Color by" (Result / Ball type) | l.87-91 | Not this slice. Same as above. |
+| "Which balls" (Home runs / Hits / All balls) | l.80-86 | **Stays `Pill`.** Calls `pick(setView, k)` (17a). |
+| "Color by" (Result / Ball type) | l.87-91 | **Stays `Pill`.** Calls `setColor(k)`. |
 | "Highlight one kind of ball" (ball types) | l.116-122 | **Removed.** `MenuRail` under "How contact ends" carries the pick. |
 | The type `FactGrid` | l.149-162 | **Moves** into the `MenuRail` panel (`TypeFacts`). |
 | `BattedBallMix` | l.148 | Stays, unchanged. It keeps the zero rows' share and the `avg` of every type. |
+
+Why the two top rows stay `Pill`, not `Segmented`: 04a's audit hands all three Contact
+chip rows to slice 17 (`04a-segmented-swap-logs.md`, the row
+`contact/ContactModule.jsx:82,89,118`). The canvas draws them as separate chips, not a
+joined row: `.tc-chip{… border:2px solid #0F1822; min-height:44px …}` with
+`.tc-chip[aria-pressed="true"]{background:#86BE98;box-shadow:2px 2px 0 #0F1822}`, in a
+`display:flex; gap:8px` group. That is the FormTrend `.tf-chip` case, which 04a keeps on
+`Pill` for the same reason. Slice 02 gives `Pill` the stamp-press.
 
 ### Every number, before and after
 
@@ -317,6 +325,7 @@ test('the ball-type pick is a MenuRail; the six averages are its panel', () => {
   carries the same split.
 - The canvas `view: 'all'` on a pick.
 - Any change inside `MenuRail` itself (slice 05).
+- The view and colour chips: they stay `Pill` (see "Which chip group goes where").
 
 ## Stop if
 

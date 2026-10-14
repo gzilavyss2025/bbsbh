@@ -1,17 +1,19 @@
 # 17a — Contact: the dots drop in
 
 Slice 17 of `spec.md` is split in two. 17a is the dot entrance. 17b moves the
-batted-ball menu onto `MenuRail`. Reason: with the Animation Lab entry, one slice
-needs six files, and the cap is five.
+batted-ball menu onto `MenuRail`. Reason: the entrance, its Lab entry and its freeze
+rule already take five files.
 
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: medium (the table says high for 17; this half has
   no new part and no JS clock, so medium is enough).
-- Depends on: 01 merged (`--ease-stamp`, `--dur-unfold`, `useInViewOnce`).
-- Parallel with: any slice that does not touch `src/screens/player/next/modules/contact/*`,
-  `src/styles/player-next/batter/contact.css` or `src/screens/AnimationLab.jsx`.
-  `motionDemos.jsx` is shared with many slices: merge `main` in before you push.
+- Depends on: 01a merged (`--ease-stamp`, `--dur-unfold`), 01c merged (`useInViewOnce`),
+  01d merged (`src/screens/animlab/PlayerMotionLab.jsx`).
+- Parallel with: any slice that does not touch `src/screens/player/next/modules/contact/*`
+  or `src/styles/player-next/batter/contact.css`. `PlayerMotionLab.jsx` and the freeze
+  list in `46-consent-modal.css` are shared with other slices: merge `main` in before you
+  push.
 
 ## Goal
 
@@ -27,7 +29,8 @@ type plays the drop again. A colour change does not. Back in the same tab does n
 - A view pick or a type pick replays the drop. "Result" / "Ball type" does not.
 - A re-render, a poll, or Back to the page in the same tab shows the dots at rest.
 - Reduced motion: the dots show at once, no drop.
-- `/animation-lab` has a "Contact — the dots drop in" entry with the real classes.
+- `/animation-lab` has a "Contact — the dots drop in" entry with the real classes, live
+  and in a frozen strip.
 - `npm run lint`, `npm test`, `npm run build` pass.
 
 ## Files
@@ -37,9 +40,11 @@ type plays the drop again. A colour change does not. Back in the same tab does n
 2. `src/styles/player-next/batter/contact.css` (122 lines) — transform box, the drop
    rules and keyframes, the wait state, the reduced-motion block.
 3. `test/player-next-contact-motion.test.js` — new.
-4. `src/screens/animlab/motionDemos.jsx` (349 lines) — `ContactDropDemo`.
-5. `src/screens/AnimationLab.jsx` (597 lines) — one `Entry`. See "Stop if": the file is
-   3 lines under the 600-line cap today.
+4. `src/screens/animlab/PlayerMotionLab.jsx` (01d) — `ContactDropDemo` and its `Entry`.
+5. `src/styles/46-consent-modal.css` (439 lines) — one rule in the additive freeze list.
+
+Not `motionDemos.jsx`, not `AnimationLab.jsx`: 01d moved every player-motion entry to
+`PlayerMotionLab.jsx`, because `AnimationLab.jsx` is at the 600-line cap.
 
 ## Canvas
 
@@ -136,43 +141,41 @@ The view chips call `pick(setView, k)` (l.82). The type chips call
 51	}
 ```
 
-No animation on the field today. `src/hooks/motion/useBecameTrue.js` exists: it returns
-true only for a value that went false → true while the component was mounted, and stays
-true while the value stays true (`docs/motion.md`, "The one-shot gate").
+No animation on the field today.
+
+`useInViewOnce` (slice 01c, `src/hooks/scroll/useInViewOnce.js`) returns `[ref, phase]`.
+`phase` is `'rest'` (already seen this bundle, reduced motion, or no
+IntersectionObserver), `'wait'` (hold it hidden until it shows), or `'play'` (it came a
+tenth into view; it stays `'play'` after that, so the class is stable). The key is
+`viewKey(playerId, slotKey)` from `src/lib/motion/inViewOnce.js`. 01c says: "The caller
+must put `ref` on a mounted element. With no element, the phase stays `'wait'`." Its
+effect runs on `[key, phase]` only, so the element must exist on the first render.
 
 ## Build
 
 ### 1. The gate in `ContactModule.jsx`
 
-Slice 01 adds `useInViewOnce`. **Read it first.** This brief assumes the shape of
-`useNearView` (`src/hooks/scroll/useNearView.js`): `const [ref, seen] =
-useInViewOnce(key)`, where `seen` is true at once when the key is already in the
-module-level `Set` (inferred: slice 01 fixes the path and the return shape). Adapt the
-two lines below to the real API.
-
-Add the imports (path inferred; use slice 01's):
+Add the imports:
 
 ```jsx
-import { useBecameTrue } from '../../../../../hooks/motion/useBecameTrue.js'
-import { useInViewOnce } from '../../../../../hooks/motion/useInViewOnce.js'
+import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
+import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 ```
 
-Add the state and the gate after l.49, before any early return (hooks must run on
-every render):
+Add the state and the gate after l.49, before any early return (hooks run on every
+render):
 
 ```jsx
   // The dots drop in the first time the field is in view (spec.md, the one-shot rule), and
   // again on each view or type pick: `gen` swaps the a/b class, which restarts the drop.
   const [gen, setGen] = useState(0)
-  const [fieldRef, seen] = useInViewOnce(`${bio.id}:contact`)
-  const entered = useBecameTrue(seen)
+  const [fieldRef, phase] = useInViewOnce(viewKey(bio.id, 'contact'))
 ```
 
 Put `ref={fieldRef}` on the root `<div>` in BOTH returns, l.71 and l.78. React keeps the
 one DOM node when the loading div becomes the card (same type, same place), so the
-observer watches one node from the first render. Do not put the ref on the `<svg>`: it
-does not exist on the first render, and a `useNearView`-shaped hook observes only the
-node it saw in its effect.
+observer has a node from the first render. Do not put the ref on the `<svg>`: it does
+not exist on the first render, and the phase would stay `'wait'` for good.
 
 Change `pick` (l.76) so a view or type pick replays the drop:
 
@@ -185,14 +188,18 @@ Leave `setColor(k)` (l.89) as it is: a colour pick does not replay.
 Compute the class after `pick`:
 
 ```jsx
-  // Not in view yet: the dots wait unseen. In view this visit, or picked since: they drop.
-  // Already played (Back in the same tab): they show at rest.
-  const dotsCls = !seen
-    ? 'fcontact__dots fcontact__dots--wait'
-    : entered || gen
-      ? `fcontact__dots fcontact__dots--play fcontact__dots--${gen % 2 ? 'b' : 'a'}`
-      : 'fcontact__dots'
+  // wait: the dots hide until the field shows. play: the first sighting this visit.
+  // gen > 0: a pick since. rest (seen before, Back in the same tab): the dots show still.
+  const dotsCls =
+    phase === 'wait'
+      ? 'fcontact__dots fcontact__dots--wait'
+      : phase === 'play' || gen
+        ? `fcontact__dots fcontact__dots--play fcontact__dots--${gen % 2 ? 'b' : 'a'}`
+        : 'fcontact__dots'
 ```
+
+Under reduced motion the phase is `'rest'`, and a pick adds `--play`; the reduced-motion
+block below turns the animation off, so the dots switch at once.
 
 Wrap the circles (l.101-114) in a group and give each dot its fraction of the stagger:
 
@@ -259,21 +266,22 @@ it would reset the delay to 0.
 Guards: every time is a `calc()` of a token, so `check-raw-values.mjs` counts nothing.
 No new flex or grid rule, so no `layout-exempt` marker. No type change.
 
-### 3. The Lab entry
+### 3. The Lab entry and its freeze rule
 
-In `src/screens/animlab/motionDemos.jsx`, add the sheet import at the top (beside
-`boxlines.css`) and the demo at the end. Invented spots, the real classes:
+In `src/screens/animlab/PlayerMotionLab.jsx` (01d), import the sheet and add the demo
+above `PlayerMotionLab`, then one `Entry` inside its fragment, after the entries already
+there. Invented spots, the real classes:
 
 ```jsx
 import '../../styles/player-next/batter/contact.css'
 …
-// The Contact dots drop in (#2073): the real .fcontact__dots and .fcontact__dot classes on
-// the card's own viewBox. The spots are invented.
+// The Contact dots drop in (#2073, slice 17a): the real .fcontact__dots and .fcontact__dot
+// classes on the card's own viewBox. The spots are invented.
 const DROP_DOTS = [
   [250, 330, 'out'], [330, 300, 'single'], [420, 250, 'double'], [190, 260, 'out'],
   [300, 180, 'hr'], [470, 330, 'single'], [140, 340, 'triple'], [380, 160, 'hr'],
 ]
-export function ContactDropDemo() {
+function ContactDropDemo() {
   return (
     <svg className="fcontact__field" viewBox="10 40 600 485" aria-hidden="true">
       <g className="fcontact__dots fcontact__dots--play fcontact__dots--a">
@@ -293,18 +301,42 @@ export function ContactDropDemo() {
 }
 ```
 
-In `src/screens/AnimationLab.jsx`, import `ContactDropDemo` in the block at l.13-25
-(alphabetical) and add one `Entry` after the stamp-in entry (it ends at l.487). Live
-stage only, no frozen strip: a strip needs a new line in the freeze list in
-`src/styles/46-consent-modal.css`, which would be a sixth file.
-
 ```jsx
       <Entry
         title="Contact — the dots drop in"
-        note={<>The batter Contact field (#2073). Each dot scales from 2.4 to 1 and fades in over 460ms on --ease-stamp, staggered across the set over 620ms. Off under reduced motion.</>}
+        note={
+          <>
+            The batter Contact field (#2073). Each dot scales from 2.4 to 1 and fades in over 460ms on the
+            stamp curve, staggered across the set over 620ms. A view or type pick plays it again. Off under
+            reduced motion.
+          </>
+        }
         live={<ContactDropDemo />}
-      />
+      >
+        <span className="animlab__stagelabel">The drop, 0 → 1080ms</span>
+        <div className="animlab__frozen">
+          {[0, 150, 300, 600, 900, 1080].map((ms) => (
+            <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
+              <ContactDropDemo />
+            </Frame>
+          ))}
+        </div>
+      </Entry>
 ```
+
+In `src/styles/46-consent-modal.css`, in the additive half of the freeze list, after the
+`.animlab__frame .player-rise` rule (01d):
+
+```css
+/* The Contact dots (#2073) stagger with their own --fcontact-f share of 620ms. */
+.animlab__frame .fcontact__dots--play .fcontact__dot {
+  animation-play-state: paused;
+  animation-delay: calc(var(--fcontact-f, 0) * var(--dur-unfold) * 1.55 + var(--animlab-delay, 0s));
+}
+```
+
+Three classes outweigh `.fcontact__dots--play .fcontact__dot` (two), so sheet order does
+not matter. `46-consent-modal.css` stays well under 600 lines.
 
 ## Test first
 
@@ -356,16 +388,28 @@ test('reduced motion: no drop', () => {
 })
 
 test('the module gates the drop on first view and swaps a/b on each view or type pick', () => {
-  assert.match(JSX, /useInViewOnce\(`\$\{bio\.id\}:contact`\)/)
-  assert.match(JSX, /useBecameTrue\(seen\)/)
+  assert.match(JSX, /useInViewOnce\(viewKey\(bio\.id, 'contact'\)\)/)
+  assert.match(JSX, /phase === 'wait'/)
   assert.match(JSX, /fcontact__dots--\$\{gen % 2 \? 'b' : 'a'\}/)
   assert.match(JSX, /'--fcontact-f'/)
   assert.match(JSX, /const pick = \(set, v\) => \{ set\(v\); setSel\(null\); setGen\(\(g\) => g \+ 1\) \}/)
 })
 ```
 
-If slice 01c names the hook or its key differently, change the first JSX assertion to
-the real call, before you write the code. Do not loosen it to a bare `useInViewOnce`.
+Add one case for the Lab (it fails before the change, too):
+
+```js
+test("the Lab shows the drop, and its frozen frames keep each dot's own delay", () => {
+  const lab = read('src/screens/animlab/PlayerMotionLab.jsx')
+  assert.match(lab, /title="Contact — the dots drop in"/)
+  assert.match(lab, /fcontact__dots fcontact__dots--play fcontact__dots--a/)
+  const freeze = stripComments(read('src/styles/46-consent-modal.css'))
+  assert.equal(
+    decl(ruleBody(freeze, '.animlab__frame .fcontact__dots--play .fcontact__dot'), 'animation-delay'),
+    'calc(var(--fcontact-f, 0) * var(--dur-unfold) * 1.55 + var(--animlab-delay, 0s))',
+  )
+})
+```
 
 ## Verify
 
@@ -376,7 +420,8 @@ the real call, before you write the code. Do not loosen it to a bare `useInViewO
   view). Tap "Hits": the drop plays again. Tap "Ball type": no drop. Navigate to a team
   page and press Back: the dots are at rest.
 - Load once with Playwright `reducedMotion: 'reduce'`: the dots show at once.
-- `/animation-lab`: the new entry plays on Play.
+- `/animation-lab`: the new entry plays on Play, and the frozen strip shows the dots
+  arriving one after another.
 - Send Gary the strip with `SendUserFile` and name the route.
 
 ## Out of scope
@@ -384,20 +429,19 @@ the real call, before you write the code. Do not loosen it to a bare `useInViewO
 - The batted-ball menu on `MenuRail` (17b).
 - A highlight fade on the dots (the canvas has none on `.tc-dt`; see Canvas).
 - The spray wedge (needs direction groups the live card does not have).
-- The view and colour chips (l.80-91). Slice 04 owns in-card toggles. If 04 moved them
-  to `Segmented` first, they call the same `pick(setView, k)` and `setColor(k)`; keep
-  those calls.
+- The look of the view and colour chips (l.80-91). They stay `Pill` (17b says why);
+  this slice changes only what `pick` does.
 - Ball flight (18) and play-through (19).
 
 ## Stop if
 
-- `useInViewOnce` is not on `main`, or it cannot say "already seen at mount" (the Back
-  case). Report its real API; do not write a second hook.
-- `src/screens/AnimationLab.jsx` cannot take the 5-line entry and stay at or under 600
-  lines (it is 597 today). If an earlier slice split the file, add the entry where that
-  slice put the others. If nobody split it, stop and report. Do not raise a budget in
-  `check-file-size.mjs`.
+- 01c is not merged, or `useInViewOnce` no longer returns `[ref, phase]` with the
+  phases `'rest'`, `'wait'`, `'play'`. Report its real API; do not write a second hook.
+- 01d is not merged (no `PlayerMotionLab.jsx`). Do not add the entry to
+  `AnimationLab.jsx`: it is 597 lines, and the cap is 600.
 - The markup at `ContactModule.jsx` l.71-115 differs from the quote above in a way that
   moves the dots out of one `marks.map` (for example, a slice put them in a child
-  component).
+  component), or the two returns no longer share one root `<div>`.
 - `--dur-unfold` or `--ease-stamp` is not defined in `src/tokens/effects.css`.
+- The dots stay hidden after the card scrolls into view (the phase is stuck at
+  `'wait'`): the ref is not on a node that exists on the first render.

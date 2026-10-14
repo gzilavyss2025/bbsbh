@@ -1,12 +1,12 @@
-# 20a — Small fixes: game-log rows and the Foul balls count cells
+# 20a — Small fixes: the game-log rows
 
 Slice 20 is split in three by file count and by which slice last touched each file:
 
 | Part | Fixes | Files |
 |---|---|---|
-| **20a** (this file) | game-log rows (hover, focus ring, open row); Foul balls cells 52px | 4 product + 1 test |
+| **20a** (this file) | game-log rows (hover, focus ring, open row, the loss ink on the open row) | 4 product + 1 test |
 | 20b | Season (WAR state, two focus rings); Contract (chevron, hover, marker) | 4 product + 1 test |
-| 20c | Similar rows (hover token, focus ring) | 1 product + 1 test |
+| 20c | Similar rows (hover token, focus ring); Foul balls cells 52px | 2 product + 1 test |
 
 ## Run
 
@@ -20,8 +20,9 @@ Slice 20 is split in three by file count and by which slice last touched each fi
 Make the game-log rows answer the pointer and the keyboard as the canvas rows do,
 without turning a row into a button: the whole row tints while the pointer is on its
 date door, the whole row draws the focus ring while the door has keyboard focus, and
-the game whose detail is open keeps a selected fill. Also make the Foul balls count
-cells 52px tall, as the board draws them.
+the game whose detail is open keeps a selected fill. On that fill a loss reads
+`--clay-deep`, because `--accent-negative` there is under AA (slice 01a measured
+4.37:1 and added the `--clay-deep` pairing instead).
 
 ## Done means
 
@@ -32,8 +33,8 @@ cells 52px tall, as the board draws them.
   is hovered (pointer devices only), the house focus ring on a row that holds the
   keyboard focus, and the selected fill (`--surface-row-selected`) with a 2px stamped
   edge on the current row. The row is still a `<tr>`; only the door acts.
-- `fouls.css`: `.fouls__cell` is `min-height: calc(var(--tap-min) + var(--space-2))`
-  (52px).
+- `pitchlog.css`: on the current row, the loss score and the ER mark read
+  `--clay-deep`.
 - `test/player-next-rows.test.js` passes; it fails before the change.
 - `npm run lint`, `npm test`, `npm run build` are green.
 
@@ -44,10 +45,10 @@ cells 52px tall, as the board draws them.
 | `src/screens/player/next/parts/LogTable.jsx` | `currentKey` prop; `aria-current` on the matching `<tr>` (l.15, l.38). |
 | `src/styles/player-next/both/logtable.css` | Three rules after `.logtable__div .mono` (after l.44), before the `@container` at l.49. |
 | `src/screens/player/next/modules/pitchlog/index.jsx` | l.207: pass `currentKey={open}`. |
-| `src/styles/player-next/batter/fouls.css` | l.76: the cell's `min-height`. |
+| `src/styles/player-next/pitcher/pitchlog.css` | One rule after `.pitchlog__hi--er` (l.79-80): the loss ink on the current row. |
 | `test/player-next-rows.test.js` | **new.** |
 
-`both/` gains no file. `logtable.css` is 127 lines, `fouls.css` 267.
+`both/` gains no file. `logtable.css` is 127 lines, `pitchlog.css` 223.
 
 ## Canvas
 
@@ -69,8 +70,6 @@ buttons). So the hover keys on the door inside the row, and the canvas 3px ink r
 becomes the house ring (`--focus-ring` at `--bw-heavy`, spec.md "Focus rings stay the
 house ring").
 
-`FoulBalls`: `.fe-cell{...;min-height:52px;border:2px solid #0F1822;margin:-1px;...}`.
-52px = `--tap-min` (44px) + `--space-2` (8px).
 
 ## Live today
 
@@ -126,23 +125,24 @@ No cell in `.logtable` sets a background (`system/table.css` sets one only on
 `thead th` and on a sticky first column; `LogTable` passes `frame="bare"` and no
 `sticky`), so a background on the `<tr>` shows in both looks.
 
-`fouls.css` l.66-80:
+`pitchlog.css` l.49-51 and l.78-80, the two loss inks a row can hold:
 
 ```css
-/* layout-exempt: centres the count name over its visit share */
-.fouls__cell {
-  appearance: none;
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  min-height: var(--tap-min);
-  margin: calc(var(--bw-hair) * -1);
-  ...
+.pitchlog__score--L {
+  color: var(--accent-negative);
+}
+...
+.pitchlog__hi--er {
+  color: var(--accent-negative);
+}
 ```
+
+(`.pitchlog__dec--L` is a filled badge with `--text-on-ink`, so the row fill does
+not touch it.) Slice 01a (`01a-motion-tokens.md`, colours step) measured
+`--accent-negative` on `--surface-row-selected` at 4.37:1, under AA, and paired
+`--clay-deep` on it instead (6.33:1). On `--surface-row-hover` `--accent-negative`
+is 4.57:1, so the hover needs no change. The batter log has no current row (it passes
+no `currentKey`), so `batlog.css` needs no change.
 
 ## Build
 
@@ -205,14 +205,21 @@ Guards:
   spec.md says do not remove a house ring. The row ring is the outer frame.
 - No transition and no animation, so no reduced-motion block is needed.
 
-### 4. `fouls.css` l.76
+### 4. `pitchlog.css`, after `.pitchlog__hi--er` (l.78-80)
 
 ```css
-  min-height: calc(var(--tap-min) + var(--space-2));
+/* On the open game's row (LogTable's aria-current, the selected fill) a loss reads the
+   deeper clay: --accent-negative is under AA on --surface-row-selected
+   (src/lib/design/contrastPairings.js). */
+.pitchlog tr[aria-current='true'] :is(.pitchlog__score--L, .pitchlog__hi--er) {
+  color: var(--clay-deep);
+}
 ```
 
-Leave the `layout-exempt` comment on l.66 where it is: the layout ratchet reads the
-comment directly before the rule.
+`--clay-deep` is a colour primitive (`src/tokens/colors.css` l.62). The ADR-0107 guard
+bans only `--paper-N` and `--rule*` in a partial, and four partials already read
+`--clay-deep` (for example `13-play-by-play.css` l.131). If `npm run lint` rejects it,
+stop and report; do not pick another colour.
 
 ## Test first
 
@@ -220,7 +227,7 @@ Create `test/player-next-rows.test.js`; run it and see it fail first.
 
 ```js
 // Slice 20a (#2073): the game-log rows answer their door (hover, focus, the open game),
-// and the Foul balls count cells are 52px, as the canvas draws them.
+// and a loss on the open game's row keeps AA contrast.
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -266,15 +273,16 @@ test('logtable.css: hover tint, the selected row, and the focus ring', () => {
   assert.ok(c.indexOf(':has(:focus-visible)') > c.indexOf("tr[aria-current='true'] {"), 'the ring rule comes after the selected rule')
 })
 
-test('fouls.css: a count cell is 52px, the tap minimum plus one step', () => {
-  const cell = ruleBody(css('batter/fouls.css'), '.fouls__cell')
-  assert.equal(decl(cell, 'min-height'), 'calc(var(--tap-min) + var(--space-2))')
+test('pitchlog.css: a loss on the open row reads the deeper clay', () => {
+  const body = ruleBody(css('pitcher/pitchlog.css'), ".pitchlog tr[aria-current='true'] :is(.pitchlog__score--L, .pitchlog__hi--er)")
+  assert.ok(body)
+  assert.equal(decl(body, 'color'), 'var(--clay-deep)')
 })
 ```
 
 ## Verify
 
-1. `node --test test/player-next-rows.test.js test/player-next-pitchlog.test.js test/player-next-batlog.test.js test/player-next-fouls.test.js test/player-next-pfouls.test.js`.
+1. `node --test test/player-next-rows.test.js test/player-next-pitchlog.test.js test/player-next-batlog.test.js`.
 2. `npm run lint`, `npm test`, `npm run build`.
 3. `npm run dev`, Chromium at 390px (card look) and 1180px (table look), pitcher
    `/player/robert-gasser-688107?nointro`, Game log card:
@@ -283,15 +291,17 @@ test('fouls.css: a count cell is 52px, the tap minimum plus one step', () => {
    - Open a game, then press Escape: the row of that game is no longer current. Open
      a game and step with Earlier / Later: behind the scrim, the current row moves.
      Take a screenshot with the dialog open and the row visible behind it.
+   - Open a game the pitcher lost: behind the scrim, its row's L score reads the
+     deeper clay.
    - Batter `/player/brice-turang-668930?nointro`: the batter log rows do not tint
-     (they hold no control). The Foul balls cells are 52px (measure one in DevTools).
+     (they hold no control).
 4. Send Gary the screenshots with `SendUserFile`, with each route.
 
 ## Out of scope
 
 - Making the whole row clickable, or a row `onClick`. Only the door acts.
 - The batter log's rows (no control in them; a later issue may add a door).
-- The Season, Contract and Similar fixes (20b, 20c).
+- The Season, Contract, Similar and Foul balls fixes (20b, 20c).
 
 ## Stop if
 

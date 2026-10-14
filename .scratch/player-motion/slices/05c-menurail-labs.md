@@ -7,10 +7,12 @@ real class names (`spec.md`, "Rules every slice follows"; `docs/motion.md`, "Ver
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: medium.
-- Depends on: 05a merged, 05b merged.
-- Parallel with: 09, 11, 16, 17. NOT with any other slice that edits
-  `src/screens/AnimationLab.jsx` (see the size note below): 01, 02, 03, 08, 10, 12, 17 may
-  each add an entry there.
+- Depends on: 05a merged, 05b merged, 01d merged (01d moves `Frame` into
+  `animlab/Entry.jsx` and adds `animlab/PlayerMotionLab.jsx`, where every player-motion
+  entry goes).
+- Parallel with: 09, 11, 16, 17. NOT with another slice that edits
+  `src/screens/animlab/PlayerMotionLab.jsx` at the same time (02, 08, 10, 12, 17 add entries
+  there): the edits do not overlap in lines, but merge `main` in before you push.
 
 ## Goal
 
@@ -21,7 +23,8 @@ rail, the panel and the rise without a player page.
 
 - `/design-lab` shows a "Menu rail" group in band Two (the shared components): one live
   `MenuRail` you can tap, and one held in the rail state.
-- `/animation-lab` shows a "Menu rail — unfold, fold and rise" entry: the live part (Play
+- `/animation-lab` shows a "Menu rail — unfold, fold and rise" entry (in
+  `PlayerMotionLab.jsx`): the live part (Play
   remounts it; tap cards to see the glide), and a frozen strip of the rise at 0, 95, 190,
   285 and 380ms.
 - `npm run lint`, `npm test`, `npm run build` pass.
@@ -32,16 +35,12 @@ rail, the panel and the rise without a player page.
 |---|---|
 | `src/screens/designlab/menurail/MenuRailLab.jsx` | **new** (a subfolder, as `jumpbar/`, `stamped/`; the flat folder holds 10 source files) |
 | `src/screens/designlab/index.jsx` | import it, render it in band Two |
-| `src/screens/animlab/MenuRailEntry.jsx` | **new**: the whole Animation Lab entry |
-| `src/screens/AnimationLab.jsx` | import it, render it (2 lines) |
+| `src/screens/animlab/PlayerMotionLab.jsx` | add the menu rail entry (01d made this file) |
 | `src/styles/46-consent-modal.css` | add the two rise bodies to the frame freeze list |
+| `test/menurail-motion.test.js` | one case: the lab freezes the rise (05b made this file) |
 
-**Size note.** `src/screens/AnimationLab.jsx` is 597 lines today; `check-file-size.mjs` caps
-it at 600 (`MAX_LINES`, no budget entry for it). An entry written inline is about 20 lines,
-so this slice keeps the entry in its own file and adds 2 lines. `spec.md` says entries go in
-`src/screens/animlab/motionDemos.jsx`; that file holds only the demo COMPONENTS (its header:
-"Nothing else may be exported"), and the `Entry` list is in `AnimationLab.jsx`. With 8
-slices adding entries, the cap breaks after the first one or two. See "Stop if".
+`src/screens/AnimationLab.jsx` is NOT touched: it sat at 597 of 600 lines, and 01d moved
+the player entries into `PlayerMotionLab.jsx` so later slices add no line there.
 
 ## Canvas
 
@@ -67,21 +66,10 @@ class hooks the app renders").
   wide, contained, children })` and `Group({ title, lede, children, grid })`.
 - `src/screens/designlab/jumpbar/JumpBarLab.jsx`: the model for a subfolder lab file
   (imports `../../../components/…`).
-- `src/screens/AnimationLab.jsx:10` imports `Entry` from `./animlab/Entry.jsx`; l.11-25
-  import the demos; l.467-487 is the last entry ("Stamped card — the stamp-in"), then
-  `</div>` and `)` at l.488-489. `Frame` (l.546-554) is local and not exported:
-
-  ```jsx
-  function Frame({ label, delayMs, children }) {
-    const style = delayMs != null ? { '--animlab-delay': `${-delayMs}ms` } : undefined
-    return (
-      <Stack gap="tight" className="animlab__frame" style={style}>
-        <div className="animlab__framebox">{children}</div>
-        <span className="animlab__framelabel">{label}</span>
-      </Stack>
-    )
-  }
-  ```
+- After 01d: `src/screens/animlab/Entry.jsx` exports `Entry` and `Frame` (`Frame({ label,
+  delayMs, children })`: a `.animlab__frame` with `--animlab-delay` set to `-delayMs` ms).
+  `src/screens/animlab/PlayerMotionLab.jsx` exports `PlayerMotionLab`, which returns a
+  fragment of `Entry`s (the first is "Player page — the rise"). Read both as merged.
 - `src/screens/animlab/Entry.jsx:41`: `Entry({ title, note, live, hover = false, children })`.
 - `src/styles/46-consent-modal.css:212-238`: the un-delayed freeze list, ending:
 
@@ -151,78 +139,60 @@ import { MenuRailHalf } from './menurail/MenuRailLab.jsx'
       </Band>
 ```
 
-### 3. `src/screens/animlab/MenuRailEntry.jsx`
+### 3. `src/screens/animlab/PlayerMotionLab.jsx`
+
+Add the imports at the top (keep 01d's), the two module-level pieces, and one more `Entry`
+at the end of the fragment `PlayerMotionLab` returns:
 
 ```jsx
 import { useState } from 'react'
 import { MenuRail } from '../../components/ui/control/MenuRail.jsx'
-import { Stack } from '../../components/ui/layout/Stack.jsx'
-import { Entry } from './Entry.jsx'
-
-// THE MENU RAIL'S ENTRY (#2073, slice 05): its own file because AnimationLab.jsx sits at
-// the 600-line cap (ADR-0038). The live stage is the real MenuRail on invented cards; the
-// strip is the real panel body (.menurail__body--a) frozen through its rise.
-// The frame below is AnimationLab.jsx's Frame, the same three classes; that one is local
-// to its file.
-const ITEMS = [
+…
+// The menu rail (#2073, slice 05): the real MenuRail on invented cards. The strip is the
+// real panel body (.menurail__body--a) frozen through its rise.
+const RAIL_ITEMS = [
   { key: 'one', title: 'First kind', meta: '41%', figures: 'Invented line one' },
   { key: 'two', title: 'Second kind', meta: '27%', figures: 'Invented line two' },
   { key: 'three', title: 'Third kind', meta: '19%', figures: 'Invented line three' },
 ]
-const BODY = <p className="hint">Invented panel text.</p>
+const RAIL_BODY = <p className="hint">Invented panel text.</p>
 
-function Live() {
+function MenuRailDemo() {
   const [picked, setPicked] = useState(null)
-  return <MenuRail label="Invented kinds" items={ITEMS} picked={picked} onPick={setPicked} panel={() => BODY} backLabel="All kinds" />
-}
-
-function Frame({ label, delayMs, children }) {
-  return (
-    <Stack gap="tight" className="animlab__frame" style={{ '--animlab-delay': `${-delayMs}ms` }}>
-      <div className="animlab__framebox">{children}</div>
-      <span className="animlab__framelabel">{label}</span>
-    </Stack>
-  )
-}
-
-export function MenuRailEntry() {
-  return (
-    <Entry
-      title="Menu rail — unfold, fold and rise"
-      note={
-        <>
-          The shared menu (#2073, styles/motion/menurail.css). Tap a card: the row folds into a rail and the
-          panel opens over 400ms (--dur-unfold, --ease-unfold); the panel body rises 8px as it fades in, 380ms on
-          --ease-stamp, and again on every new pick. Tap the picked card: the content stays while the panel
-          folds. Off under reduced motion.
-        </>
-      }
-      live={<Live />}
-    >
-      <span className="animlab__stagelabel">The rise on a pick, 0 → 380ms</span>
-      <div className="animlab__frozen">
-        {[0, 95, 190, 285, 380].map((ms) => (
-          <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
-            <div className="menurail__body menurail__body--a">{BODY}</div>
-          </Frame>
-        ))}
-      </div>
-    </Entry>
-  )
+  return <MenuRail label="Invented kinds" items={RAIL_ITEMS} picked={picked} onPick={setPicked} panel={() => RAIL_BODY} backLabel="All kinds" />
 }
 ```
 
-`motionDemos.jsx` is not touched: its header allows only demo components there.
-
-### 4. `src/screens/AnimationLab.jsx` (2 lines)
+and inside the fragment, last:
 
 ```jsx
-import { MenuRailEntry } from './animlab/MenuRailEntry.jsx'
-…
-      </Entry>          {/* the end of "Stamped card — the stamp-in" */}
-      <MenuRailEntry />
-    </div>
+      <Entry
+        title="Menu rail — unfold, fold and rise"
+        note={
+          <>
+            The shared menu (#2073, styles/motion/menurail.css). Tap a card: the row folds into a rail and the
+            panel opens over 400ms on the unfold curve; the panel body rises 8px as it fades in, 380ms on the
+            stamp curve, and again on every new pick. Tap the picked card: the content stays while the panel
+            folds. Off under reduced motion.
+          </>
+        }
+        live={<MenuRailDemo />}
+      >
+        <span className="animlab__stagelabel">The rise on a pick, 0 → 380ms</span>
+        <div className="animlab__frozen">
+          {[0, 95, 190, 285, 380].map((ms) => (
+            <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
+              <div className="menurail__body menurail__body--a">{RAIL_BODY}</div>
+            </Frame>
+          ))}
+        </div>
+      </Entry>
 ```
+
+The glide and the fold are transitions, which a frozen frame cannot hold; the live stage
+shows them (Play, then tap).
+
+### 4. (no step: `AnimationLab.jsx` is untouched)
 
 ### 5. `src/styles/46-consent-modal.css`
 
@@ -241,24 +211,25 @@ frame offset reads true). Put them before the last selector, with a comment line
 
 ## Test first
 
-No new test file. This slice adds review pages and no logic, and a test would be a sixth
-file. Every class it uses is pinned by `test/menurail.test.js` (05a) and
-`test/menurail-motion.test.js` (05b). The check here is the browser (below) and
-`npm run lint` (file size, dir size, typography). If the orchestrator wants a failing test
-first anyway, drop the design-lab half to a later PR and add this case to
-`test/menurail-motion.test.js` (it fails before step 5):
+Add one case to `test/menurail-motion.test.js` (05b's file; it already has `read`). Run it;
+it fails; then do steps 3 and 5.
 
 ```js
-test('the Animation Lab freezes the rise', () => {
-  const lab = read('styles/46-consent-modal.css')
+test('the Animation Lab shows the rail and freezes the rise', () => {
+  const lab = stripComments(read('styles/46-consent-modal.css'))
   assert.match(lab, /\.animlab__frame \.menurail__body--a,/)
   assert.match(lab, /\.animlab__frame \.menurail__body--b,/)
+  const demo = read('screens/animlab/PlayerMotionLab.jsx')
+  assert.match(demo, /<MenuRail /)
+  assert.match(demo, /className="menurail__body menurail__body--a"/)
 })
 ```
 
+The design-lab half is a review page with no logic; the browser check below covers it.
+
 ## Verify
 
-- `npm run lint` (watch `check-file-size.mjs` on `AnimationLab.jsx` and `check-dir-size.mjs`),
+- `npm run lint` (watch `check-dir-size.mjs` and `check-file-size.mjs`),
   `npm test`, `npm run build`.
 - `/design-lab?nointro` at 390px and 1180px: the "Menu rail" group under band Two. Tap the
   cards; Back; Tab through (the shut panel takes no focus). The disabled card does nothing.
@@ -274,10 +245,9 @@ test('the Animation Lab freezes the rise', () => {
 
 ## Stop if
 
-- `src/screens/AnimationLab.jsx` is over 598 lines when you start (another slice landed an
-  entry first). Do not trim other entries to make room; report it. The fix is one small prep
-  PR that moves `Frame` into `animlab/Entry.jsx` as an export and each long entry into its
-  own file, and that is not this slice's call.
+- 01d is not merged: `Frame` is not exported from `animlab/Entry.jsx`, or
+  `animlab/PlayerMotionLab.jsx` does not exist. Do not add lines to `AnimationLab.jsx`
+  (597 of 600 lines before 01d).
 - `src/screens/designlab/index.jsx` no longer has band Two as quoted.
 - The frozen frames show the body at full opacity in every frame (the pause does not
   reach it): report the selector that wins instead.
