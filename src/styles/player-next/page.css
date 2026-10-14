@@ -229,3 +229,11 @@
   background: var(--text-body);
   color: var(--text-on-ink);
 }
+.pnext-pick:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+/* Joined segments: a run of picks inside a Splits bar shares one border. */
+.splitsmod__segs .pnext-pick + .pnext-pick {
+  margin-left: calc(var(--bw-heavy) * -1);
+}

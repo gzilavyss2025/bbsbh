@@ -156,7 +156,7 @@
 .simp__switch {
   display: flex;
 }
-.simp__switch .btn {
+.simp__switch .pnext-pick {
   flex: 1;
 }
 .simp__box {
@@ -283,7 +283,7 @@
   .simp__name {
     font-size: var(--fs-display-md);
   }
-  .simp__switch .btn {
+  .simp__switch .pnext-pick {
     flex: none;
     min-width: 7.5rem;
   }

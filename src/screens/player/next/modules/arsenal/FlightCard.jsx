@@ -128,7 +128,7 @@ export function FlightCard({ rows, season, throws }) {
         <output className="flight__clock">{s.toFixed(2)} s</output>
       </div>
       <div className="flight__bar">
-        {seq && <Button size="control" pressed={ghost} onClick={() => setGhost(!ghost)}>Gravity path</Button>}
+        {seq && <button type="button" className="pnext-pick" aria-pressed={ghost} onClick={() => setGhost(!ghost)}>Gravity path</button>}
         <div className="flight__row" role="group" aria-label="Speed">
           {SPEEDS.map(([v, name]) => (
             <button key={name} type="button" className="pnext-pick" aria-pressed={speed === v} onClick={() => setSpeed(v)}>{name}</button>
