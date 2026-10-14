@@ -289,11 +289,6 @@
   border-color: var(--accent-primary);
   background: var(--surface-inset);
 }
-.pcard__swatch {
-  display: block;
-  height: 3px;
-  border-radius: var(--radius-xs);
-}
 .pcard__tname {
   min-height: 2.2em;
   font-family: var(--font-display);

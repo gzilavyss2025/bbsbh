@@ -44,7 +44,7 @@ export function HalfInning({
   onFocusInfo,
   onStepInfo,
   onRunsSoFar,
-  onLiveState,
+  onLiveState, treatment,
 }) {
   // At-bat stepping (ADR-0016): a half being stepped through one plate
   // appearance at a time (the floating bar's "Next at-bat" button) has
@@ -386,7 +386,7 @@ export function HalfInning({
             teamName={battingSide === 'away' ? homeName : awayName}
             className={noticeClass({ tone: 'event', className: 'change--framed' })}
             label={nowPitchingLabel}
-            entering={entering}
+            entering={entering} treatment={treatment} side={battingSide === 'away' ? 'home' : 'away'}
           />
         )}
 
@@ -476,7 +476,7 @@ export function HalfInning({
                 battingName={battingSide === 'away' ? awayName : homeName}
                 battingTeamId={battingSide === 'away' ? awayId : homeId}
                 callouts={callouts}
-                vsTeam={vsTeam}
+                vsTeam={vsTeam} treatment={treatment}
                 highlightsMap={highlightsMap}
                 writing={writing}
                 stepCap={stepping ? revealedAtBatCount : null}

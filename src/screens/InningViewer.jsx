@@ -411,6 +411,7 @@ export function InningViewer({
         onReveal={commitReveal}
         callouts={callouts}
         vsTeam={vsTeam}
+        treatment={winProbTreatment}
         highlights={highlights}
         atBatCountFor={atBatCountFor}
         halfInProgress={idx === liveHalfIdx}

@@ -23,13 +23,17 @@
   overflow: hidden;
 }
 
-/* The name band, in the scorebug's ink and ripple. */
+/* The name band: the pitching club's bar when it has hand-set colours
+   (--bar-fill, --bar-accent and --bar-text, set on `.pcard` by
+   headerThemeStyle), else the scorebug's navy. The ripple is the scorebug's. */
 .pcard > .change {
+  /* component-reuse-exempt: the card's own name row (PitcherNotice's markup, a headshot beside a name), not a section heading SectionHead could draw */
   position: relative;
   isolation: isolate;
   padding: var(--space-2h) var(--space-3);
-  background: var(--ink-1);
-  color: var(--text-on-ink-cream);
+  background: var(--bar-fill, var(--ink-1));
+  border-bottom: 3px solid var(--bar-accent, transparent); /* raw-value-exempt: the themed bar's accent rule, as system/section-head.css */
+  color: var(--bar-text, var(--text-on-ink-cream));
 }
 .pcard > .change::before {
   content: '';
@@ -44,21 +48,20 @@
 }
 .pcard .change__shot {
   border-radius: 0;
-  border: var(--bw-heavy) solid var(--text-on-ink-cream);
+  border: var(--bw-heavy) solid var(--bar-text, var(--text-on-ink-cream));
 }
-.pcard .change__now {
-  color: var(--text-on-ink-soft);
+.pcard .change__now,
+.pcard .change__jersey,
+.pcard .change__hand {
+  color: var(--bar-text, var(--text-on-ink-soft));
 }
 .pcard .change__pitcher,
 .pcard .change__pitcher .plink {
-  color: var(--text-on-ink-cream);
+  color: var(--bar-text, var(--text-on-ink-cream));
   font-size: var(--fs-title-md);
 }
 .pcard .change__jersey {
-  color: var(--marker);
-}
-.pcard .change__hand {
-  color: var(--field-mint);
+  opacity: 0.85; /* raw-value-exempt: a dim step, not a colour */
 }
 
 /* Sections are tables and bands, full width. */
@@ -135,6 +138,33 @@
   background: var(--surface-inset);
   box-shadow: inset 0 -3px 0 var(--ink-0); /* raw-value-exempt: underline thickness */
 }
-.pcard__swatch {
-  border-radius: 0;
+
+/* A tile's head: the pitch's mark, then its code. Colour never works alone, so the
+   code rides beside the mark (docs/pitch-types.md, rule 3). The mark is the
+   fill with an ink outline, as on the player page's arsenal, so a pale pitch
+   colour still reads on paper. */
+.pcard__tilehead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+}
+.pcard__mark {
+  flex: none;
+}
+.pcard__mark path {
+  fill: var(--pitch, var(--text-caption));
+  stroke: var(--text-heading);
+  stroke-width: 1.4; /* raw-value-exempt: outline width in the glyph's own units */
+  stroke-linejoin: round;
+}
+.pcard__mark path.pcard__mark--ring {
+  fill: none;
+  stroke: var(--pitch, var(--text-caption));
+  stroke-width: 3; /* raw-value-exempt: ring width in the glyph's own units */
+}
+.pcard__code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
 }
