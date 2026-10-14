@@ -2,7 +2,7 @@
 // Ratings are the public/data/ovr shard rows of four real players, read 2026-10-14.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { headerExtras } from '../src/screens/player/next/heroData.js'
+import { headerExtras, tierLine } from '../src/screens/player/next/heroData.js'
 
 const bio = { id: 1 }
 const TURANG = { ovr: 67, bars: { contact: 63, power: 55, speed: 74, fielding: 65 }, seasons: [2026, 2025, 2024, 2023] }
@@ -62,4 +62,12 @@ test('a minor leaguer off the Top 100 has no POT', () => {
   const [g] = headerExtras({ bio }, { hitting: { ovr: 38, level: 13 } }).ratings
   assert.equal(g.minor.pot, null)
   assert.equal(g.minor.marks.pot, null)
+})
+
+test('a tapped bar reads its own tier, found by key', () => {
+  const [g] = headerExtras({ bio }, { hitting: TURANG }).ratings
+  assert.equal(tierLine(g.rows, 'speed'), 'Speed 74 is All-Star level on its own.')
+  assert.equal(tierLine(g.rows, 'power'), 'Power 55 is Starter level on its own.')
+  assert.equal(tierLine(g.rows, 'stuff'), null)
+  assert.equal(tierLine(g.rows, null), null)
 })

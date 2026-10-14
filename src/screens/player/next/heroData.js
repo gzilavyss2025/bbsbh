@@ -28,5 +28,12 @@ export function headerExtras(core, ratings) {
   return x.nickname || x.rank || x.orgRank || x.education || views.length ? x : null
 }
 
+// The sentence a tapped bar reads (#2009): "Speed 74 is All-Star level on its own." Looked up by
+// key; null for no pick or a key the rows lack.
+export function tierLine(rows, key) {
+  const r = key && rows.find((x) => x.key === key)
+  return r ? `${r.label} ${r.value} is ${r.tier.name} level on its own.` : null
+}
+
 // Overview extras (#1884): a stat block's league-rank chips, postseason row and other-level rows.
 export const hasExtras = (b) => Boolean(b.ranks?.length || b.postseason || b.otherLevels?.length)

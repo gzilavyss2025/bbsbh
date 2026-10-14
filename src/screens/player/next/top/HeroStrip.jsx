@@ -4,6 +4,7 @@ import { Button } from '../../../../components/ui/control/Button.jsx'
 import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 import { CONSTANTS } from '../../../../api/ovr/rating.js'
 import { TIERS } from '../../../../lib/ovr/tiers.js'
+import { tierLine } from '../heroData.js'
 import '../../../../styles/ovr/card.css'
 
 const WORD = { hitting: 'Batting', pitching: 'Pitching' }
@@ -23,7 +24,7 @@ function Ladder({ view }) {
   )
 }
 
-// A minor leaguer's level meter: mint to his OVR, an ink line at his level's cap, hatching
+// A minor leaguer's level meter: mint to his OVR, a dashed line at his level's cap, hatching
 // out to POT. A mark the data lacks draws nothing.
 function Meter({ view }) {
   const { pot, levelLabel, marks } = view.minor
@@ -49,13 +50,14 @@ function Meter({ view }) {
 // A two-way player gets a Batting | Pitching switch, batting first; the pick is local, stored nowhere.
 export function HeroStrip({ id, ratings, open }) {
   const [group, setGroup] = useState(ratings[0].group)
+  const [picked, setPicked] = useState(null)
   const view = ratings.find((r) => r.group === group) ?? ratings[0]
   return (
     <div id={id} className="pnext-ovr__strip" hidden={!open}>
       {ratings.length > 1 && (
         <Cluster className="pnext-ovr__switch" role="group" aria-label="Rating">
           {ratings.map((r) => (
-            <Button key={r.group} size="control" pressed={r.group === view.group} onClick={() => setGroup(r.group)}>{WORD[r.group]}</Button>
+            <Button key={r.group} size="control" pressed={r.group === view.group} onClick={() => { setGroup(r.group); setPicked(null) }}>{WORD[r.group]}</Button>
           ))}
         </Cluster>
       )}
@@ -63,7 +65,8 @@ export function HeroStrip({ id, ratings, open }) {
         <Ladder view={view} />
         {view.minor ? <Meter view={view} /> : (
           <div className="pnext__ovr">
-            <OvrBars rows={view.rows} />
+            <OvrBars rows={view.rows} picked={picked} onPick={setPicked} />
+            <p className="pnext-ovr__read" aria-live="polite">{tierLine(view.rows, picked) ?? 'Tap a rating to read its tier.'}</p>
             {view.seasons && <p className="pnext__attr">{view.seasons}</p>}
           </div>
         )}
