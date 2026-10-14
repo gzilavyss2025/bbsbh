@@ -32,8 +32,8 @@ nothing is fetched and then hidden.
 
 | Slice | Content | State |
 | --- | --- | --- |
-| S0 | Plan, `?look=new` flag, page shell | in progress |
-| S1 | Hero, fact grid, umpires, jump bar, dock | |
+| S0 | Plan, `?look=new` flag, page shell | done |
+| S1 | Hero, fact grid, umpires, jump bar, dock | done |
 | S2 | Starting pitcher card, pitch mix, scene | |
 | S3 | Batting order, bench, roster fallback | |
 | S4 | Defensive field, former teammates | |

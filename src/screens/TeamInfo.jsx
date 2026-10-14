@@ -982,7 +982,7 @@ const NOTES_POLL_MS = 5 * 60 * 1000
 const ET_TODAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' })
 const etToday = () => ET_TODAY.format(new Date())
 
-function GameNotesButton({ feed, side }) {
+export function GameNotesButton({ feed, side }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   const info = useMemo(() => selectGameInfo(feed), [feed])
   const isMlb = (meta.sportId ?? 1) === 1
@@ -1029,7 +1029,7 @@ function GameNotesButton({ feed, side }) {
 // Linked to his manager page once fetchManager resolves a personId (older
 // cached data / a fetch that raced ahead of that field lands here without
 // one — ManagerLink degrades to plain text rather than a dead link).
-function managerFact(manager) {
+export function managerFact(manager) {
   if (!manager) return null
   return (
     // The fact PRINTS surname-first; the address takes spoken order
@@ -1073,7 +1073,7 @@ export function RefreshButton({ onReload, loading, lastUpdated, className = '' }
   )
 }
 
-function Fact({ label, value, aside }) {
+export function Fact({ label, value, aside }) {
   const text = value || <span className="fact__na">—</span>
   return (
     <div className="fact">
@@ -1107,7 +1107,7 @@ export function CrowdIcon() {
 // "full breakdown" modal since there's nothing more to show. MiLB parks and
 // any venue not on file, or an attendance value that won't parse, degrade to
 // the plain read-only Fact, per the app's graceful-degradation rule.
-function AttendanceFact({ venue, attendance }) {
+export function AttendanceFact({ venue, attendance }) {
   const [open, setOpen] = useState(false)
   const park = ballparkFor(venue)
   const count = attendance ? Number(attendance.replace(/,/g, '')) : null
@@ -1145,7 +1145,7 @@ function AttendanceFact({ venue, attendance }) {
 // venue name becomes a button that opens the to-scale field diagram, plus
 // league-ranked dimensions for an MLB park. Any venue not on file degrades to
 // the plain read-only Fact, per the app's graceful-degradation rule.
-function BallparkFact({ venue, venueId, gameDate }) {
+export function BallparkFact({ venue, venueId, gameDate }) {
   const [open, setOpen] = useState(false)
   if (!ballparkFor(venue, venueId) && !resolveBallparkLayout({ venueId, venueName: venue, gameDate })) {
     return <Fact label="Ballpark" value={venue} />
