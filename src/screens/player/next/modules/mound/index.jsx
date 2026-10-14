@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import '../../../../../styles/player-next/pitcher/mound.css'
 import { fetchWorkload } from '../../../../../api/workload.js'
+import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
@@ -45,13 +46,12 @@ function MoundCard({ view, once }) {
     <div ref={ref} className={`mound${phase === 'wait' ? ' mound--pre' : phase === 'play' ? ' mound--in' : ''}`}>
       <div className="mound__top">
         {view.tabs.length > 1 && (
-          <div role="group" aria-label="How the card reads" className="mound__tabs">
-            {view.tabs.map((t) => (
-              <button key={t} type="button" className="pnext-pick" aria-pressed={t === tab} onClick={() => setPicked(t)}>
-                {TAB_LABEL[t]}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            label="How the card reads"
+            value={tab}
+            onChange={setPicked}
+            options={view.tabs.map((t) => ({ value: t, label: TAB_LABEL[t] }))}
+          />
         )}
         {view.roleWord !== TAB_LABEL[tab] && <span className="mound__role">{view.roleWord}</span>}
       </div>
