@@ -23,9 +23,12 @@ test('era is 9 * sum(ER) / sum(IP) with IP in thirds', () => {
   assert.equal(leagueAveragesOf({ hitting: [], pitching: [arm(3, '9.2')] }).era, 2.79)
 })
 
+// The extra rates of the Advanced card (#2003); all null when the feed has no source.
+const NO_RATES = { k: null, bb: null, kbb: null, bbk: null, iso: null, babip: null, ppa: null, ops: null }
+
 test('a missing pitching split gives era null, not zero, and keeps avg', () => {
-  assert.deepEqual(leagueAveragesOf({ hitting: [bat(1, 4)], pitching: [] }), { avg: 0.25, era: null })
-  assert.deepEqual(leagueAveragesOf({ hitting: [bat(1, 4)] }), { avg: 0.25, era: null })
+  assert.deepEqual(leagueAveragesOf({ hitting: [bat(1, 4)], pitching: [] }), { avg: 0.25, era: null, ...NO_RATES })
+  assert.deepEqual(leagueAveragesOf({ hitting: [bat(1, 4)] }), { avg: 0.25, era: null, ...NO_RATES })
 })
 
 test('a season with no earned runs recorded (1901 feed) is null, not 0.00', () => {
@@ -39,12 +42,81 @@ test('earned runs far below runs (1925 feed: 4,789 ER of 18,659 R) is null, not 
 })
 
 test('a missing hitting split gives avg null', () => {
-  assert.deepEqual(leagueAveragesOf({ hitting: [bat(0, 0)], pitching: [arm(30, '90.0')] }), { avg: null, era: 3 })
+  assert.deepEqual(leagueAveragesOf({ hitting: [bat(0, 0)], pitching: [arm(30, '90.0')] }), { avg: null, era: 3, ...NO_RATES })
   assert.equal(leagueAveragesOf({}).avg, null)
 })
 
+// Two clubs, summed by hand. Hitting: PA 1000, SO 220, BB 90, H 230, TB 380, AB 900,
+// HR 30, SF 10, pitches 3800. Pitching (the opponents): AB 900, H 220, BB 95, HBP 8, SF 9, TB 350.
+const club = (stat) => ({ stat })
+const hit = [
+  club({ plateAppearances: 400, strikeOuts: 100, baseOnBalls: 40, hits: 90, totalBases: 150, atBats: 360, homeRuns: 10, sacFlies: 4, numberOfPitches: 1500 }),
+  club({ plateAppearances: 600, strikeOuts: 120, baseOnBalls: 50, hits: 140, totalBases: 230, atBats: 540, homeRuns: 20, sacFlies: 6, numberOfPitches: 2300 }),
+]
+const pit = [
+  club({ atBats: 500, hits: 120, baseOnBalls: 50, hitByPitch: 4, sacFlies: 5, totalBases: 190, inningsPitched: '100.0', earnedRuns: 40, runs: 45 }),
+  club({ atBats: 400, hits: 100, baseOnBalls: 45, hitByPitch: 4, sacFlies: 4, totalBases: 160, inningsPitched: '80.0', earnedRuns: 35, runs: 40 }),
+]
+
+test('the Advanced card rates are weighted league sums, rounded at the end', () => {
+  const r = leagueAveragesOf({ hitting: hit, pitching: pit })
+  assert.equal(r.k, 0.22) // 220 / 1000
+  assert.equal(r.bb, 0.09) // 90 / 1000
+  assert.equal(r.kbb, 0.13) // K% - BB%
+  assert.equal(r.bbk, 0.41) // 90 / 220 = 0.409
+  assert.equal(r.iso, 0.167) // (380 - 230) / 900
+  assert.equal(r.babip, 0.303) // (230 - 30) / (900 - 220 - 30 + 10) = 0.303
+  assert.equal(r.ppa, 3.8) // 3800 / 1000
+  // OBP (220+95+8)/(900+95+8+9) = 0.3191, SLG 350/900 = 0.3889 -> 0.708
+  assert.equal(r.ops, 0.708)
+})
+
+test('a rate with no source is null: no PA, no pitch count, no total bases', () => {
+  const r = leagueAveragesOf({ hitting: [club({ hits: 90, atBats: 360 })], pitching: [] })
+  for (const key of Object.keys(NO_RATES)) assert.equal(r[key], null, key)
+  // Pitches missing leaves the other rates alone.
+  const noPitches = leagueAveragesOf({ hitting: [club({ ...hit[0].stat, numberOfPitches: undefined })] })
+  assert.equal(noPitches.ppa, null)
+  assert.ok(noPitches.k > 0)
+})
+
+// A stat only some clubs carry is a league figure only when 90% of the clubs carry it (#2035 review).
+const copies = (n, stat) => Array.from({ length: n }, () => club(stat))
+const noK = { plateAppearances: 600, baseOnBalls: 50, hits: 140, atBats: 540, homeRuns: 20 }
+const withK = { ...noK, strikeOuts: 120 }
+
+test('K%, K-BB%, BB/K and BABIP use only clubs that count strikeouts; under 90% of the clubs gives null (1910: 9 of 16)', () => {
+  // 1913: all 16 count. 1910: 9 of 16 do, so the sum would divide by every club's PA.
+  assert.equal(leagueAveragesOf({ hitting: copies(16, withK) }).k, 0.2)
+  const part = leagueAveragesOf({ hitting: [...copies(9, withK), ...copies(7, noK)] })
+  for (const key of ['k', 'kbb', 'bbk', 'babip']) assert.equal(part[key], null, key)
+  assert.equal(part.bb, 0.083) // walks are counted by every club
+  // 15 of 16 is enough, and the club without strikeouts leaves the figure alone.
+  assert.equal(leagueAveragesOf({ hitting: [...copies(15, withK), club(noK)] }).k, 0.2)
+})
+
+test('pitch counts on part of the clubs: P/PA needs 90% of the clubs with a real count (3 or more a PA)', () => {
+  const real = { plateAppearances: 600, numberOfPitches: 2250 }
+  assert.equal(leagueAveragesOf({ hitting: [...copies(9, real), club({ plateAppearances: 500, numberOfPitches: 1 })] }).ppa, 3.75) // stray 1 left out
+  assert.equal(leagueAveragesOf({ hitting: [...copies(1, real), ...copies(2, { plateAppearances: 600 })] }).ppa, null)
+  // 1975-79: every club counts about 1.5 a PA.
+  assert.equal(leagueAveragesOf({ hitting: copies(10, { plateAppearances: 600, numberOfPitches: 900 }) }).ppa, null)
+})
+
+test('opponent OPS needs total bases from 90% of the clubs (1971: 1 whole club of 24 gave .606)', () => {
+  const whole = { atBats: 5000, hits: 1300, baseOnBalls: 400, hitByPitch: 30, sacFlies: 30, totalBases: 2000 }
+  const stray = { ...whole, totalBases: 12 } // a 1959 club: 12 TB on 1,300 H
+  assert.equal(leagueAveragesOf({ pitching: [...copies(9, whole), club(stray)] }).ops, leagueAveragesOf({ pitching: copies(1, whole) }).ops)
+  assert.equal(leagueAveragesOf({ pitching: [...copies(1, whole), ...copies(2, { atBats: 5000, hits: 1300 })] }).ops, null)
+})
+
+test('K-BB% goes negative when walks outnumber strikeouts', () => {
+  const r = leagueAveragesOf({ hitting: [club({ plateAppearances: 1000, strikeOuts: 90, baseOnBalls: 100 })] })
+  assert.equal(r.kbb, -0.01)
+})
+
 // --- reader ---------------------------------------------------------------
-const FILE = { lastSeason: 2025, seasons: { 1968: { avg: 0.237, era: 2.9 }, 1901: { avg: 0.267, era: null } } }
+const FILE = { lastSeason: 2025, seasons: { 1968: { avg: 0.237, era: 2.9, k: 0.158 }, 1901: { avg: 0.267, era: null } } }
 const live = {
   stats: [
     { group: { displayName: 'hitting' }, splits: [bat(50, 200)] },
@@ -58,13 +130,18 @@ globalThis.fetch = async (url) => {
   liveCalls += 1
   return { ok: true, json: async () => live }
 }
-const { leagueAverage, lastCompleteSeason } = await import('../src/api/player/leagueAverages.js')
+const { leagueAverage, leagueRates, lastCompleteSeason } = await import('../src/api/player/leagueAverages.js')
 
 test('reader reads the file; a null figure stays null', async () => {
   assert.equal(await leagueAverage(1968, 'hitting'), 0.237)
   assert.equal(await leagueAverage(1968, 'pitching'), 2.9)
   assert.equal(await leagueAverage(1901, 'pitching'), null)
   assert.equal(await lastCompleteSeason(), 2025)
+})
+
+test('leagueRates hands back the whole row, or null', async () => {
+  assert.equal((await leagueRates(1968)).k, 0.158)
+  assert.equal(await leagueRates(1890), null)
 })
 
 test('reader returns null for a season before the file and fetches nothing', async () => {
@@ -75,6 +152,8 @@ test('reader returns null for a season before the file and fetches nothing', asy
 test('the live season costs one request, cached for the session', async () => {
   assert.equal(await leagueAverage(2026, 'hitting'), 0.25)
   assert.equal(await leagueAverage(2026, 'pitching'), 3)
+  assert.equal(liveCalls, 1)
+  assert.equal((await leagueRates(2026)).avg, 0.25)
   assert.equal(liveCalls, 1)
 })
 
@@ -87,6 +166,27 @@ test('the shipped file has no clock, starts in 1901 and stays small', () => {
   assert.ok(file.seasons['1901'])
   assert.ok(file.seasons[file.lastSeason])
   assert.ok(text.length < 20_000)
+  // Every rate that is set is a real league figure (a partial feed once shipped OPS .32 and P/PA 2.2).
+  const range = { k: [0.03, 0.3], bb: [0.05, 0.15], bbk: [0.2, 2], iso: [0.05, 0.25], babip: [0.24, 0.34], ppa: [3, 4.5], ops: [0.55, 0.95] }
+  for (const [year, row] of Object.entries(file.seasons)) {
+    for (const [key, [lo, hi]] of Object.entries(range)) {
+      assert.ok(row[key] === null || (row[key] >= lo && row[key] <= hi), `${year} ${key} ${row[key]}`)
+    }
+  }
+  // The range alone let two partial-feed rows through (K% .05 in 1910-12, OPS .606 in 1971).
+  // OPS is OBP + AVG + ISO, so OPS - AVG - ISO is the league OBP, which stays near .31-.35 (.28-.37 allowed).
+  for (const [year, row] of Object.entries(file.seasons)) {
+    if (row.ops === null) continue
+    const obp = row.ops - row.avg - row.iso
+    assert.ok(obp > 0.28 && obp < 0.37, `${year} implied OBP ${obp.toFixed(3)}`)
+  }
+  // K% moves under .02 a year in the real data; a half-counted year jumps by .05.
+  let prev
+  for (const [year, row] of Object.entries(file.seasons)) {
+    if (row.k === null) continue
+    if (prev) assert.ok(Math.abs(row.k - prev.k) <= 0.02 * (year - prev.year), `${prev.year}-${year} K% ${prev.k} -> ${row.k}`)
+    prev = { year, k: row.k }
+  }
 })
 
 // --- the table cell -------------------------------------------------------
