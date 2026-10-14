@@ -7,6 +7,7 @@ import { openDb } from '../scripts/lib/db.js'
 import { aggregateGameFouls, exportFouls, exportFoulStore, foldGame, foulStatements, scopeOfGameType, wipeTeamPitchTypes } from '../scripts/gen-fouls.mjs'
 import { exportGameFouls } from '../scripts/lib/fouls/byCount.mjs'
 import { rebuildCommand, rebuildCounts } from '../scripts/lib/fouls/rebuild.mjs'
+import { pendingGames, sweepFouls } from '../scripts/lib/fouls/sweep.mjs'
 import { withGameFouls } from '../src/api/person/gameLog.js'
 import {
   fetchBatterGameFouls,
@@ -1053,4 +1054,56 @@ test('pitcherFoulLine and the league cells: byCount rides the line, null when th
   const byCount = { reach: zero(), fouls: zero(), swings: zero(), hit: zero(), walk: zero(), so: zero(), out: zero() }
   assert.equal(pitcherFoulLine({ pitchers: { 5: { g: 1, byCount } } }, 5).byCount, byCount)
   assert.equal(pitcherFoulLine({ pitchers: { 5: { g: 1 } } }, 5).byCount, null)
+})
+
+// #2024: a game whose feed fetch failed came back on no later run, because the
+// nightly window moved past it. The sweep now also takes the season's older
+// Final games that are not in the ledger.
+test('sweepFouls takes back a Final game whose fetch failed on the run before', async () => {
+  const db = await emptyDb()
+  foldInto(db, 1, '2026-07-17', 2026, 1)
+  const final = (gamePk, date) => ({ gamePk, officialDate: date, season: '2026', gameType: 'R', status: { abstractGameState: 'Final' } })
+  const schedule = { dates: [
+    { date: '2026-07-17', games: [final(1, '2026-07-17')] },
+    { date: '2026-07-18', games: [final(2, '2026-07-18')] },
+    { date: '2026-07-19', games: [final(4, '2026-07-19')] },
+    { date: '2026-10-01', games: [{ ...final(3, '2026-10-01'), status: { abstractGameState: 'Live' } }] },
+  ] }
+  // Game 2's fetch fails on the first run only; game 4's fails every time.
+  let up = false
+  let touched
+  const run = () =>
+    sweepFouls(db, {
+      schedule,
+      startDate: '2026-09-30', // games 2 and 4 are older than the trailing window
+      touched: (touched = new Set()),
+      ingest: async (g) => {
+        if (g.gamePk === 4 || !up) throw new Error('boom')
+        foldInto(db, g.gamePk, g.date, g.season, 2)
+      },
+    })
+  const inLedger = () => db.prepare('SELECT game_pk FROM foul_ingested_games ORDER BY game_pk').all().map((r) => r.game_pk)
+
+  const first = await run()
+  assert.deepEqual(first.failed.map((g) => g.gamePk).sort(), [2, 4])
+  assert.deepEqual(first.again, [], 'one failure does not fail the run')
+  assert.equal(touched.size, 0, 'a failed game writes no season (ADR-0086)')
+  assert.deepEqual(inLedger(), [1])
+
+  up = true
+  const second = await run()
+  assert.deepEqual(second.done, 2)
+  assert.deepEqual(inLedger(), [1, 2])
+  assert.equal(exportFouls(db, 2026).gamesIngested, 2)
+  assert.deepEqual(second.again.map((g) => g.gamePk), [4], 'game 4 failed twice in a row')
+  assert.deepEqual((await run()).pending.map((g) => g.gamePk), [4], 'only the failing game is left to sweep')
+})
+
+test('the older-than-window games are capped per run, and the window comes first', () => {
+  const final = (gamePk, date) => ({ gamePk, officialDate: date, season: '2026', gameType: 'R', status: { abstractGameState: 'Final' } })
+  const schedule = { dates: [
+    { date: '2026-07-18', games: [final(2, '2026-07-18'), final(3, '2026-07-18'), final(4, '2026-07-18')] },
+    { date: '2026-10-01', games: [final(5, '2026-10-01')] },
+  ] }
+  assert.deepEqual(pendingGames(schedule, new Set([3]), '2026-09-30', 1).map((g) => g.gamePk), [5, 2])
 })

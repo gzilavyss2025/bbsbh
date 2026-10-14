@@ -411,7 +411,11 @@ don't run these by hand.
   (`fouls` group, ADR-0021) APPEND-ONLY incremental sweep of Final MLB games'
   live feeds like `gen-umpire-accuracy.mjs` (`--days` trailing window;
   `--since`/`--until` backfill with checkpoints); `foul_ingested_games` is the
-  idempotency guard. Imports `FOUL_CODES`/`pitchCallCode` from
+  idempotency guard. Each run also takes up to 50 older Final games of the season that
+  are not in the ledger (the schedule starts on January 1), so a failed fetch comes back
+  (#2024, `scripts/lib/fouls/sweep.mjs`). A failed game goes into `foul_failed_games`;
+  the run exits non-zero only when the same game fails twice in a row. `--dry-run` lists
+  the Finals that are not in the ledger. Imports `FOUL_CODES`/`pitchCallCode` from
   `src/api/playbyplay.js` so live (`derive.js`) and precomputed tallies can't
   drift; two-strike detection carries the PRE-pitch count forward across
   non-PA plays (the `count`-is-post-pitch off-by-one). App reads it via
@@ -812,7 +816,8 @@ don't run these by hand.
   + `pitch-arsenal-starts/{season}/{NN}.json` (each pitcher's pitch mix per game, from the
   `pitch_arsenal_starts` table; `--clear-arsenal` re-walks it with the arsenal half, #1915),
   with the mean mph in tenths beside each in `{NN}.mph.json` (`pitch_arsenal_start_speed`, #1933)
-  + `pitch-command/{season}/{NN}.json` (the command grid), a `seasons.json` in each of the
+  + `pitch-command/{season}/{NN}.json` (the command grid) with its `league.json` (the Command card's
+  league block, #2004), a `seasons.json` in each of the
   three folders, and `pitch-arsenal-pool/all/{mlb,aaa}.json` (every season, summed from
   rows). A season store (ADR-0086, #1200): `season` leads both totals tables' keys, the
   dump splits by season (`pitch-arsenal-<season>.sql` frozen), the season and the
