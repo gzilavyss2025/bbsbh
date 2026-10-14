@@ -23,6 +23,8 @@ const ALLOWED = {
     ['player-next/both/contract.css', '.cnext__st--fa'], // free agency: not reached yet, the club may still sign him
     ['player-next/both/contract.css', '.cnext__bar--left'], // 2020: the contracted salary, not what the 60-game season paid
     ['player-next/both/contract.css', '.cnext__bar--gap'], // a season with a row and no figure
+    ['player-next/gamelog/milestones.css', '.milestones__proj'], // a projection: pencilled in, or paused with no year yet
+    ['player-next/history/awards.css', '.awmod__org.awmod__none'], // an award row whose club or org the feed does not name
     ['34-postseason.css', '.seed--bye'],
     ['77-express-lane.css', '.xl__chip--placed'],
     ['80-postseason-bracket.css', '.pbkt-mark--empty'],
@@ -30,6 +32,7 @@ const ALLOWED = {
     ['postseason/series-live.css', '.psseries__starter .projection'],
     ['postseason/primer-main.css', '.seriesribbon__game--ahead'], // a game still to play
     ['postseason/primer-main.css', '.seriesribbon__game--ifNecessary'], // a game that may not be played
+    ['player-next/history/moves.css', '.moves__noclub'], // a move whose club the feed does not name: a pencilled box, no mark
   ],
   // Waiting is provisional: an empty or loading slot that holds its place. The
   // EmptyState itself, sized tiles in a rail, round stamp slots (ADR-0035) and
@@ -72,7 +75,10 @@ const ALLOWED = {
   ],
   // A connector line that joins two things on a graph: it links, it does not
   // box anything. Dashed marks the link as a degree, not a fact (Gary, 2026-10-07).
-  connector: [['teammates/teammates.css', '.degrees__link']],
+  connector: [
+    ['teammates/teammates.css', '.degrees__link'],
+    ['player-next/history/teams.css', '.teamhist__trade'], // a trade chip between two orgs' badges: it links them, it boxes no club
+  ],
 }
 // scorecard/ is the sheet you score on: bespoke, out of scope (#1132).
 const BESPOKE = 'scorecard/'

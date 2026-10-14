@@ -1,0 +1,101 @@
+/* ==== MILESTONE WATCH (the new player page, #2017) ====
+   A countdown ledger: one row per mark, a bar from the last round number to the next.
+   Tokens only. The nearest row is inked in navy; the projection box is dashed: pencilled in. */
+
+/* layout-exempt: one column of ledger rows */
+.milestones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.milestones--loading {
+  min-height: 120px;
+}
+.milestones__group {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* layout-exempt: the ledger rows, one column */
+.milestones__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+/* layout-exempt: a row is a grid of line, bar, ends and the projection box */
+.milestones__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-1) var(--space-3);
+  align-items: end;
+}
+/* layout-exempt: value and gap, a wrapping row */
+.milestones__line {
+  grid-column: 1;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+}
+.milestones__now {
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.milestones__now abbr {
+  text-decoration: none;
+}
+.milestones__shy {
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
+.milestones__bar {
+  grid-column: 1;
+  height: var(--space-3);
+  background: var(--surface-inset);
+  border: var(--bw-heavy) solid var(--border-grid);
+}
+.milestones__fill {
+  display: block;
+  height: 100%;
+  background: var(--clay);
+}
+.milestones__row--ink .milestones__fill {
+  background: var(--navy);
+}
+.milestones__row--ink .milestones__now {
+  color: var(--navy);
+}
+.milestones__ends {
+  grid-column: 1;
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
+/* layout-exempt: the box's label over its value */
+.milestones__proj {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-heavy) dashed var(--border-grid);
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
+.milestones__proj b {
+  font-size: var(--fs-cell);
+  color: var(--text-heading);
+}
