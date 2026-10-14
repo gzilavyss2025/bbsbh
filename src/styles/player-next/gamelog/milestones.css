@@ -1,6 +1,6 @@
 /* ==== MILESTONE WATCH (the new player page, #2017) ====
    A countdown ledger: one row per mark, a bar from the last round number to the next.
-   Tokens only. The nearest row is inked in navy; an empty projection box shows a dash (dashed borders are for provisional marks only). */
+   Tokens only. The nearest row is inked in navy; the projection box is dashed: pencilled in. */
 
 /* layout-exempt: one column of ledger rows */
 .milestones {
@@ -91,7 +91,7 @@
   flex-direction: column;
   align-items: center;
   padding: var(--space-2) var(--space-3);
-  border: var(--bw-heavy) solid var(--border-grid);
+  border: var(--bw-heavy) dashed var(--border-grid);
   font-size: var(--fs-label);
   color: var(--text-caption);
 }
