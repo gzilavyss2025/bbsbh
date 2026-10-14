@@ -48,6 +48,8 @@
   stroke-width: 1.5;
   cursor: pointer;
   fill: var(--text-caption);
+  transform-box: fill-box;
+  transform-origin: center;
 }
 .fcontact__dot--sel {
   stroke: var(--text-heading);
@@ -61,6 +63,29 @@
 .fcontact__dot--line { fill: var(--batted-line); }
 .fcontact__dot--fly { fill: var(--batted-fly); }
 .fcontact__dot--pop { fill: var(--batted-pop); }
+/* The dots drop in (#2073; the canvas .tc-dt): scale 2.4 to 1 and fade in, staggered
+   across the set by --fcontact-f (0 to 1, set per dot). --play rides the a/b pair, so a
+   pick that swaps the class restarts the drop with no remount. --wait hides the dots
+   until the field is in view, so the drop is not spent off screen. */
+.fcontact__dots--wait .fcontact__dot {
+  opacity: 0;
+}
+.fcontact__dots--play .fcontact__dot {
+  animation: fcontact-drop-a calc(var(--dur-unfold) * 1.15) var(--ease-stamp) backwards;
+  animation-delay: calc(var(--fcontact-f, 0) * var(--dur-unfold) * 1.55);
+}
+.fcontact__dots--b .fcontact__dot {
+  animation-name: fcontact-drop-b;
+}
+@keyframes fcontact-drop-a {
+  from { opacity: 0; transform: scale(2.4); }
+}
+@keyframes fcontact-drop-b {
+  from { opacity: 0; transform: scale(2.4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fcontact__dots--play .fcontact__dot { animation: none; }
+}
 /* layout-exempt: the panel stacks its lines */
 .fcontact__detail {
   display: flex;

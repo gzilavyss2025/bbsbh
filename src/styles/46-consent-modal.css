@@ -269,6 +269,11 @@
   animation-play-state: paused;
   animation-delay: calc(var(--stagger-step) * var(--rise-i, 0) + var(--animlab-delay, 0s));
 }
+/* The Contact dots (#2073) stagger with their own --fcontact-f share of 620ms. */
+.animlab__frame .fcontact__dots--play .fcontact__dot {
+  animation-play-state: paused;
+  animation-delay: calc(var(--fcontact-f, 0) * var(--dur-unfold) * 1.55 + var(--animlab-delay, 0s));
+}
 .animlab__frame .lineup__row {
   animation-play-state: paused;
   animation-delay: calc(var(--row-i, 0) * 30ms + var(--animlab-delay, 0s));

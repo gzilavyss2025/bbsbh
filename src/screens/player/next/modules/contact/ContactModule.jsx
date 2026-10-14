@@ -8,6 +8,8 @@ import { BattedBallMix } from '../../../../../components/charts/BattedBallMix.js
 import { FactGrid } from '../../../../../components/ui/frame/FactGrid.jsx'
 import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
+import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
+import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg } from '../../../../../lib/ballpark/hitProjection.js'
 import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, mixRows, pickBalls } from './contactView.js'
@@ -46,6 +48,10 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const [color, setColor] = useState('result')
   const [type, setType] = useState(null)
   const [sel, setSel] = useState(null)
+  // The dots drop in the first time the field is in view (spec.md, the one-shot rule), and
+  // again on each view or type pick: `gen` swaps the a/b class, which restarts the drop.
+  const [gen, setGen] = useState(0)
+  const [fieldRef, phase] = useInViewOnce(viewKey(bio.id, 'contact'))
 
   const card = useMemo(() => {
     if (!data) return null
@@ -67,14 +73,22 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   }, [card, onCount])
 
   if (empty) return null
-  if (!card) return <div className="fcontact fcontact--wait" aria-busy="true"><p className="hint">Loading the contact…</p></div>
+  if (!card) return <div ref={fieldRef} className="fcontact fcontact--wait" aria-busy="true"><p className="hint">Loading the contact…</p></div>
 
   const cur = sel && shown.includes(sel) ? sel : null
   const detail = cur && ballDetail(cur)
   const row = mix?.find((r) => r.key === type)
-  const pick = (set, v) => { set(v); setSel(null) }
+  const pick = (set, v) => { set(v); setSel(null); setGen((g) => g + 1) }
+  // wait: the dots hide until the field shows. play: the first sighting this visit.
+  // gen > 0: a pick since. rest (seen before, Back in the same tab): the dots show still.
+  const dotsCls =
+    phase === 'wait'
+      ? 'fcontact__dots fcontact__dots--wait'
+      : phase === 'play' || gen
+        ? `fcontact__dots fcontact__dots--play fcontact__dots--${gen % 2 ? 'b' : 'a'}`
+        : 'fcontact__dots'
   return (
-    <div className="fcontact">
+    <div ref={fieldRef} className="fcontact">
       <div className="fcontact__bar">
         <div className="fcontact__chips" role="group" aria-label="Which balls">
           {VIEWS.map(([k, name]) => (
@@ -97,20 +111,23 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
               <path className="spray__foul" d={LINES} />
               <path className="spray__diamond" d={DIAMOND} />
             </g>
-            {marks.map(({ b, p }, i) => (
-              <circle
-                key={i}
-                className={`fcontact__dot fcontact__dot--${markKey(b, color)}${b === cur ? ' fcontact__dot--sel' : ''}`}
+            <g className={dotsCls}>
+                {marks.map(({ b, p }, i) => (
+                <circle
+                  key={i}
+                  className={`fcontact__dot fcontact__dot--${markKey(b, color)}${b === cur ? ' fcontact__dot--sel' : ''}`}
+                  style={{ '--fcontact-f': marks.length > 1 ? (i / (marks.length - 1)).toFixed(3) : '0' }}
                 cx={p.x}
-                cy={p.y}
-                r={b.result === 'hr' ? 11 : 9}
-                tabIndex={0}
-                role="button"
-                aria-label={`${ballDetail(b).eyebrow}${b.exitVelo == null ? '' : `, ${b.exitVelo} mph`}`}
-                onClick={() => setSel(b)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSel(b) } }}
-              />
-            ))}
+                  cy={p.y}
+                  r={b.result === 'hr' ? 11 : 9}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${ballDetail(b).eyebrow}${b.exitVelo == null ? '' : `, ${b.exitVelo} mph`}`}
+                  onClick={() => setSel(b)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSel(b) } }}
+                />
+              ))}
+            </g>
           </svg>
           <div className="fcontact__chips" role="group" aria-label="Highlight one kind of ball">
             {mix?.map((r) => (
