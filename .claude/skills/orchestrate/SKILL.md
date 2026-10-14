@@ -53,6 +53,7 @@ concurrent sessions, so measure.
 - **Do not poll in a loop.** Subscribe to child PRs. Use `send_later` (about 50
   minutes first, then about 4 hours). At most 6 checks per run, then report and
   stop. A `send_later` wake-up is the only way a run continues after the report.
+  An unattended run has its own cadence and limits (see "Unattended run").
 - Finish started work before you start new work.
 
 ## Models
@@ -247,7 +248,43 @@ handed it to you (its step 9). One prompt is a plan too. Work on the plan only.
    Ask him before you close the old PR.
 5. **Stop the plan on a failure.** A `NEEDS PARENT` line, or a PR that stays red after
    two tries, stops the later waves. Start nothing new. Tell him which prompt and why.
-6. Two prompts that share a file run one after the other, even in one wave.
+6. Two prompts that share a file run one after the other, even in one wave. A plan
+   may name append-only files (an import list, a lab entry list) that its prompts
+   may share in one wave; `/stack-prs` keeps both sides of those conflicts.
+
+## Unattended run (overnight)
+
+A run is unattended when the run plan has a **Standing answers** block, or when he
+says "overnight" or "unattended". He is asleep: the run must never wait on him.
+
+- **Never call `AskUserQuestion`.** Each place this skill says "ask" or "his yes"
+  reads the plan's Standing answers. Where none applies, take the safer choice that
+  lets other work go on, write `[DECISION: <question> — took <choice> because
+  <reason>]` in the ledger, and continue.
+- **Ledger:** the plan names where it goes (a comment thread on the plan's issue is
+  fine). Do not create an issue the plan does not name.
+- **Waves and merges:** when every PR of a wave is green, run `/stack-prs` with those
+  PR numbers (standing permission), let it merge, then start the next wave from the
+  new `origin/main`. Never stack a child on an unmerged PR.
+- **Checks:** no 6-check limit. While a child runs, keep one `send_later` check-in
+  about 40 minutes out, and act on PR events as they come. Stop at the plan's time
+  limit (default 12 hours from the start), or when every row is done or blocked.
+- **A failure blocks a chain, not the plan.** For a `NEEDS PARENT` line: if
+  `spec.md`, the brief or this skill answers it, `send_message` the answer once.
+  Otherwise, and for a PR that stays red after two tries or a child stalled on a
+  permission prompt, mark that row **blocked**, mark every row that depends on it
+  blocked, and keep running the rows that do not. Archive nothing that is blocked.
+- **Limit warning:** start nothing new and let running children finish. Set a
+  `send_later` for the reset time in `rate_limit_info` (or 60 minutes out if it has
+  none), then resume. Stop for good only at the time limit.
+- **Never, unattended:** close or edit an issue, change a label other than `wip`,
+  raise the cap, or start an Opus session the plan does not name.
+- **The morning report:** one comment on the plan's issue and your last message,
+  in the "Report to him" shape: rows merged (with the stack PRs), rows blocked and
+  why, every `[DECISION: ...]`, and the next wave to start.
+- **Before the run (his part):** start the orchestrator session in **Auto** mode.
+  Children inherit the parent's mode, and in Accept edits every git and npm call
+  waits for a tap.
 
 ## Reports and watching
 

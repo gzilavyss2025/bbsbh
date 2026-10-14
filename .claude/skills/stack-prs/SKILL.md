@@ -58,7 +58,9 @@ did, and end with a short list of what needs him.
      both must stay. If both sides changed the same logic and keeping one loses
      behavior, stop. Name both PRs and the file. Ask the maintainer with
      `AskUserQuestion`, one question at a time. If nobody is watching, stop and put
-     the question in the report as `[DECISION: ...]`.
+     the question in the report as `[DECISION: ...]`. In an unattended orchestrate
+     run, do not stop: leave the later PR out of the stack, put the question in the
+     report as `[DECISION: ...]`, and merge the rest.
    - **A PR that will not merge cleanly and is not worth the fight:** leave it out,
      and say which one and why. Do not drop it silently.
 4. **Check the stack.** If step 3 resolved no conflict, skip the local run: CI
@@ -99,7 +101,9 @@ did, and end with a short list of what needs him.
    Fix every finding that is real, in this order: correctness, spoiler, test
    integrity, then the rest. Keep each fix small. Commit fixes on the stack
    branch with a clear message. A finding that needs a design choice goes to the
-   maintainer, not into a guess. Run step 4 again after the last fix. Push.
+   maintainer, not into a guess. In an unattended orchestrate run,
+   take the PR it is in out of the stack, record the finding as `[DECISION: ...]`,
+   and go on with the rest. Run step 4 again after the last fix. Push.
 7. **Merge gates.** Check all of these on the current head of the stack PR. The
    merge waits until every one is true:
    - CI `lint-and-build` is green on the latest commit. If it is red, root-cause
