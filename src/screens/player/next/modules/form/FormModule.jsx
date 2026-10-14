@@ -6,6 +6,7 @@ import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
+import { PlayPauseIcon } from '../../parts/PlayPauseIcon.jsx'
 import { rate3 } from '../../../../../api/person/shared.js'
 import { FormChart } from './FormChart.jsx'
 import { StretchTable } from './StretchTable.jsx'
@@ -72,7 +73,7 @@ export default function FormModule({ bio, asOf, season, onEmpty, onCount }) {
             ))}
           </div>
           {!motionIsReduced() && (
-            <Button size="control" onClick={() => { if (!running && cursor >= last) setAt(0); setPlaying(!running) }}>
+            <Button size="control" icon={<PlayPauseIcon playing={running} />} onClick={() => { if (!running && cursor >= last) setAt(0); setPlaying(!running) }}>
               {running ? 'Pause' : 'Play the season'}
             </Button>
           )}
