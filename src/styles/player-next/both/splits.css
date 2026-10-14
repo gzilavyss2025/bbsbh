@@ -215,6 +215,43 @@
   line-height: var(--lh-loose);
 }
 
+/* ---- the entrance (board Splits: .part.pre, .part.in, grow) ----
+   Part (LineRows.jsx) sets .is-pre until the part is first in view in this page visit, then
+   .is-in. A part seen earlier, or under reduced motion, gets neither and rests drawn. Each bar
+   grows after --dur-fast plus one --stagger-step per row; Bar sets the row's --i. */
+.splitsmod__part.is-pre {
+  opacity: 0;
+}
+.splitsmod__part.is-in {
+  animation: splitsmod-rise calc(var(--dur-rise) * 2) var(--ease-unfold) backwards;
+}
+.splitsmod__part.is-in .splitsmod__fill {
+  animation: splitsmod-grow var(--dur-grow) var(--ease-unfold) calc(var(--dur-fast) + var(--stagger-step) * var(--i, 0)) backwards;
+}
+@keyframes splitsmod-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-3h));
+  }
+}
+@keyframes splitsmod-grow {
+  from {
+    transform: scaleX(0.02);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splitsmod__part.is-pre {
+    opacity: 1;
+  }
+  .splitsmod__part.is-in,
+  .splitsmod__part.is-in .splitsmod__fill {
+    animation: none;
+  }
+  .splitsmod__fill {
+    transition: none;
+  }
+}
+
 /* ---- the rows ---- */
 /* layout-exempt: every row kind is a fixed set of figure tracks beside one flexible name track */
 .splitsmod__grid {
@@ -344,6 +381,7 @@
   position: absolute;
   inset: 0;
   transform-origin: left center;
+  transition: transform var(--dur-grow) var(--ease-unfold);
 }
 .splitsmod__fill.is-base {
   background: var(--text-body);

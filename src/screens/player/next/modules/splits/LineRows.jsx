@@ -2,8 +2,22 @@
 // 'slash' (PA or BF, AVG/OBP/SLG, the OPS bar, HR, K%, BB%) and 'era' (G, IP, the ERA bar, K, BB).
 // A row is a line of splitsView.js; the bar is drawn from its `fill` and `tick`.
 import { HomePlateIcon } from '../../../../../components/badges/UmpireTierGlyph.jsx'
+import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
 
 const DASH = '—'
+
+// One of the card's parts. It rises the first time it comes into view in this page visit, and
+// its bars grow then (docs/motion.md, "The one-shot gate"). A part seen earlier, or under reduced
+// motion, rests drawn. `once` is the key the hook remembers: `<playerId>:splits-<group>:<part>`.
+export function Part({ once, wide, label, children }) {
+  const [ref, phase] = useInViewOnce(once)
+  const motion = phase === 'wait' ? ' is-pre' : phase === 'play' ? ' is-in' : ''
+  return (
+    <section ref={ref} className={`splitsmod__part${wide ? ' splitsmod__part--wide' : ''}${motion}`} aria-label={label}>
+      {children}
+    </section>
+  )
+}
 
 // Best and weakest in a group: the umpire pages' home plate, solid green or solid clay (splits.css).
 export function Flag({ weak }) {
@@ -46,12 +60,12 @@ export function Head({ layout, title, group, vs, dr, as: Title = 'span' }) {
 }
 
 // The OPS or ERA bar of one row: the fill, the baseline tick, the figure, the delta and the thin tag.
-function Bar({ line, metric }) {
+function Bar({ line, metric, i = 0 }) {
   const figure = metric === 'era' ? line.era : line.ops
   return (
     <span className="splitsmod__ops">
       <span className={`splitsmod__track${line.none ? ' is-none' : ''}`}>
-        {line.fill && <span className={`splitsmod__fill is-${line.fill.kind}`} style={{ transform: `scaleX(${line.fill.scale})` }} />}
+        {line.fill && <span className={`splitsmod__fill is-${line.fill.kind}`} style={{ transform: `scaleX(${line.fill.scale})`, '--i': i }} />}
         {line.tick != null && <span className="splitsmod__tick" style={{ left: `${line.tick}%` }} />}
       </span>
       <span className="splitsmod__fig">{figure}</span>
@@ -63,7 +77,7 @@ function Bar({ line, metric }) {
 
 // The cells of one row. `read` (the line's sentence) is the row's accessible text; a door row
 // names itself through its button instead, so it passes `quiet`.
-export function Cells({ line, layout, quiet }) {
+export function Cells({ line, layout, quiet, i = 0 }) {
   const has = !line.none
   const cell = (v) => (has && v != null ? v : DASH)
   return (
@@ -80,7 +94,7 @@ export function Cells({ line, layout, quiet }) {
         <>
           <span className="splitsmod__cell">{line.g ?? DASH}</span>
           <span className="splitsmod__cell">{cell(line.ip)}</span>
-          <Bar line={line} metric="era" />
+          <Bar line={line} metric="era" i={i} />
           <span className="splitsmod__cell">{cell(line.k)}</span>
           <span className="splitsmod__cell">{cell(line.bb)}</span>
         </>
@@ -91,7 +105,7 @@ export function Cells({ line, layout, quiet }) {
             {cell(line.avg)}
             <span className="splitsmod__wide">{has ? line.rest : ''}</span>
           </span>
-          <Bar line={line} metric="ops" />
+          <Bar line={line} metric="ops" i={i} />
           <span className="splitsmod__cell">{cell(line.hr)}</span>
           <span className="splitsmod__cell">{cell(line.k)}</span>
           <span className="splitsmod__cell">{cell(line.bb)}</span>
@@ -101,10 +115,10 @@ export function Cells({ line, layout, quiet }) {
   )
 }
 
-export function Row({ line, layout, base, dr }) {
+export function Row({ line, layout, base, dr, i = 0 }) {
   return (
     <div className={`splitsmod__row splitsmod__grid splitsmod__grid--${layout}${dr ? ' is-dr' : ''}${base ? ' is-base' : ''}`}>
-      <Cells line={line} layout={layout} />
+      <Cells line={line} layout={layout} i={i} />
     </div>
   )
 }
