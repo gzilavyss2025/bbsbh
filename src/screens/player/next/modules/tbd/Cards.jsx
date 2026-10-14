@@ -4,7 +4,6 @@ import { PlayerHighlightsRail } from '../../../../../components/player/PlayerHig
 import { PlayerPhotosRail } from '../../../../../components/player/PlayerPhotosRail.jsx'
 import { CommandReceivedCard } from '../../../../../components/playerstats/CommandReceivedCard.jsx'
 import { FoulCard } from '../../../../../components/playerstats/FoulCard.jsx'
-import { TransactionTimeline } from '../../../../../components/transactions/TransactionTimeline.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { Part } from './Part.jsx'
 import {
@@ -13,7 +12,6 @@ import {
   inMajors,
   photoGamesFor,
   timelineFor,
-  transactionsFor,
 } from './tbdData.js'
 
 // Today's cards, each as the live tab draws them (PlayerAnalyticsTab, PlayerHistoryTab and
@@ -64,17 +62,6 @@ export const CARDS = {
       has={(t) => t?.entries?.length}
     >
       {(t) => <CareerTimeline entries={t.entries} />}
-    </Part>
-  ),
-  transactions: ({ p }) => (
-    <Part
-      id="transactions"
-      hide={p.hide}
-      load={() => transactionsFor(p.bio, p.asOf)}
-      deps={[p.bio.id, p.asOf]}
-      has={(t) => t?.rows?.length}
-    >
-      {(t) => <TransactionTimeline rows={t.rows} />}
     </Part>
   ),
   media: Media,
