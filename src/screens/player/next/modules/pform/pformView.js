@@ -37,6 +37,8 @@ const dp = (d, k) => {
 export const METRICS = {
   era: { label: 'ERA', digits: 2, better: 'down', step: 1, format: (v) => v.toFixed(2) },
   kPct: { label: 'K%', digits: 1, better: 'up', step: 5, format: (v) => `${+v.toFixed(1)}%` },
+  // Velocity (#1933) is offered only once a pitcher has a speed on file (withSpeed). It has no season line.
+  mph: { label: 'Velocity', digits: 1, better: 'up', step: 1, format: (v) => `${v.toFixed(1)} mph` },
 }
 
 // 'SP' or 'RP' (a closer reads as a reliever) from the log's totals before `asOf`, or null with
@@ -88,9 +90,12 @@ const extreme = (points, k, up) => points.reduce((m, p, i) => ((up ? p[k] > poin
 export function chartOf(view, metric) {
   const { better, step, format } = METRICS[metric]
   const up = better === 'up'
-  const { points } = view
+  // A point with no value (a window with no speed) is left off the chart; `idx` keeps its place in the card.
+  const idx = view.points.flatMap((p, i) => (p[metric] == null ? [] : [i]))
+  const points = idx.map((i) => view.points[i])
   return {
     points: points.map((p) => ({ ...p, v: p[metric] })),
+    idx,
     season: view.season?.[metric] ?? null,
     better,
     step,
@@ -98,6 +103,20 @@ export function chartOf(view, metric) {
     best: extreme(points, metric, up),
     worst: extreme(points, metric, !up),
   }
+}
+
+// The games whose speeds the velocity series needs: those inside the first window on, none other.
+export const shownGames = (view) => view.games.slice(view.starts[0])
+
+// The view with a `mph` on each point: the mean of the primary-fastball speeds in its window, or
+// null when none of its games has one. `bySpk` maps gamePk to mph or null. Null with no speed at all.
+export function withSpeed(view, bySpk) {
+  const mean = (a) => (a.length ? a.reduce((t, x) => t + x, 0) / a.length : null)
+  const points = view.points.map((p, k) => ({
+    ...p,
+    mph: mean(view.games.slice(view.starts[k], view.ends[k] + 1).map((g) => bySpk[g.game?.gamePk]).filter((x) => x != null)),
+  }))
+  return points.some((p) => p.mph != null) ? { ...view, points } : null
 }
 
 // The card under the chart's title at point i: the big figure, the game, the gap to the season.
@@ -110,7 +129,7 @@ export function cursorText(view, i, metric) {
   const rounded = (v) => Number(v.toFixed(digits))
   const gap = (d) => (metric === 'era' ? dp(d, digits) : `${dp(d, digits)} pts`)
   return {
-    big: format(p[metric]),
+    big: p[metric] == null ? '—' : format(p[metric]),
     line1: [i === points.length - 1 && 'Latest', `${starter ? 'Start' : 'Game'} ${ends[i] + 1}`, monthDayName(p.date), `${p.isHome ? 'vs' : '@'} ${p.opp}`, p.summary]
       .filter(Boolean)
       .join(' · '),
@@ -147,7 +166,8 @@ function row(key, name, sub, games, at = null) {
 // The table under the chart: the stretch at the cursor i, the season, the best and the worst.
 export function stretchRows(view, i, metric) {
   const { games, regular, starts, ends, starter } = view
-  const { best, worst } = chartOf(view, metric)
+  const chart = chartOf(view, metric)
+  const [best, worst] = [chart.idx[chart.best], chart.idx[chart.worst]]
   const span = (k) => games.slice(starts[k], ends[k] + 1)
   const sub = (k) => {
     const g = span(k)
