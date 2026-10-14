@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react'
-import { AwardsLedger } from '../../../../../components/player/AwardsLedger.jsx'
 import { CareerTimeline } from '../../../../../components/player/CareerTimeline.jsx'
 import { PlayerHighlightsRail } from '../../../../../components/player/PlayerHighlightsRail.jsx'
 import { PlayerPhotosRail } from '../../../../../components/player/PlayerPhotosRail.jsx'
@@ -9,7 +8,6 @@ import { TransactionTimeline } from '../../../../../components/transactions/Tran
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { Part } from './Part.jsx'
 import {
-  awardsFor,
   commandReceivedCardFor,
   foulsFor,
   inMajors,
@@ -57,11 +55,6 @@ function Media({ p }) {
 }
 
 export const CARDS = {
-  awards: ({ p }) => (
-    <Part id="awards" hide={p.hide} load={() => awardsFor(p.bio, p.asOf)} deps={[p.bio.id, p.asOf]}>
-      {(ledger) => <AwardsLedger ledger={ledger} />}
-    </Part>
-  ),
   timeline: ({ p }) => (
     <Part
       id="timeline"

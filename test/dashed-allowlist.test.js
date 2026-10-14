@@ -29,6 +29,7 @@ const ALLOWED = {
     ['player-next/both/contract.css', '.cnext__bar--left'], // 2020: the contracted salary, not what the 60-game season paid
     ['player-next/both/contract.css', '.cnext__bar--gap'], // a season with a row and no figure
     ['player-next/gamelog/milestones.css', '.milestones__proj'], // a projection: pencilled in, or paused with no year yet
+    ['player-next/history/awards.css', '.awmod__org.awmod__none'], // an award row whose club or org the feed does not name
     ['34-postseason.css', '.seed--bye'],
     ['73-spray-map.css', '.spray__chip--thin'],
     ['77-express-lane.css', '.xl__chip--placed'],

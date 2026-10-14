@@ -1,0 +1,22 @@
+/* The Awards module (#2018): one ledger row per award. */
+.awmod > * + * { margin-top: var(--space-3); }
+.awmod--wait { min-height: 120px; }
+.awmod__award + .awmod__award { padding-top: var(--space-3); border-top: var(--bw-hair) solid var(--border-hairline); }
+.awmod__head { display: flex; align-items: baseline; gap: var(--space-2); margin: 0; }
+.awmod__name { font-family: var(--font-display); font-weight: var(--w-bold); font-size: var(--fs-h3); line-height: var(--lh-title); color: var(--text-heading); }
+.awmod__count { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: var(--fs-compact); font-weight: var(--w-semibold); color: var(--text-muted); }
+.awmod__tier { margin-left: auto; font-family: var(--font-display); font-size: var(--fs-label); font-weight: var(--w-bold); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
+.awmod__rows { list-style: none; margin: var(--space-1) 0 0; padding: 0; }
+/* layout-exempt: a fixed three-column ledger row (year, club, org) */
+.awmod__row { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: var(--space-2); padding: var(--space-1h) 0; border-top: var(--bw-hair) solid var(--border-grid); font-size: var(--fs-small); color: var(--text-body); }
+.awmod__when { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: var(--w-semibold); }
+.awmod__club { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.awmod__mark { flex: none; height: 17px; width: auto; max-width: 26px; object-fit: contain; }
+.awmod__org { min-width: 36px; padding: 0 var(--space-1); border: var(--bw-hair) solid var(--border-rule); border-radius: var(--radius-xs); background: var(--surface-inset); font-family: var(--font-mono); font-size: var(--fs-cell); font-weight: var(--w-semibold); letter-spacing: var(--ls-caps); text-align: center; color: var(--text-muted); }
+/* No club or org in the feed: a pencilled-in dash, never a guess. */
+.awmod__none { color: var(--graphite-soft); }
+.awmod__org.awmod__none { border-style: dashed; background: transparent; }
+.awmod__rest { list-style: none; margin: 0; padding: var(--space-2) 0 0; border-top: var(--bw-hair) solid var(--border-rule); }
+/* layout-exempt: the date line wraps under the name on a narrow card */
+.awmod__resti { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-2); padding: var(--space-1h) 0; border-bottom: var(--bw-hair) solid var(--border-grid); font-size: var(--fs-small); color: var(--text-body); }
+.awmod__restw { flex-basis: 100%; font-family: var(--font-mono); font-size: var(--fs-cell); color: var(--graphite-soft); }

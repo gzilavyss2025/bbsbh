@@ -18,8 +18,8 @@ test('Career holds nothing here: Prospect rankings moved to #1927', () => {
   assert.deepEqual(tbdCards('career', 'hitting', bat), [])
 })
 
-test('History: awards, team history, transactions, media, once per player', () => {
-  const all = ['awards', 'timeline', 'transactions', 'media']
+test('History: team history, transactions, media, once per player (Awards has its own module)', () => {
+  const all = ['timeline', 'transactions', 'media']
   assert.deepEqual(tbdCards('history', 'hitting', bat), all)
   assert.deepEqual(tbdCards('history', 'pitching', arm), all)
   assert.deepEqual(tbdCards('history', 'hitting', both), all)
