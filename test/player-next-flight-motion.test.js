@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import test from 'node:test'
+import { ruleBody, stripComments } from './helpers/css.js'
 import {
-  FLY_S, HOLD_S, PRE_S, flyStep, landedLoop, startLoop, stepLoop, stillCam, swingCam, viewAt, wrapAngle,
+  DRAG_PITCH, DRAG_YAW, FLY_S, HOLD_S, KEY_TURN, PITCH_MAX, PITCH_MIN, PRE_S,
+  dragTurn, flyStep, isDragStart, isPlainKey, landedLoop, needsFrame, seekLoop, setPlayingLoop, startLoop, stepLoop, stillCam, swingCam, turnView, viewAt, wrapAngle,
 } from '../src/screens/player/next/modules/arsenal/flightMotion.js'
 import { makeCamera, orbitOf, project } from '../src/screens/player/next/modules/arsenal/flightView.js'
 
@@ -94,5 +97,80 @@ test('orbitOf: a pose as an orbit gives the same camera as the pose', () => {
     const pb = project(b, [0, 2.4, 1.417])
     close(pa.x, pb.x, 1e-6)
     close(pa.y, pb.y, 1e-6)
+  }
+})
+
+test('the board turn rates and limits', () => {
+  assert.equal(DRAG_YAW, 0.0085)
+  assert.equal(DRAG_PITCH, 0.006)
+  assert.equal(PITCH_MIN, 0.02)
+  assert.equal(PITCH_MAX, 1.53)
+  assert.deepEqual(KEY_TURN.ArrowLeft, [0.08, 0])
+  assert.deepEqual(KEY_TURN.ArrowRight, [-0.08, 0])
+  assert.deepEqual(KEY_TURN.ArrowUp, [0, -0.06])
+  assert.deepEqual(KEY_TURN.ArrowDown, [0, 0.06])
+})
+
+test('dragTurn: right turns the yaw down, down turns the pitch up', () => {
+  const [yaw, pitch] = dragTurn(100, 50)
+  close(yaw, -0.85)
+  close(pitch, 0.3)
+})
+
+test('turnView: holds the pitch inside its limits and ends a swing', () => {
+  const swing = swingCam(stillCam(orbitOf('catcher')), orbitOf('park'))
+  const a = turnView(swing, 0.5, 10)
+  assert.equal(a.tw, 1)
+  assert.equal(a.view.pitch, PITCH_MAX)
+  close(a.view.yaw, orbitOf('catcher').yaw + 0.5)
+  assert.equal(turnView(a, 0, -10).view.pitch, PITCH_MIN)
+  // The side pose sits at pitch 0: a turn lifts it to the floor.
+  assert.equal(turnView(stillCam(orbitOf('side')), 0, 0).view.pitch, PITCH_MIN)
+  // Ended means a step does not move it.
+  assert.equal(flyStep(a, 0.1), a)
+})
+
+test('the stage takes a drag: grab cursor, vertical scroll kept, the house focus ring', () => {
+  const css = stripComments(readFileSync(new URL('../src/styles/player-next/pitcher/arsenal.css', import.meta.url), 'utf8'))
+  const turn = ruleBody(css, '.flight__turn')
+  assert.ok(turn, '.flight__turn exists')
+  assert.match(turn, /cursor:\s*grab;/)
+  assert.match(turn, /touch-action:\s*pan-y;/)
+  assert.match(ruleBody(css, '.flight__turn--drag') ?? '', /cursor:\s*grabbing;/)
+  assert.match(ruleBody(css, '.flight__turn:focus-visible') ?? '', /outline:\s*var\(--bw-heavy\) solid var\(--focus-ring\);/)
+})
+
+// A loop paused on the step where the hold ended still says `cycled`.
+const cycledPaused = { ...startLoop(false), cycled: true }
+
+test('setPlayingLoop and seekLoop clear cycled, so a paused loop does not fire onCycle every frame', () => {
+  assert.equal(setPlayingLoop(cycledPaused, false).cycled, false)
+  assert.equal(setPlayingLoop(cycledPaused, true).playing, true)
+  const sought = seekLoop(cycledPaused, 0.2)
+  assert.equal(sought.cycled, false)
+  assert.equal(sought.s, 0.2)
+  assert.equal(sought.playing, false)
+  assert.equal(sought.phase, 'fly')
+})
+
+test('needsFrame: only while on screen and something moves', () => {
+  const still = stillCam(orbitOf('catcher'))
+  const swing = swingCam(still, orbitOf('park'))
+  assert.equal(needsFrame(true, startLoop(true), still), true)
+  assert.equal(needsFrame(true, startLoop(false), swing), true)
+  assert.equal(needsFrame(true, startLoop(false), still), false)
+  assert.equal(needsFrame(false, startLoop(true), swing), false)
+})
+
+test('isDragStart: only the primary button of the primary pointer starts a drag', () => {
+  assert.equal(isDragStart({ button: 0, isPrimary: true }), true)
+  assert.equal(isDragStart({ button: 2, isPrimary: true }), false, 'a right-click opens the context menu')
+  assert.equal(isDragStart({ button: 0, isPrimary: false }), false, 'a second finger must not take the drag')
+})
+
+test('isPlainKey: a modified arrow is left to the browser (Alt+Left is Back)', () => {
+  assert.equal(isPlainKey({ altKey: false, metaKey: false, ctrlKey: false, shiftKey: false }), true)
+  for (const k of ['altKey', 'metaKey', 'ctrlKey', 'shiftKey']) {
+    assert.equal(isPlainKey({ altKey: false, metaKey: false, ctrlKey: false, shiftKey: false, [k]: true }), false, k)
   }
 })
