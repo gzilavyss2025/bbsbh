@@ -1,0 +1,878 @@
+<title>Lineup Page Redesign</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<style>
+/* app tokens + the live Former teammates stylesheet, so the real ladder component draws as on the site */
+__TOKCSS__
+/* Layout: a design-review board. Two 390px phone columns (away lineup, home lineup) under a short header,
+   then a three-note list of what changed. Every in-phone token is the repo's own paper-scorebook token. */
+:root{
+  --paper:#F6EFDC; --card:#FBF6E9; --inset:#FFFDF6; --cream:#F1E7CC; --grid:#EDE6D1;
+  --ink0:#0F1822; --ink1:#1B2A3A; --ink2:#3C4A5A; --graphite:#6B6558; --rule:#CBC1A7; --rule-soft:#DED6C0;
+  --field:#2F6E4F; --mint:#86BE98; --wash:#DDE7CF; --clay:#B4453A; --clay-soft:#F3E0DB; --marker:#F2C14E; --marker-deep:#C9A32C;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"Source Sans 3",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+  --off:5px;--field-outfield:#D8E6C9;--field-infield:#A6C393;--field-dirt:#D6AA83;--field-fence:#80A376;--field-chalk:#FFF8E9;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink1);font-family:var(--f-body);font-size:16px;line-height:1.4;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;
+  padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+.board{max-width:900px;margin:0 auto}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--field);outline-offset:2px}
+
+/* presentation header */
+.eyebrow{font:700 13px/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase;color:var(--clay);margin:0 0 8px}
+h1{font:700 44px/.95 var(--f-display);text-transform:uppercase;margin:0;color:var(--ink0);text-wrap:balance}
+.lede{max-width:62ch;margin:12px 0 0;color:var(--ink2)}
+.bar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:22px 0 26px}
+.seg{display:inline-flex;border:2px solid var(--ink0);background:var(--card)}
+.seg button{border:0;background:none;padding:9px 16px;font:700 14px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;min-height:40px}
+.seg button[aria-pressed=true]{background:var(--ink0);color:var(--cream)}
+.hint{font-size:14px;color:var(--graphite)}
+
+.frames{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start;justify-content:center}
+.frame{width:390px;max-width:100%;min-width:0}
+.route{display:flex;justify-content:space-between;gap:8px;margin:0 0 8px;font:500 12px/1.2 var(--f-mono);color:var(--graphite)}
+.route b{font:700 13px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ink0)}
+.screen{border:2px solid var(--ink0);background:var(--paper);padding:14px 14px 22px;display:flex;flex-direction:column;gap:18px;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;box-shadow:var(--off) var(--off) 0 var(--graphite)}
+
+/* site bar */
+.site{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.logo{display:flex;align-items:center;gap:7px;color:var(--clay);font:700 30px/1 var(--f-display);letter-spacing:.02em}
+.logo i{width:24px;height:24px;background:var(--clay);display:grid;place-items:center}
+.logo i:after{content:"";width:12px;height:12px;border-radius:50%;border:2px solid var(--paper)}
+.site nav{display:flex;gap:14px;font:700 13px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ink1)}
+.back{font:700 13px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ink1);margin:-6px 0 -4px}
+
+/* stamped card: heavy ink edge, hard offset shadow */
+.card{position:relative;background:var(--card);border:2px solid var(--ink0);box-shadow:var(--off) var(--off) 0 var(--ink0)}
+.band{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;background:var(--club);color:var(--onbar);border-bottom:3px solid var(--club2)}
+.band{position:relative;isolation:isolate}
+.band:before,.band:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+.band:before{background:
+  repeating-radial-gradient(circle at 105% 130%,rgba(255,255,255,.2) 0 1px,transparent 1px 7px),
+  repeating-radial-gradient(circle at -5% -40%,rgba(0,0,0,.22) 0 1px,transparent 1px 9px);
+  -webkit-mask-image:linear-gradient(100deg,#000 0%,rgba(0,0,0,.25) 50%,#000 100%);mask-image:linear-gradient(100deg,#000 0%,rgba(0,0,0,.25) 50%,#000 100%)}
+.band:after{background:linear-gradient(160deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,0) 50%,rgba(0,0,0,.14) 100%)}
+.band .mk{display:flex;align-items:center;gap:10px;min-width:0}.band .mk img{height:calc(26px * var(--mscale));width:auto;flex:none}
+.band .mk img.nlcs{height:34px}
+.band b{font:700 18px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase}
+.band .btag{font:700 13px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;border:2px solid var(--club2);color:var(--onbar);padding:3px 8px;white-space:nowrap}
+.hero{display:flex;gap:14px;align-items:center;padding:14px}
+.crest{position:relative;flex:none;width:92px;height:108px;border:2px solid var(--ink0);background:var(--tint);display:grid;place-items:center;overflow:hidden;isolation:isolate}
+/* Broadcast-style ripple: two sets of thin concentric rings from opposite corners, a light one and a dark one,
+   masked so they fade out toward the middle where the mark sits, over a soft diagonal sheen. */
+.crest:before,.crest:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+.crest:before{background:
+  repeating-radial-gradient(circle at 115% 100%,rgba(255,255,255,.28) 0 1px,transparent 1px 7px),
+  repeating-radial-gradient(circle at -15% 0%,rgba(0,0,0,.16) 0 1px,transparent 1px 9px);
+  -webkit-mask-image:linear-gradient(135deg,#000 0%,rgba(0,0,0,.25) 55%,#000 100%);mask-image:linear-gradient(135deg,#000 0%,rgba(0,0,0,.25) 55%,#000 100%)}
+.crest:after{background:linear-gradient(160deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 45%,rgba(0,0,0,.12) 100%)}
+.crest img{width:calc(100% * var(--tscale));height:calc(100% * var(--tscale));object-fit:contain;transform:translate(var(--tox),var(--toy))}
+.who{min-width:0;flex:1}
+.role{margin:0;font:700 13px/1 var(--f-display);letter-spacing:.18em;text-transform:uppercase;color:var(--ink0)}
+.who h2{margin:5px 0 0;font:700 34px/.92 var(--f-display);text-transform:uppercase;color:var(--ink0);text-wrap:balance}
+.vs{margin:8px 0 0;font:600 14px/1.2 var(--f-body);color:var(--ink2);text-transform:uppercase;letter-spacing:.04em}
+.stamp{margin-left:auto;flex:none;align-self:flex-end;background:var(--ink0);color:var(--cream);text-align:center;padding:8px 10px 7px;box-shadow:4px 4px 0 var(--ink2);min-width:74px}
+.stamp b{display:flex;align-items:baseline;justify-content:center;gap:4px;margin-top:6px;font:500 26px/1 var(--f-mono)}
+.stamp sup{font:700 12px/1 var(--f-display);letter-spacing:.14em;vertical-align:baseline}
+.stamp i{display:block;font:700 12px/1 var(--f-display);letter-spacing:.18em;font-style:normal;text-transform:uppercase;color:#B9B2A0}
+.heroSplit{display:flex;flex-direction:column}
+.facts,.umpgrid{display:grid;gap:1px;background:var(--rule);border-top:2px solid var(--ink0)}
+.facts{display:flex;flex-wrap:wrap}.facts .fact{flex:1 1 140px}
+.umpgrid{display:flex;flex-wrap:wrap}.umpgrid .fact{flex:1 1 92px}
+@media (min-width:741px){.wide .facts .fact{flex-basis:200px}.wide .umpgrid .fact{flex-basis:120px}}
+.fact{padding:9px 11px 10px;min-width:0;background:var(--card)}
+.fact small{display:block;font:700 12px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--graphite)}
+.fact span em{font-style:normal;color:var(--clay);font-weight:700}
+
+/* jump bar: the player page's .jumpbar. Heavy ink rules, square 44px items, count badges, ink current item. */
+.screen{--gut:14px}
+.jump{display:flex;gap:10px;overflow-x:auto;border-block:2px solid var(--ink0);background:var(--card);padding:10px var(--gut);margin-inline:calc(-1 * var(--gut));scrollbar-width:none;overscroll-behavior-x:contain}
+.jump::-webkit-scrollbar{display:none}
+.wide .jump{margin-inline:0;border:2px solid var(--ink0);padding:10px 12px;box-shadow:var(--off) var(--off) 0 var(--ink0);flex-wrap:wrap;overflow:visible}
+.jump button{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:2px solid var(--ink0);border-radius:0;background:var(--card);color:var(--ink0);white-space:nowrap;font:700 18px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;transition:transform .12s}
+.jump button:active{transform:translate(2px,2px)}
+.jump button[aria-current=page]{background:var(--ink0);color:var(--cream)}
+.jump .n{padding:1px 5px 0;border:2px solid var(--ink0);background:var(--card);color:var(--ink0);font:500 12px/1.2 var(--f-mono);letter-spacing:0}
+.jump button[aria-current=page] .n{border-color:var(--cream);background:var(--mint)}
+
+.rowlabel{margin:0 0 12px;font:700 18px/1 var(--f-display);letter-spacing:.18em;text-transform:uppercase;color:var(--ink0)}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.tile{background:var(--card);border:2px solid var(--ink0);box-shadow:4px 4px 0 var(--ink0);padding:11px 12px 12px;min-width:0}
+.tile small{display:block;font:700 12px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ink0)}
+.tile b{display:block;margin-top:6px;font:700 46px/.95 var(--f-display);color:var(--ink0)}
+.tile em{display:block;margin-top:5px;font:500 12px/1 var(--f-mono);font-style:normal;color:var(--graphite);text-transform:uppercase}
+.tile.wash{background:var(--wash)}
+.tile.lead{grid-column:1/-1;background:var(--ink0);color:var(--cream);box-shadow:5px 5px 0 var(--graphite);display:flex;gap:12px;align-items:center;justify-content:space-between}
+.tile.lead small,.tile.lead b{color:var(--cream)}.tile.lead small{color:#B9B2A0}
+.tile.lead b{font-size:62px}.tile.lead em{color:#B9B2A0}
+.tile.lead img{width:64px;height:76px;object-fit:cover;border:2px solid var(--cream);background:var(--ink2)}
+.pill{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--ink0);border-radius:99px;padding:3px 10px;font:700 12px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;background:var(--inset)}
+.pill.mint{background:var(--mint)}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;border:2px solid var(--ink0);background:var(--card);font:700 15px/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink0)}
+.btn.ink{background:var(--ink1);color:var(--cream)}
+.career{margin:12px 0 0;font:500 12px/1.45 var(--f-mono);color:var(--ink2);text-transform:uppercase}
+
+/* section card with hanging name tab */
+.sec{position:relative;padding-top:15px}
+.tab{position:absolute;top:0;left:14px;z-index:4;background:var(--ink0);color:var(--cream);padding:4px 11px 3px;font:700 14px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase}
+.count{position:absolute;top:0;right:14px;z-index:4;background:var(--card);border:2px solid var(--ink0);padding:2px 9px 1px;font:700 14px/1.1 var(--f-display);letter-spacing:.1em;text-transform:uppercase}
+.tape{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:2px solid var(--ink0);font:700 13px/1.25 var(--f-display);letter-spacing:.1em;text-transform:uppercase}
+.tape.hold{background:repeating-linear-gradient(135deg,var(--marker) 0 10px,#EDB93F 10px 20px);color:var(--ink0)}
+.tape.ok{background:var(--wash);color:var(--ink0)}
+.cols{display:grid;grid-template-columns:var(--lw) 44px minmax(0,1fr) 64px;gap:10px;padding:9px 12px 6px;font:700 12px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--graphite)}
+.cols span:last-child{text-align:right}
+.lu{list-style:none;margin:0;padding:0}
+.lu li{border-top:1px solid var(--rule-soft)}
+.pr{all:unset;box-sizing:border-box;display:grid;grid-template-columns:var(--lw) 44px minmax(0,1fr) 64px;gap:10px;align-items:start;width:100%;padding:10px 12px;cursor:pointer;min-height:64px}
+.pr:focus-visible{outline:2px solid var(--field);outline-offset:-3px}
+.pr[aria-expanded=true]{background:var(--inset)}
+.slot{width:var(--lw);height:var(--lw);background:var(--ink0);color:var(--cream);display:grid;place-items:center;font:700 22px/1 var(--f-display);box-shadow:2px 2px 0 var(--graphite);align-self:center}
+.slot.pos{background:none;color:var(--ink0);border:2px dashed var(--graphite);box-shadow:none;font-size:15px;letter-spacing:.04em}
+.ph{width:44px;height:52px;border:2px solid var(--ink0);background:var(--rule-soft);object-fit:cover;display:grid;place-items:center;font:700 16px var(--f-display);color:var(--ink2);align-self:center}
+.nm{min-width:0}
+.nm strong{display:block;font:700 20px/1 var(--f-display);text-transform:uppercase;color:var(--ink0);letter-spacing:.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}
+.p{font:700 12px/1 var(--f-display);letter-spacing:.1em;padding:3px 6px 2px;border:2px solid var(--ink0);background:var(--mint);text-transform:uppercase}
+.b{font:700 12px/1 var(--f-mono);color:var(--ink2)}
+.j{font:700 12px/1 var(--f-mono);color:var(--clay)}
+.vsl{margin-top:6px;font:500 12px/1.25 var(--f-mono);color:var(--ink2);text-transform:uppercase}
+.vsl u{text-decoration:none;color:var(--graphite)}
+.vsl.none{color:var(--graphite)}
+.av{text-align:right;align-self:center}
+.av b{display:block;font:700 19px/1 var(--f-mono)}
+.av small{display:block;margin-top:5px;font:500 12px/1 var(--f-mono);color:var(--graphite)}
+.det{display:none;grid-column:1/-1}
+.pr[aria-expanded=true]+.det{display:grid}
+.det{grid-template-columns:repeat(6,minmax(0,1fr));margin:0 12px 12px;border:2px solid var(--ink0);background:var(--card)}
+.det div{padding:7px 6px 8px;text-align:center;border-right:1px solid var(--rule)}
+.det div:last-child{border-right:0}
+.det small{display:block;font:700 12px/1 var(--f-display);letter-spacing:.12em;color:var(--graphite)}
+.det span{display:block;margin-top:5px;font:700 13px/1 var(--f-mono)}
+.foot{padding:11px 14px;border-top:1px solid var(--rule-soft);text-align:right;font:700 13px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--field)}
+.grp{padding:8px 12px 4px;background:var(--inset);border-top:1px solid var(--rule-soft);font:700 12px/1 var(--f-display);letter-spacing:.16em;color:var(--graphite)}
+
+/* former teammates card: collapsed by default */
+.tmhead{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:0 14px;cursor:pointer}
+.tmhead:focus-visible{outline:2px solid var(--field);outline-offset:-4px}
+.tmt{font:700 18px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ink0)}
+.tmn{margin-left:auto;font:700 13px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;border:2px solid var(--ink0);padding:2px 8px 1px;background:var(--wash)}
+.chev{width:10px;height:10px;border-right:3px solid var(--ink0);border-bottom:3px solid var(--ink0);transform:rotate(45deg) translate(-2px,-2px);transition:transform .15s}
+.tmhead[aria-expanded=true] .chev{transform:rotate(-135deg) translate(-2px,-2px)}
+.tmbody{display:none;border-top:2px solid var(--ink0)}
+.tmhead[aria-expanded=true]+.tmbody{display:block}
+.tmkey{display:flex;justify-content:space-between;padding:10px 12px 0;font:700 12px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+.tmkey span{display:flex;align-items:center;gap:6px}.tmkey img{height:22px;width:auto}
+@media (prefers-reduced-motion:reduce){.chev{transition:none}}
+/* sticky column header */
+.cols{position:sticky;top:env(safe-area-inset-top,0px);z-index:3;background:var(--card);border-bottom:2px solid var(--ink0);padding-block:10px 8px}
+.wide .cols{padding-block:10px 8px}
+/* pitch mix panel: paper ground like the card around it; pitch colours get an ink outline so they read on light */
+.pmix{margin:0 12px;background:var(--inset);color:var(--ink0);padding:12px 12px 10px;border:2px solid var(--ink0)}
+.pmh{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pmt{display:flex;flex-direction:column;gap:5px}
+.pmh h4{margin:0;font:700 16px/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase}
+.pcount{font:500 11px/1 var(--f-mono);color:var(--graphite);text-transform:uppercase}
+.pctl{display:flex;align-items:center;gap:8px;margin-top:10px}
+.plab{flex:none;width:74px;font:700 12px/1.1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--graphite)}
+.pseg{display:flex;flex:1;min-width:0;border:2px solid var(--ink0);background:var(--card)}
+.pseg button{flex:1 1 auto;min-width:0;border:0;border-right:1px solid var(--rule);background:none;color:var(--ink0);padding:0 6px;min-height:32px;font:700 12px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.pseg button:last-child{border-right:0}
+.pseg button[aria-pressed=true]{background:var(--ink0);color:var(--cream)}
+.pseg button:focus-visible{outline:2px solid var(--field);outline-offset:1px}
+.pseg em{font:500 12px/1 var(--f-mono);font-style:normal;margin-left:6px;opacity:.75}
+.pl{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.pl li{display:grid;grid-template-columns:16px 76px minmax(0,1fr) 52px 44px;gap:8px;align-items:center;font:500 12px/1 var(--f-mono)}
+.pl .gl{width:16px;height:16px}
+.pn{font:700 14px/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb{height:10px;background:var(--rule-soft);display:block}.pb i{display:block;height:100%;outline:1.5px solid var(--ink0);outline-offset:-1.5px}
+.pp{text-align:right;font-weight:700;display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.pv{text-align:right;color:var(--graphite);font-size:11px}
+.dl{width:8px;height:8px;flex:none}.dl.up{fill:var(--field)}.dl.dn{fill:var(--clay)}
+.pnone{display:block !important;color:var(--graphite);font:500 12px/1.4 var(--f-mono)}
+.pwatch{flex:none;display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 11px;border:2px solid var(--ink0);background:var(--card);color:var(--ink0);font:700 12px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase}
+.pwatch:hover{background:var(--ink0);color:var(--cream)}
+.pwatch:focus-visible{outline:2px solid var(--field);outline-offset:2px}
+.order{--lw:14px}.order.pre{--lw:34px}
+.order:not(.pre) .slot{font-size:11px;box-shadow:none}
+.order:not(.pre) .pr{gap:10px}
+/* fact cells with tap glyphs */
+.fv{display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0}
+.fv>span:first-child{font:500 13px/1.2 var(--f-mono);text-transform:uppercase;overflow-wrap:anywhere;min-width:0}
+.fv em{font-style:normal;color:var(--clay);font-weight:700}
+.fact span em{font-style:normal;color:var(--clay);font-weight:700}
+.fglyph{flex:none;width:24px;height:24px;display:grid;place-items:center;padding:0;border:2px solid var(--ink0);border-radius:50%;background:var(--ink0);color:var(--cream)}
+.fglyph:focus-visible{outline:2px solid var(--field);outline-offset:2px}
+.fglyph[aria-expanded=true]{background:var(--mint);color:var(--ink0)}
+.fglyph.tier-average{background:var(--graphite);border-color:var(--ink0)}
+.fglyph.tier-average[aria-expanded=true]{background:var(--rule-soft);color:var(--ink0)}
+.fnote{margin:8px 0 0;font:500 12px/1.4 var(--f-body);color:var(--ink2);display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.fnote[hidden]{display:none}
+.fnote b{font:700 13px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink0)}
+.fnote a{font:700 12px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--field);text-decoration:none}
+.tierp{background:var(--rule-soft);padding:2px 8px}
+.umpgrid{border-top:1px solid var(--rule)}
+/* hero action row: game notes */
+.hact{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.gnotes{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 12px;border:2px solid var(--ink0);background:var(--card);color:var(--ink0);font:700 13px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;box-shadow:3px 3px 0 var(--ink0)}
+.gnotes img{height:18px;width:auto;display:block}
+.gnotes:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink0)}
+.gnotes:focus-visible{outline:2px solid var(--field);outline-offset:2px}
+/* sticky dock: refresh, optional catch-up, next */
+.dock{position:sticky;bottom:env(safe-area-inset-bottom,0px);z-index:6;display:flex;gap:8px;align-items:stretch;padding:8px;background:var(--ink0);border:2px solid var(--ink0);box-shadow:var(--off) var(--off) 0 var(--graphite);margin-top:4px}
+.dock button{min-height:48px;border:2px solid var(--cream);font:700 15px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase}
+.dock button:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.dref{display:inline-flex;align-items:center;gap:8px;padding:0 12px;background:none;color:var(--cream)}
+.dtx{display:flex;flex-direction:column;gap:4px;text-align:left}.dtx b{font:700 13px/1 var(--f-display);letter-spacing:.14em}.dtx small{font:500 12px/1 var(--f-mono);color:#B9B2A0;letter-spacing:0}
+.dnext{flex:1;min-width:0;background:var(--cream);color:var(--ink0)}
+.dcatch{flex:1.3;min-width:0;font-size:13px !important;letter-spacing:.06em !important;background:repeating-linear-gradient(135deg,#B5824A 0 8px,#A9743C 8px 16px);color:#1E1405;border-color:#1E1405 !important}
+@media (max-width:380px){.dtx small{display:none}}
+/* defensive alignment field */
+.fieldwrap{position:relative;aspect-ratio:620/550;background-color:var(--inset);background-image:linear-gradient(rgba(203,193,167,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(203,193,167,.2) 1px,transparent 1px),radial-gradient(120% 90% at 50% 0%,rgba(203,193,167,.1),transparent 70%);background-size:16px 16px,16px 16px,100% 100%;overflow:hidden}
+.fieldsvg{position:absolute;inset:0;width:100%;height:100%}
+.fnode{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:1px}
+.fph{width:24px;height:28px;border:2px solid var(--ink0);background:var(--rule-soft);object-fit:cover;display:grid;place-items:center;flex:none}
+.fph.empty{background:var(--inset);border:2px dashed var(--graphite);color:var(--graphite);font:700 12px/1 var(--f-display);letter-spacing:.04em}
+.fl{display:flex;align-items:center;background:var(--card);border:1px solid var(--ink0);padding:3px 6px 3px;line-height:1;max-width:74px;box-shadow:1px 1px 0 var(--ink0)}
+.fl.tbd{border-style:dashed;box-shadow:none;color:var(--graphite)}
+.fl b{font:700 12px/1 var(--f-display);text-transform:uppercase;letter-spacing:.02em;color:var(--ink0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.fl i{font:700 9px/1 var(--f-mono);font-style:normal;color:var(--graphite);margin-top:2px}
+.fdh{position:absolute;left:8px;bottom:8px;display:flex;align-items:center;gap:6px;background:var(--card);border:2px solid var(--ink0);padding:4px 8px;font:700 12px/1 var(--f-display);text-transform:uppercase;letter-spacing:.04em}
+.fdh span{background:var(--mint);border:2px solid var(--ink0);padding:2px 4px 1px;font-size:10px;letter-spacing:.1em}
+.fhint{position:absolute;left:0;right:0;bottom:8px;margin:0;text-align:center;font:500 12px/1.3 var(--f-mono);color:var(--ink2);text-transform:uppercase}
+/* live Former teammates ladder, dressed in the new fonts */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.shot{display:block;overflow:hidden;background:var(--rule-soft)}.shot img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.ladderwrap{padding:12px 12px 14px;font-family:var(--f-body);text-transform:uppercase;min-width:0}
+.ladderwrap .ladder__sidename,.ladderwrap .ladder__legend,.ladderwrap .ladder__key{font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.12em;color:var(--ink2)}
+.ladderwrap .ladder__surname{font-family:var(--f-display);font-weight:700;letter-spacing:.02em;color:var(--ink0)}
+.ladderwrap .ladder__clubname{font-family:var(--f-display);font-weight:700;letter-spacing:.06em}
+.ladderwrap .ladder__years,.ladderwrap .ladder__level,.ladderwrap .ladder__pos,.ladderwrap .ladder__note{font-family:var(--f-mono)}
+.ladderwrap .shot.ladder__shot{border:2px solid var(--ink0);border-radius:0}
+/* animated pitch scene (PitchScene) */
+.pscwrap{margin-top:12px}
+.pscene{position:relative;width:100%;aspect-ratio:336/204;overflow:hidden;border:2px solid var(--ink0);background:var(--grid)}
+.pscene svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ps-sky{fill:var(--grid)}.ps-grass{fill:var(--field-outfield)}.ps-mound{fill:var(--field-dirt);opacity:.75}.ps-dirt{fill:var(--field-dirt);opacity:.55}
+.ps-back,.ps-edge{fill:none;stroke:var(--graphite);stroke-width:1;opacity:.35}
+.ps-front{fill:var(--inset);fill-opacity:.35;stroke:var(--ink1);stroke-width:1.5}.ps-grid{stroke:var(--ink1);stroke-width:.6;opacity:.3}
+.ps-ghost polyline{stroke-width:1.5;stroke-linecap:round;opacity:.6}.ps-ghost .ps-ring{stroke-width:1.4;opacity:.7}
+.ps-release{fill:var(--ink0)}.ps-ball{fill:var(--inset);stroke:var(--ink0);stroke-width:1}.ps-seam{fill:none;stroke:var(--clay);stroke-width:1}
+.ps-bar{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 10px;background:var(--ink0);color:var(--cream)}
+.ps-name{font:700 14px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase}.ps-mph{font:500 12px/1 var(--f-mono)}
+.pl li.act{background:var(--wash);box-shadow:-6px 0 0 var(--wash),6px 0 0 var(--wash)}
+.pt2l{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.pt2{display:grid;grid-template-columns:16px minmax(0,1fr) 44px 56px;gap:8px;align-items:center;padding:4px 6px}
+.pt2 b{font:700 15px/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase}.pt2 span{font:700 13px/1 var(--f-mono);text-align:right}.pt2 small{font:500 12px/1 var(--f-mono);color:var(--graphite);text-align:right}.pt2 .gl{width:16px;height:16px}
+.pt2.act{background:var(--wash)}
+/* ballpark + umpire sheets */
+.parkdraw{border:2px solid var(--ink0);margin-bottom:12px}
+.parkfacts{border-block:2px solid var(--ink0);grid-template-columns:repeat(3,minmax(0,1fr))}
+.rks{display:flex;flex-direction:column;gap:7px}
+.rk{display:grid;grid-template-columns:96px 46px minmax(0,1fr) 72px;gap:8px;align-items:center}
+.rk b{font:700 14px/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase}.rk span{font:700 13px/1 var(--f-mono);text-align:right}.rk small{font:500 12px/1 var(--f-mono);color:var(--graphite);text-align:right}
+.rkb{position:relative;height:6px;background:var(--rule-soft);display:block}.rkb u{position:absolute;top:-4px;width:10px;height:14px;margin-left:-5px;background:var(--ink0);border:2px solid var(--cream);outline:1px solid var(--ink0);text-decoration:none}
+.sfoot{margin:12px 0 0;font:500 12px/1.4 var(--f-mono);color:var(--graphite);text-transform:uppercase}
+.uplate{flex:none;width:44px;height:44px;display:grid;place-items:center;background:var(--ink0);color:var(--cream);box-shadow:3px 3px 0 var(--graphite)}
+.uhp{display:block;font:700 12px/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase;color:var(--graphite);margin-bottom:4px}
+.umono{margin:6px 0 0;font:500 12px/1.4 var(--f-mono);color:var(--graphite);text-transform:uppercase}
+.ustats{margin-top:14px;border-block:2px solid var(--ink0)}.u4{grid-template-columns:repeat(4,minmax(0,1fr))}.ustats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.ustats div{padding:7px 8px 8px;border-right:1px solid var(--rule)}.ustats div:last-child{border-right:0}
+.ustats small{display:block;font:700 12px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--graphite)}.ustats b{display:block;margin-top:4px;font:700 22px/1 var(--f-display)}.ustats sub{font:500 11px var(--f-mono);color:var(--graphite);margin-left:1px}
+.lean{position:relative;padding-top:12px}
+.lcaret{position:absolute;top:0;width:0;height:0;margin-left:-6px;border:6px solid transparent;border-top:8px solid var(--ink0);border-bottom:0}
+.lbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:2px solid var(--ink0)}
+.lseg{display:flex;flex-direction:column;gap:5px;padding:0 0 6px;border-right:1px solid var(--rule);background:var(--inset)}.lseg:last-child{border-right:0}
+.lseg i{display:block;height:10px}.lseg:nth-child(1) i{background:#1B2A3A}.lseg:nth-child(2) i{background:#51657B}.lseg:nth-child(3) i{background:#A19C8C}.lseg:nth-child(4) i{background:#D8B65A}.lseg:nth-child(5) i{background:#C9A32C}
+.lseg small{padding:0 4px;font:700 9.5px/1.15 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--graphite)}
+.lseg.on{background:var(--wash)}.lseg.on small{color:var(--ink0)}
+.watch{display:flex;gap:14px;align-items:center;justify-content:space-between}.watch b{font:700 24px/1 var(--f-display);text-transform:uppercase}
+.zmap{width:108px;height:auto;flex:none;background:var(--inset)}
+.frame:not(.wideframe) .nm strong{font-size:18px}
+.umpgrid .fv{flex-wrap:wrap}.umpgrid .fv>span:first-child{overflow-wrap:break-word}
+/* starter card */
+.sband{padding:8px 14px}.sband img{height:calc(30px * var(--mscale));width:auto;flex:none}
+.sp{display:flex;gap:12px;align-items:center;padding:12px}
+.spph{width:56px;height:66px;object-fit:cover;border:2px solid var(--ink0);background:var(--rule-soft);flex:none}
+.spwho{min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+.spwho strong{font:700 26px/1 var(--f-display);color:var(--ink0);letter-spacing:.01em}
+.spstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-block:2px solid var(--ink0)}
+.spstats div{padding:7px 10px 8px;border-right:1px solid var(--rule);min-width:0}.spstats div:last-child{border-right:0}
+.spstats small{display:block;font:700 12px/1 var(--f-display);letter-spacing:.14em;color:var(--graphite)}
+.spstats b{display:block;margin-top:4px;font:700 26px/1 var(--f-display);color:var(--ink0)}
+.spstats .ink{background:var(--ink0)}.spstats .ink small{color:#B9B2A0}.spstats .ink b{color:var(--cream)}
+.splines{padding:12px 12px 12px;display:flex;flex-direction:column;gap:12px}
+.shead{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.stitle{font:700 13px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ink0)}
+.ssub{font:500 12px/1 var(--f-mono);color:var(--graphite);text-transform:uppercase}
+.shead a{margin-left:auto;color:var(--field);font:700 12px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;text-decoration:none}
+.scells{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:2px solid var(--ink0);background:var(--inset)}
+.scells div{padding:6px 4px 6px;text-align:center;border-right:1px solid var(--rule);min-width:0}.scells div:last-child{border-right:0}
+.scells b{display:block;font:700 15px/1 var(--f-mono)}
+.scells small{display:block;margin-top:4px;font:700 12px/1 var(--f-display);letter-spacing:.12em;color:var(--graphite)}
+
+/* former teammates: photo, club logo chip, photo */
+.tm{list-style:none;margin:0;padding:8px 12px 12px;display:flex;flex-direction:column;gap:10px}
+.tm li{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center}
+.tm li:before{content:"";position:absolute;left:15%;right:15%;top:50%;border-top:2px solid var(--rule)}
+.tm .l,.tm .r{position:relative;display:flex;align-items:center;gap:6px;min-width:0}
+.tm .l{justify-content:flex-end;text-align:right}
+.tph{width:30px;height:36px;flex:none;border:2px solid var(--ink0);background:var(--rule-soft);object-fit:cover;display:block}
+.tn{min-width:0}.tn strong{display:block;font:700 13px/1 var(--f-display);text-transform:uppercase;color:var(--ink0);overflow:hidden;text-overflow:ellipsis}
+.tn small{display:block;margin-top:3px;font:700 12px/1 var(--f-mono);color:var(--graphite)}
+.tm .c{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;border:2px solid var(--ink0);background:var(--inset);padding:5px 8px;min-width:64px}
+.tm .c img{height:30px;width:auto;max-width:44px;object-fit:contain}
+.tm .c small{font:500 12px/1 var(--f-mono);color:var(--ink2)}
+
+.h2{margin:0;font:700 22px/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase;color:var(--ink0)}
+.board{max-width:1040px}
+.wideframe{width:960px;max-width:100%;margin:0 auto}
+.screen.wide{padding:22px 24px 26px}
+.wide .hero{padding:18px}.wide .crest{width:112px;height:130px}.wide .who h2{font-size:46px}.wide .who{flex:1}
+.wide .stamp{align-self:center;padding:12px 16px 10px;min-width:104px}.wide .stamp b{font-size:34px}.wide .stamp sup{font-size:14px}
+.dgrid{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:28px;align-items:start}
+.dside{display:flex;flex-direction:column;gap:22px;position:sticky;top:12px}
+.wide .cols,.wide .pr{grid-template-columns:var(--lw) 44px minmax(0,1fr) repeat(4,54px)}
+.wide .cols{padding-inline:14px}.wide .pr{padding-inline:14px}
+.wide .cols span:nth-child(n+4){text-align:right}
+.sx{align-self:center;text-align:right;font:500 14px/1 var(--f-mono)}.sx.hi{font-weight:700;font-size:16px}
+.wide .pr:hover{background:var(--inset)}
+@media (max-width:560px){.wide .cols,.wide .pr{grid-template-columns:var(--lw) 44px minmax(0,1fr) 54px 54px}.x2{display:none}}
+@media (max-width:740px){.dgrid{grid-template-columns:minmax(0,1fr)}.dside{position:static}.wide .who h2{font-size:34px}.wide .hero{flex-wrap:wrap}}
+/* hero right column: first pitch, then actions, right-aligned */
+.hside{display:flex;flex-direction:column;align-items:stretch;gap:0;width:168px;flex:none;margin-left:auto;border:2px solid var(--ink0);box-shadow:4px 4px 0 var(--ink0);background:var(--card)}
+.hbtns{display:flex;flex-direction:column;gap:0;width:100%}
+.hside .stamp{box-shadow:none;min-width:0;width:100%;margin:0;padding:10px 12px 9px}
+.hside .gnotes,.hside .mlbtv{width:100%;justify-content:space-between;box-shadow:none;border:0;border-top:2px solid var(--ink0);min-height:42px;padding:0 12px}
+.hside .gnotes:active,.hside .mlbtv:active{transform:none;background:var(--wash)}
+.hside .mlbtv{background:var(--ink1)}
+.hside .mlbtv:active{background:var(--ink2)}
+.hside .gnotes:focus-visible,.hside /* faded play button behind the MLB.TV wordmark: this opens the video */
+.mlbtv{position:relative;overflow:hidden;isolation:isolate}
+.mlbtv:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.3;transition:opacity .15s;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='21' fill='none' stroke='%23F1E7CC' stroke-width='3'/><path d='M19 14l16 10-16 10z' fill='%23F1E7CC'/></svg>") no-repeat right 36px center/34px 34px}
+.mlbtv:hover:before{opacity:.55}
+.mlbtv .wl{display:none;align-items:center;gap:5px;font:700 12px/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase;color:var(--cream)}
+.frame:not(.wideframe) .mlbtv:before{background-position:center;background-size:46px 46px;opacity:.22}
+@media (max-width:740px){.wide .mlbtv:before{background-position:center;background-size:46px 46px;opacity:.22}}
+.mlbtv:focus-visible{outline-offset:-4px}
+.wide .hside{align-self:center;width:188px}
+.mlbtv{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 10px;border:2px solid var(--ink0);background:var(--ink1);color:var(--cream);text-decoration:none;box-shadow:3px 3px 0 var(--ink0);font:700 14px/1 var(--f-display)}
+.mlbtv img{height:20px;width:auto;display:block}
+.mlbtv:focus-visible{outline:2px solid var(--field);outline-offset:2px}
+.mlbtv:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink0)}
+/* crest as a button */
+button.crest{padding:0;cursor:pointer;font:inherit;color:inherit}
+button.crest:focus-visible{outline:2px solid var(--field);outline-offset:2px}
+.cbadge{position:absolute;right:4px;bottom:4px;width:22px;height:22px;display:grid;place-items:center;border:2px solid var(--ink0);border-radius:50%;background:var(--ink0);color:var(--cream)}
+/* bench */
+.bench{border-top:2px solid var(--ink0);background:var(--inset)}
+.bench h4{margin:0;padding:10px 14px 6px;font:700 13px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ink0)}
+.bench ul{list-style:none;margin:0;padding:0 0 4px}
+.bench li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:4px 10px;align-items:center;padding:7px 14px;border-top:1px solid var(--rule-soft)}
+.bph{width:30px;height:36px;border:2px solid var(--ink0);background:var(--rule-soft);object-fit:cover;display:block;grid-row:1 / span 2}
+.bn{display:flex;align-items:baseline;gap:8px;min-width:0}.bn b{font:700 16px/1 var(--f-display);text-transform:uppercase;color:var(--ink0)}.bn small{font:700 12px/1 var(--f-mono);color:var(--graphite)}
+.bl{font:500 12px/1.3 var(--f-mono);color:var(--ink2);text-transform:uppercase}
+/* bullpen */
+.bandbtn{font:inherit;border:0;width:100%;text-align:left;cursor:pointer;min-height:48px}
+.bandbtn:focus-visible{outline:2px solid var(--mint);outline-offset:-4px}
+.bandbtn .chev{border-color:var(--onbar);flex:none}
+.bandbtn img{margin-left:auto;flex:none}
+.pdots{display:flex;gap:3px;align-items:center}
+.pd{display:inline-block;width:9px;height:9px;border:1.5px solid var(--onbar);background:transparent}
+.pd.on{background:var(--onbar)}
+.pencard .pd{border-radius:0}
+.penbody{display:none;padding:10px 12px 12px}
+.bandbtn[aria-expanded=true]+.penbody{display:block}
+.bandbtn[aria-expanded=true] .chev{transform:rotate(-135deg) translate(-2px,-2px)}
+.psum{margin:0 0 8px;font:500 12px/1.4 var(--f-mono);color:var(--ink2);text-transform:uppercase}
+.pkey{display:flex;flex-wrap:wrap;gap:4px 12px;margin-bottom:8px;font:700 10.5px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--graphite)}
+.pkey span{display:inline-flex;align-items:center;gap:5px}
+.pgrid{display:grid;grid-template-columns:minmax(0,1fr) repeat(8,19px) 28px;gap:2px;align-items:center}
+.pgh{font:700 10px/1 var(--f-display);letter-spacing:.08em;color:var(--graphite);text-align:center;margin-bottom:4px}.pgh .tod{color:var(--ink0)}
+.pgh .pt,.prow .pt{text-align:right;font:700 12px/1 var(--f-mono);color:var(--ink0)}.pgh .pt{font:700 10px/1 var(--f-display);color:var(--graphite)}
+.prow{padding:3px 0;border-top:1px solid var(--rule-soft)}
+.pnm{display:flex;align-items:center;gap:6px;min-width:0}.pnm b{font:700 14px/1 var(--f-display);text-transform:uppercase;color:var(--ink0);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc{display:grid;place-items:center;height:19px;border:1px solid var(--rule);font:500 9px/1 var(--f-mono);color:var(--ink1);background:transparent}
+i.pc{width:14px;height:14px;display:inline-block}
+.pc.on{background:var(--wash);border-color:var(--field);color:var(--ink0);font-weight:700}
+.pc.today{border-style:dashed;border-color:var(--ink0)}
+.pwhy{display:block;margin:2px 0 3px;font:500 12px/1.3 var(--f-mono);color:var(--graphite);text-transform:uppercase}
+/* season series */
+.shdr{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:12px 14px 8px}.shdr .tmt{white-space:nowrap}
+.sarr{margin-left:auto;display:flex;gap:6px}.sarr button{width:32px;height:32px;border:2px solid var(--ink0);background:var(--card);font:700 18px/1 var(--f-display)}
+.sarr button:focus-visible{outline:2px solid var(--field);outline-offset:2px}
+.scap{margin:0;padding:0 14px 8px;font:500 12px/1.3 var(--f-mono);color:var(--graphite);text-transform:uppercase}
+.sstrip{display:flex;gap:8px;overflow-x:auto;padding:4px 14px 14px;scrollbar-width:none;scroll-snap-type:x proximity}
+.sstrip::-webkit-scrollbar{display:none}
+.sc{flex:none;width:92px;scroll-snap-align:center;display:flex;flex-direction:column;gap:6px;padding:8px 8px 8px;border:2px solid var(--ink0);background:var(--inset);position:relative}
+.sc small{font:500 12px/1 var(--f-mono);color:var(--graphite)}
+.sc b{font:700 22px/1 var(--f-display);color:var(--ink0);white-space:nowrap}
+.sc.w{background:var(--wash)}.sc.l{background:var(--clay-soft)}.sc.l b{color:#7A2A22}
+.sc .sv{display:flex;align-items:center;gap:5px}.sc .sv img{height:20px;width:auto}.sc .sv i{font:700 12px/1 var(--f-mono);font-style:normal;color:var(--ink2)}
+.sc em{font:700 12px/1 var(--f-display);letter-spacing:.14em;font-style:normal;text-transform:uppercase;color:var(--ink0);border-top:1px solid var(--ink0);padding-top:5px;margin-top:1px}
+.sc.po{box-shadow:inset 0 3px 0 var(--ink0)}
+.sc.cur{background:var(--ink0);border-color:var(--ink0)}.sc.cur small,.sc.cur .sv i,.sc.cur em{color:#B9B2A0;border-color:#5B6676}.sc.cur b{color:var(--cream);font-size:19px}
+/* uniform sheet */
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(15,24,34,.55);display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheetbox{width:min(420px,100%);max-height:100%;overflow:auto;background:var(--card);border:2px solid var(--ink0);box-shadow:6px 6px 0 var(--ink0)}
+.sclose{margin-left:auto;width:36px;height:36px;border:2px solid var(--onbar);background:none;color:var(--onbar);font:700 16px/1 var(--f-display)}
+.sbody{padding:14px}
+.s1{display:flex;gap:14px;align-items:center}.s1 strong{font:700 28px/.95 var(--f-display);text-transform:uppercase;color:var(--ink0)}.s1 p{margin:6px 0 0;font:600 14px/1.3 var(--f-body);color:var(--ink1)}.s1 p span{color:var(--graphite);font-weight:400}
+.sbody h5{margin:16px 0 8px;font:700 12px/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase;color:var(--graphite)}
+.sws{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.swc{display:flex;flex-direction:column;gap:3px;border:2px solid var(--ink0);padding:6px;background:var(--inset)}.swc i{display:block;height:22px;border:1px solid var(--ink0)}.swc b{font:700 12px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase}.swc small{font:500 12px/1 var(--f-mono);color:var(--ink2)}
+.marks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.mk2{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid var(--ink0);padding:8px 4px 6px;background:var(--inset)}.mk2 img{height:34px;max-width:100%;object-fit:contain}.mk2 small{font:700 12px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase}
+.mk2.dark{background:var(--club);color:var(--onbar)}
+.figph{display:flex;gap:12px;align-items:center;border:2px dashed var(--graphite);padding:14px;color:var(--graphite)}.figph p{margin:0;font:500 12px/1.4 var(--f-mono);text-transform:uppercase}
+.screen>*,.dmain>*,.dside>*,.card{min-width:0}
+.sstrip{max-width:100%}
+/* phone: the right-hand block becomes one full-width strip of three equal cells */
+.frame:not(.wideframe) .heroact{flex-wrap:wrap}
+.frame:not(.wideframe) .hside{flex-direction:row;width:100%;margin:0}
+.frame:not(.wideframe) .hside .stamp{flex:1.2;border-right:2px solid var(--ink0);display:flex;flex-direction:column;justify-content:center;padding:8px 6px}
+.frame:not(.wideframe) .hside .stamp b{margin-top:5px;font-size:24px}
+.frame:not(.wideframe) .hbtns{flex-direction:row;flex:2}
+.frame:not(.wideframe) .hside .gnotes,.frame:not(.wideframe) .hside .mlbtv{flex:1;flex-direction:column;justify-content:center;gap:6px;border-top:0;padding:8px 6px;min-width:0}
+.frame:not(.wideframe) .hside .mlbtv{border-left:2px solid var(--ink0)}
+.frame:not(.wideframe) .hside .gnotes span,.frame:not(.wideframe) .hside .mlbtv .ar{display:none}
+.frame:not(.wideframe) .hside .mlbtv .wl{display:flex}
+.frame:not(.wideframe) .hside .gnotes{font-size:12px;letter-spacing:.1em}
+.frame:not(.wideframe) .hside .gnotes img{height:20px}
+.frame:not(.wideframe) .hside .mlbtv img{height:18px}
+@media (max-width:740px){
+  .wideframe .heroact,.wideframe .hero{flex-wrap:wrap}
+  .wide .hside{width:100%;flex-direction:row;margin:0}
+  .wide .hside .stamp{flex:1.2;border-right:2px solid var(--ink0);display:flex;flex-direction:column;justify-content:center;padding:8px 6px}
+  .wide .hbtns{flex-direction:row;flex:2}
+  .wide .hside .gnotes,.wide .hside .mlbtv{flex:1;flex-direction:column;justify-content:center;gap:6px;border-top:0;padding:8px 6px;min-width:0}
+  .wide .hside .mlbtv{border-left:2px solid var(--ink0)}
+  .wide .hside .gnotes span,.wide .hside .mlbtv .ar{display:none}
+  .wide .hside .mlbtv .wl{display:flex}
+}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px;margin-top:46px}
+.notes h3{margin:0 0 8px;font:700 18px/1 var(--f-display);letter-spacing:.16em;text-transform:uppercase;color:var(--ink0);border-bottom:2px solid var(--ink0);padding-bottom:8px}
+.notes p{margin:0;color:var(--ink2);font-size:15px}
+.fine{margin-top:34px;font-size:13px;color:var(--graphite);max-width:70ch}
+@media (max-width:420px){h1{font-size:36px}.frames{gap:28px}.screen{padding:12px 10px 20px;--gut:10px}}
+@media (prefers-reduced-motion:no-preference){.pr{transition:background .15s}}
+
+/* tap targets: visible size stays, hit area reaches 44px */
+.fglyph{position:relative}.fglyph::after{content:"";position:absolute;inset:-10px}
+.pseg button{min-height:40px}.pwatch{min-height:40px}.sarr button{width:40px;height:40px}.sclose{width:44px;height:44px}
+.hside .gnotes,.hside .mlbtv{min-height:44px}.gnotes,.mlbtv{min-height:44px}
+</style>
+
+<div class="board">
+  <p class="eyebrow">Design mockup · Tally Baseball</p>
+  <h1>Lineup pages, new system</h1>
+  <p class="lede">The away and home lineup pages rebuilt with the player page's parts: a stamped hero with a first-pitch stamp, ink and tinted tiles for the opposing starter, and one batting order card with a hanging name tab. Tap a batter to open his season line.</p>
+  <div class="bar">
+    <div class="seg" role="group" aria-label="Game">
+      <button id="g-nl" aria-pressed="true">NLCS Game 3 · upcoming</button>
+      <button id="g-aug" aria-pressed="false">Aug 16 · completed</button>
+    </div>
+    <div class="seg" id="stateseg" role="group" aria-label="Lineup state">
+      <button id="s-posted" aria-pressed="true">Lineup posted</button>
+      <button id="s-pre" aria-pressed="false">Not posted yet</button>
+      <button id="s-live" aria-pressed="false">In progress</button>
+    </div>
+    <span class="hint" id="hint">Game 3, NLCS · Oct 14, 2026 · 2026 season lines, pre-game only</span>
+  </div>
+  <div class="frames" id="frames"></div>
+
+  <div class="bar dbar" style="margin-top:56px">
+    <h2 class="h2">Desktop, 740px and wider</h2>
+    <div class="seg" role="group" aria-label="Desktop team">
+      <button id="d-away" aria-pressed="true">Away</button>
+      <button id="d-home" aria-pressed="false">Home</button>
+    </div>
+    <span class="hint">Follows the Lineup posted / Not posted toggle above. Stacks like the phone below 740px.</span>
+  </div>
+  <div id="dframe"></div>
+  <div id="sheetroot"></div>
+
+  <div class="notes">
+    <div><h3>One hero, not four blocks</h3><p>Masthead, info grid, game notes and the club bar become one stamped card. First pitch moves into the same stamp the player page uses for OVR.</p></div>
+    <div><h3>The starter as tiles</h3><p>The opposing starter's card becomes the ink lead tile plus tinted tiles, so the pitcher reads the way a hitter does on the player page.</p></div>
+    <div><h3>Your identity values stay</h3><p>The hero band uses each club's hand-set header triad and knockout mark. The crest is the lab's tile for the jersey worn: powder blue with the glove for Milwaukee, blue with the white LA for Los Angeles.</p></div>
+    <div><h3>Desktop uses the width</h3><p>The batting order shows AVG, OPS, HR and RBI inline, so nothing needs a tap. The starter and former teammates sit in a sticky left rail. It stacks to the phone layout below 740px.</p></div>
+    <div><h3>A scorekeeper's row</h3><p>Order number, photo, position, bats, jersey, then AVG and OPS. His line against today's starter sits under the name. Nothing here depends on this game's result.</p></div>
+  </div>
+  <p class="fine">Identity values come straight from the lab stores: each club's tile tint, scale and offset for the jersey it wears in this game, its header bar, accent and ink, and its knockout mark. The Aug 16 page is a played game shown as its lineup page: no score appears, season lines run through Aug 15, and each hitter's line against the starter has that game subtracted out. Pitch mix uses the full-season file. The bullpen board is left off, because the live page shows it only for a slate-current game. Umpire names on the NLCS page are Game 2's crew, shown as placeholders until Game 3's crew posts; the feed has none yet. Mockup only. Lineup order is illustrative because neither club has posted. Names, numbers, 2026 season lines, and career lines against each starter come from the MLB Stats API; the Brewers' "vs Snell" lines match the live page. Score-bearing blocks (season series results, box lines) are left out on purpose and would stay sealed.</p>
+</div>
+
+<script>__LADJS__</script>
+<script>
+var DATA = __DATA__;
+var state = 'posted', dteam = 0, pmState = {};
+var CHECK = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 6.5l3 3 5-6.5"/></svg>';
+
+function vsText(v, who){
+  if(!v) return '<div class="vsl none">No prior meetings with '+who+'</div>';
+  var ab=v[0],h=v[1],hr=v[2],k=v[3],bb=v[4],t=h+'-for-'+ab;
+  if(hr) t+=', '+hr+' HR'; if(bb) t+=', '+bb+' BB'; if(k) t+=', '+k+' K';
+  return '<div class="vsl"><u>Vs '+who+'</u> '+t+'</div>';
+}
+function photo(t,p){
+  var src = DATA.ph[p.id];
+  if(src) return '<img class="ph" src="'+src+'" alt="" width="44" height="52">';
+  var ini = p.n.split(', ')[0].charAt(0)+p.n.split(', ')[1].charAt(0);
+  return '<span class="ph" aria-hidden="true">'+ini+'</span>';
+}
+function row(t,p,i,pre,wide){
+  var lead = pre ? '<span class="slot pos">'+p.pos+'</span>' : '<span class="slot">'+(i+1)+'</span>';
+  var open = (!pre && i===0 && !wide) ? 'true' : 'false';
+  var id = t.k+'-'+p.id+(wide?'-w':'');
+  var right = wide
+    ? ['avg','ops','hr','rbi'].map(function(k,n){return '<span class="sx'+(n===0?' hi':'')+(n>1?' x2':'')+'">'+p[k]+'</span>'}).join('')
+    : '<span class="av"><b>'+p.avg+'</b><small>'+p.ops+' OPS</small></span>';
+  return '<li><button class="pr" '+(wide?'tabindex="-1" ':'')+'aria-expanded="'+open+'" aria-controls="d-'+id+'">'+lead+photo(t,p)+
+    '<span class="nm"><strong>'+p.n+'</strong><span class="meta">'+(pre?'':'<span class="p">'+p.pos+'</span>')+
+    '<span class="b">BATS '+p.b+'</span><span class="j">#'+p.j+'</span></span>'+vsText(p.vs,t.opp.last)+'</span>'+right+'</button>'+
+    (wide?'':'<div class="det" id="d-'+id+'"><div><small>OBP</small><span>'+p.obp+'</span></div><div><small>SLG</small><span>'+p.slg+'</span></div><div><small>HR</small><span>'+p.hr+'</span></div><div><small>RBI</small><span>'+p.rbi+'</span></div><div><small>PA</small><span>'+p.pa+'</span></div><div><small>BATS</small><span>'+p.b+'</span></div></div>')+'</li>';
+}
+
+function lineText(v){ if(!v) return ''; var s=v[1]+'-for-'+v[0]; if(v[2]) s+=' · '+v[2]+' HR'; if(v[4]) s+=' · '+v[4]+' BB'; if(v[3]) s+=' · '+v[3]+' K'; return s; }
+function benchHtml(t,o){
+  var rows=t.pool.filter(function(p){return !t.order.some(function(q){return q.id===p.id}) && p.vs}).sort(function(a,b){return b.vs[0]-a.vs[0]});
+  if(!rows.length) return '';
+  return '<div class="bench"><h4>Off the bench vs '+o.last+'</h4><ul>'+rows.map(function(p){
+    var ph=DATA.ph[p.id]?'<img class="bph" src="'+DATA.ph[p.id]+'" alt="">':'<span class="bph"></span>';
+    return '<li>'+ph+'<span class="bn"><b>'+p.n+'</b><small>'+p.pos+' · #'+p.j+'</small></span><span class="bl">'+lineText(p.vs)+'</span></li>';}).join('')+'</ul></div>';
+}
+function penHtml(ot,wide,k){
+  var pen=DATA.pen[ot.id]; if(!pen) return '';
+  var id='pen-'+k+(wide?'-w':'');
+  var y=pen.rows[0].cells.length-2;
+  var dots=pen.rows.map(function(r){return '<i class="pd'+(r.cells[y][0]?' on':'')+'"></i>'}).join('');
+  var pitchedY=pen.rows.filter(function(r){return r.cells[y][0]}).length;
+  var txt=pen.rows.length+' relievers · '+pitchedY+' pitched yesterday';
+  var head='<div class="pgrid pgh"><span></span>'+pen.dows.map(function(d,i){return '<span class="'+(i===pen.dows.length-1?'tod':'')+'">'+(i===pen.dows.length-1?'Now':d)+'</span>'}).join('')+'<span class="pt">7d</span></div>';
+  var rows=pen.rows.map(function(r){
+    return '<div class="prow"><div class="pgrid"><span class="pnm"><b>'+r.n+'</b></span>'+r.cells.map(function(c){
+      return '<span class="pc '+(c[0]?'on':'none')+(c[2]?' today':'')+'">'+(c[0]||'')+'</span>'}).join('')+'<span class="pt">'+r.tot+'</span></div>'+(r.why?'<small class="pwhy">'+r.why+'</small>':'')+'</div>';}).join('');
+  var key='<div class="pkey"><span><i class="pc on"></i>pitched</span><span><i class="pc none"></i>rested</span><span><i class="pc none today"></i>today</span></div>';
+  return '<div class="card pencard"><button class="band sband bandbtn" style="--club:'+ot.club+';--club2:'+ot.club2+';--onbar:'+ot.onbar+';--mscale:'+ot.mscale+'" aria-expanded="false" aria-controls="'+id+'"><b>Bullpen</b><img src="'+DATA.mono[ot.id]+'" alt=""><span class="chev" aria-hidden="true"></span></button>'+
+    '<div class="penbody" id="'+id+'">'+key+head+rows+'</div></div>';
+}
+function seriesHtml(t,k,wide){
+  var me=t.uni.s3, oppLogo=DATA.logo[t.opplogo], myLogo=DATA.logo[t.id];
+  var rw=0,rl=0;
+  var cells=DATA.series.map(function(g){
+    var M=DATA.meta, cur=g[0]===M.curDate, post=g[1]!=='R', home=g[4]===me, opp=home?g[2]:g[4];
+    var d=g[0].slice(5).replace('-0','-').replace(/^0/,'').replace('-','/');
+    if(cur) return '<div class="sc cur"><small>'+d+'</small><b>'+M.fpText+'</b><span class="sv"><i>'+(home?'vs':'@')+'</i><img src="'+oppLogo+'" alt="'+opp+'"></span><em>'+M.curTag+'</em></div>';
+    var us=home?g[5]:g[3], them=home?g[3]:g[5], w=us>them;
+    if(!post){ if(w) rw++; else rl++; }
+    return '<div class="sc '+(w?'w':'l')+(post?' po':'')+'"><small>'+d+'</small><b>'+(w?'W':'L')+' '+us+'–'+them+'</b><span class="sv"><i>'+(home?'vs':'@')+'</i><img src="'+oppLogo+'" alt="'+opp+'"></span>'+(post?'<em>NLCS</em>':'')+'</div>';
+  }).join('');
+  var lead = rw===rl?'Tied '+rw+'–'+rl:(rw>rl?t.short+' lead '+rw+'–'+rl:t.opp2short+' lead '+rl+'–'+rw);
+  var id='ss-'+k+(wide?'-w':'');
+  return '<div class="card sscard"><div class="shdr"><span class="tmt">Season series</span><span class="tmn">'+lead+'</span><span class="sarr"><button data-dir="-1" aria-label="Earlier games">‹</button><button data-dir="1" aria-label="Later games">›</button></span></div>'+
+    '<div class="sstrip" id="'+id+'" tabindex="0" aria-label="Season series games">'+cells+'</div></div>';
+}
+function sheetHtml(t){
+  var u=t.uni;
+  var sw=u.sw.map(function(s){return '<span class="swc"><i style="background:'+s[1]+'"></i><b>'+s[0]+'</b><small>'+s[1]+'</small></span>'}).join('');
+  var marks=[['Cap',DATA.x['cap'+u.cap]],['Primary',DATA.logo[t.id]],['Wordmark',DATA.x['word'+u.cap]],['Knockout',DATA.mono[t.id]]].map(function(m,i){
+    return '<div class="mk2'+(i===3?' dark':'')+'"><img src="'+m[1]+'" alt=""><small>'+m[0]+'</small></div>'}).join('');
+  var SHIRT='<svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3 3 6l2 4 2-1v12h10V9l2 1 2-4-5-3c-1 2-7 2-8 0Z"/></svg>';
+  return '<div class="scrim" id="scrim"><div class="sheetbox" role="dialog" aria-modal="true" aria-label="Uniform and marks" style="--club:'+t.club+';--club2:'+t.club2+';--onbar:'+t.onbar+';--tint:'+t.tint+';--tscale:'+t.scale+';--tox:'+t.ox+'%;--toy:'+t.oy+'%;--mscale:'+t.mscale+'">'+
+    '<div class="band sband"><b>Tonight’s uniform</b><button class="sclose" aria-label="Close">✕</button></div>'+
+    '<div class="sbody"><div class="s1"><div class="crest"><img src="'+DATA.logo[t.logo]+'" alt=""></div><div><strong>'+t.name+'</strong><p>'+u.name+'<br><span>'+u.sub+'</span></p></div></div>'+
+    '<h5>Club colors</h5><div class="sws">'+sw+'</div><h5>Marks</h5><div class="marks">'+marks+'</div>'+
+    '<h5>Batter figure</h5><div class="figph">'+SHIRT+'<p>Gameday’s figure for this uniform appears once both clubs post.</p></div></div></div></div>';
+}
+function openSheet(k){var t=DATA.teams.filter(function(x){return x.k===k})[0]; var r=document.getElementById('sheetroot'); r.innerHTML=sheetHtml(t); var s=r.querySelector('.sclose'); s.focus(); r.dataset.opener=k;}
+function closeSheet(){document.getElementById('sheetroot').innerHTML='';}
+document.addEventListener('click',function(e){
+  if(e.target.closest('.sclose')||e.target.id==='scrim') closeSheet();
+  var o=e.target.closest('[data-sheet]'); if(o) openSheet(o.dataset.sheet); var pk=e.target.closest('[data-park]'); if(pk) openParkSheet(); var um=e.target.closest('[data-ump]'); if(um){e.preventDefault(); openUmpSheet(um.dataset.ump)} var pw=e.target.closest('[data-pitch]'); if(pw) openPitchSheet(pw.dataset.pitch,pw.dataset.pk);
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape') closeSheet()});
+
+/* ---- animated pitch scene: port of PitchScene.jsx (scene math precomputed from lib/pitcherCard/scene.js) ---- */
+function f1(v){return (Math.round(v*10)/10).toString()}
+function sceneHtml(pid){
+  var d=DATA.scene.p[pid]; if(!d||!d.pitches.length) return '';
+  var S=DATA.scene, st=S.stage, fr=st.front, bk=st.back, W=S.W, H=S.H;
+  var edges=[[fr.x,fr.y,bk.x,bk.y],[fr.x+fr.w,fr.y,bk.x+bk.w,bk.y],[fr.x,fr.y+fr.h,bk.x,bk.y+bk.h],[fr.x+fr.w,fr.y+fr.h,bk.x+bk.w,bk.y+bk.h]];
+  var grid=[[fr.x+fr.w/3,fr.y,fr.x+fr.w/3,fr.y+fr.h],[fr.x+2*fr.w/3,fr.y,fr.x+2*fr.w/3,fr.y+fr.h],[fr.x,fr.y+fr.h/3,fr.x+fr.w,fr.y+fr.h/3],[fr.x,fr.y+2*fr.h/3,fr.x+fr.w,fr.y+2*fr.h/3]];
+  var g='<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true" focusable="false"><rect class="ps-sky" width="'+W+'" height="'+H+'"/><rect class="ps-grass" y="'+f1(st.horizon)+'" width="'+W+'" height="'+H+'"/>'+
+    '<ellipse class="ps-mound" cx="'+W/2+'" cy="'+f1(st.mound.y)+'" rx="'+f1(st.mound.rx)+'" ry="4"/><ellipse class="ps-dirt" cx="'+W/2+'" cy="'+f1(st.dirtCy)+'" rx="280" ry="180"/>'+
+    '<rect class="ps-back" x="'+f1(bk.x)+'" y="'+f1(bk.y)+'" width="'+f1(bk.w)+'" height="'+f1(bk.h)+'"/>'+
+    edges.map(function(e){return '<line class="ps-edge" x1="'+f1(e[0])+'" y1="'+f1(e[1])+'" x2="'+f1(e[2])+'" y2="'+f1(e[3])+'"/>'}).join('')+
+    '<rect class="ps-front" x="'+f1(fr.x)+'" y="'+f1(fr.y)+'" width="'+f1(fr.w)+'" height="'+f1(fr.h)+'"/>'+
+    grid.map(function(e){return '<line class="ps-grid" x1="'+f1(e[0])+'" y1="'+f1(e[1])+'" x2="'+f1(e[2])+'" y2="'+f1(e[3])+'"/>'}).join('')+
+    d.pitches.map(function(p,j){var end=p.pts[p.pts.length-1],c=DATA.pcol[p.code]||'#8A97AD';
+      return '<g class="ps-ghost" data-j="'+j+'"><polyline fill="none" stroke="'+c+'" points="'+p.pts.map(function(q){return f1(q[0])+','+f1(q[1])}).join(' ')+'"/><circle class="ps-ring" fill="none" stroke="'+c+'" cx="'+f1(end[0])+'" cy="'+f1(end[1])+'" r="'+f1(end[2]/2)+'"/></g>'}).join('')+
+    '<g class="ps-trail">'+Array(40+1).join('<line visibility="hidden"/>')+'</g><circle class="ps-release" cx="'+f1(d.release[0])+'" cy="'+f1(d.release[1])+'" r="2"/><circle class="ps-ball"/><path class="ps-seam"/><path class="ps-seam"/></svg>'+
+    '<div class="ps-bar" style="top:'+(S.BAR_TOP/H*100)+'%"><span class="ps-name"></span><span class="ps-mph"></span></div>';
+  return '<div class="pscene" data-pid="'+pid+'" role="img" aria-label="Behind-the-plate drawing of his pitches: '+d.pitches.map(function(p){return p.name}).join(', ')+'.">'+g+'</div>';
+}
+function startScene(el){
+  var d=DATA.scene.p[el.dataset.pid]; if(!d) return;
+  var P=d.pitches, N=40, HOLD=0.9, SLOW=DATA.scene.SLOW, shown=-1;
+  var ghosts=el.querySelectorAll('.ps-ghost'), segs=el.querySelectorAll('.ps-trail line'), ball=el.querySelector('.ps-ball'), seams=el.querySelectorAll('.ps-seam'), nm=el.querySelector('.ps-name'), mp=el.querySelector('.ps-mph');
+  var slot=Math.max.apply(null,P.map(function(p){return p.T}))*SLOW+HOLD;
+  function frame(e){ if(e==null) return {idx:0,progress:1}; var idx=Math.floor(e/slot)%P.length; return {idx:idx,progress:Math.min(1,(e%slot)/(P[idx].T*SLOW))}; }
+  function draw(e){
+    var fr=frame(e), idx=fr.idx, p=P[idx], c=DATA.pcol[p.code]||'#8A97AD';
+    if(idx!==shown){ shown=idx;
+      ghosts.forEach(function(g,j){g.setAttribute('visibility',j===idx?'hidden':'visible')});
+      segs.forEach(function(s){s.setAttribute('stroke',c)});
+      nm.textContent=p.name; mp.textContent=p.mph+' mph';
+      var card=el.closest('.card')||document; card.querySelectorAll('.pl li[data-code]').forEach(function(li){li.classList.toggle('act',li.dataset.code===p.code)});
+    }
+    var m=fr.progress*N, whole=Math.floor(m), pts=p.pts, cur=pts[N];
+    if(whole<N){var t=m-whole,a=pts[whole],b2=pts[whole+1]; cur=[a[0]+(b2[0]-a[0])*t,a[1]+(b2[1]-a[1])*t,a[2]+(b2[2]-a[2])*t]}
+    segs.forEach(function(seg,i){
+      if(i>whole||(i===whole&&whole>=N)){seg.setAttribute('visibility','hidden');return}
+      var a=pts[i],b3=i<whole?pts[i+1]:cur;
+      seg.setAttribute('visibility','visible');seg.setAttribute('x1',f1(a[0]));seg.setAttribute('y1',f1(a[1]));seg.setAttribute('x2',f1(b3[0]));seg.setAttribute('y2',f1(b3[1]));
+      seg.setAttribute('stroke-width',(b3[2]*0.62).toFixed(2));seg.setAttribute('stroke-linecap','round');seg.setAttribute('opacity',i<whole?(0.25+0.6*(i/N)).toFixed(2):'0.85');
+    });
+    var bx=cur[0],by=cur[1],r=cur[2]/2;
+    ball.setAttribute('cx',f1(bx));ball.setAttribute('cy',f1(by));ball.setAttribute('r',r.toFixed(2));
+    [-1,1].forEach(function(side,k){seams[k].setAttribute('d','M'+f1(bx+side*r*0.55)+' '+f1(by-r*0.75)+' Q'+f1(bx+side*r*0.1)+' '+f1(by)+' '+f1(bx+side*r*0.55)+' '+f1(by+r*0.75))});
+  }
+  draw(null);
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var t0=null,sh=0,raf=0;
+  function tick(ts){ if(!el.isConnected){raf=0;return} if(t0===null) t0=ts-sh; sh=ts-t0; draw(sh/1000); raf=requestAnimationFrame(tick); }
+  function start(){ if(!raf) raf=requestAnimationFrame(tick) }
+  function stop(){ cancelAnimationFrame(raf); raf=0; t0=null }
+  if('IntersectionObserver' in window){ new IntersectionObserver(function(en){ en[0].isIntersecting?start():stop() }).observe(el) } else start();
+}
+function openPitchSheet(pid,k){
+  var t=DATA.teams.filter(function(x){return x.k===k})[0], d=DATA.pm[pid]&&DATA.pm[pid].all0; if(!d) return;
+  var o=DATA.teams.filter(function(x){return x!==t})[0];
+  var tiles=d.rows.map(function(r){return '<li class="pt2" data-code="'+r.code+'">'+glyph(r)+'<b>'+r.n+'</b><span>'+Math.round(r.pct)+'%</span><small>'+(r.v?Math.round(r.v)+' mph':'')+'</small></li>'}).join('');
+  var root=document.getElementById('sheetroot');
+  root.innerHTML='<div class="scrim" id="scrim"><div class="sheetbox" role="dialog" aria-modal="true" aria-label="Pitch mix" style="--club:'+k_club(k,'club')+';--club2:'+k_club(k,'club2')+';--onbar:'+k_club(k,'onbar')+';--mscale:'+k_club(k,'mscale')+'"><div class="band sband"><b>Pitch mix</b><button class="sclose" aria-label="Close">✕</button></div><div class="sbody">'+sceneHtml(pid)+'<ul class="pt2l">'+tiles+'</ul></div></div></div>';
+  root.querySelector('.sclose').focus(); startScene(root.querySelector('.pscene'));
+}
+function k_club(k,f){return DATA.teams.filter(function(x){return x.k===k})[0][f]}
+
+/* ---- sheets: ballpark and umpire tendencies ---- */
+function ord(n){var s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])}
+function neutralBand(title){return '<div class="band sband" style="--club:#0F1822;--club2:#6B6558;--onbar:#F1E7CC"><b>'+title+'</b><button class="sclose" aria-label="Close">✕</button></div>'}
+function openParkSheet(){
+  var P=DATA.park, rk=function(group){return P.rows.filter(function(r){return r.group===group}).map(function(r){var x=(r.rank-1)/(r.total-1)*100;
+    return '<div class="rk"><b>'+r.label+'</b><span>'+r.value+'′</span><i class="rkb"><u style="left:'+x.toFixed(0)+'%"></u></i><small>'+ord(r.rank)+' of '+r.total+'</small></div>'}).join('')};
+  var root=document.getElementById('sheetroot');
+  root.innerHTML='<div class="scrim" id="scrim"><div class="sheetbox" role="dialog" aria-modal="true" aria-label="'+P.name+'">'+neutralBand(P.name)+
+    '<div class="sbody"><div class="fieldwrap parkdraw">'+DATA.fieldsvg+'</div>'+
+    '<div class="spstats parkfacts"><div><small>Opened</small><b>'+P.built+'</b></div><div><small>Roof</small><b>'+P.roof+'</b></div><div><small>Capacity</small><b>'+P.capacity.toLocaleString()+'</b></div></div>'+
+    '<h5>Outfield distances</h5><div class="rks">'+rk('dist')+'</div><h5>Wall heights</h5><div class="rks">'+rk('wall')+'</div>'+
+    '<p class="sfoot">Distances from the MLB Stats API, ranked among the 30 MLB parks. Wall outline checked against Baseball Savant.</p></div></div></div>';
+  root.querySelector('.sclose').focus();
+}
+function zoneSvg(cells){
+  var CW=46,RH=52,PAD=3,out='<svg class="zmap" viewBox="0 0 '+(CW*3+PAD*2)+' '+(RH*3+PAD*2)+'" role="img" aria-label="Where this umpire misses more than a typical umpire">';
+  cells.forEach(function(c,i){var col=i%3,row=(i-col)/3,x=PAD+col*CW,y=PAD+row*RH,over=c[1];
+    if(over>0.02){var w=Math.min(1,(over-0.02)/0.08);out+='<rect x="'+(x+2.5)+'" y="'+(y+2.5)+'" width="'+(CW-5)+'" height="'+(RH-5)+'" fill="rgba(180,69,58,'+(0.12+0.2*w).toFixed(2)+')" stroke="#B4453A" stroke-width="'+(1.2+2.2*w).toFixed(1)+'"/>'}});
+  out+='<rect x="'+PAD+'" y="'+PAD+'" width="'+CW*3+'" height="'+RH*3+'" fill="none" stroke="#0F1822" stroke-width="1.6"/>';
+  [1,2].forEach(function(k){out+='<line x1="'+(PAD+k*CW)+'" y1="'+PAD+'" x2="'+(PAD+k*CW)+'" y2="'+(PAD+RH*3)+'" stroke="#6B6558" stroke-width=".8"/><line x1="'+PAD+'" y1="'+(PAD+k*RH)+'" x2="'+(PAD+CW*3)+'" y2="'+(PAD+k*RH)+'" stroke="#6B6558" stroke-width=".8"/>'});
+  return out+'</svg>';
+}
+function openUmpSheet(id){
+  var U=DATA.ump[id]; if(!U) return;
+  var tiers=['Very pitcher friendly','Pitcher friendly','Neutral','Hitter friendly','Very hitter friendly'], keys=['veryPitcher','pitcher','neutral','hitter','veryHitter'], ti=keys.indexOf(U.lean.tier);
+  var segs=tiers.map(function(l,i){return '<span class="lseg'+(i===ti?' on':'')+'"><i></i><small>'+l+'</small></span>'}).join('');
+  var pct=function(x){return x==null?'—':(x*100).toFixed(1)+'%'};
+  var nm=U.name.split(' '), first=nm[0], last=nm.slice(1).join(' ');
+  var ch=U.ch&&U.ch.perGame!=null?'<h5>ABS challenges</h5><div class="spstats ustats"><div><small>Per game</small><b>'+U.ch.perGame.toFixed(1)+'</b></div><div><small>Overturned</small><b>'+pct(U.ch.overturnRate)+'*</b></div></div><p class="sfoot">*League average: '+pct(U.lch&&U.lch.overturnRate)+' overturned</p>':'';
+  var root=document.getElementById('sheetroot');
+  root.innerHTML='<div class="scrim" id="scrim"><div class="sheetbox" role="dialog" aria-modal="true" aria-label="Umpire tendencies">'+neutralBand('Umpire tendencies')+
+    '<div class="sbody"><div class="s1"><span class="uplate" aria-hidden="true"><svg viewBox="0 0 20 20" width="22" height="22"><polygon points="3,4 17,4 17,11 10,17 3,11" fill="currentColor"/></svg></span><div><small class="uhp">Home plate</small><strong>'+first+' '+last+'</strong><p class="umono">'+U.acc.games+' scored games · '+U.acc.called.toLocaleString()+' called pitches</p></div></div>'+
+    '<div class="spstats ustats u4"><div><small>Accuracy</small><b>'+pct(U.acc.accuracy)+'</b></div><div><small>Rank</small><b>'+U.rank.rank+'<sub>/'+U.rank.total+'</sub></b></div><div><small>Consistency</small><b>'+pct(U.acc.consistency)+'</b></div><div><small>Run impact</small><b>'+U.acc.favor.toFixed(1)+'<sub>/gm</sub></b></div></div>'+
+    '<h5>Zone lean</h5><div class="lean" role="img" aria-label="Zone lean: '+tiers[ti]+'"><span class="lcaret" style="left:'+((ti+0.5)/5*100)+'%"></span><div class="lbar">'+segs+'</div></div>'+
+    '<h5>Area to watch</h5><div class="watch"><div><b>'+(U.watch?U.watch.phrase:'No clear tendency')+'</b><p class="umono">Batter’s view. Outlined where his misses run above the league average.</p></div>'+zoneSvg(U.cells)+'</div>'+ch+
+    '<p class="sfoot">2026 season · '+U.acc.games+' scored games · updated '+U.gen+'</p></div></div></div>';
+  root.querySelector('.sclose').focus();
+}
+var TIERL={elite:'Elite',good:'Good',average:'Average',below:'Below average'};
+function applyGame(k){var g=DATA.games[k];DATA.teams=g.teams;DATA.umps=g.umps;DATA.series=g.series;DATA.pen=g.pen;DATA.umpHP=g.umpHP;DATA.tmcount=g.tmcount;DATA.gameKey=k;DATA.meta=g.meta;}
+applyGame('nl');
+function frame(t,wide){
+  var M=DATA.meta, aug=DATA.gameKey==='aug', o=t.opp, pre = !aug && state==='pre', live = !aug && state==='live';
+  var lhb = t.order.filter(function(p){return p.b==='L'}).length, rhb = t.order.filter(function(p){return p.b==='R'}).length, sw = t.order.length-lhb-rhb;
+  var cols = wide
+    ? '<div class="cols"><span></span><span></span><span>Batter</span><span>AVG</span><span>OPS</span><span class="x2">HR</span><span class="x2">RBI</span></div>'
+    : '<div class="cols"><span></span><span></span><span>Batter</span><span>AVG</span></div>';
+  var body;
+  if(!pre){
+    body = cols+'<ul class="lu">'+t.order.map(function(p,i){return row(t,p,i,false,wide)}).join('')+'</ul>';
+  } else {
+    var pos=['C','1B','2B','SS','3B','LF','CF','RF','DH'], g='';
+    pos.forEach(function(P){
+      var list=t.pool.filter(function(p){return p.pos===P}); if(!list.length) return;
+      g+='<li class="grp">'+P+'</li>'+list.map(function(p,i){return row(t,p,i,true,wide)}).join('');
+    });
+    body = '<div class="tape hold">Lineup not final · posts close to first pitch (5:00 PM)</div>'+cols+'<ul class="lu">'+g+'</ul>';
+  }
+  var tab = pre ? 'Who could play' : 'Batting order';
+  var cnt = pre ? t.pool.length+' players' : '9 · vs '+o.last;
+  var tm = t.tm.map(function(x){
+    function pl(id){return DATA.ph[id]?'<img class="tph" src="'+DATA.ph[id]+'" alt="">':'<span class="tph"></span>'}
+    return '<li><span class="l"><span class="tn"><strong>'+x[0]+'</strong><small>'+x[1]+'</small></span>'+pl(x[6])+'</span>'+
+      '<span class="c"><img src="'+DATA.tl[x[8]]+'" alt="'+x[2]+'"><small>'+x[3]+'</small></span>'+
+      '<span class="r">'+pl(x[7])+'<span class="tn"><strong>'+x[4]+'</strong><small>'+x[5]+'</small></span></span></li>'}).join('');
+  function cell(label,val,glyph,note,cls){
+    return '<div class="fact'+(cls?' '+cls:'')+'"><small>'+label+'</small><span class="fv"><span>'+val+'</span>'+(glyph||'')+'</span>'+(note?'<p class="fnote" hidden>'+note+'</p>':'')+'</div>';
+  }
+  var gb=function(kind,label,svg,attr){return '<button class="fglyph '+kind+'"'+(attr||'')+' aria-expanded="false" aria-label="'+label+'">'+svg+'</button>'};
+  var SHIRT='<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M8 3 3 6l2 4 2-1v12h10V9l2 1 2-4-5-3c-1 2-7 2-8 0Z"/></svg>';
+  var CROWD='<svg viewBox="0 0 20 20" width="12" height="12" fill="currentColor" aria-hidden="true"><circle cx="10" cy="6.5" r="2.6"/><path d="M5 16c0-3 2.2-5 5-5s5 2 5 5Z"/><circle cx="3.8" cy="8.8" r="1.8"/><circle cx="16.2" cy="8.8" r="1.8"/><path d="M1 15c0-2 1.3-3.5 3-3.5.6 0 1.1.1 1.5.4-.8.9-1.2 1.9-1.3 3.1ZM19 15c0-2-1.3-3.5-3-3.5-.6 0-1.1.1-1.5.4.8.9 1.2 1.9 1.3 3.1Z"/></svg>';
+  var DIAMOND='<svg viewBox="0 0 20 20" width="12" height="12" aria-hidden="true" fill="currentColor"><path d="M10 2 18 10 10 18 2 10Z"/></svg>';
+  var PLATE='<svg viewBox="0 0 20 20" width="12" height="12" fill="currentColor" aria-hidden="true"><polygon points="3,4 17,4 17,11 10,17 3,11"/></svg>';
+  var facts = '<div class="facts">'+
+    cell('Date',M.date)+cell('Ballpark','Dodger Stadium',gb('','Ballpark diagram',DIAMOND,' data-park="1"'))+cell('Weather',pre?'—':M.wx)+
+    cell('Attendance',M.att,gb('','How full is the stadium',CROWD),M.attNote)+
+    cell('Manager',t.mgr+' <em>'+t.mgrj+'</em>')+
+    cell('Uniform',t.uni.name,gb('','Uniform and marks',SHIRT,' data-sheet="'+t.k+'"'))+
+    cell('Broadcast',M.bc[t.k])+'</div>'+
+    '<div class="umpgrid">'+DATA.umps.map(function(u){
+      var hp = u[0]==='HP' && !pre;
+      return cell(u[0]+' ump', pre?'—':u[1], hp?gb('tier-average','Umpire accuracy: '+TIERL[DATA.ump[DATA.umpHP].rank.tier],PLATE):'', hp?'<span class="pill tierp">'+TIERL[DATA.ump[DATA.umpHP].rank.tier]+'</span> <b>'+DATA.ump[DATA.umpHP].rank.rank+' out of '+DATA.ump[DATA.umpHP].rank.total+'</b> <a href="#" data-ump="'+DATA.umpHP+'">Full breakdown →</a>':'');
+    }).join('')+'</div>';
+  var pill = pre ? '<span class="pill">Not final</span>' : '';
+  var tvBtn = '<a class="mlbtv" href="https://www.mlb.com/tv/g'+M.gamePk+'" target="_blank" rel="noopener" aria-label="Watch on MLB.TV"><img src="'+DATA.x.mlbtv+'" alt="MLB.TV"><span class="wl" aria-hidden="true"><svg viewBox="0 0 10 10" width="8" height="8" fill="currentColor"><path d="M1.5 .5 9.5 5 1.5 9.5Z"/></svg>Watch</span><span class="ar" aria-hidden="true">↗</span></a>';
+  var notesBtn = '<button class="gnotes" aria-label="Game notes, '+t.short+'"><img src="'+DATA.logo[t.id]+'" alt="">Game notes<span aria-hidden="true">↗</span></button>';
+  var stamp = '<div class="stamp"><i>First pitch</i><b>'+M.fp+'<sup>'+M.ampm+'</sup></b></div>';
+  var hside = '<div class="hside">'+stamp+'<div class="hbtns">'+notesBtn+tvBtn+'</div></div>';
+  var band = '<div class="band"><div class="mk"><img src="'+DATA.mono[t.id]+'" alt="">'+(M.nlcs?'<img class="nlcs" src="'+DATA.x.nlcs+'" alt="2026 NLCS"><b>Game 3</b>':'<b>'+M.band+'</b>')+'</div><span class="btag">'+M.tag+'</span></div>';
+  var crest = '<button class="crest crestbtn" data-sheet="'+t.k+'" aria-label="Uniform and marks for '+t.name+'"><img src="'+DATA.logo[t.logo]+'" alt=""><span class="cbadge" aria-hidden="true"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 3 3 6l2 4 2-1v12h10V9l2 1 2-4-5-3c-1 2-7 2-8 0Z"/></svg></span></button>';
+  var hero = wide
+    ? '<div class="card heroSplit">'+band+'<div class="hero">'+crest+'<div class="who"><p class="role">'+t.side+' · Lineup</p><h2>'+t.name+'</h2><p class="vs">'+t.at+'</p>'+(pre?'<div class="hact">'+pill+'</div>':'')+'</div>'+hside+'</div>'+facts+'</div>'
+    : '<div class="card heroSplit">'+band+'<div class="hero">'+crest+'<div class="who"><p class="role">'+t.side+' · Lineup</p><h2>'+t.name+'</h2><p class="vs">'+t.at+'</p></div></div>'+
+      '<div class="hero heroact" style="padding-top:0">'+(pre?'<div class="hact" style="margin:0">'+pill+'</div>':'')+hside+'</div>'+facts+'</div>';
+  var ot = DATA.teams.filter(function(x){return x!==t})[0];
+  var starter = '<div class="card"><div class="band sband" style="--club:'+ot.club+';--club2:'+ot.club2+';--onbar:'+ot.onbar+';--mscale:'+ot.mscale+'"><b>Starting pitcher</b><img src="'+DATA.mono[ot.id]+'" alt="'+ot.name+'"></div>'+
+    '<div class="sp"><img class="spph" src="'+DATA.ph[o.id]+'" alt="'+o.full+'"><div class="spwho"><strong>'+o.last.toUpperCase()+', '+o.full.split(' ')[0].toUpperCase()+'</strong>'+
+    '<span class="meta"><span class="p">'+o.hand+'HP</span><span class="j">#'+o.num+'</span></span>'+(o.pill?'<span class="pill" style="margin-top:8px">'+o.pill+'</span>':'')+'</div></div>'+
+    '<div class="spstats"><div class="ink"><small>ERA</small><b>'+o.era+'</b></div><div><small>W–L</small><b>'+o.wl+'</b></div><div><small>K</small><b>'+o.k+'</b></div><div><small>IP</small><b>'+o.ip+'</b></div></div>'+
+    '<div class="splines">'+statrow('Last start',o.lastst.split(': ')[0],o.lastst.split(': ')[1],'See all ›')+(o.career?statrow(o.career.split(':')[0],'',o.career.split(': ')[1]):'')+'</div>'+
+    pmHtml(String(o.id),t.k+(wide?'-w':''),pre?null:{L:lhb,R:rhb+(o.hand==='L'?sw:0)},wide,ot.k)+'<div style="height:12px"></div></div>';
+
+  var VP=function(x,y){return [x/620*100,(y-50)/550*100]};
+  var POSXY={CF:VP(310,168),LF:VP(138,238),RF:VP(482,238),SS:VP(222,338),'2B':VP(398,338),'3B':VP(188,446),'1B':VP(432,446),P:VP(310,442),C:VP(310,552)};
+  var defRows = pre ? [] : ot.order.map(function(p){return p}).concat([{id:o.id,n:o.last.toUpperCase()+', '+o.full.split(' ')[0].toUpperCase(),pos:'P',j:o.num}]);
+  var nodes = Object.keys(POSXY).map(function(pos){
+    var p = defRows.filter(function(x){return x.pos===pos})[0];
+    var xy = POSXY[pos];
+    var inner = p
+      ? '<span class="fl"><b>'+p.n.split(',')[0]+'</b></span>'
+      : '<span class="fl tbd"><b>—</b></span>';
+    return '<div class="fnode" style="left:'+xy[0].toFixed(1)+'%;top:'+xy[1].toFixed(1)+'%">'+inner+'</div>';
+  }).join('');
+  var dh = defRows.filter(function(x){return x.pos==='DH'})[0];
+  var field = '<div class="card"><div class="band sband" style="--club:'+ot.club+';--club2:'+ot.club2+';--onbar:'+ot.onbar+';--mscale:'+ot.mscale+'"><b>Defensive alignment</b><img src="'+DATA.mono[ot.id]+'" alt="'+ot.name+'"></div>'+
+    '<div class="fieldwrap">'+DATA.fieldsvg+nodes+
+      (pre?'<p class="fhint">Alignment sets when the lineup posts.</p>':(dh?'<div class="fdh"><span>DH</span>'+dh.n.split(',')[0]+'</div>':''))+
+    '</div></div>';
+  var order = '<div class="card order'+(pre?' pre':'')+'"><div class="band sband" style="--club:'+t.club+';--club2:'+t.club2+';--onbar:'+t.onbar+';--mscale:'+t.mscale+'"><b>'+tab+'</b><img src="'+DATA.mono[t.id]+'" alt="'+t.name+'"></div>'+body+(pre?'':benchHtml(t,o))+'<div class="foot">Full roster ›</div></div>';
+  var tmc = '<div class="card tmcard"><button class="tmhead" aria-expanded="false" aria-controls="tm-'+t.k+(wide?'-w':'')+'"><span class="tmt">Former teammates</span><span class="tmn">'+DATA.tmcount+' ties</span><span class="chev" aria-hidden="true"></span></button>'+
+    '<div class="tmbody" id="tm-'+t.k+(wide?'-w':'')+'"><div class="ladderwrap" data-lad="'+DATA.gameKey+'"></div></div></div>';
+  var REF='<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M13.5 8A5.5 5.5 0 1 1 11.8 4"/><path d="M12 1v3.5H8.5" stroke-linejoin="round"/></svg>';
+  var next = '<div class="dock">'+(aug?'':'<button class="dref" aria-label="Refresh live game data">'+REF+'<span class="dtx"><b>Refresh</b><small>As of 5:03 PM</small></span></button>')+(live?'<button class="dcatch">Catch up to live ›</button>':'')+'<button class="dnext">'+t.next+' ›</button></div>';
+  var jumpbar = '<div class="jump" role="navigation" aria-label="Game sections">'+t.jump+'</div>';
+  var top = '<div class="site"><span class="logo"><i></i>TALLY*</span><nav><span>Game Log</span><span>Menu</span></nav></div><div class="back">‹ Back</div>';
+  var vars = ' style="--club:'+t.club+';--club2:'+t.club2+';--onbar:'+t.onbar+';--tint:'+t.tint+';--tscale:'+t.scale+';--tox:'+t.ox+'%;--toy:'+t.oy+'%;--mscale:'+t.mscale+'"';
+  if(wide){
+    return '<section class="frame wideframe"'+vars+'><div class="route"><b>'+t.label+' · desktop</b><span>'+t.route+'</span></div><div class="screen wide">'+
+      top+hero+jumpbar+'<div class="dgrid"><aside class="dside">'+starter+field+penHtml(ot,true,t.k)+tmc+'</aside><div class="dmain">'+order+seriesHtml(t,t.k,true)+'</div></div>'+next+'</div></section>';
+  }
+  return '<section class="frame"'+vars+'><div class="route"><b>'+t.label+'</b><span>'+t.route+'</span></div><div class="screen">'+
+    top+hero+jumpbar+starter+field+order+penHtml(ot,false,t.k)+seriesHtml(t,t.k,false)+tmc+next+'</div></section>';
+}
+
+var GL={c:'<circle cx="8" cy="8" r="6"/>',d:'<path d="M8 1.5 14.5 8 8 14.5 1.5 8Z"/>',s:'<rect x="2.5" y="2.5" width="11" height="11"/>',t:'<path d="M8 2 14.5 14 1.5 14Z"/>',h:'<path d="M8 1.5l5.6 3.2v6.6L8 14.5l-5.6-3.2V4.7Z"/>'};
+function glyph(r){return '<svg class="gl" viewBox="0 0 16 16" aria-hidden="true" fill="'+(r.ring?'none':r.col)+'" stroke="'+(r.ring?r.col:'var(--ink0)')+'" stroke-width="'+(r.ring?2:1.3)+'">'+GL[r.sh]+'</svg>'}
+var LOOKS=[[0,'All'],[1,'1st look'],[2,'2nd'],[3,'3rd+']], SIDES=[['all','All'],['L','LHB'],['R','RHB']];
+function statrow(title,sub,s,link){
+  var cells=s.split(', ').map(function(x){var i=x.indexOf(' ');return '<div><b>'+x.slice(0,i)+'</b><small>'+x.slice(i+1)+'</small></div>'}).join('');
+  return '<div class="srow"><div class="shead"><span class="stitle">'+title+'</span>'+(sub?'<span class="ssub">'+sub+'</span>':'')+(link?'<a href="#" onclick="return false">'+link+'</a>':'')+'</div><div class="scells">'+cells+'</div></div>';
+}
+function pmHtml(id,key,cnt,wide,pk){
+  var d=DATA.pm[id]; if(!d) return '';
+  var st=pmState[key]||(pmState[key]={side:'all',look:0});
+  var v=d[st.side+st.look]||{tot:0,rows:[]};
+  var seg=function(arr,cur,kind,label){return '<div class="pseg" role="group" aria-label="'+label+'">'+arr.map(function(a){var n=(kind==='side'&&cnt&&cnt[a[0]]!=null)?'<em>'+cnt[a[0]]+'</em>':'';return '<button data-k="'+kind+'" data-v="'+a[0]+'" aria-pressed="'+(String(a[0])===String(cur))+'">'+a[1]+n+'</button>'}).join('')+'</div>'};
+  var max=v.rows.length?v.rows[0].pct:1;
+  var rows=v.rows.length? v.rows.map(function(r){
+    var dl='';
+    if(r.d!==null && Math.abs(r.d)>=2) dl='<svg class="dl '+(r.d>0?'up':'dn')+'" viewBox="0 0 10 10" aria-label="'+(r.d>0?'up ':'down ')+Math.abs(r.d).toFixed(0)+' points"><path d="'+(r.d>0?'M5 .5 9.6 9.5 .4 9.5Z':'M5 9.5 .4 .5 9.6 .5Z')+'"/></svg>';
+    return '<li data-code="'+r.code+'">'+glyph(r)+'<span class="pn">'+r.n+'</span><span class="pb"><i style="width:'+(r.pct/max*100).toFixed(0)+'%;background:'+r.col+'"></i></span><span class="pp">'+r.pct.toFixed(1)+'%'+dl+'</span><span class="pv">'+(r.v?Math.round(r.v)+' mph':'')+'</span></li>'}).join('')
+    : '<li class="pnone">Not enough pitches in this view.</li>';
+  return '<div class="pmix" data-id="'+id+'" data-key="'+key+'" data-cnt=\''+(cnt?JSON.stringify(cnt):'')+'\' data-wide="'+(wide?1:0)+'" data-pk="'+pk+'"><div class="pmh"><div class="pmt"><h4>Pitch mix</h4><span class="pcount">'+v.tot+' pitches</span></div>'+(wide?'':'<button class="pwatch" data-pitch="'+id+'" data-pk="'+pk+'" aria-label="Watch his pitches"><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true" fill="currentColor"><path d="M1.5 .5 9.5 5 1.5 9.5Z"/></svg>Watch</button>')+'</div>'+
+    '<div class="pctl"><span class="plab">Batter</span>'+seg(SIDES,st.side,'side','Side the batter hits from')+'</div>'+
+    '<div class="pctl"><span class="plab">Time through</span>'+seg(LOOKS,st.look,'look','Times facing a batter in a game')+'</div>'+
+    '<ul class="pl">'+rows+'</ul>'+(wide?'<div class="pscwrap">'+sceneHtml(id)+'</div>':'')+'</div>';
+}
+function wirePm(root){
+  root.querySelectorAll('.pmix').forEach(function(el){
+    el.querySelectorAll('.pseg button').forEach(function(b){
+      b.addEventListener('click',function(){
+        var st=pmState[el.dataset.key]; st[b.dataset.k]= b.dataset.k==='look'?+b.dataset.v:b.dataset.v;
+        var tmp=document.createElement('div'); tmp.innerHTML=pmHtml(el.dataset.id,el.dataset.key,el.dataset.cnt?JSON.parse(el.dataset.cnt):null,el.dataset.wide==='1',el.dataset.pk);
+        var n=tmp.firstChild; el.replaceWith(n); wirePm(n.parentNode); var sc=n.querySelector('.pscene'); if(sc) startScene(sc);
+      });
+    });
+  });
+}
+function jump(sel){
+  return ['MIL','LAD','Innings','Box','Scorecard'].map(function(x){
+    var n = '';
+    return '<button'+(x===sel?' aria-current="page"':'')+'>'+x+n+'</button>';
+  }).join('');
+}
+function render(){
+  DATA.teams.forEach(function(t){t.jump=jump(t.sel)});
+  document.getElementById('frames').innerHTML = DATA.teams.map(function(x){return frame(x,false)}).join('');
+  document.getElementById('dframe').innerHTML = frame(DATA.teams[dteam],true);
+  wirePm(document);
+  document.querySelectorAll('.pscene').forEach(startScene);
+  window.__PH=DATA.ph; window.__LOGOS=DATA.ladlogos;
+  document.querySelectorAll('.ladderwrap').forEach(function(el){ if(window.mountLadder) window.mountLadder(el,{ladder:DATA.ladders[el.dataset.lad],dayNight:'night',away:{id:158,teamName:'Milwaukee Brewers'},home:{id:119,teamName:'Los Angeles Dodgers'}}); });
+  document.querySelectorAll('.bandbtn').forEach(function(b){b.addEventListener('click',function(){b.setAttribute('aria-expanded', b.getAttribute('aria-expanded')==='true'?'false':'true')})});
+  document.querySelectorAll('.sscard').forEach(function(c){var s=c.querySelector('.sstrip'),cur=s.querySelector('.cur'); if(cur) s.scrollLeft=cur.offsetLeft-(s.clientWidth-cur.offsetWidth)/2; c.querySelectorAll('.sarr button').forEach(function(b){b.addEventListener('click',function(){s.scrollBy({left:+b.dataset.dir*s.clientWidth*0.8,behavior:'smooth'})})})});
+  document.querySelectorAll('.fglyph').forEach(function(g){g.addEventListener('click',function(){if(g.dataset.sheet) return;var open=g.getAttribute('aria-expanded')==='true';g.setAttribute('aria-expanded',String(!open));var n=g.closest('.fact').querySelector('.fnote');if(n)n.hidden=open})});
+  document.querySelectorAll('.tmhead').forEach(function(b){b.addEventListener('click',function(){b.setAttribute('aria-expanded', b.getAttribute('aria-expanded')==='true'?'false':'true')})});
+  document.querySelectorAll('.pr').forEach(function(b){
+    b.addEventListener('click',function(){b.setAttribute('aria-expanded', b.getAttribute('aria-expanded')==='true'?'false':'true')});
+  });
+}
+function set(s){
+  state=s;
+  document.getElementById('s-posted').setAttribute('aria-pressed', s==='posted');
+  document.getElementById('s-pre').setAttribute('aria-pressed', s==='pre');
+  document.getElementById('s-live').setAttribute('aria-pressed', s==='live');
+  render();
+}
+function setGame(k){applyGame(k); document.getElementById('g-nl').setAttribute('aria-pressed',k==='nl'); document.getElementById('g-aug').setAttribute('aria-pressed',k==='aug'); document.getElementById('stateseg').hidden=(k==='aug'); document.getElementById('hint').textContent=DATA.meta.hint; if(k==='aug') state='posted'; set(state);}
+document.getElementById('g-nl').onclick=function(){setGame('nl')};
+document.getElementById('g-aug').onclick=function(){setGame('aug')};
+document.getElementById('s-posted').onclick=function(){set('posted')};
+document.getElementById('s-pre').onclick=function(){set('pre')};
+document.getElementById('s-live').onclick=function(){set('live')};
+document.getElementById('d-away').onclick=function(){dteam=0;this.setAttribute('aria-pressed','true');document.getElementById('d-home').setAttribute('aria-pressed','false');render()};
+document.getElementById('d-home').onclick=function(){dteam=1;this.setAttribute('aria-pressed','true');document.getElementById('d-away').setAttribute('aria-pressed','false');render()};
+render();
+</script>

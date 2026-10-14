@@ -27,6 +27,7 @@ import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.j
 import { seriesForGame } from '../api/postseason/bracket.js'
 import { gameStatusLine } from '../api/postseason/text.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
+import { LineupPage } from './lineup/next/LineupPage.jsx'
 import { useCopy } from '../copy/copyContext.js'
 import { formatResetTime } from '../lib/scoresUnlocked.js'
 
@@ -35,7 +36,6 @@ import { formatResetTime } from '../lib/scoresUnlocked.js'
 // and each is a large module on its own. Splitting them further means opening
 // a game to read a lineup never downloads the innings viewer or box score
 // code until the user actually taps into that section.
-const TeamInfo = lazy(() => import('./TeamInfo.jsx').then((m) => ({ default: m.TeamInfo })))
 const InningViewer = lazy(() =>
   import('./InningViewer.jsx').then((m) => ({ default: m.InningViewer })),
 )
@@ -371,7 +371,7 @@ export function GameView({ game, section, onSection }) {
 
       {feed && step === 0 && (
         <Suspense fallback={<Loader />}>
-        <TeamInfo
+        <LineupPage
           feed={feed}
           side="away"
           manager={managers.data?.away}
@@ -403,7 +403,7 @@ export function GameView({ game, section, onSection }) {
       )}
       {feed && step === 1 && (
         <Suspense fallback={<Loader />}>
-        <TeamInfo
+        <LineupPage
           feed={feed}
           side="home"
           manager={managers.data?.home}

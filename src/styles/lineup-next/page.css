@@ -1,0 +1,10 @@
+/* ==== THE NEW LINEUP PAGE (?look=new, docs/lineup-redesign.md) ====
+   The page root is .lnext__page. Frames are Cards, so this file holds the places they sit in. */
+
+.lnext__page {
+  padding-top: var(--space-4);
+}
+.lnext__name {
+  margin: 0;
+  font-family: var(--font-display);
+}
