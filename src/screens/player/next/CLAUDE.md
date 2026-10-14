@@ -11,7 +11,7 @@ their sections (`tab` prop). Plan: `docs/player-redesign.md`.
 One `modules/<module>/` folder per module: `season` #1885, `splits` #1886, `plate` #1887,
 `contact` #1888, `form` #1889 (batter), `pform` #1930 (pitcher Form trend), `batlog` #1890,
 `pitchlog` #1851, `fouls` #1891, `similar` #1926 (ends Game log), `arsenal` #1892, `mound`
-#1893, `path` #1894, `prospects` #1927, `firsts` #1895, `innings` #1928, `contract` #1929,
+#1893, `path` #1894, `prospects` #1927, `prospect` #2068, `firsts` #1895, `innings` #1928, `contract` #1929,
 `percentile` #2011, `advanced` #2012, `runvalue` #2013, `command` #2014, `target` #2015, `pfouls` #2016,
 `milestones` #2017, `awards` #2018, `teams` #2019, `moves` #2020, `photos` #2021, `highlights` #2022 (stubs,
 wired in #2002), `tbd` #1896 (one folder, five slots: Season, On the mound (pitchers), Game log, Career and History; no

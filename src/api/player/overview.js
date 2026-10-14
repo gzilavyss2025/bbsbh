@@ -20,7 +20,6 @@ import { MLB_LOG_GAME_TYPES } from '../boxlines/rows.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from '../war.js'
 import { fetchPlayerContract } from '../person/contracts.js'
 import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor, medianRatesFor } from '../savantPercentiles.js'
-import { fetchProspectTrend, prospectTrendById, prospectCardFor } from '../prospectTrend.js'
 import {
   awardsView,
   buildBlock,
@@ -47,13 +46,11 @@ export async function loadPlayerOverview(id, asOf) {
     bio, txns, groups, primaryGroup, season, startDate, cutoff, endDate, debutYear, currentActivitySportId, liveSportId,
   } = ctx
 
-  // WAR (MLB calc, MLB-only), Statcast percentiles and the prospect-trend
-  // snapshot all ride here — same-origin static files, session-cached, so
-  // each is free after the first player page anywhere in the app. Statcast is
-  // fetched only for a player CURRENTLY active at the majors (the source has
-  // no MiLB rows); the prospect trend only below it — the two teasers are
-  // mutually exclusive, same gate PlayerAnalyticsTab's full cards use.
-  const [warCurrent, warHistory, contract, savantData, prospectTrend, awards] = await Promise.all([
+  // WAR (MLB calc, MLB-only) and Statcast percentiles ride here — same-origin static
+  // files, session-cached, so each is free after the first player page anywhere in the
+  // app. Statcast is fetched only for a player CURRENTLY active at the majors (the
+  // source has no MiLB rows).
+  const [warCurrent, warHistory, contract, savantData, awards] = await Promise.all([
     fetchWarData(),
     fetchWarHistory(id),
     // A contract ledger is a season's book, not a day's, and Cot's carries no
@@ -61,7 +58,6 @@ export async function loadPlayerOverview(id, asOf) {
     // the card simply doesn't render.
     asOf ? Promise.resolve(null) : fetchPlayerContract(id),
     currentActivitySportId === 1 ? fetchSavantPercentiles() : Promise.resolve(null),
-    currentActivitySportId !== 1 ? fetchProspectTrend() : Promise.resolve(null),
     // The awards chip strip reads every category the feed carries, same as
     // the History tab's full ledger — ranking happens in the component
     // (AwardsLedger's `preview` branch), against the site owner's own
@@ -163,19 +159,6 @@ export async function loadPlayerOverview(id, asOf) {
 
   const blocks = results.map((r) => r.block)
 
-  // The Prospect Card teaser — MiLB only, mirroring PlayerAnalyticsTab's own
-  // full-card gate one-for-one (`trendEntry.group` says which block it
-  // belongs under; a player with no trend row yet still gets a card in his
-  // PRIMARY group, so an untracked prospect isn't blank in a different way
-  // than the Analytics tab is).
-  const trendEntry = prospectTrend ? prospectTrendById(prospectTrend, bio.id) : null
-  // The card's level is the trend row's, not the live team's (#1359).
-  const card =
-    currentActivitySportId !== 1
-      ? prospectCardFor(prospectTrend, trendEntry, bio.birthDate, currentActivitySportId)
-      : null
-  const prospectCardGroup = trendEntry?.group ?? primaryGroup
-
   // Every gamePk the preview logs point at, plus the debut game — one shared
   // boxscoreLinks lookup rather than two.
   const previewPks = new Set()
@@ -221,9 +204,6 @@ export async function loadPlayerOverview(id, asOf) {
     debutBoxscorePath: debutGamePk ? links.path(debutGamePk) : null,
     progression,
     timeline,
-    prospectCard: card?.view ?? null,
-    prospectCardSportId: card?.sportId ?? null,
-    prospectCardGroup,
     awardLedger: awardsView(awards, endDate),
   }
 }
