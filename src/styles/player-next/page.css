@@ -138,6 +138,25 @@
 .pnext__section {
   padding-top: var(--space-3h);
 }
+/* A section is a wrapping row: every card takes the full row, except a pair at wide widths.
+   The section is the query container, so only its cards change. A pair is an 'a' card with
+   a 'b' card right after it (`pair` in sections.js); a card whose partner is hidden has no
+   such neighbour and stays full width. */
+/* layout-exempt: the section's cards wrap into a pair only at wide widths; the page's Stack cannot say it */
+.playernext .pnext__section {
+  flex-flow: row wrap;
+  container-type: inline-size;
+}
+.pnext__section > .pnext__slot {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+@container (min-width: 700px) {
+  .pnext__section > [data-pair='a']:has(+ [data-pair='b']),
+  .pnext__section > [data-pair='a'] + [data-pair='b'] {
+    flex-basis: calc(50% - var(--space-section) / 2);
+  }
+}
 /* A section slot: a stamped Card whose name tab hangs above it. */
 .pnext__slot {
   margin-top: var(--space-3h);

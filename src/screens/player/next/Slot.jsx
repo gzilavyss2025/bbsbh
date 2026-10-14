@@ -23,7 +23,7 @@ export function Slot({ inst, bio, asOf, season, onEmpty }) {
   const bodyRef = useRef(null)
   const [report] = useState(() => () => onEmpty(inst.key))
   return (
-    <Card frame="stamped" label={inst.label} count={count} ref={ref} className="pnext__slot">
+    <Card frame="stamped" label={inst.label} count={count} ref={ref} className="pnext__slot" data-pair={inst.pair}>
       {near ? (
         <SlotBoundary slotKey={inst.key} onFail={report}>
           <Suspense fallback={<p className="hint">Loading {inst.label}…</p>}>
