@@ -264,6 +264,19 @@ export function doorFigure(view, key, group) {
   return (group === 'pitching' ? line?.era : line?.ops) ?? '—'
 }
 
+// The pitcher's menu of the parts (board PitcherSplits, .sp-mc): a key, a title, a preview of the
+// figures and a hint of what they are. A part with no data has no card; 'all' opens every part.
+export function splitsMenu({ hand, sit, vs, glView, group }) {
+  const sitOps = (code) => sit?.groups.flatMap((g) => g.rows).find((r) => r.key === code)?.ops ?? '—'
+  return [
+    { key: 'h', title: 'By handedness', preview: hand ? `${hand.rows[0].label} ${hand.rows[0].ops} · ${hand.rows[1].label} ${hand.rows[1].ops}` : null, hint: 'OPS against' },
+    { key: 's', title: 'Situational', preview: sit ? `Empty ${sitOps('r0')} · RISP ${sitOps('risp')}` : null, hint: 'OPS against' },
+    vs && { key: 'v', title: 'Splits vs team', preview: 'Every club, career', hint: 'Career ERA' },
+    glView && { key: 'g', title: 'Game lines', preview: `Home ${doorFigure(glView, 'home', group)} · Road ${doorFigure(glView, 'road', group)}`, hint: 'Career ERA' },
+    { key: 'all', title: 'All four', preview: 'Scroll through everything', hint: 'Every section open' },
+  ].filter(Boolean)
+}
+
 // "7/5" for the season prop's year, "7/5/24" for an earlier one, so a stale meeting reads as old.
 export function meetingDate(iso, season) {
   const [y, m, d] = (iso || '').split('-')
