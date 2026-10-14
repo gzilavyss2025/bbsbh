@@ -67,12 +67,13 @@ test('the fetch asks for the four rounds, never P, and holds today back', async 
     return { ok: true, status: 200, json: async () => json }
   })
   try {
-    const out = await fetchPostseasonByRound(668930, 'hitting', { season: 2026, cutoff: '2026-10-13' })
+    const out = await fetchPostseasonByRound(668930, 'hitting', { season: 2026, cutoff: '2026-10-13', today: '2026-10-14' })
     const log = urls.filter((u) => /stats=gameLog/.test(u))
     assert.equal(log.length, 1)
     assert.match(log[0], /gameType=F,D,L,W/)
     assert.doesNotMatch(log[0], /gameType=P/)
     assert.equal(out[1].stat.gamesPlayed, 1)
+    assert.equal(await fetchPostseasonByRound(668930, 'hitting', { season: 2026, cutoff: '2025-09-10' }), null)
     assert.equal(await fetchPostseasonByRound(1, 'hitting', { season: 2026, hasDebuted: false }), null)
   } finally {
     fetchMock.mock.restore()

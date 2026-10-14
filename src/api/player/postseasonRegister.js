@@ -109,9 +109,10 @@ export function postseasonTilesView(splits, group, role = null, season = null) {
 // every row 'P' and the round is lost (boxlines/rows.js, POSTSEASON). A stat line is not a
 // score (ADR-0034), but a game still in progress today is held, as in the Game log: only games
 // before the EARLIER of the page's cutoff and the baseball today (US Pacific) count.
-export async function fetchPostseasonByRound(personId, group, { season, cutoff = null, hasDebuted = true } = {}) {
+export async function fetchPostseasonByRound(personId, group, { season, cutoff = null, hasDebuted = true, today = baseballToday() } = {}) {
+  // A dated page from an earlier year has no part of this October to show.
+  if (cutoff && Number(cutoff.slice(0, 4)) < Number(season)) return null
   if (!personId || !group || !season || !hasDebuted || !(await postseasonStarted(season))) return null
-  const today = baseballToday()
   const splits = await fetchPersonStats(personId, { type: 'gameLog', group, season, gameType: POSTSEASON.join(',') })
   return postseasonByRoundView(splits, group, cutoff && cutoff < today ? cutoff : today)
 }
