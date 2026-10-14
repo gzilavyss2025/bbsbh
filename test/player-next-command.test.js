@@ -117,3 +117,9 @@ test('pitch marks sit at each mapped pitch centroid in view units, thin pitches 
   const c = commandModView({ mlb: { FF: { R: { cells } } } }).marks[0]
   assert.deepEqual([c.x, c.y], [90, 30])
 })
+
+test('a rank at either end of the pool reads 1st or 99th, never 0th or 100th', () => {
+  const at = (r) => ({ ...league, zonePct: { ...league.zonePct, rates: league.zonePct.rates.map(() => r) } })
+  assert.match(byKey(commandModView(gasser, { league: at(99) }).tiles, 'key').zonePct.caption, / · 1st$/)
+  assert.match(byKey(commandModView(gasser, { league: at(1) }).tiles, 'key').zonePct.caption, / · 99th$/)
+})

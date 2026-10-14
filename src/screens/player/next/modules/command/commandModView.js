@@ -23,6 +23,8 @@ export const HEART = 12 // the stored index of middle-middle; the readout opens 
 const fmt = (n) => n.toLocaleString('en-US')
 const sum = (a) => (a ?? []).reduce((x, y) => x + y, 0)
 const pct = (n, of) => (of > 0 ? Math.round((n / of) * 100) : 0)
+// A percentile rank reads 1st to 99th: the mid-rank of the end of a big pool rounds to 0 or 100.
+const rankWord = (p) => ordinal(Math.min(99, Math.max(1, p)))
 
 // MLB when he has an MLB grid, else Triple-A (the live tab's rule): the default 'mlb' would drop a
 // Triple-A-only arm.
@@ -50,7 +52,7 @@ export function commandModView(entry, { stand = null, code = null, cell = HEART,
   const tiles = TILES.map(([key, label, base], i) => {
     if (thin) return { key, label, value: '—', caption: 'too few pitches', lead: false }
     const r = ranked && commandRank(league, v, key)
-    const caption = r?.median != null ? `MLB ${r.median}%${r.pct != null ? ` · ${ordinal(r.pct)}` : ''}` : base(v)
+    const caption = r?.median != null ? `MLB ${r.median}%${r.pct != null ? ` · ${rankWord(r.pct)}` : ''}` : base(v)
     return { key, label, value: v[key] == null ? '—' : `${v[key]}%`, caption, lead: i === 0 }
   })
   const rank = ranked && !thin && commandRank(league, v, 'zonePct')
@@ -77,7 +79,7 @@ export function commandModView(entry, { stand = null, code = null, cell = HEART,
     const n = v?.pitches ?? 0
     const noun = n === 1 ? 'pitch' : 'pitches'
     // "8 changeups"; a name that ends in s ("eephus") or a code with no name takes "pitches".
-    const word = name === code ? code : name.toLowerCase()
+    const word = name === code ? code : name.toLowerCase() // caps-js-exempt: a pitch name mid-sentence ("8 changeups")
     const what = !code ? noun : /s$/.test(word) || name === code ? `${word} ${noun}` : `${word}${n === 1 ? '' : 's'}`
     view.thin = `Only ${n} ${what}${stand ? ` ${HAND_WORD[stand]}` : ''}. Too few to draw a map (the floor is ${MIN_COMMAND_PITCHES}).`
     return view

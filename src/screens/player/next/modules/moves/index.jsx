@@ -22,7 +22,7 @@ function linkifyNames(text, links) {
   )
 }
 
-// Same read as the live card (tbd/tbdData.js transactionsFor).
+// The live History tab's read: transactionRowsFor (api/player/history.js).
 async function load(bio, endDate) {
   const [txns, rookieInfo] = await Promise.all([fetchTransactions(bio.id, endDate), fetchRookieRecord(bio.id)])
   return transactionRowsFor(bio, txns, rookieInfo, endDate)
