@@ -214,7 +214,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
           {codes.map((code) => (
             <li key={code}>
               <Mark code={code} />
-              <span className="mono">{code}</span> {pitchMark(code).name}
+              <span className="mono">{pitchMark(code).name}</span>
             </li>
           ))}
         </Cluster>
