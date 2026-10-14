@@ -171,6 +171,7 @@
   display: block;
   margin-top: var(--space-1);
   color: var(--text-caption);
+  font-family: var(--font-mono);
   font-size: var(--fs-cell);
 }
 .splitsmod__mc[aria-pressed='true'] .splitsmod__mp,

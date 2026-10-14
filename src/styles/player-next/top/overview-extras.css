@@ -18,6 +18,13 @@
   font-variant-numeric: tabular-nums;
   font-weight: var(--w-bold);
 }
+/* The card's notes (a chip with no hero tile, no round split) in the page's mono note face (#2071). */
+.pnext-ext .hint {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
+}
 /* The Total row stays up while By round loads, so the group keeps its height. */
 .pnext-ext__total[aria-busy='true'] {
   opacity: 0.5;

@@ -1,0 +1,163 @@
+/* PROSPECT PERFORMANCE (#2068): an ink tile, a 0-100 scale, a facts ledger. */
+
+/* layout-exempt: a fixed ledger shape (tile, scale, facts), not an auto-fit grid */
+.prospect {
+  display: grid;
+  gap: var(--space-4);
+  container-type: inline-size;
+  font-family: var(--font-mono); /* body text is mono; labels, title and the big number set their own display face */
+}
+
+.prospect--wait { min-height: 8rem; }
+
+.prospect__label,
+.prospect__fact dt {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.prospect__lead { display: flex; gap: var(--space-3); align-items: stretch; }
+
+/* layout-exempt: a fixed ledger shape (tile, scale, facts), not an auto-fit grid */
+.prospect__tile {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  min-width: 104px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-stamped-ink);
+  border: 2px solid var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+
+.prospect__tile .prospect__label,
+.prospect__tile .prospect__cap { color: inherit; }
+
+.prospect__tile--hollow {
+  background: var(--surface-inset);
+  color: var(--text-heading);
+}
+
+.prospect__tile--hollow .prospect__label,
+.prospect__tile--hollow .prospect__cap { color: var(--text-caption); }
+
+.prospect__num {
+  font-family: var(--font-display);
+  font-size: var(--fs-score-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-score);
+}
+
+.prospect__num sup { font-size: var(--fs-title-md); vertical-align: top; margin-left: 1px; }
+
+.prospect__cap { font-family: var(--font-mono); font-size: var(--fs-cell); line-height: var(--lh-compact); }
+
+/* layout-exempt: a fixed ledger shape (tile, scale, facts), not an auto-fit grid */
+.prospect__words { display: grid; gap: var(--space-1); align-content: start; min-width: 0; }
+
+.prospect__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-emphasis);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+.prospect__sub { font-size: var(--fs-cell); line-height: var(--lh-loose); color: var(--text-caption); }
+
+/* layout-exempt: a fixed ledger shape (tile, scale, facts), not an auto-fit grid */
+.prospect__scale { display: grid; gap: var(--space-1); }
+
+.prospect__dotrow { position: relative; height: 14px; }
+
+/* layout-exempt: a fixed ledger shape (tile, scale, facts), not an auto-fit grid */
+.prospect__dot {
+  position: absolute;
+  top: -2px;
+  display: grid;
+  justify-items: center;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+.prospect__dot::after {
+  content: '';
+  border-inline: 6px solid transparent;
+  border-top: 8px solid var(--marker);
+  filter: drop-shadow(0 0 0 var(--text-heading)) drop-shadow(0 1px 0 var(--text-heading));
+  margin-top: 1px;
+}
+
+.prospect__track {
+  position: relative;
+  height: 22px;
+  border: 2px solid var(--border-stamped);
+  background: var(--surface-inset);
+}
+
+.prospect__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--field);
+  border-right: 2px solid var(--text-heading);
+}
+
+.prospect__mid {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  left: 50%;
+  border-left: 2px solid var(--text-heading);
+}
+
+.prospect__ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+
+.prospect__facts { margin: 0; border-top: 2px solid var(--border-stamped); }
+
+/* layout-exempt: a fixed ledger shape (tile, scale, facts), not an auto-fit grid */
+.prospect__fact {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.prospect__fact dd { margin: 0; font-size: var(--fs-ui); min-width: 0; }
+
+.prospect__age {
+  margin: 0;
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--border-stamped);
+  background: var(--bg-page);
+  font-size: var(--fs-ui);
+  color: var(--text-heading);
+}
+
+/* A wide card sets the lead and the facts side by side. */
+@container (min-width: 640px) {
+  .prospect { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-4) var(--space-6); align-items: start; }
+  .prospect__lead { grid-column: 1; }
+  .prospect__scale { grid-column: 1; grid-row: 2; }
+  .prospect__facts { grid-column: 2; grid-row: 1 / span 2; }
+  .prospect__age { grid-column: 2; }
+}

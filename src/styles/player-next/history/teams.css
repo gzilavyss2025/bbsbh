@@ -135,6 +135,7 @@ button.teamhist__badge:focus-visible {
 .teamhist__gap {
   flex: 1 1 100%;
   margin: 0;
+  font-family: var(--font-mono);
   padding: var(--space-2) var(--space-3);
   border: var(--bw-rule) solid var(--border-rule);
   background: repeating-linear-gradient(
@@ -204,8 +205,10 @@ button.teamhist__badge:focus-visible {
 }
 .teamhist__credit {
   margin: 0;
-  font-size: var(--fs-small);
   color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
 }
 
 /* The sentences are prose, so they keep the case they were written in (same idiom as

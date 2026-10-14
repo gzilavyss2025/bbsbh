@@ -68,8 +68,10 @@
   gap: var(--space-2) var(--space-5);
   margin: var(--space-4) 0 0;
   padding: 0;
-  color: var(--text-muted);
-  font-size: var(--fs-small);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
   list-style: none;
 }
 .fform__legend b {
