@@ -1,0 +1,86 @@
+/* ==== NEW PLAYER PAGE: the Transactions card (#2020) ==== */
+
+/* Holds eight rows while the ledger loads. */
+.moves--wait {
+  min-height: calc(8 * 3rem);
+}
+.moves {
+  container-type: inline-size;
+}
+.moves__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Year divider: the year left, the count of that year's moves right. */
+/* layout-exempt: two fixed parts, year and count */
+.moves__yr {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+}
+/* Phone: date and chip and club on one line, the sentence wraps under. */
+/* layout-exempt: a ledger row, grid of fixed parts */
+.moves__row {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.moves__date {
+  color: var(--text-muted);
+  font-size: var(--fs-cell);
+}
+/* layout-exempt: mark beside its word */
+.moves__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  justify-self: start;
+  padding: 0 var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  color: var(--text-body);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+}
+.moves__row--add .moves__chip {
+  color: var(--field-deep);
+  border-color: var(--field);
+}
+.moves__row--out .moves__chip,
+.moves__row--il .moves__chip {
+  color: var(--clay-deep);
+  border-color: var(--clay);
+  background: var(--clay-soft);
+}
+/* A club the feed does not name: a pencilled box, no mark. */
+.moves__noclub {
+  width: 20px;
+  height: 20px;
+  border: var(--bw-hair) dashed var(--border-rule);
+}
+.moves__desc {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-body);
+  font-size: var(--fs-body);
+}
+@container (min-width: 640px) {
+  .moves__row {
+    grid-template-columns: 4.5rem 9rem 20px 1fr;
+  }
+  .moves__desc {
+    grid-column: auto;
+  }
+}
