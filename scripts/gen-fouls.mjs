@@ -8,8 +8,10 @@
 // in the API — the only source is each game's per-pitch play-by-play. A Final
 // game's fouls are immutable, so this is an APPEND-ONLY/incremental sweep in the
 // mould of gen-umpire-accuracy.mjs + gen-postseason-leaders.mjs: each run scans
-// a trailing window of schedule Finals, fetches the live feed for every gamePk
-// not yet ingested, folds each game's aggregates into the shared SQLite layer
+// a trailing window of schedule Finals (plus up to 50 older Finals of the season
+// not in the ledger, so a failed fetch comes back: #2024, lib/fouls/sweep.mjs),
+// fetches the live feed for every gamePk not yet ingested, folds each game's
+// aggregates into the shared SQLite layer
 // (scripts/lib/schema.sql's foul_* tables, docs/adr/0021) via incrementing
 // upserts, and marks it in foul_ingested_games so a resumed/re-run sweep never
 // double-counts. NEVER stores a feed on disk. MLB only (sportId 1), regular
@@ -31,6 +33,7 @@
 //   node scripts/gen-fouls.mjs                       # trailing 3 days
 //   node scripts/gen-fouls.mjs --days=7
 //   node scripts/gen-fouls.mjs --since=2026-03-20 [--until=2026-07-19]
+//   node scripts/gen-fouls.mjs --dry-run              # list the season's Finals not in the ledger
 //   node scripts/gen-fouls.mjs --backfill-games      # see below
 //   node scripts/gen-fouls.mjs --backfill-team-pitch-types  # see below
 //   node scripts/gen-fouls.mjs --rebuild-counts=2026  # totals + by-count cells + per-game rows, scripts/lib/fouls/rebuild.mjs
@@ -62,6 +65,7 @@ import { parseArgs, dateRange } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
 import { BATTER_KEYS, PITCHER_KEYS, countStatements, endPa, exportByCount, exportGameFouls, foldBatterTotals, foldPitcherTotals, gameShards, medianBestPa, newCells, newPitcherCells, tallyPitches } from './lib/fouls/byCount.mjs'
 import { rebuildCommand } from './lib/fouls/rebuild.mjs'
+import { CHECKPOINT_EVERY, CONCURRENCY, pendingGames, sweepFouls } from './lib/fouls/sweep.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // A SEASON STORE (ADR-0086): fouls/{season}/fouls.json (the league file) plus
@@ -71,8 +75,6 @@ const here = dirname(fileURLToPath(import.meta.url))
 const storeDir = join(here, '..', 'public', 'data', 'fouls')
 
 const DEFAULT_DAYS = 3
-const CHECKPOINT_EVERY = 100
-const CONCURRENCY = 8
 const MAX_INNING_BUCKET = 10 // innings 10+ fold into inning 10
 
 // --- pure per-game aggregation (exported for tests) --------------------------
@@ -1023,58 +1025,37 @@ async function main() {
     return
   }
 
-  const existing = new Set(db.prepare('SELECT game_pk FROM foul_ingested_games').all().map((r) => r.game_pk))
-
-  // MLB regular season and postseason (ADR-0102). Same postponed-replay dedup as
-  // the other sweeps: a replayed game is listed under both dates; keep only the
-  // officialDate bucket.
+  // MLB regular season and postseason (ADR-0102). The schedule starts on the window's January 1,
+  // so a Final game an earlier run failed to fetch comes back (#2024, scripts/lib/fouls/sweep.mjs).
   const schedule = await getJson(
-    `/api/v1/schedule?sportId=1&startDate=${startDate}&endDate=${endDate}&gameType=R,${POSTSEASON_GAME_TYPES}`,
+    `/api/v1/schedule?sportId=1&startDate=${startDate.slice(0, 4)}-01-01&endDate=${endDate}&gameType=R,${POSTSEASON_GAME_TYPES}`,
   )
-  const pending = []
-  for (const d of schedule.dates ?? []) {
-    for (const g of d.games ?? []) {
-      if (g.status?.abstractGameState !== 'Final') continue
-      if (d.date !== g.officialDate) continue
-      if (existing.has(g.gamePk)) continue
-      // The season comes from the game, never the clock (#1200).
-      pending.push({
-        gamePk: g.gamePk,
-        date: g.officialDate,
-        season: Number(g.season ?? g.officialDate.slice(0, 4)),
-        scope: scopeOfGameType(g.gameType),
-      })
-    }
+  if (args['dry-run']) {
+    const missing = pendingGames(schedule, new Set(db.prepare('SELECT game_pk FROM foul_ingested_games').all().map((r) => r.game_pk)), startDate, Infinity)
+    console.log(`dry run: ${missing.length} Final MLB games from ${startDate.slice(0, 4)}-01-01 to ${endDate} are not in the ledger${missing.length ? `: ${missing.map((g) => g.gamePk).join(', ')}` : ''}`)
+    db.close()
+    return
   }
-  console.log(`${startDate}..${endDate}: ${pending.length} un-ingested Final MLB games`)
-
-  let done = 0
-  const queue = [...pending]
-  async function worker() {
-    while (queue.length) {
-      const g = queue.shift()
-      if (!g) return
-      try {
-        await ingestGame(db, stmts, g.gamePk, g.date, g.season, g.scope)
-        touched.add(g.season)
-      } catch (err) {
-        console.error(`gamePk ${g.gamePk}: ${err.message}`)
-      }
-      done += 1
-      if (done % CHECKPOINT_EVERY === 0) {
-        console.log(`${done}/${pending.length} ingested, checkpointing...`)
-        await writeOut()
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: CONCURRENCY }, worker))
+  const { done, failed, again } = await sweepFouls(db, {
+    schedule,
+    startDate,
+    touched,
+    checkpoint: writeOut,
+    ingest: (g) => ingestGame(db, stmts, g.gamePk, g.date, g.season, g.scope),
+  })
   await writeOut()
+  if (failed.length && !touched.size) await dumpGroup(db, 'fouls') // keep foul_failed_games for the next run
 
   for (const season of touched) {
     const total = db.prepare('SELECT COUNT(*) AS n FROM foul_ingested_games WHERE season = ?').get(season).n
-    console.log(`wrote fouls/${season}/ — ${total} games on file (+${done} swept this run)`)
+    console.log(`wrote fouls/${season}/ — ${total} games on file (+${done - failed.length} swept this run)`)
   }
   if (!touched.size) console.log('no new game — wrote nothing')
+  if (failed.length) console.error(`${failed.length} game(s) failed and stay out of the ledger, for the next run: ${failed.map((g) => g.gamePk).join(', ')}`)
+  if (again.length) {
+    console.error(`failed twice in a row: ${again.map((g) => g.gamePk).join(', ')}`)
+    process.exitCode = 1
+  }
   db.close()
 }
 

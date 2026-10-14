@@ -58,6 +58,7 @@ export const GROUPS = {
     bySeason: true,
     tables: [
       'foul_ingested_games',
+      'foul_failed_games',
       'foul_batter_totals',
       'foul_batter_pa_high',
       'foul_pitcher_totals',
