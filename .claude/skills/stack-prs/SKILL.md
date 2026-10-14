@@ -1,6 +1,6 @@
 ---
 name: stack-prs
-description: Combine every open bbsbh PR into one stacked PR, review it, fix what the review finds, and merge it to main when it is ready. Use when the user says "stack the PRs", "merge everything", "land the open PRs", or asks for one batch merge. Optional args - PR numbers to include, or "dry run" to stop before the merge.
+description: Combine every open bbsbh PR into one stacked PR, review it, fix what the review finds, and merge it to main when it is ready. Use when the user says "stack the PRs", "merge everything", "land the open PRs", or asks for one batch merge. For "merge the pr" about one PR, use merge-pr instead. Optional args - PR numbers to include, or "dry run" to stop before the merge.
 ---
 
 # /stack-prs
@@ -12,7 +12,8 @@ tidy and each deploy reviewed.
 **Invoking this skill is the maintainer's explicit yes to merge to `main`.** The
 orchestrator may also invoke it under the maintainer's standing permission
 (`.claude/skills/orchestrate/`, "Stacking"); it then passes explicit PR numbers. It is
-the only merge the maintainer pre-approves. The gates in step 7 still apply. If
+the only merge the maintainer pre-approves. (`merge-pr` merges one PR when he
+asks for that PR by name; it is not a standing permission.) The gates in step 7 still apply. If
 one gate fails, stop and report. Never merge around a gate.
 
 The maintainer is not a technical user. Pick the sensible default, say what you
@@ -58,11 +59,19 @@ did, and end with a short list of what needs him.
      both must stay. If both sides changed the same logic and keeping one loses
      behavior, stop. Name both PRs and the file. Ask the maintainer with
      `AskUserQuestion`, one question at a time. If nobody is watching, stop and put
-     the question in the report as `[DECISION: ...]`.
+     the question in the report as `[DECISION: ...]`. In an unattended orchestrate
+     run, do not stop: leave the later PR out of the stack, put the question in the
+     report as `[DECISION: ...]`, and merge the rest.
    - **A PR that will not merge cleanly and is not worth the fight:** leave it out,
      and say which one and why. Do not drop it silently.
-4. **Check the stack.** Run `npm run lint`, `npm test`, and `npm run build`.
-   Fix any failure the merge caused. Fix failures one PR caused in that PR's
+4. **Check the stack.** Do not run the full `npm test` or `npm run build` here:
+   CI on the stack PR runs `npm run lint`, `npm test` and `npm run build` on
+   every push, and it is the gate in step 7. Each source PR was already green in
+   CI (`orchestrate`, "Check once"). Only when you changed code (a conflict you
+   resolved in step 3, a fix in step 6, a `main` merge in step 7) run the narrow
+   check before you push: the test files that import a file you changed
+   (`git grep -l <basename> test/`, then `node --test` on them) and
+   `npm run lint`. Fix any failure the merge caused. Fix failures one PR caused in that PR's
    code, not by loosening a test. Never skip, delete, or weaken a test
    (CLAUDE.md, "Test discipline").
 5. **Open the stack PR.** Push the branch with `git push -u origin stack/<date>` (the session branch in a
@@ -75,9 +84,10 @@ did, and end with a short list of what needs him.
    closing keyword for an issue that a source PR only references.
    Add the attribution lines from the session reminder. Subscribe to its activity
    (`subscribe_pr_activity`).
-6. **Review the stack, then fix.** Run the `code-review` skill on the stack PR at
-   `high` effort. Then check these four things by hand, because the generic review
-   does not know them:
+6. **Review the stack, then fix.** This is the only review the source PRs get.
+   Run the `code-review` skill on the stack PR at `high` effort, then the
+   `ponytail-review` skill on the same diff. Then check these four things by
+   hand, because the generic review does not know them:
    - **The spoiler rule.** A reveal-only module (`linescore.js`, `derive.js`,
      `hitchart.js`) called outside a `SealBox` reveal render function. A
      score-revealing value fetched, computed, or rendered early. See CLAUDE.md,
@@ -94,13 +104,17 @@ did, and end with a short list of what needs him.
    Fix every finding that is real, in this order: correctness, spoiler, test
    integrity, then the rest. Keep each fix small. Commit fixes on the stack
    branch with a clear message. A finding that needs a design choice goes to the
-   maintainer, not into a guess. Run step 4 again after the last fix. Push.
+   maintainer, not into a guess. In an unattended orchestrate run,
+   take the PR it is in out of the stack, record the finding as `[DECISION: ...]`,
+   and go on with the rest. After the last fix, run step 4's narrow check once
+   (not once per fix), then push. CI runs the full suite on that push.
 7. **Merge gates.** Check all of these on the current head of the stack PR. The
    merge waits until every one is true:
    - CI `lint-and-build` is green on the latest commit. If it is red, root-cause
      it, fix it, and push. Do not re-run to hope.
    - No merge conflict with `main`. If `main` moved, merge it into the stack
-     branch and re-run step 4.
+     branch. Run step 4's narrow check only if the merge had a conflict; CI
+     runs the full suite on the push.
    - The review in step 6 found nothing left open.
    - The user did not ask for a dry run.
 

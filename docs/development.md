@@ -16,7 +16,8 @@ workflow:
 
 Never push directly to `main`, invoke `vercel deploy`, or enable an ad hoc preview
 without explicit maintainer authorization. The maintainer gave the orchestrator standing
-authorization to merge through `/stack-prs`. Merging to `main` is the production
+authorization to merge through `/stack-prs`. When the maintainer says "merge the
+pr", the `merge-pr` skill merges that one PR on green CI, with no stack and no review. Merging to `main` is the production
 deployment trigger and is intentionally controlled by the maintainer.
 
 ## Cloud sessions (claude.ai/code)

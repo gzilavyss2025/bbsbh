@@ -53,6 +53,7 @@ concurrent sessions, so measure.
 - **Do not poll in a loop.** Subscribe to child PRs. Use `send_later` (about 50
   minutes first, then about 4 hours). At most 6 checks per run, then report and
   stop. A `send_later` wake-up is the only way a run continues after the report.
+  An unattended run has its own cadence and limits (see "Unattended run").
 - Finish started work before you start new work.
 
 ## Models
@@ -159,12 +160,17 @@ Read CLAUDE.md and docs/development.md ("Cloud sessions") first.
 Goal: <one sentence>. Done means: <test or visible result>.
 Slice: <files, at most 5>. Follow the pattern in <path>.
 Rules: test first (watch it fail, then fix). For a bug, reproduce it first on a
-real gamePk from docs/test-games.md. The spoiler rule applies if you touch the
+real gamePk from docs/test-games.md, and follow the debug skill. The spoiler rule applies if you touch the
 innings viewer, scorecard, lineups, or box score. Touch no other files.
-Use the ponytail skill at level full. Finish with ponytail-review. (Opus slices:
-also /code-review.)
-Verify: npm run lint, npm test, npm run build. For a visible change, send a
-screenshot with SendUserFile (Chromium, ?nointro, say what is mocked).
+Use the ponytail skill at level full. Do not run ponytail-review or /code-review:
+the stack reviews once (see "Check once"). Do not invoke the superpowers skills
+(brainstorming, writing-plans and the like): this prompt is the plan. Do not start
+subagents.
+Verify: the test files you wrote or changed, the existing test files that import
+a file you changed (git grep -l <basename> test/), and npm run lint. Do not
+run the full npm test or npm run build: CI runs them on your PR. For a visible
+change, send a screenshot with SendUserFile (Chromium, ?nointro, say what is
+mocked).
 Handoff: open a DRAFT PR to main. Body: base SHA, files, how you verified, and
 one line per issue. Write "Closes #n" when this PR meets the issue's "Done means".
 Write "Part of #n" only when the issue has more slices after this one. Subscribe
@@ -179,6 +185,27 @@ you cannot fix. To stop, send_message your parent AND end with a final line
 
 Subscribe to the child's PR when it opens. Sonnet by default. Opus when the cause
 of a bug is unknown or the spoiler rule changes (that also goes to him first).
+
+## Check once
+
+Each check runs at one layer, the cheapest one that can do it. Do not repeat it.
+
+| Check | Child session | Child PR CI | `/stack-prs` | Stack PR CI |
+|---|---|---|---|---|
+| The tests the child wrote or changed, the existing test files that import a file it changed (`git grep -l <basename> test/`), `npm run lint` | yes | | | |
+| Full `npm test`, `npm run build` | no | yes (the gate) | no | yes (the gate) |
+| The tests that import a file the stack changed, `npm run lint` | | | only after a conflict or a review fix, once before the push | |
+| `ponytail-review` and `/code-review` | no | | yes, one pass at `high`, over the whole stack | |
+
+Why: the full suite has about 5,500 tests, CI runs it at no token cost, and the
+child already drives its PR to green. A review pass costs tokens, and only the
+stack review sees two PRs that break each other. The cost of this rule: a finding
+that a child review would have caught gets fixed on the stack branch, by you.
+Keep the slice briefs exact so those findings stay few.
+
+A prompt from a plan keeps any line that tells the child to run ponytail-review or
+/code-review only if the plan is a single prompt that will not be stacked. Remove
+that line otherwise, and say so in the run report.
 
 ## Lane 3: Run a plan (prompts from `write-prompt`)
 
@@ -225,7 +252,47 @@ handed it to you (its step 9). One prompt is a plan too. Work on the plan only.
    Ask him before you close the old PR.
 5. **Stop the plan on a failure.** A `NEEDS PARENT` line, or a PR that stays red after
    two tries, stops the later waves. Start nothing new. Tell him which prompt and why.
-6. Two prompts that share a file run one after the other, even in one wave.
+6. Two prompts that share a file run one after the other, even in one wave. A plan
+   may name append-only files (an import list, a lab entry list) that its prompts
+   may share in one wave; `/stack-prs` keeps both sides of those conflicts.
+
+## Unattended run (overnight)
+
+A run is unattended when the run plan has a **Standing answers** block, or when he
+says "overnight" or "unattended". He is asleep: the run must never wait on him.
+
+- **Never call `AskUserQuestion`.** Each place this skill says "ask" or "his yes"
+  reads the plan's Standing answers. Where none applies, take the safer choice that
+  lets other work go on, write `[DECISION: <question> — took <choice> because
+  <reason>]` in the ledger, and continue.
+- **Ledger:** the plan names where it goes (a comment thread on the plan's issue is
+  fine). Do not create an issue the plan does not name.
+- **Waves and merges:** when every PR of a wave is green, run `/stack-prs` with those
+  PR numbers (standing permission), let it merge, then start the next wave from the
+  new `origin/main`. Never stack a child on an unmerged PR.
+- **Checks:** no 6-check limit. While a child runs, keep one `send_later` check-in
+  about 40 minutes out, and act on PR events as they come. Keep every gap under 55
+  minutes: each wake-up sends your whole context, and a gap past the one-hour
+  prompt cache makes it a full-price read (code.claude.com/docs/en/costs,
+  /en/prompt-caching). Keep your context small: read `list_sessions` and
+  `list_events` through a script or with `kinds`, never whole. Stop at the plan's time
+  limit (default 12 hours from the start), or when every row is done or blocked.
+- **A failure blocks a chain, not the plan.** For a `NEEDS PARENT` line: if
+  `spec.md`, the brief or this skill answers it, `send_message` the answer once.
+  Otherwise, and for a PR that stays red after two tries or a child stalled on a
+  permission prompt, mark that row **blocked**, mark every row that depends on it
+  blocked, and keep running the rows that do not. Archive nothing that is blocked.
+- **Limit warning:** start nothing new and let running children finish. Set a
+  `send_later` for the reset time in `rate_limit_info` (or 60 minutes out if it has
+  none), then resume. Stop for good only at the time limit.
+- **Never, unattended:** close or edit an issue, change a label other than `wip`,
+  raise the cap, or start an Opus session the plan does not name.
+- **The morning report:** one comment on the plan's issue and your last message,
+  in the "Report to him" shape: rows merged (with the stack PRs), rows blocked and
+  why, every `[DECISION: ...]`, and the next wave to start.
+- **Before the run (his part):** start the orchestrator session in **Auto** mode.
+  Children inherit the parent's mode, and in Accept edits every git and npm call
+  waits for a tap.
 
 ## Reports and watching
 
