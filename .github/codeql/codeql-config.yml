@@ -1,0 +1,5 @@
+# Tests read the repo's own source files as text (strip braces, match
+# patterns). Their input is never user data, so CodeQL's sanitization and
+# ReDoS rules only produce noise there. Shipped code is still scanned.
+paths-ignore:
+  - test
