@@ -6,7 +6,7 @@ import { useMediaQuery, WIDE_QUERY } from '../../../../hooks/useMediaQuery.js'
 import { pitchTiles } from '../../../../lib/pitcherCard/card.js'
 import { scenePitches } from '../../../../lib/pitcherCard/scene.js'
 import { pitchMark } from '../../../../lib/pitch/pitchTypes.js'
-import { lookAfterSideChange, looksFor, mixRows, totalPitches } from '../logic/pitchMix.js'
+import { barAxisMax, lookAfterSideChange, looksFor, mixRows, totalPitches } from '../logic/pitchMix.js'
 
 const LOOK_LABEL = { 1: '1st look', 2: '2nd', 3: '3rd+' }
 
@@ -56,6 +56,7 @@ export function PitchMixCard({ arsenal, tto, sides, lefty, name, counts }) {
   const [open, setOpen] = useState(false)
   const [activeCode, setActiveCode] = useState(null)
   const rows = useMemo(() => mixRows(arsenal, tto, sides, side, look), [arsenal, tto, sides, side, look])
+  const axis = barAxisMax(rows)
   const looks = looksFor(tto, sides, side)
   const tiles = useMemo(() => pitchTiles(arsenal), [arsenal])
   const pitches = useMemo(() => scenePitches(tiles, lefty), [tiles, lefty])
@@ -99,7 +100,7 @@ export function PitchMixCard({ arsenal, tto, sides, lefty, name, counts }) {
             <Mark code={r.code} />
             <span className="lmix__name">{pitchMark(r.code).code === 'UN' ? r.name : pitchMark(r.code).name}</span>
             <span className="lmix__bar" aria-hidden="true">
-              <i style={{ width: `${Math.min(100, r.pct)}%`, background: pitchMark(r.code).color }} />
+              <i style={{ width: `${Math.min(100, (r.pct / axis) * 100)}%`, background: pitchMark(r.code).color }} />
             </span>
             <span className="lmix__pct">
               {r.pct}%{r.delta != null && Math.abs(r.delta) >= MIN_LOOK_SHIFT && <span className="lmix__shift" aria-label={`${r.delta > 0 ? 'Up' : 'Down'} from the previous look`}>{r.delta > 0 ? '▲' : '▼'}</span>}

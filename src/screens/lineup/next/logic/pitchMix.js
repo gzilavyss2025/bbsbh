@@ -58,3 +58,10 @@ export function batterCounts(bats, hand) {
 
 // The pitches thrown across the season: the card's "741 pitches" caption.
 export const totalPitches = (arsenal) => (arsenal ?? []).reduce((n, t) => n + (t.pitches ?? 0), 0)
+
+// The bar axis ends just past the biggest share, rounded up to the next ten, so the bars show
+// the differences between pitches. A 0 to 100 axis would crush a mix whose top pitch is 38%.
+export function barAxisMax(rows) {
+  const top = Math.max(0, ...(rows ?? []).map((r) => r.pct ?? 0))
+  return Math.max(10, Math.ceil(top / 10) * 10)
+}

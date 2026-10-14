@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { batterCounts, lookAfterSideChange, looksFor, mixRows, totalPitches } from '../src/screens/lineup/next/logic/pitchMix.js'
+import { barAxisMax, batterCounts, lookAfterSideChange, looksFor, mixRows, totalPitches } from '../src/screens/lineup/next/logic/pitchMix.js'
 
 const arsenal = [
   { code: 'FF', description: 'Four-Seam Fastball', pct: 60, avgVelo: 95, pitches: 600 },
@@ -45,4 +45,11 @@ test('a switch-hitter bats from the side opposite the pitcher', () => {
 test('the caption sums the pitches thrown', () => {
   assert.equal(totalPitches(arsenal), 1000)
   assert.equal(totalPitches(null), 0)
+})
+
+test('the bar axis ends at the next ten past the biggest share', () => {
+  assert.equal(barAxisMax([{ pct: 38 }, { pct: 12 }]), 40)
+  assert.equal(barAxisMax([{ pct: 40 }]), 40)
+  assert.equal(barAxisMax([{ pct: 3 }]), 10)
+  assert.equal(barAxisMax([]), 10)
 })
