@@ -3,8 +3,8 @@
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: high.
-- Depends on: 01 merged (`useInViewOnce`, the shared rise class, `--dur-rise`,
-  `--ease-stamp`).
+- Depends on: 01a merged (`--dur-rise`, `--ease-stamp`), 01b merged (the shared rise
+  class in `player-rise.css`), 01c merged (`useInViewOnce`).
 - Parallel with: 02, 03, 05, 06, 08, 10, 13, 20. Not with 07b (07b changes `Slot.jsx`
   and `PlayerNextPage.jsx` after this lands).
 - Change from spec.md: slice 07 is split. **07a** (this file) is the slot's height and
@@ -34,12 +34,13 @@ view in this page visit.
   stopped by then, so it does not matter.
 - The Suspense fallback is `null` and the not-near branch draws nothing. The text
   "Loading {inst.label}…" is gone from `Slot.jsx`.
-- The body `<div>` gets the shared rise class (slice 01) the first time the card comes
+- The body `<div>` gets the shared rise class (slice 01b) the first time the card comes
   into view, and only when its content shows. It does not rise again on a re-render, a
   data refresh, or Back in the same tab.
 - The module contract's "Height" line in `src/screens/player/next/CLAUDE.md` says the
   new rule.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- `test/player-next-slot-hold.test.js` and `npm run lint` pass. CI runs the full
+  `npm test` and `npm run build` on the PR.
 
 ## Files
 
@@ -67,8 +68,8 @@ The rise, from the shell of every board (B-phone, B-wide, D2-phone, D2-wide):
 @media (prefers-reduced-motion:reduce){.rise,.stamp{animation:none!important;opacity:1}}
 ```
 
-Slice 01 turns this into the shared rise (`--dur-rise` 420ms on `--ease-stamp`). This
-slice only puts its class on the slot body.
+Slice 01b turns this into the shared rise (`.player-rise`, `--dur-rise` 420ms on
+`--ease-stamp`). This slice only puts its class on the slot body.
 
 ## Measured heights (done in this prep, 2026-10-14)
 
@@ -194,19 +195,20 @@ object read in an effect.
 
 ## Build
 
-### 0. Read slice 01's API first
+### 0. The slice 01c API (merged; 01c is the source of truth)
 
-Slice 01 adds `useInViewOnce` and the shared rise class. This brief assumes (inferred;
-slice 01 fixes the names):
-
-- `src/hooks/motion/useInViewOnce.js`: `const [ref, seen] = useInViewOnce(key)`. `ref` is
-  a ref object. `seen` is true once the node has come into view, and true at mount when
-  the key is already in the module-level `Set` (Back in the same tab).
-- The rise class: written below as `RISE` (for example `'rise-in'`). Use the real name.
-- Pair it with `useBecameTrue` (`src/hooks/motion/useBecameTrue.js`): it is true only when
-  `seen` went false → true while mounted, so Back (seen at mount) does not rise.
-
-Adapt the three lines that use these to the real API. Keep the behaviour.
+- `src/hooks/scroll/useInViewOnce.js`: `const [ref, phase] = useInViewOnce(key)`. `ref`
+  is a `useRef` object. `phase` is `'rest'`, `'wait'` or `'play'`. No options argument;
+  the threshold is fixed at 0.1 (`IN_VIEW_THRESHOLD`).
+  - `rest`: no entrance. The key is already in the module-level `Set` (Back in the same
+    tab), or reduced motion, or no IntersectionObserver.
+  - `wait`: not seen yet. Hold the block hidden.
+  - `play`: the block came into view. The rise runs one time; `phase` stays `'play'`.
+- `src/lib/motion/inViewOnce.js`: `viewKey(playerId, slotKey)` builds the key, and
+  `riseClass(phase)` maps the phase to the shared rise (01b): `'player-rise--wait'`,
+  `'player-rise'`, or `''`.
+- 01c says: the caller must put `ref` on a mounted element. Here it is the Card, which
+  is always mounted.
 
 ### 1. `sections.js`
 
@@ -234,12 +236,10 @@ Replace the file body with this (keep the import of `SlotBoundary` and `Card`):
 ```jsx
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { useNearView } from '../../../hooks/scroll/useNearView.js'
-import { useInViewOnce } from '../../../hooks/motion/useInViewOnce.js'
-import { useBecameTrue } from '../../../hooks/motion/useBecameTrue.js'
+import { useInViewOnce } from '../../../hooks/scroll/useInViewOnce.js'
+import { riseClass, viewKey } from '../../../lib/motion/inViewOnce.js'
 import { Card } from '../../../components/ui/frame/Card.jsx'
 import { SlotBoundary } from './SlotBoundary.jsx'
-
-const RISE = 'rise-in' // slice 01's shared rise class (use the real name)
 
 // Runs once the module has mounted. A module that rendered nothing has no data. A module
 // that shows content (nothing inside it says aria-busy) is ready: the slot drops its
@@ -275,8 +275,7 @@ function Probe({ bodyRef, onEmpty, onReady }) {
 // not jump. The body rises in the first time the card comes into view (spec, the one-shot rule).
 export function Slot({ inst, bio, asOf, season, onEmpty }) {
   const [nearRef, near] = useNearView()
-  const [viewRef, seen] = useInViewOnce(`${bio.id}:${inst.key}`)
-  const entered = useBecameTrue(seen)
+  const [viewRef, phase] = useInViewOnce(viewKey(bio.id, inst.key))
   const [Module] = useState(() => lazy(inst.load))
   const [count, setCount] = useState()
   const [held, setHeld] = useState(true)
@@ -301,7 +300,7 @@ export function Slot({ inst, bio, asOf, season, onEmpty }) {
       {near && (
         <SlotBoundary slotKey={inst.key} onFail={report}>
           <Suspense fallback={null}>
-            <div ref={bodyRef} className={entered && !held ? RISE : undefined}>
+            <div ref={bodyRef} className={held ? undefined : riseClass(phase) || undefined}>
               <Module
                 bio={bio}
                 role={inst.role}
@@ -326,13 +325,17 @@ Notes for the child:
 - `check` is declared after `watch` and called after `observe`, so the closure reads a
   defined `watch` (no TDZ error).
 - The ref callback writes two ref objects; the React compiler lint allows a write in a
-  ref callback. If `useInViewOnce` returns a callback ref, call it instead.
-- `className` without `RISE` while held: the body is invisible to the eye anyway (the
-  card holds empty space only before the module commits; once it commits, `held` drops
-  on the same tick or when the wait block goes). The class goes on when both hold.
-- The rise class carries `opacity: 0` before it runs only if slice 01 wrote it that way;
-  a body that gets the class while on screen starts from its first keyframe. That is the
-  intended entrance.
+  ref callback. `useInViewOnce` returns a ref object (01c), not a callback ref.
+- No rise class while held: the module's own wait block shows. When `held` drops, the
+  body gets `riseClass(phase)`: `player-rise--wait` (opacity 0) if the card is not in
+  view yet, `player-rise` if it is (the rise runs then), and no class on Back or under
+  reduced motion (`rest`).
+- State: `setHeld(false)` runs from the MutationObserver callback or from `Probe`'s
+  effect via `onReady`. `react-hooks/set-state-in-effect` is an ERROR in react-hooks
+  7.1.1: set state only from an observer, timer or rAF callback, never synchronously in
+  an effect body, and never read a ref during render (the `refs` rule). If lint flags
+  the direct `onReady()` call in `Probe`'s effect body, call it from the
+  MutationObserver path only (run `check` in a `queueMicrotask` callback), and report it.
 - The rise keyframe runs on the body `<div>`, never on the Card: the Card's own
   `card--stamp-in` (07b) and the rise must not fight over one `animation` property.
 
@@ -414,7 +417,8 @@ test('the slot shows no loading text and sets the hints', () => {
 })
 
 test('the body rises once per player and slot', () => {
-  assert.match(slot, /useInViewOnce\(`\$\{bio\.id\}:\$\{inst\.key\}`\)/)
+  assert.match(slot, /useInViewOnce\(viewKey\(bio\.id, inst\.key\)\)/)
+  assert.match(slot, /riseClass\(phase\)/)
   assert.match(slot, /aria-busy="true"/)
 })
 ```
@@ -423,7 +427,9 @@ Also keep `test/player-next-sections.test.js` green (it does not check `minH`).
 
 ## Verify
 
-- `npm run lint`, `npm test`, `npm run build`.
+- `node --test test/player-next-slot-hold.test.js test/player-next-sections.test.js`
+  and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on
+  your PR.
 - `npm run dev`. At 390px and 1180px, open `/player/brice-turang-668930?nointro` and
   `/player/robert-gasser-688107?nointro`.
   - No "Loading Season…" (or any "Loading {label}…") text shows at any time.
@@ -443,11 +449,12 @@ Also keep `test/player-next-sections.test.js` green (it does not check `minH`).
 - The jump-bar hold and the stamp on land (07b).
 - A module that renders `null` while it loads: today `Probe` reads that as "no data".
   Do not change that rule here.
-- No `/animation-lab` entry: the rise is slice 01's, and its lab entry is slice 01's.
+- No `/animation-lab` entry: the rise and its lab entry are slice 01b's and 01d's.
 
 ## Stop if
 
-- Slice 01 is not on `main`, or `useInViewOnce` cannot report "already seen at mount".
+- 01a, 01b or 01c is not on `main`, or `useInViewOnce` does not return `[ref, phase]`
+  with `'rest'` for a key already seen at mount.
 - `Slot.jsx` or the `SLOTS` lines differ from the quotes above (another slice changed
   them).
 - A module's first render is empty only while it waits and `Probe` now hides it (check:

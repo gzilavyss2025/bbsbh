@@ -7,8 +7,8 @@ the fold chevron and the `/animation-lab` entry.
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: medium.
-- Depends on: 01 merged (tokens `--ease-unfold`, `--dur-rise`, `--dur-grow`,
-  `--stagger-step`, and the `useInViewOnce` hook).
+- Depends on: 01a merged (tokens `--ease-unfold`, `--dur-rise`, `--dur-grow`,
+  `--stagger-step`), 01c merged (the `useInViewOnce` hook).
 - Parallel with: 02, 03, 05, 06, 07, 10. Not with 08b or 09 (same module folder).
 
 ## Goal
@@ -21,7 +21,7 @@ picks, and jumps at once on mount.
 
 ## Done means
 
-- Each part is invisible until it is 8% in view. Then it rises 14px and fades in
+- Each part is invisible until it is 10% in view (01c's fixed threshold). Then it rises 14px and fades in
   over `calc(var(--dur-rise) * 2)` on `--ease-unfold`.
 - In a part that rises, each bar grows from `scaleX(0.02)` to its value over
   `--dur-grow`, row `i` after `--dur-fast + i * --stagger-step`.
@@ -30,7 +30,8 @@ picks, and jumps at once on mount.
 - Reduced motion: every part and bar shows at once, drawn.
 - A tap on a club scrolls the strip smoothly. The first centre on mount is instant.
 - Game lines does not change in 08a (08b moves it onto `Part`).
-- `npm run lint`, `npm test`, `npm run build` pass.
+- `test/player-splits-motion.test.js` and `npm run lint` pass. CI runs the full
+  `npm test` and `npm run build` on the PR.
 
 ## Files
 
@@ -65,7 +66,8 @@ Per row (board JS): `fillStyle: 'transform:scaleX(' + v + ');animation-delay:' +
 
 The board's observer: `IntersectionObserver(..., { threshold: 0.08 })`, one per
 part (`p1`..`p4`), each unobserved after its first hit; a 2500ms fallback shows
-all parts if the observer never fires. Slice 01's `useInViewOnce` replaces this.
+all parts if the observer never fires. Slice 01c's `useInViewOnce` replaces this, at
+its fixed threshold of 0.1 (not 0.08) and with no timer fallback.
 
 Club strip: `center(smooth)` calls `s.scrollTo({ left: b.offsetLeft - s.clientWidth / 2 + b.clientWidth / 2, behavior: smooth && !reducedMotion ? 'smooth' : 'auto' })`.
 It runs with `smooth = false` on mount and `smooth = true` when the club changes.
@@ -168,24 +170,28 @@ Do not change `useAsync` or keep old rows during a load (Out of scope).
 
 ## Build
 
-### 0. Read slice 01's hook first
+### 0. The slice 01c hook (merged; 01c is the source of truth)
 
-This slice assumes (inferred, from `spec.md`; slice 01 was not written when this
-brief was): `src/hooks/motion/useInViewOnce.js` exports
-`useInViewOnce(key, options?)` and returns `[ref, phase]`, where `phase` is
-`'pre'` (not yet in view, not seen before), `'in'` (it came into view now; play)
-or `'done'` (seen earlier in this page visit, or reduced motion; rest drawn). It
-keeps the module-level `Set` and has a fallback when the observer never fires.
-Pass `{ threshold: 0.08 }` if the hook takes options. If the real hook has
-another shape, map it to these three phases in `Part` and nowhere else.
+`src/hooks/scroll/useInViewOnce.js` exports `useInViewOnce(key)` and returns
+`[ref, phase]`. There is no options argument; the threshold is fixed at 0.1
+(`IN_VIEW_THRESHOLD`). `phase` is:
+
+- `'wait'`: not yet in view, not seen before. Hold the part hidden (`is-pre`).
+- `'play'`: it came into view; play (`is-in`). It stays `'play'` after.
+- `'rest'`: seen earlier in this page visit, reduced motion, or no
+  IntersectionObserver. Rest drawn (no class).
+
+`viewKey(playerId, slotKey)` in `src/lib/motion/inViewOnce.js` builds the key. The
+hook already returns `'rest'` under reduced motion, so `Part` does not read
+`motionIsReduced`. There is no timer fallback: the caller must put `ref` on a mounted
+element (the `<section>`), or the part stays at opacity 0.
 
 ### 1. `LineRows.jsx`
 
-Add the import at the top (path as slice 01 made it):
+Add the import at the top:
 
 ```jsx
-import { useInViewOnce } from '../../../../../hooks/motion/useInViewOnce.js'
-import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
+import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
 ```
 
 Add `Part` after the `DASH` line:
@@ -195,9 +201,8 @@ Add `Part` after the `DASH` line:
 // its bars grow then (docs/motion.md, "The one-shot gate"). A part seen earlier, or under reduced
 // motion, rests drawn. `once` is the key the hook remembers: `<playerId>:splits-<group>:<part>`.
 export function Part({ once, wide, label, children }) {
-  const [ref, seen] = useInViewOnce(once, { threshold: 0.08 })
-  const phase = motionIsReduced() ? 'done' : seen
-  const motion = phase === 'pre' ? ' is-pre' : phase === 'in' ? ' is-in' : ''
+  const [ref, phase] = useInViewOnce(once)
+  const motion = phase === 'wait' ? ' is-pre' : phase === 'play' ? ' is-in' : ''
   return (
     <section ref={ref} className={`splitsmod__part${wide ? ' splitsmod__part--wide' : ''}${motion}`} aria-label={label}>
       {children}
@@ -219,11 +224,12 @@ function Bar({ line, metric, i = 0 }) {
 
 ### 2. `index.jsx`
 
-Import `Part` with the rows: `import { Flag, Head, Part, Row } from './LineRows.jsx'`.
+Import `Part` with the rows: `import { Flag, Head, Part, Row } from './LineRows.jsx'`,
+and `import { viewKey } from '../../../../../lib/motion/inViewOnce.js'`.
 Add one key prefix after `const surname = ...` (line 23):
 
 ```jsx
-  const once = `${bio.id}:splits-${group}`
+  const once = viewKey(bio.id, `splits-${group}`)
 ```
 
 Replace the two `<section className="splitsmod__part" aria-label="...">` opens and
@@ -252,7 +258,8 @@ is simpler than one count across the families, and it reads the same.
 
 ### 3. `VsTeam.jsx`
 
-Import `Part` with the rows and `motionIsReduced`. Replace lines 20-25:
+Import `Part` with the rows, `viewKey` from `lib/motion/inViewOnce.js`, and
+`motionIsReduced` from `hooks/preferences/motionIsReduced.js`. Replace lines 20-25:
 
 ```jsx
   // Keep the picked club centred in the strip, scrolling the strip itself and not the page. The
@@ -268,10 +275,12 @@ Import `Part` with the rows and `motionIsReduced`. Replace lines 20-25:
 ```
 
 Compare `pick` with a ref, not a "first run" flag: React's StrictMode runs the
-effect twice on mount in dev, and a flag would make the second run smooth.
+effect twice on mount in dev, and a flag would make the second run smooth. The ref
+is read and written only inside the effect, never during render (the react-hooks
+7.1.1 `refs` rule). The effect sets no state.
 
 Replace the root `<section className="splitsmod__part splitsmod__part--wide" aria-label="Splits vs team">`
-with `<Part once={`${bio.id}:splits-${group}:v`} wide label="Splits vs team">`
+with `<Part once={viewKey(bio.id, `splits-${group}:v`)} wide label="Splits vs team">`
 and its `</section>` with `</Part>`. The door face (`:78`) becomes
 `<Cells quiet line={line} layout={layout} i={1} />`. The base row (`:70`) keeps `i` 0.
 
@@ -400,7 +409,8 @@ test('no raw time in any splits.css animation or transition', () => {
 test('rows carry their index to the fill, and the parts go through Part', () => {
   const rows = read(`${MOD}LineRows.jsx`)
   assert.match(rows, /export function Part\(/)
-  assert.match(rows, /useInViewOnce\(/)
+  assert.match(rows, /useInViewOnce\(once\)/)
+  assert.match(rows, /phase === 'wait' \? ' is-pre' : phase === 'play' \? ' is-in' : ''/)
   assert.match(rows, /'--i': i/)
   const index = read(`${MOD}index.jsx`)
   assert.doesNotMatch(index, /<section className="splitsmod__part"/)
@@ -423,7 +433,8 @@ reduced-motion rules are indented, so the test reads them with a regex on the
 
 ## Verify
 
-1. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/player-splits-motion.test.js` and `npm run lint`. Do not run
+   the full `npm test` or `npm run build`: CI runs them on your PR.
 2. `npm run dev`. Batter: `/player/brice-turang-668930?nointro`, at 390px and at
    1180px. Scroll down to Splits. Each part rises as it comes in, and the bars grow
    one after the next. Scroll back up and down: nothing replays. Change Season:
@@ -447,11 +458,11 @@ reduced-motion rules are indented, so the test reads them with a regex on the
 
 ## Stop if
 
-- Slice 01 is not merged, or `useInViewOnce` does not exist, or it cannot give the
-  three phases (`pre`, `in`, `done`) above.
+- 01a or 01c is not merged, or `useInViewOnce` does not return `[ref, phase]` with
+  the three phases (`wait`, `play`, `rest`) above.
 - `--ease-unfold`, `--dur-rise`, `--dur-grow` or `--stagger-step` is not in
   `src/tokens/effects.css`.
 - The quoted code at `LineRows.jsx:46-51`, `:101-107`, `index.jsx:140-173` or
   `VsTeam.jsx:20-25` differs from this brief (someone changed the module).
 - An open PR touches `src/screens/player/next/modules/splits/` or `splits.css`.
-- A part stays invisible after it is in view (the hook never leaves `pre`).
+- A part stays invisible after it is in view (the hook never leaves `wait`).
