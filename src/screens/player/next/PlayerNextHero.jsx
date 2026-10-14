@@ -63,16 +63,13 @@ export function PlayerNextHero({ core }) {
     <Card as="div" frame="stamped" body="flush" stampIn className="pnext__hero">
       <HeroBand core={core} />
       <div className="pnext__id">
-        <div className="pnext-ovr__photo">
-          <Headshot
-            personId={bio.id}
-            name={bio.fullName}
-            teamId={club?.parentOrgId ?? club?.id}
-            isMlb={isMlbTeamId(club?.id) || Boolean(status && bio.debut)}
-            className="pnext__shot"
-          />
-          {stamp && <HeroStamp view={stamp} open={open} controls={stripId} onToggle={() => setOpen((o) => !o)} />}
-        </div>
+        <Headshot
+          personId={bio.id}
+          name={bio.fullName}
+          teamId={club?.parentOrgId ?? club?.id}
+          isMlb={isMlbTeamId(club?.id) || Boolean(status && bio.debut)}
+          className="pnext__shot"
+        />
         <div className="pnext__who">
           <p className="pnext__role">{[role, bio.number && `#${bio.number}`].filter(Boolean).join(' · ')}</p>
           <h1 className="pnext__name">{bio.fullName}</h1>
@@ -91,6 +88,7 @@ export function PlayerNextHero({ core }) {
           </p>
           {x?.education && <p className="pnext__attr pnext-ovr__school">{x.education}</p>}
         </div>
+        {stamp && <HeroStamp view={stamp} open={open} controls={stripId} onToggle={() => setOpen((o) => !o)} />}
       </div>
       <FactGrid look="strip" as="div">
         <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} mono />

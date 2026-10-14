@@ -1,16 +1,12 @@
 import { fetchRankMarks } from '../../../api/player/leagueRanks.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { StatTile } from '../../../components/ui/frame/StatTile.jsx'
-import { DASH } from '../parts.jsx'
 import { rankFor } from './heroData.js'
 
 // The lead tile is ink, the second a tint, the rest plain (B-phone). The caption
-// is the tile's own ("680 PA", "20 GS"), else the league figure, else "MLB calc"
-// under a WAR that has a number.
+// is the tile's own ("680 PA", "20 GS"), else the league figure.
 function captionOf(t) {
-  if (t.caption) return t.caption
-  if (t.lg) return `Lg ${t.lg}`
-  return t.k === 'WAR' && t.v !== DASH ? 'MLB calc' : undefined
+  return t.caption || (t.lg ? `Lg ${t.lg}` : undefined)
 }
 
 // One role's five tiles. A two-way player gets a labelled row per role.
