@@ -10,21 +10,38 @@ import { ProspectPill } from '../../../../components/badges/ProspectPill.jsx'
 import { RookiePill } from '../../../../components/badges/RookiePill.jsx'
 import { Headshot } from '../../../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
-import { StarterMix } from '../../../../components/playbyplay/pitcherCard/StarterMix.jsx'
 import { ProjectedStarters } from '../../../../components/workload/ProjectedStarters.jsx'
 import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { headerThemeClass, headerThemeStyle } from '../../../../lib/headerTheme.js'
-import { lastGameLine, seasonVsOpponentLine } from '../../../TeamInfo.jsx'
+import { seasonVsOpponentLine } from '../../../TeamInfo.jsx'
+import { monthDay } from '../../../../lib/dates.js'
 import { ClubBar } from './ClubBar.jsx'
+import { PitchMixCard } from './PitchMixCard.jsx'
+import { batterCounts } from '../logic/pitchMix.js'
 
-// One line of the card's strips: a small label, then the line.
-function StripRow({ label, children }) {
+// A row of boxed figures, each over its label: [value, label] pairs.
+function StatBoxes({ cells }) {
   return (
-    <p className="lsp__row">
-      <span className="lsp__rowlabel">{label}</span>
-      <span className="lsp__rowtext">{children}</span>
-    </p>
+    <dl className="lsp__boxes">
+      {cells.map(([value, label]) => (
+        <div key={label} className="lsp__box">
+          <dd className="lsp__boxvalue">{value ?? '—'}</dd>
+          <dt className="lsp__boxlabel">{label}</dt>
+        </div>
+      ))}
+    </dl>
+  )
+}
+
+// A strip's heading line: what it is, when, and an optional door at the right.
+function StripHead({ title, when, end }) {
+  return (
+    <div className="lsp__striphead">
+      <b className="lsp__striptitle">{title}</b>
+      {when && <span className="lsp__stripwhen">{when}</span>}
+      {end}
+    </div>
   )
 }
 
@@ -73,7 +90,7 @@ export function StarterCard({ data, theme, masthead }) {
               </PlayerLink>
               <span className="lsp__meta">
                 {pitcher.hand && <span className="lsp__hand">{pitcher.hand}HP</span>}
-                {pitcher.jersey && <span className="lsp__jersey">{pitcher.jersey}</span>}
+                {pitcher.jersey && <span className="lsp__jersey">#{pitcher.jersey}</span>}
               </span>
               <span className="lsp__pills">
                 <ProspectPill {...prospectBadge(data.prospectsData, pitcher.id, data.oppOrgTeamId)} />
@@ -85,12 +102,49 @@ export function StarterCard({ data, theme, masthead }) {
           </div>
           {line && <SeasonCells line={line} />}
           <div className="lsp__rows">
-            {line?.lastGame && <StripRow label="Last start">{lastGameLine(line.lastGame)}</StripRow>}
-            {line?.vsOpponent && <StripRow label="This year">{seasonVsOpponentLine(line.vsOpponent, data.vsOpponentAbbr)}</StripRow>}
+            {line?.lastGame && (
+              <section className="lsp__strip">
+                <StripHead
+                  title="Last start"
+                  when={`${monthDay(line.lastGame.date)} ${line.lastGame.home ? 'vs' : '@'} ${line.lastGame.opponent}`}
+                  end={
+                    <PlayerLink id={pitcher.id} name={pitcher.name} className="lsp__seeall">
+                      See all ›
+                    </PlayerLink>
+                  }
+                />
+                <StatBoxes
+                  cells={[
+                    [line.lastGame.inningsPitched, 'IP'],
+                    [line.lastGame.hits, 'H'],
+                    [line.lastGame.earnedRuns, 'ER'],
+                    [line.lastGame.strikeOuts, 'K'],
+                    [line.lastGame.baseOnBalls, 'BB'],
+                  ]}
+                />
+              </section>
+            )}
+            {line?.vsOpponent && (
+              <p className="lsp__thisyear">{seasonVsOpponentLine(line.vsOpponent, data.vsOpponentAbbr)}</p>
+            )}
             {data.careerVsOpp && (
               <BoxLinesDoor
                 className="lsp__career"
                 label={vsTeamDoorLabel(data.careerVsOpp, 'pitching', data.vsOpponentAbbr)}
+                face={
+                  <section className="lsp__strip">
+                    <StripHead title={`Career vs ${data.vsOpponentAbbr}`} end={<span className="lsp__seeall">See all ›</span>} />
+                    <StatBoxes
+                      cells={[
+                        [data.careerVsOpp.g, 'G'],
+                        [data.careerVsOpp.ip, 'IP'],
+                        [data.careerVsOpp.era, 'ERA'],
+                        [data.careerVsOpp.k, 'K'],
+                        [data.careerVsOpp.bb, 'BB'],
+                      ]}
+                    />
+                  </section>
+                }
                 sheet={{
                   personId: pitcher.id,
                   playerSurname: splitDisplayName(pitcher.name).last,
@@ -103,13 +157,13 @@ export function StarterCard({ data, theme, masthead }) {
             )}
           </div>
           {data.arsenal && (
-            <StarterMix
-              listOnPhone
+            <PitchMixCard
               arsenal={data.arsenal}
               tto={data.arsenalTto}
               sides={data.arsenalSides}
               lefty={pitcher.hand === 'L'}
               name={pitcher.name}
+              counts={batterCounts(data.lineup.map((p) => data.batsOf(p.id)), pitcher.hand)}
             />
           )}
         </>

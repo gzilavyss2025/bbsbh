@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { parkShort, shortDate } from '../src/screens/lineup/next/factText.js'
-import { seriesPosition } from '../src/screens/lineup/next/seriesPosition.js'
+import { parkShort, shortDate } from '../src/screens/lineup/next/logic/factText.js'
+import { seriesPosition } from '../src/screens/lineup/next/logic/seriesPosition.js'
 
 test('the date prints as weekday, month and day', () => {
   assert.equal(shortDate('2026-10-14'), 'Wed Oct 14')

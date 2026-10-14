@@ -26,9 +26,7 @@ import { PitchScene } from './PitchScene.jsx'
 //
 // No arc to draw (no pitch type the model knows, or none with a speed) keeps
 // the list alone on wide and shows no door on a phone.
-// `listOnPhone` (the new lineup page) keeps the list on a phone too and turns the door into
-// a small "Watch" button beside it, so the card reads the same at every width.
-export function StarterMix({ arsenal, tto, sides, lefty, name, listOnPhone = false }) {
+export function StarterMix({ arsenal, tto, sides, lefty, name }) {
   const wide = useMediaQuery(WIDE_QUERY)
   const [open, setOpen] = useState(false)
   const [activeCode, setActiveCode] = useState(null)
@@ -38,19 +36,6 @@ export function StarterMix({ arsenal, tto, sides, lefty, name, listOnPhone = fal
   const close = () => setOpen(false)
   const hasScene = pitches.length > 0
 
-  if (!wide && listOnPhone) {
-    return (
-      <div className="starter__mix starter__mix--phone">
-        <PitchArsenalMix arsenal={arsenal} tto={tto} sides={sides} />
-        {hasScene && (
-          <button type="button" className="starter__watchbtn" aria-haspopup="dialog" onClick={() => setOpen(true)}>
-            <span aria-hidden="true">▶</span> Watch
-          </button>
-        )}
-        {open && <MixSheet tiles={tiles} lefty={lefty} name={name} onClose={close} />}
-      </div>
-    )
-  }
   if (!wide) {
     if (!hasScene) return null
     return (
@@ -77,7 +62,7 @@ export function StarterMix({ arsenal, tto, sides, lefty, name, listOnPhone = fal
 // The phone sheet: the app's bottom sheet (.scrim/.sheet), the Now Pitching
 // card's scene and tiles, and a Close button. A tap on the dimmed backdrop,
 // or Escape, closes it too; focus goes back to the door.
-function MixSheet({ tiles, lefty, name, onClose }) {
+export function MixSheet({ tiles, lefty, name, onClose }) {
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
   return (

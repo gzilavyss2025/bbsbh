@@ -1,6 +1,6 @@
-import { selectGameSeason, selectTeamMeta } from '../../../api/select.js'
-import { headerThemeFor, mastheadMarkFor, themeKeyFor } from '../../../lib/headerTheme.js'
-import { seasonMasthead, seasonTheme } from '../../../lib/identity/seasonMarks.js'
+import { selectGameSeason, selectTeamMeta } from '../../../../api/select.js'
+import { headerThemeFor, mastheadMarkFor, themeKeyFor } from '../../../../lib/headerTheme.js'
+import { seasonMasthead, seasonTheme } from '../../../../lib/identity/seasonMarks.js'
 
 // A club's identity on one lineup page: the bar colours of the jersey it wears tonight
 // and the mark its bars draw. Identity only, never game state (ADR-0030). Not memoised:

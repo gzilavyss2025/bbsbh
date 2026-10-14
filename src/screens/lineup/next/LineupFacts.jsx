@@ -6,7 +6,7 @@ import { FactGrid } from '../../../components/ui/frame/FactGrid.jsx'
 import { ballparkFor } from '../../../lib/ballpark/ballparkData.js'
 import { resolveBallparkLayout } from '../../../lib/ballpark/layout/resolveLayout.js'
 import { CrowdIcon, Fact, managerFact } from '../../TeamInfo.jsx'
-import { parkShort, shortDate } from './factText.js'
+import { parkShort, shortDate } from './logic/factText.js'
 
 const DiamondIcon = () => (
   <svg viewBox="0 0 20 20" width="12" height="12" aria-hidden="true" fill="currentColor">
