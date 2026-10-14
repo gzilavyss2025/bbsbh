@@ -25,7 +25,7 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
   const [picked, setPicked] = useState(null)
   const [wanted, setWanted] = useState('R')
   const [sitAll, setSitAll] = useState(false)
-  const [focus, setFocus] = useState('')
+  const [focus, setFocus] = useState('h')
   const [ready, setReady] = useState(false)
   const key = picked ?? String(season)
   // October is not cut by a date and the career holds it: a dated page asks for neither.
@@ -101,15 +101,15 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
           <span className="splitsmod__lbl">Scope</span>
           <div className="splitsmod__segs">
             {SCOPES.map(([id, label]) => (
-              <Button key={id} size="control" skin="outline" pressed={scope === id} disabled={id !== 'R' && !postOk} onClick={() => { setPicked(shown); setWanted(id) }}>
+              <button key={id} type="button" className="splitsmod__pick" aria-pressed={scope === id} disabled={id !== 'R' && !postOk} onClick={() => { setPicked(shown); setWanted(id) }}>
                 {label}
-              </Button>
+              </button>
             ))}
           </div>
         </div>
         <span className="splitsmod__sum">
           <span className="splitsmod__pa">{pa ?? '—'}</span> {pitching ? 'BF' : 'PA'}
-          <Button size="control" skin="outline" onClick={() => { setPicked(null); setWanted('R'); setSitAll(false) }}>Reset</Button>
+          <button type="button" className="splitsmod__pick" onClick={() => { setPicked(null); setWanted('R'); setSitAll(false); setFocus('h') }}>Reset</button>
         </span>
       </div>
       <ul className="splitsmod__legend" aria-label="How to read the bars">
