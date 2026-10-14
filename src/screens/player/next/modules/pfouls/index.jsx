@@ -8,7 +8,7 @@ import '../../../../../styles/player-next/pitcher/pfouls.css'
 import { fetchFouls, fetchFoulsFor, foulLeaders, compareFoulsInScope, leagueFoulRates, pitcherFoulLine } from '../../../../../api/fouls.js'
 import { CountExplorer, Rail, Stat } from '../../parts/CountExplorer.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
-import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
+import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { Door } from '../../../../../components/ui/control/Door.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { useRouteLink } from '../../../../../lib/nav.js'
@@ -70,16 +70,14 @@ export default function PfoulsModule({ bio, asOf, season, onEmpty, onCount }) {
   return (
     <div className={`fouls pfouls${view.thin ? ' pfouls--thin' : ''}`}>
       {lines.R && lines.P && (
-        <div role="group" aria-label="Part of season" className="pfouls__scope">
-          {SCOPES.map(([k, label]) => (
-            <button key={k} type="button" className="pnext-pick" aria-pressed={k === scope} onClick={() => setPicked(k)}>
-              <span className="pfouls__opt">
-                {label}
-                <span className="pfouls__g">{lines[k].g} G</span>
-              </span>
-            </button>
-          ))}
-        </div>
+        <Segmented
+          label="Part of season"
+          className="pfouls__scope"
+          fill
+          value={scope}
+          onChange={setPicked}
+          options={SCOPES.map(([k, label]) => ({ value: k, label, count: `${lines[k].g} G` }))}
+        />
       )}
       <div className="fouls__body">
         {view.thin ? (
@@ -90,13 +88,13 @@ export default function PfoulsModule({ bio, asOf, season, onEmpty, onCount }) {
 
         <Stack gap="snug" className="fouls__base">
           <span className="fouls__cap">Season baseline</span>
-          <Cluster gap="tight" role="group" aria-label="Season stat">
-            {view.baseline.map((b, i) => (
-              <button key={b.key} type="button" className="pnext-pick" aria-pressed={i === metric} onClick={() => setMetric(i)}>
-                {b.label}
-              </button>
-            ))}
-          </Cluster>
+          <Segmented
+            label="Season stat"
+            fill
+            value={metric}
+            onChange={setMetric}
+            options={view.baseline.map((b, i) => ({ value: i, label: b.label }))}
+          />
           <Stack gap="base" className="fouls__metric" aria-live="polite">
             <div className="fouls__between">
               <Stat k={m.title} v={m.his} sub={m.sub} />
