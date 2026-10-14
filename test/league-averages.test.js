@@ -80,19 +80,34 @@ test('a rate with no source is null: no PA, no pitch count, no total bases', () 
   assert.ok(noPitches.k > 0)
 })
 
-test('pitch counts on part of the clubs: P/PA divides by the PA of those clubs only', () => {
-  const r = leagueAveragesOf({ hitting: [club({ plateAppearances: 400, numberOfPitches: 1500 }), club({ plateAppearances: 600 }), club({ plateAppearances: 500, numberOfPitches: 1 })] })
-  assert.equal(r.ppa, 3.75)
+// A stat only some clubs carry is a league figure only when 90% of the clubs carry it (#2035 review).
+const copies = (n, stat) => Array.from({ length: n }, () => club(stat))
+const noK = { plateAppearances: 600, baseOnBalls: 50, hits: 140, atBats: 540, homeRuns: 20 }
+const withK = { ...noK, strikeOuts: 120 }
+
+test('K%, K-BB%, BB/K and BABIP use only clubs that count strikeouts; under 90% of the clubs gives null (1910: 9 of 16)', () => {
+  // 1913: all 16 count. 1910: 9 of 16 do, so the sum would divide by every club's PA.
+  assert.equal(leagueAveragesOf({ hitting: copies(16, withK) }).k, 0.2)
+  const part = leagueAveragesOf({ hitting: [...copies(9, withK), ...copies(7, noK)] })
+  for (const key of ['k', 'kbb', 'bbk', 'babip']) assert.equal(part[key], null, key)
+  assert.equal(part.bb, 0.083) // walks are counted by every club
+  // 15 of 16 is enough, and the club without strikeouts leaves the figure alone.
+  assert.equal(leagueAveragesOf({ hitting: [...copies(15, withK), club(noK)] }).k, 0.2)
 })
 
-test('opponent OPS skips clubs whose total bases are missing or stray (a 1959 club has 12 TB on 1,384 H)', () => {
-  const stray = club({ atBats: 5000, hits: 1300, baseOnBalls: 400, hitByPitch: 30, sacFlies: 30, totalBases: 12 })
-  assert.equal(leagueAveragesOf({ pitching: [...pit, stray, club({ atBats: 5000, hits: 1300 })] }).ops, leagueAveragesOf({ pitching: pit }).ops)
+test('pitch counts on part of the clubs: P/PA needs 90% of the clubs with a real count (3 or more a PA)', () => {
+  const real = { plateAppearances: 600, numberOfPitches: 2250 }
+  assert.equal(leagueAveragesOf({ hitting: [...copies(9, real), club({ plateAppearances: 500, numberOfPitches: 1 })] }).ppa, 3.75) // stray 1 left out
+  assert.equal(leagueAveragesOf({ hitting: [...copies(1, real), ...copies(2, { plateAppearances: 600 })] }).ppa, null)
+  // 1975-79: every club counts about 1.5 a PA.
+  assert.equal(leagueAveragesOf({ hitting: copies(10, { plateAppearances: 600, numberOfPitches: 900 }) }).ppa, null)
 })
 
-test('a club counting under 3 pitches a PA is left out of P/PA (1975-79 count about 1.5)', () => {
-  assert.equal(leagueAveragesOf({ hitting: [club({ plateAppearances: 400, numberOfPitches: 1500 }), club({ plateAppearances: 600, numberOfPitches: 900 })] }).ppa, 3.75)
-  assert.equal(leagueAveragesOf({ hitting: [club({ plateAppearances: 600, numberOfPitches: 900 })] }).ppa, null)
+test('opponent OPS needs total bases from 90% of the clubs (1971: 1 whole club of 24 gave .606)', () => {
+  const whole = { atBats: 5000, hits: 1300, baseOnBalls: 400, hitByPitch: 30, sacFlies: 30, totalBases: 2000 }
+  const stray = { ...whole, totalBases: 12 } // a 1959 club: 12 TB on 1,300 H
+  assert.equal(leagueAveragesOf({ pitching: [...copies(9, whole), club(stray)] }).ops, leagueAveragesOf({ pitching: copies(1, whole) }).ops)
+  assert.equal(leagueAveragesOf({ pitching: [...copies(1, whole), ...copies(2, { atBats: 5000, hits: 1300 })] }).ops, null)
 })
 
 test('K-BB% goes negative when walks outnumber strikeouts', () => {
@@ -157,6 +172,20 @@ test('the shipped file has no clock, starts in 1901 and stays small', () => {
     for (const [key, [lo, hi]] of Object.entries(range)) {
       assert.ok(row[key] === null || (row[key] >= lo && row[key] <= hi), `${year} ${key} ${row[key]}`)
     }
+  }
+  // The range alone let two partial-feed rows through (K% .05 in 1910-12, OPS .606 in 1971).
+  // OPS is OBP + AVG + ISO, so OPS - AVG - ISO is the league OBP, which stays near .31-.35 (.28-.37 allowed).
+  for (const [year, row] of Object.entries(file.seasons)) {
+    if (row.ops === null) continue
+    const obp = row.ops - row.avg - row.iso
+    assert.ok(obp > 0.28 && obp < 0.37, `${year} implied OBP ${obp.toFixed(3)}`)
+  }
+  // K% moves under .02 a year in the real data; a half-counted year jumps by .05.
+  let prev
+  for (const [year, row] of Object.entries(file.seasons)) {
+    if (row.k === null) continue
+    if (prev) assert.ok(Math.abs(row.k - prev.k) <= 0.02 * (year - prev.year), `${prev.year}-${year} K% ${prev.k} -> ${row.k}`)
+    prev = { year, k: row.k }
   }
 })
 
