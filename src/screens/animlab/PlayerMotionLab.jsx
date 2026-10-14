@@ -71,6 +71,10 @@ function MoundDemo() {
           ))}
         </div>
       </div>
+    </div>
+  )
+}
+
 // The Splits card's entrance (board Splits): a part rises and its bars grow, one row after the
 // next. The real rows of LineRows.jsx with invented figures; `is-in` is set at once, so Play replays.
 const DEMO_SPLITS = [
@@ -180,6 +184,11 @@ export function PlayerMotionLab() {
           {[0, 95, 190, 285, 380].map((ms) => (
             <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
               <div className="menurail__body menurail__body--a">{RAIL_BODY}</div>
+            </Frame>
+          ))}
+        </div>
+      </Entry>
+      <Entry
         title="Contact — the dots drop in"
         note={
           <>
