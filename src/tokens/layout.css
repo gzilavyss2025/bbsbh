@@ -40,7 +40,10 @@
      control that stands on the page or in the bar is --tap-min. Two heights,
      not five: the 28/30/32/34/44px spread the collapse measured was one
      control drawn five ways. 34px still clears WCAG 2.5.8's 24px floor with
-     room, and styles/system/button.css keeps two of them from touching. */
+     room, and styles/system/button.css keeps two of them from touching.
+     Amended for #2073: a row of toggles inside a card (All / Regular season /
+     Postseason) is the joined Segmented part (ui/control/Segmented.jsx) at
+     --tap-min. --control-min stays for every other small control. */
   --control-min: 34px;
   /* The VISIBLE mark of an icon-only button (#1209). The tap area is always
      --tap-min; only the round mark you see changes. --mark-md is a dismiss
