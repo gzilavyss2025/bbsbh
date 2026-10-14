@@ -1882,6 +1882,19 @@ Re-run only to fold in a new season.
   (the newest nickname for the code: Brooklyn 1897 reads "Dodgers 1897"). 816 KB, 248 KB gzipped. No clock: a re-run writes
   the same bytes. The pure half is `scripts/lib/open-data/team-seasons.mjs`. Reader:
   `src/api/teamSeasons.js`.
+- `gen-pitch-starts.mjs` → `public/data/pitch-arsenal-starts/{season}/{NN}.json` and `{NN}.mph.json` — the per-start
+  pitch mix for a season before 2026, MLB only (ADR-0111). Run by hand, one season at a time:
+  `node scripts/gen-pitch-starts.mjs --season=YYYY` (required), then the same command with `--verify`. It
+  opens no SQLite database and writes no dump. It uses `aggregateGamePitchTypes` from `gen-pitch-arsenal.mjs`,
+  adds the two batter sides (the pure half is `scripts/lib/pitch/starts-sweep.mjs`), and writes the shards through `bucketsOf` and `writeShards`. The numbers equal
+  what `foldStarts` and `mphBuckets` give (a test pins this). **Resume:** it writes the shards every 100 games and
+  reads them at the start, so it skips every game already stored. A feed that fails after the client's retries goes on a
+  failed list: the script prints the list and exits non-zero. Run the same command again to fetch only what is missing.
+  **Verify gate:** it exits non-zero unless (1) 99% of the season's Final games have a row, (2) in 40 evenly
+  spaced games, 95% of the pitcher pairs are within 3 pitches of the box score and the grand total is within 1%,
+  (3) unknown pitch codes are 2% of all pitches or fewer, and (4) every shard is under 60 KB and in its
+  `personId % 100` bucket. Only when all four pass does it add the season to `seasons.json`. Reader:
+  `fetchPitchMixFor` in `src/api/pitchArsenal.js`.
 
 ## Assets / off-app
 
