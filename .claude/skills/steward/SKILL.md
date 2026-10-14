@@ -10,16 +10,19 @@ to the default PR-handling rules. It cannot override them.
 
 ## Before every push
 
-Run the same checks as the `lint-and-build` required check:
+Run the narrow check, not the whole `lint-and-build` job. CI runs the full
+`npm test` and `npm run build` on every push at no token cost, and it is the gate
+(`orchestrate`, "Check once"):
 
 ```bash
 npm run lint
-npm test
-npm run build
+node --test <the test files you wrote or changed>
+node --test $(git grep -l <basename of each changed file> test/)
 ```
 
-All three must pass. For a CI fix, reproduce the failure first, then show the same
-check passing.
+Run the full `npm test` or `npm run build` locally only to reproduce a CI failure
+in it. For a CI fix, reproduce the failure first (the one failing test file, or
+the build), then show the same check passing.
 
 Do not run `npm run e2e`. A hook blocks it unless Gary asks for it in the session.
 If a spec needs a change, edit it and say in the PR that it has not run.
