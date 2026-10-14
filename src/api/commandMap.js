@@ -192,3 +192,14 @@ export function commandPitchMarks(entry, { level = 'mlb', stand = null } = {}) {
     return { code, pitches, whiffPct, mark: { col: col / pitches, row: row / pitches } }
   })
 }
+
+// How many pitches he threw to each hand, for the split chips' own counts.
+export function commandHandCounts(entry, level = 'mlb') {
+  const out = { L: 0, R: 0 }
+  for (const byStand of Object.values(entry?.[level] ?? {})) {
+    for (const [s, hand] of Object.entries(byStand)) {
+      out[s] += (hand.cells ?? []).reduce((a, b) => a + b, 0)
+    }
+  }
+  return out
+}
