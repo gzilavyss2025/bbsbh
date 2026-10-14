@@ -30,9 +30,11 @@ that would need dozens of statsapi calls per page load). See `docs/scripts/gener
 for each generator; the reader modules:
 
 - `leagueAverages.js` — `leagueAverage(season, 'hitting'|'pitching')` → the season's
-  league AVG or ERA, or `null`; `lastCompleteSeason()` names the last year in the file;
+  league AVG or ERA, or `null`; `leagueRates(season)` → the whole row, which adds the Advanced
+  card's league rates `k`, `bb`, `kbb` (fractions), `bbk`, `iso`, `babip`, `ppa` (P/PA) and `ops`
+  (opponent OPS), each `null` when the feed has no source; `lastCompleteSeason()` names the last year in the file;
   `vsLeague(rate, league, group)` prints the signed "vs lg" cell. Reads
-  `public/data/league-averages.json` (`{ lastSeason, seasons: { [year]: { avg, era } } }`,
+  `public/data/league-averages.json` (`{ lastSeason, seasons: { [year]: { avg, era, k, bb, kbb, bbk, iso, babip, ppa, ops } } }`,
   hand-run by `gen-league-averages.mjs`). The season in play is NOT in the file: the
   reader makes one `teams/stats?group=hitting,pitching` request, keeps it in memory for
   the session, and the table marks it "to date". The pure sum lives in
