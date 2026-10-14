@@ -11,7 +11,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { readJsonOr, writeSeasons, writeShards } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
-import { addGame, boxVerdict, codesVerdict, coverageVerdict, pendingGames, rowsOfFeed, shardsOf } from './lib/pitch/starts-sweep.mjs'
+import { addGame, boxVerdict, codesVerdict, coverageVerdict, pendingGames, rowsOfFeed, sampleGames, shardsOf } from './lib/pitch/starts-sweep.mjs'
 import { shardKey100 } from '../src/lib/shardKey.js'
 
 const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data', 'pitch-arsenal-starts')
@@ -72,7 +72,7 @@ async function verify(season, dir, store, pks) {
   const cov = coverageVerdict(pks, store)
   if (!cov.ok) fails.push(`coverage: ${cov.total - cov.missing.length}/${cov.total} (first missing: ${cov.missing.join(',')})`)
 
-  const sample = pks.filter((_, i) => i % Math.max(1, Math.floor(pks.length / 40)) === 0).slice(0, 40)
+  const sample = sampleGames(pks, store)
   const pairs = []
   for (const pk of sample) {
     const box = await getJson(`/api/v1/game/${pk}/boxscore`)
