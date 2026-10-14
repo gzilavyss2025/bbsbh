@@ -1,0 +1,95 @@
+/* ---------------------------------------------------------------------------
+   THE MENU RAIL'S MOTION (#2073, slice 05; components/ui/control/MenuRail.jsx).
+   The resting look and the two states are system/menurail/menurail.css. This
+   file holds only how they change:
+
+     the cards     flex-basis and padding glide between the menu and the rail,
+                   --dur-unfold on --ease-unfold (canvas ArsenalReveal .ar-mc)
+     the figures   the one-row grid folds 1fr -> 0fr on the same pair (.ar-mx)
+     the panel     folds 0fr <-> 1fr on the same pair; its inside hides only
+                   AFTER the fold ends, so the content stays while it shuts (.ar-pn)
+     the rise      every new pick swaps the body between --a and --b. The two
+                   keyframes have the same steps, so the name change restarts the
+                   rise without a remount (canvas tp-fa / tp-fb)
+
+   A pick is a change the reader caused, so the rise plays on every pick
+   (docs/motion.md, "The one-shot gate"). Reduced motion: no glide, no rise.
+
+   .menurail__card.btn outranks .btn (0,2,0 against 0,1,0), so the list below
+   REPLACES .btn's transition: it restates the press and the edge.
+   --------------------------------------------------------------------------- */
+
+.menurail__card.btn {
+  transition:
+    flex-basis var(--dur-unfold) var(--ease-unfold),
+    padding var(--dur-unfold) var(--ease-unfold),
+    background-color var(--dur-med) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-stamp),
+    transform var(--dur-fast) var(--ease-stamp);
+}
+
+.menurail__fold {
+  transition: grid-template-rows var(--dur-unfold) var(--ease-unfold);
+}
+
+.menurail__head {
+  transition:
+    max-height var(--dur-unfold) var(--ease-unfold),
+    opacity var(--dur-med) var(--ease-standard);
+}
+
+.menurail__panel {
+  transition: grid-template-rows var(--dur-unfold) var(--ease-unfold);
+}
+/* Shutting: stay visible until the fold ends, then hide (and the panel is
+   already inert, so nothing in it takes focus meanwhile). Opening: show at once. */
+.menurail__panelin {
+  transition: visibility 0s var(--dur-unfold);
+}
+.menurail__panel--open .menurail__panelin {
+  transition-delay: 0s;
+}
+
+@keyframes menurail-rise-a {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+}
+@keyframes menurail-rise-b {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+}
+.menurail__body--a {
+  animation: menurail-rise-a var(--dur-stamp-in) var(--ease-stamp) backwards;
+}
+.menurail__body--b {
+  animation: menurail-rise-b var(--dur-stamp-in) var(--ease-stamp) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menurail__card.btn {
+    transition: none;
+  }
+  .menurail__fold {
+    transition: none;
+  }
+  .menurail__head {
+    transition: none;
+  }
+  .menurail__panel {
+    transition: none;
+  }
+  .menurail__panelin {
+    transition: none;
+  }
+  .menurail__body--a {
+    animation: none;
+  }
+  .menurail__body--b {
+    animation: none;
+  }
+}

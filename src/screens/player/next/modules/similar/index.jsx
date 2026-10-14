@@ -5,6 +5,7 @@ import { getJson } from '../../../../../api/statsapi.js'
 import { Headshot } from '../../../../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../../../../components/player/PlayerLink.jsx'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
+import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { Pill } from '../../../../../components/ui/control/Pill.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { useLinkScope } from '../../../../../lib/nav.js'
@@ -137,13 +138,14 @@ function Focus({ me, comp, mode, setMode, onBack }) {
         <Match value={comp.match} />
       </div>
       {sections.length > 1 && (
-        <div className="simp__switch" role="group" aria-label="What the dots show">
-          {sections.map((s) => (
-            <button key={s.key} type="button" className="pnext-pick" aria-pressed={s.key === sec.key} onClick={() => setMode(s.key)}>
-              {s.title}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          label="What the dots show"
+          className="simp__switch"
+          fill
+          value={sec.key}
+          onChange={setMode}
+          options={sections.map((s) => ({ value: s.key, label: s.title }))}
+        />
       )}
       <div className="simp__box">
         <div className="simp__fhead">

@@ -462,16 +462,12 @@ button.starter__careervs {
    There the ring is the two-colour band ring (#1215): a paper outline with an
    ink halo. The Pill keeps the ring's width, style and offset. A pressed
    chip's paper edge stays apart from the ring: the halo's ink fills the gap
-   between them. Focused and pressed, one box-shadow carries the press inset
-   and the halo. test/band-focus-ring.test.js holds it. */
+   between them. A press draws no shadow (the stamp-press, #2073), so the halo
+   stays on through it. test/band-focus-ring.test.js holds it. */
 .sectionhead--band .mastheadpill:focus-visible,
 .is-themed .sectionhead--club .mastheadpill:focus-visible {
   outline-color: var(--focus-ring-band);
   box-shadow: var(--ring-band);
-}
-.sectionhead--band .mastheadpill:focus-visible:active,
-.is-themed .sectionhead--club .mastheadpill:focus-visible:active {
-  box-shadow: var(--inset-cell), var(--ring-band);
 }
 
 /* Batters with history against tonight's starter who AREN'T in the posted nine

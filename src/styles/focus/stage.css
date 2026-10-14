@@ -229,7 +229,7 @@
 
 /* One row now, so the dead space a near-miss falls in is the padding above and
    below the buttons, not the old gap between two rows. Measured from the
-   BUTTON, which is load-bearing: .btn:active nudges it 1px with a transform,
+   BUTTON, which is load-bearing: .btn:active moves it 2px with a transform,
    making it the containing block for its own absolutely positioned pseudo.
    Anchor to the bar instead and the press silently re-anchors the hit area
    mid-tap — pointer down on the button, up on the page, reveal never fires.

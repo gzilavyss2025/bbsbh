@@ -1,7 +1,7 @@
 import { fetchRankMarks } from '../../../api/player/leagueRanks.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { StatTile } from '../../../components/ui/frame/StatTile.jsx'
-import { rankFor } from './heroData.js'
+import { rankFor, tileStampDelay } from './heroData.js'
 
 // The lead tile is ink, the second a tint, the rest plain (B-phone). The caption
 // is the tile's own ("680 PA", "20 GS"), else the league figure.
@@ -26,7 +26,7 @@ export function PlayerNextTiles({ block, playerId, season, label, lit }) {
             tone={i === 0 ? 'ink' : i === 1 ? 'tint' : 'plain'}
             className={lit?.group === block.group && lit.tile === t.k ? 'pnext__tile--lit' : ''}
             stampIn
-            style={{ '--stamp-delay': `${60 + i * 40}ms` }}
+            style={{ '--stamp-delay': tileStampDelay(i) }}
           />
         ))}
       </div>
