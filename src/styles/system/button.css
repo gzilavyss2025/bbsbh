@@ -58,13 +58,12 @@
      hover           pointer devices only, inside @media (hover: hover), so a
                      tap on a phone never leaves a button stuck in it. The rule
                      darkens a step: pencil to graphite on outline.
-     pressed         :active. 1px down, and --inset-cell: the box is pressed
-                     into the paper. The inset had one other job in this
-                     family, the resting shadow of .posinn__scopebtn, and
-                     --shadow-card was on its twin .stepnav__btn. Paper does
-                     not float, so neither rests on a shadow any more, and the
-                     inset moved to the one moment a control really is pressed
-                     into the page.
+     pressed         :active. The stamp-press (#2073): the box moves
+                     --bw-heavy down and right, as a stamp is pushed into the
+                     page. No shadow: the canvas press drops an offset shadow
+                     to none, and a button has no offset shadow, so it gets
+                     only the move. The inset it wore before (--inset-cell)
+                     is gone from the press.
      selected        [aria-pressed="true"] for a toggle, [aria-current="page"]
                      for the current stop in a set of pages. Ink fill AND a
                      leading tick: the tick is the part that survives
@@ -88,7 +87,8 @@
                      horseshoe in the contact sheet). The label carries the
                      state too ("Refreshing…").
 
-   Motion is --dur-fast on --ease-standard, and none at all under
+   Motion is --dur-fast. The press moves on --ease-stamp, the canvas press
+   curve; the colours change on --ease-standard. None at all under
    prefers-reduced-motion.
 
    SPACING. Two controls side by side sit at least --space-1h apart (WCAG
@@ -134,7 +134,7 @@
   text-transform: uppercase;
   cursor: pointer;
   transition:
-    transform var(--dur-fast) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-stamp),
     background-color var(--dur-fast) var(--ease-standard),
     border-color var(--dur-fast) var(--ease-standard);
 }
@@ -243,8 +243,7 @@
 }
 
 .btn:active {
-  transform: translateY(1px);
-  box-shadow: var(--inset-cell);
+  transform: translate(var(--bw-heavy), var(--bw-heavy));
 }
 
 .btn[aria-pressed='true'],
