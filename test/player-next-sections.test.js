@@ -196,12 +196,14 @@ test('with every slot a stub, all nine batter buttons show', () => {
 // still be a stub.
 const BUILT = new Set(['tbd', 'similar', 'prospects', 'innings', 'contract', 'mound', 'form', 'season', 'firsts', 'pform', 'path', 'splits', 'contact', 'fouls', 'arsenal', 'pitchlog', 'plate', 'batlog'])
 
-test('a stub module renders its placeholder line: it never returns null or calls onEmpty', () => {
+// A stub renders nothing, so Slot's probe hides its card (and a section whose every slot is a
+// stub loses its button) until the issue builds it: the live page never shows a "loads here"
+// line (decided 2026-10-14, before the swap #2040 makes this page the live one).
+test('a stub module renders nothing, so its card stays hidden until its issue builds it', () => {
   for (const slot of SLOTS.filter((s) => !BUILT.has(s.module))) {
     const src = readFileSync(new URL(`../src/screens/player/next/modules/${slot.module}/index.jsx`, import.meta.url), 'utf8')
-    if (BUILT.has(slot.module)) continue
-    assert.ok(!/return null/.test(src), `${slot.module} returns null`)
-    assert.ok(!/onEmpty\(/.test(src), `${slot.module} calls onEmpty`)
+    assert.match(src, /return null/, `${slot.module} renders something`)
+    assert.ok(!/<[a-z]/.test(src), `${slot.module} draws markup`)
   }
 })
 

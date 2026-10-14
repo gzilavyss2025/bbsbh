@@ -37,8 +37,8 @@ live hub.
   the shared `tbd` module which section it fills.
 - **Data:** the module owns its data hook. `Slot` mounts it only once the slot is near
   (`hooks/scroll/useNearView.js`), so nothing loads before then.
-- **Two states.** *Not built yet:* the stub renders its one placeholder line, never `null`
-  and never `onEmpty()`, so the card and its button stay. *No data:* a real module that has
+- **Two states.** *Not built yet:* the stub renders `null`, so `Slot` hides its card and the
+  live page shows no placeholder (changed 2026-10-14, before the swap #2040). *No data:* a real module that has
   loaded and found nothing calls `onEmpty()`, or renders nothing on its first render; `Slot`
   hides the card, and the button hides when ALL slots of its section are empty. A module that is built leaves the stub list: add it to `BUILT` in `test/player-next-sections.test.js`.
 - **Count tag:** call `onCount(n)` (or a string); `Slot` draws it on the card's edge.
