@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { MenuRail } from '../../components/ui/control/MenuRail.jsx'
 import { StatTile } from '../../components/ui/frame/StatTile.jsx'
 import { Entry, Frame } from './Entry.jsx'
 import '../../styles/player-next/both/splits.css'
@@ -55,6 +57,20 @@ function SplitsRiseDemo() {
   )
 }
 
+// The menu rail (#2073, slice 05): the real MenuRail on invented cards. The strip is the
+// real panel body (.menurail__body--a) frozen through its rise.
+const RAIL_ITEMS = [
+  { key: 'one', title: 'First kind', meta: '41%', figures: 'Invented line one' },
+  { key: 'two', title: 'Second kind', meta: '27%', figures: 'Invented line two' },
+  { key: 'three', title: 'Third kind', meta: '19%', figures: 'Invented line three' },
+]
+const RAIL_BODY = <p className="hint">Invented panel text.</p>
+
+function MenuRailDemo() {
+  const [picked, setPicked] = useState(null)
+  return <MenuRail label="Invented kinds" items={RAIL_ITEMS} picked={picked} onPick={setPicked} panel={() => RAIL_BODY} backLabel="All kinds" />
+}
+
 export function PlayerMotionLab() {
   return (
     <>
@@ -89,6 +105,27 @@ export function PlayerMotionLab() {
         }
         live={<SplitsRiseDemo />}
       />
+      <Entry
+        title="Menu rail — unfold, fold and rise"
+        note={
+          <>
+            The shared menu (#2073, styles/motion/menurail.css). Tap a card: the row folds into a rail and the
+            panel opens over 400ms on the unfold curve; the panel body rises 8px as it fades in, 380ms on the
+            stamp curve, and again on every new pick. Tap the picked card: the content stays while the panel
+            folds. Off under reduced motion.
+          </>
+        }
+        live={<MenuRailDemo />}
+      >
+        <span className="animlab__stagelabel">The rise on a pick, 0 → 380ms</span>
+        <div className="animlab__frozen">
+          {[0, 95, 190, 285, 380].map((ms) => (
+            <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
+              <div className="menurail__body menurail__body--a">{RAIL_BODY}</div>
+            </Frame>
+          ))}
+        </div>
+      </Entry>
     </>
   )
 }

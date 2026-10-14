@@ -81,7 +81,8 @@
   inset: calc(-1 * var(--space-3)) calc(-1 * var(--space-1));
 }
 .seasonmod__war:hover,
-.seasonmod__war:focus-visible {
+.seasonmod__war:focus-visible,
+.seasonmod__war[aria-expanded='true'] {
   background: var(--surface-stamped-tint);
 }
 
@@ -105,6 +106,10 @@
   text-decoration: underline;
   text-underline-offset: var(--space-1);
   cursor: pointer;
+}
+.seasonmod__link:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
 }
 
 /* The dialog, over a .scrim--center. */
@@ -138,6 +143,10 @@
   font-size: var(--fs-title-md);
   font-weight: var(--w-bold);
   cursor: pointer;
+}
+.seasonmod__x:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring-band);
+  outline-offset: calc(var(--bw-heavy) * -1);
 }
 .seasonmod__popline {
   display: flex;

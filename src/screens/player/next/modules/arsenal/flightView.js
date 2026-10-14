@@ -136,16 +136,33 @@ const POSES = {
 export const CAMERAS = [['catcher', 'Catcher'], ['mound', 'Mound'], ['side', 'Side'], ['park', 'Park']]
 const NEAR = 0.25
 
-export function makeCamera(name, W, H) {
+// A camera pose as an orbit about its look-at point (the board's toOrbit): T the look-at point, yaw and
+// pitch the angles of the lens about it (radians), dist the feet between them, fov in degrees. A swing
+// and a drag move these, so the camera turns about the scene.
+export function orbitOf(name) {
+  const { pos, tgt, fov } = POSES[name] ?? POSES.catcher
+  const d = pos.map((c, i) => c - tgt[i])
+  const dist = Math.hypot(...d)
+  return { T: tgt.slice(), yaw: Math.atan2(d[0], -d[2]), pitch: Math.asin(d[1] / dist), dist, fov }
+}
+const lensOf = (v) => [
+  v.T[0] + v.dist * Math.sin(v.yaw) * Math.cos(v.pitch),
+  v.T[1] + v.dist * Math.sin(v.pitch),
+  v.T[2] - v.dist * Math.cos(v.yaw) * Math.cos(v.pitch),
+]
+
+// `view` is a camera name ('flat', or a POSES key) or an orbit view (orbitOf).
+export function makeCamera(view, W, H) {
   // The Arsenal card's side view is flat, as the board draws it: distance across (the plate on the right),
   // height up, the height stretched so the paths visibly split.
-  if (name === 'flat') return { flat: true, W, H, ox: W * 0.881, sx: W * 0.01396, oy: H * 0.922, sy: H * 0.119 }
-  const { pos, tgt, fov } = POSES[name] ?? POSES.catcher
-  const norm = (v) => v.map((c) => c / Math.hypot(...v))
-  const f = norm(tgt.map((t, i) => t - pos[i]))
+  if (view === 'flat') return { flat: true, W, H, ox: W * 0.881, sx: W * 0.01396, oy: H * 0.922, sy: H * 0.119 }
+  const v = typeof view === 'string' ? orbitOf(view) : view
+  const pos = lensOf(v)
+  const norm = (q) => q.map((c) => c / (Math.hypot(...q) || 1))
+  const f = norm(v.T.map((t, i) => t - pos[i]))
   const r = norm([f[2], 0, -f[0]])
   const u = [f[1] * r[2] - f[2] * r[1], f[2] * r[0] - f[0] * r[2], f[0] * r[1] - f[1] * r[0]]
-  return { pos, f, r, u, W, H, k: H / 2 / Math.tan((fov * Math.PI) / 360) }
+  return { pos, f, r, u, W, H, k: H / 2 / Math.tan((v.fov * Math.PI) / 360) }
 }
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 const toCam = (cam, q) => {
