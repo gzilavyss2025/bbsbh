@@ -295,6 +295,7 @@
 }
 .command__where {
   margin: 0;
+  font-family: var(--font-mono);
   font-weight: var(--w-semibold);
 }
 /* layout-exempt: the cell's facts, a wrapping row */

@@ -158,7 +158,9 @@ button.teamhist__badge:focus-visible {
 .teamhist__note {
   grid-column: 2;
   margin: var(--space-2) 0 0;
-  font-size: var(--fs-small);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
   color: var(--text-caption);
 }
 
