@@ -54,6 +54,7 @@
   display: flex;
   height: var(--space-10);
   border: var(--bw-heavy) solid var(--border-stamped);
+  clip-path: inset(calc(var(--space-2) * -1) calc((1 - var(--roll, 1)) * 100%) calc(var(--space-2) * -1) 0);
 }
 /* layout-exempt: code over share, centred in the segment */
 .arsenal__seg {
@@ -62,6 +63,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
   min-width: 0;
   overflow: hidden;
   border-right: var(--bw-heavy) solid var(--border-stamped);
@@ -81,6 +83,49 @@
 .arsenal__seg span {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
+}
+/* The mix rolls in from the left as the card starts (board: 900ms from 100ms), a shadow riding its edge.
+   --roll is set each frame by the card's clock (modules/arsenal/timeline.js); with no clock it is 1. */
+.arsenal__mixwrap {
+  position: relative;
+}
+.arsenal__seg > b,
+.arsenal__seg > span {
+  position: relative;
+}
+/* A segment flashes paper when its pitch lands. */
+.arsenal__flash {
+  position: absolute;
+  inset: 0;
+  background: var(--surface-card);
+  pointer-events: none;
+}
+.arsenal__rolledge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--roll, 1) * 100%);
+  width: var(--space-3);
+  margin-left: calc(var(--space-3) * -1);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text-heading) 30%, transparent));
+  pointer-events: none;
+}
+/* A menu card's landing sweep and glyph pop; the card's entrance style comes from the clock. */
+.arsenal__sweep {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform-origin: left;
+  background: color-mix(in srgb, var(--accent-tint) 50%, transparent);
+  pointer-events: none;
+}
+.arsenal__pop {
+  display: inline-flex;
+}
+/* While a row enters, its transform comes from the clock each frame: take transform out of the card's
+   transition list (motion/menurail.css), or the entrance lags the clock. */
+.menurail__card.btn.arsenal__entering {
+  transition-property: flex-basis, padding, background-color, border-color, box-shadow;
 }
 
 /* The scene: the park from one camera, every path drawn on it. */

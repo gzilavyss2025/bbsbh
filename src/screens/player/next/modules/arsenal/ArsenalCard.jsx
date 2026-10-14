@@ -2,10 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { MenuRail } from '../../../../../components/ui/control/MenuRail.jsx'
 import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
+import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
+import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { ZONE, sparkD } from './flightView.js'
 import { FlightScene } from './FlightScene.jsx'
 import { GlyphPath, PitchGlyph } from './PitchGlyph.jsx'
-import { beatsAt, totalMs } from './timeline.js'
+import { beatsAt, countText, totalMs } from './timeline.js'
 
 const MID = (ZONE.y0 + ZONE.y1) / 2
 const dash = (v, f) => (v == null ? '—' : f(v))
@@ -27,8 +29,10 @@ function useArsenalClock(total, start) {
       at.current = Math.min(total, at.current + Math.min(50, now - last))
       last = now
       setT(at.current)
-      if (at.current >= total) setPlaying(false)
-      else raf = requestAnimationFrame(tick)
+      if (at.current >= total) {
+        setT(null) // the end, so a later change of length never strands the last frame
+        setPlaying(false)
+      } else raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
@@ -44,12 +48,23 @@ function useArsenalClock(total, start) {
 
 // The Pitch arsenal card (#1892, board ArsenalReveal.dc.html): the mix bar, the side view of every pitch
 // leaving one release point, where each lands (catcher's view), and a menu that opens one pitch.
-export function ArsenalCard({ rows }) {
+export function ArsenalCard({ rows, id }) {
+  // One entrance per page visit: the first time the card comes into view. A key already seen in this tab
+  // (Back, a return) shows the last frame (docs/motion.md, "The one-shot gate").
+  const [ref, phase] = useInViewOnce(viewKey(id, 'arsenal'))
   const [solo, setSolo] = useState(null)
   const flyers = rows.filter((r) => r.path)
   const one = rows.find((r) => r.code === solo) ?? null
   const pitches = useMemo(() => rows.map((r) => ({ code: r.code, ft: r.path?.T ?? null, rpm: r.spin })), [rows])
-  const clock = useArsenalClock(totalMs(pitches, SPEED), 'play')
+  const clock = useArsenalClock(totalMs(pitches, SPEED), phase === 'rest' ? 'end' : 'wait')
+  // 'play' comes once, from the observer, and stays. The clock starts in a rAF callback, not in the effect
+  // body (react-hooks 7.1.1: set-state-in-effect).
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      if (phase === 'play') clock.play()
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [phase]) // eslint-disable-line react-hooks/exhaustive-deps
   const beats = beatsAt(clock.t, pitches, { S: SPEED, solo: one?.path ? one.code : null })
   const byCode = new Map(beats.pitches.map((b) => [b.code, b]))
   // A pick, a second tap on the picked card (MenuRail sends null) and "All pitches" replay the timeline.
@@ -58,18 +73,22 @@ export function ArsenalCard({ rows }) {
     clock.play()
   }
   return (
-    <div className="arsenal__card">
-      <div className="arsenal__mix" role="img" aria-label={`Pitch mix: ${rows.map((r) => `${r.mark.name} ${Math.round(r.pct)}%`).join(', ')}`}>
-        {rows.map((r) => (
-          <span
-            key={r.code}
-            className={`arsenal__seg${r.mark.ring ? ' arsenal__seg--ring' : ''}`}
-            style={{ flexGrow: r.pct, '--pitch': r.mark.color }}
-          >
-            <b>{r.code}</b>
-            <span>{Math.round(r.pct)}%</span>
-          </span>
-        ))}
+    <div className="arsenal__card" ref={ref}>
+      <div className="arsenal__mixwrap" style={{ '--roll': beats.roll.toFixed(4) }}>
+        <div className="arsenal__mix" role="img" aria-label={`Pitch mix: ${rows.map((r) => `${r.mark.name} ${Math.round(r.pct)}%`).join(', ')}`}>
+          {rows.map((r) => (
+            <span
+              key={r.code}
+              className={`arsenal__seg${r.mark.ring ? ' arsenal__seg--ring' : ''}`}
+              style={{ flexGrow: r.pct, '--pitch': r.mark.color }}
+            >
+              <i className="arsenal__flash" aria-hidden="true" style={{ opacity: byCode.get(r.code).flash.toFixed(3) }} />
+              <b>{r.code}</b>
+              <span>{Math.round(r.pct)}%</span>
+            </span>
+          ))}
+        </div>
+        <i className="arsenal__rolledge" aria-hidden="true" style={{ opacity: beats.rollEdge ? 1 : 0 }} />
       </div>
       {flyers.length > 0 && (
         <div className="arsenal__side">
@@ -109,22 +128,47 @@ export function ArsenalCard({ rows }) {
       </div>
       <MenuRail
         label="Pitch type"
-        items={rows.map((r) => ({
-          key: r.code,
-          title: r.mark.name,
-          mark: <PitchGlyph mark={r.mark} />,
-          meta: dash(r.velo, (v) => `${v.toFixed(1)} mph`),
-          figures: (
-            <>
-              <span className="arsenal__figs">{r.pct}%</span>
-              {r.path && (
-                <svg className="arsenal__spark" viewBox="0 0 64 28" aria-hidden="true">
-                  <path className="arsenal__sparkline" d={sparkD(r.path)} />
-                </svg>
-              )}
-            </>
-          ),
-        }))}
+        items={rows.map((r) => {
+          const b = byCode.get(r.code)
+          const e = b.row.e
+          return {
+            key: r.code,
+            title: r.mark.name,
+            // The board's row entrance, set from the clock: a fade, a flip down from -80deg, a 10px rise and
+            // a 3px blur. No transform or filter once it ends, so the card's own press is free to move it.
+            className: e < 1 ? 'arsenal__entering' : undefined,
+            style: {
+              transformOrigin: '50% 0',
+              opacity: (e * b.row.dim).toFixed(3),
+              transform: e < 1 ? `perspective(700px) rotateX(${(-(1 - e) * 80).toFixed(2)}deg) translateY(${((1 - e) * 10).toFixed(2)}px)` : undefined,
+              filter: e < 1 ? `blur(${((1 - e) * 3).toFixed(2)}px)` : undefined,
+            },
+            mark: (
+              <>
+                <i className="arsenal__sweep" aria-hidden="true" style={{ transform: `scaleX(${b.sweep.x.toFixed(3)})`, opacity: b.sweep.o.toFixed(3) }} />
+                <span className="arsenal__pop" style={{ transform: `scale(${b.glyph.toFixed(3)})` }}>
+                  <PitchGlyph mark={r.mark} />
+                </span>
+              </>
+            ),
+            meta: r.velo == null ? '—' : `${countText(r.velo, b.row.count, 1)} mph`,
+            figures: (
+              <>
+                <span className="arsenal__figs">{countText(r.pct, b.row.count)}%</span>
+                {r.path && (
+                  <svg className="arsenal__spark" viewBox="0 0 64 28" aria-hidden="true">
+                    <path
+                      className="arsenal__sparkline"
+                      d={sparkD(r.path)}
+                      pathLength="1"
+                      style={{ strokeDasharray: 1, strokeDashoffset: (1 - b.u).toFixed(4) }}
+                    />
+                  </svg>
+                )}
+              </>
+            ),
+          }
+        })}
         picked={one?.code ?? null}
         onPick={pick}
         panel={(code) => {
