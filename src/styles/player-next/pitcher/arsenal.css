@@ -139,43 +139,32 @@
   stroke: var(--pitch, var(--text-caption));
   stroke-width: 2.4;
 }
-/* The paths draw in from the release point when the card opens or Replay is pressed. */
-.arsenal__side .arsenal__halo,
-.arsenal__side .arsenal__trail {
+/* The side view's beats are set frame by frame by the card's clock (modules/arsenal/timeline.js), so this
+   sheet holds only their look. Reduced motion: the clock shows the last frame; no CSS motion here. */
+.arsenal__seam {
+  fill: none;
+  stroke: var(--pitch, var(--text-caption));
+  stroke-width: 0.9;
+}
+.arsenal__ring {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 1.5;
+}
+.arsenal__ripple {
+  fill: none;
+  stroke: var(--pitch, var(--text-caption));
+  stroke-width: 1.5;
+}
+.arsenal__tick {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 1.4;
   stroke-dasharray: 1;
-  animation: arsenal-draw var(--dur-highlight) var(--ease-out) backwards;
 }
-@keyframes arsenal-draw {
-  from {
-    stroke-dashoffset: 1;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .arsenal__side .arsenal__halo,
-  .arsenal__side .arsenal__trail {
-    animation: none;
-  }
-}
-
-/* A picked pitch leaves the others as ghosts: drawn whole, never drawn in, fading up to 0.22 after the
-   replay starts (board: 400ms from 300ms). */
-.arsenal__path--ghost {
-  opacity: 0.22;
-  animation: arsenal-ghost var(--dur-unfold) var(--ease-unfold) calc(var(--dur-unfold) * 0.75) backwards;
-}
-.arsenal__side .arsenal__path--ghost .arsenal__halo,
-.arsenal__side .arsenal__path--ghost .arsenal__trail {
-  animation: none;
-}
-@keyframes arsenal-ghost {
-  from {
-    opacity: 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .arsenal__path--ghost {
-    animation: none;
-  }
+.arsenal__ticklabel {
+  fill: var(--text-caption);
+  font-family: var(--font-mono);
 }
 
 /* Where each type lands, from the catcher's seat, in the scene's corner. */
