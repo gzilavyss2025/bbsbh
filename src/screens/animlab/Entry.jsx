@@ -92,3 +92,18 @@ export function Entry({ title, note, live, hover = false, children }) {
     </Stack>
   )
 }
+
+// One frozen frame: pauses whatever animation(s) `children` renders at
+// `delayMs` elapsed (via --animlab-delay, see the `.animlab__frame` freeze list
+// in styles/46-consent-modal.css). Omit delayMs for a frame with nothing to
+// pause (a plain static swatch, like the scoreboard digits). Shared by
+// AnimationLab.jsx and PlayerMotionLab.jsx.
+export function Frame({ label, delayMs, children }) {
+  const style = delayMs != null ? { '--animlab-delay': `${-delayMs}ms` } : undefined
+  return (
+    <Stack gap="tight" className="animlab__frame" style={style}>
+      <div className="animlab__framebox">{children}</div>
+      <span className="animlab__framelabel">{label}</span>
+    </Stack>
+  )
+}
