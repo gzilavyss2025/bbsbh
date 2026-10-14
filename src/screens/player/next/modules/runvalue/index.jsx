@@ -1,19 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import '../../../../../styles/player-next/season/runvalue.css'
 import { fetchRunValue } from '../../../../../api/around-the-game/runValue.js'
-import { Door } from '../../../../../components/ui/control/Door.jsx'
-import { StatTile } from '../../../../../components/ui/frame/StatTile.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
-import { useRouteLink } from '../../../../../lib/nav.js'
-import { runValuePath } from '../../../../../lib/route.js'
 import { runValueView } from './runValueView.js'
 
-// Run value (#2013): the season in runs above an average player, then its parts as bars from a zero line.
+// Run value (#2013): the season in runs above an average player, where that ranks, and the parts that made it.
 // Open surface (ADR-0034): a nightly Savant season file, no seal and no gate. A two-way player gets one card (slot `once`).
 export default function RunvalueModule({ bio, season, onEmpty, onCount }) {
   const { data, loading } = useAsync(fetchRunValue, [])
-  const link = useRouteLink()
-  const [picked, setPicked] = useState(null)
   const view = useMemo(() => runValueView(data, bio.id, season), [data, bio.id, season])
   // A missing file resolves to its fallback, not a rejection: a settled load with no view is empty.
   const empty = !loading && !view
@@ -26,35 +20,47 @@ export default function RunvalueModule({ bio, season, onEmpty, onCount }) {
   }, [count, onCount])
   if (loading) return <div className="runvalue runvalue--loading" aria-busy="true" />
   if (empty) return null
-  const part = view.parts.find((p) => p.key === picked)
+  // One part (a pitcher) is the total again, so it gets no tile.
+  const tiles = view.parts.length > 1
   return (
     <div className="runvalue">
-      <div className={`runvalue__tiles${view.rank ? '' : ' runvalue__tiles--solo'}`}>
-        <StatTile tone="ink" label="Runs above avg" value={view.total} caption="runs vs an average player" />
-        {view.rank && <StatTile label="Rank" value={view.rank.place} caption={view.rank.caption} />}
+      <div className="runvalue__head">
+        <div className="runvalue__lead">
+          <p className="runvalue__label">Runs above average</p>
+          <p className="runvalue__total">{view.total}</p>
+        </div>
+        {view.rank && (
+          <div className="runvalue__rank">
+            <p className="runvalue__place">{view.rank.place}</p>
+            <p className="runvalue__among">{view.rank.caption}</p>
+          </div>
+        )}
       </div>
-      <ul className="runvalue__parts">
-        {view.parts.map((p) => (
-          <li key={p.key}>
-            <button type="button" className="runvalue__row" aria-pressed={p.key === picked} onClick={() => setPicked(p.key === picked ? null : p.key)}>
-              <span className="runvalue__label">{p.label}</span>
+      {view.strip != null && (
+        <div className="runvalue__strip" aria-hidden="true">
+          <span className="runvalue__rail">
+            <span className="runvalue__mark" style={{ left: `${view.strip}%` }} />
+          </span>
+          <span className="runvalue__ends">
+            <span>last</span>
+            <span>best</span>
+          </span>
+        </div>
+      )}
+      {tiles && (
+        <ul className={`runvalue__parts runvalue__parts--${view.parts.length}`}>
+          {view.parts.map((p) => (
+            <li key={p.key} className="runvalue__part">
+              <p className="runvalue__name">{p.label}</p>
+              <p className={`runvalue__num runvalue__num--${p.tone}`}>{p.value}</p>
               <span className="runvalue__track" aria-hidden="true">
-                <span className={`runvalue__bar runvalue__bar--${p.side}`} style={{ width: `${p.width / 2}%` }} />
+                {p.width > 0 && <span className={`runvalue__bar runvalue__bar--${p.side}`} style={{ width: `${p.width}%` }} />}
               </span>
-              <span className={`runvalue__num mono runvalue__num--${p.tone}`}>{p.value}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
-      <p className="runvalue__axis mono" aria-hidden="true">
-        <span>−{view.scale}</span>
-        <span>0</span>
-        <span>+{view.scale}</span>
-      </p>
-      {part && <p className="runvalue__line">{part.line}</p>}
-      <p className="runvalue__sentence">{view.sentence}</p>
-      <Door {...link(runValuePath())}>{view.door}</Door>
-      <p className="runvalue__foot">{view.foot}</p>
+              {p.place && <p className="runvalue__place-note">{p.place}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
