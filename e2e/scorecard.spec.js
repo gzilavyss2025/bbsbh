@@ -3,9 +3,7 @@
 // test/scorecard-game.test.js pins offline, so every number asserted here
 // was verified there first. What this layer adds over the unit suite: the
 // DOM truth of the clamp (a sealed half's marks literally absent), the
-// override flow end to end, and the game's two doors onto this page (the
-// tab bar, and the lineup page's door to the preview card that replaced it
-// there — ADR-0047's second amendment).
+// override flow end to end, and the game's door onto this page (the tab bar).
 import { test, expect } from './fixtures.js'
 import { installMockApi } from './fixtures/mock-api.js'
 
@@ -423,19 +421,6 @@ test('the game tab bar carries the door to the live scorecard', async ({ page })
   await tab.click()
   await expect(page).toHaveURL(/\/scorecard/)
   await expect(page.locator('.scorecard')).toBeVisible({ timeout: 20000 })
-})
-
-test('the lineup page carries the door to the preview card, not the scorecard', async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.clear())
-  await page.goto('/07072026/milstl-2/lineup1')
-  // The preview card's door moved here once the tab bar's "Card" stop became
-  // "Scorecard" — see ADR-0047's second amendment.
-  const door = page.getByRole('button', { name: /view preview card/i })
-  await expect(door).toBeVisible({ timeout: 20000 })
-  await expect(page.getByRole('button', { name: /open the live scorecard/i })).toHaveCount(0)
-  await door.click()
-  await expect(page).toHaveURL(/\/preview/)
-  await expect(page.locator('.posterstudio')).toBeVisible({ timeout: 20000 })
 })
 
 test('the sheet plays: flip box, frontier seal, one PA per tap, commit inks the half', async ({ page }) => {

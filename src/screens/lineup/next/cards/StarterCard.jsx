@@ -20,28 +20,37 @@ import { ClubBar } from './ClubBar.jsx'
 import { PitchMixCard } from './PitchMixCard.jsx'
 import { batterCounts } from '../logic/pitchMix.js'
 
+// "8/10 vs KC", with the level in brackets for a start below MLB, and no club when the feed has none.
+const lastStartWhen = (g) =>
+  [monthDay(g.date), g.opponent && `${g.home ? 'vs' : '@'} ${g.opponent}${g.level ? ` (${g.level})` : ''}`].filter(Boolean).join(' ')
+
 // A row of boxed figures, each over its label: [value, label] pairs.
-function StatBoxes({ cells }) {
+// `inline` draws spans, for a strip inside a door (a button holds phrasing content only).
+function StatBoxes({ cells, inline = false }) {
+  const Wrap = inline ? 'span' : 'dl'
+  const Box = inline ? 'span' : 'div'
+  const Value = inline ? 'span' : 'dd'
+  const Label = inline ? 'span' : 'dt'
   return (
-    <dl className="lsp__boxes">
+    <Wrap className="lsp__boxes">
       {cells.map(([value, label]) => (
-        <div key={label} className="lsp__box">
-          <dd className="lsp__boxvalue">{value ?? '—'}</dd>
-          <dt className="lsp__boxlabel">{label}</dt>
-        </div>
+        <Box key={label} className="lsp__box">
+          <Value className="lsp__boxvalue">{value ?? '—'}</Value>
+          <Label className="lsp__boxlabel">{label}</Label>
+        </Box>
       ))}
-    </dl>
+    </Wrap>
   )
 }
 
 // A strip's heading line: what it is, when, and an optional door at the right.
 function StripHead({ title, when, end }) {
   return (
-    <div className="lsp__striphead">
+    <span className="lsp__striphead">
       <b className="lsp__striptitle">{title}</b>
       {when && <span className="lsp__stripwhen">{when}</span>}
       {end}
-    </div>
+    </span>
   )
 }
 
@@ -106,7 +115,7 @@ export function StarterCard({ data, theme, masthead }) {
               <section className="lsp__strip">
                 <StripHead
                   title="Last start"
-                  when={`${monthDay(line.lastGame.date)} ${line.lastGame.home ? 'vs' : '@'} ${line.lastGame.opponent}`}
+                  when={lastStartWhen(line.lastGame)}
                   end={
                     <PlayerLink id={pitcher.id} name={pitcher.name} className="lsp__seeall">
                       See all ›
@@ -132,9 +141,10 @@ export function StarterCard({ data, theme, masthead }) {
                 className="lsp__career"
                 label={vsTeamDoorLabel(data.careerVsOpp, 'pitching', data.vsOpponentAbbr)}
                 face={
-                  <section className="lsp__strip">
+                  <span className="lsp__strip">
                     <StripHead title={`Career vs ${data.vsOpponentAbbr}`} end={<span className="lsp__seeall">See all ›</span>} />
                     <StatBoxes
+                      inline
                       cells={[
                         [data.careerVsOpp.g, 'G'],
                         [data.careerVsOpp.ip, 'IP'],
@@ -143,7 +153,7 @@ export function StarterCard({ data, theme, masthead }) {
                         [data.careerVsOpp.bb, 'BB'],
                       ]}
                     />
-                  </section>
+                  </span>
                 }
                 sheet={{
                   personId: pitcher.id,

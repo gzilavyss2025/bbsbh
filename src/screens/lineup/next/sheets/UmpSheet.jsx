@@ -1,5 +1,6 @@
 import { loadUmpire } from '../../../../api/umpires.js'
 import { PostseasonPlateLine } from '../../../../components/umpire/PostseasonPlateLine.jsx'
+import { Pill } from '../../../../components/ui/control/Pill.jsx'
 import { Door } from '../../../../components/ui/control/Door.jsx'
 import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'
 import { monthDayName } from '../../../../lib/dates.js'
@@ -35,13 +36,15 @@ function Tile({ label, value, sup }) {
 // name and nothing else.
 export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
   const navigate = useNav()
-  const { data: u } = useAsync(() => loadUmpire(id, { seasonYear }), [id, seasonYear])
+  const { data: u, loading } = useAsync(() => loadUmpire(id, { seasonYear }), [id, seasonYear])
   // His last five plate games, each with its accuracy. A plate game's row lives in whichever
   // level's byGamePk map covers it (MLB or Triple-A), so both are checked.
   const hpGames = (u?.games ?? [])
     .filter((g) => g.role === 'HP')
     .map((g) => ({ ...g, row: u.accuracy?.byGamePk?.[g.gamePk] ?? u.accuracyAAA?.byGamePk?.[g.gamePk] ?? null }))
     .slice(0, 5)
+  // Tag Triple-A rows only when the list mixes levels; otherwise every row is implicitly one level.
+  const mixed = hpGames.some((g) => (g.level ?? 'MLB') === 'AAA') && hpGames.some((g) => (g.level ?? 'MLB') !== 'AAA')
   const openGame = (g) => {
     onClose()
     navigate(gamePath(g.date, g.awayAbbr, g.homeAbbr, 'boxscore', g.gameNumber))
@@ -56,13 +59,13 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
         </span>
         <div>
           <small className="lump__role">{plate ? 'Home plate' : 'Plate record'}</small>
-          <strong className="lump__name">{u?.name ?? '…'}</strong>
+          <strong className="lump__name">{u?.name ?? (loading ? '…' : '—')}</strong>
           {season?.called ? (
             <p className="lump__meta">
               {season.games} scored games · {season.called.toLocaleString()} called pitches
             </p>
           ) : (
-            u && <EmptyState size="compact">No plate-accuracy data on file for this umpire yet.</EmptyState>
+            !loading && <EmptyState size="compact">No plate-accuracy data on file for this umpire yet.</EmptyState>
           )}
         </div>
       </div>
@@ -128,6 +131,7 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
                 <button type="button" className="plink" onClick={() => openGame(g)}>
                   {g.awayAbbr} @ {g.homeAbbr}
                 </button>
+                {mixed && (g.level ?? 'MLB') === 'AAA' && <Pill>AAA</Pill>}
                 <b>{g.row?.called ? `${((g.row.correct / g.row.called) * 100).toFixed(1)}%` : '—'}</b>
               </li>
             ))}

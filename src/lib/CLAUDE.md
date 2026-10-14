@@ -206,7 +206,7 @@ still the mark alone, never the tinted tile.
 
 ## Club theming (`headerTheme.js`)
 
-The lineup page (`screens/TeamInfo.jsx`) dresses its club-name bar and that
+The lineup page (`screens/lineup/next`) dresses its club-name bar and that
 side's section mastheads in the header colours of the jersey the club is wearing
 that game — **ADR-0030**. `headerThemeFor(teamId, treatment)` is the one
 resolver between the two header tables and that one surface; it answers `null`
@@ -236,7 +236,7 @@ failing pair; never lower the threshold.
 Two things worth knowing before changing any of it:
 
 - **MLB is keyed by treatment, MiLB by game side** — the same split the rest of
-  this file keeps. `TeamInfo` picks the key with `isMlbTeamId`; the resolver
+  this file keeps. The lineup page picks the key with `isMlbTeamId`; the resolver
   reads whichever table the id belongs to.
 - **A themed masthead re-inks its mono club mark** (`filter: brightness(0)` when
   `onBarTone` is dark), because a white knockout vanishes on a light bar. That

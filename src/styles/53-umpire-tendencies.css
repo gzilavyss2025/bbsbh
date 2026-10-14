@@ -309,33 +309,6 @@
   box-shadow: none;
 }
 
-/* ------------------------------------------------- the lineup page's zone
-   TeamInfo's page-top zone: the fill-in factgrid (date / ballpark / first
-   pitch / weather / manager / uniform), the Umpires crew, the preview door,
-   the print-sheet link, and the season series carousel all stack as ONE
-   left column (.teaminfo__topmain); the plate ump's Tendencies card is the
-   WHOLE right side beside that column from the wide breakpoint. A phone
-   keeps the single column, same order. The split keys on the card actually
-   being there (`:has`) — an MiLB crew with no card leaves the zone as plain
-   single-column flow at every width. */
-.teaminfo__topzone > .umptend {
-  margin-top: 14px;
-}
-
-@media (min-width: 740px) {
-  .teaminfo__topzone:has(> .umptend) {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 0 var(--space-6);
-    align-items: start;
-  }
-  /* Top-aligned with the factgrid across the gutter, not hanging 14px below
-     the row the phone flow needed. */
-  .teaminfo__topzone:has(> .umptend) > .umptend {
-    margin-top: 0;
-  }
-}
-
 /* "Series tied at 2-2" / "Cardinals lead series, 4-2" — the Season series
    card's masthead aside (SeasonSeriesStrip.jsx), deliberately matched to
    .sectionhead__title's own face (system/section-head.css) rather than

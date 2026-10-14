@@ -1,4 +1,3 @@
-import { lookSuffix } from './screens/lineup/next/lookFlag.js'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { GameSelect } from './screens/GameSelect.jsx'
 import { resolveGame } from './api/schedule.js'
@@ -520,7 +519,7 @@ export default function App() {
         route={route}
         seed={seedMatches ? seed.game : null}
         onSection={(section, opts) =>
-          go(`/${route.date}/${route.matchup}/${section}${lookSuffix(window.location.search, section)}`, opts)
+          go(`/${route.date}/${route.matchup}/${section}`, opts)
         }
         onHome={() => go('/')}
       />

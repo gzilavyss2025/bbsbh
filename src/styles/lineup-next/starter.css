@@ -98,6 +98,7 @@
   padding: var(--space-3) var(--space-3h) 0;
 }
 .lsp__strip {
+  display: block;
   margin-bottom: var(--space-3);
 }
 /* layout-exempt: title, date and door on one line */

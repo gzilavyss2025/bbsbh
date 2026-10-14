@@ -1,7 +1,8 @@
 # Lineup page redesign: the plan
 
-Status: **slice S0** (2026-10-14). The new page lives behind `?look=new` on
-`/{date}/{matchup}/lineup1` and `/lineup2`. The live page does not change until one swap PR.
+Status: **swapped** (2026-10-14). The new page is the lineup page on `/{date}/{matchup}/lineup1`
+and `/lineup2`. It was built behind `?look=new` first, and one swap PR removed the flag and the old
+page (`screens/TeamInfo.jsx`).
 
 This plan moves the away and home lineup pages to the new look of the player page
 ([player-redesign.md](player-redesign.md), ADR-0109). The design is a mockup that Gary
@@ -41,3 +42,16 @@ nothing is fetched and then hidden.
 | S6 | Crest, ballpark and umpire sheets on one frame | done |
 | Fidelity pass | Hero, facts, crew strip sized to its count, page grid and rail, dock, starter strips, pitch mix card, order rows, bullpen, series, sheets: matched to the artifact | done |
 | S7 | Tests, docs, swap PR (deletes the old code) | |
+
+## After the swap
+
+- The old page, `TeamInfo.jsx`, is deleted. `RefreshButton` moved to `components/ui/control/`, and
+  the small parts both pages shared moved to `screens/lineup/parts.jsx`.
+- Gary's decision to delete the three doors means nothing on the lineup page links to the preview
+  card, the blank scorecard sheet or Express Lane now. Their routes still exist. The e2e test for
+  the preview-card door was deleted with the door.
+- Old CSS that only the deleted page used (`.lineup__*`, `.starter__*`, `.teaminfo__*` in
+  `10-lineup.css`, `09-team-info.css`, `44-pre-game-cards.css`) is not removed yet. Several tests pin
+  those rules, so removing them is its own change.
+- Components that only the old page used (`StarterMatchups`, `ExpressLaneDoor`, the live
+  `FormerTeammates` card) are still in the tree. Check each for other callers before deleting.
