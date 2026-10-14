@@ -7,18 +7,11 @@ const bat = { isPitcher: false, twoWay: false }
 const arm = { isPitcher: true, twoWay: false }
 const both = { isPitcher: false, twoWay: true }
 
-test('Season: percentile rank, Advanced and Run value, in board order, for either role', () => {
-  assert.deepEqual(tbdCards('season', 'pitching', arm), ['percentile', 'advanced', 'runvalue'])
-})
-
-test('Season, hitting: Command received sits beside Advanced (it hides itself for a man who never caught)', () => {
-  assert.deepEqual(tbdCards('season', 'hitting', bat), ['percentile', 'advanced', 'cmdreceived', 'runvalue'])
-  assert.ok(!tbdCards('season', 'pitching', arm).includes('cmdreceived'))
-})
-
-test('a two-way player gets the percentile and Advanced cards per role, Run value once', () => {
-  assert.deepEqual(tbdCards('season', 'hitting', both), ['percentile', 'advanced', 'cmdreceived', 'runvalue'])
-  assert.deepEqual(tbdCards('season', 'pitching', both), ['percentile', 'advanced'])
+test('Season: only Command received is left, on the hitting role (the other cards have their own modules)', () => {
+  assert.deepEqual(tbdCards('season', 'pitching', arm), [])
+  assert.deepEqual(tbdCards('season', 'hitting', bat), ['cmdreceived'])
+  assert.deepEqual(tbdCards('season', 'hitting', both), ['cmdreceived'])
+  assert.deepEqual(tbdCards('season', 'pitching', both), [])
 })
 
 test('Career holds nothing here: Prospect rankings moved to #1927', () => {
@@ -33,15 +26,14 @@ test('History: awards, team history, transactions, media, once per player', () =
   assert.deepEqual(tbdCards('history', 'pitching', both), [])
 })
 
-test('On the mound: Target command, for a pitching role only', () => {
-  assert.deepEqual(tbdCards('on-the-mound', 'pitching', arm), ['targetcommand'])
-  assert.deepEqual(tbdCards('on-the-mound', 'pitching', both), ['targetcommand'])
+test('On the mound: nothing left here (Target command has its own module)', () => {
+  assert.deepEqual(tbdCards('on-the-mound', 'pitching', arm), [])
   assert.deepEqual(tbdCards('on-the-mound', 'hitting', bat), [])
 })
 
-test('Game log: Foul balls for a pitcher, then Milestone watch last, for either role', () => {
-  assert.deepEqual(tbdCards('game-log', 'pitching', arm), ['fouls', 'milestones'])
-  assert.deepEqual(tbdCards('game-log', 'hitting', bat), ['milestones'])
-  assert.deepEqual(tbdCards('game-log', 'hitting', both), ['milestones'])
-  assert.deepEqual(tbdCards('game-log', 'pitching', both), ['fouls', 'milestones'])
+test('Game log: Foul balls for a pitcher only (Milestone watch has its own module)', () => {
+  assert.deepEqual(tbdCards('game-log', 'pitching', arm), ['fouls'])
+  assert.deepEqual(tbdCards('game-log', 'pitching', both), ['fouls'])
+  assert.deepEqual(tbdCards('game-log', 'hitting', bat), [])
+  assert.deepEqual(tbdCards('game-log', 'hitting', both), [])
 })
