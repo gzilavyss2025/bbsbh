@@ -4,8 +4,10 @@ import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { vsTeamDoorLabel } from '../../../../../api/vsTeamSplits.js'
+import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
+import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { teamClubName, teamLocationName } from '../../../../../lib/teams.js'
-import { Cells, Chevron, Head, Row } from './LineRows.jsx'
+import { Cells, Chevron, Head, Part, Row } from './LineRows.jsx'
 import { asBase, clubChip, figLine, meetingDate, readFigs, vsTeamLine } from './splitsView.js'
 
 // Splits vs team (the board's third part): a career line against one club, from the nightly
@@ -17,11 +19,15 @@ export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
   const [open, setOpen] = useState(false)
   const stripRef = useRef(null)
   const activeRef = useRef(null)
-  // Keep the picked club centred in the strip, scrolling the strip itself and not the page.
+  // Keep the picked club centred in the strip, scrolling the strip itself and not the page. The
+  // first centre is instant; a club the reader picks glides there (board Splits, center()).
+  const centred = useRef(pick)
   useEffect(() => {
     const strip = stripRef.current
     const btn = activeRef.current
-    if (strip && btn) strip.scrollTo({ left: btn.offsetLeft - strip.clientWidth / 2 + btn.clientWidth / 2 })
+    const glide = centred.current !== pick && !motionIsReduced()
+    centred.current = pick
+    if (strip && btn) strip.scrollTo({ left: btn.offsetLeft - strip.clientWidth / 2 + btn.clientWidth / 2, behavior: glide ? 'smooth' : 'auto' })
   }, [pick])
 
   const team = vs.teams.find((t) => t.id === pick) ?? vs.teams[0]
@@ -37,7 +43,7 @@ export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
   const clubName = team ? [teamLocationName(team.id), teamClubName(team.id)].filter(Boolean).join(' ') || team.name : ''
 
   return (
-    <section className="splitsmod__part splitsmod__part--wide" aria-label="Splits vs team">
+    <Part once={viewKey(bio.id, `splits-${group}:v`)} wide label="Splits vs team">
       <SectionHead look="rule" note={`Career vs ${team?.abbr ?? ''}`}>Splits vs team</SectionHead>
       <div className="splitsmod__strip" role="group" aria-label="Opponent" ref={stripRef}>
         {vs.teams.map((t) => {
@@ -75,7 +81,7 @@ export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
           label={vsTeamDoorLabel(entry.car, group, team.abbr)}
           face={
             <span className={`splitsmod__grid splitsmod__grid--${layout} is-dr`}>
-              <Cells quiet line={line} layout={layout} />
+              <Cells quiet line={line} layout={layout} i={1} />
               <Chevron />
             </span>
           }
@@ -104,6 +110,6 @@ export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
       <Button size="control" skin="outline" className="splitsmod__more" aria-expanded={open} onClick={() => setOpen(!open)}>
         {open ? 'Show less' : 'Show more'}
       </Button>
-    </section>
+    </Part>
   )
 }
