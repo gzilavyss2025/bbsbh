@@ -137,7 +137,6 @@ export const BATTER_METRICS = [
     label: 'Swing length',
     fmt: dec1,
     def: 'How far his bat travels on its way to the ball — a shorter swing gets there quicker.',
-    lowerIsBetter: true,
   },
   {
     key: 'squaredUp',
