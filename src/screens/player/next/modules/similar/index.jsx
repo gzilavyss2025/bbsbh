@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { fetchPitchArsenalPool, similarPitchersFor } from '../../../../../api/pitchArsenal.js'
 import { fetchSavantPercentiles, similarHittersFor } from '../../../../../api/savantPercentiles.js'
 import { getJson } from '../../../../../api/statsapi.js'
+import { Headshot } from '../../../../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../../../../components/player/PlayerLink.jsx'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { Pill } from '../../../../../components/ui/control/Pill.jsx'
@@ -101,7 +102,7 @@ function Ident({ comp, link = false }) {
   const club = teamClubNameShort(comp.teamId)
   return (
     <>
-      <span className="simp__ini" aria-hidden="true">{comp.ini}</span>
+      <Headshot personId={comp.personId} name={comp.name} teamId={comp.teamId} className="simp__shot" />
       <span className="simp__who">
         <span className="simp__name">
           {link ? <PlayerLink id={comp.personId} name={comp.name}>{comp.name}</PlayerLink> : comp.name}
