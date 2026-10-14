@@ -61,6 +61,31 @@
   letter-spacing: var(--ls-none);
 }
 
+/* A row answers its door (GameLog board). The row is not a button: only the door in
+   it acts, so the tint shows while the pointer is on a link or button in the row,
+   on pointer devices only, and the row draws the house ring while that control has
+   the keyboard focus. A row with no control (every batter log row) tints under the
+   pointer itself, as the canvas row does; a group heading never tints. The open
+   game's row (aria-current, the detail dialog) keeps the selected fill and a stamped
+   edge. The focus rule comes last so its ring wins over the selected edge. */
+@media (hover: hover) {
+  .logtable__grid tbody tr:not([aria-current='true']):has(:is(a, button):hover) {
+    background: var(--surface-row-hover);
+  }
+  .logtable__grid tbody tr:not(.logtable__div, :has(a, button)):hover {
+    background: var(--surface-row-hover);
+  }
+}
+.logtable__grid tbody tr[aria-current='true'] {
+  background: var(--surface-row-selected);
+  outline: var(--bw-heavy) solid var(--border-stamped);
+  outline-offset: calc(var(--bw-heavy) * -1);
+}
+.logtable__grid tbody tr:has(:focus-visible) {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: calc(var(--bw-heavy) * -1);
+}
+
 /* The card look: each row wraps into four lines (head and end; the stat cells; the foot).
    The two empty pseudo-items, a full line each, are the line breaks. */
 @container (max-width: 719.98px) {
