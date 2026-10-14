@@ -1,0 +1,319 @@
+/* ==== COMMAND (the new player page, #2014) ====
+   modules/command/: the batter-hand switch, the pitch chips, four tiles, and the 5×5 map in camera view.
+   Board: draft C v2 (#1984). Tokens only. The heat is ink at five alpha steps; pitch colours arrive as
+   --pitch from pitchMark(code). Nothing moves, so there is nothing for reduced motion to stop. */
+
+/* layout-exempt: one column on a phone, the controls beside the map at the wide step */
+.command {
+  /* The "too few pitches" hatch: chips, tiles and the floor box. */
+  --command-hatch: repeating-linear-gradient(135deg, color-mix(in srgb, var(--ink-0) 12%, transparent) 0 5px, transparent 5px 10px);
+  container-type: inline-size;
+  display: grid;
+  gap: var(--space-5);
+}
+/* The map is a fixed square: hold the card's height while the shard loads. */
+.command--loading {
+  min-height: calc(var(--space-16) * 11);
+}
+@container (min-width: 720px) {
+  /* layout-exempt: the two columns of the wide card, as the board draws them */
+  .command:not(.command--loading) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    column-gap: var(--space-6);
+  }
+}
+/* layout-exempt: a column of the card's blocks */
+.command__side,
+.command__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.command__side {
+  gap: var(--space-4);
+}
+.command__lab,
+.command__head {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.command__lab--soft {
+  color: var(--text-caption);
+}
+.command__n {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
+}
+
+/* layout-exempt: the hand switch, three equal segments */
+.command__hands {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+/* layout-exempt: a hand's word over its count */
+.command__hand.btn,
+.command__chip.btn {
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  padding-inline: var(--space-1);
+}
+
+/* layout-exempt: the pitch chips in an ink grid, ALL two cells wide */
+.command__chips {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+@container (min-width: 720px) {
+  /* layout-exempt: one row of chips at the wide step */
+  .command__chips {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+.command__chip--all.btn {
+  grid-column: span 2;
+}
+.command__chip--thin.btn:not([aria-pressed='true']) {
+  color: var(--text-caption);
+  background-image: var(--command-hatch);
+}
+/* layout-exempt: the mark beside the code */
+.command__code {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+}
+
+/* layout-exempt: four tiles in one row at every width */
+.command__tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.command__tile.stattile {
+  padding: var(--space-2) var(--space-1);
+  text-align: center;
+}
+.command__tile .stattile__value {
+  font-size: var(--fs-num-lg);
+}
+.command__tile--thin.stattile {
+  background-image: var(--command-hatch);
+}
+.command__note,
+.command__sub {
+  margin: 0;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+/* layout-exempt: the map panel, a column */
+.command__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--bw-2, 2px) solid var(--border-stamped);
+  background: var(--surface-inset);
+}
+/* layout-exempt: the panel's heading and its view note, a wrapping row */
+.command__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+}
+.command__sub {
+  font-family: var(--font-body);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-none);
+}
+
+/* layout-exempt: the map with its High / Low words and hand boxes, centred */
+.command__zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+.command__side-word {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+/* layout-exempt: the 5×5 grid, a fixed square */
+.command__map {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  width: min(100%, calc(var(--space-16) * 5));
+  aspect-ratio: 1;
+  border: var(--bw-2, 2px) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+/* layout-exempt: a cell's count in its top corner */
+.command__cell {
+  appearance: none;
+  margin: 0;
+  padding: var(--space-1);
+  border: 0;
+  border-right: 1px solid var(--border-rule);
+  border-bottom: 1px solid var(--border-rule);
+  background: transparent;
+  color: var(--text-heading);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  text-align: start;
+  display: flex;
+  align-items: flex-start;
+}
+.command__cell:nth-child(5n) {
+  border-right: 0;
+}
+.command__cell:nth-child(n + 21) {
+  border-bottom: 0;
+}
+.command__cell--h1 {
+  background: color-mix(in srgb, var(--ink-0) 8%, transparent);
+}
+.command__cell--h2 {
+  background: color-mix(in srgb, var(--ink-0) 20%, transparent);
+}
+.command__cell--h3 {
+  background: color-mix(in srgb, var(--ink-0) 34%, transparent);
+}
+.command__cell--h4 {
+  background: color-mix(in srgb, var(--ink-0) 52%, transparent);
+  color: var(--text-on-ink);
+}
+.command__cell--h5 {
+  background: color-mix(in srgb, var(--ink-0) 70%, transparent);
+  color: var(--text-on-ink);
+}
+.command__cell[aria-pressed='true'] {
+  outline: 3px solid var(--marker);
+  outline-offset: -3px;
+}
+.command__cell:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -3px;
+  z-index: 1;
+}
+.command__overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.command__frame,
+.command__heart {
+  fill: none;
+  stroke: var(--ink-0);
+  vector-effect: non-scaling-stroke;
+}
+.command__frame {
+  stroke-width: 3;
+}
+.command__heart {
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+.command__mark {
+  fill: var(--pitch, var(--text-caption));
+  stroke: var(--text-heading);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.command__mark--ring {
+  fill: none;
+  stroke: var(--pitch, var(--text-caption));
+  stroke-width: 2.4;
+}
+.command__markcode {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  fill: var(--text-heading);
+  stroke: var(--surface-card);
+  stroke-width: 0.6px;
+  paint-order: stroke;
+}
+/* layout-exempt: the hand boxes and side words under the map */
+.command__foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  width: min(100%, calc(var(--space-16) * 5));
+}
+/* layout-exempt: a hand box beside its side word */
+.command__foot > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.command__box {
+  padding: 0 var(--space-1);
+  border: 2px solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.command__box--on {
+  border-color: var(--ink-0);
+  background: var(--ink-0);
+  color: var(--text-on-ink);
+}
+
+/* layout-exempt: the readout under the map */
+.command__readout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-rule);
+}
+.command__where {
+  margin: 0;
+  font-weight: var(--w-semibold);
+}
+/* layout-exempt: the cell's facts, a wrapping row */
+.command__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+/* layout-exempt: the floor box, the map's square, hatched, with the words in the middle */
+.command__thin {
+  display: grid;
+  place-items: center;
+  width: min(100%, calc(var(--space-16) * 5));
+  aspect-ratio: 1;
+  margin: 0 auto;
+  padding: var(--space-5);
+  border: 2px solid var(--text-caption);
+  background-image: var(--command-hatch);
+  text-align: center;
+  color: var(--text-body);
+}
