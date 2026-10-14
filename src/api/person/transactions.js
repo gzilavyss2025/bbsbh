@@ -25,6 +25,10 @@
 //     omission the app contradicted itself on — the page's own header banner,
 //     the career register's "Injured — missed season" note, and the Team
 //     Page's transaction card all show IL moves already.
+//   • KEEP the three "event" families that carry no fromTeam (eventRows below):
+//     All-Star selections, spring-training invites plus the earliest club
+//     assignment on file, and national-team / winter-league assignments. The
+//     Awards card shows the All-Star YEAR; these rows add the dated roster move.
 //   • DROP everything else: the rest of Status Change (roster status, bare
 //     activations, spring reassignments), number changes, arbitration filings.
 //     The paternity, bereavement, family-medical and restricted lists are
@@ -77,6 +81,57 @@ const TXN_TYPES = {
   RET: { label: 'Retired',      tone: 'out' },
   SU:  { label: 'Suspended',    tone: 'move' },
   NC:  { label: 'New Contract', tone: 'move' },
+}
+
+// Sport ids that are not affiliated ball: international teams and winter leagues.
+const INTERNATIONAL_SPORT = 51
+const WINTER_SPORT = 17
+const AFFILIATED_SPORTS = new Set([1, 11, 12, 13, 14, 16])
+
+const ALL_STARS_RE = /\bAll-Stars?\b/i
+const SPRING_INVITE_RE = /invited non-roster .* to spring training/i
+
+// The rows that name a club on ONE side only (ASG and SC with no fromTeam), which
+// the both-clubs ASG rule and the IL-only SC gate drop. Returns row shapes for
+// `push`. An All-Star selection arrives as an ASG row, an SC "activated" row, or
+// both on one day; one row per date. The earliest plain club assignment on file
+// is kept, later ones are the yearly reassignment and stay dropped.
+function eventRows(transactions, levelByTeamId) {
+  const out = []
+  let firstAssign = null
+  const ordered = [...(transactions ?? [])].sort((a, b) => (a.typeCode === 'ASG' ? 0 : 1) - (b.typeCode === 'ASG' ? 0 : 1))
+  for (const t of ordered) {
+    const date = t.effectiveDate || t.date
+    const desc = t.description || ''
+    if (!date || t.fromTeam?.id || !t.toTeam?.id) continue
+    if (t.typeCode !== 'ASG' && t.typeCode !== 'SC') continue
+    if (/rehab/i.test(desc) || /injured list|disabled list/i.test(desc) && !ALL_STARS_RE.test(desc)) continue
+    const club = { id: t.toTeam.id, name: t.toTeam.name }
+    const base = { date, description: desc, links: null, club }
+    if (ALL_STARS_RE.test(desc)) {
+      out.push({ ...base, sig: `ALLSTAR|${date}`, code: 'ALLSTAR', label: 'All-Star', tone: 'move' })
+      continue
+    }
+    if (t.typeCode === 'ASG' && SPRING_INVITE_RE.test(desc)) {
+      out.push({ ...base, sig: `INVITE|${date}`, code: 'INVITE', label: 'Spring Invite', tone: 'add' })
+      continue
+    }
+    const sport = levelByTeamId.get(t.toTeam.id)
+    if (sport === INTERNATIONAL_SPORT || sport === WINTER_SPORT) {
+      const national = sport === INTERNATIONAL_SPORT
+      out.push({
+        ...base,
+        sig: `EVENT|${date}|${t.toTeam.id}`,
+        code: 'EVENT',
+        label: national ? 'National Team' : 'Winter Ball',
+        tone: 'move',
+      })
+    } else if (t.typeCode === 'ASG' && AFFILIATED_SPORTS.has(sport) && (!firstAssign || date < firstAssign.date)) {
+      firstAssign = { ...base, sig: `FIRST|${t.toTeam.id}`, code: 'ASSIGNED', label: 'Assigned', tone: 'move' }
+    }
+  }
+  if (firstAssign) out.push(firstAssign)
+  return out
 }
 
 // Competition level rank, high number = higher level, so an ASG that moves a
@@ -225,6 +280,8 @@ export function transactionTimelineView(
           : null,
     })
   }
+
+  for (const row of eventRows(transactions, levelByTeamId)) push(row)
 
   // Injured list — one row per STINT, folded from the placement / transfer /
   // rehab / activation rows the loop above deliberately skipped.
