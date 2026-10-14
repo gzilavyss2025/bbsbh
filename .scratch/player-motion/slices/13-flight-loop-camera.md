@@ -132,6 +132,10 @@ variable, so a visibility change never re-renders.
 
 ## Build
 
+State rule (react-hooks 7.1.1): `react-hooks/set-state-in-effect` is an ERROR, and the
+`refs` rule forbids reading a ref during render. Set state only from a rAF, timer,
+observer or event callback, never synchronously in an effect body.
+
 ### 1. `flightMotion.js` (new)
 
 ```js

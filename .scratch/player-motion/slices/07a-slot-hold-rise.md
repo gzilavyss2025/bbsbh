@@ -5,8 +5,10 @@
 - Model: `claude-sonnet-5-5`. Effort: high.
 - Depends on: 01a merged (`--dur-rise`, `--ease-stamp`), 01b merged (the shared rise
   class in `player-rise.css`), 01c merged (`useInViewOnce`).
-- Parallel with: 02, 03, 05, 06, 08, 10, 13, 20. Not with 07b (07b changes `Slot.jsx`
+- Parallel with: 02, 03, 05, 08, 10, 13, 20. Not with 07b (07b changes `Slot.jsx`
   and `PlayerNextPage.jsx` after this lands).
+- Not in parallel with 06: both add rules to `src/styles/player-next/page.css`. Run
+  them one at a time; merge `main` in before you push.
 - Change from spec.md: slice 07 is split. **07a** (this file) is the slot's height and
   entrance. **07b** is the jump-bar hold and the stamp on land. The whole slice needed
   9 files.

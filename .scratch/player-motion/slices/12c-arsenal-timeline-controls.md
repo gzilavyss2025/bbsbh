@@ -6,9 +6,11 @@ Part 3 of 3 (12a: the clock and the side view; 12b: the bar, the rows, in view).
 
 - Model: `claude-sonnet-5-5`. Effort: medium.
 - Depends on: 12b merged, and 01d merged (`PlayerMotionLab.jsx`, `Frame` in `Entry.jsx`).
-- Parallel with: 06, 08, 10, 16, 17, 20. Not with 13, 14, 15 (same `arsenal/`
-  folder). Another open slice that adds to `PlayerMotionLab.jsx` is fine: merge
-  `main` in; the conflict is one entry beside another.
+- Parallel with: 06, 08a, 09, 16, 17b, 20. Not with 13, 14, 15 (same `arsenal/`
+  folder).
+- Shares append-only lines with other slices: `src/screens/animlab/PlayerMotionLab.jsx` (entries). The run plan may put
+  those slices in one wave. Before you push, merge `main` in, and keep both sides
+  of any conflict in those lines.
 
 ## Goal
 

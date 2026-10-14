@@ -5,7 +5,9 @@
 - Model: `claude-sonnet-5-5`. Effort: medium.
 - Depends on: 01a merged (it adds `--ease-stamp` and sets `--dur-stamp-in` 380ms and
   `--ease-stamp-in: var(--ease-stamp)`).
-- Parallel with: 02, 03, 05, 07a, 08, 10, 13, 20.
+- Parallel with: 02, 03, 05, 08, 10, 13, 20.
+- Not in parallel with 07a: both add rules to `src/styles/player-next/page.css`. Run
+  them one at a time; merge `main` in before you push.
 - Change from spec.md: **the jump-bar ease line moves to slice 02.** Slice 02 already
   rewrites the `.jumpbar__item` transition and its `:active` press (decision 1:
   `--dur-fast` on `--ease-stamp`). One slice owns that rule, so 06 does not wait for 02

@@ -168,10 +168,12 @@ layout ratchet does not count them, and `arsenal.css` has no entry in
 ## Build
 
 Read `src/components/ui/control/MenuRail.jsx` as merged by slice 05a first. The API
-in `spec.md` is: `label`, `items` (`{ key, title, meta, figures, mark }`; 05a also
-takes `label`, `disabled`, `heading`, `style`, `className` per item), `picked`,
-`onPick` (called with a key, or `null` when the picked card is tapped again),
-`panel(key)`, `backLabel`.
+is the one in `05a-menurail-part.md`, "The API": `label`, `items` (`{ key, title,
+meta, figures, mark }`, plus the optional `label`, `disabled`, `heading`, `style`,
+`className` per item), `picked`, `onPick` (called with a key, or `null` when the
+picked card is tapped again), the optional `panel(key)`, `backLabel`, `railMeta`, and
+the root `className`. This slice uses `label`, `items` (`key`, `title`, `mark`, `meta`,
+`figures`), `picked`, `onPick`, `panel`, `backLabel` and `railMeta`.
 
 ### 1. `ArsenalCard.jsx`
 
@@ -380,8 +382,8 @@ test('a ghost path does not draw in', () => {
 
 ## Stop if
 
-- `MenuRail.jsx` is not on `main`, or its props differ from spec.md (`label`,
-  `items`, `picked`, `onPick`, `panel`, `backLabel`).
+- `MenuRail.jsx` is not on `main`, or its props differ from 05a's API (`label`,
+  `items`, `picked`, `onPick`, `panel`, `backLabel`, `railMeta`).
 - `--dur-unfold` or `--ease-unfold` is not in `src/tokens/effects.css`.
 - `ArsenalCard.jsx` or `FlightScene.jsx` differs from the code quoted above (another
   slice landed first). Merge `main` and re-read before you edit.

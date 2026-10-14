@@ -173,6 +173,10 @@ feature-test it; listen for it, and the timer covers the rest.
 
 ## Build
 
+State rule (react-hooks 7.1.1): `react-hooks/set-state-in-effect` is an ERROR, and the
+`refs` rule forbids reading a ref during render. Set state only from a rAF, timer,
+observer or event callback, never synchronously in an effect body.
+
 ### 1. `src/lib/jumpbar/land.js` (new)
 
 ```js

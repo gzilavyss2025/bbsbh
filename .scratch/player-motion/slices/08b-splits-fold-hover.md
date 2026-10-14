@@ -10,7 +10,10 @@ reader opens, turns the fold chevron, adds the canvas hover and press, and adds 
 - Model: `claude-sonnet-5-5`. Effort: medium.
 - Depends on: 08a merged (and so 01a and 01c), 01d merged
   (`src/screens/animlab/PlayerMotionLab.jsx`).
-- Parallel with: 02, 03, 05, 06, 07, 10. Not with 09 (same module folder).
+- Parallel with: 02, 03, 05, 06, 07. Not with 09 (same module folder).
+- Shares append-only lines with other slices: `src/screens/animlab/PlayerMotionLab.jsx` (entries). The run plan may put
+  those slices in one wave. Before you push, merge `main` in, and keep both sides
+  of any conflict in those lines.
 
 ## Goal
 

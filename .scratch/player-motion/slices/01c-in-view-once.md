@@ -7,6 +7,8 @@ Part 3 of 4 of slice 01 (see 01a for the split).
 - Model: `claude-sonnet-5-5`. Effort: medium.
 - Depends on: none (it reads no new token).
 - Parallel with: 01a, 01b, 02a. Slices 07a, 08a, 10, 12b and 17a wait for it.
+- Not in parallel with 05b: both edit `docs/motion.md` (different paragraphs). Run
+  them one at a time; merge `main` in before you push.
 
 ## Goal
 
@@ -326,7 +328,7 @@ test('the hook: with an observer, a new block waits and a seen one rests', () =>
 
 ## Out of scope
 
-- Any caller: Slot (slice 07) and the modules call it.
+- Any caller: Slot (slice 07a) and the modules call it.
 - The rise CSS (slice 01b). This slice only names its classes in `riseClass`.
 - `useNearView`: do not change it.
 

@@ -201,6 +201,10 @@ seconds, not timeline ms, and it has no "end" state that survives a length chang
 
 ## Build
 
+State rule (react-hooks 7.1.1): `react-hooks/set-state-in-effect` is an ERROR, and the
+`refs` rule forbids reading a ref during render. Set state only from a rAF, timer,
+observer or event callback, never synchronously in an effect body.
+
 ### 1. `timeline.js` (new)
 
 ```js

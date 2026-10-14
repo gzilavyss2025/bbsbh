@@ -313,7 +313,7 @@ and keep what it checks (the same calls, in the same order). Do not drop a case.
 ## Stop if
 
 - 03a is not on `main` (no `src/components/ui/control/Segmented.jsx`), or its API
-  differs from spec.md (`label`, `value`, `onChange`, `options`, `fill`, `className`).
+  differs from 03a's (`label`, `value`, `onChange`, `options`, `fill`, `className`).
 - The quoted blocks differ from the files (line drift is fine; a different shape is
   not, for example a scope row that now has its own CSS class).
 - An open PR edits `batlog/index.jsx`, `pitchlog/index.jsx`, `season/index.jsx` or

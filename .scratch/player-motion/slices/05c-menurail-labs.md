@@ -10,9 +10,10 @@ real class names (`spec.md`, "Rules every slice follows"; `docs/motion.md`, "Ver
 - Depends on: 05a merged, 05b merged, 01d merged (01d moves `Frame` into
   `animlab/Entry.jsx` and adds `animlab/PlayerMotionLab.jsx`, where every player-motion
   entry goes).
-- Parallel with: 09, 11, 16, 17. NOT with another slice that edits
-  `src/screens/animlab/PlayerMotionLab.jsx` at the same time (08b, 10, 12c, 17a add entries
-  there): the edits do not overlap in lines, but merge `main` in before you push.
+- Parallel with: 09, 11, 16, 17b.
+- Shares append-only lines with other slices: `src/screens/animlab/PlayerMotionLab.jsx` (entries) and the freeze list in `src/styles/46-consent-modal.css`. The run plan may put
+  those slices in one wave. Before you push, merge `main` in, and keep both sides
+  of any conflict in those lines.
 
 ## Goal
 

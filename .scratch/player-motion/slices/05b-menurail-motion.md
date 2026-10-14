@@ -8,8 +8,11 @@ copied again below.
 
 - Model: `claude-sonnet-5-5`. Effort: medium (the code is below; the slice is three files).
 - Depends on: 01a merged (the tokens), 05a merged.
-- Parallel with: 02, 03, 04, 06, 07, 08, 10, 13, 20. Slices 09, 11, 16, 17 and 05c wait
+- Parallel with: 02, 04, 06, 07, 08, 10, 13, 20. Slices 09, 11, 16, 17b and 05c wait
   for this one.
+- Shares append-only lines with other slices: `src/index.css` (one `@import`) and `docs/motion.md` (one paragraph). The run plan may put
+  those slices in one wave. Before you push, merge `main` in, and keep both sides
+  of any conflict in those lines.
 
 ## Goal
 
@@ -53,7 +56,7 @@ ArsenalReveal (the timing MenuRail follows; `spec.md` maps `.4s` and
 ```
 
 PlateApproach (the rise MenuRail follows; `spec.md` maps it to `--dur-stamp-in`, 380ms after
-slice 01, and `--ease-stamp`):
+slice 01a, and `--ease-stamp`):
 
 ```css
 .tp-ff1,.tp-ff2{animation:tp-fa 380ms cubic-bezier(.2,.9,.3,1) backwards}

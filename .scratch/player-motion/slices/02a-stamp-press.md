@@ -372,7 +372,7 @@ starts a line and is followed by `{`. `ruleBody(css, '.btn:active')` returns lin
 - Other pressed controls that are not a Button or a Pill (`.gamecard__open`,
   `.xl__door`, `.offday__tile`, and the rest of the 68 `:active` rules). They keep
   their own press.
-- `Segmented` (slice 03) uses this press; it is built there.
+- `Segmented` (slice 03a) uses this press; it is built there.
 - The `--inset-cell` token: it stays (cells, the note tile, and other readers).
 
 ## Stop if

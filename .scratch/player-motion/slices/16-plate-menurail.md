@@ -7,9 +7,9 @@
   05c (the lab entries) is not needed.
 - Parallel with: 09, 11, 17 (each in its own module folder), 05c, and any slice that does not
   touch `src/screens/player/next/modules/plate/`, `src/styles/player-next/batter/plate.css`
-  or `test/player-next-plate.test.js`. NOT with 04: slice 04 may move the hand chips
-  (`PlateModule.jsx:83-89`, `Pill role="control"`) onto `Segmented`. Run 16 after 04 merges,
-  or before it; the two edits do not overlap in lines, but they share the file.
+  or `test/player-next-plate.test.js`. 04a-04d do not touch Plate: 04a's verdict table
+  leaves the hand chips (`PlateModule.jsx:85`, `Pill role="control"`) to this slice, and
+  this slice leaves them as they are. So 16 may run in parallel with 04a-04d.
 
 ## Goal
 
@@ -519,14 +519,14 @@ test('the glyph and the panel head are drawn in plate.css with tokens', () => {
 - The map, the hand chips, the cell picking, the facts' content (only their place).
 - A "% seen" share, an "In zone" or "Swings" figure in the panel (the canvas has them; they
   are new numbers here, and the facts already show the rates for the picked pitch).
-- The card entrance on first view (slice 07 owns the Slot rise).
+- The card entrance on first view (slice 07a owns the Slot rise).
 - `MenuRail` itself (05a/05b). If it needs a change, stop.
 
 ## Stop if
 
 - The live lines quoted above differ (the table call, `tableRow`, the read box, the
-  imports). Line numbers may move if slice 04 already swapped the hand chips (l.83-89) onto
-  `Segmented`; that is fine. Any other change in those blocks is a stop.
+  imports). No 04 slice edits `PlateModule.jsx` (04a's verdict), so any change in those
+  blocks is a stop.
 - `MenuRail`'s API differs from 05a (`items[].label`, `panel`, `backLabel`, `className`).
 - `glyphD` is no longer exported from `arsenal/PitchGlyph.jsx` (slices 11-15 work in that
   folder), or its signature is not `(shape, r)`.

@@ -76,7 +76,8 @@ short excerpts a slice needs. Never commit a whole board.
   `src/styles/46-consent-modal.css`. Every slice that adds an entry depends on
   01d merged.
 - **Check once** (`.claude/skills/orchestrate/SKILL.md`, "Check once"). A child
-  runs only the tests it wrote (`node --test test/<file>`) and `npm run lint`.
+  runs only the tests it wrote or changed, the existing test files that import a
+  file it changed (`git grep -l <basename> test/`), and `npm run lint`.
   CI on its PR runs the full `npm test` and `npm run build`. No child runs
   `ponytail-review` or `/code-review`: `/stack-prs` reviews the stack once.
 - **No new route, no new data.** Motion only. Do not change what a card shows,

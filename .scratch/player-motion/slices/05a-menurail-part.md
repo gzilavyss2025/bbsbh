@@ -15,8 +15,11 @@ The consumers (09 Splits, 11 Arsenal, 16 Plate, 17 Contact) wait for 05a and 05b
 - Model: `claude-sonnet-5-5`. Effort: high.
 - Depends on: 01a merged (the tokens `--dur-unfold`, `--ease-unfold`, `--dur-stamp-in`,
   `--ease-stamp`; 05a itself reads none of them, but 05b does, and the two land together).
-- Parallel with: 02, 03, 04, 06, 07, 08, 10, 13, 20. Not with 05b (05b edits the same test
+- Parallel with: 02, 03b, 04, 06, 07, 08, 10, 13, 20. Not with 05b (05b edits the same test
   helper area and `index.css`; run 05b after 05a merges, or stack them).
+- Shares append-only lines with other slices: `src/index.css` (one `@import`). The run plan may put
+  those slices in one wave. Before you push, merge `main` in, and keep both sides
+  of any conflict in those lines.
 
 ## Goal
 
@@ -86,13 +89,14 @@ files today.
 
 Two CSS custom properties a caller may set on its `className`:
 `--menurail-card` (menu basis, default 150px) and `--menurail-rail` (rail basis, default
-132px). Splits wants 128px (`calc(var(--space-16) * 2)`, live today), Contact 112px.
+132px). Both are optional. The canvas rail is 128px on Splits and 112px on Contact; a
+caller may set them, and the consumer slices (09, 17b) decide.
 
 Why each extension (say this in the PR):
 
 | Extension | Who needs it | Evidence |
 |---|---|---|
-| `panel` optional | Splits | `splits/index.jsx:126-137`: the menu opens sections in `.splitsmod__cards`, not one panel; canvas PitcherSplits has no `.sp-pn`, it opens `.cw` wrappers per section |
+| `panel` optional | any caller with no single focus panel | canvas PitcherSplits has no `.sp-pn`; it opens `.cw` wrappers per section. Slice 09 still passes `panel` (its section cards); both uses are valid |
 | `railMeta` | Arsenal | canvas `.ar-rail` keeps `.ar-m` (the mph) beside the name; Plate and Contact hide it (`.tp-rail .tp-ms{display:none}`, `.tc-rail .tc-ms{display:none}`) |
 | `items[].label` | Plate, Contact | canvas `.tp-mc`/`.tc-mc` carry `aria-label`; live `StretchTable.jsx:40` builds an aria per row |
 | `items[].disabled` | Splits | live scope buttons use `disabled`; a section with no data can grey its card |
@@ -383,7 +387,7 @@ bans `none`).
 
    A caller may set two bases on its own class: --menurail-card (the menu,
    150px as the boards draw it) and --menurail-rail (the rail, 132px as Plate
-   draws it; Splits wants 128px, Contact 112px).
+   draws it; the canvas draws 128px on Splits and 112px on Contact).
    --------------------------------------------------------------------------- */
 
 .menurail {

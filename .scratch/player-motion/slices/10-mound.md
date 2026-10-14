@@ -6,8 +6,12 @@
 - Depends on: 01a merged (tokens `--ease-stamp`, `--dur-rise`, `--dur-unfold`,
   `--dur-draw`, `--stagger-step`, `--dur-stamp-in` at 380ms), 01c merged
   (`useInViewOnce`), 01d merged (`src/screens/animlab/PlayerMotionLab.jsx`).
-- Parallel with: 02, 03, 05, 06, 07, 08a, 08b, 09, 11, 13. It shares only the lab
-  files with other slices (`spec.md`, "Shared files").
+- Parallel with: 02, 03, 05a, 05b, 06, 07, 08a, 09, 11, 13.
+- Shares append-only lines with other slices: `src/screens/animlab/PlayerMotionLab.jsx` (entries). The run plan may put
+  those slices in one wave. Before you push, merge `main` in, and keep both sides
+  of any conflict in those lines.
+- Not with 04d: 04d edits `mound/index.jsx` and `pitcher/mound.css` after this slice
+  merges (04d depends on 10).
 
 ## Goal
 
@@ -588,8 +592,8 @@ Notes for the test:
 ## Out of scope
 
 - Replaying the bars on a Starter/Bullpen tab tap.
-- The card's own stamp-in and the `Slot` hold (slice 07).
-- The tab `Button`s' press (slice 02); moving the tabs onto `Segmented` (slice 04).
+- The card's own stamp-in and the `Slot` hold (slices 07a and 07b).
+- The tab `Button`s' press (slice 02); moving the tabs onto `Segmented` (slice 04d, after this slice).
 - The `.mc-o` row hover on the board (On the mound has no such rows live).
 - A frozen strip for the lab entry.
 

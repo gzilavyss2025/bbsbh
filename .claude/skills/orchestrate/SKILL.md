@@ -164,7 +164,8 @@ real gamePk from docs/test-games.md. The spoiler rule applies if you touch the
 innings viewer, scorecard, lineups, or box score. Touch no other files.
 Use the ponytail skill at level full. Do not run ponytail-review or /code-review:
 the stack reviews once (see "Check once").
-Verify: the test files you wrote (node --test <file>) and npm run lint. Do not
+Verify: the test files you wrote or changed, the existing test files that import
+a file you changed (git grep -l <basename> test/), and npm run lint. Do not
 run the full npm test or npm run build: CI runs them on your PR. For a visible
 change, send a screenshot with SendUserFile (Chromium, ?nointro, say what is
 mocked).
@@ -189,7 +190,7 @@ Each check runs at one layer, the cheapest one that can do it. Do not repeat it.
 
 | Check | Child session | Child PR CI | `/stack-prs` | Stack PR CI |
 |---|---|---|---|---|
-| The tests the child wrote, `npm run lint` | yes | | | |
+| The tests the child wrote or changed, the existing test files that import a file it changed (`git grep -l <basename> test/`), `npm run lint` | yes | | | |
 | Full `npm test`, `npm run build` | no | yes (the gate) | only after a conflict or a review fix | yes (the gate) |
 | `ponytail-review` and `/code-review` | no | | yes, one pass at `high`, over the whole stack | |
 

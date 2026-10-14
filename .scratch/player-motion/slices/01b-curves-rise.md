@@ -8,6 +8,9 @@ Part 2 of 4 of slice 01 (see 01a for the split).
 - Depends on: 01a merged (the rise sheet reads `--dur-rise`, `--ease-stamp`,
   `--stagger-step`, and the curve test reads the tokens).
 - Parallel with: 01c, 02a. Slice 01d waits for this slice.
+- Shares append-only lines with other slices: `src/index.css` (one `@import`). The run plan may put
+  those slices in one wave. Before you push, merge `main` in, and keep both sides
+  of any conflict in those lines.
 
 ## Goal
 
@@ -360,6 +363,9 @@ assertion matches it.
 ## Stop if
 
 - `src/lib/scorecard/glide.js:15-32` or `src/index.css:219-225` differ from the quotes.
+  One known change is fine: if 05b merged first, `motion/menurail.css` follows
+  `motion/stamp-in.css`. Then put `player-rise.css` directly after `stamp-in.css`, before
+  `menurail.css` (the test asks for "directly after the stamp-in").
 - `src/lib/motion/` already exists with other files (then add to it, and report).
 - `src/styles/motion/` has 12 files already (`ls src/styles/motion | wc -l`).
 - `test/scorecard-lens-glide.test.js` fails after the move (do not change that test).

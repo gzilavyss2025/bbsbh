@@ -148,7 +148,8 @@ written, and go to step 1.
    not add a `ponytail-review` or `/code-review` step to a prompt whose PR
    lands through `/stack-prs`: the stack reviews once, over every PR in it
    (`orchestrate`, "Check once"). Tell such a prompt to verify with the tests
-   it wrote and `npm run lint`, and to let CI run the full `npm test` and
+   it wrote or changed, the existing tests that import a file it changed, and
+   `npm run lint`, and to let CI run the full `npm test` and
    `npm run build`. If the repo has no ponytail skill, skip this and do not
    mention it. Ponytail never overrides a repo rule: the spoiler rule,
    test-first and `check-dir-size` come first.

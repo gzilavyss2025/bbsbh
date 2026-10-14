@@ -10,10 +10,12 @@ rule already take five files.
   no new part and no JS clock, so medium is enough).
 - Depends on: 01a merged (`--ease-stamp`, `--dur-unfold`), 01c merged (`useInViewOnce`),
   01d merged (`src/screens/animlab/PlayerMotionLab.jsx`).
-- Parallel with: any slice that does not touch `src/screens/player/next/modules/contact/*`
-  or `src/styles/player-next/batter/contact.css`. `PlayerMotionLab.jsx` and the freeze
-  list in `46-consent-modal.css` are shared with other slices: merge `main` in before you
-  push.
+- Parallel with: any slice that does not touch `src/screens/player/next/modules/contact/*`,
+  `src/styles/player-next/batter/contact.css`, `PlayerMotionLab.jsx` or
+  `46-consent-modal.css`.
+- Shares append-only lines with other slices: `src/screens/animlab/PlayerMotionLab.jsx` (entries) and the freeze list in `src/styles/46-consent-modal.css`. The run plan may put
+  those slices in one wave. Before you push, merge `main` in, and keep both sides
+  of any conflict in those lines.
 
 ## Goal
 
@@ -78,7 +80,7 @@ fx: st.gen % 2 ? 'tc-g2' : 'tc-g1'
 A colour-mode pick (`this.setState({ mode: k, hl: '' })`) does not bump `gen`, so it
 does not replay.
 
-The values in tokens (after slice 01): 460ms = `calc(var(--dur-unfold) * 1.15)`;
+The values in tokens (after slice 01a): 460ms = `calc(var(--dur-unfold) * 1.15)`;
 620ms = `calc(var(--dur-unfold) * 1.55)`; the curve is `--ease-stamp`.
 
 **What the canvas does NOT do, and this slice does not add:**

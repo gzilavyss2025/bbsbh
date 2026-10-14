@@ -10,7 +10,10 @@ amendment comment and the two CLAUDE.md lines.
 - Depends on: **none**. (spec.md says "01 merged". Segmented reads no token that
   slice 01 adds, so it does not need to wait. The press it shows comes from
   `.btn:active`, which slice 02 changes for every Button at once.)
-- Parallel with: 01, 02, 05, 06, 07, 08, 10, 13.
+- Parallel with: 01a, 01c, 01d, 02, 06, 07, 08, 10, 13.
+- Shares append-only lines with other slices: `src/index.css` (one `@import`). The run plan may put
+  those slices in one wave. Before you push, merge `main` in, and keep both sides
+  of any conflict in those lines.
 - Blocks: 03b, 04a, 04b, 04c, 04d.
 
 ## Goal
@@ -488,8 +491,7 @@ weaken the assertion.
 
 ## Verify
 
-1. `node --test test/segmented.test.js test/button-cascade.test.js test/button-placement.test.js`
-   (the new test and the two this slice edits).
+1. `node --test test/segmented.test.js`.
 2. `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. No live screen uses Segmented yet (03b adds the lab entry, 04a-d the swaps). To
    see it in Chromium before 03b, mount it for one run in a scratch copy of the

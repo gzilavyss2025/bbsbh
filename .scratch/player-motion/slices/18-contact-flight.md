@@ -332,8 +332,11 @@ export function flightFrame(f, t, { home, land, dotR, hr }) {
 }
 ```
 
-The `eo` here is the canvas Contact one, a cubic. Slice 01's `easeOutQuart` is the
-Arsenal and PitchFlight curve; do not swap it in. The one change from the canvas: the
+The `eo` here is the canvas Contact one, a cubic. Slice 01b's `easeOutQuart` (in
+`src/lib/motion/curves.js`) is the Arsenal and PitchFlight curve; do not swap it in.
+01b exports no cubic ease-out (its exports are `cubicBezier`, `EASE_STAMP`,
+`EASE_UNFOLD`, `easeStamp`, `easeUnfold`, `easeOutQuart`), so `eo` stays local in
+`contactFlight.js`. Do not add it to `curves.js`. The one change from the canvas: the
 sample walk keeps `j` across samples (time only grows), so it is linear, not quadratic.
 The result is the same.
 
@@ -558,7 +561,7 @@ Add after `.fcontact__stats dt` (l.110-113):
 }
 ```
 
-380ms = `--dur-stamp-in` (slice 01); 60ms = `--dur-fast / 2`; 6px = `--space-1h`.
+380ms = `--dur-stamp-in` (slice 01a); 60ms = `--dur-fast / 2`; 6px = `--space-1h`.
 `stroke-width` and `stroke-dasharray` are not counted by `check-raw-values.mjs` (it
 counts hex, radius, motion times and shadows). No new flex or grid rule.
 
