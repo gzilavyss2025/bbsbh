@@ -64,3 +64,58 @@ test('the club strip glides on a pick and jumps on mount', () => {
   assert.match(vs, /behavior: glide \? 'smooth' : 'auto'/)
   assert.match(vs, /centred\.current !== pick && !motionIsReduced\(\)/)
 })
+
+const parts = stripComments(read(`${MOD}parts.css`))
+
+test('a fold the reader opens cascades its rows, and their bars grow', () => {
+  assert.equal(
+    decl(ruleBody(parts, '.splitsmod__appear'), 'animation'),
+    'splitsmod-rise calc(var(--dur-rise) * 2) var(--ease-unfold) calc(var(--stagger-step) * var(--i, 0)) backwards',
+  )
+  assert.equal(
+    decl(ruleBody(parts, '.splitsmod__appear .splitsmod__fill'), 'animation'),
+    'splitsmod-grow var(--dur-grow) var(--ease-unfold) calc(var(--dur-fast) + var(--stagger-step) * var(--i, 0)) backwards',
+  )
+  const gl = read(`${MOD}GameLines.jsx`)
+  assert.match(gl, /tapped\[item\.fold\.key\] \? 'splitsmod__appear' : undefined/)
+  assert.match(gl, /style=\{\{ '--i': i \}\}/)
+  assert.match(gl, /<Part once=\{viewKey\(bio\.id, `splits-\$\{group\}:g`\)\}/)
+})
+
+test('the fold chevron turns, and a club press shrinks the club', () => {
+  assert.equal(decl(ruleBody(parts, '.splitsmod__foldchev'), 'transition'), 'transform var(--dur-med) var(--ease-out)')
+  assert.equal(decl(ruleBody(parts, '.splitsmod__club'), 'transition'), 'transform var(--dur-fast) var(--ease-stamp)')
+  assert.equal(decl(ruleBody(parts, '.splitsmod__club:active'), 'transform'), 'scale(0.97)')
+  assert.equal(decl(ruleBody(parts, '.splitsmod__door.boxlines__door:active'), 'background'), 'var(--bg-canvas)')
+})
+
+test('the picked club prints with the canvas offset shadow', () => {
+  const body = ruleBody(parts, ".splitsmod__club[aria-pressed='true']")
+  assert.ok(body)
+  assert.equal(decl(body, 'box-shadow'), 'var(--bw-heavy) var(--bw-heavy) 0 var(--border-stamped)')
+  assert.equal(decl(ruleBody(parts, '.splitsmod__club') ?? '', 'box-shadow'), undefined, 'an unpicked club has no shadow')
+})
+
+test('hover colours, for a fine pointer only', () => {
+  const at = parts.indexOf('@media (hover: hover) and (pointer: fine)')
+  assert.ok(at > -1)
+  const block = parts.slice(at, parts.indexOf('@media (prefers-reduced-motion: reduce)', at))
+  assert.match(block, /\.splitsmod__door\.boxlines__door:hover\s*\{\s*background:\s*var\(--surface-inset\)/)
+  assert.match(block, /\.splitsmod__fold:hover\s*\{\s*background:\s*var\(--border-hairline\)/)
+  assert.match(block, /\.splitsmod__club:hover\s*\{\s*background:\s*var\(--bg-canvas\)/)
+  assert.match(block, /\.splitsmod__club\[aria-pressed='true'\]:hover\s*\{\s*background:\s*var\(--surface-inset\)/)
+})
+
+test('parts.css: reduced motion stops the cascade and the turns', () => {
+  const block = parts.slice(parts.indexOf('@media (prefers-reduced-motion: reduce)'))
+  assert.match(block, /\.splitsmod__appear,\s*\.splitsmod__appear \.splitsmod__fill\s*\{\s*animation:\s*none/)
+  assert.match(block, /\.splitsmod__club,\s*\.splitsmod__foldchev\s*\{\s*transition:\s*none/)
+})
+
+// parts.css is outside src/styles/, so check-raw-values.mjs never reads it.
+test('parts.css: no raw time and no hex', () => {
+  for (const m of parts.matchAll(/(?:animation|transition)[a-z-]*:\s*([^;}]*)/g)) {
+    assert.doesNotMatch(m[1].replace(/var\([^)]*\)/g, ''), /\d(?:ms|s)\b/, m[0])
+  }
+  assert.doesNotMatch(parts, /#[0-9a-f]{3,8}\b/i)
+})
