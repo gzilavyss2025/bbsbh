@@ -190,11 +190,6 @@
   padding: 0;
 }
 
-/* The live page's chip row carries a top margin; the card's Stack already spaces it. */
-.pnext__slot .leaguerank {
-  margin: 0;
-}
-
 /* The position pill takes the tint of the lead tile (the boards' green). */
 .pnext__club .pill {
   border-color: var(--border-stamped);
