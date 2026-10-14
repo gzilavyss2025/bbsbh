@@ -1,0 +1,116 @@
+/* ==== RUN VALUE (the new player page, #2013) ====
+   Two tiles, then the parts as bars from a zero line: gain to the right, loss to the left. Tokens only. */
+
+/* layout-exempt: one column of the card's blocks */
+.runvalue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.runvalue--loading {
+  min-height: 280px;
+}
+
+/* A 2px ink grid: the gap shows the ink behind the tiles. */
+/* layout-exempt: a fixed two-tile grid */
+.runvalue__tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--bw-heavy);
+  background: var(--border-stamped);
+}
+.runvalue__tiles--solo {
+  grid-template-columns: 1fr;
+}
+
+.runvalue__parts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* layout-exempt: label, bar track, number: a fixed three-column row */
+.runvalue__row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr 2.5rem;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-body);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.runvalue__row[aria-pressed='true'] .runvalue__label {
+  font-weight: var(--w-bold);
+}
+.runvalue__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+
+/* The zero line is the track's middle; a bar is half-width at most. */
+.runvalue__track {
+  position: relative;
+  height: 14px;
+}
+.runvalue__track::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  width: var(--bw-hair);
+  background: var(--border-rule);
+}
+.runvalue__bar {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  inset-inline-start: 50%;
+}
+.runvalue__bar--up {
+  background: var(--accent-positive);
+}
+.runvalue__bar--down {
+  background: var(--accent-negative);
+  inset-inline-start: auto;
+  inset-inline-end: 50%;
+}
+.runvalue__num {
+  text-align: right;
+}
+.runvalue__num--up {
+  color: var(--accent-positive);
+}
+.runvalue__num--down {
+  color: var(--accent-negative);
+}
+.runvalue__num--flat {
+  color: var(--text-caption);
+}
+
+/* The axis sits under the bars' track column: label column on the left, number column on the right. */
+.runvalue__axis {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  margin-inline: calc(6.5rem + var(--space-2)) calc(2.5rem + var(--space-2));
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
+.runvalue__line,
+.runvalue__sentence {
+  margin: 0;
+}
+.runvalue__line {
+  font-weight: var(--w-semibold);
+}
+.runvalue__foot {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
