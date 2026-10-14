@@ -4,7 +4,8 @@ import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { splitDisplayName } from '../../../../../api/person.js'
-import { Flag, Head, Row } from './LineRows.jsx'
+import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
+import { Flag, Head, Part, Row } from './LineRows.jsx'
 import { GameLines } from './GameLines.jsx'
 import { VsTeam } from './VsTeam.jsx'
 import { loadCareer, loadGameLines, loadSplits, loadVsTeam } from './splitsData.js'
@@ -21,6 +22,7 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
   const group = role === 'pitching' ? 'pitching' : 'hitting'
   const pitching = group === 'pitching'
   const surname = splitDisplayName(bio.fullName).last
+  const once = viewKey(bio.id, `splits-${group}`)
   const choices = seasonChoices(season, Number(String(bio.debut ?? '').slice(0, 4)) || null)
   const [picked, setPicked] = useState(null)
   const [wanted, setWanted] = useState('R')
@@ -138,19 +140,19 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
 
       <div className="splitsmod__cards" aria-busy={splits.loading}>
         {show('h') && (
-          <section className="splitsmod__part" aria-label="By handedness">
+          <Part once={`${once}:h`} label="By handedness">
             <SectionHead look="rule" note={text.tag}>By handedness</SectionHead>
             {hand ? (
               <>
                 <Head layout="slash" title="Split" group={group} vs={text.base} />
                 <Row base line={hand.base} layout="slash" />
-                {hand.rows.map((l) => <Row key={l.key} line={l} layout="slash" />)}
+                {hand.rows.map((l, i) => <Row key={l.key} i={i + 1} line={l} layout="slash" />)}
               </>
             ) : splits.loading ? <p className="hint">Loading…</p> : empties}
-          </section>
+          </Part>
         )}
         {show('s') && (
-          <section className="splitsmod__part" aria-label="Situational">
+          <Part once={`${once}:s`} label="Situational">
             <SectionHead look="rule" note={text.tag}>Situational</SectionHead>
             {sit ? (
               <>
@@ -159,7 +161,7 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
                 {sit.groups.filter((g) => sitAll || g.family === 'base').map((g) => (
                   <div key={g.family}>
                     <p className="splitsmod__fam">{g.title}</p>
-                    {g.rows.map((l) => <Row key={l.key} line={l} layout="slash" />)}
+                    {g.rows.map((l, i) => <Row key={l.key} i={i + 1} line={l} layout="slash" />)}
                   </div>
                 ))}
                 {sit.groups.length > 1 && (
@@ -169,7 +171,7 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
                 )}
               </>
             ) : splits.loading ? <p className="hint">Loading…</p> : empties}
-          </section>
+          </Part>
         )}
         {show('v') && vs.data && <VsTeam vs={vs.data} group={group} career={career.data} season={season} asOf={asOf} bio={bio} surname={surname} />}
         {show('g') && glView && <GameLines view={glView} labels={lines.data.labels} group={group} asOf={asOf} bio={bio} surname={surname} />}
