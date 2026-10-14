@@ -7,7 +7,7 @@ import { loadPositionScope } from '../../../../../api/player/history.js'
 import { fetchTeam } from '../../../../../api/team.js'
 import { BallparkDiagram } from '../../../../../components/ballpark/BallparkDiagram.jsx'
 import { FieldBackdrop } from '../../../../../components/scoring/field/FieldBackdrop.jsx'
-import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
+import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { Loader } from '../../../../../components/ui/Loader.jsx'
 import { resolveBallparkLayout } from '../../../../../lib/ballpark/layout/resolveLayout.js'
@@ -148,11 +148,14 @@ export default function InningsModule({ bio, role, asOf, season, onEmpty, onCoun
   return (
     <Stack gap="snug">
       {scopes.length > 1 && (
-        <Cluster className="pnext-inn__scope" role="group" aria-label="Scope">
-          {scopes.map((s) => (
-            <button key={s.key} type="button" className="pnext-pick" aria-pressed={scope === s.key} onClick={() => pick(s.key)}>{s.label}</button>
-          ))}
-        </Cluster>
+        <Segmented
+          label="Scope"
+          className="pnext-inn__scope"
+          fill
+          value={scope}
+          onChange={pick}
+          options={scopes.map((s) => ({ value: s.key, label: s.label }))}
+        />
       )}
       <div className={`pnext-inn__park${park === null ? ' pnext-inn__park--field' : ''}`}>
         {park && <BallparkDiagram layout={park} className="pnext-inn__art" viewBox={PARK_VIEWBOX} label={`${park.name} field`} />}
