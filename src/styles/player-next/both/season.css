@@ -37,16 +37,48 @@
   }
 }
 
-/* The WAR figure is a button: dotted rule under it, the tint on hover and while its dialog is open. */
+/* The register sits bare in the card, dressed like the game log table: heads on the card paper
+   over a heavy stamped rule, the total row on the same paper under another. */
+.seasonmod .ledger thead th {
+  background: var(--surface-card);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+/* Larger figures at the wide step; a phone keeps its 13px so the eight columns fit without a side scroll. */
+@media (min-width: 740px) {
+  .seasonmod .ledger tbody td,
+  .seasonmod .ledger tfoot td {
+    font-size: var(--fs-body);
+  }
+}
+.seasonmod .ledger .ledger__label {
+  font-family: var(--font-mono);
+}
+.seasonmod .ledger tfoot .yr {
+  font-size: var(--fs-label);
+}
+.seasonmod .ledger tfoot td {
+  background: var(--surface-card);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+}
+
+/* The WAR figure is a button: no rule under it, the tint on hover and while its dialog is open. */
 .seasonmod__war {
-  min-height: var(--space-10);
+  position: relative;
   padding: 0 var(--space-1);
   border: 0;
-  border-bottom: var(--bw-heavy) dotted var(--border-stamped);
   background: transparent;
   color: inherit;
   font: inherit;
+  line-height: var(--lh-tight);
   cursor: pointer;
+}
+/* The tap target is an overlay, so the button keeps the row its own height. */
+.seasonmod__war::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--space-3)) calc(-1 * var(--space-1));
 }
 .seasonmod__war:hover,
 .seasonmod__war:focus-visible {

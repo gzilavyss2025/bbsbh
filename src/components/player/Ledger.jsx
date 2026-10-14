@@ -1,6 +1,5 @@
 // A ranked/tabular ledger — the scorebook-style table used by the player
-// page (pitch arsenal, game log, the career register) and the standalone top
-// prospects page. `rows` are `{ key, cells, allStar?, className? }`; `className`
+// page's Season card (the career register). It sits bare: the card draws the frame. `rows` are `{ key, cells, allStar?, className? }`; `className`
 // inks/pencils a row (the register's MLB-vs-MiLB tiers). A footer is either a
 // single `total` (+`totalLabel`) or, for split footers like the register's
 // MLB/MiLB totals, a `totals` array of `{ label, cells, className? }`.
@@ -31,6 +30,7 @@ export function Ledger({
   const footRows = totals ?? (total ? [{ label: totalLabel, cells: total }] : [])
   return (
     <Table
+      frame="bare"
       label={label}
       className={`ledger ${className}`.trim()}
       aria-label={ariaLabel}
