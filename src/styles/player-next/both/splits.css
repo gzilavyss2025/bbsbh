@@ -155,9 +155,6 @@
   background: var(--text-body);
   color: var(--text-on-ink);
 }
-.splitsmod__segs .pnext-pick + .pnext-pick {
-  margin-left: calc(var(--bw-heavy) * -1);
-}
 .splitsmod__mt {
   font-family: var(--font-display);
   font-size: var(--fs-title-sm);
