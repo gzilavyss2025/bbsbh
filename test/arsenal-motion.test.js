@@ -215,3 +215,51 @@ test('the scene draws the beats: ring, ripple, seam, ticks', () => {
     assert.ok(ruleBody(css, `.${cls}`), `arsenal.css has no .${cls} rule`)
   }
 })
+
+// One declaration's value from a rule body.
+const decl = (body, prop) => body?.match(new RegExp(`(?:^|[;\\s])${prop}:\\s*([^;]+);`))?.[1].trim()
+const mod = read('src/screens/player/next/modules/arsenal/index.jsx')
+
+test('the timeline waits for the card to come into view, once per page visit', () => {
+  assert.match(card, /useInViewOnce\(viewKey\(id, 'arsenal'\)\)/)
+  assert.match(card, /useArsenalClock\(.*, phase === 'rest' \? 'end' : 'wait'\)/)
+  assert.match(card, /if \(phase === 'play'\) clock\.play\(\)/)
+  assert.match(mod, /<ArsenalCard rows=\{rows\} id=\{bio\.id\} \/>/)
+})
+
+test('the mix bar rolls in under --roll, with a shadow edge riding it', () => {
+  assert.equal(
+    decl(ruleBody(css, '.arsenal__mix'), 'clip-path'),
+    'inset(calc(var(--space-2) * -1) calc((1 - var(--roll, 1)) * 100%) calc(var(--space-2) * -1) 0)',
+  )
+  const edge = ruleBody(css, '.arsenal__rolledge')
+  assert.equal(decl(edge, 'left'), 'calc(var(--roll, 1) * 100%)')
+  assert.match(decl(edge, 'background'), /color-mix\(in srgb, var\(--text-heading\) 30%, transparent\)/)
+  assert.match(card, /'--roll': beats\.roll/)
+})
+
+test('a mix segment flashes paper on landing', () => {
+  assert.equal(decl(ruleBody(css, '.arsenal__flash'), 'background'), 'var(--surface-card)')
+  assert.match(card, /className="arsenal__flash"[^>]*flash\.toFixed/)
+})
+
+test('the menu rows enter from the clock through MenuRail item styles, with no transform lag', () => {
+  assert.equal(
+    decl(ruleBody(css, '.menurail__card.btn.arsenal__entering'), 'transition-property'),
+    'flex-basis, padding, background-color, border-color, box-shadow',
+  )
+  assert.match(card, /className: e < 1 \? 'arsenal__entering' : undefined/)
+  assert.match(card, /perspective\(700px\) rotateX\(/)
+  assert.match(card, /blur\(/)
+  assert.match(card, /countText\(r\.velo, b\.row\.count, 1\)/)
+  assert.match(card, /countText\(r\.pct, b\.row\.count\)/)
+})
+
+test('a landing sweeps the row in mint and pops its glyph', () => {
+  const sweep = ruleBody(css, '.arsenal__sweep')
+  assert.equal(decl(sweep, 'transform-origin'), 'left')
+  assert.equal(decl(sweep, 'z-index'), '-1')
+  assert.match(decl(sweep, 'background'), /color-mix\(in srgb, var\(--accent-tint\) 50%, transparent\)/)
+  assert.match(card, /scaleX\(\$\{b\.sweep\.x/)
+  assert.match(card, /className="arsenal__pop"/)
+})
