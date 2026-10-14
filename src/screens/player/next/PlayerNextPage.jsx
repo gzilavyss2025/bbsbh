@@ -59,6 +59,8 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
   }, [tab, core.data, overview.data])
   // Instance key -> true once that slot's module has said it has no data.
   const [empty, setEmpty] = useState({})
+  // The hero tile a rank chip lights: { group, tile }. Held here, stored nowhere.
+  const [lit, setLit] = useState(null)
   const back = () => window.history.back()
   const gate = AsyncGate({
     loading: core.loading || overview.loading,
@@ -91,10 +93,11 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
                 block={b}
                 playerId={core.data.bio.id}
                 season={core.data.season}
+                lit={lit}
                 label={blocks.length > 1 ? b.title : undefined}
               />
             ))}
-            <OverviewExtras blocks={blocks} />
+            <OverviewExtras blocks={blocks} lit={lit} onLight={setLit} season={core.data.season} playerId={core.data.bio.id} cutoff={asOf} />
           </Stack>
           <HubTabBar variant="anchor" tabs={sections} ariaLabel="Page sections" />
           {sections

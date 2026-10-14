@@ -4,7 +4,6 @@
 // nothing here belongs to one tab (a piece only one tab draws stays in that
 // tab's own screen).
 
-import { Pill } from '../../components/ui/control/Pill.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 export const DASH = '—'
@@ -38,20 +37,4 @@ export function Fact({ label, value, mono = false, wide = false }) {
       </div>
     </div>
   )
-}
-
-// League-rank chips right under the season tiles ("1st in NL ERA"): top-10 ranks only, from
-// hittingRanksView / pitchingRanksView. Current-day only, so they vanish under a spoiler asOf
-// (the loader skips the fetch).
-export function RankChips({ ranks }) {
-  return ranks?.map((r) => (
-    <p className="leaguerank" key={r.league}>
-      {r.items.map((it) => (
-        <Pill fill="paper" ink="--text-muted" className="leaguerank__tag" key={it.label}>
-          <strong className="leaguerank__ord">{it.text}</strong>
-          {` ${r.league} · ${it.label}${r.club ? ` · with ${r.club}` : ''}`}
-        </Pill>
-      ))}
-    </p>
-  ))
 }

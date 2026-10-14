@@ -1,0 +1,29 @@
+/* Overview extras (#2010): the season card under the tiles. The card body is the query
+   container; at 720px the groups sit in two columns. */
+.pnext-ext {
+  container-type: inline-size;
+}
+/* layout-exempt: groups fall into two columns at a container width; Grid fits by column width */
+.pnext-ext__cols {
+  display: grid;
+  gap: var(--space-5);
+}
+@container (min-width: 720px) {
+  .pnext-ext__cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.pnext-ext__ord {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+}
+/* The Total row stays up while By round loads, so the group keeps its height. */
+.pnext-ext__total[aria-busy='true'] {
+  opacity: 0.5;
+}
+/* The hero tile a chip lights: a 3px outline, drawn outside the tile's own ink edge. */
+.pnext__tile--lit {
+  outline: 3px solid var(--border-stamped);
+  outline-offset: 2px;
+}
