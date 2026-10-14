@@ -3,12 +3,15 @@ import { centeredScrollLeft, seasonSeriesCells, seasonSeriesRecord } from '../..
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { GameTime } from '../../../../components/teamstats/SeasonSeriesStrip.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
-import { monthDayYear } from '../../../../lib/dates.js'
+import { monthDay } from '../../../../lib/dates.js'
 import { useNav } from '../../../../lib/nav.js'
 import { gamePath } from '../../../../lib/route.js'
 import { teamClubName } from '../../../../lib/teams.js'
 
 // "Brewers lead 4–2", "Tied 2–2", or nothing before either club has won.
+// "8/15": the cell's date.
+const shortMd = (apiDate) => monthDay(apiDate)
+
 function leadLabel(record, aId, bId) {
   const { aWins, bWins } = record
   if (aWins === 0 && bWins === 0) return null
@@ -42,30 +45,37 @@ export function SeriesCard({ data }) {
   if (cells.length < 2 || !season) return null
   const lead = leadLabel(seasonSeriesRecord(cells, meta.id, oppMeta.id), meta.id, oppMeta.id)
   const go = (cell) => navigate(gamePath(cell.apiDate, cell.awayAbbr, cell.homeAbbr, cell.final ? 'boxscore' : 'lineup1', cell.gameNumber))
+  const scroll = (dir) => stripRef.current?.scrollBy({ left: dir * stripRef.current.clientWidth * 0.8, behavior: 'smooth' })
   return (
-    <Card frame="stamped" body="flush" label="Season series" count={lead ?? undefined} className="lss">
+    <Card frame="stamped" body="flush" className="lss">
+      <header className="lss__head">
+        <h3 className="lss__title">Season series</h3>
+        {lead && <span className="lss__lead">{lead}</span>}
+        <span className="lss__arrows">
+          <button type="button" aria-label="Earlier games" onClick={() => scroll(-1)}>‹</button>
+          <button type="button" aria-label="Later games" onClick={() => scroll(1)}>›</button>
+        </span>
+      </header>
       <div className="lss__strip" ref={stripRef} tabIndex={0} aria-label="Season series games">
         {cells.map((cell) => {
-          const won = cell.final && cell.hasScore ? cell.winnerId === meta.id : null
-          const cls = ['lss__cell', cell.isCurrent && 'is-current', won === true && 'is-win', won === false && 'is-loss'].filter(Boolean).join(' ')
+          const played = cell.final && cell.hasScore
+          const won = played ? cell.winnerId === meta.id : null
+          const mine = played ? (won ? cell.winnerScore : cell.loserScore) : null
+          const theirs = played ? (won ? cell.loserScore : cell.winnerScore) : null
+          const cls = ['lss__cell', cell.isCurrent && 'is-current', won === true && 'is-win', won === false && 'is-loss', cell.round && 'is-post'].filter(Boolean).join(' ')
           return (
             <button key={cell.gamePk} type="button" ref={cell.isCurrent ? currentRef : null} className={cls} onClick={() => go(cell)}>
-              <small className="lss__date">{monthDayYear(cell.apiDate)}</small>
-              {cell.round && <span className="lss__round">{cell.round}{cell.seriesGame ? ` · G${cell.seriesGame}` : ''}</span>}
-              {cell.final && cell.hasScore ? (
-                <b className="lss__score">
-                  <TeamLogo teamId={cell.winnerId} size={24} />
-                  {cell.winnerScore}–{cell.loserScore}
-                </b>
-              ) : cell.final ? (
-                <b className="lss__score">Final</b>
-              ) : (
-                <b className="lss__score">
-                  <GameTime gameDate={cell.gameDate} tzId={cell.tzId} tbd={cell.startTimeTBD} />
-                </b>
+              <small className="lss__date">{shortMd(cell.apiDate)}</small>
+              <b className="lss__score">
+                {played ? `${won ? 'W' : 'L'} ${mine}–${theirs}` : cell.final ? 'Final' : <GameTime gameDate={cell.gameDate} tzId={cell.tzId} tbd={cell.startTimeTBD} />}
+              </b>
+              <span className="lss__vs">
+                <i>{cell.homeId === meta.id ? 'vs' : '@'}</i>
+                <TeamLogo teamId={oppMeta.id} name={oppMeta.name} size={20} />
+              </span>
+              {(cell.round || cell.isCurrent) && (
+                <em className="lss__tag">{[cell.round && (cell.seriesGame ? `${cell.round} · G${cell.seriesGame}` : cell.round), cell.isCurrent && (cell.final ? 'This game' : 'Today')].filter(Boolean).join(' · ')}</em>
               )}
-              <span className="lss__where">@ {cell.homeAbbr}</span>
-              {cell.isCurrent && <em className="lss__now">This game</em>}
             </button>
           )
         })}

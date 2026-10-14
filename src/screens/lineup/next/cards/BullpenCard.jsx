@@ -11,8 +11,8 @@ const dayLetter = (iso) => DAY[new Date(`${iso}T00:00:00Z`).getUTCDay()]
 // pitched (with the count), an empty one a day of rest, and today is dashed. It describes
 // "now" and shows only within three days of the workload file's date (`boardGameDate`):
 // completed appearances only, so nothing here is this game's. Folded shut by default.
-export function BullpenCard({ data, workloadData }) {
-  const { oppMeta, boardGameDate } = data
+export function BullpenCard({ data, workloadData, theme, masthead }) {
+  const { oppMeta, boardGameDate, season } = data
   const rows = useMemo(
     () => (workloadData && boardGameDate ? staffGridFor(workloadData, Number(oppMeta.id), boardGameDate) : null),
     [workloadData, boardGameDate, oppMeta.id],
@@ -21,7 +21,12 @@ export function BullpenCard({ data, workloadData }) {
   const yesterday = rows[0].cells.length - 2
   const pitched = rows.filter((r) => r.cells[yesterday]?.pitches).length
   return (
-    <FoldCard title="Bullpen" count={`${rows.length} relievers · ${pitched} pitched yesterday`} className="lpen">
+    <FoldCard
+      title="Bullpen"
+      band={{ teamId: oppMeta.id, teamName: oppMeta.teamName, masthead, season, theme }}
+      className="lpen"
+    >
+      <p className="lpen__sum">{rows.length} relievers · {pitched} pitched yesterday</p>
       <div className="lpen__board">
         <div className="lpen__row lpen__row--head" aria-hidden="true">
           <span />

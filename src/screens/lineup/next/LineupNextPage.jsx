@@ -71,7 +71,7 @@ export function LineupNextPage({
           <aside className="lgrid__side">
             <StarterCard data={data} theme={id.oppTheme} masthead={id.oppMasthead} />
             <FieldCard data={data} theme={id.oppTheme} masthead={id.oppMasthead} />
-            <BullpenCard data={data} workloadData={workloadData} />
+            <BullpenCard data={data} workloadData={workloadData} theme={id.oppTheme} masthead={id.oppMasthead} />
             <TeammatesCard data={data} side={side} />
           </aside>
           <div className="lgrid__main">
