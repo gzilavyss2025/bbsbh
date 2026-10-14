@@ -2,17 +2,22 @@ import { useEffect, useState } from 'react'
 import '../../../../../styles/player-next/pitcher/pitchlog.css'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
+import { Door } from '../../../../../components/ui/control/Door.jsx'
 import { FactGrid } from '../../../../../components/ui/frame/FactGrid.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
+import { splitDisplayName } from '../../../../../api/person/identity.js'
 import { pitchMark } from '../../../../../lib/pitch/pitchTypes.js'
 import { DASH, Fact } from '../../../parts.jsx'
 import { LogTable } from '../../parts/LogTable.jsx'
-import { keyOf, loadPitchlog, scopeRows, totalsOf } from './pitchlogView.js'
+import { earlierSeason, games, keyOf, linesOf, loadPitchlog, scopeRows, totalsOf } from './pitchlogView.js'
+import { StartDetail } from './StartDetail.jsx'
 
 // The pitcher Game Log (#1851, board "GameLog"): his games this season, starts and relief outings,
-// newest first, a totals row that follows the filter, and each game's pitch mix. Open surface
+// newest first, a totals row that follows the filter, and each game's pitch mix. A row opens the
+// game detail view (StartDetail.jsx). "Load earlier season" adds one season back per press; the
+// filter and the totals span every loaded season. Open surface
 // (ADR-0034, ADR-0110): the score and decision show, except for a game on today's date
 // (pitchlogView.js holds it).
 const SHOWN = 5
@@ -21,7 +26,6 @@ const SCOPES = [
   ['reg', 'Regular season'],
   ['post', 'Postseason'],
 ]
-const games = (n) => `${n} ${n === 1 ? 'game' : 'games'}`
 const HI = { k: (v) => v >= 7, er: (v) => v >= 4 }
 // The family shape of each pitch (pitchTypes.js), on a 22-unit box.
 const SHAPE = {
@@ -56,7 +60,9 @@ const COLUMNS = [
     cell: (r) => (
       <Cluster as="span" gap="tight" align="center">
         <span className="mono pitchlog__n">{r.n}</span>
-        <b className="pitchlog__date">{r.date}</b>
+        <Door className="pitchlog__open" data-pk={r.gamePk} aria-label={`Open game ${r.n}, ${r.date} ${r.home ? 'vs' : 'at'} ${r.opp}`}>
+          {r.date}
+        </Door>
         <span className="mono pitchlog__at">{r.home ? 'vs' : 'at'}</span>
         <TeamLogo teamId={r.oppId} name={r.opp} size={30} />
         <span className="sr-only">{r.opp}</span>
@@ -124,45 +130,71 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
   const { data: view, loading, error } = useAsync(() => loadPitchlog(bio.id, season, asOf), [bio.id, season, asOf])
   const [scope, setScope] = useState('all')
   const [more, setMore] = useState(false)
+  const [earlier, setEarlier] = useState([]) // [{ season, rows }], newest first
+  const [busy, setBusy] = useState(false)
+  const [open, setOpen] = useState(null) // the gamePk in the detail view
   const empty = Boolean(error) || (!loading && !view) // a null load (no game, no log) ends the loader
+  const blocks = view ? [{ season, rows: view.rows }, ...earlier] : []
+  const all = blocks.flatMap((b) => b.rows)
   useEffect(() => {
     if (empty) onEmpty()
   }, [empty, onEmpty])
   useEffect(() => {
-    onCount(view ? games(view.rows.length) : undefined)
-  }, [view, onCount])
+    onCount(all.length ? games(all.length) : undefined)
+  }, [all.length, onCount])
 
   if (empty) return null
   if (!view) return <div className="pitchlog pitchlog--wait" aria-busy="true"><p className="hint">Loading the game log…</p></div>
 
-  const all = view.rows
   const rows = scopeRows(all, scope)
   const post = scopeRows(all, 'post').length
   const t = totalsOf(rows)
-  const shown = more ? rows : rows.slice(0, SHOWN)
-  // In the All view, a heading over each group, with its count.
-  const groups = scope === 'all' && post > 0
-  const lines = shown.flatMap((r, i) =>
-    groups && (i === 0 || r.post !== shown[i - 1].post)
-      ? [{ key: `div-${r.gamePk}`, divider: r.post ? 'Postseason' : 'Regular season', note: games(r.post ? post : all.length - post) }, { ...r, key: r.gamePk }]
-      : [{ ...r, key: r.gamePk }],
-  )
+  const lines = linesOf(blocks, scope, more ? Infinity : SHOWN)
+  const shown = lines.filter((l) => !l.divider)
   const codes = keyOf(shown)
   const counts = { all: all.length, reg: all.length - post, post }
+  const next = earlierSeason(blocks.map((b) => b.season), bio.debut)
+  const oldest = blocks.at(-1).season
+  const span = oldest === season ? season : `${oldest}–${season}`
+  const loadEarlier = () => {
+    setBusy(true)
+    setMore(true)
+    loadPitchlog(bio.id, next, asOf)
+      .catch(() => null)
+      .then((v) => {
+        setEarlier((e) => [...e, { season: next, rows: v?.rows ?? [] }])
+        setBusy(false)
+      })
+  }
+  const at = rows.findIndex((r) => r.gamePk === open)
+  const close = () => {
+    setOpen(null)
+    document.querySelector(`.pitchlog__open[data-pk="${open}"]`)?.focus()
+  }
 
   return (
-    <Stack className="pitchlog">
+    <Stack className="pitchlog" onClick={(e) => {
+        const pk = e.target.closest?.('.pitchlog__open')?.dataset.pk
+        if (pk) setOpen(Number(pk))
+      }}>
       <Cluster align="center" className="pitchlog__top">
-        {post > 0 && (
-          <Cluster gap="tight" role="group" aria-label="Show games">
-            {SCOPES.map(([id, label]) => (
-              <Button key={id} size="control" pressed={id === scope} onClick={() => setScope(id)}>
-                {label} <span className="mono">{counts[id]}</span>
-              </Button>
-            ))}
-          </Cluster>
-        )}
-        <span className="mono pitchlog__scope">{season} · newest first</span>
+        <Cluster gap="tight" align="center">
+          {next != null && (
+            <Button size="control" onClick={loadEarlier} busy={busy}>
+              {busy ? `Loading ${next}…` : 'Load earlier season'}
+            </Button>
+          )}
+          {post > 0 && (
+            <Cluster gap="tight" role="group" aria-label="Show games">
+              {SCOPES.map(([id, label]) => (
+                <Button key={id} size="control" pressed={id === scope} onClick={() => setScope(id)}>
+                  {label} <span className="mono">{counts[id]}</span>
+                </Button>
+              ))}
+            </Cluster>
+          )}
+        </Cluster>
+        <span className="mono pitchlog__scope">{span} · newest first</span>
       </Cluster>
       <FactGrid look="strip" as="div" className="pitchlog__totals">
         <Fact label="Games" value={t.games} mono />
@@ -172,7 +204,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
         <Fact label="K" value={t.k} mono />
         <Fact label="BB" value={t.bb} mono />
       </FactGrid>
-      <LogTable columns={COLUMNS} rows={lines} caption={`Game log, ${season}`} />
+      <LogTable columns={COLUMNS} rows={lines} caption={`Game log, ${span}`} />
       {rows.length > SHOWN && (
         <Button size="control" onClick={() => setMore(!more)} aria-expanded={more}>
           {more ? 'Show fewer' : `Show all ${games(rows.length)}`}
@@ -192,7 +224,26 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
         Bar: the share of each pitch type in the tracked pitches of the game, in the order of the key. Green underlined K: 7 or more. Clay
         underlined ER: 4 or more. Dec is his decision: W win, L loss, SV save, ND no decision in a start.
         {all.some((r) => !r.result) && ' A dash in Result: no final score on file. A game played today shows none until the next day, and so does a suspended game that resumes today (its row keeps the earlier date).'}
+        {' '}Tap a game to open it.
       </p>
+      {at >= 0 && (
+        <StartDetail
+          key={open}
+          row={rows[at]}
+          pitcherId={bio.id}
+          last={splitDisplayName(bio.fullName).last}
+          onEarlier={
+            at < rows.length - 1
+              ? () => {
+                  setMore(true) // the row it opens may sit past the collapsed list
+                  setOpen(rows[at + 1].gamePk)
+                }
+              : null
+          }
+          onLater={at > 0 ? () => setOpen(rows[at - 1].gamePk) : null}
+          onClose={close}
+        />
+      )}
     </Stack>
   )
 }
