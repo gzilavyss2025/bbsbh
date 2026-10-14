@@ -57,7 +57,6 @@ const KEPT = [
   'roster__empty',
   'starter__empty',
   'boxlines__empty',
-  'vsteam__none',
   'prospects__empty',
   'payboard__empty',
   'umpmodal__empty',

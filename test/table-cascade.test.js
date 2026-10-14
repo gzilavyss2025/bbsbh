@@ -498,13 +498,13 @@ test('T3: the seal stays where it was: no gate moved and no api/ import added', 
 
 // ---- slice T4: the small ledgers ----
 //
-// Six tables: the career register and the two splits (one tag, Ledger.jsx), the
-// recent-form table, the team page's prospects table, and the three small tables
-// that had no side space (awards, moved up, youngest regulars). `tag` finds the
+// Five tables: the career register (Ledger.jsx; the two splits and the
+// recent-form table left with the old player tabs, #1898), the team page's
+// prospects table, and the three small tables that had no side space (awards,
+// moved up, youngest regulars). `tag` finds the
 // <Table> by its className; `frame` and `label` are the expected props.
 const T4 = [
   { css: '26-player-page.css', ns: 'ledger', jsx: 'components/player/Ledger.jsx', tag: 'className=\\{`ledger ', frame: 'sheet', label: true, gradient: true },
-  { css: '26b-recent-form.css', ns: 'formtrend__table', jsx: 'components/playerstats/RecentFormCard.jsx', tag: 'className="ledger formtrend__table"', frame: 'sheet', label: true },
   { css: '31-wild-card.css', ns: 'prospecttable', jsx: 'screens/team/modules/minors/ProspectsCard.jsx', tag: 'className="ledger prospecttable"', frame: 'sheet', label: true },
   { css: '67-awards-ledger.css', ns: 'awardtbl', jsx: 'components/player/AwardsLedger.jsx', tag: 'className="awardtbl"', frame: 'bare', label: false },
   { css: '78-offseason.css', ns: 'movedup__table', jsx: 'components/offseason/MovedUp.jsx', tag: 'className="movedup__table"', frame: 'bare', label: false, words: true },
@@ -533,14 +533,9 @@ test('T4: frame, density, sticky and label are the ones the census set', () => {
   }
 })
 
-test('T4: the four Ledger callers each name their table, and the helper hands the name to Table', () => {
+test('T4: the Ledger caller names its table, and the helper hands the name to Table', () => {
   assert.match(src('components/player/Ledger.jsx'), /<Table\b[^>]*label=\{label\}/)
-  const names = [
-    ...src('components/player/CareerRegister.jsx').matchAll(/<Ledger\b[^>]*?label="([^"]+)"/g),
-    ...src('components/playerstats/SplitsSection.jsx').matchAll(/<Ledger\b[^>]*?label="([^"]+)"/g),
-  ].map((m) => m[1])
-  assert.equal(names.length, 4, 'four callers, four labels')
-  assert.equal(new Set(names).size, 4, 'two tables on one page get two different labels')
+  assert.match(src('screens/player/next/modules/season/index.jsx'), /<Ledger\b[^>]*?label=\{label\}/)
 })
 
 test('T4: a small ledger draws no frame, no cell padding, no head dress and no row rule of its own', () => {
@@ -552,8 +547,7 @@ test('T4: a small ledger draws no frame, no cell padding, no head dress and no r
       const names = props(body)
       for (const part of sel.split(',').map((x) => x.trim())) {
         const plain = part.match(new RegExp(String.raw`^\.${ns} (thead th|tbody td|:where\(th, td\)|th|td)(:[\w-]+(\([^)]*\))?)?$`))
-        // The `.ledger` base also names the formtrend and prospect tables.
-        if (part === `.${ns}` && ns !== 'formtrend__table') {
+        if (part === `.${ns}`) {
           for (const p of FRAME) assert.ok(!names.includes(p), `${css}: .${ns} still sets ${p}`)
         } else if (plain) {
           assert.ok(!names.includes('padding'), `${css}: ${part} still sets padding`)
@@ -583,9 +577,9 @@ test('T4: .ledger left the frame block it shared with .standings, and T8 deleted
   }
 })
 
-test('T4: the ledger keeps its footer, all-star, pencil, subtotal and nested rows, and its ONE gradient row rule', () => {
+test('T4: the ledger keeps its footer, all-star, pencil and subtotal rows, and its ONE gradient row rule', () => {
   const css = read('26-player-page.css')
-  for (const sel of ['.ledger tfoot td', '.ledger tr.is-allstar td', '.ledger tr.reg-milb td', '.ledger tr.reg-subtotal td', '.ledger tr.ledger__nested .yr', '.ledger .ledger__label']) {
+  for (const sel of ['.ledger tfoot td', '.ledger tr.is-allstar td', '.ledger tr.reg-milb td', '.ledger tr.reg-subtotal td', '.ledger .ledger__label']) {
     assert.ok(rules(css).some(([s]) => s.split(',').map((x) => x.trim()).includes(sel)), `${sel} stays in the namespace`)
   }
   assert.match(decl(ruleBody(css, '.ledger tbody tr'), 'background-image') ?? '', /^linear-gradient\(/, 'a row with a logo cell has a fractional height: one line per row')

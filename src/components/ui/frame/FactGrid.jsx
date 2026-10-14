@@ -8,8 +8,8 @@ import { Card } from './Card.jsx'
 //
 //   as         the grid element: 'dl' (the default) for facts drawn as
 //              <dt>/<dd> pairs, 'div' for the player page's <div> facts.
-//   className  the caller's own namespace ("cmdmap__facts"), which sizes the
-//              grid's columns from outside (.spray__facts .factgrid__grid).
+//   className  the caller's own namespace, which sizes the grid's columns
+//              from outside (.refextras__grid .factgrid__grid).
 //   look       'card' (the default): the grid on its own Card.
 //              'strip': the fact strip under the player page's hero (#1882).
 //              No Card: it sits flush inside a stamped card, under an ink

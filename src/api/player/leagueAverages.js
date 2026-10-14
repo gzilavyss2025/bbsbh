@@ -1,6 +1,6 @@
 import { staticJson } from '../staticJson.js'
 import { getJson } from '../statsapi.js'
-import { leagueAveragesOf, rateText } from '../../lib/math/leagueAverages.js'
+import { leagueAveragesOf } from '../../lib/math/leagueAverages.js'
 
 // League batting average and ERA for one MLB season. Season rates, not scores:
 // spoiler-free, open data, no SealBox. Seasons up to the last complete one come
@@ -43,16 +43,4 @@ function liveSeason(year) {
     liveByYear.set(year, request)
   }
   return liveByYear.get(year)
-}
-
-// The "vs lg" cell: the season's own rate (the register's printed string, ".282"
-// or "3.48") minus the league's, signed. AVG prints as .034, ERA as 0.42.
-// Either side missing is an em dash.
-export function vsLeague(rate, league, group) {
-  const own = parseFloat(rate)
-  if (!Number.isFinite(own) || league == null) return '—'
-  const pitching = group === 'pitching'
-  const gap = Number((own - league).toFixed(pitching ? 2 : 3))
-  const text = rateText(Math.abs(gap), group)
-  return `${gap > 0 ? '+' : gap < 0 ? '-' : ''}${text}`
 }

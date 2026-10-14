@@ -3,8 +3,7 @@
 This directory reached **126 files** before anyone noticed, against a root
 `CLAUDE.md` rule that says to subdivide at roughly ten. It is now fully bucketed
 by feature/domain (not by UI type); `check-dir-size.mjs` (ADR-0038) enforces that
-no bucket grows past 12 files, except the two budgeted ones: `player/` (17) and
-`charts/` (13).
+no bucket grows past 12 files.
 
 ## `SealBox.jsx` stays at the top level, on purpose
 
@@ -30,7 +29,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `ballpark/` | `BallparkDiagram`, `BallparkModal` | Park diagram + its modal |
 | `boxlines/` | `BoxLinesDoor`, `BoxLinesSheet`, `BoxLineRow`, `BoxLinesList` | The reusable drilldown behind a summary stat line (ADR-0069). **"Box Lines" is internal and never renders.** Rules: `boxlines/CLAUDE.md` |
 | `bracket/` | `PostseasonBracket`, `FullBracket`, `BracketRail`, `BracketDock`, `BracketNow`, `SurvivorsBoard` | October's bracket on the home slate. `SeriesPrimer` (in `postseason/`) draws `SurvivorsBoard` and `BracketRail` when there is no primer. `BracketNow` is the primer's small bracket. Nothing here fetches a score outside `src/api/postseason/bracket.js`'s cutoff-gated reads (ADR-0087) |
-| `charts/` | `WinProbChart`, `PitchMix`, `HitChart`, `BallFlight`, `SprayMap` | Draws a quantity. Every value arrives **already reveal-gated by its caller** — nothing here decides what may be shown |
+| `charts/` | `WinProbChart`, `HitChart`, `BallFlight`, `TargetCommand` | Draws a quantity. Every value arrives **already reveal-gated by its caller** — nothing here decides what may be shown |
 | `chrome/` | `SiteHeader`, `SiteFooter`, `SiteMenu`, `SiteSearch`, `BackBtn` | Global site frame — header/footer/menu/search, not any one screen. Rules: `chrome/CLAUDE.md` |
 | `game/` | `GameCard`, `GameFinder`, `PastGameFlipCard`, `ContinueScoring`, `BoxScoreSkeleton` | The slate/game-selection layer — a game before you're inside its innings |
 | `gamehud/` | `RollingLine`, `Scorebug`, `ConsoleBand`, `HalfTally`, `BetweenInnings` | Persistent live-game heads-up widgets shown while scoring |
@@ -40,9 +39,9 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `logbook/` | `GameStamp`, `StampGameButton`, `StampInButton`, `StampSheet` | The Logbook stamp (ADR-0035) and its shelves. `check-stamp-surfaces.mjs` names these by path. Rules: `logbook/CLAUDE.md` |
 | `logo/` | `TeamLogo`, `LogoModal`, `TeamTreatmentMark`, `JerseyCombos`, `UniformFigure` | Club-mark rendering and its sketch/print modal. `UniformFigure` is Gameday's batter figure for tonight's uniform: a shirt-icon button and the sheet that shows the figure (#1852) |
 | `offseason/` | `LevelOffseason`, `SeasonRecord`, `MovedUp`, `WinterRail` | The empty-slate page state (ADR-0074, ADR-0079, ADR-0080, ADR-0081). Rules: `offseason/CLAUDE.md` |
-| `ovr/` | `OvrTile`, `OvrMenu`, `OvrBars`, `OvrPath`, `useOvr` | The player page's OVR card (#1703): the tile on the headshot's corner and the menu sheet it opens. Open surface, no SealBox (ADR-0034). Logic is pure, in `lib/ovr/`; the card is draw-only and reads the ratings through `api/ovr/` |
+| `ovr/` | `OvrBars`, `useOvr` | The player page's OVR bars (#1703), drawn by the header extras card. Open surface, no SealBox (ADR-0034). Logic is pure, in `lib/ovr/`; the bars are draw-only and read the ratings through `api/ovr/` |
 | `player/` | `Headshot`, `PlayerLink`, `PlayerHoverCard`, `Ledger`, `CareerTimeline` | Player-identity primitives and career-level cards |
-| `playerstats/` | `RecentFormCard`, `SplitsVsTeam`, `GameLinesCard`, `SprayMapSection` | Player statistical cards (as distinct from `charts/`'s plotted quantities). `SprayMapSection` is the odd one: a self-fetching MOUNT for a `charts/` card, so the player page carries one line and the whole block — title, fetch and every reason to render nothing — moves together. **`GameLinesCard` is a REGISTRY, not a card to copy.** Rules: `src/api/boxlines/CLAUDE.md` |
+| `playerstats/` | `FoulCard`, `MilestoneWatchCard`, `RunValueCard`, `CommandReceivedCard` | Player statistical cards (as distinct from `charts/`'s plotted quantities), drawn by the player page's TBD slots |
 | `playbyplay/` | `PlayByPlay`, `BatterNotice`, `PitcherNotice`, `FielderNotice`, `pitcherCard/` | The at-bat feed's notification-card family (ADR-0017). `PitchScene` never uses React state per frame. Rules: `playbyplay/CLAUDE.md` |
 | `postseason/` | `SeriesParts`, `SeriesMark`, `SeriesFlow`, `SeriesTotals`, `SeriesRibbon`, `SeriesLeadersLedger`, `SeriesPrimer`, `edges/` | The parts both series pages draw the same way: the finished page and the live page. Draw-only; each page keeps its own spoiler footing (ADR-0087's 2026-10-01 addendum). `SeriesPrimer` is the home page series primer's two slots, fed by `usePrimer`: `SeriesRibbon` and `edges/` (Today's edges) are its main column, `BracketNow`, `SeriesTotals` and `SeriesLeadersLedger` its right column (2026-10-08 addendum) |
 | `preview/` | `SavePosterButton` | Saves the finished poster out of the canvas (`docs/preview-poster.md`) |
@@ -61,10 +60,10 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `winter/` | `LeaguePicker` | The WINTER tab's league picker: four leagues share one rail tab (ADR-0078) |
 | `workload/` | `DayStrip`, `ThresholdBullets`, `PenDots`, `StaffGrid`, `ProjectedStarters` | The four marks that draw `api/workload.js` without a sentence. Their ink is global (`styles/76-workload-marks.css`), not component-imported |
 
-Three untouched subdirectories predate this bucketing and follow their own
+Two untouched subdirectories predate this bucketing and follow their own
 internal convention rather than the domain-bucket one above: `page-turn/` (the
 forward inning-transition animation), `passport/` (the Logbook's passport-book
-UI, ADR-0036/0041), `playercard/` (the player page's similar-players cards).
+UI, ADR-0036/0041).
 
 ## Two constraints that outrank tidiness
 

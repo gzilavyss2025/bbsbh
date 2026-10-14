@@ -43,8 +43,6 @@ const KEPT = [
   ['07-team-logo-and-buttons.css', '.btn--next', 'margin-top', '20px', 'the advance stands off the page above it'],
   ['05-masthead-nav.css', '.stepnav .stepnav__btn', 'flex', '1 1 0', 'the stops share the row equally'],
   ['05-masthead-nav.css', '.stepnav .stepnav__btn', 'padding-inline', 'var(--space-1)', 'five stops fit a phone row only at the row’s own padding'],
-  ['27-player-position-innings.css', '.posinn__scopebtn', 'flex', '1 1 0', 'the scopes share the row equally'],
-  ['27-player-position-innings.css', '.posinn__scopebtn', 'padding-inline', 'var(--space-1)', 'the row, not the label, sizes the cell'],
   ['38-umpire-pages.css', '.umpage__filterbtn', 'flex', '1', 'the two filters share the row'],
   ['scorecard/page.css', '.sc-zoom__btn', 'width', 'var(--control-min)', 'a one-glyph step is square'],
   ['scorecard/page.css', '.sc-zoom__btn', 'padding', '0', 'a square takes its width from the height, not padding'],

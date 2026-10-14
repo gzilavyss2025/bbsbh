@@ -129,3 +129,13 @@ with no end date. Today's content in a stamped card is enough to ship.
   minor leaguer, a retired player and a closer.
 - When the team page (#1107) is built, it uses the same parts. A second stamped card or
   a second jump bar in `src/screens/team/` is a review failure.
+
+## Amendment (2026-10-14): the swap
+
+Decision 2 is done (#1898). `/player/{id}` and its name-and-id form serve the new page.
+The route parser keeps the old tab addresses: `/stats`, `/analytics` (with or without a
+season segment) and `/history` open the page with a `tab` value, and the page scrolls to
+that tab's section once it has loaded (Season; Plate approach, or Pitches for a pitcher;
+History). An old `?look=new` link opens the page too. The old tab screens, the tab bar,
+the shell, the old Overview and the cards and CSS that only they drew are deleted.
+`docs/player-hub.md` describes the page as it is now.

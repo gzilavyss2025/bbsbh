@@ -16,22 +16,16 @@ const ALLOWED = {
   // extra-innings runner, a postponed game, a bye seed, a bracket slot not yet
   // decided, a figure on too thin a sample, a projection.
   provisional: [
-    ['05-masthead-nav.css', '.levelprog__step.is-unreached::before'],
-    ['05-masthead-nav.css', '.levelprog__step.is-target.is-unreached'],
     ['06-loader-and-cards.css', '.postponed'],
     ['27-player-position-innings.css', '.asof-banner'], // as-of: the figures are pencilled to a date (Gary)
     ['13-play-by-play.css', '.pbp__card--placed'],
     ['13-play-by-play.css', '.pbp__placed'],
-    ['26b-player-contract.css', '.contractcard__openzone'],
-    ['26d-command-map.css', '.cmdmap__chip--thin'],
-    ['26e-contract-history.css', '.cthist__fuzzy'],
     ['player-next/both/contract.css', '.cnext__st--fa'], // free agency: not reached yet, the club may still sign him
     ['player-next/both/contract.css', '.cnext__bar--left'], // 2020: the contracted salary, not what the 60-game season paid
     ['player-next/both/contract.css', '.cnext__bar--gap'], // a season with a row and no figure
     ['player-next/gamelog/milestones.css', '.milestones__proj'], // a projection: pencilled in, or paused with no year yet
     ['player-next/history/awards.css', '.awmod__org.awmod__none'], // an award row whose club or org the feed does not name
     ['34-postseason.css', '.seed--bye'],
-    ['73-spray-map.css', '.spray__chip--thin'],
     ['77-express-lane.css', '.xl__chip--placed'],
     ['80-postseason-bracket.css', '.pbkt-mark--empty'],
     ['80-postseason-bracket.css', '.pbkt-blank'],
@@ -60,7 +54,6 @@ const ALLOWED = {
   // Chart reference lines: a mean, a median, a key bar. Not a UI state.
   chartLine: [
     ['26a-percentile-strip.css', '.pctstrip__track::before'],
-    ['26f-glove-target.css', '.glovetarget__keyitem--median::before'],
     ['report/charts.css', '.colchart__rule--mean'],
     ['postseason/series-parts.css', '.psseries__keybar'],
   ],

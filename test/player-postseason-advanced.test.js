@@ -12,7 +12,6 @@ import test, { mock } from 'node:test'
 import { advancedHittingView, advancedPitchingView } from '../src/api/person.js'
 import { fetchHittingAdvanced, fetchPitchingAdvanced } from '../src/api/person-fetch.js'
 import { loadHoverCardStats } from '../src/api/playerHoverCard.js'
-import { loadPlayerAnalytics } from '../src/api/player/analytics.js'
 
 const POST_HIT = {
   season: { gamesPlayed: 6, plateAppearances: 26, avg: '.143' },
@@ -155,7 +154,6 @@ async function urlsFor(postSeasonStartDate, run) {
 
 for (const [name, run] of [
   ['hover card', () => loadHoverCardStats(GATE_PERSON.id)],
-  ['analytics loader', () => loadPlayerAnalytics(GATE_PERSON.id)],
 ]) {
   test(`${name}: no gameType=P request before the postseason starts`, async () => {
     assert.equal((await urlsFor('2999-10-01', run)).length, 0)

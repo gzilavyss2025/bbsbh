@@ -44,7 +44,7 @@ const KNOWN_UNDEFINED = new Set([
   '--start', // 26a-percentile-strip.css — the band's geometry, per player
   '--width',
   '--pct',
-  '--level-count', // 05-masthead-nav.css — how many levels the bar draws
+  '--tier', // ovr/card.css — the row's tier colour, set per row by OvrBars.jsx
   '--rankstrip-track-width', // 28-team-hub.css
 ])
 import test from 'node:test'
