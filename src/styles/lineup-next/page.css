@@ -433,3 +433,12 @@
     opacity: 0.3;
   }
 }
+
+/* The crew's names print in the strip's mono, like every other cell (UmpireLink draws the name). */
+.lnext__umps .umps__name,
+.lnext__umps .umps__name:visited {
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-regular);
+  text-transform: uppercase;
+}
