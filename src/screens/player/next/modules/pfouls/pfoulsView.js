@@ -57,15 +57,17 @@ export function pfoulsView({ id, line, league, pool, post = false }) {
     const n = 1 + ranked.filter((r) => r[key] > me[key]).length
     return `${ordinal(n)} most of ${ranked.length} pitchers with ${MIN_PITCHER_PITCHES}+ pitches`
   }
-  const row = (r) => ({ ...baseline(r), lgName: r.lgName ?? 'MLB middle', lgSub: r.lg == null ? 'No league count' : 'all pitchers', rank: rankOf(r.rankKey), why: r.why })
+  const middleOf = `median of pitchers with ${MIN_PITCHER_PITCHES}+ pitches`
+  const row = (r) => ({ ...baseline(r), lgName: r.lgName ?? 'MLB middle', lgSub: r.lg == null ? 'No league count' : r.lgSub ?? middleOf, rank: rankOf(r.rankKey), why: r.why })
   const hisRate = line.pitches ? line.fouls / line.pitches : null
   const hisWhiff = line.whiffs ? line.fouls / line.whiffs : null
   const lgRate = league?.foulRate ?? null
-  const lgWhiff = pool ? median(pool.map((r) => r.foulsToWhiffs)) : null
-  const lgFouls = pool ? Math.round(median(pool.map((r) => r.fouls))) : null
+  // An empty pool (early in a season) has no middle: a dash, never 0.
+  const lgWhiff = pool?.length ? median(pool.map((r) => r.foulsToWhiffs)) : null
+  const lgFouls = pool?.length ? Math.round(median(pool.map((r) => r.fouls))) : null
   const baselines = [
     row({
-      key: 'rate', label: 'Foul rate', title: 'Fouls per pitch', scale: 0.35, rankKey: 'foulPct', lgName: 'League',
+      key: 'rate', label: 'Foul rate', title: 'Fouls per pitch', scale: 0.35, rankKey: 'foulPct', lgName: 'League', lgSub: 'all pitchers',
       his: hisRate, lg: lgRate, hisText: pct(hisRate), lgText: pct(lgRate),
       sub: `${line.fouls.toLocaleString('en-US')} of ${line.pitches.toLocaleString('en-US')} pitches`,
       gap: diffPts(hisRate, lgRate),

@@ -146,3 +146,15 @@ test('no line, or a line with no cells, is no view', () => {
   assert.equal(view({ line: null }), null)
   assert.equal(view({ line: line({ ...gasser, byCount: undefined }) }), null)
 })
+
+test('an empty 200+ pool gives no league middle (a dash, never 0), and the medians say whose middle they are', () => {
+  const v = view({ pool: [] })
+  const b = Object.fromEntries(v.baseline.map((r) => [r.key, r]))
+  assert.equal(b.fouls.lg, '—')
+  assert.equal(b.fouls.tick, null)
+  assert.equal(b.whiff.lg, '—')
+  const full = Object.fromEntries(view().baseline.map((r) => [r.key, r]))
+  assert.equal(full.rate.lgSub, 'all pitchers')
+  assert.equal(full.whiff.lgSub, 'median of pitchers with 200+ pitches')
+  assert.equal(full.fouls.lgSub, 'median of pitchers with 200+ pitches')
+})

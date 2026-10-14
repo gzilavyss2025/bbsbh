@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import '../../../../../styles/player-next/batter/fouls.css'
 import '../../../../../styles/player-next/pitcher/pfouls.css'
-import { fetchFouls, fetchFoulsFor, foulLeaders, foulsInScope, leagueFoulRates, pitcherFoulLine } from '../../../../../api/fouls.js'
+import { fetchFouls, fetchFoulsFor, foulLeaders, compareFoulsInScope, leagueFoulRates, pitcherFoulLine } from '../../../../../api/fouls.js'
 import { CountExplorer, Rail, Stat } from '../../parts/CountExplorer.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
@@ -48,7 +48,8 @@ export default function PfoulsModule({ bio, asOf, season, onEmpty, onCount }) {
     const lines = { R: pitcherFoulLine(data?.[0], bio.id), P: pitcherFoulLine(data?.[0]?.post, bio.id) }
     // A pick from another season or player falls back when this one has no line there.
     const scope = lines[picked] ? picked : lines.R ? 'R' : 'P'
-    const whole = data?.[1] ? foulsInScope(data[1], scope) : null
+    // compareFoulsInScope: no postseason league when the file has none, never the regular season under that label.
+    const whole = data?.[1] ? compareFoulsInScope(data[1], scope) : null
     const view = lines[scope]
       ? pfoulsView({
           id: bio.id,

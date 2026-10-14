@@ -47,7 +47,9 @@ async function pump(w, set) {
 // Photos (#2021): six camera stills of him from his latest finished games, three across; See all grows it in place.
 // Open surface (ADR-0034), but a game still being played never contributes a photo (photosView.js).
 // The page remounts per player, so one walk lives for the mount.
-export default function PhotosModule({ bio, role, asOf, season, onEmpty }) {
+export default function PhotosModule({ bio, asOf, season, onEmpty }) {
+  // The `once` slot hands a two-way player 'hitting'; his games are read on his primary group.
+  const role = bio.isPitcher ? 'pitching' : 'hitting'
   const show = !asOf && !!bio.debut && inMajors(bio)
   const [st, setSt] = useState({ photos: [], done: !show })
   const [shown, setShown] = useState(FIRST)
