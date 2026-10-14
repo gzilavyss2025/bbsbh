@@ -248,12 +248,15 @@ test('header extras hide with nothing to show, and show for any one of the five'
   assert.equal(headerExtras({ bio, orgProspectRank: 9 }, null).orgRank, 9)
   assert.equal(headerExtras({ bio: { ...bio, education: 'Rice' } }, null).education, 'Rice')
   const x = headerExtras({ bio }, { hitting: hitRating })
-  assert.equal(x.bars[0].group, 'hitting')
-  assert.ok(x.bars[0].rows.length > 0)
+  assert.equal(x.ratings[0].group, 'hitting')
+  assert.ok(x.ratings[0].rows.length > 0)
 })
 
-test('a minor leaguer (an OVR with no bars) adds no OVR bars', () => {
-  assert.equal(headerExtras({ bio }, { hitting: { ovr: 55, level: 12 } }), null)
+test('a minor leaguer (an OVR with no bars) gets the stamp and a level meter, no bars', () => {
+  const [g] = headerExtras({ bio }, { hitting: { ovr: 55, level: 12 } }).ratings
+  assert.equal(g.ovr, 55)
+  assert.deepEqual(g.rows, [])
+  assert.equal(g.minor.levelLabel, 'AA')
 })
 
 test('overview extras: a block counts for ranks, a postseason row or other levels, not for empty lists', () => {

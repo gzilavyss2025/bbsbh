@@ -17,17 +17,22 @@ export function rankFor(marks, tileKey) {
   return m && { rank: m.rank, of: m.of }
 }
 
-// Header extras (#1884): the nickname, the two prospect ranks, the school and the OVR bars. Null
-// when he has none of them, so the card hides. `ratings` is useOvr's answer; a bar is a row of
-// ovrView, so a minor leaguer (no bars) and a player with no rating add none.
+// Header extras (#2009), the hero's parts: the nickname, the two prospect ranks, the school and
+// one ovrView per rated group, hitting first (the stamp shows the first; the old OvrTile rule).
+// Null when he has none of them. `ratings` is useOvr's answer. A minor leaguer's view has no rows
+// and a `minor` (POT, level, meter marks); a player with no rating has an empty `ratings`.
 export function headerExtras(core, ratings) {
   const { bio } = core
-  const bars = ['hitting', 'pitching'].flatMap((group) => {
-    const rows = ratings?.[group] ? ovrView({ rating: ratings[group], group }).rows : []
-    return rows.length ? [{ group, rows }] : []
-  })
-  const x = { nickname: bio.nickname, rank: core.prospectRank, orgRank: core.orgProspectRank, education: bio.education, bars }
-  return x.nickname || x.rank || x.orgRank || x.education || bars.length ? x : null
+  const views = ['hitting', 'pitching'].filter((g) => ratings?.[g]).map((group) => ({ group, ...ovrView({ rating: ratings[group], group }) }))
+  const x = { nickname: bio.nickname, rank: core.prospectRank, orgRank: core.orgProspectRank, education: bio.education, ratings: views }
+  return x.nickname || x.rank || x.orgRank || x.education || views.length ? x : null
+}
+
+// The sentence a tapped bar reads (#2009): "Speed 74 is All-Star level on its own." Looked up by
+// key; null for no pick or a key the rows lack.
+export function tierLine(rows, key) {
+  const r = key && rows.find((x) => x.key === key)
+  return r ? `${r.label} ${r.value} is ${r.tier.name} level on its own.` : null
 }
 
 // Overview extras (#1884): a stat block's league-rank chips, postseason row and other-level rows.

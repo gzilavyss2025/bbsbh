@@ -56,6 +56,7 @@ const ALLOWED = {
     ['26a-percentile-strip.css', '.pctstrip__track::before'],
     ['report/charts.css', '.colchart__rule--mean'],
     ['postseason/series-parts.css', '.psseries__keybar'],
+    ['player-next/top/header-extras.css', '.pnext-ovr__cap'], // a minor leaguer's level cap on the OVR meter: the most his level can give
   ],
   // Admin and lab screens: dev-only, not the reader's app.
   adminLab: [
