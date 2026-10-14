@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { CHIPS, chartOf, cursorText, pformView, roleOf, stretchRows } from '../src/screens/player/next/modules/pform/pformView.js'
+import { CHIPS, chartOf, cursorText, pformView, roleOf, shownGames, stretchRows, withSpeed } from '../src/screens/player/next/modules/pform/pformView.js'
 
 // The pitcher Form trend's pure view (#1930): pitcherRollingSeries' points plus the chips by role,
 // the cursor line and the "How the stretches ended" rows. Samples are built, not live.
@@ -146,4 +146,34 @@ test('a stretch that faced no batters prints dashes, not NaN', () => {
   const [cursor] = stretchRows(pformView(pen, 'RP', 3), 0, 'era')
   assert.deepEqual([cursor.k, cursor.bb, cursor.good, cursor.bad], ['—', '—', '—', '—'])
   assert.deepEqual(cursor.segs.map((s) => [s.n, s.label]), [[0, ''], [0, ''], [0, ''], [0, ''], [0, '']])
+})
+
+test('velocity: a rolling mean of the primary fastball over the chip window; a game with no speed is a gap, not a zero', () => {
+  const v = pformView(LOG, 'SP', 2) // starts 1-5; windows 1-2, 2-3, 3-4, 4-5
+  assert.deepEqual(shownGames(v).map((g) => g.game.gamePk), [1, 2, 3, 4, 5]) // the games the series counts, none other
+  const s = withSpeed(v, { 1: 93, 2: 94, 3: null, 4: 95 }) // start 3 has no speed; start 5 is not on file
+  assert.deepEqual(s.points.map((p) => p.mph), [93.5, 94, 95, 95]) // the mean skips the missing start; window 4-5 has one speed
+  const gap = withSpeed(v, { 1: 93, 2: 94 })
+  assert.deepEqual(gap.points.map((p) => p.mph), [93.5, 94, null, null]) // no speed in the window: null, never 0
+  // The chart drops the gaps and keeps each point's index in the card.
+  const c = chartOf(gap, 'mph')
+  assert.deepEqual(c.points.map((p) => p.v), [93.5, 94])
+  assert.deepEqual(c.idx, [0, 1])
+  assert.equal(c.better, 'up')
+  assert.equal(c.season, null)
+  assert.deepEqual([c.best, c.worst], [1, 0])
+  assert.equal(c.format(93.46), '93.5 mph')
+  // A gap at the cursor prints a bare dash, no unit.
+  assert.equal(cursorText(gap, 3, 'mph').big, '—')
+  assert.equal(cursorText(gap, 3, 'mph').line2, '')
+  assert.equal(cursorText(s, 0, 'mph').big, '93.5 mph')
+  // The stretch rows follow the card's index, not the chart's.
+  assert.deepEqual(stretchRows(withSpeed(v, { 1: 93, 2: 94, 3: 91, 4: 90 }), 0, 'mph').map((r) => r.at), [null, null, 0, 3])
+})
+
+test('velocity: no speed on file gives no series, and the other metrics stay as they were', () => {
+  const v = pformView(LOG, 'SP', 2)
+  assert.equal(withSpeed(v, {}), null)
+  assert.equal(withSpeed(v, { 1: null, 2: null }), null)
+  assert.deepEqual(chartOf(v, 'era').idx, [0, 1, 2, 3])
 })

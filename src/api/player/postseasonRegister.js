@@ -21,6 +21,9 @@
 import { fetchPersonStats, fetchTeamAbbrevs } from '../person-fetch.js'
 import { aggregateSplits, hitterTiles, pitcherTiles } from '../person/stats.js'
 import { DASH } from '../person/shared.js'
+import { baseballToday } from '../../lib/time/standingsDates.js'
+import { LEAGUE_BY_ID } from '../../lib/postseason/seriesMarks.js'
+import { POSTSEASON, seriesAbbr } from '../boxlines/rows.js'
 import { registerColumns, yearByYearCells } from '../person/careerRegister.js'
 import { postseasonStarted } from '../postseason/started.js'
 
@@ -99,4 +102,33 @@ export function postseasonTilesView(splits, group, role = null, season = null) {
       ? [...pitcherTiles(stat, role).slice(0, 4), { k: 'WHIP', v: stat.whip ?? DASH }]
       : [...hitterTiles(stat).slice(0, 4), { k: 'OPS', v: stat.ops ?? DASH }]
   return { title: `${season} Postseason`, games: Number(stat.gamesPlayed), tiles }
+}
+
+// The Overview extras card's "By round" switch (#2005): this October's game log, one line per
+// round. The log is asked for by round, never gameType=P, because the pitching log then marks
+// every row 'P' and the round is lost (boxlines/rows.js, POSTSEASON). A stat line is not a
+// score (ADR-0034), but a game still in progress today is held, as in the Game log: only games
+// before the EARLIER of the page's cutoff and the baseball today (US Pacific) count.
+export async function fetchPostseasonByRound(personId, group, { season, cutoff = null, hasDebuted = true, today = baseballToday() } = {}) {
+  // A dated page from an earlier year has no part of this October to show.
+  if (cutoff && Number(cutoff.slice(0, 4)) < Number(season)) return null
+  if (!personId || !group || !season || !hasDebuted || !(await postseasonStarted(season))) return null
+  const splits = await fetchPersonStats(personId, { type: 'gameLog', group, season, gameType: POSTSEASON.join(',') })
+  return postseasonByRoundView(splits, group, cutoff && cutoff < today ? cutoff : today)
+}
+
+// [{ gameType, series, stat }] in bracket order (WC, DS, LCS, WS), each `stat` the round's games
+// summed by aggregateSplits (`dedupe: false`: two games with the same line are two games). `series`
+// is the round's pill ("NLDS"); the World Series is both leagues' and stays "WS". Null with no
+// postseason game before `until` (YYYY-MM-DD; omitted = no cut).
+export function postseasonByRoundView(splits, group, until = null) {
+  const rows = POSTSEASON.map((gameType) => {
+    const games = (splits ?? []).filter((s) => s.stat && s.gameType === gameType && s.date && (!until || s.date < until))
+    return games.length && {
+      gameType,
+      series: seriesAbbr(gameType, LEAGUE_BY_ID[games[0].league?.id]),
+      stat: aggregateSplits(games, group, { dedupe: false }),
+    }
+  }).filter(Boolean)
+  return rows.length ? rows : null
 }

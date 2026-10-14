@@ -43,9 +43,10 @@ import { getJson } from './lib/statsapi.mjs'
 import { bucketsOf, writeJsonIfChanged, writeSeasons, writeShards } from './lib/io.js'
 import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 import { CENTURY_CLUB_MIN, CENTURY_MPH } from '../src/api/pitchArsenal.js'
+import { commandLeague } from '../src/api/commandMap.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
-import { CELLS, COLS, aggregateGameCommand, commandStmts, markCommandIngested, parseCells } from './lib/command-grid.mjs'
+import { CELLS, COLS, aggregateGameCommand, commandStmts, exportCommandMap, markCommandIngested, parseCells } from './lib/command-grid.mjs'
 import { aggregateGameHitters, clearHitterSeason, foldHitters, hitterStmts, writeHitterGrid } from './lib/pitch/hitter-grid.mjs'
 import { readXwobaTable } from './lib/pitch/xwoba.mjs'
 import { PHYS_JOIN, PHYS_SELECT, addPhys, clearArsenalSeason, emptyPhys, foldPhysRow, physMeans, physStmt, rewalkFailures } from './lib/pitch/arsenal-physics.mjs'
@@ -53,7 +54,7 @@ import { foldStarts, writeStarts } from './lib/pitch/arsenal-starts.mjs'
 import { fetchPitcherHands } from './lib/pitch/pitcher-hands.mjs'
 import { centuryRankMap } from './lib/pitch/century-rank.mjs'
 
-export { centuryRankMap } // moved to lib/pitch/ to hold this file's size budget; tests import it from here
+export { centuryRankMap, exportCommandMap } // moved to lib/ to hold this file's size budget; tests import them from here
 
 const here = dirname(fileURLToPath(import.meta.url))
 // TWO OUTPUTS, one per reader — see writeArsenal below and src/api/pitchArsenal.js.
@@ -458,35 +459,12 @@ export function exportPitchArsenal(db, hands = {}, season = null, scope = 'R') {
 //     against each other), only arms past MIN_SIMILARITY_PITCHES (an arm below
 //     it is dropped by the ranker anyway, so shipping him is pure weight), and
 //     no `description` — the ranking reads `code`. 692 KB became 149 + 194.
-// The command grid's own shards, keyed like every other per-player dataset.
-// One file per pitcher bucket, each entry: { name, throws, mlb|aaa: { code:
-// { L: {...}, R: {...} } } }, where each hand carries the six 25-value arrays.
-// Zero-only arrays are dropped — a pitch type he never threw to lefties is
-// absent rather than twenty-five zeroes.
-export function exportCommandMap(db, season, scope = 'R') {
-  const rows = db
-    .prepare('SELECT * FROM pitch_command_cells WHERE season = ? AND scope = ? ORDER BY person_id, level, code, stand')
-    .all(season, scope)
-  const pit = {}
-  for (const r of rows) {
-    const entry = pit[r.person_id] ?? (pit[r.person_id] = { mlb: {}, aaa: {} })
-    const byCode = entry[r.level] ?? (entry[r.level] = {})
-    const hand = {}
-    CELLS.forEach((field, i) => {
-      const arr = parseCells(r[COLS[i]])
-      if (arr.some((v) => v > 0)) hand[field] = arr
-    })
-    if (!hand.cells) continue
-    ;(byCode[r.code] ?? (byCode[r.code] = {}))[r.stand] = hand
-  }
-  return { season, pit }
-}
-
 async function writeCommand(db, hands, season) {
   const pitOf = (scope) => Object.fromEntries(Object.entries(exportCommandMap(db, season, scope).pit)
     .filter(([, e]) => Object.keys(e.mlb).length || Object.keys(e.aaa).length)
     .map(([id, e]) => [id, { throws: hands[id] ?? null, ...e }]))
-  await writeShards(join(outCommand, String(season)), bucketsOf({ season }, pitOf('R'), pitOf('P')))
+  const reg = pitOf('R') // and league.json beside the buckets: the Command card's MLB median and rank (#2004)
+  await writeShards(join(outCommand, String(season)), [...bucketsOf({ season }, reg, pitOf('P')), ['league', commandLeague(reg, season)]])
   await writeSeasons(outCommand, season)
 }
 

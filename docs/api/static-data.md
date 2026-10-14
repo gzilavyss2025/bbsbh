@@ -467,7 +467,10 @@ for each generator; the reader modules:
   mix shards are at their ceiling). `fetchPitchMphFor(personId, gamePk, code?, { seasonYear })` returns mph or null.
   `fetchPitchMixFor(personId, gamePk, { seasonYear })` returns one `{ code: n }` or null. A missing
   shard, season or game all read null: the files fill with the 2026 re-walk (`--clear-arsenal`).
-  The `pitch-command` buckets (`commandMap.js`) have the same `post` key, and so do the
+  The `pitch-command` buckets (`commandMap.js`) have a `league.json` beside them (#2004): per rate, the
+  `median` and sorted `rates` of MLB pitchers with 500+ regular-season pitches; `fetchCommandLeague({ seasonYear })`
+  reads it, `commandRank(league, view, key)` gives `{ median, n, pct }` (`pct` null under the floor).
+  The buckets have the same `post` key, and so do the
   `hitter-grid` buckets (`scout/hitterGrid.js`, ADR-0096) beside `bat`. A hitter-grid file
   with `xwoba: true` holds `xwobaBip`, and `hitterCounters` then gives `wobaSum`
   (ADR-0097); without it `wobaSum` is null. Completed-game aggregates → spoiler-free, no

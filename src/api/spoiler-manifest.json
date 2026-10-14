@@ -382,7 +382,7 @@
     },
     "highlights.js": {
       "class": "mixed",
-      "why": "A clip's title narrates the play's outcome, so the play JOIN is reveal-only — but fetching is safe eagerly, and the cascade's classification helpers are a plain data transform the Node generator runs with no DOM. selectCondensedGame/selectGameClips joined the sealed list in PR #601: a condensed cut and a game's own reel narrate the whole result, and their only protection is WHERE they mount — inside the box score's SealBox reveal (GameVideoRow), or on a slate card that has already been revealed (WatchCondensedButton, rendered by GameResultFace — which is on boxscore.js's allowlist for that same already-revealed reason, and imports only formatClipDuration from here). formatClipDuration stays spoiler-free: it formats a duration string and reads no game state, which is why GameResultFace is NOT on this list. The win-probability chart's swing rows (useSwingClip) join a clip only for a big-swing play the chart already shows — and the chart is fed only reveal-gated points (winprob.js), so the play is revealed before its row, and its clip, exists.",
+      "why": "A clip's title narrates the play's outcome, so the play JOIN is reveal-only — but fetching is safe eagerly, and the cascade's classification helpers are a plain data transform the Node generator runs with no DOM. selectCondensedGame/selectGameClips joined the sealed list in PR #601: a condensed cut and a game's own reel narrate the whole result, and their only protection is WHERE they mount — inside the box score's SealBox reveal (GameVideoRow), or on a slate card that has already been revealed (WatchCondensedButton, rendered by GameResultFace — which is on boxscore.js's allowlist for that same already-revealed reason, and imports only formatClipDuration from here). formatClipDuration stays spoiler-free: it formats a duration string and reads no game state, which is why GameResultFace is NOT on this list. The win-probability chart's swing rows (useSwingClip) join a clip only for a big-swing play the chart already shows — and the chart is fed only reveal-gated points (winprob.js), so the play is revealed before its row, and its clip, exists. The pitcher Game Log's detail view (gameDetail.js) joins a clip to a play of a pitcher's game on the player page, an open surface where the plays of a game are open (ADR-0110); its score and decision come from the guarded log row, never the clip.",
       "revealOnlyExports": [
         "highlightsByPlayId",
         "highlightForPlay",
@@ -396,7 +396,8 @@
         "components/highlights/WatchCondensedButton.jsx",
         "components/inning/HalfInning.jsx",
         "screens/boxscore/revealBoxScore.js",
-        "screens/logbook/RetrospectiveSections.jsx"
+        "screens/logbook/RetrospectiveSections.jsx",
+        "screens/player/next/modules/pitchlog/gameDetail.js"
       ]
     },
     "hitchart.js": {
@@ -811,7 +812,7 @@
     },
     "player/postseasonRegister.js": {
       "class": "spoiler-free",
-      "why": "The player hub's postseason stats — the Stats tab's card (one career-aggregate row per postseason year, statsapi stats=yearByYear and career, gameType=P) and the Overview's postseason-to-date tile row (byDateRange gameType=P, over the same window as the season tiles) — over completed games. A stat line is not a score (ADR-0034). On a dated page it drops the as-of season and every later one, since that year's October may hold games past the date, and foots the rows it keeps."
+      "why": "The player hub's postseason stats — the Stats tab's card (one career-aggregate row per postseason year, statsapi stats=yearByYear and career, gameType=P) and the Overview's postseason-to-date tile row (byDateRange gameType=P, over the same window as the season tiles) — over completed games. A stat line is not a score (ADR-0034). On a dated page it drops the as-of season and every later one, since that year's October may hold games past the date, and foots the rows it keeps. Also the postseason game log by round (gameType=F,D,L,W, #2005), which holds back any game on or after the earlier of the cutoff and the baseball today."
     },
     "player/prospectRankHistory.js": {
       "class": "spoiler-free",

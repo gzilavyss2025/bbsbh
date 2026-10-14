@@ -42,6 +42,45 @@ export async function fetchCommandFor(personId, { seasonYear, scope = 'reg', str
   return shard?.pit?.[id] ?? null
 }
 
+// The Command card's league block (#2004): pitch-command/{season}/league.json,
+// written by the same export as the buckets. `null` when it is not on file.
+export async function fetchCommandLeague({ seasonYear, strict } = {}) {
+  if (seasonYear === 'all') return null
+  const season = await seasonFolderOf('pitch-command', seasonYear, { strict })
+  return season == null ? null : fetchCommandShard(`${season}/league`)
+}
+
+// The pool the league block ranks against: MLB regular season, 500+ pitches.
+export const COMMAND_LEAGUE_MIN = 500
+const LEAGUE_RATES = ['zonePct', 'heartPct', 'firstZonePct', 'whiffPct']
+
+// The block itself, from one season's `pit` map: per rate, the median and the
+// sorted rates of the pool (the generator's half; the card reads the result).
+export function commandLeague(pit, season) {
+  const pool = Object.values(pit).map((e) => commandView(e)).filter((v) => v?.pitches >= COMMAND_LEAGUE_MIN)
+  const block = { season, minPitches: COMMAND_LEAGUE_MIN }
+  for (const k of LEAGUE_RATES) {
+    const rates = pool.map((v) => v[k]).filter((x) => x != null).sort((a, b) => a - b)
+    const n = rates.length
+    block[k] = { median: n ? Math.round((rates[(n - 1) >> 1] + rates[n >> 1]) / 2) : null, rates }
+  }
+  return block
+}
+
+// His place on one rate: the MLB median, the pool size, and a mid-rank
+// percentile (those below him plus half his ties, over the pool). `view` is his
+// commandView over all pitches, both hands. Under the floor, `pct` is null:
+// never a rank among a smaller pool.
+export function commandRank(league, view, key) {
+  const rates = league?.[key]?.rates
+  if (!rates) return null
+  const x = view?.[key]
+  const ranked = view?.pitches >= league.minPitches && x != null
+  const below = rates.filter((r) => r < x).length
+  const ties = rates.filter((r) => r === x).length
+  return { median: league[key].median, n: rates.length, pct: ranked ? Math.round((100 * (below + ties / 2)) / rates.length) : null }
+}
+
 // Below this many pitches a split says more about the sample than the pitcher,
 // so the card grays it rather than drawing a map out of a dozen dots. Matches
 // the spray card's own floor in spirit: enough to have a shape.

@@ -23,6 +23,7 @@ const FILES = {
   '/data/pitch-arsenal-pool/seasons.json': index,
   '/data/pitch-arsenal-pool/all/mlb.json': { seasons: [2026, 2027], level: 'mlb' },
   '/data/pitch-command/seasons.json': index,
+  '/data/pitch-command/2026/league.json': { season: 2026, minPitches: 500 },
   '/data/umpires/seasons.json': index,
   '/data/umpires/2026/9.json': { season: 2026, id: 9, name: 'Ump', generatedAt: 'a', games: [{ gamePk: 1, date: '2026-05-01' }] },
   '/data/umpires/2027/9.json': { season: 2027, id: 9, name: 'Ump', generatedAt: 'b', games: [{ gamePk: 2, date: '2027-04-01' }] },
@@ -162,6 +163,13 @@ test("the command map takes one season: 'all' is null, with no fetch", async () 
   const { value, urls } = await urlsOf(() => fetchCommandFor(404, { seasonYear: 'all' }))
   assert.equal(value, null)
   assert.deepEqual(urls, [])
+})
+
+test("the command league block (#2004) sits in the season's folder", async () => {
+  const { fetchCommandLeague } = await import('../src/api/commandMap.js')
+  const one = await urlsOf(() => fetchCommandLeague({ seasonYear: 2026 }))
+  assert.deepEqual(one.urls, ['/data/pitch-command/2026/league.json'])
+  assert.equal(one.value.season, 2026)
 })
 
 test('the ABS club file takes the season too', async () => {

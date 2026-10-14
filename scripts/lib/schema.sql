@@ -325,6 +325,13 @@ CREATE TABLE IF NOT EXISTS foul_ingested_games (
   scope   TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P'))
 );
 
+-- A Final game whose feed fetch failed on the last run that took it (#2024). The row
+-- goes when a fetch succeeds; a game that fails while it has a row fails the run.
+CREATE TABLE IF NOT EXISTS foul_failed_games (
+  game_pk INTEGER PRIMARY KEY,
+  season  INTEGER NOT NULL
+);
+
 -- Both teams' foul totals for ONE game (the "best souvenir odds" board: which
 -- games saw the most combined fouls, i.e. the most balls that left play as a
 -- souvenir). A separate per-gamePk table rather than more columns on
