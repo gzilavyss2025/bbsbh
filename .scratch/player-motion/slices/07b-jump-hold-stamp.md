@@ -589,6 +589,8 @@ Keep `test/jump-bar.test.js` green (spy.js does not change).
   the two in this slice.
 - The jump-bar press and ease (slice 02), the hero and tile delays (slice 06).
 - The slot's rise and height hold (07a).
+- Showing the hero and tiles at rest on a return visit (slice 06b). 06b changes the
+  Overview branch of `onLand` after this slice: it clears a `still` state, then replays.
 - No `/animation-lab` entry: this slice replays the existing `card-stamp-in`.
 
 ## Stop if

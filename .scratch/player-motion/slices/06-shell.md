@@ -239,6 +239,8 @@ test('reduced motion stops the age flip', () => {
 - The jump-bar ease and press (slice 02).
 - The stamp-in keyframe and its tokens (slice 01a).
 - Replaying the hero and tiles after a jump-bar tap (slice 07b).
+- Showing the hero and tiles at rest on a return visit (slice 06b). This slice keeps
+  `stampIn` on both, so 06b can gate the stamp from the page.
 - The hero's markup and facts (PR #2071 owns the Born fact).
 - No `/animation-lab` entry: this slice adds no animation, only timings on
   `card-stamp-in` and the age-flip transition.
