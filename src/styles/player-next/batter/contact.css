@@ -114,8 +114,15 @@
 .fcontact__note {
   margin: var(--space-3h) 0 0;
   color: var(--text-caption);
-  font-size: var(--fs-small);
-  line-height: var(--lh-snug);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
+}
+.fcontact__detail .hint {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
 }
 .fcontact__facts {
   margin-top: var(--space-3);

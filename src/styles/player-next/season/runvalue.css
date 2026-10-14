@@ -109,8 +109,13 @@
 .runvalue__line {
   font-weight: var(--w-semibold);
 }
+.runvalue__sentence,
+.runvalue__foot {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
+}
 .runvalue__foot {
   margin: 0;
-  font-size: var(--fs-label);
-  color: var(--text-caption);
 }
