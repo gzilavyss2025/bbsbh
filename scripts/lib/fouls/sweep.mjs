@@ -5,9 +5,9 @@
 import { scopeOfGameType } from '../records/postseason.mjs'
 
 // Games older than the trailing window that one run takes, so one bad night cannot make a run slow.
-export const GAP_CAP = 50
-const CHECKPOINT_EVERY = 100
-const CONCURRENCY = 8
+const GAP_CAP = 50
+export const CHECKPOINT_EVERY = 100
+export const CONCURRENCY = 8
 
 // Same postponed-replay dedup as the other sweeps: a replayed game is listed under both dates;
 // keep only the officialDate bucket. The window's games come first, then up to `cap` older ones.
@@ -26,11 +26,15 @@ export function pendingGames(schedule, ingested, startDate, cap = GAP_CAP) {
 }
 
 // -> { pending, done, failed, again }. `again` are the failed games that also failed on the
-// run before. `ingest(game)` fetches and folds one game; it is passed in, so a test needs no network.
+// run before. A failed game adds no season to `touched`: a run writes only the seasons it
+// ingested a game for (ADR-0086), so the caller dumps foul_failed_games itself. `ingest(game)` fetches and folds one game; it is passed in, so a test needs no network.
 export async function sweepFouls(db, { schedule, startDate, ingest, touched, checkpoint = async () => {} }) {
   const ingested = new Set(db.prepare('SELECT game_pk FROM foul_ingested_games').all().map((r) => r.game_pk))
   const failedBefore = new Set(db.prepare('SELECT game_pk FROM foul_failed_games').all().map((r) => r.game_pk))
   const pending = pendingGames(schedule, ingested, startDate)
+  console.log(`${pending.length} un-ingested Final MLB games (the window from ${startDate}, then up to ${GAP_CAP} older)`)
+  const forget = db.prepare('DELETE FROM foul_failed_games WHERE game_pk = ?')
+  const remember = db.prepare('INSERT OR IGNORE INTO foul_failed_games (game_pk, season) VALUES (?, ?)')
   const queue = [...pending]
   const failed = []
   let done = 0
@@ -38,13 +42,13 @@ export async function sweepFouls(db, { schedule, startDate, ingest, touched, che
     for (let g = queue.shift(); g; g = queue.shift()) {
       try {
         await ingest(g)
-        db.prepare('DELETE FROM foul_failed_games WHERE game_pk = ?').run(g.gamePk)
+        forget.run(g.gamePk)
+        touched.add(g.season)
       } catch (err) {
         console.error(`gamePk ${g.gamePk}: ${err.message}`)
         failed.push(g)
-        db.prepare('INSERT OR IGNORE INTO foul_failed_games (game_pk, season) VALUES (?, ?)').run(g.gamePk, g.season)
+        remember.run(g.gamePk, g.season)
       }
-      touched.add(g.season)
       done += 1
       if (done % CHECKPOINT_EVERY === 0) {
         console.log(`${done}/${pending.length} swept, checkpointing...`)

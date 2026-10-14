@@ -1071,11 +1071,12 @@ test('sweepFouls takes back a Final game whose fetch failed on the run before', 
   ] }
   // Game 2's fetch fails on the first run only; game 4's fails every time.
   let up = false
+  let touched
   const run = () =>
     sweepFouls(db, {
       schedule,
       startDate: '2026-09-30', // games 2 and 4 are older than the trailing window
-      touched: new Set(),
+      touched: (touched = new Set()),
       ingest: async (g) => {
         if (g.gamePk === 4 || !up) throw new Error('boom')
         foldInto(db, g.gamePk, g.date, g.season, 2)
@@ -1086,6 +1087,7 @@ test('sweepFouls takes back a Final game whose fetch failed on the run before', 
   const first = await run()
   assert.deepEqual(first.failed.map((g) => g.gamePk).sort(), [2, 4])
   assert.deepEqual(first.again, [], 'one failure does not fail the run')
+  assert.equal(touched.size, 0, 'a failed game writes no season (ADR-0086)')
   assert.deepEqual(inLedger(), [1])
 
   up = true

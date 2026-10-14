@@ -10,7 +10,8 @@
 // mould of gen-umpire-accuracy.mjs + gen-postseason-leaders.mjs: each run scans
 // a trailing window of schedule Finals (plus up to 50 older Finals of the season
 // not in the ledger, so a failed fetch comes back: #2024, lib/fouls/sweep.mjs),
-// fetches the live feed for every gamePk not yet ingested, folds each game's aggregates into the shared SQLite layer
+// fetches the live feed for every gamePk not yet ingested, folds each game's
+// aggregates into the shared SQLite layer
 // (scripts/lib/schema.sql's foul_* tables, docs/adr/0021) via incrementing
 // upserts, and marks it in foul_ingested_games so a resumed/re-run sweep never
 // double-counts. NEVER stores a feed on disk. MLB only (sportId 1), regular
@@ -64,7 +65,7 @@ import { parseArgs, dateRange } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
 import { BATTER_KEYS, PITCHER_KEYS, countStatements, endPa, exportByCount, exportGameFouls, foldBatterTotals, foldPitcherTotals, gameShards, medianBestPa, newCells, newPitcherCells, tallyPitches } from './lib/fouls/byCount.mjs'
 import { rebuildCommand } from './lib/fouls/rebuild.mjs'
-import { pendingGames, sweepFouls } from './lib/fouls/sweep.mjs'
+import { CHECKPOINT_EVERY, CONCURRENCY, pendingGames, sweepFouls } from './lib/fouls/sweep.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // A SEASON STORE (ADR-0086): fouls/{season}/fouls.json (the league file) plus
@@ -74,8 +75,6 @@ const here = dirname(fileURLToPath(import.meta.url))
 const storeDir = join(here, '..', 'public', 'data', 'fouls')
 
 const DEFAULT_DAYS = 3
-const CHECKPOINT_EVERY = 100
-const CONCURRENCY = 8
 const MAX_INNING_BUCKET = 10 // innings 10+ fold into inning 10
 
 // --- pure per-game aggregation (exported for tests) --------------------------
@@ -1037,15 +1036,15 @@ async function main() {
     db.close()
     return
   }
-  const { pending, done, failed, again } = await sweepFouls(db, {
+  const { done, failed, again } = await sweepFouls(db, {
     schedule,
     startDate,
     touched,
     checkpoint: writeOut,
     ingest: (g) => ingestGame(db, stmts, g.gamePk, g.date, g.season, g.scope),
   })
-  console.log(`${startDate}..${endDate} (+ older gaps): ${pending.length} un-ingested Final MLB games`)
   await writeOut()
+  if (failed.length && !touched.size) await dumpGroup(db, 'fouls') // keep foul_failed_games for the next run
 
   for (const season of touched) {
     const total = db.prepare('SELECT COUNT(*) AS n FROM foul_ingested_games WHERE season = ?').get(season).n

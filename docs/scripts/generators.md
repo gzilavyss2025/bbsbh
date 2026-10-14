@@ -411,7 +411,11 @@ don't run these by hand.
   (`fouls` group, ADR-0021) APPEND-ONLY incremental sweep of Final MLB games'
   live feeds like `gen-umpire-accuracy.mjs` (`--days` trailing window;
   `--since`/`--until` backfill with checkpoints); `foul_ingested_games` is the
-  idempotency guard. Imports `FOUL_CODES`/`pitchCallCode` from
+  idempotency guard. Each run also takes up to 50 older Final games of the season that
+  are not in the ledger (the schedule starts on January 1), so a failed fetch comes back
+  (#2024, `scripts/lib/fouls/sweep.mjs`). A failed game goes into `foul_failed_games`;
+  the run exits non-zero only when the same game fails twice in a row. `--dry-run` lists
+  the Finals that are not in the ledger. Imports `FOUL_CODES`/`pitchCallCode` from
   `src/api/playbyplay.js` so live (`derive.js`) and precomputed tallies can't
   drift; two-strike detection carries the PRE-pitch count forward across
   non-PA plays (the `count`-is-post-pitch off-by-one). App reads it via
