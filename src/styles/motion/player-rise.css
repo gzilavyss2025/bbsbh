@@ -1,0 +1,46 @@
+/* ---------------------------------------------------------------------------
+   THE PLAYER RISE (#2073). A card, a row or a block on /player/{id} comes up
+   from --space-1h below its place as it fades in, over --dur-rise on the stamp
+   curve. The canvas draws it as `.rise` (boards B-phone and MoundCard).
+
+   WHEN IT PLAYS. Only the first time the block comes into view in this page
+   visit. useInViewOnce (hooks/scroll/useInViewOnce.js) decides, and the caller
+   writes the class for the phase it returns:
+     wait  .player-rise--wait. Not seen yet: held at opacity 0, so the block
+           does not show at rest and then jump back to 0 when its rise starts.
+     play  .player-rise. The rise runs one time.
+     rest  no class. Already seen, reduced motion, or no IntersectionObserver.
+   A row in a cascade sets --rise-i (0, 1, 2, ...) and waits that many
+   --stagger-step.
+
+   Motion only. The block's resting look stays in its own sheet. Shared by
+   the player modules and the Animation Lab, so src/index.css imports it.
+   --------------------------------------------------------------------------- */
+
+@keyframes player-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-1h));
+  }
+}
+
+.player-rise--wait {
+  opacity: 0;
+}
+
+.player-rise {
+  animation: player-rise-in var(--dur-rise) var(--ease-stamp) calc(var(--stagger-step) * var(--rise-i, 0)) backwards;
+}
+
+:root[data-motion='reduced'] .player-rise--wait {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player-rise--wait {
+    opacity: 1;
+  }
+  .player-rise {
+    animation: none;
+  }
+}
