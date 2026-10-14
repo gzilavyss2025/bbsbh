@@ -35,7 +35,8 @@ const HP = ['hitting', 'pitching']
 // section. A section holds several slots. `roles` are the stat groups the module
 // serves; a player with both gets one instance per role. `load` is a static
 // import, so a module's code arrives only when its slot comes near. `once` gives a two-way
-// player one instance (the first role he has) and no role suffix. `pair` ('a' then 'b', next
+// player one instance (the first role he has) and no role suffix. `twin` marks two one-role
+// slots with one name (the batter and pitcher Foul balls), so a two-way player gets the suffix. `pair` ('a' then 'b', next
 // to each other) sits two cards side by side at wide widths (page.css).
 export const SLOTS = [
   { id: 'season', module: 'season', section: 'season', label: 'Season', roles: HP, load: () => import('./modules/season/index.jsx') },
@@ -50,9 +51,9 @@ export const SLOTS = [
   { id: 'pform', module: 'pform', section: 'form-trend', label: 'Form trend', roles: P, load: () => import('./modules/pform/index.jsx') },
   { id: 'batlog', module: 'batlog', section: 'game-log', label: 'Game log', roles: H, load: () => import('./modules/batlog/index.jsx') },
   { id: 'pitchlog', module: 'pitchlog', section: 'game-log', label: 'Game log', roles: P, load: () => import('./modules/pitchlog/index.jsx') },
-  { id: 'pfouls', module: 'pfouls', section: 'game-log', label: 'Foul balls', roles: P, load: () => import('./modules/pfouls/index.jsx') },
+  { id: 'pfouls', module: 'pfouls', section: 'game-log', label: 'Foul balls', roles: P, twin: true, load: () => import('./modules/pfouls/index.jsx') },
   // Foul balls has no button on the boards: it sits in the Game log section, and similar players ends it (the tbd slot after it is the "more" board).
-  { id: 'fouls', module: 'fouls', section: 'game-log', label: 'Foul balls', roles: H, load: () => import('./modules/fouls/index.jsx') },
+  { id: 'fouls', module: 'fouls', section: 'game-log', label: 'Foul balls', roles: H, twin: true, load: () => import('./modules/fouls/index.jsx') },
   { id: 'similar', module: 'similar', section: 'game-log', label: 'Similar players', roles: HP, load: () => import('./modules/similar/index.jsx') },
   { id: 'milestones', module: 'milestones', section: 'game-log', label: 'Milestone watch', roles: HP, load: () => import('./modules/milestones/index.jsx') },
   { id: 'tbd-gamelog', module: 'tbd', section: 'game-log', label: 'More game log', roles: HP, load: () => import('./modules/tbd/index.jsx') },
@@ -104,7 +105,7 @@ export function slotInstances(roles) {
       ...s,
       role,
       key: `${s.id}:${role}`,
-      label: s.roles.length > 1 && roles.length > 1 && !s.once ? `${s.label} · ${WORD[role]}` : s.label,
+      label: (s.roles.length > 1 || s.twin) && roles.length > 1 && !s.once ? `${s.label} · ${WORD[role]}` : s.label,
     }))
   })
 }

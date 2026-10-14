@@ -162,6 +162,14 @@ test('the pitcher slots: Command, Target command and Foul balls (pitching) are p
   assert.deepEqual(slotInstances(['pitching']).filter((i) => ['command', 'target', 'pfouls'].includes(i.id)).map((i) => i.id), ['pfouls', 'command', 'target'])
 })
 
+test('a two-way player tells the two Foul balls cards apart; a one-way player keeps the bare name', () => {
+  const two = slotInstances(BOTH)
+  assert.equal(two.find((i) => i.id === 'fouls').label, 'Foul balls · Batting')
+  assert.equal(two.find((i) => i.id === 'pfouls').label, 'Foul balls · Pitching')
+  assert.equal(slotInstances(['hitting']).find((i) => i.id === 'fouls').label, 'Foul balls')
+  assert.equal(slotInstances(['pitching']).find((i) => i.id === 'pfouls').label, 'Foul balls')
+})
+
 test('pairs: Innings beside Awards, Photos beside Highlights; no other slot is paired', () => {
   const pairs = SLOTS.filter((s) => s.pair).map((s) => `${s.id}:${s.pair}`)
   assert.deepEqual(pairs, ['innings:a', 'awards:b', 'photos:a', 'highlights:b'])
