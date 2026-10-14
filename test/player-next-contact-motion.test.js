@@ -46,7 +46,7 @@ test('the module gates the drop on first view and swaps a/b on each view or type
   assert.match(JSX, /phase === 'wait'/)
   assert.match(JSX, /fcontact__dots--\$\{gen % 2 \? 'b' : 'a'\}/)
   assert.match(JSX, /'--fcontact-f'/)
-  assert.match(JSX, /const pick = \(set, v\) => \{ set\(v\); setSel\(null\); setGen\(\(g\) => g \+ 1\) \}/)
+  assert.match(JSX, /const pick = \(set, v\) => \{ set\(v\); setSel\(null\); setGen\(\(g\) => g \+ 1\); setPlaying\(false\) \}/)
 })
 
 test('the ball-type pick is a MenuRail; the six averages are its panel', () => {

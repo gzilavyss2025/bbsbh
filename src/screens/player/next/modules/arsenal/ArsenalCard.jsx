@@ -12,24 +12,23 @@ import { beatsAt, countText, totalMs } from './timeline.js'
 const MID = (ZONE.y0 + ZONE.y1) / 2
 const dash = (v, f) => (v == null ? '—' : f(v))
 const xwobaText = (v) => v.toFixed(3).replace(/^0/, '')
-const SPEED = 3 // the side view plays at one-third of real speed, as the board does
-
 // The side view's clock: ms into the timeline, played by the animation frame, 50ms at most a frame (the
 // board's cap). `null` means the end, so a new length never strands the last frame. `start` is 'play'
 // (start at once), 'wait' (hold the first frame) or 'end'. A reader who asked for less motion stays on the end.
-function useArsenalClock(total, start) {
+// `at` (the lab's frozen frames) pins t and wins over the clock.
+function useArsenalClock(total, start, at = null) {
   const [t, setT] = useState(() => (start === 'end' || motionIsReduced() ? null : 0))
   const [playing, setPlaying] = useState(() => start === 'play' && !motionIsReduced())
-  const at = useRef(0)
+  const pos = useRef(0)
   useEffect(() => {
     if (!playing) return undefined
     let raf
     let last = performance.now()
     const tick = (now) => {
-      at.current = Math.min(total, at.current + Math.min(50, now - last))
+      pos.current = Math.min(total, pos.current + Math.min(50, now - last))
       last = now
-      setT(at.current)
-      if (at.current >= total) {
+      setT(pos.current)
+      if (pos.current >= total) {
         setT(null) // the end, so a later change of length never strands the last frame
         setPlaying(false)
       } else raf = requestAnimationFrame(tick)
@@ -38,17 +37,17 @@ function useArsenalClock(total, start) {
     return () => cancelAnimationFrame(raf)
   }, [playing, total])
   const seek = (v, play) => {
-    at.current = v ?? total
+    pos.current = v ?? total
     setT(v)
     setPlaying(play)
   }
   const play = () => (motionIsReduced() ? seek(null, false) : seek(0, true))
-  return { t: t ?? total, playing, play, seek }
+  return { t: at ?? t ?? total, playing, play, seek }
 }
 
 // The Pitch arsenal card (#1892, board ArsenalReveal.dc.html): the mix bar, the side view of every pitch
 // leaving one release point, where each lands (catcher's view), and a menu that opens one pitch.
-export function ArsenalCard({ rows, id }) {
+export function ArsenalCard({ rows, id, at = null }) {
   // One entrance per page visit: the first time the card comes into view. A key already seen in this tab
   // (Back, a return) shows the last frame (docs/motion.md, "The one-shot gate").
   const [ref, phase] = useInViewOnce(viewKey(id, 'arsenal'))
@@ -56,7 +55,9 @@ export function ArsenalCard({ rows, id }) {
   const flyers = rows.filter((r) => r.path)
   const one = rows.find((r) => r.code === solo) ?? null
   const pitches = useMemo(() => rows.map((r) => ({ code: r.code, ft: r.path?.T ?? null, rpm: r.spin })), [rows])
-  const clock = useArsenalClock(totalMs(pitches, SPEED), phase === 'rest' ? 'end' : 'wait')
+  const [S, setS] = useState(3) // 3: one-third of real speed, as the board plays; 6: one-sixth
+  const total = totalMs(pitches, S)
+  const clock = useArsenalClock(total, phase === 'rest' ? 'end' : 'wait', at)
   // 'play' comes once, from the observer, and stays. The clock starts in a rAF callback, not in the effect
   // body (react-hooks 7.1.1: set-state-in-effect).
   useEffect(() => {
@@ -65,11 +66,15 @@ export function ArsenalCard({ rows, id }) {
     })
     return () => cancelAnimationFrame(raf)
   }, [phase]) // eslint-disable-line react-hooks/exhaustive-deps
-  const beats = beatsAt(clock.t, pitches, { S: SPEED, solo: one?.path ? one.code : null })
+  const beats = beatsAt(clock.t, pitches, { S, solo: one?.path ? one.code : null })
   const byCode = new Map(beats.pitches.map((b) => [b.code, b]))
   // A pick, a second tap on the picked card (MenuRail sends null) and "All pitches" replay the timeline.
   const pick = (code) => {
     setSolo(code)
+    clock.play()
+  }
+  const slower = () => {
+    setS(S === 3 ? 6 : 3)
     clock.play()
   }
   return (
@@ -124,7 +129,24 @@ export function ArsenalCard({ rows, id }) {
         </div>
       )}
       <div className="arsenal__bar">
-        {flyers.length > 0 && <Button size="control" onClick={clock.play}>Replay</Button>}
+        {flyers.length > 0 && (
+          <>
+            <Button size="control" onClick={clock.play}>Replay</Button>
+            <input
+              type="range"
+              className="arsenal__range"
+              min="0"
+              max={total}
+              step="1"
+              value={Math.round(clock.t)}
+              onChange={(e) => clock.seek(Number(e.target.value), false)}
+              aria-label="Scrub the pitch animation"
+            />
+            <Button size="control" onClick={slower} aria-label={`Playback speed: ${S === 3 ? 'one-third' : 'one-sixth'}`}>
+              {S === 3 ? '⅓×' : '⅙×'}
+            </Button>
+          </>
+        )}
       </div>
       <MenuRail
         label="Pitch type"

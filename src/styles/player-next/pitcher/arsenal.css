@@ -242,6 +242,16 @@
   gap: var(--space-2);
 }
 
+/* The Arsenal card's scrubber: the timeline's ms, stopped where it is moved. */
+.arsenal__range {
+  flex: 1 1 9rem;
+  min-width: 0;
+  height: var(--tap-min);
+  margin: 0;
+  accent-color: var(--text-heading);
+  cursor: ew-resize;
+}
+
 /* The menu card's figures; the card, rail and panel are MenuRail's (system/menurail/menurail.css). */
 .arsenal__figs {
   color: var(--text-muted);
