@@ -241,17 +241,18 @@ frame offset reads true). Put them before the last selector, with a comment line
 
 ## Test first
 
-No new test file: this slice adds review pages, not logic, and every class it uses is pinned
-by `test/menurail.test.js` and `test/menurail-motion.test.js`. One assertion goes in an
-existing file instead? No: that would be a sixth file. The check is the browser, below.
-If the caller requires a failing test first, add this to `test/menurail-motion.test.js`
-and drop the `46-consent-modal.css` comment line count from nothing else (it is still 5
-product files plus 1 edited test = 6, so do it only if told to):
+No new test file. This slice adds review pages and no logic, and a test would be a sixth
+file. Every class it uses is pinned by `test/menurail.test.js` (05a) and
+`test/menurail-motion.test.js` (05b). The check here is the browser (below) and
+`npm run lint` (file size, dir size, typography). If the orchestrator wants a failing test
+first anyway, drop the design-lab half to a later PR and add this case to
+`test/menurail-motion.test.js` (it fails before step 5):
 
 ```js
 test('the Animation Lab freezes the rise', () => {
   const lab = read('styles/46-consent-modal.css')
   assert.match(lab, /\.animlab__frame \.menurail__body--a,/)
+  assert.match(lab, /\.animlab__frame \.menurail__body--b,/)
 })
 ```
 

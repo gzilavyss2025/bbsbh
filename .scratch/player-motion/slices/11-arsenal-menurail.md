@@ -35,7 +35,7 @@ opacity over 400ms.
    takes the class `arsenal__path--ghost` instead of `opacity={0.25}`.
 3. `src/styles/player-next/pitcher/arsenal.css`: delete the old menu rules; add
    the ghost rule and its keyframes.
-4. `test/arsenal-menurail.test.js` (new): the source and sheet assertions below.
+4. `test/arsenal-motion.test.js` (new): the source and sheet assertions below.
 
 Do not touch `FlightCard.jsx` (slices 13 to 15 own it).
 
@@ -294,7 +294,7 @@ grid rule. The sheet shrinks by about 30 lines.
 
 ## Test first
 
-`test/arsenal-menurail.test.js` (new). Run it before the change: every case fails.
+`test/arsenal-motion.test.js` (new). Run it before the change: every case fails.
 
 ```js
 import assert from 'node:assert/strict'

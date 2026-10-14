@@ -29,9 +29,9 @@ timeline starts the first time the card comes into view, not on mount.
   `scaleX` 0 → 1 over 260ms then fades over 700ms, and the glyph pops 1.45 → 1
   over 320ms. Every pick, un-pick and Replay replays all of it, as the canvas does.
 - `MenuRail` takes an optional `style` on each item and puts it on the card button.
-- The clock waits on the first frame until the card is in view, then plays one
-  time. A return visit in the same tab (the `useInViewOnce` key is already set)
-  shows the last frame. Reduced motion shows the last frame.
+- The clock waits on the first frame while `phase` is `'wait'`, plays one time
+  when it turns `'play'`, and shows the last frame for `'rest'` (a return visit in
+  the same tab, reduced motion, no IntersectionObserver).
 - `npm run lint`, `npm test`, `npm run build` pass. The new tests fail before the change.
 
 ## Files
@@ -42,7 +42,7 @@ timeline starts the first time the card comes into view, not on mount.
    sweep, the glyph wrapper.
 3. `src/components/ui/control/MenuRail.jsx`: pass `item.style` to the card button.
 4. `src/screens/player/next/modules/arsenal/index.jsx`: pass `id={bio.id}`.
-5. `test/arsenal-timeline.test.js` (from 12a): new cases at the end.
+5. `test/arsenal-motion.test.js` (from slice 11, grown by 12a): new cases at the end.
 
 ## Canvas
 
@@ -141,14 +141,13 @@ border: …`), `.arsenal__seg` `:59-73`, `.arsenal__seg span` `:81-84`
 
 `src/screens/player/next/modules/arsenal/index.jsx:31`: `<ArsenalCard rows={rows} />`.
 
-`src/hooks/motion/useBecameTrue.js`: `useBecameTrue(value)` is true only in the
-render where `value` went false → true with the component already mounted.
-
-`useInViewOnce` (slice 01): spec.md says it keeps a module-level `Set` of keys
-`<playerId>:<slotKey>`. (inferred) Its shape follows `useNearView`
-(`src/hooks/scroll/useNearView.js`: `const [ref, near] = useNearView()`):
-`const [ref, seen] = useInViewOnce(key)`, where `seen` is true at once for a key
-already in the `Set`. Read the merged hook and adapt the two lines below.
+`useInViewOnce` (slice 01c, `src/hooks/scroll/useInViewOnce.js`):
+`const [ref, phase] = useInViewOnce(key)`, `phase` is `'rest'` (key already seen
+in this bundle, or reduced motion, or no IntersectionObserver), `'wait'` (not in
+view yet) or `'play'` (came into view; it stays `'play'`). `key` is
+`viewKey(playerId, slotKey)` from `src/lib/motion/inViewOnce.js`. The `ref` must be
+on a mounted element, or the phase stays `'wait'` (and here the card would stay on
+its first, empty frame). Read the merged files; this is what slice 01c specifies.
 
 `MenuRail.jsx` (slice 05): read it. Find the `<button type="button" … aria-pressed>`
 that draws one card.
@@ -173,8 +172,8 @@ Arsenal card)." Nothing else changes.
 Imports:
 
 ```jsx
-import { useBecameTrue } from '../../../../../hooks/motion/useBecameTrue.js'
-import { useInViewOnce } from '../../../../../hooks/<path from slice 01>/useInViewOnce.js'
+import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
+import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { beatsAt, countText, totalMs } from './timeline.js'
 ```
 
@@ -184,13 +183,13 @@ Start from in view:
 export function ArsenalCard({ rows, id }) {
   // One entrance per page visit: the first time the card comes into view. A key already seen in this tab
   // (Back, a return) shows the last frame (docs/motion.md, "The one-shot gate").
-  const [ref, seen] = useInViewOnce(`${id}:arsenal`)
-  const entered = useBecameTrue(seen)
+  const [ref, phase] = useInViewOnce(viewKey(id, 'arsenal'))
   …
-  const clock = useArsenalClock(totalMs(pitches, SPEED), seen ? 'end' : 'wait')
+  const clock = useArsenalClock(totalMs(pitches, SPEED), phase === 'rest' ? 'end' : 'wait')
+  // 'play' comes once, from the observer, and stays: this runs one time per mount.
   useEffect(() => {
-    if (entered) clock.play()
-  }, [entered]) // eslint-disable-line react-hooks/exhaustive-deps
+    if (phase === 'play') clock.play()
+  }, [phase]) // eslint-disable-line react-hooks/exhaustive-deps
   …
   return (
     <div className="arsenal__card" ref={ref}>
@@ -333,19 +332,17 @@ No reduced-motion block: these are static looks; the clock shows the last frame
 
 ## Test first
 
-Append to `test/arsenal-timeline.test.js` (it already has `read`, `card`, `css`,
-`ruleBody`). Each case fails before the change.
+Append to `test/arsenal-motion.test.js` (it already has `read`, `card`, `css`,
+`decl`, `ruleBody`). Each case fails before the change.
 
 ```js
-const decl = (body, prop) =>
-  body.split(';').map((d) => d.trim()).find((d) => d.startsWith(`${prop}:`))?.slice(prop.length + 1).trim()
 const rail = read('src/components/ui/control/MenuRail.jsx')
 const mod = read('src/screens/player/next/modules/arsenal/index.jsx')
 
 test('the timeline waits for the card to come into view, once per page visit', () => {
-  assert.match(card, /useInViewOnce\(`\$\{id\}:arsenal`\)/)
-  assert.match(card, /useBecameTrue\(seen\)/)
-  assert.match(card, /useArsenalClock\(.*, seen \? 'end' : 'wait'\)/)
+  assert.match(card, /useInViewOnce\(viewKey\(id, 'arsenal'\)\)/)
+  assert.match(card, /useArsenalClock\(.*, phase === 'rest' \? 'end' : 'wait'\)/)
+  assert.match(card, /if \(phase === 'play'\) clock\.play\(\)/)
   assert.match(mod, /<ArsenalCard rows=\{rows\} id=\{bio\.id\} \/>/)
 })
 
@@ -409,8 +406,8 @@ test('a landing sweeps the row in mint and pops its glyph', () => {
 
 ## Stop if
 
-- `useInViewOnce` is not on `main`, or it cannot tell "already seen at mount" from
-  "came into view now" (then the Back case would replay). Report its real API.
+- `useInViewOnce` is not on `main`, or it does not return `[ref, phase]` with
+  `'rest' | 'wait' | 'play'` (slice 01c). Report its real API.
 - `MenuRail` has no single card button to put `style` on, or it already writes an
   inline `style` there (merge the two objects then, and say so in the PR).
 - The inline `transform` blocks the stamp-press on a menu card after the entrance.

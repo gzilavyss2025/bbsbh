@@ -33,8 +33,8 @@ behind the ball, the landing ripple, the scale ticks and the catcher-view marks.
 ## Files
 
 1. `src/screens/player/next/modules/arsenal/timeline.js` (new): the pure timeline.
-2. `test/arsenal-timeline.test.js` (new): the timeline cases, and the source and
-   sheet cases.
+2. `test/arsenal-motion.test.js` (from slice 11): the timeline cases, the source
+   and sheet cases, and three slice-11 cases rewritten (below).
 3. `src/screens/player/next/modules/arsenal/ArsenalCard.jsx`: the clock hook, the
    beats, the inset marks.
 4. `src/screens/player/next/modules/arsenal/FlightScene.jsx`: optional `beats`,
@@ -508,16 +508,40 @@ tick label sets only `font-family` (the size is the SVG `fontSize` attribute, as
 
 ## Test first
 
-`test/arsenal-timeline.test.js` (new). Run it first: the import fails, so every
-case fails.
+`test/arsenal-motion.test.js` (slice 11 made it; it already has `read`, `card`,
+`scene`, `css`, `decl`, `ruleBody`). Run it after the edit and before the code: the
+`timeline.js` import fails, so every case fails.
+
+**a. Rewrite three slice-11 cases.** Their behaviour moves from CSS to the clock;
+the new cases pin it in its new place (the ghost fade itself is pinned by the
+"a pick leaves the others as ghosts" case below). Replace "a pick and an un-pick
+bump the replay key", "a ghost path is a class, at 0.22, …" and "a ghost path does
+not draw in" with:
 
 ```js
-import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
-import test from 'node:test'
-import { LEAD, TAIL, beatsAt, countText, eo, totalMs } from '../src/screens/player/next/modules/arsenal/timeline.js'
-import { ruleBody, stripComments } from './helpers/css.js'
+test('a pick and an un-pick replay the timeline', () => {
+  assert.match(card, /onPick=\{pick\}/)
+  assert.match(card, /const pick = \(code\) => \{[\s\S]*?setSolo\(code\)[\s\S]*?clock\.play\(\)/)
+})
 
+test('a ghost path is whole and faint from the clock, with no CSS animation to fight it', () => {
+  assert.match(scene, /b \? b\.trail : faint \? 0\.22 : 1/)
+  assert.equal(ruleBody(css, '.arsenal__path--ghost'), null)
+  assert.doesNotMatch(css, /arsenal-ghost/)
+})
+```
+
+Say in the PR text that these three cases changed and why.
+
+**b. Add the import** at the top:
+
+```js
+import { LEAD, TAIL, beatsAt, countText, eo, totalMs } from '../src/screens/player/next/modules/arsenal/timeline.js'
+```
+
+**c. Append the cases:**
+
+```js
 // The Arsenal card's timeline (#2073, slice 12): the board ArsenalReveal's beats as a pure function of t.
 // Numbers are the board's; a pitch with no path (ft null) never flies and never lands.
 const close = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} is not within ${eps} of ${b}`)
@@ -676,11 +700,6 @@ test('countText counts up with the figure\'s own decimals, or the ones asked for
 })
 
 // ---- the card and the sheet ----
-const read = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8')
-const card = read('src/screens/player/next/modules/arsenal/ArsenalCard.jsx')
-const scene = read('src/screens/player/next/modules/arsenal/FlightScene.jsx')
-const css = stripComments(read('src/styles/player-next/pitcher/arsenal.css'))
-
 test('one clock drives the side view: no remount key, no CSS draw or ghost animation', () => {
   assert.match(card, /useArsenalClock\(/)
   assert.match(card, /beatsAt\(clock\.t/)

@@ -161,8 +161,9 @@ After line 140 (`--surface-inset`), add:
   /* A table row under the pointer, and a picked row (#2073): the game logs,
      Firsts and Similar Players. The row is shaded, not lifted, so both are
      darker than the card. The text pairs are in
-     src/lib/design/contrastPairings.js. --accent-negative on a picked row is
-     4.37:1, under AA: a loss on a picked row reads --clay-deep. */
+     src/lib/design/contrastPairings.js. A loss on a picked row reads
+     --clay-deep: --accent-negative there is
+     4.37:1 (--accent-negative on --surface-row-selected), under AA. */
   --surface-row-hover:    var(--paper-4);
   --surface-row-selected: var(--paper-5);
 ```
@@ -179,8 +180,9 @@ Before the closing `]` on line 346, add:
 ```js
   // THE ROW SURFACES (#2073): a table row under the pointer, and a picked row
   // (game logs, Firsts, Similar Players). The row's own text sits on them.
-  // --accent-negative on a picked row is 4.37:1, under AA, so it is not paired:
-  // a loss on a picked row reads --clay-deep (6.33:1).
+  // --accent-negative on a picked row is not paired: it is
+  // 4.37:1 (--accent-negative on --surface-row-selected), under AA. A loss on a
+  // picked row reads --clay-deep: 6.33:1 (--clay-deep on --surface-row-selected).
   { fg: 'text-heading', bg: 'surface-row-hover', min: TEXT, note: 'row under the pointer: heading ink' },
   { fg: 'text-body', bg: 'surface-row-hover', min: TEXT, note: 'row under the pointer: body text' },
   { fg: 'text-caption', bg: 'surface-row-hover', min: TEXT, note: 'row under the pointer: caption' },
@@ -197,6 +199,12 @@ Ratios I measured with `ratio()` from this module (all above 4.5): on `#F3EBD2`:
 heading 15.01, body 12.25, caption 4.86, positive 5.09, negative 4.57. On `#EFE6C8`:
 heading 14.33, body 11.69, caption 4.64, positive 4.86, clay-deep 6.33. The one
 miss: `--accent-negative` on `#EFE6C8` is 4.37.
+
+**Guard pitfall (check-contrast, part B).** A ratio written in a comment under
+`src/tokens/` must name its pair as `N:1 (--fg on --bg)`, or lint fails ("a measured
+ratio with no pair named"). Comments in `src/lib/design/*.js` and `src/styles/` are
+checked the same way when they use that form. The comments above use the form, and
+the guard then checks the number. Keep it if you reword them.
 
 `/design-lab`'s tokens page (`src/screens/designlab/tokens.jsx`) lists every
 `paper-*` and `surface-*` token and every pairing by itself. It needs no edit.
