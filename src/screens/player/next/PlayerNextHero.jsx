@@ -9,6 +9,7 @@ import { FactGrid } from '../../../components/ui/frame/FactGrid.jsx'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { DASH, Fact, debutLabel, draftLabel } from '../parts.jsx'
 import { ageFact } from './heroData.js'
+import { HeroBand } from './top/HeroBand.jsx'
 
 // The Age fact, as a button that flips to the birthday (D2-phone). The flip is
 // the motion, so a reader who asked for less motion gets plain text.
@@ -50,6 +51,7 @@ export function PlayerNextHero({ core }) {
   const role = bio.twoWay ? 'Two-way' : bio.isPitcher ? 'Pitcher' : 'Batter'
   return (
     <Card as="div" frame="stamped" body="flush" stampIn className="pnext__hero">
+      <HeroBand core={core} />
       <div className="pnext__id">
         <Headshot
           personId={bio.id}

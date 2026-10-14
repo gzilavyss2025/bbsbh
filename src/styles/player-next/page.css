@@ -162,16 +162,7 @@
   margin-top: var(--space-3h);
 }
 
-/* THE TOP CARDS: status banners, header extras, overview extras. */
-.pnext__banner {
-  margin: 0;
-  color: var(--text-heading);
-  font-family: var(--font-display);
-  font-size: var(--fs-body);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-wide);
-  text-transform: uppercase;
-}
+/* THE TOP CARDS: header extras, overview extras (the status band is top/status.css). */
 /* A small attribute line (the .t-label recipe in src/styles/CLAUDE.md). */
 .pnext__attr {
   margin: 0;
