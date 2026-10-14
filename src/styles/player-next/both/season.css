@@ -52,6 +52,9 @@
     font-size: var(--fs-body);
   }
 }
+.seasonmod .ledger .ledger__label {
+  font-family: var(--font-mono);
+}
 .seasonmod .ledger tfoot .yr {
   font-size: var(--fs-label);
 }
@@ -60,12 +63,11 @@
   border-top: var(--bw-heavy) solid var(--border-stamped);
 }
 
-/* The WAR figure is a button: dotted rule under it, the tint on hover and while its dialog is open. */
+/* The WAR figure is a button: no rule under it, the tint on hover and while its dialog is open. */
 .seasonmod__war {
   position: relative;
   padding: 0 var(--space-1);
   border: 0;
-  border-bottom: var(--bw-heavy) dotted var(--border-stamped);
   background: transparent;
   color: inherit;
   font: inherit;
