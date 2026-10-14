@@ -17,8 +17,7 @@
   font-size: var(--fs-small);
   color: var(--text-caption);
 }
-.pitchlog__date {
-  font-weight: var(--w-bold);
+.pitchlog__open {
   white-space: nowrap;
 }
 /* A series tag (NLDS) is ink; a relief tag is an ink outline, so the two read apart. */
@@ -129,4 +128,96 @@
 }
 .pitchlog__mark path:not([stroke]) {
   stroke: var(--border-stamped);
+}
+
+/* ---- The game detail view (StartDetail.jsx): a native modal <dialog> that IS the scrim, with
+   the sheet inside. Reset the browser's dialog box so .scrim fills the window. */
+.pitchlog__dialog {
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  color: inherit;
+}
+.pitchlog__dialog:not([open]) {
+  display: none;
+}
+.pitchlog__dialog::backdrop {
+  background: none;
+}
+.pitchlog__detail {
+  max-height: 100%;
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+}
+/* The sheet scrolls, so its parts keep their height (the table's scroll wrap would shrink to 0). */
+.pitchlog__detail > * {
+  flex-shrink: 0;
+}
+.pitchlog__nav {
+  justify-content: space-between;
+}
+.pitchlog__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+}
+/* The loading reserve: about the parts that land under it. */
+.pitchlog__wait {
+  min-height: 420px;
+}
+.pitchlog__result {
+  padding: var(--space-2) var(--space-3);
+  border-inline-start: var(--bw-heavy) solid var(--border-stamped);
+}
+.pitchlog__result p {
+  margin: var(--space-1) 0 0;
+}
+.pitchlog__verdict {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+.pitchlog__result--W .pitchlog__verdict {
+  color: var(--accent-positive);
+}
+.pitchlog__result--L .pitchlog__verdict {
+  color: var(--accent-negative);
+}
+.pitchlog__h {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+.pitchlog__swatch {
+  display: inline-block;
+  width: var(--space-3);
+  height: var(--space-3);
+  vertical-align: middle;
+}
+.pitchlog__pitches td {
+  text-align: end;
+}
+.pitchlog__plays {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pitchlog__plays li + li {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.pitchlog__plays p {
+  margin: var(--space-1) 0 0;
+}
+.pitchlog__inn {
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+.pitchlog__clip {
+  margin-inline-start: auto;
 }

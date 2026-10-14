@@ -6,6 +6,7 @@ import { gameLogView, loggedSplits } from '../../../../../api/person/gameLog.js'
 import { DASH, eraOf, num } from '../../../../../api/person/shared.js'
 import { ipToOuts, outsToIp } from '../../../../../lib/math/innings.js'
 import { PITCH_TYPES } from '../../../../../lib/pitch/pitchTypes.js'
+import { teamAbbr } from '../../../../../lib/teams.js'
 
 // The pitcher Game Log's rows (#1851, ADR-0110): one row per game of the season, start or relief
 // (Gary, 2026-10-13), newest first.
@@ -41,10 +42,15 @@ export function pitchlogView(splits, { cutoff = null, scores = null, mixes = nul
     return {
       gamePk: r.gamePk,
       n: ordered.length - i,
+      of: ordered.length,
       date: r.date,
+      day: s.date,
+      gameNumber: s.game?.gameNumber ?? 1,
       home: r.home,
       oppId: s.opponent?.id ?? null,
       opp: s.opponent?.name || r.opp,
+      oppAbbr: teamAbbr(s.opponent),
+      clubAbbr: teamAbbr(s.team),
       series: r.series,
       post: s.gameType !== 'R',
       relief,
@@ -74,6 +80,37 @@ export const keyOf = (rows) => [...new Set(rows.flatMap((r) => r.mix?.map((m) =>
 
 // The filter: 'all', 'reg' (the regular season) or 'post'.
 export const scopeRows = (rows, scope) => (scope === 'all' ? rows : rows.filter((r) => r.post === (scope === 'post')))
+
+export const games = (n) => `${n} ${n === 1 ? 'game' : 'games'}`
+
+// The table's lines over the loaded seasons, `blocks` = [{ season, rows }] newest first. With
+// more than one season, each opens on a divider with its year. In the All view, a divider over
+// the regular season and the postseason of a season that has both. `limit` caps the game rows.
+export function linesOf(blocks, scope, limit = Infinity) {
+  let left = limit
+  return blocks.flatMap(({ season, rows: all }) => {
+    const scoped = scopeRows(all, scope)
+    const rows = scoped.slice(0, left)
+    left -= rows.length
+    const post = scopeRows(all, 'post').length
+    const split = scope === 'all' && post > 0
+    const head = blocks.length > 1 ? [{ key: `season-${season}`, divider: String(season), note: all.length ? games(scoped.length) : 'no games on file' }] : []
+    return head.concat(
+      rows.flatMap((r, i) =>
+        split && (i === 0 || r.post !== rows[i - 1].post)
+          ? [{ key: `div-${r.gamePk}`, divider: r.post ? 'Postseason' : 'Regular season', note: games(r.post ? post : all.length - post) }, { ...r, key: r.gamePk }]
+          : [{ ...r, key: r.gamePk }],
+      ),
+    )
+  })
+}
+
+// The season "Load earlier season" fetches next: the one before the oldest loaded, never before
+// his debut year (bio.debut). Null when there is none.
+export function earlierSeason(loaded, debut) {
+  const y = Math.min(...loaded) - 1
+  return debut && y >= Number(debut.slice(0, 4)) ? y : null
+}
 
 // The totals row over the rows the filter shows. W and L are his decisions on the rows that show one.
 export function totalsOf(rows) {
