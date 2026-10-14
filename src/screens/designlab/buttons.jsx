@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { Entry, Group } from './Entry.jsx'
 
 // The REAL Button and Door, rendered — never a copy of their markup.
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Door } from '../../components/ui/control/Door.jsx'
 import { IconButton } from '../../components/ui/control/IconButton.jsx'
+import { Segmented } from '../../components/ui/control/Segmented.jsx'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { SectionHead } from '../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
 import { MARKS, SKINS } from '../../lib/design/buttonClass.js'
@@ -95,6 +98,20 @@ function Neighbours({ face }) {
   )
 }
 
+// A live Segmented: its own state, so a tap moves the fill here as it does on a card.
+// The fourth option is disabled, to show that state beside the others.
+const SEGMENTED_OPTIONS = [
+  { value: 'all', label: 'All', count: 22 },
+  { value: 'reg', label: 'Regular season', count: 19 },
+  { value: 'post', label: 'Postseason', count: 3 },
+  { value: 'spring', label: 'Spring', disabled: true },
+]
+
+function SegmentedSpecimen({ fill = false }) {
+  const [value, setValue] = useState('all')
+  return <Segmented label="Show games" value={value} onChange={setValue} options={SEGMENTED_OPTIONS} fill={fill} />
+}
+
 export function ButtonHalf() {
   return (
     <Group
@@ -148,6 +165,17 @@ export function ButtonHalf() {
             </div>
           ))}
         </div>
+      </Entry>
+      <Entry
+        title="Segmented"
+        path="src/components/ui/control/Segmented.jsx"
+        wide
+        note="A joined row of Button toggles for a choice inside a card (#2073): 44px, a 2px stamped edge, square. One option is always on. Selected is the ink fill, with no tick: the joined row carries the state, and forced-colors mode draws it in Highlight. A count rides after the label in mono. The second row is fill: the buttons share the width. Tap, press and Tab are live."
+      >
+        <Stack gap="base">
+          <SegmentedSpecimen />
+          <SegmentedSpecimen fill />
+        </Stack>
       </Entry>
       <Entry
         title="Which face outline is"
