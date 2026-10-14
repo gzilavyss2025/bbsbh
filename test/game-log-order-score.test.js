@@ -153,3 +153,26 @@ test('fetchFinalScores: an earlier ?d= cutoff still rules over today', async () 
     api.restore()
   }
 })
+
+// Brice Turang 2026-04-04, gamePk 824134: the schedule lists a split doubleheader's postponed original
+// (state Final, no score) in one `dates` entry and the played makeup, with its score, in the next.
+test('fetchFinalScores: a gamePk the feed lists twice keeps the record that has a score, whichever comes first', async () => {
+  const team = (id, score) => ({ team: { id }, ...(score == null ? {} : { score }) })
+  for (const order of [['postponed', 'played'], ['played', 'postponed']]) {
+    const rec = {
+      postponed: { gamePk: 824134, status: { abstractGameState: 'Final' }, teams: { away: team(118), home: team(112) } },
+      played: { gamePk: 824134, status: { abstractGameState: 'Final' }, teams: { away: team(118, 2), home: team(112, 8) } },
+    }
+    const m = mock.method(globalThis, 'fetch', async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ dates: order.map((k) => ({ games: [rec[k]] })) }),
+    }))
+    try {
+      const scores = await fetchFinalScores([row('2026-04-04', 824134, 2, { team: { id: 118 } })], 'hitting', null, '2026-10-13')
+      assert.deepEqual([scores.get(824134)?.runs, scores.get(824134)?.oppRuns], [2, 8], order.join(' then '))
+    } finally {
+      m.mock.restore()
+    }
+  }
+})

@@ -200,15 +200,17 @@ async function fetchSchedule(gamePks) {
   // statsapi repeats a game across `dates` entries (162 gamePks came back as
   // 164 rows), so the join list is deduped here. rows.js keys by gamePk and
   // would survive the repeat; deduping keeps the count honest for anything
-  // that measures this list.
-  const seen = new Set()
-  const games = []
+  // that measures this list. A SPLIT DOUBLEHEADER's postponed original sits
+  // beside the played makeup under one gamePk (Turang 2026-04-04, 824134): the
+  // original says Final and has no score, so the repeat with a score wins.
+  const scored = (g) => g.teams?.away?.score != null && g.teams?.home?.score != null
+  const byPk = new Map()
   for (const g of pages.flatMap((p) => (p.dates ?? []).flatMap((d) => d.games ?? []))) {
-    if (!g?.gamePk || seen.has(g.gamePk)) continue
-    seen.add(g.gamePk)
-    games.push(g)
+    if (!g?.gamePk) continue
+    const kept = byPk.get(g.gamePk)
+    if (!kept || (!scored(kept) && scored(g))) byPk.set(g.gamePk, g)
   }
-  return games
+  return [...byPk.values()]
 }
 
 // WHERE HE BATTED, game by game — a Map gamePk -> his 1-based slot in the
