@@ -160,7 +160,7 @@ Read CLAUDE.md and docs/development.md ("Cloud sessions") first.
 Goal: <one sentence>. Done means: <test or visible result>.
 Slice: <files, at most 5>. Follow the pattern in <path>.
 Rules: test first (watch it fail, then fix). For a bug, reproduce it first on a
-real gamePk from docs/test-games.md. The spoiler rule applies if you touch the
+real gamePk from docs/test-games.md, and follow the debug skill. The spoiler rule applies if you touch the
 innings viewer, scorecard, lineups, or box score. Touch no other files.
 Use the ponytail skill at level full. Do not run ponytail-review or /code-review:
 the stack reviews once (see "Check once"). Do not invoke the superpowers skills
