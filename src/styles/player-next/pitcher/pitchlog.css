@@ -11,7 +11,6 @@
   justify-content: space-between;
 }
 .pitchlog__scope,
-.pitchlog__n,
 .pitchlog__at,
 .pitchlog__pc small {
   font-size: var(--fs-small);
@@ -81,9 +80,6 @@
 
 .pitchlog__pc {
   white-space: nowrap;
-}
-.pitchlog__pc small {
-  display: block;
 }
 .pitchlog__mixcell {
   flex: 1 1 0;
