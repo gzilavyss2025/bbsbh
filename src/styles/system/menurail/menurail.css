@@ -1,0 +1,169 @@
+/* ---------------------------------------------------------------------------
+   THE MENU RAIL (#2073, slice 05; components/ui/control/MenuRail.jsx).
+   A row of cards. Pick one and the row folds into a rail of narrow cards, and
+   the focus panel under it opens. The canvas boards: ArsenalReveal .ar-mc,
+   PitcherSplits .sp-mc, PlateApproach .tp-mc, Contact .tc-mc.
+
+   This file is the RESTING look and the two states. The motion (the unfold,
+   the fold, the rise on each pick) is styles/motion/menurail.css (docs/motion.md,
+   "The seam").
+
+   Each card is a .btn. Every rule below that meets .btn outranks it on
+   specificity, so no rule here depends on the import order.
+
+   A caller may set two bases on its own class: --menurail-card (the menu,
+   150px as the boards draw it) and --menurail-rail (the rail, 132px as Plate
+   draws it; the canvas draws 128px on Splits and 112px on Contact).
+   --------------------------------------------------------------------------- */
+
+.menurail {
+  --menurail-card: calc(var(--space-2h) * 15);
+  --menurail-rail: calc(var(--tap-min) * 3);
+}
+
+.menurail__menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2h);
+}
+
+/* A group head before a card (Contact). It takes the whole row. */
+.menurail__head {
+  flex: 1 0 100%;
+  max-height: var(--space-6);
+  overflow: hidden;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-ui);
+}
+
+/* ---- the card ---- */
+
+.menurail__card.btn {
+  --btn-fill: var(--surface-card);
+  --btn-edge: var(--border-stamped);
+  --btn-ink: var(--text-heading);
+  --btn-fill-hover: var(--surface-inset);
+  --btn-edge-hover: var(--border-stamped);
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex: 1 1 var(--menurail-card);
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  min-width: 0;
+  padding: var(--space-2h) var(--space-3);
+  border-width: var(--bw-heavy);
+  border-radius: 0;
+  font-family: var(--font-body);
+  letter-spacing: var(--ls-none);
+  text-align: left;
+}
+.menurail__card.btn[aria-pressed='true'] {
+  background: var(--accent-tint);
+  border-color: var(--border-stamped);
+  color: var(--text-heading);
+  box-shadow: var(--bw-heavy) var(--bw-heavy) 0 var(--border-stamped);
+}
+/* The pick is the mint and the shadow. No tick. */
+.menurail__card.btn[aria-pressed='true']::before {
+  content: none;
+}
+/* The stamp-press (slice 02) takes the shadow away while the card is down. */
+.menurail__card.btn[aria-pressed='true']:active {
+  box-shadow: none;
+}
+
+.menurail__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.menurail__mark {
+  display: inline-flex;
+  flex: none;
+}
+.menurail__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.menurail__meta {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The figures fold: a one-row grid that goes 1fr -> 0fr in the rail. */
+.menurail__fold {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+.menurail__figs {
+  display: block;
+  min-height: 0;
+  overflow: hidden;
+}
+.menurail__figsin {
+  display: block;
+  padding-top: var(--space-2);
+}
+
+/* ---- the rail: a card a pick, narrow; the figures fold away ---- */
+
+.menurail--rail .menurail__card.btn {
+  flex: 0 0 var(--menurail-rail);
+  padding: var(--space-1h) var(--space-3);
+  justify-content: center;
+}
+.menurail--rail .menurail__fold {
+  grid-template-rows: 0fr;
+}
+.menurail--rail .menurail__head {
+  max-height: 0;
+  opacity: 0;
+}
+.menurail--rail:not(.menurail--railmeta) .menurail__meta {
+  display: none;
+}
+
+/* ---- the focus panel: always mounted, 0fr shut, 1fr open ---- */
+
+.menurail__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+}
+.menurail__panel--open {
+  grid-template-rows: 1fr;
+}
+.menurail__panelin {
+  min-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+.menurail__panel--open .menurail__panelin {
+  visibility: visible;
+}
+/* Room on the right and the bottom for a stamped shadow in the panel: the
+   wrapper above clips (canvas .cwp did the same, 6px). */
+.menurail__inner {
+  padding: var(--space-3h) var(--space-1) var(--space-1) 0;
+}
+.menurail__back.btn {
+  margin-bottom: var(--space-3);
+}
