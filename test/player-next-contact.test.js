@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
-  ballDetail, contactBalls, contactView, firstView, markKey, mixRows, pickBalls, typeOf,
+  ballDetail, contactBalls, contactView, firstView, markKey, menuRows, mixRows, pickBalls, typeOf,
 } from '../src/screens/player/next/modules/contact/contactView.js'
 
 // The batter Contact view (#1888): the spray field's ball marks, the batted-ball mix and the
@@ -89,4 +89,21 @@ test('ballDetail: the tapped ball, xBA from the store, dashes for a missing fiel
   assert.equal(d.unit, 'ft')
   assert.deepEqual(e.stats.map((s) => s[1]), ['—', '—', '—', '—'])
   assert.equal(e.when, '')
+})
+
+test('menuRows: one card per type with a ball, count and the hits / outs share', () => {
+  const mix = mixRows([
+    ...MANY(3, { launchAngle: 5, result: 'single' }),
+    ball({ launchAngle: 5 }),
+    ...MANY(2, { launchAngle: 30, result: 'out' }),
+  ])
+  assert.deepEqual(menuRows(mix), [
+    { key: 'ground', title: 'Ground ball', meta: '4 balls', hits: '75%', outs: '25%' },
+    { key: 'fly', title: 'Fly ball', meta: '2 balls', hits: '0%', outs: '100%' },
+  ])
+})
+
+test('menuRows: one ball says "ball"; no mix gives no cards', () => {
+  assert.equal(menuRows(mixRows([ball({ launchAngle: 60 })]))[0].meta, '1 ball')
+  assert.deepEqual(menuRows(null), [])
 })

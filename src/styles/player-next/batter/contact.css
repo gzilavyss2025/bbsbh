@@ -152,3 +152,15 @@
 .fcontact__facts {
   margin-top: var(--space-3);
 }
+
+/* The ball-type menu (MenuRail): a colour swatch and the hits / outs line on each card. */
+.fcontact__swatch {
+  display: block;
+  width: var(--space-4);
+  height: var(--space-4);
+}
+.fcontact__mfig {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}

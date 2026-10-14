@@ -48,3 +48,15 @@ test('the module gates the drop on first view and swaps a/b on each view or type
   assert.match(JSX, /'--fcontact-f'/)
   assert.match(JSX, /const pick = \(set, v\) => \{ set\(v\); setSel\(null\); setGen\(\(g\) => g \+ 1\) \}/)
 })
+
+test('the ball-type pick is a MenuRail; the six averages are its panel', () => {
+  assert.match(JSX, /import \{ MenuRail \} from '\.\.\/\.\.\/\.\.\/\.\.\/\.\.\/components\/ui\/control\/MenuRail\.jsx'/)
+  assert.match(JSX, /<MenuRail\s+label="Batted ball type"/)
+  assert.match(JSX, /backLabel="All batted balls"/)
+  assert.match(JSX, /onPick=\{\(k\) => pick\(setType, k\)\}/)
+  assert.doesNotMatch(JSX, /Highlight one kind of ball/)
+  for (const k of ['Avg exit velo', 'Hard hit', 'Barrels', 'Avg launch angle', 'Avg distance', 'Avg xBA']) {
+    assert.ok(JSX.includes(`'${k}'`), k)
+  }
+  assert.match(JSX, /<BattedBallMix battedBall=\{\{ rows: mix \}\} \/>/)
+})

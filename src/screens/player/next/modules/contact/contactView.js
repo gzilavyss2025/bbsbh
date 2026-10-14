@@ -94,3 +94,19 @@ export function ballDetail(b) {
     ],
   }
 }
+
+// The ball-type menu (MenuRail) of the card: one row per type that has a ball, in the
+// mixRows order. `hits` and `outs` are the canvas's "NN% hits / NN% outs" line, from `avg`.
+// A type with no ball has nothing to pick, so it has no card (BattedBallMix still lists it).
+export function menuRows(mix) {
+  const pc = (x) => (x == null ? DASH : `${Math.round(x * 100)}%`)
+  return (mix ?? [])
+    .filter((r) => r.n > 0)
+    .map((r) => ({
+      key: r.key,
+      title: r.name,
+      meta: `${r.n} ${r.n === 1 ? 'ball' : 'balls'}`,
+      hits: pc(r.avg),
+      outs: pc(r.avg == null ? null : 1 - r.avg),
+    }))
+}
