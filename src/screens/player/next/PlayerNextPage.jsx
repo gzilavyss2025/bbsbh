@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { loadPlayerCore } from '../../../api/player/core.js'
 import { loadPlayerOverview } from '../../../api/player/overview.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../../hooks/useDocumentTitle.js'
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
+import { hasSeen, markSeen, viewKey } from '../../../lib/motion/inViewOnce.js'
 import { replayClass } from '../../../lib/jumpbar/land.js'
 import { LinkScope } from '../../../lib/nav.jsx'
 import { AsyncGate } from '../../../components/ui/AsyncGate.jsx'
@@ -66,6 +68,16 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
   // The section a jump-bar tap landed on, and how many landings so far (decision 3):
   // its cards stamp in once per landing. Never set on a cold load, Back or an old address.
   const [landed, setLanded] = useState({ key: null, tick: 0 })
+  // The top cards (hero, tiles) stamp in the first time this player's page shows in this page
+  // visit; Back inside the app shows them at rest (docs/motion.md, "The one-shot gate"). The
+  // answer is read once, at mount. The mark is written when the cards show, so a page that
+  // fails to load does not use up the stamp.
+  const topKey = viewKey(id, 'top-cards')
+  const [still, setStill] = useState(() => hasSeen(topKey))
+  const shown = Boolean(core.data && overview.data)
+  useEffect(() => {
+    if (shown) markSeen(topKey)
+  }, [shown, topKey])
   const back = () => window.history.back()
   const gate = AsyncGate({
     loading: core.loading || overview.loading,
@@ -89,6 +101,9 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
   const onLand = (key) => {
     if (motionIsReduced()) return
     if (key === 'overview') {
+      // A return visit drew the top at rest. Take that off in this commit, or the replay
+      // finds `animation: none` and plays nothing.
+      flushSync(() => setStill(false))
       for (const el of document.querySelectorAll('#overview .card--stamp-in')) replayClass(el, 'card--stamp-in')
       return
     }
@@ -101,7 +116,7 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
         <SiteHeader />
         <BackBtn onClick={back} />
         <Stack gap="section" className="pnext__page">
-          <Stack gap="section" id="overview">
+          <Stack gap="section" id="overview" className={still ? 'pnext__top--still' : undefined}>
             <PlayerNextHero core={core.data} />
             {rows.map((b) => (
               <PlayerNextTiles
