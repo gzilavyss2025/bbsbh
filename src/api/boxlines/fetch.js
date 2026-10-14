@@ -198,17 +198,27 @@ async function fetchSchedule(gamePks) {
     ),
   )
   // statsapi repeats a game across `dates` entries (162 gamePks came back as
-  // 164 rows), so the join list is deduped here. rows.js keys by gamePk and
-  // would survive the repeat; deduping keeps the count honest for anything
-  // that measures this list.
-  const seen = new Set()
-  const games = []
+  // 164 rows), so the join list is deduped here: one record per gamePk.
+  //
+  // WHICH RECORD: the first, UNLESS it has no score and a later one does. A
+  // game postponed and made up on a later date keeps its gamePk and comes back
+  // twice — the first date's `Postponed` record (Final, no score) and the played
+  // date's `Final` one (gamePk 824134: Postponed 2026-04-03, played 04-04 as
+  // game 2, 2–8; verified 2026-10-13). The played record must win, or the gate
+  // drops a game he played. A SUSPENDED game also comes back twice, but both
+  // records carry the score and only the FIRST carries `resumeDate` (777861),
+  // so it keeps the first and rows.js's resumeDate gate is unchanged. A single
+  // stuck `Postponed` record (#1031) has no second one, so it stays and goes to
+  // the linescore recovery as before. The played record may be dated today;
+  // rows.js's officialDate check holds it.
+  const scored = (g) => g.teams?.away?.score != null && g.teams?.home?.score != null
+  const byPk = new Map()
   for (const g of pages.flatMap((p) => (p.dates ?? []).flatMap((d) => d.games ?? []))) {
-    if (!g?.gamePk || seen.has(g.gamePk)) continue
-    seen.add(g.gamePk)
-    games.push(g)
+    if (!g?.gamePk) continue
+    const kept = byPk.get(g.gamePk)
+    if (!kept || (!scored(kept) && scored(g))) byPk.set(g.gamePk, g)
   }
-  return games
+  return [...byPk.values()]
 }
 
 // WHERE HE BATTED, game by game — a Map gamePk -> his 1-based slot in the
@@ -391,7 +401,7 @@ export async function fetchBoxLines({ personId, group, cutoff = null, facet = nu
 // A SUSPENDED GAME ENDS ON A LATER DAY than its split says. gamePk 777861 was
 // suspended 2025-05-19 and finished 2025-05-21; its split and officialDate stay
 // 05-19, and only the schedule record's `resumeDate` (on the first `dates`
-// entry, the one fetchSchedule keeps) names 05-21. boxLineRows' gate drops a
+// entry, the one fetchSchedule keeps for a suspended game) names 05-21. boxLineRows' gate drops a
 // record whose resumeDate, as a Pacific day, is on or after `until`.
 export async function fetchFinalScores(splits, group, cutoff = null, today = baseballToday()) {
   const until = cutoff && cutoff < today ? cutoff : today

@@ -221,6 +221,10 @@ function* gatedPairs({ splits, schedule, cutoff, gameTypes }) {
     // `resumeDate` names the day it ended (gamePk 777861: suspended 2025-05-19,
     // finished 05-21). Read as a Pacific day, on or after the cutoff = out.
     if (cutoff && g.resumeDate && !(baseballToday(new Date(g.resumeDate)) < cutoff)) continue
+    // A MAKEUP under the same gamePk: fetch.js keeps the PLAYED record, whose
+    // officialDate is the day it was played (824134: postponed 2026-04-03,
+    // played 04-04). On or after the cutoff = out, whatever date the split says.
+    if (cutoff && g.officialDate && !(g.officialDate < cutoff)) continue
     yield [s, g]
   }
 }
