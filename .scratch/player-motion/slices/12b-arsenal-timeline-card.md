@@ -5,8 +5,8 @@ Part 2 of 3 (12a: the clock and the side view; 12c: speed, scrubber, lab entry).
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: high (it builds on two parts it did not write:
-  `MenuRail` from slice 05 and `useInViewOnce` from slice 01c).
-- Depends on: 12a merged.
+  `MenuRail` from slices 05a/05b and `useInViewOnce` from slice 01c).
+- Depends on: 12a merged (and so 01a, 01b, 05a, 05b), 01c merged (`useInViewOnce`).
 - Parallel with: 06, 08, 10, 16, 17, 20. Not with 12c, 13, 14, 15.
 
 ## Goal
@@ -32,7 +32,8 @@ timeline starts the first time the card comes into view, not on mount.
 - The clock waits on the first frame while `phase` is `'wait'`, plays one time
   when it turns `'play'`, and shows the last frame for `'rest'` (a return visit in
   the same tab, reduced motion, no IntersectionObserver).
-- `npm run lint`, `npm test`, `npm run build` pass. The new tests fail before the change.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR. The new tests fail before the change.
 
 ## Files
 
@@ -161,7 +162,7 @@ its first, empty frame). Read the merged files; this is what slice 01c specifies
 shape is `{ key, title, meta, figures, mark, label, disabled, heading, style,
 className }`; `cardProps(item, picked)` gives the card Button `className:
 'menurail__card' + item.className`, `pressed`, and `style: item.style`. The card
-CSS (`src/styles/system/control/menurail.css`, `.menurail__card.btn`) already has
+CSS (`src/styles/system/menurail/menurail.css`, `.menurail__card.btn`) already has
 `position: relative; isolation: isolate`, so the sweep's `z-index: -1` sits on the
 card. Slice 05b's `src/styles/motion/menurail.css` sets:
 
@@ -411,7 +412,7 @@ test('a landing sweeps the row in mint and pops its glyph', () => {
 
 ## Verify
 
-- `npm run lint`, `npm test`, `npm run build`.
+- `node --test test/arsenal-motion.test.js` and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - `npm run dev`, `/player/robert-gasser-688107?nointro` at 390px and 1180px. Load
   the page at the top and scroll down to "Pitch arsenal": nothing plays before the
   card shows; then the bar rolls in with its edge, the rows flip in one by one and

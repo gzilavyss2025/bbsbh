@@ -3,7 +3,7 @@
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: medium.
-- Depends on: 05 merged (`MenuRail`) and 08b merged (08a's `Part` and 08b's
+- Depends on: 05a and 05b merged (`MenuRail` and its motion) and 08b merged (08a's `Part` and 08b's
   Game lines on `Part`; same module folder).
 - Parallel with: 10, 11, 13, 16, 17, 20. Not with 08a or 08b.
 
@@ -27,7 +27,8 @@ not change.
   (`MenuRail`), and only the part's bars grow, the first time it comes into view.
 - The batter's card shows the four parts as before, with 08a's rise.
 - The old menu CSS is gone; `MenuRail` has no API change.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files
 
@@ -39,7 +40,7 @@ not change.
    in-panel part rules.
 4. `test/player-splits-menurail.test.js` — new.
 
-Four files. No lab entry: the motion is `MenuRail`'s, and slice 05 adds its entry.
+Four files. No lab entry: the motion is `MenuRail`'s, and slice 05c adds its entry.
 
 ## Canvas
 
@@ -73,7 +74,7 @@ How this maps to `MenuRail` (`spec.md`, "The two new parts"):
 | `.sp-mx` (preview + hint), folds to `0fr` in the rail | `figures` (the part's figures wrapper folds to `0fr`) |
 | `fcs` (`''` or a key), tap again to clear | `picked` (`null` or a key), `onPick(null)` on a second tap |
 | `.cw` per section, `0fr` ↔ `1fr` over .45s | the one `.menurail__panel`, `0fr` ↔ `1fr` over `--dur-unfold` |
-| `.sp-mc:active` scale(.98), hover `#EDE6D1` | `MenuRail`'s own press and hover (slice 05) |
+| `.sp-mc:active` scale(.98), hover `#EDE6D1` | `MenuRail`'s own press and hover (slices 05a, 05b) |
 | picked card ink fill `#1B2A3A` | `MenuRail`'s picked look, `--accent-tint` and the offset shadow |
 
 **Decision (this slice): the section open is the `MenuRail` panel, not a per-part
@@ -337,7 +338,7 @@ test('splits.css: inside the panel a part does not rise again, and its bars stil
 
 ## Verify
 
-1. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/player-splits-menurail.test.js` and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 2. `npm run dev`, pitcher `/player/robert-gasser-688107?nointro`, at 390px and at
    1180px. The Splits card opens on the menu. Tap "By handedness": the cards
    shrink to the rail, the previews fold, the panel opens and its bars grow. Tap
@@ -352,16 +353,18 @@ test('splits.css: inside the panel a part does not rise again, and its bars stil
 
 ## Out of scope
 
-- Any change to `MenuRail` itself (slice 05). If it needs one, stop (below).
+- Any change to `MenuRail` itself (slices 05a, 05b). If it needs one, stop (below).
 - The batter's card layout.
 - A hint line under the menu ("Pick a section to open it."): the board has one,
   the live card does not. Not added here.
 
 ## Stop if
 
-- Slice 05 is not merged, or `MenuRail`'s props differ from `spec.md`
-  (`label`, `items` with `key`/`title`/`meta`/`figures`/`mark`, `picked`, `onPick`,
-  `panel`, `backLabel`).
+- 05a or 05b is not merged, or `MenuRail`'s props differ from the API in
+  `05a-menurail-part.md` ("The API": `label`, `items` with `key`/`title`/`meta`/
+  `figures`/`mark`, `picked`, `onPick`, an optional `panel`, `backLabel`, `railMeta`,
+  `className`). This slice uses `label`, `items` (`key`, `title`, `figures`),
+  `picked`, `onPick` and `panel`.
 - The panel wrapper is not `.menurail__panel` (the in-panel rules key on it), or
   a closed panel is not clipped (a part in it would count as in view).
 - `MenuRail` does not call `panel(key)` for the picked key, or cannot show a

@@ -6,8 +6,7 @@ Part 3 of 4 of slice 01 (see 01a for the split).
 
 - Model: `claude-sonnet-5-5`. Effort: medium.
 - Depends on: none (it reads no new token).
-- Parallel with: 01a, 01b, 02a. Slices 07 and the module slices that rise on view
-  (08, 10, and others) wait for it.
+- Parallel with: 01a, 01b, 02a. Slices 07a, 08a, 10, 12b and 17a wait for it.
 
 ## Goal
 
@@ -321,7 +320,7 @@ test('the hook: with an observer, a new block waits and a seen one rests', () =>
 ## Verify
 
 1. `node --test test/in-view-once.test.js`
-2. `npm run lint` (eslint reads the hook), `npm test`, `npm run build`.
+2. `npm run lint` (eslint reads the hook). Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. No screen calls the hook yet, so there is nothing to render. Do not add a caller
    in this slice.
 

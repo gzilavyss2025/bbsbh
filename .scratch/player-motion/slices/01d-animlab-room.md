@@ -312,7 +312,7 @@ so `ruleBody(css, '.animlab__frame .player-rise')` finds it.
 
 1. `node --test test/animation-lab-player.test.js`
 2. `npm run lint` (check-file-size: AnimationLab.jsx under 600; check-dir-size;
-   eslint `no-unused-vars` for the removed `Stack`), `npm test`, `npm run build`.
+   eslint `no-unused-vars` for the removed `Stack`). Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. `npm run dev`, then open `/animation-lab?nointro` in the preinstalled Chromium at
    390px and at 1180px. Scroll to "Player page — the rise". The live stage rests on
    its first frame (three tiles not shown). Press Play: the three tiles rise one

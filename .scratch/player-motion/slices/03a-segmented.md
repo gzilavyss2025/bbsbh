@@ -35,7 +35,8 @@ hand-draw a third".
 - `src/styles/system/segmented/segmented.css` draws it, imported by `src/index.css`
   directly **after** `system/pill.css` and **before** `system/button.css`.
 - `test/segmented.test.js` passes; it fails on `main` today.
-- `npm run lint`, `npm test`, `npm run build` are green.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (5)
 
@@ -487,8 +488,9 @@ weaken the assertion.
 
 ## Verify
 
-1. `node --test test/segmented.test.js test/button-cascade.test.js test/pill-cascade.test.js`.
-2. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/segmented.test.js test/button-cascade.test.js test/button-placement.test.js`
+   (the new test and the two this slice edits).
+2. `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. No live screen uses Segmented yet (03b adds the lab entry, 04a-d the swaps). To
    see it in Chromium before 03b, mount it for one run in a scratch copy of the
    design lab, take the screenshot, and do not commit that edit. Check at 390px:

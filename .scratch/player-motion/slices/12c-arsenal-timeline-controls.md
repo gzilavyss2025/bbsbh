@@ -25,7 +25,8 @@ live and a frozen strip of its frames.
 - The speed persists across picks. A pick still replays at the chosen speed.
 - `/animation-lab` shows "Pitch arsenal: the timeline" with the live card (its own
   Replay) and frames at 0, 300, 760, 1100, 1500, 2000ms and the end.
-- `npm run lint`, `npm test`, `npm run build` pass. The new tests fail before the change.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR. The new tests fail before the change.
 
 ## Files
 
@@ -280,7 +281,7 @@ test('the lab shows the timeline live and as pinned frames', () => {
 
 ## Verify
 
-- `npm run lint`, `npm test`, `npm run build`.
+- `node --test test/arsenal-motion.test.js` and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - `npm run dev`, `/player/robert-gasser-688107?nointro` at 390px and 1180px: the
   bar wraps on a phone with no horizontal scroll; drag the range: the scene, the
   bar and the rows follow; press `⅓×`: it reads `⅙×` and the flight replays twice

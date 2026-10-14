@@ -8,7 +8,8 @@ step, the scrubber and the `/animation-lab` entry.
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: high.
-- Depends on: 11 merged (and so 01 and 05).
+- Depends on: 11 merged (and so 01a, 05a and 05b), 01b merged (`easeOutQuart` in
+  `src/lib/motion/curves.js`).
 - Parallel with: 06, 08, 10, 16, 17, 20. Not with 12b, 12c, 13, 14, 15 (same
   `modules/arsenal/` folder and `arsenal.css`). Slices 13 to 15 leave
   `FlightScene.jsx` alone, so the props added here are this card's only.
@@ -29,7 +30,8 @@ behind the ball, the landing ripple, the scale ticks and the catcher-view marks.
 - The CSS `arsenal-draw` animation and the slice-11 `arsenal-ghost` animation are
   gone. The JS clock sets every opacity, so no CSS animation can override it.
 - Reduced motion: the card shows the last frame at once (`t` is `total`).
-- `npm run lint`, `npm test`, `npm run build` pass. The new tests fail before the change.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR. The new tests fail before the change.
 
 ## Files
 
@@ -726,7 +728,7 @@ test('the scene draws the beats: ring, ripple, seam, ticks', () => {
 
 ## Verify
 
-- `npm run lint`, `npm test`, `npm run build`.
+- `node --test test/arsenal-motion.test.js` and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - `npm run dev`, pitcher route `/player/robert-gasser-688107?nointro`, 390px and
   1180px. Scroll to "Pitch arsenal". The ticks draw in right to left, the ring
   pops at the release point, five balls leave together and spin, the trails draw

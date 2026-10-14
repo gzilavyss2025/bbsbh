@@ -31,7 +31,8 @@ type plays the drop again. A colour change does not. Back in the same tab does n
 - Reduced motion: the dots show at once, no drop.
 - `/animation-lab` has a "Contact — the dots drop in" entry with the real classes, live
   and in a frozen strip.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files
 
@@ -413,8 +414,8 @@ test("the Lab shows the drop, and its frozen frames keep each dot's own delay", 
 
 ## Verify
 
-- `node --test test/player-next-contact-motion.test.js`, then `npm run lint`,
-  `npm test`, `npm run build`.
+- `node --test test/player-next-contact-motion.test.js`, then `npm run lint`.
+  Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - Chromium at 390px and 1180px: `/player/brice-turang-668930?nointro`. Scroll to the
   Contact card. Take a frame strip (about 0, 200, 500, 800, 1100ms after it comes into
   view). Tap "Hits": the drop plays again. Tap "Ball type": no drop. Navigate to a team

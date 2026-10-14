@@ -343,8 +343,9 @@ assertion matches it.
 
 ## Verify
 
-1. `node --test test/motion-curves.test.js test/scorecard-lens-glide.test.js test/css-tokens.test.js`
-2. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/motion-curves.test.js`
+2. `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
+   CI also runs `test/scorecard-lens-glide.test.js`; if it fails there, see "Stop if".
 3. No screen uses `.player-rise` yet, so nothing on `/player/...` changes. Render
    `/player/brice-turang-668930?nointro` at 390px and confirm that it looks the same
    as on `main` (the import adds no rule that matches today). The Animation Lab entry

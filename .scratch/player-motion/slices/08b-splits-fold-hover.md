@@ -8,7 +8,8 @@ reader opens, turns the fold chevron, adds the canvas hover and press, and adds 
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: medium.
-- Depends on: 08a merged (and so 01).
+- Depends on: 08a merged (and so 01a and 01c), 01d merged
+  (`src/screens/animlab/PlayerMotionLab.jsx`).
 - Parallel with: 02, 03, 05, 06, 07, 10. Not with 09 (same module folder).
 
 ## Goal
@@ -32,8 +33,10 @@ hover with the canvas colours, and a club press shrinks the club a little.
 - A club press is `scale(0.97)` over `--dur-fast` on `--ease-stamp`. A door press
   is `--bg-canvas`.
 - Reduced motion: no cascade, no chevron turn, no press scale.
-- `/animation-lab` has a Splits entry with the real classes.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- `/animation-lab` has a Splits entry with the real classes, in
+  `src/screens/animlab/PlayerMotionLab.jsx`.
+- `test/player-splits-motion.test.js` and `npm run lint` pass. CI runs the full
+  `npm test` and `npm run build` on the PR.
 
 ## Files
 
@@ -42,8 +45,12 @@ hover with the canvas colours, and a club press shrinks the club a little.
 2. `src/screens/player/next/modules/splits/parts.css` — chevron turn, cascade,
    hover, press, reduced motion (191 lines today; about 55 added).
 3. `test/player-splits-motion.test.js` — add cases (08a made the file).
-4. `src/screens/animlab/motionDemos.jsx` — `SplitsRiseDemo`.
-5. The lab entry's home — see Build step 4.
+4. `src/screens/animlab/PlayerMotionLab.jsx` (01d) — `SplitsRiseDemo` and its `Entry`.
+
+Not `motionDemos.jsx`, not `AnimationLab.jsx`: 01d moved every player-motion entry to
+`PlayerMotionLab.jsx`, because `AnimationLab.jsx` is at the 600-line cap.
+`PlayerMotionLab.jsx` is shared with other slices (05c, 10, 12c, 17a): merge `main`
+in before you push, and add your entry after the ones already there.
 
 ## Canvas
 
@@ -144,8 +151,8 @@ Keep the boxlines hover outline; this slice adds only the background.
 `check-raw-values.mjs`, `check-typography.mjs` and `check-focus-ring.mjs` do not
 read it. The test below checks it for raw times and hex instead.
 
-`src/screens/AnimationLab.jsx` is **597 lines** on this checkout (cap 600). An
-`Entry` there takes about 12 lines.
+`src/screens/AnimationLab.jsx` is 597 lines (cap 600). Slice 01d added
+`src/screens/animlab/PlayerMotionLab.jsx` for every player-motion entry.
 
 ## Build
 
@@ -169,7 +176,8 @@ Add the tapped-fold state under `folds` (line 15):
             <Cells quiet line={line} layout={layout} i={i} />
 ```
 
-The root becomes `<Part once={`${bio.id}:splits-${group}:g`} wide label="Game lines">`
+Import `viewKey` from `../../../../../lib/motion/inViewOnce.js` (slice 01c). The root
+becomes `<Part once={viewKey(bio.id, `splits-${group}:g`)} wide label="Game lines">`
 and `</section>` (line 101) becomes `</Part>`.
 
 The items map takes an index: `{s.items.map((item, n) =>`, and the plain door is
@@ -264,9 +272,10 @@ Append at the end of the file:
 }
 ```
 
-### 3. `motionDemos.jsx`
+### 3. `PlayerMotionLab.jsx` (the demo)
 
-Add at the top with the other imports:
+In `src/screens/animlab/PlayerMotionLab.jsx` (01d), add at the top with the other
+imports:
 
 ```jsx
 import '../../styles/player-next/both/splits.css'
@@ -274,7 +283,9 @@ import '../player/next/modules/splits/parts.css'
 import { Row } from '../player/next/modules/splits/LineRows.jsx'
 ```
 
-Add at the end (invented figures, never a game). The demo does not use `Part`:
+Add the demo above `export function PlayerMotionLab()` (invented figures, never a
+game). Do not export it: the file exports only `PlayerMotionLab`. The demo does not
+use `Part`:
 `useInViewOnce` remembers a key for the page visit, so Play could not replay it.
 It sets `is-in` itself.
 
@@ -286,7 +297,7 @@ const DEMO_SPLITS = [
   { key: 'l', label: 'vs LHP', count: 118, avg: '.281', rest: '/.350/.470', ops: '.820', delta: '+.061', hr: 5, k: '17%', bb: '10%', fill: { kind: 'pos', scale: 0.68 }, tick: 63 },
   { key: 'r', label: 'vs RHP', count: 294, avg: '.254', rest: '/.323/.411', ops: '.734', delta: '-.025', hr: 9, k: '20%', bb: '9%', fill: { kind: 'neg', scale: 0.61 }, tick: 63 },
 ]
-export function SplitsRiseDemo() {
+function SplitsRiseDemo() {
   return (
     <div className="splitsmod">
       <section className="splitsmod__part is-in" aria-label="By handedness, invented">
@@ -300,6 +311,9 @@ export function SplitsRiseDemo() {
 ```
 
 ### 4. The lab entry
+
+Add this `Entry` inside the fragment that `PlayerMotionLab` returns, after the
+entries already there:
 
 ```jsx
       <Entry
@@ -315,26 +329,18 @@ export function SplitsRiseDemo() {
       />
 ```
 
-No frozen strip: a frozen strip needs its classes listed in the `.animlab__frame`
-selector of `src/styles/46-consent-modal.css`, which would be a sixth file.
-
-Where it goes, in this order:
-
-1. If slice 01 (or 02, 03, 05) made a home for player-page lab entries (for
-   example a component in `src/screens/animlab/` that `AnimationLab.jsx` renders
-   once), add the `Entry` there.
-2. Else, if `src/screens/AnimationLab.jsx` stays at or under 600 lines with the
-   `Entry` and the import name added, add it after the stamp-in `Entry`.
-3. Else, stop and report (see Stop if). Do not raise the file-size cap.
+No frozen strip, so no rule in the `.animlab__frame` freeze list of
+`src/styles/46-consent-modal.css` (01d: only a frozen strip needs one). Do not touch
+`AnimationLab.jsx` or `motionDemos.jsx`. Do not raise the file-size cap.
 
 ### Guards
 
 - `parts.css` is outside the CSS guards (see Live today); the test covers it.
 - `check-file-size.mjs`: `parts.css` 191 → about 250; `GameLines.jsx` 103 → about
-  115; `motionDemos.jsx` 349 → about 372.
+  115; `PlayerMotionLab.jsx` grows by about 35 lines.
 - `check-dir-size.mjs`: no new source file under `src/`.
-- `motionDemos.jsx` exports components only (react-refresh); `DEMO_SPLITS` stays
-  module-private.
+- `PlayerMotionLab.jsx` exports components only (react-refresh); `DEMO_SPLITS` and
+  `SplitsRiseDemo` stay module-private.
 
 ## Test first
 
@@ -357,7 +363,7 @@ test('a fold the reader opens cascades its rows, and their bars grow', () => {
   const gl = read(`${MOD}GameLines.jsx`)
   assert.match(gl, /tapped\[item\.fold\.key\] \? 'splitsmod__appear' : undefined/)
   assert.match(gl, /style=\{\{ '--i': i \}\}/)
-  assert.match(gl, /<Part once=\{`\$\{bio\.id\}:splits-\$\{group\}:g`\}/)
+  assert.match(gl, /<Part once=\{viewKey\(bio\.id, `splits-\$\{group\}:g`\)\}/)
 })
 
 test('the fold chevron turns, and a club press shrinks the club', () => {
@@ -394,7 +400,8 @@ test('parts.css: no raw time and no hex', () => {
 
 ## Verify
 
-1. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/player-splits-motion.test.js` and `npm run lint`. Do not run
+   the full `npm test` or `npm run build`: CI runs them on your PR.
 2. `npm run dev`, batter `/player/brice-turang-668930?nointro`, at 390px and at
    1180px. Scroll to Game lines: it rises and its bars grow. Open "Show more", then
    open the weekday fold: its rows rise one after the next. Close and open it: it
@@ -421,6 +428,6 @@ test('parts.css: no raw time and no hex', () => {
   `splitsmod-grow` are not in `splits.css`.
 - The quoted code at `GameLines.jsx:29`, `:47-58`, `:63`, `:88` or `parts.css:16-33`,
   `:150-158` differs from this brief.
-- The lab entry has no home that keeps every file at or under 600 lines (Build
-  step 4). Report the line counts.
+- `src/screens/animlab/PlayerMotionLab.jsx` does not exist (01d not merged). Do not
+  add the entry to `AnimationLab.jsx`.
 - An open PR touches `src/screens/player/next/modules/splits/`.

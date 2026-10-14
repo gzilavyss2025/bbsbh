@@ -5,7 +5,7 @@ Part of slice 20 (split in three; see `20a-small-fixes-log-rows.md` for the tabl
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: **medium** (a small slice; low would also do).
-- Depends on: **01 merged** (`--surface-row-hover`) and **04b merged** (04b edits
+- Depends on: **01a merged** (`--surface-row-hover`) and **04b merged** (04b edits
   `similar.css`). `batter/fouls.css` is touched by no other slice.
 - Parallel with: 20a, 20b.
 
@@ -23,7 +23,8 @@ FoulBalls board draws them.
 - `.simp__row:focus-visible` draws the house ring, inset (the row spans the card).
 - `.fouls__cell` is `min-height: calc(var(--tap-min) + var(--space-2))` (52px).
 - `test/player-next-similar-rows.test.js` passes; it fails before the change.
-- `npm run lint`, `npm test`, `npm run build` are green.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (3)
 
@@ -47,7 +48,7 @@ FoulBalls board draws them.
 `FoulBalls`: `.fe-cell{...;min-height:52px;border:2px solid #0F1822;margin:-1px;...}`.
 52px = `--tap-min` (44px) + `--space-2` (8px).
 
-`#F3EBD2` → `--surface-row-hover` (slice 01). The ring: the house ring at
+`#F3EBD2` → `--surface-row-hover` (slice 01a). The ring: the house ring at
 `--bw-heavy`, inset by one heavy width, as `.firsts__row:focus-visible` does
 (`both/firsts.css` l.30-33). The Back button is a `Button` and already has the
 `.btn` ring.
@@ -159,8 +160,8 @@ test('a Foul balls count cell is 52px, the tap minimum plus one step', () => {
 
 ## Verify
 
-1. `node --test test/player-next-similar-rows.test.js test/player-next-similar.test.js test/player-next-fouls.test.js test/player-next-pfouls.test.js`.
-2. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/player-next-similar-rows.test.js`.
+2. `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. `npm run dev`, Chromium at 390px and 1180px, pitcher
    `/player/robert-gasser-688107?nointro` ("Pitches like") and batter
    `/player/brice-turang-668930?nointro` ("Hits like"): point at a row (tint), Tab to
@@ -174,6 +175,6 @@ test('a Foul balls count cell is 52px, the tap minimum plus one step', () => {
 
 ## Stop if
 
-- 01 or 04b is not on `main`.
+- 01a or 04b is not on `main`.
 - `.simp__row` is no longer a `<button>` (the ring would then need a different host).
 - An open PR edits `similar.css` or `batter/fouls.css`.

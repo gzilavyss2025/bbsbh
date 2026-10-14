@@ -5,7 +5,7 @@ Part of slice 20 (split in three; see `20a-small-fixes-log-rows.md` for the tabl
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: **medium**.
-- Depends on: **01 merged** (`--ease-stamp`) and **04a merged** (04a edits
+- Depends on: **01a merged** (`--ease-stamp`) and **04a merged** (04a edits
   `season/index.jsx`).
 - Parallel with: 20a, 20c, and any slice that does not touch these four files.
 
@@ -34,7 +34,8 @@ Three small state fixes the canvas draws and the live cards miss:
   `[open]` with a transition, the closed bar has a hover, and a reduced-motion block
   turns the transition off.
 - `test/player-next-season-contract-states.test.js` passes; it fails before the change.
-- `npm run lint`, `npm test`, `npm run build` are green.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (5)
 
@@ -346,8 +347,8 @@ their line, or are indented). Keep that order.
 
 ## Verify
 
-1. `node --test test/player-next-season-contract-states.test.js test/player-next-season.test.js test/player-next-contract.test.js`.
-2. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/player-next-season-contract-states.test.js`.
+2. `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. `npm run dev`, Chromium at 390px and 1180px, batter
    `/player/brice-turang-668930?nointro`:
    - Season card: tap a WAR figure. Behind the scrim the figure keeps its tint. Tab
@@ -371,7 +372,7 @@ their line, or are indented). Keep that order.
 
 ## Stop if
 
-- 01 is not on `main` (`--ease-stamp` missing from `src/tokens/effects.css`) or 04a is
+- 01a is not on `main` (`--ease-stamp` missing from `src/tokens/effects.css`) or 04a is
   not on `main`.
 - The table rows have no `key`, or two rows share one (then `aria-expanded` would mark
   two buttons): report it.

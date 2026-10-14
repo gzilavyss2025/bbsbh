@@ -3,7 +3,7 @@
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: high.
-- Depends on: 01 merged (`--stagger-step`, `--ease-stamp-in`), **07a merged** (it
+- Depends on: 01a merged (`--stagger-step`, `--ease-stamp-in`), **07a merged** (it
   rewrites `Slot.jsx`; this slice adds two props to that version). Slice 02 does not
   block it (02 changes only `jumpbar.css`; this slice changes `HubTabBar.jsx`).
 - Parallel with: 02, 03, 05, 06, 08, 10, 13, 20.
@@ -31,7 +31,8 @@ A cold load, Back, a return visit and an old `/stats` address do not stamp.
   `--stagger-step`), or for `overview`, restarts the hero's and the tiles' stamp-in.
 - Reduced motion: no stamp and no replay (the page checks `motionIsReduced()`; the CSS
   already sets `animation: none`, `stamp-in.css:28-32`). The hold still runs.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files
 
@@ -558,7 +559,7 @@ Keep `test/jump-bar.test.js` green (spy.js does not change).
 
 ## Verify
 
-- `npm run lint`, `npm test`, `npm run build`.
+- `node --test test/jump-bar-land.test.js` and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - `npm run dev`, 390px and 1180px, `/player/brice-turang-668930?nointro` and
   `/player/robert-gasser-688107?nointro`, in the preinstalled Chromium.
   - From the top, tap History (the farthest section). It lands with the History name

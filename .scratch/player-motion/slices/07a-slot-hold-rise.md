@@ -423,13 +423,13 @@ test('the body rises once per player and slot', () => {
 })
 ```
 
-Also keep `test/player-next-sections.test.js` green (it does not check `minH`).
+`test/player-next-sections.test.js` does not check `minH`; CI runs it on the PR.
 
 ## Verify
 
-- `node --test test/player-next-slot-hold.test.js test/player-next-sections.test.js`
-  and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on
-  your PR.
+- `node --test test/player-next-slot-hold.test.js` and `npm run lint`. Do not run the
+  full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in
+  `.claude/skills/orchestrate/SKILL.md`).
 - `npm run dev`. At 390px and 1180px, open `/player/brice-turang-668930?nointro` and
   `/player/robert-gasser-688107?nointro`.
   - No "Loading Season…" (or any "Loading {label}…") text shows at any time.

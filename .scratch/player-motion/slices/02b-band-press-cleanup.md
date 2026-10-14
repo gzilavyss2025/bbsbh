@@ -242,8 +242,8 @@ it guards against a press shadow coming back. Then delete the rules.
 
 ## Verify
 
-1. `node --test test/band-focus-ring.test.js test/stamp-press.test.js test/pill-cascade.test.js test/button-cascade.test.js`
-2. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/band-focus-ring.test.js` (this slice edits it).
+2. `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. `npm run dev`, then in the preinstalled Chromium at 390px:
    - `/team/milwaukee-brewers-158?nointro` (the hub hero): Tab to Game Notes and
      to the Postseason Odds Pill; hold a press with the keyboard (`page.keyboard.down('Space')`)

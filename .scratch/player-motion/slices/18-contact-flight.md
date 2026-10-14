@@ -28,7 +28,8 @@ landed state at once.
   and 60ms). The screen reader hears the ball once, after it lands.
 - A second tap on the same ball flies it again.
 - Reduced motion: no flight, no rings; the selection ring and the full panel show at once.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files
 
@@ -723,8 +724,8 @@ test('the module flies the tapped ball and speaks once, on landing', () => {
 
 ## Verify
 
-- `node --test test/player-next-contact-flight.test.js`, then `npm run lint`,
-  `npm test`, `npm run build`.
+- `node --test test/player-next-contact-flight.test.js`, then `npm run lint`.
+  Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - Chromium at 390px and 1180px: `/player/brice-turang-668930?nointro`. Tap a home run.
   Take a frame strip at about 0, 260, 900, 1500ms, landing, landing + 300ms, landing +
   1400ms. Check: the pulse at the plate, the ball growing at the top of its arc, the

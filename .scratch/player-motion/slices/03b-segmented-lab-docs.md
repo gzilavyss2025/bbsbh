@@ -26,7 +26,8 @@ third control.
 - `src/tokens/layout.css` says why in-card toggles are 44px now and `--control-min`
   stays 34px.
 - Both CLAUDE.md files name Segmented. `src/CLAUDE.md` stays at **exactly 255 lines**.
-- `npm run lint`, `npm test`, `npm run build` are green.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (4)
 
@@ -197,8 +198,8 @@ No new test. Before you edit, run `node scripts/check-claude-md.mjs` and
 
 ## Verify
 
-1. `npm run lint` (the `check-claude-md` line must stay green), `npm test`,
-   `npm run build`.
+1. `npm run lint` (the `check-claude-md` line must stay green). This slice writes no
+   test. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 2. `npm run dev`, open `http://localhost:5173/design-lab?nointro` in Chromium at
    390px and 1180px. Find "Segmented" under "The button". Check: the buttons join
    (one 2px line between them), the selected one is ink with paper text and no

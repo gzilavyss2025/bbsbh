@@ -290,9 +290,9 @@ colors.css, so this works.
 
 ## Verify
 
-1. `node --test test/player-motion-tokens.test.js test/scorecard-lens-glide.test.js test/alias-tokens.test.js test/css-tokens.test.js`
+1. `node --test test/player-motion-tokens.test.js`
 2. `npm run lint`. Read the check-contrast output: the ten new rows show a tick.
-3. `npm test`, `npm run build`.
+3. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 4. Render `/design-lab?nointro` in the preinstalled Chromium at 390px. Find the
    tokens page: `--paper-4`, `--paper-5`, `--surface-row-hover` and
    `--surface-row-selected` show as swatches, and the new pairings show in the

@@ -25,7 +25,8 @@ as the canvas draws them. Their hand-written flex rules go away.
   its 740px rule targets the Segmented buttons (they stop filling at that width, as
   the canvas does).
 - `test/segmented-swap-innings-similar.test.js` passes; it fails before the change.
-- `npm run lint`, `npm test`, `npm run build` are green.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (5)
 
@@ -232,8 +233,8 @@ test('similar.css: no hand-drawn switch; the wide step stops the fill', () => {
 
 ## Verify
 
-1. `node --test test/segmented-swap-innings-similar.test.js test/player-next-innings.test.js test/player-next-similar.test.js`.
-2. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/segmented-swap-innings-similar.test.js`.
+2. `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. `npm run dev`, Chromium, 390px and 1180px:
    - Batter `/player/brice-turang-668930?nointro`: the Innings by position card's
      Season / MLB career row is joined, fills up to 460px and is centred; a tap

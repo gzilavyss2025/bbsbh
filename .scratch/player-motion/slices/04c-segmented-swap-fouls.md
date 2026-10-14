@@ -27,7 +27,8 @@ two-column grid and two-line labels go away.
 - Unused imports are gone (`Cluster`, `Pill` in FoulsCard; `Button`, `Cluster`,
   `Pill` in pfouls).
 - `test/segmented-swap-fouls.test.js` passes; it fails before the change.
-- `npm run lint`, `npm test`, `npm run build` are green.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (4)
 
@@ -242,8 +243,8 @@ test('pfouls.css: the scope keeps its margin and loses the grid and the two-line
 
 ## Verify
 
-1. `node --test test/segmented-swap-fouls.test.js test/player-next-fouls.test.js test/player-next-pfouls.test.js`.
-2. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/segmented-swap-fouls.test.js`.
+2. `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. `npm run dev`, Chromium at 390px and 1180px:
    - Batter `/player/brice-turang-668930?nointro`, Foul balls card: the Season stat
      row is joined and fills; a tap changes the figures and the rail below.

@@ -5,7 +5,7 @@ The second half of slice 17 (`spec.md`). 17a did the dot entrance.
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: medium (a swap onto a finished part, like 09).
-- Depends on: 05 merged (`MenuRail`), 17a merged (the `gen` counter and `pick`).
+- Depends on: 05a and 05b merged (`MenuRail` and its motion), 17a merged (the `gen` counter and `pick`).
 - Parallel with: any slice that does not touch the Contact files below.
 
 ## Goal
@@ -25,7 +25,8 @@ drop from 17a. Every number the card shows today stays.
 - A second tap on the picked card, or "All batted balls", closes the panel and shows
   all types again.
 - Keyboard: Tab reaches each card; Enter or Space picks; the panel follows in the DOM.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files
 
@@ -50,7 +51,7 @@ other `MenuRail` source (spec.md lists `.tc-mc`/`.tc-mx`/`.tc-pn`):
 .tc-ff1,.tc-ff2{animation:tc-fa 380ms cubic-bezier(.2,.9,.3,1) backwards}
 ```
 
-`MenuRail` (slice 05) already draws all of this. This slice writes none of it.
+`MenuRail` (slices 05a and 05b) already draws all of this. This slice writes none of it.
 
 A card on the canvas shows the name, a share (`.tc-ms`), and under it (`.tc-mx`, the
 part that folds away) a result bar and "NN% hits / NN% outs". The panel holds a
@@ -309,7 +310,7 @@ test('the ball-type pick is a MenuRail; the six averages are its panel', () => {
 ## Verify
 
 - `node --test test/player-next-contact.test.js test/player-next-contact-motion.test.js`,
-  then `npm run lint`, `npm test`, `npm run build`.
+  then `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - Chromium at 390px and 1180px: `/player/brice-turang-668930?nointro`. Pick "Fly ball":
   the menu folds to a rail, the panel opens with six averages, the field shows only fly
   balls and the dots drop in again. Tap "Fly ball" again: all types come back. Tab
@@ -324,7 +325,7 @@ test('the ball-type pick is a MenuRail; the six averages are its panel', () => {
 - The canvas result bar on each card (`.tc-seg`): a new chart. The hits / outs line
   carries the same split.
 - The canvas `view: 'all'` on a pick.
-- Any change inside `MenuRail` itself (slice 05).
+- Any change inside `MenuRail` itself (slices 05a, 05b).
 - The view and colour chips: they stay `Pill` (see "Which chip group goes where").
 
 ## Stop if

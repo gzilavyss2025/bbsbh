@@ -3,7 +3,7 @@
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: medium.
-- Depends on: 01 merged (it adds `--ease-stamp` and sets `--dur-stamp-in` 380ms and
+- Depends on: 01a merged (it adds `--ease-stamp` and sets `--dur-stamp-in` 380ms and
   `--ease-stamp-in: var(--ease-stamp)`).
 - Parallel with: 02, 03, 05, 07a, 08, 10, 13, 20.
 - Change from spec.md: **the jump-bar ease line moves to slice 02.** Slice 02 already
@@ -23,7 +23,8 @@ fact turns on the canvas curve and close to the canvas time.
 - Tile `i` carries `--stamp-delay: (120 + 40 * i)ms` (today it is `60 + 40 * i`).
 - `.pnext__ageflip` turns with `transform calc(var(--dur-flip) * 1.15) var(--ease-stamp)`.
 - A reduced-motion block next to it sets `transition: none`.
-- `npm run lint`, `npm test`, `npm run build` pass. The new test fails before the change.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR. The new test fails before the change.
 
 ## Files
 
@@ -90,7 +91,7 @@ canvas has no two-row board).
 }
 ```
 
-`src/styles/motion/stamp-in.css:24-26` (read only; slice 01 changes the tokens it reads):
+`src/styles/motion/stamp-in.css:24-26` (read only; slice 01a changes the tokens it reads):
 
 ```css
 .card--stamp-in {
@@ -220,7 +221,7 @@ test('reduced motion stops the age flip', () => {
 
 ## Verify
 
-- `npm run lint`, `npm test`, `npm run build`.
+- `node --test test/player-next-shell-motion.test.js` and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - `npm run dev`; open `/player/brice-turang-668930?nointro` and
   `/player/robert-gasser-688107?nointro` in the preinstalled Chromium at 390px and
   1180px. Take a frame strip of the first 500ms (for example, screenshots at 0, 100,
@@ -234,7 +235,7 @@ test('reduced motion stops the age flip', () => {
 ## Out of scope
 
 - The jump-bar ease and press (slice 02).
-- The stamp-in keyframe and its tokens (slice 01).
+- The stamp-in keyframe and its tokens (slice 01a).
 - Replaying the hero and tiles after a jump-bar tap (slice 07b).
 - The hero's markup and facts (PR #2071 owns the Born fact).
 - No `/animation-lab` entry: this slice adds no animation, only timings on
@@ -242,7 +243,7 @@ test('reduced motion stops the age flip', () => {
 
 ## Stop if
 
-- Slice 01 is not on `main` (`grep -n "ease-stamp" src/tokens/effects.css` finds nothing).
+- Slice 01a is not on `main` (`grep -n "ease-stamp" src/tokens/effects.css` finds nothing).
 - `PlayerNextHero.jsx:53` or `PlayerNextTiles.jsx:33` differs from the code quoted
   above (other than #2071's line 77).
 - `.pnext__ageflip` already has a different transition than `var(--dur-slow) var(--ease-out)`.

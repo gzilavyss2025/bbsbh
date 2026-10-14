@@ -31,7 +31,8 @@ become one joined 44px `Segmented` row (decision 4 in spec.md), instead of separ
   element is fine).
 - Unused imports (`Button`, `Cluster`) are gone where nothing else uses them.
 - `test/segmented-swap-logs.test.js` passes; it fails before the change.
-- `npm run lint`, `npm test`, `npm run build` are green.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (5)
 
@@ -288,8 +289,8 @@ and keep what it checks (the same calls, in the same order). Do not drop a case.
 
 ## Verify
 
-1. `node --test test/segmented-swap-logs.test.js test/player-next-batlog.test.js test/player-next-pitchlog.test.js test/player-next-season.test.js test/player-next-advanced.test.js`.
-2. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/segmented-swap-logs.test.js`.
+2. `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. `npm run dev`. In Chromium at 390px and 1180px:
    - Batter `/player/brice-turang-668930?nointro`, Season card: the scope row is
      joined, 44px, ink on the selected one, no tick. Tap Minors (if shown), then

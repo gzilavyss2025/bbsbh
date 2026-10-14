@@ -11,7 +11,7 @@ real class names (`spec.md`, "Rules every slice follows"; `docs/motion.md`, "Ver
   `animlab/Entry.jsx` and adds `animlab/PlayerMotionLab.jsx`, where every player-motion
   entry goes).
 - Parallel with: 09, 11, 16, 17. NOT with another slice that edits
-  `src/screens/animlab/PlayerMotionLab.jsx` at the same time (02, 08, 10, 12, 17 add entries
+  `src/screens/animlab/PlayerMotionLab.jsx` at the same time (08b, 10, 12c, 17a add entries
   there): the edits do not overlap in lines, but merge `main` in before you push.
 
 ## Goal
@@ -27,7 +27,8 @@ rail, the panel and the rise without a player page.
   `PlayerMotionLab.jsx`): the live part (Play
   remounts it; tap cards to see the glide), and a frozen strip of the rise at 0, 95, 190,
   285 and 380ms.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (5)
 
@@ -229,8 +230,8 @@ The design-lab half is a review page with no logic; the browser check below cove
 
 ## Verify
 
-- `npm run lint` (watch `check-dir-size.mjs` and `check-file-size.mjs`),
-  `npm test`, `npm run build`.
+- `node --test test/menurail-motion.test.js` (this slice adds to it) and `npm run lint`
+  (watch `check-dir-size.mjs` and `check-file-size.mjs`). Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - `/design-lab?nointro` at 390px and 1180px: the "Menu rail" group under band Two. Tap the
   cards; Back; Tab through (the shut panel takes no focus). The disabled card does nothing.
 - `/animation-lab?nointro`: the last entry. The frozen strip shows the body faint and 8px

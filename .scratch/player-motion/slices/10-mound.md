@@ -3,8 +3,9 @@
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: medium.
-- Depends on: 01 merged (tokens `--ease-stamp`, `--dur-rise`, `--dur-unfold`,
-  `--dur-draw`, `--stagger-step`, `--dur-stamp-in` at 380ms, and `useInViewOnce`).
+- Depends on: 01a merged (tokens `--ease-stamp`, `--dur-rise`, `--dur-unfold`,
+  `--dur-draw`, `--stagger-step`, `--dur-stamp-in` at 380ms), 01c merged
+  (`useInViewOnce`), 01d merged (`src/screens/animlab/PlayerMotionLab.jsx`).
 - Parallel with: 02, 03, 05, 06, 07, 08a, 08b, 09, 11, 13. It shares only the lab
   files with other slices (`spec.md`, "Shared files").
 
@@ -20,7 +21,7 @@ line draws. A pointer hover lifts a bar.
 
 - Before the card is in view, the track block, the fill, the zone, the Day chip,
   the bars, the pitch counts and the average line are hidden or at zero.
-- In view (phase `in`): each beat plays once on the timeline in "Canvas". Every
+- In view (phase `'play'`): each beat plays once on the timeline in "Canvas". Every
   time is a token or `calc()` of tokens.
 - The Day chip pulses 4 times (about 10s) and then rests. The pulse animates
   `opacity` and `transform` on a ring, not `box-shadow`.
@@ -29,8 +30,10 @@ line draws. A pointer hover lifts a bar.
   once with no beat.
 - Under `(hover: hover) and (pointer: fine)`, a bar hover lifts it
   `calc(var(--bw-heavy) * -1.5)` (3px) and brightens it, over `--dur-fast`.
-- `/animation-lab` has an On the mound entry with the real classes.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- `/animation-lab` has an On the mound entry with the real classes, in
+  `src/screens/animlab/PlayerMotionLab.jsx`.
+- `test/player-next-mound-motion.test.js` and `npm run lint` pass. CI runs the full
+  `npm test` and `npm run build` on the PR.
 
 ## Files
 
@@ -39,8 +42,12 @@ line draws. A pointer hover lifts a bar.
 2. `src/styles/player-next/pitcher/mound.css` — the motion block (349 lines today;
    about 110 added).
 3. `test/player-next-mound-motion.test.js` — new.
-4. `src/screens/animlab/motionDemos.jsx` — `MoundDemo`.
-5. The lab entry's home — see Build step 4.
+4. `src/screens/animlab/PlayerMotionLab.jsx` (01d) — `MoundDemo` and its `Entry`.
+
+Not `motionDemos.jsx`, not `AnimationLab.jsx`: 01d moved every player-motion entry to
+`PlayerMotionLab.jsx`, because `AnimationLab.jsx` is at the 600-line cap.
+`PlayerMotionLab.jsx` is shared with other slices (05c, 08b, 12c, 17a): merge `main`
+in before you push, and add your entry after the ones already there.
 
 ## Canvas
 
@@ -184,22 +191,27 @@ does not pulse (the board has no chip there).
 `:133-137` (`.mound__fill`), `:138-143` (`.mound__zone`), `:210-219`
 (`.mound__pv`), `:220-225` (`.mound__avg`). None has motion today.
 
-`src/screens/AnimationLab.jsx` is **597 lines** on this checkout (cap 600).
+`src/screens/AnimationLab.jsx` is 597 lines (cap 600). Slice 01d added
+`src/screens/animlab/PlayerMotionLab.jsx` for every player-motion entry.
 
 ## Build
 
-### 0. Read slice 01's hook first
+### 0. The slice 01c hook (merged; 01c is the source of truth)
 
-Same assumption as 08a (inferred; slice 01 was not written when this brief was):
-`useInViewOnce(key, options?)` returns `[ref, phase]`, `phase` one of `'pre'`,
-`'in'`, `'done'`. If the real hook has another shape, map it to these three in
-`MoundCard` only.
+`src/hooks/scroll/useInViewOnce.js` exports `useInViewOnce(key)` and returns
+`[ref, phase]`. There is no options argument; the threshold is fixed at 0.1.
+`phase` is `'wait'` (not seen yet: hold hidden, `.mound--pre`), `'play'` (it came
+into view: play, `.mound--in`; it stays `'play'`), or `'rest'` (seen earlier in this
+page visit, reduced motion, or no IntersectionObserver: rest drawn, no class).
+`viewKey(playerId, slotKey)` in `src/lib/motion/inViewOnce.js` builds the key. The
+hook already returns `'rest'` under reduced motion, so `MoundCard` does not read
+`motionIsReduced`.
 
 ### 1. `index.jsx`
 
 ```jsx
-import { useInViewOnce } from '../../../../../hooks/motion/useInViewOnce.js'
-import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
+import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
+import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 ```
 
 `MoundModule` keeps the data and the two early returns, and hands the view on.
@@ -213,7 +225,7 @@ export default function MoundModule({ bio, asOf, season, onEmpty }) {
   useEffect(...)                       // unchanged
   if (loading) return <div className="mound mound--loading" aria-busy="true" />
   if (empty) return null
-  return <MoundCard view={view} once={`${bio.id}:mound`} />
+  return <MoundCard view={view} once={viewKey(bio.id, 'mound')} />
 }
 
 // The card. It mounts once the data is in, so the in-view ref sits on a node that exists at
@@ -221,12 +233,11 @@ export default function MoundModule({ bio, asOf, season, onEmpty }) {
 // (docs/motion.md, "The one-shot gate"); seen before, or under reduced motion, it rests drawn.
 function MoundCard({ view, once }) {
   const [picked, setPicked] = useState(null)
-  const [ref, seen] = useInViewOnce(once, { threshold: 0.08 })
-  const phase = motionIsReduced() ? 'done' : seen
+  const [ref, phase] = useInViewOnce(once)
   const tab = view.tabs.includes(picked) ? picked : view.tab
   const v = view.views[tab]
   return (
-    <div ref={ref} className={`mound${phase === 'pre' ? ' mound--pre' : phase === 'in' ? ' mound--in' : ''}`}>
+    <div ref={ref} className={`mound${phase === 'wait' ? ' mound--pre' : phase === 'play' ? ' mound--in' : ''}`}>
       …the old body, unchanged…
     </div>
   )
@@ -395,17 +406,19 @@ Notes:
   sets `box-shadow: none`, and the chip's `--shadow-stamped-soft` prints as it lands.
 - `calc((a + b) * 2)` and `calc(t * (6 + var(--k, 0)))` are valid time `calc()`s.
 
-### 3. `motionDemos.jsx`
+### 3. `PlayerMotionLab.jsx` (the demo)
 
-Add the import with the others: `import '../../styles/player-next/pitcher/mound.css'`.
-Add at the end (invented figures; `mound--in` is set at once, so Play replays):
+In `src/screens/animlab/PlayerMotionLab.jsx` (01d), add the import with the others:
+`import '../../styles/player-next/pitcher/mound.css'`. Add the demo above
+`export function PlayerMotionLab()`, not exported (the file exports only
+`PlayerMotionLab`). Invented figures; `mound--in` is set at once, so Play replays:
 
 ```jsx
 // On the mound's entrance (board MoundCard): the days-since fill draws, the Day chip stamps and
 // pulses, the bars grow one after the next and their counts fade in, the average draws. The
 // real classes with invented figures.
 const DEMO_OUTINGS = [[10, 88], [28, 95], [46, 79], [64, 101], [82, 92]]
-export function MoundDemo() {
+function MoundDemo() {
   return (
     <div className="mound mound--in">
       <div className="mound__block mound__block--track">
@@ -439,6 +452,9 @@ export function MoundDemo() {
 
 ### 4. The lab entry
 
+Add this `Entry` inside the fragment that `PlayerMotionLab` returns, after the
+entries already there:
+
 ```jsx
       <Entry
         title="On the mound — the card comes in"
@@ -453,14 +469,9 @@ export function MoundDemo() {
       />
 ```
 
-No frozen strip (it needs the classes in `.animlab__frame` in
-`src/styles/46-consent-modal.css`, a sixth file). Where it goes, in this order:
-
-1. If slice 01 (or 02, 03, 05, 08b) made a home for player-page lab entries, add
-   the `Entry` there.
-2. Else, if `src/screens/AnimationLab.jsx` stays at or under 600 lines with the
-   `Entry` and the import name, add it after the stamp-in `Entry`.
-3. Else, stop and report. Do not raise the file-size cap.
+No frozen strip, so no rule in the `.animlab__frame` freeze list of
+`src/styles/46-consent-modal.css` (01d: only a frozen strip needs one). Do not touch
+`AnimationLab.jsx` or `motionDemos.jsx`. Do not raise the file-size cap.
 
 ### Guards
 
@@ -468,10 +479,11 @@ No frozen strip (it needs the classes in `.animlab__frame` in
 - `check-layout-ratchet.mjs`: no new flex, grid or column. Pass.
 - `check-typography.mjs`: no font declarations added. Pass.
 - `check-file-size.mjs`: `mound.css` 349 → about 460; `index.jsx` 175 → about 185;
-  `motionDemos.jsx` → about 385 (more if 08b landed first). All under 600.
+  `PlayerMotionLab.jsx` grows by about 45 lines (more if other lab slices landed
+  first). All under 600.
 - `check-dir-size.mjs`: no new source file under `src/`.
 - `test/css-tokens.test.js` fails a `var(--token)` that no sheet defines: every
-  token above exists after slice 01.
+  token above exists after slice 01a.
 
 ## Test first
 
@@ -541,7 +553,8 @@ test('no raw time in any mound.css animation or transition', () => {
 test('the card gates its entrance on view, and each bar carries its index', () => {
   const jsx = read('src/screens/player/next/modules/mound/index.jsx')
   assert.match(jsx, /function MoundCard\(/)
-  assert.match(jsx, /useInViewOnce\(once/)
+  assert.match(jsx, /useInViewOnce\(once\)/)
+  assert.match(jsx, /phase === 'wait' \? ' mound--pre' : phase === 'play' \? ' mound--in' : ''/)
   assert.match(jsx, /mound__block mound__block--track/)
   assert.match(jsx, /'--k': i/)
 })
@@ -560,7 +573,8 @@ Notes for the test:
 
 ## Verify
 
-1. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/player-next-mound-motion.test.js` and `npm run lint`. Do not
+   run the full `npm test` or `npm run build`: CI runs them on your PR.
 2. `npm run dev`, pitcher `/player/robert-gasser-688107?nointro`, at 390px and at
    1180px. Scroll to On the mound: the beats play once as it comes into view. Scroll
    away and back: nothing replays. Count the Day chip's pulses: 4, then still.
@@ -581,13 +595,14 @@ Notes for the test:
 
 ## Stop if
 
-- Slice 01 is not merged, or `useInViewOnce` cannot give the three phases, or any
+- 01a, 01c or 01d is not merged, or `useInViewOnce` does not return `[ref, phase]`
+  with the three phases (`wait`, `play`, `rest`), or any
   token in the "Canvas" table is missing from `src/tokens/effects.css`.
-- `--dur-stamp-in` is not 380ms (01 changes it from `var(--dur-slow)`).
+- `--dur-stamp-in` is not 380ms (01a changes it from `var(--dur-slow)`).
 - `card-stamp-in` is not in `src/styles/motion/stamp-in.css`, or its `from` is no
   longer opacity, the stamped offset and `box-shadow: none`.
 - The quoted code at `index.jsx:17-36`, `:80-85`, `:140-148` or `mound.css:193-199`
   differs from this brief.
-- The lab entry has no home that keeps every file at or under 600 lines. Report the
-  line counts.
+- `src/screens/animlab/PlayerMotionLab.jsx` does not exist (01d not merged). Do not
+  add the entry to `AnimationLab.jsx`.
 - An open PR touches `src/screens/player/next/modules/mound/` or `mound.css`.

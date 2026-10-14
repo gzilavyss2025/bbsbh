@@ -3,7 +3,8 @@
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: medium.
-- Depends on: 05 merged (`MenuRail`), and so 01 merged (`--dur-unfold`, `--ease-unfold`).
+- Depends on: 05a and 05b merged (`MenuRail` and its motion), and so 01a merged
+  (`--dur-unfold`, `--ease-unfold`).
 - Parallel with: 06, 08, 10, 16, 17, 20. Not with 12 to 15: they edit the same
   `modules/arsenal/` folder and `arsenal.css`, in the order 11, 12a, 12b, 12c, 13,
   14, 15 (spec.md, "Shared files").
@@ -25,7 +26,8 @@ opacity over 400ms.
 - Each pick and each un-pick bumps `run`, so the side view draws in again.
 - A ghost path fades in from 0 to 0.22 over `--dur-unfold`, starting at
   `calc(var(--dur-unfold) * 0.75)` (300ms). A ghost path does not draw in.
-- `npm run lint`, `npm test`, `npm run build` pass. The new test fails before the change.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR. The new test fails before the change.
 
 ## Files
 
@@ -54,7 +56,7 @@ ArsenalReveal board, `<style>`:
 .ar-ff1,.ar-ff2{animation:ar-fa .38s cubic-bezier(.23,1,.32,1) backwards}
 ```
 
-All of that is MenuRail's job now (slice 05). This slice only feeds it.
+All of that is MenuRail's job now (slices 05a and 05b). This slice only feeds it.
 
 The card in menu state, canvas markup: a head row (glyph, name, mph on the right),
 then the folding figures (`.ar-mx`: drop sparkline, flight time, usage %). Back
@@ -262,8 +264,8 @@ Delete lines 190-217 (the `.arsenal__menu`, `.arsenal__pick.btn` and
 `.arsenal__name` rules, with their comments) and lines 241-247 (the two
 `.arsenal__menu--rail` rules). Keep `.arsenal__figs`, `.arsenal__spark`,
 `.arsenal__sparkline`, `.arsenal__sparkbase`. Put a one-line comment above
-`.arsenal__figs`: `/* The menu card's figures; the card, rail and panel are MenuRail's (system/menurail.css). */`
-(slice 05a's sheet is `src/styles/system/control/menurail.css`; use the merged name).
+`.arsenal__figs`: `/* The menu card's figures; the card, rail and panel are MenuRail's (system/menurail/menurail.css). */`
+(slice 05a's sheet is `src/styles/system/menurail/menurail.css`).
 
 After the reduced-motion block that ends at line 158, add:
 
@@ -358,7 +360,7 @@ test('a ghost path does not draw in', () => {
 
 ## Verify
 
-- `npm run lint`, `npm test`, `npm run build`.
+- `node --test test/arsenal-motion.test.js` and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - `npm run dev`, then the pitcher route `/player/robert-gasser-688107?nointro` at
   390px and 1180px. Scroll to "Pitch arsenal". Tap "Four-seam": the cards fold to a
   rail, the panel opens with the rise, the side view draws the four-seamer again

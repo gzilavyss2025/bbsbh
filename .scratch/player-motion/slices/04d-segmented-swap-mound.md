@@ -24,7 +24,8 @@ with its gap goes away.
 - `mound.css` has no `.mound__tabs` rule.
 - The `Button` import is gone if nothing else in the file uses it.
 - `test/segmented-swap-mound.test.js` passes; it fails before the change.
-- `npm run lint`, `npm test`, `npm run build` are green.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (3)
 
@@ -139,8 +140,8 @@ test('mound.css: no gap rule splits the joined tabs', () => {
 
 ## Verify
 
-1. `node --test test/segmented-swap-mound.test.js test/player-next-mound.test.js`.
-2. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/segmented-swap-mound.test.js`.
+2. `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. `npm run dev`, Chromium at 390px and 1180px, pitcher
    `/player/robert-gasser-688107?nointro`, On the mound card. The tabs show only
    when the card has two views (`view.tabs.length > 1`). If Gasser has one, say so

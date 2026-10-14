@@ -276,7 +276,7 @@ Merge the new names into the file's existing import lines rather than adding dup
 
 ## Verify
 
-- `npm run lint`, `npm test`, `npm run build`.
+- `node --test test/player-next-flight-motion.test.js` and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - `/player/robert-gasser-688107?nointro` at 1180px: drag the stage left and right, up and
   down; the camera buttons go unpressed; the loop keeps playing. Tap Park: it swings from
   the turned view. Tab to the stage: the house ring shows; the arrows turn it and the page

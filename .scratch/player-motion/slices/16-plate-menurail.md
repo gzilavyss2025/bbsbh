@@ -49,7 +49,8 @@ MenuRail and its panel replace the table in `.fplate__mix`.
   pitches" row, `i === 0`). Every pick clears the picked map cell (today: `setCell(-1)`).
 - `StretchTable.jsx` and `formchart.css` are unchanged. Form trend (batter and pitcher)
   looks as before.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (5)
 
@@ -492,7 +493,7 @@ test('the glyph and the panel head are drawn in plate.css with tokens', () => {
 
 ## Verify
 
-- `npm run lint`, `npm test`, `npm run build`.
+- `node --test test/player-next-plate.test.js` and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - Batter `/player/brice-turang-668930?nointro`, scroll to Plate approach, at 390px and
   1180px:
   - Menu state: one card a pitch type, biggest first; each shows the glyph, the name, the

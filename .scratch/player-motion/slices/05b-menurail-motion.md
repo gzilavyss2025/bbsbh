@@ -7,7 +7,7 @@ copied again below.
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: medium (the code is below; the slice is three files).
-- Depends on: 01 merged (the tokens), 05a merged.
+- Depends on: 01a merged (the tokens), 05a merged.
 - Parallel with: 02, 03, 04, 06, 07, 08, 10, 13, 20. Slices 09, 11, 16, 17 and 05c wait
   for this one.
 
@@ -23,7 +23,8 @@ new pick. Under reduced motion every state switches at once.
   token-only.
 - `src/index.css` imports it after `motion/stamp-in.css`, before `focus/`.
 - `test/menurail-motion.test.js` passes, and it failed before.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (3)
 
@@ -196,8 +197,8 @@ uses the same pair); the head's opacity `240ms` → `--dur-med`; `8px` → `var(
 Guard notes:
 - `check-raw-values.mjs` counts a `transition`/`animation` with a non-zero raw time. Every
   time here is a `var()` or `0s` (a zero is not counted). The motion budget stays 55.
-- `--dur-unfold`, `--ease-unfold`, `--ease-stamp`, `--dur-stamp-in` come from slice 01.
-  `test/css-tokens.test.js` fails a `var(--x)` no sheet defines, so 01 must be merged.
+- `--dur-unfold`, `--ease-unfold`, `--ease-stamp`, `--dur-stamp-in` come from slice 01a.
+  `test/css-tokens.test.js` fails a `var(--x)` no sheet defines, so 01a must be merged.
 - One rule per selector (no selector lists) on purpose: `ruleBody` in the test finds the
   rule by its exact selector.
 - Keyframe names start with the block name (`spec.md`: `menurail-rise-a`, never `rise`).
@@ -295,7 +296,7 @@ block is indented two spaces, so `ruleBody` would never find it.
 
 ## Verify
 
-- `npm run lint`, `npm test`, `npm run build`.
+- `node --test test/menurail-motion.test.js` and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - Same local scratch mount as 05a (`/design-lab?nointro`, removed before the commit), or
   wait for 05c. At 390px and 1180px: tap a card, watch the row glide to the rail in about
   0.4s and the panel fold open; the panel body rises 8px as it fades in. Tap another rail
@@ -314,7 +315,7 @@ block is indented two spaces, so `ruleBody` would never find it.
 - 05a is not merged, or its class names differ from the ones above
   (`menurail__card`, `menurail__fold`, `menurail__head`, `menurail__panel`,
   `menurail__panel--open`, `menurail__panelin`, `menurail__body--a|b`).
-- Slice 01's tokens are missing from `src/tokens/effects.css`.
+- Slice 01a's tokens are missing from `src/tokens/effects.css`.
 - `check-raw-values.mjs` reports a motion count above its budget.
 - The rise does not restart on a second pick in the browser (then the a/b swap is broken in
   05a; report, do not add a `key` remount).

@@ -36,7 +36,8 @@ pitches of the round as faint numbered trails.
   the scrubber, drag and keys repaint.
 - Every colour comes from `pitchMark` (on each row) or from a CSS token read at run time.
   No hex in the new code.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files
 
@@ -676,7 +677,8 @@ test('the flight card draws on a labelled canvas, at the board shape', () => {
 
 ## Verify
 
-- `npm run lint` (watch `check-dead-exports`: every new export has a user), `npm test`, `npm run build`.
+- `node --test test/player-next-flight-motion.test.js` and `npm run lint` (watch
+  `check-dead-exports`: every new export has a user). Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - `/player/robert-gasser-688107?nointro` at 390px and at 1180px. Compare with the board:
   the comet trail thin and faint at release, thick and solid near the ball; the ball's
   shadow and dashed drop line; the ripple on landing; In order, the earlier pitches faint

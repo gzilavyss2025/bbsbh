@@ -347,8 +347,8 @@ starts a line and is followed by `{`. `ruleBody(css, '.btn:active')` returns lin
 
 ## Verify
 
-1. `node --test test/stamp-press.test.js test/button-cascade.test.js test/pill-cascade.test.js test/jump-bar.test.js test/band-focus-ring.test.js test/icon-button.test.js`
-2. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/stamp-press.test.js`
+2. `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. `npm run dev`. In the preinstalled Chromium (Playwright), at 390px and 1180px:
    - `/design-lab?nointro`, the Button and Pill sections (the cells are live).
    - `/player/brice-turang-668930?nointro`, the jump bar and any card toggle.

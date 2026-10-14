@@ -13,7 +13,7 @@ The consumers (09 Splits, 11 Arsenal, 16 Plate, 17 Contact) wait for 05a and 05b
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: high.
-- Depends on: 01 merged (the tokens `--dur-unfold`, `--ease-unfold`, `--dur-stamp-in`,
+- Depends on: 01a merged (the tokens `--dur-unfold`, `--ease-unfold`, `--dur-stamp-in`,
   `--ease-stamp`; 05a itself reads none of them, but 05b does, and the two land together).
 - Parallel with: 02, 03, 04, 06, 07, 08, 10, 13, 20. Not with 05b (05b edits the same test
   helper area and `index.css`; run 05b after 05a merges, or stack them).
@@ -37,7 +37,8 @@ part: no baseball knowledge, no `api/` import.
   picked card and the open/closed panel, with tokens only.
 - `src/index.css` imports it after `system/jumpbar/jumpbar.css`.
 - `test/menurail.test.js` passes, and it failed before the change.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (5)
 
@@ -50,7 +51,7 @@ part: no baseball knowledge, no `api/` import.
 | `test/menurail.test.js` | **new**: the pure core, the markup source, the CSS |
 
 Why the pure core sits beside the component, not in `src/lib/design/`: that folder holds 11
-files, and slice 03 may add `segmentedClass.js` there. `src/components/ui/control/` holds 4
+files, and slice 03a adds `segmentedClass.js` there. `src/components/ui/control/` holds 4
 files today.
 
 ## The API (spec.md, plus the extensions this slice adds)
@@ -737,7 +738,7 @@ builder passes them), fix the regex to the order the builder writes, not the bui
 
 ## Verify
 
-- `npm run lint`, `npm test`, `npm run build`.
+- `node --test test/menurail.test.js` and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - Nothing on a live route uses `MenuRail` yet (05c adds the lab entries; 09, 11, 16, 17
   adopt it). To see it now, mount it for a minute in `/design-lab` locally with invented
   items, check the two states at 390px and 1180px with `?nointro`, then remove the

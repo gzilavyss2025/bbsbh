@@ -27,7 +27,8 @@ rests 1150ms after it lands, then flies the next. The balls not played yet fade 
 - A dot tap, a view pick or a type pick stops play.
 - Reduced motion: play still steps (one ball per 1150ms), with no flight and no fill
   transition.
-- `npm run lint`, `npm test`, `npm run build` pass.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files
 
@@ -655,8 +656,8 @@ test('the module plays in date order and holds each ball DWELL_MS after it lands
 
 ## Verify
 
-- `node --test test/player-next-contact-play.test.js`, then `npm run lint`, `npm test`,
-  `npm run build`.
+- `node --test test/player-next-contact-play.test.js`, then `npm run lint`.
+  Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - Chromium at 390px and 1180px: `/player/brice-turang-668930?nointro`. Pick "Home runs"
   and press Play. Take a frame strip across two balls: the flight, the rest, the next
   flight; the faint balls ahead; the fill moving. Press Pause mid-flight: the ball lands

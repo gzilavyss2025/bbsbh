@@ -11,7 +11,7 @@ Slice 20 is split in three by file count and by which slice last touched each fi
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: **medium**.
-- Depends on: **01 merged** (the two row tokens) and **04a merged** (04a edits
+- Depends on: **01a merged** (the two row tokens) and **04a merged** (04a edits
   `pitchlog/index.jsx`).
 - Parallel with: 20b, 20c, and any slice that does not touch these four files.
 
@@ -36,7 +36,8 @@ the game whose detail is open keeps a selected fill. On that fill a loss reads
 - `pitchlog.css`: on the current row, the loss score and the ER mark read
   `--clay-deep`.
 - `test/player-next-rows.test.js` passes; it fails before the change.
-- `npm run lint`, `npm test`, `npm run build` are green.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files (5)
 
@@ -64,7 +65,7 @@ r.bg = sel === x.i ? '#EFE6C8' : 'transparent'
 ```
 
 Token map: `#F3EBD2` → `--surface-row-hover`, `#EFE6C8` → `--surface-row-selected`
-(both added by slice 01), `#0F1822` → `--border-stamped`. The canvas row is a
+(both added by slice 01a), `#0F1822` → `--border-stamped`. The canvas row is a
 `<button>`; **the live row stays a `<tr>`** (the brief says do not turn rows into
 buttons). So the hover keys on the door inside the row, and the canvas 3px ink ring
 becomes the house ring (`--focus-ring` at `--bw-heavy`, spec.md "Focus rings stay the
@@ -282,8 +283,8 @@ test('pitchlog.css: a loss on the open row reads the deeper clay', () => {
 
 ## Verify
 
-1. `node --test test/player-next-rows.test.js test/player-next-pitchlog.test.js test/player-next-batlog.test.js`.
-2. `npm run lint`, `npm test`, `npm run build`.
+1. `node --test test/player-next-rows.test.js`.
+2. `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 3. `npm run dev`, Chromium at 390px (card look) and 1180px (table look), pitcher
    `/player/robert-gasser-688107?nointro`, Game log card:
    - Point at a date: the whole row tints. Point at the logo or a figure: no tint.
@@ -305,7 +306,7 @@ test('pitchlog.css: a loss on the open row reads the deeper clay', () => {
 
 ## Stop if
 
-- 01 is not on `main` (`--surface-row-hover` or `--surface-row-selected` is missing
+- 01a is not on `main` (`--surface-row-hover` or `--surface-row-selected` is missing
   from `src/tokens/colors.css`), or 04a is not on `main`.
 - The live rows now hold a different control (for example the batter log gained a
   date link): the hover still works, but report it.

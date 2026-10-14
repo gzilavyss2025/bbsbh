@@ -3,7 +3,7 @@
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: **high** (a rAF engine and two pure state machines).
-- Depends on: **01 merged** (`src/lib/motion/curves.js` with `easeOutQuart`).
+- Depends on: **01b merged** (`src/lib/motion/curves.js` with `easeOutQuart`).
 - Order: slices 11 and 12 also touch `modules/arsenal/`. If one of them is open and
   touches `flightView.js` or `FlightCard.jsx`, wait for it to merge, then merge `main` in.
 - Parallel with: any slice outside `modules/arsenal/`. Not with 11, 12, 14, 15.
@@ -27,7 +27,8 @@ the camera to the new pose over 0.95 s on an ease-out-quart, in place of the sna
   yaw takes the short way round.
 - Reduced motion: no loop, the landed frame shows at once, the camera snaps, the scrubber
   still works. The Play button stays hidden (as today).
-- `npm run lint`, `npm test`, `npm run build` pass.
+- The tests this slice writes and `npm run lint` pass. CI runs the full `npm test` and
+  `npm run build` on the PR.
 
 ## Files
 
@@ -210,8 +211,8 @@ export function flyStep(cam, dt) {
 }
 ```
 
-Check the curve name in `src/lib/motion/curves.js` after slice 01. If it is not
-`easeOutQuart`, use the name it has (spec.md fixes `easeOutQuart`).
+`easeOutQuart` is the exact name slice 01b exports from `src/lib/motion/curves.js`
+(the quartic ease-out, clamped to [0, 1]). Import that name; do not add a local copy.
 
 ### 2. `flightView.js`
 
@@ -497,7 +498,7 @@ exist), so every case fails first.
 
 ## Verify
 
-- `npm run lint`, `npm test`, `npm run build`.
+- `node --test test/player-next-flight-motion.test.js` and `npm run lint`. Do not run the full `npm test` or `npm run build`: CI runs them on your PR ("Check once" in `.claude/skills/orchestrate/SKILL.md`).
 - `npm run dev`, open `/player/robert-gasser-688107?nointro` at 390px and at 1180px. Scroll
   to Pitch arsenal. Watch two full cycles of In order: release wait, flight, hold, next
   pitch, and back to pitch 1 after the last one. Switch to Together: it loops the set.
@@ -521,7 +522,7 @@ exist), so every case fails first.
 
 ## Stop if
 
-- `src/lib/motion/curves.js` does not exist or has no ease-out-quart function (slice 01 not merged).
+- `src/lib/motion/curves.js` does not exist or does not export `easeOutQuart` (slice 01b not merged).
 - `FlightCard.jsx` or `flightView.js` differ from the code quoted in "Live today" in a way
   that changes the plan (for example, slice 11 or 12 moved the clock or the cameras).
 - `modules/arsenal/` would go past 12 files.
