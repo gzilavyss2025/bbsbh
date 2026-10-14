@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
 import { CAMERAS, ZONE, orbitOf, towardOf, tunnelView, verdictOf } from './flightView.js'
-import { flyStep, landedLoop, startLoop, stepLoop, stillCam, swingCam } from './flightMotion.js'
+import {
+  KEY_TURN, dragTurn, flyStep, landedLoop, needsFrame, seekLoop, setPlayingLoop, startLoop, stepLoop, stillCam, swingCam, turnView,
+} from './flightMotion.js'
 import { FlightScene } from './FlightScene.jsx'
 import { PitchGlyph } from './PitchGlyph.jsx'
 
@@ -28,37 +30,55 @@ function useFlightLoop({ stage, end, speed, reduced, onCycle }) {
   useEffect(() => {
     cfg.current = { end, speed, onCycle }
   })
+  // Starts the frame loop if it is idle; the effect below sets it.
+  const wake = useRef(null)
   const put = (next) => {
     eng.current = next
     setSnap(next)
+    wake.current?.()
   }
 
   useEffect(() => {
-    if (reduced) return undefined
+    wake.current = null
+    if (reduced) {
+      // A live switch to reduced motion: the landed frame, and the camera where it was going.
+      const { loop, cam } = eng.current
+      if (loop.playing || cam.tw < 1) put({ loop: landedLoop(), cam: stillCam(cam.to) })
+      return undefined
+    }
     let vis = true
     const node = stage.current
     const io =
       node && typeof IntersectionObserver !== 'undefined'
-        ? new IntersectionObserver((es) => { vis = es.some((e) => e.isIntersecting) }, { rootMargin: '120px' })
+        ? new IntersectionObserver((es) => {
+            vis = es.some((e) => e.isIntersecting)
+            wake.current?.()
+          }, { rootMargin: '120px' })
         : null
     if (io) io.observe(node)
-    let raf
-    let last = performance.now()
+    let raf = 0
+    let last = 0
     const frame = (now) => {
+      raf = 0
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       const cur = eng.current
-      if (vis && (cur.loop.playing || cur.cam.tw < 1)) {
-        const { end: e, speed: v, onCycle: cycle } = cfg.current
-        const next = { loop: stepLoop(cur.loop, dt, e, v), cam: flyStep(cur.cam, dt) }
-        eng.current = next
-        setSnap(next)
-        if (next.loop.cycled) cycle()
-      }
+      const { end: e, speed: v, onCycle: cycle } = cfg.current
+      const next = { loop: stepLoop(cur.loop, dt, e, v), cam: flyStep(cur.cam, dt) }
+      eng.current = next
+      setSnap(next)
+      if (next.loop.cycled) cycle()
+      if (needsFrame(vis, next.loop, next.cam)) raf = requestAnimationFrame(frame)
+    }
+    // Frames run only while there is something to move (needsFrame); anything that changes that calls this.
+    wake.current = () => {
+      if (raf || !needsFrame(vis, eng.current.loop, eng.current.cam)) return
+      last = performance.now()
       raf = requestAnimationFrame(frame)
     }
-    raf = requestAnimationFrame(frame)
+    wake.current()
     return () => {
+      wake.current = null
       cancelAnimationFrame(raf)
       if (io) io.disconnect()
     }
@@ -71,8 +91,9 @@ function useFlightLoop({ stage, end, speed, reduced, onCycle }) {
     playing: loop.playing,
     view: cam.view,
     restart: () => put({ ...eng.current, loop: reduced ? landedLoop() : startLoop(true) }),
-    setPlaying: (on) => put({ ...eng.current, loop: { ...eng.current.loop, playing: on } }),
-    seek: (s) => put({ ...eng.current, loop: { ...eng.current.loop, phase: 'fly', timer: 0, s, prevS: s, playing: false } }),
+    setPlaying: (on) => put({ ...eng.current, loop: setPlayingLoop(eng.current.loop, on) }),
+    seek: (s) => put({ ...eng.current, loop: seekLoop(eng.current.loop, s) }),
+    turn: (yaw, pitch) => put({ ...eng.current, cam: turnView(eng.current.cam, yaw, pitch) }),
     flyTo: (key) => {
       const to = orbitOf(key)
       put({ ...eng.current, cam: reduced ? stillCam(to) : swingCam(eng.current.cam, to) })
@@ -106,14 +127,18 @@ export function FlightCard({ rows, season, throws }) {
     },
   })
   const { s, playing } = fly
-  const held = fly.phase === 'hold'
   const p = seq ? flyers[i] : null
   const tunnel = seq ? null : tunnelView(shown)
-  const onPlay = () => {
-    if (playing) return fly.setPlaying(false)
-    if (!held) return fly.setPlaying(true)
-    if (seq && flyers.length > 1) setI((i + 1) % flyers.length)
-    fly.restart()
+  // Drag or the arrow keys turn the view (the board's orbit). The loop plays on; no camera preset is pressed after.
+  const drag = useRef(null)
+  const [dragging, setDragging] = useState(false)
+  const turn = (yaw, pitch) => {
+    fly.turn(yaw, pitch)
+    setCamera('')
+  }
+  const endDrag = () => {
+    drag.current = null
+    setDragging(false)
   }
   const label = seq
     ? `${p.code} · ${mph(p.velo)} · ${p.path.T.toFixed(2)} s`
@@ -137,7 +162,10 @@ export function FlightCard({ rows, season, throws }) {
             pressed={seq ? n === i : on.has(r.code)}
             aria-label={r.velo == null ? r.mark.name : `${r.mark.name}, ${mph(r.velo)}`}
             onClick={() => {
-              if (!seq) return setOn((cur) => new Set(cur.has(r.code) ? [...cur].filter((c) => c !== r.code) : [...cur, r.code]))
+              if (!seq) {
+                setOn((cur) => new Set(cur.has(r.code) ? [...cur].filter((c) => c !== r.code) : [...cur, r.code]))
+                return fly.restart()
+              }
               setI(n)
               fly.restart()
             }}
@@ -151,8 +179,38 @@ export function FlightCard({ rows, season, throws }) {
         {CAMERAS.map(([key, name]) => (
           <button key={key} type="button" className="pnext-pick" aria-pressed={camera === key} onClick={() => { setCamera(key); fly.flyTo(key) }}>{name}</button>
         ))}
+        <span className="flight__hint" aria-hidden="true">Drag to rotate</span>
       </div>
-      <div className="flight__stage" ref={stage}>
+      <div
+        className={`flight__stage flight__turn${dragging ? ' flight__turn--drag' : ''}`}
+        ref={stage}
+        tabIndex={0}
+        role="group"
+        aria-label="Pitch flight view. Drag, or use the arrow keys, to turn it."
+        onPointerDown={(e) => {
+          drag.current = { x: e.clientX, y: e.clientY }
+          setDragging(true)
+          try {
+            e.currentTarget.setPointerCapture(e.pointerId)
+          } catch {
+            // An old browser without pointer capture still drags while the pointer stays on the stage.
+          }
+        }}
+        onPointerMove={(e) => {
+          const at = drag.current
+          if (!at) return
+          turn(...dragTurn(e.clientX - at.x, e.clientY - at.y))
+          drag.current = { x: e.clientX, y: e.clientY }
+        }}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onKeyDown={(e) => {
+          const m = KEY_TURN[e.key]
+          if (!m) return
+          e.preventDefault()
+          turn(m[0], m[1])
+        }}
+      >
         <FlightScene
           camera={fly.view}
           w={336}
@@ -164,7 +222,7 @@ export function FlightCard({ rows, season, throws }) {
         />
       </div>
       <div className="flight__bar">
-        {!reduced && <Button size="control" onClick={onPlay}>{playing ? 'Pause' : held ? (seq && flyers.length > 1 ? 'Next' : 'Replay') : 'Play'}</Button>}
+        {!reduced && <Button size="control" onClick={() => fly.setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</Button>}
         <input
           className="flight__range"
           type="range"
