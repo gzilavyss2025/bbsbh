@@ -4,11 +4,10 @@ Part 2 of 3 (12a: the clock and the side view; 12c: speed, scrubber, lab entry).
 
 ## Run
 
-- Model: `claude-sonnet-5-5`. Effort: high (it reads two parts it did not write:
-  `MenuRail` from slice 05 and `useInViewOnce` from slice 01).
+- Model: `claude-sonnet-5-5`. Effort: high (it builds on two parts it did not write:
+  `MenuRail` from slice 05 and `useInViewOnce` from slice 01c).
 - Depends on: 12a merged.
-- Parallel with: 06, 08, 10, 16, 17, 20. Not with 12c, 13, 14, 15. Not with any open
-  PR on `MenuRail.jsx` (09, 16, 17 read it; only this slice edits it, by one prop).
+- Parallel with: 06, 08, 10, 16, 17, 20. Not with 12c, 13, 14, 15.
 
 ## Goal
 
@@ -28,7 +27,8 @@ timeline starts the first time the card comes into view, not on mount.
   `mph` and `%` count up over 700ms from `240 + i*80` ms. On landing, the sweep
   `scaleX` 0 → 1 over 260ms then fades over 700ms, and the glyph pops 1.45 → 1
   over 320ms. Every pick, un-pick and Replay replays all of it, as the canvas does.
-- `MenuRail` takes an optional `style` on each item and puts it on the card button.
+- The row entrance uses MenuRail's existing `items[].style` and `items[].className`
+  (slice 05a); `MenuRail.jsx` does not change.
 - The clock waits on the first frame while `phase` is `'wait'`, plays one time
   when it turns `'play'`, and shows the last frame for `'rest'` (a return visit in
   the same tab, reduced motion, no IntersectionObserver).
@@ -40,9 +40,8 @@ timeline starts the first time the card comes into view, not on mount.
    flash, the row beats, the in-view start.
 2. `src/styles/player-next/pitcher/arsenal.css`: the clip, the edge, the flash, the
    sweep, the glyph wrapper.
-3. `src/components/ui/control/MenuRail.jsx`: pass `item.style` to the card button.
-4. `src/screens/player/next/modules/arsenal/index.jsx`: pass `id={bio.id}`.
-5. `test/arsenal-motion.test.js` (from slice 11, grown by 12a): new cases at the end.
+3. `src/screens/player/next/modules/arsenal/index.jsx`: pass `id={bio.id}`.
+4. `test/arsenal-motion.test.js` (from slice 11, grown by 12a): new cases at the end.
 
 ## Canvas
 
@@ -93,14 +92,23 @@ mp: (p.mph * e2).toFixed(1) + ' mph', pc: Math.round(p.use * e2) + '%'
 All of these numbers are in `beatsAt` (12a): `roll`, `rollEdge`, and per pitch
 `flash`, `row.e`, `row.count`, `row.dim`, `sweep.x`, `sweep.o`, `glyph`, `u`.
 
-### Decision: the row entrance goes through `MenuRail` as an item `style`
+### Decision: the row entrance goes through MenuRail's `items[].style`, not arsenal CSS
 
 The canvas sets the row entrance from the same clock as everything else, and
 replays it on every pick, un-pick and Replay. A CSS keyframe in `arsenal.css`
 would need a second start signal and a class swap to restart, and the count-up
-needs the clock anyway. So the card computes the style per frame and MenuRail
-passes it through: one optional field, no new behaviour in the shared part. The
-`perspective(700px)` goes inside the transform, so no wrapper is needed.
+needs the clock anyway. So the card computes the style per frame and hands it to
+MenuRail's `items[].style`, which slice 05a already passes to the card Button
+(`cardProps` → `style: item.style`). The `perspective(700px)` goes inside the
+transform, so no wrapper is needed.
+
+One catch: slice 05b gives `.menurail__card.btn` a `transform var(--dur-fast)`
+transition (for the press). A per-frame inline transform under that transition
+lags 120ms behind the clock. The canvas card has no transform transition. So,
+while a row enters, the item also gets `className: 'arsenal__entering'`, and
+`arsenal.css` drops `transform` from the transition list for that class only. The
+fold (`flex-basis`, `padding`) keeps its glide, because a pick plays the fold and
+the entrance at the same time.
 
 ## Live today
 
@@ -149,25 +157,37 @@ view yet) or `'play'` (came into view; it stays `'play'`). `key` is
 on a mounted element, or the phase stays `'wait'` (and here the card would stay on
 its first, empty frame). Read the merged files; this is what slice 01c specifies.
 
-`MenuRail.jsx` (slice 05): read it. Find the `<button type="button" … aria-pressed>`
-that draws one card.
+`MenuRail.jsx` (slice 05a, `src/components/ui/control/MenuRail.jsx`): the item
+shape is `{ key, title, meta, figures, mark, label, disabled, heading, style,
+className }`; `cardProps(item, picked)` gives the card Button `className:
+'menurail__card' + item.className`, `pressed`, and `style: item.style`. The card
+CSS (`src/styles/system/control/menurail.css`, `.menurail__card.btn`) already has
+`position: relative; isolation: isolate`, so the sweep's `z-index: -1` sits on the
+card. Slice 05b's `src/styles/motion/menurail.css` sets:
+
+```css
+.menurail__card.btn {
+  transition:
+    flex-basis var(--dur-unfold) var(--ease-unfold),
+    padding var(--dur-unfold) var(--ease-unfold),
+    background-color var(--dur-med) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-stamp),
+    transform var(--dur-fast) var(--ease-stamp);
+}
+```
+
+Read both merged files; if they differ from this, follow the merged code.
 
 ## Build
 
-### 1. `MenuRail.jsx`
-
-On the card button, add `style={item.style}` (use the loop variable's real name).
-In the header comment's item list, add: "`style` (optional): inline style for the
-card button, for a caller that drives the card's own entrance from a clock (the
-Arsenal card)." Nothing else changes.
-
-### 2. `index.jsx`
+### 1. `index.jsx`
 
 ```jsx
       <ArsenalCard rows={rows} id={bio.id} />
 ```
 
-### 3. `ArsenalCard.jsx`
+### 2. `ArsenalCard.jsx`
 
 Imports:
 
@@ -223,9 +243,8 @@ The `MenuRail` items:
             title: r.mark.name,
             // The board's row entrance, set from the clock: a fade, a flip down from -80deg, a 10px rise and
             // a 3px blur. No transform or filter once it ends, so the card's own press is free to move it.
+            className: e < 1 ? 'arsenal__entering' : undefined,
             style: {
-              position: 'relative',
-              isolation: 'isolate',
               transformOrigin: '50% 0',
               opacity: (e * b.row.dim).toFixed(3),
               transform: e < 1 ? `perspective(700px) rotateX(${(-(1 - e) * 80).toFixed(2)}deg) translateY(${((1 - e) * 10).toFixed(2)}px)` : undefined,
@@ -261,8 +280,9 @@ The `MenuRail` items:
 
 Notes:
 
-- If MenuRail's card CSS already sets `position: relative` and `isolation`, drop
-  those two keys. The sweep (`z-index: -1`) needs both on the button.
+- MenuRail's card already has `position: relative; isolation: isolate`, which
+  the sweep (`z-index: -1`) needs. If the merged CSS lacks them, add the two keys
+  to `style`.
 - The `transform` key is `undefined` after the entrance, not `'none'`: an inline
   `none` would beat the stamp-press `:active` transform (slice 02).
 - The sweep sits in `mark`, but it is absolute to the whole card.
@@ -270,7 +290,7 @@ Notes:
   ends on `r.pct` as text: the same figures the card shows today.
 - The row sparkline draws with its pitch (`1 - u`); a ghost row's line is whole.
 
-### 4. `arsenal.css`
+### 3. `arsenal.css`
 
 Add `clip-path` to `.arsenal__mix`, `position: relative` to `.arsenal__seg`, and
 these rules after `.arsenal__seg span`:
@@ -317,6 +337,12 @@ these rules after `.arsenal__seg span`:
 .arsenal__pop {
   display: inline-flex;
 }
+/* While a row enters, its transform comes from the clock each frame: take transform out of the card's
+   transition list (motion/menurail.css), or the entrance lags the clock. The first five entries keep their
+   durations by index; the sixth duration has no property and is dropped. */
+.menurail__card.btn.arsenal__entering {
+  transition-property: flex-basis, padding, background-color, border-color, box-shadow;
+}
 ```
 
 Write the `clip-path` into the existing `.arsenal__mix` rule (one rule, so
@@ -336,7 +362,6 @@ Append to `test/arsenal-motion.test.js` (it already has `read`, `card`, `css`,
 `decl`, `ruleBody`). Each case fails before the change.
 
 ```js
-const rail = read('src/components/ui/control/MenuRail.jsx')
 const mod = read('src/screens/player/next/modules/arsenal/index.jsx')
 
 test('the timeline waits for the card to come into view, once per page visit', () => {
@@ -362,8 +387,12 @@ test('a mix segment flashes paper on landing', () => {
   assert.match(card, /className="arsenal__flash"[^>]*flash\.toFixed/)
 })
 
-test('the menu rows enter from the clock through MenuRail item styles', () => {
-  assert.match(rail, /style=\{\w+\.style\}/)
+test('the menu rows enter from the clock through MenuRail item styles, with no transform lag', () => {
+  assert.equal(
+    decl(ruleBody(css, '.menurail__card.btn.arsenal__entering'), 'transition-property'),
+    'flex-basis, padding, background-color, border-color, box-shadow',
+  )
+  assert.match(card, /className: e < 1 \? 'arsenal__entering' : undefined/)
   assert.match(card, /perspective\(700px\) rotateX\(/)
   assert.match(card, /blur\(/)
   assert.match(card, /countText\(r\.velo, b\.row\.count, 1\)/)
@@ -402,14 +431,15 @@ test('a landing sweeps the row in mint and pops its glyph', () => {
 - The speed step, the scrubber and the `/animation-lab` entry (12c).
 - The flight-time counter on each menu row (the board's `0.40 s` beside the
   sparkline, `sm`). The live card does not show flight time in the menu.
-- Any other change to `MenuRail`.
+- Any change to `MenuRail.jsx` or its sheets.
 
 ## Stop if
 
 - `useInViewOnce` is not on `main`, or it does not return `[ref, phase]` with
   `'rest' | 'wait' | 'play'` (slice 01c). Report its real API.
-- `MenuRail` has no single card button to put `style` on, or it already writes an
-  inline `style` there (merge the two objects then, and say so in the PR).
+- MenuRail's merged `cardProps` does not pass `item.style` and `item.className` to
+  the card Button, or `motion/menurail.css` has a different transition list (then
+  copy the merged list, minus `transform`, and say so in the PR).
 - The inline `transform` blocks the stamp-press on a menu card after the entrance.
 - A frame takes over 16ms at 390px on the dev build with the menu entering.
 - `ArsenalCard.jsx` passes 250 lines; move the items mapping into a

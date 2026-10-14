@@ -5,8 +5,8 @@
 - Model: `claude-sonnet-5-5`. Effort: medium.
 - Depends on: 05 merged (`MenuRail`), and so 01 merged (`--dur-unfold`, `--ease-unfold`).
 - Parallel with: 06, 08, 10, 16, 17, 20. Not with 12 to 15: they edit the same
-  `modules/arsenal/` files, in the order 11, 12a, 12b, 12c, 13, 14, 15. Slice 12a and
-  slices 13 to 15 also edit `FlightScene.jsx`.
+  `modules/arsenal/` folder and `arsenal.css`, in the order 11, 12a, 12b, 12c, 13,
+  14, 15 (spec.md, "Shared files").
 
 ## Goal
 
@@ -165,8 +165,9 @@ layout ratchet does not count them, and `arsenal.css` has no entry in
 
 ## Build
 
-Read `src/components/ui/control/MenuRail.jsx` as merged by slice 05 first. The API
-in `spec.md` is: `label`, `items` (`{ key, title, meta, figures, mark }`), `picked`,
+Read `src/components/ui/control/MenuRail.jsx` as merged by slice 05a first. The API
+in `spec.md` is: `label`, `items` (`{ key, title, meta, figures, mark }`; 05a also
+takes `label`, `disabled`, `heading`, `style`, `className` per item), `picked`,
 `onPick` (called with a key, or `null` when the picked card is tapped again),
 `panel(key)`, `backLabel`.
 
@@ -223,6 +224,7 @@ export function ArsenalCard({ rows }) {
           return r ? <Detail r={r} /> : null
         }}
         backLabel="All pitches"
+        railMeta
       />
     </div>
   )
@@ -233,8 +235,10 @@ Notes:
 
 - The card shows the same facts as before: mph moves to `meta` (the canvas head
   row), usage and the sparkline go in `figures` (the part that folds).
-- `backLabel`: if slice 05's MenuRail draws the label as given, with no arrow, pass
-  `"← All pitches"` (the live text and the canvas text). Read MenuRail to decide.
+- `railMeta` keeps the mph on the rail cards, as the canvas `.ar-rail` does
+  (slice 05a's optional prop; Plate and Contact leave it off).
+- `backLabel="All pitches"`: slice 05a's MenuRail draws it as a ghost `Button` with
+  `icon="←"`, so the arrow is already there. Do not put a second arrow in the text.
 - `panel` may get the last picked key while the panel closes (spec.md), so look the
   row up by code and return `null` when it is gone.
 - `Detail` does not change. MenuRail's `menurail__body--a/--b` rise replaces any
@@ -259,7 +263,7 @@ Delete lines 190-217 (the `.arsenal__menu`, `.arsenal__pick.btn` and
 `.arsenal__menu--rail` rules). Keep `.arsenal__figs`, `.arsenal__spark`,
 `.arsenal__sparkline`, `.arsenal__sparkbase`. Put a one-line comment above
 `.arsenal__figs`: `/* The menu card's figures; the card, rail and panel are MenuRail's (system/menurail.css). */`
-(use the sheet name slice 05 really made).
+(slice 05a's sheet is `src/styles/system/control/menurail.css`; use the merged name).
 
 After the reduced-motion block that ends at line 158, add:
 
@@ -314,7 +318,8 @@ const decl = (body, prop) =>
 test('the arsenal menu is a MenuRail, with the Detail as its panel', () => {
   assert.match(card, /import \{ MenuRail \} from '[./]+components\/ui\/control\/MenuRail\.jsx'/)
   assert.match(card, /<MenuRail[\s\S]*panel=\{/)
-  assert.match(card, /backLabel=/)
+  assert.match(card, /backLabel="All pitches"/)
+  assert.match(card, /railMeta/)
   assert.doesNotMatch(card, /\{one && <Detail/)
   assert.doesNotMatch(card, /arsenal__menu/)
 })

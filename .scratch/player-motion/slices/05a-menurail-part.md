@@ -31,7 +31,7 @@ part: no baseball knowledge, no `api/` import.
   stamp-press come with it ("One control, one door", `src/CLAUDE.md` l.222).
 - `src/components/ui/control/menuRail.js` holds the pure core: the `shownKey` lag, the a/b
   generation, the class lists, the card props and the panel props.
-- `src/styles/system/control/menurail.css` draws the menu state, the rail state, the
+- `src/styles/system/menurail/menurail.css` draws the menu state, the rail state, the
   picked card and the open/closed panel, with tokens only.
 - `src/index.css` imports it after `system/jumpbar/jumpbar.css`.
 - `test/menurail.test.js` passes, and it failed before the change.
@@ -43,7 +43,7 @@ part: no baseball knowledge, no `api/` import.
 |---|---|
 | `src/components/ui/control/MenuRail.jsx` | **new**: the component |
 | `src/components/ui/control/menuRail.js` | **new**: the pure core (node cannot import `.jsx`) |
-| `src/styles/system/control/menurail.css` | **new**: resting look and states. A **new subfolder** `control/`: `src/styles/system/` holds 12 `.css` files today, the `check-dir-size.mjs` cap (`MAX_FILES = 12`). Slice 03 should put `segmented.css` in the same `system/control/` folder |
+| `src/styles/system/menurail/menurail.css` | **new**: resting look and states. A **new subfolder**: `src/styles/system/` holds 12 `.css` files today, the `check-dir-size.mjs` cap (`MAX_FILES = 12`). Slice 03a does the same (`system/segmented/segmented.css`) |
 | `src/index.css` | one `@import` line |
 | `test/menurail.test.js` | **new**: the pure core, the markup source, the CSS |
 
@@ -250,7 +250,7 @@ import { bodyClass, cardProps, firstView, nextView, panelProps, pickFor, rootPro
 
 // THE MENU RAIL (#2073, slice 05): one shared menu of cards that folds into a rail, with
 // a focus panel under it for the picked card. Arsenal, Splits, Plate approach and Contact
-// use it. Drawn once, in styles/system/control/menurail.css; it moves in
+// use it. Drawn once, in styles/system/menurail/menurail.css; it moves in
 // styles/motion/menurail.css. No baseball knowledge (ui/CLAUDE.md).
 //
 //   label     the menu's aria-label.   items  [{ key, title, meta, figures, mark,
@@ -325,7 +325,7 @@ Notes:
   (padding is not part of the content height), so the padding sits one level deeper
   (`__figsin`, `__inner`).
 
-### 3. `src/styles/system/control/menurail.css`
+### 3. `src/styles/system/menurail/menurail.css`
 
 `src/styles/system/` is skipped by `layout/check-layout-ratchet.mjs` (the parts themselves),
 so this file needs no `layout-exempt` markers. Every value is a token or a `calc` of one.
@@ -525,7 +525,7 @@ with a comment:
 ```css
 /* The MENU RAIL (#2073): MenuRail.jsx. Its selectors outrank .btn, so its place does not
    depend on system/button.css. The motion is motion/menurail.css. */
-@import './styles/system/control/menurail.css';
+@import './styles/system/menurail/menurail.css';
 ```
 
 Do NOT put it between `system/button.css` and `07-team-logo-and-buttons.css`:
@@ -552,7 +552,7 @@ import { buttonAria } from '../src/lib/design/buttonClass.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const read = (rel) => readFileSync(join(SRC, rel), 'utf8')
-const css = () => stripComments(read('styles/system/control/menurail.css'))
+const css = () => stripComments(read('styles/system/menurail/menurail.css'))
 const decl = (body, property) =>
   body?.split(';').map((d) => d.trim()).find((d) => d.startsWith(`${property}:`))?.slice(property.length + 1).trim()
 
@@ -657,7 +657,7 @@ test('the panel: 0fr and hidden when shut, 1fr and visible when open', () => {
 
 test('index.css loads the sheet, and not between button.css and 07', () => {
   const imports = [...read('index.css').matchAll(/@import '\.\/styles\/([^']+)'/g)].map((m) => m[1])
-  const at = imports.indexOf('system/control/menurail.css')
+  const at = imports.indexOf('system/menurail/menurail.css')
   assert.ok(at > -1)
   assert.equal(imports[imports.indexOf('system/button.css') + 1], '07-team-logo-and-buttons.css')
 })
@@ -683,9 +683,7 @@ test('index.css loads the sheet, and not between button.css and 07', () => {
 
 ## Stop if
 
-- `src/styles/system/` no longer holds exactly 12 `.css` files, or `system/control/`
-  already exists with a different purpose (slice 03 may create it first; then add
-  `menurail.css` beside `segmented.css` and go on).
+- `src/styles/system/menurail/` already exists with other files in it.
 - `Button` no longer passes `...rest` to the `<button>`, or `pressed` no longer writes
   `aria-pressed` through `buttonAria`.
 - `.btn[aria-pressed='true']` gains specificity above 0,2,0, or `.btn` stops reading

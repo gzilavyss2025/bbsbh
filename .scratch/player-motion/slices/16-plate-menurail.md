@@ -7,7 +7,9 @@
   05c (the lab entries) is not needed.
 - Parallel with: 09, 11, 17 (each in its own module folder), 05c, and any slice that does not
   touch `src/screens/player/next/modules/plate/`, `src/styles/player-next/batter/plate.css`
-  or `test/player-next-plate.test.js`.
+  or `test/player-next-plate.test.js`. NOT with 04: slice 04 may move the hand chips
+  (`PlateModule.jsx:83-89`, `Pill role="control"`) onto `Segmented`. Run 16 after 04 merges,
+  or before it; the two edits do not overlap in lines, but they share the file.
 
 ## Goal
 
@@ -522,7 +524,8 @@ test('the glyph and the panel head are drawn in plate.css with tokens', () => {
 ## Stop if
 
 - The live lines quoted above differ (the table call, `tableRow`, the read box, the
-  imports), or `PlateModule.jsx` is not 162 lines when you start.
+  imports). Line numbers may move if slice 04 already swapped the hand chips (l.83-89) onto
+  `Segmented`; that is fine. Any other change in those blocks is a stop.
 - `MenuRail`'s API differs from 05a (`items[].label`, `panel`, `backLabel`, `className`).
 - `glyphD` is no longer exported from `arsenal/PitchGlyph.jsx` (slices 11-15 work in that
   folder), or its signature is not `(shape, r)`.

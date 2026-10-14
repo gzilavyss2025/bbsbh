@@ -61,8 +61,12 @@ did, and end with a short list of what needs him.
      the question in the report as `[DECISION: ...]`.
    - **A PR that will not merge cleanly and is not worth the fight:** leave it out,
      and say which one and why. Do not drop it silently.
-4. **Check the stack.** Run `npm run lint`, `npm test`, and `npm run build`.
-   Fix any failure the merge caused. Fix failures one PR caused in that PR's
+4. **Check the stack.** If step 3 resolved no conflict, skip the local run: CI
+   on the stack PR runs `npm run lint`, `npm test` and `npm run build`, and it
+   is the gate in step 7. Each source PR was already green in CI, and its
+   session did not review itself (`orchestrate`, "Check once"). If step 3
+   resolved a conflict, or step 6 made a fix, run all three here before you
+   push. Fix any failure the merge caused. Fix failures one PR caused in that PR's
    code, not by loosening a test. Never skip, delete, or weaken a test
    (CLAUDE.md, "Test discipline").
 5. **Open the stack PR.** Push the branch with `git push -u origin stack/<date>` (the session branch in a
@@ -75,9 +79,10 @@ did, and end with a short list of what needs him.
    closing keyword for an issue that a source PR only references.
    Add the attribution lines from the session reminder. Subscribe to its activity
    (`subscribe_pr_activity`).
-6. **Review the stack, then fix.** Run the `code-review` skill on the stack PR at
-   `high` effort. Then check these four things by hand, because the generic review
-   does not know them:
+6. **Review the stack, then fix.** This is the only review the source PRs get.
+   Run the `code-review` skill on the stack PR at `high` effort, then the
+   `ponytail-review` skill on the same diff. Then check these four things by
+   hand, because the generic review does not know them:
    - **The spoiler rule.** A reveal-only module (`linescore.js`, `derive.js`,
      `hitchart.js`) called outside a `SealBox` reveal render function. A
      score-revealing value fetched, computed, or rendered early. See CLAUDE.md,

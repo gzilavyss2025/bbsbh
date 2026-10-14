@@ -10,7 +10,8 @@ step, the scrubber and the `/animation-lab` entry.
 - Model: `claude-sonnet-5-5`. Effort: high.
 - Depends on: 11 merged (and so 01 and 05).
 - Parallel with: 06, 08, 10, 16, 17, 20. Not with 12b, 12c, 13, 14, 15 (same
-  `modules/arsenal/` files; 13 to 15 also edit `FlightScene.jsx`).
+  `modules/arsenal/` folder and `arsenal.css`). Slices 13 to 15 leave
+  `FlightScene.jsx` alone, so the props added here are this card's only.
 
 ## Goal
 
@@ -110,8 +111,9 @@ its label `<text y="174" text-anchor="middle" font-size="6.5px" fill=graphite op
 The canvas tick step 46.9px is 10 ft on its 336px view; the live flat camera's
 `cam.sx` is 336 × 0.01396 = 4.69 px a foot, so the step is `cam.sx * 10`.
 
-`easeOutQuart` from `src/lib/motion/curves.js` (slice 01) is the canvas `eo`
-without the clamp. `timeline.js` adds the clamp.
+`easeOutQuart` from `src/lib/motion/curves.js` (slice 01b) is the canvas `eo`,
+clamped. `timeline.js` re-exports it as `eo` with its own clamp too, so the module
+does not depend on that detail.
 
 ## Live today
 
@@ -750,10 +752,10 @@ test('the scene draws the beats: ring, ripple, seam, ticks', () => {
 
 ## Stop if
 
-- `src/lib/motion/curves.js` does not export `easeOutQuart` (slice 01).
+- `src/lib/motion/curves.js` does not export `easeOutQuart` (slice 01b).
 - `ArsenalCard.jsx` does not use `MenuRail` yet (slice 11 not merged).
 - `FlightScene.jsx` or `FlightCard.jsx` changed in a way that makes `FlightCard`
-  pass `beats`, `ring` or `ticks`, or a slice 13 to 15 branch is open on
+  pass `beats`, `ring` or `ticks`, or an open branch also edits
   `FlightScene.jsx`.
 - `react-hooks` lint flags the clock (for example `set-state-in-effect`). Move the
   state change into the rAF callback; if that does not clear it, stop and report.

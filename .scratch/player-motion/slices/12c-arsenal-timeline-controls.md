@@ -5,10 +5,10 @@ Part 3 of 3 (12a: the clock and the side view; 12b: the bar, the rows, in view).
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: medium.
-- Depends on: 12b merged.
+- Depends on: 12b merged, and 01d merged (`PlayerMotionLab.jsx`, `Frame` in `Entry.jsx`).
 - Parallel with: 06, 08, 10, 16, 17, 20. Not with 13, 14, 15 (same `arsenal/`
-  folder), and not at the same time as another slice that adds to
-  `AnimationLab.jsx` (it sits at the 600-line cap; see Stop if).
+  folder). Another open slice that adds to `PlayerMotionLab.jsx` is fine: merge
+  `main` in; the conflict is one entry beside another.
 
 ## Goal
 
@@ -32,9 +32,12 @@ live and a frozen strip of its frames.
 1. `src/screens/player/next/modules/arsenal/ArsenalCard.jsx`: `S` state, the range,
    the speed button; an `at` prop for the lab.
 2. `src/styles/player-next/pitcher/arsenal.css`: `.arsenal__range`.
-3. `src/screens/animlab/motionDemos.jsx`: `ArsenalTimelineEntry` with invented rows.
-4. `src/screens/AnimationLab.jsx`: one import name, one `<ArsenalTimelineEntry />`.
-5. `test/arsenal-motion.test.js`: new cases at the end.
+3. `src/screens/animlab/PlayerMotionLab.jsx` (slice 01d): the timeline entry with
+   invented rows.
+4. `test/arsenal-motion.test.js`: new cases at the end.
+
+`AnimationLab.jsx` and `motionDemos.jsx` do not change (slice 01d: every player
+motion entry goes in `PlayerMotionLab.jsx`).
 
 ## Canvas
 
@@ -85,11 +88,13 @@ export function ArsenalCard({ rows, id }) {
 `arsenal.css` `.flight__range` (today `:321-327`) is the Pitch flight card's range;
 do not reuse it (slices 13 to 15 own that card).
 
-`src/screens/AnimationLab.jsx` is 597 lines (cap 600). `Entry` is exported from
-`src/screens/animlab/Entry.jsx` (`{ title, note, live, hover, children }`); the frozen
-strip classes are `animlab__stagelabel`, `animlab__frozen`, `animlab__frame`,
-`animlab__framebox`, `animlab__framelabel` (`AnimationLab.jsx:546-554`, `Frame`).
-`motionDemos.jsx` (349 lines) exports only components; its data stays module-private.
+After slice 01d: `src/screens/animlab/PlayerMotionLab.jsx` exports
+`PlayerMotionLab`, a fragment of `Entry` blocks that `AnimationLab.jsx` renders with
+one line. `src/screens/animlab/Entry.jsx` exports `Entry` (`{ title, note, live,
+hover, children }`) and `Frame` (`{ label, delayMs, children }`; `delayMs` only
+sets `--animlab-delay` for CSS animations, so leave it out for a JS frame). The
+frozen strip wrapper is `<div className="animlab__frozen">`, its label
+`<span className="animlab__stagelabel">`.
 
 ## Build
 
@@ -168,9 +173,9 @@ After the `.arsenal__bar, .flight__bar, .flight__row` rule:
 `flex: 1 1 9rem` is not a counted layout rule (the ratchet counts column, wrap,
 grid). `9rem` is already used by `.flight__range`; it is not a radius or a time.
 
-### 3. `motionDemos.jsx`
+### 3. `PlayerMotionLab.jsx`
 
-Imports:
+Imports (beside the ones 01d wrote; `Entry` and `Frame` are already imported):
 
 ```jsx
 import '../../styles/player-next/pitcher/arsenal.css'
@@ -178,10 +183,9 @@ import { pitchMark } from '../../lib/pitch/pitchTypes.js'
 import { ArsenalCard } from '../player/next/modules/arsenal/ArsenalCard.jsx'
 import { flightPath } from '../player/next/modules/arsenal/flightView.js'
 import { LEAD, totalMs } from '../player/next/modules/arsenal/timeline.js'
-import { Entry } from './Entry.jsx'
 ```
 
-At the end:
+Above `export function PlayerMotionLab()`:
 
 ```jsx
 // The Arsenal card's timeline (#2073, slice 12): an invented three-pitch arm, the paths built by the real
@@ -208,7 +212,7 @@ const DEMO_ROWS = DEMO_ARM.map(([code, pct, velo, spin, [x0, z0, pfxX, pfxZ, ext
 }))
 const DEMO_END = totalMs(DEMO_ROWS.map((r) => ({ code: r.code, ft: r.path.T, rpm: r.spin })), 3)
 
-export function ArsenalTimelineEntry() {
+function ArsenalTimelineEntry() {
   return (
     <Entry
       title="Pitch arsenal: the timeline"
@@ -224,12 +228,9 @@ export function ArsenalTimelineEntry() {
       <span className="animlab__stagelabel">The timeline, 0 → {DEMO_END}ms</span>
       <div className="animlab__frozen">
         {[0, 300, LEAD, 1100, 1500, 2000, DEMO_END].map((ms) => (
-          <div key={ms} className="animlab__frame">
-            <div className="animlab__framebox">
-              <ArsenalCard rows={DEMO_ROWS} id={`animlab-${ms}`} at={ms} />
-            </div>
-            <span className="animlab__framelabel">{ms}ms</span>
-          </div>
+          <Frame key={ms} label={`${ms}ms`}>
+            <ArsenalCard rows={DEMO_ROWS} id={`animlab-${ms}`} at={ms} />
+          </Frame>
         ))}
       </div>
     </Entry>
@@ -242,19 +243,15 @@ Check `flightPath`'s inputs in `flightView.js:40` (`INPUTS = ['x0', 'z0', 'pfxX'
 the frames are too wide for `.animlab__frozen`, wrap each `ArsenalCard` in a
 `<div style={{ width: 336 }}>` (inline, in the lab only).
 
-### 4. `AnimationLab.jsx`
-
-Add `ArsenalTimelineEntry,` to the `./animlab/motionDemos.jsx` import list (it is
-alphabetical: first), and `<ArsenalTimelineEntry />` after the stamp-in `</Entry>`
-(today line 487). Two lines: the file goes to 599.
+Then render `<ArsenalTimelineEntry />` as the last child of the fragment that
+`PlayerMotionLab` returns.
 
 ## Test first
 
 Append to `test/arsenal-motion.test.js`. Each case fails before the change.
 
 ```js
-const demos = read('src/screens/animlab/motionDemos.jsx')
-const lab = read('src/screens/AnimationLab.jsx')
+const lab = read('src/screens/animlab/PlayerMotionLab.jsx')
 
 test('the speed button switches 1/3 and 1/6 and replays; the timeline length follows it', () => {
   assert.match(card, /useState\(3\)/)
@@ -275,16 +272,15 @@ test('the scrubber spans the timeline and stops the clock where it is moved', ()
 
 test('the lab shows the timeline live and as pinned frames', () => {
   assert.match(card, /at \?\? t \?\? total/)
-  assert.match(demos, /export function ArsenalTimelineEntry\(/)
-  assert.match(demos, /<ArsenalCard rows=\{DEMO_ROWS\}[^>]*at=\{ms\}/)
+  assert.match(lab, /function ArsenalTimelineEntry\(/)
+  assert.match(lab, /<ArsenalCard rows=\{DEMO_ROWS\}[^>]*at=\{ms\}/)
   assert.match(lab, /<ArsenalTimelineEntry \/>/)
 })
 ```
 
 ## Verify
 
-- `npm run lint` (watch `check-file-size.mjs` on `AnimationLab.jsx`), `npm test`,
-  `npm run build`.
+- `npm run lint`, `npm test`, `npm run build`.
 - `npm run dev`, `/player/robert-gasser-688107?nointro` at 390px and 1180px: the
   bar wraps on a phone with no horizontal scroll; drag the range: the scene, the
   bar and the rows follow; press `⅓×`: it reads `⅙×` and the flight replays twice
@@ -304,9 +300,9 @@ test('the lab shows the timeline live and as pinned frames', () => {
 
 ## Stop if
 
-- `AnimationLab.jsx` would pass 600 lines (another slice added an entry first).
-  Do not raise its budget in `check-file-size.mjs`. Stop and report; the fix is a
-  structural move of entries, which is not this slice's job.
+- `src/screens/animlab/PlayerMotionLab.jsx` is not on `main` (slice 01d), or it
+  would pass 600 lines. Do not raise a budget in `check-file-size.mjs`; stop and
+  report.
 - `ArsenalCard` passes 250 lines.
 - `useArsenalClock` or `beatsAt` differ from 12a's shape.
 - The range input fails `check-focus-ring.mjs` or shows no focus ring (it should get

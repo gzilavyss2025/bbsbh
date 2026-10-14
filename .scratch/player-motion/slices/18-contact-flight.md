@@ -392,6 +392,11 @@ export function FlightMarks({ frame, home }) {
 `motionIsReduced()` is read in render, which is fine: it reads `<html>` and a media
 query, and the tap that starts a flight renders again.
 
+**Lint:** `eslint-plugin-react-hooks` 7.1.1 runs its recommended set, where
+`react-hooks/set-state-in-effect` is an ERROR. `setClock` runs only in the rAF callback,
+never in the effect body. Keep it that way: do not add a `setClock({ shot, t: 0 })` at
+the top of the effect (the `clock.shot === shot ? … : 0` line does that job in render).
+
 ### 3. `ContactModule.jsx`
 
 Imports:
@@ -752,3 +757,5 @@ test('the module flies the tapped ball and speaks once, on landing', () => {
   code as written. Do not edit the number to match: find the difference from the code
   in this brief, and report it.
 - `ContactModule.jsx` would pass 600 lines.
+- `npm run lint` reports a `react-hooks/*` error on `useFlightClock` or on the `model`
+  memo. Report the message; do not disable the rule.

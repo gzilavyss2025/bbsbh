@@ -161,10 +161,12 @@ Slice: <files, at most 5>. Follow the pattern in <path>.
 Rules: test first (watch it fail, then fix). For a bug, reproduce it first on a
 real gamePk from docs/test-games.md. The spoiler rule applies if you touch the
 innings viewer, scorecard, lineups, or box score. Touch no other files.
-Use the ponytail skill at level full. Finish with ponytail-review. (Opus slices:
-also /code-review.)
-Verify: npm run lint, npm test, npm run build. For a visible change, send a
-screenshot with SendUserFile (Chromium, ?nointro, say what is mocked).
+Use the ponytail skill at level full. Do not run ponytail-review or /code-review:
+the stack reviews once (see "Check once").
+Verify: the test files you wrote (node --test <file>) and npm run lint. Do not
+run the full npm test or npm run build: CI runs them on your PR. For a visible
+change, send a screenshot with SendUserFile (Chromium, ?nointro, say what is
+mocked).
 Handoff: open a DRAFT PR to main. Body: base SHA, files, how you verified, and
 one line per issue. Write "Closes #n" when this PR meets the issue's "Done means".
 Write "Part of #n" only when the issue has more slices after this one. Subscribe
@@ -179,6 +181,26 @@ you cannot fix. To stop, send_message your parent AND end with a final line
 
 Subscribe to the child's PR when it opens. Sonnet by default. Opus when the cause
 of a bug is unknown or the spoiler rule changes (that also goes to him first).
+
+## Check once
+
+Each check runs at one layer, the cheapest one that can do it. Do not repeat it.
+
+| Check | Child session | Child PR CI | `/stack-prs` | Stack PR CI |
+|---|---|---|---|---|
+| The tests the child wrote, `npm run lint` | yes | | | |
+| Full `npm test`, `npm run build` | no | yes (the gate) | only after a conflict or a review fix | yes (the gate) |
+| `ponytail-review` and `/code-review` | no | | yes, one pass at `high`, over the whole stack | |
+
+Why: the full suite has about 5,500 tests, CI runs it at no token cost, and the
+child already drives its PR to green. A review pass costs tokens, and only the
+stack review sees two PRs that break each other. The cost of this rule: a finding
+that a child review would have caught gets fixed on the stack branch, by you.
+Keep the slice briefs exact so those findings stay few.
+
+A prompt from a plan keeps any line that tells the child to run ponytail-review or
+/code-review only if the plan is a single prompt that will not be stacked. Remove
+that line otherwise, and say so in the run report.
 
 ## Lane 3: Run a plan (prompts from `write-prompt`)
 

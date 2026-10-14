@@ -144,11 +144,12 @@ written, and go to step 1.
    writes or changes code, put this line first in that prompt: `Use the
    ponytail skill at level full. Reuse what the repo already has before you
    write anything new.` Use `lite` when the author wants to choose between
-   options, and `ultra` when the author doubts the task needs to exist. Also
-   add a last step to that prompt: run the `ponytail-review` skill on the diff,
-   apply the cuts it lists, then run `/code-review`. Do not add either to a
-   prompt that only researches, decides or writes prose, or to a prompt that
-   only reviews. If the repo has no ponytail skill, skip this and do not
+   options, and `ultra` when the author doubts the task needs to exist. Do
+   not add a `ponytail-review` or `/code-review` step to a prompt whose PR
+   lands through `/stack-prs`: the stack reviews once, over every PR in it
+   (`orchestrate`, "Check once"). Tell such a prompt to verify with the tests
+   it wrote and `npm run lint`, and to let CI run the full `npm test` and
+   `npm run build`. If the repo has no ponytail skill, skip this and do not
    mention it. Ponytail never overrides a repo rule: the spoiler rule,
    test-first and `check-dir-size` come first.
 8. **List the changes.** After the prompts, list each change and its reason,

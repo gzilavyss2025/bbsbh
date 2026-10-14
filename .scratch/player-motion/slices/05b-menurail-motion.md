@@ -83,7 +83,7 @@ uses the same pair); the head's opacity `240ms` → `--dur-med`; `8px` → `var(
   Specificity 0,1,0. The card rule below is `.menurail__card.btn` (0,2,0), so it REPLACES
   `.btn`'s transition list; that is why it restates `transform` and `border-color`, and why
   it needs its own reduced-motion rule.
-- After 05a: `src/styles/system/control/menurail.css` has the state rules this sheet moves
+- After 05a: `src/styles/system/menurail/menurail.css` has the state rules this sheet moves
   between (`.menurail--rail .menurail__card.btn`, `.menurail--rail .menurail__fold`,
   `.menurail__panel--open`, `.menurail__panelin`, `.menurail--rail .menurail__head`), and
   `MenuRail.jsx` writes `menurail__body menurail__body--a|b` on the panel body.
@@ -98,7 +98,7 @@ uses the same pair); the head's opacity `240ms` → `--dur-med`; `8px` → `var(
 ```css
 /* ---------------------------------------------------------------------------
    THE MENU RAIL'S MOTION (#2073, slice 05; components/ui/control/MenuRail.jsx).
-   The resting look and the two states are system/control/menurail.css. This
+   The resting look and the two states are system/menurail/menurail.css. This
    file holds only how they change:
 
      the cards     flex-basis and padding glide between the menu and the rail,
