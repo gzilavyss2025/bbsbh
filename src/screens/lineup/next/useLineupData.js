@@ -129,8 +129,11 @@ export function useLineupData({ feed, side, vsTeam, careerMatchupsData, workload
     [hitterIds, season, info.officialDate, meta.sportId],
   )
 
+  // Which side a hitter bats from (L, R or S), from the game's player table.
+  const batsOf = (id) => feed?.gameData?.players?.[`ID${id}`]?.batSide?.code ?? ''
+
   return {
-    meta, oppMeta, info, season, isMlb, closed, lineup, birthdayIds, oppPitcher, oppDefense, oppBullpenArms,
+    batsOf, meta, oppMeta, info, season, isMlb, closed, lineup, birthdayIds, oppPitcher, oppDefense, oppBullpenArms,
     orgTeamId, oppOrgTeamId, careerVsOpp, vsOpponentAbbr, oppPitcherLine,
     arsenal, arsenalTto, arsenalSides, boardGameDate, projectedStarters,
     teammatePairs, orgTies, startingIds, matchups, starterLast, roster, hitterLines: hitterLines ?? {},
