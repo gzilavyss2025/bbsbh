@@ -14,7 +14,7 @@ function captionOf(t) {
 }
 
 // One role's five tiles. A two-way player gets a labelled row per role.
-export function PlayerNextTiles({ block, playerId, season, label }) {
+export function PlayerNextTiles({ block, playerId, season, label, lit }) {
   const marks = useAsync(() => fetchRankMarks(playerId, block.group, block.rankSplits, season), [playerId, block, season]).data
   return (
     <section className="pnext__tiles" aria-label={label}>
@@ -28,6 +28,7 @@ export function PlayerNextTiles({ block, playerId, season, label }) {
             caption={captionOf(t)}
             rank={rankFor(marks, t.k)}
             tone={i === 0 ? 'ink' : i === 1 ? 'tint' : 'plain'}
+            className={lit?.group === block.group && lit.tile === t.k ? 'pnext__tile--lit' : ''}
             stampIn
             style={{ '--stamp-delay': `${60 + i * 40}ms` }}
           />

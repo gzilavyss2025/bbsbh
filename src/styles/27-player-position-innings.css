@@ -87,27 +87,6 @@
   text-align: right;
 }
 
-/* ---- league-rank chips under the season tiles ("1st NL · ERA") ---- */
-.leaguerank {
-  margin: 10px 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1h);
-}
-/* Each chip is a paper pill (#1131). It keeps one thing: a baseline row, so
-   the mono ordinal at --fs-ui and the caps label at --fs-label share a line
-   instead of centring on their two different boxes. */
-.leaguerank__tag {
-  align-items: baseline;
-}
-.leaguerank__ord {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-weight: var(--w-bold);
-  font-size: var(--fs-ui);
-  color: var(--text-heading);
-}
-
 /* ---- Slate empty-day banners — the same tape-banner recipe as the player
    page's All-Star/rehab banners above, for GameSelect's empty-slate spot.
    break-banner reuses the celebratory All-Star blue (every level goes dark
