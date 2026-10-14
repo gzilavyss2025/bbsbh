@@ -14,7 +14,7 @@ One `modules/<module>/` folder per module: `season` #1885, `splits` #1886, `plat
 `percentile` #2011, `advanced` #2012, `runvalue` #2013, `command` #2014, `target` #2015, `pfouls` #2016,
 `milestones` #2017, `awards` #2018, `teams` #2019, `moves` #2020, `photos` #2021, `highlights` #2022 (stubs,
 wired in #2002), `tbd` #1896 (one folder, five slots: Season, On the mound (pitchers), Game log, Career and History; no
-Overview slot, the top cards cover it). Order inside a section is
+Overview slot, the top cards cover it; only Command received is left, the other four slots render nothing). Order inside a section is
 the `SLOTS` order in `sections.js`. `SLOTS` hints: `once` gives a two-way player one instance with no role
 suffix; `twin` adds the suffix to two one-role slots with one name (the two Foul balls); `pair:
 'a'|'b'` puts an adjacent pair side by side at wide widths (`page.css`, a container query). No section has its own button beyond the jump bar's nine.

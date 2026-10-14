@@ -9,7 +9,7 @@ import '../../../../../styles/player-next/both/tbd.css'
 // and hides alone; when all of a slot's cards have, the slot reports empty. Career has no
 // card left (Prospect rankings is #1927), so it renders nothing on its first render.
 export default function TbdModule({ bio, role, asOf, season, section, onEmpty }) {
-  const keys = tbdCards(section, role, bio)
+  const keys = tbdCards(section, role)
   const [gone, setGone] = useState({})
   const hide = useCallback((k) => setGone((g) => (g[k] ? g : { ...g, [k]: true })), [])
   const allGone = keys.length > 0 && keys.every((k) => gone[k])

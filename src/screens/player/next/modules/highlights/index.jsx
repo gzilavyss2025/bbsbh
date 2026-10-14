@@ -5,7 +5,7 @@ import { HighlightSheet } from '../../../../../components/playbyplay/HighlightSh
 import { Door } from '../../../../../components/ui/control/Door.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { inMajors } from '../tbd/tbdData.js'
-import { highlightsView } from './highlightsView.js'
+import { clipsTag, highlightsView } from './highlightsView.js'
 
 const SHOWN = 6
 
@@ -23,7 +23,7 @@ export default function HighlightsModule({ bio, asOf, season, onEmpty, onCount }
   const empty = !live || (!loading && !items.length)
   useEffect(() => {
     if (empty) onEmpty()
-    else if (!loading) onCount(`${items.length} clips`)
+    else if (!loading) onCount(clipsTag(items.length))
   }, [empty, loading, items.length, onEmpty, onCount])
   if (empty) return null
   if (loading) return <div className="hlmod hlmod--wait" aria-busy="true" />

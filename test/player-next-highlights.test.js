@@ -1,7 +1,7 @@
 // The Highlights module's pure view (src/screens/player/next/modules/highlights/highlightsView.js, #2022).
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { highlightsView } from '../src/screens/player/next/modules/highlights/highlightsView.js'
+import { highlightsView, clipsTag } from '../src/screens/player/next/modules/highlights/highlightsView.js'
 
 const clip = (clipId, date, o = {}) => ({ clipId, date, gamePk: 1, playerId: 668930, title: `t${clipId}`, duration: '00:00:30', poster: 'p', ...o })
 const NOW = new Date('2026-10-13T20:00:00Z')
@@ -35,4 +35,9 @@ test('a missing length prints none and a missing title stays empty (the card sho
   assert.equal(c.length, '')
   assert.equal(c.title, '')
   assert.deepEqual(view([]), [])
+})
+
+test('the count tag is singular for one clip', () => {
+  assert.equal(clipsTag(1), '1 clip')
+  assert.equal(clipsTag(37), '37 clips')
 })
