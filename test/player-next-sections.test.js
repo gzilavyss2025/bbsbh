@@ -53,7 +53,7 @@ test('no season games empties the log and foul-ball slots only: Similar players 
   assert.deepEqual(seedEmpty(inst, [hit]), {})
   const two = slotInstances(BOTH)
   const g2 = seedEmpty(two, [hit, { group: 'pitching', seasonGames: 0 }])
-  assert.deepEqual(two.filter((i) => g2[i.key]).map((i) => i.module), ['pitchlog'])
+  assert.deepEqual(two.filter((i) => g2[i.key]).map((i) => i.module), ['pitchlog', 'pfouls'])
 })
 
 test('postseason games keep the log: a call-up with only October games still has one', () => {
@@ -73,22 +73,22 @@ import { SLOTS, rolesOf, seedEmpty, shownSections, slotInstances } from '../src/
 
 const BOTH = ['hitting', 'pitching']
 
-test('the slots are the 18 module folders, with each section holding its modules in order', () => {
+test('the slots are the 30 module folders, with each section holding its modules in order', () => {
   assert.deepEqual(
     [...new Set(SLOTS.map((s) => s.module))].sort(),
-    ['arsenal', 'batlog', 'contact', 'contract', 'firsts', 'form', 'fouls', 'innings', 'mound', 'path', 'pform', 'pitchlog', 'plate', 'prospects', 'season', 'similar', 'splits', 'tbd'],
+    ['advanced', 'arsenal', 'awards', 'batlog', 'command', 'contact', 'contract', 'firsts', 'form', 'fouls', 'highlights', 'innings', 'milestones', 'mound', 'moves', 'path', 'percentile', 'pform', 'pfouls', 'photos', 'pitchlog', 'plate', 'prospects', 'runvalue', 'season', 'similar', 'splits', 'target', 'tbd', 'teams'],
   )
   const at = (section) => SLOTS.filter((s) => s.section === section).map((s) => s.module)
-  assert.deepEqual(at('season'), ['season', 'tbd'])
+  assert.deepEqual(at('season'), ['season', 'percentile', 'advanced', 'runvalue', 'tbd'])
   assert.deepEqual(at('career'), ['path', 'prospects', 'tbd'])
-  assert.deepEqual(at('history'), ['firsts', 'innings', 'contract', 'tbd'])
+  assert.deepEqual(at('history'), ['firsts', 'innings', 'awards', 'contract', 'teams', 'moves', 'photos', 'highlights', 'tbd'])
   assert.deepEqual(at('form-trend'), ['form', 'pform'])
-  assert.deepEqual(at('on-the-mound'), ['mound', 'tbd'])
+  assert.deepEqual(at('on-the-mound'), ['mound', 'command', 'target', 'tbd'])
   assert.equal(new Set(SLOTS.map((s) => s.id)).size, SLOTS.length)
 })
 
-test('the Game log section ends with foul balls, similar players, then the tbd slot', () => {
-  assert.deepEqual(SLOTS.filter((s) => s.section === 'game-log').map((s) => s.module), ['batlog', 'pitchlog', 'fouls', 'similar', 'tbd'])
+test('the Game log section runs logs, foul balls, similar players, milestones, then the tbd slot', () => {
+  assert.deepEqual(SLOTS.filter((s) => s.section === 'game-log').map((s) => s.module), ['batlog', 'pitchlog', 'pfouls', 'fouls', 'similar', 'milestones', 'tbd'])
 })
 
 test('the tbd slots for the pitcher boards: On the mound for a pitcher only, Game log for both', () => {
@@ -141,7 +141,44 @@ test('a button hides only when every slot in its section is empty', () => {
   // Both empty: it goes.
   const gone = Object.fromEntries(career.map((i) => [i.key, true]))
   assert.deepEqual(keys(shownSections(sections, inst, gone)), ['overview', 'history'])
-  assert.equal(history.length, 4)
+  assert.equal(history.length, 9)
+})
+
+test('a once slot gets one instance for a two-way player, with no role suffix; a pitcher-only slot is not once', () => {
+  const two = slotInstances(BOTH)
+  for (const id of ['runvalue', 'awards', 'teams', 'moves', 'photos', 'highlights']) {
+    const mine = two.filter((i) => i.id === id)
+    assert.equal(mine.length, 1, id)
+    assert.equal(mine[0].role, 'hitting', id)
+    assert.ok(!mine[0].label.includes('·'), id)
+  }
+  assert.equal(slotInstances(['pitching']).find((i) => i.id === 'awards').role, 'pitching')
+  // A slot that is not once still doubles: Percentile rank per role, with the suffix.
+  assert.deepEqual(two.filter((i) => i.id === 'percentile').map((i) => i.label), ['Percentile rank · Batting', 'Percentile rank · Pitching'])
+})
+
+test('the pitcher slots: Command, Target command and Foul balls (pitching) are pitcher-only', () => {
+  assert.deepEqual(slotInstances(['hitting']).filter((i) => ['command', 'target', 'pfouls'].includes(i.id)), [])
+  assert.deepEqual(slotInstances(['pitching']).filter((i) => ['command', 'target', 'pfouls'].includes(i.id)).map((i) => i.id), ['pfouls', 'command', 'target'])
+})
+
+test('a two-way player tells the two Foul balls cards apart; a one-way player keeps the bare name', () => {
+  const two = slotInstances(BOTH)
+  assert.equal(two.find((i) => i.id === 'fouls').label, 'Foul balls · Batting')
+  assert.equal(two.find((i) => i.id === 'pfouls').label, 'Foul balls · Pitching')
+  assert.equal(slotInstances(['hitting']).find((i) => i.id === 'fouls').label, 'Foul balls')
+  assert.equal(slotInstances(['pitching']).find((i) => i.id === 'pfouls').label, 'Foul balls')
+})
+
+test('pairs: Innings beside Awards, Photos beside Highlights; no other slot is paired', () => {
+  const pairs = SLOTS.filter((s) => s.pair).map((s) => `${s.id}:${s.pair}`)
+  assert.deepEqual(pairs, ['innings:a', 'awards:b', 'photos:a', 'highlights:b'])
+  // Each b follows its a directly in the history order.
+  const h = SLOTS.filter((s) => s.section === 'history').map((s) => s.id)
+  assert.equal(h[h.indexOf('innings') + 1], 'awards')
+  assert.equal(h[h.indexOf('photos') + 1], 'highlights')
+  // The instance keeps the hint, so Slot can draw it.
+  assert.equal(slotInstances(['hitting']).find((i) => i.id === 'awards').pair, 'b')
 })
 
 // ---- "not built yet" is not "no data" ----
@@ -159,12 +196,14 @@ test('with every slot a stub, all nine batter buttons show', () => {
 // still be a stub.
 const BUILT = new Set(['tbd', 'similar', 'prospects', 'innings', 'contract', 'mound', 'form', 'season', 'firsts', 'pform', 'path', 'splits', 'contact', 'fouls', 'arsenal', 'pitchlog', 'plate', 'batlog'])
 
-test('a stub module renders its placeholder line: it never returns null or calls onEmpty', () => {
+// A stub renders nothing, so Slot's probe hides its card (and a section whose every slot is a
+// stub loses its button) until the issue builds it: the live page never shows a "loads here"
+// line (decided 2026-10-14, before the swap #2040 makes this page the live one).
+test('a stub module renders nothing, so its card stays hidden until its issue builds it', () => {
   for (const slot of SLOTS.filter((s) => !BUILT.has(s.module))) {
     const src = readFileSync(new URL(`../src/screens/player/next/modules/${slot.module}/index.jsx`, import.meta.url), 'utf8')
-    if (BUILT.has(slot.module)) continue
-    assert.ok(!/return null/.test(src), `${slot.module} returns null`)
-    assert.ok(!/onEmpty\(/.test(src), `${slot.module} calls onEmpty`)
+    assert.match(src, /return null/, `${slot.module} renders something`)
+    assert.ok(!/<[a-z]/.test(src), `${slot.module} draws markup`)
   }
 })
 

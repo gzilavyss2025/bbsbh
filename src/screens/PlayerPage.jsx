@@ -26,7 +26,7 @@ import { PlayerHubShell } from './player/PlayerHubShell.jsx'
 import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCard.jsx'
 import { gameLogDoorLabel } from './player/overviewPreview.js'
 import { DASH, Fact, RankChips, StatGrid, debutLabel, draftLabel, roleWord } from './player/parts.jsx'
-import { isoToday, monthDayName } from '../lib/dates.js'
+import { monthDayName, photoGameRows } from '../lib/dates.js'
 import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { FactGrid } from '../components/ui/frame/FactGrid.jsx'
 
@@ -399,11 +399,7 @@ function PlayerPhotosSection({ playerId, group, season }) {
     [playerId, group, season],
   )
   if (!games) return null
-  const today = isoToday()
-  const rows = games
-    .filter((s) => s.game?.gamePk && s.date && s.date !== today)
-    .map((s) => ({ gamePk: s.game.gamePk, apiDate: s.date }))
-    .sort((a, b) => (a.apiDate < b.apiDate ? -1 : a.apiDate > b.apiDate ? 1 : 0))
+  const rows = photoGameRows(games)
   if (!rows.length) return null
   return <PlayerPhotosRail personId={playerId} games={rows} limit={PREVIEW_PHOTOS} />
 }

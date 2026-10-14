@@ -80,6 +80,8 @@ export function similarHittersFor(data, personId, opts) {
 // drives the ↓ marker beside it. That marker is doing real work: the percentile
 // (and so the polygon) is pre-flipped so farther out is always better, which
 // means a good BB%-allowed spoke reaches the rim while its raw number is small.
+// One exception: swing length keeps Savant's own order (a longer swing ranks higher, #2007),
+// so its spoke shows where he stands, not better or worse, and it carries no ↓.
 // Without the ↓ a reader reasonably concludes the chart is drawn backwards.
 const pct1 = (n) => `${n.toFixed(1)}%`
 const dec2 = (n) => n.toFixed(2)
@@ -137,7 +139,6 @@ export const BATTER_METRICS = [
     label: 'Swing length',
     fmt: dec1,
     def: 'How far his bat travels on its way to the ball — a shorter swing gets there quicker.',
-    lowerIsBetter: true,
   },
   {
     key: 'squaredUp',

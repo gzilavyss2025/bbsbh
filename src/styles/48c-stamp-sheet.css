@@ -80,7 +80,7 @@
 /* A completed collection keeps one quiet, permanent mark of it — the
    highlighter's yellow, as a ring rather than a rosette. It was the stamp's
    own kraft until ADR-0083; a finished set is a highlight, not a cover, and
-   yellow reads at 8.4:1 (--marker on --album-board) where the kraft read at
+   yellow reads at 8.5:1 (--marker on --album-board) where the kraft read at
    4.2:1 (--seal-cover on --album-board).
    No badge glyph, no "complete" label; the ring alone is the whole statement.
    Only ever reached from the counting surface (`counts`), so the book page
