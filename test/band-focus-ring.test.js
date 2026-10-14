@@ -13,8 +13,8 @@
 // It is on the band controls only; the paper-page ring does not change.
 //
 // Four more things this file holds:
-//   - a control that is focused AND pressed (:active) shows both: the press
-//     inset and the halo, in one box-shadow;
+//   - a control that is focused AND pressed (:active) keeps the halo: the
+//     press draws no shadow (#2073), so no rule has to restate the ring;
 //   - every club bar and hero tile the app can draw is at 3:1 against one of
 //     the two ring colours;
 //   - the records page's chips, tiles and back link draw a ring at all (their
@@ -116,15 +116,24 @@ for (const [rel, host] of BAND_CONTROLS) {
     assert.doesNotMatch(body, /--bar-|--seal|--marker|--tint/, 'no club colour, seal or marker on the ring (ADR-0030, ADR-0083)')
   })
 
-  test(`${host}: focused AND pressed, it shows the press inset and the halo`, () => {
-    // The control's :active rule draws its press as an inset box-shadow. A
-    // focus rule that sets box-shadow alone would erase it (or the :active
-    // rule would erase the halo). One box-shadow carries both.
-    const found = rulesFor(rel, `${host}:focus-visible:active`)
-    assert.equal(found.length, 1, `one ${host}:focus-visible:active rule in ${rel}`)
-    assert.equal(decl(found[0].body, 'box-shadow'), 'var(--inset-cell), var(--ring-band)')
+  test(`${host}: focused AND pressed, the halo stays with no second rule`, () => {
+    // The stamp-press (#2073) is a move only, so no :active rule sets a
+    // box-shadow and the focus rule's halo survives the press. A
+    // :focus-visible:active rule here would only add back the old press inset.
+    assert.equal(rulesFor(rel, `${host}:focus-visible:active`).length, 0, `no ${host}:focus-visible:active rule in ${rel}`)
   })
 }
+
+test('the Button and Pill press draws no box-shadow, so a band halo needs no :active rule', () => {
+  for (const [rel, selector] of [
+    ['system/button.css', '.btn:active'],
+    ['system/pill.css', '.pill--control:active'],
+  ]) {
+    const found = rulesFor(rel, selector)
+    assert.ok(found.length >= 1, selector)
+    for (const { body } of found) assert.equal(decl(body, 'box-shadow'), undefined, selector)
+  }
+})
 
 test('the paper-page ring does not change: 2px --focus-ring on the Pill and the Button', () => {
   for (const [rel, selector] of [
