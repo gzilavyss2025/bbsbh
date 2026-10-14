@@ -136,6 +136,34 @@
   background: var(--surface-card);
   line-height: var(--lh-zero);
 }
+
+/* The stage turns under a drag or the arrow keys (the board's orbit). A vertical swipe still scrolls the page. */
+.flight__turn {
+  cursor: grab;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.flight__turn--drag {
+  cursor: grabbing;
+}
+.flight__turn:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+.flight__hint {
+  margin-left: auto;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+}
+/* breakpoint-exempt: the board hides the hint under 440px */
+@media (max-width: 439px) {
+  .flight__hint {
+    display: none;
+  }
+}
 .arsenal__scene {
   display: block;
   width: 100%;

@@ -72,3 +72,30 @@ export function flyStep(cam, dt) {
   const tw = Math.min(1, cam.tw + dt / FLY_S)
   return { ...cam, tw, view: tw >= 1 ? cam.to : viewAt(cam.from, cam.to, easeOutQuart(tw)) }
 }
+
+// The reader's own turn of the camera (the board's rotate): radians a pixel of drag, radians a key press,
+// and the pitch limits — just above the ground to just short of straight down.
+export const DRAG_YAW = 0.0085
+export const DRAG_PITCH = 0.006
+export const PITCH_MIN = 0.02
+export const PITCH_MAX = 1.53
+export const KEY_TURN = { ArrowLeft: [0.08, 0], ArrowRight: [-0.08, 0], ArrowUp: [0, -0.06], ArrowDown: [0, 0.06] }
+
+// A drag of dx, dy pixels as [yaw, pitch] radians: drag right turns the scene right.
+export const dragTurn = (dx, dy) => [-dx * DRAG_YAW, dy * DRAG_PITCH]
+
+// The camera turned by yaw and pitch radians. A turn ends a swing where it is.
+export function turnView(cam, yaw, pitch) {
+  const v = cam.view
+  const view = { ...v, yaw: v.yaw + yaw, pitch: Math.min(PITCH_MAX, Math.max(PITCH_MIN, v.pitch + pitch)) }
+  return { view, from: view, to: view, tw: 1 }
+}
+
+// Play or pause. `cycled` is cleared: a loop paused on the step where the hold ended must not fire onCycle again.
+export const setPlayingLoop = (L, playing) => ({ ...L, playing, cycled: false })
+
+// A scrub to `s` seconds: the loop pauses in the flight.
+export const seekLoop = (L, s) => ({ ...L, phase: 'fly', timer: 0, s, prevS: s, playing: false, cycled: false })
+
+// Whether the frame loop has work: the stage is on screen and the loop plays or a camera swings.
+export const needsFrame = (visible, L, cam) => visible && (L.playing || cam.tw < 1)
