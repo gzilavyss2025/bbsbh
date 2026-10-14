@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNav } from '../../lib/nav.js'
 import { Cluster } from '../ui/layout/Cluster.jsx'
 import { countLabel, currentSection, holdStep, scrollLeftToShow } from '../../lib/jumpbar/spy.js'
+import { createLanding } from '../../lib/jumpbar/land.js'
 import { motionIsReduced } from '../../hooks/preferences/motionIsReduced.js'
 
 // The tab bar under a hub's pinned identity header. ONE control, two shapes —
@@ -64,6 +65,44 @@ const HOLD_MS = 250
 // outside the component: the React compiler lint rejects Date.now() inline.
 const holdFor = () => ({ until: Date.now() + HOLD_MS })
 
+// The reader's own moves. Any one ends a tap's hold on its section.
+const MOVES = ['wheel', 'touchstart', 'keydown', 'pointerdown']
+// The longest a tap holds its section (as the page's old-address landing does).
+const HOLD_MAX_MS = 4000
+
+// A tap's hold on its section (`hold`, slice 07b): scroll to it, and scroll to it again
+// each time the page above it changes size (slots load as the scroll passes them), so it
+// lands where the reader asked. `onLand` (or null) gets createLanding's single call. The
+// caller feeds `scrolled` and `ended` from listeners it attached on mount (rule 3) and
+// calls `stop` on the reader's move.
+function holdTarget({ el, root, offset, onLand }) {
+  const behavior = motionIsReduced() ? 'auto' : 'smooth'
+  const scroller = root ?? document.scrollingElement
+  const topOf = () => el.getBoundingClientRect().top - (root ? root.getBoundingClientRect().top : 0)
+  const aim = () => {
+    if (!el.isConnected) return stop()
+    if (root) root.scrollTo({ top: root.scrollTop + topOf() - offset, behavior })
+    else window.scrollTo({ top: window.scrollY + topOf() - offset, behavior })
+  }
+  const atEnd = () => {
+    const height = root ? root.clientHeight : window.innerHeight
+    return scroller.scrollHeight > height && scroller.scrollTop + height >= scroller.scrollHeight - 2
+  }
+  const landing = onLand ? createLanding({ isThere: () => Math.abs(topOf() - offset) <= 2 || atEnd(), onLand }) : null
+  // timer and ro exist before the first aim(), because aim() may call stop().
+  const timer = setTimeout(() => stop(), HOLD_MAX_MS)
+  // The observer fires once on observe(): that is the first scroll.
+  const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(aim)
+  if (ro) ro.observe(el.parentElement)
+  else aim()
+  function stop() {
+    ro?.disconnect()
+    clearTimeout(timer)
+    landing?.cancel()
+  }
+  return { scrolled: () => landing?.scrolled(), ended: () => landing?.ended(), stop }
+}
+
 // THE JUMP BAR. Square buttons with a count badge; the current one is ink.
 // Under 740px it is one row that scrolls sideways; at 740px and up it wraps in
 // a bordered box (styles/system/jumpbar/jumpbar.css).
@@ -78,6 +117,10 @@ const holdFor = () => ({ until: Date.now() + HOLD_MS })
 //               A tap lands the section this far down; the spy reads the line
 //               there too.
 //   className   optional namespace for the caller (for example, sticky).
+//   hold        optional. A tap holds its section in place while the page above it
+//               grows, until the reader moves (holdTarget). The player page sets it.
+//   onLand      optional, with `hold`. Called with the key once the tap's scroll has
+//               landed (lib/jumpbar/land.js). Not called if the reader moved first.
 //
 // Three rules hold it together:
 // 1. The bar scrolls ITSELF to keep the current button in view. On a tab bar
@@ -90,12 +133,18 @@ const holdFor = () => ({ until: Date.now() + HOLD_MS })
 //    a tap attached would catch that same tap as it bubbles.
 //
 // The colours are the app's own (ADR-0030): ink, paper and --accent-tint.
-function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '' }) {
+function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '', hold = false, onLand }) {
   const [current, setCurrent] = useState(tabs[0]?.key ?? null)
   const navRef = useRef(null)
   const btnRefs = useRef(new Map())
   const holdRef = useRef(null)
   const spyRef = useRef(null)
+  const tapRef = useRef(null) // the tap's hold: { scrolled, ended, stop } or null
+  // onLand can change each render; the hold reads the latest one.
+  const onLandRef = useRef(onLand)
+  useEffect(() => {
+    onLandRef.current = onLand
+  })
   const [barWidth, setBarWidth] = useState(0)
   const keys = tabs.map((t) => t.key).join('|')
 
@@ -167,6 +216,29 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '' }) {
     if (left !== nav.scrollLeft) nav.scrollTo({ left, behavior: motionIsReduced() ? 'auto' : 'smooth' })
   }, [current, barWidth])
 
+  // The tap's hold (rule 3: these listeners attach on mount, never in a tap). The tap's
+  // own pointerdown and keydown come BEFORE its click, so they end the old hold, never
+  // the new one.
+  useEffect(() => {
+    if (!hold) return undefined
+    const target = scrollRoot?.current ?? window
+    const onScroll = () => tapRef.current?.scrolled()
+    const onEnd = () => tapRef.current?.ended()
+    const onMove = () => {
+      tapRef.current?.stop()
+      tapRef.current = null
+    }
+    target.addEventListener('scroll', onScroll, { passive: true })
+    target.addEventListener('scrollend', onEnd)
+    for (const e of MOVES) window.addEventListener(e, onMove, { passive: true })
+    return () => {
+      target.removeEventListener('scroll', onScroll)
+      target.removeEventListener('scrollend', onEnd)
+      for (const e of MOVES) window.removeEventListener(e, onMove)
+      onMove()
+    }
+  }, [hold, scrollRoot])
+
   const jump = (key) => {
     const el = document.getElementById(key)
     if (!el) return
@@ -174,8 +246,14 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '' }) {
     holdRef.current = holdFor()
     // A tap that scrolls nowhere fires no scroll event: ask the spy to measure once the hold ends.
     spyRef.current?.()
+    const root = scrollRoot?.current ?? null
+    if (hold) {
+      tapRef.current?.stop()
+      const land = onLandRef.current
+      tapRef.current = holdTarget({ el, root, offset, onLand: land ? () => land(key) : null })
+      return
+    }
     const behavior = motionIsReduced() ? 'auto' : 'smooth'
-    const root = scrollRoot?.current
     if (root) {
       const top = root.scrollTop + el.getBoundingClientRect().top - root.getBoundingClientRect().top - offset
       root.scrollTo({ top, behavior })

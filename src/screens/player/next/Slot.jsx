@@ -38,13 +38,18 @@ function Probe({ bodyRef, onEmpty, onReady }) {
 // Until the module shows content the card holds `inst.minH` (sections.js) and
 // shows no text, so the page does not jump. The body rises in the first time the
 // card comes into view. The page tells the jump bar through `onEmpty`.
-export function Slot({ inst, bio, asOf, season, onEmpty }) {
+export function Slot({ inst, bio, asOf, season, onEmpty, stamp = 0, order = 0 }) {
   const [nearRef, near] = useNearView()
   const [viewRef, phase] = useInViewOnce(viewKey(bio.id, inst.key))
   const [Module] = useState(() => lazy(inst.load))
   const [count, setCount] = useState()
   const [held, setHeld] = useState(true)
   const bodyRef = useRef(null)
+  // The jump bar's stamp (decision 3): the card stamps in once for each landing on its
+  // section. `stamped` is the landing whose stamp has played; the class stays off until
+  // the next one. State is derived in render, never set in an effect.
+  const [stamped, setStamped] = useState(0)
+  const stamping = stamp > 0 && stamp !== stamped
   const [report] = useState(() => () => onEmpty(inst.key))
   const [ready] = useState(() => () => setHeld(false))
   const [phone, wide] = inst.minH ?? [0, 0]
@@ -59,7 +64,15 @@ export function Slot({ inst, bio, asOf, season, onEmpty }) {
       }}
       className={`pnext__slot${held ? ' pnext__slot--hold' : ''}`}
       aria-busy={held || undefined}
-      style={{ '--slot-hold': `${phone}px`, '--slot-hold-wide': `${wide}px` }}
+      stampIn={stamping}
+      onAnimationEnd={(e) => {
+        if (e.target === e.currentTarget && e.animationName === 'card-stamp-in') setStamped(stamp)
+      }}
+      style={{
+        '--slot-hold': `${phone}px`,
+        '--slot-hold-wide': `${wide}px`,
+        ...(stamping ? { '--stamp-delay': `calc(var(--stagger-step) * ${order})` } : null),
+      }}
       data-pair={inst.pair}
     >
       {near && (

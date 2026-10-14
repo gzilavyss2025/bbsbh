@@ -6,34 +6,20 @@ import { useAsync } from '../../../../../hooks/useAsync.js'
 import { pitchMark } from '../../../../../lib/pitch/pitchTypes.js'
 import { sidesInOrder } from '../../../../../lib/zone/regions.js'
 import { GRID, viewCol } from '../../../../../lib/zone/zoneGeometry.js'
-import { StretchTable } from '../form/StretchTable.jsx'
-import { MIN_CELL, OUTCOMES, fmtPct, pitchRows, pitchesVs, plateView } from './plateView.js'
+import { MenuRail } from '../../../../../components/ui/control/MenuRail.jsx'
+import { glyphD } from '../arsenal/PitchGlyph.jsx'
+import { MIN_CELL, OUTCOMES, fmtMph, fmtPct, outcomeFigures, pitchRows, pitchesVs, plateView } from './plateView.js'
 
 // The batter Plate approach (#1887): where his pitches land and how each one ended, by pitch type
 // and pitcher hand. An open surface (ADR-0034): season sums over Final games, no game result.
 // The grid is the Matchup Scout's hitter-grid store (ADR-0096) plus its plate file (#1911).
+// The pitch mix is the shared MenuRail (#2073): a card a pitch type; the panel opens the picked one.
 const HANDS = [[null, 'All pitchers'], ['L', 'vs LHP'], ['R', 'vs RHP']]
 const ROWS = ['Above the zone', 'High', 'Middle', 'Low', 'Below the zone']
 const ENDS = ["Hitter's side", "Pitcher's side"]
-const COLUMNS = [{ key: 'n', label: 'Pitches' }, { key: 'mph', label: 'MPH' }, { key: 'whiff', label: 'Whiff' }]
 const [LEFT, RIGHT] = sidesInOrder('pitcher')
 const COLS = [`Wide ${LEFT}`, LEFT, 'Center', RIGHT, `Wide ${RIGHT}`]
 const pct = (v) => Math.round(v * 100)
-const mph = (v) => (v == null ? '—' : v.toFixed(1))
-
-// A table row: the bar is the five outcomes as whole numbers (under 8% prints no number).
-const tableRow = (key, name, sub, at, v) => ({
-  key,
-  name,
-  sub,
-  at,
-  segs: v.segs ? v.segs.map((n) => ({ n, label: n / v.n >= 0.08 ? String(pct(n / v.n)) : '' })) : [],
-  good: v.hit == null ? '—' : `${pct(v.hit)}% hitter's`,
-  bad: v.pitcher == null ? '—' : `${pct(v.pitcher)}% pitcher's`,
-  n: v.n.toLocaleString(),
-  mph: mph(v.rates.mph),
-  whiff: fmtPct(v.rates.whiff),
-})
 
 export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
   const { data: grid, loading, error } = useAsync(() => (asOf ? null : fetchHitterGridFor(bio.id, season, { plate: true })), [bio.id, season, asOf])
@@ -61,11 +47,42 @@ export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
   const name = code ? pitchMark(code).name : 'All pitches'
   const handName = HANDS.find((h) => h[0] === hand)[1]
   const picked = cell >= 0 ? view.cells[cell] : null
-  const tableRows = [
-    tableRow('all', 'All pitches', `${handName} · ${view.n.toLocaleString()} pitches`, 0, view),
-    ...rows.map((r, i) => tableRow(r.code, pitchMark(r.code).name, `${r.code} · ${r.n.toLocaleString()} pitches`, i + 1, r.view)),
-  ]
-  const at = tableRows.findIndex((r) => r.key === (code ?? 'all'))
+  const card = (r) => {
+    const title = pitchMark(r.code).name
+    const f = outcomeFigures(title, r.view)
+    return {
+      key: r.code,
+      title,
+      meta: f.n,
+      mark: <Glyph code={r.code} />,
+      label: f.aria,
+      figures: (
+        <>
+          <span className="fplate__figs">MPH {f.mph} · Whiff {f.whiff}</span>
+          <Bar f={f} />
+        </>
+      ),
+    }
+  }
+  // The focus panel: the picked pitch. While the panel folds shut it keeps the last pick;
+  // a hand change can drop that pitch, so a missing row draws nothing.
+  const focus = (key) => {
+    const r = rows.find((x) => x.code === key)
+    if (!r) return null
+    const f = outcomeFigures(pitchMark(key).name, r.view)
+    return (
+      <div className="fplate__focus">
+        <div className="fplate__phead">
+          <Glyph code={key} size={30} />
+          <span className="fplate__pname">
+            {pitchMark(key).name}
+            <small className="fplate__psub">{key} · {f.n} pitches</small>
+          </span>
+        </div>
+        <Bar f={f} />
+      </div>
+    )
+  }
   const read = picked
     ? {
         title: `${ROWS[Math.floor(picked.i / GRID)]} · ${COLS[GRID - 1 - (picked.i % GRID)]}`,
@@ -120,25 +137,28 @@ export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
           </p>
           <div className="fplate__read" aria-live="polite">
             <span className="fplate__readtitle">{read.title}</span>
+            {!picked && view.segs && <Bar f={outcomeFigures(name, view)} />}
             <span className="fplate__readtext">{read.text}</span>
           </div>
         </div>
         <div className="fplate__mix">
           <SectionHead look="rule" as="h3" note={handName}>Pitch mix</SectionHead>
-          <StretchTable
-            columns={COLUMNS}
-            rows={tableRows}
-            legend={OUTCOMES}
-            ends={ENDS}
-            cursor={at}
-            onPick={(i) => { setPick(i === 0 || tableRows[i].key === code ? null : tableRows[i].key); setCell(-1) }}
+          <MenuRail
+            className="fplate__menu"
+            label="Pitch type"
+            items={rows.map(card)}
+            picked={code}
+            onPick={(key) => { setPick(key); setCell(-1) }}
+            panel={focus}
+            backLabel="All pitches"
           />
+          <Key />
           <FactGrid className="fplate__facts">
             <Fact label="Swing" value={fmtPct(view.rates.swing)} />
             <Fact label="Chase" value={fmtPct(view.rates.chase)} />
             <Fact label="In zone" value={fmtPct(view.rates.zone)} />
             <Fact label="Whiff" value={fmtPct(view.rates.whiff)} />
-            <Fact label="Avg MPH" value={mph(view.rates.mph)} />
+            <Fact label="Avg MPH" value={fmtMph(view.rates.mph)} />
             <Fact label="Swings" value={view.swings.toLocaleString()} />
           </FactGrid>
           <p className="fplate__note">
@@ -156,6 +176,45 @@ function Fact({ label, value }) {
     <div className="fact">
       <dt className="fact__label">{label}</dt>
       <dd className="fact__value">{value}</dd>
+    </div>
+  )
+}
+
+// The pitch's mark (docs/pitch-types.md): the family is the shape, the pitch the colour.
+function Glyph({ code, size = 20 }) {
+  const mark = pitchMark(code)
+  return (
+    <svg className="fplate__icon" width={size} height={size} viewBox="-11 -11 22 22" aria-hidden="true">
+      <path className={`fplate__glyph${mark.ring ? ' fplate__glyph--ring' : ''}`} d={glyphD(mark.shape, 7)} style={{ '--pitch': mark.color }} />
+    </svg>
+  )
+}
+
+// The five outcomes and the two sides: the Form trend table's bar markup, on its classes (formchart.css).
+function Bar({ f }) {
+  return (
+    <>
+      <span className="fstretch__bar" aria-hidden="true">
+        {f.segs.map((s, i) => (
+          <span key={OUTCOMES[i]} className="fstretch__seg" data-i={i} hidden={!s.n} style={{ flex: `${s.n} 1 0` }}>{s.label}</span>
+        ))}
+      </span>
+      <span className="fstretch__ends" aria-hidden="true">
+        <span className="fstretch__end fstretch__end--good">{f.good}</span>
+        <span className="fstretch__end fstretch__end--bad">{f.bad}</span>
+      </span>
+    </>
+  )
+}
+
+// The key to the bars: the Form trend table's key markup.
+function Key() {
+  return (
+    <div className="fstretch__key">
+      <div className="fstretch__keyhead"><span className="fstretch__end--good">{ENDS[0]}</span><span className="fstretch__end--bad">{ENDS[1]}</span></div>
+      <div className="fstretch__bar" aria-hidden="true">
+        {OUTCOMES.map((o, i) => <span key={o} className="fstretch__seg" data-i={i}>{o}</span>)}
+      </div>
     </div>
   )
 }
