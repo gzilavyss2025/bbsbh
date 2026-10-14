@@ -1,11 +1,28 @@
-import { RefreshButton } from '../../TeamInfo.jsx'
+import { timeOfDay } from '../../../lib/dates.js'
 
-// The bar that rides the foot of the page: refresh, keep-awake while the game is live,
-// "Catch up to live" on a game in progress, and the advance button.
+const RefreshIcon = () => (
+  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M13.5 8A5.5 5.5 0 1 1 11.8 4" />
+    <path d="M12 1v3.5H8.5" strokeLinejoin="round" />
+  </svg>
+)
+
+// The dock that sticks to the foot of the page: Refresh (with when the data is from), the
+// keep-awake switch while the game is live, "Catch up to live" on a game in progress, and the
+// advance button. Catch-up wears the kraft reveal skin: the same texture, and so the same
+// warning, as every other reveal in the app (ADR-0055).
 export function LineupDock({ onReload, loading, lastUpdated, isLive, keepAwake, onSetKeepAwake, onCatchUp, onNext, nextLabel }) {
   return (
-    <div className="pagenav pagenav--innings lnext__dock">
-      <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} className="innings__refresh--float" />
+    <div className="ldock">
+      {onReload && (
+        <button type="button" className="ldock__ref" aria-label="Refresh live game data" disabled={loading} onClick={onReload}>
+          <RefreshIcon />
+          <span className="ldock__tx">
+            <b>{loading ? 'Refreshing…' : 'Refresh'}</b>
+            {lastUpdated && !loading && <small>As of {timeOfDay(lastUpdated)}</small>}
+          </span>
+        </button>
+      )}
       {isLive && (
         <button
           type="button"
@@ -13,28 +30,20 @@ export function LineupDock({ onReload, loading, lastUpdated, isLive, keepAwake, 
           aria-checked={keepAwake}
           aria-label={keepAwake ? 'Keep screen awake: on' : 'Keep screen awake: off'}
           title="Keep the screen from sleeping during this live game"
-          className={`awaketoggle${keepAwake ? ' is-on' : ''}`}
+          className="ldock__awake"
           onClick={() => onSetKeepAwake(!keepAwake)}
         >
-          <span className="awaketoggle__icon" aria-hidden="true">
-            {keepAwake ? '☀' : '☾'}
-          </span>
+          <span aria-hidden="true">{keepAwake ? '☀' : '☾'}</span>
         </button>
       )}
-      {onCatchUp ? (
-        <div className="revealsplit">
-          <button className="btn btn--reveal revealsplit__btn" onClick={onCatchUp}>
-            Catch up to live ›
-          </button>
-          <button className="btn btn--ink btn--next revealsplit__btn" onClick={onNext}>
-            {nextLabel}
-          </button>
-        </div>
-      ) : (
-        <button className="btn btn--ink btn--next" onClick={onNext}>
-          {nextLabel}
+      {onCatchUp && (
+        <button type="button" className="ldock__catch btn btn--reveal" onClick={onCatchUp}>
+          Catch up to live ›
         </button>
       )}
+      <button type="button" className="ldock__next" onClick={onNext}>
+        {nextLabel}
+      </button>
     </div>
   )
 }

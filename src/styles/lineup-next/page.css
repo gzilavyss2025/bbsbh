@@ -263,6 +263,14 @@
 .lnext__umps .fact {
   flex-basis: 92px;
 }
+/* The crew fills its rows whatever its size: four cells are two by two on a phone and one row
+   wide; six are three by two on a phone and one row wide; any other count wraps and grows. */
+.lnext__umps--4 .fact {
+  flex-basis: 40%;
+}
+.lnext__umps--6 .fact {
+  flex-basis: 28%;
+}
 .lfact__value {
   display: flex;
   align-items: center;
@@ -318,13 +326,74 @@
   gap: var(--space-2);
 }
 
-/* THE DOCK rides the foot of the page, like the live page's floating bar. */
-.lnext__dock {
+/* THE DOCK sticks to the foot of the page: refresh, keep-awake, catch-up, advance. */
+/* layout-exempt: a row of buttons that share the bar */
+.ldock {
   position: sticky;
   bottom: env(safe-area-inset-bottom, 0);
+  z-index: var(--z-sticky);
+  display: flex;
+  gap: var(--space-2);
+  align-items: stretch;
+  padding: var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--text-heading);
+  box-shadow: var(--shadow-stamped-soft);
+}
+.ldock button {
+  min-height: 48px;
+  border: var(--bw-heavy) solid var(--surface-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.ldock button:focus-visible {
+  outline: 2px solid var(--focus-ring-band);
+  outline-offset: 2px;
+}
+.ldock__ref,
+.ldock__awake {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  background: none;
+  color: var(--surface-card);
+}
+/* layout-exempt: label over its as-of time */
+.ldock__tx {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  text-align: left;
+}
+.ldock__tx b {
+  font-size: var(--fs-label);
+}
+.ldock__tx small {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-none);
+}
+.ldock__next,
+.ldock__catch {
+  flex: 1;
+  min-width: 0;
+}
+.ldock__next {
+  background: var(--surface-card);
+  color: var(--text-heading);
 }
 
 @media (min-width: 740px) {
+  /* One row of the whole crew from the wide step. */
+  .lnext__umps--4 .fact,
+  .lnext__umps--6 .fact {
+    flex-basis: 0;
+  }
   /* layout-exempt: hero row, identity beside the action box */
   .lnext__hero {
     display: grid;

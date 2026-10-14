@@ -84,6 +84,9 @@ function CrowdCell({ info }) {
   )
 }
 
+// The crew is as long as the game's crew: four umpires (HP, 1B, 2B, 3B) in most games, six
+// with the two foul-line umpires (LF, RF) in the postseason. The strip sizes its cells to the
+// count, so no cell sits alone on a row (see .lnext__umps--4 and --6).
 // The fact strip and the crew, in two strips under the hero. Weather is the outdoor reading
 // (Box weather shows only when it is missing). The Uniform glyph opens the crest sheet. The
 // crew is UmpiresCard's cells; before the crew posts the strip says so in one cell.
@@ -104,7 +107,7 @@ export function LineupFacts({ feed, side, info, officials, season, manager, unif
         />
         {side === 'away' && <Cell label="Broadcast" value={broadcast} />}
       </FactGrid>
-      <FactGrid look="strip" className="lnext__facts lnext__umps">
+      <FactGrid look="strip" className={`lnext__facts lnext__umps lnext__umps--${officials.length}`}>
         {officials.length === 0 && !selectRecordIsClosed(feed) && <Fact label="Umpires" value="Not posted yet" />}
         <UmpiresCard officials={officials} seasonYear={season} closed={selectRecordIsClosed(feed)} />
       </FactGrid>

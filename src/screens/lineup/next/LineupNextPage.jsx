@@ -24,6 +24,7 @@ import '../../../styles/lineup-next/order.css'
 import '../../../styles/lineup-next/field.css'
 import '../../../styles/lineup-next/series.css'
 import '../../../styles/lineup-next/sheet.css'
+import '../../../styles/lineup-next/grid.css'
 
 // The new lineup page (docs/lineup-redesign.md), at `?look=new` on lineup1 and lineup2.
 // It takes the props TeamInfo takes, plus the game chrome the live page leaves to GameView
@@ -66,12 +67,18 @@ export function LineupNextPage({
         />
         </LineupHero>
         <LineupJumpBar tabs={tabs} onSection={onSection} />
-        <StarterCard data={data} theme={id.oppTheme} masthead={id.oppMasthead} />
-        <OrderCard data={data} masthead={id.masthead} />
-        <FieldCard data={data} theme={id.oppTheme} masthead={id.oppMasthead} />
-        <SeriesCard data={data} />
-        <BullpenCard data={data} workloadData={workloadData} />
-        <TeammatesCard data={data} side={side} />
+        <div className="lgrid">
+          <aside className="lgrid__side">
+            <StarterCard data={data} theme={id.oppTheme} masthead={id.oppMasthead} />
+            <FieldCard data={data} theme={id.oppTheme} masthead={id.oppMasthead} />
+            <BullpenCard data={data} workloadData={workloadData} />
+            <TeammatesCard data={data} side={side} />
+          </aside>
+          <div className="lgrid__main">
+            <OrderCard data={data} masthead={id.masthead} />
+            <SeriesCard data={data} />
+          </div>
+        </div>
         {sheet && (
           <ClubSheet
             name={id.meta.name}
