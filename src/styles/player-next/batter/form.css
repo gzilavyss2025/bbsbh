@@ -68,8 +68,10 @@
   gap: var(--space-2) var(--space-5);
   margin: var(--space-4) 0 0;
   padding: 0;
-  color: var(--text-muted);
-  font-size: var(--fs-small);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
   list-style: none;
 }
 .fform__legend b {
@@ -79,8 +81,9 @@
 .fform__note {
   margin: var(--space-3) 0 0;
   color: var(--text-caption);
-  font-size: var(--fs-small);
-  line-height: var(--lh-ui);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
 }
 .fform > .section-head {
   margin-top: var(--space-6);

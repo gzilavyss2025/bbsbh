@@ -468,7 +468,7 @@ for each generator; the reader modules:
   `{ season, mph: { pitcherId: { gamePk: { code: tenths } } } }`, a code with no speed left out (own file: the
   mix shards are at their ceiling). `fetchPitchMphFor(personId, gamePk, code?, { seasonYear })` returns mph or null.
   `fetchPitchMixFor(personId, gamePk, { seasonYear })` returns one `{ code: n }` or null. A missing
-  shard, season or game all read null: the files fill with the 2026 re-walk (`--clear-arsenal`).
+  shard, season or game all read null. The 2026 store comes from `gen-pitch-arsenal` (`--clear-arsenal` re-walks it). Seasons before 2026 come from `gen-pitch-starts`, MLB only, with no database rows (ADR-0111); a season is in `seasons.json` only after `--verify` passes.
   The `pitch-command` buckets (`commandMap.js`) have a `league.json` beside them (#2004): per rate, the
   `median` and sorted `rates` of MLB pitchers with 500+ regular-season pitches; `fetchCommandLeague({ seasonYear })`
   reads it, `commandRank(league, view, key)` gives `{ median, n, pct }` (`pct` null under the floor).

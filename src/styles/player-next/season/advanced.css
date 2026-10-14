@@ -88,10 +88,14 @@
   color: var(--text-caption);
 }
 .pnext-adv__cap {
+  font-family: var(--font-mono);
   font-size: var(--fs-label);
   opacity: 0.8;
 }
 .pnext-adv__note {
   margin: 0;
   color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
 }

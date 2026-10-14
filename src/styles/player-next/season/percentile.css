@@ -162,7 +162,9 @@
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-4);
   margin: var(--space-2) 0 0;
-  font-size: var(--fs-label);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
   color: var(--text-caption);
 }
 .pctl__swatch {

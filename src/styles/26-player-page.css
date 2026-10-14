@@ -417,6 +417,8 @@
   color: var(--graphite);
 }
 .reg-gap__note {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
   font-style: italic;
 }
 /* The note spans the rest of the row (see Ledger's spanCell) instead of

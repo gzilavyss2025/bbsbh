@@ -114,7 +114,9 @@
 .command__note,
 .command__sub {
   margin: 0;
-  font-size: var(--fs-small);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
   color: var(--text-caption);
 }
 
@@ -136,7 +138,7 @@
   gap: var(--space-1) var(--space-2);
 }
 .command__sub {
-  font-family: var(--font-body);
+  font-family: var(--font-mono);
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-none);
 }
@@ -293,6 +295,7 @@
 }
 .command__where {
   margin: 0;
+  font-family: var(--font-mono);
   font-weight: var(--w-semibold);
 }
 /* layout-exempt: the cell's facts, a wrapping row */

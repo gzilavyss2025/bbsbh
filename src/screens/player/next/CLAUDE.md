@@ -11,7 +11,7 @@ their sections (`tab` prop). Plan: `docs/player-redesign.md`.
 One `modules/<module>/` folder per module: `season` #1885, `splits` #1886, `plate` #1887,
 `contact` #1888, `form` #1889 (batter), `pform` #1930 (pitcher Form trend), `batlog` #1890,
 `pitchlog` #1851, `fouls` #1891, `similar` #1926 (ends Game log), `arsenal` #1892, `mound`
-#1893, `path` #1894, `prospects` #1927, `firsts` #1895, `innings` #1928, `contract` #1929,
+#1893, `path` #1894, `prospects` #1927, `prospect` #2068, `firsts` #1895, `innings` #1928, `contract` #1929,
 `percentile` #2011, `advanced` #2012, `runvalue` #2013, `command` #2014, `target` #2015, `pfouls` #2016,
 `milestones` #2017, `awards` #2018, `teams` #2019, `moves` #2020, `photos` #2021, `highlights` #2022 (stubs,
 wired in #2002), `tbd` #1896 (one folder, five slots: Season, On the mound (pitchers), Game log, Career and History; no
@@ -22,10 +22,9 @@ suffix; `twin` adds the suffix to two one-role slots with one name (the two Foul
 
 ## The top cards
 
-`top/` holds the status band and two page-level cards that are NOT slots: `HeroBand` (the status rows, the first child of the hero card, #2008) and `HeaderExtras` (nickname,
-prospect pills, school, OVR bars) sits under the hero, `OverviewExtras` (rank chips, postseason, other
-levels) sits under the tiles (#1884, TbdWire "top"). Each is a plain stamped Card with the old
-page's content and hides when it has none. The banner text is `../statusBanners.js`.
+`top/` holds the hero's parts and one page-level card, none of them slots: `HeroBand` (the status rows, the first child of the hero card, #2008);
+`HeroStamp` and `HeroStrip` (#2009: the OVR stamp on the photo, a button that opens the ratings strip at the hero's foot, folded on load; the name-block extras are `headerExtras` in `../heroData.js`);
+`OverviewExtras` (rank chips, postseason, other levels), a stamped Card under the tiles that hides when it has none. The banner text is `../statusBanners.js`.
 
 ## The module contract
 

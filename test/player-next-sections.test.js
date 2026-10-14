@@ -73,14 +73,14 @@ import { SLOTS, rolesOf, seedEmpty, shownSections, slotInstances } from '../src/
 
 const BOTH = ['hitting', 'pitching']
 
-test('the slots are the 30 module folders, with each section holding its modules in order', () => {
+test('the slots are the 31 module folders, with each section holding its modules in order', () => {
   assert.deepEqual(
     [...new Set(SLOTS.map((s) => s.module))].sort(),
-    ['advanced', 'arsenal', 'awards', 'batlog', 'command', 'contact', 'contract', 'firsts', 'form', 'fouls', 'highlights', 'innings', 'milestones', 'mound', 'moves', 'path', 'percentile', 'pform', 'pfouls', 'photos', 'pitchlog', 'plate', 'prospects', 'runvalue', 'season', 'similar', 'splits', 'target', 'tbd', 'teams'],
+    ['advanced', 'arsenal', 'awards', 'batlog', 'command', 'contact', 'contract', 'firsts', 'form', 'fouls', 'highlights', 'innings', 'milestones', 'mound', 'moves', 'path', 'percentile', 'pform', 'pfouls', 'photos', 'pitchlog', 'plate', 'prospect', 'prospects', 'runvalue', 'season', 'similar', 'splits', 'target', 'tbd', 'teams'],
   )
   const at = (section) => SLOTS.filter((s) => s.section === section).map((s) => s.module)
   assert.deepEqual(at('season'), ['season', 'percentile', 'advanced', 'runvalue', 'tbd'])
-  assert.deepEqual(at('career'), ['path', 'prospects', 'tbd'])
+  assert.deepEqual(at('career'), ['path', 'prospects', 'prospect', 'tbd'])
   assert.deepEqual(at('history'), ['firsts', 'innings', 'awards', 'contract', 'teams', 'moves', 'photos', 'highlights', 'tbd'])
   assert.deepEqual(at('form-trend'), ['form', 'pform'])
   assert.deepEqual(at('on-the-mound'), ['mound', 'command', 'target', 'tbd'])
@@ -194,7 +194,7 @@ test('with every slot a stub, all nine batter buttons show', () => {
 // Modules an issue has built: real modules, which may return null and call onEmpty when
 // they have no data. Add a module here in the PR that builds it; every other module must
 // still be a stub.
-const BUILT = new Set(['tbd', 'similar', 'prospects', 'innings', 'contract', 'mound', 'form', 'season', 'firsts', 'pform', 'path', 'splits', 'contact', 'fouls', 'arsenal', 'pitchlog', 'plate', 'batlog', 'runvalue', 'percentile', 'target', 'advanced', 'milestones', 'awards', 'command', 'moves', 'teams', 'photos', 'pfouls', 'highlights'])
+const BUILT = new Set(['tbd', 'similar', 'prospects', 'prospect', 'innings', 'contract', 'mound', 'form', 'season', 'firsts', 'pform', 'path', 'splits', 'contact', 'fouls', 'arsenal', 'pitchlog', 'plate', 'batlog', 'runvalue', 'percentile', 'target', 'advanced', 'milestones', 'awards', 'command', 'moves', 'teams', 'photos', 'pfouls', 'highlights'])
 
 // A stub renders nothing, so Slot's probe hides its card (and a section whose every slot is a
 // stub loses its button) until the issue builds it: the live page never shows a "loads here"
@@ -248,12 +248,15 @@ test('header extras hide with nothing to show, and show for any one of the five'
   assert.equal(headerExtras({ bio, orgProspectRank: 9 }, null).orgRank, 9)
   assert.equal(headerExtras({ bio: { ...bio, education: 'Rice' } }, null).education, 'Rice')
   const x = headerExtras({ bio }, { hitting: hitRating })
-  assert.equal(x.bars[0].group, 'hitting')
-  assert.ok(x.bars[0].rows.length > 0)
+  assert.equal(x.ratings[0].group, 'hitting')
+  assert.ok(x.ratings[0].rows.length > 0)
 })
 
-test('a minor leaguer (an OVR with no bars) adds no OVR bars', () => {
-  assert.equal(headerExtras({ bio }, { hitting: { ovr: 55, level: 12 } }), null)
+test('a minor leaguer (an OVR with no bars) gets the stamp and a level meter, no bars', () => {
+  const [g] = headerExtras({ bio }, { hitting: { ovr: 55, level: 12 } }).ratings
+  assert.equal(g.ovr, 55)
+  assert.deepEqual(g.rows, [])
+  assert.equal(g.minor.levelLabel, 'AA')
 })
 
 test('overview extras: a block counts for ranks, a postseason row or other levels, not for empty lists', () => {

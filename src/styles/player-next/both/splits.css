@@ -75,8 +75,9 @@
   margin: 0;
   padding: var(--space-2h) 0 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
-  color: var(--text-muted);
-  font-size: var(--fs-label);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
   line-height: var(--lh-loose);
   list-style: none;
 }
@@ -170,6 +171,7 @@
   display: block;
   margin-top: var(--space-1);
   color: var(--text-caption);
+  font-family: var(--font-mono);
   font-size: var(--fs-cell);
 }
 .splitsmod__mc[aria-pressed='true'] .splitsmod__mp,

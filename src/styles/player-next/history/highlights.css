@@ -14,5 +14,5 @@
 .hlmod__box--play { left: 0; }
 .hlmod__box--len { right: 0; font-variant-numeric: tabular-nums; }
 .hlmod__when { font-size: var(--fs-cell); color: var(--text-muted); }
-.hlmod__title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: var(--fs-small); line-height: var(--lh-title); color: var(--text-body); }
+.hlmod__title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-family: var(--font-mono); font-size: var(--fs-small); line-height: var(--lh-title); color: var(--text-body); }
 .hlmod__clip:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: 2px; }
