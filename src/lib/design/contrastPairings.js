@@ -74,7 +74,7 @@ export const PAIRINGS = [
   // yellow is the completed-set ring, a non-text affordance, held to the 3:1
   // bar. It was the seal amber until ADR-0083 — a finished set is a highlight,
   // not a cover — which also took the ring from 4.2:1 (--seal-cover on
-  // --album-board) to 8.4:1 (--marker on --album-board).
+  // --album-board) to 8.5:1 (--marker on --album-board).
   { fg: 'album-foil', bg: 'album-board', min: TEXT, note: 'stamp sheet pane title on the album board' },
   { fg: 'album-foil-soft', bg: 'album-board', min: TEXT, note: 'stamp caption on the album board' },
   { fg: 'marker', bg: 'album-board', min: UI, note: 'completed-set ring on the album board' },
@@ -242,9 +242,9 @@ export const PAIRINGS = [
   { fg: 'accent-primary', bg: 'surface-card', min: UI, note: 'former teammates ladder traced line' },
   // The arsenal "other" family (#1347) draws on the Now Pitching card, whose
   // fill is --marker 16% over --surface-card (.notice--event, #1132 N7). Neither
-  // reader parses color-mix(), so that composite is the literal #F8EECE,
+  // reader parses color-mix(), so that composite is the literal #FAEED0,
   // worked out by hand.
-  { fg: 'arsenal-other', bg: '#F8EECE', min: UI, note: 'arsenal other family on the Now Pitching card fill' },
+  { fg: 'arsenal-other', bg: '#FAEED0', min: UI, note: 'arsenal other family on the Now Pitching card fill' },
   { fg: 'arsenal-other', bg: 'surface-card', min: UI, note: 'arsenal other family on a raised card' },
   // Adjacent segments are only 1.6-2.5:1 against each other — unavoidable in a
   // monotone ramp — so a paper hairline carries every boundary instead.
@@ -304,8 +304,8 @@ export const PAIRINGS = [
   { fg: 'text-heading', bg: '#BECBB5', min: TEXT, note: 'slate filter chip on hover: dominant (field 28%)' },
   { fg: 'text-heading', bg: '#EBD4C2', min: TEXT, note: 'slate filter chip at rest: blowout (clay 16%)' },
   { fg: 'text-heading', bg: '#E4BFAF', min: TEXT, note: 'slate filter chip on hover: blowout (clay 28%)' },
-  { fg: 'text-heading', bg: '#F4E8C3', min: TEXT, note: 'slate filter chip at rest: close game (marker 16%)' },
-  { fg: 'text-heading', bg: '#F2E3B0', min: TEXT, note: 'slate filter chip on hover: close game (marker 28%)' },
+  { fg: 'text-heading', bg: '#F5E8C5', min: TEXT, note: 'slate filter chip at rest: close game (marker 16%)' },
+  { fg: 'text-heading', bg: '#F5E2B4', min: TEXT, note: 'slate filter chip on hover: close game (marker 28%)' },
   { fg: 'text-heading', bg: '#D3D5D0', min: TEXT, note: 'slate filter chip at rest: extra innings (allstar-blue 16%)' },
   { fg: 'text-heading', bg: '#B9C2C6', min: TEXT, note: 'slate filter chip on hover: extra innings (allstar-blue 28%)' },
   // THE BAND CONTROLS (#1131 slice 5). The Postseason Odds and Stamp In pill
@@ -333,13 +333,13 @@ export const PAIRINGS = [
   { fg: 'text-on-ink', bg: 'navy', min: TEXT, note: 'lens turn chip: paper ink on navy' },
   // The lens's new-pitcher notice (#724, L5, lens-cards.css) on the tier-1
   // notice ground, `color-mix(in srgb, var(--marker) 16%, var(--surface-card))`.
-  // The checker does not parse color-mix(), so #F8EECE is that mix by hand.
+  // The checker does not parse color-mix(), so #FAEED0 is that mix by hand.
   // The Entering card's three inks on the inset paper are asserted above.
-  { fg: 'text-heading', bg: '#F8EECE', min: TEXT, note: 'lens notice: label and name' },
-  { fg: 'clay', bg: '#F8EECE', min: TEXT, note: 'lens notice: uniform number' },
-  { fg: 'field', bg: '#F8EECE', min: TEXT, note: 'lens notice: throwing hand' },
-  { fg: 'clay-deep', bg: '#F8EECE', min: TEXT, note: 'lens notice: the entry flag' },
-  { fg: 'text-caption', bg: '#F8EECE', min: TEXT, note: 'lens notice: arsenal and last time out' },
+  { fg: 'text-heading', bg: '#FAEED0', min: TEXT, note: 'lens notice: label and name' },
+  { fg: 'clay', bg: '#FAEED0', min: TEXT, note: 'lens notice: uniform number' },
+  { fg: 'field', bg: '#FAEED0', min: TEXT, note: 'lens notice: throwing hand' },
+  { fg: 'clay-deep', bg: '#FAEED0', min: TEXT, note: 'lens notice: the entry flag' },
+  { fg: 'text-caption', bg: '#FAEED0', min: TEXT, note: 'lens notice: arsenal and last time out' },
   // The Notice's info tone (#1132; styles/system/notice.css, .notice--info), the
   // default for every Notice. #EBE8DD is `color-mix(in srgb, var(--navy) 7%,
   // var(--surface-card))` by hand: a change to that mix changes this hex. The
@@ -372,7 +372,7 @@ export const PAIRINGS = [
   // THE STAMPED PARTS (#1882, system/stamped/stamped.css): the name tab, the
   // count tag, and the stat tile's three fills. The edge and the two shadows
   // are UI marks on the page they sit on.
-  { fg: 'text-on-ink', bg: 'surface-stamped-ink', min: TEXT, note: 'stamped card name tab; ink stat tile number' },
+  { fg: 'text-on-ink-cream', bg: 'surface-stamped-ink', min: TEXT, note: 'stamped card name tab; ink stat tile number' },
   { fg: 'text-on-ink-dim', bg: 'surface-stamped-ink', min: TEXT, note: 'ink stat tile label and caption' },
   { fg: 'text-heading', bg: 'surface-stamped-tint', min: TEXT, note: 'tint stat tile label and number' },
   { fg: 'text-muted', bg: 'surface-stamped-tint', min: TEXT, note: 'tint stat tile caption' },

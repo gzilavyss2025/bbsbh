@@ -26,7 +26,7 @@
   margin: 0;
   padding: var(--space-1) var(--space-2h);
   background: var(--surface-stamped-ink);
-  color: var(--text-on-ink);
+  color: var(--text-on-ink-cream);
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   font-weight: var(--w-bold);
@@ -94,7 +94,7 @@
 }
 .card--ink .rankmark {
   --rank-stroke: transparent;
-  color: var(--text-on-ink);
+  color: var(--text-on-ink-cream);
 }
 /* On the tint, the caption takes the soft ink (graphite is 4.52:1 there, too
    near the floor). On ink, the label and the caption take the dim paper. */
@@ -106,7 +106,7 @@
   color: var(--text-on-ink-dim);
 }
 .card--ink .stattile__value {
-  color: var(--text-on-ink);
+  color: var(--text-on-ink-cream);
 }
 
 /* THE FACT STRIP. The gap-rule grid of .factgrid__grid, on the hairline: the
