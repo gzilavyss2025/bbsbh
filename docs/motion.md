@@ -45,7 +45,9 @@ move exactly as their own headers instruct. That also covers `focus/` and
 
 ## The one-shot gate
 
-Every one-shot in the package hangs off `src/hooks/motion/useBecameTrue.js`.
+Every one-shot in the package hangs off one of two gates:
+`src/hooks/motion/useBecameTrue.js` for a change the reader sees happen, and
+`src/hooks/scroll/useInViewOnce.js` for an entrance on the player page.
 
 A CSS animation runs when its element mounts, or when the element gains the
 class carrying it. That is right for a change the reader just caused and wrong
@@ -60,6 +62,17 @@ false → true with the component already mounted, and keeps returning true whil
 it stays true, so the class it drives is stable. State is adjusted during
 render — React's documented escape hatch, the same shape `ScorecardPage`'s
 ink-in diff uses — so the committed DOM carries the class from its first frame.
+
+**`useInViewOnce` is the entrance gate (#2073).** A card on `/player/{id}` plays its
+entrance (a rise, a bar grow, a draw) the first time it comes a tenth into view in
+this page visit. A module-level `Set` of `<playerId>:<slotKey>` keys
+(`src/lib/motion/inViewOnce.js`) lives for the life of the JS bundle, so a re-render,
+a poll and Back in the same tab do not replay it, and a full page load does. It
+returns a phase: `wait` holds the card hidden until it shows, `play` runs the
+entrance, `rest` is the end state (seen, reduced motion, or no
+IntersectionObserver). A tap that changes what a card shows (a pick, a filter) is a
+change the reader caused, so its motion may play on every tap; that motion does not
+go through this gate.
 
 **It is not `ScorecardPage`'s diff, and was deliberately not lifted from it.**
 That one diffs a SET of at-bat ids, because it marks individual cells inside a

@@ -343,4 +343,19 @@ export const PAIRINGS = [
   { fg: 'text-heading', bg: 'bg-canvas', min: TEXT, note: 'stamped card count tag' },
   { fg: 'border-stamped', bg: 'bg-canvas', min: UI, note: 'stamped edge and shadow on the page' },
   { fg: 'border-stamped-soft', bg: 'bg-canvas', min: UI, note: 'soft stamped shadow under the ink tile' },
+  // THE ROW SURFACES (#2073): a table row under the pointer, and a picked row
+  // (game logs, Firsts, Similar Players). The row's own text sits on them.
+  // --accent-negative on a picked row is not paired: it is
+  // 4.37:1 (--accent-negative on --surface-row-selected), under AA. A loss on a
+  // picked row reads --clay-deep: 6.33:1 (--clay-deep on --surface-row-selected).
+  { fg: 'text-heading', bg: 'surface-row-hover', min: TEXT, note: 'row under the pointer: heading ink' },
+  { fg: 'text-body', bg: 'surface-row-hover', min: TEXT, note: 'row under the pointer: body text' },
+  { fg: 'text-caption', bg: 'surface-row-hover', min: TEXT, note: 'row under the pointer: caption' },
+  { fg: 'accent-positive', bg: 'surface-row-hover', min: TEXT, note: 'row under the pointer: a win' },
+  { fg: 'accent-negative', bg: 'surface-row-hover', min: TEXT, note: 'row under the pointer: a loss' },
+  { fg: 'text-heading', bg: 'surface-row-selected', min: TEXT, note: 'picked row: heading ink' },
+  { fg: 'text-body', bg: 'surface-row-selected', min: TEXT, note: 'picked row: body text' },
+  { fg: 'text-caption', bg: 'surface-row-selected', min: TEXT, note: 'picked row: caption' },
+  { fg: 'accent-positive', bg: 'surface-row-selected', min: TEXT, note: 'picked row: a win' },
+  { fg: 'clay-deep', bg: 'surface-row-selected', min: TEXT, note: 'picked row: a loss' },
 ]

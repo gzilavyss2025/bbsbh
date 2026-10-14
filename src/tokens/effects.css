@@ -59,13 +59,34 @@
   --dur-med:    220ms;
   --dur-slow:   360ms;
 
+  /* THE PLAYER PAGE'S TWO CURVES (#2073, from the design canvas). The stamp
+     curve drops fast and settles with no overshoot: the stamp-in, the press
+     of every Button and Pill, and new motion on the player page. The unfold
+     curve is softer at the end: a menu that folds to a rail, a panel that
+     opens. --ease-out stays for the rest of the app. JS reads both curves
+     through src/lib/motion/curves.js, and a test pins the two copies
+     together. */
+  --ease-stamp:  cubic-bezier(0.2, 0.9, 0.3, 1);
+  --ease-unfold: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* The player page's durations (#2073), from the canvas. A rise is a card or
+     a row that comes up as it fades in (motion/player-rise.css). An unfold is
+     a menu, a rail or a panel that opens. A grow is a bar that fills to its
+     value. A draw is a line or a track that inks itself. In a cascade, row n
+     waits n x --stagger-step. A value that one slice needs one time stays in
+     that slice, as calc(var(--dur-...) * n), never as a raw time. */
+  --dur-rise:     420ms;
+  --dur-unfold:   400ms;
+  --dur-grow:     750ms;
+  --dur-draw:     900ms;
+  --stagger-step: 55ms;
+
   /* The stamp-in (#1882, motion/stamp-in.css): a stamped card drops
-     --stamped-offset into its own shadow as it appears. The canvas drew it at
-     380ms on cubic-bezier(.2,.9,.3,1). That is under the eye's floor from
-     --dur-slow and --ease-out, so the motion reads those two. It is not the
-     Stamp In page (ADR-0042). */
-  --dur-stamp-in:  var(--dur-slow);
-  --ease-stamp-in: var(--ease-out);
+     --stamped-offset into its own shadow as it appears. Since #2073 it reads
+     the canvas values: 380ms on the stamp curve. It is not the Stamp In page
+     (ADR-0042). */
+  --dur-stamp-in:  380ms;
+  --ease-stamp-in: var(--ease-stamp);
 
   /* Sub-200ms press feedback (review-animations STANDARDS.md's "button press
      feedback" spec) for controls a touch heavier than the plain --dur-fast tap. */

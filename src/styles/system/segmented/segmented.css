@@ -1,0 +1,86 @@
+/* ---------------------------------------------------------------------------
+   SEGMENTED — a joined row of 44px toggles for a choice inside a card (#2073,
+   components/ui/control/Segmented.jsx). Not a third control: each option is a
+   .btn (system/button.css), and this sheet re-skins it inside the group.
+
+   THE ANATOMY. One spec; every part reads a token.
+
+     height     --tap-min (44px). --control-min (34px) stays for the other
+                small controls (tokens/layout.css).
+     edge       --bw-heavy solid --border-stamped. Square: no radius.
+     join       every button after the first moves left by one edge
+                (calc(var(--bw-heavy) * -1)), so two edges draw as one.
+     face       --surface-card with --text-heading ink. The type is .btn's:
+                the display face, uppercase, --ls-label, --fs-ui.
+     selected   [aria-pressed='true']: --text-heading fill, --text-on-ink text,
+                and NO tick. The joined row and the fill carry the state. In
+                forced-colors mode the fill becomes Highlight, so the state does
+                not rest on a colour the mode removes (the job .btn's tick does).
+     count      .segmented__count: a mono figure after the label.
+     fill       .segmented--fill: the buttons share the row (flex: 1 1 0).
+     press      .btn:active, unchanged (slice 02 owns the press for every Button).
+     focus      .btn:focus-visible, the house ring. The focused button lifts above
+                its neighbours so the next button does not cover the ring.
+
+   WHERE IT SITS IN THE CASCADE. src/index.css imports this file after
+   system/pill.css and BEFORE system/button.css, which must stay directly before
+   07 (test/button-cascade.test.js). So every rule here is written at two-class
+   specificity: it wins on specificity, never on order. test/segmented.test.js
+   pins the slot.
+   --------------------------------------------------------------------------- */
+
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.segmented .segmented__btn {
+  --btn-fill: var(--surface-card);
+  --btn-edge: var(--border-stamped);
+  --btn-ink: var(--text-heading);
+  --btn-fill-hover: var(--surface-inset);
+  --btn-edge-hover: var(--border-stamped);
+
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3h);
+  border-width: var(--bw-heavy);
+  border-radius: 0;
+  font-size: var(--fs-ui);
+}
+
+.segmented .segmented__btn + .segmented__btn {
+  margin-left: calc(var(--bw-heavy) * -1);
+}
+
+.segmented .segmented__btn[aria-pressed='true'] {
+  background: var(--text-heading);
+  border-color: var(--border-stamped);
+  color: var(--text-on-ink);
+}
+
+.segmented .segmented__btn[aria-pressed='true']::before {
+  content: none;
+}
+
+.segmented .segmented__btn:focus-visible {
+  position: relative;
+  z-index: 1;
+}
+
+.segmented--fill > .segmented__btn {
+  flex: 1 1 0;
+}
+
+.segmented .segmented__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-none);
+}
+
+@media (forced-colors: active) {
+  .segmented .segmented__btn[aria-pressed='true'] {
+    background: Highlight;
+    color: HighlightText;
+  }
+}
