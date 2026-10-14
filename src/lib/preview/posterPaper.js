@@ -28,7 +28,7 @@ const FALLBACK = {
   rule: '#CBC1A7',
   ruleSoft: '#DED6C0',
   ruleGrid: '#EDE6D1',
-  marker: '#E9C33F',
+  marker: '#F2C14E',
   field: '#2F6E4F',
   clay: '#B4453A',
   navy: '#1B2A3A',

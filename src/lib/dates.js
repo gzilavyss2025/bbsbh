@@ -1,5 +1,6 @@
 // Date helpers. The MLB schedule endpoint expects YYYY-MM-DD in the park's
 // local sense, but for slate selection the user's local date is close enough.
+import { baseballToday } from './time/standingsDates.js'
 
 export function toApiDate(date = new Date()) {
   const y = date.getFullYear()
@@ -12,6 +13,18 @@ export function toApiDate(date = new Date()) {
 // against. toApiDate above is the local-date one; don't swap them.
 export function isoToday() {
   return new Date().toISOString().slice(0, 10)
+}
+
+// A player's this-season game-log rows for the photo rail, oldest first. Only
+// games dated before the baseball day (US Pacific): a game tonight may still be
+// in progress, and its photos can show the result. Not isoToday(): after 00:00
+// UTC that is already tomorrow, and tonight's game would pass.
+export function photoGameRows(games, now = new Date()) {
+  const today = baseballToday(now)
+  return games
+    .filter((s) => s.game?.gamePk && s.date && s.date < today)
+    .map((s) => ({ gamePk: s.game.gamePk, apiDate: s.date }))
+    .sort((a, b) => a.apiDate.localeCompare(b.apiDate))
 }
 
 export function addDays(date, n) {

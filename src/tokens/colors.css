@@ -21,6 +21,7 @@
   --paper-1:  #F6EFDC;   /* standard page — folded into --paper-0 */
   --paper-2:  #FBF6E9;   /* raised card / cell fill */
   --paper-3:  #FFFDF6;   /* brightest inset (revealed value) */
+  --paper-cream: #F1E7CC; /* cream knockout on ink: the player-page draft hex (#1984) */
 
   /* Pushed darker in #1128 from #16222F, which sat 4.2 (CIE76) / 2.78
      (CIEDE2000) from --ink-1 — under or at the 1.0 just-noticeable threshold
@@ -111,12 +112,12 @@
   --ovr-down:    var(--ovr-allstar);
 
   /* ---- Highlight / marker ---- */
-  --marker:   #E9C33F;   /* highlighter yellow — "watch" flag */
+  --marker:   #F2C14E;   /* highlighter yellow — "watch" flag */
   /* The hatch stripe of --hold-texture (tokens/effects.css), which is the
      "on hold" member of the status-tape family. Kraft used to weave that tape
      and no longer may (ADR-0083): a rehab banner wearing the cover's own
      material promises a tap that lifts nothing. Dark --text-heading holds AA
-     against BOTH stripes: 10.5:1 (--text-heading on --marker) on the base,
+     against BOTH stripes: 10.7:1 (--text-heading on --marker) on the base,
      7.5:1 (--text-heading on --marker-deep) on the hatch. Both asserted in
      check-contrast.mjs, the same way the kraft pair always has been. */
   --marker-deep: #C9A32C;
@@ -143,6 +144,7 @@
   --text-muted:       var(--ink-2);
   --text-caption:     var(--graphite);
   --text-on-ink:      var(--paper-2);
+  --text-on-ink-cream: var(--paper-cream); /* new player-page band, stamp and strip: the draft cream (#1984) */
   --text-on-seal:     var(--seal-ink);
   /* Three rungs of paper text on a dark fill (navy, ink, clay, graphite), by
      light: bright, soft, dim. Each aliases the primitive it replaces in the

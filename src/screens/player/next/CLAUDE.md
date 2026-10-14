@@ -12,9 +12,13 @@ One `modules/<module>/` folder per module: `season` #1885, `splits` #1886, `plat
 `contact` #1888, `form` #1889 (batter), `pform` #1930 (pitcher Form trend), `batlog` #1890,
 `pitchlog` #1851, `fouls` #1891, `similar` #1926 (ends Game log), `arsenal` #1892, `mound`
 #1893, `path` #1894, `prospects` #1927, `firsts` #1895, `innings` #1928, `contract` #1929,
-`tbd` #1896 (one folder, five slots: Season, On the mound (pitchers), Game log, Career and History; no
+`percentile` #2011, `advanced` #2012, `runvalue` #2013, `command` #2014, `target` #2015, `pfouls` #2016,
+`milestones` #2017, `awards` #2018, `teams` #2019, `moves` #2020, `photos` #2021, `highlights` #2022 (stubs,
+wired in #2002), `tbd` #1896 (one folder, five slots: Season, On the mound (pitchers), Game log, Career and History; no
 Overview slot, the top cards cover it). Order inside a section is
-the `SLOTS` order in `sections.js`. No section has its own button beyond the jump bar's nine.
+the `SLOTS` order in `sections.js`. `SLOTS` hints: `once` gives a two-way player one instance with no role
+suffix; `twin` adds the suffix to two one-role slots with one name (the two Foul balls); `pair:
+'a'|'b'` puts an adjacent pair side by side at wide widths (`page.css`, a container query). No section has its own button beyond the jump bar's nine.
 
 ## The top cards
 
@@ -33,8 +37,8 @@ page's content and hides when it has none. The banner text is `../statusBanners.
   the shared `tbd` module which section it fills.
 - **Data:** the module owns its data hook. `Slot` mounts it only once the slot is near
   (`hooks/scroll/useNearView.js`), so nothing loads before then.
-- **Two states.** *Not built yet:* the stub renders its one placeholder line, never `null`
-  and never `onEmpty()`, so the card and its button stay. *No data:* a real module that has
+- **Two states.** *Not built yet:* the stub renders `null`, so `Slot` hides its card and the
+  live page shows no placeholder (changed 2026-10-14, before the swap #2040). *No data:* a real module that has
   loaded and found nothing calls `onEmpty()`, or renders nothing on its first render; `Slot`
   hides the card, and the button hides when ALL slots of its section are empty. A module that is built leaves the stub list: add it to `BUILT` in `test/player-next-sections.test.js`.
 - **Count tag:** call `onCount(n)` (or a string); `Slot` draws it on the card's edge.
@@ -43,9 +47,9 @@ page's content and hides when it has none. The banner text is `../statusBanners.
 - **Failure:** a module that throws, or whose chunk fails to load, hides its card like `onEmpty()`
   (`SlotBoundary`, which logs the error with the slot key); it never takes down the page. The page
   also hides the log slots from its own data: with no season or postseason games, `seedEmpty` hides
-  `batlog`, `pitchlog` and `fouls` before they mount.
-- **CSS:** the module's own file, in its folder or `src/styles/player-next/<module>.css`,
-  imported from its `index.jsx` (`src/styles` is at its file budget).
+  `batlog`, `pitchlog`, `fouls` and `pfouls` before they mount.
+- **CSS:** the module's own file in `src/styles/player-next/<group>/`, imported from its `index.jsx`.
+  `both/` is full: new files go in `season/`, `history/`, `gamelog/`, `pitcher/` or `top/`.
 - **Shared parts:** a part two modules use sits in `parts/`, not in one module's folder:
   `LogTable.jsx`, the game log table (pitchlog #1851, batlog #1890).
 - **Open surface (ADR-0034):** no seal, no gate. Keep `?d=` and `?s=` on every link (the
