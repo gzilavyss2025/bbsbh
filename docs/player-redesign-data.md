@@ -85,6 +85,7 @@ Module issue: #1885.
 | Career WAR (12.8 / 2.1) | `public/data/war-history/{NN}.json` + `war.json` | have | — |
 | Postseason by year and career | `fetchPostseasonRegister` (`src/api/player/postseasonRegister.js`, `gameType=P`) | have | — |
 | Tiles in each scope | same lines | have | — |
+| Postseason by round | `fetchPostseasonByRound` (`src/api/player/postseasonRegister.js`, `gameLog` with `gameType=F,D,L,W`, never `P`) | have | — |
 | League AVG / ERA per season (WAR popover) | `leagueAverage()` + `public/data/league-averages.json` (`scripts/gen-league-averages.mjs`) | have | Run the generator after the 2026 Final: `lastSeason` is still 2025 |
 | All-Star star | `fetchAllStarRosterIds` sets `r.allStar` in `src/api/player/stats.js` | have | Render it. MLB only. Neither board player has an MLB All-Star season |
 | Gap rows (injured / did not play) | `missingSeasonRows` (`src/api/person/careerRegister.js`) with IL transactions | reshape | It starts at the MLB debut. Start at the first pro season, and add a fixed "2020: no minor-league season" note |
