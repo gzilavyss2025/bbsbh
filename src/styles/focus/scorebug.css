@@ -1,0 +1,266 @@
+/* ------------------------------------------ focus mode: the scorebug's broadcast look */
+/* The console band's skin (ADR-0043's band, 24-floating-nav-and-hud.css's strip),
+   drawn after the TV scorebugs a reader knows: the pitcher bar above the batter
+   bar, a panel for each club with the big score on it, a dark centre for the
+   inning and the outs, and the bases tilted back like plates on the grass.
+
+   SKIN ONLY. Every selector below is a class the markup already has
+   (Scorebug.jsx); no element moved, no prop changed, and nothing here reads the
+   feed. The floating dock on the ordinary page is the bare `.gamehud` and stays
+   as it was: every rule here starts at `.gamehud--console`.
+
+   Imported after console.css, which sets the band's width, floor and wide
+   placement, and before atbat/reference. It wins on cascade order, not
+   specificity, like the rest of focus/ (see stage.css).
+
+   Four tricks do the layout, so a change to Scorebug.jsx's markup has to
+   re-check each one:
+   - `display: contents` on `.gamehud__marks` and `.gamehud__runscol` hands their
+     children to the strip's own grid, so logo, score, centre, score, logo run
+     left to right in one row.
+   - Each club's tile spans its logo cell AND its score cell. The tile carries
+     the club's tint (`--tint`, TeamTreatmentMark), and a score cell is a sibling
+     that cannot read it, so the tile is painted under the score instead and the
+     score cell is transparent. The ripple on the tile then runs through both.
+   - `order` puts the pitcher bar above the batter bar; the two rows are direct
+     flex items of the card because `.gamehud__lines` is `display: contents`.
+   - `:has()` on the inning arrow marks the club at bat. It reads state the
+     markup already carries and adds none. */
+
+.gamehud--console {
+  padding: 0;
+  gap: 0;
+  background: var(--ink-0);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  box-shadow: var(--shadow-stamped-soft);
+}
+
+/* ---- the two name bars */
+.gamehud--console .gamehud__row {
+  position: relative;
+  isolation: isolate;
+  align-items: center;
+  padding: var(--space-1h) var(--space-2h);
+}
+
+/* The ripple: thin rings from opposite corners, one light and one dark, faded
+   toward the middle. Shared by the bars and the club panels so they read as one
+   printed sheet. */
+.gamehud--console .gamehud__row::before,
+.gamehud--console .gamehud__tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* raw-value-exempt: ripple ring colours are translucent white and black over any ground */
+  background:
+    repeating-radial-gradient(circle at 108% 130%, rgba(255, 255, 255, 0.14) 0 1px, transparent 1px 7px),
+    repeating-radial-gradient(circle at -8% -40%, rgba(0, 0, 0, 0.2) 0 1px, transparent 1px 9px);
+  mask-image: linear-gradient(100deg, #000 0%, rgba(0, 0, 0, 0.3) 55%, #000 100%); /* raw-value-exempt: mask alpha */
+}
+
+.gamehud--console .gamehud__row--pitcher {
+  order: -2;
+  background: var(--ink-2);
+  padding-left: var(--space-5);
+}
+
+.gamehud--console .gamehud__row--batter {
+  order: -1;
+  background: var(--ink-1);
+  border-top: var(--bw-heavy) solid var(--ink-0);
+}
+
+.gamehud--console .gamehud__who,
+.gamehud--console .gamehud__val {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-lg);
+  letter-spacing: var(--ls-emphasis);
+  color: var(--text-on-ink-cream);
+}
+
+.gamehud--console .gamehud__row--pitcher .gamehud__who,
+.gamehud--console .gamehud__row--pitcher .gamehud__val {
+  font-size: var(--fs-title-md);
+}
+
+/* The half just ended: the bars keep the last batter and pitcher, dimmed, so the
+   band holds its height instead of collapsing to the strip (HalfInning's
+   composeLive sets `over`). */
+.gamehud--console.gamehud--over .gamehud__row {
+  opacity: 0.55; /* raw-value-exempt: a dim step, not a colour */
+}
+
+/* ---- the strip: club panel, centre, club panel */
+/* layout-exempt: a fixed five-column grid whose children come from two display: contents wrappers */
+.gamehud--console .gamehud__strip {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) minmax(84px, 0.9fr) minmax(0, 1fr) 48px;
+  margin: 0;
+  min-height: 100px;
+  background: var(--ink-0);
+  border-top: var(--bw-heavy) solid var(--ink-0);
+}
+
+.gamehud--console .gamehud__marks,
+.gamehud--console .gamehud__runscol {
+  display: contents;
+}
+
+.gamehud--console .gamehud__div {
+  display: none;
+}
+
+.gamehud--console .gamehud__tile {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  grid-row: 1;
+}
+
+.gamehud--console .gamehud__tile--away {
+  grid-column: 1 / 3;
+  justify-content: flex-start;
+  padding-left: var(--space-3);
+}
+
+.gamehud--console .gamehud__tile--home {
+  grid-column: 4 / 6;
+  justify-content: flex-end;
+  padding-right: var(--space-3);
+}
+
+/* The score rides on its club's tile: the tile runs under it, so colour and
+   ripple pass through logo and number as one panel. The digits are cream with
+   an ink outline, so they read on a light tint and a dark one alike. */
+.gamehud--console .gamehud__runs {
+  position: relative;
+  z-index: 1;
+  grid-row: 1;
+  background: transparent;
+  color: var(--text-on-ink-cream);
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-xl);
+  font-weight: var(--w-bold);
+  -webkit-text-stroke: 5px var(--ink-0); /* raw-value-exempt: outline width scales with the digit */
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 rgba(15, 24, 34, 0.4); /* raw-value-exempt: ink drop under the digit */
+}
+
+.gamehud--console .gamehud__runscol .gamehud__runs:first-child {
+  grid-column: 2;
+}
+
+.gamehud--console .gamehud__runscol .gamehud__runs:last-child {
+  grid-column: 4;
+}
+
+/* The club at bat wears the marker underline on its panel. */
+.gamehud--console .gamehud__strip:has(.gamehud__tri--up:not(.gamehud__tri--dim)) .gamehud__tile--away,
+.gamehud--console .gamehud__strip:has(.gamehud__tri--down:not(.gamehud__tri--dim)) .gamehud__tile--home {
+  box-shadow: inset 0 -5px 0 var(--marker); /* raw-value-exempt: underline thickness */
+}
+
+/* ---- the centre: inning on top, bases and outs below, cream seams */
+.gamehud--console .gamehud__inninghalf {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: stretch;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--space-1h);
+  padding: var(--space-2h) var(--space-1) 0;
+  background: var(--ink-0);
+  border-inline: var(--bw-heavy) solid var(--text-on-ink-cream);
+}
+
+.gamehud--console .gamehud__innnum {
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-md);
+  color: var(--text-on-ink-cream);
+}
+
+/* Only the arrow for the half in play shows, in marker yellow. */
+.gamehud--console .gamehud__tri--dim {
+  display: none;
+}
+
+.gamehud--console .gamehud__tri--up {
+  border-bottom-color: var(--marker);
+  margin-top: var(--space-2);
+}
+
+.gamehud--console .gamehud__tri--down {
+  border-top-color: var(--marker);
+  margin-top: var(--space-2h);
+}
+
+/* layout-exempt: the bases stack over the outs inside one grid cell of the strip */
+.gamehud--console .gamehud__diamondwrap {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: end;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0 var(--space-1) var(--space-2);
+  pointer-events: none;
+}
+
+/* The bases tilt back with a shadow underneath; an occupied one turns yellow. */
+.gamehud--console .gamehud__diamond {
+  width: 68px; /* raw-value-exempt: the tilted plates need their own size */
+  height: 68px;
+  transform: perspective(140px) rotateX(52deg);
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.65)); /* raw-value-exempt: plate shadow */
+}
+
+.gamehud--console .gamehud__diamond rect {
+  stroke: var(--text-on-ink-dim);
+}
+
+.gamehud--console .gamehud__diamond rect[fill='transparent'] {
+  fill: var(--text-on-ink-soft);
+}
+
+.gamehud--console .gamehud__diamond rect:not([fill='transparent']) {
+  fill: var(--marker);
+  stroke: var(--marker-deep);
+}
+
+.gamehud--console .gamehud__outs {
+  flex-direction: row;
+  gap: var(--space-2);
+}
+
+.gamehud--console .gamehud__outdot {
+  background: transparent;
+  border: var(--bw-heavy) solid var(--text-on-ink-cream);
+}
+
+.gamehud--console .gamehud__outdot--filled {
+  background: var(--text-on-ink-cream);
+}
+
+@media (min-width: 740px) {
+  /* layout-exempt: the same five columns, narrower tiles for the 264px desktop card */
+  .gamehud--console .gamehud__strip {
+    grid-template-columns: 40px minmax(0, 1fr) 84px minmax(0, 1fr) 40px;
+  }
+
+  .gamehud--console .gamehud__runs {
+    font-size: var(--fs-score-lg);
+  }
+
+  .gamehud--console .gamehud__tile--away {
+    padding-left: var(--space-2);
+  }
+
+  .gamehud--console .gamehud__tile--home {
+    padding-right: var(--space-2);
+  }
+}

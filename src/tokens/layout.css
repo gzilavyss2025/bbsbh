@@ -70,8 +70,12 @@
      Two values, not one: the band's batter/pitcher lines sit ABOVE the score
      strip, and the wide breakpoint gives that stack a bigger type role, which
      makes the narrow (264px) desktop card the taller of the two. Redefined
-     below at the same 740px cut both files already share. */
-  --console-hud-h: 126px;
+     below at the same 740px cut both files already share.
+
+     The broadcast skin (focus/scorebug.css) made the band one height at every
+     width — 183px measured at 390, 834 and 1100 — so the two values agree today;
+     they stay two lines so a width that needs its own number can have one. */
+  --console-hud-h: 183px;
 
   /* The slate's team-logo nav banner (GameSelect's TeamFilterStrip) — the
      height its wrapper holds open while the club list is still being fetched,
@@ -203,6 +207,6 @@
    stage.css's grid breakpoint. */
 @media (min-width: 740px) {
   :root {
-    --console-hud-h: 130px;
+    --console-hud-h: 183px;
   }
 }

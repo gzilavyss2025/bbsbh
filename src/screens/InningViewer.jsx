@@ -68,6 +68,7 @@ function sameLiveState(a, b) {
     a.inning === b.inning &&
     a.half === b.half &&
     a.outs === b.outs &&
+    a.over === b.over &&
     a.bases?.first === b.bases?.first &&
     a.bases?.second === b.bases?.second &&
     a.bases?.third === b.bases?.third &&

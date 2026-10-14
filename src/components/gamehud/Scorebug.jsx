@@ -9,10 +9,11 @@ import { BaseState } from '../scoring/BaseState.jsx'
 // `revealed || isNextToReveal` gate that keeps a jumped-to sealed half from
 // ever reaching this component).
 //
-// `batter`/`pitcher` are both null between a half ending (3rd out) and the
-// user actually navigating to the next one — nobody's "up" and nobody's
-// "on the mound" in that gap, so both rows disappear rather than show stale
-// or blank content; `inning`/`half` already point at what's coming next.
+// Between a half ending (3rd out) and the user actually navigating to the next
+// one, `over` is true: bases and outs are clear and `inning`/`half` already
+// point at what's coming next, but the two name bars keep the half's last
+// batter and pitcher, dimmed, so the band holds its height. `batter`/`pitcher`
+// are only null when the feed names neither (a thin MiLB feed).
 export function Scorebug({
   awayName,
   homeName,
@@ -29,6 +30,7 @@ export function Scorebug({
   pitcher, // { last, pitches } | null
   bases,
   outs = 0,
+  over = false, // the half just ended: the name bars stay, dimmed
   className = '',
 }) {
   const top = half === 'top'
@@ -38,7 +40,7 @@ export function Scorebug({
   // bare padded gap above it.
   const blank = !batter && !pitcher
   return (
-    <div className={`gamehud ${blank ? 'gamehud--blank' : ''} ${className}`}>
+    <div className={`gamehud ${blank ? 'gamehud--blank' : ''} ${over ? 'gamehud--over' : ''} ${className}`}>
       {/* `display: contents` (24-floating-nav-and-hud.css), so the card's own
           column stacking sees straight through this wrapper to the same two
           rows it always had — in BOTH placements, the dock and the anchored

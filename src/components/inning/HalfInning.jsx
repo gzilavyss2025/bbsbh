@@ -322,17 +322,18 @@ export function HalfInning({
     } else if (nowPitching) {
       pitcher = { last: nowPitching.name.split(',')[0], pitches: (enteringPitches ?? 0) + (live?.pitchesSoFar ?? 0) }
     }
-    // The half is over (3rd out) but the user hasn't navigated to the next
-    // one yet — this half's batter/pitcher/bases/outs no longer describe
-    // anything current, and the NEXT half's don't exist yet either. Rather
-    // than freeze on the half that just ended, blank the batter/pitcher and
-    // bases/outs and point the inning/half indicator at what's coming next.
+    // The half is over (3rd out) but the user hasn't navigated on: bases and
+    // outs clear and the indicator points at what's next. The name bars KEEP
+    // the half's last batter and pitcher, dimmed (`over`), so the band holds
+    // its height instead of collapsing; both are already revealed, as this
+    // snapshot only reaches the 3rd out once the reveal mark does.
     if (outs >= 3) {
       return {
         bases: { first: false, second: false, third: false },
         outs: 0,
-        batter: null,
-        pitcher: null,
+        batter,
+        pitcher,
+        over: true,
         inning: half === 'top' ? inning : inning + 1,
         half: half === 'top' ? 'bottom' : 'top',
       }
