@@ -8,6 +8,12 @@
 .logtable {
   container-type: inline-size;
 }
+/* The Table's wrap clips (overflow-x: auto), and a clipping ancestor is the box a sticky header
+   sticks to, so it would stay put in the wrap and scroll away with the page. This table never
+   scrolls sideways (the card look takes over below 720 px), so the wrap does not clip here. */
+.logtable .table {
+  overflow: visible;
+}
 .logtable__grid {
   width: 100%;
   border-collapse: collapse;
@@ -23,6 +29,17 @@
   text-align: left;
   white-space: nowrap;
   color: var(--text-caption);
+}
+/* The header row sticks to the top of the screen while the log scrolls past (table look only;
+   the card look hides it). border-collapse drops a sticky cell's border, so the rule under it
+   is an inset shadow. */
+.logtable__grid thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-card);
+  border-bottom: 0;
+  box-shadow: inset 0 calc(-1 * var(--bw-heavy)) 0 var(--border-stamped);
 }
 .logtable__grid td {
   padding: var(--space-2);

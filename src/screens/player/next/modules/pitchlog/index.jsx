@@ -59,8 +59,7 @@ const COLUMNS = [
     card: 'head',
     cell: (r) => (
       <Cluster as="span" gap="tight" align="center">
-        <span className="mono pitchlog__n">{r.n}</span>
-        <Door className="pitchlog__open" data-pk={r.gamePk} aria-label={`Open game ${r.n}, ${r.date} ${r.home ? 'vs' : 'at'} ${r.opp}`}>
+        <Door className="pitchlog__open" data-pk={r.gamePk} aria-label={`Open game, ${r.date} ${r.home ? 'vs' : 'at'} ${r.opp}`}>
           {r.date}
         </Door>
         <span className="mono pitchlog__at">{r.home ? 'vs' : 'at'}</span>
@@ -102,7 +101,7 @@ const COLUMNS = [
     cell: (r) => (
       <span className="mono">
         {r.pitches ?? DASH}
-        {r.pitches != null && r.strikes != null && <small> {r.strikes} strikes</small>}
+        {r.pitches != null && r.strikes != null && <small> ({r.strikes} S/{r.pitches - r.strikes} B)</small>}
       </span>
     ),
   },
@@ -215,7 +214,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
           {codes.map((code) => (
             <li key={code}>
               <Mark code={code} />
-              <span className="mono">{code}</span> {pitchMark(code).name}
+              <span className="mono">{pitchMark(code).name}</span>
             </li>
           ))}
         </Cluster>
