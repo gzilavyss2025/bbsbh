@@ -1891,7 +1891,7 @@ Re-run only to fold in a new season.
   reads them at the start, so it skips every game already stored. A feed that fails after the client's retries goes on a
   failed list: the script prints the list and exits non-zero. Run the same command again to fetch only what is missing.
   **Verify gate:** it exits non-zero unless (1) 99% of the season's Final games have a row, (2) in 40 evenly
-  spaced games, 95% of the pitcher pairs are within 3 pitches of the box score and the grand total is within 1%,
+  spaced games that have stored rows (a game with no pitch types in the feed is check 1's, not this one's), 95% of the pitcher pairs are within 3 pitches of the box score and the grand total is within 1%,
   (3) unknown pitch codes are 2% of all pitches or fewer, and (4) every shard is under 60 KB and in its
   `personId % 100` bucket. Only when all four pass does it add the season to `seasons.json`. Reader:
   `fetchPitchMixFor` in `src/api/pitchArsenal.js`.

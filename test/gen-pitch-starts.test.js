@@ -4,7 +4,7 @@ import { openDb } from '../scripts/lib/db.js'
 import { mphBuckets, startsBuckets, foldStarts } from '../scripts/lib/pitch/arsenal-starts.mjs'
 import { aggregateGamePitchTypes } from '../scripts/gen-pitch-arsenal.mjs'
 import {
-  addGame, boxVerdict, codesVerdict, coverageVerdict, pendingGames, rowsOfFeed, shardsOf,
+  addGame, boxVerdict, codesVerdict, coverageVerdict, pendingGames, rowsOfFeed, sampleGames, shardsOf,
 } from '../scripts/lib/pitch/starts-sweep.mjs'
 
 const pitch = (code, speed) => ({ isPitch: true, details: { type: { code, description: code } }, pitchData: speed == null ? undefined : { startSpeed: speed } })
@@ -75,4 +75,22 @@ test('codes: unknown codes fail only above 2% of all pitches', () => {
   assert.equal(codesVerdict({ FF: 98, IN: 2 }).ok, true)
   assert.equal(codesVerdict({ FF: 97, IN: 3 }).ok, false)
   assert.deepEqual(codesVerdict({ FF: 98, IN: 2 }).unknown, { IN: 2 })
+})
+
+// 2019: the season's first game was the Tokyo Dome opener, which has no pitch types in the feed. It
+// held the sample's first slot, every one of its pitchers read 0, and the box check failed a good season.
+test('the box sample skips a game with no stored rows, even the first', () => {
+  const pks = Array.from({ length: 100 }, (_, i) => i + 1)
+  const store = { pit: { 1: Object.fromEntries(pks.slice(1).map((p) => [p, { FF: 1 }])) } } // game 1 has no rows
+  const sample = sampleGames(pks, store)
+  assert.equal(sample.includes(1), false)
+  assert.ok(sample.length > 0 && sample.length <= 40)
+})
+
+test('the box sample is the old pick, 40 evenly spaced games, when every game has rows', () => {
+  const pks = Array.from({ length: 2467 }, (_, i) => i + 1)
+  const store = { pit: { 1: Object.fromEntries(pks.map((p) => [p, { FF: 1 }])) } }
+  const old = pks.filter((_, i) => i % Math.max(1, Math.floor(pks.length / 40)) === 0).slice(0, 40)
+  assert.deepEqual(sampleGames(pks, store), old)
+  assert.deepEqual(sampleGames(pks.slice(0, 7), { pit: { 1: Object.fromEntries(pks.slice(0, 7).map((p) => [p, { FF: 1 }])) } }), pks.slice(0, 7))
 })

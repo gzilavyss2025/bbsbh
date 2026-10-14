@@ -58,6 +58,14 @@ export function coverageVerdict(pks, store) {
   return { ok: pks.length > 0 && (pks.length - missing.length) * 100 >= pks.length * 99, total: pks.length, missing: missing.slice(0, 20) }
 }
 
+// The games check 2 compares: 40 evenly spaced, from the games the store holds. A game with no rows is
+// check 1's business; the Tokyo Dome opener of 2019 has no pitch types and sat first in the old pick.
+export function sampleGames(pks, store) {
+  const have = gamesOf(store)
+  const held = pks.filter((pk) => have.has(String(pk)))
+  return held.filter((_, i) => i % Math.max(1, Math.floor(held.length / 40)) === 0).slice(0, 40)
+}
+
 // Check 2: `pairs` is `[{ stored, box }]`, one per pitcher and game.
 export function boxVerdict(pairs) {
   const near = pairs.filter((p) => Math.abs(p.stored - p.box) <= 3).length
