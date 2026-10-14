@@ -1,36 +1,11 @@
 import { foulCountCells } from '../../../../../api/fouls.js'
+import { baseline, diffPts, pct, place, plural, signed } from '../../parts/foulsFormat.js'
 
 // The Foul balls card's pure view (#1891): the 12-count grid, the rates per count and the three
 // season baselines, each against the league. The cells come from `byCount` and the season totals
 // from the total fields; they are not reconciled here (a few batters differ by 1 or 2, #1979).
-const DASH = '—'
-const MINUS = '−'
 const ENDS = [['hit', 'Hit'], ['walk', 'Walk'], ['out', 'Out in play'], ['so', 'Strikeout']]
-
-const pct = (x, d = 1) => (Number.isFinite(x) ? `${(x * 100).toFixed(d)}%` : DASH)
-const signed = (n, text) => (n === 0 ? text : `${n > 0 ? '+' : MINUS}${text}`)
-const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
 const sum = (cells, key) => cells.reduce((a, c) => a + c[key], 0)
-const place = (v, scale) => (Number.isFinite(v) ? Math.min(100, (v / scale) * 100) : 0)
-
-// "+12.3 pts" for two fouls-per-swing fractions.
-const diffPts = (his, lg) => {
-  if (his == null || lg == null) return DASH
-  const d = Number(((his - lg) * 100).toFixed(1))
-  return `${signed(d, Math.abs(d).toFixed(1))} pts`
-}
-
-function baseline({ key, label, title, his, lg, hisText, lgText, sub, lgSub, gap, scale }) {
-  const top = Math.max(scale, his ?? 0, lg ?? 0)
-  return {
-    key, label, title, sub, lgSub, gap,
-    his: hisText,
-    lg: lg == null ? DASH : lgText,
-    gapNote: !gap || gap === DASH ? '' : /^[+−]/.test(gap) ? `${gap} for him` : 'level with the league',
-    fill: place(his, top),
-    tick: lg == null ? null : place(lg, top),
-  }
-}
 
 export function foulsView({ line, league }) {
   const mine = foulCountCells(line?.byCount)
