@@ -17,6 +17,13 @@ export function rankFor(marks, tileKey) {
   return m && { rank: m.rank, of: m.of }
 }
 
+// The top's stamp-in beat (B-phone, B-wide): the hero card lands at 60ms, then the tiles
+// one after another from 120ms, 40ms apart. Values from the canvas; no token is 40ms.
+export const HERO_STAMP_DELAY = '60ms'
+const TILE_FIRST_MS = 120
+const TILE_STEP_MS = 40
+export const tileStampDelay = (i) => `${TILE_FIRST_MS + i * TILE_STEP_MS}ms`
+
 // Header extras (#2009), the hero's parts: the nickname, the two prospect ranks, the school and
 // one ovrView per rated group, hitting first (the stamp shows the first; the old OvrTile rule).
 // Null when he has none of them. `ratings` is useOvr's answer. A minor leaguer's view has no rows

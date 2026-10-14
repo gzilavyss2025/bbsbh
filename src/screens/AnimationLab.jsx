@@ -7,7 +7,7 @@ import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { PostponedBanner } from '../components/game/GameCardParts.jsx'
 import { CountBlink, Stat } from '../components/gamehud/StatBox.jsx'
 import { CLOSE_SEQUENCE_MS, INK_SET_MS, INK_SET_OVERSHOOT, TALLY_STAGGER_MS } from '../components/inning/focus/beats.js'
-import { Entry } from './animlab/Entry.jsx'
+import { Entry, Frame } from './animlab/Entry.jsx'
 import {
   AtMarkDemo,
   BoxLinesEntrance,
@@ -23,7 +23,7 @@ import {
   StrikeDemo,
   WriteOnDemo,
 } from './animlab/motionDemos.jsx'
-import { Stack } from '../components/ui/layout/Stack.jsx'
+import { PlayerMotionLab } from './animlab/PlayerMotionLab.jsx'
 
 // Unlisted QA page (see route.js), reachable only by direct URL
 // (/animation-lab). Every decorative animation in the app gets its own entry:
@@ -471,20 +471,22 @@ export function AnimationLab() {
           <>
             The player page&rsquo;s stamped card and stat tile (#1882, styles/motion/stamp-in.css). It
             appears flat in the place of its own shadow, then comes up 4px as the shadow prints, in
-            360ms. Off under reduced motion.
+            380ms. Off under reduced motion.
           </>
         }
         live={<StampInDemo />}
       >
-        <span className="animlab__stagelabel">The stamp-in, 0 → 360ms</span>
+        <span className="animlab__stagelabel">The stamp-in, 0 → 380ms</span>
         <div className="animlab__frozen">
-          {[0, 60, 120, 240, 360].map((ms) => (
+          {[0, 60, 120, 240, 380].map((ms) => (
             <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
               <StampInDemo />
             </Frame>
           ))}
         </div>
       </Entry>
+
+      <PlayerMotionLab />
     </div>
   )
 }
@@ -536,20 +538,6 @@ function InkSetDemo() {
         <span className="pbp__code pbp__code--hit pbp__code--ink">2B</span>
       </span>
     </span>
-  )
-}
-
-// One frozen frame: pauses whatever animation(s) `children` renders at
-// `delayMs` elapsed (via --animlab-delay, see index.css's ANIMATION LAB
-// block) — omit delayMs for a frame with nothing to pause (a plain static
-// swatch, like the scoreboard digits below).
-function Frame({ label, delayMs, children }) {
-  const style = delayMs != null ? { '--animlab-delay': `${-delayMs}ms` } : undefined
-  return (
-    <Stack gap="tight" className="animlab__frame" style={style}>
-      <div className="animlab__framebox">{children}</div>
-      <span className="animlab__framelabel">{label}</span>
-    </Stack>
   )
 }
 

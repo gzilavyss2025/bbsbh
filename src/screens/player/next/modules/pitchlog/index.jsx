@@ -3,6 +3,7 @@ import '../../../../../styles/player-next/pitcher/pitchlog.css'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { Door } from '../../../../../components/ui/control/Door.jsx'
+import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { FactGrid } from '../../../../../components/ui/frame/FactGrid.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
@@ -184,13 +185,12 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
             </Button>
           )}
           {post > 0 && (
-            <Cluster gap="tight" role="group" aria-label="Show games">
-              {SCOPES.map(([id, label]) => (
-                <button key={id} type="button" className="pnext-pick" aria-pressed={id === scope} onClick={() => setScope(id)}>
-                  {label} <span className="mono">{counts[id]}</span>
-                </button>
-              ))}
-            </Cluster>
+            <Segmented
+              label="Show games"
+              value={scope}
+              onChange={setScope}
+              options={SCOPES.map(([id, label]) => ({ value: id, label, count: counts[id] }))}
+            />
           )}
         </Cluster>
         <span className="mono pitchlog__scope">{span} · newest first</span>

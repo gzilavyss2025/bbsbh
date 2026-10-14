@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { fetchFouls, fetchFoulsFor, batterFoulLine, leagueFoulRates } from '../../../../../api/fouls.js'
 import { CountExplorer, Rail, Stat } from '../../parts/CountExplorer.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
-import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
+import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { foulsView } from './foulsView.js'
 
@@ -46,13 +46,13 @@ export default function FoulsCard({ bio, asOf, season, onEmpty, onCount }) {
 
         <Stack gap="snug" className="fouls__base">
           <span className="fouls__cap">Season baseline</span>
-          <Cluster gap="tight" role="group" aria-label="Season stat">
-            {view.baseline.map((b, i) => (
-              <button key={b.key} type="button" className="pnext-pick" aria-pressed={b === m} onClick={() => setMetric(i)}>
-                {b.label}
-              </button>
-            ))}
-          </Cluster>
+          <Segmented
+            label="Season stat"
+            fill
+            value={Math.min(metric, view.baseline.length - 1)}
+            onChange={setMetric}
+            options={view.baseline.map((b, i) => ({ value: i, label: b.label }))}
+          />
           <Stack gap="base" className="fouls__metric" aria-live="polite">
             <div className="fouls__between">
               <Stat k={m.title} v={m.his} sub={m.sub} />

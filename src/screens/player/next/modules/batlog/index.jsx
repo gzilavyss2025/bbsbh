@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import '../../../../../styles/player-next/batter/batlog.css'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
+import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { FactGrid } from '../../../../../components/ui/frame/FactGrid.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
@@ -118,13 +119,12 @@ export default function BatlogModule({ bio, asOf, season, onEmpty, onCount }) {
     <Stack className="batlog">
       <Cluster align="center" className="batlog__top">
         {post > 0 && (
-          <Cluster gap="tight" role="group" aria-label="Show games">
-            {SCOPES.map(([id, label]) => (
-              <button key={id} type="button" className="pnext-pick" aria-pressed={id === scope} onClick={() => (setScope(id), setMore(false))}>
-                {label} <span className="mono">{counts[id]}</span>
-              </button>
-            ))}
-          </Cluster>
+          <Segmented
+            label="Show games"
+            value={scope}
+            onChange={(id) => (setScope(id), setMore(false))}
+            options={SCOPES.map(([id, label]) => ({ value: id, label, count: counts[id] }))}
+          />
         )}
         <span className="mono batlog__scope">{season} · newest first</span>
       </Cluster>
