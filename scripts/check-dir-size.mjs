@@ -462,7 +462,8 @@ const BUDGETS = {
   // loads on that one screen during that one window.
   // +1 for 10b-former-teammates.css — the Former Teammates Ladder (#1352).
   // Its rules would have pushed 10-lineup.css two bands past its line cap.
-  'src/styles': 119, // +1: 57a-franchise-history.css, extends 57-ballpark-card.css
+  // 119 -> 112: the player swap (#1898) took the old tabs' card partials with them.
+  'src/styles': 112, // +1: 57a-franchise-history.css, extends 57-ballpark-card.css
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -1031,7 +1032,8 @@ const BUDGETS = {
   // +1 for PostseasonRacePage.jsx — the current-season "if it ended today"
   // bracket + Wild Card standings, same one-route-one-screen shape.
   // +1: NineKeysPage.jsx — one route, one screen, same as its neighbours.
-  'src/screens': 44,
+  // 44 -> 43: PlayerPage.jsx went with the player swap (#1898).
+  'src/screens': 43,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.
@@ -1066,40 +1068,6 @@ const BUDGETS = {
   // was at its own budget.
   'src/hooks': 28,
   'src/screens/identity-lab': 15,
-  // New entry: +1 for PlayerHoverCard.jsx — a player-identity primitive like
-  // Headshot/PlayerLink beside it, not one of this bucket's ten player-PAGE cards.
-  // 13 -> 15 for GameLog.jsx (the Game log card, split out of PlayerPage.jsx so
-  // its MLB/AAA level toggle can own its own useState — PlayerPage can't add a
-  // hook past its `if (gate) return gate` loading gate, same reason
-  // CareerRegister is its own component) and GameLink.jsx (the boxscore link
-  // GameLog.jsx needs, promoted out of PlayerPage.jsx so the two other
-  // PlayerPage call sites and this one share one definition instead of three).
-  // 15 -> 16 for ContractHistoryLedger.jsx — the history tab's contract ledger,
-  // a peer of AwardsLedger.jsx and CareerTimeline.jsx beside it and built the
-  // same way: one card that only draws, its view model pure in src/api. The
-  // guard's usual remedy of a subdirectory would put ONE of this bucket's
-  // player-page cards in a folder of its own and leave the other ten flat,
-  // which is not a subdivision, only a scattering.
-  // 16 -> 17 for ProspectRankHistoryCard.jsx (#1111) — the prospect-ranking
-  // card that sits beside LevelProgressionCard.jsx on the History tab and the
-  // Overview. It shares that card's shell, so moving it to a folder of its own
-  // would split one dossier in two. src/components/playerstats/ is already at
-  // the 12-file cap, so it cannot take it either.
-  'src/components/player': 17,
-  // New entry: src/components/charts holds 13, one past the cap, for
-  // GloveTarget.jsx — the Glove Target plot, a peer of CommandMap.jsx and
-  // SprayMap.jsx beside it and built the same way (one component that only
-  // draws, its view model pure in src/api).
-  //
-  // A deliberate budget rather than a subdivision, which is the choice this
-  // guard's own header offers. The remedies available are both worse than the
-  // thirteenth file: a charts/command/ folder would take three of these and
-  // leave ten scattered flat, and a full pitching/hitting/game split would move
-  // twelve existing components and every import of them — a refactor with its
-  // own risks, landing inside a feature PR, while other agents hold files in
-  // this tree. Worth doing on its own; not worth doing here. If a fourteenth
-  // arrives, do the split instead of raising this again.
-  'src/components/charts': 13,
   // New entry: +1 for blockageCorrected.js — the diary's first `corrected`
   // entry that sits ABOVE the entry it corrects rather than replacing it
   // (the diary is append-only, see docs/agents/research-diary.md's second

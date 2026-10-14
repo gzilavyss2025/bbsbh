@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { readFileSync } from 'node:fs'
 import { familyBand, orderFamily } from '../src/api/person/family/family.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 
@@ -47,23 +46,4 @@ test('familyBand reads the shard once and returns the entries with the credit li
   } finally {
     globalThis.fetch = realFetch
   }
-})
-
-// The repo's unit suite runs under plain node, which cannot load .jsx, so the
-// component's three rules are pinned on its source; the browser check draws it.
-const src = readFileSync(new URL('../src/components/player/family/FamilyBand.jsx', import.meta.url), 'utf8')
-
-test('FamilyBand draws nothing for no entries, and has no SealBox', () => {
-  assert.match(src, /if \(!entries\?\.length\) return null/)
-  assert.doesNotMatch(src, /SealBox/)
-})
-
-test('every relative goes through PlayerLink, which draws a name with no link for a null id', () => {
-  assert.match(src, /<PlayerLink id=\{e\.personId\} name=\{e\.name\}/)
-  assert.match(src, /<Pill>\{e\.relation\}<\/Pill>/)
-  assert.match(src, /Family in baseball/)
-})
-
-test('the credit lines print as the prospect card prints its credits', () => {
-  assert.match(src, /className="prankhist__credit"/)
 })

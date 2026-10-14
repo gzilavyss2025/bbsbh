@@ -39,15 +39,15 @@
 //   '/admin/contenders'                 -> { name: 'admin-contenders' }  (Contender Diary, Clerk-admin gated)
 //   '/admin/contracts'                  -> { name: 'admin-contracts' }  (contract-identity review queue, Clerk-admin gated)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
-//   '/player/{name-id}'                 -> { name: 'player', id, asOf, sportId }  (?look=new: name 'player-next', #1884)
-//   '/player/{name-id}/{stats|analytics|history}'
-//                                       -> { name: 'player-{tab}', id, asOf, sportId }
-//                                          (the player hub's tabs — an unknown third
-//                                           segment falls back to the bare player page)
+//   '/player/{name-id}'                 -> { name: 'player', id, asOf, sportId }
+//   '/player/{name-id}/{stats|analytics|history}[/…]'
+//                                       -> + { tab }  (the old tab addresses: the page
+//                                          scrolls to the tab's section, #1898; an unknown
+//                                          segment is the bare player page)
 //   '/team/{name-id}'                   -> { name: 'team', id, asOf, sportId }
 //   '/umpire/{name-id}'                 -> { name: 'umpire', id }
 //   '/umpires'                          -> { name: 'umpire-rankings' }
-//   '/fouls' '/umpires' '/abs-challenges' '/umpire/{name-id}' '/player/{name-id}/analytics'
+//   '/fouls' '/umpires' '/abs-challenges' '/umpire/{name-id}'
 //     + '/{year|all}?vs={year}'         -> + { seasonYear, vs }  (a season view; seasons/route.js)
 //   '/scout', '/scout/{pitcher}/{hitter}' -> { name: 'scout', ... }  (Matchup Scout; scout/route.js)
 //   '/situational-records'              -> { name: 'situational-records', asOf, sportId, metric, half, month }
@@ -194,22 +194,10 @@ const TEAM_TAB_ROUTES = {
   minors: 'team-minors',
 }
 
-// The player hub's tabs, as `third URL segment -> route name` — the same table
-// shape, and for the same reasons, as TEAM_TAB_ROUTES above. Every one is a real
-// address (the URL changes, back/forward work, each tab is shareable), and each
-// loads only its own data (ADR-0034's precedent, applied to /player).
-// The Overview tab is the bare '/player/{id}', so it is deliberately absent.
-//
-// One difference from the team table, and it is the whole compatibility story:
-// an UNKNOWN third segment here resolves to the bare player page rather than
-// falling through. '/player/{id}' has been a live address for the app's whole
-// life, and a link with anything appended to it — a hand-edited URL, a tab
-// renamed later — must still land on the man's page.
-const PLAYER_TAB_ROUTES = {
-  stats: 'player-stats',
-  analytics: 'player-analytics',
-  history: 'player-history',
-}
+// The old player-hub tab addresses (#1898). The tabs are gone: each opens the one
+// player page, which scrolls to the tab's section, so every shared link still works.
+// Any other segment, or a fourth one (the old '/analytics/{year}'), is the bare page.
+const PLAYER_OLD_TABS = new Set(['stats', 'analytics', 'history'])
 
 // --- Addresses that carry a name -------------------------------------------
 //
@@ -331,7 +319,7 @@ export function parseRoute(url) {
       ? { name: 'home', date, sportId: sport, ...league }
       : { name: 'home', sportId: sport, ...league }
   }
-  const season = parseSeasonRoute(parts, q, { asOf, sportId, idFromSlug })
+  const season = parseSeasonRoute(parts, q, { idFromSlug })
   if (season) return season
   if (parts.length === 1 && parts[0] === 'logos') return { name: 'logos' }
   if (parts.length === 1 && parts[0] === 'about') return { name: 'about' }
@@ -541,7 +529,7 @@ export function parseRoute(url) {
   const scout = parseScoutRoute(parts, q, { asOf, idFromSlug })
   if (scout) return scout
   if (parts.length === 2 && parts[0] === 'player')
-    return { name: q.get('look') === 'new' ? 'player-next' : 'player', id: idFromSlug(parts[1]), asOf, sportId }
+    return { name: 'player', id: idFromSlug(parts[1]), asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')
     return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId }
   // A series id (e.g. '2025-division-112-158') already matches
@@ -601,22 +589,21 @@ export function parseRoute(url) {
     return { name: TEAM_TAB_ROUTES[parts[2]], id: idFromSlug(parts[1]), asOf, sportId }
   // An UNKNOWN third segment ('/team/158/media', a hand-edited URL, a tab
   // renamed later) lands on the club's own page — the same contract
-  // PLAYER_TAB_ROUTES keeps for '/player/{id}/…'. Without it the generic game
+  // PLAYER_OLD_TABS keeps for '/player/{id}/…'. Without it the generic game
   // branch below read the URL as date='team', matchup='158', and GameRoute
   // asked statsapi for the schedule of date=null at every level (#1164).
   if (parts.length === 3 && parts[0] === 'team')
     return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId }
-  // The player hub's tabs. Same 3-segment shape as the team tabs above, so it
-  // needs the same placement ahead of the generic game branch below, which would
-  // otherwise read '/player/661388/stats' as date='player'. An unrecognised third
-  // segment answers with the bare player route rather than falling through —
-  // see PLAYER_TAB_ROUTES for why that fallback is part of the contract.
-  if (parts.length === 3 && parts[0] === 'player')
+  // The old player tab addresses. Same 3-segment shape as the team tabs above, so
+  // this sits ahead of the generic game branch below, which would otherwise read
+  // '/player/661388/stats' as date='player'.
+  if ((parts.length === 3 || parts.length === 4) && parts[0] === 'player')
     return {
-      name: PLAYER_TAB_ROUTES[parts[2]] ?? 'player',
+      name: 'player',
       id: idFromSlug(parts[1]),
       asOf,
       sportId,
+      ...(PLAYER_OLD_TABS.has(parts[2]) && { tab: parts[2] }),
     }
   if (parts.length === 3) {
     const [date, matchup, section] = parts
@@ -800,18 +787,6 @@ export function linkQuery({ d, s } = {}) {
 // hasn't loaded the name yet builds a working link without it.
 export function playerPath(id, opts = {}) {
   return `/player/${entitySegment(id, opts.name)}${linkQuery(opts)}`
-}
-// Any player-hub tab, by its URL segment ('stats' / 'analytics' / 'history'),
-// plus 'overview' for the bare '/player/{id}' the tabs hang off. The exact
-// counterpart of teamTabPath below, and it goes through linkQuery for the same
-// reason: a player page opened at a dated URL must keep `?d=`/`?s=` across a tab
-// switch, or one visit would answer "entering July 5" on one tab and "today" on
-// the next.
-// The Analytics tab also takes `seasonYear` and `vs` (#1202).
-export function playerTabPath(id, tab, opts = {}) {
-  if (tab === 'overview') return playerPath(id, opts)
-  const base = `/player/${entitySegment(id, opts.name)}/${tab}`
-  return tab === 'analytics' ? seasonPath(base, opts, linkQuery(opts)) : `${base}${linkQuery(opts)}`
 }
 export function teamPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}${linkQuery(opts)}`

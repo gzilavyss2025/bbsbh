@@ -74,12 +74,6 @@ const ALLOWLIST = {
   // The cover, its copy, the tear.
   '12-sealbox.css': ['.sealbox.cover', '.sealtear__face', '.cover__main'],
 
-  // The pencilled-in option year on a contract. Finding 9's must-survive list.
-  // `.contractcard__seg--option` sets --seg-dot, a CUSTOM PROPERTY rather than
-  // a paint property — an indirection a sweep that only reads `background`,
-  // `color` and `border` would have painted straight over.
-  '26b-player-contract.css': ['.contractcard__seg--option', '.contractcard__openzone'],
-
   // The Last 10 Games home-game ticket, and the same home/away convention on
   // the season strip. Finding 9's must-survive list — the hatched win-loss
   // stamps are printed ON this kraft. contrastPairings.js pins the pair.

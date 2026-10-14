@@ -69,6 +69,8 @@ const ALLOWLIST = {
   'src/lib/milbColors.js#MILB_COLORS': 'Re-exported on purpose ("so every existing MiLB caller ... still has one import for \'MiLB colors\'") even though every current caller happens to import it from brandColors.js instead. Kept open as the intended single entry point.',
   'src/lib/milbColors.js#MILB_RESEARCHED_PAIRS': 'Same re-export as MILB_COLORS above, same file, same rationale.',
   'src/lib/wpa/wpaBandColors.js#WPA_PLOT_SIZE': 'Declared "exported so Team Identity Lab\'s WPA preview can render its tile pattern at TRUE size" — the lab does not currently read it (comment may be ahead of the wiring), flagged for a maintainer to confirm rather than deleted blind.',
+  'src/api/gloveTarget.js#fetchGloveTargetFor': 'The player swap (#1898) removed its last screen (the old Analytics tab; the new page draws TargetCommand). The reader stays while gen-command-zone.mjs still writes /data/glove-target; retiring the generator and this reader together is a call for Gary, not a lint fix.',
+  'src/api/levelTenure.js#fetchLevelTenure': 'Same swap, same reason: the old Prospect card was its one caller. gen-level-tenure-benchmark.mjs and the research diary still use the benchmark file, so the reader waits on the same call.',
 }
 
 const allFiles = CORPUS_ROOTS.flatMap((root) => walk(join(ROOT, root), { skip: IGNORE_DIRS }))

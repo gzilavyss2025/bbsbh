@@ -784,10 +784,7 @@
         "api/playbyplay/notificationCards.js"
       ]
     },
-    "player/analytics.js": {
-      "class": "spoiler-free",
-      "why": "The player hub's Analytics tab loader — Statcast percentiles, advanced rates, the pitch/batted-ball mix and the similarity neighbours, all season aggregates over completed games. Same open-surface footing as every other player-page loader (ADR-0034)."
-    },
+
     "player/context.js": {
       "class": "spoiler-free",
       "why": "The player hub's shared fetch vocabulary — the person, his transaction feed, the current-season date-cut window and the year-by-year tables. Season and career facts on a surface deliberately outside the scoring flow. Its one date rule (every dated fetch is cut off the day BEFORE a `?d=` link's game) is the player page's own as-of contract, not a seal."
@@ -820,10 +817,7 @@
       "class": "spoiler-free",
       "why": "The player page's Prospect rankings card: the years a man sat on a top-prospect list, from a frozen 2005-2024 file. A scout's ranking of a player, not a fact about a game, so it opens live (ADR-0034). It names no source and no year itself; labels, credits and coverage all come from the file."
     },
-    "player/stats.js": {
-      "class": "cutoff-gated",
-      "why": "The player hub's Stats tab loader — the game log, the splits and the career register. A game-log row carries this player's own line, a link to that game's (sealed) box score, and the game's final score (#1914): boxlines/fetch.js's fetchFinalScores asks the schedule only for the gamePks of rows dated before the EARLIER of the page's cutoff and the baseball today (US Pacific), so a same-day game 1, any game played today, and anything later is never asked about. Today is held even with no `?d=`, because a link out of a game stamps none (ADR-0034); the register is a career aggregate. Its one score-adjacent element is SplitsVsTeam's last-meeting line, gated against the page's own asOf in the component."
-    },
+
     "ovr/career.js": {
       "class": "spoiler-free",
       "why": "Pure OVR career blend: per-season Savant percentiles in, one percentile per metric out, with a recency weight and an age shift for sprint speed and fastball velocity (docs/ovr-rating.md). Season quality-of-contact figures on an open surface (ADR-0034), never a game's result. It fetches nothing and reads no game."

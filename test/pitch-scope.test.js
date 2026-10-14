@@ -5,8 +5,7 @@ import assert from 'node:assert/strict'
 import { arsenalScoped, pitchArsenalFor, postPitchesOf, heatView } from '../src/api/pitchArsenal.js'
 import { combineCommandEntries } from '../src/lib/seasons/combine.js'
 import { commandView } from '../src/api/commandMap.js'
-import { parseRoute, playerTabPath } from '../src/lib/route.js'
-import { vsPitchScope } from '../src/lib/seasons/route.js'
+import { absChallengesPath, parseRoute } from '../src/lib/route.js'
 
 const cells = (n) => Array.from({ length: 25 }, (_, i) => (i === 12 ? n : 0))
 const data = () => ({
@@ -85,24 +84,12 @@ test('command: two buckets add cell by cell, a missing field adds zeros', () => 
 })
 
 test('the scope rides the address: absent is Regular, a bad value is dropped', () => {
-  const at = (qs) => parseRoute(`/player/tarik-skubal-669373/analytics${qs}`)
+  // /abs-challenges keeps the pitch scope; the player tab that also took it is gone (#1898).
+  const at = (qs) => parseRoute(`/abs-challenges${qs}`)
   assert.equal('scope' in at(''), false)
   assert.equal(at('?scope=post').scope, 'post')
   assert.equal(at('?scope=all').scope, 'all')
   assert.equal('scope' in at('?scope=bogus'), false)
-  assert.match(playerTabPath(669373, 'analytics', { scope: 'post' }), /\?scope=post$/)
-  assert.doesNotMatch(playerTabPath(669373, 'analytics', { scope: 'reg' }), /scope/)
-})
-
-test('the compare card loads under the scope the main card landed on', () => {
-  // Current season: the control already collapsed a man with no October pitches to Regular.
-  assert.equal(vsPitchScope({ picked: null, shelfScope: 'reg' }), 'reg')
-  assert.equal(vsPitchScope({ picked: null, shelfScope: 'post' }), 'post')
-  // A picked past season: wait for the shelf, then follow what it served. A saved
-  // 'post' for a season with no postseason was served as Regular, and the compare
-  // card must not read a postseason the main card is not showing.
-  assert.equal(vsPitchScope({ picked: 2024, shelfScope: 'post', shelfLoading: true }), null)
-  assert.equal(vsPitchScope({ picked: 2024, shelfScope: 'post', shelfLoading: false, shelfServed: 'reg' }), 'reg')
-  assert.equal(vsPitchScope({ picked: 2024, shelfScope: 'post', shelfLoading: false, shelfServed: 'post' }), 'post')
-  assert.equal(vsPitchScope({ picked: 2024, shelfScope: 'all', shelfLoading: false, shelfServed: undefined }), 'reg')
+  assert.match(absChallengesPath({ scope: 'post' }), /\?scope=post$/)
+  assert.doesNotMatch(absChallengesPath({ scope: 'reg' }), /scope/)
 })

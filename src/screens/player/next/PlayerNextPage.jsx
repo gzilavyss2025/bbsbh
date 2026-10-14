@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { loadPlayerCore } from '../../../api/player/core.js'
 import { loadPlayerOverview } from '../../../api/player/overview.js'
 import { useAsync } from '../../../hooks/useAsync.js'
@@ -19,15 +19,42 @@ import { StatusBanners } from './top/StatusBanners.jsx'
 import { jumpSections, rolesOf, seedEmpty, shownSections, slotInstances } from './sections.js'
 import '../../../styles/player-next/page.css'
 
-// The new player page (#1884, docs/player-redesign.md), at /player/{id}?look=new
-// beside the live page: hero, fact strip, stat tiles, jump bar, and one empty
-// slot per section for the module issues to fill. An open surface (ADR-0034):
-// nothing here is sealed or gated. Both loaders mount together, as PlayerPage
-// does, because they share playerContext only while in flight.
-function PlayerNextBody({ id, asOf, sportId }) {
+// The player page (#1884, docs/player-redesign.md), at /player/{id} since the swap
+// (#1898): hero, fact strip, stat tiles, jump bar, and one slot per module. An open
+// surface (ADR-0034): nothing here is sealed or gated. Both loaders mount together,
+// because they share playerContext only while in flight.
+// `tab` is an old tab address ('/player/{id}/stats'): the page scrolls to that tab's
+// section once, when it has loaded, so an old link lands where it pointed.
+const TAB_SECTION = { stats: 'season', history: 'history' }
+const tabSection = (tab, roles) =>
+  tab === 'analytics' ? (roles.includes('hitting') ? 'plate-approach' : 'pitches') : TAB_SECTION[tab]
+
+function PlayerNextBody({ id, asOf, sportId, tab }) {
   const core = useAsync(() => loadPlayerCore(id, asOf), [id, asOf])
   const overview = useAsync(() => loadPlayerOverview(id, asOf), [id, asOf])
   useDocumentTitle(core.data?.bio.fullName || null)
+  useEffect(() => {
+    if (!tab || !core.data || !overview.data) return
+    const el = document.getElementById(tabSection(tab, rolesOf(core.data.bio, overview.data.blocks)))
+    if (!el) return
+    el.scrollIntoView()
+    // Slots above it load as they come near and grow, which pushes the section down.
+    // Hold it at the top until the reader moves.
+    // ponytail: a fixed 4 s hold; a slot that loads later than that can still push it.
+    const hold = new ResizeObserver(() => el.scrollIntoView())
+    hold.observe(el.parentElement)
+    const MOVES = ['wheel', 'touchstart', 'keydown', 'pointerdown']
+    const stop = () => {
+      hold.disconnect()
+      for (const e of MOVES) window.removeEventListener(e, stop)
+    }
+    for (const e of MOVES) window.addEventListener(e, stop, { passive: true })
+    const timer = setTimeout(stop, 4000)
+    return () => {
+      clearTimeout(timer)
+      stop()
+    }
+  }, [tab, core.data, overview.data])
   // Instance key -> true once that slot's module has said it has no data.
   const [empty, setEmpty] = useState({})
   const back = () => window.history.back()

@@ -1,21 +1,10 @@
-// The History tab's own loader — `/player/{id}/history`.
-//
-// What it feeds: the Awards ledger, Innings by position, the Firsts card, Path
-// to the Majors + Team history (for a player who HAS debuted — a pre-debut
-// player's pair leads his Overview instead), and the transaction timeline.
-//
-// Fetch nothing another tab owns: no tiles, no game log, no register, no
-// Statcast/advanced/arsenal bundle, no contract. See src/api/player/context.js
-// for the three rules.
+// The player page's history readers: awards, innings by position, the Firsts card
+// and the transaction timeline, each called by the module that draws it.
 
 import {
   fetchFielding,
   fetchMilbFielding,
-  fetchMilbFieldingSeason,
-  fetchMilbStarterRelieverSeason,
   fetchPersonStats,
-  fetchPlayerAwards,
-  fetchStarterReliever,
   fetchStarterRelieverStints,
   fetchTradeCohort,
   findFirstPitcherFaced,
@@ -23,26 +12,21 @@ import {
   findFirstStrikeoutBatter,
   MILESTONE_EVENTS,
 } from '../person-fetch.js'
-import { buildCareerTimeline, resolveCareerOrgs } from '../careerTimeline.js'
+import { resolveCareerOrgs } from '../careerTimeline.js'
 import { fetchTeam } from '../team.js'
-import { fetchRookieRecord } from '../rookies.js'
 import {
   awardsView,
-  dropRehabStints,
   fieldingView,
   firstMilestoneSeasons,
   firstsFromGameLog,
   FIRSTS_DEFS,
-  levelProgressionView,
   PITCHER_FIRSTS_DEFS,
-  pitchingStints,
   starterRelieverCareer,
-  starterRelieverView,
   tradeKey,
   transactionTimelineView,
 } from '../person.js'
 import { teamFullName } from '../../lib/teams.js'
-import { boxscoreLinks, playerContext, yearByYearFor } from './context.js'
+import { boxscoreLinks, playerContext } from './context.js'
 
 // The opponent of one first (f: the first, g: its boxscore link, or undefined). He
 // is the away club when he was at home. `oppId` is the logo's key; the rest label it.
@@ -263,131 +247,4 @@ export async function loadFirsts(id, asOf, group) {
     ctx.debutYear ? fetchPersonStats(id, { type: 'gameLog', group, season: ctx.debutYear, sportId: 1 }) : [],
   ])
   return { bio: ctx.bio, firsts: await firstsFor(ctx, group, ybySplits, debutSplits, { people: false }) }
-}
-
-export async function loadPlayerHistory(id, asOf) {
-  const ctx = await playerContext(id, asOf)
-  if (!ctx) return null
-  const { bio, txns, groups, primaryGroup, season, endDate, debutYear, liveSportId, currentActivitySportId } = ctx
-
-  const [awards, rookieInfo, yby, debutSplits] = await Promise.all([
-    // The ledger ranks EVERY award the feed carries, and a prospect's case —
-    // league MVP, Futures Game, the Baseball America teams — is the whole
-    // section for him, which is why this is not conditional on bio.debut.
-    fetchPlayerAwards(id),
-    fetchRookieRecord(id),
-    Promise.all(groups.map(async (group) => ({ group, ...(await yearByYearFor(ctx, group)) }))),
-    // The MLB debut is always sportId 1; its game log anchors both the debut
-    // "first" and findFirstStart's earliest rows.
-    bio.debut && debutYear
-      ? fetchPersonStats(id, {
-          type: 'gameLog', group: bio.isPitcher ? 'pitching' : 'hitting',
-          season: debutYear, sportId: 1,
-        })
-      : Promise.resolve([]),
-  ])
-  const primaryResult = yby.find((r) => r.group === primaryGroup) ?? yby[0]
-
-  const awardLedger = await awardLedgerFor(awards, endDate)
-  const transactions = await transactionRowsFor(bio, txns, rookieInfo, endDate)
-
-  // -------------------------------------------------------------------------
-  // Path to the Majors + Team history (post-debut only — see overview.js)
-  // -------------------------------------------------------------------------
-  let progression = null
-  let timeline = null
-  if (bio.debut && primaryResult) {
-    // Strip rehab-assignment noise (see dropRehabStints) so an established big
-    // leaguer's stray rehab innings don't relight a MiLB level.
-    progression = levelProgressionView(
-      dropRehabStints(primaryResult.milbYbySplits, debutYear),
-      primaryResult.group,
-      liveSportId,
-      primaryResult.mlbYbySplits,
-    )
-    // Fed the player's FULL year-by-year — every MiLB level plus MLB, NOT the
-    // rehab-trimmed splits — because a genuine post-debut option-down season is
-    // real team history worth showing; careerTimelineView does its own finer
-    // rehab filter (the same test the register uses, so the two agree).
-    timeline = await buildCareerTimeline(
-      [...primaryResult.mlbYbySplits, ...primaryResult.milbYbySplits],
-      primaryGroup,
-      debutYear,
-    )
-  }
-
-  // -------------------------------------------------------------------------
-  // Innings by position
-  // -------------------------------------------------------------------------
-  // The fielding diamond (position players) or the starter/reliever IP pair
-  // (pitchers + two-way). Season scope is eager; the MLB/MiLB career scopes
-  // lazy-load on toggle (see loadPositionScope). A player with no current-season
-  // data (a retired/FA vet like Rich Hill) defaults to his first career scope,
-  // eagerly loaded so the card isn't empty.
-  const showFielding = !bio.isPitcher && !bio.twoWay
-  const showPitching = bio.isPitcher || bio.twoWay
-  let positionInnings = null
-  if (showFielding || showPitching) {
-    const pitchResult = yby.find((r) => r.group === 'pitching')
-    const pitchStints = showPitching
-      ? pitchingStints([...(pitchResult?.mlbYbySplits ?? []), ...(pitchResult?.milbYbySplits ?? [])])
-      : []
-    const hasMilb = showFielding
-      ? (primaryResult?.milbYbySplits?.length ?? 0) > 0
-      : pitchStints.some((s) => s.sportId !== 1)
-    const scopeArgs = { showFielding, showPitching, pitchStints }
-    // Season scope: an MLB player is a single sportId-1 call (his season is his
-    // major-league season — earlier MiLB rehab lives in the career scopes). A
-    // player currently in the minors fans out every MiLB level, so a mid-season
-    // promotion (AA -> AAA) isn't undercounted.
-    const inMajors = currentActivitySportId === 1
-    const [fieldSeasonSplits, srSeasonSplits] = await Promise.all([
-      showFielding
-        ? inMajors ? fetchFielding(id, { season, sportId: 1 }) : fetchMilbFieldingSeason(id, season)
-        : Promise.resolve([]),
-      showPitching
-        ? inMajors ? fetchStarterReliever(id, { season, sportId: 1 }) : fetchMilbStarterRelieverSeason(id, season)
-        : Promise.resolve([]),
-    ])
-    const seasonScope = {
-      fielding: showFielding ? fieldingView(fieldSeasonSplits) : null,
-      pitching: showPitching ? starterRelieverView(srSeasonSplits) : null,
-    }
-    const seasonHasData = Boolean(seasonScope.fielding || seasonScope.pitching)
-    const options = []
-    if (seasonHasData) options.push({ key: 'season', label: 'Season' })
-    if (bio.debut) options.push({ key: 'mlb', label: 'MLB career' })
-    if (hasMilb) options.push({ key: 'milb', label: 'MiLB career' })
-    const defaultScope = seasonHasData ? 'season' : options[0]?.key ?? null
-    const initial = defaultScope === 'season'
-      ? seasonScope
-      : defaultScope
-        ? await loadPositionScope(id, defaultScope, scopeArgs)
-        : null
-    if (options.length && initial && (initial.fielding || initial.pitching)) {
-      positionInnings = { options, defaultScope, initial, ...scopeArgs }
-    }
-  }
-
-  // Firsts: the dated milestones of his primary role (see firstsFor).
-  const firstsGroup = bio.isPitcher ? 'pitching' : 'hitting'
-  const firsts = await firstsFor(
-    ctx,
-    firstsGroup,
-    yby.find((r) => r.group === firstsGroup)?.mlbYbySplits ?? [],
-    debutSplits,
-  )
-
-  return {
-    bio,
-    season,
-    asOf,
-    sportId: currentActivitySportId,
-    awardLedger,
-    positionInnings,
-    firsts,
-    progression,
-    timeline,
-    transactions,
-  }
 }

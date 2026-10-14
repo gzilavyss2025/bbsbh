@@ -1,35 +1,5 @@
-import { getJson } from './statsapi.js'
-import { fetchPersonStats } from './person-fetch.js'
 import { aggregateSplits } from './person/stats.js'
-import { MLB_LOG_GAME_TYPES } from './boxlines/rows.js'
 import { teamAbbr } from '../lib/teams.js'
-
-// The PLAYER page's "Recent form" card for hitters: how he's hit over his
-// last 7 / 15 / 30 games against his own full-season line — the hitter
-// analog of workload.js's pitcher recent-appearances precompute, but fetched
-// live per-player rather than read from a nightly file. The three windows are
-// cut from one game-log fetch (regular season and October, like the Game log
-// card), and the season line is a second call that fails on its own to null.
-// A rookie with under 30 games this season just has a null last30, which nulls
-// the whole card — see hitterFormView.
-//
-// Name note: src/api/recentForm.js is an unrelated, already-shipped TEAM page
-// module (the "Last 10 Games" roster projection consumed by
-// screens/team/data/loadRoster.js) — this file is the PLAYER page's per-hitter
-// stat-line card and intentionally carries a different name (hitterForm, not
-// recentForm) so the two "recent form" features never collide on one path.
-export async function fetchHitterForm(personId, season) {
-  if (!personId || !season) return null
-  // The windows come from the game log, the same list the Game log card draws:
-  // `lastXGames` with a mixed game-type list answers one row per type plus a
-  // total that is no last-N window (probed 2026-10-06), so October could not
-  // join a window any other way. The season line stays the regular season's.
-  const [log, seasonLine] = await Promise.all([
-    fetchPersonStats(personId, { type: 'gameLog', group: 'hitting', season, gameType: MLB_LOG_GAME_TYPES }),
-    getJson(`/api/v1/people/${personId}/stats?stats=season&group=hitting&season=${season}`).then(statFor).catch(() => null),
-  ])
-  return { ...hitterFormWindows(log), season: seasonLine }
-}
 
 // The last 7 / 15 / 30 games of a game log, newest last, as one stat line each.
 // A game's order is its date, then its game number in a doubleheader. Two games
@@ -73,10 +43,6 @@ export function rollingSeries(log, w) {
     return { startDate: games[i].date, endDate: points[i].date, ops: points[i].ops }
   }
   return { points, best: stretch((a, b) => a > b), worst: stretch((a, b) => a < b) }
-}
-
-function statFor(data) {
-  return data?.stats?.[0]?.splits?.[0]?.stat ?? null
 }
 
 // Signed OPS-points delta, e.g. "+.102" / "−.054" — same U+2212 minus-sign

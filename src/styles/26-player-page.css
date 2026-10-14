@@ -41,71 +41,14 @@
   margin-left: calc(-1 * var(--space-2h));
 }
 
-.player .mono,
 .team-hub .mono {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
-/* Every hint/caveat on the player page (loading, error, not-found, the
-   season-cutoff footnote) reads scorebook all-caps like the rest of the page. */
-.player .hint {
-  text-transform: uppercase;
-}
-
 /* Section heads on these pages are SectionHead now (#1113): the sub-heads
    draw look="rule", the pencil leader that used to live here, and the hub's
    draw look="label". system/section-head.css. */
-
-/* ---- player hero ---- */
-.player__hero {
-  display: grid;
-  grid-template-columns: 104px 1fr auto;
-  gap: var(--space-4);
-  align-items: center;
-  margin-top: 4px;
-  padding-bottom: var(--space-3);
-  border-bottom: var(--bw-rule) solid var(--border-rule);
-}
-.player__herologo {
-  align-self: center;
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1h);
-}
-/* The league mark in the crest slot, for a player on no club. Sized to match
-   the club logo it replaces (56px, 96px on the wide breakpoint below) so the
-   hero's third column keeps its width and the name doesn't shift between a
-   rostered player's page and a free agent's. Dimmed a touch — it is standing
-   in for an identity, not asserting one. */
-.player__herologo--league {
-  cursor: default;
-}
-.player__leaguemark {
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
-  opacity: 0.7;
-}
-.player__ident {
-  /* Grid items default to min-width:auto, which lets long names push this
-     column (and the logo after it) past the viewport edge on mobile. */
-  min-width: 0;
-  /* Size container so .player__name-last--long can scale to the column's
-     ACTUAL width (cqw) — the headshot and hero logo are fixed-px, so this
-     column shrinks faster than the viewport and a vw-based size can't track
-     it. Safe here: the column is the grid's 1fr track, so its width never
-     depends on its own contents. */
-  container-type: inline-size;
-}
-/* The affiliate mark — the parent MLB org's wordmark, drawn small below a
-   MiLB player's own team logo, like a jersey's affiliation patch. Only
-   rendered when `bio.team.parentOrgId` is present (see PlayerPage.jsx). */
-.player__herologo-affiliate {
-  opacity: 0.75;
-}
 .shot {
   display: block;
   width: var(--shot-xl-w);
@@ -175,145 +118,6 @@
   transform: scale(1.6);
   filter: none;
 }
-.player__name {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  color: var(--text-heading);
-  letter-spacing: var(--ls-num);
-  min-width: 0;
-}
-.player__name-first {
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-h3);
-  line-height: var(--lh-compact);
-  color: var(--text-caption);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.player__name-last {
-  font-weight: var(--w-bold);
-  font-size: clamp(20px, 7vw, 32px);
-  line-height: var(--lh-score);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-/* A long surname-plus-number ("Misiorowski #32", "Contreras #24") steps the
-   display size down — the jersey number with it — rather than ellipsizing the
-   player's own name on his own page (PlayerPage adds the modifier when the
-   combined length reaches 11 units). Container-relative (cqw, see
-   .player__ident) so the size tracks the hero's middle column, which shrinks
-   faster than the viewport; 11.4cqw fits an 11-char surname plus number down
-   to ~360px phones (verified 320–430px; at 320 the ellipsis safety net still
-   applies). */
-.player__name-last--long {
-  font-size: clamp(14px, 11.4cqw, 25px);
-}
-.player__name-last--long .player__num {
-  font-size: var(--fs-ui);
-}
-.player__num {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--clay);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-title-md);
-  margin-left: 5px;
-}
-/* "Small attribute line under a name": the .phcard__meta / .t-label recipe.
-   Position and hand inherit it: "SP · THROWS L" is one line. */
-.player__meta {
-  margin: 6px 0 0;
-  font-family: var(--font-display);
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-compact);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  line-height: var(--lh-prose);
-  text-transform: uppercase;
-}
-.player__meta .sep {
-  color: var(--graphite-soft);
-}
-/* "Bats L / Throws R" as one unbreakable chunk — plain text let a two-way
-   player's longer meta line (position · hand · team) wrap mid-phrase,
-   splitting "Throws" from "R" and stranding the separator before the team. */
-.player__hand {
-  white-space: nowrap;
-}
-/* The hero's second meta line: club, roster status, prospect pills. Its own
-   row rather than the tail of the attribute line above it (see PlayerPage's
-   comment) — a flex row with a real gap, so the pills sit beside the club
-   name without mid-dots and wrap cleanly when both ranks are present. */
-.player__clubline {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-1) var(--space-2);
-  margin: 3px 0 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  letter-spacing: var(--ls-label);
-  line-height: var(--lh-prose);
-  text-transform: uppercase;
-}
-/* A <button> (.plink) inherits no letter-spacing, so the link names it. */
-.player__team {
-  letter-spacing: var(--ls-label);
-  color: var(--navy);
-  font-weight: var(--w-semibold);
-}
-/* "Free Agent" / "Retired", standing in the meta line where a club name would
-   be for a player who is on nobody's roster. Same weight as .player__team so
-   the line's rhythm doesn't change, but graphite rather than navy ink: it is a
-   state, not a place, and nothing behind it opens. Unbreakable for the same
-   reason .player__hand is: a hitter's meta line already carries both bat and
-   throw hands, and the wrap landed between "Free" and "Agent". */
-.player__status {
-  color: var(--text-caption);
-  font-weight: var(--w-semibold);
-  white-space: nowrap;
-}
-.player .factgrid {
-  margin-top: var(--space-4);
-}
-
-
-/* ---- 5-tile season row (reuses .stat) ----
-   Same edge-to-edge hairline-ruled grid as .factgrid/.player__splits, inside
-   a Card (sheet, flush body; #1113, slice C2) that draws the frame. The grid
-   keeps the --border-rule ground its 1px gaps show as rules. Also covers
-   SplitsVsTeam's career line, which reuses this class inside its own
-   .vsteam__grid Card rather than styling its own grid. */
-.player__statgrid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1px;
-  background: var(--border-rule);
-}
-.player__statgrid .stat {
-  background: var(--surface-card);
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  padding: var(--space-2h) 3px;
-}
-.player__statgrid .stat__v {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-title-sm);
-}
-
-/* The vs-LHP/RHP split ledger sitting under the stat grid above (see
-   PlayerPage.jsx) — neither card carries its own margin, so the wrapper keeps
-   them off each other when the heading's own margin is the smaller of the two. */
-.player__seasonsplits {
-  margin-top: 10px;
-}
 
 /* The Regular / Postseason switch above the split tables. */
 .player__splitscope {
@@ -330,148 +134,6 @@
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
   min-width: 52px;
-}
-
-/* A situational family's label row ("Runners", "In the count"), spanning the
-   whole table. The six situational rows are two families that OVERLAP rather
-   than one list of alternatives — RISP and Two strikes describe the same plate
-   appearance all the time — so they are ruled apart instead of run together.
-   Recessed and captioned rather than inked: it is a divider carrying a name,
-   not a data row, and must never be mistaken for one. */
-/* The reference line a split table is read against — the FIRST body row, not a
-   footer. See referenceRow in SplitsSection.jsx: a tinted, rule-separated row
-   under the data claims to be the sum of it, and the situational rows overlap
-   so they do not sum. Inked and ruled off BELOW so the rows that follow read as
-   hanging from it. */
-.ledger tr.ledger__ref td {
-  border-bottom: var(--bw-rule) solid var(--border-rule);
-  background: var(--bg-page);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-}
-.ledger tr.ledger__ref .yr {
-  font-family: var(--font-display);
-  letter-spacing: var(--ls-caps);
-  font-size: var(--fs-label);
-  color: var(--text-caption);
-}
-/* A row CONTAINED by the one above it — RISP inside Runners on. Indenting is
-   how a ledger has always said "part of the line above", and it replaced a
-   two-line all-caps footnote that said so in prose. */
-.ledger tr.ledger__nested .yr {
-  padding-left: 22px;
-  color: var(--text-caption);
-}
-
-.ledger tr.ledger__family td {
-  background: var(--surface-inset);
-  font-family: var(--font-display);
-  letter-spacing: var(--ls-label);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
-  text-align: left;
-  padding-top: var(--space-1);
-  padding-bottom: var(--space-1);
-  border-top: var(--bw-hair) solid var(--border-rule);
-}
-
-.player__blocktitle {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  font-size: var(--fs-num-md);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-  margin: 22px 0 0;
-  padding-top: var(--space-4);
-  border-top: var(--bw-rule) solid var(--border-rule);
-}
-
-.player__career {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-  font-size: var(--fs-ui);
-  color: var(--text-body);
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--inset-cell);
-  padding: var(--space-2h) var(--space-3);
-  margin: 0;
-  line-height: var(--lh-body);
-}
-.player__caveat {
-  margin-top: var(--space-5);
-}
-
-/* ---- splits ----
-   Same edge-to-edge grid treatment as .factgrid (the bio card above it):
-   one hairline-ruled grid inside a Card (#1113, slice C2) rather than a gap
-   of separately bordered/shadowed cards. */
-.player__splits {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--border-rule);
-}
-.split {
-  background: var(--surface-card);
-  padding: var(--space-2h) var(--space-3);
-  margin: 0;
-}
-/* An odd item count (e.g. a pitcher's 5-item Firsts) leaves the last card
-   alone in column 1 with nothing in column 2 — stretch it across both so the
-   container's own hairline background never shows through as a bare block. */
-.player__splits > .split:nth-child(2n + 1):last-child {
-  grid-column: 1 / -1;
-}
-.split__k {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  font-size: var(--fs-label);
-  color: var(--text-caption);
-}
-/* Phone (base): stack the date over its description so the date gets the card's
-   full width on line one and the opponent/pitcher/hitter reads on line two —
-   the extra room lets the team firsts spell out the full club name. The wider
-   layout restores the single-line date-and-sub row (see the min-width rule). */
-.split__row {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  margin-top: 3px;
-}
-.split__v {
-  font-size: var(--fs-ui);
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-num);
-}
-.split__note {
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
-  font-weight: var(--w-regular);
-}
-@media (min-width: 740px) {
-  .split__row {
-    flex-direction: row;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-2);
-  }
-}
-
-/* ---- splits vs team: opponent picker + career line + last meeting ----
-   A finger-scrollable strip of every MLB club's logo (unselected clubs dulled to
-   grayscale, the selected one in full color), the career stat tiles below it,
-   and the last-meeting stat line under those. */
-.vsteam {
-  margin-top: var(--space-2);
 }
 /* The opponent picker's "tray" — an inset panel (recessed paper + hairline
    border + inner shadow) that lifts the logo strip off the page so it reads as a
@@ -532,9 +194,6 @@
   filter: grayscale(1);
   opacity: 0.4;
   transition: filter var(--dur-fast) ease, opacity var(--dur-fast) ease;
-}
-.vsteam__team.is-empty .teamlogo {
-  opacity: 0.24;
 }
 .vsteam__team.is-active {
   border-color: var(--accent-primary);
@@ -634,141 +293,8 @@
     display: none;
   }
 }
-.vsteam__grid {
-  margin-top: 2px;
-}
-.vsteam__grid .stat {
-  padding: var(--space-2h) 2px;
-}
-.vsteam__none {
-  margin: 8px 0 0;
-}
-/* The conditional last-meeting card — a caption naming what it is ("Last game
-   vs STL"), then the date + opponent, a divider, and the broadcast-style stat
-   line, the same mono treatment as the game log. A ledger Card (#1113, slice
-   C2); this rule keeps its margin and its own inset. */
-.vsteam__last {
-  margin: 10px 0 0;
-  padding: var(--space-2) var(--space-3);
-}
-.vsteam__last-label {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  color: var(--text-caption);
-  margin-bottom: 5px;
-}
-.vsteam__last-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2);
-  margin: 0;
-}
-.vsteam__last-meta {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  white-space: nowrap;
-}
-.vsteam__last-sep {
-  color: var(--border-rule);
-}
-.vsteam__last-line {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-small);
-  color: var(--text-body);
-}
-
-/* ---- game log: one broadcast-style stat line per game ----
-   The date + opponent ride a fixed left column; the stat line ("2-4, 2B, HR,
-   2 RBI, K") fills the rest in mono, reading like a TV lower-third. The log
-   is a Card (sheet, flush body; #1113, slice C2) holding the list. */
-.gamelog {
-  margin: 8px 0 0;
-}
-.gamelog__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.gamelog__row {
-  display: grid;
-  /* max-content, not a fixed px: sized to the widest date+opponent across
-     every row in THIS log, so a long nickname ("Diamondbacks") never wraps
-     just because some fixed guess undershot it — the stat-line column has
-     room to give since most lines are far short of the card's full width. */
-  grid-template-columns: max-content minmax(0, 1fr);
-  align-items: baseline;
-  column-gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
-.gamelog__row:first-child {
-  border-top: none;
-}
-.gamelog__meta {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-1h);
-  min-width: 0;
-}
-.gamelog__date {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-}
-.gamelog__opp {
-  font-family: var(--font-body);
-  font-size: var(--fs-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-muted);
-  /* .gamelog__row's max-content meta column already sizes to fit the
-     widest date+opponent in the log, so no nickname needs to wrap in
-     practice — this is just the flex-item safety net: a plain flex child
-     defaults to min-width:auto, which would refuse to shrink at all on a
-     viewport too narrow even for that (rather than wrapping gracefully). */
-  min-width: 0;
-}
-/* Level pill on a combined MLB + rehab game log (see gameLogView's tagLevel) —
-   tells apart a rehabbing big leaguer's MLB rows from his MiLB rehab rows. */
-.gamelog__level {
-  margin-left: 5px;
-  padding: 1px var(--space-1);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-xs);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  color: var(--text-caption);
-  vertical-align: middle;
-}
-.gamelog__line {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
-  color: var(--text-body);
-  text-align: right;
-}
 
 /* ---- data ledgers: game log & year-by-year (the card back) ---- */
-/* Row copy ("vs"/"@" before the opponent) is written lowercase in JS; force it
-   uppercase here rather than littering the markup with literal caps. */
-.player .ledger td {
-  text-transform: uppercase;
-}
 /* Row dividers as ONE full-width line per row (a background gradient owned by
    the row) rather than a per-cell `border-top`. These are auto-layout tables,
    and a row that carries a logo cell (the prospect tables' team/level columns)
@@ -834,7 +360,6 @@
   font-size: var(--fs-label);
   color: var(--text-caption);
 }
-
 /* ---- career register: unified MLB (inked) + MiLB (penciled) rows ----
    MLB rows keep the ledger's default ink; MiLB rows are penciled in graphite,
    so the two competitions read as distinct at a glance — the scorebook's
@@ -861,9 +386,6 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--graphite);
-  vertical-align: middle;
-}
-.reg-pill__logo {
   vertical-align: middle;
 }
 /* A same-season, same-level N TM row is a subtotal, not another stint. Its
@@ -916,14 +438,6 @@
   .ledger {
     --table-cell: var(--space-1h) var(--space-1h);
   }
-}
-/* The "converted to pitcher" note that sits above the stat blocks. (The
-   register's own footnote is gone — it shows every stint as a row now.) */
-.reg-convert {
-  margin: 0 2px 14px;
-  font-size: var(--fs-compact);
-  font-style: italic;
-  color: var(--graphite);
 }
 /* MILESTONE WATCH card below the career register — a Card (sheet, flush body;
    #1113, slice C2) rather than a bare line, since it now carries a projected
