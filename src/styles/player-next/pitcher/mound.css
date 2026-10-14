@@ -134,6 +134,7 @@
   position: absolute;
   inset: 0 auto 0 0;
   background: var(--navy);
+  transform-origin: left center;
 }
 .mound__zone {
   position: absolute;
@@ -195,6 +196,8 @@
   bottom: 0;
   min-width: 12px;
   transform: translateX(-50%);
+  transform-origin: bottom center;
+  transition: translate var(--dur-fast) var(--ease-stamp), filter var(--dur-fast) var(--ease-stamp);
   background: var(--navy);
 }
 .mound__bar--relief {
@@ -221,6 +224,7 @@
   position: absolute;
   inset-inline: 0;
   border-top: var(--bw-heavy) solid var(--clay);
+  transform-origin: left center;
   pointer-events: none;
 }
 .mound__today {
@@ -345,5 +349,131 @@
   }
   .mound__short {
     display: inline;
+  }
+}
+
+/* --- the entrance (board MoundCard) ---
+   MoundCard (index.jsx) sets .mound--pre until the card first comes into view in this page
+   visit, then .mound--in, which plays each beat once. A card seen earlier, or under reduced
+   motion, gets neither and rests drawn. Times count in --stagger-step from the moment the card
+   is in view. Bars grow on `scale` and lift on `translate`, so neither fights the bar's own
+   translateX(-50%) on `transform`. */
+.mound--pre .mound__block--track,
+.mound--pre .mound__zone,
+.mound--pre .mound__pv,
+.mound--pre .mound__now .mound__day {
+  opacity: 0;
+}
+.mound--pre .mound__fill,
+.mound--pre .mound__avg {
+  transform: scaleX(0);
+}
+.mound--pre .mound__bar {
+  scale: 1 0;
+}
+
+.mound--in .mound__block--track {
+  animation: mound-rise var(--dur-rise) var(--ease-stamp) calc(var(--stagger-step) * 1.5) backwards;
+}
+.mound--in .mound__fill {
+  animation: mound-draw var(--dur-draw) var(--ease-stamp) calc(var(--stagger-step) * 4.5) backwards;
+}
+.mound--in .mound__zone {
+  animation: mound-fade var(--dur-unfold) var(--ease-out) var(--dur-draw) backwards;
+}
+.mound--in .mound__now .mound__day {
+  animation: card-stamp-in var(--dur-stamp-in) var(--ease-stamp) calc(var(--stagger-step) * 9) backwards;
+}
+.mound--in .mound__bar {
+  animation: mound-grow calc(var(--stagger-step) * 12) var(--ease-stamp) calc(var(--stagger-step) * (6 + var(--k, 0))) backwards;
+}
+.mound--in .mound__pv {
+  animation: mound-fade calc(var(--dur-fast) * 2.5) var(--ease-out) calc(var(--stagger-step) * (14 + var(--k, 0))) backwards;
+}
+.mound--in .mound__avg {
+  animation: mound-draw var(--dur-draw) var(--ease-stamp) calc(var(--stagger-step) * 13) backwards;
+}
+
+/* The Day chip's pulse: a ring in the board's gold that fades in, grows a little and fades out,
+   4 times, then rests (docs/motion.md: the seal breath stops after 4; the box-shadow ring
+   liveedge-pulse repainted every frame and was replaced). Opacity and transform only. */
+.mound__now .mound__day::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--bw-heavy) * -2);
+  border: var(--bw-heavy) solid var(--award-line);
+  opacity: 0;
+  pointer-events: none;
+}
+.mound--in .mound__now .mound__day::after {
+  animation: mound-ring calc((var(--dur-draw) + var(--dur-unfold)) * 2) ease-in-out calc(var(--stagger-step) * 25) 4;
+}
+
+@keyframes mound-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-1h));
+  }
+}
+@keyframes mound-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes mound-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes mound-grow {
+  from {
+    scale: 1 0;
+  }
+}
+@keyframes mound-ring {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mound__bar:hover {
+    translate: 0 calc(var(--bw-heavy) * -1.5);
+    filter: brightness(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mound--pre .mound__block--track,
+  .mound--pre .mound__zone,
+  .mound--pre .mound__pv,
+  .mound--pre .mound__now .mound__day {
+    opacity: 1;
+  }
+  .mound--pre .mound__fill,
+  .mound--pre .mound__avg {
+    transform: none;
+  }
+  .mound--pre .mound__bar {
+    scale: none;
+  }
+  .mound--in .mound__block--track,
+  .mound--in .mound__fill,
+  .mound--in .mound__zone,
+  .mound--in .mound__now .mound__day,
+  .mound--in .mound__now .mound__day::after,
+  .mound--in .mound__bar,
+  .mound--in .mound__pv,
+  .mound--in .mound__avg {
+    animation: none;
+  }
+  .mound__bar {
+    transition: none;
   }
 }

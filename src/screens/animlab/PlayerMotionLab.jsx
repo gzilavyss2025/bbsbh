@@ -1,5 +1,6 @@
 import { StatTile } from '../../components/ui/frame/StatTile.jsx'
 import { Entry, Frame } from './Entry.jsx'
+import '../../styles/player-next/pitcher/mound.css'
 
 // ---------------------------------------------------------------------------
 // THE PLAYER PAGE'S MOTION (#2073) on /animation-lab.
@@ -33,6 +34,41 @@ function RiseDemo() {
   )
 }
 
+// On the mound's entrance (board MoundCard): the days-since fill draws, the Day chip stamps and
+// pulses, the bars grow one after the next and their counts fade in, the average draws. The
+// real classes with invented figures.
+const DEMO_OUTINGS = [[10, 88], [28, 95], [46, 79], [64, 101], [82, 92]]
+function MoundDemo() {
+  return (
+    <div className="mound mound--in">
+      <div className="mound__block mound__block--track">
+        <div className="mound__trk">
+          <span className="mound__chip">
+            <span className="mono"><b>9/30</b> · 92 P</span>
+          </span>
+          <span className="mound__now" style={{ left: '70%' }}>
+            <span className="mound__day">Day 5</span>
+          </span>
+          <div className="mound__rail">
+            <span className="mound__fill" style={{ width: '70%' }} />
+            <span className="mound__zone" style={{ left: '70%', width: '14%' }} />
+          </div>
+        </div>
+      </div>
+      <div className="mound__block">
+        <div className="mound__plot mono">
+          <span className="mound__avg" style={{ bottom: '82%' }} />
+          {DEMO_OUTINGS.map(([left, p], k) => (
+            <span key={left} className={`mound__bar${k === DEMO_OUTINGS.length - 1 ? ' mound__bar--last' : ''}`} style={{ left: `${left}%`, width: '6%', height: `${Math.round((p / 110) * 100)}%`, '--k': k }}>
+              <span className="mound__pv">{p}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function PlayerMotionLab() {
   return (
     <>
@@ -56,6 +92,17 @@ export function PlayerMotionLab() {
           ))}
         </div>
       </Entry>
+      <Entry
+        title="On the mound — the card comes in"
+        note={
+          <>
+            The pitcher&rsquo;s On the mound card (board MoundCard). The days-since fill draws, the
+            Day chip stamps, then pulses four times and rests; the outing bars grow one after the
+            next, their counts fade in, and the average line draws. Off under reduced motion.
+          </>
+        }
+        live={<MoundDemo />}
+      />
     </>
   )
 }
