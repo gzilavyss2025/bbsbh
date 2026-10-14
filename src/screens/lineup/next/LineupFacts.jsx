@@ -92,13 +92,18 @@ function CrowdCell({ info }) {
 // (Box weather shows only when it is missing). The Uniform glyph opens the crest sheet. The
 // crew is UmpiresCard's cells; before the crew posts the strip says so in one cell.
 export function LineupFacts({ feed, side, info, officials, season, manager, uniform, broadcast, weather, weatherLoading, onUniform }) {
+  const boxWeather = !weatherLoading && !weather?.text && Boolean(info.weather)
+  // Date, park, weather, attendance, manager, uniform, plus Box weather and Broadcast when shown.
+  // The strip splits them into two even rows on a wide screen (see .lnext__facts--7 and --8), so a
+  // cell never sits alone on a row of its own.
+  const count = 6 + (boxWeather ? 1 : 0) + (side === 'away' ? 1 : 0)
   return (
     <>
-      <FactGrid look="strip" className="lnext__facts">
+      <FactGrid look="strip" className={`lnext__facts lnext__facts--${count}`}>
         <Cell label="Date" value={shortDate(info.officialDate)} />
         <ParkCell info={info} />
         <Cell label="Weather" value={weatherLoading ? '…' : weather?.text} />
-        {!weatherLoading && !weather?.text && info.weather && <Cell label="Box weather" value={info.weather} />}
+        {boxWeather && <Cell label="Box weather" value={info.weather} />}
         <CrowdCell info={info} />
         <Cell label="Manager" value={managerFact(manager)} />
         <Cell

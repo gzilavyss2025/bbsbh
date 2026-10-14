@@ -263,6 +263,17 @@
 .lnext__umps .fact {
   flex-basis: 92px;
 }
+/* From the wide step the facts fill two even rows: six are three and three, seven are four and
+   three, eight are four and four. The basis is one row's share, less the 1px rules. */
+@media (min-width: 740px) {
+  .lnext__facts--6 .fact {
+    flex-basis: calc(33.33% - var(--bw-hair));
+  }
+  .lnext__facts--7 .fact,
+  .lnext__facts--8 .fact {
+    flex-basis: calc(25% - var(--bw-hair));
+  }
+}
 /* The crew fills its rows whatever its size: four cells are two by two on a phone and one row
    wide; six are three by two on a phone and one row wide; any other count wraps and grows. */
 .lnext__umps--4 .fact {
