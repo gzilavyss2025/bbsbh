@@ -180,6 +180,11 @@ card. Slice 05b's `src/styles/motion/menurail.css` sets:
 
 Read both merged files; if they differ from this, follow the merged code.
 
+State rule (react-hooks 7.1.1): `react-hooks/set-state-in-effect` is an ERROR, and the
+`refs` rule forbids reading a ref during render. Set state only from a rAF, timer or
+observer callback, never synchronously in an effect body. The start effect below
+calls `clock.play()` from a rAF callback for this reason.
+
 ## Build
 
 ### 1. `index.jsx`
@@ -207,9 +212,12 @@ export function ArsenalCard({ rows, id }) {
   const [ref, phase] = useInViewOnce(viewKey(id, 'arsenal'))
   …
   const clock = useArsenalClock(totalMs(pitches, SPEED), phase === 'rest' ? 'end' : 'wait')
-  // 'play' comes once, from the observer, and stays: this runs one time per mount.
+  // 'play' comes once, from the observer, and stays: this runs one time per mount. The clock
+  // starts in a rAF callback, not in the effect body (react-hooks 7.1.1: set-state-in-effect).
   useEffect(() => {
-    if (phase === 'play') clock.play()
+    if (phase !== 'play') return undefined
+    const raf = requestAnimationFrame(() => clock.play())
+    return () => cancelAnimationFrame(raf)
   }, [phase]) // eslint-disable-line react-hooks/exhaustive-deps
   …
   return (
