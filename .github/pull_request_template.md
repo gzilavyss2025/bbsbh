@@ -51,9 +51,8 @@ file, etc.). `.claude/skills/run/SKILL.md` has the live-data setup. Don't
 troubleshoot an unreachable-network failure by re-running headed/`--debug`.
 -->
 
-- [ ] `npm run lint` passes
-- [ ] `npm test` passes
-- [ ] `npm run build` passes
+- [ ] `npm run lint` passes, and the tests that cover the changed files pass (run locally)
+- [ ] CI `lint-and-build` is green (the full `npm test` and `npm run build` run there, not locally)
 - [ ] Exercised the affected flow in `npm run dev` against a live or recent game, and sent a screenshot — <!-- route, gamePk, what was mocked -->
 <!-- Run `npm run e2e` only when Gary asks for it. -->
 

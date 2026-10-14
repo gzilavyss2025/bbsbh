@@ -9,7 +9,9 @@ import reactHooks from 'eslint-plugin-react-hooks'
 // mis-declared dependency array is exactly the kind of bug that could leak a
 // sealed value. Keep those on.
 export default [
-  { ignores: ['dist/', 'dev-dist/', 'node_modules/', '.claude/worktrees/'] },
+  // .scratch/ holds working notes and one-off research scripts. Nothing ships
+  // from it or imports it, so lint skips it (310 files, about 13% of the run).
+  { ignores: ['dist/', 'dev-dist/', 'node_modules/', '.claude/worktrees/', '.scratch/'] },
 
   // App source — browser globals, JSX, hooks.
   {

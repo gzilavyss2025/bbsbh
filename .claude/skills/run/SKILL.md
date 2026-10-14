@@ -27,8 +27,9 @@ captured API/image fixtures so a spec doesn't need live network at all.
 Do not run the Playwright suite on your own. Run it only when Gary asks for it
 in this session ("run e2e", "run the playwright tests"). A hook enforces this:
 `.claude/hooks/e2e-on-request.mjs` refuses `npm run e2e`, `npm run visual` and
-`playwright test` until Gary's prompt asks. Your default checks are `npm test`,
-`npm run lint`, the build, and a dev-server link that Gary can open. You can
+`playwright test` until Gary's prompt asks. Your default checks are `npm run lint`,
+the tests that cover the files you changed, and a dev-server link that Gary can
+open; CI runs the full `npm test` and the build (`orchestrate`, "Check once"). You can
 still write or edit a spec when a change needs one; say in the handoff that it
 has not run.
 

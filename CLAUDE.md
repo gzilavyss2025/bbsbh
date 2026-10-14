@@ -48,8 +48,9 @@ entry you touched also needs an update. A stale tier is worse than none.
 ## Workflow & deployment
 
 **All sessions use task branches and pull requests. Never push directly to `main`
-or trigger a Vercel deployment.** One exception: a `/stack-prs` merge, run by Gary or
-by the orchestrator under his standing permission (`.claude/skills/orchestrate/`). This
+or trigger a Vercel deployment.** Two exceptions: a `/stack-prs` merge, run by Gary or
+by the orchestrator under his standing permission (`.claude/skills/orchestrate/`), and
+`merge-pr` when Gary says "merge the pr" (green CI only, no stack). This
 is a Vercel Hobby project (about 100 deployments a day): keep work-in-progress off
 `main` and batch related changes into one stack. Non-`main` previews are disabled. Verify in your own container or checkout instead.
 

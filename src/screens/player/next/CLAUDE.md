@@ -23,7 +23,7 @@ suffix; `twin` adds the suffix to two one-role slots with one name (the two Foul
 ## The top cards
 
 `top/` holds the hero's parts and one page-level card, none of them slots: `HeroBand` (the status rows, the first child of the hero card, #2008);
-`HeroStamp` and `HeroStrip` (#2009: the OVR stamp on the photo, a button that opens the ratings strip at the hero's foot, folded on load; the name-block extras are `headerExtras` in `../heroData.js`);
+`HeroStamp` and `HeroStrip` (#2009: the OVR stamp at the right end of the hero row, a button that opens the ratings strip at the hero's foot, folded on load; the name-block extras are `headerExtras` in `../heroData.js`);
 `OverviewExtras` (rank chips, postseason, other levels), a stamped Card under the tiles that hides when it has none. The banner text is `../statusBanners.js`.
 
 ## The module contract

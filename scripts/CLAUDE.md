@@ -109,7 +109,9 @@ process automatically.
 ## Lint guards (run by `npm run lint`, CI-enforced via `ci.yml`)
 
 `check-all.mjs` runs eslint and every guard below, in order. A new guard goes in its
-`GUARDS` list. Guards that walk the tree share `lib/walk.mjs`.
+`GUARDS` list. Guards that walk the tree share `lib/walk.mjs`. Output is quiet: a
+passing step prints nothing, a failing step prints all its output, and
+`npm run lint -- --verbose` prints every step. eslint caches under `node_modules/.cache/`.
 
 Guard catalog (one entry per guard): `docs/scripts/tooling.md`.
 
