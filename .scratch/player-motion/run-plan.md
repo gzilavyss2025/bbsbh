@@ -113,6 +113,10 @@ row 01a of .scratch/player-motion/run-plan.md: motion tokens and row surfaces.
 Use the branch the session gives you. It starts at current origin/main.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -154,6 +158,10 @@ row 01c of .scratch/player-motion/run-plan.md: `useInViewOnce`, the one-shot ent
 Use the branch the session gives you. It starts at current origin/main.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -195,6 +203,10 @@ row 03a of .scratch/player-motion/run-plan.md: `Segmented`: the joined 44px cont
 Use the branch the session gives you. It starts at current origin/main.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -236,6 +248,10 @@ row 01b of .scratch/player-motion/run-plan.md: the JS curves and the player rise
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -277,6 +293,10 @@ row 02a of .scratch/player-motion/run-plan.md: the site-wide stamp-press.
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -318,6 +338,10 @@ row 05a of .scratch/player-motion/run-plan.md: `MenuRail`, the part (markup, pur
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -359,6 +383,10 @@ row 06 of .scratch/player-motion/run-plan.md: Shell: hero and tile stagger, age 
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -400,6 +428,10 @@ row 03b of .scratch/player-motion/run-plan.md: `Segmented`: the design-lab entry
 Use the branch the session gives you. It starts at current origin/main, which has rows 03a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -441,6 +473,10 @@ row 04a of .scratch/player-motion/run-plan.md: Swap the player toggles onto `Seg
 Use the branch the session gives you. It starts at current origin/main, which has rows 03a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -482,6 +518,10 @@ row 04b of .scratch/player-motion/run-plan.md: Swap the player toggles onto `Seg
 Use the branch the session gives you. It starts at current origin/main, which has rows 03a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -523,6 +563,10 @@ row 04c of .scratch/player-motion/run-plan.md: Swap the player toggles onto `Seg
 Use the branch the session gives you. It starts at current origin/main, which has rows 03a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -564,6 +608,10 @@ row 01d of .scratch/player-motion/run-plan.md: room on the Animation Lab, and th
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a, 01b merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -605,6 +653,10 @@ row 02b of .scratch/player-motion/run-plan.md: remove the band rules the old pre
 Use the branch the session gives you. It starts at current origin/main, which has rows 02a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -646,6 +698,10 @@ row 05b of .scratch/player-motion/run-plan.md: `MenuRail` motion (the unfold, th
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a, 05a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -687,6 +743,10 @@ row 07a of .scratch/player-motion/run-plan.md: Slot: hold the height, no loading
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a, 01b, 01c, 06 merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -728,6 +788,10 @@ row 08a of .scratch/player-motion/run-plan.md: Splits: rise on view, bars grow, 
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a, 01c merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -769,6 +833,10 @@ row 13 of .scratch/player-motion/run-plan.md: Pitch flight: loop, off-screen pau
 Use the branch the session gives you. It starts at current origin/main, which has rows 01b merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -810,6 +878,10 @@ row 20a of .scratch/player-motion/run-plan.md: Small fixes: the game-log rows.
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a, 04a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -851,6 +923,10 @@ row 20b of .scratch/player-motion/run-plan.md: Small fixes: Season (WAR state, f
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a, 04a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -892,6 +968,10 @@ row 20c of .scratch/player-motion/run-plan.md: Small fixes: the Similar rows and
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a, 04b merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -933,6 +1013,10 @@ row 05c of .scratch/player-motion/run-plan.md: `MenuRail` in `/design-lab` and `
 Use the branch the session gives you. It starts at current origin/main, which has rows 01d, 05a, 05b merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -974,6 +1058,10 @@ row 07b of .scratch/player-motion/run-plan.md: Jump bar: hold the target, stamp 
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a, 07a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1015,6 +1103,10 @@ row 08b of .scratch/player-motion/run-plan.md: Splits: Game lines rise, fold cas
 Use the branch the session gives you. It starts at current origin/main, which has rows 08a, 01d merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1056,6 +1148,10 @@ row 10 of .scratch/player-motion/run-plan.md: On the mound: track draw, bar grow
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a, 01c, 01d merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1097,6 +1193,10 @@ row 11 of .scratch/player-motion/run-plan.md: Arsenal menu and panel onto MenuRa
 Use the branch the session gives you. It starts at current origin/main, which has rows 05a, 05b merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1138,6 +1238,10 @@ row 16 of .scratch/player-motion/run-plan.md: Plate approach onto `MenuRail`; ri
 Use the branch the session gives you. It starts at current origin/main, which has rows 05a, 05b merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1179,6 +1283,10 @@ row 17a of .scratch/player-motion/run-plan.md: Contact: the dots drop in.
 Use the branch the session gives you. It starts at current origin/main, which has rows 01a, 01c, 01d merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1220,6 +1328,10 @@ row 09 of .scratch/player-motion/run-plan.md: Splits: the pitcher's menu onto Me
 Use the branch the session gives you. It starts at current origin/main, which has rows 05a, 05b, 08b merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1261,6 +1373,10 @@ row 04d of .scratch/player-motion/run-plan.md: Swap the player toggles onto `Seg
 Use the branch the session gives you. It starts at current origin/main, which has rows 03a, 10 merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1302,6 +1418,10 @@ row 12a of .scratch/player-motion/run-plan.md: Arsenal timeline, part 1: one clo
 Use the branch the session gives you. It starts at current origin/main, which has rows 11, 01b merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1343,6 +1463,10 @@ row 17b of .scratch/player-motion/run-plan.md: Contact: the batted-ball menu ont
 Use the branch the session gives you. It starts at current origin/main, which has rows 05a, 05b, 17a merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1384,6 +1508,10 @@ row 12b of .scratch/player-motion/run-plan.md: Arsenal timeline, part 2: mix bar
 Use the branch the session gives you. It starts at current origin/main, which has rows 12a, 01c merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1425,6 +1553,10 @@ row 18 of .scratch/player-motion/run-plan.md: Contact: ball flight on tap.
 Use the branch the session gives you. It starts at current origin/main, which has rows 17b merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1466,6 +1598,10 @@ row 12c of .scratch/player-motion/run-plan.md: Arsenal timeline, part 3: speed s
 Use the branch the session gives you. It starts at current origin/main, which has rows 12b, 01d merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1507,6 +1643,10 @@ row 19 of .scratch/player-motion/run-plan.md: Contact: play through the balls.
 Use the branch the session gives you. It starts at current origin/main, which has rows 18 merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1548,6 +1688,10 @@ row 14 of .scratch/player-motion/run-plan.md: Pitch flight: orbit drag and keys.
 Use the branch the session gives you. It starts at current origin/main, which has rows 13, 12c merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,
@@ -1589,6 +1733,10 @@ row 15 of .scratch/player-motion/run-plan.md: Pitch flight: `<canvas>` trail ren
 Use the branch the session gives you. It starts at current origin/main, which has rows 14 merged.
 Use the ponytail skill at level full. Reuse what the repo already has before you
 write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
 
 Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
 .scratch/player-motion/spec.md, and your brief,

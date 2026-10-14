@@ -163,7 +163,9 @@ Rules: test first (watch it fail, then fix). For a bug, reproduce it first on a
 real gamePk from docs/test-games.md. The spoiler rule applies if you touch the
 innings viewer, scorecard, lineups, or box score. Touch no other files.
 Use the ponytail skill at level full. Do not run ponytail-review or /code-review:
-the stack reviews once (see "Check once").
+the stack reviews once (see "Check once"). Do not invoke the superpowers skills
+(brainstorming, writing-plans and the like): this prompt is the plan. Do not start
+subagents.
 Verify: the test files you wrote or changed, the existing test files that import
 a file you changed (git grep -l <basename> test/), and npm run lint. Do not
 run the full npm test or npm run build: CI runs them on your PR. For a visible
@@ -269,7 +271,11 @@ says "overnight" or "unattended". He is asleep: the run must never wait on him.
   PR numbers (standing permission), let it merge, then start the next wave from the
   new `origin/main`. Never stack a child on an unmerged PR.
 - **Checks:** no 6-check limit. While a child runs, keep one `send_later` check-in
-  about 40 minutes out, and act on PR events as they come. Stop at the plan's time
+  about 40 minutes out, and act on PR events as they come. Keep every gap under 55
+  minutes: each wake-up sends your whole context, and a gap past the one-hour
+  prompt cache makes it a full-price read (code.claude.com/docs/en/costs,
+  /en/prompt-caching). Keep your context small: read `list_sessions` and
+  `list_events` through a script or with `kinds`, never whole. Stop at the plan's time
   limit (default 12 hours from the start), or when every row is done or blocked.
 - **A failure blocks a chain, not the plan.** For a `NEEDS PARENT` line: if
   `spec.md`, the brief or this skill answers it, `send_message` the answer once.
