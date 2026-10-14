@@ -34,9 +34,14 @@ const HP = ['hitting', 'pitching']
 // One entry per module folder (modules/<module>/index.jsx), in page order within a
 // section. A section holds several slots. `roles` are the stat groups the module
 // serves; a player with both gets one instance per role. `load` is a static
-// import, so a module's code arrives only when its slot comes near.
+// import, so a module's code arrives only when its slot comes near. `once` gives a two-way
+// player one instance (the first role he has) and no role suffix. `pair` ('a' then 'b', next
+// to each other) sits two cards side by side at wide widths (page.css).
 export const SLOTS = [
   { id: 'season', module: 'season', section: 'season', label: 'Season', roles: HP, load: () => import('./modules/season/index.jsx') },
+  { id: 'percentile', module: 'percentile', section: 'season', label: 'Percentile rank', roles: HP, load: () => import('./modules/percentile/index.jsx') },
+  { id: 'advanced', module: 'advanced', section: 'season', label: 'Advanced', roles: HP, load: () => import('./modules/advanced/index.jsx') },
+  { id: 'runvalue', module: 'runvalue', section: 'season', label: 'Run value', roles: HP, once: true, load: () => import('./modules/runvalue/index.jsx') },
   { id: 'tbd-season', module: 'tbd', section: 'season', label: 'More season', roles: HP, load: () => import('./modules/tbd/index.jsx') },
   { id: 'splits', module: 'splits', section: 'splits', label: 'Splits', roles: HP, load: () => import('./modules/splits/index.jsx') },
   { id: 'plate', module: 'plate', section: 'plate-approach', label: 'Plate approach', roles: H, load: () => import('./modules/plate/index.jsx') },
@@ -45,19 +50,28 @@ export const SLOTS = [
   { id: 'pform', module: 'pform', section: 'form-trend', label: 'Form trend', roles: P, load: () => import('./modules/pform/index.jsx') },
   { id: 'batlog', module: 'batlog', section: 'game-log', label: 'Game log', roles: H, load: () => import('./modules/batlog/index.jsx') },
   { id: 'pitchlog', module: 'pitchlog', section: 'game-log', label: 'Game log', roles: P, load: () => import('./modules/pitchlog/index.jsx') },
+  { id: 'pfouls', module: 'pfouls', section: 'game-log', label: 'Foul balls', roles: P, load: () => import('./modules/pfouls/index.jsx') },
   // Foul balls has no button on the boards: it sits in the Game log section, and similar players ends it (the tbd slot after it is the "more" board).
   { id: 'fouls', module: 'fouls', section: 'game-log', label: 'Foul balls', roles: H, load: () => import('./modules/fouls/index.jsx') },
   { id: 'similar', module: 'similar', section: 'game-log', label: 'Similar players', roles: HP, load: () => import('./modules/similar/index.jsx') },
+  { id: 'milestones', module: 'milestones', section: 'game-log', label: 'Milestone watch', roles: HP, load: () => import('./modules/milestones/index.jsx') },
   { id: 'tbd-gamelog', module: 'tbd', section: 'game-log', label: 'More game log', roles: HP, load: () => import('./modules/tbd/index.jsx') },
   { id: 'arsenal', module: 'arsenal', section: 'pitches', label: 'Pitch arsenal', roles: P, load: () => import('./modules/arsenal/index.jsx') },
   { id: 'mound', module: 'mound', section: 'on-the-mound', label: 'On the mound', roles: P, load: () => import('./modules/mound/index.jsx') },
+  { id: 'command', module: 'command', section: 'on-the-mound', label: 'Command', roles: P, load: () => import('./modules/command/index.jsx') },
+  { id: 'target', module: 'target', section: 'on-the-mound', label: 'Target command', roles: P, load: () => import('./modules/target/index.jsx') },
   { id: 'tbd-mound', module: 'tbd', section: 'on-the-mound', label: 'More on the mound', roles: P, load: () => import('./modules/tbd/index.jsx') },
   { id: 'path', module: 'path', section: 'career', label: 'Path to the Majors', roles: HP, load: () => import('./modules/path/index.jsx') },
   { id: 'prospects', module: 'prospects', section: 'career', label: 'Prospect rankings', roles: HP, load: () => import('./modules/prospects/index.jsx') },
   { id: 'tbd-career', module: 'tbd', section: 'career', label: 'More career', roles: HP, load: () => import('./modules/tbd/index.jsx') },
   { id: 'firsts', module: 'firsts', section: 'history', label: 'Firsts', roles: HP, load: () => import('./modules/firsts/index.jsx') },
-  { id: 'innings', module: 'innings', section: 'history', label: 'Innings by position', roles: HP, load: () => import('./modules/innings/index.jsx') },
+  { id: 'innings', module: 'innings', section: 'history', label: 'Innings by position', roles: HP, pair: 'a', load: () => import('./modules/innings/index.jsx') },
+  { id: 'awards', module: 'awards', section: 'history', label: 'Awards', roles: HP, once: true, pair: 'b', load: () => import('./modules/awards/index.jsx') },
   { id: 'contract', module: 'contract', section: 'history', label: 'Contract', roles: HP, load: () => import('./modules/contract/index.jsx') },
+  { id: 'teams', module: 'teams', section: 'history', label: 'Team history', roles: HP, once: true, load: () => import('./modules/teams/index.jsx') },
+  { id: 'moves', module: 'moves', section: 'history', label: 'Transactions', roles: HP, once: true, load: () => import('./modules/moves/index.jsx') },
+  { id: 'photos', module: 'photos', section: 'history', label: 'Photos', roles: HP, once: true, pair: 'a', load: () => import('./modules/photos/index.jsx') },
+  { id: 'highlights', module: 'highlights', section: 'history', label: 'Highlights', roles: HP, once: true, pair: 'b', load: () => import('./modules/highlights/index.jsx') },
   { id: 'tbd-history', module: 'tbd', section: 'history', label: 'More history', roles: HP, load: () => import('./modules/tbd/index.jsx') },
 ]
 
@@ -85,12 +99,12 @@ export function jumpSections(bio, blocks) {
 // slot on a two-way player says which role in its name tab.
 export function slotInstances(roles) {
   return SLOTS.flatMap((s) => {
-    const mine = s.roles.filter((r) => roles.includes(r))
+    const mine = s.roles.filter((r) => roles.includes(r)).slice(0, s.once ? 1 : undefined)
     return mine.map((role) => ({
       ...s,
       role,
       key: `${s.id}:${role}`,
-      label: s.roles.length > 1 && roles.length > 1 ? `${s.label} · ${WORD[role]}` : s.label,
+      label: s.roles.length > 1 && roles.length > 1 && !s.once ? `${s.label} · ${WORD[role]}` : s.label,
     }))
   })
 }
@@ -109,7 +123,7 @@ export function shownSections(sections, instances, empty) {
 // slots have nothing, while the section keeps its other slots (Similar players). The log
 // lists postseason games too, so a call-up with only October games keeps his log. Each log
 // module reads its own role's block. Same shape as `empty`: key -> true.
-const LOG_MODULES = new Set(['batlog', 'fouls', 'pitchlog'])
+const LOG_MODULES = new Set(['batlog', 'fouls', 'pitchlog', 'pfouls'])
 export function seedEmpty(instances, blocks) {
   const out = {}
   for (const i of instances) {
