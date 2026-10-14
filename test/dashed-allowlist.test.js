@@ -82,7 +82,10 @@ const ALLOWED = {
   ],
   // A connector line that joins two things on a graph: it links, it does not
   // box anything. Dashed marks the link as a degree, not a fact (Gary, 2026-10-07).
-  connector: [['teammates/teammates.css', '.degrees__link']],
+  connector: [
+    ['teammates/teammates.css', '.degrees__link'],
+    ['player-next/history/teams.css', '.teamhist__trade'], // a trade chip between two orgs' badges: it links them, it boxes no club
+  ],
 }
 // scorecard/ is the sheet you score on: bespoke, out of scope (#1132).
 const BESPOKE = 'scorecard/'

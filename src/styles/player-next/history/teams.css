@@ -1,0 +1,215 @@
+/* ==== TEAM HISTORY (the new player page, #2019) ====
+   A season ledger of club badges: the year on the left, the clubs on the right. A farm club's
+   badge flips (FlipCard) to its parent org. The current club is the one inked badge. Tokens only. */
+
+.teamhist {
+  container-type: inline-size;
+}
+/* The reserve is for the load only. */
+.teamhist--wait {
+  min-height: 420px;
+}
+
+.teamhist__ledger {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: the year column and the badge column, as in the design */
+.teamhist__season {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  column-gap: var(--space-2);
+  align-items: start;
+  padding: var(--space-3) 0;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.teamhist__season:last-child {
+  border-bottom: 0;
+}
+/* layout-exempt: the year over its Here now tag */
+.teamhist__yr {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  white-space: nowrap;
+}
+.teamhist__here {
+  padding: var(--space-1) var(--space-2);
+  background: var(--surface-stamped-ink);
+  color: var(--marker);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-tight);
+  white-space: normal;
+}
+
+/* layout-exempt: the badges wrap, a row */
+.teamhist__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.teamhist__badge {
+  flex: 1 1 7rem;
+  min-width: 7rem;
+  max-width: 12.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+button.teamhist__badge {
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-press);
+}
+button.teamhist__badge:active {
+  transform: translate(2px, 2px);
+}
+button.teamhist__badge:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* layout-exempt: the mark beside the name and its line */
+.teamhist__face {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  column-gap: var(--space-2);
+  align-items: center;
+  min-height: 58px;
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.flipcard__face--back .teamhist__face {
+  background: var(--surface-inset);
+}
+.teamhist__face--cur {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+}
+/* layout-exempt: the name over its level and games */
+.teamhist__nm {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.teamhist__nm b {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.teamhist__nm .mono {
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+.teamhist__face--cur .teamhist__nm .mono {
+  color: var(--text-on-ink-soft);
+}
+.teamhist__fl {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+
+/* A season with no games: a hatched band with a sentence. */
+.teamhist__gap {
+  flex: 1 1 100%;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-rule) solid var(--border-rule);
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ink-0) 16%, transparent) 0 2px,
+    transparent 2px 7px
+  ) var(--surface-card);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+/* layout-exempt: the mark inside the chip, a row */
+.teamhist__trade {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-rule) dashed var(--border-stamped);
+  background: var(--bg-page);
+  font-size: var(--fs-cell);
+}
+.teamhist__note {
+  grid-column: 2;
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+/* ---- Family in baseball ---- */
+/* layout-exempt: the band's label, its rows, the credit */
+.teamhist__fam {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: var(--bw-rule) solid var(--border-stamped);
+}
+.teamhist__faml {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.teamhist__famlist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: headshot, name and line, relation pill */
+.teamhist__famrow {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  column-gap: var(--space-3);
+  align-items: center;
+}
+.teamhist__shot {
+  width: 46px;
+  height: 54px;
+}
+.teamhist__famnm {
+  font-weight: var(--w-bold);
+  font-size: var(--fs-body);
+}
+.teamhist__credit {
+  margin: 0;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+/* The sentences are prose, so they keep the case they were written in (same idiom as
+   .prankhist__foot): the hatched band, the rehab note and the Retrosheet credit. */
+#root .teamhist__gap,
+#root .teamhist__note,
+#root .teamhist__credit {
+  text-transform: none; /* caps-exempt: the card's prose lines, same idiom as .prankhist__foot */
+}
