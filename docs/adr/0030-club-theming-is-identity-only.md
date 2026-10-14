@@ -201,3 +201,21 @@ resolver imports no feed, linescore, reveal, or derivation module. A colour
 still cannot encode a score. Untuned `(club, treatment)` pairs still fall back
 to default navy rather than synthesising a triad, so the WCAG guard still covers
 every bar that actually renders.
+
+## Addendum (2026-10-14): the full Now Pitching card's name band
+
+The full Now Pitching card (`components/playbyplay/pitcherCard/`) names the club
+that is pitching and shows its arm, so it is a card that identifies the club.
+Its name band now wears that club's hand-set triad (`--bar-fill`,
+`--bar-accent`, `--bar-text`), set on `.pcard` by `headerThemeStyle` from the
+club and the jersey it wears (`PitcherCard`'s `side` and `treatment`). A club
+with no tuned triad keeps the default navy band.
+
+This is the one place the card family takes club colour, and the earlier
+addendum's list of cards that stay in the app's palette is unchanged for the
+rest of it. The compact relief cards, the pre-pitch change notices and the amber
+event notices still draw the Notice frame in the app's own colours. The full
+card left that family when its frame became the stamped paper card (the
+scorebug and table skin, #2096); only its band is themed, never its stat
+tables, its pitch tiles or any control. The safety argument is unchanged: the
+inputs are `(teamId, treatment)` and nothing else.

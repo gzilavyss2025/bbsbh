@@ -17,7 +17,7 @@ import { useDialogFocus } from '../../../hooks/dialog/useDialogFocus.js'
 //
 // Not portalled (ModalPortal): the scorecard page has no isolating parent,
 // and a portal to <body> would leave #root's all-caps rule behind.
-export function PitcherSheet({ feed, arm, onClose }) {
+export function PitcherSheet({ feed, arm, treatment, onClose }) {
   const backRef = useRef(null)
   useDialogFocus(backRef, onClose)
   const { pitcher, team, relief, fresh } = arm
@@ -31,6 +31,8 @@ export function PitcherSheet({ feed, arm, onClose }) {
             pitcher={pitcher}
             teamId={team.id}
             teamName={team.name}
+            side={team.side}
+            treatment={treatment}
             className={noticeClass({ tone: 'event', className: 'change--framed' })}
             label={fresh ? 'Now pitching' : 'Pitching'}
           />

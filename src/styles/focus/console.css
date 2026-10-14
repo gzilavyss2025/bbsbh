@@ -458,26 +458,21 @@
 .gamehud--console {
   width: 100%;
   border-bottom: 3px solid var(--band-rule);
-  /* The band holds its height even when it has nothing to say. Once the half's
-     3rd out lands nobody is up, Scorebug drops both the batter and pitcher rows
-     (its `blank`), and without this floor the band collapsed by ~50px and
-     yanked the hero card up the page at the exact moment the reader was
-     reading it. The comment here used to CLAIM the height was held while
-     nothing held it; --console-hud-h is the measured resting height (see
-     tokens/layout.css) and this is what actually pins it. */
+  /* The band holds its height. Once the half's 3rd out lands the bars keep the
+     last batter and pitcher, dimmed (Scorebug's `over`), so the band stays at
+     its resting height as the half ends instead of yanking the hero card up
+     the page while the reader reads it. --console-hud-h is the measured
+     resting height (see tokens/layout.css) and this floor pins it. */
   min-height: var(--console-hud-h);
 }
 
-/* Between innings nobody is up (Scorebug's `blank`) — the rows are gone, so
+/* No batter or pitcher row (Scorebug's `blank` — a feed that names neither) —
    the card's own top padding would just be dead space above the strip.
 
    The floor comes off WITH them. Holding the band at its full height with no
-   rows in it left ~60px of bare navy under the strip — a dark slab the reader
-   sees on every landing, since a half is blank until its first at-bat opens.
-   That reads as a rendering fault, which is worse than the shift the floor was
-   added to stop; the shift itself is now small (the mobile scale-up below came
-   off too), and it happens as the half ends rather than while an at-bat is
-   being read. */
+   rows in it left ~60px of bare navy under the strip — a dark slab that reads
+   as a rendering fault. This is no longer the half-end case: a half that just
+   ended keeps its bars, dimmed (`over`), and holds the floor. */
 .gamehud--console.gamehud--blank {
   padding-top: 0;
   min-height: 0;

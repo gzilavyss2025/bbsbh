@@ -19,6 +19,7 @@ import { BatterNotice } from '../playbyplay/BatterNotice.jsx'
 import { FinalizedLineCard } from '../playbyplay/PitcherHandoffCard.jsx'
 import { UpNextBatters } from '../playbyplay/UpNextBatters.jsx'
 import { useBecameTrue } from '../../hooks/motion/useBecameTrue.js'
+import { liveAtThirdOut } from '../../lib/scorebug/liveState.js'
 
 export function HalfInning({
   feed,
@@ -45,6 +46,7 @@ export function HalfInning({
   onStepInfo,
   onRunsSoFar,
   onLiveState,
+  treatment,
 }) {
   // At-bat stepping (ADR-0016): a half being stepped through one plate
   // appearance at a time (the floating bar's "Next at-bat" button) has
@@ -322,21 +324,8 @@ export function HalfInning({
     } else if (nowPitching) {
       pitcher = { last: nowPitching.name.split(',')[0], pitches: (enteringPitches ?? 0) + (live?.pitchesSoFar ?? 0) }
     }
-    // The half is over (3rd out) but the user hasn't navigated to the next
-    // one yet — this half's batter/pitcher/bases/outs no longer describe
-    // anything current, and the NEXT half's don't exist yet either. Rather
-    // than freeze on the half that just ended, blank the batter/pitcher and
-    // bases/outs and point the inning/half indicator at what's coming next.
-    if (outs >= 3) {
-      return {
-        bases: { first: false, second: false, third: false },
-        outs: 0,
-        batter: null,
-        pitcher: null,
-        inning: half === 'top' ? inning : inning + 1,
-        half: half === 'top' ? 'bottom' : 'top',
-      }
-    }
+    // The 3rd out is revealed and the reader has not navigated on: see liveAtThirdOut.
+    if (outs >= 3) return liveAtThirdOut({ batter, pitcher, inning, half })
     return { bases, outs, batter, pitcher, inning, half }
   }
 
@@ -386,6 +375,8 @@ export function HalfInning({
             className={noticeClass({ tone: 'event', className: 'change--framed' })}
             label={nowPitchingLabel}
             entering={entering}
+            treatment={treatment}
+            side={battingSide === 'away' ? 'home' : 'away'}
           />
         )}
 
@@ -476,6 +467,7 @@ export function HalfInning({
                 battingTeamId={battingSide === 'away' ? awayId : homeId}
                 callouts={callouts}
                 vsTeam={vsTeam}
+                treatment={treatment}
                 highlightsMap={highlightsMap}
                 writing={writing}
                 stepCap={stepping ? revealedAtBatCount : null}

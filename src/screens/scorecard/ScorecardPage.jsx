@@ -58,7 +58,7 @@ import { useLensMotion } from '../../components/scoring/lens/motion/useLensMotio
 // The sheet is EDITABLE: tapping a filled box opens the notation editor and
 // the override is stored per-cell on this device (lib/scorecardNotes.js) —
 // the pencil-over-ink layer, never a change to anything derived.
-export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onReload, loading, lastUpdated, round = '' }) {
+export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onReload, loading, lastUpdated, round = '', treatment }) {
   const [side, setSide] = useState('top')
   const regulation = selectRegulationInnings(feed)
   const actualCount = selectInningCount(feed)
@@ -374,7 +374,7 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
           onPitcher={() => setSheetArm(arm)}
         />
       )}
-      {inLens && sheetArm && <PitcherSheet feed={feed} arm={sheetArm} onClose={() => setSheetArm(null)} />}
+      {inLens && sheetArm && <PitcherSheet feed={feed} arm={sheetArm} treatment={treatment} onClose={() => setSheetArm(null)} />}
       {lens === 'whole' && <LensBack onBack={() => setWholeSheet(false)} />}
 
       {editing && (

@@ -121,6 +121,7 @@
 /* The full Now Pitching card (#1344) — a subdirectory, since src/styles is at
    its file ratchet (scripts/check-dir-size.mjs). */
 @import './styles/pitcher-card/card.css';
+@import './styles/pitcher-card/table.css';
 @import './styles/14-strike-zone.css';
 @import './styles/18-uniforms-and-jerseys.css';
 @import './styles/19-pattern-and-sketch-labs.css';
@@ -235,11 +236,14 @@
    a partial that outgrew the 600-line file cap was to subdivide, which is what
    ADR-0038 asks for in the first place. It happened a second time when the
    half's tally joined the console row: console.css came out of stage.css along
-   the same seam — the shell versus one band inside it. These four stay LAST,
+   the same seam — the shell versus one band inside it. These five stay LAST,
    and in this order — every rule in them wins on cascade order, not
    specificity. See focus/stage.css's header. */
 @import './styles/focus/stage.css';
 @import './styles/focus/console.css';
+/* The console band's broadcast skin (ADR-0043's band): after console.css, which owns the band's
+   width, floor and wide placement, and before atbat/reference. */
+@import './styles/focus/scorebug.css';
 @import './styles/focus/atbat.css';
 @import './styles/focus/reference.css';
 

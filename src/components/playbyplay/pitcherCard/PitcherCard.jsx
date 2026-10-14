@@ -2,6 +2,7 @@ import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../../../api/game.
 import { fetchPitcherPostseasonCareer } from '../../../api/postseason/pitcherCareer.js'
 import { fetchPitchArsenalFor, pitchArsenalFor } from '../../../api/pitchArsenal.js'
 import { useAsync } from '../../../hooks/useAsync.js'
+import { headerThemeFor, headerThemeStyle, themeKeyFor } from '../../../lib/headerTheme.js'
 import {
   entryFlag,
   isPostseason,
@@ -33,7 +34,12 @@ import { SeasonLines } from './SeasonLines.jsx'
 //
 // `relief`: he enters as a reliever (any arm after the first half his club
 // pitched). Drives "Starter in relief" and "Pitched yesterday".
-export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className, label, entering }) {
+//
+// THE NAME BAND WEARS THE PITCHING CLUB'S COLOURS (ADR-0030's 2026-10-14
+// addendum): `side` and `treatment` (the jersey both clubs wear, `{ away, home }`)
+// resolve the same hand-set triad the lineup cards use, and a club with none
+// keeps the default navy. Identity only; no game state reaches the theme.
+export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className, label, entering, side, treatment }) {
   const game = feed?.gameData ?? {}
   const officialDate = game.datetime?.officialDate ?? null
   const season = game.game?.season ?? null
@@ -68,8 +74,9 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
   const tiles = positionPlayer ? [] : pitchTiles(pitchArsenalFor(data?.shard, id, sportId === 1))
   const flag = data ? entryFlag({ role, relief, last: data.last, officialDate }) : null
 
+  const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment?.[side]))
   return (
-    <div className={`pcard ${className ?? ''}`}>
+    <div className={`pcard ${className ?? ''}`} style={headerThemeStyle(theme)}>
       <PitcherNotice
         pitcher={pitcher}
         teamId={teamId}

@@ -96,7 +96,7 @@ import { filmCanExist } from '../../api/expresslane/eligibility.js'
 // at `writingUpTo` below for why there is a cap at all, and why it is small.
 const WRITE_ON_CAP = 6
 
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, halfInProgress = false, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, windowed = false, focusStep = null, onFocusInfo, writing = false }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, halfInProgress = false, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, windowed = false, focusStep = null, onFocusInfo, writing = false, treatment }) {
   const stepping = stepCap != null
   // Whether RAW pitch clips can exist for this game at all — the same rules
   // that decide whether Express Lane draws a door, and what keeps a MiLB or
@@ -386,7 +386,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           node = pitcher ? (
             <>
               <PitcherCard
-                feed={feed} relief pitcher={pitcher}
+                feed={feed} relief pitcher={pitcher} treatment={treatment} side={battingSide === 'away' ? 'home' : 'away'}
                 teamId={pitchingTeamId}
                 teamName={pitchingName}
                 className={noticeClass({ tone: 'event', className: 'change--framed' })}

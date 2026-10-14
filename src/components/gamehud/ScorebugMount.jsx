@@ -97,6 +97,7 @@ export function ScorebugMount({
       pitcher={live.pitcher}
       bases={live.bases}
       outs={live.outs}
+      over={Boolean(live.over)}
       className="gamehud--console"
     />
   )

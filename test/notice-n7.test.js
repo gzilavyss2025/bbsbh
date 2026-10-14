@@ -120,7 +120,8 @@ test('N7: the role roots keep the caller\'s className, and the full card\'s head
     assert.equal(count(live, 'noticeClass('), name === 'PitcherNotice' ? 1 : 0, `${name} does not draw the frame itself`)
   }
   const card = src('components/playbyplay/pitcherCard/PitcherCard.jsx')
-  assert.ok(card.includes("<div className={`pcard ${className ?? ''}`}>"), 'the frame lands on .pcard')
+  // The root also carries the pitching club's theme properties as `style` (ADR-0030's 2026-10-14 addendum); the frame class still lands on it.
+  assert.ok(card.includes("<div className={`pcard ${className ?? ''}`} style={headerThemeStyle(theme)}>"), 'the frame lands on .pcard')
   assert.doesNotMatch(card.slice(card.indexOf('<PitcherNotice')).split('/>')[0], /className/, 'the header takes no frame')
 })
 

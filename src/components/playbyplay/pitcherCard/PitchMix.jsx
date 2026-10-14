@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { tileColumns } from '../../../lib/pitcherCard/card.js'
 import { scenePitches } from '../../../lib/pitcherCard/scene.js'
+import { pitchMark } from '../../../lib/pitch/pitchTypes.js'
+import { PitchMark } from './PitchMark.jsx'
 import { PitchScene } from './PitchScene.jsx'
 
 const NOTE =
@@ -41,7 +43,10 @@ export function PitchMix({ tiles, lefty, name }) {
       <div className="pcard__tiles" style={{ '--pcard-tile-cols': tileColumns(tiles.length) }}>
         {tiles.map((t) => (
           <div key={t.code ?? 'other'} className={`pcard__tile${t.code && t.code === activeCode ? ' is-active' : ''}`}>
-            <span className={`pcard__swatch fill--${t.family}`} />
+            <span className="pcard__tilehead">
+              <PitchMark mark={pitchMark(t.code)} />
+              {t.code && <span className="pcard__code">{t.code}</span>}
+            </span>
             <span className="pcard__tname">{t.name}</span>
             <span className="pcard__pct">{t.pct}%</span>
             <span className="pcard__mph">

@@ -62,6 +62,7 @@ export const InningPage = memo(function InningPage({
   onRunsSoFar,
   onLiveState,
   presentationOnly = false,
+  treatment,
 }) {
   const idx = halfIndex(inning, half)
   const revealed = idx <= revealedThrough
@@ -91,6 +92,7 @@ export const InningPage = memo(function InningPage({
         onReveal={presentationOnly ? noop : onReveal}
         callouts={callouts}
         vsTeam={vsTeam}
+        treatment={treatment}
         highlights={highlights}
         revealedAtBatCount={atBatCountFor(inning, half)}
         halfInProgress={halfInProgress}

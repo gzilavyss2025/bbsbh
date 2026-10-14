@@ -39,6 +39,7 @@ import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { useStampUnseal } from '../hooks/useStamps.js'
 import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCalloutLedger.js'
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
+import { sameLiveState } from '../lib/scorebug/liveState.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -55,32 +56,8 @@ const RevealCloudSync = isClerkEnabled
 // its own `noop` for the page-turn preview.
 const noopReveal = () => {}
 
-// Value-equality check for the scorebug's live snapshot (see `liveState`
-// below) — `entries` is rebuilt fresh every render in PlayByPlay.jsx, so a
-// composite object arrives with a new identity every render even when
-// nothing in it actually changed; comparing every leaf field is what lets
-// the setState call that reports it become a true no-op on an unchanged
-// snapshot instead of triggering another render (and another report) forever.
-function sameLiveState(a, b) {
-  if (a === b) return true
-  if (!a || !b) return false
-  return (
-    a.inning === b.inning &&
-    a.half === b.half &&
-    a.outs === b.outs &&
-    a.bases?.first === b.bases?.first &&
-    a.bases?.second === b.bases?.second &&
-    a.bases?.third === b.bases?.third &&
-    a.batter?.order === b.batter?.order &&
-    a.batter?.last === b.batter?.last &&
-    a.batter?.line === b.batter?.line &&
-    a.pitcher?.last === b.pitcher?.last &&
-    a.pitcher?.pitches === b.pitcher?.pitches
-  )
-}
-
 // Value-equality checks for the other two things PlayByPlay reports back up
-// (`runsInProgress`, `stepInfo`), for exactly the reason `sameLiveState` above
+// (`runsInProgress`, `stepInfo`), for exactly the reason `sameLiveState` (lib/scorebug/liveState.js)
 // exists: each report arrives as a freshly-built object every time, so a plain
 // setState replaced state — and re-rendered this whole tree — even when the
 // content was identical. See `reportStepInfo`/`reportRunsSoFar` in the component.
@@ -410,6 +387,7 @@ export function InningViewer({
         onReveal={commitReveal}
         callouts={callouts}
         vsTeam={vsTeam}
+        treatment={winProbTreatment}
         highlights={highlights}
         atBatCountFor={atBatCountFor}
         halfInProgress={idx === liveHalfIdx}
