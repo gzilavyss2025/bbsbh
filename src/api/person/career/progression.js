@@ -113,31 +113,33 @@ function formatSeasonSpan(seasons) {
   return start === end ? `${start}` : `${start}–${String(end).slice(2)}`
 }
 
-export function careerTimelineView(splits, group, debutYear, orgOf = null) {
-  // Sum the workload per team-season (a mid-season same-level trade can split
-  // one club's year across rows; a team-less synthetic aggregate row carries no
-  // team.id and is skipped by the guard, so it can't double-count). Also tally
-  // MLB workload per season so the post-debut rehab test below can compare.
-  // `order` keeps the earliest position that team-season held in the input —
-  // the only chronological signal a year-by-year split carries (statsapi lists
-  // a traded season's stints in the order he played them, and the caller
-  // concatenates MLB before the MiLB fan-out). The org sort below reads it.
+// Sum the workload per team-season (a mid-season same-level trade can split one
+// club's year across rows; a team-less synthetic aggregate row carries no
+// team.id and is skipped by the guard, so it can't double-count). `order` keeps
+// the earliest position that team-season held in the input — the only
+// chronological signal a year-by-year split carries (statsapi lists a traded
+// season's stints in the order he played them, and the caller concatenates MLB
+// before the MiLB fan-out).
+function teamSeasonTotals(splits) {
   const byKey = new Map()
   for (const [i, s] of (splits ?? []).entries()) {
     const season = Number(s.season)
     const teamId = s.team?.id
     const sportId = s.sport?.id
     if (!season || !teamId || !sportId) continue
-    const games = num(s.stat?.gamesPlayed)
-    const outs = ipToOuts(s.stat?.inningsPitched)
     const key = `${season}|${teamId}`
     if (!byKey.has(key)) {
       byKey.set(key, { season, teamId, sportId, teamName: s.team?.name ?? '', games: 0, outs: 0, order: i })
     }
     const acc = byKey.get(key)
-    acc.games += games
-    acc.outs += outs
+    acc.games += num(s.stat?.gamesPlayed)
+    acc.outs += ipToOuts(s.stat?.inningsPitched)
   }
+  return [...byKey.values()]
+}
+
+export function careerTimelineView(splits, group, debutYear, orgOf = null) {
+  const byKey = teamSeasonTotals(splits)
   const qualifies = (a) => {
     // Any MLB action at all is real team history — even a single AB or a third
     // of an inning puts that club on the map. The cup-of-coffee floor and the
@@ -159,7 +161,7 @@ export function careerTimelineView(splits, group, debutYear, orgOf = null) {
     if (debutYear && a.season > debutYear && !meetsWorkload(a.games, a.outs, group, REHAB_CAP)) return false
     return true
   }
-  const kept = [...byKey.values()].filter(qualifies)
+  const kept = byKey.filter(qualifies)
   if (!kept.length) return null
 
   // Walk the qualifying team-seasons in chronological order — earliest year
@@ -230,4 +232,46 @@ export function careerTimelineView(splits, group, debutYear, orgOf = null) {
     }
   })
   return { entries }
+}
+
+// ---------------------------------------------------------------------------
+// Team seasons — the per-season ledger behind the Team history card: one row
+// per season with every club he logged real time with, bottom-up by level (MLB
+// last), each stint carrying its level, its MLB parent org (`orgId`: an MLB
+// club is its own; null when a farm club's parent didn't resolve) and a `rehab`
+// flag. Same year-by-year splits and the same workload tests as the timeline
+// above, with one difference: a post-debut MiLB stint under REHAB_CAP is kept
+// and flagged instead of dropped, so the card can print it as a note. A 2020
+// with no stint, between two seasons that have one, is an explicit
+// `{ season: 2020, noSeason: true }` row when he was a minor leaguer in 2019 and
+// played on after 2020 (no minor-league season was played; other empty years,
+// an injury, simply have no row). Order inside a traded
+// season is by level only — ponytail: the timeline's org-grouped sort is not
+// repeated here; add it if a ledger cell must read per org.
+// ---------------------------------------------------------------------------
+
+export function teamSeasonsView(splits, group, debutYear, orgOf = null) {
+  const bySeason = new Map()
+  for (const a of teamSeasonTotals(splits)) {
+    const mlb = a.sportId === 1
+    const rehab = !mlb && !!debutYear && a.season > debutYear && !meetsWorkload(a.games, a.outs, group, REHAB_CAP)
+    if (a.games < 1 && a.outs < 1) continue
+    if (!mlb && !rehab && !meetsWorkload(a.games, a.outs, group, CUP_OF_COFFEE_FLOOR)) continue
+    const stints = bySeason.get(a.season) ?? []
+    stints.push({
+      teamId: a.teamId, teamName: a.teamName, sportId: a.sportId, level: SPORT_LABEL[a.sportId] ?? '',
+      orgId: mlb ? a.teamId : orgOf?.(a.teamId, a.season) ?? null, rehab,
+    })
+    bySeason.set(a.season, stints)
+  }
+  const years = [...bySeason.keys()].sort((x, y) => x - y)
+  if (!years.length) return null
+  const seasons = years.map((season) => ({
+    season,
+    stints: bySeason.get(season).sort((x, y) => CAREER_ORDER.indexOf(x.sportId) - CAREER_ORDER.indexOf(y.sportId)),
+  }))
+  if (years.at(-1) > 2020 && !bySeason.has(2020) && bySeason.get(2019)?.every((x) => x.sportId !== 1)) {
+    seasons.splice(seasons.findIndex((s) => s.season > 2020), 0, { season: 2020, noSeason: true })
+  }
+  return { seasons }
 }
