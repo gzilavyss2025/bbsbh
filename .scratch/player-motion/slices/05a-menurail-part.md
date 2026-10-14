@@ -26,11 +26,13 @@ part: no baseball knowledge, no `api/` import.
 
 ## Done means
 
-- `src/components/ui/control/MenuRail.jsx` renders the API below. Each card is the real
-  `Button` (`.btn`), so the house focus ring, the disabled state and the slice-02
-  stamp-press come with it ("One control, one door", `src/CLAUDE.md` l.222).
-- `src/components/ui/control/menuRail.js` holds the pure core: the `shownKey` lag, the a/b
-  generation, the class lists, the card props and the panel props.
+- `src/components/ui/control/MenuRail.jsx` renders the API below. Each card is a `.btn`
+  (the markup `Button.jsx` writes, through `buttonClass.js`), so the house focus ring, the
+  disabled state and the slice-02 stamp-press come with it ("One control, one door",
+  `src/CLAUDE.md` l.222).
+- `src/components/ui/control/menuRail.js` holds the pure core (the `shownKey` lag, the a/b
+  generation, the class lists, the card and panel props) and the markup builder
+  `menuRailMarkup(h, props)`, so the test can server-render the real markup.
 - `src/styles/system/menurail/menurail.css` draws the menu state, the rail state, the
   picked card and the open/closed panel, with tokens only.
 - `src/index.css` imports it after `system/jumpbar/jumpbar.css`.
@@ -42,7 +44,7 @@ part: no baseball knowledge, no `api/` import.
 | File | Change |
 |---|---|
 | `src/components/ui/control/MenuRail.jsx` | **new**: the component |
-| `src/components/ui/control/menuRail.js` | **new**: the pure core (node cannot import `.jsx`) |
+| `src/components/ui/control/menuRail.js` | **new**: the pure core and the markup builder (node cannot import `.jsx`) |
 | `src/styles/system/menurail/menurail.css` | **new**: resting look and states. A **new subfolder**: `src/styles/system/` holds 12 `.css` files today, the `check-dir-size.mjs` cap (`MAX_FILES = 12`). Slice 03a does the same (`system/segmented/segmented.css`) |
 | `src/index.css` | one `@import` line |
 | `test/menurail.test.js` | **new**: the pure core, the markup source, the CSS |
@@ -181,11 +183,21 @@ width would snap while the padding glides. A fixed basis glides. A long title el
 
 ## Build
 
-### 1. `src/components/ui/control/menuRail.js` (pure)
+### 1. `src/components/ui/control/menuRail.js` (pure, and the markup builder)
+
+The markup is built here with `h` (React's `createElement`), so `node --test` can render it
+with `react-dom/server` and read the real attributes. Node cannot import a `.jsx` file, so
+the cards and the Back button write the markup `Button.jsx` writes (`type="button"`,
+`buttonClassName`, `buttonAria`, the `.btn__icon` span) through the same pure helpers in
+`src/lib/design/buttonClass.js`. Slice 03a's `Segmented` does the same
+(`segmentedMarkup(h, props)`). They are still `.btn`: one control, one door.
 
 ```js
-// THE MENU RAIL'S PURE CORE (#2073, slice 05). MenuRail.jsx renders it; node --test
-// pins it (a .jsx file cannot be imported there).
+import { buttonAria, buttonClassName } from '../../../lib/design/buttonClass.js'
+
+// THE MENU RAIL'S PURE CORE AND MARKUP (#2073, slice 05). MenuRail.jsx holds the state and
+// calls menuRailMarkup(createElement, …); node --test renders the same builder with
+// react-dom/server (a .jsx file cannot be imported there).
 //
 // The view is { picked, shownKey, gen }:
 //   picked    what the caller says is picked now (a key or null)
@@ -222,8 +234,8 @@ export function rootProps({ picked = null, railMeta = false, className = '' } = 
   }
 }
 
-// The props for the card's Button. `pressed` is always a boolean, so every card is a
-// toggle (aria-pressed "true" or "false"), never an ordinary action.
+// The card's props. `pressed` is always a boolean, so every card is a toggle
+// (aria-pressed "true" or "false"), never an ordinary action.
 export function cardProps(item, picked = null) {
   return {
     className: ['menurail__card', item.className].filter(Boolean).join(' '),
@@ -239,14 +251,83 @@ export const panelProps = (open) => ({
   className: open ? 'menurail__panel menurail__panel--open' : 'menurail__panel',
   inert: !open,
 })
+
+// The whole part. `view` is the step nextView returned for this render.
+export function menuRailMarkup(h, { label, items, picked = null, onPick, panel, backLabel, railMeta = false, className = '', view }) {
+  const open = picked != null
+  const card = (item) => {
+    const { pressed, className: cls, ...rest } = cardProps(item, picked)
+    return h(
+      'button',
+      {
+        key: item.key,
+        type: 'button',
+        className: buttonClassName({ className: cls }),
+        ...buttonAria({ pressed }),
+        ...rest,
+        onClick: () => onPick(pickFor(item.key, picked)),
+      },
+      h(
+        'span',
+        { className: 'menurail__top' },
+        item.mark != null && h('span', { className: 'menurail__mark', 'aria-hidden': 'true' }, item.mark),
+        h('span', { className: 'menurail__title' }, item.title),
+        item.meta != null && h('span', { className: 'menurail__meta' }, item.meta),
+      ),
+      item.figures != null &&
+        h(
+          'span',
+          { className: 'menurail__fold' },
+          h('span', { className: 'menurail__figs' }, h('span', { className: 'menurail__figsin' }, item.figures)),
+        ),
+    )
+  }
+  const cells = items.flatMap((item) => [
+    item.heading ? h('span', { key: `${item.key}:head`, className: 'menurail__head' }, item.heading) : null,
+    card(item),
+  ])
+  const back =
+    backLabel &&
+    h(
+      'button',
+      { type: 'button', className: buttonClassName({ skin: 'ghost', className: 'menurail__back' }), onClick: () => onPick(null) },
+      h('span', { className: 'btn__icon', 'aria-hidden': 'true' }, '←'),
+      backLabel,
+    )
+  const body = view.shownKey != null && h('div', { className: bodyClass(view.gen) }, panel(view.shownKey))
+  return h(
+    'div',
+    rootProps({ picked, railMeta, className }),
+    h('div', { className: 'menurail__menu', role: 'group', 'aria-label': label }, ...cells),
+    panel &&
+      h(
+        'div',
+        panelProps(open),
+        h('div', { className: 'menurail__panelin' }, h('div', { className: 'menurail__inner' }, back, body)),
+      ),
+  )
+}
 ```
+
+Notes:
+- `cells` is spread into `h(…)` as separate children, so the keys are only for React's
+  list check; spreading with keys is fine. If the dev build warns about keys, pass
+  `cells` as one array child instead (`h('div', {...}, cells)`).
+- `inert` is a boolean prop in React 19 (`package.json` has `react ^19.3.0`): `true` writes
+  `inert=""`, `false` writes nothing.
+- The panel follows the menu in the DOM, so Tab goes card, card, …, Back, panel.
+- The Back button sits OUTSIDE the rising body, as on the canvas (`.ar-back` is before
+  `.ar-ff1`). It stays put while the content rises.
+- Why three wrappers in the fold and the panel: the grid track goes to `0fr`, and the item
+  with `min-height: 0; overflow: hidden` goes to 0 height. Padding on THAT item would stay
+  (padding is not part of the content height), so the padding sits one level deeper
+  (`__figsin`, `__inner`).
 
 ### 2. `src/components/ui/control/MenuRail.jsx`
 
 ```jsx
-import { Fragment, useState } from 'react'
-import { Button } from './Button.jsx'
-import { bodyClass, cardProps, firstView, nextView, panelProps, pickFor, rootProps } from './menuRail.js'
+import { createElement, useState } from 'react'
+import { firstView, menuRailMarkup, nextView } from './menuRail.js'
 
 // THE MENU RAIL (#2073, slice 05): one shared menu of cards that folds into a rail, with
 // a focus panel under it for the picked card. Arsenal, Splits, Plate approach and Contact
@@ -257,73 +338,24 @@ import { bodyClass, cardProps, firstView, nextView, panelProps, pickFor, rootPro
 //             label, disabled, heading, style, className }]
 //   picked    a key, or null for the full menu.   onPick(key | null)
 //   panel     optional (key) => node: the focus panel. It stays mounted, so it can fold.
-//   backLabel optional: a ghost Button at the top of the panel that closes it.
+//   backLabel optional: a ghost button at the top of the panel that closes it.
 //   railMeta  keep `meta` on the rail (Arsenal keeps the mph).
 //   className the caller's namespace on the root; it may set --menurail-card and
 //             --menurail-rail (the two flex bases).
 //
-// Each card is the real Button (one control, one door), so the focus ring, the disabled
-// state and the stamp-press are the button's own.
-export function MenuRail({ label, items, picked = null, onPick, panel, backLabel, railMeta = false, className = '' }) {
+// The markup is menuRail.js's builder, so node --test renders exactly what ships. Each
+// card is a .btn (the markup Button.jsx writes), so the focus ring, the disabled state and
+// the stamp-press are the button's own.
+export function MenuRail(props) {
+  const picked = props.picked ?? null
   // Adjust state during render (React's documented escape hatch, as useBecameTrue does):
   // the committed DOM carries the new body class from its first frame.
   const [view, setView] = useState(() => firstView(picked))
   const next = nextView(view, picked)
   if (next !== view) setView(next)
-  const open = picked != null
-
-  return (
-    <div {...rootProps({ picked, railMeta, className })}>
-      <div className="menurail__menu" role="group" aria-label={label}>
-        {items.map((item) => (
-          <Fragment key={item.key}>
-            {item.heading && <span className="menurail__head">{item.heading}</span>}
-            <Button {...cardProps(item, picked)} onClick={() => onPick(pickFor(item.key, picked))}>
-              <span className="menurail__top">
-                {item.mark != null && <span className="menurail__mark" aria-hidden="true">{item.mark}</span>}
-                <span className="menurail__title">{item.title}</span>
-                {item.meta != null && <span className="menurail__meta">{item.meta}</span>}
-              </span>
-              {item.figures != null && (
-                <span className="menurail__fold">
-                  <span className="menurail__figs">
-                    <span className="menurail__figsin">{item.figures}</span>
-                  </span>
-                </span>
-              )}
-            </Button>
-          </Fragment>
-        ))}
-      </div>
-      {panel && (
-        <div {...panelProps(open)}>
-          <div className="menurail__panelin">
-            <div className="menurail__inner">
-              {backLabel && (
-                <Button skin="ghost" icon="←" className="menurail__back" onClick={() => onPick(null)}>
-                  {backLabel}
-                </Button>
-              )}
-              {next.shownKey != null && <div className={bodyClass(next.gen)}>{panel(next.shownKey)}</div>}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
+  return menuRailMarkup(createElement, { ...props, picked, view: next })
 }
 ```
-
-Notes:
-- `inert` is a boolean prop in React 19 (`package.json` has `react ^19.3.0`): `inert={true}`
-  writes `inert=""`, `false` writes nothing.
-- The panel follows the menu in the DOM, so Tab goes card, card, …, Back, panel.
-- The Back button sits OUTSIDE the rising body, as on the canvas (`.ar-back` is before
-  `.ar-ff1`). It stays put while the content rises.
-- Why three wrappers in the fold and the panel: the grid track goes to `0fr`, and the item
-  with `min-height: 0; overflow: hidden` goes to 0 height. Padding on THAT item would stay
-  (padding is not part of the content height), so the padding sits one level deeper
-  (`__figsin`, `__inner`).
 
 ### 3. `src/styles/system/menurail/menurail.css`
 
@@ -534,27 +566,49 @@ Do NOT put it between `system/button.css` and `07-team-logo-and-buttons.css`:
 ## Test first
 
 `test/menurail.test.js`. Write it, run `node --test test/menurail.test.js`, see every case
-fail (the files do not exist), then build.
+fail (the files do not exist), then build. The markup cases render the real builder with
+`react-dom/server` (the suite's one way to read React output; `test/CLAUDE.md`).
 
 ```js
-// The shared menu, rail and panel (#2073, slice 05a): the pure core, the markup the
-// component writes, and the resting CSS of the two states.
+// The shared menu, rail and panel (#2073, slice 05a): the pure core, the markup it renders
+// (server-rendered, the real builder MenuRail.jsx calls) and the resting CSS of the states.
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { stripComments, ruleBody } from './helpers/css.js'
 import {
-  BODY_A, BODY_B, bodyClass, cardProps, firstView, nextView, panelProps, pickFor, rootProps,
+  BODY_A, BODY_B, bodyClass, cardProps, firstView, menuRailMarkup, nextView, panelProps, pickFor, rootProps,
 } from '../src/components/ui/control/menuRail.js'
-import { buttonAria } from '../src/lib/design/buttonClass.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const read = (rel) => readFileSync(join(SRC, rel), 'utf8')
 const css = () => stripComments(read('styles/system/menurail/menurail.css'))
 const decl = (body, property) =>
   body?.split(';').map((d) => d.trim()).find((d) => d.startsWith(`${property}:`))?.slice(property.length + 1).trim()
+
+const ITEMS = [
+  { key: 'a', title: 'First', meta: '41%', figures: 'one', label: 'First: 41 percent' },
+  { key: 'b', title: 'Second', meta: '27%', figures: 'two', heading: 'Group B' },
+  { key: 'c', title: 'Third', disabled: true },
+]
+const render = ({ picked = null, view = firstView(picked), ...rest } = {}) =>
+  renderToStaticMarkup(
+    menuRailMarkup(createElement, {
+      label: 'Kinds',
+      items: ITEMS,
+      onPick() {},
+      panel: (k) => createElement('p', null, `panel ${k}`),
+      backLabel: 'All kinds',
+      picked,
+      view,
+      ...rest,
+    }),
+  )
+const count = (s, needle) => s.split(needle).length - 1
 
 test('the panel shows the last pick while it folds shut (the shownKey lag)', () => {
   let v = firstView(null)
@@ -567,18 +621,15 @@ test('the panel shows the last pick while it folds shut (the shownKey lag)', () 
 })
 
 test('every new pick swaps the body a <-> b; a close or the same pick does not', () => {
-  let v = firstView(null)
-  v = nextView(v, 'FF')
+  let v = nextView(firstView(null), 'FF')
   const g1 = v.gen
   v = nextView(v, 'SL')
   assert.equal(v.gen, g1 + 1)
   assert.notEqual(bodyClass(g1), bodyClass(v.gen))
-  const same = nextView(v, 'SL')
-  assert.equal(same, v) // the same object: no state write during render
+  assert.equal(nextView(v, 'SL'), v) // the same object: no state write during render
   const shut = nextView(v, null)
   assert.equal(shut.gen, v.gen)
-  const again = nextView(shut, 'SL') // re-open the same pitch: it rises again
-  assert.equal(again.gen, v.gen + 1)
+  assert.equal(nextView(shut, 'SL').gen, v.gen + 1) // re-open the same one: it rises again
   assert.deepEqual([bodyClass(0), bodyClass(1)], [`menurail__body ${BODY_A}`, `menurail__body ${BODY_B}`])
 })
 
@@ -588,41 +639,60 @@ test('a tap on the picked card closes; a tap on another picks it', () => {
   assert.equal(pickFor('SL', null), 'SL')
 })
 
-test('the root says which state it is in', () => {
-  assert.deepEqual(rootProps({ picked: null }), { className: 'menurail', 'data-state': 'menu' })
-  assert.deepEqual(rootProps({ picked: 'FF', railMeta: true, className: 'x' }), {
+test('the small helpers: root state, card toggle, inert panel', () => {
+  assert.deepEqual(rootProps({ picked: 'a', railMeta: true, className: 'x' }), {
     className: 'menurail menurail--rail menurail--railmeta x',
     'data-state': 'rail',
   })
-})
-
-test('every card is a toggle: aria-pressed true on the pick, false on the rest', () => {
-  const ff = { key: 'FF', title: 'Four-seam', label: 'Four-seam: 40%' }
-  assert.deepEqual(buttonAria(cardProps(ff, 'FF')), { 'aria-pressed': 'true' })
-  assert.deepEqual(buttonAria(cardProps(ff, 'SL')), { 'aria-pressed': 'false' })
-  assert.deepEqual(buttonAria(cardProps(ff, null)), { 'aria-pressed': 'false' })
-  assert.equal(cardProps(ff, null)['aria-label'], 'Four-seam: 40%')
-  assert.equal(cardProps({ key: 'v', disabled: true }, null).disabled, true)
-  assert.equal(cardProps({ key: 'v' }, null).disabled, undefined)
-  assert.equal(cardProps({ key: 'v', className: 'is-x' }, null).className, 'menurail__card is-x')
-})
-
-test('a closed panel is inert; an open one is not', () => {
+  assert.equal(cardProps({ key: 'a' }, null).pressed, false)
+  assert.equal(cardProps({ key: 'a', className: 'is-x' }, 'a').className, 'menurail__card is-x')
   assert.deepEqual(panelProps(false), { className: 'menurail__panel', inert: true })
   assert.deepEqual(panelProps(true), { className: 'menurail__panel menurail__panel--open', inert: false })
 })
 
-test('the component writes the group, the Button cards, the inert panel and the a/b body', () => {
-  const jsx = read('components/ui/control/MenuRail.jsx')
-  assert.match(jsx, /role="group" aria-label=\{label\}/)
-  assert.match(jsx, /<Button \{\.\.\.cardProps\(item, picked\)\}/)
-  assert.match(jsx, /<div \{\.\.\.panelProps\(open\)\}>/)
-  assert.match(jsx, /className=\{bodyClass\(next\.gen\)\}>\{panel\(next\.shownKey\)\}/)
-  assert.match(jsx, /skin="ghost"[^>]*onClick=\{\(\) => onPick\(null\)\}/)
-  assert.doesNotMatch(jsx, /from '\.\.\/\.\.\/\.\.\/api\//) // a ui/ part: no feed
+test('menu state markup: a labelled group of .btn toggles, all off; the panel shut and inert', () => {
+  const html = render()
+  assert.match(html, /^<div class="menurail" data-state="menu">/)
+  assert.match(html, /<div class="menurail__menu" role="group" aria-label="Kinds">/)
+  assert.equal(count(html, 'class="btn menurail__card"'), 3)
+  assert.equal(count(html, 'aria-pressed="false"'), 3)
+  assert.equal(count(html, 'aria-pressed="true"'), 0)
+  assert.match(html, /aria-label="First: 41 percent"/)
+  assert.match(html, /<button type="button" class="btn menurail__card" aria-pressed="false" disabled=""/)
+  assert.ok(html.indexOf('Group B') < html.indexOf('Second')) // the head comes before its card
+  assert.match(html, /<div class="menurail__panel" inert="">/)
+  assert.doesNotMatch(html, /menurail__body/) // nothing picked yet: no body
 })
 
-test('menu state: cards share the row from a 150px basis; the pick is mint with a 2px shadow', () => {
+test('rail state markup: one card pressed, the panel open, not inert, body b (first pick), Back first', () => {
+  const html = render({ picked: 'b', view: nextView(firstView(null), 'b') })
+  assert.match(html, /data-state="rail"/)
+  assert.match(html, /class="menurail menurail--rail"/)
+  assert.equal(count(html, 'aria-pressed="true"'), 1)
+  assert.match(html, /<div class="menurail__panel menurail__panel--open">/)
+  assert.doesNotMatch(html, /menurail__panel menurail__panel--open" inert/)
+  assert.match(html, /class="btn btn--ghost menurail__back"><span class="btn__icon" aria-hidden="true">←<\/span>All kinds<\/button><div class="menurail__body menurail__body--b"><p>panel b<\/p>/)
+})
+
+test('closing keeps the last panel while it folds, and the panel goes inert at once', () => {
+  const open = nextView(nextView(firstView(null), 'a'), 'b') // gen 2: body a
+  const html = render({ picked: null, view: nextView(open, null) })
+  assert.match(html, /data-state="menu"/)
+  assert.match(html, /<div class="menurail__panel" inert="">/)
+  assert.match(html, /<div class="menurail__body menurail__body--a"><p>panel b<\/p>/)
+})
+
+test('no panel prop: no panel at all (Splits opens its own sections)', () => {
+  assert.doesNotMatch(render({ panel: undefined }), /menurail__panel/)
+})
+
+test('MenuRail.jsx renders the builder with the stepped view', () => {
+  const jsx = read('components/ui/control/MenuRail.jsx')
+  assert.match(jsx, /return menuRailMarkup\(createElement, \{ \.\.\.props, picked, view: next \}\)/)
+  assert.match(jsx, /if \(next !== view\) setView\(next\)/)
+})
+
+test('menu state CSS: cards share the row from a 150px basis; the pick is mint with a 2px shadow', () => {
   const c = css()
   assert.equal(decl(ruleBody(c, '.menurail'), '--menurail-card'), 'calc(var(--space-2h) * 15)')
   const card = ruleBody(c, '.menurail__card.btn')
@@ -638,7 +708,7 @@ test('menu state: cards share the row from a 150px basis; the pick is mint with 
   assert.equal(decl(figs, 'overflow'), 'hidden')
 })
 
-test('rail state: narrow cards, the figures fold to 0fr, the meta hides unless railMeta', () => {
+test('rail state CSS: narrow cards, the figures fold to 0fr, the meta hides unless railMeta', () => {
   const c = css()
   assert.equal(decl(ruleBody(c, '.menurail'), '--menurail-rail'), 'calc(var(--tap-min) * 3)')
   assert.equal(decl(ruleBody(c, '.menurail--rail .menurail__card.btn'), 'flex'), '0 0 var(--menurail-rail)')
@@ -647,7 +717,7 @@ test('rail state: narrow cards, the figures fold to 0fr, the meta hides unless r
   assert.equal(decl(ruleBody(c, '.menurail--rail .menurail__head'), 'max-height'), '0')
 })
 
-test('the panel: 0fr and hidden when shut, 1fr and visible when open', () => {
+test('panel CSS: 0fr and hidden when shut, 1fr and visible when open', () => {
   const c = css()
   assert.equal(decl(ruleBody(c, '.menurail__panel'), 'grid-template-rows'), '0fr')
   assert.equal(decl(ruleBody(c, '.menurail__panel--open'), 'grid-template-rows'), '1fr')
@@ -657,11 +727,13 @@ test('the panel: 0fr and hidden when shut, 1fr and visible when open', () => {
 
 test('index.css loads the sheet, and not between button.css and 07', () => {
   const imports = [...read('index.css').matchAll(/@import '\.\/styles\/([^']+)'/g)].map((m) => m[1])
-  const at = imports.indexOf('system/menurail/menurail.css')
-  assert.ok(at > -1)
+  assert.ok(imports.indexOf('system/menurail/menurail.css') > -1)
   assert.equal(imports[imports.indexOf('system/button.css') + 1], '07-team-logo-and-buttons.css')
 })
 ```
+
+If a markup regex fails only on attribute ORDER (React writes props in the order the
+builder passes them), fix the regex to the order the builder writes, not the builder.
 
 ## Verify
 
@@ -684,8 +756,10 @@ test('index.css loads the sheet, and not between button.css and 07', () => {
 ## Stop if
 
 - `src/styles/system/menurail/` already exists with other files in it.
-- `Button` no longer passes `...rest` to the `<button>`, or `pressed` no longer writes
-  `aria-pressed` through `buttonAria`.
+- `buttonClassName` or `buttonAria` (`src/lib/design/buttonClass.js`) changed signature, or
+  `Button.jsx` writes markup the builder does not match (a new attribute or wrapper).
+- `renderToStaticMarkup` writes the inert panel as something other than `inert=""` (then
+  report what it writes; do not drop the attribute).
 - `.btn[aria-pressed='true']` gains specificity above 0,2,0, or `.btn` stops reading
   `--btn-fill` / `--btn-fill-hover`.
 - `check-contrast.mjs` or `check-typography.mjs` fails on a value above and no token fits.

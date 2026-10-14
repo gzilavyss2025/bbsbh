@@ -364,7 +364,7 @@ test('the module gates the drop on first view and swaps a/b on each view or type
 })
 ```
 
-If slice 01 names the hook or its key differently, change the first JSX assertion to
+If slice 01c names the hook or its key differently, change the first JSX assertion to
 the real call, before you write the code. Do not loosen it to a bare `useInViewOnce`.
 
 ## Verify
