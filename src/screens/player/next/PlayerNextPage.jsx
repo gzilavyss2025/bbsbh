@@ -13,7 +13,6 @@ import { AsOfBanner } from '../../../components/seal/AsOfBanner.jsx'
 import { PlayerNextHero } from './PlayerNextHero.jsx'
 import { PlayerNextTiles } from './PlayerNextTiles.jsx'
 import { Slot } from './Slot.jsx'
-import { HeaderExtras } from './top/HeaderExtras.jsx'
 import { OverviewExtras } from './top/OverviewExtras.jsx'
 import { jumpSections, rolesOf, seedEmpty, shownSections, slotInstances } from './sections.js'
 import '../../../styles/player-next/page.css'
@@ -86,7 +85,6 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
         <Stack gap="section" className="pnext__page">
           <Stack gap="section" id="overview">
             <PlayerNextHero core={core.data} />
-            <HeaderExtras core={core.data} />
             {rows.map((b) => (
               <PlayerNextTiles
                 key={b.group}

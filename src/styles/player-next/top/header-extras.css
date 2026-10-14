@@ -1,0 +1,227 @@
+/* Header extras in the hero (#2009, draft A v2 section 2): the OVR stamp on the photo corner,
+   the name-block extras, and the ratings strip at the foot of the hero. The strip is its own
+   query container: from 720px the ladder sits left and the bars take two columns right. */
+
+/* THE STAMP. The photo frame holds it; stamp and POT tag are absolute, so a late rating never
+   moves the hero. */
+.pnext-ovr__photo {
+  position: relative;
+  flex: none;
+}
+/* layout-exempt: the number over its word, centred in the stamp */
+.pnext-ovr__stamp {
+  position: absolute;
+  right: -6px;
+  bottom: -10px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 58px;
+  padding: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+  box-shadow: 3px 3px 0 var(--text-muted);
+  cursor: pointer;
+}
+.pnext-ovr__stamp:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* layout-exempt: a number over its label */
+.pnext-ovr__face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.pnext-ovr__face.is-pressed {
+  animation: pnext-ovr-press var(--dur-fast) var(--ease-press);
+}
+@keyframes pnext-ovr-press {
+  50% {
+    transform: translate(2px, 2px);
+  }
+}
+.pnext-ovr__num {
+  font-size: var(--fs-num-lg);
+  line-height: var(--lh-solid);
+}
+.pnext-ovr__word {
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-xwide);
+}
+.pnext-ovr__pot {
+  position: absolute;
+  top: -10px;
+  right: -6px;
+  z-index: 1;
+  padding: 0 var(--space-1);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  white-space: nowrap;
+}
+
+/* THE NAME BLOCK: a nickname under the name, the school under the club line. */
+.pnext-ovr__nick {
+  margin: var(--space-1) 0 0;
+  color: var(--text-heading);
+  font-size: var(--fs-small);
+  font-style: italic;
+}
+.pnext-ovr__school {
+  margin-top: var(--space-1h);
+}
+.pnext__club .pill.pnext-ovr__tier {
+  background: var(--surface-card);
+}
+
+/* THE STRIP. */
+.pnext-ovr__strip {
+  container-type: inline-size;
+  padding: var(--space-3) var(--space-3h) var(--space-3h);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.pnext-ovr__switch {
+  margin-bottom: var(--space-3);
+}
+/* layout-exempt: ladder over bars on a phone, side by side by container width */
+.pnext-ovr__cols {
+  display: grid;
+  gap: var(--space-3h);
+}
+/* layout-exempt: six fixed tier steps in one row */
+.pnext-ovr__ladder {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-self: start;
+  margin: 0;
+  padding: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  list-style: none;
+}
+/* layout-exempt: a tier name over its first rating */
+.pnext-ovr__ladder li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  padding: var(--space-1) 0;
+  color: var(--text-heading);
+  text-align: center;
+}
+.pnext-ovr__ladder li + li {
+  border-left: var(--bw-rule) solid var(--border-hairline);
+}
+.pnext-ovr__ladder li[aria-current] {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+.pnext-ovr__step {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  text-transform: uppercase;
+}
+.pnext-ovr__lo {
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--fs-cell);
+}
+.pnext-ovr__ladder li[aria-current] .pnext-ovr__lo {
+  color: var(--text-on-ink-cream);
+}
+/* OvrBars on the stamp's look: flat (no slant), twenty segments in mint; the value chip keeps
+   its tier colour. */
+.pnext-ovr__strip .pnext__ovr {
+  --ovr-slant: 0deg;
+}
+.pnext-ovr__strip .ovrbars__fill {
+  background: repeating-linear-gradient(90deg, var(--field-mint) 0 calc(5% - 2px), transparent calc(5% - 2px) 5%);
+}
+
+/* THE LEVEL METER (a minor leaguer): mint to now, hatching to POT, an ink line at the cap. */
+.pnext-ovr__meter {
+  position: relative;
+  height: 22px;
+  margin-top: var(--space-6);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.pnext-ovr__fill,
+.pnext-ovr__hatch {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
+.pnext-ovr__fill {
+  border-right: 3px solid var(--border-stamped);
+  background: var(--field-mint);
+}
+.pnext-ovr__hatch {
+  background: repeating-linear-gradient(135deg, var(--text-muted) 0 2px, transparent 2px 7px);
+  opacity: 0.4;
+}
+.pnext-ovr__cap {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  border-left: var(--bw-heavy) solid var(--border-stamped);
+}
+.pnext-ovr__mtag {
+  position: absolute;
+  top: -28px;
+  padding: var(--space-1) var(--space-1h);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+.pnext-ovr__mtag--cap {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-heading);
+}
+/* layout-exempt: the scale's two ends */
+.pnext-ovr__scale {
+  display: flex;
+  justify-content: space-between;
+  margin: var(--space-1) 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-cell);
+}
+
+@container (min-width: 720px) {
+  .pnext-ovr__cols {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-6);
+  }
+  .pnext-ovr__strip .ovrbars {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-5);
+  }
+}
+@media (min-width: 740px) {
+  .pnext-ovr__stamp {
+    width: 64px;
+    height: 66px;
+  }
+}
