@@ -194,7 +194,7 @@ test('with every slot a stub, all nine batter buttons show', () => {
 // Modules an issue has built: real modules, which may return null and call onEmpty when
 // they have no data. Add a module here in the PR that builds it; every other module must
 // still be a stub.
-const BUILT = new Set(['tbd', 'similar', 'prospects', 'innings', 'contract', 'mound', 'form', 'season', 'firsts', 'pform', 'path', 'splits', 'contact', 'fouls', 'arsenal', 'pitchlog', 'plate', 'batlog'])
+const BUILT = new Set(['tbd', 'similar', 'prospects', 'innings', 'contract', 'mound', 'form', 'season', 'firsts', 'pform', 'path', 'splits', 'contact', 'fouls', 'arsenal', 'pitchlog', 'plate', 'batlog', 'target'])
 
 // A stub renders nothing, so Slot's probe hides its card (and a section whose every slot is a
 // stub loses its button) until the issue builds it: the live page never shows a "loads here"
