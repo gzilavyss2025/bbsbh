@@ -77,6 +77,12 @@
 .pitchlog__hi--er {
   color: var(--accent-negative);
 }
+/* On the open game's row (LogTable's aria-current, the selected fill) a loss reads the
+   deeper clay: --accent-negative is under AA on --surface-row-selected
+   (src/lib/design/contrastPairings.js). */
+.pitchlog tr[aria-current='true'] :is(.pitchlog__score--L, .pitchlog__hi--er) {
+  color: var(--clay-deep);
+}
 
 .pitchlog__pc {
   white-space: nowrap;
