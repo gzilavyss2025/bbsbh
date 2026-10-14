@@ -144,9 +144,9 @@ test('bat speed and squared-up % format as one-decimal numbers, mph and percent'
   assert.equal(rows.find((r) => r.key === 'squaredUp').value, '23.4%')
 })
 
-test('swing length is flagged lower-is-better; bat speed and squared-up % are not', () => {
+test('swing length keeps Savant\'s order, so only chase % is lower-is-better', () => {
   const rows = percentileRows(BAT_WITH_TRACKING, RAW_BAT_WITH_TRACKING, 'hitting')
-  assert.equal(rows.find((r) => r.key === 'swingLength').lowerIsBetter, true)
+  assert.equal(rows.find((r) => r.key === 'swingLength').lowerIsBetter, false)
   assert.equal(rows.find((r) => r.key === 'batSpeed').lowerIsBetter, false)
   assert.equal(rows.find((r) => r.key === 'squaredUp').lowerIsBetter, false)
 })
@@ -219,7 +219,7 @@ test('the definition explains the baseline only when a baseline is present', () 
 })
 
 test('a lower-is-better metric\'s baseline is the raw figure, not a verdict', () => {
-  // Chase % and swing length are lower-is-better: the median printed beside
+  // Chase % is lower-is-better (swing length keeps Savant's order): the median printed beside
   // them must still be Savant's own raw median rate, unflipped — the strip's
   // dot position (not the baseline number) is what already encodes direction.
   const rows = percentileRows(BAT_WITH_TRACKING, RAW_BAT_WITH_TRACKING, 'hitting', {
@@ -227,6 +227,6 @@ test('a lower-is-better metric\'s baseline is the raw figure, not a verdict', ()
     swingLength: 7.3,
   })
   const swingLength = rows.find((r) => r.key === 'swingLength')
-  assert.equal(swingLength.lowerIsBetter, true)
+  assert.equal(swingLength.lowerIsBetter, false)
   assert.equal(swingLength.baseline, '7.3')
 })
