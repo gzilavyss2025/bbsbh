@@ -1,11 +1,54 @@
-/* ==== THE CREST SHEET (docs/lineup-redesign.md, slice S6) ====
-   Uniform, club colours, marks and the batter figure, in the app's bottom sheet. */
+/* ==== THE SHEETS (docs/lineup-redesign.md): crest, ballpark, umpire ====
+   The app's bottom sheet under a scrim, with a house band at the top and stamped boxes inside. */
 
-.lsheet__title {
+/* layout-exempt: a fixed bar over a scrolling body */
+.lsheet {
+  padding: 0;
+  overflow: hidden;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+}
+/* layout-exempt: title at the left, close at the right */
+.lsheet__bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3h);
+  border-radius: 0;
+}
+.lsheet__bartitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-h2);
+  font-size: var(--fs-title-sm);
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.lsheet__close {
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border: var(--bw-heavy) solid currentColor;
+  background: none;
+  color: inherit;
+  font-size: var(--fs-h3);
+  cursor: pointer;
+}
+.lsheet__close:focus-visible {
+  outline: 2px solid var(--focus-ring-band);
+  outline-offset: 2px;
+}
+.lsheet__body {
+  overflow-y: auto;
+  padding: var(--space-3h) var(--space-3h) calc(var(--space-4) + env(safe-area-inset-bottom));
+}
+.lsheet__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
   text-transform: uppercase;
 }
 .lsheet__sub {
@@ -13,11 +56,16 @@
   color: var(--text-caption);
 }
 .lsheet__head {
-  margin: var(--space-3) 0 var(--space-2);
+  margin: var(--space-4) 0 var(--space-2);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-xwide);
   text-transform: uppercase;
+}
+.lsheet__foot {
+  margin: var(--space-3) 0 0;
+  color: var(--text-caption);
+  font-size: var(--fs-small);
 }
 /* layout-exempt: swatches and marks wrap as a row */
 .lsheet__colors,
@@ -53,8 +101,193 @@
   align-items: center;
   gap: var(--space-1h);
 }
-
 /* The batter figure, smaller than the Uniform fact's own sheet so the marks stay in view. */
 .lsheet .ufig {
   height: min(260px, 40dvh);
+}
+
+/* THE PARK: stat boxes, then ranked rows with a dot on a bar. */
+/* layout-exempt: three boxed facts, a fixed row */
+.lpark__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: var(--space-3) 0 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+.lpark__fact {
+  padding: var(--space-2) var(--space-3);
+}
+.lpark__fact + .lpark__fact {
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+.lpark__fact dt {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lpark__fact dd {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+}
+.lpark__ranks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: label, value, dot bar and rank: a fixed row */
+.lpark__rank {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) 44px minmax(0, 1fr) 84px;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-1h) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.lpark__rank b {
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lpark__val,
+.lpark__rank small {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+.lpark__rank small {
+  color: var(--text-caption);
+  text-align: right;
+}
+.lpark__track {
+  position: relative;
+  display: block;
+  height: 2px;
+  background: var(--border-hairline);
+}
+.lpark__track u {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--accent-tint);
+  text-decoration: none;
+}
+
+/* THE UMPIRE: who, four figures, the zone lean, the area to watch. */
+/* layout-exempt: plate mark beside the name block */
+.lump__id {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.lump__plate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--text-heading);
+  color: var(--surface-card);
+}
+.lump__role {
+  display: block;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.lump__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  text-transform: uppercase;
+}
+.lump__meta {
+  margin: var(--space-1) 0 0;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+/* layout-exempt: four boxed figures, a fixed row */
+.lump__tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: var(--space-3) 0 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+/* layout-exempt: two boxed figures, a fixed row */
+.lump__tiles--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.lump__tile {
+  padding: var(--space-2) var(--space-3);
+}
+.lump__tile + .lump__tile {
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+.lump__tile dt {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lump__tile dd {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+}
+.lump__lean {
+  position: relative;
+  padding-top: var(--space-2);
+}
+.lump__caret {
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 0;
+  margin-left: calc(-1 * var(--space-1h));
+  border-inline: var(--space-1h) solid transparent;
+  border-top: var(--space-2) solid var(--text-heading);
+}
+/* layout-exempt: five equal segments, a fixed row */
+.lump__bar {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+.lump__seg {
+  padding: var(--space-2) var(--space-1);
+  text-align: center;
+}
+.lump__seg + .lump__seg {
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+.lump__seg.is-on {
+  background: var(--text-heading);
+  color: var(--surface-card);
+}
+.lump__seg small {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+/* layout-exempt: the phrase beside the zone map */
+.lump__watch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.lump__watch b {
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
 }

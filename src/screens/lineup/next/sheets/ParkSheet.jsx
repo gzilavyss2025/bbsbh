@@ -1,0 +1,69 @@
+import { BallparkDiagram } from '../../../../components/ballpark/BallparkDiagram.jsx'
+import { rankedDimensions } from '../../../../lib/ballpark/ballparkData.js'
+import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
+import { ordinal } from '../../../../lib/format.js'
+import { SheetFrame } from './SheetFrame.jsx'
+
+// Where a park's value sits among the parks, as a dot on a bar: the deepest at the right end.
+// `rank` 1 is the biggest, so the dot runs from the right (1) to the left (total).
+const spot = (rank, total) => (total > 1 ? ((total - rank) / (total - 1)) * 100 : 50)
+
+function RankRows({ rows }) {
+  return (
+    <ul className="lpark__ranks">
+      {rows.map((r) => (
+        <li key={`${r.group}-${r.key}`} className="lpark__rank">
+          <b>{r.label}</b>
+          <span className="lpark__val">{r.value}′</span>
+          <i className="lpark__track" aria-hidden="true">
+            <u style={{ left: `${spot(r.rank, r.total)}%` }} />
+          </i>
+          <small>
+            {ordinal(r.rank)} of {r.total}
+          </small>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+// The park the game is played in, as a sheet: the real wall for the game's date, when it opened,
+// its roof and capacity, and each outfield distance and wall height ranked among the MLB parks.
+// Static park geometry, no score, so it sits outside any seal. A minor-league park the registry
+// can draw opens with the drawing alone. The drawing is the wall on the game's date; the facts
+// and ranks are today's park, which the foot says when they differ.
+export function ParkSheet({ venue, venueId, gameDate, onClose }) {
+  const data = rankedDimensions(venue, venueId)
+  const layout = resolveBallparkLayout({ venueId, venueName: venue, gameDate })
+  if (!data && !layout) return null
+  const name = venue || data?.name || layout.name
+  return (
+    <SheetFrame title={name} onClose={onClose}>
+      {layout && <BallparkDiagram layout={layout} />}
+      {data && (
+        <>
+          <dl className="lpark__facts">
+            {[
+              ['Opened', data.built],
+              ['Roof', data.roof],
+              ['Capacity', data.capacity?.toLocaleString()],
+            ].map(([label, value]) => (
+              <div key={label} className="lpark__fact">
+                <dt>{label}</dt>
+                <dd>{value || '—'}</dd>
+              </div>
+            ))}
+          </dl>
+          <h4 className="lsheet__head">Outfield distances</h4>
+          <RankRows rows={data.rows.filter((r) => r.group === 'dist')} />
+          <h4 className="lsheet__head">Wall heights</h4>
+          <RankRows rows={data.rows.filter((r) => r.group === 'wall')} />
+        </>
+      )}
+      <p className="lsheet__foot">
+        {layout?.validTo && `The drawing shows the wall used through ${layout.validTo.slice(0, 4)}; the ranks are for today's park. `}
+        {data ? 'Distances from the MLB Stats API, ranked among the MLB parks. Wall outline checked against Baseball Savant.' : 'Distances from the MLB Stats API.'}
+      </p>
+    </SheetFrame>
+  )
+}

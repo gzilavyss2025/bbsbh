@@ -87,9 +87,10 @@
   font-weight: var(--w-bold);
 }
 .lord__vs {
-  color: var(--text-body);
+  color: var(--text-caption);
   font-family: var(--font-mono);
-  font-size: var(--fs-small);
+  font-size: var(--fs-cell);
+  text-transform: uppercase;
 }
 /* layout-exempt: AVG over OPS */
 .lord__avg {

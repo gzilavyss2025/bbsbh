@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { selectRecordIsClosed } from '../../../api/gamerecord/played.js'
-import { BallparkModal } from '../../../components/ballpark/BallparkModal.jsx'
 import { UmpiresCard } from '../../../components/umpire/UmpiresCard.jsx'
 import { FactGrid } from '../../../components/ui/frame/FactGrid.jsx'
 import { ballparkFor } from '../../../lib/ballpark/ballparkData.js'
 import { resolveBallparkLayout } from '../../../lib/ballpark/layout/resolveLayout.js'
 import { CrowdIcon, Fact, managerFact } from '../../TeamInfo.jsx'
 import { parkShort, shortDate } from './logic/factText.js'
+import { ParkSheet } from './sheets/ParkSheet.jsx'
+import { UmpSheet } from './sheets/UmpSheet.jsx'
 
 const DiamondIcon = () => (
   <svg viewBox="0 0 20 20" width="12" height="12" aria-hidden="true" fill="currentColor">
@@ -54,7 +55,7 @@ function ParkCell({ info }) {
         value={parkShort(info.venue)}
         glyph={known && <Glyph label="Ballpark diagram" onClick={() => setOpen(true)}><DiamondIcon /></Glyph>}
       />
-      {open && <BallparkModal venue={info.venue} venueId={info.venueId} gameDate={info.officialDate} onClose={() => setOpen(false)} />}
+      {open && <ParkSheet venue={info.venue} venueId={info.venueId} gameDate={info.officialDate} onClose={() => setOpen(false)} />}
     </>
   )
 }
@@ -109,7 +110,7 @@ export function LineupFacts({ feed, side, info, officials, season, manager, unif
       </FactGrid>
       <FactGrid look="strip" className={`lnext__facts lnext__umps lnext__umps--${officials.length}`}>
         {officials.length === 0 && !selectRecordIsClosed(feed) && <Fact label="Umpires" value="Not posted yet" />}
-        <UmpiresCard officials={officials} seasonYear={season} closed={selectRecordIsClosed(feed)} />
+        <UmpiresCard officials={officials} seasonYear={season} closed={selectRecordIsClosed(feed)} Sheet={UmpSheet} />
       </FactGrid>
     </>
   )

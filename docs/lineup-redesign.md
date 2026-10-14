@@ -38,5 +38,6 @@ nothing is fetched and then hidden.
 | S3 | Batting order, bench, roster fallback | done |
 | S4 | Defensive field, former teammates | done |
 | S5 | Season series, bullpen | done |
-| S6 | Crest sheet (uniform, colours, marks); ballpark and umpire sheets reuse the live modals | done |
+| S6 | Crest, ballpark and umpire sheets on one frame | done |
+| Fidelity pass | Hero, facts, crew strip sized to its count, page grid and rail, dock, starter strips, pitch mix card, order rows, bullpen, series, sheets: matched to the artifact | done |
 | S7 | Tests, docs, swap PR (deletes the old code) | |
