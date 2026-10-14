@@ -78,8 +78,8 @@ export function FlightCard({ rows, season, throws }) {
         <em>{label}</em>
       </div>
       <div className="flight__row" role="group" aria-label="Show">
-        <Button size="control" pressed={seq} onClick={() => setMode('seq')}>In order</Button>
-        <Button size="control" pressed={!seq} onClick={() => setMode('tog')}>Together</Button>
+        <button type="button" className="pnext-pick" aria-pressed={seq} onClick={() => setMode('seq')}>In order</button>
+        <button type="button" className="pnext-pick" aria-pressed={!seq} onClick={() => setMode('tog')}>Together</button>
       </div>
       <div className="flight__row" role="group" aria-label="Pitches">
         {flyers.map((r, n) => (
@@ -100,7 +100,7 @@ export function FlightCard({ rows, season, throws }) {
       </div>
       <div className="flight__row" role="group" aria-label="Camera">
         {CAMERAS.map(([key, name]) => (
-          <Button key={key} size="control" pressed={camera === key} onClick={() => setCamera(key)}>{name}</Button>
+          <button key={key} type="button" className="pnext-pick" aria-pressed={camera === key} onClick={() => setCamera(key)}>{name}</button>
         ))}
       </div>
       <div className="flight__stage">
@@ -131,7 +131,7 @@ export function FlightCard({ rows, season, throws }) {
         {seq && <Button size="control" pressed={ghost} onClick={() => setGhost(!ghost)}>Gravity path</Button>}
         <div className="flight__row" role="group" aria-label="Speed">
           {SPEEDS.map(([v, name]) => (
-            <Button key={name} size="control" pressed={speed === v} onClick={() => setSpeed(v)}>{name}</Button>
+            <button key={name} type="button" className="pnext-pick" aria-pressed={speed === v} onClick={() => setSpeed(v)}>{name}</button>
           ))}
         </div>
       </div>

@@ -120,9 +120,9 @@ export default function BatlogModule({ bio, asOf, season, onEmpty, onCount }) {
         {post > 0 && (
           <Cluster gap="tight" role="group" aria-label="Show games">
             {SCOPES.map(([id, label]) => (
-              <Button key={id} size="control" pressed={id === scope} onClick={() => (setScope(id), setMore(false))}>
+              <button key={id} type="button" className="pnext-pick" aria-pressed={id === scope} onClick={() => (setScope(id), setMore(false))}>
                 {label} <span className="mono">{counts[id]}</span>
-              </Button>
+              </button>
             ))}
           </Cluster>
         )}

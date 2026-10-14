@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import '../../../../../styles/player-next/pitcher/mound.css'
 import { fetchWorkload } from '../../../../../api/workload.js'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
-import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { teamAbbr } from '../../../../../lib/teams.js'
 import { moundView } from './moundView.js'
@@ -38,9 +37,9 @@ export default function MoundModule({ bio, asOf, season, onEmpty }) {
         {view.tabs.length > 1 && (
           <div role="group" aria-label="How the card reads" className="mound__tabs">
             {view.tabs.map((t) => (
-              <Button key={t} size="control" pressed={t === tab} onClick={() => setPicked(t)}>
+              <button key={t} type="button" className="pnext-pick" aria-pressed={t === tab} onClick={() => setPicked(t)}>
                 {TAB_LABEL[t]}
-              </Button>
+              </button>
             ))}
           </div>
         )}

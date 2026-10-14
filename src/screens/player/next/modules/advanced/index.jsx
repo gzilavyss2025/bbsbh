@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import '../../../../../styles/player-next/season/advanced.css'
-import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { loadAdvanced } from './advancedData.js'
@@ -35,7 +34,7 @@ export default function AdvancedModule({ bio, role, asOf, season, onEmpty, onCou
         {views.post && (
           <Cluster role="group" aria-label="Scope">
             {SCOPES.map(([k, text]) => (
-              <Button key={k} size="control" pressed={active === k} onClick={() => (setScope(k), setOpen(null))}>{text}</Button>
+              <button key={k} type="button" className="pnext-pick" aria-pressed={active === k} onClick={() => (setScope(k), setOpen(null))}>{text}</button>
             ))}
           </Cluster>
         )}

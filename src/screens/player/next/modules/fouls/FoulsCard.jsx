@@ -3,7 +3,6 @@ import { fetchFouls, fetchFoulsFor, batterFoulLine, leagueFoulRates } from '../.
 import { CountExplorer, Rail, Stat } from '../../parts/CountExplorer.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
-import { Pill } from '../../../../../components/ui/control/Pill.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { foulsView } from './foulsView.js'
 
@@ -49,9 +48,9 @@ export default function FoulsCard({ bio, asOf, season, onEmpty, onCount }) {
           <span className="fouls__cap">Season baseline</span>
           <Cluster gap="tight" role="group" aria-label="Season stat">
             {view.baseline.map((b, i) => (
-              <Pill key={b.key} role="control" fill="paper" pressed={b === m} onClick={() => setMetric(i)}>
+              <button key={b.key} type="button" className="pnext-pick" aria-pressed={b === m} onClick={() => setMetric(i)}>
                 {b.label}
-              </Pill>
+              </button>
             ))}
           </Cluster>
           <Stack gap="base" className="fouls__metric" aria-live="polite">

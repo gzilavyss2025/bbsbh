@@ -9,9 +9,7 @@ import { fetchFouls, fetchFoulsFor, foulLeaders, compareFoulsInScope, leagueFoul
 import { CountExplorer, Rail, Stat } from '../../parts/CountExplorer.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
-import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { Door } from '../../../../../components/ui/control/Door.jsx'
-import { Pill } from '../../../../../components/ui/control/Pill.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { useRouteLink } from '../../../../../lib/nav.js'
 import { foulsPath } from '../../../../../lib/route.js'
@@ -74,12 +72,12 @@ export default function PfoulsModule({ bio, asOf, season, onEmpty, onCount }) {
       {lines.R && lines.P && (
         <div role="group" aria-label="Part of season" className="pfouls__scope">
           {SCOPES.map(([k, label]) => (
-            <Button key={k} size="control" pressed={k === scope} onClick={() => setPicked(k)}>
+            <button key={k} type="button" className="pnext-pick" aria-pressed={k === scope} onClick={() => setPicked(k)}>
               <span className="pfouls__opt">
                 {label}
                 <span className="pfouls__g">{lines[k].g} G</span>
               </span>
-            </Button>
+            </button>
           ))}
         </div>
       )}
@@ -94,9 +92,9 @@ export default function PfoulsModule({ bio, asOf, season, onEmpty, onCount }) {
           <span className="fouls__cap">Season baseline</span>
           <Cluster gap="tight" role="group" aria-label="Season stat">
             {view.baseline.map((b, i) => (
-              <Pill key={b.key} role="control" fill="paper" pressed={i === metric} onClick={() => setMetric(i)}>
+              <button key={b.key} type="button" className="pnext-pick" aria-pressed={i === metric} onClick={() => setMetric(i)}>
                 {b.label}
-              </Pill>
+              </button>
             ))}
           </Cluster>
           <Stack gap="base" className="fouls__metric" aria-live="polite">

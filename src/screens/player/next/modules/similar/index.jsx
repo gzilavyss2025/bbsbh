@@ -139,9 +139,9 @@ function Focus({ me, comp, mode, setMode, onBack }) {
       {sections.length > 1 && (
         <div className="simp__switch" role="group" aria-label="What the dots show">
           {sections.map((s) => (
-            <Button key={s.key} size="tap" pressed={s.key === sec.key} onClick={() => setMode(s.key)}>
+            <button key={s.key} type="button" className="pnext-pick" aria-pressed={s.key === sec.key} onClick={() => setMode(s.key)}>
               {s.title}
-            </Button>
+            </button>
           ))}
         </div>
       )}

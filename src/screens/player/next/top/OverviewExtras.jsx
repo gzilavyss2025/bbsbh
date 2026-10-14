@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { fetchPostseasonByRound } from '../../../../api/player/postseasonRegister.js'
-import { Button } from '../../../../components/ui/control/Button.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { StatTile } from '../../../../components/ui/frame/StatTile.jsx'
@@ -39,10 +38,10 @@ function Ranks({ block, lit, onLight }) {
             const key = `${r.league}:${it.label}`
             const on = it.tile ? lit?.group === block.group && lit.tile === it.tile : bare === key
             return (
-              <Button key={key} size="control" pressed={on} onClick={() => tap(key, it.tile)}>
+              <button key={key} type="button" className="pnext-pick" aria-pressed={on} onClick={() => tap(key, it.tile)}>
                 <strong className="pnext-ext__ord">{it.text}</strong>
                 {` ${r.league} · ${it.label}${r.club ? ` · with ${r.club}` : ''}`}
-              </Button>
+              </button>
             )
           })}
         </Cluster>
@@ -71,7 +70,7 @@ function Postseason({ block, playerId, season, cutoff }) {
     <Stack gap="snug">
       <Cluster className="pnext-ext__switch" role="group" aria-label="Postseason scope">
         {[['total', 'Total'], ['rounds', 'By round']].map(([key, label]) => (
-          <Button key={key} size="control" pressed={scope === key} onClick={() => setScope(key)}>{label}</Button>
+          <button key={key} type="button" className="pnext-pick" aria-pressed={scope === key} onClick={() => setScope(key)}>{label}</button>
         ))}
       </Cluster>
       {rows ? rows.map((r) => <TileRow key={r.gameType} title={r.series} note={`${r.games} G`} tiles={r.tiles} />) : (

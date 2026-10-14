@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchHitterGridFor } from '../../../../../api/scout/hitterGrid.js'
 import { FactGrid } from '../../../../../components/ui/frame/FactGrid.jsx'
-import { Pill } from '../../../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { pitchMark } from '../../../../../lib/pitch/pitchTypes.js'
@@ -82,9 +81,9 @@ export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
     <div className="fplate">
       <div className="fplate__hands" role="group" aria-label="Pitcher hand">
         {HANDS.map(([h, label]) => (
-          <Pill key={label} role="control" fill="paper" pressed={h === hand} disabled={h != null && !pitchesVs(grid, h)} onClick={() => { setHand(h); setCell(-1) }}>
+          <button key={label} type="button" className="pnext-pick" aria-pressed={h === hand} disabled={h != null && !pitchesVs(grid, h)} onClick={() => { setHand(h); setCell(-1) }}>
             {label}
-          </Pill>
+          </button>
         ))}
       </div>
       <div className="fplate__cols">
