@@ -16,7 +16,7 @@ const SCOPES = [['R', 'Regular'], ['P', 'Postseason'], ['A', 'All']]
 
 // The Splits module (#1886; boards Splits and PitcherSplits): a season and scope bar over four
 // parts — by handedness, situational, splits vs team, game lines. The first two follow the bar;
-// the last two are the career. A pitcher opens on a menu of the four and shows the ones picked.
+// the last two are the career. Both roles open on a menu of the four, on By handedness, and show the ones picked.
 export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount }) {
   const group = role === 'pitching' ? 'pitching' : 'hitting'
   const pitching = group === 'pitching'
@@ -75,15 +75,17 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
   if (empty) return null
   if (!ready && !splits.error) return <div className="splitsmod splitsmod--wait" aria-busy="true" />
 
-  const show = (id) => !pitching || focus === id || focus === 'all'
+  const show = (id) => focus === id || focus === 'all'
   const hand = tables?.hand
   const sit = tables?.sit
   const sitOps = (code) => sit?.groups.flatMap((g) => g.rows).find((r) => r.key === code)?.ops ?? '—'
+  const opsHint = pitching ? 'OPS against' : 'OPS'
+  const careerHint = pitching ? 'Career ERA' : 'Career OPS'
   const menu = [
-    ['h', 'By handedness', hand && `${hand.rows[0].label} ${hand.rows[0].ops} · ${hand.rows[1].label} ${hand.rows[1].ops}`, 'OPS against'],
-    ['s', 'Situational', sit && `Empty ${sitOps('r0')} · RISP ${sitOps('risp')}`, 'OPS against'],
-    vs.data && ['v', 'Splits vs team', 'Every club, career', 'Career ERA'],
-    glView && ['g', 'Game lines', `Home ${doorFigure(glView, 'home', group)} · Road ${doorFigure(glView, 'road', group)}`, 'Career ERA'],
+    ['h', 'By handedness', hand && `${hand.rows[0].label} ${hand.rows[0].ops} · ${hand.rows[1].label} ${hand.rows[1].ops}`, opsHint],
+    ['s', 'Situational', sit && `Empty ${sitOps('r0')} · RISP ${sitOps('risp')}`, opsHint],
+    vs.data && ['v', 'Splits vs team', 'Every club, career', careerHint],
+    glView && ['g', 'Game lines', `Home ${doorFigure(glView, 'home', group)} · Road ${doorFigure(glView, 'road', group)}`, careerHint],
     ['all', 'All four', 'Scroll through everything', 'Every section open'],
   ].filter(Boolean)
   const empties = <p className="splitsmod__none">{`No ${scope === 'P' ? 'postseason ' : ''}splits for ${shown === 'career' ? 'his career' : shown}.`}</p>
@@ -122,19 +124,17 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
         <li><Flag weak />Weakest in its group</li>
       </ul>
 
-      {pitching && (
-        <div className={`splitsmod__menu${focus ? ' is-rail' : ''}`} role="group" aria-label="Splits sections">
-          {menu.map(([id, title, preview, hint]) => (
-            <button key={id} type="button" className="splitsmod__mc" aria-pressed={focus === id} onClick={() => setFocus(focus === id ? '' : id)}>
-              <span className="splitsmod__mt">{title}</span>
-              <span className="splitsmod__mx">
-                <span className="splitsmod__mp">{preview}</span>
-                <span className="splitsmod__mh">{hint}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+      <div className={`splitsmod__menu${focus ? ' is-rail' : ''}`} role="group" aria-label="Splits sections">
+        {menu.map(([id, title, preview, hint]) => (
+          <button key={id} type="button" className="splitsmod__mc" aria-pressed={focus === id} onClick={() => setFocus(focus === id ? '' : id)}>
+            <span className="splitsmod__mt">{title}</span>
+            <span className="splitsmod__mx">
+              <span className="splitsmod__mp">{preview}</span>
+              <span className="splitsmod__mh">{hint}</span>
+            </span>
+          </button>
+        ))}
+      </div>
 
       <div className="splitsmod__cards" aria-busy={splits.loading}>
         {show('h') && (
