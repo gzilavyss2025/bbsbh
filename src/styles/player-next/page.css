@@ -168,6 +168,17 @@
   margin-top: var(--space-3h);
 }
 
+/* A slot holds its measured height (sections.js `minH`) until its module shows content, so a
+   slot that loads above the reader does not push the page. Slot.jsx sets the two numbers. */
+.pnext__slot--hold {
+  min-height: var(--slot-hold);
+}
+@media (min-width: 740px) {
+  .pnext__slot--hold {
+    min-height: var(--slot-hold-wide);
+  }
+}
+
 /* THE TOP CARDS: header extras, overview extras (the status band is top/status.css). */
 /* A small attribute line (the .t-label recipe in src/styles/CLAUDE.md). */
 .pnext__attr {
