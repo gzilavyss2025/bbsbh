@@ -5,6 +5,7 @@ import { MLB_LOG_GAME_TYPES } from '../../../../../api/boxlines/rows.js'
 import { fetchSprayFor, sprayView } from '../../../../../api/spray.js'
 import { rate3 } from '../../../../../api/person/shared.js'
 import { BattedBallMix } from '../../../../../components/charts/BattedBallMix.jsx'
+import { MenuRail } from '../../../../../components/ui/control/MenuRail.jsx'
 import { FactGrid } from '../../../../../components/ui/frame/FactGrid.jsx'
 import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
@@ -12,7 +13,7 @@ import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
 import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg } from '../../../../../lib/ballpark/hitProjection.js'
-import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, mixRows, pickBalls } from './contactView.js'
+import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, menuRows, mixRows, pickBalls } from './contactView.js'
 
 // The batter Contact module (#1888): where each ball went, tapped for its exit velocity, launch
 // angle and xBA, and how his contact ends by ball type. An open surface (ADR-0034): one season of
@@ -77,7 +78,6 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
 
   const cur = sel && shown.includes(sel) ? sel : null
   const detail = cur && ballDetail(cur)
-  const row = mix?.find((r) => r.key === type)
   const pick = (set, v) => { set(v); setSel(null); setGen((g) => g + 1) }
   // wait: the dots hide until the field shows. play: the first sighting this visit.
   // gen > 0: a pick since. rest (seen before, Back in the same tab): the dots show still.
@@ -129,13 +129,6 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
               ))}
             </g>
           </svg>
-          <div className="fcontact__chips" role="group" aria-label="Highlight one kind of ball">
-            {mix?.map((r) => (
-              <button key={r.key} type="button" className="pnext-pick" aria-pressed={r.key === type} disabled={!r.n} onClick={() => pick(setType, r.key === type ? null : r.key)}>
-                {r.name} {r.n}
-              </button>
-            ))}
-          </div>
         </div>
         <div className="fcontact__detail" aria-live="polite">
           {detail ? (
@@ -162,26 +155,49 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
         <>
           <SectionHead look="rule" as="h3" note={`${mix.reduce((t, r) => t + r.n, 0)} balls with a launch angle`}>How contact ends</SectionHead>
           <BattedBallMix battedBall={{ rows: mix }} />
-          {row && (
-            <FactGrid className="fcontact__facts">
-              {[
-                ['Avg exit velo', one(row.ev, ' mph')],
-                ['Hard hit', pct(row.hard)],
-                ['Barrels', row.barrel],
-                ['Avg launch angle', one(row.la, '°')],
-                ['Avg distance', one(row.dist, ' ft')],
-                ['Avg xBA', row.xba == null ? '—' : rate3(row.xba)],
-              ].map(([k, v]) => (
-                <div className="fact" key={k}><dt className="fact__label">{k}</dt><dd className="fact__value">{v}</dd></div>
-              ))}
-            </FactGrid>
-          )}
+          <MenuRail
+            label="Batted ball type"
+            items={menuRows(mix).map((r) => ({
+              key: r.key,
+              title: r.title,
+              meta: r.meta,
+              mark: (
+                <svg className="fcontact__swatch" viewBox="0 0 16 16" aria-hidden="true">
+                  <circle className={`fcontact__dot--${r.key}`} cx="8" cy="8" r="6" />
+                </svg>
+              ),
+              figures: <span className="fcontact__mfig">{r.hits} hits · {r.outs} outs</span>,
+            }))}
+            picked={type}
+            onPick={(k) => pick(setType, k)}
+            panel={(k) => <TypeFacts row={mix.find((r) => r.key === k)} />}
+            backLabel="All batted balls"
+          />
           <p className="fcontact__note">
             Share is of balls with a launch angle. The right-hand figure is his average on those balls (hits over balls in play).
-            Hard is 95 mph or more. Pick a ball type above to see its averages.
+            Hard is 95 mph or more. Pick a ball type to see its averages and to show only those balls on the field.
           </p>
         </>
       )}
     </div>
+  )
+}
+
+// The averages of one ball type: the MenuRail panel.
+function TypeFacts({ row }) {
+  if (!row) return null
+  return (
+    <FactGrid className="fcontact__facts">
+      {[
+        ['Avg exit velo', one(row.ev, ' mph')],
+        ['Hard hit', pct(row.hard)],
+        ['Barrels', row.barrel],
+        ['Avg launch angle', one(row.la, '°')],
+        ['Avg distance', one(row.dist, ' ft')],
+        ['Avg xBA', row.xba == null ? '—' : rate3(row.xba)],
+      ].map(([k, v]) => (
+        <div className="fact" key={k}><dt className="fact__label">{k}</dt><dd className="fact__value">{v}</dd></div>
+      ))}
+    </FactGrid>
   )
 }

@@ -13,6 +13,13 @@
   padding-top: var(--space-4);
 }
 
+/* THE TOP CARDS AT REST: a return visit (Back inside the app) shows the hero and the tiles with
+   no stamp-in. The page drops this class when a jump-bar tap lands on Overview, so that tap
+   stamps them again (slice 07b). It wraps #overview only, so section cards are not touched. */
+.pnext__top--still .card--stamp-in {
+  animation: none;
+}
+
 /* THE HERO: photo left of the identity. */
 /* layout-exempt: photo beside the identity, two fixed parts */
 .pnext__id {

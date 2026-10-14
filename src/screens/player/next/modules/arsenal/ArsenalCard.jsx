@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
+import { MenuRail } from '../../../../../components/ui/control/MenuRail.jsx'
 import { ZONE, sparkD } from './flightView.js'
 import { FlightScene } from './FlightScene.jsx'
 import { GlyphPath, PitchGlyph } from './PitchGlyph.jsx'
@@ -15,8 +16,14 @@ export function ArsenalCard({ rows }) {
   const [run, setRun] = useState(0) // a new key replays the paths' draw-in
   const flyers = rows.filter((r) => r.path)
   const one = rows.find((r) => r.code === solo) ?? null
+  // A pick, a second tap on the picked card (MenuRail sends null) and "All pitches" each replay the
+  // side view, as the board does.
+  const pick = (code) => {
+    setSolo(code)
+    setRun((n) => n + 1)
+  }
   return (
-    <div className={`arsenal__card${one ? ' arsenal__card--solo' : ''}`}>
+    <div className="arsenal__card">
       <div className="arsenal__mix" role="img" aria-label={`Pitch mix: ${rows.map((r) => `${r.mark.name} ${Math.round(r.pct)}%`).join(', ')}`}>
         {rows.map((r) => (
           <span
@@ -57,27 +64,34 @@ export function ArsenalCard({ rows }) {
       )}
       <div className="arsenal__bar">
         {flyers.length > 0 && <Button size="control" onClick={() => setRun(run + 1)}>Replay</Button>}
-        {one && <Button size="control" onClick={() => setSolo(null)}>← All pitches</Button>}
       </div>
-      <div className={`arsenal__menu${one ? ' arsenal__menu--rail' : ''}`} role="group" aria-label="Pitch type">
-        {rows.map((r) => (
-          <Button
-            key={r.code}
-            className="arsenal__pick"
-            pressed={one?.code === r.code}
-            onClick={() => setSolo(one?.code === r.code ? null : r.code)}
-          >
-            <span className="arsenal__name"><PitchGlyph mark={r.mark} /><b>{r.mark.name}</b></span>
-            <span className="arsenal__figs">{dash(r.velo, (v) => `${v.toFixed(1)} mph`)} · {r.pct}%</span>
-            {r.path && (
-              <svg className="arsenal__spark" viewBox="0 0 64 28" aria-hidden="true">
-                <path className="arsenal__sparkline" d={sparkD(r.path)} />
-              </svg>
-            )}
-          </Button>
-        ))}
-      </div>
-      {one && <Detail r={one} />}
+      <MenuRail
+        label="Pitch type"
+        items={rows.map((r) => ({
+          key: r.code,
+          title: r.mark.name,
+          mark: <PitchGlyph mark={r.mark} />,
+          meta: dash(r.velo, (v) => `${v.toFixed(1)} mph`),
+          figures: (
+            <>
+              <span className="arsenal__figs">{r.pct}%</span>
+              {r.path && (
+                <svg className="arsenal__spark" viewBox="0 0 64 28" aria-hidden="true">
+                  <path className="arsenal__sparkline" d={sparkD(r.path)} />
+                </svg>
+              )}
+            </>
+          ),
+        }))}
+        picked={one?.code ?? null}
+        onPick={pick}
+        panel={(code) => {
+          const r = rows.find((x) => x.code === code)
+          return r ? <Detail r={r} /> : null
+        }}
+        backLabel="All pitches"
+        railMeta
+      />
     </div>
   )
 }

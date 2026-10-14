@@ -5,7 +5,7 @@ import { GlyphPath } from './PitchGlyph.jsx'
 const BALL = 0.121 // ft, the ball's radius
 
 // The park seen from one camera, with each pitch type's path drawn up to `s` seconds into its flight.
-// `items` are arsenal rows with a path. Under `solo` the other paths are drawn whole and faint; under
+// `items` are arsenal rows with a path. Under `solo` the other paths are drawn whole as faint ghosts (`.arsenal__path--ghost`); under
 // `ghost` each drawn path gets its gravity-only path dashed beside it. Colour and shape are the
 // pitchMark's (docs/pitch-types.md), passed in on each row.
 export function FlightScene({ camera, w, h, items, s, solo = null, ghost = false, label }) {
@@ -26,7 +26,7 @@ export function FlightScene({ camera, w, h, items, s, solo = null, ghost = false
         const dot = landed && it.landing ? project(cam, [it.landing.x, it.landing.h, PLATE_Z]) : null
         const d = trailD(cam, it.path.at, t)
         return (
-          <g key={it.code} opacity={faint ? 0.25 : 1}>
+          <g key={it.code} className={faint ? 'arsenal__path arsenal__path--ghost' : 'arsenal__path'}>
             {ghost && !faint && <path className="arsenal__gravity" d={trailD(cam, it.path.grav, t)} />}
             <path className="arsenal__halo" d={d} pathLength="1" />
             <path className="arsenal__trail" d={d} pathLength="1" style={{ '--pitch': it.mark.color }} />
