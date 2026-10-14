@@ -46,21 +46,17 @@
 .simp__row:hover {
   background: var(--bg-canvas);
 }
-/* layout-exempt: centres two letters in the box */
-.simp__ini {
+/* The neighbour's headshot, in the box the initials used to fill. Compound with .shot
+   (Headshot always sets it), so it outranks the base .shot sizing. Its monogram
+   fallback is display-sized, so it drops to the box's own size. */
+.shot.simp__shot {
   grid-area: ini;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: var(--simp-ini-w);
   height: var(--simp-ini-h);
   border: var(--bw-heavy) solid var(--border-stamped);
-  background: var(--bg-canvas);
-  color: var(--text-heading);
-  font-family: var(--font-display);
+}
+.shot.simp__shot.shot--fallback {
   font-size: var(--fs-h3);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
 }
 /* layout-exempt: name over the club line */
 .simp__who {
