@@ -152,13 +152,6 @@
   gap: var(--space-3);
   align-items: center;
 }
-/* layout-exempt: two joined buttons */
-.simp__switch {
-  display: flex;
-}
-.simp__switch .pnext-pick {
-  flex: 1;
-}
 .simp__box {
   padding: 0 var(--space-3);
   border: var(--bw-heavy) solid var(--border-stamped);
@@ -283,7 +276,7 @@
   .simp__name {
     font-size: var(--fs-display-md);
   }
-  .simp__switch .pnext-pick {
+  .simp__switch.segmented--fill > .segmented__btn {
     flex: none;
     min-width: 7.5rem;
   }
