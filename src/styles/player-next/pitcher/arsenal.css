@@ -373,6 +373,8 @@
 }
 .flight__fact small {
   display: block;
-  color: var(--text-muted);
-  font-size: var(--fs-small);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
 }

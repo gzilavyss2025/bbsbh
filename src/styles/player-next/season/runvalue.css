@@ -106,9 +106,7 @@
 .runvalue__sentence {
   margin: 0;
 }
-.runvalue__line {
-  font-weight: var(--w-semibold);
-}
+.runvalue__line,
 .runvalue__sentence,
 .runvalue__foot {
   color: var(--text-caption);
