@@ -1,87 +1,154 @@
 /* ==== RUN VALUE (the new player page, #2013) ====
-   Two tiles, then the parts as bars from a zero line: gain to the right, loss to the left. Tokens only. */
+   The total and its rank side by side, a last-to-best strip under them, then one tile per part. Tokens only. */
 
 /* layout-exempt: one column of the card's blocks */
 .runvalue {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 .runvalue--loading {
-  min-height: 280px;
+  min-height: 220px;
 }
 
-/* A 2px ink grid: the gap shows the ink behind the tiles. */
-/* layout-exempt: a fixed two-tile grid */
-.runvalue__tiles {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--bw-heavy);
-  background: var(--border-stamped);
+/* layout-exempt: the total on the left, the rank on the right, both sitting on the baseline */
+.runvalue__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
 }
-.runvalue__tiles--solo {
-  grid-template-columns: 1fr;
+/* layout-exempt: a stack of small label, big figure, caption */
+.runvalue__lead,
+.runvalue__rank {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
 }
-
-.runvalue__parts {
-  list-style: none;
+.runvalue__rank {
+  align-items: flex-end;
+  text-align: right;
+}
+.runvalue__label,
+.runvalue__total,
+.runvalue__place,
+.runvalue__among,
+.runvalue__name,
+.runvalue__num,
+.runvalue__place-note {
   margin: 0;
-  padding: 0;
 }
-/* layout-exempt: label, bar track, number: a fixed three-column row */
-.runvalue__row {
-  display: grid;
-  grid-template-columns: 6.5rem 1fr 2.5rem;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  min-height: 44px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--text-body);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.runvalue__row[aria-pressed='true'] .runvalue__label {
-  font-weight: var(--w-bold);
-}
-.runvalue__label {
+.runvalue__label,
+.runvalue__among,
+.runvalue__name {
   font-family: var(--font-display);
   font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-xwide);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+}
+.runvalue__label,
+.runvalue__name {
+  color: var(--text-caption);
+}
+.runvalue__among {
+  color: var(--text-heading);
+}
+.runvalue__total,
+.runvalue__place {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+}
+.runvalue__total {
+  color: var(--accent-positive);
+  font-size: var(--fs-hero-2xl);
+  line-height: var(--lh-hero);
+}
+.runvalue__place {
+  color: var(--text-heading);
+  font-size: var(--fs-hero-lg);
+  line-height: var(--lh-display);
 }
 
-/* The zero line is the track's middle; a bar is half-width at most. */
-.runvalue__track {
-  position: relative;
-  height: 14px;
+/* The strip: a rail with an end tick each side, and a dot where the rank falls. Decoration: the rank is also printed above. */
+/* layout-exempt: the rail over its end labels */
+.runvalue__strip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
 }
-.runvalue__track::before {
-  content: '';
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 50%;
-  width: var(--bw-hair);
+.runvalue__rail {
+  position: relative;
+  height: var(--space-1);
+  margin-inline: var(--space-2);
   background: var(--border-rule);
 }
-.runvalue__bar {
+.runvalue__rail::before,
+.runvalue__rail::after {
+  content: '';
   position: absolute;
-  top: 2px;
-  bottom: 2px;
-  inset-inline-start: 50%;
+  top: calc(-1 * var(--space-1h));
+  width: var(--bw-heavy);
+  height: var(--space-4);
+  background: var(--border-stamped);
 }
-.runvalue__bar--up {
+.runvalue__rail::before {
+  inset-inline-start: 0;
+}
+.runvalue__rail::after {
+  inset-inline-end: 0;
+}
+.runvalue__mark {
+  position: absolute;
+  top: 50%;
+  width: var(--space-4);
+  height: var(--space-4);
+  box-sizing: border-box;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 50%;
   background: var(--accent-positive);
+  transform: translate(-50%, -50%);
+  z-index: 1;
 }
-.runvalue__bar--down {
-  background: var(--accent-negative);
-  inset-inline-start: auto;
-  inset-inline-end: 50%;
+/* layout-exempt: two end labels, one at each end of the rail */
+.runvalue__ends {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+
+/* The tiles: a gap-rule grid, the ink behind showing through the gaps. Three parts in a row, four (a two-way player) in two. */
+/* layout-exempt: a fixed count of tiles on a hairline */
+.runvalue__parts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--bw-hair);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--border-stamped);
+}
+.runvalue__parts--4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+/* layout-exempt: one column of a tile's name, number, bar and place */
+.runvalue__part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
+  padding: var(--space-3) var(--space-2h);
+  background: var(--surface-card);
 }
 .runvalue__num {
-  text-align: right;
+  font-family: var(--font-display);
+  font-size: var(--fs-display-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
 }
 .runvalue__num--up {
   color: var(--accent-positive);
@@ -92,28 +159,23 @@
 .runvalue__num--flat {
   color: var(--text-caption);
 }
-
-/* The axis sits under the bars' track column: label column on the left, number column on the right. */
-.runvalue__axis {
-  display: flex;
-  justify-content: space-between;
-  margin: 0;
-  margin-inline: calc(6.5rem + var(--space-2)) calc(2.5rem + var(--space-2));
-  font-size: var(--fs-label);
-  color: var(--text-caption);
+.runvalue__track {
+  display: block;
+  height: var(--space-2);
+  background: var(--border-hairline);
 }
-.runvalue__line,
-.runvalue__sentence {
-  margin: 0;
+.runvalue__bar {
+  display: block;
+  height: 100%;
 }
-.runvalue__line,
-.runvalue__sentence,
-.runvalue__foot {
+.runvalue__bar--up {
+  background: var(--accent-positive);
+}
+.runvalue__bar--down {
+  background: var(--accent-negative);
+}
+.runvalue__place-note {
   color: var(--text-caption);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
-  line-height: var(--lh-loose);
-}
-.runvalue__foot {
-  margin: 0;
 }
