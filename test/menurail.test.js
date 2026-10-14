@@ -110,6 +110,11 @@ test('closing keeps the last panel while it folds, and the panel goes inert at o
   assert.match(html, /<div class="menurail__body menurail__body--a"><p>panel b<\/p>/)
 })
 
+test('no panel prop: a pick does not throw', () => {
+  const html = render({ panel: undefined, picked: 'b', view: nextView(firstView(null), 'b') })
+  assert.equal(count(html, 'menurail__panel'), 0)
+})
+
 test('no panel prop: no panel at all (Splits opens its own sections)', () => {
   assert.doesNotMatch(render({ panel: undefined }), /menurail__panel/)
 })

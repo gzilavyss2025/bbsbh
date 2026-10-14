@@ -99,7 +99,7 @@ export function menuRailMarkup(h, { label, items, picked = null, onPick, panel, 
       h('span', { className: 'btn__icon', 'aria-hidden': 'true' }, '←'),
       backLabel,
     )
-  const body = view.shownKey != null && h('div', { className: bodyClass(view.gen) }, panel(view.shownKey))
+  const body = panel && view.shownKey != null && h('div', { className: bodyClass(view.gen) }, panel(view.shownKey))
   return h(
     'div',
     rootProps({ picked, railMeta, className }),
