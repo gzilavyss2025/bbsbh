@@ -10,6 +10,8 @@ const snapshot = {
     { playerId: 815394, group: 'hitting', sportId: 12, percentile: 86, qualified: true, sampleSize: 268, populationSize: 640, movement: null, history: [] },
     { playerId: 808207, group: 'pitching', sportId: 12, percentile: 75, qualified: true, sampleSize: 69, populationSize: 757, movement: { delta: 7, sinceDate: '2026-10-01' }, history: [] },
     { playerId: 800724, group: 'hitting', sportId: 12, percentile: null, qualified: false, sampleSize: 28, populationSize: 640, movement: null, history: [] },
+    { playerId: 900001, group: 'hitting', sportId: 12, percentile: 22, qualified: true, sampleSize: 300, populationSize: 640, movement: null, history: [] },
+    { playerId: 900002, group: 'pitching', sportId: 12, percentile: null, qualified: false, sampleSize: 20, populationSize: 757, movement: null, history: [] },
   ],
 }
 const tenure = { levels: { AA: { hitting: { unit: 'pa', median: 410, n: 366 }, pitching: { unit: 'outs', median: 205, n: 437 } } } }
@@ -50,4 +52,17 @@ test('none hides the card: no trend row, an MLB player, or a page dated before t
   assert.equal(prospectView(snapshot, tenure, { id: 815394, team: { id: 158, parentOrgId: null } }, null), null)
   assert.equal(prospectView(snapshot, tenure, milb(815394, '2005-09-01'), '2025-09-14'), null)
   assert.ok(prospectView(snapshot, tenure, milb(815394, '2005-09-01'), '2026-09-14'))
+})
+
+test('the percentile suffix is the ordinal one, never a fixed "th"', () => {
+  const v = prospectView(snapshot, tenure, milb(900001, '2003-01-01'), null)
+  assert.deepEqual([v.pct, v.suffix], [22, 'nd'])
+  assert.equal(prospectView(snapshot, tenure, milb(815394, '2005-09-01'), null).suffix, 'th')
+})
+
+test('an early-sample tile counts PA for a hitter and IP for a pitcher, never outs', () => {
+  const bat = prospectView(snapshot, tenure, milb(800724, '2005-11-01'), null)
+  assert.deepEqual([bat.tileNum, bat.tileCap], ['28', 'PA of 40'])
+  const arm = prospectView(snapshot, tenure, milb(900002, '2004-01-01'), null)
+  assert.deepEqual([arm.tileNum, arm.tileCap], ['6.2', 'IP of 10.0'])
 })

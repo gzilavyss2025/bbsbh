@@ -69,7 +69,7 @@
   color: var(--text-heading);
 }
 
-.prospect__sub { font-size: var(--fs-small); color: var(--text-caption); }
+.prospect__sub { font-size: var(--fs-cell); line-height: var(--lh-loose); color: var(--text-caption); }
 
 /* layout-exempt: a fixed ledger shape (tile, scale, facts), not an auto-fit grid */
 .prospect__scale { display: grid; gap: var(--space-1); }

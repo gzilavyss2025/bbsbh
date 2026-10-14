@@ -27,14 +27,14 @@ export default function ProspectModule({ bio, asOf, onEmpty, onCount }) {
         {v.state === 'qualified' ? (
           <div className="prospect__tile">
             <span className="prospect__label">{v.heading}</span>
-            <span className="prospect__num">{v.pct}<sup>th</sup></span>
-            <span className="prospect__cap">PERCENTILE</span>
+            <span className="prospect__num">{v.pct}<sup>{v.suffix}</sup></span>
+            <span className="prospect__cap">Percentile</span>
           </div>
         ) : (
           <div className="prospect__tile prospect__tile--hollow">
             <span className="prospect__label">{v.heading}</span>
-            <span className="prospect__num">{v.sampleSize}</span>
-            <span className="prospect__cap">PA OF {v.floor}</span>
+            <span className="prospect__num">{v.tileNum}</span>
+            <span className="prospect__cap">{v.tileCap}</span>
           </div>
         )}
         <div className="prospect__words">

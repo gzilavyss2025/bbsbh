@@ -174,8 +174,10 @@
 }
 .pnext-ovr__read {
   margin: var(--space-2) 0 0;
-  color: var(--text-muted);
-  font-size: var(--fs-small);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
 }
 
 /* THE LEVEL METER (a minor leaguer): mint to now, hatching to POT, a dashed line at the cap. */

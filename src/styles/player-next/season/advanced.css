@@ -88,6 +88,7 @@
   color: var(--text-caption);
 }
 .pnext-adv__cap {
+  font-family: var(--font-mono);
   font-size: var(--fs-label);
   opacity: 0.8;
 }

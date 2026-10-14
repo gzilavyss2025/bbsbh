@@ -10,6 +10,8 @@ const GROUP_WORD = { OPS: 'hitters', ERA: 'pitchers' }
 
 // PA for a hitter, outs for a pitcher (the file's own unit), said the way the page says it.
 const amount = (metric, n) => (metric === 'OPS' ? `${n} PA` : `${outsToIp(n)} IP`)
+const count = (metric, n) => (metric === 'OPS' ? String(n) : outsToIp(n))
+const unit = (metric) => (metric === 'OPS' ? 'PA' : 'IP')
 
 function moveText(movement) {
   const m = movementState(movement)
@@ -40,12 +42,13 @@ export function prospectView(snapshot, tenureSnap, bio, asOf) {
   const age = e && `${e.years} ${e.years === 1 ? 'year' : 'years'} ${e.direction} than the average qualified ${level} ${GROUP_WORD[metric].slice(0, -1)}.`
   const base = { state: view.state, count: level, heading: `${metric} vs ${level}`, metric, tenure, age }
   if (view.state === 'unqualified') {
-    return { ...base, title: `Early sample · ${amount(metric, view.sampleSize)}`, need: `${amount(metric, view.floor)} needed to join the qualified ${level} ${GROUP_WORD[metric]} population.`, sampleSize: view.sampleSize, floor: view.floor }
+    return { ...base, title: `Early sample · ${amount(metric, view.sampleSize)}`, need: `${amount(metric, view.floor)} needed to join the qualified ${level} ${GROUP_WORD[metric]} population.`, tileNum: count(metric, view.sampleSize), tileCap: `${unit(metric)} of ${count(metric, view.floor)}` }
   }
   return {
     ...base,
     pct: view.percentile,
     ordinal: ordinal(view.percentile),
+    suffix: ordinal(view.percentile).slice(String(view.percentile).length),
     standing: view.standing,
     tierLabel: view.tierLabel,
     comparison: `Compared with ${view.populationSize} qualified ${level} ${GROUP_WORD[metric]} with at least ${amount(metric, view.floor)}`,
