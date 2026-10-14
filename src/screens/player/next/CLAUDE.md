@@ -43,6 +43,8 @@ suffix; `twin` adds the suffix to two one-role slots with one name (the two Foul
 - **Count tag:** call `onCount(n)` (or a string); `Slot` draws it on the card's edge.
 - **Height:** `SLOTS` gives each slot `minH: [phone, wide]` (measured, a floor). `Slot` holds that height,
   with no text, until the module shows content (nothing inside says `aria-busy`); then the body rises in once. So every wait block a module returns carries `aria-busy="true"` (`test/player-next-wait-busy.test.js`).
+- **Menus:** the card menus of `splits` (pitcher), `plate`, `contact` and `arsenal` are the shared `MenuRail` (`components/ui/control/`): menu cards fold into a rail and open a panel. A module does not build its own.
+- **Top cards:** the hero and tiles stamp in once per page visit, gated by `viewKey(id, 'top-cards')`; a return visit shows them at rest (`pnext__top--still`, `page.css`).
 - **Failure:** a module that throws, or whose chunk fails to load, hides its card like `onEmpty()`
   (`SlotBoundary`, which logs the error with the slot key); it never takes down the page. The page
   also hides the log slots from its own data: with no season or postseason games, `seedEmpty` hides
