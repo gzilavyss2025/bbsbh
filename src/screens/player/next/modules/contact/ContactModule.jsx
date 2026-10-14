@@ -14,7 +14,7 @@ import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg } from '../../../../../lib/ballpark/hitProjection.js'
 import { FlightMarks, useFlightClock } from './ContactFlight.jsx'
-import { flightFrame, flightOf } from './contactFlight.js'
+import { flightFrame, flightOf, isAirFlight } from './contactFlight.js'
 import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, menuRows, mixRows, pickBalls } from './contactView.js'
 
 // The batter Contact module (#1888): where each ball went, tapped for its exit velocity, launch
@@ -152,7 +152,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
           {detail ? (
             <>
               <span className="fcontact__eyebrow">
-                {flying ? (cur.launchAngle != null && cur.launchAngle < 10 ? 'On the ground' : 'In the air') : detail.eyebrow}
+                {flying ? (isAirFlight(cur) ? 'In the air' : 'On the ground') : detail.eyebrow}
               </span>
               <span className="fcontact__when">{detail.when}</span>
               <span className="fcontact__big">

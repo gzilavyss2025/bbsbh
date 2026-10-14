@@ -149,3 +149,12 @@ test('the module flies the tapped ball and speaks once, on landing', () => {
   assert.match(JSX, /<span className="sr-only" aria-live="polite">/)
   assert.doesNotMatch(JSX, /className="fcontact__detail" aria-live/)
 })
+
+test('isAirFlight is the one predicate for the flight model and its in-flight label', async () => {
+  const { isAirFlight } = await import('../src/screens/player/next/modules/contact/contactFlight.js')
+  assert.equal(isAirFlight({ launchAngle: 9, exitVelo: 90, distance: 150 }), true, '8 degrees and up is a fitted flight')
+  assert.equal(isAirFlight({ launchAngle: 7, exitVelo: 90, distance: 150 }), false)
+  assert.equal(isAirFlight({ launchAngle: null, exitVelo: 90, distance: 150 }), false, 'no angle hops')
+  assert.equal(isAirFlight({ launchAngle: 25, exitVelo: null, distance: 150 }), false, 'no speed hops')
+  assert.equal(isAirFlight({ launchAngle: 25, exitVelo: 90, distance: null }), false, 'no distance hops')
+})

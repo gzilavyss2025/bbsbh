@@ -46,11 +46,15 @@ export function simFlight(ev, la, lift) {
 // angle and a distance is fitted: the lift is bisected until the sim lands at the
 // distance. Anything else hops along the ground. `chord` is home to the landing point
 // in diagram feet, the stand-in for a missing distance.
+// True for a ball the model flies through the air: a lift of 8 degrees or more, with a speed and a
+// distance. Anything else hops, and the panel's in-flight label reads the same predicate.
+export const isAirFlight = (ball) => ball.launchAngle != null && ball.launchAngle >= 8 && ball.exitVelo != null && Boolean(ball.distance)
+
 export function flightModel(ball, chord) {
   const ev = ball.exitVelo, la = ball.launchAngle, dist = ball.distance || chord
   const sf = [], sz = []
   let T
-  if (la != null && la >= 8 && ev != null && ball.distance) {
+  if (isAirFlight(ball)) {
     let lo = 0, hi = 0.45, s
     if (dist <= simFlight(ev, la, lo).dist) s = lo
     else if (dist >= simFlight(ev, la, hi).dist) s = hi
