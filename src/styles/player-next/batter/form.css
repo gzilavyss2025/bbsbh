@@ -79,6 +79,7 @@
 .fform__note {
   margin: var(--space-3) 0 0;
   color: var(--text-caption);
+  font-family: var(--font-mono);
   font-size: var(--fs-small);
   line-height: var(--lh-ui);
 }
