@@ -4,7 +4,7 @@ import test from 'node:test'
 import { ruleBody, stripComments } from './helpers/css.js'
 import {
   DRAG_PITCH, DRAG_YAW, FLY_S, HOLD_S, KEY_TURN, PITCH_MAX, PITCH_MIN, PRE_S,
-  dragTurn, flyStep, landedLoop, needsFrame, seekLoop, setPlayingLoop, startLoop, stepLoop, stillCam, swingCam, turnView, viewAt, wrapAngle,
+  dragTurn, flyStep, isDragStart, isPlainKey, landedLoop, needsFrame, seekLoop, setPlayingLoop, startLoop, stepLoop, stillCam, swingCam, turnView, viewAt, wrapAngle,
 } from '../src/screens/player/next/modules/arsenal/flightMotion.js'
 import { makeCamera, orbitOf, project } from '../src/screens/player/next/modules/arsenal/flightView.js'
 
@@ -160,4 +160,17 @@ test('needsFrame: only while on screen and something moves', () => {
   assert.equal(needsFrame(true, startLoop(false), swing), true)
   assert.equal(needsFrame(true, startLoop(false), still), false)
   assert.equal(needsFrame(false, startLoop(true), swing), false)
+})
+
+test('isDragStart: only the primary button of the primary pointer starts a drag', () => {
+  assert.equal(isDragStart({ button: 0, isPrimary: true }), true)
+  assert.equal(isDragStart({ button: 2, isPrimary: true }), false, 'a right-click opens the context menu')
+  assert.equal(isDragStart({ button: 0, isPrimary: false }), false, 'a second finger must not take the drag')
+})
+
+test('isPlainKey: a modified arrow is left to the browser (Alt+Left is Back)', () => {
+  assert.equal(isPlainKey({ altKey: false, metaKey: false, ctrlKey: false, shiftKey: false }), true)
+  for (const k of ['altKey', 'metaKey', 'ctrlKey', 'shiftKey']) {
+    assert.equal(isPlainKey({ altKey: false, metaKey: false, ctrlKey: false, shiftKey: false, [k]: true }), false, k)
+  }
 })

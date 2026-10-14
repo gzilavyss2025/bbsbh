@@ -99,3 +99,10 @@ export const seekLoop = (L, s) => ({ ...L, phase: 'fly', timer: 0, s, prevS: s, 
 
 // Whether the frame loop has work: the stage is on screen and the loop plays or a camera swings.
 export const needsFrame = (visible, L, cam) => visible && (L.playing || cam.tw < 1)
+
+// Only the primary button of the primary pointer starts a drag: a right-click opens the context menu
+// (and may swallow the pointerup), and a second finger must not take the drag from the first.
+export const isDragStart = (e) => e.button === 0 && e.isPrimary !== false
+
+// A modified arrow key belongs to the browser (Alt+Left is Back), so the stage only turns on a plain one.
+export const isPlainKey = (e) => !(e.altKey || e.metaKey || e.ctrlKey || e.shiftKey)

@@ -3,7 +3,7 @@ import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
 import { CAMERAS, ZONE, orbitOf, towardOf, tunnelView, verdictOf } from './flightView.js'
 import {
-  KEY_TURN, dragTurn, flyStep, landedLoop, needsFrame, seekLoop, setPlayingLoop, startLoop, stepLoop, stillCam, swingCam, turnView,
+  KEY_TURN, dragTurn, flyStep, isDragStart, isPlainKey, landedLoop, needsFrame, seekLoop, setPlayingLoop, startLoop, stepLoop, stillCam, swingCam, turnView,
 } from './flightMotion.js'
 import { FlightScene } from './FlightScene.jsx'
 import { PitchGlyph } from './PitchGlyph.jsx'
@@ -188,6 +188,7 @@ export function FlightCard({ rows, season, throws }) {
         role="group"
         aria-label="Pitch flight view. Drag, or use the arrow keys, to turn it."
         onPointerDown={(e) => {
+          if (!isDragStart(e)) return
           drag.current = { x: e.clientX, y: e.clientY }
           setDragging(true)
           try {
@@ -206,7 +207,7 @@ export function FlightCard({ rows, season, throws }) {
         onPointerCancel={endDrag}
         onKeyDown={(e) => {
           const m = KEY_TURN[e.key]
-          if (!m) return
+          if (!m || !isPlainKey(e)) return
           e.preventDefault()
           turn(m[0], m[1])
         }}
