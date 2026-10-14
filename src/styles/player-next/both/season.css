@@ -37,6 +37,19 @@
   }
 }
 
+/* The register sits bare in the card, dressed like the game log table: heads on the card paper
+   over a heavy stamped rule, the total row on the same paper under another. */
+.seasonmod .ledger thead th {
+  background: var(--surface-card);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.seasonmod .ledger tfoot td {
+  background: var(--surface-card);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+}
+
 /* The WAR figure is a button: dotted rule under it, the tint on hover and while its dialog is open. */
 .seasonmod__war {
   min-height: var(--space-10);
