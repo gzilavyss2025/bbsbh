@@ -325,5 +325,10 @@
   font-size: var(--fs-label);
 }
 .lmix__scene {
-  margin-top: var(--space-3);
+  /* The scene runs edge to edge across the pitch mix card, under its list. */
+  margin: var(--space-3) calc(-1 * var(--space-3)) calc(-1 * var(--space-3));
+  border-width: var(--bw-heavy) 0 0;
+  border-style: solid;
+  border-color: var(--border-stamped);
+  border-radius: 0;
 }
