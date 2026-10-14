@@ -140,8 +140,14 @@ export function useLineupData({ feed, side, vsTeam, careerMatchupsData, workload
   // Which side a hitter bats from (L, R or S), from the game's player table.
   const batsOf = (id) => feed?.gameData?.players?.[`ID${id}`]?.batSide?.code ?? ''
 
+  // A hitter's position and number from the game's player table: the bench rows' small line.
+  const tagOf = (id) => {
+    const p = feed?.gameData?.players?.[`ID${id}`]
+    return [p?.primaryPosition?.abbreviation, p?.primaryNumber && `#${p.primaryNumber}`].filter(Boolean).join(' · ')
+  }
+
   return {
-    batsOf, seriesGames: seriesGames ?? [], meta, oppMeta, info, season, isMlb, closed, lineup, birthdayIds, oppPitcher, oppDefense, oppBullpenArms,
+    batsOf, tagOf, seriesGames: seriesGames ?? [], meta, oppMeta, info, season, isMlb, closed, lineup, birthdayIds, oppPitcher, oppDefense, oppBullpenArms,
     orgTeamId, oppOrgTeamId, careerVsOpp, vsOpponentAbbr, oppPitcherLine,
     arsenal, arsenalTto, arsenalSides, boardGameDate, projectedStarters,
     teammatePairs, orgTies, startingIds, matchups, starterLast, roster, hitterLines: hitterLines ?? {},

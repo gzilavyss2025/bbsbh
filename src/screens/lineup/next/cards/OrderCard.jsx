@@ -25,11 +25,19 @@ const DETAIL = [
   ['RBI', 'rbi'],
   ['AB', 'atBats'],
 ]
+// The wide row's figures, in column order.
+const WIDE_COLS = [
+  ['AVG', 'avg'],
+  ['OPS', 'ops'],
+  ['HR', 'homeRuns'],
+  ['RBI', 'rbi'],
+]
 const val = (line, key) => (line?.[key] == null || line?.[key] === '' ? '—' : line[key])
 
-// One batter: the order number (or the position, before the lineup posts), a photo, the
-// name, the hand and number, his career line against tonight's starter, and his season
-// AVG. A tap opens the rest of the line on a phone; wide screens show it across the row.
+// One batter: the order number (or the position, before the lineup posts), a photo, the name,
+// his position, hand and number, his career line against tonight's starter, and his season
+// line. A tap opens the rest of the line on a phone; a wide screen shows AVG, OPS, HR and RBI
+// across the row, so nothing needs a tap.
 function OrderRow({ lead, player, line, bats, note, wide, open, onToggle, pills }) {
   const detailId = `lnext-det-${player.id}`
   return (
@@ -49,22 +57,25 @@ function OrderRow({ lead, player, line, bats, note, wide, open, onToggle, pills 
             {player.nameLastFirst ?? player.name}
           </PlayerLink>
           <span className="lord__meta">
-            {player.position && <span>{player.position}</span>}
+            {player.position && <span className="lord__pos">{player.position}</span>}
             {bats && <span>Bats {bats}</span>}
-            {player.jersey && <span>#{player.jersey}</span>}
+            {player.jersey && <span className="lord__num">#{player.jersey}</span>}
             {pills}
           </span>
           {note && <span className="lord__vs">{note}</span>}
         </span>
-        <span className="lord__avg">
-          <b>{val(line, 'avg')}</b>
-          <small>{val(line, 'ops')} OPS</small>
-        </span>
-        {wide && DETAIL.slice(2, 4).map(([label, key]) => (
-          <span key={key} className="lord__wide" aria-label={label}>
-            {val(line, key)}
+        {wide ? (
+          WIDE_COLS.map(([label, key], i) => (
+            <span key={key} className={`lord__figure${i === 0 ? ' lord__figure--lead' : ''}`} aria-label={label}>
+              {val(line, key)}
+            </span>
+          ))
+        ) : (
+          <span className="lord__avg">
+            <b>{val(line, 'avg')}</b>
+            <small>{val(line, 'ops')} OPS</small>
           </span>
-        ))}
+        )}
       </button>
       {!wide && open && (
         <dl className="lord__det" id={detailId}>
@@ -107,9 +118,12 @@ export function OrderCard({ data, masthead }) {
       )}
     </>
   )
+  // "vs Snell 0-for-1, 1 K", or that he has no history against him. A game whose starter has no
+  // career file shows no line at all.
   const noteOf = (id) => {
+    if (!data.starterLast) return ''
     const row = matchups.byId.get(id)
-    return row ? matchupLine(row, level) : ''
+    return row ? `vs ${data.starterLast} ${matchupLine(row, level)}` : `No prior meetings with ${data.starterLast}`
   }
   const posted = lineup.length > 0
   const title = posted ? 'Batting order' : 'Who could play'
@@ -121,6 +135,12 @@ export function OrderCard({ data, masthead }) {
       className="lord"
       head={<ClubBar title={title} teamId={meta.id} teamName={meta.teamName} masthead={masthead} season={season} />}
     >
+      {(posted || roster.length > 0) && (
+        <div className="lord__cols" aria-hidden="true">
+          <span>Batter</span>
+          {wide ? WIDE_COLS.map(([label]) => <span key={label}>{label}</span>) : <span>AVG</span>}
+        </div>
+      )}
       {posted ? (
         <ul className="lord__list">
           {lineup.map((p) => (
@@ -167,8 +187,14 @@ export function OrderCard({ data, masthead }) {
           <ul className="lord__benchlist">
             {matchups.bench.map((r) => (
               <li key={r.id} className="lord__benchrow">
-                <b>{r.name}</b>
-                <span>{matchupLine(r, level)}</span>
+                <Headshot personId={r.id} name={r.name} className="lord__benchshot" />
+                <span className="lord__benchname">
+                  <PlayerLink id={r.id} className="lord__benchlink">
+                    {r.name}
+                  </PlayerLink>
+                  <small>{data.tagOf(r.id)}</small>
+                </span>
+                <span className="lord__benchline">{matchupLine(r, level)}</span>
               </li>
             ))}
           </ul>

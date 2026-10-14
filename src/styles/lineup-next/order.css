@@ -32,10 +32,13 @@
 }
 .lord__lead {
   flex: none;
-  min-width: 1.5em;
-  color: var(--text-caption);
+  min-width: 1.6em;
+  padding: var(--space-1) var(--space-1h);
+  background: var(--text-heading);
+  color: var(--surface-card);
   font-family: var(--font-mono);
-  font-size: var(--fs-ui);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
   text-align: center;
 }
 .shot.lord__shot {
@@ -72,6 +75,17 @@
   font-size: var(--fs-small);
   text-transform: uppercase;
 }
+.lord__pos {
+  padding: var(--space-1) var(--space-1h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--accent-tint);
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.lord__num {
+  color: var(--clay);
+  font-weight: var(--w-bold);
+}
 .lord__vs {
   color: var(--text-body);
   font-family: var(--font-mono);
@@ -93,11 +107,43 @@
   color: var(--text-caption);
   font-size: var(--fs-small);
 }
-.lord__wide {
+.lord__figure {
   flex: none;
-  min-width: 3ch;
+  width: 54px;
   text-align: right;
   font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+}
+.lord__figure--lead {
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+}
+
+/* THE COLUMN HEADER sticks to the top while the order scrolls under it. */
+/* layout-exempt: a heading over the figures, one flex row */
+.lord__cols {
+  position: sticky;
+  top: env(safe-area-inset-top, 0);
+  z-index: var(--z-raised);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3h);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lord__cols span:first-child {
+  flex: 1;
+  padding-left: calc(var(--space-6) + var(--space-10));
+}
+.lord__cols span:not(:first-child) {
+  width: 54px;
+  text-align: right;
 }
 
 /* THE DETAIL: the rest of the season line, under an open row. */
@@ -143,16 +189,45 @@
   padding: 0;
   list-style: none;
 }
-/* layout-exempt: name beside its line */
+/* layout-exempt: photo, name block and the career line in a row */
 .lord__benchrow {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
   gap: var(--space-3);
-  padding: var(--space-1h) 0;
+  padding: var(--space-2) 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.shot.lord__benchshot {
+  flex: none;
+  width: 32px;
+  height: 38px;
+  border: var(--bw-hair) solid var(--border-stamped);
+  border-radius: 0;
+}
+/* layout-exempt: a name over its position and number */
+.lord__benchname {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.plink.lord__benchlink {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+}
+.lord__benchname small {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
   font-size: var(--fs-small);
 }
-.lord__benchrow span {
+.lord__benchline {
+  flex: 1;
+  min-width: 0;
   font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-align: right;
 }
 .lord__foot {
   padding: var(--space-2) var(--space-3h) var(--space-3);
