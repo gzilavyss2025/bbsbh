@@ -1,0 +1,204 @@
+/* ==== PERCENTILE RANK (the new player page, #2011) ====
+   A rank-strip ledger: best at the right edge, a hollow square at the median, fill plus a shape plus the number.
+   Tokens only. No seal amber: this is an open surface. */
+
+/* layout-exempt: one column of the card's blocks */
+.pctl {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+/* The reserve is for the load only: one 44px line per metric, the axis and the foot. */
+.pctl--loading {
+  min-height: calc(var(--rows, 9) * 44px + 72px);
+}
+
+/* layout-exempt: the axis row shares the ledger's columns */
+.pctl__axis,
+.pctl__btn {
+  display: grid;
+  grid-template-columns: 6rem 4.5rem minmax(0, 1fr) 3.25rem;
+  align-items: center;
+  column-gap: var(--space-2);
+}
+.pctl__axis {
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+  grid-template-columns: calc(10.5rem + var(--space-2)) minmax(0, 1fr) 3.25rem;
+}
+.pctl__axis-scale {
+  display: flex;
+  justify-content: space-between;
+}
+.pctl__axis-pct {
+  text-align: end;
+}
+.pctl__axis-word {
+  display: none;
+}
+.pctl__sq {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--ink-0);
+  vertical-align: baseline;
+}
+
+.pctl__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pctl__row {
+  border-bottom: 1px solid var(--border-hairline);
+}
+.pctl__btn {
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.pctl__row--open .pctl__btn {
+  outline: 2px solid var(--ink-0);
+  outline-offset: -2px;
+}
+.pctl__label {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+.pctl__raw {
+  font-size: var(--fs-small);
+  white-space: nowrap;
+}
+.pctl__raw b {
+  font-weight: var(--w-medium);
+}
+.pctl__down {
+  color: var(--text-caption);
+}
+.pctl__med {
+  display: none;
+  color: var(--text-caption);
+}
+
+.pctl__strip {
+  position: relative;
+  height: 16px;
+  border: 2px solid var(--ink-0);
+  background: var(--surface-card);
+}
+.pctl__fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+}
+.pctl__fill--top {
+  background: var(--field-mint);
+}
+.pctl__fill--mid {
+  background: var(--field-wash);
+}
+.pctl__fill--low {
+  background: var(--clay);
+}
+/* The hollow square at the median (50). */
+.pctl__mid {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  translate: -50% -50%;
+  border: 2px solid var(--ink-0);
+  background: var(--surface-card);
+}
+.pctl__tick {
+  position: absolute;
+  inset-block: -4px;
+  width: 3px;
+  translate: -50% 0;
+  background: var(--ink-0);
+}
+
+.pctl__pct {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  font-size: var(--fs-small);
+}
+.pctl__pct em {
+  font-style: normal;
+  font-size: var(--fs-cell);
+  min-width: 1ch;
+}
+
+.pctl__more {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  font-size: var(--fs-ui);
+}
+.pctl__more p {
+  margin: 0 0 var(--space-1);
+}
+.pctl__more .mono {
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
+
+/* layout-exempt: the key, a wrapping row */
+.pctl__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
+.pctl__swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--ink-0);
+  vertical-align: -2px;
+}
+.pctl__swatch--top {
+  background: var(--field-mint);
+}
+.pctl__swatch--mid {
+  background: var(--field-wash);
+}
+.pctl__swatch--low {
+  background: var(--clay);
+}
+.pctl__foot {
+  margin: 0;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+
+/* Wide card: the median shows beside his number. */
+@container (min-width: 520px) {
+  .pctl__med,
+  .pctl__axis-word {
+    display: inline;
+  }
+  .pctl__axis,
+  .pctl__btn {
+    grid-template-columns: 8rem 11rem minmax(0, 1fr) 4.5rem;
+    column-gap: var(--space-3);
+  }
+  .pctl__axis {
+    grid-template-columns: 19rem minmax(0, 1fr) 4.5rem;
+  }
+}
