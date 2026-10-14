@@ -1,0 +1,70 @@
+/* ==== THE PITCHER'S FOUL BALLS CARD (#2016) ====
+   The card reuses the batter card's classes (batter/fouls.css). This file holds what the pitcher card alone needs. */
+
+/* layout-exempt: two equal scope buttons across the card */
+.pfouls__scope {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+/* layout-exempt: the scope's name over its game count */
+.pfouls__opt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.pfouls__g {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+
+/* The ends from his side: a strikeout is good for him, a hit bad (the batter card is the other way). */
+.pfouls .fouls__seg--so {
+  background: var(--accent-positive);
+  color: var(--text-on-ink);
+}
+.pfouls .fouls__seg--out {
+  background: var(--field-mint);
+  color: var(--text-heading);
+}
+.pfouls .fouls__seg--walk {
+  background: var(--clay-soft);
+  color: var(--text-heading);
+}
+.pfouls .fouls__seg--hit {
+  background: var(--accent-negative);
+  color: var(--text-on-ink);
+}
+
+/* A thin scope: no grid and no panel, so one column. */
+.pfouls__thin {
+  margin: 0;
+  padding: var(--space-4);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--bg-canvas);
+  color: var(--text-body);
+}
+@container (min-width: 45rem) {
+  .pfouls--thin .fouls__body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "pick" "base";
+  }
+  .pfouls__thin {
+    grid-area: pick;
+  }
+}
+
+.pfouls .fouls__note {
+  margin: 0;
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+}
+.pfouls__rank {
+  color: var(--text-heading);
+}
+.pfouls__why {
+  margin: 0;
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+}
