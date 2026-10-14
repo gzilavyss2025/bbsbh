@@ -7,6 +7,11 @@ import '../../styles/player-next/batter/contact.css'
 import '../../styles/player-next/both/splits.css'
 import '../player/next/modules/splits/parts.css'
 import { Row } from '../player/next/modules/splits/LineRows.jsx'
+import '../../styles/player-next/pitcher/arsenal.css'
+import { pitchMark } from '../../lib/pitch/pitchTypes.js'
+import { ArsenalCard } from '../player/next/modules/arsenal/ArsenalCard.jsx'
+import { flightPath } from '../player/next/modules/arsenal/flightView.js'
+import { LEAD, totalMs } from '../player/next/modules/arsenal/timeline.js'
 
 // ---------------------------------------------------------------------------
 // THE PLAYER PAGE'S MOTION (#2073) on /animation-lab.
@@ -133,6 +138,55 @@ function ContactDropDemo() {
   )
 }
 
+// The Arsenal card's timeline (#2073, slice 12): an invented three-pitch arm, the paths built by the real
+// flightPath. Each frozen frame pins the card's clock with `at`; the live card plays from its own Replay
+// (the lab's Play remounts it, but its in-view key is already seen, so it shows the last frame).
+const DEMO_ARM = [
+  // code, usage %, mph, rpm, [x0, z0, pfxX, pfxZ, extension, plateTime], landing { x, h } ft
+  ['FF', 52, 94.1, 2310, [-1.9, 5.8, -6.5, 9.1, 6.4, 0.41], { x: 0.2, h: 3.0 }],
+  ['SL', 30, 85.6, 2540, [-2.0, 5.7, 3.0, 1.0, 6.3, 0.45], { x: 0.5, h: 2.0 }],
+  ['CH', 18, 86.2, 1750, [-1.9, 5.7, -7.5, 4.0, 6.3, 0.45], { x: -0.4, h: 1.8 }],
+]
+const DEMO_ROWS = DEMO_ARM.map(([code, pct, velo, spin, [x0, z0, pfxX, pfxZ, extension, plateTime], landing]) => ({
+  code,
+  mark: pitchMark(code),
+  pitches: 100,
+  pct,
+  velo,
+  spin,
+  flight: plateTime,
+  whiffPct: null,
+  xwoba: null,
+  landing,
+  path: flightPath({ x0, z0, pfxX, pfxZ, extension, plateTime }, landing),
+}))
+const DEMO_END = totalMs(DEMO_ROWS.map((r) => ({ code: r.code, ft: r.path.T, rpm: r.spin })), 3)
+
+function ArsenalTimelineEntry() {
+  return (
+    <Entry
+      title="Pitch arsenal: the timeline"
+      note={
+        <>
+          The Arsenal card (#2073, modules/arsenal/timeline.js): one clock draws the mix bar, the menu rows and
+          the side view. {LEAD}ms of build-up, then every pitch leaves the one release point at one-third speed.
+          Press the card&rsquo;s own Replay. Reduced motion shows the last frame.
+        </>
+      }
+      live={<ArsenalCard rows={DEMO_ROWS} id="animlab" />}
+    >
+      <span className="animlab__stagelabel">The timeline, 0 → {DEMO_END}ms</span>
+      <div className="animlab__frozen">
+        {[0, 300, LEAD, 1100, 1500, 2000, DEMO_END].map((ms) => (
+          <Frame key={ms} label={`${ms}ms`}>
+            <ArsenalCard rows={DEMO_ROWS} id={`animlab-${ms}`} at={ms} />
+          </Frame>
+        ))}
+      </div>
+    </Entry>
+  )
+}
+
 export function PlayerMotionLab() {
   return (
     <>
@@ -219,6 +273,7 @@ export function PlayerMotionLab() {
         }
         live={<MoundDemo />}
       />
+      <ArsenalTimelineEntry />
     </>
   )
 }
