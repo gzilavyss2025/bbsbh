@@ -20,12 +20,13 @@
   border: var(--bw-heavy) solid var(--border-stamped);
   border-radius: 0;
   box-shadow: var(--shadow-stamped);
-  overflow: hidden;
 }
 
 /* The name band: the pitching club's bar when it has hand-set colours
    (--bar-fill, --bar-accent and --bar-text, set on `.pcard` by
-   headerThemeStyle), else the scorebug's navy. The ripple is the scorebug's. */
+   headerThemeStyle), else the scorebug's navy. The ripple is the scorebug's.
+   ADR-0030's addendum themes THIS BAND ONLY: nothing else under `.pcard` may
+   read the three properties, so a new descendant must not use `--bar-*`. */
 .pcard > .change {
   /* component-reuse-exempt: the card's own name row (PitcherNotice's markup, a headshot beside a name), not a section heading SectionHead could draw */
   position: relative;

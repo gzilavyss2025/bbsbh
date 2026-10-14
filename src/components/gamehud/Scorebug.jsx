@@ -34,10 +34,11 @@ export function Scorebug({
   className = '',
 }) {
   const top = half === 'top'
-  // Between innings (see the doc above) there's no batter/pitcher row left
-  // to anchor the card's own top padding/rounding to — `gamehud--blank` lets
-  // the strip itself flow all the way to the top edge instead of leaving a
-  // bare padded gap above it.
+  // No batter/pitcher row to anchor the card's own top padding/rounding to
+  // (a feed that names neither, or before the first step) — `gamehud--blank`
+  // lets the strip itself flow all the way to the top edge instead of leaving
+  // a bare padded gap above it. A half that just ended is NOT blank: it keeps
+  // its two bars, dimmed (`over`).
   const blank = !batter && !pitcher
   return (
     <div className={`gamehud ${blank ? 'gamehud--blank' : ''} ${over ? 'gamehud--over' : ''} ${className}`}>

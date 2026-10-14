@@ -67,14 +67,10 @@
      band's phone-only scale-up came off (focus/console.css) — a floor left above
      the real height is not a floor, it is padding nothing can see.
 
-     Two values, not one: the band's batter/pitcher lines sit ABOVE the score
-     strip, and the wide breakpoint gives that stack a bigger type role, which
-     makes the narrow (264px) desktop card the taller of the two. Redefined
-     below at the same 740px cut both files already share.
-
-     The broadcast skin (focus/scorebug.css) made the band one height at every
-     width — 183px measured at 390, 834 and 1100 — so the two values agree today;
-     they stay two lines so a width that needs its own number can have one. */
+     One value for every width: the broadcast skin (focus/scorebug.css) fixes
+     the band's strip at 100px under two fixed-size name bars, so the band
+     measured 183px at 390, 834 and 1100. Re-measure it if a bar's type role or
+     the strip's min-height changes. */
   --console-hud-h: 183px;
 
   /* The slate's team-logo nav banner (GameSelect's TeamFilterStrip) — the
@@ -200,13 +196,3 @@
      large phone        560px  600px  620px  640px
      small tablet       700px  720px  739px  739.98px  760px  860px  30rem
      tablet, laptop     899px  900px  959.98px  1024px  1040px  1200px  1279px */
-
-/* --console-hud-h's desktop half — see the mobile value above for why this is
-   two numbers, not one, and for the rule that both are measured. Same 740px cut
-   as 24-floating-nav-and-hud.css's own `.gamehud--console` media block and
-   stage.css's grid breakpoint. */
-@media (min-width: 740px) {
-  :root {
-    --console-hud-h: 183px;
-  }
-}

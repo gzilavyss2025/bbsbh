@@ -4,8 +4,10 @@ Every pitch type has ONE mark. It looks the same on every page and for every
 pitcher. The data lives in `src/lib/pitch/pitchTypes.js`. Read `pitchMark(code)`;
 do not choose a colour or a shape for a pitch anywhere else.
 
-Status: the table exists and has a test (`test/pitch-types.test.js`). One screen
-uses it: the new player page's Pitch arsenal module (#1892, `PitchGlyph.jsx`).
+Status: the table exists and has a test (`test/pitch-types.test.js`). Two screens
+use it: the new player page's Pitch arsenal module (#1892, `PitchGlyph.jsx`) and the
+Now Pitching card's pitch-mix tiles (`PitchMark.jsx`). Both draw the shapes from
+`src/lib/pitch/pitchGlyph.js`.
 Gary chose the rules in a design session on a dark-ground artifact
 (the pitcher detail page redesign, "Gasser Arsenal"). Treat the colours as a
 starting point he can still tune.

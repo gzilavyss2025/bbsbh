@@ -158,10 +158,12 @@
   display: contents;
 }
 
-/* Between innings (Scorebug.jsx's `blank` — no batter/pitcher row left):
-   drop the card's own top padding so the strip flows straight to the top
-   edge and picks up the card's own rounding via the `overflow: hidden`
-   clip above, instead of leaving a bare padded bar over an empty strip. */
+/* No batter or pitcher row (Scorebug.jsx's `blank` — a feed that names
+   neither, or before the first step; a half that just ended keeps its bars,
+   dimmed): drop the card's own top padding so the strip flows straight to
+   the top edge and picks up the card's own rounding via the `overflow:
+   hidden` clip above, instead of leaving a bare padded bar over an empty
+   strip. */
 .gamehud--blank {
   padding-top: 0;
 }

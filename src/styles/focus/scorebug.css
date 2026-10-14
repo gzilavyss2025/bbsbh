@@ -90,8 +90,9 @@
 /* The half just ended: the bars keep the last batter and pitcher, dimmed, so the
    band holds its height instead of collapsing to the strip (HalfInning's
    composeLive sets `over`). */
-.gamehud--console.gamehud--over .gamehud__row {
-  opacity: 0.55; /* raw-value-exempt: a dim step, not a colour */
+.gamehud--console.gamehud--over .gamehud__who,
+.gamehud--console.gamehud--over .gamehud__val {
+  color: var(--text-on-ink-dim);
 }
 
 /* ---- the strip: club panel, centre, club panel */

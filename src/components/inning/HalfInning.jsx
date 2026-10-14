@@ -19,6 +19,7 @@ import { BatterNotice } from '../playbyplay/BatterNotice.jsx'
 import { FinalizedLineCard } from '../playbyplay/PitcherHandoffCard.jsx'
 import { UpNextBatters } from '../playbyplay/UpNextBatters.jsx'
 import { useBecameTrue } from '../../hooks/motion/useBecameTrue.js'
+import { liveAtThirdOut } from '../../lib/scorebug/liveState.js'
 
 export function HalfInning({
   feed,
@@ -44,7 +45,8 @@ export function HalfInning({
   onFocusInfo,
   onStepInfo,
   onRunsSoFar,
-  onLiveState, treatment,
+  onLiveState,
+  treatment,
 }) {
   // At-bat stepping (ADR-0016): a half being stepped through one plate
   // appearance at a time (the floating bar's "Next at-bat" button) has
@@ -322,22 +324,8 @@ export function HalfInning({
     } else if (nowPitching) {
       pitcher = { last: nowPitching.name.split(',')[0], pitches: (enteringPitches ?? 0) + (live?.pitchesSoFar ?? 0) }
     }
-    // The half is over (3rd out) but the user hasn't navigated on: bases and
-    // outs clear and the indicator points at what's next. The name bars KEEP
-    // the half's last batter and pitcher, dimmed (`over`), so the band holds
-    // its height instead of collapsing; both are already revealed, as this
-    // snapshot only reaches the 3rd out once the reveal mark does.
-    if (outs >= 3) {
-      return {
-        bases: { first: false, second: false, third: false },
-        outs: 0,
-        batter,
-        pitcher,
-        over: true,
-        inning: half === 'top' ? inning : inning + 1,
-        half: half === 'top' ? 'bottom' : 'top',
-      }
-    }
+    // The 3rd out is revealed and the reader has not navigated on: see liveAtThirdOut.
+    if (outs >= 3) return liveAtThirdOut({ batter, pitcher, inning, half })
     return { bases, outs, batter, pitcher, inning, half }
   }
 
@@ -386,7 +374,9 @@ export function HalfInning({
             teamName={battingSide === 'away' ? homeName : awayName}
             className={noticeClass({ tone: 'event', className: 'change--framed' })}
             label={nowPitchingLabel}
-            entering={entering} treatment={treatment} side={battingSide === 'away' ? 'home' : 'away'}
+            entering={entering}
+            treatment={treatment}
+            side={battingSide === 'away' ? 'home' : 'away'}
           />
         )}
 
@@ -476,7 +466,8 @@ export function HalfInning({
                 battingName={battingSide === 'away' ? awayName : homeName}
                 battingTeamId={battingSide === 'away' ? awayId : homeId}
                 callouts={callouts}
-                vsTeam={vsTeam} treatment={treatment}
+                vsTeam={vsTeam}
+                treatment={treatment}
                 highlightsMap={highlightsMap}
                 writing={writing}
                 stepCap={stepping ? revealedAtBatCount : null}

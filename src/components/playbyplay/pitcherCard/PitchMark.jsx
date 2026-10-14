@@ -1,10 +1,10 @@
-import { glyphD } from '../../../screens/player/next/modules/arsenal/PitchGlyph.jsx'
+import { glyphD } from '../../../lib/pitch/pitchGlyph.js'
 
 // One pitch's mark as the pitchMark(code) table draws it (docs/pitch-types.md):
 // the family is the shape, the pitch is the colour, a ring is hollow. This file
 // picks neither; it only draws what the mark says. It shares the player page
-// arsenal's shape paths (glyphD) but not its stylesheet, which loads with that
-// page only, so the few rules it needs are `.pcard__mark` in
+// arsenal's shape paths (lib/pitch/pitchGlyph.js) but not its stylesheet, which
+// loads with that page only, so the few rules it needs are `.pcard__mark` in
 // styles/pitcher-card/table.css.
 export function PitchMark({ mark, size = 16 }) {
   return (

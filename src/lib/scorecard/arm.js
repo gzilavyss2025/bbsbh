@@ -37,7 +37,7 @@ export function frontierArmChange(feed, revealedThrough, at) {
   if (!feed || !inning || halfIndex(inning, half) !== revealedThrough + 1) return null
   const fielding = half === 'top' ? 'home' : 'away'
   const club = feed.gameData?.teams?.[fielding] ?? {}
-  const team = { id: club.id ?? null, name: club.clubName ?? club.teamName ?? '' }
+  const team = { id: club.id ?? null, name: club.clubName ?? club.teamName ?? '', side: fielding }
   // `id` is a player id, or a pitcher already built (the leadoff change's own,
   // so its boxscore jersey matches the innings viewer's card).
   const arm = (id, fresh, relief = inning > 1) => {
