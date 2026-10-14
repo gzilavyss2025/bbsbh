@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { MIN_CELL, OUTCOMES, fmtPct, pitchRows, pitchesVs, plateView } from '../src/screens/player/next/modules/plate/plateView.js'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
+import { stripComments, ruleBody } from './helpers/css.js'
+import { MIN_CELL, OUTCOMES, fmtMph, fmtPct, outcomeFigures, pitchRows, pitchesVs, plateView } from '../src/screens/player/next/modules/plate/plateView.js'
 
 // The batter Plate approach's pure view (#1887): swing, chase and in-zone rates, the way each
 // pitch ended, and the 5 x 5 map, all from the hitter-grid counters. The board's numbers are samples.
@@ -89,4 +93,56 @@ test('a pitch type view reads that type alone; an empty view is null', () => {
 test('a percent with no number is a dash with no unit', () => {
   assert.equal(fmtPct(0.2306), '23.1%')
   assert.equal(fmtPct(null), '—')
+})
+
+const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
+const read = (rel) => readFileSync(join(SRC, rel), 'utf8')
+const MOD = 'screens/player/next/modules/plate/'
+
+test('a cut prints the figures the table printed: labels from 8%, both sides, count, speed, whiff', () => {
+  const f = outcomeFigures('Four-seam', plateView(one(counters())))
+  // segs [18, 146, 34, 18, 34] of 250: 7.2% prints nothing, 58.4% prints 58.
+  assert.deepEqual(f.segs.map((s) => s.label), ['', '58', '14', '', '14'])
+  assert.deepEqual(f.segs.map((s) => s.n), [18, 146, 34, 18, 34])
+  assert.equal(f.good, "66% hitter's")
+  assert.equal(f.bad, "21% pitcher's")
+  assert.equal(f.n, '250')
+  assert.equal(f.mph, '90.0')
+  assert.equal(f.whiff, '39.5%')
+  assert.equal(f.aria, "Four-seam: Pitches 250, MPH 90.0, Whiff 39.5%, 21% pitcher's")
+})
+
+test('no plate file: no bar, both sides and the speed are a dash', () => {
+  const f = outcomeFigures('Four-seam', plateView(one(counters({ noPlate: true }))))
+  assert.deepEqual(f.segs, [])
+  assert.equal(f.good, '—')
+  assert.equal(f.bad, '—')
+  assert.equal(f.mph, '—')
+  assert.equal(fmtMph(null), '—')
+})
+
+test('the pitch mix is the shared MenuRail; the stretch table stays the Form trend\'s', () => {
+  const jsx = read(`${MOD}PlateModule.jsx`)
+  assert.match(jsx, /import \{ MenuRail \} from '\.\.\/\.\.\/\.\.\/\.\.\/\.\.\/components\/ui\/control\/MenuRail\.jsx'/)
+  assert.doesNotMatch(jsx, /StretchTable/)
+  assert.match(jsx, /picked=\{code\}/) // null is "All pitches", as the table's row 0 was
+  assert.match(jsx, /backLabel="All pitches"/)
+  assert.match(jsx, /onPick=\{\(key\) => \{ setPick\(key\); setCell\(-1\) \}\}/)
+  assert.match(jsx, /label: f\.aria/)
+  // Form trend still draws the table.
+  assert.match(read('screens/player/next/modules/form/FormModule.jsx'), /StretchTable/)
+  assert.match(read('screens/player/next/modules/pform/index.jsx'), /StretchTable/)
+})
+
+test('the module loads the bar classes itself now that it drops StretchTable', () => {
+  const idx = read(`${MOD}index.jsx`)
+  assert.ok(idx.indexOf('both/formchart.css') > -1)
+  assert.ok(idx.indexOf('both/formchart.css') < idx.indexOf('batter/plate.css'))
+})
+
+test('the glyph and the panel head are drawn in plate.css with tokens', () => {
+  const c = stripComments(read('styles/player-next/batter/plate.css'))
+  assert.equal(ruleBody(c, '.fplate__glyph').match(/fill:\s*([^;]+);/)[1].trim(), 'var(--pitch, var(--text-caption))')
+  assert.match(ruleBody(c, '.fplate__pname'), /font-size:\s*var\(--fs-hero-sm\)/)
+  assert.match(ruleBody(c, '.fplate__menu'), /margin-top:\s*var\(--space-3\)/)
 })

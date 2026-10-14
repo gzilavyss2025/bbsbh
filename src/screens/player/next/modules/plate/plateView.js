@@ -17,6 +17,27 @@ const ZONE = ALL.filter((i) => inZone({ col: i % GRID, row: Math.floor(i / GRID)
 const OUT = ALL.filter((i) => !ZONE.includes(i))
 
 export const fmtPct = (v) => (v == null ? '—' : `${(v * 100).toFixed(1)}%`)
+export const fmtMph = (v) => (v == null ? '—' : v.toFixed(1))
+const whole = (v) => Math.round(v * 100)
+
+// The figures one cut prints (#1887; slice 16 moved them here from PlateModule's table row,
+// unchanged): the five outcomes as whole-number labels (a share under 8% prints none), the
+// two sides, the count, the speed and the whiff. `name` makes the card's aria-label.
+export function outcomeFigures(name, v) {
+  const n = v.n.toLocaleString()
+  const mph = fmtMph(v.rates.mph)
+  const whiff = fmtPct(v.rates.whiff)
+  const bad = v.pitcher == null ? '—' : `${whole(v.pitcher)}% pitcher's`
+  return {
+    segs: v.segs ? v.segs.map((k) => ({ n: k, label: k / v.n >= 0.08 ? String(whole(k / v.n)) : '' })) : [],
+    good: v.hit == null ? '—' : `${whole(v.hit)}% hitter's`,
+    bad,
+    n,
+    mph,
+    whiff,
+    aria: `${name}: Pitches ${n}, MPH ${mph}, Whiff ${whiff}, ${bad}`,
+  }
+}
 
 // [inPlay, ball, foul, called, whiff] over some cells; null when the plate counters are not on file.
 function mix(c, at = ALL) {

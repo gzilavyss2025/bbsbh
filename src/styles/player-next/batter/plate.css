@@ -177,3 +177,53 @@
   font-size: var(--fs-cell);
   line-height: var(--lh-loose);
 }
+
+/* ---- the pitch mix on the shared MenuRail (#2073, slice 16) ----
+   The menu, the rail and the panel are components/ui/control/MenuRail.jsx; the
+   bars are the Form trend's .fstretch classes (both/formchart.css). */
+.fplate__menu {
+  margin-top: var(--space-3);
+}
+.fplate__icon {
+  flex: none;
+}
+.fplate__glyph {
+  fill: var(--pitch, var(--text-caption));
+  stroke: var(--text-heading);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.fplate__glyph--ring {
+  fill: none;
+  stroke: var(--pitch, var(--text-caption));
+  stroke-width: 3;
+}
+.fplate__figs {
+  display: block;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+/* layout-exempt: the glyph beside the pitch's name */
+.fplate__phead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2h);
+}
+/* layout-exempt: the name over its count line */
+.fplate__pname {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+}
+.fplate__psub {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-regular);
+}
